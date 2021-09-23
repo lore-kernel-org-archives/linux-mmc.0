@@ -5,166 +5,108 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48A6BC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:13:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA8E8C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:42:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 30323610C8
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:13:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A674061214
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:42:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242799AbhIWSPS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 14:15:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44328 "EHLO
+        id S242782AbhIWSoX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 14:44:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50904 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242855AbhIWSPC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 14:15:02 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D755C0613E7
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:13:17 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id b15so28619015lfe.7
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:13:17 -0700 (PDT)
+        with ESMTP id S242780AbhIWSoX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 14:44:23 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01F1DC061574
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:42:51 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id i4so29806915lfv.4
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:42:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=EU9IPP096OeclFzFMM2Ay6h5ady4PhP3HzR9YloYxzA=;
-        b=hUqI2ov2NiUzTKqx3J7nQLUSavcjKJdrwXscXXPegZOM38uXJGByC9gzUlpVCQ1eY6
-         yob7s8ApRkuoLTuE75uwg8VXagYviziVattKKFwjFweM2pWRVBeJGyCz90l1gUj+GlzD
-         Bkiq0A2Y9ZhYT4GnidJq+ZJxfORVovrYPUhDbpeXMrfi0mzR06/AM1aSQvyzZsSTB/L5
-         qjTs9AH92IeIRoVhkUOz4d3jFye3c6fIYGDraAlT3HiKyJ9RrTu0+S9v698YkeAXh7Q5
-         Ih9aMm+jVr6AC9iHbDSPpAFfkoFp0K9D1JxTnykKEPXl+JHUtQTC4R+wHbCfPKxUnpXy
-         UQyg==
+        bh=qLd/BdaqZlC0KRB/JkCwEu5Y3OBwFONiTRcJuhLnYDE=;
+        b=mQ3D8nWr8Anm6V9Tt5JigeZHH2N11yXwU72+0TjsPkRqIry+DpbExoz5z2HvyuFM/K
+         x/R8GkxeaeA+bpUJwiopaJIL3d3JL6iodn++HjBOI1Mltw0ZhyoK3SJUX/OyHhxAI8UO
+         AsSeJ81K5XkNQ8fOYaA5vYmvEudjCidUxvrnxi0biNOw5iL0UH1STY31kE41d7gAQdyP
+         P4ng7lsjQzNTzIpws0bbVlMeRqjgBWVsdszTnk06gs37/3TVkUUCUM2nVzb0TjXzsNIf
+         EqDUT7kfalS2lWofrn6g06CJSMzXWVevhmIkmYZggdN5adxDj2egDSqn3/byVNORFhjt
+         kBTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=EU9IPP096OeclFzFMM2Ay6h5ady4PhP3HzR9YloYxzA=;
-        b=UjvUE159Oike7YGvsY3EC8E3QNbyDlAz/ubiwM50xNcqS5jJObq05lLcXgD3L7wqo0
-         V4iIegqyKG7FgiRVSuCFXTPDNRQkJW3dUNkL4liGUWm31/0GsmL+UWsII/A2ZxO72gci
-         rx7y5eX1qyrynwKUC4D/f4mMxzWlCvgwMAAarCVqMVmKVp7IapypxDXmMNU9wl9EhzED
-         H06N+0FBiRC6d0ajIlFidAclEANPAfGhnYn+ifvMJvC2UnvctImPd/O1LW/VRFnRg5eS
-         KM8n9uTtoDOEBlVr4Sx1Jfa0CbfDXvMazYrDiAyaLGZLVD+E4GT9BgGFLOW54KAiDVCK
-         f0NA==
-X-Gm-Message-State: AOAM530kJXJamk5Sg5Jph3mYpr5lRAhUw/mnTR71kelnXoPCg8x13IC2
-        cmAojaZUYqNSFGW/hGvLQduwKp6pzf2BJZRfMsxktA==
-X-Google-Smtp-Source: ABdhPJwdKxAIFgqFT76MuUcfsk2unbcW2af2CnUcD2lkSYJnkndGJ0sNbrvI2hqv9sK4stP3MupDcAVmXSRtsYQvC2c=
-X-Received: by 2002:a19:6a16:: with SMTP id u22mr5421205lfu.254.1632420794094;
- Thu, 23 Sep 2021 11:13:14 -0700 (PDT)
+        bh=qLd/BdaqZlC0KRB/JkCwEu5Y3OBwFONiTRcJuhLnYDE=;
+        b=K3mSL4RdRwsnAOEa/oSAWMUFJ6zKLoLs90F6FPiAX3k80W8RXj1QQ6Z7YLUnUmStge
+         Mjo2EcomvxvI5rwtDiTGRLYJN6pfbw5DtWPRSnUtaFgw3w+YNzfHLEFkYpS7PGIv9esY
+         WiWkY1U90+78MfOVAS6bIz7ODlOpiCVTuhPc6vjJqoCnrkrj818100KDIEOpX/g4ywRP
+         Q8F4yp3XQg9OSqGEI9kNphVTzNUFCqfyE/N+yhhG1sVFoOzoHk+WPz0rhRXEMAy+IdLs
+         jmJHCHxkLWx/QrGq3L63jC5MkjIEVFxCBuAHRzdw6/jT2akyC9K9i9oLcKtF0qpBWAFd
+         ZiVw==
+X-Gm-Message-State: AOAM531Kln2YmCrRWRvVHywRqAYi+0WctZXis29GXKcgWi9gHQKwfk2n
+        i6+FMm+Yztrhz8Yh+zsyljuMFtpQJVJfNPLDcNXgRg==
+X-Google-Smtp-Source: ABdhPJwKC/ceZVeFkHVDWpsiUL2AuORS0rQm5OnsSuTJfc6qjT4zjYVWQocFPvAt9/ZvZW+6iOHfIzVFCWpUSzGmWIc=
+X-Received: by 2002:a2e:898c:: with SMTP id c12mr6964298lji.16.1632422569302;
+ Thu, 23 Sep 2021 11:42:49 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210916181808.2399-1-xiongx18@fudan.edu.cn>
-In-Reply-To: <20210916181808.2399-1-xiongx18@fudan.edu.cn>
+References: <20210921110029.21944-1-tony@atomide.com> <20210921110029.21944-5-tony@atomide.com>
+In-Reply-To: <20210921110029.21944-5-tony@atomide.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Sep 2021 20:12:38 +0200
-Message-ID: <CAPDyKFr8nkVCQB63rZ6ZcHeTrmQno7aYv2Pa3PmZwzW9Ei3HDQ@mail.gmail.com>
-Subject: Re: [PATCH] drivers/mmc: fix reference count leaks in moxart_probe
-To:     Xin Xiong <xiongx18@fudan.edu.cn>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        yuanxzhang@fudan.edu.cn, Xiyu Yang <xiyuyang19@fudan.edu.cn>,
-        Xin Tan <tanxin.ctf@gmail.com>
+Date:   Thu, 23 Sep 2021 20:42:12 +0200
+Message-ID: <CAPDyKFoxheP2BjGBwf+MMt6hzURi2ymFrB8X9zzO9aQWzatJog@mail.gmail.com>
+Subject: Re: [PATCH 4/5] mmc: sdhci-omap: Parse legacy ti,non-removable property
+To:     Tony Lindgren <tony@atomide.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 16 Sept 2021 at 20:19, Xin Xiong <xiongx18@fudan.edu.cn> wrote:
+On Tue, 21 Sept 2021 at 13:00, Tony Lindgren <tony@atomide.com> wrote:
 >
-> The issue happens in several error handling paths on two refcounted
-> object related to the object "host" (dma_chan_rx, dma_chan_tx). In
-> these paths, the function forgets to decrement the reference count of
-> one or both objects' reference count increased earlier by
-> dma_request_chan(), causing reference count leaks.
+> We need to support the legacy ti,non-removable property too. Let's warn
+> about the legacy property and mark the device as non-removable.
 >
-> Fix it by decreasing reference counts of both objects in each path
-> separately.
+> Naturally all the mainline kernel devicetree files will get updated to use
+> the standard non-removable property with the sdhci-omap conversion. But we
+> also have folks updating their kernels with custom devicetree files that
+> we need to consider.
 >
-> Signed-off-by: Xin Xiong <xiongx18@fudan.edu.cn>
-> Signed-off-by: Xiyu Yang <xiyuyang19@fudan.edu.cn>
-> Signed-off-by: Xin Tan <tanxin.ctf@gmail.com>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 > ---
->  drivers/mmc/host/moxart-mmc.c | 38 ++++++++++++++++++++++++++---------
->  1 file changed, 28 insertions(+), 10 deletions(-)
+>  drivers/mmc/host/sdhci-omap.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
-> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-> index 6c9d38132..b5aa1010c 100644
-> --- a/drivers/mmc/host/moxart-mmc.c
-> +++ b/drivers/mmc/host/moxart-mmc.c
-> @@ -606,7 +606,28 @@ static int moxart_probe(struct platform_device *pdev)
->         host->sysclk = clk_get_rate(clk);
->         host->fifo_width = readl(host->base + REG_FEATURE) << 2;
->         host->dma_chan_tx = dma_request_chan(dev, "tx");
-> +       if (IS_ERR(host->dma_chan_tx)) {
-> +               if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER) {
-> +                       ret = -EPROBE_DEFER;
-> +            goto out;
-> +        }
-> +    }
-> +
->         host->dma_chan_rx = dma_request_chan(dev, "rx");
-> +       if (IS_ERR(host->dma_chan_rx)) {
-> +               if (!IS_ERR(host->dma_chan_tx))
-> +                       dma_release_channel(host->dma_chan_tx);
-> +               if (PTR_ERR(host->dma_chan_rx) == -EPROBE_DEFER) {
-> +                       ret = -EPROBE_DEFER;
-> +                       goto out;
-> +        }
-> +        dev_dbg(dev, "PIO mode transfer enabled\n");
-> +        host->have_dma = false;
-> +    } else if (IS_ERR(host->dma_chan_tx)) {
-> +               dma_release_channel(host->chan_rx);
-> +               dev_dbg(dev, "PIO mode transfer enabled\n");
-> +               host->have_dma = false;
-> +    }
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -1213,6 +1213,11 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>         if (of_find_property(dev->of_node, "dmas", NULL))
+>                 sdhci_switch_external_dma(host, true);
 >
->         spin_lock_init(&host->lock);
->
-> @@ -615,15 +636,7 @@ static int moxart_probe(struct platform_device *pdev)
->         mmc->f_min = DIV_ROUND_CLOSEST(host->sysclk, CLK_DIV_MASK * 2);
->         mmc->ocr_avail = 0xffff00;      /* Support 2.0v - 3.6v power. */
->
-> -       if (IS_ERR(host->dma_chan_tx) || IS_ERR(host->dma_chan_rx)) {
-> -               if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER ||
-> -                   PTR_ERR(host->dma_chan_rx) == -EPROBE_DEFER) {
-> -                       ret = -EPROBE_DEFER;
-> -                       goto out;
-> -               }
-> -               dev_dbg(dev, "PIO mode transfer enabled\n");
-> -               host->have_dma = false;
-> -       } else {
-> +    if (!IS_ERR(host->dma_chan_tx) && !IS_ERR(host->dma_chan_rx)) {
->                 dev_dbg(dev, "DMA channels found (%p,%p)\n",
->                          host->dma_chan_tx, host->dma_chan_rx);
->                 host->have_dma = true;
-> @@ -664,8 +677,13 @@ static int moxart_probe(struct platform_device *pdev)
->         }
->
->         ret = devm_request_irq(dev, irq, moxart_irq, 0, "moxart-mmc", host);
-> -       if (ret)
-> +       if (ret) {
-> +               if (host->have_dma) {
-> +                       dma_release_channel(host->dma_chan_tx);
-> +                       dma_release_channel(host->dma_chan_rx);
-> +               }
->                 goto out;
+> +       if (device_property_read_bool(dev, "ti,non-removable")) {
+> +               dev_warn_once(dev, "using old ti,non-removable property\n");
+
+Perhaps we should document this property for sdhci-omap and thus also
+set it as deprecated. What do you think?
+
+> +               mmc->caps |= MMC_CAP_NONREMOVABLE;
 > +       }
-
-You are right, that we should call dma_release_channel in some error
-paths. Although, the above looks rather messy to me. May I suggest
-that we add the error handling below the "out" label instead. Along
-the lines of this:
-
-if (!IS_ERR(host->dma_chan_tx))
-     dma_release_channel(host->dma_chan_tx);
-if (!IS_ERR(host->dma_chan_rx))
-     dma_release_channel(host->dma_chan_rx);
-
+> +
+>         /* R1B responses is required to properly manage HW busy detection. */
+>         mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
 >
->         dev_set_drvdata(dev, mmc);
->         mmc_add_host(mmc);
 > --
-> 2.25.1
->
+> 2.33.0
 
 Kind regards
 Uffe
