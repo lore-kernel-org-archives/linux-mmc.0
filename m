@@ -2,143 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FA2CC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 08:14:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7EE7C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 08:52:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3D93A61248
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 08:14:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C18206126A
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 08:52:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239796AbhIWIPe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 04:15:34 -0400
-Received: from www.zeus03.de ([194.117.254.33]:34584 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239788AbhIWIPe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 23 Sep 2021 04:15:34 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=P1K4WFzqVBCfGfvG7ONdFZD8bOdv
-        N2bmJ8xRPqUY1lc=; b=Ue+H5jx8fDZcN2sw88R1ct7BqXWKgwwk2816i8VoSuII
-        5BR5QXQOczOmkBiLJKV7jr75EwDGb4TclW40MYjtqoP+bxXfpFGW1jB2kJ6WFfDp
-        1t6OIHkrLZuo4YY9FMbAJ4GeNh6v51CVbY6xOCumZVY75SQOG757Y/o+abyCn88=
-Received: (qmail 3544687 invoked from network); 23 Sep 2021 10:14:01 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Sep 2021 10:14:01 +0200
-X-UD-Smtp-Session: l3s3148p1@ClUYNqXM3KIgAwDPXw+uAD4EFbbNt2H0
-Date:   Thu, 23 Sep 2021 10:13:52 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Avri Altman <Avri.Altman@wdc.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
-Message-ID: <YUw3QMa07jOTB4wO@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Avri Altman <Avri.Altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-References: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
- <DM6PR04MB65756FA165B1263AFCE45B2AFCDD9@DM6PR04MB6575.namprd04.prod.outlook.com>
+        id S240033AbhIWIyV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 04:54:21 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:33874 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S240018AbhIWIyV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 04:54:21 -0400
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 18N7VEMw021941;
+        Thu, 23 Sep 2021 04:52:21 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
+ subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=pp1; bh=vi//wIVyT+h5+C9jizJGkEb5o7LV4fbjChl0kUpetww=;
+ b=ZahMwh30SuExkEvWaCr4uDmzth0/Ynn/aa+vNfgPGvQyFRMZP7bCkaBLi1sy5ObAJiuL
+ LR6QwWhhMYvwuzAcrehriLgx+VJn6JTrHTJd+a/CPsF5+o8flAz5raWqxdCIbQGvkjs+
+ 3VE4VSyxbCWJZQpU/zj9VL9diXQQm4icfrC7Izb/Pk4ZHDc85pys8hJ0buAizg9eJfOB
+ p5GSaOWyBePyx3Cioe1YtKtLM3g0dXpsR4wC9TM7MxnEnfO+VEvwtSjIpl0d+xHKCzGR
+ PauF1TgmwASkD1w2mvn0DmP3UD5b1kbRtDtjSsOG2ghcvqqk0cYcnigj89TJnknQm9s7 4g== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3b8n8q1skh-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 23 Sep 2021 04:52:21 -0400
+Received: from m0098409.ppops.net (m0098409.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 18N87m8F003634;
+        Thu, 23 Sep 2021 04:52:19 -0400
+Received: from ppma06fra.de.ibm.com (48.49.7a9f.ip4.static.sl-reverse.com [159.122.73.72])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3b8n8q1sjg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 23 Sep 2021 04:52:19 -0400
+Received: from pps.filterd (ppma06fra.de.ibm.com [127.0.0.1])
+        by ppma06fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 18N8hx4k020988;
+        Thu, 23 Sep 2021 08:52:16 GMT
+Received: from b06avi18878370.portsmouth.uk.ibm.com (b06avi18878370.portsmouth.uk.ibm.com [9.149.26.194])
+        by ppma06fra.de.ibm.com with ESMTP id 3b7q6pq4ab-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 23 Sep 2021 08:52:16 +0000
+Received: from d06av22.portsmouth.uk.ibm.com (d06av22.portsmouth.uk.ibm.com [9.149.105.58])
+        by b06avi18878370.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 18N8lKmU54133162
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 23 Sep 2021 08:47:20 GMT
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 824174C1C0;
+        Thu, 23 Sep 2021 08:52:11 +0000 (GMT)
+Received: from d06av22.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 71F604C182;
+        Thu, 23 Sep 2021 08:52:10 +0000 (GMT)
+Received: from osiris (unknown [9.145.165.148])
+        by d06av22.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
+        Thu, 23 Sep 2021 08:52:10 +0000 (GMT)
+Date:   Thu, 23 Sep 2021 10:52:08 +0200
+From:   Heiko Carstens <hca@linux.ibm.com>
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     Gerald Schaefer <gerald.schaefer@linux.ibm.com>, axboe@kernel.dk,
+        gregkh@linuxfoundation.org, chaitanya.kulkarni@wdc.com,
+        atulgopinathan@gmail.com, hare@suse.de, maximlevitsky@gmail.com,
+        oakad@yahoo.com, ulf.hansson@linaro.org, colin.king@canonical.com,
+        shubhankarvk@gmail.com, baijiaju1990@gmail.com, trix@redhat.com,
+        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
+        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
+        sth@linux.ibm.com, hoeppner@linux.ibm.com, gor@linux.ibm.com,
+        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
+        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 7/9] s390/block/dcssblk: add error handling support for
+ add_disk()
+Message-ID: <YUxAOKY7dXZAABhI@osiris>
+References: <20210902174105.2418771-1-mcgrof@kernel.org>
+ <20210902174105.2418771-8-mcgrof@kernel.org>
+ <YTIscKy+jg5L/TMh@osiris>
+ <YTLP8mYBX37R++9E@bombadil.infradead.org>
+ <20210906134346.19c14246@thinkpad>
+ <YT+B+vCUcpZEq8hM@bombadil.infradead.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="mPxYo/fkNlC8Yls/"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <DM6PR04MB65756FA165B1263AFCE45B2AFCDD9@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <YT+B+vCUcpZEq8hM@bombadil.infradead.org>
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: 2XeQEdid_UYFD9jsrBRsyb10jcGxIyKO
+X-Proofpoint-GUID: oI5-SgomwrvMO_toFwGrIdfrCQ0BSo8E
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.391,FMLib:17.0.607.475
+ definitions=2021-09-23_02,2021-09-22_01,2020-04-07_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 bulkscore=0
+ phishscore=0 spamscore=0 malwarescore=0 priorityscore=1501
+ lowpriorityscore=0 mlxscore=0 mlxlogscore=999 adultscore=0 impostorscore=0
+ clxscore=1011 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2109200000 definitions=main-2109230052
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Mon, Sep 13, 2021 at 09:53:14AM -0700, Luis Chamberlain wrote:
+> On Mon, Sep 06, 2021 at 01:43:46PM +0200, Gerald Schaefer wrote:
+> > On Fri, 3 Sep 2021 18:46:26 -0700
+> > Luis Chamberlain <mcgrof@kernel.org> wrote:
+> > 
+> > > On Fri, Sep 03, 2021 at 04:08:48PM +0200, Heiko Carstens wrote:
+> > > > On Thu, Sep 02, 2021 at 10:41:03AM -0700, Luis Chamberlain wrote:
+> > > > > We never checked for errors on add_disk() as this function
+> > > > > returned void. Now that this is fixed, use the shiny new
+> > > > > error handling.
+> > > > > 
+> > > > > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> > > > > ---
+> > > > >  drivers/s390/block/dcssblk.c | 4 +++-
+> > > > >  1 file changed, 3 insertions(+), 1 deletion(-)
+> > > > > 
+> > > > > diff --git a/drivers/s390/block/dcssblk.c b/drivers/s390/block/dcssblk.c
+> > > > > index 5be3d1c39a78..b0fd5009a12e 100644
+> > > > > --- a/drivers/s390/block/dcssblk.c
+> > > > > +++ b/drivers/s390/block/dcssblk.c
+> > > > > @@ -696,7 +696,9 @@ dcssblk_add_store(struct device *dev, struct device_attribute *attr, const char
+> > > > >  	}
+> > > > >  
+> > > > >  	get_device(&dev_info->dev);
+> > > > > -	device_add_disk(&dev_info->dev, dev_info->gd, NULL);
+> > > > > +	rc = device_add_disk(&dev_info->dev, dev_info->gd, NULL);
+> > > > > +	if (rc)
+> > > > > +		goto put_dev;
+> > > > 
+> > > > This looks not correct to me. We seem to have now in case of an error:
+> > > > 
+> > > > - reference count imbalance (= memory leak)
+> > > > - dax cleanup is missing
+> > > 
+> > > Care to provide an alternative?
+> > 
+> > See patch below:
+> 
+> Thanks! Will you queue this up on your end or do would you
+> prefer for me to roll this into my tree and eventually resend
+> with the rest?
 
---mPxYo/fkNlC8Yls/
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Avri,
-
-first of all, thank you very much for asking your SD experts and
-providing this valuable information! This is much appreciated. Sadly, I
-have only indirect access to the SD specs and more advanced measurement
-techniques.
-
-> "We are ok with host sending CMD12 to abort data transfer when they
-> discover failure with response / incoming data. In both SD/eMMC spec,
-> stop transmission command is allowed during data transfer phase
-> ('data' state).
-
-Yes. The spec is clear about the data state.
-
-> Sometimes, the CMD12 would have been received by card while in 'tran'
-> state. As long host is able to handle the 'illegal command' error
-> indication for this situation, we don't see any other problem.=20
-
-Confirmed. The call to mmc_send_abort_tuning() returns -EILSEQ. But it
-still makes the card work. Leaving out the call to
-mmc_send_abort_tuning() gives:
-
-	mmc1: error -5 whilst initialising SD card
-
-> Per SD Spec, CMD12 is allowed in 'tran' state only for SDUC card. In
-> non SDUC cards, CMD12 received while in 'tran' state will be treated
-> as illegal command.
-
-I didn't know about SDUC. The advantage of the approach Ulf suggested is
-that we can distinguish the type of cards in the SD callback if needed.
-
-> However we could not understand how aborting the data transfer is
-> helping host to complete the tuning scheme and have successful read /
-> write operations."
-
-I also didn't know why. But read on, there is a pointer now.
-
-> They also think that :
-> " we believe this hack was added to avoid the data transfer after respons=
-e crc error...
-> Receiving CRC error with the tuning pattern would be normal as long as th=
-e tuning was not complete."
-
-Yes, I get CRC and CMD_IDX errors for CMD19.
-
-> My 5 cents are, maybe you should try retries > 0 in sd_send_abort_tuning,
-> If indeed it's a crc while tuning is not complete.
-
-Interesting. If I do this, I get a timeout error from
-mmc_send_abort_tuning(). And bingo! If I replace mmc_send_abort_tuning()
-with mdelay(100) the card also probes fine. Also, if I skip this patch
-series (so abort_tuning is only for MMC) and add the delay in my host
-driver, then the card also comes up. I don't think, though, I should fix
-it in the host driver.
-
-Is there a delay defined somewhere which ones need to wait after a CRC
-error in tuning? I couldn't find it in the simplified spec.
-
-Thanks for the help again,
-
-   Wolfram
-
-
---mPxYo/fkNlC8Yls/
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmFMNzwACgkQFA3kzBSg
-KbZJjA/8DKMEtZ9snVtx0MTW4EDIEhPfQ6Am3h4vOxrz36F5GOCdBU28+OoOyFbt
-otus8MnotOLID3bGk09gN0kZ3nB3AUEUM3fkKwo6sO7ojfsf2v2ETODu/yQBI3rC
-0ZFofnhDaav2YYQroDXQrn8vI+a25sWlXYS8bjFz1asJspwVlbwW7xbNXCySXFHy
-GGwHW9prDV5BvRUXXSfscWrPcI0D4J1c7irQB5Vm9MTnxxvkZXoDGwjJ8hyPW1rr
-esldyYBsb2/gYvwn65DhgHyf7JKJNqPyxzg5VOAf5wGzY2yeCGLAYEA5ZSzUJNe3
-quZlsZ/sf4+sPqLi0YVCoCDcr+bEKnii4WxirNlVqDKYyqEz+Q8Qp9MdrQkOQM+s
-92f3X2l2frtfgITe0o5iQax9AMm31/inmtZbzBpsKAYyrm3K9PMXDpkcBc4ofvz2
-769pzV80NJay9RIYf9acPowFN5pK551BhxH73N8ykyVzIEZ/HnK9bmzKUfEIeD81
-u7ExKGDSdMk4x/qz4j3/PjexgaFVSJVgBoLfbIQbWdVWvWcqDqTnwxLkpRvhzO+1
-wQXY5ZthGAYlsrV6G4udPlFi8GhEUNfe6BrKH3vnCv5qRcYqlC3xkHjkiof6mQ+7
-jUis/5HhB2uX0zv4tI70DO8s27GdTfZ+yJ23rjetVO5I7LiSQYM=
-=GjHc
------END PGP SIGNATURE-----
-
---mPxYo/fkNlC8Yls/--
+Please add the patch to your tree.
