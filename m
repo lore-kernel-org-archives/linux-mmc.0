@@ -2,107 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22BFDC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:50:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 196D1C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:56:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0CBC261211
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:50:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA24C61108
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:56:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242714AbhIWSwQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 14:52:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52702 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242818AbhIWSwP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 14:52:15 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4713C061574
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:50:43 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id u18so28788211lfd.12
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:50:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=a7vHKwPnC7hEtXrd03mle93ZP4aba1/3B4SjvXJlTvA=;
-        b=SXOiDUOdXGtEgmwNQYs3HY+HWg7YotuRhmoNRze1L/8yzmVJ4HR2hLbn1a86kBqmJs
-         EegYy/rd/rqDVbFcwMIRrFf7kHDZ6d+zsWCyJnoqP5X/Wjgkvap0w8lQ2XPuo6bqpB8c
-         ZwQPuqo7wPPWrJzNyT4smKYH260KQVwHNsMdRNF3QCnlNe9JeeABLfgqdzU7O/3h/KdY
-         XbQV/pRKIInLXM5p6NLScoz0kzLQZpgLH6UJ+6D1NrFdNVPNMTB5ujaDcmEmSaFfNYWw
-         NODxcAGCGCovyzf0CPf6I+HAK9hXiupU0TzJ3f9t5vEfOdI/kQJGG4uKS7xlCetslo8M
-         I7YQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=a7vHKwPnC7hEtXrd03mle93ZP4aba1/3B4SjvXJlTvA=;
-        b=2TWxuSXYuJqvCTISf1GpQplAWHfazlFrS3mBAVBvTvTPGV1zRF2/xHDWr5oNUKZuzz
-         bZmGSRDD77G5eK/YuXtna9Ge7F55azYIMjXTIAEPSRYxu9c/ac9KQYUXg44ULcqbFlcJ
-         j1GtP8M+jGbbasZGCtdrAT/djFkkm1yS4ynKLsXPt5jIl4tSyh/j2H4OXYmuTUpGi7SE
-         7UWsRosLzHVWcDw8tlcRbt6r8eabpIqyP9fs4BZD0BXBQcS4unxTADhiBCNROEM6zmf5
-         dvu6qAIV6CAm88GtbtGlZcb39wbfAks6Ar4lWRdZ49/yD0Rq+b9if3iPsU4yK7dNKZTm
-         +eMw==
-X-Gm-Message-State: AOAM530G1n5wsKA748c84i7vs52eC33rerUXZ6lFzey9Rpe6B6pNiknk
-        bQ0K8kOwQSscLTfhAo7f+QtKKRMK4fNN5qu2e1vYWyLBBaU=
-X-Google-Smtp-Source: ABdhPJzhaxz4DazQpYUhqCWQrdiiBV98vStzxP6Hw/Bb9OPFYQQVjJky9gfAdUdCUhgs1b1k2gQfbPLCj5AaPZWj+bw=
-X-Received: by 2002:a05:6512:2397:: with SMTP id c23mr5535583lfv.358.1632423041943;
- Thu, 23 Sep 2021 11:50:41 -0700 (PDT)
+        id S240287AbhIWS6W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 14:58:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:35722 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S237009AbhIWS6W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 23 Sep 2021 14:58:22 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C717961038;
+        Thu, 23 Sep 2021 18:56:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1632423409;
+        bh=oA9cN/OvRa/NHNZMtxn/7VPYWlgZX4G8M4XX5+D2XwQ=;
+        h=From:To:Cc:Subject:Date:From;
+        b=JDK4mMgboMSDvX6LRP+ZOdAMvYjGRwi2DRbADwL3B0JyOIMZ8ZacEZAnF71wnICIF
+         qDQWFtjvQJe+xw9mA1ElX09HDcwx3CCwj61fUboLvBxG6dsEDHz1+Cfce5cBrB2KM7
+         AHTe1cd7zyqxkJCqSJraKnhyj3al9/GoiJmshdyUXUjVezUl/+2ZZcUX4CrQubpbSH
+         lZ6MnEtX28LR7i7yKRNpETZG4uRRc4O2bPjyfY5Y/eHqNzxw3SZ5z+/GMIdDVA32yR
+         R3uKSkJBNUYR6gxR4NZDFablfDcH+iXM5+6hilEpI1m8JysiFqu6TlfAMtiw6xq7xY
+         iTQxk4ChMF3kg==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Cc:     Satya Tangirala <satyaprateek2357@gmail.com>, dm-devel@redhat.com,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: [PATCH v3 0/4] blk-crypto cleanups
+Date:   Thu, 23 Sep 2021 11:56:25 -0700
+Message-Id: <20210923185629.54823-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-References: <20210921143359.1738149-1-linus.walleij@linaro.org>
-In-Reply-To: <20210921143359.1738149-1-linus.walleij@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Sep 2021 20:50:04 +0200
-Message-ID: <CAPDyKFrDMeuAWjWSBF5s1-cyO_faRMWdcs=YYmnYNaOK1L3xZw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: Add small comment about reset thread
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        Ludovic Barre <ludovic.barre@st.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 21 Sept 2021 at 16:36, Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> Put a small comment before assigning IRQ_WAKE_THREAD
-> telling us what is going on.
->
-> Cc: Russell King <linux@armlinux.org.uk>
-> Cc: Yann Gautier <yann.gautier@foss.st.com>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+This series renames struct blk_keyslot_manager to struct
+blk_crypto_profile, as it is misnamed; it doesn't always manage
+keyslots.  It's much more logical to think of it as the
+"blk-crypto profile" of a device, similar to blk_integrity_profile.
 
-Applied for next, thanks!
+This series also improves the inline-encryption.rst documentation file,
+and cleans up blk-crypto-fallback a bit.
 
-Kind regards
-Uffe
+This series applies to v5.15-rc2.
 
+Changed v2 => v3:
+  - Made some minor tweaks to patches 3 and 4, mostly comments and
+    documentation.
+  - Clarified a commit message to mention no change in behavior.
+  - Added a Reviewed-by tag.
 
-> ---
->  drivers/mmc/host/mmci.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 3765e2f4ad98..c9cacd4d5b22 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1394,6 +1394,10 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
->         } else if (host->variant->busy_timeout && busy_resp &&
->                    status & MCI_DATATIMEOUT) {
->                 cmd->error = -ETIMEDOUT;
-> +               /*
-> +                * This will wake up mmci_irq_thread() which will issue
-> +                * a hardware reset of the MMCI block.
-> +                */
->                 host->irq_action = IRQ_WAKE_THREAD;
->         } else {
->                 cmd->resp[0] = readl(base + MMCIRESPONSE0);
-> --
-> 2.31.1
->
+Changed v1 => v2:
+  - Fixed a build error in blk-integrity.c.
+  - Removed a mention of "ksm" from a comment.
+  - Dropped the patch "blk-crypto-fallback: consolidate static variables".
+  - Added Acked-by and Reviewed-by tags.
+
+Eric Biggers (4):
+  blk-crypto-fallback: properly prefix function and struct names
+  blk-crypto: rename keyslot-manager files to blk-crypto-profile
+  blk-crypto: rename blk_keyslot_manager to blk_crypto_profile
+  blk-crypto: update inline encryption documentation
+
+ Documentation/block/inline-encryption.rst | 451 +++++++++--------
+ block/Makefile                            |   2 +-
+ block/blk-crypto-fallback.c               | 118 ++---
+ block/blk-crypto-profile.c                | 564 +++++++++++++++++++++
+ block/blk-crypto.c                        |  29 +-
+ block/blk-integrity.c                     |   4 +-
+ block/keyslot-manager.c                   | 578 ----------------------
+ drivers/md/dm-core.h                      |   4 +-
+ drivers/md/dm-table.c                     | 168 +++----
+ drivers/md/dm.c                           |  10 +-
+ drivers/mmc/core/crypto.c                 |  11 +-
+ drivers/mmc/host/cqhci-crypto.c           |  33 +-
+ drivers/scsi/ufs/ufshcd-crypto.c          |  32 +-
+ drivers/scsi/ufs/ufshcd-crypto.h          |   9 +-
+ drivers/scsi/ufs/ufshcd.c                 |   2 +-
+ drivers/scsi/ufs/ufshcd.h                 |   6 +-
+ include/linux/blk-crypto-profile.h        | 166 +++++++
+ include/linux/blkdev.h                    |  18 +-
+ include/linux/device-mapper.h             |   4 +-
+ include/linux/keyslot-manager.h           | 120 -----
+ include/linux/mmc/host.h                  |   4 +-
+ 21 files changed, 1203 insertions(+), 1130 deletions(-)
+ create mode 100644 block/blk-crypto-profile.c
+ delete mode 100644 block/keyslot-manager.c
+ create mode 100644 include/linux/blk-crypto-profile.h
+ delete mode 100644 include/linux/keyslot-manager.h
+
+-- 
+2.33.0
+
