@@ -2,97 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7657FC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 20:31:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25755C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 21:09:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5F96461241
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 20:31:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0CAD160EB2
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 21:09:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243199AbhIWUcf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 16:32:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47454 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243192AbhIWUce (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 16:32:34 -0400
-Received: from mail-oi1-x233.google.com (mail-oi1-x233.google.com [IPv6:2607:f8b0:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FDA4C061756
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 13:31:02 -0700 (PDT)
-Received: by mail-oi1-x233.google.com with SMTP id a3so11428864oid.6
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 13:31:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=KfgAPoqNGuGt4SJWxFhDYx6cCrPZC3ApVgwyVQdWxZM=;
-        b=ChnyOEHaPJ/TAR3ZO07ITYZC4dk5cWTX5CBxf2SKvotJ87MuYQxnsdyR18WVvEE9Th
-         xPVsA7CaQS+LgHHk9HKRqKp8G4wSZgdIYqoyU3hpoQ9oPA8fZfZm052PHIFBMfK68cvH
-         o1KDHflaL6+bP6jA3y+obR9KV/z2auTeSasdCQNKP7KBrDtJYxluXhr6uiy2NPkbtN4A
-         0sfAo6J8Tx+lQGBz7615tJZwXNIU2FYrG+bIo7uY6qIp4FJlJd6W1xDVD/1t3/zuC5yc
-         IczFJOvaSfuSAT6sW2My5SNi5J8QyQ1SXBQXDQbuBpY5oICzeC0bWGnX1KPx/nLjAvbo
-         +AKA==
+        id S243225AbhIWVLK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 17:11:10 -0400
+Received: from mail-oi1-f177.google.com ([209.85.167.177]:43538 "EHLO
+        mail-oi1-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S243174AbhIWVLJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 17:11:09 -0400
+Received: by mail-oi1-f177.google.com with SMTP id w19so11541174oik.10;
+        Thu, 23 Sep 2021 14:09:37 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=KfgAPoqNGuGt4SJWxFhDYx6cCrPZC3ApVgwyVQdWxZM=;
-        b=57zVfnC74t91EZzXR4rfqxtqm2qzXE68dldJYlwDZ9wMeDN5kGbp2YPb+ylndkayzC
-         PoLM9DaFA8n0rfECiDGhk27UseOchQWhj0H6ByYW7sQQr4xPOMO2ZNEvqWzTckDZ3t/J
-         iZHOaN/3JWMFt4l24FcajgIOaE2UAtnyAZhzhKq05LBNFh1zkrhgjU9TzRfw4cyGDdgn
-         DWDZaJKauyorMYEWHJ7SBayhaX5ac/V5yabZjHkC8KLvrN4bVLAbid8QCSjosKdM4347
-         i2p/U2PFpeomMksVOJYEew4z2r7ZL1n4nvb/IdcWQlm+Ed9fgQv1XYVDLE9oVlYZClTf
-         qzYQ==
-X-Gm-Message-State: AOAM5309WuX0EywvDB9Sq0FHLO7OqhyXuVLw7AU9SM9q2UBQyrmU2bAC
-        odQuZI2SBJ//h/g1qX/CumJEPA==
-X-Google-Smtp-Source: ABdhPJxWTm6CaT1ND6bGaFNTSAKpnrLv00eqNbrx0WnULUxuw/bK1fjd8KciNlyMULO9ikiI352lKQ==
-X-Received: by 2002:a05:6808:138c:: with SMTP id c12mr13956146oiw.34.1632429061671;
-        Thu, 23 Sep 2021 13:31:01 -0700 (PDT)
-Received: from builder.lan (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
-        by smtp.gmail.com with ESMTPSA id i1sm1583036ooo.15.2021.09.23.13.31.00
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=ECAcJQ5j3b9V37w+5AU1dCjJzeuc06UOkYf0x/TJhHI=;
+        b=xIdLizm4aubTc3dGOr/JOOrmu/jGmoWQ1B+ry9dtYUiPsD6NfmRoN4HOihRT5Cyc+m
+         26xhWVWU5zolKwopYzzACSCyMQyPhWdae9KYinSfzPY5V2bUmsZtHQw253u+mXUwjWcz
+         hZ3KtcEaJ7G2AQo6VVgkHgs1IBpP9BcRnck4CkZnO85wIlE7eu5bb6ai3XjNu8f5jYq5
+         Vc8mP7zS1F+f+X30oCmD1y+uTkuD3rvthnLu+18HsnIjblgiJ+3d/z5A+JHeqv1LqEfh
+         dI5UbMrEeCVxS35KYOftBanaD2WRfDGWBceNepJmXAnA5kKf5mZTrTvWR3FyQkGAyc2u
+         NRcA==
+X-Gm-Message-State: AOAM5314M/Ns5HRCOV8AJMEoGbhkjzLYg4+Tk7O1cc5lV7jp7CS2BSMl
+        JK3KG9Ggu+n2Da6WjjxcI9fQA//FoA==
+X-Google-Smtp-Source: ABdhPJxgGB/F5m/HUdgfquhEQY/6qPe41K4exPARMH+1jXMEbOmyXEtt37OEluaLbFS8sOex0LCyaQ==
+X-Received: by 2002:aca:645:: with SMTP id 66mr5369149oig.145.1632431377021;
+        Thu, 23 Sep 2021 14:09:37 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id d10sm1701331ooj.24.2021.09.23.14.09.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Sep 2021 13:31:01 -0700 (PDT)
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>, ulf.hansson@linaro.org,
-        adrian.hunter@intel.com, robh+dt@kernel.org
-Cc:     rampraka@codeaurora.org, sartgarg@codeaurora.org,
-        nitirawa@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, linux-mmc@vger.kernel.org, agross@kernel.org,
-        devicetree@vger.kernel.org, stummala@codeaurora.org,
-        pragalla@codeaurora.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org
-Subject: Re: (subset) [PATCH V1] arm64: dts: qcom: sc7180: Use maximum drive strength values for eMMC
-Date:   Thu, 23 Sep 2021 15:30:59 -0500
-Message-Id: <163242893971.825761.9292228692666120286.b4-ty@linaro.org>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <1629132650-26277-1-git-send-email-sbhanu@codeaurora.org>
-References: <1629132650-26277-1-git-send-email-sbhanu@codeaurora.org>
+        Thu, 23 Sep 2021 14:09:36 -0700 (PDT)
+Received: (nullmailer pid 3527425 invoked by uid 1000);
+        Thu, 23 Sep 2021 21:09:34 -0000
+Date:   Thu, 23 Sep 2021 16:09:34 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     linux-pm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Lucas Stach <dev@lynxeye.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        linux-kernel@vger.kernel.org, Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, David Heidelberg <david@ixit.cz>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>, linux-tegra@vger.kernel.org,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        linux-usb@vger.kernel.org, linux-clk@vger.kernel.org,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Nishanth Menon <nm@ti.com>, linux-pwm@vger.kernel.org,
+        linux-staging@lists.linux.dev, Stefan Agner <stefan@agner.ch>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        dri-devel@lists.freedesktop.org,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        devicetree@vger.kernel.org, Lee Jones <lee.jones@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v12 05/35] dt-bindings: clock: tegra-car: Document new
+ clock sub-nodes
+Message-ID: <YUztDv/KbKVAY7cB@robh.at.kernel.org>
+References: <20210920181145.19543-1-digetx@gmail.com>
+ <20210920181145.19543-6-digetx@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210920181145.19543-6-digetx@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 16 Aug 2021 22:20:50 +0530, Shaik Sajida Bhanu wrote:
-> The current drive strength values are not sufficient on non discrete
-> boards and this leads to CRC errors during switching to HS400 enhanced
-> strobe mode.
+On Mon, 20 Sep 2021 21:11:15 +0300, Dmitry Osipenko wrote:
+> Document sub-nodes which describe Tegra SoC clocks that require a higher
+> voltage of the core power domain in order to operate properly on a higher
+> clock rates.  Each node contains a phandle to OPP table and power domain.
 > 
-> Hardware simulation results on non discrete boards shows up that use the
-> maximum drive strength values for data and command lines could helps
-> in avoiding these CRC errors.
+> The root PLLs and system clocks don't have any specific device dedicated
+> to them, clock controller is in charge of managing power for them.
 > 
-> [...]
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  .../bindings/clock/nvidia,tegra20-car.yaml    | 37 +++++++++++++++++++
+>  1 file changed, 37 insertions(+)
+> 
 
-Applied, thanks!
-
-[1/1] arm64: dts: qcom: sc7180: Use maximum drive strength values for eMMC
-      commit: 752432e40e8f0d02d0af07cce2d6d4b250be11ef
-
-Best regards,
--- 
-Bjorn Andersson <bjorn.andersson@linaro.org>
+Reviewed-by: Rob Herring <robh@kernel.org>
