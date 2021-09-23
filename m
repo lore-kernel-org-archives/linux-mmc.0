@@ -7,106 +7,119 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA8E8C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:42:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E57FBC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:50:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A674061214
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:42:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C32EE61029
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 18:50:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242782AbhIWSoX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 14:44:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50904 "EHLO
+        id S242714AbhIWSvq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 14:51:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242780AbhIWSoX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 14:44:23 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01F1DC061574
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:42:51 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id i4so29806915lfv.4
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:42:50 -0700 (PDT)
+        with ESMTP id S242768AbhIWSvp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 14:51:45 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C097BC061574
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:50:13 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id u18so28782981lfd.12
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 11:50:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qLd/BdaqZlC0KRB/JkCwEu5Y3OBwFONiTRcJuhLnYDE=;
-        b=mQ3D8nWr8Anm6V9Tt5JigeZHH2N11yXwU72+0TjsPkRqIry+DpbExoz5z2HvyuFM/K
-         x/R8GkxeaeA+bpUJwiopaJIL3d3JL6iodn++HjBOI1Mltw0ZhyoK3SJUX/OyHhxAI8UO
-         AsSeJ81K5XkNQ8fOYaA5vYmvEudjCidUxvrnxi0biNOw5iL0UH1STY31kE41d7gAQdyP
-         P4ng7lsjQzNTzIpws0bbVlMeRqjgBWVsdszTnk06gs37/3TVkUUCUM2nVzb0TjXzsNIf
-         EqDUT7kfalS2lWofrn6g06CJSMzXWVevhmIkmYZggdN5adxDj2egDSqn3/byVNORFhjt
-         kBTA==
+         :cc:content-transfer-encoding;
+        bh=gGXok9C2zJwna124nPWk+7zhfwPZ1Gc6OCclICzrU9s=;
+        b=tF4NIGAYXmKJ/H3ElgS0dtGh5wnxcOEkstv9geZ8CLJSG7VESZWmjZPkPRe2gtBgSu
+         BeOR4O5npXiBdl+y6GEeutpjj8++GniiM3Q8bzTW72t1SQBNzMgklig3FUx+Ps4q6WOO
+         ONZExqJAj9rCHQDCreTVWxyF5/YupkU7KE9FasMcQSDR7ibIDieIL4wEx5EmUZSoqSG7
+         rgnRL5dsU0+dLVLIG600iulp2QytIf1RRaRyp8qdx0AcQm8eQ+eftf/zqDakgs6kve4u
+         IN6+h9A1q3Yklm9Edt7XyiuBR8MN2dHG8HGeGg3SuuCh60zK13BUiLeF0HEho43lciHJ
+         5dhA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qLd/BdaqZlC0KRB/JkCwEu5Y3OBwFONiTRcJuhLnYDE=;
-        b=K3mSL4RdRwsnAOEa/oSAWMUFJ6zKLoLs90F6FPiAX3k80W8RXj1QQ6Z7YLUnUmStge
-         Mjo2EcomvxvI5rwtDiTGRLYJN6pfbw5DtWPRSnUtaFgw3w+YNzfHLEFkYpS7PGIv9esY
-         WiWkY1U90+78MfOVAS6bIz7ODlOpiCVTuhPc6vjJqoCnrkrj818100KDIEOpX/g4ywRP
-         Q8F4yp3XQg9OSqGEI9kNphVTzNUFCqfyE/N+yhhG1sVFoOzoHk+WPz0rhRXEMAy+IdLs
-         jmJHCHxkLWx/QrGq3L63jC5MkjIEVFxCBuAHRzdw6/jT2akyC9K9i9oLcKtF0qpBWAFd
-         ZiVw==
-X-Gm-Message-State: AOAM531Kln2YmCrRWRvVHywRqAYi+0WctZXis29GXKcgWi9gHQKwfk2n
-        i6+FMm+Yztrhz8Yh+zsyljuMFtpQJVJfNPLDcNXgRg==
-X-Google-Smtp-Source: ABdhPJwKC/ceZVeFkHVDWpsiUL2AuORS0rQm5OnsSuTJfc6qjT4zjYVWQocFPvAt9/ZvZW+6iOHfIzVFCWpUSzGmWIc=
-X-Received: by 2002:a2e:898c:: with SMTP id c12mr6964298lji.16.1632422569302;
- Thu, 23 Sep 2021 11:42:49 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=gGXok9C2zJwna124nPWk+7zhfwPZ1Gc6OCclICzrU9s=;
+        b=XWxsf8TG0z51OjGQykPb59TBGwg6ISQPKJnKfu6m9H8lLtGziDiCpU54X8JYTOq+wg
+         oX8kWMgFfibKVqQB9BjA3deyoxy/9UuKjMFk6OojdaZgC7LhG2s7SZDzq0VdwJ2EK/VR
+         CM1QZzejl6aqDsMYDdtS5zBF92A2kmkgTFy+7cTKzj7H1DbhtW3niSYo+Tnzj248L3+Y
+         VPpyJOQRY/R51+nHrUgmm2+mivSNGzBURXuLW7tjdN3e3y4fmeLMvTxZjF09oKrATw5m
+         4tzKHoEgSMq5LZnYa7/zdp50LgZUDzsQtvDJTsfqRY9xqPWNc8RzIQ/uJCRBXjsIYF70
+         8Z6g==
+X-Gm-Message-State: AOAM532B+HEPNjHFxZM9oppGayhUNiJT/ULtSYh68W/JuYpX+RCVDgJ5
+        TOFnTqYRYZ+vdW5slDp1YbGYFf73R+UYncikmIu03U+xgFA=
+X-Google-Smtp-Source: ABdhPJz/3jM+HCenFQ1gKxUxySNubtYcaPRo7nshJex5Hy+YMoHfq+kEtsAKYVRqCqeAyDXzSo+nzfhy17UjRv6dItM=
+X-Received: by 2002:a2e:85c2:: with SMTP id h2mr6940282ljj.367.1632423012098;
+ Thu, 23 Sep 2021 11:50:12 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210921110029.21944-1-tony@atomide.com> <20210921110029.21944-5-tony@atomide.com>
-In-Reply-To: <20210921110029.21944-5-tony@atomide.com>
+References: <af8f8b8674ba4fcc9a781019e4aeb72c@hyperstone.com>
+In-Reply-To: <af8f8b8674ba4fcc9a781019e4aeb72c@hyperstone.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Sep 2021 20:42:12 +0200
-Message-ID: <CAPDyKFoxheP2BjGBwf+MMt6hzURi2ymFrB8X9zzO9aQWzatJog@mail.gmail.com>
-Subject: Re: [PATCH 4/5] mmc: sdhci-omap: Parse legacy ti,non-removable property
-To:     Tony Lindgren <tony@atomide.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>
+Date:   Thu, 23 Sep 2021 20:49:35 +0200
+Message-ID: <CAPDyKFqD=KKgSC1PQz_RVm=sGMWtdFsaHSHDiKDxMKajbkszMA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Dont wait for DRTO on Write RSP error
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     "jh80.chung@samsung.com" <jh80.chung@samsung.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 21 Sept 2021 at 13:00, Tony Lindgren <tony@atomide.com> wrote:
+On Thu, 16 Sept 2021 at 07:59, Christian L=C3=B6hle <CLoehle@hyperstone.com=
+> wrote:
 >
-> We need to support the legacy ti,non-removable property too. Let's warn
-> about the legacy property and mark the device as non-removable.
+> Only wait for DRTO on reads, otherwise the driver hangs.
 >
-> Naturally all the mainline kernel devicetree files will get updated to use
-> the standard non-removable property with the sdhci-omap conversion. But we
-> also have folks updating their kernels with custom devicetree files that
-> we need to consider.
+> The driver prevents sending CMD12 on response errors like CRCs.
+> According to the comment this is because some cards have problems
+> with this during the UHS tuning sequence.
+> Unfortunately this workaround currently also applies for any command
+> with data.
+> On reads this will set the drto timer which then triggers after a while.
+> On writes this will not set any timer and the tasklet will not be
+> scheduled again.
+> I cannot attest for the UHS workarounds need, but even if so, it should
+> at most apply to reads.
+> I have observed many hangs when CMD25 response contained a CRC error.
+> This patch fixes this without touching the actual UHS tuning workaround.
 >
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
-> ---
->  drivers/mmc/host/sdhci-omap.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -1213,6 +1213,11 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->         if (of_find_property(dev->of_node, "dmas", NULL))
->                 sdhci_switch_external_dma(host, true);
->
-> +       if (device_property_read_bool(dev, "ti,non-removable")) {
-> +               dev_warn_once(dev, "using old ti,non-removable property\n");
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
-Perhaps we should document this property for sdhci-omap and thus also
-set it as deprecated. What do you think?
+Applied for next and by adding a stable tag, thanks!
 
-> +               mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +       }
-> +
->         /* R1B responses is required to properly manage HW busy detection. */
->         mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
->
-> --
-> 2.33.0
+If you don't think we need the stable tag, please tell me.
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 6578cc64ae9e..22cf13dc799b 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2081,7 +2081,8 @@ static void dw_mci_tasklet_func(struct tasklet_stru=
+ct *t)
+>                                  * delayed. Allowing the transfer to take=
+ place
+>                                  * avoids races and keeps things simple.
+>                                  */
+> -                               if (err !=3D -ETIMEDOUT) {
+> +                               if (err !=3D -ETIMEDOUT &&
+> +                                   host->dir_status =3D=3D DW_MCI_RECV_S=
+TATUS) {
+>                                         state =3D STATE_SENDING_DATA;
+>                                         continue;
+>                                 }
+> --
+> 2.32.0
+> Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+> Managing Directors: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+>
