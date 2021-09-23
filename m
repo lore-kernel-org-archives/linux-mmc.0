@@ -5,197 +5,152 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78561C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 10:51:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCDF3C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 11:50:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 62DFB6023F
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 10:51:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B69FB610D1
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 11:50:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240483AbhIWKxW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 06:53:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52638 "EHLO
+        id S240718AbhIWLvr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 07:51:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37850 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240403AbhIWKxW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 06:53:22 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5B3DC061756
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 03:51:50 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id i25so25134068lfg.6
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 03:51:50 -0700 (PDT)
+        with ESMTP id S240705AbhIWLvp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 07:51:45 -0400
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61802C061757
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 04:50:13 -0700 (PDT)
+Received: by mail-lf1-x131.google.com with SMTP id b15so25010835lfe.7
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 04:50:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=ZZAOZKDlswTrDBuirwUgec+0wirM62qGZzElgpQmHWc=;
-        b=c+uc7dBvi0o8VbzJj/9l72hYiJGZlLposYxLzcXp04J15VNUZglANSoNSTDDY85VzH
-         9vcFA6NuhDzSRoRriGM2MYxe/FAvpzq7X/o0hRTXU+qgvdYtk7qjkCTO+lmokQPVA7Ls
-         icxidEkDd5X+hRAWmWFWd09TXCzDoI36pJp9V4gkqRGQQJVVkj/BuAyWzf4443bnTbVG
-         /qHD9LXObzKDT2bZKHkljt6nCAU6th1mLXX3YeTygPVJ23jy142kItEgR6zrzlULEtcX
-         3kfJEY/v4XlmrkiAj4BseE976o2W388hKlH7aVSTJsHmZAhpgrYnEdKzpxiPolFZvLF/
-         gakw==
+        bh=BuhjfnIzHPL8k/0hEDGsJJcwbt02W2zMnf1vEQ+PDis=;
+        b=VGU6L3poPyGvDF/aXFsDDNXQCN6mrAJdddBE1kYrMR5yGUwgqOq8Ka50kemkwIQBMd
+         xcf75qW+cASxwx2aKMQJeW+smC0+uRSNVmsAp5ONF0enm/vmc7NeyiBnQ/KzflwyFJOI
+         P1lieRAYSO25kGZ78vNXKGRkohrMSMU6HoCFq0ikLyBVeRJsvTC04BnNaxmWF3TxnDLc
+         TI+CJee7tnr2wfApqfiQ39KWQcsebq37lX4j4bGXcaFOLoplJnRtT1iQeQZrVbkShI6n
+         TDVIS6SzZsoeliR5AhmzrYGpxG8IpxMBT5bHfHKnhY+rF08K/as7N91N1ZV+JQLZMv0K
+         V/rQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ZZAOZKDlswTrDBuirwUgec+0wirM62qGZzElgpQmHWc=;
-        b=e99N0YB8YvYN5PPg5123ex0ZLDXztq6XhZAbP5f4ONnbpWn9W+0ecj7SZiFuzSAPFb
-         EXmhr7NzWlx2bO4UgqI142yFpyebT2ZaKFfuRnCVynyfgpalLK/fu+yz5lXydx/9N9Je
-         i4c2CKjifCL0qJdyiTjwIYjoz2Rbgbv93Hp4ldAG7IMhyEP4USfhsfHDjlgAoBk6Y3qk
-         f4J/U+0Fx8olBYvB8FX6zPYNm9wjqdLV4UE16YcXguW5Qhowa79Ek7Rx3bcXpBFjmVDw
-         7znD8OsX5e+zyCicSx5esQQLo7tuqvmXJD4Ny0x8qOxD/3Ds4YhW67IjWOtCn2oQCxie
-         SBJg==
-X-Gm-Message-State: AOAM530mnM4cKQx0tme76sPyVCcOlZ2ViSoQAW2fHC5fqy0rsXcU53Lj
-        7GNybUkCcrrl0E/AjApr/IqBGBQIS8LgaDajOv6bUw==
-X-Google-Smtp-Source: ABdhPJzDqiDdo7fH13X6725lmGDL0pLCjz5Voj6/qRJne0PS12YyRUk8hp3c10PW5rrZoHYv6HTq9mLQec1PhG0Xb6k=
-X-Received: by 2002:a2e:85c2:: with SMTP id h2mr4412758ljj.367.1632394309094;
- Thu, 23 Sep 2021 03:51:49 -0700 (PDT)
+        bh=BuhjfnIzHPL8k/0hEDGsJJcwbt02W2zMnf1vEQ+PDis=;
+        b=jiyGxuE4NRhmplHHS5BcJlcYa4PhdN4rZRfxvRfRpiGJg56+9IQHw7R2Mkc+dIUAap
+         XNrF2f36EB9gFHhSJCuYWOfHQB8zNt2YvaC3NyfQ3bLuSso/4DnrAffTtViQfzHKIPR8
+         4MFebBoNKycDEewQ7ydIvtCZNPzFXJWGcKvPmMoITeFUdH6oyH8bIlA0cQ5Yx2h66alU
+         3i00CgUoUTfA3VGAOQ5qAEoybeLdGeOCVAr1xpv++3RHkfQVc4YRWNjhmPjQjohtgKQ2
+         1kkpE4Gq/3ONpQLM//7QuKtAmiOhmE1DO5jEKO1ZiCq0/WwlkhrYP8WF0oxgzlaeIR2V
+         jJ2A==
+X-Gm-Message-State: AOAM530jqcDhXaVp4TCNuVTKwJxaOk5iv5JMtaro75bA1sI/OX73XABt
+        /bLDja3XOeB8lr21jgDKUEuWCWrEyX64xYo/8IbSow==
+X-Google-Smtp-Source: ABdhPJxWkcEBeEeQpHl0z0PoIbho+KHQTVz5XNhEXvCE7yAmB2lRq3X91tXNby/WaVO/Vwb4Bp4hfOzgrqT8EjU/Zug=
+X-Received: by 2002:a05:6512:1515:: with SMTP id bq21mr3739550lfb.71.1632397811612;
+ Thu, 23 Sep 2021 04:50:11 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210913080504.832521-1-narmstrong@baylibre.com>
-In-Reply-To: <20210913080504.832521-1-narmstrong@baylibre.com>
+References: <20210914182023.8103-1-wsa+renesas@sang-engineering.com> <20210914182023.8103-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210914182023.8103-2-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Sep 2021 12:51:12 +0200
-Message-ID: <CAPDyKFqLvnAOAmk3PeNiBzwXTgwvG+zEO1b_pJNzSuUZ3Zamxg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
-To:     Neil Armstrong <narmstrong@baylibre.com>
+Date:   Thu, 23 Sep 2021 13:49:35 +0200
+Message-ID: <CAPDyKFrqwo2+W4uSGwWYRmNHWAZC1cRozVs7GXXcBJ23FCU_bA@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc: core: add helper to send STOP
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Christian Hewitt <christianshewitt@gmail.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Sept 2021 at 10:05, Neil Armstrong <narmstrong@baylibre.com> wrote:
+On Tue, 14 Sept 2021 at 20:20, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> The memory at the end of the controller only accepts 32bit read/write
-> accesses, but the arm64 memcpy_to/fromio implementation only uses 64bit
-> (which will be split into two 32bit access) and 8bit leading to incomplete
-> copies to/from this memory when the buffer is not multiple of 8bytes.
+> There was a helper in the block layer already, but we need it in other
+> parts soon as well. So, make it more generic by adding the 'retries'
+> parameter and add the helper to mmc_ops.
 >
-> Add a local copy using writel/readl accesses to make sure we use the right
-> memory access width.
->
-> The switch to memcpy_to/fromio was done because of 285133040e6c
-> ("arm64: Import latest memcpy()/memmove() implementation"), but using memcpy
-> worked before since it mainly used 32bit memory acceses.
->
-> Fixes: 103a5348c22c ("mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk")
-> Reported-by: Christian Hewitt <christianshewitt@gmail.com>
-> Suggested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 > ---
->  drivers/mmc/host/meson-gx-mmc.c | 49 +++++++++++++++++++++++----------
->  1 file changed, 35 insertions(+), 14 deletions(-)
+>  drivers/mmc/core/block.c   | 14 +-------------
+>  drivers/mmc/core/mmc_ops.h | 14 ++++++++++++++
+>  2 files changed, 15 insertions(+), 13 deletions(-)
 >
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 3f28eb4d17fe..08c0ff0bfa8b 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -746,7 +746,7 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
->         writel(start, host->regs + SD_EMMC_START);
->  }
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 431af5e8be2f..58f1aa5ac33f 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1642,18 +1642,6 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  #define MMC_DATA_RETRIES       2
+>  #define MMC_NO_RETRIES         (MMC_MAX_RETRIES + 1)
 >
-> -/* local sg copy to buffer version with _to/fromio usage for dram_access_quirk */
-> +/* local sg copy for dram_access_quirk */
->  static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data,
->                                   size_t buflen, bool to_buffer)
+> -static int mmc_blk_send_stop(struct mmc_card *card, unsigned int timeout)
+> -{
+> -       struct mmc_command cmd = {
+> -               .opcode = MMC_STOP_TRANSMISSION,
+> -               .flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC,
+> -               /* Some hosts wait for busy anyway, so provide a busy timeout */
+> -               .busy_timeout = timeout,
+> -       };
+> -
+> -       return mmc_wait_for_cmd(card->host, &cmd, 5);
+> -}
+> -
+>  static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
 >  {
-> @@ -764,21 +764,34 @@ static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data
->         sg_miter_start(&miter, sgl, nents, sg_flags);
+>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> @@ -1663,7 +1651,7 @@ static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
 >
->         while ((offset < buflen) && sg_miter_next(&miter)) {
-> -               unsigned int len;
-> +               unsigned int buf_offset = 0;
-> +               unsigned int len, left;
-> +               u32 *buf = miter.addr;
+>         mmc_retune_hold_now(card->host);
+>
+> -       mmc_blk_send_stop(card, timeout);
+> +       mmc_send_stop(card->host, timeout, 5);
+>
+>         err = mmc_poll_for_busy(card, timeout, false, MMC_BUSY_IO);
+>
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index ae25ffc2e870..6e9d1b6b9e55 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -9,6 +9,7 @@
+>  #define _MMC_MMC_OPS_H
+>
+>  #include <linux/types.h>
+> +#include <linux/mmc/mmc.h>
+>
+>  enum mmc_busy_cmd {
+>         MMC_BUSY_CMD6,
+> @@ -57,5 +58,18 @@ int mmc_cmdq_enable(struct mmc_card *card);
+>  int mmc_cmdq_disable(struct mmc_card *card);
+>  int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms);
+>
+> +static inline int mmc_send_stop(struct mmc_host *host, unsigned int timeout,
+
+Nitpick: Would you mind renaming timeout to timeout_ms, as to clarify its unit.
+
+> +                          unsigned int retries)
+> +{
+> +       struct mmc_command cmd = {
+> +               .opcode = MMC_STOP_TRANSMISSION,
+> +               .flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC,
+> +               /* Some hosts wait for busy anyway, so provide a busy timeout */
+> +               .busy_timeout = timeout,
+> +       };
 > +
-> +               if (((unsigned long int)miter.addr % 4))
-> +                       dev_err(host->dev, "non word aligned sg");
-
-This looks weird. You print an error message, but continue to process
-data? If this is a case you can't handle, perhaps you should propagate
-an error code instead?
-
-Additionally, you may want to use the IS_ALIGNED() macro.
-
->
->                 len = min(miter.length, buflen - offset);
->
-> -               /* When dram_access_quirk, the bounce buffer is a iomem mapping */
-> -               if (host->dram_access_quirk) {
-> -                       if (to_buffer)
-> -                               memcpy_toio(host->bounce_iomem_buf + offset, miter.addr, len);
-> -                       else
-> -                               memcpy_fromio(miter.addr, host->bounce_iomem_buf + offset, len);
-> +               if ((len % 4))
-> +                       dev_err(host->dev, "non word multiple sg");
-
-Again, a dev_err() doesn't seem like the right thing to do. If you
-can't handle this, please return an error code instead.
-
-Perhaps returning an error code isn't convenient at this point. An
-option could then be to pre-validate the sglist at the time of
-starting the request. We have other host drivers doing this, have a
-look at drivers/mmc/host/mmci*, for example.
-
+> +       return mmc_wait_for_cmd(host, &cmd, retries);
+> +}
 > +
-> +               left = len;
-> +
-> +               if (to_buffer) {
-> +                       do {
-> +                               writel(*buf++, host->bounce_iomem_buf + offset + buf_offset);
-> +
-> +                               buf_offset += 4;
-> +                               left -= 4;
-> +                       } while (left);
->                 } else {
-> -                       if (to_buffer)
-> -                               memcpy(host->bounce_buf + offset, miter.addr, len);
-> -                       else
-> -                               memcpy(miter.addr, host->bounce_buf + offset, len);
-> +                       do {
-> +                               *buf++ = readl(host->bounce_iomem_buf + offset + buf_offset);
-> +
-> +                               buf_offset += 4;
-> +                               left -= 4;
-> +                       } while (left);
->                 }
+>  #endif
 >
->                 offset += len;
-> @@ -830,7 +843,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->                 if (data->flags & MMC_DATA_WRITE) {
->                         cmd_cfg |= CMD_CFG_DATA_WR;
->                         WARN_ON(xfer_bytes > host->bounce_buf_size);
-> -                       meson_mmc_copy_buffer(host, data, xfer_bytes, true);
-> +                       if (host->dram_access_quirk)
-> +                               meson_mmc_copy_buffer(host, data, xfer_bytes, true);
-> +                       else
-> +                               sg_copy_to_buffer(data->sg, data->sg_len,
-> +                                                 host->bounce_buf, xfer_bytes);
->                         dma_wmb();
->                 }
->
-> @@ -999,7 +1016,11 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
->         if (meson_mmc_bounce_buf_read(data)) {
->                 xfer_bytes = data->blksz * data->blocks;
->                 WARN_ON(xfer_bytes > host->bounce_buf_size);
-> -               meson_mmc_copy_buffer(host, data, xfer_bytes, false);
-> +               if (host->dram_access_quirk)
-> +                       meson_mmc_copy_buffer(host, data, xfer_bytes, false);
-> +               else
-> +                       sg_copy_from_buffer(data->sg, data->sg_len,
-> +                                           host->bounce_buf, xfer_bytes);
->         }
->
->         next_cmd = meson_mmc_get_next_command(cmd);
 > --
-> 2.25.1
+> 2.30.2
 >
+
+Otherwise, this looks good to me!
 
 Kind regards
 Uffe
