@@ -2,84 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AD57C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 22:30:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C33CFC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 05:29:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E6BFF61241
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 22:30:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9D2AA61211
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 05:29:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243462AbhIWWc2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 18:32:28 -0400
-Received: from mail-oi1-f176.google.com ([209.85.167.176]:33710 "EHLO
-        mail-oi1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243516AbhIWWcY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 18:32:24 -0400
-Received: by mail-oi1-f176.google.com with SMTP id 24so11943230oix.0;
-        Thu, 23 Sep 2021 15:30:52 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=EYw81LhkE+j/tNbqGktOKpSybyNxssM0CQDhbHTTuGI=;
-        b=A7+fBjO0ylRFr5+wvw54oK9NInuZyr/Az4pyns1cfvVaoXBoZgs8i1J0YIbZqDRJ8p
-         WMQ3RFfMUvfj/Gbo3TDu7Kyz7hCH/t8XNHSfCXJy9rGpN98WHUR2wXropAWfpkRz/6yr
-         njGx/ZR3xmddhp+Fj7Mg3Xvgd7hzBrN275m/QWVx2bke0D6ewiW98j+LZzDgMYL18eRA
-         CXJ/yC4NdynvGz8f6qzCOuP7Hox1u0bzlFi1zMzwQpYY8pK5eD+HET3ucD+0GN6ItADw
-         az4dSHoAQAmLtGEGCPWrG5WKrZSiO9FtfE26nJJpgITM6F2Jqr9ovOEXKq6io5z4cTIC
-         tbAg==
-X-Gm-Message-State: AOAM533t7cQhz/hMa8OSZeRRhTpW35w/FloqTayAof409G1QGsMDKBGR
-        Sn+tbSWC4q6Epqp9I/MLKw==
-X-Google-Smtp-Source: ABdhPJw/GzGbCRG9q14Aq42KNHCaxYKZryjuXontx6QuVzsgJbcCdC6o1520LmPrIYIZlvoMAoQcPA==
-X-Received: by 2002:aca:241a:: with SMTP id n26mr14607337oic.137.1632436252504;
-        Thu, 23 Sep 2021 15:30:52 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id y83sm1634133oia.47.2021.09.23.15.30.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Sep 2021 15:30:51 -0700 (PDT)
-Received: (nullmailer pid 3642842 invoked by uid 1000);
-        Thu, 23 Sep 2021 22:30:51 -0000
-Date:   Thu, 23 Sep 2021 17:30:51 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Tony Lindgren <tony@atomide.com>
-Cc:     Faiz Abbas <faiz_abbas@ti.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-omap@vger.kernel.org, Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH 1/5] dt-bindings: sdhci-omap: Update binding for legacy
- SoCs
-Message-ID: <YU0AG6fFBeogvDR+@robh.at.kernel.org>
-References: <20210921111600.24577-1-tony@atomide.com>
- <20210921111600.24577-2-tony@atomide.com>
+        id S243369AbhIXFas (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Sep 2021 01:30:48 -0400
+Received: from mga04.intel.com ([192.55.52.120]:1448 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S242549AbhIXFar (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 24 Sep 2021 01:30:47 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10116"; a="222117451"
+X-IronPort-AV: E=Sophos;i="5.85,319,1624345200"; 
+   d="scan'208";a="222117451"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Sep 2021 22:29:13 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.85,319,1624345200"; 
+   d="scan'208";a="558844083"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.84]) ([10.237.72.84])
+  by fmsmga002.fm.intel.com with ESMTP; 23 Sep 2021 22:29:11 -0700
+Subject: Re: [PATCH v1 2/2] mmc: sdhci: Use the SW timer when the HW timer
+ cannot meet the timeout value required by the device
+To:     Bean Huo <huobean@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20210917172727.26834-1-huobean@gmail.com>
+ <20210917172727.26834-3-huobean@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <fc14d8e1-9438-d4b0-80f4-ccf9055ab7d3@intel.com>
+Date:   Fri, 24 Sep 2021 08:29:51 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210921111600.24577-2-tony@atomide.com>
+In-Reply-To: <20210917172727.26834-3-huobean@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 21 Sep 2021 14:15:56 +0300, Tony Lindgren wrote:
-> Let's add compatible values for the legacy SoCs so we can continue
-> deprecating omap_hsmmc in favor of sdhci-omap driver.
+On 17/09/21 8:27 pm, Bean Huo wrote:
+> From: Bean Huo <beanhuo@micron.com>
 > 
-> For omap5, we want to have a separate compatible from omap4 for the
-> additional features available on omap5. AFAIK ti81 can just use the
-> omap4 compatible.
+> If the data transmission timeout value required by the device exceeds
+> the maximum timeout value of the host HW timer, we still use the HW
+> timer with the maximum timeout value of the HW timer. This setting is
+> suitable for most R/W situations. But sometimes, the device will complete
+> the R/W task within its required timeout value (greater than the HW timer).
+> In this case, the HW timer for data transmission will time out.
 > 
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: devicetree@vger.kernel.org
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
+> Currently, in this condition, we  disable the HW timer and use the SW
+> timer only when the SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk is set by the
+> host driver. The patch is to remove this if statement restriction and
+> allow data transmission to use the SW timer when the hardware timer cannot
+> meet the required timeout value.
+
+The reason it is a quirk is because it does not work for all hardware.
+For some controllers the timeout cannot really be disabled, only the
+interrupt is disabled, and then the controller never indicates completion
+if the timeout is exceeded.
+
+> 
+> Signed-off-by: Bean Huo <beanhuo@micron.com>
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci.c | 6 +-----
+>  1 file changed, 1 insertion(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 357b365bf0ec..463517fd9886 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -969,9 +969,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+>  		count++;
+>  		current_timeout <<= 1;
+>  		if (count > host->max_timeout_count) {
+> -			if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
+> -				DBG("Too large timeout 0x%x requested for CMD%d!\n",
+> -				    count, cmd->opcode);
+>  			count = host->max_timeout_count;
+>  			*too_big = true;
+>  			break;
+> @@ -1016,8 +1013,7 @@ void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  	bool too_big = false;
+>  	u8 count = sdhci_calc_timeout(host, cmd, &too_big);
+>  
+> -	if (too_big &&
+> -	    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
+> +	if (too_big) {
+>  		sdhci_calc_sw_timeout(host, cmd);
+>  		sdhci_set_data_timeout_irq(host, false);
+>  	} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
 > 
 
-Acked-by: Rob Herring <robh@kernel.org>
