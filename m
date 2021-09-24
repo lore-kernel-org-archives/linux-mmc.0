@@ -2,114 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15540C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 13:29:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39BD7C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 13:33:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EDC0B60F4C
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 13:29:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1ED1F61039
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 13:33:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346378AbhIXNao (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Sep 2021 09:30:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50908 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346353AbhIXN3v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2021 09:29:51 -0400
-Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 777CEC110F27;
-        Fri, 24 Sep 2021 06:08:11 -0700 (PDT)
-Received: by mail-wr1-x432.google.com with SMTP id d6so27222411wrc.11;
-        Fri, 24 Sep 2021 06:08:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:subject:from:to:cc:date:in-reply-to:references
-         :user-agent:mime-version:content-transfer-encoding;
-        bh=L8DrcJ04fYBbAqwtjuYGZedbkhprKkVzLxtRv6jljE0=;
-        b=Fg0aYxo6+s+uELekjWngwheQHMypDTpbQlYyXvo0UGErxffAUdW2lo8a1UIEmawOcI
-         DuHMG2ugBNusVVheZn1ZT2E97qpU8/kIKkF1gH/2nWjQwrEMyM/3MkIafdBaKb0sQ0q0
-         QCj1GGladdTX38GzUcupi0P3D5B+qOP1pVNtRyGaLxL4Yj1aPXWpVuUV6Q6KGRdu+vvm
-         zSfPS00oHas5qXG8Ws6z8B9U9uWb5Q/TnotFUvqOLuRiBE2k6kdSbThzsDwFiiogM6Nt
-         PUqg00pOgnrB3DG/Cj1XP4T7aIm2OQUz+jF3E+cfWJhjeR7LESts2GBTDyt6X3fbt9AP
-         D2eQ==
+        id S1346733AbhIXNfU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Sep 2021 09:35:20 -0400
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:59818
+        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1345769AbhIXNfG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2021 09:35:06 -0400
+Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com [209.85.221.72])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 83A3040292
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2021 13:33:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1632490412;
+        bh=XKzcwZuGjS/78EnzwfC5NLVDtJ4nskm07UNCWnFZuVI=;
+        h=From:To:Cc:Subject:Date:Message-Id:MIME-Version;
+        b=vGBJYhCRiA7zVmNnSG0ktqTG3xgW4SN9ZyiulTA5inQ/1YPM+AmmdD+YnEa2QAvxN
+         0AExaOdRY4rnhp6GnG8oymNhAMRj94w4liJQiPsIaBoLmSiiMaXi4MkvgRuaMyPMqD
+         IO1WjdTqfFMmSItio2BQI2/XuaU6e0Qy2TC56Jic7dO4nd9bblW/fPF+P5Sh8SUrJq
+         +v89xKglXwYjw8bNT2jVdPv7E1Pfhuixvm4/pZIKsmjmyH/puSEWKFWf34lPJpYwtk
+         y8T/2Er8uyNkCYz9y2D7cD6Sj7gQupvfwmtG6/C0+fx39NSzQxpnBE4nYMhSRyT901
+         kfQI2tcrp9H2g==
+Received: by mail-wr1-f72.google.com with SMTP id r7-20020a5d6947000000b0015e0f68a63bso8074129wrw.22
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2021 06:33:32 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
-         :references:user-agent:mime-version:content-transfer-encoding;
-        bh=L8DrcJ04fYBbAqwtjuYGZedbkhprKkVzLxtRv6jljE0=;
-        b=6qjtpXVj/9Z7bk2yOYYxpvTBqjQfhXzs635QvEfRhMDrUzwMhQQ6XFUidfOE1cNhfi
-         lKbD/M/s8YKVIjr7AyGnS7nC/uRB4sFL+UAWT1u3BdhoXEA0yPNaJmKK1JQ7dEzA4Yjq
-         qyaIGBQMs8YE0FdjLKeWRihaCKqYMnMBmjd63CZqqK+Zvy+hjPcQq3Xw1IXdQKoQeTsz
-         V38GFKsAKNkcTp1NhKbYO4xfXPiWMFPVQ0bdmQrWQJ96BjtlzywiXDLMP1I2Qbp0QTM0
-         KiAvIYdyxhRO49nl0iNOKSlMgvvvMSK8RCchUsG3sUrCo0PX+P74zniCxqUJSK+ZhsHj
-         6O0g==
-X-Gm-Message-State: AOAM530WWLajuqhBZotd+PK2HSDbAtgkGb0f72SYOKvBmcXDiwlGgrtB
-        1aWINOLvLibY3x6ZmIbb8B0=
-X-Google-Smtp-Source: ABdhPJwmnD2H0Y7Q9bPtkbMy9wEasRf5Qn8rOk8pUDhDpYPD+IKOdWCKpyJ8EFc2yzKoqOrmtp3qbA==
-X-Received: by 2002:a05:600c:3585:: with SMTP id p5mr2075440wmq.110.1632488890092;
-        Fri, 24 Sep 2021 06:08:10 -0700 (PDT)
-Received: from p200300e94717cfc52fe6da3ec1ed0822.dip0.t-ipconnect.de (p200300e94717cfc52fe6da3ec1ed0822.dip0.t-ipconnect.de. [2003:e9:4717:cfc5:2fe6:da3e:c1ed:822])
-        by smtp.googlemail.com with ESMTPSA id g143sm12478865wme.16.2021.09.24.06.08.09
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=XKzcwZuGjS/78EnzwfC5NLVDtJ4nskm07UNCWnFZuVI=;
+        b=8Nz11iKHEbIoFh8Hp2lA/nm7SAkiX9cpHlIX484/APuJfPTB8HPVaCpG7iYdicLfxQ
+         uisPrKfMCRCuftK/bJ5G+GpUkDmItTdN/oWDKLuZy48h+TURYvux47x2V/LMum+lh32A
+         6J16NDqp9J6BfNbL6nggkpEqIFWnTQMTcdBKLw9/gXpwXJPjWJuW8/gqaRPwWhTljGJz
+         KnEV1wrNRV/M4P/kZf8wHxT68WjnDTzwHWBa4aif38BRpHB1XQODmbDniVepDoDAObLd
+         TxmHuR46NFs7o6sQR0HL9eCSqjiSc6OSARvIxd0xDS+2iqfqpHETq3JSQfhHtWvuttqr
+         1p8Q==
+X-Gm-Message-State: AOAM5309alzyqdJg9jaJdtLXf5fZJZy864ZSg4KGBCPy0j/Q6M42DP6b
+        8qTb3yHLY414qGshMbetPj78sPKvbz4A5g1GxkJ6L4eUjhManKLNo1s5ormkVMDzBpAzoHmw8/1
+        UrPDR6gzcmn/PI4jUxkAjoNiKRzJBLyex823zCg==
+X-Received: by 2002:a05:6000:1567:: with SMTP id 7mr11418487wrz.84.1632490411880;
+        Fri, 24 Sep 2021 06:33:31 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwejRfNkpbo05/gq3EhCAin4mt4r31Piv7+agmXlRHuJktohhgGDajWxZvlAJGT9ZJUgdgE0g==
+X-Received: by 2002:a05:6000:1567:: with SMTP id 7mr11418468wrz.84.1632490411764;
+        Fri, 24 Sep 2021 06:33:31 -0700 (PDT)
+Received: from localhost.localdomain (lk.84.20.244.219.dc.cable.static.lj-kabel.net. [84.20.244.219])
+        by smtp.gmail.com with ESMTPSA id n7sm8259677wra.37.2021.09.24.06.33.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Sep 2021 06:08:09 -0700 (PDT)
-Message-ID: <5a5db6c2eed2273a8903b5052312f039dd629401.camel@gmail.com>
-Subject: Re: [PATCH v1 2/2] mmc: sdhci: Use the SW timer when the HW timer
- cannot meet the timeout value required by the device
-From:   Bean Huo <huobean@gmail.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Date:   Fri, 24 Sep 2021 15:08:08 +0200
-In-Reply-To: <79056ca7-bfe3-1b25-b6fd-de8a9388b75f@intel.com>
-References: <20210917172727.26834-1-huobean@gmail.com>
-         <20210917172727.26834-3-huobean@gmail.com>
-         <fc14d8e1-9438-d4b0-80f4-ccf9055ab7d3@intel.com>
-         <beda2d5ecc3c15e9bf9aa18383c22c2a90d31dab.camel@gmail.com>
-         <93292ef4-8548-d2ba-d803-d3b40b7e6c1d@intel.com>
-         <40e525300cd656dd17ffc89e1fcbc9a47ea90caf.camel@gmail.com>
-         <79056ca7-bfe3-1b25-b6fd-de8a9388b75f@intel.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.5-0ubuntu1 
+        Fri, 24 Sep 2021 06:33:31 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+To:     linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-s3c: Describe driver in KConfig
+Date:   Fri, 24 Sep 2021 15:32:57 +0200
+Message-Id: <20210924133257.112017-1-krzysztof.kozlowski@canonical.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2021-09-24 at 15:17 +0300, Adrian Hunter wrote:
-> > > >          sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
-> > > > }
-> > > > The driver has detected that the hardware timer cannot meet the
-> > > > timeout
-> > > > requirements of the device, but we still use the hardware
-> > > > timer,
-> > > > which will
-> > > > allow potential timeout issuea . Rather than allowing a
-> > > > potential
-> > > > problem to exist, why can’t software timing be used to avoid
-> > > > this
-> > > > problem?
-> > > Timeouts aren't that accurate.  The maximum is assumed still to
-> > > work.
-> > > mmc->max_busy_timeout is used to tell the core what the maximum
-> > > is.
-> > mmc->max_busy_timeout is still a representation of Host HW timer
-> > maximum timeout count, isn't it? 
-> 
-> 
-> Not necessarily.  For SDHCI_QUIRK2_DISABLE_HW_TIMEOUT it would be
-> 
-> set to zero to indicate no maximum.
+Describe better which driver applies to which SoC, to make configuring
+kernel for Samsung SoC easier.
 
-yes, this is the purpose of the patch, for the host controller without
-quirk SDHCI_QUIRK2_DISABLE_HW_TIMEOUT, if the timeout count required by
-device is beyond the HW timer max count, we choose SW timer to avoid the HW timer timeout IRQ.
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+---
+ drivers/mmc/host/Kconfig | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-I don't know if I get it correctly.
-
-Bean
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 71313961cc54..e4c1648e364e 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -315,15 +315,17 @@ config MMC_SDHCI_TEGRA
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_S3C
+-	tristate "SDHCI support on Samsung S3C SoC"
++	tristate "SDHCI support on Samsung S3C/S5P/Exynos SoC"
+ 	depends on MMC_SDHCI
+ 	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  often referrered to as the HSMMC block in some of the Samsung S3C
+-	  range of SoC.
++	  (S3C2416, S3C2443, S3C6410), S5Pv210 and Exynos (Exynso4210,
++	  Exynos4412) SoCs.
+ 
+-	  If you have a controller with this interface, say Y or M here.
++	  If you have a controller with this interface (thereforeyou build for
++	  such Samsung SoC), say Y or M here.
+ 
+ 	  If unsure, say N.
+ 
+-- 
+2.30.2
 
