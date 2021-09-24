@@ -2,103 +2,168 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDBE1C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 11:34:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44632C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 11:46:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A65A4610F7
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 11:34:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2277261164
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 11:46:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244933AbhIXLfj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Sep 2021 07:35:39 -0400
-Received: from mga02.intel.com ([134.134.136.20]:34093 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S244439AbhIXLfj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 24 Sep 2021 07:35:39 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10116"; a="211295196"
-X-IronPort-AV: E=Sophos;i="5.85,319,1624345200"; 
-   d="scan'208";a="211295196"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Sep 2021 04:34:06 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.85,319,1624345200"; 
-   d="scan'208";a="703494695"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.84]) ([10.237.72.84])
-  by fmsmga006.fm.intel.com with ESMTP; 24 Sep 2021 04:34:03 -0700
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-at91: replace while loop with
- read_poll_timeout
-To:     Claudiu Beznea <claudiu.beznea@microchip.com>,
-        eugen.hristev@microchip.com, ulf.hansson@linaro.org,
-        nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
-        ludovic.desroches@microchip.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        id S1343597AbhIXLrb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Sep 2021 07:47:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56844 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1343592AbhIXLra (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2021 07:47:30 -0400
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBF31C061756;
+        Fri, 24 Sep 2021 04:45:56 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id i23so26701848wrb.2;
+        Fri, 24 Sep 2021 04:45:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=/0j9nbgsdZbL0omEY1qL679LVqCMTV/VffKv5oBSsjU=;
+        b=aSa45hd+S3Fv4JUSFQ+a3kgyKy5NX9AGa0CJIDVYWneSLwqkbiGb/QdRzY0bbT5fCx
+         I5O4NVZz0Uu5SXECHchsCiEDV+0pF1h0jDRjGsHHd/MMUIcEO2XWJ0sgaG+TVFCHJlbA
+         LLN0zDYzeBL8vywSI/Lv/8QqoeQIQxcLsdqRdvAYHEs8WJggfxFMXa4dFgl4w4H1sZ1E
+         x/gqlahyDWoB8y9TvhZM5C6tp7AK5IHa3ZR+468h9O+WQjC1vNg+c+pJH31tebmvMgir
+         RkFo3J81bVSyJa2ikn2M/7W76P6DXmnBIoUh/vomkTMw77kg74sfka5XJ4newu0u3Kvo
+         F/gg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=/0j9nbgsdZbL0omEY1qL679LVqCMTV/VffKv5oBSsjU=;
+        b=yxJLI5/irlzxY5WDCwWHocLWI6EP+5B5thoRGTGDKYPgEd31kZv3dYWdDqEr9FEk2u
+         TAWyfqLUv9A39Gn0mPGmK/L7QP5L/mXvswQugSHM7eRfw06gZXn4aJrtME/0d+Re4ozj
+         B9pXLnokHdQCxAbD0y/clkBy/TorALK5fbqNlHySsQBi2CFPkT5w6cIQEo2jU2XX4pHC
+         P2VyPsW/OjN/WF22a6+c2VyD21gvnKB8W/5eUGaExDpx8ebroXOn1nX7PNdLxdk4uUjS
+         jwfM+zisZA5iaAuJLieUdiaR4xeraU3IgHzgllgOme+AygEdIE9vW+JsTbrIe1adFNps
+         Y0Lg==
+X-Gm-Message-State: AOAM533o3+2ITK6K5cm5tthd48oKCmxpGFZZvccGnHx1nHCZgy3KcIoO
+        5bGRqDBuOn9NkS1Zf6GTJXOz45LHOtnaiQ==
+X-Google-Smtp-Source: ABdhPJzb83WVQz4xAx2zTEdtFMOpdwV8pBiewli/yezfwpfrrb9fSHQRbv32+HAgzGOsiDEBNZ8JnA==
+X-Received: by 2002:a05:600c:298:: with SMTP id 24mr1645157wmk.116.1632483955458;
+        Fri, 24 Sep 2021 04:45:55 -0700 (PDT)
+Received: from p200300e94717cfc52fe6da3ec1ed0822.dip0.t-ipconnect.de (p200300e94717cfc52fe6da3ec1ed0822.dip0.t-ipconnect.de. [2003:e9:4717:cfc5:2fe6:da3e:c1ed:822])
+        by smtp.googlemail.com with ESMTPSA id c4sm8157259wrt.23.2021.09.24.04.45.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 24 Sep 2021 04:45:55 -0700 (PDT)
+Message-ID: <40e525300cd656dd17ffc89e1fcbc9a47ea90caf.camel@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: sdhci: Use the SW timer when the HW timer
+ cannot meet the timeout value required by the device
+From:   Bean Huo <huobean@gmail.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-References: <20210924082851.2132068-1-claudiu.beznea@microchip.com>
- <20210924082851.2132068-3-claudiu.beznea@microchip.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <10b77993-8ab9-75dc-69e8-2775f8fcc7b1@intel.com>
-Date:   Fri, 24 Sep 2021 14:34:42 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.14.0
+Date:   Fri, 24 Sep 2021 13:45:54 +0200
+In-Reply-To: <93292ef4-8548-d2ba-d803-d3b40b7e6c1d@intel.com>
+References: <20210917172727.26834-1-huobean@gmail.com>
+         <20210917172727.26834-3-huobean@gmail.com>
+         <fc14d8e1-9438-d4b0-80f4-ccf9055ab7d3@intel.com>
+         <beda2d5ecc3c15e9bf9aa18383c22c2a90d31dab.camel@gmail.com>
+         <93292ef4-8548-d2ba-d803-d3b40b7e6c1d@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
 MIME-Version: 1.0
-In-Reply-To: <20210924082851.2132068-3-claudiu.beznea@microchip.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/09/21 11:28 am, Claudiu Beznea wrote:
-> Replace while loop with read_poll_timeout().
+On Fri, 2021-09-24 at 13:07 +0300, Adrian Hunter wrote:
+> On 24/09/21 12:17 pm, Bean Huo wrote:
+> > On Fri, 2021-09-24 at 08:29 +0300, Adrian Hunter wrote:
+> > > > If the data transmission timeout value required by the device
+> > > > exceeds
+> > > > the maximum timeout value of the host HW timer, we still use
+> > > > the HW
+> > > > timer with the maximum timeout value of the HW timer. This
+> > > > setting
+> > > > is
+> > > > suitable for most R/W situations. But sometimes, the device
+> > > > will
+> > > > complete
+> > > > the R/W task within its required timeout value (greater than
+> > > > the HW
+> > > > timer).
+> > > > In this case, the HW timer for data transmission will time out.
+> > > > Currently, in this condition, we  disable the HW timer and use
+> > > > the
+> > > > SW
+> > > > timer only when the SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk is
+> > > > set by
+> > > > the
+> > > > host driver. The patch is to remove this if statement
+> > > > restriction
+> > > > and
+> > > > allow data transmission to use the SW timer when the hardware
+> > > > timer
+> > > > cannot
+> > > > meet the required timeout value.
+> > > 
+> > > The reason it is a quirk is because it does not work for all
+> > > hardware.
+> > > 
+> > > For some controllers the timeout cannot really be disabled, only
+> > > the
+> > > 
+> > > interrupt is disabled, and then the controller never indicates
+> > > completion
+> > > 
+> > > if the timeout is exceeded.
+> > 
+> > Hi Adrian,
+> > Thanks for your review.
+> > 
+> > Yes, you are right. But this quirk prevents disabling the hardware
+> > timeoutIRQ. The purpose of this patch is to disable the hardware
+> > timeout IRQ and
+> > select the software timeout.
+> > 
+> > void __sdhci_set_timeout(struct sdhci_host *host, struct
+> > mmc_command
+> > *cmd)
+> > {
+> >         bool too_big = false;
+> >         u8 count = sdhci_calc_timeout(host, cmd, &too_big);
+> > 
+> >         if (too_big) {
+> >                 sdhci_calc_sw_timeout(host, cmd);
+> >                 sdhci_set_data_timeout_irq(host, false); // disable
+> > IRQ
+> >         } else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
+> >                 sdhci_set_data_timeout_irq(host, true);
+> >         }
+> > 
+> >         sdhci_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
+> > }
+> > 
+> > 
+> > The driver has detected that the hardware timer cannot meet the
+> > timeout
+> > requirements of the device, but we still use the hardware timer,
+> > which will
+> > allow potential timeout issuea . Rather than allowing a potential
+> > problem to exist, why can’t software timing be used to avoid this
+> > problem?
 > 
-> Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
+> Timeouts aren't that accurate.  The maximum is assumed still to work.
+> mmc->max_busy_timeout is used to tell the core what the maximum is.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
 
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 16 +++++-----------
->  1 file changed, 5 insertions(+), 11 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 134ba01d3063..d1a1c548c515 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -62,7 +62,6 @@ static void sdhci_at91_set_force_card_detect(struct sdhci_host *host)
->  static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	u16 clk;
-> -	unsigned long timeout;
->  
->  	host->mmc->actual_clock = 0;
->  
-> @@ -87,16 +86,11 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
->  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->  
->  	/* Wait max 20 ms */
-> -	timeout = 20;
-> -	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> -		& SDHCI_CLOCK_INT_STABLE)) {
-> -		if (timeout == 0) {
-> -			pr_err("%s: Internal clock never stabilised.\n",
-> -			       mmc_hostname(host->mmc));
-> -			return;
-> -		}
-> -		timeout--;
-> -		mdelay(1);
-> +	if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
-> +			      1000, 20000, false, host, SDHCI_CLOCK_CONTROL)) {
-> +		pr_err("%s: Internal clock never stabilised.\n",
-> +		       mmc_hostname(host->mmc));
-> +		return;
->  	}
->  
->  	clk |= SDHCI_CLOCK_CARD_EN;
-> 
+
+
+mmc->max_busy_timeout is still a representation of Host HW timer
+maximum timeout count, isn't it? 
+
+Bean
 
