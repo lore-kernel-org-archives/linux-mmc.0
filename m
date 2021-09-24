@@ -1,113 +1,166 @@
 Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39BD7C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 13:33:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCE3EC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 19:23:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1ED1F61039
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 13:33:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A6B65610CB
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Sep 2021 19:23:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346733AbhIXNfU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Sep 2021 09:35:20 -0400
-Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:59818
-        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1345769AbhIXNfG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2021 09:35:06 -0400
-Received: from mail-wr1-f72.google.com (mail-wr1-f72.google.com [209.85.221.72])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 83A3040292
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2021 13:33:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1632490412;
-        bh=XKzcwZuGjS/78EnzwfC5NLVDtJ4nskm07UNCWnFZuVI=;
-        h=From:To:Cc:Subject:Date:Message-Id:MIME-Version;
-        b=vGBJYhCRiA7zVmNnSG0ktqTG3xgW4SN9ZyiulTA5inQ/1YPM+AmmdD+YnEa2QAvxN
-         0AExaOdRY4rnhp6GnG8oymNhAMRj94w4liJQiPsIaBoLmSiiMaXi4MkvgRuaMyPMqD
-         IO1WjdTqfFMmSItio2BQI2/XuaU6e0Qy2TC56Jic7dO4nd9bblW/fPF+P5Sh8SUrJq
-         +v89xKglXwYjw8bNT2jVdPv7E1Pfhuixvm4/pZIKsmjmyH/puSEWKFWf34lPJpYwtk
-         y8T/2Er8uyNkCYz9y2D7cD6Sj7gQupvfwmtG6/C0+fx39NSzQxpnBE4nYMhSRyT901
-         kfQI2tcrp9H2g==
-Received: by mail-wr1-f72.google.com with SMTP id r7-20020a5d6947000000b0015e0f68a63bso8074129wrw.22
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Sep 2021 06:33:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=XKzcwZuGjS/78EnzwfC5NLVDtJ4nskm07UNCWnFZuVI=;
-        b=8Nz11iKHEbIoFh8Hp2lA/nm7SAkiX9cpHlIX484/APuJfPTB8HPVaCpG7iYdicLfxQ
-         uisPrKfMCRCuftK/bJ5G+GpUkDmItTdN/oWDKLuZy48h+TURYvux47x2V/LMum+lh32A
-         6J16NDqp9J6BfNbL6nggkpEqIFWnTQMTcdBKLw9/gXpwXJPjWJuW8/gqaRPwWhTljGJz
-         KnEV1wrNRV/M4P/kZf8wHxT68WjnDTzwHWBa4aif38BRpHB1XQODmbDniVepDoDAObLd
-         TxmHuR46NFs7o6sQR0HL9eCSqjiSc6OSARvIxd0xDS+2iqfqpHETq3JSQfhHtWvuttqr
-         1p8Q==
-X-Gm-Message-State: AOAM5309alzyqdJg9jaJdtLXf5fZJZy864ZSg4KGBCPy0j/Q6M42DP6b
-        8qTb3yHLY414qGshMbetPj78sPKvbz4A5g1GxkJ6L4eUjhManKLNo1s5ormkVMDzBpAzoHmw8/1
-        UrPDR6gzcmn/PI4jUxkAjoNiKRzJBLyex823zCg==
-X-Received: by 2002:a05:6000:1567:: with SMTP id 7mr11418487wrz.84.1632490411880;
-        Fri, 24 Sep 2021 06:33:31 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJwejRfNkpbo05/gq3EhCAin4mt4r31Piv7+agmXlRHuJktohhgGDajWxZvlAJGT9ZJUgdgE0g==
-X-Received: by 2002:a05:6000:1567:: with SMTP id 7mr11418468wrz.84.1632490411764;
-        Fri, 24 Sep 2021 06:33:31 -0700 (PDT)
-Received: from localhost.localdomain (lk.84.20.244.219.dc.cable.static.lj-kabel.net. [84.20.244.219])
-        by smtp.gmail.com with ESMTPSA id n7sm8259677wra.37.2021.09.24.06.33.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 24 Sep 2021 06:33:31 -0700 (PDT)
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-To:     linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-s3c: Describe driver in KConfig
-Date:   Fri, 24 Sep 2021 15:32:57 +0200
-Message-Id: <20210924133257.112017-1-krzysztof.kozlowski@canonical.com>
-X-Mailer: git-send-email 2.30.2
+        id S1346475AbhIXTZ2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Sep 2021 15:25:28 -0400
+Received: from esa2.hgst.iphmx.com ([68.232.143.124]:15399 "EHLO
+        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1344513AbhIXTZ1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Sep 2021 15:25:27 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1632511434; x=1664047434;
+  h=from:to:subject:date:message-id:references:in-reply-to:
+   content-transfer-encoding:mime-version;
+  bh=CWs1csaab69yZfLyFJso7PqQgEwlwrhyVfgqfKUPyhI=;
+  b=ACokYfYgaqRUhHdVtAYVhvtcN6m34eBXgLC6JKh07yAQWaJ7xw184Vr6
+   hj2If4p958WCPMIUhdPMviaHJkXcnNwn15PBIvBgImG0Al9sGkLmd137w
+   P5V2IR0u4rMG3N26QJ5P2p1A8/LK2Clg0jU4ucj1lo4sdjNyUvUbmA5kC
+   tOZyJYi6YoRdDCThSTB6mNKGnbTcFCJZMmjkDXPzlioZDhYJUjYQ9MF+c
+   CIliUWRCN+nLbfks91NyyQSs51XBlAZzJdc83GdhiT8ukuHKEPv7NkO88
+   7oLIvcG8TQ1frRZ7N7y1btvfhpomGTXNvvX8o1JC+5TIm99S2G0gzSIrG
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.85,320,1624291200"; 
+   d="scan'208";a="284695974"
+Received: from mail-dm6nam11lp2174.outbound.protection.outlook.com (HELO NAM11-DM6-obe.outbound.protection.outlook.com) ([104.47.57.174])
+  by ob1.hgst.iphmx.com with ESMTP; 25 Sep 2021 03:23:53 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=BWJ9W0Uv6VHEGn3qoCkj9AFYgwEzOmQFY69IJSLutGguddf2lvhzKD9bCVj/1qKMZmwfgAlKcxFdhhXju+pgRZb425RUM4Xetcq3BtyYTke7m2aSQLmo6Q8dvrG54UGWpHAVPDPfa2h0Aau1IB1uKXwoq2v36bBmLJz7pETJ8VEpVHCizcDJh+nRTDtsvSZ1oqrqtQiIQcuRoodn/kGchbesrBQVbSSuV356TlefYZrzcNu/kkPsXva54g2rpj7vL2fCBcbSmWgQW8XpkTqLvY2nFYEeGSZPEkDW3Xe0RuivXJVBUlqFJqQygDpnGnL4HhBuhqkh3uEE+hYIfXeIrg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901; h=From:Date:Subject:Message-ID:Content-Type:MIME-Version;
+ bh=wLFJTr4U5K9SfZ7k7uQckmEWmkgktVMng364airh7zk=;
+ b=DN38XVtDGsCZDQ2GWOTOBcJ0UZqQ/LCct77S66VOi+9IrN1QJfmG4R8C/Fb0DU1Li+soV2bK10T1cSo81V8Cm20w7z59suI4bIs9t3y1ddTi0rFeKkpcIrk4wCz1voLDqnmt08Em6Ddsq+lok9uGuMhLB5SSX2o4RHqxc1Y454Xx7D1E+RjZQvfbJak1kmsBqHePuO96OrKm3+6yIfDHhJ8s8QB1tFe+fqFOgJTAEatIt48AmVEdDc6mpBZyCqgz2crCFl8qfcypoJVC/mip6slFuWEU9aE2JTFI+KcG53QeiI0/jWEhs01lDgr7HsT3tCSx+HcG7IG9fUGYarCAMg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=wLFJTr4U5K9SfZ7k7uQckmEWmkgktVMng364airh7zk=;
+ b=as2Npg4XDjakprF7yz6Kqr6NBUbTJhjNO1ooWSAMHGtdtEwm+Cm/4iRx0lLQIZhs5FBUN2uY54Fh+HpstfXE6IFGtrZZRDBft9HXIP2tSmJ2B3o0Y7gntbpbkru82X3ilzmLpDMbcgI9PwpG+a3dw6NrPvzraVA8NgIUngSqHWo=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ DM5PR04MB0861.namprd04.prod.outlook.com (2603:10b6:3:fa::7) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4544.14; Fri, 24 Sep 2021 19:23:52 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::edbe:4c5:6ee8:fc59]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::edbe:4c5:6ee8:fc59%4]) with mapi id 15.20.4544.018; Fri, 24 Sep 2021
+ 19:23:52 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     Michael Heimpold <mhei@heimpold.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH v3] mmc-utils: One further optimization of trimming
+ routine
+Thread-Topic: [PATCH v3] mmc-utils: One further optimization of trimming
+ routine
+Thread-Index: AQHXrlo9n9CRqSpXlkiY8aXWwjUThKuzlosg
+Date:   Fri, 24 Sep 2021 19:23:52 +0000
+Message-ID: <DM6PR04MB6575735AD7DCEC10236BDDA7FCA49@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20210920194633.814-1-mhei@heimpold.de>
+In-Reply-To: <20210920194633.814-1-mhei@heimpold.de>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: heimpold.de; dkim=none (message not signed)
+ header.d=none;heimpold.de; dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: b4c05dd6-44a6-4574-d3f1-08d97f90d7e2
+x-ms-traffictypediagnostic: DM5PR04MB0861:
+x-microsoft-antispam-prvs: <DM5PR04MB086149FE52E18B240E4D7428FCA49@DM5PR04MB0861.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-oob-tlc-oobclassifiers: OLM:4941;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: Ktu1hz0diZ9GgdXJh9bM6f3tBMbcLSTjPHQfuaB7A2PDIF/o1CCt6HuLWrIjxrqtOdXX/x++GYhCxjVF+hn/VirCLA1RxP0n27ZHq+GMC4tAUpjBaXcuPvHlyjI4dj27eMz+KuDOGH3P63q06BqC/5//SebrYjhNUyqbNdPJct1cc87HEQ10EDAqN/2Vb615HUsGgnVWS9DtY8G+bsrRJxcHBnNkFVP7NSomefJmp53AcZgFyt/F2Gzl/e5ASwlojdoxF1XAFDLLQUOxYdb9CFqMOzm/m66/eaDjXzK4v7+Zws1Qzmcs3tG5EzkV9IobfWjVxmomDa2xNP0AVbnwBENcZ/Dv6daifZhIiu46VEkFZEE+2+nuZqOGf84sppII/b619V2UqSN+oZlq058dSBUCAN6AUic0Sba4o/vL0x8+iBdMoDqqKjCpS9qZZ1pP530eMvcXtIs0XuO9GjbtDNqrYQsJ/dEBjq+hAnC9NnLZTMlWLWsTYTECYK77n62TMcK5UiieoRFKqlZlvDoQHN5XYzli+byfOU6v3c40LcFaJ2XAKjJ3wZOe82+BNprvb3G6mPiLs/yUqE1DJBNzoGt58VCD6wOyoh76xbKjuaQCAcjlX8mJmTp7exYpHrVq4MctdkW8Ye9H4RVYihG0NmBqMvm76EVT5eimS7KzWR+USyVb9SaL/Cnr5O4Hg7VbgZrJWPE0YOt4dhkVf7mOkw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(316002)(83380400001)(110136005)(186003)(66476007)(7696005)(76116006)(66556008)(5660300002)(122000001)(6506007)(9686003)(38100700002)(86362001)(4744005)(71200400001)(38070700005)(508600001)(8676002)(2906002)(26005)(33656002)(66446008)(55016002)(66946007)(8936002)(52536014)(64756008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?fq6T37T3c17r9mvb3QwEdCX4LoeEYCDN/4V/WGuWmzv1nOkqaKRSzaReiJST?=
+ =?us-ascii?Q?vm9Ist9Y4WzLeswimuJo2Qj86bby8ixG1fO0GCdHGC9EnSpQcWLXx2ASauC6?=
+ =?us-ascii?Q?366pY/hLxzA6vB/dMsrgCNhTatCkWMHJhmbm+mBkcMuI1eJsDpbbj/Ofi0NO?=
+ =?us-ascii?Q?ALPFyG3+Xoucb3ofAAv45gsnyF8hgsIvwMsh0nI2zlzRBTegX7lnaSW4TIQI?=
+ =?us-ascii?Q?Su09KhqvvPB1wMyc9LmKFQAGXSjG7tGya0CfDpu2hgtvmhTZ4gmnP58Gue3r?=
+ =?us-ascii?Q?+aqrvOXXMfciNNMlzVwLqszTi596EkhsSMpUUDAaDvrz5b4/a6+UttkFS9zu?=
+ =?us-ascii?Q?PAyVoc5ZjQQp7RpNX7ihs7lMwaGagUYQ/DbbaZV9hcNzlHyMS8im+LqblB5F?=
+ =?us-ascii?Q?4B97LSizMzXTLIU1JRTM0ADgafOWgx9VeyEZDrMkwXuIE4hN7UVneOzMLx1q?=
+ =?us-ascii?Q?YqUZtYrjHw0a2+ECJAlKcuVTBr2fhWyxp+pZxlHrm2bxiRHhyQYfAKLwAVX/?=
+ =?us-ascii?Q?2rSV/V+t3IhIjip7KMR4ZNT0eKaSZW76GtIWjhBv/eAPGM5zwfygpta1RFJR?=
+ =?us-ascii?Q?yhKR/bGNQQ1vQ3tZQ/JV6vho2dShnJb02kW8ZWJRxh3mTv7UbZ4zr3FBoF4l?=
+ =?us-ascii?Q?uXseyIa0E5gZc/uiwG/xpMkmQ1v2IP9QFCpmfv9MdeZGH+t/lQkHowzzZxiQ?=
+ =?us-ascii?Q?uoFa99a0nrQL3uMBrjTpSZfYrwvQZhMQHE3gMq+UR8FwaQ8RHMxIN6bsuJjk?=
+ =?us-ascii?Q?z6wwWg80fsZY6628T7qVuCFonceJRYbpNInEOv8ZrRM6pt6A3bZHNwJqUGe1?=
+ =?us-ascii?Q?7qob7xfUl6bpDnKOf0c1PqSav9lhgPVf7DcnaYqG3noE8tcQMziQ2ZfZ0vTV?=
+ =?us-ascii?Q?KWW+xKfinbUMeUm8ixZElMPFtaqrw99ZGeYzxiKHPdwxPfu78q0kJURTnKUH?=
+ =?us-ascii?Q?9von55OiOi3XbxZjJuih+1dC2K8szlhLRR7KlGXI90eYJz7HsR6/fTJXjpEd?=
+ =?us-ascii?Q?ZIuZAbw5Xj9EA7WPU5syB8GhNAco/35dYDWyYEfOvCNbU/OkkKLULYSa9CO4?=
+ =?us-ascii?Q?OWcaoFs8E/XIknxbo6vPsLwtm//RxN9zfHusN9lfUmOhvdubIZpBmFd0A4th?=
+ =?us-ascii?Q?1+XoRHuo209Th5pzaKV9D+YnfT2nocnxmegqaEgqsUc2E+xSFXz7ebWo05iy?=
+ =?us-ascii?Q?NsbTllDZff9bDGLFFHzu5rZNxy8uwfANVgmksnDATsyTr5qEBjVev3ruaaBA?=
+ =?us-ascii?Q?zXS6jgn9GPo/xJnE2jD8G937N/VpToMZu4nMP+r5o1myDutxtx0boGolq17f?=
+ =?us-ascii?Q?lNgGpVA2t55U71fZF1BmIUkH?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b4c05dd6-44a6-4574-d3f1-08d97f90d7e2
+X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Sep 2021 19:23:52.1978
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: T9QIIa6BAbjrGw0fA0fzqyZWXDW7rtefrx43e9OeqtylrnGLLapxIVN7h/Ojm+Om0jxuq9S8vJl4M92i2YoWyw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR04MB0861
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Describe better which driver applies to which SoC, to make configuring
-kernel for Samsung SoC easier.
+=20
+> The last change to the trimming routine made it more efficient,
+> however, we can even get rid of the memmove() as we leave the
+> function with strdup() anyway.
+>=20
+> Signed-off-by: Michael Heimpold <mhei@heimpold.de>
+> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Acked-by: Avri Altman <avri.altman@wdc.com>
 
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
----
- drivers/mmc/host/Kconfig | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 71313961cc54..e4c1648e364e 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -315,15 +315,17 @@ config MMC_SDHCI_TEGRA
- 	  If unsure, say N.
- 
- config MMC_SDHCI_S3C
--	tristate "SDHCI support on Samsung S3C SoC"
-+	tristate "SDHCI support on Samsung S3C/S5P/Exynos SoC"
- 	depends on MMC_SDHCI
- 	depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  often referrered to as the HSMMC block in some of the Samsung S3C
--	  range of SoC.
-+	  (S3C2416, S3C2443, S3C6410), S5Pv210 and Exynos (Exynso4210,
-+	  Exynos4412) SoCs.
- 
--	  If you have a controller with this interface, say Y or M here.
-+	  If you have a controller with this interface (thereforeyou build for
-+	  such Samsung SoC), say Y or M here.
- 
- 	  If unsure, say N.
- 
--- 
-2.30.2
+> ---
+>=20
+> While doing some house-keeping, I found this somewhat older
+> patch still hanging around (v2 was sent on 2018-12-08).
+> I'm just resending to check what's the current opinion
+> about it :-)
+>=20
+>  lsmmc.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
+>=20
+> diff --git a/lsmmc.c b/lsmmc.c
+> index 06cc0b8..05d59e8 100644
+> --- a/lsmmc.c
+> +++ b/lsmmc.c
+> @@ -393,10 +393,9 @@ char *read_file(char *name)
+>                 start++;
+>                 len--;
+>         }
+> -       memmove(line, start, len);
+> -       line[len] =3D '\0';
+>=20
+> -       return strdup(line);
+> +       start[len] =3D '\0';
+> +       return strdup(start);
+>  }
+>=20
+>  /* Hexadecimal string parsing functions */
+> --
+> 2.17.1
 
