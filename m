@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9953C4321E
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:42:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA0A3C43217
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:43:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 92A8860E73
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:42:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C64336112E
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:43:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232204AbhIZWoc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 26 Sep 2021 18:44:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43334 "EHLO
+        id S232356AbhIZWom (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 26 Sep 2021 18:44:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231758AbhIZWoT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2021 18:44:19 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE217C061575;
-        Sun, 26 Sep 2021 15:42:42 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id g41so68399978lfv.1;
-        Sun, 26 Sep 2021 15:42:42 -0700 (PDT)
+        with ESMTP id S232168AbhIZWoa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2021 18:44:30 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BF8FC061604;
+        Sun, 26 Sep 2021 15:42:53 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id x27so68580306lfu.5;
+        Sun, 26 Sep 2021 15:42:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=i4Ar1sKgIFsBbBlQEbxczmgkR6jb9rRmAkGMRfPTYAk=;
-        b=JHPU2Kca1+QN2KgQCk5fxNWMjv0GyidVyLzYc1zHo6uI4WKbF+MpJW8N/ggDp7ZR1T
-         RePIWmnLYq14XdW1/KnviDUZ59mUlcJrLAVJLC9skmwTJZ/cU31ps3tw/ttGBR4lyWol
-         ULnGfzlUqbL9ZwsO3K3Vmy6U6SgZYvJgCiraBW+77+vS+2SvGVVTGewqxStiPz3xrSPI
-         eBXZWJO+Yn6drzJTEJkYKyGSw6BMyntRdxrfke4msBZohWyn2m0RQlh9MMnU47vs6VEj
-         cP1xkjxOnsVSURB7IrQpGW88Fjk0dOLIQRdhfwDONnFL9JIS0vuiD04vL8S8oqfTbxuE
-         b2Qw==
+        bh=ibGug1ieM1Zc7MJuknBrkttvd7qxV12foe1b+4QmuwU=;
+        b=kbXThiOoi0vzjYApWe9WZLh0hlOouNdrFZyO2JP+i3UfSJjgZObFZzUbXmu28zm6JQ
+         /h+YsaZTtX/0vk6B/EP6J03Oc4yZSNDgR0epomtyU3qOkQWjUHqzwheMyDhzoV20Ey47
+         BgQH0sWVDr81rmz86l9vxe9CjVdN7kRfnDAlzY2eNpki9UvjlbTGLfZIY3EPSqq3VQh8
+         9FEHfARqn4dBw2N8AR2eb5GV3rTP6nLtbqs3HjHMMuj4g/aDNDHzgH5VzSyH5ArIoFhy
+         aRJ5FQWOYl9a1LwzbZlRT8N3S6SM9bBHO3EAO3tUmf6Gt7Pnn/jRl08Th2rs0aSsznLN
+         jFOQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=i4Ar1sKgIFsBbBlQEbxczmgkR6jb9rRmAkGMRfPTYAk=;
-        b=5FoA1r+4GUIDg5IOct66nl4UpShgy5Mt91HbQgEdj+RslLBgpWMwrMNzj0PWQBzRSL
-         dTnxkbxZoD3//X0jm+bFXuLks8Srrow9hHJCF8EZ9bKUnHlkXFOJZ1I1+na0/WzF3O3P
-         eD5UQ8aZKR383yPXtE7vrNhgyNo3r9qcczIkj8C423RADjxmKon2JSTgjivC6pnmMuIp
-         unc+EEcteNfpMG+wS8DjeavF2uGaFA682YKXaTJ5fxGJetEJ3/XQ3FdJZuXetwSV0zEB
-         ZWE3FfO9HAKBIxQ75EPyHN5Sk57za1jKYoiKVaUlD2iGV0DWD9BVMAcUMCLxkwpTv8M/
-         KU3A==
-X-Gm-Message-State: AOAM532K2X7B5zys6SWd5ACgojd7Aq8OFWCOFfjYQq/xxvnr9C+Yrsgf
-        2iU/1hy41uADv8/ea5IgGuo=
-X-Google-Smtp-Source: ABdhPJxm/9SGTpXmIU6KOUW8nx7f+qRgzeye8oo59aTJA/2lTZoJ+DqEFdLAgXZPM8PJsX7e7lNUUw==
-X-Received: by 2002:a2e:a22a:: with SMTP id i10mr24713382ljm.464.1632696161310;
-        Sun, 26 Sep 2021 15:42:41 -0700 (PDT)
+        bh=ibGug1ieM1Zc7MJuknBrkttvd7qxV12foe1b+4QmuwU=;
+        b=Vg1yPc3rPDqT/+1p1j0Vlo0q1dOBCE0kSgCmP6BxaArPzk371f5Slii6o1f2nVjE5K
+         R293A3iC/y2CvjzNXng/NidktxnJOLkkMDczTkzIo/474ZF6lqboMXJ6ACR90lmCNsvk
+         kj7T99DP2Bc5YZBeJZiD/TuTDMEETyYJzNcL/cfVoFsaoPob0IIRxWn8Cb4ir8kLuaS8
+         As9eII9WUOvbym1P9ZQm7QiUkx7guuQ+yVU3EMuJXHJMwnBgUBvMvUVEUlV/0cdxmGL6
+         yZXGIp5eWIPU1+ZBfY8efGIDaepOng2+Ixy3WzsyEO9YnwfqEWKGDvIkQWNuQXJIqGBO
+         8Xlg==
+X-Gm-Message-State: AOAM531NGpb2Si4KpdnoyFcY6oV47G2Eu+w1fmB3MwrmLoQkiCrWBRGE
+        o/UhHjUQ+KhNeRHh7SaDMHo=
+X-Google-Smtp-Source: ABdhPJz9jmqshMFNSzsvvuoXAr836UQZuXKjIHTOQk7wjEqKcJU8pApVPvjhCU/i+v1wEXe12JOXPw==
+X-Received: by 2002:a19:c354:: with SMTP id t81mr21318120lff.387.1632696171915;
+        Sun, 26 Sep 2021 15:42:51 -0700 (PDT)
 Received: from localhost.localdomain (46-138-80-108.dynamic.spd-mgts.ru. [46.138.80.108])
-        by smtp.gmail.com with ESMTPSA id m10sm1408899lfr.272.2021.09.26.15.42.40
+        by smtp.gmail.com with ESMTPSA id m10sm1408899lfr.272.2021.09.26.15.42.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 26 Sep 2021 15:42:41 -0700 (PDT)
+        Sun, 26 Sep 2021 15:42:51 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -76,9 +76,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v13 13/35] drm/tegra: gr2d: Support generic power domain and runtime PM
-Date:   Mon, 27 Sep 2021 01:40:36 +0300
-Message-Id: <20210926224058.1252-14-digetx@gmail.com>
+Subject: [PATCH v13 22/35] media: dt: bindings: tegra-vde: Convert to schema
+Date:   Mon, 27 Sep 2021 01:40:45 +0300
+Message-Id: <20210926224058.1252-23-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210926224058.1252-1-digetx@gmail.com>
 References: <20210926224058.1252-1-digetx@gmail.com>
@@ -88,267 +88,201 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add runtime power management and support generic power domains.
+Convert NVIDIA Tegra video decoder binding to schema.
 
-Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
-Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
-Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
-Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
+Reviewed-by: Rob Herring <robh@kernel.org>
+Acked-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/gpu/drm/tegra/gr2d.c | 155 +++++++++++++++++++++++++++++++++--
- 1 file changed, 147 insertions(+), 8 deletions(-)
+ .../bindings/media/nvidia,tegra-vde.txt       |  64 -----------
+ .../bindings/media/nvidia,tegra-vde.yaml      | 107 ++++++++++++++++++
+ 2 files changed, 107 insertions(+), 64 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
+ create mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
 
-diff --git a/drivers/gpu/drm/tegra/gr2d.c b/drivers/gpu/drm/tegra/gr2d.c
-index de288cba3905..13df8f118f75 100644
---- a/drivers/gpu/drm/tegra/gr2d.c
-+++ b/drivers/gpu/drm/tegra/gr2d.c
-@@ -7,11 +7,21 @@
- #include <linux/iommu.h>
- #include <linux/module.h>
- #include <linux/of_device.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/reset.h>
-+
-+#include <soc/tegra/common.h>
- 
- #include "drm.h"
- #include "gem.h"
- #include "gr2d.h"
- 
-+enum {
-+	RST_MC,
-+	RST_GR2D,
-+	RST_GR2D_MAX,
-+};
-+
- struct gr2d_soc {
- 	unsigned int version;
- };
-@@ -21,6 +31,9 @@ struct gr2d {
- 	struct host1x_channel *channel;
- 	struct clk *clk;
- 
-+	struct reset_control_bulk_data resets[RST_GR2D_MAX];
-+	unsigned int nresets;
-+
- 	const struct gr2d_soc *soc;
- 
- 	DECLARE_BITMAP(addr_regs, GR2D_NUM_REGS);
-@@ -101,16 +114,24 @@ static int gr2d_open_channel(struct tegra_drm_client *client,
- 			     struct tegra_drm_context *context)
- {
- 	struct gr2d *gr2d = to_gr2d(client);
-+	int err;
- 
- 	context->channel = host1x_channel_get(gr2d->channel);
- 	if (!context->channel)
- 		return -ENOMEM;
- 
-+	err = pm_runtime_resume_and_get(client->base.dev);
-+	if (err) {
-+		host1x_channel_put(context->channel);
-+		return err;
-+	}
-+
- 	return 0;
- }
- 
- static void gr2d_close_channel(struct tegra_drm_context *context)
- {
-+	pm_runtime_put_sync(context->client->base.dev);
- 	host1x_channel_put(context->channel);
- }
- 
-@@ -190,6 +211,27 @@ static const u32 gr2d_addr_regs[] = {
- 	GR2D_VA_BASE_ADDR_SB,
- };
- 
-+static int gr2d_get_resets(struct device *dev, struct gr2d *gr2d)
-+{
-+	int err;
-+
-+	gr2d->resets[RST_MC].id = "mc";
-+	gr2d->resets[RST_GR2D].id = "2d";
-+	gr2d->nresets = RST_GR2D_MAX;
-+
-+	err = devm_reset_control_bulk_get_optional_exclusive_released(
-+				dev, gr2d->nresets, gr2d->resets);
-+	if (err) {
-+		dev_err(dev, "failed to get reset: %d\n", err);
-+		return err;
-+	}
-+
-+	if (WARN_ON(!gr2d->resets[RST_GR2D].rstc))
-+		return -ENOENT;
-+
-+	return 0;
-+}
-+
- static int gr2d_probe(struct platform_device *pdev)
- {
- 	struct device *dev = &pdev->dev;
-@@ -202,6 +244,8 @@ static int gr2d_probe(struct platform_device *pdev)
- 	if (!gr2d)
- 		return -ENOMEM;
- 
-+	platform_set_drvdata(pdev, gr2d);
-+
- 	gr2d->soc = of_device_get_match_data(dev);
- 
- 	syncpts = devm_kzalloc(dev, sizeof(*syncpts), GFP_KERNEL);
-@@ -214,11 +258,9 @@ static int gr2d_probe(struct platform_device *pdev)
- 		return PTR_ERR(gr2d->clk);
- 	}
- 
--	err = clk_prepare_enable(gr2d->clk);
--	if (err) {
--		dev_err(dev, "cannot turn on clock\n");
-+	err = gr2d_get_resets(dev, gr2d);
-+	if (err)
- 		return err;
--	}
- 
- 	INIT_LIST_HEAD(&gr2d->client.base.list);
- 	gr2d->client.base.ops = &gr2d_client_ops;
-@@ -231,20 +273,31 @@ static int gr2d_probe(struct platform_device *pdev)
- 	gr2d->client.version = gr2d->soc->version;
- 	gr2d->client.ops = &gr2d_ops;
- 
-+	pm_runtime_enable(dev);
-+	pm_runtime_use_autosuspend(dev);
-+	pm_runtime_set_autosuspend_delay(dev, 200);
-+
-+	err = devm_tegra_core_dev_init_opp_table_common(dev);
-+	if (err)
-+		goto disable_rpm;
-+
- 	err = host1x_client_register(&gr2d->client.base);
- 	if (err < 0) {
- 		dev_err(dev, "failed to register host1x client: %d\n", err);
--		clk_disable_unprepare(gr2d->clk);
--		return err;
-+		goto disable_rpm;
- 	}
- 
- 	/* initialize address register map */
- 	for (i = 0; i < ARRAY_SIZE(gr2d_addr_regs); i++)
- 		set_bit(gr2d_addr_regs[i], gr2d->addr_regs);
- 
--	platform_set_drvdata(pdev, gr2d);
+diff --git a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
+deleted file mode 100644
+index 602169b8aa19..000000000000
+--- a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
++++ /dev/null
+@@ -1,64 +0,0 @@
+-NVIDIA Tegra Video Decoder Engine
 -
- 	return 0;
+-Required properties:
+-- compatible : Must contain one of the following values:
+-   - "nvidia,tegra20-vde"
+-   - "nvidia,tegra30-vde"
+-   - "nvidia,tegra114-vde"
+-   - "nvidia,tegra124-vde"
+-   - "nvidia,tegra132-vde"
+-- reg : Must contain an entry for each entry in reg-names.
+-- reg-names : Must include the following entries:
+-  - sxe
+-  - bsev
+-  - mbe
+-  - ppe
+-  - mce
+-  - tfe
+-  - ppb
+-  - vdma
+-  - frameid
+-- iram : Must contain phandle to the mmio-sram device node that represents
+-         IRAM region used by VDE.
+-- interrupts : Must contain an entry for each entry in interrupt-names.
+-- interrupt-names : Must include the following entries:
+-  - sync-token
+-  - bsev
+-  - sxe
+-- clocks : Must include the following entries:
+-  - vde
+-- resets : Must contain an entry for each entry in reset-names.
+-- reset-names : Should include the following entries:
+-  - vde
+-
+-Optional properties:
+-- resets : Must contain an entry for each entry in reset-names.
+-- reset-names : Must include the following entries:
+-  - mc
+-- iommus: Must contain phandle to the IOMMU device node.
+-
+-Example:
+-
+-video-codec@6001a000 {
+-	compatible = "nvidia,tegra20-vde";
+-	reg = <0x6001a000 0x1000 /* Syntax Engine */
+-	       0x6001b000 0x1000 /* Video Bitstream Engine */
+-	       0x6001c000  0x100 /* Macroblock Engine */
+-	       0x6001c200  0x100 /* Post-processing Engine */
+-	       0x6001c400  0x100 /* Motion Compensation Engine */
+-	       0x6001c600  0x100 /* Transform Engine */
+-	       0x6001c800  0x100 /* Pixel prediction block */
+-	       0x6001ca00  0x100 /* Video DMA */
+-	       0x6001d800  0x300 /* Video frame controls */>;
+-	reg-names = "sxe", "bsev", "mbe", "ppe", "mce",
+-		    "tfe", "ppb", "vdma", "frameid";
+-	iram = <&vde_pool>; /* IRAM region */
+-	interrupts = <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>, /* Sync token interrupt */
+-		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>, /* BSE-V interrupt */
+-		     <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>; /* SXE interrupt */
+-	interrupt-names = "sync-token", "bsev", "sxe";
+-	clocks = <&tegra_car TEGRA20_CLK_VDE>;
+-	reset-names = "vde", "mc";
+-	resets = <&tegra_car 61>, <&mc TEGRA20_MC_RESET_VDE>;
+-	iommus = <&mc TEGRA_SWGROUP_VDE>;
+-};
+diff --git a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
+new file mode 100644
+index 000000000000..3b6c1f031e04
+--- /dev/null
++++ b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
+@@ -0,0 +1,107 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/media/nvidia,tegra-vde.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+disable_rpm:
-+	pm_runtime_dont_use_autosuspend(dev);
-+	pm_runtime_disable(dev);
++title: NVIDIA Tegra Video Decoder Engine
 +
-+	return err;
- }
- 
- static int gr2d_remove(struct platform_device *pdev)
-@@ -259,15 +312,101 @@ static int gr2d_remove(struct platform_device *pdev)
- 		return err;
- 	}
- 
-+	pm_runtime_dont_use_autosuspend(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
++maintainers:
++  - Dmitry Osipenko <digetx@gmail.com>
++  - Jon Hunter <jonathanh@nvidia.com>
++  - Thierry Reding <thierry.reding@gmail.com>
 +
-+	return 0;
-+}
++properties:
++  compatible:
++    oneOf:
++      - items:
++          - enum:
++              - nvidia,tegra132-vde
++              - nvidia,tegra124-vde
++              - nvidia,tegra114-vde
++              - nvidia,tegra30-vde
++          - enum:
++              - nvidia,tegra20-vde
++      - items:
++          - const: nvidia,tegra20-vde
 +
-+static int __maybe_unused gr2d_runtime_suspend(struct device *dev)
-+{
-+	struct gr2d *gr2d = dev_get_drvdata(dev);
-+	int err;
++  reg:
++    maxItems: 9
 +
-+	host1x_channel_stop(gr2d->channel);
-+	reset_control_bulk_release(gr2d->nresets, gr2d->resets);
++  reg-names:
++    items:
++      - const: sxe
++      - const: bsev
++      - const: mbe
++      - const: ppe
++      - const: mce
++      - const: tfe
++      - const: ppb
++      - const: vdma
++      - const: frameid
 +
-+	/*
-+	 * GR2D module shouldn't be reset while hardware is idling, otherwise
-+	 * host1x's cmdproc will stuck on trying to access any G2 register
-+	 * after reset. GR2D module could be either hot-reset or reset after
-+	 * power-gating of the HEG partition. Hence we will put in reset only
-+	 * the memory client part of the module, the HEG GENPD will take care
-+	 * of resetting GR2D module across power-gating.
-+	 *
-+	 * On Tegra20 there is no HEG partition, but it's okay to have
-+	 * undetermined h/w state since userspace is expected to reprogram
-+	 * the state on each job submission anyways.
-+	 */
-+	err = reset_control_acquire(gr2d->resets[RST_MC].rstc);
-+	if (err) {
-+		dev_err(dev, "failed to acquire MC reset: %d\n", err);
-+		goto acquire_reset;
-+	}
++  clocks:
++    maxItems: 1
 +
-+	err = reset_control_assert(gr2d->resets[RST_MC].rstc);
-+	reset_control_release(gr2d->resets[RST_MC].rstc);
-+	if (err) {
-+		dev_err(dev, "failed to assert MC reset: %d\n", err);
-+		goto acquire_reset;
-+	}
++  resets:
++    maxItems: 2
 +
- 	clk_disable_unprepare(gr2d->clk);
- 
- 	return 0;
++  reset-names:
++    items:
++      - const: vde
++      - const: mc
 +
-+acquire_reset:
-+	reset_control_bulk_acquire(gr2d->nresets, gr2d->resets);
-+	reset_control_bulk_deassert(gr2d->nresets, gr2d->resets);
++  interrupts:
++    maxItems: 3
 +
-+	return err;
- }
- 
-+static int __maybe_unused gr2d_runtime_resume(struct device *dev)
-+{
-+	struct gr2d *gr2d = dev_get_drvdata(dev);
-+	int err;
++  interrupt-names:
++    items:
++      - const: sync-token
++      - const: bsev
++      - const: sxe
 +
-+	err = reset_control_bulk_acquire(gr2d->nresets, gr2d->resets);
-+	if (err) {
-+		dev_err(dev, "failed to acquire reset: %d\n", err);
-+		return err;
-+	}
++  iommus:
++    maxItems: 1
 +
-+	err = clk_prepare_enable(gr2d->clk);
-+	if (err) {
-+		dev_err(dev, "failed to enable clock: %d\n", err);
-+		goto release_reset;
-+	}
++  iram:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description:
++      Phandle of the SRAM MMIO node.
 +
-+	/* this is a reset array which deasserts both 2D MC and 2D itself */
-+	err = reset_control_bulk_deassert(gr2d->nresets, gr2d->resets);
-+	if (err) {
-+		dev_err(dev, "failed to deassert reset: %d\n", err);
-+		goto disable_clk;
-+	}
++required:
++  - compatible
++  - reg
++  - reg-names
++  - clocks
++  - resets
++  - reset-names
++  - interrupts
++  - interrupt-names
 +
-+	return 0;
++additionalProperties: false
 +
-+disable_clk:
-+	clk_disable_unprepare(gr2d->clk);
-+release_reset:
-+	reset_control_bulk_release(gr2d->nresets, gr2d->resets);
-+
-+	return err;
-+}
-+
-+static const struct dev_pm_ops tegra_gr2d_pm = {
-+	SET_RUNTIME_PM_OPS(gr2d_runtime_suspend, gr2d_runtime_resume, NULL)
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+				pm_runtime_force_resume)
-+};
-+
- struct platform_driver tegra_gr2d_driver = {
- 	.driver = {
- 		.name = "tegra-gr2d",
- 		.of_match_table = gr2d_match,
-+		.pm = &tegra_gr2d_pm,
- 	},
- 	.probe = gr2d_probe,
- 	.remove = gr2d_remove,
++examples:
++  - |
++    video-codec@6001a000 {
++      compatible = "nvidia,tegra20-vde";
++      reg = <0x6001a000 0x1000>, /* Syntax Engine */
++            <0x6001b000 0x1000>, /* Video Bitstream Engine */
++            <0x6001c000  0x100>, /* Macroblock Engine */
++            <0x6001c200  0x100>, /* Post-processing Engine */
++            <0x6001c400  0x100>, /* Motion Compensation Engine */
++            <0x6001c600  0x100>, /* Transform Engine */
++            <0x6001c800  0x100>, /* Pixel prediction block */
++            <0x6001ca00  0x100>, /* Video DMA */
++            <0x6001d800  0x300>; /* Video frame controls */
++      reg-names = "sxe", "bsev", "mbe", "ppe", "mce",
++                  "tfe", "ppb", "vdma", "frameid";
++      iram = <&iram>; /* IRAM MMIO region */
++      interrupts = <0  9 4>, /* Sync token */
++                   <0 10 4>, /* BSE-V */
++                   <0 12 4>; /* SXE */
++      interrupt-names = "sync-token", "bsev", "sxe";
++      clocks = <&clk 61>;
++      reset-names = "vde", "mc";
++      resets = <&rst 61>, <&mem 13>;
++      iommus = <&mem 15>;
++    };
 -- 
 2.32.0
 
