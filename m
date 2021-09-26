@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66D91C41535
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:42:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35439C4167D
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:42:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 44C516112E
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:42:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1289761157
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:42:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231180AbhIZWoK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 26 Sep 2021 18:44:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43268 "EHLO
+        id S231250AbhIZWoM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 26 Sep 2021 18:44:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230463AbhIZWoH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2021 18:44:07 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4B9DC061570;
-        Sun, 26 Sep 2021 15:42:30 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id z24so69309940lfu.13;
-        Sun, 26 Sep 2021 15:42:30 -0700 (PDT)
+        with ESMTP id S231147AbhIZWoK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2021 18:44:10 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F17C2C061570;
+        Sun, 26 Sep 2021 15:42:32 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id m3so68752784lfu.2;
+        Sun, 26 Sep 2021 15:42:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=+whg/vR1lDDJUCWuilT5Vzp2lbX9lxYPieEOT99+gTQ=;
-        b=oLWO/vyJTTDlVSPydjP6AYwkxAlr5iy/JlDt/BbqS2lo6hlZ0KNz/gRTRZMVQMNioh
-         r5RcVUqdWSzdO0lxxF9KtGbegUFjhhrCk9P0rWeO2PerhFEKe2aboHJQPDzuab4ph1c0
-         Rf5BdnU2fVLsbsUkmx+w3l4wDfbekTni6Uxy5ycqAb58A1dHRJR1pEpPAgs+0LIJKX/z
-         LuabDfkxB1YypmB/U+MK1kmHxsyOpVlw2B1ID+Efp9rvDOxySvk9xAFgdkoIwGc8yJnk
-         fe9QIotDuDDvzaTVA8SnOkMqz+HXxGziXFx5DVCCTSaNmdXkG3Cyr5Gdv6P8E52hK/Fe
-         zwZw==
+        bh=yMo8zD+Y4gBSxPVZ+67KkVYFkJ7TR9WX94Fb70e9izk=;
+        b=fcIYQRh9XxRIRXB/80/nSQZZbSclhF1IL2Ysssmz6UKjW/8VpVzXFUvmz9grBShsTu
+         VY5ke319Yg3BYCLYbFEy5O8IeLmQn9yib7lZ2ftgx2+fIKvsmLFpV0gXmKw3cSgiighL
+         z44ewmkuBPt55RT3SFFzXQ3xeJSsGDr0R4F5fmCAgEZ3Efq3SxBDHo37JYtEBEgNhF5e
+         sqYnRxIxZOHNZc31mQcCtuct8H5wSkbK0FZqVF2bFwuxog0VZwrjfcsus/XQPqBML4Qq
+         L8c/AYAqg5mMqw1TOVr8DG9+zLXCh6uEPr60TGhx0UtzFD0QyNg5T/qESzi3qS9Skfa2
+         9UHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=+whg/vR1lDDJUCWuilT5Vzp2lbX9lxYPieEOT99+gTQ=;
-        b=T+ZfdGgPV/F8KXnemEgO+JDAjrH9zoTpEiEyDBCFuiZEoz+ENMAhAc8odHD6TsN28r
-         TVCKv/4ehN3IOAak0sJm3X7pLETyWxcKes8aDuv3CITOIIl78bcK0sjrGNwldGsWe5Hk
-         TcZkP6q1VoWvSUUwr5n1pbVZ3i0I3Mpp4Iy983RCBnc7cPvSiWQSklDt7XyEoyf0Zu1J
-         +CD1SUZjqXJ8iCRmvC/frv7ic/9U5CHgGqCuFxk5pt/REEYtZt2Zuvgked8Bwk0mCibg
-         0tGTtFjNe1jn8wWVGWRNrHyApglI/RcTxNmhmlNhxHWcLZ1xpNCa0/OiY3ZHyls7MU3Q
-         Gc5Q==
-X-Gm-Message-State: AOAM533Ql0lbcgyQmppOYIT0Ue5Q95nCya2NgNf0HG46wETb+X2kZfzx
-        DYW9idi1NfyZv3tQlPkm9TU=
-X-Google-Smtp-Source: ABdhPJz3XYdDBXG91bqXj0hDSBRKOWWLM6fxt9rVwzqDlgF9wZeNbMEbj7czzXrnV4JtevuwcX+/SA==
-X-Received: by 2002:a2e:7d07:: with SMTP id y7mr25887502ljc.406.1632696149001;
-        Sun, 26 Sep 2021 15:42:29 -0700 (PDT)
+        bh=yMo8zD+Y4gBSxPVZ+67KkVYFkJ7TR9WX94Fb70e9izk=;
+        b=Nu6SKFcqJh50azuFrLdtn7v6Hbnvl7FEBQBX4O2+ysvl8Smtg1qSpZKt9UudadzXAD
+         IQgMYlB7IrTbyBrrHaMWYfAV4zx7STULtl/QOaLbgnqQ4cP5PEIKmZ+u5bR0ptKFdUQn
+         e1FDVFH9AsP9ssnE61CGdNjfRbnjkJUCybHSBakg1IBcsARcO4+wOQmmfjGgSLhVJHqf
+         Pv70IoNti+pmcpw9D9AkMf98N5DGbyBHGinV01YLNmZ5vDtku/Wd5rSzk+Cl6FeYAdaR
+         JOHUBi5B3yspElkQVlqQcQvmNg2mv9btVcaxko2sBFIqfdoIN23dfNBX0M+bVfn44YlB
+         d5kA==
+X-Gm-Message-State: AOAM533IFjZM4jjItq8hS19zxtCZ8BvBfO2utTn1MEEVvco/K5kAOTQu
+        MSNU6kbjSxadzil1QVCpKZA=
+X-Google-Smtp-Source: ABdhPJxo7iqkV9l9gRrhuOVZ5G8rPWWXpZNjmUEhYykmnabkYmPdy6DxYveMBgNr9BLYgvhEo0AjEQ==
+X-Received: by 2002:a2e:9a98:: with SMTP id p24mr25245378lji.55.1632696151415;
+        Sun, 26 Sep 2021 15:42:31 -0700 (PDT)
 Received: from localhost.localdomain (46-138-80-108.dynamic.spd-mgts.ru. [46.138.80.108])
-        by smtp.gmail.com with ESMTPSA id m10sm1408899lfr.272.2021.09.26.15.42.27
+        by smtp.gmail.com with ESMTPSA id m10sm1408899lfr.272.2021.09.26.15.42.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 26 Sep 2021 15:42:28 -0700 (PDT)
+        Sun, 26 Sep 2021 15:42:31 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -76,9 +76,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v13 03/35] soc/tegra: pmc: Disable PMC state syncing
-Date:   Mon, 27 Sep 2021 01:40:26 +0300
-Message-Id: <20210926224058.1252-4-digetx@gmail.com>
+Subject: [PATCH v13 05/35] dt-bindings: clock: tegra-car: Document new clock sub-nodes
+Date:   Mon, 27 Sep 2021 01:40:28 +0300
+Message-Id: <20210926224058.1252-6-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210926224058.1252-1-digetx@gmail.com>
 References: <20210926224058.1252-1-digetx@gmail.com>
@@ -88,107 +88,74 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Disable PMC state syncing in order to ensure that we won't break older
-kernels once device-trees will be updated with the addition of the power
-domains. This also allows to apply device-tree PM patches independently
-from the driver patches.
+Document sub-nodes which describe Tegra SoC clocks that require a higher
+voltage of the core power domain in order to operate properly on a higher
+clock rates.  Each node contains a phandle to OPP table and power domain.
 
+The root PLLs and system clocks don't have any specific device dedicated
+to them, clock controller is in charge of managing power for them.
+
+Reviewed-by: Rob Herring <robh@kernel.org>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/soc/tegra/pmc.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ .../bindings/clock/nvidia,tegra20-car.yaml    | 37 +++++++++++++++++++
+ 1 file changed, 37 insertions(+)
 
-diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
-index 50091c4ec948..fb8faf7b226a 100644
---- a/drivers/soc/tegra/pmc.c
-+++ b/drivers/soc/tegra/pmc.c
-@@ -360,6 +360,7 @@ struct tegra_pmc_soc {
- 	unsigned int num_pmc_clks;
- 	bool has_blink_output;
- 	bool has_usb_sleepwalk;
-+	bool supports_core_domain;
- };
+diff --git a/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml b/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+index 459d2a525393..f832abb7f11a 100644
+--- a/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
++++ b/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+@@ -42,6 +42,36 @@ properties:
+   "#reset-cells":
+     const: 1
  
- /**
-@@ -3041,6 +3042,7 @@ static void tegra20_pmc_setup_irq_polarity(struct tegra_pmc *pmc,
- }
- 
- static const struct tegra_pmc_soc tegra20_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra20_powergates),
- 	.powergates = tegra20_powergates,
- 	.num_cpu_powergates = 0,
-@@ -3101,6 +3103,7 @@ static const char * const tegra30_reset_sources[] = {
- };
- 
- static const struct tegra_pmc_soc tegra30_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra30_powergates),
- 	.powergates = tegra30_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra30_cpu_powergates),
-@@ -3157,6 +3160,7 @@ static const u8 tegra114_cpu_powergates[] = {
- };
- 
- static const struct tegra_pmc_soc tegra114_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra114_powergates),
- 	.powergates = tegra114_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra114_cpu_powergates),
-@@ -3273,6 +3277,7 @@ static const struct pinctrl_pin_desc tegra124_pin_descs[] = {
- };
- 
- static const struct tegra_pmc_soc tegra124_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra124_powergates),
- 	.powergates = tegra124_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra124_cpu_powergates),
-@@ -3398,6 +3403,7 @@ static const struct tegra_wake_event tegra210_wake_events[] = {
- };
- 
- static const struct tegra_pmc_soc tegra210_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra210_powergates),
- 	.powergates = tegra210_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra210_cpu_powergates),
-@@ -3555,6 +3561,7 @@ static const struct tegra_wake_event tegra186_wake_events[] = {
- };
- 
- static const struct tegra_pmc_soc tegra186_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = 0,
- 	.powergates = NULL,
- 	.num_cpu_powergates = 0,
-@@ -3689,6 +3696,7 @@ static const struct tegra_wake_event tegra194_wake_events[] = {
- };
- 
- static const struct tegra_pmc_soc tegra194_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = 0,
- 	.powergates = NULL,
- 	.num_cpu_powergates = 0,
-@@ -3757,6 +3765,7 @@ static const char * const tegra234_reset_sources[] = {
- };
- 
- static const struct tegra_pmc_soc tegra234_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = 0,
- 	.powergates = NULL,
- 	.num_cpu_powergates = 0,
-@@ -3803,6 +3812,14 @@ static void tegra_pmc_sync_state(struct device *dev)
- {
- 	int err;
- 
-+	/*
-+	 * Newer device-trees have power domains, but we need to prepare all
-+	 * device drivers with runtime PM and OPP support first, otherwise
-+	 * state syncing is unsafe.
-+	 */
-+	if (!pmc->soc->supports_core_domain)
-+		return;
++patternProperties:
++  "^(sclk)|(pll-[cem])$":
++    type: object
++    properties:
++      compatible:
++        enum:
++          - nvidia,tegra20-sclk
++          - nvidia,tegra30-sclk
++          - nvidia,tegra30-pllc
++          - nvidia,tegra30-plle
++          - nvidia,tegra30-pllm
 +
- 	/*
- 	 * Older device-trees don't have core PD, and thus, there are
- 	 * no dependencies that will block the state syncing. We shouldn't
++      operating-points-v2: true
++
++      clocks:
++        items:
++          - description: node's clock
++
++      power-domains:
++        maxItems: 1
++        description: phandle to the core SoC power domain
++
++    required:
++      - compatible
++      - operating-points-v2
++      - clocks
++      - power-domains
++
++    additionalProperties: false
++
+ required:
+   - compatible
+   - reg
+@@ -59,6 +89,13 @@ examples:
+         reg = <0x60006000 0x1000>;
+         #clock-cells = <1>;
+         #reset-cells = <1>;
++
++        sclk {
++            compatible = "nvidia,tegra20-sclk";
++            operating-points-v2 = <&opp_table>;
++            clocks = <&tegra_car TEGRA20_CLK_SCLK>;
++            power-domains = <&domain>;
++        };
+     };
+ 
+     usb-controller@c5004000 {
 -- 
 2.32.0
 
