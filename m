@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F9A0C43219
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:43:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49F8FC43217
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:43:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1962D60E76
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:43:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 36A9C6108E
+	for <linux-mmc@archiver.kernel.org>; Sun, 26 Sep 2021 22:43:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232550AbhIZWpS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 26 Sep 2021 18:45:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43456 "EHLO
+        id S232592AbhIZWpZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 26 Sep 2021 18:45:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43406 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231271AbhIZWof (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2021 18:44:35 -0400
+        with ESMTP id S232037AbhIZWoZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Sep 2021 18:44:25 -0400
 Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52ED3C061777;
-        Sun, 26 Sep 2021 15:42:58 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id u8so67671565lff.9;
-        Sun, 26 Sep 2021 15:42:58 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B475BC06176F;
+        Sun, 26 Sep 2021 15:42:48 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id b20so68764452lfv.3;
+        Sun, 26 Sep 2021 15:42:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=nuKrXeUQQi+X+gXF6rgX7l9I20zb6cKrHqHuf0Fo3Dc=;
-        b=dn51Amd+ZiuI77hrmQemh5v3PyNv/szhsuuUhMOhdqHANVdlmgYMameiyltwAXjJ4H
-         qMj2vmzeaODnsYi/Foe6McLqQLzWfpYrTzDHFIAhSExXreqkUt4AzPD/RItbIhdoldlt
-         LTEQml73Z++0qMvdoC/Do/aWaR+MqANOnnel2oyp+EdePmv+tPaGtAhkKt4kQ+aaYsIk
-         c38IP1u811Yi/1b/fXhiTcKXI1tPrntNyHdVKRW7EV6xzQDBPEkpjDjF6WLOlRj4g7eO
-         UVttcL9BenvV9Mq+cdNhN0ftjW9zKOHKhpeYNze8AGR7F1AqvLHpGIn2fQ2eMeN4vDLt
-         RbVg==
+        bh=TplqdteIbqpMA+cRsM4zt2txSdRrivaAa9SZu7q2V5k=;
+        b=DT8SqkTx9xz6k5lBqurvLVNFLdDdNs18xHEmnjZRBgAU1JSad+bgMJ81V3A4GmsmTZ
+         XowmCira9qNyl8dSJVMy/CQy5BcPRZhPsuaAFiu1jL+qX/a5eYq2O+sQc7xSfauFkP4m
+         +pn2x9DI/qGMzxHWuTKSB+M18jvc1+XJaBhC0YuMgopcrO0gn/8p6tvkSyfDLx93MaOx
+         qYRNA8NToNmautjcGGBRmv4GKJFBj6OsUDIAu7dXCDn704AXf/iCp0Sr82+qnR3FufLx
+         PrZkoA1pl/W18qvaRpoqzCfJZzgnN2nvFdueq1mSh2rjjCQLbwpO0RJnPPH2g2WgZ0Hm
+         IHkg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=nuKrXeUQQi+X+gXF6rgX7l9I20zb6cKrHqHuf0Fo3Dc=;
-        b=PactRU8bjOVT+Zjp03yXcxcREpok9ZTC5EgG8Px3GB2r71UmVlid1nEHPdGlA5J98f
-         sOVJbC0Jjja0gJJdHGRxvDM01tso2lpOba6EB32ohFQX42r0RTWqlDUtHut2dFWiGRim
-         drTRwugWJZvby2NAzAxIfiW4fo0hc4lMJDmE5lqfHV7X21qe5Sti+EnzwtnAEHwT5W0I
-         f+u9koexFgbf+PdE4PnwV7If41viIg9TibQc4WlfTdcuC0Encio5J9ZFv8HUNcCrfG1l
-         AePR2j928cTvETgiWRK+6IaSiGGjgKpblDfiqKLWmdBEAGiioliScwOVd5gYCAMnDPaG
-         p5bQ==
-X-Gm-Message-State: AOAM531N92zjxt4S1m3YmzRhk82dp22cxjVSd767Y0f0Q+pLn02HkBBb
-        5AegCvvqKzYxmgKpc43W4w8=
-X-Google-Smtp-Source: ABdhPJwAQdBa0bMUBgP5K5DEgHKTvbjdloNJFNRgxFsvhBIQJF5xLXGg67bpUH9/UyyvyAx5OqFK9g==
-X-Received: by 2002:a05:6512:50f:: with SMTP id o15mr20603071lfb.337.1632696176740;
-        Sun, 26 Sep 2021 15:42:56 -0700 (PDT)
+        bh=TplqdteIbqpMA+cRsM4zt2txSdRrivaAa9SZu7q2V5k=;
+        b=pZL85+yNuPvOmJuuPjjQ7Vx9+BNWwRRwmmWpuSUUVYRpYnWLXwqz628dF9ZTr765xF
+         hxY/9ZOegF65asTwGbbi62Yx5w+bjqOQ6a0NYq3N1YgpAMpGbB3vGHf58bmyf/i5UR7g
+         2s7GgpeGKpkLJ932zzpxgskUR34nS0oaW7bFNSCqkA/8hNve5jNuRC97s++WWJA9gbrh
+         WKqz2dV8rncg2RG23Q57a+Cpp9MoZBuFRMMoTBDeKELN+c3mbVzU3RFXdilPktWCH/Wa
+         rNWoFGqOpizHOqTcZlX3MOrWNS38gbFrJvOtsYaUgSNkgf9FiwlBaTNB8rIpA0ZcPhQB
+         2QnQ==
+X-Gm-Message-State: AOAM533LZ6V0iX/iN1R2ECy3TDx0URL2JmLUXP149I0Ve48Bc8Nh6nrp
+        92oEmFnSwsi6w696JxFmdxFby46nKiE=
+X-Google-Smtp-Source: ABdhPJwlAUBpizVFZGBDDXF0eyht6X+0wdQr4/CTF3bROuR6FynrfMDO6KQYCL2y/DdbHgZuQiB3yw==
+X-Received: by 2002:a05:6512:750:: with SMTP id c16mr21689714lfs.21.1632696167148;
+        Sun, 26 Sep 2021 15:42:47 -0700 (PDT)
 Received: from localhost.localdomain (46-138-80-108.dynamic.spd-mgts.ru. [46.138.80.108])
-        by smtp.gmail.com with ESMTPSA id m10sm1408899lfr.272.2021.09.26.15.42.55
+        by smtp.gmail.com with ESMTPSA id m10sm1408899lfr.272.2021.09.26.15.42.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 26 Sep 2021 15:42:56 -0700 (PDT)
+        Sun, 26 Sep 2021 15:42:46 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -76,9 +76,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v13 26/35] soc/tegra: fuse: Use resource-managed helpers
-Date:   Mon, 27 Sep 2021 01:40:49 +0300
-Message-Id: <20210926224058.1252-27-digetx@gmail.com>
+Subject: [PATCH v13 18/35] pwm: tegra: Add runtime PM and OPP support
+Date:   Mon, 27 Sep 2021 01:40:41 +0300
+Message-Id: <20210926224058.1252-19-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210926224058.1252-1-digetx@gmail.com>
 References: <20210926224058.1252-1-digetx@gmail.com>
@@ -88,179 +88,210 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use resource-managed helpers to make code cleaner and more correct,
-properly releasing all resources in case of driver probe error.
+The PWM on Tegra belongs to the core power domain and we're going to
+enable GENPD support for the core domain. Now PWM must be resumed using
+runtime PM API in order to initialize the PWM power state. The PWM clock
+rate must be changed using OPP API that will reconfigure the power domain
+performance state in accordance to the rate. Add runtime PM and OPP
+support to the PWM driver.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/soc/tegra/fuse/fuse-tegra.c   | 32 ++++++++++++++------------
- drivers/soc/tegra/fuse/fuse-tegra20.c | 33 ++++++++++++++++++++++++---
- 2 files changed, 48 insertions(+), 17 deletions(-)
+ drivers/pwm/pwm-tegra.c | 88 ++++++++++++++++++++++++++++++++---------
+ 1 file changed, 70 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/soc/tegra/fuse/fuse-tegra.c b/drivers/soc/tegra/fuse/fuse-tegra.c
-index cc032729a143..fe4f935ce73a 100644
---- a/drivers/soc/tegra/fuse/fuse-tegra.c
-+++ b/drivers/soc/tegra/fuse/fuse-tegra.c
-@@ -182,6 +182,12 @@ static const struct nvmem_cell_info tegra_fuse_cells[] = {
- 	},
- };
+diff --git a/drivers/pwm/pwm-tegra.c b/drivers/pwm/pwm-tegra.c
+index 11a10b575ace..afb5ecde007e 100644
+--- a/drivers/pwm/pwm-tegra.c
++++ b/drivers/pwm/pwm-tegra.c
+@@ -42,12 +42,16 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/pm_opp.h>
+ #include <linux/pwm.h>
+ #include <linux/platform_device.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/pm_runtime.h>
+ #include <linux/slab.h>
+ #include <linux/reset.h>
  
-+static void tegra_fuse_restore(void *base)
-+{
-+	fuse->clk = NULL;
-+	fuse->base = base;
-+}
++#include <soc/tegra/common.h>
 +
- static int tegra_fuse_probe(struct platform_device *pdev)
- {
- 	void __iomem *base = fuse->base;
-@@ -189,13 +195,16 @@ static int tegra_fuse_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	int err;
+ #define PWM_ENABLE	(1 << 31)
+ #define PWM_DUTY_WIDTH	8
+ #define PWM_DUTY_SHIFT	16
+@@ -145,7 +149,7 @@ static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 		required_clk_rate =
+ 			(NSEC_PER_SEC / period_ns) << PWM_DUTY_WIDTH;
  
-+	err = devm_add_action(&pdev->dev, tegra_fuse_restore, base);
-+	if (err)
-+		return err;
-+
- 	/* take over the memory region from the early initialization */
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	fuse->phys = res->start;
- 	fuse->base = devm_ioremap_resource(&pdev->dev, res);
- 	if (IS_ERR(fuse->base)) {
- 		err = PTR_ERR(fuse->base);
--		fuse->base = base;
- 		return err;
- 	}
- 
-@@ -205,19 +214,20 @@ static int tegra_fuse_probe(struct platform_device *pdev)
- 			dev_err(&pdev->dev, "failed to get FUSE clock: %ld",
- 				PTR_ERR(fuse->clk));
- 
--		fuse->base = base;
- 		return PTR_ERR(fuse->clk);
- 	}
- 
- 	platform_set_drvdata(pdev, fuse);
- 	fuse->dev = &pdev->dev;
- 
--	pm_runtime_enable(&pdev->dev);
-+	err = devm_pm_runtime_enable(&pdev->dev);
-+	if (err)
-+		return err;
- 
- 	if (fuse->soc->probe) {
- 		err = fuse->soc->probe(fuse);
+-		err = clk_set_rate(pc->clk, required_clk_rate);
++		err = dev_pm_opp_set_rate(pc->dev, required_clk_rate);
  		if (err < 0)
--			goto restore;
-+			return err;
- 	}
+ 			return -EINVAL;
  
- 	memset(&nvmem, 0, sizeof(nvmem));
-@@ -241,7 +251,7 @@ static int tegra_fuse_probe(struct platform_device *pdev)
- 		err = PTR_ERR(fuse->nvmem);
- 		dev_err(&pdev->dev, "failed to register NVMEM device: %d\n",
- 			err);
--		goto restore;
-+		return err;
- 	}
+@@ -181,8 +185,8 @@ static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 	 * before writing the register. Otherwise, keep it enabled.
+ 	 */
+ 	if (!pwm_is_enabled(pwm)) {
+-		err = clk_prepare_enable(pc->clk);
+-		if (err < 0)
++		err = pm_runtime_resume_and_get(pc->dev);
++		if (err)
+ 			return err;
+ 	} else
+ 		val |= PWM_ENABLE;
+@@ -193,7 +197,7 @@ static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 	 * If the PWM is not enabled, turn the clock off again to save power.
+ 	 */
+ 	if (!pwm_is_enabled(pwm))
+-		clk_disable_unprepare(pc->clk);
++		pm_runtime_put(pc->dev);
  
- 	fuse->rst = devm_reset_control_get_optional(&pdev->dev, "fuse");
-@@ -249,7 +259,7 @@ static int tegra_fuse_probe(struct platform_device *pdev)
- 		err = PTR_ERR(fuse->rst);
- 		dev_err(&pdev->dev, "failed to get FUSE reset: %pe\n",
- 			fuse->rst);
--		goto restore;
-+		return err;
+ 	return 0;
+ }
+@@ -204,8 +208,8 @@ static int tegra_pwm_enable(struct pwm_chip *chip, struct pwm_device *pwm)
+ 	int rc = 0;
+ 	u32 val;
+ 
+-	rc = clk_prepare_enable(pc->clk);
+-	if (rc < 0)
++	rc = pm_runtime_resume_and_get(pc->dev);
++	if (rc)
+ 		return rc;
+ 
+ 	val = pwm_readl(pc, pwm->hwpwm);
+@@ -224,7 +228,7 @@ static void tegra_pwm_disable(struct pwm_chip *chip, struct pwm_device *pwm)
+ 	val &= ~PWM_ENABLE;
+ 	pwm_writel(pc, pwm->hwpwm, val);
+ 
+-	clk_disable_unprepare(pc->clk);
++	pm_runtime_put_sync(pc->dev);
+ }
+ 
+ static const struct pwm_ops tegra_pwm_ops = {
+@@ -256,11 +260,23 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwm->clk))
+ 		return PTR_ERR(pwm->clk);
+ 
++	ret = devm_pm_runtime_enable(&pdev->dev);
++	if (ret)
++		return ret;
++
++	ret = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
++	if (ret)
++		return ret;
++
++	ret = pm_runtime_resume_and_get(&pdev->dev);
++	if (ret)
++		return ret;
++
+ 	/* Set maximum frequency of the IP */
+-	ret = clk_set_rate(pwm->clk, pwm->soc->max_frequency);
++	ret = dev_pm_opp_set_rate(pwm->dev, pwm->soc->max_frequency);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "Failed to set max frequency: %d\n", ret);
+-		return ret;
++		goto put_pm;
  	}
  
  	/*
-@@ -258,26 +268,20 @@ static int tegra_fuse_probe(struct platform_device *pdev)
- 	 */
- 	err = pm_runtime_resume_and_get(&pdev->dev);
- 	if (err)
--		goto restore;
-+		return err;
- 
- 	err = reset_control_reset(fuse->rst);
- 	pm_runtime_put(&pdev->dev);
- 
- 	if (err < 0) {
- 		dev_err(&pdev->dev, "failed to reset FUSE: %d\n", err);
--		goto restore;
-+		return err;
+@@ -278,7 +294,7 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwm->rst)) {
+ 		ret = PTR_ERR(pwm->rst);
+ 		dev_err(&pdev->dev, "Reset control is not found: %d\n", ret);
+-		return ret;
++		goto put_pm;
  	}
  
- 	/* release the early I/O memory mapping */
- 	iounmap(base);
+ 	reset_control_deassert(pwm->rst);
+@@ -291,34 +307,67 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "pwmchip_add() failed: %d\n", ret);
+ 		reset_control_assert(pwm->rst);
+-		return ret;
++		goto put_pm;
+ 	}
  
++	pm_runtime_put(&pdev->dev);
++
  	return 0;
--
--restore:
--	fuse->clk = NULL;
--	fuse->base = base;
--	pm_runtime_disable(&pdev->dev);
--	return err;
++put_pm:
++	pm_runtime_put(&pdev->dev);
++	return ret;
  }
  
- static int __maybe_unused tegra_fuse_runtime_resume(struct device *dev)
-diff --git a/drivers/soc/tegra/fuse/fuse-tegra20.c b/drivers/soc/tegra/fuse/fuse-tegra20.c
-index 8ec9fc5e5e4b..12503f563e36 100644
---- a/drivers/soc/tegra/fuse/fuse-tegra20.c
-+++ b/drivers/soc/tegra/fuse/fuse-tegra20.c
-@@ -94,9 +94,28 @@ static bool dma_filter(struct dma_chan *chan, void *filter_param)
- 	return of_device_is_compatible(np, "nvidia,tegra20-apbdma");
- }
- 
-+static void tegra20_fuse_release_channel(void *data)
-+{
-+	struct tegra_fuse *fuse = data;
-+
-+	dma_release_channel(fuse->apbdma.chan);
-+	fuse->apbdma.chan = NULL;
-+}
-+
-+static void tegra20_fuse_free_coherent(void *data)
-+{
-+	struct tegra_fuse *fuse = data;
-+
-+	dma_free_coherent(fuse->dev, sizeof(u32), fuse->apbdma.virt,
-+			  fuse->apbdma.phys);
-+	fuse->apbdma.virt = NULL;
-+	fuse->apbdma.phys = 0x0;
-+}
-+
- static int tegra20_fuse_probe(struct tegra_fuse *fuse)
+ static int tegra_pwm_remove(struct platform_device *pdev)
  {
- 	dma_cap_mask_t mask;
+ 	struct tegra_pwm_chip *pc = platform_get_drvdata(pdev);
 +	int err;
  
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
-@@ -105,13 +124,21 @@ static int tegra20_fuse_probe(struct tegra_fuse *fuse)
- 	if (!fuse->apbdma.chan)
- 		return -EPROBE_DEFER;
+ 	pwmchip_remove(&pc->chip);
  
-+	err = devm_add_action_or_reset(fuse->dev, tegra20_fuse_release_channel,
-+				       fuse);
++	err = pm_runtime_resume_and_get(pc->dev);
 +	if (err)
 +		return err;
 +
- 	fuse->apbdma.virt = dma_alloc_coherent(fuse->dev, sizeof(u32),
- 					       &fuse->apbdma.phys,
- 					       GFP_KERNEL);
--	if (!fuse->apbdma.virt) {
--		dma_release_channel(fuse->apbdma.chan);
-+	if (!fuse->apbdma.virt)
- 		return -ENOMEM;
--	}
+ 	reset_control_assert(pc->rst);
++	pm_runtime_put(pc->dev);
+ 
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM_SLEEP
+-static int tegra_pwm_suspend(struct device *dev)
++static int __maybe_unused tegra_pwm_runtime_suspend(struct device *dev)
+ {
+-	return pinctrl_pm_select_sleep_state(dev);
++	struct tegra_pwm_chip *pc = dev_get_drvdata(dev);
++	int err;
 +
-+	err = devm_add_action_or_reset(fuse->dev, tegra20_fuse_free_coherent,
-+				       fuse);
++	clk_disable_unprepare(pc->clk);
++
++	err = pinctrl_pm_select_sleep_state(dev);
++	if (err) {
++		clk_prepare_enable(pc->clk);
++		return err;
++	}
++
++	return 0;
+ }
+ 
+-static int tegra_pwm_resume(struct device *dev)
++static int __maybe_unused tegra_pwm_runtime_resume(struct device *dev)
+ {
+-	return pinctrl_pm_select_default_state(dev);
++	struct tegra_pwm_chip *pc = dev_get_drvdata(dev);
++	int err;
++
++	err = pinctrl_pm_select_default_state(dev);
 +	if (err)
 +		return err;
++
++	err = clk_prepare_enable(pc->clk);
++	if (err) {
++		pinctrl_pm_select_sleep_state(dev);
++		return err;
++	}
++
++	return 0;
+ }
+-#endif
  
- 	fuse->apbdma.config.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
- 	fuse->apbdma.config.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ static const struct tegra_pwm_soc tegra20_pwm_soc = {
+ 	.num_channels = 4,
+@@ -344,7 +393,10 @@ static const struct of_device_id tegra_pwm_of_match[] = {
+ MODULE_DEVICE_TABLE(of, tegra_pwm_of_match);
+ 
+ static const struct dev_pm_ops tegra_pwm_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(tegra_pwm_suspend, tegra_pwm_resume)
++	SET_RUNTIME_PM_OPS(tegra_pwm_runtime_suspend, tegra_pwm_runtime_resume,
++			   NULL)
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
+ };
+ 
+ static struct platform_driver tegra_pwm_driver = {
 -- 
 2.32.0
 
