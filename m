@@ -2,108 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38FEFC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 05:47:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F356EC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 07:57:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 11A446115B
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 05:47:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D7141610E8
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 07:57:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232929AbhI0Fte (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Sep 2021 01:49:34 -0400
-Received: from mga03.intel.com ([134.134.136.65]:52528 "EHLO mga03.intel.com"
+        id S233304AbhI0H7G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Sep 2021 03:59:06 -0400
+Received: from www.zeus03.de ([194.117.254.33]:52344 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232594AbhI0Fte (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 27 Sep 2021 01:49:34 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10119"; a="224467283"
-X-IronPort-AV: E=Sophos;i="5.85,325,1624345200"; 
-   d="scan'208";a="224467283"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Sep 2021 22:47:56 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.85,325,1624345200"; 
-   d="scan'208";a="437594752"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.84]) ([10.237.72.84])
-  by orsmga003.jf.intel.com with ESMTP; 26 Sep 2021 22:47:53 -0700
-Subject: Re: [PATCH v2] mmc: sdhci-sprd: Wait until DLL locked after being
- configured
-To:     Chunyan Zhang <zhang.lyra@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Baolin Wang <baolin.wang7@gmail.com>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Chunyan Zhang <chunyan.zhang@unisoc.com>,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
-        LKML <linux-kernel@vger.kernel.org>
-References: <20210926092835.146449-1-zhang.lyra@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <847b5295-ba23-107c-6fee-4e766a86ce7a@intel.com>
-Date:   Mon, 27 Sep 2021 08:48:31 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.14.0
+        id S233256AbhI0H7G (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 27 Sep 2021 03:59:06 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=0EVDa5QxvZYMFElrQTVC6S90Ul/L
+        2VJCQVfcEe1ir3Q=; b=g2coNAtfZbos4swKzLPTRrsQMsDC0eajWbshFU7Rpklq
+        EehvohT0v1jTV33GTHrP5+N2VlPen5Mxot04YpuWf1B/0vpqAK4Hp0n6M+eM6yVW
+        u2g4qBmEU+9HK9Z+JSmDL/iKFi0eDEPPS/gbnfei+dWfFpUHM6B4+kxuWNeDrk8=
+Received: (qmail 752711 invoked from network); 27 Sep 2021 09:57:27 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 27 Sep 2021 09:57:27 +0200
+X-UD-Smtp-Session: l3s3148p1@R9y0cvXMWsEgARa4RUvHAbZgIYagrKBM
+Date:   Mon, 27 Sep 2021 09:57:26 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old
+ SDHIs
+Message-ID: <YVF5ZskkvlI40pkg@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20210826082107.47299-1-wsa+renesas@sang-engineering.com>
+ <CAMuHMdUXc0oSCXJ-5QmPJz0VkX1Aib+ZAv8K2LN_fT1+5mocqw@mail.gmail.com>
+ <YSelsjPyswWCr7Nu@shikoro>
+ <CAPDyKFp2Ut4UJoRXPD4t+k1+ZfmT-CQZ3obNA_iPF6OA-t+T7g@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20210926092835.146449-1-zhang.lyra@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="sqIE+3Q7Xi3ZbRr/"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFp2Ut4UJoRXPD4t+k1+ZfmT-CQZ3obNA_iPF6OA-t+T7g@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/09/21 12:28 pm, Chunyan Zhang wrote:
-> From: Zhenxiong Lai <zhenxiong.lai@unisoc.com>
-> 
-> According to the specification, DLL status has to be locked before using it.
-> 
-> Signed-off-by: Zhenxiong Lai <zhenxiong.lai@unisoc.com>
-> Signed-off-by: Chunyan Zhang <chunyan.zhang@unisoc.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+--sqIE+3Q7Xi3ZbRr/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> ---
-> Changes since v1:
-> * Use read_poll_timeout() instead of while loop.
-> ---
->  drivers/mmc/host/sdhci-sprd.c | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index 11e375579cfb..f33e9349e4e6 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -8,6 +8,7 @@
->  #include <linux/delay.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/highmem.h>
-> +#include <linux/iopoll.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> @@ -39,6 +40,9 @@
->  #define  SDHCI_SPRD_BIT_POSRD_DLY_INV		BIT(21)
->  #define  SDHCI_SPRD_BIT_NEGRD_DLY_INV		BIT(29)
->  
-> +#define SDHCI_SPRD_REG_32_DLL_STS0	0x210
-> +#define SDHCI_SPRD_DLL_LOCKED		BIT(18)
-> +
->  #define SDHCI_SPRD_REG_32_BUSY_POSI		0x250
->  #define  SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN	BIT(25)
->  #define  SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN	BIT(24)
-> @@ -256,6 +260,15 @@ static void sdhci_sprd_enable_phy_dll(struct sdhci_host *host)
->  	sdhci_writel(host, tmp, SDHCI_SPRD_REG_32_DLL_CFG);
->  	/* wait 1ms */
->  	usleep_range(1000, 1250);
-> +
-> +	if (read_poll_timeout(sdhci_readl, tmp, (tmp & SDHCI_SPRD_DLL_LOCKED),
-> +		2000, USEC_PER_SEC, false, host, SDHCI_SPRD_REG_32_DLL_STS0)) {
-> +		pr_err("%s: DLL locked fail!\n", mmc_hostname(host->mmc));
-> +		pr_info("%s: DLL_STS0 : 0x%x, DLL_CFG : 0x%x\n",
-> +			 mmc_hostname(host->mmc),
-> +			 sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_STS0),
-> +			 sdhci_readl(host, SDHCI_SPRD_REG_32_DLL_CFG));
-> +	}
->  }
->  
->  static void sdhci_sprd_set_clock(struct sdhci_host *host, unsigned int clock)
-> 
 
+> I have applied it for fixes (v5.15) and added a stable tag, hope that's okay.
+
+Your 'fixes' branch is still in -next only. Could you send it to Linus,
+please?
+
+
+--sqIE+3Q7Xi3ZbRr/
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmFReWIACgkQFA3kzBSg
+KbabCBAAny2Cg1vNqRfSr6cuj1uQj7+A5Ej6qrSKfHbk1aJE5KXi/NNrPF8ocmEu
+LyfmlxeBTkvSOHxFdVl+ofI3Rvl0maq3UFFqbFkOQQ8nB8GLTsXOIGLfcC2dtw+z
+OPWvLbo7FfJ8vstpDVG2gtSPT2yAZUgAxHRE2m6sOpz92FwIQOIogb9UrfxuiKqm
+Nydy7YPtEL4ffLf+e2TMO9mZUpsPkiemb8LWL0MHZm1mIaQEC4hv9ImzxUhDJtpc
+RtxkA4M1WVCvjBpw8yr4urJHYPviHs8WKbiMHD0CByg2vh1wqrLMdpFpsOwkUTTC
+UFh5GghjNJPlZHfH92yzLGSSls0gMTZ9JtXQOCQ+Y3kBlQdLhGcsGHYeUAaxdk7B
+qTq8J6qwiuH6OXDf4+lPc8G9+Q6GBgLFrEwQx0w8NCd8VlBQwsxSsSBzWDeAxfHV
+EUamOADqTcJK4VadmLnHu9hmP2pXOyCnGJr6JIyLYlbezsH8DZvA3lEgPnLF+bjn
+OAv22QsB5GchCEIIOqJoDAV6qkjT19XU88BSqW4fkOMh8n6FuDSabwKz20SPlG9D
+leb3jAP63k37QY8uxxoGPC+CPqlQlzUruwwYVMCGWkZ2vsmWTzRE5mCT/tzcjcmg
+GPp5W1Wgir2vXvNM1Q2/lVH3lRCSbx4hBMfS8I05kQYyFqTbQ7w=
+=FpLB
+-----END PGP SIGNATURE-----
+
+--sqIE+3Q7Xi3ZbRr/--
