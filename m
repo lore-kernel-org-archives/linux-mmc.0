@@ -2,86 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F356EC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 07:57:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C17C5C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 09:45:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D7141610E8
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 07:57:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9DD4760F70
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 09:45:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233304AbhI0H7G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Sep 2021 03:59:06 -0400
-Received: from www.zeus03.de ([194.117.254.33]:52344 "EHLO mail.zeus03.de"
+        id S233587AbhI0JrD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Sep 2021 05:47:03 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49980 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233256AbhI0H7G (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 27 Sep 2021 03:59:06 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=0EVDa5QxvZYMFElrQTVC6S90Ul/L
-        2VJCQVfcEe1ir3Q=; b=g2coNAtfZbos4swKzLPTRrsQMsDC0eajWbshFU7Rpklq
-        EehvohT0v1jTV33GTHrP5+N2VlPen5Mxot04YpuWf1B/0vpqAK4Hp0n6M+eM6yVW
-        u2g4qBmEU+9HK9Z+JSmDL/iKFi0eDEPPS/gbnfei+dWfFpUHM6B4+kxuWNeDrk8=
-Received: (qmail 752711 invoked from network); 27 Sep 2021 09:57:27 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 27 Sep 2021 09:57:27 +0200
-X-UD-Smtp-Session: l3s3148p1@R9y0cvXMWsEgARa4RUvHAbZgIYagrKBM
-Date:   Mon, 27 Sep 2021 09:57:26 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old
- SDHIs
-Message-ID: <YVF5ZskkvlI40pkg@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-References: <20210826082107.47299-1-wsa+renesas@sang-engineering.com>
- <CAMuHMdUXc0oSCXJ-5QmPJz0VkX1Aib+ZAv8K2LN_fT1+5mocqw@mail.gmail.com>
- <YSelsjPyswWCr7Nu@shikoro>
- <CAPDyKFp2Ut4UJoRXPD4t+k1+ZfmT-CQZ3obNA_iPF6OA-t+T7g@mail.gmail.com>
+        id S233680AbhI0JrC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 27 Sep 2021 05:47:02 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E597461157;
+        Mon, 27 Sep 2021 09:45:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1632735924;
+        bh=gFGitQYEbKU+ll1qJ4OCqESVHY1IMF80+p0Jqsb7qYE=;
+        h=From:To:Cc:Subject:Date:From;
+        b=o6PSo81tkdTwK2YP2LSaneKqFnF7Ou7RHR44P7NLtHNmh9aGGhJ+XPQSxGi7gfxjj
+         QDh/V2gXj4WWHOMI2J22bBciYlwxSrH0/q25j/mViAP9yg0vAcWoxMKb4tWWJ+lY4e
+         IwrtDqS4CLTH1b0VH05ynKY+uwD+E+7Jr9EElnKZdBh1obUEOJKFm4fJWtB3gm7SzW
+         M9bqm6EwZhifWOwPZwYQoSkvs/O5IKYtbuC7TE6Qc63v/Q7ggIJBDqxPs8aEoOB47j
+         4m1zB/FMn4NUuUI6fEItZ1t+3U4rPtw5b8Qhg0z+xDjmD1pJ1GiNz4+977X0v9fDu3
+         NfBV/yZQG8tDw==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        Nathan Chancellor <nathan@kernel.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Jens Axboe <axboe@kernel.dk>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        llvm@lists.linux.dev
+Subject: [PATCH] memstick: avoid out-of-range warning
+Date:   Mon, 27 Sep 2021 11:44:47 +0200
+Message-Id: <20210927094520.696665-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="sqIE+3Q7Xi3ZbRr/"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFp2Ut4UJoRXPD4t+k1+ZfmT-CQZ3obNA_iPF6OA-t+T7g@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Arnd Bergmann <arnd@arndb.de>
 
---sqIE+3Q7Xi3ZbRr/
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+clang-14 complains about a sanity check that always passes when the
+page size is 64KB or larger:
 
+drivers/memstick/core/ms_block.c:1739:21: error: result of comparison of constant 65536 with expression of type 'unsigned short' is always false [-Werror,-Wtautological-constant-out-of-range-compare]
+        if (msb->page_size > PAGE_SIZE) {
+            ~~~~~~~~~~~~~~ ^ ~~~~~~~~~
 
-> I have applied it for fixes (v5.15) and added a stable tag, hope that's okay.
+This is fine, it will still work on all architectures, so just shut
+up that warning with a cast.
 
-Your 'fixes' branch is still in -next only. Could you send it to Linus,
-please?
+Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/memstick/core/ms_block.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+index acf36676e388..487e4cc2951e 100644
+--- a/drivers/memstick/core/ms_block.c
++++ b/drivers/memstick/core/ms_block.c
+@@ -1736,7 +1736,7 @@ static int msb_init_card(struct memstick_dev *card)
+ 	msb->pages_in_block = boot_block->attr.block_size * 2;
+ 	msb->block_size = msb->page_size * msb->pages_in_block;
+ 
+-	if (msb->page_size > PAGE_SIZE) {
++	if ((size_t)msb->page_size > PAGE_SIZE) {
+ 		/* this isn't supported by linux at all, anyway*/
+ 		dbg("device page %d size isn't supported", msb->page_size);
+ 		return -EINVAL;
+-- 
+2.29.2
 
---sqIE+3Q7Xi3ZbRr/
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmFReWIACgkQFA3kzBSg
-KbabCBAAny2Cg1vNqRfSr6cuj1uQj7+A5Ej6qrSKfHbk1aJE5KXi/NNrPF8ocmEu
-LyfmlxeBTkvSOHxFdVl+ofI3Rvl0maq3UFFqbFkOQQ8nB8GLTsXOIGLfcC2dtw+z
-OPWvLbo7FfJ8vstpDVG2gtSPT2yAZUgAxHRE2m6sOpz92FwIQOIogb9UrfxuiKqm
-Nydy7YPtEL4ffLf+e2TMO9mZUpsPkiemb8LWL0MHZm1mIaQEC4hv9ImzxUhDJtpc
-RtxkA4M1WVCvjBpw8yr4urJHYPviHs8WKbiMHD0CByg2vh1wqrLMdpFpsOwkUTTC
-UFh5GghjNJPlZHfH92yzLGSSls0gMTZ9JtXQOCQ+Y3kBlQdLhGcsGHYeUAaxdk7B
-qTq8J6qwiuH6OXDf4+lPc8G9+Q6GBgLFrEwQx0w8NCd8VlBQwsxSsSBzWDeAxfHV
-EUamOADqTcJK4VadmLnHu9hmP2pXOyCnGJr6JIyLYlbezsH8DZvA3lEgPnLF+bjn
-OAv22QsB5GchCEIIOqJoDAV6qkjT19XU88BSqW4fkOMh8n6FuDSabwKz20SPlG9D
-leb3jAP63k37QY8uxxoGPC+CPqlQlzUruwwYVMCGWkZ2vsmWTzRE5mCT/tzcjcmg
-GPp5W1Wgir2vXvNM1Q2/lVH3lRCSbx4hBMfS8I05kQYyFqTbQ7w=
-=FpLB
------END PGP SIGNATURE-----
-
---sqIE+3Q7Xi3ZbRr/--
