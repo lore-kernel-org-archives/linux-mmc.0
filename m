@@ -2,92 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55A3CC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE3B4C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3FCCA60FED
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD182610A2
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237861AbhI0WeH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Sep 2021 18:34:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58012 "EHLO
+        id S237908AbhI0WeP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Sep 2021 18:34:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58064 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237907AbhI0WeG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:34:06 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AE82C06176C
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:28 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id m3so84286470lfu.2
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:27 -0700 (PDT)
+        with ESMTP id S237918AbhI0WeO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:34:14 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B23BC061769
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:35 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id t10so83887298lfd.8
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=SAV2dI3X88ydfOMXbonZID2jQP48rETdyvNKxKLYNPg=;
-        b=iOQKOZoBWu6aAtqdhuJBCPRE0R9IxoWYPjReXHRRDRkl5u0y3z+S++TOtHmkW418HH
-         k+AXre6ePRj3ux1vuM+IBe/IHdZp31blTPXkVv00rYvqmvbSVz2Puuo6XN9q/SU0yJSP
-         U9AnY2+DFE+bV4bYhz5raBwMjZSqYV3kTXOscgQyeiH+MxKkNTk1/rSJdEQM5uRMNhrr
-         NFwkFu84W+kT5iiMt7st56R0oBbwGZ0lQd9/XVCy83d27KY7VCu3pheHI0PzUyhOcIPt
-         x3UhcbrX4yIJLF/u8CsrGeGbHhfBS4MXjrSNbyjuCAzqmOQZqbS4VqvYDx1a4f3rgLxj
-         jWOA==
+        bh=SWtpZ8PO1D/9eZFX8nceZYsmLHQWGmkDYyw8clyIoeQ=;
+        b=nsv+9QbYaiqvtpvL0wrJuH7G7mw8h6nMh5mofTyXGGAeKDE8SUGersA+a/Yo3NkFAr
+         aniIIzDZ6Jbf0clUsu2XlJdS32IPCPd9V3FHvw5WnG5PidLr41vu5a16BeAd0ww2ZLyh
+         RgWN54kjzvAjvFPaejwwXJaYwsdpZqxPr3YBK3CaBn/dylvTLV2OOnsH/w+oaaKIdd7E
+         +F2HXqZgxbqkizIt2ZzKQOpzx94qj5/yKPko8l3qUfJ8V4Q6hC8w8RzN8k2uxmCZpxHq
+         WhgAGDzMaiMWranShw8/gsrbRLnRvabX3luVEEkOmMZy0v32tnx/xDK3duThElp/r9Zq
+         WArw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=SAV2dI3X88ydfOMXbonZID2jQP48rETdyvNKxKLYNPg=;
-        b=cRsNHMT7TPlOArr9SMrRIzTHZofP5tCfMFs9LoRElwpwh+0qtNYmWlIDjWWeoEk6GG
-         F8INbwa3ayTPqGlUR6eVasPh8kSQycmSiJJI9O92NEEL5MugcNBY1+dngQU7Stm3EjcJ
-         lFwAhBR0JFHzjzmx+clNKgxfz/iGu3BsNQPBi0OtR6H61a4kj6r+a6n5P68XNfP/WS7l
-         r+Rrv0epfgjEzEpBZG7YE01WERUfcE6fRmsl7aefPSF42vxYBoGQw7ZXLUJu9zHqow2z
-         fR5Vw35sajJUz+jEfeUusi7G5HRgTpi4+f5jyHCLl8/5qrog+0JdcRr+vallXxSri1H5
-         /tgA==
-X-Gm-Message-State: AOAM531Wsu1aL4ZToGyYZxEDyO1C2m4hWG4fcZd+gJ3KD8z7Qdb7DFGC
-        YS03bj7JbGD1mIB67JiUwxlsOsOzIk7/VvYgZerZtQ==
-X-Google-Smtp-Source: ABdhPJxKf8OveAlrAasR+aFk/YGcU6+uIQU0IZmKf/y0+7GbA0Rb/fU7JxpeqlFoOuE6gM97daTIsD26XiHsH04vjDs=
-X-Received: by 2002:a05:651c:213:: with SMTP id y19mr2270930ljn.273.1632781946357;
- Mon, 27 Sep 2021 15:32:26 -0700 (PDT)
+        bh=SWtpZ8PO1D/9eZFX8nceZYsmLHQWGmkDYyw8clyIoeQ=;
+        b=2KB0yZeVFqNeBpCkdh0i7s+zDk+Cc/TEDhHaYKlo+WCMXDktPfwGKUgHfZZJt6UoSz
+         tg7UmiGzgM/wtBebgoLB7LP3gH6lO6hU7XHwUbqb2mRtPgCzifgfd8GCfsovsyqw+vM/
+         AmPyzi0fVn0JvCCmTtp1Ffu+Fin9aNzXCFDiI9SEhOo64Vs+zWyIImk4MeUjaER9q7W5
+         gNj13qUGBESpkzksXW69JCV3NnetY9DccrP0abcCQ+ytVzaBYag0TlH7s2xyAeeh63vm
+         cJCIcypEPRZivSzOCHWXhZTNGjbJdcbrF5COnguM3MpbibX4USGp25S6UdeBR7ooZDQa
+         wOUA==
+X-Gm-Message-State: AOAM532SPP5Zoq4vABFziAi4gGZy9T7Rfay9+o4ijKcWQTB9XxBlg2p5
+        ZHVHYTcMY4cJSoOso+z230Mm/e+XM2ULyiW9PmDYyI0AviI=
+X-Google-Smtp-Source: ABdhPJyEXb/yQ9/a6K8aBzhJdUYb10ZUYNoy2vlteyYKNJZtPx8j46XiOXQmIJRCjJRs1TQZhUKudUPzSmNoSz+Gk+Y=
+X-Received: by 2002:a05:6512:3fa5:: with SMTP id x37mr2271959lfa.233.1632781953710;
+ Mon, 27 Sep 2021 15:32:33 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210924082851.2132068-1-claudiu.beznea@microchip.com>
-In-Reply-To: <20210924082851.2132068-1-claudiu.beznea@microchip.com>
+References: <20210924133257.112017-1-krzysztof.kozlowski@canonical.com>
+In-Reply-To: <20210924133257.112017-1-krzysztof.kozlowski@canonical.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 28 Sep 2021 00:31:50 +0200
-Message-ID: <CAPDyKFptb5infBgd1zEQC03kH3Z2sO8zvxV6LMO1fLtk5NZFkw@mail.gmail.com>
-Subject: Re: [PATCH v2 0/2] mmc: sdhci-of-at91: fix for shdci-of-at91
-To:     Claudiu Beznea <claudiu.beznea@microchip.com>
-Cc:     Eugen Hristev <eugen.hristev@microchip.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Tue, 28 Sep 2021 00:31:56 +0200
+Message-ID: <CAPDyKFr6tEEm0j7qBrA3dqqEZxF-5+DXrau3TKTK8RRuYeL5yA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-s3c: Describe driver in KConfig
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 24 Sept 2021 at 10:29, Claudiu Beznea
-<claudiu.beznea@microchip.com> wrote:
+On Fri, 24 Sept 2021 at 15:33, Krzysztof Kozlowski
+<krzysztof.kozlowski@canonical.com> wrote:
 >
-> Hi,
+> Describe better which driver applies to which SoC, to make configuring
+> kernel for Samsung SoC easier.
 >
-> This series adds a fix for sdhci-of-at91 driver (patch 1/2). Along with
-> it patch 2/2 replaces a while loop + timeout with read_poll_timeout().
->
-> Changes in v2:
-> - use read_poll_timeout() in patch 1/2
-> - add patch 2/2
->
-> Claudiu Beznea (2):
->   mmc: sdhci-of-at91: wait for calibration done before proceed
->   mmc: sdhci-of-at91: replace while loop with read_poll_timeout
->
->  drivers/mmc/host/sdhci-of-at91.c | 22 +++++++++++-----------
->  1 file changed, 11 insertions(+), 11 deletions(-)
->
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 
-Applied for fixes and by adding tags for stable, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/Kconfig | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 71313961cc54..e4c1648e364e 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -315,15 +315,17 @@ config MMC_SDHCI_TEGRA
+>           If unsure, say N.
+>
+>  config MMC_SDHCI_S3C
+> -       tristate "SDHCI support on Samsung S3C SoC"
+> +       tristate "SDHCI support on Samsung S3C/S5P/Exynos SoC"
+>         depends on MMC_SDHCI
+>         depends on PLAT_SAMSUNG || ARCH_S5PV210 || ARCH_EXYNOS || COMPILE_TEST
+>         help
+>           This selects the Secure Digital Host Controller Interface (SDHCI)
+>           often referrered to as the HSMMC block in some of the Samsung S3C
+> -         range of SoC.
+> +         (S3C2416, S3C2443, S3C6410), S5Pv210 and Exynos (Exynso4210,
+> +         Exynos4412) SoCs.
+>
+> -         If you have a controller with this interface, say Y or M here.
+> +         If you have a controller with this interface (thereforeyou build for
+> +         such Samsung SoC), say Y or M here.
+>
+>           If unsure, say N.
+>
+> --
+> 2.30.2
+>
