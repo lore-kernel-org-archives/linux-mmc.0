@@ -2,106 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6056C4321E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0888DC43219
 	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1D31610A2
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E579F610E8
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237882AbhI0WeE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S237847AbhI0WeE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 27 Sep 2021 18:34:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57986 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237875AbhI0WeC (ORCPT
+        with ESMTP id S237800AbhI0WeC (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:34:02 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE93DC06176E
+Received: from mail-io1-xd36.google.com (mail-io1-xd36.google.com [IPv6:2607:f8b0:4864:20::d36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54E58C061769
         for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:21 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id i4so83801719lfv.4
+Received: by mail-io1-xd36.google.com with SMTP id n71so24919349iod.0
         for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=DMB4uEvQ0xVrD8Va6J2iEK6E/SkN/sPqQLy12BaukGc=;
-        b=Ocvt4nNiCJOqVLkC9W3p356vc5csAvL5pLJ13h8XPW8trbNtFaIUVNv7mumrKE9Lta
-         gcCk7oDxWmM17/f/NKWtizEG59pXAjMXZQmltDRXTFj3dWjxCl9rTft57VO6li4yWr1B
-         AbgIH2WytDlNVw1rF+XJL3Nj8cLUzfBRtGy87wKrFtJ6Af1WqhVWn6eooD+BFppmLQ7b
-         TkN603eiWwcAInfD0bsL7XyJR9EUqpVbiZcyyrgOIfwOmlNDHUU57SzMeMZocmp8u3qw
-         2RACZ5DcBDyb6B4v2a2dkwGPSH9VyfLTowxSy/obkHqqfb7MxOKvt9jNXTEH4YRudCGS
-         mvXw==
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=+UmxU11hST5wQMMsZTOdrPPgQ47TLPa20pybe++XQYM=;
+        b=DYK0QeVSPErU0fdUHY9fTGU4W7LYS3OpstW7jKN2zQIGz6Fg75r2GHQ3mNhW9RIn1l
+         +/XX+0IaT+QuP2WnY1RDSSQe/LzU370EV/dACbM1CoHg6kWxfp4JKYe9NsSJNOZspcJv
+         79kSmVRSpqY6HusQwOsl5Cca71RoZZnxCQ7faeNT+onSgNJoOacMUCqYfldqMMFZnJn1
+         op2n2nb0dzUlxGLwnR76PnSZAQEAPJSGaPxLjQP0iN7EFQdPXw6p08Wye3gAirxio6qw
+         Ay8cPI17oe8ngWi6HmVYmshTvXlSdR08xlvJOMOinmATWt5vmC9kQdW4ky3oHMIbMIRb
+         tKgw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=DMB4uEvQ0xVrD8Va6J2iEK6E/SkN/sPqQLy12BaukGc=;
-        b=kD6YUNkDwBOSsuRQWGgyf7hgBgM6BPwYHiRUE7yOxe/X0fm+Oin7VPKHSIE+A1ABas
-         FAHaSlqb6feB5M5o/BnQ7k18H5nbWAKneGCkFcVZoW3R5lspKYrGToKoFHM5cWUvQILx
-         wkveBq8Fynqmfmj6kCeZ5U9vn7V+mUO6WlTj+8Uso+Ni3sxRp1sIAtRSsVG8fui86ibF
-         JSO6cjQbQgk+AaazRbxdYIJJNXq+KrIvVTod5eYMcXRiDoD6xvFnWzxxHTaWgyKE2fI2
-         Hooda+uVIt9r9S58X3P1QZyglxC/naiGWguF+U9wXgwNbwl2idiWAtB9oJ8+vHIdBmqS
-         sU1w==
-X-Gm-Message-State: AOAM531QxO4DpSVo0MAfhtKSws+pNRoQTLghB0dghKJgkJ2+92WJQpaw
-        y0sl5EV6/uRHV5ZM9BIjSQi7m4OYjaqjJ5iPrWtaMQ==
-X-Google-Smtp-Source: ABdhPJy5S/UJseOoADDBSALYznDfpb/mX97baRse3NaikYI0hAJV3/+tDHz8WgddNqOPuo4UZWWx6twW/GK4Tjgi138=
-X-Received: by 2002:ac2:4157:: with SMTP id c23mr2148581lfi.184.1632781940116;
- Mon, 27 Sep 2021 15:32:20 -0700 (PDT)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=+UmxU11hST5wQMMsZTOdrPPgQ47TLPa20pybe++XQYM=;
+        b=Z9okL/pf9RrsmivDgbVlTkgkSExSHwAPn6XS4kEDfFf4Iai3QyiQKgiurbOEN3Y4Xc
+         nnFF8suDGj1bCTqyl4X4vckJHhA26LLlPsif751EnDOxBlGNHZEZEFHN72ztD7yXhOr0
+         lW8q5ubRV0UfBHszTTCv9Yv+aLWLoBdVHlnla1aFHCO93ZaHQ3idZ+kVGujoACTNU01F
+         dgRe/PxSQ2/czsEvglkKK44u3jbFz8fSb267JBjFih9KyQ5jgOVwjFzguBsM2nkFK/Fi
+         ERNn/bsytTqhulx/IPnHeEev3G0MRVJJJRaG7qzUDlxHAstpzY+nHL3hkK8S/+aVb0P/
+         +uNw==
+X-Gm-Message-State: AOAM530Lg6aT0zTMNdMPbtorR2wG3b9XRAJ/bzt9/EShUCKDU98Jfkgq
+        T1vM/IS3CCDk25azOVk8hYyD+w==
+X-Google-Smtp-Source: ABdhPJzCRspGfuZEaibKYg9STMBXwDX6ihxLpFk5STZ/wJRDMFJCRfEhMCvkyfG9LlSO8u6kMpd4Fg==
+X-Received: by 2002:a02:3f4f:: with SMTP id c15mr1841581jaf.1.1632781940669;
+        Mon, 27 Sep 2021 15:32:20 -0700 (PDT)
+Received: from [192.168.1.116] ([66.219.217.159])
+        by smtp.gmail.com with ESMTPSA id p4sm9291645ilj.26.2021.09.27.15.32.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 27 Sep 2021 15:32:19 -0700 (PDT)
+Subject: Re: [PATCH v2 0/6] block: 5th batch of add_disk() error handling
+ conversions
+To:     Luis Chamberlain <mcgrof@kernel.org>, gregkh@linuxfoundation.org,
+        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
+        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
+        colin.king@canonical.com, shubhankarvk@gmail.com,
+        baijiaju1990@gmail.com, trix@redhat.com,
+        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
+        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
+        sth@linux.ibm.com, hoeppner@linux.ibm.com, hca@linux.ibm.com,
+        gor@linux.ibm.com, borntraeger@de.ibm.com, oberpar@linux.ibm.com,
+        tj@kernel.org
+Cc:     linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20210927220232.1071926-1-mcgrof@kernel.org>
+From:   Jens Axboe <axboe@kernel.dk>
+Message-ID: <25afa23b-52af-9b79-8bd8-5e31da62c291@kernel.dk>
+Date:   Mon, 27 Sep 2021 16:32:17 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <20210924073441.7835-1-tony@atomide.com>
-In-Reply-To: <20210924073441.7835-1-tony@atomide.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 28 Sep 2021 00:31:44 +0200
-Message-ID: <CAPDyKFqnJw+D307X93TdLagtnratuMM7Fwi=qceedA9J=Cn9ww@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: sdhci-omap: Document ti,non-removable
- property as deprecated
-To:     Tony Lindgren <tony@atomide.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        DTML <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20210927220232.1071926-1-mcgrof@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 24 Sept 2021 at 09:34, Tony Lindgren <tony@atomide.com> wrote:
->
-> Nowadays the standard non-removable property should be used, but we
-> still need to parse the ti,non-removable too. Let's document it as a
-> deprecated property.
->
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: devicetree@vger.kernel.org
-> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
+On 9/27/21 4:02 PM, Luis Chamberlain wrote:
+> This is the 5th series of driver conversions for add_disk() error
+> handling. This set along with the entire 7th set of patches can be
+> found on my 20210927-for-axboe-add-disk-error-handling branch [0].
 
-Applied for next, thanks!
+Applied 1-2.
 
-Kind regards
-Uffe
+-- 
+Jens Axboe
 
-
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
-> @@ -28,6 +28,9 @@ Optional properties:
->                 DMA specifiers listed in dmas. The string naming is to be "tx"
->                 and "rx" for TX and RX DMA requests, respectively.
->
-> +Deprecated properties:
-> +- ti,non-removable: Compatible with the generic non-removable property
-> +
->  Example:
->         mmc1: mmc@4809c000 {
->                 compatible = "ti,dra7-sdhci";
-> --
-> 2.33.0
