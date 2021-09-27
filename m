@@ -2,52 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C040C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:00:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FBBBC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A3D461157
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:00:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5D83B60EB6
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:04:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237531AbhI0WCM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Sep 2021 18:02:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50716 "EHLO
+        id S238173AbhI0WFw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Sep 2021 18:05:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50848 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237306AbhI0WCH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:02:07 -0400
+        with ESMTP id S238034AbhI0WF3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:05:29 -0400
 Received: from bombadil.infradead.org (unknown [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 928FAC061765;
-        Mon, 27 Sep 2021 15:00:29 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57DB8C061235;
+        Mon, 27 Sep 2021 15:02:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
         Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=eOGl5IZyZNnFXmP+I7kKDBQKd7BBidBOUcZv+xPQqWI=; b=lliCu+eKd3V1P+/sYJ0yd2PCrh
-        9ELPfdPTivFsxLYVUQdamOKpTZQ5EjeWqzTGXImkFZuCCORPUD+0L7y3MbC4152PxLGq8Q1x3nR/y
-        WbH9zYoGLr25pTRIqdL8Iu252s6oS8y94K/V+SoZG/YWmCX6lWaIFAVta7RgjUzwN4eZpHHbAljny
-        jv2QEBGFzrDs1l7laCe38Z7KLC4Fkl4R9S9hCiIPX6RUKp9M4N4rKNplc99ZW22MSmEaB6Zf+XayC
-        yn1e0cU462V4kxPmlszoM+JuCqTn1LzCOZ63BKAAsE7Uby00tY6XZZ6oGKLaoejvN+6vYqRkn+h/6
-        FCYNbmoQ==;
+        bh=y0kWvQS67gJE9oH2Tu+3mzoZQKPgF7CjDPD3Aqrkl9E=; b=czcgq8i1+g9A9g+zXiauQIA7Kj
+        pbcCXZYG2uU49Bh9MXwzR4eMtk+Vd3AktD9gnc4BiUDpyy4iQxV2/JvF8DBmWH47Cr2miHslnIT9R
+        hyxzvkr9FA94O+Tw5P7L6DlzcfXn4Px/DZGDRFqjWtgWamOX5q9SvCKacNlgYzcaHRCkzXAcXJzG5
+        vHQLx42LfHZkPRYMmGSG3gLSUwIuDr+XsLW79eCmEuOKvi9YZXC0FRuxTa+lCAXES/zPk9nmKqffx
+        U+Vc1UKWOMktji+o+HOsBfKCbnXOD5KE5TEdqhnK2ZXjs3bdgYZDKgxz6VrS0GSSNUw8Pyc/2N+bC
+        bzxoHKtg==;
 Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mUyfM-004SV3-Vt; Mon, 27 Sep 2021 22:00:05 +0000
+        id 1mUyhl-004Uu2-Rg; Mon, 27 Sep 2021 22:02:33 +0000
 From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     axboe@kernel.dk, martin.petersen@oracle.com, jejb@linux.ibm.com,
-        kbusch@kernel.org, sagi@grimberg.me, adrian.hunter@intel.com,
-        beanhuo@micron.com, ulf.hansson@linaro.org, avri.altman@wdc.com,
-        swboyd@chromium.org, agk@redhat.com, snitzer@redhat.com,
-        josef@toxicpanda.com
-Cc:     hch@infradead.org, hare@suse.de, bvanassche@acm.org,
-        ming.lei@redhat.com, linux-scsi@vger.kernel.org,
-        linux-nvme@lists.infradead.org, linux-mmc@vger.kernel.org,
-        dm-devel@redhat.com, nbd@other.debian.org,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v4 5/6] loop: add error handling support for add_disk()
-Date:   Mon, 27 Sep 2021 14:59:57 -0700
-Message-Id: <20210927215958.1062466-6-mcgrof@kernel.org>
+To:     axboe@kernel.dk, gregkh@linuxfoundation.org,
+        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
+        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
+        colin.king@canonical.com, shubhankarvk@gmail.com,
+        baijiaju1990@gmail.com, trix@redhat.com,
+        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
+        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
+        sth@linux.ibm.com, hoeppner@linux.ibm.com, hca@linux.ibm.com,
+        gor@linux.ibm.com, borntraeger@de.ibm.com, oberpar@linux.ibm.com,
+        tj@kernel.org
+Cc:     linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Gerald Schaefer <gerald.schaefer@linux.ibm.com>,
+        Luis Chamberlain <mcgrof@kernel.org>
+Subject: [PATCH v2 5/6] s390/block/dcssblk: add error handling support for add_disk()
+Date:   Mon, 27 Sep 2021 15:02:31 -0700
+Message-Id: <20210927220232.1071926-6-mcgrof@kernel.org>
 X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210927215958.1062466-1-mcgrof@kernel.org>
-References: <20210927215958.1062466-1-mcgrof@kernel.org>
+In-Reply-To: <20210927220232.1071926-1-mcgrof@kernel.org>
+References: <20210927220232.1071926-1-mcgrof@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: Luis Chamberlain <mcgrof@infradead.org>
@@ -55,42 +58,44 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
+
 We never checked for errors on add_disk() as this function
 returned void. Now that this is fixed, use the shiny new
 error handling.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-Reviewed-by: Hannes Reinecke <hare@suse.de>
 Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+Signed-off-by: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
 ---
- drivers/block/loop.c | 8 +++++++-
+ drivers/s390/block/dcssblk.c | 8 +++++++-
  1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/block/loop.c b/drivers/block/loop.c
-index 7bf4686af774..00ee365ed5e0 100644
---- a/drivers/block/loop.c
-+++ b/drivers/block/loop.c
-@@ -2394,13 +2394,19 @@ static int loop_add(int i)
- 	disk->event_flags	= DISK_EVENT_FLAG_UEVENT;
- 	sprintf(disk->disk_name, "loop%d", i);
- 	/* Make this loop device reachable from pathname. */
--	add_disk(disk);
-+	err = add_disk(disk);
-+	if (err)
-+		goto out_cleanup_disk;
-+
- 	/* Show this loop device. */
- 	mutex_lock(&loop_ctl_mutex);
- 	lo->idr_visible = true;
- 	mutex_unlock(&loop_ctl_mutex);
-+
- 	return i;
+diff --git a/drivers/s390/block/dcssblk.c b/drivers/s390/block/dcssblk.c
+index 5be3d1c39a78..0741a9321712 100644
+--- a/drivers/s390/block/dcssblk.c
++++ b/drivers/s390/block/dcssblk.c
+@@ -696,7 +696,9 @@ dcssblk_add_store(struct device *dev, struct device_attribute *attr, const char
+ 	}
  
-+out_cleanup_disk:
-+	blk_cleanup_disk(disk);
- out_cleanup_tags:
- 	blk_mq_free_tag_set(&lo->tag_set);
- out_free_idr:
+ 	get_device(&dev_info->dev);
+-	device_add_disk(&dev_info->dev, dev_info->gd, NULL);
++	rc = device_add_disk(&dev_info->dev, dev_info->gd, NULL);
++	if (rc)
++		goto out_dax;
+ 
+ 	switch (dev_info->segment_type) {
+ 		case SEG_TYPE_SR:
+@@ -712,6 +714,10 @@ dcssblk_add_store(struct device *dev, struct device_attribute *attr, const char
+ 	rc = count;
+ 	goto out;
+ 
++out_dax:
++	put_device(&dev_info->dev);
++	kill_dax(dev_info->dax_dev);
++	put_dax(dev_info->dax_dev);
+ put_dev:
+ 	list_del(&dev_info->lh);
+ 	blk_cleanup_disk(dev_info->gd);
 -- 
 2.30.2
 
