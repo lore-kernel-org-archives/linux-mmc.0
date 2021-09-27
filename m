@@ -2,135 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB085C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6056C4321E
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A8E5760FED
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1D31610A2
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Sep 2021 22:32:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237653AbhI0Wdy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Sep 2021 18:33:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57934 "EHLO
+        id S237882AbhI0WeE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Sep 2021 18:34:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237658AbhI0Wdy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:33:54 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9C22C061575
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:15 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id x27so84139028lfu.5
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:15 -0700 (PDT)
+        with ESMTP id S237875AbhI0WeC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Sep 2021 18:34:02 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE93DC06176E
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:21 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id i4so83801719lfv.4
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Sep 2021 15:32:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=zKu0IEoODoUZIet78XIQ7gITGkb6gFdWyb3HNpoDiRY=;
-        b=kpXgGEYkOKaDhkkfgBp7BBAINU+UWy4oa9d0ezLNX1RdkCrN5HQFAcEpIxYdSqaY8E
-         4l+zTnannSueZmhgY3UnxmyNBaFabr0j0X2ntWtPMkfvb+VutnzecmJmXqGu0zexnRjx
-         uXmSVxOUQjEHQO/mqp5FlkjS8NjpvBTAl593Q0gzCq2cbHArqKK4E9y1M1argn71WiC6
-         JO2B/CXOEM7xbpGpU2P6VwrNk9BJEt5K2j4oOUF4X6Fs+MOeYgZqgEt/5NsJ1CkTTM1F
-         cahMn+4wLj+ys0ZhlokvVekdhkb6slO+PCWGpOm9BNz6ndkrwQIpfKjbP7x8xOfI6lVD
-         bkUA==
+        bh=DMB4uEvQ0xVrD8Va6J2iEK6E/SkN/sPqQLy12BaukGc=;
+        b=Ocvt4nNiCJOqVLkC9W3p356vc5csAvL5pLJ13h8XPW8trbNtFaIUVNv7mumrKE9Lta
+         gcCk7oDxWmM17/f/NKWtizEG59pXAjMXZQmltDRXTFj3dWjxCl9rTft57VO6li4yWr1B
+         AbgIH2WytDlNVw1rF+XJL3Nj8cLUzfBRtGy87wKrFtJ6Af1WqhVWn6eooD+BFppmLQ7b
+         TkN603eiWwcAInfD0bsL7XyJR9EUqpVbiZcyyrgOIfwOmlNDHUU57SzMeMZocmp8u3qw
+         2RACZ5DcBDyb6B4v2a2dkwGPSH9VyfLTowxSy/obkHqqfb7MxOKvt9jNXTEH4YRudCGS
+         mvXw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=zKu0IEoODoUZIet78XIQ7gITGkb6gFdWyb3HNpoDiRY=;
-        b=mGANGb30vFetgQQfhpBma6a58pyqsbaNzXn8YaSReyoP2+Sp+9Ef3NsxAEOxKf70Ai
-         v2qRpxW6r/gG8olekC8F4j7BT/H5cBrMH9UblksLbpUxFfIUty8NHLwjvmkQdI+5pxID
-         tGbQ+BbTeq4jltSBsnHX2BcqDM9hP6EPpNrwANgQcDGPb47Lb6Ie2SI08HXUcp4HAgjd
-         kUjiwQmj+jVcJmPAVfgKnl/fF756pFHYvIvxdi9i/HB9TzD/UlZJ+DzIMTwuPrpTix1s
-         u6ph7IAfpEoKdzB+sgi2NcJk/1lcEbf5r6a1OjFiZ/v9GNYp+yCrkHJnmech37i8rosL
-         YKQw==
-X-Gm-Message-State: AOAM532J3wTYdh9SSozS2Ro5Sz9IoJp6H/AcEQbUtDvX4G1fmnkacEwy
-        bSnIdwDJ5Lp1HXRNUWRYZqMjB70gWaiGqfn2ylhsIA==
-X-Google-Smtp-Source: ABdhPJzhJkeB4zE1uCuw+O9on0VZVgtLXjw2moy+UGvPzQgeEJy+bQMNoHXRMUWjpXTYDrUF0YGvWaKZ2x6KDD8fqxo=
-X-Received: by 2002:a05:6512:2397:: with SMTP id c23mr2162094lfv.358.1632781934165;
- Mon, 27 Sep 2021 15:32:14 -0700 (PDT)
+        bh=DMB4uEvQ0xVrD8Va6J2iEK6E/SkN/sPqQLy12BaukGc=;
+        b=kD6YUNkDwBOSsuRQWGgyf7hgBgM6BPwYHiRUE7yOxe/X0fm+Oin7VPKHSIE+A1ABas
+         FAHaSlqb6feB5M5o/BnQ7k18H5nbWAKneGCkFcVZoW3R5lspKYrGToKoFHM5cWUvQILx
+         wkveBq8Fynqmfmj6kCeZ5U9vn7V+mUO6WlTj+8Uso+Ni3sxRp1sIAtRSsVG8fui86ibF
+         JSO6cjQbQgk+AaazRbxdYIJJNXq+KrIvVTod5eYMcXRiDoD6xvFnWzxxHTaWgyKE2fI2
+         Hooda+uVIt9r9S58X3P1QZyglxC/naiGWguF+U9wXgwNbwl2idiWAtB9oJ8+vHIdBmqS
+         sU1w==
+X-Gm-Message-State: AOAM531QxO4DpSVo0MAfhtKSws+pNRoQTLghB0dghKJgkJ2+92WJQpaw
+        y0sl5EV6/uRHV5ZM9BIjSQi7m4OYjaqjJ5iPrWtaMQ==
+X-Google-Smtp-Source: ABdhPJy5S/UJseOoADDBSALYznDfpb/mX97baRse3NaikYI0hAJV3/+tDHz8WgddNqOPuo4UZWWx6twW/GK4Tjgi138=
+X-Received: by 2002:ac2:4157:: with SMTP id c23mr2148581lfi.184.1632781940116;
+ Mon, 27 Sep 2021 15:32:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210917172727.26834-1-huobean@gmail.com> <20210917172727.26834-2-huobean@gmail.com>
-In-Reply-To: <20210917172727.26834-2-huobean@gmail.com>
+References: <20210924073441.7835-1-tony@atomide.com>
+In-Reply-To: <20210924073441.7835-1-tony@atomide.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 28 Sep 2021 00:31:38 +0200
-Message-ID: <CAPDyKFo+vVE_nH7b6HoZA==psx1+BiL8GqKCFXScRQKcnu+-OA@mail.gmail.com>
-Subject: Re: [PATCH v1 1/2] mmc: sdhci: Return true only when timeout exceeds
- capacity of the HW timer
-To:     Bean Huo <huobean@gmail.com>
+Date:   Tue, 28 Sep 2021 00:31:44 +0200
+Message-ID: <CAPDyKFqnJw+D307X93TdLagtnratuMM7Fwi=qceedA9J=Cn9ww@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: sdhci-omap: Document ti,non-removable
+ property as deprecated
+To:     Tony Lindgren <tony@atomide.com>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Bean Huo <beanhuo@micron.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        linux-omap <linux-omap@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        DTML <devicetree@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 17 Sept 2021 at 19:27, Bean Huo <huobean@gmail.com> wrote:
+On Fri, 24 Sept 2021 at 09:34, Tony Lindgren <tony@atomide.com> wrote:
 >
-> From: Bean Huo <beanhuo@micron.com>
+> Nowadays the standard non-removable property should be used, but we
+> still need to parse the ti,non-removable too. Let's document it as a
+> deprecated property.
 >
-> Clean up sdhci_calc_timeout() a bit,  and let it set too_big to be true only
-> when the timeout value required by the eMMC device exceeds the capability of
-> the host hardware timer.
->
-> Signed-off-by: Bean Huo <beanhuo@micron.com>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: devicetree@vger.kernel.org
+> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Applied for next (deferring patch2), thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci.c | 21 +++++++++------------
->  1 file changed, 9 insertions(+), 12 deletions(-)
+>  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7ae398f8d4d3..357b365bf0ec 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -930,7 +930,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
->         struct mmc_data *data;
->         unsigned target_timeout, current_timeout;
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> @@ -28,6 +28,9 @@ Optional properties:
+>                 DMA specifiers listed in dmas. The string naming is to be "tx"
+>                 and "rx" for TX and RX DMA requests, respectively.
 >
-> -       *too_big = true;
-> +       *too_big = false;
->
->         /*
->          * If the host controller provides us with an incorrect timeout
-> @@ -941,7 +941,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
->         if (host->quirks & SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
->                 return host->max_timeout_count;
->
-> -       /* Unspecified command, asume max */
-> +       /* Unspecified command, assume max */
->         if (cmd == NULL)
->                 return host->max_timeout_count;
->
-> @@ -968,17 +968,14 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
->         while (current_timeout < target_timeout) {
->                 count++;
->                 current_timeout <<= 1;
-> -               if (count > host->max_timeout_count)
-> +               if (count > host->max_timeout_count) {
-> +                       if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
-> +                               DBG("Too large timeout 0x%x requested for CMD%d!\n",
-> +                                   count, cmd->opcode);
-> +                       count = host->max_timeout_count;
-> +                       *too_big = true;
->                         break;
-> -       }
-> -
-> -       if (count > host->max_timeout_count) {
-> -               if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
-> -                       DBG("Too large timeout 0x%x requested for CMD%d!\n",
-> -                           count, cmd->opcode);
-> -               count = host->max_timeout_count;
-> -       } else {
-> -               *too_big = false;
-> +               }
->         }
->
->         return count;
+> +Deprecated properties:
+> +- ti,non-removable: Compatible with the generic non-removable property
+> +
+>  Example:
+>         mmc1: mmc@4809c000 {
+>                 compatible = "ti,dra7-sdhci";
 > --
-> 2.25.1
->
+> 2.33.0
