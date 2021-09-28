@@ -2,37 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 221F4C4167D
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E50BC41535
 	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 20:08:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0F83161157
+	by mail.kernel.org (Postfix) with ESMTP id 5A94F61157
 	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 20:08:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242657AbhI1UKB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 16:10:01 -0400
-Received: from www.zeus03.de ([194.117.254.33]:60742 "EHLO mail.zeus03.de"
+        id S242653AbhI1UKC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 16:10:02 -0400
+Received: from www.zeus03.de ([194.117.254.33]:60790 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S242643AbhI1UJ7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S242656AbhI1UJ7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 28 Sep 2021 16:09:59 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=a3VTofJ6q07YzM
-        cJ7axeINyJDw4hdg1OHgnT+sNimz0=; b=AbPsXFNeBxoyZu0PMeiZc/mSg78xTY
-        V5eze5xOFavDXyfSqyqxosqjdITro3J8DgsasOwGy6pl6nb96XCw4GKz/PSUeq7U
-        MXgIn4n9v8/sWw27b64BK20ig91C1eGZ3ckFur8xBfcaxm3roXuRMz35r43C+L3Y
-        eeuBygxmpR0G8=
-Received: (qmail 1377205 invoked from network); 28 Sep 2021 22:08:16 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Sep 2021 22:08:16 +0200
-X-UD-Smtp-Session: l3s3148p1@OVsexhPNctIgAwDPXxnDADNsFyRXxb9N
+        :mime-version:content-transfer-encoding; s=k1; bh=LCC3s3F/AEsrPw
+        s+Jpx5oCOLBgvia9+3zAivxUwx3KA=; b=m64vu1eiFBh2vPBEU9ALv1gYjavORS
+        fNgSjFG4ZuC0oREl/zjyvnNEUxiwmWR6HtqIohhzqmH8PQB2Z74XE7/3IToA+I6B
+        WDAgUMh+I+vyuElaFGizq65x82qH2H6F4aRf5npEuXYnE8RFIFA2F7CELBy9rFO9
+        r/oRHGmaeViaU=
+Received: (qmail 1377281 invoked from network); 28 Sep 2021 22:08:17 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Sep 2021 22:08:17 +0200
+X-UD-Smtp-Session: l3s3148p1@XDQ4xhPNdtIgAwDPXxnDADNsFyRXxb9N
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-renesas-soc@vger.kernel.org
 Cc:     linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org,
         Geert Uytterhoeven <geert+renesas@glider.be>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH 1/9] clk: renesas: gen3-cpg: add dummy SDnH clock
-Date:   Tue, 28 Sep 2021 22:07:56 +0200
-Message-Id: <20210928200804.50922-2-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 3/9] clk: renesas: r8a779a0: add SDnH clock to V3U
+Date:   Tue, 28 Sep 2021 22:07:58 +0200
+Message-Id: <20210928200804.50922-4-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210928200804.50922-1-wsa+renesas@sang-engineering.com>
 References: <20210928200804.50922-1-wsa+renesas@sang-engineering.com>
@@ -42,92 +42,57 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently, SDnH is handled together with SDn. This caused lots of
-problems, so we want SDnH as a seperate clock. Introduce a dummy SDnH
-type here which creates a fixed-factor clock with factor 1. That allows
-us to convert the per-SoC CPG drivers while keeping the old behaviour
-for now. A later patch then will add the proper functionality.
+Currently a pass-through clock but we will make it a real divider clock
+in the next patches.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/clk/renesas/rcar-cpg-lib.c  | 9 +++++++++
- drivers/clk/renesas/rcar-cpg-lib.h  | 4 ++++
- drivers/clk/renesas/rcar-gen3-cpg.c | 4 ++++
- drivers/clk/renesas/rcar-gen3-cpg.h | 4 ++++
- 4 files changed, 21 insertions(+)
+ drivers/clk/renesas/r8a779a0-cpg-mssr.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/clk/renesas/rcar-cpg-lib.c b/drivers/clk/renesas/rcar-cpg-lib.c
-index 5678768ee1f2..351cb9c04f5c 100644
---- a/drivers/clk/renesas/rcar-cpg-lib.c
-+++ b/drivers/clk/renesas/rcar-cpg-lib.c
-@@ -65,6 +65,15 @@ void cpg_simple_notifier_register(struct raw_notifier_head *notifiers,
- /*
-  * SDn Clock
-  */
-+
-+struct clk * __init cpg_sdh_clk_register(const char *name,
-+	void __iomem *sdnckcr, const char *parent_name,
-+	struct raw_notifier_head *notifiers)
-+{
-+	/* placeholder during transition */
-+	return clk_register_fixed_factor(NULL, name, parent_name, 0, 1, 1);
-+}
-+
- #define CPG_SD_STP_HCK		BIT(9)
- #define CPG_SD_STP_CK		BIT(8)
+diff --git a/drivers/clk/renesas/r8a779a0-cpg-mssr.c b/drivers/clk/renesas/r8a779a0-cpg-mssr.c
+index f16d125ca009..fb7f0cf2654a 100644
+--- a/drivers/clk/renesas/r8a779a0-cpg-mssr.c
++++ b/drivers/clk/renesas/r8a779a0-cpg-mssr.c
+@@ -33,6 +33,7 @@ enum rcar_r8a779a0_clk_types {
+ 	CLK_TYPE_R8A779A0_PLL1,
+ 	CLK_TYPE_R8A779A0_PLL2X_3X,	/* PLL[23][01] */
+ 	CLK_TYPE_R8A779A0_PLL5,
++	CLK_TYPE_R8A779A0_SDH,
+ 	CLK_TYPE_R8A779A0_SD,
+ 	CLK_TYPE_R8A779A0_MDSEL,	/* Select parent/divider using mode pin */
+ 	CLK_TYPE_R8A779A0_OSC,	/* OSC EXTAL predivider and fixed divider */
+@@ -84,6 +85,9 @@ enum clk_ids {
+ 	DEF_BASE(_name, _id, CLK_TYPE_R8A779A0_PLL2X_3X, CLK_MAIN, \
+ 		 .offset = _offset)
  
-diff --git a/drivers/clk/renesas/rcar-cpg-lib.h b/drivers/clk/renesas/rcar-cpg-lib.h
-index d00c91b116ca..548cb9562f35 100644
---- a/drivers/clk/renesas/rcar-cpg-lib.h
-+++ b/drivers/clk/renesas/rcar-cpg-lib.h
-@@ -26,6 +26,10 @@ void cpg_simple_notifier_register(struct raw_notifier_head *notifiers,
- 
- void cpg_reg_modify(void __iomem *reg, u32 clear, u32 set);
- 
-+struct clk * __init cpg_sdh_clk_register(const char *name,
-+	void __iomem *sdnckcr, const char *parent_name,
-+	struct raw_notifier_head *notifiers);
++#define DEF_SDH(_name, _id, _parent, _offset)   \
++	DEF_BASE(_name, _id, CLK_TYPE_R8A779A0_SDH, _parent, .offset = _offset)
 +
- struct clk * __init cpg_sd_clk_register(const char *name,
- 	void __iomem *base, unsigned int offset, const char *parent_name,
- 	struct raw_notifier_head *notifiers, bool skip_first);
-diff --git a/drivers/clk/renesas/rcar-gen3-cpg.c b/drivers/clk/renesas/rcar-gen3-cpg.c
-index 558191c99b48..182b189bc8f4 100644
---- a/drivers/clk/renesas/rcar-gen3-cpg.c
-+++ b/drivers/clk/renesas/rcar-gen3-cpg.c
-@@ -486,6 +486,10 @@ struct clk * __init rcar_gen3_cpg_clk_register(struct device *dev,
- 			mult *= 2;
+ #define DEF_SD(_name, _id, _parent, _offset)   \
+ 	DEF_BASE(_name, _id, CLK_TYPE_R8A779A0_SD, _parent, .offset = _offset)
+ 
+@@ -145,7 +149,8 @@ static const struct cpg_core_clk r8a779a0_core_clks[] __initconst = {
+ 	DEF_FIXED("cp",		R8A779A0_CLK_CP,	CLK_EXTAL,	2, 1),
+ 	DEF_FIXED("cl16mck",	R8A779A0_CLK_CL16MCK,	CLK_PLL1_DIV2,	64, 1),
+ 
+-	DEF_SD("sd0",		R8A779A0_CLK_SD0,	CLK_SDSRC,	0x870),
++	DEF_SDH("sdh0",		R8A779A0_CLK_SD0H,	CLK_SDSRC,	   0x870),
++	DEF_SD( "sd0",		R8A779A0_CLK_SD0,	R8A779A0_CLK_SD0H, 0x870),
+ 
+ 	DEF_DIV6P1("mso",	R8A779A0_CLK_MSO,	CLK_PLL5_DIV4,	0x87c),
+ 	DEF_DIV6P1("canfd",	R8A779A0_CLK_CANFD,	CLK_PLL5_DIV4,	0x878),
+@@ -293,6 +298,10 @@ static struct clk * __init rcar_r8a779a0_cpg_clk_register(struct device *dev,
+ 		div = cpg_pll_config->pll5_div;
  		break;
  
-+	case CLK_TYPE_GEN3_SDH:
++	case CLK_TYPE_R8A779A0_SDH:
 +		return cpg_sdh_clk_register(core->name, base + core->offset,
 +					   __clk_get_name(parent), notifiers);
 +
- 	case CLK_TYPE_GEN3_SD:
+ 	case CLK_TYPE_R8A779A0_SD:
  		return cpg_sd_clk_register(core->name, base, core->offset,
  					   __clk_get_name(parent), notifiers,
-diff --git a/drivers/clk/renesas/rcar-gen3-cpg.h b/drivers/clk/renesas/rcar-gen3-cpg.h
-index 3d949c4a3244..2bc0afadf604 100644
---- a/drivers/clk/renesas/rcar-gen3-cpg.h
-+++ b/drivers/clk/renesas/rcar-gen3-cpg.h
-@@ -17,6 +17,7 @@ enum rcar_gen3_clk_types {
- 	CLK_TYPE_GEN3_PLL2,
- 	CLK_TYPE_GEN3_PLL3,
- 	CLK_TYPE_GEN3_PLL4,
-+	CLK_TYPE_GEN3_SDH,
- 	CLK_TYPE_GEN3_SD,
- 	CLK_TYPE_GEN3_R,
- 	CLK_TYPE_GEN3_MDSEL,	/* Select parent/divider using mode pin */
-@@ -32,6 +33,9 @@ enum rcar_gen3_clk_types {
- 	CLK_TYPE_GEN3_SOC_BASE,
- };
- 
-+#define DEF_GEN3_SDH(_name, _id, _parent, _offset)	\
-+	DEF_BASE(_name, _id, CLK_TYPE_GEN3_SDH, _parent, .offset = _offset)
-+
- #define DEF_GEN3_SD(_name, _id, _parent, _offset)	\
- 	DEF_BASE(_name, _id, CLK_TYPE_GEN3_SD, _parent, .offset = _offset)
- 
 -- 
 2.30.2
 
