@@ -2,218 +2,368 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27ACCC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:37:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C45E2C43217
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:54:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8613601FA
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:37:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A7CB661159
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:54:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239223AbhI1Him (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 03:38:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39526 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239099AbhI1Hil (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2021 03:38:41 -0400
-Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6895EC061604
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2021 00:37:02 -0700 (PDT)
-Received: by mail-wr1-x42e.google.com with SMTP id k7so4407030wrd.13
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2021 00:37:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=m6ukGi3jrrjha+D9TPzmB0py/6c66GKZD4MHDgm6P10=;
-        b=jThVZfplycMd8BrUu3i9rNEKQNvwMgZjFUZXnQKydP/BPS7L2KFyndlKOcvnKctuZ9
-         HRyckDu+6vU7w9dVAbB6kMteE2kSjzUJs9KPrvhM6bF86qVi/Greu59ujd8iaTfBbX3q
-         aB5ZJEouLh6jYdGFvBFAMKG16NoUfuorcKE3kJ3dr8E4mfnQJQKzbl8shvPQWRIX5gcq
-         6SfbIqKB9eS3DCtvImkzc2mPzCF63+01M3y8tB4DyB0Eq8I9eZ96KlsxTeQ/o6Cfqs5c
-         JvHjRPqqPIl+4vcGso3fSkh9FW3I8xKhBV1p68mcwWM3lGiHKf/kWk6xh5nEzCPBwzm0
-         Njfw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=m6ukGi3jrrjha+D9TPzmB0py/6c66GKZD4MHDgm6P10=;
-        b=N1F8YlMiTd9l9KaLjQVeHlc/VUaXDgkbX4F7WD1AaZx6WAss50zpJHixm9whilG8jG
-         v9xmralfuCxeOweRL2erdpMoCIHEwjgQYXNWMDztM5S/ZlEZanYcBUH/qjxWgsugViwB
-         n52bEbfWuA8bJAc4LyXnzSeUGkX1d60Sivx8juv86jci10bUaBhXXN/rdGPAhGFkhV2Y
-         jl2SAzsQUujAWKH3VRxoFNiZWyXcc3srKiHqVU9sNW7kuX/rhjHHRSU0ozSvbUxTzhwT
-         JzPgr04dOjcdV1bECRjd+nw73SCxzVPWkys8f1QlKxV5abSja17qpFg1lP9P39XWz5xN
-         aOCg==
-X-Gm-Message-State: AOAM5330iWo0eBpyPQxh0cJnbCriTF3R6VYldPI+EclkLoakMvFjC2om
-        45lhuaDUJhcHpmQxVssL7SrTVw==
-X-Google-Smtp-Source: ABdhPJx7PDOCZTrSfSoBj6A6tBDBSqv3hllEA/Frui6VQ5UkscYFuYYCsZLNiyYN8XNDhB+/VDyqoQ==
-X-Received: by 2002:a05:6000:18a4:: with SMTP id b4mr4703065wri.96.1632814620869;
-        Tue, 28 Sep 2021 00:37:00 -0700 (PDT)
-Received: from localhost.localdomain ([2001:861:44c0:66c0:af32:f180:8ede:d9da])
-        by smtp.gmail.com with ESMTPSA id q8sm8210170wrv.26.2021.09.28.00.36.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Sep 2021 00:37:00 -0700 (PDT)
-From:   Neil Armstrong <narmstrong@baylibre.com>
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        christianshewitt@gmail.com, martin.blumenstingl@googlemail.com,
-        Neil Armstrong <narmstrong@baylibre.com>
-Subject: [PATCH v2] mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
-Date:   Tue, 28 Sep 2021 09:36:52 +0200
-Message-Id: <20210928073652.434690-1-narmstrong@baylibre.com>
-X-Mailer: git-send-email 2.25.1
+        id S239506AbhI1H4H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 03:56:07 -0400
+Received: from mail.kernel.org ([198.145.29.99]:36074 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239357AbhI1H4F (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 28 Sep 2021 03:56:05 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B80DD611C3;
+        Tue, 28 Sep 2021 07:54:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1632815665;
+        bh=JwfWSl4lOeGQdDMCaqzC/YoR5dLIQUBHyX/TyVwAtrk=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=B9DErRv0DXvR79z0gAToMQix95rYf1C7EZpx01Zx4vKlfkZEb0dTcwcHyclo66CNs
+         +kMEasFS5dFlnuses0vfgEA8cVtmJTf95pNfn4OyiKfJPOAVVSyBFGgi6PYZ40mMr/
+         lyS2acpMRFpyufwCoovmBfdDpm5HF4HHeMHZWcN+Wm+jnCDFj/NcLLoTdxhHkWGu9/
+         ktzZG7k/GDNoFUREQkQ+rtAcsMsBvPDVxXZWc9w0Bb+1mpLgaRpioNK0EGSQ7Z6DDj
+         ZSe0j1Uo2ARkHoiSqNjIl7LAvtUK2tk3alnXiAat/zi8dUUwpZk9r4kjuLwljK7Dq7
+         Jz7Xz09aLl5eg==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc:     Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Charles Keepax <ckeepax@opensource.cirrus.com>,
+        Simon Trimmer <simont@opensource.cirrus.com>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Russell King <linux@armlinux.org.uk>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Will Deacon <will@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        Helge Deller <deller@gmx.de>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-ia64@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-parisc@vger.kernel.org, linux-riscv@lists.infradead.org,
+        Kalle Valo <kvalo@codeaurora.org>,
+        Rob Clark <robdclark@gmail.com>, Sean Paul <sean@poorly.run>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Joerg Roedel <joro@8bytes.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Alex Elder <elder@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        linux-arm-msm@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        freedreno@lists.freedesktop.org, iommu@lists.linux-foundation.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, ath10k@lists.infradead.org,
+        linux-wireless@vger.kernel.org, linux-gpio@vger.kernel.org
+Subject: [PATCH 2/2] [v2] qcom_scm: hide Kconfig symbol
+Date:   Tue, 28 Sep 2021 09:50:27 +0200
+Message-Id: <20210928075216.4193128-2-arnd@kernel.org>
+X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20210928075216.4193128-1-arnd@kernel.org>
+References: <20210928075216.4193128-1-arnd@kernel.org>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=5434; h=from:subject; bh=lS4QGxtvZRm6mTGA/rTgX19F6pA1j0bugQURcq/3QAY=; b=owEBbQKS/ZANAwAKAXfc29rIyEnRAcsmYgBhUsXaGyiGIMSGGuF5dkoQ2VcYQnCURDzSJRc5WVYP IBzwcJ6JAjMEAAEKAB0WIQQ9U8YmyFYF/h30LIt33NvayMhJ0QUCYVLF2gAKCRB33NvayMhJ0bN1EA CRjmWZncIY6W2w9k4SPCXrYZiHMywnxdATOrVB7b5363hyzdDXsHtZC+6y9ULstvXsiP9Komz47Oco ofPnbcey9KMoMlqPfyj/DhD1YcTPZPCWWvlGZjhI2I9+LYE0EWLqn/hRXFdWNio1OiRzuezN1fOPo1 sd512JiTtq5DvM8aL+/rcYO95MJbK0NJXH6TZW4obXhyPmXljqo7uA8j7/VmUv33oDw4G2S5PbQ5VE LrDugBmZJf1lkY5JonPRKa2QSH0MafVks71/GYWEsMRJ0EoUzVr8jJR0fmHYqTb8okkwVZ3I+1DoUP E7qsbgHgaoKjtdUomWpZLFpe8eVN2Xb/c/yirYY5/aL311Rh2qJnPvp07DCU38a/IBaa9iny8r+xkc 6xc5L8lv751VU/cl0DTOtxtiqXWatmXWm1m2bg9JvFIEYHN3uuRp2oSQFBw5q44tOfRRfPNofAadc/ votcgmMz5ocgQNQmryBf9xesLMaEOuvDljze7SFKJE9WBUJ4Wx+2HNg2BUWNQicsqr6UUhr15xK1cE MtiDXS/h7Epl0tw9+S8KmTYLSjnBgn6y0eDWqo5cp9ysLqPR1lL8G2+gFQNmmqZXWhks7pb+DkMSAl dzBmQqKX/+8kIVUYTyyy0fBInsdA/m0/Yn7cArfGcLpPiSHZaKyTuuoKDaZw==
-X-Developer-Key: i=narmstrong@baylibre.com; a=openpgp; fpr=89EC3D058446217450F22848169AB7B1A4CFF8AE
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The memory at the end of the controller only accepts 32bit read/write
-accesses, but the arm64 memcpy_to/fromio implementation only uses 64bit
-(which will be split into two 32bit access) and 8bit leading to incomplete
-copies to/from this memory when the buffer is not multiple of 8bytes.
+From: Arnd Bergmann <arnd@arndb.de>
 
-Add a local copy using writel/readl accesses to make sure we use the right
-memory access width.
+Now that SCM can be a loadable module, we have to add another
+dependency to avoid link failures when ipa or adreno-gpu are
+built-in:
 
-The switch to memcpy_to/fromio was done because of 285133040e6c
-("arm64: Import latest memcpy()/memmove() implementation"), but using memcpy
-worked before since it mainly used 32bit memory acceses.
+aarch64-linux-ld: drivers/net/ipa/ipa_main.o: in function `ipa_probe':
+ipa_main.c:(.text+0xfc4): undefined reference to `qcom_scm_is_available'
 
-Fixes: 103a5348c22c ("mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk")
-Reported-by: Christian Hewitt <christianshewitt@gmail.com>
-Suggested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
-Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+ld.lld: error: undefined symbol: qcom_scm_is_available
+>>> referenced by adreno_gpu.c
+>>>               gpu/drm/msm/adreno/adreno_gpu.o:(adreno_zap_shader_load) in archive drivers/built-in.a
+
+This can happen when CONFIG_ARCH_QCOM is disabled and we don't select
+QCOM_MDT_LOADER, but some other module selects QCOM_SCM. Ideally we'd
+use a similar dependency here to what we have for QCOM_RPROC_COMMON,
+but that causes dependency loops from other things selecting QCOM_SCM.
+
+This appears to be an endless problem, so try something different this
+time:
+
+ - CONFIG_QCOM_SCM becomes a hidden symbol that nothing 'depends on'
+   but that is simply selected by all of its users
+
+ - All the stubs in include/linux/qcom_scm.h can go away
+
+ - arm-smccc.h needs to provide a stub for __arm_smccc_smc() to
+   allow compile-testing QCOM_SCM on all architectures.
+
+ - To avoid a circular dependency chain involving RESET_CONTROLLER
+   and PINCTRL_SUNXI, drop the 'select RESET_CONTROLLER' statement.
+   According to my testing this still builds fine, and the QCOM
+   platform selects this symbol already.
+
+Acked-by: Kalle Valo <kvalo@codeaurora.org>
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
-Changes since v1:
-- added sg pre-validation at meson_mmc_request and dropped checks in meson_mmc_copy_buffer
+Changes in v2:
+  - drop the 'select RESET_CONTROLLER' line, rather than adding
+    more of the same
+---
+ drivers/firmware/Kconfig                |  5 +-
+ drivers/gpu/drm/msm/Kconfig             |  4 +-
+ drivers/iommu/Kconfig                   |  2 +-
+ drivers/media/platform/Kconfig          |  2 +-
+ drivers/mmc/host/Kconfig                |  2 +-
+ drivers/net/ipa/Kconfig                 |  1 +
+ drivers/net/wireless/ath/ath10k/Kconfig |  2 +-
+ drivers/pinctrl/qcom/Kconfig            |  3 +-
+ include/linux/arm-smccc.h               | 10 ++++
+ include/linux/qcom_scm.h                | 71 -------------------------
+ 10 files changed, 20 insertions(+), 82 deletions(-)
 
- drivers/mmc/host/meson-gx-mmc.c | 73 ++++++++++++++++++++++++++-------
- 1 file changed, 59 insertions(+), 14 deletions(-)
-
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 3f28eb4d17fe..8f36536cb1b6 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -746,7 +746,7 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
- 	writel(start, host->regs + SD_EMMC_START);
- }
+diff --git a/drivers/firmware/Kconfig b/drivers/firmware/Kconfig
+index 220a58cf0a44..cda7d7162cbb 100644
+--- a/drivers/firmware/Kconfig
++++ b/drivers/firmware/Kconfig
+@@ -203,10 +203,7 @@ config INTEL_STRATIX10_RSU
+ 	  Say Y here if you want Intel RSU support.
  
--/* local sg copy to buffer version with _to/fromio usage for dram_access_quirk */
-+/* local sg copy for dram_access_quirk */
- static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data,
- 				  size_t buflen, bool to_buffer)
- {
-@@ -764,21 +764,27 @@ static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data
- 	sg_miter_start(&miter, sgl, nents, sg_flags);
+ config QCOM_SCM
+-	tristate "Qcom SCM driver"
+-	depends on ARM || ARM64
+-	depends on HAVE_ARM_SMCCC
+-	select RESET_CONTROLLER
++	tristate
  
- 	while ((offset < buflen) && sg_miter_next(&miter)) {
--		unsigned int len;
-+		unsigned int buf_offset = 0;
-+		unsigned int len, left;
-+		u32 *buf = miter.addr;
+ config QCOM_SCM_DOWNLOAD_MODE_DEFAULT
+ 	bool "Qualcomm download mode enabled by default"
+diff --git a/drivers/gpu/drm/msm/Kconfig b/drivers/gpu/drm/msm/Kconfig
+index e9c6af78b1d7..3ddf739a6f9b 100644
+--- a/drivers/gpu/drm/msm/Kconfig
++++ b/drivers/gpu/drm/msm/Kconfig
+@@ -17,7 +17,7 @@ config DRM_MSM
+ 	select DRM_SCHED
+ 	select SHMEM
+ 	select TMPFS
+-	select QCOM_SCM if ARCH_QCOM
++	select QCOM_SCM
+ 	select WANT_DEV_COREDUMP
+ 	select SND_SOC_HDMI_CODEC if SND_SOC
+ 	select SYNC_FILE
+@@ -55,7 +55,7 @@ config DRM_MSM_GPU_SUDO
  
- 		len = min(miter.length, buflen - offset);
-+		left = len;
+ config DRM_MSM_HDMI_HDCP
+ 	bool "Enable HDMI HDCP support in MSM DRM driver"
+-	depends on DRM_MSM && QCOM_SCM
++	depends on DRM_MSM
+ 	default y
+ 	help
+ 	  Choose this option to enable HDCP state machine
+diff --git a/drivers/iommu/Kconfig b/drivers/iommu/Kconfig
+index 124c41adeca1..989c83acbfee 100644
+--- a/drivers/iommu/Kconfig
++++ b/drivers/iommu/Kconfig
+@@ -308,7 +308,7 @@ config APPLE_DART
+ config ARM_SMMU
+ 	tristate "ARM Ltd. System MMU (SMMU) Support"
+ 	depends on ARM64 || ARM || (COMPILE_TEST && !GENERIC_ATOMIC64)
+-	depends on QCOM_SCM || !QCOM_SCM #if QCOM_SCM=m this can't be =y
++	select QCOM_SCM
+ 	select IOMMU_API
+ 	select IOMMU_IO_PGTABLE_LPAE
+ 	select ARM_DMA_USE_IOMMU if ARM
+diff --git a/drivers/media/platform/Kconfig b/drivers/media/platform/Kconfig
+index 157c924686e4..80321e03809a 100644
+--- a/drivers/media/platform/Kconfig
++++ b/drivers/media/platform/Kconfig
+@@ -565,7 +565,7 @@ config VIDEO_QCOM_VENUS
+ 	depends on VIDEO_DEV && VIDEO_V4L2 && QCOM_SMEM
+ 	depends on (ARCH_QCOM && IOMMU_DMA) || COMPILE_TEST
+ 	select QCOM_MDT_LOADER if ARCH_QCOM
+-	select QCOM_SCM if ARCH_QCOM
++	select QCOM_SCM
+ 	select VIDEOBUF2_DMA_CONTIG
+ 	select V4L2_MEM2MEM_DEV
+ 	help
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 71313961cc54..95b3511b0560 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -547,7 +547,7 @@ config MMC_SDHCI_MSM
+ 	depends on MMC_SDHCI_PLTFM
+ 	select MMC_SDHCI_IO_ACCESSORS
+ 	select MMC_CQHCI
+-	select QCOM_SCM if MMC_CRYPTO && ARCH_QCOM
++	select QCOM_SCM if MMC_CRYPTO
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  support present in Qualcomm SOCs. The controller supports
+diff --git a/drivers/net/ipa/Kconfig b/drivers/net/ipa/Kconfig
+index 8f99cfa14680..d037682fb7ad 100644
+--- a/drivers/net/ipa/Kconfig
++++ b/drivers/net/ipa/Kconfig
+@@ -4,6 +4,7 @@ config QCOM_IPA
+ 	depends on ARCH_QCOM || COMPILE_TEST
+ 	depends on QCOM_RPROC_COMMON || (QCOM_RPROC_COMMON=n && COMPILE_TEST)
+ 	select QCOM_MDT_LOADER if ARCH_QCOM
++	select QCOM_SCM
+ 	select QCOM_QMI_HELPERS
+ 	help
+ 	  Choose Y or M here to include support for the Qualcomm
+diff --git a/drivers/net/wireless/ath/ath10k/Kconfig b/drivers/net/wireless/ath/ath10k/Kconfig
+index 741289e385d5..ca007b800f75 100644
+--- a/drivers/net/wireless/ath/ath10k/Kconfig
++++ b/drivers/net/wireless/ath/ath10k/Kconfig
+@@ -44,7 +44,7 @@ config ATH10K_SNOC
+ 	tristate "Qualcomm ath10k SNOC support"
+ 	depends on ATH10K
+ 	depends on ARCH_QCOM || COMPILE_TEST
+-	depends on QCOM_SCM || !QCOM_SCM #if QCOM_SCM=m this can't be =y
++	select QCOM_SCM
+ 	select QCOM_QMI_HELPERS
+ 	help
+ 	  This module adds support for integrated WCN3990 chip connected
+diff --git a/drivers/pinctrl/qcom/Kconfig b/drivers/pinctrl/qcom/Kconfig
+index 32ea2a8ec02b..5ff4207df66e 100644
+--- a/drivers/pinctrl/qcom/Kconfig
++++ b/drivers/pinctrl/qcom/Kconfig
+@@ -3,7 +3,8 @@ if (ARCH_QCOM || COMPILE_TEST)
  
--		/* When dram_access_quirk, the bounce buffer is a iomem mapping */
--		if (host->dram_access_quirk) {
--			if (to_buffer)
--				memcpy_toio(host->bounce_iomem_buf + offset, miter.addr, len);
--			else
--				memcpy_fromio(miter.addr, host->bounce_iomem_buf + offset, len);
-+		if (to_buffer) {
-+			do {
-+				writel(*buf++, host->bounce_iomem_buf + offset + buf_offset);
-+
-+				buf_offset += 4;
-+				left -= 4;
-+			} while (left);
- 		} else {
--			if (to_buffer)
--				memcpy(host->bounce_buf + offset, miter.addr, len);
--			else
--				memcpy(miter.addr, host->bounce_buf + offset, len);
-+			do {
-+				*buf++ = readl(host->bounce_iomem_buf + offset + buf_offset);
-+
-+				buf_offset += 4;
-+				left -= 4;
-+			} while (left);
- 		}
- 
- 		offset += len;
-@@ -830,7 +836,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 		if (data->flags & MMC_DATA_WRITE) {
- 			cmd_cfg |= CMD_CFG_DATA_WR;
- 			WARN_ON(xfer_bytes > host->bounce_buf_size);
--			meson_mmc_copy_buffer(host, data, xfer_bytes, true);
-+			if (host->dram_access_quirk)
-+				meson_mmc_copy_buffer(host, data, xfer_bytes, true);
-+			else
-+				sg_copy_to_buffer(data->sg, data->sg_len,
-+						  host->bounce_buf, xfer_bytes);
- 			dma_wmb();
- 		}
- 
-@@ -849,12 +859,43 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
- 	writel(cmd->arg, host->regs + SD_EMMC_CMD_ARG);
- }
- 
-+static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data *data)
+ config PINCTRL_MSM
+ 	tristate "Qualcomm core pin controller driver"
+-	depends on GPIOLIB && (QCOM_SCM || !QCOM_SCM) #if QCOM_SCM=m this can't be =y
++	depends on GPIOLIB
++	select QCOM_SCM
+ 	select PINMUX
+ 	select PINCONF
+ 	select GENERIC_PINCONF
+diff --git a/include/linux/arm-smccc.h b/include/linux/arm-smccc.h
+index 7d1cabe15262..63ccb5252190 100644
+--- a/include/linux/arm-smccc.h
++++ b/include/linux/arm-smccc.h
+@@ -321,10 +321,20 @@ asmlinkage unsigned long __arm_smccc_sve_check(unsigned long x0);
+  * from register 0 to 3 on return from the SMC instruction.  An optional
+  * quirk structure provides vendor specific behavior.
+  */
++#ifdef CONFIG_HAVE_ARM_SMCCC
+ asmlinkage void __arm_smccc_smc(unsigned long a0, unsigned long a1,
+ 			unsigned long a2, unsigned long a3, unsigned long a4,
+ 			unsigned long a5, unsigned long a6, unsigned long a7,
+ 			struct arm_smccc_res *res, struct arm_smccc_quirk *quirk);
++#else
++static inline void __arm_smccc_smc(unsigned long a0, unsigned long a1,
++			unsigned long a2, unsigned long a3, unsigned long a4,
++			unsigned long a5, unsigned long a6, unsigned long a7,
++			struct arm_smccc_res *res, struct arm_smccc_quirk *quirk)
 +{
-+	struct scatterlist *sg;
-+	int i;
-+
-+	/* Reject request if any element offset or size is not 32bit aligned */
-+	for_each_sg(data->sg, sg, data->sg_len, i) {
-+		if (!IS_ALIGNED(sg->offset, sizeof(u32)) ||
-+		    !IS_ALIGNED(sg->length, sizeof(u32))) {
-+			dev_err(mmc_dev(mmc), "unaligned sg offset %u len %u\n",
-+				data->sg->offset, data->sg->length);
-+			return -EINVAL;
-+		}
-+	}
-+
-+	return 0;
++	*res = (struct arm_smccc_res){};
 +}
-+
- static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct meson_host *host = mmc_priv(mmc);
- 	bool needs_pre_post_req = mrq->data &&
- 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
++#endif
  
-+	/*
-+	 * The memory at the end of the controller used as bounce buffer for
-+	 * the dram_access_quirk only accepts 32bit read/write access,
-+	 * check the aligment and length of the data before starting the request.
-+	 */
-+	if (host->dram_access_quirk && mrq->data) {
-+		mrq->cmd->error = meson_mmc_validate_dram_access(mmc, mrq->data);
-+		if (mrq->cmd->error) {
-+			mmc_request_done(mmc, mrq);
-+			return;
-+		}
-+	}
-+
- 	if (needs_pre_post_req) {
- 		meson_mmc_get_transfer_mode(mmc, mrq);
- 		if (!meson_mmc_desc_chain_mode(mrq->data))
-@@ -999,7 +1040,11 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
- 	if (meson_mmc_bounce_buf_read(data)) {
- 		xfer_bytes = data->blksz * data->blocks;
- 		WARN_ON(xfer_bytes > host->bounce_buf_size);
--		meson_mmc_copy_buffer(host, data, xfer_bytes, false);
-+		if (host->dram_access_quirk)
-+			meson_mmc_copy_buffer(host, data, xfer_bytes, false);
-+		else
-+			sg_copy_from_buffer(data->sg, data->sg_len,
-+					    host->bounce_buf, xfer_bytes);
- 	}
+ /**
+  * __arm_smccc_hvc() - make HVC calls
+diff --git a/include/linux/qcom_scm.h b/include/linux/qcom_scm.h
+index c0475d1c9885..81cad9e1e412 100644
+--- a/include/linux/qcom_scm.h
++++ b/include/linux/qcom_scm.h
+@@ -61,7 +61,6 @@ enum qcom_scm_ice_cipher {
+ #define QCOM_SCM_PERM_RW (QCOM_SCM_PERM_READ | QCOM_SCM_PERM_WRITE)
+ #define QCOM_SCM_PERM_RWX (QCOM_SCM_PERM_RW | QCOM_SCM_PERM_EXEC)
  
- 	next_cmd = meson_mmc_get_next_command(cmd);
+-#if IS_ENABLED(CONFIG_QCOM_SCM)
+ extern bool qcom_scm_is_available(void);
+ 
+ extern int qcom_scm_set_cold_boot_addr(void *entry, const cpumask_t *cpus);
+@@ -115,74 +114,4 @@ extern int qcom_scm_lmh_dcvsh(u32 payload_fn, u32 payload_reg, u32 payload_val,
+ extern int qcom_scm_lmh_profile_change(u32 profile_id);
+ extern bool qcom_scm_lmh_dcvsh_available(void);
+ 
+-#else
+-
+-#include <linux/errno.h>
+-
+-static inline bool qcom_scm_is_available(void) { return false; }
+-
+-static inline int qcom_scm_set_cold_boot_addr(void *entry,
+-		const cpumask_t *cpus) { return -ENODEV; }
+-static inline int qcom_scm_set_warm_boot_addr(void *entry,
+-		const cpumask_t *cpus) { return -ENODEV; }
+-static inline void qcom_scm_cpu_power_down(u32 flags) {}
+-static inline u32 qcom_scm_set_remote_state(u32 state,u32 id)
+-		{ return -ENODEV; }
+-
+-static inline int qcom_scm_pas_init_image(u32 peripheral, const void *metadata,
+-		size_t size) { return -ENODEV; }
+-static inline int qcom_scm_pas_mem_setup(u32 peripheral, phys_addr_t addr,
+-		phys_addr_t size) { return -ENODEV; }
+-static inline int qcom_scm_pas_auth_and_reset(u32 peripheral)
+-		{ return -ENODEV; }
+-static inline int qcom_scm_pas_shutdown(u32 peripheral) { return -ENODEV; }
+-static inline bool qcom_scm_pas_supported(u32 peripheral) { return false; }
+-
+-static inline int qcom_scm_io_readl(phys_addr_t addr, unsigned int *val)
+-		{ return -ENODEV; }
+-static inline int qcom_scm_io_writel(phys_addr_t addr, unsigned int val)
+-		{ return -ENODEV; }
+-
+-static inline bool qcom_scm_restore_sec_cfg_available(void) { return false; }
+-static inline int qcom_scm_restore_sec_cfg(u32 device_id, u32 spare)
+-		{ return -ENODEV; }
+-static inline int qcom_scm_iommu_secure_ptbl_size(u32 spare, size_t *size)
+-		{ return -ENODEV; }
+-static inline int qcom_scm_iommu_secure_ptbl_init(u64 addr, u32 size, u32 spare)
+-		{ return -ENODEV; }
+-extern inline int qcom_scm_mem_protect_video_var(u32 cp_start, u32 cp_size,
+-						 u32 cp_nonpixel_start,
+-						 u32 cp_nonpixel_size)
+-		{ return -ENODEV; }
+-static inline int qcom_scm_assign_mem(phys_addr_t mem_addr, size_t mem_sz,
+-		unsigned int *src, const struct qcom_scm_vmperm *newvm,
+-		unsigned int dest_cnt) { return -ENODEV; }
+-
+-static inline bool qcom_scm_ocmem_lock_available(void) { return false; }
+-static inline int qcom_scm_ocmem_lock(enum qcom_scm_ocmem_client id, u32 offset,
+-		u32 size, u32 mode) { return -ENODEV; }
+-static inline int qcom_scm_ocmem_unlock(enum qcom_scm_ocmem_client id,
+-		u32 offset, u32 size) { return -ENODEV; }
+-
+-static inline bool qcom_scm_ice_available(void) { return false; }
+-static inline int qcom_scm_ice_invalidate_key(u32 index) { return -ENODEV; }
+-static inline int qcom_scm_ice_set_key(u32 index, const u8 *key, u32 key_size,
+-				       enum qcom_scm_ice_cipher cipher,
+-				       u32 data_unit_size) { return -ENODEV; }
+-
+-static inline bool qcom_scm_hdcp_available(void) { return false; }
+-static inline int qcom_scm_hdcp_req(struct qcom_scm_hdcp_req *req, u32 req_cnt,
+-		u32 *resp) { return -ENODEV; }
+-
+-static inline int qcom_scm_qsmmu500_wait_safe_toggle(bool en)
+-		{ return -ENODEV; }
+-
+-static inline int qcom_scm_lmh_dcvsh(u32 payload_fn, u32 payload_reg, u32 payload_val,
+-				     u64 limit_node, u32 node_id, u64 version)
+-		{ return -ENODEV; }
+-
+-static inline int qcom_scm_lmh_profile_change(u32 profile_id) { return -ENODEV; }
+-
+-static inline bool qcom_scm_lmh_dcvsh_available(void) { return -ENODEV; }
+-#endif
+ #endif
 -- 
-2.25.1
+2.29.2
 
