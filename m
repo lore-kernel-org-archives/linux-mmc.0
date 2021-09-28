@@ -2,173 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FD58C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 13:29:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2173EC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 14:31:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 18B9B611CE
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 13:29:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0493261213
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 14:31:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240925AbhI1Nbc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 09:31:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38172 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240848AbhI1Nbb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2021 09:31:31 -0400
-Received: from mail-il1-x133.google.com (mail-il1-x133.google.com [IPv6:2607:f8b0:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2747AC06176C
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2021 06:29:52 -0700 (PDT)
-Received: by mail-il1-x133.google.com with SMTP id h20so23254603ilj.13
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2021 06:29:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ieee.org; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=KV5AEITggXzrcUqW0Pn0JDUCXvtzQQd7nfX6VcyNvh0=;
-        b=gsEil9aJ5ZOw0ASchzCW/AY/NlZwbg7FdvHHAbffANcuyVgNVj8F3r/I3y/OyqwIbk
-         QkY/gO8vfPAMQp75rG6vgEG7NkfLO4ZNSWbXrGEOjX3dKqow4MOof9p7GrAO13Ckl/VP
-         f8/C6WiPIW+rxE9R7UiZnONtD/dro2yaem2kM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=KV5AEITggXzrcUqW0Pn0JDUCXvtzQQd7nfX6VcyNvh0=;
-        b=xmBnoSuRS1MvsqzEDZhHP3D2ACzjYJny5MxsLFBaX3Gz8L/GoGm5noXVnMwaDG6O8x
-         M6rMlRerdePS783AcBGGAFx/Xc6C9V3IftKTS+xealjqqbLA9l/vvxqb6V52wqr3GCyG
-         xmBZK4YMqPDi8H5LlzKayBU0VW72NY6ZIgqI+oZagHZ3pBrKPfzb5Bh2spcaGl8/+I3U
-         UT8BC+4KP9lkV5YBH/xX3ucT90d1E+dFTXgQT66cjdtQBOCnuLpgquBuNHjMeIAHJHgS
-         xo1GB4kW1F97kFi9MxLor6QHS8XSjMryyIQ8sLnMivzudxkmTG7s+ChRAUYwj4TGe3hz
-         eCNw==
-X-Gm-Message-State: AOAM530JTTorS2/tgYtdWOafaF7wbtteWclqk6E9OAFyOV+eEUuEMxpV
-        Ce6h0PbPLXegVK45+wqvEG1XaA==
-X-Google-Smtp-Source: ABdhPJz3qmL3tZ3U3XkVDcDl9dtP+yn06EspPEdsou0GIPYBieCdKEZlaSYFieS9Yrw1uFrX87cOuw==
-X-Received: by 2002:a92:c744:: with SMTP id y4mr4108077ilp.288.1632835791399;
-        Tue, 28 Sep 2021 06:29:51 -0700 (PDT)
-Received: from [172.22.22.4] (c-73-185-129-58.hsd1.mn.comcast.net. [73.185.129.58])
-        by smtp.googlemail.com with ESMTPSA id m13sm11831997ilh.45.2021.09.28.06.29.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 28 Sep 2021 06:29:50 -0700 (PDT)
-Subject: Re: [PATCH 2/2] [v2] qcom_scm: hide Kconfig symbol
-To:     Arnd Bergmann <arnd@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Mark Brown <broonie@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Charles Keepax <ckeepax@opensource.cirrus.com>,
-        Simon Trimmer <simont@opensource.cirrus.com>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Russell King <linux@armlinux.org.uk>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Will Deacon <will@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        Helge Deller <deller@gmx.de>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        x86@kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-ia64@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-parisc@vger.kernel.org, linux-riscv@lists.infradead.org,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Rob Clark <robdclark@gmail.com>, Sean Paul <sean@poorly.run>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Joerg Roedel <joro@8bytes.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Alex Elder <elder@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        linux-arm-msm@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        freedreno@lists.freedesktop.org, iommu@lists.linux-foundation.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, ath10k@lists.infradead.org,
-        linux-wireless@vger.kernel.org, linux-gpio@vger.kernel.org
-References: <20210928075216.4193128-1-arnd@kernel.org>
- <20210928075216.4193128-2-arnd@kernel.org>
-From:   Alex Elder <elder@ieee.org>
-Message-ID: <19bbc40d-3f13-7e9d-72c0-5d206b016bb7@ieee.org>
-Date:   Tue, 28 Sep 2021 08:29:48 -0500
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
-MIME-Version: 1.0
-In-Reply-To: <20210928075216.4193128-2-arnd@kernel.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S241280AbhI1Ocx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 10:32:53 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48884 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S241289AbhI1Ocx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 28 Sep 2021 10:32:53 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPS id C4CEF61206;
+        Tue, 28 Sep 2021 14:31:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1632839473;
+        bh=qPiKAu2AM3OFxYI94VV8CTi9/boRfGv5S+dSwa8efyI=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=U6c+ELuJmgrtrYADO7dH/hipDU+477SayaIXvdMGXCjgUA7iR9jVlt2qUJgMFkqf4
+         BV8i40scVOG30es/Z6661wHXyy5e/Pt3DezFtAYGW6oQQoAuZ0n1XFhNcvNhFljVdI
+         4RxjvJfBOpcNRHd8o5VhzHdUMf7NIDshE6gqELrATpFeVHq4lwqXtHaMjeP/kOrMKr
+         nSJOc15SCmLq56MjHNksBkhmdymJRtATqx6w9cItmRNG/RsDQFnmJ5zexbnyMnv7uo
+         oEoyVlx6acb/YzXU/bqfbyFsF6gHTXAP2Xxcori6bRi5XM6l5gfvlcjpw0SXgdzBTX
+         MJsrmL9Ot6drQ==
+Subject: Re: [GIT PULL] MMC fixes for v5.15-rc4
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20210927211352.21266-1-ulf.hansson@linaro.org>
+References: <20210927211352.21266-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20210927211352.21266-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15-2
+X-PR-Tracked-Commit-Id: b81bede4d138ce62f7342e27bf55ac93c8071818
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 0c72b292de0b2865f21e5ffc9bed2b36b8c8e693
+Message-Id: <163283947375.32258.4142840560346560882.pr-tracker-bot@kernel.org>
+Date:   Tue, 28 Sep 2021 14:31:13 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/28/21 2:50 AM, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> Now that SCM can be a loadable module, we have to add another
-> dependency to avoid link failures when ipa or adreno-gpu are
-> built-in:
-> 
-> aarch64-linux-ld: drivers/net/ipa/ipa_main.o: in function `ipa_probe':
-> ipa_main.c:(.text+0xfc4): undefined reference to `qcom_scm_is_available'
-> 
-> ld.lld: error: undefined symbol: qcom_scm_is_available
->>>> referenced by adreno_gpu.c
->>>>                gpu/drm/msm/adreno/adreno_gpu.o:(adreno_zap_shader_load) in archive drivers/built-in.a
-> 
-> This can happen when CONFIG_ARCH_QCOM is disabled and we don't select
-> QCOM_MDT_LOADER, but some other module selects QCOM_SCM. Ideally we'd
-> use a similar dependency here to what we have for QCOM_RPROC_COMMON,
-> but that causes dependency loops from other things selecting QCOM_SCM.
-> 
-> This appears to be an endless problem, so try something different this
-> time:
-> 
->   - CONFIG_QCOM_SCM becomes a hidden symbol that nothing 'depends on'
->     but that is simply selected by all of its users
-> 
->   - All the stubs in include/linux/qcom_scm.h can go away
-> 
->   - arm-smccc.h needs to provide a stub for __arm_smccc_smc() to
->     allow compile-testing QCOM_SCM on all architectures.
-> 
->   - To avoid a circular dependency chain involving RESET_CONTROLLER
->     and PINCTRL_SUNXI, drop the 'select RESET_CONTROLLER' statement.
->     According to my testing this still builds fine, and the QCOM
->     platform selects this symbol already.
-> 
-> Acked-by: Kalle Valo <kvalo@codeaurora.org>
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
-> Changes in v2:
->    - drop the 'select RESET_CONTROLLER' line, rather than adding
->      more of the same
-> ---
->   drivers/firmware/Kconfig                |  5 +-
->   drivers/gpu/drm/msm/Kconfig             |  4 +-
->   drivers/iommu/Kconfig                   |  2 +-
->   drivers/media/platform/Kconfig          |  2 +-
->   drivers/mmc/host/Kconfig                |  2 +-
->   drivers/net/ipa/Kconfig                 |  1 +
+The pull request you sent on Mon, 27 Sep 2021 23:13:52 +0200:
 
-For drivers/net/ipa/Kconfig, looks good to me.
-Nice simplification.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15-2
 
-Acked-by: Alex Elder <elder@linaro.org>
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/0c72b292de0b2865f21e5ffc9bed2b36b8c8e693
 
->   drivers/net/wireless/ath/ath10k/Kconfig |  2 +-
->   drivers/pinctrl/qcom/Kconfig            |  3 +-
->   include/linux/arm-smccc.h               | 10 ++++
->   include/linux/qcom_scm.h                | 71 -------------------------
->   10 files changed, 20 insertions(+), 82 deletions(-)
-> 
+Thank you!
 
-. . .
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
