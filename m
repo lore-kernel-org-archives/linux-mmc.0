@@ -2,108 +2,162 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6CB4C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 08:44:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 632A3C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 09:40:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A044761159
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 08:44:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 468BC60FBF
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 09:40:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239684AbhI1Iqa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 04:46:30 -0400
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:39034 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S239618AbhI1Iq3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2021 04:46:29 -0400
-Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 18S8NPRj005548;
-        Tue, 28 Sep 2021 04:44:24 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=zBxfoBHkX8WZAFCzMW2WEkfCuH/znFi5cWiwbPqjqWM=;
- b=EGz9+271qGmkpAW3qZvfm5GhIfGvLkS9sQHypX5tsIotlkKWr2kV5oZY0YMYsWdeJIN7
- eUiRtCOCChOG9S8wIuGLIB2rLSTZa72xcVtajiOCtIpNi2CP8QArSEXGwiaiYw9EBVKL
- LHWObPhD6knPvm9aZh+SuHO92g3B6klmYQ1Sm6zqls3XkEqKAwclCbyjyKXGiH/nyJ6a
- B9K7lPZNN2FdYQZEzeJckB5wcVAZegaPQll5SQJGMHx08o1OOsCTWJp+Jg27qaBQOXLq
- Ll/w5rTWdDU0tzcImRkxehDQzZxDrcDjpG+P3c4PkbvhWPq/b4p6hTafmqFBgBSWQlbc sQ== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3bagsfe4rh-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 28 Sep 2021 04:44:23 -0400
-Received: from m0098394.ppops.net (m0098394.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 18S8iNuH031289;
-        Tue, 28 Sep 2021 04:44:23 -0400
-Received: from ppma06ams.nl.ibm.com (66.31.33a9.ip4.static.sl-reverse.com [169.51.49.102])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3bagsfe4qw-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 28 Sep 2021 04:44:23 -0400
-Received: from pps.filterd (ppma06ams.nl.ibm.com [127.0.0.1])
-        by ppma06ams.nl.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 18S8hFQQ031611;
-        Tue, 28 Sep 2021 08:44:20 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma06ams.nl.ibm.com with ESMTP id 3b9u1jbtpu-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 28 Sep 2021 08:44:20 +0000
-Received: from d06av25.portsmouth.uk.ibm.com (d06av25.portsmouth.uk.ibm.com [9.149.105.61])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 18S8iGao59572508
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 28 Sep 2021 08:44:16 GMT
-Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id AA92E11C06C;
-        Tue, 28 Sep 2021 08:44:16 +0000 (GMT)
-Received: from d06av25.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 951DF11C069;
-        Tue, 28 Sep 2021 08:44:15 +0000 (GMT)
-Received: from osiris (unknown [9.145.163.77])
-        by d06av25.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Tue, 28 Sep 2021 08:44:15 +0000 (GMT)
-Date:   Tue, 28 Sep 2021 10:44:14 +0200
-From:   Heiko Carstens <hca@linux.ibm.com>
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>, gregkh@linuxfoundation.org,
-        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
-        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
-        colin.king@canonical.com, shubhankarvk@gmail.com,
-        baijiaju1990@gmail.com, trix@redhat.com,
-        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
-        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
-        sth@linux.ibm.com, hoeppner@linux.ibm.com, gor@linux.ibm.com,
-        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
-        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        id S239959AbhI1Jlm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 05:41:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39950 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239844AbhI1Jll (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2021 05:41:41 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C8A7C061575;
+        Tue, 28 Sep 2021 02:40:02 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id g19-20020a1c9d13000000b003075062d4daso2272821wme.0;
+        Tue, 28 Sep 2021 02:40:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=kDkv9Rpe3a3jzGJpilYOh+kLID8MJzgQoAqFKyN7zzY=;
+        b=dXhS1cV6qlYv0CDkxqkjmzcjKegIk7zJ2DYRCJ5Y2q+mvkKKsOFouo+tf4uBkvpFy2
+         jh6h4d0uOPoobXjanz6zqU2DVyxq7Tvbog/H60y4DwcfR+KTxrRkPdLYgIzchj5RmVnm
+         TQXZzvo+bfwifAQc4zDQNXULZR6DiRQ02ZgFhZ5QKj3SJ/8VDnOWmpZzsxtpTqEB0sxR
+         oj/hN5Sqe+nF5mmDfljrM3rYK36/DNYBmxD5i+bYiiOSl92IuKa5NifBxMqGR/5uKfGO
+         qJEfnQ0iqTr/6LQlwPPEPJDYcQ/TtMm2RgTed8p2D6M+05YUbad/8R2D1Aum9rpFKl1K
+         EiJg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=kDkv9Rpe3a3jzGJpilYOh+kLID8MJzgQoAqFKyN7zzY=;
+        b=AdzExY+jk7Bl1IEVyywDQxUqGkrTu7CV8OqteIjNZMdRL1goQMKFMKnNNGaHeog/hz
+         e4tHPE2P5A2eR7zYphNlbj9+q0IqCztk2gIXJJH9TSpHqQmKaaXyzPwQZ5bde6DlpS5f
+         frtKvFN/iUDV2sJ/4lgnI6udO8rdw3ue1uKqDUwoXD+ZK3fDoy8Lglm6JdNpRZ/gRmJ4
+         VRrdb32xJ6mczhrYaZSH8Zfv4yKb5lcgyrBNAt1IIi8cXjA43aZ58Snv7KZCxCwCnb9P
+         Sf0g2TYPeqTZ4XUikH7H35UHV190q9xAo6fpm7S95BjAG+gMaoxeRN7dWUVZjEq+6M3Y
+         D/jQ==
+X-Gm-Message-State: AOAM532HqCVfx3BuLC3+vhL3ZSc5DpPTrZJKuG2E5VOyWRBs9JX7GQTA
+        wOrw/bUlR94DuD5/6E0NT9WneS8Tv6UQOQ==
+X-Google-Smtp-Source: ABdhPJxbDvWQk8LU895jSojgwYxMgVF/DrgdEY1oIDfvjuuanKc8kPB1K795AZFfMtuK4Vw/wEnOjw==
+X-Received: by 2002:a05:600c:4f54:: with SMTP id m20mr3766804wmq.96.1632822001067;
+        Tue, 28 Sep 2021 02:40:01 -0700 (PDT)
+Received: from p200300e94717cfac3e891446077632d6.dip0.t-ipconnect.de (p200300e94717cfac3e891446077632d6.dip0.t-ipconnect.de. [2003:e9:4717:cfac:3e89:1446:776:32d6])
+        by smtp.googlemail.com with ESMTPSA id t126sm2117440wma.4.2021.09.28.02.40.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Sep 2021 02:40:00 -0700 (PDT)
+Message-ID: <987cb93359dc95ce9fb387b755fadb0ab6eb98f9.camel@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: sdhci: Use the SW timer when the HW timer
+ cannot meet the timeout value required by the device
+From:   Bean Huo <huobean@gmail.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 0/6] block: 5th batch of add_disk() error handling
- conversions
-Message-ID: <YVLV3s66GVVSQ+tj@osiris>
-References: <20210927220232.1071926-1-mcgrof@kernel.org>
- <25afa23b-52af-9b79-8bd8-5e31da62c291@kernel.dk>
+Date:   Tue, 28 Sep 2021 11:39:59 +0200
+In-Reply-To: <37497369a4cf5f729e7b3e31727a7d64be5482db.camel@gmail.com>
+References: <20210917172727.26834-1-huobean@gmail.com>
+         <20210917172727.26834-3-huobean@gmail.com>
+         <fc14d8e1-9438-d4b0-80f4-ccf9055ab7d3@intel.com>
+         <beda2d5ecc3c15e9bf9aa18383c22c2a90d31dab.camel@gmail.com>
+         <93292ef4-8548-d2ba-d803-d3b40b7e6c1d@intel.com>
+         <40e525300cd656dd17ffc89e1fcbc9a47ea90caf.camel@gmail.com>
+         <79056ca7-bfe3-1b25-b6fd-de8a9388b75f@intel.com>
+         <5a5db6c2eed2273a8903b5052312f039dd629401.camel@gmail.com>
+         <5072935e-d855-7029-1ac0-0883978f66e5@intel.com>
+         <37497369a4cf5f729e7b3e31727a7d64be5482db.camel@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <25afa23b-52af-9b79-8bd8-5e31da62c291@kernel.dk>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: YxG9ke3W_jbTNpwVPcs7XrGQVIxP9RN0
-X-Proofpoint-ORIG-GUID: iz_w5IRro-Zutc101Wh7ZoX-CWSF6VdI
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.391,FMLib:17.0.607.475
- definitions=2021-09-28_04,2021-09-28_01,2020-04-07_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0
- mlxlogscore=999 bulkscore=0 malwarescore=0 spamscore=0 lowpriorityscore=0
- priorityscore=1501 phishscore=0 impostorscore=0 mlxscore=0 clxscore=1015
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2109230001 definitions=main-2109280050
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Sep 27, 2021 at 04:32:17PM -0600, Jens Axboe wrote:
-> On 9/27/21 4:02 PM, Luis Chamberlain wrote:
-> > This is the 5th series of driver conversions for add_disk() error
-> > handling. This set along with the entire 7th set of patches can be
-> > found on my 20210927-for-axboe-add-disk-error-handling branch [0].
+On Fri, 2021-09-24 at 23:33 +0200, Bean Huo wrote:
+> On Fri, 2021-09-24 at 16:26 +0300, Adrian Hunter wrote:
+> > On 24/09/21 4:08 pm, Bean Huo wrote:
+> > > On Fri, 2021-09-24 at 15:17 +0300, Adrian Hunter wrote:
+> > > > > > >          sdhci_writeb(host, count,
+> > > > > > > SDHCI_TIMEOUT_CONTROL);
+> > > > > > > }
+> > > > > > > The driver has detected that the hardware timer cannot
+> > > > > > > meet
+> > > > > > > the
+> > > > > > > timeout
+> > > > > > > requirements of the device, but we still use the hardware
+> > > > > > > timer,
+> > > > > > > which will
+> > > > > > > allow potential timeout issuea . Rather than allowing a
+> > > > > > > potential
+> > > > > > > problem to exist, why can’t software timing be used to
+> > > > > > > avoid
+> > > > > > > this
+> > > > > > > problem?
+> > > > > > Timeouts aren't that accurate.  The maximum is assumed
+> > > > > > still
+> > > > > > to
+> > > > > > work.
+> > > > > > mmc->max_busy_timeout is used to tell the core what the
+> > > > > > maximum
+> > > > > > is.
+> > > > > mmc->max_busy_timeout is still a representation of Host HW
+> > > > > timer
+> > > > > maximum timeout count, isn't it? 
+> > > > 
+> > > > Not necessarily.  For SDHCI_QUIRK2_DISABLE_HW_TIMEOUT it would
+> > > > be
+> > > > 
+> > > > set to zero to indicate no maximum.
+> > > 
+> > > yes, this is the purpose of the patch, for the host controller
+> > > without
+> > > quirk SDHCI_QUIRK2_DISABLE_HW_TIMEOUT, if the timeout count
+> > > required by
+> > > device is beyond the HW timer max count, we choose SW timer to
+> > > avoid the HW timer timeout IRQ.
+> > > 
+> > > I don't know if I get it correctly.
+> > 
+> > Why can't drivers that want the behaviour just set the quirk?
+> > 
+> > Drivers that do not work with the quirk, do not have to set it.
 > 
-> Applied 1-2.
+> Adrian,
+> 
+> We cannot add this quirk to every host driver. This is the difference
+> on the device side. In addition, I don't know what the maximum
+> hardware
+> timer budget for each host is. Even if you use the same SOC, the
+> maximum time budget on different platforms may be different.
+> 
+> Assume that the maximum timeout time supported by the hardware timer
+> is
+> 100 milliseconds, but the maximum data transmission time required by
+> the device is 150 milliseconds. In most cases, data transfer will not
+> take so long. 150 is the maximum time under extreme conditions. This
+> means that the device just needs to complete a data transfer within
+> > 100ms and keep the data line busy. If we still use the HW timer, it
+> will trigger a DATA LINE timeout interrupt.
+> 
+> This patch does not affect scenarios where the hardware timer meets
+> the
+> max data transmission time requirements of the device. It will still
+> use the hardware timer. Only when the device changes, will it switch
+> to
+> using the SW timer.
+> 
+> Bean
+> 
 
-Hmm.. naturally I would have expected that the dasd patch also would
-go via block tree. But let's not spend too much time figuring out what
-gets routed where.
-Applied 4-6. Thanks!
+Hi Adrian,
+
+Would you please review this patch again and is it possible to be
+accepted?
+
+Bean
+
