@@ -2,59 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2173EC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 14:31:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC47BC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 15:13:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0493261213
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 14:31:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B42C36101E
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 15:13:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241280AbhI1Ocx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 10:32:53 -0400
-Received: from mail.kernel.org ([198.145.29.99]:48884 "EHLO mail.kernel.org"
+        id S241507AbhI1PPR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 11:15:17 -0400
+Received: from www.zeus03.de ([194.117.254.33]:35368 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S241289AbhI1Ocx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 28 Sep 2021 10:32:53 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPS id C4CEF61206;
-        Tue, 28 Sep 2021 14:31:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1632839473;
-        bh=qPiKAu2AM3OFxYI94VV8CTi9/boRfGv5S+dSwa8efyI=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=U6c+ELuJmgrtrYADO7dH/hipDU+477SayaIXvdMGXCjgUA7iR9jVlt2qUJgMFkqf4
-         BV8i40scVOG30es/Z6661wHXyy5e/Pt3DezFtAYGW6oQQoAuZ0n1XFhNcvNhFljVdI
-         4RxjvJfBOpcNRHd8o5VhzHdUMf7NIDshE6gqELrATpFeVHq4lwqXtHaMjeP/kOrMKr
-         nSJOc15SCmLq56MjHNksBkhmdymJRtATqx6w9cItmRNG/RsDQFnmJ5zexbnyMnv7uo
-         oEoyVlx6acb/YzXU/bqfbyFsF6gHTXAP2Xxcori6bRi5XM6l5gfvlcjpw0SXgdzBTX
-         MJsrmL9Ot6drQ==
-Subject: Re: [GIT PULL] MMC fixes for v5.15-rc4
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20210927211352.21266-1-ulf.hansson@linaro.org>
-References: <20210927211352.21266-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20210927211352.21266-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15-2
-X-PR-Tracked-Commit-Id: b81bede4d138ce62f7342e27bf55ac93c8071818
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 0c72b292de0b2865f21e5ffc9bed2b36b8c8e693
-Message-Id: <163283947375.32258.4142840560346560882.pr-tracker-bot@kernel.org>
-Date:   Tue, 28 Sep 2021 14:31:13 +0000
+        id S241492AbhI1PPQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 28 Sep 2021 11:15:16 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=+21Wry4timplKVudZJMqCEQXr3dn
+        xi/GZbTN32kQy3g=; b=LW2Ne+6LvDPugwaCBKkK8FMOiNTxdk7oDFWPUeBvfjNb
+        Fm3+RNGCJd0humYGz6v7UOsB6tNCcqkGbzsnoAog0ogmArXTfOvU/ggpjfaBuuZJ
+        DFdKvmEEOcljibibl3lXRfr3JkD1VvKmhyKpp0OKq7p6P8HZeOnju5gika2nkE4=
+Received: (qmail 1295169 invoked from network); 28 Sep 2021 17:13:34 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Sep 2021 17:13:34 +0200
+X-UD-Smtp-Session: l3s3148p1@TDI6qA/NzuYgARa4Rac9ATot9flkfyHw
+Date:   Tue, 28 Sep 2021 17:13:33 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH 2/3] mmc: core: also abort tuning with CMD12 for SD
+Message-ID: <YVMxHaTJordlRrFV@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
+ <20210914182023.8103-3-wsa+renesas@sang-engineering.com>
+ <CAPDyKFp0AgAqbJnvpUb4gxP_7wGszEZxVXU1=0UCMB3c+ruLzA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="mDZRYI2RgJSDBSv6"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFp0AgAqbJnvpUb4gxP_7wGszEZxVXU1=0UCMB3c+ruLzA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Mon, 27 Sep 2021 23:13:52 +0200:
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15-2
+--mDZRYI2RgJSDBSv6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/0c72b292de0b2865f21e5ffc9bed2b36b8c8e693
+Hi Ulf,
 
-Thank you!
+> Besides the minor nitpicks, this looks good to me!
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Thanks for the review! However, I acquired new data which could mean
+that this series is maybe really a workaround. Let's put it on hold for
+now until I have found out more.
+
+Happy hacking,
+
+   Wolfram
+
+
+--mDZRYI2RgJSDBSv6
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmFTMRkACgkQFA3kzBSg
+KbZeXA//bZqLOo1ZugqbgDQddaG1NbGNt+YXGKlTEKalhnuQex61bhJg+8G+L2ku
+jHDm3/pk8JkNp9J9DWSBkc/oiU4e+nQfKls9u5/oMGzYENfTQsgkFxpnpC6fAXx5
+iFWME/SNvzeXnPMBrtb1tK2fQbbnGDeISTdNEIY+BYMUsVqXx6+cO/P6ZCShcoM6
+TvrD3QiyR3jT5aYasQEAorEZQJ2DHM6YbXlJaKnwFX0/BQbu6l2iM0WmGFBwO4Zk
+x48RUg6i/H0RisZEz4WqTh/mF7w+l0QHLdOYY4E4GQGjF1n/vTLvzdjo106HVfKN
+/ndT7/VItFunz988xmDtFNvknUcGN7eXr7ZE/bYvs5f3Jcj5Q7Mx06Eo8D9sIxvD
+ocLxozYEkU5wUk4GnWt0B2oAiYi7TwVQDoN+KdxmUD9RTAKfWTi5uaZt8IIx8K7A
+pEjYtnq+iQ10D+HhPOdDmw4r6v8a5LJlTZgbwc7pv1RbwJ2N1LfGpzhS8ZdjJNGr
+J9aszYvmlikM7NVjOHuS4QJFMHZ/vFD3ThMGN2+aYv4ozE8bnB7RJXSpJqEo+mGC
+Mxvl04IywZh7OiVTE498qDVaWu3ftPPaa6YRnEekjsuscEWStbzqJCkDukrLB+eb
+8XwSfzWTutz8x4j4BDNIWd/KpHLE8uUTy6gBvzMUv6Jbwa1OZBc=
+=g279
+-----END PGP SIGNATURE-----
+
+--mDZRYI2RgJSDBSv6--
