@@ -2,95 +2,218 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37DB2C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:09:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27ACCC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:37:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1E998611F2
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:09:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E8613601FA
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 07:37:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239161AbhI1HKm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 03:10:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44422 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239068AbhI1HKk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 28 Sep 2021 03:10:40 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D26DF6127C;
-        Tue, 28 Sep 2021 07:09:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1632812941;
-        bh=UL3HabPZo5poDvomfSgnMsUOXswOov4XaFV+Mhe/hPM=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=peKRlRdshfCDM0WKkr1XAFZ5JA0DCpMVcB0qXm9NxkojuV08GN8y4VUWHQuL7c9ZY
-         6sWn8yb6HkL33eo7lHoIpmV+16YmcV5URUsbb5ROqMLP/B2oYGO9uzYlQKzwmYIte9
-         JjCrZb+8LY02VUAqdkytXO6BXCrNT6hTbVe6tjxqsCJOIcI5lKKEAFEQw+MtMj1kd9
-         7TD06BzKQnK5KlREkvXV6RcZ4dYFoBhJ+Sg8NqJMxbI95VJng6XTqHy4AQImO9S4Kf
-         gEL4X76N6d2P14bUwruG/Y5pIfa3QIReUn3JXZEw80+7KD8/DNNMDPScLhF7pMaSHH
-         +Epm+raz+IWiQ==
-Received: by mail-wm1-f52.google.com with SMTP id 136-20020a1c048e000000b0030d05169e9bso1249623wme.4;
-        Tue, 28 Sep 2021 00:09:01 -0700 (PDT)
-X-Gm-Message-State: AOAM532eFBrVLN0yyjVeef3QUJ7y/HUlJr6qjLOy5iZfdwwYYBbQwv6z
-        kmM47WsEAOJ+SNiheGd/9UfQm5XreTmeoj6zLKY=
-X-Google-Smtp-Source: ABdhPJy7UdwG5CMt3vBprQtkQXDtnziSdWAdhBrxF2DYHzwuiJfWIuOu4DEBfNVS3j3HCobxe7h4te4Xc8Y+nnvjU1E=
-X-Received: by 2002:a1c:7413:: with SMTP id p19mr3161995wmc.98.1632812940328;
- Tue, 28 Sep 2021 00:09:00 -0700 (PDT)
+        id S239223AbhI1Him (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 03:38:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39526 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239099AbhI1Hil (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Sep 2021 03:38:41 -0400
+Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6895EC061604
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2021 00:37:02 -0700 (PDT)
+Received: by mail-wr1-x42e.google.com with SMTP id k7so4407030wrd.13
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Sep 2021 00:37:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=m6ukGi3jrrjha+D9TPzmB0py/6c66GKZD4MHDgm6P10=;
+        b=jThVZfplycMd8BrUu3i9rNEKQNvwMgZjFUZXnQKydP/BPS7L2KFyndlKOcvnKctuZ9
+         HRyckDu+6vU7w9dVAbB6kMteE2kSjzUJs9KPrvhM6bF86qVi/Greu59ujd8iaTfBbX3q
+         aB5ZJEouLh6jYdGFvBFAMKG16NoUfuorcKE3kJ3dr8E4mfnQJQKzbl8shvPQWRIX5gcq
+         6SfbIqKB9eS3DCtvImkzc2mPzCF63+01M3y8tB4DyB0Eq8I9eZ96KlsxTeQ/o6Cfqs5c
+         JvHjRPqqPIl+4vcGso3fSkh9FW3I8xKhBV1p68mcwWM3lGiHKf/kWk6xh5nEzCPBwzm0
+         Njfw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=m6ukGi3jrrjha+D9TPzmB0py/6c66GKZD4MHDgm6P10=;
+        b=N1F8YlMiTd9l9KaLjQVeHlc/VUaXDgkbX4F7WD1AaZx6WAss50zpJHixm9whilG8jG
+         v9xmralfuCxeOweRL2erdpMoCIHEwjgQYXNWMDztM5S/ZlEZanYcBUH/qjxWgsugViwB
+         n52bEbfWuA8bJAc4LyXnzSeUGkX1d60Sivx8juv86jci10bUaBhXXN/rdGPAhGFkhV2Y
+         jl2SAzsQUujAWKH3VRxoFNiZWyXcc3srKiHqVU9sNW7kuX/rhjHHRSU0ozSvbUxTzhwT
+         JzPgr04dOjcdV1bECRjd+nw73SCxzVPWkys8f1QlKxV5abSja17qpFg1lP9P39XWz5xN
+         aOCg==
+X-Gm-Message-State: AOAM5330iWo0eBpyPQxh0cJnbCriTF3R6VYldPI+EclkLoakMvFjC2om
+        45lhuaDUJhcHpmQxVssL7SrTVw==
+X-Google-Smtp-Source: ABdhPJx7PDOCZTrSfSoBj6A6tBDBSqv3hllEA/Frui6VQ5UkscYFuYYCsZLNiyYN8XNDhB+/VDyqoQ==
+X-Received: by 2002:a05:6000:18a4:: with SMTP id b4mr4703065wri.96.1632814620869;
+        Tue, 28 Sep 2021 00:37:00 -0700 (PDT)
+Received: from localhost.localdomain ([2001:861:44c0:66c0:af32:f180:8ede:d9da])
+        by smtp.gmail.com with ESMTPSA id q8sm8210170wrv.26.2021.09.28.00.36.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Sep 2021 00:37:00 -0700 (PDT)
+From:   Neil Armstrong <narmstrong@baylibre.com>
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        christianshewitt@gmail.com, martin.blumenstingl@googlemail.com,
+        Neil Armstrong <narmstrong@baylibre.com>
+Subject: [PATCH v2] mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
+Date:   Tue, 28 Sep 2021 09:36:52 +0200
+Message-Id: <20210928073652.434690-1-narmstrong@baylibre.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20210927152412.2900928-1-arnd@kernel.org> <87k0j1qj0i.fsf@codeaurora.org>
-In-Reply-To: <87k0j1qj0i.fsf@codeaurora.org>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Tue, 28 Sep 2021 09:08:44 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a2FiMLZK7W9L9XD5h=3yS8QJ6iMr0pXHtCNrpctZG4FhQ@mail.gmail.com>
-Message-ID: <CAK8P3a2FiMLZK7W9L9XD5h=3yS8QJ6iMr0pXHtCNrpctZG4FhQ@mail.gmail.com>
-Subject: Re: [PATCH] [RFC] qcom_scm: hide Kconfig symbol
-To:     Kalle Valo <kvalo@codeaurora.org>
-Cc:     Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, Rob Clark <robdclark@gmail.com>,
-        Sean Paul <sean@poorly.run>, David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Joerg Roedel <joro@8bytes.org>, Will Deacon <will@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Alex Elder <elder@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        freedreno <freedreno@lists.freedesktop.org>,
-        "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Networking <netdev@vger.kernel.org>, ath10k@lists.infradead.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-sunxi@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
+X-Developer-Signature: v=1; a=openpgp-sha256; l=5434; h=from:subject; bh=lS4QGxtvZRm6mTGA/rTgX19F6pA1j0bugQURcq/3QAY=; b=owEBbQKS/ZANAwAKAXfc29rIyEnRAcsmYgBhUsXaGyiGIMSGGuF5dkoQ2VcYQnCURDzSJRc5WVYP IBzwcJ6JAjMEAAEKAB0WIQQ9U8YmyFYF/h30LIt33NvayMhJ0QUCYVLF2gAKCRB33NvayMhJ0bN1EA CRjmWZncIY6W2w9k4SPCXrYZiHMywnxdATOrVB7b5363hyzdDXsHtZC+6y9ULstvXsiP9Komz47Oco ofPnbcey9KMoMlqPfyj/DhD1YcTPZPCWWvlGZjhI2I9+LYE0EWLqn/hRXFdWNio1OiRzuezN1fOPo1 sd512JiTtq5DvM8aL+/rcYO95MJbK0NJXH6TZW4obXhyPmXljqo7uA8j7/VmUv33oDw4G2S5PbQ5VE LrDugBmZJf1lkY5JonPRKa2QSH0MafVks71/GYWEsMRJ0EoUzVr8jJR0fmHYqTb8okkwVZ3I+1DoUP E7qsbgHgaoKjtdUomWpZLFpe8eVN2Xb/c/yirYY5/aL311Rh2qJnPvp07DCU38a/IBaa9iny8r+xkc 6xc5L8lv751VU/cl0DTOtxtiqXWatmXWm1m2bg9JvFIEYHN3uuRp2oSQFBw5q44tOfRRfPNofAadc/ votcgmMz5ocgQNQmryBf9xesLMaEOuvDljze7SFKJE9WBUJ4Wx+2HNg2BUWNQicsqr6UUhr15xK1cE MtiDXS/h7Epl0tw9+S8KmTYLSjnBgn6y0eDWqo5cp9ysLqPR1lL8G2+gFQNmmqZXWhks7pb+DkMSAl dzBmQqKX/+8kIVUYTyyy0fBInsdA/m0/Yn7cArfGcLpPiSHZaKyTuuoKDaZw==
+X-Developer-Key: i=narmstrong@baylibre.com; a=openpgp; fpr=89EC3D058446217450F22848169AB7B1A4CFF8AE
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 28, 2021 at 9:05 AM Kalle Valo <kvalo@codeaurora.org> wrote:
-> Arnd Bergmann <arnd@kernel.org> writes:
-> > From: Arnd Bergmann <arnd@arndb.de>
-> I assume I can continue to build test ATH10K_SNOC with x86 as before?
-> That's important for me. If yes, then:
->
-> Acked-by: Kalle Valo <kvalo@codeaurora.org>
->
-> --
-> https://patchwork.kernel.org/project/linux-wireless/list/
->
-> https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
+The memory at the end of the controller only accepts 32bit read/write
+accesses, but the arm64 memcpy_to/fromio implementation only uses 64bit
+(which will be split into two 32bit access) and 8bit leading to incomplete
+copies to/from this memory when the buffer is not multiple of 8bytes.
 
-Yes, the difference is that this will then also build the qcom_scm module, but
-that should not cause any problems after the other changes in this patch.
+Add a local copy using writel/readl accesses to make sure we use the right
+memory access width.
 
-      Arnd
+The switch to memcpy_to/fromio was done because of 285133040e6c
+("arm64: Import latest memcpy()/memmove() implementation"), but using memcpy
+worked before since it mainly used 32bit memory acceses.
+
+Fixes: 103a5348c22c ("mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk")
+Reported-by: Christian Hewitt <christianshewitt@gmail.com>
+Suggested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+---
+Changes since v1:
+- added sg pre-validation at meson_mmc_request and dropped checks in meson_mmc_copy_buffer
+
+ drivers/mmc/host/meson-gx-mmc.c | 73 ++++++++++++++++++++++++++-------
+ 1 file changed, 59 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 3f28eb4d17fe..8f36536cb1b6 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -746,7 +746,7 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
+ 	writel(start, host->regs + SD_EMMC_START);
+ }
+ 
+-/* local sg copy to buffer version with _to/fromio usage for dram_access_quirk */
++/* local sg copy for dram_access_quirk */
+ static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data,
+ 				  size_t buflen, bool to_buffer)
+ {
+@@ -764,21 +764,27 @@ static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data
+ 	sg_miter_start(&miter, sgl, nents, sg_flags);
+ 
+ 	while ((offset < buflen) && sg_miter_next(&miter)) {
+-		unsigned int len;
++		unsigned int buf_offset = 0;
++		unsigned int len, left;
++		u32 *buf = miter.addr;
+ 
+ 		len = min(miter.length, buflen - offset);
++		left = len;
+ 
+-		/* When dram_access_quirk, the bounce buffer is a iomem mapping */
+-		if (host->dram_access_quirk) {
+-			if (to_buffer)
+-				memcpy_toio(host->bounce_iomem_buf + offset, miter.addr, len);
+-			else
+-				memcpy_fromio(miter.addr, host->bounce_iomem_buf + offset, len);
++		if (to_buffer) {
++			do {
++				writel(*buf++, host->bounce_iomem_buf + offset + buf_offset);
++
++				buf_offset += 4;
++				left -= 4;
++			} while (left);
+ 		} else {
+-			if (to_buffer)
+-				memcpy(host->bounce_buf + offset, miter.addr, len);
+-			else
+-				memcpy(miter.addr, host->bounce_buf + offset, len);
++			do {
++				*buf++ = readl(host->bounce_iomem_buf + offset + buf_offset);
++
++				buf_offset += 4;
++				left -= 4;
++			} while (left);
+ 		}
+ 
+ 		offset += len;
+@@ -830,7 +836,11 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 		if (data->flags & MMC_DATA_WRITE) {
+ 			cmd_cfg |= CMD_CFG_DATA_WR;
+ 			WARN_ON(xfer_bytes > host->bounce_buf_size);
+-			meson_mmc_copy_buffer(host, data, xfer_bytes, true);
++			if (host->dram_access_quirk)
++				meson_mmc_copy_buffer(host, data, xfer_bytes, true);
++			else
++				sg_copy_to_buffer(data->sg, data->sg_len,
++						  host->bounce_buf, xfer_bytes);
+ 			dma_wmb();
+ 		}
+ 
+@@ -849,12 +859,43 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+ 	writel(cmd->arg, host->regs + SD_EMMC_CMD_ARG);
+ }
+ 
++static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data *data)
++{
++	struct scatterlist *sg;
++	int i;
++
++	/* Reject request if any element offset or size is not 32bit aligned */
++	for_each_sg(data->sg, sg, data->sg_len, i) {
++		if (!IS_ALIGNED(sg->offset, sizeof(u32)) ||
++		    !IS_ALIGNED(sg->length, sizeof(u32))) {
++			dev_err(mmc_dev(mmc), "unaligned sg offset %u len %u\n",
++				data->sg->offset, data->sg->length);
++			return -EINVAL;
++		}
++	}
++
++	return 0;
++}
++
+ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+ 	bool needs_pre_post_req = mrq->data &&
+ 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+ 
++	/*
++	 * The memory at the end of the controller used as bounce buffer for
++	 * the dram_access_quirk only accepts 32bit read/write access,
++	 * check the aligment and length of the data before starting the request.
++	 */
++	if (host->dram_access_quirk && mrq->data) {
++		mrq->cmd->error = meson_mmc_validate_dram_access(mmc, mrq->data);
++		if (mrq->cmd->error) {
++			mmc_request_done(mmc, mrq);
++			return;
++		}
++	}
++
+ 	if (needs_pre_post_req) {
+ 		meson_mmc_get_transfer_mode(mmc, mrq);
+ 		if (!meson_mmc_desc_chain_mode(mrq->data))
+@@ -999,7 +1040,11 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+ 	if (meson_mmc_bounce_buf_read(data)) {
+ 		xfer_bytes = data->blksz * data->blocks;
+ 		WARN_ON(xfer_bytes > host->bounce_buf_size);
+-		meson_mmc_copy_buffer(host, data, xfer_bytes, false);
++		if (host->dram_access_quirk)
++			meson_mmc_copy_buffer(host, data, xfer_bytes, false);
++		else
++			sg_copy_from_buffer(data->sg, data->sg_len,
++					    host->bounce_buf, xfer_bytes);
+ 	}
+ 
+ 	next_cmd = meson_mmc_get_next_command(cmd);
+-- 
+2.25.1
+
