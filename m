@@ -2,269 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEAEDC4321E
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 20:08:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91041C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 20:08:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA231611C3
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 20:08:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B378611C3
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Sep 2021 20:08:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242634AbhI1UKA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 16:10:00 -0400
-Received: from www.zeus03.de ([194.117.254.33]:60768 "EHLO mail.zeus03.de"
+        id S242647AbhI1UKB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Sep 2021 16:10:01 -0400
+Received: from www.zeus03.de ([194.117.254.33]:60722 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S242651AbhI1UJ7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S242639AbhI1UJ7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 28 Sep 2021 16:09:59 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=6tiFmHJOKHCjgd
-        uCVK4nJNv00hRWu/l7X/LgDQu/ShA=; b=SBk2oI8NJ/O1f2fFWMgWwF7DNC8ftV
-        Vi+nLV8m5JOzSdiliRsUAeRmusNbgY+WiwSKXWiNg6owf1o0/H2hR81jr2CFnoLt
-        sGc38fVcpVZVnfCWLq0gP3hZud25O7aUt+DWILM8Uii2JALVZWoNkmdze8tSsA3A
-        +lTzdyFvEMYok=
-Received: (qmail 1377243 invoked from network); 28 Sep 2021 22:08:16 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Sep 2021 22:08:16 +0200
-X-UD-Smtp-Session: l3s3148p1@a3srxhPNdNIgAwDPXxnDADNsFyRXxb9N
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=VllxzAoyPmRjUQMfdLtFMrZRpCf
+        R1IvoyEt2gW9BBPI=; b=KluvlGPO0rkUqddabSS692WlmoosKAE5pg1c4GJ+2ZM
+        LAEl5iN+54xlb4vPzEB5SEgbeLI2xOk7RpbGGRrnqOcI+brEHXoV87qIV2h2Vvqi
+        jyO4QLT07iWuuAJxDbRGfmeN5RKextvwJ92KR89sm2M0tApcW0b/OcPbM17H8PVM
+        =
+Received: (qmail 1377167 invoked from network); 28 Sep 2021 22:08:15 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 28 Sep 2021 22:08:15 +0200
+X-UD-Smtp-Session: l3s3148p1@PVLdxRPNcNIgAwDPXxnDADNsFyRXxb9N
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-renesas-soc@vger.kernel.org
 Cc:     linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org,
         Geert Uytterhoeven <geert+renesas@glider.be>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH 2/9] clk: renesas: add SDnH clock to Gen3 SoCs
-Date:   Tue, 28 Sep 2021 22:07:57 +0200
-Message-Id: <20210928200804.50922-3-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 0/9] clk/mmc: renesas_sdhi: refactor SDnH to be a seperate clock
+Date:   Tue, 28 Sep 2021 22:07:55 +0200
+Message-Id: <20210928200804.50922-1-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210928200804.50922-1-wsa+renesas@sang-engineering.com>
-References: <20210928200804.50922-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently a pass-through clock but we will make it a real divider clock
-in the next patches.
+We wanted this for a long time, so finally here is the first RFC to
+refactor SDHI clocks so that SDnH is a seperate clock. In general, the
+new code looks much clearer to me, plus it is 80 lines shorter.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/clk/renesas/r8a774a1-cpg-mssr.c | 12 ++++++++----
- drivers/clk/renesas/r8a774b1-cpg-mssr.c | 12 ++++++++----
- drivers/clk/renesas/r8a774c0-cpg-mssr.c |  9 ++++++---
- drivers/clk/renesas/r8a774e1-cpg-mssr.c | 12 ++++++++----
- drivers/clk/renesas/r8a7795-cpg-mssr.c  | 12 ++++++++----
- drivers/clk/renesas/r8a7796-cpg-mssr.c  | 12 ++++++++----
- drivers/clk/renesas/r8a77965-cpg-mssr.c | 12 ++++++++----
- drivers/clk/renesas/r8a77980-cpg-mssr.c |  3 ++-
- drivers/clk/renesas/r8a77990-cpg-mssr.c |  9 ++++++---
- drivers/clk/renesas/r8a77995-cpg-mssr.c |  3 ++-
- 10 files changed, 64 insertions(+), 32 deletions(-)
+One downside is that patch 4 looks messy. When switching from old to new
+handling in the clock driver, I see no alternative to switch the MMC
+driver in the same patch. clk_set_rate just has to work. However, the
+MMC part is small, so I hope we can deal with it as an exception this
+time. Please read the patch description for details.
 
-diff --git a/drivers/clk/renesas/r8a774a1-cpg-mssr.c b/drivers/clk/renesas/r8a774a1-cpg-mssr.c
-index 39b185d8e957..804f3362763c 100644
---- a/drivers/clk/renesas/r8a774a1-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a774a1-cpg-mssr.c
-@@ -100,10 +100,14 @@ static const struct cpg_core_clk r8a774a1_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",       R8A774A1_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",       R8A774A1_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",      R8A774A1_CLK_SD0,   CLK_SDSRC,     0x074),
--	DEF_GEN3_SD("sd1",      R8A774A1_CLK_SD1,   CLK_SDSRC,     0x078),
--	DEF_GEN3_SD("sd2",      R8A774A1_CLK_SD2,   CLK_SDSRC,     0x268),
--	DEF_GEN3_SD("sd3",      R8A774A1_CLK_SD3,   CLK_SDSRC,     0x26c),
-+	DEF_GEN3_SDH("sd0h",    R8A774A1_CLK_SD0H,  CLK_SDSRC,        0x074),
-+	DEF_GEN3_SD( "sd0",     R8A774A1_CLK_SD0,   R8A774A1_CLK_SD0H, 0x074),
-+	DEF_GEN3_SDH("sd1h",    R8A774A1_CLK_SD1H,  CLK_SDSRC,        0x078),
-+	DEF_GEN3_SD( "sd1",     R8A774A1_CLK_SD1,   R8A774A1_CLK_SD1H, 0x078),
-+	DEF_GEN3_SDH("sd2h",    R8A774A1_CLK_SD2H,  CLK_SDSRC,        0x268),
-+	DEF_GEN3_SD( "sd2",     R8A774A1_CLK_SD2,   R8A774A1_CLK_SD2H, 0x268),
-+	DEF_GEN3_SDH("sd3h",    R8A774A1_CLK_SD3H,  CLK_SDSRC,        0x26c),
-+	DEF_GEN3_SD( "sd3",     R8A774A1_CLK_SD3,   R8A774A1_CLK_SD3H, 0x26c),
- 
- 	DEF_FIXED("cl",         R8A774A1_CLK_CL,    CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cp",         R8A774A1_CLK_CP,    CLK_EXTAL,      2, 1),
-diff --git a/drivers/clk/renesas/r8a774b1-cpg-mssr.c b/drivers/clk/renesas/r8a774b1-cpg-mssr.c
-index af602d83c8ce..97fe5d2227fe 100644
---- a/drivers/clk/renesas/r8a774b1-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a774b1-cpg-mssr.c
-@@ -97,10 +97,14 @@ static const struct cpg_core_clk r8a774b1_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",       R8A774B1_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",       R8A774B1_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",      R8A774B1_CLK_SD0,   CLK_SDSRC,     0x074),
--	DEF_GEN3_SD("sd1",      R8A774B1_CLK_SD1,   CLK_SDSRC,     0x078),
--	DEF_GEN3_SD("sd2",      R8A774B1_CLK_SD2,   CLK_SDSRC,     0x268),
--	DEF_GEN3_SD("sd3",      R8A774B1_CLK_SD3,   CLK_SDSRC,     0x26c),
-+	DEF_GEN3_SDH("sd0h",    R8A774B1_CLK_SD0H,  CLK_SDSRC,         0x074),
-+	DEF_GEN3_SD( "sd0",     R8A774B1_CLK_SD0,   R8A774B1_CLK_SD0H, 0x074),
-+	DEF_GEN3_SDH("sd1h",    R8A774B1_CLK_SD1H,  CLK_SDSRC,         0x078),
-+	DEF_GEN3_SD( "sd1",     R8A774B1_CLK_SD1,   R8A774B1_CLK_SD1H, 0x078),
-+	DEF_GEN3_SDH("sd2h",    R8A774B1_CLK_SD2H,  CLK_SDSRC,         0x268),
-+	DEF_GEN3_SD( "sd2",     R8A774B1_CLK_SD2,   R8A774B1_CLK_SD2H, 0x268),
-+	DEF_GEN3_SDH("sd3h",    R8A774B1_CLK_SD3H,  CLK_SDSRC,         0x26c),
-+	DEF_GEN3_SD( "sd3",     R8A774B1_CLK_SD3,   R8A774B1_CLK_SD3H, 0x26c),
- 
- 	DEF_FIXED("cl",         R8A774B1_CLK_CL,    CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cp",         R8A774B1_CLK_CP,    CLK_EXTAL,      2, 1),
-diff --git a/drivers/clk/renesas/r8a774c0-cpg-mssr.c b/drivers/clk/renesas/r8a774c0-cpg-mssr.c
-index 5b938eb2df25..611a5bd8f29e 100644
---- a/drivers/clk/renesas/r8a774c0-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a774c0-cpg-mssr.c
-@@ -108,9 +108,12 @@ static const struct cpg_core_clk r8a774c0_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",      R8A774C0_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",      R8A774C0_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",     R8A774C0_CLK_SD0,   CLK_SDSRC,	  0x0074),
--	DEF_GEN3_SD("sd1",     R8A774C0_CLK_SD1,   CLK_SDSRC,	  0x0078),
--	DEF_GEN3_SD("sd3",     R8A774C0_CLK_SD3,   CLK_SDSRC,	  0x026c),
-+	DEF_GEN3_SDH("sd0h",   R8A774C0_CLK_SD0H, CLK_SDSRC,   	     0x0074),
-+	DEF_GEN3_SD( "sd0",    R8A774C0_CLK_SD0,  R8A774C0_CLK_SD0H, 0x0074),
-+	DEF_GEN3_SDH("sd1h",   R8A774C0_CLK_SD1H, CLK_SDSRC,         0x0078),
-+	DEF_GEN3_SD( "sd1",    R8A774C0_CLK_SD1,  R8A774C0_CLK_SD1H, 0x0078),
-+	DEF_GEN3_SDH("sd3h",   R8A774C0_CLK_SD3H, CLK_SDSRC,         0x026c),
-+	DEF_GEN3_SD( "sd3",    R8A774C0_CLK_SD3,  R8A774C0_CLK_SD3H, 0x026c),
- 
- 	DEF_FIXED("cl",        R8A774C0_CLK_CL,    CLK_PLL1,      48, 1),
- 	DEF_FIXED("cp",        R8A774C0_CLK_CP,    CLK_EXTAL,      2, 1),
-diff --git a/drivers/clk/renesas/r8a774e1-cpg-mssr.c b/drivers/clk/renesas/r8a774e1-cpg-mssr.c
-index 40c71466df37..98beea6f4f6c 100644
---- a/drivers/clk/renesas/r8a774e1-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a774e1-cpg-mssr.c
-@@ -100,10 +100,14 @@ static const struct cpg_core_clk r8a774e1_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",       R8A774E1_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",       R8A774E1_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",      R8A774E1_CLK_SD0,   CLK_SDSRC,     0x074),
--	DEF_GEN3_SD("sd1",      R8A774E1_CLK_SD1,   CLK_SDSRC,     0x078),
--	DEF_GEN3_SD("sd2",      R8A774E1_CLK_SD2,   CLK_SDSRC,     0x268),
--	DEF_GEN3_SD("sd3",      R8A774E1_CLK_SD3,   CLK_SDSRC,     0x26c),
-+	DEF_GEN3_SDH("sd0h",    R8A774E1_CLK_SD0H,  CLK_SDSRC,         0x074),
-+	DEF_GEN3_SD( "sd0",     R8A774E1_CLK_SD0,   R8A774E1_CLK_SD0H, 0x074),
-+	DEF_GEN3_SDH("sd1h",    R8A774E1_CLK_SD1H,  CLK_SDSRC,         0x078),
-+	DEF_GEN3_SD( "sd1",     R8A774E1_CLK_SD1,   R8A774E1_CLK_SD1H, 0x078),
-+	DEF_GEN3_SDH("sd2h",    R8A774E1_CLK_SD2H,  CLK_SDSRC,         0x268),
-+	DEF_GEN3_SD( "sd2",     R8A774E1_CLK_SD2,   R8A774E1_CLK_SD2H, 0x268),
-+	DEF_GEN3_SDH("sd3h",    R8A774E1_CLK_SD3H,  CLK_SDSRC,         0x26c),
-+	DEF_GEN3_SD( "sd3",     R8A774E1_CLK_SD3,   R8A774E1_CLK_SD3H, 0x26c),
- 
- 	DEF_FIXED("cl",         R8A774E1_CLK_CL,    CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cr",         R8A774E1_CLK_CR,    CLK_PLL1_DIV4,  2, 1),
-diff --git a/drivers/clk/renesas/r8a7795-cpg-mssr.c b/drivers/clk/renesas/r8a7795-cpg-mssr.c
-index c32d2c678046..9ca26057e809 100644
---- a/drivers/clk/renesas/r8a7795-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a7795-cpg-mssr.c
-@@ -104,10 +104,14 @@ static struct cpg_core_clk r8a7795_core_clks[] __initdata = {
- 	DEF_FIXED("s3d2",       R8A7795_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",       R8A7795_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",      R8A7795_CLK_SD0,   CLK_SDSRC,     0x074),
--	DEF_GEN3_SD("sd1",      R8A7795_CLK_SD1,   CLK_SDSRC,     0x078),
--	DEF_GEN3_SD("sd2",      R8A7795_CLK_SD2,   CLK_SDSRC,     0x268),
--	DEF_GEN3_SD("sd3",      R8A7795_CLK_SD3,   CLK_SDSRC,     0x26c),
-+	DEF_GEN3_SDH("sd0h",    R8A7795_CLK_SD0H,  CLK_SDSRC,        0x074),
-+	DEF_GEN3_SD( "sd0",     R8A7795_CLK_SD0,   R8A7795_CLK_SD0H, 0x074),
-+	DEF_GEN3_SDH("sd1h",    R8A7795_CLK_SD1H,  CLK_SDSRC,        0x078),
-+	DEF_GEN3_SD( "sd1",     R8A7795_CLK_SD1,   R8A7795_CLK_SD1H, 0x078),
-+	DEF_GEN3_SDH("sd2h",    R8A7795_CLK_SD2H,  CLK_SDSRC,        0x268),
-+	DEF_GEN3_SD( "sd2",     R8A7795_CLK_SD2,   R8A7795_CLK_SD2H, 0x268),
-+	DEF_GEN3_SDH("sd3h",    R8A7795_CLK_SD3H,  CLK_SDSRC,        0x26c),
-+	DEF_GEN3_SD( "sd3",     R8A7795_CLK_SD3,   R8A7795_CLK_SD3H, 0x26c),
- 
- 	DEF_FIXED("cl",         R8A7795_CLK_CL,    CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cr",         R8A7795_CLK_CR,    CLK_PLL1_DIV4,  2, 1),
-diff --git a/drivers/clk/renesas/r8a7796-cpg-mssr.c b/drivers/clk/renesas/r8a7796-cpg-mssr.c
-index 41593c126faf..0dc0ba349a54 100644
---- a/drivers/clk/renesas/r8a7796-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a7796-cpg-mssr.c
-@@ -106,10 +106,14 @@ static const struct cpg_core_clk r8a7796_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",       R8A7796_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",       R8A7796_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",      R8A7796_CLK_SD0,   CLK_SDSRC,     0x074),
--	DEF_GEN3_SD("sd1",      R8A7796_CLK_SD1,   CLK_SDSRC,     0x078),
--	DEF_GEN3_SD("sd2",      R8A7796_CLK_SD2,   CLK_SDSRC,     0x268),
--	DEF_GEN3_SD("sd3",      R8A7796_CLK_SD3,   CLK_SDSRC,     0x26c),
-+	DEF_GEN3_SDH("sd0h",    R8A7796_CLK_SD0H,  CLK_SDSRC,        0x074),
-+	DEF_GEN3_SD( "sd0",     R8A7796_CLK_SD0,   R8A7796_CLK_SD0H, 0x074),
-+	DEF_GEN3_SDH("sd1h",    R8A7796_CLK_SD1H,  CLK_SDSRC,        0x078),
-+	DEF_GEN3_SD( "sd1",     R8A7796_CLK_SD1,   R8A7796_CLK_SD1H, 0x078),
-+	DEF_GEN3_SDH("sd2h",    R8A7796_CLK_SD2H,  CLK_SDSRC,        0x268),
-+	DEF_GEN3_SD( "sd2",     R8A7796_CLK_SD2,   R8A7796_CLK_SD2H, 0x268),
-+	DEF_GEN3_SDH("sd3h",    R8A7796_CLK_SD3H,  CLK_SDSRC,        0x26c),
-+	DEF_GEN3_SD( "sd3",     R8A7796_CLK_SD3,   R8A7796_CLK_SD3H, 0x26c),
- 
- 	DEF_FIXED("cl",         R8A7796_CLK_CL,    CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cr",         R8A7796_CLK_CR,    CLK_PLL1_DIV4,  2, 1),
-diff --git a/drivers/clk/renesas/r8a77965-cpg-mssr.c b/drivers/clk/renesas/r8a77965-cpg-mssr.c
-index bc1be8bcbbe4..d85489522b8e 100644
---- a/drivers/clk/renesas/r8a77965-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a77965-cpg-mssr.c
-@@ -101,10 +101,14 @@ static const struct cpg_core_clk r8a77965_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",	R8A77965_CLK_S3D2,	CLK_S3,		2, 1),
- 	DEF_FIXED("s3d4",	R8A77965_CLK_S3D4,	CLK_S3,		4, 1),
- 
--	DEF_GEN3_SD("sd0",	R8A77965_CLK_SD0,	CLK_SDSRC,	0x074),
--	DEF_GEN3_SD("sd1",	R8A77965_CLK_SD1,	CLK_SDSRC,	0x078),
--	DEF_GEN3_SD("sd2",	R8A77965_CLK_SD2,	CLK_SDSRC,	0x268),
--	DEF_GEN3_SD("sd3",	R8A77965_CLK_SD3,	CLK_SDSRC,	0x26c),
-+	DEF_GEN3_SDH("sd0h",	R8A77965_CLK_SD0H,	CLK_SDSRC,   	   0x074),
-+	DEF_GEN3_SD( "sd0",	R8A77965_CLK_SD0,	R8A77965_CLK_SD0H, 0x074),
-+	DEF_GEN3_SDH("sd1h",	R8A77965_CLK_SD1H,	CLK_SDSRC,   	   0x078),
-+	DEF_GEN3_SD( "sd1",	R8A77965_CLK_SD1,	R8A77965_CLK_SD1H, 0x078),
-+	DEF_GEN3_SDH("sd2h",	R8A77965_CLK_SD2H,	CLK_SDSRC,   	   0x268),
-+	DEF_GEN3_SD( "sd2",	R8A77965_CLK_SD2,	R8A77965_CLK_SD2H, 0x268),
-+	DEF_GEN3_SDH("sd3h",	R8A77965_CLK_SD3H,	CLK_SDSRC,   	   0x26c),
-+	DEF_GEN3_SD( "sd3",	R8A77965_CLK_SD3,	R8A77965_CLK_SD3H, 0x26c),
- 
- 	DEF_FIXED("cl",		R8A77965_CLK_CL,	CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cr",         R8A77965_CLK_CR,	CLK_PLL1_DIV4,  2, 1),
-diff --git a/drivers/clk/renesas/r8a77980-cpg-mssr.c b/drivers/clk/renesas/r8a77980-cpg-mssr.c
-index 9fe372286c1e..4ff2abad1de0 100644
---- a/drivers/clk/renesas/r8a77980-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a77980-cpg-mssr.c
-@@ -96,7 +96,8 @@ static const struct cpg_core_clk r8a77980_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",	R8A77980_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",	R8A77980_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",	R8A77980_CLK_SD0,   CLK_SDSRC,	  0x0074),
-+	DEF_GEN3_SDH("sd0h",	R8A77980_CLK_SD0H,  CLK_SDSRC,	       0x0074),
-+	DEF_GEN3_SD( "sd0",	R8A77980_CLK_SD0,   R8A77980_CLK_SD0H, 0x0074),
- 
- 	DEF_FIXED("cl",		R8A77980_CLK_CL,    CLK_PLL1_DIV2, 48, 1),
- 	DEF_FIXED("cp",		R8A77980_CLK_CP,    CLK_EXTAL,	    2, 1),
-diff --git a/drivers/clk/renesas/r8a77990-cpg-mssr.c b/drivers/clk/renesas/r8a77990-cpg-mssr.c
-index a582f2ec3294..637c3f062fae 100644
---- a/drivers/clk/renesas/r8a77990-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a77990-cpg-mssr.c
-@@ -100,9 +100,12 @@ static const struct cpg_core_clk r8a77990_core_clks[] __initconst = {
- 	DEF_FIXED("s3d2",      R8A77990_CLK_S3D2,  CLK_S3,         2, 1),
- 	DEF_FIXED("s3d4",      R8A77990_CLK_S3D4,  CLK_S3,         4, 1),
- 
--	DEF_GEN3_SD("sd0",     R8A77990_CLK_SD0,   CLK_SDSRC,	  0x0074),
--	DEF_GEN3_SD("sd1",     R8A77990_CLK_SD1,   CLK_SDSRC,	  0x0078),
--	DEF_GEN3_SD("sd3",     R8A77990_CLK_SD3,   CLK_SDSRC,	  0x026c),
-+	DEF_GEN3_SDH("sd0h",   R8A77990_CLK_SD0H,  CLK_SDSRC,         0x0074),
-+	DEF_GEN3_SD( "sd0",    R8A77990_CLK_SD0,   R8A77990_CLK_SD0H, 0x0074),
-+	DEF_GEN3_SDH("sd1h",   R8A77990_CLK_SD1H,  CLK_SDSRC,         0x0078),
-+	DEF_GEN3_SD( "sd1",    R8A77990_CLK_SD1,   R8A77990_CLK_SD1H, 0x0078),
-+	DEF_GEN3_SDH("sd3h",   R8A77990_CLK_SD3H,  CLK_SDSRC,         0x026c),
-+	DEF_GEN3_SD( "sd3",    R8A77990_CLK_SD3,   R8A77990_CLK_SD3H, 0x026c),
- 
- 	DEF_FIXED("cl",        R8A77990_CLK_CL,    CLK_PLL1,      48, 1),
- 	DEF_FIXED("cr",        R8A77990_CLK_CR,    CLK_PLL1D2,     2, 1),
-diff --git a/drivers/clk/renesas/r8a77995-cpg-mssr.c b/drivers/clk/renesas/r8a77995-cpg-mssr.c
-index 81c0bc1e78af..007f6fda1db4 100644
---- a/drivers/clk/renesas/r8a77995-cpg-mssr.c
-+++ b/drivers/clk/renesas/r8a77995-cpg-mssr.c
-@@ -103,7 +103,8 @@ static const struct cpg_core_clk r8a77995_core_clks[] __initconst = {
- 	DEF_GEN3_PE("s3d2c",   R8A77995_CLK_S3D2C, CLK_S3, 2, CLK_PE, 2),
- 	DEF_GEN3_PE("s3d4c",   R8A77995_CLK_S3D4C, CLK_S3, 4, CLK_PE, 4),
- 
--	DEF_GEN3_SD("sd0",     R8A77995_CLK_SD0,   CLK_SDSRC,     0x268),
-+	DEF_GEN3_SDH("sd0h",   R8A77995_CLK_SD0H, CLK_SDSRC,         0x268),
-+	DEF_GEN3_SD( "sd0",    R8A77995_CLK_SD0,  R8A77995_CLK_SD0H, 0x268),
- 
- 	DEF_DIV6P1("canfd",    R8A77995_CLK_CANFD, CLK_PLL0D3,    0x244),
- 	DEF_DIV6P1("mso",      R8A77995_CLK_MSO,   CLK_PLL1D2,    0x014),
+Another thing to discuss is the gating of SDn and SDnH. Documentation
+says that SDnH should be gated/ungated depending on the selected
+frequency, not depending on the number of users. I tried to handle this
+via RuntimePM but its need to balance enable/disable calls added quite
+some complexity to my prototype, and it was far from working. So, I
+switched strategies and included the gating to the divider table. So,
+for every divider, SDnH is correctly gated/ungated. SDn should be always
+on, so this is handled there as well. If we want to save power, I think
+we can still use RuntimePM to disable all clocks, as long as we make
+sure the frequencies are set again when resuming. However, this all is
+not a regression because RuntimePM currently does not work for SDHI
+anyhow.
+
+The third thing to discuss is probably the DT bindings. I just added DT
+updates for R-Car H3 ES2.0 and M3-N, but will happily add the others
+once we agreed on the bindings.
+
+These patches have been tested on R-Car H3 ES2.0, M3N, and V3U. More
+testing is needed on Gen2 to make sure no regressions happen. The base
+branch is <renesas-devel-2021-09-28-v5.15-rc3>. A branch can be found
+here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/separate-sdhn
+
+Hopefully I haven't forgotten something important, but I think this is
+it for now.
+
+Looking forward to comments and testing.
+
+Thanks and happy hacking,
+
+   Wolfram
+
+
+Wolfram Sang (9):
+  clk: renesas: gen3-cpg: add dummy SDnH clock
+  clk: renesas: add SDnH clock to Gen3 SoCs
+  clk: renesas: r8a779a0: add SDnH clock to V3U
+  clk: renesas: gen3: switch to new SD clock handling
+  clk: renesas: gen3-cpg: remove outdated SD_SKIP_FIRST
+  dt-bindings: mmc: renesas,sdhi: add optional SDnH clock
+  arm64: dts: r8a77951: add SDnH clocks
+  arm64: dts: r8a77965: add SDnH clocks
+  mmc: renesas_sdhi: parse DT for SDnH
+
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml |   3 +-
+ arch/arm64/boot/dts/renesas/r8a77951.dtsi     |  12 +-
+ arch/arm64/boot/dts/renesas/r8a77965.dtsi     |  12 +-
+ drivers/clk/renesas/r8a774a1-cpg-mssr.c       |  12 +-
+ drivers/clk/renesas/r8a774b1-cpg-mssr.c       |  12 +-
+ drivers/clk/renesas/r8a774c0-cpg-mssr.c       |   9 +-
+ drivers/clk/renesas/r8a774e1-cpg-mssr.c       |  12 +-
+ drivers/clk/renesas/r8a7795-cpg-mssr.c        |  12 +-
+ drivers/clk/renesas/r8a7796-cpg-mssr.c        |  12 +-
+ drivers/clk/renesas/r8a77965-cpg-mssr.c       |  12 +-
+ drivers/clk/renesas/r8a77980-cpg-mssr.c       |   3 +-
+ drivers/clk/renesas/r8a77990-cpg-mssr.c       |   9 +-
+ drivers/clk/renesas/r8a77995-cpg-mssr.c       |   3 +-
+ drivers/clk/renesas/r8a779a0-cpg-mssr.c       |  17 +-
+ drivers/clk/renesas/rcar-cpg-lib.c            | 211 +++---------------
+ drivers/clk/renesas/rcar-cpg-lib.h            |   7 +-
+ drivers/clk/renesas/rcar-gen3-cpg.c           |  24 +-
+ drivers/clk/renesas/rcar-gen3-cpg.h           |   4 +
+ drivers/mmc/host/renesas_sdhi.h               |   1 +
+ drivers/mmc/host/renesas_sdhi_core.c          |  36 ++-
+ 20 files changed, 170 insertions(+), 253 deletions(-)
+
 -- 
 2.30.2
 
