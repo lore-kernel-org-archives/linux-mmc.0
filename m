@@ -2,241 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1C3CC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 12:38:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEB3FC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 14:46:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7BA661406
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 12:38:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A87A3613D3
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 14:46:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343836AbhI2Mj6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Sep 2021 08:39:58 -0400
-Received: from mga06.intel.com ([134.134.136.31]:21285 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1343735AbhI2Mj6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 29 Sep 2021 08:39:58 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10121"; a="285944712"
-X-IronPort-AV: E=Sophos;i="5.85,332,1624345200"; 
-   d="scan'208";a="285944712"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Sep 2021 05:38:16 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.85,332,1624345200"; 
-   d="scan'208";a="707248480"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by fmsmga006.fm.intel.com with ESMTP; 29 Sep 2021 05:38:13 -0700
-Subject: Re: [PATCH v1 2/2] mmc: sdhci: Use the SW timer when the HW timer
- cannot meet the timeout value required by the device
-To:     Bean Huo <huobean@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20210917172727.26834-1-huobean@gmail.com>
- <20210917172727.26834-3-huobean@gmail.com>
- <fc14d8e1-9438-d4b0-80f4-ccf9055ab7d3@intel.com>
- <beda2d5ecc3c15e9bf9aa18383c22c2a90d31dab.camel@gmail.com>
- <93292ef4-8548-d2ba-d803-d3b40b7e6c1d@intel.com>
- <40e525300cd656dd17ffc89e1fcbc9a47ea90caf.camel@gmail.com>
- <79056ca7-bfe3-1b25-b6fd-de8a9388b75f@intel.com>
- <5a5db6c2eed2273a8903b5052312f039dd629401.camel@gmail.com>
- <5072935e-d855-7029-1ac0-0883978f66e5@intel.com>
- <37497369a4cf5f729e7b3e31727a7d64be5482db.camel@gmail.com>
- <32b753ff-6702-fa51-2df2-32ff1d955a23@intel.com>
- <296607ef57f3fb632107997f4edca99a5722beab.camel@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <b7fd4a22-65f6-d1c4-675c-5930452a1fea@intel.com>
-Date:   Wed, 29 Sep 2021 15:38:00 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S1344590AbhI2OsM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Sep 2021 10:48:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47336 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1344484AbhI2OsM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2021 10:48:12 -0400
+Received: from mail-ot1-x32d.google.com (mail-ot1-x32d.google.com [IPv6:2607:f8b0:4864:20::32d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A930C06161C
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 07:46:31 -0700 (PDT)
+Received: by mail-ot1-x32d.google.com with SMTP id r43-20020a05683044ab00b0054716b40005so3159881otv.4
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 07:46:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=JgcoX77LyqJgFfCrFyyxOmmlaV13zT4pyPZ6+xdzSpA=;
+        b=spTZQ2DbWP0psTWqELtDKdf3ctbS0vkigNQvxkRIwhOKUH8KugD69eFtioiLkoK3Gy
+         wtqV+fvcjNiD9+cDbUIXJF+qCw7Y3d8YdkSsHI7IVobxU9CSf3vqhqyWu/Oq2SRFBdHo
+         neDrQGuVYezgzLNIKMm1q/0+ChFeu07DQsXdVBLPC5Qj84WxDssil2uJW+0l+TPuEHxn
+         Ll6FKrKdGbGmGBGxLGRQmQdKBljtf5QtFgK2eTl3cDvLsBHoaJmId4Ifl7rnnbvBhn0D
+         LTj441MSq8B+PPi3TmUJ+3vz8OX7s4Ovl41Aj0dWJafRLB3UbpVpcLmdU8ARwxFqFRiP
+         nSKQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=JgcoX77LyqJgFfCrFyyxOmmlaV13zT4pyPZ6+xdzSpA=;
+        b=Q4m4MEH8qqABpmCUrbSj4YOYBPjL+P7SxQ47svgqHQ6zoaiLzFdDZjzKCyDnu7p0Tx
+         EC0ia5f52Oj5s5BcNoUupXUWufk+tgRr/6GqmDy5zs/yldE5A24R+7AxuCptOtdJmITt
+         +W1cT+AXBXEvEbDO88yRgpLiwNuZnxucm4Wp2MlyO1pLQb+xFGOiDwozTcuVdvAwQ/k4
+         NAXSq/MGQ0RKceuNVpiLKeyJYJtnXNxr9XBwawbBTDHxtgf8cMSXfUYL9FyVnmlHoRms
+         FK7jCIGF5h6z9+uhLXSvQxk+uEupbRSD1r2psFQ4jiq/XlzPv868rfzZAbZfBCf7Xg6h
+         R55Q==
+X-Gm-Message-State: AOAM533Lm03IcEDdeM0f+l4gmKaQ/WuyPqsCYB+WbCe3V2kgwZq5/Z4S
+        fqmt5AC84MM5RPudqHJsZBfz3w==
+X-Google-Smtp-Source: ABdhPJy1xutLgHZ1k75FBuuFr8v0/9rSKe4U8iMaiX+gLlBxKTV+rJxW6+Z2BJ3/QZooCn7GiUFhFA==
+X-Received: by 2002:a9d:6254:: with SMTP id i20mr324075otk.349.1632926790406;
+        Wed, 29 Sep 2021 07:46:30 -0700 (PDT)
+Received: from yoga (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
+        by smtp.gmail.com with ESMTPSA id v14sm5473ook.2.2021.09.29.07.46.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 29 Sep 2021 07:46:29 -0700 (PDT)
+Date:   Wed, 29 Sep 2021 09:46:27 -0500
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Will Deacon <will@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Rob Clark <robdclark@gmail.com>, Sean Paul <sean@poorly.run>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Joerg Roedel <joro@8bytes.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Alex Elder <elder@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        Andy Gross <agross@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        freedreno <freedreno@lists.freedesktop.org>,
+        "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Networking <netdev@vger.kernel.org>, ath10k@lists.infradead.org,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-sunxi@lists.linux.dev
+Subject: Re: [PATCH] [RFC] qcom_scm: hide Kconfig symbol
+Message-ID: <YVR8Q7LO0weiFin+@yoga>
+References: <20210927152412.2900928-1-arnd@kernel.org>
+ <20210929095107.GA21057@willie-the-truck>
+ <CAK8P3a2QnJkYCoEWhziYYXQusb-25_wUhA5ZTGtBsyfFx3NWzQ@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <296607ef57f3fb632107997f4edca99a5722beab.camel@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a2QnJkYCoEWhziYYXQusb-25_wUhA5ZTGtBsyfFx3NWzQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/09/2021 13:49, Bean Huo wrote:
-> Hi Adrian,
-> 
-> On Tue, 2021-09-28 at 13:18 +0300, Adrian Hunter wrote:
->> On 25/09/2021 00:33, Bean Huo wrote:
->>> On Fri, 2021-09-24 at 16:26 +0300, Adrian Hunter wrote:
->>>> On 24/09/21 4:08 pm, Bean Huo wrote:
->>>>> On Fri, 2021-09-24 at 15:17 +0300, Adrian Hunter wrote:
->>>>>>>>>          sdhci_writeb(host, count,
->>>>>>>>> SDHCI_TIMEOUT_CONTROL);
->>>>>>>>> }
->>>>>>>>> The driver has detected that the hardware timer cannot
->>>>>>>>> meet
->>>>>>>>> the
->>>>>>>>> timeout
->>>>>>>>> requirements of the device, but we still use the
->>>>>>>>> hardware
->>>>>>>>> timer,
->>>>>>>>> which will
->>>>>>>>> allow potential timeout issuea . Rather than allowing a
->>>>>>>>> potential
->>>>>>>>> problem to exist, why can’t software timing be used to
->>>>>>>>> avoid
->>>>>>>>> this
->>>>>>>>> problem?
->>>>>>>> Timeouts aren't that accurate.  The maximum is assumed
->>>>>>>> still
->>>>>>>> to
->>>>>>>> work.
->>>>>>>> mmc->max_busy_timeout is used to tell the core what the
->>>>>>>> maximum
->>>>>>>> is.
->>>>>>> mmc->max_busy_timeout is still a representation of Host HW
->>>>>>> timer
->>>>>>> maximum timeout count, isn't it? 
->>>>>>
->>>>>> Not necessarily.  For SDHCI_QUIRK2_DISABLE_HW_TIMEOUT it
->>>>>> would be
->>>>>>
->>>>>> set to zero to indicate no maximum.
->>>>>
->>>>> yes, this is the purpose of the patch, for the host controller
->>>>> without
->>>>> quirk SDHCI_QUIRK2_DISABLE_HW_TIMEOUT, if the timeout count
->>>>> required by
->>>>> device is beyond the HW timer max count, we choose SW timer to
->>>>> avoid the HW timer timeout IRQ.
->>>>>
->>>>> I don't know if I get it correctly.
->>>>
->>>> Why can't drivers that want the behaviour just set the quirk?
->>>>
->>>> Drivers that do not work with the quirk, do not have to set it.
->>>
->>> Adrian,
->>>
->>> We cannot add this quirk to every host driver.
->>
->> I was suggesting only the ones for which it works.
->>
->>>  This is the difference
->>> on the device side.
->>
->> It is the host controller that has the problem, not the device.
->> Hence the quirk.
->>
->>> In addition, I don't know what the maximum hardware
->>> timer budget for each host is.
->>
->> mmc->max_busy_timeout is calculated by sdhci.c, or the driver can
->> override the maximum count via ->get_max_timeout_count() or the
->> driver
->> can override mmc->max_busy_timeout.
->>
->> With the quirk, sdhci.c will usually set mmc->max_busy_timeout to
->> zero.
->> That allows timeouts greater than the hardware can support, and then,
->> with the quirk, the driver will switch to a software timeout when
->> needed.
->>
-> 
-> 
-> According to your above statement, do you mean that the eMMC host
-> controller does not support the scenario where the data transmission
-> timeout value required by the eMMC device is greater than the capacity
-> of the eMMC host hardware data transmission timer? Unless the eMMC host
-> vendor accepts their eMMC host accepts the use of SW timers in this
-> case (adding quirks)?
+On Wed 29 Sep 05:04 CDT 2021, Arnd Bergmann wrote:
 
-Yes
+> On Wed, Sep 29, 2021 at 11:51 AM Will Deacon <will@kernel.org> wrote:
+> > On Mon, Sep 27, 2021 at 05:22:13PM +0200, Arnd Bergmann wrote:
+> > >
+> > > diff --git a/drivers/iommu/Kconfig b/drivers/iommu/Kconfig
+> > > index 124c41adeca1..989c83acbfee 100644
+> > > --- a/drivers/iommu/Kconfig
+> > > +++ b/drivers/iommu/Kconfig
+> > > @@ -308,7 +308,7 @@ config APPLE_DART
+> > >  config ARM_SMMU
+> > >       tristate "ARM Ltd. System MMU (SMMU) Support"
+> > >       depends on ARM64 || ARM || (COMPILE_TEST && !GENERIC_ATOMIC64)
+> > > -     depends on QCOM_SCM || !QCOM_SCM #if QCOM_SCM=m this can't be =y
+> > > +     select QCOM_SCM
+> > >       select IOMMU_API
+> > >       select IOMMU_IO_PGTABLE_LPAE
+> > >       select ARM_DMA_USE_IOMMU if ARM
+> >
+> > I don't want to get in the way of this patch because I'm also tired of the
+> > randconfig failures caused by QCOM_SCM. However, ARM_SMMU is applicable to
+> > a wide variety of (non-qcom) SoCs and so it seems a shame to require the
+> > QCOM_SCM code to be included for all of those when it's not strictly needed
+> > at all.
+> 
+> Good point, I agree that needs to be fixed. I think this additional
+> change should do the trick:
+> 
 
->> However, that won't work for every host controller, because some do
->> not
->> provide a completion interrupt after the timeout, even if the timeout
->> interrupt is disabled.  
-> 
-> Do you mean that if we disable the hardware timer/timeout interrupt and
-> use the software timer, the eMMC host controller will not trigger a
-> completion interrupt?
+ARM_SMMU and QCOM_IOMMU are two separate implementations and both uses
+QCOM_SCM. So both of them should select QCOM_SCM.
 
-Yes.  On some hardware, if the timeout interrupt is disabled, and the
-operation takes longer than the hardware timeout value, then there is
-no completion interrupt.  It is as if the timeout "happens" even if the
-interrupt is disabled.
+"Unfortunately" the Qualcomm portion of ARM_SMMU is builtin
+unconditionally, so going with something like select QCOM_SCM if
+ARCH_QCOM would still require the stubs in qcom_scm.h.
 
-> Even before the SW timer expires, the data
-> transfer between the host and the eMMC device is complete? Is this what
-> you mean?
+Regards,
+Bjorn
 
-I'm not 100% sure about what happens if the operation completes
-before the hardware timeout value, but I think it gets a completion
-interrupt same as normal.
-
+> --- a/drivers/iommu/Kconfig
+> +++ b/drivers/iommu/Kconfig
+> @@ -308,7 +308,6 @@ config APPLE_DART
+>  config ARM_SMMU
+>         tristate "ARM Ltd. System MMU (SMMU) Support"
+>         depends on ARM64 || ARM || (COMPILE_TEST && !GENERIC_ATOMIC64)
+> -       select QCOM_SCM
+>         select IOMMU_API
+>         select IOMMU_IO_PGTABLE_LPAE
+>         select ARM_DMA_USE_IOMMU if ARM
+> @@ -438,7 +437,7 @@ config QCOM_IOMMU
+>         # Note: iommu drivers cannot (yet?) be built as modules
+>         bool "Qualcomm IOMMU Support"
+>         depends on ARCH_QCOM || (COMPILE_TEST && !GENERIC_ATOMIC64)
+> -       depends on QCOM_SCM=y
+> +       select QCOM_SCM
+>         select IOMMU_API
+>         select IOMMU_IO_PGTABLE_LPAE
+>         select ARM_DMA_USE_IOMMU
 > 
+> I'll see if that causes any problems for the randconfig builds.
 > 
->> That means they should set mmc->max_busy_timeout
->> to the hardware value.  Hence the quirk is needed to tell the
->> difference.
->>
-> 
-> This means this quirk is for eMMC host can privode the completion
-> interrupt in case HW timer is disabled?  
-
-Yes
-
->>> Even if you use the same SOC, the
->>> maximum time budget on different platforms may be different.
->>
->> The mmc core calculates timeouts based on the relevant standards and
->> values provided by the device itself.
-> 
-> 
-> Yes, but the eMMC standard does not define the maximum timeout value.
-> Different eMMC will have different timeout values.
-> 
->>
->>> Assume that the maximum timeout time supported by the hardware
->>> timer is
->>> 100 milliseconds
->>
->> I realise it is an example, but 100 milliseconds is a bit low. Legacy
->> host controllers have always had to deal with standard SD card and
->> MMC card timeouts.  SD card write timeout of 500 milliseconds for
->> instance.
-> 
-> 
-> Yes, this is just an example. I have several platforms, they are TI,
-> NXP, Intel and Qcom. The timeout time of the hardware timer is
-> different, the greatest one is 1.3s, some are less than 500ms.
-> 
->>
->>> but the maximum data transmission time required by
->>> the device is 150 milliseconds. In most cases, data transfer will
->>> not
->>> take so long. 150 is the maximum time under extreme conditions.
->>> This
->>> means that the device just needs to complete a data transfer within
->>>> 100ms and keep the data line busy. If we still use the HW timer,
->>>> it
->>> will trigger a DATA LINE timeout interrupt.
->>>
->>> This patch does not affect scenarios where the hardware timer meets
->>> the
->>> max data transmission time requirements of the device. It will
->>> still
->>> use the hardware timer. Only when the device changes, will it
->>> switch to
->>> using the SW timer.
->>
->> Which is what the quirk does.  So I am very confused why the quirk is
->> no goo
-> 
-> Because I don't know what the maximum volume of the real hardware timer
-> of each host controller is.> And different hosts have different timer
-> capacities.
-> Meanwhile, the eMMC devices have different data
-> transmission timeout between the different density/series as well.
-> 
-> Would you please confirm your three points above? If they are true, I
-> agree we cannot disable hardware timers and use SW tiner on some
-> platforms.
-
-Yes, I expect the quirk will do what you need.  Have you tried it?
+>        Arnd
