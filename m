@@ -2,173 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3450C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 03:03:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3400FC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 06:54:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9350661350
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 03:03:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06CB3613C8
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 06:54:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243259AbhI2DFg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Sep 2021 23:05:36 -0400
-Received: from mail-eopbgr1320102.outbound.protection.outlook.com ([40.107.132.102]:51806
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S230022AbhI2DFf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 28 Sep 2021 23:05:35 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=emcbTd8efx5S0e0faKnJi/X66uLUIXlp1cqRuT9gnOGm+SFG3Fq3sH+WmZkEgLQM7sndmiZd41+UqbwLEqs2kLaNyfbxHTrspkd8ta5VSGXFOYPcKsIwGOThX7feVsci/pBIXvF3YmTJTTqu2g9zjJXAgiKPffs0rhxIEFx8tyvPIMgZGfETDHjt4XTcJUiL5VLCXVAm+q6itHfirWhuBVgqaGK9v1OKA6Iv9CU2fCJ5IaqL7T59Slxo+N1eNKCavUq79g/sZmiuheJwzKIz/w9P7uWqNy4t9CC+Pem1dU6gVwg1oHGP1mmwFrIAQA+LdAMc3YNPrUdDqo5Fg+6Crw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901; h=From:Date:Subject:Message-ID:Content-Type:MIME-Version;
- bh=47gpZ4wcuSiMuVU0zW1foMsE6PGPfylT1k3NoiWXXEQ=;
- b=MYce7PdElr4U9D1lafayqZW7piISHbR70lwamiuLmK+5H+wUpDrhwMlUk+E1NOAgJarUoAGyqy/xvvPYPJrohZeV3PSU3STyRE8wTpiniHyaRyPUiy/qJOc5g+Yq6jELo17FxqQOk5x3ETwyMt7YjMGhNVz9Kgm7IY8JDtFZ8OFCw0Degwzx07FofnvjjomPYuFxxjN+W+mRG++07vnCeWPJkl1ZyVB+FPgoRhErbvaZ4lIIUFnEYr89FAZPg8nsExBIlv4lVPexa6As/rYTZzuWXmowv7+RuBPzQvhXziXn60U04ZaLyAONixM844D0Hu+sZq9W1eGMSBsdM6PRDg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=aspeedtech.com; dmarc=pass action=none
- header.from=aspeedtech.com; dkim=pass header.d=aspeedtech.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aspeedtech.com;
- s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=47gpZ4wcuSiMuVU0zW1foMsE6PGPfylT1k3NoiWXXEQ=;
- b=1h1ZCGVNuSpHbBRSDwUYG1QNZ/8fQHB79VYDUq6GHZPR7Itgg9jP1utj0GXd8Opi2Q5hf0/dlg0AEnVkNkgXmx3mgIBeWx2TKW+0gaTOuNwMcTcJXOdkuS+QTXk/rIAk526Atk07aB58e18jbjetqvAwprB/NK9wNWSNDF5ra9pg3FaCKTBCt3sV9SVMvoJXwmfAPntXAqNY0Q7sebujWLqf7wl7W5PRGQmlxj1Nik//8e1Bwaf8mtGkWNxprhi+Sucpe04DCcJLsgs4Wf57rvCslE7X1Ty2xzmeG6RAhGb/qHbtLrQhgCk1NekbZkHtNTp0xt/YCYSPe8XjK65pbg==
-Received: from HK0PR06MB2786.apcprd06.prod.outlook.com (2603:1096:203:5b::22)
- by HK2PR0601MB1938.apcprd06.prod.outlook.com (2603:1096:202:d::20) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4544.19; Wed, 29 Sep
- 2021 03:03:44 +0000
-Received: from HK0PR06MB2786.apcprd06.prod.outlook.com
- ([fe80::ddf1:e9d4:c209:8ab8]) by HK0PR06MB2786.apcprd06.prod.outlook.com
- ([fe80::ddf1:e9d4:c209:8ab8%7]) with mapi id 15.20.4544.022; Wed, 29 Sep 2021
- 03:03:44 +0000
-From:   Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     "joel@jms.id.au" <joel@jms.id.au>,
-        "mturquette@baylibre.com" <mturquette@baylibre.com>,
-        "sboyd@kernel.org" <sboyd@kernel.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "linux-aspeed@lists.ozlabs.org" <linux-aspeed@lists.ozlabs.org>,
-        "openbmc@lists.ozlabs.org" <openbmc@lists.ozlabs.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
+        id S244231AbhI2Gzj convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Sep 2021 02:55:39 -0400
+Received: from mail4.swissbit.com ([176.95.1.100]:33800 "EHLO
+        mail4.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229536AbhI2Gzj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2021 02:55:39 -0400
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 5EAB712259E;
+        Wed, 29 Sep 2021 08:53:57 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 4FAA4122566;
+        Wed, 29 Sep 2021 08:53:57 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Wed, 29 Sep 2021 08:53:57 +0200 (CEST)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.15; Wed, 29 Sep
+ 2021 08:53:56 +0200
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0792.015; Wed, 29 Sep 2021 08:53:56 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Jaehoon Chung <jh80.chung@samsung.com>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>,
-        "andrew@aj.id.au" <andrew@aj.id.au>,
-        BMC-SW <BMC-SW@aspeedtech.com>,
-        Steven Lee <steven_lee@aspeedtech.com>
-Subject: RE: [PATCH 10/10] dt-bindings: mmc: aspeed: Add a new compatible
- string
-Thread-Topic: [PATCH 10/10] dt-bindings: mmc: aspeed: Add a new compatible
- string
-Thread-Index: AQHXs9HHr7TBfuGZLUCpoIBAXdEJGKu4upXggAFOF4CAAEp/kA==
-Date:   Wed, 29 Sep 2021 03:03:43 +0000
-Message-ID: <HK0PR06MB278642C55052360B039853FAB2A99@HK0PR06MB2786.apcprd06.prod.outlook.com>
-References: <20210922103116.30652-1-chin-ting_kuo@aspeedtech.com>
- <20210922103116.30652-11-chin-ting_kuo@aspeedtech.com>
- <YVIUf7/4ukMcrOb9@robh.at.kernel.org>
- <HK0PR06MB2786DAAA2D6E58EA2E2FCB6BB2A89@HK0PR06MB2786.apcprd06.prod.outlook.com>
- <CAL_Jsq+TZFXrvfJTjofVcnT6jJat-3SvWj+jAq0QST8ndfeUMA@mail.gmail.com>
-In-Reply-To: <CAL_Jsq+TZFXrvfJTjofVcnT6jJat-3SvWj+jAq0QST8ndfeUMA@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "marten.lindahl@axis.com" <marten.lindahl@axis.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+Thread-Topic: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+Thread-Index: AQHXq5f2H1xcZooo4kGJdi3JsFt1D6uy2hoAgAfLcc8=
+Date:   Wed, 29 Sep 2021 06:53:56 +0000
+Message-ID: <cfe4476922584dff91bf0fdbec0c0843@hyperstone.com>
+References: <CGME20210917075050epcas1p1962cd1c7c388b20ad17cb841461dae1b@epcas1p1.samsung.com>
+        <bf19053cf6f547bcbb364975cda84c30@hyperstone.com>,<a8031e66-77a0-ae9b-d78d-daebc1d7dc47@samsung.com>
+In-Reply-To: <a8031e66-77a0-ae9b-d78d-daebc1d7dc47@samsung.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=aspeedtech.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: ef6e649e-4e8b-4651-5f51-08d982f5bf8e
-x-ms-traffictypediagnostic: HK2PR0601MB1938:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <HK2PR0601MB19388E40F76C91F0BE916D26B2A99@HK2PR0601MB1938.apcprd06.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:6108;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: qMH1lC2y3CsoKvA9JalTKyz/5+vf8y8k3K4LaSvLWX/WP93djtXbcfv5iUUMdkTxSrNAeSL+Qs08WoJ+jXK1eZEzKzfcLrOf0rrxspoXHNo8bvtbwETcInIbULuh8bzFmPg4bkcBe5BIWKc8STKZvoZX5I33ESoiZCj1Kojfb7QzjmhQc8Hahtn5bjJBWGs0cf8mcfe9Hu7sZaVivtqJgQuL91RI+ibu4mksZ9fhFAO6rC41lzbbGUY3nJWGjW0FShOmfqOLScph8c3Q4lJnc1I5N1NA/DJfZWNG+HJi6LcTlPPL0gZ5cZClGg/7fHLWeOPLPVjVcN5lPUwMIsnyyTJOBaYInJ5/MUKudE7IGWr/jIA0O+XgVfn6QpSoi2g5S65SXeGHOassmJTB4pbl/ioxQgs6z8bAfwZHWBmufcypkQKz4/06v3vlgQ66YKHVeNNfVOuQBl8LJeUu0v3cwntvvKOTHlv6yNKFLr8KfKPCLOx5bj9DmF56lmUD0IH9PprltOji9aCovKHehgaczFuB0bNJB4B2josJdaeAtNcTL8tUUoME0NLhtbijugQjscyKFok/zhgPdcK7csTYBE8szT1dbRYSFnXbXRdRNnwzYuxsvr2YG3bpSHGR23YjCR2LO7buQT+K16VzFbB34zEugLeT0gotGKg+G00t4gcaeEKN2O2Z0PycGzOb76E8h1wj2On4jM3agrIsZlH+DQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:HK0PR06MB2786.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(107886003)(86362001)(54906003)(38100700002)(316002)(508600001)(83380400001)(76116006)(122000001)(66946007)(26005)(8676002)(38070700005)(55016002)(66476007)(66446008)(64756008)(66556008)(5660300002)(71200400001)(186003)(7696005)(7416002)(2906002)(4326008)(6506007)(53546011)(9686003)(6916009)(52536014)(8936002)(33656002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?elhCc2J6cVBnbEcyb3Z4L3pJeGUzUVhmR1FaN0dIK2hTVVFBTEFkUlBoUmdV?=
- =?utf-8?B?U1ZodG5ZMnh5RE5VSUZJbFN2LzBxU2JtTXJ2MXVuaVBiSzRjS0t1UzJ2SnlB?=
- =?utf-8?B?aVFFMHhXTDdBSmhnOTc3SENnQitrbFlCUjNMcXJrL3RnMHlaQlRrWDJGR1dw?=
- =?utf-8?B?bWFreVNuYkpxZVl5bXIzaHZFRCtvVzlZZWFIYzFHNkdBalFMQzVSTlMwVElV?=
- =?utf-8?B?YlJWc09LWDNnQTlUM3hhQ3dVMTFZTlpzQWloazBjZEtVRSs2dDd3VmRhYmZ5?=
- =?utf-8?B?RnZaczFtdzNJMy9vbHIwMG5GcVlNbVIrT3JkM2xIZStYbURRMHd2Zjh5eGhZ?=
- =?utf-8?B?YzlpUFFWNUFrNU43bE93NmgxS1hFQm00NFBBNlVra2RMajRaSjlTWmpOaTF6?=
- =?utf-8?B?TGtDcXlOQ201M1lpdkhmR1E0Qk1hdmo0THlXWndyVU9MaURVeXA1M2c0OFpM?=
- =?utf-8?B?VldPTGJNdTByZEIzalJERXJRcGZhL0dvUGFzcjVLU3hXUzI4WWxwOCtxellz?=
- =?utf-8?B?SVdPVkN2KzBhMFpIandKbi9jdk9YY1pLK1lsazRwUUdNMVJ2dTh2K0o0cWpJ?=
- =?utf-8?B?RVphMnBhSjB5NXd1ZlgzOXlNMDNPV1pnQVoyUlR2NXZYLzBaQ25xOXNweVpv?=
- =?utf-8?B?UlhLKzVOZ0NrYUk5aGZuc1p2VlB1TGx5VVdCV1ZYL0hPOEFlbkhNVzkzVXBT?=
- =?utf-8?B?ajVmWmNsWUg0bVZOaXNURDJoQ2hvdW5WY1Z2a2ZLUVFhUm4rUXF2Y1BnSHI4?=
- =?utf-8?B?UTJ4TDVwcEJzajcrd2NpUTl1bnBHMzhBYThWdDRzNVdCcENvYUUrbkxOTVZ3?=
- =?utf-8?B?VUxNbzJhWSs1eS8xNHE0eE0yYnVINjI3Z2JTT05CTDNhRk9xbWpXeSthaXJE?=
- =?utf-8?B?Njd4WU1lNHFvYUFSVUJEUkZHTWE1Uk1Lc3RkTzI3RnNSc2JlMEN6NEwzQWxH?=
- =?utf-8?B?RFFXeG44QWs4aGlzRC8wL1VqaGthUDJsRU1yMEhBc2l1M21WUy90bDk1aGRT?=
- =?utf-8?B?Sis3UTgrQ0lBOFFSb2lKMkNVek8wQk9mTmdQcGVkTGtVWkxTUUx0RG1QbjFZ?=
- =?utf-8?B?Z01tV3V3bFoxNDF5YWN3QVlESzZHRWJTaXc4a3h1ejFTTmdOQmQrWVlSZHlS?=
- =?utf-8?B?VVpyTWc3ZndOYWlJZHVScmhUTFRTU1pZdHJuN2EzVWRkd1A4c3BlektoSnha?=
- =?utf-8?B?SHo3bUFndFVKU1cwK0E5NW8zbWk1dmZGVWV0UWErcHMvRHBLRHNON2Z2ZUk4?=
- =?utf-8?B?RExlK2pJREwyaUswdlZkeWhPOGV2QnZRZDRacWFoV01DRUwrMFI2Snkyc1hh?=
- =?utf-8?B?ZkdiUTlhYW0vYjJ1a2NiVHoyOEVNdC9nT2FZZVBPY3BNcm13RkxZQmsrdS9U?=
- =?utf-8?B?YWxqbnVmUTc1Zlp2RkM0RE1BVDhsbG1lY09hc0k3R05JZGtmU1FlK29UcFZW?=
- =?utf-8?B?bGNPaGlpOXZ3RFkwbUJ4MVdjUHZLakloMjJ4ZXJ3ZjlOclJZVWFpMUx1cVJJ?=
- =?utf-8?B?S1dTMzQ4ZVA0V0J6YktsTWQ2bjZzYlI3NTVvbFNIekg3TUdjSS9zdW1RSGd4?=
- =?utf-8?B?eUplVnphRkhIWllESlltUFEvZngvbjkwOURjRSthUXJuN24xMXd2cnRZL2VU?=
- =?utf-8?B?ZXVmbDQrRVArMURBelFubEthNHU3TFk4c0hZak90RVlXNFVWdkZKdDlLOHlI?=
- =?utf-8?B?RzV0YVFRVHpZRWVkc0x6SmZCUldWajhtNDFnSWpWa3VNREUxM1RNMVBySmFN?=
- =?utf-8?Q?svck7R44EpdkHsZI7jgYRM/0Kwpn112maj2SFl+?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+x-originating-ip: [10.154.1.4]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-X-OriginatorOrg: aspeedtech.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: HK0PR06MB2786.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ef6e649e-4e8b-4651-5f51-08d982f5bf8e
-X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Sep 2021 03:03:44.0024
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 43d4aa98-e35b-4575-8939-080e90d5a249
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: nl2JrpZUxNGUEGuRfELiCWXbD1RGLK8LROPFbPhn1UysXvjo/HSKEuBTlWwHEcGZdlJ+jexSPs62sBppG03HNqugeGsAgIt+PMhgoRbRhhA=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: HK2PR0601MB1938
+X-TMASE-Version: DDEI-5.1-8.6.1018-26436.006
+X-TMASE-Result: 10--8.923600-10.000000
+X-TMASE-MatchedRID: 9M69yBZ2Ml7UL3YCMmnG4vGG8F2k2BBVyeUl7aCTy8hntCkewtW30NPW
+        omJfPYQZIMBvuronWr9dOsaQOyKqmhLwsVmbC9NrOGTV4fFD6yAlBKvI9NWIX2KBXlPtOqqX+Kc
+        0X1niQZ/Zw2EtavuoguktgXE4NG6+/N0WsxWI4Qc4zRqVgiL30+vWkvu/824/qr3CBdU3C2Dy71
+        Hqi5zuoEqna2uFlro8j0IvV7jlqDhyPzMTUSO1JKoXHZz/dXlxEf7F4CIBjrgHAA5cb5vjShpOM
+        U5lxqhiiAMSTyXyFbpYKJTez2dVw+A4UzWGh1IDqoeab9Xgz8/865QlVwxmG+D0a1g8E91Lpsmo
+        b0bsTdbi8zVgXoAltsILlqmfHjNKVnRXm1iHN1bEQdG7H66TyH4gKq42LRYkxE61TJzkcAdC0wa
+        nE9fdSCKvjz/0r1QsSnj98gYIwLl+3BndfXUhXQ==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-12:0,22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: ef480ddb-5583-4819-a4e8-456c38ac6e8f-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgUm9iDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogUm9iIEhlcnJp
-bmcgPHJvYmhAa2VybmVsLm9yZz4NCj4gU2VudDogV2VkbmVzZGF5LCBTZXB0ZW1iZXIgMjksIDIw
-MjEgNjoyOCBBTQ0KPiBUbzogQ2hpbi1UaW5nIEt1byA8Y2hpbi10aW5nX2t1b0Bhc3BlZWR0ZWNo
-LmNvbT4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCAxMC8xMF0gZHQtYmluZGluZ3M6IG1tYzogYXNw
-ZWVkOiBBZGQgYSBuZXcgY29tcGF0aWJsZQ0KPiBzdHJpbmcNCj4gDQo+IE9uIE1vbiwgU2VwIDI3
-LCAyMDIxIGF0IDk6NTEgUE0gQ2hpbi1UaW5nIEt1bw0KPiA8Y2hpbi10aW5nX2t1b0Bhc3BlZWR0
-ZWNoLmNvbT4gd3JvdGU6DQo+ID4NCj4gPiBIaSBSb2IsDQo+ID4NCj4gPiA+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+ID4gPiBGcm9tOiBSb2IgSGVycmluZyA8cm9iaEBrZXJuZWwub3Jn
-Pg0KPiA+ID4gU2VudDogVHVlc2RheSwgU2VwdGVtYmVyIDI4LCAyMDIxIDI6NTkgQU0NCj4gPiA+
-IFRvOiBDaGluLVRpbmcgS3VvIDxjaGluLXRpbmdfa3VvQGFzcGVlZHRlY2guY29tPg0KPiA+ID4g
-U3ViamVjdDogUmU6IFtQQVRDSCAxMC8xMF0gZHQtYmluZGluZ3M6IG1tYzogYXNwZWVkOiBBZGQg
-YSBuZXcNCj4gPiA+IGNvbXBhdGlibGUgc3RyaW5nDQo+ID4gPg0KPiA+ID4gT24gV2VkLCBTZXAg
-MjIsIDIwMjEgYXQgMDY6MzE6MTZQTSArMDgwMCwgQ2hpbi1UaW5nIEt1byB3cm90ZToNCj4gPiA+
-ID4gQWRkICJhc3BlZWQsYXN0MjYwMC1lbW1jIiBjb21wYXRpYmxlIHN0cmluZyBmb3IgdGhlIHNh
-a2Ugb2YNCj4gPiA+ID4gZGlzdGluZ3Vpc2hpbmcgYmV0d2VlbiBTRCBhbmQgZU1NQyBkZXZpY2Uu
-DQo+ID4gPg0KPiA+ID4gV2h5Pw0KPiA+ID4NCj4gPiA+IElzIHRoZSBoL3cgYmxvY2sgZGlmZmVy
-ZW50PyBXZSBhbHJlYWR5IGhhdmUgcHJvcGVydGllcyB0byBoYW5kbGUNCj4gPiA+IHNvbWUgb2Yg
-dGhlIGVNTUMgc3BlY2lmaWNzLiBBbHNvLCB5b3UgY2FuIGhhdmUgYSBjaGlsZCBub2RlIGZvciB0
-aGUNCj4gPiA+IGVNTUMgZGV2aWNlIGlmIHlvdSBuZWVkIHRoYXQuDQo+ID4NCj4gPiBUaGVyZSBh
-cmUgdHdvIFNEL1NESU8gY29udHJvbGxlcnMgaW4gYSBBU1QyNjAwIFNvQy4NCj4gPiBPbmUgaXMg
-Zm9yIFNEIGNhcmQgYW5kIHRoZSBvdGhlciBpcyBmb3IgZU1NQy4NCj4gPiBBbHRob3VnaCBib3Ro
-IG9mIHRoZW0gYXJlIGVtYmVkZGVkIGluIHRoZSBzYW1lIFNvQywgdGhlIGRlc2lnbiBvZg0KPiA+
-IGRlbGF5IGNlbGwgYW5kIHRoZSBtYW51ZmFjdHVyZSBwcm9jZXNzIGFyZSBkaWZmZXJlbnQuIFRo
-ZSBkZWxheSBwaGFzZQ0KPiA+IGlzIGRlZmluaXRlbHkgZGlmZmVyZW50IGFuZCwgdGh1cywgd2Ug
-bmVlZCBhIGZsYWcsIGNvbXBhdGlibGUsIHRvIGRpc3Rpbmd1aXNoIHRoZQ0KPiBkZXZpY2UsIFNE
-IG9yIGVNTUMuDQo+ID4NCj4gPiBXaXRob3V0ICJhc3BlZWQsYXN0MjYwMC1lbW1jIiBjb21wYXRp
-YmxlLCBvZiBjb3Vyc2UsIGVNTUMgZGV2aWNlIGNhbg0KPiA+IHdvcmsgd2l0aCBvcmlnaW5hbCBz
-ZGhjaSBkcml2ZXIgYW5kIGRldmljZSB0cmVlIHNldHRpbmcuIEJ1dCwgZm9yDQo+ID4gdWx0cmEt
-c3BlZWQgb3IgSFMyMDAgY2FzZSwgQVNUMjYwMCBTb0MgbmVlZHMgc29tZSBwaGFzZSBkZWxheSB3
-aGljaA0KPiAobWF4aW11bSkgdmFsdWUgaXMgZGlmZmVyZW50IGJldHdlZW4gU0QgYW5kIGVNTUMg
-ZGV2aWNlLg0KPiANCj4gVGhpcyBpcyBxdWl0ZSBjb21tb24gYXMgdHdlYWtpbmcgdGhlIHRpbWlu
-ZyBpcyBhbHNvIG5lZWQgcGVyIGJvYXJkLg0KPiBMb29rIGF0IHdoYXQgb3RoZXIgYmluZGluZ3Mg
-aGF2ZSBkb25lLiBBIHByb3BlcnR5IGlzIG1vcmUgYXBwcm9wcmlhdGUgaGVyZS4NCg0KT2theSwg
-SSB3aWxsIHRyeSB0byBjaGVjayB3aGV0aGVyIHRoZXJlIGlzIGFuIGV4aXN0aW5nIGJpbmRpbmcg
-d2hpY2ggY2FuIGFjaGlldmUgdGhpcyBwdXJwb3NlLg0KT3IsIG1heWJlLCBhcyB5b3Ugc2FpZCwg
-YSBwcm9wZXJ0eSBpcyBiZXR0ZXIgc2luY2UgdGhpcyBwaGFzZSBkZWxheSBpcyBhIHByb3ByaWV0
-YXJ5DQpIVyBkZXNpZ24gYW5kIGlzIGRpZmZlcmVudCBiZXR3ZWVuIGVhY2ggY2hpcHNldCB2ZXJz
-aW9uLg0KDQo+IA0KPiBSb2INCg0KQ2hpbi1UaW5nDQo=
+Hey,
+so more generally the timeout here can be 41954 up to 167783 ms.
+Is 42s too low to view it as invalid here?
+Would you prefer the patch exluding the specific timeout values instead of anything above
+41954?
+
+Regards,
+Christian
+
+
+
+
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Sent: Friday, September 24, 2021 11:49 AM
+To: Christian Löhle; linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org
+Cc: marten.lindahl@axis.com; ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+    
+Hi,
+
+On 9/17/21 4:50 PM, Christian Löhle wrote:
+> 
+> Set the limit to 1s if the register is at reset value.
+> 
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 6578cc64ae9e..cd9a6e0a7449 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1983,6 +1983,14 @@ static void dw_mci_set_drto(struct dw_mci *host)
+>        /* add a bit spare time */
+>        drto_ms += 10;
+>  
+> +     /*
+> +      * If TMOUT register still holds the reset value the above calculation
+> +      * would yield a timeout of over 167 seconds, limit it to 1000ms.
+> +      * Normal reads/writes should not take anywhere close to 120s.
+> +      */
+> +     if (drto_ms > 120000)
+> +             drto_ms = 1000;
+> +
+
+If dtrt_ms is 167sec, it means that bus_hz should be 0 or 1.
+What value is your host->bus_hz?
+
+Best Regards,
+Jaehoon Chung
+
+>        spin_lock_irqsave(&host->irq_lock, irqflags);
+>        if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
+>                mod_timer(&host->dto_timer,
+> 
+
+    =
+Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+Managing Directors: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
