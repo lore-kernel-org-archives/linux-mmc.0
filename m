@@ -2,101 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70D60C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 00:12:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF58BC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 00:40:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A23A61452
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 00:12:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C7D64615A2
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 00:40:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347352AbhI3AO0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Sep 2021 20:14:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37236 "EHLO
+        id S245276AbhI3Alp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Sep 2021 20:41:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346612AbhI3AOZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2021 20:14:25 -0400
-Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11342C06161C
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 17:12:44 -0700 (PDT)
-Received: by mail-wr1-x432.google.com with SMTP id w29so7014259wra.8
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 17:12:43 -0700 (PDT)
+        with ESMTP id S244341AbhI3Alp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2021 20:41:45 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74FADC06161C;
+        Wed, 29 Sep 2021 17:40:03 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id x27so18133551lfu.5;
+        Wed, 29 Sep 2021 17:40:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=so++ktLIXuia7S6U7BNUIBcKY9801GrgXLBNXOJCctA=;
-        b=H10inSR11/VqU/haFPGpWYX4eIl9XnsEwCEZH+0AQ8FWEQkjTj0EN+Ya1EZTQu+shE
-         kLIbu8rSIIg9sHC7IW3s76bjB/WmFjFJjdj0iG5s2SYq24KYemuCcgelDuoHT3GfKS5v
-         GHSR1Dp2nFiYEjqUc142eJslL5BRz2qpBArRi0DXE+UlUPDs76Licbk4P74ic6KB3nuO
-         nbcqF+xbsNBjS+T7iHicGmK/f3REcqIW+rmyhP9eOiM6KxgtdZWCtDzuFE1OlxUQLNxZ
-         DffsQdUDTQvoP4PoIaIP9ZQclasRxjaTX+Ph27orlZrw9Of2+FqJkvWU93dImtsnJ5AL
-         8P4A==
+        d=gmail.com; s=20210112;
+        h=subject:from:to:cc:references:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=xEzZC82rqk2En9Ed7KsQn1FTg8FAxs/dG3UWgw54VAY=;
+        b=O8dP8YX3oMg9WnbDyZu1hmO2h68+60K+lapykwVro5Dm9ppn/F9/NcbISMG5UgjbC1
+         Gl65W0faHrgnuG4Ivm1ZPA//iIglFIfYes3pHap406XwsMqh6ze54KPK6G1G3O5UlV3H
+         OpAwEnFC47Abzp/TQ4SNOauFELwfHEFZLL20Xt+YDmW+i0BdpaHAE8kOe1R0ZwvSJ88R
+         vse5HwrZKesjEBIM+g1FgoFyiPN/TBhtT+YBZZx+rRc0POYrOrKJZ64TomxVC2KqUNKa
+         /E+/csDF4DZh2HAhhjUkvllNeyvgxTMBlt9VzUAWKm/iPV4qw7A2k9Nqntk6VvZaM2tE
+         WgAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=so++ktLIXuia7S6U7BNUIBcKY9801GrgXLBNXOJCctA=;
-        b=TmYXkS6DngOl9urQUTItHtM2Q+soTKWnf+vRrrJMcTNvUeYT9poP3yds37NUsHuxAO
-         17YZ26spyrpvKwLB52XwFK86dHYsspLLvl5VI0dO8Hlj8wtzG0Ip3XlQNJJV7VqthtQe
-         ytBRhHJ5h9KBLkUbR97Osez3LqB17MXaaGeqkZMc3jYXngxkR1gh6ahq7Kx2yW+evbj9
-         dUZ58XvzfIhy1Y/yYndt+EmlNuCnTK/nAnc3CeqHqLNPiqOIJSYB3kb2HTtVgWOKLiuE
-         Ty5eWY/7EYebMQYfXi9oPyT+vj++mFugaJPc7dDpWoUiXQ2PlUtgbMbXfaXRQfa/Tw+2
-         ZMOw==
-X-Gm-Message-State: AOAM5329SJu7Y9Ka+M6aXyV82WZvU++9zzEkfWil/7mikxoSkB3X6zES
-        thLzhR0zy7FZCy/bNpjBOpq+yDbpW3/Bf6s3ofRPZA==
-X-Google-Smtp-Source: ABdhPJzLw+kdyCSCCFIkNR/DETrYiq3Usylp9hzBKF2UTTUKIJsZKQpT9jR+TAL9iB1u9TMtKwstF0pfX1MRpQGrFfM=
-X-Received: by 2002:adf:dd8a:: with SMTP id x10mr2980547wrl.200.1632960762539;
- Wed, 29 Sep 2021 17:12:42 -0700 (PDT)
+        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=xEzZC82rqk2En9Ed7KsQn1FTg8FAxs/dG3UWgw54VAY=;
+        b=iymX/5SeA5DZoS7QTiNcTck0k4lQuLG208oKGYpoY+Vukmhs6+MCFWgkcQbWxSA6hy
+         WL0RMICq/vbSIjUN7LM3exUZ4d/mk6GlLqRPdqchk9O8GMrhh18392BEqL+BECJpgzDp
+         ylWytHSHo09KN4TmWm9fTqx1Mbwdvce0bbmixpFm6qsbaWfxYCbGlDlYUoUOue2Yga8j
+         6+NS0ANr5zz2ZztZnu+bNXrHTAoJ0CN18uGKOZXp0AxaJSOe2CI63485YufEr/2n7cns
+         EYA4vF+F6YPBJxs6oxmyudszfbMdbsxhCS+AfRjGgIn1ZZIYpx46GwmLEK3B3mTTZDah
+         BZAA==
+X-Gm-Message-State: AOAM530rE5xVj4kfItluG/hdUBXtE6fLdilnMM4D6RRnCnmROoT8yJZG
+        t/UTDQ4FeTV7a7zDRkr7w97Y9IeI7ug=
+X-Google-Smtp-Source: ABdhPJwR5F7TvblD+2tTvq+HxgGw1yddafN9WyTWe+FiqhsLFgixz8gInIIfk3R5GKlFeUDsI4kXHw==
+X-Received: by 2002:a05:651c:150a:: with SMTP id e10mr2955411ljf.287.1632962401591;
+        Wed, 29 Sep 2021 17:40:01 -0700 (PDT)
+Received: from [192.168.2.145] (46-138-80-108.dynamic.spd-mgts.ru. [46.138.80.108])
+        by smtp.googlemail.com with ESMTPSA id l23sm163024ljg.99.2021.09.29.17.40.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 29 Sep 2021 17:40:01 -0700 (PDT)
+Subject: Re: [PATCH v13 16/35] usb: chipidea: tegra: Add runtime PM and OPP
+ support
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>
+Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        devicetree@vger.kernel.org, linux-clk@vger.kernel.org
+References: <20210926224058.1252-1-digetx@gmail.com>
+ <20210926224058.1252-17-digetx@gmail.com>
+Message-ID: <e8f778b0-816f-3273-2c46-5d2460545610@gmail.com>
+Date:   Thu, 30 Sep 2021 03:40:00 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-References: <20210929212713.1213476-1-brendanhiggins@google.com> <20210929212713.1213476-2-brendanhiggins@google.com>
-In-Reply-To: <20210929212713.1213476-2-brendanhiggins@google.com>
-From:   David Gow <davidgow@google.com>
-Date:   Thu, 30 Sep 2021 08:12:31 +0800
-Message-ID: <CABVgOSm-UO7dqgBQs81rof1H92Vcfs0j4XsWBa_Wt+LTiimWNA@mail.gmail.com>
-Subject: Re: [PATCH v2 1/5] gcc-plugins/structleak: add makefile var for
- disabling structleak
-To:     Brendan Higgins <brendanhiggins@google.com>
-Cc:     Shuah Khan <shuah@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-        Kees Cook <keescook@chromium.org>, rafael@kernel.org,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>, andreas.noever@gmail.com,
-        michael.jamet@intel.com,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        YehezkelShB@gmail.com, Masahiro Yamada <masahiroy@kernel.org>,
-        michal.lkml@markovi.net,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        "open list:KERNEL SELFTEST FRAMEWORK" 
-        <linux-kselftest@vger.kernel.org>,
-        KUnit Development <kunit-dev@googlegroups.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-iio@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-usb@vger.kernel.org, linux-hardening@vger.kernel.org,
-        linux-kbuild@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20210926224058.1252-17-digetx@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Sep 30, 2021 at 5:27 AM Brendan Higgins
-<brendanhiggins@google.com> wrote:
->
-> KUnit and structleak don't play nice, so add a makefile variable for
-> enabling structleak when it complains.
->
-> Co-developed-by: Kees Cook <keescook@chromium.org>
-> Signed-off-by: Kees Cook <keescook@chromium.org>
-> Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
+27.09.2021 01:40, Dmitry Osipenko пишет:
+> The Tegra USB controller belongs to the core power domain and we're going
+> to enable GENPD support for the core domain. Now USB controller must be
+> resumed using runtime PM API in order to initialize the USB power state.
+> We already support runtime PM for the CI device, but CI's PM is separated
+> from the RPM managed by tegra-usb driver. Add runtime PM and OPP support
+> to the driver.
+> 
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 > ---
-> Changes since last revision:
->  - None
-> ---
+>  drivers/usb/chipidea/ci_hdrc_tegra.c | 53 ++++++++++++++++++++++++----
+>  1 file changed, 46 insertions(+), 7 deletions(-)
 
-This seems as sensible a way of working around this as we're going to
-get in the short-term.
-
-Reviewed-by: David Gow <davidgow@google.com>
-
-Cheers,
--- David
+Peter Chen, could you please ack this patch? Thanks in advance!
