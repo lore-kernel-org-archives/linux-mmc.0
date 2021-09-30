@@ -2,189 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB804C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 10:08:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D622C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 11:00:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CF4E961994
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 10:08:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7DDE3619A6
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 11:00:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349676AbhI3KKQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Sep 2021 06:10:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58660 "EHLO
+        id S1350206AbhI3LCY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Sep 2021 07:02:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349677AbhI3KKP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2021 06:10:15 -0400
+        with ESMTP id S1350257AbhI3LCY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2021 07:02:24 -0400
 Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1F42C06176C
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Sep 2021 03:08:32 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id j5so18184946lfg.8
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Sep 2021 03:08:32 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98D78C06176A
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Sep 2021 04:00:41 -0700 (PDT)
+Received: by mail-lf1-x12c.google.com with SMTP id j5so18720216lfg.8
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Sep 2021 04:00:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=mwTJIBSdS6R0C6OOzQhsYG/CA9Av8xCuOU1iydIZfq8=;
-        b=ivZCT+RSpG5Lr3g/DnUUf9qNfJjNYEBDbk0sXckN3US/d3v73YYcN23q0gW1WEDlCF
-         4QdzhSNaM0Lm9mjqyKiP/SvHhFGovDkoONIkjO6jEXsrqXkeuyGKcdG2dAh8vfVEmSRj
-         nke3WD52VbQKrXvU5FjyYTgmtUKEHPvQpiBan+Leef4aA7HQdSVd7xVwJ67rmFFTYmIt
-         zE+4gHgh7oa4RgNQvVReezvOaMgOIT+2CvBjbFAVrMr2Ej5UazkPfRl0orjBYUB0/MF5
-         4C2cUNV52DHLyVT8sMkGmEiMl7PP1Efg+OV9kaU8DlpmA6RXnUJOzKC55Om6qfkezQHS
-         mQgQ==
+         :cc;
+        bh=3paTwRjuoWutw0fS6/rPNTw4z+kWTMvX0jj70+ZzL4k=;
+        b=cD2OX5QDfrdNPoZ9A4XO3D6eqhyMMxfaYKqbM6zDQXwU4mrq886RI2lJonX3G1Xbj1
+         B9cp0Ua9DwOfvKaNLPaCL0aP6sY9y7udhrEzOMtzhAuTgswAXyO8aff+ZXYQpyJO3idR
+         kE+Oxo/2Xe6VXt7Q0oa+SvePrU3C36PFG0kcH7zt1p+YBtbQBIgwTTPvxfKR+V/+D+iN
+         s+OnFLmSlxWyqNiPG4HxWXEClKyAtS4o9CakIyZi7U6lknTBeVqjA3N/ezifZ58Z18mJ
+         TDDKRkjXV5TEq+O5Sdawl79edJH/mXv47pG+IBoX24RwyXC4sz7ZJDYuTYfuufWUQANz
+         af1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=mwTJIBSdS6R0C6OOzQhsYG/CA9Av8xCuOU1iydIZfq8=;
-        b=R1yu8+7ZdwBbMM7g+kCO+zuTlWWb2Ep9Pa6gUCSHlzyLmWyKEqnWj0typpMAOupSRW
-         Y9u2ruqgl8UDBsiAUJpaAZEGsN90sL59rUjNvSEfhw0HO3fXnu6gE2wuQB7inwUElTF3
-         dmVDBbqV3vx9QUnDNGrhgM1PoG5BGDgQQwxEwjPMbwMeU9CiYGOHmvmSux/HSzv9iwqD
-         HeMcluUhuVKJ+N6H7cZcjdRx6bBuHKn1UWTIduQt9Oy6FTaFRDzku+5T6s4dkCbODmJv
-         DaDQMAm4hLOuFlN7GfHA6haDXc6jm3nKt0bcpY1Mt6xdLiQC0s8O37iXD+qAl+BFUVMO
-         KySA==
-X-Gm-Message-State: AOAM531QWCM3gjdjruZnhFGKvQSM2YhkKk49PsE2W9lhK7TB2ZmxJmaf
-        vMWIhVMeYvcCU/mMaiBgYqlurx5xnmCdtqPsLZzTUw==
-X-Google-Smtp-Source: ABdhPJxp5GhGqokFxVNBLzc5wAxYntlHon3eHPcHlnoTTXeNni+3NFATmwx155GBOUerq63XPBnIf991pZVt2hJfQIM=
-X-Received: by 2002:a2e:898c:: with SMTP id c12mr5105509lji.16.1632996511275;
- Thu, 30 Sep 2021 03:08:31 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=3paTwRjuoWutw0fS6/rPNTw4z+kWTMvX0jj70+ZzL4k=;
+        b=awK4yp4Qqvsr+Yif5P79r+y0n2YWqLpvrv1qzQdZeVCyE6s+OZU/c47PyvT4YLp2Sc
+         ls1Ii6IRxiRbYqSfcfW3o5+4Tp5jmL5AvFsLgxUlyAl2ttM956l03d3PKg38WeapHWXo
+         dwjmybBCV+naVdwMHywwUJOzNDvf91lw/6ezV4zu9kgN4E1Kj4OV/wI/fclV6a56CS0D
+         KpoLXVgNJMHUa/qBAGZIFe6ju8t5JGtvP1giN/rrJhagh6Zd7vnrM1Qlt9wXVJXvlkr1
+         aiHFEABEyg+JKuzF+Tjj6zX1ODzaGdhhPhewa3Bt57I+TFBwscmBon8c3U8XLDljUSOF
+         Bi3Q==
+X-Gm-Message-State: AOAM532gfLis3prMXWZNnQiqOttL32DV6dZNscSDeQzcDIniWcqMV0u/
+        m7+sQ8FtOF4U3OFRZhtZKzt4n7+WOTYeqfFLRK62uQ==
+X-Google-Smtp-Source: ABdhPJwlcPYRdliaFL/hRdve/aA6h3WG2/GLsSKGwlkKHIB0RGyN7KREuv1W0CW/YZik2WJlpZRa6gdfWMqznikfaMU=
+X-Received: by 2002:a19:5f4b:: with SMTP id a11mr5099579lfj.373.1632999639151;
+ Thu, 30 Sep 2021 04:00:39 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com> <20210920161136.2398632-9-Jerome.Pouiller@silabs.com>
-In-Reply-To: <20210920161136.2398632-9-Jerome.Pouiller@silabs.com>
+References: <20210926132847.22268-1-shawn.guo@linaro.org>
+In-Reply-To: <20210926132847.22268-1-shawn.guo@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 30 Sep 2021 12:07:55 +0200
-Message-ID: <CAPDyKFp2_41mScO=-Ev+kvYD5xjShQdLugU_2FTTmvzgCxmEWA@mail.gmail.com>
-Subject: Re: [PATCH v7 08/24] wfx: add bus_sdio.c
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        driverdevel <devel@driverdev.osuosl.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        DTML <devicetree@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
+Date:   Thu, 30 Sep 2021 13:00:03 +0200
+Message-ID: <CAPDyKFoVJSkODW8bjHcTVywiNPMQndHhg2B9haQTP_3M3-B3hQ@mail.gmail.com>
+Subject: Re: [RFC PATCH] mmc: sdhci: Map more voltage level to SDHCI_POWER_330
+To:     Shawn Guo <shawn.guo@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 20 Sept 2021 at 18:12, Jerome Pouiller
-<Jerome.Pouiller@silabs.com> wrote:
+On Sun, 26 Sept 2021 at 15:28, Shawn Guo <shawn.guo@linaro.org> wrote:
 >
-> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> On Thundercomm TurboX CM2290, the eMMC OCR reports vdd = 23 (3.5 ~ 3.6 V),
+> which is being treated as an invalid value by sdhci_set_power_noreg().
+> And thus eMMC is totally broken on the platform.
 >
-> Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> [    1.436599] ------------[ cut here ]------------
+> [    1.436606] mmc0: Invalid vdd 0x17
+> [    1.436640] WARNING: CPU: 2 PID: 69 at drivers/mmc/host/sdhci.c:2048 sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436655] Modules linked in:
+> [    1.436662] CPU: 2 PID: 69 Comm: kworker/u8:1 Tainted: G        W         5.15.0-rc1+ #137
+> [    1.436669] Hardware name: Thundercomm TurboX CM2290 (DT)
+> [    1.436674] Workqueue: events_unbound async_run_entry_fn
+> [    1.436685] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+> [    1.436692] pc : sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436698] lr : sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436703] sp : ffff800010803a60
+> [    1.436705] x29: ffff800010803a60 x28: ffff6a9102465f00 x27: ffff6a9101720a70
+> [    1.436715] x26: ffff6a91014de1c0 x25: ffff6a91014de010 x24: ffff6a91016af280
+> [    1.436724] x23: ffffaf7b1b276640 x22: 0000000000000000 x21: ffff6a9101720000
+> [    1.436733] x20: ffff6a9101720370 x19: ffff6a9101720580 x18: 0000000000000020
+> [    1.436743] x17: 0000000000000000 x16: 0000000000000004 x15: ffffffffffffffff
+> [    1.436751] x14: 0000000000000000 x13: 00000000fffffffd x12: ffffaf7b1b84b0bc
+> [    1.436760] x11: ffffaf7b1b720d10 x10: 000000000000000a x9 : ffff800010803a60
+> [    1.436769] x8 : 000000000000000a x7 : 000000000000000f x6 : 00000000fffff159
+> [    1.436778] x5 : 0000000000000000 x4 : 0000000000000000 x3 : 00000000ffffffff
+> [    1.436787] x2 : 0000000000000000 x1 : 0000000000000000 x0 : ffff6a9101718d80
+> [    1.436797] Call trace:
+> [    1.436800]  sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436805]  sdhci_set_ios+0xa0/0x7fc
+> [    1.436811]  mmc_power_up.part.0+0xc4/0x164
+> [    1.436818]  mmc_start_host+0xa0/0xb0
+> [    1.436824]  mmc_add_host+0x60/0x90
+> [    1.436830]  __sdhci_add_host+0x174/0x330
+> [    1.436836]  sdhci_msm_probe+0x7c0/0x920
+> [    1.436842]  platform_probe+0x68/0xe0
+> [    1.436850]  really_probe.part.0+0x9c/0x31c
+> [    1.436857]  __driver_probe_device+0x98/0x144
+> [    1.436863]  driver_probe_device+0xc8/0x15c
+> [    1.436869]  __device_attach_driver+0xb4/0x120
+> [    1.436875]  bus_for_each_drv+0x78/0xd0
+> [    1.436881]  __device_attach_async_helper+0xac/0xd0
+> [    1.436888]  async_run_entry_fn+0x34/0x110
+> [    1.436895]  process_one_work+0x1d0/0x354
+> [    1.436903]  worker_thread+0x13c/0x470
+> [    1.436910]  kthread+0x150/0x160
+> [    1.436915]  ret_from_fork+0x10/0x20
+> [    1.436923] ---[ end trace fcfac44cb045c3a8 ]---
+>
+> Fix the issue by mapping MMC_VDD_35_36 (and MMC_VDD_34_35) to
+> SDHCI_POWER_330 as well.
+>
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 > ---
->  drivers/net/wireless/silabs/wfx/bus_sdio.c | 261 +++++++++++++++++++++
->  1 file changed, 261 insertions(+)
->  create mode 100644 drivers/net/wireless/silabs/wfx/bus_sdio.c
+> I'm not sure if this is the right solution, as I do not have SDHCI
+> specification.  Hence it's a RFC.
 >
-> diff --git a/drivers/net/wireless/silabs/wfx/bus_sdio.c b/drivers/net/wir=
-eless/silabs/wfx/bus_sdio.c
+>  drivers/mmc/host/sdhci.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 8eefa7d5fe85..2427481535a3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2042,6 +2042,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>                         break;
+>                 case MMC_VDD_32_33:
+>                 case MMC_VDD_33_34:
+> +               case MMC_VDD_34_35:
+> +               case MMC_VDD_35_36:
+>                         pwr = SDHCI_POWER_330;
 
-[...]
+The SDHCI specification doesn't state exactly what level
+SDHCI_POWER_330 corresponds to. It's 3.3V typically.
 
-> +
-> +static int wfx_sdio_probe(struct sdio_func *func,
-> +                         const struct sdio_device_id *id)
-> +{
-> +       struct device_node *np =3D func->dev.of_node;
-> +       struct wfx_sdio_priv *bus;
-> +       int ret;
-> +
-> +       if (func->num !=3D 1) {
-> +               dev_err(&func->dev, "SDIO function number is %d while it =
-should always be 1 (unsupported chip?)\n",
-> +                       func->num);
-> +               return -ENODEV;
-> +       }
-> +
-> +       bus =3D devm_kzalloc(&func->dev, sizeof(*bus), GFP_KERNEL);
-> +       if (!bus)
-> +               return -ENOMEM;
-> +
-> +       if (!np || !of_match_node(wfx_sdio_of_match, np)) {
-> +               dev_warn(&func->dev, "no compatible device found in DT\n"=
-);
-> +               return -ENODEV;
-> +       }
-> +
-> +       bus->func =3D func;
-> +       bus->of_irq =3D irq_of_parse_and_map(np, 0);
-> +       sdio_set_drvdata(func, bus);
-> +       func->card->quirks |=3D MMC_QUIRK_LENIENT_FN0 |
-> +                             MMC_QUIRK_BLKSZ_FOR_BYTE_MODE |
-> +                             MMC_QUIRK_BROKEN_BYTE_MODE_512;
+I don't have any strong opinion about this change, although I am a
+little bit puzzled over why this solves the problem for you.
 
-I would rather see that you add an SDIO_FIXUP for the SDIO card, to
-the sdio_fixup_methods[], in drivers/mmc/core/quirks.h, instead of
-this.
+Unless the host (sdhci) announces that it supports MMC_VDD_34_35 or
+MMC_VDD_35_36 through its mmc->ocr_avail mask, the mmc core shouldn't
+try to use it. Can you perhaps check what value the mmc->ocr_avail
+gets assigned to in sdhci_setup_host() for your mmc host?
 
-> +
-> +       sdio_claim_host(func);
-> +       ret =3D sdio_enable_func(func);
-> +       /* Block of 64 bytes is more efficient than 512B for frame sizes =
-< 4k */
-> +       sdio_set_block_size(func, 64);
-> +       sdio_release_host(func);
-> +       if (ret)
-> +               return ret;
-> +
-> +       bus->core =3D wfx_init_common(&func->dev, &wfx_sdio_pdata,
-> +                                   &wfx_sdio_hwbus_ops, bus);
-> +       if (!bus->core) {
-> +               ret =3D -EIO;
-> +               goto sdio_release;
-> +       }
-> +
-> +       ret =3D wfx_probe(bus->core);
-> +       if (ret)
-> +               goto sdio_release;
-> +
-> +       return 0;
-> +
-> +sdio_release:
-> +       sdio_claim_host(func);
-> +       sdio_disable_func(func);
-> +       sdio_release_host(func);
-> +       return ret;
-> +}
-> +
-> +static void wfx_sdio_remove(struct sdio_func *func)
-> +{
-> +       struct wfx_sdio_priv *bus =3D sdio_get_drvdata(func);
-> +
-> +       wfx_release(bus->core);
-> +       sdio_claim_host(func);
-> +       sdio_disable_func(func);
-> +       sdio_release_host(func);
-> +}
-> +
-> +static const struct sdio_device_id wfx_sdio_ids[] =3D {
-> +       { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILABS_WF200)=
- },
-> +       { },
-> +};
-> +MODULE_DEVICE_TABLE(sdio, wfx_sdio_ids);
-> +
-> +struct sdio_driver wfx_sdio_driver =3D {
-> +       .name =3D "wfx-sdio",
-> +       .id_table =3D wfx_sdio_ids,
-> +       .probe =3D wfx_sdio_probe,
-> +       .remove =3D wfx_sdio_remove,
-> +       .drv =3D {
-> +               .owner =3D THIS_MODULE,
-> +               .of_match_table =3D wfx_sdio_of_match,
-
-Is there no power management? Or do you intend to add that on top?
-
-> +       }
-> +};
+>                         break;
+>                 default:
 > --
-> 2.33.0
+> 2.17.1
 >
 
 Kind regards
