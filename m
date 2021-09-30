@@ -2,108 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EA7DC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 21:27:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70D60C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 00:12:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 68A9061501
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Sep 2021 21:27:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A23A61452
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 00:12:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346991AbhI2V3V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Sep 2021 17:29:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55648 "EHLO
+        id S1347352AbhI3AO0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Sep 2021 20:14:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347003AbhI2V3M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2021 17:29:12 -0400
-Received: from mail-yb1-xb4a.google.com (mail-yb1-xb4a.google.com [IPv6:2607:f8b0:4864:20::b4a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01382C061775
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 14:27:31 -0700 (PDT)
-Received: by mail-yb1-xb4a.google.com with SMTP id t9-20020a056902124900b005b64be937e1so5143409ybu.23
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 14:27:30 -0700 (PDT)
+        with ESMTP id S1346612AbhI3AOZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Sep 2021 20:14:25 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11342C06161C
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 17:12:44 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id w29so7014259wra.8
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Sep 2021 17:12:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20210112;
-        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=08MMqZQxkHJyz/VF+8d0XPyGY6ToAo0OA/OmmtaYHyg=;
-        b=Xc0r7XDhQk/RWJL3VJzgIR6Z34QQY3yA7gfvyI2MR/G/ctI7q+99DthyY5LlcWg2e7
-         yNZKWxRGgPdrPrKcdjVGfuLYpgUyyaxc9QM+cEdXLZO7cGIBk81SomjCOBT5pFHhS50s
-         c6xbphtTxJebvIq+LQjYxHjM/EiPRt3x+0CttaNT3TVpxgt96Nx34le5hdAMHS1ggHKu
-         uoCMduNUutZNaLiuUGpfAGsoSYuT04gWEbTvHxWTQXG9vA1xAV4uphxEGXqqwOYkP7G9
-         Czl8saVkvd0Wswmv2h2fMTdekMv294gEiwyuHMbzXc/Mvk4eKvpBG3Q+5f1Pbd2ghoD/
-         m3kA==
+        bh=so++ktLIXuia7S6U7BNUIBcKY9801GrgXLBNXOJCctA=;
+        b=H10inSR11/VqU/haFPGpWYX4eIl9XnsEwCEZH+0AQ8FWEQkjTj0EN+Ya1EZTQu+shE
+         kLIbu8rSIIg9sHC7IW3s76bjB/WmFjFJjdj0iG5s2SYq24KYemuCcgelDuoHT3GfKS5v
+         GHSR1Dp2nFiYEjqUc142eJslL5BRz2qpBArRi0DXE+UlUPDs76Licbk4P74ic6KB3nuO
+         nbcqF+xbsNBjS+T7iHicGmK/f3REcqIW+rmyhP9eOiM6KxgtdZWCtDzuFE1OlxUQLNxZ
+         DffsQdUDTQvoP4PoIaIP9ZQclasRxjaTX+Ph27orlZrw9Of2+FqJkvWU93dImtsnJ5AL
+         8P4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
-         :references:subject:from:to:cc;
-        bh=08MMqZQxkHJyz/VF+8d0XPyGY6ToAo0OA/OmmtaYHyg=;
-        b=gFH4aNSOA4UJhFbUyusEgAoWSZnCabBSAg20Hg7QptIzRF9Sl6YCP/kRdFW9Euc3Ms
-         swk9YC9xDSpHn3e4dxhQ6A+ya9qTPWjIH71/heGsO/O5aAk9dPRir5XOzMqTUFtyGG9Q
-         VhN/5OyHMLMnn4+s8smskrq118RFCBYfrFm3l9vnrvHwK1ZbsxH8e2eajZ8VUZVCeiHg
-         pF/Ui1SDP1/jnKfuucag7s57kXwphBuheoG9vGELddoNRUXBNL2n9wryRUUFPnSANmDR
-         X2Sb9NyfSMAZ1IRqZtLV07SbxXObmJETHffJmSVtI6POhPLg/sx0qQiMrQLste0fh6Qi
-         T6hA==
-X-Gm-Message-State: AOAM531S42wdFrc2dWSuM1oMU/uC6oh5lOOafTtX/MtX37pdXyFEfk+x
-        e5TvgNJ/SpgmqgIbPnmz1wBJdYY1dVofznzBKudzjA==
-X-Google-Smtp-Source: ABdhPJydtA3evA/mok1g6x4rh7TZpUEjkOozHd/KU5sU/LKW6mja59yYtNHfsoGoBJBqAHbTDyWHKtYkEMdXaZ/OgKddcA==
-X-Received: from mactruck.svl.corp.google.com ([2620:15c:2cb:201:83f4:ff43:90d6:efd3])
- (user=brendanhiggins job=sendgmr) by 2002:a25:1584:: with SMTP id
- 126mr2372236ybv.126.1632950850186; Wed, 29 Sep 2021 14:27:30 -0700 (PDT)
-Date:   Wed, 29 Sep 2021 14:27:13 -0700
-In-Reply-To: <20210929212713.1213476-1-brendanhiggins@google.com>
-Message-Id: <20210929212713.1213476-6-brendanhiggins@google.com>
-Mime-Version: 1.0
-References: <20210929212713.1213476-1-brendanhiggins@google.com>
-X-Mailer: git-send-email 2.33.0.685.g46640cef36-goog
-Subject: [PATCH v2 5/5] bitfield: build kunit tests without structleak plugin
-From:   Brendan Higgins <brendanhiggins@google.com>
-To:     shuah@kernel.org, davidgow@google.com, arnd@arndb.de,
-        keescook@chromium.org, rafael@kernel.org, jic23@kernel.org,
-        lars@metafoo.de, ulf.hansson@linaro.org, andreas.noever@gmail.com,
-        michael.jamet@intel.com, mika.westerberg@linux.intel.com,
-        YehezkelShB@gmail.com, masahiroy@kernel.org,
-        michal.lkml@markovi.net, ndesaulniers@google.com
-Cc:     linux-kselftest@vger.kernel.org, kunit-dev@googlegroups.com,
-        linux-kernel@vger.kernel.org, torvalds@linux-foundation.org,
-        gregkh@linuxfoundation.org, linux-iio@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-hardening@vger.kernel.org, linux-kbuild@vger.kernel.org,
-        Brendan Higgins <brendanhiggins@google.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=so++ktLIXuia7S6U7BNUIBcKY9801GrgXLBNXOJCctA=;
+        b=TmYXkS6DngOl9urQUTItHtM2Q+soTKWnf+vRrrJMcTNvUeYT9poP3yds37NUsHuxAO
+         17YZ26spyrpvKwLB52XwFK86dHYsspLLvl5VI0dO8Hlj8wtzG0Ip3XlQNJJV7VqthtQe
+         ytBRhHJ5h9KBLkUbR97Osez3LqB17MXaaGeqkZMc3jYXngxkR1gh6ahq7Kx2yW+evbj9
+         dUZ58XvzfIhy1Y/yYndt+EmlNuCnTK/nAnc3CeqHqLNPiqOIJSYB3kb2HTtVgWOKLiuE
+         Ty5eWY/7EYebMQYfXi9oPyT+vj++mFugaJPc7dDpWoUiXQ2PlUtgbMbXfaXRQfa/Tw+2
+         ZMOw==
+X-Gm-Message-State: AOAM5329SJu7Y9Ka+M6aXyV82WZvU++9zzEkfWil/7mikxoSkB3X6zES
+        thLzhR0zy7FZCy/bNpjBOpq+yDbpW3/Bf6s3ofRPZA==
+X-Google-Smtp-Source: ABdhPJzLw+kdyCSCCFIkNR/DETrYiq3Usylp9hzBKF2UTTUKIJsZKQpT9jR+TAL9iB1u9TMtKwstF0pfX1MRpQGrFfM=
+X-Received: by 2002:adf:dd8a:: with SMTP id x10mr2980547wrl.200.1632960762539;
+ Wed, 29 Sep 2021 17:12:42 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210929212713.1213476-1-brendanhiggins@google.com> <20210929212713.1213476-2-brendanhiggins@google.com>
+In-Reply-To: <20210929212713.1213476-2-brendanhiggins@google.com>
+From:   David Gow <davidgow@google.com>
+Date:   Thu, 30 Sep 2021 08:12:31 +0800
+Message-ID: <CABVgOSm-UO7dqgBQs81rof1H92Vcfs0j4XsWBa_Wt+LTiimWNA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/5] gcc-plugins/structleak: add makefile var for
+ disabling structleak
+To:     Brendan Higgins <brendanhiggins@google.com>
+Cc:     Shuah Khan <shuah@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Kees Cook <keescook@chromium.org>, rafael@kernel.org,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>, andreas.noever@gmail.com,
+        michael.jamet@intel.com,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        YehezkelShB@gmail.com, Masahiro Yamada <masahiroy@kernel.org>,
+        michal.lkml@markovi.net,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        "open list:KERNEL SELFTEST FRAMEWORK" 
+        <linux-kselftest@vger.kernel.org>,
+        KUnit Development <kunit-dev@googlegroups.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-iio@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-usb@vger.kernel.org, linux-hardening@vger.kernel.org,
+        linux-kbuild@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Arnd Bergmann <arnd@arndb.de>
+On Thu, Sep 30, 2021 at 5:27 AM Brendan Higgins
+<brendanhiggins@google.com> wrote:
+>
+> KUnit and structleak don't play nice, so add a makefile variable for
+> enabling structleak when it complains.
+>
+> Co-developed-by: Kees Cook <keescook@chromium.org>
+> Signed-off-by: Kees Cook <keescook@chromium.org>
+> Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
+> ---
+> Changes since last revision:
+>  - None
+> ---
 
-The structleak plugin causes the stack frame size to grow immensely:
+This seems as sensible a way of working around this as we're going to
+get in the short-term.
 
-lib/bitfield_kunit.c: In function 'test_bitfields_constants':
-lib/bitfield_kunit.c:93:1: error: the frame size of 7440 bytes is larger than 2048 bytes [-Werror=frame-larger-than=]
+Reviewed-by: David Gow <davidgow@google.com>
 
-Turn it off in this file.
-
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
-Reviewed-by: Kees Cook <keescook@chromium.org>
----
-Changes since last revision:
- - Dropped -Wframe-larger-than=10240 from CFLAGS.
----
- lib/Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/lib/Makefile b/lib/Makefile
-index 5efd1b435a37c..a841be5244ac6 100644
---- a/lib/Makefile
-+++ b/lib/Makefile
-@@ -351,7 +351,7 @@ obj-$(CONFIG_OBJAGG) += objagg.o
- obj-$(CONFIG_PLDMFW) += pldmfw/
- 
- # KUnit tests
--CFLAGS_bitfield_kunit.o := $(call cc-option,-Wframe-larger-than=10240)
-+CFLAGS_bitfield_kunit.o := $(DISABLE_STRUCTLEAK_PLUGIN)
- obj-$(CONFIG_BITFIELD_KUNIT) += bitfield_kunit.o
- obj-$(CONFIG_LIST_KUNIT_TEST) += list-test.o
- obj-$(CONFIG_LINEAR_RANGES_TEST) += test_linear_ranges.o
--- 
-2.33.0.685.g46640cef36-goog
-
+Cheers,
+-- David
