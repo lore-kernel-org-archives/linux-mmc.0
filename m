@@ -2,102 +2,154 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC1AEC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 12:45:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C40AC43217
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 12:51:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CF84B619EE
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 12:45:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31C0161A8F
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 12:51:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354458AbhJAMrK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 08:47:10 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:51675 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1353947AbhJAMrJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Oct 2021 08:47:09 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1633092325; h=Content-Transfer-Encoding: Content-Type:
- MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=DxUzotX+Y7gO/nEKkP180xLqp5Xbdp3BDVDGIp9TVHI=; b=AP08yk6XSzc/ZrFpN+kUqCZrpWY4Gv+47bE64L6xSAqkAdCjYqtuwMMSu9WIP+Kmblvfsqlp
- 6YhOV8qxDZH4/yRb61ZrFuVF/kgpjPPCeBHB35dhPmcGzrzWwdC0GaYxWjJkFr+FlMXNDFj/
- XBdUQKuAtCI9u9sRPrqN27/qM2k=
-X-Mailgun-Sending-Ip: 69.72.43.7
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n07.prod.us-west-2.postgun.com with SMTP id
- 615702db605ecf100bfaac92 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 01 Oct 2021 12:45:15
- GMT
-Sender: kvalo=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 23036C43618; Fri,  1 Oct 2021 12:45:15 +0000 (UTC)
-Received: from tykki (tynnyri.adurom.net [51.15.11.48])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id A3539C4338F;
-        Fri,  1 Oct 2021 12:45:11 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org A3539C4338F
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
-From:   Kalle Valo <kvalo@codeaurora.org>
-To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
-Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org,
-        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v7 12/24] wfx: add hif_api_*.h
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
-        <20210920161136.2398632-13-Jerome.Pouiller@silabs.com>
-        <875yuhkm4c.fsf@codeaurora.org> <2600267.GQK6fj20dd@pc-42>
-Date:   Fri, 01 Oct 2021 15:45:05 +0300
-In-Reply-To: <2600267.GQK6fj20dd@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
- Pouiller"'s message of "Fri,
-        01 Oct 2021 13:52:52 +0200")
-Message-ID: <877dewkj72.fsf@codeaurora.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        id S1353556AbhJAMwr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Oct 2021 08:52:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59184 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230239AbhJAMwr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 08:52:47 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2A39C06177B
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Oct 2021 05:51:02 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id i19so35068534lfu.0
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Oct 2021 05:51:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=U3g3FVHcAfq2CjS/tDBEgPrTjvgAlik1UmRsepWrO/M=;
+        b=AzjhIKsGc5F00nF8gT49XgOerH2kylziofl1fTWdcLRpswV4wNz8DKK5xJ7On0pP/7
+         FUfZ1Wgbt1/fuaxVdMYCvvgTtIGVXfv0UoK33+IzBB+zOi+jh2jn6j2wyaLjswS/IOzw
+         SQjTg3BAouTPEqyD9JFdD9cYzi69CQhCoGH5fKvFHMMepL7XM0KGl/OrspTiy4mR9WhP
+         foe5FrlQSoXx4OG2RW+Mn3fWJuth6XGpzQJ4ILLPGQ/0+fTYG3YwXfmnYk9SirlbmFbB
+         VWqNGRy6BMbC7o4y9fE4zK6CBmWtNh3bv3/HT2LLpsFmdOSr7meyX9U8IJw0f7EYsu6v
+         RPYQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=U3g3FVHcAfq2CjS/tDBEgPrTjvgAlik1UmRsepWrO/M=;
+        b=mo2EABph/fW2L4BkH5zTaSSoZqihLbuNjHpThOQra7Ybk0x/caR5GhHpq3Tqy10Xdf
+         l177l4mRsqUGOQoixNA9XUL+7uDwvTxXPbjLXrokd4UraC+UH93ZUo8HynmoFyyhgsRM
+         EmgWgq0z/vByJJoMsWswR7aaXK6r4+dqoK6NdHejh3l3456q9p4eD9oCCng35VaVzjKS
+         shLrZyP8ampRaHAfoPMYZbznQei140rhR3SA4waZuPHuEvUmU2i/SKOacmE0GqcygsPg
+         xahN7uDPIOSKRsr0I2axGyA3rCcwr9PSnQt+yh6bzw/sbsHRWprv9SWE019EklGrhlwv
+         UoTw==
+X-Gm-Message-State: AOAM531wMaNnDMWyW1HXUzel+Pt85XVANu4fmO89ckdivKDbo8gUxoQz
+        O2x+GxNydEBakTqurowm1w6uKR74hYpCle7dPn5m/A==
+X-Google-Smtp-Source: ABdhPJwqqw8e12Oj8Mbs+ZBogohxgciqSKBUNXiyR2zo3nKqwCJ61Gsrw5pb7r1VVcKkZcvnXQuH+1x0Dzep9YUsgPg=
+X-Received: by 2002:a19:5f4b:: with SMTP id a11mr5158365lfj.373.1633092661107;
+ Fri, 01 Oct 2021 05:51:01 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-3-digetx@gmail.com>
+In-Reply-To: <20210926224058.1252-3-digetx@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 1 Oct 2021 14:50:25 +0200
+Message-ID: <CAPDyKFrtE75Tf-vefM0isj52PJ5_v525AjqU2TMUpc4__rYLhA@mail.gmail.com>
+Subject: Re: [PATCH v13 02/35] soc/tegra: Add devm_tegra_core_dev_init_opp_table_common()
+To:     Dmitry Osipenko <digetx@gmail.com>,
+        Viresh Kumar <vireshk@kernel.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
-
-> On Friday 1 October 2021 13:41:55 CEST Kalle Valo wrote:
->> Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
->>=20
->> > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
->> >
->> > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
->>=20
->> [...]
->>=20
->> > --- /dev/null
->> > +++ b/drivers/net/wireless/silabs/wfx/hif_api_cmd.h
->> > @@ -0,0 +1,555 @@
->> > +/* SPDX-License-Identifier: Apache-2.0 */
->>=20
->> I don't how I missed this earlier:
->>=20
->> hif_api_cmd.h:/* SPDX-License-Identifier: Apache-2.0 */
->> hif_api_general.h:/* SPDX-License-Identifier: Apache-2.0 */
->> hif_api_mib.h:/* SPDX-License-Identifier: Apache-2.0 */
->>=20
->> Apache-2.0 license is a blocker for me, see LICENSES/dual/Apache-2.0.
+On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> Ok. It is not a problem here. I have the authorisation to change it in
-> GPLv2-only.
+> Only couple drivers need to get the -ENODEV error code and majority of
+> drivers need to explicitly initialize the performance state. Add new
+> common helper which sets up OPP table for these drivers.
+>
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  include/soc/tegra/common.h | 24 ++++++++++++++++++++++++
+>  1 file changed, 24 insertions(+)
+>
+> diff --git a/include/soc/tegra/common.h b/include/soc/tegra/common.h
+> index af41ad80ec21..5b4a042f60fb 100644
+> --- a/include/soc/tegra/common.h
+> +++ b/include/soc/tegra/common.h
+> @@ -39,4 +39,28 @@ devm_tegra_core_dev_init_opp_table(struct device *dev,
+>  }
+>  #endif
+>
+> +/*
+> + * This function should be invoked with the enabled runtime PM of the device
+> + * in order to initialize performance state properly. Most of Tegra devices
+> + * are assumed to be suspended at a probe time and GENPD require RPM to be
+> + * enabled to set up the rpm-resume state, otherwise device is active and
+> + * performance state is applied immediately. Note that it will initialize
+> + * OPP bandwidth if it's wired in a device-tree for this device, which is
+> + * undesirable for a suspended device.
+> + */
+> +static inline int
+> +devm_tegra_core_dev_init_opp_table_common(struct device *dev)
+> +{
+> +       struct tegra_core_opp_params opp_params = {};
+> +       int err;
+> +
+> +       opp_params.init_state = true;
+> +
+> +       err = devm_tegra_core_dev_init_opp_table(dev, &opp_params);
+> +       if (err != -ENODEV)
+> +               return err;
+> +
+> +       return 0;
+> +}
 
-Great, thanks!
+Just want to share a few thoughts around these functions.
 
---=20
-https://patchwork.kernel.org/project/linux-wireless/list/
+So, I assume it's fine to call
+devm_tegra_core_dev_init_opp_table_common() or
+devm_tegra_core_dev_init_opp_table() from consumer drivers during
+->probe(), as long as those drivers are tegra specific, which I assume
+all are in the series!?
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
-hes
+My point is, a cross SoC consumer driver that needs to initiate OPP
+tables can get rather messy, if it would need to make one specific
+function call per SoC.
+
+That said, I hope we can tackle this as a separate/future problem, so
+the series can get merged as is.
+
+> +
+>  #endif /* __SOC_TEGRA_COMMON_H__ */
+> --
+> 2.32.0
+>
+
+Kind regards
+Uffe
