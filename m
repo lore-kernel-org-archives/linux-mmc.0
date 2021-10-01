@@ -2,172 +2,198 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42135C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 17:06:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F272C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 00:14:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2284A61881
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Sep 2021 17:06:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 781A061267
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 00:14:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349265AbhI3RIc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Sep 2021 13:08:32 -0400
-Received: from mail.kernel.org ([198.145.29.99]:35150 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1349021AbhI3RIc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 30 Sep 2021 13:08:32 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 01C07617E6;
-        Thu, 30 Sep 2021 17:06:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1633021609;
-        bh=qB28pyd3G9W1jKU1sJvEmXSTCB/fM9hWT/YO9coO46Y=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lD57I7buZC1D+E/nzOsGe0U6OnyD8kIUuCz9uhE3hVGiL5ivBjtmL2P/Nn7oFn8+A
-         VXrPZctdXHc0YQ1Tf3KPhhEsTj9EZhra5W8tNNXYZcYUC65XFTIFCR2Uz23fbx3wew
-         vW0IUupDXZrundBUHGdNgTD4y+nj69kh1XiadvJ+RF7V0qlKXy9p1qY5F/Boswqb9T
-         8TkWRFWlsqmJiH2FIGnVy30ojkH9FuZuK1q6/1GF9lRs0m2rDrskD8+arwKi/Tm9JS
-         IcZoholK/+5AHdWXzh16Ff5a7TEYZolj28BmojKYyw0oV3eB6hCkulag+JZD8mHy9X
-         9dBgrdTdFLtMA==
-Received: by pali.im (Postfix)
-        id A4204E79; Thu, 30 Sep 2021 19:06:46 +0200 (CEST)
-Date:   Thu, 30 Sep 2021 19:06:46 +0200
-From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
-To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        driverdevel <devel@driverdev.osuosl.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        DTML <devicetree@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH v7 08/24] wfx: add bus_sdio.c
-Message-ID: <20210930170646.cffsuytdpa72izbh@pali>
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
- <20210920161136.2398632-9-Jerome.Pouiller@silabs.com>
- <CAPDyKFp2_41mScO=-Ev+kvYD5xjShQdLugU_2FTTmvzgCxmEWA@mail.gmail.com>
- <19731906.ZuIkq4dnIL@pc-42>
+        id S1350993AbhJAAQO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Sep 2021 20:16:14 -0400
+Received: from mailout2.samsung.com ([203.254.224.25]:38003 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1345765AbhJAAQO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Sep 2021 20:16:14 -0400
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+        by mailout2.samsung.com (KnoxPortal) with ESMTP id 20211001001429epoutp02052a09838c1c3debad9ad6a164e5bf32~pv9bgoAcm0947609476epoutp02g
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Oct 2021 00:14:29 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20211001001429epoutp02052a09838c1c3debad9ad6a164e5bf32~pv9bgoAcm0947609476epoutp02g
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1633047269;
+        bh=DzRE5t4Nqs/YomOh3gWgUJRZgn+Nx9wVWadBQc+COIk=;
+        h=Subject:To:Cc:From:Date:In-Reply-To:References:From;
+        b=n129Urpioj+j+AD2cL3vq9u3N4NnT0OWh+2wAxVQ4z7uKAiVVfTuuOqLNwJqYlMY0
+         Y0psiQ+64GNXvEkuXeO3hag+VwaiQEWlL8mSitJGxjh+ZzybV9YXg/+K0Nzp6Ublxt
+         0mCwL/Bt6qhM6rT0cGhsHY7cwsrvbwO2k06sEHzY=
+Received: from epsnrtp4.localdomain (unknown [182.195.42.165]) by
+        epcas1p1.samsung.com (KnoxPortal) with ESMTP id
+        20211001001428epcas1p16d31c2c7b7bd1d66076015f3de2d6d97~pv9a8p_GH2162121621epcas1p1p;
+        Fri,  1 Oct 2021 00:14:28 +0000 (GMT)
+Received: from epsmges1p5.samsung.com (unknown [182.195.38.237]) by
+        epsnrtp4.localdomain (Postfix) with ESMTP id 4HL9b149Hsz4x9QQ; Fri,  1 Oct
+        2021 00:14:21 +0000 (GMT)
+Received: from epcas1p4.samsung.com ( [182.195.41.48]) by
+        epsmges1p5.samsung.com (Symantec Messaging Gateway) with SMTP id
+        03.3B.13888.8D256516; Fri,  1 Oct 2021 09:14:16 +0900 (KST)
+Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
+        epcas1p4.samsung.com (KnoxPortal) with ESMTPA id
+        20211001001415epcas1p40c13dc3fa74b72600b117e1180428f52~pv9Oc25cZ3227232272epcas1p4D;
+        Fri,  1 Oct 2021 00:14:15 +0000 (GMT)
+Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
+        epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
+        20211001001415epsmtrp25f2258c6a3ae37328e7cba86cf330372~pv9OcKBM00216202162epsmtrp2h;
+        Fri,  1 Oct 2021 00:14:15 +0000 (GMT)
+X-AuditID: b6c32a39-227ff70000003640-d7-615652d817eb
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        86.10.08750.7D256516; Fri,  1 Oct 2021 09:14:15 +0900 (KST)
+Received: from [10.113.113.235] (unknown [10.113.113.235]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20211001001415epsmtip2df8b22c81186bd401ad252101617a6be~pv9OPE-Sy0723307233epsmtip2O;
+        Fri,  1 Oct 2021 00:14:15 +0000 (GMT)
+Subject: Re: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc:     "marten.lindahl@axis.com" <marten.lindahl@axis.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+From:   Jaehoon Chung <jh80.chung@samsung.com>
+Message-ID: <2cd1ea80-9fde-ef0f-6ce6-b29ba0894994@samsung.com>
+Date:   Fri, 1 Oct 2021 09:15:00 +0900
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+        Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+In-Reply-To: <cfe4476922584dff91bf0fdbec0c0843@hyperstone.com>
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <19731906.ZuIkq4dnIL@pc-42>
-User-Agent: NeoMutt/20180716
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpmk+LIzCtJLcpLzFFi42LZdljTQPdGUFiiwevtohazb/tbXN41h83i
+        yP9+RosJVyczWhxfG+7A6nF9XYDHmXUPGD3uXNvD5vF5k1wAS1S2TUZqYkpqkUJqXnJ+SmZe
+        uq2Sd3C8c7ypmYGhrqGlhbmSQl5ibqqtkotPgK5bZg7QUiWFssScUqBQQGJxsZK+nU1RfmlJ
+        qkJGfnGJrVJqQUpOgWmBXnFibnFpXrpeXmqJlaGBgZEpUGFCdsa7ozuZCuaJVTS++cDcwNgk
+        1MXIySEhYCIx9+x7ZhBbSGAHo8S+A35djFxA9idGiY43z5ggEp8ZJT4fZYdpeL2xjR0ivotR
+        YuLvYoiG94wSK78uYgRJCAt4SOx4O48VxBYR2MkocWm/WBcjBwezQI7EnG/5IGE2AR2J7d+O
+        g83nFbCTuHbiIdhMFgEViflfToIdJCoQKfH35C5WiBpBiZMzn7CA2JxA9Y8mdoLZzALiEree
+        zGeCsOUlmrfOZga5R0LgK7tE05tlzBBHu0hc3nyTDcIWlnh1fAvUM1ISn9/thYpXS+xqPgPV
+        3MEocWtbExNEwlhi/9LJTBAPaEqs36UPEVaU2Pl7LiPEYj6Jd197WEFKJAR4JTraoIGrInHp
+        9UsmmFV3n/xnhbA9JB5+us46gVFxFpLXZiF5ZxaSd2YhLF7AyLKKUSy1oDg3PbXYsMAUHtXJ
+        +bmbGMGpUctyB+P0tx/0DjEycTAeYpTgYFYS4f0hHpwoxJuSWFmVWpQfX1Sak1p8iNEUGNgT
+        maVEk/OByTmvJN7QxNLAxMzI2MTC0MxQSZz32GvLRCGB9MSS1OzU1ILUIpg+Jg5OqQamNVcN
+        lz8XkjXwNTVwWhjpfnd36c6nW/jeb1zNe02zJmrujxMyrx58OKzsdDwvfmq1ra7kwcXT/tfP
+        715z+c0nA7MTyuJqR1odT2m6TWpeXGDVcuoPo+ovgTV/LJynblsT81t5WXaitMj0l3w2pz76
+        F1W27DpVLffqZCBTjPjpU1dnSG7fq29S3fMwIGfzms4pL9j6vaentJ8rFSm1WiNqk9vTKbjj
+        ypKf92ZfEUi1nlEuYsgj8Vv/+m6uV3oP3on6br55vPiQKuu5mcbT7QT6XLOmVN5WN2c6dZIj
+        W/DEwh0FIq2rFvKut21e4MBTf3R6XUltu/KRnKmftjDbBhSeDxY8qNS2Nsi0PpBVaMZ5JZbi
+        jERDLeai4kQAo25RJxYEAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrKLMWRmVeSWpSXmKPExsWy7bCSvO71oLBEg19dMhazb/tbXN41h83i
+        yP9+RosJVyczWhxfG+7A6nF9XYDHmXUPGD3uXNvD5vF5k1wASxSXTUpqTmZZapG+XQJXxruj
+        O5kK5olVNL75wNzA2CTUxcjJISFgIvF6Yxt7FyMXh5DADkaJK5M/skIkpCQ+P53K1sXIAWQL
+        Sxw+XAxR85ZR4uzyHhaQGmEBD4kdb+exgiREBHYySixePI8ZpIFZIEei43EsRMMvRonp2+4z
+        gTSwCehIbP92HMzmFbCTuHbiITuIzSKgIjH/y0lmEFtUIFKi6cRWNogaQYmTM5+ALeMEqn80
+        sRPMZhZQl/gz7xIzhC0ucevJfCYIW16ieets5gmMQrOQtM9C0jILScssJC0LGFlWMUqmFhTn
+        pucWGxYY5aWW6xUn5haX5qXrJefnbmIEx4SW1g7GPas+6B1iZOJgPMQowcGsJML7Qzw4UYg3
+        JbGyKrUoP76oNCe1+BCjNAeLkjjvha6T8UIC6YklqdmpqQWpRTBZJg5OqQamQxfvdJc4R2ru
+        PMOUulC+Qdu5ZWHqrSar1mUXT3z81H+oRJ5B5bqof7DpkWVBDnOiFhZe6n50V69oyibvwm63
+        GX3lk2Lqj8Wm7vpxaKZR600ezk1JdecXb93xMmKf0ozPZ7lif9/t3MdheMPyqO6BZTf+J07l
+        0D8+4QajSalEg3bOy9hpewIamzIE3JbaepmcZwhgbMgtSFZT/6Lnms03xaBAndM86q2RbsNS
+        1ljm7QIzpr5Q1X2xp1bF8/Mp51qBmU32umnNjOxKay32rur12OOps0vwxLFpxmbRB84rb9c6
+        OtP0aN9VZe1pj+zu3kljvT+Dpfpe6yaLv/NNEtiD6z7r9TW6sbwtaH53cqUSS3FGoqEWc1Fx
+        IgAQJfif+AIAAA==
+X-CMS-MailID: 20211001001415epcas1p40c13dc3fa74b72600b117e1180428f52
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20210917075050epcas1p1962cd1c7c388b20ad17cb841461dae1b
+References: <CGME20210917075050epcas1p1962cd1c7c388b20ad17cb841461dae1b@epcas1p1.samsung.com>
+        <bf19053cf6f547bcbb364975cda84c30@hyperstone.com>
+        <a8031e66-77a0-ae9b-d78d-daebc1d7dc47@samsung.com>
+        <cfe4476922584dff91bf0fdbec0c0843@hyperstone.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thursday 30 September 2021 18:51:09 Jérôme Pouiller wrote:
-> Hello Ulf,
-> 
-> On Thursday 30 September 2021 12:07:55 CEST Ulf Hansson wrote:
-> > On Mon, 20 Sept 2021 at 18:12, Jerome Pouiller
-> > <Jerome.Pouiller@silabs.com> wrote:
-> > >
-> > > From: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> > >
-> > > Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> > > ---
-> > >  drivers/net/wireless/silabs/wfx/bus_sdio.c | 261 +++++++++++++++++++++
-> > >  1 file changed, 261 insertions(+)
-> > >  create mode 100644 drivers/net/wireless/silabs/wfx/bus_sdio.c
-> > >
-> > > diff --git a/drivers/net/wireless/silabs/wfx/bus_sdio.c b/drivers/net/wireless/silabs/wfx/bus_sdio.c
-> > 
-> > [...]
-> > 
-> > > +
-> > > +static int wfx_sdio_probe(struct sdio_func *func,
-> > > +                         const struct sdio_device_id *id)
-> > > +{
-> > > +       struct device_node *np = func->dev.of_node;
-> > > +       struct wfx_sdio_priv *bus;
-> > > +       int ret;
-> > > +
-> > > +       if (func->num != 1) {
-> > > +               dev_err(&func->dev, "SDIO function number is %d while it should always be 1 (unsupported chip?)\n",
-> > > +                       func->num);
-> > > +               return -ENODEV;
-> > > +       }
-> > > +
-> > > +       bus = devm_kzalloc(&func->dev, sizeof(*bus), GFP_KERNEL);
-> > > +       if (!bus)
-> > > +               return -ENOMEM;
-> > > +
-> > > +       if (!np || !of_match_node(wfx_sdio_of_match, np)) {
-> > > +               dev_warn(&func->dev, "no compatible device found in DT\n");
-> > > +               return -ENODEV;
-> > > +       }
-> > > +
-> > > +       bus->func = func;
-> > > +       bus->of_irq = irq_of_parse_and_map(np, 0);
-> > > +       sdio_set_drvdata(func, bus);
-> > > +       func->card->quirks |= MMC_QUIRK_LENIENT_FN0 |
-> > > +                             MMC_QUIRK_BLKSZ_FOR_BYTE_MODE |
-> > > +                             MMC_QUIRK_BROKEN_BYTE_MODE_512;
-> > 
-> > I would rather see that you add an SDIO_FIXUP for the SDIO card, to
-> > the sdio_fixup_methods[], in drivers/mmc/core/quirks.h, instead of
-> > this.
-> 
-> In the current patch, these quirks are applied only if the device appears
-> in the device tree (see the condition above). If I implement them in
-> drivers/mmc/core/quirks.h they will be applied as soon as the device is
-> detected. Is it what we want?
-> 
-> Note: we already have had a discussion about the strange VID/PID declared
-> by this device:
->   https://www.spinics.net/lists/netdev/msg692577.html
+Hi
 
-Yes, vendor id 0x0000 is invalid per SDIO spec. So based on this vendor
-id, it is not possible to write any quirk in mmc/sdio generic code.
+On 9/29/21 3:53 PM, Christian Löhle wrote:
+> Hey,
+> so more generally the timeout here can be 41954 up to 167783 ms.
+> Is 42s too low to view it as invalid here?
+> Would you prefer the patch exluding the specific timeout values instead of anything above
+> 41954?
+It's dependent with bus_hz value and div value.
+So it's always not 167 or 42 seconds. Your comment is "TMOUT register is invalid".
+But it's not invalid value. 
+We can set to proper value at TMOUT register during probing or somewhere, according to each boards.
 
-Ulf, but maybe it could be possible to write quirk based on OF
-compatible string?
+I understood what you want to avoid the long time timeout.
+- I think your commit-msg, subject and comment need to describe in more detail. (Not register invalid)
+- Not always 42 or 167secs when TMOUT is 0xFFFFFF. In some cases, it's under 100ms even though TMOUT is 0xFFFFFF.
 
-Jérôme, could you please notify your hw departement that this sdio card
-does not comply with SDIO spec due to incorrect vendor id stored in hw,
-so they could fix this issue in next product, by proper allocation of
-vendor id number from USB-IF (*)? I know that for existing products it
-is not possible to fix, but it can be fixed in next generation of
-products based on used SDIO IP.
+If I misunderstood something, let me know, plz.
 
-(*) - USB-IF really allocates SDIO vendor ids, see:
-https://lore.kernel.org/linux-mmc/20210607140216.64iuprp3siggslrk@pali/
+Anyway, Thanks for reporting this. 
+
+Best Regards,
+Jaehoon Chung
 
 > 
-> [...]
-> > > +
-> > > +static const struct sdio_device_id wfx_sdio_ids[] = {
-> > > +       { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILABS_WF200) },
-> > > +       { },
-> > > +};
-> > > +MODULE_DEVICE_TABLE(sdio, wfx_sdio_ids);
-> > > +
-> > > +struct sdio_driver wfx_sdio_driver = {
-> > > +       .name = "wfx-sdio",
-> > > +       .id_table = wfx_sdio_ids,
-> > > +       .probe = wfx_sdio_probe,
-> > > +       .remove = wfx_sdio_remove,
-> > > +       .drv = {
-> > > +               .owner = THIS_MODULE,
-> > > +               .of_match_table = wfx_sdio_of_match,
-> > 
-> > Is there no power management? Or do you intend to add that on top?
-> 
-> It seems we already have had this discussion:
-> 
->   https://lore.kernel.org/netdev/CAPDyKFqJf=vUqpQg3suDCadKrFTkQWFTY_qp=+yDK=_Lu9gJGg@mail.gmail.com/#r
-> 
-> In this thread, Kalle said:
-> > Many mac80211 drivers do so that the device is powered off during
-> > interface down (ifconfig wlan0 down), and as mac80211 does interface
-> > down automatically during suspend, suspend then works without extra
-> > handlers.
+> Regards,
+> Christian
 > 
 > 
-> -- 
-> Jérôme Pouiller
 > 
 > 
+> From: Jaehoon Chung <jh80.chung@samsung.com>
+> Sent: Friday, September 24, 2021 11:49 AM
+> To: Christian Löhle; linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org
+> Cc: marten.lindahl@axis.com; ulf.hansson@linaro.org
+> Subject: Re: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+>     
+> Hi,
+> 
+> On 9/17/21 4:50 PM, Christian Löhle wrote:
+>>
+>> Set the limit to 1s if the register is at reset value.
+>>
+>> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+>> ---
+>>   drivers/mmc/host/dw_mmc.c | 8 ++++++++
+>>   1 file changed, 8 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 6578cc64ae9e..cd9a6e0a7449 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1983,6 +1983,14 @@ static void dw_mci_set_drto(struct dw_mci *host)
+>>         /* add a bit spare time */
+>>         drto_ms += 10;
+>>   
+>> +     /*
+>> +      * If TMOUT register still holds the reset value the above calculation
+>> +      * would yield a timeout of over 167 seconds, limit it to 1000ms.
+>> +      * Normal reads/writes should not take anywhere close to 120s.
+>> +      */
+>> +     if (drto_ms > 120000)
+>> +             drto_ms = 1000;
+>> +
+> 
+> If dtrt_ms is 167sec, it means that bus_hz should be 0 or 1.
+> What value is your host->bus_hz?
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+>>         spin_lock_irqsave(&host->irq_lock, irqflags);
+>>         if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
+>>                 mod_timer(&host->dto_timer,
+>>
+> 
+>     =
+> Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+> Managing Directors: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+> 
+> 
+
