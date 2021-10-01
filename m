@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3EBFC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 10:10:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14B17C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 11:42:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DC2686134F
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 10:10:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9F1061A6F
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 11:42:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353432AbhJAKMC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 06:12:02 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:42042 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1353427AbhJAKMC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Oct 2021 06:12:02 -0400
+        id S1354114AbhJALoQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Oct 2021 07:44:16 -0400
+Received: from so254-9.mailgun.net ([198.61.254.9]:33513 "EHLO
+        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1354082AbhJALoN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 07:44:13 -0400
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1633083018; h=Content-Transfer-Encoding: Content-Type:
+ s=smtp; t=1633088549; h=Content-Transfer-Encoding: Content-Type:
  MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=ZetgfVAwbJoN4AAZzEvqpEj2r1iuIB1GedGi9+QD1zc=; b=J+pZ7xDrLdY0NDgYzAI0lsR4rHSWoe7BW09qMe9TvGFV/p97/4x9LJAsMRQZ8Eka+lZX8K+8
- DxUdp7XskpDsxawPyeDuQ62hOPwkgeEuBPKxrAVkfH4UC/5twVn518dR0Zb5TXXkFYUSFCHu
- EvBuUSOpfx7CgtrOsC37SzT6QUg=
-X-Mailgun-Sending-Ip: 69.72.43.7
+ To: From: Sender; bh=dIrdlju3fVWX1YgwfatLNksAWCETMoXVhNoE8IO4bXc=; b=OkNdI7K6M4DWPGPOLUb0Gs3sIrCMqoFqWgsl3iCaZwFOlgXxWnuRA/HBsZLQIGXrk4Nzr6q9
+ BOikFxbbItjswa1Ov7AHHi7ru+Qjqa8NKA8TAh3PTl3SLlYzN5UMdJ+beyxgnCxJdGDgTTne
+ ZHLwwUrrSAtk39Izamf1wLMluxg=
+X-Mailgun-Sending-Ip: 198.61.254.9
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org
  (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n07.prod.us-west-2.postgun.com with SMTP id
- 6156de72605ecf100b5be9e4 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 01 Oct 2021 10:09:54
+ smtp-out-n04.prod.us-west-2.postgun.com with SMTP id
+ 6156f40a47d64efb6d324020 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 01 Oct 2021 11:42:02
  GMT
 Sender: kvalo=codeaurora.org@mg.codeaurora.org
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 9D619C4360D; Fri,  1 Oct 2021 10:09:54 +0000 (UTC)
+        id 321FBC4360C; Fri,  1 Oct 2021 11:42:02 +0000 (UTC)
 Received: from tykki (tynnyri.adurom.net [51.15.11.48])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
         (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 0E305C43460;
-        Fri,  1 Oct 2021 10:09:50 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org 0E305C43460
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id A33EDC4338F;
+        Fri,  1 Oct 2021 11:41:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org A33EDC4338F
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
 From:   Kalle Valo <kvalo@codeaurora.org>
@@ -50,13 +50,13 @@ Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
         linux-mmc@vger.kernel.org,
         Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v7 15/24] wfx: add hif_rx.c/hif_rx.h
+Subject: Re: [PATCH v7 12/24] wfx: add hif_api_*.h
 References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
-        <20210920161136.2398632-16-Jerome.Pouiller@silabs.com>
-Date:   Fri, 01 Oct 2021 13:09:48 +0300
-In-Reply-To: <20210920161136.2398632-16-Jerome.Pouiller@silabs.com> (Jerome
-        Pouiller's message of "Mon, 20 Sep 2021 18:11:27 +0200")
-Message-ID: <87a6jtkqdv.fsf@codeaurora.org>
+        <20210920161136.2398632-13-Jerome.Pouiller@silabs.com>
+Date:   Fri, 01 Oct 2021 14:41:55 +0300
+In-Reply-To: <20210920161136.2398632-13-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Mon, 20 Sep 2021 18:11:24 +0200")
+Message-ID: <875yuhkm4c.fsf@codeaurora.org>
 User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
@@ -73,38 +73,18 @@ Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 
 [...]
 
-> +static int hif_startup_indication(struct wfx_dev *wdev,
-> +				  const struct hif_msg *hif, const void *buf)
-> +{
-> +	const struct hif_ind_startup *body =3D buf;
-> +
-> +	if (body->status || body->firmware_type > 4) {
-> +		dev_err(wdev->dev, "received invalid startup indication");
-> +		return -EINVAL;
-> +	}
-> +	memcpy(&wdev->hw_caps, body, sizeof(struct hif_ind_startup));
-> +	le16_to_cpus((__le16 *)&wdev->hw_caps.hardware_id);
-> +	le16_to_cpus((__le16 *)&wdev->hw_caps.num_inp_ch_bufs);
-> +	le16_to_cpus((__le16 *)&wdev->hw_caps.size_inp_ch_buf);
-> +	le32_to_cpus((__le32 *)&wdev->hw_caps.supported_rate_mask);
+> --- /dev/null
+> +++ b/drivers/net/wireless/silabs/wfx/hif_api_cmd.h
+> @@ -0,0 +1,555 @@
+> +/* SPDX-License-Identifier: Apache-2.0 */
 
-I don't really like the casts here, and not really reliable either if
-there's ever more fields. I would just store values as little endian in
-hw_caps, I doubt it's performance critical.
+I don't how I missed this earlier:
 
-And why does struct hif_ind_startup use both u32 and __le32? If it's in
-little endian it should always use __le types.
+hif_api_cmd.h:/* SPDX-License-Identifier: Apache-2.0 */
+hif_api_general.h:/* SPDX-License-Identifier: Apache-2.0 */
+hif_api_mib.h:/* SPDX-License-Identifier: Apache-2.0 */
 
-[...]
-
-> +	if (hif_id & 0x80)
-> +		dev_err(wdev->dev, "unsupported HIF indication: ID %02x\n",
-> +			hif_id);
-> +	else
-> +		dev_err(wdev->dev, "unexpected HIF confirmation: ID %02x\n",
-> +			hif_id);
-
-No magic values, please. A proper define for bit 0x80 would be nice.
+Apache-2.0 license is a blocker for me, see LICENSES/dual/Apache-2.0.
 
 --=20
 https://patchwork.kernel.org/project/linux-wireless/list/
