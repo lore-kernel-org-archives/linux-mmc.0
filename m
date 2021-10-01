@@ -2,250 +2,232 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A9F7C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 16:47:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67A88C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 18:12:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5EB6761A07
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 16:47:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 527B761263
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 18:12:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355130AbhJAQss (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 12:48:48 -0400
-Received: from mail-dm6nam10on2087.outbound.protection.outlook.com ([40.107.93.87]:32480
-        "EHLO NAM10-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232094AbhJAQsr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Oct 2021 12:48:47 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=B69MrppiS0ZX/PVhghlVWgy70RW81m++qtpdePZvLrpIA57FFQoW5hG4KXvBL36UZs6hYFYfffjDH7i0cNYxo+DOf0V5Nubufx3KJ8guAwpRVzMwfcVyVW18HKEH5iC14eskY9SwfftZ0v2JISqZ3tV8d2F0jUp/mq72XssPQQbPiodJb+60ceS2LCFFcIjRA1opd/KTQNJiCQT/P8OuBzN8A4qCPc/N+Uwv4lr7+XXZMMfcweHa3GlRnKKwbhy8cTv84YTuaWs3SSMsuS/zXoB+9LKEWWaP2W+BNOVv7WtqVAlZkV8+8NXz1NCrN8AbQ5U8EPgRjc/NGl+w36coJg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=iNE946XaZZ/UDavnyWdB+dlNXnVSkFQT2AvCfqZ19LQ=;
- b=IJNs7HNM7VXNka+sDhyls9nj6IMzVWOFf6S/YJYChlpQ7hmuvMIzq91h+5b/EyJZadaK++xx4dJvZtKEgayviOK+HrMRDKsVw4SDr9hsp8mXSgTb0COcmNttrz1qSF8zk8SIFwW8c1Tybw2QqwWh2wRrgfPOjqKFu7slqKjC7H42fHvsxZT31ff89j1xhUTdNxaAJxhTjCTRlAjs2cZmf1PA7kHX4qFTEsfkzzsZ/F7eBUPG+8myqNH6yC6vzohmqaXEQCo7qMjhu1TX5iWc6/e1IeTCsPivQ/2r3hkJkjms7luj9ZuLesSnb6z5rmwKuJBnqO1p7wYbdamzeUPOlQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
- dkim=pass header.d=silabs.com; arc=none
+        id S1355601AbhJASON (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Oct 2021 14:14:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50134 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232126AbhJASOM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 14:14:12 -0400
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 277CBC061775;
+        Fri,  1 Oct 2021 11:12:28 -0700 (PDT)
+Received: by mail-pj1-x1036.google.com with SMTP id r7so7084989pjo.3;
+        Fri, 01 Oct 2021 11:12:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=iNE946XaZZ/UDavnyWdB+dlNXnVSkFQT2AvCfqZ19LQ=;
- b=POOPWQV2ow6Xxz/o+nJ7aG+1JjbEtyNhsNvglR1hS4lbxR0hVew6Q05o9aiAjyGrvqgJLWQLxLr+TxE8i9A04RJmOafPJP4/uoZ5C+/kJH3+jhPnoG2b8nOfHIx16NaP9VbQQKZhkZYu4TUjR90gCwR3U0Iqog7VeRAgYNL1sk8=
-Authentication-Results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=silabs.com;
-Received: from PH0PR11MB5657.namprd11.prod.outlook.com (2603:10b6:510:ee::19)
- by PH0PR11MB5580.namprd11.prod.outlook.com (2603:10b6:510:e5::10) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.15; Fri, 1 Oct
- 2021 16:46:54 +0000
-Received: from PH0PR11MB5657.namprd11.prod.outlook.com
- ([fe80::31cb:3b13:b0e8:d8f4]) by PH0PR11MB5657.namprd11.prod.outlook.com
- ([fe80::31cb:3b13:b0e8:d8f4%9]) with mapi id 15.20.4544.025; Fri, 1 Oct 2021
- 16:46:54 +0000
-From:   =?ISO-8859-1?Q?J=E9r=F4me?= Pouiller <jerome.pouiller@silabs.com>
-To:     Pali =?ISO-8859-1?Q?Roh=E1r?= <pali@kernel.org>
-Cc:     Kalle Valo <kvalo@codeaurora.org>, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org, devel@driverdev.osuosl.org,
-        linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v7 10/24] wfx: add fwio.c/fwio.h
-Date:   Fri, 01 Oct 2021 18:46:44 +0200
-Message-ID: <19961646.Mslci0rqIs@pc-42>
-Organization: Silicon Labs
-In-Reply-To: <20211001160832.ozxc7bhlwlmjeqbo@pali>
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com> <2174509.SLDT7moDbM@pc-42> <20211001160832.ozxc7bhlwlmjeqbo@pali>
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
-X-ClientProxiedBy: PR1P264CA0020.FRAP264.PROD.OUTLOOK.COM
- (2603:10a6:102:19f::7) To PH0PR11MB5657.namprd11.prod.outlook.com
- (2603:10b6:510:ee::19)
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=j1V9qLdJ7N9KO3G5HusJFlDeTFePzR9GzlCEJBTXj3U=;
+        b=iqFo/EBaTQNoe4x5hYB05wov6we850SStXP27FhStUkPDi9Lr9CWiQLcFcDIALBm8E
+         4aWBViejYhUjMssufYOySZ9pWWpO2RVKv96lA4BCEqUabGROHoYIsK7l2LPjzPfy8g4o
+         yM28Gfs3u3n3VBCSmWyCeyHJFQKECIVQbY/T4OtYNF2j/i333wL67XIOvBtOW4nEUZoc
+         2iBZ8+/5EXoI/tbZTf3Rh/pXmHKcwjnUE4HbtlNfQRdFGXdV5wKHTKbSoErpkWxddN0t
+         MstNBNLID4V2yUaye9E18Ok1dmajJWaN13VXKpYkEY6DmB5XlIwx4Dn7ZseK4WcTqmeg
+         7nwg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=j1V9qLdJ7N9KO3G5HusJFlDeTFePzR9GzlCEJBTXj3U=;
+        b=p29H3V2HLsNE65vewlUzvAGk1IjZp6wLYiv9MGSEzC2MDSPpeKvbEupxIKi6f4fWMz
+         ZbSPD9HflyvnSGVUHVTRnScR9RpGQ8A7NJW4dT5uIK3x9Yswa/GiYiSdbni8DVLu868a
+         scnnrzjkRMXRS+mv9dwsi0LHitwPiKs57PtkyD5la7BEoJfnFpZL+h3FEoxH0sO8caMX
+         l1XkAP5WJvWXINvfRl4HyAvrlcR0AdRPJnwZZG8FzPCkA4fkXpZZiVGRHDVaxJlRqVNi
+         A41YDx1pTrTvf+iVBp++4gKNRIXklVs1QvY9yaVZpkD6bXCBB7PJfb30xboQUVxWegMc
+         FkOQ==
+X-Gm-Message-State: AOAM533rgdp7QD3RijKxiDUOakiI8Qmizzds77Z4lxIih8s8iAxNeWi3
+        db+RTx+y/VUOG8k1uhvqWpSlgKqoVwc=
+X-Google-Smtp-Source: ABdhPJyfvygyojPKT3w4OvBrSy5IcoV7PC60DzY5WgZ5LojtQSC6JOTGKIKAg7rflEge8lah9V8Bew==
+X-Received: by 2002:a17:90a:1942:: with SMTP id 2mr21445882pjh.195.1633111946990;
+        Fri, 01 Oct 2021 11:12:26 -0700 (PDT)
+Received: from localhost (searspoint.nvidia.com. [216.228.112.21])
+        by smtp.gmail.com with ESMTPSA id m10sm8294682pjs.21.2021.10.01.11.12.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Oct 2021 11:12:26 -0700 (PDT)
+From:   Yury Norov <yury.norov@gmail.com>
+To:     Stephen Rothwell <sfr@canb.auug.org.au>
+Cc:     Yury Norov <yury.norov@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
+        kvm@vger.kernel.org,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        Alexander Lobakin <alobakin@pm.me>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        Andrea Merello <andrea.merello@gmail.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>,
+        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Brian Cain <bcain@codeaurora.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph Lameter <cl@linux.com>,
+        Daniel Bristot de Oliveira <bristot@redhat.com>,
+        David Hildenbrand <david@redhat.com>,
+        Dennis Zhou <dennis@kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ian Rogers <irogers@google.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
+        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
+        Leo Yan <leo.yan@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Namhyung Kim <namhyung@kernel.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Peter Xu <peterx@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Petr Mladek <pmladek@suse.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Rich Felker <dalias@libc.org>,
+        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Shuah Khan <shuah@kernel.org>,
+        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Tejun Heo <tj@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: [PATCH RESEND 2 00/16] Resend bitmap patches
+Date:   Fri,  1 Oct 2021 11:12:10 -0700
+Message-Id: <20211001181226.228340-1-yury.norov@gmail.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Received: from pc-42.localnet (37.71.187.125) by PR1P264CA0020.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:19f::7) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.14 via Frontend Transport; Fri, 1 Oct 2021 16:46:51 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 2f8cd9c0-07d9-44f5-66f7-08d984fb12d3
-X-MS-TrafficTypeDiagnostic: PH0PR11MB5580:
-X-Microsoft-Antispam-PRVS: <PH0PR11MB55800B53CBB43D69870F8C7693AB9@PH0PR11MB5580.namprd11.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: B0vtxO/EvZFGsvg6E0yrYhRD4OOcwDSlpTSPsVfbEQw6yH+kUfciv112J/6iVTaIlXiRbJ5tff2DXj5uTTYUY5+yfhixIYUSABN0szxXvFWdy6iLPfgmwOtbf53F6Yq3OlK7JFEVP5G/DlAUyL2TI3/JIeElOqycsWCgS0+nWedDwDzekz1kTikPmVbvZfMxy7LX+2wU3m0rfPGPwpw/OAtSGMDwk273qFJ+ro3u/Rc7p4spBh9c7jzDqFwQb3zvDUwLxnCMBHqMNckeuHttzc0anha3nmZNSwn3eKU4I/D2lT/q716l00mzgOqL6Id2lBZSOKi1w53BSYQVZElRoLReCCtbrFGx1aLV+7R8hmlnYJgmn+CglIUa8j7P+dPxrkx0XZsrAoI8gzQS6t0z0sBfeqk2HiD64XLkjOegPoZlTZBvi1e1KmHLaMOI+eT85DjQ1YwM45iTe0LrsrtgIBwnd/4uYbcyuzE4b/yvi0VCyykZUZsQdvyZIKDxXHcZzX/OhFZP5aeC3qcYBwoLAWt43Gvru79C650QcpOAcGm0COLCs4m+HIZrqSfKtW7ysG+CqGRwCjGB0O8xSX7iSs8F/jvJR2Sv9AMnEZKyXhRf5MhpA2aD2eNQihOQzMh5xJs7e8pedyKCD4CANw9q1DmeClBTYPBFiz9RORA4JHnZ3uctob5AYWfuMKicb02URMO814rPXOPJfxGv8IBl0h8VHXhbvJePhQ2qPMRAz6j0UxsYTQ5SOwC0ljaMBrChGciQXn1RhYwk9dtQSB+AQAaLZZHnigCVaeYs6gUk+WLQaff6r0MXGBRfBArnNWBM
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR11MB5657.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(7416002)(966005)(6512007)(4326008)(6486002)(508600001)(8936002)(5660300002)(9686003)(86362001)(66556008)(6916009)(66476007)(8676002)(52116002)(66946007)(38350700002)(38100700002)(36916002)(186003)(26005)(956004)(54906003)(316002)(66574015)(6666004)(83380400001)(33716001)(6506007)(2906002)(39026012);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?iso-8859-1?Q?S1Yq1aFsuN/KeJwgA374r0Wc1ni2uUW4MtLDRsONSq8lgSf+HDYFxcuWe7?=
- =?iso-8859-1?Q?Z0q9GdaX/eo4XFurzmo+gT4GedHNU9pkpktGovI/c3F3JfnIrnCMY6mIJN?=
- =?iso-8859-1?Q?1hqODZ7Nv3pTYsTbpgeRrqKUveoGEoADAorblVmUCwtleGjtTF7B0yZpLa?=
- =?iso-8859-1?Q?1uzJjFxLfUgYMzMZUeGv5o/SaORrRnNlW+sUsvyFwok3PyTEZU79I91u+8?=
- =?iso-8859-1?Q?LU7f41BSrjK4TKeO+lH/ZgX8vhB4Gi8ra4lj0nDQpNeMxpoiyH8hX3Ge3L?=
- =?iso-8859-1?Q?E5a5joA1+6eDo8hDRo2T2HQt5r0acadk1Mq+41PcRBLYKGIfmr1NLA7gTB?=
- =?iso-8859-1?Q?BUKixTID7GVvot3j+X3FlSb9YxFuIND8D773ZMVxVJvFpQp+wN443jlaJV?=
- =?iso-8859-1?Q?5iRAaXjRNSRda7GVU2ldburg59u3nDi+ZoqX/x86Xcc+m3n179kPjauHHN?=
- =?iso-8859-1?Q?aSqEsAapTClA5atOpDWmn/Ce++320NGVQYccAybnXpkviuEKEKinGXTzVa?=
- =?iso-8859-1?Q?JTuhX06dfS8S2lF9ElLQgRlAWaY3IMzis96EsgIMtvt/KiZni/0vSu6uTS?=
- =?iso-8859-1?Q?CD/e7Bn95lHDQzr7esXGfEYKXgNcPxpHm26gblixL/A1jQmj3s5sJFeHEb?=
- =?iso-8859-1?Q?SP7HongDGrYtFM6Q7KKdZJ+BEDtLuD9N1F60HgrYWwPUGZkLNdZKzF+ogZ?=
- =?iso-8859-1?Q?A6bGulOMUT6bhwgOL7t8ot1l8sQf+srgcnbN7xZQrhCHME0JAGrc5DxO/I?=
- =?iso-8859-1?Q?2k5xBDLlvvs1loLT2ZHtF/G0VTko4QGumr+HwSHCNQ36shPVE63s7dIbqk?=
- =?iso-8859-1?Q?Jyur2CrWnL//oJX/rV8OLWI3Ww2fhJgG3LC3MSejzI+pXiiq3ayBvjMtk0?=
- =?iso-8859-1?Q?EmU3g4GwgehIGh8ADnxPOakuGicbr/rsaEJUdkTIE/SO2HE/nJTmJ1RY5x?=
- =?iso-8859-1?Q?p2ALVGyQmxl1GMoDRz8ihIbcD31FDbxmwuMziN2v2PyYRdxoxX0edPQAS2?=
- =?iso-8859-1?Q?VzKH07lDH8op13EEILNeT9qTNrCAUcQWIxCYOtYOGqONaiP2so5e4gO9oY?=
- =?iso-8859-1?Q?AObLngTTv0DebV52LD+8wFX7SeerwOM3I/W1ET5FcLZM0UJepzcSWgQVgn?=
- =?iso-8859-1?Q?fRRyDiAT6p9/hrlwkdsCV6bCVpk4gd57FRNl8Zr9Dbf0tu+oy5Njt+wPoP?=
- =?iso-8859-1?Q?f69uYKHKaEu9uN/7RE2K26/zbWE/TDjz9jQfpw/U9VA0K3B9rAe4Pwy1p/?=
- =?iso-8859-1?Q?KpHj7NYSDUrNU5Hams2b8GAlCmJOlZbOK4XxK/lebdV0f+g1BprPRL0dwz?=
- =?iso-8859-1?Q?HaBdZ0ekMx856/mS6fQbl8BDPs02xH54I7eC9I6UlhnDH1+CwGCUsVVAtd?=
- =?iso-8859-1?Q?dvJY3jg3iE?=
-X-OriginatorOrg: silabs.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2f8cd9c0-07d9-44f5-66f7-08d984fb12d3
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR11MB5657.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 01 Oct 2021 16:46:53.8835
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: YGbxwhtBrPUAXMIfYrPG2oRoxFxtFpjLXpybnqSO00MTfsM17RRC9TuPchiTatqtSGUowGO7l8YUuiV7fPP8dA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB5580
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Friday 1 October 2021 18:08:32 CEST Pali Roh=E1r wrote:
-> On Friday 01 October 2021 17:09:41 J=E9r=F4me Pouiller wrote:
-> > On Friday 1 October 2021 13:58:38 CEST Kalle Valo wrote:
-> > > Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
-> > >
-> > > > From: J=E9r=F4me Pouiller <jerome.pouiller@silabs.com>
-> > > >
-> > > > Signed-off-by: J=E9r=F4me Pouiller <jerome.pouiller@silabs.com>
-> > >
-> > > [...]
-> > >
-> > > > +static int get_firmware(struct wfx_dev *wdev, u32 keyset_chip,
-> > > > +                     const struct firmware **fw, int *file_offset)
-> > > > +{
-> > > > +     int keyset_file;
-> > > > +     char filename[256];
-> > > > +     const char *data;
-> > > > +     int ret;
-> > > > +
-> > > > +     snprintf(filename, sizeof(filename), "%s_%02X.sec",
-> > > > +              wdev->pdata.file_fw, keyset_chip);
-> > > > +     ret =3D firmware_request_nowarn(fw, filename, wdev->dev);
-> > > > +     if (ret) {
-> > > > +             dev_info(wdev->dev, "can't load %s, falling back to %=
-s.sec\n",
-> > > > +                      filename, wdev->pdata.file_fw);
-> > > > +             snprintf(filename, sizeof(filename), "%s.sec",
-> > > > +                      wdev->pdata.file_fw);
-> > > > +             ret =3D request_firmware(fw, filename, wdev->dev);
-> > > > +             if (ret) {
-> > > > +                     dev_err(wdev->dev, "can't load %s\n", filenam=
-e);
-> > > > +                     *fw =3D NULL;
-> > > > +                     return ret;
-> > > > +             }
-> > > > +     }
-> > >
-> > > How is this firmware file loading supposed to work? If I'm reading th=
-e
-> > > code right, the driver tries to load file "wfm_wf200_??.sec" but in
-> > > linux-firmware the file is silabs/wfm_wf200_C0.sec:
-> > >
-> > > https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmwa=
-re.git/tree/silabs
-> > >
-> > > That can't work automatically, unless I'm missing something of course=
-.
-> >
-> > The firmware are signed. "C0" is the key used to sign this firmware. Th=
-is
-> > key must match with the key burned into the chip. Fortunately, the driv=
-er
-> > is able to read the key accepted by the chip and automatically choose t=
-he
-> > right firmware.
-> >
-> > We could imagine to add a attribute in the DT to choose the firmware to
-> > load. However, it would be a pity to have to specify it manually wherea=
-s
-> > the driver is able to detect it automatically.
-> >
-> > Currently, the only possible key is C0. However, it exists some interna=
-l
-> > parts with other keys. In addition, it is theoretically possible to ask
-> > to Silabs to burn parts with a specific key in order to improve securit=
-y
-> > of a product.
-> >
-> > Obviously, for now, this feature mainly exists for the Silabs firmware
-> > developers who have to work with other keys.
-> >
-> > > Also I would prefer to use directory name as the driver name wfx, but=
- I
-> > > guess silabs is also doable.
-> >
-> > I have no opinion.
-> >
-> >
-> > > Also I'm not seeing the PDS files in linux-firmware. The idea is that
-> > > when user installs an upstream kernel and the linux-firmware everythi=
-ng
-> > > will work automatically, without any manual file installations.
-> >
-> > WF200 is just a chip. Someone has to design an antenna before to be abl=
-e
-> > to use.
-> >
-> > However, we have evaluation boards that have antennas and corresponding
-> > PDS files[1]. Maybe linux-firmware should include the PDS for these boa=
-rds
->=20
-> So chip vendor provides firmware and card vendor provides PDS files.
+Hi Stephen,
 
-Exactly.
+Can you please take this series into the next tree? It has been already
+in next-tree for 5.14:
 
-> In
-> my opinion all files should go into linux-firmware repository. If Silabs
-> has PDS files for its devel boards (which are basically cards) then I
-> think these files should go also into linux-firmware repository.
->=20
-> And based on some parameter, driver should load correct PDS file. Seems
-> like DT can be a place where to put something which indicates which PDS
-> file should be used.
->=20
-> But should be in DT directly name of PDS file? Or should be in DT just
-> additional compatible string with card vendor name and then in driver
-> itself should be mapping table from compatible string to filename? I do
-> not know what is better.
+https://lore.kernel.org/linux-mmc/YSeduU41Ef568xhS@alley/T/
 
-The DT already accepts the attribute silabs,antenna-config-file (see
-patch #2).
+But it was damaged and we decided to merge it in 5.15 cycle. No changes
+comparing to 5.14, except for Andy's patch that was already upstreamed
+and therefore removed from here.
 
-I think that linux-firmware repository will reject the pds files if
-no driver in the kernel directly point to it. Else how to detect orphans?
-So, I think it is slightly better to use a mapping table.
+The git tree is here:
+	https://github.com/norov/linux/tree/bitmap-20210929
 
+Thanks,
+Yury
 
-> > and the DT should contains the name of the design. eg:
-> >
-> >     compatible =3D "silabs,brd4001a", "silabs,wf200";
-> >
-> > So the driver will know which PDS it should use.
-> >
-> > In fact, I am sure I had this idea in mind when I have started to write
-> > the wfx driver. But with the time I have forgotten it.
-> >
-> > If you agree with that idea, I can work on it next week.
-> >
-> >
-> > [1]: https://github.com/SiliconLabs/wfx-pds
+Yury Norov (16):
+  bitops: protect find_first_{,zero}_bit properly
+  bitops: move find_bit_*_le functions from le.h to find.h
+  include: move find.h from asm_generic to linux
+  arch: remove GENERIC_FIND_FIRST_BIT entirely
+  lib: add find_first_and_bit()
+  cpumask: use find_first_and_bit()
+  all: replace find_next{,_zero}_bit with find_first{,_zero}_bit where
+    appropriate
+  tools: sync tools/bitmap with mother linux
+  cpumask: replace cpumask_next_* with cpumask_first_* where appropriate
+  include/linux: move for_each_bit() macros from bitops.h to find.h
+  find: micro-optimize for_each_{set,clear}_bit()
+  Replace for_each_*_bit_from() with for_each_*_bit() where appropriate
+  mm/percpu: micro-optimize pcpu_is_populated()
+  bitmap: unify find_bit operations
+  lib: bitmap: add performance test for bitmap_print_to_pagebuf
+  vsprintf: rework bitmap_list_string
 
+ MAINTAINERS                                   |   4 +-
+ arch/alpha/include/asm/bitops.h               |   2 -
+ arch/arc/Kconfig                              |   1 -
+ arch/arc/include/asm/bitops.h                 |   1 -
+ arch/arm/include/asm/bitops.h                 |   1 -
+ arch/arm64/Kconfig                            |   1 -
+ arch/arm64/include/asm/bitops.h               |   1 -
+ arch/csky/include/asm/bitops.h                |   1 -
+ arch/h8300/include/asm/bitops.h               |   1 -
+ arch/hexagon/include/asm/bitops.h             |   1 -
+ arch/ia64/include/asm/bitops.h                |   2 -
+ arch/m68k/include/asm/bitops.h                |   2 -
+ arch/mips/Kconfig                             |   1 -
+ arch/mips/include/asm/bitops.h                |   1 -
+ arch/openrisc/include/asm/bitops.h            |   1 -
+ arch/parisc/include/asm/bitops.h              |   2 -
+ arch/powerpc/include/asm/bitops.h             |   2 -
+ arch/powerpc/include/asm/cputhreads.h         |   2 +-
+ arch/powerpc/platforms/pasemi/dma_lib.c       |   4 +-
+ arch/riscv/include/asm/bitops.h               |   1 -
+ arch/s390/Kconfig                             |   1 -
+ arch/s390/include/asm/bitops.h                |   1 -
+ arch/s390/kvm/kvm-s390.c                      |   2 +-
+ arch/sh/include/asm/bitops.h                  |   1 -
+ arch/sparc/include/asm/bitops_32.h            |   1 -
+ arch/sparc/include/asm/bitops_64.h            |   2 -
+ arch/x86/Kconfig                              |   1 -
+ arch/x86/include/asm/bitops.h                 |   2 -
+ arch/x86/kernel/apic/vector.c                 |   4 +-
+ arch/x86/um/Kconfig                           |   1 -
+ arch/xtensa/include/asm/bitops.h              |   1 -
+ block/blk-mq.c                                |   2 +-
+ drivers/block/rnbd/rnbd-clt.c                 |   2 +-
+ drivers/dma/ti/edma.c                         |   2 +-
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c         |   4 +-
+ drivers/hwmon/ltc2992.c                       |   3 +-
+ drivers/iio/adc/ad7124.c                      |   2 +-
+ drivers/infiniband/hw/irdma/hw.c              |  16 +-
+ drivers/media/cec/core/cec-core.c             |   2 +-
+ drivers/media/mc/mc-devnode.c                 |   2 +-
+ drivers/mmc/host/renesas_sdhi_core.c          |   2 +-
+ drivers/net/virtio_net.c                      |   2 +-
+ drivers/pci/controller/dwc/pci-dra7xx.c       |   2 +-
+ drivers/scsi/lpfc/lpfc_sli.c                  |  10 +-
+ drivers/soc/fsl/qbman/bman_portal.c           |   2 +-
+ drivers/soc/fsl/qbman/qman_portal.c           |   2 +-
+ drivers/soc/ti/k3-ringacc.c                   |   4 +-
+ drivers/tty/n_tty.c                           |   2 +-
+ drivers/virt/acrn/ioreq.c                     |   3 +-
+ fs/f2fs/segment.c                             |   8 +-
+ fs/ocfs2/cluster/heartbeat.c                  |   2 +-
+ fs/ocfs2/dlm/dlmdomain.c                      |   4 +-
+ fs/ocfs2/dlm/dlmmaster.c                      |  18 +-
+ fs/ocfs2/dlm/dlmrecovery.c                    |   2 +-
+ fs/ocfs2/dlm/dlmthread.c                      |   2 +-
+ include/asm-generic/bitops.h                  |   1 -
+ include/asm-generic/bitops/le.h               |  64 ---
+ include/linux/bitmap.h                        |  34 +-
+ include/linux/bitops.h                        |  34 --
+ include/linux/cpumask.h                       |  46 ++-
+ include/linux/find.h                          | 372 ++++++++++++++++++
+ kernel/time/clocksource.c                     |   4 +-
+ lib/Kconfig                                   |   3 -
+ lib/find_bit.c                                |  21 +
+ lib/find_bit_benchmark.c                      |  21 +
+ lib/genalloc.c                                |   2 +-
+ lib/test_bitmap.c                             |  37 ++
+ lib/vsprintf.c                                |  24 +-
+ mm/percpu.c                                   |  35 +-
+ net/ncsi/ncsi-manage.c                        |   4 +-
+ tools/include/asm-generic/bitops.h            |   1 -
+ tools/include/asm-generic/bitops/find.h       | 145 -------
+ tools/include/linux/bitmap.h                  |   7 +-
+ .../bitops => tools/include/linux}/find.h     |  54 ++-
+ tools/lib/find_bit.c                          |  20 +
+ 75 files changed, 637 insertions(+), 441 deletions(-)
+ create mode 100644 include/linux/find.h
+ delete mode 100644 tools/include/asm-generic/bitops/find.h
+ rename {include/asm-generic/bitops => tools/include/linux}/find.h (83%)
 
---=20
-J=E9r=F4me Pouiller
-
+-- 
+2.30.2
 
