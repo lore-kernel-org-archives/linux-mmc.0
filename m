@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C40AC43217
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 12:51:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 211C5C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 13:25:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 31C0161A8F
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 12:51:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0B03C61267
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 13:25:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353556AbhJAMwr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 08:52:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59184 "EHLO
+        id S230422AbhJAN0x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Oct 2021 09:26:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38918 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230239AbhJAMwr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 08:52:47 -0400
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2A39C06177B
-        for <linux-mmc@vger.kernel.org>; Fri,  1 Oct 2021 05:51:02 -0700 (PDT)
-Received: by mail-lf1-x12a.google.com with SMTP id i19so35068534lfu.0
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Oct 2021 05:51:02 -0700 (PDT)
+        with ESMTP id S231564AbhJAN0s (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 09:26:48 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4CE97C0613E4
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Oct 2021 06:25:00 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id i25so38733325lfg.6
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Oct 2021 06:25:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=U3g3FVHcAfq2CjS/tDBEgPrTjvgAlik1UmRsepWrO/M=;
-        b=AzjhIKsGc5F00nF8gT49XgOerH2kylziofl1fTWdcLRpswV4wNz8DKK5xJ7On0pP/7
-         FUfZ1Wgbt1/fuaxVdMYCvvgTtIGVXfv0UoK33+IzBB+zOi+jh2jn6j2wyaLjswS/IOzw
-         SQjTg3BAouTPEqyD9JFdD9cYzi69CQhCoGH5fKvFHMMepL7XM0KGl/OrspTiy4mR9WhP
-         foe5FrlQSoXx4OG2RW+Mn3fWJuth6XGpzQJ4ILLPGQ/0+fTYG3YwXfmnYk9SirlbmFbB
-         VWqNGRy6BMbC7o4y9fE4zK6CBmWtNh3bv3/HT2LLpsFmdOSr7meyX9U8IJw0f7EYsu6v
-         RPYQ==
+        bh=Ce1L2tN5HKfi3fvHHadmQ3q2m1uy07zcuZbE6aqO/w8=;
+        b=powMYwV2MjTTSNc/t+dTNLdv1N7EGIPyjZGEPVcI3gY1sc7M027cz1jk10A8Akvayt
+         xjVreVrw3OhYWDozi4k1FD15Y/REv1+kRr+cjUF2h0j1veF2W18YSPZ0Q5Yr4sHeIvE2
+         xbMkeHo9U1tEXk06Mw9Kuy4lgLyOxpZSHnK0HBd2vSzL2VjpwHt/hOcHFKIy7B6LJi7A
+         uoB+oX4ib19bvdTB1CDwwSKijlssZrKUF/Rsk7l+ZYlLV+xqUcOhO1E9Y9gSeqjAwXK/
+         ooBHqYOXpxuJ8myCcf7rUgQtf3FwOKbuwTsCqu62SbjlUC9B1vASEJMY0Aqy8D3WeZyF
+         q1kg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=U3g3FVHcAfq2CjS/tDBEgPrTjvgAlik1UmRsepWrO/M=;
-        b=mo2EABph/fW2L4BkH5zTaSSoZqihLbuNjHpThOQra7Ybk0x/caR5GhHpq3Tqy10Xdf
-         l177l4mRsqUGOQoixNA9XUL+7uDwvTxXPbjLXrokd4UraC+UH93ZUo8HynmoFyyhgsRM
-         EmgWgq0z/vByJJoMsWswR7aaXK6r4+dqoK6NdHejh3l3456q9p4eD9oCCng35VaVzjKS
-         shLrZyP8ampRaHAfoPMYZbznQei140rhR3SA4waZuPHuEvUmU2i/SKOacmE0GqcygsPg
-         xahN7uDPIOSKRsr0I2axGyA3rCcwr9PSnQt+yh6bzw/sbsHRWprv9SWE019EklGrhlwv
-         UoTw==
-X-Gm-Message-State: AOAM531wMaNnDMWyW1HXUzel+Pt85XVANu4fmO89ckdivKDbo8gUxoQz
-        O2x+GxNydEBakTqurowm1w6uKR74hYpCle7dPn5m/A==
-X-Google-Smtp-Source: ABdhPJwqqw8e12Oj8Mbs+ZBogohxgciqSKBUNXiyR2zo3nKqwCJ61Gsrw5pb7r1VVcKkZcvnXQuH+1x0Dzep9YUsgPg=
-X-Received: by 2002:a19:5f4b:: with SMTP id a11mr5158365lfj.373.1633092661107;
- Fri, 01 Oct 2021 05:51:01 -0700 (PDT)
+        bh=Ce1L2tN5HKfi3fvHHadmQ3q2m1uy07zcuZbE6aqO/w8=;
+        b=dY0Dme8vLidRc6THSbFc3XwN2jIGAtV9J5S68BTp/x36IGl9RWJgwE2I42KfsZJVdJ
+         NDoa6DKde/g5RphG+Jd+elfjvuTLQ2ul50sOzswuZMPoPP+o+G2AFbuxBj0tIMPgaksh
+         F8itOqIP2V+TN3LO5DJbzYQTS/zhyxp9XZFS4wOIcvFzYcCXioDRHeYj/6BDwyAd2xgX
+         hjuzvd0AzUzOoyPfOL1A1x/e5564vbcNNEF0axuJ+dtyDoakoiYZxFpF/Cl0+pXe2NOE
+         my5pZv/bN2abSn/Z4hwzHREb2uT9K0bpm1n20QSPY9/YpSbmZpYXtgKJcr4x9i3g/Guv
+         jopA==
+X-Gm-Message-State: AOAM533GpGUERT0u5BezOlgWrJW33lX6NwwdVbaVDO44LANw5WBhSgPF
+        Kdh4g+LZgxTEtxDC3Bo/UASkj3Cx1/Cgnx3OysqBuA==
+X-Google-Smtp-Source: ABdhPJx3j8rYzIefonx7fnLDHN6Ws0loCtwYPf/Gwf8OXRLpCYIkD4HnMnNV/rnmavNwT0BrQF7QYu3k62ifmvyYjCU=
+X-Received: by 2002:a19:5f4b:: with SMTP id a11mr5339726lfj.373.1633094698289;
+ Fri, 01 Oct 2021 06:24:58 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-3-digetx@gmail.com>
-In-Reply-To: <20210926224058.1252-3-digetx@gmail.com>
+References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-10-digetx@gmail.com>
+In-Reply-To: <20210926224058.1252-10-digetx@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 1 Oct 2021 14:50:25 +0200
-Message-ID: <CAPDyKFrtE75Tf-vefM0isj52PJ5_v525AjqU2TMUpc4__rYLhA@mail.gmail.com>
-Subject: Re: [PATCH v13 02/35] soc/tegra: Add devm_tegra_core_dev_init_opp_table_common()
-To:     Dmitry Osipenko <digetx@gmail.com>,
-        Viresh Kumar <vireshk@kernel.org>
+Date:   Fri, 1 Oct 2021 15:24:21 +0200
+Message-ID: <CAPDyKFqqQvKusZ2gzHh69LNrncvi9_o04_xFKDpAkDbS-8Zecg@mail.gmail.com>
+Subject: Re: [PATCH v13 09/35] gpu: host1x: Add runtime PM and OPP support
+To:     Dmitry Osipenko <digetx@gmail.com>
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
         Stephen Boyd <sboyd@kernel.org>,
         Peter De Schrijver <pdeschrijver@nvidia.com>,
         Mikko Perttunen <mperttunen@nvidia.com>,
@@ -89,67 +89,213 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> Only couple drivers need to get the -ENODEV error code and majority of
-> drivers need to explicitly initialize the performance state. Add new
-> common helper which sets up OPP table for these drivers.
+> Add runtime PM and OPP support to the Host1x driver. For the starter we
+> will keep host1x always-on because dynamic power management require a major
+> refactoring of the driver code since lot's of code paths are missing the
+> RPM handling and we're going to remove some of these paths in the future.
 >
+> Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
+> Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
+> Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
+> Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
 > Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 > ---
->  include/soc/tegra/common.h | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
+
+[...]
+
+> --- a/drivers/gpu/host1x/dev.c
+> +++ b/drivers/gpu/host1x/dev.c
+> @@ -6,14 +6,18 @@
+>   */
 >
-> diff --git a/include/soc/tegra/common.h b/include/soc/tegra/common.h
-> index af41ad80ec21..5b4a042f60fb 100644
-> --- a/include/soc/tegra/common.h
-> +++ b/include/soc/tegra/common.h
-> @@ -39,4 +39,28 @@ devm_tegra_core_dev_init_opp_table(struct device *dev,
+>  #include <linux/clk.h>
+> +#include <linux/delay.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/io.h>
+>  #include <linux/list.h>
+>  #include <linux/module.h>
+>  #include <linux/of_device.h>
+>  #include <linux/of.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/slab.h>
+>
+> +#include <soc/tegra/common.h>
+> +
+>  #define CREATE_TRACE_POINTS
+>  #include <trace/events/host1x.h>
+>  #undef CREATE_TRACE_POINTS
+> @@ -190,6 +194,9 @@ static void host1x_setup_sid_table(struct host1x *host)
+>         const struct host1x_info *info = host->info;
+>         unsigned int i;
+>
+> +       if (!info->has_hypervisor)
+> +               return;
+> +
+>         for (i = 0; i < info->num_sid_entries; i++) {
+>                 const struct host1x_sid_entry *entry = &info->sid_table[i];
+>
+> @@ -347,6 +354,27 @@ static void host1x_iommu_exit(struct host1x *host)
+>         }
 >  }
->  #endif
 >
-> +/*
-> + * This function should be invoked with the enabled runtime PM of the device
-> + * in order to initialize performance state properly. Most of Tegra devices
-> + * are assumed to be suspended at a probe time and GENPD require RPM to be
-> + * enabled to set up the rpm-resume state, otherwise device is active and
-> + * performance state is applied immediately. Note that it will initialize
-> + * OPP bandwidth if it's wired in a device-tree for this device, which is
-> + * undesirable for a suspended device.
-> + */
-> +static inline int
-> +devm_tegra_core_dev_init_opp_table_common(struct device *dev)
+> +static int host1x_get_resets(struct host1x *host)
 > +{
-> +       struct tegra_core_opp_params opp_params = {};
 > +       int err;
 > +
-> +       opp_params.init_state = true;
+> +       host->resets[0].id = "mc";
+> +       host->resets[1].id = "host1x";
+> +       host->nresets = ARRAY_SIZE(host->resets);
 > +
-> +       err = devm_tegra_core_dev_init_opp_table(dev, &opp_params);
-> +       if (err != -ENODEV)
+> +       err = devm_reset_control_bulk_get_optional_exclusive_released(
+> +                               host->dev, host->nresets, host->resets);
+> +       if (err) {
+> +               dev_err(host->dev, "failed to get reset: %d\n", err);
 > +               return err;
+> +       }
+> +
+> +       if (WARN_ON(!host->resets[1].rstc))
+> +               return -ENOENT;
 > +
 > +       return 0;
 > +}
-
-Just want to share a few thoughts around these functions.
-
-So, I assume it's fine to call
-devm_tegra_core_dev_init_opp_table_common() or
-devm_tegra_core_dev_init_opp_table() from consumer drivers during
-->probe(), as long as those drivers are tegra specific, which I assume
-all are in the series!?
-
-My point is, a cross SoC consumer driver that needs to initiate OPP
-tables can get rather messy, if it would need to make one specific
-function call per SoC.
-
-That said, I hope we can tackle this as a separate/future problem, so
-the series can get merged as is.
-
 > +
->  #endif /* __SOC_TEGRA_COMMON_H__ */
-> --
-> 2.32.0
+>  static int host1x_probe(struct platform_device *pdev)
+>  {
+>         struct host1x *host;
+> @@ -423,12 +451,9 @@ static int host1x_probe(struct platform_device *pdev)
+>                 return err;
+>         }
 >
+> -       host->rst = devm_reset_control_get(&pdev->dev, "host1x");
+> -       if (IS_ERR(host->rst)) {
+> -               err = PTR_ERR(host->rst);
+> -               dev_err(&pdev->dev, "failed to get reset: %d\n", err);
+> +       err = host1x_get_resets(host);
+> +       if (err)
+>                 return err;
+> -       }
+>
+>         err = host1x_iommu_init(host);
+>         if (err < 0) {
+> @@ -443,22 +468,10 @@ static int host1x_probe(struct platform_device *pdev)
+>                 goto iommu_exit;
+>         }
+>
+> -       err = clk_prepare_enable(host->clk);
+> -       if (err < 0) {
+> -               dev_err(&pdev->dev, "failed to enable clock\n");
+> -               goto free_channels;
+> -       }
+> -
+> -       err = reset_control_deassert(host->rst);
+> -       if (err < 0) {
+> -               dev_err(&pdev->dev, "failed to deassert reset: %d\n", err);
+> -               goto unprepare_disable;
+> -       }
+> -
+>         err = host1x_syncpt_init(host);
+>         if (err) {
+>                 dev_err(&pdev->dev, "failed to initialize syncpts\n");
+> -               goto reset_assert;
+> +               goto free_channels;
+>         }
+>
+>         err = host1x_intr_init(host, syncpt_irq);
+> @@ -467,10 +480,18 @@ static int host1x_probe(struct platform_device *pdev)
+>                 goto deinit_syncpt;
+>         }
+>
+> -       host1x_debug_init(host);
+> +       pm_runtime_enable(&pdev->dev);
+> +
+> +       err = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
+> +       if (err)
+> +               goto pm_disable;
+>
+> -       if (host->info->has_hypervisor)
+> -               host1x_setup_sid_table(host);
+> +       /* the driver's code isn't ready yet for the dynamic RPM */
+> +       err = pm_runtime_resume_and_get(&pdev->dev);
+> +       if (err)
+> +               goto pm_disable;
+> +
+> +       host1x_debug_init(host);
+>
+>         err = host1x_register(host);
+>         if (err < 0)
+> @@ -486,13 +507,14 @@ static int host1x_probe(struct platform_device *pdev)
+>         host1x_unregister(host);
+>  deinit_debugfs:
+>         host1x_debug_deinit(host);
+> +
+> +       pm_runtime_put(&pdev->dev);
+
+pm_runtime_put() is asynchronous, so it may not actually succeed to
+trigger the ->runtime_suspend() callback to be invoked. Thus, this
+could end up that we leave clocks prepared/enabled when ->probe()
+fails, for example.
+
+I guess pm_runtime_put_sync_suspend() is slightly better.
+
+Another option is to call pm_runtime_force_suspend(), but then you
+must skip the call pm_runtime_disable() afterwards, as that has
+already been done inside that function.
+
+> +pm_disable:
+> +       pm_runtime_disable(&pdev->dev);
+> +
+>         host1x_intr_deinit(host);
+>  deinit_syncpt:
+>         host1x_syncpt_deinit(host);
+> -reset_assert:
+> -       reset_control_assert(host->rst);
+> -unprepare_disable:
+> -       clk_disable_unprepare(host->clk);
+>  free_channels:
+>         host1x_channel_list_free(&host->channel_list);
+>  iommu_exit:
+> @@ -507,19 +529,94 @@ static int host1x_remove(struct platform_device *pdev)
+>
+>         host1x_unregister(host);
+>         host1x_debug_deinit(host);
+> +
+> +       pm_runtime_put(&pdev->dev);
+
+Similar comment as in ->probe().
+
+> +       pm_runtime_disable(&pdev->dev);
+> +
+>         host1x_intr_deinit(host);
+>         host1x_syncpt_deinit(host);
+> -       reset_control_assert(host->rst);
+> -       clk_disable_unprepare(host->clk);
+>         host1x_iommu_exit(host);
+>
+>         return 0;
+>  }
+>
+> +
+> +       host1x_setup_sid_table(host);
+> +       host1x_syncpt_restore(host);
+> +       host1x_intr_start(host);
+> +
+> +       return 0;
+> +
+> +disable_clk:
+> +       clk_disable_unprepare(host->clk);
+> +release_reset:
+> +       reset_control_bulk_release(host->nresets, host->resets);
+> +
+> +       return err;
+> +}
+> +
+> +static const struct dev_pm_ops host1x_pm = {
+> +       SET_RUNTIME_PM_OPS(host1x_runtime_suspend, host1x_runtime_resume,
+> +                          NULL)
+> +       /* TODO: add system suspend-resume once driver will be ready for that */
+> +};
+
+[...]
 
 Kind regards
 Uffe
