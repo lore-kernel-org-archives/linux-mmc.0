@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 230E0C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 09:22:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 290E1C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 09:36:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 096AB61AA6
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 09:22:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06D5961A57
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 09:36:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352998AbhJAJYZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 05:24:25 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:21160 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229951AbhJAJYY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 1 Oct 2021 05:24:24 -0400
+        id S1353064AbhJAJht (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Oct 2021 05:37:49 -0400
+Received: from so254-9.mailgun.net ([198.61.254.9]:47068 "EHLO
+        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1352915AbhJAJht (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 05:37:49 -0400
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1633080161; h=Content-Transfer-Encoding: Content-Type:
+ s=smtp; t=1633080965; h=Content-Transfer-Encoding: Content-Type:
  MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=iYvrZUrKg77KiOcHuyT/fMvLDJyxg91TZsc59MuYT9s=; b=NJR49LQdwz9FivahiTsDpvlr7OHuRBsuwqPa38JDs7fgj9wJ+NihTQBykDUQGYqw32itvhq6
- HxtbTF333JRYOB95cjcxbcM34/6VgZrz4CEf2pAK4MEnKAzODeh/TqAGFKVl5zdnJwkJjtv/
- rZWvfMoHY2xkU8q+zrbjGQjpRcc=
-X-Mailgun-Sending-Ip: 69.72.43.7
+ To: From: Sender; bh=BeCtPj+gAx1yb+qr7Piiqq97L5UNvZlh+6GnVLGIR9Q=; b=ngIOHp/xnpkNK9dJFbTE1+SSwJG/n9pqzhohZ669Td8nuvj9hwYYYiC0YyruY6h/F33k0NpF
+ KRT0/FBI80e75msfcAYQ1UX978iTdgKermxzaDjJD7/JZ+UmfV9p+MPo6AVFVnG1j/acJCQG
+ 2njHA8dcEtNo2MH5gug8XvP+m3Q=
+X-Mailgun-Sending-Ip: 198.61.254.9
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org
  (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n02.prod.us-east-1.postgun.com with SMTP id
- 6156d3498578ef11edf7775c (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 01 Oct 2021 09:22:17
+ smtp-out-n02.prod.us-west-2.postgun.com with SMTP id
+ 6156d66947d64efb6dd25f1f (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 01 Oct 2021 09:35:37
  GMT
 Sender: kvalo=codeaurora.org@mg.codeaurora.org
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 4710CC43617; Fri,  1 Oct 2021 09:22:16 +0000 (UTC)
+        id 399F7C4338F; Fri,  1 Oct 2021 09:35:37 +0000 (UTC)
 Received: from tykki (tynnyri.adurom.net [51.15.11.48])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
         (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 4765DC4338F;
-        Fri,  1 Oct 2021 09:22:12 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org 4765DC4338F
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id B05F2C4338F;
+        Fri,  1 Oct 2021 09:35:33 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org B05F2C4338F
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
 From:   Kalle Valo <kvalo@codeaurora.org>
@@ -50,13 +50,13 @@ Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
         linux-mmc@vger.kernel.org,
         Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v7 05/24] wfx: add main.c/main.h
+Subject: Re: [PATCH v7 20/24] wfx: add scan.c/scan.h
 References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
-        <20210920161136.2398632-6-Jerome.Pouiller@silabs.com>
-Date:   Fri, 01 Oct 2021 12:22:08 +0300
-In-Reply-To: <20210920161136.2398632-6-Jerome.Pouiller@silabs.com> (Jerome
-        Pouiller's message of "Mon, 20 Sep 2021 18:11:17 +0200")
-Message-ID: <87y27dkslb.fsf@codeaurora.org>
+        <20210920161136.2398632-21-Jerome.Pouiller@silabs.com>
+Date:   Fri, 01 Oct 2021 12:35:28 +0300
+In-Reply-To: <20210920161136.2398632-21-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Mon, 20 Sep 2021 18:11:32 +0200")
+Message-ID: <87r1d5krz3.fsf@codeaurora.org>
 User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
@@ -73,85 +73,58 @@ Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 
 [...]
 
-> +/* The device needs data about the antenna configuration. This informati=
-on in
-> + * provided by PDS (Platform Data Set, this is the wording used in WF200
-> + * documentation) files. For hardware integrators, the full process to c=
-reate
-> + * PDS files is described here:
-> + *   https:github.com/SiliconLabs/wfx-firmware/blob/master/PDS/README.md
-> + *
-> + * So this function aims to send PDS to the device. However, the PDS fil=
-e is
-> + * often bigger than Rx buffers of the chip, so it has to be sent in mul=
-tiple
-> + * parts.
-> + *
-> + * In add, the PDS data cannot be split anywhere. The PDS files contains=
- tree
-> + * structures. Braces are used to enter/leave a level of the tree (in a =
-JSON
-> + * fashion). PDS files can only been split between root nodes.
+> +/* It is not really necessary to run scan request asynchronously. Howeve=
+r,
+> + * there is a bug in "iw scan" when ieee80211_scan_completed() is called=
+ before
+> + * wfx_hw_scan() return
 > + */
-> +int wfx_send_pds(struct wfx_dev *wdev, u8 *buf, size_t len)
+> +void wfx_hw_scan_work(struct work_struct *work)
 > +{
-> +	int ret;
-> +	int start, brace_level, i;
+> +	struct wfx_vif *wvif =3D container_of(work, struct wfx_vif, scan_work);
+> +	struct ieee80211_scan_request *hw_req =3D wvif->scan_req;
+> +	int chan_cur, ret, err;
 > +
-> +	start =3D 0;
-> +	brace_level =3D 0;
-> +	if (buf[0] !=3D '{') {
-> + dev_err(wdev->dev, "valid PDS start with '{'. Did you forget to
-> compress it?\n");
-> +		return -EINVAL;
+> +	mutex_lock(&wvif->wdev->conf_mutex);
+> +	mutex_lock(&wvif->scan_lock);
+> +	if (wvif->join_in_progress) {
+> +		dev_info(wvif->wdev->dev, "abort in-progress REQ_JOIN");
+> +		wfx_reset(wvif);
 > +	}
-> +	for (i =3D 1; i < len - 1; i++) {
-> +		if (buf[i] =3D=3D '{')
-> +			brace_level++;
-> +		if (buf[i] =3D=3D '}')
-> +			brace_level--;
-> +		if (buf[i] =3D=3D '}' && !brace_level) {
-> +			i++;
-> +			if (i - start + 1 > WFX_PDS_MAX_SIZE)
-> +				return -EFBIG;
-> +			buf[start] =3D '{';
-> +			buf[i] =3D 0;
-> +			dev_dbg(wdev->dev, "send PDS '%s}'\n", buf + start);
-> +			buf[i] =3D '}';
-> +			ret =3D hif_configuration(wdev, buf + start,
-> +						i - start + 1);
-> +			if (ret > 0) {
-> + dev_err(wdev->dev, "PDS bytes %d to %d: invalid data (unsupported
-> options?)\n",
-> +					start, i);
-> +				return -EINVAL;
-> +			}
-> +			if (ret =3D=3D -ETIMEDOUT) {
-> + dev_err(wdev->dev, "PDS bytes %d to %d: chip didn't reply (corrupted
-> file?)\n",
-> +					start, i);
-> +				return ret;
-> +			}
-> +			if (ret) {
-> + dev_err(wdev->dev, "PDS bytes %d to %d: chip returned an unknown
-> error\n",
-> +					start, i);
-> +				return -EIO;
-> +			}
-> +			buf[i] =3D ',';
-> +			start =3D i;
+> +	update_probe_tmpl(wvif, &hw_req->req);
+> +	chan_cur =3D 0;
+> +	err =3D 0;
+> +	do {
+> +		ret =3D send_scan_req(wvif, &hw_req->req, chan_cur);
+> +		if (ret > 0) {
+> +			chan_cur +=3D ret;
+> +			err =3D 0;
 > +		}
-> +	}
+> +		if (!ret)
+> +			err++;
+> +		if (err > 2) {
+> +			dev_err(wvif->wdev->dev, "scan has not been able to start\n");
+> +			ret =3D -ETIMEDOUT;
+> +		}
+> +	} while (ret >=3D 0 && chan_cur < hw_req->req.n_channels);
+> +	mutex_unlock(&wvif->scan_lock);
+> +	mutex_unlock(&wvif->wdev->conf_mutex);
+> +	__ieee80211_scan_completed_compat(wvif->wdev->hw, ret < 0);
+> +}
+> +
+> +int wfx_hw_scan(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
+> +		struct ieee80211_scan_request *hw_req)
+> +{
+> +	struct wfx_vif *wvif =3D (struct wfx_vif *)vif->drv_priv;
+> +
+> +	WARN_ON(hw_req->req.n_channels > HIF_API_MAX_NB_CHANNELS);
+> +	wvif->scan_req =3D hw_req;
+> +	schedule_work(&wvif->scan_work);
 > +	return 0;
 > +}
 
-I'm not really fond of having this kind of ASCII based parser in the
-kernel. Do you have an example compressed file somewhere?
-
-Does the device still work without these PDS files? I ask because my
-suggestion is to remove this part altogether and revisit after the
-initial driver is moved to drivers/net/wireless. A lot simpler to review
-complex features separately.
+This scan logic looks fishy to me, but no time to investigate in detail.
+Though not a blocker.
 
 --=20
 https://patchwork.kernel.org/project/linux-wireless/list/
