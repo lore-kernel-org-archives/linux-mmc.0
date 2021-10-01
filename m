@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12E38C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 18:13:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01362C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 18:13:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0314461ABB
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 18:13:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E15436135E
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 18:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355760AbhJASO6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 14:14:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50290 "EHLO
+        id S1355869AbhJASPF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Oct 2021 14:15:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355766AbhJASOl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 14:14:41 -0400
-Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 074C9C061786;
-        Fri,  1 Oct 2021 11:12:55 -0700 (PDT)
-Received: by mail-pg1-x52f.google.com with SMTP id n18so10130257pgm.12;
-        Fri, 01 Oct 2021 11:12:55 -0700 (PDT)
+        with ESMTP id S1355750AbhJASOp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 14:14:45 -0400
+Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A9F8C0613EB;
+        Fri,  1 Oct 2021 11:13:01 -0700 (PDT)
+Received: by mail-pj1-x1033.google.com with SMTP id pg10so6655222pjb.5;
+        Fri, 01 Oct 2021 11:13:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=VLy9LsAE1T2z9U4JDqIutJ7y1ngXQSApraUIYcYJOyU=;
-        b=RqGgq1Gui9qj6v5FhzU2Eme+ksvufLQkHpL1NLLShseFIvZVfExATbBuRM+QV8/5Ys
-         WHdLQN3fvdgQvcmS1RBVCw8MAAgn/0MU5BhhDv0+oVtUeEVJuHQsk5Z02cvgyZVjC07n
-         v9GWj2eGNR8atCtfi/Xz248xzrytCP0o3kjN03Lc96NXHICFXpySqyYkUAv9gQWRMN4a
-         0DuP1UtwM6lsH6mm5KwCzBeDy5NOvvOaoYRjaoqLjd3rVK5rFmrhwFunen3L6B73ebby
-         7KUvRRLoVPqZ/3pjp5UC8XOaWkxZ+3C/kttZG3UVqah3j4jmIRIFHk1nNSU5PRww7lMV
-         v0TA==
+        bh=FIPuS4OLzQCF5AgK/VmYDt3q+TnxbO8XesSIDRxgCzY=;
+        b=OUPs20Lz/NmbRxei/rcKEENCor4GrIksTbNzrra8o8sGuoimx71sXhzX9Of43nAnI/
+         mtkXVzPKdKv18s+rx/EDmdNghESXRYhcZubBhhiltyvNDVGcAN1wfPJp6chufp3k5zKa
+         DtCX0vJNCzUwHi0xdLwtTK985EUilWbQIKMWGdgIrEELDhcRcMJg8N8NFHuDF12RNQPz
+         6rHWpH1T21yydWaNUcBB8SvN/n4NeggmGa7dghzyUMTL4jIlroY40idxGtFCOXovvnZG
+         i7cdjmKJSVuY+GoLvZAtZC6hQy7WfscaNhF9R3CmeyVmTkey4TfMvi/1IP07zzSCFrow
+         reag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=VLy9LsAE1T2z9U4JDqIutJ7y1ngXQSApraUIYcYJOyU=;
-        b=m4/buynAonhg85BQKaS6huuUS6gKOeIcwvDZ+EUbfFMYTgxIDsipM733hSeNTvW6k3
-         yCR4QJRnyLHjySMcs4klAdqyf0y+M7CSIiMwh6QEbYR/N92/TGbKs67RWquNzg3cCe7R
-         /cK0mhd32VTYYpSUEThpghpaRu097G8mJj7aajRlxJQqFip83xc88Q4AEePOaBRCF8KR
-         OjZuklDuYFUa9RpEpDiFKzRoLbelSCJgLVclv1vRjr6jqieXuGybcDA/psknjweM3OZO
-         uU2S0sYHSc/QDkQvZFEb4jXEZc2bqJOaXkQ9aCAKbzSuyWDGkx1cyWhXZ6KaeaxUvjY3
-         EMZg==
-X-Gm-Message-State: AOAM5310cnbfg39yWJ7DJ3/CYewQmm+cNFG5TVegVSNshffu8G5Tk2j5
-        4qKiXgHscrAEftvkL/+QOGE=
-X-Google-Smtp-Source: ABdhPJwrnDJGSoaT9Br2Nv7RM+IySWEruHS27yyIVmntrp/IgX7T6yOqSL6dFpIAO1gd33cuMzjIWA==
-X-Received: by 2002:a62:1d02:0:b0:448:604e:fb83 with SMTP id d2-20020a621d02000000b00448604efb83mr11520510pfd.12.1633111974412;
-        Fri, 01 Oct 2021 11:12:54 -0700 (PDT)
+        bh=FIPuS4OLzQCF5AgK/VmYDt3q+TnxbO8XesSIDRxgCzY=;
+        b=YOz9fgTCgGAUGnenRa0NEggV+tC7lvbszQQ/a6VyNXtt7IHYO6Ny+k6kMOJLdCyrQy
+         GCgu7kpZ+9vZCK2lh4kQ3+Tqze60VPQygDhMZNLWyWB3Si5lnU0XgzDidAoulKips1/u
+         kVuKzQUFnp8e8mJ1958EvdDutNmWLHCyE+MmVJ05WkQxZeUizIES1ENIIrgAeMIfRG2A
+         MOKQsAUNfknIwnUKhZlH5wK/YWzJzRFTfdlXWgHfLBimXG784R98BaO9GAnp5nlY4M2H
+         Lc5eb0GNZvZVxX9nPAFSfKq8d4ZvxJtxHAVfwjxqP83K+8RQlVxWYtmjPNaht8VCn94D
+         WeoA==
+X-Gm-Message-State: AOAM53110TMZQD0kavlQce35X71IodAVfWU3fAkBujBmM88IPlB3X7aU
+        /hcuV/gr2TLo0WsFrExRqwFyxbNHwEo=
+X-Google-Smtp-Source: ABdhPJwYsv/lJiq2bBbSjjU3f4DxXazbTsA4OLPiXahnaImXyC6vCzP9cY+tmf9cr+7T5Q6pwdEmdw==
+X-Received: by 2002:a17:90a:da06:: with SMTP id e6mr14937823pjv.63.1633111980523;
+        Fri, 01 Oct 2021 11:13:00 -0700 (PDT)
 Received: from localhost (searspoint.nvidia.com. [216.228.112.21])
-        by smtp.gmail.com with ESMTPSA id n12sm6800014pff.166.2021.10.01.11.12.53
+        by smtp.gmail.com with ESMTPSA id 186sm5925966pfg.20.2021.10.01.11.12.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Oct 2021 11:12:54 -0700 (PDT)
+        Fri, 01 Oct 2021 11:13:00 -0700 (PDT)
 From:   Yury Norov <yury.norov@gmail.com>
 To:     Stephen Rothwell <sfr@canb.auug.org.au>
 Cc:     Yury Norov <yury.norov@gmail.com>,
@@ -102,9 +102,9 @@ Cc:     Yury Norov <yury.norov@gmail.com>,
         Will Deacon <will@kernel.org>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Yoshinori Sato <ysato@users.sourceforge.jp>
-Subject: [PATCH 03/16] include: move find.h from asm_generic to linux
-Date:   Fri,  1 Oct 2021 11:12:32 -0700
-Message-Id: <20211001181245.228419-4-yury.norov@gmail.com>
+Subject: [PATCH 05/16] lib: add find_first_and_bit()
+Date:   Fri,  1 Oct 2021 11:12:34 -0700
+Message-Id: <20211001181245.228419-6-yury.norov@gmail.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20211001181245.228419-1-yury.norov@gmail.com>
 References: <20211001181245.228419-1-yury.norov@gmail.com>
@@ -114,351 +114,158 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-find_bit API and bitmap API are closely related, but inclusion paths
-are different - include/asm-generic and include/linux, correspondingly.
-In the past it made a lot of troubles due to circular dependencies
-and/or undefined symbols. Fix this by moving find.h under include/linux.
+Currently find_first_and_bit() is an alias to find_next_and_bit(). However,
+it is widely used in cpumask, so it worth to optimize it. This patch adds
+its own implementation for find_first_and_bit().
+
+On x86_64 find_bit_benchmark says:
+
+Before (#define find_first_and_bit(...) find_next_and_bit(..., 0):
+Start testing find_bit() with random-filled bitmap
+[  140.291468] find_first_and_bit:           46890919 ns,  32671 iterations
+Start testing find_bit() with sparse bitmap
+[  140.295028] find_first_and_bit:               7103 ns,      1 iterations
+
+After:
+Start testing find_bit() with random-filled bitmap
+[  162.574907] find_first_and_bit:           25045813 ns,  32846 iterations
+Start testing find_bit() with sparse bitmap
+[  162.578458] find_first_and_bit:               4900 ns,      1 iterations
+
+(Thanks to Alexey Klimov for thorough testing.)
 
 Signed-off-by: Yury Norov <yury.norov@gmail.com>
 Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Alexey Klimov <aklimov@redhat.com>
 ---
- MAINTAINERS                                  |  2 +-
- arch/alpha/include/asm/bitops.h              |  2 --
- arch/arc/include/asm/bitops.h                |  1 -
- arch/arm/include/asm/bitops.h                |  1 -
- arch/arm64/include/asm/bitops.h              |  1 -
- arch/csky/include/asm/bitops.h               |  1 -
- arch/h8300/include/asm/bitops.h              |  1 -
- arch/hexagon/include/asm/bitops.h            |  1 -
- arch/ia64/include/asm/bitops.h               |  2 --
- arch/m68k/include/asm/bitops.h               |  2 --
- arch/mips/include/asm/bitops.h               |  1 -
- arch/openrisc/include/asm/bitops.h           |  1 -
- arch/parisc/include/asm/bitops.h             |  2 --
- arch/powerpc/include/asm/bitops.h            |  2 --
- arch/riscv/include/asm/bitops.h              |  1 -
- arch/s390/include/asm/bitops.h               |  1 -
- arch/sh/include/asm/bitops.h                 |  1 -
- arch/sparc/include/asm/bitops_32.h           |  1 -
- arch/sparc/include/asm/bitops_64.h           |  2 --
- arch/x86/include/asm/bitops.h                |  2 --
- arch/xtensa/include/asm/bitops.h             |  1 -
- include/asm-generic/bitops.h                 |  1 -
- include/linux/bitmap.h                       |  1 +
- include/{asm-generic/bitops => linux}/find.h | 12 +++++++++---
- 24 files changed, 11 insertions(+), 32 deletions(-)
- rename include/{asm-generic/bitops => linux}/find.h (97%)
+ include/linux/find.h     | 27 +++++++++++++++++++++++++++
+ lib/find_bit.c           | 21 +++++++++++++++++++++
+ lib/find_bit_benchmark.c | 21 +++++++++++++++++++++
+ 3 files changed, 69 insertions(+)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index abd0dd5aa003..181139d30068 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3308,8 +3308,8 @@ M:	Yury Norov <yury.norov@gmail.com>
- R:	Andy Shevchenko <andriy.shevchenko@linux.intel.com>
- R:	Rasmus Villemoes <linux@rasmusvillemoes.dk>
- S:	Maintained
--F:	include/asm-generic/bitops/find.h
- F:	include/linux/bitmap.h
-+F:	include/linux/find.h
- F:	lib/bitmap.c
- F:	lib/find_bit.c
- F:	lib/find_bit_benchmark.c
-diff --git a/arch/alpha/include/asm/bitops.h b/arch/alpha/include/asm/bitops.h
-index 5adca78830b5..e1d8483a45f2 100644
---- a/arch/alpha/include/asm/bitops.h
-+++ b/arch/alpha/include/asm/bitops.h
-@@ -430,8 +430,6 @@ static inline unsigned int __arch_hweight8(unsigned int w)
- 
- #endif /* __KERNEL__ */
- 
--#include <asm-generic/bitops/find.h>
--
- #ifdef __KERNEL__
- 
- /*
-diff --git a/arch/arc/include/asm/bitops.h b/arch/arc/include/asm/bitops.h
-index a7daaf64ae34..bdb7e190a294 100644
---- a/arch/arc/include/asm/bitops.h
-+++ b/arch/arc/include/asm/bitops.h
-@@ -189,7 +189,6 @@ static inline __attribute__ ((const)) unsigned long __ffs(unsigned long x)
- #include <asm-generic/bitops/atomic.h>
- #include <asm-generic/bitops/non-atomic.h>
- 
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/le.h>
- #include <asm-generic/bitops/ext2-atomic-setbit.h>
- 
-diff --git a/arch/arm/include/asm/bitops.h b/arch/arm/include/asm/bitops.h
-index c92e42a5c8f7..8e94fe7ab5eb 100644
---- a/arch/arm/include/asm/bitops.h
-+++ b/arch/arm/include/asm/bitops.h
-@@ -264,7 +264,6 @@ static inline int find_next_bit_le(const void *p, int size, int offset)
- 
- #endif
- 
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/le.h>
- 
- /*
-diff --git a/arch/arm64/include/asm/bitops.h b/arch/arm64/include/asm/bitops.h
-index 81a3e519b07d..9b3c787132d2 100644
---- a/arch/arm64/include/asm/bitops.h
-+++ b/arch/arm64/include/asm/bitops.h
-@@ -18,7 +18,6 @@
- 
- #include <asm-generic/bitops/ffz.h>
- #include <asm-generic/bitops/fls64.h>
--#include <asm-generic/bitops/find.h>
- 
- #include <asm-generic/bitops/sched.h>
- #include <asm-generic/bitops/hweight.h>
-diff --git a/arch/csky/include/asm/bitops.h b/arch/csky/include/asm/bitops.h
-index 02b72a000767..72e1b2aa29a0 100644
---- a/arch/csky/include/asm/bitops.h
-+++ b/arch/csky/include/asm/bitops.h
-@@ -59,7 +59,6 @@ static __always_inline unsigned long __fls(unsigned long x)
- 
- #include <asm-generic/bitops/ffz.h>
- #include <asm-generic/bitops/fls64.h>
--#include <asm-generic/bitops/find.h>
- 
- #ifndef _LINUX_BITOPS_H
- #error only <linux/bitops.h> can be included directly
-diff --git a/arch/h8300/include/asm/bitops.h b/arch/h8300/include/asm/bitops.h
-index c867a80cab5b..4489e3d6edd3 100644
---- a/arch/h8300/include/asm/bitops.h
-+++ b/arch/h8300/include/asm/bitops.h
-@@ -168,7 +168,6 @@ static inline unsigned long __ffs(unsigned long word)
- 	return result;
- }
- 
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/sched.h>
- #include <asm-generic/bitops/hweight.h>
- #include <asm-generic/bitops/lock.h>
-diff --git a/arch/hexagon/include/asm/bitops.h b/arch/hexagon/include/asm/bitops.h
-index 71429f756af0..75d6ba3643b8 100644
---- a/arch/hexagon/include/asm/bitops.h
-+++ b/arch/hexagon/include/asm/bitops.h
-@@ -271,7 +271,6 @@ static inline unsigned long __fls(unsigned long word)
- }
- 
- #include <asm-generic/bitops/lock.h>
--#include <asm-generic/bitops/find.h>
- 
- #include <asm-generic/bitops/fls64.h>
- #include <asm-generic/bitops/sched.h>
-diff --git a/arch/ia64/include/asm/bitops.h b/arch/ia64/include/asm/bitops.h
-index 2f24ee6459d2..577be93c0818 100644
---- a/arch/ia64/include/asm/bitops.h
-+++ b/arch/ia64/include/asm/bitops.h
-@@ -441,8 +441,6 @@ static __inline__ unsigned long __arch_hweight64(unsigned long x)
- 
- #endif /* __KERNEL__ */
- 
--#include <asm-generic/bitops/find.h>
--
- #ifdef __KERNEL__
- 
- #include <asm-generic/bitops/le.h>
-diff --git a/arch/m68k/include/asm/bitops.h b/arch/m68k/include/asm/bitops.h
-index 7b414099e5fc..f551a2160294 100644
---- a/arch/m68k/include/asm/bitops.h
-+++ b/arch/m68k/include/asm/bitops.h
-@@ -529,6 +529,4 @@ static inline int __fls(int x)
- #include <asm-generic/bitops/le.h>
- #endif /* __KERNEL__ */
- 
--#include <asm-generic/bitops/find.h>
--
- #endif /* _M68K_BITOPS_H */
-diff --git a/arch/mips/include/asm/bitops.h b/arch/mips/include/asm/bitops.h
-index dc2a6234dd3c..c09d57f907f7 100644
---- a/arch/mips/include/asm/bitops.h
-+++ b/arch/mips/include/asm/bitops.h
-@@ -446,7 +446,6 @@ static inline int ffs(int word)
- }
- 
- #include <asm-generic/bitops/ffz.h>
--#include <asm-generic/bitops/find.h>
- 
- #ifdef __KERNEL__
- 
-diff --git a/arch/openrisc/include/asm/bitops.h b/arch/openrisc/include/asm/bitops.h
-index 7f1ca35213d8..d773ed938acb 100644
---- a/arch/openrisc/include/asm/bitops.h
-+++ b/arch/openrisc/include/asm/bitops.h
-@@ -30,7 +30,6 @@
- #include <asm/bitops/fls.h>
- #include <asm/bitops/__fls.h>
- #include <asm-generic/bitops/fls64.h>
--#include <asm-generic/bitops/find.h>
- 
- #ifndef _LINUX_BITOPS_H
- #error only <linux/bitops.h> can be included directly
-diff --git a/arch/parisc/include/asm/bitops.h b/arch/parisc/include/asm/bitops.h
-index aa4e883431c1..c7a9997ac9cb 100644
---- a/arch/parisc/include/asm/bitops.h
-+++ b/arch/parisc/include/asm/bitops.h
-@@ -208,8 +208,6 @@ static __inline__ int fls(unsigned int x)
- 
- #endif /* __KERNEL__ */
- 
--#include <asm-generic/bitops/find.h>
--
- #ifdef __KERNEL__
- 
- #include <asm-generic/bitops/le.h>
-diff --git a/arch/powerpc/include/asm/bitops.h b/arch/powerpc/include/asm/bitops.h
-index 11847b6a244e..abc8f2c7c570 100644
---- a/arch/powerpc/include/asm/bitops.h
-+++ b/arch/powerpc/include/asm/bitops.h
-@@ -255,8 +255,6 @@ unsigned long __arch_hweight64(__u64 w);
- #include <asm-generic/bitops/hweight.h>
- #endif
- 
--#include <asm-generic/bitops/find.h>
--
- /* wrappers that deal with KASAN instrumentation */
- #include <asm-generic/bitops/instrumented-atomic.h>
- #include <asm-generic/bitops/instrumented-lock.h>
-diff --git a/arch/riscv/include/asm/bitops.h b/arch/riscv/include/asm/bitops.h
-index 396a3303c537..3540b690944b 100644
---- a/arch/riscv/include/asm/bitops.h
-+++ b/arch/riscv/include/asm/bitops.h
-@@ -20,7 +20,6 @@
- #include <asm-generic/bitops/fls.h>
- #include <asm-generic/bitops/__fls.h>
- #include <asm-generic/bitops/fls64.h>
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/sched.h>
- #include <asm-generic/bitops/ffs.h>
- 
-diff --git a/arch/s390/include/asm/bitops.h b/arch/s390/include/asm/bitops.h
-index fd149480b6e2..f7cefdde7c24 100644
---- a/arch/s390/include/asm/bitops.h
-+++ b/arch/s390/include/asm/bitops.h
-@@ -387,7 +387,6 @@ static inline int fls(unsigned int word)
- #endif /* CONFIG_HAVE_MARCH_Z9_109_FEATURES */
- 
- #include <asm-generic/bitops/ffz.h>
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/hweight.h>
- #include <asm-generic/bitops/sched.h>
- #include <asm-generic/bitops/le.h>
-diff --git a/arch/sh/include/asm/bitops.h b/arch/sh/include/asm/bitops.h
-index 3b6c7b5b7ec9..10ceb0d6b5a9 100644
---- a/arch/sh/include/asm/bitops.h
-+++ b/arch/sh/include/asm/bitops.h
-@@ -68,6 +68,5 @@ static inline unsigned long __ffs(unsigned long word)
- #include <asm-generic/bitops/fls64.h>
- 
- #include <asm-generic/bitops/le.h>
--#include <asm-generic/bitops/find.h>
- 
- #endif /* __ASM_SH_BITOPS_H */
-diff --git a/arch/sparc/include/asm/bitops_32.h b/arch/sparc/include/asm/bitops_32.h
-index 0ceff3b915a8..889afa9f990f 100644
---- a/arch/sparc/include/asm/bitops_32.h
-+++ b/arch/sparc/include/asm/bitops_32.h
-@@ -100,7 +100,6 @@ static inline void change_bit(unsigned long nr, volatile unsigned long *addr)
- #include <asm-generic/bitops/fls64.h>
- #include <asm-generic/bitops/hweight.h>
- #include <asm-generic/bitops/lock.h>
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/le.h>
- #include <asm-generic/bitops/ext2-atomic.h>
- 
-diff --git a/arch/sparc/include/asm/bitops_64.h b/arch/sparc/include/asm/bitops_64.h
-index ca7ea5913494..005a8ae858f1 100644
---- a/arch/sparc/include/asm/bitops_64.h
-+++ b/arch/sparc/include/asm/bitops_64.h
-@@ -52,8 +52,6 @@ unsigned int __arch_hweight8(unsigned int w);
- #include <asm-generic/bitops/lock.h>
- #endif /* __KERNEL__ */
- 
--#include <asm-generic/bitops/find.h>
--
- #ifdef __KERNEL__
- 
- #include <asm-generic/bitops/le.h>
-diff --git a/arch/x86/include/asm/bitops.h b/arch/x86/include/asm/bitops.h
-index 0367efdc5b7a..a288ecd230ab 100644
---- a/arch/x86/include/asm/bitops.h
-+++ b/arch/x86/include/asm/bitops.h
-@@ -380,8 +380,6 @@ static __always_inline int fls64(__u64 x)
- #include <asm-generic/bitops/fls64.h>
- #endif
- 
--#include <asm-generic/bitops/find.h>
--
- #include <asm-generic/bitops/sched.h>
- 
- #include <asm/arch_hweight.h>
-diff --git a/arch/xtensa/include/asm/bitops.h b/arch/xtensa/include/asm/bitops.h
-index 3f71d364ba90..cd225896c40f 100644
---- a/arch/xtensa/include/asm/bitops.h
-+++ b/arch/xtensa/include/asm/bitops.h
-@@ -205,7 +205,6 @@ BIT_OPS(change, "xor", )
- #undef BIT_OP
- #undef TEST_AND_BIT_OP
- 
--#include <asm-generic/bitops/find.h>
- #include <asm-generic/bitops/le.h>
- 
- #include <asm-generic/bitops/ext2-atomic-setbit.h>
-diff --git a/include/asm-generic/bitops.h b/include/asm-generic/bitops.h
-index df9b5bc3d282..a47b8a71d6fe 100644
---- a/include/asm-generic/bitops.h
-+++ b/include/asm-generic/bitops.h
-@@ -20,7 +20,6 @@
- #include <asm-generic/bitops/fls.h>
- #include <asm-generic/bitops/__fls.h>
- #include <asm-generic/bitops/fls64.h>
--#include <asm-generic/bitops/find.h>
- 
- #ifndef _LINUX_BITOPS_H
- #error only <linux/bitops.h> can be included directly
-diff --git a/include/linux/bitmap.h b/include/linux/bitmap.h
-index 37f36dad18bd..c88b2321ba14 100644
---- a/include/linux/bitmap.h
-+++ b/include/linux/bitmap.h
-@@ -6,6 +6,7 @@
- 
- #include <linux/align.h>
- #include <linux/bitops.h>
-+#include <linux/find.h>
- #include <linux/limits.h>
- #include <linux/string.h>
- #include <linux/types.h>
-diff --git a/include/asm-generic/bitops/find.h b/include/linux/find.h
-similarity index 97%
-rename from include/asm-generic/bitops/find.h
-rename to include/linux/find.h
-index 91b1b23f2b0c..c5410c243e04 100644
---- a/include/asm-generic/bitops/find.h
+diff --git a/include/linux/find.h b/include/linux/find.h
+index ea57f7f38c49..6048f8c97418 100644
+--- a/include/linux/find.h
 +++ b/include/linux/find.h
-@@ -1,6 +1,12 @@
- /* SPDX-License-Identifier: GPL-2.0 */
--#ifndef _ASM_GENERIC_BITOPS_FIND_H_
--#define _ASM_GENERIC_BITOPS_FIND_H_
-+#ifndef __LINUX_FIND_H_
-+#define __LINUX_FIND_H_
+@@ -12,6 +12,8 @@ extern unsigned long _find_next_bit(const unsigned long *addr1,
+ 		const unsigned long *addr2, unsigned long nbits,
+ 		unsigned long start, unsigned long invert, unsigned long le);
+ extern unsigned long _find_first_bit(const unsigned long *addr, unsigned long size);
++extern unsigned long _find_first_and_bit(const unsigned long *addr1,
++					 const unsigned long *addr2, unsigned long size);
+ extern unsigned long _find_first_zero_bit(const unsigned long *addr, unsigned long size);
+ extern unsigned long _find_last_bit(const unsigned long *addr, unsigned long size);
+ 
+@@ -123,6 +125,31 @@ unsigned long find_first_bit(const unsigned long *addr, unsigned long size)
+ }
+ #endif
+ 
++#ifndef find_first_and_bit
++/**
++ * find_first_and_bit - find the first set bit in both memory regions
++ * @addr1: The first address to base the search on
++ * @addr2: The second address to base the search on
++ * @size: The bitmap size in bits
++ *
++ * Returns the bit number for the next set bit
++ * If no bits are set, returns @size.
++ */
++static inline
++unsigned long find_first_and_bit(const unsigned long *addr1,
++				 const unsigned long *addr2,
++				 unsigned long size)
++{
++	if (small_const_nbits(size)) {
++		unsigned long val = *addr1 & *addr2 & GENMASK(size - 1, 0);
 +
-+#ifndef __LINUX_BITMAP_H
-+#error only <linux/bitmap.h> can be included directly
++		return val ? __ffs(val) : size;
++	}
++
++	return _find_first_and_bit(addr1, addr2, size);
++}
 +#endif
 +
-+#include <linux/bitops.h>
- 
- extern unsigned long _find_next_bit(const unsigned long *addr1,
- 		const unsigned long *addr2, unsigned long nbits,
-@@ -259,4 +265,4 @@ unsigned long find_next_bit_le(const void *addr, unsigned
- #error "Please fix <asm/byteorder.h>"
+ #ifndef find_first_zero_bit
+ /**
+  * find_first_zero_bit - find the first cleared bit in a memory region
+diff --git a/lib/find_bit.c b/lib/find_bit.c
+index 0f8e2e369b1d..1b8e4b2a9cba 100644
+--- a/lib/find_bit.c
++++ b/lib/find_bit.c
+@@ -89,6 +89,27 @@ unsigned long _find_first_bit(const unsigned long *addr, unsigned long size)
+ EXPORT_SYMBOL(_find_first_bit);
  #endif
  
--#endif /*_ASM_GENERIC_BITOPS_FIND_H_ */
-+#endif /*__LINUX_FIND_H_ */
++#ifndef find_first_and_bit
++/*
++ * Find the first set bit in two memory regions.
++ */
++unsigned long _find_first_and_bit(const unsigned long *addr1,
++				  const unsigned long *addr2,
++				  unsigned long size)
++{
++	unsigned long idx, val;
++
++	for (idx = 0; idx * BITS_PER_LONG < size; idx++) {
++		val = addr1[idx] & addr2[idx];
++		if (val)
++			return min(idx * BITS_PER_LONG + __ffs(val), size);
++	}
++
++	return size;
++}
++EXPORT_SYMBOL(_find_first_and_bit);
++#endif
++
+ #ifndef find_first_zero_bit
+ /*
+  * Find the first cleared bit in a memory region.
+diff --git a/lib/find_bit_benchmark.c b/lib/find_bit_benchmark.c
+index 5637c5711db9..db904b57d4b8 100644
+--- a/lib/find_bit_benchmark.c
++++ b/lib/find_bit_benchmark.c
+@@ -49,6 +49,25 @@ static int __init test_find_first_bit(void *bitmap, unsigned long len)
+ 	return 0;
+ }
+ 
++static int __init test_find_first_and_bit(void *bitmap, const void *bitmap2, unsigned long len)
++{
++	static DECLARE_BITMAP(cp, BITMAP_LEN) __initdata;
++	unsigned long i, cnt;
++	ktime_t time;
++
++	bitmap_copy(cp, bitmap, BITMAP_LEN);
++
++	time = ktime_get();
++	for (cnt = i = 0; i < len; cnt++) {
++		i = find_first_and_bit(cp, bitmap2, len);
++		__clear_bit(i, cp);
++	}
++	time = ktime_get() - time;
++	pr_err("find_first_and_bit: %18llu ns, %6ld iterations\n", time, cnt);
++
++	return 0;
++}
++
+ static int __init test_find_next_bit(const void *bitmap, unsigned long len)
+ {
+ 	unsigned long i, cnt;
+@@ -129,6 +148,7 @@ static int __init find_bit_test(void)
+ 	 * traverse only part of bitmap to avoid soft lockup.
+ 	 */
+ 	test_find_first_bit(bitmap, BITMAP_LEN / 10);
++	test_find_first_and_bit(bitmap, bitmap2, BITMAP_LEN / 2);
+ 	test_find_next_and_bit(bitmap, bitmap2, BITMAP_LEN);
+ 
+ 	pr_err("\nStart testing find_bit() with sparse bitmap\n");
+@@ -145,6 +165,7 @@ static int __init find_bit_test(void)
+ 	test_find_next_zero_bit(bitmap, BITMAP_LEN);
+ 	test_find_last_bit(bitmap, BITMAP_LEN);
+ 	test_find_first_bit(bitmap, BITMAP_LEN);
++	test_find_first_and_bit(bitmap, bitmap2, BITMAP_LEN);
+ 	test_find_next_and_bit(bitmap, bitmap2, BITMAP_LEN);
+ 
+ 	/*
 -- 
 2.30.2
 
