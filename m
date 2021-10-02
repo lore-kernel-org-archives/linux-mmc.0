@@ -2,138 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC38AC43217
-	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 09:25:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98B6EC433EF
+	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 13:29:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C329661507
-	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 09:25:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E72461B27
+	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 13:29:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232726AbhJBJ1G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 2 Oct 2021 05:27:06 -0400
-Received: from mail-vs1-f54.google.com ([209.85.217.54]:35694 "EHLO
-        mail-vs1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232719AbhJBJZX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2021 05:25:23 -0400
-Received: by mail-vs1-f54.google.com with SMTP id f18so14116319vsp.2;
-        Sat, 02 Oct 2021 02:23:37 -0700 (PDT)
+        id S233289AbhJBNbG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 2 Oct 2021 09:31:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52142 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230089AbhJBNbF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2021 09:31:05 -0400
+Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74184C0613EC;
+        Sat,  2 Oct 2021 06:29:19 -0700 (PDT)
+Received: by mail-ed1-x52d.google.com with SMTP id dj4so46212653edb.5;
+        Sat, 02 Oct 2021 06:29:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Qo3Emk/l8HcCIf+3gstpLuI9ENkhEiIS4ul424Y9Sro=;
+        b=aOZwHotJ3gUPWwDNRFcZRYnC6a7noj054IlZhpAzpGNhoxcOlo5TX8RdV5hENx05oj
+         EKcg+cvSAcMO2iGcygEUBc6HHJDFbPVMMI/TF15rpVR23QWwoTFk/X8oycnb5NIxMB34
+         N5yKIFa0fmRiJKg5fluaBsCK5vQTjwjGLYoEOCOCEsGRqDuqRupcKrQOcfuy7AR83yDK
+         WvaRZRxybEcfzxadlwSxat7mWOMPeIVz3bByBEY21ZN+8HrFiJcRpI/yvW4+4uxi1I6e
+         u0MWIsYScnt8QzkEz2BLRVx03t+qu5XEeCpmWczO6XhvOQbAMrZB2+fEkPRvzFTYDCwJ
+         fp1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Lj27fX+w/X1fzAaixWVl+EMSmBzqib+t1AvqNPW0Qfo=;
-        b=eQ7Xi9BjwHarBUNbWz9NkWr+Fq1PS//jsakctwN1H55+6xYfn/5LXwsCHrYFZTnUcN
-         mwY9NJ2FfvWu3wmzbKuXrU4cXn5mqLsTR+efLwMLgNDEMAWvHqEkC1Ik1WFbgAvIz2Gx
-         JuEmKDTYxqlB2l312wzigYfwJemW5sYFhCM0NfF9vpNfGv0hzOSF9UNhjuEdtnXfk9yU
-         +JV7vk5s/EldK0mGmu9saoMP1nnYXQ8OPZdp5na8Mvyp8T5XCGp8apmtWP8pJ3+9C2/p
-         Oz2qn2Q2SE80s6k8HBIQ6iGYUF6tBC1YlRtYk+B5o1q8F2GiFLEMTWrTF/w9WIiGgS8A
-         0qxw==
-X-Gm-Message-State: AOAM532FJKaFkA2ueioqhCgwtr7GJs9sIsBrPlBln+xYP93w8czVziVJ
-        p4hIiGc02j1P9w0wLDl2qshMRPZ42IoTmnUuAeg=
-X-Google-Smtp-Source: ABdhPJyIkTe18axoKGGfe6/riaB8UL54KfoHPvrebxDva0p8GQNYtsCXNMqktxYUF4cWRNiUDZV6LfcDHAZk9sL3kO8=
-X-Received: by 2002:a67:c295:: with SMTP id k21mr5066492vsj.37.1633166617532;
- Sat, 02 Oct 2021 02:23:37 -0700 (PDT)
+        bh=Qo3Emk/l8HcCIf+3gstpLuI9ENkhEiIS4ul424Y9Sro=;
+        b=P4BjtikxLX6+8y2Usz8HgKjzCeOQA/zWVGXyayJY0OaZgikwJd2shkAIVtsXQ6qO1Y
+         C/PNY0tnY1mb9q4aWY6uyvRaiW1WWTydeIlgWe/PseDhcb48d713QofjPv17QSHk+SZY
+         bXwe8739nAI0M98hI9HF6Q3VuZYc/FBPI7BZ1RVrrOc8w87dMv37kcHiRg6+d3Bz6jyU
+         mCs6xbQNS7syteHevYYIOU2aH7hbXhN1i1f4d+fZuAXvWfNxnJjKvay8xKRd4F8Ww+PC
+         4b0ghSL/VWeTk1wPU8/heO9CSia6i7YcwMS3J2DYA5jOHFPiglYKd+tjYAbFcstDqbzj
+         /pww==
+X-Gm-Message-State: AOAM533379pQK4pFGb5j5jLeYgszq2ZhWEAHl4DDpPlMge5CZ/CM3sAk
+        D8D+XfCn0uIXMqFvetjnq84QHYcez5fr6JD6RzU=
+X-Google-Smtp-Source: ABdhPJxTmHrkD5TOWf2Hau50nDISHpJ4h1F8E+CIDPxAHzzjSpfOif6k/wo7Xx2BSYXSD1XoY71m0y3DIXIbtf4M/GM=
+X-Received: by 2002:a17:906:948:: with SMTP id j8mr4003927ejd.371.1633181357828;
+ Sat, 02 Oct 2021 06:29:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211001181245.228419-1-yury.norov@gmail.com> <20211001181245.228419-4-yury.norov@gmail.com>
-In-Reply-To: <20211001181245.228419-4-yury.norov@gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Sat, 2 Oct 2021 11:23:26 +0200
-Message-ID: <CAMuHMdUbzBBpCvw+44BAEVWtLfXLH_75JUcsUkedyxZYmdwL7w@mail.gmail.com>
-Subject: Re: [PATCH 03/16] include: move find.h from asm_generic to linux
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux MM <linux-mm@kvack.org>,
-        Linux-Arch <linux-arch@vger.kernel.org>,
-        "open list:KERNEL SELFTEST FRAMEWORK" 
-        <linux-kselftest@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        linux-perf-users@vger.kernel.org, KVM list <kvm@vger.kernel.org>,
-        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Alexander Lobakin <alobakin@pm.me>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        Andrea Merello <andrea.merello@gmail.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Arnaldo Carvalho de Melo <acme@redhat.com>,
-        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Brian Cain <bcain@codeaurora.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph Lameter <cl@linux.com>,
-        Daniel Bristot de Oliveira <bristot@redhat.com>,
-        David Hildenbrand <david@redhat.com>,
-        Dennis Zhou <dennis@kernel.org>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Ian Rogers <irogers@google.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
-        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
-        Leo Yan <leo.yan@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Namhyung Kim <namhyung@kernel.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Peter Xu <peterx@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Petr Mladek <pmladek@suse.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Rich Felker <dalias@libc.org>,
-        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Shuah Khan <shuah@kernel.org>,
-        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Tejun Heo <tj@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>
+References: <20210930065733.31943-1-tony@atomide.com> <20210930065733.31943-2-tony@atomide.com>
+In-Reply-To: <20210930065733.31943-2-tony@atomide.com>
+From:   Adam Ford <aford173@gmail.com>
+Date:   Sat, 2 Oct 2021 08:29:06 -0500
+Message-ID: <CAHCN7xJ_28ALRds4rduQP3LZoEK9y6mdia_czKU0DWse7FnjoA@mail.gmail.com>
+Subject: Re: [PATCH 1/5] dt-bindings: sdhci-omap: Update binding for legacy SoCs
+To:     Tony Lindgren <tony@atomide.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Rob Herring <robh@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Yuri,
-
-Thanks for your patch!
-
-On Fri, Oct 1, 2021 at 8:12 PM Yury Norov <yury.norov@gmail.com> wrote:
-> find_bit API and bitmap API are closely related, but inclusion paths
-> are different - include/asm-generic and include/linux, correspondingly.
-> In the past it made a lot of troubles due to circular dependencies
-> and/or undefined symbols. Fix this by moving find.h under include/linux.
-
-.. and including it from include/linux/bitmap.h, like the other helper includes?
-
-> Signed-off-by: Yury Norov <yury.norov@gmail.com>
-> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
->  arch/m68k/include/asm/bitops.h               |  2 --
-
-Acked-by: Geert Uytterhoeven <geert@linux-m68k.org>
-
-> --- a/include/linux/bitmap.h
-> +++ b/include/linux/bitmap.h
-> @@ -6,6 +6,7 @@
+On Thu, Sep 30, 2021 at 1:58 AM Tony Lindgren <tony@atomide.com> wrote:
 >
->  #include <linux/align.h>
->  #include <linux/bitops.h>
-> +#include <linux/find.h>
->  #include <linux/limits.h>
->  #include <linux/string.h>
->  #include <linux/types.h>
+> Let's add compatible values for the legacy SoCs so we can continue
+> deprecating omap_hsmmc in favor of sdhci-omap driver.
+>
+> For omap5, we want to have a separate compatible from omap4 for the
+> additional features available on omap5. AFAIK ti81 can just use the
+> omap4 compatible.
+>
+> Cc: devicetree@vger.kernel.org
+> Acked-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Gr{oetje,eeting}s,
+Tony,
 
-                        Geert
+I noticed that you added omap3 compatibility to the driver and the
+bindings, but no device tree changes for omap3.dtsi to enable this.
+Is there anything holding back?
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+I modified omap3.dtsi and changed the compatible flag to
+ti,omap3-sdhci and it boots from SD card just fine.  For some reason,
+I cannot get the wl1283 to function, but the driver probes, so I need
+to spend some time investigating this.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+If i can get my wl1283 working again, I'll reply with a tested note.
+I hope to have more time tomorrow, but i can't do it any more today.
+
+adam
+
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-omap.txt | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-omap.txt
+> @@ -5,7 +5,11 @@ Refer to mmc.txt for standard MMC bindings.
+>  For UHS devices which require tuning, the device tree should have a "cpu_thermal" node which maps to the appropriate thermal zone. This is used to get the temperature of the zone during tuning.
+>
+>  Required properties:
+> -- compatible: Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+> +- compatible: Should be "ti,omap2430-sdhci" for omap2430 controllers
+> +             Should be "ti,omap3-sdhci" for omap3 controllers
+> +             Should be "ti,omap4-sdhci" for omap4 and ti81 controllers
+> +             Should be "ti,omap5-sdhci" for omap5 controllers
+> +             Should be "ti,dra7-sdhci" for DRA7 and DRA72 controllers
+>               Should be "ti,k2g-sdhci" for K2G
+>               Should be "ti,am335-sdhci" for am335x controllers
+>               Should be "ti,am437-sdhci" for am437x controllers
+> --
+> 2.33.0
