@@ -2,122 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 164D3C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 21:25:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC38AC43217
+	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 09:25:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EF93B61AFA
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Oct 2021 21:25:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C329661507
+	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 09:25:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231732AbhJAV1U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Oct 2021 17:27:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37970 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229820AbhJAV1T (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Oct 2021 17:27:19 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF876C061775;
-        Fri,  1 Oct 2021 14:25:34 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id x27so43719879lfu.5;
-        Fri, 01 Oct 2021 14:25:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=PCx+Mv1g2fXDWZ1yxKCufXcb8CGDrVVRus80Eavv7Ms=;
-        b=AoOrU/vzFMh0SeboIlXMtpNDGkYKn1nagDBoSx7YjB/QehXjY148G9jNUrxWmj+VLS
-         thqf3WTWyv2KgzuCKJgAZtvLfuVTKHVZvxZ6W/v3MpnV1knnxoAKmsgMXbYc8hQX6L4m
-         27bTEIknYqodxO1P46g5y8th3QuIbfdgGpCEWEBjBEI0bRGm4qAhzegrULVaAiivY+Mh
-         x+t6HwqOhcQgQuTMWHPo+FtI3bPeA65O68izCkj0O0dmOktC4XPdYvSp/C5mg+rlwHvZ
-         baqhRxdt1w4rGWw9l8GTpQxhVXx3W19ivPNG/b+kFePi3tvLX4ZgYZ2jb6Li8kajTdY4
-         hAdA==
+        id S232726AbhJBJ1G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 2 Oct 2021 05:27:06 -0400
+Received: from mail-vs1-f54.google.com ([209.85.217.54]:35694 "EHLO
+        mail-vs1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232719AbhJBJZX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2021 05:25:23 -0400
+Received: by mail-vs1-f54.google.com with SMTP id f18so14116319vsp.2;
+        Sat, 02 Oct 2021 02:23:37 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=PCx+Mv1g2fXDWZ1yxKCufXcb8CGDrVVRus80Eavv7Ms=;
-        b=NIlFTU4KZtSGaa9ROP2zLnktTBr/rp2DmU0rRs8E2DLYGP7aVREEAbriZ6E9t6lTZ1
-         6zNPFZWVm0/FtRLDec3rSSNpMWWualS2/faz/qB2919hfgTkhqCSIwLMvwOaRt52rZrp
-         sMfgy1RJHaJnj7lax3lUqh49zOYvS+5tp3tYeoCxgkMxRiSpLFAzeUP/3R7IGdll9bR8
-         EzubxedCGYwHZTyp9htLuGjNHVH/GrbE9gYWiwzD6TtT5Y1qcZdjdV8me1bABMEVtE6c
-         /hQWiK4mSefPTSt4WJ3hVgitFEVs8oW0xg1l526zgVrlrIeScfnLPSY08poGu1cxHXhY
-         jLpg==
-X-Gm-Message-State: AOAM531/ORymA41U1r9ewl+QvHpG02Kv2l1zgCJaO9vvlWHioi7r7Ycp
-        k4jxrjMnxcxiOsJ6dHIuURk=
-X-Google-Smtp-Source: ABdhPJyBKnVQGEy++56pE3HiXi9tWCycvRfw9hdTpeQ3zwv+9sj//Y/axLqWUGErfO2svv3m5cLJIA==
-X-Received: by 2002:ac2:51a6:: with SMTP id f6mr310738lfk.150.1633123533086;
-        Fri, 01 Oct 2021 14:25:33 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-198.dynamic.spd-mgts.ru. [79.139.163.198])
-        by smtp.googlemail.com with ESMTPSA id u4sm927755lfu.200.2021.10.01.14.25.31
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 01 Oct 2021 14:25:32 -0700 (PDT)
-Subject: Re: [PATCH v13 14/35] drm/tegra: gr3d: Support generic power domain
- and runtime PM
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20210926224058.1252-15-digetx@gmail.com>
- <CAPDyKFoZdmnmcdoWsD36uQesSjz8KJOq0JxY5tNbHgO_xMy+_g@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <4281a6db-9875-7266-268a-a1639e7d01ff@gmail.com>
-Date:   Sat, 2 Oct 2021 00:25:31 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Lj27fX+w/X1fzAaixWVl+EMSmBzqib+t1AvqNPW0Qfo=;
+        b=eQ7Xi9BjwHarBUNbWz9NkWr+Fq1PS//jsakctwN1H55+6xYfn/5LXwsCHrYFZTnUcN
+         mwY9NJ2FfvWu3wmzbKuXrU4cXn5mqLsTR+efLwMLgNDEMAWvHqEkC1Ik1WFbgAvIz2Gx
+         JuEmKDTYxqlB2l312wzigYfwJemW5sYFhCM0NfF9vpNfGv0hzOSF9UNhjuEdtnXfk9yU
+         +JV7vk5s/EldK0mGmu9saoMP1nnYXQ8OPZdp5na8Mvyp8T5XCGp8apmtWP8pJ3+9C2/p
+         Oz2qn2Q2SE80s6k8HBIQ6iGYUF6tBC1YlRtYk+B5o1q8F2GiFLEMTWrTF/w9WIiGgS8A
+         0qxw==
+X-Gm-Message-State: AOAM532FJKaFkA2ueioqhCgwtr7GJs9sIsBrPlBln+xYP93w8czVziVJ
+        p4hIiGc02j1P9w0wLDl2qshMRPZ42IoTmnUuAeg=
+X-Google-Smtp-Source: ABdhPJyIkTe18axoKGGfe6/riaB8UL54KfoHPvrebxDva0p8GQNYtsCXNMqktxYUF4cWRNiUDZV6LfcDHAZk9sL3kO8=
+X-Received: by 2002:a67:c295:: with SMTP id k21mr5066492vsj.37.1633166617532;
+ Sat, 02 Oct 2021 02:23:37 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFoZdmnmcdoWsD36uQesSjz8KJOq0JxY5tNbHgO_xMy+_g@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20211001181245.228419-1-yury.norov@gmail.com> <20211001181245.228419-4-yury.norov@gmail.com>
+In-Reply-To: <20211001181245.228419-4-yury.norov@gmail.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Sat, 2 Oct 2021 11:23:26 +0200
+Message-ID: <CAMuHMdUbzBBpCvw+44BAEVWtLfXLH_75JUcsUkedyxZYmdwL7w@mail.gmail.com>
+Subject: Re: [PATCH 03/16] include: move find.h from asm_generic to linux
+To:     Yury Norov <yury.norov@gmail.com>
+Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux MM <linux-mm@kvack.org>,
+        Linux-Arch <linux-arch@vger.kernel.org>,
+        "open list:KERNEL SELFTEST FRAMEWORK" 
+        <linux-kselftest@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        linux-perf-users@vger.kernel.org, KVM list <kvm@vger.kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Alexander Lobakin <alobakin@pm.me>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        Andrea Merello <andrea.merello@gmail.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>,
+        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Brian Cain <bcain@codeaurora.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph Lameter <cl@linux.com>,
+        Daniel Bristot de Oliveira <bristot@redhat.com>,
+        David Hildenbrand <david@redhat.com>,
+        Dennis Zhou <dennis@kernel.org>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ian Rogers <irogers@google.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
+        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
+        Leo Yan <leo.yan@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Namhyung Kim <namhyung@kernel.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Peter Xu <peterx@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Petr Mladek <pmladek@suse.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Rich Felker <dalias@libc.org>,
+        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Shuah Khan <shuah@kernel.org>,
+        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Tejun Heo <tj@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-01.10.2021 17:06, Ulf Hansson пишет:
-> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wrote:
->> Add runtime power management and support generic power domains.
->>
->> Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
->> Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
->> Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
->> Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
->> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
->> ---
->>  drivers/gpu/drm/tegra/gr3d.c | 388 ++++++++++++++++++++++++++++++-----
-> [...]
+Hi Yuri,
 
-> 
-> I was looking for a call to dev_pm_opp_set_rate(), but couldn't find
-> it. Isn't that needed when changing the rate of the clock?
+Thanks for your patch!
 
-That is another good catch! Previous versions of this patch were
-changing the rate, while the current version not. So the
-set_opp_helper() isn't needed for this patch anymore. It may become
-needed sometime later, but not for this series. I'll remove it in the
-next version, thanks!
+On Fri, Oct 1, 2021 at 8:12 PM Yury Norov <yury.norov@gmail.com> wrote:
+> find_bit API and bitmap API are closely related, but inclusion paths
+> are different - include/asm-generic and include/linux, correspondingly.
+> In the past it made a lot of troubles due to circular dependencies
+> and/or undefined symbols. Fix this by moving find.h under include/linux.
+
+.. and including it from include/linux/bitmap.h, like the other helper includes?
+
+> Signed-off-by: Yury Norov <yury.norov@gmail.com>
+> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+>  arch/m68k/include/asm/bitops.h               |  2 --
+
+Acked-by: Geert Uytterhoeven <geert@linux-m68k.org>
+
+> --- a/include/linux/bitmap.h
+> +++ b/include/linux/bitmap.h
+> @@ -6,6 +6,7 @@
+>
+>  #include <linux/align.h>
+>  #include <linux/bitops.h>
+> +#include <linux/find.h>
+>  #include <linux/limits.h>
+>  #include <linux/string.h>
+>  #include <linux/types.h>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
