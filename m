@@ -2,133 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD09FC433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 23:44:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94A36C433FE
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Oct 2021 13:58:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B777061B03
-	for <linux-mmc@archiver.kernel.org>; Sat,  2 Oct 2021 23:44:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B89D61A05
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Oct 2021 13:58:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234274AbhJBXpw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 2 Oct 2021 19:45:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44894 "EHLO
+        id S230408AbhJCOAT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 3 Oct 2021 10:00:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234280AbhJBXps (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Oct 2021 19:45:48 -0400
-Received: from gandalf.ozlabs.org (gandalf.ozlabs.org [IPv6:2404:9400:2:0:216:3eff:fee2:21ea])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF6D7C0613EF;
-        Sat,  2 Oct 2021 16:44:01 -0700 (PDT)
-Received: from authenticated.ozlabs.org (localhost [127.0.0.1])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (No client certificate requested)
-        by mail.ozlabs.org (Postfix) with ESMTPSA id 4HMNpy1d9Pz4xb9;
-        Sun,  3 Oct 2021 10:43:54 +1100 (AEDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canb.auug.org.au;
-        s=201702; t=1633218235;
-        bh=jdy5JNJViBbQceeojrb8Lg+GiJVod62XNefz9Q9zGMg=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=rLO4CxydwThjUYpKtT+ewMDVdVfKgCUwXrMukvMI1VENAoBzrFq71t4MN+6vbfVl2
-         fpPtMPnefXCa8oYRNOzlImwID10tgnIpA9sveg8qEGU4QACpUb2AjUUDGx3ESg00Xs
-         zkUnh3hPftLvlEMti64+zjYQzCjeU6w/1fdveZCbQeJ6c2YqUItmyBjGVEVzyw8jv8
-         XK1pHUwz03abFsQ0b7r6dtl+8LbQzouyMfQW+zJCgzhTxj3AwcULYWKDNVuX0v8NXg
-         vBVj4+Rqgcu7D2yuTjoAwK9Htz79Vq6AZd5MBrdIdzef9FkZptW2qIDrCxEQxeFXFW
-         nmt2SFbhCMPKQ==
-Date:   Sun, 3 Oct 2021 10:43:53 +1100
-From:   Stephen Rothwell <sfr@canb.auug.org.au>
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
-        kvm@vger.kernel.org,
-        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Alexander Lobakin <alobakin@pm.me>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        Andrea Merello <andrea.merello@gmail.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Arnaldo Carvalho de Melo <acme@redhat.com>,
-        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Brian Cain <bcain@codeaurora.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph Lameter <cl@linux.com>,
-        Daniel Bristot de Oliveira <bristot@redhat.com>,
-        David Hildenbrand <david@redhat.com>,
-        Dennis Zhou <dennis@kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Ian Rogers <irogers@google.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
-        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
-        Leo Yan <leo.yan@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Namhyung Kim <namhyung@kernel.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Peter Xu <peterx@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Petr Mladek <pmladek@suse.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Rich Felker <dalias@libc.org>,
-        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Shuah Khan <shuah@kernel.org>,
-        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Tejun Heo <tj@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>
-Subject: Re: [PATCH RESEND 2 00/16] Resend bitmap patches
-Message-ID: <20211003104353.7787c3e9@canb.auug.org.au>
-In-Reply-To: <YVjm3NXEhoBQtUSI@yury-ThinkPad>
-References: <20211001181245.228419-1-yury.norov@gmail.com>
-        <20211003094722.434c030d@canb.auug.org.au>
-        <YVjm3NXEhoBQtUSI@yury-ThinkPad>
+        with ESMTP id S230405AbhJCOAT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Oct 2021 10:00:19 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD629C0613EC
+        for <linux-mmc@vger.kernel.org>; Sun,  3 Oct 2021 06:58:31 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id oj15-20020a17090b4d8f00b0019f8860d6e2so3376538pjb.5
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Oct 2021 06:58:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=9WrBX8ansHuvSpv9nqokuMgzB1KN55NYa8tseNN8L50=;
+        b=IGkLXN6UzlOWMlfGr4FAb3ik+X6qyXcxNST8j4Y8fkYbAcYrpwSy9GUIyx1zE04SK+
+         BA2M/fGND4PLfs8KN65Nh8QDPGtCJeTD2lmMor9agL6KftLRg4rFc/aaVIuICmfIB2gM
+         9zIG6PbGz6exAoMxFmGgwug3MZuSCcCy+RnvUI1POVAWsu4shjZ4D80Xun2ZyDzT11gJ
+         pobg3xrvB3vOQN/NCGZPRYzaYa9qeFs7tebBZnsuE93TYtX1GAWPvlsW8CamgMjD3CUF
+         NrC+050PzO2GUdwfqI0/mYJtAIBxKN43YlK1rRWoCv69uv4wevy6PY+sQDW7/dejU9ld
+         dcGQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=9WrBX8ansHuvSpv9nqokuMgzB1KN55NYa8tseNN8L50=;
+        b=nqolyBa4VKwWHpWUtS14DScoIYZjOFGVoji7zVnhY7Z2l5t7J7yJ3xZPQULRlujR1Y
+         Eu14bRThJKQZGElscP40Ley9XKzeI5DQtDzZ2hL0BwvQrBNFen73fZL5z3jo3peuOjNq
+         VEb+U41V8G7/xvFENNpjNwpuJrLJKHQ8ooC5keiGbLJ0JF8RbX9t3D0wtvBLA0QK9a+p
+         F9QfSPgqqoADDaZp4gvYkKUfMZrN3kgUU+1lZOFFZcVTUe55/rDWEGqeFX4gds/NXXIH
+         bEyXcE4TkqimCNW0CAPjymxFvUhxKJk5ARHZQc8SCSPkgDqTnTKSWkISD9DOrnONTeHa
+         qs6g==
+X-Gm-Message-State: AOAM5319iwzhl3KdqYF5G0xmCdmzPfWlUVs8Xm6ssUA8rekn6k7rlW1f
+        YXzINJF+EcTvMGqJXwjEQQAbXvYfxnLC8A==
+X-Google-Smtp-Source: ABdhPJx9xIlSQUqcX7OLNVY2Hd8715d8ebJYtH1jy+9OggFBY+rkI1flTUgoI4SNkcTM5gImorHcHg==
+X-Received: by 2002:a17:90a:1a4c:: with SMTP id 12mr24541653pjl.175.1633269510042;
+        Sun, 03 Oct 2021 06:58:30 -0700 (PDT)
+Received: from dragon (80.251.214.228.16clouds.com. [80.251.214.228])
+        by smtp.gmail.com with ESMTPSA id 3sm10493334pjk.18.2021.10.03.06.58.28
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 03 Oct 2021 06:58:29 -0700 (PDT)
+Date:   Sun, 3 Oct 2021 21:58:23 +0800
+From:   Shawn Guo <shawn.guo@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [RFC PATCH] mmc: sdhci: Map more voltage level to SDHCI_POWER_330
+Message-ID: <20211003135822.GA13320@dragon>
+References: <20210926132847.22268-1-shawn.guo@linaro.org>
+ <CAPDyKFoVJSkODW8bjHcTVywiNPMQndHhg2B9haQTP_3M3-B3hQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; boundary="Sig_/+sbm5rWV9n_aJg+5hEB3VwJ";
- protocol="application/pgp-signature"; micalg=pgp-sha256
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoVJSkODW8bjHcTVywiNPMQndHhg2B9haQTP_3M3-B3hQ@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---Sig_/+sbm5rWV9n_aJg+5hEB3VwJ
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+On Thu, Sep 30, 2021 at 01:00:03PM +0200, Ulf Hansson wrote:
+> On Sun, 26 Sept 2021 at 15:28, Shawn Guo <shawn.guo@linaro.org> wrote:
+> >
+> > On Thundercomm TurboX CM2290, the eMMC OCR reports vdd = 23 (3.5 ~ 3.6 V),
+> > which is being treated as an invalid value by sdhci_set_power_noreg().
+> > And thus eMMC is totally broken on the platform.
+> >
+> > [    1.436599] ------------[ cut here ]------------
+> > [    1.436606] mmc0: Invalid vdd 0x17
+> > [    1.436640] WARNING: CPU: 2 PID: 69 at drivers/mmc/host/sdhci.c:2048 sdhci_set_power_noreg+0x168/0x2b4
+> > [    1.436655] Modules linked in:
+> > [    1.436662] CPU: 2 PID: 69 Comm: kworker/u8:1 Tainted: G        W         5.15.0-rc1+ #137
+> > [    1.436669] Hardware name: Thundercomm TurboX CM2290 (DT)
+> > [    1.436674] Workqueue: events_unbound async_run_entry_fn
+> > [    1.436685] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+> > [    1.436692] pc : sdhci_set_power_noreg+0x168/0x2b4
+> > [    1.436698] lr : sdhci_set_power_noreg+0x168/0x2b4
+> > [    1.436703] sp : ffff800010803a60
+> > [    1.436705] x29: ffff800010803a60 x28: ffff6a9102465f00 x27: ffff6a9101720a70
+> > [    1.436715] x26: ffff6a91014de1c0 x25: ffff6a91014de010 x24: ffff6a91016af280
+> > [    1.436724] x23: ffffaf7b1b276640 x22: 0000000000000000 x21: ffff6a9101720000
+> > [    1.436733] x20: ffff6a9101720370 x19: ffff6a9101720580 x18: 0000000000000020
+> > [    1.436743] x17: 0000000000000000 x16: 0000000000000004 x15: ffffffffffffffff
+> > [    1.436751] x14: 0000000000000000 x13: 00000000fffffffd x12: ffffaf7b1b84b0bc
+> > [    1.436760] x11: ffffaf7b1b720d10 x10: 000000000000000a x9 : ffff800010803a60
+> > [    1.436769] x8 : 000000000000000a x7 : 000000000000000f x6 : 00000000fffff159
+> > [    1.436778] x5 : 0000000000000000 x4 : 0000000000000000 x3 : 00000000ffffffff
+> > [    1.436787] x2 : 0000000000000000 x1 : 0000000000000000 x0 : ffff6a9101718d80
+> > [    1.436797] Call trace:
+> > [    1.436800]  sdhci_set_power_noreg+0x168/0x2b4
+> > [    1.436805]  sdhci_set_ios+0xa0/0x7fc
+> > [    1.436811]  mmc_power_up.part.0+0xc4/0x164
+> > [    1.436818]  mmc_start_host+0xa0/0xb0
+> > [    1.436824]  mmc_add_host+0x60/0x90
+> > [    1.436830]  __sdhci_add_host+0x174/0x330
+> > [    1.436836]  sdhci_msm_probe+0x7c0/0x920
+> > [    1.436842]  platform_probe+0x68/0xe0
+> > [    1.436850]  really_probe.part.0+0x9c/0x31c
+> > [    1.436857]  __driver_probe_device+0x98/0x144
+> > [    1.436863]  driver_probe_device+0xc8/0x15c
+> > [    1.436869]  __device_attach_driver+0xb4/0x120
+> > [    1.436875]  bus_for_each_drv+0x78/0xd0
+> > [    1.436881]  __device_attach_async_helper+0xac/0xd0
+> > [    1.436888]  async_run_entry_fn+0x34/0x110
+> > [    1.436895]  process_one_work+0x1d0/0x354
+> > [    1.436903]  worker_thread+0x13c/0x470
+> > [    1.436910]  kthread+0x150/0x160
+> > [    1.436915]  ret_from_fork+0x10/0x20
+> > [    1.436923] ---[ end trace fcfac44cb045c3a8 ]---
+> >
+> > Fix the issue by mapping MMC_VDD_35_36 (and MMC_VDD_34_35) to
+> > SDHCI_POWER_330 as well.
+> >
+> > Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+> > ---
+> > I'm not sure if this is the right solution, as I do not have SDHCI
+> > specification.  Hence it's a RFC.
+> >
+> >  drivers/mmc/host/sdhci.c | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 8eefa7d5fe85..2427481535a3 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2042,6 +2042,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+> >                         break;
+> >                 case MMC_VDD_32_33:
+> >                 case MMC_VDD_33_34:
+> > +               case MMC_VDD_34_35:
+> > +               case MMC_VDD_35_36:
+> >                         pwr = SDHCI_POWER_330;
+> 
+> The SDHCI specification doesn't state exactly what level
+> SDHCI_POWER_330 corresponds to. It's 3.3V typically.
+> 
+> I don't have any strong opinion about this change, although I am a
+> little bit puzzled over why this solves the problem for you.
+> 
+> Unless the host (sdhci) announces that it supports MMC_VDD_34_35 or
+> MMC_VDD_35_36 through its mmc->ocr_avail mask, the mmc core shouldn't
+> try to use it. Can you perhaps check what value the mmc->ocr_avail
+> gets assigned to in sdhci_setup_host() for your mmc host?
 
-Hi Yury,
+Hi Ulf,
 
-On Sat, 2 Oct 2021 16:10:20 -0700 Yury Norov <yury.norov@gmail.com> wrote:
->
-> Ok, I'll resend it based on Linus tree shortly
+Thanks for the comment!
 
-There is no big hurry, the next linux-next release will not be until
-Tuesday (my time).  So you have time to retest after the rebase.
+ocr_avail is 0xfff800, which is a result of mmc_regulator_get_ocrmask()
+call.  On this platform, the vmmc has a 3.6V max voltage.  I can enforce
+`regulator-max-microvolt` to be 3.3V to fix the problem, but I'm not
+sure it's more correct than this RFC change.
 
---=20
-Cheers,
-Stephen Rothwell
-
---Sig_/+sbm5rWV9n_aJg+5hEB3VwJ
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEENIC96giZ81tWdLgKAVBC80lX0GwFAmFY7rkACgkQAVBC80lX
-0GxF9gf+KAnaxw0eisqqSqcepbYMcwRtN4jFLkus8fDpuO17V4jnFQLsw22GkxaP
-Mcrbu2fgU/PVCWgxn/3uRSlJnjb0jaZ44zVym1DBof8qIiX5YIiDjaTobS7r16L+
-Bbiaury6Fe2RTDRqsxgiMtSJ4+DzQXNyRqNocCsMSElLwDjs3YARuFBS+dh/enDA
-uqX2MA+FH2Ijb75pqd/ui1ydpehNWtgvCKFltoaVTKEV2NP7ex2617WmSifleQOy
-xnWdwCU3UH8FA05x0q6B1o9TgpqHSjDeuq5A8AlM/s2Efh9rAU3lh4JTkKC69XLo
-+B2Tj8og5FXwIiw40Ua9fIxIZ0uJ5w==
-=4tcx
------END PGP SIGNATURE-----
-
---Sig_/+sbm5rWV9n_aJg+5hEB3VwJ--
+Shawn 
