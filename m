@@ -2,224 +2,297 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7693BC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 15:57:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90DD6C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 16:47:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50261613D5
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 15:57:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6A19761216
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 16:47:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235640AbhJDP7E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Oct 2021 11:59:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42300 "EHLO
+        id S233501AbhJDQtL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Oct 2021 12:49:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234809AbhJDP7E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2021 11:59:04 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6A8EC061745;
-        Mon,  4 Oct 2021 08:57:14 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id e15so73647536lfr.10;
-        Mon, 04 Oct 2021 08:57:14 -0700 (PDT)
+        with ESMTP id S237351AbhJDQtK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2021 12:49:10 -0400
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62C24C061745
+        for <linux-mmc@vger.kernel.org>; Mon,  4 Oct 2021 09:47:21 -0700 (PDT)
+Received: by mail-ed1-x533.google.com with SMTP id v18so66098543edc.11
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Oct 2021 09:47:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=oXxI7X/1bkoyfWLqsQl0b8N5L2M43qDxOhyRLjNgwgs=;
-        b=pH5gGGqkZlMuFnRyIJAXiewuWBbmrXc4nrj48Dzw+Xc6gukr3JlL4bc0XqPdYPe5DQ
-         NDB4vv+qA4gvKAo7lM0mnIDk8dHTj89Skv+bi+CnIwKoB0GbtflokeLFAGWMWBkGuUwO
-         vnV+cxSUarX4fvwMNp98YdWmdtdCmVfrq9kQiTD/iscLYeiALsQL/FGXMsD8gWDMtQgb
-         SdntlSYjQY8VC2aw+ENPn0LFmLD5mx6hdBsOFMb8vi+SpeKciwoN3fNZiNgmP/61OVVQ
-         wnD2qG3x98rXnlrsSFT8O6Xj/b7E6uaK2TJJmtNceUOe0ut/Z6O07eTqHqNZmJmGlly8
-         1zZw==
+        d=pensando.io; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=eZ0v1u2tk23X5eUN5tNJiDFXAjN4+CmumgmY2tcIBG4=;
+        b=RpLKd5VUguSaG7sbGMc3WPh6mT0KzRNou9Sj/ADgtL4EheWkrgXurqmaMbVHdVITzW
+         KF+MR6qLNw8ZL60D81vZASo4gW6XTolLG/v+6dM4MKIdJGG7Ajp9/s1PFT8g+x7heccg
+         OEaB2OJoyU93X6ebMP4zaFkwPc4vwNXC/faIKZXdTGjz7UU8EjvNz72NfJheb/qKZPnW
+         +ZsSDcw/8UF9j5T7tn3AEbeGgsca6FECZr/HjPl1pm/68S3KpjDLVK1TyCQ3z+CKFgqD
+         8qlNDkbTfNj37JE9RRuvtleXTuWUZOuTEEmIGkQCcQLm2AJPFGVzkvOCJr1kVJxwI2SC
+         +4aw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=oXxI7X/1bkoyfWLqsQl0b8N5L2M43qDxOhyRLjNgwgs=;
-        b=QQ9WkcJSRIIDfAKEViFn8odN8m6sW2AcT33Ny0B7YDP5A4VQ81xIgQqxi4C6wDMXPR
-         uNmNAy/RH03b3YjBS31LpJ9OIpXzOG8p1dkPF3CbPnI1UxA03hcyqiiVyAUECWHidBP6
-         SBTmsKbCWrJV94tEBqMc9dERYhtnwTKo8074npB1WNZeZP5zsYAVOkIHNwrZmZr36BS0
-         7rsn5SQiYpJRQiPJUwT7Jz0NmMeIktq8LmsEaZ1jf2674GxgGYkzmyCjCA3H5Ce0Tsfm
-         /ZkyShA9tanplHheIECAepB97n3lQ8uNY+xtaBIHXcM4WmrkSTSxMn9pWkO3unBBOH0f
-         2aRg==
-X-Gm-Message-State: AOAM531WtDx9XxSj2lAy81T91jDuTqUOVELcm5PFwqxYmTwmzMvMcGFO
-        J3elyH6NxSZzGNZNv82xEow=
-X-Google-Smtp-Source: ABdhPJwVBnc7vV9bh5UvETfiXZp05qVUc3d2AIsNbe2sLzFhSwuNlbIJLQFDdKH2jbPpxZ0FciK83w==
-X-Received: by 2002:a05:6512:31c1:: with SMTP id j1mr15924982lfe.442.1633363033096;
-        Mon, 04 Oct 2021 08:57:13 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-57.dynamic.spd-mgts.ru. [79.139.163.57])
-        by smtp.googlemail.com with ESMTPSA id l9sm886038lje.32.2021.10.04.08.57.11
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 04 Oct 2021 08:57:12 -0700 (PDT)
-Subject: Re: [PATCH v13 13/35] drm/tegra: gr2d: Support generic power domain
- and runtime PM
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20210926224058.1252-14-digetx@gmail.com>
- <CAPDyKFpzhv1UxjM0q5AWHVxTWC_cCO_Kg_6exO0o_=EoVvjo+w@mail.gmail.com>
- <aad7a508-7fb5-3418-f902-def80c365094@gmail.com>
- <CAPDyKFppSuP6FfaBaGn3o+8WvTT=vJ8XMzZ47WPQ1JKiUYyEpw@mail.gmail.com>
- <8d75436d-864a-7ce0-ba53-daa8b663035a@gmail.com>
- <CAPDyKFpqs5gUcym4q+GuiJy13eXqjEnx-eFdUT4bQpcfPAOEYw@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <f5b5e06a-71ed-1250-f0ad-692062e00e01@gmail.com>
-Date:   Mon, 4 Oct 2021 18:57:11 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=eZ0v1u2tk23X5eUN5tNJiDFXAjN4+CmumgmY2tcIBG4=;
+        b=Rdz6SDAbM7zgEGIVTnH3komWmn+4lU26PhfdwCBUGuctcSE26n8YeZHpslgWnVURVE
+         asF4pswEE3aKhgtU/+E/tXDQ1HnG8YomhwZs5klcHTQSj7BaVsYpyuA2YmiOSifiHrOg
+         XhlJ0L4LbXMi1WJEutBcbmw0/7T/8d93t+wl899/Ro2fKpuBKg1H0Dg6Fc1BDdxYaUT5
+         hwI47kUH1gPSO/tfBmi8v64SCCdOjhI1/HCAQ2bqcEu/K9rKrMSa3Qvsb9b0SKNXXAGp
+         rt/saNIZQQK22GD+toG7mZGbRstey6tr6TtcShyk9G+U3LclYvDp62PlviDyNaXacAeh
+         CjEQ==
+X-Gm-Message-State: AOAM532PnDEIAm3+lETnRL7uNvLKOfvMcW7c4CS8mA3Jj0UktLJVwyWZ
+        j4DolNu7aOcInUz06ovHknaCW5qyVaEITgW2DbV5veCzJNTdhffI
+X-Google-Smtp-Source: ABdhPJzjVM4V14h8OdtJUWCc39edoN+MVZ7X+KSuNidkbdX/lWnwMxkr2+OCau6qpimILQv/4qAfa5xdI8gET8cJFXM=
+X-Received: by 2002:a50:9dca:: with SMTP id l10mr19480865edk.61.1633366000496;
+ Mon, 04 Oct 2021 09:46:40 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFpqs5gUcym4q+GuiJy13eXqjEnx-eFdUT4bQpcfPAOEYw@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
+ <CACRpkdbQD6p7fbGtuu1c92uXfSFDCTwqjqsXHpgnD5Lg4v0Okw@mail.gmail.com>
+ <20210304091025.ny52qjm7wbfvmjgl@mobilestation> <CACRpkdZroi+_oHqipS71MAGif190y7jWU5Myf55vz=_um4w5cQ@mail.gmail.com>
+ <CAK9rFnzDZ4MNm68AJ75g7zegLD-7UMHyoVR-4ssitYTTEeQm5g@mail.gmail.com> <CACRpkdZEURRTe15HGf93SvyHej=_6qhfP9KWPSQbCM=SLUVKmA@mail.gmail.com>
+In-Reply-To: <CACRpkdZEURRTe15HGf93SvyHej=_6qhfP9KWPSQbCM=SLUVKmA@mail.gmail.com>
+From:   Brad Larson <brad@pensando.io>
+Date:   Mon, 4 Oct 2021 09:46:28 -0700
+Message-ID: <CAK9rFnxuiAX2-5TFhfyTdpaY3BRysX_Q2sJkca4LhOLzapB83Q@mail.gmail.com>
+Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-04.10.2021 14:01, Ulf Hansson пишет:
-> On Fri, 1 Oct 2021 at 21:00, Dmitry Osipenko <digetx@gmail.com> wrote:
->>
->> 01.10.2021 17:55, Ulf Hansson пишет:
->>> On Fri, 1 Oct 2021 at 16:29, Dmitry Osipenko <digetx@gmail.com> wrote:
->>>>
->>>> 01.10.2021 16:39, Ulf Hansson пишет:
->>>>> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wrote:
->>>>>>
->>>>>> Add runtime power management and support generic power domains.
->>>>>>
->>>>>> Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
->>>>>> Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
->>>>>> Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
->>>>>> Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
->>>>>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
->>>>>> ---
->>>>>>  drivers/gpu/drm/tegra/gr2d.c | 155 +++++++++++++++++++++++++++++++++--
->>>>>
->>>>> [...]
->>>>>
->>>>>>  static int gr2d_remove(struct platform_device *pdev)
->>>>>> @@ -259,15 +312,101 @@ static int gr2d_remove(struct platform_device *pdev)
->>>>>>                 return err;
->>>>>>         }
->>>>>>
->>>>>> +       pm_runtime_dont_use_autosuspend(&pdev->dev);
->>>>>> +       pm_runtime_disable(&pdev->dev);
->>>>>
->>>>> There is no guarantee that the ->runtime_suspend() has been invoked
->>>>> here, which means that clock may be left prepared/enabled beyond this
->>>>> point.
->>>>>
->>>>> I suggest you call pm_runtime_force_suspend(), instead of
->>>>> pm_runtime_disable(), to make sure that gets done.
->>>>
->>>> The pm_runtime_disable() performs the final synchronization, please see [1].
->>>>
->>>> [1]
->>>> https://elixir.bootlin.com/linux/v5.15-rc3/source/drivers/base/power/runtime.c#L1412
->>>
->>> pm_runtime_disable() end up calling _pm_runtime_barrier(), which calls
->>> cancel_work_sync() if dev->power.request_pending has been set.
->>>
->>> If the work that was punted to the pm_wq in rpm_idle() has not been
->>> started yet, we end up just canceling it. In other words, there are no
->>> guarantees it runs to completion.
->>
->> You're right. Although, in a case of this particular patch, the syncing
->> is actually implicitly done by pm_runtime_dont_use_autosuspend().
->>
->> But for drivers which don't use auto-suspend, there is no sync. This
->> looks like a disaster, it's a very common pattern for drivers to
->> 'put+disable'.
->>
->>> Moreover, use space may have bumped the usage count via sysfs for the
->>> device (pm_runtime_forbid()) to keep the device runtime resumed.
->>
->> Right, this is also a disaster in a case of driver removal.
->>
->>>> Calling pm_runtime_force_suspend() isn't correct because each 'enable'
->>>> must have the corresponding 'disable'. Hence there is no problem here.
->>>
->>> pm_runtime_force_suspend() calls pm_runtime_disable(), so I think that
->>> should be fine. No?
->>
->> [adding Rafael]
->>
->> Rafael, could you please explain how drivers are supposed to properly
->> suspend and disable RPM to cut off power and reset state that was
->> altered by the driver's resume callback? What we're missing? Is Ulf's
->> suggestion acceptable?
->>
->> The RPM state of a device is getting reset on driver's removal, hence
->> all refcounts that were bumped by the rpm-resume callback of the device
->> driver will be screwed up if device is kept resumed after removal. I
->> just verified that it's true in practice.
-> 
-> Note that, what makes the Tegra drivers a bit special is that they are
-> always built with CONFIG_PM being set (selected from the "SoC"
-> Kconfig).
-> 
-> Therefore, pm_runtime_force_suspend() can work for some of these
-> cases. Using this, would potentially avoid the driver from having to
-> runtime resume the device in ->remove(), according to the below
-> generic sequence, which is used in many drivers.
-> 
-> pm_runtime_get_sync()
-> clk_disable_unprepare() (+ additional things to turn off the device)
-> pm_runtime_disable()
-> pm_runtime_put_noidle()
+On Sun, Aug 29, 2021 at 2:09 PM Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> On Mon, Aug 23, 2021 at 3:06 AM Brad Larson <brad@pensando.io> wrote:
+>
+> > The gpio pins being used for the Elba SoC SPI CS are dedicated to this
+> > function.  Are you recommending that the code in
+> > drivers/gpio/gpio-elba-spics.c be integrated into
+> > drivers/spi/spi-dw-mmio.c?
+>
+> That makes most sense does it not?
+>
+> Special purpose pins should be managed by that special purpose
+> hardware driver, DW SPI in this case.
+>
+> The compatible string etc should be enough to determine that we
+> need some extra GPIO control here, possibly specify extra registers
+> for the SPI host etc.
+>
+> The struct spi_master has a special callback .set_cs() and you
+> should make this behave special for your special hardware.
+> In the case of the DW driver it appears that even subdrivers can
+> pass a custom version of this call in struct dw_spi.
+>
+> Yours,
+> Linus Walleij
 
-It's not a problem to change this patchset. The problem is that if
-you'll grep mainline for 'pm_runtime_disable', you will find that there
-are a lot of drivers in a potential trouble.
+Yes that works, please see the diff below where the file
+gpio-elba-spics.c goes away.  The original implementation was
+motivated by gpio-spear-spics.c.
 
-I'm proposing that we should change pm_runtime_disable() to perform the
-syncing with this oneliner:
+Best,
+Brad
 
-diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
-index ec94049442b9..5c9f28165824 100644
---- a/drivers/base/power/runtime.c
-+++ b/drivers/base/power/runtime.c
-@@ -1380,6 +1380,8 @@ EXPORT_SYMBOL_GPL(pm_runtime_barrier);
-  */
- void __pm_runtime_disable(struct device *dev, bool check_resume)
- {
-+	flush_work(&dev->power.work);
+diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
+index d3b509e175e47..14751c7ccd1f4 100644
+--- a/drivers/gpio/Kconfig
++++ b/drivers/gpio/Kconfig
+@@ -240,11 +240,6 @@ config GPIO_EIC_SPRD
+  help
+   Say yes here to support Spreadtrum EIC device.
+
+-config GPIO_ELBA_SPICS
+- bool "Pensando Elba SoC SPI Chip Select as GPIO support"
+- depends on ARCH_PENSANDO_ELBA_SOC
+- def_bool y
+-
+ config GPIO_EM
+  tristate "Emma Mobile GPIO"
+  depends on (ARCH_EMEV2 || COMPILE_TEST) && OF_GPIO
+
+
+diff --git a/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+index a59405dc5676d..17dfb0c91f84c 100644
+--- a/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
++++ b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+@@ -66,8 +66,8 @@
+
+ &spi0 {
+  num-cs = <4>;
+- cs-gpios = <&spics 0 GPIO_ACTIVE_LOW>, <&spics 1 GPIO_ACTIVE_LOW>,
+-   <&porta 1 GPIO_ACTIVE_LOW>, <&porta 7 GPIO_ACTIVE_LOW>;
++ cs-gpios = <0>, <0>,
++ <&porta 1 GPIO_ACTIVE_LOW>, <&porta 7 GPIO_ACTIVE_LOW>;
+  status = "okay";
+  spi0_cs0@0 {
+  compatible = "pensando,cpld";
+
+
+diff --git a/arch/arm64/boot/dts/pensando/elba.dtsi
+b/arch/arm64/boot/dts/pensando/elba.dtsi
+index 029dd5f0045f3..3ff4c39815639 100644
+--- a/arch/arm64/boot/dts/pensando/elba.dtsi
++++ b/arch/arm64/boot/dts/pensando/elba.dtsi
+@@ -127,6 +127,7 @@
+  spi0: spi@2800 {
+  compatible = "pensando,elba-spi";
+  reg = <0x0 0x2800 0x0 0x100>;
++ pensando,spics = <&mssoc 0x2468 0>;
+  clocks = <&ahb_clk>;
+  interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
+  #address-cells = <1>;
+@@ -257,13 +258,6 @@
+  reg = <0x0 0x307c2080 0x0 0x4>;
+  };
+
+- spics: spics@307c2468 {
+- compatible = "pensando,elba-spics";
+- reg = <0x0 0x307c2468 0x0 0x4>;
+- gpio-controller;
+- #gpio-cells = <2>;
+- };
+-
+  pcie@307c2480 {
+  compatible = "pensando,pcie";
+  reg = <0x0 0x307c2480 0x0 0x4 /* MS CFG_WDT */
+
+
+diff --git a/drivers/spi/spi-dw-mmio.c b/drivers/spi/spi-dw-mmio.c
+index 3379720cfcb8..64644bae8923 100644
+--- a/drivers/spi/spi-dw-mmio.c
++++ b/drivers/spi/spi-dw-mmio.c
+@@ -16,6 +16,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_platform.h>
++#include <linux/gpio.h>
+ #include <linux/acpi.h>
+ #include <linux/property.h>
+ #include <linux/regmap.h>
+@@ -53,6 +54,24 @@ struct dw_spi_mscc {
+        void __iomem        *spi_mst; /* Not sparx5 */
+ };
+
++struct dw_spi_elba {
++       struct regmap *regmap;
++       unsigned int reg;
++       unsigned int ctl;
++};
 +
- 	spin_lock_irq(&dev->power.lock);
++/*
++ * ctl:              1               |               0
++ * cs:       1               0       |       1               0
++ * bit:  7-------6-------5-------4---|---3-------2-------1-------0
++ *      cs1   cs1_ovr   cs0   cs0_ovr|  cs1   cs1_ovr   cs0   cs0_ovr
++ *                  ssi1             |            ssi0
++ */
++#define ELBA_SPICS_SHIFT(ctl, cs)      (4 * (ctl) + 2 * (cs))
++#define ELBA_SPICS_MASK(ctl, cs)       (0x3 << ELBA_SPICS_SHIFT(ctl, cs))
++#define ELBA_SPICS_SET(ctl, cs, val)   \
++                       ((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(ctl, cs))
++
+ /*
+  * The Designware SPI controller (referred to as master in the documentation)
+  * automatically deasserts chip select when the tx fifo is empty. The chip
+@@ -237,6 +256,74 @@ static int dw_spi_canaan_k210_init(struct
+platform_device *pdev,
+        return 0;
+ }
 
- 	if (dev->power.disable_depth > 0) {
-
-Objections?
-
-The sysfs rpm-forbid is a separate problem and it's less troublesome
-since it requires root privileges. It's also not something that
-userspace touches casually. For now I don't know what could be done
-about it.
++static void elba_spics_set_cs(struct dw_spi_elba *dwselba, int cs, int enable)
++{
++       regmap_update_bits(dwselba->regmap, dwselba->reg,
++                          ELBA_SPICS_MASK(dwselba->ctl, cs),
++                          ELBA_SPICS_SET(dwselba->ctl, cs, enable));
++}
++
++static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
++{
++       struct dw_spi *dws = spi_master_get_devdata(spi->master);
++       struct dw_spi_mmio *dwsmmio = container_of(dws, struct
+dw_spi_mmio, dws);
++       struct dw_spi_elba *dwselba = dwsmmio->priv;
++       u8 cs = spi->chip_select;
++
++       if (cs < 2) {
++               /* overridden native chip-select */
++               elba_spics_set_cs(dwselba, spi->chip_select, enable);
++       }
++
++       /*
++        * The DW SPI controller needs a native CS bit selected to start
++        * the serial engine, and we have fewer native CSs than we need, so
++        * use CS0 always.
++        */
++       spi->chip_select = 0;
++       dw_spi_set_cs(spi, enable);
++       spi->chip_select = cs;
++}
++
++static int dw_spi_elba_init(struct platform_device *pdev,
++                           struct dw_spi_mmio *dwsmmio)
++{
++       struct of_phandle_args args;
++       struct dw_spi_elba *dwselba;
++       struct regmap *regmap;
++       int rc;
++
++       rc = of_parse_phandle_with_fixed_args(pdev->dev.of_node,
++                                             "pensando,spics", 2, 0, &args);
++       if (rc) {
++               dev_err(&pdev->dev, "could not find pensando,spics\n");
++               return rc;
++       }
++
++       regmap = syscon_node_to_regmap(args.np);
++       if (IS_ERR(regmap)) {
++               dev_err(&pdev->dev, "could not map pensando,spics\n");
++               return PTR_ERR(regmap);
++       }
++
++       dwselba = devm_kzalloc(&pdev->dev, sizeof(*dwselba), GFP_KERNEL);
++       if (!dwselba)
++               return -ENOMEM;
++
++       dwselba->regmap = regmap;
++       dwselba->reg = args.args[0];
++       dwselba->ctl = args.args[1];
++
++       /* deassert cs */
++       elba_spics_set_cs(dwselba, 0, 1);
++       elba_spics_set_cs(dwselba, 1, 1);
++
++       dwsmmio->priv = dwselba;
++       dwsmmio->dws.set_cs = dw_spi_elba_set_cs;
++
++       return 0;
++}
++
+ static int dw_spi_mmio_probe(struct platform_device *pdev)
+ {
+        int (*init_func)(struct platform_device *pdev,
+@@ -351,6 +438,7 @@ static const struct of_device_id dw_spi_mmio_of_match[] = {
+        { .compatible = "intel,keembay-ssi", .data = dw_spi_keembay_init},
+        { .compatible = "microchip,sparx5-spi", dw_spi_mscc_sparx5_init},
+        { .compatible = "canaan,k210-spi", dw_spi_canaan_k210_init},
++       { .compatible = "pensando,elba-spi", .data = dw_spi_elba_init},
+        { /* end of table */}
+ };
+ MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
