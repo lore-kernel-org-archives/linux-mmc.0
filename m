@@ -2,109 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB14FC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 14:52:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 368C9C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 14:56:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BDEDC61175
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 14:52:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 15507611C0
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 14:56:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235276AbhJDOyi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Oct 2021 10:54:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55232 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234608AbhJDOyi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2021 10:54:38 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5727C061749;
-        Mon,  4 Oct 2021 07:52:48 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id e15so72801906lfr.10;
-        Mon, 04 Oct 2021 07:52:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=e9mEC7vyz6aYS5ipxJsTFX2kQTkmdkM9KeZtG855BT0=;
-        b=j0Ur3IU22Dtc5kFnP/nXkoktbxHcZFHOAKKskIoJgXkwGHYXbbkyALnAz04dfcCoVV
-         0Mi+yf7x6bLdauQEAwTnqbWC6yASn3DvUmQzjLsswUxGTTKJ6s/CRmffsVicfj4H/JdQ
-         c/LIIg0L7rv8lHs1sW2K5rZwgSx57ZXcHyto17YWq5qqGR+KdrUM8a/vBIQevrz7MKqt
-         4+fAAMP0uH9K8IRIrKtcrYu5d1hJt2gQAndx84DW2UalqWNKhO6AnDeKmZJUWZRpcZPy
-         CmjMAchXyeOg4QY//26g7aMb6W3U/7YeGFmXOquN7S/42F7Yuv5Wu7Qw7InfGjWugPr7
-         q3/A==
+        id S235367AbhJDO6E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Oct 2021 10:58:04 -0400
+Received: from mail-ot1-f41.google.com ([209.85.210.41]:33328 "EHLO
+        mail-ot1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234270AbhJDO6D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2021 10:58:03 -0400
+Received: by mail-ot1-f41.google.com with SMTP id d12-20020a05683025cc00b0054d8486c6b8so21899479otu.0;
+        Mon, 04 Oct 2021 07:56:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=e9mEC7vyz6aYS5ipxJsTFX2kQTkmdkM9KeZtG855BT0=;
-        b=i4FOD3fZwEezdBUfN0ibfgTJ8bBbIkAGRvpk6bnVxVD/jD6xaHkpPLWblD5dUTA+FN
-         xwnrb6cpktDfgsOJD7Z5NERbkC9ww5+MyuGnsg2HQ8KIjLd2G1yRTE2kR4R2aYhBARFP
-         7YJ9e/gjVT07bv7KzONujK/NvIL1OyachS6GD/Y2L5sEUYGzwcZvcwc2GR6dsTQptgRf
-         C//fUStXeY3Ufp/Fr4R7r1feYRNHMpIIlFJAxlPEMs4EegXfmRQHMUTiEVeti98JFixw
-         eMGZiKBw+sR90a7JmXSCm1P/+VIVC7PO7L00zZkOmgBPMJsDygKER/rrAVzJwqHVoKdZ
-         vN3A==
-X-Gm-Message-State: AOAM5326A24VhUpnlyO4l8r+dzkw2KfbwBEIgBbWc9ROTtdICTxxKtu2
-        E3uku8UKjseBYCt/yHAVPrE=
-X-Google-Smtp-Source: ABdhPJwZpF/pb309DarSmG6340t8JrbcT7IOPdU/tSH1oTe/CJm/C7yaYY6kTpK2zLUPD04MKNAKqg==
-X-Received: by 2002:a2e:5450:: with SMTP id y16mr16673360ljd.21.1633359167035;
-        Mon, 04 Oct 2021 07:52:47 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-57.dynamic.spd-mgts.ru. [79.139.163.57])
-        by smtp.googlemail.com with ESMTPSA id o19sm1632148lfg.68.2021.10.04.07.52.45
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 04 Oct 2021 07:52:46 -0700 (PDT)
-Subject: Re: [PATCH v13 00/35] NVIDIA Tegra power management patches for 5.16
-To:     Viresh Kumar <viresh.kumar@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=UeUM07RhvrYbbVT4CwAvE71B5q6FutAaaYoosNs/OLU=;
+        b=gREl8FImZj+BjLKP6VHE26BVUmJ7lhTqnKTfWupCrtowfNjR7pouOxowvpXjlG5tCU
+         MmEpHky8tXV25XVjF6gRb3EtHa5D86SkAGw9kLazy6C6x2Bd+aHp3jWLe5BzUE/BwP+C
+         0iD9JsZ/I3DkmyttPV7qQ5NK8xQf3SMyZ6WVuMBMiSWWBoiaSnNJCdFkqc2rVWtTBXzF
+         DFeprGk8wqFMd3MHI8UleGyud++Gf6RJzUDE8jmLnfbCWwMQDsp82e6Zp2t99oMLVQhy
+         nHYe8zEffK+icIqEiLsNAd6D9DO4lJkeT+UYAglzA42BgBQSov2twzcqcnVZSeFwEKxG
+         kvEA==
+X-Gm-Message-State: AOAM531nNqrzmIUfp4URfM3BmPfIxDDCLfOh4fItCFKuPw6gMzQ87qmN
+        4a5yk1oxG+f/TgIRZv4m5A==
+X-Google-Smtp-Source: ABdhPJwTiPCJqeC94GsV+hyfmUppbS17ludrZGocAWa2w3O5UQ8A31nIxZVYFfsCsgGx6QuxxwA6UQ==
+X-Received: by 2002:a05:6830:922:: with SMTP id v34mr9365861ott.240.1633359374469;
+        Mon, 04 Oct 2021 07:56:14 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id k15sm2899685otp.68.2021.10.04.07.56.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 04 Oct 2021 07:56:13 -0700 (PDT)
+Received: (nullmailer pid 1285437 invoked by uid 1000);
+        Mon, 04 Oct 2021 14:56:13 -0000
+Date:   Mon, 4 Oct 2021 09:56:13 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        devicetree@vger.kernel.org, linux-clk@vger.kernel.org,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20211004091129.fhlfhsddzk5fakuj@vireshk-i7>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <80e0e5a9-7987-a334-7a2b-a7b09b591414@gmail.com>
-Date:   Mon, 4 Oct 2021 17:52:45 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: arasan,sdci: drop unneeded clock-cells
+ dependency
+Message-ID: <YVsWDaC0TOSOrrxW@robh.at.kernel.org>
+References: <20210928082346.22398-1-krzysztof.kozlowski@canonical.com>
 MIME-Version: 1.0
-In-Reply-To: <20211004091129.fhlfhsddzk5fakuj@vireshk-i7>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210928082346.22398-1-krzysztof.kozlowski@canonical.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-04.10.2021 12:11, Viresh Kumar пишет:
-> On 27-09-21, 01:40, Dmitry Osipenko wrote:
->> This series adds runtime PM support to Tegra drivers and enables core
->> voltage scaling for Tegra20/30 SoCs, resolving overheating troubles.
->>
->> All patches in this series are interdependent and should go via Tegra tree.
-> 
-> So you don't need any OPP changes anymore ? I just came back from
-> vacation, don't know what you guys discussed in between :)
-> 
+On Tue, Sep 28, 2021 at 10:23:46AM +0200, Krzysztof Kozlowski wrote:
+> The meta-schema already defines dependency between clock-cells and
 
-We discussed it and decided that we don't need more OPP/domain core
-changes. It's already good enough for the starter and making it all
-absolutely ideal doesn't worth the effort for now.
+You mean the schema already does.
+
+> clock-output-names.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 4 ----
+>  1 file changed, 4 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+> index 23abb7e8b9d8..dd70431df0b7 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+> @@ -158,10 +158,6 @@ properties:
+>      description:
+>        The MIO bank number in which the command and data lines are configured.
+>  
+> -dependencies:
+> -  clock-output-names: [ '#clock-cells' ]
+
+The schema defines this.
+
+> -  '#clock-cells': [ clock-output-names ]
+
+But not this. That's because in the common case, clock-output-names is 
+optional. But here it is required when '#clock-cells' is present.
+
+Rob
