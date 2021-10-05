@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BF2EC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 10:24:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6286C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 10:24:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8629E61251
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 10:24:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B056615A6
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 10:24:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233989AbhJEK0Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 06:26:25 -0400
-Received: from mga18.intel.com ([134.134.136.126]:3414 "EHLO mga18.intel.com"
+        id S234017AbhJEK00 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 06:26:26 -0400
+Received: from mga12.intel.com ([192.55.52.136]:42844 "EHLO mga12.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233928AbhJEK0Y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S233946AbhJEK0Y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 5 Oct 2021 06:26:24 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10127"; a="212636871"
+X-IronPort-AV: E=McAfee;i="6200,9189,10127"; a="205826612"
 X-IronPort-AV: E=Sophos;i="5.85,348,1624345200"; 
-   d="scan'208";a="212636871"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2021 03:24:34 -0700
+   d="scan'208";a="205826612"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2021 03:24:33 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.85,348,1624345200"; 
-   d="scan'208";a="711770038"
+   d="scan'208";a="483724768"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga006.fm.intel.com with ESMTP; 05 Oct 2021 03:24:31 -0700
+  by fmsmga007.fm.intel.com with ESMTP; 05 Oct 2021 03:24:31 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id EC2AD86; Tue,  5 Oct 2021 13:24:37 +0300 (EEST)
+        id 0C32E265; Tue,  5 Oct 2021 13:24:38 +0300 (EEST)
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Eric Biggers <ebiggers@google.com>,
@@ -33,9 +33,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v1 1/6] mmc: sdhci: Introduce couple of quirks to ignore particular state of CD GPIO
-Date:   Tue,  5 Oct 2021 13:24:25 +0300
-Message-Id: <20211005102430.63716-2-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 3/6] mmc: sdhci: Replace bxt_get_cd() with SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH
+Date:   Tue,  5 Oct 2021 13:24:27 +0300
+Message-Id: <20211005102430.63716-4-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.33.0
 In-Reply-To: <20211005102430.63716-1-andriy.shevchenko@linux.intel.com>
 References: <20211005102430.63716-1-andriy.shevchenko@linux.intel.com>
@@ -45,63 +45,100 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some platforms may provide contradictory info in some states of CD GPIO line,
-and hence that state or states should be ignored. Introduce couple of quirks
-for that.
+The bxt_get_cd() repeats the functionality of sdhci_get_cd() when
+SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH is set. Thus, replace the
+method with the setting of the quirk.
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/sdhci.c | 13 ++++++++-----
- drivers/mmc/host/sdhci.h |  4 ++++
- 2 files changed, 12 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci-acpi.c     | 24 +-----------------------
+ drivers/mmc/host/sdhci-pci-core.c | 24 +-----------------------
+ 2 files changed, 2 insertions(+), 46 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 357b365bf0ec..a7960ee3ef4f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2395,7 +2395,7 @@ EXPORT_SYMBOL_GPL(sdhci_set_ios);
- static int sdhci_get_cd(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 8fe65f172a61..126c3afaf21b 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -359,28 +359,6 @@ static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+ 
+ #endif
+ 
+-static int bxt_get_cd(struct mmc_host *mmc)
+-{
 -	int gpio_cd = mmc_gpio_get_cd(mmc);
-+	int gpio_cd;
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	unsigned long flags;
+-	int ret = 0;
+-
+-	if (!gpio_cd)
+-		return 0;
+-
+-	spin_lock_irqsave(&host->lock, flags);
+-
+-	if (host->flags & SDHCI_DEVICE_DEAD)
+-		goto out;
+-
+-	ret = !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+-out:
+-	spin_unlock_irqrestore(&host->lock, flags);
+-
+-	return ret;
+-}
+-
+ static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
+ {
+ 	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+@@ -393,7 +371,7 @@ static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *ad
+ 		host->timeout_clk = 1000; /* 1000 kHz i.e. 1 MHz */
  
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		return 0;
-@@ -2405,11 +2405,14 @@ static int sdhci_get_cd(struct mmc_host *mmc)
- 		return 1;
+ 	if (acpi_dev_hid_uid_match(adev, "80865ACA", NULL))
+-		host->mmc_host_ops.get_cd = bxt_get_cd;
++		host->quirks2 |= SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH;
  
- 	/*
--	 * Try slot gpio detect, if defined it take precedence
--	 * over build in controller functionality
-+	 * Try slot GPIO detect, if defined it take precedence
-+	 * over build in controller functionality.
- 	 */
--	if (gpio_cd >= 0)
--		return !!gpio_cd;
-+	gpio_cd = mmc_gpio_get_cd(mmc);
-+	if (gpio_cd == 0 && !(host->quirks2 & SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_LOW))
-+		return 0;
-+	if (gpio_cd > 0 && !(host->quirks2 & SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH))
-+		return 1;
+ 	intel_dsm_init(intel_host, &pdev->dev, host->mmc);
  
- 	/* If polling, assume that the card is always present. */
- 	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index e8d04e42a5af..fb7910d22b18 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -464,6 +464,10 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
- /* Controller has CRC in 136 bit Command Response */
- #define SDHCI_QUIRK2_RSP_136_HAS_CRC			(1<<16)
-+/* Controller requires additional card detection test on GPIO low */
-+#define SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_LOW		(1<<17)
-+/* Controller requires additional card detection test on GPIO high */
-+#define SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH		(1<<18)
- /*
-  * Disable HW timeout if the requested timeout is more than the maximum
-  * obtainable timeout.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 70ab0a7a3de8..30caa0b325de 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -616,28 +616,6 @@ static int intel_select_drive_strength(struct mmc_card *card,
+ 	return intel_host->drv_strength;
+ }
+ 
+-static int bxt_get_cd(struct mmc_host *mmc)
+-{
+-	int gpio_cd = mmc_gpio_get_cd(mmc);
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	unsigned long flags;
+-	int ret = 0;
+-
+-	if (!gpio_cd)
+-		return 0;
+-
+-	spin_lock_irqsave(&host->lock, flags);
+-
+-	if (host->flags & SDHCI_DEVICE_DEAD)
+-		goto out;
+-
+-	ret = !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+-out:
+-	spin_unlock_irqrestore(&host->lock, flags);
+-
+-	return ret;
+-}
+-
+ #define SDHCI_INTEL_PWR_TIMEOUT_CNT	20
+ #define SDHCI_INTEL_PWR_TIMEOUT_UDELAY	100
+ 
+@@ -1171,7 +1149,7 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ 	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXTM_SD ||
+ 	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_APL_SD ||
+ 	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_GLK_SD)
+-		slot->host->mmc_host_ops.get_cd = bxt_get_cd;
++		slot->host->quirks2 |= SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH;
+ 
+ 	if (slot->chip->pdev->subsystem_vendor == PCI_VENDOR_ID_NI &&
+ 	    slot->chip->pdev->subsystem_device == PCI_SUBDEVICE_ID_NI_78E3)
 -- 
 2.33.0
 
