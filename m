@@ -2,154 +2,164 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B68BC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 06:02:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B459C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 06:12:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6E65661528
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 06:02:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B58861139
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 06:12:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232094AbhJEGEW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 02:04:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38780 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231597AbhJEGET (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 02:04:19 -0400
-Received: from gandalf.ozlabs.org (gandalf.ozlabs.org [IPv6:2404:9400:2:0:216:3eff:fee2:21ea])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3838C061745;
-        Mon,  4 Oct 2021 23:02:29 -0700 (PDT)
-Received: from authenticated.ozlabs.org (localhost [127.0.0.1])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        id S232108AbhJEGOm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 02:14:42 -0400
+Received: from so254-9.mailgun.net ([198.61.254.9]:29854 "EHLO
+        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231597AbhJEGOl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 02:14:41 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1633414372; h=Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
+ To: From: Sender; bh=+xbESTP4kkiGyu41HaCLG8ls13YPmSv1/s4uk3OzTP4=; b=tw10qUZKwx7UTHUgD5VsaBJSxROO2jmDBbQmBuLY/90HheTp4TGEVwxoWdiWE82E6rxsUz/Q
+ UwQ7hRXvVXRDUpXhGHmpBqul/nnqmFp6BOlML/sBK4OJ/Mcz6CB112gVqhsPa/9EJRUvGLzd
+ OdtECb02rRJFe2fqhVlN9RV3GhE=
+X-Mailgun-Sending-Ip: 198.61.254.9
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n07.prod.us-east-1.postgun.com with SMTP id
+ 615becd49ffb41314998b028 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 05 Oct 2021 06:12:36
+ GMT
+Sender: kvalo=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id E4D8AC43460; Tue,  5 Oct 2021 06:12:35 +0000 (UTC)
+Received: from tykki (tynnyri.adurom.net [51.15.11.48])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.ozlabs.org (Postfix) with ESMTPSA id 4HNn6Z0Lw4z4xbT;
-        Tue,  5 Oct 2021 17:02:14 +1100 (AEDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canb.auug.org.au;
-        s=201702; t=1633413746;
-        bh=NxMykwAtSBGQYw1NN1b8tuLk3z/eu8KgxmvlevpwR08=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=AuN21dHC9+MvuIwLhRD96bDPhCznYUF4mW6sVZScbRUzl9khYXUvaDeVKY7j3EpSi
-         SxLzKS1Bs4wrte7aWbXpZFWoemH0PNGO4D37mni3TZjB1HF9v41Jp65nKUZ8k7EWb7
-         1WS06ttvm7jDrexi/wdAcBbdmsaNmdqfqkCfLltRleNNHw6/4tsoys9pHDR4kMpQ3X
-         hiZ975kZUM946XlJkVfu3fcj8ixvWtI9+4vCQ14o+3BoPZXOQo2KwupnUaz3BSOQLv
-         PP+voIhGccH2rnqTb4t4QCc3N3EFgiuOYx9ydItftfDiXwetSYPCE98mkJ03f/99MZ
-         0OvLwF5mq8Z4Q==
-Date:   Tue, 5 Oct 2021 17:02:13 +1100
-From:   Stephen Rothwell <sfr@canb.auug.org.au>
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
-        kvm@vger.kernel.org,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        Alexander Lobakin <alobakin@pm.me>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        Andrea Merello <andrea.merello@gmail.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Arnaldo Carvalho de Melo <acme@redhat.com>,
-        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Brian Cain <bcain@codeaurora.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph Lameter <cl@linux.com>,
-        Daniel Bristot de Oliveira <bristot@redhat.com>,
-        David Hildenbrand <david@redhat.com>,
-        Dennis Zhou <dennis@kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Ian Rogers <irogers@google.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
-        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
-        Leo Yan <leo.yan@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Namhyung Kim <namhyung@kernel.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Peter Xu <peterx@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Petr Mladek <pmladek@suse.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Rich Felker <dalias@libc.org>,
-        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Shuah Khan <shuah@kernel.org>,
-        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Tejun Heo <tj@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>
-Subject: Re: [PATCH RESEND 3 00/16] Bitmap patches for 5.15
-Message-ID: <20211005170213.6e4ca629@canb.auug.org.au>
-In-Reply-To: <20211005054059.475634-1-yury.norov@gmail.com>
-References: <20211005054059.475634-1-yury.norov@gmail.com>
+        (Authenticated sender: kvalo)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id E4385C4338F;
+        Tue,  5 Oct 2021 06:12:31 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org E4385C4338F
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
+From:   Kalle Valo <kvalo@codeaurora.org>
+To:     Pali =?utf-8?Q?Roh=C3=A1r?= <pali@kernel.org>
+Cc:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v7 13/24] wfx: add hif_tx*.c/hif_tx*.h
+References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
+        <20210920161136.2398632-14-Jerome.Pouiller@silabs.com>
+        <87fstlkr1m.fsf@codeaurora.org> <2873071.CAOYYqaKbK@pc-42>
+        <20211001161316.w3cwsigacznjbowl@pali>
+Date:   Tue, 05 Oct 2021 09:12:27 +0300
+In-Reply-To: <20211001161316.w3cwsigacznjbowl@pali> ("Pali \=\?utf-8\?Q\?Roh\?\=
+ \=\?utf-8\?Q\?\=C3\=A1r\=22's\?\= message of
+        "Fri, 1 Oct 2021 18:13:16 +0200")
+Message-ID: <87tuhwf19w.fsf@codeaurora.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-Content-Type: multipart/signed; boundary="Sig_/UQDD3e=d/fr65N4eQ6HWDaN";
- protocol="application/pgp-signature"; micalg=pgp-sha256
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---Sig_/UQDD3e=d/fr65N4eQ6HWDaN
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Pali Roh=C3=A1r <pali@kernel.org> writes:
 
-Hi Yury,
+> On Friday 01 October 2021 17:17:52 J=C3=A9r=C3=B4me Pouiller wrote:
+>> On Friday 1 October 2021 11:55:33 CEST Kalle Valo wrote:
+>> > CAUTION: This email originated from outside of the organization.
+>> > Do not click links or open attachments unless you recognize the
+>> > sender and know the content is safe.
+>> >=20
+>> >=20
+>> > Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
+>> >=20
+>> > > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+>> > >
+>> > > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+>> >=20
+>> > [...]
+>> >=20
+>> > > --- /dev/null
+>> > > +++ b/drivers/net/wireless/silabs/wfx/hif_tx_mib.h
+>> > > @@ -0,0 +1,49 @@
+>> > > +/* SPDX-License-Identifier: GPL-2.0-only */
+>> > > +/*
+>> > > + * Implementation of the host-to-chip MIBs of the hardware API.
+>> > > + *
+>> > > + * Copyright (c) 2017-2020, Silicon Laboratories, Inc.
+>> > > + * Copyright (c) 2010, ST-Ericsson
+>> > > + * Copyright (C) 2010, ST-Ericsson SA
+>> > > + */
+>> > > +#ifndef WFX_HIF_TX_MIB_H
+>> > > +#define WFX_HIF_TX_MIB_H
+>> > > +
+>> > > +struct wfx_vif;
+>> > > +struct sk_buff;
+>> > > +
+>> > > +int hif_set_output_power(struct wfx_vif *wvif, int val);
+>> > > +int hif_set_beacon_wakeup_period(struct wfx_vif *wvif,
+>> > > +                              unsigned int dtim_interval,
+>> > > +                              unsigned int listen_interval);
+>> > > +int hif_set_rcpi_rssi_threshold(struct wfx_vif *wvif,
+>> > > +                             int rssi_thold, int rssi_hyst);
+>> > > +int hif_get_counters_table(struct wfx_dev *wdev, int vif_id,
+>> > > +                        struct hif_mib_extended_count_table *arg);
+>> > > +int hif_set_macaddr(struct wfx_vif *wvif, u8 *mac);
+>> > > +int hif_set_rx_filter(struct wfx_vif *wvif,
+>> > > +                   bool filter_bssid, bool fwd_probe_req);
+>> > > +int hif_set_beacon_filter_table(struct wfx_vif *wvif, int tbl_len,
+>> > > +                             const struct hif_ie_table_entry *tbl);
+>> > > +int hif_beacon_filter_control(struct wfx_vif *wvif,
+>> > > +                           int enable, int beacon_count);
+>> > > +int hif_set_operational_mode(struct wfx_dev *wdev, enum
+>> > > hif_op_power_mode mode);
+>> > > +int hif_set_template_frame(struct wfx_vif *wvif, struct sk_buff *sk=
+b,
+>> > > +                        u8 frame_type, int init_rate);
+>> > > +int hif_set_mfp(struct wfx_vif *wvif, bool capable, bool required);
+>> > > +int hif_set_block_ack_policy(struct wfx_vif *wvif,
+>> > > +                          u8 tx_tid_policy, u8 rx_tid_policy);
+>> > > +int hif_set_association_mode(struct wfx_vif *wvif, int ampdu_densit=
+y,
+>> > > +                          bool greenfield, bool short_preamble);
+>> > > +int hif_set_tx_rate_retry_policy(struct wfx_vif *wvif,
+>> > > +                              int policy_index, u8 *rates);
+>> > > +int hif_keep_alive_period(struct wfx_vif *wvif, int period);
+>> > > +int hif_set_arp_ipv4_filter(struct wfx_vif *wvif, int idx, __be32 *=
+addr);
+>> > > +int hif_use_multi_tx_conf(struct wfx_dev *wdev, bool enable);
+>> > > +int hif_set_uapsd_info(struct wfx_vif *wvif, unsigned long val);
+>> > > +int hif_erp_use_protection(struct wfx_vif *wvif, bool enable);
+>> > > +int hif_slot_time(struct wfx_vif *wvif, int val);
+>> > > +int hif_wep_default_key_id(struct wfx_vif *wvif, int val);
+>> > > +int hif_rts_threshold(struct wfx_vif *wvif, int val);
+>> >=20
+>> > "wfx_" prefix missing from quite a few functions.
+>>=20
+>> I didn't know it was mandatory to prefix all the functions with the
+>> same prefix.
 
-On Mon,  4 Oct 2021 22:40:43 -0700 Yury Norov <yury.norov@gmail.com> wrote:
+I don't know either if this is mandatory or not, for example I do not
+have any recollection what Linus and other maintainers think of this. I
+just personally think it's good practise to use driver prefix ("wfx_")
+in all non-static functions.
+
+Any opinions from others? Greg?
+
+>> With the rule of 80-columns, I think I will have to change a bunch of
+>> code :( .
 >
-> Please pull this bitmap series. The git tree is here:
->         https://github.com/norov/linux/tree/bitmap-master-5.15
+> I think that new drivers can use 100 characters per line.
 
-Actually branch bitmap-master-5.15 of https://github.com/norov/linux.git
-
-I would prefer a more generic branch name (unless this is a short term
-tree - since I will fetch it every day until you tell me to stop)
-
-Added to linux-next from today.
-
-Thanks for adding your subsystem tree as a participant of linux-next.  As
-you may know, this is not a judgement of your code.  The purpose of
-linux-next is for integration testing and to lower the impact of
-conflicts between subsystems in the next merge window.=20
-
-You will need to ensure that the patches/commits in your tree/series have
-been:
-     * submitted under GPL v2 (or later) and include the Contributor's
-        Signed-off-by,
-     * posted to the relevant mailing list,
-     * reviewed by you (or another maintainer of your subsystem tree),
-     * successfully unit tested, and=20
-     * destined for the current or next Linux merge window.
-
-Basically, this should be just what you would send to Linus (or ask him
-to fetch).  It is allowed to be rebased if you deem it necessary.
+That's my understanding as well.
 
 --=20
-Cheers,
-Stephen Rothwell=20
-sfr@canb.auug.org.au
+https://patchwork.kernel.org/project/linux-wireless/list/
 
---Sig_/UQDD3e=d/fr65N4eQ6HWDaN
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEENIC96giZ81tWdLgKAVBC80lX0GwFAmFb6mUACgkQAVBC80lX
-0Gxbewf/Ww/E+XPHdQ1mp59XC0GkoUKOxCBfGR1vs7uFtk/jjJjQgZczaO5K0V8B
-5AV4HEuVQrACgBuuHnKuciVhbzgu5zwK6AitIcZTU904LwEr+mUZuhKteKdGMzlp
-fIWXLaQEDg3eHhTk3IYFiCJK/xQqU4TxVD4vCCGveKRh2C603nww/En/sYfFrmOk
-1ofCL8wN1uxqI+rsm21e2cXvb4IlMto5uimejQmP55fyX9zsdZ95ZUHg3jLb4sy3
-JAP298Vgeqhv3ynmkjYzYilP4TC0psiyQMGvwuzlFMN/qaywyQ1OeKYCm0ymgAXr
-lnHzfD2RdD0mlcaxkqWAWThdw6GFag==
-=qIlm
------END PGP SIGNATURE-----
-
---Sig_/UQDD3e=d/fr65N4eQ6HWDaN--
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
