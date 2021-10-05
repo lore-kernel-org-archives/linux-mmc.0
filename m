@@ -2,124 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18C79C43217
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 22:43:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F1B4C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 22:46:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 01A8A611AE
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 22:43:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06B52611C5
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 22:46:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233567AbhJEWpP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 18:45:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48286 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230113AbhJEWpO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 18:45:14 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54390C061749;
-        Tue,  5 Oct 2021 15:43:23 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id t9so2291296lfd.1;
-        Tue, 05 Oct 2021 15:43:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:from:to:cc:references:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=QG+ghKl7BYypZZjDut6dTGHyiOgVAsyM1BWUZUWMu5U=;
-        b=Hd/Hgnl41abY2ut8awTV9Znfi0+mLbBx9rjGKMvBmv1GvhO4shIY8zKBANOfUfey6t
-         f5Ia/T7DT6465kZqrrXQThtz+C/Dyv3WwmTVE2S1/knhHJ2ZkcQGMJbpA7lJW8S92LV6
-         d4sMrDbdjRQ26EUeegNXhFT6soeFLf+BrXj5mPF3K+E6tl1/jGMbmKZnQ0VlaBRfoOWR
-         LuKoByxkOGkGhSjkSGOlHwyrskSGBdkV8ouXlaDVeZDQXkFs5OsF+2lgPEibKvUXARwq
-         QkljhBPkuFryLkM004napUFJxFdOqOTZNrXbWHEUeRQ3+onIjoSJKZ6XnhXG+LemKrOd
-         A8Qw==
+        id S236893AbhJEWsA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 18:48:00 -0400
+Received: from mail-oi1-f171.google.com ([209.85.167.171]:42821 "EHLO
+        mail-oi1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236820AbhJEWr7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 18:47:59 -0400
+Received: by mail-oi1-f171.google.com with SMTP id x124so1358397oix.9;
+        Tue, 05 Oct 2021 15:46:08 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=QG+ghKl7BYypZZjDut6dTGHyiOgVAsyM1BWUZUWMu5U=;
-        b=NKI6DzBBUj47SPHJaqj6L5uQHerhcCXQksJx4tDOH1zx+N1pv6NrMPzSbhiWv/yU5S
-         ZBYvK4WRoqZMlzzoztwywNi9hKE98gSfUXHBh3cpC7kjObydvS8Ea27tfA1lqGmvLVqr
-         mLWkdz/E+hfvRyAjoDBGPDOGhznyeoBn7eVLTAVK7oG0IX4fvvhbdjWz5xn9Ro/lOM5J
-         n/ZGXsKtPa0go78f/essm4XLKivJ7a/5cm3MkZnRQrFpqsa9XzeSuXpPps32NFeitH6d
-         xQvmc1I64tLtG99RgnhjGenIJM6Rz/FNcAc1vpx5rRgUPrtKvauMNcjsHKak4D49bdVG
-         xYhA==
-X-Gm-Message-State: AOAM530T77ZomtnnPADz4neUXMxhHuafoXQrozcjqjl0Z5ZcBz3AbtXw
-        0Pulf/vqDXRs9tEHv214GuQ=
-X-Google-Smtp-Source: ABdhPJxfNs4Gfg7N3fvFBrC2l/U9ZmVjgRHnpJ3ajA7WdQF4gcWUZ5S7J4URL5OZbbHW8d5K2gyE2g==
-X-Received: by 2002:a2e:743:: with SMTP id i3mr24366437ljd.250.1633473801726;
-        Tue, 05 Oct 2021 15:43:21 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-57.dynamic.spd-mgts.ru. [79.139.163.57])
-        by smtp.googlemail.com with ESMTPSA id q30sm2086817lfb.108.2021.10.05.15.43.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 05 Oct 2021 15:43:21 -0700 (PDT)
-Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20210926224058.1252-7-digetx@gmail.com>
- <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com>
- <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
- <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
- <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com>
-Message-ID: <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
-Date:   Wed, 6 Oct 2021 01:43:20 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
-MIME-Version: 1.0
-In-Reply-To: <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
+         :message-id;
+        bh=idk/OPLqOoxicS++8eNcVOO+4pet2v6UE8sH+4Sn+Fs=;
+        b=WyTt2CQ9yJFlHGsC8zVMPHHvq5DXj31iv+UOO1BmXHi63+boxFKUna0r6qh0YTQY1/
+         M6TlUdbENjmP7LKGWBkuEjexUxmMNRskHJcy8eU4pYWnCYPzV/Fs/ilhnlQbyID86q5a
+         hvadqI9on0eHQYE6O2A0GT2ydrplUF0O10uZd25G56AjOs/rAZ7lU/mqGC3Io6kjssSg
+         sekxx0qnJLKGOTterNuzRs8zgl217lLuLxLGt14WiOShWd8U8Fn7urS4M+9uiUvILwQA
+         B8TU7Fnns99SfJyDaEBZfWzSpF9TDVV0hlB1T1uOtZX/EitPCyLKOSA+/GFJnXrALjir
+         Xzog==
+X-Gm-Message-State: AOAM533xb7Cko15KkCkvj0LbQF//I+SDLs5IsG8PlTuU/rz11d6CEkgn
+        aOTdNXsO68c5Zfxs7/t/HQ==
+X-Google-Smtp-Source: ABdhPJzuCyAG5KCu9OI9pzfAoSNtgTk0/nwWINbsvAaJKNhig4buPmUm2PEwS2D8Cwi0GfG/C6nvPw==
+X-Received: by 2002:aca:2415:: with SMTP id n21mr4542248oic.27.1633473967660;
+        Tue, 05 Oct 2021 15:46:07 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id a9sm3775851otk.3.2021.10.05.15.46.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 Oct 2021 15:46:06 -0700 (PDT)
+Received: (nullmailer pid 106780 invoked by uid 1000);
+        Tue, 05 Oct 2021 22:45:59 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     devicetree@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?utf-8?b?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>,
+        netdev@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        devel@driverdev.osuosl.org,
+        =?utf-8?q?Pali_Roh=C3=A1r?= <pali@kernel.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org
+In-Reply-To: <20211005135400.788058-3-Jerome.Pouiller@silabs.com>
+References: <20211005135400.788058-1-Jerome.Pouiller@silabs.com> <20211005135400.788058-3-Jerome.Pouiller@silabs.com>
+Subject: Re: [PATCH v8 02/24] dt-bindings: introduce silabs,wfx.yaml
+Date:   Tue, 05 Oct 2021 17:45:59 -0500
+Message-Id: <1633473959.392405.106778.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-06.10.2021 01:19, Dmitry Osipenko пишет:
-...
-> I reproduced the OFF problem by removing the clk prepare/unprepare from
-> the suspend/resume of the clk driver and making some extra changes to
-> clock tree topology and etc to trigger the problem on Nexus 7.
+On Tue, 05 Oct 2021 15:53:38 +0200, Jerome Pouiller wrote:
+> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
 > 
-> tegra-pmc 7000e400.pmc: failed to turn off PM domain heg: -13
+> Prepare the inclusion of the wfx driver in the kernel.
 > 
-> It happens from genpd_suspend_noirq() -> tegra_genpd_power_off() -> clk
-> -> GENPD -> I2C -> runtime-pm.
+> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> ---
+>  .../bindings/net/wireless/silabs,wfx.yaml     | 137 ++++++++++++++++++
+>  1 file changed, 137 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
 > 
-> -13 is EACCES, it comes from the runtime PM of I2C device. RPM is
-> prohibited/disabled during late (NOIRQ) suspend by the drivers core.
 
-My bad, I double-checked and it's not I2C RPM that is failing now, but
-the clock's RPM [1], which is also unavailable during NOIRQ.
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
-[1]
-https://elixir.free-electrons.com/linux/v5.15-rc4/source/drivers/clk/clk.c#L116
+yamllint warnings/errors:
+./Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml:39:31: [error] syntax error: mapping values are not allowed here (syntax)
 
-Previously it was I2C RPM that was failing in a similar way, but code
-changed a tad since that time.
+dtschema/dtc warnings/errors:
+make[1]: *** Deleting file 'Documentation/devicetree/bindings/net/wireless/silabs,wfx.example.dts'
+Traceback (most recent call last):
+  File "/usr/local/bin/dt-extract-example", line 45, in <module>
+    binding = yaml.load(open(args.yamlfile, encoding='utf-8').read())
+  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/main.py", line 434, in load
+    return constructor.get_single_data()
+  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 120, in get_single_data
+    node = self.composer.get_single_node()
+  File "_ruamel_yaml.pyx", line 706, in _ruamel_yaml.CParser.get_single_node
+  File "_ruamel_yaml.pyx", line 724, in _ruamel_yaml.CParser._compose_document
+  File "_ruamel_yaml.pyx", line 775, in _ruamel_yaml.CParser._compose_node
+  File "_ruamel_yaml.pyx", line 889, in _ruamel_yaml.CParser._compose_mapping_node
+  File "_ruamel_yaml.pyx", line 775, in _ruamel_yaml.CParser._compose_node
+  File "_ruamel_yaml.pyx", line 891, in _ruamel_yaml.CParser._compose_mapping_node
+  File "_ruamel_yaml.pyx", line 904, in _ruamel_yaml.CParser._parse_next_event
+ruamel.yaml.scanner.ScannerError: mapping values are not allowed in this context
+  in "<unicode string>", line 39, column 31
+make[1]: *** [Documentation/devicetree/bindings/Makefile:20: Documentation/devicetree/bindings/net/wireless/silabs,wfx.example.dts] Error 1
+make[1]: *** Waiting for unfinished jobs....
+./Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml:  mapping values are not allowed in this context
+  in "<unicode string>", line 39, column 31
+/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml: ignoring, error parsing file
+warning: no schema found in file: ./Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+make: *** [Makefile:1441: dt_binding_check] Error 2
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/patch/1536655
+
+This check can fail if there are any dependencies. The base for a patch
+series is generally the most recent rc1.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit.
+
