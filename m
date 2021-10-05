@@ -2,113 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85D8AC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 10:46:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E42DC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 13:11:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66F3561354
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 10:46:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 34423615A3
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 13:11:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233514AbhJEKru (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 06:47:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48718 "EHLO
+        id S234614AbhJENM7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 09:12:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233077AbhJEKru (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 06:47:50 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E59F5C06161C;
-        Tue,  5 Oct 2021 03:45:59 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id g10so16999605edj.1;
-        Tue, 05 Oct 2021 03:45:59 -0700 (PDT)
+        with ESMTP id S234694AbhJENM7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 09:12:59 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88B13C061755
+        for <linux-mmc@vger.kernel.org>; Tue,  5 Oct 2021 06:11:08 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id j5so81050262lfg.8
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Oct 2021 06:11:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=cIIxJObi+e13NmHv65VtLTgT3/9mPzupU8skdaC+/ac=;
-        b=moF1A5AADl4m9a/AWvqtYEGUruMAE24BQ0ekMHjyRw9JBhSB9uLARlzooYReDJm83N
-         ZqdWx4rSiCxofnYQHFkq6nlrsxxt/kEarV6q76IpKaWAQy32eZ/m8RgX1O9nGx0PSiwD
-         6PuMtSCkfxhff+rgkcMCvv4suLA7jfxXf26my09QMdeEQxBGAi+q3v7CwW4B5kZ+QIQB
-         nnV1HhzFapxDw4tKLqLgpExtZBen3LUkgV7bpWQaUK2N6kfsuQsxTwQdZADJTxKomwS+
-         4ujkzJMIY908r8OBaw+jXEbwfWMtaamCNi0p9uEc1bzBFtVGY2cSaqp8THtt6Rd20gCh
-         ndLg==
+         :cc:content-transfer-encoding;
+        bh=jjr/5gs80cWEm3vhyk3aM1mKvl135EXltar2PLrRZ/k=;
+        b=P2GJcTPd6Kk45HZ8Ezt3mOStexgciMfR/ERjqn7quus9WPj7c0pgJ31TVKDyKIyFGw
+         Y+F7WGFBzXS/vp5jDxxMyzTz/hmBB5xPYGuEv6qEQ23KVdyCACYcfsWUkcNmRV/ofYHS
+         vE4LfuNllox/XGETXWlqstK2Q0L/vr7oXCynROhlgtpi4vvXnVvj6wEyBllh0eoIaYn8
+         f40td9gch4cO2Jp1h51EkJPAQ6/xwpwREWWIr5YIzLYLVQSBM9my6mb9NpueANAdQfBZ
+         CLGXLy2HZcaqGOasKeUtPNXPs47D7ubFHOmVm/lx2TuvCwySuEvv9iGf+AtaMpafWnSk
+         y69w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=cIIxJObi+e13NmHv65VtLTgT3/9mPzupU8skdaC+/ac=;
-        b=AugDPtooqHf3ysaed7IFEIiBGeShNnXJXy7XyJeeD6LM7trN5v44WvGWmmKXUycBGY
-         sAm8SX35XOgPGHmtKYPu0Jcv7nBEq3cBPa0TW0YcNiv0QhusCgTfNaG5va5eb3yJJm5Y
-         56x2we1kmqnT+lgHhN3U4LmJYFXPwaS8ak6tOaAXCrgQm7Qo2MRr5GMsxkzikM6nbCRU
-         3D8MJIBzcTBxNbBVPJbkEjaL2M99ft3GLGvfPeDVzKTrtjd10sAz1eTR4GWassQa4m2G
-         9UB7mPYVqVJTE3Xt4pkdr8Ke6enMYNboOpKu9La6k+Svz4Ry9XPJltLpmdfSiRvkbjpL
-         C6LA==
-X-Gm-Message-State: AOAM531BVWQVGCHEBX67RkiQDnoRx1l+X5nJiHIojWi4F+ClNSUtS0yq
-        JdxStK6AssikFS4ldY79N2YceiU84IyYRThzpQ/bspXb
-X-Google-Smtp-Source: ABdhPJyLahJVk0oA8O9uOJ3sJ4bZ5NZT4ZV1Vn9RfrurcfjD3ViTjOfDDkA8qpc8CM24WI20/bKb1FTujaVHOeqsN84=
-X-Received: by 2002:a50:be81:: with SMTP id b1mr26068397edk.59.1633430757237;
- Tue, 05 Oct 2021 03:45:57 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=jjr/5gs80cWEm3vhyk3aM1mKvl135EXltar2PLrRZ/k=;
+        b=1VaILmeRrJEn7kfp8Sd4ZgDG45hLDR9YmUSQO2dfXTMyw+3Xu+9csJbbn0DubS5zen
+         xIo1hMc1yJYZqzw2LPh9mebKYeRJ3f1QyV1Sv04c2F0a4A2qfhkba0svl7d7lq5hFyVi
+         iKI97kgcW0W2+3ExNxKgCCVhQ9eCrT2rxNeXlWWr3uA2qaas2WTYDX+cUWggTp9q+V+V
+         XCicQzSYniD+SDN532sFAuemOhKewqYo7Aw69hGkH4zOLRshNhAFJ1AC/BV7b2WHXt5+
+         D4+8tQkOc0xy5alxaT5o/RSfVweXo4VmGaKFUxQZzPs8Q6v6tvlZpD1C7twKVhtljRTl
+         2esQ==
+X-Gm-Message-State: AOAM533ZHY3D9CWoXEn04uKQ/TZ7gwJXlAZCoSGVVT1YLEqiHiK6nJJA
+        hI04yjsg8oQcY55swCOWpUXsKli+7gaYL7rKs0gDoIz8luSghQ==
+X-Google-Smtp-Source: ABdhPJzhN75cYX0QdxPZZrVkTo8LNm3eo8IzoivQ7mSAH2J9FquztKwBCIMLaRlaWOOdBUUox7ZGcX1wvMYGNrjgk1w=
+X-Received: by 2002:a05:651c:20b:: with SMTP id y11mr22911109ljn.463.1633439466354;
+ Tue, 05 Oct 2021 06:11:06 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210930065733.31943-1-tony@atomide.com> <20210930065733.31943-2-tony@atomide.com>
- <CAHCN7xJ_28ALRds4rduQP3LZoEK9y6mdia_czKU0DWse7FnjoA@mail.gmail.com> <YVwHEqaAtk0MFwmR@atomide.com>
-In-Reply-To: <YVwHEqaAtk0MFwmR@atomide.com>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Tue, 5 Oct 2021 05:45:46 -0500
-Message-ID: <CAHCN7xLBi09oHa75SxOc=CJ3hHZCNTxn6Z7m0NwuMcLY8+UL6g@mail.gmail.com>
-Subject: Re: [PATCH 1/5] dt-bindings: sdhci-omap: Update binding for legacy SoCs
-To:     Tony Lindgren <tony@atomide.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-7-digetx@gmail.com>
+ <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com> <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
+In-Reply-To: <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 5 Oct 2021 15:10:30 +0200
+Message-ID: <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
+Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Rob Herring <robh@kernel.org>
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 5, 2021 at 3:04 AM Tony Lindgren <tony@atomide.com> wrote:
+On Sat, 2 Oct 2021 at 22:44, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> Hi,
+> 01.10.2021 15:32, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >> +static __maybe_unused int tegra_clock_pm_suspend(struct device *dev)
+> >> +{
+> >> +       struct tegra_clk_device *clk_dev =3D dev_get_drvdata(dev);
+> >> +
+> >> +       /*
+> >> +        * Power management of the clock is entangled with the Tegra P=
+MC
+> >> +        * GENPD because PMC driver enables/disables clocks for toggli=
+ng
+> >> +        * of the PD's on/off state.
+> >> +        *
+> >> +        * The PMC GENPD is resumed in NOIRQ phase, before RPM of the =
+clocks
+> >> +        * becomes available, hence PMC can't use clocks at the early =
+resume
+> >> +        * phase if RPM is involved. For example when 3d clock is enab=
+led,
+> >> +        * it may enable the parent PLL clock that needs to be RPM-res=
+umed.
+> >> +        *
+> >> +        * Secondly, the PLL clocks may be enabled by the low level su=
+spend
+> >> +        * code, so we need to assume that PLL is in enabled state dur=
+ing
+> >> +        * suspend.
+> >> +        *
+> >> +        * We will keep PLLs and system clock resumed during suspend t=
+ime.
+> >> +        * All PLLs on all SoCs are low power and system clock is alwa=
+ys-on,
+> >> +        * so practically not much is changed here.
+> >> +        */
+> >> +
+> >> +       return clk_prepare(clk_dev->hw->clk);
+> > I am trying to understand, more exactly, what you intend to achieve
+> > with the clk_prepare() here. It looks a bit weird, to me. Can you try
+> > to elaborate a bit more on the use case?
 >
-> * Adam Ford <aford173@gmail.com> [211002 13:29]:
-> > I noticed that you added omap3 compatibility to the driver and the
-> > bindings, but no device tree changes for omap3.dtsi to enable this.
-> > Is there anything holding back?
->
-> There is at least the wl1251 quirk handling missing as I mentioned in
-> the cover letter. I guess we could enable sdhci except for wl1251 users
-> though.
+> The Tegra GENPD driver enable/disable clocks when domain is turned on.
 
-Sorry, I guess I missed the cover letter.  I didn't see any obvious
-differences between the drivers other than the hsmmc driver enumerated
-before the DMA, so it threw some splat indicating that.  The newer
-driver appears to enumerate after the DMA, so that message
-disappeared.
+Okay. I noticed that in tegra_genpd_power_on(). And the same clocks
+are enabled/disabled also in tegra_genpd_power_off(), when powering
+off the PM domain.
+
+So I guess the problem kind of exists for tegra_genpd_power_off() too?
+
+> This can't be done during early system resume, when domains are getting
+> turned on by the drivers core, because when clock is enabled, it's
+> getting prepared (RPM-resumed) and this preparation fails because
+> performance state of the clock goes up and it doesn't work during the
+> early resume time since I2C, which applies the state to hardware, is
+> suspended and can't work at that early time.
+
+This sounds complicated and I still don't quite follow all of it, sorry.
+
+So, tegra_genpd_power_on() gets called from genpd_resume_noirq(), when
+the first device of the attached devices to genpd gets resumed. And
+vice versa for tegra_genpd_power_off() and genpd_suspend_noirq().
+
+Are you saying that trying to enable/disable clocks from
+tegra_genpd_power_on|off() in these paths doesn't work, because it
+would also require the performance state to be changed, which would
+fail because the I2C bus/driver is suspended?
 
 >
-> > I modified omap3.dtsi and changed the compatible flag to
-> > ti,omap3-sdhci and it boots from SD card just fine.  For some reason,
-> > I cannot get the wl1283 to function, but the driver probes, so I need
-> > to spend some time investigating this.
+> Secondly, Tegra has arch-specific low level assembly which touches
+> clocks during last phase of system suspend and in the beginning of
+> resume. Hence, clocks should stay prepared during suspend just because
+> technically clock should be prepared before it can be enabled.
+
+So the low level code is gating and ungating the clock behind the back
+of the clock driver then? Why is that done like that, more exactly?
+
+>
+> > Is this rather about making sure that the clock's corresponding PM
+> > domain stays powered on during system suspend? In that case, I think
+> > there may be an alternative option....
 > >
-> > If i can get my wl1283 working again, I'll reply with a tested note.
-> > I hope to have more time tomorrow, but i can't do it any more today.
 >
-> I don't have wl1283 omap3 devices online, but I have tested that the
-> sdhci patches do work with wl12xx and mwifiex drivers. Did you figure
-> out why your wl1283 is not working with sdhci?
+> This is not about domain staying powered on, this is about keeping the
+> performance state of the domain high during suspend.
 
-I did get it working.  It was a MAC address issue.  I didn't properly
-set the MAC address.  Once I did, it worked just fine.
+Right, so the PM domain managed in tegra_genpd_power_on|off() can
+still be powered on/off, as long as the clock remains ungated?
 
-I think I sent a 2nd reply with a tested-by message.
-
-adam
->
-> Regards,
->
-> Tony
+Kind regards
+Uffe
