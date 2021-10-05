@@ -2,150 +2,71 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9AA5C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 06:44:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40E68C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 08:04:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 89B7C61425
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 06:44:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E27A610EA
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 08:04:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232117AbhJEGqM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 02:46:12 -0400
-Received: from mail.kernel.org ([198.145.29.99]:34584 "EHLO mail.kernel.org"
+        id S232929AbhJEIG3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 04:06:29 -0400
+Received: from muru.com ([72.249.23.125]:40900 "EHLO muru.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231816AbhJEGqM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Oct 2021 02:46:12 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 75CA261165;
-        Tue,  5 Oct 2021 06:44:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1633416261;
-        bh=cXUDZv200Bhhq7gsR76VWgnrwqp0ABdauVK7hmqot5w=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=ZV5n+9UvZODI6hqY+hb84xZZ1gka6VxdbbUQjl/0NAUqSzWU7FrBtKsWVpAkb0irz
-         V8vqf+Kaa2+NvGcLcV5IQbzHRf1XRZ0WnY97LaQ7AwSDXBd/kpmrzPVe4o70wgrxNY
-         1JOlhmTWHZ964BV2Q0fLJw6wiy7KiwOZnkTdV6+c=
-Date:   Tue, 5 Oct 2021 08:44:19 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Kalle Valo <kvalo@codeaurora.org>
-Cc:     Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
-        devel@driverdev.osuosl.org, devicetree@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>, netdev@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        "David S . Miller" <davem@davemloft.net>
-Subject: Re: [PATCH v7 13/24] wfx: add hif_tx*.c/hif_tx*.h
-Message-ID: <YVv0Q4ARfh/ebof5@kroah.com>
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
- <20210920161136.2398632-14-Jerome.Pouiller@silabs.com>
- <87fstlkr1m.fsf@codeaurora.org>
- <2873071.CAOYYqaKbK@pc-42>
- <20211001161316.w3cwsigacznjbowl@pali>
- <87tuhwf19w.fsf@codeaurora.org>
+        id S232793AbhJEIG2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Oct 2021 04:06:28 -0400
+Received: from localhost (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTPS id 3911180E1;
+        Tue,  5 Oct 2021 08:05:06 +0000 (UTC)
+Date:   Tue, 5 Oct 2021 11:04:34 +0300
+From:   Tony Lindgren <tony@atomide.com>
+To:     Adam Ford <aford173@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 1/5] dt-bindings: sdhci-omap: Update binding for legacy
+ SoCs
+Message-ID: <YVwHEqaAtk0MFwmR@atomide.com>
+References: <20210930065733.31943-1-tony@atomide.com>
+ <20210930065733.31943-2-tony@atomide.com>
+ <CAHCN7xJ_28ALRds4rduQP3LZoEK9y6mdia_czKU0DWse7FnjoA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <87tuhwf19w.fsf@codeaurora.org>
+In-Reply-To: <CAHCN7xJ_28ALRds4rduQP3LZoEK9y6mdia_czKU0DWse7FnjoA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 05, 2021 at 09:12:27AM +0300, Kalle Valo wrote:
-> Pali Rohár <pali@kernel.org> writes:
+Hi,
+
+* Adam Ford <aford173@gmail.com> [211002 13:29]:
+> I noticed that you added omap3 compatibility to the driver and the
+> bindings, but no device tree changes for omap3.dtsi to enable this.
+> Is there anything holding back?
+
+There is at least the wl1251 quirk handling missing as I mentioned in
+the cover letter. I guess we could enable sdhci except for wl1251 users
+though.
+
+> I modified omap3.dtsi and changed the compatible flag to
+> ti,omap3-sdhci and it boots from SD card just fine.  For some reason,
+> I cannot get the wl1283 to function, but the driver probes, so I need
+> to spend some time investigating this.
 > 
-> > On Friday 01 October 2021 17:17:52 Jérôme Pouiller wrote:
-> >> On Friday 1 October 2021 11:55:33 CEST Kalle Valo wrote:
-> >> > CAUTION: This email originated from outside of the organization.
-> >> > Do not click links or open attachments unless you recognize the
-> >> > sender and know the content is safe.
-> >> > 
-> >> > 
-> >> > Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
-> >> > 
-> >> > > From: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> >> > >
-> >> > > Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> >> > 
-> >> > [...]
-> >> > 
-> >> > > --- /dev/null
-> >> > > +++ b/drivers/net/wireless/silabs/wfx/hif_tx_mib.h
-> >> > > @@ -0,0 +1,49 @@
-> >> > > +/* SPDX-License-Identifier: GPL-2.0-only */
-> >> > > +/*
-> >> > > + * Implementation of the host-to-chip MIBs of the hardware API.
-> >> > > + *
-> >> > > + * Copyright (c) 2017-2020, Silicon Laboratories, Inc.
-> >> > > + * Copyright (c) 2010, ST-Ericsson
-> >> > > + * Copyright (C) 2010, ST-Ericsson SA
-> >> > > + */
-> >> > > +#ifndef WFX_HIF_TX_MIB_H
-> >> > > +#define WFX_HIF_TX_MIB_H
-> >> > > +
-> >> > > +struct wfx_vif;
-> >> > > +struct sk_buff;
-> >> > > +
-> >> > > +int hif_set_output_power(struct wfx_vif *wvif, int val);
-> >> > > +int hif_set_beacon_wakeup_period(struct wfx_vif *wvif,
-> >> > > +                              unsigned int dtim_interval,
-> >> > > +                              unsigned int listen_interval);
-> >> > > +int hif_set_rcpi_rssi_threshold(struct wfx_vif *wvif,
-> >> > > +                             int rssi_thold, int rssi_hyst);
-> >> > > +int hif_get_counters_table(struct wfx_dev *wdev, int vif_id,
-> >> > > +                        struct hif_mib_extended_count_table *arg);
-> >> > > +int hif_set_macaddr(struct wfx_vif *wvif, u8 *mac);
-> >> > > +int hif_set_rx_filter(struct wfx_vif *wvif,
-> >> > > +                   bool filter_bssid, bool fwd_probe_req);
-> >> > > +int hif_set_beacon_filter_table(struct wfx_vif *wvif, int tbl_len,
-> >> > > +                             const struct hif_ie_table_entry *tbl);
-> >> > > +int hif_beacon_filter_control(struct wfx_vif *wvif,
-> >> > > +                           int enable, int beacon_count);
-> >> > > +int hif_set_operational_mode(struct wfx_dev *wdev, enum
-> >> > > hif_op_power_mode mode);
-> >> > > +int hif_set_template_frame(struct wfx_vif *wvif, struct sk_buff *skb,
-> >> > > +                        u8 frame_type, int init_rate);
-> >> > > +int hif_set_mfp(struct wfx_vif *wvif, bool capable, bool required);
-> >> > > +int hif_set_block_ack_policy(struct wfx_vif *wvif,
-> >> > > +                          u8 tx_tid_policy, u8 rx_tid_policy);
-> >> > > +int hif_set_association_mode(struct wfx_vif *wvif, int ampdu_density,
-> >> > > +                          bool greenfield, bool short_preamble);
-> >> > > +int hif_set_tx_rate_retry_policy(struct wfx_vif *wvif,
-> >> > > +                              int policy_index, u8 *rates);
-> >> > > +int hif_keep_alive_period(struct wfx_vif *wvif, int period);
-> >> > > +int hif_set_arp_ipv4_filter(struct wfx_vif *wvif, int idx, __be32 *addr);
-> >> > > +int hif_use_multi_tx_conf(struct wfx_dev *wdev, bool enable);
-> >> > > +int hif_set_uapsd_info(struct wfx_vif *wvif, unsigned long val);
-> >> > > +int hif_erp_use_protection(struct wfx_vif *wvif, bool enable);
-> >> > > +int hif_slot_time(struct wfx_vif *wvif, int val);
-> >> > > +int hif_wep_default_key_id(struct wfx_vif *wvif, int val);
-> >> > > +int hif_rts_threshold(struct wfx_vif *wvif, int val);
-> >> > 
-> >> > "wfx_" prefix missing from quite a few functions.
-> >> 
-> >> I didn't know it was mandatory to prefix all the functions with the
-> >> same prefix.
-> 
-> I don't know either if this is mandatory or not, for example I do not
-> have any recollection what Linus and other maintainers think of this. I
-> just personally think it's good practise to use driver prefix ("wfx_")
-> in all non-static functions.
-> 
-> Any opinions from others? Greg?
+> If i can get my wl1283 working again, I'll reply with a tested note.
+> I hope to have more time tomorrow, but i can't do it any more today.
 
-For static functions, pick what you want.
+I don't have wl1283 omap3 devices online, but I have tested that the
+sdhci patches do work with wl12xx and mwifiex drivers. Did you figure
+out why your wl1283 is not working with sdhci?
 
-For global functions, like this, use a common prefix that indicates the
-driver as you are now playing in the global namespace of a 30 million
-line project.
+Regards,
 
-> >> With the rule of 80-columns, I think I will have to change a bunch of
-> >> code :( .
-> >
-> > I think that new drivers can use 100 characters per line.
-> 
-> That's my understanding as well.
-
-Yes, that's fine.
-
-thanks,
-
-greg k-h
+Tony
