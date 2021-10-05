@@ -2,62 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C402C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:26:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E2C7C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:50:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D84DB615A3
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:26:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 51E9261501
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:50:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234371AbhJER2J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 13:28:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58826 "EHLO mail.kernel.org"
+        id S234590AbhJERvz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 13:51:55 -0400
+Received: from m43-7.mailgun.net ([69.72.43.7]:46816 "EHLO m43-7.mailgun.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233671AbhJER2J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Oct 2021 13:28:09 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7EE6A61350;
-        Tue,  5 Oct 2021 17:26:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1633454778;
-        bh=TRVVk+cqSwmsQPPrsGSixnwW56Ss0wyABclPIq4gyE8=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=pyoR1P2drWCfoIMMWXbZbYfSVyvJ+FFcLILOhILVTcsHIzWS7FylokMYssDKCymyv
-         KIjPMKiI4uqFw4QY1iuTRSlKATXzlVP6qy4TIHTip7QDbtZ0i6gNX0RzsafwUdS84C
-         Mvk7JYogoERYPcVuDz/UCTwBOxQS8JAnRrQhEyq7jAdHoTm6zFXTCqcjrKhAn2Ss1L
-         8rTeB+xJGsbDesPU1hTAlYm3FQZ9dE43ca/V3p3ofMC1D99wew15nHOznhpgsvVFUT
-         l/v5J9seOQknAg6LBuPw3SzPjujBnzeECGRpsZ3/iIrXPXLRKEi+11+Cac7sBPs17W
-         x8awmT/CeEBcg==
-Date:   Tue, 5 Oct 2021 10:26:17 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-Cc:     Satya Tangirala <satyaprateek2357@gmail.com>, dm-devel@redhat.com,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v4 0/4] blk-crypto cleanups
-Message-ID: <YVyKuXgDjNgNdSHS@gmail.com>
-References: <20210929163600.52141-1-ebiggers@kernel.org>
+        id S233821AbhJERvx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Oct 2021 13:51:53 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1633456203; h=Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
+ To: From: Sender; bh=umNYz8pA01LGfst/ZDKb/BGeTkpsTgzCMazCvgWWhM4=; b=VjtQjJwQyacALVa+HJ4owpHSoS/5KMh/aHpaHvdiNdxhl+jU0qH3E7xovWXv2Z9m/khV//r1
+ QSeZOBkC01lBripgAbe6v9DOmGqmB532zFgGmcLPCugGixT2lB8IK8/EqgJeR7V0xor8Eni9
+ S02aHQlcckY4RLA28AYAoY8l6yk=
+X-Mailgun-Sending-Ip: 69.72.43.7
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n07.prod.us-east-1.postgun.com with SMTP id
+ 615c903a003e680efbce267a (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 05 Oct 2021 17:49:46
+ GMT
+Sender: kvalo=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 9EE95C4338F; Tue,  5 Oct 2021 17:49:45 +0000 (UTC)
+Received: from tykki (tynnyri.adurom.net [51.15.11.48])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: kvalo)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id E2E1DC4338F;
+        Tue,  5 Oct 2021 17:49:41 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org E2E1DC4338F
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
+From:   Kalle Valo <kvalo@codeaurora.org>
+To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v8 00/24] wfx: get out from the staging area
+References: <20211005135400.788058-1-Jerome.Pouiller@silabs.com>
+        <875yubfthh.fsf@codeaurora.org> <2810333.gDgIz5hftg@pc-42>
+Date:   Tue, 05 Oct 2021 20:49:37 +0300
+In-Reply-To: <2810333.gDgIz5hftg@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
+ Pouiller"'s message of "Tue,
+        05 Oct 2021 18:22:31 +0200")
+Message-ID: <87o883e4zy.fsf@codeaurora.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210929163600.52141-1-ebiggers@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 29, 2021 at 09:35:56AM -0700, Eric Biggers wrote:
-> This series renames struct blk_keyslot_manager to struct
-> blk_crypto_profile, as it is misnamed; it doesn't always manage
-> keyslots.  It's much more logical to think of it as the
-> "blk-crypto profile" of a device, similar to blk_integrity_profile.
-> 
-> This series also improves the inline-encryption.rst documentation file,
-> and cleans up blk-crypto-fallback a bit.
-> 
-> This series applies to block/for-next.
-> 
-> Changed v3 => v4:
->   - Rebased onto block/for-next to resolve a conflict due to
->     'struct request' being moved.
-> 
+J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
 
-Ping?
+> On Tuesday 5 October 2021 16:15:22 CEST Kalle Valo wrote:
+>> Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
+>>=20
+>> > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> [...]
+>> > v8:
+>> >   - Change the way the DT is handled. The user can now specify the nam=
+e of
+>> >     the board (=3D chip + antenna) he use. It easier for board designe=
+rs to
+>> >     add new entries. I plan to send a PR to linux-firmware to include =
+PDS
+>> >     files of the developpement boards belong the firmware (I also plan=
+ to
+>> >     relocate these file into wfx/ instead of silabs/). (Kalle, Pali)
+>> >   - Prefix visible functions and structs with "wfx_". I mostly kept the
+>> >     code under 80 columns. (Kalle, Pali, Greg)
+>> >   - Remove support for force_ps_timeout for now. (Kalle)
+>> >   - Fix licenses of Makefile, Kconfig and hif_api*.h. (Kalle)
+>> >   - Do not mix and match endianess in struct hif_ind_startup. (Kalle)
+>> >   - Remove magic values. (Kalle)
+>> >   - Use IS_ALIGNED(). (BTW, PTR_IS_ALIGNED() does not exist?) (Kalle)
+>> >   - I have also noticed that some headers files did not declare all the
+>> >     struct they used.
+>> >
+>> >   These issues remain (I hope they are not blockers):
+>> >   - I have currently no ideas how to improve/simplify the parsing PDS =
+file.
+>> >     (Kalle)
+>>=20
+>> For the PDS file problem it would help if you could actually describe
+>> what the firmware requires/needs and then we can start from that. I had
+>> some questions about this in v7 but apparently you missed those.
+>
+> Did you received this reply[1]?
+>
+> [1]: https://lore.kernel.org/all/2723787.uDASXpoAWK@pc-42/
 
-- Eric
+I did and I even made further questions:
+
+https://lore.kernel.org/all/87k0ixj5vn.fsf@codeaurora.org/
+
+Can we please continue the discussion on that thread instead of passing
+out lore links to each other :)
+
+--=20
+https://patchwork.kernel.org/project/linux-wireless/list/
+
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
