@@ -2,256 +2,222 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FFADC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 08:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48C8DC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 09:18:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3DD426120C
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 08:46:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 31D3E61409
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 09:18:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233216AbhJEIsI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 04:48:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48228 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233174AbhJEIsH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 04:48:07 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F29C8C061762
-        for <linux-mmc@vger.kernel.org>; Tue,  5 Oct 2021 01:46:16 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id x27so83148531lfu.5
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Oct 2021 01:46:16 -0700 (PDT)
+        id S233290AbhJEJUp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 05:20:45 -0400
+Received: from mail-dm6nam08on2044.outbound.protection.outlook.com ([40.107.102.44]:31994
+        "EHLO NAM04-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S232478AbhJEJUo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Oct 2021 05:20:44 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fFzx7VpTp7mvRMiWcYzA0dEJmNp5ygNKfY7qGNxG3i65hLr7SR2swueGdPUbg2BQmPPfL9k2b3pAC5C1Ya7aET9jNmPvHwR38YciD+E63LAgD3UL2322kXh7/IG76cEkNZKwV51exTIq0e2ZaEd+f60cABbVpee+OBOoFIInaaZT4ZwJ35ZQ+ZpFi/LUpC/jDGFUnGJavmIzzvGEevMnSPx6LXbuwmDUs0zQBNndWfREG9uW7MHkzBkabUDE4lN4e+6AcIiKmO9DxiAUOSBT9mB9A2fakAQDZgh6SMN7VpwnmAqVvxZXsNKrkGZEa9eIAynuHqQcftYRWQ+fLcU2BQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=xd2rc9Rns02J4L6pGxUEphajjqcaDZYT4pLBUhrMfPM=;
+ b=GA7K/DmDV+unjvnEfn+E3yA+aqBi40Q5pH7Utk4Dza2opEC67tpCUJGxtfrsCBXHAxZWFs1PHTc2U2Zn8JbUVRx3W39SKusByEFw08tEaRwfmtQurIVxRJim0GFZQFS1LHVkobFhehi+ycC26SWhrWAfPMP99EHDPnRzS3+mVyFwo8zlg/xSPv9ayRCPsnCBUAPWU9oZeRGhekSJHBcONazMuV2b4Gb0Wx7WvWOefzmEJOGakl8P2srwd4504Jz0nFAUeOXEFy/wRDJTVd+aZ6EqFV395Nwex5Q2CLfFbG8BVAyQQRfYFvcrkhMN32+PFiJHfjw3geZr5tLhLgUv5w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
+ dkim=pass header.d=silabs.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=2XcUpJPfTy5QEwAH/Xm2eJXv/Zjhn/CbqgwcIVdR3Ko=;
-        b=StXvAQCBgcoX52kszMxZz5N8R1x7Jgws/vzvdghPVQAxrXcGRe2RV40TtiBs01cHvb
-         4a5hw6zBLLU11txa6ewFuW9GpUN94HGnLOEV6ABOkN/9NWcwu7jcjaojZzLlNklwrgPD
-         dpIvqQ39l/x1H3aGnXsOZUFdHRyasRBY5NQd8N8R3/OV70vtN1crrVBsGUPIpB2iOyv0
-         UZx+tqDe1nAs0yHDAToyTIIFcp9uipa16SSJ3+3DlZT3pK7Ak8o+tJ1Rnlf5JuyuntNb
-         XAyihgpLL6GB1mGseG20od2eroj4LTOulwyKeLzypAzWsA4UW3y49HvFCk9klXyRwvmI
-         pPbw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=2XcUpJPfTy5QEwAH/Xm2eJXv/Zjhn/CbqgwcIVdR3Ko=;
-        b=O7T8fD2uPqAxHbefB7DJVZBYDsR/dZXnLJQ66m5GChdoPsi+omTP8isUV2Vub0a6CQ
-         agdlr6e74xelh+ZCCqDJx04JSiFkgCSv0a+WDh3mEg2WKlOnpp4q1CpHegGX8k3ZfjZl
-         gjiz41vch+cwHbB9KtySsTTU9KJgMR5U3g+430vpmfIMMM9iDuqlBV5jGRecdBr3JEdV
-         oissS9uvfWzja5UzFNXwbqrECSaacy5ViIXrXC3nVyHC+XryuWPmawp2jnidMMJqMFCU
-         c1gnoQUiZoVqjbtO85f/OO+zLY0gwAt8bsMhCMjaQUVOdHtJfL+nBf8NXpXh64mt+bHe
-         hX9A==
-X-Gm-Message-State: AOAM5337hk/LjgICS7lbIrju5p3goPsAaxqVNX+UMRbQR4uaXUTozhkJ
-        Sn+xyOx+u9MvWY6IgYwXTSItwDCBD1vrzJgWixwNgQ==
-X-Google-Smtp-Source: ABdhPJykqgW510fRv0PXxhEsYvLSC1wn3+yBs/rj2+Acwz1tRjhApok8H3vRKI1vEzEqYcUMDwpiGAqI/4xOyfOJSWs=
-X-Received: by 2002:a19:e307:: with SMTP id a7mr1560996lfh.358.1633423575163;
- Tue, 05 Oct 2021 01:46:15 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-14-digetx@gmail.com>
- <CAPDyKFpzhv1UxjM0q5AWHVxTWC_cCO_Kg_6exO0o_=EoVvjo+w@mail.gmail.com>
- <aad7a508-7fb5-3418-f902-def80c365094@gmail.com> <CAPDyKFppSuP6FfaBaGn3o+8WvTT=vJ8XMzZ47WPQ1JKiUYyEpw@mail.gmail.com>
- <8d75436d-864a-7ce0-ba53-daa8b663035a@gmail.com> <CAPDyKFpqs5gUcym4q+GuiJy13eXqjEnx-eFdUT4bQpcfPAOEYw@mail.gmail.com>
- <f5b5e06a-71ed-1250-f0ad-692062e00e01@gmail.com>
-In-Reply-To: <f5b5e06a-71ed-1250-f0ad-692062e00e01@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 5 Oct 2021 10:45:38 +0200
-Message-ID: <CAPDyKFpWzLdKr0bYX4VYwNpPuJNEs=weEpNpDH6zfv9e8SaxJQ@mail.gmail.com>
-Subject: Re: [PATCH v13 13/35] drm/tegra: gr2d: Support generic power domain
- and runtime PM
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-Content-Type: text/plain; charset="UTF-8"
+ d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=xd2rc9Rns02J4L6pGxUEphajjqcaDZYT4pLBUhrMfPM=;
+ b=DgVBUyNgKC6LSig19JAJhKNAlQeHRFKVCFfVpus0r45cVpORtqOc2681g4zwUxBne4DjzfHqP71WjKd3zz8gtW5kcADDMvazeCwXI6LM8imbZ13Qb3yktFtqJ0Tb1xCdMScce0SpW4iqa8CbShMU9b8wVYppw9qLcD3rTJSSLnA=
+Authentication-Results: linuxfoundation.org; dkim=none (message not signed)
+ header.d=none;linuxfoundation.org; dmarc=none action=none
+ header.from=silabs.com;
+Received: from PH0PR11MB5657.namprd11.prod.outlook.com (2603:10b6:510:ee::19)
+ by PH0PR11MB5595.namprd11.prod.outlook.com (2603:10b6:510:e5::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.15; Tue, 5 Oct
+ 2021 09:18:51 +0000
+Received: from PH0PR11MB5657.namprd11.prod.outlook.com
+ ([fe80::31cb:3b13:b0e8:d8f4]) by PH0PR11MB5657.namprd11.prod.outlook.com
+ ([fe80::31cb:3b13:b0e8:d8f4%9]) with mapi id 15.20.4566.022; Tue, 5 Oct 2021
+ 09:18:50 +0000
+From:   =?ISO-8859-1?Q?J=E9r=F4me?= Pouiller <jerome.pouiller@silabs.com>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Pali =?ISO-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        Kalle Valo <kvalo@codeaurora.org>, devel@driverdev.osuosl.org,
+        devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        netdev@vger.kernel.org, linux-wireless@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org, "David S . Miller" <davem@davemloft.net>
+Subject: Re: [PATCH v7 13/24] wfx: add hif_tx*.c/hif_tx*.h
+Date:   Tue, 05 Oct 2021 11:18:42 +0200
+Message-ID: <3256127.6qxvVGrUKR@pc-42>
+Organization: Silicon Labs
+In-Reply-To: <YVwLB02y67JOvoth@kroah.com>
+References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com> <36155992.WRNEVsFkd7@pc-42> <YVwLB02y67JOvoth@kroah.com>
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
+X-ClientProxiedBy: PAYP264CA0024.FRAP264.PROD.OUTLOOK.COM
+ (2603:10a6:102:11f::11) To PH0PR11MB5657.namprd11.prod.outlook.com
+ (2603:10b6:510:ee::19)
+MIME-Version: 1.0
+Received: from pc-42.localnet (37.71.187.125) by PAYP264CA0024.FRAP264.PROD.OUTLOOK.COM (2603:10a6:102:11f::11) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.22 via Frontend Transport; Tue, 5 Oct 2021 09:18:47 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: c1871129-d99c-4406-694c-08d987e124dc
+X-MS-TrafficTypeDiagnostic: PH0PR11MB5595:
+X-Microsoft-Antispam-PRVS: <PH0PR11MB559565BC9D2FB72797C42BC193AF9@PH0PR11MB5595.namprd11.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:7219;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: c36K92m55EoogVbWT5G56VIoBXdS1paiG+wgKfeimJ5lEb9O9nPPnXxUB5BZtSQAqKxrqXouOhNN+DJ6EiNZORmAm8oazL61iXFvd6L/6S/SWKdOG/ZdA7OE+M0uDw0wB+epNtgJ+EH0W19tNfPcOB2+QNeOOe6RoYxACQzIdp0VFaZNQtIsxFD4ri6I8HKKyUh8d0kS0PD6BXheUOSK5E7u2dFdfdLpW446wUjepNxoKRCSWTp5iH6QWrgDlfPNvcdHHWCtXk03DvPcK2oOW+k0bj5cLnoebxmWxNH0ze4mOnso0umXazQg28ILrtmaPEp/8W4+67hiMstBl61GRkTq5rau+ZavHS2sLMwbL35d4E27OmFkhQN2wvDCWZDG4ieUe/dRw5oYB6acbqfIfUVNAfKvIcmXPfMLMMoJgVFpFMjV0gsVeJdLxrLbAyq0MEwNDIS5ctZra1zo90JvxTwFGi751GwFYFBjudEggFReyqPjWP43A/eBO9CdwMFGB0NQ6hXEnIqFmTDFriI3hsMDCurWdaWRW3KoOrtcnCMV5GcI3Hw9QvP8sE6t0pj64KU9yXG0pjaXCDEh3Tx5RLzMr1w3ElAl2YprwvhjWXSAG56BgKE6ICKjnZLhC82vE0niyKSqF9juciaXPZaF6Ulv6qSsFkdh/dMhChSwsdBu2/drEbXFA0I4zsIDx+ekIHqpWZvn5jA+LykW8fMBmW6OgJHxKs7n3MDXBT3ay2w=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR11MB5657.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(186003)(38100700002)(83380400001)(9686003)(8676002)(7416002)(6512007)(316002)(86362001)(4326008)(66574015)(5660300002)(26005)(52116002)(956004)(33716001)(54906003)(66476007)(6666004)(2906002)(6486002)(66946007)(6916009)(66556008)(38350700002)(8936002)(6506007)(508600001)(36916002)(39026012);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?iso-8859-1?Q?maPzBPMe9fT79zwzjoS703gkfM+/zVQfucN1U6+ZUK1fzjRCaX5YjlTJtN?=
+ =?iso-8859-1?Q?QZScueNi9o15IIltN78YSCHsW9A0tr5XrUGwBnYwkM/tnTAGUU6n6IL2W+?=
+ =?iso-8859-1?Q?MRAnqnKOIH10eXgmddWTC7TakjYFOvVhTUs06FlsSPvCbxFcIZar7v8gJZ?=
+ =?iso-8859-1?Q?oXymhhz31soqdevC/MImBjqo/cEbw6RoZvQZ4CLcs3QXJ9HwFWAk0Y/78R?=
+ =?iso-8859-1?Q?43wd4qBZPv+qi+LY8EWZQGQyfQrvSsjLcCgO5jErjpHBUyGYMiB4caO4Bz?=
+ =?iso-8859-1?Q?dgGF1OdKF+TbeU7Wc9pFxBiPAhuQ48xLlAPz7TZaY9ku4TUMrEcB3tCO89?=
+ =?iso-8859-1?Q?AnQfBXhE13rkdrZZuz/YhruJJJj3JGIHq0RjPbWIzRGDzKK/lJdJXL4XF3?=
+ =?iso-8859-1?Q?XJGulQPrRRlrM/S4C2Ih7PukdYJvGEBHbC8qsNk0PTcOzMkAMAdzaBw6n3?=
+ =?iso-8859-1?Q?FdTmmuNA/2ZKKXgZQ8cjSRjMAE/pxkDtT5eD6R+0z1CtE7Nl2ASBqpI2qh?=
+ =?iso-8859-1?Q?5xFP0uaZzHwAapwMMjE+mhwPvdCCv/OBzCRjnA4oh9/WSpGCdUHBSZCOSX?=
+ =?iso-8859-1?Q?8vpQEH52ygPsPfFtImKmG6F34+V/8XhV4xNhrDGQ7B4u3IlabE95JoxYh/?=
+ =?iso-8859-1?Q?p31Zv9ug94wTco2oE8HqpmXC73OaF08qHVXPRCNKU1HWGaYiCo4fVChc2M?=
+ =?iso-8859-1?Q?ndQo9++QTuXnFONJTqcu1fec4zDPIhxfU3uRnlMkWvZy7JSNNeml5RZzQW?=
+ =?iso-8859-1?Q?3ypZ7PD4ipe172WQo8rRhTgXx5A7qdhZZVpIXEu9kQH07wtYcAAvm4fu2c?=
+ =?iso-8859-1?Q?K0J6zjyQRpG4blLt4pSKCVowboddY2yHe9ziffYW7xT7Xs+l7Jwm+ohGkF?=
+ =?iso-8859-1?Q?lUPDs5/0SIg9EzKIIIbBXDCxVcazJYw6T1CY3ZHFrhNBy9hHyVDhNdtMmN?=
+ =?iso-8859-1?Q?b7uEwbpERnx7KkeovWNKCKkR+KH2D/119AYs/aagpK0vBbTMIAXjoyjx0+?=
+ =?iso-8859-1?Q?518/ixd5GduAaQVzNtnb6UMMJam76FNiWk3PlMQLMfUNCec2F6uqQl/HUl?=
+ =?iso-8859-1?Q?ouRpr9C9vQ1jrR7ChhjkoC8wXhZlURGH4RmwZuv6wf0ZEr0m6J5VTXnK2x?=
+ =?iso-8859-1?Q?2FfaHqFBij2R0PGVgLvwbEppeC0Sz8+NYmsPx8hviKXWoCDh63RGKQ9oFv?=
+ =?iso-8859-1?Q?km89FchVsor1V0dJhphI/ruqKtmnNwtLSLsVtXZ4sPu1LTzj/PcNEWVrW/?=
+ =?iso-8859-1?Q?kHQa2u0YIF7Xw8XDiOcQ1PfDGKKiU/2zdVlzTcDU2UbAgo4hhiUDoIYBcc?=
+ =?iso-8859-1?Q?7sq4qBo4nsN+2s21sdRzUCIaD5W2gT23APfwiKr7ZZA9BZHTzAc1AjyEha?=
+ =?iso-8859-1?Q?N0t7CsDoUW?=
+X-OriginatorOrg: silabs.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: c1871129-d99c-4406-694c-08d987e124dc
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR11MB5657.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Oct 2021 09:18:50.7980
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: o2/eETphrUEf/qvZiU6mpWrH1HuA+serCWVA/YW1yrFGcOkRRyHySTYeXIFejqUVjmci8c3uFtIyomtYz+oVig==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB5595
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 4 Oct 2021 at 17:57, Dmitry Osipenko <digetx@gmail.com> wrote:
+On Tuesday 5 October 2021 10:21:27 CEST Greg Kroah-Hartman wrote:
+> On Tue, Oct 05, 2021 at 10:17:32AM +0200, J=E9r=F4me Pouiller wrote:
+> > On Tuesday 5 October 2021 08:12:27 CEST Kalle Valo wrote:
+> > > Pali Roh=E1r <pali@kernel.org> writes:
+> > > > On Friday 01 October 2021 17:17:52 J=E9r=F4me Pouiller wrote:
+> > > >> On Friday 1 October 2021 11:55:33 CEST Kalle Valo wrote:
+> > > >> > Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
+> > > >> >
+> > > >> > > From: J=E9r=F4me Pouiller <jerome.pouiller@silabs.com>
+> > > >> > >
+> > > >> > > Signed-off-by: J=E9r=F4me Pouiller <jerome.pouiller@silabs.com=
 >
-> 04.10.2021 14:01, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> > On Fri, 1 Oct 2021 at 21:00, Dmitry Osipenko <digetx@gmail.com> wrote:
-> >>
-> >> 01.10.2021 17:55, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> >>> On Fri, 1 Oct 2021 at 16:29, Dmitry Osipenko <digetx@gmail.com> wrote=
-:
-> >>>>
-> >>>> 01.10.2021 16:39, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> >>>>> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> w=
-rote:
-> >>>>>>
-> >>>>>> Add runtime power management and support generic power domains.
-> >>>>>>
-> >>>>>> Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
-> >>>>>> Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
-> >>>>>> Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1=
- T124
-> >>>>>> Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
-> >>>>>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
-> >>>>>> ---
-> >>>>>>  drivers/gpu/drm/tegra/gr2d.c | 155 ++++++++++++++++++++++++++++++=
-+++--
-> >>>>>
-> >>>>> [...]
-> >>>>>
-> >>>>>>  static int gr2d_remove(struct platform_device *pdev)
-> >>>>>> @@ -259,15 +312,101 @@ static int gr2d_remove(struct platform_devi=
-ce *pdev)
-> >>>>>>                 return err;
-> >>>>>>         }
-> >>>>>>
-> >>>>>> +       pm_runtime_dont_use_autosuspend(&pdev->dev);
-> >>>>>> +       pm_runtime_disable(&pdev->dev);
-> >>>>>
-> >>>>> There is no guarantee that the ->runtime_suspend() has been invoked
-> >>>>> here, which means that clock may be left prepared/enabled beyond th=
-is
-> >>>>> point.
-> >>>>>
-> >>>>> I suggest you call pm_runtime_force_suspend(), instead of
-> >>>>> pm_runtime_disable(), to make sure that gets done.
-> >>>>
-> >>>> The pm_runtime_disable() performs the final synchronization, please =
-see [1].
-> >>>>
-> >>>> [1]
-> >>>> https://elixir.bootlin.com/linux/v5.15-rc3/source/drivers/base/power=
-/runtime.c#L1412
-> >>>
-> >>> pm_runtime_disable() end up calling _pm_runtime_barrier(), which call=
-s
-> >>> cancel_work_sync() if dev->power.request_pending has been set.
-> >>>
-> >>> If the work that was punted to the pm_wq in rpm_idle() has not been
-> >>> started yet, we end up just canceling it. In other words, there are n=
-o
-> >>> guarantees it runs to completion.
-> >>
-> >> You're right. Although, in a case of this particular patch, the syncin=
-g
-> >> is actually implicitly done by pm_runtime_dont_use_autosuspend().
-> >>
-> >> But for drivers which don't use auto-suspend, there is no sync. This
-> >> looks like a disaster, it's a very common pattern for drivers to
-> >> 'put+disable'.
-> >>
-> >>> Moreover, use space may have bumped the usage count via sysfs for the
-> >>> device (pm_runtime_forbid()) to keep the device runtime resumed.
-> >>
-> >> Right, this is also a disaster in a case of driver removal.
-> >>
-> >>>> Calling pm_runtime_force_suspend() isn't correct because each 'enabl=
-e'
-> >>>> must have the corresponding 'disable'. Hence there is no problem her=
-e.
-> >>>
-> >>> pm_runtime_force_suspend() calls pm_runtime_disable(), so I think tha=
-t
-> >>> should be fine. No?
-> >>
-> >> [adding Rafael]
-> >>
-> >> Rafael, could you please explain how drivers are supposed to properly
-> >> suspend and disable RPM to cut off power and reset state that was
-> >> altered by the driver's resume callback? What we're missing? Is Ulf's
-> >> suggestion acceptable?
-> >>
-> >> The RPM state of a device is getting reset on driver's removal, hence
-> >> all refcounts that were bumped by the rpm-resume callback of the devic=
+> > > >> >
+> > > >> > [...]
+> > > >> >
+> > > >> > > --- /dev/null
+> > > >> > > +++ b/drivers/net/wireless/silabs/wfx/hif_tx_mib.h
+> > > >> > > @@ -0,0 +1,49 @@
+> > > >> > > +/* SPDX-License-Identifier: GPL-2.0-only */
+> > > >> > > +/*
+> > > >> > > + * Implementation of the host-to-chip MIBs of the hardware AP=
+I.
+> > > >> > > + *
+> > > >> > > + * Copyright (c) 2017-2020, Silicon Laboratories, Inc.
+> > > >> > > + * Copyright (c) 2010, ST-Ericsson
+> > > >> > > + * Copyright (C) 2010, ST-Ericsson SA
+> > > >> > > + */
+> > > >> > > +#ifndef WFX_HIF_TX_MIB_H
+> > > >> > > +#define WFX_HIF_TX_MIB_H
+> > > >> > > +
+> > > >> > > +struct wfx_vif;
+> > > >> > > +struct sk_buff;
+> > > >> > > +
+> > > >> > > +int hif_set_output_power(struct wfx_vif *wvif, int val);
+> > > >> > > +int hif_set_beacon_wakeup_period(struct wfx_vif *wvif,
+> > > >> > > +                              unsigned int dtim_interval,
+> > > >> > > +                              unsigned int listen_interval);
+> > > >> > > +int hif_set_rcpi_rssi_threshold(struct wfx_vif *wvif,
+> > > >> > > +                             int rssi_thold, int rssi_hyst);
+> > > >> > > +int hif_get_counters_table(struct wfx_dev *wdev, int vif_id,
+> > > >> > > +                        struct hif_mib_extended_count_table *=
+arg);
+> > > >> > > +int hif_set_macaddr(struct wfx_vif *wvif, u8 *mac);
+> > > >> > > +int hif_set_rx_filter(struct wfx_vif *wvif,
+> > > >> > > +                   bool filter_bssid, bool fwd_probe_req);
+> > > >> > > +int hif_set_beacon_filter_table(struct wfx_vif *wvif, int tbl=
+_len,
+> > > >> > > +                             const struct hif_ie_table_entry =
+*tbl);
+> > > >> > > +int hif_beacon_filter_control(struct wfx_vif *wvif,
+> > > >> > > +                           int enable, int beacon_count);
+> > > >> > > +int hif_set_operational_mode(struct wfx_dev *wdev, enum
+> > > >> > > hif_op_power_mode mode);
+> > > >> > > +int hif_set_template_frame(struct wfx_vif *wvif, struct sk_bu=
+ff *skb,
+> > > >> > > +                        u8 frame_type, int init_rate);
+> > > >> > > +int hif_set_mfp(struct wfx_vif *wvif, bool capable, bool requ=
+ired);
+> > > >> > > +int hif_set_block_ack_policy(struct wfx_vif *wvif,
+> > > >> > > +                          u8 tx_tid_policy, u8 rx_tid_policy)=
+;
+> > > >> > > +int hif_set_association_mode(struct wfx_vif *wvif, int ampdu_=
+density,
+> > > >> > > +                          bool greenfield, bool short_preambl=
+e);
+> > > >> > > +int hif_set_tx_rate_retry_policy(struct wfx_vif *wvif,
+> > > >> > > +                              int policy_index, u8 *rates);
+> > > >> > > +int hif_keep_alive_period(struct wfx_vif *wvif, int period);
+> > > >> > > +int hif_set_arp_ipv4_filter(struct wfx_vif *wvif, int idx, __=
+be32 *addr);
+> > > >> > > +int hif_use_multi_tx_conf(struct wfx_dev *wdev, bool enable);
+> > > >> > > +int hif_set_uapsd_info(struct wfx_vif *wvif, unsigned long va=
+l);
+> > > >> > > +int hif_erp_use_protection(struct wfx_vif *wvif, bool enable)=
+;
+> > > >> > > +int hif_slot_time(struct wfx_vif *wvif, int val);
+> > > >> > > +int hif_wep_default_key_id(struct wfx_vif *wvif, int val);
+> > > >> > > +int hif_rts_threshold(struct wfx_vif *wvif, int val);
+> > > >> >
+> > > >> > "wfx_" prefix missing from quite a few functions.
+> > > >>
+> > > >> I didn't know it was mandatory to prefix all the functions with th=
 e
-> >> driver will be screwed up if device is kept resumed after removal. I
-> >> just verified that it's true in practice.
+> > > >> same prefix.
+> > >
+> > > I don't know either if this is mandatory or not, for example I do not
+> > > have any recollection what Linus and other maintainers think of this.=
+ I
+> > > just personally think it's good practise to use driver prefix ("wfx_"=
+)
+> > > in all non-static functions.
 > >
-> > Note that, what makes the Tegra drivers a bit special is that they are
-> > always built with CONFIG_PM being set (selected from the "SoC"
-> > Kconfig).
-> >
-> > Therefore, pm_runtime_force_suspend() can work for some of these
-> > cases. Using this, would potentially avoid the driver from having to
-> > runtime resume the device in ->remove(), according to the below
-> > generic sequence, which is used in many drivers.
-> >
-> > pm_runtime_get_sync()
-> > clk_disable_unprepare() (+ additional things to turn off the device)
-> > pm_runtime_disable()
-> > pm_runtime_put_noidle()
->
-> It's not a problem to change this patchset. The problem is that if
-> you'll grep mainline for 'pm_runtime_disable', you will find that there
-> are a lot of drivers in a potential trouble.
+> > What about structs (especially all the structs from hif_api.*.h)? Do yo=
+u
+> > think I should also prefix them with wfx_?
+>=20
+> Why would they _not_ have wfx_ as a prefix if they only pertain to this
+> driver?
 
-Let's start by fixing this patchset, please - then we can consider
-what to do with the other cases separately.
+hmmm... to keep identifiers small and readable? I find
+"wfx_hif_set_tx_rate_retry_policy" a bit long.
 
->
-> I'm proposing that we should change pm_runtime_disable() to perform the
-> syncing with this oneliner:
->
-> diff --git a/drivers/base/power/runtime.c b/drivers/base/power/runtime.c
-> index ec94049442b9..5c9f28165824 100644
-> --- a/drivers/base/power/runtime.c
-> +++ b/drivers/base/power/runtime.c
-> @@ -1380,6 +1380,8 @@ EXPORT_SYMBOL_GPL(pm_runtime_barrier);
->   */
->  void __pm_runtime_disable(struct device *dev, bool check_resume)
->  {
-> +       flush_work(&dev->power.work);
-> +
+Don't worry, I don't want to debate the rules. I am going to apply them.
 
-What about the latency this may introduce? I am not sure that is
-acceptable here!?
+--=20
+J=E9r=F4me Pouiller
 
->         spin_lock_irq(&dev->power.lock);
->
->         if (dev->power.disable_depth > 0) {
->
-> Objections?
->
-> The sysfs rpm-forbid is a separate problem and it's less troublesome
-> since it requires root privileges. It's also not something that
-> userspace touches casually. For now I don't know what could be done
-> about it.
 
-As I said, the common method to address this problem is to run the
-following sequence:
-
-pm_runtime_get_sync()
-"power off the device"
-pm_runtime_disable()
-pm_runtime_put_noidle()
-
-This works even if user space, via sysfs, has triggered a call to
-pm_runtime_forbid(). Or doesn't it?
-
-If you don't like it, pm_runtime_force_suspend() should work too, at
-least for your cases, I believe.
-
-Kind regards
-Uffe
