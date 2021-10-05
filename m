@@ -2,128 +2,223 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50AA6C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 17:16:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C6B5C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 05:40:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2A5546139F
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Oct 2021 17:16:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6922261507
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 05:40:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233862AbhJDRSF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Oct 2021 13:18:05 -0400
-Received: from mail-vs1-f44.google.com ([209.85.217.44]:38880 "EHLO
-        mail-vs1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233446AbhJDRSE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Oct 2021 13:18:04 -0400
-Received: by mail-vs1-f44.google.com with SMTP id y141so4802845vsy.5;
-        Mon, 04 Oct 2021 10:16:15 -0700 (PDT)
+        id S231594AbhJEFms (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 01:42:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33846 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230403AbhJEFmr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 01:42:47 -0400
+Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61EA5C061745;
+        Mon,  4 Oct 2021 22:40:57 -0700 (PDT)
+Received: by mail-pl1-x634.google.com with SMTP id b22so1532583pls.1;
+        Mon, 04 Oct 2021 22:40:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=av2xBHrLGpKKZFp0hKB8ZbiiBN2E9k8Q3N8s6NRbFdw=;
+        b=PKuJVAQDnM7o1A1xpeF9VLcI17Tqus9XxFzhAFuALd4R+DXgKacNKpcN4FRR5jgShX
+         0UBK5eiN6fVVUtxRfpi88bjCdDPrJuc5Dn1Af826bcu4uksV/iFiCPl2pWonOLzVlBR/
+         0KCtgKab/npd30UZLa5Aoka8viu0QbsVH2Ngcxp9cExcUTfUPsA20If8PgSMlp0y3ErD
+         z7rQDCQkAAczGP5c9hqIIwOORhPeEF6XVN9fMG+XWt7PjZA/pdSBQFZMmiqNX2HefQV4
+         YAPjieQrGgSghN3pjiWlHzLfAYELhqIizkpXRwvoBwysp++4UikVvpezIYL/senmkl2I
+         hJpQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/cIKwqiiuLgobXDQ2FDfJfThXFQMEGwTN5ZwOTn9O4c=;
-        b=pQ4iaKDNP+C76ASPJ2mNlCnDlix1tg5tvrHS3GvszQjLs03q47lolUVyHOsEcux8pb
-         qTVmxfw+2rQIgYxAWauzoUgPFJ2+6k2aUDcApDf7D0P1KMsvxYAusx9oX/HnoHAIQojP
-         IMd3iv6wNA1iZPZWe0Z0s2RueHGBQTwAhV2GK0gpIEXgqD5JMNC3Ccsck0ksheTG3o2t
-         i4jNcFf/E3raLQNKNIqaCHoyUEkPMnUZlEzeVD7LfVi6CrnKLXtQp0VwshXmwGtzp/xX
-         B3r8cYKH98L8taa9sTz/QLQegdb4GWG85eRNs6/3naEDFpNfmb+P9adh1ogvR5G9GZLr
-         mQ4w==
-X-Gm-Message-State: AOAM533OFF1PJzZqhDPtV1AS6vCsilbXlb5xnkemZ2x63igvuRDiY6MF
-        V8hizUAykX+p9OtrDzU6FWhPeSc/x/x2XAN8mFA=
-X-Google-Smtp-Source: ABdhPJwNIZzHrryVaq03dDhlSZqDVIvNqhD8sTXheMyiIkrcLXtixi70I9evUxN+y2x4M+IJ+XLbx0Evor3VmO5CVqA=
-X-Received: by 2002:a67:c295:: with SMTP id k21mr11443962vsj.37.1633367774534;
- Mon, 04 Oct 2021 10:16:14 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
- <CAHp75VcG9KajNpDbewDq7QzotB6t7MfwiGk15FaobX+cmMVSzg@mail.gmail.com>
- <CAK9rFnwrA=W2Vk5yFwG4N_WS=eBXXnhtexA+tqgAYb6xOAO4oQ@mail.gmail.com>
- <CAHp75VdfrJ3JV_gL3xCLHOiw6Tj-5Ep7z5JKWUFKFbUt8gobcw@mail.gmail.com>
- <CAK9rFnx--z_pr_yR6CqGsH04ddwUtx4rxc7MxNNmy7ZSF86+Mg@mail.gmail.com>
- <CAMuHMdUz4vUQzXBHA9AiT3w6L20yBpgd0emVZJb=v_qw70qiJQ@mail.gmail.com>
- <CAK9rFnw-j8whcsK-NQ4w4+sCdrumCk7Bb=J+KfsF9ZO2Tf5r5g@mail.gmail.com>
- <CAMuHMdW0s=x+DBZffeuEcyifDRfy8YM3c_wEAZscO7twR2wj3Q@mail.gmail.com> <CAK9rFnwCry1G7RqdWL9W1vq6Q3RV9tRxmDD6UErY=hQB6W-=_Q@mail.gmail.com>
-In-Reply-To: <CAK9rFnwCry1G7RqdWL9W1vq6Q3RV9tRxmDD6UErY=hQB6W-=_Q@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 4 Oct 2021 19:16:03 +0200
-Message-ID: <CAMuHMdUCESsnrbsh981OeNfnuiGn7w49wbUctxc_FnsZyP8GZA@mail.gmail.com>
-Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
-To:     Brad Larson <brad@pensando.io>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=av2xBHrLGpKKZFp0hKB8ZbiiBN2E9k8Q3N8s6NRbFdw=;
+        b=JdPvgt1V5qrXvy0IDTwmtRQbt/z+uN84FbZa+3peb//X3fZHTUND1oPXM2Nfn+YYn8
+         +pE+IPnSy7pHs5nUDKO1IegIQ6qyZV/EQOOnntujSt05bjra79rh/fE201X5b4raAlDi
+         TQ3GfuNmCcr7uB90cmeuRBnbxVaWg/Lf3C86JL6lgZhy7OkfEUI6EvnGlzY7tK3dQLPc
+         n7M+0ML2w19owsPxfVaDgQLgUSHj/mxpkbSW2Nv42WumaYEzNQbTcERwoipRsyIqeFgV
+         3zqvmDyv+IMH2H0ejkuAGxeawiJABAwTB95yDB3XLsGMhnEmO7Qa8MzpAIKHQSD2Mf+E
+         3Rqw==
+X-Gm-Message-State: AOAM531TphuW2GP4ASeJiOFXT1+Pa/YcwkYpO5JYMkJPujLPpDTAOrqr
+        Svy1ds6KZqXkX+VaITGtyHg=
+X-Google-Smtp-Source: ABdhPJwO5flC4hUMWWj7yG3YyGmvMkMYfWlRb1NWlMcNKI//7aKBUf5dAIWmvjHk9EHwFLu2wf1g3Q==
+X-Received: by 2002:a17:90a:4b4d:: with SMTP id o13mr1510046pjl.236.1633412456736;
+        Mon, 04 Oct 2021 22:40:56 -0700 (PDT)
+Received: from localhost (searspoint.nvidia.com. [216.228.112.21])
+        by smtp.gmail.com with ESMTPSA id x21sm16155237pfa.186.2021.10.04.22.40.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 04 Oct 2021 22:40:56 -0700 (PDT)
+From:   Yury Norov <yury.norov@gmail.com>
+To:     Stephen Rothwell <sfr@canb.auug.org.au>
+Cc:     Yury Norov <yury.norov@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
+        kvm@vger.kernel.org,
+        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
+        Alexander Lobakin <alobakin@pm.me>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        Andrea Merello <andrea.merello@gmail.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>,
+        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Brian Cain <bcain@codeaurora.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph Lameter <cl@linux.com>,
+        Daniel Bristot de Oliveira <bristot@redhat.com>,
+        David Hildenbrand <david@redhat.com>,
+        Dennis Zhou <dennis@kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ian Rogers <irogers@google.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
+        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
+        Leo Yan <leo.yan@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Namhyung Kim <namhyung@kernel.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Peter Xu <peterx@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Petr Mladek <pmladek@suse.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Rich Felker <dalias@libc.org>,
+        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Shuah Khan <shuah@kernel.org>,
+        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Tejun Heo <tj@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Will Deacon <will@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: [PATCH RESEND 3 00/16] Bitmap patches for 5.15
+Date:   Mon,  4 Oct 2021 22:40:43 -0700
+Message-Id: <20211005054059.475634-1-yury.norov@gmail.com>
+X-Mailer: git-send-email 2.30.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brad,
+Hi Stephen,
 
-On Mon, Oct 4, 2021 at 7:14 PM Brad Larson <brad@pensando.io> wrote:
-> On Mon, Aug 23, 2021 at 1:11 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> > On Mon, Aug 23, 2021 at 6:31 PM Brad Larson <brad@pensando.io> wrote:
-> > > On Mon, Aug 23, 2021 at 12:50 AM Geert Uytterhoeven
-> > > <geert@linux-m68k.org> wrote:
-> > > > On Mon, Aug 23, 2021 at 3:14 AM Brad Larson <brad@pensando.io> wrote:
-> > > > > On Mon, Mar 29, 2021 at 3:40 AM Andy Shevchenko
-> > > [...]
-> > > > > Regarding the above module question and Kconfig definition, since I
-> > > > > first looked at this and reviewed the comments I realized I should be
-> > > > > using builtin.  The file gpio/Kconfig is currently this
-> > > > >
-> > > > > config GPIO_ELBA_SPICS
-> > > > >         def_bool y
-> > > > >         depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
-> > > >
-> > > > That means the driver will default to yes by merely enabling
-> > > > COMPILE_TEST, which is a no-go.
-> > > >
-> > > >     config GPIO_ELBA_SPICS
-> > > >             bool "one-line summary"
-> > > >             depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
-> > > >             default y if ARCH_PENSANDO_ELBA_SOC
-> > >
-> > > Thanks Geert, changed to this
-> > >
-> > > --- a/drivers/gpio/Kconfig
-> > > +++ b/drivers/gpio/Kconfig
-> > > @@ -241,8 +241,9 @@ config GPIO_EIC_SPRD
-> > >           Say yes here to support Spreadtrum EIC device.
-> > >
-> > >  config GPIO_ELBA_SPICS
-> > > +       bool "Pensando Elba SoC SPI Chip Select as GPIO support"
-> > > +       depends on ARCH_PENSANDO_ELBA_SOC
-> > >         def_bool y
-> > > -       depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
-> >
-> > So we're losing the COMPILE_TEST ability again?
-> >
->
-> Hi Geert,
->
-> The gpio-elba-spics.c driver is being deleted with the spi chip-select
-> control integrated into spi-dw-mmio.c.  The GPIO_ELBA_SPICS config
-> option goes away and fixes my breakage of COMPILE_TEST.
+Please pull this bitmap series. The git tree is here:
+        https://github.com/norov/linux/tree/bitmap-master-5.15
 
-OK. Thanks for the follow-up.
+Thanks,
+Yury
 
-Gr{oetje,eeting}s,
+Yury Norov (16):
+  bitops: protect find_first_{,zero}_bit properly
+  bitops: move find_bit_*_le functions from le.h to find.h
+  include: move find.h from asm_generic to linux
+  arch: remove GENERIC_FIND_FIRST_BIT entirely
+  lib: add find_first_and_bit()
+  cpumask: use find_first_and_bit()
+  all: replace find_next{,_zero}_bit with find_first{,_zero}_bit where
+    appropriate
+  tools: sync tools/bitmap with mother linux
+  cpumask: replace cpumask_next_* with cpumask_first_* where appropriate
+  include/linux: move for_each_bit() macros from bitops.h to find.h
+  find: micro-optimize for_each_{set,clear}_bit()
+  Replace for_each_*_bit_from() with for_each_*_bit() where appropriate
+  mm/percpu: micro-optimize pcpu_is_populated()
+  bitmap: unify find_bit operations
+  lib: bitmap: add performance test for bitmap_print_to_pagebuf
+  vsprintf: rework bitmap_list_string
 
-                        Geert
+ MAINTAINERS                                   |   4 +-
+ arch/alpha/include/asm/bitops.h               |   2 -
+ arch/arc/Kconfig                              |   1 -
+ arch/arc/include/asm/bitops.h                 |   1 -
+ arch/arm/include/asm/bitops.h                 |   1 -
+ arch/arm64/Kconfig                            |   1 -
+ arch/arm64/include/asm/bitops.h               |   1 -
+ arch/csky/include/asm/bitops.h                |   1 -
+ arch/h8300/include/asm/bitops.h               |   1 -
+ arch/hexagon/include/asm/bitops.h             |   1 -
+ arch/ia64/include/asm/bitops.h                |   2 -
+ arch/m68k/include/asm/bitops.h                |   2 -
+ arch/mips/Kconfig                             |   1 -
+ arch/mips/include/asm/bitops.h                |   1 -
+ arch/openrisc/include/asm/bitops.h            |   1 -
+ arch/parisc/include/asm/bitops.h              |   2 -
+ arch/powerpc/include/asm/bitops.h             |   2 -
+ arch/powerpc/include/asm/cputhreads.h         |   2 +-
+ arch/powerpc/platforms/pasemi/dma_lib.c       |   4 +-
+ arch/riscv/include/asm/bitops.h               |   1 -
+ arch/s390/Kconfig                             |   1 -
+ arch/s390/include/asm/bitops.h                |   1 -
+ arch/s390/kvm/kvm-s390.c                      |   2 +-
+ arch/sh/include/asm/bitops.h                  |   1 -
+ arch/sparc/include/asm/bitops_32.h            |   1 -
+ arch/sparc/include/asm/bitops_64.h            |   2 -
+ arch/x86/Kconfig                              |   1 -
+ arch/x86/include/asm/bitops.h                 |   2 -
+ arch/x86/kernel/apic/vector.c                 |   4 +-
+ arch/x86/um/Kconfig                           |   1 -
+ arch/xtensa/include/asm/bitops.h              |   1 -
+ block/blk-mq.c                                |   2 +-
+ drivers/block/rnbd/rnbd-clt.c                 |   2 +-
+ drivers/dma/ti/edma.c                         |   2 +-
+ drivers/gpu/drm/etnaviv/etnaviv_gpu.c         |   4 +-
+ drivers/hwmon/ltc2992.c                       |   3 +-
+ drivers/iio/adc/ad7124.c                      |   2 +-
+ drivers/infiniband/hw/irdma/hw.c              |  16 +-
+ drivers/media/cec/core/cec-core.c             |   2 +-
+ drivers/media/mc/mc-devnode.c                 |   2 +-
+ drivers/mmc/host/renesas_sdhi_core.c          |   2 +-
+ drivers/net/virtio_net.c                      |   2 +-
+ drivers/pci/controller/dwc/pci-dra7xx.c       |   2 +-
+ drivers/scsi/lpfc/lpfc_sli.c                  |  10 +-
+ drivers/soc/fsl/qbman/bman_portal.c           |   2 +-
+ drivers/soc/fsl/qbman/qman_portal.c           |   2 +-
+ drivers/soc/ti/k3-ringacc.c                   |   4 +-
+ drivers/tty/n_tty.c                           |   2 +-
+ drivers/virt/acrn/ioreq.c                     |   3 +-
+ fs/f2fs/segment.c                             |   8 +-
+ fs/ocfs2/cluster/heartbeat.c                  |   2 +-
+ fs/ocfs2/dlm/dlmdomain.c                      |   4 +-
+ fs/ocfs2/dlm/dlmmaster.c                      |  18 +-
+ fs/ocfs2/dlm/dlmrecovery.c                    |   2 +-
+ fs/ocfs2/dlm/dlmthread.c                      |   2 +-
+ include/asm-generic/bitops.h                  |   1 -
+ include/asm-generic/bitops/le.h               |  64 ---
+ include/linux/bitmap.h                        |  34 +-
+ include/linux/bitops.h                        |  34 --
+ include/linux/cpumask.h                       |  46 ++-
+ include/linux/find.h                          | 372 ++++++++++++++++++
+ kernel/time/clocksource.c                     |   4 +-
+ lib/Kconfig                                   |   3 -
+ lib/find_bit.c                                |  21 +
+ lib/find_bit_benchmark.c                      |  21 +
+ lib/genalloc.c                                |   2 +-
+ lib/test_bitmap.c                             |  37 ++
+ lib/vsprintf.c                                |  24 +-
+ mm/percpu.c                                   |  35 +-
+ net/ncsi/ncsi-manage.c                        |   4 +-
+ tools/include/asm-generic/bitops.h            |   1 -
+ tools/include/asm-generic/bitops/find.h       | 145 -------
+ tools/include/linux/bitmap.h                  |   7 +-
+ .../bitops => tools/include/linux}/find.h     |  54 ++-
+ tools/lib/find_bit.c                          |  20 +
+ 75 files changed, 637 insertions(+), 441 deletions(-)
+ create mode 100644 include/linux/find.h
+ delete mode 100644 tools/include/asm-generic/bitops/find.h
+ rename {include/asm-generic/bitops => tools/include/linux}/find.h (83%)
 
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+2.30.2
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
