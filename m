@@ -2,150 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36762C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:16:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C402C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:26:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1E3646121F
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:16:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D84DB615A3
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 17:26:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236744AbhJERSH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 13:18:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57318 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236636AbhJERSF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 13:18:05 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D97E5C061749;
-        Tue,  5 Oct 2021 10:16:14 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id u18so89541742lfd.12;
-        Tue, 05 Oct 2021 10:16:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=v4VMlYai/5OJD6I0jXVUBp7T7QQDEKF1EDfzlyrXPNg=;
-        b=W2HYfURkJzDMqxvMvdLnaSxyL8uT7r1csfbSZPSbXORQw+cwWFtMynJRUEG4LiQrHQ
-         y3v5acYIRN1Eb0FbSRLCSIRtUZRGATp/wXu0GpAF7MIKkyEe30yYqs44aRZ5hx7PQUf8
-         KTIq6kvEdh07WxUJ9lahyZFbc91AomDi579Y3/gpCjlzb6mopUwQ7ho2PCW0cuccDWMY
-         /i99LFk5tTWbSOuutGf0fRJHd37tPZRn46J6NSoa+sUFqOvBAVR+EQT9iPI/71vRNDUs
-         E1DUIcTLGVE0YH8x38A9SKJivF5TQbdR1jagf785PZye81GIeWabHB+XUJ5q/1UXW+WG
-         AQEw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=v4VMlYai/5OJD6I0jXVUBp7T7QQDEKF1EDfzlyrXPNg=;
-        b=DuF4QpkjwFbd4dwlYAhig4rmQJm8ielyZnZ9Ys+SAdiAecq64Ir6wFBUuPbV4j1M+n
-         l8WZxK7bHDsWhMoefwJ8ThuVZM6f2HxW6SJP+kANUWoH6YuK7xvfuAofdrEp+uPjbDQt
-         e2JlK9dJNKr5t7emnh1CplDlaTY+g0h+lGvquMTkLSNTGGSaona6zhrrvCtDWTpQeoF8
-         QNlx7oJuIC2y+Kr52lLRm+BSzcT2/n3hzqhc/wxoPLMLqcZ4IiNofE3rn4A0ThxHZhb+
-         hwVsNNjbCj25/cAMYZBmkAeSgI+512ATeaK867OLdlENIY7XmKIqAT9NIGCr+lslVwWu
-         6dlQ==
-X-Gm-Message-State: AOAM530Y30SpHEqmWsHTtTGfeSHetiuNcwwgRNU1PxSomh39kkYnrjs/
-        4rL44LG/rgUyZvo76ZOMgsQ=
-X-Google-Smtp-Source: ABdhPJzFxn+EEvAfXINlDGqbDWfWJzkpl0QRwm+Z1jKxlyPCyoz5MyhKfZrnAr2zjaXtazuDCKJIlw==
-X-Received: by 2002:a05:6512:10d0:: with SMTP id k16mr4573650lfg.530.1633454173285;
-        Tue, 05 Oct 2021 10:16:13 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-57.dynamic.spd-mgts.ru. [79.139.163.57])
-        by smtp.googlemail.com with ESMTPSA id o12sm2013505lft.254.2021.10.05.10.16.11
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 05 Oct 2021 10:16:12 -0700 (PDT)
-Subject: Re: [PATCH v13 13/35] drm/tegra: gr2d: Support generic power domain
- and runtime PM
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20210926224058.1252-14-digetx@gmail.com>
- <CAPDyKFpzhv1UxjM0q5AWHVxTWC_cCO_Kg_6exO0o_=EoVvjo+w@mail.gmail.com>
- <aad7a508-7fb5-3418-f902-def80c365094@gmail.com>
- <CAPDyKFppSuP6FfaBaGn3o+8WvTT=vJ8XMzZ47WPQ1JKiUYyEpw@mail.gmail.com>
- <8d75436d-864a-7ce0-ba53-daa8b663035a@gmail.com>
- <CAPDyKFpqs5gUcym4q+GuiJy13eXqjEnx-eFdUT4bQpcfPAOEYw@mail.gmail.com>
- <f5b5e06a-71ed-1250-f0ad-692062e00e01@gmail.com>
- <CAPDyKFpWzLdKr0bYX4VYwNpPuJNEs=weEpNpDH6zfv9e8SaxJQ@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <65f5ea6a-5d04-57cc-f4e4-bf29f22af7f0@gmail.com>
-Date:   Tue, 5 Oct 2021 20:16:11 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S234371AbhJER2J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 13:28:09 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58826 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233671AbhJER2J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Oct 2021 13:28:09 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7EE6A61350;
+        Tue,  5 Oct 2021 17:26:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1633454778;
+        bh=TRVVk+cqSwmsQPPrsGSixnwW56Ss0wyABclPIq4gyE8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=pyoR1P2drWCfoIMMWXbZbYfSVyvJ+FFcLILOhILVTcsHIzWS7FylokMYssDKCymyv
+         KIjPMKiI4uqFw4QY1iuTRSlKATXzlVP6qy4TIHTip7QDbtZ0i6gNX0RzsafwUdS84C
+         Mvk7JYogoERYPcVuDz/UCTwBOxQS8JAnRrQhEyq7jAdHoTm6zFXTCqcjrKhAn2Ss1L
+         8rTeB+xJGsbDesPU1hTAlYm3FQZ9dE43ca/V3p3ofMC1D99wew15nHOznhpgsvVFUT
+         l/v5J9seOQknAg6LBuPw3SzPjujBnzeECGRpsZ3/iIrXPXLRKEi+11+Cac7sBPs17W
+         x8awmT/CeEBcg==
+Date:   Tue, 5 Oct 2021 10:26:17 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
+Cc:     Satya Tangirala <satyaprateek2357@gmail.com>, dm-devel@redhat.com,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: Re: [PATCH v4 0/4] blk-crypto cleanups
+Message-ID: <YVyKuXgDjNgNdSHS@gmail.com>
+References: <20210929163600.52141-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFpWzLdKr0bYX4VYwNpPuJNEs=weEpNpDH6zfv9e8SaxJQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210929163600.52141-1-ebiggers@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-...
->> It's not a problem to change this patchset. The problem is that if
->> you'll grep mainline for 'pm_runtime_disable', you will find that there
->> are a lot of drivers in a potential trouble.
+On Wed, Sep 29, 2021 at 09:35:56AM -0700, Eric Biggers wrote:
+> This series renames struct blk_keyslot_manager to struct
+> blk_crypto_profile, as it is misnamed; it doesn't always manage
+> keyslots.  It's much more logical to think of it as the
+> "blk-crypto profile" of a device, similar to blk_integrity_profile.
 > 
-> Let's start by fixing this patchset, please - then we can consider
-> what to do with the other cases separately.
+> This series also improves the inline-encryption.rst documentation file,
+> and cleans up blk-crypto-fallback a bit.
+> 
+> This series applies to block/for-next.
+> 
+> Changed v3 => v4:
+>   - Rebased onto block/for-next to resolve a conflict due to
+>     'struct request' being moved.
+> 
 
-Yeah, should be better to discuss it separately.
+Ping?
 
-...
->>  void __pm_runtime_disable(struct device *dev, bool check_resume)
->>  {
->> +       flush_work(&dev->power.work);
->> +
-> 
-> What about the latency this may introduce? I am not sure that is
-> acceptable here!?
-
-I'm not aware about any code which relies on the original 'cancelling'
-behaviour, perhaps Rafael should have more insight.
-
-...
->> The sysfs rpm-forbid is a separate problem and it's less troublesome
->> since it requires root privileges. It's also not something that
->> userspace touches casually. For now I don't know what could be done
->> about it.
-> 
-> As I said, the common method to address this problem is to run the
-> following sequence:
-> 
-> pm_runtime_get_sync()
-> "power off the device"
-> pm_runtime_disable()
-> pm_runtime_put_noidle()
-> 
-> This works even if user space, via sysfs, has triggered a call to
-> pm_runtime_forbid(). Or doesn't it?
-> 
-> If you don't like it, pm_runtime_force_suspend() should work too, at
-> least for your cases, I believe.
-
-I'll update the patches, thank you.
+- Eric
