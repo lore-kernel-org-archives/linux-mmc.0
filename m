@@ -2,180 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E42DC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 13:11:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00C4DC43219
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 13:55:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 34423615A3
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 13:11:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DE9FE6023D
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Oct 2021 13:55:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234614AbhJENM7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 09:12:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54568 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234694AbhJENM7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 09:12:59 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88B13C061755
-        for <linux-mmc@vger.kernel.org>; Tue,  5 Oct 2021 06:11:08 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id j5so81050262lfg.8
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Oct 2021 06:11:08 -0700 (PDT)
+        id S235838AbhJEN45 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 09:56:57 -0400
+Received: from mail-dm3nam07on2066.outbound.protection.outlook.com ([40.107.95.66]:60512
+        "EHLO NAM02-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S235485AbhJEN4O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Oct 2021 09:56:14 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LLeJt8XUQvqSlON1Hma5rGFztaV+zbK/kxKdP6r+rj/GntsObRX9AUobl9FUsPRmJNee5W1Rst8jl3aHwYj9gIULpig3UGba3JOewCMrHmT32t73fjGy5urp6ud327kmQKoJkw61vV/fEzKQrBLfvsp2U35RkJnazRfudKSTa+YB9PCr9dyp4FkB5K542NUdG97zbYmzXc69AnVcKPSsl8SO2fFi7Pqsxs4sNl8hZJZOqLzQ8T5bhxXDxa8EbCFaNIoK46yL1E+TQEwaF5Y7ym4JlLV3WVjSpr+fQMg5cCtsFoyvUdU3zQ9Yp9iFDqFY0O4k3adhcMUF2LqGGX535Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=IyY90r6QMFMHTI+VFb7nrT6DVJW15/DHuG0/svc2nKU=;
+ b=BAPJlNLTNe5IMm8FSHnRyttP04KnM4jCwtYFJC31rsyivf8IAUFztIznU3BleHepyyfANX0wIY21wl4ZYBJTGHvd3hj+8245wLaRkKN2zZoOmcQJ8C6pLlkqIqZCnDfINFFM38bKY0a6QyymqArLtoL50xcajL6nMmw3x06D3ivERlGqyiKlG/Y93GV044pQ5xTX2+xAQmHYAVhwB9LHAWzP2LJQlWEaJs18mmbStpN/p2yvDgLMVIiJpvWnbIsWHNNcnUykuAC1GZp1zH5Uw6jmDvX0BZgvSwB8tbgaepQwnFFBdjTWCWw+LJtqtO5fawNxwPGsrTNOCbQnnpb/Dw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
+ dkim=pass header.d=silabs.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=jjr/5gs80cWEm3vhyk3aM1mKvl135EXltar2PLrRZ/k=;
-        b=P2GJcTPd6Kk45HZ8Ezt3mOStexgciMfR/ERjqn7quus9WPj7c0pgJ31TVKDyKIyFGw
-         Y+F7WGFBzXS/vp5jDxxMyzTz/hmBB5xPYGuEv6qEQ23KVdyCACYcfsWUkcNmRV/ofYHS
-         vE4LfuNllox/XGETXWlqstK2Q0L/vr7oXCynROhlgtpi4vvXnVvj6wEyBllh0eoIaYn8
-         f40td9gch4cO2Jp1h51EkJPAQ6/xwpwREWWIr5YIzLYLVQSBM9my6mb9NpueANAdQfBZ
-         CLGXLy2HZcaqGOasKeUtPNXPs47D7ubFHOmVm/lx2TuvCwySuEvv9iGf+AtaMpafWnSk
-         y69w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=jjr/5gs80cWEm3vhyk3aM1mKvl135EXltar2PLrRZ/k=;
-        b=1VaILmeRrJEn7kfp8Sd4ZgDG45hLDR9YmUSQO2dfXTMyw+3Xu+9csJbbn0DubS5zen
-         xIo1hMc1yJYZqzw2LPh9mebKYeRJ3f1QyV1Sv04c2F0a4A2qfhkba0svl7d7lq5hFyVi
-         iKI97kgcW0W2+3ExNxKgCCVhQ9eCrT2rxNeXlWWr3uA2qaas2WTYDX+cUWggTp9q+V+V
-         XCicQzSYniD+SDN532sFAuemOhKewqYo7Aw69hGkH4zOLRshNhAFJ1AC/BV7b2WHXt5+
-         D4+8tQkOc0xy5alxaT5o/RSfVweXo4VmGaKFUxQZzPs8Q6v6tvlZpD1C7twKVhtljRTl
-         2esQ==
-X-Gm-Message-State: AOAM533ZHY3D9CWoXEn04uKQ/TZ7gwJXlAZCoSGVVT1YLEqiHiK6nJJA
-        hI04yjsg8oQcY55swCOWpUXsKli+7gaYL7rKs0gDoIz8luSghQ==
-X-Google-Smtp-Source: ABdhPJzhN75cYX0QdxPZZrVkTo8LNm3eo8IzoivQ7mSAH2J9FquztKwBCIMLaRlaWOOdBUUox7ZGcX1wvMYGNrjgk1w=
-X-Received: by 2002:a05:651c:20b:: with SMTP id y11mr22911109ljn.463.1633439466354;
- Tue, 05 Oct 2021 06:11:06 -0700 (PDT)
+ d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=IyY90r6QMFMHTI+VFb7nrT6DVJW15/DHuG0/svc2nKU=;
+ b=R01P38XZSBLcVY/65QW1JX2dsN6HPvrXLy5yrCe0agSivILUfrG/IB27W3sV6SpRz1eaRrtho2tbLWQvQpmcOKmrQOB85zDKmCsahdw+sajae1yjvw/ugFaVmhjQWyOdv+wDnQkv/nFRuKkV2yH2eWWW7x8+SQpc9+SuXiNjHk0=
+Authentication-Results: vger.kernel.org; dkim=none (message not signed)
+ header.d=none;vger.kernel.org; dmarc=none action=none header.from=silabs.com;
+Received: from PH0PR11MB5657.namprd11.prod.outlook.com (2603:10b6:510:ee::19)
+ by PH0PR11MB5643.namprd11.prod.outlook.com (2603:10b6:510:d5::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.14; Tue, 5 Oct
+ 2021 13:54:22 +0000
+Received: from PH0PR11MB5657.namprd11.prod.outlook.com
+ ([fe80::31cb:3b13:b0e8:d8f4]) by PH0PR11MB5657.namprd11.prod.outlook.com
+ ([fe80::31cb:3b13:b0e8:d8f4%9]) with mapi id 15.20.4566.022; Tue, 5 Oct 2021
+ 13:54:22 +0000
+From:   Jerome Pouiller <Jerome.Pouiller@silabs.com>
+To:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        Kalle Valo <kvalo@codeaurora.org>
+Cc:     devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
+        <jerome.pouiller@silabs.com>
+Subject: [PATCH v8 01/24] mmc: sdio: add SDIO IDs for Silabs WF200 chip
+Date:   Tue,  5 Oct 2021 15:53:37 +0200
+Message-Id: <20211005135400.788058-2-Jerome.Pouiller@silabs.com>
+X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20211005135400.788058-1-Jerome.Pouiller@silabs.com>
+References: <20211005135400.788058-1-Jerome.Pouiller@silabs.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
+X-ClientProxiedBy: PR3P189CA0084.EURP189.PROD.OUTLOOK.COM
+ (2603:10a6:102:b4::29) To PH0PR11MB5657.namprd11.prod.outlook.com
+ (2603:10b6:510:ee::19)
 MIME-Version: 1.0
-References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-7-digetx@gmail.com>
- <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com> <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
-In-Reply-To: <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 5 Oct 2021 15:10:30 +0200
-Message-ID: <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
-Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Received: from pc-42.silabs.com (37.71.187.125) by PR3P189CA0084.EURP189.PROD.OUTLOOK.COM (2603:10a6:102:b4::29) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.14 via Frontend Transport; Tue, 5 Oct 2021 13:54:19 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: bfc93fb3-a266-4aa2-225f-08d98807a23e
+X-MS-TrafficTypeDiagnostic: PH0PR11MB5643:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <PH0PR11MB564398A291BC6D2A46399C2A93AF9@PH0PR11MB5643.namprd11.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6108;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: kiMVW1NA41GtfWmADX55QOmxS9nyRnDiW1F7K8S5lvYtsOl8QU3glTDu5G4Se7G0Spb0lgzELtDzYToGtJ0B4CoxhgEqfy6ht/f/LGUmtP/1Pldhbro3a1IWWvw2tV0eyIAP6482pLLvDOvpBABai0943LfBqy4AcGsLVtw6sVpLqQv6Cu7kuYvbwHXcb5nmvDTF85vKJQ2LAAC+LqLq+6Z336QS661ThRasxvUWD5o/+/1BGqiZ2gCq+MqIQTNKLX7MCAwhZa4C595Nn6p6w7WSd4TkSWKwJRdxF4peqB4VuGaNGgnds8RwJlYVlxjkhT6SlYgKA4Xvf+8THx2hS9my3gGJkSj/1Xc7q5xpohKigGOFsDlrTIcZUISk7FgOhbsfLjqqVGxoGxQyfq/+eZOopz90mjrnbn9lo+LK3HbEXNPrsMMDQj9m9Q0PX7krS/Xa50V9Uf26dPOjsahJyEjWfIAU33j15atie6nHxdrx0BB7/5rVqmdMjuevsYXKBq//0qKP0WFfJUXihbzenhG9iEbbfpgcXVVQxnZ5NKmix7NMxIl7yfXoM0kl5KYNXUkd7r90paXA2FcMCLpBFDcZjV8yYwl+l/i9++B6a7RXj7q65pePVFuZekl90cjKm4IG3wiZzAZ+A8RqmpGRwLyAZsLUII9kilOmA1FoRXGoqQsVnq1mjc5xUkDQXUovaujJDqHKoZ6BV3RC11B3hQ==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR11MB5657.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(7416002)(2616005)(956004)(54906003)(8936002)(4744005)(36756003)(1076003)(186003)(38100700002)(86362001)(6486002)(6916009)(5660300002)(38350700002)(66946007)(66476007)(66556008)(52116002)(7696005)(508600001)(6666004)(2906002)(316002)(4326008)(26005)(107886003)(8676002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?TG84THZCZVZGQyswTnVBaFQ0a2lpZllhOFBhdnpWckI4QWNLdkoxYmx5S1U5?=
+ =?utf-8?B?dGtBZ1dEUUlZSEx5UjdBYkJ0TnhldEFSOWx6M0RtNkhzNGQ5QWxXUUdITVlu?=
+ =?utf-8?B?VW5ZTVZOK0grYldpeWRDUFpia3lJdks0QkFkMUs4MmZ3U2IySGtZRjhIQWMx?=
+ =?utf-8?B?anhBNEZTaFEwYVhCOHJqLzFwcy8vY25KVWxjdHF1MVhGSG5nS0dTalFwWEw5?=
+ =?utf-8?B?K3BtY08wRUlNZ3dEdERIK3gxY3FVS1ZIUFh2VDZkU1dyNEN4aC9reVRYWkpH?=
+ =?utf-8?B?eUlXaWJyK3JGbDlCTXZSUFFaY3RXZi92eWlUTURhdXZBenc4UGU0VHJKelJL?=
+ =?utf-8?B?VncwUmhEckJkRFMwTklXbTJBekdXM0VyaTZEZktxSFo3N1M1NnJhN3RibjFs?=
+ =?utf-8?B?bEdTemxEY3E2U3kxdkdoanVLdmZQTkR1U0hpN1dhNGtRSzZYcUpaMHZ2R1lZ?=
+ =?utf-8?B?VWlnTDZpM2JEbzF4SnF6MHVtUnB3b0RUTnM4OVJYYVg2ckh6VHRyaDdZalZu?=
+ =?utf-8?B?bmhFek1zN1RHb3NleVplZWlhakdoRDBhNnFzOE1zTEJhZ1l4UWNTNm56cHRx?=
+ =?utf-8?B?bmlVUXlKR0ZHaG5pZTJ5QlNqbTRyUHV1YkVHcDFoZUVmd3pYK1ZramR5Zncx?=
+ =?utf-8?B?cHhiTDcwbW1DZi9MR2g3aUw0cERKZi8yUUVGdXUvdklRUTNkaCs4SXNBaWZC?=
+ =?utf-8?B?RWduOGFUVkplUnpiT1dBSE8vWmpNdVlXZWdWWWM1dkJSYVZsZlY1bVZKek1x?=
+ =?utf-8?B?T09KR2drSHk0QWtUOTNiSCtNMGlvd2RjQTNhQlJkYWZLTm5Rakc5cjQ1bVVG?=
+ =?utf-8?B?YnN3WjJrNitXV3pEYmxWZ3pGU2dmQWNaSmpwNnUxWnhhN0FrNUdGZmcxYVFj?=
+ =?utf-8?B?MmgrZ1FPYXozMGJHRVYreWVES2xvRnZIdzczL0lnazdtaG0vdCtoMmdCN3Ra?=
+ =?utf-8?B?OGJxdlJ0aXZJT1laOUtGdTRaTFczRWsrQ3lNUk83MXBkTnkralY1SGE2NDNM?=
+ =?utf-8?B?Vkp2WjNnVDV6bnRoWkszZmtGNzFFNnVlNUtJd09FRlRNZGMxT25XcWVSMzZr?=
+ =?utf-8?B?aUJnUDV5WEN2SkFlbVZOUWdjNzdBTUkwN3RUYmphUjAvcFc2M2JISzZyUEw3?=
+ =?utf-8?B?WlgvZUk4aitHLy83ZFhxR2xxNzRXbFRYYkx4UnBBZlBPOFhhOTFNOWdFZFJa?=
+ =?utf-8?B?ZXh1alhCL3R4WkpqM3hpK0VWSHp1RkhQdmNFdjVxMUowM05DK3BWR1NZQlZ3?=
+ =?utf-8?B?VnoyWGhqQ3I5eWFzVWZuN1FOblJlTHhPRHJnVnZsOTd1L25NOU0wVXVkczFo?=
+ =?utf-8?B?V3IzWWN5YzA1YVZlRWc5eXlkZlFMUm84SjM2UVM4bzVkQ0JBZUZHWkhFNkNt?=
+ =?utf-8?B?c2g2Qm0venJrbHB6cWx3NEUxN3ZXWTVhUnk3QzZDUEJTZ25XbXRyc0NDaHor?=
+ =?utf-8?B?TW9hRGdSR25qeVk5ZzVMbGxMM2s0T2JvZUtCRzZlaktqWVlvZEFJSStUZkxO?=
+ =?utf-8?B?NFRtRHRCSDNPaHJCNDBPOG1FNDBTSEgvRU5pU1BuR1NRSm1EYWdtOS9OaHMw?=
+ =?utf-8?B?ZXRZRk1BRTNNN1VIa1A0ZTRGYmJTT21rUFAwK2VXaXkyaVl1cVVEOXg1QWQ4?=
+ =?utf-8?B?eWpRU2tSZGFPLzVJYjdSMHBENmltTDBVdG5yNjRNczhHV3QwdEpULzZKdHIw?=
+ =?utf-8?B?TVVkenEvaXZHMmlIQzEwMGZ6YzNhcEovTlhJVmcyVGVESnlZa3oxblRYUFhx?=
+ =?utf-8?Q?An2+eg8i7YZ9LhaRWab5WVdW4VZJjisXFR+4+7J?=
+X-OriginatorOrg: silabs.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: bfc93fb3-a266-4aa2-225f-08d98807a23e
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR11MB5657.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Oct 2021 13:54:22.0553
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: Wt19S5bBwQYK+loR/03QnJT+FemsDJodLINigxbDjl/nhGBU6i4L61K1R6KYEBb+qHnkg/IaCRQdT0OSaREA4Q==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB5643
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 2 Oct 2021 at 22:44, Dmitry Osipenko <digetx@gmail.com> wrote:
->
-> 01.10.2021 15:32, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> >> +static __maybe_unused int tegra_clock_pm_suspend(struct device *dev)
-> >> +{
-> >> +       struct tegra_clk_device *clk_dev =3D dev_get_drvdata(dev);
-> >> +
-> >> +       /*
-> >> +        * Power management of the clock is entangled with the Tegra P=
-MC
-> >> +        * GENPD because PMC driver enables/disables clocks for toggli=
-ng
-> >> +        * of the PD's on/off state.
-> >> +        *
-> >> +        * The PMC GENPD is resumed in NOIRQ phase, before RPM of the =
-clocks
-> >> +        * becomes available, hence PMC can't use clocks at the early =
-resume
-> >> +        * phase if RPM is involved. For example when 3d clock is enab=
-led,
-> >> +        * it may enable the parent PLL clock that needs to be RPM-res=
-umed.
-> >> +        *
-> >> +        * Secondly, the PLL clocks may be enabled by the low level su=
-spend
-> >> +        * code, so we need to assume that PLL is in enabled state dur=
-ing
-> >> +        * suspend.
-> >> +        *
-> >> +        * We will keep PLLs and system clock resumed during suspend t=
-ime.
-> >> +        * All PLLs on all SoCs are low power and system clock is alwa=
-ys-on,
-> >> +        * so practically not much is changed here.
-> >> +        */
-> >> +
-> >> +       return clk_prepare(clk_dev->hw->clk);
-> > I am trying to understand, more exactly, what you intend to achieve
-> > with the clk_prepare() here. It looks a bit weird, to me. Can you try
-> > to elaborate a bit more on the use case?
->
-> The Tegra GENPD driver enable/disable clocks when domain is turned on.
-
-Okay. I noticed that in tegra_genpd_power_on(). And the same clocks
-are enabled/disabled also in tegra_genpd_power_off(), when powering
-off the PM domain.
-
-So I guess the problem kind of exists for tegra_genpd_power_off() too?
-
-> This can't be done during early system resume, when domains are getting
-> turned on by the drivers core, because when clock is enabled, it's
-> getting prepared (RPM-resumed) and this preparation fails because
-> performance state of the clock goes up and it doesn't work during the
-> early resume time since I2C, which applies the state to hardware, is
-> suspended and can't work at that early time.
-
-This sounds complicated and I still don't quite follow all of it, sorry.
-
-So, tegra_genpd_power_on() gets called from genpd_resume_noirq(), when
-the first device of the attached devices to genpd gets resumed. And
-vice versa for tegra_genpd_power_off() and genpd_suspend_noirq().
-
-Are you saying that trying to enable/disable clocks from
-tegra_genpd_power_on|off() in these paths doesn't work, because it
-would also require the performance state to be changed, which would
-fail because the I2C bus/driver is suspended?
-
->
-> Secondly, Tegra has arch-specific low level assembly which touches
-> clocks during last phase of system suspend and in the beginning of
-> resume. Hence, clocks should stay prepared during suspend just because
-> technically clock should be prepared before it can be enabled.
-
-So the low level code is gating and ungating the clock behind the back
-of the clock driver then? Why is that done like that, more exactly?
-
->
-> > Is this rather about making sure that the clock's corresponding PM
-> > domain stays powered on during system suspend? In that case, I think
-> > there may be an alternative option....
-> >
->
-> This is not about domain staying powered on, this is about keeping the
-> performance state of the domain high during suspend.
-
-Right, so the PM domain managed in tegra_genpd_power_on|off() can
-still be powered on/off, as long as the clock remains ungated?
-
-Kind regards
-Uffe
+RnJvbTogSsOpcsO0bWUgUG91aWxsZXIgPGplcm9tZS5wb3VpbGxlckBzaWxhYnMuY29tPgoKQWRk
+IFNpbGFicyBTRElPIElEIHRvIHNkaW9faWRzLmguCgpOb3RlIHRoYXQgdGhlIHZhbHVlcyB1c2Vk
+IGJ5IFNpbGFicyBhcmUgdW5jb21tb24uIEEgZHJpdmVyIGNhbm5vdCBmdWxseQpyZWx5IG9uIHRo
+ZSBTRElPIFBuUC4gSXQgc2hvdWxkIGFsc28gY2hlY2sgaWYgdGhlIGRldmljZSBpcyBkZWNsYXJl
+ZCBpbgp0aGUgRFQuCgpTaWduZWQtb2ZmLWJ5OiBKw6lyw7RtZSBQb3VpbGxlciA8amVyb21lLnBv
+dWlsbGVyQHNpbGFicy5jb20+Ci0tLQogaW5jbHVkZS9saW51eC9tbWMvc2Rpb19pZHMuaCB8IDcg
+KysrKysrKwogMSBmaWxlIGNoYW5nZWQsIDcgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBhL2lu
+Y2x1ZGUvbGludXgvbW1jL3NkaW9faWRzLmggYi9pbmNsdWRlL2xpbnV4L21tYy9zZGlvX2lkcy5o
+CmluZGV4IGE4NWM5ZjBiZDQ3MC4uNDgzNjkyZjMwMDJhIDEwMDY0NAotLS0gYS9pbmNsdWRlL2xp
+bnV4L21tYy9zZGlvX2lkcy5oCisrKyBiL2luY2x1ZGUvbGludXgvbW1jL3NkaW9faWRzLmgKQEAg
+LTI1LDYgKzI1LDEzIEBACiAgKiBWZW5kb3JzIGFuZCBkZXZpY2VzLiAgU29ydCBrZXk6IHZlbmRv
+ciBmaXJzdCwgZGV2aWNlIG5leHQuCiAgKi8KIAorLyoKKyAqIFNpbGFicyBkb2VzIG5vdCB1c2Ug
+YSByZWxpYWJsZSB2ZW5kb3IgSUQuIFRvIGF2b2lkIGNvbmZsaWN0cywgdGhlIGRyaXZlcgorICog
+d29uJ3QgcHJvYmUgdGhlIGRldmljZSBpZiBpdCBpcyBub3QgYWxzbyBkZWNsYXJlZCBpbiB0aGUg
+RFQuCisgKi8KKyNkZWZpbmUgU0RJT19WRU5ET1JfSURfU0lMQUJTCQkJMHgwMDAwCisjZGVmaW5l
+IFNESU9fREVWSUNFX0lEX1NJTEFCU19XRjIwMAkJMHgxMDAwCisKICNkZWZpbmUgU0RJT19WRU5E
+T1JfSURfU1RFCQkJMHgwMDIwCiAjZGVmaW5lIFNESU9fREVWSUNFX0lEX1NURV9DVzEyMDAJCTB4
+MjI4MAogCi0tIAoyLjMzLjAKCg==
