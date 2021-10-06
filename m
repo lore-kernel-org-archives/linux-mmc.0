@@ -2,84 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A489C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 13:29:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EDE3C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 15:02:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7400C61151
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 13:29:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6877461186
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 15:02:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238111AbhJFNbJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Oct 2021 09:31:09 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:22928 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231565AbhJFNbH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 09:31:07 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1633526955;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=wzQmzBUEihVkKDDjIOOM5bJWBT7h0GK8QC/ZlgQykqs=;
-        b=i5tP3pinYcf1oGJX/YTXOhc9Qd4zocU+QtT6ShOwAvhTo8EQnHPfvgTQgbeKX3tws2AOOW
-        rUrVotiVTv7zWfiguSCZp5ExD9ruQt3egvn/64TwY0W6Yh7iFYxZ61w9zSJyHz9iRfwigq
-        0rvBU76iZ6pi/epe83A/Uhc5RVuOJ9g=
-Received: from mail-qk1-f198.google.com (mail-qk1-f198.google.com
- [209.85.222.198]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-210-xoNG1RTENGu601nTpsalNw-1; Wed, 06 Oct 2021 09:29:14 -0400
-X-MC-Unique: xoNG1RTENGu601nTpsalNw-1
-Received: by mail-qk1-f198.google.com with SMTP id w2-20020a3794020000b02903b54f40b442so2219000qkd.0
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Oct 2021 06:29:14 -0700 (PDT)
+        id S238226AbhJFPEm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Oct 2021 11:04:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45588 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239112AbhJFPEm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 11:04:42 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FEABC061746
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Oct 2021 08:02:49 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id y15so11798975lfk.7
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Oct 2021 08:02:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=R4UxXX9KG4xRnVHb1QP83F57gPSySRp26PaptBp9W+E=;
+        b=c2A8rXvYzl1XNvZe6X4yZXQ3DLXLxHVa95fIeuj9rBZ45m5+8eQqA0RVm1pT9i5zOe
+         IP0uAHiT77O47MvBhw0735+i5MKafDMF8rm3XY3+GiY3sm1DHFCDtLS1irEQ7rjem6PH
+         z6EPzmh3XFxdiXENPbjV4F/Nf8XkcT+AS3X7bYULQ8nuQH/96YZs/87VtOMKIKoncsmB
+         wA9+TSN42zh2xgxKchxfLbMFWohuQcgnEa0N5aqbEa5qFEoqSh5C/B6sWPtyoLrUx+Wb
+         saDrRNUR/xjybJOgghpZJTkrVZHaWjg59TzFmav3zbSgFAtoov70UgIuygPiykA8TN7O
+         vaig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=wzQmzBUEihVkKDDjIOOM5bJWBT7h0GK8QC/ZlgQykqs=;
-        b=4FOhi52w9pMTJ4U9dQBvqahYeUjz+A6JfqolgwxXq184w85PajSEGn4R+FEzh0yTzV
-         hhM7pEZ9kZzG8VaH0AcpR33LWI/d62jcHW5V1hGIQ+h+Y3sMY2j1xpxtr05dvGHvpkOf
-         7KGGZC2Sn+fzaVlSNytHMNUedSWn+7NnY/Hxl9Gx6ClFw3ROwhOUgSx2DBeMRQ2maGNE
-         eh4t8TPhErC8B+TY+BZNYCCKXGRSReXQsv0+mMJg324PdwIIscDvblvcWCMFKv8RaM3O
-         vVlLivnpKXopJinJ6s7SapXZrdUT/LcBJvTF+ZMfZN7wsAmXBkMY9rTb71fDjI51Boeg
-         dDKw==
-X-Gm-Message-State: AOAM531PXYK4JGS1VHLoIRAw5N0IZcHYuTlx2V8Q1CNu4Oc07qPxPFlK
-        5Nzy8DFJTzi2w92vIl6WfPjfEz1HpLexQw0fDCJqkCyw6o0sEqBoZcXAXJrV1Z9l5F+gPW0U3WX
-        o/MxN3h/pHFxOprUYmwc=
-X-Received: by 2002:ac8:88:: with SMTP id c8mr7511089qtg.12.1633526953779;
-        Wed, 06 Oct 2021 06:29:13 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJw/8v3wqkJ1Y5E44+yD/hKM+9kQgCyFGq7beETeqK37nW1j+ndjaNNfhnHZDIHaVp6v5rSBYQ==
-X-Received: by 2002:ac8:88:: with SMTP id c8mr7511066qtg.12.1633526953614;
-        Wed, 06 Oct 2021 06:29:13 -0700 (PDT)
-Received: from localhost (pool-68-160-176-52.bstnma.fios.verizon.net. [68.160.176.52])
-        by smtp.gmail.com with ESMTPSA id z6sm950959qke.24.2021.10.06.06.29.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Oct 2021 06:29:13 -0700 (PDT)
-Date:   Wed, 6 Oct 2021 09:29:12 -0400
-From:   Mike Snitzer <snitzer@redhat.com>
-To:     linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>
-Cc:     Satya Tangirala <satyaprateek2357@gmail.com>, dm-devel@redhat.com,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v4 4/4] blk-crypto: update inline encryption documentation
-Message-ID: <YV2kqFA3y3qo8ls/@redhat.com>
-References: <20210929163600.52141-1-ebiggers@kernel.org>
- <20210929163600.52141-5-ebiggers@kernel.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=R4UxXX9KG4xRnVHb1QP83F57gPSySRp26PaptBp9W+E=;
+        b=ZJNCA0MPCZfIanpS4qOpw/Lz5S86a26tpyWG960i4rTd2H/kXS7moJAWLUku2zlKjx
+         zVVpPJQNmNcOAw0+nf43MGwuqkDPdJqQgeCyTPTz9NFLpf5oA8X9Dj8t0hgkWFaKJVZT
+         QgnllgJwVb0MEqVGyACru0RIda1wWwaQLSjObubs+JEn5UoDnWKf0bLQVxk6HwPs8AQl
+         f5wLQN5FoFSmcIPcjBvp5+ttBda/Wq7KPvih6Kk42DvgmMIa1OSJla1zfE6Uu3W8CyEk
+         x0IvvgFn35P9sTaq6mG794GzN+rcftCJDFLpsXprzOH7qj2KCifDQT026WKGdy4bvoiE
+         jpJA==
+X-Gm-Message-State: AOAM530nM1A+4Gwvf9iW1aJgiJQtGTb8OXtMCXDqn6QdnJNlDAwtoMWr
+        CPdpT08EGzNEmCRFUDvwnvosUOYOnD6m4zZgDMYzaA==
+X-Google-Smtp-Source: ABdhPJwzkIcdOlAvbcG0LoR5b5rYqJwoDDhoAr9cF2QmPGsGTRkgcfVrKXVLKuhHnG+954Nczl0s2lh35/naoTki6mY=
+X-Received: by 2002:a2e:85c2:: with SMTP id h2mr30410582ljj.367.1633532563483;
+ Wed, 06 Oct 2021 08:02:43 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210929163600.52141-5-ebiggers@kernel.org>
+References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
+ <20210930170646.cffsuytdpa72izbh@pali> <CAPDyKFoaw8rdPRdjgAJz3-T2_fS1iA9jtonbwZAYE0npUNfOQQ@mail.gmail.com>
+ <149139701.nbvtKH4F0p@pc-42>
+In-Reply-To: <149139701.nbvtKH4F0p@pc-42>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 6 Oct 2021 17:02:07 +0200
+Message-ID: <CAPDyKFr62Kykg3=9WiXAV8UToqjw8gj4t6bbM7pGQ+iGGQRLmg@mail.gmail.com>
+Subject: Re: [PATCH v7 08/24] wfx: add bus_sdio.c
+To:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>
+Cc:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        driverdevel <devel@driverdev.osuosl.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        DTML <devicetree@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 29 2021 at 12:36P -0400,
-Eric Biggers <ebiggers@kernel.org> wrote:
+On Tue, 5 Oct 2021 at 10:14, J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@sil=
+abs.com> wrote:
+>
+> On Friday 1 October 2021 17:23:16 CEST Ulf Hansson wrote:
+> > On Thu, 30 Sept 2021 at 19:06, Pali Roh=C3=A1r <pali@kernel.org> wrote:
+> > > On Thursday 30 September 2021 18:51:09 J=C3=A9r=C3=B4me Pouiller wrot=
+e:
+> > > > On Thursday 30 September 2021 12:07:55 CEST Ulf Hansson wrote:
+> > > > > On Mon, 20 Sept 2021 at 18:12, Jerome Pouiller
+> > > > > <Jerome.Pouiller@silabs.com> wrote:
+> > > > > >
+> > > > > > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> > > > > >
+> > > > > > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silab=
+s.com>
+> > > > > > ---
+> > > > > >  drivers/net/wireless/silabs/wfx/bus_sdio.c | 261 +++++++++++++=
+++++++++
+> > > > > >  1 file changed, 261 insertions(+)
+> > > > > >  create mode 100644 drivers/net/wireless/silabs/wfx/bus_sdio.c
+> > > > > >
+> > > > > > diff --git a/drivers/net/wireless/silabs/wfx/bus_sdio.c b/drive=
+rs/net/wireless/silabs/wfx/bus_sdio.c
+> > > > >
+> > > > > [...]
+> > > > >
+> > > > > > +
+> > > > > > +static int wfx_sdio_probe(struct sdio_func *func,
+> > > > > > +                         const struct sdio_device_id *id)
+> > > > > > +{
+> > > > > > +       struct device_node *np =3D func->dev.of_node;
+> > > > > > +       struct wfx_sdio_priv *bus;
+> > > > > > +       int ret;
+> > > > > > +
+> > > > > > +       if (func->num !=3D 1) {
+> > > > > > +               dev_err(&func->dev, "SDIO function number is %d=
+ while it should always be 1 (unsupported chip?)\n",
+> > > > > > +                       func->num);
+> > > > > > +               return -ENODEV;
+> > > > > > +       }
+> > > > > > +
+> > > > > > +       bus =3D devm_kzalloc(&func->dev, sizeof(*bus), GFP_KERN=
+EL);
+> > > > > > +       if (!bus)
+> > > > > > +               return -ENOMEM;
+> > > > > > +
+> > > > > > +       if (!np || !of_match_node(wfx_sdio_of_match, np)) {
+> > > > > > +               dev_warn(&func->dev, "no compatible device foun=
+d in DT\n");
+> > > > > > +               return -ENODEV;
+> > > > > > +       }
+> > > > > > +
+> > > > > > +       bus->func =3D func;
+> > > > > > +       bus->of_irq =3D irq_of_parse_and_map(np, 0);
+> > > > > > +       sdio_set_drvdata(func, bus);
+> > > > > > +       func->card->quirks |=3D MMC_QUIRK_LENIENT_FN0 |
+> > > > > > +                             MMC_QUIRK_BLKSZ_FOR_BYTE_MODE |
+> > > > > > +                             MMC_QUIRK_BROKEN_BYTE_MODE_512;
+> > > > >
+> > > > > I would rather see that you add an SDIO_FIXUP for the SDIO card, =
+to
+> > > > > the sdio_fixup_methods[], in drivers/mmc/core/quirks.h, instead o=
+f
+> > > > > this.
+> > > >
+> > > > In the current patch, these quirks are applied only if the device a=
+ppears
+> > > > in the device tree (see the condition above). If I implement them i=
+n
+> > > > drivers/mmc/core/quirks.h they will be applied as soon as the devic=
+e is
+> > > > detected. Is it what we want?
+> > > >
+> > > > Note: we already have had a discussion about the strange VID/PID de=
+clared
+> > > > by this device:
+> > > >   https://www.spinics.net/lists/netdev/msg692577.html
+> > >
+> > > Yes, vendor id 0x0000 is invalid per SDIO spec. So based on this vend=
+or
+> > > id, it is not possible to write any quirk in mmc/sdio generic code.
+> > >
+> > > Ulf, but maybe it could be possible to write quirk based on OF
+> > > compatible string?
+> >
+> > Yes, that would be better in my opinion.
+> >
+> > We already have DT bindings to describe embedded SDIO cards (a subnode
+> > to the mmc controller node), so we should be able to extend that I
+> > think.
+>
+> So, this feature does not yet exist? Do you consider it is a blocker for
+> the current patch?
 
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Rework most of inline-encryption.rst to be easier to follow, to correct
-> some information, to add some important details and remove some
-> unimportant details, and to take into account the renaming from
-> blk_keyslot_manager to blk_crypto_profile.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+Yes, sorry. I think we should avoid unnecessary hacks in SDIO func
+drivers, especially those that deserve to be fixed in the mmc core.
 
-Reviewed-by: Mike Snitzer <snitzer@redhat.com>
+Moreover, we already support the similar thing for eMMC cards, plus
+that most parts are already done for SDIO too.
 
+>
+> To be honest, I don't really want to take over this change in mmc/core.
+
+I understand. Allow me a couple of days, then I can post a patch to
+help you out.
+
+>
+> --
+> J=C3=A9r=C3=B4me Pouiller
+
+Kind regards
+Uffe
