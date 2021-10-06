@@ -2,135 +2,267 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B597C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 12:44:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52EDDC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 12:45:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 52E7761163
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 12:44:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37CDF60F23
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 12:45:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238545AbhJFMqQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Oct 2021 08:46:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41240 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238471AbhJFMqP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 08:46:15 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DE3BC061749
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Oct 2021 05:44:23 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id n8so9747192lfk.6
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Oct 2021 05:44:23 -0700 (PDT)
+        id S238557AbhJFMr3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Oct 2021 08:47:29 -0400
+Received: from mail-eopbgr1400094.outbound.protection.outlook.com ([40.107.140.94]:47988
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S238087AbhJFMr2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 6 Oct 2021 08:47:28 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=juiaulFGbvEpbYwssHlNxgwwklCGkmHZA7PG46EAW56CXSWZ1/bVBQAfhYArPaiNn1Sl/t3Ch17uUFaykItk1klJoh5eOK+8AAjhTHNK+NKZqJM+mj/18g3oD6YYV1dQITX5NEkOWUEmbBNj5Bk22QaVKa4yCDFfJK4iTramFwvheR39kbFaOmaCPRFjjctzugN7U6IAGYR6ztMrPKhTlKvJ5UbvQ5QuyBORQ19EGGGNA2bUG5+xEL7P1GZKWDk5b13eqhzeofqQAmvtZ0DjuLbAmLUDIxG6qJCtP9f92hj6XikV8jf5yNUlx55N/H9iVqSMysEcn2jkKSzSULMJnA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Mf2oQVjuvGOy9DKBNCAqeqZJW1odrHZ8enkdK1DbURE=;
+ b=Ak2HtRij/0B5m+F73n+l5/4aSlZlNw+MGNg3ccsw2ir/BdiaThdAn2kWkBJgYNTOIpeghWg1lhHRcx3yLOvUc/YDJkpALrPkFTNKToln3ckIEcy0GLbqgmsU/sbV51jGtJL9QChUnS/PmlqPKn2jqKUor7Jio6I1oPfx45yEnMJwmtVhy5oF21JY+HMjWX1csKDg4SSbpwP7ZfbULAXDJj5S655+ZFbX0+2PSpb22hQxkNKmRtxGhea/651aOmfLhWMVXsohqr+e2OTDFYbZXNn1eLgh4ZhEzf3mHKntQu7vtGVHuuj7irBTPPLzY4usx3q6+hRtnb08QdiRdPYO6w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=ZKqaWxUs3sgD4tdQBsKfjQHFZ50A1AY57zWO3HzEaz0=;
-        b=p7O7r3g85OL9vVkRCa3Pfl3C5X1Jfj9eXjPMKWVLsEhkWogxYEcClklxYGVWQq8A2P
-         lEHLpYxRHgQW4uXVDoPHoUArsfuteRAt1b6CIA3FJ+EjNOe5zUT+AAgMFYGSzljSZ6TO
-         KoFs69gM6EHycwixuzD1lK9+dV8Me5UuqmZ9rtY57gAwYRrE057gkoCf0Uoi9LCBgyR9
-         7atsGho2QXhE+dDu8BmXr5Ur/SWTeiQD4sTYuNaaOKKOVXapsZOBOVO1z6VNsE4WUUbL
-         lGzoNXh0xJAquXu3k8a0vYJYpOb6yc9cyGw4+SDPKUnM/cHV804+EyEdWXyu6r4B41NO
-         0G0w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=ZKqaWxUs3sgD4tdQBsKfjQHFZ50A1AY57zWO3HzEaz0=;
-        b=4mVcBbMfDVjFs9llgQnQ7qFe4oos6W7cl/vS08McaFWoIzkPRMS07rMjk+nLul4DFZ
-         XbyxAphApqGY656xP3BeOf+/5cZgNM9GBOZk9e3CIwO7gAXW26ufQvJQ2DsDEoEs2F6I
-         8waNS0yKdyGidJX3enOuUL0OhHMJC9Tps2ltD87Gj2EscWAzLi0Cy/sCsdFOeewnuwzW
-         eRbxxUNkqVEAWEySJRe1/iSOSyQhSLaHBnWaaW3CLgIT3NsNU0+8BtboreUpdDUEh9BM
-         Oyx8PVaXGoGmUY9Ldme26X7iSB59SJru1jf7+6Ztp1Jj/TzekG0ucpfSp2Yt7FqX7wDo
-         DAiw==
-X-Gm-Message-State: AOAM532Srd5tQ9Nm7Hlixg2B4XKsks5VwC9qd2PN7lGVETg3wTf3FelA
-        CFkpRbMFNVhdkhsqBS0OStCe6F7nApoAmQzRDC+6lQ==
-X-Google-Smtp-Source: ABdhPJyXxeHpfLtxmaaabzboN40a7mbS25hsa4pgTQ9RD1C7UcaYr5BpIOQmIiI1EQ4OQX0iO/sLUK+eeOQGXFL/ZtE=
-X-Received: by 2002:ac2:4157:: with SMTP id c23mr9458293lfi.184.1633524257867;
- Wed, 06 Oct 2021 05:44:17 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-7-digetx@gmail.com>
- <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com>
- <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com> <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
- <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com> <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
-In-Reply-To: <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 6 Oct 2021 14:43:41 +0200
-Message-ID: <CAPDyKFr2-f1wM+6jF9vWJ-Nq80Zg1Z3qFP6saULOrBi1270HGw@mail.gmail.com>
-Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-Content-Type: text/plain; charset="UTF-8"
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Mf2oQVjuvGOy9DKBNCAqeqZJW1odrHZ8enkdK1DbURE=;
+ b=Sl8Frh0kDT3MTlyfwAr3Vu+UZnU5FMuNaIPjWPfZZb4yNceskyv8rnLZtzsQ7shOklgyU563gcbtdRxO8BbRK5izv7e3a2weVXbe8/vEBM//67A1lLpnxRFRPrqo4G9qDZqDFxvfDdzbHHURpzBbL/Ydfp7JGkh8S3AkMirmXnc=
+Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com (2603:1096:604:bb::5)
+ by OSBPR01MB4696.jpnprd01.prod.outlook.com (2603:1096:604:7d::18) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4566.17; Wed, 6 Oct
+ 2021 12:45:33 +0000
+Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com
+ ([fe80::9ca6:1cf:5:9fc1]) by OS0PR01MB5922.jpnprd01.prod.outlook.com
+ ([fe80::9ca6:1cf:5:9fc1%3]) with mapi id 15.20.4587.018; Wed, 6 Oct 2021
+ 12:45:32 +0000
+From:   Biju Das <biju.das.jz@bp.renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: RE: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old
+ SDHIs
+Thread-Topic: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old
+ SDHIs
+Thread-Index: AQHXmlNVs4LNmIzCAkCmNj25qUqILavE3GMAgAFNm3A=
+Date:   Wed, 6 Oct 2021 12:45:32 +0000
+Message-ID: <OS0PR01MB59224A73CA29E3D07CD2F0C486B09@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+References: <20210826082107.47299-1-wsa+renesas@sang-engineering.com>
+ <OS0PR01MB5922BA32F4FB02E3390781DD86AF9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+In-Reply-To: <OS0PR01MB5922BA32F4FB02E3390781DD86AF9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 6b6e8a29-89c7-4fb2-9aff-08d988c72fb5
+x-ms-traffictypediagnostic: OSBPR01MB4696:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <OSBPR01MB469670D149DEECD6D9F6E71D86B09@OSBPR01MB4696.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:10000;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: jBxAAmQLLI7RRpE8ytyyqSHYkicOQZ19qcUkEaYPiR8r6vG3Hrf+bUeOU04atTugHYoZYYt4Jm3yZ890/EHw4KS9z2OV9shW5SCg2d1tuCIwDF56P8t2N+fFpsEnBj+C4webvSZydPQS0AsAd9grskkTZJXY6zIY+fvpVz70tew6nr1bAmenT6JnX/enZ+FPODeCR7ZyPCfvWp1mzZoWwjA7rkxXbp9CAJz8cssKGHcLS4bUBOaR9R++2bmw6Yg1eWaHZMu6B+JmYqASyZoo2QFIJS1F5ek9Mw6oEJNVP9ggRWYM2uX7AAzXqRy9mInsKCTqrTriLGZfyHEcuyxkHlcgoFKtvxef2u2eXrLc7DmspCBXIGvDY6b6x086nYOAjhlrOxRJH3tORmQhbp6AJ3m844HRvfvMRHg99XmvKlf7dhwC60++uFNSxoZSBkFGq5zSfs5syHWvNo13jN1ij/PTFcNSM4pRnrOb8/sjWVHzmeezLYbRzA9Tps5o83VZhCm6gjBo8nxRNeOrC7Op7EEQeT1ur5I31Ila7HmVwDDkesMfHl+RU3ePwf7MIR2xIukvDw+aZXc6hasnCUJrcSD75YO8cxW2xioZfrLbtUKWdP4S/bCrQAhMkJAt7P+dp2BQ63HrFCUZoG/M9IX0VUvX87EfVr/CMsaf6oJ4NeBSc5R8uJXhDnxf26JMdci0KvXCgnj8OJY2fa3r38s66g==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OS0PR01MB5922.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(64756008)(71200400001)(316002)(8676002)(508600001)(66946007)(38100700002)(66446008)(66476007)(55016002)(76116006)(4326008)(38070700005)(122000001)(66556008)(186003)(33656002)(54906003)(86362001)(2906002)(26005)(9686003)(5660300002)(7696005)(8936002)(6506007)(83380400001)(52536014)(53546011)(110136005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?hXVklvI3XGeZzHv2Kuud83FxBEqlFD1MBAh4Doxr1P+uVt7mcWqSXchJkQuN?=
+ =?us-ascii?Q?In2dwnCuUHAv0RnodJWHxdUXqCin5tjP/x9IZVpAhoRgyLRBbtN+pkopLEHw?=
+ =?us-ascii?Q?pCQr7bmP9xLw1pPjc637BCA1hBzU+kcb7LPVejPaSEdKEJV2lqdcX6K25B2J?=
+ =?us-ascii?Q?3KzvWkU8T5yKNF7cstUy3nhIsXSgrr35lh2wYPXUHZzEzDTW09wMNEJIBdVV?=
+ =?us-ascii?Q?eNNi5zTKTZS9OhSKraBrRY9IcYzWGAUPzVAphpZig66mLjTRaFrJYNPWFZF6?=
+ =?us-ascii?Q?pIQLmZEMIZckr8CG6b2dX2M4+gxZaBJjfheOdTLfEEqFPVAqMkmrpaIe70hW?=
+ =?us-ascii?Q?XF51ol/bTjdP7RiqGgLqg9LJ/5BB0/ke0c5Z6OImtFpbI+IQBu9fYZFMQQLT?=
+ =?us-ascii?Q?vyFXIpV7lVDreDXeyBUwwJQCAQW7QSzxJpgS1hHNqf5LaSqhoTiDN2feNKj8?=
+ =?us-ascii?Q?AT4PUxNXV+jkQUV7bqYjmQEcExV6zeqhte153XnjAZKyAAT9aOqS9pg/Pb23?=
+ =?us-ascii?Q?winBfYdZk7drU9yTvfy83djFSC/Byhk8S4ovSxQ1/zgSq4UDh8o7y2E7Ngae?=
+ =?us-ascii?Q?oVBbcjMmL65B25l51VkS2YrJClyqdf9t/nizjVKiDpkradebVnnh6+OLBzGK?=
+ =?us-ascii?Q?h3wEyuNLg0t4tYZkgdcboOPkhjInyy95pL7ZdQgIm4Q5ruJl5OOL8ODTIzOR?=
+ =?us-ascii?Q?fzHWHxZHrSmBBCEPmNUk83oZL9R5HTeGaXUy5/ki3in6BTtgUqdaEnjjiIFn?=
+ =?us-ascii?Q?kKCkPba5ME5BRiE+zcJ5GkPqmyJ6wN0PdoXq2EUOuOXdI5RkG3pxZlbKcVMY?=
+ =?us-ascii?Q?Sastot1j62zFmQSo/2Tpaj7Qc46mc1Qp1Q5co5DlzTbsu+dcr44+pYcpeEHU?=
+ =?us-ascii?Q?VL2RSxg8tyH2VaO2jCRdyns6zx4GxIkswHOrtDJ7T9fx70ByCZrQ+ajhLHM0?=
+ =?us-ascii?Q?ZzEUJ3GjtqUXrRpK6DgNHk+VpeYQ7/0FrTLT7Y1U7xY4seikwCo2JRtCSDWv?=
+ =?us-ascii?Q?03VtBvkbx6u2OXsLl0mw4QkhPMLykXvNzRwXsjm0gKIgfrnj9OdmGK1pbbnc?=
+ =?us-ascii?Q?3OV8lr0YFENIgkGKUmxFVXf600Lf5t8l96hZacJArvj0pPJv7DXPsvhR3cn9?=
+ =?us-ascii?Q?lVb88lLW/Cmav+iLSKkZgUCdqfhlB1iSN7fur9zsVqxbBzcfhvdjQGhUFeL3?=
+ =?us-ascii?Q?b9IYWozIC+DAJcGyaeBkI87NryrcEWHjZJLvq4AIDZ8ylRM1SMQycK7zjLW/?=
+ =?us-ascii?Q?yNNRaz7/vr0m/CvJB8sjq83hWpAcQAKclThOSFrEySfJPPhUSwSTdRutspln?=
+ =?us-ascii?Q?z7Q=3D?=
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: OS0PR01MB5922.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6b6e8a29-89c7-4fb2-9aff-08d988c72fb5
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Oct 2021 12:45:32.5903
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: dEumjH2MHVXcLHCZFknkGOOcXspe6kQv3z+vg6p5nc8+if8PSFWR32cXCIJwde+hLxSuJ+8OfaEVqcLM3vl4uDoV/AZgMCeMTWa8Zk7U94M=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSBPR01MB4696
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 6 Oct 2021 at 00:43, Dmitry Osipenko <digetx@gmail.com> wrote:
->
-> 06.10.2021 01:19, Dmitry Osipenko =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> ...
-> > I reproduced the OFF problem by removing the clk prepare/unprepare from
-> > the suspend/resume of the clk driver and making some extra changes to
-> > clock tree topology and etc to trigger the problem on Nexus 7.
+Hi All,
+
+I have reproduced this issue on RZ/G2M pin by configuring cd using SDHI ins=
+tead of gpio irq.=20
+After applying the patch card detection/removal works as expected.
+
+Looks like the issue is present on R-Car Gen3 boards with cd as pin(ie, car=
+d detection/removal using SDHI IRQ).
+I will post a patch to fixing this issue.
+
+Please find the logs
+
+With IRQ fix on reset function
+-----------------------------------
+    3.090956] renesas_sdhi_internal_dmac ee100000.mmc: mmc1 base at 0x00000=
+000ee100000, max clock rate 200 MHz
+[    4.855266] mmc1: new ultra high speed SDR104 SDHC card at address aaaa
+[    4.865396] mmcblk1: mmc1:aaaa SP32G 29.7 GiB
+[    4.885474]  mmcblk1: p1
+
+
+root@hihope-rzg2m:~# [   60.220648] mmc1: card aaaa removed
+[   61.613520] mmc1: new ultra high speed SDR104 SDHC card at address aaaa
+[   61.626103] mmcblk1: mmc1:aaaa SP32G 29.7 GiB
+[   61.647925]  mmcblk1: p1
+
+root@hihope-rzg2m:~# cat /proc/interrupts | grep ee100000.mmc
+162:       2158          0          0          0          0          0     =
+GIC-0 197 Level     ee100000.mmc
+
+
+without IRQ fix.
+-----------------
+
+renesas_sdhi_internal_dmac ee140000.mmc: mmc2 base at 0x00000000ee140000, m=
+ax clock rate 200 MHz
+
+But there is no card detection during boot.
+it is not detecting card removal/removal at all
+
+root@hihope-rzg2m:~# cat /proc/interrupts | grep ee100000.mmc
+162:          0          0          0          0          0          0     =
+GIC-0 197 Level     ee100000.mmc
+root@hihope-rzg2m:~#
+
+
+regards,
+Biju
+
+
+
+> -----Original Message-----
+> From: Biju Das
+> Sent: 05 October 2021 18:03
+> To: 'Wolfram Sang' <wsa+renesas@sang-engineering.com>; linux-
+> mmc@vger.kernel.org
+> Cc: linux-renesas-soc@vger.kernel.org; Geert Uytterhoeven
+> <geert+renesas@glider.be>; Yoshihiro Shimoda
+> <yoshihiro.shimoda.uh@renesas.com>; Geert Uytterhoeven
+> <geert+renesas@glider.be>
+> Subject: RE: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on
+> old SDHIs
+>=20
+> Hi Wolfram,
+>=20
+> On my RZ/G2L board, if I configure card detection irq from SDHI, instead
+> of card detection using gpio interrupt, then it is missing card detection
+> interrupt after reset.
+>=20
+> Just wondering, does it work on R-Car with CD irq from SDHI instead of
+> card detection using gpio interrupt?
+>=20
+> With the below changes, I am getting cd interrupts from SDHI after reset.
+>=20
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c
+> b/drivers/mmc/host/renesas_sdhi_core.c
+> index a4407f391f66..32f34de1a2a6 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -561,6 +561,8 @@ static void renesas_sdhi_reset(struct tmio_mmc_host
+> *host)
+>                 /* Unknown why but without polling reset status, it will
+> hang */
+>                 read_poll_timeout(reset_control_status, ret, ret =3D=3D 0=
+, 1,
+> 100,
+>                                   false, priv->rstc);
+> +
+> +               tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_CMD);
+>                 /* At least SDHI_VER_GEN2_SDR50 needs manual release of
+> reset */
+>=20
+>=20
+> Regards,
+> Biju
+>=20
+>=20
+> > -----Original Message-----
+> > From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > Sent: 26 August 2021 09:21
+> > To: linux-mmc@vger.kernel.org
+> > Cc: linux-renesas-soc@vger.kernel.org; Geert Uytterhoeven
+> > <geert+renesas@glider.be>; Yoshihiro Shimoda
+> > <yoshihiro.shimoda.uh@renesas.com>; Wolfram Sang <wsa+renesas@sang-
+> > engineering.com>
+> > Subject: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on
+> > old SDHIs
 > >
-> > tegra-pmc 7000e400.pmc: failed to turn off PM domain heg: -13
+> > Old SDHI instances have a default value for the reset register which
+> > keeps it in reset state by default. So, when applying a hard reset we
+> > need to manually leave the soft reset state as well. Later SDHI
+> > instances have a different default value, the one we write manually now=
+.
 > >
-> > It happens from genpd_suspend_noirq() -> tegra_genpd_power_off() -> clk
-> > -> GENPD -> I2C -> runtime-pm.
+> > Fixes: b4d86f37eacb ("mmc: renesas_sdhi: do hard reset if possible")
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > ---
 > >
-> > -13 is EACCES, it comes from the runtime PM of I2C device. RPM is
-> > prohibited/disabled during late (NOIRQ) suspend by the drivers core.
->
-> My bad, I double-checked and it's not I2C RPM that is failing now, but
-> the clock's RPM [1], which is also unavailable during NOIRQ.
+> > Geez, typical SDHI nastiness here...
+> >
+> > Geert: I think this fixes the issue you saw on Koelsch. It works fine
+> > on my Lager now at least. Can you please test and tag if all goes well?
+> > It would be great to have this in 5.14 but it definately needs Geert's
+> > confirmation first.
+> >
+> >  drivers/mmc/host/renesas_sdhi_core.c | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c
+> > b/drivers/mmc/host/renesas_sdhi_core.c
+> > index 6fc4cf3c9dce..a4407f391f66 100644
+> > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > @@ -561,6 +561,8 @@ static void renesas_sdhi_reset(struct
+> > tmio_mmc_host
+> > *host)
+> >  		/* Unknown why but without polling reset status, it will hang
+> */
+> >  		read_poll_timeout(reset_control_status, ret, ret =3D=3D 0, 1, 100,
+> >  				  false, priv->rstc);
+> > +		/* At least SDHI_VER_GEN2_SDR50 needs manual release of reset
+> > */
+> > +		sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+> >  		priv->needs_adjust_hs400 =3D false;
+> >  		renesas_sdhi_set_clock(host, host->clk_cache);
+> >  	} else if (priv->scc_ctl) {
+> > --
+> > 2.30.2
 
-Yes, that sounds reasonable.
-
-You would then need a similar patch for the tegra clock driver as I
-suggested for tegra I2C driver. That should solve the problem, I
-think.
-
->
-> [1]
-> https://elixir.free-electrons.com/linux/v5.15-rc4/source/drivers/clk/clk.=
-c#L116
->
-> Previously it was I2C RPM that was failing in a similar way, but code
-> changed a tad since that time.
-
-Alright. In any case, as long as the devices gets suspended in the
-correct order, I think it should be fine to cook a patch along the
-lines of what I suggest for the I2C driver as well.
-
-It should work, I think. Although, maybe you want to avoid runtime
-resuming the I2C device, unless it's the device belonging to the PMIC
-interface, if there is a way to distinguish that for the driver.
-
-Kind regards
-Uffe
