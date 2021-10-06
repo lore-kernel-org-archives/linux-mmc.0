@@ -2,139 +2,157 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E24BC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 02:40:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F533C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 03:49:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21A6F611CC
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 02:40:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 08CE66115B
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 03:49:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237158AbhJFCl6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Oct 2021 22:41:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44886 "EHLO
+        id S230363AbhJFDvZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Oct 2021 23:51:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229908AbhJFCl5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 22:41:57 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41FB3C061749;
-        Tue,  5 Oct 2021 19:40:06 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id t9so4046677lfd.1;
-        Tue, 05 Oct 2021 19:40:06 -0700 (PDT)
+        with ESMTP id S230261AbhJFDvY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Oct 2021 23:51:24 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D1A4C061755
+        for <linux-mmc@vger.kernel.org>; Tue,  5 Oct 2021 20:49:21 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id y15so4500910lfk.7
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Oct 2021 20:49:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:from:to:cc:references:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=jBjl2SKIDUWdGGNNCdNQzm0sXvagxduES6I98oCU5Y8=;
-        b=chv8eTFsLZvhIeL+hkzvYI0WTv6C1hQt4IbTe+2xmGQkTHoN3MvZ0Jtjaf5nJ60yH8
-         Qll610va/L7nfzXyHi9q5H18Ow+SshG+eVNj+gSdDfOq3y7RXIcXU17IFSrdKUsqMGDl
-         Bns94mjB430lIX1L+jpyb63pJy7SuBLUq2Zz5gUmkoa+ld9TdVOzDhd/itLWhWEQUYh6
-         w/ij/t35/Agn1d9bEjw9KP0FJwCJbX0TIcoQQ9rohRXEEbOoZw69in/qeyGnWiJ4R/RF
-         +DxmiKiv3q4SpB4Czd0/XkoQ7itREY7Ra4KeHWPZGr13fZLG2O0bWXrsMD3HPPH5buvd
-         Yn0g==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=l6uSTYKI1iDVQ1/5MVV35eiuQr3oTGL96afJoVN7XpE=;
+        b=XMP0oiRighob77xlb1PXIzbL2qu7sd7BzC0FticBn2Be9aA1nYfrnT70VCqohLdx3q
+         vA8YhA0yyD5li8ZRYbhNQz+bdNWHdMYyMIk/y4Ha2x3vA3udI+GGWlrbxZsA8V1I10i1
+         +QF/eMLISmlGltEdbr7NmJVTaVM6rHQWjAxJgTpetWPilWj8OFNsLi/Zcq240E8/V4Qh
+         FRNjGIq5x8LN0FTLd2H8v1Q5jPAVjGnYoo+hpozvUPnpE50RwWjatQsa30Z7S5s2o/jI
+         CNlW4Kha+zjkWTI/jp7b5/BBvFjjpVfJRGQ48r7KLmQhSADf9iuCcnB03Pjt5t5/Grtx
+         a2ww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=jBjl2SKIDUWdGGNNCdNQzm0sXvagxduES6I98oCU5Y8=;
-        b=4WZuTi/aFT8t0rIWmsNGXbNserSJoChOakY8uTfD8c8w09DW6C1uX9c7zH0O4LT5h6
-         h80Q8hc8S6aBiPGZ+lhWX14WVOyTvrZfEVeaeTUoJ5/KJf0D6u3FsSatLSMjFGJpICso
-         FBFho8zQsDwUsH/9b9QpmvquzW5dZwDdIZCtuYi69Inkm5G4s+XXQzEIpPPNMnrinYkq
-         gpzl+UNoK4YmYwNmPlylIWBxCk/1GRUFWfnECkvCbk9O6EPAV8Nh/HNqv5txVl/oWMF+
-         Yj6wzFjpXEIbULx1tjyJ6VEw1oftLzUZ+Uni2NVOpXDzjd7MC8+yakgjPWBuOHATu0zq
-         Tv7Q==
-X-Gm-Message-State: AOAM5332YZQX7BPuAOuuaHrL9W/Gy61+C/YFzKU72Q1m4YAMBi8dnrdg
-        mOS2Q8XKGdkNNoZJBEjbiXo=
-X-Google-Smtp-Source: ABdhPJz5nDf5e1lLckhTPfcq8ws67JWhBNrPmg70PycmaRWuWT397hKxpbU2YgDLYDLc8supNRztWA==
-X-Received: by 2002:a2e:91d4:: with SMTP id u20mr25686467ljg.81.1633488004426;
-        Tue, 05 Oct 2021 19:40:04 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-57.dynamic.spd-mgts.ru. [79.139.163.57])
-        by smtp.googlemail.com with ESMTPSA id o19sm2137695lfg.68.2021.10.05.19.40.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 05 Oct 2021 19:40:03 -0700 (PDT)
-Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20210926224058.1252-7-digetx@gmail.com>
- <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com>
- <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
- <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
- <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com>
- <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
-Message-ID: <8597d539-311b-4f04-481c-b48e6a5a882a@gmail.com>
-Date:   Wed, 6 Oct 2021 05:40:02 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=l6uSTYKI1iDVQ1/5MVV35eiuQr3oTGL96afJoVN7XpE=;
+        b=T54HcK00Bcvv8P3Uk3kJlOkAin+pbNG58L9QykQ7ltvRXX8INng8x/KirCSp/qOHWg
+         mtGOJQ6FK/vo4i0VSmBzOXQq7R3PEnzKrNMP7GX3Jlw4jWeNz2Cvqnudh4nfJn7mjRGm
+         +H/bH8DkpYEh1dls83GRIpQV6pEsG/SJVYdlffKNFww7PAwT1YQDdwhHuxICamWOsV2y
+         dfNNwJ0XXKCA3z7klT3nLyorU7WNB9+viaC4t2SQxV+x+ov0FKr219uqPWquf4mp/ARe
+         6G1+Zish0HCeLLQUQ4naYvHbPgqLatfcCaJoi5p/cEdwN1+cEEts1U8wlkZ2HeX7K0FG
+         637A==
+X-Gm-Message-State: AOAM532Km46B2zLgjpsf44H1kGM1A2XKXZ96MD5vXsOK301U+lmFnZ0b
+        5EMN8zPjxrOOz5xjyb15RMENDb3DGEdgXVMOtWwDjw==
+X-Google-Smtp-Source: ABdhPJya/cHmu4jYQmBnP1nXJTIFK74KW21Myh3oIz3kpdEwg32cUPpqXnXVmYd4H6feMiKWwtLp8SDERd4E6oJYIJg=
+X-Received: by 2002:a2e:5442:: with SMTP id y2mr26848306ljd.436.1633492159155;
+ Tue, 05 Oct 2021 20:49:19 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20210829131305.534417-1-dmitry.baryshkov@linaro.org> <4a508fc1-6253-9c11-67fb-f84f17fd2719@kali.org>
+In-Reply-To: <4a508fc1-6253-9c11-67fb-f84f17fd2719@kali.org>
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Date:   Wed, 6 Oct 2021 06:49:08 +0300
+Message-ID: <CAA8EJprsfzFWP1KH61UEkjJmY8rDFTN5i_53Mc0e9n3oxJsBNA@mail.gmail.com>
+Subject: Re: [RFC v2 00/13] create power sequencing subsystem
+To:     Steev Klimaszewski <steev@kali.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        "open list:DRM DRIVER FOR MSM ADRENO GPU" 
+        <linux-arm-msm@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
+        ath10k@lists.infradead.org,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-06.10.2021 01:43, Dmitry Osipenko пишет:
-> 06.10.2021 01:19, Dmitry Osipenko пишет:
-> ...
->> I reproduced the OFF problem by removing the clk prepare/unprepare from
->> the suspend/resume of the clk driver and making some extra changes to
->> clock tree topology and etc to trigger the problem on Nexus 7.
->>
->> tegra-pmc 7000e400.pmc: failed to turn off PM domain heg: -13
->>
->> It happens from genpd_suspend_noirq() -> tegra_genpd_power_off() -> clk
->> -> GENPD -> I2C -> runtime-pm.
->>
->> -13 is EACCES, it comes from the runtime PM of I2C device. RPM is
->> prohibited/disabled during late (NOIRQ) suspend by the drivers core.
-> 
-> My bad, I double-checked and it's not I2C RPM that is failing now, but
-> the clock's RPM [1], which is also unavailable during NOIRQ.
-> 
-> [1]
-> https://elixir.free-electrons.com/linux/v5.15-rc4/source/drivers/clk/clk.c#L116
-> 
-> Previously it was I2C RPM that was failing in a similar way, but code
-> changed a tad since that time.
-> 
+Hi Steev,
 
-Just in case, I checked that the suspension order isn't somehow the
-source of the problem by adding links to device tree in order to always
-suspend clocks after the rest of devices and still GENPD gets -EACCESS
-from clk_pm_runtime_get().
+On Tue, 14 Sept 2021 at 02:39, Steev Klimaszewski <steev@kali.org> wrote:
+>
+>
+> On 8/29/21 8:12 AM, Dmitry Baryshkov wrote:
+> > This is the second RFC on the proposed power sequencer subsystem. This
+> > is a generification of the MMC pwrseq code. The subsystem tries to
+> > abstract the idea of complex power-up/power-down/reset of the devices.
+> >
+> > To ease migration to pwrseq and to provide compatibility with older
+> > device trees, while keeping drivers simple, this iteration of RFC
+> > introduces pwrseq fallback support: pwrseq driver can register fallback
+> > providers. If another device driver requests pwrseq instance and none
+> > was declared, the pwrseq fallback code would go through the list of
+> > fallback providers and if the match is found, driver would return a
+> > crafted pwrseq instance. For now this mechanism is limited to the OF
+> > device matching, but it can be extended further to use any combination
+> > of device IDs.
+> >
+> > The primary set of devices that promted me to create this patchset is
+> > the Qualcomm BT+WiFi family of chips. They reside on serial+platform or
+> > serial + SDIO interfaces (older generations) or on serial+PCIe (newer
+> > generations).  They require a set of external voltage regulators to be
+> > powered on and (some of them) have separate WiFi and Bluetooth enable
+> > GPIOs.
+> >
+> > This patchset being an RFC tries to demonstrate the approach, design and
+> > usage of the pwrseq subsystem. Following issues are present in the RFC
+> > at this moment but will be fixed later if the overall approach would be
+> > viewed as acceptable:
+> >
+> >  - No documentation
+> >    While the code tries to be self-documenting proper documentation
+> >    would be required.
+> >
+> >  - Minimal device tree bindings changes
+> >    There are no proper updates for the DT bindings (thus neither Rob
+> >    Herring nor devicetree are included in the To/Cc lists). The dt
+> >    schema changes would be a part of v1.
+> >
+> >  - Lack of proper PCIe integration
+> >    At this moment support for PCIe is hacked up to be able to test the
+> >    PCIe part of qca6390. Proper PCIe support would require automatically
+> >    powering up the devices before the bus scan depending on the proper
+> >    device structure in the device tree.
+> >
+> > Changes since RFC v1:
+> >  - Provider pwrseq fallback support
+> >  - Implement fallback support in pwrseq_qca.
+> >  - Mmove susclk handling to pwrseq_qca.
+> >  - Significantly simplify hci_qca.c changes, by dropping all legacy
+> >    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
+> >    parts of the chip.
+> >
+> I tested this here, on the Lenovo Yoga C630, after creating a patch to
+> do basically the same thing as the db845c does.  One thing I noticed, if
+> PWRSEQ=y and the rest are =m, there is a build error.  I suppose once
+> the full set is posted and not RFC, I can send the patch for that.
 
-RPM is disabled by dpm_suspend_late(), which is invoked before
-dpm_suspend_noirq() [1]. Hence RPM is unavailable in NOIRQ phase in any
-case.
+Please excuse me for the delay in the response. I was carried away by
+other duties. Yes, could you please provide a fixup patch.
+I'm going to send v1 now, containing mostly cosmetical and
+documentation changes. I'll include your patch in v2.
 
-[1]
-https://elixir.bootlin.com/linux/v5.15-rc4/source/kernel/power/suspend.c#L399
+> One question I have, if you don't mind, in patch 11, you add a second
+> channel to qca power sequencer.  I've added that here, but in the c630's
+> dts, "vreg_l23a_3p3: ldo23" is empty, so I added the same numbers in for
+> the regulator, and I'm wondering how to test that it's actually working
+> correctly?
+
+That's a good question. I have not looked in the details in the ath10k
+documentation. I'll try finding it.
+Maybe Kalle Valo can answer your question. Could you please duplicate
+your question on the ath10k mailing list?
+
+-- 
+With best wishes
+Dmitry
