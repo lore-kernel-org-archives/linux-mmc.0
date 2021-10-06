@@ -2,152 +2,289 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 799EFC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 11:25:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 655B8C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 12:39:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C08B611C0
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 11:25:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 496F461130
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 12:39:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238306AbhJFL1O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Oct 2021 07:27:14 -0400
-Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.50]:30681 "EHLO
-        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238225AbhJFL1O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 07:27:14 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1633519501;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=XmOcGtT2R465zJ0p3YcHjU0RIWZ17S32hOWrnIUbcrI=;
-    b=Wyk3/KpwXB7JBpVWSuZngWq9N+/rbmh5zGCnBQkH6Ys9BTjqtK8jUmkWcLqdM+VWDF
-    3cL4VN9mQKJehOdxiWhCMPnR3YuVSh8t+f60LmfFJwQ8kt9WtTSNNpgMBaqW5H1JvIBy
-    A1dDbrbYJQlPCOrZyU937frb0G5LujqstD+Ymz7JwvniOLJBxHq6B+9dTaV0LpsiltZb
-    s4Rd2pqljo4iXCXeB/VdY3Dlaz3EKN3FwRTGAS7qaIfDOs+TnMQ7q70I8n8Dx6LO5RBc
-    SGAeW2b6jDfCOlI9Ibnfx/QQvFvBGHUdIbgS2le34uvL6MLKji9iWg1ZWAuDMAcSfRHj
-    QHRg==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMhflhwDubTJ9o1OAA2UMf2MwPVbjdbna"
-X-RZG-CLASS-ID: mo00
-Received: from iMac.fritz.box
-    by smtp.strato.de (RZmta 47.33.8 DYNA|AUTH)
-    with ESMTPSA id I01f74x96BP09II
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-        (Client did not present a certificate);
-    Wed, 6 Oct 2021 13:25:00 +0200 (CEST)
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bean Huo <beanhuo@micron.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        letux-kernel@openphoenux.org, kernel@pyra-handheld.com,
-        "H. Nikolaus Schaller" <hns@goldelico.com>
-Subject: [RFC] mmc: core: transplant ti,wl1251 quirks from to be retired omap_hsmmc
-Date:   Wed,  6 Oct 2021 13:25:00 +0200
-Message-Id: <8ecc5c79c1dd0627d570ede31e18c860786cacca.1633519499.git.hns@goldelico.com>
-X-Mailer: git-send-email 2.33.0
+        id S238424AbhJFMlH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Oct 2021 08:41:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40062 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238387AbhJFMlG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 08:41:06 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5765CC061749
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Oct 2021 05:39:14 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id b20so9926497lfv.3
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Oct 2021 05:39:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=pt+Sx1i9oC8cMVf+wV0+G1/1GyaW/f/U+87KiyoFd/E=;
+        b=xMf9icJn0dugjBCs5EETJwxewMPK+UjZJs0KYkQ+tEswLY8Y3dBB9eTNHx1P1I74NS
+         uUI5ilQPq4HQIhfoBn10OmK0TYfUpJUGARspsbdoXLABNOzo+QHCEBYNQqtp8KkfHt5y
+         5rgwO4l1nEO/qkIK43xyczyY9zOTefr2lTBwMo3yoVkLR70uqjlAQwkhytRA6fQvBCmo
+         38mmmmGjJXtf94GAftHcVeOr9+ASGdyzPc89mvgsEeg3ssJr7d0NZzeAChud6hgWLQ0x
+         CaiyTsOATrGgHO8lc2Hzh8roRCTRT7QTYzscdKXQfmhYcgY68+9elxMF8yXF5L53e23A
+         iVFA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=pt+Sx1i9oC8cMVf+wV0+G1/1GyaW/f/U+87KiyoFd/E=;
+        b=UqbNnMjheSs5byYSsN5PQckahqPchYPabo8VE3+tJtD+xxAPbrPom/UjUwGygXVRBa
+         FFqGW68qoBgLllXJ2E51zYnvRTLIO1ZXQR0X89x8a331bQ2uSSsTMQAfq+mPeIU/dimn
+         cLlEA6Uslpk1mEdtzz6TdVFtMjGutcx0gtfIMh9ixhA5mfrt4HHOmvkQH1rOtWtyM+ff
+         77WdPpXCDi8fRQmVkWOyCutDNMRVnNZBnhsunzyl5IpRn7bpcXILIlDKk+0lL8B4GDfA
+         ChVFttG6DWsf2CjBWIdr1XlTCq3gWvEhCVJ3O95bpAN8WdkmKtpNj/fv9fED5isXB1CU
+         bJag==
+X-Gm-Message-State: AOAM5314/HzB46EH0v6ltVvwY63AHR096fU8ntgwk/WNoV2vUci7CViQ
+        GPkQ6Llua4Wz3mLcjKDJbPTJuviQLjy1+piSyUrzGQ==
+X-Google-Smtp-Source: ABdhPJwaJVEKqlVek7TGUDap3J+eg+aVlfc7HMdVbc1X8zMSF/wwjX+qoHICL3q8G6NLzKZ0rQnEZO321GxsAccQSGs=
+X-Received: by 2002:a05:651c:20b:: with SMTP id y11mr29225280ljn.463.1633523952478;
+ Wed, 06 Oct 2021 05:39:12 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-7-digetx@gmail.com>
+ <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com>
+ <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com> <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
+ <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com>
+In-Reply-To: <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 6 Oct 2021 14:38:35 +0200
+Message-ID: <CAPDyKFq_-HGPRNiNDmnEbuah0mUYoRUWVs1SvbQ6VNMMwEcXjA@mail.gmail.com>
+Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The TiWi 5 WiFi module needs special setup of the sdio
-interface before it can be probed.
+On Wed, 6 Oct 2021 at 00:19, Dmitry Osipenko <digetx@gmail.com> wrote:
+>
+> 05.10.2021 16:10, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > On Sat, 2 Oct 2021 at 22:44, Dmitry Osipenko <digetx@gmail.com> wrote:
+> >>
+> >> 01.10.2021 15:32, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >>>> +static __maybe_unused int tegra_clock_pm_suspend(struct device *dev=
+)
+> >>>> +{
+> >>>> +       struct tegra_clk_device *clk_dev =3D dev_get_drvdata(dev);
+> >>>> +
+> >>>> +       /*
+> >>>> +        * Power management of the clock is entangled with the Tegra=
+ PMC
+> >>>> +        * GENPD because PMC driver enables/disables clocks for togg=
+ling
+> >>>> +        * of the PD's on/off state.
+> >>>> +        *
+> >>>> +        * The PMC GENPD is resumed in NOIRQ phase, before RPM of th=
+e clocks
+> >>>> +        * becomes available, hence PMC can't use clocks at the earl=
+y resume
+> >>>> +        * phase if RPM is involved. For example when 3d clock is en=
+abled,
+> >>>> +        * it may enable the parent PLL clock that needs to be RPM-r=
+esumed.
+> >>>> +        *
+> >>>> +        * Secondly, the PLL clocks may be enabled by the low level =
+suspend
+> >>>> +        * code, so we need to assume that PLL is in enabled state d=
+uring
+> >>>> +        * suspend.
+> >>>> +        *
+> >>>> +        * We will keep PLLs and system clock resumed during suspend=
+ time.
+> >>>> +        * All PLLs on all SoCs are low power and system clock is al=
+ways-on,
+> >>>> +        * so practically not much is changed here.
+> >>>> +        */
+> >>>> +
+> >>>> +       return clk_prepare(clk_dev->hw->clk);
+> >>> I am trying to understand, more exactly, what you intend to achieve
+> >>> with the clk_prepare() here. It looks a bit weird, to me. Can you try
+> >>> to elaborate a bit more on the use case?
+> >>
+> >> The Tegra GENPD driver enable/disable clocks when domain is turned on.
+> >
+> > Okay. I noticed that in tegra_genpd_power_on(). And the same clocks
+> > are enabled/disabled also in tegra_genpd_power_off(), when powering
+> > off the PM domain.
+> >
+> > So I guess the problem kind of exists for tegra_genpd_power_off() too?
+>
+> Both OFF/ON are affected by the same problem. If domain was already
+> turned OFF before genpd_suspend_noirq(), then the OFF problem isn't visib=
+le.
+>
+> I reproduced the OFF problem by removing the clk prepare/unprepare from
+> the suspend/resume of the clk driver and making some extra changes to
+> clock tree topology and etc to trigger the problem on Nexus 7.
+>
+> tegra-pmc 7000e400.pmc: failed to turn off PM domain heg: -13
+>
+> I happens from genpd_suspend_noirq() -> tegra_genpd_power_off() -> clk
+> -> GENPD -> I2C -> runtime-pm.
+>
+> -13 is EACCES, it comes from the runtime PM of I2C device. RPM is
+> prohibited/disabled during late (NOIRQ) suspend by the drivers core.
 
-So far, this is done in omap_hsmmc_init_card() in omap_hsmmc.c
-which makes it useable only if connected to omap devices
-which use the omap_hsmmc. The OpenPandora is the most promient
-example.
+Thanks for the clarification!
 
-There are plans to switch to a newer sdhci-omap driver and
-retire omap_hsmmc. Hence this quirk must be reworked or moved
-somewhere else. Ideally to some location that is not dependent
-on the specific SoC mmc host driver.
+>
+> >> This can't be done during early system resume, when domains are gettin=
+g
+> >> turned on by the drivers core, because when clock is enabled, it's
+> >> getting prepared (RPM-resumed) and this preparation fails because
+> >> performance state of the clock goes up and it doesn't work during the
+> >> early resume time since I2C, which applies the state to hardware, is
+> >> suspended and can't work at that early time.
+> >
+> > This sounds complicated and I still don't quite follow all of it, sorry=
+.
+> >
+> > So, tegra_genpd_power_on() gets called from genpd_resume_noirq(), when
+> > the first device of the attached devices to genpd gets resumed. And
+> > vice versa for tegra_genpd_power_off() and genpd_suspend_noirq().
+> >
+> > Are you saying that trying to enable/disable clocks from
+> > tegra_genpd_power_on|off() in these paths doesn't work, because it
+> > would also require the performance state to be changed, which would
+> > fail because the I2C bus/driver is suspended?
+>
+> Yes, but it's actually not I2C bus/driver that is suspended, it's
+> runtime PM that is unavailable during NOIRQ. The I2C driver itself is
+> suspended after domains are turned OFF and resumed before they are
+> enabled. It's just runtime PM API that is unavailable. I'm wondering if
+> this could be changed.
 
-Analysis has shown that omap_hsmmc_init_card() is called
-through the host->ops->init_card hook which itself
-is called in three generic locations:
+In principle what you ask for, is if we can avoid calling
+__pm_runtime_disable() in __device_suspend_late() (and vice versa in
+device_resume_early()).
 
-mmc_init_card()
-mmc_sd_init_card()
-mmc_sdio_init_card()
+I think the short answer is no, at least from a generic point of view.
+Maybe we can figure out a way to allow this on a per device basis, as
+an opt-in solution. I am not sure what Rafael would think about this,
+let's see.
 
-All these functions share a call to mmc_select_card() shortly
-after running the init hook and therefore I assume that
-a good place transplanting the special wl1251 handling is
-mmc_select_card() - unless we want to copy and maintain the
-code to three different places.
+Another option to address the problem is already available to use for
+these kinds of cases. This would be to add also a pair of
+->suspend|resume() callbacks to I2C driver. Along the lines of the
+below.
 
-After this quirk has been moved there, we can remove
-omap_hsmmc_init_card() in omap_hsmmc.c in a separate patch.
-Indeed the plan is to remove omap_hsmmc.c completely.
-
-A future development path to generalize could be to make
-the code not depend on compatible = "ti,wl1251" but check
-for optional device tree properties (non-std-sdio, bus width,
-vendor, device, blksize, max_dtr, ocr) which can be defined
-for any child device of the mmd/sd port needing such special
-setup.
-
-Related-to: commit f6498b922e57 ("mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid of pandora_wl1251_init_card")
-Related-to: commit 2398c41d6432 ("omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251")
-Related-to: commit f9d50fef4b64 ("ARM: OMAP2+: omap3-pandora: add wifi support")
-Tested-by: H. Nikolaus Schaller <hns@goldelico.com> # on OpenPandora
-Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
----
- drivers/mmc/core/mmc_ops.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 0c54858e89c0..6f9b96be9fe6 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -7,6 +7,7 @@
- 
- #include <linux/slab.h>
- #include <linux/export.h>
-+#include <linux/of.h>
- #include <linux/types.h>
- #include <linux/scatterlist.h>
- 
-@@ -107,6 +108,35 @@ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
- 
- int mmc_select_card(struct mmc_card *card)
- {
-+	if (card->type == MMC_TYPE_SDIO || card->type == MMC_TYPE_SD_COMBO) {
-+		struct device_node *np = card->host->parent->of_node;
-+
-+		/*
-+		 * REVISIT: should be made more general
-+		 * e.g. by expanding the DT bindings of child nodes to
-+		 * optionally provide this information:
-+		 * Documentation/devicetree/bindings/mmc/mmc-card.txt
-+		 */
-+
-+		np = of_get_compatible_child(np, "ti,wl1251");
-+		if (np) {
-+			/*
-+			 * We have TI wl1251 attached to this mmc. Pass this
-+			 * information to the SDIO core because it can't be
-+			 * probed by normal methods.
-+			 */
-+
-+			dev_info(card->host->parent, "found wl1251\n");
-+			card->quirks |= MMC_QUIRK_NONSTD_SDIO;
-+			card->cccr.wide_bus = 1;
-+			card->cis.vendor = 0x104c;
-+			card->cis.device = 0x9066;
-+			card->cis.blksize = 512;
-+			card->cis.max_dtr = 24000000;
-+			card->ocr = 0x80;
-+			of_node_put(np);
-+		}
-+	}
- 
- 	return _mmc_select_card(card->host, card);
+diff --git a/drivers/i2c/busses/i2c-tegra.c b/drivers/i2c/busses/i2c-tegra.=
+c
+index c883044715f3..589bf872ab25 100644
+--- a/drivers/i2c/busses/i2c-tegra.c
++++ b/drivers/i2c/busses/i2c-tegra.c
+@@ -1918,6 +1918,7 @@ static int __maybe_unused
+tegra_i2c_resume(struct device *dev)
  }
--- 
-2.33.0
 
+ static const struct dev_pm_ops tegra_i2c_pm =3D {
++       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_put_noidle, pm_runtime_get_sync)
+        SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(tegra_i2c_suspend, tegra_i2c_resume)
+        SET_RUNTIME_PM_OPS(tegra_i2c_runtime_suspend, tegra_i2c_runtime_res=
+ume,
+                           NULL)
+
+In this way, the device would already be runtime resumed, if there is
+call to pm_runtime_get_sync() from the clock framework due to the
+clk_prepare|unprepare() being called. If that also turns out to happen
+*after* runtime PM has been disabled for the device, the call to
+pm_runtime_get_sync() would still succeed (returning 1, see
+rpm_resume()), rather than a negative error code.
+
+Yes, we may end up runtime resuming the device during system suspend,
+even if it turns out not to be needed. Although, that doesn't seem to
+be the case for the Tegra I2C driver, right?
+
+>
+> I'm also wondering if we could add some 'was_enabled' flag to GENPDs,
+> setting it by genpd_suspend_noirq() for the enabled domains, and then
+> powering-on GENPDs from genpd_resume_noirq() only if they were in the
+> enabled state during genpd_suspend_noirq() time. It actually puzzled me
+> for a quite long time why GENPD core enables domains unconditionally
+> during early resume. This should solve a part of the problem and it
+> makes suspend/resume a bit safer because there is a smaller chance to
+> crash hardware during suspend, at least it's easier to debug.
+
+Just because the PM domain was already off at genpd_suspend_noirq(),
+doesn't mean that it can stay powered off at genpd_resume_noirq(). At
+least as is today.
+
+The main reason why genpd_resume_noirq() powers on the PM domain, is
+because it's not possible for the consumer drivers to rely on runtime
+PM to do it (because runtime PM has been disabled by the PM core).
+
+>
+> >> Secondly, Tegra has arch-specific low level assembly which touches
+> >> clocks during last phase of system suspend and in the beginning of
+> >> resume. Hence, clocks should stay prepared during suspend just because
+> >> technically clock should be prepared before it can be enabled.
+> >
+> > So the low level code is gating and ungating the clock behind the back
+> > of the clock driver then? Why is that done like that, more exactly?
+>
+> I revisited that code again, and it shouldn't touch the clocks.
+> I changed that code to not toggle the clocks [1] sometime ago, but
+> forgot about it.
+>
+> [1] https://git.kernel.org/linus/680ae4452
+>
+> >>> Is this rather about making sure that the clock's corresponding PM
+> >>> domain stays powered on during system suspend? In that case, I think
+> >>> there may be an alternative option....
+> >>>
+> >>
+> >> This is not about domain staying powered on, this is about keeping the
+> >> performance state of the domain high during suspend.
+> >
+> > Right, so the PM domain managed in tegra_genpd_power_on|off() can
+> > still be powered on/off, as long as the clock remains ungated?
+>
+> Not ungated, but prepared.
+
+Okay, thanks for clarifying!
+
+In summary, it sounds like you should be able to fix this problem in
+the I2C driver as I suggested above. If that works, that seems much
+better.
+
+Moreover, it would leave the clocks gated/unprepared when the system
+is fully suspended, which I guess is better from an energy point of
+view?
+
+Kind regards
+Uffe
