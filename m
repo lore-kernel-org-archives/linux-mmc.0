@@ -2,118 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24F20C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 15:44:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 441D0C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 17:16:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E14861056
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 15:44:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3145560F58
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Oct 2021 17:16:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231944AbhJFPqn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Oct 2021 11:46:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55388 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230021AbhJFPqn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 11:46:43 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EACC0C061755
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Oct 2021 08:44:50 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id t9so12060910lfd.1
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Oct 2021 08:44:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=fLrVITo26Q9Q7weH2zRlnHSrkqoVRNsgF3IljUMw/5c=;
-        b=Vg8DOLDKNftBf2yy9dK6Xu1rxd/66jDMb60w1wudX13vfZa0M/6yuZ2L3Ygm2csCZ3
-         jLcbL9E56EllkroBLM9jukgbbcSyD1QMRyBjepsQeTuJLlPrYsriP7jtOFmPy0sZmnJS
-         7eWPrpin7ou2GbkMqFD0a4eoIoqGEczu4GoHJMi69TvCg9o3UqvP9klBSN/f7/JFChpI
-         n3TyNm3ZH5czD+YCJExOTWay2kXUR2LaX6C4IijpAUGGMd4OJpGUFSAM/CA8LvYuL6kp
-         /2X1gfVLCMCX6sI6icXWPlpWYyO737tRElmxRwaVexZ9D8+1CvERswsdnwx4UsrB6XK6
-         j4Vw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=fLrVITo26Q9Q7weH2zRlnHSrkqoVRNsgF3IljUMw/5c=;
-        b=EOyp7bL2R6KnUoKWnEydZ4/kNmwrPvxyY+XduG6houGPAJvWU9zkM5ZtzGBUOry9gM
-         Rqb5vpH+dUGK48PegfajHbgpB1xndtIr5xHuzeRwu8H6fueKgF0t16sNfvnj8KB/o8b2
-         wuTWRyZRN5ZaXRN8PUd/hlTM8rY9xa+pYQegsen0JyiqbzMwfTC6wVx1G28/8HvjPnP0
-         J1ziRMoOWZ/PXGF9oSl9kuyMn7Qvg23xhapZ+nprSv0YsMKC1N5xGivwQouDMgcVDn+4
-         7rkC0AWvjpTF0cM0hrg8X3SzCfGFdKxYAZWpsycJHv9xowdKZLC4bUGZawKNh/2ZnIZD
-         vOcA==
-X-Gm-Message-State: AOAM530TlC263VSmRY6h+xcxXmPduJJusXoeNYRyLKR+A7B3H4qqG0xR
-        tPHVBNnraAObcBJafrzabdBf1i6EzsaNsrkr2yGA8IDtr/g=
-X-Google-Smtp-Source: ABdhPJzIWAUgQf7sZffi7dUYnaY6L0kMYXgI0e/0GVYqQBe6gtEhMBe5NQ6q+RSowbWaMfSxH4GzmhM9Xk70+dvXHcg=
-X-Received: by 2002:a05:651c:4c9:: with SMTP id e9mr29848643lji.229.1633535089235;
- Wed, 06 Oct 2021 08:44:49 -0700 (PDT)
-MIME-Version: 1.0
-References: <20211004151646.73599-1-krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20211004151646.73599-1-krzysztof.kozlowski@canonical.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 6 Oct 2021 17:44:12 +0200
-Message-ID: <CAPDyKFoACP79Zt4DuJJEyRPRb0yXhcNmfDJwVk-yBZt61Z88MA@mail.gmail.com>
-Subject: Re: [PATCH next] dt-bindings: mmc: arasan,sdci: bring back
- requirement of clock-output-names
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        id S239104AbhJFRSE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Oct 2021 13:18:04 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:17495 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S233287AbhJFRSE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Oct 2021 13:18:04 -0400
+X-IronPort-AV: E=Sophos;i="5.85,352,1624287600"; 
+   d="scan'208";a="96161009"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie5.idc.renesas.com with ESMTP; 07 Oct 2021 02:16:10 +0900
+Received: from localhost.localdomain (unknown [10.226.92.216])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 52F484007F47;
+        Thu,  7 Oct 2021 02:16:08 +0900 (JST)
+From:   Biju Das <biju.das.jz@bp.renesas.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        linux-mmc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        linux-renesas-soc@vger.kernel.org
+Subject: [PATCH] mmc: renesas_sdhi: Fix internal cd irq miss with hard reset
+Date:   Wed,  6 Oct 2021 18:16:05 +0100
+Message-Id: <20211006171605.6861-1-biju.das.jz@bp.renesas.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 4 Oct 2021 at 17:17, Krzysztof Kozlowski
-<krzysztof.kozlowski@canonical.com> wrote:
->
-> The schema defines dependency only of clock-output-names on #clock-cells.
-> The dependency in opposite direction - requirement of clock-output-names
-> if #clock-cells is defined - should be explicitly included in the
-> bindings.
->
-> Reported-by: Rob Herring <robh@kernel.org>
-> Fixes: 22ea8ab0dcc4 ("dt-bindings: mmc: arasan,sdci: drop unneeded clock-cells dependency")
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
->
 
-Applied for next, thanks!
+This patch fixes internal cd irq miss after hard reset by enabling
+internal card insertion/removal interrupts.
 
-I took the liberty to squash this into the previous commit, and move
-the reported-by tag into a reviewed-by tag from Rob.
+Fixes: b4d86f37eacb ("mmc: renesas_sdhi: do hard reset if possible")
+Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+---
+Hi All,
 
-Feel free to yell at me if there is something you don't like with the
-squashed commit.
+On RZ/G2M board, if i enable internal cd, then it is missing irq after hard reset.
+Please find my test logs with card inserted during boot,
 
-Kind regards
-Uffe
+case 1:- current case (no internal cd interrupt)
+root@hihope-rzg2m:~# cat /proc/interrupts | grep mmc
+162:          0          0          0          0          0          0     GIC-0 197 Level     ee100000.mmc
+163:        151          0          0          0          0          0     GIC-0 199 Level     ee140000.mmc
+164:       1500          0          0          0          0          0     GIC-0 200 Level     ee160000.mmc
+root@hihope-rzg2m:~#
 
 
-> ---
->
-> Fixes tag from the linux-next
->
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-> ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> index dd70431df0b7..de6f076e0ece 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> @@ -158,6 +158,9 @@ properties:
->      description:
->        The MIO bank number in which the command and data lines are configured.
->
-> +dependencies:
-> +  '#clock-cells': [ clock-output-names ]
-> +
->  required:
->    - compatible
->    - reg
-> --
-> 2.30.2
->
+case 2:- current case + patch
+root@hihope-rzg2m:~# cat /proc/interrupts | grep mmc
+162:       1107          0          0          0          0          0     GIC-0 197 Level     ee100000.mmc
+163:        151          0          0          0          0          0     GIC-0 199 Level     ee140000.mmc
+164:       1106          0          0          0          0          0     GIC-0 200 Level     ee160000.mmc
+root@hihope-rzg2m:~#
+
+case 3:- with cd nterrupt as gpio
+root@hihope-rzg2m:~# cat /proc/interrupts | grep mmc
+162:        796          0          0          0          0          0     GIC-0 197 Level     ee100000.mmc
+163:        151          0          0          0          0          0     GIC-0 199 Level     ee140000.mmc
+164:       1010          0          0          0          0          0     GIC-0 200 Level     ee160000.mmc
+197:          0          0          0          0          0          0  gpio-rcar  12 Edge      ee100000.mmc cd
+root@hihope-rzg2m:~# 
+---
+ drivers/mmc/host/renesas_sdhi.h      | 1 +
+ drivers/mmc/host/renesas_sdhi_core.c | 9 +++++++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
+index 0c45e82ff0de..1199693690da 100644
+--- a/drivers/mmc/host/renesas_sdhi.h
++++ b/drivers/mmc/host/renesas_sdhi.h
+@@ -68,6 +68,7 @@ struct renesas_sdhi {
+ 	u32 scc_tappos_hs400;
+ 	const u8 *adjust_hs400_calib_table;
+ 	bool needs_adjust_hs400;
++	bool internal_cd;
+ 
+ 	/* Tuning values: 1 for success, 0 for failure */
+ 	DECLARE_BITMAP(taps, BITS_PER_LONG);
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index a4407f391f66..9d828094169a 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -561,6 +561,11 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ 		/* Unknown why but without polling reset status, it will hang */
+ 		read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
+ 				  false, priv->rstc);
++
++		if (priv->internal_cd)
++			tmio_mmc_enable_mmc_irqs(host, TMIO_STAT_CARD_REMOVE |
++						 TMIO_STAT_CARD_INSERT);
++
+ 		/* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
+ 		sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+ 		priv->needs_adjust_hs400 = false;
+@@ -1017,6 +1022,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	if (IS_ERR(priv->rstc))
+ 		return PTR_ERR(priv->rstc);
+ 
++	if (priv->rstc && !(host->mmc->caps & MMC_CAP_NONREMOVABLE) &&
++	    !mmc_can_gpio_cd(host->mmc))
++		priv->internal_cd = true;
++
+ 	ver = sd_ctrl_read16(host, CTL_VERSION);
+ 	/* GEN2_SDR104 is first known SDHI to use 32bit block count */
+ 	if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
+-- 
+2.17.1
+
