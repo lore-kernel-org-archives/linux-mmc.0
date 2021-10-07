@@ -2,144 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 487F5C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 10:36:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64532C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 10:41:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2B69C60F02
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 10:36:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 401E360C4C
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 10:41:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240882AbhJGKij (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Oct 2021 06:38:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58180 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240366AbhJGKig (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2021 06:38:36 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02C76C061746;
-        Thu,  7 Oct 2021 03:36:43 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id j21so4940213lfe.0;
-        Thu, 07 Oct 2021 03:36:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=ykOpkcPay17tN46aJsTbBt/EvOAhIOt9Ph+3e4w9jz0=;
-        b=afTh3cKAR41VV1PzE4qeHfwMWxfp0/pcOp3Da/PudAOrW+6HBuKX/lfLd/NzTKwNma
-         ufMSpUrFcOojZcWaNgGv/bI92xdz4jP055eLah+Isfxcq9LZlZV+5o92WFw3nhfNIg8b
-         03bp6aqODY9zL3GDYaXmZzLqH18tsLd3UGA6I028Q9FYLwMrPtUMobVZldWX5ovYkl/B
-         oo9VaiP6FWirRUX6Y9X3ZVnPRAS6CDzQxIR2EGXUbTMdVa0/YNXVWMQ1SAgebOktiGWK
-         Pk8o3odzNbqyAuC2/RW72o9N5r/lduG7vF09Bj9DjozW/EkST+ugoVGToScUwpVWnDFo
-         Plkw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=ykOpkcPay17tN46aJsTbBt/EvOAhIOt9Ph+3e4w9jz0=;
-        b=RF/qB33SyFGxb2UX+jYTcBPnSnx6TsUko1qq4ST+pFkzD5UwLiDxepEvZGZ3nBzFxc
-         ywhLM/K2lfTdmROV8R3tKGcRZVbjhSMS/gJ/o8tK/yC3RxnCPMwwugNR0C2gZc9G1wgy
-         TojhRK3qACDt21isdkuvsAjpPPIuWnHEQmItD2617KCWYdrpKiFiUBhBg2ezDccOwqic
-         odvVDQYiLUvtlmeG+9ZGMNW4KKbzjfBekkoB6vFm/jv1b5wn+V9rar/MVna7bR5sMqRz
-         ouJBZdw5MWJLG6tMg8kYsBA+LxC8M30Ln9dyfN5FzIZesauBlongf23sbnmKRL7zN1y/
-         cGIw==
-X-Gm-Message-State: AOAM5328I5ncjCCzK/iFLcQkpbFfnSd7bfLY3H41/wE2Ckk8NSm7r0dp
-        TJ3uyXtL8HscrtKh9ycwM3k=
-X-Google-Smtp-Source: ABdhPJyE8Q56+BzF1am4IROAPlSkQQYH4pyokUqMf5GkrZE9wtSrOR5LeCuCqwdD3O56FQleQsf4qg==
-X-Received: by 2002:a05:6512:39d3:: with SMTP id k19mr1115363lfu.258.1633603001431;
-        Thu, 07 Oct 2021 03:36:41 -0700 (PDT)
-Received: from [192.168.2.145] (79-139-163-57.dynamic.spd-mgts.ru. [79.139.163.57])
-        by smtp.googlemail.com with ESMTPSA id k10sm2601041ljj.24.2021.10.07.03.36.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 07 Oct 2021 03:36:41 -0700 (PDT)
-Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-References: <20210926224058.1252-1-digetx@gmail.com>
- <20210926224058.1252-7-digetx@gmail.com>
- <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com>
- <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com>
- <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
- <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com>
- <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
- <CAPDyKFr2-f1wM+6jF9vWJ-Nq80Zg1Z3qFP6saULOrBi1270HGw@mail.gmail.com>
- <b06bf794-b8b3-417b-58ef-4d815ca86c95@gmail.com>
- <4c7b1a4c-c136-3650-8f77-9f98caa506f7@gmail.com>
- <2dd6bffc-9817-f4b1-0b92-f82f22fcf79a@gmail.com>
- <CAPDyKFox6THcxDouW2T7F2W__ZcoJP5GeG+H_a4NQmSqAFZ_oQ@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <81ce6f35-acb0-fe34-1efc-537c058a2160@gmail.com>
-Date:   Thu, 7 Oct 2021 13:36:39 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S240800AbhJGKnZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Oct 2021 06:43:25 -0400
+Received: from so254-9.mailgun.net ([198.61.254.9]:61910 "EHLO
+        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S241090AbhJGKnX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2021 06:43:23 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1633603290; h=Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
+ To: From: Sender; bh=FZv7up9pezh0ULf63JB/fz3Zol9bcHG9+0bdesm9Xmw=; b=utyb0q4heUQHjM2xN4LBCviAs239efIyXmbwlc52JhK8grYJ8zjtpaUEhUl5wVgYZWQe055F
+ Kp5XzUmeSGMsv4hfTZj/u1mT3ZLMGrVeu9JLOILnQuKw+KTQUH/xLWZCda4asNGNW1E3h2Y8
+ mbe9wNbqoUyXdWJMOMZOGd9Ui3o=
+X-Mailgun-Sending-Ip: 198.61.254.9
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n05.prod.us-west-2.postgun.com with SMTP id
+ 615eced603355859c85c5815 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 07 Oct 2021 10:41:26
+ GMT
+Sender: kvalo=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 3896BC43617; Thu,  7 Oct 2021 10:41:26 +0000 (UTC)
+Received: from tykki (tynnyri.adurom.net [51.15.11.48])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: kvalo)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 0DED9C4338F;
+        Thu,  7 Oct 2021 10:41:21 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org 0DED9C4338F
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
+From:   Kalle Valo <kvalo@codeaurora.org>
+To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v7 05/24] wfx: add main.c/main.h
+References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
+        <3570035.Z1gqkuQO5x@pc-42> <875yu9cjvk.fsf@codeaurora.org>
+        <2672405.M38RcEoSet@pc-42>
+Date:   Thu, 07 Oct 2021 13:41:18 +0300
+In-Reply-To: <2672405.M38RcEoSet@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
+ Pouiller"'s message of "Thu,
+        07 Oct 2021 12:00:18 +0200")
+Message-ID: <87zgrl86cx.fsf@codeaurora.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFox6THcxDouW2T7F2W__ZcoJP5GeG+H_a4NQmSqAFZ_oQ@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-07.10.2021 12:18, Ulf Hansson пишет:
->> Please let me iterate once again. The problem we currently have is that
->> clock may be enabled during NOIRQ time. In order to enable clock, it
->> needs to be prepared. In order to prepare clock, the clock's device
->> needs to be runtime-resumed. The runtime PM is unavailable at the NOIRQ
->> time.
->>
->> To solve this problem we need to prepare clock beforehand.
->>
->> The clock will stay prepared during suspend, but this is not a problem
->> since all the clocks we care about don't require high voltage and
->> voltage is guaranteed to be bumped high during suspend by Tegra's
->> regulator-coupler driver anyways.
->>
->> So everything we need to do is to keep clocks prepared. There are two
->> options how to do that:
->>
->> [1] this patch which explicitly prepares clocks using clk API.
->>
->> [2] Use runtime PM API, like this:
->>
->> static const struct dev_pm_ops tegra_clock_pm = {
->>         SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_resume_and_get, pm_runtime_put)
->> };
->>
->> Ulf, are you now okay with the current variant [1] of the patch or you
->> prefer the second [2] option more?
-> I prefer option [2]. The clock_prepare|unprepare() thingy in option
-> [1], looks more like an odd workaround to me.
-> 
-> Does that make sense to you as well?
+J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
 
-I don't have a strong preference since both variants give the same
-effect. I'll keep testing option [2] and will use it in the next version
-if no problem will be found. Thank you!
+>> >> >> I'm not really fond of having this kind of ASCII based parser in t=
+he
+>> >> >> kernel. Do you have an example compressed file somewhere?
+>> >> >
+>> >> > An example of uncompressed configuration file can be found here[1].=
+ Once
+>> >> > compressed with [2], you get:
+>> >> >
+>> >> >     {a:{a:4,b:1},b:{a:{a:4,b:0,c:0,d:0,e:A},b:{a:4,b:0,c:0,d:0,e:B}=
+,c:{a:4,b:0,c:0,d:0,e:C},d:{a:4,b:0,c:0,d:0,e:D},e:{a:4,b:0,c:0,d:0,e:E},f:=
+{a:4,b:0,c:0,d:0,e:F},g:{a:4,b:0,c:0,d:0,e:G},h:{a:4,b:0,c:0,d:0,e:H},i:{a:=
+4,b:0,c:0,d:0,e:I},j:{a:4,b:0,c:0,d:0,e:J},k:{a:4,b:0,c:0,d:0,e:K},l:{a:4,b=
+:0,c:0,d:1,e:L},m:{a:4,b:0,c:0,d:1,e:M}},c:{a:{a:4},b:{a:6},c:{a:6,c:0},d:{=
+a:6},e:{a:6},f:{a:6}},e:{b:0,c:1},h:{e:0,a:50,b:0,d:0,c:[{a:1,b:[0,0,0,0,0,=
+0]},{a:2,b:[0,0,0,0,0,0]},{a:[3,9],b:[0,0,0,0,0,0]},{a:A,b:[0,0,0,0,0,0]},{=
+a:B,b:[0,0,0,0,0,0]},{a:[C,D],b:[0,0,0,0,0,0]},{a:E,b:[0,0,0,0,0,0]}]},j:{a=
+:0,b:0}}
+>> >>
+>> >> So what's the grand idea with this braces format? I'm not getting it.
+>> >
+>> >   - It allows to describe a tree structure
+>> >   - It is ascii (easy to dump, easy to copy-paste)
+>> >   - It is small (as I explain below, size matters)
+>> >   - Since it is similar to JSON, the structure is obvious to many peop=
+le
+>> >
+>> > Anyway, I am not the author of that and I have to deal with it.
+>>=20
+>> I'm a supported for JSON like formats, flexibility and all that. But
+>> they belong to user space, not kernel.
+>>=20
+>> >> Usually the drivers just consider this kind of firmware configuration
+>> >> data as a binary blob and dump it to the firmware, without knowing wh=
+at
+>> >> the data contains. Can't you do the same?
+>> >
+>> > [I didn't had received this mail :( ]
+>> >
+>> > The idea was also to send it as a binary blob. However, the firmware u=
+se
+>> > a limited buffer (1500 bytes) to parse it. In most of case the PDS exc=
+eeds
+>> > this size. So, we have to split the PDS before to send it.
+>> >
+>> > Unfortunately, we can't split it anywhere. The PDS is a tree structure=
+ and
+>> > the firmware expects to receive a well formatted tree.
+>> >
+>> > So, the easiest way to send it to the firmware is to split the tree
+>> > between each root nodes and send each subtree separately (see also the
+>> > comment above wfx_send_pds()).
+>> >
+>> > Anyway, someone has to cook this configuration before to send it to the
+>> > firmware. This could be done by a script outside of the kernel. Then we
+>> > could change the input format to simplify a bit the processing in the
+>> > kernel.
+>>=20
+>> I think a binary file with TLV format would be much better, but I'm sure
+>> there also other good choises.
+>>=20
+>> > However, the driver has already some users and I worry that changing
+>> > the input format would lead to a mess.
+>>=20
+>> You can implement a script which converts the old format to the new
+>> format. And you can use different naming scheme in the new format so
+>> that we don't accidentally load the old format. And even better if you
+>> add a some kind of signature in the new format and give a proper error
+>> from the driver if it doesn't match.
+>
+> Ok. I am going to change the input format. I think the new function is
+> going to look like:
+>
+> int wfx_send_pds(struct wfx_dev *wdev, u8 *buf, size_t buf_len)
+> {
+> 	int ret;
+> 	int start =3D 0;
+>
+> 	if (buf[start] !=3D '{') {
+> 		dev_err(wdev->dev, "valid PDS start with '{'. Did you forget to compres=
+s it?\n");
+> 		return -EINVAL;
+> 	}
+> 	while (start < buf_len) {
+> 		len =3D strnlen(buf + start, buf_len - start);
+> 		if (len > WFX_PDS_MAX_SIZE) {
+> 			dev_err(wdev->dev, "PDS chunk is too big (legacy format?)\n");
+> 			return -EINVAL;
+> 		}
+> 		dev_dbg(wdev->dev, "send PDS '%s'\n", buf + start);
+> 		ret =3D wfx_hif_configuration(wdev, buf + start, len);
+> 		/* FIXME: Add error handling here */
+> 		start +=3D len;
+> 	}
+> 	return 0;
 
+Did you read at all what I wrote above? Please ditch the ASCII format
+completely.
+
+--=20
+https://patchwork.kernel.org/project/linux-wireless/list/
+
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
