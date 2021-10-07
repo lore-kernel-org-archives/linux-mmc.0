@@ -2,229 +2,199 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D781FC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 08:35:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6905C43217
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 09:19:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BA05260F70
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 08:35:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9BEAC61175
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 09:19:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231661AbhJGIhv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Oct 2021 04:37:51 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:39517 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232445AbhJGIhu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 7 Oct 2021 04:37:50 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1633595757; h=Content-Transfer-Encoding: Content-Type:
- MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=THqy+F0YtKNfeYDAR6Uu0AL5jJ4BrmAfvTC+DB6h4Dw=; b=EjfAbrh/FhmOPJ6/BT9ZCjp89ZRPrxt65WmJGkWEfF+rxbLvXtVA4expr2Hj1PNa63eKdVs4
- /Q4B87MgGtdfwPPayupzyLJ201F5NwX7NwNA7yCzMDecNtgWyiQX6+a/S0omOG9iLKUamhvi
- UP+CfX3F5xeqmy1MLSw2hujUdxo=
-X-Mailgun-Sending-Ip: 69.72.43.7
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n02.prod.us-east-1.postgun.com with SMTP id
- 615eb169b8ab9916b3ee7ade (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 07 Oct 2021 08:35:53
- GMT
-Sender: kvalo=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 7136FC43616; Thu,  7 Oct 2021 08:35:52 +0000 (UTC)
-Received: from tykki (tynnyri.adurom.net [51.15.11.48])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id D47DBC4338F;
-        Thu,  7 Oct 2021 08:35:47 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org D47DBC4338F
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
-From:   Kalle Valo <kvalo@codeaurora.org>
-To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
-Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org,
-        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v7 05/24] wfx: add main.c/main.h
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
-        <2723787.uDASXpoAWK@pc-42> <87k0ixj5vn.fsf@codeaurora.org>
-        <3570035.Z1gqkuQO5x@pc-42>
-Date:   Thu, 07 Oct 2021 11:35:43 +0300
-In-Reply-To: <3570035.Z1gqkuQO5x@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
- Pouiller"'s message of "Wed,
-        06 Oct 2021 09:32:49 +0200")
-Message-ID: <875yu9cjvk.fsf@codeaurora.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        id S240550AbhJGJVZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Oct 2021 05:21:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40272 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240542AbhJGJVU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2021 05:21:20 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4214C061766
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Oct 2021 02:19:25 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id r19so21117295lfe.10
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Oct 2021 02:19:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=lm42Xwh2Jm/bg7CFlkLuIvFq/6TymtSrcpKOF86TZ4E=;
+        b=kHtkBo9ZhQK5B1g4gzDepRMdzKt0BA7KDm9S+bG1ZgKaspEmsSEi4cACZ4QVhoSXMX
+         LAfkFrgrWPpYUQwgbd/jFB/KmVdrQAyHi9LRYCkY0mLjcj0rcs/pG+L9ji8mf5hkwZWm
+         oCET0LSGZwPR2S/Po4ecuyfXN/LJokwrNRtgoDL7jxNUmhQLR1EDjkk9LPBIRez4RyVc
+         eTHY3LyShSYeeYkfxXuXf+koCknCWj8EK3Cs9ygH5Mk1jcwi12qvbyJ7fIHV9isXv1Us
+         jGyfzeq8NNyvrlER3/UOZSyUDyr38dWbguKbn5rCOcG20K3+07f6jhOEXzDPnPAMKvBl
+         2ylg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=lm42Xwh2Jm/bg7CFlkLuIvFq/6TymtSrcpKOF86TZ4E=;
+        b=JiklXnfQkVO3IcT4Or41Rco4Pj9pn9Tn/5P+PlbKU0WKK+5QKU5RlX4uyScFd8Qb9g
+         TqEgNvqXbF2kgyCD/P6WvpGvkaBDivrbUoAkEEWe65UqlWP4LjY6zQW0cZ8PwkNv1DYE
+         arMXrIUlrT1dJ5dt8AAjsz7I45Qlx5YAmxApHoai+iCrZI8CDcphzj2JffMlMDM5O8bC
+         +3KjguDGzQ/+EUw56dw/FCr2ziEF+EcODaZb4AbICN+4eJ6nDMDV1BVHBX/LQPX12IHy
+         F22UJa6inDjqdrvmpAEB9ysPYO4DxBAp7Bi4bmwl2wb7lvmLSxXS9Jn8T/Jiw2DYonYr
+         xZsw==
+X-Gm-Message-State: AOAM532dOSk/jEiXAjWqQakKQTMjbIPPMGmnCB8Jd1MpZEx7OdQWlty+
+        l2RPxgp9caujAz88WaQDDgb8tUayrXxyM0TSRChm5Q==
+X-Google-Smtp-Source: ABdhPJyLVYNwO6wH7UjbrvAKZXt6rP/z5UNYySvnmg5CD1b+EuFOoKR5sbXNeY4a58mDR28IUl9i55ImMkilW9q3b14=
+X-Received: by 2002:a05:6512:3095:: with SMTP id z21mr3161687lfd.167.1633598363639;
+ Thu, 07 Oct 2021 02:19:23 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-7-digetx@gmail.com>
+ <CAPDyKFq+LS4Jr1GyC-a-tGWPzGH0JxfJ9wKY=uQEBGYm952azw@mail.gmail.com>
+ <24101cd6-d3f5-1e74-db39-145ecd30418b@gmail.com> <CAPDyKFreK7976PJL-1zySoza_yXM7rMQ64aODWUZ+U3L-uCa0w@mail.gmail.com>
+ <4bdba8a2-4b9b-ed7d-e6ca-9218d8200a85@gmail.com> <74a47158-e2e4-5fd0-3f37-0b50d4ead4d9@gmail.com>
+ <CAPDyKFr2-f1wM+6jF9vWJ-Nq80Zg1Z3qFP6saULOrBi1270HGw@mail.gmail.com>
+ <b06bf794-b8b3-417b-58ef-4d815ca86c95@gmail.com> <4c7b1a4c-c136-3650-8f77-9f98caa506f7@gmail.com>
+ <2dd6bffc-9817-f4b1-0b92-f82f22fcf79a@gmail.com>
+In-Reply-To: <2dd6bffc-9817-f4b1-0b92-f82f22fcf79a@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 7 Oct 2021 11:18:47 +0200
+Message-ID: <CAPDyKFox6THcxDouW2T7F2W__ZcoJP5GeG+H_a4NQmSqAFZ_oQ@mail.gmail.com>
+Subject: Re: [PATCH v13 06/35] clk: tegra: Support runtime PM and power domain
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
-
-> Hi Kalle,
+On Thu, 7 Oct 2021 at 01:21, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> On Friday 1 October 2021 14:18:04 CEST Kalle Valo wrote:
->> J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
->>=20
->> > On Friday 1 October 2021 11:22:08 CEST Kalle Valo wrote:
->> >> Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
->> >>=20
->> >> > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
->> >> >
->> >> > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.co=
-m>
->> >>=20
->> >> [...]
->> >>=20
->> >> > +/* The device needs data about the antenna configuration. This inf=
-ormation in
->> >> > + * provided by PDS (Platform Data Set, this is the wording used in=
- WF200
->> >> > + * documentation) files. For hardware integrators, the full proces=
-s to create
->> >> > + * PDS files is described here:
->> >> > + *   https:github.com/SiliconLabs/wfx-firmware/blob/master/PDS/REA=
-DME.md
->> >> > + *
->> >> > + * So this function aims to send PDS to the device. However, the P=
-DS file is
->> >> > + * often bigger than Rx buffers of the chip, so it has to be sent =
-in multiple
->> >> > + * parts.
->> >> > + *
->> >> > + * In add, the PDS data cannot be split anywhere. The PDS files co=
-ntains tree
->> >> > + * structures. Braces are used to enter/leave a level of the tree =
-(in a JSON
->> >> > + * fashion). PDS files can only been split between root nodes.
->> >> > + */
->> >> > +int wfx_send_pds(struct wfx_dev *wdev, u8 *buf, size_t len)
->> >> > +{
->> >> > +     int ret;
->> >> > +     int start, brace_level, i;
->> >> > +
->> >> > +     start =3D 0;
->> >> > +     brace_level =3D 0;
->> >> > +     if (buf[0] !=3D '{') {
->> >> > + dev_err(wdev->dev, "valid PDS start with '{'. Did you forget to
->> >> > compress it?\n");
->> >> > +             return -EINVAL;
->> >> > +     }
->> >> > +     for (i =3D 1; i < len - 1; i++) {
->> >> > +             if (buf[i] =3D=3D '{')
->> >> > +                     brace_level++;
->> >> > +             if (buf[i] =3D=3D '}')
->> >> > +                     brace_level--;
->> >> > +             if (buf[i] =3D=3D '}' && !brace_level) {
->> >> > +                     i++;
->> >> > +                     if (i - start + 1 > WFX_PDS_MAX_SIZE)
->> >> > +                             return -EFBIG;
->> >> > +                     buf[start] =3D '{';
->> >> > +                     buf[i] =3D 0;
->> >> > +                     dev_dbg(wdev->dev, "send PDS '%s}'\n", buf + =
-start);
->> >> > +                     buf[i] =3D '}';
->> >> > +                     ret =3D hif_configuration(wdev, buf + start,
->> >> > +                                             i - start + 1);
->> >> > +                     if (ret > 0) {
->> >> > + dev_err(wdev->dev, "PDS bytes %d to %d: invalid data (unsupported
->> >> > options?)\n",
->> >> > +                                     start, i);
->> >> > +                             return -EINVAL;
->> >> > +                     }
->> >> > +                     if (ret =3D=3D -ETIMEDOUT) {
->> >> > + dev_err(wdev->dev, "PDS bytes %d to %d: chip didn't reply (corrup=
-ted
->> >> > file?)\n",
->> >> > +                                     start, i);
->> >> > +                             return ret;
->> >> > +                     }
->> >> > +                     if (ret) {
->> >> > + dev_err(wdev->dev, "PDS bytes %d to %d: chip returned an unknown
->> >> > error\n",
->> >> > +                                     start, i);
->> >> > +                             return -EIO;
->> >> > +                     }
->> >> > +                     buf[i] =3D ',';
->> >> > +                     start =3D i;
->> >> > +             }
->> >> > +     }
->> >> > +     return 0;
->> >> > +}
->> >>=20
->> >> I'm not really fond of having this kind of ASCII based parser in the
->> >> kernel. Do you have an example compressed file somewhere?
->> >
->> > An example of uncompressed configuration file can be found here[1]. On=
-ce
->> > compressed with [2], you get:
->> >
->> >     {a:{a:4,b:1},b:{a:{a:4,b:0,c:0,d:0,e:A},b:{a:4,b:0,c:0,d:0,e:B},c:=
-{a:4,b:0,c:0,d:0,e:C},d:{a:4,b:0,c:0,d:0,e:D},e:{a:4,b:0,c:0,d:0,e:E},f:{a:=
-4,b:0,c:0,d:0,e:F},g:{a:4,b:0,c:0,d:0,e:G},h:{a:4,b:0,c:0,d:0,e:H},i:{a:4,b=
-:0,c:0,d:0,e:I},j:{a:4,b:0,c:0,d:0,e:J},k:{a:4,b:0,c:0,d:0,e:K},l:{a:4,b:0,=
-c:0,d:1,e:L},m:{a:4,b:0,c:0,d:1,e:M}},c:{a:{a:4},b:{a:6},c:{a:6,c:0},d:{a:6=
-},e:{a:6},f:{a:6}},e:{b:0,c:1},h:{e:0,a:50,b:0,d:0,c:[{a:1,b:[0,0,0,0,0,0]}=
-,{a:2,b:[0,0,0,0,0,0]},{a:[3,9],b:[0,0,0,0,0,0]},{a:A,b:[0,0,0,0,0,0]},{a:B=
-,b:[0,0,0,0,0,0]},{a:[C,D],b:[0,0,0,0,0,0]},{a:E,b:[0,0,0,0,0,0]}]},j:{a:0,=
-b:0}}
->>=20
->> So what's the grand idea with this braces format? I'm not getting it.
+> 07.10.2021 01:01, Dmitry Osipenko =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > 07.10.2021 00:14, Dmitry Osipenko =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >> 06.10.2021 15:43, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >>> On Wed, 6 Oct 2021 at 00:43, Dmitry Osipenko <digetx@gmail.com> wrote=
+:
+> >>>>
+> >>>> 06.10.2021 01:19, Dmitry Osipenko =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >>>> ...
+> >>>>> I reproduced the OFF problem by removing the clk prepare/unprepare =
+from
+> >>>>> the suspend/resume of the clk driver and making some extra changes =
+to
+> >>>>> clock tree topology and etc to trigger the problem on Nexus 7.
+> >>>>>
+> >>>>> tegra-pmc 7000e400.pmc: failed to turn off PM domain heg: -13
+> >>>>>
+> >>>>> It happens from genpd_suspend_noirq() -> tegra_genpd_power_off() ->=
+ clk
+> >>>>> -> GENPD -> I2C -> runtime-pm.
+> >>>>>
+> >>>>> -13 is EACCES, it comes from the runtime PM of I2C device. RPM is
+> >>>>> prohibited/disabled during late (NOIRQ) suspend by the drivers core=
+.
+> >>>>
+> >>>> My bad, I double-checked and it's not I2C RPM that is failing now, b=
+ut
+> >>>> the clock's RPM [1], which is also unavailable during NOIRQ.
+> >>>
+> >>> Yes, that sounds reasonable.
+> >>>
+> >>> You would then need a similar patch for the tegra clock driver as I
+> >>> suggested for tegra I2C driver. That should solve the problem, I
+> >>> think.
+> >>>
+> >>>>
+> >>>> [1]
+> >>>> https://elixir.free-electrons.com/linux/v5.15-rc4/source/drivers/clk=
+/clk.c#L116
+> >>>>
+> >>>> Previously it was I2C RPM that was failing in a similar way, but cod=
+e
+> >>>> changed a tad since that time.
+> >>>
+> >>> Alright. In any case, as long as the devices gets suspended in the
+> >>> correct order, I think it should be fine to cook a patch along the
+> >>> lines of what I suggest for the I2C driver as well.
+> >>>
+> >>> It should work, I think. Although, maybe you want to avoid runtime
+> >>> resuming the I2C device, unless it's the device belonging to the PMIC
+> >>> interface, if there is a way to distinguish that for the driver.
+> >>
+> >> Ulf, thank you very much for the suggestions! I was thinking about thi=
+s
+> >> all once again and concluded that the simplest variant will be to just
+> >> remove the suspend ops from the clk driver since neither of PLLs requi=
+re
+> >> high voltage. We now have voltage bumped to a nominal level during
+> >> suspend by Tegra's regulator-coupler driver and it's much higher than
+> >> voltage needed by PLLs. So the problem I was trying to work around
+> >> doesn't really exist anymore.
+> >
+> > I hurried a bit with the conclusion, keep forgetting that I need to
+> > change the clock tree in order to test it all properly :/ It's not fixe=
+d
+> > yet.
+> >
 >
->   - It allows to describe a tree structure
->   - It is ascii (easy to dump, easy to copy-paste)
->   - It is small (as I explain below, size matters)
->   - Since it is similar to JSON, the structure is obvious to many people
+> Please let me iterate once again. The problem we currently have is that
+> clock may be enabled during NOIRQ time. In order to enable clock, it
+> needs to be prepared. In order to prepare clock, the clock's device
+> needs to be runtime-resumed. The runtime PM is unavailable at the NOIRQ
+> time.
 >
-> Anyway, I am not the author of that and I have to deal with it.
-
-I'm a supported for JSON like formats, flexibility and all that. But
-they belong to user space, not kernel.
-
->> Usually the drivers just consider this kind of firmware configuration
->> data as a binary blob and dump it to the firmware, without knowing what
->> the data contains. Can't you do the same?
+> To solve this problem we need to prepare clock beforehand.
 >
-> [I didn't had received this mail :( ]
+> The clock will stay prepared during suspend, but this is not a problem
+> since all the clocks we care about don't require high voltage and
+> voltage is guaranteed to be bumped high during suspend by Tegra's
+> regulator-coupler driver anyways.
 >
-> The idea was also to send it as a binary blob. However, the firmware use
-> a limited buffer (1500 bytes) to parse it. In most of case the PDS exceeds
-> this size. So, we have to split the PDS before to send it.
+> So everything we need to do is to keep clocks prepared. There are two
+> options how to do that:
 >
-> Unfortunately, we can't split it anywhere. The PDS is a tree structure and
-> the firmware expects to receive a well formatted tree.
+> [1] this patch which explicitly prepares clocks using clk API.
 >
-> So, the easiest way to send it to the firmware is to split the tree
-> between each root nodes and send each subtree separately (see also the
-> comment above wfx_send_pds()).
+> [2] Use runtime PM API, like this:
 >
-> Anyway, someone has to cook this configuration before to send it to the
-> firmware. This could be done by a script outside of the kernel. Then we
-> could change the input format to simplify a bit the processing in the
-> kernel.
+> static const struct dev_pm_ops tegra_clock_pm =3D {
+>         SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_resume_and_get, pm_runtime_put=
+)
+> };
+>
+> Ulf, are you now okay with the current variant [1] of the patch or you
+> prefer the second [2] option more?
 
-I think a binary file with TLV format would be much better, but I'm sure
-there also other good choises.
+I prefer option [2]. The clock_prepare|unprepare() thingy in option
+[1], looks more like an odd workaround to me.
 
-> However, the driver has already some users and I worry that changing
-> the input format would lead to a mess.
+Does that make sense to you as well?
 
-You can implement a script which converts the old format to the new
-format. And you can use different naming scheme in the new format so
-that we don't accidentally load the old format. And even better if you
-add a some kind of signature in the new format and give a proper error
-from the driver if it doesn't match.
-
---=20
-https://patchwork.kernel.org/project/linux-wireless/list/
-
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
-hes
+Kind regards
+Uffe
