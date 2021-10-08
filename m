@@ -2,113 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEBF5C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 21:39:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 964D6C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 08:45:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C764D61152
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Oct 2021 21:39:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D4EF61056
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 08:45:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242218AbhJGVlL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Oct 2021 17:41:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44966 "EHLO
+        id S229606AbhJHIrG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Oct 2021 04:47:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52616 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234055AbhJGVlL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Oct 2021 17:41:11 -0400
-Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04E8EC061755
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Oct 2021 14:39:17 -0700 (PDT)
-Received: by mail-pf1-x434.google.com with SMTP id m26so6468103pff.3
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Oct 2021 14:39:17 -0700 (PDT)
+        with ESMTP id S229814AbhJHIrE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Oct 2021 04:47:04 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1918C061760
+        for <linux-mmc@vger.kernel.org>; Fri,  8 Oct 2021 01:45:01 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id y26so36609507lfa.11
+        for <linux-mmc@vger.kernel.org>; Fri, 08 Oct 2021 01:45:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=mABlAwLHsZ2a12EUjiNkKav9QrrHKT70s/HzdqkWE9E=;
-        b=KOXShFYrpT17QDKG0QhwkvnzbPTN/YOi70RVHOLm1gt/YtfyuuNn1yHFuZsNlYYbI/
-         Ytl+mCjoVpFHGlAf+mQsNd8MKB8YXWFPthHCMjoR0qJeUcKjCLVcx1CI/kUFjRxswbc4
-         U11nPNpmz6ZGzj9bYnUXKEs3XpDXH7tqGkVrA=
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Kt2zeS8aw7UOEZ6UIIHWzjYYnKYswwjSSwV1Raxj+m8=;
+        b=fTfPNAJ5Cgq1rDMNmAMyd5mDbrysDz/ytlWtUV45dO3zjXDMHMp90D5WNdtSMFyek7
+         JoXip2UNiYzW6vU9UEoYArzBXBTu8Idi0B19hue3jzH5Ii8rkR8QJkvDrH0auuIDhqTm
+         +QsHn2+DDmuMlWEsrcmZz22zIj1/sgIVSroD8RzRE2JjvPWoLOa0hvSDLQz0mL2og7Zq
+         eKId3iiMm+kql6bK6BLyM/XH25r4zzpK1ibfffX3K04w4kvlJnGj14BFkoj0bneeKngQ
+         e/tRPYS4i+4pAa67dBMvB8Km+CUk+FZVewgAgXfnkbY1A3YTG+SFhkLpFbsAIlgd3Y4J
+         h/xw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=mABlAwLHsZ2a12EUjiNkKav9QrrHKT70s/HzdqkWE9E=;
-        b=V+aa00IjudxYXKwQ7Wqje/0kJ53xYlB4I77aAOt0lQa+GaNb5eFTgW1GZV09pgGUf8
-         dlq9251lvlkm/7HikGKzTdtSsB1vOidAS9unTUjfUJ1tpZ538v8m/bTsa4eN3qV/tpmx
-         tokTCO7PtfyLpOTPZ0JXyMwhDORex924gffYThQgywbaEnO/K8mdp/DDQ75K0klOfQIK
-         uBHijWmQBLy+g0D8mu4I2OXGHo6107uzp6f0dTa4dCaAAM3FFf6YtF3/0Srz3tNqCA3p
-         d4TJ4lGszReWehmlRUn8A2veauX5fgM/CNYQKklZxaGwtYi8VBBiTa8JwEu7TO/l8sGi
-         iqYQ==
-X-Gm-Message-State: AOAM531bJkC8BTJHurWjVF34g0dsKfcsE7/tpOlVynQ++Ic3jDd8uAEg
-        qw4++OUuRfcIg6hTn2PTS26X94zI4ySuhw==
-X-Google-Smtp-Source: ABdhPJxvbA/4rbO9TRSd5ktXNt2aF6zSgyORSZNtDfGY4hRoTZWjZpVgsk1GUcCi++RinXgl215IWQ==
-X-Received: by 2002:aa7:8891:0:b0:44c:255d:391f with SMTP id z17-20020aa78891000000b0044c255d391fmr6802303pfe.26.1633642755461;
-        Thu, 07 Oct 2021 14:39:15 -0700 (PDT)
-Received: from mail-pf1-f172.google.com (mail-pf1-f172.google.com. [209.85.210.172])
-        by smtp.gmail.com with ESMTPSA id k17sm336789pff.214.2021.10.07.14.39.14
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 07 Oct 2021 14:39:14 -0700 (PDT)
-Received: by mail-pf1-f172.google.com with SMTP id p1so6434034pfh.8
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Oct 2021 14:39:14 -0700 (PDT)
-X-Received: by 2002:a63:1a64:: with SMTP id a36mr1565093pgm.225.1633642753857;
- Thu, 07 Oct 2021 14:39:13 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Kt2zeS8aw7UOEZ6UIIHWzjYYnKYswwjSSwV1Raxj+m8=;
+        b=nuX2gvmvhOLa4rxnBT/gl8N7u5u1uBFOxYA0Z0Ux4HDPTGLXaPgMqXuJPOcQ6GkZzq
+         NxBHqW2eNH4Tp08L5DZSTNfRnM917caF4ma+43lGMzVA2Wv+TnPFTPEgQvmQdbKvfpN5
+         rY012YS/Pkh7MxqbafPS+YvbqRS/xKrM8cv9B2JATMOOhIUT7O42q8nIs3PCQ2peydPy
+         XVwS21+sbumzXmtVyg7+6PnhoDuQFrt97a87a6wIA9saZIdaazoM5EZ8cUz0nE+NkEEY
+         jJox49XBGPRsqscdC9QPumWTQwlCBpqLWb+fosGB3C4G39LQHd0AR9wakF70GEWk5Lme
+         jFnA==
+X-Gm-Message-State: AOAM533S6p/Tkxb+XNun4jMHmBjRyRo/FKd7fgk+edCtJOJR6XsYDjmh
+        2n7/0zqD2/8123mYshKb+PlLEQ==
+X-Google-Smtp-Source: ABdhPJwrtpQdAJ79EajjX9Yv8er2FlDFohRG70iBpVkmrPgMcTjYV9LLJ/a3T2xsfVopSXy3NUB6iw==
+X-Received: by 2002:a05:651c:1110:: with SMTP id d16mr2205874ljo.326.1633682700097;
+        Fri, 08 Oct 2021 01:45:00 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-129-146.NA.cust.bahnhof.se. [155.4.129.146])
+        by smtp.gmail.com with ESMTPSA id h2sm186649lfe.134.2021.10.08.01.44.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Oct 2021 01:44:58 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.15-rc5
+Date:   Fri,  8 Oct 2021 10:44:58 +0200
+Message-Id: <20211008084458.30104-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20211005102430.63716-1-andriy.shevchenko@linux.intel.com> <YV8jfavX/W9T25YX@smile.fi.intel.com>
-In-Reply-To: <YV8jfavX/W9T25YX@smile.fi.intel.com>
-From:   Raul Rangel <rrangel@chromium.org>
-Date:   Thu, 7 Oct 2021 15:39:02 -0600
-X-Gmail-Original-Message-ID: <CAHQZ30BbXA0GEuzUy68=W94ArMiO=3Sbg-HQNqUdtSTcvWOF0A@mail.gmail.com>
-Message-ID: <CAHQZ30BbXA0GEuzUy68=W94ArMiO=3Sbg-HQNqUdtSTcvWOF0A@mail.gmail.com>
-Subject: Re: [PATCH v1 0/6] mmc: sdhci-pci: Add some CD GPIO related quirks
-To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Eric Biggers <ebiggers@google.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It looks like you were previously using the `cd-gpios` DT property to
-determine this. It also sounds like you switched from DT to ACPI so
-you lost the ability to use this field?
+Hi Linus,
 
-Can you not use something like the following:
-https://source.chromium.org/chromiumos/chromiumos/codesearch/+/main:src/third_party/kernel/v5.10/drivers/mmc/host/sdhci-acpi.c;l=945
+Here's a PR with a couple of MMC fixes intended for v5.15-rc5. Details about the
+highlights are as usual found in the signed tag.
 
-p.s.,
-Sorry for resending. I sent it as rich text before.
+Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
-On Thu, Oct 7, 2021 at 10:47 AM Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
->
-> On Tue, Oct 05, 2021 at 01:24:24PM +0300, Andy Shevchenko wrote:
-> > It appears that one of the supported platform magically worked with the
-> > custom IRQ handler (any hints how?) while having two PCB designs with
-> > an opposite CD sense level. Here is an attempt to fix it by quirking out
-> > CD GPIO.
-> >
-> > Patch 1 introduces two additional quirks (it's done this way due to
-> > patch 3, see below). Patch 2 is an actual fix for the mentioned platform.
-> > If backported need to be taken with patch 1 together. Patch 3 is (RFT)
-> > clean up. The questionable part here is the locking scheme. Shouldn't
-> > we do something similar in the generic IRQ handler of SDHCI? Or Broxton
-> > case has something quite different in mind?
-> >
-> > Patches 4-6 are dead-code removals. Patch 4 accompanying patch 2, patches
-> > 5-6 just similar to it, but (functionally) independent. Would like to hear
-> > if it's okay to do.
-> >
-> > Any comments, hints, advice are welcome!
->
-> Adrian, Ulf, any comments on this? At least first two fix the regression and
-> would be nice to have them in sooner than later (I can split them separately
-> if required).
->
-> --
-> With Best Regards,
-> Andy Shevchenko
->
->
+The following changes since commit 9e1ff307c779ce1f0f810c7ecce3d95bbae40896:
+
+  Linux 5.15-rc4 (2021-10-03 14:08:47 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15-rc4
+
+for you to fetch changes up to 8a38a4d51c5055d0201542e5ea3c0cb287f6e223:
+
+  mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk (2021-10-06 17:23:28 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - meson-gx: Fix read/write access for dram-access-quirk
+ - sdhci-of-at91: Fix calibration sequence
+
+----------------------------------------------------------------
+Claudiu Beznea (2):
+      mmc: sdhci-of-at91: wait for calibration done before proceed
+      mmc: sdhci-of-at91: replace while loop with read_poll_timeout
+
+Neil Armstrong (1):
+      mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
+
+ drivers/mmc/host/meson-gx-mmc.c  | 73 ++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/sdhci-of-at91.c | 22 ++++++------
+ 2 files changed, 70 insertions(+), 25 deletions(-)
