@@ -2,194 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6446FC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 09:46:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E97E2C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 12:12:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4B38961037
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 09:46:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF35D60F5C
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 12:12:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238955AbhJHJry (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Oct 2021 05:47:54 -0400
-Received: from mga11.intel.com ([192.55.52.93]:42568 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S238771AbhJHJrw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 8 Oct 2021 05:47:52 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10130"; a="223883223"
-X-IronPort-AV: E=Sophos;i="5.85,357,1624345200"; 
-   d="scan'208";a="223883223"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2021 02:45:11 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.85,357,1624345200"; 
-   d="scan'208";a="524977886"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by fmsmga008.fm.intel.com with ESMTP; 08 Oct 2021 02:45:09 -0700
-Subject: Re: [PATCH v1 5/6] mmc: sdhci-pci: Remove dead code (cd_gpio, cd_irq
- et al)
-To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Eric Biggers <ebiggers@google.com>,
-        Raul E Rangel <rrangel@chromium.org>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <20211005102430.63716-1-andriy.shevchenko@linux.intel.com>
- <20211005102430.63716-6-andriy.shevchenko@linux.intel.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <05957c44-73f2-b53f-a23f-9f7d19cfe10b@intel.com>
-Date:   Fri, 8 Oct 2021 12:45:08 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S240715AbhJHMOo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Oct 2021 08:14:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43768 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240374AbhJHMOn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Oct 2021 08:14:43 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73126C061570
+        for <linux-mmc@vger.kernel.org>; Fri,  8 Oct 2021 05:12:48 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id u18so38236187lfd.12
+        for <linux-mmc@vger.kernel.org>; Fri, 08 Oct 2021 05:12:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=unTpf7x1Zh6JRpmWN02YBcJMyEDfP5RqTCFbqPM8fdM=;
+        b=fLHObyHwvExZ2uwtIURuHTokmgPMLOoI13yXgx7J2tO4djlc/TRcIOGWD2AkkStj1R
+         kidKUiPwAWCHaHUq20y5+gpwFYknlcdxNmRi0vpts9ewZxGw0iCuV5J3WJK94tCQoyCw
+         fIusWF7VSQ7fHLBaEou0EfT080Y+6nncMMLvoHRX5qyfCtcmxxP+AAsJJz5ZXccL4z6r
+         YX30n2a8ry6i39tzQXiSqGmoSe05IOWcOdup60gsUKum0WVr8VFdfvdUcM1m5GCO/Qqj
+         c7yZprUqDRYcRRhLcI06TxKeHJAEczWJDSLq7sqt/tsH0JvKno+lKxRG2TlviBjomxho
+         dy2g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=unTpf7x1Zh6JRpmWN02YBcJMyEDfP5RqTCFbqPM8fdM=;
+        b=BulNRciFUf8zOYw4i+haMxyijkuwXcHvISHK/HTZqnaYO/XQ9HE4ShwW6uroWtpPyj
+         ND8jVXFStlQVmL2hba/CySwKWnJ2tsPeKJ744fCAMfA4PiKwn4Dt/tIjYw1JfQqKXQu8
+         7bO5zRhwm9cpjKb8hHs3XdrK+WwFAv0hO6CZKZFaWve814xB6TivEFQe7/cOlvEplUdi
+         qYqFG3QiyXoUGMK+uuk+EE0WzTnptvNI0P6HC5j9rvpNgti4X3NsckHfBaz22R5T47AB
+         chGkKiyxYH4qoLLv1tGlf4RBaJmKqjYNzR9J8YVcbRt7aFRHHoFVbO0Hr9Wp/46WlGi9
+         22XA==
+X-Gm-Message-State: AOAM532F8ShfUotEB3h6jixcYXN8OR1bMFRvQ4D88+oyYYcu79dRxLUa
+        BuDhZebcb020l5Du4wx23xZIKJra59aIuHGTVCTlGg==
+X-Google-Smtp-Source: ABdhPJxf19NU+QPvfRT/N467g3ccGQlt314KORg+0xxNxgDfSfY7SuyLB1ZmTmPxF4MrWRNgXgPbZVRhZQtJoZbOAtc=
+X-Received: by 2002:a05:651c:4c9:: with SMTP id e9mr3216170lji.229.1633695166786;
+ Fri, 08 Oct 2021 05:12:46 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20211005102430.63716-6-andriy.shevchenko@linux.intel.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20211004024935.15326-1-shawn.guo@linaro.org>
+In-Reply-To: <20211004024935.15326-1-shawn.guo@linaro.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 8 Oct 2021 14:12:10 +0200
+Message-ID: <CAPDyKFrNq4J9TsyqXhXnQuxCotUPQE=4qjUQWk2bpNGvS7Rm4Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Map more voltage level to SDHCI_POWER_330
+To:     Shawn Guo <shawn.guo@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 05/10/2021 13:24, Andy Shevchenko wrote:
-> The last user of this struct gone couple of releases ago.
-> Remove the dead code for good and encourage people to use
-> MMC core functionality for that.
+On Mon, 4 Oct 2021 at 04:49, Shawn Guo <shawn.guo@linaro.org> wrote:
+>
+> On Thundercomm TurboX CM2290, the eMMC OCR reports vdd = 23 (3.5 ~ 3.6 V),
+> which is being treated as an invalid value by sdhci_set_power_noreg().
+> And thus eMMC is totally broken on the platform.
+>
+> [    1.436599] ------------[ cut here ]------------
+> [    1.436606] mmc0: Invalid vdd 0x17
+> [    1.436640] WARNING: CPU: 2 PID: 69 at drivers/mmc/host/sdhci.c:2048 sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436655] Modules linked in:
+> [    1.436662] CPU: 2 PID: 69 Comm: kworker/u8:1 Tainted: G        W         5.15.0-rc1+ #137
+> [    1.436669] Hardware name: Thundercomm TurboX CM2290 (DT)
+> [    1.436674] Workqueue: events_unbound async_run_entry_fn
+> [    1.436685] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+> [    1.436692] pc : sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436698] lr : sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436703] sp : ffff800010803a60
+> [    1.436705] x29: ffff800010803a60 x28: ffff6a9102465f00 x27: ffff6a9101720a70
+> [    1.436715] x26: ffff6a91014de1c0 x25: ffff6a91014de010 x24: ffff6a91016af280
+> [    1.436724] x23: ffffaf7b1b276640 x22: 0000000000000000 x21: ffff6a9101720000
+> [    1.436733] x20: ffff6a9101720370 x19: ffff6a9101720580 x18: 0000000000000020
+> [    1.436743] x17: 0000000000000000 x16: 0000000000000004 x15: ffffffffffffffff
+> [    1.436751] x14: 0000000000000000 x13: 00000000fffffffd x12: ffffaf7b1b84b0bc
+> [    1.436760] x11: ffffaf7b1b720d10 x10: 000000000000000a x9 : ffff800010803a60
+> [    1.436769] x8 : 000000000000000a x7 : 000000000000000f x6 : 00000000fffff159
+> [    1.436778] x5 : 0000000000000000 x4 : 0000000000000000 x3 : 00000000ffffffff
+> [    1.436787] x2 : 0000000000000000 x1 : 0000000000000000 x0 : ffff6a9101718d80
+> [    1.436797] Call trace:
+> [    1.436800]  sdhci_set_power_noreg+0x168/0x2b4
+> [    1.436805]  sdhci_set_ios+0xa0/0x7fc
+> [    1.436811]  mmc_power_up.part.0+0xc4/0x164
+> [    1.436818]  mmc_start_host+0xa0/0xb0
+> [    1.436824]  mmc_add_host+0x60/0x90
+> [    1.436830]  __sdhci_add_host+0x174/0x330
+> [    1.436836]  sdhci_msm_probe+0x7c0/0x920
+> [    1.436842]  platform_probe+0x68/0xe0
+> [    1.436850]  really_probe.part.0+0x9c/0x31c
+> [    1.436857]  __driver_probe_device+0x98/0x144
+> [    1.436863]  driver_probe_device+0xc8/0x15c
+> [    1.436869]  __device_attach_driver+0xb4/0x120
+> [    1.436875]  bus_for_each_drv+0x78/0xd0
+> [    1.436881]  __device_attach_async_helper+0xac/0xd0
+> [    1.436888]  async_run_entry_fn+0x34/0x110
+> [    1.436895]  process_one_work+0x1d0/0x354
+> [    1.436903]  worker_thread+0x13c/0x470
+> [    1.436910]  kthread+0x150/0x160
+> [    1.436915]  ret_from_fork+0x10/0x20
+> [    1.436923] ---[ end trace fcfac44cb045c3a8 ]---
+>
+> Fix the issue by mapping MMC_VDD_35_36 (and MMC_VDD_34_35) to
+> SDHCI_POWER_330 as well.
+>
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 
-So this is dependent on patch 4 i.e. that patch removed the
-references to the code being removed in this patch.  Please
-make a note of that in the commit message.
+Applied for fixes and by adding a stable tag, thanks!
+
+Kind regards
+Uffe
 
 
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 76 +------------------------------
->  drivers/mmc/host/sdhci-pci.h      |  2 -
->  2 files changed, 1 insertion(+), 77 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 8d01285e1b32..a4279437bb5f 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -345,73 +345,6 @@ static int pch_hc_probe_slot(struct sdhci_pci_slot *slot)
->  	return 0;
->  }
->  
-> -#ifdef CONFIG_PM
-> -
-> -static irqreturn_t sdhci_pci_sd_cd(int irq, void *dev_id)
-> -{
-> -	struct sdhci_pci_slot *slot = dev_id;
-> -	struct sdhci_host *host = slot->host;
-> -
-> -	mmc_detect_change(host->mmc, msecs_to_jiffies(200));
-> -	return IRQ_HANDLED;
-> -}
-> -
-> -static void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
-> -{
-> -	int err, irq, gpio = slot->cd_gpio;
-> -
-> -	slot->cd_gpio = -EINVAL;
-> -	slot->cd_irq = -EINVAL;
-> -
-> -	if (!gpio_is_valid(gpio))
-> -		return;
-> -
-> -	err = devm_gpio_request(&slot->chip->pdev->dev, gpio, "sd_cd");
-> -	if (err < 0)
-> -		goto out;
-> -
-> -	err = gpio_direction_input(gpio);
-> -	if (err < 0)
-> -		goto out_free;
-> -
-> -	irq = gpio_to_irq(gpio);
-> -	if (irq < 0)
-> -		goto out_free;
-> -
-> -	err = request_irq(irq, sdhci_pci_sd_cd, IRQF_TRIGGER_RISING |
-> -			  IRQF_TRIGGER_FALLING, "sd_cd", slot);
-> -	if (err)
-> -		goto out_free;
-> -
-> -	slot->cd_gpio = gpio;
-> -	slot->cd_irq = irq;
-> -
-> -	return;
-> -
-> -out_free:
-> -	devm_gpio_free(&slot->chip->pdev->dev, gpio);
-> -out:
-> -	dev_warn(&slot->chip->pdev->dev, "failed to setup card detect wake up\n");
-> -}
-> -
-> -static void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
-> -{
-> -	if (slot->cd_irq >= 0)
-> -		free_irq(slot->cd_irq, slot);
-> -}
-> -
-> -#else
-> -
-> -static inline void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
-> -{
-> -}
-> -
-> -static inline void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
-> -{
-> -}
-> -
-> -#endif
-> -
->  static int mfd_emmc_probe_slot(struct sdhci_pci_slot *slot)
->  {
->  	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE;
-> @@ -2113,7 +2046,6 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  	slot->chip = chip;
->  	slot->host = host;
->  	slot->rst_n_gpio = -EINVAL;
-> -	slot->cd_gpio = -EINVAL;
->  	slot->cd_idx = -1;
->  
->  	host->hw_name = "PCI";
-> @@ -2184,15 +2116,11 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
->  	if (ret)
->  		goto remove;
->  
-> -	sdhci_pci_add_own_cd(slot);
-> -
->  	/*
->  	 * Check if the chip needs a separate GPIO for card detect to wake up
->  	 * from runtime suspend.  If it is not there, don't allow runtime PM.
-> -	 * Note sdhci_pci_add_own_cd() sets slot->cd_gpio to -EINVAL on failure.
->  	 */
-> -	if (chip->fixes && chip->fixes->own_cd_for_runtime_pm &&
-> -	    !gpio_is_valid(slot->cd_gpio) && slot->cd_idx < 0)
-> +	if (chip->fixes && chip->fixes->own_cd_for_runtime_pm && slot->cd_idx < 0)
->  		chip->allow_runtime_pm = false;
->  
->  	return slot;
-> @@ -2212,8 +2140,6 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
->  	int dead;
->  	u32 scratch;
->  
-> -	sdhci_pci_remove_own_cd(slot);
-> -
->  	dead = 0;
->  	scratch = readl(slot->host->ioaddr + SDHCI_INT_STATUS);
->  	if (scratch == (u32)-1)
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 15b36cd47860..8bb3b9c78589 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -158,8 +158,6 @@ struct sdhci_pci_slot {
->  	struct sdhci_host	*host;
->  
->  	int			rst_n_gpio;
-> -	int			cd_gpio;
-> -	int			cd_irq;
->  
->  	int			cd_idx;
->  	bool			cd_override_level;
-> 
-
+> Changes since RFC:
+> - Add a comment for 3.4 ~ 3.6V voltage range.
+>
+>  drivers/mmc/host/sdhci.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 8eefa7d5fe85..2d80a04e11d8 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2042,6 +2042,12 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+>                         break;
+>                 case MMC_VDD_32_33:
+>                 case MMC_VDD_33_34:
+> +               /*
+> +                * 3.4 ~ 3.6V are valid only for those platforms where it's
+> +                * known that the voltage range is supported by hardware.
+> +                */
+> +               case MMC_VDD_34_35:
+> +               case MMC_VDD_35_36:
+>                         pwr = SDHCI_POWER_330;
+>                         break;
+>                 default:
+> --
+> 2.17.1
+>
