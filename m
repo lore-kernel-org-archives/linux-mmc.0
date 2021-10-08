@@ -2,104 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 964D6C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 08:45:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E685AC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 09:38:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6D4EF61056
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 08:45:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CAECB61027
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Oct 2021 09:38:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229606AbhJHIrG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Oct 2021 04:47:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52616 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229814AbhJHIrE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Oct 2021 04:47:04 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1918C061760
-        for <linux-mmc@vger.kernel.org>; Fri,  8 Oct 2021 01:45:01 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id y26so36609507lfa.11
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Oct 2021 01:45:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Kt2zeS8aw7UOEZ6UIIHWzjYYnKYswwjSSwV1Raxj+m8=;
-        b=fTfPNAJ5Cgq1rDMNmAMyd5mDbrysDz/ytlWtUV45dO3zjXDMHMp90D5WNdtSMFyek7
-         JoXip2UNiYzW6vU9UEoYArzBXBTu8Idi0B19hue3jzH5Ii8rkR8QJkvDrH0auuIDhqTm
-         +QsHn2+DDmuMlWEsrcmZz22zIj1/sgIVSroD8RzRE2JjvPWoLOa0hvSDLQz0mL2og7Zq
-         eKId3iiMm+kql6bK6BLyM/XH25r4zzpK1ibfffX3K04w4kvlJnGj14BFkoj0bneeKngQ
-         e/tRPYS4i+4pAa67dBMvB8Km+CUk+FZVewgAgXfnkbY1A3YTG+SFhkLpFbsAIlgd3Y4J
-         h/xw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Kt2zeS8aw7UOEZ6UIIHWzjYYnKYswwjSSwV1Raxj+m8=;
-        b=nuX2gvmvhOLa4rxnBT/gl8N7u5u1uBFOxYA0Z0Ux4HDPTGLXaPgMqXuJPOcQ6GkZzq
-         NxBHqW2eNH4Tp08L5DZSTNfRnM917caF4ma+43lGMzVA2Wv+TnPFTPEgQvmQdbKvfpN5
-         rY012YS/Pkh7MxqbafPS+YvbqRS/xKrM8cv9B2JATMOOhIUT7O42q8nIs3PCQ2peydPy
-         XVwS21+sbumzXmtVyg7+6PnhoDuQFrt97a87a6wIA9saZIdaazoM5EZ8cUz0nE+NkEEY
-         jJox49XBGPRsqscdC9QPumWTQwlCBpqLWb+fosGB3C4G39LQHd0AR9wakF70GEWk5Lme
-         jFnA==
-X-Gm-Message-State: AOAM533S6p/Tkxb+XNun4jMHmBjRyRo/FKd7fgk+edCtJOJR6XsYDjmh
-        2n7/0zqD2/8123mYshKb+PlLEQ==
-X-Google-Smtp-Source: ABdhPJwrtpQdAJ79EajjX9Yv8er2FlDFohRG70iBpVkmrPgMcTjYV9LLJ/a3T2xsfVopSXy3NUB6iw==
-X-Received: by 2002:a05:651c:1110:: with SMTP id d16mr2205874ljo.326.1633682700097;
-        Fri, 08 Oct 2021 01:45:00 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-129-146.NA.cust.bahnhof.se. [155.4.129.146])
-        by smtp.gmail.com with ESMTPSA id h2sm186649lfe.134.2021.10.08.01.44.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 08 Oct 2021 01:44:58 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.15-rc5
-Date:   Fri,  8 Oct 2021 10:44:58 +0200
-Message-Id: <20211008084458.30104-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        id S238227AbhJHJk3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Oct 2021 05:40:29 -0400
+Received: from mga09.intel.com ([134.134.136.24]:5161 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229863AbhJHJkZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 8 Oct 2021 05:40:25 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10130"; a="226373516"
+X-IronPort-AV: E=Sophos;i="5.85,357,1624345200"; 
+   d="scan'208";a="226373516"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2021 02:38:30 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.85,357,1624345200"; 
+   d="scan'208";a="524976647"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by fmsmga008.fm.intel.com with ESMTP; 08 Oct 2021 02:38:26 -0700
+Subject: Re: [PATCH v1 1/6] mmc: sdhci: Introduce couple of quirks to ignore
+ particular state of CD GPIO
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Eric Biggers <ebiggers@google.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+References: <20211005102430.63716-1-andriy.shevchenko@linux.intel.com>
+ <20211005102430.63716-2-andriy.shevchenko@linux.intel.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <2bed40e1-9601-7aae-a246-9939cb744526@intel.com>
+Date:   Fri, 8 Oct 2021 12:38:26 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20211005102430.63716-2-andriy.shevchenko@linux.intel.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 05/10/2021 13:24, Andy Shevchenko wrote:
+> Some platforms may provide contradictory info in some states of CD GPIO line,
+> and hence that state or states should be ignored. Introduce couple of quirks
+> for that.
 
-Here's a PR with a couple of MMC fixes intended for v5.15-rc5. Details about the
-highlights are as usual found in the signed tag.
+OK, I have looked closer now :-)
 
-Please pull this in!
+Hooking ->get_cd() should work, and that is preferred to new quirks.
+Please try that.
 
-Kind regards
-Ulf Hansson
+> 
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 13 ++++++++-----
+>  drivers/mmc/host/sdhci.h |  4 ++++
+>  2 files changed, 12 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 357b365bf0ec..a7960ee3ef4f 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2395,7 +2395,7 @@ EXPORT_SYMBOL_GPL(sdhci_set_ios);
+>  static int sdhci_get_cd(struct mmc_host *mmc)
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+> -	int gpio_cd = mmc_gpio_get_cd(mmc);
+> +	int gpio_cd;
+>  
+>  	if (host->flags & SDHCI_DEVICE_DEAD)
+>  		return 0;
+> @@ -2405,11 +2405,14 @@ static int sdhci_get_cd(struct mmc_host *mmc)
+>  		return 1;
+>  
+>  	/*
+> -	 * Try slot gpio detect, if defined it take precedence
+> -	 * over build in controller functionality
+> +	 * Try slot GPIO detect, if defined it take precedence
+> +	 * over build in controller functionality.
+>  	 */
+> -	if (gpio_cd >= 0)
+> -		return !!gpio_cd;
+> +	gpio_cd = mmc_gpio_get_cd(mmc);
+> +	if (gpio_cd == 0 && !(host->quirks2 & SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_LOW))
+> +		return 0;
+> +	if (gpio_cd > 0 && !(host->quirks2 & SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH))
+> +		return 1;
+>  
+>  	/* If polling, assume that the card is always present. */
+>  	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index e8d04e42a5af..fb7910d22b18 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -464,6 +464,10 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+>  /* Controller has CRC in 136 bit Command Response */
+>  #define SDHCI_QUIRK2_RSP_136_HAS_CRC			(1<<16)
+> +/* Controller requires additional card detection test on GPIO low */
+> +#define SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_LOW		(1<<17)
+> +/* Controller requires additional card detection test on GPIO high */
+> +#define SDHCI_QUIRK_CARD_DETECTION_IF_GPIO_HIGH		(1<<18)
+>  /*
+>   * Disable HW timeout if the requested timeout is more than the maximum
+>   * obtainable timeout.
+> 
 
-
-The following changes since commit 9e1ff307c779ce1f0f810c7ecce3d95bbae40896:
-
-  Linux 5.15-rc4 (2021-10-03 14:08:47 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15-rc4
-
-for you to fetch changes up to 8a38a4d51c5055d0201542e5ea3c0cb287f6e223:
-
-  mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk (2021-10-06 17:23:28 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - meson-gx: Fix read/write access for dram-access-quirk
- - sdhci-of-at91: Fix calibration sequence
-
-----------------------------------------------------------------
-Claudiu Beznea (2):
-      mmc: sdhci-of-at91: wait for calibration done before proceed
-      mmc: sdhci-of-at91: replace while loop with read_poll_timeout
-
-Neil Armstrong (1):
-      mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
-
- drivers/mmc/host/meson-gx-mmc.c  | 73 ++++++++++++++++++++++++++++++++--------
- drivers/mmc/host/sdhci-of-at91.c | 22 ++++++------
- 2 files changed, 70 insertions(+), 25 deletions(-)
