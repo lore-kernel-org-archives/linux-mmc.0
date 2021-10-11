@@ -2,121 +2,150 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF12CC433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 Oct 2021 04:20:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ACF25C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Oct 2021 05:23:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AAB8C60F9C
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 Oct 2021 04:20:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F85760F35
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Oct 2021 05:23:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229594AbhJIEWs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 9 Oct 2021 00:22:48 -0400
-Received: from zg8tmty1ljiyny4xntqumjca.icoremail.net ([165.227.154.27]:56504
-        "HELO zg8tmty1ljiyny4xntqumjca.icoremail.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with SMTP id S229480AbhJIEWr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Oct 2021 00:22:47 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fudan.edu.cn; s=dkim; h=Received:From:To:Cc:Subject:Date:
-        Message-Id:MIME-Version:Content-Transfer-Encoding; bh=djcJNMrGEx
-        11DVeXfstEyaEscPLXu5hozbJu0q4CIqU=; b=tW3DT98Y/QG1bzhwtNp/ra8uo9
-        Wxaa2l2HM3rczHiQ8lc4PvZ1UYti6+NOCW8R0N6R5XhfoJc87rGWOdBvR0uBOxEW
-        l/WxbBN6V6gpxzqO6H0JD4MbPujy8rvVav3lfyer8hLJZHLQcf4JcQfMnWPwJSXF
-        XUj9OTAUsElweQ/wY=
-Received: from localhost.localdomain (unknown [10.102.225.147])
-        by app2 (Coremail) with SMTP id XQUFCgBXim6OGGFhruAAAA--.1394S4;
-        Sat, 09 Oct 2021 12:20:40 +0800 (CST)
-From:   Xin Xiong <xiongx18@fudan.edu.cn>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     yuanxzhang@fudan.edu.cn, Xin Xiong <xiongx18@fudan.edu.cn>,
-        Xiyu Yang <xiyuyang19@fudan.edu.cn>,
-        Xin Tan <tanxin.ctf@gmail.com>
-Subject: [PATCH v4] drivers/mmc: fix reference count leaks in moxart_probe
-Date:   Sat,  9 Oct 2021 12:19:18 +0800
-Message-Id: <20211009041918.28419-1-xiongx18@fudan.edu.cn>
-X-Mailer: git-send-email 2.25.1
+        id S231872AbhJKFZp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Oct 2021 01:25:45 -0400
+Received: from muru.com ([72.249.23.125]:43204 "EHLO muru.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231560AbhJKFZo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 11 Oct 2021 01:25:44 -0400
+Received: from localhost (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTPS id 9DC92805F;
+        Mon, 11 Oct 2021 05:24:15 +0000 (UTC)
+Date:   Mon, 11 Oct 2021 08:23:42 +0300
+From:   Tony Lindgren <tony@atomide.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        Rob Herring <robh@kernel.org>,
+        DTML <devicetree@vger.kernel.org>
+Subject: Re: [PATCH 4/5] mmc: sdhci-omap: Implement PM runtime functions
+Message-ID: <YWPKXvPCTIir+TzG@atomide.com>
+References: <20210930065733.31943-1-tony@atomide.com>
+ <20210930065733.31943-5-tony@atomide.com>
+ <CAPDyKFpybVPeYy-FsXnzDXNri+f7rhPmKa6vBF8NMUc3dQCZRw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: XQUFCgBXim6OGGFhruAAAA--.1394S4
-X-Coremail-Antispam: 1UD129KBjvJXoW7WF1xJF4Utw4rKFyUXr4xJFb_yoW8tr4xpF
-        48Cr9xKrWUtr4agF4xCa1kXF18Zr1Fyw4akrZ8u3s7A34UJFnrC34kG3W0qF95JryrXa9Y
-        gF15tF1ruFW8JFJanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDU0xBIdaVrnRJUUUvS14x267AKxVW8JVW5JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
-        rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-        1l84ACjcxK6xIIjxv20xvE14v26w1j6s0DM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26F4U
-        JVW0owA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
-        Cq3wAac4AC62xK8xCEY4vEwIxC4wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC
-        0VAKzVAqx4xG6I80ewAv7VC0I7IYx2IY67AKxVWUGVWUXwAv7VC2z280aVAFwI0_Jr0_Gr
-        1lOx8S6xCaFVCjc4AY6r1j6r4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IE
-        rcIFxwCY02Avz4vE-syl42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2
-        IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v2
-        6r126r1DMIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2
-        IY6xkF7I0E14v26r1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWrZr1j6s0DMIIF0xvEx4A2
-        jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43
-        ZEXa7VU1c4S5UUUUU==
-X-CM-SenderInfo: arytiiqsuqiimz6i3vldqovvfxof0/1tbiARAIEFKp41whwwABsu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpybVPeYy-FsXnzDXNri+f7rhPmKa6vBF8NMUc3dQCZRw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The issue happens in several error handling paths on two refcounted
-object related to the object "host" (dma_chan_rx, dma_chan_tx). In
-these paths, the function forgets to decrement one or both objects'
-reference count increased earlier by dma_request_chan(), causing
-reference count leaks.
+* Ulf Hansson <ulf.hansson@linaro.org> [211008 14:44]:
+> On Thu, 30 Sept 2021 at 08:57, Tony Lindgren <tony@atomide.com> wrote:
+> >
+> > Implement PM runtime functions and enable MMC_CAP_AGGRESSIVE_PM.
+> 
+> I suggest you split this change into two pieces. MMC_CAP_AGGRESSIVE_PM
+> is about enabling runtime PM management for the eMMC/SD card device,
+> which is perfectly fine to use independently of whether runtime PM is
+> supported for the host device.
 
-Fix it by balancing the refcounts of both objects in some error
-handling paths. In correspondence with the changes in moxart_probe(),
-IS_ERR() is replaced with IS_ERR_OR_NULL() in moxart_remove() as well.
+OK
 
-Signed-off-by: Xin Xiong <xiongx18@fudan.edu.cn>
-Signed-off-by: Xiyu Yang <xiyuyang19@fudan.edu.cn>
-Signed-off-by: Xin Tan <tanxin.ctf@gmail.com>
----
- drivers/mmc/host/moxart-mmc.c | 16 ++++++++++++++--
- 1 file changed, 14 insertions(+), 2 deletions(-)
+> > @@ -1350,6 +1357,11 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+> >         if (ret)
+> >                 goto err_cleanup_host;
+> >
+> > +       sdhci_omap_context_save(omap_host);
+> > +       omap_host->context_valid = 1;
+> 
+> Looks like you can remove this flag, it's not being used.
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index 6c9d38132..7b9fcef49 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -621,6 +621,14 @@ static int moxart_probe(struct platform_device *pdev)
- 			ret = -EPROBE_DEFER;
- 			goto out;
- 		}
-+		if (!IS_ERR(host->dma_chan_tx)) {
-+			dma_release_channel(host->dma_chan_tx);
-+			host->dma_chan_tx = NULL;
-+		}
-+		if (!IS_ERR(host->dma_chan_rx)) {
-+			dma_release_channel(host->dma_chan_rx);
-+			host->dma_chan_rx = NULL;
-+		}
- 		dev_dbg(dev, "PIO mode transfer enabled\n");
- 		host->have_dma = false;
- 	} else {
-@@ -675,6 +683,10 @@ static int moxart_probe(struct platform_device *pdev)
- 	return 0;
- 
- out:
-+	if (!IS_ERR_OR_NULL(host->dma_chan_tx))
-+		dma_release_channel(host->dma_chan_tx);
-+	if (!IS_ERR_OR_NULL(host->dma_chan_rx))
-+		dma_release_channel(host->dma_chan_rx);
- 	if (mmc)
- 		mmc_free_host(mmc);
- 	return ret;
-@@ -687,9 +699,9 @@ static int moxart_remove(struct platform_device *pdev)
- 
- 	dev_set_drvdata(&pdev->dev, NULL);
- 
--	if (!IS_ERR(host->dma_chan_tx))
-+	if (!IS_ERR_OR_NULL(host->dma_chan_tx))
- 		dma_release_channel(host->dma_chan_tx);
--	if (!IS_ERR(host->dma_chan_rx))
-+	if (!IS_ERR_OR_NULL(host->dma_chan_rx))
- 		dma_release_channel(host->dma_chan_rx);
- 	mmc_remove_host(mmc);
- 	mmc_free_host(mmc);
--- 
-2.25.1
+Hmm I think it is needed as otherwise we end up trying to restore
+an invalid context on probe on the first pm_runtime_get(). Do you
+have some nicer solution for that in mind?
 
+> > +
+> > +       pm_runtime_put_sync(dev);
+> 
+> I recommend to use the PM runtime autosuspend feature, as to avoid an
+> initial latency for every I/O request to the host driver. The mmc core
+> already supports that, see mmc_release_host().
+> 
+> The typical default timeout value for autosuspend, is usually set
+> ~50-200ms, by host drivers (if I recall correctly).
+
+OK I have a patch to also enable autosuspend too, I'll add that
+too for the next revision.
+
+> > @@ -1371,6 +1383,7 @@ static int sdhci_omap_remove(struct platform_device *pdev)
+> >         struct device *dev = &pdev->dev;
+> >         struct sdhci_host *host = platform_get_drvdata(pdev);
+> >
+> > +       pm_runtime_get_sync(dev);
+> >         sdhci_remove_host(host, true);
+> >         pm_runtime_put_sync(dev);
+> 
+> There is no guarantee that this triggers a call to
+> ->sdhci_omap_runtime_suspend(), which I guess is what we want.
+> Userspace via sysfs may have increase the RPM usage count
+> (pm_runtime_forbid(), for example.
+> 
+> To address this, I would call pm_runtime_disable() first and then
+> explicitly put the device into low power state, rather than relying on
+> runtime PM to do it. Another option could be to use
+> pm_runtime_force_suspend().
+
+OK I'll take a look.
+
+> > @@ -1402,42 +1415,75 @@ static void sdhci_omap_context_restore(struct sdhci_omap_host *omap_host)
+> >         sdhci_omap_writel(omap_host, SDHCI_OMAP_ISE, omap_host->ise);
+> >  }
+> >
+> > -static int __maybe_unused sdhci_omap_suspend(struct device *dev)
+> > +static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
+> >  {
+> >         struct sdhci_host *host = dev_get_drvdata(dev);
+> >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+> >
+> > -       sdhci_suspend_host(host);
+> > -
+> 
+> Shouldn't you call sdhci_runtime_suspend_host() somewhere here?
+
+I'm pretty sure I tried, but runtime resume did not seem to work after
+doing that.. I'll take a look again.
+
+> > +static int __maybe_unused sdhci_omap_suspend(struct device *dev)
+> > +{
+> > +       struct sdhci_host *host = dev_get_drvdata(dev);
+> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +       struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+> > +
+> > +       if (omap_host->is_runtime_suspended)
+> > +               return 0;
+> 
+> So if the host is already runtime suspended, it's okay to just leave it as is?
+
+Ideally yeah there should not be anything left to do for suspesnd at
+that point. But sounds like I may be missing something.
+
+> In a way that sounds like you could call pm_runtime_force_suspend()
+> instead, assuming the sdhci_omap_runtime_suspend() can be extended to
+> do the right thing for system suspend as well.
+
+OK I'll check.
+
+> It looks a bit odd that sdhci_suspend_host() is called only when the
+> host is runtime resumed. Perhaps you can elaborate a bit more on why
+> this is, so I can understand better what you want to achieve here.
+
+I guess I'm not clear on what's left for sdhci_suspend_host() to do if
+the host is already runtime suspended :)
+
+Regards,
+
+Tony
