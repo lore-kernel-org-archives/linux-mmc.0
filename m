@@ -2,282 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61065C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Oct 2021 15:17:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DB5FC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Oct 2021 17:38:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 355E960EBB
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Oct 2021 15:17:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16013610C9
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Oct 2021 17:38:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233270AbhJLPTH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Oct 2021 11:19:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42344 "EHLO
+        id S230427AbhJLRkV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Oct 2021 13:40:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229565AbhJLPTG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2021 11:19:06 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFDB3C061570
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Oct 2021 08:17:04 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id y26so89917827lfa.11
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Oct 2021 08:17:04 -0700 (PDT)
+        with ESMTP id S230268AbhJLRkV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2021 13:40:21 -0400
+Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB317C061570;
+        Tue, 12 Oct 2021 10:38:18 -0700 (PDT)
+Received: by mail-ed1-x52b.google.com with SMTP id y12so2520168eda.4;
+        Tue, 12 Oct 2021 10:38:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=mZwXotgdRXbDRTYbxk7Ps+MfiCotYKiewGVd05wCXEg=;
-        b=d0bq8nteJsZ6xxSDWZh6n16JvxPEBzNY5WvwIBJlgi7ugmnFpzYKVm7J2fFQHDYRgN
-         H4fsvyfRdJf0zAVnG/QAYBLmoB2OKTKNPZsXfBQQmEHFdUws6IT3oJb2BWAXn2Xn423d
-         KouB5146/dUf/+8puI1X/H4MkGVV05fsD50y/xUVUFzu5/hig+OrXzv7Zo7Gltw3m6P4
-         0fTWn2z0E1gt4q/RszDsICg3+T0R1fVXfRtUZSCrT8/4y218jmNhfcJhB02ty3QeEATm
-         AAhPkkfN3wpTOLHOGG5WaMVp+Wt9yzlTHmpKTebCkSGJ/DVHT45S0lX/g1ISX2s/s5/9
-         3tXw==
+        bh=65fKHD+M+Er9uhTpiihlsDl5Duc5t5mBhlZrIZ+70nA=;
+        b=mN5vlKdY6YDJyc0zZRmv57rBSX9TIH/y0NImzGlHpfeNIzchoiBRFGCwlopaw2hMmG
+         zZ5dMQ3ZXbvUFC/Oy1EryRSkJvMjXDzOtBY1RyvRfJESJbQtQxajEjLU2aMr9LoTh1EC
+         djoZIRgbsW3JQw3QnqQwBEocyAxLUnLJM5e//bsqHOIecXyQHSEADaXi2N6Ol6N08u0C
+         HPiGCC4PYRYsD/KNimIyjqFRhsLknRBdth56xcxMpYvEAqnNTSwQBDOLHLiBzqllQcu2
+         fs/VibPU3Wz0lXNzxqD5MrdfBRPjJ2Llr9ZNcAfX3hZA16kPGNtFmL+w8hxFnJdHa+Td
+         fGHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=mZwXotgdRXbDRTYbxk7Ps+MfiCotYKiewGVd05wCXEg=;
-        b=44BoAWaD7D+xQVUnkTRDaCz1565soUAAzoNyLcIhvwAO5fiH57ActEr+qt7FmsGRbF
-         DJmK0VYWYbGCAczKPIAkfZRjEWVVyHQ8DtRvonivVBhLfkgpnPw7KFSRpt0uabN7F2sg
-         Dn/4mVJopiPPtboNOVhDttePWGYA/ukbnVE3en3qqmXgJsDcK3CsTz7iKz65zJQBwAE1
-         GoGq69HB4HgDKxveCjMwh4l2vXAlTogsmA3xlM1pPl9skUWBpbWZPff0bG0j2Y7hyLEj
-         GuLIrYf42DEM2XKvymqLpCRrznIQzkAH72Hw8KwLxNFDrPMramtqmN61+u30rvuDiDP3
-         9VPA==
-X-Gm-Message-State: AOAM531aKw0IBZNZ7M4VI3oInaHqf1li0Dj3ahZwSs0/l7wvqW3pohaA
-        KMDySMxwI6Wy7zHfrefRZmMmm/yvUGZdInkreYGJKw==
-X-Google-Smtp-Source: ABdhPJzzhuOVO5eUQIR6ctxpH9Ml/c2aH/vUGWsenPtNroPFmlr98Po14oVt0BfhHGm+q9XSoWvUW3yOWA2sHZzYFho=
-X-Received: by 2002:a05:651c:4c9:: with SMTP id e9mr30286160lji.229.1634051822985;
- Tue, 12 Oct 2021 08:17:02 -0700 (PDT)
+        bh=65fKHD+M+Er9uhTpiihlsDl5Duc5t5mBhlZrIZ+70nA=;
+        b=DuzNAzf2NAdE+a+cKpYoqYZ9MXII+iBAwBiiALWaeJ3EQrT+1ock+vLbKsCCRcaP7i
+         VqCXnZ7rYPQT/V6BaWC+NF8Z94sy19sSi0LPw3pTIDFnDYz+gUv8XTWvsfvz7HehrOVr
+         tlR/KOJ41xwxM4ypQyojgoBAKwYbMJ3MkF59fZ7JvRsEk2ItwekqXFgE6RgP7Mrn+dKI
+         tDbtsYHEKLZhURcNkBv1sXlz6pUjxA3U+JrPs8Zh6dIT+Cj2RnZKwvOf3aZSw8B2NJ+W
+         eAIrcAsdLR4pJIcTfmJV2ZoRdazjfmJvzOSeHAS6hovzaNZs3mXWk+7yFyBTKDZKHfdP
+         icIQ==
+X-Gm-Message-State: AOAM5330V6YdMm23jN3BkIK6VZyStQ78bjeaUUE4Bzrgabk04pmUeBrI
+        HkCCss1JlPW3BuOWb4n16qdo7/x+j5Arl1na/jE=
+X-Google-Smtp-Source: ABdhPJxQJjl7ARsqRIHmUeD3KgJ517Bp5Voq/I2Xz+g7p2aC2VY3cryaO8s/aiOTYbwy/qmkPf7Fr+Tra2Ndald3Xfk=
+X-Received: by 2002:a05:6402:10da:: with SMTP id p26mr1496074edu.283.1634060297308;
+ Tue, 12 Oct 2021 10:38:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211012103750.38328-1-tony@atomide.com> <20211012103750.38328-5-tony@atomide.com>
-In-Reply-To: <20211012103750.38328-5-tony@atomide.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 12 Oct 2021 17:16:26 +0200
-Message-ID: <CAPDyKFq_jiYPrm_kcprijFfcceVVGnZpkG+4ZY_XSBXJnCT0LA@mail.gmail.com>
-Subject: Re: [PATCH 4/6] mmc: sdhci-omap: Implement PM runtime functions
-To:     Tony Lindgren <tony@atomide.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        Rob Herring <robh@kernel.org>,
-        DTML <devicetree@vger.kernel.org>
+References: <20211005102430.63716-1-andriy.shevchenko@linux.intel.com>
+ <YV8jfavX/W9T25YX@smile.fi.intel.com> <cc9d92a9-0896-5222-2080-1380afd480ba@intel.com>
+In-Reply-To: <cc9d92a9-0896-5222-2080-1380afd480ba@intel.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Tue, 12 Oct 2021 23:37:30 +0300
+Message-ID: <CAHp75VdAGkG-xK1sMna6dG7dAd7ZbnGicimorftTOjZ-8cvC1A@mail.gmail.com>
+Subject: Re: [PATCH v1 0/6] mmc: sdhci-pci: Add some CD GPIO related quirks
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Eric Biggers <ebiggers@google.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 12 Oct 2021 at 12:38, Tony Lindgren <tony@atomide.com> wrote:
->
-> Implement PM runtime functions and enable autosuspend.
->
-> Note that we save context in probe to avoid restoring invalid context
-> on the first resume. For system suspend, we have the new PM runtime
-> functions do most of the work.
->
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
-> ---
->  drivers/mmc/host/sdhci-omap.c | 78 ++++++++++++++++++++++++++++-------
->  1 file changed, 63 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -1207,6 +1207,8 @@ static const struct soc_device_attribute sdhci_omap_soc_devices[] = {
->         }
->  };
->
-> +static void sdhci_omap_context_save(struct sdhci_omap_host *omap_host);
-> +
->  static int sdhci_omap_probe(struct platform_device *pdev)
->  {
->         int ret;
-> @@ -1252,6 +1254,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->         omap_host->timing = MMC_TIMING_LEGACY;
->         omap_host->flags = data->flags;
->         omap_host->omap_offset = data->omap_offset;
-> +       omap_host->con = -EINVAL;
->         host->ioaddr += offset;
->         host->mapbase = regs->start + offset;
->
-> @@ -1302,6 +1305,8 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->          * SYSCONFIG register of omap devices. The callback will be invoked
->          * as part of pm_runtime_get_sync.
->          */
-> +       pm_runtime_use_autosuspend(dev);
-> +       pm_runtime_set_autosuspend_delay(dev, 50);
->         pm_runtime_enable(dev);
->         ret = pm_runtime_resume_and_get(dev);
->         if (ret) {
-> @@ -1312,7 +1317,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->         ret = sdhci_omap_set_capabilities(host);
->         if (ret) {
->                 dev_err(dev, "failed to set system capabilities\n");
-> -               goto err_put_sync;
-> +               goto err_rpm_put;
->         }
->
->         host->mmc_host_ops.start_signal_voltage_switch =
-> @@ -1340,7 +1345,7 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->
->         ret = sdhci_setup_host(host);
->         if (ret)
-> -               goto err_put_sync;
-> +               goto err_rpm_put;
->
->         ret = sdhci_omap_config_iodelay_pinctrl_state(omap_host);
->         if (ret)
-> @@ -1350,15 +1355,21 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->         if (ret)
->                 goto err_cleanup_host;
->
-> +       sdhci_omap_context_save(omap_host);
+On Thu, Oct 7, 2021 at 10:45 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 07/10/2021 19:42, Andy Shevchenko wrote:
+> > On Tue, Oct 05, 2021 at 01:24:24PM +0300, Andy Shevchenko wrote:
 
-Calling sdhci_omap_context_save() here looks unnecessary. The device
-is already runtime resumed at this point.
+...
 
-In other words, sdhci_omap_context_save() will be called from the
-->runtime_suspend() callback, next time the device becomes runtime
-suspended. That should be sufficient, right?
+> > Adrian, Ulf, any comments on this? At least first two fix the regression and
+> > would be nice to have them in sooner than later (I can split them separately
+> > if required).
+>
+> I am not sure we need new quirks, given that we can just hook the callback
+> and do anything that way.  However I really haven't had time to look closely
+> yet, sorry.
 
-> +
-> +       pm_runtime_mark_last_busy(dev);
-> +       pm_runtime_put_autosuspend(dev);
-> +
->         return 0;
->
->  err_cleanup_host:
->         sdhci_cleanup_host(host);
->
-> -err_put_sync:
-> -       pm_runtime_put_sync(dev);
-> -
-> +err_rpm_put:
-> +       pm_runtime_mark_last_busy(dev);
-> +       pm_runtime_put_autosuspend(dev);
->  err_rpm_disable:
-> +       pm_runtime_dont_use_autosuspend(dev);
->         pm_runtime_disable(dev);
->
->  err_pltfm_free:
-> @@ -1371,8 +1382,12 @@ static int sdhci_omap_remove(struct platform_device *pdev)
->         struct device *dev = &pdev->dev;
->         struct sdhci_host *host = platform_get_drvdata(pdev);
->
-> +       pm_runtime_get_sync(dev);
->         sdhci_remove_host(host, true);
-> +       pm_runtime_dont_use_autosuspend(dev);
->         pm_runtime_put_sync(dev);
-> +       /* Ensure device gets idled despite userspace sysfs config */
-> +       pm_runtime_force_suspend(dev);
->         pm_runtime_disable(dev);
+Adrian, thanks for review, I'll address your comments in v2.
 
-The call to pm_runtime_disable() can be removed, as that is taken care
-of in pm_runtime_force_suspend().
-
->         sdhci_pltfm_free(pdev);
->
-> @@ -1402,42 +1417,75 @@ static void sdhci_omap_context_restore(struct sdhci_omap_host *omap_host)
->         sdhci_omap_writel(omap_host, SDHCI_OMAP_ISE, omap_host->ise);
->  }
->
-> -static int __maybe_unused sdhci_omap_suspend(struct device *dev)
-> +static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
->  {
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->
-> -       sdhci_suspend_host(host);
-> +       sdhci_runtime_suspend_host(host);
->
->         sdhci_omap_context_save(omap_host);
->
->         pinctrl_pm_select_idle_state(dev);
->
-> -       pm_runtime_force_suspend(dev);
-> -
->         return 0;
->  }
->
-> -static int __maybe_unused sdhci_omap_resume(struct device *dev)
-> +static int __maybe_unused sdhci_omap_runtime_resume(struct device *dev)
->  {
->         struct sdhci_host *host = dev_get_drvdata(dev);
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->
-> -       pm_runtime_force_resume(dev);
-> -
->         pinctrl_pm_select_default_state(dev);
->
-> -       sdhci_omap_context_restore(omap_host);
-> +       if (omap_host->con != -EINVAL)
-> +               sdhci_omap_context_restore(omap_host);
-> +
-> +       sdhci_runtime_resume_host(host, 0);
-> +
-> +       return 0;
-> +}
-> +
-> +static int __maybe_unused sdhci_omap_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       int err;
-> +
-> +       /* Enable for configuring wakeups, paired in resume */
-> +       err = pm_runtime_resume_and_get(dev);
-> +       if (err < 0)
-> +               return err;
-> +
-> +       sdhci_suspend_host(host);
-
-As far as I can tell, sdhci_suspend_host() doesn't really make sense
-for the omap variant. What you need, is to put the device into the
-same low power state as "runtime suspend", that should be sufficient.
-
-The system wakeup will be armed (and later then disarmed) by the PM
-core, when it calls device_wakeup_arm_wake_irqs() from the
-dpm_suspend_noirq() phase.
-
-In other words, pointing the system suspend/resume callbacks to
-pm_runtime_force_suspend|resume() should work fine, I think.
-
-> +
-> +       return pm_runtime_force_suspend(dev);
-> +}
-> +
-> +static int __maybe_unused sdhci_omap_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       int err;
-> +
-> +       err = pm_runtime_force_resume(dev);
-> +       if (err < 0)
-> +               dev_warn(dev, "force resume failed: %i\n", err);
->
->         sdhci_resume_host(host);
->
-> +       /* Balance pm_runtime_resume_and_get() done in suspend */
-> +       pm_runtime_put(dev);
-> +
->         return 0;
->  }
->  #endif
-> -static SIMPLE_DEV_PM_OPS(sdhci_omap_dev_pm_ops, sdhci_omap_suspend,
-> -                        sdhci_omap_resume);
-> +
-> +static const struct dev_pm_ops sdhci_omap_dev_pm_ops = {
-> +       SET_RUNTIME_PM_OPS(sdhci_omap_runtime_suspend,
-> +                          sdhci_omap_runtime_resume, NULL)
-> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_omap_suspend, sdhci_omap_resume)
-> +};
->
->  static struct platform_driver sdhci_omap_driver = {
->         .probe = sdhci_omap_probe,
-> --
-> 2.33.0
-
-Kind regards
-Uffe
+-- 
+With Best Regards,
+Andy Shevchenko
