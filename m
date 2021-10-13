@@ -2,154 +2,261 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D6AFC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Oct 2021 02:39:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1A7EC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Oct 2021 08:34:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E171E60041
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Oct 2021 02:39:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D88D16103C
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Oct 2021 08:34:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235550AbhJMCl4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Oct 2021 22:41:56 -0400
-Received: from mx0b-00069f02.pphosted.com ([205.220.177.32]:2970 "EHLO
-        mx0b-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229980AbhJMClz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Oct 2021 22:41:55 -0400
-Received: from pps.filterd (m0246630.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 19D0ZVeY028779;
-        Wed, 13 Oct 2021 02:39:50 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=to : cc : subject :
- from : message-id : references : date : in-reply-to : content-type :
- mime-version; s=corp-2021-07-09;
- bh=t2CWOQ8EStR5WKjsZvK3E+dZXibdDn5M07OTPmXUMhM=;
- b=a/qL2xj24SR9rEG0BMzDrd2DjA0hqBajGGiRAlVH8mD+UXyPCsjpUOYu6sS+tC+Mu/9z
- H+b0IRcyPqjlwhNCBTX7Dp12TO2f3zfO5EVCQeYBq+e2fD3W5/sSYOt6czQ9WX35x5x0
- pzX8KIMW3KimauPPRLZvFuebWhgQyCAhBqGV6oRIYBBa8e7zeb9QXqv0TaLY36Jpsawi
- rLpCHwIS4xrXcmMwH/GAOuPIuBEDjlPPiabhkGobyktGPbAbPUCQKGNiqFlvRPbrQYwP
- B9XixcL3QwVikKbXnKeCdSZpGlIFVNid/biaQsj3hcQRsDeeSY5R9R5Cc0N4O9ocoY2I Dg== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by mx0b-00069f02.pphosted.com with ESMTP id 3bnkbh0txh-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 13 Oct 2021 02:39:49 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 19D2UkDR170221;
-        Wed, 13 Oct 2021 02:39:49 GMT
-Received: from nam02-dm3-obe.outbound.protection.outlook.com (mail-dm3nam07lp2045.outbound.protection.outlook.com [104.47.56.45])
-        by aserp3020.oracle.com with ESMTP id 3bmae01t1m-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 13 Oct 2021 02:39:48 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=URV9lCnG5UV+FwQyb4L9Lx2nFMcNMmrYV0YMdgNo1f5LPbkS/LEsW33dt2KEhE5iZwDWuuG0R/S3HglhtuQuhYDqDh0vG0R0pY2XIvHl+KamRIfHeZmqsk00HbyQkohxXK8CvreX+uhfL5qurdCUtmmXEPiUxb6k47KWGNpqqtdqAVvNEGXYao/aq0gDQFpqtmBLjHji88O769N+Al0jJ/nGq4pVRxHQdg7pXRzqWnu6NCAzHOE5H3d1luQbZsVO48rXxhnzaQjA1WmmHCnRQ5Lh9mYCPiXt0GHH0N+WpAa5+xqT5muEDgJd4Je4bHvr2jT3Qrn3LM9qDfD7eSf8ig==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=t2CWOQ8EStR5WKjsZvK3E+dZXibdDn5M07OTPmXUMhM=;
- b=ezkWYl/Lo/EuAIuMuo4cDv1vf2Pj2f0pdTfUxvzqfF6a5Q5hyAaTlPE5DkRMCXVmAzEb3gVUthNE3p7N40OrgF7zmkQFTb6L8Ot7R44FwAeCB9hjgzxs+qmB5VNkAEPxPbotNT3IAKnhXC14h2vVlqcLiQSYmimg3S1SR3DWDmb1qmR5rgjLqVF4xPBSSEDo3kGz7sNNIbCpzM1JRsuoMT6io+3g8DVk+FTOaVOsNA+Lnj0d7VePU8SyRjKMJersenoJ/YZpqU/HBO+SJaHO28UqZQAtzJZ7jKH2DVXwzosjjtKlW/VnRXY3pkWXNgcAmTBiBrfsvWRypAcTPI/I5w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=t2CWOQ8EStR5WKjsZvK3E+dZXibdDn5M07OTPmXUMhM=;
- b=iLZ0T5dVNHxVpY4PZqw6RweKAwTnrJvdu6raucCEvZGjEEBVmXglgHP2+qpF0YIErwnUnjAHdUtywZO7S7N5nF5vMF9mBYuE4gS74bXzAfu2yQ2fdd73qXy03/ZcArMNtjC4hQl4ax8PFofjgvq8Ob1MYaf0g/UZtnc2VDN6ywk=
-Authentication-Results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=oracle.com;
-Received: from CO1PR10MB4754.namprd10.prod.outlook.com (2603:10b6:303:91::24)
- by CO6PR10MB5411.namprd10.prod.outlook.com (2603:10b6:5:35e::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4587.20; Wed, 13 Oct
- 2021 02:39:47 +0000
-Received: from CO1PR10MB4754.namprd10.prod.outlook.com
- ([fe80::7c3a:acce:d3fc:a654]) by CO1PR10MB4754.namprd10.prod.outlook.com
- ([fe80::7c3a:acce:d3fc:a654%6]) with mapi id 15.20.4587.026; Wed, 13 Oct 2021
- 02:39:47 +0000
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-block@vger.kernel.org, Jens Axboe <axboe@kernel.dk>,
-        Satya Tangirala <satyaprateek2357@gmail.com>,
-        dm-devel@redhat.com, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v5 0/4] blk-crypto cleanups
-From:   "Martin K. Petersen" <martin.petersen@oracle.com>
-Organization: Oracle Corporation
-Message-ID: <yq1h7dlps38.fsf@ca-mkp.ca.oracle.com>
-References: <20211012214330.40470-1-ebiggers@kernel.org>
-Date:   Tue, 12 Oct 2021 22:39:44 -0400
-In-Reply-To: <20211012214330.40470-1-ebiggers@kernel.org> (Eric Biggers's
-        message of "Tue, 12 Oct 2021 14:43:26 -0700")
-Content-Type: text/plain
-X-ClientProxiedBy: SN7PR04CA0078.namprd04.prod.outlook.com
- (2603:10b6:806:121::23) To CO1PR10MB4754.namprd10.prod.outlook.com
- (2603:10b6:303:91::24)
+        id S238444AbhJMIgG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Oct 2021 04:36:06 -0400
+Received: from mail-ua1-f48.google.com ([209.85.222.48]:33367 "EHLO
+        mail-ua1-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233965AbhJMIgF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Oct 2021 04:36:05 -0400
+Received: by mail-ua1-f48.google.com with SMTP id i15so3065100uap.0;
+        Wed, 13 Oct 2021 01:34:02 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=l0RRw7xVwNpsAY02+ArhU1yvtoPb5CrI3VDg630/yPA=;
+        b=2CnWaP2/16Cjj0584CteIi0dMUWMTHDtaDrhDS5zk6PtFtctbu1PAv3QSjkrOCbYbP
+         HkGZ+hw2BJrOR/9VX8Opl1VhaSSWCBjCNVP7Vm+P424Wv9GB9JOJaOEyppL08WPsCyE5
+         OTrx6R1iMQGz5FVoeIJAjSqG1CDCBWeqcfLiRPO/JKbr62klP9nkWmMNYv+08aEJkmg8
+         dAv+wDe9CI+OAohLzOtZycm9uZtjT94pEVsPz5JR1LKNyhIc34wY6uVx90SLT1WcpQ7l
+         sZni3Fa+onM8KCBpKl/ZQJgICOSt8agInKLR3XqWcIyBvYUbMuAaVFPmOhS11mkmxWSE
+         B6ng==
+X-Gm-Message-State: AOAM531ly69iKluPw87xd09mANS4G91zRHxzzPB3avXwGug1iUx8E5Vd
+        milYTFDFzlhGMHXGKTJpwRpzkAXdTdASGcnf3i8=
+X-Google-Smtp-Source: ABdhPJz8vAjVyFzbQZQfzWhoBtw54N4Dh37trBEyZCu0OliGre0gadpho8UeiffgHtQ5sHdjrWNiu52vneuqRScceSQ=
+X-Received: by 2002:a05:6102:290c:: with SMTP id cz12mr15801153vsb.35.1634114041966;
+ Wed, 13 Oct 2021 01:34:01 -0700 (PDT)
 MIME-Version: 1.0
-Received: from ca-mkp.ca.oracle.com (138.3.201.12) by SN7PR04CA0078.namprd04.prod.outlook.com (2603:10b6:806:121::23) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4608.14 via Frontend Transport; Wed, 13 Oct 2021 02:39:47 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: def6faad-742d-45c7-1ebd-08d98df2b8e2
-X-MS-TrafficTypeDiagnostic: CO6PR10MB5411:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <CO6PR10MB5411E51F502BD9A9ED9A63808EB79@CO6PR10MB5411.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:4303;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: kdKBApzz4XdzJYpg5Q6ahClm6OWqTJmLOITqSNq2Gc+G01g5xXO32kslt01a7l2R2rfp+lsXELDZYvg341z2ubGfjk+c6Bi8XUoDL2PBJZk3euM6Kx7m69g97vW7ExWcP2LV0ePeijRn3s4Lff/mVrVPaxXfbJeigQnP8GCzeIwMGWWM4nWmO9CDORtfyV9ucjCmo9lFL+kCfm90T8lbyfgYzMwrNOpK8+BPkkm6WZ7hs69Vzw/dausX/FUh2WoRKbRZOYLFS3j2wZ4leSBmAeSuel3d7JGSeBG4kvYNz4bk2AogmO/ismaHuvIMZ0JcnBZBab/Qc4/Yva6qS44PX1wy90fjlQ7ZjtUdJlOm1F6E72CvhMvHrf4MTTD3oa1iWJwgUqZDfpgHzXETvKe0/dFjNLuLAgB2kUDo2mvG1sPm7m7miqdGs9MTzcvxs2b9OLY0kjXIF2ubQ9pFkgi9ttI2L4CgYZq89zGvjsovSb1Ob+JnadgVe52aZ2XrLx9ASsjCKoXbcdPgGW9QL9wOqE8xHomJdKz7xmU0SbW4Kt+BlDDT/gRzI4sFS82eZMIl/RbPTDzVpyjiprR5Yk9EZ8Iwrf9tw1/LaOh4qkcbo1oqHSdazRgg/ut2SaOCCpl0fBfJ+x1WGAwneHYyTXVy59hoGAdg0vo52HSrGYilP4fux7+sJZzk6xwx76ZfkCGKdUZ12C+vAH8nhAa7DeSj2g==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CO1PR10MB4754.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(66556008)(316002)(186003)(8676002)(4744005)(508600001)(66946007)(7696005)(5660300002)(55016002)(66476007)(38350700002)(956004)(86362001)(6666004)(36916002)(54906003)(52116002)(38100700002)(8936002)(6916009)(4326008)(26005)(2906002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?K/90f0YuCD304c7hT2Q2s32/CqsN1lAO9+EbbCKEIy1IaOh1Gqmb0b4PKPFM?=
- =?us-ascii?Q?L78Jo+lx93SeI5/G8maijP3ZclZPSGfO0cD5WOKte+yPgOC6iqz8jX+uNZ9J?=
- =?us-ascii?Q?wUyfsmSEHjzrzTx3BJePKjJMsXZ2sajzW/rQI1zJFG3V13DmdoGsTah1UAMn?=
- =?us-ascii?Q?tEmzDT/Y7ilAOGT+RGAiVMNmG86p65/W7vPzhx1BZlQj46DgflfUHmFQaxZA?=
- =?us-ascii?Q?uMMipOKEVYclrVqOb/sFE5L/WI2fbSAtmwdMVASNBYah9fosd8dZaG4OVfUS?=
- =?us-ascii?Q?Kycen8oAPzuYEHiUI7y40X+lgDkTdgYP4aiSm3r28H0Pox048RFx9dl11jJp?=
- =?us-ascii?Q?kWUha8qAEIzh1q+BnpGKc48eQcIoFj3eXBBIhQlc+BWgsfxHJAzMOnSKTxEw?=
- =?us-ascii?Q?qnBBgRXFVFoF8DXCiIRJyLJUPo+PZGhFNI754tyd2HKG2q/X7ChthFpvDS3D?=
- =?us-ascii?Q?LVNK28oL2WcY2JFOZ5NnlYgPcoV9v8lmmowW0YnFFNS5KOpCzEqb26A8U4dS?=
- =?us-ascii?Q?1OWz2ZeLPjNSZnbiK7xNA5XyT245L/ScOMClJkdiEX1FaLLULxu/bSWxbMew?=
- =?us-ascii?Q?Mq2jO/mBHyy8iI8JOCQlg7qfymURGKJxwsq5fzYQh5IUC3MzVSutrSngZz5i?=
- =?us-ascii?Q?pE/qwHCbet3SSEyf6JXhut2J6NinXfj/EpXRbgJr2CXABJJoLAXiqOJJIym+?=
- =?us-ascii?Q?MtSUCj/4Pr5XQwbo1UxAhej15+exoQVYmMF3GLAZ7r2ehIlTl2cjaG67plmM?=
- =?us-ascii?Q?A1sHfjwUDzDBjfgFqGQ8nx7jnohEN/goVqzTzxfpHO7EfI3DKNV+t+cGpHL6?=
- =?us-ascii?Q?q+KEgB1MySD7JoojnYtBnyNBsETJSxbeeGEh/bjfQqJ2tiX88Yvoqm9fIojU?=
- =?us-ascii?Q?XdKNRxguykL6JaobowHg1onQnSQZhhE1Lp93SK2p/jEr1L5iuk9mvrFC1tm/?=
- =?us-ascii?Q?cItW2O5EIIdNF57Tu8mxsakzewo9N7o+eHUwN5gmA/dFExsle8ZchlY9o268?=
- =?us-ascii?Q?Wrgqhxs9KvyJV1VnmZm32dwODt6F2A7XvCrVQLl+WGlJPwvOM01pyoib4ths?=
- =?us-ascii?Q?E/WZ0H4j5IupohnOuomSrla1kKG2b7iUC9N5pKt5F4gYG3NXx8QeY/lHCth9?=
- =?us-ascii?Q?2IVWmsCoVT/W+VLlrAEaByje/W4dnFUwNoqi0rah5aQksJgmwEcK8E6hpZBE?=
- =?us-ascii?Q?chNL7coUw2K/BQHLhjx8TLYWOtvsdgxrpVL4iHhNPR1xh8pemspz4KIrrPv4?=
- =?us-ascii?Q?f0x/so6bTUmbyF8FRkAnFhyTFVCIMhFnAOe3qg1PT/nbLijhB9V8oFWXsiSE?=
- =?us-ascii?Q?lFlMSi3rEpEh/fTpumJgZnAv?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: def6faad-742d-45c7-1ebd-08d98df2b8e2
-X-MS-Exchange-CrossTenant-AuthSource: CO1PR10MB4754.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Oct 2021 02:39:47.3900
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: b5DKqZlQILGMYDNBGtuawAZLl8goBso206I5gV/hGpLnj6smuDYZZ2Z35nwnb3uXMXaIIOMTf+8O8V73Rxmk64lWqlhZIKAEKDqVS0NCCu8=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CO6PR10MB5411
-X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10135 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 phishscore=0
- suspectscore=0 mlxlogscore=994 bulkscore=0 mlxscore=0 malwarescore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2109230001 definitions=main-2110130013
-X-Proofpoint-GUID: QNXjq9eFW7lVqOXyPdF0ark14z9raHL3
-X-Proofpoint-ORIG-GUID: QNXjq9eFW7lVqOXyPdF0ark14z9raHL3
+References: <20210928200804.50922-1-wsa+renesas@sang-engineering.com> <20210928200804.50922-5-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210928200804.50922-5-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 13 Oct 2021 10:33:50 +0200
+Message-ID: <CAMuHMdUdjNXkW-F0-aPR-o6uQaHsYz=yKf6RhC2tvxRpdhDzhw@mail.gmail.com>
+Subject: Re: [RFC PATCH 4/9] clk: renesas: gen3: switch to new SD clock handling
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram,
 
-Eric,
+clk: renesas: rcar-gen3: ...
 
-> This series renames struct blk_keyslot_manager to struct
-> blk_crypto_profile, as it is misnamed; it doesn't always manage
-> keyslots.  It's much more logical to think of it as the "blk-crypto
-> profile" of a device, similar to blk_integrity_profile.
+Thanks for your patch!
 
-Looks good to me, easier to follow.
+On Tue, Sep 28, 2021 at 10:08 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> The old SD handling code was huge and could not handle all the details
+> which showed up on R-Car Gen3 SoCs meanwhile. It is time to switch to
+> another design. Have SDnH a seperate clock, use the existing divider
 
-Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+separate  (as checkpatch told me ;-)
 
--- 
-Martin K. Petersen	Oracle Linux Engineering
+> clocks and move the errata handling from the clock driver to the SDHI
+> driver where it belongs.
+>
+> This patch removes the old SD handling code and switch to the new one.
+> This updates the SDHI driver at the same time. Because the SDHI driver
+> can only communitcate with the clock driver via clk_set_rate(), I don't
+
+communicate (as Gmail composer told me ;-)
+
+> see an alternative to this flag-day-approach, so we cross subsystems
+> here.
+>
+> The patch sadly looks messy for the CPG lib, but it is basically a huge
+> chunk of code removed and smaller chunks added. It looks much better
+> when you just view the resulting source file.
+
+Indeed, the end result is pretty neat.
+BTW, the diff looks much better with the --histogram option of
+git diff/show.
+
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+> --- a/drivers/clk/renesas/rcar-cpg-lib.c
+> +++ b/drivers/clk/renesas/rcar-cpg-lib.c
+
+> -static int cpg_sd_clock_set_rate(struct clk_hw *hw, unsigned long rate,
+> -                                unsigned long parent_rate)
+> +struct clk * __init cpg_sdh_clk_register(const char *name,
+> +       void __iomem *sdnckcr, const char *parent_name,
+> +       struct raw_notifier_head *notifiers)
+>  {
+> -       struct sd_clock *clock = to_sd_clock(hw);
+> -       unsigned int i;
+> -
+> -       for (i = 0; i < clock->div_num; i++)
+> -               if (rate == DIV_ROUND_CLOSEST(parent_rate,
+> -                                             clock->div_table[i].div))
+> -                       break;
+> +       struct cpg_simple_notifier *csn;
+> +       struct clk *clk;
+>
+> -       if (i >= clock->div_num)
+> -               return -EINVAL;
+> +       csn = kzalloc(sizeof(*csn), GFP_KERNEL);
+> +       if (!csn)
+> +               return ERR_PTR(-ENOMEM);
+>
+> -       clock->cur_div_idx = i;
+> +       csn->reg = sdnckcr;
+>
+> -       cpg_reg_modify(clock->csn.reg, CPG_SD_STP_MASK | CPG_SD_FC_MASK,
+> -                      clock->div_table[i].val &
+> -                      (CPG_SD_STP_MASK | CPG_SD_FC_MASK));
+> +       clk = clk_register_divider_table(NULL, name, parent_name, 0, sdnckcr,
+> +                                        SDnSRCFC_SHIFT, 8, 0, cpg_sdh_div_table,
+> +                                        &cpg_lock);
+> +       if (IS_ERR(clk))
+> +               return clk;
+
+Missing "kfree(csn)".
+
+>
+> -       return 0;
+> +       cpg_simple_notifier_register(notifiers, csn);
+> +       return clk;
+>  }
+
+>  struct clk * __init cpg_sd_clk_register(const char *name,
+> -       void __iomem *base, unsigned int offset, const char *parent_name,
+> -       struct raw_notifier_head *notifiers, bool skip_first)
+> +       void __iomem *sdnckcr, const char *parent_name)
+>  {
+> -       struct clk_init_data init = {};
+> -       struct sd_clock *clock;
+> -       struct clk *clk;
+> -       u32 val;
+> -
+> -       clock = kzalloc(sizeof(*clock), GFP_KERNEL);
+> -       if (!clock)
+> -               return ERR_PTR(-ENOMEM);
+> -
+> -       init.name = name;
+> -       init.ops = &cpg_sd_clock_ops;
+> -       init.flags = CLK_SET_RATE_PARENT;
+> -       init.parent_names = &parent_name;
+> -       init.num_parents = 1;
+> -
+> -       clock->csn.reg = base + offset;
+> -       clock->hw.init = &init;
+> -       clock->div_table = cpg_sd_div_table;
+> -       clock->div_num = ARRAY_SIZE(cpg_sd_div_table);
+> -
+> -       if (skip_first) {
+> -               clock->div_table++;
+> -               clock->div_num--;
+> -       }
+> -
+> -       val = readl(clock->csn.reg) & ~CPG_SD_FC_MASK;
+> -       val |= CPG_SD_STP_MASK | (clock->div_table[0].val & CPG_SD_FC_MASK);
+> -       writel(val, clock->csn.reg);
+> -
+> -       clk = clk_register(NULL, &clock->hw);
+> -       if (IS_ERR(clk))
+> -               goto free_clock;
+> -
+> -       cpg_simple_notifier_register(notifiers, &clock->csn);
+> -       return clk;
+> -
+> -free_clock:
+> -       kfree(clock);
+> -       return clk;
+> +       return clk_register_divider_table(NULL, name, parent_name, 0, sdnckcr,
+> +                                         0, 2, 0, cpg_sd_div_table, &cpg_lock);
+
+So the SDn clock can no longer be disabled, as CPG_SD_STP_CK
+handling is gone?
+
+>  }
+
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+
+> @@ -141,6 +143,16 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>         if (!(host->pdata->flags & TMIO_MMC_MIN_RCAR2) || mmc_doing_tune(host->mmc))
+>                 return clk_get_rate(priv->clk);
+>
+> +       if (priv->clkh) {
+> +               bool use_4tap = priv->quirks && priv->quirks->hs400_4taps;
+> +               bool need_slow_clkh = (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104) ||
+> +                                     (host->mmc->ios.timing == MMC_TIMING_MMC_HS400);
+> +               clkh_mult = use_4tap && need_slow_clkh ? 2 : 4;
+> +               ref_clk = priv->clkh;
+> +       }
+> +
+> +       new_clock = wanted_clock * clkh_mult;
+> +
+>         /*
+>          * We want the bus clock to be as close as possible to, but no
+>          * greater than, new_clock.  As we can divide by 1 << i for
+> @@ -148,11 +160,10 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>          * possible, but no greater than, new_clock << i.
+>          */
+>         for (i = min(9, ilog2(UINT_MAX / new_clock)); i >= 0; i--) {
+> -               freq = clk_round_rate(priv->clk, new_clock << i);
+> +               freq = clk_round_rate(ref_clk, new_clock << i);
+>                 if (freq > (new_clock << i)) {
+>                         /* Too fast; look for a slightly slower option */
+> -                       freq = clk_round_rate(priv->clk,
+> -                                             (new_clock << i) / 4 * 3);
+> +                       freq = clk_round_rate(ref_clk, (new_clock << i) / 4 * 3);
+>                         if (freq > (new_clock << i))
+>                                 continue;
+>                 }
+> @@ -164,7 +175,10 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>                 }
+>         }
+>
+> -       clk_set_rate(priv->clk, best_freq);
+> +       clk_set_rate(ref_clk, best_freq);
+> +
+> +       if (ref_clk == priv->clkh)
+
+"if (priv->clkh)", for consistency with above?
+
+> +               clk_set_rate(priv->clk, best_freq / clkh_mult);
+>
+>         return clk_get_rate(priv->clk);
+>  }
+> @@ -908,6 +922,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>                 return ret;
+>         }
+>
+> +       /* Fallback for old DTs */
+> +       if (of_device_is_compatible(pdev->dev.of_node, "renesas,rcar-gen3-sdhi"))
+
+I think it would be cleaner to check a flag in struct
+renesas_sdhi_of_data instead.
+
+> +               priv->clkh = clk_get_parent(clk_get_parent(priv->clk));
+> +
+>         /*
+>          * Some controllers provide a 2nd clock just to run the internal card
+>          * detection logic. Unfortunately, the existing driver architecture does
+
+The core looks good to me, but I have to admit I'm no expert on the
+SDHn/SDn clock relations and the various SDHI transfer modes.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
