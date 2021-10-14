@@ -2,147 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90BCDC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 11:24:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8094FC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:12:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 75A686101E
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 11:24:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5EA1260F41
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:12:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230510AbhJNL0z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Oct 2021 07:26:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53976 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230305AbhJNL0y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Oct 2021 07:26:54 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECFD6C06174E
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 04:24:49 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id i24so24841108lfj.13
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 04:24:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=OGtOo92AjWnKYY5OPbYe9MEWHB9ev5MSnpBwIdnoK64=;
-        b=HyeXMegDIQhugU9sQPoCD/5lwNwZUFuKGYhBgll/9ArrEkfaVpI208dAX2MtsEX07w
-         zHqUN8sw/J80UqSOGPakEV5W7kHM3E27fSC+KOV9Tn/iEm2D2ecneapPFn9uf6zMeGRo
-         Zfjq5HmlRaPdvPyu4/RRdeDLmt9J5Zc2X/+Psy7fy7wcOSZ9zDd1lW/VE5O0dFrOnSpH
-         tgvB8E6FjrTQZVDqfkD56h7iyqK7P6CO4SaPQQ4i/YyMF6NEzVAH98APOUjWimsEo+k4
-         k+xE4UgEV/f92/n+wptc45aJfIR2JZ5Bo8ZvwuWiHziF+LaouE/NRQnEZBYB15smvSPM
-         JS/w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=OGtOo92AjWnKYY5OPbYe9MEWHB9ev5MSnpBwIdnoK64=;
-        b=CsbGqWs4Iup0c41ENpBHjzr9uJXW3StpKbgnkfEz7VXQbcnYKYg4g2lzW6bCVZQQMU
-         D4rJIL6dk7U2CzDAM9zmLYVxO1gO3vcVjmttWRTc16TBWZey7R5AZXd1LrdChjF3M+HN
-         36zV+/cm7AOM6PIO8wZuzGqSwmuMn0zhS3QWRFJMN/ep7mNvC+ry2d9nQcYYIZvoSorA
-         wzBBDFQAITera8tWIUXpfVEwSF3UpMAXaAFmy7L+lTq+wuacc2WASBIkEoDKyP46Rrb9
-         uAWxf6g2JV80GpeEq0h1hzKwVRtRf4Ba90D+CR5YUwvw7+nzIf44eOIBvPdfMFjnRK7p
-         XUcg==
-X-Gm-Message-State: AOAM5324/qi6Yzi/xhZmWGsNPMTpRTTGlv3Qh9XTcvvaLPqk1VXUhi/a
-        Bi3MLWpZvhPGMv4LPnF8WnD21ezJX16QCmo4+j4k/g==
-X-Google-Smtp-Source: ABdhPJzL2UMZ09NVAzbjnfTAcDgcPiREcKQT/vEagroDfcuBbtCgsw0BMAaEHT1QlVRzEXve7ktEcuVrG27MFU6PjsM=
-X-Received: by 2002:a05:651c:4c9:: with SMTP id e9mr5394747lji.229.1634210683423;
- Thu, 14 Oct 2021 04:24:43 -0700 (PDT)
+        id S230199AbhJNNOk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Oct 2021 09:14:40 -0400
+Received: from mga14.intel.com ([192.55.52.115]:47571 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230094AbhJNNOg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 14 Oct 2021 09:14:36 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10136"; a="227955794"
+X-IronPort-AV: E=Sophos;i="5.85,372,1624345200"; 
+   d="scan'208";a="227955794"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2021 06:12:31 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.85,372,1624345200"; 
+   d="scan'208";a="571327891"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by fmsmga002.fm.intel.com with ESMTP; 14 Oct 2021 06:12:28 -0700
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: clear the buffer_read_ready to
+ reset standard tuning circuit
+To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com
+References: <1634206268-5416-1-git-send-email-haibo.chen@nxp.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <541668c6-ea4f-afa3-8ef4-9727c46bb2c6@intel.com>
+Date:   Thu, 14 Oct 2021 16:12:28 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-References: <20211013100052.125461-1-colin.king@canonical.com>
-In-Reply-To: <20211013100052.125461-1-colin.king@canonical.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 14 Oct 2021 13:24:07 +0200
-Message-ID: <CAPDyKFp7jsEPjun=2mTDGrGM=mHM=jUQvGwDObfMx8odQ9d2Ag@mail.gmail.com>
-Subject: Re: [PATCH][next] mmc: moxart: Fix null pointer dereference on
- pointer host
-To:     Colin King <colin.king@canonical.com>
-Cc:     Xiyu Yang <xiyuyang19@fudan.edu.cn>,
-        Xin Tan <tanxin.ctf@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <1634206268-5416-1-git-send-email-haibo.chen@nxp.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 13 Oct 2021 at 12:00, Colin King <colin.king@canonical.com> wrote:
->
-> From: Colin Ian King <colin.king@canonical.com>
->
-> There are several error return paths that dereference the null pointer
-> host because the pointer has not yet been set to a valid value.
-> Fix this by adding a new out_mmc label and exiting via this label
-> to avoid the host clean up and hence the null pointer dereference.
->
-> Addresses-Coverity: ("Explicit null dereference")
-> Fixes: 8105c2abbf36 ("mmc: moxart: Fix reference count leaks in moxart_probe")
-> Signed-off-by: Colin Ian King <colin.king@canonical.com>
+On 14/10/2021 13:11, haibo.chen@nxp.com wrote:
+> From: Haibo Chen <haibo.chen@nxp.com>
+> 
+> To reset standard tuning circuit completely, after clear ESDHC_MIX_CTRL_EXE_TUNE,
+> also need to clear bit buffer_read_ready, this operation will finally clear the
+> USDHC IP internal logic flag execute_tuning_with_clr_buf, make sure the following
+> normal data transfer will not be impacted by standard tuning logic used before.
+> 
+> Find this issue when do quick SD card insert/remove stress test. During standard
+> tuning prodedure, if remove SD card, USDHC standard tuning logic can't clear the
+> internal flag execute_tuning_with_clr_buf. Next time when insert SD card, all
+> data related commands can't get any data related interrupts, include data transfer
+> complete interrupt, data timeout interrupt, data CRC interrupt, data end bit interrupt.
+> Always trigger software timeout issue. Even reset the USDHC through bits in register
+> SYS_CTRL (0x2C, bit28 reset tuning, bit26 reset data, bit 25 reset command, bit 24
+> reset all) can't recover this. From the user's point of view, USDHC stuck, SD can't
+> be recognized any more.
+> 
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
-Applied for next, thanks!
+Apart from the request for a fixes tag:
 
-Kind regards
-Uffe
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/moxart-mmc.c | 13 +++++++------
->  1 file changed, 7 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-> index 7b9fcef490de..16d1c7a43d33 100644
-> --- a/drivers/mmc/host/moxart-mmc.c
-> +++ b/drivers/mmc/host/moxart-mmc.c
-> @@ -566,37 +566,37 @@ static int moxart_probe(struct platform_device *pdev)
->         if (!mmc) {
->                 dev_err(dev, "mmc_alloc_host failed\n");
->                 ret = -ENOMEM;
-> -               goto out;
-> +               goto out_mmc;
->         }
->
->         ret = of_address_to_resource(node, 0, &res_mmc);
->         if (ret) {
->                 dev_err(dev, "of_address_to_resource failed\n");
-> -               goto out;
-> +               goto out_mmc;
->         }
->
->         irq = irq_of_parse_and_map(node, 0);
->         if (irq <= 0) {
->                 dev_err(dev, "irq_of_parse_and_map failed\n");
->                 ret = -EINVAL;
-> -               goto out;
-> +               goto out_mmc;
->         }
->
->         clk = devm_clk_get(dev, NULL);
->         if (IS_ERR(clk)) {
->                 ret = PTR_ERR(clk);
-> -               goto out;
-> +               goto out_mmc;
->         }
->
->         reg_mmc = devm_ioremap_resource(dev, &res_mmc);
->         if (IS_ERR(reg_mmc)) {
->                 ret = PTR_ERR(reg_mmc);
-> -               goto out;
-> +               goto out_mmc;
->         }
->
->         ret = mmc_of_parse(mmc);
->         if (ret)
-> -               goto out;
-> +               goto out_mmc;
->
->         host = mmc_priv(mmc);
->         host->mmc = mmc;
-> @@ -687,6 +687,7 @@ static int moxart_probe(struct platform_device *pdev)
->                 dma_release_channel(host->dma_chan_tx);
->         if (!IS_ERR_OR_NULL(host->dma_chan_rx))
->                 dma_release_channel(host->dma_chan_rx);
-> +out_mmc:
->         if (mmc)
->                 mmc_free_host(mmc);
->         return ret;
-> --
-> 2.32.0
->
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index f18d169bc8ff..e658f0174242 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1187,6 +1187,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+>  	u32 ctrl;
+> +	int ret;
+>  
+>  	/* Reset the tuning circuit */
+>  	if (esdhc_is_usdhc(imx_data)) {
+> @@ -1199,7 +1200,22 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+>  		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+>  			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+>  			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+>  			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+> +			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
+> +			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
+> +				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
+> +			if (ret == -ETIMEDOUT)
+> +				dev_warn(mmc_dev(host->mmc),
+> +				 "Warning! clear execute tuning bit failed\n");
+> +			/*
+> +			 * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
+> +			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
+> +			 * will finally make sure the normal data transfer logic correct.
+> +			 */
+> +			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
+> +			ctrl |= SDHCI_INT_DATA_AVAIL;
+> +			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
+>  		}
+>  	}
+>  }
+> 
+
