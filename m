@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3902EC4321E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38FF2C43219
 	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:26:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24D14610E7
+	by mail.kernel.org (Postfix) with ESMTP id 1689D610CC
 	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:26:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230467AbhJNN2W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S231374AbhJNN2W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Thu, 14 Oct 2021 09:28:22 -0400
-Received: from mga02.intel.com ([134.134.136.20]:28810 "EHLO mga02.intel.com"
+Received: from mga03.intel.com ([134.134.136.65]:19461 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231267AbhJNN2T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 14 Oct 2021 09:28:19 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10136"; a="214838151"
+        id S230049AbhJNN2U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 14 Oct 2021 09:28:20 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10136"; a="227632682"
 X-IronPort-AV: E=Sophos;i="5.85,372,1624345200"; 
-   d="scan'208";a="214838151"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2021 06:26:14 -0700
+   d="scan'208";a="227632682"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2021 06:26:14 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.85,372,1624345200"; 
-   d="scan'208";a="626798350"
+   d="scan'208";a="571331106"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga001.fm.intel.com with ESMTP; 14 Oct 2021 06:26:12 -0700
+  by fmsmga002.fm.intel.com with ESMTP; 14 Oct 2021 06:26:12 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id D82AF361; Thu, 14 Oct 2021 16:26:19 +0300 (EEST)
+        id 0316037B; Thu, 14 Oct 2021 16:26:19 +0300 (EEST)
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Eric Biggers <ebiggers@google.com>,
@@ -33,56 +33,182 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Raul E Rangel <rrangel@chromium.org>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v3 0/5]  mmc: sdhci-pci: Remove dead code and deduplicate
-Date:   Thu, 14 Oct 2021 16:26:08 +0300
-Message-Id: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v3 3/5] mmc: sdhci-pci: Remove dead code (struct sdhci_pci_data et al)
+Date:   Thu, 14 Oct 2021 16:26:11 +0300
+Message-Id: <20211014132613.27861-4-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
+References: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It appears that one of the supported platform magically worked with
-the custom IRQ handler (any hints how?) while having two PCB designs
-with an opposite CD sense level. Quirking it out reveals the code
-duplication and dead code.
+The last user of this struct gone a couple of releases ago.
+Besides that there were not so many users of this API for
+more than 10 years:
 
-Patch 1 is code deduplication to save few LOCs.
-Patch 2-5 are dead code removals.
+1/ The one is Intel Merrifield, that had been added 2016-08-31
+   by the commit 3976b0380b31 ("x86/platform/intel-mid: Enable
+   SD card detection on Merrifield") and removed 2021-02-11 by
+   the commit 4590d98f5a4f ("sfi: Remove framework for deprecated
+   firmware").
 
-In v3:
-- dropped the fix as it has been applied (Ulf)
-- added tag (Adrian)
-- elaborated commit IDs with their short descriptions in patch 3 (Adrian)
-- corrected dependency in patch 5 (Adrian)
+2/ The other is Intel Sunrisepoint related, that had been added
+   2015-02-06 by the commit e1bfad6d936d ("mmc: sdhci-pci: Add
+   support for drive strength selection for SPT") and removed
+   2017-03-20 by the commit 51ced59cc02e ("mmc: sdhci-pci: Use
+   ACPI DSM to get driver strength for some Intel devices").
 
-In v2:
-- redone fix to use ->get_cd() instead of quirks (Adrian)
-- due to above transformed previous clean up to the current patch 2
-- added a new patch, i.e. patch 3
-- added commit IDs to patch 4 (Adrian)
-- mentioned dependencies on previous patches in patch 5 and 6 (Adrian)
+Effectively this is a revert of the commit 52c506f0bc72 ("mmc:
+sdhci-pci: add platform data").
 
-Andy Shevchenko (5):
-  mmc: sdhci: Deduplicate sdhci_get_cd_nogpio()
-  mmc: sdhci: Remove unused prototype declaration in the header
-  mmc: sdhci-pci: Remove dead code (struct sdhci_pci_data et al)
-  mmc: sdhci-pci: Remove dead code (cd_gpio, cd_irq et al)
-  mmc: sdhci-pci: Remove dead code (rst_n_gpio et al)
-
- drivers/mmc/host/Makefile          |   1 -
- drivers/mmc/host/sdhci-acpi.c      |  14 +--
- drivers/mmc/host/sdhci-pci-core.c  | 152 +----------------------------
- drivers/mmc/host/sdhci-pci-data.c  |   6 --
- drivers/mmc/host/sdhci-pci.h       |   5 -
- drivers/mmc/host/sdhci.c           |  19 ++++
- drivers/mmc/host/sdhci.h           |   2 +-
- include/linux/mmc/sdhci-pci-data.h |  18 ----
- 8 files changed, 26 insertions(+), 191 deletions(-)
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/Makefile          |  1 -
+ drivers/mmc/host/sdhci-pci-core.c  | 31 ++++--------------------------
+ drivers/mmc/host/sdhci-pci-data.c  |  6 ------
+ drivers/mmc/host/sdhci-pci.h       |  1 -
+ include/linux/mmc/sdhci-pci-data.h | 18 -----------------
+ 5 files changed, 4 insertions(+), 53 deletions(-)
  delete mode 100644 drivers/mmc/host/sdhci-pci-data.c
  delete mode 100644 include/linux/mmc/sdhci-pci-data.h
 
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 14004cc09aaa..ea36d379bd3c 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -14,7 +14,6 @@ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+ sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o sdhci-pci-arasan.o \
+ 				   sdhci-pci-dwc-mshc.o sdhci-pci-gli.o
+-obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
+ obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 19e13dfae593..8938c63b1e77 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -17,8 +17,6 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/slab.h>
+ #include <linux/device.h>
+-#include <linux/mmc/host.h>
+-#include <linux/mmc/mmc.h>
+ #include <linux/scatterlist.h>
+ #include <linux/io.h>
+ #include <linux/iopoll.h>
+@@ -26,11 +24,13 @@
+ #include <linux/pm_runtime.h>
+ #include <linux/pm_qos.h>
+ #include <linux/debugfs.h>
+-#include <linux/mmc/slot-gpio.h>
+-#include <linux/mmc/sdhci-pci-data.h>
+ #include <linux/acpi.h>
+ #include <linux/dmi.h>
+ 
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/slot-gpio.h>
++
+ #ifdef CONFIG_X86
+ #include <asm/iosf_mbi.h>
+ #endif
+@@ -2131,22 +2131,6 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 	slot->cd_gpio = -EINVAL;
+ 	slot->cd_idx = -1;
+ 
+-	/* Retrieve platform data if there is any */
+-	if (*sdhci_pci_get_data)
+-		slot->data = sdhci_pci_get_data(pdev, slotno);
+-
+-	if (slot->data) {
+-		if (slot->data->setup) {
+-			ret = slot->data->setup(slot->data);
+-			if (ret) {
+-				dev_err(&pdev->dev, "platform setup failed\n");
+-				goto free;
+-			}
+-		}
+-		slot->rst_n_gpio = slot->data->rst_n_gpio;
+-		slot->cd_gpio = slot->data->cd_gpio;
+-	}
+-
+ 	host->hw_name = "PCI";
+ 	host->ops = chip->fixes && chip->fixes->ops ?
+ 		    chip->fixes->ops :
+@@ -2233,10 +2217,6 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
+ 		chip->fixes->remove_slot(slot, 0);
+ 
+ cleanup:
+-	if (slot->data && slot->data->cleanup)
+-		slot->data->cleanup(slot->data);
+-
+-free:
+ 	sdhci_free_host(host);
+ 
+ 	return ERR_PTR(ret);
+@@ -2259,9 +2239,6 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
+ 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
+ 		slot->chip->fixes->remove_slot(slot, dead);
+ 
+-	if (slot->data && slot->data->cleanup)
+-		slot->data->cleanup(slot->data);
+-
+ 	sdhci_free_host(slot->host);
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci-pci-data.c b/drivers/mmc/host/sdhci-pci-data.c
+deleted file mode 100644
+index 18638fb363d8..000000000000
+--- a/drivers/mmc/host/sdhci-pci-data.c
++++ /dev/null
+@@ -1,6 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only
+-#include <linux/module.h>
+-#include <linux/mmc/sdhci-pci-data.h>
+-
+-struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev, int slotno);
+-EXPORT_SYMBOL_GPL(sdhci_pci_get_data);
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 8f90c4163bb5..15b36cd47860 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -156,7 +156,6 @@ struct sdhci_pci_fixes {
+ struct sdhci_pci_slot {
+ 	struct sdhci_pci_chip	*chip;
+ 	struct sdhci_host	*host;
+-	struct sdhci_pci_data	*data;
+ 
+ 	int			rst_n_gpio;
+ 	int			cd_gpio;
+diff --git a/include/linux/mmc/sdhci-pci-data.h b/include/linux/mmc/sdhci-pci-data.h
+deleted file mode 100644
+index 1d42872d22f3..000000000000
+--- a/include/linux/mmc/sdhci-pci-data.h
++++ /dev/null
+@@ -1,18 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0 */
+-#ifndef LINUX_MMC_SDHCI_PCI_DATA_H
+-#define LINUX_MMC_SDHCI_PCI_DATA_H
+-
+-struct pci_dev;
+-
+-struct sdhci_pci_data {
+-	struct pci_dev	*pdev;
+-	int		slotno;
+-	int		rst_n_gpio; /* Set to -EINVAL if unused */
+-	int		cd_gpio;    /* Set to -EINVAL if unused */
+-	int		(*setup)(struct sdhci_pci_data *data);
+-	void		(*cleanup)(struct sdhci_pci_data *data);
+-};
+-
+-extern struct sdhci_pci_data *(*sdhci_pci_get_data)(struct pci_dev *pdev,
+-				int slotno);
+-#endif
 -- 
 2.33.0
 
