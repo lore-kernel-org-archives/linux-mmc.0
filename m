@@ -2,113 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8094FC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:12:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E542C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:26:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5EA1260F41
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:12:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2FAF2610E7
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 13:26:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230199AbhJNNOk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Oct 2021 09:14:40 -0400
-Received: from mga14.intel.com ([192.55.52.115]:47571 "EHLO mga14.intel.com"
+        id S231268AbhJNN2T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Oct 2021 09:28:19 -0400
+Received: from mga06.intel.com ([134.134.136.31]:20897 "EHLO mga06.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230094AbhJNNOg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 14 Oct 2021 09:14:36 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10136"; a="227955794"
+        id S230467AbhJNN2S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 14 Oct 2021 09:28:18 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10136"; a="288543198"
 X-IronPort-AV: E=Sophos;i="5.85,372,1624345200"; 
-   d="scan'208";a="227955794"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2021 06:12:31 -0700
+   d="scan'208";a="288543198"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2021 06:26:14 -0700
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.85,372,1624345200"; 
-   d="scan'208";a="571327891"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by fmsmga002.fm.intel.com with ESMTP; 14 Oct 2021 06:12:28 -0700
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: clear the buffer_read_ready to
- reset standard tuning circuit
-To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-Cc:     shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, linux-imx@nxp.com
-References: <1634206268-5416-1-git-send-email-haibo.chen@nxp.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <541668c6-ea4f-afa3-8ef4-9727c46bb2c6@intel.com>
-Date:   Thu, 14 Oct 2021 16:12:28 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+   d="scan'208";a="548740861"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by fmsmga004.fm.intel.com with ESMTP; 14 Oct 2021 06:26:12 -0700
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+        id E0B5C2E4; Thu, 14 Oct 2021 16:26:19 +0300 (EEST)
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Eric Biggers <ebiggers@google.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH v3 1/5] mmc: sdhci: Deduplicate sdhci_get_cd_nogpio()
+Date:   Thu, 14 Oct 2021 16:26:09 +0300
+Message-Id: <20211014132613.27861-2-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
+References: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
 MIME-Version: 1.0
-In-Reply-To: <1634206268-5416-1-git-send-email-haibo.chen@nxp.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/10/2021 13:11, haibo.chen@nxp.com wrote:
-> From: Haibo Chen <haibo.chen@nxp.com>
-> 
-> To reset standard tuning circuit completely, after clear ESDHC_MIX_CTRL_EXE_TUNE,
-> also need to clear bit buffer_read_ready, this operation will finally clear the
-> USDHC IP internal logic flag execute_tuning_with_clr_buf, make sure the following
-> normal data transfer will not be impacted by standard tuning logic used before.
-> 
-> Find this issue when do quick SD card insert/remove stress test. During standard
-> tuning prodedure, if remove SD card, USDHC standard tuning logic can't clear the
-> internal flag execute_tuning_with_clr_buf. Next time when insert SD card, all
-> data related commands can't get any data related interrupts, include data transfer
-> complete interrupt, data timeout interrupt, data CRC interrupt, data end bit interrupt.
-> Always trigger software timeout issue. Even reset the USDHC through bits in register
-> SYS_CTRL (0x2C, bit28 reset tuning, bit26 reset data, bit 25 reset command, bit 24
-> reset all) can't recover this. From the user's point of view, USDHC stuck, SD can't
-> be recognized any more.
-> 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+The analogue of the sdhci_get_cd_nogpio() is used in the sdhci-pci-core
+and sdhci-acpi modules. Deduplicate it by moving to sdhci and exporting.
 
-Apart from the request for a fixes tag:
-
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-acpi.c     | 14 +-------------
+ drivers/mmc/host/sdhci-pci-core.c | 18 ------------------
+ drivers/mmc/host/sdhci.c          | 19 +++++++++++++++++++
+ drivers/mmc/host/sdhci.h          |  1 +
+ 4 files changed, 21 insertions(+), 31 deletions(-)
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index f18d169bc8ff..e658f0174242 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1187,6 +1187,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
->  	u32 ctrl;
-> +	int ret;
->  
->  	/* Reset the tuning circuit */
->  	if (esdhc_is_usdhc(imx_data)) {
-> @@ -1199,7 +1200,22 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
->  		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
->  			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
->  			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> +			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
->  			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-> +			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
-> +			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
-> +				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
-> +			if (ret == -ETIMEDOUT)
-> +				dev_warn(mmc_dev(host->mmc),
-> +				 "Warning! clear execute tuning bit failed\n");
-> +			/*
-> +			 * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
-> +			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
-> +			 * will finally make sure the normal data transfer logic correct.
-> +			 */
-> +			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
-> +			ctrl |= SDHCI_INT_DATA_AVAIL;
-> +			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
->  		}
->  	}
->  }
-> 
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 8fe65f172a61..f1ef0d28b0dd 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -362,23 +362,11 @@ static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+ static int bxt_get_cd(struct mmc_host *mmc)
+ {
+ 	int gpio_cd = mmc_gpio_get_cd(mmc);
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	unsigned long flags;
+-	int ret = 0;
+ 
+ 	if (!gpio_cd)
+ 		return 0;
+ 
+-	spin_lock_irqsave(&host->lock, flags);
+-
+-	if (host->flags & SDHCI_DEVICE_DEAD)
+-		goto out;
+-
+-	ret = !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+-out:
+-	spin_unlock_irqrestore(&host->lock, flags);
+-
+-	return ret;
++	return sdhci_get_cd_nogpio(mmc);
+ }
+ 
+ static int intel_probe_slot(struct platform_device *pdev, struct acpi_device *adev)
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index d0f2edfe296c..19e13dfae593 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -616,24 +616,6 @@ static int intel_select_drive_strength(struct mmc_card *card,
+ 	return intel_host->drv_strength;
+ }
+ 
+-static int sdhci_get_cd_nogpio(struct mmc_host *mmc)
+-{
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	unsigned long flags;
+-	int ret = 0;
+-
+-	spin_lock_irqsave(&host->lock, flags);
+-
+-	if (host->flags & SDHCI_DEVICE_DEAD)
+-		goto out;
+-
+-	ret = !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+-out:
+-	spin_unlock_irqrestore(&host->lock, flags);
+-
+-	return ret;
+-}
+-
+ static int bxt_get_cd(struct mmc_host *mmc)
+ {
+ 	int gpio_cd = mmc_gpio_get_cd(mmc);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index dbe87995596c..269c86569402 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2425,6 +2425,25 @@ static int sdhci_get_cd(struct mmc_host *mmc)
+ 	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+ }
+ 
++int sdhci_get_cd_nogpio(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	int ret = 0;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->flags & SDHCI_DEVICE_DEAD)
++		goto out;
++
++	ret = !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
++out:
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(sdhci_get_cd_nogpio);
++
+ static int sdhci_check_ro(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index e8d04e42a5af..c593af479832 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -775,6 +775,7 @@ void sdhci_set_power_and_bus_voltage(struct sdhci_host *host,
+ 				     unsigned short vdd);
+ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ 			   unsigned short vdd);
++int sdhci_get_cd_nogpio(struct mmc_host *mmc);
+ void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq);
+ int sdhci_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
+ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+-- 
+2.33.0
 
