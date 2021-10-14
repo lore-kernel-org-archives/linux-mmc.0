@@ -2,90 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BBD7C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 11:20:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CA59C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 11:24:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 616C4610D0
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 11:20:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 44AFF610F9
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 11:24:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230177AbhJNLWj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Oct 2021 07:22:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52968 "EHLO
+        id S230370AbhJNL01 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Oct 2021 07:26:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53854 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230032AbhJNLWj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Oct 2021 07:22:39 -0400
-Received: from mail-ua1-x936.google.com (mail-ua1-x936.google.com [IPv6:2607:f8b0:4864:20::936])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33B46C06174E
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 04:20:34 -0700 (PDT)
-Received: by mail-ua1-x936.google.com with SMTP id e7so10465652ual.11
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 04:20:34 -0700 (PDT)
+        with ESMTP id S229984AbhJNL01 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Oct 2021 07:26:27 -0400
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67A2EC061570
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 04:24:22 -0700 (PDT)
+Received: by mail-lf1-x131.google.com with SMTP id r19so25013734lfe.10
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 04:24:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=2SsWb5zBEuql+rj/JRtzxIkZvDD53R135NjgjLfojg8=;
-        b=Ctjn9wnv9T8ASZGza6N3LXLNgVS/LhluzbFLQAHjhQ0ccBpox6ozvJtsBKd5G6djpI
-         O7/1/dk2A6H4jjcTdkM3e436CKAasWlmHWWJYx/6gAnSeBsImiUBWRe2kwognXnQrrbo
-         8hvUdiV9JKSrBIdBsDr4qNuEfikHdQPBAMRt3umo7+8U+xGYFirTOsR5aEB629EEFNpG
-         YC/RDKCmBIElzZr2399KN5R2ThVpbuprxMHXketUqz0KRR7/9Ma2+i6AsMTTVtZSU/ZU
-         jk+ajKeGe4MoxBBzAoYYjclMG76/gETNN2qIMy2nAD6grzBhfc394fYik7BFq4+NRKzZ
-         UzgQ==
+        bh=qBxhJYaCOX3Id7KwwNjAEqmvk1pt+TeT2pj5DWPXCKY=;
+        b=VdV9zFSD3os+m4+AHDB+PAnnnCCeOwAUayEF1wwCJ6RVpB/uXIpS3/UTNSsqq8qiUv
+         1zZc261Xkg9DT2oQEf9fQY1tHr4mGbcEWFI1/Xv1T0+aq0s/xxqJGzFOfXQHn0zlDs4l
+         5u4efJKQTGyc+ohk+ibFqRaDKNk9L6zYBPrAMsxbCRtzOuUAMt9SoPRyMc5bIlYWu8hG
+         QqEVrEppMoMQU/6UULwvetb3fkh83PHbzACSlwIcwnPACRjxDs00UMsnjLZgZ4v/GVvu
+         mVjzQhR/papd8lNztKvbV0TpnFlZG+RfwuuQeysxqdRBKskMBipqdF4mHvIxPPm+8HVk
+         BCSw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=2SsWb5zBEuql+rj/JRtzxIkZvDD53R135NjgjLfojg8=;
-        b=vO/HQ+jEeuCi+oTqgd2lc3rimRovLpiUrKY97r7dagwxQK/Vzs/QyBcsPYylPSglsQ
-         LTDdAjY8hm/lgrrzPFB27hlz3d5TCWF1ely30sG6ZOUPZIf6FMJD9e4hvicmo2F4qdIi
-         VIUs7EvbNX1gT7RajHMnAde5DN7DahouQLlRtSoYUu1OupyFetWlWUtcMivfZyrlRkI8
-         5Ng9jXppQ0IFLbPr2ymK9SHekj2Jh5cma6/UqU5Mu+e+biSGAD7Q+BCOzwaZTY8NKERP
-         kDKYUxFR76M56onkvlnnzMRHigt3e6nSwJcunGwUOLEtJud4ljCOOUSdAkRsSu5IqiXt
-         cv7g==
-X-Gm-Message-State: AOAM531MYlIh4KKG5+Dkc/u+h+++NTrRhCmQnB5cbMjExCTq0CaIaa30
-        reVXaMO8JPaH9EmJe+PjSED2f0Q+afQoRg7qz6o=
-X-Google-Smtp-Source: ABdhPJw+zV4fiH+59fD+s47//hMcHWbJ985q5ybRYr1j7y/FssJTjj5wUvzDM0420cN2s/u9i1SsdWdl2YqXZMCnUto=
-X-Received: by 2002:a67:d114:: with SMTP id u20mr6107367vsi.3.1634210433285;
- Thu, 14 Oct 2021 04:20:33 -0700 (PDT)
+        bh=qBxhJYaCOX3Id7KwwNjAEqmvk1pt+TeT2pj5DWPXCKY=;
+        b=B0rYoHrYEpAXRp2UdDHfyhG3GSjbeKgstl03JwT3nP6WL/GvypO+adGoBaoeq0Kf2b
+         5sGYQMKCf98hkG3ZwXy87BgS0Yny86fwsArX9Khvm+5otAsX35NJWT07BB82n98f5RN4
+         LuKX9uRmvgImW5mH7aZXFuQinMYXkNHBhktOGUz0ywrxrVlwgLOQ8SSI76iQyH7NeDj0
+         zUzaaYwvjBTGo3QYbWWNhpGHh8Qyf/Vr3AQyapRfSqMbZfICHbI/4fhasIALv6ot/54+
+         1iu9lAPszTuGJblYpDjv+SLH5yfsmn7uKPWXAc29JtUyU/iLy9psWshMXaJT1TenpSvm
+         0AHA==
+X-Gm-Message-State: AOAM531mdWBgektj0tZilJAHS2R3eLlAxWr7p8EI6K38qvOY8rkRj0UB
+        +YNkXjZlG7XKcmhQKHpL+UPotgWNFrhJGDu2xGCSOQ==
+X-Google-Smtp-Source: ABdhPJy4bhF2na6uhZbQZ/ETeLgPA6upQWe9mpPZBreg2G5kdHjhMXSFWBGqAMxhuvr8Qvr3RKHNWppnqSwqqjagFBg=
+X-Received: by 2002:a2e:b8d5:: with SMTP id s21mr5632172ljp.300.1634210660744;
+ Thu, 14 Oct 2021 04:24:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <1634206268-5416-1-git-send-email-haibo.chen@nxp.com>
-In-Reply-To: <1634206268-5416-1-git-send-email-haibo.chen@nxp.com>
-From:   Fabio Estevam <festevam@gmail.com>
-Date:   Thu, 14 Oct 2021 08:20:22 -0300
-Message-ID: <CAOMZO5ALWG9ovHGJ4Nw0x72E0+ONxQjYzGNPTkUKgX7La8W1-A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: clear the buffer_read_ready to
- reset standard tuning circuit
-To:     Bough Chen <haibo.chen@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>
+References: <20211013201723.52212-1-andriy.shevchenko@linux.intel.com> <20211013201723.52212-2-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20211013201723.52212-2-andriy.shevchenko@linux.intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 14 Oct 2021 13:23:44 +0200
+Message-ID: <CAPDyKFrGv1OhnXhzq9KmjktcfLwuD=k8BU+aYqbJHCOiv-a5PA@mail.gmail.com>
+Subject: Re: [PATCH v2 1/6] mmc: sdhci-pci: Read card detect from ACPI for
+ Intel Merrifield
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc:     Eric Biggers <ebiggers@google.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Haibo,
+On Wed, 13 Oct 2021 at 22:17, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+>
+> Intel Merrifield platform had been converted to use ACPI enumeration.
+> However, the driver missed an update to retrieve card detect GPIO.
+> Fix it here.
+>
+> Unfortunately we can't rely on CD GPIO state because there are two
+> different PCB designs in the wild that are using the opposite card
+> detection sense and there is no way to distinguish those platforms,
+> that's why ignore CD GPIO completely and use it only as an event.
+>
+> Fixes: 4590d98f5a4f ("sfi: Remove framework for deprecated firmware")
+> BugLink: https://github.com/edison-fw/meta-intel-edison/issues/135
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-On Thu, Oct 14, 2021 at 7:36 AM <haibo.chen@nxp.com> wrote:
->
-> From: Haibo Chen <haibo.chen@nxp.com>
->
-> To reset standard tuning circuit completely, after clear ESDHC_MIX_CTRL_EXE_TUNE,
-> also need to clear bit buffer_read_ready, this operation will finally clear the
-> USDHC IP internal logic flag execute_tuning_with_clr_buf, make sure the following
-> normal data transfer will not be impacted by standard tuning logic used before.
->
-> Find this issue when do quick SD card insert/remove stress test. During standard
-> tuning prodedure, if remove SD card, USDHC standard tuning logic can't clear the
-> internal flag execute_tuning_with_clr_buf. Next time when insert SD card, all
-> data related commands can't get any data related interrupts, include data transfer
-> complete interrupt, data timeout interrupt, data CRC interrupt, data end bit interrupt.
-> Always trigger software timeout issue. Even reset the USDHC through bits in register
-> SYS_CTRL (0x2C, bit28 reset tuning, bit26 reset data, bit 25 reset command, bit 24
-> reset all) can't recover this. From the user's point of view, USDHC stuck, SD can't
-> be recognized any more.
+Applied for fixes and by adding a stable tag, thanks!
 
-Please add a Fixes tag, thanks.
+Note that, I am expecting yet another version of the remaining patches
+in the series, allowing you to address the final comments from Adrian.
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 29 ++++++++++++++++++++++++-----
+>  1 file changed, 24 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index be19785227fe..d0f2edfe296c 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -616,16 +616,12 @@ static int intel_select_drive_strength(struct mmc_card *card,
+>         return intel_host->drv_strength;
+>  }
+>
+> -static int bxt_get_cd(struct mmc_host *mmc)
+> +static int sdhci_get_cd_nogpio(struct mmc_host *mmc)
+>  {
+> -       int gpio_cd = mmc_gpio_get_cd(mmc);
+>         struct sdhci_host *host = mmc_priv(mmc);
+>         unsigned long flags;
+>         int ret = 0;
+>
+> -       if (!gpio_cd)
+> -               return 0;
+> -
+>         spin_lock_irqsave(&host->lock, flags);
+>
+>         if (host->flags & SDHCI_DEVICE_DEAD)
+> @@ -638,6 +634,21 @@ static int bxt_get_cd(struct mmc_host *mmc)
+>         return ret;
+>  }
+>
+> +static int bxt_get_cd(struct mmc_host *mmc)
+> +{
+> +       int gpio_cd = mmc_gpio_get_cd(mmc);
+> +
+> +       if (!gpio_cd)
+> +               return 0;
+> +
+> +       return sdhci_get_cd_nogpio(mmc);
+> +}
+> +
+> +static int mrfld_get_cd(struct mmc_host *mmc)
+> +{
+> +       return sdhci_get_cd_nogpio(mmc);
+> +}
+> +
+>  #define SDHCI_INTEL_PWR_TIMEOUT_CNT    20
+>  #define SDHCI_INTEL_PWR_TIMEOUT_UDELAY 100
+>
+> @@ -1341,6 +1352,14 @@ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>                                          MMC_CAP_1_8V_DDR;
+>                 break;
+>         case INTEL_MRFLD_SD:
+> +               slot->cd_idx = 0;
+> +               slot->cd_override_level = true;
+> +               /*
+> +                * There are two PCB designs of SD card slot with the opposite
+> +                * card detection sense. Quirk this out by ignoring GPIO state
+> +                * completely in the custom ->get_cd() callback.
+> +                */
+> +               slot->host->mmc_host_ops.get_cd = mrfld_get_cd;
+>                 slot->host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>                 break;
+>         case INTEL_MRFLD_SDIO:
+> --
+> 2.33.0
+>
