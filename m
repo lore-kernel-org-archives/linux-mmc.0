@@ -2,145 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA646C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Oct 2021 15:14:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BA0FC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Oct 2021 16:03:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1FA7611C1
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Oct 2021 15:14:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F300C61040
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Oct 2021 16:03:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240892AbhJOPQi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Oct 2021 11:16:38 -0400
-Received: from Galois.linutronix.de ([193.142.43.55]:50798 "EHLO
-        galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240877AbhJOPQh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Oct 2021 11:16:37 -0400
-From:   Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020; t=1634310869;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=xuQ9dlseb8QSm1Z1qmlP/P61CRYzuxuhzN+uy8YQa4c=;
-        b=VbRC6g75nsEgTp52bSLZb1bvKlYsvT0DUQhp1nvTPv2mvoJplXXFrkUa92NGhfnlofU43n
-        NGagCYRNmkgvONMRTAO96OD8D+5kLEE8qvx25X7eWFIawKriuSGnZ+t2BdzlelL6bYDvn1
-        7x6qHhY2NreivGd4RN0r2Gh2+Om8wzHN28E9IsMni1tpBzSsT7ZwHqQ3kgmzsLORMxc8Du
-        x25+8lPDdmtMW0PBynZqucU69zjr2I4DF4g03QmuRtiecj4fK9Ubs0/wkLbnn33i6Zwd4F
-        TQxdT0o/2LESVyw3Xfxh7MjiW0DVf7Zg6oTAQ0kOMVZN7GJraBVMJUF1iwq6Ug==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020e; t=1634310869;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=xuQ9dlseb8QSm1Z1qmlP/P61CRYzuxuhzN+uy8YQa4c=;
-        b=8/q4h8aY2eTLusekixdaiKwfo4eGZ7DKaSQD54mcFKcjcfWh0qDtQn4ySYovt4Iu0f2WvW
-        JSPKlU4ShcrIwtAg==
-To:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
+        id S241104AbhJOQFg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Oct 2021 12:05:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49316 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S241102AbhJOQFf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Oct 2021 12:05:35 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E5D6C061570;
+        Fri, 15 Oct 2021 09:03:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=Od2a8TFTLmg9DGz72n8zhdlcSfRxQN9hmAR8G79f8WM=; b=zpoEuN51DFs4fhLm9POkiTQky4
+        9O/oaqVH2laWoAs8xuwUdEKR4/qbrzR/U21xA9Xztch1OlsSCl0n4YInhg7MTTmOsrxQZwr/9xdRW
+        ytuBXSaeO0eE3YnOi//wyLqxzUY2Wv7n4Tua7gKLfwf1ZOhzIFYYB6fbcX85qF4omi6wOeNsXYsAj
+        P3AAaaFMtNaNmhXE1yzu5AVLWvZUXunFIpq9/MQV7ao2oZGOA7/msv+IKWQDmiTQp1rPYWu4uUlh6
+        v2rV29C81WiKHBmadBY8UQNISQRNz/tZeTef+0rOelvrUedFIoDf+oKeQ66aaUW15yhBvRr706oy1
+        QyzXgp/g==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mbPg8-007zM4-Cn; Fri, 15 Oct 2021 16:03:28 +0000
+Date:   Fri, 15 Oct 2021 09:03:28 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Cc:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-scsi@vger.kernel.org, linux-usb@vger.kernel.org,
-        usb-storage@lists.one-eyed-alien.net
-Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
+        usb-storage@lists.one-eyed-alien.net, Jens Axboe <axboe@kernel.dk>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         "James E.J. Bottomley" <jejb@linux.ibm.com>,
         "Martin K. Petersen" <martin.petersen@oracle.com>,
         Alan Stern <stern@rowland.harvard.edu>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Christoph Hellwig <hch@infradead.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Subject: [RFC PATCH 3/3] scsi, usb: storage: Complete the blk-request directly.
-Date:   Fri, 15 Oct 2021 17:14:12 +0200
-Message-Id: <20211015151412.3229037-4-bigeasy@linutronix.de>
-In-Reply-To: <20211015151412.3229037-1-bigeasy@linutronix.de>
+        Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [RFC PATCH 1/3] blk-mq: Add blk_mq_complete_request_direct()
+Message-ID: <YWmmULYUeo/Zd6Jl@infradead.org>
 References: <20211015151412.3229037-1-bigeasy@linutronix.de>
+ <20211015151412.3229037-2-bigeasy@linutronix.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211015151412.3229037-2-bigeasy@linutronix.de>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The usb-storage driver runs in a thread and completes its request from
-that thread. Since it is a single queued device it always schedules
-ksoftirqd for its completion.
+On Fri, Oct 15, 2021 at 05:14:10PM +0200, Sebastian Andrzej Siewior wrote:
+> +void blk_mq_complete_request_direct(struct request *rq)
+> +{
+> +	WRITE_ONCE(rq->state, MQ_RQ_COMPLETE);
+> +	rq->q->mq_ops->complete(rq);
+> +}
 
-The completion is performed in the SCSI stack. Add
-scsi_done_preemptible() which inlines most of scsi_mq_done() and
-completes the request directly via blk_mq_complete_request_direct().
-
-Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
----
- drivers/scsi/scsi_lib.c   | 17 ++++++++++++++++-
- drivers/usb/storage/usb.c |  2 +-
- include/scsi/scsi_cmnd.h  |  7 +++++++
- 3 files changed, 24 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/scsi/scsi_lib.c b/drivers/scsi/scsi_lib.c
-index 572673873ddf8..f0eeedce6b081 100644
---- a/drivers/scsi/scsi_lib.c
-+++ b/drivers/scsi/scsi_lib.c
-@@ -1575,16 +1575,31 @@ static blk_status_t scsi_prepare_cmd(struct request=
- *req)
- 	return scsi_cmd_to_driver(cmd)->init_command(cmd);
- }
-=20
--static void scsi_mq_done(struct scsi_cmnd *cmd)
-+static void _scsi_mq_done(struct scsi_cmnd *cmd)
- {
- 	if (unlikely(blk_should_fake_timeout(scsi_cmd_to_rq(cmd)->q)))
- 		return;
- 	if (unlikely(test_and_set_bit(SCMD_STATE_COMPLETE, &cmd->state)))
- 		return;
- 	trace_scsi_dispatch_cmd_done(cmd);
-+}
-+
-+static void scsi_mq_done(struct scsi_cmnd *cmd)
-+{
-+	_scsi_mq_done(cmd);
- 	blk_mq_complete_request(scsi_cmd_to_rq(cmd));
- }
-=20
-+void scsi_done_preemptible(struct scsi_cmnd *scmd)
-+{
-+	if (scmd->scsi_done !=3D scsi_mq_done) {
-+		scmd->scsi_done(scmd);
-+		return;
-+	}
-+	_scsi_mq_done(scmd);
-+	blk_mq_complete_request_direct(scsi_cmd_to_rq(scmd));
-+}
-+
- static void scsi_mq_put_budget(struct request_queue *q, int budget_token)
- {
- 	struct scsi_device *sdev =3D q->queuedata;
-diff --git a/drivers/usb/storage/usb.c b/drivers/usb/storage/usb.c
-index 90aa9c12ffac5..6ceedd1e14ce7 100644
---- a/drivers/usb/storage/usb.c
-+++ b/drivers/usb/storage/usb.c
-@@ -417,7 +417,7 @@ static int usb_stor_control_thread(void * __us)
- 		if (srb) {
- 			usb_stor_dbg(us, "scsi cmd done, result=3D0x%x\n",
- 					srb->result);
--			srb->scsi_done(srb);
-+			scsi_done_preemptible(srb);
- 		}
- 	} /* for (;;) */
-=20
-diff --git a/include/scsi/scsi_cmnd.h b/include/scsi/scsi_cmnd.h
-index eaf04c9a1dfcb..e992f2f74dd69 100644
---- a/include/scsi/scsi_cmnd.h
-+++ b/include/scsi/scsi_cmnd.h
-@@ -396,4 +396,11 @@ static inline unsigned scsi_transfer_length(struct scs=
-i_cmnd *scmd)
- extern void scsi_build_sense(struct scsi_cmnd *scmd, int desc,
- 			     u8 key, u8 asc, u8 ascq);
-=20
-+static inline void scsi_done(struct scsi_cmnd *scmd)
-+{
-+	scmd->scsi_done(scmd);
-+}
-+
-+extern void scsi_done_preemptible(struct scsi_cmnd *scmd);
-+
- #endif /* _SCSI_SCSI_CMND_H */
---=20
-2.33.0
-
+As this is called by the driver we known what ->complete this helper
+would call.  So instead of doing this we could just call
+blk_mq_set_request_complete and the actual completion helper.
+The comment above it will need some updates of course.
