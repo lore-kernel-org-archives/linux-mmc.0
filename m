@@ -2,190 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 692C6C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 20:07:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BEA20C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Oct 2021 00:16:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E4C860F6F
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Oct 2021 20:07:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A926D6105A
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Oct 2021 00:16:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232898AbhJNUJK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Oct 2021 16:09:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60966 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234079AbhJNUJK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Oct 2021 16:09:10 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0A20C061760
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 13:07:04 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id t16so28777510eds.9
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Oct 2021 13:07:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=tOC9prHZYIEZh+iOSkgASgqcP4dzHU1Vi2nx843IsCk=;
-        b=NL0BrbBgqbeg+0k1NdyHAoUworVxwn/bPXtWcOyPrJjiIpNlT1faHXA45eyP9NndQ8
-         GY6YgAmOHLAZ/tAmiSlkjl6N8hPbdMSxqgVNlAkQWq4zFMK0JLWO7AArMg2YnWWk2jSp
-         k3WkVkHvKn3O99QXT7K3GiVbGxYD/qzA3Bw94Yswc2z3skllu6r8XA+f/34SzUTYrVno
-         +RIWyNtx2rCeOe/yliw4fna8bHmSd0oZjw9hN+mJnzJL47/a/yr3XjQDu7aRj4zYWWVv
-         4EypWFYkT+zi4P4XBv6M0hYyyXU8d9p2vYXwozwbXGocu6QkkGopMHu6J9GPflpKU/6N
-         gtyA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=tOC9prHZYIEZh+iOSkgASgqcP4dzHU1Vi2nx843IsCk=;
-        b=h0450381W5E5c7b8NcNg+WiYy18LHVk+mbDme996vINuTC9f8/iguQnRFqrkpmUUDF
-         ja/5+2GlT10HX2f+syqkyV28+4sdeiAwLgFkxqj7+rQkrbdnQmmmomr9uIGFpZbKkRY/
-         V2vZde1Xwq+ytez1oDz8OHldny81hCzVgNwbl22gRRDCCtr4Gw6nJPeKz0CX3aG3n5Eu
-         wy6K+zEEhq6g/MBhYGhudKAdaaLU/mqnu0Oqo4VzsCU1FJ1C8JpfP36bptPlymKo6hwh
-         3ygvCnhE/Qe9ap95NAPkaeF6rxsTAXXb1yxZ2s+qoaXE14dp3wPUaYdTtV5KAqrR2o14
-         TsuA==
-X-Gm-Message-State: AOAM530oDkr/LoOuRFfpCvFrizQx70EJZXnS8XUKxuWoO49Jtrb2ZbDQ
-        mkcZuTJEyuW0PukAEmoN2+tpCPc0qRhJWdnsrV6xyg==
-X-Google-Smtp-Source: ABdhPJxD9UzCWfjeFxRsC1YkcQ1vTaG6mft6f+Mucv9VjzzB99L17qlsFkC2Y1a/7iwSh5iOwxPa20nY0PCyjOOngtw=
-X-Received: by 2002:a17:906:b19:: with SMTP id u25mr1397747ejg.36.1634242022767;
- Thu, 14 Oct 2021 13:07:02 -0700 (PDT)
+        id S232779AbhJOASz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Oct 2021 20:18:55 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39988 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230288AbhJOASy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 14 Oct 2021 20:18:54 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E8CD660FDC;
+        Fri, 15 Oct 2021 00:16:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1634257009;
+        bh=y921IoviWP7ArGzf/NBOMznO7PDvJ8OxA3PyazLbsOc=;
+        h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+        b=pCi7obhE30Iv7WDLzDrA4nCqMpadPw7MZJ4gYnNOHFAEalPk0tCfXZ+HvEgIia54U
+         k5+ll1GaVAyg84eUhAyLwhqHOdQKc5j/bZAGSbmkH6qti6sgp8m0qd4S+tgooJBsvi
+         Bfo88sZs4vrSNE0j56eripPvUMf3IBWonfEc+HLOFZ9sxVGaJL8DzHHzYEXwRxWl0r
+         A4rwIYS+vtYWACJUmQ03lxppfSC74ZnEnhHDw/NZDVscNhabCkz2muTRcVOXPhQEjA
+         PJXP+VLbj7pUdDQo23ONQeh2EGBx+EfEgtxggBF7Ue2zJiXRQWWbLOdD60/739HnJ8
+         A6nKTZXjxBrOA==
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
- <CACRpkdbQD6p7fbGtuu1c92uXfSFDCTwqjqsXHpgnD5Lg4v0Okw@mail.gmail.com>
- <20210304091025.ny52qjm7wbfvmjgl@mobilestation> <CACRpkdZroi+_oHqipS71MAGif190y7jWU5Myf55vz=_um4w5cQ@mail.gmail.com>
- <CAK9rFnzDZ4MNm68AJ75g7zegLD-7UMHyoVR-4ssitYTTEeQm5g@mail.gmail.com>
- <CACRpkdZEURRTe15HGf93SvyHej=_6qhfP9KWPSQbCM=SLUVKmA@mail.gmail.com>
- <CAK9rFnxuiAX2-5TFhfyTdpaY3BRysX_Q2sJkca4LhOLzapB83Q@mail.gmail.com> <CACRpkdbF3oXec-8Z-1fNVL47mfYo2TW8WTDxzpwaR2YqLaTdAQ@mail.gmail.com>
-In-Reply-To: <CACRpkdbF3oXec-8Z-1fNVL47mfYo2TW8WTDxzpwaR2YqLaTdAQ@mail.gmail.com>
-From:   Brad Larson <brad@pensando.io>
-Date:   Thu, 14 Oct 2021 13:06:52 -0700
-Message-ID: <CAK9rFnx1NN92coAgUC7douF+ny8dCL5uoFopBaWAE_q02-XWyg@mail.gmail.com>
-Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20210920181145.19543-6-digetx@gmail.com>
+References: <20210920181145.19543-1-digetx@gmail.com> <20210920181145.19543-6-digetx@gmail.com>
+Subject: Re: [PATCH v12 05/35] dt-bindings: clock: tegra-car: Document new clock sub-nodes
+From:   Stephen Boyd <sboyd@kernel.org>
+Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        devicetree@vger.kernel.org, linux-clk@vger.kernel.org,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Dmitry Osipenko <digetx@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Nishanth Menon <nm@ti.com>, Peter Chen <peter.chen@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Uwe =?utf-8?q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Viresh Kumar <vireshk@kernel.org>
+Date:   Thu, 14 Oct 2021 17:16:47 -0700
+Message-ID: <163425700766.1688384.4481739110941660602@swboyd.mtv.corp.google.com>
+User-Agent: alot/0.9.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 12, 2021 at 4:52 PM Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> On Mon, Oct 4, 2021 at 6:46 PM Brad Larson <brad@pensando.io> wrote:
->
-> > Yes that works, please see the diff below where the file
-> > gpio-elba-spics.c goes away.  The original implementation was
-> > motivated by gpio-spear-spics.c.
->
-> This looks good to me :)
->
-> Yours,
-> Linus Walleij
+Quoting Dmitry Osipenko (2021-09-20 11:11:15)
+> diff --git a/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.y=
+aml b/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+> index 459d2a525393..f832abb7f11a 100644
+> --- a/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+> +++ b/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+> @@ -42,6 +42,36 @@ properties:
+>    "#reset-cells":
+>      const: 1
+> =20
+> +patternProperties:
+> +  "^(sclk)|(pll-[cem])$":
+> +    type: object
+> +    properties:
+> +      compatible:
+> +        enum:
+> +          - nvidia,tegra20-sclk
+> +          - nvidia,tegra30-sclk
+> +          - nvidia,tegra30-pllc
+> +          - nvidia,tegra30-plle
+> +          - nvidia,tegra30-pllm
+> +
+> +      operating-points-v2: true
+> +
+> +      clocks:
+> +        items:
+> +          - description: node's clock
+> +
+> +      power-domains:
+> +        maxItems: 1
+> +        description: phandle to the core SoC power domain
 
-Hi Linus,
+Is this done to associate the power domain with a particular clk? And an
+OPP table with a particular clk?
 
-:-)  It's better to not have to look at a related gpio driver file to
-the spi-dw-mmio.c
-driver and think it could possibly be used as general purpose gpio.
-
-Here is a response summary per patch.  Should I start respinning the
-patchset against
-the latest linux-next tag?  The changes are merged to our production
-5.10.28 kernel
-and the next step is to re-spin the set against the latest linux-next
-which has a newer dtc,
-run checkpatch, etc.  For reference as this has been cooking for
-awhile here is the
-overview from V2 patchset cover letter.
-
-This series enables support for Pensando Elba SoC based platforms.
-
-The Elba SoC has the following features:
-- Sixteen ARM64 A72 cores
-- Dual DDR 4/5 memory controllers
-- 32 lanes of PCIe Gen3/4 to the Host
-- Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
-  also a single 1GE management port.
-- Storage/crypto offloads and 144 programmable P4 cores.
-- QSPI and EMMC for SoC storage
-- Two SPI interfaces for peripheral management
-- I2C bus for platform management
-
-Summary of response to V1/V2 patchset
-0001-gpio-Add-Elba-SoC-gpio-driver-for-spi-cs-control.patch
-- This patch is deleted.  Elba SOC specific gpio spics control is
-  integrated into spi-dw-mmio.c.
-
-0002-spi-cadence-quadspi-Add-QSPI-support-for-Pensando-El.patch
-- Changed compatible to "pensando,elba-qspi" to be more descriptive
-  in spi-cadence-quadspi.c.
-
-- Arnd wondered if moving to DT properties for quirks may be the
-  way to go.  Feedback I've received on other patches was don't
-  mix two efforts in one patch so I'm currently just adding the
-  Elba support to the current design.
-
-0003-spi-dw-Add-support-for-Pensando-Elba-SoC-SPI.patch
-- Changed the implementation to use existing dw_spi_set_cs() and
-  integrated Elba specific CS control into spi-dw-mmio.c.  The
-  native designware support is for two chip-selects while Elba
-  provides 4 chip-selects.  Instead of adding a new file for
-  this support in gpio-elba-spics.c the support is in one
-  file (spi-dw-mmio.c).
-
-0004-spidev-Add-Pensando-CPLD-compatible.patch
-- This patch is deleted.  The addition of compatible "pensando,cpld"
-  to spidev.c is removed.
-
-0005-mmc-sdhci-cadence-Add-Pensando-Elba-SoC-support.patch
-- Ulf and Yamada-san agreed the amount of code for this support
-  is not enough to need a new file.  The support is added into
-  sdhci-cadence.c and new files sdhci-cadence-elba.c and
-  sdhci-cadence.h are deleted.
-- Redundant defines are removed (e.g. use SDHCI_CDNS_HRS04 and
-  remove SDIO_REG_HRS4).
-- Removed phy init function sd4_set_dlyvr() and used existing
-  sdhci_cdns_phy_init(). Init values are from DT properties.
-- Replace  devm_ioremap_resource(&pdev->dev, iomem)
-     with  devm_platform_ioremap_resource(pdev, 1)
-- Refactored the elba priv_writ_l() and elba_write_l() to
-  remove a little redundant code.
-- The config option CONFIG_MMC_SDHCI_CADENCE_ELBA goes away.
-- Only C syntax and Elba functions are prefixed with elba_
-
-0006-arm64-Add-config-for-Pensando-SoC-platforms.patch
-- Added a little more info to the platform help text to assist
-  users to decide on including platform support or not.
-
-0007-arm64-dts-Add-Pensando-Elba-SoC-support.patch
-- Node names changed to DT generic names
-- Changed from using 'spi@' which is reserved
-- The elba-flash-parts.dtsi is kept separate as
-  it is included in multiple dts files.
-- SPDX license tags at the top of each file
-- The compatible = "pensando,elba" and 'model' are
-  now together in the board file.
-- UIO nodes removed
-- Ordered nodes by increasing unit address
-- Removed an unreferenced container node.
-- Dropped deprecated 'device_type' for uart0 node.
-- Added syscon usage
-
-0010-dt-bindings-spi-cadence-qspi-Add-support-for-Pensand.patch
-- Updated since the latest documentation has been converted to yaml
-
-0011-dt-bindings-gpio-Add-Pensando-Elba-SoC-support.patch
-- This patch is deleted since the Elba gpio spics is added to
-  the spi dw driver and documented there.
-
-Best,
-Brad
+> +
+> +    required:
+> +      - compatible
+> +      - operating-points-v2
+> +      - clocks
+> +      - power-domains
+> +
+> +    additionalProperties: false
+> +
+>  required:
+>    - compatible
+>    - reg
