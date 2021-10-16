@@ -2,129 +2,188 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C87BC433EF
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 Oct 2021 11:26:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DCA6C43217
+	for <linux-mmc@archiver.kernel.org>; Sat, 16 Oct 2021 15:36:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D103261101
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 Oct 2021 11:26:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1333460F46
+	for <linux-mmc@archiver.kernel.org>; Sat, 16 Oct 2021 15:36:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244302AbhJPL2o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 16 Oct 2021 07:28:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53224 "EHLO
+        id S237813AbhJPPis (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 16 Oct 2021 11:38:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229848AbhJPL2o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Oct 2021 07:28:44 -0400
-Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 712BEC061570;
-        Sat, 16 Oct 2021 04:26:36 -0700 (PDT)
-Received: by mail-pj1-x102b.google.com with SMTP id oa4so9034324pjb.2;
-        Sat, 16 Oct 2021 04:26:36 -0700 (PDT)
+        with ESMTP id S234575AbhJPPir (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Oct 2021 11:38:47 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CE1FC061570;
+        Sat, 16 Oct 2021 08:36:39 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id i24so54405169lfj.13;
+        Sat, 16 Oct 2021 08:36:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id;
-        bh=r9fwNM9GKQH17yC9Q3NgykdrcmxUpMayXjBnqsUJA/0=;
-        b=eMBXODueWZCF1lIKJ7Hd0flKHLkiZO3LfXKwhNIfdNKmmDZ1FbLrKs6Np+LC4PXdZZ
-         4bOG39GvqJOnvlkUcPdrduDx8AlDVCExczFaQIXPCkeo1e87pTmCuy2IYfe8KR6wdw4j
-         x7WVK9016VeDuYZjWDqcpTAqqZNOGl+JgnIH4D4u3m6m33SJ//lfoxpLUMDPp0TShl/c
-         et7qB3yezm3S8QumdhCPi4H97M55n+N2W7ybK1MAgfZVHsgdP0HkAQLVeHhRzk1WmigX
-         2uKw4GXQx6pFbiPk9SmBdep5VTcU79uOXq2IGhQ9duydZb0K1ul//wkhRG1F9YacQZOq
-         3Q3g==
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=iXmHQbdUUEj7iD9UdLGIRExPe2SbeX0x9hgeURTYmuQ=;
+        b=gy+a/5BSaOUZjjMeREUgCptM2ybr7PF148YGvG+CqztuyGq8LBhigc7vHDIIyQZ4RR
+         nCkxVRmxG6APD0+J/FGkfKxkl0tNsjzP7W5/HDgmaFfOHmvbOI3WCtMY70n8umX8yEJV
+         FJGDPXjLDrI9pGt9cpA+/Wo5Ds2dyHODEA9wSoRG9q3PsnHlqMpubsdtzMh+a+j199o6
+         sBrVM5rVaDlfadaBelsLV+JFBxj2s8A9ruw+Th0rjBkgDfinqABq4j1GP6WbYKhHhnWW
+         e25hnD271Cbz3yMZERuOiAdnU4nILxFmsh9aOU6cSv/0XCWbnrMGgN49CuZqdBiLmYgo
+         PhGg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=r9fwNM9GKQH17yC9Q3NgykdrcmxUpMayXjBnqsUJA/0=;
-        b=f+/iR5flfut0N2xZvYBaicQGiYrz63xsouTH64w16jAj51eWnZ+dnN57J+kDqCIymv
-         Mvs0ap37+eIcKJodMIb5UbdyuSh6XUh8tk1lSgVrq5e/5rC52+ts979Sk2nL8XHdpKkL
-         ezzhVum0zEsUfKv6MQWjh6fQhNEoWrH/qAgBxWgDPPEXEaiDJp/kijWFQn51xkFxogpY
-         I5Yiff+qmKFWjDU4P2A12X7D8mEWhkGG8CgVbUHH8ZNnBL1GfFD/ajlN8E06ih1vQi0f
-         r4qNzm27RWu6t5sj9MB0+96Z2SEpuhpkCOykWPdMlOmKWYKlgzQfhLnz+Bifh3MxkeNq
-         eaRQ==
-X-Gm-Message-State: AOAM533h/q9IjBwtBB4KvRcVlrCAT5ly0I6g3yLfN5HvhcEJBTjPRZ59
-        MyyCHSXzfqQDNNaN0KbIi2HBT8vTnKTg
-X-Google-Smtp-Source: ABdhPJzGsqr8LeqTNeI6Koql+jBGFZuHGYGO7eFxnG8JX3bVKUJD1wkzkSl6NhSbq2pPiSIH3S66Rw==
-X-Received: by 2002:a17:90b:4b85:: with SMTP id lr5mr20087134pjb.66.1634383595956;
-        Sat, 16 Oct 2021 04:26:35 -0700 (PDT)
-Received: from vultr.guest ([107.191.53.97])
-        by smtp.gmail.com with ESMTPSA id h4sm7096943pgn.6.2021.10.16.04.26.33
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 16 Oct 2021 04:26:35 -0700 (PDT)
-From:   Zheyu Ma <zheyuma97@gmail.com>
-To:     maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Zheyu Ma <zheyuma97@gmail.com>
-Subject: [PATCH] memstick: r592: Fix a UAF bug when removing the driver
-Date:   Sat, 16 Oct 2021 11:26:21 +0000
-Message-Id: <1634383581-11055-1-git-send-email-zheyuma97@gmail.com>
-X-Mailer: git-send-email 2.7.4
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=iXmHQbdUUEj7iD9UdLGIRExPe2SbeX0x9hgeURTYmuQ=;
+        b=77+wQh5JSBvSRipG4bflGBZadMuOCKuoPz4zRYjNOoM7i83MvqLsfzFxgYPTFYB2y5
+         pEVKasO991N6S89jOoOhZ1zKa5cycPk4n7ZaQbjnBP5HCTgzkDHkToC4ndG8nMb4AMe5
+         d5KSiVukiDXNPJ+J71wnoFelNHkmln40qArHEg0yZVc5H0L0OydIDbwJqU7lIH8C792I
+         DKohOws2kGx5oq1wqohQdEvGzKSgpzMyYJTzNE2LkZogzrMHlyxLAuekJ79fVZ4R+gTt
+         HOD2KjDopLVtWKsWdKTzwM+gvr+Q2s7esoUeDi0sNggCPwp92j0gjW2FLrcEDUVFh/sX
+         9iVw==
+X-Gm-Message-State: AOAM531yzIB82WTrmLXDn7gN8ShM1V5KzzFPf+UtrAbkMDKNMihZmVDy
+        X7qs26TZ4lsOA+7HCF/tF+o=
+X-Google-Smtp-Source: ABdhPJxtvgN0MWJt4cva3KTlHcgZzj89zboYkD6ihnqr+bNLevlFAbbJkDz7ATXU/w01SNAG8MS09Q==
+X-Received: by 2002:a2e:a544:: with SMTP id e4mr15585258ljn.225.1634398597937;
+        Sat, 16 Oct 2021 08:36:37 -0700 (PDT)
+Received: from [192.168.2.145] (46-138-48-94.dynamic.spd-mgts.ru. [46.138.48.94])
+        by smtp.googlemail.com with ESMTPSA id w26sm1021100ljh.18.2021.10.16.08.36.36
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 16 Oct 2021 08:36:37 -0700 (PDT)
+Subject: Re: [PATCH v13 11/35] drm/tegra: dc: Support OPP and SoC core voltage
+ scaling
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
+References: <20210926224058.1252-1-digetx@gmail.com>
+ <20210926224058.1252-12-digetx@gmail.com>
+ <CAPDyKFobSsFOnmFc4BG353uYgECGD1U1U020oQwB7pX0mfCfvw@mail.gmail.com>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <9bb95684-de30-697a-139c-1e3e54dade2a@gmail.com>
+Date:   Sat, 16 Oct 2021 18:36:35 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFobSsFOnmFc4BG353uYgECGD1U1U020oQwB7pX0mfCfvw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In r592_remove(), the driver will free dma after freeing the host, which
-may cause a UAF bug.
+01.10.2021 16:27, Ulf Hansson пишет:
+> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wrote:
+>>
+>> Add OPP and SoC core voltage scaling support to the display controller
+>> driver. This is required for enabling system-wide DVFS on pre-Tegra186
+>> SoCs.
+>>
+>> Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
+>> Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
+>> Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
+>> Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
+>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+>> ---
+>>  drivers/gpu/drm/tegra/dc.c | 74 ++++++++++++++++++++++++++++++++++++++
+>>  drivers/gpu/drm/tegra/dc.h |  2 ++
+>>  2 files changed, 76 insertions(+)
+>>
+>> diff --git a/drivers/gpu/drm/tegra/dc.c b/drivers/gpu/drm/tegra/dc.c
+>> index a29d64f87563..d4047a14e2b6 100644
+>> --- a/drivers/gpu/drm/tegra/dc.c
+>> +++ b/drivers/gpu/drm/tegra/dc.c
+>> @@ -11,9 +11,12 @@
+>>  #include <linux/interconnect.h>
+>>  #include <linux/module.h>
+>>  #include <linux/of_device.h>
+>> +#include <linux/pm_domain.h>
+>> +#include <linux/pm_opp.h>
+>>  #include <linux/pm_runtime.h>
+>>  #include <linux/reset.h>
+>>
+>> +#include <soc/tegra/common.h>
+>>  #include <soc/tegra/pmc.h>
+>>
+>>  #include <drm/drm_atomic.h>
+>> @@ -1762,6 +1765,47 @@ int tegra_dc_state_setup_clock(struct tegra_dc *dc,
+>>         return 0;
+>>  }
+>>
+>> +static void tegra_dc_update_voltage_state(struct tegra_dc *dc,
+>> +                                         struct tegra_dc_state *state)
+>> +{
+>> +       unsigned long rate, pstate;
+>> +       struct dev_pm_opp *opp;
+>> +       int err;
+>> +
+>> +       if (!dc->has_opp_table)
+>> +               return;
+>> +
+>> +       /* calculate actual pixel clock rate which depends on internal divider */
+>> +       rate = DIV_ROUND_UP(clk_get_rate(dc->clk) * 2, state->div + 2);
+>> +
+>> +       /* find suitable OPP for the rate */
+>> +       opp = dev_pm_opp_find_freq_ceil(dc->dev, &rate);
+>> +
+>> +       if (opp == ERR_PTR(-ERANGE))
+>> +               opp = dev_pm_opp_find_freq_floor(dc->dev, &rate);
+>> +
+>> +       if (IS_ERR(opp)) {
+>> +               dev_err(dc->dev, "failed to find OPP for %luHz: %pe\n",
+>> +                       rate, opp);
+>> +               return;
+>> +       }
+>> +
+>> +       pstate = dev_pm_opp_get_required_pstate(opp, 0);
+>> +       dev_pm_opp_put(opp);
+>> +
+>> +       /*
+>> +        * The minimum core voltage depends on the pixel clock rate (which
+>> +        * depends on internal clock divider of the CRTC) and not on the
+>> +        * rate of the display controller clock. This is why we're not using
+>> +        * dev_pm_opp_set_rate() API and instead controlling the power domain
+>> +        * directly.
+>> +        */
+>> +       err = dev_pm_genpd_set_performance_state(dc->dev, pstate);
+>> +       if (err)
+>> +               dev_err(dc->dev, "failed to set power domain state to %lu: %d\n",
+>> +                       pstate, err);
+> 
+> Yeah, the above code looks very similar to the code I pointed to in
+> patch6. Perhaps we need to discuss with Viresh, whether it makes sense
+> to fold in a patch adding an opp helper function after all, to avoid
+> the open coding.
+> 
+> Viresh?
 
-The following log reveals it:
-
-[   45.361796 ] BUG: KASAN: use-after-free in r592_remove+0x269/0x350 [r592]
-[   45.364286 ] Call Trace:
-[   45.364472 ]  dump_stack_lvl+0xa8/0xd1
-[   45.364751 ]  print_address_description+0x87/0x3b0
-[   45.365137 ]  kasan_report+0x172/0x1c0
-[   45.365415 ]  ? r592_remove+0x269/0x350 [r592]
-[   45.365834 ]  ? r592_remove+0x269/0x350 [r592]
-[   45.366168 ]  __asan_report_load8_noabort+0x14/0x20
-[   45.366531 ]  r592_remove+0x269/0x350 [r592]
-[   45.378785 ]
-[   45.378903 ] Allocated by task 4674:
-[   45.379162 ]  ____kasan_kmalloc+0xb5/0xe0
-[   45.379455 ]  __kasan_kmalloc+0x9/0x10
-[   45.379730 ]  __kmalloc+0x150/0x280
-[   45.379984 ]  memstick_alloc_host+0x2a/0x190
-[   45.380664 ]
-[   45.380781 ] Freed by task 5509:
-[   45.381014 ]  kasan_set_track+0x3d/0x70
-[   45.381293 ]  kasan_set_free_info+0x23/0x40
-[   45.381635 ]  ____kasan_slab_free+0x10b/0x140
-[   45.381950 ]  __kasan_slab_free+0x11/0x20
-[   45.382241 ]  slab_free_freelist_hook+0x81/0x150
-[   45.382575 ]  kfree+0x13e/0x290
-[   45.382805 ]  memstick_free+0x1c/0x20
-[   45.383070 ]  device_release+0x9c/0x1d0
-[   45.383349 ]  kobject_put+0x2ef/0x4c0
-[   45.383616 ]  put_device+0x1f/0x30
-[   45.383865 ]  memstick_free_host+0x24/0x30
-[   45.384162 ]  r592_remove+0x242/0x350 [r592]
-[   45.384473 ]  pci_device_remove+0xa9/0x250
-
-Signed-off-by: Zheyu Ma <zheyuma97@gmail.com>
----
- drivers/memstick/host/r592.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
-index e79a0218c492..1d35d147552d 100644
---- a/drivers/memstick/host/r592.c
-+++ b/drivers/memstick/host/r592.c
-@@ -838,15 +838,15 @@ static void r592_remove(struct pci_dev *pdev)
- 	}
- 	memstick_remove_host(dev->host);
- 
-+	if (dev->dummy_dma_page)
-+		dma_free_coherent(&pdev->dev, PAGE_SIZE, dev->dummy_dma_page,
-+			dev->dummy_dma_page_physical_address);
-+
- 	free_irq(dev->irq, dev);
- 	iounmap(dev->mmio);
- 	pci_release_regions(pdev);
- 	pci_disable_device(pdev);
- 	memstick_free_host(dev->host);
--
--	if (dev->dummy_dma_page)
--		dma_free_coherent(&pdev->dev, PAGE_SIZE, dev->dummy_dma_page,
--			dev->dummy_dma_page_physical_address);
- }
- 
- #ifdef CONFIG_PM_SLEEP
--- 
-2.17.6
-
+I'll keep it open-coded for now. This code is specific to Tegra because
+normally ceil error shouldn't fall back to the floor, but for Tegra it's
+expected to happen and it's a normal condition.
