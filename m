@@ -2,88 +2,211 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80AD6C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 17 Oct 2021 02:17:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58C7DC433FE
+	for <linux-mmc@archiver.kernel.org>; Sun, 17 Oct 2021 08:38:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 55A9B60FF2
-	for <linux-mmc@archiver.kernel.org>; Sun, 17 Oct 2021 02:17:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4686661050
+	for <linux-mmc@archiver.kernel.org>; Sun, 17 Oct 2021 08:38:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241304AbhJQCTR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 16 Oct 2021 22:19:17 -0400
-Received: from mail-pj1-f43.google.com ([209.85.216.43]:50884 "EHLO
-        mail-pj1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231467AbhJQCTR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Oct 2021 22:19:17 -0400
-Received: by mail-pj1-f43.google.com with SMTP id gn3so4345508pjb.0;
-        Sat, 16 Oct 2021 19:17:08 -0700 (PDT)
+        id S241479AbhJQIki (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 17 Oct 2021 04:40:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45968 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234310AbhJQIkg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Oct 2021 04:40:36 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D472C061765;
+        Sun, 17 Oct 2021 01:38:24 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id i24so58710405lfj.13;
+        Sun, 17 Oct 2021 01:38:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=opxUgAexG3s+/01pbgkqJfjPAUC0LEyYCXhf01ZbC0c=;
+        b=D7kQyoaL09G2+qKjzlGip7Tt2fmqCCpaZgG45v9JMgbOfXMzpbe/F4Zokvs+VPF/lD
+         WfrP/tvOaQ8QBq3g7FNly2cBTmnmgB1n+NoFfi8LpcH9hw6cxOgxmQsUnhUWqjQsOPdk
+         EUwCSAhuwGMtcYj4aJlAvkIXk38IFW5ZrLYFxPg1cXOn2fOiRk64e8LzpJPHNmNOPPVJ
+         0E1w2kLkFxNQpvmJiOkeYPr8EOUsx5Je8yU7KPsBWr2sFivNGheJ7VSh8C9+gTO/FKEG
+         CVJzyRbEzNl6m5aC5n8JeMKgPz7GJOq6ARqSDsndsJRJcrWKQ8cr/YdS6AaPiYKrPPMN
+         8Cuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=fV7wt55es3O887KqSyNg2L4d5z06f5+6gZKXYBgENbc=;
-        b=aekhMvXjm9Hzbu4rI5DeiWkLacUQzqORFInqrv7XfRAJdCfPqt0FauZETQ0tC4m/p2
-         2JSYdd6dzsR6WT8OlvQPb8d7+INyKYIBpwxkzw//rboYhGajAhblE1c89goHbpenrdIL
-         CeH1d7/dDs4SfD5J+EUIrzyNxWKqe7hqqj0/NVaHcU3c5S20BcELuEs3o8wWdHnUcmtT
-         UjkcE3heawnKiHE7Vo7TY1qd8wLXSjRpMDAPNzStwv7XQyq57JTAXvI5P1Li0A3htz6H
-         jCACw6DF4CMcAnaXluIp7ziyKJljsM7+fLhCW1bTQ3v8yjxnE2wobjwrQ6ymzQp98ie+
-         KYvg==
-X-Gm-Message-State: AOAM531Mg2s9+0tlAXrqtIqfRbQUcv+PZ8jtB/LYP7SX3ugmzWSL8ubb
-        z/hV76P6SHetIPBLaVj9rDs=
-X-Google-Smtp-Source: ABdhPJwX4+eVa8trz7lYi/E7NLSGakuYDA/RZFWugFfp09y8UAxLNJgTnF/ZOArpyQJtQmEZD7yHKg==
-X-Received: by 2002:a17:902:e5c7:b0:13f:1dd9:1f25 with SMTP id u7-20020a170902e5c700b0013f1dd91f25mr19485471plf.35.1634437028031;
-        Sat, 16 Oct 2021 19:17:08 -0700 (PDT)
-Received: from ?IPV6:2601:647:4000:d7:bf67:3ac:3e6:895b? ([2601:647:4000:d7:bf67:3ac:3e6:895b])
-        by smtp.gmail.com with ESMTPSA id ng5sm8675025pjb.51.2021.10.16.19.17.06
+        bh=opxUgAexG3s+/01pbgkqJfjPAUC0LEyYCXhf01ZbC0c=;
+        b=ih44PBZ6QNwV7BCEkge3vL2xWF1sbABGl09D6sl7h/QnYGFz/5wjWt67ubeVYjAvDB
+         0AsJwTM7bAWQzyWbh5uGFgGH4NnJpG8imcG2RdTOjHEZjiMEQF0r8E9o0UE8mUPDZYXP
+         97t6ZMgNVc9TVeyL7uW1ylXwpDq9yatvVRS47l6o3Z1JqO2x1UnktZK9a5p9eaw+QIVn
+         mknBiVFPDRg5OkGlJewdtneZk93q2kNUUcVrz95ilod8bMW90x1SK67R0kalOCL4j7F8
+         HnqKsNllCUflAQ/0rgo2adgXZ7uMbephuU1ipnq7beXLqC8qfGVpcHtW2eG8lOCdxvq+
+         ApzA==
+X-Gm-Message-State: AOAM533Vpylkfiae+sWdq/M7elKjeo4WxYcA2Mna4iyKdlO4lXW0H7h+
+        ZZnkiFRQ2xdG5OXMKZTsY+I=
+X-Google-Smtp-Source: ABdhPJxQusOyrULmSzYae9aV203LQo0/dtj0Yz/g3SI3pMK/z/tMpwc72My6KFI8vzlhgvLi1jfZ/w==
+X-Received: by 2002:a05:6512:a8d:: with SMTP id m13mr23749109lfu.305.1634459902328;
+        Sun, 17 Oct 2021 01:38:22 -0700 (PDT)
+Received: from [192.168.2.145] (46-138-48-94.dynamic.spd-mgts.ru. [46.138.48.94])
+        by smtp.googlemail.com with ESMTPSA id r30sm1092639lfp.298.2021.10.17.01.38.20
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 16 Oct 2021 19:17:07 -0700 (PDT)
-Message-ID: <e567fc59-46b1-bc83-c90c-199257ff8c93@acm.org>
-Date:   Sat, 16 Oct 2021 19:17:05 -0700
+        Sun, 17 Oct 2021 01:38:21 -0700 (PDT)
+Subject: Re: [PATCH v13 20/35] mtd: rawnand: tegra: Add runtime PM and OPP
+ support
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
+References: <20210926224058.1252-1-digetx@gmail.com>
+ <20210926224058.1252-21-digetx@gmail.com>
+ <CAPDyKFoF2QxZss_h9B1NFqOqgeF=TQ6LajCedGiJ9_P8X5M0NA@mail.gmail.com>
+ <0bcbcd3d-2154-03d2-f572-dc9032125c26@gmail.com>
+ <CAPDyKFohA9iu2UQfwoc0pCrCGupdwnUTWjKOtP09_C2KaFSo8w@mail.gmail.com>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <073114ea-490b-89a9-e82d-852b34cb11df@gmail.com>
+Date:   Sun, 17 Oct 2021 11:38:20 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.2.0
-Subject: Re: [RFC PATCH 3/3] scsi, usb: storage: Complete the blk-request
- directly.
+In-Reply-To: <CAPDyKFohA9iu2UQfwoc0pCrCGupdwnUTWjKOtP09_C2KaFSo8w@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-To:     Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
-        Christoph Hellwig <hch@infradead.org>
-Cc:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-usb@vger.kernel.org,
-        usb-storage@lists.one-eyed-alien.net, Jens Axboe <axboe@kernel.dk>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "James E.J. Bottomley" <jejb@linux.ibm.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Thomas Gleixner <tglx@linutronix.de>
-References: <20211015151412.3229037-1-bigeasy@linutronix.de>
- <20211015151412.3229037-4-bigeasy@linutronix.de>
- <YWmmn4MpTSGHRVOU@infradead.org>
- <20211015161653.muq37x6mkeru6lxc@linutronix.de>
-From:   Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <20211015161653.muq37x6mkeru6lxc@linutronix.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/15/21 09:16, Sebastian Andrzej Siewior wrote:
-> On 2021-10-15 09:04:47 [-0700], Christoph Hellwig wrote:
->> Bart has been working on removing the ->scsi_done indirection, so this
->> will need to find a way to interact with that
+01.10.2021 18:01, Ulf Hansson пишет:
+> On Fri, 1 Oct 2021 at 16:35, Dmitry Osipenko <digetx@gmail.com> wrote:
+>>
+>> 01.10.2021 17:24, Ulf Hansson пишет:
+>>> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wrote:
+>>>>
+>>>> The NAND on Tegra belongs to the core power domain and we're going to
+>>>> enable GENPD support for the core domain. Now NAND must be resumed using
+>>>> runtime PM API in order to initialize the NAND power state. Add runtime PM
+>>>> and OPP support to the NAND driver.
+>>>>
+>>>> Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+>>>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+>>>> ---
+>>>>  drivers/mtd/nand/raw/tegra_nand.c | 55 ++++++++++++++++++++++++++-----
+>>>>  1 file changed, 47 insertions(+), 8 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mtd/nand/raw/tegra_nand.c b/drivers/mtd/nand/raw/tegra_nand.c
+>>>> index 32431bbe69b8..098fcc9cb9df 100644
+>>>> --- a/drivers/mtd/nand/raw/tegra_nand.c
+>>>> +++ b/drivers/mtd/nand/raw/tegra_nand.c
+>>>> @@ -17,8 +17,11 @@
+>>>>  #include <linux/mtd/rawnand.h>
+>>>>  #include <linux/of.h>
+>>>>  #include <linux/platform_device.h>
+>>>> +#include <linux/pm_runtime.h>
+>>>>  #include <linux/reset.h>
+>>>>
+>>>> +#include <soc/tegra/common.h>
+>>>> +
+>>>>  #define COMMAND                                        0x00
+>>>>  #define   COMMAND_GO                           BIT(31)
+>>>>  #define   COMMAND_CLE                          BIT(30)
+>>>> @@ -1151,6 +1154,7 @@ static int tegra_nand_probe(struct platform_device *pdev)
+>>>>                 return -ENOMEM;
+>>>>
+>>>>         ctrl->dev = &pdev->dev;
+>>>> +       platform_set_drvdata(pdev, ctrl);
+>>>>         nand_controller_init(&ctrl->controller);
+>>>>         ctrl->controller.ops = &tegra_nand_controller_ops;
+>>>>
+>>>> @@ -1166,14 +1170,22 @@ static int tegra_nand_probe(struct platform_device *pdev)
+>>>>         if (IS_ERR(ctrl->clk))
+>>>>                 return PTR_ERR(ctrl->clk);
+>>>>
+>>>> -       err = clk_prepare_enable(ctrl->clk);
+>>>> +       err = devm_pm_runtime_enable(&pdev->dev);
+>>>> +       if (err)
+>>>> +               return err;
+>>>> +
+>>>> +       err = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
+>>>> +       if (err)
+>>>> +               return err;
+>>>> +
+>>>> +       err = pm_runtime_resume_and_get(&pdev->dev);
+>>>>         if (err)
+>>>>                 return err;
+>>>>
+>>>>         err = reset_control_reset(rst);
+>>>>         if (err) {
+>>>>                 dev_err(ctrl->dev, "Failed to reset HW: %d\n", err);
+>>>> -               goto err_disable_clk;
+>>>> +               goto err_put_pm;
+>>>>         }
+>>>>
+>>>>         writel_relaxed(HWSTATUS_CMD_DEFAULT, ctrl->regs + HWSTATUS_CMD);
+>>>> @@ -1188,21 +1200,19 @@ static int tegra_nand_probe(struct platform_device *pdev)
+>>>>                                dev_name(&pdev->dev), ctrl);
+>>>>         if (err) {
+>>>>                 dev_err(ctrl->dev, "Failed to get IRQ: %d\n", err);
+>>>> -               goto err_disable_clk;
+>>>> +               goto err_put_pm;
+>>>>         }
+>>>>
+>>>>         writel_relaxed(DMA_MST_CTRL_IS_DONE, ctrl->regs + DMA_MST_CTRL);
+>>>>
+>>>>         err = tegra_nand_chips_init(ctrl->dev, ctrl);
+>>>>         if (err)
+>>>> -               goto err_disable_clk;
+>>>> -
+>>>> -       platform_set_drvdata(pdev, ctrl);
+>>>> +               goto err_put_pm;
+>>>>
+>>>
+>>> There is no corresponding call pm_runtime_put() here. Is it
+>>> intentional to always leave the device runtime resumed after ->probe()
+>>> has succeeded?
+>>>
+>>> I noticed you included some comments about this for some other
+>>> drivers, as those needed more tweaks. Is that also the case for this
+>>> driver?
+>>
+>> Could you please clarify? There is pm_runtime_put() in both probe-error
+>> and remove() code paths here.
 > 
-> Okay. So I just wait until it is there. Is this v5.15/16 material?
+> I was not considering the error path of ->probe() (or ->remove()), but
+> was rather thinking about when ->probe() completes successfully. Then
+> you keep the device runtime resumed, because you have called
+> pm_runtime_resume_and_get() for it.
+> 
+> Shouldn't you have a corresponding pm_runtime_put() in ->probe(),
+> allowing it to be runtime suspended, until the device is really needed
+> later on. No?
 
-Isn't it too late to submit patches for v5.15 other than bugfixes for 
-patches merged during the v5.15 merge window?
-
-Martin Petersen, the SCSI maintainer, has been so kind to queue the 
-patch series that removes the scsi_done member for the v5.16 merge 
-window. So that patch series should become available soon in the 
-following git repository:
-git://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git
-
-Thanks,
-
-Bart.
+This driver doesn't support active power management. I don't have Tegra
+hardware that uses NAND storage for testing, so it's up to somebody else
+to implement dynamic power management. NAND doesn't require high
+voltages, so it's fine to keep the old driver behaviour by keeping
+hardware resumed since the probe time.
