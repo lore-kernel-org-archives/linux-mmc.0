@@ -2,168 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7672C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:33:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 704CAC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:37:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8F3D5610A1
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:33:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A0C6610A1
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:37:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230281AbhJSLfd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Oct 2021 07:35:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52124 "EHLO
+        id S230097AbhJSLji (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Oct 2021 07:39:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53024 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230129AbhJSLfc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:35:32 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39515C061745
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:33:20 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id z11so6759568lfj.4
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:33:20 -0700 (PDT)
+        with ESMTP id S235396AbhJSLji (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:39:38 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 423DFC06161C
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:37:25 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id y15so6742682lfk.7
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:37:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=u0s+MRa6BbcGpvsOlUlfmhtY9CK4scvdiwFF9cElhZw=;
-        b=zJOeEH7mVlODgtA1ytsYcL3oVpI65df6qTKVbqOcxDintMSOXA/cJZFOs0Rp4hnxjX
-         BwBKo2n6mtkVpHNsZi8qzn4MxXDhnauDlquTDk4u5YFRst/QkIkxGzm/P3iaDTYpPQOp
-         aM0RU0mwV4kFO5EeS4R6XNVROYiAeo/4wk7tQnLMHnlM1Nw/UVbFFRiKJaolD2ddDDgi
-         EiCOIZyEMOcqTstavrKBSRLT6daDBBTqcogaOyRctlHT34RcwVCnARGPufUKBYH6omuV
-         h9Nk+Y2TRQcjYe5ACk2M5lphSu8T8jJ4VaHiti6V8QK64wa+I3vhGF97fYFMLf7OSKwf
-         3SOA==
+        bh=CwfDNTxztsaFFsnMzgXIH5wS3ZyzclKxra1KT8MNpgQ=;
+        b=Djlw03UNXO1XUB5rvTWozOrTXI61Rd2t0/E0T3eVHz5A8+A+LdKVUkFga+7BShD5RF
+         hE6Ghz7dGz6XUAqj0UTOE8KKqUR+60Jg0PmdsA/NAi87fldmewCRm34XhEmbIPqR7GWb
+         w1Z42F1t/SSUAtkq2JVqkjsYGJ5kgQiMHCaElfzQalkMXq+8DU3ZUV5Bnx9rnD1TXkZo
+         BpPV96vUysgEL7Y+FOYQITxwwVufBP027CnMgVWHyfblYcycIE4St/wm8T35mzgeYMbg
+         YgS9xRDofO0VlOqFvX6Ph7whGNH3mwGsU8l8aNrjcpG8X9fs+yC4Bg/hNA3R5dvFUmRA
+         P1cg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=u0s+MRa6BbcGpvsOlUlfmhtY9CK4scvdiwFF9cElhZw=;
-        b=vpUWv5ogha1t0NjjjxX155+ZRzy8GCBIk/p+DJuJs2U1g2O9czzp/gHjQeAIM+4T9d
-         baF0b7VeTIlGCZEqnzpWlqEQBsmSOwhCHyOXDjf++JFRjLRytI3G3rEvp59CxblrhLy4
-         kT04i38DT59PaMq5PCgMHqmGyBd9cDRJfmiaUnr1y1RTY2Iw0CiIGMg8BcaTPTAzM5Y5
-         np+lonMyOthFwq7nAZItAPv3ob/H4/Y1biTjIz+/iNsaNWh/nIYQqtyR/4U9WsHes/Rt
-         Wn01c2ikIxg5Ow5awg7VX25E+t8LrEIDqIrXUL4hWEhLBU3UBR1YOkOOz9/t78kXac9i
-         L71Q==
-X-Gm-Message-State: AOAM532HyzTooQjzVmKFEi5tf8p+cVzE+3BO0HAjibq9t7SfvYad1Aqb
-        tXkEDD8ffkXL5i5WJoYZw9RKmeFIGY0vSQJtCu3iqDZUCb8=
-X-Google-Smtp-Source: ABdhPJyvzlbeUg5nknswT9fRpzEBgAq1CRwBL30gDpwapLO2KcPflPXRFhVEQ3HDIidxz2Pe4GPMCZnb/ylSOve+v+8=
-X-Received: by 2002:a19:e307:: with SMTP id a7mr5396888lfh.358.1634643198337;
- Tue, 19 Oct 2021 04:33:18 -0700 (PDT)
+        bh=CwfDNTxztsaFFsnMzgXIH5wS3ZyzclKxra1KT8MNpgQ=;
+        b=Kw0fZqQAw5FB4/yaQTIk+sOjb4N7bLdNrSmvcQBz8Z3Z8UqhfSQHOtABwcXFpFG4zi
+         2AehWuSThfh9xMeAvI6JQ7Nh0nzpsuQnzsbf5LW2EIBbCF8cYcNrU1eDMuDjM0BSuQyF
+         uVcQsJ6gYttMnJqoPG61NJeT2lysdwm3ZnS1pyq0ftiY5IpiB//dn+Kd1DVbgFFkPfFA
+         bsLuO8tpFvZ7DI3c2OtefpvVm6RfRvfBd5W5ERNUhYXn+qBMSpoCGvykRObBzOWL86XB
+         NeSwT6sPU580gYNv+8AUa9DxGnFqLDE+YwkoP6xTzmraCPBiGOd65y1stjewu5XE/fJ5
+         nk+w==
+X-Gm-Message-State: AOAM532m/pZhI5UUyCN4o3m6uUmbZQ6i9gNrkzxUJSdgkWu7trYZfI6M
+        2gQIv+cWKtm2BKgdRGTZEvRyHjILoNAj/CM9179vpQ==
+X-Google-Smtp-Source: ABdhPJwKUD35kQ6H8T4ZUXwLM6yT/9Zi5J5IpF/jT0jYnziIq0TIFEZANVCooZqV1pAEC4qgZoWDu9C2MOPsIbuEtUA=
+X-Received: by 2002:a05:6512:32c5:: with SMTP id f5mr5717565lfg.373.1634643443626;
+ Tue, 19 Oct 2021 04:37:23 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211018135559.244400-1-bigeasy@linutronix.de> <20211018135559.244400-3-bigeasy@linutronix.de>
-In-Reply-To: <20211018135559.244400-3-bigeasy@linutronix.de>
+References: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
+In-Reply-To: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Oct 2021 13:32:42 +0200
-Message-ID: <CAPDyKFrnmevHeCZ3Fb3XCOx6cHvEv6b3ktYdU-WAnuuq8L4kXQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: core: Use blk_mq_complete_request_direct().
-To:     Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-block <linux-block@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jens Axboe <axboe@kernel.dk>,
-        Christoph Hellwig <hch@infradead.org>
+Date:   Tue, 19 Oct 2021 13:36:47 +0200
+Message-ID: <CAPDyKFpX8Xh6aZ6aO=CcHYw45aq89oSywZx9tVaq+GOW1HP=aA@mail.gmail.com>
+Subject: Re: [PATCH v3 0/5] mmc: sdhci-pci: Remove dead code and deduplicate
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc:     Eric Biggers <ebiggers@google.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Adrian
+On Thu, 14 Oct 2021 at 15:26, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+>
+> It appears that one of the supported platform magically worked with
+> the custom IRQ handler (any hints how?) while having two PCB designs
+> with an opposite CD sense level. Quirking it out reveals the code
+> duplication and dead code.
+>
+> Patch 1 is code deduplication to save few LOCs.
+> Patch 2-5 are dead code removals.
+>
+> In v3:
+> - dropped the fix as it has been applied (Ulf)
+> - added tag (Adrian)
+> - elaborated commit IDs with their short descriptions in patch 3 (Adrian)
+> - corrected dependency in patch 5 (Adrian)
+>
+> In v2:
+> - redone fix to use ->get_cd() instead of quirks (Adrian)
+> - due to above transformed previous clean up to the current patch 2
+> - added a new patch, i.e. patch 3
+> - added commit IDs to patch 4 (Adrian)
+> - mentioned dependencies on previous patches in patch 5 and 6 (Adrian)
+>
+> Andy Shevchenko (5):
+>   mmc: sdhci: Deduplicate sdhci_get_cd_nogpio()
+>   mmc: sdhci: Remove unused prototype declaration in the header
+>   mmc: sdhci-pci: Remove dead code (struct sdhci_pci_data et al)
+>   mmc: sdhci-pci: Remove dead code (cd_gpio, cd_irq et al)
+>   mmc: sdhci-pci: Remove dead code (rst_n_gpio et al)
+>
+>  drivers/mmc/host/Makefile          |   1 -
+>  drivers/mmc/host/sdhci-acpi.c      |  14 +--
+>  drivers/mmc/host/sdhci-pci-core.c  | 152 +----------------------------
+>  drivers/mmc/host/sdhci-pci-data.c  |   6 --
+>  drivers/mmc/host/sdhci-pci.h       |   5 -
+>  drivers/mmc/host/sdhci.c           |  19 ++++
+>  drivers/mmc/host/sdhci.h           |   2 +-
+>  include/linux/mmc/sdhci-pci-data.h |  18 ----
+>  8 files changed, 26 insertions(+), 191 deletions(-)
+>  delete mode 100644 drivers/mmc/host/sdhci-pci-data.c
+>  delete mode 100644 include/linux/mmc/sdhci-pci-data.h
+>
 
-On Mon, 18 Oct 2021 at 15:56, Sebastian Andrzej Siewior
-<bigeasy@linutronix.de> wrote:
->
-> The completion callback for the sdhci-pci device is invoked from a
-> kworker.
-> I couldn't identify in which context is mmc_blk_mq_req_done() invoke but
-> the remaining caller are from invoked from preemptible context. Here it
-> would make sense to complete the request directly instead scheduling
-> ksoftirqd for its completion.
->
-> Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-
-Thanks for working on this!
-
-I have looped in Adrian, to allow him to provide us with his input too.
-
-> ---
->  drivers/mmc/core/block.c | 22 ++++++++++++++--------
->  1 file changed, 14 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 431af5e8be2f8..7d6b43fe52e8a 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2051,7 +2051,8 @@ static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
->                 mmc_put_card(mq->card, &mq->ctx);
->  }
->
-> -static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
-> +static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
-> +                               bool can_sleep)
->  {
->         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
->         struct mmc_request *mrq = &mqrq->brq.mrq;
-> @@ -2063,10 +2064,14 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
->          * Block layer timeouts race with completions which means the normal
->          * completion path cannot be used during recovery.
->          */
-> -       if (mq->in_recovery)
-> +       if (mq->in_recovery) {
->                 mmc_blk_mq_complete_rq(mq, req);
-> -       else if (likely(!blk_should_fake_timeout(req->q)))
-> -               blk_mq_complete_request(req);
-> +       } else if (likely(!blk_should_fake_timeout(req->q))) {
-> +               if (can_sleep)
-> +                       blk_mq_complete_request_direct(req, mmc_blk_mq_complete);
-> +               else
-> +                       blk_mq_complete_request(req);
-> +       }
->
->         mmc_blk_mq_dec_in_flight(mq, req);
->  }
-> @@ -2087,7 +2092,7 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq)
->
->         mmc_blk_urgent_bkops(mq, mqrq);
->
-> -       mmc_blk_mq_post_req(mq, req);
-> +       mmc_blk_mq_post_req(mq, req, true);
->  }
->
->  static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
-> @@ -2106,7 +2111,7 @@ static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
->         if (prev_req)
->                 *prev_req = mq->complete_req;
->         else
-> -               mmc_blk_mq_post_req(mq, mq->complete_req);
-> +               mmc_blk_mq_post_req(mq, mq->complete_req, true);
->
->         mq->complete_req = NULL;
->
-> @@ -2178,7 +2183,8 @@ static void mmc_blk_mq_req_done(struct mmc_request *mrq)
->         mq->rw_wait = false;
->         wake_up(&mq->wait);
->
-> -       mmc_blk_mq_post_req(mq, req);
-> +       /* context unknown */
-> +       mmc_blk_mq_post_req(mq, req, false);
-
-So it seems we would benefit from knowing the context here, right?
-
-At this point, what you suggest seems like a reasonable way forward
-(assuming atomic context), but in a next step we could potentially add
-a non-atomic helper function for mmc host drivers to call, when that
-is suitable. Would that make sense you think?
-
->  }
->
->  static bool mmc_blk_rw_wait_cond(struct mmc_queue *mq, int *err)
-> @@ -2238,7 +2244,7 @@ static int mmc_blk_mq_issue_rw_rq(struct mmc_queue *mq,
->         err = mmc_start_request(host, &mqrq->brq.mrq);
->
->         if (prev_req)
-> -               mmc_blk_mq_post_req(mq, prev_req);
-> +               mmc_blk_mq_post_req(mq, prev_req, true);
->
->         if (err)
->                 mq->rw_wait = false;
+Applied for next, thanks!
 
 Kind regards
 Uffe
