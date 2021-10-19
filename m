@@ -2,141 +2,222 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10BFDC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:37:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D8CC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:40:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F015B61372
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:37:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A971B6137E
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:40:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235433AbhJSLkC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Oct 2021 07:40:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53142 "EHLO
+        id S235415AbhJSLnJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Oct 2021 07:43:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53994 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235405AbhJSLj7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:39:59 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8599C061773
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:37:37 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id r19so6706944lfe.10
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:37:37 -0700 (PDT)
+        with ESMTP id S235379AbhJSLnI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:43:08 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FE97C06176A
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:40:55 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id u21so6774439lff.8
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:40:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=U36LIf5+tljufBvVEM58yc8vCPbhSTcJ8OL4uJO2PFM=;
-        b=zEOFkXRvhUqeeBzMbMrkfCpPQwfb2xW23osQXL1q9VtS9XMSBvnFtcInNPvmzPCv2i
-         Y/4Szbo8QuKG70ldNdcts4hXKIdKoV7R3s7WcT/PJvA4pV1japkkbY4eWI/37YAYBAs7
-         SRKyZL/1qFGHnhoznGUdDx0CNYwgGHmL1xoYHmOyy3L21EzqOigNuWA4s3Iqz7JbhREp
-         xRrzaDUW+FlE8K4oLUDSpELoxfWOZ9dciloZxAtiKXs4WGFenYy9FpihvHclQ/2L9f7r
-         4GDv2Wrj2uWORwrV31M7yLPbQKHky+hRKpk9tpYVWmYWtFJyAz6U+KBqHpW95tp/EF/U
-         BkTQ==
+         :cc:content-transfer-encoding;
+        bh=p/y6DgAZycykowwrleZpy70Yak++qIhNqJ9ImugcYMs=;
+        b=gbZb/rIEkq16uEpMdDfbn531uPXxDE2vXRTZ1At7zc8FyijjHf+TaWP9WSCNsx9CRl
+         Ax+uAwkmd3zCdbRdDaM3dpQ6QH2wtz6LdoMLA6+gjkzDI8FsGa3Gg4WLu7V9K5SrUrby
+         y6A+UktAxyprVLbdSpurxxaZ8mnWtv03QgVC25vrqwdz6F5CjpkyH0G67ZL5o2xSalbx
+         z2YLwvEkGXJDZVRENSUyiANgZXnd7Hl65An187cV1TSi/tcYxCoWRVEqIP0BwzqCyQr0
+         hoZBxk1g0lrSFu4sw+cYxe+pvM8G9j1I2iiX+c9B9ryltLhmQtiX2zDR77yR1QolGdKK
+         MOng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=U36LIf5+tljufBvVEM58yc8vCPbhSTcJ8OL4uJO2PFM=;
-        b=7wMbSAONhikHGGLhmsdLGBwWV4ANXay3NgcwBNfE/r5f1ONFC2Etjiq2LNaNbSglD8
-         Kbpf9Ke78VpGbeuLZ+WCkJb6uqb/I6vws47YT/58lo5CD9PB3YllCKFbshVlxVBVuDTt
-         pwXKh2clf/R4iwN20zzfBzN8UmeRc9HuLjWX2jnAAtjntCBkCPEkznyiKFwRuKWzXNGe
-         Ko8kLADdIjr9lyRhobmaDp+6w+X/MG0wIQLTpOsG5UwX2+VMEkVN+MpmrboHe2h6AwE9
-         pmya4GpQN0huthY6e+le8nDDrLo9T3/qIpFetdg5EeYpm5rmyW5/miJEF9pL2dwclgdv
-         AvHw==
-X-Gm-Message-State: AOAM531tOULKrBSuKnpCVnG7hg3pIlSvXCr/kIe8jxzWzjB0CumLot0n
-        rM9sCattyMNYgGJWSGqtj/mLu5NnSrdFX47oxF6HYQ==
-X-Google-Smtp-Source: ABdhPJzZoWIKBvppscKREVbWcuzaxw1WipKDOxdzvZxLuHJRu3ua1R5naxHREJaxvKXNplNOKPTE/Il2eRRibOTPz3U=
-X-Received: by 2002:a05:6512:1515:: with SMTP id bq21mr5598334lfb.71.1634643456337;
- Tue, 19 Oct 2021 04:37:36 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=p/y6DgAZycykowwrleZpy70Yak++qIhNqJ9ImugcYMs=;
+        b=2XchWEUoeWf6ztXzfPqP0M4QxnImpp+gXNB4eW9RgyZGmQVywQfmEBg0Lm/Rcd6nPm
+         wiMLngU0ekd/EsWWe28HF0eRPkKTx1VFvaamYO0yMdXhdUc8Nm5h1aT0X/jHOuaQ9rLx
+         hyk7Vu5fWA4MptrV/4thx8+I1czrxkr4yg8djY31anyae222TPwkAvgDZ/qsHzMAFGvr
+         kYdDchbTPdkz51fUAOLsi80mXXfvMgNZ78AbQdwYVNuHHPPJgY6DfE7FTewbLxPT8fTH
+         kCwkdyFfkLa8sz7wldjUVhlIMS2J8IpKqWCd1rE+v9/Wcm0vMdJG5yPvWYN01yBjyDd4
+         BjQQ==
+X-Gm-Message-State: AOAM531F//1ckhKBetOWqntmCJT/UX+DfAdOjTnCHbiIypu6mj6RhiaR
+        0PAXFNWRX65rwazzdBcdY63fG9Rwb5hEsrXtH3rNcA==
+X-Google-Smtp-Source: ABdhPJyiZ8hxPaWs5ZGwktR/58DXEHsnrg2iCZG7+dtLEFQZezq+DvEjCTIwbhL0fm341kLJAfk/05h60QX3kuXQ9G4=
+X-Received: by 2002:a05:6512:3084:: with SMTP id z4mr5314051lfd.167.1634643653278;
+ Tue, 19 Oct 2021 04:40:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <1634383581-11055-1-git-send-email-zheyuma97@gmail.com>
-In-Reply-To: <1634383581-11055-1-git-send-email-zheyuma97@gmail.com>
+References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-21-digetx@gmail.com>
+ <CAPDyKFoF2QxZss_h9B1NFqOqgeF=TQ6LajCedGiJ9_P8X5M0NA@mail.gmail.com>
+ <0bcbcd3d-2154-03d2-f572-dc9032125c26@gmail.com> <CAPDyKFohA9iu2UQfwoc0pCrCGupdwnUTWjKOtP09_C2KaFSo8w@mail.gmail.com>
+ <073114ea-490b-89a9-e82d-852b34cb11df@gmail.com>
+In-Reply-To: <073114ea-490b-89a9-e82d-852b34cb11df@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Oct 2021 13:36:59 +0200
-Message-ID: <CAPDyKFp4tt4xA-Fo_E7yWV2Mi4ES5ko=g1XgfaJwxhkSiaCEMg@mail.gmail.com>
-Subject: Re: [PATCH] memstick: r592: Fix a UAF bug when removing the driver
-To:     Zheyu Ma <zheyuma97@gmail.com>
-Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
+Date:   Tue, 19 Oct 2021 13:40:16 +0200
+Message-ID: <CAPDyKFoOMvEW0o6=-_bYKhwUcbfeTD4qu-K2tfkdXiR0bErHsw@mail.gmail.com>
+Subject: Re: [PATCH v13 20/35] mtd: rawnand: tegra: Add runtime PM and OPP support
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        David Heidelberg <david@ixit.cz>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 16 Oct 2021 at 13:26, Zheyu Ma <zheyuma97@gmail.com> wrote:
+On Sun, 17 Oct 2021 at 10:38, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> In r592_remove(), the driver will free dma after freeing the host, which
-> may cause a UAF bug.
+> 01.10.2021 18:01, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > On Fri, 1 Oct 2021 at 16:35, Dmitry Osipenko <digetx@gmail.com> wrote:
+> >>
+> >> 01.10.2021 17:24, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >>> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wro=
+te:
+> >>>>
+> >>>> The NAND on Tegra belongs to the core power domain and we're going t=
+o
+> >>>> enable GENPD support for the core domain. Now NAND must be resumed u=
+sing
+> >>>> runtime PM API in order to initialize the NAND power state. Add runt=
+ime PM
+> >>>> and OPP support to the NAND driver.
+> >>>>
+> >>>> Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+> >>>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> >>>> ---
+> >>>>  drivers/mtd/nand/raw/tegra_nand.c | 55 ++++++++++++++++++++++++++--=
+---
+> >>>>  1 file changed, 47 insertions(+), 8 deletions(-)
+> >>>>
+> >>>> diff --git a/drivers/mtd/nand/raw/tegra_nand.c b/drivers/mtd/nand/ra=
+w/tegra_nand.c
+> >>>> index 32431bbe69b8..098fcc9cb9df 100644
+> >>>> --- a/drivers/mtd/nand/raw/tegra_nand.c
+> >>>> +++ b/drivers/mtd/nand/raw/tegra_nand.c
+> >>>> @@ -17,8 +17,11 @@
+> >>>>  #include <linux/mtd/rawnand.h>
+> >>>>  #include <linux/of.h>
+> >>>>  #include <linux/platform_device.h>
+> >>>> +#include <linux/pm_runtime.h>
+> >>>>  #include <linux/reset.h>
+> >>>>
+> >>>> +#include <soc/tegra/common.h>
+> >>>> +
+> >>>>  #define COMMAND                                        0x00
+> >>>>  #define   COMMAND_GO                           BIT(31)
+> >>>>  #define   COMMAND_CLE                          BIT(30)
+> >>>> @@ -1151,6 +1154,7 @@ static int tegra_nand_probe(struct platform_de=
+vice *pdev)
+> >>>>                 return -ENOMEM;
+> >>>>
+> >>>>         ctrl->dev =3D &pdev->dev;
+> >>>> +       platform_set_drvdata(pdev, ctrl);
+> >>>>         nand_controller_init(&ctrl->controller);
+> >>>>         ctrl->controller.ops =3D &tegra_nand_controller_ops;
+> >>>>
+> >>>> @@ -1166,14 +1170,22 @@ static int tegra_nand_probe(struct platform_=
+device *pdev)
+> >>>>         if (IS_ERR(ctrl->clk))
+> >>>>                 return PTR_ERR(ctrl->clk);
+> >>>>
+> >>>> -       err =3D clk_prepare_enable(ctrl->clk);
+> >>>> +       err =3D devm_pm_runtime_enable(&pdev->dev);
+> >>>> +       if (err)
+> >>>> +               return err;
+> >>>> +
+> >>>> +       err =3D devm_tegra_core_dev_init_opp_table_common(&pdev->dev=
+);
+> >>>> +       if (err)
+> >>>> +               return err;
+> >>>> +
+> >>>> +       err =3D pm_runtime_resume_and_get(&pdev->dev);
+> >>>>         if (err)
+> >>>>                 return err;
+> >>>>
+> >>>>         err =3D reset_control_reset(rst);
+> >>>>         if (err) {
+> >>>>                 dev_err(ctrl->dev, "Failed to reset HW: %d\n", err);
+> >>>> -               goto err_disable_clk;
+> >>>> +               goto err_put_pm;
+> >>>>         }
+> >>>>
+> >>>>         writel_relaxed(HWSTATUS_CMD_DEFAULT, ctrl->regs + HWSTATUS_C=
+MD);
+> >>>> @@ -1188,21 +1200,19 @@ static int tegra_nand_probe(struct platform_=
+device *pdev)
+> >>>>                                dev_name(&pdev->dev), ctrl);
+> >>>>         if (err) {
+> >>>>                 dev_err(ctrl->dev, "Failed to get IRQ: %d\n", err);
+> >>>> -               goto err_disable_clk;
+> >>>> +               goto err_put_pm;
+> >>>>         }
+> >>>>
+> >>>>         writel_relaxed(DMA_MST_CTRL_IS_DONE, ctrl->regs + DMA_MST_CT=
+RL);
+> >>>>
+> >>>>         err =3D tegra_nand_chips_init(ctrl->dev, ctrl);
+> >>>>         if (err)
+> >>>> -               goto err_disable_clk;
+> >>>> -
+> >>>> -       platform_set_drvdata(pdev, ctrl);
+> >>>> +               goto err_put_pm;
+> >>>>
+> >>>
+> >>> There is no corresponding call pm_runtime_put() here. Is it
+> >>> intentional to always leave the device runtime resumed after ->probe(=
+)
+> >>> has succeeded?
+> >>>
+> >>> I noticed you included some comments about this for some other
+> >>> drivers, as those needed more tweaks. Is that also the case for this
+> >>> driver?
+> >>
+> >> Could you please clarify? There is pm_runtime_put() in both probe-erro=
+r
+> >> and remove() code paths here.
+> >
+> > I was not considering the error path of ->probe() (or ->remove()), but
+> > was rather thinking about when ->probe() completes successfully. Then
+> > you keep the device runtime resumed, because you have called
+> > pm_runtime_resume_and_get() for it.
+> >
+> > Shouldn't you have a corresponding pm_runtime_put() in ->probe(),
+> > allowing it to be runtime suspended, until the device is really needed
+> > later on. No?
 >
-> The following log reveals it:
->
-> [   45.361796 ] BUG: KASAN: use-after-free in r592_remove+0x269/0x350 [r592]
-> [   45.364286 ] Call Trace:
-> [   45.364472 ]  dump_stack_lvl+0xa8/0xd1
-> [   45.364751 ]  print_address_description+0x87/0x3b0
-> [   45.365137 ]  kasan_report+0x172/0x1c0
-> [   45.365415 ]  ? r592_remove+0x269/0x350 [r592]
-> [   45.365834 ]  ? r592_remove+0x269/0x350 [r592]
-> [   45.366168 ]  __asan_report_load8_noabort+0x14/0x20
-> [   45.366531 ]  r592_remove+0x269/0x350 [r592]
-> [   45.378785 ]
-> [   45.378903 ] Allocated by task 4674:
-> [   45.379162 ]  ____kasan_kmalloc+0xb5/0xe0
-> [   45.379455 ]  __kasan_kmalloc+0x9/0x10
-> [   45.379730 ]  __kmalloc+0x150/0x280
-> [   45.379984 ]  memstick_alloc_host+0x2a/0x190
-> [   45.380664 ]
-> [   45.380781 ] Freed by task 5509:
-> [   45.381014 ]  kasan_set_track+0x3d/0x70
-> [   45.381293 ]  kasan_set_free_info+0x23/0x40
-> [   45.381635 ]  ____kasan_slab_free+0x10b/0x140
-> [   45.381950 ]  __kasan_slab_free+0x11/0x20
-> [   45.382241 ]  slab_free_freelist_hook+0x81/0x150
-> [   45.382575 ]  kfree+0x13e/0x290
-> [   45.382805 ]  memstick_free+0x1c/0x20
-> [   45.383070 ]  device_release+0x9c/0x1d0
-> [   45.383349 ]  kobject_put+0x2ef/0x4c0
-> [   45.383616 ]  put_device+0x1f/0x30
-> [   45.383865 ]  memstick_free_host+0x24/0x30
-> [   45.384162 ]  r592_remove+0x242/0x350 [r592]
-> [   45.384473 ]  pci_device_remove+0xa9/0x250
->
-> Signed-off-by: Zheyu Ma <zheyuma97@gmail.com>
+> This driver doesn't support active power management. I don't have Tegra
+> hardware that uses NAND storage for testing, so it's up to somebody else
+> to implement dynamic power management. NAND doesn't require high
+> voltages, so it's fine to keep the old driver behaviour by keeping
+> hardware resumed since the probe time.
 
-Applied for next, thanks!
+Alright, fair enough and thanks for clarifying!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/memstick/host/r592.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
-> index e79a0218c492..1d35d147552d 100644
-> --- a/drivers/memstick/host/r592.c
-> +++ b/drivers/memstick/host/r592.c
-> @@ -838,15 +838,15 @@ static void r592_remove(struct pci_dev *pdev)
->         }
->         memstick_remove_host(dev->host);
->
-> +       if (dev->dummy_dma_page)
-> +               dma_free_coherent(&pdev->dev, PAGE_SIZE, dev->dummy_dma_page,
-> +                       dev->dummy_dma_page_physical_address);
-> +
->         free_irq(dev->irq, dev);
->         iounmap(dev->mmio);
->         pci_release_regions(pdev);
->         pci_disable_device(pdev);
->         memstick_free_host(dev->host);
-> -
-> -       if (dev->dummy_dma_page)
-> -               dma_free_coherent(&pdev->dev, PAGE_SIZE, dev->dummy_dma_page,
-> -                       dev->dummy_dma_page_physical_address);
->  }
->
->  #ifdef CONFIG_PM_SLEEP
-> --
-> 2.17.6
->
