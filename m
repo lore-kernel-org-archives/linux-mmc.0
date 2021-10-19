@@ -2,139 +2,168 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2032CC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:00:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7672C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:33:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E9A361154
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:00:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F3D5610A1
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:33:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235459AbhJSLCu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Oct 2021 07:02:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44416 "EHLO
+        id S230281AbhJSLfd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Oct 2021 07:35:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235461AbhJSLCT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:02:19 -0400
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7302C061749
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:00:06 -0700 (PDT)
-Received: by mail-lj1-x22d.google.com with SMTP id l5so5308875lja.13
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:00:06 -0700 (PDT)
+        with ESMTP id S230129AbhJSLfc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:35:32 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39515C061745
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:33:20 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id z11so6759568lfj.4
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:33:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=fhcLUKrBImGGMRzyP+CFlqIv6hjPWjO7YEI4Yb6th7U=;
-        b=UQqUDWO7ROvKv8Hqj1mQPLsjfINQXF5hgyQWNGLAXZQfGfyIAqTOWdpbSJrSJ9KQjK
-         PzPRnyl9V8HVgePK1MBIrboKiaIyurVF9GDoB7H9S3GJahabMPdksDeaJeNmTk42JXVg
-         fOgoeKfE9AKDTCdHWUZRsR2CE+r1WIDkcS2ZwldA2lM0S03FPh1OqtGx+PfaPnZEFFd6
-         msGE5e5VHdVwFpdeMqfBJxe7kgV+OdpNWbvWmoqmICD3falTtCIqq5rBlfvb4XcyYzna
-         PIQNHYlMoHBPUik/e93ltso4J/ktCDg/rlWrYwFvF2kC77bolDKAftaiS9eXuxVJ5gPN
-         75Ww==
+        bh=u0s+MRa6BbcGpvsOlUlfmhtY9CK4scvdiwFF9cElhZw=;
+        b=zJOeEH7mVlODgtA1ytsYcL3oVpI65df6qTKVbqOcxDintMSOXA/cJZFOs0Rp4hnxjX
+         BwBKo2n6mtkVpHNsZi8qzn4MxXDhnauDlquTDk4u5YFRst/QkIkxGzm/P3iaDTYpPQOp
+         aM0RU0mwV4kFO5EeS4R6XNVROYiAeo/4wk7tQnLMHnlM1Nw/UVbFFRiKJaolD2ddDDgi
+         EiCOIZyEMOcqTstavrKBSRLT6daDBBTqcogaOyRctlHT34RcwVCnARGPufUKBYH6omuV
+         h9Nk+Y2TRQcjYe5ACk2M5lphSu8T8jJ4VaHiti6V8QK64wa+I3vhGF97fYFMLf7OSKwf
+         3SOA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=fhcLUKrBImGGMRzyP+CFlqIv6hjPWjO7YEI4Yb6th7U=;
-        b=bQaaBUBzVai3TUKtGiSNS+R4wVL1CFvRtEBbHAm9tCY2RzyvlvKj4ue+OesWujybYn
-         lZSA8sBRuWkl3uowG0Np1rPV5H3CYX5TqhbiA+p5A0xvqsFNoxNQzJ2pktSrFAPlf41C
-         AZRmj1eY14VmOj1PVAkHr23YrvvOApDeBYTYBNtrR2VghZouSTNTbZL5RtGtwOy84Ac4
-         BYqWQ/ta3+NOxZ3sFX40l+p2TG7FPHmEKdrylKZEgn0B+6GucZm8yKKr2lgt6+NCChlR
-         BGFEuxVNvSq5OIBZQpQWvVONqtH+uXVm0E8+LG9x1eVl36L/BUF2lmLkOKZ2E7DgTH3K
-         LphA==
-X-Gm-Message-State: AOAM530TaA4rfs/GUtQkTlGzATJhHlXHBDVtpeQ3yXi9r4s/Geo7Hn1E
-        kIu3J7JJksmN2wJb41//zYPEbNqpV6ATuPGBhIqLxg==
-X-Google-Smtp-Source: ABdhPJzf1bPQYIrC4YDjG6//d+l2gXH03slc1jpLFuj+Q/lrN6n4AuzYGHLbd0c4sMy+tFuYicdEVimuqX1tyqVpcrk=
-X-Received: by 2002:a2e:874d:: with SMTP id q13mr6133764ljj.16.1634641204614;
- Tue, 19 Oct 2021 04:00:04 -0700 (PDT)
+        bh=u0s+MRa6BbcGpvsOlUlfmhtY9CK4scvdiwFF9cElhZw=;
+        b=vpUWv5ogha1t0NjjjxX155+ZRzy8GCBIk/p+DJuJs2U1g2O9czzp/gHjQeAIM+4T9d
+         baF0b7VeTIlGCZEqnzpWlqEQBsmSOwhCHyOXDjf++JFRjLRytI3G3rEvp59CxblrhLy4
+         kT04i38DT59PaMq5PCgMHqmGyBd9cDRJfmiaUnr1y1RTY2Iw0CiIGMg8BcaTPTAzM5Y5
+         np+lonMyOthFwq7nAZItAPv3ob/H4/Y1biTjIz+/iNsaNWh/nIYQqtyR/4U9WsHes/Rt
+         Wn01c2ikIxg5Ow5awg7VX25E+t8LrEIDqIrXUL4hWEhLBU3UBR1YOkOOz9/t78kXac9i
+         L71Q==
+X-Gm-Message-State: AOAM532HyzTooQjzVmKFEi5tf8p+cVzE+3BO0HAjibq9t7SfvYad1Aqb
+        tXkEDD8ffkXL5i5WJoYZw9RKmeFIGY0vSQJtCu3iqDZUCb8=
+X-Google-Smtp-Source: ABdhPJyvzlbeUg5nknswT9fRpzEBgAq1CRwBL30gDpwapLO2KcPflPXRFhVEQ3HDIidxz2Pe4GPMCZnb/ylSOve+v+8=
+X-Received: by 2002:a19:e307:: with SMTP id a7mr5396888lfh.358.1634643198337;
+ Tue, 19 Oct 2021 04:33:18 -0700 (PDT)
 MIME-Version: 1.0
-References: <1634263236-6111-1-git-send-email-haibo.chen@nxp.com>
-In-Reply-To: <1634263236-6111-1-git-send-email-haibo.chen@nxp.com>
+References: <20211018135559.244400-1-bigeasy@linutronix.de> <20211018135559.244400-3-bigeasy@linutronix.de>
+In-Reply-To: <20211018135559.244400-3-bigeasy@linutronix.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Oct 2021 12:59:28 +0200
-Message-ID: <CAPDyKFrJVZ99=edvKPwqEMSWz6vhGtRa4ig8pjjQg7mnqOjZ9g@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-esdhc-imx: clear the buffer_read_ready to
- reset standard tuning circuit
-To:     Haibo Chen <haibo.chen@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+Date:   Tue, 19 Oct 2021 13:32:42 +0200
+Message-ID: <CAPDyKFrnmevHeCZ3Fb3XCOx6cHvEv6b3ktYdU-WAnuuq8L4kXQ@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: core: Use blk_mq_complete_request_direct().
+To:     Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-block <linux-block@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jens Axboe <axboe@kernel.dk>,
+        Christoph Hellwig <hch@infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 15 Oct 2021 at 04:25, <haibo.chen@nxp.com> wrote:
->
-> From: Haibo Chen <haibo.chen@nxp.com>
->
-> To reset standard tuning circuit completely, after clear ESDHC_MIX_CTRL_EXE_TUNE,
-> also need to clear bit buffer_read_ready, this operation will finally clear the
-> USDHC IP internal logic flag execute_tuning_with_clr_buf, make sure the following
-> normal data transfer will not be impacted by standard tuning logic used before.
->
-> Find this issue when do quick SD card insert/remove stress test. During standard
-> tuning prodedure, if remove SD card, USDHC standard tuning logic can't clear the
-> internal flag execute_tuning_with_clr_buf. Next time when insert SD card, all
-> data related commands can't get any data related interrupts, include data transfer
-> complete interrupt, data timeout interrupt, data CRC interrupt, data end bit interrupt.
-> Always trigger software timeout issue. Even reset the USDHC through bits in register
-> SYS_CTRL (0x2C, bit28 reset tuning, bit26 reset data, bit 25 reset command, bit 24
-> reset all) can't recover this. From the user's point of view, USDHC stuck, SD can't
-> be recognized any more.
->
-> Fixes: d9370424c948 ("mmc: sdhci-esdhc-imx: reset tuning circuit when power on mmc card")
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
++ Adrian
 
-Applied for fixes and by adding stable tag, thanks!
+On Mon, 18 Oct 2021 at 15:56, Sebastian Andrzej Siewior
+<bigeasy@linutronix.de> wrote:
+>
+> The completion callback for the sdhci-pci device is invoked from a
+> kworker.
+> I couldn't identify in which context is mmc_blk_mq_req_done() invoke but
+> the remaining caller are from invoked from preemptible context. Here it
+> would make sense to complete the request directly instead scheduling
+> ksoftirqd for its completion.
+>
+> Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+
+Thanks for working on this!
+
+I have looped in Adrian, to allow him to provide us with his input too.
+
+> ---
+>  drivers/mmc/core/block.c | 22 ++++++++++++++--------
+>  1 file changed, 14 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 431af5e8be2f8..7d6b43fe52e8a 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2051,7 +2051,8 @@ static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
+>                 mmc_put_card(mq->card, &mq->ctx);
+>  }
+>
+> -static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
+> +static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
+> +                               bool can_sleep)
+>  {
+>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+>         struct mmc_request *mrq = &mqrq->brq.mrq;
+> @@ -2063,10 +2064,14 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
+>          * Block layer timeouts race with completions which means the normal
+>          * completion path cannot be used during recovery.
+>          */
+> -       if (mq->in_recovery)
+> +       if (mq->in_recovery) {
+>                 mmc_blk_mq_complete_rq(mq, req);
+> -       else if (likely(!blk_should_fake_timeout(req->q)))
+> -               blk_mq_complete_request(req);
+> +       } else if (likely(!blk_should_fake_timeout(req->q))) {
+> +               if (can_sleep)
+> +                       blk_mq_complete_request_direct(req, mmc_blk_mq_complete);
+> +               else
+> +                       blk_mq_complete_request(req);
+> +       }
+>
+>         mmc_blk_mq_dec_in_flight(mq, req);
+>  }
+> @@ -2087,7 +2092,7 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq)
+>
+>         mmc_blk_urgent_bkops(mq, mqrq);
+>
+> -       mmc_blk_mq_post_req(mq, req);
+> +       mmc_blk_mq_post_req(mq, req, true);
+>  }
+>
+>  static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
+> @@ -2106,7 +2111,7 @@ static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
+>         if (prev_req)
+>                 *prev_req = mq->complete_req;
+>         else
+> -               mmc_blk_mq_post_req(mq, mq->complete_req);
+> +               mmc_blk_mq_post_req(mq, mq->complete_req, true);
+>
+>         mq->complete_req = NULL;
+>
+> @@ -2178,7 +2183,8 @@ static void mmc_blk_mq_req_done(struct mmc_request *mrq)
+>         mq->rw_wait = false;
+>         wake_up(&mq->wait);
+>
+> -       mmc_blk_mq_post_req(mq, req);
+> +       /* context unknown */
+> +       mmc_blk_mq_post_req(mq, req, false);
+
+So it seems we would benefit from knowing the context here, right?
+
+At this point, what you suggest seems like a reasonable way forward
+(assuming atomic context), but in a next step we could potentially add
+a non-atomic helper function for mmc host drivers to call, when that
+is suitable. Would that make sense you think?
+
+>  }
+>
+>  static bool mmc_blk_rw_wait_cond(struct mmc_queue *mq, int *err)
+> @@ -2238,7 +2244,7 @@ static int mmc_blk_mq_issue_rw_rq(struct mmc_queue *mq,
+>         err = mmc_start_request(host, &mqrq->brq.mrq);
+>
+>         if (prev_req)
+> -               mmc_blk_mq_post_req(mq, prev_req);
+> +               mmc_blk_mq_post_req(mq, prev_req, true);
+>
+>         if (err)
+>                 mq->rw_wait = false;
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index f18d169bc8ff..e658f0174242 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1187,6 +1187,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
->         u32 ctrl;
-> +       int ret;
->
->         /* Reset the tuning circuit */
->         if (esdhc_is_usdhc(imx_data)) {
-> @@ -1199,7 +1200,22 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
->                 } else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
->                         ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
->                         ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> +                       ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
->                         writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-> +                       /* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
-> +                       ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
-> +                               ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
-> +                       if (ret == -ETIMEDOUT)
-> +                               dev_warn(mmc_dev(host->mmc),
-> +                                "Warning! clear execute tuning bit failed\n");
-> +                       /*
-> +                        * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
-> +                        * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
-> +                        * will finally make sure the normal data transfer logic correct.
-> +                        */
-> +                       ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
-> +                       ctrl |= SDHCI_INT_DATA_AVAIL;
-> +                       writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
->                 }
->         }
->  }
-> --
-> 2.17.1
->
