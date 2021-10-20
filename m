@@ -2,222 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D8CC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:40:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF703C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 06:39:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A971B6137E
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Oct 2021 11:40:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C5C53610A2
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 06:39:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235415AbhJSLnJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Oct 2021 07:43:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53994 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235379AbhJSLnI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Oct 2021 07:43:08 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FE97C06176A
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:40:55 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id u21so6774439lff.8
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Oct 2021 04:40:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=p/y6DgAZycykowwrleZpy70Yak++qIhNqJ9ImugcYMs=;
-        b=gbZb/rIEkq16uEpMdDfbn531uPXxDE2vXRTZ1At7zc8FyijjHf+TaWP9WSCNsx9CRl
-         Ax+uAwkmd3zCdbRdDaM3dpQ6QH2wtz6LdoMLA6+gjkzDI8FsGa3Gg4WLu7V9K5SrUrby
-         y6A+UktAxyprVLbdSpurxxaZ8mnWtv03QgVC25vrqwdz6F5CjpkyH0G67ZL5o2xSalbx
-         z2YLwvEkGXJDZVRENSUyiANgZXnd7Hl65An187cV1TSi/tcYxCoWRVEqIP0BwzqCyQr0
-         hoZBxk1g0lrSFu4sw+cYxe+pvM8G9j1I2iiX+c9B9ryltLhmQtiX2zDR77yR1QolGdKK
-         MOng==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=p/y6DgAZycykowwrleZpy70Yak++qIhNqJ9ImugcYMs=;
-        b=2XchWEUoeWf6ztXzfPqP0M4QxnImpp+gXNB4eW9RgyZGmQVywQfmEBg0Lm/Rcd6nPm
-         wiMLngU0ekd/EsWWe28HF0eRPkKTx1VFvaamYO0yMdXhdUc8Nm5h1aT0X/jHOuaQ9rLx
-         hyk7Vu5fWA4MptrV/4thx8+I1czrxkr4yg8djY31anyae222TPwkAvgDZ/qsHzMAFGvr
-         kYdDchbTPdkz51fUAOLsi80mXXfvMgNZ78AbQdwYVNuHHPPJgY6DfE7FTewbLxPT8fTH
-         kCwkdyFfkLa8sz7wldjUVhlIMS2J8IpKqWCd1rE+v9/Wcm0vMdJG5yPvWYN01yBjyDd4
-         BjQQ==
-X-Gm-Message-State: AOAM531F//1ckhKBetOWqntmCJT/UX+DfAdOjTnCHbiIypu6mj6RhiaR
-        0PAXFNWRX65rwazzdBcdY63fG9Rwb5hEsrXtH3rNcA==
-X-Google-Smtp-Source: ABdhPJyiZ8hxPaWs5ZGwktR/58DXEHsnrg2iCZG7+dtLEFQZezq+DvEjCTIwbhL0fm341kLJAfk/05h60QX3kuXQ9G4=
-X-Received: by 2002:a05:6512:3084:: with SMTP id z4mr5314051lfd.167.1634643653278;
- Tue, 19 Oct 2021 04:40:53 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210926224058.1252-1-digetx@gmail.com> <20210926224058.1252-21-digetx@gmail.com>
- <CAPDyKFoF2QxZss_h9B1NFqOqgeF=TQ6LajCedGiJ9_P8X5M0NA@mail.gmail.com>
- <0bcbcd3d-2154-03d2-f572-dc9032125c26@gmail.com> <CAPDyKFohA9iu2UQfwoc0pCrCGupdwnUTWjKOtP09_C2KaFSo8w@mail.gmail.com>
- <073114ea-490b-89a9-e82d-852b34cb11df@gmail.com>
-In-Reply-To: <073114ea-490b-89a9-e82d-852b34cb11df@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Oct 2021 13:40:16 +0200
-Message-ID: <CAPDyKFoOMvEW0o6=-_bYKhwUcbfeTD4qu-K2tfkdXiR0bErHsw@mail.gmail.com>
-Subject: Re: [PATCH v13 20/35] mtd: rawnand: tegra: Add runtime PM and OPP support
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-pwm@vger.kernel.org,
+        id S229741AbhJTGmI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Oct 2021 02:42:08 -0400
+Received: from mga11.intel.com ([192.55.52.93]:59683 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229591AbhJTGmH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 20 Oct 2021 02:42:07 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10142"; a="226167087"
+X-IronPort-AV: E=Sophos;i="5.87,166,1631602800"; 
+   d="scan'208";a="226167087"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2021 23:39:53 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,166,1631602800"; 
+   d="scan'208";a="575146481"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by fmsmga002.fm.intel.com with ESMTP; 19 Oct 2021 23:39:50 -0700
+Subject: Re: [PATCH v2 2/2] mmc: core: Use blk_mq_complete_request_direct().
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Cc:     linux-block <linux-block@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        David Heidelberg <david@ixit.cz>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jens Axboe <axboe@kernel.dk>,
+        Christoph Hellwig <hch@infradead.org>
+References: <20211018135559.244400-1-bigeasy@linutronix.de>
+ <20211018135559.244400-3-bigeasy@linutronix.de>
+ <CAPDyKFrnmevHeCZ3Fb3XCOx6cHvEv6b3ktYdU-WAnuuq8L4kXQ@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <675b6ad0-080c-c2ad-314c-618a941f9d1c@intel.com>
+Date:   Wed, 20 Oct 2021 09:39:49 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFrnmevHeCZ3Fb3XCOx6cHvEv6b3ktYdU-WAnuuq8L4kXQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 17 Oct 2021 at 10:38, Dmitry Osipenko <digetx@gmail.com> wrote:
->
-> 01.10.2021 18:01, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> > On Fri, 1 Oct 2021 at 16:35, Dmitry Osipenko <digetx@gmail.com> wrote:
-> >>
-> >> 01.10.2021 17:24, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> >>> On Mon, 27 Sept 2021 at 00:42, Dmitry Osipenko <digetx@gmail.com> wro=
-te:
-> >>>>
-> >>>> The NAND on Tegra belongs to the core power domain and we're going t=
-o
-> >>>> enable GENPD support for the core domain. Now NAND must be resumed u=
-sing
-> >>>> runtime PM API in order to initialize the NAND power state. Add runt=
-ime PM
-> >>>> and OPP support to the NAND driver.
-> >>>>
-> >>>> Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
-> >>>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
-> >>>> ---
-> >>>>  drivers/mtd/nand/raw/tegra_nand.c | 55 ++++++++++++++++++++++++++--=
----
-> >>>>  1 file changed, 47 insertions(+), 8 deletions(-)
-> >>>>
-> >>>> diff --git a/drivers/mtd/nand/raw/tegra_nand.c b/drivers/mtd/nand/ra=
-w/tegra_nand.c
-> >>>> index 32431bbe69b8..098fcc9cb9df 100644
-> >>>> --- a/drivers/mtd/nand/raw/tegra_nand.c
-> >>>> +++ b/drivers/mtd/nand/raw/tegra_nand.c
-> >>>> @@ -17,8 +17,11 @@
-> >>>>  #include <linux/mtd/rawnand.h>
-> >>>>  #include <linux/of.h>
-> >>>>  #include <linux/platform_device.h>
-> >>>> +#include <linux/pm_runtime.h>
-> >>>>  #include <linux/reset.h>
-> >>>>
-> >>>> +#include <soc/tegra/common.h>
-> >>>> +
-> >>>>  #define COMMAND                                        0x00
-> >>>>  #define   COMMAND_GO                           BIT(31)
-> >>>>  #define   COMMAND_CLE                          BIT(30)
-> >>>> @@ -1151,6 +1154,7 @@ static int tegra_nand_probe(struct platform_de=
-vice *pdev)
-> >>>>                 return -ENOMEM;
-> >>>>
-> >>>>         ctrl->dev =3D &pdev->dev;
-> >>>> +       platform_set_drvdata(pdev, ctrl);
-> >>>>         nand_controller_init(&ctrl->controller);
-> >>>>         ctrl->controller.ops =3D &tegra_nand_controller_ops;
-> >>>>
-> >>>> @@ -1166,14 +1170,22 @@ static int tegra_nand_probe(struct platform_=
-device *pdev)
-> >>>>         if (IS_ERR(ctrl->clk))
-> >>>>                 return PTR_ERR(ctrl->clk);
-> >>>>
-> >>>> -       err =3D clk_prepare_enable(ctrl->clk);
-> >>>> +       err =3D devm_pm_runtime_enable(&pdev->dev);
-> >>>> +       if (err)
-> >>>> +               return err;
-> >>>> +
-> >>>> +       err =3D devm_tegra_core_dev_init_opp_table_common(&pdev->dev=
-);
-> >>>> +       if (err)
-> >>>> +               return err;
-> >>>> +
-> >>>> +       err =3D pm_runtime_resume_and_get(&pdev->dev);
-> >>>>         if (err)
-> >>>>                 return err;
-> >>>>
-> >>>>         err =3D reset_control_reset(rst);
-> >>>>         if (err) {
-> >>>>                 dev_err(ctrl->dev, "Failed to reset HW: %d\n", err);
-> >>>> -               goto err_disable_clk;
-> >>>> +               goto err_put_pm;
-> >>>>         }
-> >>>>
-> >>>>         writel_relaxed(HWSTATUS_CMD_DEFAULT, ctrl->regs + HWSTATUS_C=
-MD);
-> >>>> @@ -1188,21 +1200,19 @@ static int tegra_nand_probe(struct platform_=
-device *pdev)
-> >>>>                                dev_name(&pdev->dev), ctrl);
-> >>>>         if (err) {
-> >>>>                 dev_err(ctrl->dev, "Failed to get IRQ: %d\n", err);
-> >>>> -               goto err_disable_clk;
-> >>>> +               goto err_put_pm;
-> >>>>         }
-> >>>>
-> >>>>         writel_relaxed(DMA_MST_CTRL_IS_DONE, ctrl->regs + DMA_MST_CT=
-RL);
-> >>>>
-> >>>>         err =3D tegra_nand_chips_init(ctrl->dev, ctrl);
-> >>>>         if (err)
-> >>>> -               goto err_disable_clk;
-> >>>> -
-> >>>> -       platform_set_drvdata(pdev, ctrl);
-> >>>> +               goto err_put_pm;
-> >>>>
-> >>>
-> >>> There is no corresponding call pm_runtime_put() here. Is it
-> >>> intentional to always leave the device runtime resumed after ->probe(=
-)
-> >>> has succeeded?
-> >>>
-> >>> I noticed you included some comments about this for some other
-> >>> drivers, as those needed more tweaks. Is that also the case for this
-> >>> driver?
-> >>
-> >> Could you please clarify? There is pm_runtime_put() in both probe-erro=
-r
-> >> and remove() code paths here.
-> >
-> > I was not considering the error path of ->probe() (or ->remove()), but
-> > was rather thinking about when ->probe() completes successfully. Then
-> > you keep the device runtime resumed, because you have called
-> > pm_runtime_resume_and_get() for it.
-> >
-> > Shouldn't you have a corresponding pm_runtime_put() in ->probe(),
-> > allowing it to be runtime suspended, until the device is really needed
-> > later on. No?
->
-> This driver doesn't support active power management. I don't have Tegra
-> hardware that uses NAND storage for testing, so it's up to somebody else
-> to implement dynamic power management. NAND doesn't require high
-> voltages, so it's fine to keep the old driver behaviour by keeping
-> hardware resumed since the probe time.
+On 19/10/2021 14:32, Ulf Hansson wrote:
+> + Adrian
+> 
+> On Mon, 18 Oct 2021 at 15:56, Sebastian Andrzej Siewior
+> <bigeasy@linutronix.de> wrote:
+>>
+>> The completion callback for the sdhci-pci device is invoked from a
+>> kworker.
+>> I couldn't identify in which context is mmc_blk_mq_req_done() invoke but
+>> the remaining caller are from invoked from preemptible context. Here it
+>> would make sense to complete the request directly instead scheduling
+>> ksoftirqd for its completion.
+>>
+>> Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+> 
+> Thanks for working on this!
+> 
+> I have looped in Adrian, to allow him to provide us with his input too.
 
-Alright, fair enough and thanks for clarifying!
+Thanks!
 
-Kind regards
-Uffe
+Looks good to me.
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+
+> 
+>> ---
+>>  drivers/mmc/core/block.c | 22 ++++++++++++++--------
+>>  1 file changed, 14 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>> index 431af5e8be2f8..7d6b43fe52e8a 100644
+>> --- a/drivers/mmc/core/block.c
+>> +++ b/drivers/mmc/core/block.c
+>> @@ -2051,7 +2051,8 @@ static void mmc_blk_mq_dec_in_flight(struct mmc_queue *mq, struct request *req)
+>>                 mmc_put_card(mq->card, &mq->ctx);
+>>  }
+>>
+>> -static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
+>> +static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
+>> +                               bool can_sleep)
+>>  {
+>>         struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+>>         struct mmc_request *mrq = &mqrq->brq.mrq;
+>> @@ -2063,10 +2064,14 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
+>>          * Block layer timeouts race with completions which means the normal
+>>          * completion path cannot be used during recovery.
+>>          */
+>> -       if (mq->in_recovery)
+>> +       if (mq->in_recovery) {
+>>                 mmc_blk_mq_complete_rq(mq, req);
+>> -       else if (likely(!blk_should_fake_timeout(req->q)))
+>> -               blk_mq_complete_request(req);
+>> +       } else if (likely(!blk_should_fake_timeout(req->q))) {
+>> +               if (can_sleep)
+>> +                       blk_mq_complete_request_direct(req, mmc_blk_mq_complete);
+>> +               else
+>> +                       blk_mq_complete_request(req);
+>> +       }
+>>
+>>         mmc_blk_mq_dec_in_flight(mq, req);
+>>  }
+>> @@ -2087,7 +2092,7 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq)
+>>
+>>         mmc_blk_urgent_bkops(mq, mqrq);
+>>
+>> -       mmc_blk_mq_post_req(mq, req);
+>> +       mmc_blk_mq_post_req(mq, req, true);
+>>  }
+>>
+>>  static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
+>> @@ -2106,7 +2111,7 @@ static void mmc_blk_mq_complete_prev_req(struct mmc_queue *mq,
+>>         if (prev_req)
+>>                 *prev_req = mq->complete_req;
+>>         else
+>> -               mmc_blk_mq_post_req(mq, mq->complete_req);
+>> +               mmc_blk_mq_post_req(mq, mq->complete_req, true);
+>>
+>>         mq->complete_req = NULL;
+>>
+>> @@ -2178,7 +2183,8 @@ static void mmc_blk_mq_req_done(struct mmc_request *mrq)
+>>         mq->rw_wait = false;
+>>         wake_up(&mq->wait);
+>>
+>> -       mmc_blk_mq_post_req(mq, req);
+>> +       /* context unknown */
+>> +       mmc_blk_mq_post_req(mq, req, false);
+> 
+> So it seems we would benefit from knowing the context here, right?
+> 
+> At this point, what you suggest seems like a reasonable way forward
+> (assuming atomic context), but in a next step we could potentially add
+> a non-atomic helper function for mmc host drivers to call, when that
+> is suitable. Would that make sense you think?
+> 
+>>  }
+>>
+>>  static bool mmc_blk_rw_wait_cond(struct mmc_queue *mq, int *err)
+>> @@ -2238,7 +2244,7 @@ static int mmc_blk_mq_issue_rw_rq(struct mmc_queue *mq,
+>>         err = mmc_start_request(host, &mqrq->brq.mrq);
+>>
+>>         if (prev_req)
+>> -               mmc_blk_mq_post_req(mq, prev_req);
+>> +               mmc_blk_mq_post_req(mq, prev_req, true);
+>>
+>>         if (err)
+>>                 mq->rw_wait = false;
+> 
+> Kind regards
+> Uffe
+> 
+
