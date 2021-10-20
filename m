@@ -2,167 +2,125 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 267C0C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 14:30:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C7C6C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 16:01:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0EC816136F
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 14:30:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2EB2161374
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 16:01:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230466AbhJTOcs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Oct 2021 10:32:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51876 "EHLO
+        id S230372AbhJTQD3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Oct 2021 12:03:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231147AbhJTOcg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Oct 2021 10:32:36 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 319C6C06176C
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 07:30:22 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id t9so15523753lfd.1
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 07:30:22 -0700 (PDT)
+        with ESMTP id S230407AbhJTQD2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Oct 2021 12:03:28 -0400
+Received: from mail-io1-xd2f.google.com (mail-io1-xd2f.google.com [IPv6:2607:f8b0:4864:20::d2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8FD3C061749
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 09:01:13 -0700 (PDT)
+Received: by mail-io1-xd2f.google.com with SMTP id s17so25195370ioa.13
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 09:01:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=chromium.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=V8w9KrLOh1e4/GeU4pCFQml0fcDuxEzceReSFQbl/RY=;
-        b=Z4SbQud7ZO2doXmNbDxU8eh364WpB+CytVG+jjq/n2wOGTwGgEyHbkVSFNxfBA1v5K
-         Tez31O/2/krC7zuzCiFYCeyyVGeTTfK9iTRzgdFEKuYsrF0upefHM0JNNFfoFX++j9Yt
-         ygq/expCumks7h7y+U2H1zsz3Svs5/gzVwsAqw/ljPpbFiJOwuUOQHtHdJPY4gaDaTRo
-         o3Lx0zImErdtRXIBOe7xQwqWqo+KFQ0ow1EvsMXjlPl3H2ZDEyO6r45EEAjJFNOYj0+x
-         1UkBmJewQAMB1n8URyzu9DIcA2Xb4nzwxd9qfvX3rKedFfrNtErMbJnbJVQfYMGUeBw7
-         gbxA==
+         :cc;
+        bh=nGh8xwLjUotuMiU7nTi+DQvy/W64PTEcDbyGcmEl7Ao=;
+        b=ic4HEJrkQ+00mdGRe3DgeBN2pK4kIaBuH1BFNpXr2+B1fbcOjQox0JkM+8P6NGIR79
+         O2vWfq44Cr3mbH/Uf8n5kqNct++3KnL6369AoBwXknoYZ4RWAYKQmYGwwDCcn604znbF
+         Ho6kZs45TUU1JZqzsXj0JbOMVEsWt6q9BjWnQ=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=V8w9KrLOh1e4/GeU4pCFQml0fcDuxEzceReSFQbl/RY=;
-        b=XzFoS04JXVPm0bN7JZMnwphnI/s+766wGdmuyVUCfHTyagKjmxqkQsitACtVcc2nwW
-         4Kz52i9/wKE1paaQGYlJUyBSvxe63CydIdzCy1Q8l7Y4WCBqaad29KvuZN15KWoEC9IX
-         sG2Bo7SwDnwjo24DL16Jl9YPqzknn3mFHEjYAa5EuKZcOh3b0wtVP497IgOb69XzzlIu
-         14MrdRmC9lhPeTKWyirHt9LdGDlIxobzRkhAyIb6iSkwPgjduPMO5pl4wC0VHONLaHWY
-         CnjtRlFqaSj83pgjlpS8BTUWCXs4jbLr6KpM/ighhxCpMgMa7gIviIgWURbBgoSdwPxg
-         01Nw==
-X-Gm-Message-State: AOAM533f5nFkAJJektKsT6FEqVf4QJbXFeKjRiLW8x26dLjzT1uCzFVF
-        NtIoQ+7GrQIZ9T9x6JlUbYnen5+4FpVkNr+ux/4pcg==
-X-Google-Smtp-Source: ABdhPJyiRYwjpNbimgCBc8Bb0ImqExuF52wcmQN7YkfkIuNEmX2BOdjiQfUP3MJSXgo9cLEPYL8sBG21S/UfXH7Bx/w=
-X-Received: by 2002:ac2:5e3c:: with SMTP id o28mr135613lfg.184.1634740220385;
- Wed, 20 Oct 2021 07:30:20 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=nGh8xwLjUotuMiU7nTi+DQvy/W64PTEcDbyGcmEl7Ao=;
+        b=3VqoORCdrfPmoiHTFdl4gwVm/kwAeizrS3vAw/HOSxDEpy2HNLR/d/x/CQV90qd9DQ
+         zHC0HdPLNXCmT4OjPYpTSSvoKrlAq0BP5QpPKPcK/GxBefd4xms1VQX1yRANcpOuQPOh
+         f7R+yki54vcZWO2gp7CVww1YHT5aeByIX3GCGZ5SPpjoU/Ld8lv0hNM8vDYSQm3fbYf8
+         EV6snKfHVz2SFXMdS6XhqdhCHroHcH4AHmE6ykhtshClKr5HNRe2MH9FnjSmUpkoccTh
+         APoniIsBrqo6LQi9m5ayFwruOxb8RqF9JgMYtk93svlaPSjjz3fn+gaJ46SXdZcF6VAT
+         5I+g==
+X-Gm-Message-State: AOAM530aslCaPdJittQxjB1HFhdecQsf5DC5NNBeh6AJmcO96pZCr1JK
+        b2+RzEgGjrxFO2jVjEV8URj9np3lJvwuhA==
+X-Google-Smtp-Source: ABdhPJxFTDRaruh+JqxgGZi1N7gOMQwaw9NUJENTz0DOw2u533DeQXbN0JjIUSuWKrR+0KBcsd/Yqw==
+X-Received: by 2002:a05:6602:2d14:: with SMTP id c20mr23249iow.95.1634745672850;
+        Wed, 20 Oct 2021 09:01:12 -0700 (PDT)
+Received: from mail-io1-f48.google.com (mail-io1-f48.google.com. [209.85.166.48])
+        by smtp.gmail.com with ESMTPSA id c4sm1266233ioo.48.2021.10.20.09.01.12
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 Oct 2021 09:01:12 -0700 (PDT)
+Received: by mail-io1-f48.google.com with SMTP id e144so25272264iof.3
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 09:01:12 -0700 (PDT)
+X-Received: by 2002:a02:c731:: with SMTP id h17mr99223jao.93.1634745671995;
+ Wed, 20 Oct 2021 09:01:11 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211014143031.1313783-1-Jerome.Pouiller@silabs.com> <20211014143031.1313783-3-Jerome.Pouiller@silabs.com>
-In-Reply-To: <20211014143031.1313783-3-Jerome.Pouiller@silabs.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 20 Oct 2021 16:29:44 +0200
-Message-ID: <CAPDyKFpr0kpRXoUACNNSwe8pL1S9wJPjnX+GFGS1PNezKCDYzQ@mail.gmail.com>
-Subject: Re: [RFC PATCH 2/2] mmc: allow to match the device tree to apply quirks
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>
+References: <20211020102907.70195-1-ulf.hansson@linaro.org>
+In-Reply-To: <20211020102907.70195-1-ulf.hansson@linaro.org>
+From:   Doug Anderson <dianders@chromium.org>
+Date:   Wed, 20 Oct 2021 09:01:00 -0700
+X-Gmail-Original-Message-ID: <CAD=FV=Wooy9c+S2QpQRn2Y0qKf16Q4cS6RtJ311NjkRSwrpeiw@mail.gmail.com>
+Message-ID: <CAD=FV=Wooy9c+S2QpQRn2Y0qKf16Q4cS6RtJ311NjkRSwrpeiw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Drop use of ->init_card() callback
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Matthias Kaehlcke <mka@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 14 Oct 2021 at 16:30, Jerome Pouiller
-<Jerome.Pouiller@silabs.com> wrote:
+Hi,
+
+On Wed, Oct 20, 2021 at 3:29 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> For dw_mmc, the ->init_card() callback is being used to turn on/off
+> automatic internal clock gating for powersave, which is needed to properly
+> support SDIO irqs on DAT1.
 >
-> MMC subsystem provides a way to apply quirks when a device match some
-> properties (VID, PID, etc...) Unfortunately, some SDIO devices does not
-> comply with the SDIO specification and does not provide reliable VID/PID
-> (eg. Silabs WF200).
+> However, using the ->init_card() comes with a drawback in this case, as it
+> means that the powersave feature becomes disabled, no matter whether the
+> SDIO irqs becomes turned on or not. To improve the behaviour, let's change
+> into using the ->enable_sdio_irq() callback instead. This works fine,
+> because dw_mmc uses sdio_signal_irq() to signal the irqs, thus the
+> ->enable_sdio_irq() is never executed from within atomic context.
 >
-> So, the drivers for these devices rely on device tree to identify the
-> device.
->
-> This patch allows the MMC to also rely on the device tree to apply a
-> quirk.
->
-> Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  drivers/mmc/core/card.h   |  3 +++
->  drivers/mmc/core/quirks.h | 18 ++++++++++++++++++
->  2 files changed, 21 insertions(+)
->
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index 7bd392d55cfa..2f73f8567e14 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -59,6 +59,9 @@ struct mmc_fixup {
->         /* for MMC cards */
->         unsigned int ext_csd_rev;
->
-> +       /* Match against functions declared in device tree */
-> +       const char *const *of_compatible;
+>  drivers/mmc/host/dw_mmc.c | 39 +++++++++++++++++----------------------
+>  1 file changed, 17 insertions(+), 22 deletions(-)
 
-const char is probably sufficient.
+So it was a really long time ago now, but I swear that I put it in
+init_card() for a reason. Sure enough, commit b24c8b260189 ("mmc:
+dw_mmc: Cleanup disable of low power mode w/ SDIO interrupts") talks
+about this. Your patch is largely a revert of that one. Looking at
+that commit plus commit f8c58c113634 ("mmc: dw_mmc: Protect
+read-modify-write of INTMASK with a lock") makes me wonder whether
+it's indeed safe to do all the modifications that you're doing in
+dw_mci_enable_sdio_irq().
 
-> +
->         void (*vendor_fixup)(struct mmc_card *card, int data);
->         int data;
->  };
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index c7ef2d14b359..ef368386e711 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -10,6 +10,7 @@
->   *
->   */
->
-> +#include <linux/of.h>
->  #include <linux/mmc/sdio_ids.h>
->
->  #include "card.h"
-> @@ -145,6 +146,20 @@ static const struct mmc_fixup __maybe_unused sdio_fi=
-xup_methods[] =3D {
->         END_FIXUP
->  };
->
-> +static inline bool mmc_fixup_of_compatible_match(struct mmc_card *card,
-> +                                                const char *const *compa=
-t_list)
-> +{
-> +       struct device_node *of_node;
-> +       int i;
-> +
-> +       for (i =3D 0; i < 7; i++) {
+I think that back in the day dw_mci_enable_sdio_irq() could be called
+in multiple places: directly as a result of the interrupt handler and
+also by other code that wanted the interrupt enabled.
 
-We need to iterate up '8', to cover all functional devices.
+Oh, I think I see. Commit 32dba73772f8 ("mmc: dw_mmc: Convert to use
+MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs") is the key? After that
+commit then it makes sense. The place you've added the code is a place
+that is _not_ called from the interrupt handler.
 
-The function numbers are from 1->7, while we use '0' for the
-"mmc-card" compatible.
+OK, so this looks right to me then. Feel free to add:
 
-> +               of_node =3D mmc_of_find_child_device(card->host, i);
-> +               if (of_node && of_device_compatible_match(of_node, compat=
-_list))
-> +                       return true;
-> +       }
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
 
-Another option, which would avoid doing the iteration over and over
-again in mmc_of_find_child_device(), would be to simply do the parsing
-of the compatible in the child nodes, right here. In other words, just
-use for_each_child_of_node().
 
-> +       return false;
-> +}
-> +
->  static inline void mmc_fixup_device(struct mmc_card *card,
->                                     const struct mmc_fixup *table)
->  {
-> @@ -173,6 +188,9 @@ static inline void mmc_fixup_device(struct mmc_card *=
-card,
->                         continue;
->                 if (rev < f->rev_start || rev > f->rev_end)
->                         continue;
-> +               if (f->of_compatible !=3D NULL &&
-> +                   !mmc_fixup_of_compatible_match(card, f->of_compatible=
-))
-> +                       continue;
->
->                 dev_dbg(&card->dev, "calling %ps\n", f->vendor_fixup);
->                 f->vendor_fixup(card, f->data);
+I also wouldn't mind if you added some of the research above to the
+commit message
 
-Kind regards
-Uffe
+
+
+> +       if (clk_en_a != clk_en_a_old) {
+> +               mci_writel(host, CLKENA, clk_en_a);
+> +               mci_send_cmd(slot, SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT,
+> +                            0);
+
+nit: that 0 looks lonely on its own line now. :(
