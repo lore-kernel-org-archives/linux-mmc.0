@@ -2,125 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C7C6C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 16:01:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55CDAC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 20:58:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2EB2161374
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 16:01:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3B7B5611ED
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Oct 2021 20:58:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230372AbhJTQD3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Oct 2021 12:03:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44706 "EHLO
+        id S230420AbhJTVAj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Oct 2021 17:00:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230407AbhJTQD2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Oct 2021 12:03:28 -0400
-Received: from mail-io1-xd2f.google.com (mail-io1-xd2f.google.com [IPv6:2607:f8b0:4864:20::d2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8FD3C061749
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 09:01:13 -0700 (PDT)
-Received: by mail-io1-xd2f.google.com with SMTP id s17so25195370ioa.13
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 09:01:13 -0700 (PDT)
+        with ESMTP id S230049AbhJTVAi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Oct 2021 17:00:38 -0400
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB407C06161C;
+        Wed, 20 Oct 2021 13:58:23 -0700 (PDT)
+Received: by mail-ed1-x536.google.com with SMTP id w19so515857edd.2;
+        Wed, 20 Oct 2021 13:58:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=nGh8xwLjUotuMiU7nTi+DQvy/W64PTEcDbyGcmEl7Ao=;
-        b=ic4HEJrkQ+00mdGRe3DgeBN2pK4kIaBuH1BFNpXr2+B1fbcOjQox0JkM+8P6NGIR79
-         O2vWfq44Cr3mbH/Uf8n5kqNct++3KnL6369AoBwXknoYZ4RWAYKQmYGwwDCcn604znbF
-         Ho6kZs45TUU1JZqzsXj0JbOMVEsWt6q9BjWnQ=
+        d=gmail.com; s=20210112;
+        h=subject:to:references:from:message-id:date:user-agent:mime-version
+         :in-reply-to:content-language:content-transfer-encoding;
+        bh=p82YL0D5HeYBv9P48l1ubMQJCPT1B3EyFPBHcWoPvPM=;
+        b=cNwcJVoCFZ7X0025fVWetlAmRER6U4CpeECs+r3BzxQpK6Lo4oovoSYc2l2t+LRRIC
+         aAHlpgn+bsVdrJzV+MdFNSsVb+lDbJmkKBmu2UfpoiL2IlST84vNzDC+yiDSgucnsjVA
+         7Rf9Qhv96YOB5E5ac/U+o3PEE0F8ifgcvISjUw67Z+lRdCLQQ06IBGiz89bwUQAVk1go
+         nD7nz3GD/R/7rrcIf1CIIBr0kYFU7R35rfC0FH11K6mRnL/qYLKI9cpPkFBFjm8owi98
+         +1TVov3yAXTJ9FZj7iaZPq3NWsrZQpys4mHvcqoiUna6UCEqNmI2TfieNJWcNXcaECyc
+         jRBA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=nGh8xwLjUotuMiU7nTi+DQvy/W64PTEcDbyGcmEl7Ao=;
-        b=3VqoORCdrfPmoiHTFdl4gwVm/kwAeizrS3vAw/HOSxDEpy2HNLR/d/x/CQV90qd9DQ
-         zHC0HdPLNXCmT4OjPYpTSSvoKrlAq0BP5QpPKPcK/GxBefd4xms1VQX1yRANcpOuQPOh
-         f7R+yki54vcZWO2gp7CVww1YHT5aeByIX3GCGZ5SPpjoU/Ld8lv0hNM8vDYSQm3fbYf8
-         EV6snKfHVz2SFXMdS6XhqdhCHroHcH4AHmE6ykhtshClKr5HNRe2MH9FnjSmUpkoccTh
-         APoniIsBrqo6LQi9m5ayFwruOxb8RqF9JgMYtk93svlaPSjjz3fn+gaJ46SXdZcF6VAT
-         5I+g==
-X-Gm-Message-State: AOAM530aslCaPdJittQxjB1HFhdecQsf5DC5NNBeh6AJmcO96pZCr1JK
-        b2+RzEgGjrxFO2jVjEV8URj9np3lJvwuhA==
-X-Google-Smtp-Source: ABdhPJxFTDRaruh+JqxgGZi1N7gOMQwaw9NUJENTz0DOw2u533DeQXbN0JjIUSuWKrR+0KBcsd/Yqw==
-X-Received: by 2002:a05:6602:2d14:: with SMTP id c20mr23249iow.95.1634745672850;
-        Wed, 20 Oct 2021 09:01:12 -0700 (PDT)
-Received: from mail-io1-f48.google.com (mail-io1-f48.google.com. [209.85.166.48])
-        by smtp.gmail.com with ESMTPSA id c4sm1266233ioo.48.2021.10.20.09.01.12
-        for <linux-mmc@vger.kernel.org>
+        h=x-gm-message-state:subject:to:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=p82YL0D5HeYBv9P48l1ubMQJCPT1B3EyFPBHcWoPvPM=;
+        b=hdQ+cfU08ridE4P5hI70YvOnLSmqor7kp6oPNT8/5Rn2TtD16U1/RNnO58bd7l8UYz
+         fKne0c+avxG/WlBV1gG/Z2XwGhqBQ5lbwk1ViA0eM8vSo9antioWUC/L9do0RUieNrDj
+         16nnXOfW2HUzRBKk/PAPkRVqqKAl0TASr6R75scrbVMUZodaLusHYUPfP7wNePhSKycQ
+         7fZnHx3/RVTOeWyoDr+wDg5dUESsEF8PawUQG4iM3dxlCAid6L613bY4Fe/yYks4uJdb
+         UIoR7FOSXFVgumqQtg6c8ju/D/8eXS0+22VXjuGlek39OQpBUHmD3oBnFQ1kJ3gyNw0V
+         TIKw==
+X-Gm-Message-State: AOAM532iXPxhrQkKLuH1qzxZO4SMu1FMoVuYyisXHj609aQFYapp2qH9
+        dd7oP0m0jw9KD5S8r4Fe0q1h+uyA/dQ=
+X-Google-Smtp-Source: ABdhPJwqfJvimEIS2BOKN2FCENYqFv1j80aLjxbRsgh7c8AbCjxmJKnAw+fheMF42FL+GZDS+gMZEQ==
+X-Received: by 2002:a50:8ade:: with SMTP id k30mr1741326edk.162.1634763502346;
+        Wed, 20 Oct 2021 13:58:22 -0700 (PDT)
+Received: from ?IPv6:2001:981:6fec:1:3bbb:3574:7e12:f56f? ([2001:981:6fec:1:3bbb:3574:7e12:f56f])
+        by smtp.gmail.com with ESMTPSA id v8sm1735117edj.7.2021.10.20.13.58.21
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 20 Oct 2021 09:01:12 -0700 (PDT)
-Received: by mail-io1-f48.google.com with SMTP id e144so25272264iof.3
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Oct 2021 09:01:12 -0700 (PDT)
-X-Received: by 2002:a02:c731:: with SMTP id h17mr99223jao.93.1634745671995;
- Wed, 20 Oct 2021 09:01:11 -0700 (PDT)
+        Wed, 20 Oct 2021 13:58:22 -0700 (PDT)
+Subject: Re: [PATCH v3 0/5] mmc: sdhci-pci: Remove dead code and deduplicate
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Eric Biggers <ebiggers@google.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+References: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
+From:   Ferry Toth <fntoth@gmail.com>
+Message-ID: <27fbd7d6-3d44-39f4-9589-06dc6deed572@gmail.com>
+Date:   Wed, 20 Oct 2021 22:58:21 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
 MIME-Version: 1.0
-References: <20211020102907.70195-1-ulf.hansson@linaro.org>
-In-Reply-To: <20211020102907.70195-1-ulf.hansson@linaro.org>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Wed, 20 Oct 2021 09:01:00 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=Wooy9c+S2QpQRn2Y0qKf16Q4cS6RtJ311NjkRSwrpeiw@mail.gmail.com>
-Message-ID: <CAD=FV=Wooy9c+S2QpQRn2Y0qKf16Q4cS6RtJ311NjkRSwrpeiw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Drop use of ->init_card() callback
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20211014132613.27861-1-andriy.shevchenko@linux.intel.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi,
+Op 14-10-2021 om 15:26 schreef Andy Shevchenko:
+> It appears that one of the supported platform magically worked with
+> the custom IRQ handler (any hints how?) while having two PCB designs
+> with an opposite CD sense level. Quirking it out reveals the code
+> duplication and dead code.
+> 
+> Patch 1 is code deduplication to save few LOCs.
+> Patch 2-5 are dead code removals.
 
-On Wed, Oct 20, 2021 at 3:29 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> For dw_mmc, the ->init_card() callback is being used to turn on/off
-> automatic internal clock gating for powersave, which is needed to properly
-> support SDIO irqs on DAT1.
->
-> However, using the ->init_card() comes with a drawback in this case, as it
-> means that the powersave feature becomes disabled, no matter whether the
-> SDIO irqs becomes turned on or not. To improve the behaviour, let's change
-> into using the ->enable_sdio_irq() callback instead. This works fine,
-> because dw_mmc uses sdio_signal_irq() to signal the irqs, thus the
-> ->enable_sdio_irq() is never executed from within atomic context.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c | 39 +++++++++++++++++----------------------
->  1 file changed, 17 insertions(+), 22 deletions(-)
+Tested-by: Ferry Toth <ftoth@exalondelft.nl> @ Intel Edison-Arduino board
 
-So it was a really long time ago now, but I swear that I put it in
-init_card() for a reason. Sure enough, commit b24c8b260189 ("mmc:
-dw_mmc: Cleanup disable of low power mode w/ SDIO interrupts") talks
-about this. Your patch is largely a revert of that one. Looking at
-that commit plus commit f8c58c113634 ("mmc: dw_mmc: Protect
-read-modify-write of INTMASK with a lock") makes me wonder whether
-it's indeed safe to do all the modifications that you're doing in
-dw_mci_enable_sdio_irq().
+> In v3:
+> - dropped the fix as it has been applied (Ulf)
+> - added tag (Adrian)
+> - elaborated commit IDs with their short descriptions in patch 3 (Adrian)
+> - corrected dependency in patch 5 (Adrian)
+> 
+> In v2:
+> - redone fix to use ->get_cd() instead of quirks (Adrian)
+> - due to above transformed previous clean up to the current patch 2
+> - added a new patch, i.e. patch 3
+> - added commit IDs to patch 4 (Adrian)
+> - mentioned dependencies on previous patches in patch 5 and 6 (Adrian)
+> 
+> Andy Shevchenko (5):
+>    mmc: sdhci: Deduplicate sdhci_get_cd_nogpio()
+>    mmc: sdhci: Remove unused prototype declaration in the header
+>    mmc: sdhci-pci: Remove dead code (struct sdhci_pci_data et al)
+>    mmc: sdhci-pci: Remove dead code (cd_gpio, cd_irq et al)
+>    mmc: sdhci-pci: Remove dead code (rst_n_gpio et al)
+> 
+>   drivers/mmc/host/Makefile          |   1 -
+>   drivers/mmc/host/sdhci-acpi.c      |  14 +--
+>   drivers/mmc/host/sdhci-pci-core.c  | 152 +----------------------------
+>   drivers/mmc/host/sdhci-pci-data.c  |   6 --
+>   drivers/mmc/host/sdhci-pci.h       |   5 -
+>   drivers/mmc/host/sdhci.c           |  19 ++++
+>   drivers/mmc/host/sdhci.h           |   2 +-
+>   include/linux/mmc/sdhci-pci-data.h |  18 ----
+>   8 files changed, 26 insertions(+), 191 deletions(-)
+>   delete mode 100644 drivers/mmc/host/sdhci-pci-data.c
+>   delete mode 100644 include/linux/mmc/sdhci-pci-data.h
+> 
 
-I think that back in the day dw_mci_enable_sdio_irq() could be called
-in multiple places: directly as a result of the interrupt handler and
-also by other code that wanted the interrupt enabled.
-
-Oh, I think I see. Commit 32dba73772f8 ("mmc: dw_mmc: Convert to use
-MMC_CAP2_SDIO_IRQ_NOTHREAD for SDIO IRQs") is the key? After that
-commit then it makes sense. The place you've added the code is a place
-that is _not_ called from the interrupt handler.
-
-OK, so this looks right to me then. Feel free to add:
-
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
-
-
-I also wouldn't mind if you added some of the research above to the
-commit message
-
-
-
-> +       if (clk_en_a != clk_en_a_old) {
-> +               mci_writel(host, CLKENA, clk_en_a);
-> +               mci_send_cmd(slot, SDMMC_CMD_UPD_CLK | SDMMC_CMD_PRV_DAT_WAIT,
-> +                            0);
-
-nit: that 0 looks lonely on its own line now. :(
