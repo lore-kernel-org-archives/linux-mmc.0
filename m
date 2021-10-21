@@ -2,291 +2,291 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B841C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Oct 2021 14:00:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68E1DC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Oct 2021 14:38:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4A14B61212
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Oct 2021 14:00:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 466926121E
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Oct 2021 14:38:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230374AbhJUOCd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Oct 2021 10:02:33 -0400
-Received: from de-smtp-delivery-102.mimecast.com ([194.104.109.102]:58432 "EHLO
+        id S231524AbhJUOkv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Oct 2021 10:40:51 -0400
+Received: from de-smtp-delivery-102.mimecast.com ([194.104.109.102]:50501 "EHLO
         de-smtp-delivery-102.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231256AbhJUOCc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Oct 2021 10:02:32 -0400
+        by vger.kernel.org with ESMTP id S231431AbhJUOkq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Oct 2021 10:40:46 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=mimecast20200619;
-        t=1634824815;
+        t=1634827109;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=YycY/ISqb/TGWCnEJ3r8KJBhHzL4dovBMkP2Dh3MSco=;
-        b=Mh06+LA3V4PFekA1rchhKtdn5yOjzpzKusoVTVI7w//l6ln817FU42tG7BX9+Mw9flA2tM
-        gG08ND+yBsftVQTGEecwFBoMPoYiguEhchmyPzEyGwd1mPSOMMB4xqR5amLT4OyFB0tm1R
-        Nj2Ky6Hcbgqg+/JhZZR3BUOXZsY6IP0=
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com
- (mail-vi1eur04lp2050.outbound.protection.outlook.com [104.47.14.50]) (Using
+        bh=PmKMeltsmd9H9QVthL9m0GwkM9AzdQSzndoNzQqiuOk=;
+        b=Fxu6YPtZmRAsiYBR82dO7z1KKvAyXP/aMvutPaCHDcK9Wc3vkM906ZcObw0N/Kb+22hqJ2
+        7c3K3EXVAeOQjNbKVURS5ms6X2hsLEo1YiluCLrTMSyB9u/+DAOMB/CkcTp+vguqi3urPh
+        GC/D7t6MjRyPODxQakvB7l00a4U6rdE=
+Received: from EUR03-VE1-obe.outbound.protection.outlook.com
+ (mail-ve1eur03lp2052.outbound.protection.outlook.com [104.47.9.52]) (Using
  TLS) by relay.mimecast.com with ESMTP id
- de-mta-25-xwYe7n8vNSKWZOwFqWhDKQ-2; Thu, 21 Oct 2021 16:00:13 +0200
-X-MC-Unique: xwYe7n8vNSKWZOwFqWhDKQ-2
+ de-mta-23-T_h0X1DnNuevvBRtw2_37Q-1; Thu, 21 Oct 2021 16:38:27 +0200
+X-MC-Unique: T_h0X1DnNuevvBRtw2_37Q-1
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=m37tGLuyaoWG6ja2ZfCPoc/qPzSMk3/dZscwIkaoj6N9pIsRPY+PHpy3MvaYL4v5sVIpHBYkobfDzFoAXW3wPUzc+RhNN2NmAWieeaKqxEuMRDbCOcr2nnDLHUGDwGI/w0eC8T/UtTXgvg4dA+nl7MnZYZsVjEeFHjcL7YPAyO9gWZH5q4hmlIF+cKLmfc8XIBfNCoOnCdaogH8Kl3gQTsYrgRTBxEYBnu0CNHMAVDwY6Z+w6fF1l4wpo21CBhpY1fmbeRtGf8YImX6hboTq8bUGh8AbrT8nKy7wNmO1oi7b/mRBdpMWHguINL39bkJpFu+tijwQJDIxi7e4BnDS0Q==
+ b=JIRiiZ2l0w1zrNb3NQw2US61okq5CUydVKCyLE5+HOSULuzrfYqwN4T5IwqIAQrFuY4PdHAE6w0fmOY+hEMaaAzNy9303hHWbWLy1N0jsu0vH2osntPyipWxYXZp7hWbuN/l/E71mKsnyuLu3S9Fauy3y3WeYBIHnD5XLXmpuhRTQw1fIQP8smQpnmFJqwAg7YeNQ4OTXp/MzR3b9wQnnqAgqZybeaDyUyC3HgGjV4B2PF61NS2x0ADAyydTD8TTRcLznXnr4wcXjCFDxvvrVV5OgyyO5ddh4uGtAtjqyu7bux9ZchR/y+fRrgbE8HUb2VyJGhIruenBma3fgktrzg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+PpBqOfmdO9V2tSWfofZtZbpLiUL/z7AvnR6f1I8zus=;
- b=K+QTqFdXfh9EIcCzOOwi9Kzhzr1iaw85whqrHP6cP6ySkCZarh8QqzDqYOQQntmWJNnYxkLyvIqYkxQ2lCfnMJNWufxyUpsm5NaKsOnHXDfMiiIBfGKMBUEVb7NzyxAS5M09qxTKtG09ecEWiDS02wi1Y+sgnNctIjwMjI64XpOK13Enf8Az1iCdnwdWy1zDg2ZnZMl3hssO7fQusYjFehsOKqqCEzFuNHKcCIyb0MaymZ6ucrrFy6/q2nbGRQO4Ps+7O01SViL6p7Wu6RtNzYmvBaxN+05HEiE2sgB3FNjzkrKYpnwbF7rOUp+IcYmdxT68EI6CGQWL+xpo3/64cg==
+ bh=cy4HwgaQTkFHFrab8EGXN+FaChQKQvWT5nzgm+rHOuk=;
+ b=c0crxHCjMyTKOv7kSca522YeVv6nRtuB4Hmrx18pKhPYgjluGcHTSwbrwGN7jwOel8kNEyDGuuez/rxOr5S93mrcyoeWi7WnCAdosgboop4AvJM02SxO8zaLAatFIrS0jC9vfT89sXprZ6JBgmJgjLqwMD0ptwz1K4jJCMByxhaSfWnSQrAzdWRUg4VDOLXu17mauQCsBPdlqhM4sLZevJqge4otI7bQD21SVWaT5pJfZ8l+zYOYqfOTBpyUx8cdV9WnwSeOFSzGhsH3WU+jqVyXvj8GBRvI7YbwO1TJVWIVKWT195xc4C4eDYIIWLAYqj9AR2VKC1zaZRnM2OmQEQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=suse.com; dmarc=pass action=none header.from=suse.com;
  dkim=pass header.d=suse.com; arc=none
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=suse.com;
+Authentication-Results: oss.nxp.com; dkim=none (message not signed)
+ header.d=none;oss.nxp.com; dmarc=none action=none header.from=suse.com;
 Received: from VI1PR0402MB3439.eurprd04.prod.outlook.com (2603:10a6:803:4::13)
- by VE1PR04MB6496.eurprd04.prod.outlook.com (2603:10a6:803:11c::29) with
+ by VI1PR0401MB2368.eurprd04.prod.outlook.com (2603:10a6:800:29::25) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4628.16; Thu, 21 Oct
- 2021 14:00:12 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4608.17; Thu, 21 Oct
+ 2021 14:38:26 +0000
 Received: from VI1PR0402MB3439.eurprd04.prod.outlook.com
  ([fe80::88cc:32fc:2cae:3fde]) by VI1PR0402MB3439.eurprd04.prod.outlook.com
  ([fe80::88cc:32fc:2cae:3fde%7]) with mapi id 15.20.4608.018; Thu, 21 Oct 2021
- 14:00:12 +0000
-Date:   Thu, 21 Oct 2021 21:59:56 +0800
+ 14:38:26 +0000
+Date:   Thu, 21 Oct 2021 22:38:07 +0800
 From:   Chester Lin <clin@suse.com>
-To:     Bough Chen <haibo.chen@nxp.com>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>, dl-S32 <S32@nxp.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Aisheng Dong <aisheng.dong@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+To:     "Radu Nicolae Pirea (NXP OSS)" <radu-nicolae.pirea@oss.nxp.com>
+CC:     s32@nxp.com, Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
+        Matthias Brugger <mbrugger@suse.com>,
+        devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Shawn Guo <shawnguo@kernel.org>,
         Sascha Hauer <s.hauer@pengutronix.de>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
         Fabio Estevam <festevam@gmail.com>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Radu-nicolae Pirea (OSS)" <radu-nicolae.pirea@oss.nxp.com>,
-        Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
-        Matthias Brugger <mbrugger@suse.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, Dong Aisheng <aisheng.dong@nxp.com>,
+        BOUGH CHEN <haibo.chen@nxp.com>,
         "Ivan T . Ivanov" <iivanov@suse.de>, "Lee, Chun-Yi" <jlee@suse.com>
-Subject: Re: [RFC PATCH 2/3] mmc: sdhci-esdhc-imx: add NXP S32G2 support
-Message-ID: <YXFyXDv2FVV2Smk1@linux-8mug>
+Subject: Re: [PATCH 3/3] arm64: dts: s32g2: add USDHC support
+Message-ID: <YXF7T1F3Lo2agRpz@linux-8mug>
 References: <20211021071333.32485-1-clin@suse.com>
- <20211021071333.32485-3-clin@suse.com>
- <YXEXMGGiVOiLZ0H9@linux-8mug>
- <VI1PR04MB52943C2FF87D6C95639F282590BF9@VI1PR04MB5294.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset=utf-8
+ <20211021071333.32485-4-clin@suse.com>
+ <7b44bbd45bd6ab4c3815bbc6266d51ce5187ccab.camel@oss.nxp.com>
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <VI1PR04MB52943C2FF87D6C95639F282590BF9@VI1PR04MB5294.eurprd04.prod.outlook.com>
-X-ClientProxiedBy: AM6P194CA0041.EURP194.PROD.OUTLOOK.COM
- (2603:10a6:209:84::18) To VI1PR0402MB3439.eurprd04.prod.outlook.com
+In-Reply-To: <7b44bbd45bd6ab4c3815bbc6266d51ce5187ccab.camel@oss.nxp.com>
+X-ClientProxiedBy: AM6PR08CA0036.eurprd08.prod.outlook.com
+ (2603:10a6:20b:c0::24) To VI1PR0402MB3439.eurprd04.prod.outlook.com
  (2603:10a6:803:4::13)
 MIME-Version: 1.0
-Received: from linux-8mug (118.166.56.207) by AM6P194CA0041.EURP194.PROD.OUTLOOK.COM (2603:10a6:209:84::18) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4628.16 via Frontend Transport; Thu, 21 Oct 2021 14:00:06 +0000
+Received: from linux-8mug (118.166.56.207) by AM6PR08CA0036.eurprd08.prod.outlook.com (2603:10a6:20b:c0::24) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4628.16 via Frontend Transport; Thu, 21 Oct 2021 14:38:20 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: ae71e323-6df4-4256-6fa5-08d9949b1931
-X-MS-TrafficTypeDiagnostic: VE1PR04MB6496:
-X-Microsoft-Antispam-PRVS: <VE1PR04MB64968147208F467E7B43E011ADBF9@VE1PR04MB6496.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Office365-Filtering-Correlation-Id: cdbce505-2e44-4601-4804-08d994a0710a
+X-MS-TrafficTypeDiagnostic: VI1PR0401MB2368:
+X-Microsoft-Antispam-PRVS: <VI1PR0401MB23686AAF82555FC8DF72E213ADBF9@VI1PR0401MB2368.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: YCMSmQgMR1MYxYKDpKnfVwSpLW7hgyvcbTc1k5Sjgl5MU2KZEXflE+onqQCx1UFm0MAWU353kpwc5q8PlOKiEMzrrIFolx52z+DaMK7eNNqw0tnRRyeJsuh6tNdu1GFShY8VyzxuYrmlyyp/7VUmgc+QND8Sg798Ul8+QMfkFO96cSt6kWrgQ2TAPFkwMRCc4/S3GSrfxvHqt+v+3xQ9P9dXOI4r8e5ZqU7WwIqksH6FuB9TcghhRaolwdqtwdwNv4KAxNqVnLav0LH1XPCYRG3+5BoMATPAEgP+ayr9/WnaYGQCpsgTg602zwvysRKQ28REFiwP8S/kGnLrmH/5BgOgLTStQt2QL10uHq8Ml/zQCwr3ELHKamvOy0pJSadfltjjyvdwzei99jeCFRiXqAEKKypanBfX8OPzcMoaSZJorURkUhKdNzPM8MlrxKBWo8haT/Uelzqi5LBn/L8X5PGy6u5EPVPUlmY0ZykUdBxa5Yhn+MvprgdJ4JhJWzJTeLccJg0YV7marAsmleL1y1hKo2jNPoQthnlT0lEzdM87phOFXo+j6JypIm+6nUYIF/HzByf7KU4/nKwigyim/af7FD3u59w47qW4VX5bcJWt8F0b7dqGJtE3TJ8D2Akd5+ixE8uH/EeoK/1ITxBIKKiJfh6Id3+EzlL0Q17pRf8GcljLFo9wPpP04aHEhH9XKwVJHsE15CPxIXW5vvVc/RUf8wgVzlYsaXg/utzaKgU=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR0402MB3439.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(6916009)(83380400001)(55236004)(508600001)(6496006)(2906002)(38100700002)(45080400002)(66556008)(53546011)(33716001)(8936002)(4326008)(6666004)(66946007)(66476007)(316002)(86362001)(54906003)(5660300002)(107886003)(966005)(55016002)(7416002)(956004)(186003)(8676002)(26005)(9686003);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 4rNwYo0nb2s2ulIb6oyl6V6dz57EosfcP0/IhGAdfZtqu3Hbsa/7jQXfmB95MKMC/NCl8kawbiETNtxnZEm7rzxABFdoTfxVK1jtoTrjIOWkXTlRoQwfccVFGSlUQ4SEq8IsBikMWM58iH/nlPm7eNI0zAzRuRThx/MAyEsqPPfo3xFMSfyIjwsRr40iZbZ4AY7SMPl+HSqyxNt7nAoZM0OTFj3KxzdePDMGV/uKqbCSn492Mq/6foUacSgt90MDEW+OGPKCBlZvNwo1zSHaNLwWcytFXwBCyXbVWhTMbk6TpTRJ51DZO0c52kzOxgfFW0PUJgXLQXHxeL44MvAVtmwDSCfsKTE+6NE6MNewOMYEjb85j61Z/uXtnVy+d4JJKZWWWqnmfWkEaI0LKLL2lkCh4twHL0UXzR5rMXn6rxhqaAeFPovoewCSTqnO/qYhUR2+X0WJVOHMawbCFEtaVNqaErXOQuKKpa59cFZ/ywGLha/kPsswEC46SLwwytco+1K4TwoQKVvUAKTy514tunbbNSg+o+7oufsoO9Z/7exmkK9/gTrQCQ7tmZBc4fWlA8mcYduGS67j5M9JqbtQa+NwkZ0DBQ5DDdAXBoM0MJyaDWRftx1m3XOfumbGN+N8s83P2Jl5Cl2TXlXDrBaTqbryzpp0GH6SArC12/5QNwXp+d/WYWtBxw+Bnqz5+4aOknpd9WgdGMeir40+6t/HzzoyOhJMqD6sSJfFS862WC8=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR0402MB3439.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(107886003)(4001150100001)(8936002)(9686003)(186003)(5660300002)(66946007)(86362001)(26005)(66556008)(66476007)(6496006)(4326008)(966005)(55236004)(38100700002)(6666004)(8676002)(33716001)(83380400001)(2906002)(55016002)(316002)(54906003)(508600001)(7416002)(956004)(6916009);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?RyYQ7h0N4ru91Dma2I+POvEtKIWkNwFDRLF7QrNEAdulycQNn/gdW4PPrnAF?=
- =?us-ascii?Q?XADvBsEXWlLBJBhSO0h6NCdYw4Jg97TeyGESxovBTS6lH15vFpXXjYdvsfRC?=
- =?us-ascii?Q?pUwYg98GsDesjSYiRuGE9NSepG0Cl4SBx8RIFNmNzvkvXSgasqld7+ix3QPL?=
- =?us-ascii?Q?JDOYwsXuuxngsa2ug3qJHywnKRsd/vJjuO/rDA439etdCWhmgHMLUPRscsvK?=
- =?us-ascii?Q?ki5QZs+ZiVXpk2/kk7rnKm2uTb5zlUwodl5RFMbBpNej69iDXtQqppcdGSzc?=
- =?us-ascii?Q?05K6hlOJM8ECmJSZlRTUWDWAs+TsdtI3slsjEJtxHnsXOuWGlhcqjmMSAwol?=
- =?us-ascii?Q?k09uUcfZ3SjFDacRu9SEsFZ6RWYqGFQsM12ROIm3vflLiipHAuyZTKiJ/Ww8?=
- =?us-ascii?Q?+A65czzGTy5mhui1WAjGKDcAySETCpavMSo/KD+0oOi0Bik1bEDtivcrQJsm?=
- =?us-ascii?Q?CxP/p9BySzC9t8uG9ruQC8bOvLYFVi+dVJMwPxUVWuveld2VmNcTHqdDHrki?=
- =?us-ascii?Q?UH/rubnm/Vkx8bXwAt+SLhM7x9c3Q0EV65tIdHHuG9Bd4Iu7ljk60/8XnNlb?=
- =?us-ascii?Q?fS3Omn3LQiTv6iq3n3gupLHXevJfANfp4O1vmRWlzBuGMvsspN/c9IMnPpQz?=
- =?us-ascii?Q?gXNUGAwWg1hEQzdMQBMIraoWFQNJ40iJq6Sw10EzStVZPBN2umTthq8wtPSe?=
- =?us-ascii?Q?lXqqbTNe4mtsOEnK5dvDGxMzWCtbC1ZNbJzwGjOIQYx5hBf5nA7kI+DTUHzR?=
- =?us-ascii?Q?U4CJqJe0WAF3rFx/Q/B95OCPYv409EntLYNOAnXmlHE5uzQ8QB6KV13T2QZT?=
- =?us-ascii?Q?5SXy8o1rWCqiEaEKq5oRe4zd1ZWaL9XXc3FS/8hwE+ZuLYBtiDHP1T7Lz5sr?=
- =?us-ascii?Q?vjhtj3d0Jf1xkkPfT9iLn/G5w20qpH6fTbF//Q/ng1JFPkPMHoEhrgimQy5A?=
- =?us-ascii?Q?jT2U/P1R395WfTM4CS/OPNxNX71fJdDO/Yy1eVc349JNWUdEOv4cKi9GuVov?=
- =?us-ascii?Q?r+WLaxEfke6sYjkP44pyCgdshl0pL/EcHOz0aofOvm8VimcOv8fJ2wpuZUog?=
- =?us-ascii?Q?gleBiWEFK5AxcLD84bR97HGKdmMlLGVKKxzdVE2V5njLnIhVxWVPaXBRELYk?=
- =?us-ascii?Q?51HuLFBcUF88/oiz1hiw81rU0RribmCHTNpiWcUFHmLj1yh5kMuZpTeDP9/0?=
- =?us-ascii?Q?jTJ0dWSFFQV6dEhWwLgHVAPtXzCmfYWzLrOuT85C2IJNpE1iV1h8rzMU1oiS?=
- =?us-ascii?Q?BgpwCrPPBr5NTz460CdpnzD6zPKzXGWnL4QX7bX5uZXtGjSRssnzMnpwqJom?=
- =?us-ascii?Q?BtNfiJ2UKrLWfHD0Kc8oAlDSECT/0ViD8vs5D4XFNn9qXd9wwXqVYjKD4uV6?=
- =?us-ascii?Q?sLmFi2nmz+5YRgaT7qMhbgBU9rZlglhTwXENYSd3ppn9fhAnNZDz50g82yHc?=
- =?us-ascii?Q?5ZFBR664b1g=3D?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?m/r3NHJX++Ry/69cvhQe0RWVA7DAWSjQTGfTtE06N+0SQ00SfLJDxwfTXlut?=
+ =?us-ascii?Q?CLuD8Frc8T2Dt5MAwwZBwWyHVDJ6feR328X6wRbSKNCqK0YulbG2ml9AnEFU?=
+ =?us-ascii?Q?Z35YVlCYRqpxP6GZiauruB53nNLPpKrrWiUpop5s7iXrKW8WWly7LPq76rab?=
+ =?us-ascii?Q?V8uKMxW6n/7TpgmbPObd1fbax9LXJrz59BR56c0qCKmluO9aAyGamrL4siZ4?=
+ =?us-ascii?Q?0HkeWZPrUB4/48+on7pbCscYfPsVM0KhutdTQdzVJcmEb9uHFXGKtLUBoqSU?=
+ =?us-ascii?Q?UZ6PTdTBpeOAFMi9wOwegG3W8bJs7k70dCZfq2X/2s0xNuLsudZ16peQIRiX?=
+ =?us-ascii?Q?wkIC0AegkTJcapx+U0bwjKUQplFXZ6R/mKCb9gQR+2cLA2jIdoAN5fBzt0zP?=
+ =?us-ascii?Q?mfLsbpQfEd4r8fgSdAaV8/v0M3YneDMM++LFDlytEg9EFDAYb84Ah6lJ/BWh?=
+ =?us-ascii?Q?1tC+WP4Al15r+h6GwUXZeJRkqGhcAuuKq3bJiQ4naKijB6c0NUvT0jGjPvVy?=
+ =?us-ascii?Q?sqwkbX9aF9H5byO3hUZEGZGvwCMwJFIgEgMkyr1dr/y8RNi/KQOB+zhEBYwg?=
+ =?us-ascii?Q?6DsO1hwovB4b9uMbVSVzYO9dnV+73pKH16ieIal+9H8JKBUqgCO7MEnWVOST?=
+ =?us-ascii?Q?V5Ek7pSWEVGB5MhfwMF7nDn3DEFpRSvb7OqmfzLOM2BWC1AxJZetMEIx34hB?=
+ =?us-ascii?Q?sfb3z04qmAhfQS3ehT7yKdattEwVdIRipQ6NKRvXE7ukSfoGotuA+nozURtL?=
+ =?us-ascii?Q?JqTZLFrsw9Z2qsdB33XRt1tnFPuOVZ4HpR6rDwnMyJvltXV5qoL16Z8x/Vxy?=
+ =?us-ascii?Q?eWqmmyAy0fBdHfpeID6faD5JcA3Ja6GxsPw8jse8Vg8nU9LNT4BqfDB54Wpm?=
+ =?us-ascii?Q?vt/cBVbR3JQ7+wNRWKMXwD7grdjc/F+rVSp9Ex4hrwCJcb3Zvy46o/13og7c?=
+ =?us-ascii?Q?yLjxkUtjiznQonG3NZivJpW8kST0sYFUy3Krr8NBt9P7Q8if2s+O1SaWKe/6?=
+ =?us-ascii?Q?PDc6RXCp9lzxhwjBIqdmRSCLxzujXzRcxKHrSVs0lyVaYIqZ+0XelxRaBdSC?=
+ =?us-ascii?Q?OTq2jDn8fTefnbaOChN1oO2bzesGXrkhPAhJlFVafyFr3j5BaafhJpp+IBEl?=
+ =?us-ascii?Q?ei1P1J5EdZHenBMXsrfJBft2bHIx/nJw7foCBiQP9wQI3kx/rtKz3bDf3S6R?=
+ =?us-ascii?Q?H3e+aXjctP99ULOorEchlqYhW/BBnKmm317WH/jEHJt/5XRWoOGTNmUjWDIU?=
+ =?us-ascii?Q?ySTNRSw2HjDM+1DNkCKur3e13ZDmqnz+G5TF7d44m9r0DPZyDqHTPF6nw/91?=
+ =?us-ascii?Q?YvR1L9V/0k9Fxz5m25+ZvH1k?=
 X-OriginatorOrg: suse.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ae71e323-6df4-4256-6fa5-08d9949b1931
+X-MS-Exchange-CrossTenant-Network-Message-Id: cdbce505-2e44-4601-4804-08d994a0710a
 X-MS-Exchange-CrossTenant-AuthSource: VI1PR0402MB3439.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Oct 2021 14:00:12.2792
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Oct 2021 14:38:26.4481
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: f7a17af6-1c5c-4a36-aa8b-f5be247aa4ba
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
 X-MS-Exchange-CrossTenant-UserPrincipalName: clin@suse.com
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VE1PR04MB6496
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR0401MB2368
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Haibo,
+Hi Radu,
 
-On Thu, Oct 21, 2021 at 08:00:43AM +0000, Bough Chen wrote:
-> > -----Original Message-----
-> > From: Chester Lin [mailto:clin@suse.com]
-> > Sent: 2021=E5=B9=B410=E6=9C=8821=E6=97=A5 15:31
-> > To: Ulf Hansson <ulf.hansson@linaro.org>; dl-S32 <S32@nxp.com>; dl-linu=
-x-imx
-> > <linux-imx@nxp.com>; Bough Chen <haibo.chen@nxp.com>; Aisheng Dong
-> > <aisheng.dong@nxp.com>; linux-mmc@vger.kernel.org
-> > Cc: Rob Herring <robh+dt@kernel.org>; Shawn Guo <shawnguo@kernel.org>;
-> > Sascha Hauer <s.hauer@pengutronix.de>; Pengutronix Kernel Team
-> > <kernel@pengutronix.de>; Fabio Estevam <festevam@gmail.com>;
-> > devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
-> > linux-kernel@vger.kernel.org; Radu-nicolae Pirea (OSS)
-> > <radu-nicolae.pirea@oss.nxp.com>; Andreas F=C3=A4rber <afaerber@suse.de=
->;
-> > Matthias Brugger <mbrugger@suse.com>; Ivan T . Ivanov <iivanov@suse.de>=
-;
-> > Lee, Chun-Yi <jlee@suse.com>
-> > Subject: Re: [RFC PATCH 2/3] mmc: sdhci-esdhc-imx: add NXP S32G2 suppor=
-t
-> >=20
-> > Hi NXP S32 and i.MX Linux teams,
-> >=20
-> > On Thu, Oct 21, 2021 at 03:13:32PM +0800, Chester Lin wrote:
-> > > Support the SDHCI controller found on NXP S32G2 platform. The new fla=
-g
-> > > ESDHC_FLAG_SKIP_ERR004536 is used because the hardware erratum bit is
-> > > not applicable for S32G2.
-> > >
-> > > Signed-off-by: Chester Lin <clin@suse.com>
-> > > ---
-> > >  drivers/mmc/host/sdhci-esdhc-imx.c | 17 +++++++++++++++--
-> > >  1 file changed, 15 insertions(+), 2 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > index f18d169bc8ff..d0f7d46a0354 100644
-> > > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > > @@ -196,6 +196,9 @@
-> > >   */
-> > >  #define ESDHC_FLAG_BROKEN_AUTO_CMD23	BIT(16)
-> > >
-> > > +/* ERR004536 is not applicable for the IP  */
-> > > +#define ESDHC_FLAG_SKIP_ERR004536	BIT(17)
-> > > +
-> > >  enum wp_types {
-> > >  	ESDHC_WP_NONE,		/* no WP, neither controller nor gpio */
-> > >  	ESDHC_WP_CONTROLLER,	/* mmc controller internal WP */
-> > > @@ -289,6 +292,13 @@ static const struct esdhc_soc_data
-> > usdhc_imx7d_data =3D {
-> > >  			| ESDHC_FLAG_BROKEN_AUTO_CMD23,
-> > >  };
-> > >
-> > > +static struct esdhc_soc_data usdhc_s32g2_data =3D {
-> > > +	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_MAN_TUNING
-> > > +			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
-> > > +			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
-> > > +			| ESDHC_FLAG_SKIP_ERR004536,
-> > > +};
-> > > +
-> > >  static struct esdhc_soc_data usdhc_imx7ulp_data =3D {
-> > >  	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
-> > >  			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200 @@ -347,6
-> > +357,7 @@
-> > > static const struct of_device_id imx_esdhc_dt_ids[] =3D {
-> > >  	{ .compatible =3D "fsl,imx7ulp-usdhc", .data =3D &usdhc_imx7ulp_dat=
-a, },
-> > >  	{ .compatible =3D "fsl,imx8qxp-usdhc", .data =3D &usdhc_imx8qxp_dat=
-a, },
-> > >  	{ .compatible =3D "fsl,imx8mm-usdhc", .data =3D &usdhc_imx8mm_data,=
- },
-> > > +	{ .compatible =3D "nxp,s32g2-usdhc", .data =3D &usdhc_s32g2_data, }=
-,
-> > >  	{ /* sentinel */ }
-> > >  };
-> > >  MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids); @@ -1359,8 +1370,10
-> > @@
-> > > static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
-> > >  		 * erratum ESDHC_FLAG_ERR004536 fix for MX6Q TO1.2 and MX6DL
-> > >  		 * TO1.1, it's harmless for MX6SL
-> > >  		 */
-> > > -		writel(readl(host->ioaddr + 0x6c) & ~BIT(7),
-> > > -			host->ioaddr + 0x6c);
-> > > +		if (!(imx_data->socdata->flags & ESDHC_FLAG_SKIP_ERR004536)) {
-> > > +			writel(readl(host->ioaddr + 0x6c) & ~BIT(7),
-> > > +				host->ioaddr + 0x6c);
-> > > +		}
-> >=20
-> > Hope you don't might that I raise this question here. Is it really nece=
-ssary to
-> > unconditionally apply the erratum bit even if some SoCs might not need =
-this
-> > workaround? From the S32 implementation in CodeAurora[1], I noticed tha=
-t
-> > this bit is not required by S32V/S32G so I wonder if there's any better=
- way to
-> > refine this part?
-> >=20
+On Thu, Oct 21, 2021 at 04:32:52PM +0300, Radu Nicolae Pirea (NXP OSS) wrot=
+e:
+> Hi Chester,
 >=20
-> I confirmed with IP owner before, for SoC contain this errata fixup, clea=
-r this bit 7
-> will enable the fixup, set the bit 7 will disable the fixup.
-> For SoC which do not contain this errata fixup, this bit 7 has no definit=
-ion.
-> So it's okay to clear this bit 7 unconditionally.
+> On Thu, 2021-10-21 at 15:13 +0800, Chester Lin wrote:
+> > Add a mmc node to support USDHC on NXP S32G2 platforms.
+> >=20
+> > Signed-off-by: Chester Lin <clin@suse.com>
+> > ---
+> > =A0arch/arm64/boot/dts/freescale/s32g2.dtsi=A0=A0=A0=A0=A0 | 32
+> > +++++++++++++++++++
+> > =A0.../arm64/boot/dts/freescale/s32g274a-evb.dts |=A0 4 +++
+> > =A0.../boot/dts/freescale/s32g274a-rdb2.dts=A0=A0=A0=A0=A0 |=A0 4 +++
+> > =A03 files changed, 40 insertions(+)
+> >=20
+> > diff --git a/arch/arm64/boot/dts/freescale/s32g2.dtsi
+> > b/arch/arm64/boot/dts/freescale/s32g2.dtsi
+> > index 59ea8a25aa4c..19e2e2561374 100644
+> > --- a/arch/arm64/boot/dts/freescale/s32g2.dtsi
+> > +++ b/arch/arm64/boot/dts/freescale/s32g2.dtsi
+> > @@ -79,6 +79,26 @@ psci {
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0};
+> > =A0=A0=A0=A0=A0=A0=A0=A0};
+> > =A0
+> > +=A0=A0=A0=A0=A0=A0=A0clocks {
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0usdhc_clk_module: usdhc_c=
+lk_module {
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+ompatible =3D "fixed-clock";
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+lock-frequency =3D <133333333>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0#=
+clock-cells =3D <0>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0};
+> > +
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0usdhc_clk_ahb: usdhc_clk_=
+ahb {
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+ompatible =3D "fixed-clock";
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+lock-frequency =3D <400000000>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0#=
+clock-cells =3D <0>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0};
+> > +
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0usdhc_clk_core: usdhc_clk=
+_core {
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+ompatible =3D "fixed-clock";
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+lock-frequency =3D <400000000>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0#=
+clock-cells =3D <0>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0};
+>=20
+> Adding the clock bindings as fixed-clock doesn't describe the hardware.
+> Using fixed-clock is suitable for quartz crystals and oscillators. Here
+> we should have the bindings to the clock driver. Are you planning to
+> submit such driver soon or you will add here more fixed clocks every
+> time you add a peripheral in the dts?
 >=20
 
-Thanks for your reply. If I understand correctly, this bit should be almost=
- the
-same even if the IP can be used in different SoCs. Actually I haven't found=
- an
-issue even if I have tried to clear the bit-7 on S32G274A although this pat=
-ch
-just gets the driver working on S32G, which still has limited functions [e.=
-g.
-pins_100mhz and pins_200mhz are missing]. I just wonder if any case should
-avoid touching this bit since the s32 downstream kernel has a specific hand=
-ling
-for this part.
+Yes, I'm planning to add real clock bindings but not just fixed rates I obs=
+erved
+from EVB and RDB2 boards. Since the upstream support is based on the psci
+method and TF-A, I noticed that we can use SCMI clocks [+smc transport driv=
+er,
+e.g. "arm,scmi-smc"] as clock inputs for most IPs on S32G, and AFAICS the
+downstream TF-A[1] has infrastructure to support SCMI clock protocl
+[protocol-id: 0x14, arm,smc-id: 0xc20000fe].
 
-@NXP S32 team:
-Please let us know if any concern about this bit.
+However it will take much time to verify and upstream all SCMI-related stuf=
+f
+such as clock dt-bindings, so I am thinking of using fixed-clock as the fir=
+st
+step to have initial support before we can have all SCMI bindings get accep=
+ted
+by upstream.
 
-Thanks,
+Please feel free to let me know if any suggestions.
+
+Regards,
 Chester
->=20
->=20
-> > Thanks,
-> > Chester
-> >=20
-> > [1]
-> > https://eur01.safelinks.protection.outlook.com/?url=3Dhttps%3A%2F%2Fsou=
-rce.
-> > codeaurora.org%2Fexternal%2Fautobsps32%2Flinux%2Ftree%2Fdrivers%2Fm
-> > mc%2Fhost%2Fsdhci-esdhc-imx.c%3Fh%3Drelease%2Fbsp30.0-5.4-rt%23n1268
-> > &amp;data=3D04%7C01%7Chaibo.chen%40nxp.com%7Cec36a273354b4b66c45b
-> > 08d99464c449%7C686ea1d3bc2b4c6fa92cd99c5c301635%7C0%7C0%7C63770
-> > 3982782606697%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJ
-> > QIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&amp;sdata=3Dhvzsy
-> > 3W%2FpKXBmXxS8%2F73huzb157a%2FuHa5G4lFWj5ABQ%3D&amp;reserved=3D
-> > 0
-> >=20
-> > >
-> > >  		/* disable DLL_CTRL delay line settings */
-> > >  		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
-> > > --
-> > > 2.30.0
-> > >
->=20
 
+[1] https://source.codeaurora.org/external/autobsps32/arm-trusted-firmware/=
+tree/plat/nxp/s32g/s32g_svc.c?h=3Drelease/bsp30.0-2.3
+
+> Cheers.
+> Radu P.
+>=20
+> > +=A0=A0=A0=A0=A0=A0=A0};
+> > +
+> > =A0=A0=A0=A0=A0=A0=A0=A0soc {
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0compatible =3D "simple-=
+bus";
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0#address-cells =3D <1>;
+> > @@ -109,6 +129,18 @@ uart2: serial@402bc000 {
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0status =3D "disabled";
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0};
+> > =A0
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0usdhc0: mmc@402f0000 {
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+ompatible =3D "nxp,s32g2-usdhc";
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0r=
+eg =3D <0x402f0000 0x1000>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0i=
+nterrupts =3D <GIC_SPI 36
+> > IRQ_TYPE_LEVEL_HIGH>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0b=
+us-width =3D <8>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+locks =3D <&usdhc_clk_module>,
+> > <&usdhc_clk_ahb>,
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0=A0=A0=A0=A0=A0=A0=A0 <&usdhc_clk_core>;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0c=
+lock-names =3D "ipg", "ahb", "per";
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0n=
+o-1-8-v;
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0s=
+tatus =3D "disabled";
+> > +=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0};
+> > +
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0gic: interrupt-controll=
+er@50800000 {
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0compatible =3D "arm,gic-v3";
+> > =A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=A0=
+=A0reg =3D <0x50800000 0x10000>,
+> > diff --git a/arch/arm64/boot/dts/freescale/s32g274a-evb.dts
+> > b/arch/arm64/boot/dts/freescale/s32g274a-evb.dts
+> > index 9118d8d2ee01..89428f1883d9 100644
+> > --- a/arch/arm64/boot/dts/freescale/s32g274a-evb.dts
+> > +++ b/arch/arm64/boot/dts/freescale/s32g274a-evb.dts
+> > @@ -32,3 +32,7 @@ memory@80000000 {
+> > =A0&uart0 {
+> > =A0=A0=A0=A0=A0=A0=A0=A0status =3D "okay";
+> > =A0};
+> > +
+> > +&usdhc0 {
+> > +=A0=A0=A0=A0=A0=A0=A0status =3D "okay";
+> > +};
+> > diff --git a/arch/arm64/boot/dts/freescale/s32g274a-rdb2.dts
+> > b/arch/arm64/boot/dts/freescale/s32g274a-rdb2.dts
+> > index e05ee854cdf5..30eae51121de 100644
+> > --- a/arch/arm64/boot/dts/freescale/s32g274a-rdb2.dts
+> > +++ b/arch/arm64/boot/dts/freescale/s32g274a-rdb2.dts
+> > @@ -38,3 +38,7 @@ &uart0 {
+> > =A0&uart1 {
+> > =A0=A0=A0=A0=A0=A0=A0=A0status =3D "okay";
+> > =A0};
+> > +
+> > +&usdhc0 {
+> > +=A0=A0=A0=A0=A0=A0=A0status =3D "okay";
+> > +};
+>=20
+>=20
 
