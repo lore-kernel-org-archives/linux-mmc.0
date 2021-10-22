@@ -2,156 +2,174 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38DA1C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Oct 2021 06:39:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6102AC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Oct 2021 06:53:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1C85B60EE2
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Oct 2021 06:39:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 43D596103E
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Oct 2021 06:53:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230238AbhJVGmA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Oct 2021 02:42:00 -0400
-Received: from mailout4.samsung.com ([203.254.224.34]:42815 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231761AbhJVGmA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Oct 2021 02:42:00 -0400
-Received: from epcas1p2.samsung.com (unknown [182.195.41.46])
-        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20211022063941epoutp048ba51a4dd49c7ecf35c75e72444bddff~wRwvzkW9-3170331703epoutp04D
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Oct 2021 06:39:41 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20211022063941epoutp048ba51a4dd49c7ecf35c75e72444bddff~wRwvzkW9-3170331703epoutp04D
+        id S230428AbhJVGzm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Oct 2021 02:55:42 -0400
+Received: from mailout2.w1.samsung.com ([210.118.77.12]:46784 "EHLO
+        mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229609AbhJVGzl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Oct 2021 02:55:41 -0400
+Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
+        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20211022065322euoutp02a39f851bb55600f9d93a8a65fb4a5f04~wR8s4bRlj1844818448euoutp023
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Oct 2021 06:53:22 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20211022065322euoutp02a39f851bb55600f9d93a8a65fb4a5f04~wR8s4bRlj1844818448euoutp023
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1634884781;
-        bh=GgRKhJImcsOAtS3q4YtTz2oA+8fQnxgrL56dGAuTdp4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=HqAwT1jFEFSkYauVnTbGfMPk+PhO2E4xMk13JkjqGHD3jMTUcSsWvhtdZXCMHeNoG
-         ATHd948rbx7LJR7SPeeKxho6qak160fNpUA8OghFLAAYscf7X36Uhrb0nYAE3Cr0WO
-         uP0anKwgKPiA7O4LmvM+5CnQjjfyb37ht61/SEpU=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-        epcas1p2.samsung.com (KnoxPortal) with ESMTP id
-        20211022063941epcas1p2ef8e3070840abaaae103bcbfb6216ade~wRwvkM6-81437314373epcas1p22;
-        Fri, 22 Oct 2021 06:39:41 +0000 (GMT)
-Received: from epsmges1p1.samsung.com (unknown [182.195.38.242]) by
-        epsnrtp3.localdomain (Postfix) with ESMTP id 4HbF7v1c5rz4x9QP; Fri, 22 Oct
-        2021 06:39:39 +0000 (GMT)
-Received: from epcas1p1.samsung.com ( [182.195.41.45]) by
-        epsmges1p1.samsung.com (Symantec Messaging Gateway) with SMTP id
-        B7.33.09574.5AC52716; Fri, 22 Oct 2021 15:39:33 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-        epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
-        20211022063932epcas1p2016e6cff9b171f9a6fedfb1e48ee8695~wRwn21_tN1434414344epcas1p2G;
-        Fri, 22 Oct 2021 06:39:32 +0000 (GMT)
-Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
-        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20211022063932epsmtrp11cb2646f33facc3be831e2e78d2f544c~wRwn2HtMz0354103541epsmtrp1C;
-        Fri, 22 Oct 2021 06:39:32 +0000 (GMT)
-X-AuditID: b6c32a35-1abff70000002566-9a-61725ca54767
-Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
-        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
-        47.9D.08738.4AC52716; Fri, 22 Oct 2021 15:39:32 +0900 (KST)
-Received: from localhost.localdomain (unknown [10.88.98.193]) by
-        epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-        20211022063932epsmtip1be7b3cd49607ff5ca6982b6772659c6d~wRwnsTJi51607316073epsmtip1h;
-        Fri, 22 Oct 2021 06:39:32 +0000 (GMT)
-From:   Huijin Park <huijin.park@samsung.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Huijin Park <bbanghj.park@gmail.com>,
-        Huijin Park <huijin.park@samsung.com>
-Subject: [PATCH 2/2] mmc: core: use jiffies to checking timeout for CMD1
-Date:   Fri, 22 Oct 2021 15:39:20 +0900
-Message-Id: <20211022063920.2145-2-huijin.park@samsung.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20211022063920.2145-1-huijin.park@samsung.com>
+        s=mail20170921; t=1634885602;
+        bh=/WKuMZXmyN9g3NUoCm7JeLh9gsgC7GPgu9pjRaESrVs=;
+        h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
+        b=IXzqAY0/P9JdPo3iOVPdA8JTMz9ZO4qJgV+M0efjFQtsW7usZp3TISprKwfj5I+k2
+         h7D5gzUPTBxcoIrwftkqwpW/g5+O1aiXnGJS99M8nrPQY/BFt1spL6SYxQgOMayIx7
+         dw0hShiI9dccq0IaQ4KWD+4PZkaXe3+iJlB5Dd0I=
+Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTP id
+        20211022065322eucas1p2d1662fc50f2c475b77f812245d0a0081~wR8srIpOM0066500665eucas1p2C;
+        Fri, 22 Oct 2021 06:53:22 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+        eusmges2new.samsung.com (EUCPMTA) with SMTP id 28.E8.42068.2EF52716; Fri, 22
+        Oct 2021 07:53:22 +0100 (BST)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20211022065322eucas1p2f974ab996cb85da62b38f8509f4722d8~wR8sWRYrp0904009040eucas1p2s;
+        Fri, 22 Oct 2021 06:53:22 +0000 (GMT)
+Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
+        eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+        20211022065322eusmtrp2d84e4c664b45faf173f9fc3e4f310589~wR8sVoBLC0774607746eusmtrp2j;
+        Fri, 22 Oct 2021 06:53:22 +0000 (GMT)
+X-AuditID: cbfec7f4-c71ff7000002a454-b8-61725fe20243
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+        eusmgms1.samsung.com (EUCPMTA) with SMTP id 76.EA.31287.2EF52716; Fri, 22
+        Oct 2021 07:53:22 +0100 (BST)
+Received: from [106.210.134.192] (unknown [106.210.134.192]) by
+        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20211022065321eusmtip2654027f06bc38a2088114310e278d67c~wR8r22ofr3071930719eusmtip2w;
+        Fri, 22 Oct 2021 06:53:21 +0000 (GMT)
+Message-ID: <5d7d4a61-3652-85cc-6edb-e26ef8373c6e@samsung.com>
+Date:   Fri, 22 Oct 2021 08:53:21 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrOKsWRmVeSWpSXmKPExsWy7bCmru7SmKJEg41rxSxe7j3EbNFx0cXi
-        8q45bBZH/vczWhxfG+7A6rFz1l12jzvX9rB59G1ZxejxeZNcAEtUtk1GamJKapFCal5yfkpm
-        XrqtkndwvHO8qZmBoa6hpYW5kkJeYm6qrZKLT4CuW2YO0FYlhbLEnFKgUEBicbGSvp1NUX5p
-        SapCRn5xia1SakFKToFZgV5xYm5xaV66Xl5qiZWhgYGRKVBhQnbGwU8/mAsmc1e87dVtYHzO
-        0cXIySEhYCKx7HgvaxcjF4eQwA5GiYtzJrBDOJ8YJf5cnA2V+cwocbjvBFCGA6xlV58CRHwX
-        o8ScGZvY4Dr+z9rMDDKXTUBb4vrarYwgtoiAhsSeh+dZQWxmgS5GiZu3HEAGCQt4SKye5A9i
-        sgioSlz6awxSwStgLXHw2EUmiOvkJWZe+s4OYnMK2EhsfvaODaJGUOLkzCcsEBPlJZq3zmaG
-        qD/HLrHhqjeE7SLxr38SG4QtLPHq+BZ2CFtK4mV/G5RdLrFrwlVmkPMlBBoYJfrWfmeFSBhL
-        vHu7lhnkNmYBTYn1u/QhwooSO3/PZYTYyyfx7msPKyRIeCU62oQgSlQlFl/9CDVFWuLQg7uM
-        ECUeEtvfVUECqp9R4uzHbrYJjAqzkHwzC8k3sxAWL2BkXsUollpQnJueWmxYYAiP3eT83E2M
-        4BSoZbqDceLbD3qHGJk4GA8xSnAwK4nw7q7ITxTiTUmsrEotyo8vKs1JLT7EaAoM6onMUqLJ
-        +cAknFcSb2hiaWBiZmRiYWxpbKYkzvtZrjBRSCA9sSQ1OzW1ILUIpo+Jg1Oqgenhwx2h0Qxb
-        o+8/+tqkle565fQ2obDeJSpTJa/nO+yMMWO5++3MOf65d+8WzNXaus1rUsCDGaLv1d5++Dc7
-        Yh5rMb/7zam8NaYfHQL5uPLNl6UI7JHNsudhEboTm6P6b9OhgkSV7Pb9b6Kv88puE6rKEhG1
-        8xP+vHuF+cRFe3+KB858N6urZc7ft2uVg3/uPbyfMWDf9WRLFy+vNofzs2y0H8T1KEYcjiic
-        +F03MfJ0U9UemUKmTOEWZiFzgfylsmtbl13kvsS0RcOk6Vfd36+Xppy5t+xCtP6ZZk7h0Jn9
-        Ni/CGKdwnWIS7HadfDk25vX2yRxdzoXlQZ5Lg5e9m3kk5HrUjdyoyQcvNDy79UCJpTgj0VCL
-        uag4EQC2Mf73CgQAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrILMWRmVeSWpSXmKPExsWy7bCSnO6SmKJEgws79Sxe7j3EbNFx0cXi
-        8q45bBZH/vczWhxfG+7A6rFz1l12jzvX9rB59G1ZxejxeZNcAEsUl01Kak5mWWqRvl0CV8bB
-        Tz+YCyZzV7zt1W1gfM7RxcjBISFgIrGrT6GLkYtDSGAHo8SqXwvZuhg5geLSEu92XmeFqBGW
-        OHy4GKLmA6PEg/UvwGrYBLQlrq/dyghiiwhoSOx5eJ4VxGYW6GOU6PyVBdIrLOAhsXqSP4jJ
-        IqAqcemvMUgFr4C1xMFjF5kgNslLzLz0nR3E5hSwkdj87B3YdCGgmjmHT7BD1AtKnJz5hAVi
-        urxE89bZzBMYBWYhSc1CklrAyLSKUTK1oDg3PbfYsMAoL7Vcrzgxt7g0L10vOT93EyM4VLW0
-        djDuWfVB7xAjEwfjIUYJDmYlEd7dFfmJQrwpiZVVqUX58UWlOanFhxilOViUxHkvdJ2MFxJI
-        TyxJzU5NLUgtgskycXBKNTDJNfnM9yg9Opu/SmQmS22hvcaOZd9arBf7x0Yvq1HRVG5SOvru
-        E0MO47ulS46/qDmyiMNe3NEy5Vu64I3DqsELHno7Nm2+71wYyrCH+T7P/ZAirps8y1Me7Xsl
-        lWOS/2U6h7WszNTuxwbetikZG+xaMjnE+D+fe/Nw+0fpWfVvvj2qCpez5xVzk995e7uGdlMR
-        /8fZv3kU5F4eOuXYIRmUv3DbocnN9dpz86erby64UWJ0f48G58eVa7pt/MKDPh72779uUFXm
-        a/r4eGpS1pXLThb3F3EcPJVUfm3PCevnUpcX589b+F7Y/XbruZPMlee/flY5MCsg6cIV0Vml
-        6tKOho4Btd8tXvUtE71w85cSS3FGoqEWc1FxIgDQ2e69xAIAAA==
-X-CMS-MailID: 20211022063932epcas1p2016e6cff9b171f9a6fedfb1e48ee8695
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0)
+        Gecko/20100101 Thunderbird/91.2.0
+Subject: Re: [PATCH] mmc: dw_mmc: exynos: fix the finding clock sample value
+Content-Language: en-US
+To:     Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc:     ulf.hansson@linaro.org, krzysztof.kozlowski@canonical.com,
+        christianshewitt@gmail.com, mihailescu2m@gmail.com
+From:   Marek Szyprowski <m.szyprowski@samsung.com>
+In-Reply-To: <20211022040041.23156-1-jh80.chung@samsung.com>
+Content-Transfer-Encoding: 7bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA01Se0hTcRTut3t3dx3MblPzZGE0SSjSUhYsUlFImGCxklr0YF3zptKmtatp
+        T5ZW1Cgfs7KWsVWQYk2nLHu5UvPRc4ZCmShZSYG0bBXlfGw5r5b/fd93vvP7zjn8SEx8mR9C
+        ZmblMNosWi0hhHhDu7sz4qNKS6/63h8mG+otw2Q9o6f4sjrnCE/W6i1GstqLbr6sw6KMJ+RG
+        3TlCft/YL5D3vWkk5EW2aiT/WR+q4G8TxqQx6swDjHZl3C5hhq7VINg3QuU/+X0C6dAJkR75
+        kUBJ4VHNVVyPhKSYqkLwvtyOOPILwXjXDQFHfiJoNQ9jMy2GigcYV6hE8KW4aZq4ELi7PxM+
+        l4iKgy8Nb3EfxqmlUFdlm9bnwbPLg1N6EJUKpisDAh8OoJKhpMnJ92GMCobeQRPPhwOpRCit
+        NOOczoK5wTPlIago0Dv1U2/6UTEwYTs73bsY7jorpgYC6jUJZeebcW7sdVBlHRNwOACGOmzT
+        eBF47/vCfA2FCD44LAKOnEXQXXAJca610OcYnYwjJyOWQe2DlZycAFdL//B8MlD+0OOcxw3h
+        D4aGcoyTRXD6lJhzh4Oxo+ZfbPPrLqwESYyzzmKctb5x1jrG/7lmhFejYCaX1aQzbHQWkxfJ
+        0ho2Nys9cne2ph5N/p4Xno5f91DlkCuyBfFI1IKAxCSBoof52bRYlEYfPMRos1XaXDXDtqCF
+        JC4JFqXabqvEVDqdw+xlmH2MdqbKI/1CdDxr3EQe3zk/0bPisB8iLMvUtxSWoIinXnG3pjyD
+        WHdn/JLhkzTa4C2wr3ENRUVvXf/1bmqs1HPM5NSEpXxLvvnxR08bjZId9YrEkJdoTTzhCTXv
+        SDCaH+q1Y9fOtZmG2xyqrsJN1qS6J8kbvCl79bUt/uJoZTy7uV3U5yp/O1fy49348fZBV/P+
+        kfDgpKiEW7ItpzWBNa1B+3+nSctUw6/ath44ae1U2nsddrI9PzGg6GCM2b3zQ1jOHV3Kc9mZ
+        IF5nbFOs8EhzrEJ6XbF642b94/4ljtuNlhplUeDA2vjMbjZyR9mYVRWh7K91h14Y2ckrUm9f
+        MGePfaCvMfSoBGcz6KjlmJal/wI3mrvyrAMAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrNIsWRmVeSWpSXmKPExsVy+t/xe7qP4osSDR718li8ujWZ2eLGrzZW
+        i41vfzBZHPnfz2ixftpPVovja8Md2DxmNfSyeeycdZfd4861PWwefVtWMXp83iQXwBqlZ1OU
+        X1qSqpCRX1xiqxRtaGGkZ2hpoWdkYqlnaGwea2VkqqRvZ5OSmpNZllqkb5egl9FwZBJ7wQ+B
+        isPfWhgbGFt4uxg5OSQETCQmzdnF3MXIxSEksJRRYur9z4wQCRmJk9MaWCFsYYk/17rYIIre
+        M0qsXfcULMErYCfxfNt1FhCbRUBVYuOKLWwQcUGJkzOfgMVFBZIkPm6YwQxiCwv4SEw48Bas
+        l1lAXOLWk/lMILaIgKvExOULWCDixRJd8+YxQSzrZ5Q4MGMP2EVsAoYSXW+7wBZwCthI/N3S
+        AzXITKJraxcjhC0vsf3tHOYJjEKzkNwxC8m+WUhaZiFpWcDIsopRJLW0ODc9t9hQrzgxt7g0
+        L10vOT93EyMw1rYd+7l5B+O8Vx/1DjEycTAeYpTgYFYS4d1dkZ8oxJuSWFmVWpQfX1Sak1p8
+        iNEUGBgTmaVEk/OB0Z5XEm9oZmBqaGJmaWBqaWasJM67de6aeCGB9MSS1OzU1ILUIpg+Jg5O
+        qQYmv42NmfLVRy9bGuwOCl9V+9lC5bKS0iFvv88bPORN/2k53f8haJ3Rz/nk8/nXrH+64+8r
+        XXzAHFK6XzXZ/PNEwQX5WjxSu499PpyzYWmfl5FRxl/PIwKu1t63ery/qLXXcUyy+F/l2/76
+        8hSpzwd+B9zIixH/7fH5kwhX9adP1yqjD90LlAhgnLF3a07Kdr/6Nd2nKvdKNnrc5t137UT4
+        HDmOnLOvJfYHXprRtc5tV7Rj1lrnXxmXT94ojnGZoXok7WSZU2LExBuGF9pSou87th/04NcN
+        yP2iP0tRR0M3UUVc0mM6/xsjwwJuC0Wjr3t8lv+/lCwetXLhztv3hKe6rWDYLKS5gFV7u0X2
+        CUslluKMREMt5qLiRAAWkyIKPgMAAA==
+X-CMS-MailID: 20211022065322eucas1p2f974ab996cb85da62b38f8509f4722d8
 X-Msg-Generator: CA
 Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: SVC_REQ_APPROVE
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20211022063932epcas1p2016e6cff9b171f9a6fedfb1e48ee8695
-References: <20211022063920.2145-1-huijin.park@samsung.com>
-        <CGME20211022063932epcas1p2016e6cff9b171f9a6fedfb1e48ee8695@epcas1p2.samsung.com>
+X-RootMTR: 20211022035959epcas1p40ccc67175d6a4a22943e5836609fb834
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20211022035959epcas1p40ccc67175d6a4a22943e5836609fb834
+References: <CGME20211022035959epcas1p40ccc67175d6a4a22943e5836609fb834@epcas1p4.samsung.com>
+        <20211022040041.23156-1-jh80.chung@samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch uses jiffies for checking timeout instead of loop count.
-Because the previous patch which is adjusting interval time changes
-the timeout value. Besides using jiffies is more clearly for checking
-timeout instead of counting loop.
+On 22.10.2021 06:00, Jaehoon Chung wrote:
+> Even though there are candiates value if can't find best value, it's
+> returned -EIO. It's not proper behavior.
+> If there is not best value, use a first candiate value to work eMMC.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Signed-off-by: Huijin Park <huijin.park@samsung.com>
+Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 61b4ffdc89ce..f48216d65d2c 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -176,14 +176,16 @@ int mmc_go_idle(struct mmc_host *host)
- int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- {
- 	struct mmc_command cmd = {};
--	int i, err = 0;
-+	int err = 0;
- 	int interval = 1, interval_max = 10;
-+	unsigned long timeout;
- 
- 	cmd.opcode = MMC_SEND_OP_COND;
- 	cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
- 
--	for (i = 100; i; i--) {
-+	timeout = jiffies + msecs_to_jiffies(1000);
-+	while (true) {
- 		err = mmc_wait_for_cmd(host, &cmd, 0);
- 		if (err)
- 			break;
-@@ -197,7 +199,12 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 				break;
- 		}
- 
--		err = -ETIMEDOUT;
-+		if (time_after(jiffies, timeout)) {
-+			pr_err("%s: Card stuck being busy! %s\n",
-+			       mmc_hostname(host), __func__);
-+			err = -ETIMEDOUT;
-+			break;
-+		}
- 
- 		mmc_delay(interval);
- 		if (interval < interval_max)
+Works fine with all eMMC modules I have on my test systems.
+
+> ---
+>   drivers/mmc/host/dw_mmc-exynos.c | 22 +++++++++++++++++++++-
+>   1 file changed, 21 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 0c75810812a0..a475c249c430 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -431,6 +431,7 @@ static inline u8 dw_mci_exynos_move_next_clksmpl(struct dw_mci *host)
+>   		clksel = mci_readl(host, CLKSEL);
+>   
+>   	sample = (clksel + 1) & 0x7;
+> +
+>   	clksel = SDMMC_CLKSEL_UP_SAMPLE(clksel, sample);
+>   
+>   	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+> @@ -464,6 +465,14 @@ static s8 dw_mci_exynos_get_best_clksmpl(u8 candiates)
+>   		}
+>   	}
+>   
+> +	/* Return a first candiates value, if there is some candiates */
+> +	for (i = 0; i < iter; i++) {
+> +		__c = ror8(candiates, i);
+> +		if ((__c & 0x1) == 0x1) {
+> +			loc = i;
+> +			goto out;
+> +		}
+> +	}
+>   out:
+>   	return loc;
+>   }
+> @@ -493,7 +502,18 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+>   		dw_mci_exynos_set_clksmpl(host, found);
+>   		priv->tuned_sample = found;
+>   	} else {
+> -		ret = -EIO;
+> +		/*
+> +		 * If there is no cadiates value, then it needs to return -EIO.
+> +		 * If there are candiates values and don't find bset clk sample value,
+> +		 * then use a first candiates clock sample value.
+> +		 */
+> +		if (candiates == 0) {
+> +			ret = -EIO;
+> +			dev_warn(&mmc->class_dev,
+> +				"There is no candiates value about clksmpl!\n");
+> +		} else {
+> +			priv->tuned_sample = dw_mci_exynos_get_clksmpl(host);
+> +		}
+>   	}
+>   
+>   	return ret;
+
+Best regards
 -- 
-2.17.1
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
 
