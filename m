@@ -2,38 +2,58 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 685B4C433FE
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 19:33:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36D82C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 22:22:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 446636103C
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 19:33:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0FB7C6101C
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 22:22:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231823AbhJXTfa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Oct 2021 15:35:30 -0400
-Received: from mout.kundenserver.de ([212.227.17.10]:46019 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231538AbhJXTf3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Oct 2021 15:35:29 -0400
-Received: from mail-wm1-f44.google.com ([209.85.128.44]) by
- mrelayeu.kundenserver.de (mreue109 [213.165.67.113]) with ESMTPSA (Nemesis)
- id 1M2fDl-1mg6xB2L3H-004DXt; Sun, 24 Oct 2021 21:33:06 +0200
-Received: by mail-wm1-f44.google.com with SMTP id b133-20020a1c808b000000b0032ca4d18aebso6898085wmd.2;
-        Sun, 24 Oct 2021 12:33:06 -0700 (PDT)
-X-Gm-Message-State: AOAM533HTIBq3hCwwGKazh6pnxCKMId/bIP3UF9zEsThuL/ne2PSMtw3
-        SMk6azf+fGYpUUAX7yA8s9WmTDoGGzjnbJPgCI8=
-X-Google-Smtp-Source: ABdhPJw4hH7C/a2zk240txDvHL7tN8+k+dIxhQayqZg6YZyRuMpfgd65spSGiNjZlg56v83/yxP5Ni8w6w2+98dAEhQ=
-X-Received: by 2002:a05:600c:1548:: with SMTP id f8mr15117795wmg.35.1635103986146;
- Sun, 24 Oct 2021 12:33:06 -0700 (PDT)
-MIME-Version: 1.0
-References: <20211024154027.1479261-1-Mr.Bossman075@gmail.com>
-In-Reply-To: <20211024154027.1479261-1-Mr.Bossman075@gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Sun, 24 Oct 2021 21:32:50 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a3ccWgpQF8-Ej7Di_=eCs+cibDgiY5962iPKsMgzD_qSg@mail.gmail.com>
-Message-ID: <CAK8P3a3ccWgpQF8-Ej7Di_=eCs+cibDgiY5962iPKsMgzD_qSg@mail.gmail.com>
+        id S231696AbhJXWYa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Oct 2021 18:24:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48938 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229533AbhJXWY3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Oct 2021 18:24:29 -0400
+Received: from mail-qk1-x72a.google.com (mail-qk1-x72a.google.com [IPv6:2607:f8b0:4864:20::72a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C726BC061745;
+        Sun, 24 Oct 2021 15:21:59 -0700 (PDT)
+Received: by mail-qk1-x72a.google.com with SMTP id y10so10061144qkp.9;
+        Sun, 24 Oct 2021 15:21:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=9ncurX3TaX2r+KRIahQhViZWdSQLGqym5eYqOGdMFmY=;
+        b=dy/qQaSfalOC797IGCHjeiHIGgOIKYRtzs+71nz8jiWATJK/JtNHcnKC2GszBndsRz
+         DxCJWVUAEE/Jeu0XM2ZWTFjWCb6fBbhGsUrxqnR6vtUhzQ5oOOXYdR8Ryy9zpYxVlrr/
+         GLVRyy6V1NMR6FkqjlbZqJnPHRrYkiiW6K+3m3vKkw+58uBQKQN7i2Y3+lT3pRYWNkGG
+         t+NphDwcGy9h2FcTf+uuN8s64sn00pVbe4dopWeSwQy7gHRYLZifrc+kDzH1rJMIbrEu
+         f+cd0BQpCmBOCzqk8GRUlLzVCj83HbHK+dA6hqJzZi/XjeaOw6jT2WSUxKjwrVzIe0z3
+         pGqg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=9ncurX3TaX2r+KRIahQhViZWdSQLGqym5eYqOGdMFmY=;
+        b=B/Ub8itLV2ngdGWeIp9ZktLFXHUz5aIGM3kGzcUnYRjh5C+OTiNNsrM4Kj7Rjm+Pky
+         gUYGW8jiAi6t+NayMvDn/8tBG9WWrA8Ao78OTJprnNvWm1ZAvjkafMqFtANGTLip/q/l
+         yBIvegyY9+fGPRVUxhvkIj25BcHgnJusQhsrJf4zUcaGt0Amp7SLWRKvlI385p0tx0gf
+         ImJFqFaPpAI+oyP6ee6p/nHYNFE+jX/0vSmNFisSapEF8x8z5DFmYhdIHHSaSdhs+gBj
+         4Tr2O0LzUQQX7Ni0YBNwc0JOXFGJk6IRgR6Wpxl1nD02IPRDH9KRhX/AbKg3qo2Bk6+s
+         W2+A==
+X-Gm-Message-State: AOAM533T0fR4OoW0EThNAd0DPGuoDSVZi3Y+B5wiQpb7WjlyC6hj1bKp
+        6pJRXXupQQcj0CoPWRZXgzsRFyy6E4IJBUKJ
+X-Google-Smtp-Source: ABdhPJxH3dXajawJmgGedUFt/0s9RkSQOpUZRanfORVnF05b6MtQzzbf90iWYh6sgaNjBabsAL6DrA==
+X-Received: by 2002:a37:9c57:: with SMTP id f84mr10900583qke.16.1635114118201;
+        Sun, 24 Oct 2021 15:21:58 -0700 (PDT)
+Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
+        by smtp.gmail.com with ESMTPSA id i2sm6030226qti.92.2021.10.24.15.21.56
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 24 Oct 2021 15:21:57 -0700 (PDT)
 Subject: Re: [PATCH 00/13] This patchset aims to add initial support for the
  i.MXRT10xx family
-To:     Jesse Taube <mr.bossman075@gmail.com>
+To:     Arnd Bergmann <arnd@arndb.de>
 List-Id: <soc.lore.kernel.org>
 Cc:     NXP Linux Team <linux-imx@nxp.com>,
         Michael Turquette <mturquette@baylibre.com>,
@@ -48,8 +68,7 @@ Cc:     NXP Linux Team <linux-imx@nxp.com>,
         Stefan Agner <stefan@agner.ch>,
         Linus Walleij <linus.walleij@linaro.org>,
         gregkh <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
-        SoC Team <soc@kernel.org>,
+        Olof Johansson <olof@lixom.net>, SoC Team <soc@kernel.org>,
         Russell King - ARM Linux <linux@armlinux.org.uk>,
         Abel Vesa <abel.vesa@nxp.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
@@ -65,57 +84,74 @@ Cc:     NXP Linux Team <linux-imx@nxp.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
         "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
         "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:ijSh8KXz9yGLScq0wxSXSqtezBqpCDdhnwiuDPpD9kH75RQnRE0
- ZK/afQsy0B4yZ7y1N0VpJ/G9U9EeXQ0Re73DMdXLLT8x0IhLZQ99krcnis7WbHBWavIn6lU
- d9D4O0kgZowaTVUN+gzAIM4OYi5NCI67u5r/vV1+pAyHARaNN2y8gZeKuzhJRkViH/cKrBi
- AojeRN/GxKuaWQfF5S8RA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:dhGgQdPx4oQ=:UHVrONz9YTHa3Lk9O6zc5u
- OSVCwKR4calueVJjuvmN9YpKDezKl8EXtP7NQFF1BWLLZEivMPyVzz5FQgnX7+gPxpqiNN2+5
- G4cqI1J9oI1OkgojGhBL7O/xtt+buZcIiQVJMIXwX79GJh2P8UgrGjYbGGxNwbGWfQw3NRU3m
- kWBLD4ltGzMQqH9HomM1d9zlIsnrJ0eSC7zEjDx8LlEyXTvlsGuFH6MskIIlaMg0oxiqKST9V
- 8OUx2I+AXsH+iT4uxFkunq0x+a+lUfXuudFR6sDbdPOSydYwSY9EGVIMJZEjWD3KjIXPMaCou
- GfWIp/sLG5DVoPKGYwYZiYv4V4xaDwmkJVMVEJa/6RqkiOos6PwCWyCcpWL8D1P5LDFgtQ2VH
- kKnIafyQCY1g4Mop5H2GSX5OjeX2x3WrgOVmK97/EU/4gDfY5soZNI6hGo5r/ZdwKVrWIqI6K
- PZCT6GwfJNS2HEUM1A7Lz1DMWvQTT0jQk6ekcp9k3RR5/xPBerd9hh0STGW+D9ykEK+M2l/9Z
- w2UACRbFZzVHj6FbwibFOCkeuKVC/hWPxFB+4p+XNflWhFR/lLfBYCPQvDYtEi6C+ZN3/Q4kY
- f0aE2BZM+Ki56j/rsI4KiWC054YLlzb0iTCilri0kww8q9dqvEZQrN/DKxp4vzxS6291CVXmn
- oBUIYvNKNFNPioL6/Mq0Vp6KhAlWrzyJ/TCGIjlbOZr431OiEAGI2+AAc2i5/+Rt8bImuioAv
- CQXSraJG7uK0niWXxi3i/7j22mbT84Lo5+6T07J1S8nuKaXrKIvUXOUis2M0OieN2iYeR/P/W
- ic2iIGmZVQ9Hn3VzAZ4WFgeQthqLMF2jvk0/fcQO3gVu0ZmtWY=
+References: <20211024154027.1479261-1-Mr.Bossman075@gmail.com>
+ <CAK8P3a3ccWgpQF8-Ej7Di_=eCs+cibDgiY5962iPKsMgzD_qSg@mail.gmail.com>
+From:   Jesse Taube <mr.bossman075@gmail.com>
+Message-ID: <b7132b95-4a9f-db7c-6010-3f9df99a3087@gmail.com>
+Date:   Sun, 24 Oct 2021 18:21:56 -0400
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
+MIME-Version: 1.0
+In-Reply-To: <CAK8P3a3ccWgpQF8-Ej7Di_=eCs+cibDgiY5962iPKsMgzD_qSg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Oct 24, 2021 at 5:40 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
+Hello Arnd,
+
+Giulio is in CC
+
+On 10/24/21 3:32 PM, Arnd Bergmann wrote:
+> On Sun, Oct 24, 2021 at 5:40 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
+>>
+>> Add initial support for the i.MXRT10xx SoC family
+>> starting with the i.IMXRT1050 SoC.
+>> This patchset contains:
+>> - i.MXRT10xx family infrastructure
+>> - i.MXRT1050 pinctrl driver adaption
+>> - i.MXRT1050 clock driver adaption
+>> - i.MXRT1050 sd-card driver adaption
+>> - i.MXRT1050 uart driver adaption
+>> - i.MXRT1050-evk basic support
+> 
+> Can you expand the description a bit more so it makes sense as a changelog
+> text for the merge commit? It's fairly rare these days that we add support for a
+> MMU-less platform, so it would be good if the introductory text answers
+> questions like:
+> 
+> - what is this platform used for, and what is the purpose of running Linux on it
+>   in place of the usual RTOS variants?
+> 
+> - are you doing this just for fun, or are there any commercial use cases?
+
+The purpose of this is for learning and fun, as far as we know there are no
+commercial use cases, but we hope there will be.
+
+> - what are the minimum and maximum memory configurations this has
+>   been tested with?
+
+We both have only tested with 32MB of ram on i.MXRT1050/60-evk.
+
+> - what user space are you testing with: any particular distro that supports
+>   this platform, and do you run elf-fdpic or flat binaries.
+
+We are using Buildroot[1] and that only uses flat binaries.
+i.MXRT1050/20 have already been up-streamed to U-Boot[2].
+
+> - are you planning to also support the newer i.MXRT11xx or
+>   Cortex-R based designs like the S32S?
+
+We plan to support the i.MXRT11xx, but unsure about the S32x, it depends 
+on the interest. 
+
+> 
+>        Arnd
 >
-> Add initial support for the i.MXRT10xx SoC family
-> starting with the i.IMXRT1050 SoC.
-> This patchset contains:
-> - i.MXRT10xx family infrastructure
-> - i.MXRT1050 pinctrl driver adaption
-> - i.MXRT1050 clock driver adaption
-> - i.MXRT1050 sd-card driver adaption
-> - i.MXRT1050 uart driver adaption
-> - i.MXRT1050-evk basic support
+[1]: https://github.com/Mr-Bossman/imxrt-linux-buildroot.git
+[2]: https://source.denx.de/u-boot/u-boot/-/blob/master/configs/imxrt1050-evk_defconfig
 
-Can you expand the description a bit more so it makes sense as a changelog
-text for the merge commit? It's fairly rare these days that we add support for a
-MMU-less platform, so it would be good if the introductory text answers
-questions like:
-
-- what is this platform used for, and what is the purpose of running Linux on it
-  in place of the usual RTOS variants?
-
-- are you doing this just for fun, or are there any commercial use cases?
-
-- what are the minimum and maximum memory configurations this has
-  been tested with?
-
-- what user space are you testing with: any particular distro that supports
-  this platform, and do you run elf-fdpic or flat binaries.
-
-- are you planning to also support the newer i.MXRT11xx or
-  Cortex-R based designs like the S32S?
-
-       Arnd
+Thank you, 
+Jesse Taube.
