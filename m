@@ -2,36 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D226BC43217
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 18:17:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 685B4C433FE
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 19:33:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB4E260FE7
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 18:17:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 446636103C
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Oct 2021 19:33:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231911AbhJXSTv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Oct 2021 14:19:51 -0400
-Received: from mout.kundenserver.de ([212.227.126.130]:41731 "EHLO
+        id S231823AbhJXTfa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Oct 2021 15:35:30 -0400
+Received: from mout.kundenserver.de ([212.227.17.10]:46019 "EHLO
         mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230520AbhJXSTv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Oct 2021 14:19:51 -0400
-Received: from mail-wr1-f46.google.com ([209.85.221.46]) by
- mrelayeu.kundenserver.de (mreue009 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1MEFnR-1mUVJN2Smb-00AGJf; Sun, 24 Oct 2021 20:17:28 +0200
-Received: by mail-wr1-f46.google.com with SMTP id d3so4293198wrh.8;
-        Sun, 24 Oct 2021 11:17:28 -0700 (PDT)
-X-Gm-Message-State: AOAM531GPGGgVsvId6o3tNXWVuDMJY/klEFxlCZFFcFV8U30XvOXE2ZK
-        9Zs/41seGiJMT0azw68wMxYI5OsjOm65H7itICo=
-X-Google-Smtp-Source: ABdhPJwA4yx55xXPjGdoweMWLIzjsgLLmIyhDfO5RJ81PIjOMOGnfiDjEbR4fO6wCEdBYAYuSOM2cYFl2DdATduylko=
-X-Received: by 2002:a05:6000:18c7:: with SMTP id w7mr16559015wrq.411.1635099448118;
- Sun, 24 Oct 2021 11:17:28 -0700 (PDT)
+        with ESMTP id S231538AbhJXTf3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Oct 2021 15:35:29 -0400
+Received: from mail-wm1-f44.google.com ([209.85.128.44]) by
+ mrelayeu.kundenserver.de (mreue109 [213.165.67.113]) with ESMTPSA (Nemesis)
+ id 1M2fDl-1mg6xB2L3H-004DXt; Sun, 24 Oct 2021 21:33:06 +0200
+Received: by mail-wm1-f44.google.com with SMTP id b133-20020a1c808b000000b0032ca4d18aebso6898085wmd.2;
+        Sun, 24 Oct 2021 12:33:06 -0700 (PDT)
+X-Gm-Message-State: AOAM533HTIBq3hCwwGKazh6pnxCKMId/bIP3UF9zEsThuL/ne2PSMtw3
+        SMk6azf+fGYpUUAX7yA8s9WmTDoGGzjnbJPgCI8=
+X-Google-Smtp-Source: ABdhPJw4hH7C/a2zk240txDvHL7tN8+k+dIxhQayqZg6YZyRuMpfgd65spSGiNjZlg56v83/yxP5Ni8w6w2+98dAEhQ=
+X-Received: by 2002:a05:600c:1548:: with SMTP id f8mr15117795wmg.35.1635103986146;
+ Sun, 24 Oct 2021 12:33:06 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211024154027.1479261-1-Mr.Bossman075@gmail.com> <20211024154027.1479261-13-Mr.Bossman075@gmail.com>
-In-Reply-To: <20211024154027.1479261-13-Mr.Bossman075@gmail.com>
+References: <20211024154027.1479261-1-Mr.Bossman075@gmail.com>
+In-Reply-To: <20211024154027.1479261-1-Mr.Bossman075@gmail.com>
 From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Sun, 24 Oct 2021 20:17:12 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a1aZ-LMANnvcr4XX=uTbut78yL=48E8iLHr3AFgVqpi+g@mail.gmail.com>
-Message-ID: <CAK8P3a1aZ-LMANnvcr4XX=uTbut78yL=48E8iLHr3AFgVqpi+g@mail.gmail.com>
-Subject: Re: [PATCH 12/13] ARM: dts: imx: add i.MXRT1050-EVK support
+Date:   Sun, 24 Oct 2021 21:32:50 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a3ccWgpQF8-Ej7Di_=eCs+cibDgiY5962iPKsMgzD_qSg@mail.gmail.com>
+Message-ID: <CAK8P3a3ccWgpQF8-Ej7Di_=eCs+cibDgiY5962iPKsMgzD_qSg@mail.gmail.com>
+Subject: Re: [PATCH 00/13] This patchset aims to add initial support for the
+ i.MXRT10xx family
 To:     Jesse Taube <mr.bossman075@gmail.com>
 List-Id: <soc.lore.kernel.org>
 Cc:     NXP Linux Team <linux-imx@nxp.com>,
@@ -65,57 +66,56 @@ Cc:     NXP Linux Team <linux-imx@nxp.com>,
         "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
         "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:vp3kZKeUmESK+1XWJrXM8FvK63w1mlDQk+fQX6bD9XAxOeRYYD5
- 7qc2Fi0ruvuVrm6uHmgeuroh2/Qaq+JZ77Kn7jXWPw5V/PcOska9ScrRsNHkN8a2q3LsecH
- 2wkzvDNiWVutyKkHlw08xCHL1uknETekmU2eRryi3DLgPd3zrkJIJcLy9nxN+V5Gx4ekQik
- wm/3ij7dHNXL1DQRnW4Ew==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:bHIj7tZfXGE=:aAKiZe9ob+1NvGxt9Ug04K
- dT11Up/i6Se539tgsw9yTgKzt54eqJfV9mWj14qCsACuL6S6IL7VjYU7O2PFJ57q1uRbDgpkq
- f6DmhyeB3jmq1mq8j2PzVY2d0lc9Q8bIAfIxF8MbngcU63+zDMWXMZdKWRzh51OJ8pCwyal22
- QgbD2Euu/9P+wmYnY60fdxBuYguUg9F+zfcMujmufLjV7pM0rky0elbXV1DsmVcxqYonX3jrz
- Jrf9sgpg2qI9/+nethUg0lkTJ3x1+l6yc+C+glXPUyTFSUuHmLvpCJA9iPIEOyyIdtYBi7npu
- Vp2P8AJwb65ZepdvREPWlGEiqO2L9fNs2Mdo3qrbHXlWJkoYIYyHXPY8NjsW/FcZnGaLOVtC+
- 7vdwfeWxjyFbHTk3usqCnNeABpNzvyD8jKwd6dBA/9bKSNhicnvS6tF5DwrHZaWp85fqHIX08
- D0+mw8ZarbXAIyysaXZCjdhqWJtxOV6Q3eHe1nOwpEGlzW36reAee4nBtJ+R0HHVvxDeMshFX
- Tg4E9XwtswH0uPRiU48z/nSBU56HpkXTwF5fkvXnXWuub/2ct7imdCrOdYzdZX8MsDzan8P9B
- s7FiskBIzzSNqARn/rpHdEwGhy9C80jN4DcImwbuCKB5pTFmmupiKgPBnF1GSZO/kWrEg8ag0
- c4vZCviAM15t7Hj1dwy/0i72Q1oxLUXaelqIbfOXdQsM1CvqBC0/na/Il0/JBuyd4zjM7P61x
- J3jxqqg+mwyVIOgEzxI0fLjwJ6Q0O75gWBobuOGS+65ZVKrktRtUYNyMWsoX3vKrqmWTERMRz
- zY7ID/ilJnaqqVh/C/FzWJZyj1R0fWRAu/hz/2VNCFjvJP2arI=
+X-Provags-ID: V03:K1:ijSh8KXz9yGLScq0wxSXSqtezBqpCDdhnwiuDPpD9kH75RQnRE0
+ ZK/afQsy0B4yZ7y1N0VpJ/G9U9EeXQ0Re73DMdXLLT8x0IhLZQ99krcnis7WbHBWavIn6lU
+ d9D4O0kgZowaTVUN+gzAIM4OYi5NCI67u5r/vV1+pAyHARaNN2y8gZeKuzhJRkViH/cKrBi
+ AojeRN/GxKuaWQfF5S8RA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:dhGgQdPx4oQ=:UHVrONz9YTHa3Lk9O6zc5u
+ OSVCwKR4calueVJjuvmN9YpKDezKl8EXtP7NQFF1BWLLZEivMPyVzz5FQgnX7+gPxpqiNN2+5
+ G4cqI1J9oI1OkgojGhBL7O/xtt+buZcIiQVJMIXwX79GJh2P8UgrGjYbGGxNwbGWfQw3NRU3m
+ kWBLD4ltGzMQqH9HomM1d9zlIsnrJ0eSC7zEjDx8LlEyXTvlsGuFH6MskIIlaMg0oxiqKST9V
+ 8OUx2I+AXsH+iT4uxFkunq0x+a+lUfXuudFR6sDbdPOSydYwSY9EGVIMJZEjWD3KjIXPMaCou
+ GfWIp/sLG5DVoPKGYwYZiYv4V4xaDwmkJVMVEJa/6RqkiOos6PwCWyCcpWL8D1P5LDFgtQ2VH
+ kKnIafyQCY1g4Mop5H2GSX5OjeX2x3WrgOVmK97/EU/4gDfY5soZNI6hGo5r/ZdwKVrWIqI6K
+ PZCT6GwfJNS2HEUM1A7Lz1DMWvQTT0jQk6ekcp9k3RR5/xPBerd9hh0STGW+D9ykEK+M2l/9Z
+ w2UACRbFZzVHj6FbwibFOCkeuKVC/hWPxFB+4p+XNflWhFR/lLfBYCPQvDYtEi6C+ZN3/Q4kY
+ f0aE2BZM+Ki56j/rsI4KiWC054YLlzb0iTCilri0kww8q9dqvEZQrN/DKxp4vzxS6291CVXmn
+ oBUIYvNKNFNPioL6/Mq0Vp6KhAlWrzyJ/TCGIjlbOZr431OiEAGI2+AAc2i5/+Rt8bImuioAv
+ CQXSraJG7uK0niWXxi3i/7j22mbT84Lo5+6T07J1S8nuKaXrKIvUXOUis2M0OieN2iYeR/P/W
+ ic2iIGmZVQ9Hn3VzAZ4WFgeQthqLMF2jvk0/fcQO3gVu0ZmtWY=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Sun, Oct 24, 2021 at 5:40 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
+>
+> Add initial support for the i.MXRT10xx SoC family
+> starting with the i.IMXRT1050 SoC.
+> This patchset contains:
+> - i.MXRT10xx family infrastructure
+> - i.MXRT1050 pinctrl driver adaption
+> - i.MXRT1050 clock driver adaption
+> - i.MXRT1050 sd-card driver adaption
+> - i.MXRT1050 uart driver adaption
+> - i.MXRT1050-evk basic support
 
-> +               pinctrl_semc: semcgrp {
-> +                       fsl,pins = <
+Can you expand the description a bit more so it makes sense as a changelog
+text for the merge commit? It's fairly rare these days that we add support for a
+MMU-less platform, so it would be good if the introductory text answers
+questions like:
 
-This node doesn't appear to be referenced from anywhere. Is it actually needed?
+- what is this platform used for, and what is the purpose of running Linux on it
+  in place of the usual RTOS variants?
 
-> +
-> +/ {
-> +       #address-cells = <1>;
-> +       #size-cells = <1>;
-> +
-> +       aliases {
-> +               gpio0 = &gpio1;
-> +               gpio1 = &gpio2;
-> +               gpio2 = &gpio3;
-> +               gpio3 = &gpio4;
-> +               gpio4 = &gpio5;
-> +               mmc0 = &usdhc1;
-> +               serial0 = &lpuart1;
-> +       };
+- are you doing this just for fun, or are there any commercial use cases?
 
-The aliases should go into the .dts file.
+- what are the minimum and maximum memory configurations this has
+  been tested with?
 
-> +               edma1: dma-controller@400E8000 {
-> +                       #dma-cells = <2>;
-> +                       compatible = "fsl,imx7ulp-edma";
-> +                       reg = <0x400E8000 0x4000>,
-> +                               <0x400EC000 0x4000>;
+- what user space are you testing with: any particular distro that supports
+  this platform, and do you run elf-fdpic or flat binaries.
 
-Use lowercase letters in hex numbers here.
+- are you planning to also support the newer i.MXRT11xx or
+  Cortex-R based designs like the S32S?
 
-        Arnd
+       Arnd
