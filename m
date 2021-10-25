@@ -2,66 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C11AC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 06:45:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D21FEC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 07:03:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 09F3E60F46
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 06:45:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB4006008E
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 07:03:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231133AbhJYGrr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Oct 2021 02:47:47 -0400
-Received: from Galois.linutronix.de ([193.142.43.55]:52704 "EHLO
-        galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229727AbhJYGrq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Oct 2021 02:47:46 -0400
-Date:   Mon, 25 Oct 2021 08:45:22 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020; t=1635144323;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ddXW1IAEewv3IDmdYyUoJd2X13n5ysAHyyFO1j6t/0o=;
-        b=Im+Ftc4FvRhlJHm9A0ueRGkbHUxNi5W8PUeFsip9tCBZHgxDMrN5fLCzB1Mj5RfmSxsgTv
-        nUz1xg8C3FKg9pLOXwrEyn/OqghQCbV1BcD6Ygr4aiCgBKLt7Kpw/geopYGXbf1jhzW4Km
-        75mGSfl9vt/RkWaTHvbJX0zpdc/AyvnXtmOz/OSApOD9Ma3SqSzP6qRrQ6MPRS8kwGmhiT
-        /fHEqCRPXsjP3HB/Zwjs+8k0OA4ajkxEDyg6yfaBcfwOU09x5/BHqfAB8C3nKPV5UBW2W3
-        x/QA6eWkQt3Qn4W5o9yogBktQKtWAoPY3wF39JhSpVRmFUdlUtDYZsoPJpEPxg==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020e; t=1635144323;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=ddXW1IAEewv3IDmdYyUoJd2X13n5ysAHyyFO1j6t/0o=;
-        b=nNFDOrz6yv8xHs0xavwonaW23nJ5RD8tYubLAMGMS9I6ophJjCFQvRPKRpKZoPTxXX23wD
-        2zWwB6/KQvDvtIDg==
-From:   Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
-        tglx@linutronix.de, Ulf Hansson <ulf.hansson@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>
-Subject: Re: [PATCH v2 1/2] blk-mq: Add blk_mq_complete_request_direct()
-Message-ID: <20211025064522.5rkkj72rcfka3wqj@linutronix.de>
-References: <20211018135559.244400-1-bigeasy@linutronix.de>
- <20211018135559.244400-2-bigeasy@linutronix.de>
- <YW2Q0ikJR13NWgGD@infradead.org>
+        id S230505AbhJYHFp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Oct 2021 03:05:45 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57870 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230451AbhJYHFo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Oct 2021 03:05:44 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0D7276023E;
+        Mon, 25 Oct 2021 07:03:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1635145402;
+        bh=b2ZKJTUdVCkQS98YgaVFDNlMI1qmq4hVxYpwYJLnGtg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=MzOchr4576iqwit9K0Ldca9+pYoKpfyGuYszBN92hzVgeAumWYcSkFFNzHUHnR9t8
+         IFdhS78dCOmgDw1v+9PDUa2IQyTZ4n11kTg86BDVQPWRosFvPtYjqkjgxC+wFTHpBz
+         clQ9QwAOGF9xZIGk81HvKHYiMrjdyIXGyIo7jLluoE551DFabHl4Lin66wy6Q3mWx4
+         csSwDEowZiD4D/4CAsApmtVBIE9Mfs3hwapL7Pg6EUrlFmFbg/LBfEfGXGICg6Lqec
+         8gDzG0jqMmTGMMpLnAQjBO2u1kDGdE4OaVWBUxRPTYEKEHeK6NG5X1lyFryg2ZwvPk
+         ePKY37PeR+c5A==
+Date:   Mon, 25 Oct 2021 12:33:19 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     "A, Rashmi" <rashmi.a@intel.com>
+Cc:     "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Kishon <kishon@ti.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        "linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>,
+        Mark Gross <mgross@linux.intel.com>,
+        "kris.pan@linux.intel.com" <kris.pan@linux.intel.com>,
+        "Zhou, Furong" <furong.zhou@intel.com>,
+        "Sangannavar, Mallikarjunappa" 
+        <mallikarjunappa.sangannavar@intel.com>,
+        "Hunter, Adrian" <adrian.hunter@intel.com>,
+        "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>,
+        "Srikandan, Nandhini" <nandhini.srikandan@intel.com>
+Subject: Re: [PATCH v2 0/4] Add support of eMMC PHY for Intel Thunder Bay
+Message-ID: <YXZWt6vGIVqOhgt1@matsya>
+References: <20210829182443.30802-1-rashmi.a@intel.com>
+ <CAPDyKFq2VQ=khYnmfsQGPPcpRnxyATVSpwKSZ4MTbKn64rthVA@mail.gmail.com>
+ <DM6PR11MB306560AE06F83FC56B9F89988CAE9@DM6PR11MB3065.namprd11.prod.outlook.com>
+ <YVwqVRkwAYnoJR6x@matsya>
+ <DM6PR11MB30651D5F6C252EA70BAA43CE8C839@DM6PR11MB3065.namprd11.prod.outlook.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YW2Q0ikJR13NWgGD@infradead.org>
+In-Reply-To: <DM6PR11MB30651D5F6C252EA70BAA43CE8C839@DM6PR11MB3065.namprd11.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-10-18 08:20:50 [-0700], Christoph Hellwig wrote:
-> On Mon, Oct 18, 2021 at 03:55:58PM +0200, Sebastian Andrzej Siewior wrote:
-> > +static inline void blk_mq_complete_request_direct(struct request *rq,
-> > +						  void (*complete)(struct request *rq))
+On 25-10-21, 05:46, A, Rashmi wrote:
 > 
-> Pleae avoid the overly long line.
 > 
-> ote that by doing the normal two tab indent for the continuation that
-> would be super trivial and way more readable.
+> > -----Original Message-----
+> > From: Vinod Koul <vkoul@kernel.org>
+> > Sent: Tuesday, October 5, 2021 4:05 PM
+> > To: A, Rashmi <rashmi.a@intel.com>
+> > Cc: Ulf Hansson <ulf.hansson@linaro.org>; Michal Simek
+> > <michal.simek@xilinx.com>; linux-mmc <linux-mmc@vger.kernel.org>; Linux
+> > ARM <linux-arm-kernel@lists.infradead.org>; Linux Kernel Mailing List <linux-
+> > kernel@vger.kernel.org>; Kishon <kishon@ti.com>; Andy Shevchenko
+> > <andriy.shevchenko@linux.intel.com>; linux-phy@lists.infradead.org; Mark
+> > Gross <mgross@linux.intel.com>; kris.pan@linux.intel.com; Zhou, Furong
+> > <furong.zhou@intel.com>; Sangannavar, Mallikarjunappa
+> > <mallikarjunappa.sangannavar@intel.com>; Hunter, Adrian
+> > <adrian.hunter@intel.com>; Vaidya, Mahesh R
+> > <mahesh.r.vaidya@intel.com>; Srikandan, Nandhini
+> > <nandhini.srikandan@intel.com>
+> > Subject: Re: [PATCH v2 0/4] Add support of eMMC PHY for Intel Thunder Bay
+> > 
+> > On 04-10-21, 06:04, A, Rashmi wrote:
+> > 
+> > > Applied patch1 and patch2 for next, thus leaving the phy changes in
+> > > patch3 and patch 4 for Kishon/Vinod to pick up.
+> > >
+> > > Thanks and kind regards
+> > > Uffe
+> > >
+> > >
+> > > Thanks Uffe,
+> > > Hi Kishon/Vinod,
+> > > 	Please let me know if you have any comments
+> > 
+> > Need ack from Rob on binding patch
+> > 
+> > --
+> > ~Vinod
+> 
+> Hi Rob Herring,
+> 	Please help to review the eMMC dt-binding patches
 
-Oki.
+Just realised, neither Rob nor the DT list is in CC, ofcourse he would
+not have seen this.
 
-Sebastian
+Please rebase and repost with Rob and DT list in CC!
+
+-- 
+~Vinod
