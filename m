@@ -2,752 +2,202 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 871DBC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 01:52:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8BECC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 05:46:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7221461078
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 01:52:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A1E3160EE9
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 05:46:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232285AbhJYBzG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Oct 2021 21:55:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38036 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232363AbhJYByx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Oct 2021 21:54:53 -0400
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37E37C061764
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Oct 2021 18:52:30 -0700 (PDT)
-Received: by mail-pj1-x1033.google.com with SMTP id u12so3005393pjy.1
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Oct 2021 18:52:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=Q1neRQW6iWz++Svjfto9axucT32YZJr4yBXI91dhO+A=;
-        b=McuYemQ7dArqJjQVgEYgCw4TczQAgGtCrQF/3EaKAQBSeGFIVjNqf6JkXMq0X8dCMO
-         Vg6z0Mk4/R8vAzaff2Wo3EeO7kxfqzNRXJ42rfxdNBYUzFsrGVWQbuBKE510qutkT3oe
-         ZNq6ZX6ofsw6BA2EMQb9hzAA5osQ112+jBR30X8ZcDNP52oyccEJzgv3MSV/+OWwQLQ5
-         9TcZkac3BGW5MvhGsLSFHW17rhyB/MRVJR9lC4o7YNcE+BUOgrhpaCXJNK6DBxyPgFFO
-         Klhepk9q7H3toasXg69wt7B6AQqbLVuglmLHL9f/DrvsVXHBzJ50ZBz8FfhmaNXPvaLw
-         5evg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=Q1neRQW6iWz++Svjfto9axucT32YZJr4yBXI91dhO+A=;
-        b=5Xjb7tkw7c6FaZMqNivaCCii7Sm1TV9adQtKjLiYzlnLfEfBCTxgCSgAgcghByULv7
-         f8UE2Obs/LEd4NgjCNXeowJOAWYYGc3ErmMpPbCE5nOqVTk9GVsDzMY0qcVxWcRyqmBh
-         NlH7tJ5VH8EYQg5rhx26eJuKvmbhDiKFRDVNvpsuc/xbnNFu9V0LydTxuA8wwl8D+RbX
-         RNtWU8CzK8sXxEa3+sOuaseLfTNObIXkbH/vszmY9yAv9KNrxn4XIavX6kpte7ro743w
-         l7fMMHkG6wxH8LdsKfwEHOCKE1RUADlRADdY/IVCb36zpnms0pLTn9Jq18AcGtn6wmdt
-         13Jg==
-X-Gm-Message-State: AOAM532kR9IAKEL7Gahiua3cdpasvDTIrWOuFXm1LIMBkaFkOwt2l/bt
-        idqUBX9B4N7wATWR2lNFwwWmpA==
-X-Google-Smtp-Source: ABdhPJx4Vbx2HRxTGe4bbX1O45y4qkZGG3X1ERfoFhgcMILSv+4FNCskBPb3bKd6c03X0TtHAPtSPg==
-X-Received: by 2002:a17:902:bd98:b0:13f:9ae7:54d1 with SMTP id q24-20020a170902bd9800b0013f9ae754d1mr13501496pls.15.1635126749666;
-        Sun, 24 Oct 2021 18:52:29 -0700 (PDT)
-Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id q10sm14855225pgn.31.2021.10.24.18.52.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 24 Oct 2021 18:52:29 -0700 (PDT)
-From:   Brad Larson <brad@pensando.io>
-To:     linux-arm-kernel@lists.infradead.org
-Cc:     arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com,
-        broonie@kernel.org, fancer.lancer@gmail.com,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net,
-        brad@pensando.io, linux-gpio@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-Date:   Sun, 24 Oct 2021 18:51:56 -0700
-Message-Id: <20211025015156.33133-12-brad@pensando.io>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20211025015156.33133-1-brad@pensando.io>
-References: <20211025015156.33133-1-brad@pensando.io>
+        id S229841AbhJYFtA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Oct 2021 01:49:00 -0400
+Received: from mga02.intel.com ([134.134.136.20]:28714 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229499AbhJYFs7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Oct 2021 01:48:59 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10147"; a="216739468"
+X-IronPort-AV: E=Sophos;i="5.87,179,1631602800"; 
+   d="scan'208";a="216739468"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Oct 2021 22:46:38 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,179,1631602800"; 
+   d="scan'208";a="496630841"
+Received: from fmsmsx606.amr.corp.intel.com ([10.18.126.86])
+  by orsmga008.jf.intel.com with ESMTP; 24 Oct 2021 22:46:37 -0700
+Received: from fmsmsx610.amr.corp.intel.com (10.18.126.90) by
+ fmsmsx606.amr.corp.intel.com (10.18.126.86) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2242.12; Sun, 24 Oct 2021 22:46:37 -0700
+Received: from fmsmsx604.amr.corp.intel.com (10.18.126.84) by
+ fmsmsx610.amr.corp.intel.com (10.18.126.90) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2242.12; Sun, 24 Oct 2021 22:46:36 -0700
+Received: from fmsedg601.ED.cps.intel.com (10.1.192.135) by
+ fmsmsx604.amr.corp.intel.com (10.18.126.84) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2242.12 via Frontend Transport; Sun, 24 Oct 2021 22:46:36 -0700
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (104.47.58.104)
+ by edgegateway.intel.com (192.55.55.70) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2242.12; Sun, 24 Oct 2021 22:46:36 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VZoFTYuLKE0FxJRcVCrRWUiR6XiHJjjtayZH4vjmbaG5/I+5QVbRgjDEyrKWiDbVESx8JAwIUI7aAqKbAHUhk/Ht8xDyLCpaK+j76jCcSzazGuhAxqGGp1JtCh448lXCsPvEDXO1UXZAm8oeX5YbzOc15dmjilxuN2BonNo1DWEwImzCxocS6b9pa6vHt32prQk7XXZFV7XF/Cm+8g6WKXALHzyXvv0B3L+MqPV8dzBw8Y8fnzhBQIailTCfXbDhBJfST4Yqs+1QqTDkZa/L8GeGAB2lcakLiZAB/SJf4qpM5oPQcl6oWrc+XJnbO+QQ3/LLU8m6jcIh9c0vgZptfQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=MULtSLIwCDphDvdMB7ttMPIF9iI/E+zP/dBCk2SWKPo=;
+ b=SCNiV31zq6k2rQS4oHc9p9gwycuQecgCQ1Hv3DNClTZ0v/yhPwY2gPGl7bwWP1oADq8BeydQZVUeI8Vg9v+fgS0h4dVGe2VBlExgJ2de+d90x6sXisjJoAYopSxkXNHRiNHJUWe2lYHd1AqJKOwVme03CpJhLSOT8FI0p2PYHnZCLeo1bIboObgfBNICAL4gquPuY0FCYgRk/vRS1SrfHt0d2MHreAtZUnqJVlKQhvd0QuLTM40Mim18VQpUUxD+jiDNfPxQBL/gxmQGnGLhpZlUBnYR82FVflcYf6Vv/UYtuISvaqAtxNBJuP0c0Mw0uqFequ+AgXl5BGZAwd9FlQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=intel.onmicrosoft.com;
+ s=selector2-intel-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=MULtSLIwCDphDvdMB7ttMPIF9iI/E+zP/dBCk2SWKPo=;
+ b=OFeoEcWG8R0BvOiU3IMrgqSp2sEodQNZ1YqJDrr2vwXCK5bbAopIlRjUocjC8ZspZq6z7ovYoGtM4jY1rFx4+vfV+vq344g/s+JZLdYBCbFxL99+Cu0as9qxfnw1dtpoaKxR6LEB5UndnRZ34eAytSLS6yHlxOgF8FMnnhbYBpo=
+Received: from DM6PR11MB3065.namprd11.prod.outlook.com (2603:10b6:5:72::15) by
+ DM6PR11MB2811.namprd11.prod.outlook.com (2603:10b6:5:c8::26) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.4628.20; Mon, 25 Oct 2021 05:46:29 +0000
+Received: from DM6PR11MB3065.namprd11.prod.outlook.com
+ ([fe80::ace2:ed94:516:31a7]) by DM6PR11MB3065.namprd11.prod.outlook.com
+ ([fe80::ace2:ed94:516:31a7%4]) with mapi id 15.20.4628.020; Mon, 25 Oct 2021
+ 05:46:29 +0000
+From:   "A, Rashmi" <rashmi.a@intel.com>
+To:     Vinod Koul <vkoul@kernel.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Kishon <kishon@ti.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        "linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>,
+        Mark Gross <mgross@linux.intel.com>,
+        "kris.pan@linux.intel.com" <kris.pan@linux.intel.com>,
+        "Zhou, Furong" <furong.zhou@intel.com>,
+        "Sangannavar, Mallikarjunappa" 
+        <mallikarjunappa.sangannavar@intel.com>,
+        "Hunter, Adrian" <adrian.hunter@intel.com>,
+        "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>,
+        "Srikandan, Nandhini" <nandhini.srikandan@intel.com>
+Subject: RE: [PATCH v2 0/4] Add support of eMMC PHY for Intel Thunder Bay
+Thread-Topic: [PATCH v2 0/4] Add support of eMMC PHY for Intel Thunder Bay
+Thread-Index: AQHXnQMuYeQydCD7LECFRtxjQUnwfKuje/GAgB8UJTCAAd8wgIAfGSXA
+Date:   Mon, 25 Oct 2021 05:46:28 +0000
+Message-ID: <DM6PR11MB30651D5F6C252EA70BAA43CE8C839@DM6PR11MB3065.namprd11.prod.outlook.com>
+References: <20210829182443.30802-1-rashmi.a@intel.com>
+ <CAPDyKFq2VQ=khYnmfsQGPPcpRnxyATVSpwKSZ4MTbKn64rthVA@mail.gmail.com>
+ <DM6PR11MB306560AE06F83FC56B9F89988CAE9@DM6PR11MB3065.namprd11.prod.outlook.com>
+ <YVwqVRkwAYnoJR6x@matsya>
+In-Reply-To: <YVwqVRkwAYnoJR6x@matsya>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+dlp-reaction: no-action
+dlp-version: 11.6.200.16
+dlp-product: dlpe-windows
+authentication-results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=intel.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 07985191-a36d-440f-aa10-08d9977acac0
+x-ms-traffictypediagnostic: DM6PR11MB2811:
+x-ld-processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
+x-microsoft-antispam-prvs: <DM6PR11MB281151F58AA02706884E1E9D8C839@DM6PR11MB2811.namprd11.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:9508;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: ngE7l13Z6xS7M3pvArBEMxPLLmbE8B/F3b4+Bk0XrPN/aWLHWyOwxpO+vI6y5QGFCoh3SStSrWAEwwIuCN76+T+V9IUAm4CMZOchaCWPwuAafX17KnTv8GqyRd5BUXPYNWAbnpYN/Ifklqm+Hv8YK8eGS4Y5NkAnp5JQkUb8BVKiK7LBtjO+En8eXHppILpk+MRjF1TC3DpIwbRrstkIPS6Ajp6wPmKg33NukaeT1IEAiozO5foB2tGqwdNN3pOuZD91a/9qiQ8/IrWDMzHm2Pvv0B3DSrdgdm2wDZ/yH3tcQ5+0F6zoiepnHOjC/iUV8M8PI8Ysp8lP1JE49BoIPOY+lDQy4DoBaJAp3skZ+dkmFbXiTYUj9tRf/NkB7c9Y2tQm7cgYxybp19yYCtTC++ex43LHO+qU1L9wlslc8HNGerfZNqkNKs9MENM7Ak2AGJBMF6azaTkiOv79RF8qLqyvAoH7qSyLyujaG/zRPPBx0D1KpIh+0jbV9Q3/8Cq86BgSe5+Zu677n4/4BVLzxxqTLnT+g6KuS8u0NZRZhtTNdVt2qKm/hqBDmBD+js4oJxP1l9P+Rj1ntmPBax18doEbrROWl7yVmXYSaGlKSnqCFO4zBVCuXY6pOfZT82miDiSvFZA+zKqAijZY8hR4bZI5v14vD4zmvmPbuw7q6kYJWwsB9Wa5YxbdqiKMU8BCZrJYzvwrumHMZ7aCsBFMQA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR11MB3065.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(54906003)(110136005)(86362001)(6506007)(55236004)(71200400001)(8936002)(38100700002)(53546011)(316002)(83380400001)(122000001)(82960400001)(7416002)(5660300002)(508600001)(186003)(8676002)(52536014)(9686003)(55016002)(38070700005)(4326008)(7696005)(2906002)(66476007)(66556008)(66446008)(76116006)(64756008)(66946007)(33656002)(4744005)(26005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?p7VUuDHVAQM27czUm2NwxLhg0E2gmUkskKhXy2Mgw8zegsX0FjndsAgqPLaY?=
+ =?us-ascii?Q?AQ6QP8vMaot02P4/pb3uIdwmb2wtOzd7PtMly3uNqCymx/hGkm0rNtKPct/Y?=
+ =?us-ascii?Q?HVH8VsSQkun0uZZ+awhve2hV4/mdWuhPHTyTc4NyyAMAm3UFoo2olQtREUqk?=
+ =?us-ascii?Q?lAxiOVrXb/wtSNTRzzgW5mOHOeyM8pSQ7wWmdou7rcf4j+L8sVOlmFbA38+z?=
+ =?us-ascii?Q?1G7h9uiKSE7j+RiOFW1N7grhBU5wk/eyaLNG6gjO+jUBC1cVGu/cgP8P0/jy?=
+ =?us-ascii?Q?BNZTZOncKY17OJlfrHsw37RgK/y5P5J/kFp/jrfpnmJkkSRUyXGMN3RcwJuG?=
+ =?us-ascii?Q?j1Wa9GtEBF7Tc4homKxtN15dRFLr5oJHTNl8qKK5D69FZBJhSm3nlSoUkPB+?=
+ =?us-ascii?Q?2TEUe/EmD3kpjtA1yrFWBt5fLJZ3d7a4H/PTwsBQZ1istXHRTzYRkW3UhQuL?=
+ =?us-ascii?Q?nsLvnuPomzsrMBY56IKmKV7oYTJfEaoJ6vGeVPXmMGkFbpe4QPiNiQxQO7ny?=
+ =?us-ascii?Q?prcFXk0pLpeOG6JLiLoyfmvyRn8D+gNqCXy6nAzDR8ou5JfWnjJSjYvRmzcC?=
+ =?us-ascii?Q?e5ANkIkh2Z/+M+Idk8zFHOAjxGHvgkHW75nmEKGFi+Mn0Aif+F8/k83VMtcR?=
+ =?us-ascii?Q?TV0THo6Bvhlxosa6k6W/q6JMixJ0YwqHVweXbJpY76QCUyIHDad3CSZRHxBi?=
+ =?us-ascii?Q?efrWE3x7CGXL7gUQKljLHCv/0ZpkbYPsH3b/A8vnS9QWqMaom3Vm+s1lDgnn?=
+ =?us-ascii?Q?gwiNOBsvqiVH4IZ2p+Wx/TLb6hDXqk0Sym2gJr86h67L148yZxPEzj/8wvCI?=
+ =?us-ascii?Q?4bCMvJmKSVxl2aA6tO6a770xtOejMVcm5lm0uCQ1Fl8vknPl51MvakAQf/AP?=
+ =?us-ascii?Q?hMMES3ZtM/k4grJCReI9CYX4oYTEhc76JHAcCyviRXz5YnEivpB34J3yErbG?=
+ =?us-ascii?Q?0CcgOwe5XL2guHdZZLFu734MpmkPb9HuH0IptkhuTt5FQPI7eHYK9iiVymY3?=
+ =?us-ascii?Q?kedbW9GgIaG61rlwgdM31KY+xfaqmQhMBW02LaiVSaK9Rsw8ZEO2XSKllXkH?=
+ =?us-ascii?Q?MwiVzVE7rR1LIyw2DPAHih0S7TkVecpxV8ppM5ALW4+pgWyLNfiCI7FebaSo?=
+ =?us-ascii?Q?axlESiquCAzVfFF1DjiA+qAgDfda0VqlXDMPZj3VXrefGDXm8RmCKzxJ4ciy?=
+ =?us-ascii?Q?FheIRPvmLHenzbIvZbQxmenfjKcLzdJ+tYjk71eQ/Ig4e+8/u7j8OGCOUkjX?=
+ =?us-ascii?Q?aipYvF5EQXym+eJ0js55gSy3JbBdRH+7zXOexitBi5GRADKxNlMbcEa1WmQj?=
+ =?us-ascii?Q?VEe/83cazl2PPH/jq7rXOI4qGMuEssWQu+zXe4C8YdthbWMnsMW/H9K3J0us?=
+ =?us-ascii?Q?9jHXUDQtLjHecV1qxgE2TagOdFGcoHzssMkb+ea79AhOOUERZK/HQp0wrBCV?=
+ =?us-ascii?Q?rz6laPfiVtr7Uj49XaUIHS9JHssDIhu6a2n8rNhayRwAGr1bdaYRWFSMpA4m?=
+ =?us-ascii?Q?Q0erT1ikCxie4/PqDt1P7lKl2UqF1kFIUnTG31K9RV9QIlDDx0EwN6BkM2Wm?=
+ =?us-ascii?Q?TF3D7m79iNHoqydHvkxKvogL+u7Bz2WB19m6mPFC28JESO8zG7stloCwwYdv?=
+ =?us-ascii?Q?rg=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR11MB3065.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 07985191-a36d-440f-aa10-08d9977acac0
+X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Oct 2021 05:46:28.6707
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: tGvtxnNYsKlvXiVMNQEHaohjOPYMO3BodxJVA2iAkuc7lI7tf/QpdSiDJmBY/x4rs6lnKO1LiRD5zDXWboNFvA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR11MB2811
+X-OriginatorOrg: intel.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add Pensando common and Elba SoC specific device nodes
 
-Signed-off-by: Brad Larson <brad@pensando.io>
----
-Changelog:
-- Node names changed to DT generic names
-- Changed from using 'spi@' which is reserved
-- The elba-flash-parts.dtsi is kept separate as
-  it is included in multiple dts files.
-- SPDX license tags at the top of each file
-- The compatible = "pensando,elba" and 'model' are
-  now together in the board file.
-- UIO nodes removed
-- Ordered nodes by increasing unit address
-- Removed an unreferenced container node.
-- Dropped deprecated 'device_type' for uart0 node.
 
- arch/arm64/boot/dts/Makefile                  |   1 +
- arch/arm64/boot/dts/pensando/Makefile         |   6 +
- arch/arm64/boot/dts/pensando/elba-16core.dtsi | 192 ++++++++++++++++++
- .../boot/dts/pensando/elba-asic-common.dtsi   |  96 +++++++++
- arch/arm64/boot/dts/pensando/elba-asic.dts    |  23 +++
- .../boot/dts/pensando/elba-flash-parts.dtsi   | 103 ++++++++++
- arch/arm64/boot/dts/pensando/elba.dtsi        | 181 +++++++++++++++++
- 7 files changed, 602 insertions(+)
- create mode 100644 arch/arm64/boot/dts/pensando/Makefile
- create mode 100644 arch/arm64/boot/dts/pensando/elba-16core.dtsi
- create mode 100644 arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
- create mode 100644 arch/arm64/boot/dts/pensando/elba-asic.dts
- create mode 100644 arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
- create mode 100644 arch/arm64/boot/dts/pensando/elba.dtsi
+> -----Original Message-----
+> From: Vinod Koul <vkoul@kernel.org>
+> Sent: Tuesday, October 5, 2021 4:05 PM
+> To: A, Rashmi <rashmi.a@intel.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>; Michal Simek
+> <michal.simek@xilinx.com>; linux-mmc <linux-mmc@vger.kernel.org>; Linux
+> ARM <linux-arm-kernel@lists.infradead.org>; Linux Kernel Mailing List <li=
+nux-
+> kernel@vger.kernel.org>; Kishon <kishon@ti.com>; Andy Shevchenko
+> <andriy.shevchenko@linux.intel.com>; linux-phy@lists.infradead.org; Mark
+> Gross <mgross@linux.intel.com>; kris.pan@linux.intel.com; Zhou, Furong
+> <furong.zhou@intel.com>; Sangannavar, Mallikarjunappa
+> <mallikarjunappa.sangannavar@intel.com>; Hunter, Adrian
+> <adrian.hunter@intel.com>; Vaidya, Mahesh R
+> <mahesh.r.vaidya@intel.com>; Srikandan, Nandhini
+> <nandhini.srikandan@intel.com>
+> Subject: Re: [PATCH v2 0/4] Add support of eMMC PHY for Intel Thunder Bay
+>=20
+> On 04-10-21, 06:04, A, Rashmi wrote:
+>=20
+> > Applied patch1 and patch2 for next, thus leaving the phy changes in
+> > patch3 and patch 4 for Kishon/Vinod to pick up.
+> >
+> > Thanks and kind regards
+> > Uffe
+> >
+> >
+> > Thanks Uffe,
+> > Hi Kishon/Vinod,
+> > 	Please let me know if you have any comments
+>=20
+> Need ack from Rob on binding patch
+>=20
+> --
+> ~Vinod
 
-diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
-index 639e01a4d855..34f99a99c488 100644
---- a/arch/arm64/boot/dts/Makefile
-+++ b/arch/arm64/boot/dts/Makefile
-@@ -20,6 +20,7 @@ subdir-y += marvell
- subdir-y += mediatek
- subdir-y += microchip
- subdir-y += nvidia
-+subdir-y += pensando
- subdir-y += qcom
- subdir-y += realtek
- subdir-y += renesas
-diff --git a/arch/arm64/boot/dts/pensando/Makefile b/arch/arm64/boot/dts/pensando/Makefile
-new file mode 100644
-index 000000000000..61031ec11838
---- /dev/null
-+++ b/arch/arm64/boot/dts/pensando/Makefile
-@@ -0,0 +1,6 @@
-+# SPDX-License-Identifier: GPL-2.0
-+dtb-$(CONFIG_ARCH_PENSANDO) += elba-asic.dtb
-+
-+always-y	:= $(dtb-y)
-+subdir-y	:= $(dts-dirs)
-+clean-files	:= *.dtb
-diff --git a/arch/arm64/boot/dts/pensando/elba-16core.dtsi b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
-new file mode 100644
-index 000000000000..acf5941afbc1
---- /dev/null
-+++ b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
-@@ -0,0 +1,192 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+/ {
-+	cpus {
-+		#address-cells = <2>;
-+		#size-cells = <0>;
-+
-+		cpu-map {
-+			cluster0 {
-+				core0 { cpu = <&cpu0>; };
-+				core1 { cpu = <&cpu1>; };
-+				core2 { cpu = <&cpu2>; };
-+				core3 { cpu = <&cpu3>; };
-+			};
-+
-+			cluster1 {
-+				core0 { cpu = <&cpu4>; };
-+				core1 { cpu = <&cpu5>; };
-+				core2 { cpu = <&cpu6>; };
-+				core3 { cpu = <&cpu7>; };
-+			};
-+
-+			cluster2 {
-+				core0 { cpu = <&cpu8>; };
-+				core1 { cpu = <&cpu9>; };
-+				core2 { cpu = <&cpu10>; };
-+				core3 { cpu = <&cpu11>; };
-+			};
-+
-+			cluster3 {
-+				core0 { cpu = <&cpu12>; };
-+				core1 { cpu = <&cpu13>; };
-+				core2 { cpu = <&cpu14>; };
-+				core3 { cpu = <&cpu15>; };
-+			};
-+		};
-+
-+		/* CLUSTER 0 */
-+		cpu0: cpu@0 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x0>;
-+			next-level-cache = <&l2_0>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu1: cpu@1 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x1>;
-+			next-level-cache = <&l2_0>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu2: cpu@2 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x2>;
-+			next-level-cache = <&l2_0>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu3: cpu@3 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x3>;
-+			next-level-cache = <&l2_0>;
-+			enable-method = "psci";
-+		};
-+
-+		l2_0: l2-cache0 {
-+			compatible = "cache";
-+		};
-+
-+		/* CLUSTER 1 */
-+		cpu4: cpu@100 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x100>;
-+			next-level-cache = <&l2_1>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu5: cpu@101 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x101>;
-+			next-level-cache = <&l2_1>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu6: cpu@102 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x102>;
-+			next-level-cache = <&l2_1>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu7: cpu@103 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x103>;
-+			next-level-cache = <&l2_1>;
-+			enable-method = "psci";
-+		};
-+
-+		l2_1: l2-cache1 {
-+			compatible = "cache";
-+		};
-+
-+		/* CLUSTER 2 */
-+		cpu8: cpu@200 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x200>;
-+			next-level-cache = <&l2_2>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu9: cpu@201 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x201>;
-+			next-level-cache = <&l2_2>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu10: cpu@202 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x202>;
-+			next-level-cache = <&l2_2>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu11: cpu@203 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x203>;
-+			next-level-cache = <&l2_2>;
-+			enable-method = "psci";
-+		};
-+
-+		l2_2: l2-cache2 {
-+			compatible = "cache";
-+		};
-+
-+		/* CLUSTER 3 */
-+		cpu12: cpu@300 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x300>;
-+			next-level-cache = <&l2_3>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu13: cpu@301 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x301>;
-+			next-level-cache = <&l2_3>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu14: cpu@302 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x302>;
-+			next-level-cache = <&l2_3>;
-+			enable-method = "psci";
-+		};
-+
-+		cpu15: cpu@303 {
-+			device_type = "cpu";
-+			compatible = "arm,cortex-a72";
-+			reg = <0 0x303>;
-+			next-level-cache = <&l2_3>;
-+			enable-method = "psci";
-+		};
-+
-+		l2_3: l2-cache3 {
-+			compatible = "cache";
-+		};
-+
-+		psci {
-+			compatible = "arm,psci-0.2";
-+			method = "smc";
-+		};
-+
-+	};
-+};
-diff --git a/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
-new file mode 100644
-index 000000000000..ba584c0fe0d5
---- /dev/null
-+++ b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
-@@ -0,0 +1,96 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/* Copyright (c) 2019-2021, Pensando Systems Inc. */
-+
-+&ahb_clk {
-+	clock-frequency = <400000000>;
-+};
-+
-+&emmc_clk {
-+	clock-frequency = <200000000>;
-+};
-+
-+&flash_clk {
-+	clock-frequency = <400000000>;
-+};
-+
-+&ref_clk {
-+	clock-frequency = <156250000>;
-+};
-+
-+&qspi {
-+	status = "okay";
-+	flash0: flash@0 {
-+		compatible = "jedec,spi-nor";
-+		reg = <0>;
-+		spi-max-frequency = <40000000>;
-+		spi-rx-bus-width = <2>;
-+		m25p,fast-read;
-+		cdns,read-delay = <0>;
-+		cdns,tshsl-ns = <0>;
-+		cdns,tsd2d-ns = <0>;
-+		cdns,tchsh-ns = <0>;
-+		cdns,tslch-ns = <0>;
-+	};
-+};
-+
-+&gpio0 {
-+	status = "okay";
-+};
-+
-+&emmc {
-+	bus-width = <8>;
-+	status = "okay";
-+};
-+
-+&wdt0 {
-+	status = "okay";
-+};
-+
-+&i2c0 {
-+	clock-frequency = <100000>;
-+	status = "okay";
-+	rtc@51 {
-+		compatible = "nxp,pcf85263";
-+		reg = <0x51>;
-+	};
-+};
-+
-+&spi0 {
-+	num-cs = <4>;
-+	cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
-+		   <&porta 7 GPIO_ACTIVE_LOW>;
-+	status = "okay";
-+	spi0_cs0@0 {
-+		compatible = "semtech,sx1301";	/* Enable spidev */
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		spi-max-frequency = <12000000>;
-+		reg = <0>;
-+	};
-+
-+	spi0_cs1@1 {
-+		compatible = "semtech,sx1301";
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		spi-max-frequency = <12000000>;
-+		reg = <1>;
-+	};
-+
-+	spi0_cs2@2 {
-+		compatible = "semtech,sx1301";
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		spi-max-frequency = <12000000>;
-+		reg = <2>;
-+		interrupt-parent = <&porta>;
-+		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-+	};
-+
-+	spi0_cs3@3 {
-+		compatible = "semtech,sx1301";
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		spi-max-frequency = <12000000>;
-+		reg = <3>;
-+	};
-+};
-diff --git a/arch/arm64/boot/dts/pensando/elba-asic.dts b/arch/arm64/boot/dts/pensando/elba-asic.dts
-new file mode 100644
-index 000000000000..131931dc643f
---- /dev/null
-+++ b/arch/arm64/boot/dts/pensando/elba-asic.dts
-@@ -0,0 +1,23 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+/dts-v1/;
-+
-+/ {
-+	model = "Elba ASIC Board";
-+	compatible = "pensando,elba";
-+
-+	aliases {
-+		serial0 = &uart0;
-+		spi0 = &spi0;
-+		spi1 = &qspi;
-+	};
-+
-+	chosen {
-+		stdout-path = "serial0:115200n8";
-+	};
-+};
-+
-+#include "elba.dtsi"
-+#include "elba-16core.dtsi"
-+#include "elba-asic-common.dtsi"
-+#include "elba-flash-parts.dtsi"
-diff --git a/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi b/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
-new file mode 100644
-index 000000000000..e69734c2c267
---- /dev/null
-+++ b/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
-@@ -0,0 +1,103 @@
-+// SPDX-License-Identifier: GPL-2.0
-+
-+&flash0 {
-+	partitions {
-+		compatible = "fixed-partitions";
-+		#address-cells = <1>;
-+		#size-cells = <1>;
-+		partition@0 {
-+			label = "flash";
-+			reg = <0x10000 0xfff0000>;
-+		};
-+
-+		partition@f0000 {
-+			label = "golduenv";
-+			reg = <0xf0000 0x10000>;
-+		};
-+
-+		partition@100000 {
-+			label = "boot0";
-+			reg = <0x100000 0x80000>;
-+		};
-+
-+		partition@180000 {
-+			label = "golduboot";
-+			reg = <0x180000 0x200000>;
-+		};
-+
-+		partition@380000 {
-+			label = "brdcfg0";
-+			reg = <0x380000 0x10000>;
-+		};
-+
-+		partition@390000 {
-+			label = "brdcfg1";
-+			reg = <0x390000 0x10000>;
-+		};
-+
-+		partition@400000 {
-+			label = "goldfw";
-+			reg = <0x400000 0x3c00000>;
-+		};
-+
-+		partition@4010000 {
-+			label = "fwmap";
-+			reg = <0x4010000 0x20000>;
-+		};
-+
-+		partition@4030000 {
-+			label = "fwsel";
-+			reg = <0x4030000 0x20000>;
-+		};
-+
-+		partition@4090000 {
-+			label = "bootlog";
-+			reg = <0x4090000 0x20000>;
-+		};
-+
-+		partition@40b0000 {
-+			label = "panicbuf";
-+			reg = <0x40b0000 0x20000>;
-+		};
-+
-+		partition@40d0000 {
-+			label = "uservars";
-+			reg = <0x40d0000 0x20000>;
-+		};
-+
-+		partition@4200000 {
-+			label = "uboota";
-+			reg = <0x4200000 0x400000>;
-+		};
-+
-+		partition@4600000 {
-+			label = "ubootb";
-+			reg = <0x4600000 0x400000>;
-+		};
-+
-+		partition@4a00000 {
-+			label = "mainfwa";
-+			reg = <0x4a00000 0x1000000>;
-+		};
-+
-+		partition@5a00000 {
-+			label = "mainfwb";
-+			reg = <0x5a00000 0x1000000>;
-+		};
-+
-+		partition@6a00000 {
-+			label = "diaguboot";
-+			reg = <0x6a00000 0x400000>;
-+		};
-+
-+		partition@8000000 {
-+			label = "diagfw";
-+			reg = <0x8000000 0x7fe0000>;
-+		};
-+
-+		partition@ffe0000 {
-+			label = "ubootenv";
-+			reg = <0xffe0000 0x10000>;
-+		};
-+	};
-+};
-diff --git a/arch/arm64/boot/dts/pensando/elba.dtsi b/arch/arm64/boot/dts/pensando/elba.dtsi
-new file mode 100644
-index 000000000000..b28f69e0bd91
---- /dev/null
-+++ b/arch/arm64/boot/dts/pensando/elba.dtsi
-@@ -0,0 +1,181 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/* Copyright (c) 2019-2021, Pensando Systems Inc. */
-+
-+#include <dt-bindings/gpio/gpio.h>
-+#include "dt-bindings/interrupt-controller/arm-gic.h"
-+
-+/ {
-+	interrupt-parent = <&gic>;
-+	#address-cells = <2>;
-+	#size-cells = <2>;
-+
-+	dma-coherent;
-+
-+	ahb_clk: oscillator0 {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+	};
-+
-+	emmc_clk: oscillator2 {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+	};
-+
-+	flash_clk: oscillator3 {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+	};
-+
-+	ref_clk: oscillator4 {
-+		compatible = "fixed-clock";
-+		#clock-cells = <0>;
-+	};
-+
-+	timer {
-+		compatible = "arm,armv8-timer";
-+		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(1) |
-+					IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(1) |
-+					IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(1) |
-+					IRQ_TYPE_LEVEL_LOW)>,
-+			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(1) |
-+					IRQ_TYPE_LEVEL_LOW)>;
-+	};
-+
-+	pmu {
-+		compatible = "arm,cortex-a72-pmu";
-+		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(1) |
-+				IRQ_TYPE_LEVEL_LOW)>;
-+	};
-+
-+	soc: soc {
-+		compatible = "simple-bus";
-+		#address-cells = <2>;
-+		#size-cells = <2>;
-+		ranges;
-+
-+		i2c0: i2c@400 {
-+			compatible = "snps,designware-i2c";
-+			reg = <0x0 0x400 0x0 0x100>;
-+			clocks = <&ahb_clk>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			i2c-sda-hold-time-ns = <480>;
-+			snps,sda-timeout-ms = <750>;
-+			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+		};
-+
-+		wdt0: watchdog@1400 {
-+			compatible = "snps,dw-wdt";
-+			reg = <0x0 0x1400 0x0 0x100>;
-+			clocks = <&ahb_clk>;
-+			interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
-+			status = "disabled";
-+		};
-+
-+		qspi: spi@2400 {
-+			compatible = "pensando,elba-qspi", "cdns,qspi-nor";
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			reg = <0x0 0x2400 0x0 0x400>,
-+			      <0x0 0x7fff0000 0x0 0x1000>;
-+			interrupts = <GIC_SPI 0 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&flash_clk>;
-+			cdns,fifo-depth = <1024>;
-+			cdns,fifo-width = <4>;
-+			cdns,trigger-address = <0x7fff0000>;
-+			status = "disabled";
-+		};
-+
-+		spi0: spi@2800 {
-+			compatible = "pensando,elba-spi";
-+			reg = <0x0 0x2800 0x0 0x100>;
-+			pensando,spics = <&mssoc 0x2468>;
-+			clocks = <&ahb_clk>;
-+			interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			num-cs = <2>;
-+			status = "disabled";
-+		};
-+
-+		gpio0: gpio@4000 {
-+			#address-cells = <1>;
-+			#size-cells = <0>;
-+			compatible = "snps,dw-apb-gpio";
-+			reg = <0x0 0x4000 0x0 0x78>;
-+			status = "disabled";
-+
-+			porta: gpio-port@0 {
-+				compatible = "snps,dw-apb-gpio-port";
-+				reg = <0>;
-+				gpio-controller;
-+				#gpio-cells = <2>;
-+				ngpios = <8>;
-+				interrupts = <GIC_SPI 1 IRQ_TYPE_LEVEL_HIGH>;
-+				interrupt-controller;
-+				interrupt-parent = <&gic>;
-+				#interrupt-cells = <2>;
-+			};
-+
-+			portb: gpio-port@1 {
-+				compatible = "snps,dw-apb-gpio-port";
-+				reg = <1>;
-+				gpio-controller;
-+				#gpio-cells = <2>;
-+				ngpios = <8>;
-+			};
-+		};
-+
-+		uart0: serial@4800 {
-+			compatible = "ns16550a";
-+			reg = <0x0 0x4800 0x0 0x100>;
-+			clocks = <&ref_clk>;
-+			interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
-+			reg-shift = <2>;
-+			reg-io-width = <4>;
-+		};
-+
-+		gic: interrupt-controller@800000 {
-+			compatible = "arm,gic-v3";
-+			#interrupt-cells = <3>;
-+			#address-cells = <2>;
-+			#size-cells = <2>;
-+			ranges;
-+			interrupt-controller;
-+			reg = <0x0 0x800000 0x0 0x200000>,	/* GICD */
-+			      <0x0 0xa00000 0x0 0x200000>;	/* GICR */
-+			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
-+
-+			gic_its: msi-controller@820000 {
-+				compatible = "arm,gic-v3-its";
-+				msi-controller;
-+				#msi-cells = <1>;
-+				reg = <0x0 0x820000 0x0 0x10000>;
-+				socionext,synquacer-pre-its =
-+							<0xc00000 0x1000000>;
-+			};
-+		};
-+
-+		emmc: mmc@30440000 {
-+			compatible = "pensando,elba-emmc", "cdns,sd4hc";
-+			clocks = <&emmc_clk>;
-+			interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
-+			reg = <0x0 0x30440000 0x0 0x10000>,
-+			      <0x0 0x30480044 0x0 0x4>;    /* byte-lane ctrl */
-+			cdns,phy-input-delay-sd-highspeed = <0x4>;
-+			cdns,phy-input-delay-legacy = <0x4>;
-+			cdns,phy-input-delay-sd-uhs-sdr50 = <0x6>;
-+			cdns,phy-input-delay-sd-uhs-ddr50 = <0x16>;
-+			mmc-ddr-1_8v;
-+			status = "disabled";
-+		};
-+
-+		mssoc: mssoc@307c0000 {
-+			compatible = "syscon", "simple-mfd";
-+			reg = <0x0 0x307c0000 0x0 0x3000>;
-+		};
-+	};
-+};
--- 
-2.17.1
+Hi Rob Herring,
+	Please help to review the eMMC dt-binding patches
 
+-Rashmi
