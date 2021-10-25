@@ -2,119 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D629CC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 11:15:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 766E6C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 11:56:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BAACD60F46
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 11:15:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 52AC861029
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Oct 2021 11:56:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232077AbhJYLRa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Oct 2021 07:17:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:51196 "EHLO mail.kernel.org"
+        id S230058AbhJYL6w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Oct 2021 07:58:52 -0400
+Received: from mail.kernel.org ([198.145.29.99]:43810 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230126AbhJYLR3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 Oct 2021 07:17:29 -0400
-Received: from disco-boy.misterjones.org (disco-boy.misterjones.org [51.254.78.96])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1017C60238;
-        Mon, 25 Oct 2021 11:15:07 +0000 (UTC)
-Received: from disco-boy.misterjones.org ([51.254.78.96] helo=www.loen.fr)
-        by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <maz@kernel.org>)
-        id 1mexwW-001LU4-U6; Mon, 25 Oct 2021 12:15:04 +0100
+        id S230232AbhJYL6v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Oct 2021 07:58:51 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A54486103B;
+        Mon, 25 Oct 2021 11:56:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1635162989;
+        bh=vqpRZoi93e7o70oGoNc6I9LrPapSYh6Mmot6+2/0THc=;
+        h=From:To:Cc:Subject:Date:From;
+        b=JE6ytb9hku1WGVzQLZQ+a8v2oABanPqDM2XsvBdSHdBxyRNno/bKRcXlnUlaaORxh
+         gGdomLwcD5GVIBS68EYYyYeXEj0ctiU5bM5xxR/mm7gsQN+o3VOlOWTYCs6w73+Ky4
+         /r1nL/v+kVVpP/Da6fvKB8bQPIfFCfFWZ+tNxMBgYnRwHjo+6yJ4jwxK8pJqRWxHWK
+         WR8aVyrOrxWbzjAOAOBZtJ4mgAHr9qfGPBcKKnUOXKMvJgMIYEYJgdUbOEFxlx5Uwg
+         9WGF2KO972jM35buedMUBrE/tKgBaTLXcQ/d2CcTQkxY5xn73sbuFOZk+FjGmbkZMm
+         a5rrHyRRf7Zcg==
+Received: from johan by xi.lan with local (Exim 4.94.2)
+        (envelope-from <johan@kernel.org>)
+        id 1meyaK-0001O3-D3; Mon, 25 Oct 2021 13:56:12 +0200
+From:   Johan Hovold <johan@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Johan Hovold <johan@kernel.org>,
+        stable@vger.kernel.org
+Subject: [PATCH] mmc: vub300: fix control-message timeouts
+Date:   Mon, 25 Oct 2021 13:56:08 +0200
+Message-Id: <20211025115608.5287-1-johan@kernel.org>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
-Date:   Mon, 25 Oct 2021 12:15:04 +0100
-From:   Marc Zyngier <maz@kernel.org>
-To:     Mark Rutland <mark.rutland@arm.com>, Brad Larson <brad@pensando.io>
-Cc:     linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
-        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
-        broonie@kernel.org, fancer.lancer@gmail.com,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net,
-        linux-gpio@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-In-Reply-To: <20211025091731.GA2001@C02TD0UTHF1T.local>
-References: <20211025015156.33133-1-brad@pensando.io>
- <20211025015156.33133-12-brad@pensando.io>
- <20211025091731.GA2001@C02TD0UTHF1T.local>
-User-Agent: Roundcube Webmail/1.4.11
-Message-ID: <a20805de16e1196c2ed46dd949473c9a@kernel.org>
-X-Sender: maz@kernel.org
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-X-SA-Exim-Connect-IP: 51.254.78.96
-X-SA-Exim-Rcpt-To: mark.rutland@arm.com, brad@pensando.io, linux-arm-kernel@lists.infradead.org, arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com, broonie@kernel.org, fancer.lancer@gmail.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net, linux-gpio@vger.kernel.org, linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-X-SA-Exim-Mail-From: maz@kernel.org
-X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-10-25 10:17, Mark Rutland wrote:
-> Hi,
-> 
-> On Sun, Oct 24, 2021 at 06:51:56PM -0700, Brad Larson wrote:
->> Add Pensando common and Elba SoC specific device nodes
->> 
->> Signed-off-by: Brad Larson <brad@pensando.io>
-> 
-> [...]
-> 
->> +	timer {
->> +		compatible = "arm,armv8-timer";
->> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(1) |
->> +					IRQ_TYPE_LEVEL_LOW)>,
->> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(1) |
->> +					IRQ_TYPE_LEVEL_LOW)>,
->> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(1) |
->> +					IRQ_TYPE_LEVEL_LOW)>,
->> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(1) |
->> +					IRQ_TYPE_LEVEL_LOW)>;
->> +	};
-> 
-> The GIC_CPU_MASK_SIMPLE() stuff is meant for GICv2, but as below you
-> have GICv3, where this is not valid, so this should go.
-> 
-> Also, beware that GIC_CPU_MASK_SIMPLE(1) means a single CPU, which
-> doesn't mak sense for the 16 CPUs you have.
-> 
->> +		gic: interrupt-controller@800000 {
->> +			compatible = "arm,gic-v3";
->> +			#interrupt-cells = <3>;
->> +			#address-cells = <2>;
->> +			#size-cells = <2>;
->> +			ranges;
->> +			interrupt-controller;
->> +			reg = <0x0 0x800000 0x0 0x200000>,	/* GICD */
->> +			      <0x0 0xa00000 0x0 0x200000>;	/* GICR */
+USB control-message timeouts are specified in milliseconds and should
+specifically not vary with CONFIG_HZ.
 
-This is missing the GICv2 compat regions that the CPUs implement.
+Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
+Cc: stable@vger.kernel.org      # 3.0
+Signed-off-by: Johan Hovold <johan@kernel.org>
+---
+ drivers/mmc/host/vub300.c | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
 
->> +			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
->> +
->> +			gic_its: msi-controller@820000 {
->> +				compatible = "arm,gic-v3-its";
->> +				msi-controller;
->> +				#msi-cells = <1>;
->> +				reg = <0x0 0x820000 0x0 0x10000>;
->> +				socionext,synquacer-pre-its =
->> +							<0xc00000 0x1000000>;
->> +			};
->> +		};
-> 
-> Is there any shared lineage with Synquacer? The commit message didn't
-> describe this quirk.
-
-Funny, it looks like there is a sudden outburst of stupid copy/paste
-among HW designers. TI did the exact same thing recently.
-
-This totally negates all the advantages of having an ITS and makes
-sure that you have all the overhead. Facepalm...
-
-         M.
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index 4950d10d3a19..97beece62fec 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -576,7 +576,7 @@ static void check_vub300_port_status(struct vub300_mmc_host *vub300)
+ 				GET_SYSTEM_PORT_STATUS,
+ 				USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+ 				0x0000, 0x0000, &vub300->system_port_status,
+-				sizeof(vub300->system_port_status), HZ);
++				sizeof(vub300->system_port_status), 1000);
+ 	if (sizeof(vub300->system_port_status) == retval)
+ 		new_system_port_status(vub300);
+ }
+@@ -1241,7 +1241,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 						SET_INTERRUPT_PSEUDOCODE,
+ 						USB_DIR_OUT | USB_TYPE_VENDOR |
+ 						USB_RECIP_DEVICE, 0x0000, 0x0000,
+-						xfer_buffer, xfer_length, HZ);
++						xfer_buffer, xfer_length, 1000);
+ 			kfree(xfer_buffer);
+ 			if (retval < 0)
+ 				goto copy_error_message;
+@@ -1284,7 +1284,7 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 						SET_TRANSFER_PSEUDOCODE,
+ 						USB_DIR_OUT | USB_TYPE_VENDOR |
+ 						USB_RECIP_DEVICE, 0x0000, 0x0000,
+-						xfer_buffer, xfer_length, HZ);
++						xfer_buffer, xfer_length, 1000);
+ 			kfree(xfer_buffer);
+ 			if (retval < 0)
+ 				goto copy_error_message;
+@@ -1991,7 +1991,7 @@ static void __set_clock_speed(struct vub300_mmc_host *vub300, u8 buf[8],
+ 		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+ 				SET_CLOCK_SPEED,
+ 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x00, 0x00, buf, buf_array_size, HZ);
++				0x00, 0x00, buf, buf_array_size, 1000);
+ 	if (retval != 8) {
+ 		dev_err(&vub300->udev->dev, "SET_CLOCK_SPEED"
+ 			" %dkHz failed with retval=%d\n", kHzClock, retval);
+@@ -2013,14 +2013,14 @@ static void vub300_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+ 				SET_SD_POWER,
+ 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0000, 0x0000, NULL, 0, HZ);
++				0x0000, 0x0000, NULL, 0, 1000);
+ 		/* must wait for the VUB300 u-proc to boot up */
+ 		msleep(600);
+ 	} else if ((ios->power_mode == MMC_POWER_UP) && !vub300->card_powered) {
+ 		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+ 				SET_SD_POWER,
+ 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				0x0001, 0x0000, NULL, 0, HZ);
++				0x0001, 0x0000, NULL, 0, 1000);
+ 		msleep(600);
+ 		vub300->card_powered = 1;
+ 	} else if (ios->power_mode == MMC_POWER_ON) {
+@@ -2275,14 +2275,14 @@ static int vub300_probe(struct usb_interface *interface,
+ 				GET_HC_INF0,
+ 				USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+ 				0x0000, 0x0000, &vub300->hc_info,
+-				sizeof(vub300->hc_info), HZ);
++				sizeof(vub300->hc_info), 1000);
+ 	if (retval < 0)
+ 		goto error5;
+ 	retval =
+ 		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+ 				SET_ROM_WAIT_STATES,
+ 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+-				firmware_rom_wait_states, 0x0000, NULL, 0, HZ);
++				firmware_rom_wait_states, 0x0000, NULL, 0, 1000);
+ 	if (retval < 0)
+ 		goto error5;
+ 	dev_info(&vub300->udev->dev,
+@@ -2297,7 +2297,7 @@ static int vub300_probe(struct usb_interface *interface,
+ 				GET_SYSTEM_PORT_STATUS,
+ 				USB_DIR_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+ 				0x0000, 0x0000, &vub300->system_port_status,
+-				sizeof(vub300->system_port_status), HZ);
++				sizeof(vub300->system_port_status), 1000);
+ 	if (retval < 0) {
+ 		goto error4;
+ 	} else if (sizeof(vub300->system_port_status) == retval) {
 -- 
-Jazz is not dead. It just smells funny...
+2.32.0
+
