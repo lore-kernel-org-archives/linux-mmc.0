@@ -2,105 +2,375 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4974C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 01:29:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 756D5C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 03:10:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C75F60F46
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 01:29:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 540A960F90
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 03:10:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234715AbhJZBbV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Oct 2021 21:31:21 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:42707 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234401AbhJZBbU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Oct 2021 21:31:20 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1635211737;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=oBsGXv55wWpplGjyxCfLIopyx/VwLnsEwvC3TZf8Ruo=;
-        b=NPtkJC08RpkXsEX6baBApRCE6SclQemhLMEKQiXg4m1IqFAVZVP3RH4yDNEwGkOZW6ncBM
-        PviR1d1DNFfXPMkOktKB69D5YHGncMd31Yf6DeMbP7pGFV1ElThkAs/z1dk4+ggEzmfyTr
-        M0R3AlOhnKBNZbE9XnFPmdNPm6QsEPQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-59-Usvy8dpZOTeXQXE67Jz7Jg-1; Mon, 25 Oct 2021 21:28:53 -0400
-X-MC-Unique: Usvy8dpZOTeXQXE67Jz7Jg-1
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 114CB872FF3;
-        Tue, 26 Oct 2021 01:28:52 +0000 (UTC)
-Received: from T590 (ovpn-8-17.pek2.redhat.com [10.72.8.17])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id A2ED15D6BA;
-        Tue, 26 Oct 2021 01:28:44 +0000 (UTC)
-Date:   Tue, 26 Oct 2021 09:28:39 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Stephen Rothwell <sfr@canb.auug.org.au>,
-        Linux Next Mailing List <linux-next@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        id S233645AbhJZDMu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Oct 2021 23:12:50 -0400
+Received: from new2-smtp.messagingengine.com ([66.111.4.224]:35895 "EHLO
+        new2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S233243AbhJZDMt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Oct 2021 23:12:49 -0400
+Received: from compute2.internal (compute2.nyi.internal [10.202.2.42])
+        by mailnew.nyi.internal (Postfix) with ESMTP id 4270858075B;
+        Mon, 25 Oct 2021 23:10:25 -0400 (EDT)
+Received: from imap43 ([10.202.2.93])
+  by compute2.internal (MEProxy); Mon, 25 Oct 2021 23:10:25 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm1; bh=8zoZ7PiK4dC5PQTpKqhe5iwBh4kOsIB
+        /MaKEN4pRp1E=; b=j2Kv7xWRIH80egJksQIylqmLoTFnSROf09yekN7s+jwWBma
+        T0cOg3r1a/kqzmLFHNiGiuKKfnvbUfsbZGnfFySQ6pby/Zp3LI5DRrC1qIhPFKMp
+        47wuz2XIvxXjRDhMwtifY/sKLgrG9/lGTjZotODcI7+iCyrXJXIed/+rHPS3EQAc
+        1vk7QzPsLMCsQiYbXHzsPPpu2vkSRd2GMfSsTneOJnKBbh2XWc9NxeJvTCWje3op
+        grbkhJh4Gj6SIEtZtqtbtRsbR5CE5lQNFkarwdA+qj7s+EdyYuCYkz8FZ55fAc/y
+        O+ZHCsRejFp9ejWczeHYkDqBmpuixiUlabD1MWA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=8zoZ7P
+        iK4dC5PQTpKqhe5iwBh4kOsIB/MaKEN4pRp1E=; b=eRNKixxP/orY7kkJu/V3Wc
+        vVLBdjVV/qyIZKmS4Ui7ISvZjHvg8Kwv6E2+4CF9tlzcrz2a0DZ2sRlA2nASSaFj
+        8di54kuMEVxYh3hX6ySZtnkt0+kDUeWBZdQnNIlq9bjlNb73J2cOCLsyYelJvUbs
+        g7I6lphxoF539P5fXJb3vl01wj0zdmTUd4IEoNYllVCtE4KCmpAHkrSUCs2lYAgA
+        RoCycqoPLkLNZzh1llutwhtJbDs5w7ebcA/EQUwzjqv/E7+8OqaJJRZDtdy3Ayue
+        fpWOJUZAnIeok/9Agyb7vufz9mYVAfN5b4eW6yydcsZhAbkloiqAhq6DINqAuu6w
+        ==
+X-ME-Sender: <xms:oHF3YY09ZjDfsKoD3wt5Z-5dvDP3J1oiOGIBtLYR85qBUoFa8ct64w>
+    <xme:oHF3YTH_xsIvUL2-_FyNp-oS4rO7h5EyRAnHnPESlnpn3Gdtx8IQcWJkw8pW96wXb
+    Rb9cW_9pco-rV0mMg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvtddrvdefiedgheekucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreertdenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhephefhfeekgfekudevheffheeihedujeefjeevjeefudfgfeeutdeuvdeh
+    hfevueffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:oHF3YQ4GjW5XsQsrFYnw2pHbnq43QjJ7GfrGpUkn8JM1-Nn6lKa1Mg>
+    <xmx:oHF3YR2UR8Ng24x5sEgMBnAkqODiXxzhhWcKaeSVzX5R9Ohmo2SzwQ>
+    <xmx:oHF3YbHii2GQRdDpA7wmwFB2KxkPuKAjz7tBrC142I8W-BIJwuP-Tw>
+    <xmx:oXF3YacFQe3ACCNt5ZKpLoR01YR8ctFFE7ZmUiQebEhqCqtxHem4WQ>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id E6257AC03DB; Mon, 25 Oct 2021 23:10:23 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-1369-gd055fb5e7c-fm-20211018.002-gd055fb5e
+Mime-Version: 1.0
+Message-Id: <95669b37-d512-4439-86cb-418ab085118f@www.fastmail.com>
+In-Reply-To: <20210922103116.30652-6-chin-ting_kuo@aspeedtech.com>
+References: <20210922103116.30652-1-chin-ting_kuo@aspeedtech.com>
+ <20210922103116.30652-6-chin-ting_kuo@aspeedtech.com>
+Date:   Tue, 26 Oct 2021 13:40:03 +1030
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Michael Turquette" <mturquette@baylibre.com>,
+        "Stephen Boyd" <sboyd@kernel.org>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>
-Subject: Re: linux-next: Tree for Oct 25
-Message-ID: <YXdZxzAPejKyE8Oi@T590>
-References: <20211025204921.73cb3011@canb.auug.org.au>
- <82bbf33e-918f-da01-95e6-9b2cc1b8b610@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <82bbf33e-918f-da01-95e6-9b2cc1b8b610@gmail.com>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.15
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org
+Cc:     BMC-SW@aspeedtech.com, "Steven Lee" <steven_lee@aspeedtech.com>
+Subject: Re: [PATCH 05/10] mmc: aspeed: Adjust delay taps calculation method
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 26, 2021 at 01:11:07AM +0300, Dmitry Osipenko wrote:
-> Hello,
+Hi Chin-Ting,
+
+I think we can split this up a bit:
+
+On Wed, 22 Sep 2021, at 20:01, Chin-Ting Kuo wrote:
+> - The maximum tap delay may be slightly different on
+>   different platforms. It may also be different due to
+>   different SoC processes or different manufacturers.
+>   Thus, the maximum tap delay should be gotten from the
+>   device tree through max-tap-delay property.
+
+I think this could be a patch on its own
+
+> - The delay time for each tap is an absolute value which
+>   is independent of clock frequency. But, in order to combine
+>   this principle with "phase" concept, clock frequency is took
+>   into consideration during calculating delay taps.
+> - The delay cell of eMMC device is non-uniform.
+>   The time period of the first tap is two times of others.
+
+Again, this could be a patch of its own
+
+> - The clock phase degree range is from -360 to 360.
+>   But, if the clock phase signedness is negative, clock signal
+>   is output from the falling edge first by default and thus, clock
+>   signal is leading to data signal by 90 degrees at least.
+
+This line of development is impacted by my comment on an earlier patch 
+in the series, so should be its own patch.
+
+>
+> Signed-off-by: Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 115 ++++++++++++++++++++++-------
+>  1 file changed, 89 insertions(+), 26 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c 
+> b/drivers/mmc/host/sdhci-of-aspeed.c
+> index c6eaeb02e3f9..739c9503a5ed 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -44,6 +44,7 @@ struct aspeed_sdc {
 > 
-> Recent -next has this new warning splat coming from MMC, please take a look.
+>  	spinlock_t lock;
+>  	void __iomem *regs;
+> +	u32 max_tap_delay_ps;
+>  };
 > 
->  ------------[ cut here ]------------
->  WARNING: CPU: 0 PID: 525 at kernel/sched/core.c:9477 __might_sleep+0x65/0x68
->  do not call blocking ops when !TASK_RUNNING; state=2 set at [<4316eb02>] prepare_to_wait+0x2e/0xb8
->  Modules linked in:
->  CPU: 0 PID: 525 Comm: Xorg Tainted: G        W         5.15.0-rc6-next-20211025-00226-g89ccd6948ec3 #5
->  Hardware name: NVIDIA Tegra SoC (Flattened Device Tree)
->  (unwind_backtrace) from [<c01089f9>] (show_stack+0x11/0x14)
->  (show_stack) from [<c0afacb9>] (dump_stack_lvl+0x2b/0x34)
->  (dump_stack_lvl) from [<c011f689>] (__warn+0xa1/0xe8)
->  (__warn) from [<c0af6729>] (warn_slowpath_fmt+0x65/0x7c)
->  (warn_slowpath_fmt) from [<c01421b9>] (__might_sleep+0x65/0x68)
->  (__might_sleep) from [<c07eb377>] (mmc_blk_rw_wait+0x2f/0x118)
->  (mmc_blk_rw_wait) from [<c07eba11>] (mmc_blk_mq_issue_rq+0x219/0x71c)
->  (mmc_blk_mq_issue_rq) from [<c07ec199>] (mmc_mq_queue_rq+0xf9/0x200)
->  (mmc_mq_queue_rq) from [<c04ad247>] (__blk_mq_try_issue_directly+0xcb/0x100)
->  (__blk_mq_try_issue_directly) from [<c04adb89>] (blk_mq_request_issue_directly+0x2d/0x48)
->  (blk_mq_request_issue_directly) from [<c04adcf3>] (blk_mq_flush_plug_list+0x14f/0x1f4)
->  (blk_mq_flush_plug_list) from [<c04a5313>] (blk_flush_plug+0x83/0xb8)
->  (blk_flush_plug) from [<c0b013cb>] (io_schedule+0x2b/0x3c)
->  (io_schedule) from [<c0b01a17>] (bit_wait_io+0xf/0x48)
+>  struct aspeed_sdhci_tap_param {
+> @@ -63,6 +64,7 @@ struct aspeed_sdhci_tap_desc {
+>  struct aspeed_sdhci_phase_desc {
+>  	struct aspeed_sdhci_tap_desc in;
+>  	struct aspeed_sdhci_tap_desc out;
+> +	u32 nr_taps;
+>  };
+> 
+>  struct aspeed_sdhci_pdata {
+> @@ -158,43 +160,60 @@ aspeed_sdc_set_phase_taps(struct aspeed_sdc *sdc,
+>  }
+> 
+>  #define PICOSECONDS_PER_SECOND		1000000000000ULL
+> -#define ASPEED_SDHCI_NR_TAPS		15
+> -/* Measured value with *handwave* environmentals and static loading */
+> -#define ASPEED_SDHCI_MAX_TAP_DELAY_PS	1253
+> +#define ASPEED_SDHCI_MAX_TAPS		15
 
-The following patch should fix the issue:
+Why are we renaming this? It looks to cause a bit of noise in the diff.
 
-diff --git a/block/blk-mq.c b/block/blk-mq.c
-index a71aeed7b987..bee9cb2a44cb 100644
---- a/block/blk-mq.c
-+++ b/block/blk-mq.c
-@@ -2223,7 +2223,7 @@ void blk_mq_flush_plug_list(struct blk_plug *plug, bool from_schedule)
- 		return;
- 	plug->rq_count = 0;
- 
--	if (!plug->multiple_queues && !plug->has_elevator) {
-+	if (!plug->multiple_queues && !plug->has_elevator && !from_schedule) {
- 		blk_mq_plug_issue_direct(plug, from_schedule);
- 		if (rq_list_empty(plug->mq_list))
- 			return;
+> +
+>  static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+> -				     int phase_deg)
+> +				     bool invert, int phase_deg, u32 nr_taps)
 
--- 
-Ming
+Hmm.
 
+>  {
+>  	u64 phase_period_ps;
+>  	u64 prop_delay_ps;
+>  	u64 clk_period_ps;
+> -	unsigned int tap;
+> -	u8 inverted;
+> +	u32 tap = 0;
+> +	struct aspeed_sdc *sdc = dev_get_drvdata(dev->parent);
+> 
+> -	phase_deg %= 360;
+> +	if (sdc->max_tap_delay_ps == 0)
+> +		return 0;
+
+I don't think just silently returning 0 here is the right thing to do.
+
+What about -EINVAL, or printing a warning and using the old hard-coded 
+value?
+
+> 
+> -	if (phase_deg >= 180) {
+> -		inverted = ASPEED_SDHCI_TAP_PARAM_INVERT_CLK;
+> -		phase_deg -= 180;
+> -		dev_dbg(dev,
+> -			"Inverting clock to reduce phase correction from %d to %d degrees\n",
+> -			phase_deg + 180, phase_deg);
+> -	} else {
+> -		inverted = 0;
+> +	prop_delay_ps = sdc->max_tap_delay_ps / nr_taps;
+> +	clk_period_ps = div_u64(PICOSECONDS_PER_SECOND, (u64)rate_hz);
+> +
+> +	/*
+> +	 * For ast2600, if clock phase degree is negative, clock signal is
+> +	 * output from falling edge first by default. Namely, clock signal
+> +	 * is leading to data signal by 90 degrees at least.
+> +	 */
+
+Have I missed something about a asymmetric clock timings? Otherwise the 
+falling edge is 180 degrees away from the rising edge? I'm still not 
+clear on why 90 degrees is used here.
+
+> +	if (invert) {
+> +		if (phase_deg >= 90)
+> +			phase_deg -= 90;
+> +		else
+> +			phase_deg = 0;
+
+Why are we throwing away information?
+
+>  	}
+> 
+> -	prop_delay_ps = ASPEED_SDHCI_MAX_TAP_DELAY_PS / ASPEED_SDHCI_NR_TAPS;
+> -	clk_period_ps = div_u64(PICOSECONDS_PER_SECOND, (u64)rate_hz);
+>  	phase_period_ps = div_u64((u64)phase_deg * clk_period_ps, 360ULL);
+> 
+> -	tap = div_u64(phase_period_ps, prop_delay_ps);
+> -	if (tap > ASPEED_SDHCI_NR_TAPS) {
+> +	/*
+> +	 * The delay cell is non-uniform for eMMC controller.
+> +	 * The time period of the first tap is two times of others.
+> +	 */
+> +	if (nr_taps == 16 && phase_period_ps > prop_delay_ps * 2) {
+> +		phase_period_ps -= prop_delay_ps * 2;
+> +		tap++;
+> +	}
+> +
+> +	tap += div_u64(phase_period_ps, prop_delay_ps);
+> +	if (tap > ASPEED_SDHCI_MAX_TAPS) {
+>  		dev_dbg(dev,
+>  			 "Requested out of range phase tap %d for %d degrees of phase 
+> compensation at %luHz, clamping to tap %d\n",
+> -			 tap, phase_deg, rate_hz, ASPEED_SDHCI_NR_TAPS);
+> -		tap = ASPEED_SDHCI_NR_TAPS;
+> +			 tap, phase_deg, rate_hz, ASPEED_SDHCI_MAX_TAPS);
+> +		tap = ASPEED_SDHCI_MAX_TAPS;
+>  	}
+> 
+> -	return inverted | tap;
+> +	if (invert) {
+> +		dev_info(dev, "invert the clock\n");
+
+I prefer we drop this message
+
+> +		tap |= ASPEED_SDHCI_TAP_PARAM_INVERT_CLK;
+> +	}
+> +
+> +	return tap;
+>  }
+> 
+>  static void
+> @@ -202,13 +221,19 @@ aspeed_sdhci_phases_to_taps(struct device *dev, 
+> unsigned long rate,
+>  			    const struct mmc_clk_phase *phases,
+>  			    struct aspeed_sdhci_tap_param *taps)
+>  {
+> +	struct sdhci_host *host = dev->driver_data;
+> +	struct aspeed_sdhci *sdhci;
+> +
+> +	sdhci = sdhci_pltfm_priv(sdhci_priv(host));
+>  	taps->valid = phases->valid;
+> 
+>  	if (!phases->valid)
+>  		return;
+> 
+> -	taps->in = aspeed_sdhci_phase_to_tap(dev, rate, phases->in_deg);
+> -	taps->out = aspeed_sdhci_phase_to_tap(dev, rate, phases->out_deg);
+> +	taps->in = aspeed_sdhci_phase_to_tap(dev, rate, phases->inv_in_deg,
+> +				phases->in_deg, sdhci->phase_desc->nr_taps);
+> +	taps->out = aspeed_sdhci_phase_to_tap(dev, rate, phases->inv_out_deg,
+> +				phases->out_deg, sdhci->phase_desc->nr_taps);
+>  }
+> 
+>  static void
+> @@ -230,8 +255,8 @@ aspeed_sdhci_configure_phase(struct sdhci_host 
+> *host, unsigned long rate)
+>  	aspeed_sdc_set_phase_taps(sdhci->parent, sdhci->phase_desc, taps);
+>  	dev_dbg(dev,
+>  		"Using taps [%d, %d] for [%d, %d] degrees of phase correction at 
+> %luHz (%d)\n",
+> -		taps->in & ASPEED_SDHCI_NR_TAPS,
+> -		taps->out & ASPEED_SDHCI_NR_TAPS,
+> +		taps->in & ASPEED_SDHCI_MAX_TAPS,
+> +		taps->out & ASPEED_SDHCI_MAX_TAPS,
+>  		params->in_deg, params->out_deg, rate, host->timing);
+>  }
+> 
+> @@ -493,6 +518,7 @@ static const struct aspeed_sdhci_phase_desc 
+> ast2600_sdhci_phase[] = {
+>  			.enable_mask = ASPEED_SDC_S0_PHASE_OUT_EN,
+>  			.enable_value = 3,
+>  		},
+> +		.nr_taps = 15,
+>  	},
+>  	/* SDHCI/Slot 1 */
+>  	[1] = {
+> @@ -506,6 +532,31 @@ static const struct aspeed_sdhci_phase_desc 
+> ast2600_sdhci_phase[] = {
+>  			.enable_mask = ASPEED_SDC_S1_PHASE_OUT_EN,
+>  			.enable_value = 3,
+>  		},
+> +		.nr_taps = 15,
+> +	},
+> +};
+> +
+> +static const struct aspeed_sdhci_phase_desc ast2600_emmc_phase[] = {
+> +	/* eMMC slot 0 */
+> +	[0] = {
+> +		.in = {
+> +			.tap_mask = ASPEED_SDC_S0_PHASE_IN,
+> +			.enable_mask = ASPEED_SDC_S0_PHASE_IN_EN,
+> +			.enable_value = 1,
+> +		},
+> +		.out = {
+> +			.tap_mask = ASPEED_SDC_S0_PHASE_OUT,
+> +			.enable_mask = ASPEED_SDC_S0_PHASE_OUT_EN,
+> +			.enable_value = 3,
+> +		},
+> +
+> +		/*
+> +		 * There are 15 taps recorded in AST2600 datasheet.
+> +		 * But, actually, the time period of the first tap
+> +		 * is two times of others. Thus, 16 tap is used to
+> +		 * emulate this situation.
+> +		 */
+> +		.nr_taps = 16,
+
+I think this is a very indirect way to communicate the problem. The 
+only time we look at nr_taps is in a test that explicitly compensates 
+for the non-uniform delay. I think we should just have a boolean struct 
+member called 'non_uniform_delay' rather than 'nr_taps', as the number 
+of taps isn't what's changing. But also see the discussion below about 
+a potential aspeed,tap-delays property.
+
+>  	},
+>  };
+> 
+> @@ -515,10 +566,17 @@ static const struct aspeed_sdhci_pdata 
+> ast2600_sdhci_pdata = {
+>  	.nr_phase_descs = ARRAY_SIZE(ast2600_sdhci_phase),
+>  };
+> 
+> +static const struct aspeed_sdhci_pdata ast2600_emmc_pdata = {
+> +	.clk_div_start = 1,
+> +	.phase_desc = ast2600_emmc_phase,
+> +	.nr_phase_descs = ARRAY_SIZE(ast2600_emmc_phase),
+> +};
+> +
+>  static const struct of_device_id aspeed_sdhci_of_match[] = {
+>  	{ .compatible = "aspeed,ast2400-sdhci", .data = &ast2400_sdhci_pdata, },
+>  	{ .compatible = "aspeed,ast2500-sdhci", .data = &ast2400_sdhci_pdata, },
+>  	{ .compatible = "aspeed,ast2600-sdhci", .data = &ast2600_sdhci_pdata, },
+> +	{ .compatible = "aspeed,ast2600-emmc", .data = &ast2600_emmc_pdata, },
+
+This needs to be documented (and binding documentation patches need to 
+be the first patches in the series). Something further to consider is 
+whether we separate the compatibles or add e.g. an aspeed,tap-delays 
+property that specifies the specific delay of each logic element. This 
+might take the place of e.g. the max-tap-delay property?
+
+Andrew
+
+>  	{ }
+>  };
+> 
+> @@ -562,6 +620,11 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>  		goto err_clk;
+>  	}
+> 
+> +	ret = of_property_read_u32(pdev->dev.of_node, "max-tap-delay",
+> +			&sdc->max_tap_delay_ps);
+> +	if (ret)
+> +		sdc->max_tap_delay_ps = 0;
+> +
+>  	dev_set_drvdata(&pdev->dev, sdc);
+> 
+>  	parent = pdev->dev.of_node;
+> -- 
+> 2.17.1
