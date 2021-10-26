@@ -2,160 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F0D6C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 18:09:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD823C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 18:10:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 466ED60F90
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 18:09:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 904E660C4B
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 18:10:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236726AbhJZSLa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Oct 2021 14:11:30 -0400
-Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.50]:24024 "EHLO
-        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233729AbhJZSL2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Oct 2021 14:11:28 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1635271724;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
-    From:Subject:Sender;
-    bh=74t1mRAJSitLug010w0F1NW8drDiZWZJSwlgKAAwYPI=;
-    b=NIWrYrscnOR/x9mpeRFH6NMUQkRWah+6dtDPHFXz3fhE2c+jeI2EAiuUHVM+fOOJ9I
-    aWaGC9M7f4gHYCucgPCtRPj0rAOEDgI5sewSpGVsT/y6Qy8rxE72mBbjm6ZMaO8YJJim
-    clXUC2zSIqwWF3gSKGrqmJct+GufrKT5t8BMqNzwTDgR7RosccHy6IHPSm4fY1tY45Ka
-    kvSBi4PsXig0C4AVV8UYm1A34dV0F5eZl5n872rJpMCm25cwM5/ZombCvkLQ1GM8AkEi
-    CmIIv2xM1UBCGiW8/lCzH5P9lMrWNZTZVsv/OWrA1il1NymoQ9B1FBRdqi/Kmj9ulCrQ
-    ZB+Q==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj7gpw91N5y2S3i8J+"
-X-RZG-CLASS-ID: mo00
-Received: from mbp-13-nikolaus.fritz.box
-    by smtp.strato.de (RZmta 47.34.1 SBL|AUTH)
-    with ESMTPSA id d01d1fx9QI8hyjg
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Tue, 26 Oct 2021 20:08:43 +0200 (CEST)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Subject: Re: [RFC] mmc: core: transplant ti,wl1251 quirks from to be retired
- omap_hsmmc
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-In-Reply-To: <CAPDyKFraMXqC9OBeUTpm=bxjrFZTCopV3ZJQf1TRsA8UeTWdTA@mail.gmail.com>
-Date:   Tue, 26 Oct 2021 20:08:42 +0200
-Cc:     Jerome Pouiller <Jerome.Pouiller@silabs.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
-        Tony Lindgren <tony@atomide.com>,
-        Linux-OMAP <linux-omap@vger.kernel.org>
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <80C6A8DD-183B-4FDD-B203-D3108C106043@goldelico.com>
-References: <8ecc5c79c1dd0627d570ede31e18c860786cacca.1633519499.git.hns@goldelico.com>
- <CAPDyKFraMXqC9OBeUTpm=bxjrFZTCopV3ZJQf1TRsA8UeTWdTA@mail.gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-X-Mailer: Apple Mail (2.3445.104.21)
+        id S236563AbhJZSNW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Oct 2021 14:13:22 -0400
+Received: from mail-oi1-f178.google.com ([209.85.167.178]:40503 "EHLO
+        mail-oi1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235040AbhJZSNW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Oct 2021 14:13:22 -0400
+Received: by mail-oi1-f178.google.com with SMTP id n63so21836213oif.7;
+        Tue, 26 Oct 2021 11:10:57 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=LwN+X4PEi3Ouq9X6OKykFlJGA9GO8zaZsDpJ3nIh2IU=;
+        b=Qi/2+Pr5/cT8G69/r6fgXaQN/XXtP1TrdIN6IQGPhoSsiS2aUmlAOuR6BQbvIueYNY
+         IXFpVqC0HZhbJJis2BO3gj2H9aZNVhD/OckUuuGQQlpDrWvdhuZjVwaClt/UgOayoAee
+         8gVA7HTI2OnDgG7BOXyAvb2/oucX9caWAgAJAroS+RYYs7AnEABzgYTbyQ0/LE1ou72y
+         Y/d1XElEPyTXbCDxBKau0Pbnk10zFVRSRfFylAzQqNsss8JjiqIx2pqzYbyCkouA0ezp
+         wRgrn27qpW4lYLFEcNL1RUN+v99v8LeGQEa6uVv6HmbEFwEOqqEgwz+QFxAI/bIiY0hp
+         4DDg==
+X-Gm-Message-State: AOAM533lapW0SyullYYVKPtb5hgsczF2oMRMpLI0ES1L+zNxuX4pSy8Z
+        cKMYxgXzcTkNDAJ5CwIvvg==
+X-Google-Smtp-Source: ABdhPJxO0G7gdDH3/w0eJlvozSh7pEFCagRG5POucla9GUeZ9R93VkMIf59HbJp1MZLXLSpbSBydTQ==
+X-Received: by 2002:aca:240e:: with SMTP id n14mr239723oic.52.1635271857578;
+        Tue, 26 Oct 2021 11:10:57 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id bk8sm5045827oib.57.2021.10.26.11.10.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Oct 2021 11:10:56 -0700 (PDT)
+Received: (nullmailer pid 2952060 invoked by uid 1000);
+        Tue, 26 Oct 2021 18:10:54 -0000
+Date:   Tue, 26 Oct 2021 13:10:54 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, fancer.lancer@gmail.com,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net,
+        linux-gpio@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 03/11] dt-bindings: mmc: Add Pensando Elba SoC binding
+Message-ID: <YXhErvvSfKIBvHae@robh.at.kernel.org>
+References: <20211025015156.33133-1-brad@pensando.io>
+ <20211025015156.33133-4-brad@pensando.io>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211025015156.33133-4-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uf,
+On Sun, Oct 24, 2021 at 06:51:48PM -0700, Brad Larson wrote:
+> Pensando Elba ARM 64-bit SoC is integrated with this IP and
+> explicitly controls byte-lane enables resulting in an additional
+> reg property resource.
+> 
+> Signed-off-by: Brad Larson <brad@pensando.io>
+> ---
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml         | 13 ++++++++-----
+>  1 file changed, 8 insertions(+), 5 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> index af7442f73881..6c68b7b5abec 100644
+> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> @@ -15,13 +15,16 @@ allOf:
+>  
+>  properties:
+>    compatible:
+> -    items:
+> -      - enum:
+> -          - socionext,uniphier-sd4hc
+> -      - const: cdns,sd4hc
+> +    oneOf:
+> +      - items:
+> +        - enum:
+> +            - socionext,uniphier-sd4hc
+> +            - pensando,elba-emmc
+> +        - const: cdns,sd4hc
+>  
+>    reg:
+> -    maxItems: 1
+> +    minItems: 1
+> +    maxItems: 2
 
-+ Tony, linux-omap list
+If there is more than 1, then you need to describe what each entry is.
 
-> Am 26.10.2021 um 19:12 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
->=20
-> + Jerome
->=20
-> On Wed, 6 Oct 2021 at 13:25, H. Nikolaus Schaller <hns@goldelico.com> =
-wrote:
->>=20
->> The TiWi 5 WiFi module needs special setup of the sdio
->> interface before it can be probed.
->>=20
->> So far, this is done in omap_hsmmc_init_card() in omap_hsmmc.c
->> which makes it useable only if connected to omap devices
->> which use the omap_hsmmc. The OpenPandora is the most promient
->> example.
->>=20
->> There are plans to switch to a newer sdhci-omap driver and
->> retire omap_hsmmc. Hence this quirk must be reworked or moved
->> somewhere else. Ideally to some location that is not dependent
->> on the specific SoC mmc host driver.
->>=20
->> Analysis has shown that omap_hsmmc_init_card() is called
->> through the host->ops->init_card hook which itself
->> is called in three generic locations:
->>=20
->> mmc_init_card()
->> mmc_sd_init_card()
->> mmc_sdio_init_card()
->>=20
->> All these functions share a call to mmc_select_card() shortly
->> after running the init hook and therefore I assume that
->> a good place transplanting the special wl1251 handling is
->> mmc_select_card() - unless we want to copy and maintain the
->> code to three different places.
->>=20
->> After this quirk has been moved there, we can remove
->> omap_hsmmc_init_card() in omap_hsmmc.c in a separate patch.
->> Indeed the plan is to remove omap_hsmmc.c completely.
->>=20
->> A future development path to generalize could be to make
->> the code not depend on compatible =3D "ti,wl1251" but check
->> for optional device tree properties (non-std-sdio, bus width,
->> vendor, device, blksize, max_dtr, ocr) which can be defined
->> for any child device of the mmd/sd port needing such special
->> setup.
->=20
-> I wouldn't go that path, simply because it may look like we encourage
-> vendors to deviate from the SDIO spec. :-)
-
-Well, that ti,wl1251 chip is so old [1] that probably the SDIO spec did
-deviate from what the vendor thought it will look like :)
-
-[1] https://www.ti.com/lit/ml/swmt009a/swmt009a.pdf
-
-> At least for now, matching on the compatible string and applying card
-> quirks makes perfect sense to me.
-
-Yes, that is how it already was in the omal_hsmmc driver quirks.
-
->=20
->>=20
->> Related-to: commit f6498b922e57 ("mmc: host: omap_hsmmc: add code for =
-special init of wl1251 to get rid of pandora_wl1251_init_card")
->> Related-to: commit 2398c41d6432 ("omap: pdata-quirks: remove =
-openpandora quirks for mmc3 and wl1251")
->> Related-to: commit f9d50fef4b64 ("ARM: OMAP2+: omap3-pandora: add =
-wifi support")
->> Tested-by: H. Nikolaus Schaller <hns@goldelico.com> # on OpenPandora
->> Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
->=20
-> As a matter of fact, the similar problem that you are looking to
-> address (applying card quirks based on DT compatibility strings), is
-> partly being taken care of in another series [1], being discussed
-> right now. I think the solution for the ti,wl1251 should be based upon
-> that too. Please have a look and see if you can play with that!?
-
-That is interesting.
-Yes, maybe it can be the basis. At least for finding the chip and =
-driver.
-
-BR and thanks,
-Nikolaus
-
->=20
-> Kind regards
-> Uffe
->=20
-> [1]
-> [RFC PATCH 0/2] mmc: allow to rely on the DT to apply quirks
-> =
-https://lore.kernel.org/lkml/20211014143031.1313783-1-Jerome.Pouiller@sila=
-bs.com/
-
+>  
+>    interrupts:
+>      maxItems: 1
+> -- 
+> 2.17.1
+> 
+> 
