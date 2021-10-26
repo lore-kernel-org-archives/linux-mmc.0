@@ -2,157 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20DC9C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 14:43:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE6B8C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 15:40:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A16860E74
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 14:43:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 916586109D
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Oct 2021 15:40:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236891AbhJZOpW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Oct 2021 10:45:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58872 "EHLO
+        id S236893AbhJZPnB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Oct 2021 11:43:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236876AbhJZOpV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Oct 2021 10:45:21 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FB1CC061745
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Oct 2021 07:42:57 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id y26so17717467lfa.11
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Oct 2021 07:42:57 -0700 (PDT)
+        with ESMTP id S237006AbhJZPm7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Oct 2021 11:42:59 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 944C0C061243
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Oct 2021 08:40:34 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id d13so15829949ljg.0
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Oct 2021 08:40:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=IeDPLqe3LBKUpRJz9gheIRoaNjTzo/azi2xTKJ59u4Q=;
-        b=rtTjZwJ3hBs0LVsm1btVhVOPMJ9I5MezaBoSmoqbce3/qjWaQC2+rhDsqRinNFpWQ9
-         XEIv2SKGN2wjW6chPzCLFT9zXOXt09mKGJ/wp/DNysqfz/QAU71tshSVm8II8W/47Zro
-         fFViFfYJTYFIggox35NWeXMsLXyiHz4KJZOhp09/tVEVgiKZNFcmb7ZD3JDtHb1fBhVQ
-         yS2F4rXj6uNpRlrHm4EgqyOu1tCiRlDKS7dy0yVGyj64Vd+6Vc46iZY7ovCpsczbeLZF
-         xEdJJP60JLVtl8SPNzMqy327fFe1kk/K19U6B1zRdDm/RDl/oaOFpQn9GHaOGF5wYdRV
-         5zfA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=dI3e2yWb/uU+1tnC1/zWVYk4uFqXhgsB4McGikM5lUw=;
+        b=dgqlsNw0H5kyGA5TWB1RzuH7MVg+T2iViWLbbis+jByI8r2y+xQU9cOFSvOLU6ZKwi
+         3KaZDMBvsBp9nlr86Zou84ys64kzpuoVHsSfDA+rfEa1mWlAKvlOGensxU02agst4UAp
+         R2Bj+LwW6QR9ZH1Ddy4MdqlbOvhXCoAc0tNFsCvO6wmlRaw0Qy9E5Cd73l1U9ES991qN
+         /guby18kM499xkdc0KXbPb+WKOaWUd/ZOpVfhP3tyk2Fjt59n4oeM15mwPnvzIVraLp/
+         /wecRv/8zpr5bLyYtG6dvKo/f9h/K4ASKz9BDARltki9+DmNrBIzyxORfk7DPWFZCKng
+         UIow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=IeDPLqe3LBKUpRJz9gheIRoaNjTzo/azi2xTKJ59u4Q=;
-        b=lDKSOs4Q65bs/Ooer+PkdLgZ4vl5CtwwrO1VPfIqGaBiRikBqpD1BuVSjAjCjw+uj3
-         ssPvhTE8VYWAk3V/osXw/Yy+agwmVEkDT6lgmB6oSJ58XJc534II0tqKJ6sEkWSEOnXj
-         HOHJoEQJT+Dk1EQankFMvAj7rUQ5lsr1slcTA0N0j45YaSv7V0uJuyleYbViwaSZ1VPZ
-         pX8lQe+Peg6OIRk6UeMMsXlYJIcILwyzjTpIWWosRC18WdD6yDTqixRh8heEhEd12BZS
-         U1zSR8yYa09JHTvy82Qv4TvJ1ufxSEsUVBEH+D8eHpFlFP7Khz6AbwTjH27BM6oEhIB3
-         XxTg==
-X-Gm-Message-State: AOAM533nSfJ7F0Sb5Id0UdQz/Euqwxcp3NyzMMWYp1QIiL59rl+MDcV6
-        lo/mCC3b46+bbCMA7yrkMVUlAA==
-X-Google-Smtp-Source: ABdhPJzbC4V4BOc77PUffVI7AxDyDMkYAgocDN0aDe9m5/bXIjvUGOQ5RhLNx5fCyuk5xWO+M9NHyA==
-X-Received: by 2002:a05:6512:3407:: with SMTP id i7mr24013249lfr.563.1635259375652;
-        Tue, 26 Oct 2021 07:42:55 -0700 (PDT)
-Received: from [192.168.1.211] ([37.153.55.125])
-        by smtp.gmail.com with ESMTPSA id bi9sm2256901lfb.40.2021.10.26.07.42.54
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 26 Oct 2021 07:42:55 -0700 (PDT)
-Subject: Re: [PATCH v1 01/15] dt-bindings: add pwrseq device tree bindings
-To:     Rob Herring <robh@kernel.org>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
- <20211006035407.1147909-2-dmitry.baryshkov@linaro.org>
- <YXf6TbV2IpPbB/0Y@robh.at.kernel.org>
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Message-ID: <37b26090-945f-1e17-f6ab-52552a4b6d89@linaro.org>
-Date:   Tue, 26 Oct 2021 17:42:54 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=dI3e2yWb/uU+1tnC1/zWVYk4uFqXhgsB4McGikM5lUw=;
+        b=BcwGINeHD/C4s06FTzalM5jpK2tWtJyj2tAtI6+EGpcvajPZoH3s7HFj+v0ZYBVYnb
+         lMYUULbGu9VBHK+KWD+rwej08mxcSDpIPox9SSs+jwmGOc9XnHnMwBCNxeFRI4l4Zab2
+         tGkhZqB9D2hA1F09JiOd5De/ynHIZse/VzdNFLwqlVnpOmIcb/Dnf3gvOJcL+KLZkbLV
+         i0y0TfTsqXngn6meIpzQXVsoJxthos8QA2d83W94O3FYd5xI09Ppb36lYIxJRmt9Ta5N
+         9X8MeuvZ+VzvpJPnn0qv9dJJslIrxtvV6IH2lcDi4cBFMLXRd0MF/zRsJpgu0uUrUDGH
+         4fng==
+X-Gm-Message-State: AOAM533w6z8NCIWh+LUZ2vpbXG3pxLS7eAIjTbJyM2yJ3NVZHFeFlndc
+        ujGfcV06Tfl3MTIu5iIpYNBX1lp5U4JBY8tbja26fQ==
+X-Google-Smtp-Source: ABdhPJxjK+2RgtinaImTk9WZkEHEmETy0+4aTjX4JMJv4txyCEICQCRa7hvJGpINMvqMR/q9t/VdpFVs6tZRpTs+f24=
+X-Received: by 2002:a2e:b550:: with SMTP id a16mr27647108ljn.229.1635262832943;
+ Tue, 26 Oct 2021 08:40:32 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <YXf6TbV2IpPbB/0Y@robh.at.kernel.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+References: <20211021071333.32485-1-clin@suse.com>
+In-Reply-To: <20211021071333.32485-1-clin@suse.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 26 Oct 2021 17:39:55 +0200
+Message-ID: <CAPDyKFrfUmisEO=OXZAi7U9N5gsfZHLWX7gPTHwt_AAsv78NpA@mail.gmail.com>
+Subject: Re: [PATCH 0/3] Add SDHCI driver support for NXP S32G2
+To:     Chester Lin <clin@suse.com>
+Cc:     Rob Herring <robh+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
+        s32@nxp.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Radu Nicolae Pirea <radu-nicolae.pirea@oss.nxp.com>,
+        Dong Aisheng <aisheng.dong@nxp.com>,
+        BOUGH CHEN <haibo.chen@nxp.com>,
+        =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>,
+        Matthias Brugger <mbrugger@suse.com>,
+        "Ivan T . Ivanov" <iivanov@suse.de>, "Lee, Chun-Yi" <jlee@suse.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/10/2021 15:53, Rob Herring wrote:
-> On Wed, Oct 06, 2021 at 06:53:53AM +0300, Dmitry Baryshkov wrote:
->> Add device tree bindings for the new power sequencer subsystem.
->> Consumers would reference pwrseq nodes using "foo-pwrseq" properties.
->> Providers would use '#pwrseq-cells' property to declare the amount of
->> cells in the pwrseq specifier.
-> 
-> Please use get_maintainers.pl.
-> 
-> This is not a pattern I want to encourage, so NAK on a common binding.
+On Thu, 21 Oct 2021 at 09:13, Chester Lin <clin@suse.com> wrote:
+>
+> Hello,
+>
+> This is a patch series for initial sdhci support on NXP S32G2 platforms.
+> In the previous work[1], only basic DTs and serial ports are supported for
+> minimum hardware booting. Here we want to add a mmc-host node and add
+> support in the sdhci-esdhc-imx driver so that S32G2 can also mount file
+> system from SDCard but not just ramdisk. As the first step, we choose fixed
+> clocks to fulfill the requirements the mmc host driver needs, and they will
+> be replaced by ARM SCMI clock protocol (0x14) once the SCMI feature are
+> added into S32G2 DT later.
+>
+> This patchset has been verified with NXP downstream firmware blobs [ver:
+> bsp27/28/29/30], such as TF-A[2] and U-Boot[3] (BL33) on CodeAurora.
+>
+> Thanks,
+> Chester
+>
+> [1]: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/tree/arch/arm64/boot/dts/freescale/s32g2.dtsi
+> [2]: https://source.codeaurora.org/external/autobsps32/arm-trusted-firmware/
+> [3]: https://source.codeaurora.org/external/autobsps32/u-boot/
+>
+> Chester Lin (3):
+>   dt-bindings: mmc: fsl-imx-esdhc: add NXP S32G2 support
+>   mmc: sdhci-esdhc-imx: add NXP S32G2 support
+>   arm64: dts: s32g2: add USDHC support
+>
+>  .../bindings/mmc/fsl-imx-esdhc.yaml           |  1 +
+>  arch/arm64/boot/dts/freescale/s32g2.dtsi      | 32 +++++++++++++++++++
+>  .../arm64/boot/dts/freescale/s32g274a-evb.dts |  4 +++
+>  .../boot/dts/freescale/s32g274a-rdb2.dts      |  4 +++
+>  drivers/mmc/host/sdhci-esdhc-imx.c            | 17 ++++++++--
+>  5 files changed, 56 insertions(+), 2 deletions(-)
+>
 
+Patch 1 and 2, applied for next, thanks!
 
-Could you please spend a few more words, describing what is not 
-encouraged? The whole foo-subsys/#subsys-cells structure?
-
-Or just specifying the common binding?
-
-> 
->>
->> Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
->> ---
->>   .../bindings/power/pwrseq/pwrseq.yaml         | 32 +++++++++++++++++++
->>   1 file changed, 32 insertions(+)
->>   create mode 100644 Documentation/devicetree/bindings/power/pwrseq/pwrseq.yaml
->>
->> diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq.yaml b/Documentation/devicetree/bindings/power/pwrseq/pwrseq.yaml
->> new file mode 100644
->> index 000000000000..4a8f6c0218bf
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/power/pwrseq/pwrseq.yaml
->> @@ -0,0 +1,32 @@
->> +# SPDX-License-Identifier: GPL-2.0
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/power/pwrseq/pwrseq.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: Power Sequencer devices
->> +
->> +maintainers:
->> +  - Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
->> +
->> +properties:
->> +  "#powerseq-cells":
->> +    description:
->> +      Number of cells in a pwrseq specifier.
->> +
->> +patternProperties:
->> +  ".*-pwrseq$":
->> +    description: Power sequencer supply phandle(s) for this node
->> +
->> +additionalProperties: true
->> +
->> +examples:
->> +  - |
->> +    qca_pwrseq: qca-pwrseq {
->> +      #pwrseq-cells = <1>;
->> +    };
->> +
->> +    bluetooth {
->> +      bt-pwrseq = <&qca_pwrseq 1>;
->> +    };
->> +...
->> -- 
->> 2.33.0
->>
->>
-
-
--- 
-With best wishes
-Dmitry
+Kind regards
+Uffe
