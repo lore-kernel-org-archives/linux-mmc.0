@@ -2,101 +2,76 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1590C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 00:55:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39383C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 03:13:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 89F9960F90
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 00:55:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 19BA760ED4
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 03:13:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236116AbhJ0A5w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Oct 2021 20:57:52 -0400
-Received: from mailgw01.mediatek.com ([60.244.123.138]:33852 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232410AbhJ0A5v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Oct 2021 20:57:51 -0400
-X-UUID: b2ad23b1aa9443eaa969d3190fcc4121-20211027
-X-UUID: b2ad23b1aa9443eaa969d3190fcc4121-20211027
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw01.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1685992770; Wed, 27 Oct 2021 08:55:24 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- 15.2.792.15; Wed, 27 Oct 2021 08:55:23 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 27 Oct 2021 08:55:22 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        "Matthias Brugger" <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <srv_heupstream@mediatek.com>,
-        "Wenbin Mei" <wenbin.mei@mediatek.com>, <stable@vger.kernel.org>
-Subject: [PATCH v2] mmc: cqhci: clear HALT state after CQE enable
-Date:   Wed, 27 Oct 2021 08:55:20 +0800
-Message-ID: <20211027005520.14481-1-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 2.25.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-MTK:  N
+        id S236305AbhJ0DPd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Oct 2021 23:15:33 -0400
+Received: from inva021.nxp.com ([92.121.34.21]:39064 "EHLO inva021.nxp.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233962AbhJ0DPc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 26 Oct 2021 23:15:32 -0400
+Received: from inva021.nxp.com (localhost [127.0.0.1])
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 22F37202C64;
+        Wed, 27 Oct 2021 05:13:07 +0200 (CEST)
+Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id DE9CE202C5F;
+        Wed, 27 Oct 2021 05:13:06 +0200 (CEST)
+Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
+        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id C7974183AD6D;
+        Wed, 27 Oct 2021 11:13:05 +0800 (+08)
+From:   haibo.chen@nxp.com
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-imx@nxp.com, haibo.chen@nxp.com
+Subject: [PATCH] mmc: sdhci: disable ADMA when PAGE SIZE is 64K
+Date:   Wed, 27 Oct 2021 10:47:21 +0800
+Message-Id: <1635302841-18997-1-git-send-email-haibo.chen@nxp.com>
+X-Mailer: git-send-email 2.7.4
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-While mmc0 enter suspend state, we need halt CQE to send legacy cmd(flush
-cache) and disable cqe, for resume back, we enable CQE and not clear HALT
-state.
-In this case MediaTek mmc host controller will keep the value for HALT
-state after CQE disable/enable flow, so the next CQE transfer after resume
-will be timeout due to CQE is in HALT state, the log as below:
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: timeout for tag 2
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: ============ CQHCI REGISTER DUMP ===========
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Caps:      0x100020b6 | Version:  0x00000510
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Config:    0x00001103 | Control:  0x00000001
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: TDL base:  0xfd05f000 | TDL up32: 0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Doorbell:  0x8000203c | TCN:      0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Task clr:  0x00000000 | SSC1:     0x00001000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: CRNQP:     0x00000000 | CRNQDUN:  0x00000000
-<4>.(4)[318:kworker/4:1H]mmc0: cqhci: CRNQIS:    0x00000000 | CRNQIE:   0x00000000
+From: Haibo Chen <haibo.chen@nxp.com>
 
-This change check HALT state after CQE enable, if CQE is in HALT state, we
-will clear it.
+For ADMA with quirks SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC, it limit
+the max segment size as 64K-1. Currently, linux kernel support
+4K/16K/64K PAGE_SIZE. If choose 64K PAGE_SIZE, sdhci in ADMA mode
+with the upper quirks will meet issue.
 
-Fixes: a4080225f51d ("mmc: cqhci: support for command queue enabled host")
-Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Cc: stable@vger.kernel.org
+Though mmc driver give block layer the max segment size through
+blk_queue_max_segment_size(), but in this function, it will compare
+the argument with PAGE_SIZE, and will choose PAGE_SIZE if the argument
+is smaller than PAGE_SIZE. When PAGE_SIZE is 64K, finally the mmc
+request queue will get 64K as the max segment size. Once the sg data
+length=64K, ADMA will meet issue. For this case, need to disable ADMA
+mode.
+
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/cqhci-core.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index ca8329d55f43..b0d30c35c390 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -282,6 +282,9 @@ static void __cqhci_enable(struct cqhci_host *cq_host)
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index dbe87995596c..47e0c0156b94 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -4187,6 +4187,12 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		host->flags &= ~SDHCI_USE_ADMA;
+ 	}
  
- 	cqhci_writel(cq_host, cqcfg, CQHCI_CFG);
- 
-+	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
-+		cqhci_writel(cq_host, 0, CQHCI_CTL);
++	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC) &&
++		PAGE_SIZE >= 65536 && (host->flags & SDHCI_USE_ADMA)) {
++		DBG("Disabling ADMA as it don't support >= 64K PAGE_SIZE\n");
++		host->flags &= ~SDHCI_USE_ADMA;
++	}
 +
- 	mmc->cqe_on = true;
+ 	if (sdhci_can_64bit_dma(host))
+ 		host->flags |= SDHCI_USE_64_BIT_DMA;
  
- 	if (cq_host->ops->enable)
 -- 
-2.25.1
+2.17.1
 
