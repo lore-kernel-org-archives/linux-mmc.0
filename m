@@ -2,72 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7744BC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 21:42:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15E78C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 21:54:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C5A861073
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 21:42:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC3DE610C7
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 21:54:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229469AbhJ0Voq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Oct 2021 17:44:46 -0400
-Received: from mail-oo1-f51.google.com ([209.85.161.51]:43848 "EHLO
-        mail-oo1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229437AbhJ0Vop (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Oct 2021 17:44:45 -0400
-Received: by mail-oo1-f51.google.com with SMTP id x135-20020a4a418d000000b002b961605657so734847ooa.10;
-        Wed, 27 Oct 2021 14:42:19 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=3ZN6Gv8dEcW1STN8Y2wfeq1p+xH2xHX+YM1iSvc+i+g=;
-        b=pJBl845a8EFQQCI/4ReJyLOs5ki5lAAZr35SvzQskOn2rtmaEdi4Mg8jvkratLh8s9
-         ozRCM+5TQRIct2p+nlrfQKZLKBNLas4vL+V2f5+KCroZGDz8knzK1VGhYWRAj64cLWnp
-         w31Bwhl+G8AcACq+B2lkmsv0grGGkTQ5xxftSJp976ySI6VA2oy63k23YYG1gTJNWTaP
-         zful9bIPCHvI5A6+1pLK+pXp9hOXwLO+qh5cnlyUxcbR/kEmuUweUcGhheKNHJ4xrhD1
-         gaCIy1QX5oqLMPcvuH3HQaftjvbZszjg3VrLTO9JAFHEseSSROYF4NbWTCUEiCsZWyWc
-         5jnA==
-X-Gm-Message-State: AOAM530Wb2HrrufB7bmdoWvB3/MHNYZgBL0xD/Cx3phMWo+kB1AH64ET
-        MDyd8CG15T8AvgeM/paccQ==
-X-Google-Smtp-Source: ABdhPJy8CB+owYFlIjx4OeQ8acjoEEhZ2gt1lUZamqU0YdKU0HTcA07RQOmqMgTczHc9zBnIQAp4Iw==
-X-Received: by 2002:a4a:9204:: with SMTP id f4mr152062ooh.87.1635370939410;
-        Wed, 27 Oct 2021 14:42:19 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id v22sm520079ott.80.2021.10.27.14.42.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Oct 2021 14:42:18 -0700 (PDT)
-Received: (nullmailer pid 2219669 invoked by uid 1000);
-        Wed, 27 Oct 2021 21:42:17 -0000
-Date:   Wed, 27 Oct 2021 16:42:17 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     arnd@arndb.de, bgolaszewski@baylibre.com,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linus.walleij@linaro.org, linux-kernel@vger.kernel.org,
-        broonie@kernel.org, olof@lixom.net, linux-gpio@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        fancer.lancer@gmail.com
-Subject: Re: [PATCH v3 05/11] spi: dw: Add Pensando Elba SoC SPI Controller
- bindings
-Message-ID: <YXnHuRi264DkxLML@robh.at.kernel.org>
-References: <20211025015156.33133-1-brad@pensando.io>
- <20211025015156.33133-6-brad@pensando.io>
+        id S229734AbhJ0V4j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Oct 2021 17:56:39 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44074 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229705AbhJ0V4i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 27 Oct 2021 17:56:38 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id D5D5B610CA;
+        Wed, 27 Oct 2021 21:54:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1635371652;
+        bh=P97TBuOSU6VCfn0fOqxvrzobUnZ38EQAx73aJ380G0I=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=M3VfebhT9aqmPN+g46qbnnrewNbanEgi94dTcPhTU7mpjH5jB8Y7+HKwlB8s7jjVw
+         AhPYMHtft/LjFNLK9Hsgj2L68/zVZEBGbpWec7MeDUupldbzjTlVnOAleK8/azkKW8
+         iFoc69n5G3V3irQEsvfGSmy36nnA8Gg9ufrGzY2OC7kVp2uH4tt5vzrFHWkHMKIJj/
+         7wTkzJE1LXtsccFy9kec2XLrFpEWyaIMu7GE41Q4IEaMYAg7teyu8b/AaSKfJARIyI
+         Nlg/tP+rBkWt+6QT1/8s4X3SDvNG/rDkbALb4JlBMtTBjRHbngtdRbmIuIn7wfMf0g
+         O4mAIg9NwhW1g==
+Received: by mail-ed1-f53.google.com with SMTP id h7so16646998ede.8;
+        Wed, 27 Oct 2021 14:54:12 -0700 (PDT)
+X-Gm-Message-State: AOAM530fbq34jSycT0x21NOeLtHrwJpN0NtDgzse7kJYY+zas2mkQlcW
+        hSJ/zyTxheAeFH+pDZuyIBkq+j0spsetsTO7wA==
+X-Google-Smtp-Source: ABdhPJz4kxW1DR4UGq5S1PijHQ34O4WuSLKy+4MFc+0p8RGDh6RSrjWvUEec/qgQMkxVs4c2i1XYv6o1JFKR1o6WZok=
+X-Received: by 2002:a17:907:7f10:: with SMTP id qf16mr244409ejc.390.1635371651311;
+ Wed, 27 Oct 2021 14:54:11 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211025015156.33133-6-brad@pensando.io>
+References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
+ <20211006035407.1147909-2-dmitry.baryshkov@linaro.org> <YXf6TbV2IpPbB/0Y@robh.at.kernel.org>
+ <37b26090-945f-1e17-f6ab-52552a4b6d89@linaro.org>
+In-Reply-To: <37b26090-945f-1e17-f6ab-52552a4b6d89@linaro.org>
+From:   Rob Herring <robh@kernel.org>
+Date:   Wed, 27 Oct 2021 16:53:59 -0500
+X-Gmail-Original-Message-ID: <CAL_JsqLAnJqZ95_bf6_fFmPJFMjuy43UfP2UxzEmFMNnG_t-Ug@mail.gmail.com>
+Message-ID: <CAL_JsqLAnJqZ95_bf6_fFmPJFMjuy43UfP2UxzEmFMNnG_t-Ug@mail.gmail.com>
+Subject: Re: [PATCH v1 01/15] dt-bindings: add pwrseq device tree bindings
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "open list:BLUETOOTH DRIVERS" <linux-bluetooth@vger.kernel.org>,
+        ath10k@lists.infradead.org,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 24 Oct 2021 18:51:50 -0700, Brad Larson wrote:
-> The Pensando Elba SoC has integrated the DW APB SPI Controller
-> 
-> Signed-off-by: Brad Larson <brad@pensando.io>
-> ---
->  Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml | 2 ++
->  1 file changed, 2 insertions(+)
-> 
+On Tue, Oct 26, 2021 at 9:42 AM Dmitry Baryshkov
+<dmitry.baryshkov@linaro.org> wrote:
+>
+> On 26/10/2021 15:53, Rob Herring wrote:
+> > On Wed, Oct 06, 2021 at 06:53:53AM +0300, Dmitry Baryshkov wrote:
+> >> Add device tree bindings for the new power sequencer subsystem.
+> >> Consumers would reference pwrseq nodes using "foo-pwrseq" properties.
+> >> Providers would use '#pwrseq-cells' property to declare the amount of
+> >> cells in the pwrseq specifier.
+> >
+> > Please use get_maintainers.pl.
+> >
+> > This is not a pattern I want to encourage, so NAK on a common binding.
+>
+>
+> Could you please spend a few more words, describing what is not
+> encouraged? The whole foo-subsys/#subsys-cells structure?
 
-Acked-by: Rob Herring <robh@kernel.org>
+No, that's generally how common provider/consumer style bindings work.
+
+> Or just specifying the common binding?
+
+If we could do it again, I would not have mmc pwrseq binding. The
+properties belong in the device's node. So don't generalize the mmc
+pwrseq binding.
+
+It's a kernel problem if the firmware says there's a device on a
+'discoverable' bus and the kernel can't discover it. I know you have
+the added complication of a device with 2 interfaces, but please,
+let's solve one problem at a time.
+
+Rob
