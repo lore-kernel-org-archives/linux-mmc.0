@@ -2,175 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD78BC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 07:09:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A6BCC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 07:26:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BE6436103B
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 07:09:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1049A60FF2
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 07:26:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229809AbhJ1HLj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Oct 2021 03:11:39 -0400
-Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.50]:21061 "EHLO
-        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229808AbhJ1HLi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 03:11:38 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1635404932;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
-    From:Subject:Sender;
-    bh=AmCnIkC4xxL8JxCkpiyDD7JlfpGKYsyeat25tXevaX4=;
-    b=jLG7PP43yreRqs2U/5telR2iGo8kTKwncWbdYEzwaXEixgwnzzyHQfHvpq/S82OQes
-    AsyOI2BgYqECOyfzjOyyGa/W3p6dSVPtTG2yU10XZYMFyCoQEMxp0Y9RHYWtqL6hTpCT
-    WusP6S5qw46BdJFMUPKoNF5IB+i/JkEP9wqEbw5X99NalY0WX2hYiZWke3gU3Wip/h+3
-    +ccdwFUUUsFTYX68Qg+sKxIsgyJkWm8FnVgV0keKoO69tl2z456sfZtQ8A86kxJHRvSu
-    rE6DoMoECg0dJ2kXG7UE6Rpo6jmeA3TE6uymcscduEWq574YnyuAhGbqOLxFI8vdUrRM
-    J1jg==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw4vtTA=="
-X-RZG-CLASS-ID: mo00
-Received: from imac.fritz.box
-    by smtp.strato.de (RZmta 47.34.1 DYNA|AUTH)
-    with ESMTPSA id d01d1fx9S78p4jN
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Thu, 28 Oct 2021 09:08:51 +0200 (CEST)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Subject: Re: [RFC] mmc: core: transplant ti,wl1251 quirks from to be retired
- omap_hsmmc
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-In-Reply-To: <CAPDyKFp47sAXhM2s5HOqV2wLf-kYRhdqSdzcn7a62ZW23SSPdg@mail.gmail.com>
-Date:   Thu, 28 Oct 2021 09:08:50 +0200
-Cc:     Jerome Pouiller <Jerome.Pouiller@silabs.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
-        Tony Lindgren <tony@atomide.com>,
-        Linux-OMAP <linux-omap@vger.kernel.org>
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <470A96FD-DB24-4C32-BC9F-AE2F617FBF2D@goldelico.com>
-References: <8ecc5c79c1dd0627d570ede31e18c860786cacca.1633519499.git.hns@goldelico.com>
- <CAPDyKFraMXqC9OBeUTpm=bxjrFZTCopV3ZJQf1TRsA8UeTWdTA@mail.gmail.com>
- <80C6A8DD-183B-4FDD-B203-D3108C106043@goldelico.com>
- <935598D6-B8B5-4EC8-B87E-8EDC0F3B58CF@goldelico.com>
- <CAPDyKFp47sAXhM2s5HOqV2wLf-kYRhdqSdzcn7a62ZW23SSPdg@mail.gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-X-Mailer: Apple Mail (2.3445.104.21)
+        id S229771AbhJ1H2r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Oct 2021 03:28:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47286 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229626AbhJ1H2q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 03:28:46 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F1C8C061570;
+        Thu, 28 Oct 2021 00:26:20 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id i13so2054855lfe.4;
+        Thu, 28 Oct 2021 00:26:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=An+PWLgm9KGN3ZMc6V12HECPGYxxsybsWas2GAbfS9c=;
+        b=LcKx75XoCzDyv0KsxRa8EIVtTggERMVMVW374pW7DAVBNZ33LF7adCQ9RGECxrFB+w
+         yJHwxBiT2dYqM4p8BPRy9nKSkAl5p3Uo7C42tASPiUJ72SrmzFH7CQVs1k+qVXC3F1VF
+         skPF9xEF8L8upTlOi5AWdiT5t4piblTAtqXzFgrleKRlndDTTv4OreEfSdkUNXvrTS7s
+         K5DWdozMtt9tMGFKDYXJLPmnrp7lFA+s2nf4OoIyF/wisNVGYbvA/2hYTbLPICeMfK+J
+         ooFNAR7Z3lBu41WoefUsrnQoi1N9x2aBlQ+zKCwfMrBSBYijUsRnxyiV1YbF3on7iE9u
+         bkUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=An+PWLgm9KGN3ZMc6V12HECPGYxxsybsWas2GAbfS9c=;
+        b=XFD4KFESWl4dSZm5s1G2tfo3XpVQ0PUnEBw0ZnMTzpx/oZJgWfKyLUOGBt7AByMrs2
+         IVRmMWUy6iQnYt2amynx4tJtFdrczmiK2677PHxAPKIYqYadGvRNfWCzUC/R5hdoONl+
+         VYCsyZU3vdG0XSbo3GYoLai0wO4fZzuTcs0+YbL+G+iuq8SqcDgBLd5qzFbsLQ8dNj12
+         iYXBP1XzKuhDeDD8ForZp52rV8GloGWweKOtxNajofkVlGIByZwjBSHKbT3NOP2vfwnC
+         jJ6bCEPER8ZV+M8QntmpA7wDxLkrKt2n8nzwZGPKwPpvQGC4LwdRaDZ4OISCYueDpuLF
+         xx+A==
+X-Gm-Message-State: AOAM532pj1D/7Jog1MUrK0Hrc8+/FX7FcsQyzizWDnxSxMHXFv2Uu+fZ
+        o4yAq8Yj+s54068vBgKhmV0=
+X-Google-Smtp-Source: ABdhPJyfOzJGwTUDwgcZTLmFS1lc6/QeQ+Ig43q40Kd5rQQFpKZziM4sJzXi3z7oppp69E6pL9tIPQ==
+X-Received: by 2002:a05:6512:3501:: with SMTP id h1mr2607048lfs.446.1635405978604;
+        Thu, 28 Oct 2021 00:26:18 -0700 (PDT)
+Received: from mobilestation ([95.79.132.211])
+        by smtp.gmail.com with ESMTPSA id r7sm226300lfc.106.2021.10.28.00.26.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 Oct 2021 00:26:18 -0700 (PDT)
+Date:   Thu, 28 Oct 2021 10:26:16 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <brad@pensando.io>
+Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
+        linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, olof@lixom.net, linux-gpio@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 04/11] dt-bindings: spi: Add compatible for Pensando
+ Elba SoC
+Message-ID: <20211028072616.p3mazud3vi5jgynk@mobilestation>
+References: <20211025015156.33133-1-brad@pensando.io>
+ <20211025015156.33133-5-brad@pensando.io>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211025015156.33133-5-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hello Brad
 
+The patch name "dt-bindings: spi: Add compatible for Pensando Elba
+SoC" doesn't mention to what bindings it is referring to. For the sake
+of having a more representative git log I'd suggest at least to add
+"cdns" vendor name in the title, like: "dt-bindings: spi: cdns: Add ..."
+Otherwise it's impossible to understand to what bindings you're adding
+a new compatibility especially seeing you are doing the similar thing
+for the DW SPI in the next patch.
 
-> Am 27.10.2021 um 23:31 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
->=20
-> On Wed, 27 Oct 2021 at 19:01, H. Nikolaus Schaller <hns@goldelico.com> =
-wrote:
->>=20
->> Hi Ulf,
->>=20
->>> Am 26.10.2021 um 20:08 schrieb H. Nikolaus Schaller =
-<hns@goldelico.com>:
->>>=20
->>> Hi Uf,
->>>>=20
->>>> As a matter of fact, the similar problem that you are looking to
->>>> address (applying card quirks based on DT compatibility strings), =
-is
->>>> partly being taken care of in another series [1], being discussed
->>>> right now. I think the solution for the ti,wl1251 should be based =
-upon
->>>> that too. Please have a look and see if you can play with that!?
->>>=20
->>> That is interesting.
->>> Yes, maybe it can be the basis. At least for finding the chip and =
-driver.
->>=20
->> I have done a first experiment.
->>=20
->> It seems as if the series [1] does the opposite of what we need... It =
-just
->> skips entries in struct mmc_fixup if the DT does *not* match.
->=20
-> Ohh, I didn't look that close. In that case the code isn't doing what
-> it *should*. The point is really to match on the compatible string and
-> then add quirks if that is found.
+-Sergey
 
-That is what I had expected.
-
->=20
-> Let me have a closer look - and for sure, I am willing to help if =
-needed.
->=20
->>=20
->> This new match is not even tried in the wl1251 case since =
-card->cis.vendor
->> and card->cis.device are not properly initialized when =
-mmc_fixup_device() is called.
->> (in the upstream code the init_card function sets these and also sets =
-MMC_QUIRK_NONSTD_SDIO
->> to early abort before sdio_read_cccr, sdio_read_common_cis, and =
-mmc_fixup_device).
->=20
-> We can call mmc_fixup_device() more than once during initialization
-> and provide different struct mmc_fixup* - if that is needed.
-
-Ah, looks good.
-
->=20
->>=20
->> What I don't get from the code is how cis.vendor or cis.device can be
->> initialized from device tree for a specific device. As far as I see =
-it can
->> only be checked for and some quirks can be set from a table if vendor =
-and
->> device read from the CIS registers do match.
->=20
-> Yes. I thought that should be possible, but maybe it is not?
-
-It seems to be a hen or egg issue here. MMC_QUIRK_NONSTD_SDIO should be =
-set
-before we can match by vendor and device or compatible. But it can't be =
-set
-late.
-
->=20
->>=20
->> Instead, we want to match DT and define some values for an otherwise =
-unknown
->> device (i.e. we can't match by vendor or other methods) to help to =
-initialize
->> the interface. So in mmc_fixup_device it is too late and we need =
-something
->> running earlier, based purely on device tree information...
->=20
-> Okay, I will have a closer look. Maybe we need to extend the card
-> quirks interface a bit to make it suitable for this case too.
-
-Combining your suggestions we could do roughly:
-
-in mmc_sdio_init_card():
-
-	if (host->ops->init_card)
-		host->ops->init_card(host, card);
-	else
-		mmc_fixup_device(host, sdio_prepare_fixups_methods);
-
-Next we need a location for the sdio_prepare_fixups_methods table and =
-functions.
-
-For "ti,wl1251" we would then provide the entry in the table and a =
-function doing
-the setup. But where should these be defined? Likely not in a header =
-file like
-quirks.h? But there is no quirks.c.
-
-Best regards,
-Nikolaus
-
+On Sun, Oct 24, 2021 at 06:51:49PM -0700, Brad Larson wrote:
+> Document the cadence qspi controller compatible for Pensando Elba SoC
+> boards.  The Elba qspi fifo size is 1024.
+> 
+> Signed-off-by: Brad Larson <brad@pensando.io>
+> ---
+>  Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml b/Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+> index 0e7087cc8bf9..d4413eced17a 100644
+> --- a/Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+> +++ b/Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+> @@ -20,6 +20,7 @@ properties:
+>                - ti,k2g-qspi
+>                - ti,am654-ospi
+>                - intel,lgm-qspi
+> +              - pensando,elba-qspi
+>            - const: cdns,qspi-nor
+>        - const: cdns,qspi-nor
+>  
+> @@ -38,7 +39,7 @@ properties:
+>      description:
+>        Size of the data FIFO in words.
+>      $ref: "/schemas/types.yaml#/definitions/uint32"
+> -    enum: [ 128, 256 ]
+> +    enum: [ 128, 256, 1024 ]
+>      default: 128
+>  
+>    cdns,fifo-width:
+> -- 
+> 2.17.1
+> 
