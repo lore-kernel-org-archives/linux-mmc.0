@@ -2,65 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 682BDC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 23:12:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D05AC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 02:21:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3E58961039
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Oct 2021 23:12:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21AD661106
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 02:21:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230270AbhJ0XPA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Oct 2021 19:15:00 -0400
-Received: from straum.hexapodia.org ([216.252.162.53]:47748 "EHLO
-        straum.hexapodia.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230260AbhJ0XO7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Oct 2021 19:14:59 -0400
-X-Greylist: delayed 448 seconds by postgrey-1.27 at vger.kernel.org; Wed, 27 Oct 2021 19:14:59 EDT
-Received: by straum.hexapodia.org (Postfix, from userid 22448)
-        id 845D94070D; Wed, 27 Oct 2021 16:05:05 -0700 (PDT)
-Date:   Wed, 27 Oct 2021 16:05:05 -0700
-From:   Andy Isaacson <adi@hexapodia.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-kernel@vger.kernel.org
-Subject: [PATCH] docs: mmc: update maintainer name and URL
-Message-ID: <20211027230505.GA23994@hexapodia.org>
+        id S229823AbhJ1CXY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Oct 2021 22:23:24 -0400
+Received: from mailgw01.mediatek.com ([60.244.123.138]:44216 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229809AbhJ1CXY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Oct 2021 22:23:24 -0400
+X-UUID: 1de94ce069ba4bd59c11ecb3b1595b5d-20211028
+X-UUID: 1de94ce069ba4bd59c11ecb3b1595b5d-20211028
+Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw01.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 52249534; Thu, 28 Oct 2021 10:20:54 +0800
+Received: from mtkmbs10n1.mediatek.inc (172.21.101.34) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
+ Thu, 28 Oct 2021 10:20:52 +0800
+Received: from localhost.localdomain (10.17.3.154) by mtkmbs10n1.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.2.792.15 via Frontend
+ Transport; Thu, 28 Oct 2021 10:20:52 +0800
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
+        "Yong Mao" <yong.mao@mediatek.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <srv_heupstream@mediatek.com>,
+        "Wenbin Mei" <wenbin.mei@mediatek.com>, <stable@vger.kernel.org>
+Subject: [PATCH] mmc: mediatek: move cqhci init behind ungate clock
+Date:   Thu, 28 Oct 2021 10:20:49 +0800
+Message-ID: <20211028022049.22129-1-wenbin.mei@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii; format=flowed
-Content-Disposition: inline
-X-Old-GPG-Fingerprint: 1914 0645 FD53 C18E EEEF C402 4A69 B1F3 68D2 A63F
-X-GPG-Fingerprint: A5FC 6141 F76D B6B1 C81F  0FB7 AFA0 A45F ED3D 116D
-X-GPG-Key-URL: http://web.hexapodia.org/~adi/gpg.txt
-X-Domestic-Surveillance: money launder bomb tax evasion
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The mmc-utils repo is no longer in /cjb/ and Ulf has taken over 
-maintenance.
+We must enable clock before cqhci init, because crypto needs
+read information from CQHCI registers, otherwise, it will hang
+in MediaTek mmc host controller.
 
-Signed-off-by: Andy Isaacson <adi@hexapodia.org>
-
+Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+Fixes: 88bd652b3c74 ("mmc: mediatek: command queue support")
+Cc: stable@vger.kernel.org
 ---
- Documentation/driver-api/mmc/mmc-tools.rst | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 38 +++++++++++++++++++-------------------
+ 1 file changed, 19 insertions(+), 19 deletions(-)
 
-diff --git a/Documentation/driver-api/mmc/mmc-tools.rst b/Documentation/driver-api/mmc/mmc-tools.rst
-index a231e9644351..eee1c2ccfa8f 100644
---- a/Documentation/driver-api/mmc/mmc-tools.rst
-+++ b/Documentation/driver-api/mmc/mmc-tools.rst
-@@ -2,10 +2,10 @@
- MMC tools introduction
- ======================
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index b124cfee05a1..943940b44e83 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -2656,6 +2656,25 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		host->dma_mask = DMA_BIT_MASK(32);
+ 	mmc_dev(mmc)->dma_mask = &host->dma_mask;
  
--There is one MMC test tools called mmc-utils, which is maintained by Chris Ball,
-+There is one MMC test tools called mmc-utils, which is maintained by Ulf Hansson,
- you can find it at the below public git repository:
++	host->timeout_clks = 3 * 1048576;
++	host->dma.gpd = dma_alloc_coherent(&pdev->dev,
++				2 * sizeof(struct mt_gpdma_desc),
++				&host->dma.gpd_addr, GFP_KERNEL);
++	host->dma.bd = dma_alloc_coherent(&pdev->dev,
++				MAX_BD_NUM * sizeof(struct mt_bdma_desc),
++				&host->dma.bd_addr, GFP_KERNEL);
++	if (!host->dma.gpd || !host->dma.bd) {
++		ret = -ENOMEM;
++		goto release_mem;
++	}
++	msdc_init_gpd_bd(host, &host->dma);
++	INIT_DELAYED_WORK(&host->req_timeout, msdc_request_timeout);
++	spin_lock_init(&host->lock);
++
++	platform_set_drvdata(pdev, mmc);
++	msdc_ungate_clock(host);
++	msdc_init_hw(host);
++
+ 	if (mmc->caps2 & MMC_CAP2_CQE) {
+ 		host->cq_host = devm_kzalloc(mmc->parent,
+ 					     sizeof(*host->cq_host),
+@@ -2676,25 +2695,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		mmc->max_seg_size = 64 * 1024;
+ 	}
  
--	https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/
-+	https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
- 
- Functions
- =========
+-	host->timeout_clks = 3 * 1048576;
+-	host->dma.gpd = dma_alloc_coherent(&pdev->dev,
+-				2 * sizeof(struct mt_gpdma_desc),
+-				&host->dma.gpd_addr, GFP_KERNEL);
+-	host->dma.bd = dma_alloc_coherent(&pdev->dev,
+-				MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+-				&host->dma.bd_addr, GFP_KERNEL);
+-	if (!host->dma.gpd || !host->dma.bd) {
+-		ret = -ENOMEM;
+-		goto release_mem;
+-	}
+-	msdc_init_gpd_bd(host, &host->dma);
+-	INIT_DELAYED_WORK(&host->req_timeout, msdc_request_timeout);
+-	spin_lock_init(&host->lock);
+-
+-	platform_set_drvdata(pdev, mmc);
+-	msdc_ungate_clock(host);
+-	msdc_init_hw(host);
+-
+ 	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+ 			       IRQF_TRIGGER_NONE, pdev->name, host);
+ 	if (ret)
 -- 
-2.20.1
+2.25.1
 
