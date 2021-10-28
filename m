@@ -2,103 +2,175 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 705F1C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 05:54:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD78BC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 07:09:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 542BC60E76
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 05:54:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE6436103B
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 07:09:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229705AbhJ1F4o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Oct 2021 01:56:44 -0400
-Received: from mailgw01.mediatek.com ([60.244.123.138]:34426 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229586AbhJ1F4n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 01:56:43 -0400
-X-UUID: 239480cb99e147c4b7009459a10e5637-20211028
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=Nr8c5aHXlwibVnUmW5WuIOgCi8SwSdCWVI3tM+6NXBo=;
-        b=i3RgqrlnGo13bJizqF/Vxt+fpiid41r9ZRpPd9N481LpjQlc5LppxpWGdmNqku/PbhBUkWTdty5Oe+MGABO1I2f51ux4rndXnZHzdTalWHjQjWgRJ2bIjy59XXLSX9eR5W7AqreMpq5nYE6ASXQpBQv5vMJ4cJabPXxzEP6QWvI=;
-X-UUID: 239480cb99e147c4b7009459a10e5637-20211028
-Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
-        (envelope-from <chaotian.jing@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1214121677; Thu, 28 Oct 2021 13:54:14 +0800
-Received: from mtkmbs10n1.mediatek.inc (172.21.101.34) by
- mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.792.15; Thu, 28 Oct 2021 13:54:13 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkmbs10n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.15 via Frontend
- Transport; Thu, 28 Oct 2021 13:54:12 +0800
-Message-ID: <facef42345435d82600aca87d9b020fa073506ce.camel@mediatek.com>
-Subject: Re: [PATCH] mmc: mediatek: move cqhci init behind ungate clock
-From:   Chaotian Jing <chaotian.jing@mediatek.com>
-To:     Wenbin Mei <wenbin.mei@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Matthias Brugger <matthias.bgg@gmail.com>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
-        Yong Mao <yong.mao@mediatek.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <srv_heupstream@mediatek.com>, <stable@vger.kernel.org>
-Date:   Thu, 28 Oct 2021 13:54:12 +0800
-In-Reply-To: <20211028022049.22129-1-wenbin.mei@mediatek.com>
-References: <20211028022049.22129-1-wenbin.mei@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
-MIME-Version: 1.0
-X-MTK:  N
-Content-Transfer-Encoding: base64
+        id S229809AbhJ1HLj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Oct 2021 03:11:39 -0400
+Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.50]:21061 "EHLO
+        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229808AbhJ1HLi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 03:11:38 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1635404932;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
+    From:Subject:Sender;
+    bh=AmCnIkC4xxL8JxCkpiyDD7JlfpGKYsyeat25tXevaX4=;
+    b=jLG7PP43yreRqs2U/5telR2iGo8kTKwncWbdYEzwaXEixgwnzzyHQfHvpq/S82OQes
+    AsyOI2BgYqECOyfzjOyyGa/W3p6dSVPtTG2yU10XZYMFyCoQEMxp0Y9RHYWtqL6hTpCT
+    WusP6S5qw46BdJFMUPKoNF5IB+i/JkEP9wqEbw5X99NalY0WX2hYiZWke3gU3Wip/h+3
+    +ccdwFUUUsFTYX68Qg+sKxIsgyJkWm8FnVgV0keKoO69tl2z456sfZtQ8A86kxJHRvSu
+    rE6DoMoECg0dJ2kXG7UE6Rpo6jmeA3TE6uymcscduEWq574YnyuAhGbqOLxFI8vdUrRM
+    J1jg==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw4vtTA=="
+X-RZG-CLASS-ID: mo00
+Received: from imac.fritz.box
+    by smtp.strato.de (RZmta 47.34.1 DYNA|AUTH)
+    with ESMTPSA id d01d1fx9S78p4jN
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Thu, 28 Oct 2021 09:08:51 +0200 (CEST)
+Content-Type: text/plain;
+        charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
+Subject: Re: [RFC] mmc: core: transplant ti,wl1251 quirks from to be retired
+ omap_hsmmc
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+In-Reply-To: <CAPDyKFp47sAXhM2s5HOqV2wLf-kYRhdqSdzcn7a62ZW23SSPdg@mail.gmail.com>
+Date:   Thu, 28 Oct 2021 09:08:50 +0200
+Cc:     Jerome Pouiller <Jerome.Pouiller@silabs.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
+        Tony Lindgren <tony@atomide.com>,
+        Linux-OMAP <linux-omap@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <470A96FD-DB24-4C32-BC9F-AE2F617FBF2D@goldelico.com>
+References: <8ecc5c79c1dd0627d570ede31e18c860786cacca.1633519499.git.hns@goldelico.com>
+ <CAPDyKFraMXqC9OBeUTpm=bxjrFZTCopV3ZJQf1TRsA8UeTWdTA@mail.gmail.com>
+ <80C6A8DD-183B-4FDD-B203-D3108C106043@goldelico.com>
+ <935598D6-B8B5-4EC8-B87E-8EDC0F3B58CF@goldelico.com>
+ <CAPDyKFp47sAXhM2s5HOqV2wLf-kYRhdqSdzcn7a62ZW23SSPdg@mail.gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+X-Mailer: Apple Mail (2.3445.104.21)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gVGh1LCAyMDIxLTEwLTI4IGF0IDEwOjIwICswODAwLCBXZW5iaW4gTWVpIHdyb3RlOg0KPiBX
-ZSBtdXN0IGVuYWJsZSBjbG9jayBiZWZvcmUgY3FoY2kgaW5pdCwgYmVjYXVzZSBjcnlwdG8gbmVl
-ZHMNCj4gcmVhZCBpbmZvcm1hdGlvbiBmcm9tIENRSENJIHJlZ2lzdGVycywgb3RoZXJ3aXNlLCBp
-dCB3aWxsIGhhbmcNCj4gaW4gTWVkaWFUZWsgbW1jIGhvc3QgY29udHJvbGxlci4NCj4gDQo+IFNp
-Z25lZC1vZmYtYnk6IFdlbmJpbiBNZWkgPHdlbmJpbi5tZWlAbWVkaWF0ZWsuY29tPg0KICBBY2tl
-ZC1ieTogQ2hhb3RpYW4gSmluZyA8Y2hhb3RpYW4uamluZ0BtZWRpYXRlay5jb20+DQo+IEZpeGVz
-OiA4OGJkNjUyYjNjNzQgKCJtbWM6IG1lZGlhdGVrOiBjb21tYW5kIHF1ZXVlIHN1cHBvcnQiKQ0K
-PiBDYzogc3RhYmxlQHZnZXIua2VybmVsLm9yZw0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hvc3Qv
-bXRrLXNkLmMgfCAzOCArKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0tLQ0KPiAtLS0N
-Cj4gIDEgZmlsZSBjaGFuZ2VkLCAxOSBpbnNlcnRpb25zKCspLCAxOSBkZWxldGlvbnMoLSkNCj4g
-DQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIGIvZHJpdmVycy9tbWMv
-aG9zdC9tdGstc2QuYw0KPiBpbmRleCBiMTI0Y2ZlZTA1YTEuLjk0Mzk0MGI0NGU4MyAxMDA2NDQN
-Cj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYw0KPiArKysgYi9kcml2ZXJzL21tYy9o
-b3N0L210ay1zZC5jDQo+IEBAIC0yNjU2LDYgKzI2NTYsMjUgQEAgc3RhdGljIGludCBtc2RjX2Ry
-dl9wcm9iZShzdHJ1Y3QNCj4gcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0KPiAgCQlob3N0LT5kbWFf
-bWFzayA9IERNQV9CSVRfTUFTSygzMik7DQo+ICAJbW1jX2RldihtbWMpLT5kbWFfbWFzayA9ICZo
-b3N0LT5kbWFfbWFzazsNCj4gIA0KPiArCWhvc3QtPnRpbWVvdXRfY2xrcyA9IDMgKiAxMDQ4NTc2
-Ow0KPiArCWhvc3QtPmRtYS5ncGQgPSBkbWFfYWxsb2NfY29oZXJlbnQoJnBkZXYtPmRldiwNCj4g
-KwkJCQkyICogc2l6ZW9mKHN0cnVjdCBtdF9ncGRtYV9kZXNjKSwNCj4gKwkJCQkmaG9zdC0+ZG1h
-LmdwZF9hZGRyLCBHRlBfS0VSTkVMKTsNCj4gKwlob3N0LT5kbWEuYmQgPSBkbWFfYWxsb2NfY29o
-ZXJlbnQoJnBkZXYtPmRldiwNCj4gKwkJCQlNQVhfQkRfTlVNICogc2l6ZW9mKHN0cnVjdA0KPiBt
-dF9iZG1hX2Rlc2MpLA0KPiArCQkJCSZob3N0LT5kbWEuYmRfYWRkciwgR0ZQX0tFUk5FTCk7DQo+
-ICsJaWYgKCFob3N0LT5kbWEuZ3BkIHx8ICFob3N0LT5kbWEuYmQpIHsNCj4gKwkJcmV0ID0gLUVO
-T01FTTsNCj4gKwkJZ290byByZWxlYXNlX21lbTsNCj4gKwl9DQo+ICsJbXNkY19pbml0X2dwZF9i
-ZChob3N0LCAmaG9zdC0+ZG1hKTsNCj4gKwlJTklUX0RFTEFZRURfV09SSygmaG9zdC0+cmVxX3Rp
-bWVvdXQsIG1zZGNfcmVxdWVzdF90aW1lb3V0KTsNCj4gKwlzcGluX2xvY2tfaW5pdCgmaG9zdC0+
-bG9jayk7DQo+ICsNCj4gKwlwbGF0Zm9ybV9zZXRfZHJ2ZGF0YShwZGV2LCBtbWMpOw0KPiArCW1z
-ZGNfdW5nYXRlX2Nsb2NrKGhvc3QpOw0KPiArCW1zZGNfaW5pdF9odyhob3N0KTsNCj4gKw0KPiAg
-CWlmIChtbWMtPmNhcHMyICYgTU1DX0NBUDJfQ1FFKSB7DQo+ICAJCWhvc3QtPmNxX2hvc3QgPSBk
-ZXZtX2t6YWxsb2MobW1jLT5wYXJlbnQsDQo+ICAJCQkJCSAgICAgc2l6ZW9mKCpob3N0LT5jcV9o
-b3N0KSwNCj4gQEAgLTI2NzYsMjUgKzI2OTUsNiBAQCBzdGF0aWMgaW50IG1zZGNfZHJ2X3Byb2Jl
-KHN0cnVjdA0KPiBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpDQo+ICAJCW1tYy0+bWF4X3NlZ19zaXpl
-ID0gNjQgKiAxMDI0Ow0KPiAgCX0NCj4gIA0KPiAtCWhvc3QtPnRpbWVvdXRfY2xrcyA9IDMgKiAx
-MDQ4NTc2Ow0KPiAtCWhvc3QtPmRtYS5ncGQgPSBkbWFfYWxsb2NfY29oZXJlbnQoJnBkZXYtPmRl
-diwNCj4gLQkJCQkyICogc2l6ZW9mKHN0cnVjdCBtdF9ncGRtYV9kZXNjKSwNCj4gLQkJCQkmaG9z
-dC0+ZG1hLmdwZF9hZGRyLCBHRlBfS0VSTkVMKTsNCj4gLQlob3N0LT5kbWEuYmQgPSBkbWFfYWxs
-b2NfY29oZXJlbnQoJnBkZXYtPmRldiwNCj4gLQkJCQlNQVhfQkRfTlVNICogc2l6ZW9mKHN0cnVj
-dA0KPiBtdF9iZG1hX2Rlc2MpLA0KPiAtCQkJCSZob3N0LT5kbWEuYmRfYWRkciwgR0ZQX0tFUk5F
-TCk7DQo+IC0JaWYgKCFob3N0LT5kbWEuZ3BkIHx8ICFob3N0LT5kbWEuYmQpIHsNCj4gLQkJcmV0
-ID0gLUVOT01FTTsNCj4gLQkJZ290byByZWxlYXNlX21lbTsNCj4gLQl9DQo+IC0JbXNkY19pbml0
-X2dwZF9iZChob3N0LCAmaG9zdC0+ZG1hKTsNCj4gLQlJTklUX0RFTEFZRURfV09SSygmaG9zdC0+
-cmVxX3RpbWVvdXQsIG1zZGNfcmVxdWVzdF90aW1lb3V0KTsNCj4gLQlzcGluX2xvY2tfaW5pdCgm
-aG9zdC0+bG9jayk7DQo+IC0NCj4gLQlwbGF0Zm9ybV9zZXRfZHJ2ZGF0YShwZGV2LCBtbWMpOw0K
-PiAtCW1zZGNfdW5nYXRlX2Nsb2NrKGhvc3QpOw0KPiAtCW1zZGNfaW5pdF9odyhob3N0KTsNCj4g
-LQ0KPiAgCXJldCA9IGRldm1fcmVxdWVzdF9pcnEoJnBkZXYtPmRldiwgaG9zdC0+aXJxLCBtc2Rj
-X2lycSwNCj4gIAkJCSAgICAgICBJUlFGX1RSSUdHRVJfTk9ORSwgcGRldi0+bmFtZSwgaG9zdCk7
-DQo+ICAJaWYgKHJldCkNCg==
+
+
+> Am 27.10.2021 um 23:31 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+>=20
+> On Wed, 27 Oct 2021 at 19:01, H. Nikolaus Schaller <hns@goldelico.com> =
+wrote:
+>>=20
+>> Hi Ulf,
+>>=20
+>>> Am 26.10.2021 um 20:08 schrieb H. Nikolaus Schaller =
+<hns@goldelico.com>:
+>>>=20
+>>> Hi Uf,
+>>>>=20
+>>>> As a matter of fact, the similar problem that you are looking to
+>>>> address (applying card quirks based on DT compatibility strings), =
+is
+>>>> partly being taken care of in another series [1], being discussed
+>>>> right now. I think the solution for the ti,wl1251 should be based =
+upon
+>>>> that too. Please have a look and see if you can play with that!?
+>>>=20
+>>> That is interesting.
+>>> Yes, maybe it can be the basis. At least for finding the chip and =
+driver.
+>>=20
+>> I have done a first experiment.
+>>=20
+>> It seems as if the series [1] does the opposite of what we need... It =
+just
+>> skips entries in struct mmc_fixup if the DT does *not* match.
+>=20
+> Ohh, I didn't look that close. In that case the code isn't doing what
+> it *should*. The point is really to match on the compatible string and
+> then add quirks if that is found.
+
+That is what I had expected.
+
+>=20
+> Let me have a closer look - and for sure, I am willing to help if =
+needed.
+>=20
+>>=20
+>> This new match is not even tried in the wl1251 case since =
+card->cis.vendor
+>> and card->cis.device are not properly initialized when =
+mmc_fixup_device() is called.
+>> (in the upstream code the init_card function sets these and also sets =
+MMC_QUIRK_NONSTD_SDIO
+>> to early abort before sdio_read_cccr, sdio_read_common_cis, and =
+mmc_fixup_device).
+>=20
+> We can call mmc_fixup_device() more than once during initialization
+> and provide different struct mmc_fixup* - if that is needed.
+
+Ah, looks good.
+
+>=20
+>>=20
+>> What I don't get from the code is how cis.vendor or cis.device can be
+>> initialized from device tree for a specific device. As far as I see =
+it can
+>> only be checked for and some quirks can be set from a table if vendor =
+and
+>> device read from the CIS registers do match.
+>=20
+> Yes. I thought that should be possible, but maybe it is not?
+
+It seems to be a hen or egg issue here. MMC_QUIRK_NONSTD_SDIO should be =
+set
+before we can match by vendor and device or compatible. But it can't be =
+set
+late.
+
+>=20
+>>=20
+>> Instead, we want to match DT and define some values for an otherwise =
+unknown
+>> device (i.e. we can't match by vendor or other methods) to help to =
+initialize
+>> the interface. So in mmc_fixup_device it is too late and we need =
+something
+>> running earlier, based purely on device tree information...
+>=20
+> Okay, I will have a closer look. Maybe we need to extend the card
+> quirks interface a bit to make it suitable for this case too.
+
+Combining your suggestions we could do roughly:
+
+in mmc_sdio_init_card():
+
+	if (host->ops->init_card)
+		host->ops->init_card(host, card);
+	else
+		mmc_fixup_device(host, sdio_prepare_fixups_methods);
+
+Next we need a location for the sdio_prepare_fixups_methods table and =
+functions.
+
+For "ti,wl1251" we would then provide the entry in the table and a =
+function doing
+the setup. But where should these be defined? Likely not in a header =
+file like
+quirks.h? But there is no quirks.c.
+
+Best regards,
+Nikolaus
 
