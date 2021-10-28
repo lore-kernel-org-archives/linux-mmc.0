@@ -2,101 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77425C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 10:01:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49B5BC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 10:01:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 570A46044F
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 10:01:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 32ABD610FF
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 10:01:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229978AbhJ1KDb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Oct 2021 06:03:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54058 "EHLO
+        id S230157AbhJ1KDl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Oct 2021 06:03:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54090 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229833AbhJ1KDa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 06:03:30 -0400
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9A4FC061767
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 03:01:01 -0700 (PDT)
-Received: by mail-lf1-x12a.google.com with SMTP id x27so12398287lfu.5
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 03:01:01 -0700 (PDT)
+        with ESMTP id S229993AbhJ1KDf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 06:03:35 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3780C061570
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 03:01:08 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id 188so9734204ljj.4
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 03:01:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=JGBiy7a8G7oR5F6DyXz2xyj+Rcnf2xoUsqDj5a5PwIE=;
-        b=V0xQFWVEEdsy62NqWxmnYhcAWZXtzA8H3Ae95eo2PyHilcECmYUmOB7M+klZhK3pGl
-         3HfRtp4OC7l4y6mIXbhEi1YWVBoOkWqm+8Z5WXVyfGYllUiRK7nvMAhuxtRUIsxwSlgs
-         B4Kr2PpN6OD5bnDqgMo6A5kFh2/Ny4OCUIy1K4NmUGx0laoSBFRY1EgWxtTKURHncmhC
-         GDr+h+RDbQBPLk5vNQUFWkjWmf4PFJ/YDfgT4s2aZmUMMjDhWG5Qtl/Q2o8EftxNai2G
-         7Jigxvnurf0odgfUb7y0CojZzIj2sd7TVxuigzuW6j1KRZDcuZb3tV+nAnYfQc5o+SWe
-         14hA==
+        bh=fSUUXSAFp+U/pzk0ZFFpNl+pmZUQiHZI7Km2UPBgzxo=;
+        b=pyIEuQfNSMvWaNLN4sXO6MGPdFJpMAFX/V8Vn8qMhLNzrgXfippjXKeKDerh0YjsyA
+         5zJn7MNZHNZ1qb/mkLWiMtNDvLViR3JI/44RxloJPwcBxfyqdZ+YZn3XtnjbxEnWdeCF
+         oH4tqXjy1QIcOtTY6iBFWJaSihr9CGTa7luZZEOj6Fp6qgzZR8vMz4o3Zt/HfvVvazNY
+         g8Wy5QOhBD0LdnPBnL2ZlFko2KwmA+VfMcCgLZeImT46c2F5ifBBlsf4f/hXLAKLaINP
+         RhDXWzKBA/GH1ZdLCh/odbLVryNdOWeYi6/0z0cGAHJL2ZBOOrdQrNH8qqGkstHdDf4m
+         NQoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=JGBiy7a8G7oR5F6DyXz2xyj+Rcnf2xoUsqDj5a5PwIE=;
-        b=JF7b5q0pGJmFgECcsUko76cz/x7exRy8q/y2hPswmkvie1Y1W2RtIi/bUDr3xHU+EX
-         dxPMdOW/utzzhWvS4kkePLUwqrb+yTKHDZc0MTj6SrEqZeg3KWUM8isqVdgHcbJ9VEuF
-         TPw6jwru3KxvOfHaVcc2EwqJ4Q/ta7jSAElc9fmBZujXcVWP+T/qmvvvU5sBAfCvjBED
-         X+jXEr2IpGNxnuBI3YG+WNdvNGcRA2Ilg/eg87Y5hsEvWKChpAPoWHi3YNyU+L5LDnbv
-         c51CHZFJ4gJcGi4156CrRkXKeg5LbidDM5hyyyMdFAK4ddiEUQg6QoXmPyAZymRUz/jw
-         S5IA==
-X-Gm-Message-State: AOAM530OCq8slCQQc1j17NUg8tkiXAHp6RS5tYm/Rql6KPRKAEYYzR0g
-        i5FkwP5qr+MSp7MqUt9nxwRdZApMOY2vdlp0gB+56xBUmhs=
-X-Google-Smtp-Source: ABdhPJythDnG9fEkitz3W/LsxTx1pEvwh8OLMZ19ogSESq1/MSLxciKhd1VL/h6p/gJ7lf23WF0EC7ai0Krz4swFAZ4=
-X-Received: by 2002:ac2:44c3:: with SMTP id d3mr3329177lfm.184.1635415260225;
- Thu, 28 Oct 2021 03:01:00 -0700 (PDT)
+        bh=fSUUXSAFp+U/pzk0ZFFpNl+pmZUQiHZI7Km2UPBgzxo=;
+        b=lD7QlwaSJhCCDRYu2PZHmBMSJEnF/2uqGswrf5X8nQ9sU+uIWquNloCgKMY/djQ48T
+         AzamSrpkbw30LQpr9TReTe6P3jFwpzGuwvSb5MLvDLUjHThVZTlxinA7ixmbtZrK3jjK
+         fl9qPVsYZRFZ6O9ugB8mDXaFKr3mfltAATAGhGzb8DQKXb7rtEwm3E49F1IUnUhRb5Ue
+         4AHtZEbtCHiyD9aTtWWBhDMDqQ0GcCJVitoLyo3yCjrDSR5rOsLJ984hWtDBzfJTlmss
+         +Z9EYdqzz6vNhXQoAwzbI0xmZX4neXRdjNYjL1sicAM5uqOlB3JDy7L66eWMinCWL2gu
+         EY9A==
+X-Gm-Message-State: AOAM5327gavFgoCk0nSOI4nIjKULGxkNLwFoq/8Lsf/2JsBNy3S0qsbd
+        KGJ393RLUtCtNt4L0gFL4AnxFHMbJn4k4Zm68Fj8Hw==
+X-Google-Smtp-Source: ABdhPJxluntOhxdxK38z3qCSthne3EvWdVhekoNo1AufTq1f5b0lSX4qPbjRU8qzy2AYU+QFtnq4Te9kDWr177reDPc=
+X-Received: by 2002:a05:651c:907:: with SMTP id e7mr3774078ljq.300.1635415267227;
+ Thu, 28 Oct 2021 03:01:07 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211027230505.GA23994@hexapodia.org>
-In-Reply-To: <20211027230505.GA23994@hexapodia.org>
+References: <20211028022049.22129-1-wenbin.mei@mediatek.com>
+In-Reply-To: <20211028022049.22129-1-wenbin.mei@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 28 Oct 2021 12:00:23 +0200
-Message-ID: <CAPDyKFpG66uzG7RmzXKf44_RAZyUWG3T2Qgk12cWY_iw4cvCPg@mail.gmail.com>
-Subject: Re: [PATCH] docs: mmc: update maintainer name and URL
-To:     Andy Isaacson <adi@hexapodia.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 28 Oct 2021 12:00:30 +0200
+Message-ID: <CAPDyKFpcPDKmL-MCsXssX2ABVQ3LnMQVM+pG1=z68_b4d6bPBA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mediatek: move cqhci init behind ungate clock
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com,
+        stable@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 28 Oct 2021 at 01:05, Andy Isaacson <adi@hexapodia.org> wrote:
+On Thu, 28 Oct 2021 at 04:20, Wenbin Mei <wenbin.mei@mediatek.com> wrote:
 >
-> The mmc-utils repo is no longer in /cjb/ and Ulf has taken over
-> maintenance.
+> We must enable clock before cqhci init, because crypto needs
+> read information from CQHCI registers, otherwise, it will hang
+> in MediaTek mmc host controller.
 >
-> Signed-off-by: Andy Isaacson <adi@hexapodia.org>
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> Fixes: 88bd652b3c74 ("mmc: mediatek: command queue support")
+> Cc: stable@vger.kernel.org
 
-Thanks for updating this, I have completely forgotten about it.
-
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
->
 > ---
->  Documentation/driver-api/mmc/mmc-tools.rst | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/mtk-sd.c | 38 +++++++++++++++++++-------------------
+>  1 file changed, 19 insertions(+), 19 deletions(-)
 >
-> diff --git a/Documentation/driver-api/mmc/mmc-tools.rst b/Documentation/driver-api/mmc/mmc-tools.rst
-> index a231e9644351..eee1c2ccfa8f 100644
-> --- a/Documentation/driver-api/mmc/mmc-tools.rst
-> +++ b/Documentation/driver-api/mmc/mmc-tools.rst
-> @@ -2,10 +2,10 @@
->  MMC tools introduction
->  ======================
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index b124cfee05a1..943940b44e83 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -2656,6 +2656,25 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 host->dma_mask = DMA_BIT_MASK(32);
+>         mmc_dev(mmc)->dma_mask = &host->dma_mask;
 >
-> -There is one MMC test tools called mmc-utils, which is maintained by Chris Ball,
-> +There is one MMC test tools called mmc-utils, which is maintained by Ulf Hansson,
->  you can find it at the below public git repository:
+> +       host->timeout_clks = 3 * 1048576;
+> +       host->dma.gpd = dma_alloc_coherent(&pdev->dev,
+> +                               2 * sizeof(struct mt_gpdma_desc),
+> +                               &host->dma.gpd_addr, GFP_KERNEL);
+> +       host->dma.bd = dma_alloc_coherent(&pdev->dev,
+> +                               MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+> +                               &host->dma.bd_addr, GFP_KERNEL);
+> +       if (!host->dma.gpd || !host->dma.bd) {
+> +               ret = -ENOMEM;
+> +               goto release_mem;
+> +       }
+> +       msdc_init_gpd_bd(host, &host->dma);
+> +       INIT_DELAYED_WORK(&host->req_timeout, msdc_request_timeout);
+> +       spin_lock_init(&host->lock);
+> +
+> +       platform_set_drvdata(pdev, mmc);
+> +       msdc_ungate_clock(host);
+> +       msdc_init_hw(host);
+> +
+>         if (mmc->caps2 & MMC_CAP2_CQE) {
+>                 host->cq_host = devm_kzalloc(mmc->parent,
+>                                              sizeof(*host->cq_host),
+> @@ -2676,25 +2695,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 mmc->max_seg_size = 64 * 1024;
+>         }
 >
-> -       https://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/
-> +       https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git
->
->  Functions
->  =========
+> -       host->timeout_clks = 3 * 1048576;
+> -       host->dma.gpd = dma_alloc_coherent(&pdev->dev,
+> -                               2 * sizeof(struct mt_gpdma_desc),
+> -                               &host->dma.gpd_addr, GFP_KERNEL);
+> -       host->dma.bd = dma_alloc_coherent(&pdev->dev,
+> -                               MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+> -                               &host->dma.bd_addr, GFP_KERNEL);
+> -       if (!host->dma.gpd || !host->dma.bd) {
+> -               ret = -ENOMEM;
+> -               goto release_mem;
+> -       }
+> -       msdc_init_gpd_bd(host, &host->dma);
+> -       INIT_DELAYED_WORK(&host->req_timeout, msdc_request_timeout);
+> -       spin_lock_init(&host->lock);
+> -
+> -       platform_set_drvdata(pdev, mmc);
+> -       msdc_ungate_clock(host);
+> -       msdc_init_hw(host);
+> -
+>         ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+>                                IRQF_TRIGGER_NONE, pdev->name, host);
+>         if (ret)
 > --
-> 2.20.1
+> 2.25.1
 >
