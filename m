@@ -2,236 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4DBEC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 09:11:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CD73C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 09:32:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BAA68610CB
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 09:11:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5C4BC60E8F
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 09:32:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229877AbhJ1JNx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Oct 2021 05:13:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42818 "EHLO
+        id S230098AbhJ1Jet (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Oct 2021 05:34:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229835AbhJ1JNx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 05:13:53 -0400
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2380BC061570;
-        Thu, 28 Oct 2021 02:11:26 -0700 (PDT)
-Received: by mail-lj1-x230.google.com with SMTP id q16so9547373ljg.3;
-        Thu, 28 Oct 2021 02:11:26 -0700 (PDT)
+        with ESMTP id S230088AbhJ1Jer (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 05:34:47 -0400
+Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E067C061745
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 02:32:20 -0700 (PDT)
+Received: by mail-lj1-x233.google.com with SMTP id u5so9571962ljo.8
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 02:32:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=HaFtusB1yeYK1/7m7q8b+ikbAL6j1FjDXfNSnND+K+s=;
-        b=CNlzPEP8uc7ZR0GWOjIFHlNlkGQOygo1HWywRgQLrbNjvWHSQUc1QC6atXT/nUUOs+
-         3sjpm2BpheifE/FQeL/k49qGTL3C2MKhzMH/VC1geTGMtTjj/yJ3L3HThJavP+im8IT6
-         D+D3mtIYQQl8pNli9276ZnrJWSF9MusaAvemGvDYi7Dt1qMDdKFyjIiIhliMCymTdcxy
-         PL1Zmi4fH/lzKE9nyWYhIv8CCLFeItEyoGQ6QmS36puPgTYOqfYn/N3uHjBq1Fv7AS/H
-         /bQbj8jXlBxWXu0JQ3XEV65t9p1N1cQfCCvmIgx3oX83tcXqyZFdMKIXA4Asy7JvVIhc
-         hEHw==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=H1cBbZ29iBhIzlADanMboqR5PTvmcX6f2VNyLE4w9Tk=;
+        b=ZF8RwgiR46eeZoRy7bQm9ex9lg/svajTlowMu+8I/nRfgUrrjWGJSl4sMB22wU7Yzo
+         /amQHrUnik25ChBxiQIVRNWRGarvxrwqBWfH5dqMT9GU5jy4sRNGgEF71cLdL2CDAqVT
+         qikRVVu61rlTBpGB7b+ixhzqMJF7B15oRsKr15GP84lQO92p4ldyL+uJ9MVUVxMOsFfh
+         QWbkYGdti4Q2LauYBohGXpFdBS1pQF4Qfydx8mBSrZU/m9NsxdO93pfcRWqvy1OG/g7W
+         IdbctlT1Tu4E6WoZI23e4BP+BHnxdqJXOc1BL2l2bVA0/suNaoegxy8PlicibO70KB7E
+         674A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=HaFtusB1yeYK1/7m7q8b+ikbAL6j1FjDXfNSnND+K+s=;
-        b=3UIPMjBvicqED3vx+8zuPwpKI2BXXN+sCBtYqKptEG0CztfOaZ/br7gn19XnDrG8XG
-         DkIobEr7VorCNgYdUBoLEDvaBcCV1tlqnQ12SXM82XK4o442we/y2J4DN001LMezvZed
-         qoDy5FsGTOx8RrlxjGY7Zx8JKGpeNzU7bU3MEmEwLWYBCaPNlnYfXLLrwfF5JqoUrcQL
-         BpJEYuZWhhkrj/Ua5hEbL4ogDFyFkhYacF1Q+RpLnLOwEuvKg4ldjrcYs8gn8ReQ3FVm
-         VJI6D48phPgCaboyYxe69E+bx+8LZ4ZoShmUQCkwACRWD8m1d4CCwRgCMkSlL/WK8FX+
-         gFkQ==
-X-Gm-Message-State: AOAM530fNsBoHpaSN53AQOLD8tgXbVlBvJD30q704XBg5D/8ikRxSbP3
-        IiBqkxe1WLyIn/rpstDp3Qc=
-X-Google-Smtp-Source: ABdhPJwvejmxjwMA5o6s6xVgy7YmVtp4cnGquHofMTEAjHPOnw0Wp7qMrUELXqJcrnoC2X5l7Y60Rw==
-X-Received: by 2002:a05:651c:a09:: with SMTP id k9mr3283882ljq.442.1635412284082;
-        Thu, 28 Oct 2021 02:11:24 -0700 (PDT)
-Received: from mobilestation ([95.79.132.211])
-        by smtp.gmail.com with ESMTPSA id bn28sm248802ljb.117.2021.10.28.02.11.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Oct 2021 02:11:23 -0700 (PDT)
-Date:   Thu, 28 Oct 2021 12:11:21 +0300
-From:   Serge Semin <fancer.lancer@gmail.com>
-To:     Brad Larson <brad@pensando.io>
-Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
-        linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
-        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
-        broonie@kernel.org, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, olof@lixom.net, linux-gpio@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 10/11] spi: dw: Add support for Pensando Elba SoC
-Message-ID: <20211028091121.3ncs4lqfck47edo4@mobilestation>
-References: <20211025015156.33133-1-brad@pensando.io>
- <20211025015156.33133-11-brad@pensando.io>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=H1cBbZ29iBhIzlADanMboqR5PTvmcX6f2VNyLE4w9Tk=;
+        b=zHGvs3docaC+JN+yHTbLXFRSGFOSJn0qD3c8NS9VgQ9gT6Oyof2f6OSuKUvCbq6mpI
+         S2lgatP5a0uGCEWT09moMTqlmm9s34yPJF4aSr1vzXRnRHRyC/hdAjkIXBtSkKoTzFMv
+         iz1vVmLYVIbDNRFneiad8vNPanDl3XE9piP1NSP6lQRzqkJCBFfwcXijWKQk/odUxznn
+         U/yPv5Ay4/soyGOQfrDUYkHfOEvl6vCS4WJqx9s+vWe+GX0LxktSTaa3hqh87x5E6Omn
+         8UHq0wosChLG5t0ZJR70FOn5bJ6XcZEy4A1UGdPYmvOv60JHT+q6fH5xv9pZg9CT8gZi
+         BGdw==
+X-Gm-Message-State: AOAM532S858JsvkW8pXF0L9aB/z05sBvHmarZmA/MHHONHbiHtaxrHSa
+        Wxzq/h0xVXnTCZ+egbbNuSh5d7xH48G/tGQKMcSIvQ==
+X-Google-Smtp-Source: ABdhPJxJuR23jXNDWfiQxoqWI52YVAi1m5sbex/r8p4Wi8DX0c1r6Ft0KZ8J9L4U+hz7GkJMrE2CJvDkj11pjzajMi0=
+X-Received: by 2002:a05:651c:11c4:: with SMTP id z4mr3422469ljo.463.1635413538930;
+ Thu, 28 Oct 2021 02:32:18 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211025015156.33133-11-brad@pensando.io>
+References: <8ecc5c79c1dd0627d570ede31e18c860786cacca.1633519499.git.hns@goldelico.com>
+ <CAPDyKFp47sAXhM2s5HOqV2wLf-kYRhdqSdzcn7a62ZW23SSPdg@mail.gmail.com>
+ <470A96FD-DB24-4C32-BC9F-AE2F617FBF2D@goldelico.com> <2013308.OSlt1BDEiP@pc-42>
+In-Reply-To: <2013308.OSlt1BDEiP@pc-42>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 28 Oct 2021 11:31:42 +0200
+Message-ID: <CAPDyKFouhj7V7n-7NSw=9-vLWqPvAmhUuZFVPR5Htw=aCLVZ_Q@mail.gmail.com>
+Subject: Re: [RFC] mmc: core: transplant ti,wl1251 quirks from to be retired omap_hsmmc
+To:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
+        "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
+        Tony Lindgren <tony@atomide.com>,
+        Linux-OMAP <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Oct 24, 2021 at 06:51:55PM -0700, Brad Larson wrote:
-> The Pensando Elba SoC includes a DW apb_ssi v4 controller
-> with device specific chip-select control.  The Elba SoC
-> provides four chip-selects where the native DW IP supports
-> two chip-selects.
-> 
-> Signed-off-by: Brad Larson <brad@pensando.io>
-> ---
-> Changelog:
-> - Changed the implementation to use existing dw_spi_set_cs() and
->   integrated Elba specific CS control into spi-dw-mmio.c.  The
->   native designware support is for two chip-selects while Elba
->   provides 4 chip-selects.  Instead of adding a new file for
->   this support in gpio-elba-spics.c the support is in one
->   file (spi-dw-mmio.c).
-> 
->  drivers/spi/spi-dw-mmio.c | 85 +++++++++++++++++++++++++++++++++++++++
->  1 file changed, 85 insertions(+)
-> 
-> diff --git a/drivers/spi/spi-dw-mmio.c b/drivers/spi/spi-dw-mmio.c
-> index 3379720cfcb8..fe7b595fe33d 100644
-> --- a/drivers/spi/spi-dw-mmio.c
-> +++ b/drivers/spi/spi-dw-mmio.c
-> @@ -53,6 +53,24 @@ struct dw_spi_mscc {
->  	void __iomem        *spi_mst; /* Not sparx5 */
->  };
->  
-> +struct dw_spi_elba {
-> +	struct regmap *regmap;
-> +	unsigned int reg;
-> +};
-> +
-> +/*
+[...]
 
-> + * Elba SoC does not use ssi, pin override is used for cs 0,1 and
-> + * gpios for cs 2,3 as defined in the device tree.
+> > Combining your suggestions we could do roughly:
+> >
+> > in mmc_sdio_init_card():
+> >
+> >         if (host->ops->init_card)
+> >                 host->ops->init_card(host, card);
+> >         else
+> >                 mmc_fixup_device(host, sdio_prepare_fixups_methods);
+>
+> I think I mostly agree, but why you don't call mmc_fixup_device() if
+> init_card is defined? (BTW, mmc_fixup_device() takes a card as
+> first parameter)
 
-I believe GPIO-based CS is the platform-property rather than the SoC
-one. It's up to the board designers which GPIOs to use as a custom
-chip-select signal. Thus it would be better to discard the comment
-regarding the GPIOs here.
+Ack.
 
-> + *
-> + * cs:  |       1               0
-> + * bit: |---3-------2-------1-------0
-> + *      |  cs1   cs1_ovr   cs0   cs0_ovr
-> + */
-> +#define ELBA_SPICS_SHIFT(cs)		(2 * (cs))
-> +#define ELBA_SPICS_MASK(cs)		(0x3 << ELBA_SPICS_SHIFT(cs))
-> +#define ELBA_SPICS_SET(cs, val)	\
-> +			((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(cs))
-> +
->  /*
->   * The Designware SPI controller (referred to as master in the documentation)
->   * automatically deasserts chip select when the tx fifo is empty. The chip
-> @@ -237,6 +255,72 @@ static int dw_spi_canaan_k210_init(struct platform_device *pdev,
->  	return 0;
->  }
->  
-> +static void elba_spics_set_cs(struct dw_spi_elba *dwselba, int cs, int enable)
-> +{
-> +	regmap_update_bits(dwselba->regmap, dwselba->reg, ELBA_SPICS_MASK(cs),
-> +			   ELBA_SPICS_SET(cs, enable));
-> +}
-> +
-> +static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
-> +{
-> +	struct dw_spi *dws = spi_master_get_devdata(spi->master);
-> +	struct dw_spi_mmio *dwsmmio = container_of(dws, struct dw_spi_mmio, dws);
-> +	struct dw_spi_elba *dwselba = dwsmmio->priv;
-> +	u8 cs = spi->chip_select;
-> +
-> +	if (cs < 2) {
-> +		/* overridden native chip-select */
-> +		elba_spics_set_cs(dwselba, spi->chip_select, enable);
-> +	}
-> +
-> +	/*
-> +	 * The DW SPI controller needs a native CS bit selected to start
+>
+>
+> > Next we need a location for the sdio_prepare_fixups_methods table and functions.
+> >
+> > For "ti,wl1251" we would then provide the entry in the table and a function doing
+> > the setup. But where should these be defined? Likely not in a header file like
+> > quirks.h? But there is no quirks.c.
+>
+> I think you can place your function in drivers/mmc/core/card.h. There are
+> already add_quirk(), add_limit_rate_quirk(), add_quirk_mmc(), etc...
 
-> +	 * the serial engine, and we have fewer native CSs than we need, so
-                                  ^
-                                  + "the platform may have ..."
+FYI: I don't mind adding a quirks.c, if that makes sense.
 
-> +	 * use CS0 always.
-> +	 */
-> +	spi->chip_select = 0;
-> +	dw_spi_set_cs(spi, enable);
-> +	spi->chip_select = cs;
-
-Is it correct to think that the DW SSI output CS signals are
-multiplexed between the native DW SSI CS logic and the logic
-implemented in the ELBA SPICS syscon? Thus by setting "csX_ovr" in the
-ELBA_SPICS CSR do you get to switch between the DW SSI SER logic and
-the signal level selected by the "csX" field of that register?
-
-* Most likely I already asked this question in v2 but it was long time
-ago, so it's better to clarify things over.
-
-> +}
-> +
-> +static int dw_spi_elba_init(struct platform_device *pdev,
-> +			    struct dw_spi_mmio *dwsmmio)
-> +{
-> +	struct of_phandle_args args;
-> +	struct dw_spi_elba *dwselba;
-> +	struct regmap *regmap;
-> +	int rc;
-> +
-
-> +	rc = of_parse_phandle_with_fixed_args(pdev->dev.of_node,
-> +			"pensando,spics", 1, 0, &args);
-> +	if (rc) {
-> +		dev_err(&pdev->dev, "could not find pensando,spics\n");
-> +		return rc;
-> +	}
-> +
-> +	regmap = syscon_node_to_regmap(args.np);
-> +	if (IS_ERR(regmap)) {
-> +		dev_err(&pdev->dev, "could not map pensando,spics\n");
-> +		return PTR_ERR(regmap);
-> +	}
-
-There is a good wrapper for this: syscon_regmap_lookup_by_phandle_args() .
-
-The property name isn't well descriptive in the syscon-related
-part. Could you add something like:
-"pensando,elba-syscon-spics"/"pensando,syscon-spics"?
-
--Sergey
-
-> +
-> +	dwselba = devm_kzalloc(&pdev->dev, sizeof(*dwselba), GFP_KERNEL);
-> +	if (!dwselba)
-> +		return -ENOMEM;
-> +
-> +	dwselba->regmap = regmap;
-> +	dwselba->reg = args.args[0];
-> +
-> +	/* deassert cs */
-> +	elba_spics_set_cs(dwselba, 0, 1);
-> +	elba_spics_set_cs(dwselba, 1, 1);
-> +
-> +	dwsmmio->priv = dwselba;
-> +	dwsmmio->dws.set_cs = dw_spi_elba_set_cs;
-> +
-> +	return 0;
-> +}
-> +
->  static int dw_spi_mmio_probe(struct platform_device *pdev)
->  {
->  	int (*init_func)(struct platform_device *pdev,
-> @@ -351,6 +435,7 @@ static const struct of_device_id dw_spi_mmio_of_match[] = {
->  	{ .compatible = "intel,keembay-ssi", .data = dw_spi_keembay_init},
->  	{ .compatible = "microchip,sparx5-spi", dw_spi_mscc_sparx5_init},
->  	{ .compatible = "canaan,k210-spi", dw_spi_canaan_k210_init},
-> +	{ .compatible = "pensando,elba-spi", .data = dw_spi_elba_init},
->  	{ /* end of table */}
->  };
->  MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
-> -- 
-> 2.17.1
-> 
+Kind regards
+Uffe
