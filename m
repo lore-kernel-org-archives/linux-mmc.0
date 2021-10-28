@@ -2,227 +2,236 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7D6BC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 08:59:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4DBEC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 09:11:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 985E26023D
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 08:59:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BAA68610CB
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 09:11:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229993AbhJ1JB5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Oct 2021 05:01:57 -0400
-Received: from mail-co1nam11on2073.outbound.protection.outlook.com ([40.107.220.73]:45217
-        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229791AbhJ1JBz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 28 Oct 2021 05:01:55 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=CxTeh5v2JKUGXTQZqE3NT5pfisEkgyDW5MjHrFVeRxl2/C/iW/Gv5OaFwCtIzPnzqBReyFHEMVZEpvFfcM0EmdorrPWX0fiZBhv+jVn+tdgK3J0NgchEhCJMHmuyJLI2l2a8ZYwEuJYeojbXuG9eBTqbIlf/nF9kLWTgCn5vDTAeOW+7weUhEqnANkB1KEpMlZ5otvvg9QxB2iE6KGL1Bkj+znIkATBYSybt2jswlS9YihVEowz/FPih7BH8yT15xCkO7HP4zf9RFuWTe09e1Iyqkb6Vnf2o95YSzUgcO+7JZdt4JYXjDz3yq8yhB6tw1SJiS4BKDW3yOZUfKYc8iw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DMNKFJ4oHHqQ0aofXt/zsA6e3KSUrbf0pUcq4sUB1gA=;
- b=coL4XSBFWexKj+sA42yLp+ODVAYp5TN/dZIXBQU0Tw3tJgcfSuHOMkW7Ts8Dv+dfXSpoZ/ZQ0MlKn28ByOEYmGAFrxyvkQU8NJ0WOROKlYokYvcCee6+KdJH4frYMVZ+6uC4e4oCk9SbtVSXMIa9F1L/HL9dcMUI5B4/KjzJABvTjsiZvoBA5FPX3NMIEyMkttrvk/702AGkc1GTObj7Wth8ae8sNCyZCmCdPLeWS+1GW5tLhmy2yBei1Oa/WJKxO7d5rBu6mgpLMo1q4Qm9PhpIC4uS8FD1HS796xfxFnbgRpDnG2TOWoNbx55VJrxADAldLz3nn9oNlOszzdfFIg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
- dkim=pass header.d=silabs.com; arc=none
+        id S229877AbhJ1JNx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Oct 2021 05:13:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42818 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229835AbhJ1JNx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 05:13:53 -0400
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2380BC061570;
+        Thu, 28 Oct 2021 02:11:26 -0700 (PDT)
+Received: by mail-lj1-x230.google.com with SMTP id q16so9547373ljg.3;
+        Thu, 28 Oct 2021 02:11:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DMNKFJ4oHHqQ0aofXt/zsA6e3KSUrbf0pUcq4sUB1gA=;
- b=PA60R27B1paoJmdYViMd+nY0aGEANqAR34cDrqjodt5ESCHzssl1oeYfLu+q63SfGaxJx2TxP4xFtqmIxkkTHzWR0ZTzfOYjqVRizuVkLENbcqXqahVFgqO5nVN8Gt5NRQqpXYY3CAHfZrVPOMRkY7UbTjA5CLpPgNadvDBmndY=
-Authentication-Results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=silabs.com;
-Received: from PH0PR11MB5657.namprd11.prod.outlook.com (2603:10b6:510:ee::19)
- by PH0PR11MB5612.namprd11.prod.outlook.com (2603:10b6:510:e7::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4628.18; Thu, 28 Oct
- 2021 08:59:25 +0000
-Received: from PH0PR11MB5657.namprd11.prod.outlook.com
- ([fe80::31cb:3b13:b0e8:d8f4]) by PH0PR11MB5657.namprd11.prod.outlook.com
- ([fe80::31cb:3b13:b0e8:d8f4%9]) with mapi id 15.20.4628.020; Thu, 28 Oct 2021
- 08:59:25 +0000
-From:   =?ISO-8859-1?Q?J=E9r=F4me?= Pouiller <jerome.pouiller@silabs.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "H. Nikolaus Schaller" <hns@goldelico.com>
-Cc:     Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
-        Tony Lindgren <tony@atomide.com>,
-        Linux-OMAP <linux-omap@vger.kernel.org>
-Subject: Re: [RFC] mmc: core: transplant ti,wl1251 quirks from to be retired omap_hsmmc
-Date:   Thu, 28 Oct 2021 10:59:17 +0200
-Message-ID: <2013308.OSlt1BDEiP@pc-42>
-Organization: Silicon Labs
-In-Reply-To: <470A96FD-DB24-4C32-BC9F-AE2F617FBF2D@goldelico.com>
-References: <8ecc5c79c1dd0627d570ede31e18c860786cacca.1633519499.git.hns@goldelico.com> <CAPDyKFp47sAXhM2s5HOqV2wLf-kYRhdqSdzcn7a62ZW23SSPdg@mail.gmail.com> <470A96FD-DB24-4C32-BC9F-AE2F617FBF2D@goldelico.com>
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
-X-ClientProxiedBy: PR0P264CA0277.FRAP264.PROD.OUTLOOK.COM
- (2603:10a6:100:1::25) To PH0PR11MB5657.namprd11.prod.outlook.com
- (2603:10b6:510:ee::19)
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=HaFtusB1yeYK1/7m7q8b+ikbAL6j1FjDXfNSnND+K+s=;
+        b=CNlzPEP8uc7ZR0GWOjIFHlNlkGQOygo1HWywRgQLrbNjvWHSQUc1QC6atXT/nUUOs+
+         3sjpm2BpheifE/FQeL/k49qGTL3C2MKhzMH/VC1geTGMtTjj/yJ3L3HThJavP+im8IT6
+         D+D3mtIYQQl8pNli9276ZnrJWSF9MusaAvemGvDYi7Dt1qMDdKFyjIiIhliMCymTdcxy
+         PL1Zmi4fH/lzKE9nyWYhIv8CCLFeItEyoGQ6QmS36puPgTYOqfYn/N3uHjBq1Fv7AS/H
+         /bQbj8jXlBxWXu0JQ3XEV65t9p1N1cQfCCvmIgx3oX83tcXqyZFdMKIXA4Asy7JvVIhc
+         hEHw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=HaFtusB1yeYK1/7m7q8b+ikbAL6j1FjDXfNSnND+K+s=;
+        b=3UIPMjBvicqED3vx+8zuPwpKI2BXXN+sCBtYqKptEG0CztfOaZ/br7gn19XnDrG8XG
+         DkIobEr7VorCNgYdUBoLEDvaBcCV1tlqnQ12SXM82XK4o442we/y2J4DN001LMezvZed
+         qoDy5FsGTOx8RrlxjGY7Zx8JKGpeNzU7bU3MEmEwLWYBCaPNlnYfXLLrwfF5JqoUrcQL
+         BpJEYuZWhhkrj/Ua5hEbL4ogDFyFkhYacF1Q+RpLnLOwEuvKg4ldjrcYs8gn8ReQ3FVm
+         VJI6D48phPgCaboyYxe69E+bx+8LZ4ZoShmUQCkwACRWD8m1d4CCwRgCMkSlL/WK8FX+
+         gFkQ==
+X-Gm-Message-State: AOAM530fNsBoHpaSN53AQOLD8tgXbVlBvJD30q704XBg5D/8ikRxSbP3
+        IiBqkxe1WLyIn/rpstDp3Qc=
+X-Google-Smtp-Source: ABdhPJwvejmxjwMA5o6s6xVgy7YmVtp4cnGquHofMTEAjHPOnw0Wp7qMrUELXqJcrnoC2X5l7Y60Rw==
+X-Received: by 2002:a05:651c:a09:: with SMTP id k9mr3283882ljq.442.1635412284082;
+        Thu, 28 Oct 2021 02:11:24 -0700 (PDT)
+Received: from mobilestation ([95.79.132.211])
+        by smtp.gmail.com with ESMTPSA id bn28sm248802ljb.117.2021.10.28.02.11.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 Oct 2021 02:11:23 -0700 (PDT)
+Date:   Thu, 28 Oct 2021 12:11:21 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <brad@pensando.io>
+Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
+        linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, olof@lixom.net, linux-gpio@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 10/11] spi: dw: Add support for Pensando Elba SoC
+Message-ID: <20211028091121.3ncs4lqfck47edo4@mobilestation>
+References: <20211025015156.33133-1-brad@pensando.io>
+ <20211025015156.33133-11-brad@pensando.io>
 MIME-Version: 1.0
-Received: from pc-42.localnet (37.71.187.125) by PR0P264CA0277.FRAP264.PROD.OUTLOOK.COM (2603:10a6:100:1::25) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4649.15 via Frontend Transport; Thu, 28 Oct 2021 08:59:23 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 4e74c73d-dbaa-4f0d-0c33-08d999f13dd6
-X-MS-TrafficTypeDiagnostic: PH0PR11MB5612:
-X-Microsoft-Antispam-PRVS: <PH0PR11MB5612835835EB0956E6D8A3EF93869@PH0PR11MB5612.namprd11.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:10000;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: HByCEgUGvmkPk21NIjxeVb2WwcG8/zGFKNj7aJ6ZFwZgDMLbfgcafwovbBRwkPNTN+TyOfYtN5wbU+3SQJenbEPYbfAJfWLK11sMQmf95AXYXHCe7D4NnQhrKh51pQNsF9iXyKs6+4XnEv2vFepqbE93Hfnit4Xrd23yIZXo8jR/1aCklzXnvyijzT/1oYqLxtdX1y4aDF/BSBYhLmMG6m2VkdIbXwxpe7Dty3wyx2TJMIx61n8S3lllcOHnbmr/z8cBOXO5IkcLuBQZ3FyIz4GTrvKDHlnc95VFUtU8AeSG553cNFO6LJrPk8qbOzO+c8NCniWH34+96zLYwlmfdZdhaL9w7Zd9oMFGuyiByEeRZvenhtEMT5rzdMO6Px/p6TnhYMvcjjrLjdtS/QTeFBa7oXGfHcIfXdZdl9SoWJzspenj+q1vtgbdvcQm46HW3JrSnO/TGF+AiNdxknK1hhvF1qrKV4zTsyGRRel/rPtgtQX9mAmqxTmrXattMHj+2lHf5zbb7XE9EafCSaLpT4QqENr1au1/0ViBY2HZ5wMPBnEG64ct6VKaV0Fmqdm7xPcPjd+jqK3HAhfBy7c9M1eEu+rlb+23IL4xfXZPF70TeBiKTFSUMAFhbgXSfsdGUfqCgBZtC5ovS8Y61ntQuoD/oGAh+/krxVJx1d2sm4fLj9GQ5lETrXGHyeNKE1CKdXktDioVbS5nFWTNh6+pPhw10n95eth6psB8tKbzj2w=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR11MB5657.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(508600001)(66556008)(66476007)(2906002)(66946007)(186003)(9686003)(26005)(956004)(4326008)(8676002)(8936002)(6486002)(316002)(110136005)(52116002)(33716001)(6666004)(83380400001)(6506007)(54906003)(6512007)(86362001)(66574015)(5660300002)(38100700002)(7416002)(36916002)(38350700002)(39026012);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?iso-8859-1?Q?E44jxA7hC6DyuP1CzC3H5zdE3FwtW6VaXTA//l1JsL5cEssQLfWicUQqU5?=
- =?iso-8859-1?Q?gdeRC1kJrbGYkUm+dp+Qj2StSsPXqBnLZ8F20/z5vVRbVvopA5ZixtkGaY?=
- =?iso-8859-1?Q?17J8Hrou2sigo3ePPooRCH9d4Tx804bD9DJB4gTs+u60d/+lAMs9Wd78Vu?=
- =?iso-8859-1?Q?JTdYvuVJIbbCw8Pvusld4yCH4nTQ/Cs0YGfpVNXAMTD2uzIptTOHW7+IIH?=
- =?iso-8859-1?Q?gXjM2gGvshFt76o1COUxi1KRDMSVhaa+y4HlkRByr02vS0fIajGhmCcAcf?=
- =?iso-8859-1?Q?PBxCew3tZ/pAiUfauVySincaFCi0VQMmbxE+CdtsVYyOkuHhqf2+qr3Ybo?=
- =?iso-8859-1?Q?hpzGHXQDJWeMa16rOp7/wfWI93ppSGY/8IPkgSjJ3yLGE4s2mAuWek0LJT?=
- =?iso-8859-1?Q?Ve+aJQTPqJmifUgOmgojq+JjABsteJSz3Iinj9zr7NKu5mKE2U4zG2RV0s?=
- =?iso-8859-1?Q?LBv3mdtAd5lfWtQcCtTG9rDbwAZbNBmNJCWng5EFas6ZPwYLNg27W0l80q?=
- =?iso-8859-1?Q?oEX7C1pYYHnJoBCYJdnnCQjdgVoctDQyhnAeZ0sacTvDzNe9WHPJdqLBww?=
- =?iso-8859-1?Q?2TTqPlC0U4f5/gVuo8iCIQnrcb+i6fWU72rl30sn0Nt6dWReouFqy5nJ2z?=
- =?iso-8859-1?Q?HW7DiVqRXQr+qPX9ZD9os0IOp7kcYpOEBtk9JtjtNbX/+oTOvklI4Ca6l0?=
- =?iso-8859-1?Q?9VUc6OvF8B7JDTTLVmhThcEjEdxsb/7rptrw6v70naFaOiul0e04yFrgth?=
- =?iso-8859-1?Q?CqaXw2a6xvEVUAdaSQ7gHoi8cY5YSo8t8o2w1z8Clu97JYs6kO9p6Ggcxl?=
- =?iso-8859-1?Q?BAGmRYMy3osHXoCPFnmeGP0vT7e/bzP7zpbmP0fZtSbaiycWl5Hnu/z/8f?=
- =?iso-8859-1?Q?G4wjNDphXQ5/FsO2qHwUlRajhjmE4v5TBz7T9MstnDkuXCm2uhjI0/3xyZ?=
- =?iso-8859-1?Q?fs28YYhzZ4mdcRmTD4uVd0ahjkMCmyktBDb0EWONNnS5qLHgxWmvMVdLtA?=
- =?iso-8859-1?Q?Kydin+JaOAYMKmOOLheNlUVVk47ZaCeR4upwTjp1U+C+oiDVtPXSgXQQYT?=
- =?iso-8859-1?Q?6dY4qKvbHchtYoxoqjVm+j04gjUi4Mo3fXt1hsFGyuoUDUQlRyJz05Et4f?=
- =?iso-8859-1?Q?CMzvtj2cZPz1h4FSVeyBWYhHiqvxAS4swNn+RE9ev9DYJK2m9Xfaxk0xHN?=
- =?iso-8859-1?Q?MrpeM5X+weZ3UiFqmcEaDyb4qN4GOQNwfmMSzWBP/ZUvWLLpFp5sgweAz6?=
- =?iso-8859-1?Q?HL1eZsjvTGNBSC9+gPgR4wWxYZ9GST7LwemkW+BtzfT/1oDqTtA3J/HW20?=
- =?iso-8859-1?Q?ivkDknUWMoISik8+tXtWtaP5js1dfDxbtqEJ9OoHqr9d4VvuUkiOf4FpUz?=
- =?iso-8859-1?Q?Obq3glXkjdFsaAQi09GFJ7SFIpm3gbhfQZGmLfKGnKvefuNQAia+e4GhCs?=
- =?iso-8859-1?Q?qdJh7JCL+dc0tjRaMNrPI6KwUlYuwu06p9zYbmHZZqZb7xu6dhmGF2dNxb?=
- =?iso-8859-1?Q?WmLCO+xV3fIIyN0MvWle3AoszldaQQyHcfrGPFtu8j4IrOJ5zzJTNhhtkt?=
- =?iso-8859-1?Q?FgHK++aQJTUtS71iQr5LLoOFNVza68igiDYrgwV2ftYGsM1MHVyCoT0H1e?=
- =?iso-8859-1?Q?JBpzdtx25m3dzI5bdmIZiKI/1Mk14+oF3rUELIQnVACoj179wi+LwMs6yc?=
- =?iso-8859-1?Q?zYSHNgqq5FWilDWgiY0=3D?=
-X-OriginatorOrg: silabs.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4e74c73d-dbaa-4f0d-0c33-08d999f13dd6
-X-MS-Exchange-CrossTenant-AuthSource: PH0PR11MB5657.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Oct 2021 08:59:25.4914
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 4cYu0UTUPfPT6hBG0aLZllb2tjRXqtxrtcIu4wy0mr2/u35yLy7uIbkjj+RbR4eAonl9bUiQB7U64FdAxDSBkQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH0PR11MB5612
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211025015156.33133-11-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Nikolaus,
+On Sun, Oct 24, 2021 at 06:51:55PM -0700, Brad Larson wrote:
+> The Pensando Elba SoC includes a DW apb_ssi v4 controller
+> with device specific chip-select control.  The Elba SoC
+> provides four chip-selects where the native DW IP supports
+> two chip-selects.
+> 
+> Signed-off-by: Brad Larson <brad@pensando.io>
+> ---
+> Changelog:
+> - Changed the implementation to use existing dw_spi_set_cs() and
+>   integrated Elba specific CS control into spi-dw-mmio.c.  The
+>   native designware support is for two chip-selects while Elba
+>   provides 4 chip-selects.  Instead of adding a new file for
+>   this support in gpio-elba-spics.c the support is in one
+>   file (spi-dw-mmio.c).
+> 
+>  drivers/spi/spi-dw-mmio.c | 85 +++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 85 insertions(+)
+> 
+> diff --git a/drivers/spi/spi-dw-mmio.c b/drivers/spi/spi-dw-mmio.c
+> index 3379720cfcb8..fe7b595fe33d 100644
+> --- a/drivers/spi/spi-dw-mmio.c
+> +++ b/drivers/spi/spi-dw-mmio.c
+> @@ -53,6 +53,24 @@ struct dw_spi_mscc {
+>  	void __iomem        *spi_mst; /* Not sparx5 */
+>  };
+>  
+> +struct dw_spi_elba {
+> +	struct regmap *regmap;
+> +	unsigned int reg;
+> +};
+> +
+> +/*
 
-On Thursday 28 October 2021 09:08:50 CEST H. Nikolaus Schaller wrote:
-> > Am 27.10.2021 um 23:31 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
-> > On Wed, 27 Oct 2021 at 19:01, H. Nikolaus Schaller <hns@goldelico.com> =
-wrote:
-> >>> Am 26.10.2021 um 20:08 schrieb H. Nikolaus Schaller <hns@goldelico.co=
-m>:
-> >>>> As a matter of fact, the similar problem that you are looking to
-> >>>> address (applying card quirks based on DT compatibility strings), is
-> >>>> partly being taken care of in another series [1], being discussed
-> >>>> right now. I think the solution for the ti,wl1251 should be based up=
-on
-> >>>> that too. Please have a look and see if you can play with that!?
-> >>>
-> >>> That is interesting.
-> >>> Yes, maybe it can be the basis. At least for finding the chip and dri=
-ver.
-> >>
-> >> I have done a first experiment.
-> >>
-> >> It seems as if the series [1] does the opposite of what we need... It =
-just
-> >> skips entries in struct mmc_fixup if the DT does *not* match.
-> >
-> > Ohh, I didn't look that close. In that case the code isn't doing what
-> > it *should*. The point is really to match on the compatible string and
-> > then add quirks if that is found.
->=20
-> That is what I had expected.
+> + * Elba SoC does not use ssi, pin override is used for cs 0,1 and
+> + * gpios for cs 2,3 as defined in the device tree.
 
-Note I have not tested this code. My primary goal was to submit the idea. I
-think I will be able to send a true PR next week.
+I believe GPIO-based CS is the platform-property rather than the SoC
+one. It's up to the board designers which GPIOs to use as a custom
+chip-select signal. Thus it would be better to discard the comment
+regarding the GPIOs here.
 
+> + *
+> + * cs:  |       1               0
+> + * bit: |---3-------2-------1-------0
+> + *      |  cs1   cs1_ovr   cs0   cs0_ovr
+> + */
+> +#define ELBA_SPICS_SHIFT(cs)		(2 * (cs))
+> +#define ELBA_SPICS_MASK(cs)		(0x3 << ELBA_SPICS_SHIFT(cs))
+> +#define ELBA_SPICS_SET(cs, val)	\
+> +			((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(cs))
+> +
+>  /*
+>   * The Designware SPI controller (referred to as master in the documentation)
+>   * automatically deasserts chip select when the tx fifo is empty. The chip
+> @@ -237,6 +255,72 @@ static int dw_spi_canaan_k210_init(struct platform_device *pdev,
+>  	return 0;
+>  }
+>  
+> +static void elba_spics_set_cs(struct dw_spi_elba *dwselba, int cs, int enable)
+> +{
+> +	regmap_update_bits(dwselba->regmap, dwselba->reg, ELBA_SPICS_MASK(cs),
+> +			   ELBA_SPICS_SET(cs, enable));
+> +}
+> +
+> +static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
+> +{
+> +	struct dw_spi *dws = spi_master_get_devdata(spi->master);
+> +	struct dw_spi_mmio *dwsmmio = container_of(dws, struct dw_spi_mmio, dws);
+> +	struct dw_spi_elba *dwselba = dwsmmio->priv;
+> +	u8 cs = spi->chip_select;
+> +
+> +	if (cs < 2) {
+> +		/* overridden native chip-select */
+> +		elba_spics_set_cs(dwselba, spi->chip_select, enable);
+> +	}
+> +
+> +	/*
+> +	 * The DW SPI controller needs a native CS bit selected to start
 
-> > Let me have a closer look - and for sure, I am willing to help if neede=
-d.
+> +	 * the serial engine, and we have fewer native CSs than we need, so
+                                  ^
+                                  + "the platform may have ..."
 
-I confirm it does not have the expected behavior. !mmc_fixup_of_compatible_=
-match()
-should be mmc_fixup_of_compatible_match(), sorry.
+> +	 * use CS0 always.
+> +	 */
+> +	spi->chip_select = 0;
+> +	dw_spi_set_cs(spi, enable);
+> +	spi->chip_select = cs;
 
+Is it correct to think that the DW SSI output CS signals are
+multiplexed between the native DW SSI CS logic and the logic
+implemented in the ELBA SPICS syscon? Thus by setting "csX_ovr" in the
+ELBA_SPICS CSR do you get to switch between the DW SSI SER logic and
+the signal level selected by the "csX" field of that register?
 
-[...]
-> >> What I don't get from the code is how cis.vendor or cis.device can be
-> >> initialized from device tree for a specific device. As far as I see it=
- can
-> >> only be checked for and some quirks can be set from a table if vendor =
-and
-> >> device read from the CIS registers do match.
-> >
-> > Yes. I thought that should be possible, but maybe it is not?
->=20
-> It seems to be a hen or egg issue here. MMC_QUIRK_NONSTD_SDIO should be s=
-et
-> before we can match by vendor and device or compatible. But it can't be s=
-et
-> late.
+* Most likely I already asked this question in v2 but it was long time
+ago, so it's better to clarify things over.
 
-I think you can add a new fixup table that could be applied earlier (as you
-do in your suggestion below).
+> +}
+> +
+> +static int dw_spi_elba_init(struct platform_device *pdev,
+> +			    struct dw_spi_mmio *dwsmmio)
+> +{
+> +	struct of_phandle_args args;
+> +	struct dw_spi_elba *dwselba;
+> +	struct regmap *regmap;
+> +	int rc;
+> +
 
+> +	rc = of_parse_phandle_with_fixed_args(pdev->dev.of_node,
+> +			"pensando,spics", 1, 0, &args);
+> +	if (rc) {
+> +		dev_err(&pdev->dev, "could not find pensando,spics\n");
+> +		return rc;
+> +	}
+> +
+> +	regmap = syscon_node_to_regmap(args.np);
+> +	if (IS_ERR(regmap)) {
+> +		dev_err(&pdev->dev, "could not map pensando,spics\n");
+> +		return PTR_ERR(regmap);
+> +	}
 
-> >> Instead, we want to match DT and define some values for an otherwise u=
-nknown
-> >> device (i.e. we can't match by vendor or other methods) to help to ini=
-tialize
-> >> the interface. So in mmc_fixup_device it is too late and we need somet=
-hing
-> >> running earlier, based purely on device tree information...
-> >
-> > Okay, I will have a closer look. Maybe we need to extend the card
-> > quirks interface a bit to make it suitable for this case too.
->=20
-> Combining your suggestions we could do roughly:
->=20
-> in mmc_sdio_init_card():
->=20
->         if (host->ops->init_card)
->                 host->ops->init_card(host, card);
->         else
->                 mmc_fixup_device(host, sdio_prepare_fixups_methods);
+There is a good wrapper for this: syscon_regmap_lookup_by_phandle_args() .
 
-I think I mostly agree, but why you don't call mmc_fixup_device() if
-init_card is defined? (BTW, mmc_fixup_device() takes a card as
-first parameter)
+The property name isn't well descriptive in the syscon-related
+part. Could you add something like:
+"pensando,elba-syscon-spics"/"pensando,syscon-spics"?
 
+-Sergey
 
-> Next we need a location for the sdio_prepare_fixups_methods table and fun=
-ctions.
->=20
-> For "ti,wl1251" we would then provide the entry in the table and a functi=
-on doing
-> the setup. But where should these be defined? Likely not in a header file=
- like
-> quirks.h? But there is no quirks.c.
-
-I think you can place your function in drivers/mmc/core/card.h. There are
-already add_quirk(), add_limit_rate_quirk(), add_quirk_mmc(), etc...
-
-
---=20
-J=E9r=F4me Pouiller
-
-
+> +
+> +	dwselba = devm_kzalloc(&pdev->dev, sizeof(*dwselba), GFP_KERNEL);
+> +	if (!dwselba)
+> +		return -ENOMEM;
+> +
+> +	dwselba->regmap = regmap;
+> +	dwselba->reg = args.args[0];
+> +
+> +	/* deassert cs */
+> +	elba_spics_set_cs(dwselba, 0, 1);
+> +	elba_spics_set_cs(dwselba, 1, 1);
+> +
+> +	dwsmmio->priv = dwselba;
+> +	dwsmmio->dws.set_cs = dw_spi_elba_set_cs;
+> +
+> +	return 0;
+> +}
+> +
+>  static int dw_spi_mmio_probe(struct platform_device *pdev)
+>  {
+>  	int (*init_func)(struct platform_device *pdev,
+> @@ -351,6 +435,7 @@ static const struct of_device_id dw_spi_mmio_of_match[] = {
+>  	{ .compatible = "intel,keembay-ssi", .data = dw_spi_keembay_init},
+>  	{ .compatible = "microchip,sparx5-spi", dw_spi_mscc_sparx5_init},
+>  	{ .compatible = "canaan,k210-spi", dw_spi_canaan_k210_init},
+> +	{ .compatible = "pensando,elba-spi", .data = dw_spi_elba_init},
+>  	{ /* end of table */}
+>  };
+>  MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
+> -- 
+> 2.17.1
+> 
