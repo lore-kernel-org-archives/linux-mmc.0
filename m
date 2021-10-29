@@ -2,127 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73A85C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 21:22:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDEADC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 05:57:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 545E860FE3
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Oct 2021 21:22:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E4076108F
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 05:57:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231151AbhJ1VY1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Oct 2021 17:24:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41270 "EHLO
+        id S231890AbhJ2GAJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Oct 2021 02:00:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230404AbhJ1VY1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Oct 2021 17:24:27 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62923C061570
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 14:21:59 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id 1so7095464ljv.2
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Oct 2021 14:21:59 -0700 (PDT)
+        with ESMTP id S231774AbhJ2GAH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Oct 2021 02:00:07 -0400
+Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA1AAC061570;
+        Thu, 28 Oct 2021 22:57:38 -0700 (PDT)
+Received: by mail-pg1-x532.google.com with SMTP id c4so8860136pgv.11;
+        Thu, 28 Oct 2021 22:57:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/pA7yi/3lIK3ukD2TvOeRH5iB5l4NA2U0LMCXAcXsfQ=;
-        b=ch7NEQ3fbZV69Oxf4AJM9RuoLQBovOZ63p6NdkSGynz6G3GJSC2IXiR3SYWnWJE4hJ
-         Q/2Az/Ig+7xwC4oNPNLaSGmJ6RZfJcQjrhmUTe0szv10uSl4R/E4COdir6jwCWLI9XWU
-         RQ69r9235BXcn/63n6pGzn7aN/7s0CTR69DKX6GJ2ngOGhY8AL/KcuILHxxKA7q3yCuE
-         oSE9xjNE5Ys2I70NQOWxBlUVVj3TyuaIQZVfmMGEIiMWSmEURLtyoUpWwfxnJyosMnEl
-         PZLk17xQf2Vo+Ku/LoKD65ApPI52xkgwRSswX9v/kspuafDalQ99NkVOAqORaV6JvXkt
-         eXDw==
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id;
+        bh=/eLfvL2Jbm+xAho2C5JOCgKSfFZCxzezHuhj1zZc88Q=;
+        b=LLAk9V2nrWxEHEbs807OY6TPiCcD/Tj8WY3jL2alrwbmMAUx2QrsJVe3eLHWzqgw03
+         puO+zBu6qlAKFGGuR5IMOPjEQBi0UbEjCjx2hC6dXV7aw+UZgIyDDQ5EWXvbjfzQlEOS
+         CmqvQz3jDoNE1gzBwX4GJng3tZ+lTKWWyRFB7/2QJT8uejlHva2wwGJyy+lakC8BAmzP
+         0mG8qG3BBXfkYmAEh7DDS2Y3TOlbD7ov8Dy0ORTyb2eOyUgoCPdwxnEhRaYJ3xGKXqA5
+         Ir//bbCIJdKzUR9iLqGvoAF0h36b0wDOiA8CdKrVoqqAqUtJ3ypRVNx/lREESTp5aqCz
+         DWtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/pA7yi/3lIK3ukD2TvOeRH5iB5l4NA2U0LMCXAcXsfQ=;
-        b=4SxaiDIPtcJGBdgDdGfLj5MwIuS3efF/O1hYq72hf4fAUVeoX4zr+AsQtyA7T/lNkv
-         OL3LG0K2lmuYot0jUzAA8JGcgHH1OtO/LO91+/heo8+EJLlUIyo6GLsxt0mwYqM4p98Y
-         tZnjl3uysPzp4MA9+wN67uEiFj8oSPggciRoEXaU46EELiCBoB7YTJdPbA3HKQQzsdpA
-         VWNRg8fCBWU4wFte5+i5stqm0bP5WZBcnYaJvm1RAn8UlA8HnVzjJ6lnmXg35q0e2JC9
-         BcO1TuqU2m3VFnxLJB6GVvHPBFhSwV+rVolRZUbJINqeLbCC7pYbDU8bKtw0S1/ZvrCy
-         b++g==
-X-Gm-Message-State: AOAM530/ntHKgB/pxbCbVnMpQsUXzjlpGUf8fRgIFTXlkLe2FNdd4DGf
-        +cZrpdvye162kphcq3vwtLWXrkJzxNZdD6sSUTEJn8DWKA4=
-X-Google-Smtp-Source: ABdhPJzPnUd/FFDhC481+FpAxJaqLFchVwbZ4f6v20WtJ45oqrfimP6Yy0uyBNSdYxjTDOFt5nxMle6XwdKvNgbxJSs=
-X-Received: by 2002:a2e:a5c8:: with SMTP id n8mr7456473ljp.367.1635456117760;
- Thu, 28 Oct 2021 14:21:57 -0700 (PDT)
-MIME-Version: 1.0
-References: <20211028195149.8003-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20211028195149.8003-1-wsa+renesas@sang-engineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 28 Oct 2021 23:21:20 +0200
-Message-ID: <CAPDyKFoFuM8mmyE0M+D=KvXiRkaX6xMiTag9qKd9Yb1q+OeM6g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: tmio: reenable card irqs after the reset callback
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Biju Das <biju.das.jz@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=/eLfvL2Jbm+xAho2C5JOCgKSfFZCxzezHuhj1zZc88Q=;
+        b=kdO1rGlhDXpjbUr/kv3quBw7U/Q87stK+22XQBiEMOLMFgEgityLiTHW8GbIjUNRwl
+         R2uQtOd3reqDow/V/zp30jt0HCcHcqm2LwYyfqvOtYsihieQH2P4Jpf5WBhcEqXSj/R2
+         eD6pqs7nnKZBHalMlFI3u0yYl3W2PgLJlYLsTW080p4hR4VHCtAT838+meeDERDmxv8P
+         my2jF3W1O5QMQ5zbO5w+6PHjI9Rlzvuu205PCmgC+7wq3aN3e6pypNdkDfzl1XRaXuZi
+         iyYUxO61bKQfWQcZ2jymuezAH5b+M6q51sq0bnAnw6cXkLrPUhwYpXZrI2K7o+D9RcXu
+         i6QA==
+X-Gm-Message-State: AOAM531DP/gDfEozLM76OqFlZrMgms91HS0qxCDGGzvdJcooPnOMbJDE
+        abYLzOaV9M/Ey+YOkOPTqgM=
+X-Google-Smtp-Source: ABdhPJzTUQO8qbsA2CFCz8IzTdSIKbyCJtZZWJ0fbh1FiLa0m612Ix5kY2j1bzUu12S/Zc6YdhOiFQ==
+X-Received: by 2002:a05:6a00:1946:b0:44d:8136:a4a4 with SMTP id s6-20020a056a00194600b0044d8136a4a4mr9011198pfk.46.1635487058167;
+        Thu, 28 Oct 2021 22:57:38 -0700 (PDT)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id mr2sm3599648pjb.25.2021.10.28.22.57.36
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 28 Oct 2021 22:57:37 -0700 (PDT)
+From:   "LH.Kuo" <lhjeff911@gmail.com>
+X-Google-Original-From: "LH.Kuo" <lh.kuo@sunplus.com>
+To:     ulf.hansson@linaro.org, p.zabel@pengutronix.de, robh+dt@kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+Cc:     dvorkin@tibbo.com, qinjian@cqplus1.com, wells.lu@sunplus.com,
+        "LH.Kuo" <lh.kuo@sunplus.com>
+Subject: [PATCH 0/2] Add SD/SDIO control driver for Sunplus SP7021 SoC
+Date:   Fri, 29 Oct 2021 13:57:33 +0800
+Message-Id: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 28 Oct 2021 at 21:51, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> The reset callback may clear the internal card detect interrupts, so
-> make sure to reenable them if needed.
->
-> Fixes: b4d86f37eacb ("mmc: renesas_sdhi: do hard reset if possible")
-> Reported-by: Biju Das <biju.das.jz@bp.renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
+many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
+etc.) into a single chip. It is designed for industrial control.
 
-Applied for fixes and by adding a stable tag, thanks!
+Refer to:														
+https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
+https://tibbo.com/store/plus1.html
 
-Kind regards
-Uffe
+LH.Kuo (2):
+  mmc: Add SD/SDIO driver for Sunplus SP7021
+  devicetree bindings mmc Add bindings doc for Sunplus SP7021
 
-> ---
->  drivers/mmc/host/tmio_mmc_core.c | 17 ++++++++++++-----
->  1 file changed, 12 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 7dfc26f48c18..e2affa52ef46 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -195,6 +195,10 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
->         sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
->         host->sdcard_irq_mask = host->sdcard_irq_mask_all;
->
-> +       if (host->native_hotplug)
-> +               tmio_mmc_enable_mmc_irqs(host,
-> +                               TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
-> +
->         tmio_mmc_set_bus_width(host, host->mmc->ios.bus_width);
->
->         if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
-> @@ -956,8 +960,15 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         case MMC_POWER_OFF:
->                 tmio_mmc_power_off(host);
->                 /* For R-Car Gen2+, we need to reset SDHI specific SCC */
-> -               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-> +               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2) {
->                         host->reset(host);
-> +
-> +                       if (host->native_hotplug)
-> +                               tmio_mmc_enable_mmc_irqs(host,
-> +                                               TMIO_STAT_CARD_REMOVE |
-> +                                               TMIO_STAT_CARD_INSERT);
-> +               }
-> +
->                 host->set_clock(host, 0);
->                 break;
->         case MMC_POWER_UP:
-> @@ -1185,10 +1196,6 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
->         _host->set_clock(_host, 0);
->         tmio_mmc_reset(_host);
->
-> -       if (_host->native_hotplug)
-> -               tmio_mmc_enable_mmc_irqs(_host,
-> -                               TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
-> -
->         spin_lock_init(&_host->lock);
->         mutex_init(&_host->ios_lock);
->
-> --
-> 2.30.2
->
+ .../devicetree/bindings/mmc/sunplus-sd2.yaml       |   82 ++
+ MAINTAINERS                                        |   41 +-
+ drivers/mmc/host/Kconfig                           |   10 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sunplus_sd2.c                     | 1069 ++++++++++++++++++++
+ drivers/mmc/host/sunplus_sd2.h                     |  216 ++++
+ 6 files changed, 1403 insertions(+), 16 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+ create mode 100644 drivers/mmc/host/sunplus_sd2.c
+ create mode 100644 drivers/mmc/host/sunplus_sd2.h
+
+-- 
+2.7.4
+
