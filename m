@@ -2,134 +2,79 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2326C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 20:47:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 098F7C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 21:47:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D4543600D4
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 20:47:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DFE9B60D43
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 21:47:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229873AbhJ2UuP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Oct 2021 16:50:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47130 "EHLO
+        id S230388AbhJ2Vt5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Oct 2021 17:49:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231579AbhJ2UuL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Oct 2021 16:50:11 -0400
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F4B4C061767
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Oct 2021 13:47:42 -0700 (PDT)
-Received: by mail-pf1-x433.google.com with SMTP id m26so10293735pff.3
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Oct 2021 13:47:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gateworks-com.20210112.gappssmtp.com; s=20210112;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=q6q7dhl63K0a4V6lewAQaxJp4RGvHA9klh2DreQqjXE=;
-        b=Mj591mzc0wcoRmJBkK3AHtHEhUgfomweYYpsRd6FRXw3g5o8k2LwmSBjuTTvUsY7wc
-         cJZRFP4wxvayjmnmYtE+eB9OLAxe4K5RZvlLRcB/v0RJUFPFA1rbVGE35uEUfocjRBYK
-         1Up10ZBunn2UXZFQQUzGkYZ4B6mayWg5sMMq85w4TWio19YGriVG5HOlQrWEXHLkc2VK
-         Tl7WBdI2xsBd0+dTStGxyRL4E5i76mitnaDZBA5TwxQUUBTYrKLSVjfxLD58RVgLEZyT
-         u6hrVjuXd2IGudPZ8XPtwMkBUnTJii+duzzjC6gb7sAxIezze770w26RcbltzlG2zPH3
-         ADtQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=q6q7dhl63K0a4V6lewAQaxJp4RGvHA9klh2DreQqjXE=;
-        b=T+QHjDKy9UPjIEiObaBdqi/JvAV3HAzh37d5D08Eo02rTtIdm26L8oTyLlin5lNhQa
-         PQw5uN44Rg8pR2N1EeFLCpTNF3ruK44f5dBBd+qS1gM5EqKeBKt268/kzOH+3z0nTih5
-         +fJFTmz3Qcr0ya1pEYCsCZ2Nak5nZmhXdc6oMDpv6en6W6hHtwbVNuLUPY+oA/oKfx5N
-         o6rQ2WlfUCbk5AaDQSFISf9dNcZBnFhGgE9xGKmbiyUQC4phD4zK1LUFEXMwifW39HxW
-         7AA9CVeHXsP9rXxDNx3EsiasYCTrWuwmuE6LsOrLdpKcjYAwvWOvbBfuwFJ5gurGSjfc
-         FBHA==
-X-Gm-Message-State: AOAM5327TjAfM8dFSFpazalVpcZQY8RgK1YQlHmWxJMvwAMRNMdnvFo+
-        Z9qbQZmJKWC+J/Vp+Bi/EpsqMLhMGvRxpOe5CDDkn9WAtoajcmjL
-X-Google-Smtp-Source: ABdhPJw+U9FRiC/wIUE2OexNPkKJ7zAvW3OfkX9BZqxejhcm7/AXeJJpW3pTuMADiK8n/xbJPKFIjeHhjWnSiQU1Xms=
-X-Received: by 2002:aa7:96f8:0:b0:47b:eb13:e0b6 with SMTP id
- i24-20020aa796f8000000b0047beb13e0b6mr13304394pfq.27.1635540460700; Fri, 29
- Oct 2021 13:47:40 -0700 (PDT)
-MIME-Version: 1.0
-From:   Tim Harvey <tharvey@gateworks.com>
-Date:   Fri, 29 Oct 2021 13:47:29 -0700
-Message-ID: <CAJ+vNU2Vt2hWW=Yxh5W=bVerJjwbNoJpTDGgXxUUo9PZvzFe9A@mail.gmail.com>
-Subject: IMX8MM eMMC CQHCI timeout
-To:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Marcel Ziswiler <marcel@ziswiler.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Schrempf Frieder <frieder.schrempf@kontron.de>,
-        Adam Ford <aford173@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Lucas Stach <l.stach@pengutronix.de>,
-        Peng Fan <peng.fan@nxp.com>, Frank Li <Frank.Li@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>,
+        with ESMTP id S230355AbhJ2Vt4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Oct 2021 17:49:56 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B951EC061570;
+        Fri, 29 Oct 2021 14:47:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:
+        Subject:Sender:Reply-To:Content-ID:Content-Description;
+        bh=9nDAyc2CEQnQbldKt9DkGeYslg1kSi1u4+9mTf4hmOU=; b=U03hNFRjzzqmMGdfaNDvAi+PC/
+        sMi8qnty/SIi8RZeyRF+OQ9pZJsHtS7yvDTcADBP/RhifuaqKN4yf3v2/RE2gaGSINkenep3Oy7D5
+        1kyPmjhVhlqHePk3XMkhfNgpAHgc6fEDX56DCiX2CUbQqiNM1CIOBLWxxlG3w5VyZCqk1eAPKZl9I
+        OWN0vpL5Ed9y+R3ns19WmIM2MXjUs3pUE0dJTS+cDkIdVRLm1NL0CSDhzaRE3KD2owTdsW3Vrietk
+        47Zlhyr35TZMk8tM0HMujz7DMf8glfCWPOVrfOyFKemEtOwQItcfbTxd66vfovsOSuSUMVvfB/nno
+        9gRFmVcQ==;
+Received: from [2601:1c0:6280:3f0::aa0b]
+        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mgZif-00CPI9-Vz; Fri, 29 Oct 2021 21:47:26 +0000
+Subject: Re: [GIT PULL] MMC fixes for v5.15-rc8
+To:     Linus Torvalds <torvalds@linux-foundation.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Cale Collins <ccollins@gateworks.com>
-Content-Type: text/plain; charset="UTF-8"
+        Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     linux-mmc@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-m68k <linux-m68k@lists.linux-m68k.org>
+References: <20211029120709.79366-1-ulf.hansson@linaro.org>
+ <CAHk-=wgQLtvDh-3zhGNCWNAssubDxgxC+7RdEmHBmK_84rLT2Q@mail.gmail.com>
+From:   Randy Dunlap <rdunlap@infradead.org>
+Message-ID: <c9deee06-dd78-22fc-2d93-7c70e1f6522b@infradead.org>
+Date:   Fri, 29 Oct 2021 14:47:24 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
+MIME-Version: 1.0
+In-Reply-To: <CAHk-=wgQLtvDh-3zhGNCWNAssubDxgxC+7RdEmHBmK_84rLT2Q@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Greetings,
+On 10/29/21 11:04 AM, Linus Torvalds wrote:
+> On Fri, Oct 29, 2021 at 5:07 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>
+>>   - winbond: Silences build errors on M68K
+> 
+> I think this one is wrong.
+> 
+> I think the problem is that m68k declares "claim_dma_lock()" in the
+> wrong header file. It's in <asm/floppy.h> instead of <asm/dma.h>
+> 
+> I'm somewhat surprised that this doesn't hit m68k in other places -
+> there are other drivers that use that same ISA DMA interface.
 
-I've encountered the following MMC CQHCI timeout message a couple of
-times now on IMX8MM boards with eMMC with a 5.10 based kernel:
+I moved claim_dma_lock() and release_dma_lock() fro asm/floppy.h
+to asm/dma.h (for arch/m68k/). I spent a few hours trying to fix
+the resulting fallout.  Guess I'm just slow.
 
-[  224.356283] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-[  224.362764] mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
-[  224.369250] mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
-[  224.375726] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-[  224.382197] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-[  224.388665] mmc2: cqhci: TDL base:  0x8003f000 | TDL up32: 0x00000000
-[  224.395129] mmc2: cqhci: Doorbell:  0xbf01dfff | TCN:      0x00000000
-[  224.401598] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x08000000
-[  224.408064] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-[  224.414532] mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000800
-[  224.420997] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-[  224.427467] mmc2: cqhci: Resp idx:  0x0000000d | Resp arg: 0x00000000
-[  224.433934] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-[  224.440404] mmc2: sdhci: Sys addr:  0x7c722000 | Version:  0x00000002
-[  224.446877] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000020
-[  224.453346] mmc2: sdhci: Argument:  0x00018000 | Trn mode: 0x00000023
-[  224.459811] mmc2: sdhci: Present:   0x01f88008 | Host ctl: 0x00000030
-[  224.466281] mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-[  224.472752] mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-[  224.479225] mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-[  224.485690] mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
-[  224.492161] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
-[  224.498628] mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-[  224.505097] mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00ffffff
-[  224.511575] mmc2: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0xffc003ff
-[  224.518043] mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d07f01
-[  224.524512] mmc2: sdhci: Host ctl2: 0x00000088
-[  224.528986] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfe179020
-[  224.535451] mmc2: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS DUMP ====
-[  224.543052] mmc2: sdhci-esdhc-imx: cmd debug status:  0x2120
-[  224.548740] mmc2: sdhci-esdhc-imx: data debug status:  0x2200
-[  224.554510] mmc2: sdhci-esdhc-imx: trans debug status:  0x2300
-[  224.560368] mmc2: sdhci-esdhc-imx: dma debug status:  0x2400
-[  224.566054] mmc2: sdhci-esdhc-imx: adma debug status:  0x2510
-[  224.571826] mmc2: sdhci-esdhc-imx: fifo debug status:  0x2680
-[  224.577608] mmc2: sdhci-esdhc-imx: async fifo debug status:  0x2750
-[  224.583900] mmc2: sdhci: ============================================
+FWIW, the biggest problem I had was the variety of types of DMA that
+M68K supports (once a driver includes <asm/dma.h>, things get messy).
 
-I don't know how to make the issue occur, both times it occured simply
-reading a file in the rootfs ext4 fs on the emmc.
+> I've pulled this, but I hate how random that fix is.
 
-Some research shows:
-- https://community.nxp.com/t5/i-MX-Processors/The-issues-on-quot-mmc0-cqhci-timeout-for-tag-0-quot/m-p/993779
-- http://git.toradex.com/cgit/linux-toradex.git/commit/?h=toradex_5.4-2.3.x-imx&id=fd33531be843566c59a5fc655f204bbd36d7f3c6
 
-I'm not clear if this info is up-to-date. The NXP 5.4 kernel did not
-enable this feature but if I'm not mistaken CQHCI support itself
-didn't land in mainline until a later kernel so it would make sense it
-was not enabled at that time. I do see the NXP 5.10 kernels have this
-enabled so I'm curious if it is an issue there.
-
-Any other IMX8MM or other SoC users know what this could be about or
-what I could do for a test to try to reproduce it so I can see if it
-occurs in other kernel versions?
-
-Best regards,
-
-Tim
+-- 
+~Randy
