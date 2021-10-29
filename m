@@ -2,92 +2,171 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0203DC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 18:05:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15221C43219
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 18:06:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DEB2460FC3
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 18:05:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EFA3B6117A
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Oct 2021 18:06:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229498AbhJ2SHm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Oct 2021 14:07:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38200 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229655AbhJ2SHl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Oct 2021 14:07:41 -0400
-Received: from mail-lj1-x235.google.com (mail-lj1-x235.google.com [IPv6:2a00:1450:4864:20::235])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90E54C061714
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Oct 2021 11:05:12 -0700 (PDT)
-Received: by mail-lj1-x235.google.com with SMTP id 188so18180374ljj.4
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Oct 2021 11:05:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=K6KCBeD/pNCG9HZQnIVtuH+wCZVkgQgovkR8K6qXsz0=;
-        b=DK+Tp3O/3gtk6Mj6EirsKfvX8mAe0+szIVxVBHJaMcoxLOtuvV48Rqi0Ta0I9gUMTR
-         F0btd8b3EQOXM97fEoJPbO3hLFaaM//stWMVDGe6zk5xsGZmTRz6EQE2YKHKyw7CXr/F
-         N8UoFNI/13+/GBJUOvYX4fRekOCCnOhfYNR30=
+        id S230163AbhJ2SJY convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Oct 2021 14:09:24 -0400
+Received: from mail-oi1-f175.google.com ([209.85.167.175]:44685 "EHLO
+        mail-oi1-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229498AbhJ2SJX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Oct 2021 14:09:23 -0400
+Received: by mail-oi1-f175.google.com with SMTP id y207so14481360oia.11;
+        Fri, 29 Oct 2021 11:06:54 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=K6KCBeD/pNCG9HZQnIVtuH+wCZVkgQgovkR8K6qXsz0=;
-        b=p97/N0xVoJpBDqsT0HODOD3MlGXEbbq1D+Wv7kLoNCAHPv99ISiW5VO0+jXfri2Dxw
-         w7LNiKot+gmPKMp4Yhk3zW0mpnDy0Dty8MFd+9bv5WrEmrvYZ8aSdFntJrZytFDogpXy
-         9lbRobp8KZEUUEaDwUdiDXR1CoxqR+NxZR04btArv2DPKgbGzHoEUdCqE/OEXRwejuZD
-         yIgs/DtQy5HRWwzTOWESfc56Fl17mf6j1l4dTEyrB73jAZ6e9kG1oAQQ4f+YTDVB5gYK
-         8UDNLFe8wWtkKbqvh+Z74CAEd+VIx1d3CryZFWb/+zrkkHUYxDpQH/FNi43RtgTA5H20
-         +o9A==
-X-Gm-Message-State: AOAM532iEELAPYvzk/D++g3hxBeYLHbkQ/iSlkL6TU475rfng9NQdSBi
-        t6+ZaWcS6rA6QOByi1Eb3DbPIVkJqmlxAKGqjj4=
-X-Google-Smtp-Source: ABdhPJw2NUAwCwUTe5J/SsXZfzYPA/mxPS91jSIRSoEajBuJ7SYEQ22MpFZJWxtypP1wykew6S4Mlg==
-X-Received: by 2002:a2e:888a:: with SMTP id k10mr13223506lji.329.1635530710344;
-        Fri, 29 Oct 2021 11:05:10 -0700 (PDT)
-Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com. [209.85.167.42])
-        by smtp.gmail.com with ESMTPSA id q20sm651187ljp.61.2021.10.29.11.05.09
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 29 Oct 2021 11:05:10 -0700 (PDT)
-Received: by mail-lf1-f42.google.com with SMTP id p16so22659945lfa.2
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Oct 2021 11:05:09 -0700 (PDT)
-X-Received: by 2002:a05:6512:3993:: with SMTP id j19mr9826124lfu.402.1635530709299;
- Fri, 29 Oct 2021 11:05:09 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=5+xv1sYACq7ekC+Hz2Y0cCbNG5PRGqC0Z37yaKBG5NI=;
+        b=Sr0btJpxeH+8l2WkcJB+nnurmUh8y2agnebQltQWjlijMFsRLzNz+czsHj8whq3qi8
+         cZiMqp+uGs0JoPBR8jHVrueuwF+BzRm+SHV8yjchhh7nPjTAmUMXAG58R8S1B/HrEKXE
+         48Y0+6VLP9FVpQa46Ocu3aTcAmjJfrhoBlRgVWosGkN91c7FWFNGcaTeVpDL7XVgMiQP
+         smv0aKKeOZUdg3iehJN+o5We3B+sLPbWSs/6dtjHM64Zb0CVWyhS+okykTDatxNE0WmA
+         O6pzIleKnJWT/4gMj5HCBy4PdcDBQiA7JeoAUxalNJTEP8tqJlpBM9Xxqp993hdVd1wr
+         IAkg==
+X-Gm-Message-State: AOAM5320jm2lq6Qw2bZiyr9kQobeP33rgUWYXPxHR5UFYFUhMacTdC8R
+        iJtkOsUiGzB8Cl8ARjMRRZcDicgxCqkTxsv3TlJOsL87LJ8=
+X-Google-Smtp-Source: ABdhPJyOQcK/yH8YWrJNxVYGyhhICBtBpU/kmrIuW/r1/0glQukNI66xy0DXMlLLQgevqp7sBswHRDfWJcvpb+2DdN8=
+X-Received: by 2002:a05:6808:128d:: with SMTP id a13mr612592oiw.51.1635530814547;
+ Fri, 29 Oct 2021 11:06:54 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211029120709.79366-1-ulf.hansson@linaro.org>
-In-Reply-To: <20211029120709.79366-1-ulf.hansson@linaro.org>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Fri, 29 Oct 2021 11:04:53 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wgQLtvDh-3zhGNCWNAssubDxgxC+7RdEmHBmK_84rLT2Q@mail.gmail.com>
-Message-ID: <CAHk-=wgQLtvDh-3zhGNCWNAssubDxgxC+7RdEmHBmK_84rLT2Q@mail.gmail.com>
-Subject: Re: [GIT PULL] MMC fixes for v5.15-rc8
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     linux-mmc@vger.kernel.org,
+References: <20211025224032.21012-1-digetx@gmail.com> <20211025224032.21012-21-digetx@gmail.com>
+ <09c05206-c0e5-9a25-8ffa-b9291f6ea5ae@gmail.com> <CAJZ5v0i9OtA1nDiv8UXuF3ASdENFYJFV7+nMWm6Pcu=kw8k1aQ@mail.gmail.com>
+ <4dc8a6bd-4072-ccbf-513b-221d286bd6d5@gmail.com>
+In-Reply-To: <4dc8a6bd-4072-ccbf-513b-221d286bd6d5@gmail.com>
+From:   "Rafael J. Wysocki" <rafael@kernel.org>
+Date:   Fri, 29 Oct 2021 20:06:43 +0200
+Message-ID: <CAJZ5v0hKQf-xZq2fx1pA5oxMqP_XJV=AG0Rqu7BKRUZGDz6H5Q@mail.gmail.com>
+Subject: Re: [PATCH v14 20/39] pwm: tegra: Add runtime PM and OPP support
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-m68k <linux-m68k@lists.linux-m68k.org>
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        David Heidelberg <david@ixit.cz>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 29, 2021 at 5:07 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Fri, Oct 29, 2021 at 6:29 PM Dmitry Osipenko <digetx@gmail.com> wrote:
 >
->  - winbond: Silences build errors on M68K
+> 29.10.2021 18:56, Rafael J. Wysocki пишет:
+> > On Fri, Oct 29, 2021 at 5:20 PM Dmitry Osipenko <digetx@gmail.com> wrote:
+> >>
+> >> 26.10.2021 01:40, Dmitry Osipenko пишет:
+> >>> +     ret = devm_pm_runtime_enable(&pdev->dev);
+> >>> +     if (ret)
+> >>> +             return ret;
+> >>> +
+> >>> +     ret = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
+> >>> +     if (ret)
+> >>> +             return ret;
+> >>> +
+> >>> +     ret = pm_runtime_resume_and_get(&pdev->dev);
+> >>> +     if (ret)
+> >>> +             return ret;
+> >>> +
+> >>>       /* Set maximum frequency of the IP */
+> >>> -     ret = clk_set_rate(pwm->clk, pwm->soc->max_frequency);
+> >>> +     ret = dev_pm_opp_set_rate(pwm->dev, pwm->soc->max_frequency);
+> >>>       if (ret < 0) {
+> >>>               dev_err(&pdev->dev, "Failed to set max frequency: %d\n", ret);
+> >>> -             return ret;
+> >>> +             goto put_pm;
+> >>>       }
+> >>>
+> >>>       /*
+> >>> @@ -278,7 +294,7 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+> >>>       if (IS_ERR(pwm->rst)) {
+> >>>               ret = PTR_ERR(pwm->rst);
+> >>>               dev_err(&pdev->dev, "Reset control is not found: %d\n", ret);
+> >>> -             return ret;
+> >>> +             goto put_pm;
+> >>>       }
+> >>>
+> >>>       reset_control_deassert(pwm->rst);
+> >>> @@ -291,10 +307,15 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+> >>>       if (ret < 0) {
+> >>>               dev_err(&pdev->dev, "pwmchip_add() failed: %d\n", ret);
+> >>>               reset_control_assert(pwm->rst);
+> >>> -             return ret;
+> >>> +             goto put_pm;
+> >>>       }
+> >>>
+> >>> +     pm_runtime_put(&pdev->dev);
+> >>> +
+> >>>       return 0;
+> >>> +put_pm:
+> >>> +     pm_runtime_put_sync_suspend(&pdev->dev);
+> >>> +     return ret;
+> >>>  }
+> >>>
+> >>>  static int tegra_pwm_remove(struct platform_device *pdev)
+> >>> @@ -305,20 +326,44 @@ static int tegra_pwm_remove(struct platform_device *pdev)
+> >>>
+> >>>       reset_control_assert(pc->rst);
+> >>>
+> >>> +     pm_runtime_force_suspend(&pdev->dev);
+> >>
+> >> I just noticed that RPM core doesn't reset RPM-enable count of a device
+> >> on driver's unbind (pm_runtime_reinit). It was a bad idea to use
+> >> devm_pm_runtime_enable() + pm_runtime_force_suspend() here, since RPM is
+> >> disabled twice on driver's removal, and thus, RPM will never be enabled
+> >> again.
+> >>
+> >> I'll fix it for PWM and other drivers in this series, in v15.
+> >
+> > Well, for the record, IMV using pm_runtime_force_suspend() is
+> > generally a questionable idea.
+> >
+>
+> Please clarify why it's a questionable idea.
 
-I think this one is wrong.
+There are a few reasons.
 
-I think the problem is that m68k declares "claim_dma_lock()" in the
-wrong header file. It's in <asm/floppy.h> instead of <asm/dma.h>
+Generally speaking, it makes assumptions that may not be satisfied.
 
-I'm somewhat surprised that this doesn't hit m68k in other places -
-there are other drivers that use that same ISA DMA interface.
+For instance, it assumes that the driver will never have to work with
+the ACPI PM domain, because the ACPI PM domain has a separate set of
+callbacks for system-wide suspend and resume and they are not the same
+as its PM-runtime callbacks, so if the driver is combined with the
+ACPI PM domain, running pm_runtime_force_suspend() may not work as
+expected.
 
-I've pulled this, but I hate how random that fix is.
+Next, it assumes that PM-runtime is actually enabled for the device
+and the RPM_STATUS of it is valid when it is running.
 
-(And on the topic of hate - the merge messages are just auto-munged
-from the commit line - please spend a _bit_ more time on it, ok? Or at
-least make it closer to proper English - things like "Re-enable card
-irqs after a reset in tmio driver" instead of "tmio: Re-enable card
-irqs after a reset")
+Further, it assumes that the PM-runtime suspend callback of the driver
+will always be suitable for system-wide suspend which may not be the
+case if the device can generate wakeup signals and it is not allowed
+to wake up the system from sleep by user space.
 
-              Linus
+Next, if the driver has to work with a PM domain (other than the ACPI
+one) or bus type that doesn't take the pm_runtime_force_suspend()
+explicitly into account, it may end up running the runtime-suspend
+callback provided by that entity from within its system-wide suspend
+callback which may not work as expected.
+
+I guess I could add a few if I had to.
