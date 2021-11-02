@@ -2,152 +2,222 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8C70C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Nov 2021 15:26:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FA70C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BE986603E5
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Nov 2021 15:26:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 317CC60F58
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Nov 2021 15:28:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234613AbhKBP30 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Nov 2021 11:29:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55232 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234554AbhKBP3Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Nov 2021 11:29:24 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CB19C061205
-        for <linux-mmc@vger.kernel.org>; Tue,  2 Nov 2021 08:26:49 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id i26so33627432ljg.7
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Nov 2021 08:26:49 -0700 (PDT)
+        id S231540AbhKBPau (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Nov 2021 11:30:50 -0400
+Received: from mail-eopbgr1410137.outbound.protection.outlook.com ([40.107.141.137]:47712
+        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S233684AbhKBPat (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 Nov 2021 11:30:49 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=JqY//wK4O8kjTDpECb0It3qKjOBoy/tKS5oVNztmATFuOE3elll02g0qiL4IJcIKDva5jPy875WAJKM6HFsk1HC381BEPFedXqre9oJrlDnc6JPZgtLHORui4/lhfBXqLmHdy3p2kau+YLMnpd1lFlEz9lfjiPG8mjia+fwezMpOChyy0XD5rfNP5RLiTDF3Wh+WTvpk/mtQL0RZsa8U0bECZxYU9JOHn9bJ4/qE8ko4bEji2xsI+VlzF5Ow7eg6qH8ZVuLvXvM8YPOmVTTxEyocyzQmKvFu7C4v04nmiasMgnwbWsOxsmJt9iANQk5mT0PCgkr21jBodqWb8c0Sdg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ACZhwZGSg729XGfVOoyH2ZzBlm+iW80CuHjzlCnDbSw=;
+ b=IhzEeP2A/M8HGnYSiQv0nI4oR85RMtEgwuXyAzCRWC0ByW1moZOuhX03MepbkKVL5XKnmDNISAzXrvH/5n7x78HIoaF7LeMG9Fq2yLfLy7POAfrFHiGSxBxK79GcMJ1I0/RrZz4f91AgapUWNhMy2FkJZtB9ZLJeaWIQonIuU3A59obOsmckrwXT6t6H+hk20mjyc/o7bmsqgHAaxUg7nPQQ37YaBX6v+Grz6bB0VvwPkeY9REa6DGHXKIOZ79h0KjiM9afCaaqctmEEXTI9yTA0RP5thsZC7Ga47wwQzPDfHpFbym/p1zvX1B1EQFnpNo2FCXbmDR30sKX5Z7CxNw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
+ header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=fxVnPZH6b6L2I7aYk+0v0By0qTM5ney7UTSCmiLQK+A=;
-        b=x5JmB/0OUUm0n3pUNm0d3bDFVZ9zoYTwmC68+WhMKiYCDd8J6meh19KGHZHjteCmGj
-         Gb+poFRw+Q5O4+zzJh7M1JgxVnp1aEyWS9A6EwcLLgY1LpLfVZUgGn2Yl2smq1KttslG
-         jPUkrYMvywbQCMzI5XmPp3b7So9dWZKEff10PaYosjnRDQLTQFGGPrDw8wBORG8lCbKW
-         055tT1pMfjVah6HOGuwIlD2rt3+wAoJcH5D10pnUSYQaFdjeh/fCItdq489Cn5qMhSnu
-         pXYuysYzaAZvTPJAXCBoDBvy2nCrHmK0DLmb5ukSGYKQGQKHUnB+TYuHVt5IerDWDAHS
-         SkwQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=fxVnPZH6b6L2I7aYk+0v0By0qTM5ney7UTSCmiLQK+A=;
-        b=cfGU86bxYiLdxOCE6SRo660PUom0c0mmAhxQhDjSu/yYX082Avhq4DAdnnEU9Chyvi
-         0lcs2z8Kr/i/OBh+tX3ixXWDGIid0I/tH4EZZp626/+mHKtq6Gjrsybq3749OkO8jDxk
-         yclWHKk0iYC15goP13qxOgGg7Bg7SM/H+wd/bkhcB+ZVs7S19o7xcimCi+DRaznFgVO1
-         v4Ucwp39XYkSJ7uhaQ3Q97A07Ymu8C8ZMs18+tzvHxbpiQ/c6iLsrhEqCAWNFlq7V71G
-         zKNid9xmtvpx4/QcwdHpr0KJXU3ElrbCnijxhNMJiJcT1XnWZmdRoOc/+N9g+Ma4lxj2
-         8MrA==
-X-Gm-Message-State: AOAM533f22c9Thr8Nt5IyrhOFMfuaktYjjuZMImudY+pvQLtwnLqukI6
-        oImznO6uBGPw4hWqt+SI5Uh8Lg==
-X-Google-Smtp-Source: ABdhPJywD1fXGsmUvzlGsbwzhNq/8e0eLaGhh844IKPxeN7lhccCNTjpZy9biEo0Bug7ay78GS+QVg==
-X-Received: by 2002:a2e:7210:: with SMTP id n16mr29186843ljc.155.1635866807510;
-        Tue, 02 Nov 2021 08:26:47 -0700 (PDT)
-Received: from [192.168.1.211] ([37.153.55.125])
-        by smtp.gmail.com with ESMTPSA id c1sm1844823ljr.111.2021.11.02.08.26.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 02 Nov 2021 08:26:46 -0700 (PDT)
-Subject: Re: [PATCH v1 01/15] dt-bindings: add pwrseq device tree bindings
-To:     Rob Herring <robh@kernel.org>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "open list:BLUETOOTH DRIVERS" <linux-bluetooth@vger.kernel.org>,
-        ath10k@lists.infradead.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
- <20211006035407.1147909-2-dmitry.baryshkov@linaro.org>
- <YXf6TbV2IpPbB/0Y@robh.at.kernel.org>
- <37b26090-945f-1e17-f6ab-52552a4b6d89@linaro.org>
- <CAL_JsqLAnJqZ95_bf6_fFmPJFMjuy43UfP2UxzEmFMNnG_t-Ug@mail.gmail.com>
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Message-ID: <31792ef1-20b0-b801-23b7-29f303b91def@linaro.org>
-Date:   Tue, 2 Nov 2021 18:26:45 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ACZhwZGSg729XGfVOoyH2ZzBlm+iW80CuHjzlCnDbSw=;
+ b=kPt/abrCNCYLhBp9hG3MeEUyCbfBVVUD+Dk2Su6qkrDXWdneoKdIyvDAv2PVVuly0sjzmToJa25nYnMAPCbVtPFGhpOfeuU9vdZicanH8rjPLDdMhtEEZ3OOWJ62S5soUm68vq4/R9uMvImaR8k4NVAT1Nvt1UxlV02yfcLwPYI=
+Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com (2603:1096:604:bb::5)
+ by OS0PR01MB5922.jpnprd01.prod.outlook.com (2603:1096:604:bb::5) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4649.15; Tue, 2 Nov
+ 2021 15:28:11 +0000
+Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com
+ ([fe80::c0bd:405a:cdd3:f153]) by OS0PR01MB5922.jpnprd01.prod.outlook.com
+ ([fe80::c0bd:405a:cdd3:f153%8]) with mapi id 15.20.4649.019; Tue, 2 Nov 2021
+ 15:28:11 +0000
+From:   Biju Das <biju.das.jz@bp.renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH] mmc: renesas_sdhi: Fix internal cd irq miss with hard
+ reset
+Thread-Topic: [PATCH] mmc: renesas_sdhi: Fix internal cd irq miss with hard
+ reset
+Thread-Index: AQHXutXdv6ZsGiNewUOReWqD4pnIGavfGfWAgAArXcCAAAG4oIABBI8ggAincACAALqzwIAG2DWg
+Date:   Tue, 2 Nov 2021 15:28:11 +0000
+Message-ID: <OS0PR01MB59222477102B63D3F0D7E580868B9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+References: <20211006171605.6861-1-biju.das.jz@bp.renesas.com>
+ <YXK7AfUYxuFWl3rl@ninjato>
+ <OS0PR01MB5922DC39B54A0B8D7AA8B3DC86809@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+ <OS0PR01MB592212E593522E4E72BEAFCA86809@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+ <OS0PR01MB592273BA2B117BE67B108BDF86819@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+ <YXr91sKve3pmY+yj@ninjato>
+ <OS0PR01MB59227455C2F3B1AB3BE0237D86879@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+In-Reply-To: <OS0PR01MB59227455C2F3B1AB3BE0237D86879@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+Accept-Language: en-GB, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=bp.renesas.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: aa271a15-c116-48d8-b0b8-08d99e156195
+x-ms-traffictypediagnostic: OS0PR01MB5922:
+x-microsoft-antispam-prvs: <OS0PR01MB5922B0863BDBAA4508A98A47868B9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7691;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: mq7IsjfXiaj2r/BRiQj0bDnk4nE9S/Ffcvxb8iTfY/zYb40jeIdJZxEntXnjCEsAHU3BbBnYCDNgVBuzo22B1jKpQ9/+VR0kPVyZgNVzzJo7PnMkQYrt8kVK86z0R0Zyzna8Ya+I2rTVewcCIQMpA0tJUdBD6MXAgu7jI+QNw93tsvINtk5B/xs+1gYMM7E49D2LCkw+8QewIJADlQ+KKfDdCctZLKnkugo9231G0QcJHVAwyl5V/Ov2Xmjs8P+bSP8NNliRLXx8/a1esIormgGLV70OHqtJQrAu6xf1lFK1p4VesUriGM65OK4mQ5dnB/foWCWxmtK914twVIecZoca/vRpLfi0cUcY/1tN61lBARHVdc6lPSHEL9F2dp23IW9wCroW5xaLDiCR5r04bzaBRIJKR/JO/1qKJYKogvOfRnZdh32yBAfb90j6RNtdUmCagaK35Q+OlYD+XEIgkZai0piEu2AaoPEnmU4BfXNSblBI39nepa2990NV9BAyeAI+ZCsPlkQiCv/GEiOmwEQ1shrjmehSu8m3uqm+OKXZEkYiQPRaWOu41wYqiQ9OhiHCGHAWvcJ1D0NGCRryy7Fco+BjnRXV+vsjdCjbqGtizC8TfUty3pVnN+eJUqcN5pM2tD6RBGqjIrAp7UxJDaBRNnBRSqwJEr6y6nuSQqLcivBgxlli7R+dciDNsx7IrcDYte6lWJ07as5OLn6nWA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OS0PR01MB5922.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(8676002)(316002)(33656002)(6506007)(186003)(54906003)(71200400001)(508600001)(83380400001)(8936002)(5660300002)(2906002)(55016002)(122000001)(7696005)(76116006)(66446008)(66556008)(66476007)(52536014)(64756008)(26005)(9686003)(38070700005)(38100700002)(66946007)(86362001)(4326008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?oiI2Hk3QgpbK1BNVAL1PVY7HpQ2nYr93Qr8T7+PSCSnk943zvj1FXAO35CkP?=
+ =?us-ascii?Q?SAKwyPyJemSxZF+ppgA2QNNlCwjT2Dygul02yUeBWtW9yaewJNQ9Gu/2Kyxe?=
+ =?us-ascii?Q?DsT8OP3KxftK4qCehuM5SHvt8DaVGMQHKgXrAOAw8cC8DL8dkGAg0rAQ5dUJ?=
+ =?us-ascii?Q?VEIO3T4ztGZcINPhMQe/S+JxInqfE18bwCPPRM99kScP39eTjcWIpgtdAFPQ?=
+ =?us-ascii?Q?QmRxwpW422yN52l49TzypRIlvkM8BXhGTyt4WfytjKM8iT7pivxPy6JCxx1S?=
+ =?us-ascii?Q?QYPJiCGvli2FkyYFA31YclCAl7txP5PhvLpm4RLFfE982Sc16KDqgwLJo0hy?=
+ =?us-ascii?Q?QJwSnVp+nqjjSmzllJW1Gb0ovnsW30JspIwNeCAR2kCnlGPvrJOx+pKrpWov?=
+ =?us-ascii?Q?DlJ3pz8k+BfHDc6DE1/lAQFPO7MOwslcC1eEzX0hcnxLBtQeZkAj/rYmVwXz?=
+ =?us-ascii?Q?CbuphmKoO48lgnrMFWm0vZw3Z3wcJVxPLEq1APBGJ/V/dIM4Ucv6wuHWgNZy?=
+ =?us-ascii?Q?GrSmGh0k/GM2LPSxrCnqbFLbf41I54CauZobcOcLIQejE9sVpszy3PEtm/0i?=
+ =?us-ascii?Q?32Z4EVC/jDhOzPNChstyE+0tReCCO4E2cP+NYn5kXVY6sPe3stYArC7N2Mx1?=
+ =?us-ascii?Q?b4JO5IoZtIUzqjPB5KyxobSOkZoS128C/PtAvsULlSOZ3XBBCruGT5fgtBMa?=
+ =?us-ascii?Q?xIvDZ0Nx/+KGOWpoKIvHNz7WGFC+/mtK/l6KgF/cbe4rZ2snl9Lzt1cFfl55?=
+ =?us-ascii?Q?wm+PNiWf8LBpbSpO+l+0mgmsmQxUkja4YumGbzoQZvSUdIxs+oM42vcvLyPv?=
+ =?us-ascii?Q?FTB8U4N+zCmCU4NzNGlugshix4P6OZXJ9eKDl2KN7t3JR/oWQwKi4nM3r8/T?=
+ =?us-ascii?Q?vLroQ/sNPcEpMbkmO+CGNXxKPJn0R9kl1kwQxcuvICAOOSCF8+sP83/h4NhU?=
+ =?us-ascii?Q?spLAB6vAw6HcaBtSzK2jA7KRtXKRt4dSLPB/0EVPmKy7/cq194wSTi6RNulO?=
+ =?us-ascii?Q?xobw9jRghiUIkLL0Dr8MbOLAz0aJQ25+YQTpDaBcvl3WhMeb3cJ3+vHObtMS?=
+ =?us-ascii?Q?pNSRdigHA16r5Bn187SsrSLBT7XFvPwHgd+l0qOrG3zueJKGzPUzxqB8ul1j?=
+ =?us-ascii?Q?KAVNyE0I2Pd9jCg+YtrhxMmUZ2uFnBUZavLuTs5TMv7sXN8hCb4Asz63bXHX?=
+ =?us-ascii?Q?3gbBInguMbEeIPFhktjg+cHb8QTaJD5ehG2FlYcZYS2rdDM8OsaKabvktnJM?=
+ =?us-ascii?Q?CX9YmBLVPu2csErVa/92AvHvGqll+JbbDk/rJs7MmZKSlSCC9HOr06kegVrb?=
+ =?us-ascii?Q?I5/NshcAerZRt/mUu6spv6kQ0JZanzlI4DstNRF2MQxBy64cBZn/mnWeV74i?=
+ =?us-ascii?Q?jVSXdsd8ZbvIN2njOgJp/mhkrhX/Yr2cKhLsWUkuApzMhLTb6IRYJoT+fgwD?=
+ =?us-ascii?Q?oKtqOWIrXhSHFv+HKVYlzfNt033vAWMKYnH3/VCwPLm7FFzw9FE3Y+Zhua32?=
+ =?us-ascii?Q?hCLrDYQ3V6sLh1V2O0ztJjtzPfQnMPnvO81QIHif6EM4djviTs0HRaTChaWq?=
+ =?us-ascii?Q?AM4Uq1U3FWtMlDfohX/o2IA3vHwZiEcfMFsXNFhvLLxULPM7lBwr2pO3RbVw?=
+ =?us-ascii?Q?O3u2WrAhJv95G5IuOxHELxMPOLAdnKTcVtM3lbb04Zsur+B3O1wIZwTdIyfD?=
+ =?us-ascii?Q?0maoIA=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-In-Reply-To: <CAL_JsqLAnJqZ95_bf6_fFmPJFMjuy43UfP2UxzEmFMNnG_t-Ug@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+X-OriginatorOrg: bp.renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: OS0PR01MB5922.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: aa271a15-c116-48d8-b0b8-08d99e156195
+X-MS-Exchange-CrossTenant-originalarrivaltime: 02 Nov 2021 15:28:11.6983
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: L6kkv9/k3aqJcEFj5LNp6sOHY7O7tGcDveE4XHsrqGlLF/PYbqLlxEpFmBAKVBVTCStWgjEcruG3F9T2owEZiXp73sbKmA+aUNtOK642Uk8=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: OS0PR01MB5922
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/10/2021 00:53, Rob Herring wrote:
-> On Tue, Oct 26, 2021 at 9:42 AM Dmitry Baryshkov
-> <dmitry.baryshkov@linaro.org> wrote:
->>
->> On 26/10/2021 15:53, Rob Herring wrote:
->>> On Wed, Oct 06, 2021 at 06:53:53AM +0300, Dmitry Baryshkov wrote:
->>>> Add device tree bindings for the new power sequencer subsystem.
->>>> Consumers would reference pwrseq nodes using "foo-pwrseq" properties.
->>>> Providers would use '#pwrseq-cells' property to declare the amount of
->>>> cells in the pwrseq specifier.
->>>
->>> Please use get_maintainers.pl.
->>>
->>> This is not a pattern I want to encourage, so NAK on a common binding.
->>
->>
->> Could you please spend a few more words, describing what is not
->> encouraged? The whole foo-subsys/#subsys-cells structure?
-> 
-> No, that's generally how common provider/consumer style bindings work.
-> 
->> Or just specifying the common binding?
-> 
-> If we could do it again, I would not have mmc pwrseq binding. The
-> properties belong in the device's node. So don't generalize the mmc
-> pwrseq binding.
-> 
-> It's a kernel problem if the firmware says there's a device on a
-> 'discoverable' bus and the kernel can't discover it. I know you have
-> the added complication of a device with 2 interfaces, but please,
-> let's solve one problem at a time.
+Hi Wolfram,
 
-The PCI bus handling is a separate topic for now (as you have seen from 
-the clearly WIP patches targeting just testing of qca6390's wifi part).
+> Subject: RE: [PATCH] mmc: renesas_sdhi: Fix internal cd irq miss with har=
+d
+> reset
+>=20
+> Hi Wolfram,
+>=20
+> Thanks for the feedback.
+>=20
+> > Subject: Re: [PATCH] mmc: renesas_sdhi: Fix internal cd irq miss with
+> > hard reset
+> >
+> > Hi Biju,
+> >
+> > > Finally found the issue. There is one more patch for host->reset in
+> > tmio_mmc_core.c. please see below.
+> > > If you add this code, then it works.
+> >
+> > Thanks for finding the culprit! To get this hopefully into v5.15
+> > still, I will simply add this chunk like you suggested. However, I
+> > really wonder if we shouldn't just replace this:
+> >
+> > >                 /* For R-Car Gen2+, we need to reset SDHI specific
+> > > SCC
+> > */
+> > >                 if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
+> > >                         host->reset(host);
+> > >
+> > >                 if (host->native_hotplug)
+> > >                         tmio_mmc_enable_mmc_irqs(host,
+> > >                                 TMIO_STAT_CARD_REMOVE |
+> > > TMIO_STAT_CARD_INSERT);
+> > >
+> >
+> > with a simple call to
+> >
+> > 	tmio_mmc_reset(host)
+> >
+> > (with tmio_mmc_reset() still updated to set the card interrupts, of
+> > course)? I have to admit I haven't checked all paths for side-effects
+> > yet, but maybe you can already test if this change also works (instead
+> > of adding the second chunk)? If so, we could change it incrementally
+> > for 5.16.
+>=20
+> Agreed. Will test and provide you feedback.
 
-For me there are three parts of the device:
-- power regulator / device embedded power domain.
-- WiFi
-- Bluetooth
+I have tested and it works ok on RZ/G2L platform.=20
 
-With the power regulator being a complex and a bit nasty beast. It has 
-several regulators beneath, which have to be powered up in a proper way.
-Next platforms might bring additional requirements common to both WiFi 
-and BT parts (like having additional clocks, etc). It is externally 
-controlled (after providing power to it you have to tell, which part of 
-the chip is required by pulling up the WiFi and/or BT enable GPIOs.
+Looking at the code, further optimization is possible. Can you please check=
+ below and
+If it is ok, please add to the new patch for 5.16.
 
-Having to duplicate this information in BT and WiFi cases results in 
-non-aligned bindings (with WiFi and BT parts using different set of 
-properties and different property names) and non-algined drivers (so the 
-result of the powerup would depend on the order of drivers probing).
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_c=
+ore.c
+index e2affa52ef46..e8add010bd7d 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -960,14 +960,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, str=
+uct mmc_ios *ios)
+        case MMC_POWER_OFF:
+                tmio_mmc_power_off(host);
+                /* For R-Car Gen2+, we need to reset SDHI specific SCC */
+-               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2) {
+-                       host->reset(host);
+-
+-                       if (host->native_hotplug)
+-                               tmio_mmc_enable_mmc_irqs(host,
+-                                               TMIO_STAT_CARD_REMOVE |
+-                                               TMIO_STAT_CARD_INSERT);
+-               }
++               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
++                       tmio_mmc_reset(host);
+=20
+                host->set_clock(host, 0);
+                break;
+@@ -1295,10 +1289,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+        if (host->clk_cache)
+                host->set_clock(host, host->clk_cache);
+=20
+-       if (host->native_hotplug)
+-               tmio_mmc_enable_mmc_irqs(host,
+-                               TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSE=
+RT);
+-
+        tmio_mmc_enable_dma(host, true);
+=20
+        return 0;
 
-So far I still suppose that having a single separate entity controlling 
-the powerup of such chips is the right thing to do.
-
-I'd prefer to use the power-domain bindings (as the idea seems to be 
-aligned here), but as the power-domain is used for the in-chip power 
-domains, we had to invent the pwrseq name.
-
--- 
-With best wishes
-Dmitry
+Regards,
+Biju
