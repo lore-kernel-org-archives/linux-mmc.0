@@ -2,97 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06AFBC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 12:26:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36179C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 13:00:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DF1D860E08
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 12:26:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1560F60F90
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 13:00:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229816AbhKCM30 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Nov 2021 08:29:26 -0400
-Received: from www.zeus03.de ([194.117.254.33]:53720 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231476AbhKCM30 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 3 Nov 2021 08:29:26 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=dalSsZMZGXDNwurXXr+ILQFzvpH
-        zhGeUPZpij+Gllzs=; b=K+1rR447VYfDG/6W1FjsNwevQgbh2coFSeRBw5L9Sct
-        NP1n07k6rbQF3Ahvjz127r3gZZJMZt5/f0EDmB6Xtjx3gZ8qo8XV9+tys1brDMHy
-        pYXIp4E8Y5aKO6ZlBJ3NqXZxbDCxhMY17sAO6n+NnNN7FriKRYvfL5ICOW1vOlw0
-        =
-Received: (qmail 3844152 invoked from network); 3 Nov 2021 13:26:48 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Nov 2021 13:26:48 +0100
-X-UD-Smtp-Session: l3s3148p1@PBEahuHPBJkgAQnoAGqXAf+bVXO+JoZP
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] mmc: tmio: reinit card irqs in reset routine
-Date:   Wed,  3 Nov 2021 13:26:46 +0100
-Message-Id: <20211103122646.64422-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.2
+        id S230185AbhKCND2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Nov 2021 09:03:28 -0400
+Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.51]:34010 "EHLO
+        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230152AbhKCND2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2021 09:03:28 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1635944419;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=mAhcM7qlQhV+zsJUgsi5MqKZxixjHLQqGyoVSaOR4WA=;
+    b=mFGC93xFn007IUPTB+Of4os9W1giMJJSxt+UwfFGfnxN7e6Au1M+2+KnQRjcHC03vY
+    EYpx9MWXTcTFnhnNsPeKdstKX3j2R5Ybyh98db9dRCzwXanDDjLIX709fKxOQioqEd6t
+    KvQbP3/7+/wLSENYEy9/gbld2Em1QvrCK2bB3P3ewQr5/W8pdeay6508pe0uUr6O98f6
+    r0P61LIxrpflTLQypczOqLxiT2CUxHouiZnx673Wh3m0ndxLW2cFggNL2WADL/7VV8d0
+    LYKpT39Ojdne4pUFzN6x5rrzSGH8kSM/l1td8GIaYVrxf0SWypsIocH0EN467AL821Fd
+    CwfQ==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMhflhwDubTJ9o1OAA2UMf2MwPVbgc7na"
+X-RZG-CLASS-ID: mo00
+Received: from iMac.fritz.box
+    by smtp.strato.de (RZmta 47.34.1 DYNA|AUTH)
+    with ESMTPSA id 902c63xA3D0F0EW
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+    Wed, 3 Nov 2021 14:00:15 +0100 (CET)
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
+        <jerome.pouiller@silabs.com>, Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Tony Lindgren <tony@atomide.com>, Bean Huo <beanhuo@micron.com>
+Cc:     notasas@gmail.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, letux-kernel@openphoenux.org,
+        kernel@pyra-handheld.com,
+        "H. Nikolaus Schaller" <hns@goldelico.com>
+Subject: [RFC v3 0/6] mmc: core: extend mmc_fixup_device and transplant ti,wl1251 quirks from to be retired omap_hsmmc
+Date:   Wed,  3 Nov 2021 14:00:08 +0100
+Message-Id: <cover.1635944413.git.hns@goldelico.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Biju Das <biju.das.jz@bp.renesas.com>
+RFC V3 2021-11-03 14:00:13:
+* patches have been split into smaller ones a little further
+* propose a new macro for setup of device tree compatible quirks
+* directly include patches by jerome.pouiller@silabs.com
+  in this series
 
-Refactor the code so that card detect irqs are always reenabled after a
-reset. This avoids doing it manually all over the code or forgetting to
-do this in the future.
+RFC V2 2021-11-01 10:24:26:
+* reworked to not misuse mmc_select_card() but add a call to
+  mmc_fixup_device() right after where host->ops->init_card
+  was called before to apply the wl1251 specific quirks.
+  Device tree matching is done by a new table passed to mmc_fixup_device().
+  suggested by: ulf.hansson@linaro.org
+  based on patches by: jerome.pouiller@silabs.com
 
-Reported-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-[wsa: added a comment when 'native_hotplug' has to be set]
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc_core.c | 15 +++------------
- 1 file changed, 3 insertions(+), 12 deletions(-)
+RFC V1 2021-10-06 13:24:13:
 
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index e2affa52ef46..a5850d83908b 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -960,14 +960,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	case MMC_POWER_OFF:
- 		tmio_mmc_power_off(host);
- 		/* For R-Car Gen2+, we need to reset SDHI specific SCC */
--		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2) {
--			host->reset(host);
--
--			if (host->native_hotplug)
--				tmio_mmc_enable_mmc_irqs(host,
--						TMIO_STAT_CARD_REMOVE |
--						TMIO_STAT_CARD_INSERT);
--		}
-+		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-+			tmio_mmc_reset(host);
- 
- 		host->set_clock(host, 0);
- 		break;
-@@ -1175,6 +1169,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
- 	if (mmc_can_gpio_cd(mmc))
- 		_host->ops.get_cd = mmc_gpio_get_cd;
- 
-+	/* must be set before tmio_mmc_reset() */
- 	_host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
- 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
- 				  !mmc_card_is_removable(mmc));
-@@ -1295,10 +1290,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
- 	if (host->clk_cache)
- 		host->set_clock(host, host->clk_cache);
- 
--	if (host->native_hotplug)
--		tmio_mmc_enable_mmc_irqs(host,
--				TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
--
- 	tmio_mmc_enable_dma(host, true);
- 
- 	return 0;
+
+H. Nikolaus Schaller (4):
+  mmc: core: provide macro and table to match the device tree to apply
+    quirks
+  mmc: core: add new calls to mmc_fixup_device(sdio_card_init_methods)
+  mmc: core: transplant ti,wl1251 quirks from to be retired omap_hsmmc
+  mmc: host: omap_hsmmc: revert special init for wl1251
+
+Jérôme Pouiller (2):
+  mmc: core: rewrite mmc_fixup_device()
+  mmc: core: allow to match the device tree to apply quirks
+
+ drivers/mmc/core/card.h       | 37 ++++++++++++++++++
+ drivers/mmc/core/mmc.c        |  1 +
+ drivers/mmc/core/quirks.h     | 70 ++++++++++++++++++++++++++---------
+ drivers/mmc/core/sd.c         |  2 +
+ drivers/mmc/core/sdio.c       |  1 +
+ drivers/mmc/host/omap_hsmmc.c | 36 ------------------
+ 6 files changed, 94 insertions(+), 53 deletions(-)
+
 -- 
-2.30.2
+2.33.0
 
