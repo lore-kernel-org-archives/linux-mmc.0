@@ -2,122 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C849C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 17:37:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9A86C43219
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 17:51:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 82846600EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 17:37:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C349260EE9
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 17:51:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229654AbhKCRjn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Nov 2021 13:39:43 -0400
-Received: from finn.gateworks.com ([108.161.129.64]:59578 "EHLO
-        finn.localdomain" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229621AbhKCRjn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2021 13:39:43 -0400
-X-Greylist: delayed 2558 seconds by postgrey-1.27 at vger.kernel.org; Wed, 03 Nov 2021 13:39:42 EDT
-Received: from 068-189-091-139.biz.spectrum.com ([68.189.91.139] helo=tharvey.pdc.gateworks.com)
-        by finn.localdomain with esmtp (Exim 4.93)
-        (envelope-from <tharvey@gateworks.com>)
-        id 1miJWj-007u4e-Tl; Wed, 03 Nov 2021 16:54:18 +0000
-From:   Tim Harvey <tharvey@gateworks.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        id S230198AbhKCRyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Nov 2021 13:54:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48892 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229697AbhKCRyA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2021 13:54:00 -0400
+Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEA77C061714;
+        Wed,  3 Nov 2021 10:51:23 -0700 (PDT)
+Received: by mail-ua1-x92e.google.com with SMTP id b17so6091629uas.0;
+        Wed, 03 Nov 2021 10:51:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=y16TxmkBvfqZgNLIXU85g39fksG0Qn9oks7FAgvFiCM=;
+        b=fPXyM8mzP3xvv8wh3rn4V3uaO87BNrn0AJ9Qk+6md27hPqHI7elIBnRFfZrMbkrB8z
+         HMRAMWtnw0XtczVwAoKFJVJIdYOkvt8HQYEM8C6xTdZXiSzf4OZxmxoe6Y08fRhREPSJ
+         XIWi2Lh6dvIz44V28gaJTn+LjOAiatp6weuHgHr8HN783Bom+vt60CdU1nql8hJzFwAf
+         8xk0AzN3X2eOPziruIBW+zMsjC7zIG02FuAJFh5F++waTBxWkxxKZf6WCNIdprizOMbW
+         Xm+0CZZTDVOgSmjSd7lFoDAmPZFRD0BUunnY1+vhJaIeWPGb9aoKk/6xNIoKE9mP9EBy
+         QQOg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=y16TxmkBvfqZgNLIXU85g39fksG0Qn9oks7FAgvFiCM=;
+        b=6ed8Ak2NxFyuoGWkmmzeNtFP+9ujHdtv9ZDijobAHU4OlBvshZxm2U188Q9L5z5dK/
+         fmT/ex04l0kVE2zarxz6Gk/8lG7Elfd7l2NCv//B5gEChpJnmFfKPtdFfoqrVdAln8m4
+         Vdx1knm2xcNgXy7Ie0RYCeNGQa+ECDf+QyNhkWhDDtzdAl+8c5xuFWAZ0AYHNJk9BTQT
+         tCrJPQf0kyw2zxNfzg01+R5xXegX0poj4npcKcgJjwlm4Qgg8DyGl8Yl8Mxa4k89YgEV
+         dBiQH8zd+0AmJ+suvBt4VdJzBZ/TYADHMgH99ZORQq/Z5pVH8yItVNcCPamWLsS4mAIx
+         CISA==
+X-Gm-Message-State: AOAM532KKTYw+5sL9nIyLuKDlMc9GmQU6KRqXWs9JMN8H57Nx/BWTHb9
+        tx2NYG0H7boJX16/FijrcDVGygK40wCcgHTwII8=
+X-Google-Smtp-Source: ABdhPJx8cB1VYKTTJlveYA1FJ28sZ0zZeouC+gUZUYrWW2QvfiO2tYkKYYUUJqVe1q+ewdOqhm9/EvWuL40E8vwi7uo=
+X-Received: by 2002:ab0:6ca7:: with SMTP id j7mr39236673uaa.133.1635961882870;
+ Wed, 03 Nov 2021 10:51:22 -0700 (PDT)
+MIME-Version: 1.0
+References: <20211102225701.98944-1-Mr.Bossman075@gmail.com>
+ <20211102225701.98944-12-Mr.Bossman075@gmail.com> <CAOMZO5AxMXxDkNDqGJDhtepqSUxGRCWO+L=c67O==4fx66M7XQ@mail.gmail.com>
+ <c1610093-95ae-68d3-57ae-93b1bc9715d7@gmail.com> <5ebe48f5-7b9c-be99-d50c-65a056084b96@benettiengineering.com>
+In-Reply-To: <5ebe48f5-7b9c-be99-d50c-65a056084b96@benettiengineering.com>
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Wed, 3 Nov 2021 14:51:12 -0300
+Message-ID: <CAOMZO5DHCYaxzSASKq6Bk8ALkiQeVjPOHOyk-pKYepJFJk6oFQ@mail.gmail.com>
+Subject: Re: [PATCH v2 11/13] mmc: sdhci-esdhc-imx: Add sdhc support for
+ i.MXRT series
+To:     Giulio Benetti <giulio.benetti@benettiengineering.com>
+List-Id: <soc.lore.kernel.org>
+Cc:     Jesse Taube <mr.bossman075@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
         Shawn Guo <shawnguo@kernel.org>,
         Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        BOUGH CHEN <haibo.chen@nxp.com>, linux-mmc@vger.kernel.org,
-        Marcel Ziswiler <marcel@ziswiler.com>,
-        Schrempf Frieder <frieder.schrempf@kontron.de>,
-        Adam Ford <aford173@gmail.com>,
-        Lucas Stach <l.stach@pengutronix.de>,
-        Peng Fan <peng.fan@nxp.com>
-Cc:     Tim Harvey <tharvey@gateworks.com>, stable@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-esdhc-imx: disable CMDQ support
-Date:   Wed,  3 Nov 2021 09:54:15 -0700
-Message-Id: <20211103165415.2016-1-tharvey@gateworks.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
-References: <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
+        Sascha Hauer <kernel@pengutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dong Aisheng <aisheng.dong@nxp.com>,
+        Stefan Agner <stefan@agner.ch>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
+        soc@kernel.org, Russell King - ARM Linux <linux@armlinux.org.uk>,
+        Abel Vesa <abel.vesa@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-serial@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On IMX SoC's which support CMDQ the following can occur during high a
-high cpu load:
+Hi Giulio,
 
-mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
-mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
-mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-mmc2: cqhci: TDL base:  0x8003f000 | TDL up32: 0x00000000
-mmc2: cqhci: Doorbell:  0xbf01dfff | TCN:      0x00000000
-mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x08000000
-mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000800
-mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-mmc2: cqhci: Resp idx:  0x0000000d | Resp arg: 0x00000000
-mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-mmc2: sdhci: Sys addr:  0x7c722000 | Version:  0x00000002
-mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000020
-mmc2: sdhci: Argument:  0x00018000 | Trn mode: 0x00000023
-mmc2: sdhci: Present:   0x01f88008 | Host ctl: 0x00000030
-mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
-mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
-mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00ffffff
-mmc2: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0xffc003ff
-mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d07f01
-mmc2: sdhci: Host ctl2: 0x00000088
-mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfe179020
-mmc2: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS DUMP ====
-mmc2: sdhci-esdhc-imx: cmd debug status:  0x2120
-mmc2: sdhci-esdhc-imx: data debug status:  0x2200
-mmc2: sdhci-esdhc-imx: trans debug status:  0x2300
-mmc2: sdhci-esdhc-imx: dma debug status:  0x2400
-mmc2: sdhci-esdhc-imx: adma debug status:  0x2510
-mmc2: sdhci-esdhc-imx: fifo debug status:  0x2680
-mmc2: sdhci-esdhc-imx: async fifo debug status:  0x2750
-mmc2: sdhci: ============================================
+On Tue, Nov 2, 2021 at 8:30 PM Giulio Benetti
+<giulio.benetti@benettiengineering.com> wrote:
 
-For now, disable CMDQ support on the imx8qm/imx8qxp/imx8mm until the
-issue is found and resolved.
+> If we add every SoC we will end up having a long list for every device
+> driver. At the moment it would be 7 parts:
+> 1) imxrt1020
+> 2) imxrt1024
+> .
+> .
+> .
+> 7) imxrt1170
+>
+> Is it ok anyway?
 
-Fixes: bb6e358169bf6 ("mmc: sdhci-esdhc-imx: add CMDQ support")
-Fixes: cde5e8e9ff146 ("mmc: sdhci-esdhc-imx: Add an new esdhc_soc_data
-for i.MX8MM")
-
-Cc: stable@vger.kernel.org
-Signed-off-by: Tim Harvey <tharvey@gateworks.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 --
- 1 file changed, 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index e658f0174242..60f19369de84 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -300,7 +300,6 @@ static struct esdhc_soc_data usdhc_imx8qxp_data = {
- 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
- 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
- 			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
--			| ESDHC_FLAG_CQHCI
- 			| ESDHC_FLAG_STATE_LOST_IN_LPMODE
- 			| ESDHC_FLAG_CLK_RATE_LOST_IN_PM_RUNTIME,
- };
-@@ -309,7 +308,6 @@ static struct esdhc_soc_data usdhc_imx8mm_data = {
- 	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
- 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
- 			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
--			| ESDHC_FLAG_CQHCI
- 			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
- };
- 
--- 
-2.17.1
-
+As this patch adds the support for imxrt1050, I would go with
+"fsl,imxrt1050-usdhc" for now.
