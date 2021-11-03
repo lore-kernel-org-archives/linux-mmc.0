@@ -2,124 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8363EC4321E
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 19:10:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BD7DC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 23:19:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A9256112E
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 19:10:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 54A59611C3
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Nov 2021 23:19:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231237AbhKCTNX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Nov 2021 15:13:23 -0400
-Received: from smtpcmd0756.aruba.it ([62.149.156.56]:51744 "EHLO
-        smtpcmd0756.aruba.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230492AbhKCTNW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2021 15:13:22 -0400
-Received: from [192.168.153.129] ([146.241.216.221])
-        by Aruba Outgoing Smtp  with ESMTPSA
-        id iLehmQUVD4n4riLehmFuEJ; Wed, 03 Nov 2021 20:10:44 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
-        t=1635966644; bh=0/31yxmO9a/oC0P8HSIAOi7F4D8XhUglntlI8cyweIg=;
-        h=Subject:To:From:Date:MIME-Version:Content-Type;
-        b=JHt8XzSjYLi1rWyUyi2ykyjLwTWrBHdvKgItGaNHY9vgQDx4CIXQIBALXxgxMWPRM
-         oGtbjIF7McsY1X/k1uP2Acdeqw2BIas+OYupr81C2Dcca7XMa2Vp0Sp0FJTrwpcsSX
-         gFRfNMSc4dWtlo/n9+z2VXPjPRkCSC59N3R0G8+8JwmsfgviQHXTaF7kvRBJuWubei
-         hx+F0V/WiqGSUyEdMZ1mqAWtMsH7ZhpC7rP9NDKtvKOajBIDiWHDZJL7lyTxdyUfDg
-         n4sufjnQVMtJZjMUz4pfih0uAXT2MavO/91P0GGzNZ/d33kaReBHi5j6jAzzW4d6FZ
-         +cACDqCxUK6YQ==
-Subject: Re: [PATCH v2 11/13] mmc: sdhci-esdhc-imx: Add sdhc support for
- i.MXRT series
-To:     Fabio Estevam <festevam@gmail.com>
-List-Id: <soc.lore.kernel.org>
-Cc:     Jesse Taube <mr.bossman075@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Stefan Agner <stefan@agner.ch>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
-        soc@kernel.org, Russell King - ARM Linux <linux@armlinux.org.uk>,
-        Abel Vesa <abel.vesa@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-serial@vger.kernel.org
-References: <20211102225701.98944-1-Mr.Bossman075@gmail.com>
- <20211102225701.98944-12-Mr.Bossman075@gmail.com>
- <CAOMZO5AxMXxDkNDqGJDhtepqSUxGRCWO+L=c67O==4fx66M7XQ@mail.gmail.com>
- <c1610093-95ae-68d3-57ae-93b1bc9715d7@gmail.com>
- <5ebe48f5-7b9c-be99-d50c-65a056084b96@benettiengineering.com>
- <CAOMZO5DHCYaxzSASKq6Bk8ALkiQeVjPOHOyk-pKYepJFJk6oFQ@mail.gmail.com>
-From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
-Message-ID: <78cba8ec-72b0-89b8-d6e3-09ecea19ca7b@benettiengineering.com>
-Date:   Wed, 3 Nov 2021 20:10:39 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        id S229907AbhKCXVs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Nov 2021 19:21:48 -0400
+Received: from alexa-out.qualcomm.com ([129.46.98.28]:37911 "EHLO
+        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229652AbhKCXVr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2021 19:21:47 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1635981551; x=1667517551;
+  h=from:to:cc:subject:date:message-id:mime-version;
+  bh=k64ynEfu975pQWgOL6O+bE+0nql5whpTZa6mWxc4sNg=;
+  b=vfYdhCCNio9Nj2sUAo43ZeQe+DGyJ83NDjaVhjxrMQfAgM+8J2FR4ylD
+   bAzjjvdbLmtmxYBaVatQ/3G594CDBse3NudnQLNCH06JQqdfGBFuiusEy
+   1EbVWdcpAc/fbGwarCLMwqbProBS4a1SFH484AQKf9G4m2UCbGJL/CG3P
+   E=;
+Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
+  by alexa-out.qualcomm.com with ESMTP; 03 Nov 2021 16:19:11 -0700
+X-QCInternal: smtphost
+Received: from nasanex01c.na.qualcomm.com ([10.47.97.222])
+  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Nov 2021 16:19:10 -0700
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nasanex01c.na.qualcomm.com (10.47.97.222) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.922.7;
+ Wed, 3 Nov 2021 16:19:09 -0700
+Received: from gabriel.qualcomm.com (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.922.7; Wed, 3 Nov 2021
+ 16:19:09 -0700
+From:   Gaurav Kashyap <quic_gaurkash@quicinc.com>
+To:     <linux-scsi@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-block@vger.kernel.org>,
+        <linux-fscrypt@vger.kernel.org>, <thara.gopinath@linaro.org>,
+        <asutoshd@codeaurora.org>,
+        Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Subject: [PATCH 0/4] Adds wrapped key support for inline storage encryption
+Date:   Wed, 3 Nov 2021 16:18:36 -0700
+Message-ID: <20211103231840.115521-1-quic_gaurkash@quicinc.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-In-Reply-To: <CAOMZO5DHCYaxzSASKq6Bk8ALkiQeVjPOHOyk-pKYepJFJk6oFQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfF6/WWjL7PJeZTTfz9UiWozyugqncNHx9tTkfwkkeDbnl31INXrmdyJqCSDLjNgQNAiX+KEFaL/glNmQk4hLNz+e91vJZFmZ3NF5I4POniLdU+133jcp
- XzXAVa/DOc7iJ7Umt9dQCiK70yv+dPSCm6DyvEHh3sPzUmjoblvN2rbQedLd/KRav15zduP3h7pa3TBT7GXnqFDja1xM10FZDIRnNyWpakY0+K6IpWr9CtRp
- RbGD2bB0eWYl2pgQ6oK7rgqwkfBiXt6WBqx32YZalbWMiwFTgFZXYFX2bhI4iGNXtHbYX6M7a2P6awc9yt+RpNOC46ceA2OSF2GD2nNLCCA85tkJbOLpIuW+
- 2qJ4tYuOUeifsY8fJ1OAWVgvpme4hq+Jn9KOnjeL9hMJkqLhKlMoFBWG4ZFAjx6P+T/WjW84919f5FBekomjfNlXPtI2bx8LowHcHVMxxtgWKrIy8/HCjQse
- hMtGvQbiPuqHqMSGKMU0Q3721Q7hTJXFuObQDrhcRED7Kw6KTtE+Aczv5xnK+GZFMBgayrKg+SPoimBROvDme87huk7quiukeu+sSdj2ldoS4sJzD14db2fG
- fUZGCElF1aWolDYn3zDRnuI9aNLyzS3y1bYpg51QmCdVikiJpSb9nuEDd32x1YmU5g6bp8wj6JvNaeEdLN+hZ8C98TiPIvfIAQlyjNyu4rl6AtSJkRa0xbkl
- Oqwe2dhAY8fi/AdyGAOTkGT9EcPX6i/VjPEh3HGAOLI7lQRyq0Do61LOcfvBUvIvN4UdwfKqBwD9s9EPIMQEYbN3mTdK+1FUVYNZBAwyyypuvn/FOjtDyP2H
- JMyFerHaBWkngEyHrqz25mjCOQMODTDTsNvvVliBq93lDPsgK3mJEl0Habe+NGvFA2p8EJtf0FwLgL0DRkJHzdhMV88ocFN+5a1+J0RrGZr4w1tABUN/5cm1
- WudLVrZSILp4LPugdLhbdtWqzTVqLr7Z5bwjuyY0ykWP1Okhj8x8edAs9QHPcNhSXogZq6iiuo5o1gC6xSOGhsYvQsVxL3miS8s3fPyG/QjEvDLLBWrnRyF1
- 0glwqRkuoJSHoK/FA3aAdIQ9Aeg2lDGEs3pbsWIwLor0bSAzNFFlUwrWmx7Z5ykPs8sZoNMAWTJRAnNPRjzG87S0dPFSboLuLSo=
+Content-Type: text/plain
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Fabio, Jesse, Rob, All,
+This currently has 4 patches with another coming in shortly for MMC.
 
-On 11/3/21 6:51 PM, Fabio Estevam wrote:
-> Hi Giulio,
-> 
-> On Tue, Nov 2, 2021 at 8:30 PM Giulio Benetti
-> <giulio.benetti@benettiengineering.com> wrote:
-> 
->> If we add every SoC we will end up having a long list for every device
->> driver. At the moment it would be 7 parts:
->> 1) imxrt1020
->> 2) imxrt1024
->> .
->> .
->> .
->> 7) imxrt1170
->>
->> Is it ok anyway?
-> 
-> As this patch adds the support for imxrt1050, I would go with
-> "fsl,imxrt1050-usdhc" for now.
-> 
+1. Moves ICE functionality to a common library, so that different storage controllers can use it.
+2. Adds a SCM call for derive raw secret needed for wrapped keys.
+3. Adds a hardware key manager library needed for wrapped keys.
+4. Adds wrapped key support in ufs for storage encryption
 
-Ok, then it's the same as pointed by Rob for lpuart[1]; @Jesse: we will 
-do the same for all peripherals(more or less) since it seems there are 
-little differences in the i.MXRT family.
+Gaurav Kashyap (4):
+  ufs: move ICE functionality to a common library
+  qcom_scm: scm call for deriving a software secret
+  soc: qcom: add HWKM library for storage encryption
+  soc: qcom: add wrapped key support for ICE
 
-[1]: 
-https://lore.kernel.org/lkml/D0A3E11F-FEDE-4B2D-90AB-63DFC245A935@benettiengineering.com/T/
+ drivers/firmware/qcom_scm.c       |  61 +++++++
+ drivers/firmware/qcom_scm.h       |   1 +
+ drivers/scsi/ufs/ufs-qcom-ice.c   | 200 ++++++-----------------
+ drivers/scsi/ufs/ufs-qcom.c       |   1 +
+ drivers/scsi/ufs/ufs-qcom.h       |   5 +
+ drivers/scsi/ufs/ufshcd-crypto.c  |  47 ++++--
+ drivers/scsi/ufs/ufshcd.h         |   5 +
+ drivers/soc/qcom/Kconfig          |  14 ++
+ drivers/soc/qcom/Makefile         |   2 +
+ drivers/soc/qcom/qti-ice-common.c | 215 +++++++++++++++++++++++++
+ drivers/soc/qcom/qti-ice-hwkm.c   |  77 +++++++++
+ drivers/soc/qcom/qti-ice-regs.h   | 257 ++++++++++++++++++++++++++++++
+ include/linux/qcom_scm.h          |   5 +
+ include/linux/qti-ice-common.h    |  37 +++++
+ 14 files changed, 766 insertions(+), 161 deletions(-)
+ create mode 100644 drivers/soc/qcom/qti-ice-common.c
+ create mode 100644 drivers/soc/qcom/qti-ice-hwkm.c
+ create mode 100644 drivers/soc/qcom/qti-ice-regs.h
+ create mode 100644 include/linux/qti-ice-common.h
 
-Thanks a lot
-Best regards
 -- 
-Giulio Benetti
-Benetti Engineering sas
+2.17.1
+
