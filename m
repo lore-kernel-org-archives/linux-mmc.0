@@ -2,107 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D97A2C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 22:49:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 70801C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 22:53:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BBE8B6125F
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 22:49:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5AEAF6112D
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 22:53:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231467AbhKDWwL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Nov 2021 18:52:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43410 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230000AbhKDWwK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 4 Nov 2021 18:52:10 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D107E60F36;
-        Thu,  4 Nov 2021 22:49:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636066172;
-        bh=kYqtI0mPMx4gcviSBi44P510ajI/enNAKDVG0kdjQLk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Ik7xFatCo+8BVT1paXK/d2Hw/6DPTxNYNUskfzPUK0bHtlWZIAsVOtncSM1Bchtp3
-         WTUOFx4+OrOjkxocBiwZxbbQcmqcpjmThB6Y1BRjRBnkACoXWmMuf0cFgGH9XoFOgD
-         XFdXd2PvuVY2Jxa/xjRpeIMrQEUTAZfzy6NYr2T/tocBj+J6R6ogIWpLm9vZWLtjIG
-         Sju3HWHakRKW8lFwGpRuzcAozD8vG+5LpUpe0YWxnxUL51bHn+To34t6vpEnuEtxct
-         McT0/pXFcxRDGnY+DfJ3ymCPriTGdjaFOQy1ZJVIU6AC+ZXMcD2PDV84lIIeV3c4j2
-         Qo6AzIb/ftXYQ==
-Date:   Thu, 4 Nov 2021 15:49:16 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Cc:     linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, thara.gopinath@linaro.org,
-        asutoshd@codeaurora.org
-Subject: Re: [PATCH 0/4] Adds wrapped key support for inline storage
- encryption
-Message-ID: <YYRjbCDhEt8Vh1xv@gmail.com>
-References: <20211103231840.115521-1-quic_gaurkash@quicinc.com>
+        id S232008AbhKDW4H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Nov 2021 18:56:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45136 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231759AbhKDW4E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2021 18:56:04 -0400
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26D73C061208
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Nov 2021 15:53:26 -0700 (PDT)
+Received: by mail-ed1-x536.google.com with SMTP id ee33so26898023edb.8
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Nov 2021 15:53:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pensando.io; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=VaaNOGobytyErlzeuWKHVMN+JarWlcxJWqZAgz0U4Ac=;
+        b=FlDR1CIlE6iRQnoU9OBH1RPrCi8GzrhNWlj5EC+Gthsht2PmwwAxK16cLula+lgUPs
+         HOI/5cwUZAWe7lQVsc2+ydn3+DIrEiblam9I9N3nf2gypDgJfzSNZUMs8t2sFXv5a00G
+         P9yaDiisNl5dxds3OnAz3aysPkEnhpFd1qZqirqO7wN9hgfOtG3sanlPhY/EX3YJWB2a
+         l2dVkbCnPpQddHFc8namR2MuSEXffsyLyDIbbl+XJh8sS+etmHrnUFliTGK7r2JUjG7X
+         eRCWK35JXuzREcuuesNh3s2soD3NCib6F2QgnT+bjkyI1xtoXTMSccyr0ClCkhgCCk4/
+         1PDg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=VaaNOGobytyErlzeuWKHVMN+JarWlcxJWqZAgz0U4Ac=;
+        b=KrjAe7cVHF/xGPFfFDGPaB9ZVHHSCL6O9U6mTm2ljk0buB6q6m4/zIXmpf5kE8A2tm
+         j+3Q0fU93yKW0gwDkTEJsNXVJ/2M3xWjunZ4DpbNrTZvZQDWlt3A+GuUTexFAhG9oFcu
+         JDr2PtP3y4iNNWCXiRl4VyjeAkkvSc/fFXNL8vWIaC7G6hnY2S70uCoCnykyDlsBCnZA
+         kNMvFfQgBdIu3ta6gn+6ZkKgW1H9BPrrqxt8sJkRk7Nf2TPKtSy9iVHPqwvFtp0ccAQS
+         xPdA5RPsLv5JG6Wz9i88ecpzGuC75L3TkM4+AzzrtFLLyVy99pU6UArjgvqa3ySIg//b
+         HEKg==
+X-Gm-Message-State: AOAM530A6g7hFHmlF64cPG+UcUdHPoqdYs5jeZHZzOj12aYP2/FCtZLy
+        HeZ07p0/7ewzVXNwd3EE4KCr4t10OFbHsH6HKkAoNA==
+X-Google-Smtp-Source: ABdhPJzUrnvUCW/c69Ez93sR4uzeVeBsL/wv91s5v5bUJWtKFABC5QThvyqPWPpbeJXV+eImBVpvq8PzbROnddUV+80=
+X-Received: by 2002:a17:906:a3c4:: with SMTP id ca4mr64446282ejb.529.1636066404493;
+ Thu, 04 Nov 2021 15:53:24 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211103231840.115521-1-quic_gaurkash@quicinc.com>
+References: <20211025015156.33133-1-brad@pensando.io> <20211025015156.33133-12-brad@pensando.io>
+ <20211025091731.GA2001@C02TD0UTHF1T.local>
+In-Reply-To: <20211025091731.GA2001@C02TD0UTHF1T.local>
+From:   Brad Larson <brad@pensando.io>
+Date:   Thu, 4 Nov 2021 15:53:13 -0700
+Message-ID: <CAK9rFnx7DgS3TYMmu5NBacV_6WC_UwJ=u7n3e_fGd0RpEcg3kA@mail.gmail.com>
+Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
+To:     Mark Rutland <mark.rutland@arm.com>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gaurav,
+Hi Mark,
 
-On Wed, Nov 03, 2021 at 04:18:36PM -0700, Gaurav Kashyap wrote:
-> This currently has 4 patches with another coming in shortly for MMC.
-> 
-> 1. Moves ICE functionality to a common library, so that different storage controllers can use it.
-> 2. Adds a SCM call for derive raw secret needed for wrapped keys.
-> 3. Adds a hardware key manager library needed for wrapped keys.
-> 4. Adds wrapped key support in ufs for storage encryption
-> 
-> Gaurav Kashyap (4):
->   ufs: move ICE functionality to a common library
->   qcom_scm: scm call for deriving a software secret
->   soc: qcom: add HWKM library for storage encryption
->   soc: qcom: add wrapped key support for ICE
-> 
->  drivers/firmware/qcom_scm.c       |  61 +++++++
->  drivers/firmware/qcom_scm.h       |   1 +
->  drivers/scsi/ufs/ufs-qcom-ice.c   | 200 ++++++-----------------
->  drivers/scsi/ufs/ufs-qcom.c       |   1 +
->  drivers/scsi/ufs/ufs-qcom.h       |   5 +
->  drivers/scsi/ufs/ufshcd-crypto.c  |  47 ++++--
->  drivers/scsi/ufs/ufshcd.h         |   5 +
->  drivers/soc/qcom/Kconfig          |  14 ++
->  drivers/soc/qcom/Makefile         |   2 +
->  drivers/soc/qcom/qti-ice-common.c | 215 +++++++++++++++++++++++++
->  drivers/soc/qcom/qti-ice-hwkm.c   |  77 +++++++++
->  drivers/soc/qcom/qti-ice-regs.h   | 257 ++++++++++++++++++++++++++++++
->  include/linux/qcom_scm.h          |   5 +
->  include/linux/qti-ice-common.h    |  37 +++++
->  14 files changed, 766 insertions(+), 161 deletions(-)
->  create mode 100644 drivers/soc/qcom/qti-ice-common.c
->  create mode 100644 drivers/soc/qcom/qti-ice-hwkm.c
->  create mode 100644 drivers/soc/qcom/qti-ice-regs.h
->  create mode 100644 include/linux/qti-ice-common.h
+On Mon, Oct 25, 2021 at 2:17 AM Mark Rutland <mark.rutland@arm.com> wrote:
+>
+> Hi,
+>
+> On Sun, Oct 24, 2021 at 06:51:56PM -0700, Brad Larson wrote:
+> > Add Pensando common and Elba SoC specific device nodes
+> >
+> > Signed-off-by: Brad Larson <brad@pensando.io>
+>
+> [...]
+>
+> > +     timer {
+> > +             compatible = "arm,armv8-timer";
+> > +             interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(1) |
+> > +                                     IRQ_TYPE_LEVEL_LOW)>,
+> > +                          <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(1) |
+> > +                                     IRQ_TYPE_LEVEL_LOW)>,
+> > +                          <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(1) |
+> > +                                     IRQ_TYPE_LEVEL_LOW)>,
+> > +                          <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(1) |
+> > +                                     IRQ_TYPE_LEVEL_LOW)>;
+> > +     };
+>
+> The GIC_CPU_MASK_SIMPLE() stuff is meant for GICv2, but as below you
+> have GICv3, where this is not valid, so this should go.
+>
+> Also, beware that GIC_CPU_MASK_SIMPLE(1) means a single CPU, which
+> doesn't mak sense for the 16 CPUs you have.
+>
 
-Thanks for the patches!  These are on top of my patchset
-"[RFC PATCH v2 0/5] Support for hardware-wrapped inline encryption keys"
-(https://lore.kernel.org/linux-block/20210916174928.65529-1-ebiggers@kernel.org),
-right?  You should mention that in your cover letter, so that it's possible for
-people to apply your patches for reviewing or testing, and also to provide
-context about what this feature is and why it is important.
+Thanks for pointing this out.  Elba SoC is a GICv3 implementation and looking
+at other device tree files we should be using this:
 
-As part of that, it would be helpful to specifically mention the documentation
-for hardware-wrapped keys in Documentation/block/inline-encryption.rst that I
-included in my patchset.  It provides a lot of background information that your
-patches are hard to understand without (at least your patches 2-4; your first
-patch isn't dependent on the hardware-wrapped keys feature).
+        timer {
+                compatible = "arm,armv8-timer";
+                interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(16) |
+                                        IRQ_TYPE_LEVEL_LOW)>,
+                             <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(16) |
+                                        IRQ_TYPE_LEVEL_LOW)>,
+                             <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(16) |
+                                        IRQ_TYPE_LEVEL_LOW)>,
+                             <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(16) |
+                                        IRQ_TYPE_LEVEL_LOW)>;
+        };
 
-Can you include information about how your patches were tested?  That's really
-important to include.
+> > +             gic: interrupt-controller@800000 {
+> > +                     compatible = "arm,gic-v3";
+> > +                     #interrupt-cells = <3>;
+> > +                     #address-cells = <2>;
+> > +                     #size-cells = <2>;
+> > +                     ranges;
+> > +                     interrupt-controller;
+> > +                     reg = <0x0 0x800000 0x0 0x200000>,      /* GICD */
+> > +                           <0x0 0xa00000 0x0 0x200000>;      /* GICR */
+> > +                     interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
+> > +
+> > +                     gic_its: msi-controller@820000 {
+> > +                             compatible = "arm,gic-v3-its";
+> > +                             msi-controller;
+> > +                             #msi-cells = <1>;
+> > +                             reg = <0x0 0x820000 0x0 0x10000>;
+> > +                             socionext,synquacer-pre-its =
+> > +                                                     <0xc00000 0x1000000>;
+> > +                     };
+> > +             };
+>
+> Is there any shared lineage with Synquacer? The commit message didn't
+> describe this quirk.
 
-Please run './scripts/checkpatch.pl' on your patches, as recommended in
-Documentation/process/submitting-patches.rst.  It can catch a lot of issues.
+There is no shared lineage with Synqacer.  We are solving the same issue
+with the same mechanism.  I'll add a comment to this DTS node.
 
-Please use the imperative tense, like "add wrapped key support" rather than
-"adds wrapped key support".
-
-I'll leave some more comments on the individual patches.
-
-- Eric
+Thanks,
+Brad
