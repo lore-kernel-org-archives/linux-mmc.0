@@ -2,66 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2013C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 02:06:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2ECAC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 02:13:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BEADD611C9
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 02:06:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC26160F39
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 02:13:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230000AbhKDCJB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Nov 2021 22:09:01 -0400
-Received: from mail-eopbgr00073.outbound.protection.outlook.com ([40.107.0.73]:60391
+        id S230511AbhKDCP7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Nov 2021 22:15:59 -0400
+Received: from mail-eopbgr00077.outbound.protection.outlook.com ([40.107.0.77]:47936
         "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S230198AbhKDCJA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 3 Nov 2021 22:09:00 -0400
+        id S232075AbhKDCP6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 3 Nov 2021 22:15:58 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=mXe3MVae1pCL9ySYogxlXZzPgNtT4NdqwK6kSF1pEzseEsjEPl946muThybiIDzltzkirj7pA9Hy/m/HoFd4+ylK+nFzCwdIMZthVR5mqUlCEaBtojeC2xnDveL3oX+oxbWeRkQUM4fRMYwsoznefevsngjH8IYydjea3uN59Cm5B9pI5Yw+GCXkrdJ8JwYxAJRHwJpR+l03Xef2NCy92iOI37MfmQDtQz+Ikk/mcl+KUO2b4BLsCkXi4woxgkhaVcWEjasSQaDT5+Q9rl1uGwhOVXoRNrV/JLuNkqwhGaQE+J0VF5hdlQskfq2A9/1Lj1CNLMm+hdYAYCqOkmdIbw==
+ b=bOXiz7yiZdsvay/emDPp95uEUWqky7kNfLCqFbPqBHIG7PXa7OqrV/vipqXr4AsLbpoWH5nHSPu6Bs7GMndxV7tMILo6WNOLFf3xHR2YBXy1psZaPNiqKDjbCy3kZPddZxawpYbuYw7S3OixPKlw4UYPPJr6FaGZMvgSXp9RQJaxceU2AUOM+jeE7sE2LKHswRu/GCcOTDuuFg+UL8lR3r6KPV6E4QUzbHIaZhQ+n6LtaKh8kup3zXU+eiQDM1SFYbwKV2hMmshwYhzCYnwW8kg+KRH/RbbHKxbnf9IAs8Ju1E5gloe58AAN2mmL6H7X++F+kzkss4z/9VzQBJ9MLg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=HKXOOsKhnBVjE8Oq9ktd2ruNdmr2j+aI5kt2ig6Fb2U=;
- b=e/5FgosZasep6XXM6wMGq+O7DqpxkLuyTvcYJVgEB3vhsRAbFok3SM2ZRzJuoyMqugsuT7mlajNZJ0OJGp7av3gSOBPd1Jf/Z2K2eMqPhw39jrgyqNlmxIuG5yqnr6AUaNK2YX7gpfTZysI4OpP/TYup7B4/kS2LrDfK2CUEmuVwUL+d9wW1lafdwYYCXMLNuh4ctbNlab+vMH8bxhnzftcI37pb7qmwocL3jzEklAMwlVbSCgJ5ntkTFv7YFIE5jPFN41WRqs07Ubv6rXhoyFQClYOYYYsjs/EpVBzCD55ApYG9R9CMlq9qVFkszm3Pad0muAS6wS2UgHOpDMmZRA==
+ bh=auBbE0FFxUMe3EbNs+uRxJrTr5YYWFy3d9pWLMXSoj0=;
+ b=MAS9x5Tws9BBnATYDSUDFlZZTobbOOvnUXDL4ijxnHxwavkDZ0kTjbWM7L8VnGvWthwVILvcTpOWhjgPzG7zFyzKytOTWu/xE3hU5kJyekmWPq+ntpty7fbAANHDM8EdIv+cXIlQJqrPtUfSB47D7Qs/ngUUinYr/71J8dbgnQmwOb8a/5eE2XVEtiJT1CUvwfRVsESMo8u5tX/im9itdlrOKJdhA9lKvzpah7Xhs2AIrRVSOwEKml8D1hBMMJJ75FSHeSQtRUBfuDaObPDkMx5a7sThRUANgORN5sIqgI4Q/9VgwhegSfrBPiuXgpgH8k5s0E+I52lcwSTS6FwyAA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=HKXOOsKhnBVjE8Oq9ktd2ruNdmr2j+aI5kt2ig6Fb2U=;
- b=ZTv9wo/f0OtBvYGiwnnW5YneN8MXFIrazMM3v1uV3TeopPChrc4HBRv457hSLehcZjartQX1rlMw3dJFcPI8bKNtPw9k6zWQYXiNKuhAgQkDcbvkyG1ismScossdJ0l6SNnnrCMd9DOzulc7Q0FluVzjHVem5bIRKV9AUPf7iqw=
+ bh=auBbE0FFxUMe3EbNs+uRxJrTr5YYWFy3d9pWLMXSoj0=;
+ b=TaWlLylV+0Ua9DuMbS9HEXm0Myxkvzl/kbIToSUknpsk7CpLIVSG6Uiw7HTf2qccY0u5WipVvjSAyqUrHsXDTmbCDkR7N0nYtwmHEcQCoWYat3yXK5xnMaV/DOe6D4erCw2MwTezgnWve6w6xEn1k85PJTGFDPRdXDJEkwf+i/4=
 Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
  DB8PR04MB7116.eurprd04.prod.outlook.com (2603:10a6:10:127::22) with Microsoft
  SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4649.15; Thu, 4 Nov 2021 02:06:10 +0000
+ 15.20.4649.15; Thu, 4 Nov 2021 02:13:18 +0000
 Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
  ([fe80::94cc:8972:12cd:5bef]) by DB7PR04MB4010.eurprd04.prod.outlook.com
  ([fe80::94cc:8972:12cd:5bef%3]) with mapi id 15.20.4669.010; Thu, 4 Nov 2021
- 02:06:10 +0000
+ 02:13:18 +0000
 From:   Bough Chen <haibo.chen@nxp.com>
-To:     "tharvey@gateworks.com" <tharvey@gateworks.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+To:     "tharvey@gateworks.com" <tharvey@gateworks.com>
+CC:     Linux MMC List <linux-mmc@vger.kernel.org>,
         Marcel Ziswiler <marcel@ziswiler.com>,
+        Fabio Estevam <festevam@gmail.com>,
         Schrempf Frieder <frieder.schrempf@kontron.de>,
         Adam Ford <aford173@gmail.com>,
         Lucas Stach <l.stach@pengutronix.de>,
-        Peng Fan <peng.fan@nxp.com>
-CC:     "tharvey@gateworks.com" <tharvey@gateworks.com>,
-        "stable@vger.kernel.org" <stable@vger.kernel.org>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: disable CMDQ support
-Thread-Topic: [PATCH] mmc: sdhci-esdhc-imx: disable CMDQ support
-Thread-Index: AQHX0NltNnUwTqAIJUyyxnRkg02IaKvynvgA
-Date:   Thu, 4 Nov 2021 02:06:10 +0000
-Message-ID: <DB7PR04MB40101E7FDF84E2997074861D908D9@DB7PR04MB4010.eurprd04.prod.outlook.com>
-References: <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
- <20211103165415.2016-1-tharvey@gateworks.com>
-In-Reply-To: <20211103165415.2016-1-tharvey@gateworks.com>
+        Peng Fan <peng.fan@nxp.com>, Frank Li <frank.li@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        Cale Collins <ccollins@gateworks.com>
+Subject: RE: IMX8MM eMMC CQHCI timeout
+Thread-Topic: IMX8MM eMMC CQHCI timeout
+Thread-Index: AQHXzQY5w6gpJ5wepUWwHp8A5XAi06vt6qtQgAQg4wCAAJt7wA==
+Date:   Thu, 4 Nov 2021 02:13:18 +0000
+Message-ID: <DB7PR04MB401000F24AAD8C5310AAB7D1908D9@DB7PR04MB4010.eurprd04.prod.outlook.com>
+References: <CAJ+vNU2Vt2hWW=Yxh5W=bVerJjwbNoJpTDGgXxUUo9PZvzFe9A@mail.gmail.com>
+ <VI1PR04MB52942DA2B09A320B8060A3A8908A9@VI1PR04MB5294.eurprd04.prod.outlook.com>
+ <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
+In-Reply-To: <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
 Accept-Language: zh-CN, en-US
 Content-Language: en-US
 X-MS-Has-Attach: yes
@@ -69,189 +69,328 @@ X-MS-TNEF-Correlator:
 authentication-results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nxp.com;
 x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 5436b040-e7eb-4543-e12e-08d99f37abec
+x-ms-office365-filtering-correlation-id: a9c99cf6-888d-4635-d192-08d99f38aad4
 x-ms-traffictypediagnostic: DB8PR04MB7116:
 x-ld-processed: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635,ExtAddr
-x-microsoft-antispam-prvs: <DB8PR04MB711657283E0E8BE02424A52C908D9@DB8PR04MB7116.eurprd04.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:83;
+x-microsoft-antispam-prvs: <DB8PR04MB7116358E24BE9A357895B458908D9@DB8PR04MB7116.eurprd04.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7691;
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: HE8cluoTr+NKW/1Qd5yOZAySdfVChCaJBe83dUkMTZKzsKVG7Oufx0fOH9mpdPYLn1wIjLRAVfpybYWUqbEfQQwlYVD/Lwa9uBsea+5AWo8+QxfzLq7iwUZgEV9eL+YhLqyPzXUgFMN7pqTWWmCoZ9zizh/FCi306cBDJuwgwzLmJiG59k4w0UAnF3+GKHnHsqvydEya8nz+iuJ+m+tTUTg3oUmQ8ov/2AyuNyRAqqCBg8TjN9WpeTG9IBcdVn0Hmp3VhveLrJw/t581Eoh3H50hcNVulGM60MApkxoBUI6OhMgk2stZrA1Pc33TowiaPRtUJFO+lLiLpf2F7tEjnD2jxVORUebOS1hyNYDFiwK4hRUJ8A303PghSGHeFYy8H+6hrU7enxBh6RAABO/tUEQoARnb46XIlTyVxvarIzZ7U/pbZxA4w/oTiPv3JeKda0SKKrpyAVlRB6+Homu7mXITnyRZ/CC3Ny067qXSze94ntXiaM4VVMDpjrdZcDiqHh6rnDyp6opq4HAh1m9SY/Gm7PuhM0d0JeCiJz0fSWx3aR7MetfWjLCJCz536JA7pf5WV1lOnZ4TJa7CKohFyfxKpfP2WkSxFIhtrtP/bWzWA1IPa7o1LEQSw0L7qQa7j0ctMgeUuC+Fxtqfd9dPOTk6XcaBLVBCZjT7BRwgkLs6HIAgNbzqxUmFAUxIV9TUCgvAo7rjzUOvwNzgLAzbN5n/hi5jUrqKcJIf9t3LXJw=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(508600001)(8936002)(8676002)(83380400001)(186003)(122000001)(86362001)(38100700002)(71200400001)(921005)(55016002)(26005)(9686003)(66556008)(5660300002)(66476007)(99936003)(53546011)(4326008)(110136005)(38070700005)(6506007)(33656002)(54906003)(66446008)(7416002)(52536014)(2906002)(7696005)(64756008)(66946007)(316002)(6636002)(76116006);DIR:OUT;SFP:1101;
+x-microsoft-antispam-message-info: 8H4HTMZLnWKjFdEeDORvpzk9vDv+Pea08ATM9hdHuFtH7tTyX+IUoOTjBOigM2FP2BBc8ywtYis8tElspssm+hxOoRdNLJbrcoNx2TFz2LkrsLVUaKjLHBbB8o00Jr8G66IiWWPIyKoruyrkwPX72/LI3fA/FeRg935UvXW+SJP5ouZdr/LW1XPihDCnci8X8qT9p7FWwE49iygB+ELegruHv3oVbEia1Y+MxJ+fqJ0MJcc/91TV4SvPYHx14EQncjxUxCKu008mNFePJQtrVjeejURXi1sjZtrXM24kaMGRQbDWRcJ4ge9UvoRt+HSBFa9xMbhwN4j4/p0ERdZGJLHCeOXRkDfAxBx2uoX63db9a+vPrMk3+j9VzeXwHJK1QtdGe9cMTA1rbm16gvOfhqA9aHa4xDZUUdViwc268YrP6BNl9Age40FEvGJ/7t0Wv41Ed4fjUbuTwCgREZnPq+vBQeJIe2OdBdh+WHPSzjzVa+ldhD2nSO1/DJI9A714BJJBHYv582yHmlTz7xjvD8MmKZNbIZX27GaQwDKPopNMJ+Z+IHrmsfZIPleeIof1J7UItuf/fM5CyuUJoUbSHMJRm6mKbBJ2pCxUVe/JpGGS8sJSAoGCZ7XjQh0+rSAgxGiEdxuiDK5aKzoU9BKAXYyljZommXxOLVNnesvVqQ5oq4fFzBXjcKvpYS/X5+bRq02oKv88gG/lYFNZ1F7XZVR2P9dOCJV5POIPXQOPjy4T5VzgLVuvoTN8ggFcvB8i4Qjvx8ie8mPNXZ6Rhn6wpvkWuVzNS4YJxG+xcK2sCmohlOd/Ullvwap5MFV1h6EhAj8IdPVjP0G1ejOZ6GHbSw1+27qWgaI7fM3vXc91lDg=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(508600001)(8936002)(45080400002)(8676002)(83380400001)(186003)(122000001)(86362001)(38100700002)(71200400001)(55016002)(26005)(9686003)(966005)(66556008)(5660300002)(66476007)(99936003)(53546011)(4326008)(38070700005)(6506007)(33656002)(54906003)(66446008)(7416002)(52536014)(2906002)(7696005)(64756008)(66946007)(316002)(6916009)(76116006)(32563001);DIR:OUT;SFP:1101;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?gb2312?B?UDF6VUpDc1NqR28xQWJlMFpnM1pFRS9uVE41a1EwY2V1cnNsTXNpUTh2RElr?=
- =?gb2312?B?Y0RpOWhlVzBiNGpJeElWODA0WGFDMk9FMGJQVlNsZnRxbzgrb2Y2bktZRW81?=
- =?gb2312?B?c05RTVF6SHQ2TWZldmFjc21vUzU4N0pTQUtmTEc2QjhnMGx5NWdQWGtDRlFn?=
- =?gb2312?B?eDROTCtnZ3dQUHNCTFV4enJVL05rbUNzS3VMcDYyU2ZmUEdpWDcwbUhadWhH?=
- =?gb2312?B?MWNGNG95TWp1T1NGSCt1V0poYXZsb1RQcUJqKy91VDlNOGpIYTk4b1hJREhJ?=
- =?gb2312?B?WThNNUFtdXN6ajI1SG9GemdSWEJxdkNOc3MwNEZPQmJhTnh2WFJBaUxTR3hU?=
- =?gb2312?B?VmtyWEgxYTQrSy9SNDZieGdaOEZPYUpMdFZHZFZYK1IvUjF6Tlo3Zmpxb3B1?=
- =?gb2312?B?dDZ3bDFGR2c0bjV0eEpwTkVvSTk2eEpJZUI1eDBxTWx6blNPbXRJcGpxRW1Y?=
- =?gb2312?B?UVp6S0RiUkJPTThJekdSczBvYW9hK0dncXNSaE5WOHFuNXJySUlJQkRQcmE3?=
- =?gb2312?B?SytZL3plUXVTdVRtMDcvcEZtVDI0THpSazlRUWx6R3JXSnBGK3dtL1Vvb3dF?=
- =?gb2312?B?ZHFrQlNORFVSb0VKV1p6SnBGVURBYlN1KzUwRUd5Vml5eEs4ZFA5WW95OStD?=
- =?gb2312?B?UEpxRGhDZ2VRWVdhY0l5a0MySGl5QjlGay84Q2lsazd1MFRPWElFamE1VmFr?=
- =?gb2312?B?YWpSbWVTU2Roam9oeGF4eUZWSjJybXFaTEJjbFFSN1g3OEdUYkQ1MjBRWXdO?=
- =?gb2312?B?R0FnNVBpSlduVjZIMFdIRlZFZG01VUx4T2gyZWRPV2RyZWFiamRRM1BpWVgy?=
- =?gb2312?B?OGxvVmFvV2lzVitiMHkrWjBJSDRadnRKaTJMeVFyM05salNFMVBGdTFESmlj?=
- =?gb2312?B?L09INDNnZVZEcDdhRW93Z2FLM1BlZjNGMTFCeXlKQ0doUzhTOEJzSGZFSCt4?=
- =?gb2312?B?OHZTbitULzY5cTdxODdrY2QxMUYzbE40Vm5CSjZlanIzMlg2Nkw5bXRUeVJI?=
- =?gb2312?B?LzN5TFkyUWFMRXFYQVEzNzZlempQL2I1SXcxVXl4VUpPSTJqVitIZGxYNzdo?=
- =?gb2312?B?dS8waCtYVnJNOXJqaVZyVVhiMDcvWUVrajNDeTRnMmZFblJrMjB6MWI4VTV0?=
- =?gb2312?B?ZS82eFpvY3NKTkNjOE0xRy9Ea2JzZTRJRmg2L201Y0VuajJPNEZ2VWhXYjZU?=
- =?gb2312?B?aWN4R0QyR1VtSFZRMHF2OHFrd0UzSUIzRHVJaGFwT1EvTnRFTWZDakNyeGxN?=
- =?gb2312?B?M3c1UmdNY1JCNmcrTElrZ1VEYTFDNUR5SEdXNUxYTnJNYUtML0lySGhmWTA4?=
- =?gb2312?B?UnAvSlVOemxSNDhpVDlZZUFjazFNa1hpeUhTMjZYdjdwVnNhVzBJZ1ZKNEpO?=
- =?gb2312?B?aUh3dE5OOTliMnlMZmFHbFpzL2FIc3hDQTNIaGpCNE5xUUdKMnlOb3ZNeDF4?=
- =?gb2312?B?bk51U0swQzl0cWRUWVhKcnFWS0JEOUkyUjlaUm1adk42N01oeXNyOGZYekFP?=
- =?gb2312?B?cDVsK3VSUStZMjB1RFB2WE0vYXlGTjZYTFdOVmZEbHBnN0p6aWE2RTVRZzlY?=
- =?gb2312?B?ZS9CcTQ3Nm0yLzBOZGhPZXVCaEV2UUxXMERoWXBIeWR5dmRXYVppYjQyR2VC?=
- =?gb2312?B?cEpSUnBpVVNoNlVkUHpPWDYxL0dZVzdGQldUckQwL1lEQjRMc2RaM1VUTnNW?=
- =?gb2312?B?YzNQSTBzS20yaWVLMEkyUGQ5NXRtZmM4Zi9SRmdkQVJjSEZhT1Fhdlo3d0RV?=
- =?gb2312?B?WGtDSTFIWVRUdnB0NWV4OVd1eXhKUHgzWGwvL1Z6NDE5NEZTcC9TNnBZd0U1?=
- =?gb2312?B?RVFZU1g0amJWdS8vQkw0MFVSNGNjVTlQbG1qY2ZpUEJUaHVQTWF3U1NqNGN0?=
- =?gb2312?B?NUZlcHBnSzUxYlVCcTdSSWZOemluSGZkRHhvS3JaQWhZb2lxTExvWFA1TzJ1?=
- =?gb2312?B?b3pJVkliOVR0WEIwdFFHKzJYVVgyMjJmMWxZMDVJeGRhTjgyUzVnd3A1ZWVl?=
- =?gb2312?B?bFZOVlFuQW40aGpyRjFmVHVIcXZCa3NUaHhOd0hxLysvTERDMnRDUUVEaGY2?=
- =?gb2312?B?THdXVTFTSkw0ay9BTU4zU3ZXb1FJbjBERXVMdjNVb3JmMmw5UW1sL1dUMDVu?=
- =?gb2312?B?VW1hTDRXSmdHekU2cDV6K1QyejZOZE1OM05jNlhtejVwVS91UitMNzd3SGJk?=
- =?gb2312?B?emc9PQ==?=
+x-ms-exchange-antispam-messagedata-0: =?gb2312?B?UlRUOUxlM2NNOUJZS24xM3lMMVBMRUw4OVIvQU5Db3ZMZTVXOWdKKzFMZktM?=
+ =?gb2312?B?TEV1YnZFQUl1dTlFOVRZZXc5SDNEci9MY1VGV2N1N1BmUzZNMmRDazJBb1h2?=
+ =?gb2312?B?akRjUUdoQXRXUjA1ZFVVK1FkYWgvRlc1MVRYcytvRkZXZFRPRjVYYWJkVGE5?=
+ =?gb2312?B?Y1Z0NkZCYkpXWThEMk9Ib0I2TEFhOEZodTBhUFFVaHNYd0o3NUg2VUQyWWFW?=
+ =?gb2312?B?T0Q3TjNDRFlWSDdBNnZkbFI3WG1mRW5QT3pva05MRnZnTzNWR2RzajN6b0xK?=
+ =?gb2312?B?S3JKbXdXTXd4MS9SS3Z1SHdXREgrQjlZS05ha0F6aytXUCt1UkplbnFYdC84?=
+ =?gb2312?B?UVFZOUwxaTJ4UWtZTEczaXBjU3lnemtGc0ZUQWhMLzJyRnYveUFoWTYyNUNX?=
+ =?gb2312?B?YUpheklKODNLRzY0dzZsZ2h5a3QxcEhkeFpFNmw3N3ZMZ2F6MFZVSzRISUJR?=
+ =?gb2312?B?bnNZY1FHbnA5NStZR3RVKzZjWk9rWW1NbTdUMStxVnB4blpNYVIwMmJTMm1B?=
+ =?gb2312?B?TjdKUjdldS9ISDBKZ001OEw3eVp5UGhqditQOU8wUjAvWUhDanN6akh2MWpj?=
+ =?gb2312?B?TDNOUVZVajhLNFcxY3Z3OWo3VUxsZHJ1SE5ib01XdUN4S0ZpZ2QxdWNwckp0?=
+ =?gb2312?B?aU12TlNYd0pzSHArbTFBOGFsT1l1d0hOdDFYREJaUkhEN1JEdXFabGNaVkdL?=
+ =?gb2312?B?TDd6Mk9ubDRaM0Q1aGFuZHVkZ0VjdTA0eXNKV0tqY3BqOXFNQjRPU1RDVlQy?=
+ =?gb2312?B?MXBKQlVrMmpoeVlRMy83ZlpkMEdQdEhqbVRLTnFnaXBpaU5yWU80VkFVbytn?=
+ =?gb2312?B?QXhTd2h1NGlabDVvYXBBY2JoUkdDeVBhbDJTOXZMODNjMzIvSzFwUGU1R0pa?=
+ =?gb2312?B?SElOZ1FId0RSck9kRE1MTEN5cjU0T2pJQkZYOU9NMjJhZk9nMkxCQTBrU2Jp?=
+ =?gb2312?B?dFF3NytHTU5teTVCQ2F4MnBLYnJ0cDBlRFRvQXc3MlhvVVlMYUYrM1ZZeWtj?=
+ =?gb2312?B?NU9Oa2M1cGExZStiS3g2UGdpajdTOFZsKzY2eUtuSTFhbXBiVDVvekNaNFdm?=
+ =?gb2312?B?a0diUEtZRVkvd2NhQWltSDNyUWROUXBtaVN4aFROVU8zSURzaERrNWlGZ0Y4?=
+ =?gb2312?B?RUdibkk0djk0ZzRZQnFQK3ZKUFA1cy9QYW42R1d6aDlqVTdsWVpkbko1Q09h?=
+ =?gb2312?B?WllZMVFMMlUvU1VzelgrVCsrYmhjS0l2aVVraGQ3YU12akNPZDRDVEd4enRt?=
+ =?gb2312?B?djV5Y3VrMXA4RisreXVjVW5uMnhrZnFuTWQ0VWxJZG9vT2t6Wnk4elFtMjA4?=
+ =?gb2312?B?V01IeDF5NXh2WWtLY2VpUm9sQS9KNVNUYjdIMzFEaGk4bE1xVm1icUtiVWN3?=
+ =?gb2312?B?eEcxSFI0WnJPejZ6dlBXbUhJYlVQRUVMdWZZbElubHFwbjFRcFZrY2x2c0dL?=
+ =?gb2312?B?MFk1dktrakFORS8xM2dYVVA4Vkd0RHVKTXVkTG1mZ0dYTWRWa3hIMHlnblFy?=
+ =?gb2312?B?aFJxdjA2S2ZUMXBGaWJQbjB0SG1zc2JQdkJTeFVGZy9tY0hTdXpzQUlDOXVB?=
+ =?gb2312?B?OHI0YTEwTmZoOTY0SHNQeE5TOEpMM0VjT0pjaWZ3QTNBRFhnU0ZJS2s1M2xn?=
+ =?gb2312?B?VW5SZnV3alRDd0xNZlAvalFadnNRQkFrV0g0QndHUG93QkxtVm0vYnZUVjJY?=
+ =?gb2312?B?WU5YV1FFOFJsRi92MEdKM1pidWJPUk94NGM0VCszRlNyeEUvZmIvUExLRlU1?=
+ =?gb2312?B?YUlIckN2cFlBaU5qcVB5ZmN2V1llTWRSWTkvZURNbUt5MkpnS1p5dVhHMVVF?=
+ =?gb2312?B?bWt3L2pBOTc3SXFGTTJrMkx1bDd2R1hmRENPTUxndTQ1RjFqTDEvcjkwK2kr?=
+ =?gb2312?B?TVVCaXVKMUF0RTFuN3Mwc041SThwR1hJOXNEa2JqTHRSLzIyWFMrN0dsTnZQ?=
+ =?gb2312?B?QlNVWENEeC82UVAwQ3F1SHJjR09JUEZKeFlpRmdPYU1GUzU3K3RjUjNFNXEz?=
+ =?gb2312?B?S0I5YmNnV3VSV2RWZEZuMmxDVDhLTGRwdzdNOGY3cjRpdnFSaVRqMElVY3dO?=
+ =?gb2312?B?blFXK25HRFF2Mm93bGdSV0VYdmt5Q0t2Z3kzL3hvVGtpaWdoUVk0aXowTDk4?=
+ =?gb2312?B?SkQ1Mng4SjZQR1UvNXV5d1F4UllxZE5xWjlaeUpPRmd4cnc4bjJrVWdIcHhr?=
+ =?gb2312?B?U1E9PQ==?=
 Content-Type: multipart/signed;
         protocol="application/x-pkcs7-signature";
         micalg=SHA1;
-        boundary="----=_NextPart_000_019B_01D7D163.93557DE0"
+        boundary="----=_NextPart_000_01A7_01D7D164.94C8C780"
 MIME-Version: 1.0
 X-OriginatorOrg: nxp.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
 X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5436b040-e7eb-4543-e12e-08d99f37abec
-X-MS-Exchange-CrossTenant-originalarrivaltime: 04 Nov 2021 02:06:10.4532
+X-MS-Exchange-CrossTenant-Network-Message-Id: a9c99cf6-888d-4635-d192-08d99f38aad4
+X-MS-Exchange-CrossTenant-originalarrivaltime: 04 Nov 2021 02:13:18.1255
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
 X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: sJR9ZnZWKiiwOZC7f8lBEyR5YrK7D2DBWtyu1Y6rgT+lTdmI5r3uFqoMq7NhEbSx9b7V4shUpH0iKrky5utR1Q==
+X-MS-Exchange-CrossTenant-userprincipalname: 7BkivHoRAic7u+vFv4FqQKxlqQ/pvfLTPpRhehatUnra3ly1jghIu2N6sIbb+OH2WtJaCRaM5gTT3BwNC1UwEw==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB8PR04MB7116
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-------=_NextPart_000_019B_01D7D163.93557DE0
+------=_NextPart_000_01A7_01D7D164.94C8C780
 Content-Type: text/plain;
 	charset="gb2312"
 Content-Transfer-Encoding: quoted-printable
 
 > -----Original Message-----
 > From: Tim Harvey [mailto:tharvey@gateworks.com]
-> Sent: 2021=C4=EA11=D4=C24=C8=D5 0:54
-> To: Adrian Hunter <adrian.hunter@intel.com>; Ulf Hansson
-> <ulf.hansson@linaro.org>; Shawn Guo <shawnguo@kernel.org>; Sascha =
-Hauer
-> <s.hauer@pengutronix.de>; Pengutronix Kernel Team
-> <kernel@pengutronix.de>; Fabio Estevam <festevam@gmail.com>;
-> dl-linux-imx <linux-imx@nxp.com>; Bough Chen <haibo.chen@nxp.com>;
-> linux-mmc@vger.kernel.org; Marcel Ziswiler <marcel@ziswiler.com>;
-> Schrempf Frieder <frieder.schrempf@kontron.de>; Adam Ford
-> <aford173@gmail.com>; Lucas Stach <l.stach@pengutronix.de>; Peng Fan
-> <peng.fan@nxp.com>
-> Cc: tharvey@gateworks.com; stable@vger.kernel.org
-> Subject: [PATCH] mmc: sdhci-esdhc-imx: disable CMDQ support
+> Sent: 2021=C4=EA11=D4=C24=C8=D5 0:50
+> To: Bough Chen <haibo.chen@nxp.com>
+> Cc: Linux MMC List <linux-mmc@vger.kernel.org>; Marcel Ziswiler
+> <marcel@ziswiler.com>; Fabio Estevam <festevam@gmail.com>; Schrempf
+> Frieder <frieder.schrempf@kontron.de>; Adam Ford <aford173@gmail.com>;
+> Lucas Stach <l.stach@pengutronix.de>; Peng Fan <peng.fan@nxp.com>; =
+Frank
+> Li <frank.li@nxp.com>; Adrian Hunter <adrian.hunter@intel.com>; Shawn =
+Guo
+> <shawnguo@kernel.org>; Ulf Hansson <ulf.hansson@linaro.org>; Sascha
+> Hauer <s.hauer@pengutronix.de>; Pengutronix Kernel Team
+> <kernel@pengutronix.de>; dl-linux-imx <linux-imx@nxp.com>; Cale =
+Collins
+> <ccollins@gateworks.com>
+> Subject: Re: IMX8MM eMMC CQHCI timeout
 >=20
-> On IMX SoC's which support CMDQ the following can occur during high a =
-high
-> cpu load:
->=20
-> mmc2: cqhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D CQHCI REGISTER DUMP =
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
-> mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
-> mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-> mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-> mmc2: cqhci: TDL base:  0x8003f000 | TDL up32: 0x00000000
-> mmc2: cqhci: Doorbell:  0xbf01dfff | TCN:      0x00000000
-> mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x08000000
-> mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-> mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000800
-> mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-> mmc2: cqhci: Resp idx:  0x0000000d | Resp arg: 0x00000000
-> mmc2: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER DUMP =
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> mmc2: sdhci: Sys addr:  0x7c722000 | Version:  0x00000002
-> mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000020
-> mmc2: sdhci: Argument:  0x00018000 | Trn mode: 0x00000023
-> mmc2: sdhci: Present:   0x01f88008 | Host ctl: 0x00000030
-> mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-> mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-> mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-> mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
-> mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
-> mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-> mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00ffffff
-> mmc2: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0xffc003ff
-> mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d07f01
-> mmc2: sdhci: Host ctl2: 0x00000088
-> mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfe179020
-> mmc2: sdhci-esdhc-imx: =3D=3D=3D=3D=3D=3D=3D=3D=3D ESDHC IMX DEBUG =
-STATUS DUMP =3D=3D=3D=3D
-> mmc2: sdhci-esdhc-imx: cmd debug status:  0x2120
-> mmc2: sdhci-esdhc-imx: data debug status:  0x2200
-> mmc2: sdhci-esdhc-imx: trans debug status:  0x2300
-> mmc2: sdhci-esdhc-imx: dma debug status:  0x2400
-> mmc2: sdhci-esdhc-imx: adma debug status:  0x2510
-> mmc2: sdhci-esdhc-imx: fifo debug status:  0x2680
-> mmc2: sdhci-esdhc-imx: async fifo debug status:  0x2750
-> mmc2: sdhci: =
+> On Sun, Oct 31, 2021 at 6:57 PM Bough Chen <haibo.chen@nxp.com> wrote:
+> >
+> > > -----Original Message-----
+> > > From: Tim Harvey [mailto:tharvey@gateworks.com]
+> > > Sent: 2021=C4=EA10=D4=C230=C8=D5 4:47
+> > > To: Linux MMC List <linux-mmc@vger.kernel.org>; Marcel Ziswiler
+> > > <marcel@ziswiler.com>; Fabio Estevam <festevam@gmail.com>; =
+Schrempf
+> > > Frieder <frieder.schrempf@kontron.de>; Adam Ford
+> > > <aford173@gmail.com>; Bough Chen <haibo.chen@nxp.com>; Lucas Stach
+> > > <l.stach@pengutronix.de>; Peng Fan <peng.fan@nxp.com>; Frank Li
+> > > <frank.li@nxp.com>
+> > > Cc: Adrian Hunter <adrian.hunter@intel.com>; Shawn Guo
+> > > <shawnguo@kernel.org>; Ulf Hansson <ulf.hansson@linaro.org>; =
+Sascha
+> > > Hauer <s.hauer@pengutronix.de>; Pengutronix Kernel Team
+> > > <kernel@pengutronix.de>; dl-linux-imx <linux-imx@nxp.com>; Cale
+> > > Collins <ccollins@gateworks.com>
+> > > Subject: IMX8MM eMMC CQHCI timeout
+> > >
+> > > Greetings,
+> > >
+> > > I've encountered the following MMC CQHCI timeout message a couple =
+of
+> > > times now on IMX8MM boards with eMMC with a 5.10 based kernel:
+> > >
+> > > [  224.356283] mmc2: cqhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D =
+CQHCI REGISTER DUMP
+> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > > [  224.362764] mmc2: cqhci: Caps:      0x0000310a | Version:
+> > > 0x00000510
+> > > [  224.369250] mmc2: cqhci: Config:    0x00001001 | Control:
+> 0x00000000
+> > > [  224.375726] mmc2: cqhci: Int stat:  0x00000000 | Int enab:
+> 0x00000006
+> > > [  224.382197] mmc2: cqhci: Int sig:   0x00000006 | Int Coal:
+> 0x00000000
+> > > [  224.388665] mmc2: cqhci: TDL base:  0x8003f000 | TDL up32:
+> 0x00000000
+> > > [  224.395129] mmc2: cqhci: Doorbell:  0xbf01dfff | TCN:
+> 0x00000000
+> > > [  224.401598] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend:
+> 0x08000000
+> > > [  224.408064] mmc2: cqhci: Task clr:  0x00000000 | SSC1:
+> 0x00011000
+> > > [  224.414532] mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp:
+> > > 0x00000800
+> > > [  224.420997] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:
+> > > 0x00000000
+> > > [  224.427467] mmc2: cqhci: Resp idx:  0x0000000d | Resp arg:
+> > > 0x00000000 [  224.433934] mmc2: sdhci: =
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI REGISTER
+> > > DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D [  224.440404] mmc2: sdhci: =
+Sys addr:  0x7c722000
+> | Version:
+> > > 0x00000002 [  224.446877] mmc2: sdhci: Blk size:  0x00000200 | Blk
+cnt:
+> > > 0x00000020 [  224.453346] mmc2: sdhci: Argument:  0x00018000 | Trn
+> > > mode: 0x00000023
+> > > [  224.459811] mmc2: sdhci: Present:   0x01f88008 | Host ctl:
+> 0x00000030
+> > > [  224.466281] mmc2: sdhci: Power:     0x00000002 | Blk gap:
+> > > 0x00000080
+> > > [  224.472752] mmc2: sdhci: Wake-up:   0x00000008 | Clock:
+> > > 0x0000000f
+> > > [  224.479225] mmc2: sdhci: Timeout:   0x0000008f | Int stat:
+> 0x00000000
+> > > [  224.485690] mmc2: sdhci: Int enab:  0x107f4000 | Sig enab:
+> > > 0x107f4000 [  224.492161] mmc2: sdhci: ACmd stat: 0x00000000 | =
+Slot
+int:
+> 0x00000502
+> > > [  224.498628] mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:
+> > > 0x8000b407
+> > > [  224.505097] mmc2: sdhci: Cmd:       0x00000d1a | Max curr:
+> 0x00ffffff
+> > > [  224.511575] mmc2: sdhci: Resp[0]:   0x00000000 | Resp[1]:
+> 0xffc003ff
+> > > [  224.518043] mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:
+> 0x00d07f01
+> > > [  224.524512] mmc2: sdhci: Host ctl2: 0x00000088 [  224.528986]
+> mmc2:
+> > > sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfe179020 [  224.535451]
+> > > mmc2: sdhci-esdhc-imx: =3D=3D=3D=3D=3D=3D=3D=3D=3D ESDHC IMX DEBUG =
+STATUS DUMP
+> =3D=3D=3D=3D [
+> > > 224.543052] mmc2: sdhci-esdhc-imx: cmd debug status:  0x2120 [
+> > > 224.548740] mmc2: sdhci-esdhc-imx: data debug status:  0x2200 [
+> > > 224.554510] mmc2: sdhci-esdhc-imx: trans debug status:  0x2300 [
+> > > 224.560368] mmc2: sdhci-esdhc-imx: dma debug status:  0x2400 [
+> > > 224.566054] mmc2: sdhci-esdhc-imx: adma debug status:  0x2510 [
+> > > 224.571826] mmc2: sdhci-esdhc-imx: fifo debug status:  0x2680 [
+> > > 224.577608] mmc2: sdhci-esdhc-imx: async fifo debug status:  =
+0x2750
+> > > [  224.583900] mmc2: sdhci:
+> > > =
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
 =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > >
+> > > I don't know how to make the issue occur, both times it occured
+> > > simply
+> > reading
+> > > a file in the rootfs ext4 fs on the emmc.
+> > >
+> > > Some research shows:
+> > > -
+> > > =
+https://eur01.safelinks.protection.outlook.com/?url=3Dhttps%3A%2F%2Fco
+> > > mmu
+> > >
+> nity.nxp.com%2Ft5%2Fi-MX-Processors%2FThe-issues-on-quot-mmc0-cqhci-
+> > > tim
+> > >
+> eout-for-tag-0-quot%2Fm-p%2F993779&amp;data=3D04%7C01%7Chaibo.chen%4
+> > >
+> 0nxp.com%7C1dc0981634f5460a779808d99b1d5a88%7C686ea1d3bc2b4c6fa9
+> > >
+> 2cd99c5c301635%7C0%7C0%7C637711372651089473%7CUnknown%7CTWFp
+> > >
+> bGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI
+> > >
+> 6Mn0%3D%7C1000&amp;sdata=3DITcs7%2FMy%2F1Vx1TMB2VlaY4QhibKuSFBD
+> > > 6UZhzVFl%2FqY%3D&amp;reserved=3D0
+> > > -
+> > > =
+https://eur01.safelinks.protection.outlook.com/?url=3Dhttp%3A%2F%2Fgit
+> > > .torad%2F&amp;data=3D04%7C01%7Chaibo.chen%40nxp.com%7C281983c39
+> 6a442e7
+> > >
+> 8d2108d99ee9f858%7C686ea1d3bc2b4c6fa92cd99c5c301635%7C0%7C0%7C6
+> 37715
+> > >
+> 549993442194%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQ
+> IjoiV2l
+> > >
+> uMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&amp;sdata=3DCyMZIUVjzXj
+> 2tD3
+> > > MfO4kUAOXr5SazgtJSRlhro9wOvU%3D&amp;reserved=3D0
+> > >
+> ex.com%2Fcgit%2Flinux-toradex.git%2Fcommit%2F%3Fh%3Dtoradex_5.4-2.3.
+> > > x
+> -imx%26id%3Dfd33531be843566c59a5fc655f204bbd36d7f3c6&amp;data=3D04%
+> > >
+> 7C01%7Chaibo.chen%40nxp.com%7C1dc0981634f5460a779808d99b1d5a88%
+> > >
+> 7C686ea1d3bc2b4c6fa92cd99c5c301635%7C0%7C0%7C637711372651089473
+> > > %7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzI
+> iLCJ
+> > >
+> BTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C1000&amp;sdata=3DxaamzPb2CdW6YDzW
+> > > g8uBb0PjomkoWAziu5qglvMbT2I%3D&amp;reserved=3D0
+> > >
+> > > I'm not clear if this info is up-to-date. The NXP 5.4 kernel did =
+not
+> > enable this
+> > > feature but if I'm not mistaken CQHCI support itself didn't land =
+in
+> > mainline until
+> > > a later kernel so it would make sense it was not enabled at that
+> > > time. I
+> > do see
+> > > the NXP 5.10 kernels have this enabled so I'm curious if it is an
+> > > issue
+> > there.
+> > >
+> > > Any other IMX8MM or other SoC users know what this could be about =
+or
+> > > what
+> > I
+> > > could do for a test to try to reproduce it so I can see if it =
+occurs
+> > > in
+> > other kernel
+> > > versions?
+> >
+> > Hi Tim,
+> >
+> > I'm debugging this issue those days, but unfortunately, still not =
+find
+> > the root cause.
+> > The register value of Doorbell, Dev Queue, Dev Pend seems abnormal.
+> > This issue happens on all i.MX SoC which support cmdq feature when =
+cpu
+> > loading is high.. Now I lack a mmc logic analyzer, make it not easy =
+to
+> > debug this issue. So stll need some time. Sorry about that.
+> > If you want to make mmc work stable, you can disable the cmdq as a
+> > workaround.
+> >
+> > Best Regards
+> > Haibo Chen
 >=20
-> For now, disable CMDQ support on the imx8qm/imx8qxp/imx8mm until the
-> issue is found and resolved.
+> Haibo,
 >=20
-> Fixes: bb6e358169bf6 ("mmc: sdhci-esdhc-imx: add CMDQ support")
-> Fixes: cde5e8e9ff146 ("mmc: sdhci-esdhc-imx: Add an new esdhc_soc_data =
-for
-> i.MX8MM")
->=20
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Tim Harvey <tharvey@gateworks.com>
+> Thanks for the information. Do you know how to easily reproduce it
+reliably for
+> testing?
 
-Reviewed-by: Haibo Chen <haibo.chen@nxp.com>
+Still not, can only meet this issue randomly after few hours stress test
+under high CPU loading.
+
+My next step is :
+1, find a way to reproduce this issue easily
+2, get emmc logic analyzer.
+
+
+>=20
+> I have tried the following on an eMMC filesystem:
+> stress --cpu 32 --io 32 &
+> dd if=3D/dev/zero of=3Dfoo bs=3D1M count=3D1000 & dd if=3D/dev/zero =
+of=3Dfoo bs=3D1M
+> count=3D1000 & rm foo
+>=20
+> I'm unable to reproduce the issue that way, and it has only happened
+randomly
+> once or twice.
+>=20
+> Perhaps we should disable CMDQ for now until you can sort this out? I =
+can
+> submit a patch for that.
+
+Yes, please.
 
 Best Regards
 Haibo Chen
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 2 --
->  1 file changed, 2 deletions(-)
 >=20
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index e658f0174242..60f19369de84 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -300,7 +300,6 @@ static struct esdhc_soc_data usdhc_imx8qxp_data =
-=3D {
->  	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->  			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
->  			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
-> -			| ESDHC_FLAG_CQHCI
->  			| ESDHC_FLAG_STATE_LOST_IN_LPMODE
->  			| ESDHC_FLAG_CLK_RATE_LOST_IN_PM_RUNTIME,
->  };
-> @@ -309,7 +308,6 @@ static struct esdhc_soc_data usdhc_imx8mm_data =3D =
-{
->  	.flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->  			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
->  			| ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
-> -			| ESDHC_FLAG_CQHCI
->  			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
->  };
+> Best regards,
 >=20
-> --
-> 2.17.1
+> Tim
 
-
-------=_NextPart_000_019B_01D7D163.93557DE0
+------=_NextPart_000_01A7_01D7D164.94C8C780
 Content-Type: application/pkcs7-signature;
 	name="smime.p7s"
 Content-Transfer-Encoding: base64
@@ -409,8 +548,8 @@ ZSBDQSA1MQswCQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3Zl
 bjEWMBQGA1UECAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT
 8ixkARkWA254cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwCEy0ABsdWyH4wxYEw
 yQ4AAAAGx1YwCQYFKw4DAhoFAKCCArkwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG
-9w0BCQUxDxcNMjExMTA0MDIwNjAzWjAjBgkqhkiG9w0BCQQxFgQUjvV5DuiDl1C7Nvm2CWBQr9KD
-VjIwgZMGCSqGSIb3DQEJDzGBhTCBgjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAoGCCqGSIb3
+9w0BCQUxDxcNMjExMTA0MDIxMzE1WjAjBgkqhkiG9w0BCQQxFgQUD61ccrxjib3xS+8fNcv7/GNN
+xRIwgZMGCSqGSIb3DQEJDzGBhTCBgjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAoGCCqGSIb3
 DQMHMAsGCWCGSAFlAwQBAjAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAwBwYFKw4DAhow
 CwYJYIZIAWUDBAIDMAsGCWCGSAFlAwQCAjALBglghkgBZQMEAgEwgd8GCSsGAQQBgjcQBDGB0TCB
 zjCBtjEcMBoGA1UEAwwTTlhQIEVudGVycHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoM
@@ -420,11 +559,11 @@ b20xCzAJBgNVBAYTAk5MAhMtAAbHVf9AFft39E7nAAAABsdVMIHhBgsqhkiG9w0BCRACCzGB0aCB
 zjCBtjEcMBoGA1UEAwwTTlhQIEVudGVycHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoM
 CE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5kaG92ZW4xFjAUBgNVBAgMDU5vb3JkLUJyYWJhbnQxEzAR
 BgoJkiaJk/IsZAEZFgN3YmkxEzARBgoJkiaJk/IsZAEZFgNueHAxEzARBgoJkiaJk/IsZAEZFgNj
-b20xCzAJBgNVBAYTAk5MAhMtAAbHVf9AFft39E7nAAAABsdVMA0GCSqGSIb3DQEBAQUABIIBAEjz
-IU+dbrBHkFTwkh5bd661TFgk4tX9YjKkJIye/FlM5SdI7uvZpF0ZuhvCvrPJb0wxMTkdFzbtkXCu
-02GaLu82q5UM1LyTvw/NvltCMGvdgs+s+1ICU/X45Uu83eie2ZlW3Un5Sg5yEpbXcfG22Ud81P9y
-hWDZWi1HFX3HndyVOSmkz0DpK+sN8FiS0nMV86Pt/WGw/A9SwzVRD40q7TgEd7TzzJyP5saDQV95
-UQSxIKZUITnSBbCmZpp/pOsLbT1HI+n5lGUYoVZDtGdorzPBsFqPE0grRC6Ja1j2JNM1jeR0X3EQ
-4l699T3Q4AL+ypRmQXFOdqok0vwmKtSIxUMAAAAAAAA=
+b20xCzAJBgNVBAYTAk5MAhMtAAbHVf9AFft39E7nAAAABsdVMA0GCSqGSIb3DQEBAQUABIIBALOD
+BeRwfTS6f0et2/qFP0ZQ0XCQLju/XNYTpNM0hVlxgGdufOs98OxSS3XTmUKaTynpHBBVYIKn3Mvj
+OeI0GdLODoGI2uaZnRdD4uMwEvOkaWGF92yOceXDIBd46rRkfsKvaHQoifbWdbhz8fyPLtgsHxVZ
+2jhOMfOQNtOxE+LZcNBKVbOMGz5OEeKyaZMY5AZ0pIVSMFMxNv16DN6nMWGkpt34znJ7UGnSC6jL
+RmVpTnV+it0ddCUKbQ62E5eLSp3v9SjmKMCR5kOZVBGglvVjwvLh/DVJ/IsPfBHlZZl8oi47ML8S
+rlPfsdQpUue0kJcWQYFDquG8+hFJbPpH2j4AAAAAAAA=
 
-------=_NextPart_000_019B_01D7D163.93557DE0--
+------=_NextPart_000_01A7_01D7D164.94C8C780--
