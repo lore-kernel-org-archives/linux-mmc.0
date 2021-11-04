@@ -2,156 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DDE3C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 02:30:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4555AC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 06:32:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E53461073
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 02:30:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B2AF61050
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Nov 2021 06:32:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230176AbhKDCdR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Nov 2021 22:33:17 -0400
-Received: from smtpcmd11116.aruba.it ([62.149.156.116]:44386 "EHLO
-        smtpcmd11116.aruba.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229893AbhKDCdQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Nov 2021 22:33:16 -0400
-Received: from smtpclient.apple ([146.241.216.221])
-        by Aruba Outgoing Smtp  with ESMTPA
-        id iSWPmxR5yumo4iSWQmmgHU; Thu, 04 Nov 2021 03:30:37 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
-        t=1635993037; bh=DZRFcy1A7pDPfjI/xc1yZ9deWpS/ap+fHvhGYQj6qt8=;
-        h=Content-Type:From:Mime-Version:Subject:Date:To;
-        b=N8Q8E/6Lo/V5C07x9Zz6934M8WwsfhWu8eM5yC4g709131ZDfKQ+D2c5MBrLa7p8x
-         ru3wUQY9WIsXCbt/L2HiBHbiQGWmNkrQ2mWW0vwk8VXfTuQrwLsgXeT195gWsUWpov
-         p5zFaVPIfEUSAGvculvT1gtSBlOeQk96cGl9ilrpLS2B8aF1nxxbK01xJlW+7xnLOT
-         2UPvC5XV3ecGPXATf3UDklKW0SAkWIVa3mZKJ1keCBTn8Ps60mWQzWRHT+8F3Ky78r
-         pA6IcEVkF4LDaFay0QoPvnCvQQjDNS6/yFtI72vD1ggnsBccLyiEgan2HHuiryO3cT
-         AVHBkNzusU5dQ==
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
-Mime-Version: 1.0 (1.0)
-Subject: Re: [PATCH v2 11/13] mmc: sdhci-esdhc-imx: Add sdhc support for i.MXRT series
-Date:   Thu, 4 Nov 2021 03:30:33 +0100
-Message-Id: <B67A91BD-DAE9-468B-8731-251DE86E6B5B@benettiengineering.com>
-References: <YYMx28VvhR7nvMlt@robh.at.kernel.org>
-List-Id: <soc.lore.kernel.org>
-Cc:     Jesse Taube <mr.bossman075@gmail.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Stefan Agner <stefan@agner.ch>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
-        soc@kernel.org, Russell King - ARM Linux <linux@armlinux.org.uk>,
-        Abel Vesa <abel.vesa@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-serial@vger.kernel.org
-In-Reply-To: <YYMx28VvhR7nvMlt@robh.at.kernel.org>
-To:     Rob Herring <robh@kernel.org>
-X-Mailer: iPhone Mail (18H107)
-X-CMAE-Envelope: MS4wfA6GKfpXsRSNdwkIFTYQmUTZuqvvSqJg+QZ+U7tg2NH81o4pATFmJwAt9hr+3r2mNiS/sSK61vhtevF2cYqatJs6yFEDZMD5XAiD/Unil39uyjcDlR+E
- BcLXaIVZu4wKmq7xHmquyZQ9nQ3yxwcQ9iSgSki4StzrrvVTODPwjlAoDCbWXg3JeXCnJwf3N31U3quzLH0FFn7keK841utBPTSj8wFLVizEXBcybktsurWu
- vSAWrJVMfzQJqsZjAI+23fH9DD1GDdIZHmy8iAaNO/xA2EsVETe3uYkP9zIQ/2BrIcFaspiY7pBtb7q/CxnBA6dW4FakqGWyck2+HEEgVE6IyxDF4EA5AgX4
- vRQ4K7lOSHYLeJzs/ufxTJ/mMseghKr4wcjElkIZ7eP2XiQdLMNJJVZo0/OefdLTDhZY1+/rnybjvoSWOVgxCGmHfL9yn8FTO9pUA5hNE6JPVQ2MDMweeWb0
- G+5dsKEqJMQ4Mum9W+ibAj27IXt7E1u94i+Saple09dGbLXkIYWuDasXHmdEJdJobZ0xw4TF993iGYYhmRF1XYqJ9EfAU2t+X1Zrhw8KR7r2+1zASXyJhIyM
- vFn0oMrkO3YrgpxLciN1aigouwRBienWmrH22H404ZC2j5dCWnGRWg81fZE/F3hTFmCade+L94a9w45sR8gUGR6zdYeYndCEy9mlCsPRM0FoMiHqmoquhS/4
- 7H1mmZz/dkqjG0dTNCLwDTR5d36gxqYxBWJb7N4W16x9E3tpaIxefOBUddegq0TPjAOla3W5UsdCMojSjykEsi4aOj57KIpNDgE7kMNRSsU3F37BESUaPTh9
- K3NgAhha3vddkCcY3pZ1YQ0QdxIrxSxM3K1ghN1U0pGG7/1T2cJ7Llfyva+k7TeMnDBBs0OV4f27BaCakDrK0CxFN1WjJmWUvm2+dBfQzwlxEANSxS9Urs3E
- RMhlMRxuU/4Ua8NvOM98GwPGVJF0No5AZb+M3grJE22WMJIFMw9RfciVdeleM15p9AcbsN6JdtHOaELVhDCxubtWKXnENjFT/Yg+Ju2qq6LUk0KtwtBnQr8N
- BCSy73MRVwLhTUucDQcoIUon2spbaJDehjTz12VXFJ+PYw7RSXKGvdT/t3XmqQiiXvoRt71Z4lN5yuyulmkB5laNulworHZJU94=
+        id S230445AbhKDGf2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Nov 2021 02:35:28 -0400
+Received: from mailout1.samsung.com ([203.254.224.24]:27910 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230202AbhKDGfZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2021 02:35:25 -0400
+Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
+        by mailout1.samsung.com (KnoxPortal) with ESMTP id 20211104063246epoutp015ed7dbf2b3277701ae44849f4499d74c~0RDbCNCVr2260022600epoutp01Y
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Nov 2021 06:32:46 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20211104063246epoutp015ed7dbf2b3277701ae44849f4499d74c~0RDbCNCVr2260022600epoutp01Y
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1636007566;
+        bh=XQ82X6xPFxlA23GhyUFqTKX41dSNvOuOx32KdybUn1c=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=F/ZTwDYaIr2OtIw3fHPNqVmTyeREQFjC/SE1LU5Z5BoKm5uZWWHHTEx+QnM+pFDqQ
+         uGf5qJvPGFGuKlXF5B+MrRm6/1uXc9XGioAbLsR7d92kjeAZTaEYHtzybqnIc35KJO
+         Vn+MgvlFgiK4AEpDzeC3iJdW0xIboCVbpd6wh7m4=
+Received: from epsnrtp1.localdomain (unknown [182.195.42.162]) by
+        epcas1p3.samsung.com (KnoxPortal) with ESMTP id
+        20211104063246epcas1p3b6855d69870811311cf5e3649731bfd3~0RDawkgZ-0545405454epcas1p31;
+        Thu,  4 Nov 2021 06:32:46 +0000 (GMT)
+Received: from epsmges1p1.samsung.com (unknown [182.195.38.247]) by
+        epsnrtp1.localdomain (Postfix) with ESMTP id 4HlDMw2wgKz4x9Q8; Thu,  4 Nov
+        2021 06:32:44 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+        epsmges1p1.samsung.com (Symantec Messaging Gateway) with SMTP id
+        23.D8.64085.C8E73816; Thu,  4 Nov 2021 15:32:44 +0900 (KST)
+Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
+        epcas1p4.samsung.com (KnoxPortal) with ESMTPA id
+        20211104063243epcas1p4526b49feac019f3eadb33a23dc132976~0RDYjQpBR2528025280epcas1p4x;
+        Thu,  4 Nov 2021 06:32:43 +0000 (GMT)
+Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
+        epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
+        20211104063243epsmtrp2af96d8ca02daefd99b095a730c64a2ee~0RDYilWqk2025420254epsmtrp2e;
+        Thu,  4 Nov 2021 06:32:43 +0000 (GMT)
+X-AuditID: b6c32a35-9c3ff7000000fa55-5c-61837e8c9c8f
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+        55.19.29871.B8E73816; Thu,  4 Nov 2021 15:32:43 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.88.98.193]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20211104063243epsmtip22d1d87717fd7119effbcf8082bd3396f~0RDYaryWr1646816468epsmtip2j;
+        Thu,  4 Nov 2021 06:32:43 +0000 (GMT)
+From:   Huijin Park <huijin.park@samsung.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Huijin Park <bbanghj.park@gmail.com>,
+        Huijin Park <huijin.park@samsung.com>
+Subject: [PATCH v2 0/2] mmc: core: adjust polling interval for CMD1
+Date:   Thu,  4 Nov 2021 15:32:29 +0900
+Message-Id: <20211104063231.2115-1-huijin.park@samsung.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrNKsWRmVeSWpSXmKPExsWy7bCmvm5PXXOiwestEhYv9x5itui46GJx
+        edccNosj//sZLY6vDXdg9dg56y67x51re9g8+rasYvT4vEkugCUq2yYjNTEltUghNS85PyUz
+        L91WyTs43jne1MzAUNfQ0sJcSSEvMTfVVsnFJ0DXLTMHaKuSQlliTilQKCCxuFhJ386mKL+0
+        JFUhI7+4xFYptSAlp8CsQK84Mbe4NC9dLy+1xMrQwMDIFKgwITvj5K3l7AUXWCt63j5ibWA8
+        ztLFyMkhIWAi8XnFHSCbi0NIYAejROumo2wQzidGiY+dV1ghnG+MEtsP/4ZrOT9/M5gtJLCX
+        UWL5yWQIG6hj+U49EJtNQFvi+tqtjCC2iICGxJ6H51lBbGaBLkaJm7ccQGxhAWeJb1u2AcU5
+        OFgEVCV+rJIDCfMKWEvsfLaGHWKVvMTMS9/ZIeKCEidnPmGBGCMv0bx1NjPIbRIC29glvj65
+        ygwyR0LARWLhciuIXmGJV8e3QM2Rkvj8bi8bhF0usWvCVajeBkaJvrXfWSESxhLv3q4Fm8Ms
+        oCmxfpc+RFhRYufvuYwQe/kk3n3tYYVYxSvR0SYEUaIqsfjqR6gp0hKHHtxlhLA9JBZtPgVW
+        LiQQK/HhS+kERvlZSJ6ZheSZWQh7FzAyr2IUSy0ozk1PLTYsMITHaHJ+7iZGcKrTMt3BOPHt
+        B71DjEwcjIcYJTiYlUR4n29oShTiTUmsrEotyo8vKs1JLT7EaAoM3YnMUqLJ+cBkm1cSb2hi
+        aWBiZmRiYWxpbKYkzvtZrjBRSCA9sSQ1OzW1ILUIpo+Jg1OqgSmA/8nCbTMOa2wL/Lq4vU+s
+        Ju7NsROsL7ytL/lFRTMU9Fnc+PBi8YYDC/Lrjxo8WOly87/hsYOzZrVlWU532mET0xDcd5c3
+        M0vmn7BvBq//rClrl70xEjdQ2flc4Yvk1ieX31eV78vI3VeX8sEluWKt/Lpp6v1zXYubt6xN
+        0PYT/13VPI/Ha2ffdO2l+i3vm3sZCydd9A0//OqSocWWjbERTO08XR2LzlmfXfVEbravbxJf
+        ru2n9T2at59dOcpge2nZea37ohnbLHZ4/Vhw8IzPmfdPVPJt67zc/jLNzvDi3MSvy+f6YdZS
+        Ts6DC2/NWzr/6bLElIXuz5c4r++4v4m9bbFUw3Nd+f1Bef/59M4osRRnJBpqMRcVJwIANQO8
+        L/4DAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprDLMWRmVeSWpSXmKPExsWy7bCSvG53XXOiQdt/M4uXew8xW3RcdLG4
+        vGsOm8WR//2MFsfXhjuweuycdZfd4861PWwefVtWMXp83iQXwBLFZZOSmpNZllqkb5fAlXHy
+        1nL2ggusFT1vH7E2MB5n6WLk5JAQMJE4P38zkM3FISSwm1Fix4ZT7BAJaYl3O6+zdjFyANnC
+        EocPF0PUfGCUeNrxHayGTUBb4vrarYwgtoiAhsSeh+dZQWxmgT5Gic5fWSC2sICzxLct28Dm
+        sAioSvxYJQcS5hWwltj5bA3UKnmJmZcgRvIKCEqcnPmEBWKMvETz1tnMExj5ZiFJzUKSWsDI
+        tIpRMrWgODc9t9iwwDAvtVyvODG3uDQvXS85P3cTIzgAtTR3MG5f9UHvECMTB+MhRgkOZiUR
+        3ucbmhKFeFMSK6tSi/Lji0pzUosPMUpzsCiJ817oOhkvJJCeWJKanZpakFoEk2Xi4JRqYPIu
+        9jR0/Ldb9CNnaHPapC070+5PPlRbGVxxR6hlwd/nuWqHW5WzrOfGpbPcL31X9GOHQ3BVgOws
+        Va33j1lPKfzYJv7AU6/s3bSjp56+3bD0+v8X5lXB9c9unT4Skyn96MyXoAMLqteZavy/VL7n
+        T03WmxUH+q9OTJPTPtYw499Mtmx1Z4U9YtnNjyK+/dBucFC31Vc1K1tsUWJlNUHG2nRveXg1
+        r0tFidu3bucbWrPi753bHThrw0+PqT5LX9/yX8i8/TAbS+qUnv1CD76ecKjlZVdwD/p54nRb
+        xp3GffmXnWdPbd0jd36CgtKDgLwLGlzJkl+b5lpWFdzcvNRrWZFz6JFgttTz0td/a1e2+Sqx
+        FGckGmoxFxUnAgBmCLlzrwIAAA==
+X-CMS-MailID: 20211104063243epcas1p4526b49feac019f3eadb33a23dc132976
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20211104063243epcas1p4526b49feac019f3eadb33a23dc132976
+References: <CGME20211104063243epcas1p4526b49feac019f3eadb33a23dc132976@epcas1p4.samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Rob, Jesse, All,
+This series is for adjusting polling interval for CMD1 using
+__mmc_poll_for_busy() common function which provides a stricter
+timeout checking and a throttling mechanism.
 
-> Il giorno 4 nov 2021, alle ore 02:05, Rob Herring <robh@kernel.org> ha scr=
-itto:
->=20
-> =EF=BB=BFOn Wed, Nov 03, 2021 at 12:30:17AM +0100, Giulio Benetti wrote:
->> Hi Fabio, Jesse, All,
->>=20
->>> On 11/3/21 12:25 AM, Jesse Taube wrote:
->>>=20
->>>=20
->>> On 11/2/21 19:17, Fabio Estevam wrote:
->>>> On Tue, Nov 2, 2021 at 7:57 PM Jesse Taube <mr.bossman075@gmail.com> wr=
-ote:
->>>>=20
->>>>>   static struct esdhc_soc_data usdhc_imx8qxp_data =3D {
->>>>>          .flags =3D ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->>>>> @@ -357,6 +363,7 @@ static const struct of_device_id imx_esdhc_dt_ids[=
-] =3D {
->>>>>          { .compatible =3D "fsl,imx7ulp-usdhc", .data =3D &usdhc_imx7u=
-lp_data, },
->>>>>          { .compatible =3D "fsl,imx8qxp-usdhc", .data =3D &usdhc_imx8q=
-xp_data, },
->>>>>          { .compatible =3D "fsl,imx8mm-usdhc", .data =3D &usdhc_imx8mm=
-_data, },
->>>>> +       { .compatible =3D "fsl,imxrt-usdhc", .data =3D &usdhc_imxrt_da=
-ta, },
->>>>=20
->>>> I thought Rob suggested to use the SoC name, so this would be:
->>>>=20
->>> Uh i think that may have been for the UART.
->>>> { .compatible =3D "fsl,imxrt1050-usdhc", .data =3D &usdhc_imxrt1050_dat=
-a, },
->>>>=20
->>>> The same applies to the other bindings in the series.
->>>>=20
->>>> This way it would be possible to differentiate between future
->>>> supported i.MX RT devices.
->>>>=20
->>> This makes sense will do in V3.
->>>=20
->>=20
->> If we add every SoC we will end up having a long list for every device
->> driver. At the moment it would be 7 parts:
->> 1) imxrt1020
->> 2) imxrt1024
->> .
->> .
->> .
->> 7) imxrt1170
->=20
-> You don't need a driver update if you use a fallback. When you add=20
-> the 2nd chip, if you think it is 'the same', then you do:
->=20
-> compatible =3D "fsl,imxrt1024-usdhc", "fsl,imxrt1050-usdhc";
->=20
-> That requires no driver update until the driver needs to handle some=20
-> difference. And when there is a difference, you don't need a DT update.
+v1...v2:
+ - Change __mmc_poll_for_busy() first parameter type to 'mmc_host*'.
+ - Use __mmc_poll_for_busy() common function.
 
-This solution is pretty fine, we=E2=80=99re going with that then, for this a=
-nd every driver involved.
+Huijin Park (2):
+  mmc: core: change __mmc_poll_for_busy() parameter type
+  mmc: core: adjust polling interval for CMD1
 
-Thank you for pointing us.
+ drivers/mmc/core/block.c   |  4 +-
+ drivers/mmc/core/mmc.c     |  2 +-
+ drivers/mmc/core/mmc_ops.c | 89 ++++++++++++++++++++++++--------------
+ drivers/mmc/core/mmc_ops.h |  2 +-
+ drivers/mmc/core/sd.c      |  2 +-
+ 5 files changed, 62 insertions(+), 37 deletions(-)
 
-Best regards
-Giulio Benetti
-Benetti Engineering sas
-
->=20
-> You could make "fsl,imxrt-usdhc" the fallback from the start if you are=20=
-
-> adverse to the first way.
->=20
-> Rob
+-- 
+2.17.1
 
