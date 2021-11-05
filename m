@@ -2,148 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 371C3C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Nov 2021 00:02:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E47B1C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Nov 2021 00:08:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1CF686112E
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Nov 2021 00:02:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C3A1161052
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Nov 2021 00:08:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232541AbhKEAFD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Nov 2021 20:05:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60372 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232397AbhKEAFA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Nov 2021 20:05:00 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 816E6C061205
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Nov 2021 17:02:16 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id v11so24554576edc.9
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Nov 2021 17:02:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=HOphd7Vw+yHC8lqA1EFBT5Der5nQd77Uyr9RS3TE3vY=;
-        b=ojAFxlvXXrY1p/+SCZHNI7vZKCcculw8iwC2NB/OnEXmwSfS5TMU8io5BA6UvqotV6
-         Lu0brpWxP9c61Un72pLgyWZ3YQYH1VCkWP44lc5QdKl7kAgwDSH+9tbOhVy5/j10uH55
-         yupyF0xr7R9A4rIMZf6XiTwIAcW6VuIdu1kjsTCW+ufFooXR8AfmOKtW6GKbHe5peSEb
-         xHmdEFu0X2dazlU7X3BE5QM1gwZEtsktpeKN9AH24rIr8l4JUXSEAB6GmdxNl2QE1LSu
-         nJGQKw32D7zUVU/RBnNN/23Bc3WC1QqQvbZ1UIAbz4+TbesqMlENDvCogHkU7Bs4IboY
-         ZPsw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=HOphd7Vw+yHC8lqA1EFBT5Der5nQd77Uyr9RS3TE3vY=;
-        b=2D3yfQwqw/wEZa5v7Vifjx1idCdwhiuyMn8GtqHssHsbAY00l4VA84HF1XT8PeVw82
-         e6hzrPLCuutRcFng5jwi4tIaipGQRsNuKY7wG0mKKRC9PGEUL95Da48jHLkfhyyYaWfs
-         jnm0itxdTidN68M15xlk/0t+OvPshrEQ16ZA8ttQ+ftem2dwyR3CRhyXp3Yd5W8wehU1
-         rDoWmxQUnOn+G17ThVFbX/E7qLDKc//Ui0b44v8Tog/6lWeIpzAbFCdj+ZhL5DYODqPf
-         qSP6zsfE9qtFVxyt+xGIdlZdwHzOuVE/gv9kaaxlpnaQJESgJDrDPcjy4HWWSiuy/H1b
-         dHqw==
-X-Gm-Message-State: AOAM532Svr0db8Tv1Xzxa1nnJD0mJ6UoZ5lNfCTYVK4aSaVEe/C2mO9t
-        90Yxp30gDonRQtgTg8WHDp+hsktatj6exKc4LxYLuw==
-X-Google-Smtp-Source: ABdhPJxOPpYinyvLA0o3crm9sNVZWqIh0PTIeVd1zqa9HAyW2SKHBi/7U4L6LYyUfGY3YXZzKF/K+/23bYyzZsAdBDo=
-X-Received: by 2002:a17:907:1dd5:: with SMTP id og21mr16511258ejc.233.1636070535098;
- Thu, 04 Nov 2021 17:02:15 -0700 (PDT)
+        id S232468AbhKEALF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Nov 2021 20:11:05 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52756 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232040AbhKEALE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 4 Nov 2021 20:11:04 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id AA8AF61213;
+        Fri,  5 Nov 2021 00:08:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1636070905;
+        bh=o7fFEo7v95r3iaFFPQHwPY1pIQpE9DbEFCqQaOJe6Lw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=pfTCFDU4zWT1NbEWL4TbXNmTbeYHhbEpOvZnCEgSFp1XjOi+oe8VVSXRRwecpV8yc
+         6UGhRvK1ypR4w8u5zjLj4qClt2sJTiYOVEtCjxRhI6uPHilBxNGTjnzq2a3DKNUIUu
+         IOGSrUNFLvydShYxr1XPzSK7+k2VVWFE+fsv/moiZVf/0FQPdnPzF55b/5ZqgdWj73
+         iz7vhHFqILa/+NpK3Ho77WNPSFMc+zY4t1gwgmG34jf+Evis8AcJqJdX5u01ujWxf0
+         lxVYYQ+mR0XdkvP9U8OvCZmQ4p2rZq4AV8zY1wSNt2mvsEMN5gJ6JfA6BSpe0yDtKt
+         fLzIbRnWuwM7g==
+Date:   Thu, 4 Nov 2021 17:08:24 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Cc:     linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, thara.gopinath@linaro.org,
+        asutoshd@codeaurora.org
+Subject: Re: [PATCH 4/4] soc: qcom: add wrapped key support for ICE
+Message-ID: <YYR1+LgBnSQ+pVhr@gmail.com>
+References: <20211103231840.115521-1-quic_gaurkash@quicinc.com>
+ <20211103231840.115521-5-quic_gaurkash@quicinc.com>
 MIME-Version: 1.0
-References: <20211025015156.33133-1-brad@pensando.io> <20211025015156.33133-12-brad@pensando.io>
- <20211025091731.GA2001@C02TD0UTHF1T.local> <a20805de16e1196c2ed46dd949473c9a@kernel.org>
-In-Reply-To: <a20805de16e1196c2ed46dd949473c9a@kernel.org>
-From:   Brad Larson <brad@pensando.io>
-Date:   Thu, 4 Nov 2021 17:02:04 -0700
-Message-ID: <CAK9rFnxH=DtC9vEJJCXkGEWjvg2E8vHPUcRy9rJpo34Furtmvw@mail.gmail.com>
-Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-To:     Marc Zyngier <maz@kernel.org>
-Cc:     Mark Rutland <mark.rutland@arm.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211103231840.115521-5-quic_gaurkash@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Marc,
+On Wed, Nov 03, 2021 at 04:18:40PM -0700, Gaurav Kashyap wrote:
+> Add support for wrapped keys in ufs and common ICE library.
+> Qualcomm's ICE solution uses a hardware block called Hardware
+> Key Manager (HWKM) to handle wrapped keys.
+> 
+> This patch adds the following changes to support this.
+> 1. Link to HWKM library for initialization.
+> 2. Most of the key management is done from Trustzone via scm calls.
+>    Added calls to this from the ICE library.
+> 3. Added support for this framework in UFS.
+> 4. Added support for deriving SW secret as it cannot be done in
+>    linux kernel for wrapped keys.
+> 
+> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
+> ---
+>  drivers/scsi/ufs/ufs-qcom-ice.c   |  34 +++++++++-
+>  drivers/scsi/ufs/ufs-qcom.c       |   1 +
+>  drivers/scsi/ufs/ufs-qcom.h       |   5 ++
+>  drivers/scsi/ufs/ufshcd-crypto.c  |  47 ++++++++++---
+>  drivers/scsi/ufs/ufshcd.h         |   5 ++
+>  drivers/soc/qcom/qti-ice-common.c | 108 ++++++++++++++++++++++++++----
+>  include/linux/qti-ice-common.h    |   7 +-
+>  7 files changed, 180 insertions(+), 27 deletions(-)
+> 
+> diff --git a/drivers/scsi/ufs/ufs-qcom-ice.c b/drivers/scsi/ufs/ufs-qcom-ice.c
+> index 6608a9015eab..79d642190997 100644
+> --- a/drivers/scsi/ufs/ufs-qcom-ice.c
+> +++ b/drivers/scsi/ufs/ufs-qcom-ice.c
+> @@ -45,6 +45,21 @@ int ufs_qcom_ice_init(struct ufs_qcom_host *host)
+>  	}
+>  	mmio.ice_mmio = host->ice_mmio;
+>  
+> +#if IS_ENABLED(CONFIG_QTI_HW_WRAPPED_KEYS)
+> +	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "ice_hwkm");
+> +	if (!res) {
+> +		dev_warn(dev, "ICE HWKM registers not found\n");
+> +		goto disable;
+> +	}
+> +
+> +	host->ice_hwkm_mmio = devm_ioremap_resource(dev, res);
+> +	if (IS_ERR(host->ice_hwkm_mmio)) {
+> +		err = PTR_ERR(host->ice_hwkm_mmio);
+> +		dev_err(dev, "Failed to map ICE registers; err=%d\n", err);
+> +		return err;
+> +	}
+> +	mmio.ice_hwkm_mmio = host->ice_hwkm_mmio;
+> +#endif
 
-On Mon, Oct 25, 2021 at 4:15 AM Marc Zyngier <maz@kernel.org> wrote:
->
-> On 2021-10-25 10:17, Mark Rutland wrote:
-> > Hi,
-> >
-> > On Sun, Oct 24, 2021 at 06:51:56PM -0700, Brad Larson wrote:
-> >> Add Pensando common and Elba SoC specific device nodes
-> >>
-> >> Signed-off-by: Brad Larson <brad@pensando.io>
-> >
-> > [...]
-> >> +            gic: interrupt-controller@800000 {
-> >> +                    compatible = "arm,gic-v3";
-> >> +                    #interrupt-cells = <3>;
-> >> +                    #address-cells = <2>;
-> >> +                    #size-cells = <2>;
-> >> +                    ranges;
-> >> +                    interrupt-controller;
-> >> +                    reg = <0x0 0x800000 0x0 0x200000>,      /* GICD */
-> >> +                          <0x0 0xa00000 0x0 0x200000>;      /* GICR */
->
-> This is missing the GICv2 compat regions that the CPUs implement.
+The driver shouldn't completely disable ICE support just because HW wrapped keys
+aren't supported by the hardware or by the device tree file.  Instead, it should
+declare support for standard keys only.  I.e. CONFIG_QTI_HW_WRAPPED_KEYS
+shouldn't force the use of HW wrapped keys, it should just add support for them.
 
-Is this what is described as optional in the GIC architecture specification
-where a GICv3 system can run restricted GICv2 code?  Can you point
-me in the right direction in the spec and example dts node if needed.
+> diff --git a/drivers/scsi/ufs/ufshcd-crypto.c b/drivers/scsi/ufs/ufshcd-crypto.c
+> index 0ed82741f981..965a8cc6c183 100644
+> --- a/drivers/scsi/ufs/ufshcd-crypto.c
+> +++ b/drivers/scsi/ufs/ufshcd-crypto.c
 
-> >> +                    interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
-> >> +
-> >> +                    gic_its: msi-controller@820000 {
-> >> +                            compatible = "arm,gic-v3-its";
-> >> +                            msi-controller;
-> >> +                            #msi-cells = <1>;
-> >> +                            reg = <0x0 0x820000 0x0 0x10000>;
-> >> +                            socionext,synquacer-pre-its =
-> >> +                                                    <0xc00000 0x1000000>;
-> >> +                    };
-> >> +            };
-> >
-> > Is there any shared lineage with Synquacer? The commit message didn't
-> > describe this quirk.
->
-> Funny, it looks like there is a sudden outburst of stupid copy/paste
-> among HW designers. TI did the exact same thing recently.
->
-> This totally negates all the advantages of having an ITS and makes
-> sure that you have all the overhead. Facepalm...
+ufshcd-crypto.c is part of ufshcd-core, not ufs_qcom.  It should be changed in a
+separate patch.
 
-Some background may help explain.  To generate an LPI a peripheral must
-write to the GITS_TRANSLATER (a specific address). For the ITS to know
-which translations apply to the generated interrupts, it must know which
-peripheral performed the write. The ID of the peripheral is known as its
-DeviceID, which is often carried along with the write as an AXI sideband
-signal.
+> @@ -18,6 +18,7 @@ static const struct ufs_crypto_alg_entry {
+>  };
+>  
+>  static int ufshcd_program_key(struct ufs_hba *hba,
+> +				  const struct blk_crypto_key *key,
+>  			      const union ufs_crypto_cfg_entry *cfg, int slot)
+>  {
+>  	int i;
+> @@ -27,7 +28,7 @@ static int ufshcd_program_key(struct ufs_hba *hba,
+>  	ufshcd_hold(hba, false);
+>  
+>  	if (hba->vops && hba->vops->program_key) {
+> -		err = hba->vops->program_key(hba, cfg, slot);
+> +		err = hba->vops->program_key(hba, key, cfg, slot);
+>  		goto out;
+>  	}
 
-The Elba SoC doesn't carry the DeviceID, so we have to conjure one up
-between the peripheral and the ITS.  Instead of telling a peripheral to target
-the GITS_TRANSLATER directly, we instead direct it to a specific offset
-within a pre-ITS address range (our own IP block).  For writes that land in
-that memory range, we derive the DeviceID from (offset >> 2).  The pre-ITS
-block then sends (DeviceID, data) to the GITS_TRANSLATER.
+vops->program_key shouldn't take in both a key and a cfg.  It should be just one
+or the other.  'cfg' doesn't appear to work for HW wrapped keys, and it seems
+the existing user doesn't really need a 'cfg' in the first place, so it would
+have to be just 'key'.
 
-The hardware designer came up with the Pre-ITS mechanism in Feb 2018.
-When we looked at the upstream kernel later (we developed on 4.14)
-we found that not only did it support something similar, it supported the
-exact scheme we are using.
+> +#if IS_ENABLED(CONFIG_QTI_HW_WRAPPED_KEYS)
 
-Thanks,
-Brad
+As noted above, ufshcd-crypto isn't specific to ufs_qcom.  It therefore must not
+contain references to CONFIG_QTI_HW_WRAPPED_KEYS, as that kconfig option is
+specific to Qualcomm platforms.
+
+> +static int ufshcd_crypto_derive_sw_secret(struct blk_crypto_profile *profile,
+> +					 const u8 *wrapped_key,
+> +					 unsigned int wrapped_key_size,
+> +					 u8 sw_secret[BLK_CRYPTO_SW_SECRET_SIZE])
+> +{
+> +	struct ufs_hba *hba =
+> +		container_of(profile, struct ufs_hba, crypto_profile);
+> +
+> +	if (hba->vops && hba->vops->derive_secret)
+> +		return  hba->vops->derive_secret(wrapped_key,
+> +							wrapped_key_size, sw_secret);
+> +
+> +	return 0;
+> +}
+
+The fallback case should return -EOPNOTSUPP, which indicates that the operation
+is not supported, rather than 0 which indicates that it succeeded.
+
+> @@ -190,7 +213,11 @@ int ufshcd_hba_init_crypto_capabilities(struct ufs_hba *hba)
+>  	hba->crypto_profile.ll_ops = ufshcd_crypto_ops;
+>  	/* UFS only supports 8 bytes for any DUN */
+>  	hba->crypto_profile.max_dun_bytes_supported = 8;
+> +#if IS_ENABLED(CONFIG_QTI_HW_WRAPPED_KEYS)
+> +	hba->crypto_profile.key_types_supported = BLK_CRYPTO_KEY_TYPE_HW_WRAPPED;
+> +#else
+>  	hba->crypto_profile.key_types_supported = BLK_CRYPTO_KEY_TYPE_STANDARD;
+> +#endif
+>  	hba->crypto_profile.dev = hba->dev;
+
+My comments from above apply to this too.  Checking a Qualcomm-specific kconfig
+option isn't appropriate here.  Also the supported key types shouldn't be static
+from the kconfig; they should be determined by the actual hardware capabilities.
+
+Note that in the Android kernels, for the division of work between ufshcd-core
+and host drivers, we ended up going with a solution where the UFS host drivers
+can just override the whole blk_crypto_profile (previously called
+blk_keyslot_manager).  You may have to do the same, although it would be
+preferable to find a way to share more code.
+
+Also, at runtime, does any of the Qualcomm hardware support multiple key types,
+and if so can they be used at the same time?
+
+- Eric
