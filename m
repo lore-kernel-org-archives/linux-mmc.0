@@ -2,157 +2,214 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9F86C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  6 Nov 2021 00:15:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BD59C4332F
+	for <linux-mmc@archiver.kernel.org>; Sat,  6 Nov 2021 10:01:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C2D9C61216
-	for <linux-mmc@archiver.kernel.org>; Sat,  6 Nov 2021 00:15:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1A4CB6120D
+	for <linux-mmc@archiver.kernel.org>; Sat,  6 Nov 2021 10:01:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231461AbhKFARm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Nov 2021 20:17:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45896 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230262AbhKFARm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Nov 2021 20:17:42 -0400
-Received: from mail-io1-xd36.google.com (mail-io1-xd36.google.com [IPv6:2607:f8b0:4864:20::d36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDC23C061570
-        for <linux-mmc@vger.kernel.org>; Fri,  5 Nov 2021 17:15:01 -0700 (PDT)
-Received: by mail-io1-xd36.google.com with SMTP id e144so12596656iof.3
-        for <linux-mmc@vger.kernel.org>; Fri, 05 Nov 2021 17:15:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=ZU+MzU0ZEDH7nSxRtRXuJGZABom3WhI1ZlmNx15F40s=;
-        b=pY7qGbnHMRsCS3LAwxMklA5Z0DdTdBWQwi/36UmDXtuFJ/Yl0dK7WXROt2yGNguafQ
-         VC3vXB+dmoPfxROqSeLglz6w7Fi4g1XEWQB5Gl6HFCsSHlJByDMQmyKRLBD4/EMZT5Ed
-         LNpl3OKp+tAsUj048P5Rdz808XP14vJdIAGrIE3U6Q9TTY/8a5g6cdEYDdKUg3+pP2Q0
-         lxrjPfamKfVWwerk6Tm5St5MpwzSr5tEAvtFKzhfg/g8gVoxbolNsnJ2l6oc9O6CHwP7
-         QOv3Riij5ih9tGRTxExOB7YxuCkYBFBz9AXpoInidncHy7vSNrrr9iOAXfd3faFu7mB2
-         qxkQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=ZU+MzU0ZEDH7nSxRtRXuJGZABom3WhI1ZlmNx15F40s=;
-        b=P86zZuJzxbGIWpOM8xEizfFhoR+xUsqhL/oS+0LwqKTnDDZsvOpTi9MU4FTmq4jor9
-         Ga2nTzypOlOT7YKM4xXTSAeFDXA1GQ43haPDnikjxYQXIUtNA33hW75ucFUes60VUtKr
-         6WObJ5mgLilbt8GsQLnUficyYQAGuQWxPdRIwhtu2isEMIwoRpSVB2ToAbPIPy8d9AK1
-         mEiNGGymLT9UMH4fyhNQXdeWxoRCi+GBZMWhKhvERKb2V8zHlwhE1zMUzzti441ju5uh
-         mF1CDOqgKIBbTHxd1ifYN6AscBnrWes1klbb4hQ1y10p73aNWDbdtp9Y2zAdfKB2GF30
-         +45Q==
-X-Gm-Message-State: AOAM531zAAGw9bcKWXf9cDB8AEvN8k7/vUy2e4eW/GQNypI4P1y0mRx8
-        711WQCaZtqwURdGElB1eEeo/VSR8TUcrIntRDH0E2g==
-X-Google-Smtp-Source: ABdhPJz04yfZrGtLPM3XUhfJ8xkAu4uZTHrjAdncW1+QkWx2iRLZ/lyUwRAWNkbB0Oi46x89Q9Ejsy1sxE02gEvI4V0=
-X-Received: by 2002:a6b:ee10:: with SMTP id i16mr1891810ioh.98.1636157700556;
- Fri, 05 Nov 2021 17:15:00 -0700 (PDT)
-MIME-Version: 1.0
-References: <20211103152359.24699-1-marten.lindahl@axis.com>
-In-Reply-To: <20211103152359.24699-1-marten.lindahl@axis.com>
-From:   Doug Anderson <dianders@google.com>
-Date:   Fri, 5 Nov 2021 17:14:48 -0700
-Message-ID: <CAD=FV=WsSPcs3ggGWNp5J288B+TBoSYuY7JmEWDii05w4tTdgw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Allow lower TMOUT value than maximum
-To:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kernel@axis.com,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        id S231765AbhKFKEI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 6 Nov 2021 06:04:08 -0400
+Received: from mail-eopbgr1320103.outbound.protection.outlook.com ([40.107.132.103]:15328
+        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S229645AbhKFKEI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 6 Nov 2021 06:04:08 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fdoknI4c0byry3G3oiRx8Hj/PhatwD2e5YUy4ICRLiOdzbd04Hf0QtXjilPHzlbrmsToSBL2M7jkRwAp29832el5lFv2fMKydDtJjFTgLTHPFWQLyhoR7Le5e/3F7vDFZxodIxZxSludI2byjxV9uLkpwCQMhGdmME2JGTmSgecayFmg4mYui5nZwTH0GYJbBy7Lo9hilUg4u3wSh0KUQUWaotLkBiA6X0TrVYVcYC4wn53lR8dBpwtMrNiVkiDFXct7gY+LWGjcGlhflgUlED7kmQcT51Y0ryw3Mx5J/pI/u3HedahDZ687waWZguyFrf1hNMHR8bWYMvaeh7g66w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=NNPXi/kelSEt6iiMVQhAO+u0I/JiQFC7CbPCLYaCr3Q=;
+ b=nT5pnDAdTPyi8tjVPcLmJ9qXUmL+o1n4hwUr7oZ2i+xkY/IBim3QeOiNkY/1WZkkAOAyIB7TNqyv6Ud9l3AUh6wrZdzXGDyY7Kwhln3PGB3f9UpCIOLusFUHovyFsSBIUxfQkKfcvC8abqI0UIamkW+9/GBz9Qwnmrmx1dEtz3fusQphn+iI0Krrqfs+KU31froqAFzibJ4hc+hxG/pEtE25JRpFC2YYheOh7YGprDBadciUd2OvG+uOiuqJrizRE+QxOCrbfX57mxWjUEn0b7/Ns2WWxCXMhei0Z9o9MCL9cTUn7G7jG2SK2JFdBvJlCBSTmvSBf7goM7IMXrHCRA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=aspeedtech.com; dmarc=pass action=none
+ header.from=aspeedtech.com; dkim=pass header.d=aspeedtech.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aspeedtech.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=NNPXi/kelSEt6iiMVQhAO+u0I/JiQFC7CbPCLYaCr3Q=;
+ b=pafACHs3jLfpSr+QqncxlXXpi8gmrc3Ro9q7Q1jqlb3MIcDlMQgyYqkg6UP67Ftm9MQtIVtB0HfxGNtgM3oxP1ssuAsS8ir9BhSVD006lse7kDPn2uTU68cuxQFaX8Y1pz27Tcm45omZSg04NaHout6bvMTJvLKgzP0jbciKdH1wplpdVrFoeiLupF0/ODyNZ9sh3zuImLCoAWnP5ICewvXxIwQghZxTGtVcdKIuZ9Orb7U6hPooEI2s+CaevCttS+tnEAq3GRjld3NcEkzvtLHYAHlmYxDUz39shdYsOKk27CJcYqCX5eZeEkmf4SAse8G9wS6VRUZ6QofCVvM4fA==
+Received: from HK0PR06MB2786.apcprd06.prod.outlook.com (2603:1096:203:5b::22)
+ by HK0PR06MB2257.apcprd06.prod.outlook.com (2603:1096:203:43::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.13; Sat, 6 Nov
+ 2021 10:01:23 +0000
+Received: from HK0PR06MB2786.apcprd06.prod.outlook.com
+ ([fe80::399b:41fb:d745:beb0]) by HK0PR06MB2786.apcprd06.prod.outlook.com
+ ([fe80::399b:41fb:d745:beb0%5]) with mapi id 15.20.4669.013; Sat, 6 Nov 2021
+ 10:01:23 +0000
+From:   Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
+To:     Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-aspeed@lists.ozlabs.org" <linux-aspeed@lists.ozlabs.org>,
+        "openbmc@lists.ozlabs.org" <openbmc@lists.ozlabs.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>
+CC:     BMC-SW <BMC-SW@aspeedtech.com>,
+        Steven Lee <steven_lee@aspeedtech.com>
+Subject: RE: [PATCH 02/10] sdhci: aspeed: Add SDR50 support
+Thread-Topic: [PATCH 02/10] sdhci: aspeed: Add SDR50 support
+Thread-Index: AQHXygDgYvIRiYrxv0eZsBMlnzAipqv2RD3A
+Date:   Sat, 6 Nov 2021 10:01:23 +0000
+Message-ID: <HK0PR06MB27868D14ED8DF7550246674CB28F9@HK0PR06MB2786.apcprd06.prod.outlook.com>
+References: <20210922103116.30652-1-chin-ting_kuo@aspeedtech.com>
+ <20210922103116.30652-3-chin-ting_kuo@aspeedtech.com>
+ <125453f3-55d5-4b2a-afe8-6e76b268ce01@www.fastmail.com>
+In-Reply-To: <125453f3-55d5-4b2a-afe8-6e76b268ce01@www.fastmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: aj.id.au; dkim=none (message not signed)
+ header.d=none;aj.id.au; dmarc=none action=none header.from=aspeedtech.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 2d1cbf56-cf48-4668-f380-08d9a10c63eb
+x-ms-traffictypediagnostic: HK0PR06MB2257:
+x-microsoft-antispam-prvs: <HK0PR06MB225750B4BCC263D8A8574799B28F9@HK0PR06MB2257.apcprd06.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8273;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: /q3MqqTpxX2vujLsuSg3YPMzL9dsZPXWYAQWIRBXMB6ZozDH+fewCSUZ2fvi4mTSpZl9p3QSqcIJzoj2O7uVHcSj+WYb+A+xXbNkqeqtzFoP9NDEAhaeSCkBcF3eQPQWL46duq8x6zTfgwXr5NxOXhBWuqS90tSFh7TlOQeH/792+VlxclvZPO8ZKl+uJ2tfZ14x4QJDNcNHzZkei6wL33F/gEOl6RfkkhCU0yeBNL6xc5aGhvD9Ctxs/foZndy48sHnFS90uXubS0F6wE2GyQwveyFqwZKpkh+xcVceVGkvWpxJ/yngkBloZBeX1dAZSHAYXJi+7eK7LnBL8ZTW9VfzJSNaEbQeJukYUQ0LBE0zImuBUFpJv7t5g72LlznxBzqvB8Ekx1oozGJWoadOaFnoJLj0hetd5FhuPXfEKt6adwC/k/gzDstjijE6VrpKW7WHI4xGksaznV4q+/a78A1Iyjk64rtZx72SDp+dEG6n67vC4JOTL/N1Y8L4pLmfOE0HtXwHvvhf864pK7x/aEhIyhiF0aMH1bnCuXl/QjQEtarpML1PhLcd8ch9uDG63jnA8LKfvV8nzvO26LIN6y5tttZ3KQixvYx4mRbKfZgIbUfovWZv5QLopIs/sCHy9fvMrWnfn0sP6DfqbYmYvVJbmL5RycHAEZACOQxYKUDjByHucfMhy32xI+eaYbrIJ9ilt6mtJFzPqvrRVK7X5m30mCmR//KWnHqcZVVBp1M=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:HK0PR06MB2786.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(376002)(366004)(136003)(39830400003)(346002)(396003)(66556008)(26005)(52536014)(66476007)(316002)(66446008)(54906003)(64756008)(5660300002)(110136005)(86362001)(6506007)(4326008)(53546011)(921005)(2906002)(76116006)(71200400001)(38100700002)(38070700005)(122000001)(186003)(33656002)(83380400001)(7416002)(55016002)(8936002)(66946007)(107886003)(8676002)(7696005)(9686003)(508600001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?aT2DSeTaCUB8t2RUCcufWLeUXm5jX3qFgJC0LyehmaujEXHvo9oCnl89QltV?=
+ =?us-ascii?Q?5Bk6dC43kLPwptIwY6NB1yyFUFi0Wua5mED17PwUvKMjh+4M1oz4ZRlqh1Aa?=
+ =?us-ascii?Q?54lFV5XH/zuf4CrJHrvCoB3xo21kp17MzvsebDYKrUibTpi7m322OgFAC4yg?=
+ =?us-ascii?Q?E9MN71brLmdC0KM0GQI/KYsqgti1R4zvhaAFiaANKtfa4K1Z8wNfnxcmB7/7?=
+ =?us-ascii?Q?wOppgukP59+wQuw+qd0djd6gufuThMw8FY2U2Wbpq6e4O/tlYcoOGpiNa2z3?=
+ =?us-ascii?Q?p3vgbVlZdh5cgArxCd3ab1bFU+OqF3MMH+rCYLePiie1o5U2hMJZVpL8aTis?=
+ =?us-ascii?Q?dunRilJN3GAzRUEcwlkdKDTGWW++KjJIWB9naDB/o0JC3uPfciT7J7l3UN1V?=
+ =?us-ascii?Q?sa1Mo+GKp+1Io4Lj0lQqJxuSufKkVlKcQgYdvA4YjCwm3GbXiQE9JPSF1RV4?=
+ =?us-ascii?Q?lyjCF2lk6COBTFJuZ50zWsGiGVTBq7H+0y5T4p5ViTHKpFvSD71f3H/XxmoX?=
+ =?us-ascii?Q?ut0FX0X7Qf6PtkK9KpxET9zCLV23Z5iyr+huEdBEp2ap7aqAkXy/wom+tgci?=
+ =?us-ascii?Q?k+Q6U6TEsnW5sd0oscuEvK44nLI7z8kMIoq+RDQVe1Ljj7hUVEpW2JITzxIg?=
+ =?us-ascii?Q?X41TAvadPPnfiSxvOO/uGXVAsa5LM0yoypcyFq7rHCF5ZcB2sXTU275x+iHX?=
+ =?us-ascii?Q?rv3+/ybzRihF8svkA/FL6xDbbxRJQBPR6aW+t8CVXcjYeSWSf+Jrpo5jS7tI?=
+ =?us-ascii?Q?n1kjhZH+eCkR4VY/vChz8akEzHhXqMXKkI8k+ZJ5CQeHbkVGWAbP7HpUAhz0?=
+ =?us-ascii?Q?FHTjqYd5m7VasAeF+HqlYwQB/5tVt/YMtcCAkLehhmieXI344AIbbbbI7RCV?=
+ =?us-ascii?Q?uXck1n+yM8gWybrb5e8xDxO1JmB894xhgYKsZbbZqqchamKJ2rnTkxWxs4QZ?=
+ =?us-ascii?Q?8Dm6+oz+r+D6vSkq9Vfha5KAOFnjLBjAAC/rzJxs3rg37wphK6N6oo2eAi5+?=
+ =?us-ascii?Q?BIvpLZt5su4HSGIhEATr2minKGJzQm/xgks36nHFIkZ0jofyYK0gWacMXXID?=
+ =?us-ascii?Q?Bhx5nlbsgh2p3vcyuM5we6987c7fSd/fQwMoE3KmePPrcWePqKJwVyjGFNZg?=
+ =?us-ascii?Q?/QHGw0yCL8t+Tp9NM0BXfiyZ80vcHj63yVwiIpCpjUUzfFQ2gCOXkKC0YwlC?=
+ =?us-ascii?Q?3wIWOUI0awskkVMxoCTyieY6yroDQKYySJnWtldMrXzm//6ptZa1ef5a3QtJ?=
+ =?us-ascii?Q?dwtJk/1R1f5YDK8kl9eFT8payasGHzI9rHRM8dJoH9w7z3VCcgavqrQk8jqZ?=
+ =?us-ascii?Q?nHsi7z+pxfW8mcziYiyfYBwbolGtQQGcNwi5kUWvpxvWjW0zzW22ygazSFGe?=
+ =?us-ascii?Q?0O+2L1bo2AZH142Ltk/DJKdSkseSnVR80nKLaF/2Dy5FNWS3HMNMH/Xz7gVP?=
+ =?us-ascii?Q?CSRhuNm9Omk7GNvHwIpZIWzGWYEDU3botNJ9K9LNzIQXz8Xa+8hNGFi+qTwE?=
+ =?us-ascii?Q?Ha+q5UyAV8NEBnz0/LvGj4Wa6efWUjh9ZjvzxTT18yQj13i/WvrA11LZ+z/L?=
+ =?us-ascii?Q?0PZwVCGpb2+j6XA4vAbUJ5wiqrvJenOtr5lIjs30gyDd80WPTEuIvHpZ67Ed?=
+ =?us-ascii?Q?yeLL1MtP2jQmeIDmT7AUZ2WWp+ZLCytjHJC29D5R8dsKISp2nYwv5VVarFti?=
+ =?us-ascii?Q?8tPViw=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: aspeedtech.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: HK0PR06MB2786.apcprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2d1cbf56-cf48-4668-f380-08d9a10c63eb
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Nov 2021 10:01:23.4364
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 43d4aa98-e35b-4575-8939-080e90d5a249
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: v60szUVETU1ZPbdbllHajRGh66P7qQ9fegJRw8jRGFZPdcYLe4t8orPiHpXuPjqb2PR8f5jaE265ga5nufxFma7U9OZfAIwMYV0f3IaKViY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: HK0PR06MB2257
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Andrew,
 
-On Wed, Nov 3, 2021 at 8:24 AM M=C3=A5rten Lindahl <marten.lindahl@axis.com=
-> wrote:
->
-> The TMOUT register is always set with a full value for every transfer,
-> which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
-> Since the software dto_timer acts as a backup in cases when this timeout
-> is not long enough, it is normally not a problem. But setting a full
-> value makes it impossible to test shorter timeouts, when for example
-> testing data read times on different SD cards.
->
-> Add a function to set any value smaller than the maximum of 0xFFFFFF.
->
-> Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 29 ++++++++++++++++++++++++++++-
->  1 file changed, 28 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 6578cc64ae9e..0d23b8ed9403 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -54,6 +54,7 @@
->
->  #define DW_MCI_FREQ_MAX        200000000       /* unit: HZ */
->  #define DW_MCI_FREQ_MIN        100000          /* unit: HZ */
-> +#define DW_MCI_DATA_TMOUT_NS_MAX       83886075
->
->  #define IDMAC_INT_CLR          (SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI =
-| \
->                                  SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU=
- | \
-> @@ -1283,6 +1284,32 @@ static void dw_mci_setup_bus(struct dw_mci_slot *s=
-lot, bool force_clkinit)
->         mci_writel(host, CTYPE, (slot->ctype << slot->id));
->  }
->
-> +static void dw_mci_set_data_timeout(struct dw_mci *host, u32 timeout_ns)
+Thanks for the review.
 
-The type of "timeout_ns" should match `struct mmc_data`, which is
-unsigned int, not u32.
+> -----Original Message-----
+> From: Andrew Jeffery <andrew@aj.id.au>
+> Sent: Tuesday, October 26, 2021 8:31 AM
+> Subject: Re: [PATCH 02/10] sdhci: aspeed: Add SDR50 support
+>=20
+> Hi Chin-Ting,
+>=20
+> Sorry for the delay in looking at your series.
+>=20
+> On Wed, 22 Sep 2021, at 20:01, Chin-Ting Kuo wrote:
+> > From the analog waveform analysis result, SD/SDIO controller of
+> > AST2600 cannot always work well with 200MHz. The upper bound stable
+> > frequency for SD/SDIO controller is 100MHz. Thus, SDR50 supported bit,
+> > instead of SDR104, in capability 2 register should be set in advance.
+> >
+> > Signed-off-by: Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
+> > ---
+> >  drivers/mmc/host/sdhci-of-aspeed.c | 8 ++++++++
+> >  1 file changed, 8 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-aspeed.c
+> > b/drivers/mmc/host/sdhci-of-aspeed.c
+> > index 6e4e132903a6..c6eaeb02e3f9 100644
+> > --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> > +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> > @@ -35,6 +35,8 @@
+> >  #define ASPEED_SDC_CAP1_1_8V           (0 * 32 + 26)
+> >  /* SDIO{14,24} */
+> >  #define ASPEED_SDC_CAP2_SDR104         (1 * 32 + 1)
+> > +/* SDIO{14,24} */
+>=20
+> I don't think we need to duplicate this comment.
 
+Okay, it will be modified in the next patch version.
 
-> +{
-> +       u32 timeout, freq_mhz, tmp, tmout;
-> +
-> +       if (!timeout_ns || timeout_ns > DW_MCI_DATA_TMOUT_NS_MAX) {
-> +               /* Set maximum */
-> +               tmout =3D 0xFFFFFFFF;
-> +               goto tmout_done;
-> +       }
+>=20
+> > +#define ASPEED_SDC_CAP2_SDR50          (1 * 32 + 0)
+>=20
+> Can we keep the defines in increasing bit order (i.e. put
+> ASPEED_SDC_CAP2_SDR50 above ASPEED_SDC_CAP2_SDR104)?
+>=20
 
-I don't think that the above is right. If the card clock is 50 Hz
-instead of 200 Hz then 0xffffffff is actually ~83 ms * 4 =3D ~332 ms. It
-would be better to attempt to program it correctly.
+Okay.
 
-Can you just do the math below and if the number is greater than can
-be represented then you can just put in the max?
+> >
+> >  struct aspeed_sdc {
+> >  	struct clk *clk;
+> > @@ -410,11 +412,17 @@ static int aspeed_sdhci_probe(struct
+> > platform_device *pdev)
+> >  	sdhci_get_of_property(pdev);
+> >
+> >  	if (of_property_read_bool(np, "mmc-hs200-1_8v") ||
+> > +		of_property_read_bool(np, "sd-uhs-sdr50") ||
+>=20
+> Minor formatting issue, but can you make sure all the conditions are alig=
+ned
+> vertically from the left?
+>=20
 
-Interestingly enough, in `struct mmc_data` this is documented as a max
-of 80 ms, though I don't think your code should care about that. Just
-cap to the maximum value after your math.
+It will also be updated in the next patch version.
 
+> >  	    of_property_read_bool(np, "sd-uhs-sdr104")) {
+> >  		aspeed_sdc_set_slot_capability(host, dev->parent,
+> ASPEED_SDC_CAP1_1_8V,
+> >  					       true, slot);
+> >  	}
+> >
+> > +	if (of_property_read_bool(np, "sd-uhs-sdr50")) {
+> > +		aspeed_sdc_set_slot_capability(host, dev->parent,
+> ASPEED_SDC_CAP2_SDR50,
+> > +					       true, slot);
+> > +	}
+> > +
+> >  	if (of_property_read_bool(np, "sd-uhs-sdr104")) {
+> >  		aspeed_sdc_set_slot_capability(host, dev->parent,
+> ASPEED_SDC_CAP2_SDR104,
+> >  					       true, slot);
+> > --
+> > 2.17.1
 
-> +       timeout =3D timeout_ns;
-> +       freq_mhz =3D DIV_ROUND_UP(host->bus_hz, NSEC_PER_MSEC);
-> +
-> +       /* TMOUT[7:0] (RESPONSE_TIMEOUT) */
-> +       tmout =3D 0xFF; /* Set maximum */
-> +
-> +       /* TMOUT[31:8] (DATA_TIMEOUT) */
-> +       tmp =3D DIV_ROUND_UP_ULL((u64)timeout * freq_mhz, MSEC_PER_SEC);
-> +       tmout |=3D (tmp & 0xFFFFFF) << 8;
-
-Combining your two calculations, I guess you have:
-
-tmp =3D timeout * (bus_hz / 1000000) / 1000
-
-Why isn't this just:
-
-tmp =3D (timeout * bus_hz) / 1000000000
-
-Since you're doing 64-bit math anyway I don't think you need to worry
-about that calculation overflowing. Multiplying two 32-bit numbers
-can't exceed 64-bits, right?
-
-
-Also: I think "bus_hz" is the wrong thing to be using here. You need
-to take CLKDIV into account like dw_mci_set_drto() does.
-
-
--Doug
+Chin-Ting
