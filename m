@@ -2,89 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9374FC433F5
-	for <linux-mmc@archiver.kernel.org>; Sat,  6 Nov 2021 15:16:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE3F4C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun,  7 Nov 2021 19:20:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A44860174
-	for <linux-mmc@archiver.kernel.org>; Sat,  6 Nov 2021 15:16:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C97586113A
+	for <linux-mmc@archiver.kernel.org>; Sun,  7 Nov 2021 19:20:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230410AbhKFPTQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 6 Nov 2021 11:19:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42982 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230023AbhKFPTP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Nov 2021 11:19:15 -0400
-Received: from merlin.infradead.org (merlin.infradead.org [IPv6:2001:8b0:10b:1234::107])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3B02C061570;
-        Sat,  6 Nov 2021 08:16:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=merlin.20170209; h=Content-Transfer-Encoding:Content-Type:
-        In-Reply-To:MIME-Version:Date:Message-ID:References:Cc:To:Subject:From:Sender
-        :Reply-To:Content-ID:Content-Description;
-        bh=T9k+w06FwjbzHUtiFkZET+tVXhJuCL3KtuVic5fllVQ=; b=P3Dw2dKE6F5l4AFDIIbf3yENQB
-        c6YDZFSuTM3sE/kunkR0n4IVERp+UiuGLYTE+IWw6jOWJpwnj+IJ5QrqgLJhYwtc57FIF6deiGsiK
-        n7M7t2rlPTCIkJhxMJIYWAiDvROVqbipKKIONN3472ykGB9hvnA6p5fuHKKGazL03cDAejMq/8uqU
-        W4S7rxjrtBCk5KWY23dAqsTqwcSQIRgrRGMROPEwy9ADxctZls9YiV0g37k5fWFp4iuzkL8rTZ0Ln
-        rcqFA4f+CpqikywqIDs1bAC4zKrPJMuT9Kic1opRI68E4pcFViTcuSX3i+Wfa3k5gNtJzYQJuy1fO
-        7YIhpUJQ==;
-Received: from [2601:1c0:6280:3f0::aa0b]
-        by merlin.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mjNQi-008ZCb-L7; Sat, 06 Nov 2021 15:16:28 +0000
-From:   Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH 2/2] mmc: Add mmc driver for Sunplus SP7021
-To:     Tony Huang <tonyhuang.sunplus@gmail.com>, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        p.zabel@pengutronix.de
-Cc:     wells.lu@sunplus.com, Tony Huang <tony.huang@sunplus.com>
-References: <1636208598-18234-1-git-send-email-tony.huang@sunplus.com>
- <1636208598-18234-3-git-send-email-tony.huang@sunplus.com>
-Message-ID: <3da7cacf-d5ab-9f08-6d15-a75cf952d43d@infradead.org>
-Date:   Sat, 6 Nov 2021 08:16:10 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
-MIME-Version: 1.0
-In-Reply-To: <1636208598-18234-3-git-send-email-tony.huang@sunplus.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S232440AbhKGTXZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 7 Nov 2021 14:23:25 -0500
+Received: from mail-oi1-f171.google.com ([209.85.167.171]:34516 "EHLO
+        mail-oi1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233834AbhKGTXV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Nov 2021 14:23:21 -0500
+Received: by mail-oi1-f171.google.com with SMTP id bg25so23586130oib.1;
+        Sun, 07 Nov 2021 11:20:38 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
+         :message-id;
+        bh=r1/wcCU/2X1I1Y5JLtP+b/0PYuwkoBpy63PD+ijntA4=;
+        b=sDfEXnMnRmWnvZ3LwFMNxyQkR4vvIMexEljFCodigxeHNxQ3njyk1G7NIh5mz+rQqy
+         NiHZezq3C2TWQtaxfB7xvZIQJ2Rkb1I1dSXtyWEYKaW9I2SjOZ2VPd8mDglyQDQHiSjw
+         /0sfmOwfrjLaBat55BKYMYR9N8Mu/bxWRfEQYNb4AqkNNhzdC+Z8mhoVFA7RlQw/FOUH
+         juebuetITryX8vrV1Ow7F+KV1O7/V107bbMExxyVGQdEwUXKp+igq/NMuCD3M67HrPjF
+         cngLy52X8zpijmpNcXHRh7S/jjL4xCh0D7Ri6hdtwg1uPo9r+z55czzKotNHG7JNWuVQ
+         gxHw==
+X-Gm-Message-State: AOAM531JDX1eSEATioN62oDb2rQsvJIejweu91ZtOdKGvUDFcwa4b/Wv
+        9TqeTxfGEiYCuXJCsT/p3A==
+X-Google-Smtp-Source: ABdhPJzEUvEsha8d49NX1P6EOkdOY8Nv3eLZZ3xuEKDjM4jFGhTBU1+upmwtuoWD0mh/bp/aKWrBJw==
+X-Received: by 2002:a05:6808:170e:: with SMTP id bc14mr34049600oib.86.1636312837939;
+        Sun, 07 Nov 2021 11:20:37 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id h1sm2628351oom.12.2021.11.07.11.20.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 07 Nov 2021 11:20:37 -0800 (PST)
+Received: (nullmailer pid 1404562 invoked by uid 1000);
+        Sun, 07 Nov 2021 19:20:36 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Tony Huang <tonyhuang.sunplus@gmail.com>
+Cc:     wells.lu@sunplus.com, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org, robh+dt@kernel.org,
+        ulf.hansson@linaro.org, linux-kernel@vger.kernel.org,
+        p.zabel@pengutronix.de, Tony Huang <tony.huang@sunplus.com>
+In-Reply-To: <1636208598-18234-2-git-send-email-tony.huang@sunplus.com>
+References: <1636208598-18234-1-git-send-email-tony.huang@sunplus.com> <1636208598-18234-2-git-send-email-tony.huang@sunplus.com>
+Subject: Re: [PATCH 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+Date:   Sun, 07 Nov 2021 13:20:36 -0600
+Message-Id: <1636312836.425525.1404561.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[resending, had some kind of email error on the first try]
+On Sat, 06 Nov 2021 22:23:17 +0800, Tony Huang wrote:
+> Add mmc yaml file for Sunplus SP7021
+> 
+> Signed-off-by: Tony Huang <tony.huang@sunplus.com>
+> ---
+>  .../devicetree/bindings/mmc/sunplus-mmc.yaml       | 64 ++++++++++++++++++++++
+>  MAINTAINERS                                        |  5 ++
+>  2 files changed, 69 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
+> 
 
-On 11/6/21 7:23 AM, Tony Huang wrote:
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index ccc148c..2a78cbc 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -14,6 +14,15 @@ config MMC_DEBUG
->   	  added host drivers please don't invent their private macro for
->   	  debugging.
->   
-> +config MMC_SUNPLUS
-> +	tristate "Sunplus SP7021 MMC Controller"
-> +	depends on ARCH_SUNPLUS || SOC_I143 || SOC_Q645
-> +	default y
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
-Is this needed to be able to boot?  That's about the only
-reason that "default y" could be justified.
+yamllint warnings/errors:
 
-> +	help
-> +		If you say yes here, you will get support for eMMC host interface
-> +		on sunplus Socs.
+dtschema/dtc warnings/errors:
+Documentation/devicetree/bindings/mmc/sunplus-mmc.example.dts:21:18: fatal error: dt-bindings/clock/sp-sp7021.h: No such file or directory
+   21 |         #include <dt-bindings/clock/sp-sp7021.h>
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+make[1]: *** [scripts/Makefile.lib:385: Documentation/devicetree/bindings/mmc/sunplus-mmc.example.dt.yaml] Error 1
+make[1]: *** Waiting for unfinished jobs....
+make: *** [Makefile:1441: dt_binding_check] Error 2
 
-		   Sunplus SoCs.
+doc reference errors (make refcheckdocs):
+MAINTAINERS: Documentation/devicetree/bindings/mmc/sunplu-mmc.yaml
 
-> +		If unsure, say N.
-> +		Sunplus  eMMC Host Controller v4.51 support"
+See https://patchwork.ozlabs.org/patch/1551671
 
-What is that last line for?
+This check can fail if there are any dependencies. The base for a patch
+series is generally the most recent rc1.
 
-And all lines of the help text should be indented with
-one tab + 2 spaces per coding-style.rst.
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
 
-thanks.
--- 
-~Randy
+pip3 install dtschema --upgrade
+
+Please check and re-submit.
+
