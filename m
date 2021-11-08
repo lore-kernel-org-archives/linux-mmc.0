@@ -2,123 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6924C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 20:01:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9051C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 22:50:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C326C619BB
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 20:01:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 850216134F
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 22:50:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234550AbhKHUEd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 15:04:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60480 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236813AbhKHUEc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 15:04:32 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5BA7C061714
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Nov 2021 12:01:47 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id b15so47858946edd.7
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2021 12:01:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=rC7iBqJW1E9TnpQ1uBnuIKH8XymcaerC1Chr1eaKswE=;
-        b=MR2b77pFp/RULoljKlfL/ze9zs5V8AoGkmeOg8+PgzqIEv54cJigFrDiwibz/Hr0BL
-         5WBc4qstuKm2ba4nG8H1dzRzHc75XZ18ZL9SwUdwnzYRukHTQrMiaUk4m8GDMUmN5biZ
-         ZFE/esjMojBXcmoqJUixJU962e8ZfyNCQQ+3pOASDqmC3ChoWDkFREGrBtV90FpIv03v
-         aGMWIoxZkKWl7Borb/a1DuG6y3iz/sHW2gJbohrXNUnYedOBAN2Q+dVx33DtopzCE6UN
-         yhcAXvbW49/lfVVzk8sUi8ziShDrg8XeFY6Siq1H1zfHFDzIxdCOR3rQn0InQKTQV4zN
-         8n3w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=rC7iBqJW1E9TnpQ1uBnuIKH8XymcaerC1Chr1eaKswE=;
-        b=WmaoDq8mUeOKrEAdUwDUDO3BMfALX1oiIewEuVsG0UfMG6aBf4dQuP+29QdYOqaeHX
-         9D+oY6aEALNMS1aSHe++7UwoHHlU4PYrgJ9zmg8GDXG9oXcFnTAR94taOvv2zo1R/FPc
-         l4LM3mXu6ECfve0V0Aa1QLF7DLpAQHj4VPJwZbF33GG6jPk3KRWOpuiabl4jPJWVGr1I
-         VP+bMesWxS6yCgBu1utukaaPIHh3WnSi7lFRQgcNPFECKXgB3/YBNybzbKd/fqjcME4K
-         Dm4G8y778nkXqwAR+Fmro4ZZ/f4Y4Vhk6CLEumKhGAr0r71x1iCzKP2Sk616amvg6kvl
-         5Qaw==
-X-Gm-Message-State: AOAM531Q84HKhohjjOpZ7wXyzdt3hl6uCFndE7FwRa7t6oDdY27HoPiq
-        CKNL5ke0o6eDz/kNAXHAxUI0Tjb9zeAaNNYeyloACg==
-X-Google-Smtp-Source: ABdhPJziBcog/9TPjwbG/ZnN+mAUxWZYVP+3hLOcUxtkIOopkTmFCKpeALN2UTcbadopRFqsjTQx7nNu5czXA7KfX7w=
-X-Received: by 2002:a05:6402:3488:: with SMTP id v8mr2295916edc.170.1636401706425;
- Mon, 08 Nov 2021 12:01:46 -0800 (PST)
+        id S240792AbhKHWx2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 17:53:28 -0500
+Received: from 113.196.136.146.ll.static.sparqnet.net ([113.196.136.146]:39618
+        "EHLO mg.sunplus.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S233784AbhKHWx1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 17:53:27 -0500
+X-Greylist: delayed 52664 seconds by postgrey-1.27 at vger.kernel.org; Mon, 08 Nov 2021 17:53:26 EST
+X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
+        ,3)
+Received: from 172.17.9.202
+        by mg02.sunplus.com with MailGates ESMTP Server V5.0(53148:0:AUTH_RELAY)
+        (envelope-from <tony.huang@sunplus.com>); Tue, 09 Nov 2021 06:50:43 +0800 (CST)
+Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
+ sphcmbx01.sunplus.com.tw (172.17.9.202) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.23; Tue, 9 Nov 2021 06:50:37 +0800
+Received: from sphcmbx02.sunplus.com.tw ([::1]) by sphcmbx02.sunplus.com.tw
+ ([fe80::f8bb:bd77:a854:5b9e%14]) with mapi id 15.00.1497.023; Tue, 9 Nov 2021
+ 06:50:38 +0800
+From:   =?big5?B?VG9ueSBIdWFuZyC2wMNoq3A=?= <tony.huang@sunplus.com>
+To:     Rob Herring <robh@kernel.org>,
+        Tony Huang <tonyhuang.sunplus@gmail.com>
+CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        =?big5?B?V2VsbHMgTHUgp2aq2sTL?= <wells.lu@sunplus.com>
+Subject: RE: [PATCH 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+Thread-Topic: [PATCH 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus
+ SP7021
+Thread-Index: AQHX0xnqVbqgnYL/xUqU9M+7PT79mqv5XGeAgADinoA=
+Date:   Mon, 8 Nov 2021 22:50:37 +0000
+Message-ID: <53c3729b77c442d1a94f99ae39eabd80@sphcmbx02.sunplus.com.tw>
+References: <1636208598-18234-1-git-send-email-tony.huang@sunplus.com>
+ <1636208598-18234-2-git-send-email-tony.huang@sunplus.com>
+ <YYlbaTyAXYMw8A5O@robh.at.kernel.org>
+In-Reply-To: <YYlbaTyAXYMw8A5O@robh.at.kernel.org>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [172.25.108.54]
+Content-Type: text/plain; charset="big5"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-References: <20211025015156.33133-1-brad@pensando.io> <20211025015156.33133-12-brad@pensando.io>
- <20211025091731.GA2001@C02TD0UTHF1T.local> <a20805de16e1196c2ed46dd949473c9a@kernel.org>
- <CAK9rFnxH=DtC9vEJJCXkGEWjvg2E8vHPUcRy9rJpo34Furtmvw@mail.gmail.com>
- <87zgqi96nh.wl-maz@kernel.org> <CAK9rFnz6X3wR6bMPkVicGoqj+prm5OmY3y3B_8Fc+WGJxcVsXA@mail.gmail.com>
- <87lf1ye84p.wl-maz@kernel.org>
-In-Reply-To: <87lf1ye84p.wl-maz@kernel.org>
-From:   Brad Larson <brad@pensando.io>
-Date:   Mon, 8 Nov 2021 12:01:35 -0800
-Message-ID: <CAK9rFnxYH2V5K8xKLAExJA7CFip8p6shsdDHa4SrnRo5Y9-CJA@mail.gmail.com>
-Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-To:     Marc Zyngier <maz@kernel.org>
-Cc:     Mark Rutland <mark.rutland@arm.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Nov 8, 2021 at 11:54 AM Marc Zyngier <maz@kernel.org> wrote:
-> >
-> > The Elba SoC is an embedded chip and not intended as a SBSA-compliant
-> > general platform.
->
-> This has nothing to do with following a standard. It has to do with
-> following the intended use of the architecture. What you have here is
-> the system architecture equivalent of trusting userspace to build the
-> kernel page tables. It can work in limited cases. But would you want
-> to deploy such construct at scale? Probably not.
->
-> > In this implementation the ITS is used to provide message-based
-> > interrupts for our (potentially large set) of hardware based
-> > platform device instances.  Virtualization is not a consideration.
-> > We don't have a SMMU.  Interrupt isolation isn't a practical
-> > consideration for this product.
->
-> Because you have foreseen all use cases for this HW ahead of time, and
-> can already tell how SW is going to make use of it? Oh well...
->
-> > Propose adding a comment to the dts.
-> >
-> > +                       /*
-> > +                        * Elba SoC implemented a pre-ITS that happened to
-> > +                        * be the same implementation as synquacer.
-> > +                        */
->
-> Which contains zero information. What you really want is: "We have
-> decided to ignore the system architecture, good luck".
->
->         M.
->
-> --
-> Without deviation from the norm, progress is not possible.
-
-On the contrary, the confusion of using the existing driver match
-"socionext,synquacer-pre-its" is answered, why add new code.
-Looks like we are deviating from the norm ;-).  I'm not seeing how
-this conversation is a productive use of time for a platform in
-production.
-
-Thanks,
-Brad
+RGVhciBSb2I6DQoNCj4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzJdIGR0LWJpbmRpbmc6IG1tYzog
+QWRkIG1tYyB5YW1sIGZpbGUgZm9yIFN1bnBsdXMNCj4gU1A3MDIxDQo+IA0KPiBPbiBTYXQsIE5v
+diAwNiwgMjAyMSBhdCAxMDoyMzoxN1BNICswODAwLCBUb255IEh1YW5nIHdyb3RlOg0KPiA+IEFk
+ZCBtbWMgeWFtbCBmaWxlIGZvciBTdW5wbHVzIFNQNzAyMQ0KPiA+DQo+ID4gU2lnbmVkLW9mZi1i
+eTogVG9ueSBIdWFuZyA8dG9ueS5odWFuZ0BzdW5wbHVzLmNvbT4NCj4gPiAtLS0NCj4gPiAgLi4u
+L2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3N1bnBsdXMtbW1jLnlhbWwgICAgICAgfCA2NA0KPiAr
+KysrKysrKysrKysrKysrKysrKysrDQo+ID4gIE1BSU5UQUlORVJTICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgIHwgIDUgKysNCj4gPiAgMiBmaWxlcyBjaGFuZ2VkLCA2OSBp
+bnNlcnRpb25zKCspDQo+ID4gIGNyZWF0ZSBtb2RlIDEwMDY0NA0KPiA+IERvY3VtZW50YXRpb24v
+ZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc3VucGx1cy1tbWMueWFtbA0KPiA+DQo+ID4gZGlmZiAt
+LWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc3VucGx1cy1tbWMu
+eWFtbA0KPiA+IGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9zdW5wbHVz
+LW1tYy55YW1sDQo+ID4gbmV3IGZpbGUgbW9kZSAxMDA2NDQNCj4gPiBpbmRleCAwMDAwMDAwLi5m
+YzVhNWY2DQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsrKyBiL0RvY3VtZW50YXRpb24vZGV2aWNl
+dHJlZS9iaW5kaW5ncy9tbWMvc3VucGx1cy1tbWMueWFtbA0KPiA+IEBAIC0wLDAgKzEsNjQgQEAN
+Cj4gPiArIyBTUERYLUxpY2Vuc2UtSWRlbnRpZmllcjogKEdQTC0yLjAtb25seSBPUiBCU0QtMi1D
+bGF1c2UpICMgQ29weXJpZ2h0DQo+ID4gKyhDKSBTdW5wbHVzIEx0ZC4gQ28uIDIwMjEgJVlBTUwg
+MS4yDQo+ID4gKy0tLQ0KPiA+ICskaWQ6IGh0dHA6Ly9kZXZpY2V0cmVlLm9yZy9zY2hlbWFzL21t
+Yy9zdW5wbHVzLW1tYy55YW1sIw0KPiA+ICskc2NoZW1hOiBodHRwOi8vZGV2aWNldHJlZS5vcmcv
+bWV0YS1zY2hlbWFzL2NvcmUueWFtbCMNCj4gPiArDQo+ID4gK3RpdGxlOiBzdW5wbHVzIE1NQyBj
+b250cm9sbGVyDQo+ID4gKw0KPiA+ICthbGxPZjoNCj4gPiArICAtICRyZWY6ICJtbWMtY29udHJv
+bGxlci55YW1sIg0KPiA+ICsNCj4gPiArbWFpbnRhaW5lcnM6DQo+ID4gKyAgLSB0b255Lmh1YW5n
+IDx0b255Lmh1YW5nQHN1bnBsdXMuY29tPg0KPiANCj4gUGxlYXNlIGZpeCB5b3VyIG5hbWUuDQpP
+SyxJIHdpbGwgZml4Lg0KDQo+IA0KPiA+ICsNCj4gPiArcHJvcGVydGllczoNCj4gPiArICBjb21w
+YXRpYmxlOg0KPiA+ICsgICAgZW51bToNCj4gPiArICAgICAgLSBzdW5wbHVzLHNwNzAyMS1lbW1j
+DQo+ID4gKyAgICAgIC0gc3VucGx1cyxpMTQzLWVtbWMNCj4gPiArICAgICAgLSBzdW5wbHVzLHE2
+NDUtZW1tYw0KPiANCj4gYmxhbmsgbGluZSBoZXJlLg0KT0ssSSB3aWxsIGFkZCBibGFuayBsaW5l
+Lg0KPiANCj4gPiArICByZWc6DQo+ID4gKyAgICBtYXhJdGVtczogMQ0KPiA+ICsNCj4gPiArICBp
+bnRlcnJ1cHRzOg0KPiA+ICsgICAgbWF4SXRlbXM6IDENCj4gPiArDQo+ID4gKyAgY2xvY2tzOg0K
+PiA+ICsgICAgbWluSXRlbXM6IDENCj4gPiArDQo+ID4gKyAgcmVzZXRzOg0KPiA+ICsgICAgbWF4
+SXRlbXM6IDENCj4gPiArDQo+ID4gK3JlcXVpcmVkOg0KPiA+ICsgIC0gY29tcGF0aWJsZQ0KPiA+
+ICsgIC0gcmVnDQo+ID4gKyAgLSBpbnRlcnJ1cHRzDQo+ID4gKyAgLSBjbG9ja3MNCj4gPiArICAt
+IHJlc2V0cw0KPiA+ICsNCj4gPiArdW5ldmFsdWF0ZWRQcm9wZXJ0aWVzOiBmYWxzZQ0KPiA+ICsN
+Cj4gPiArZXhhbXBsZXM6DQo+ID4gKyAgLSB8DQo+ID4gKyAgICAjaW5jbHVkZSA8ZHQtYmluZGlu
+Z3MvaW50ZXJydXB0LWNvbnRyb2xsZXIvaXJxLmg+DQo+ID4gKyAgICAjaW5jbHVkZSA8ZHQtYmlu
+ZGluZ3MvaW50ZXJydXB0LWNvbnRyb2xsZXIvYXJtLWdpYy5oPg0KPiA+ICsgICAgI2luY2x1ZGUg
+PGR0LWJpbmRpbmdzL2Nsb2NrL3NwLXNwNzAyMS5oPg0KPiA+ICsgICAgI2luY2x1ZGUgPGR0LWJp
+bmRpbmdzL3Jlc2V0L3NwLXNwNzAyMS5oPg0KPiA+ICsgICAgbW1jMDogbW1jQDljMDAzYjAwIHsN
+Cj4gPiArICAgICAgICBjb21wYXRpYmxlID0gInN1bnBsdXMsc3A3MDIxLWVtbWMiOw0KPiA+ICsg
+ICAgICAgIHJlZyA9IDwweDljMDAzYjAwIDB4MTgwPjsNCj4gPiArICAgICAgICBpbnRlcnJ1cHRz
+ID0gPDIwIElSUV9UWVBFX0xFVkVMX0hJR0g+Ow0KPiA+ICsgICAgICAgIGNsb2NrcyA9IDwmY2xr
+YyBDQVJEX0NUTDA+Ow0KPiA+ICsgICAgICAgIHJlc2V0cyA9IDwmcnN0YyBSU1RfQ0FSRF9DVEww
+PjsNCj4gPiArICAgICAgICBidXMtd2lkdGggPSA8OD47DQo+ID4gKyAgICAgICAgbWF4LWZyZXF1
+ZW5jeSA9IDw1MjAwMDAwMD47DQo+ID4gKyAgICAgICAgbm9uLXJlbW92YWJsZTsNCj4gPiArICAg
+ICAgICBkaXNhYmxlLXdwOw0KPiA+ICsgICAgICAgIGNhcC1tbWMtaGlnaHNwZWVkOw0KPiA+ICsg
+ICAgICAgIG1tYy1kZHItM18zdjsNCj4gPiArICAgICAgICBuby1zZGlvOw0KPiA+ICsgICAgICAg
+IG5vLXNkOw0KPiA+ICsgICAgfTsNCj4gPiArLi4uDQo+ID4gZGlmZiAtLWdpdCBhL01BSU5UQUlO
+RVJTIGIvTUFJTlRBSU5FUlMgaW5kZXggM2I3OWZkNC4uMTc5ZTYwYSAxMDA2NDQNCj4gPiAtLS0g
+YS9NQUlOVEFJTkVSUw0KPiA+ICsrKyBiL01BSU5UQUlORVJTDQo+ID4gQEAgLTE3OTQ1LDYgKzE3
+OTQ1LDExIEBAIEw6CW5ldGRldkB2Z2VyLmtlcm5lbC5vcmcNCj4gPiAgUzoJTWFpbnRhaW5lZA0K
+PiA+ICBGOglkcml2ZXJzL25ldC9ldGhlcm5ldC9kbGluay9zdW5kYW5jZS5jDQo+ID4NCj4gPiAr
+U1VOUExVUyBNTUMgRFJJVkVSDQo+ID4gK006CVRvbnkgSHVhbmcgPHRvbnkuaHVhbmdAc3VucGx1
+cy5jb20+DQo+ID4gK1M6CU1haW50YWluZWQNCj4gPiArRjoJRG9jdW1lbnRhdGlvbi9kZXZpY2V0
+cmVlL2JpbmRpbmdzL21tYy9zdW5wbHUtbW1jLnlhbWwNCj4gPiArDQo+ID4gIFNVUEVSSA0KPiA+
+ICBNOglZb3NoaW5vcmkgU2F0byA8eXNhdG9AdXNlcnMuc291cmNlZm9yZ2UuanA+DQo+ID4gIE06
+CVJpY2ggRmVsa2VyIDxkYWxpYXNAbGliYy5vcmc+DQo+ID4gLS0NCj4gPiAyLjcuNA0KPiA+DQo+
+ID4NCg==
