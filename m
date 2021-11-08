@@ -2,115 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 572D0C43217
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 10:26:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A469CC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 10:30:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 414B761207
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 10:26:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 89E4E61355
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 10:30:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237552AbhKHK3K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 05:29:10 -0500
-Received: from foss.arm.com ([217.140.110.172]:48408 "EHLO foss.arm.com"
+        id S238081AbhKHKd2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 05:33:28 -0500
+Received: from smtp1.axis.com ([195.60.68.17]:40182 "EHLO smtp1.axis.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237572AbhKHK2s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Nov 2021 05:28:48 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 257AB1FB;
-        Mon,  8 Nov 2021 02:26:01 -0800 (PST)
-Received: from FVFF77S0Q05N (unknown [10.57.58.140])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id C89913F800;
-        Mon,  8 Nov 2021 02:25:58 -0800 (PST)
-Date:   Mon, 8 Nov 2021 10:25:52 +0000
-From:   Mark Rutland <mark.rutland@arm.com>
-To:     Brad Larson <brad@pensando.io>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-Message-ID: <YYj7MA4D1zCF39lh@FVFF77S0Q05N>
-References: <20211025015156.33133-1-brad@pensando.io>
- <20211025015156.33133-12-brad@pensando.io>
- <20211025091731.GA2001@C02TD0UTHF1T.local>
- <CAK9rFnx7DgS3TYMmu5NBacV_6WC_UwJ=u7n3e_fGd0RpEcg3kA@mail.gmail.com>
+        id S238021AbhKHKd1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Nov 2021 05:33:27 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=axis.com; q=dns/txt; s=axis-central1; t=1636367444;
+  x=1667903444;
+  h=date:to:cc:subject:message-id:references:mime-version:
+   content-transfer-encoding:in-reply-to:from;
+  bh=jcvr+8FwHp05abelF9JKosyLHvMrxeXcnnzcoFj30ek=;
+  b=crf9qHvxh1dYbnfmjIddpy3jOxP0Itb8p6LNomLmxaymue88POsjSupD
+   ircHCzwajV9yvbVNdS7EBlqDwgY05+PKJoucF0r2X+51nUmBStfDqT3fZ
+   82OCwhQ4FMPyVC5+vvYI/pZeCSpFdxhbWXE/Fi2tfDQCvnmJ2cP6ryTPK
+   PxIHJ1VuruZn3STGYv4/7issztIY/Pd68nQlxHZVe5PbhF/1Ju634BJa0
+   En/Lh1YllA0P/WSsDltXZPNfMijimWUyGCcwIN/PC7yFyt1Acyc0zd5/2
+   LCo1yJcFHaABZe3a4CLIATw7oirMrqngln3uwh610BNoRR3QewLKK3NgU
+   w==;
+Date:   Mon, 8 Nov 2021 11:30:42 +0100
+To:     Doug Anderson <dianders@google.com>
+CC:     =?iso-8859-1?Q?M=E5rten?= Lindahl <Marten.Lindahl@axis.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kernel <kernel@axis.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Allow lower TMOUT value than maximum
+Message-ID: <20211108103042.GA28891@axis.com>
+References: <20211103152359.24699-1-marten.lindahl@axis.com>
+ <CAD=FV=WsSPcs3ggGWNp5J288B+TBoSYuY7JmEWDii05w4tTdgw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="iso-8859-1"
 Content-Disposition: inline
-In-Reply-To: <CAK9rFnx7DgS3TYMmu5NBacV_6WC_UwJ=u7n3e_fGd0RpEcg3kA@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAD=FV=WsSPcs3ggGWNp5J288B+TBoSYuY7JmEWDii05w4tTdgw@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+From:   Marten Lindahl <martenli@axis.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 04, 2021 at 03:53:13PM -0700, Brad Larson wrote:
-> On Mon, Oct 25, 2021 at 2:17 AM Mark Rutland <mark.rutland@arm.com> wrote:
-> > On Sun, Oct 24, 2021 at 06:51:56PM -0700, Brad Larson wrote:
-> > > +     timer {
-> > > +             compatible = "arm,armv8-timer";
-> > > +             interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(1) |
-> > > +                                     IRQ_TYPE_LEVEL_LOW)>,
-> > > +                          <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(1) |
-> > > +                                     IRQ_TYPE_LEVEL_LOW)>,
-> > > +                          <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(1) |
-> > > +                                     IRQ_TYPE_LEVEL_LOW)>,
-> > > +                          <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(1) |
-> > > +                                     IRQ_TYPE_LEVEL_LOW)>;
-> > > +     };
-> >
-> > The GIC_CPU_MASK_SIMPLE() stuff is meant for GICv2, but as below you
-> > have GICv3, where this is not valid, so this should go.
-> >
-> > Also, beware that GIC_CPU_MASK_SIMPLE(1) means a single CPU, which
-> > doesn't mak sense for the 16 CPUs you have.
-> >
+On Sat, Nov 06, 2021 at 01:14:48AM +0100, Doug Anderson wrote:
+> Hi,
+
+Hi Doug!
+
 > 
-> Thanks for pointing this out.  Elba SoC is a GICv3 implementation and looking
-> at other device tree files we should be using this:
+> On Wed, Nov 3, 2021 at 8:24 AM Mårten Lindahl <marten.lindahl@axis.com> wrote:
+> >
+> > The TMOUT register is always set with a full value for every transfer,
+> > which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
+> > Since the software dto_timer acts as a backup in cases when this timeout
+> > is not long enough, it is normally not a problem. But setting a full
+> > value makes it impossible to test shorter timeouts, when for example
+> > testing data read times on different SD cards.
+> >
+> > Add a function to set any value smaller than the maximum of 0xFFFFFF.
+> >
+> > Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+> > ---
+> >  drivers/mmc/host/dw_mmc.c | 29 ++++++++++++++++++++++++++++-
+> >  1 file changed, 28 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index 6578cc64ae9e..0d23b8ed9403 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -54,6 +54,7 @@
+> >
+> >  #define DW_MCI_FREQ_MAX        200000000       /* unit: HZ */
+> >  #define DW_MCI_FREQ_MIN        100000          /* unit: HZ */
+> > +#define DW_MCI_DATA_TMOUT_NS_MAX       83886075
+> >
+> >  #define IDMAC_INT_CLR          (SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
+> >                                  SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
+> > @@ -1283,6 +1284,32 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+> >         mci_writel(host, CTYPE, (slot->ctype << slot->id));
+> >  }
+> >
+> > +static void dw_mci_set_data_timeout(struct dw_mci *host, u32 timeout_ns)
 > 
->         timer {
->                 compatible = "arm,armv8-timer";
->                 interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(16) |
->                                         IRQ_TYPE_LEVEL_LOW)>,
->                              <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(16) |
->                                         IRQ_TYPE_LEVEL_LOW)>,
->                              <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(16) |
->                                         IRQ_TYPE_LEVEL_LOW)>,
->                              <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(16) |
->                                         IRQ_TYPE_LEVEL_LOW)>;
->         };
+> The type of "timeout_ns" should match `struct mmc_data`, which is
+> unsigned int, not u32.
 
-No; as above, you should *not* use GIC_CPU_MASK_SIMPLE() at all for GICv3. i.e.
+Will fix.
 
->         timer {
->                 compatible = "arm,armv8-timer";
->                 interrupts = <GIC_PPI 13 IRQ_TYPE_LEVEL_LOW>,
->                              <GIC_PPI 14 IRQ_TYPE_LEVEL_LOW>,
->                              <GIC_PPI 11 IRQ_TYPE_LEVEL_LOW>,
->                              <GIC_PPI 10 IRQ_TYPE_LEVEL_LOW>;
->         };
+> 
+> 
+> > +{
+> > +       u32 timeout, freq_mhz, tmp, tmout;
+> > +
+> > +       if (!timeout_ns || timeout_ns > DW_MCI_DATA_TMOUT_NS_MAX) {
+> > +               /* Set maximum */
+> > +               tmout = 0xFFFFFFFF;
+> > +               goto tmout_done;
+> > +       }
+> 
+> I don't think that the above is right. If the card clock is 50 Hz
+> instead of 200 Hz then 0xffffffff is actually ~83 ms * 4 = ~332 ms. It
+> would be better to attempt to program it correctly.
+> 
+> Can you just do the math below and if the number is greater than can
+> be represented then you can just put in the max?
+> 
 
-Please see the GICv3 binding documentation:
+Yes. Good point. Much better way to do it.
 
-  Documentation/devicetree/bindings/interrupt-controller/arm,gic-v3.yaml
+> Interestingly enough, in `struct mmc_data` this is documented as a max
+> of 80 ms, though I don't think your code should care about that. Just
+> cap to the maximum value after your math.
+> 
+> 
+> > +       timeout = timeout_ns;
+> > +       freq_mhz = DIV_ROUND_UP(host->bus_hz, NSEC_PER_MSEC);
+> > +
+> > +       /* TMOUT[7:0] (RESPONSE_TIMEOUT) */
+> > +       tmout = 0xFF; /* Set maximum */
+> > +
+> > +       /* TMOUT[31:8] (DATA_TIMEOUT) */
+> > +       tmp = DIV_ROUND_UP_ULL((u64)timeout * freq_mhz, MSEC_PER_SEC);
+> > +       tmout |= (tmp & 0xFFFFFF) << 8;
+> 
+> Combining your two calculations, I guess you have:
+> 
+> tmp = timeout * (bus_hz / 1000000) / 1000
+> 
+> Why isn't this just:
+> 
+> tmp = (timeout * bus_hz) / 1000000000
+> 
+> Since you're doing 64-bit math anyway I don't think you need to worry
+> about that calculation overflowing. Multiplying two 32-bit numbers
+> can't exceed 64-bits, right?
 
-... and note that it does not have the cpumask field as use by the binding for
-prior generations of GIC:
+Will do so.
+> 
+> 
+> Also: I think "bus_hz" is the wrong thing to be using here. You need
+> to take CLKDIV into account like dw_mci_set_drto() does.
+> 
 
-  Documentation/devicetree/bindings/interrupt-controller/arm,gic.yaml
+Will do so.
+Good comments. Thanks!
 
-
-If you've seen other dts files using GIC_CPU_MASK_SIMPLE() with GICv3, those
-are incorrect, and need to be fixed.
-
-Thanks,
-Mark.
+Kind regards
+Mårten
+> 
+> -Doug
