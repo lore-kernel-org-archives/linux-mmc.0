@@ -2,98 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E48EAC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 14:29:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 968B2C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 15:00:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C3FBB61076
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 14:29:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7663B61207
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 15:00:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240503AbhKHOcV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 09:32:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41246 "EHLO
+        id S240196AbhKHPDZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 10:03:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48320 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240482AbhKHOcE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 09:32:04 -0500
-Received: from mail-oi1-x231.google.com (mail-oi1-x231.google.com [IPv6:2607:f8b0:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18AD0C061746;
-        Mon,  8 Nov 2021 06:29:20 -0800 (PST)
-Received: by mail-oi1-x231.google.com with SMTP id q124so27826788oig.3;
-        Mon, 08 Nov 2021 06:29:20 -0800 (PST)
+        with ESMTP id S234731AbhKHPDY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 10:03:24 -0500
+Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A886C061570
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Nov 2021 07:00:40 -0800 (PST)
+Received: by mail-lf1-x12c.google.com with SMTP id p16so36863493lfa.2
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2021 07:00:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc:content-transfer-encoding;
-        bh=68r1lgwXM3RG0RRJc0xxy8x2Y9oUDOK8ImS4lcfjZPI=;
-        b=U2nd9MHWQlajh8UZYZKwbQoxDazN+Sbi8zVp10acdFOt1qqkVCuoLJ+1z6tvfcz01v
-         DrPvPUxsQFbRMNOWvRN9FfnBGHKh7T9/trfcZjVYj7mhRyiFCb1cnzzhg3R+3dlhgMTM
-         Y5WE0QwMlR6rSd6LTSHb6qs71E1fKIhADfYc+ur24qLbZ62yNo7k98axBlYW/G8pCdFZ
-         5UtkTvLbXDsaSjEUTvQhb8KY6P4OTcWIMSDUOaQ1wsaa4VglkZYPeTyWuPXJ0D/Hhbgi
-         6JIJU5MZQ/EMU0/SdoIk894bywXIBlKP0AfDLmCYwINgwMlGmxW6ctOK8FkKvDpYBZY4
-         DZTg==
+        bh=NSTQzYJRWmUa8HDHRPnVFUMCKGtizSx9Zp/eRuhf0I4=;
+        b=KFog4aZDxepJW+x80u2oSQVis6MUievGTZprsC/FLW5RLc5MOd0W60MK1xlJCbHtIL
+         aSvdbgJvOzJhnb+PtwRUtsqFxCrx1V85R4YyppgN/qJopJ/66F/ofVVlz9IOobryEBJm
+         vi3r9gZRR8gpBmVyESbdchFFv9ap3apHIbfXasWZlQnHT2as1nP+WsK56OSC0obS/E4c
+         7ksFjh5xqzT+RtghecV0JeY9NHihqBVJXY0rfqk8OSBCMEG1POlXreVqFlooPEGeH1DK
+         scMbIScbPWCKWfGx5oqWz7vapdTSrzs2oM9AnG9Bq7zLIm53GrJnoqCaVCZMaAh3qLUn
+         Brqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc:content-transfer-encoding;
-        bh=68r1lgwXM3RG0RRJc0xxy8x2Y9oUDOK8ImS4lcfjZPI=;
-        b=307fHy1T/QHos5gBOhWf1zM33VuPkfEBiwrHgTxSxjKcYKrZbUy+apwgN8GG3nnFXl
-         WBFalsdHfBbaw1pMyAZ8NK0SChvRiXJWnc+2TyLby32IsZSpDwhKRtOFn3/2dg93U6Xm
-         KmmOwyorIjvs0fubpU4MtA0cM/Pc3/Lp2YEYPMiC632mGX1cJW8YZwKKy3cFAWn+B3HM
-         m4iYntlTXFhMGi30jbO55VkhWKUerBQU8gidTCp62Qcl4qADD5oX2qApEopqODiz4ei/
-         3LKWgHWoyK/8UgtxuODX9CktcZya8i4YvfzMm0Rg8es3V7Rd1aXd7P6OnLmVEjTXQiqL
-         3Bxg==
-X-Gm-Message-State: AOAM531yifLJUcTHr78hTP0ft82eroTzyo6bBTBDt1CjMaoQzQ7j0Dyt
-        JrMu2lcIzONe7ro5hFwIplIENnDjDuViH+3ir8w8vOIGDis=
-X-Google-Smtp-Source: ABdhPJzIpu6Yvoy0DvvwJP7+eYWIe6lu7afU6tSgrGh5o1XD/JtM6lSrT2uVGax6Q2tL58IShFlsSLq8T4cR6LrxpXw=
-X-Received: by 2002:a05:6808:f09:: with SMTP id m9mr37656930oiw.68.1636381759469;
- Mon, 08 Nov 2021 06:29:19 -0800 (PST)
+        bh=NSTQzYJRWmUa8HDHRPnVFUMCKGtizSx9Zp/eRuhf0I4=;
+        b=jZIIb/s/4mAXvfLmIiHYzU3zZ/jexJIrgOt9E9IDdkPySi56rodgncaXtc8EX4D+gG
+         KJ4v6y0A/WHy+qcUoAGaULiIxbejeDkwiQDpE3S/7j6zE9/tQGgncGR+Q1bVufb/BOkW
+         30e753N2N+SJHIl/L+g9tO2u5G4wGekHMX7Edryqle9z/zibtKdYer9XEoK8bGjklNsl
+         C9epLm7e1yJwyG9uTD7X8IewQv6nWCU+YTcCUV130ME00LUMiGVlEGNMVxJmFb6qe+36
+         0R/FBPqq2TGyyMOApmaQFYwE2PBmIxA1Pgeki5M1zwr2Ru+UN3iJhd2MNFxseLJWJdHK
+         bCzg==
+X-Gm-Message-State: AOAM532eYPZgp8ATKKug+Rm2OUGBaha++5mhnTSQe3ukI7gU6Cfpl3UJ
+        SWxX9jMDUrcyQbLb7WvYTbLY+GF++mgC85Fjq1o8YQ==
+X-Google-Smtp-Source: ABdhPJwIkFTWhf65ohVl5zLi9xzGO3YL9vA7Sp8rqRwe+aOyuz1yYzAemJJVh4ab8ZlwS3nPfsFt7vdw0lCgtagWByU=
+X-Received: by 2002:a19:8c4d:: with SMTP id i13mr119053lfj.254.1636383638105;
+ Mon, 08 Nov 2021 07:00:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20211104063231.2115-1-huijin.park@samsung.com>
- <CGME20211104063250epcas1p36056caad956e599300146bae77f799d6@epcas1p3.samsung.com>
- <20211104063231.2115-3-huijin.park@samsung.com> <DM6PR04MB657559D2E25D4FF21689116CFC8D9@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB657559D2E25D4FF21689116CFC8D9@DM6PR04MB6575.namprd04.prod.outlook.com>
-From:   Huijin Park <bbanghj.park@gmail.com>
-Date:   Mon, 8 Nov 2021 23:29:07 +0900
-Message-ID: <CAMy0x0mUO3Sv-87MTvkn+hpYtKeWW7bEWSrjMopqupFytpOCpQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: core: adjust polling interval for CMD1
-To:     Avri Altman <Avri.Altman@wdc.com>
-Cc:     Huijin Park <huijin.park@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <cover.1636103151.git.hns@goldelico.com> <e072de2b480103dbebd941f35be96197534642ee.1636103151.git.hns@goldelico.com>
+ <4570288.hTGhjlNkSs@pc-42> <7121F069-56C7-402C-BA82-A922B1A36587@goldelico.com>
+In-Reply-To: <7121F069-56C7-402C-BA82-A922B1A36587@goldelico.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 8 Nov 2021 16:00:02 +0100
+Message-ID: <CAPDyKFo09xhaWbGgWuPa2=x0zXCfir0VMDhd4ZdSc8rh25nG9A@mail.gmail.com>
+Subject: Re: [RFC v4 2/6] mmc: core: allow to match the device tree to apply quirks
+To:     "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Tony Lindgren <tony@atomide.com>,
+        Bean Huo <beanhuo@micron.com>, notasas@gmail.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        letux-kernel@openphoenux.org, kernel@pyra-handheld.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-2021=EB=85=84 11=EC=9B=94 4=EC=9D=BC (=EB=AA=A9) =EC=98=A4=ED=9B=84 4:27, A=
-vri Altman <Avri.Altman@wdc.com>=EB=8B=98=EC=9D=B4 =EC=9E=91=EC=84=B1:
+On Sat, 6 Nov 2021 at 15:31, H. Nikolaus Schaller <hns@goldelico.com> wrote=
+:
 >
+> Hi J=C3=A9r=C3=B4me,
 >
-> > In mmc_send_op_cond(), loops are continuously performed at the same
-> > interval of 10 ms.  However the behaviour is not good for some eMMC whi=
-ch
-> > can be out from a busy state earlier than 10 ms if normal.
+> > Am 05.11.2021 um 15:27 schrieb J=C3=A9r=C3=B4me Pouiller <jerome.pouill=
+er@silabs.com>:
 > >
-> > Rather than fixing about the interval time in mmc_send_op_cond(), let's
-> > instead convert into using the common __mmc_poll_for_busy().
+> > On Friday 5 November 2021 10:05:47 CET H. Nikolaus Schaller wrote:
+> >> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> >>
+> >> MMC subsystem provides a way to apply quirks when a device match some
+> >> properties (VID, PID, etc...) Unfortunately, some SDIO devices does no=
+t
+> >> comply with the SDIO specification and does not provide reliable VID/P=
+ID
+> >> (eg. Silabs WF200).
+> >>
+> >> So, the drivers for these devices rely on device tree to identify the
+> >> device.
+> >>
+> >> This patch allows the MMC to also rely on the device tree to apply a
+> >> quirk.
+> >>
+> >> Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
 > >
-> > The reason for adjusting the interval time is that it is important to r=
-educe the
-> > eMMC initialization time, especially in devices that use eMMC as rootfs=
-.
-> That's an impressive improvement.
-> Can you share some of the use-cases in which 10ms reduction in boot time =
-is required?
+> > Thank you for to have taken care of that (Maybe, you would like to add =
+a
+> > "Co-developed-by:" tag).
+>
+> Well, I just have taken your and Ulf's proposal and done 90% copy&paste.
+> So there wasn't much development, just editing...
+>
+> >
+> >
+> >> ---
+> >> drivers/mmc/core/card.h   |  3 +++
+> >> drivers/mmc/core/quirks.h | 17 +++++++++++++++++
+> >> 2 files changed, 20 insertions(+)
+> >>
+> >> +static inline bool mmc_fixup_of_compatible_match(struct mmc_card *car=
+d,
+> >> +                                                const char *const *co=
+mpat_list)
 
-It can be used as one of the improvements and tuning items that
-can make rootfs preparation faster for cold booting.
-(e.g. if it is delayed, it outputs "Waiting for root device.." log.)
-Above all, I think it is not desirable to delay even though mmc
-initialization is done.
+After a second thought, I am not sure we really need a list of
+compatibles here. The quirks we may want to apply should be specific
+per device and most likely not shared among a family of devices, don't
+you think?
 
-Thanks,
+> >> +{
+> >> +       struct device_node *np;
+> >> +
+> >> +       for_each_child_of_node(mmc_dev(card->host)->of_node, np) {
+> >> +               if (of_device_compatible_match(np, compat_list))
+> >> +                       return true;
+> >
+> > Intel robot complains about of_device_compatible_match():
+> >
+> >    ERROR: modpost: "of_device_compatible_match" [drivers/mmc/core/mmc_c=
+ore.ko] undefined!
+> >
+> > I think we have to add this line:
+> >
+> >    EXPORT_SYMBOL(of_device_compatible_match);
+> >
+> > in drivers/of/base.c
+
+If we change to use one compatible string, rather than a list - then
+we can use of_device_is_compatible() instead, which is already
+properly exported with EXPORT_SYMBOL().
 
 >
-> Thanks,
-> Avri
+> I had seen the krobot message as well but could not figure out
+> what it meant...
+>
+> But with your hint it indeed looks like an omission in drivers/of/base.c
+> Having something exported in include/linux/of.h but code not
+> marked EXPORT_SYMBOL...
+>
+> That needs a separate patch. I'll add one with a
+>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Reported-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+>
+> and some Fixes: tag. Since it has a different audience I think
+> I should post it separately.
+>
+> BTW: krobot noted the same issue for mmc_of_find_child_device()
+> in drivers/mmc/core/core.c (which we do not touch in this series).
+> But maybe it should be fixed as well.
+
+If there is an existing problem, please send a separate fix/patch for that.
+
+>
+> So let's wait for more comments and then I may distribute a [PATCH v1].
+> Or should I do a [PATCH v5] to continue version counting?
+
+I suggest moving from RFC into using PATCH v1, as this isn't really an
+RFC any more.
+
+>
+> BR,
+> Nikolaus
+>
+
+Kind regards
+Uffe
