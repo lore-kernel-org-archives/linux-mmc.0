@@ -2,61 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5141C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 19:02:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18DC9C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 19:35:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8008161101
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 19:02:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE302619E1
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 19:35:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236479AbhKHTFD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 14:05:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47032 "EHLO
+        id S237666AbhKHTiM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 14:38:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236462AbhKHTFC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 14:05:02 -0500
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0346DC061570
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Nov 2021 11:02:18 -0800 (PST)
-Received: by mail-ed1-x531.google.com with SMTP id f4so66320675edx.12
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2021 11:02:17 -0800 (PST)
+        with ESMTP id S237652AbhKHTiM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 14:38:12 -0500
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C56CC061714
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Nov 2021 11:35:27 -0800 (PST)
+Received: by mail-ed1-x52f.google.com with SMTP id c8so50184079ede.13
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2021 11:35:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=VD+leqfaw7cvxdr0hdFUU2DCytmZoC8d64RVpkQq7Mc=;
-        b=QZxWU12BBlyzV83NZ0nj9FJqE578Gabv8/gbF+d7mLGZ5cQX8AgfwZMd/klbb4Q7nC
-         PAFQCWFzxcoO/K4BCuUpp+PjpDMIElcMArXLIRhJcmba/ZnjBsX1DS17Q26OAo2maj+U
-         Ppdz+/ge3amaVKLu8Ik9xygjmi+PArEtI3PJbN0TLKBEqgZKrxvWTBHohz5qteRRIRKi
-         kMJa4u2ZWtDi4J6FsvAneMAo1DhkXbiNqXeGa8O9eyAvgrcteZ+Ftr3FEUB/ufGHmurG
-         xto0fd8hVfFGFGn5C47G6yTijEG16i4Mi4jKLSQh/zc13i5aIjodWmKJN/z85gHv+eNw
-         JLkg==
+        bh=Z/MR0vqbYTkAsYuLNAb29468NBKY3mHo6iVJJTJx4h0=;
+        b=eH34PqDe6uY4jqBZvuGAv4uNlpzvYcOVNa+yRh0IxFWZ1+GwXQO3Nq6sdkn6AwMr66
+         Ob+7tJckDHQ+VOwnmEeh80RE3zHnAN6dJJIeMB7LpesL9hvdGCZ2Tx/qgZRB3THQHLbw
+         oBoRUsdOoupzBgR6+wAiZXO/ztOh0Yfnt8p1N3O7XaRt0Mkwhy2sBqk4i6k0bAGZ95dx
+         c3Yq+9Uz+EXC0pC8+vFZm19F3wTiMKSvEMy+A/5zfM5vBbULOrzQU8PN7idtAW0qUqSZ
+         MmNAaBNXfK3aN4Gk0R4FvG4b8nUi7x6YGy4BYP/sumJP31Lhf9oB9eyUDZFuA6nrokBu
+         MY/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=VD+leqfaw7cvxdr0hdFUU2DCytmZoC8d64RVpkQq7Mc=;
-        b=GkXddEpnXdezYyBJ84X8uzyub4LhGQl95qTJNblrL+wl+5UZT9VMLfJiOJG0AoEA2O
-         Arn8rzIN+9lJamlSac3YOkoAajCGpdTArsBfiRe7es5K8rac2imYOesUOStgK+FXU95B
-         MWr6vbr6Wpo6z4quzEnYqSEjxdXqhpTVohJ+msndOet9KPvf8wy1ikHMUlsQ+or7NxTK
-         ccBNQt2NUkxFw7XpCHDWVxY3VaG7P+N7wi1cmhWRRQgYg7hdc0SD8MQuo/Ys2kzxK02M
-         pcmzSEGdh3xtivSe4jF2Dmbe59u6K1B0OF/OKUHk3WtoddlUHhSb/W7LHFeiVzVGdj6N
-         DQvQ==
-X-Gm-Message-State: AOAM533/CQ8lBWGbqHQGYZ8x3zflC1lwW6eGae0R94YG3Eun5QiF3PtW
-        zUJrcN3mfUvGhNL8kJOAMeWNJF9PORLLEUoqlKVPjA==
-X-Google-Smtp-Source: ABdhPJzMqefrKaXcq09jbz4WokOBxPmGYf48od5DTPAH1Xprc6tdW5gTGoen6SETdNxoSREsXucD53VYWn7EbFB3k7w=
-X-Received: by 2002:a17:907:d89:: with SMTP id go9mr1896295ejc.330.1636398136568;
- Mon, 08 Nov 2021 11:02:16 -0800 (PST)
+        bh=Z/MR0vqbYTkAsYuLNAb29468NBKY3mHo6iVJJTJx4h0=;
+        b=F6gTQllRDZ0pUaTvfjQ44O+gkNpdEjSKKhwMSGJ20kMnVodmcVUJQC1hk+QcYsucGs
+         U3pBGmzCNI4eNBRRFod7xKSZWmW/a7QG3b9T3p6Gi+jXgrSNIQ6F6rytb5l9Kgi1NKpz
+         5NCpzy5RrW2OmXiGIVkvDsQX5Fw6o4fFtVCOwPsqIGl4tAbg6rEp4eu+AH4tRRgToAt8
+         XgLesJ/Pl5vOzTqRZQK7Kum8bHYxj/Vi6oOS6k0Vr1Xjhx1k4GwBK6HQM3ZtagDfvEi4
+         /5nWtMhjU3KDaUmgPl96MjTPIc5Ay8rIEVoZDA2JkL6mI+IXwqXbAtNo4ydLeug+rER2
+         L2MA==
+X-Gm-Message-State: AOAM533bKsknlEuFQKGR7E8lJNKIkEJA6UrfvNUzTyHpJypGb36T33Q9
+        btxdE/zfzM8gCJ+7l1Vt7bZJZ894sueTF84imwiFvA==
+X-Google-Smtp-Source: ABdhPJwpaoKAhf7YBb+13Nn+Kx8crS+r3pHNmhs/IkckIQ1sUmJKNxXCpW8CIp7Ll4JNzOB6vtAZ1z8y699gDaYjS1U=
+X-Received: by 2002:a17:907:2d20:: with SMTP id gs32mr2084348ejc.270.1636400125691;
+ Mon, 08 Nov 2021 11:35:25 -0800 (PST)
 MIME-Version: 1.0
 References: <20211025015156.33133-1-brad@pensando.io> <20211025015156.33133-12-brad@pensando.io>
- <20211025091731.GA2001@C02TD0UTHF1T.local> <CAK9rFnx7DgS3TYMmu5NBacV_6WC_UwJ=u7n3e_fGd0RpEcg3kA@mail.gmail.com>
- <YYj7MA4D1zCF39lh@FVFF77S0Q05N>
-In-Reply-To: <YYj7MA4D1zCF39lh@FVFF77S0Q05N>
+ <20211025091731.GA2001@C02TD0UTHF1T.local> <a20805de16e1196c2ed46dd949473c9a@kernel.org>
+ <CAK9rFnxH=DtC9vEJJCXkGEWjvg2E8vHPUcRy9rJpo34Furtmvw@mail.gmail.com> <87zgqi96nh.wl-maz@kernel.org>
+In-Reply-To: <87zgqi96nh.wl-maz@kernel.org>
 From:   Brad Larson <brad@pensando.io>
-Date:   Mon, 8 Nov 2021 11:02:05 -0800
-Message-ID: <CAK9rFnxzZJyVOtG7kkWkHiOD6_bcZqDp3SXYMiHeCY4RDAsKLA@mail.gmail.com>
+Date:   Mon, 8 Nov 2021 11:35:14 -0800
+Message-ID: <CAK9rFnz6X3wR6bMPkVicGoqj+prm5OmY3y3B_8Fc+WGJxcVsXA@mail.gmail.com>
 Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-To:     Mark Rutland <mark.rutland@arm.com>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+To:     Marc Zyngier <maz@kernel.org>
+Cc:     Mark Rutland <mark.rutland@arm.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Arnd Bergmann <arnd@arndb.de>,
         Linus Walleij <linus.walleij@linaro.org>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
@@ -78,47 +79,80 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Mark,
 
-On Mon, Nov 8, 2021 at 2:26 AM Mark Rutland <mark.rutland@arm.com> wrote:
+On Fri, Nov 5, 2021 at 4:35 AM Marc Zyngier <maz@kernel.org> wrote:
 >
-> No; as above, you should *not* use GIC_CPU_MASK_SIMPLE() at all for GICv3. i.e.
+> > > >> +                    interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
+> > > >> +
+> > > >> +                    gic_its: msi-controller@820000 {
+> > > >> +                            compatible = "arm,gic-v3-its";
+> > > >> +                            msi-controller;
+> > > >> +                            #msi-cells = <1>;
+> > > >> +                            reg = <0x0 0x820000 0x0 0x10000>;
+> > > >> +                            socionext,synquacer-pre-its =
+> > > >> +                                                    <0xc00000 0x1000000>;
+> > > >> +                    };
+> > > >> +            };
+> > > >
+> > > > Is there any shared lineage with Synquacer? The commit message didn't
+> > > > describe this quirk.
+> > >
+> > > Funny, it looks like there is a sudden outburst of stupid copy/paste
+> > > among HW designers. TI did the exact same thing recently.
+> > >
+> > > This totally negates all the advantages of having an ITS and makes
+> > > sure that you have all the overhead. Facepalm...
+> >
+> > Some background may help explain.  To generate an LPI a peripheral must
+> > write to the GITS_TRANSLATER (a specific address). For the ITS to know
+> > which translations apply to the generated interrupts, it must know which
+> > peripheral performed the write. The ID of the peripheral is known as its
+> > DeviceID, which is often carried along with the write as an AXI sideband
+> > signal.
 >
-> >         timer {
-> >                 compatible = "arm,armv8-timer";
-> >                 interrupts = <GIC_PPI 13 IRQ_TYPE_LEVEL_LOW>,
-> >                              <GIC_PPI 14 IRQ_TYPE_LEVEL_LOW>,
-> >                              <GIC_PPI 11 IRQ_TYPE_LEVEL_LOW>,
-> >                              <GIC_PPI 10 IRQ_TYPE_LEVEL_LOW>;
-> >         };
+> Yes, I happen to be vaguely familiar with the GIC architecture.
 >
-> Please see the GICv3 binding documentation:
+> > The Elba SoC doesn't carry the DeviceID, so we have to conjure one up
+> > between the peripheral and the ITS.  Instead of telling a peripheral to target
+> > the GITS_TRANSLATER directly, we instead direct it to a specific offset
+> > within a pre-ITS address range (our own IP block).  For writes that land in
+> > that memory range, we derive the DeviceID from (offset >> 2).  The pre-ITS
+> > block then sends (DeviceID, data) to the GITS_TRANSLATER.
+> >
+> > The hardware designer came up with the Pre-ITS mechanism in Feb 2018.
+> > When we looked at the upstream kernel later (we developed on 4.14)
+> > we found that not only did it support something similar, it supported the
+> > exact scheme we are using.
 >
->   Documentation/devicetree/bindings/interrupt-controller/arm,gic-v3.yaml
+> And this scheme is totally wrong. It breaks interrupt isolation.
 >
-> ... and note that it does not have the cpumask field as use by the binding for
-> prior generations of GIC:
+> Instead of having a single doorbell and getting the ITS to segregate
+> between devices itself, you end-up with multiple ones, allowing a
+> rogue device to impersonate another one by targeting another doorbell.
+> You can't even use an SMMU to preserve some isolation, because all the
+> doorbells are in the *same page*. Unmitigated disaster.
 >
->   Documentation/devicetree/bindings/interrupt-controller/arm,gic.yaml
+> At this stage, why did you bother having an ITS at all? You get none
+> of the security features. Only the excess area, memory allocation,
+> additional latency and complexity. All you get is a larger INTID
+> space.
 >
->
-> If you've seen other dts files using GIC_CPU_MASK_SIMPLE() with GICv3, those
-> are incorrect, and need to be fixed.
->
-> Thanks,
-> Mark.
+> This only shows that the hardware designer didn't understand the ITS
+> at all. Which seems a common pattern, unfortunately.
 
-I'll use the bindings documentation as the primary reference.  The use of
-GIC_CPU_MASK_SIMPLE() is removed and tests ok.  These arm64 dts files in
-linux-next are gic-v3 and use GIC_CPU_MASK_SIMPLE(1, 2, 4, 8)
+The Elba SoC is an embedded chip and not intended as a SBSA-compliant
+general platform.  In this implementation the ITS is used to provide
+message-based interrupts for our (potentially large set) of hardware
+based platform device instances.  Virtualization is not a consideration.
+We don't have a SMMU.  Interrupt isolation isn't a practical consideration
+for this product.  Propose adding a comment to the dts.
 
-./nvidia/tegra234.dtsi
-./renesas/r9a07g044.dtsi
-./renesas/r8a779a0.dtsi
-./qcom/sm8350.dtsi
-./qcom/sm8250.dtsi
-./freescale/fsl-ls1028a.dtsi
-./freescale/imx8mp.dtsi
-./freescale/imx8mn.dtsi
-./freescale/imx8mm.dtsi
++                       /*
++                        * Elba SoC implemented a pre-ITS that happened to
++                        * be the same implementation as synquacer.
++                        */
+                        its: interrupt-controller@820000 {
+                                compatible = "arm,gic-v3-its";
+                                msi-controller;
 
-Thanks,
+Thanks
 Brad
