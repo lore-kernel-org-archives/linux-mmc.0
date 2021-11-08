@@ -2,143 +2,188 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3268BC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 16:08:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5073EC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 17:06:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 177766101C
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 16:08:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E26F617E5
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Nov 2021 17:06:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241169AbhKHQLB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 11:11:01 -0500
-Received: from mo4-p02-ob.smtp.rzone.de ([85.215.255.84]:31187 "EHLO
-        mo4-p02-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240140AbhKHQLB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 11:11:01 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636387693;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
-    From:Subject:Sender;
-    bh=OWta8qPy7Rz4O3vAbvE7uq7v9vG3C895qdAIdUoRe4Q=;
-    b=B3HJSWEj6Y3IcSUm7V4uKH9P8VNJfXzhkN2xRHoHAwhdZtU0rqtOobdbvOx6Hs5Z0u
-    D7qjRgGkHymlmzvTcapuEtrNcaq+Jdc13kCwkx4D97zPscdfXrj1icWS3AiVC1cbc32g
-    ZJ40wzbX6Jm38MXvcaRAEstYsox0v2Gju35IjSfCsCGSP0yQMEJLqdtLToNnrnf03MxB
-    XFOXpiUKOscPC3uJH8+VmbrXtmnIhIbAU25VVUi6WlyrQ1cwDoQVnTfjAPtcTPaDw3gz
-    eZQOHjchdFfEFJAmUGUhTWPeaV1nubueoGxSO4+/3OwuQa2n30jDDASyy2btM3CpNPGM
-    8E3w==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj7gpw91N5y2S3gMZ+"
-X-RZG-CLASS-ID: mo00
-Received: from imac.fritz.box
-    by smtp.strato.de (RZmta 47.34.1 DYNA|AUTH)
-    with ESMTPSA id 902c63xA8G8CLcO
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Mon, 8 Nov 2021 17:08:12 +0100 (CET)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Subject: Re: [RFC v4 5/6] mmc: core: transplant ti,wl1251 quirks from to be
- retired omap_hsmmc
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-In-Reply-To: <CAPDyKFrH8f80cs5dbh=3ugjyEzoUYXhStpHQyhUSd6b9wD78vw@mail.gmail.com>
-Date:   Mon, 8 Nov 2021 17:08:12 +0100
-Cc:     =?utf-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Tony Lindgren <tony@atomide.com>,
-        Bean Huo <beanhuo@micron.com>,
-        =?utf-8?Q?Gra=C5=BEvydas_Ignotas?= <notasas@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        letux-kernel@openphoenux.org, kernel@pyra-handheld.com
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <2C170E2D-C9E6-4D90-AD0B-CFC0864F3F17@goldelico.com>
-References: <cover.1636103151.git.hns@goldelico.com>
- <3ca9a3099d86d631235b6c03ae260bc581cc8d60.1636103151.git.hns@goldelico.com>
- <CAPDyKFrH8f80cs5dbh=3ugjyEzoUYXhStpHQyhUSd6b9wD78vw@mail.gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-X-Mailer: Apple Mail (2.3445.104.21)
+        id S240459AbhKHRIu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 12:08:50 -0500
+Received: from mail-ot1-f43.google.com ([209.85.210.43]:37581 "EHLO
+        mail-ot1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240435AbhKHRIt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 12:08:49 -0500
+Received: by mail-ot1-f43.google.com with SMTP id v40-20020a056830092800b0055591caa9c6so26571202ott.4;
+        Mon, 08 Nov 2021 09:06:04 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=+wQZvNgyyjn3+v8l34ysdaksISh5LnqUaxH3QVKQ1xw=;
+        b=I8p2I/RHrX5ktMbVMimY3tdkhs9UkVsSUQIyDqOqzilLm9O0qfWSPiGpZ5W8AI2gcR
+         wzoicZrt21ix8CijJUuTI0ZUZWK/Jm9CPRKYq7Hw5/3ha8ajLzT/UoA9xF1EaD5k7G9c
+         7KO/uvGjLDMUmwtv+vHwfae65psYwlFMxksjvk5PrA7y3eZAb9QzA3tF9gNOGdGrcDpo
+         u19ksL6XGRsKJxOxouF8KMryEblHfISZZ4YNfKhv9ENzK0VkLfKOcyqWQ1f2nU4QYgBT
+         SPVJACgHTzBCz0YIhlzBNkD70Ah4Eo8jKNuVYvfAoPS2McZLH/YUMdGd9cTlhPHpZ8zn
+         LyxQ==
+X-Gm-Message-State: AOAM530XH9Siwd/CYc2xKrMCt/88HT5ZtOYopgMRXqiWqWuGO5K3kfEa
+        Lnzm+8jkIE313EwZzIj3Eg==
+X-Google-Smtp-Source: ABdhPJyE2m9Bd0mTaoOq+L1k+wveMzvoclq85f8PRR1u9eZbzhJbadk37zweFJPvLaJOuibGv4aDZw==
+X-Received: by 2002:a9d:5c2:: with SMTP id 60mr457729otd.104.1636391164189;
+        Mon, 08 Nov 2021 09:06:04 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id q29sm5703534oof.38.2021.11.08.09.06.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 08 Nov 2021 09:06:03 -0800 (PST)
+Received: (nullmailer pid 3517392 invoked by uid 1000);
+        Mon, 08 Nov 2021 17:06:01 -0000
+Date:   Mon, 8 Nov 2021 11:06:01 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jesse Taube <mr.bossman075@gmail.com>
+List-Id: <soc.lore.kernel.org>
+Cc:     linux-imx@nxp.com, mturquette@baylibre.com, sboyd@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
+        stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
+        adrian.hunter@intel.com, jirislaby@kernel.org,
+        giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
+Subject: Re: [PATCH v2 05/13] dt-bindings: clock: imx: Add documentation for
+ i.MXRT clock
+Message-ID: <YYlY+S9iuTjRNFW+@robh.at.kernel.org>
+References: <20211102225701.98944-1-Mr.Bossman075@gmail.com>
+ <20211102225653.W9X4uTuBfjTBCe44PlQdYj5pRnczkEUmvmbnCVeKkeM@z>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211102225653.W9X4uTuBfjTBCe44PlQdYj5pRnczkEUmvmbnCVeKkeM@z>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Nov 02, 2021 at 06:56:53PM -0400, Jesse Taube wrote:
+> From: Jesse Taube <mr.bossman075@gmail.com>
+> 
+> Add DT binding documentation for i.MXRT clock driver.
+> 
+> Cc: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> ---
+> V1->V2:
+> * Replace macros with values
+> ---
+>  .../bindings/clock/imxrt-clock.yaml           | 70 +++++++++++++++++++
+>  1 file changed, 70 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/clock/imxrt-clock.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/imxrt-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
+> new file mode 100644
+> index 000000000000..4e92f79cf707
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
+> @@ -0,0 +1,70 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/clock/imxrt-clock.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Clock bindings for Freescale i.MXRT
+> +
+> +maintainers:
+> +  - Giulio Benetti <giulio.benetti@benettiengineering.com>
+> +  - Jesse Taube <Mr.Bossman075@gmail.com>
+> +
+> +description: |
+> +  The clock consumer should specify the desired clock by having the clock
+> +  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
+> +  for the full list of i.MXRT clock IDs.
 
+blank line
 
-> Am 08.11.2021 um 16:33 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
->=20
-> On Fri, 5 Nov 2021 at 10:06, H. Nikolaus Schaller <hns@goldelico.com> =
-wrote:
->>=20
->> The TiWi WL1251 WiFi chip needs special setup of the sdio
->> interface before it can be probed.
->>=20
->> So far, this is done in omap_hsmmc_init_card() in omap_hsmmc.c
->> which makes it useable only if connected to omap devices
->> which use the omap_hsmmc. The OpenPandora is the most promient
->> example.
->>=20
->> There are plans to switch to a newer sdhci-omap driver and
->> retire omap_hsmmc. Hence this quirk must be reworked or moved
->> somewhere else. Ideally to some location that is not dependent
->> on the specific SoC mmc host driver.
->>=20
->> This is achieved by the new mmc_fixup_device() option introduced
->> by ("mmc: allow to match the device tree to apply quirks") to match
->> through device tree compatible string.
->>=20
->> This quirk will be called early right after where =
-host->ops->init_card()
->> and thus omap_hsmmc_init_card() was previously called.
->>=20
->> Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
->> ---
->> drivers/mmc/core/card.h   | 19 +++++++++++++++++++
->> drivers/mmc/core/quirks.h |  7 +++++++
->> 2 files changed, 26 insertions(+)
->>=20
->> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
->> index 089ede71d3150..20c8dfd6831cf 100644
->> --- a/drivers/mmc/core/card.h
->> +++ b/drivers/mmc/core/card.h
->> @@ -168,6 +168,25 @@ static inline void __maybe_unused =
-add_limit_rate_quirk(struct mmc_card *card,
->>        card->quirk_max_rate =3D data;
->> }
->>=20
->> +static inline void __maybe_unused wl1251_quirk(struct mmc_card =
-*card,
->> +                                              int data)
->> +{
->> +       /*
->> +        * We have TI wl1251 attached to this mmc. Pass this
->> +        * information to the SDIO core because it can't be
->> +        * probed by normal methods.
->> +        */
->> +
->> +       dev_info(card->host->parent, "found wl1251\n");
->> +       card->quirks |=3D MMC_QUIRK_NONSTD_SDIO;
->> +       card->cccr.wide_bus =3D 1;
->> +       card->cis.vendor =3D 0x104c;
->> +       card->cis.device =3D 0x9066;
->> +       card->cis.blksize =3D 512;
->> +       card->cis.max_dtr =3D 24000000;
->> +       card->ocr =3D 0x80;
->=20
-> In the past, we discussed a bit around why card->ocr needs to be set =
-here.
->=20
-> The reason could very well be that the DTS file is specifying the
-> vmmc-supply with 1.8V fixed regulator, which seems wrong to me.
->=20
-> I would be very interested to know if we would change
-> "regulator-min|max-microvolt" of the regulator in the DTS, into
-> somewhere in between 2700000-3600000 (2.7-3.6V) - and see if that
-> allows us to drop the assignment of "card->ocr =3D  0x80;" above. =
-Would
-> you mind doing some tests for this?
->=20
-> If that works, we should add some comments about it above, I think.
+> +properties:
+> +  compatible:
+> +    oneOf:
 
-Will try before posting next version [PATCH v1].
+Don't need oneOf for a single entry.
 
+> +      - enum:
+> +          - fsl,imxrt1050-ccm
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    minItems: 1
+> +
+> +  clock-names:
+> +    minItems: 1
+
+You have to define the name.
+
+> +
+> +  '#clock-cells':
+> +    const: 1
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - clock-names
+> +  - '#clock-cells'
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  - |
+> +    anatop: anatop@400d8000 {
+> +      compatible = "fsl,imxrt-anatop";
+> +      reg = <0x400d8000 0x4000>;
+> +    };
+
+Not relevant to the example.
+
+> +
+> +    ccm@400fc000 {
+> +      compatible = "fsl,imxrt1050-ccm";
+> +      reg = <0x400fc000 0x4000>;
+> +      interrupts = <95>,<96>;
+> +      clocks = <&osc>;
+> +      clock-names = "osc";
+> +      #clock-cells = <1>;
+> +    };
+> +
+> +    gpt: timer@401ec000 {
+
+Drop unused labels.
+
+> +      compatible = "fsl,imx53-gpt", "fsl,imx31-gpt";
+
+Probably should be: "fsl,imxrt1050-gpt", "fsl,imx31-gpt"
+
+Unless there's same features/quirks as the MX53 version?
+
+> +      reg = <0x401ec000 0x4000>;
+> +      interrupts = <100>;
+> +      clocks = <&clks 3>;
+> +      clock-names = "per";
+> +    };
+> -- 
+> 2.33.1
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> 
