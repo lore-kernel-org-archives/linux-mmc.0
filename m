@@ -2,106 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E094C43217
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 02:59:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF034C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 07:58:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7D05F6128B
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 02:59:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD779611CA
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 07:58:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242204AbhKIDB4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 22:01:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42422 "EHLO
+        id S243833AbhKIIBQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Nov 2021 03:01:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236778AbhKIDBz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 22:01:55 -0500
-Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A47A7C061570;
-        Mon,  8 Nov 2021 18:59:10 -0800 (PST)
-Received: by mail-qt1-x82a.google.com with SMTP id j17so3608491qtx.2;
-        Mon, 08 Nov 2021 18:59:10 -0800 (PST)
+        with ESMTP id S235038AbhKIIBP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2021 03:01:15 -0500
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22007C061764;
+        Mon,  8 Nov 2021 23:58:30 -0800 (PST)
+Received: by mail-pl1-x62c.google.com with SMTP id p18so19403235plf.13;
+        Mon, 08 Nov 2021 23:58:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=KTb+7uV/W+NPaaM9VZAqKHX3rqV7nBXAeF1f2Hw+bI4=;
-        b=ij+A9vEaG/2b35tGtQspRFkQMmic+mzirQ6ss4f/MwfoH4dzDnv59zb8J+Z+6X+kh7
-         4yjzK5yktnBWaipNbGhofbMEcLokPg7SctncpMsolsWZCuvWq7gJSy7Gai6sWstsXsrb
-         CMf6vZW/0s4TevvgP7k2kMqwgi89Tcvt0JJJVRhUtQUSKEbx4eO1+RaNnHexPy6SE4F8
-         wCVdqB0/ghtqKkXCYW4O7akYJrWwXwCCzvIW8M4H3/qOhLvf4PJmRjuIgDD5YfkSCr5y
-         4rP3pBXOd0s5VfWM3hWx75mee76G+majcCOiD/sB3Tw/sUYZt3TVVz/bhAQAMicr6/ta
-         WsAA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references;
+        bh=vb4eBAY7N0LkA2iKekvmFSd0kTlc+hgeAZzRroUDRuw=;
+        b=kpLT0wPZJt6N/49Pzo75OHSy2fqytkL41+ufcjkYpfslXkv3VR+ssVUG7Gru6hZdAb
+         BR6paiz71+CewpnfAb6crR2dRV5bM8sSc7U864hrzw3TlxFoTdrt9nLxXK40dcOnEFlr
+         pvILyaldpTye8QyT8kBZZHky4Cy7w3mN6NKEnnCwEi0rm2MJb9Vb94giXZGmnua3PHJq
+         0DK3FrfXqXymLu+MGP5rvEX9uqHYgYYbBIO8KFQvJPEwPAQYRSVGmcHaQkbMCWoHGfxF
+         1Yw5w1lMhyE5F2loMRunWKnRxiOnhBzpKkHlV2bVRJw8No7UWyvnLImBRgX3l2noCj1Z
+         k6qQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=KTb+7uV/W+NPaaM9VZAqKHX3rqV7nBXAeF1f2Hw+bI4=;
-        b=jhlQz4jW0G5/fuenasVSbO62E9MQXQqHKPmCypm54ja7hWNS/9G6or/PEhjk5yDayI
-         CQVoBnqMJzOcFUQvhAo/+CMA4lHY4guucDQOjPsIw4BBH+B+C1SICYk2uXK9hIXS/UAd
-         Du4yhg+RWpkI/VMA9hxFmUXISLD7pRgfavCOzvGLxGcx78yUqOfwZWsRyFj0kWpqiFGK
-         q4iEQQTMfxXVCUr4zxmcVy9QQCZaJ9f2BibFvQqIkrZD2QmMxG6rwaX4GHsgu0DTnWOd
-         NLgUK619pL8kfeTDsvJzDo7ylkE4kOsAcedShZ5OkCjiOw9t8Ub4l5lSXhDS2ywtxGnO
-         qfXw==
-X-Gm-Message-State: AOAM530mQH1aeYXMFVbxw91XhH3R6C3Wc/ahQrIT0xKB/uz7dA6zk+SK
-        YXDx0/3AEZeb8ll3rpula00=
-X-Google-Smtp-Source: ABdhPJwFKM3gy/6Cpe0SzF+P+k3n+KU7EeM7tmAMCtcmrYQX7XtMBHopzbqmIn4FtK1sLFxDRdNQ6g==
-X-Received: by 2002:a05:622a:2d6:: with SMTP id a22mr4824094qtx.220.1636426749863;
-        Mon, 08 Nov 2021 18:59:09 -0800 (PST)
-Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id g13sm11137437qko.103.2021.11.08.18.59.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 08 Nov 2021 18:59:09 -0800 (PST)
-Message-ID: <7a96b7aa-b7f7-ac9d-89e9-4843104f4254@gmail.com>
-Date:   Mon, 8 Nov 2021 21:59:07 -0500
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.2.1
-Subject: Re: [PATCH v2 02/13] dt-bindings: pinctrl: add i.MXRT1050 pinctrl
- binding doc
-Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>
-List-Id: <soc.lore.kernel.org>
-Cc:     Rob Herring <robh@kernel.org>, mturquette@baylibre.com,
-        aisheng.dong@nxp.com, linux@armlinux.org.uk,
-        s.hauer@pengutronix.de, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, kernel@pengutronix.de,
-        shawnguo@kernel.org, linux-serial@vger.kernel.org,
-        jirislaby@kernel.org, robh+dt@kernel.org, abel.vesa@nxp.com,
-        festevam@gmail.com, ulf.hansson@linaro.org,
-        linux-kernel@vger.kernel.org, stefan@agner.ch, olof@lixom.net,
-        sboyd@kernel.org, nobuhiro1.iwamatsu@toshiba.co.jp,
-        linux-clk@vger.kernel.org, arnd@arndb.de,
-        devicetree@vger.kernel.org, linux-imx@nxp.com, soc@kernel.org,
-        gregkh@linuxfoundation.org, giulio.benetti@benettiengineering.com
-References: <20211102225701.98944-1-Mr.Bossman075@gmail.com>
- <20211102225701.98944-3-Mr.Bossman075@gmail.com>
- <1635902437.626178.3880384.nullmailer@robh.at.kernel.org>
- <c97c45ac-d9d6-a21b-9c43-69f58b07f265@gmail.com>
- <CACRpkda9e8FtjR3XB97Lu8X5=yeApk==4+zSqo3Qp6bWxgJAcw@mail.gmail.com>
-From:   Jesse Taube <mr.bossman075@gmail.com>
-In-Reply-To: <CACRpkda9e8FtjR3XB97Lu8X5=yeApk==4+zSqo3Qp6bWxgJAcw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references;
+        bh=vb4eBAY7N0LkA2iKekvmFSd0kTlc+hgeAZzRroUDRuw=;
+        b=YUAGzIJjqLhHMaXN3+9hUfUokO8yaCJ8J1XVoOImnvQ/IlZ+Z2iihAFslqUb9y8JL2
+         b3d7zNmjeKUF6x6vOq27DvNGJqFXBIYPJ1MbVl6zN+CStcfIuT5dDiys7FXVp1xf3dBc
+         ax/tQ4kznZNAwnVWTdbECncpnLsFMDVSVFXmpPJ8/MF8yeoLX+vnbABIvp2mNVJlkLcT
+         lem8ZKwvoZXZws6DHVSPKruhvmUJOpFrPLIr7E9IDriQ5CI4CMgvvdSTcgso/j2DFXL1
+         XEwwvGFKm1YBa+10XO0srZ5kLjN6TfpFPSoqyNCZnG20wZ5LfxKUG5g5XaPjsVByPXlM
+         OtTw==
+X-Gm-Message-State: AOAM531bxMNgnqkSuoI2XzGw74BS7n3jq328DzE3/CqFR3EuqP6RjmqI
+        kyyjgaOJNmSXMyPme59L0xI=
+X-Google-Smtp-Source: ABdhPJxnmtWC3JYFZjtqMdreyxgTZBG8189r0SLPti74aaLSDn2TxU+yRGNkh4u+6hEc9AB6Hy0mIA==
+X-Received: by 2002:a17:90b:1806:: with SMTP id lw6mr5049028pjb.59.1636444709599;
+        Mon, 08 Nov 2021 23:58:29 -0800 (PST)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id x135sm10635714pfd.78.2021.11.08.23.58.27
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 08 Nov 2021 23:58:29 -0800 (PST)
+From:   "LH.Kuo" <lhjeff911@gmail.com>
+X-Google-Original-From: "LH.Kuo" <lh.kuo@sunplus.com>
+To:     p.zabel@pengutronix.de, daniel.thompson@linaro.org,
+        lee.jones@linaro.org, u.kleine-koenig@pengutronix.de,
+        ulf.hansson@linaro.org, robh+dt@kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+Cc:     qinjian@cqplus1.com, wells.lu@sunplus.com,
+        "LH.Kuo" <lh.kuo@sunplus.com>
+Subject: [PATCH v2 0/2] Add SD/SDIO control driver for Sunplus SP7021 SoC               
+Date:   Tue,  9 Nov 2021 15:58:23 +0800
+Message-Id: <1636444705-17883-1-git-send-email-lh.kuo@sunplus.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
+References: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+	This is a patch series for SD/SDIO driver for Sunplus SP7021 SoC.										
+											
+	Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates										
+	many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and										
+	etc.) into a single chip. It is designed for industrial control.										
+											
+	Refer to:										
+	https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview										
+	https://tibbo.com/store/plus1.html	
 
+LH.Kuo (2):
+  mmc: Add SD/SDIO driver for Sunplus SP7021
+  devicetree bindings mmc Add bindings doc for Sunplus SP7021
 
-On 11/8/21 20:07, Linus Walleij wrote:
-> On Wed, Nov 3, 2021 at 2:38 AM Jesse Taube <mr.bossman075@gmail.com> wrote:
-> 
->> Ah I thought it would stop make at error i see it now, is there a way to
->> do one file.
-> 
-> Yes:
-> 
-> make dt_binding_check DT_SCHEMA_FILES=Documentation/...
-Thank you :). I'm sorry about the lack of activity recently but Giulio 
-has his work and i have school, but don't worry we are making progress. 
-Thanks so much for everyone's help with this, and dealing with my 
-newbieness.
-> Yours,
-> Linus Walleij
-> 
+ .../devicetree/bindings/mmc/sunplus-sd2.yaml       |   82 ++
+ MAINTAINERS                                        |    7 +
+ drivers/mmc/host/Kconfig                           |   10 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sunplus_sd2.c                     | 1068 ++++++++++++++++++++
+ drivers/mmc/host/sunplus_sd2.h                     |  155 +++
+ 6 files changed, 1323 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+ create mode 100644 drivers/mmc/host/sunplus_sd2.c
+ create mode 100644 drivers/mmc/host/sunplus_sd2.h
+
+-- 
+2.7.4
+
