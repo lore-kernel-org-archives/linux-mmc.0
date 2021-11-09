@@ -2,61 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98C83C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:28:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E094C43217
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 02:59:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 81AA9610A3
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:28:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D05F6128B
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 02:59:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242657AbhKIBa5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 20:30:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48160 "EHLO
+        id S242204AbhKIDB4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 22:01:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244187AbhKIB2y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 20:28:54 -0500
-Received: from mail-oo1-xc31.google.com (mail-oo1-xc31.google.com [IPv6:2607:f8b0:4864:20::c31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 283A7C0797B8
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Nov 2021 17:07:26 -0800 (PST)
-Received: by mail-oo1-xc31.google.com with SMTP id m37-20020a4a9528000000b002b83955f771so6388927ooi.7
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Nov 2021 17:07:26 -0800 (PST)
+        with ESMTP id S236778AbhKIDBz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Nov 2021 22:01:55 -0500
+Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A47A7C061570;
+        Mon,  8 Nov 2021 18:59:10 -0800 (PST)
+Received: by mail-qt1-x82a.google.com with SMTP id j17so3608491qtx.2;
+        Mon, 08 Nov 2021 18:59:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ednwC4rk+fMRoZ56y8enAsmD1OcJ155WuvM3vrzbF0g=;
-        b=kW2VZKXq10e3+j2pN2rREnvfGn/ed2pBKv/FDDZGYkiJ1B/Tm+e592rBZOssvxp1nL
-         lJ8uNMknOuWUpEbsMD9f5YGmpAyp6iPS1isss6b24feSEfiOdZDz5BB1kClvWeRx3m+k
-         nSKJo7mf0P6cENwhEMcYQl79zQf2G4kpxcTjF8qti3XLvenzR4E8B9owfJGlT5swp/tO
-         0E211Heecg5kaSUuT4hqK7LMmN/Dv9ANQuL2x50Vl2dhZTV7X4DyPTdhV7FFap/gkuZA
-         a7curh+yVVMTtyUoMlA9s4fMN4nseVOWXU0tC4BMuT7AR0lvBWHgKVcMoJw8R1BKkXeI
-         mtJg==
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=KTb+7uV/W+NPaaM9VZAqKHX3rqV7nBXAeF1f2Hw+bI4=;
+        b=ij+A9vEaG/2b35tGtQspRFkQMmic+mzirQ6ss4f/MwfoH4dzDnv59zb8J+Z+6X+kh7
+         4yjzK5yktnBWaipNbGhofbMEcLokPg7SctncpMsolsWZCuvWq7gJSy7Gai6sWstsXsrb
+         CMf6vZW/0s4TevvgP7k2kMqwgi89Tcvt0JJJVRhUtQUSKEbx4eO1+RaNnHexPy6SE4F8
+         wCVdqB0/ghtqKkXCYW4O7akYJrWwXwCCzvIW8M4H3/qOhLvf4PJmRjuIgDD5YfkSCr5y
+         4rP3pBXOd0s5VfWM3hWx75mee76G+majcCOiD/sB3Tw/sUYZt3TVVz/bhAQAMicr6/ta
+         WsAA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ednwC4rk+fMRoZ56y8enAsmD1OcJ155WuvM3vrzbF0g=;
-        b=H5NTYWNvtVrSO9UlyXnTeT0qjAeByCgNvfj8xXL+2aNjOI77YlWVF1eEopXwouETvO
-         XL/Esp2zGlWkMMcA68zNa4OeyWEqYcnUJl3V2tLSeYsqqfw8fi5dFLF7QY6lE3BNvO2E
-         aqr7+lBqTMrp36pDhA9pIhvYAT5L+Z4OFMUkvz5UlVLpEhOcLXsXy6nuNo7gA0Y1akiu
-         zlcGqovnfIC4Bu72Ca8wXRwDSZDOtIuFEIp9cqU+t0fyfNehxbpA9AEfOCB1vGHsYcvh
-         gjEAV8AEAzrqMdCuagim875lJ3ozi1HvdN++CLYso2g4p0mPdloO1xfKUXP2bcPKP0fB
-         OqLw==
-X-Gm-Message-State: AOAM533sk/Xm7F9nnJvMhN2w2VLWi/oEYQIq999PmCKzQr5fwrpRMhni
-        Qy27rM4VU2OOXtX8uHgefTjvazI5xuUEE7qRY0RX/Q==
-X-Google-Smtp-Source: ABdhPJxZSqASgOxakIs7bpwXgWYlDpKIrlNu94fm32sHo3EvuzrjMEZORAzZOMFOE3CUot1IZlKvoozayP2kRdmgAXQ=
-X-Received: by 2002:a4a:e5cd:: with SMTP id r13mr1831608oov.84.1636420045513;
- Mon, 08 Nov 2021 17:07:25 -0800 (PST)
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=KTb+7uV/W+NPaaM9VZAqKHX3rqV7nBXAeF1f2Hw+bI4=;
+        b=jhlQz4jW0G5/fuenasVSbO62E9MQXQqHKPmCypm54ja7hWNS/9G6or/PEhjk5yDayI
+         CQVoBnqMJzOcFUQvhAo/+CMA4lHY4guucDQOjPsIw4BBH+B+C1SICYk2uXK9hIXS/UAd
+         Du4yhg+RWpkI/VMA9hxFmUXISLD7pRgfavCOzvGLxGcx78yUqOfwZWsRyFj0kWpqiFGK
+         q4iEQQTMfxXVCUr4zxmcVy9QQCZaJ9f2BibFvQqIkrZD2QmMxG6rwaX4GHsgu0DTnWOd
+         NLgUK619pL8kfeTDsvJzDo7ylkE4kOsAcedShZ5OkCjiOw9t8Ub4l5lSXhDS2ywtxGnO
+         qfXw==
+X-Gm-Message-State: AOAM530mQH1aeYXMFVbxw91XhH3R6C3Wc/ahQrIT0xKB/uz7dA6zk+SK
+        YXDx0/3AEZeb8ll3rpula00=
+X-Google-Smtp-Source: ABdhPJwFKM3gy/6Cpe0SzF+P+k3n+KU7EeM7tmAMCtcmrYQX7XtMBHopzbqmIn4FtK1sLFxDRdNQ6g==
+X-Received: by 2002:a05:622a:2d6:: with SMTP id a22mr4824094qtx.220.1636426749863;
+        Mon, 08 Nov 2021 18:59:09 -0800 (PST)
+Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
+        by smtp.gmail.com with ESMTPSA id g13sm11137437qko.103.2021.11.08.18.59.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 08 Nov 2021 18:59:09 -0800 (PST)
+Message-ID: <7a96b7aa-b7f7-ac9d-89e9-4843104f4254@gmail.com>
+Date:   Mon, 8 Nov 2021 21:59:07 -0500
 MIME-Version: 1.0
-References: <20211102225701.98944-1-Mr.Bossman075@gmail.com>
- <20211102225701.98944-3-Mr.Bossman075@gmail.com> <1635902437.626178.3880384.nullmailer@robh.at.kernel.org>
- <c97c45ac-d9d6-a21b-9c43-69f58b07f265@gmail.com>
-In-Reply-To: <c97c45ac-d9d6-a21b-9c43-69f58b07f265@gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Tue, 9 Nov 2021 02:07:14 +0100
-Message-ID: <CACRpkda9e8FtjR3XB97Lu8X5=yeApk==4+zSqo3Qp6bWxgJAcw@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.2.1
 Subject: Re: [PATCH v2 02/13] dt-bindings: pinctrl: add i.MXRT1050 pinctrl
  binding doc
-To:     Jesse Taube <mr.bossman075@gmail.com>
+Content-Language: en-US
+To:     Linus Walleij <linus.walleij@linaro.org>
 List-Id: <soc.lore.kernel.org>
 Cc:     Rob Herring <robh@kernel.org>, mturquette@baylibre.com,
         aisheng.dong@nxp.com, linux@armlinux.org.uk,
@@ -71,19 +74,34 @@ Cc:     Rob Herring <robh@kernel.org>, mturquette@baylibre.com,
         linux-clk@vger.kernel.org, arnd@arndb.de,
         devicetree@vger.kernel.org, linux-imx@nxp.com, soc@kernel.org,
         gregkh@linuxfoundation.org, giulio.benetti@benettiengineering.com
-Content-Type: text/plain; charset="UTF-8"
+References: <20211102225701.98944-1-Mr.Bossman075@gmail.com>
+ <20211102225701.98944-3-Mr.Bossman075@gmail.com>
+ <1635902437.626178.3880384.nullmailer@robh.at.kernel.org>
+ <c97c45ac-d9d6-a21b-9c43-69f58b07f265@gmail.com>
+ <CACRpkda9e8FtjR3XB97Lu8X5=yeApk==4+zSqo3Qp6bWxgJAcw@mail.gmail.com>
+From:   Jesse Taube <mr.bossman075@gmail.com>
+In-Reply-To: <CACRpkda9e8FtjR3XB97Lu8X5=yeApk==4+zSqo3Qp6bWxgJAcw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 3, 2021 at 2:38 AM Jesse Taube <mr.bossman075@gmail.com> wrote:
 
-> Ah I thought it would stop make at error i see it now, is there a way to
-> do one file.
 
-Yes:
-
-make dt_binding_check DT_SCHEMA_FILES=Documentation/...
-
-Yours,
-Linus Walleij
+On 11/8/21 20:07, Linus Walleij wrote:
+> On Wed, Nov 3, 2021 at 2:38 AM Jesse Taube <mr.bossman075@gmail.com> wrote:
+> 
+>> Ah I thought it would stop make at error i see it now, is there a way to
+>> do one file.
+> 
+> Yes:
+> 
+> make dt_binding_check DT_SCHEMA_FILES=Documentation/...
+Thank you :). I'm sorry about the lack of activity recently but Giulio 
+has his work and i have school, but don't worry we are making progress. 
+Thanks so much for everyone's help with this, and dealing with my 
+newbieness.
+> Yours,
+> Linus Walleij
+> 
