@@ -2,212 +2,169 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC7D5C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 08:42:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FF23C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 10:58:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A1AF46103D
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 08:42:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 83DB4611C4
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 10:58:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244404AbhKIIpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Nov 2021 03:45:04 -0500
-Received: from mga17.intel.com ([192.55.52.151]:34445 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S244408AbhKIIpC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 9 Nov 2021 03:45:02 -0500
-X-IronPort-AV: E=McAfee;i="6200,9189,10162"; a="213136740"
-X-IronPort-AV: E=Sophos;i="5.87,219,1631602800"; 
-   d="scan'208";a="213136740"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2021 00:41:55 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.87,219,1631602800"; 
-   d="scan'208";a="601733520"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga004.jf.intel.com with ESMTP; 09 Nov 2021 00:41:54 -0800
-Subject: Re: [PATCH] mmc: sdhci: disable ADMA when PAGE SIZE is 64K
-To:     Bough Chen <haibo.chen@nxp.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>
-References: <1635302841-18997-1-git-send-email-haibo.chen@nxp.com>
- <34233159-2931-b02a-ef16-1029d8d7829a@intel.com>
- <VI1PR04MB5294AFD5A60F98A73E12A16290879@VI1PR04MB5294.eurprd04.prod.outlook.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <74c896b2-5e9e-b1c9-485f-9c4ffd7d7072@intel.com>
-Date:   Tue, 9 Nov 2021 10:41:53 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
-MIME-Version: 1.0
-In-Reply-To: <VI1PR04MB5294AFD5A60F98A73E12A16290879@VI1PR04MB5294.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+        id S243137AbhKILBh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Nov 2021 06:01:37 -0500
+Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.51]:32615 "EHLO
+        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S241381AbhKILBg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Nov 2021 06:01:36 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636455520;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
+    From:Subject:Sender;
+    bh=bOG02lyzrxPvPgbhhEPxvJgmZtyePuW31NB1W7OZX9M=;
+    b=Tw6vovwnao8Vxi45qZyJVEp8VoUdjuDTgLEZOTSb/kSUcYDrLEqpxStSVhssB55ngu
+    wdTDkAXD2Bhn2LOSEN8kdebtOHS2NdCPyhf2FO3LiJDfH5MXj9Ph9DJksh5dwvg7azZM
+    UFh5jX8IV4I05zXocOjJclyYWJqvO58lSL8VRk5pw/Bz22O+pCkSw1RNkvxm5L6uOx4x
+    MJ8Za0TlepwYXMFADBg9M1+KPNGalssmC7mC2DwPxVhDbW/l0q+NM42uu2jammBn3EPh
+    6e86JFDBk9VWlc6raF5JreDH0wvI/3jfRFpbv9AeAFD4txkYQ0+vLwRdnnAO1C4OLe8M
+    wL7A==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj7gpw91N5y2S3i8cT6Q=="
+X-RZG-CLASS-ID: mo00
+Received: from imac.fritz.box
+    by smtp.strato.de (RZmta 47.34.1 DYNA|AUTH)
+    with ESMTPSA id 902c63xA9AwdOVl
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Tue, 9 Nov 2021 11:58:39 +0100 (CET)
+Content-Type: text/plain;
+        charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
+Subject: Re: [RFC v4 5/6] mmc: core: transplant ti,wl1251 quirks from to be
+ retired omap_hsmmc
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+In-Reply-To: <CAPDyKFrH8f80cs5dbh=3ugjyEzoUYXhStpHQyhUSd6b9wD78vw@mail.gmail.com>
+Date:   Tue, 9 Nov 2021 11:58:38 +0100
+Cc:     =?utf-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Tony Lindgren <tony@atomide.com>,
+        Bean Huo <beanhuo@micron.com>,
+        =?utf-8?Q?Gra=C5=BEvydas_Ignotas?= <notasas@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        letux-kernel@openphoenux.org, kernel@pyra-handheld.com
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <C2F065E7-10C5-4701-A6F7-6B5A6198F0DF@goldelico.com>
+References: <cover.1636103151.git.hns@goldelico.com>
+ <3ca9a3099d86d631235b6c03ae260bc581cc8d60.1636103151.git.hns@goldelico.com>
+ <CAPDyKFrH8f80cs5dbh=3ugjyEzoUYXhStpHQyhUSd6b9wD78vw@mail.gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+X-Mailer: Apple Mail (2.3445.104.21)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/10/2021 14:40, Bough Chen wrote:
->> -----Original Message-----
->> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
->> Sent: 2021年10月27日 13:50
->> To: Bough Chen <haibo.chen@nxp.com>; ulf.hansson@linaro.org
->> Cc: linux-mmc@vger.kernel.org; dl-linux-imx <linux-imx@nxp.com>
->> Subject: Re: [PATCH] mmc: sdhci: disable ADMA when PAGE SIZE is 64K
->>
->> On 27/10/2021 05:47, haibo.chen@nxp.com wrote:
->>> From: Haibo Chen <haibo.chen@nxp.com>
->>>
->>> For ADMA with quirks SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC, it
->> limit
->>> the max segment size as 64K-1. Currently, linux kernel support
->>> 4K/16K/64K PAGE_SIZE. If choose 64K PAGE_SIZE, sdhci in ADMA mode with
->>> the upper quirks will meet issue.
->>>
->>> Though mmc driver give block layer the max segment size through
->>> blk_queue_max_segment_size(), but in this function, it will compare
->>> the argument with PAGE_SIZE, and will choose PAGE_SIZE if the argument
->>> is smaller than PAGE_SIZE. When PAGE_SIZE is 64K, finally the mmc
->>> request queue will get 64K as the max segment size. Once the sg data
->>> length=64K, ADMA will meet issue. For this case, need to disable ADMA
->>> mode.
->>
->> Sorry, I didn't look closely enough at this.
->>
->> For the 64K PAGE_SIZE case, did you try blk_queue_virt_boundary() with a 32K
->> mask instead of blk_queue_max_segment_size() ?
->> e.g. a hack for testing purposes like this:
-> 
-> I test on my board, this do not work, I still can see sg data_length = 65536.
+Hi Ulf,
 
-What about tweaking the logic to write ADMA descriptors?
-Something like below for instance?
+> Am 08.11.2021 um 16:33 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+>=20
+> On Fri, 5 Nov 2021 at 10:06, H. Nikolaus Schaller <hns@goldelico.com> =
+wrote:
+>>=20
+>> +       card->quirks |=3D MMC_QUIRK_NONSTD_SDIO;
+>> +       card->cccr.wide_bus =3D 1;
+>> +       card->cis.vendor =3D 0x104c;
+>> +       card->cis.device =3D 0x9066;
+>> +       card->cis.blksize =3D 512;
+>> +       card->cis.max_dtr =3D 24000000;
+>> +       card->ocr =3D 0x80;
+>=20
+> In the past, we discussed a bit around why card->ocr needs to be set =
+here.
+>=20
+> The reason could very well be that the DTS file is specifying the
+> vmmc-supply with 1.8V fixed regulator, which seems wrong to me.
 
+I have checked with the schematics but the wlan_en regulator-fixed is =
+just a GPIO
+controlling some pin of the wifi chip.
 
+I guess it enables some regulator or power switch inside the wifi module =
+which
+has unknown voltage.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 269c86569402..07c6da1f2f0f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -771,7 +771,19 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
- 			len -= offset;
- 		}
- 
--		BUG_ON(len > 65536);
-+		/*
-+		 * The block layer forces a minimum segment size of PAGE_SIZE,
-+		 * so 'len' can be too big here if PAGE_SIZE >= 64KiB. Write
-+		 * multiple descriptors, noting that the ADMA table is sized
-+		 * for 4KiB chunks anyway, so it will be big enough.
-+		 */
-+		while (len > host->max_adma) {
-+			int n = 32 * 1024; /* 32KiB*/
-+
-+			__sdhci_adma_write_desc(host, &desc, addr, n, ADMA2_TRAN_VALID);
-+			addr += n;
-+			len -= n;
-+		}
- 
- 		/* tran, valid */
- 		if (len)
-@@ -3968,6 +3980,7 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
- 	 * descriptor for each segment, plus 1 for a nop end descriptor.
- 	 */
- 	host->adma_table_cnt = SDHCI_MAX_SEGS * 2 + 1;
-+	host->max_adma = 65536;
- 
- 	host->max_timeout_count = 0xE;
- 
-@@ -4633,10 +4646,12 @@ int sdhci_setup_host(struct sdhci_host *host)
- 	 * be larger than 64 KiB though.
- 	 */
- 	if (host->flags & SDHCI_USE_ADMA) {
--		if (host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC)
-+		if (host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC) {
-+			host->max_adma = 65532; /* 32-bit alignment */
- 			mmc->max_seg_size = 65535;
--		else
-+		} else {
- 			mmc->max_seg_size = 65536;
-+		}
- 	} else {
- 		mmc->max_seg_size = mmc->max_req_size;
- 	}
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index bb883553d3b4..d7929d725730 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -340,7 +340,8 @@ struct sdhci_adma2_64_desc {
- 
- /*
-  * Maximum segments assuming a 512KiB maximum requisition size and a minimum
-- * 4KiB page size.
-+ * 4KiB page size. Note this also allows enough for multiple descriptors in
-+ * case of PAGE_SIZE >= 64KiB.
-  */
- #define SDHCI_MAX_SEGS		128
- 
-@@ -543,6 +544,7 @@ struct sdhci_host {
- 	unsigned int blocks;	/* remaining PIO blocks */
- 
- 	int sg_count;		/* Mapped sg entries */
-+	int max_adma;		/* Max. length in ADMA descriptor */
- 
- 	void *adma_table;	/* ADMA descriptor table */
- 	void *align_buffer;	/* Bounce buffer */
--- 
-2.25.1
+We can interpret this as two sequential power-switches. The first one =
+controlled
+by the gpio-register bit and switches gpio power to the gpio pad of the =
+SoC. The second
+one switches the battery voltage to the internal circuits of the wifi =
+module.
 
+The GPIO itself is on 1.8V VIO level which seems to be the reason for =
+the min/max.
 
+Now it is a little arbitrary what the DTS describes: the gpio voltage or =
+the unknown
+internal voltage of the second switch.
 
+So from hardware perspective the min/max values are irrelevant.
 
-> 
-> Best Regards
-> Haibo Chen
->>
->> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c index
->> b15c034b42fb..4c3a9d999500 100644
->> --- a/drivers/mmc/core/queue.c
->> +++ b/drivers/mmc/core/queue.c
->> @@ -376,8 +376,7 @@ static void mmc_setup_queue(struct mmc_queue *mq,
->> struct mmc_card *card)
->>  	 * both blk_queue_max_segment_size().
->>  	 */
->>  	if (!host->can_dma_map_merge)
->> -		blk_queue_max_segment_size(mq->queue,
->> -			round_down(host->max_seg_size, block_size));
->> +		blk_queue_virt_boundary(mq->queue, 0x7fff);
->>
->>  	dma_set_max_seg_size(mmc_dev(host),
->> queue_max_segment_size(mq->queue));
->>
->>
->>
->>
->>>
->>> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 6 ++++++
->>>  1 file changed, 6 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
->>> dbe87995596c..47e0c0156b94 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -4187,6 +4187,12 @@ int sdhci_setup_host(struct sdhci_host *host)
->>>  		host->flags &= ~SDHCI_USE_ADMA;
->>>  	}
->>>
->>> +	if ((host->quirks & SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC) &&
->>> +		PAGE_SIZE >= 65536 && (host->flags & SDHCI_USE_ADMA)) {
->>> +		DBG("Disabling ADMA as it don't support >= 64K PAGE_SIZE\n");
->>> +		host->flags &= ~SDHCI_USE_ADMA;
->>> +	}
->>> +
->>>  	if (sdhci_can_64bit_dma(host))
->>>  		host->flags |= SDHCI_USE_64_BIT_DMA;
->>>
->>>
-> 
+>=20
+> I would be very interested to know if we would change
+> "regulator-min|max-microvolt" of the regulator in the DTS, into
+> somewhere in between 2700000-3600000 (2.7-3.6V)
+
+Ok, if the mmc driver does something with these values it may have =
+indeed an influence.
+
+> - and see if that
+> allows us to drop the assignment of "card->ocr =3D  0x80;" above. =
+Would
+> you mind doing some tests for this?
+
+Well, with min/max=3D3.3V and no ocr I get:
+
+[    2.765136] omap_hsmmc 480ad000.mmc: card claims to support voltages =
+below defined range
+[    2.776367] omap_hsmmc 480ad000.mmc: found wl1251
+[    2.782287] mmc2: new SDIO card at address 0001
+[   10.874237] omap_hsmmc 480ad000.mmc: could not set regulator OCR =
+(-22)
+[   10.945373] wl1251_sdio: probe of mmc2:0001:1 failed with error -16
+
+Adding back card->ocr =3D 0x80 (and keeping 3.3V for min/max) shows =
+exactly the same.
+
+Only min/max 1.8V + OCR works:
+
+[    2.824188] mmc2: new SDIO card at address 0001
+[    2.806518] omap_hsmmc 480ad000.mmc: card claims to support voltages =
+below defined range
+[    2.815979] omap_hsmmc 480ad000.mmc: found wl1251
+[   10.981018] omap_hsmmc 480ad000.mmc: found wl1251
+[   11.018280] wl1251: using dedicated interrupt line
+[   11.321136] wl1251: loaded
+[   11.378601] wl1251: initialized
+[   14.521759] omap_hsmmc 480ad000.mmc: found wl1251
+[   38.680725] omap_hsmmc 480ad000.mmc: found wl1251
+[   39.646942] wl1251: 151 tx blocks at 0x3b788, 35 rx blocks at 0x3a780
+[   39.654785] wl1251: firmware booted (Rev 4.0.4.3.7)
+
+Therefore I also tried the 4th combination: min/max 1.8V and no ocr =
+quirk and it fails again.
+
+Finally I tried setting min to 2.7V and max to 3.6V. This ends up in
+
+[    0.402648] reg-fixed-voltage fixed-regulator-wg7210_en: Fixed =
+regulator specified with variable voltages
+
+So it seems that we need both: min/max =3D 1.8V and OCR. A little =
+unexpected since I had expected
+that min/max is completely irrelevant.
+
+> If that works, we should add some comments about it above, I think.
+
+So at the moment no change for [PATCH v1] which I can now send out.
+
+BR and thanks,
+Nikolaus
 
