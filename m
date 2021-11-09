@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27040C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:24:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C033C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:24:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 13373610A2
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:24:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4D2F0619E4
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:24:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240250AbhKIB1b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 20:27:31 -0500
-Received: from mail.kernel.org ([198.145.29.99]:50114 "EHLO mail.kernel.org"
+        id S243400AbhKIB1c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 20:27:32 -0500
+Received: from mail.kernel.org ([198.145.29.99]:55686 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S243195AbhKIBXO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Nov 2021 20:23:14 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5EF2761A7C;
-        Tue,  9 Nov 2021 01:08:44 +0000 (UTC)
+        id S231455AbhKIBZX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Nov 2021 20:25:23 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5DCE161B4D;
+        Tue,  9 Nov 2021 01:09:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636420125;
-        bh=I4SmqnossPhHxOXUZ77imqOgFRIT8hdLs0FlF0lcN0k=;
+        s=k20201202; t=1636420194;
+        bh=F4eNFyJm5WoYxKUWjpQAcaTi1pCk82JppJb9aHHpSlI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=olLJ4iI/cU8wZMmZ5w4DPNZxZ/W1pdlWuwJJacFmHAzE5w0AxGmo1/fO7KmxEI9Mp
-         a8wVE/ABvkr711/a2MEy1AxLE+exuMgQU72lK2+G0F8f+hxZBYQvKG3UuzSGAM4jgQ
-         sSHk7x65pv6yqg3dZ1m0sZ87tnnOZxg3Xn4IYTyHENiIwrJSSMq3MLuT1cKrxq//f1
-         p9CRlW2Fqq/svFOeTeRGABhnxPHoiQo4RXQY554KpX00OrMCDHm2swgaYBd98jPjR0
-         khl5nIFgNymXK9NotxVunup6KNel6Y6E9X8PzSjdyLPTzQ4hBZ8Eeutogd2lMjQcwm
-         6o6fQtPLuFaog==
+        b=LMuNLKz46uCpHPy3RW77yrJSh2SKIkgWvb3NGiT+mUa6QbGipG3Mkjc75OzMrq19B
+         dvXWPboPnAI7bs3ZWhUgwSiNZEaRJi17l2U6dX9EwyRhFWWC95mw94rnzMvVhuv/6F
+         CFKSOHlhGcrh6Sa8ErizWTIjlERHk3W/zyWzuErrX1kn242pivtgohmV/Qxi/+jvd/
+         2N1hMwlQZ8tHjooHcURx8rTNaksdgnUi3VIaUDwPr1NVOCXkff4kyq6BIaYLgawTis
+         YjyDuu52SjHPgLNGkjg4//v7X5BSZAJ3UaMA7Xf7ObpGxjOx6jm9hiTf0JBserrKhM
+         zaJxU5XqYEQTw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Zheyu Ma <zheyuma97@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, maximlevitsky@gmail.com,
         oakad@yahoo.com, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 21/33] memstick: r592: Fix a UAF bug when removing the driver
-Date:   Mon,  8 Nov 2021 20:07:55 -0500
-Message-Id: <20211109010807.1191567-21-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 20/30] memstick: r592: Fix a UAF bug when removing the driver
+Date:   Mon,  8 Nov 2021 20:09:08 -0500
+Message-Id: <20211109010918.1192063-20-sashal@kernel.org>
 X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20211109010807.1191567-1-sashal@kernel.org>
-References: <20211109010807.1191567-1-sashal@kernel.org>
+In-Reply-To: <20211109010918.1192063-1-sashal@kernel.org>
+References: <20211109010918.1192063-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -95,10 +95,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
-index 2539984c1db1c..256634ec58b63 100644
+index b3857445d6736..7779aaa6b9b81 100644
 --- a/drivers/memstick/host/r592.c
 +++ b/drivers/memstick/host/r592.c
-@@ -841,15 +841,15 @@ static void r592_remove(struct pci_dev *pdev)
+@@ -842,15 +842,15 @@ static void r592_remove(struct pci_dev *pdev)
  	}
  	memstick_remove_host(dev->host);
  
