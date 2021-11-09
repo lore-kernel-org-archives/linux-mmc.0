@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1E6FC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:18:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27040C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:24:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A5DB26120A
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:18:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 13373610A2
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Nov 2021 01:24:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239884AbhKIBVV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Nov 2021 20:21:21 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44370 "EHLO mail.kernel.org"
+        id S240250AbhKIB1b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Nov 2021 20:27:31 -0500
+Received: from mail.kernel.org ([198.145.29.99]:50114 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S243172AbhKIBTS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 8 Nov 2021 20:19:18 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 23CCC619EA;
-        Tue,  9 Nov 2021 01:07:32 +0000 (UTC)
+        id S243195AbhKIBXO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Nov 2021 20:23:14 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5EF2761A7C;
+        Tue,  9 Nov 2021 01:08:44 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1636420053;
+        s=k20201202; t=1636420125;
         bh=I4SmqnossPhHxOXUZ77imqOgFRIT8hdLs0FlF0lcN0k=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=mLz5r4emxMdKQ2L+TbdzqaViL84hoyLovZ18AocV1OGTm1JAXT77GjJihZRDK+qj3
-         xC3uC+bsAvmWjqwlROrfv7bWatFWGv2Y3dtnOZe6t1zML3oRRiD/DjBpUhOYyLbd+W
-         JSDFjSTpkehD5YxB9ExX5rsELDV14Eqx72+YadhA57PhluqS3qa0bGNZI/d0z2+gAA
-         Tx5o8OLW9gXh7EYDc32MBHGlRO2xHIpIjKu2bHMqwEYzvoe4m3yLHCqp5w7xgsmmlQ
-         5l/CLyWlm4KIsXp3D1wvL5Qqp/i78yesbemq72J4Ot+VVEgZf4b6odfBT9YSUeWhpR
-         mWPZcyNDFweJg==
+        b=olLJ4iI/cU8wZMmZ5w4DPNZxZ/W1pdlWuwJJacFmHAzE5w0AxGmo1/fO7KmxEI9Mp
+         a8wVE/ABvkr711/a2MEy1AxLE+exuMgQU72lK2+G0F8f+hxZBYQvKG3UuzSGAM4jgQ
+         sSHk7x65pv6yqg3dZ1m0sZ87tnnOZxg3Xn4IYTyHENiIwrJSSMq3MLuT1cKrxq//f1
+         p9CRlW2Fqq/svFOeTeRGABhnxPHoiQo4RXQY554KpX00OrMCDHm2swgaYBd98jPjR0
+         khl5nIFgNymXK9NotxVunup6KNel6Y6E9X8PzSjdyLPTzQ4hBZ8Eeutogd2lMjQcwm
+         6o6fQtPLuFaog==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Zheyu Ma <zheyuma97@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, maximlevitsky@gmail.com,
         oakad@yahoo.com, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 25/39] memstick: r592: Fix a UAF bug when removing the driver
-Date:   Mon,  8 Nov 2021 20:06:35 -0500
-Message-Id: <20211109010649.1191041-25-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 21/33] memstick: r592: Fix a UAF bug when removing the driver
+Date:   Mon,  8 Nov 2021 20:07:55 -0500
+Message-Id: <20211109010807.1191567-21-sashal@kernel.org>
 X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20211109010649.1191041-1-sashal@kernel.org>
-References: <20211109010649.1191041-1-sashal@kernel.org>
+In-Reply-To: <20211109010807.1191567-1-sashal@kernel.org>
+References: <20211109010807.1191567-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
