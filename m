@@ -2,39 +2,39 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6326C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5423CC43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA87460F55
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E14261211
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232548AbhKJRU1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Nov 2021 12:20:27 -0500
-Received: from mo4-p03-ob.smtp.rzone.de ([85.215.255.101]:29839 "EHLO
+        id S232538AbhKJRU0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Nov 2021 12:20:26 -0500
+Received: from mo4-p03-ob.smtp.rzone.de ([81.169.146.174]:31502 "EHLO
         mo4-p03-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232531AbhKJRUR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 12:20:17 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636564637;
+        with ESMTP id S232530AbhKJRUQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 12:20:16 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636564636;
     s=strato-dkim-0002; d=goldelico.com;
     h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
     From:Subject:Sender;
-    bh=ytqJC3tzZimA/vKcRado/QdQBzzBwoUDJjRTyS4f9aA=;
-    b=EyOzxBlGkWfsOzL1IyznACWamAo+HRmO4uhsrHV+K5khnzF01XHHLSudLFEhfnZQdr
-    bRBI2JRPAmzq7j2YEuoSz83btKAqzWInQDRbv+zM+IAQ1OfxUtnQ/CVkixg+kUEZzUI5
-    JS6jMaFzDE+Ea7mO80Id/YOR6b/UegluClGUjLXH8yZt4gbVT0ZCyqq7eSp8ekUrmBv0
-    kJJqGioTztglisIaComB8tKGYuaQR0DCa7BQYjnR1RellVcbTBE14dLm/Y7/NJ44O/wQ
-    WfvycOZaieaMj2zFFwwQ9vhRP8R7ODz6DceZBeXe2Lxwow3KZD+/+KVtuOqzJ6+p69ew
-    7igA==
+    bh=XvpxS5OFU4cnap0VF0F9jtBT1cYmdBFqjEJq/FCaiF8=;
+    b=VSXURCHjPxpLoH7hrTx0BwfOGckmooQaWe8weZuxjM07QoGE+1Dbxdo4DdFepqZb5W
+    CDrdg7A+vZXXH5qg7qDLLJM+VjoffGHt2NUZU08ZKMQvkrFgrF0QWAnulNW2EwpY4VQF
+    +OPVdUmOj29N4TKadXthQ1LlSDLgMFfiWMD2N3vZ3zcHqy0JgVlUqbIcziXWSmHw+Vnm
+    fGWUhz+LKQqwrk11uq83H6X9Q7aRDURUCVi9RX548ZZW6B0osVPss8gfoZaZMHjaSzjr
+    xUwPBO4SgVheb8tDPD9LUCmBSPzuv5irbRsFxGfta4VlVqZXvrTQAeuHeDw9dEC7zrAU
+    sIMw==
 Authentication-Results: strato.com;
     dkim=none
 X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMhflhwDubTJ9o12DNOsPj0lByOdfLlf0"
 X-RZG-CLASS-ID: mo00
 Received: from iMac.fritz.box
     by smtp.strato.de (RZmta 47.34.5 DYNA|AUTH)
-    with ESMTPSA id Y02aa4xAAHHG51i
+    with ESMTPSA id Y02aa4xAAHHF51g
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
         (Client did not present a certificate);
-    Wed, 10 Nov 2021 18:17:16 +0100 (CET)
+    Wed, 10 Nov 2021 18:17:15 +0100 (CET)
 From:   "H. Nikolaus Schaller" <hns@goldelico.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
@@ -51,9 +51,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     notasas@gmail.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, letux-kernel@openphoenux.org,
         kernel@pyra-handheld.com, linux-omap@vger.kernel.org
-Subject: [PATCH v2 6/6] mmc: host: omap_hsmmc: revert special init for wl1251
-Date:   Wed, 10 Nov 2021 18:17:11 +0100
-Message-Id: <77d313b97d1e18b0eb7ed2d88d718d960f329bb0.1636564631.git.hns@goldelico.com>
+Subject: [PATCH v2 4/6] mmc: core: Fixup storing of OCR for MMC_QUIRK_NONSTD_SDIO
+Date:   Wed, 10 Nov 2021 18:17:09 +0100
+Message-Id: <e7936cff7fc24d187ef2680d3b4edb0ade58f293.1636564631.git.hns@goldelico.com>
 X-Mailer: git-send-email 2.33.0
 In-Reply-To: <cover.1636564631.git.hns@goldelico.com>
 References: <cover.1636564631.git.hns@goldelico.com>
@@ -63,76 +63,50 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Replaces: commit f6498b922e57 ("mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid of pandora_wl1251_init_card")
-Requires: commit ("mmc: core: transplant ti,wl1251 quirks from to be retired omap_hsmmc")
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-After moving the wl1251 quirks from omap_hsmmc_init_card() to wl1251_quirk()
-and sdio_card_init_methods[] we can remove omap_hsmmc_init_card() completely.
+The mmc core takes a specific path to support initializing of a
+non-standard SDIO card. This is triggered by looking for the card-quirk,
+MMC_QUIRK_NONSTD_SDIO.
 
-This also removes the specialization on the combination of omap_hsmmc and wl1251.
+In mmc_sdio_init_card() this gets rather messy, as it causes the code to
+bail out earlier, compared to the usual path. This leads to that the OCR
+doesn't get saved properly in card->ocr. Fortunately, only omap_hsmmc has
+been using the MMC_QUIRK_NONSTD_SDIO and is dealing with the issue, by
+assigning a hardcoded value (0x80) to card->ocr from an ->init_card() ops.
 
-Related-to: commit f6498b922e57 ("mmc: host: omap_hsmmc: add code for special init of wl1251 to get rid of pandora_wl1251_init_card")
-Related-to: commit 2398c41d6432 ("omap: pdata-quirks: remove openpandora quirks for mmc3 and wl1251")
-Related-to: commit f9d50fef4b64 ("ARM: OMAP2+: omap3-pandora: add wifi support")
+To make the behaviour consistent, let's instead rely on the core to save
+the OCR in card->ocr during initialization.
+
+Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
 ---
- drivers/mmc/host/omap_hsmmc.c | 36 -----------------------------------
- 1 file changed, 36 deletions(-)
+ drivers/mmc/core/sdio.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 6960e305e0a39..9749639ea8977 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1504,41 +1504,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	omap_hsmmc_set_bus_mode(host);
- }
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index cf8ee66990508..41164748723d2 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -709,6 +709,8 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 		host->ops->init_card(host, card);
+ 	mmc_fixup_device(card, sdio_card_init_methods);
  
--static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
--{
--	struct omap_hsmmc_host *host = mmc_priv(mmc);
--
--	if (card->type == MMC_TYPE_SDIO || card->type == MMC_TYPE_SD_COMBO) {
--		struct device_node *np = mmc_dev(mmc)->of_node;
--
--		/*
--		 * REVISIT: should be moved to sdio core and made more
--		 * general e.g. by expanding the DT bindings of child nodes
--		 * to provide a mechanism to provide this information:
--		 * Documentation/devicetree/bindings/mmc/mmc-card.txt
--		 */
--
--		np = of_get_compatible_child(np, "ti,wl1251");
--		if (np) {
--			/*
--			 * We have TI wl1251 attached to MMC3. Pass this
--			 * information to the SDIO core because it can't be
--			 * probed by normal methods.
--			 */
--
--			dev_info(host->dev, "found wl1251\n");
--			card->quirks |= MMC_QUIRK_NONSTD_SDIO;
--			card->cccr.wide_bus = 1;
--			card->cis.vendor = 0x104c;
--			card->cis.device = 0x9066;
--			card->cis.blksize = 512;
--			card->cis.max_dtr = 24000000;
--			card->ocr = 0x80;
--			of_node_put(np);
--		}
--	}
--}
--
- static void omap_hsmmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- {
- 	struct omap_hsmmc_host *host = mmc_priv(mmc);
-@@ -1667,7 +1632,6 @@ static struct mmc_host_ops omap_hsmmc_ops = {
- 	.set_ios = omap_hsmmc_set_ios,
- 	.get_cd = mmc_gpio_get_cd,
- 	.get_ro = mmc_gpio_get_ro,
--	.init_card = omap_hsmmc_init_card,
- 	.enable_sdio_irq = omap_hsmmc_enable_sdio_irq,
- };
++	card->ocr = ocr_card;
++
+ 	/*
+ 	 * If the host and card support UHS-I mode request the card
+ 	 * to switch to 1.8V signaling level.  No 1.8v signalling if
+@@ -821,7 +823,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 			goto mismatch;
+ 		}
+ 	}
+-	card->ocr = ocr_card;
++
+ 	mmc_fixup_device(card, sdio_fixup_methods);
  
+ 	if (card->type == MMC_TYPE_SD_COMBO) {
 -- 
 2.33.0
 
