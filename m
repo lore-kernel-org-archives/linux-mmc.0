@@ -2,138 +2,214 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEE87C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 05:44:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E572FC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 09:58:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8295761152
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 05:44:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D27BB611BF
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 09:58:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229733AbhKJFrY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Nov 2021 00:47:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35562 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229572AbhKJFrY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 00:47:24 -0500
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2ED6BC061764;
-        Tue,  9 Nov 2021 21:44:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:
-        Subject:Sender:Reply-To:Content-ID:Content-Description;
-        bh=XKGeqJIYO+lXOLSgLOgckhybYcbrlqamxdYjsBQnxnk=; b=h/JHkgtP2VJG+QeaETTKQCAlPS
-        aBL+9ZBuv9V32CD0/9dX+CDu/sknLiG0Dj3M3F2o8WFWqQBTmyVvlduhTsZB8PQDmghwSvPtOo+Lw
-        Quy8l2BF3Q0q9QCblIqAUBi5G0wsRzSSh7kODpcIcv1LddmRdPauh8lnYty4mYYOshL8qSZFaJept
-        X+Xrnjy4rlLWLNCTa3aFnqyKQnHifHCM6YAnyEqgks1R6PA/c1Kr6MwTeteIsWqn2uT+JESJKcGl0
-        23pAQUvpGRhf4OGTaezO0Qu0+oskTaBYqFSc4KyXGTaOqEsLRyd8bHTop43+gjt7dPGfK8k1BMkl1
-        AAtqtxlQ==;
-Received: from [2601:1c0:6280:3f0::aa0b]
-        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mkgPM-004VRj-FR; Wed, 10 Nov 2021 05:44:29 +0000
-Subject: Re: [PATCH v2 1/2] mmc: Add SD/SDIO driver for Sunplus SP7021
-To:     =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>,
-        "LH.Kuo" <lhjeff911@gmail.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "daniel.thompson@linaro.org" <daniel.thompson@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-Cc:     "qinjian@cqplus1.com" <qinjian@cqplus1.com>,
-        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>
-References: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
- <1636444705-17883-1-git-send-email-lh.kuo@sunplus.com>
- <1636444705-17883-2-git-send-email-lh.kuo@sunplus.com>
- <6c5c6e83-8176-8b4a-9c2c-f01a262de5de@infradead.org>
- <d25f2bff024b40fd9691960221c0bebe@sphcmbx02.sunplus.com.tw>
-From:   Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <92e8310d-0688-0df3-2422-4b179fd9cbbd@infradead.org>
-Date:   Tue, 9 Nov 2021 21:44:27 -0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        id S230516AbhKJKBl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Nov 2021 05:01:41 -0500
+Received: from m43-7.mailgun.net ([69.72.43.7]:20672 "EHLO m43-7.mailgun.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230440AbhKJKBk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 10 Nov 2021 05:01:40 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1636538333; h=Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
+ To: From: Sender; bh=fcAghAoVZ0JxeVWaGkjHk7dhQU80Wv79lwRh7/w5leA=; b=YONSAFkIVy8MPKG2z45+r95oWH+g9iu1Quwgynf0h9lH1x46cg+RhfIjvsFA5Ud3X60ekyQV
+ 2zOP/cFtSfSFFAos1O/AgdsHgmAdR59spjFRI7jvoN6K6+ZOYLzwal5rwPk2xdMlMHBo1f3a
+ niEkXv0LXTgEfpVuA2JEKdGbNBs=
+X-Mailgun-Sending-Ip: 69.72.43.7
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n05.prod.us-east-1.postgun.com with SMTP id
+ 618b97db0f34c3436a4a4aac (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 10 Nov 2021 09:58:51
+ GMT
+Sender: kvalo=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 8A01DC43616; Wed, 10 Nov 2021 09:58:50 +0000 (UTC)
+Received: from tykki (tynnyri.adurom.net [51.15.11.48])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: kvalo)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 85DE0C4338F;
+        Wed, 10 Nov 2021 09:58:46 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org 85DE0C4338F
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
+From:   Kalle Valo <kvalo@codeaurora.org>
+To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v7 05/24] wfx: add main.c/main.h
+References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
+        <87zgrl86cx.fsf@codeaurora.org> <87v92985ys.fsf@codeaurora.org>
+        <6117440.dvjIZRh6BQ@pc-42>
+Date:   Wed, 10 Nov 2021 11:58:41 +0200
+In-Reply-To: <6117440.dvjIZRh6BQ@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
+ Pouiller"'s message of "Thu,
+        07 Oct 2021 13:22:14 +0200")
+Message-ID: <87lf1wnxgu.fsf@codeaurora.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-In-Reply-To: <d25f2bff024b40fd9691960221c0bebe@sphcmbx02.sunplus.com.tw>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi--
+J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
 
-On 11/9/21 9:40 PM, Lh Kuo 郭力豪 wrote:
-> Hi
-> 
->> -----Original Message-----
->> From: Randy Dunlap <rdunlap@infradead.org>
->> Sent: Wednesday, November 10, 2021 10:33 AM
->> To: LH.Kuo <lhjeff911@gmail.com>; p.zabel@pengutronix.de;
->> daniel.thompson@linaro.org; lee.jones@linaro.org;
->> u.kleine-koenig@pengutronix.de; ulf.hansson@linaro.org; robh+dt@kernel.org;
->> linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org;
->> devicetree@vger.kernel.org
->> Cc: qinjian@cqplus1.com; Wells Lu 呂芳騰 <wells.lu@sunplus.com>; Lh Kuo
->> 郭力豪 <lh.Kuo@sunplus.com>
->> Subject: Re: [PATCH v2 1/2] mmc: Add SD/SDIO driver for Sunplus SP7021
->>
->> Hi--
->>
->> On 11/8/21 11:58 PM, LH.Kuo wrote:
->>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>> index 5af8494..2aba9eb 100644
->>> --- a/drivers/mmc/host/Kconfig
->>> +++ b/drivers/mmc/host/Kconfig
->>> @@ -1091,5 +1091,15 @@ config MMC_OWL
->>>    	  This selects support for the SD/MMC Host Controller on
->>>    	  Actions Semi Owl SoCs.
->>>
->>> +config MMC_SP_SDV2
->>> +	tristate "Sunplus SP7021 SD/SDIO Controller"
->>> +	depends on SOC_SP7021
->>> +	help
->>> +		If you say yes here, you will get support for SD/SDIO host interface
->>> +		on sunplus Socs.
->>
->> 		   Sunplus SoCs.
->>
->>> +		If you have a controller with this interface, say Y or M here.
->>> +		If unsure, say N.
->>
->> All 4 lines of help text should be indented only with one tab + 2 spaces,
->> not 2 tabs, per coding-style.rst.
->>
->>
->>> +                Sunplus  SD/SDIO Host Controller support"
->>
->> I am thinking that this last line should not be here at all... ???
->>
->>
->> thanks.
->> --
->> ~Randy
-> 
-> 
-> I will make change as below  is it OK ?
-> 
-> config MMC_SP_SDV2
-> 	tristate "Sunplus SP7021 SD/SDIO Controller"
-> 	depends on SOC_SP7021
-> 	help
-> 	  This selects the Sunplus Host Controller Interface
-> 	  support present in Sunplus SP7021 SOCs. The controller supports
-> 	  SD/SDIO devices.
-> 		
-> 		If you have a controller with this interface, say Y or M here.
-> 		
-> 		If unsure, say N.
+> On Thursday 7 October 2021 12:49:47 CEST Kalle Valo wrote:
+>> CAUTION: This email originated from outside of the organization. Do
+>> not click links or open attachments unless you recognize the sender
+>> and know the content is safe.
+>>=20
+>>=20
+>> Kalle Valo <kvalo@codeaurora.org> writes:
+>>=20
+>> > J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
+>> >
+>> >>> >> >> I'm not really fond of having this kind of ASCII based parser =
+in the
+>> >>> >> >> kernel. Do you have an example compressed file somewhere?
+>> >>> >> >
+>> >>> >> > An example of uncompressed configuration file can be found here=
+[1]. Once
+>> >>> >> > compressed with [2], you get:
+>> >>> >> >
+>> >>> >> >     {a:{a:4,b:1},b:{a:{a:4,b:0,c:0,d:0,e:A},b:{a:4,b:0,c:0,d:0,=
+e:B},c:{a:4,b:0,c:0,d:0,e:C},d:{a:4,b:0,c:0,d:0,e:D},e:{a:4,b:0,c:0,d:0,e:E=
+},f:{a:4,b:0,c:0,d:0,e:F},g:{a:4,b:0,c:0,d:0,e:G},h:{a:4,b:0,c:0,d:0,e:H},i=
+:{a:4,b:0,c:0,d:0,e:I},j:{a:4,b:0,c:0,d:0,e:J},k:{a:4,b:0,c:0,d:0,e:K},l:{a=
+:4,b:0,c:0,d:1,e:L},m:{a:4,b:0,c:0,d:1,e:M}},c:{a:{a:4},b:{a:6},c:{a:6,c:0}=
+,d:{a:6},e:{a:6},f:{a:6}},e:{b:0,c:1},h:{e:0,a:50,b:0,d:0,c:[{a:1,b:[0,0,0,=
+0,0,0]},{a:2,b:[0,0,0,0,0,0]},{a:[3,9],b:[0,0,0,0,0,0]},{a:A,b:[0,0,0,0,0,0=
+]},{a:B,b:[0,0,0,0,0,0]},{a:[C,D],b:[0,0,0,0,0,0]},{a:E,b:[0,0,0,0,0,0]}]},=
+j:{a:0,b:0}}
+>> >>> >>
+>> >>> >> So what's the grand idea with this braces format? I'm not getting=
+ it.
+>> >>> >
+>> >>> >   - It allows to describe a tree structure
+>> >>> >   - It is ascii (easy to dump, easy to copy-paste)
+>> >>> >   - It is small (as I explain below, size matters)
+>> >>> >   - Since it is similar to JSON, the structure is obvious to many =
+people
+>> >>> >
+>> >>> > Anyway, I am not the author of that and I have to deal with it.
+>> >>>
+>> >>> I'm a supported for JSON like formats, flexibility and all that. But
+>> >>> they belong to user space, not kernel.
+>> >>>
+>> >>> >> Usually the drivers just consider this kind of firmware configura=
+tion
+>> >>> >> data as a binary blob and dump it to the firmware, without knowin=
+g what
+>> >>> >> the data contains. Can't you do the same?
+>> >>> >
+>> >>> > [I didn't had received this mail :( ]
+>> >>> >
+>> >>> > The idea was also to send it as a binary blob. However, the firmwa=
+re use
+>> >>> > a limited buffer (1500 bytes) to parse it. In most of case the PDS=
+ exceeds
+>> >>> > this size. So, we have to split the PDS before to send it.
+>> >>> >
+>> >>> > Unfortunately, we can't split it anywhere. The PDS is a tree struc=
+ture and
+>> >>> > the firmware expects to receive a well formatted tree.
+>> >>> >
+>> >>> > So, the easiest way to send it to the firmware is to split the tree
+>> >>> > between each root nodes and send each subtree separately (see also=
+ the
+>> >>> > comment above wfx_send_pds()).
+>> >>> >
+>> >>> > Anyway, someone has to cook this configuration before to send it t=
+o the
+>> >>> > firmware. This could be done by a script outside of the kernel. Th=
+en we
+>> >>> > could change the input format to simplify a bit the processing in =
+the
+>> >>> > kernel.
+>> >>>
+>> >>> I think a binary file with TLV format would be much better, but I'm =
+sure
+>> >>> there also other good choises.
+>> >>>
+>> >>> > However, the driver has already some users and I worry that changi=
+ng
+>> >>> > the input format would lead to a mess.
+>> >>>
+>> >>> You can implement a script which converts the old format to the new
+>> >>> format. And you can use different naming scheme in the new format so
+>> >>> that we don't accidentally load the old format. And even better if y=
+ou
+>> >>> add a some kind of signature in the new format and give a proper err=
+or
+>> >>> from the driver if it doesn't match.
+>> >>
+>> >> Ok. I am going to change the input format. I think the new function is
+>> >> going to look like:
+>> >>
+>> >> int wfx_send_pds(struct wfx_dev *wdev, u8 *buf, size_t buf_len)
+>> >> {
+>> >>      int ret;
+>> >>      int start =3D 0;
+>> >>
+>> >>      if (buf[start] !=3D '{') {
+>> >>              dev_err(wdev->dev, "valid PDS start with '{'. Did you fo=
+rget to compress it?\n");
+>> >>              return -EINVAL;
+>> >>      }
+>> >>      while (start < buf_len) {
+>> >>              len =3D strnlen(buf + start, buf_len - start);
+>> >>              if (len > WFX_PDS_MAX_SIZE) {
+>> >>                      dev_err(wdev->dev, "PDS chunk is too big (legacy=
+ format?)\n");
+>> >>                      return -EINVAL;
+>> >>              }
+>> >>              dev_dbg(wdev->dev, "send PDS '%s'\n", buf + start);
+>> >>              ret =3D wfx_hif_configuration(wdev, buf + start, len);
+>> >>              /* FIXME: Add error handling here */
+>> >>              start +=3D len;
+>> >>      }
+>> >>      return 0;
+>> >
+>> > Did you read at all what I wrote above? Please ditch the ASCII format
+>> > completely.
+>>=20
+>> Sorry, I read this too hastily. I just saw "buf[start] !=3D '{'" and
+>> assumed this is the same ASCII format, but not sure anymore. Can you
+>> explain what changes you made now?
+>
+> The script I am going to write will compute where the PDS have to be split
+> (this work is currently done by the driver). The script will add a
+> separating character (let's say '\0') between each chunk.
+>
+> The driver will just have to find the separating character, send the
+> chunk and repeat.
 
-Too much indentation on the last 2 (non-blank) help text lines.
-Should just be one tab + 2 spaces, not 2 tabs.
+I would forget ASCII altogether and implement a proper binary format
+like TLV. For example, ath10k uses TLV with board-2.bin files (grep for
+enum ath10k_bd_ie_type).
 
+Also I recommend changing the file "signature" ('{') to something else
+so that the driver detects incorrect formats. And maybe even use suffix
+.pds2 or something like that to make it more obvious and avoid
+confusion?
 
--- 
-~Randy
+--=20
+https://patchwork.kernel.org/project/linux-wireless/list/
+
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
