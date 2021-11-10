@@ -2,143 +2,235 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55231C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 16:12:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14A6CC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 16:36:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2C6C760FD8
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 16:12:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ECE6761205
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 16:36:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229513AbhKJQPh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Nov 2021 11:15:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37660 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229512AbhKJQPh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 11:15:37 -0500
-Received: from mail-il1-x12d.google.com (mail-il1-x12d.google.com [IPv6:2607:f8b0:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1252C061764
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2021 08:12:49 -0800 (PST)
-Received: by mail-il1-x12d.google.com with SMTP id i11so3010026ilv.13
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2021 08:12:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=pEJ/SCrJjaume2dLUSw04eQWyt8/jEs361CV5IViq10=;
-        b=AuKKXdU9F9WRWcUPjMHAXVmID8HXlRZPMR3sCmtvpqm/SMfGzrpCDvrOG1hH7+642N
-         M7A7ZKcSAL3KMjTwywNoBFApzfDloiF2T6Aufo71jcpvagaoYZC4XWxwQYldjt+29Mtg
-         ZJidKmhNkODeLTAh0f33EM2A8yJgM0hRoWkbUNIAJ2mzDXz8KyeN8andV8XA8ShKBYp7
-         CAMzFTTjALRLlbL10O1KQ9vDH7+GjZhUmKp5UbWqWoAzWoIpXq67Gdc+czsqBwAzJjyY
-         UdWHR/2DILxJYj9jNwjkc+EpJcfw4ZgIbffPkTM8eVXpfwrYGoCqM2lL1kPdXPAVMepv
-         0h/Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=pEJ/SCrJjaume2dLUSw04eQWyt8/jEs361CV5IViq10=;
-        b=VAWo3e3TBPTvI6O6fLp5hNEiUvhfvcaawpaBcOB5n2PByXMn5t4hdsoLFLKFF91EB8
-         O0TIXgwI75YJ5Bnv79VjZcSqLeNMY6B6e9vWxUqzoC5zA03Z5e/3S2OUAL2JK5KZrrrI
-         6AfV8HlIfbampVDNyaSKmuh6448VpmxRTGCMR7Be1M3+ROIKuvyeePXIZCdIrKMFFi2r
-         /AgF99ywyqN5GvBeYm1g4ypHE+qyfJSInfA4npqsElDE6fHrcZ/a/B4Ik7Vvskr/Jdug
-         CNznrssyyM2ambkyzgYZmF5YXwTYQY8eFANd5BGtjNHTgTtDOrozVhuiskxQwQruGs52
-         a6ww==
-X-Gm-Message-State: AOAM530KQeOqOuICMZX71N1Id46+/5Hhx9In9H5e3zDQD9AFYPNI2SJa
-        hSGYeK3Ws+OgnMZe63QnL44tMc2ul1Vze+Oi8deDZw==
-X-Google-Smtp-Source: ABdhPJwSPxrY1l2fjs45by1JxOV+m/QC7W8ftGdEBCIu5Gsp7Pxop2hlXpQDFbqrDQOj4QATBMCW7VlXomFZIlrNVOo=
-X-Received: by 2002:a05:6e02:1a67:: with SMTP id w7mr103719ilv.165.1636560768898;
- Wed, 10 Nov 2021 08:12:48 -0800 (PST)
-MIME-Version: 1.0
-References: <20211110110500.4105-1-marten.lindahl@axis.com>
-In-Reply-To: <20211110110500.4105-1-marten.lindahl@axis.com>
-From:   Doug Anderson <dianders@google.com>
-Date:   Wed, 10 Nov 2021 08:12:36 -0800
-Message-ID: <CAD=FV=U6k=nTpYS8NCBfQvu-PT7TBJDPFggUBugX5L1K5Xzryw@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: Allow lower TMOUT value than maximum
-To:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kernel@axis.com,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        id S230474AbhKJQjf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Nov 2021 11:39:35 -0500
+Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.53]:19620 "EHLO
+        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229602AbhKJQje (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 11:39:34 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636562190;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
+    From:Subject:Sender;
+    bh=vixtzLgz9wAeqX7MgV8LYC7Uo4wMPwTAmWbOEZb+dx4=;
+    b=XrZKyA4TyM2YCWaRM3n9RD6dA7/hN42tVFe0HSvlNFUcqdkD3YQpY3j2RjPoFvqCez
+    1zT2Lrenp2Zvog52Sddstj14peb1TOyegHrTZmpcE1Hd6kolADT/LsHLWRroNZncd3ZE
+    Y/KhIevbLN7TJU3rHowunhoFJ8VFUnscncTiPeNGtBXGsNSSIoJXHyFrftYBDt4yK4m4
+    OXMWdEzq4EDCu5VfW/bAX3QP9taTxOEsA1SztPROc1S5EIu2bD7sA4WCyYUV0JiSp3uC
+    AvIZHvcNIxADT5C8hEKhc+tM7DyJBWGh0z3sbv25JSTWX/1BMq4ZGJ5dRxO59pNPUH36
+    +ovg==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw47pgLk="
+X-RZG-CLASS-ID: mo00
+Received: from imac.fritz.box
+    by smtp.strato.de (RZmta 47.34.5 DYNA|AUTH)
+    with ESMTPSA id Y02aa4xAAGaT4uA
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Wed, 10 Nov 2021 17:36:29 +0100 (CET)
+Content-Type: text/plain;
+        charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
+Subject: Re: [RFC v4 5/6] mmc: core: transplant ti,wl1251 quirks from to be
+ retired omap_hsmmc
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+In-Reply-To: <CAPDyKFoz6b-+HQYdypYD7EUXxwj7th-=41MAK=ZTnKQWRmLArQ@mail.gmail.com>
+Date:   Wed, 10 Nov 2021 17:36:28 +0100
+Cc:     =?utf-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Tony Lindgren <tony@atomide.com>,
+        Bean Huo <beanhuo@micron.com>,
+        =?utf-8?Q?Gra=C5=BEvydas_Ignotas?= <notasas@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        letux-kernel@openphoenux.org, kernel@pyra-handheld.com
 Content-Transfer-Encoding: quoted-printable
+Message-Id: <B6ECEECF-EC1D-431E-B4E4-915B29E31AEE@goldelico.com>
+References: <cover.1636103151.git.hns@goldelico.com>
+ <3ca9a3099d86d631235b6c03ae260bc581cc8d60.1636103151.git.hns@goldelico.com>
+ <CAPDyKFrH8f80cs5dbh=3ugjyEzoUYXhStpHQyhUSd6b9wD78vw@mail.gmail.com>
+ <C2F065E7-10C5-4701-A6F7-6B5A6198F0DF@goldelico.com>
+ <CAPDyKFoz6b-+HQYdypYD7EUXxwj7th-=41MAK=ZTnKQWRmLArQ@mail.gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+X-Mailer: Apple Mail (2.3445.104.21)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Ulf,
 
+> Am 09.11.2021 um 21:01 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+>=20
+> On Tue, 9 Nov 2021 at 11:58, H. Nikolaus Schaller <hns@goldelico.com> =
+wrote:
+>>=20
+>> Hi Ulf,
+>>=20
+>>> Am 08.11.2021 um 16:33 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+>>>=20
+>>> On Fri, 5 Nov 2021 at 10:06, H. Nikolaus Schaller =
+<hns@goldelico.com> wrote:
+>>>>=20
+>>>> +       card->quirks |=3D MMC_QUIRK_NONSTD_SDIO;
+>>>> +       card->cccr.wide_bus =3D 1;
+>>>> +       card->cis.vendor =3D 0x104c;
+>>>> +       card->cis.device =3D 0x9066;
+>>>> +       card->cis.blksize =3D 512;
+>>>> +       card->cis.max_dtr =3D 24000000;
+>>>> +       card->ocr =3D 0x80;
+>>>=20
+>>> In the past, we discussed a bit around why card->ocr needs to be set =
+here.
+>>>=20
+>>> The reason could very well be that the DTS file is specifying the
+>>> vmmc-supply with 1.8V fixed regulator, which seems wrong to me.
+>>=20
+>> I have checked with the schematics but the wlan_en regulator-fixed is =
+just a GPIO
+>> controlling some pin of the wifi chip.
+>>=20
+>> I guess it enables some regulator or power switch inside the wifi =
+module which
+>> has unknown voltage.
+>>=20
+>> We can interpret this as two sequential power-switches. The first one =
+controlled
+>> by the gpio-register bit and switches gpio power to the gpio pad of =
+the SoC. The second
+>> one switches the battery voltage to the internal circuits of the wifi =
+module.
+>>=20
+>> The GPIO itself is on 1.8V VIO level which seems to be the reason for =
+the min/max.
+>>=20
+>> Now it is a little arbitrary what the DTS describes: the gpio voltage =
+or the unknown
+>> internal voltage of the second switch.
+>>=20
+>> So from hardware perspective the min/max values are irrelevant.
+>=20
+> I completely agree with you! That's also why I earlier suggested
+> moving to use an mmc-pwrseq node
+> (Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml), that
+> would allow a better description of the HW.
 
-On Wed, Nov 10, 2021 at 3:05 AM M=C3=A5rten Lindahl <marten.lindahl@axis.co=
-m> wrote:
->
-> The TMOUT register is always set with a full value for every transfer,
-> which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
-> Since the software dto_timer acts as a backup in cases when this timeout
-> is not long enough, it is normally not a problem.
+Basically yes.
 
-I'm not 100% sure about what the part about "the software dto_timer
-acts as a backup in cases when this timeout is not long enough" means.
-At the moment the software fallback should be set to the same as the
-hardware value, right? So the software backup doesn't help make the
-timeout longer...
+> Nevertheless, the important point is that the mmc core gets a valid
+> host->ocr_avail to work with during card initialization. And in this
+> case, it's probably good enough to model this via changing the
+> regulator-min|max-microvolt to get a proper value from the
+> "regulator".
+>=20
+>>=20
+>>>=20
+>>> I would be very interested to know if we would change
+>>> "regulator-min|max-microvolt" of the regulator in the DTS, into
+>>> somewhere in between 2700000-3600000 (2.7-3.6V)
+>>=20
+>> Ok, if the mmc driver does something with these values it may have =
+indeed an influence.
+>>=20
+>>> - and see if that
+>>> allows us to drop the assignment of "card->ocr =3D  0x80;" above. =
+Would
+>>> you mind doing some tests for this?
+>>=20
+>> Well, with min/max=3D3.3V and no ocr I get:
+>>=20
+>> [    2.765136] omap_hsmmc 480ad000.mmc: card claims to support =
+voltages below defined range
+>> [    2.776367] omap_hsmmc 480ad000.mmc: found wl1251
+>> [    2.782287] mmc2: new SDIO card at address 0001
+>=20
+> That's really great information! During the first initialization
+> attempt, things are working fine and the SDIO card gets properly
+> detected.
+>=20
+>> [   10.874237] omap_hsmmc 480ad000.mmc: could not set regulator OCR =
+(-22)
+>> [   10.945373] wl1251_sdio: probe of mmc2:0001:1 failed with error =
+-16
+>=20
+> It looks like the card is being re-initialized when it's time to probe
+> with the SDIO func driver. This makes sense, assuming it's been
+> powered off via runtime PM (the "cap-power-off-card" DT property
+> should be set in the DTS for this card's slot).
+>=20
+> I looked a bit closer to understand the problem above and then I
+> realized why the card->ocr is being set from omap_hsmmc ->init_card()
+> callback. It's most likely because the mmc core in
+> mmc_sdio_init_card() doesn't save the card->ocr when
+> MMC_QUIRK_NONSTD_SDIO is set. Instead it becomes the responsibility
+> for the ->init_card() callback to do it, which seems wrong to me.
+>=20
+> Note that the card->ocr is being used when re-initializing the SDIO =
+card.
+>=20
+> I have just sent a patch [1], would you mind trying it, in combination
+> with not assigning card->ocr in $subject patch?
 
+Yes, it works! I have not even played with the wlan_en regulator =
+voltage.
 
-> But setting a full
-> value makes it impossible to test shorter timeouts, when for example
-> testing data read times on different SD cards.
->
-> Add a function to set any value smaller than the maximum of 0xFFFFFF.
->
-> Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
-> ---
->
-> v2:
->  - Calculate new value before checking boundaries
->  - Include CLKDIV register to get proper value
->
-> v3:
->  - Use 'if-else' instead of 'goto'
->  - Don't touch response field when maximize data field
->
->  drivers/mmc/host/dw_mmc.c | 28 +++++++++++++++++++++++++++-
->  1 file changed, 27 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 6578cc64ae9e..637ae2aea9fa 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1283,6 +1283,32 @@ static void dw_mci_setup_bus(struct dw_mci_slot *s=
-lot, bool force_clkinit)
->         mci_writel(host, CTYPE, (slot->ctype << slot->id));
->  }
->
-> +static void dw_mci_set_data_timeout(struct dw_mci *host,
-> +                                   unsigned int timeout_ns)
-> +{
-> +       unsigned int clk_div, tmp, tmout;
-> +
-> +       clk_div =3D (mci_readl(host, CLKDIV) & 0xFF) * 2;
-> +       if (clk_div =3D=3D 0)
-> +               clk_div =3D 1;
-> +
-> +       tmp =3D DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz,
-> +                              NSEC_PER_SEC * clk_div);
-> +
-> +       /* TMOUT[7:0] (RESPONSE_TIMEOUT) */
-> +       tmout =3D 0xFF; /* Set maximum */
-> +
-> +       /* TMOUT[31:8] (DATA_TIMEOUT) */
-> +       if (!tmp || tmp > 0xFFFFFF)
-> +               tmout |=3D (0xFFFFFF << 8);
-> +       else
-> +               tmout |=3D (tmp & 0xFFFFFF) << 8;
-> +
-> +       mci_writel(host, TMOUT, tmout);
-> +       dev_dbg(host->dev, "timeout_ns: %u =3D> TMOUT[31:8]: 0x%06x",
-> +               timeout_ns, tmout >> 8);
+>=20
+>>=20
+>> Adding back card->ocr =3D 0x80 (and keeping 3.3V for min/max) shows =
+exactly the same.
+>>=20
+>> Only min/max 1.8V + OCR works:
+>>=20
+>> [    2.824188] mmc2: new SDIO card at address 0001
+>> [    2.806518] omap_hsmmc 480ad000.mmc: card claims to support =
+voltages below defined range
+>> [    2.815979] omap_hsmmc 480ad000.mmc: found wl1251
+>> [   10.981018] omap_hsmmc 480ad000.mmc: found wl1251
+>> [   11.018280] wl1251: using dedicated interrupt line
+>> [   11.321136] wl1251: loaded
+>> [   11.378601] wl1251: initialized
+>> [   14.521759] omap_hsmmc 480ad000.mmc: found wl1251
+>> [   38.680725] omap_hsmmc 480ad000.mmc: found wl1251
+>> [   39.646942] wl1251: 151 tx blocks at 0x3b788, 35 rx blocks at =
+0x3a780
+>> [   39.654785] wl1251: firmware booted (Rev 4.0.4.3.7)
+>>=20
+>> Therefore I also tried the 4th combination: min/max 1.8V and no ocr =
+quirk and it fails again.
+>>=20
+>> Finally I tried setting min to 2.7V and max to 3.6V. This ends up in
+>>=20
+>> [    0.402648] reg-fixed-voltage fixed-regulator-wg7210_en: Fixed =
+regulator specified with variable voltages
+>>=20
+>> So it seems that we need both: min/max =3D 1.8V and OCR. A little =
+unexpected since I had expected
+>> that min/max is completely irrelevant.
+>>=20
+>>> If that works, we should add some comments about it above, I think.
+>>=20
+>> So at the moment no change for [PATCH v1] which I can now send out.
+>>=20
+>> BR and thanks,
+>> Nikolaus
+>>=20
+>=20
+> Thanks a lot for doing these tests! If I am right, it looks like we
+> should be able to skip assigning card->ocr for this quirk, but let's
+> see.
 
-nit: In theory 0x%06x is slightly better written as %#08x. I wouldn't
-spin the patch just for that, though.
+Indeed we can. That is great.
 
-In any case, I think this is fine to the best of my knowledge of how
-this timeout is supposed to work, so I'm happy with:
+Now the question is how to handle the dependency on your patch.
+Somehow we must ensure that it is merged before my $subject patch.
+Even if someone decides to backport this to stable.
 
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
+BR and thanks,
+Nikolaus=
