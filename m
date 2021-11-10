@@ -2,36 +2,36 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96A19C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A29E7C43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 78B9360EB9
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C2A7610CB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:17:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232267AbhKJRUI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Nov 2021 12:20:08 -0500
-Received: from mo4-p02-ob.smtp.rzone.de ([81.169.146.170]:13151 "EHLO
+        id S232499AbhKJRUJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Nov 2021 12:20:09 -0500
+Received: from mo4-p02-ob.smtp.rzone.de ([85.215.255.81]:9000 "EHLO
         mo4-p02-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230471AbhKJRUH (ORCPT
+        with ESMTP id S232235AbhKJRUH (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 12:20:07 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636564635;
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636564634;
     s=strato-dkim-0002; d=goldelico.com;
     h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Cc:Date:
     From:Subject:Sender;
-    bh=OzCoVJYxglf1y8GP+J0FWzWTGQYuFXTicqOEQEZRkXM=;
-    b=MXkk1EQBq2K67AfpJSaFYHO8T2BNsRr3F9holWpMYKPnF+u9zRZzTUzIBFNLjBbn6o
-    zWlolbBU+kKCjAY8mlnUOMhuRSLjo3DCAkWvSjIVfD+PKkbRr1Vc9kvNBmdCNVxG/VJr
-    9bYY2puVxjxPjC3QB8/JSwS/uaHOzBcYxTQ/ynTVZu9Og+72D1NOFos3BnDXYAF2Iywm
-    TJTKOcL+9lJdlFyI0fntsNnOxPhElH/A4ZGFiCSl7410aATdT7adtMpd3UcUaUVgcFtJ
-    w1r0tjsCS/UmZQHxdb/0RYjUVo39o0nzSM1YafswDV7BvzBn3a9A6XCDhMqbXK0wAK4l
-    Q9+Q==
+    bh=rfHhgGu+rg+elNFlFNuaURtWhhkpzMlWnoVXeLgI82s=;
+    b=Br2pG8waLTXhsj/nN5LDDWWYcMO6nIh2JeaFwpTbFT6Zu8ExHvbaUxfnDv9Wfxxav0
+    EkSHSxMFdCtkiSJL1pq8kt5FKeeVADCme/kojBfso5YweOGqRtixTjzccRP5cRjpUFjQ
+    gztfd0QqB1ShWI4qkW0Z/P3ZY0aYolho9qD9AR8SehYyPbKwyY5oif7yfrCZyaYaLDRk
+    C+J5+DuOi9tXYlG8psAgFE7wqq/OXtfJ2Xl2+CZw11SyHts7hX5n2bGMY/SQ7tPKfi7l
+    TEE/c/ycTCY61b0PVX7PLr8hPGo6+FxKy1VweXzrlrRuqm/Qz4uiPfwkTBrtxqUPbD75
+    8esA==
 Authentication-Results: strato.com;
     dkim=none
 X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMhflhwDubTJ9o12DNOsPj0lByOdfLlf0"
 X-RZG-CLASS-ID: mo00
 Received: from iMac.fritz.box
     by smtp.strato.de (RZmta 47.34.5 DYNA|AUTH)
-    with ESMTPSA id Y02aa4xAAHHE51e
+    with ESMTPSA id Y02aa4xAAHHE51d
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
         (Client did not present a certificate);
     Wed, 10 Nov 2021 18:17:14 +0100 (CET)
@@ -51,9 +51,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     notasas@gmail.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, letux-kernel@openphoenux.org,
         kernel@pyra-handheld.com, linux-omap@vger.kernel.org
-Subject: [PATCH v2 2/6] mmc: core: allow to match the device tree to apply quirks
-Date:   Wed, 10 Nov 2021 18:17:07 +0100
-Message-Id: <9e68e3d23e62a78527aabc1281f89e15200c7d09.1636564631.git.hns@goldelico.com>
+Subject: [PATCH v2 1/6] mmc: core: rewrite mmc_fixup_device()
+Date:   Wed, 10 Nov 2021 18:17:06 +0100
+Message-Id: <6515c1e8b3aa69ad273726f6e877d85c20f286ad.1636564631.git.hns@goldelico.com>
 X-Mailer: git-send-email 2.33.0
 In-Reply-To: <cover.1636564631.git.hns@goldelico.com>
 References: <cover.1636564631.git.hns@goldelico.com>
@@ -66,80 +66,66 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Jérôme Pouiller <jerome.pouiller@silabs.com>
 
-MMC subsystem provides a way to apply quirks when a device match some
-properties (VID, PID, etc...) Unfortunately, some SDIO devices do not
-comply with the SDIO specification and does not provide reliable VID/PID
-(eg. Silabs WF200).
-
-So, the drivers for these devices rely on device tree to identify the
-device.
-
-This patch allows the MMC to also rely on the device tree to apply a
-quirk.
+Currently, mmc_fixup_device() is a bit difficult to read because of
+particularly long condition.
 
 Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
 Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
 ---
- drivers/mmc/core/card.h   |  3 +++
- drivers/mmc/core/quirks.h | 17 +++++++++++++++++
- 2 files changed, 20 insertions(+)
+ drivers/mmc/core/quirks.h | 41 +++++++++++++++++++++++----------------
+ 1 file changed, 24 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 7bd392d55cfa5..483e7f2f1039e 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -59,6 +59,9 @@ struct mmc_fixup {
- 	/* for MMC cards */
- 	unsigned int ext_csd_rev;
- 
-+	/* Match against functions declared in device tree */
-+	const char *of_compatible;
-+
- 	void (*vendor_fixup)(struct mmc_card *card, int data);
- 	int data;
- };
 diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index c7ef2d14b359f..4a767f2fbaaaa 100644
+index d68e6e513a4f4..c7ef2d14b359f 100644
 --- a/drivers/mmc/core/quirks.h
 +++ b/drivers/mmc/core/quirks.h
-@@ -10,6 +10,7 @@
-  *
-  */
+@@ -152,22 +152,29 @@ static inline void mmc_fixup_device(struct mmc_card *card,
+ 	u64 rev = cid_rev_card(card);
  
-+#include <linux/of.h>
- #include <linux/mmc/sdio_ids.h>
- 
- #include "card.h"
-@@ -145,6 +146,19 @@ static const struct mmc_fixup __maybe_unused sdio_fixup_methods[] = {
- 	END_FIXUP
- };
- 
-+static inline bool mmc_fixup_of_compatible_match(struct mmc_card *card,
-+						 const char *compatible)
-+{
-+	struct device_node *np;
-+
-+	for_each_child_of_node(mmc_dev(card->host)->of_node, np) {
-+		if (of_device_is_compatible(np, compatible))
-+			return true;
-+	}
-+
-+	return false;
-+}
-+
- static inline void mmc_fixup_device(struct mmc_card *card,
- 				    const struct mmc_fixup *table)
- {
-@@ -173,6 +187,9 @@ static inline void mmc_fixup_device(struct mmc_card *card,
- 			continue;
- 		if (rev < f->rev_start || rev > f->rev_end)
- 			continue;
-+		if (f->of_compatible &&
-+		    !mmc_fixup_of_compatible_match(card, f->of_compatible))
+ 	for (f = table; f->vendor_fixup; f++) {
+-		if ((f->manfid == CID_MANFID_ANY ||
+-		     f->manfid == card->cid.manfid) &&
+-		    (f->oemid == CID_OEMID_ANY ||
+-		     f->oemid == card->cid.oemid) &&
+-		    (f->name == CID_NAME_ANY ||
+-		     !strncmp(f->name, card->cid.prod_name,
+-			      sizeof(card->cid.prod_name))) &&
+-		    (f->cis_vendor == card->cis.vendor ||
+-		     f->cis_vendor == (u16) SDIO_ANY_ID) &&
+-		    (f->cis_device == card->cis.device ||
+-		     f->cis_device == (u16) SDIO_ANY_ID) &&
+-		    (f->ext_csd_rev == EXT_CSD_REV_ANY ||
+-		     f->ext_csd_rev == card->ext_csd.rev) &&
+-		    rev >= f->rev_start && rev <= f->rev_end) {
+-			dev_dbg(&card->dev, "calling %ps\n", f->vendor_fixup);
+-			f->vendor_fixup(card, f->data);
+-		}
++		if (f->manfid != CID_MANFID_ANY &&
++		    f->manfid != card->cid.manfid)
 +			continue;
- 
- 		dev_dbg(&card->dev, "calling %ps\n", f->vendor_fixup);
- 		f->vendor_fixup(card, f->data);
++		if (f->oemid != CID_OEMID_ANY &&
++		    f->oemid != card->cid.oemid)
++			continue;
++		if (f->name != CID_NAME_ANY &&
++		    strncmp(f->name, card->cid.prod_name,
++			    sizeof(card->cid.prod_name)))
++			continue;
++		if (f->cis_vendor != (u16)SDIO_ANY_ID &&
++		    f->cis_vendor != card->cis.vendor)
++			continue;
++		if (f->cis_device != (u16)SDIO_ANY_ID &&
++		    f->cis_device != card->cis.device)
++			continue;
++		if (f->ext_csd_rev != EXT_CSD_REV_ANY &&
++		    f->ext_csd_rev != card->ext_csd.rev)
++			continue;
++		if (rev < f->rev_start || rev > f->rev_end)
++			continue;
++
++		dev_dbg(&card->dev, "calling %ps\n", f->vendor_fixup);
++		f->vendor_fixup(card, f->data);
+ 	}
+ }
 -- 
 2.33.0
 
