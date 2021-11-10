@@ -2,91 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6508C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:20:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DC23C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 19:16:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A61F861205
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 17:20:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 856BB6117A
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Nov 2021 19:16:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231319AbhKJRXe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Nov 2021 12:23:34 -0500
-Received: from mo4-p03-ob.smtp.rzone.de ([81.169.146.175]:12360 "EHLO
-        mo4-p03-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231129AbhKJRXe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 12:23:34 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1636564813;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
-    From:Subject:Sender;
-    bh=FUXvSxOapEOXszxLHtIzwAEW82zU3mG7PzhVm47QW28=;
-    b=hOoo1qtZdqiqh0qncTFEqLXVBnCuQam5+StailPMtwLwGlJ99HwodaSgkIQnKeeKxY
-    dyIZG7QRcGyg8qs57kji2prd3ExawyjgCxHXdea2QSrrbl+Kz1uAXaEMk03AQWj3F6v8
-    Sd47QloDE8FAECS9t7YlA7zpZOKTuEMG1ILgtWAnV9Ke7LhRPomi51vkQ5bv67dEqyuS
-    /SOiqlDLzGPT6Q/KQBVVl6PU7zcBe4WejmhM1ATjmkfPKLjcnawOOH4CrVkQpRUhctKH
-    6Uwm4I1cFCwj7r0qAhU/RQqv0K4gK0AziQ9qrCo816FPi1MjvZnd0UP9a6twOUsI5OsH
-    z04g==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw47pgLk="
-X-RZG-CLASS-ID: mo00
-Received: from imac.fritz.box
-    by smtp.strato.de (RZmta 47.34.5 DYNA|AUTH)
-    with ESMTPSA id Y02aa4xAAHKD521
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Wed, 10 Nov 2021 18:20:13 +0100 (CET)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Subject: Re: [PATCH v2 4/6] mmc: core: Fixup storing of OCR for
- MMC_QUIRK_NONSTD_SDIO
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-In-Reply-To: <e7936cff7fc24d187ef2680d3b4edb0ade58f293.1636564631.git.hns@goldelico.com>
-Date:   Wed, 10 Nov 2021 18:20:12 +0100
-Cc:     =?utf-8?Q?Gra=C5=BEvydas_Ignotas?= <notasas@gmail.com>,
-        linux-mmc@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        =?utf-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Tony Lindgren <tony@atomide.com>,
-        Bean Huo <beanhuo@micron.com>,
-        Nikolaus Schaller <hns@goldelico.com>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Tian Tao <tiantao6@hisilicon.com>,
-        Andreas Kemnade <andreas@kemnade.info>,
-        Yang Li <abaci-bugfix@linux.alibaba.com>
-Content-Transfer-Encoding: 7bit
-Message-Id: <857E13BF-020B-4184-801D-783ADBDC42A1@goldelico.com>
-References: <cover.1636564631.git.hns@goldelico.com>
- <e7936cff7fc24d187ef2680d3b4edb0ade58f293.1636564631.git.hns@goldelico.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-X-Mailer: Apple Mail (2.3445.104.21)
+        id S232769AbhKJTTJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Nov 2021 14:19:09 -0500
+Received: from www.zeus03.de ([194.117.254.33]:54970 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232707AbhKJTTI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 10 Nov 2021 14:19:08 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=vF1Wsj/PEwKkfb
+        w8YWFv/x2ThhwK4/iSmPZ0sryZuYI=; b=DxK+sTe/mwIUkIkejBdmI08IZBDwtz
+        GMkHbangNcB1/k9Klix60gsU4HA50AUjjD3GaPeslcWeAls2UzVoIxHJF3Z7YHlE
+        0Rb2cnbvEBdzbMUEa3/yEW8tFO+8i7CCA7Hzsd3IbW5R67xr7tj2k7YRyP51FyR6
+        0bzxmTCLSwE5U=
+Received: (qmail 722332 invoked from network); 10 Nov 2021 20:16:19 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 10 Nov 2021 20:16:19 +0100
+X-UD-Smtp-Session: l3s3148p1@sE2KD3TQ0JogAwDPXwnKAAv7bcN/CGzA
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-renesas-soc@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH v2 01/21] clk: renesas: rcar-gen3: add dummy SDnH clock
+Date:   Wed, 10 Nov 2021 20:15:50 +0100
+Message-Id: <20211110191610.5664-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20211110191610.5664-1-wsa+renesas@sang-engineering.com>
+References: <20211110191610.5664-1-wsa+renesas@sang-engineering.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> Am 10.11.2021 um 18:17 schrieb H. Nikolaus Schaller <hns@goldelico.com>:
-> 
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> The mmc core takes a specific path to support initializing of a
-> non-standard SDIO card. This is triggered by looking for the card-quirk,
-> MMC_QUIRK_NONSTD_SDIO.
-> 
-> 	if (card->type == MMC_TYPE_SD_COMBO) {
-> -- 
-> 2.33.0
-> 
+Currently, SDnH is handled together with SDn. This caused lots of
+problems, so we want SDnH as a separate clock. Introduce a dummy SDnH
+type here which creates a fixed-factor clock with factor 1. That allows
+us to convert the per-SoC CPG drivers while keeping the old behaviour
+for now. A later patch then will add the proper functionality.
 
-Sorry, I just recognised after pressing the send button that with "early"
-you probably meant this to be 1/6... Should I resubmit?
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+---
 
-BR,
-Nikolaus
+Changes since RFC v1:
+* fixed typo in commit message
+* added tag from Geert
 
+ drivers/clk/renesas/rcar-cpg-lib.c  | 9 +++++++++
+ drivers/clk/renesas/rcar-cpg-lib.h  | 4 ++++
+ drivers/clk/renesas/rcar-gen3-cpg.c | 4 ++++
+ drivers/clk/renesas/rcar-gen3-cpg.h | 4 ++++
+ 4 files changed, 21 insertions(+)
+
+diff --git a/drivers/clk/renesas/rcar-cpg-lib.c b/drivers/clk/renesas/rcar-cpg-lib.c
+index 5678768ee1f2..351cb9c04f5c 100644
+--- a/drivers/clk/renesas/rcar-cpg-lib.c
++++ b/drivers/clk/renesas/rcar-cpg-lib.c
+@@ -65,6 +65,15 @@ void cpg_simple_notifier_register(struct raw_notifier_head *notifiers,
+ /*
+  * SDn Clock
+  */
++
++struct clk * __init cpg_sdh_clk_register(const char *name,
++	void __iomem *sdnckcr, const char *parent_name,
++	struct raw_notifier_head *notifiers)
++{
++	/* placeholder during transition */
++	return clk_register_fixed_factor(NULL, name, parent_name, 0, 1, 1);
++}
++
+ #define CPG_SD_STP_HCK		BIT(9)
+ #define CPG_SD_STP_CK		BIT(8)
+ 
+diff --git a/drivers/clk/renesas/rcar-cpg-lib.h b/drivers/clk/renesas/rcar-cpg-lib.h
+index d00c91b116ca..548cb9562f35 100644
+--- a/drivers/clk/renesas/rcar-cpg-lib.h
++++ b/drivers/clk/renesas/rcar-cpg-lib.h
+@@ -26,6 +26,10 @@ void cpg_simple_notifier_register(struct raw_notifier_head *notifiers,
+ 
+ void cpg_reg_modify(void __iomem *reg, u32 clear, u32 set);
+ 
++struct clk * __init cpg_sdh_clk_register(const char *name,
++	void __iomem *sdnckcr, const char *parent_name,
++	struct raw_notifier_head *notifiers);
++
+ struct clk * __init cpg_sd_clk_register(const char *name,
+ 	void __iomem *base, unsigned int offset, const char *parent_name,
+ 	struct raw_notifier_head *notifiers, bool skip_first);
+diff --git a/drivers/clk/renesas/rcar-gen3-cpg.c b/drivers/clk/renesas/rcar-gen3-cpg.c
+index 558191c99b48..182b189bc8f4 100644
+--- a/drivers/clk/renesas/rcar-gen3-cpg.c
++++ b/drivers/clk/renesas/rcar-gen3-cpg.c
+@@ -486,6 +486,10 @@ struct clk * __init rcar_gen3_cpg_clk_register(struct device *dev,
+ 			mult *= 2;
+ 		break;
+ 
++	case CLK_TYPE_GEN3_SDH:
++		return cpg_sdh_clk_register(core->name, base + core->offset,
++					   __clk_get_name(parent), notifiers);
++
+ 	case CLK_TYPE_GEN3_SD:
+ 		return cpg_sd_clk_register(core->name, base, core->offset,
+ 					   __clk_get_name(parent), notifiers,
+diff --git a/drivers/clk/renesas/rcar-gen3-cpg.h b/drivers/clk/renesas/rcar-gen3-cpg.h
+index 3d949c4a3244..2bc0afadf604 100644
+--- a/drivers/clk/renesas/rcar-gen3-cpg.h
++++ b/drivers/clk/renesas/rcar-gen3-cpg.h
+@@ -17,6 +17,7 @@ enum rcar_gen3_clk_types {
+ 	CLK_TYPE_GEN3_PLL2,
+ 	CLK_TYPE_GEN3_PLL3,
+ 	CLK_TYPE_GEN3_PLL4,
++	CLK_TYPE_GEN3_SDH,
+ 	CLK_TYPE_GEN3_SD,
+ 	CLK_TYPE_GEN3_R,
+ 	CLK_TYPE_GEN3_MDSEL,	/* Select parent/divider using mode pin */
+@@ -32,6 +33,9 @@ enum rcar_gen3_clk_types {
+ 	CLK_TYPE_GEN3_SOC_BASE,
+ };
+ 
++#define DEF_GEN3_SDH(_name, _id, _parent, _offset)	\
++	DEF_BASE(_name, _id, CLK_TYPE_GEN3_SDH, _parent, .offset = _offset)
++
+ #define DEF_GEN3_SD(_name, _id, _parent, _offset)	\
+ 	DEF_BASE(_name, _id, CLK_TYPE_GEN3_SD, _parent, .offset = _offset)
+ 
+-- 
+2.30.2
 
