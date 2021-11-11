@@ -2,233 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34C30C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 02:09:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5406EC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 09:22:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15F626109F
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 02:09:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3CDD361264
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 09:22:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234388AbhKKCMh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Nov 2021 21:12:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60250 "EHLO
+        id S232067AbhKKJYs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Nov 2021 04:24:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234262AbhKKCMQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Nov 2021 21:12:16 -0500
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E450C06122C
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2021 18:08:18 -0800 (PST)
-Received: by mail-ed1-x532.google.com with SMTP id c8so17742284ede.13
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Nov 2021 18:08:18 -0800 (PST)
+        with ESMTP id S230021AbhKKJYr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2021 04:24:47 -0500
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E106C061767
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Nov 2021 01:21:58 -0800 (PST)
+Received: by mail-lf1-x134.google.com with SMTP id bi37so7757397lfb.5
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Nov 2021 01:21:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=x2f7mNHFGCNYaSYUTYmGvh1vF4I+NlTW7cZ0xXVFvLk=;
-        b=R4e4rH97jtwiKe8JCRSPD7urIB71/MDTR7HT4WFDvsXO8IrUI4+548uXNHI9ID3lZu
-         ctRbmW192o3CLs0qNxFTxBCye9EBSZkH+6BcdqEU6rVxRlFYKy040LsrwY9U2/e3N9jk
-         g/4+qNNO3jPTFBzaQHv+vSZJo6HD1LXmlOdccw3xhoNNOq0Wx3YUYcQOgtpjf2QssKqf
-         Ka0cbFDu8beL9hediOtMJ61ifIeAMkFmCOuTBo4KFiMKHUb/xX8WuLw/E1xpveb816UN
-         Rf52hxvUYnbd0Oz9Zd1+EL7Mx4InKcoZh16Uy1SpFRE+cL0hPTYM5mCzX1zqW56R1I3Z
-         6Z+w==
+        bh=upzcV63NGKfkcgiX0pF2jdWcUrYxKUE4MnPXAlmhZ24=;
+        b=xITzxxjhV5bA9MTZ9uG5YUE2S5tR5hlBgqhBgSx0uLF2Q9yNZovs+KT6z1In0PQJNh
+         0OyAKYXNaT1139a6RzIJ9T1IbxrrR7vAOQngnXWq7J232baYxeSQG8PKMYWR9xVLK+xa
+         BhUgCP9a9R4hNZLRj+KlDiwlj2q35fPONGGsLtkVHMa3pq/4QUmS+oVBF+CAeYaXrcjX
+         L4ln7EuawMiSAWgSda7TS9arDP6yB5uAzps91Pr9kVD7WQB3WqBuvjrQcBNU7P7hnVGv
+         0WfhqrsXGO640evD5yam0MQOsRn1S+AeAgnatB12p1jRtgeG5KqwqAwVDrSNWXNjJyyy
+         /Umw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=x2f7mNHFGCNYaSYUTYmGvh1vF4I+NlTW7cZ0xXVFvLk=;
-        b=A9InGlgKiAmx2ylM8xsJgPVSod+D1IVDyeVf5QX2MeMHQAwtoxRA8Ki0TA0UQi8pO2
-         Xkvp5900AWgby0JEzNtfAQTsCnmM0HOwZkovVm4Zf/nQguxVJty0tvjUgNZt0B41JINB
-         8jTbP+DFrTPuZtD+62QkDbh2obDP8zYfxCUFSBisYLl7Hf+06y+r6yxIP3rdQN3aUdEU
-         82OjPLjc+gW6V3ibbOKFHf0lbIH0lBzqk680YVrFpTOlgp59imDu4v7nwilfpLoZMlf7
-         ExMlbIXbZ/CpjAbWltsBMvTJeliw8D7yZkiP2Tv1r9Ok+VDzRR/Kle7oSqeif2psZVOC
-         bjeQ==
-X-Gm-Message-State: AOAM533RE+RuxsU8Fd/TDe5IOWbCXgFSwMzxDB48xWTDUiz+W632Zqlm
-        yH5lVA07Tr/blj08hiOqBvf4Wq5tAdKjUrmBn/spyQ==
-X-Google-Smtp-Source: ABdhPJwJ+V96RLd1FGOaO5sgF7EbrYmQoVDLbepCA1fvbEiabgxL8IStUtFtpIgbWCwxk9FiIehcIWd/3jwLCeXjOIk=
-X-Received: by 2002:a17:906:1451:: with SMTP id q17mr4784534ejc.36.1636596496906;
- Wed, 10 Nov 2021 18:08:16 -0800 (PST)
+        bh=upzcV63NGKfkcgiX0pF2jdWcUrYxKUE4MnPXAlmhZ24=;
+        b=izHO7XlMGpWoWJ1c2uHooAhryXfpJbvagmU+YmrsNLqBp3tUcVwkoXV+tasCUrHcGo
+         D4+6HY5VgAxIVU4SAjVddq2d3of3LDX4g2PMW0v+5IDxsGUA42fgPWuuM/mJLYSex90s
+         ObYTNFvEbzDvxO07bdvAGVpcos+47icwIQnbw+DB8YW+lj9gSiFKbU9o5qnB3K/A+N5w
+         GFOQIhRUBb+R0jAuZcYR8nKFqaVrJVNUCamLp5KzM8aTLESNWf7sf1CX7zAvnkgsvMKz
+         F68/eZd2DhxVYX0TD1qz2YCUUtG6N+dA1CCsvUrShZ0+CebYNemyWyb7cNW+D4dct35r
+         ajJg==
+X-Gm-Message-State: AOAM531AQWMpXLbPJ9nv6TH47X3wmZ6Z2XUujouVUvjIqrJun2rMMs2M
+        G/BfM2aNeSeZ/Xzy5PrFCzVdrfB+g8OeyhwOphMz+g==
+X-Google-Smtp-Source: ABdhPJwltgmgxSoCafwjV++Ud4heliO80/2F+tNg3MhJJVkgjUldFy5JKooQdnOSvoRB1dfX8e9S2gCDAEl+Lj9sX4c=
+X-Received: by 2002:ac2:5a46:: with SMTP id r6mr5589070lfn.358.1636622516569;
+ Thu, 11 Nov 2021 01:21:56 -0800 (PST)
 MIME-Version: 1.0
-References: <20211025015156.33133-1-brad@pensando.io> <20211025015156.33133-12-brad@pensando.io>
- <YXnGkjXMmLdFHEIF@robh.at.kernel.org>
-In-Reply-To: <YXnGkjXMmLdFHEIF@robh.at.kernel.org>
-From:   Brad Larson <brad@pensando.io>
-Date:   Wed, 10 Nov 2021 18:08:05 -0800
-Message-ID: <CAK9rFnzRF_Tv-DRO3SvrcZz7PmzPQOGJLS6f_ZBJPR4QbjG-Dw@mail.gmail.com>
-Subject: Re: [PATCH v3 11/11] arm64: dts: Add Pensando Elba SoC support
-To:     Rob Herring <robh@kernel.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
+References: <cover.1636564631.git.hns@goldelico.com> <e7936cff7fc24d187ef2680d3b4edb0ade58f293.1636564631.git.hns@goldelico.com>
+ <857E13BF-020B-4184-801D-783ADBDC42A1@goldelico.com>
+In-Reply-To: <857E13BF-020B-4184-801D-783ADBDC42A1@goldelico.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 11 Nov 2021 10:21:19 +0100
+Message-ID: <CAPDyKFqMm18GuTk9=v==iVxKa=SWLj2Xh6acoK=N6dVJJ6Xiaw@mail.gmail.com>
+Subject: Re: [PATCH v2 4/6] mmc: core: Fixup storing of OCR for MMC_QUIRK_NONSTD_SDIO
+To:     "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     =?UTF-8?Q?Gra=C5=BEvydas_Ignotas?= <notasas@gmail.com>,
+        linux-mmc@vger.kernel.org,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>, kernel@pyra-handheld.com,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
         Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Tony Lindgren <tony@atomide.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Tian Tao <tiantao6@hisilicon.com>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Yang Li <abaci-bugfix@linux.alibaba.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
-
-On Wed, Oct 27, 2021 at 2:37 PM Rob Herring <robh@kernel.org> wrote:
+On Wed, 10 Nov 2021 at 18:20, H. Nikolaus Schaller <hns@goldelico.com> wrote:
 >
-> > +always-y     := $(dtb-y)
-> > +subdir-y     := $(dts-dirs)
-> > +clean-files  := *.dtb
+> > Am 10.11.2021 um 18:17 schrieb H. Nikolaus Schaller <hns@goldelico.com>:
+> >
+> > From: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> > The mmc core takes a specific path to support initializing of a
+> > non-standard SDIO card. This is triggered by looking for the card-quirk,
+> > MMC_QUIRK_NONSTD_SDIO.
+> >
+> >       if (card->type == MMC_TYPE_SD_COMBO) {
+> > --
+> > 2.33.0
+> >
 >
-> None of these lines should be needed.
+> Sorry, I just recognised after pressing the send button that with "early"
+> you probably meant this to be 1/6... Should I resubmit?
 
-Yes, these will be removed.
+No need to re-submit, this works fine!
 
-> > diff --git a/arch/arm64/boot/dts/pensando/elba-16core.dtsi b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
-> > new file mode 100644
-> > index 000000000000..acf5941afbc1
-> > --- /dev/null
-> > +++ b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
-> > @@ -0,0 +1,192 @@
-> > +// SPDX-License-Identifier: GPL-2.0
->
-> Do you care about using with non-GPL OS? Dual license is preferred.
->
-Dual is fine, changing to this:
-SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-
-> > +             psci {
->
-> This goes at the root level.
->
-Moving to the root level
-
-> > +                     compatible = "arm,psci-0.2";
-> > +                     method = "smc";
-> > +             };
-> > +
-> > +     };
-> > +};
-> > diff --git a/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
-> > +
-> > +&spi0 {
-> > +     num-cs = <4>;
-> > +     cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
-> > +                <&porta 7 GPIO_ACTIVE_LOW>;
-> > +     status = "okay";
-> > +     spi0_cs0@0 {
->
-> Node names should reflect the class of device and use standard name
-> defined in the DT spec. This probably doesn't have one. 'lora' perhaps?
->
-Right, I didn't see a standard name and found many approaches in other files
-so I likely based off of one of these below.   I searched the dts
-files for 'lora' and
-didn't find it.  Is that an acronym?  I can change it to what the preference is.
-
-./microchip/sparx5_pcb134_board.dtsi:
-&spi0 {
-   status = "okay";
-   spi@0 {
-           compatible = "spi-mux";
-           ...
-};
-
-./rockchip/rk3399.dtsi:
-spi5 {
-        spi5_clk: spi5-clk {
-                rockchip,pins =
-                        <2 RK_PC6 2 &pcfg_pull_up>;
-        };
-        spi5_cs0: spi5-cs0 {
-                rockchip,pins =
-                        <2 RK_PC7 2 &pcfg_pull_up>;
-        };
-        spi5_rx: spi5-rx {
-                rockchip,pins =
-                        <2 RK_PC4 2 &pcfg_pull_up>;
-        };
-        spi5_tx: spi5-tx {
-                rockchip,pins =
-                        <2 RK_PC5 2 &pcfg_pull_up>;
-        };
-};
-
->
-> > +             compatible = "semtech,sx1301";  /* Enable spidev */
->
-> What's spidev?
->
-It's module drivers/spi/spidev.c which won't populate /dev/spidevB.C unless
-there is a match which we need for the system to boot.  An earlier patch added
-to the compatible list below and the feedback on that was to remove it.  Later I
-noticed the compatible list expanded...
-
-static const struct of_device_id spidev_dt_ids[] = {
-        { .compatible = "rohm,dh2228fv" },
-        { .compatible = "lineartechnology,ltc2488" },
-        { .compatible = "semtech,sx1301" },
-        { .compatible = "lwn,bk4" },
-        { .compatible = "dh,dhcom-board" },
-        { .compatible = "menlo,m53cpld" },
-        { .compatible = "cisco,spi-petra" },
-        { .compatible = "micron,spi-authenta" },
-        {},
-};
-
-> > +             #address-cells = <1>;
-> > +             #size-cells = <1>;
-> > +             spi-max-frequency = <12000000>;
-> > +             reg = <0>;
-> > +     };
-> > +
-> > +     spi0_cs1@1 {
-> > +             compatible = "semtech,sx1301";
-> > +             #address-cells = <1>;
-> > +             #size-cells = <1>;
-> > +             spi-max-frequency = <12000000>;
-> > +             reg = <1>;
-> > +     };
-> > +
-> > +     spi0_cs2@2 {
-> > +             compatible = "semtech,sx1301";
-> > +             #address-cells = <1>;
-> > +             #size-cells = <1>;
-> > +             spi-max-frequency = <12000000>;
-> > +             reg = <2>;
-> > +             interrupt-parent = <&porta>;
-> > +             interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-> > +     };
-> > +
-> > +     spi0_cs3@3 {
-> > +             compatible = "semtech,sx1301";
-> > +             #address-cells = <1>;
-> > +             #size-cells = <1>;
-> > +             spi-max-frequency = <12000000>;
-> > +             reg = <3>;
-> > +     };
-> > +};
-> > diff --git a/arch/arm64/boot/dts/pensando/elba-asic.dts b/arch/arm64/boot/dts/pensando/elba-asic.dts
-> > new file mode 100644
-> > index 000000000000..131931dc643f
-> > --- /dev/null
-> > +++ b/arch/arm64/boot/dts/pensando/elba-asic.dts
-> > @@ -0,0 +1,23 @@
-> > +// SPDX-License-Identifier: GPL-2.0
-> > +
-> > +/dts-v1/;
-> > +
-> > +/ {
-> > +     model = "Elba ASIC Board";
-> > +     compatible = "pensando,elba";
->
-> Normally we have a compatible for the board plus the soc compatible.
-
-In this case there are currently five different boards/products that have no
-variations needing a board level description.
-
-Thanks,
-Brad
+Kind regards
+Uffe
