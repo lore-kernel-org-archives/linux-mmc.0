@@ -2,114 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A169C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 09:49:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77559C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 12:10:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 50C6161107
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 09:49:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 539D761261
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Nov 2021 12:10:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232570AbhKKJwE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Nov 2021 04:52:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49188 "EHLO
+        id S232203AbhKKMNm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Nov 2021 07:13:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52820 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229668AbhKKJwD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2021 04:52:03 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE58BC061767
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Nov 2021 01:49:14 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id u22so4001435lju.7
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Nov 2021 01:49:14 -0800 (PST)
+        with ESMTP id S230400AbhKKMNm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Nov 2021 07:13:42 -0500
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42162C061767
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Nov 2021 04:10:53 -0800 (PST)
+Received: by mail-lj1-x22a.google.com with SMTP id t11so11498195ljh.6
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Nov 2021 04:10:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=OCREGG06PLhapCFom87STE1uw55Yr5x9ePMRWOvmT3k=;
-        b=J/P1hPH6j7wvhRvFyZd3TqxaZ6OSx5WqY79nSlVHc4q6aeCj4OCVN+lpKr5aO4eqav
-         IPFsV0kv/g4BObRIKl9w8qk9UoqVi/8vR/0nRghSEKV4z0cZMzgvCU/vUJ7HbB4o2Y3d
-         1qSTNUQddXh+8wvVo08Dz/WCCuaeIEfsODFVrgBdmxHrNzPpnF8nAwkGfo1be2/P1DNp
-         Xa6sgTl0U0KkhVEVBO6ghGt/4WR1iUFpPVd4/CI3RhmNeK8iTFleaaIdQB3M8BFB9yx7
-         1HSWsHio+2uDFqg0+fkcemqvzpCwM+W5Cjtt7mdn76KfyXVA1YsmlqpdRaqlvEfNuY4x
-         j7lg==
+         :cc:content-transfer-encoding;
+        bh=mVYKVIklyAhOeKYt/Djeg3160H0V9y1eVTKBm55rYr4=;
+        b=k3q5rOXFghTofEhfgNFZGn72Byg4WZL2YMlU6dcRFOH29E5OyE3PdQ0M6W1RFKUZOo
+         xWLww/RlEIby7RDSU/5H1KWl8+vtnxd3rGXQuU7T9UFtiSvVGWGc+A6OvPxp/+Dur9nC
+         WCYs48v2xKH3SjEsyiCmAWgKUXDHVfWfANcRXrumWUOEog/P6Pk3OOq7WbLCW19a9kvj
+         D3kj2DPxIf4BhHrVZUi4xJr3HwXqdMkp/uRl49atKJ3KliyTwzqIFbLpIyjpa3BlHDvh
+         6u+oL8zRKeXi7mKqlrBnXuxsNs4/IsJtkwrWRm3vGSBd61HiKtOyWYqSeZIXeMPPKTWL
+         jwyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=OCREGG06PLhapCFom87STE1uw55Yr5x9ePMRWOvmT3k=;
-        b=bkNUKfXYLfQ2jR13ZEOGrOpksuYTa4Vut4p5ugCK6iXkJy/tUVkwn08e4A9PmS0kRt
-         UoUGi89wxfwm8rklKrqzwn9CfLz/5R8459Lby8OC0qFzQm8o6iVPu9Zg4bjdyGJnWlnd
-         z1+pCdTTojZzYHBDARYs+XePCsST3FDcFvADdox/AKMVxqd5OWEL5dzF1Td+sYVdq/Am
-         uf/MrNvXY/nVc/3YuvijwPAc4CaZA8kK1RiUiDHav/JagE18ZFEAGa9FD9Bv2alUaJpb
-         6YStstfCRP+3Q920vTxpsOkrPWMBO+lyx1B6+pvNF/vu2bEaIX3zU3Gjl7b2xU2EDmoB
-         yFDA==
-X-Gm-Message-State: AOAM532xOZZEltZQkJFn3Yu9Mu5AhyPY0CemaMH9AzygDc+epa1Yj6lU
-        h5yZm2J8sNQn7pWvHaTk9LZedfFEXdxM/Crr+tOxzA==
-X-Google-Smtp-Source: ABdhPJxkX3V93M0k93HKNu7+qIoL9WfO3AxPfyLW/zo4eZiEbynnSydtnx20bP3Pjol+PTMrmXAci3syYf02ZC4ce3U=
-X-Received: by 2002:a2e:7114:: with SMTP id m20mr5714665ljc.229.1636624153256;
- Thu, 11 Nov 2021 01:49:13 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=mVYKVIklyAhOeKYt/Djeg3160H0V9y1eVTKBm55rYr4=;
+        b=mPkZP/MN1ZfgNJnyF2NIs36sNXBfs/ikwCNs1kANz8TRmfhGSzUra/qWu9y02waUJk
+         /3lKfRL5a6tmBPjQ3KQxOGjs0aHb3q+/mDUBlqW5Sakbh6/v8MXalwVlXFsWayyfWvDZ
+         MvVTB9KU1FQxCZYGp594h/KuJcvpOrPbixN2tqd0NT/FEUSU/eR2r//T6TorQJuD/1E7
+         HRKkc9b2MGwx6reShb1wGb3KQeJ/kKsZiYnae/GBsugCgZKi5vOcX/4u8rLv+HEbddHh
+         iAt8nT2mo0jBKvg9j5UnI/1WTSlXbvFxEgFJcK+tRAuMYuVO03LIsFm401HXvmKD/ftm
+         eXXw==
+X-Gm-Message-State: AOAM531ijMqRLso2fpHK+Y2jJ0E9k0CvlQqXozsO9/8V0G8hcahmQR3S
+        glbCW0KZsRwrkwx4YPVjvpYsK5PCHwjiAZxHdQbMlg==
+X-Google-Smtp-Source: ABdhPJxou4aoi7oS5hpR0rqworoRVynrLUveORbssI5/aUrXcszt6Nh4XLnfTXeqZb8oc5ikkuX0GL8UbFkNhyUb6/o=
+X-Received: by 2002:a05:651c:10b1:: with SMTP id k17mr6595483ljn.463.1636632651450;
+ Thu, 11 Nov 2021 04:10:51 -0800 (PST)
 MIME-Version: 1.0
-References: <20211110191610.5664-1-wsa+renesas@sang-engineering.com> <20211110191610.5664-21-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20211110191610.5664-21-wsa+renesas@sang-engineering.com>
+References: <cover.1636564631.git.hns@goldelico.com>
+In-Reply-To: <cover.1636564631.git.hns@goldelico.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 11 Nov 2021 10:48:36 +0100
-Message-ID: <CAPDyKFrW1T-4UeS6R2j8+2LKJ5D0iELXJ_Q+Mmq=Mk6CfjDPQA@mail.gmail.com>
-Subject: Re: [RFC PATCH v2 20/21] mmc: sdhi: parse DT for SDnH
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
+Date:   Thu, 11 Nov 2021 13:10:15 +0100
+Message-ID: <CAPDyKFruL-b7VgkuTL+TH5apY_bgjUTBwinYeqM0Xk4cKWP0rg@mail.gmail.com>
+Subject: Re: [PATCH v2 0/6] mmc: core: extend mmc_fixup_device and transplant
+ ti,wl1251 quirks from to be retired omap_hsmmc
+To:     "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Tony Lindgren <tony@atomide.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Tian Tao <tiantao6@hisilicon.com>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Yang Li <abaci-bugfix@linux.alibaba.com>, notasas@gmail.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        letux-kernel@openphoenux.org, kernel@pyra-handheld.com,
+        linux-omap@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 10 Nov 2021 at 20:16, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Wed, 10 Nov 2021 at 18:17, H. Nikolaus Schaller <hns@goldelico.com> wrot=
+e:
 >
-> If there is a SDnH clock provided in DT, let's use it instead of relying
-> on the fallback.
+> PATCH V2 2021-11-10 18:17:11:
+> * remove setting card->ocr =3D 0x80 because it is no longer needed (by H.=
+ Nikolaus Schaller <hns@goldelico.com>)
+> * include patch "mmc: core: Fixup storing of OCR for MMC_QUIRK_NONSTD_SDI=
+O" by Ulf Hansson <ulf.hansson@linaro.org>
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> PATCH V1 2021-11-09 11:59:08:
+> * merge call of mmc_fixup_device for sdio into other commit (suggested by=
+ Ulf Hansson <ulf.hansson@linaro.org>)
+> * do not call mmc_fixup_device(card, sdio_card_init_methods) for mmc and =
+sd interfaces, just sdio (suggested by Ulf Hansson <ulf.hansson@linaro.org>=
+)
+> * do not use a matching list but a single string constant (suggested by U=
+lf Hansson <ulf.hansson@linaro.org>)
+> * switched to "[PATCH v1]" (suggested by Ulf Hansson <ulf.hansson@linaro.=
+org>)
+>
+> RFC V4 2021-11-05 10:05:51:
+> * remove const from char *const * (Ulf Hansson <ulf.hansson@linaro.org>)
+> * use for_each_child_of_node() to scan compatible children (Ulf Hansson <=
+ulf.hansson@linaro.org>)
+> (see: https://lore.kernel.org/lkml/CAPDyKFpr0kpRXoUACNNSwe8pL1S9wJPjnX+GF=
+GS1PNezKCDYzQ@mail.gmail.com/)
+>
+> RFC V3 2021-11-03 14:00:13:
+> * patches have been split into smaller ones a little further
+> * propose a new macro for setup of device tree compatible quirks
+> * directly include patches by jerome.pouiller@silabs.com
+>   in this series
+>
+> RFC V2 2021-11-01 10:24:26:
+> * reworked to not misuse mmc_select_card() but add a call to
+>   mmc_fixup_device() right after where host->ops->init_card
+>   was called before to apply the wl1251 specific quirks.
+>   Device tree matching is done by a new table passed to mmc_fixup_device(=
+).
+>   suggested by: ulf.hansson@linaro.org
+>   based on patches by: jerome.pouiller@silabs.com
+>
+> RFC V1 2021-10-06 13:24:13:
+>
+>
+> H. Nikolaus Schaller (3):
+>   mmc: core: provide macro and table to match the device tree to apply
+>     quirks
+>   mmc: core: transplant ti,wl1251 quirks from to be retired omap_hsmmc
+>   mmc: host: omap_hsmmc: revert special init for wl1251
+>
+> J=C3=A9r=C3=B4me Pouiller (2):
+>   mmc: core: rewrite mmc_fixup_device()
+>   mmc: core: allow to match the device tree to apply quirks
+>
+> Ulf Hansson (1):
+>   mmc: core: Fixup storing of OCR for MMC_QUIRK_NONSTD_SDIO
+>
+>  drivers/mmc/core/card.h       | 36 ++++++++++++++++++++
+>  drivers/mmc/core/quirks.h     | 64 +++++++++++++++++++++++++----------
+>  drivers/mmc/core/sdio.c       |  5 ++-
+>  drivers/mmc/host/omap_hsmmc.c | 36 --------------------
+>  4 files changed, 87 insertions(+), 54 deletions(-)
+>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+This looks good to me, I will queue it up as soon as rc1 is out, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->
-> Changes since RFC v1:
-> * added tag from Geert
-> * use dev_err_probe()
->
->  drivers/mmc/host/renesas_sdhi_core.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 230182de5e88..db053fba5330 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -919,6 +919,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->         if (IS_ERR(priv->clk))
->                 return dev_err_probe(&pdev->dev, PTR_ERR(priv->clk), "cannot get clock");
->
-> +       priv->clkh = devm_clk_get_optional(&pdev->dev, "clkh");
-> +       if (IS_ERR(priv->clkh))
-> +               return dev_err_probe(&pdev->dev, PTR_ERR(priv->clkh), "cannot get clkh");
-> +
->         /*
->          * Some controllers provide a 2nd clock just to run the internal card
->          * detection logic. Unfortunately, the existing driver architecture does
-> @@ -957,7 +961,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->                 dma_priv->dma_buswidth = of_data->dma_buswidth;
->                 host->bus_shift = of_data->bus_shift;
->                 /* Fallback for old DTs */
-> -               if (of_data->sdhi_flags & SDHI_FLAG_NEED_CLKH_FALLBACK)
-> +               if (!priv->clkh && of_data->sdhi_flags & SDHI_FLAG_NEED_CLKH_FALLBACK)
->                         priv->clkh = clk_get_parent(clk_get_parent(priv->clk));
->
->         }
-> --
-> 2.30.2
->
