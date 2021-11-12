@@ -2,129 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BFAA3C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 14:28:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3E69C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 15:00:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AA9C161039
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 14:28:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CB7E61057
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 15:00:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235228AbhKLObE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Nov 2021 09:31:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41112 "EHLO
+        id S235157AbhKLPDm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Nov 2021 10:03:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235226AbhKLObD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Nov 2021 09:31:03 -0500
-Received: from mail-oi1-x22f.google.com (mail-oi1-x22f.google.com [IPv6:2607:f8b0:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DC85C061766;
-        Fri, 12 Nov 2021 06:28:13 -0800 (PST)
-Received: by mail-oi1-x22f.google.com with SMTP id q124so18190004oig.3;
-        Fri, 12 Nov 2021 06:28:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=sender:subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=x5dfSUHa1njoopDFflSMfZqV2g9VFMYcNiM5aiRugeo=;
-        b=VYSjzYM+QuDZ26S8+m6rUl0o+PC8pqY7nVUW31EomlzBGk1hF4UaAGOLXL03Sxgq4k
-         GmQ0BI+jQKcdjgCViAosV+9bmYzbhmeDclSSvQ2QVeofKAWuVh5/oTiLuS74rdXZvspS
-         wkqCLN+B75Udtsujv6++p96gd/GPIywNxMvpaUAlWdOylHuEkVP1PMqfB4iLXVOH2FBp
-         fX3UJhoBm2XdD9T64ZIGEoMk+F7BgwlNE1dKE49DpD+mATY+rt8pizFFmvLNWSvgBc0x
-         W0NkFWf/R64HxaTNiUxFefA28VRhDFTvXs3/0xn7IUGm1YYj6nG2e9pkvtSeCEZ5ZhwD
-         f16w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:sender:subject:to:cc:references:from:message-id
-         :date:user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=x5dfSUHa1njoopDFflSMfZqV2g9VFMYcNiM5aiRugeo=;
-        b=nWZ8rws3CfghxDhrTQbToqTZhw6UUq7X4lXhV5ofZ49orJAabmaxuQeCE+LFD8qO4f
-         DRrS2luilW8na3VfPWQWbfoVV6xckFCzNvs+DrI05JCy/HVpUoxBG2nipIYwGxPD8DZ/
-         P0VauYxwl6G9OZL6UoKKV7Mxnsqflns30yDhNNUZRFJWp9SAU2YCnzahS5F7VANE0EKK
-         RTBfjyN8bCAcXdiZtB4v/AMUXTrrmhPqs/JpjrQbBmLv2h7daUZGeTLkmRO8rODgjBKI
-         09S4bIGPxwKIoov5WpOm2iKrVIU1cWZVt1j0q8/aUh/WL5J+fKoDLQNYyla85o7XvdfH
-         Bl6Q==
-X-Gm-Message-State: AOAM532G6VkmuKhDgECeJk4alnWRGqHejA2kgVV2wqWIFWzKIdst1/Q3
-        m5aUliZwEXUxG/+rnsattss=
-X-Google-Smtp-Source: ABdhPJzdXAiqkHjNaY9KvH435R1uUoa7Ewk7VHxGDNdTXjcKZxF8WNLoJN4qb9Pk7ctJYmVRXQPq1w==
-X-Received: by 2002:a05:6808:2186:: with SMTP id be6mr27190633oib.115.1636727292441;
-        Fri, 12 Nov 2021 06:28:12 -0800 (PST)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id l19sm1083194ooq.17.2021.11.12.06.28.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 12 Nov 2021 06:28:11 -0800 (PST)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Subject: Re: [PATCH V4 6/9] dt-bindings: watchdog: imx7ulp-wdt: Add imx8ulp
- compatible string
-To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>, robh+dt@kernel.org,
-        aisheng.dong@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
-        ulf.hansson@linaro.org, broonie@kernel.org, wim@linux-watchdog.org,
-        linux@rempel-privat.de
-Cc:     kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
-        daniel.lezcano@linaro.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, Jacky Bai <ping.bai@nxp.com>,
-        Rob Herring <robh@kernel.org>, Peng Fan <peng.fan@nxp.com>
-References: <20211112082930.3809351-1-peng.fan@oss.nxp.com>
- <20211112082930.3809351-7-peng.fan@oss.nxp.com>
-From:   Guenter Roeck <linux@roeck-us.net>
-Message-ID: <ecd1b962-0401-e077-f1c4-426fafde58f8@roeck-us.net>
-Date:   Fri, 12 Nov 2021 06:28:08 -0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        with ESMTP id S231553AbhKLPDm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Nov 2021 10:03:42 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F709C061766
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Nov 2021 07:00:51 -0800 (PST)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1mlY2j-0002Kw-FN; Fri, 12 Nov 2021 16:00:41 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1mlY2f-0009aF-N8; Fri, 12 Nov 2021 16:00:36 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1mlY2e-0001S6-HH; Fri, 12 Nov 2021 16:00:36 +0100
+Date:   Fri, 12 Nov 2021 16:00:36 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     =?utf-8?B?5p2O5ZOy?= <sensor1010@163.com>
+Cc:     ulf.hansson@linaro.org, srinivas.pandruvada@linux.intel.com,
+        pali@kernel.org, TheSven73@gmail.com, lznuaa@gmail.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: drivers/mmc/cor/bus: Delete redundant match function
+Message-ID: <20211112150036.6lhhoak4uk5hhgqt@pengutronix.de>
+References: <22161945.a8.17d061e089f.Coremail.sensor1010@163.com>
 MIME-Version: 1.0
-In-Reply-To: <20211112082930.3809351-7-peng.fan@oss.nxp.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="wbyaqsxhuvb4rjo2"
+Content-Disposition: inline
+In-Reply-To: <22161945.a8.17d061e089f.Coremail.sensor1010@163.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/12/21 12:29 AM, Peng Fan (OSS) wrote:
-> From: Jacky Bai <ping.bai@nxp.com>
-> 
-> The wdog on i.MX8ULP is derived from i.MX7ULP, it uses two compatible
-> strings, so update the compatible string for i.MX8ULP.
-> 
-> Reviewed-by: Dong Aisheng <aisheng.dong@nxp.com>
-> Acked-by: Rob Herring <robh@kernel.org>
-> Signed-off-by: Jacky Bai <ping.bai@nxp.com>
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
 
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+--wbyaqsxhuvb4rjo2
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> ---
-> 
->   - v4 changes:
->     no
-> 
->   - v3 changes:
->     no
-> 
->   - v2 changes:
->     refine the commit message
-> 
->   .../devicetree/bindings/watchdog/fsl-imx7ulp-wdt.yaml      | 7 +++++--
->   1 file changed, 5 insertions(+), 2 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/watchdog/fsl-imx7ulp-wdt.yaml b/Documentation/devicetree/bindings/watchdog/fsl-imx7ulp-wdt.yaml
-> index 51d6d482bbc2..fb603a20e396 100644
-> --- a/Documentation/devicetree/bindings/watchdog/fsl-imx7ulp-wdt.yaml
-> +++ b/Documentation/devicetree/bindings/watchdog/fsl-imx7ulp-wdt.yaml
-> @@ -14,8 +14,11 @@ allOf:
->   
->   properties:
->     compatible:
-> -    enum:
-> -      - fsl,imx7ulp-wdt
-> +    oneOf:
-> +      - const: fsl,imx7ulp-wdt
-> +      - items:
-> +          - const: fsl,imx8ulp-wdt
-> +          - const: fsl,imx7ulp-wdt
->   
->     reg:
->       maxItems: 1
-> 
+On Wed, Nov 10, 2021 at 03:12:51AM +0800, =E6=9D=8E=E5=93=B2 wrote:
+> HI=EF=BC=9A
+>      I failed to send kernel patch mail with git sendmail,
+>     could  you help me take a look at the submitted patch?
+>     the attachment is a patch file,=20
+>     For convenience, I put the content of the patch in the body of the em=
+ail
+>=20
+>=20
+>                                                                          =
+                   thanks.
+>                                                                          =
+                   lizhe
+> patch :=20
+> |
+> From 40577316f4dbcf35061a14f27f7a777c2f4199a1 Mon Sep 17 00:00:00 2001
+> From: lizhe <sensor1010@163.com>
+> Date: Tue, 9 Nov 2021 10:13:43 -0800
+> Subject: [PATCH] drivers/mmc/cor/bus: Delete redundant match function
+>=20
+>=20
+> When the device and the driver are matching,
+> if the device or the bus to which the device driver belongs
+> does not provide a match function,
+> then the device and the driver are matched by default.
+> function 'driver_match_device' illustrates this mechanism.
+> Because the return value of mmc_bus_match is 1,
+> even if this function is not provided,
+> the function 'driver_match_device' returns 1,
+> so function 'mmc_bus_match' is redundant.
+>=20
+>=20
+> Signed-off-by: lizhe <sensor1010@163.com>
 
+Acked-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+
+Apart from how the patch is put in the mail, a maintainer responsible
+for picking patches up in this area will probably refuse because the
+name in the From line of your mail doesn't match the name used in the
+Signed-off-by: line.
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=C3=B6nig         =
+   |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--wbyaqsxhuvb4rjo2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmGOgZEACgkQwfwUeK3K
+7AlFoAf8Cau9xfSiQBZyFfnC7a9fAdv42gHWDFrcUV9IRMMMncRI86jgFP5Sp2Ju
++2/DEtNnc1xd+dkPWcJqkt9oDLze6b9yBNmLoBnmeBu2YOofObQ/3UECrpyuiy+H
+B1fmgTG+VQqr8IGqCGrzSwFRlQBkPd1WiMs+9pTvtZDwd72PAaKAzZ3NuEkboAP0
+vQ9QTF9jIxzzXpDrSD2RLb18+RUM3VzD1h1vS2bvCUirSyh86P6XDBTitv0YaMn6
+thsdRIYLypP/ZPnW4Ca2FyGysR4tieWBCY9f5HPG5DLwO8fZyTte2TgKBIwkqYeH
+iLIKwBbnZYvs2LL2wj3/npLzxaRtzg==
+=ed8R
+-----END PGP SIGNATURE-----
+
+--wbyaqsxhuvb4rjo2--
