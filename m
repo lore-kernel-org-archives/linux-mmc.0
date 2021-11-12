@@ -2,106 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D21EEC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 12:46:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE8D4C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 13:05:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1A3C60F70
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 12:46:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 96F9961078
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 13:05:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231652AbhKLMsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Nov 2021 07:48:55 -0500
-Received: from smtp2.axis.com ([195.60.68.18]:31740 "EHLO smtp2.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234899AbhKLMsy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 12 Nov 2021 07:48:54 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1636721164;
-  x=1668257164;
-  h=date:to:cc:subject:message-id:references:mime-version:
-   content-transfer-encoding:in-reply-to:from;
-  bh=NclBtNPNw9Vr+khtvDfxrz42JW1fwjkBn5TPduy+D2o=;
-  b=pCzV64F7PYUwAzf59PdMGk+2XLCq676plyq6LSp2slmmBk5OCKoMAijB
-   TcEKbXfnp4DW+rfmuh/I63v6T6wiPg7tZ5mw46hAKoZJtJgiYyGM09vxp
-   7Psa2xGOtxmcIsYvII2KvoQR4JpaKRGAYul8BtShLqS4hRNeohbK4yLfh
-   rlzerxPtgEGwOXesP4IZXiaW+Fjc6dh9kpSCfa1EM/wxbctR6urjHqm9v
-   vAigUy5n64IAGGnd4hWHiZI7y0woVtfS8Z5s4rOGCFX7n5NyiL1u+qRzr
-   S09OZC3qhEEg+2i9SJIYrkbo2vzdY0PFM5k8OuSWhT5r2eRr1BKL3lpi/
-   w==;
-Date:   Fri, 12 Nov 2021 13:46:02 +0100
-To:     Vincent Whitchurch <Vincent.Whitchurch@axis.com>
-CC:     =?iso-8859-1?Q?M=E5rten?= Lindahl <Marten.Lindahl@axis.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        kernel <kernel@axis.com>, Doug Anderson <dianders@google.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Avoid hung state if GEN_CMD transfer fails
-Message-ID: <20211112124602.GA23161@axis.com>
-References: <20211103182716.28419-1-marten.lindahl@axis.com>
- <20211111154020.GA21634@axis.com>
+        id S234881AbhKLNIF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Nov 2021 08:08:05 -0500
+Received: from mail-ua1-f45.google.com ([209.85.222.45]:43743 "EHLO
+        mail-ua1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231652AbhKLNIC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Nov 2021 08:08:02 -0500
+Received: by mail-ua1-f45.google.com with SMTP id v3so18546734uam.10;
+        Fri, 12 Nov 2021 05:05:11 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=cpWPWQ5V5jSlJkNgA2Bco8aLW+Cp4lV6fRTZaCU0dKY=;
+        b=GBEQc+QYuqmNX3jOJb9rU3MDtQZfH3gpyN5u226LRal8YkHrtgZYmgPJP8hSluFKj9
+         gYK+PDe8rJXc3WGzepGyeXbHzmjuP5weUCeMZnFKUKlYUeurc6Kj3PQuAmnydLfqC8sw
+         GiKYZiMUsc2yjtMplHt/0TG/TmOh8WZMEU18Upd2FJINMCP6PBDdr8rP0VQdVS0fhhBO
+         B1zkhumCuA9n10/mHc1O35BbuAf6CqTN2mzwPnwnOPheEkDpHzSD/7U5nm55996FRNzv
+         BfSxr/FaLTyDDnbMd52tn0DIzYDBVvCIqzrsgQ/p+eoalbCHn4UC1raSuVuzcEvPeDTr
+         rmsA==
+X-Gm-Message-State: AOAM531ckA840GYshX9wUTXxo5Q7dV+pa8s3NC+Q7hASSkX2VtwWy6zg
+        DGumZfWgaGX35jGxjEiBd7JFwWLi34N+3w==
+X-Google-Smtp-Source: ABdhPJyIcW8iZmylvMj5kHMTjcG+ppcPV4airBPDM0GxK6sBk6opPyv5MsQehqZ+Orl8ob7DdMnCYQ==
+X-Received: by 2002:a67:3310:: with SMTP id z16mr9701544vsz.5.1636722311295;
+        Fri, 12 Nov 2021 05:05:11 -0800 (PST)
+Received: from mail-ua1-f54.google.com (mail-ua1-f54.google.com. [209.85.222.54])
+        by smtp.gmail.com with ESMTPSA id 23sm3766735vkk.17.2021.11.12.05.05.10
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 12 Nov 2021 05:05:11 -0800 (PST)
+Received: by mail-ua1-f54.google.com with SMTP id l43so18647398uad.4;
+        Fri, 12 Nov 2021 05:05:10 -0800 (PST)
+X-Received: by 2002:a67:af0a:: with SMTP id v10mr9951410vsl.35.1636722310600;
+ Fri, 12 Nov 2021 05:05:10 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20211111154020.GA21634@axis.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-From:   Marten Lindahl <martenli@axis.com>
+References: <20211110191610.5664-1-wsa+renesas@sang-engineering.com> <20211110191610.5664-3-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20211110191610.5664-3-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 12 Nov 2021 14:04:59 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdXLNB3ycxFkXH6UHAbAHWk0qr4UnSq5VNnYTXsEqTBzHQ@mail.gmail.com>
+Message-ID: <CAMuHMdXLNB3ycxFkXH6UHAbAHWk0qr4UnSq5VNnYTXsEqTBzHQ@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 02/21] clk: renesas: rcar-gen3: add SDnH clock
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 11, 2021 at 04:40:20PM +0100, Vincent Whitchurch wrote:
-> On Wed, Nov 03, 2021 at 07:27:16PM +0100, Mårten Lindahl wrote:
-> > If we get a data error during a block transfer command, a stop command
-> > (CMD12) is normally initiated. But this does not work for the general
-> > command (CMD56), but instead the action is ignored and an uninitialized
-> > command struct is used for the stop action, with unexpected result.
-> > 
-> > Fix this by adding a check for GEN_CMD when preparing stop transmission.
-> > 
-> > Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
-> > ---
-> >  drivers/mmc/host/dw_mmc.c | 3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index 6578cc64ae9e..988c32e93e03 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -335,7 +335,8 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
-> >  	    cmdr == MMC_WRITE_BLOCK ||
-> >  	    cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
-> >  	    cmdr == MMC_SEND_TUNING_BLOCK ||
-> > -	    cmdr == MMC_SEND_TUNING_BLOCK_HS200) {
-> > +	    cmdr == MMC_SEND_TUNING_BLOCK_HS200 ||
-> > +	    cmdr == MMC_GEN_CMD) {
-> >  		stop->opcode = MMC_STOP_TRANSMISSION;
-> >  		stop->arg = 0;
-> >  		stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
+On Wed, Nov 10, 2021 at 8:16 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Currently a pass-through clock but we will make it a real divider clock
+> in the next patches.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> ---
+> Changes since RFC v1:
+> * fixed subject prefix
+> * fixed whitespace issues
+> * added tag from Geert
 
-Hi!
-> 
-> While this fix looks correct for CMD56, the "Data transfer mode"
-> sections of the eMMC and SD specifications list several more data
-> commands, all of which can be aborted by CMD12, but which aren't handled
-> in the if above.
-> 
-> If I'm not mistaken, those will also result in an uninitialized stop
-> command being sent in the case of an error, since the driver calls
-> send_stop_abort() on any data error.
-> 
-> Is there a reason why those other commands should not be in the list
-> above, or should we fix this list so that CMD12 is initialized for all
-> data commands except SD_IO_RW_EXTENDED?
+Thanks for the update!
 
-I agree that there are more commands that according to the specification
-should be included in the list. The most obvious ones that I identify are:
-CMD26, CMD27, CMD30, CMD46, and CMD47.
+> --- a/drivers/clk/renesas/r8a774a1-cpg-mssr.c
+> +++ b/drivers/clk/renesas/r8a774a1-cpg-mssr.c
+> @@ -100,10 +100,14 @@ static const struct cpg_core_clk r8a774a1_core_clks[] __initconst = {
+>         DEF_FIXED("s3d2",       R8A774A1_CLK_S3D2,  CLK_S3,         2, 1),
+>         DEF_FIXED("s3d4",       R8A774A1_CLK_S3D4,  CLK_S3,         4, 1),
+>
+> -       DEF_GEN3_SD("sd0",      R8A774A1_CLK_SD0,   CLK_SDSRC,     0x074),
+> -       DEF_GEN3_SD("sd1",      R8A774A1_CLK_SD1,   CLK_SDSRC,     0x078),
+> -       DEF_GEN3_SD("sd2",      R8A774A1_CLK_SD2,   CLK_SDSRC,     0x268),
+> -       DEF_GEN3_SD("sd3",      R8A774A1_CLK_SD3,   CLK_SDSRC,     0x26c),
+> +       DEF_GEN3_SDH("sd0h",    R8A774A1_CLK_SD0H,  CLK_SDSRC,        0x074),
+> +       DEF_GEN3_SD( "sd0",     R8A774A1_CLK_SD0,   R8A774A1_CLK_SD0H, 0x074),
+> +       DEF_GEN3_SDH("sd1h",    R8A774A1_CLK_SD1H,  CLK_SDSRC,        0x078),
+> +       DEF_GEN3_SD( "sd1",     R8A774A1_CLK_SD1,   R8A774A1_CLK_SD1H, 0x078),
+> +       DEF_GEN3_SDH("sd2h",    R8A774A1_CLK_SD2H,  CLK_SDSRC,        0x268),
+> +       DEF_GEN3_SD( "sd2",     R8A774A1_CLK_SD2,   R8A774A1_CLK_SD2H, 0x268),
+> +       DEF_GEN3_SDH("sd3h",    R8A774A1_CLK_SD3H,  CLK_SDSRC,        0x26c),
+> +       DEF_GEN3_SD( "sd3",     R8A774A1_CLK_SD3,   R8A774A1_CLK_SD3H, 0x26c),
 
-But the reason why I added just CMD56 is that I have an easy way to test
-this specific command, and which was how I saw the need for this fix.
+The last column is no longer aligned.
+I don't like the extra space before the "sdN" names. I understand
+why you added it, but it can easily be made looking good by listing
+all sdNh clocks first ;-)
 
-My suggestion is to separate adding the other commands to one (or more)
-separate patch(es), to when there are good test cases for those.
+No need to resend, consider it done while queuing in renesas-clk-for-v5.17.
 
-Kind regards
-Mårten
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
