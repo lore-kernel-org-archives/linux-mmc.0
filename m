@@ -2,108 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7C95C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 12:17:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D21EEC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 12:46:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C7F266103C
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 12:17:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1A3C60F70
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 12:46:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234852AbhKLMUs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Nov 2021 07:20:48 -0500
-Received: from mail-vk1-f173.google.com ([209.85.221.173]:46022 "EHLO
-        mail-vk1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234811AbhKLMUs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Nov 2021 07:20:48 -0500
-Received: by mail-vk1-f173.google.com with SMTP id m19so213047vko.12;
-        Fri, 12 Nov 2021 04:17:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=KS2sKiDr9po7riufi5pMSwEWAne4JUDpYMGieP7r2Lg=;
-        b=7BjBloGsD6wSFzTVX4bjJT87mUYDfdpASipKZ+OwsIXIcA4dzX3iyL+rebzXkuO76+
-         2BSehMFSvR62rwQeTTFFy58ZH+/yLtajRNiq2hrm2oYl47PgC0YeugsuGzkmXXgY8I06
-         MfvgQ0eC6/1DGtJAPJF8IO/Et2jxUB8wKRDz1q8J2z3+m2mpoBOSeD+Mgwp4bD4Z8JBK
-         SgUtSktRygqZ0o+iNS5TqbPQ5lJe6aeOe55jHfs+dCZ8lss3OUr7U9ANFC2fMDZjl0pY
-         BQ9CWvsHCYUYOkN486bHOt1K+/o893t7h5t1HB6u1ikC9wyljGq4ZZQ3G2ytuynBi2jz
-         oNyA==
-X-Gm-Message-State: AOAM533FyPviL14ENF1HOOdX8l1ZwOJ09kNqxRwwDVKnxkEsk0sJIRfv
-        52HB4rztl5goaWhcdMSw+P6nJOHVIZonzw==
-X-Google-Smtp-Source: ABdhPJzxSaWSWU+HZ2fG6cLQ1m0tcFyVXKy3FfYhOEVPj99aERN4QGYja2kGTUf/Pro+SDBoUBls6w==
-X-Received: by 2002:a1f:d0c4:: with SMTP id h187mr22750377vkg.1.1636719476807;
-        Fri, 12 Nov 2021 04:17:56 -0800 (PST)
-Received: from mail-ua1-f42.google.com (mail-ua1-f42.google.com. [209.85.222.42])
-        by smtp.gmail.com with ESMTPSA id e9sm4165619uan.9.2021.11.12.04.17.56
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 12 Nov 2021 04:17:56 -0800 (PST)
-Received: by mail-ua1-f42.google.com with SMTP id e10so18436964uab.3;
-        Fri, 12 Nov 2021 04:17:56 -0800 (PST)
-X-Received: by 2002:ab0:15a1:: with SMTP id i30mr21935808uae.122.1636719476202;
- Fri, 12 Nov 2021 04:17:56 -0800 (PST)
-MIME-Version: 1.0
-References: <20210817090313.31858-1-biju.das.jz@bp.renesas.com>
- <20210817090313.31858-3-biju.das.jz@bp.renesas.com> <CAMuHMdVXpn7X3Tm_ouq6DVUDP4mxMO8EObFjtfEU4pX6sodo9A@mail.gmail.com>
- <YY5WZ1r10EphBJEZ@shikoro>
-In-Reply-To: <YY5WZ1r10EphBJEZ@shikoro>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 12 Nov 2021 13:17:45 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUbU5NX7Zpd=oSmizCwpOVEn6Ojnfw85uBET78HUsDFCw@mail.gmail.com>
-Message-ID: <CAMuHMdUbU5NX7Zpd=oSmizCwpOVEn6Ojnfw85uBET78HUsDFCw@mail.gmail.com>
-Subject: Re: [PATCH v4 2/2] dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        id S231652AbhKLMsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Nov 2021 07:48:55 -0500
+Received: from smtp2.axis.com ([195.60.68.18]:31740 "EHLO smtp2.axis.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234899AbhKLMsy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 12 Nov 2021 07:48:54 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=axis.com; q=dns/txt; s=axis-central1; t=1636721164;
+  x=1668257164;
+  h=date:to:cc:subject:message-id:references:mime-version:
+   content-transfer-encoding:in-reply-to:from;
+  bh=NclBtNPNw9Vr+khtvDfxrz42JW1fwjkBn5TPduy+D2o=;
+  b=pCzV64F7PYUwAzf59PdMGk+2XLCq676plyq6LSp2slmmBk5OCKoMAijB
+   TcEKbXfnp4DW+rfmuh/I63v6T6wiPg7tZ5mw46hAKoZJtJgiYyGM09vxp
+   7Psa2xGOtxmcIsYvII2KvoQR4JpaKRGAYul8BtShLqS4hRNeohbK4yLfh
+   rlzerxPtgEGwOXesP4IZXiaW+Fjc6dh9kpSCfa1EM/wxbctR6urjHqm9v
+   vAigUy5n64IAGGnd4hWHiZI7y0woVtfS8Z5s4rOGCFX7n5NyiL1u+qRzr
+   S09OZC3qhEEg+2i9SJIYrkbo2vzdY0PFM5k8OuSWhT5r2eRr1BKL3lpi/
+   w==;
+Date:   Fri, 12 Nov 2021 13:46:02 +0100
+To:     Vincent Whitchurch <Vincent.Whitchurch@axis.com>
+CC:     =?iso-8859-1?Q?M=E5rten?= Lindahl <Marten.Lindahl@axis.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        kernel <kernel@axis.com>, Doug Anderson <dianders@google.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Avoid hung state if GEN_CMD transfer fails
+Message-ID: <20211112124602.GA23161@axis.com>
+References: <20211103182716.28419-1-marten.lindahl@axis.com>
+ <20211111154020.GA21634@axis.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20211111154020.GA21634@axis.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+From:   Marten Lindahl <martenli@axis.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+On Thu, Nov 11, 2021 at 04:40:20PM +0100, Vincent Whitchurch wrote:
+> On Wed, Nov 03, 2021 at 07:27:16PM +0100, Mårten Lindahl wrote:
+> > If we get a data error during a block transfer command, a stop command
+> > (CMD12) is normally initiated. But this does not work for the general
+> > command (CMD56), but instead the action is ignored and an uninitialized
+> > command struct is used for the stop action, with unexpected result.
+> > 
+> > Fix this by adding a check for GEN_CMD when preparing stop transmission.
+> > 
+> > Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+> > ---
+> >  drivers/mmc/host/dw_mmc.c | 3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> > index 6578cc64ae9e..988c32e93e03 100644
+> > --- a/drivers/mmc/host/dw_mmc.c
+> > +++ b/drivers/mmc/host/dw_mmc.c
+> > @@ -335,7 +335,8 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
+> >  	    cmdr == MMC_WRITE_BLOCK ||
+> >  	    cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
+> >  	    cmdr == MMC_SEND_TUNING_BLOCK ||
+> > -	    cmdr == MMC_SEND_TUNING_BLOCK_HS200) {
+> > +	    cmdr == MMC_SEND_TUNING_BLOCK_HS200 ||
+> > +	    cmdr == MMC_GEN_CMD) {
+> >  		stop->opcode = MMC_STOP_TRANSMISSION;
+> >  		stop->arg = 0;
+> >  		stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
 
-On Fri, Nov 12, 2021 at 12:56 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> > > +            - description: IMCLK, SDHI channel main clock1.
->
-> Sounds like "core"
->
-> > > +            - description: IMCLK2, SDHI channel main clock2. When this clock is
-> > > +                           turned off, external SD card detection cannot be
-> > > +                           detected.
->
-> "cd"
->
-> > > +            - description: CLK_HS, SDHI channel High speed clock which operates
-> > > +                           4 times that of SDHI channel main clock1.
->
-> "clkh" compared to the Gen3 bindings to me.
->
-> > > +            - description: ACLK, SDHI channel bus clock.
->
-> This I don't understand. The CPG-MSSR clock?
+Hi!
+> 
+> While this fix looks correct for CMD56, the "Data transfer mode"
+> sections of the eMMC and SD specifications list several more data
+> commands, all of which can be aborted by CMD12, but which aren't handled
+> in the if above.
+> 
+> If I'm not mistaken, those will also result in an uninitialized stop
+> command being sent in the case of an error, since the driver calls
+> send_stop_abort() on any data error.
+> 
+> Is there a reason why those other commands should not be in the list
+> above, or should we fix this list so that CMD12 is initialized for all
+> data commands except SD_IO_RW_EXTENDED?
 
-RZ/G2L has more fine-grained control of module clocks.
-On e.g. R-Car SoCs, there is a single "MSTP" bit to disable "the"
-module clock, but in practice it may control multiple clock inputs
-to a module.  The actual clock tree is not documented, so we model
-this as a single module clock.  So probably the MSTP bit controls
-both the main channel clock and the bus clock.
+I agree that there are more commands that according to the specification
+should be included in the list. The most obvious ones that I identify are:
+CMD26, CMD27, CMD30, CMD46, and CMD47.
 
-Gr{oetje,eeting}s,
+But the reason why I added just CMD56 is that I have an easy way to test
+this specific command, and which was how I saw the need for this fix.
 
-                        Geert
+My suggestion is to separate adding the other commands to one (or more)
+separate patch(es), to when there are good test cases for those.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Kind regards
+Mårten
