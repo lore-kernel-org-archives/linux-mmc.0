@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7E33C4167D
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 19:36:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46B62C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 19:37:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D4375611C8
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 19:36:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E71660F42
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 19:37:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236421AbhKNTjq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 14 Nov 2021 14:39:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57624 "EHLO
+        id S236443AbhKNTjw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 Nov 2021 14:39:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57630 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236278AbhKNTjO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Nov 2021 14:39:14 -0500
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44680C061202;
-        Sun, 14 Nov 2021 11:36:19 -0800 (PST)
-Received: by mail-lf1-x132.google.com with SMTP id l22so37517537lfg.7;
-        Sun, 14 Nov 2021 11:36:19 -0800 (PST)
+        with ESMTP id S236286AbhKNTjQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Nov 2021 14:39:16 -0500
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2371AC061766;
+        Sun, 14 Nov 2021 11:36:21 -0800 (PST)
+Received: by mail-lf1-x134.google.com with SMTP id br15so33785340lfb.9;
+        Sun, 14 Nov 2021 11:36:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=FJyi42euXBD3SLFWkAig1L26OU8nvTPoOeHmCjkl8Pw=;
-        b=m+tKiQF1UfXveaaEoR5NXfWAGdDwZ1EI0fv5wWOQjXzxXS7LWqXUBIHNoqQIZcJks+
-         bYO7VRJo08iGjzATxYAghlYCBfPlLNZByrG9sZuL+n9+kTgs+A1c+eE8D9aAr/XDyLsy
-         2wO67BVC9Cm+LkPqVebesjbhq1/oFTkZnNeHNEWjJBr8zeAxsErVVtGjpLr/sVjN8p2f
-         KJm/fJGpRd4RH/7MqYPxN60BwCbWcOQvV8oNjiYNCAvknufspZByBxOuzY1+WvddEwge
-         z5SKzGV56o4MGJTK6MmkJCKHJXo7OPJm7hOuV9ekp4HKi708gHiEhg9btbQccppAO/C/
-         oi6A==
+        bh=Nt2qbTsx4R5g/N/VYBhOrl2siDQQfrnptMwGepUXSgQ=;
+        b=PY51TTFwH0m4HipJgbXsB6ZC3iVbAeFU7OTHuPPWs2KdRdQdJ9yxbm2hDqfTrs/vx2
+         x9fn2xYmw1RCNX0CiHHNb6M6vO3FyySd4NJorkVJHwM5GyA0X3hj94cEwdK6I2PhTGQO
+         KttOxQJLiXzdIpkIcSQzMG2jBLGzz5z2OUrRV5ApGDdoFlzQ7pkvuWFEEBRwpF2hN7Nz
+         9mBtL2P2PmS46Vy6AwNo/o2zxAsQ0wuIUKxQZMYOUJlFBYlS6oTYB/5a55pJCKPfB+x4
+         thfw8QxDpxgQwMEQSliDgzsYNUrG5TKKFypnKw97DLWkgXdKdkv5kyvfV6/QiQlO5ElE
+         yxtw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=FJyi42euXBD3SLFWkAig1L26OU8nvTPoOeHmCjkl8Pw=;
-        b=0DPcv2B2YSpQJrHttIj+UeuegsQ+ShVLgImvxE+Eq1NSV20xzJoYHCsSXvl9N/M5v2
-         fvhKBkRqMCdffoYJxuZykZxKowQ8lqIXkhn2eahwCoq+1MslOeK+2zRKyxP1kfmx6pG+
-         OghTwrrCt9J9z5PW5oH7o8Hlk+IHlkg6BfS8ukRxWBkymVf+DOa58IpYQU6LMnCGxcDt
-         Qfj9QCEd/FF2qUKNT+1LXo3aJNhe3yZHXWG0ZjKstDovIitxKt/BAK4Cf1H2rqSZYRLp
-         v39AOm6TfSBx1vatso97+jX8uv5bWim+gwTGGXBSMmzrnR1JSdxZJLNgbQqUAxa8bOnl
-         rKBw==
-X-Gm-Message-State: AOAM532mEBxWxYmmwLQufDXuyhWDu8sV4LEw3+e4sQxjwHruBon0coWR
-        MxkMoOI+DwZ7yk+IA/snxFo=
-X-Google-Smtp-Source: ABdhPJxWnkMCSazgFKTxmisGh39c9ndglfNZLnXP5yEtBf3Rud8Pq+Q56I/bCua3TWC86tH59SjWHA==
-X-Received: by 2002:a05:6512:3c9f:: with SMTP id h31mr29188639lfv.407.1636918577628;
-        Sun, 14 Nov 2021 11:36:17 -0800 (PST)
+        bh=Nt2qbTsx4R5g/N/VYBhOrl2siDQQfrnptMwGepUXSgQ=;
+        b=q3fLh5IinUcZzV+E2Feg0JL6BpKdPgfMY2VrZ2bBqUXD2XszPewcG7M+FGiGqK7EPV
+         EVYxyNvBUJx5BcV917hL3Bpbz6ejzhdOZmD8VbnJ+XRDYxgkB/wu6LcxyWIHK0x5ot6Q
+         GV298NR1bcT4x/YW+PYcUJ3pj5N3qy66qWROvj+90CgGbVQ15QR+NfVqWPmYM3rEKQ7Q
+         pKOTUwkcRH6v5i2iZpRUG6ztjoGtDFkaO8Xp8lZ904ojjxLfxAPfUPR3clu7zETrNvbZ
+         CjcLEt2Zk4AJBqIT0L7zAGC35c0b6rlxFIoIY96KUYt2Dgh4xzIMk0GljBBMOKNpBQZB
+         QZ4g==
+X-Gm-Message-State: AOAM532q15wn0MJDwQC+zWKSinA1MKjdGZgVbqAYPlx4jLYK8a5l/dWu
+        PP+EaOD9it+opaTMghgeuXs=
+X-Google-Smtp-Source: ABdhPJyCn1mroR3QR162ws2gTrgQy+5DIqWT2a8A0Li8HEVrOthnlBlAF9Yt2RxFo3UELPlMvcm47g==
+X-Received: by 2002:a05:6512:200e:: with SMTP id a14mr31017152lfb.370.1636918579528;
+        Sun, 14 Nov 2021 11:36:19 -0800 (PST)
 Received: from localhost.localdomain (46-138-46-211.dynamic.spd-mgts.ru. [46.138.46.211])
-        by smtp.gmail.com with ESMTPSA id p18sm1191280lfu.127.2021.11.14.11.36.16
+        by smtp.gmail.com with ESMTPSA id p18sm1191280lfu.127.2021.11.14.11.36.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 14 Nov 2021 11:36:17 -0800 (PST)
+        Sun, 14 Nov 2021 11:36:19 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -67,9 +67,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
         linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-Subject: [PATCH v15 22/39] mtd: rawnand: tegra: Add runtime PM and OPP support
-Date:   Sun, 14 Nov 2021 22:34:18 +0300
-Message-Id: <20211114193435.7705-23-digetx@gmail.com>
+Subject: [PATCH v15 24/39] media: dt: bindings: tegra-vde: Convert to schema
+Date:   Sun, 14 Nov 2021 22:34:20 +0300
+Message-Id: <20211114193435.7705-25-digetx@gmail.com>
 X-Mailer: git-send-email 2.33.1
 In-Reply-To: <20211114193435.7705-1-digetx@gmail.com>
 References: <20211114193435.7705-1-digetx@gmail.com>
@@ -79,144 +79,201 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The NAND on Tegra belongs to the core power domain and we're going to
-enable GENPD support for the core domain. Now NAND must be resumed using
-runtime PM API in order to initialize the NAND power state. Add runtime PM
-and OPP support to the NAND driver.
+Convert NVIDIA Tegra video decoder binding to schema.
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+Reviewed-by: Rob Herring <robh@kernel.org>
+Acked-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/mtd/nand/raw/tegra_nand.c | 58 ++++++++++++++++++++++++++-----
- 1 file changed, 50 insertions(+), 8 deletions(-)
+ .../bindings/media/nvidia,tegra-vde.txt       |  64 -----------
+ .../bindings/media/nvidia,tegra-vde.yaml      | 107 ++++++++++++++++++
+ 2 files changed, 107 insertions(+), 64 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
+ create mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
 
-diff --git a/drivers/mtd/nand/raw/tegra_nand.c b/drivers/mtd/nand/raw/tegra_nand.c
-index 32431bbe69b8..b36e5260ae27 100644
---- a/drivers/mtd/nand/raw/tegra_nand.c
-+++ b/drivers/mtd/nand/raw/tegra_nand.c
-@@ -17,8 +17,11 @@
- #include <linux/mtd/rawnand.h>
- #include <linux/of.h>
- #include <linux/platform_device.h>
-+#include <linux/pm_runtime.h>
- #include <linux/reset.h>
- 
-+#include <soc/tegra/common.h>
-+
- #define COMMAND					0x00
- #define   COMMAND_GO				BIT(31)
- #define   COMMAND_CLE				BIT(30)
-@@ -1151,6 +1154,7 @@ static int tegra_nand_probe(struct platform_device *pdev)
- 		return -ENOMEM;
- 
- 	ctrl->dev = &pdev->dev;
-+	platform_set_drvdata(pdev, ctrl);
- 	nand_controller_init(&ctrl->controller);
- 	ctrl->controller.ops = &tegra_nand_controller_ops;
- 
-@@ -1166,14 +1170,23 @@ static int tegra_nand_probe(struct platform_device *pdev)
- 	if (IS_ERR(ctrl->clk))
- 		return PTR_ERR(ctrl->clk);
- 
--	err = clk_prepare_enable(ctrl->clk);
-+	err = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
-+	if (err)
-+		return err;
-+
-+	/*
-+	 * This driver doesn't support active power management yet,
-+	 * so we will simply keep device resumed.
-+	 */
-+	pm_runtime_enable(&pdev->dev);
-+	err = pm_runtime_resume_and_get(&pdev->dev);
- 	if (err)
- 		return err;
- 
- 	err = reset_control_reset(rst);
- 	if (err) {
- 		dev_err(ctrl->dev, "Failed to reset HW: %d\n", err);
--		goto err_disable_clk;
-+		goto err_put_pm;
- 	}
- 
- 	writel_relaxed(HWSTATUS_CMD_DEFAULT, ctrl->regs + HWSTATUS_CMD);
-@@ -1188,21 +1201,20 @@ static int tegra_nand_probe(struct platform_device *pdev)
- 			       dev_name(&pdev->dev), ctrl);
- 	if (err) {
- 		dev_err(ctrl->dev, "Failed to get IRQ: %d\n", err);
--		goto err_disable_clk;
-+		goto err_put_pm;
- 	}
- 
- 	writel_relaxed(DMA_MST_CTRL_IS_DONE, ctrl->regs + DMA_MST_CTRL);
- 
- 	err = tegra_nand_chips_init(ctrl->dev, ctrl);
- 	if (err)
--		goto err_disable_clk;
+diff --git a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
+deleted file mode 100644
+index 602169b8aa19..000000000000
+--- a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
++++ /dev/null
+@@ -1,64 +0,0 @@
+-NVIDIA Tegra Video Decoder Engine
 -
--	platform_set_drvdata(pdev, ctrl);
-+		goto err_put_pm;
- 
- 	return 0;
- 
--err_disable_clk:
--	clk_disable_unprepare(ctrl->clk);
-+err_put_pm:
-+	pm_runtime_put_sync_suspend(ctrl->dev);
-+	pm_runtime_force_suspend(ctrl->dev);
- 	return err;
- }
- 
-@@ -1219,11 +1231,40 @@ static int tegra_nand_remove(struct platform_device *pdev)
- 
- 	nand_cleanup(chip);
- 
-+	pm_runtime_put_sync_suspend(ctrl->dev);
-+	pm_runtime_force_suspend(ctrl->dev);
+-Required properties:
+-- compatible : Must contain one of the following values:
+-   - "nvidia,tegra20-vde"
+-   - "nvidia,tegra30-vde"
+-   - "nvidia,tegra114-vde"
+-   - "nvidia,tegra124-vde"
+-   - "nvidia,tegra132-vde"
+-- reg : Must contain an entry for each entry in reg-names.
+-- reg-names : Must include the following entries:
+-  - sxe
+-  - bsev
+-  - mbe
+-  - ppe
+-  - mce
+-  - tfe
+-  - ppb
+-  - vdma
+-  - frameid
+-- iram : Must contain phandle to the mmio-sram device node that represents
+-         IRAM region used by VDE.
+-- interrupts : Must contain an entry for each entry in interrupt-names.
+-- interrupt-names : Must include the following entries:
+-  - sync-token
+-  - bsev
+-  - sxe
+-- clocks : Must include the following entries:
+-  - vde
+-- resets : Must contain an entry for each entry in reset-names.
+-- reset-names : Should include the following entries:
+-  - vde
+-
+-Optional properties:
+-- resets : Must contain an entry for each entry in reset-names.
+-- reset-names : Must include the following entries:
+-  - mc
+-- iommus: Must contain phandle to the IOMMU device node.
+-
+-Example:
+-
+-video-codec@6001a000 {
+-	compatible = "nvidia,tegra20-vde";
+-	reg = <0x6001a000 0x1000 /* Syntax Engine */
+-	       0x6001b000 0x1000 /* Video Bitstream Engine */
+-	       0x6001c000  0x100 /* Macroblock Engine */
+-	       0x6001c200  0x100 /* Post-processing Engine */
+-	       0x6001c400  0x100 /* Motion Compensation Engine */
+-	       0x6001c600  0x100 /* Transform Engine */
+-	       0x6001c800  0x100 /* Pixel prediction block */
+-	       0x6001ca00  0x100 /* Video DMA */
+-	       0x6001d800  0x300 /* Video frame controls */>;
+-	reg-names = "sxe", "bsev", "mbe", "ppe", "mce",
+-		    "tfe", "ppb", "vdma", "frameid";
+-	iram = <&vde_pool>; /* IRAM region */
+-	interrupts = <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>, /* Sync token interrupt */
+-		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>, /* BSE-V interrupt */
+-		     <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>; /* SXE interrupt */
+-	interrupt-names = "sync-token", "bsev", "sxe";
+-	clocks = <&tegra_car TEGRA20_CLK_VDE>;
+-	reset-names = "vde", "mc";
+-	resets = <&tegra_car 61>, <&mc TEGRA20_MC_RESET_VDE>;
+-	iommus = <&mc TEGRA_SWGROUP_VDE>;
+-};
+diff --git a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
+new file mode 100644
+index 000000000000..c143aaa06346
+--- /dev/null
++++ b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
+@@ -0,0 +1,107 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/media/nvidia,tegra-vde.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+	return 0;
-+}
++title: NVIDIA Tegra Video Decoder Engine
 +
-+static int __maybe_unused tegra_nand_runtime_resume(struct device *dev)
-+{
-+	struct tegra_nand_controller *ctrl = dev_get_drvdata(dev);
-+	int err;
++maintainers:
++  - Dmitry Osipenko <digetx@gmail.com>
++  - Jon Hunter <jonathanh@nvidia.com>
++  - Thierry Reding <thierry.reding@gmail.com>
 +
-+	err = clk_prepare_enable(ctrl->clk);
-+	if (err) {
-+		dev_err(dev, "Failed to enable clock: %d\n", err);
-+		return err;
-+	}
++properties:
++  compatible:
++    oneOf:
++      - items:
++          - enum:
++              - nvidia,tegra132-vde
++              - nvidia,tegra124-vde
++              - nvidia,tegra114-vde
++      - items:
++          - const: nvidia,tegra30-vde
++          - const: nvidia,tegra20-vde
++      - items:
++          - const: nvidia,tegra20-vde
 +
-+	return 0;
-+}
++  reg:
++    maxItems: 9
 +
-+static int __maybe_unused tegra_nand_runtime_suspend(struct device *dev)
-+{
-+	struct tegra_nand_controller *ctrl = dev_get_drvdata(dev);
++  reg-names:
++    items:
++      - const: sxe
++      - const: bsev
++      - const: mbe
++      - const: ppe
++      - const: mce
++      - const: tfe
++      - const: ppb
++      - const: vdma
++      - const: frameid
 +
- 	clk_disable_unprepare(ctrl->clk);
- 
- 	return 0;
- }
- 
-+static const struct dev_pm_ops tegra_nand_pm = {
-+	SET_RUNTIME_PM_OPS(tegra_nand_runtime_suspend, tegra_nand_runtime_resume,
-+			   NULL)
-+};
++  clocks:
++    maxItems: 1
 +
- static const struct of_device_id tegra_nand_of_match[] = {
- 	{ .compatible = "nvidia,tegra20-nand" },
- 	{ /* sentinel */ }
-@@ -1234,6 +1275,7 @@ static struct platform_driver tegra_nand_driver = {
- 	.driver = {
- 		.name = "tegra-nand",
- 		.of_match_table = tegra_nand_of_match,
-+		.pm = &tegra_nand_pm,
- 	},
- 	.probe = tegra_nand_probe,
- 	.remove = tegra_nand_remove,
++  resets:
++    maxItems: 2
++
++  reset-names:
++    items:
++      - const: vde
++      - const: mc
++
++  interrupts:
++    maxItems: 3
++
++  interrupt-names:
++    items:
++      - const: sync-token
++      - const: bsev
++      - const: sxe
++
++  iommus:
++    maxItems: 1
++
++  iram:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description:
++      Phandle of the SRAM MMIO node.
++
++required:
++  - compatible
++  - reg
++  - reg-names
++  - clocks
++  - resets
++  - reset-names
++  - interrupts
++  - interrupt-names
++
++additionalProperties: false
++
++examples:
++  - |
++    video-codec@6001a000 {
++      compatible = "nvidia,tegra20-vde";
++      reg = <0x6001a000 0x1000>, /* Syntax Engine */
++            <0x6001b000 0x1000>, /* Video Bitstream Engine */
++            <0x6001c000  0x100>, /* Macroblock Engine */
++            <0x6001c200  0x100>, /* Post-processing Engine */
++            <0x6001c400  0x100>, /* Motion Compensation Engine */
++            <0x6001c600  0x100>, /* Transform Engine */
++            <0x6001c800  0x100>, /* Pixel prediction block */
++            <0x6001ca00  0x100>, /* Video DMA */
++            <0x6001d800  0x300>; /* Video frame controls */
++      reg-names = "sxe", "bsev", "mbe", "ppe", "mce",
++                  "tfe", "ppb", "vdma", "frameid";
++      iram = <&iram>; /* IRAM MMIO region */
++      interrupts = <0  9 4>, /* Sync token */
++                   <0 10 4>, /* BSE-V */
++                   <0 12 4>; /* SXE */
++      interrupt-names = "sync-token", "bsev", "sxe";
++      clocks = <&clk 61>;
++      reset-names = "vde", "mc";
++      resets = <&rst 61>, <&mem 13>;
++      iommus = <&mem 15>;
++    };
 -- 
 2.33.1
 
