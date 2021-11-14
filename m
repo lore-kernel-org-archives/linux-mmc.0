@@ -2,124 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3E69C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 15:00:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46654C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 19:36:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9CB7E61057
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Nov 2021 15:00:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E56E60F42
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 19:36:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235157AbhKLPDm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Nov 2021 10:03:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48860 "EHLO
+        id S236199AbhKNTi7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 Nov 2021 14:38:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231553AbhKLPDm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Nov 2021 10:03:42 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F709C061766
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Nov 2021 07:00:51 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1mlY2j-0002Kw-FN; Fri, 12 Nov 2021 16:00:41 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1mlY2f-0009aF-N8; Fri, 12 Nov 2021 16:00:36 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1mlY2e-0001S6-HH; Fri, 12 Nov 2021 16:00:36 +0100
-Date:   Fri, 12 Nov 2021 16:00:36 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     =?utf-8?B?5p2O5ZOy?= <sensor1010@163.com>
-Cc:     ulf.hansson@linaro.org, srinivas.pandruvada@linux.intel.com,
-        pali@kernel.org, TheSven73@gmail.com, lznuaa@gmail.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: drivers/mmc/cor/bus: Delete redundant match function
-Message-ID: <20211112150036.6lhhoak4uk5hhgqt@pengutronix.de>
-References: <22161945.a8.17d061e089f.Coremail.sensor1010@163.com>
+        with ESMTP id S233136AbhKNTix (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Nov 2021 14:38:53 -0500
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D247C061766;
+        Sun, 14 Nov 2021 11:35:59 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id e9so30696219ljl.5;
+        Sun, 14 Nov 2021 11:35:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=8oXDZz/nBiCoTxlA9cxo84oljRiezPiTcqnco4cDqBk=;
+        b=UGiBcLX07i5tcZxvhl3xcl9985grLoBUJAa4nRMHfBtuA9SzMfsuQOokNs05nW45Kf
+         fQ8FsDl1gXUKd7aOzVAj++iGHO6pht7jhYaLJORIroBQUJOJO9rPq9oxaRguXpOkR2es
+         HKP3ddYdww1CTi2F/hA7kDwJyxua+kdEMfbP1LtJkhMKVUVe5qNFLOEgGsUnr96BFYvp
+         R/9sL5Cmvuv2na9Be//dTaiIzeOCk4fJifZc/ZGwfRCEQEINzhrhJS2O8CXYanKCr3eD
+         32uE6FSYjQMmoQ3FUb4jLKgEQ72IGAqmoXuUJB74Hm9gM0+EPjBtUTu6PyutHzCoCoz+
+         OWFA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=8oXDZz/nBiCoTxlA9cxo84oljRiezPiTcqnco4cDqBk=;
+        b=AkRAGrbCx3k2jmEpOq0StMIpNiuxxkYlWxdhUO5mq1FuzZpyKOCGWJ8/I5SNqGxjYu
+         Re+6Z7GqEtR4S+DRnBoaYWwbM6a6tFUXNv1j/cd1VppWh0yzD2aHgbCthHatkaH3372A
+         3Fgow4LMCGUOhPC8kYwVk5SGL/GVRbxnN8nv4y5ysxUcp9pS/WNGNmiee3gqrzVJwyMJ
+         OW4tpzisbhWRUi0Zz3Kd+OR/9xfwatKg245TWuTjfABGuysdDqH8A57ikVxuwDfWJq7+
+         NO3o9cQCxLwWsW10NaB+ZL1arA2aGjTTYgDHt1OWN3p1e5PZc8zSQbt0VKZz/WCuOiYs
+         hB9A==
+X-Gm-Message-State: AOAM533O3MgrugOViqF6M/O8gtytnZR6ZW6G7Zz0Hh9t7Nv0gG4x0JjK
+        wtSCklL8oEAuRaQk31uocJ0=
+X-Google-Smtp-Source: ABdhPJyNBM6ekkt/rg2AVG2uuJ/lXhjS09khr+YszZ8itWbaLgdOiAar/DdNSG4Di+eXJpFjV0CQkA==
+X-Received: by 2002:a05:651c:308:: with SMTP id a8mr34365352ljp.149.1636918557606;
+        Sun, 14 Nov 2021 11:35:57 -0800 (PST)
+Received: from localhost.localdomain (46-138-46-211.dynamic.spd-mgts.ru. [46.138.46.211])
+        by smtp.gmail.com with ESMTPSA id p18sm1191280lfu.127.2021.11.14.11.35.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 14 Nov 2021 11:35:57 -0800 (PST)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>
+Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
+Subject: [PATCH v15 01/39] soc/tegra: Enable runtime PM during OPP state-syncing
+Date:   Sun, 14 Nov 2021 22:33:57 +0300
+Message-Id: <20211114193435.7705-2-digetx@gmail.com>
+X-Mailer: git-send-email 2.33.1
+In-Reply-To: <20211114193435.7705-1-digetx@gmail.com>
+References: <20211114193435.7705-1-digetx@gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="wbyaqsxhuvb4rjo2"
-Content-Disposition: inline
-In-Reply-To: <22161945.a8.17d061e089f.Coremail.sensor1010@163.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+GENPD core now can set up domain's performance state properly while device
+is RPM-suspended. Runtime PM of a device must be enabled during setup
+because GENPD checks whether device is suspended and check doesn't work
+while RPM is disabled. Instead of replicating the boilerplate RPM-enable
+code around OPP helper for each driver, let's make OPP helper to take care
+of enabling it.
 
---wbyaqsxhuvb4rjo2
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ drivers/soc/tegra/common.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
-On Wed, Nov 10, 2021 at 03:12:51AM +0800, =E6=9D=8E=E5=93=B2 wrote:
-> HI=EF=BC=9A
->      I failed to send kernel patch mail with git sendmail,
->     could  you help me take a look at the submitted patch?
->     the attachment is a patch file,=20
->     For convenience, I put the content of the patch in the body of the em=
-ail
->=20
->=20
->                                                                          =
-                   thanks.
->                                                                          =
-                   lizhe
-> patch :=20
-> |
-> From 40577316f4dbcf35061a14f27f7a777c2f4199a1 Mon Sep 17 00:00:00 2001
-> From: lizhe <sensor1010@163.com>
-> Date: Tue, 9 Nov 2021 10:13:43 -0800
-> Subject: [PATCH] drivers/mmc/cor/bus: Delete redundant match function
->=20
->=20
-> When the device and the driver are matching,
-> if the device or the bus to which the device driver belongs
-> does not provide a match function,
-> then the device and the driver are matched by default.
-> function 'driver_match_device' illustrates this mechanism.
-> Because the return value of mmc_bus_match is 1,
-> even if this function is not provided,
-> the function 'driver_match_device' returns 1,
-> so function 'mmc_bus_match' is redundant.
->=20
->=20
-> Signed-off-by: lizhe <sensor1010@163.com>
+diff --git a/drivers/soc/tegra/common.c b/drivers/soc/tegra/common.c
+index cd33e99249c3..35c882da55fc 100644
+--- a/drivers/soc/tegra/common.c
++++ b/drivers/soc/tegra/common.c
+@@ -10,6 +10,7 @@
+ #include <linux/export.h>
+ #include <linux/of.h>
+ #include <linux/pm_opp.h>
++#include <linux/pm_runtime.h>
+ 
+ #include <soc/tegra/common.h>
+ #include <soc/tegra/fuse.h>
+@@ -43,6 +44,7 @@ static int tegra_core_dev_init_opp_state(struct device *dev)
+ {
+ 	unsigned long rate;
+ 	struct clk *clk;
++	bool rpm_enabled;
+ 	int err;
+ 
+ 	clk = devm_clk_get(dev, NULL);
+@@ -57,8 +59,31 @@ static int tegra_core_dev_init_opp_state(struct device *dev)
+ 		return -EINVAL;
+ 	}
+ 
++	/*
++	 * Runtime PM of the device must be enabled in order to set up
++	 * GENPD's performance properly because GENPD core checks whether
++	 * device is suspended and this check doesn't work while RPM is
++	 * disabled. This makes sure the OPP vote below gets cached in
++	 * GENPD for the device. Instead, the vote is done the next time
++	 * the device gets runtime resumed.
++	 */
++	rpm_enabled = pm_runtime_enabled(dev);
++	if (!rpm_enabled)
++		pm_runtime_enable(dev);
++
++	/* should never happen in practice */
++	if (!pm_runtime_enabled(dev)) {
++		dev_WARN(dev, "failed to enable runtime PM\n");
++		pm_runtime_disable(dev);
++		return -EINVAL;
++	}
++
+ 	/* first dummy rate-setting initializes voltage vote */
+ 	err = dev_pm_opp_set_rate(dev, rate);
++
++	if (!rpm_enabled)
++		pm_runtime_disable(dev);
++
+ 	if (err) {
+ 		dev_err(dev, "failed to initialize OPP clock: %d\n", err);
+ 		return err;
+-- 
+2.33.1
 
-Acked-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
-
-Apart from how the patch is put in the mail, a maintainer responsible
-for picking patches up in this area will probably refuse because the
-name in the From line of your mail doesn't match the name used in the
-Signed-off-by: line.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=C3=B6nig         =
-   |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---wbyaqsxhuvb4rjo2
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmGOgZEACgkQwfwUeK3K
-7AlFoAf8Cau9xfSiQBZyFfnC7a9fAdv42gHWDFrcUV9IRMMMncRI86jgFP5Sp2Ju
-+2/DEtNnc1xd+dkPWcJqkt9oDLze6b9yBNmLoBnmeBu2YOofObQ/3UECrpyuiy+H
-B1fmgTG+VQqr8IGqCGrzSwFRlQBkPd1WiMs+9pTvtZDwd72PAaKAzZ3NuEkboAP0
-vQ9QTF9jIxzzXpDrSD2RLb18+RUM3VzD1h1vS2bvCUirSyh86P6XDBTitv0YaMn6
-thsdRIYLypP/ZPnW4Ca2FyGysR4tieWBCY9f5HPG5DLwO8fZyTte2TgKBIwkqYeH
-iLIKwBbnZYvs2LL2wj3/npLzxaRtzg==
-=ed8R
------END PGP SIGNATURE-----
-
---wbyaqsxhuvb4rjo2--
