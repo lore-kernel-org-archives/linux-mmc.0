@@ -2,171 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C834DC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 08:38:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0DBFC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 08:54:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD6F061BFD
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 08:38:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F9EE63220
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 08:54:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230365AbhKOIli (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 03:41:38 -0500
-Received: from esa6.hgst.iphmx.com ([216.71.154.45]:44594 "EHLO
-        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230266AbhKOIlb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 03:41:31 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1636965518; x=1668501518;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=+IqWx3oHBvvIRqDaJHogWBvMPsVNCjBBvp9em9krzC4=;
-  b=NmFFd1xSe3hgAhE3kuS4ti0mjGxlS7XqK+gWtwObaNcHMNJzQ2Drq3dK
-   a0e7OVOnzDCadFEmbdexbwsgfdNYdlaWtRMOKosNKTEcr4KRWpcs58XrO
-   7PEZiJOO7fv7rIPNNpS50nn1z1Ws4QYEOEFL2r7aNvkc5ULQBdDetKgoY
-   mb/sig/aAXAGPCyuNlPtJKyKOZYmPHzEME7N70ngS65HR22XjI+voMkdF
-   HmQ6te1LMnchtQDiYoZ482x4QuXdusyZNxhkS8kWDUqvoO2zTo8bhdhY/
-   n0epJAtj+zAgzcmrkO54JOExSG0AqKltZXYephMs5ieM97Uw1zhGxR3FA
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.87,235,1631548800"; 
-   d="scan'208";a="186611839"
-Received: from mail-bn8nam12lp2176.outbound.protection.outlook.com (HELO NAM12-BN8-obe.outbound.protection.outlook.com) ([104.47.55.176])
-  by ob1.hgst.iphmx.com with ESMTP; 15 Nov 2021 16:38:35 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=G6VXyyCvFjBgpQEoc7TS4KTIIeZ/mO0PLj+0Whic4jYyh3WglAXcyD7u2P8bvSfLZvLtTL7Ykg5bMCporzA5aqVheEdDCvHPRT3Z0Ewh7a3Ah4goftocBuCRLNlRuJC620AL28DjoalUO0c7fhD+Z9bWOyaHGulMmLjAOpwyiEG2OpI6/ZjvMYZQyJ4l4WZFpG4OamcwnYYRbqgAcPb4NCiKwKNjSHB8k9TSjl5sV43zd2VI+0+zC+pTj2ZhiPs6NQmo2zCfpvXItOv9NRs95aTg+TNR8kSiYIvt9klcDe0ViIrnXelifgHddYU72qfWk+XMvrjS8o7J7TXLbf/NYQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+IqWx3oHBvvIRqDaJHogWBvMPsVNCjBBvp9em9krzC4=;
- b=YtbFB+DEppJ38QgA18Ms9cvEfyCb3qJMsKtf+DdTYe8XonL6CmdCXaJc7v9fiTlxUwDBB7hfsjoD712qn/n/bPjUIVTI2k0Mf4xBPwUkQtTD2mjG+ce3nVn0BZJEqumOGKM+m2r2dhSReCUhCsirhT9Yiz9SRfJoTZLdTj6WjOZmbkj2AsVDHWnj901ucJUNF38bLzdQ2xjR5kdghN+D7NctRBH5kJ/edonO8w//Sk+0lLAUZVlF1P+JN38DRs6/yqpZM0m2NYNwAJoTjTovTXmjsx06BUTj0MzBSdmGDAabEAOvJVgj8l55lUWzKC6EEIbiZKq0IMuQe7V9+BF0KQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+IqWx3oHBvvIRqDaJHogWBvMPsVNCjBBvp9em9krzC4=;
- b=xXKA/voxdzSTROte4ovhTY8qbOqBBN3T2Ky/Qu5wcWoQ9D3VAxAnKbLRAzvGRlSpTfvJTTOLcoCkBf+pHnZkMf1v1itMpqeDKTYJVfDIQaiE2odmZ7QOVGR55SFYmkfE215CDfJdLYicriuHPDaRXlzuL5l0IayokNIpv85bF34=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM6PR04MB6574.namprd04.prod.outlook.com (2603:10b6:5:208::7) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4690.19; Mon, 15 Nov 2021 08:38:33 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::edbe:4c5:6ee8:fc59]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::edbe:4c5:6ee8:fc59%4]) with mapi id 15.20.4690.027; Mon, 15 Nov 2021
- 08:38:33 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Bean Huo <huobean@gmail.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-CC:     "beanhuo@micron.com" <beanhuo@micron.com>
-Subject: RE: [PATCH v1 1/2] mmc-utils: Use memcpy instead of strncpy
-Thread-Topic: [PATCH v1 1/2] mmc-utils: Use memcpy instead of strncpy
-Thread-Index: AQHX2Zhgc4q1kM9RKEyjWb6PnCX2TawERAbA
-Date:   Mon, 15 Nov 2021 08:38:33 +0000
-Message-ID: <DM6PR04MB65753B3AB67AB262FC3383EFFC989@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20211114204331.39555-1-huobean@gmail.com>
- <20211114204331.39555-2-huobean@gmail.com>
-In-Reply-To: <20211114204331.39555-2-huobean@gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 137d05c3-f7ac-43cf-79ff-08d9a8134ee4
-x-ms-traffictypediagnostic: DM6PR04MB6574:
-x-microsoft-antispam-prvs: <DM6PR04MB6574B3ACD140DB4A2E1BD04EFC989@DM6PR04MB6574.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:361;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 1QdI55tTcgQyXlrZwyz+MJvTTJhDYmVW6in5wBGZXwu7AY3557S5Xx4yB6FilWMBTs7sIpbmOHWuQWeH6IL34nkYHtYYiotZX+ne/poCjWCUh5rIMARJs8ALqlP9XIQKkTIV7TRVvgDNd9NTIebd6h0daWp2su3RN7/kTylrWsNmS6kpZu8+DOSjDqTs8vmO9SD0KVmOdIovzzXkgdkCMNBTeNJdq1o5v9Eh/ADo/3rSB6jN0gytLIkxMRCZqVX3HV1B/uR2sNanwWUESQCjuWa5mpkwgH6FMOmFN+F5TDefQWEvGLkkU5FkqwUgAKMWJdT6Dj1PiT83HfLlZGwZODv23XeiJEiCXHaLxkKAj1LYUjV4j92ZT5pkhfGxXNc+geEPq9I1ec86qufJCoOBA6jzd8UtbcF/ghCyQBS+PEaG0zxoYbWj1fDHzriL18wnG/xOf06ZK9r0shLvvK9jABqZ8rU6iswHqft0K93u43E5caDI9BsgCRaEatOVPCL6353Hz7R8Z4PKvvZfgm7ghshuLfv37Iiz/ilPzHN4YgE6bbIemTG09HyAqWx0ElONvp4Om9zw5INaBf+f1iMF+oQcIk+GV5VQL/+gfutWsEhIMU3fkIeK4gL29CR9QnvQ+X5J0mHTw/vdVrhMkENhQluA9aN/aHI48ZcdiF/B5+g2EBz7Zm9k9mny8gT5HUWa7JsdBGPMSakGmvbybNwJJUIHj96iDnYxQT3OgSYtf4kehrLqA16eLNebpW+IKfYhTDnm3GvlMuHxsoNB5LzTK3nKxe5WiLuI/qQR/DsAo2IpM88iIiwDweEsd3pklLhG
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(33656002)(122000001)(52536014)(6506007)(26005)(2906002)(9686003)(5660300002)(8936002)(508600001)(7696005)(38070700005)(110136005)(55016002)(86362001)(38100700002)(71200400001)(66556008)(186003)(66476007)(64756008)(66446008)(76116006)(82960400001)(83380400001)(316002)(66946007)(966005)(8676002)(4326008)(156123004);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?cEpuM3BzQURVeExXYXM2Y25HOVhVQzNCQ0pUbGM2U09mdzFxYm1ta1kxRXor?=
- =?utf-8?B?ZThheWRRRTllY2t3UzJNZ2lmUU9lQ0xUMFZuVGR6SE03aGJ4MmdGU0VsWG1w?=
- =?utf-8?B?dmJYV1l2cVNyd0RkMjRYd25mQUVITk0rcVlrVjRWTXFKTVR0N3psMklnVng3?=
- =?utf-8?B?MzByKzFETTZDN0thVk9qQTlxRHBraWhrNVYxelY2T01PVFBMYm1aVlpWeTBB?=
- =?utf-8?B?WStSZldmdzkvRGNqTUMxTm1JM2ptZndxdzcyWjNlRUVvV20yY2c1T2xucGFB?=
- =?utf-8?B?QTArSWgwRHV1WDN2dVFncXhReFpHd2NBZTJ1UWovQU1oa1c2YkowVnFtSVFX?=
- =?utf-8?B?SkpZZVVMakt3M1hZQURhNURldWo2ejRPTDFtb1FOc2JvNkpBdkxkeFBkZjha?=
- =?utf-8?B?dm5WRzRMZGNWOVprNlQvWXgxNldGTlBGUjJxdzRQdFV4dHE3dmxkSVlZdFND?=
- =?utf-8?B?RWdMUW5RVlJmaEVrcTVJeDZOcnRLV2RxY1h0YzNvdnZVcVpwcHpGclN6bTVp?=
- =?utf-8?B?ak1qWG1waTYyNTdXejZ3NnFpblhNaTBRd2d3alZNSHk0bE96SUtRWmFtdWc3?=
- =?utf-8?B?dXlwdlJUWkdjaVdJazZZWDJBdW9VLzFLZHl0U2N3RFVWbFFqc0o3MHV1a09Q?=
- =?utf-8?B?UThQZmNpNjBST1daOFkzZ2xxeFZzelpoVWtZYkQyYmlnUEQxT0o5bjdUOStB?=
- =?utf-8?B?blJCYUVxem9vWHlWaWQ5R0R2a29mcU9aMmNFMXFtTUdhOWoyZUpaZDlOUTBv?=
- =?utf-8?B?aTZYR1lsUys5MmRWTy9yRDIzM0ZLTGcyb3FDOW83cjJ6YmVxTlAwNmFIMzNa?=
- =?utf-8?B?ZDNpKytsSnNFMVI5V1FVN0lKWHB5U0xTZTh5SFhpSTUzSGhqTjNRZE5mckJQ?=
- =?utf-8?B?OXE2OTNmZ3hxdENQay9zdEZ2WW5oUE5hMXZNRUJuY1BUOGNsM2ZuWHE5Rzhl?=
- =?utf-8?B?aHBJMjRDT0hLYkhsclBKdENBcGl3VmhEdVhIYlpKaGZOY1JEZkc3d3RhbEo0?=
- =?utf-8?B?ckhpVU5mRklLY2lkeTFINE95a2xkY3RzQzhqZldNUTQ5dWhXMjR6YlZIRXJV?=
- =?utf-8?B?L3lnN0ZXYTR1cHlDK3hQOW9mbkRycjRRVlBLTzhRRHpNUDNuR0JJTHhkVHZD?=
- =?utf-8?B?ZTB2b1Y0LytUSkp1RmlUVndzTEMyd2tSMVl2OWhpSlR0bzBvRE1wekdyeXVh?=
- =?utf-8?B?TmZ1Z3QrSEx0aUlGK1NOUG9ha3BWb0w1bHc2N3JyakZvV1FHaERJdmplcW5h?=
- =?utf-8?B?OVV0Y1Nxckxqdzk0Sk5ZUjNSYkh0eXNndHJwYlBRNzNjVFpSanhmWkQwMXhm?=
- =?utf-8?B?N3VYaFloQUtxYk10UVdyYWs5R05qYkVjMnZ3Y2V6Q3Q3dFNPTmxsM0p5YVJQ?=
- =?utf-8?B?dlZpTGNyaDBqWDN2ckpOVE04TVFDR21ES040VlA5UFlsd0w4d2x2NkJXK2lx?=
- =?utf-8?B?b2lQREYrVlhkemxrZVd3VjNyaTcyZC9HcnczSkdTL2pYTDZxd3BPeXlxVHRI?=
- =?utf-8?B?cFIxaG1hbkRDN2lzVzhqNUN3RjVLQS82VUJwNHpVUXZvWlJvOWxCZldYODFG?=
- =?utf-8?B?UDlhbVRmcEhUQ3pDYlEwVEhBUlk1cCs3VlAxOGZtM08vTmhDbTRXZjgxWXI5?=
- =?utf-8?B?dmJHWHQ2SVlTd0FQaHFZdy9QeHlpNW1QY2pESjNwb2hWb1JOSG1DOWxoRFZ0?=
- =?utf-8?B?Z0luTUN4MXdKazFlWnp2ditvOVlyQXJ1SURqelBLcC9hNUNySytvaDRqQm8y?=
- =?utf-8?B?ZnRUWXRMVHN4aTYzcENkK2hWYWZTc3ZHYTdOdE5QSW5RZ1RxNTVaSmdrQU9y?=
- =?utf-8?B?MzJxaEdrT2I2dDlQUDZTTXZJMVNpZmFEQTFLWUlyeHBxZzBoZXJZMTJvcmxI?=
- =?utf-8?B?RFJFYU8zSUYyMlZvdkVrRjIyUklFVm5peXZKVkd3YW1xNm9abllBOHRxT1FF?=
- =?utf-8?B?SWMvSDNPYllUNGh4VHVBcTEvZ3pnbXlvZm5sUklId0RHVUdTcHh5ZFh2QmNM?=
- =?utf-8?B?WFBCOWhGUVBwb2hWVERwMVpxb3drT2pldnk0ZTFBTGhCYjZFaEUzZjNpQjhC?=
- =?utf-8?B?REU3cWdPOE9vZXVHT2J6aHNMTE9KSkpIM1pmY1V3cWd5RktrQmZRb1ZkUXEz?=
- =?utf-8?B?WTVVSS9sWlZVMWRJS2dKeHQ1M2JsVlJlZG1pNHN5UFNMcnZTR21ERnFNS0c3?=
- =?utf-8?B?cFE9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S229999AbhKOI5t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 03:57:49 -0500
+Received: from mail.kernel.org ([198.145.29.99]:55202 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229919AbhKOI5o (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 15 Nov 2021 03:57:44 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9880061BE2;
+        Mon, 15 Nov 2021 08:54:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1636966486;
+        bh=1h0g2AYqXFphX4dDyELLl2t7YQIUXZ6UIHT7JYg2iMs=;
+        h=From:To:Cc:Subject:Date:From;
+        b=kv+C8zB0tbPMdXf3ORNkXrRH4MrGq92/hxOUWQ7rrNLjPwyN92rkebIKY8icgiOfU
+         pMdG65xZlUKOnr8NUOP6pmXxc3gZzuCmcsiwcDOb6St8hs6LkWB6n1ZZo98RlrnVvp
+         FkqOBIn33Yi9JZOuQ6miAmszWpYRosGKoEiu9hmpXWXS0VgUXakje0NXKySH0Rz+mZ
+         5B6hNND+tRm0kn91fmSGmzeWYTduFgTH0JLa1xNb8xKQOI2gwIYz/OsIEp39PngVMt
+         ez7HK1j37N1+6Gl5sR4/i/hvvdNCZ5Sdb+Rvh2P8BC4uYTPFd5lIc2Ou5i9m3hH8E0
+         48X4U7Q98MS4A==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Vinod Koul <vkoul@kernel.org>
+Cc:     Arnd Bergmann <arnd@arndb.de>, Andy Gross <agross@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Hyun Kwon <hyun.kwon@xilinx.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Laxman Dewangan <ldewangan@nvidia.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Scott Branden <sbranden@broadcom.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        alsa-devel@alsa-project.org, bcm-kernel-feedback-list@broadcom.com,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-rpi-kernel@lists.infradead.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
+        linux-tegra@vger.kernel.org
+Subject: [PATCH 00/11] dmaengine: kill off dma_slave_config->slave_id
+Date:   Mon, 15 Nov 2021 09:53:52 +0100
+Message-Id: <20211115085403.360194-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 137d05c3-f7ac-43cf-79ff-08d9a8134ee4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Nov 2021 08:38:33.0330
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: qYz6S3yobxKPT7/dusiQLK3TnZrRt49npB5gK3NbeEFfo5dYIycnBp5xDtWnXI54ctVCHi0A7xLgLTW0BSUQFA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB6574
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgQmVhbiwNCj4gDQo+IFRoZSAtV3N0cmluZ29wLXRydW5jYXRpb24gd2FybmluZyBhZGRlZCBp
-biBHQ0MgOC4wOg0KPiAgICAgaHR0cHM6Ly9nY2MuZ251Lm9yZy9idWd6aWxsYS9zaG93X2J1Zy5j
-Z2k/aWQ9ODI5NDQNCj4gDQo+IElmIHlvdSB1c2UgdGhlIEdDQyA+IHY4LjAsIHlvdSBwcm9iYWJs
-eSB3aWxsIGdldCB0aGlzIGNvbXBpbGF0aW9uIGVycm9yOg0KPiANCj4gZXJyb3I6IOKAmF9fYnVp
-bHRpbl9zdHJuY3B54oCZIG91dHB1dCBtYXkgYmUgdHJ1bmNhdGVkIGNvcHlpbmcgOCBieXRlcyBm
-cm9tIGENCj4gc3RyaW5nIG9mIGxlbmd0aCA1MTEgWy1XZXJyb3I9c3RyaW5nb3AtdHJ1bmNhdGlv
-bl0NCj4gDQo+IFVzZSBtZW1jcHkgaW5zdGVhZCBvZiBzdHJuY3B5IHRvIGF2b2lkIHRoaXMgY29t
-cGlsYXRpb24gZXJyb3IuDQo+IA0KPiBTaWduZWQtb2ZmLWJ5OiBCZWFuIEh1byA8YmVhbmh1b0Bt
-aWNyb24uY29tPg0KTG9va2luZyBpbnRvIHRoZSBsaW5rIGFib3ZlLCBpdCBzYXkgdGhhdCB0aGlz
-IHdhcm5pbmc6DQoiLi4uIGlzIHNwZWNpZmljYWxseSBpbnRlbmRlZCB0byBoaWdobGlnaHQgbGlr
-ZWx5IHVuaW50ZW5kZWQgdXNlcyBvZiB0aGUgc3RybmNweSBmdW5jdGlvbiB0aGF0IHRydW5jYXRl
-IHRoZSB0ZXJtaW5hdGluZyBOVUwgY2hhcmN0ZXIgZnJvbSB0aGUgc291cmNlIHN0cmluZy4iDQoN
-CkFzIHRoaXMgaXMgbm90IHRoZSBjYXNlIGhlcmUsIEkgd291bGRuJ3Qgd29ycnkgYWJvdXQgdGhp
-cyB3YXJuaW5nLg0KDQpUaGFua3MsDQpBdnJpDQoNCj4gLS0tDQo+ICBtbWNfY21kcy5jIHwgMyAr
-Ky0NCj4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4g
-DQo+IGRpZmYgLS1naXQgYS9tbWNfY21kcy5jIGIvbW1jX2NtZHMuYw0KPiBpbmRleCAyMDVlNmU1
-Yjg5ZjkuLmVjYmRlMzkzN2M4MSAxMDA2NDQNCj4gLS0tIGEvbW1jX2NtZHMuYw0KPiArKysgYi9t
-bWNfY21kcy5jDQo+IEBAIC0xODM1LDcgKzE4MzUsOCBAQCBpbnQgZG9fcmVhZF9leHRjc2QoaW50
-IG5hcmdzLCBjaGFyICoqYXJndikNCj4gDQo+ICAgICAgICAgaWYgKGV4dF9jc2RfcmV2ID49IDcp
-IHsNCj4gICAgICAgICAgICAgICAgICBtZW1zZXQobGJ1ZiwgMCwgc2l6ZW9mKGxidWYpKTsNCj4g
-LSAgICAgICAgICAgICAgIHN0cm5jcHkobGJ1ZiwgKGNoYXIqKSZleHRfY3NkW0VYVF9DU0RfRklS
-TVdBUkVfVkVSU0lPTl0sIDgpOw0KPiArICAgICAgICAgICAgICAgbWVtY3B5KGxidWYsIChjaGFy
-KikmZXh0X2NzZFtFWFRfQ1NEX0ZJUk1XQVJFX1ZFUlNJT05dLCA4KTsNCj4gKyAgICAgICAgICAg
-ICAgIGxidWZbOF0gPSAnXDAnOw0KPiAgICAgICAgICAgICAgICAgcHJpbnRmKCJlTU1DIEZpcm13
-YXJlIFZlcnNpb246ICVzXG4iLCBsYnVmKTsNCj4gICAgICAgICAgICAgICAgIHByaW50ZigiZU1N
-QyBMaWZlIFRpbWUgRXN0aW1hdGlvbiBBDQo+IFtFWFRfQ1NEX0RFVklDRV9MSUZFX1RJTUVfRVNU
-X1RZUF9BXTogMHglMDJ4XG4iLA0KPiAgICAgICAgICAgICAgICAgICAgICAgICBleHRfY3NkW0VY
-VF9DU0RfREVWSUNFX0xJRkVfVElNRV9FU1RfVFlQX0FdKTsNCj4gLS0NCj4gMi4yNS4xDQoNCg==
+From: Arnd Bergmann <arnd@arndb.de>
+
+I recently came across some new uses of the 'slave_id' field that
+I had (almost) removed a few years ago. There are no legitimate
+uses of this field in the kernel, only a few stale references and
+two drivers that abuse the field as a side-channel between the
+dmaengine driver and its client.
+
+Let's change the xilinx and qualcomm drivers to use the documented
+side-channel (peripheral_data) instead, and remove the remnants of
+it to prevent new users from coming in.
+
+As the last patch in the series depends on all the others, it would
+be nice have everything merged into the dmaengine tree for v5.17.
+
+       Arnd
+
+Arnd Bergmann (11):
+  ASoC: dai_dma: remove slave_id field
+  spi: pic32: stop setting dma_config->slave_id
+  mmc: bcm2835: stop setting chan_config->slave_id
+  dmaengine: shdma: remove legacy slave_id parsing
+  dmaengine: pxa/mmp: stop referencing config->slave_id
+  dmaengine: sprd: stop referencing config->slave_id
+  dmaengine: qcom-adm: stop abusing slave_id config
+  dmaengine: xilinx_dpdma: stop using slave_id field
+  dmaengine: tegra20-apb: stop checking config->slave_id
+  staging: ralink-gdma: stop using slave_id config
+  dmaengine: remove slave_id config field
+
+ drivers/dma/mmp_pdma.c                    |  6 ---
+ drivers/dma/pxa_dma.c                     |  7 ---
+ drivers/dma/qcom/qcom_adm.c               | 56 ++++++++++++++++++++---
+ drivers/dma/sh/shdma-base.c               |  8 ----
+ drivers/dma/sprd-dma.c                    |  3 --
+ drivers/dma/tegra20-apb-dma.c             |  6 ---
+ drivers/dma/xilinx/xilinx_dpdma.c         | 12 +++--
+ drivers/gpu/drm/xlnx/zynqmp_disp.c        |  9 +++-
+ drivers/mmc/host/bcm2835.c                |  2 -
+ drivers/mtd/nand/raw/qcom_nandc.c         | 14 +++++-
+ drivers/spi/spi-pic32.c                   |  2 -
+ drivers/staging/ralink-gdma/ralink-gdma.c | 12 ++---
+ drivers/tty/serial/msm_serial.c           | 15 +++++-
+ include/linux/dma/qcom_adm.h              | 12 +++++
+ include/linux/dma/xilinx_dpdma.h          | 11 +++++
+ include/linux/dmaengine.h                 |  4 --
+ include/sound/dmaengine_pcm.h             |  2 -
+ sound/core/pcm_dmaengine.c                |  5 +-
+ sound/soc/tegra/tegra20_spdif.c           |  1 -
+ 19 files changed, 119 insertions(+), 68 deletions(-)
+ create mode 100644 include/linux/dma/qcom_adm.h
+ create mode 100644 include/linux/dma/xilinx_dpdma.h
+
+-- 
+2.30.2
+
+Cc: Andy Gross <agross@kernel.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Baolin Wang <baolin.wang7@gmail.com>
+Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Chunyan Zhang <zhang.lyra@gmail.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Hyun Kwon <hyun.kwon@xilinx.com>
+Cc: Jaroslav Kysela <perex@perex.cz>
+Cc: Jon Hunter <jonathanh@nvidia.com>
+Cc: Lars-Peter Clausen <lars@metafoo.de>
+Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+Cc: Laxman Dewangan <ldewangan@nvidia.com>
+Cc: Manivannan Sadhasivam <mani@kernel.org>
+Cc: Mark Brown <broonie@kernel.org>
+Cc: Michal Simek <michal.simek@xilinx.com>
+Cc: Nicolas Saenz Julienne <nsaenz@kernel.org>
+Cc: Orson Zhai <orsonzhai@gmail.com>
+Cc: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Scott Branden <sbranden@broadcom.com>
+Cc: Takashi Iwai <tiwai@suse.com>
+Cc: Thierry Reding <thierry.reding@gmail.com>
+Cc: Vinod Koul <vkoul@kernel.org>
+Cc: alsa-devel@alsa-project.org
+Cc: bcm-kernel-feedback-list@broadcom.com
+Cc: dmaengine@vger.kernel.org
+Cc: dri-devel@lists.freedesktop.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-arm-msm@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-mtd@lists.infradead.org
+Cc: linux-rpi-kernel@lists.infradead.org
+Cc: linux-serial@vger.kernel.org
+Cc: linux-spi@vger.kernel.org
+Cc: linux-staging@lists.linux.dev
+Cc: linux-tegra@vger.kernel.org
