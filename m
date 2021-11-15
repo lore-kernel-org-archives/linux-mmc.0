@@ -2,148 +2,159 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96D2EC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:46:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FEDBC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:54:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7ADF461B95
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:46:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 346D863212
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:54:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231890AbhKOOt1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 09:49:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59782 "EHLO
+        id S229949AbhKOO5r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 09:57:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231716AbhKOOt0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:49:26 -0500
-Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B2C4C061570;
-        Mon, 15 Nov 2021 06:46:26 -0800 (PST)
-Received: by mail-lj1-x234.google.com with SMTP id e7so21503997ljq.12;
-        Mon, 15 Nov 2021 06:46:25 -0800 (PST)
+        with ESMTP id S229864AbhKOO5q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:57:46 -0500
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47B40C061714
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:54:50 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id 13so36091366ljj.11
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:54:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=f9990VLRY1mM2sii4oucAgZqtJr4f6UTn2nlUsBeiyA=;
-        b=MKv4lJzovSleVVtb8Uez4QS8nWVoyslVc4dAhZ3Ja9hcfOWhdQeyMWw6FHhrLjYpMe
-         nYJhoHPJHieO78N1tejBSn1JjrO7HehrBzOD6p80ebHQ/GkZbHzj+oDCc5U4EAGGyBKV
-         xbJLawSqjqY4fBNx9jKlTQhw4P401MYqth7VhZkzSxvdhwOw2g0BxwUpHsNeyVoCEXwg
-         AneGSb38fLLRS0lfd/WXUhHjDQTfopD289+UYtNAyG6eoU7lhx2ZHI9h8rOgSDINeyOy
-         BSHVlS4ECWcjRF5ej1E2mdUBpiNe11q16/40ayNE4SINNFWYIMy3ZhzwXNTN4fPHDK38
-         wMxQ==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=g5ZgJ9ybSmxZaOHHfIm4FqhKxdTXF1lea99HqmX4/j4=;
+        b=S91lIxy96BaMvhkT0VPnFcikbWRtwwutqfr3lTkCtCq1PrRMkdxqm2RG7xPV7dcvMn
+         ixNALaIF3BB2n+gjkWhO9X8eTUozOK2MYQSbNgOqSxK5+pE6XsnCZHjA+CIujIbSbL2i
+         hwvZ5eKAZjpU15iwildNA/UmGQ6IlDMsKBppAJKy4OIhVLvPDcnaB41YJjyL+GaPTLmJ
+         /3pEmGWXKH6jtNVews2k/Rpksn8k4DPH2VrbJ/86u92kDlpa5MnkP8NFO962MG5OKDUe
+         6J1WNZJZJpOxZKYfKbjA4/0jYytSaINvifSuXG+Hkj6EMCT/Wso4PkZvTO2KGK6YmPwL
+         ECeg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=f9990VLRY1mM2sii4oucAgZqtJr4f6UTn2nlUsBeiyA=;
-        b=EGI7XTEKJK30mo06GtmmCuEk6hAAOu9Yoxxp4a0yCLbpDki9eXCf2fLD8+ZgaaQEnz
-         D4uS5FKI/LMTrRXO0cARBLFSb8UxXQ+9oztDgOT0ABbf+fHheeVa4Ip9Ao1qQ2ldGwDU
-         ekAK0eEcTu88DHjCV2x74+5djr/DMg3Ot5dU9pq56dKnIESEIbCaFpeaqS3fAwlcpofO
-         +AI+p/8zDM/suBSPRgwaJGimczRrtcIssTNGH7KPAKHS2PdVcBFRP/pIK04bLsoXuqUg
-         byPg7NEoTGslz5DIlP1sjJdwOFK6nJu9UnUxEFORzAUV7LZ0yIA0ecdUVSqqRnU6bqRY
-         wgAg==
-X-Gm-Message-State: AOAM531cafvAaf8LoAF0dWMQIDv6JNYs4Ql34l+Y4ELMjvW5g3eFIgOi
-        u681M/SmTf3rZocMn3kEQCbiRi5SWbU=
-X-Google-Smtp-Source: ABdhPJyGzX+uJoClUoX59O9YRdwTgWzR3XA1e/9PtaHs0iyNVaYjGst0rpo/clkWJ4amyTD6J2hiFA==
-X-Received: by 2002:a2e:b711:: with SMTP id j17mr29887114ljo.39.1636987584324;
-        Mon, 15 Nov 2021 06:46:24 -0800 (PST)
-Received: from [192.168.2.145] (46-138-46-211.dynamic.spd-mgts.ru. [46.138.46.211])
-        by smtp.googlemail.com with ESMTPSA id j2sm1445777lfr.109.2021.11.15.06.46.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 15 Nov 2021 06:46:24 -0800 (PST)
-Subject: Re: [PATCH 01/11] ASoC: dai_dma: remove slave_id field
-To:     Lars-Peter Clausen <lars@metafoo.de>,
-        Arnd Bergmann <arnd@kernel.org>
-Cc:     Vinod Koul <vkoul@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-        Andy Gross <agross@kernel.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Baolin Wang <baolin.wang7@gmail.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Hyun Kwon <hyun.kwon@xilinx.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Jon Hunter <jonathanh@nvidia.com>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Laxman Dewangan <ldewangan@nvidia.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Scott Branden <sbranden@broadcom.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
-        dmaengine@vger.kernel.org,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" 
-        <linux-rpi-kernel@lists.infradead.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-staging@lists.linux.dev,
-        "open list:TEGRA ARCHITECTURE SUPPORT" <linux-tegra@vger.kernel.org>
-References: <20211115085403.360194-1-arnd@kernel.org>
- <20211115085403.360194-2-arnd@kernel.org>
- <647b842d-76a1-7a96-3ea7-8a37b62bc18e@metafoo.de>
- <CAK8P3a2EVseM4t=e982fFhzBGSZxZ2_V-FHwr-fQPd-bkAKaJg@mail.gmail.com>
- <d2dd42fc-e58a-0c06-7f7e-a6a2161c368d@metafoo.de>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <5737810c-420a-2f8d-99bf-24a2558d5855@gmail.com>
-Date:   Mon, 15 Nov 2021 17:46:22 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=g5ZgJ9ybSmxZaOHHfIm4FqhKxdTXF1lea99HqmX4/j4=;
+        b=5WHDoz22HYbNR7VLiPBOZM3AaUk9SHhr1/lq4zVsDKDM04/OulEy/wEOkzpriZrGJR
+         75JU02zgz7UCZxEPHruzTVX6RGWBILpDf6yGuJTiDIhw07jU8NysaGrTWTjR+uS4KuzW
+         nxzd4UJ8jDcRV+AOM2V68iA4oEyf92Nvu6txhrkYsti4C11J1mWIwAAWLT4GtQPL4ZpW
+         ilquCxZCKYu5MXzfoPeKexMJXV6RMarj50S2mQ1Gt4F3E7uSRUw8q/CKlh6lK6/PERBm
+         6T32IPU2Pl1SZWtNRBwXyaVEyi24ip5nnYWlWdOFFaq/kktP512q3Tzvok1NYYNpecKf
+         XU/Q==
+X-Gm-Message-State: AOAM531J1ayYChft50Ofecclh4vkWrbIwKpie0gXaQXoQkhmWAGrUZk+
+        AN1zbh3W8PUcPEReFXxMQ9Rtps5J39ckH+UexijSIQ==
+X-Google-Smtp-Source: ABdhPJygyd5g7ToVRwbyKiuO6zgP6SOT0F2D9JY8QzEtk3bx0lvD5R8Wkifd26j79pvUhJhXZOxfQukEdkytUIffyyw=
+X-Received: by 2002:a2e:80c3:: with SMTP id r3mr39387862ljg.4.1636988088500;
+ Mon, 15 Nov 2021 06:54:48 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <d2dd42fc-e58a-0c06-7f7e-a6a2161c368d@metafoo.de>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
+ <20211103165415.2016-1-tharvey@gateworks.com>
+In-Reply-To: <20211103165415.2016-1-tharvey@gateworks.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 15 Nov 2021 15:54:11 +0100
+Message-ID: <CAPDyKFqb_muY2AwpxpgFObH74EdkSif0qH0YjADb-MfKB83oHg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: disable CMDQ support
+To:     Tim Harvey <tharvey@gateworks.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <Kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        BOUGH CHEN <haibo.chen@nxp.com>, linux-mmc@vger.kernel.org,
+        Marcel Ziswiler <marcel@ziswiler.com>,
+        Schrempf Frieder <frieder.schrempf@kontron.de>,
+        Adam Ford <aford173@gmail.com>,
+        Lucas Stach <l.stach@pengutronix.de>,
+        Peng Fan <peng.fan@nxp.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-15.11.2021 14:53, Lars-Peter Clausen пишет:
-> On 11/15/21 11:42 AM, Arnd Bergmann wrote:
->> On Mon, Nov 15, 2021 at 11:14 AM Lars-Peter Clausen <lars@metafoo.de>
->> wrote:
->>> On 11/15/21 9:53 AM, Arnd Bergmann wrote:
->>>> From: Arnd Bergmann <arnd@arndb.de>
->>>>
->>>> This field is never set, and serves no purpose, so remove it.
->>> I agree that we should remove it. Its been legacy support code for a
->>> while, but the description that there is no user is not right.
->>>
->>> The tegra20_spdif driver obviously uses it and that user is removed in
->>> this patch. I think it makes sense to split that out into a separate
->>> patch with a description why the driver will still work even with
->>> slave_id removed. Maybe the best is to remove the whole tegra20_spdif
->>> driver.
->> Ok, I'll split out the tegra patch and try to come up with a better
->> description for it. What I saw in that driver is it just passes down the
->> slave_id number from a 'struct resource', but there is nothing in
->> the kernel that sets up this resource.
->>
->> Do you or someone else have more information on the state of this
->> driver? I can see that it does not contain any of_device_id based
->> probing, so it seems that this is either dead code, the platform_device
->> gets created by some other code that is no longer compatible with
->> this driver.
-> 
-> I've looked into this a while back, when I tried to remove slave_id. And
-> as far as I can tell there were never any in-tree users of this driver,
-> even back when we used platform board files. Maybe somebody from Nvidia
-> knows if there are out-of-tree users.
+On Wed, 3 Nov 2021 at 17:54, Tim Harvey <tharvey@gateworks.com> wrote:
+>
+> On IMX SoC's which support CMDQ the following can occur during high a
+> high cpu load:
+>
+> mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+> mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
+> mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
+> mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
+> mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
+> mmc2: cqhci: TDL base:  0x8003f000 | TDL up32: 0x00000000
+> mmc2: cqhci: Doorbell:  0xbf01dfff | TCN:      0x00000000
+> mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x08000000
+> mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+> mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000800
+> mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+> mmc2: cqhci: Resp idx:  0x0000000d | Resp arg: 0x00000000
+> mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> mmc2: sdhci: Sys addr:  0x7c722000 | Version:  0x00000002
+> mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000020
+> mmc2: sdhci: Argument:  0x00018000 | Trn mode: 0x00000023
+> mmc2: sdhci: Present:   0x01f88008 | Host ctl: 0x00000030
+> mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
+> mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
+> mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
+> mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
+> mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
+> mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
+> mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00ffffff
+> mmc2: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0xffc003ff
+> mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d07f01
+> mmc2: sdhci: Host ctl2: 0x00000088
+> mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfe179020
+> mmc2: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS DUMP ====
+> mmc2: sdhci-esdhc-imx: cmd debug status:  0x2120
+> mmc2: sdhci-esdhc-imx: data debug status:  0x2200
+> mmc2: sdhci-esdhc-imx: trans debug status:  0x2300
+> mmc2: sdhci-esdhc-imx: dma debug status:  0x2400
+> mmc2: sdhci-esdhc-imx: adma debug status:  0x2510
+> mmc2: sdhci-esdhc-imx: fifo debug status:  0x2680
+> mmc2: sdhci-esdhc-imx: async fifo debug status:  0x2750
+> mmc2: sdhci: ============================================
+>
+> For now, disable CMDQ support on the imx8qm/imx8qxp/imx8mm until the
+> issue is found and resolved.
+>
+> Fixes: bb6e358169bf6 ("mmc: sdhci-esdhc-imx: add CMDQ support")
+> Fixes: cde5e8e9ff146 ("mmc: sdhci-esdhc-imx: Add an new esdhc_soc_data
+> for i.MX8MM")
+>
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Tim Harvey <tharvey@gateworks.com>
 
-That Tegra SPDIF driver was never used. Still there is a growing
-interest nowadays in making it alive by implementing HDMI audio support
-for Tegra20 SoC. It was on my todo list for a long time, I'll try to
-prioritize that work 5.17, it shouldn't take much effort.
+Applied for fixes, thanks!
 
-The slave_id should be removed anyways, it won't be needed.
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index e658f0174242..60f19369de84 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -300,7 +300,6 @@ static struct esdhc_soc_data usdhc_imx8qxp_data = {
+>         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+>                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+>                         | ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
+> -                       | ESDHC_FLAG_CQHCI
+>                         | ESDHC_FLAG_STATE_LOST_IN_LPMODE
+>                         | ESDHC_FLAG_CLK_RATE_LOST_IN_PM_RUNTIME,
+>  };
+> @@ -309,7 +308,6 @@ static struct esdhc_soc_data usdhc_imx8mm_data = {
+>         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+>                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+>                         | ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
+> -                       | ESDHC_FLAG_CQHCI
+>                         | ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+>  };
+>
+> --
+> 2.17.1
+>
