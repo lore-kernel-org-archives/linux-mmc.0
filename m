@@ -2,129 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07515C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 10:56:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87BEFC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 11:38:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DD1C061AED
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 10:56:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6AEAD6108F
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 11:38:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231622AbhKOK7l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 05:59:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34968 "EHLO
+        id S230444AbhKOLk5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 06:40:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44560 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231403AbhKOK7f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 05:59:35 -0500
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FB2CC061746
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 02:56:39 -0800 (PST)
-Received: by mail-lf1-x12a.google.com with SMTP id b40so42415617lfv.10
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 02:56:39 -0800 (PST)
+        with ESMTP id S229919AbhKOLkz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 06:40:55 -0500
+Received: from mail-oi1-x230.google.com (mail-oi1-x230.google.com [IPv6:2607:f8b0:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 109E3C061746;
+        Mon, 15 Nov 2021 03:37:58 -0800 (PST)
+Received: by mail-oi1-x230.google.com with SMTP id n66so34075928oia.9;
+        Mon, 15 Nov 2021 03:37:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=dMjL3KGHGCu5hceBLZ1A8Lt8hm3+JYwCKT4ycpSLRDY=;
-        b=sdeZzuJjuxC1GH5CbosT9rO285E1tyPwPEZeExcKCXi4YuHEVaWXNHv1bp/BrX+O0m
-         vF94uR6nLAWUQtw+aVmw6cb7UVezx2TZWL9OZOMIt1U4NP6clzx66rXS+zm8L06BE4HX
-         f/Nhz4vMeBbuTLM4MWj5Yv0pZzNHJ2zak17C1xD706Q5yR31byg3uyOHYHaCDVwauWqF
-         LWHTwHnScTWjZjjeJf/AS7F1l4xLq2VjYLu/xB1nbQpzJ+WA7/vGkM1IDuvxlIu0SngM
-         XcBjdQXTWzmNa9yt3mir1nad1c8z/E7DBNl4vjr6/rbROge/eIr5/pePXpI8a6bj6hEk
-         YThg==
+        bh=H0MaBm2tCNOzB7pxkxpAcyTPKCZcMQtr/VIW7MJsUgQ=;
+        b=qTz/EZkX979C2y62JUPQuqDRKsfB3tWivmXImqgc5AxOejpWrusp6Tf/0BhalJZ83j
+         bHSSje7oWXVZMP8qK5xYvRxJdpXZ28FPevlfqgm59grjJVZsrmBkKfQrKov/7o6VGd9+
+         Vb3f+6den9moXBzjoerkc20XUDz1VDJuLGY178NXxrQi1M2h78+j945ZLHPrP2jGBzUU
+         tPtx0wXoOIClo2xAkaX/JhyO/SCbcUkkKmpUzWS+ue6ikTQ7MaomiijiN6nh3Y2yJ3+W
+         1TvXaH4jaZ669TF8D2xyK4WF+McS2j6zGLILvnVwT/wYjbeU0DXVIv+tz8xKvNQgM1MY
+         E50g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=dMjL3KGHGCu5hceBLZ1A8Lt8hm3+JYwCKT4ycpSLRDY=;
-        b=kb7kG4gZE87zFwd5s/ihVW/FYB2G8r9aFPAP/bZFv8r4aZ6zvJrxvIz3FrBK0LoVrK
-         kSWH3yG7D1o2b4HXFWEjNdIh8GPymsRL3IdUN8G/vIsBfjcLmgFupojs9rePWrNFWm3J
-         6TnCq4WcoqNgGBXv2dZWjI2cjmq8/alSTrwPNJLM6H9k/3FRQayK76DbZM7v5/sZbUMK
-         6XvkL9KxLSFJqamPDRM6LGiJMUtp7NAW8SIM+yaxdXbBzQmYatwdzZlmD3HqQVl8OWdq
-         SLOa7R8glWLPNhj1Y/dPB4omXWEb3V2ZY9vzvYYoirAQOx7BOymAbyfXeuRFNKfVqDPS
-         Kjdg==
-X-Gm-Message-State: AOAM531iqHdER6co5qGQs0FEg1j73HabjEsDQ1t8Byyr4KhYwKFGuf7/
-        ePhSD0hBJuMQu90XZv4fqGjPzWiVO+plDL4sXc6mqCa29qU=
-X-Google-Smtp-Source: ABdhPJx3ALnWielc4AoTimzxkI6Nugo3rVzkrCt4sq0osRKPBQU5KAf8FDgz8XeOQxOsblYgJ7LKqjoWPMmt9bv3vx8=
-X-Received: by 2002:a19:8c4d:: with SMTP id i13mr35556910lfj.254.1636973797671;
- Mon, 15 Nov 2021 02:56:37 -0800 (PST)
+        bh=H0MaBm2tCNOzB7pxkxpAcyTPKCZcMQtr/VIW7MJsUgQ=;
+        b=J0BRSoq6IpOQ6+WCHfazsEXZBAPQ98t3CyGqyIeI5PIg8IO08T4DcYN67ZHfWm65wc
+         SCYtDDYW2tUec0YFno3C9k4pQE+Q4r2lbLzA2s7Qw5D+/rVPaDjJm1Ne+kCjmyGbeO7O
+         Npch3710tGq2uCVoGgAdjcyYMcAsVG/pzDeXhyM0PYgSb6zEBEkZ/HuTlnD0LN7m0dJx
+         GcsYj23/mZMUO5aVxdMVyfapSkoFHDbqgStgBZx06/A4YD5csLdySlyajpiDCc54Iy3w
+         HBiauZvyj8SOf2VVB9KtehgQYqSa6vaUPLY1p1d0N9+d0NVrPEsrczPsmyrt/2VfZx2o
+         TK0g==
+X-Gm-Message-State: AOAM530Y84hkNeaQF3yJyQq4ibj7Ou1PvLm38p3XPR+sdalv7SHoy4+N
+        kfB2xgiXR+yGIuqvdG/yZCgI4Ed4D/KS7SVLVAh1OX77hoXp7Q==
+X-Google-Smtp-Source: ABdhPJxCkoOTLSfk6A9QBUZwpfU4iWuHy9PNDHr4sst+/yML5Gwy6pBqNPujWetD8QFsLI5kYqMAgyIsZlc0negOeW4=
+X-Received: by 2002:a05:6808:d54:: with SMTP id w20mr31698921oik.91.1636976277388;
+ Mon, 15 Nov 2021 03:37:57 -0800 (PST)
 MIME-Version: 1.0
-References: <20211103122646.64422-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20211103122646.64422-1-wsa+renesas@sang-engineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 15 Nov 2021 11:56:01 +0100
-Message-ID: <CAPDyKFotgvLvtZ3EzsFz_4HfUeKwpZbyq0-2BjuJZoDw9u=Ptw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: tmio: reinit card irqs in reset routine
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Biju Das <biju.das.jz@bp.renesas.com>
+References: <20211114204331.39555-1-huobean@gmail.com> <20211114204331.39555-2-huobean@gmail.com>
+ <CAHP4M8VAhcTysoBRfNQSiN3fTY6GK9fTz5+hzvzoEuNfC+9CHQ@mail.gmail.com> <937514c9cbb3dd86a659d3fff11fb0f6fa3de8e9.camel@gmail.com>
+In-Reply-To: <937514c9cbb3dd86a659d3fff11fb0f6fa3de8e9.camel@gmail.com>
+From:   Ajay Garg <ajaygargnsit@gmail.com>
+Date:   Mon, 15 Nov 2021 17:07:45 +0530
+Message-ID: <CAHP4M8W=EE+v7LeORkLSPBChQQjmALNR-Nm+GY6TkUjE4qiiDw@mail.gmail.com>
+Subject: Re: [PATCH v1 1/2] mmc-utils: Use memcpy instead of strncpy
+To:     Bean Huo <huobean@gmail.com>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        beanhuo@micron.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 3 Nov 2021 at 13:26, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+> I don't understand how above memcpy() overflow/underflow/out-of-bounds?
+> would you please provide more specific reason?
 >
-> From: Biju Das <biju.das.jz@bp.renesas.com>
+> memcpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
 >
-> Refactor the code so that card detect irqs are always reenabled after a
-> reset. This avoids doing it manually all over the code or forgetting to
-> do this in the future.
->
-> Reported-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> [wsa: added a comment when 'native_hotplug' has to be set]
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> here lbuf is a char array lbuf[10], and ext_csd is a __u8 array, __u8
+> ext_csd[512].
 
-Applied for next, thanks!
+Ok, in the given information parameters, it might work fine at runtime.
 
-Kind regards
-Uffe
+But still, using 8 as the magic number makes the code illegible for a
+third-party. Plus the code is also unoptimised, eg :
+
+i)
+If ext = "abc", then we need to copy (3 + 1) bytes.
+However, currently memcpy would copy (8 + 1) bytes.
+
+ii)
+If ext = "abcdefghijklmnopqrst", then we need to copy (9 + 1) bytes.
+However, currently memcpy would copy (8 + 1) bytes.
 
 
-> ---
->  drivers/mmc/host/tmio_mmc_core.c | 15 +++------------
->  1 file changed, 3 insertions(+), 12 deletions(-)
+> Yes, but please remember that mmc-utils is mainly used for embedded
+> platforms, they are not easy/inconvenient to update to the latest
+> library to support these two APIs(strlcpy needs libbsd-dev, and strscpy
+> needs some one else.).  If we use strlcpy or strscpy, mmc-utils will
+> not be portable. Do you know any other API that can be used and make
+> code more portable and simpler?
 >
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index e2affa52ef46..a5850d83908b 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -960,14 +960,8 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         case MMC_POWER_OFF:
->                 tmio_mmc_power_off(host);
->                 /* For R-Car Gen2+, we need to reset SDHI specific SCC */
-> -               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2) {
-> -                       host->reset(host);
-> -
-> -                       if (host->native_hotplug)
-> -                               tmio_mmc_enable_mmc_irqs(host,
-> -                                               TMIO_STAT_CARD_REMOVE |
-> -                                               TMIO_STAT_CARD_INSERT);
-> -               }
-> +               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-> +                       tmio_mmc_reset(host);
->
->                 host->set_clock(host, 0);
->                 break;
-> @@ -1175,6 +1169,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
->         if (mmc_can_gpio_cd(mmc))
->                 _host->ops.get_cd = mmc_gpio_get_cd;
->
-> +       /* must be set before tmio_mmc_reset() */
->         _host->native_hotplug = !(mmc_can_gpio_cd(mmc) ||
->                                   mmc->caps & MMC_CAP_NEEDS_POLL ||
->                                   !mmc_card_is_removable(mmc));
-> @@ -1295,10 +1290,6 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
->         if (host->clk_cache)
->                 host->set_clock(host, host->clk_cache);
->
-> -       if (host->native_hotplug)
-> -               tmio_mmc_enable_mmc_irqs(host,
-> -                               TMIO_STAT_CARD_REMOVE | TMIO_STAT_CARD_INSERT);
-> -
->         tmio_mmc_enable_dma(host, true);
->
->         return 0;
-> --
-> 2.30.2
->
+
+Hmm, you can always start adding code locally in your codebase.
+Anyways, if you *must* use only "already available code", snprintf is
+an alternative.
+
+snprintf(lbuf, sizeof(lbuf), (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
