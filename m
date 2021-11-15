@@ -2,159 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FEDBC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:54:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8A2EC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:55:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 346D863212
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:54:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9860B63210
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:55:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229949AbhKOO5r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 09:57:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33448 "EHLO
+        id S230463AbhKOO6A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 09:58:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229864AbhKOO5q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:57:46 -0500
-Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47B40C061714
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:54:50 -0800 (PST)
-Received: by mail-lj1-x232.google.com with SMTP id 13so36091366ljj.11
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:54:50 -0800 (PST)
+        with ESMTP id S229661AbhKOO5x (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:57:53 -0500
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6F22C061570
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:54:57 -0800 (PST)
+Received: by mail-lj1-x230.google.com with SMTP id v15so36273884ljc.0
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:54:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=g5ZgJ9ybSmxZaOHHfIm4FqhKxdTXF1lea99HqmX4/j4=;
-        b=S91lIxy96BaMvhkT0VPnFcikbWRtwwutqfr3lTkCtCq1PrRMkdxqm2RG7xPV7dcvMn
-         ixNALaIF3BB2n+gjkWhO9X8eTUozOK2MYQSbNgOqSxK5+pE6XsnCZHjA+CIujIbSbL2i
-         hwvZ5eKAZjpU15iwildNA/UmGQ6IlDMsKBppAJKy4OIhVLvPDcnaB41YJjyL+GaPTLmJ
-         /3pEmGWXKH6jtNVews2k/Rpksn8k4DPH2VrbJ/86u92kDlpa5MnkP8NFO962MG5OKDUe
-         6J1WNZJZJpOxZKYfKbjA4/0jYytSaINvifSuXG+Hkj6EMCT/Wso4PkZvTO2KGK6YmPwL
-         ECeg==
+         :cc:content-transfer-encoding;
+        bh=UUAPWsnoiLM3vc2JZAav9FCp/mPIHeCjDkBEZi9UNbM=;
+        b=XTtutu8LfP+yFqWXSfW2K3GmweHvKPYj8G1+hQ3jBp0XGIAX+OOGxUpyfIV3z/sRBy
+         bw63UfNepZcBCGJAL86Arsu0WQxJPiMUOAoFqh7RP4jLmXf99yu+g/GS5iXMDWvKU4kR
+         jQJkESY4y19hw8ewWIjUaET2M5RwTGavEoD7uDD5p4K4uncnuoRxQfQpKMDzj5dYPpeI
+         HTBCtpFSJaCeqO9TsoweM2XGUGbj7kVnWqLBq72t2sMvBHB4f8ybyr4Ai99Bly+Tmfw4
+         EJz3o4atKj1MEA+z0Qvw/vXAa+CFfTsU/nufHBwEDAhoH5HJC0YYKTwPHBAEZE89RUER
+         f4jA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=g5ZgJ9ybSmxZaOHHfIm4FqhKxdTXF1lea99HqmX4/j4=;
-        b=5WHDoz22HYbNR7VLiPBOZM3AaUk9SHhr1/lq4zVsDKDM04/OulEy/wEOkzpriZrGJR
-         75JU02zgz7UCZxEPHruzTVX6RGWBILpDf6yGuJTiDIhw07jU8NysaGrTWTjR+uS4KuzW
-         nxzd4UJ8jDcRV+AOM2V68iA4oEyf92Nvu6txhrkYsti4C11J1mWIwAAWLT4GtQPL4ZpW
-         ilquCxZCKYu5MXzfoPeKexMJXV6RMarj50S2mQ1Gt4F3E7uSRUw8q/CKlh6lK6/PERBm
-         6T32IPU2Pl1SZWtNRBwXyaVEyi24ip5nnYWlWdOFFaq/kktP512q3Tzvok1NYYNpecKf
-         XU/Q==
-X-Gm-Message-State: AOAM531J1ayYChft50Ofecclh4vkWrbIwKpie0gXaQXoQkhmWAGrUZk+
-        AN1zbh3W8PUcPEReFXxMQ9Rtps5J39ckH+UexijSIQ==
-X-Google-Smtp-Source: ABdhPJygyd5g7ToVRwbyKiuO6zgP6SOT0F2D9JY8QzEtk3bx0lvD5R8Wkifd26j79pvUhJhXZOxfQukEdkytUIffyyw=
-X-Received: by 2002:a2e:80c3:: with SMTP id r3mr39387862ljg.4.1636988088500;
- Mon, 15 Nov 2021 06:54:48 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=UUAPWsnoiLM3vc2JZAav9FCp/mPIHeCjDkBEZi9UNbM=;
+        b=DovfBbdLrOdsV/AnME8IcxLIiX8h8Uk0Ft5edOh4GWv+pr0yRGa+FwrjkuEwhfThjC
+         GMWC0G16BFTSKcF9GPsemUv7p23zh2fp/K/80lfGdKtmi/tSFU3yLjfDmCmNbmIuTW+g
+         5zI35mXDA2xpITLVVGVGqJDBpCIzLLBvyUVo3FdtO9s2Uz/uuouYsorpeQaq2CSSlNqC
+         pjV2z9AUR82ASMxUFbl4tiCcC7ydp8z7+IK557ZwL8VBZHUeSL/plyAyPxsVfxgJl8hs
+         9kM/KDmKzPLUYsvCrz82Bp4nYpH54VWXCfO4dG1wqC7OMkPfNMaS2KXXYkkZGR+0nBXp
+         xQIA==
+X-Gm-Message-State: AOAM533w0DXIh7uSnxK6AnF6y0gTtAztMAn+kEu8SBzEbOIC5rrK5bqS
+        NaAM6an8MsWmoz5ulX4pShYBbP4d/UGk4PMhgLDFm5wm81Y=
+X-Google-Smtp-Source: ABdhPJy94na1Vg7LReOTUtAbBxos4LZgCJzL6h9qu8RN2NomuCPrUFehfr4wpPIqiBtjy6hdOXI08Q1V/RwakWTnEII=
+X-Received: by 2002:a2e:a22a:: with SMTP id i10mr39273850ljm.16.1636988096023;
+ Mon, 15 Nov 2021 06:54:56 -0800 (PST)
 MIME-Version: 1.0
-References: <CAJ+vNU3zKEVz=fHu2hLmEpsQKzinUFW-28Lm=2wSEghjMvQtmw@mail.gmail.com>
- <20211103165415.2016-1-tharvey@gateworks.com>
-In-Reply-To: <20211103165415.2016-1-tharvey@gateworks.com>
+References: <20211110110500.4105-1-marten.lindahl@axis.com>
+In-Reply-To: <20211110110500.4105-1-marten.lindahl@axis.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 15 Nov 2021 15:54:11 +0100
-Message-ID: <CAPDyKFqb_muY2AwpxpgFObH74EdkSif0qH0YjADb-MfKB83oHg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: disable CMDQ support
-To:     Tim Harvey <tharvey@gateworks.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <Kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        BOUGH CHEN <haibo.chen@nxp.com>, linux-mmc@vger.kernel.org,
-        Marcel Ziswiler <marcel@ziswiler.com>,
-        Schrempf Frieder <frieder.schrempf@kontron.de>,
-        Adam Ford <aford173@gmail.com>,
-        Lucas Stach <l.stach@pengutronix.de>,
-        Peng Fan <peng.fan@nxp.com>, stable@vger.kernel.org
+Date:   Mon, 15 Nov 2021 15:54:19 +0100
+Message-ID: <CAPDyKFpKbKEePYyb1fQ_cxjtJS6JuF1qFKh2KKfXpM23nvkH+g@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: dw_mmc: Allow lower TMOUT value than maximum
+To:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Doug Anderson <dianders@google.com>, kernel@axis.com,
+        linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 3 Nov 2021 at 17:54, Tim Harvey <tharvey@gateworks.com> wrote:
+On Wed, 10 Nov 2021 at 12:05, M=C3=A5rten Lindahl <marten.lindahl@axis.com>=
+ wrote:
 >
-> On IMX SoC's which support CMDQ the following can occur during high a
-> high cpu load:
+> The TMOUT register is always set with a full value for every transfer,
+> which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
+> Since the software dto_timer acts as a backup in cases when this timeout
+> is not long enough, it is normally not a problem. But setting a full
+> value makes it impossible to test shorter timeouts, when for example
+> testing data read times on different SD cards.
 >
-> mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-> mmc2: cqhci: Caps:      0x0000310a | Version:  0x00000510
-> mmc2: cqhci: Config:    0x00001001 | Control:  0x00000000
-> mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-> mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-> mmc2: cqhci: TDL base:  0x8003f000 | TDL up32: 0x00000000
-> mmc2: cqhci: Doorbell:  0xbf01dfff | TCN:      0x00000000
-> mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x08000000
-> mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-> mmc2: cqhci: SSC2:      0x00000001 | DCMD rsp: 0x00000800
-> mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-> mmc2: cqhci: Resp idx:  0x0000000d | Resp arg: 0x00000000
-> mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> mmc2: sdhci: Sys addr:  0x7c722000 | Version:  0x00000002
-> mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000020
-> mmc2: sdhci: Argument:  0x00018000 | Trn mode: 0x00000023
-> mmc2: sdhci: Present:   0x01f88008 | Host ctl: 0x00000030
-> mmc2: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-> mmc2: sdhci: Wake-up:   0x00000008 | Clock:    0x0000000f
-> mmc2: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-> mmc2: sdhci: Int enab:  0x107f4000 | Sig enab: 0x107f4000
-> mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000502
-> mmc2: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-> mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00ffffff
-> mmc2: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0xffc003ff
-> mmc2: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d07f01
-> mmc2: sdhci: Host ctl2: 0x00000088
-> mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xfe179020
-> mmc2: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS DUMP ====
-> mmc2: sdhci-esdhc-imx: cmd debug status:  0x2120
-> mmc2: sdhci-esdhc-imx: data debug status:  0x2200
-> mmc2: sdhci-esdhc-imx: trans debug status:  0x2300
-> mmc2: sdhci-esdhc-imx: dma debug status:  0x2400
-> mmc2: sdhci-esdhc-imx: adma debug status:  0x2510
-> mmc2: sdhci-esdhc-imx: fifo debug status:  0x2680
-> mmc2: sdhci-esdhc-imx: async fifo debug status:  0x2750
-> mmc2: sdhci: ============================================
+> Add a function to set any value smaller than the maximum of 0xFFFFFF.
 >
-> For now, disable CMDQ support on the imx8qm/imx8qxp/imx8mm until the
-> issue is found and resolved.
->
-> Fixes: bb6e358169bf6 ("mmc: sdhci-esdhc-imx: add CMDQ support")
-> Fixes: cde5e8e9ff146 ("mmc: sdhci-esdhc-imx: Add an new esdhc_soc_data
-> for i.MX8MM")
->
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Tim Harvey <tharvey@gateworks.com>
+> Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
 
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 2 --
->  1 file changed, 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index e658f0174242..60f19369de84 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -300,7 +300,6 @@ static struct esdhc_soc_data usdhc_imx8qxp_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
->                         | ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
-> -                       | ESDHC_FLAG_CQHCI
->                         | ESDHC_FLAG_STATE_LOST_IN_LPMODE
->                         | ESDHC_FLAG_CLK_RATE_LOST_IN_PM_RUNTIME,
->  };
-> @@ -309,7 +308,6 @@ static struct esdhc_soc_data usdhc_imx8mm_data = {
->         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
->                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
->                         | ESDHC_FLAG_HS400 | ESDHC_FLAG_HS400_ES
-> -                       | ESDHC_FLAG_CQHCI
->                         | ESDHC_FLAG_STATE_LOST_IN_LPMODE,
->  };
+> v2:
+>  - Calculate new value before checking boundaries
+>  - Include CLKDIV register to get proper value
 >
+> v3:
+>  - Use 'if-else' instead of 'goto'
+>  - Don't touch response field when maximize data field
+>
+>  drivers/mmc/host/dw_mmc.c | 28 +++++++++++++++++++++++++++-
+>  1 file changed, 27 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 6578cc64ae9e..637ae2aea9fa 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1283,6 +1283,32 @@ static void dw_mci_setup_bus(struct dw_mci_slot *s=
+lot, bool force_clkinit)
+>         mci_writel(host, CTYPE, (slot->ctype << slot->id));
+>  }
+>
+> +static void dw_mci_set_data_timeout(struct dw_mci *host,
+> +                                   unsigned int timeout_ns)
+> +{
+> +       unsigned int clk_div, tmp, tmout;
+> +
+> +       clk_div =3D (mci_readl(host, CLKDIV) & 0xFF) * 2;
+> +       if (clk_div =3D=3D 0)
+> +               clk_div =3D 1;
+> +
+> +       tmp =3D DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz,
+> +                              NSEC_PER_SEC * clk_div);
+> +
+> +       /* TMOUT[7:0] (RESPONSE_TIMEOUT) */
+> +       tmout =3D 0xFF; /* Set maximum */
+> +
+> +       /* TMOUT[31:8] (DATA_TIMEOUT) */
+> +       if (!tmp || tmp > 0xFFFFFF)
+> +               tmout |=3D (0xFFFFFF << 8);
+> +       else
+> +               tmout |=3D (tmp & 0xFFFFFF) << 8;
+> +
+> +       mci_writel(host, TMOUT, tmout);
+> +       dev_dbg(host->dev, "timeout_ns: %u =3D> TMOUT[31:8]: 0x%06x",
+> +               timeout_ns, tmout >> 8);
+> +}
+> +
+>  static void __dw_mci_start_request(struct dw_mci *host,
+>                                    struct dw_mci_slot *slot,
+>                                    struct mmc_command *cmd)
+> @@ -1303,7 +1329,7 @@ static void __dw_mci_start_request(struct dw_mci *h=
+ost,
+>
+>         data =3D cmd->data;
+>         if (data) {
+> -               mci_writel(host, TMOUT, 0xFFFFFFFF);
+> +               dw_mci_set_data_timeout(host, data->timeout_ns);
+>                 mci_writel(host, BYTCNT, data->blksz*data->blocks);
+>                 mci_writel(host, BLKSIZ, data->blksz);
+>         }
 > --
-> 2.17.1
+> 2.20.1
 >
