@@ -2,102 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C427C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 20:44:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 034D2C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 07:12:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4664660FE8
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Nov 2021 20:44:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D946561ABD
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 07:12:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236321AbhKNUq4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 14 Nov 2021 15:46:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44344 "EHLO
+        id S230207AbhKOHPG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 02:15:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39588 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236299AbhKNUqk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Nov 2021 15:46:40 -0500
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3DCAC061746;
-        Sun, 14 Nov 2021 12:43:43 -0800 (PST)
-Received: by mail-wm1-x335.google.com with SMTP id y196so12157753wmc.3;
-        Sun, 14 Nov 2021 12:43:43 -0800 (PST)
+        with ESMTP id S236478AbhKOHMX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 02:12:23 -0500
+Received: from mail-oi1-x229.google.com (mail-oi1-x229.google.com [IPv6:2607:f8b0:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D22B4C061746;
+        Sun, 14 Nov 2021 23:09:28 -0800 (PST)
+Received: by mail-oi1-x229.google.com with SMTP id bk14so32954388oib.7;
+        Sun, 14 Nov 2021 23:09:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=kP3xYHTgf3xiqvDKR6oSKFaK/9w+EGSR3L/Lkf7VsQI=;
-        b=lAzy2bWFZq2Zin54Yg0kAwXMjeDJEtweIebrF0xO0GOO5NkHV9312Jc288Cwori1Zy
-         w4/jfkpbR4SokHguodLQe/jJanwzQcFAiCtkdUBCYp/PaSjfSWD6Dgz4CdLiBu+BUmpC
-         MjfM9w37cJxk69Aj08wuJt3vvrgR2iOL2jUKUsw636ECbOuuvNX/pVc8BTPMDaQoHfEr
-         smeftQSGueZY3A3eAsZW948Ljshe+dMcHL9qrPLCXVkySn2o+pDpZK2CqxwlIi16bdAl
-         04t3eLPDXEHJN5n4Ikwsgton6LveXaEgb6SmSWaxn3WrUdZ6OdlfVbG78Mr0RocCc57K
-         fU+g==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=X4ODnEJjowecd7yqWRpehN0iPzgGiq8oGDsSH++GI2s=;
+        b=C3zVhigno+aRneCu/clLZRU8PVrt9Ew/Ykbh4vxb/wYor5MNIbN+SO/i2aNcolWG6C
+         Sc2i4Ki8e8MmEZnWLuHlt8DM7wSBi+bpnnFLdtRs9iEsFFL79Bn0T/oSa7fMItnosH7Z
+         LWjqifeqvDMPoTRZdwPKgP6OmFF+xOsvKQVEtc54IyvpKB23S9KBpKuf22xKaucSFDi4
+         ckmpF/beGMNfNt6XxY2E1USn6PP4porRnPJSBMbQqI/EKAhXxMKK8M+ATaUvzRwiLQ6p
+         lurXkrjqKNj37iXN1QeoHgH02CoSD34w1d8VNlrRCNP8AYaQ5D0GE16rtsj7oFvS6q76
+         iqjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=kP3xYHTgf3xiqvDKR6oSKFaK/9w+EGSR3L/Lkf7VsQI=;
-        b=Kovgo+VgIoH/GfJWec7wEsQqo/ZRv6GiJAV19I5PTSqZbcO31wCqLTwWh9NI6/YlzD
-         LgW9cqX3b7RB6WapUgIMuGqHFTsa/7bRMNBa68kkCqrWMRuIDctvERZPfzvKHY+M4gl1
-         12IyyaIN0y737HVCuC4+iP0XDgppO5XUPT8flUFDnKMh8sP9515ZzCLqToIeb+/jQmMW
-         iFZkxmpXYQa9slbY4XDAc2US8B3ic8IVoBiks4V/Egesjl4C7VFu8c4ZHj4Akm7RHk2s
-         7eBqvaDQkEs+oCHEElKYh1meWlXcULJ2ySBrhIPxma797cx0DeQ8e8KKN6GUiTIQE/66
-         LYzQ==
-X-Gm-Message-State: AOAM531WV2/qcSov8X1x/GRT7cZTEwchnymUIVbw/3Ek+pEBbDXMooeN
-        qnvvGpUqqptDoCPreYZcuSA=
-X-Google-Smtp-Source: ABdhPJxeTDf5dBMTjMgL/1GC8axroAWjiyIS35II9SYiAeyu3WJ3ec4+ujpo1+0qwcLPOUbFyQFNog==
-X-Received: by 2002:a7b:c2a1:: with SMTP id c1mr5103680wmk.112.1636922622505;
-        Sun, 14 Nov 2021 12:43:42 -0800 (PST)
-Received: from ubuntu-laptop.speedport.ip (p200300e94719c9aa03f58ab728c81581.dip0.t-ipconnect.de. [2003:e9:4719:c9aa:3f5:8ab7:28c8:1581])
-        by smtp.gmail.com with ESMTPSA id m14sm16673630wrp.28.2021.11.14.12.43.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 14 Nov 2021 12:43:42 -0800 (PST)
-From:   Bean Huo <huobean@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     beanhuo@micron.com
-Subject: [PATCH v1 1/2] mmc-utils: Use memcpy instead of strncpy
-Date:   Sun, 14 Nov 2021 21:43:30 +0100
-Message-Id: <20211114204331.39555-2-huobean@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20211114204331.39555-1-huobean@gmail.com>
-References: <20211114204331.39555-1-huobean@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=X4ODnEJjowecd7yqWRpehN0iPzgGiq8oGDsSH++GI2s=;
+        b=1RFex8KcRJT9OBniRxhAf6KDjuSlIQipexNeH3Wppot7OazMWs44OgZr3Zs9sT+MiH
+         dfRY5LI0J0QLZb8AIVvMZ4gpcS8Vd343DO89G5GzXp36CEwYogdmhgjG1/tIB6MD3SI5
+         l9rd5lkRNI/YPIhvRb4VrTOjo/gVuPTaZnMFbKSnegAqdEOO3poPH+k/LzzqiZ56K+e+
+         xIx4z1jFDIzI8IAkXW6MX+NKvpcbHidvqqKxINTBHm2JrLbzoPB0eIuyVnKVfxPXiPP9
+         9e4slYcBhwcSWmKVHZKl6vLkLBNeoFGjyIIlyv5N8HYplk8YFYy3KziTP5qVzvZ2Axc7
+         qn0A==
+X-Gm-Message-State: AOAM5326dnpoh6CttvwhqSmtd+qIA568Yu2EYGTocE0Jf5ykp5qtwXv/
+        cP/FODLXM1yuNcWUEGamDrh0CAxz2xwi/INDzmM=
+X-Google-Smtp-Source: ABdhPJwf5dgmjmpfLme7Gl4S1F6A+I4lA+bMShSszsLO4PbcnBl3X2dSlWPrfxxjI/TfnsL/5qAgi/JW1ptms6kIQP0=
+X-Received: by 2002:a05:6808:d54:: with SMTP id w20mr30512951oik.91.1636960168207;
+ Sun, 14 Nov 2021 23:09:28 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20211114204331.39555-1-huobean@gmail.com> <20211114204331.39555-2-huobean@gmail.com>
+In-Reply-To: <20211114204331.39555-2-huobean@gmail.com>
+From:   Ajay Garg <ajaygargnsit@gmail.com>
+Date:   Mon, 15 Nov 2021 12:39:15 +0530
+Message-ID: <CAHP4M8VAhcTysoBRfNQSiN3fTY6GK9fTz5+hzvzoEuNfC+9CHQ@mail.gmail.com>
+Subject: Re: [PATCH v1 1/2] mmc-utils: Use memcpy instead of strncpy
+To:     Bean Huo <huobean@gmail.com>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        beanhuo@micron.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Bean Huo <beanhuo@micron.com>
+Hi Bean.
 
-The -Wstringop-truncation warning added in GCC 8.0:
-    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82944
+> -               strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
+> +               memcpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
+> +               lbuf[8] = '\0';
 
-If you use the GCC > v8.0, you probably will get this compilation error:
+Above copies exactly 8 bytes, without any regard to the sizes of
+destination-buffer (lbuf) or source-buffer (ext_csd). Thus, there are
+high chances of overflow/underflow/out-of-bounds.
 
-error: ‘__builtin_strncpy’ output may be truncated copying 8
-bytes from a string of length 511 [-Werror=stringop-truncation]
+If ext_csd contains, say a string 5 characters long, you would want to
+copy 6 characters (5 for length, 1 for null-terminator).
 
-Use memcpy instead of strncpy to avoid this compilation error.
+I guess you are trying to copy as-many-bytes as possible to lbuf,
+including the null-character.
+Thus, strlcpy/strscpy should be used here.
 
-Signed-off-by: Bean Huo <beanhuo@micron.com>
----
- mmc_cmds.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Something like :
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 205e6e5b89f9..ecbde3937c81 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1835,7 +1835,8 @@ int do_read_extcsd(int nargs, char **argv)
- 
- 	if (ext_csd_rev >= 7) {
-                 memset(lbuf, 0, sizeof(lbuf));
--		strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
-+		memcpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
-+		lbuf[8] = '\0';
- 		printf("eMMC Firmware Version: %s\n", lbuf);
- 		printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
- 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
--- 
-2.25.1
+strlcpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], sizeof(lbuf));
+or
+strscpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], sizeof(lbuf));
 
+Note that you do not need to worry about putting the null-terminator.
+strlcpy/strscpy already take care of that for you.
+
+
+Thanks and Regards,
+Ajay
