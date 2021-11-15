@@ -2,237 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82994C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:35:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96D2EC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:46:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6382461B6F
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:35:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7ADF461B95
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:46:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236725AbhKOOie (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 09:38:34 -0500
-Received: from mail-eopbgr1400094.outbound.protection.outlook.com ([40.107.140.94]:42336
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S236802AbhKOOhH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 15 Nov 2021 09:37:07 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ZCfJFLIXHp/gPtnf8kYdKZ7O8fwYVppPfvm4g2+QaHhBZU2U5hBf/0jlMvY7VBdGR6iFQWb5yPt9uQ7SYgPOo9IMEMIcRjLGYzH1swVaKT1BrrabV/bOT4S8t41o3ag+Ja4/pzEnWoEooKGXMiQs3hIU29HvmMKD/fPsmTmg3pjRTKZtJq0NeTchnnxkXH5ePe7T8PWax3IS5zIWJp6TIZVUn9zL1KfccSu+atocgm6pn2d8w0tOX2CJJZm4/mu488j0MMsQZH8VvS3Y/+WsfSVjdugFtnQIQ30oXA6lCiVINOz4VfGz1lmqBrY+wYWqqSfNvIIbEn17jf0d9zPX/Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=4Tde6zNICw995H9vX/Y7Y1xFWeoFwd/vo46mNPEb23c=;
- b=iv+t+NbIoZMUB93pKYLxjGPQBv/UnLC7FTPs/1omm4iereL6lTrY9VitCYTVpIDJqheoHLmQepp5TbVb+gjpeIPTepmy7XrEplCOw16DU3CokBw8hFFeE2U0AJ1NxDYTHLNM4EGjfaNMGSPOP2Da7o/bE5eNMCU6z1IzOx8RWNA0sTLxmm9FzVU/YyC0OsZxsPuRQwMiU8H5W8Tcu7Fs9WAK65Ul0wjvbT1uqSuCsfyLkd43m+brIkUIDaAuYDz5dEOOsxlkhDnFCaJ1D8sS6B3VZylrSxskhl/noCgtMNeILnm/0JtAgNfh0Te3kezyLn9uN8MQXiSuTSHB3FmpFA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
+        id S231890AbhKOOt1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 09:49:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59782 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231716AbhKOOt0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:49:26 -0500
+Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B2C4C061570;
+        Mon, 15 Nov 2021 06:46:26 -0800 (PST)
+Received: by mail-lj1-x234.google.com with SMTP id e7so21503997ljq.12;
+        Mon, 15 Nov 2021 06:46:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=4Tde6zNICw995H9vX/Y7Y1xFWeoFwd/vo46mNPEb23c=;
- b=h+Gt0hNBRUCrNXjPGj51RL4RPKSHD8h9QbCAU+8XVKA4tEQEVIqXh+0gLzIiUhd8BurRyViNAZ5Y+XT9mGtAEy7p7zFjlMU56BIStHXyIMqyTY5r8QVxtVgj44e/CmC2hgdwoqhHsXOLUyjA4daje/WR1FxuswJ6QdbFZFGkMxE=
-Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com (2603:1096:604:bb::5)
- by OSAPR01MB4082.jpnprd01.prod.outlook.com (2603:1096:604:54::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4690.17; Mon, 15 Nov
- 2021 14:34:08 +0000
-Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com
- ([fe80::c0bd:405a:cdd3:f153]) by OS0PR01MB5922.jpnprd01.prod.outlook.com
- ([fe80::c0bd:405a:cdd3:f153%8]) with mapi id 15.20.4690.027; Mon, 15 Nov 2021
- 14:34:08 +0000
-From:   Biju Das <biju.das.jz@bp.renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: RE: [RFC PATCH v2 00/21] clk/mmc: renesas_sdhi: refactor SDnH to be a
- separate clock
-Thread-Topic: [RFC PATCH v2 00/21] clk/mmc: renesas_sdhi: refactor SDnH to be
- a separate clock
-Thread-Index: AQHX1md0JjZB7mYmWkWf3VwZdHwxSqwErpiA
-Date:   Mon, 15 Nov 2021 14:34:07 +0000
-Message-ID: <OS0PR01MB5922A97F46F04F3EBDD8E55886989@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-References: <20211110191610.5664-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20211110191610.5664-1-wsa+renesas@sang-engineering.com>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 06aa9b36-bcc3-40e8-e0a1-08d9a844fb7b
-x-ms-traffictypediagnostic: OSAPR01MB4082:
-x-microsoft-antispam-prvs: <OSAPR01MB40822F8017813C0BD9D2F9DE86989@OSAPR01MB4082.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:10000;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: U+oakMXtXSHVomKNsiDOf4RfIyC7WpN4MxeHTEf1iVQv9+epu/ZYixEaThKYfcqy6LLDeV+nXKyQ/PQgdA0YZnu6+Q9A4A6oylp1MzXuf3VlttVr+awXDEc/XXSZH3EreHonbH7U1htouMtjOtXRjUmA76xwDCccKpKBWAjYjc3xo0hAZlCUV8cmIfwANpNjlboPIHoqWSBjlH74ozb2DaYB8KbeJ3tZ/GVr0xejgM5TG+0eRhuA8NuKgF4iVKvweo75LBSUEcgmPNgT/BHq3YfxbUcDPvRR5AANfT4M5XEPvd+xfDvNCVWh8AsSWdUwwTE3hwbYlVE7QcI9tZews/GOK5aSW9USp5dwJzPNb8sonZtfIZ/ihH3lffL2+VXHx5D/jcsp+j4OH7b1D28cj78PXr46zTQE4X9vYD4FgYFh83fHPA3NrMrTdQldQ+h+bNrYBTievcc0eMZHddKMQNPFG+ZC9wWeIKgAB8AL7mLbC+eIS5If0CP/3yCbno3TFCeU0JgCrF3ArT71h1OuA+ZOAzN3ekDgToqyDvOHf/YL05RM92zX3Zb8qtwh3rWpnEzQMsriJ3//MxyDKKHwRgwE8o9Lx8Sp0kQ5Rn3WBOB1Wh7GguWFiJwjBx55MVaCqIWuDQJHTmUrCFiu/qmneIadf+ip4IqSbBFGyaTd1DKZ6DT7mhkH1W/dqvaQotqGJpRv4Qjo1X84TAr9J7GkhA==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OS0PR01MB5922.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(55016002)(5660300002)(6506007)(66946007)(33656002)(38070700005)(122000001)(316002)(110136005)(2906002)(7696005)(38100700002)(54906003)(71200400001)(4326008)(86362001)(9686003)(66446008)(64756008)(66476007)(66556008)(83380400001)(508600001)(52536014)(26005)(8936002)(8676002)(186003)(76116006);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?dKUfZoWSb+tQakIdF4NUg0VvYwMEEtAIBWtDrae7odyzagYfavUazR0LKZQM?=
- =?us-ascii?Q?VFm4HdJtcf8gJxTFlOG6QZdUboRUcnncN0UokNxKNd3vl5AR0v5JDYw8zKkF?=
- =?us-ascii?Q?flL7825Ab6lsdi/FCwjO26r7Z3WdwWRBzlkMA/NbLFEcBn0JoZ4F6JxwXwrx?=
- =?us-ascii?Q?dWDq/+DPzKPL74JbAfIwXa9HsJRCAPbZ1JTAcse48dFa41LIsgVB4FYXpG5j?=
- =?us-ascii?Q?bA2ciVSob6g+PJPzoRVQy9qKI2xOXyR0zxpuxQaDJiQhNjhIz5pL/UvXls+Q?=
- =?us-ascii?Q?WNJcIEbzV+9YypqofTg5j+ufUtA3uXbnj3BTRXAuMwKW5Ab8/L84dFYmfMrl?=
- =?us-ascii?Q?2SZwqBvUFLB636z1uyQxCwXD7Yru8LeFnXhQ+XMq/IX9vwaTZq6Sm+YIOd89?=
- =?us-ascii?Q?2Y1HYZh49Bvj9DEE6rksv0X1wEANX64Ugt5MPiH5NFG2N3k5TgOkXZwnxZqp?=
- =?us-ascii?Q?Kryg3pNk5aR1kL8TD/kvbbvbYpVRrUZz09S+Av8wVTqUBl4KjdcVKCs1+zWc?=
- =?us-ascii?Q?cvwziuT7fYXT45ROlF7i4UjvRqHP4UIOtfBRhPb3WiKypPSUw5KiLQuHgrSJ?=
- =?us-ascii?Q?E5qzl+K9xxEQdSnE3pJjGQyZArq+G+aFms9R/9h8KGwbgOYkz58MgUtx7jBE?=
- =?us-ascii?Q?z5wFlK8oAuoHlFJuzpuzTRhzOKa6dtxp73BYR7q10QsMbp36+e1x2ksZIetj?=
- =?us-ascii?Q?ReapIke0xtAYSaNr5WDrkjppdU3zCPzMQxK5Ceu/BNiZ1BFJG2WcN2pWZgdo?=
- =?us-ascii?Q?e6mG8gH+WAc4b4sye6SUFCUFCCT7kJm/QZgYHCWrwrrJzWQINUgzxrKnr2uJ?=
- =?us-ascii?Q?s6HZoPg0KuKdFP+7LQC9gCzH9LWQtFKY98STZ7p9mzXp9Ijf3q7dw5j2RSnW?=
- =?us-ascii?Q?C/4aNcyePFZWYQ9FFd96o/DhLYqsoXtD/CH0Pp6BJIrmn70fSxvfTcYjaclp?=
- =?us-ascii?Q?Qr6pukruQ5F/y9q+l2x1MhDovN0wI7FhuBqmoc0EWbClqX45/sC2XDbF6qo4?=
- =?us-ascii?Q?oIf2I4zlwWTKFcMHNQPOT0vrLb+RKQBBVa94UAIFpIXVQNyzBR10fAs7gu4y?=
- =?us-ascii?Q?Dsy36HkmCJY0XJGmfx+bxiS/NBNJSBGpf50a5/AZyCDa+W7YOa+V2ykawuY2?=
- =?us-ascii?Q?iajyfWqhEyzaDGONxHgL2SVUltDatQ24mAUbfRMK7HSmsAnbdwKEpbDetwyN?=
- =?us-ascii?Q?ssD9ZsDEa5b9b+ME9RFcLZmlq3fxvbCbqaXoGRU/hRc1js/Jio5RQAFnAYxm?=
- =?us-ascii?Q?RMsxUMdjOOLcR5d6EkXzzy7JeVbY63PB+rfytv2Wa8scSWHtRhlMIU7gzGm+?=
- =?us-ascii?Q?I9W0m4oFHVbWWOKXvhKZfpwiJhfDI843A7y+OFKsC7wz0dl9wNUzA5K5y5Xs?=
- =?us-ascii?Q?QHskjmcNAx1M4ElXrnAVXPBnyYYCLOhAKUYIQazidoLiAUARrCckExdfyOA+?=
- =?us-ascii?Q?hkEipYAqh7Oufq0OkqxFgkp6eOtesPZfjOv27TCZo49p1a5+c9aNPxRCWmr3?=
- =?us-ascii?Q?eYnPlTfx4vzU3L5wO2RbqNKzbta5ZTIvDy93GBnBAKkbBigxyRKaFOQhaV94?=
- =?us-ascii?Q?wfnvfYZzJ3qn3yPLtbpKNxmkT6OyXgFYf7zpNHeqJmBKjKFGMF8L1fp4kUHT?=
- =?us-ascii?Q?XJpXpDBn2Ps2T7WZFPodr5rxj/4cmBMOcfozGUqnZPVBJXFfk0AMDx5W/5Kt?=
- =?us-ascii?Q?Sy0cYw=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=f9990VLRY1mM2sii4oucAgZqtJr4f6UTn2nlUsBeiyA=;
+        b=MKv4lJzovSleVVtb8Uez4QS8nWVoyslVc4dAhZ3Ja9hcfOWhdQeyMWw6FHhrLjYpMe
+         nYJhoHPJHieO78N1tejBSn1JjrO7HehrBzOD6p80ebHQ/GkZbHzj+oDCc5U4EAGGyBKV
+         xbJLawSqjqY4fBNx9jKlTQhw4P401MYqth7VhZkzSxvdhwOw2g0BxwUpHsNeyVoCEXwg
+         AneGSb38fLLRS0lfd/WXUhHjDQTfopD289+UYtNAyG6eoU7lhx2ZHI9h8rOgSDINeyOy
+         BSHVlS4ECWcjRF5ej1E2mdUBpiNe11q16/40ayNE4SINNFWYIMy3ZhzwXNTN4fPHDK38
+         wMxQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=f9990VLRY1mM2sii4oucAgZqtJr4f6UTn2nlUsBeiyA=;
+        b=EGI7XTEKJK30mo06GtmmCuEk6hAAOu9Yoxxp4a0yCLbpDki9eXCf2fLD8+ZgaaQEnz
+         D4uS5FKI/LMTrRXO0cARBLFSb8UxXQ+9oztDgOT0ABbf+fHheeVa4Ip9Ao1qQ2ldGwDU
+         ekAK0eEcTu88DHjCV2x74+5djr/DMg3Ot5dU9pq56dKnIESEIbCaFpeaqS3fAwlcpofO
+         +AI+p/8zDM/suBSPRgwaJGimczRrtcIssTNGH7KPAKHS2PdVcBFRP/pIK04bLsoXuqUg
+         byPg7NEoTGslz5DIlP1sjJdwOFK6nJu9UnUxEFORzAUV7LZ0yIA0ecdUVSqqRnU6bqRY
+         wgAg==
+X-Gm-Message-State: AOAM531cafvAaf8LoAF0dWMQIDv6JNYs4Ql34l+Y4ELMjvW5g3eFIgOi
+        u681M/SmTf3rZocMn3kEQCbiRi5SWbU=
+X-Google-Smtp-Source: ABdhPJyGzX+uJoClUoX59O9YRdwTgWzR3XA1e/9PtaHs0iyNVaYjGst0rpo/clkWJ4amyTD6J2hiFA==
+X-Received: by 2002:a2e:b711:: with SMTP id j17mr29887114ljo.39.1636987584324;
+        Mon, 15 Nov 2021 06:46:24 -0800 (PST)
+Received: from [192.168.2.145] (46-138-46-211.dynamic.spd-mgts.ru. [46.138.46.211])
+        by smtp.googlemail.com with ESMTPSA id j2sm1445777lfr.109.2021.11.15.06.46.23
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 15 Nov 2021 06:46:24 -0800 (PST)
+Subject: Re: [PATCH 01/11] ASoC: dai_dma: remove slave_id field
+To:     Lars-Peter Clausen <lars@metafoo.de>,
+        Arnd Bergmann <arnd@kernel.org>
+Cc:     Vinod Koul <vkoul@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Andy Gross <agross@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Hyun Kwon <hyun.kwon@xilinx.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Laxman Dewangan <ldewangan@nvidia.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Scott Branden <sbranden@broadcom.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        dmaengine@vger.kernel.org,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" 
+        <linux-rpi-kernel@lists.infradead.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-staging@lists.linux.dev,
+        "open list:TEGRA ARCHITECTURE SUPPORT" <linux-tegra@vger.kernel.org>
+References: <20211115085403.360194-1-arnd@kernel.org>
+ <20211115085403.360194-2-arnd@kernel.org>
+ <647b842d-76a1-7a96-3ea7-8a37b62bc18e@metafoo.de>
+ <CAK8P3a2EVseM4t=e982fFhzBGSZxZ2_V-FHwr-fQPd-bkAKaJg@mail.gmail.com>
+ <d2dd42fc-e58a-0c06-7f7e-a6a2161c368d@metafoo.de>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <5737810c-420a-2f8d-99bf-24a2558d5855@gmail.com>
+Date:   Mon, 15 Nov 2021 17:46:22 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: OS0PR01MB5922.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 06aa9b36-bcc3-40e8-e0a1-08d9a844fb7b
-X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Nov 2021 14:34:07.8036
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: AoVnKXt8y1hJyT+g3mRBYMCFzsLZHCGx4DgmcUsVZiv0Bt8bqsklqDBex+klpDbamp2c6NAK1xgn7616PrI44T7T2eBfpGxJ0imN5N+Nxjo=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSAPR01MB4082
+In-Reply-To: <d2dd42fc-e58a-0c06-7f7e-a6a2161c368d@metafoo.de>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+15.11.2021 14:53, Lars-Peter Clausen пишет:
+> On 11/15/21 11:42 AM, Arnd Bergmann wrote:
+>> On Mon, Nov 15, 2021 at 11:14 AM Lars-Peter Clausen <lars@metafoo.de>
+>> wrote:
+>>> On 11/15/21 9:53 AM, Arnd Bergmann wrote:
+>>>> From: Arnd Bergmann <arnd@arndb.de>
+>>>>
+>>>> This field is never set, and serves no purpose, so remove it.
+>>> I agree that we should remove it. Its been legacy support code for a
+>>> while, but the description that there is no user is not right.
+>>>
+>>> The tegra20_spdif driver obviously uses it and that user is removed in
+>>> this patch. I think it makes sense to split that out into a separate
+>>> patch with a description why the driver will still work even with
+>>> slave_id removed. Maybe the best is to remove the whole tegra20_spdif
+>>> driver.
+>> Ok, I'll split out the tegra patch and try to come up with a better
+>> description for it. What I saw in that driver is it just passes down the
+>> slave_id number from a 'struct resource', but there is nothing in
+>> the kernel that sets up this resource.
+>>
+>> Do you or someone else have more information on the state of this
+>> driver? I can see that it does not contain any of_device_id based
+>> probing, so it seems that this is either dead code, the platform_device
+>> gets created by some other code that is no longer compatible with
+>> this driver.
+> 
+> I've looked into this a while back, when I tried to remove slave_id. And
+> as far as I can tell there were never any in-tree users of this driver,
+> even back when we used platform board files. Maybe somebody from Nvidia
+> knows if there are out-of-tree users.
 
-> Subject: [RFC PATCH v2 00/21] clk/mmc: renesas_sdhi: refactor SDnH to be =
-a
-> separate clock
->=20
-> Here is the second RFC to refactor SDHI clocks so that SDnH is a separate
-> clock. The main advantage is that we can handle per-SoC quirks regarding
-> the clocks now in the SDHI driver rather than the clock driver. This is
-> where it belongs because only there we know which mode needs which tuning=
-.
-> Also, the code is way cleaner and more readable now.
->=20
-> Geert seemed basically okay with this approach, so I continued to work on
-> it by addressing his comments and adding DT updates for all other involve=
-d
-> SoCs. I also excluded V3M now because it has a different SDnH handling. I=
-t
-> shouldn't be affected by this series. But it may be that we need to add
-> V3M SDnH handling later because it may be missing since ever. If so, this
-> series will make that additional task a lot easier.
->=20
-> The downside is that patch 4 looks messy. When switching from old to new
-> handling in the clock driver, I see no alternative to switch the MMC
-> driver in the same patch. clk_set_rate just has to work. However, the MMC
-> part is small, so I hope we can deal with it as an exception this time. M=
-y
-> suggestion is that Geert takes all the patches via his clk and renesas-dt
-> trees wich MMC acks from Ulf. Is this okay for you, guys?
->=20
-> These patches have been tested on R-Car H3 ES1.0, H3 ES2.0, M3-W ES1.0,
-> M3N, E3, and V3U (remote only). On Gen2 a H2 has been tested. I tested
-> SDR104, HS200, HS400, and regular modes. All observed values and relation=
-s
-> in 'clk_summary' made perfect sense. Actually, this is the first time all
-> quirks are correctly handled. HS200 with 4tap was broken before which was
-> the initial reason for this patch series.
->=20
-> Detailed changes are in the patch descriptions.
->=20
-> A branch can be found here:
->=20
->   git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git
-> renesas/sdhi/separate-sdhn-v2
->=20
-> Looking forward to comments and testing.
+That Tegra SPDIF driver was never used. Still there is a growing
+interest nowadays in making it alive by implementing HDMI audio support
+for Tegra20 SoC. It was on my todo list for a long time, I'll try to
+prioritize that work 5.17, it shouldn't take much effort.
 
-I have tested this patch series on RZ/G2{M,N,E,L} boards
-and all looks good.
-
-Regards,
-Biju
-
->=20
-> Thanks and happy hacking,
->=20
->    Wolfram
->=20
-> Wolfram Sang (21):
-> clk: renesas: rcar-gen3: add dummy SDnH clock
-> clk: renesas: rcar-gen3: add SDnH clock
-> clk: renesas: r8a779a0: add SDnH clock to V3U
-> mmc: sdhi: internal_dmac: flag non-standard SDnH handling for V3M
-> clk: renesas: rcar-gen3: switch to new SD clock handling
-> clk: renesas: rcar-gen3: remove outdated SD_SKIP_FIRST
-> dt-bindings: mmc: renesas,sdhi: add optional SDnH clock
-> arm64: dts: reneas: r8a774a1: add SDnH clocks
-> arm64: dts: reneas: r8a774b1: add SDnH clocks
-> arm64: dts: reneas: r8a774c0: add SDnH clocks
-> arm64: dts: reneas: r8a774e1: add SDnH clocks
-> arm64: dts: reneas: r8a77951: add SDnH clocks
-> arm64: dts: reneas: r8a77960: add SDnH clocks
-> arm64: dts: reneas: r8a77961: add SDnH clocks
-> arm64: dts: reneas: r8a77965: add SDnH clocks
-> arm64: dts: reneas: r8a77980: add SDnH clocks
-> arm64: dts: reneas: r8a77990: add SDnH clocks
-> arm64: dts: reneas: r8a77995: add SDnH clocks
-> mmc: sdhi: use dev_err_probe when getting clock fails
-> mmc: sdhi: parse DT for SDnH
-> arm64: dts: reneas: r8a779a0: add SDnH clocks
->=20
-> .../devicetree/bindings/mmc/renesas,sdhi.yaml |  16 +-
-> arch/arm64/boot/dts/renesas/r8a774a1.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a774b1.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a774c0.dtsi     |   9 +-
-> arch/arm64/boot/dts/renesas/r8a774e1.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a77951.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a77960.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a77961.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a77965.dtsi     |  12 +-
-> arch/arm64/boot/dts/renesas/r8a77980.dtsi     |   3 +-
-> arch/arm64/boot/dts/renesas/r8a77990.dtsi     |   9 +-
-> arch/arm64/boot/dts/renesas/r8a77995.dtsi     |   3 +-
-> arch/arm64/boot/dts/renesas/r8a779a0.dtsi     |   3 +-
-> drivers/clk/renesas/r8a774a1-cpg-mssr.c       |  12 +-
-> drivers/clk/renesas/r8a774b1-cpg-mssr.c       |  12 +-
-> drivers/clk/renesas/r8a774c0-cpg-mssr.c       |   9 +-
-> drivers/clk/renesas/r8a774e1-cpg-mssr.c       |  12 +-
-> drivers/clk/renesas/r8a7795-cpg-mssr.c        |  12 +-
-> drivers/clk/renesas/r8a7796-cpg-mssr.c        |  12 +-
-> drivers/clk/renesas/r8a77965-cpg-mssr.c       |  12 +-
-> drivers/clk/renesas/r8a77980-cpg-mssr.c       |   3 +-
-> drivers/clk/renesas/r8a77990-cpg-mssr.c       |   9 +-
-> drivers/clk/renesas/r8a77995-cpg-mssr.c       |   3 +-
-> drivers/clk/renesas/r8a779a0-cpg-mssr.c       |  17 +-
-> drivers/clk/renesas/rcar-cpg-lib.c            | 211 +++---------------
-> drivers/clk/renesas/rcar-cpg-lib.h            |   7 +-
-> drivers/clk/renesas/rcar-gen3-cpg.c           |  24 +-
-> drivers/clk/renesas/rcar-gen3-cpg.h           |   4 +
-> drivers/mmc/host/renesas_sdhi.h               |   4 +
-> drivers/mmc/host/renesas_sdhi_core.c          |  39 +++-
-> drivers/mmc/host/renesas_sdhi_internal_dmac.c |  21 ++
-> 31 files changed, 261 insertions(+), 289 deletions(-)
->=20
-> --
-> 2.30.2
-
+The slave_id should be removed anyways, it won't be needed.
