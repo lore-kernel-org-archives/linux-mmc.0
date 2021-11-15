@@ -2,140 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 823BEC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:55:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6F6FC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:55:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C17463219
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:55:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA4E563225
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 14:55:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229661AbhKOO6A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 09:58:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33502 "EHLO
+        id S232176AbhKOO6U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 09:58:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229864AbhKOO6A (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:58:00 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45599C061570
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:55:04 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id t11so36133987ljh.6
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:55:04 -0800 (PST)
+        with ESMTP id S231889AbhKOO6J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 09:58:09 -0500
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B5EDC061204
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:55:11 -0800 (PST)
+Received: by mail-lf1-x133.google.com with SMTP id p16so44392261lfa.2
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 06:55:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=L4dQb9bI/nF/LdtSNvytuCGCdqOvBdUbMDkCHhqnw1U=;
-        b=FgoUMGuQP2TVwQPlX5+4cW8knkZrMIjpu1BwvthctuoigZq8ek8gx6QaPJPHZ2A4uZ
-         YaStWGgRdqZPxLAO+EaPzGg4kK3iP1GK2tdlQjN1UiOz06K2M22pBQ4sYa2sb2tvlWG3
-         5WmAQegVRc2oz9T4Q9CC4kKMgRxAcfoahfgE3YUV4uXvoogQWjR4okD99GC/VReQd/YF
-         4eTnGxlH6G/qj+JXNxIXU+w+XYH0Hp1lGZsr0aFODqQvN19DeXjPhDn8wXHtrNQwhuh8
-         2Z7Jiry9aduNqwXY4dWlKkGhbYcmkFSk/czAQRTg8OYSGA4ESOhjN3WuXJ7MqUYC98/o
-         j8Iw==
+         :cc;
+        bh=gHoS2QIQL9jiqdDjkTDeK4x6Tmu2ipOUCUNpKzNE59E=;
+        b=e9U5TdTPp4xKy1kJcXwDzSC8tbSpVywEYH9Z+sUjf4G9L8eFHtx5l3hWhed7rd1Ajz
+         ebxts1R/3Vp3BD3fmiIs8ijW3vwxCRNKKrpAMPOT4NK7HnryzYPTd9dWWqyCBM/3mHnA
+         vTVpkSClOFZnaQA1Ggw0m1qKX5z9BFeyCSc4VjSaCn4xvJCaKykOcCzMkrUu/7sEAMyj
+         DCGbe70UQxZRmBIWafqA3pLWLk2Lx7W2zU1CZkBTpErb5uREerVsGeElEyyT8+u6f//7
+         cKqncI+6LUB4ho/pCz33S0HvvdKcK7yNiEWVK9N5MT9zepjoT0gjtQYQ+6o7aVhzRCiv
+         8/zw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=L4dQb9bI/nF/LdtSNvytuCGCdqOvBdUbMDkCHhqnw1U=;
-        b=lfB5xupsGqyliMB8JhDK7gl0gQCKck0d5GY/WsEkB9U4C6ib2FkZNC9AoCPhe/LgSc
-         w+iry2FUibeD+Gn/YVHGRwtkyLQHTAoHENsFtRDfWXch2wWHY3N6XkcjsM1gTcS8wCVv
-         I+Jr1Wgk23Y2dHQ7W1F69jIm5vGzTD4a73skVulBYJnMA4YQEu17O0e9gWo0bPE//pbK
-         LD/grDAioVj8jOjl6XulQOjEM/E7YAWe/BWDUV4C/eX9NQot7/wbaYURMMwpbRcKxBFd
-         mM9wNh+IeHOAmByAutceG+97nPSRYKqLvUon1HBYv9j/q3IjH1OhnOT46ffUi55hh9q6
-         tK1Q==
-X-Gm-Message-State: AOAM531knwe8ZI0a0R9AvC5iSRFAj6PVtJ3COzMJkM8yxipjfHLquU7N
-        IcSAyhwJo7JoE6PLW/OFs3lZcJXuLlRKoqSIw2PZIQ==
-X-Google-Smtp-Source: ABdhPJwL0yY24aTYONuKRYpZACxpDl8FPJZXxorHZizuYP5UvUeQ2YTon2cOy7GRLQXTmEH0c2QfB0dYeSM606JaSi4=
-X-Received: by 2002:a2e:a5c8:: with SMTP id n8mr40399279ljp.367.1636988102606;
- Mon, 15 Nov 2021 06:55:02 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=gHoS2QIQL9jiqdDjkTDeK4x6Tmu2ipOUCUNpKzNE59E=;
+        b=C3RmeeU+Bsc+Bz5CwD7U6Yhurmz4P+/SXem/x8OV0UnheXp3/k1b7Pv9OTHqUNLkdc
+         WAdQnyaJg4Su4kCivKnUDp3Aym9QbQVIZkD9X83Uk3Iy13I031nVZzpVWINl4LkpSTbe
+         +lGDYolOJogkzWf8JsTQzZ19OtB8BWmrRqd0O6OqQf/sKWSM3G7SPRJWbkeS7bf7Zx3R
+         qaUly1VKm6XL4jzzX6khKutXK4QzlT2zAhqgBHNa+/x3xuOcAq//D+foje2VDFnZ0CMQ
+         F5zpQWo8iIbKewkzCqtbXRF2pk8+cqZo0rx4j/bq32XSdV1+XfZXt4yXfaQqMS4ZkGha
+         sjnQ==
+X-Gm-Message-State: AOAM533ybI+DZs4vSifb5A9k8bQL7u0+uEDWaWx0OZaxTZ5BvbgzvtfI
+        qJKpNCyw1l6IgdU03n/INGYydjXTBeRd5+96EoynSw==
+X-Google-Smtp-Source: ABdhPJyFimQg7KkOTLtcJuBiGvEEcKgbemK/wWoYIOj4AkODv0WaiGPYUVNn88xx+gbks93TFVmDWvukiTbSyXAzBIA=
+X-Received: by 2002:a19:8c4d:: with SMTP id i13mr37079711lfj.254.1636988109753;
+ Mon, 15 Nov 2021 06:55:09 -0800 (PST)
 MIME-Version: 1.0
-References: <20211103182716.28419-1-marten.lindahl@axis.com>
- <20211111154020.GA21634@axis.com> <20211112124602.GA23161@axis.com>
-In-Reply-To: <20211112124602.GA23161@axis.com>
+References: <20211112082930.3809351-1-peng.fan@oss.nxp.com> <20211112082930.3809351-3-peng.fan@oss.nxp.com>
+In-Reply-To: <20211112082930.3809351-3-peng.fan@oss.nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 15 Nov 2021 15:54:26 +0100
-Message-ID: <CAPDyKFrz9x-H5v0yAWVjgDi-=5DwmYZNTTLku6SLziVDNgZNzw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Avoid hung state if GEN_CMD transfer fails
-To:     Marten Lindahl <martenli@axis.com>
-Cc:     Vincent Whitchurch <vincent.whitchurch@axis.com>,
-        =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        kernel <kernel@axis.com>, Doug Anderson <dianders@google.com>
+Date:   Mon, 15 Nov 2021 15:54:33 +0100
+Message-ID: <CAPDyKFq=7aiRhKw5f3EqoTq3Npyjs+L1xJBxjjqtTwh03GuXow@mail.gmail.com>
+Subject: Re: [PATCH V4 2/9] dt-bindings: mmc: imx-esdhc: Add imx8ulp
+ compatible string
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+Cc:     robh+dt@kernel.org, aisheng.dong@nxp.com, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, broonie@kernel.org, linux@roeck-us.net,
+        wim@linux-watchdog.org, linux@rempel-privat.de,
+        Kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+        daniel.lezcano@linaro.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, Jacky Bai <ping.bai@nxp.com>,
+        Rob Herring <robh@kernel.org>, Peng Fan <peng.fan@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 12 Nov 2021 at 13:46, Marten Lindahl <martenli@axis.com> wrote:
+On Fri, 12 Nov 2021 at 09:30, Peng Fan (OSS) <peng.fan@oss.nxp.com> wrote:
 >
-> On Thu, Nov 11, 2021 at 04:40:20PM +0100, Vincent Whitchurch wrote:
-> > On Wed, Nov 03, 2021 at 07:27:16PM +0100, M=C3=A5rten Lindahl wrote:
-> > > If we get a data error during a block transfer command, a stop comman=
-d
-> > > (CMD12) is normally initiated. But this does not work for the general
-> > > command (CMD56), but instead the action is ignored and an uninitializ=
-ed
-> > > command struct is used for the stop action, with unexpected result.
-> > >
-> > > Fix this by adding a check for GEN_CMD when preparing stop transmissi=
-on.
-> > >
-> > > Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
-> > > ---
-> > >  drivers/mmc/host/dw_mmc.c | 3 ++-
-> > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > > index 6578cc64ae9e..988c32e93e03 100644
-> > > --- a/drivers/mmc/host/dw_mmc.c
-> > > +++ b/drivers/mmc/host/dw_mmc.c
-> > > @@ -335,7 +335,8 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *=
-host, struct mmc_command *cmd)
-> > >         cmdr =3D=3D MMC_WRITE_BLOCK ||
-> > >         cmdr =3D=3D MMC_WRITE_MULTIPLE_BLOCK ||
-> > >         cmdr =3D=3D MMC_SEND_TUNING_BLOCK ||
-> > > -       cmdr =3D=3D MMC_SEND_TUNING_BLOCK_HS200) {
-> > > +       cmdr =3D=3D MMC_SEND_TUNING_BLOCK_HS200 ||
-> > > +       cmdr =3D=3D MMC_GEN_CMD) {
-> > >             stop->opcode =3D MMC_STOP_TRANSMISSION;
-> > >             stop->arg =3D 0;
-> > >             stop->flags =3D MMC_RSP_R1B | MMC_CMD_AC;
+> From: Jacky Bai <ping.bai@nxp.com>
 >
-> Hi!
-> >
-> > While this fix looks correct for CMD56, the "Data transfer mode"
-> > sections of the eMMC and SD specifications list several more data
-> > commands, all of which can be aborted by CMD12, but which aren't handle=
-d
-> > in the if above.
-> >
-> > If I'm not mistaken, those will also result in an uninitialized stop
-> > command being sent in the case of an error, since the driver calls
-> > send_stop_abort() on any data error.
-> >
-> > Is there a reason why those other commands should not be in the list
-> > above, or should we fix this list so that CMD12 is initialized for all
-> > data commands except SD_IO_RW_EXTENDED?
+> The USDHC on i.MX8ULP is derived from i.MX8MM, it uses two
+> compatible strings, so update the compatible string for i.MX8ULP.
 >
-> I agree that there are more commands that according to the specification
-> should be included in the list. The most obvious ones that I identify are=
-:
-> CMD26, CMD27, CMD30, CMD46, and CMD47.
->
-> But the reason why I added just CMD56 is that I have an easy way to test
-> this specific command, and which was how I saw the need for this fix.
->
-> My suggestion is to separate adding the other commands to one (or more)
-> separate patch(es), to when there are good test cases for those.
+> Reviewed-by: Dong Aisheng <aisheng.dong@nxp.com>
+> Acked-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Jacky Bai <ping.bai@nxp.com>
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
 
-I agree with both of you, it would be nice to make a change that takes
-care of all the relevant commands at once, rather than having to come
-back to this later again.
-
-On the other hand, as it's not always straightforward to test the
-other commands, I am fine with this as well.
-
-So, applied for next, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  - v4 changes:
+>    no
+>
+>  - v3 changes:
+>    no
+>
+>  - v2 changes:
+>    refine the commit message
+>
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index 19621a2f8beb..d5be9863009c 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -44,6 +44,10 @@ properties:
+>                - fsl,imx8qm-usdhc
+>                - fsl,imx8qxp-usdhc
+>            - const: fsl,imx7d-usdhc
+> +      - items:
+> +          - enum:
+> +              - fsl,imx8ulp-usdhc
+> +          - const: fsl,imx8mm-usdhc
+>
+>    reg:
+>      maxItems: 1
+> --
+> 2.25.1
+>
