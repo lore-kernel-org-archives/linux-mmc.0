@@ -2,146 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ED94C4167D
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 23:22:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC88BC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Nov 2021 04:29:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E51C26113D
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Nov 2021 23:22:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B82D16023D
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Nov 2021 04:29:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345554AbhKOXZF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Nov 2021 18:25:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60710 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353585AbhKOXWf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Nov 2021 18:22:35 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DE27C048C9F
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 14:24:52 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id w1so78673863edd.10
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Nov 2021 14:24:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=IA3uzL8dfIEQ00f28ulGEts22lGGQNmtQewySBj0XO4=;
-        b=Bnv0ttRfNHVHdyq5LKLvyQjxpdMyK7zrZW+zF5YjwYhHNMqsmwWAV+1/zv3GBfmNDp
-         dXZU4ZfENKWeRflnaGRWMV7/FLXl9mG+IQLudrxrRoFHQiAC8EGsSesyMOVUo5McbFRf
-         +ppanSSlMs9Y4KjlkRjfUIf5VlAb1iLIWkx5y64VCMv7JDe6NmtMgXnhUpdfxxE3ybIg
-         /Hohp9KrrQy5z8x2OBjx4agALcsIkg5fPX6iWzTB/WpMsVL7RmSwgi1CCzJrKrV7dXtC
-         ig4npH2Y26QS10+qVyUxNe6jMz0mps8dMY3nnEb87rYqgDXq7Iw2K8aoFA58OHiqXBfm
-         +gKw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=IA3uzL8dfIEQ00f28ulGEts22lGGQNmtQewySBj0XO4=;
-        b=LerGY4obrg4oqzs6o2Rj72fFealZEjzZgdnm109gORoYmhWLEIkGbQqzZw7Ze/XVHU
-         AOrvAl+6REpNfpHlgNOqVOgoI4Mnnszp2/twZnWNeViKbEEmOPY9jm8iFGXKzRMg8P1O
-         SmiWRSpgVUq/DuJDvUm0tzVEUVdOXkuXNQKYpQavSgC61covUcyUN0H+SnG8yddExMnw
-         8fAoW6LvkvBGlBWuPyMucfIMsDmDxwc1zWQk+7bhBR+lUNSAIiidWofNiadUBqlapRJf
-         EBxyrZEecTK8Y1DFZB/dIPD8KPHc8vHSZBuOZaYg7CWCzB+cHUDZvoEOSMZDMfQxZ5bh
-         eGew==
-X-Gm-Message-State: AOAM532+WqiKw6merzNOcqVBWPCMhxu9mBqGha0Pl0aBOZGLPtM8nXFj
-        hl2aQLi1+9Sbfk1j2EvkepEn9ug/OoOMKrvXc7VlZA==
-X-Google-Smtp-Source: ABdhPJzxxVv/7atCKO4fqs47SY7HQRIQQsohvPdp3HNDWi3IhAIZG7PhKinKRwqO+bPgkrlboDKA7GrYcJYLOWPB3fY=
-X-Received: by 2002:a17:907:6da9:: with SMTP id sb41mr3361170ejc.88.1637015090784;
- Mon, 15 Nov 2021 14:24:50 -0800 (PST)
-MIME-Version: 1.0
-References: <20211025015156.33133-1-brad@pensando.io> <20211025015156.33133-6-brad@pensando.io>
- <20211028074945.rv2j5kgzk7yc2srr@mobilestation>
-In-Reply-To: <20211028074945.rv2j5kgzk7yc2srr@mobilestation>
-From:   Brad Larson <brad@pensando.io>
-Date:   Mon, 15 Nov 2021 14:24:40 -0800
-Message-ID: <CAK9rFnw396xK+u3qUpgbnGNw7WDJPJm0L3o4nPAcFeqQjBDbXg@mail.gmail.com>
-Subject: Re: [PATCH v3 05/11] spi: dw: Add Pensando Elba SoC SPI Controller bindings
-To:     Serge Semin <fancer.lancer@gmail.com>
-Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
-        Rob Herring <robh@kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        id S240031AbhKPEc3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Nov 2021 23:32:29 -0500
+Received: from mail.kernel.org ([198.145.29.99]:54926 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233013AbhKPEb4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 15 Nov 2021 23:31:56 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 66AA16023D;
+        Tue, 16 Nov 2021 04:28:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1637036939;
+        bh=rcwRBlCKqfF/fOP7nToqyQtxiDrvbRwb9qhV9pcd3SE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=WCkkYmiCsuCs6VTYyStyePuhjavoZznkD15Pfk4kfmFcnpOyhqwefXwCEerdsi5BB
+         gaxqtKh7IVnWz3O+cSAsdJUjs6zKFkagpHyNquC8O99klBS/lKo/7gFtT7CHdCC6ar
+         6K/pSsHI8+2FH3V1I1L7V2qq8dmjNebnK0MyEtDZ/hdrNv4x1IyseRUmNFq3EiZJ7c
+         1oiPRI0DMs2kje0Hvslatdsud/obFQMRW9uHW8NpKk4mIv94ytNZbHvJadN/Nn9YZY
+         tGLIxmhA6nCk6OcdFZAV34UHFuwVplf/2bcz9WsNFmm3THY7N2KypMCnwedbGoDGcy
+         AW5qdaBZVvhpQ==
+Date:   Tue, 16 Nov 2021 09:58:54 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Arnd Bergmann <arnd@arndb.de>, Andy Gross <agross@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Hyun Kwon <hyun.kwon@xilinx.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Laxman Dewangan <ldewangan@nvidia.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
         Mark Brown <broonie@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Scott Branden <sbranden@broadcom.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        dmaengine@vger.kernel.org,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" 
+        <linux-rpi-kernel@lists.infradead.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-staging@lists.linux.dev,
+        "open list:TEGRA ARCHITECTURE SUPPORT" <linux-tegra@vger.kernel.org>
+Subject: Re: [PATCH 08/11] dmaengine: xilinx_dpdma: stop using slave_id field
+Message-ID: <YZMzhoWX0S5oPI6j@matsya>
+References: <20211115085403.360194-1-arnd@kernel.org>
+ <20211115085403.360194-9-arnd@kernel.org>
+ <YZIk6cVb7XibrMjf@pendragon.ideasonboard.com>
+ <CAK8P3a1Fu11-e0CK2of8u3ebdjom84UKuXhBKi5FUs5ZPPdOVA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a1Fu11-e0CK2of8u3ebdjom84UKuXhBKi5FUs5ZPPdOVA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Sergey,
-
-On Thu, Oct 28, 2021 at 12:49 AM Serge Semin <fancer.lancer@gmail.com> wrote:
->
-> On Sun, Oct 24, 2021 at 06:51:50PM -0700, Brad Larson wrote:
-> > The Pensando Elba SoC has integrated the DW APB SPI Controller
->
-> Please add the "dt-bindings: " prefix to the patch name and discard
-> the word "bindings" from the title as the submitting DT-patches
-> requires:
-> Documentation/devicetree/bindings/submitting-patches.rst
-
-I'll add that.  I recall looking at the recent git log for similar
-changes to the file as the current recommended approach.
-
+On 15-11-21, 11:21, Arnd Bergmann wrote:
+> On Mon, Nov 15, 2021 at 10:14 AM Laurent Pinchart
+> <laurent.pinchart@ideasonboard.com> wrote:
+> > On Mon, Nov 15, 2021 at 09:54:00AM +0100, Arnd Bergmann wrote:
+> > > @@ -1285,11 +1287,13 @@ static int xilinx_dpdma_config(struct dma_chan *dchan,
+> > >       spin_lock_irqsave(&chan->lock, flags);
+> > >
+> > >       /*
+> > > -      * Abuse the slave_id to indicate that the channel is part of a video
+> > > -      * group.
+> > > +      * Abuse the peripheral_config to indicate that the channel is part
 > >
-> > Signed-off-by: Brad Larson <brad@pensando.io>
-> > ---
-> >  Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml | 2 ++
-> >  1 file changed, 2 insertions(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> > index d7e08b03e204..0b5ebb2ae6e7 100644
-> > --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> > +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> > @@ -73,6 +73,8 @@ properties:
-> >                - renesas,r9a06g032-spi # RZ/N1D
-> >                - renesas,r9a06g033-spi # RZ/N1S
-> >            - const: renesas,rzn1-spi   # RZ/N1
->
-> > +      - description: Pensando Elba SoC SPI Controller
-> > +        const: pensando,elba-spi
->
-> AFAICS from the driver-part of the patchset it's not enough. You've
-> also got the syscon phandle, which needs to be reflected in the
-> bindings. That also makes me thinking that you didn't perform the
-> "dtbs_check" on the dts-files you were going to submit, but for some
-> reason discarded from this series (btw why?). If you did you would
-> have got an error of an unevaluated property detection.
+> > Is it still an abuse, or is this now the right way to pass custom data
+> > to the DMA engine driver ?
+> 
+> It doesn't make the driver any more portable, but it's now being
+> more explicit about it. As far as I can tell, this is the best way
+> to pass data that cannot be expressed through the regular interfaces
+> in DT and the dmaengine API.
+> 
+> Ideally there would be a generic way to pass this flag, but I couldn't
+> figure out what this is actually doing, or whether there is a better
+> way. Maybe Vinod has an idea.
+> 
+> I'll change s/Abuse/Use/ for the moment until I get a definite answer.
 
-I ran the checks below and didn't get errors.  Rob provided some info
-and I found the server did not have yamllint installed (not flagged by
-tool).  Also dt-schema was not the latest.  I'm re-doing this and
-including "DT_CHECKER_FLAGS=-m" as that is new with v5.13.
+I would feel this is still not use for the peripheral_config, but lets
+keep it to get rid of slave_id.
 
-make ARCH=arm64 dtbs_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-make ARCH=arm64 dtbs_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
-make ARCH=arm64 dtbs_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-make ARCH=arm64 dtbs_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
-make ARCH=arm64 dtbs_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/pensando,elba.yaml
+Also, I would be better if this was moved to DT as the next cell, don't
+recall why that was not done/feasible.
 
-make dt_binding_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-make dt_binding_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
-make dt_binding_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-make dt_binding_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
-make dt_binding_check
-DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/pensando,elba.yaml
-
-Thanks
-Brad
+-- 
+~Vinod
