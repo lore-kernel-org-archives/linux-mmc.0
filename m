@@ -2,86 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6B2CC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Nov 2021 19:02:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C5E9C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Nov 2021 19:27:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A6A5961AF7
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Nov 2021 19:02:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3524663236
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Nov 2021 19:27:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239715AbhKPTFw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 Nov 2021 14:05:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46852 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239703AbhKPTFv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Nov 2021 14:05:51 -0500
-Received: from metanate.com (unknown [IPv6:2001:8b0:1628:5005::111])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DA8AC061570;
-        Tue, 16 Nov 2021 11:02:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=metanate.com; s=stronger; h=Content-Transfer-Encoding:References:
-        In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Content-Type:Reply-To:
-        Content-ID:Content-Description;
-        bh=sD33PGmKEFg2lgudOlt/ckkVm4Bclu2oHhDV+vr313w=; b=om0H6GArX9eyqCRkNXRAN6WK3+
-        KOtqS4n9+lawsWjbTma/Xd+ATk+6xGbEgP6ujN6tXA9EDkScYzQ7DaiRgPNV/0bWjUdIscrKSa3xu
-        WdlnQLCVouRcgvyqw7/VERhkKCj0hPZ0a9Hx9JlERpQN6KXhkmKul/hHubFClOMNw++xmv/AadZD5
-        dZsEY4A70BEiM04cbANPMOAyT23nsnjteMtce4o3kUjHvaCw/M8XedKolNKjMby/wuNj8Ak+SeD5U
-        im9psvHy526OoTI66P+N/0lJPO/0NltsAKsjhSvRr3QaOFcr3TNoTQKuOCOBUNp7idFQeoqHF2uHh
-        7Om1zWuQ==;
-Received: from [81.174.171.191] (helo=donbot.metanate.com)
-        by email.metanate.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-        (Exim 4.93)
-        (envelope-from <john@metanate.com>)
-        id 1mn3jG-00031A-Rd; Tue, 16 Nov 2021 19:02:50 +0000
-From:   John Keeping <john@metanate.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        John Keeping <john@metanate.com>
-Subject: [PATCH 2/2] mmc: dw_mmc: use standard "mmc" alias stem
-Date:   Tue, 16 Nov 2021 19:02:44 +0000
-Message-Id: <20211116190244.1417591-3-john@metanate.com>
-X-Mailer: git-send-email 2.34.0
-In-Reply-To: <20211116190244.1417591-1-john@metanate.com>
-References: <20211116190244.1417591-1-john@metanate.com>
+        id S239922AbhKPTaP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 Nov 2021 14:30:15 -0500
+Received: from www.zeus03.de ([194.117.254.33]:41988 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239920AbhKPTaO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 16 Nov 2021 14:30:14 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=KqYnMDA+rPf68ZnvQaONoLWqJL3I
+        3Pgwef0pH4uM9t8=; b=BcjGeHSAIl/+jqVR9x2AhBj25ErtAMBhw323ya5H9lUI
+        3twJ70SAqocLHK8xWaOEG3XJUa4QWxv4ZiqrlNMxBUGl3tWTvv6dZnVZpBmf9SoK
+        YZjg8OqO1jcoLr+357oJ81fh9axSS5ZOjH8Nhkq26TyVDEbeSSNtRvFlXu8Gobw=
+Received: (qmail 2848732 invoked from network); 16 Nov 2021 20:27:14 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 16 Nov 2021 20:27:14 +0100
+X-UD-Smtp-Session: l3s3148p1@Ihem6ezQBpQgAwDPXw8LABHxMEpbPi3w
+Date:   Tue, 16 Nov 2021 20:27:13 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: Use devm_clk_get_optional() to obtain
+ CD clock
+Message-ID: <YZQGEfz43rkUf7AF@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+References: <540d803d31bf9aa1d0f78f431cae0ccd05387edc.1637069733.git.geert+renesas@glider.be>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Authenticated: YES
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="2AcDv5UJRus9xcTD"
+Content-Disposition: inline
+In-Reply-To: <540d803d31bf9aa1d0f78f431cae0ccd05387edc.1637069733.git.geert+renesas@glider.be>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The standard stem for MMC aliases is "mmc" and this is used by the MMC
-core to set the slot index.
 
-Use this in preference to the non-standard "mshc" stem when setting the
-controller ID to avoid needing two aliases for each MMC device in order
-to cover both the core and dw_mmc-specific functionality.
+--2AcDv5UJRus9xcTD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The old "mshc" lookup is kept for backwards compatibility.
+On Tue, Nov 16, 2021 at 02:36:07PM +0100, Geert Uytterhoeven wrote:
+> Use the existing devm_clk_get_optional() helper to obtain the optional
+> Card Detect clock, instead of open-coding the same operation.
+> a side effect, real errors will now be handled correctly instead of
+> being ignored.
+>=20
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Signed-off-by: John Keeping <john@metanate.com>
----
- drivers/mmc/host/dw_mmc.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 37af1245304b..6ffaa354410a 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -112,7 +112,11 @@ int dw_mci_of_alias_get_id(struct dw_mci *host)
- 	if (WARN_ON(!host->dev->of_node))
- 		return 0;
- 
--	ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
-+	ctrl_id = of_alias_get_id(host->dev->of_node, "mmc");
-+
-+	/* Compatibility fallback for old device trees. */
-+	if (ctrl_id < 0)
-+		ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
- 
- 	if (ctrl_id < 0)
- 		ctrl_id = 0;
--- 
-2.34.0
+Thanks, Geert!
 
+
+--2AcDv5UJRus9xcTD
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmGUBgwACgkQFA3kzBSg
+KbZu9RAApRP4HwvCV+sQb6HBvMbovLrZB7TM3OETuC3kV0az0BhDSjZwNYj2v2q8
+OnsJ9pvfkDQ6P3NCK63Gl5HRjWRiZmEv7GQ7K23JZek+ah9N1DduCb2V0Ln1o7Hc
+pXy+Zy6S2QiqCWpdHX7Xhs06MKbbM2W3ayHtMjSn52nP18Uarn66t+V/ESXLrt4U
+SWiyvTjnYz0xbHb68MjFQl9C5mj8uE6HbJbNtzeKBZbUYRsbnH6O/66kgLLqYCgb
+kyck6uzSJUhir2m5DgBDdkgTJos7ShwV2Xz/ERgeh2YuAUA/oDH4555iDdc/aCxX
+t43NNIERzTzvFe0g6wGLbqHZQ9ZSiEaLOUJnmjCVpihX0u9dHRQeioIJ5sQk+rSN
+SuUCXlxUCRB1XriYLV6eDVJI++76QQLe0L3TST6wUO4dFp2OItWrCjJNjka0a1WN
+dQxsKK+yew9aQaAsJVfWEDzgJ3B1xU/c/daERupe/OdhVQiNlmloJO6dFAHw61IQ
+iaNFCInBeLoJ7FHMg5kPPM8fmz4Tf2S+7TTPURxt9SCWxaCSU8aUlQwG7EYieFBg
+ag4Y/giKkr0xYTuw5oDdIZdJyMuj255GX0y87PvpNTrCh/NqS07xSvZU0skl83oW
+uhEA9r6Lys9dfjx3bKrrpW1iE+hLEElq0hT6jU8ARSAJ69HarIU=
+=OjTg
+-----END PGP SIGNATURE-----
+
+--2AcDv5UJRus9xcTD--
