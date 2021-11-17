@@ -2,104 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E46ADC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 12:37:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D99DC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 12:51:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B618461261
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 12:37:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 641F46322C
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 12:51:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231181AbhKQMkP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 Nov 2021 07:40:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58958 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229970AbhKQMkP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Nov 2021 07:40:15 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CED0C061764
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 04:37:16 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id t26so7664224lfk.9
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 04:37:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20210112.gappssmtp.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=UmgNinn2XG0l2TpUWf4rIjZei+iMCEFikabmRp2Oijw=;
-        b=VIcyXUUnkhvAZoaEKNOq2M/yKqEWjaYjpRjMRTdrb9sWFn0NWiRt44NaqXp+dmCGGl
-         5oUbEOay7eRM+/h+SP+th8Dm/VSVD5NlKhMZnO/Sd9TZYC426S2x2fz1N5TbUy7jk6Zj
-         /0CdXr8OUfuuxUYRgB0n7H9nzbajOOt995rKyGUyJVxRI0gN2KzjoNNBoQI0Mt3qJqvn
-         wyiXeEGSVrkYUsdHiGcImABne+uLWNrLN2kLiWqNJc8f3hyVcWRadwRQNQo4Pdkm4WJy
-         doZbiWqjsOOT2cBvTBL1fG/iHyDInhU1jza6HuHRkgwOfYphFGtQafxBO8FlkQRVYqNR
-         Q9dQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=UmgNinn2XG0l2TpUWf4rIjZei+iMCEFikabmRp2Oijw=;
-        b=KgPDxfr3LyZ7n3gB9m4DxfGL3nDepQOgmqSMQr4WVtMYAcNmWeYY27YkQxswhEfSqv
-         eu6wCXZC/BNfJYd68KRS+Q0+jDS1kQLEt9hwdk10qwNi9iJ4O016rcdWWIHgdtJRm5kO
-         1c9/2rDBWH9huhz4wIVPnJAAJ+gKwIddvXhUFrrXfDuPgQgTrPapDSQAJMP9Vz9Jgl9V
-         XEOqXSF1oOA64wp6GH3rHrrYpQSNtFpu1yHwUYU3CKTqtLsx2HUhq4MBlIl53rG4S9nX
-         VR/6Na+BvVq6ZL+5fhOvkQbzMFpLiQ8Dvu+UWPvQcF454xxvQ+BNLmZqDgunK/r/Zi4T
-         ja4A==
-X-Gm-Message-State: AOAM5313Y4lWy+zVOws8jU2DK1Ml2RWbI5imZiJsbWzQOqq1PcAy0D3K
-        7Wpj7HRMDciY6moXZscttvg92w==
-X-Google-Smtp-Source: ABdhPJx8dnn1MWVaLvGvat9pWvPezRMJtiUeuocTmxk6ejL4s0ulJIeu/Gt9DwFiczdwPMXzkEnTmA==
-X-Received: by 2002:a19:c30e:: with SMTP id t14mr15152912lff.375.1637152634425;
-        Wed, 17 Nov 2021 04:37:14 -0800 (PST)
-Received: from localhost (h-46-59-88-219.A463.priv.bahnhof.se. [46.59.88.219])
-        by smtp.gmail.com with ESMTPSA id x17sm2133612ljp.95.2021.11.17.04.37.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 17 Nov 2021 04:37:13 -0800 (PST)
-Date:   Wed, 17 Nov 2021 13:37:13 +0100
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH] mmc: renesas_sdhi: simplify an expression
-Message-ID: <YZT3eQKg8AIzMIPC@oden.dyn.berto.se>
-References: <20211117103850.28397-1-wsa+renesas@sang-engineering.com>
+        id S237334AbhKQMyC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 Nov 2021 07:54:02 -0500
+Received: from mga18.intel.com ([134.134.136.126]:47772 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S237331AbhKQMxs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 17 Nov 2021 07:53:48 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10170"; a="220825545"
+X-IronPort-AV: E=Sophos;i="5.87,241,1631602800"; 
+   d="scan'208";a="220825545"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2021 04:50:49 -0800
+X-IronPort-AV: E=Sophos;i="5.87,241,1631602800"; 
+   d="scan'208";a="593341576"
+Received: from smile.fi.intel.com ([10.237.72.184])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2021 04:50:45 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.95)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1mnKOb-007nEs-Sq;
+        Wed, 17 Nov 2021 14:50:37 +0200
+Date:   Wed, 17 Nov 2021 14:50:37 +0200
+From:   "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>
+To:     "A, Rashmi" <rashmi.a@intel.com>
+Cc:     "michal.simek@xilinx.com" <michal.simek@xilinx.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "kishon@ti.com" <kishon@ti.com>,
+        "vkoul@kernel.org" <vkoul@kernel.org>,
+        "linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>,
+        "mgross@linux.intel.com" <mgross@linux.intel.com>,
+        "kris.pan@linux.intel.com" <kris.pan@linux.intel.com>,
+        "Zhou, Furong" <furong.zhou@intel.com>,
+        "Sangannavar, Mallikarjunappa" 
+        <mallikarjunappa.sangannavar@intel.com>,
+        "Hunter, Adrian" <adrian.hunter@intel.com>,
+        "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>,
+        "Srikandan, Nandhini" <nandhini.srikandan@intel.com>
+Subject: Re: [RESEND PATCH v2 4/4] phy: intel: Add Thunder Bay eMMC PHY
+ support
+Message-ID: <YZT6nTI0aJXsJ1o2@smile.fi.intel.com>
+References: <20211027115516.4475-1-rashmi.a@intel.com>
+ <20211027115516.4475-5-rashmi.a@intel.com>
+ <DM6PR11MB3065C3329182A196C46DE5F68C9A9@DM6PR11MB3065.namprd11.prod.outlook.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20211117103850.28397-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <DM6PR11MB3065C3329182A196C46DE5F68C9A9@DM6PR11MB3065.namprd11.prod.outlook.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+On Wed, Nov 17, 2021 at 06:38:59AM +0000, A, Rashmi wrote:
+> > -----Original Message-----
+> > From: A, Rashmi <rashmi.a@intel.com>
+> > Sent: Wednesday, October 27, 2021 5:25 PM
 
-Nice fix.
-
-On 2021-11-17 11:38:50 +0100, Wolfram Sang wrote:
-> We already have 'quirks', no need to go via 'priv'.
+> Thank you Rob for the review of emmc dt-bindings.
 > 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-
-> ---
->  drivers/mmc/host/renesas_sdhi_core.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Hi Vinod/Kishon,
 > 
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index a4407f391f66..29bc086f6cb5 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -1044,7 +1044,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->  	     host->mmc->caps2 & (MMC_CAP2_HS200_1_8V_SDR |
->  				 MMC_CAP2_HS400_1_8V))) {
->  		const struct renesas_sdhi_scc *taps = of_data->taps;
-> -		bool use_4tap = priv->quirks && priv->quirks->hs400_4taps;
-> +		bool use_4tap = quirks && quirks->hs400_4taps;
->  		bool hit = false;
->  
->  		for (i = 0; i < of_data->taps_num; i++) {
-> -- 
-> 2.30.2
-> 
+> Please let me know if there are any comments.
+> Looking forward for your acknowledgement for the patch, phy: intel: Add Thunder Bay eMMC PHY support
+
+Please, learn how not to put 450 unrelated lines in your responce(s) via email.
+(Yes, I know that one may try to configure folding, but by default not many
+ MUAs support this)
 
 -- 
-Kind Regards,
-Niklas Söderlund
+With Best Regards,
+Andy Shevchenko
+
+
