@@ -2,94 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90630C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 22:29:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83931C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 23:30:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6E1B761882
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 22:29:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6291461B3F
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 23:30:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241259AbhKQWcf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 Nov 2021 17:32:35 -0500
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:47192 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S241184AbhKQWcc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Nov 2021 17:32:32 -0500
-Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
-        by mx0b-0016f401.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1AHJXBXP026889;
-        Wed, 17 Nov 2021 14:29:21 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=pfpt0220; bh=t4PWee8KaXYwU5JN+/qBheWEVVFEWJOWDj1bcZKdljg=;
- b=RAG34UvhA+lvP4Zq6QIxTYSF0c6D2SNLhzHXkaCEAsURsKAaA1I29aISZ7ehIModkjg0
- pwcGKK3oZC5jRQVIEsqZrWjUKthoXRNwIfyPXEXiEN0spOo6dM6bmzAUDNh/zwLax+i1
- 77IJt+gXrKxJL4aZ0FqfRg1cA98c4TRirJSy4ZY71hw6W9dS69g6xVfT6AHC2R/NUnVe
- o/4dTvmhFmVlEk2vz1darKuzRUP0H7YdQd6jq0LJOZKjvpJ5+LGCZ09G2Rj/c8lDe7wH
- 7VYyMhirFzbxqfLGRZ6CKYWYM8le/xsmJ7FwT+thVPBA2cxYgEQNVEiyxIWpCixQWQft GA== 
-Received: from dc5-exch02.marvell.com ([199.233.59.182])
-        by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3cd8028mm3-5
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Wed, 17 Nov 2021 14:29:21 -0800
-Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.18; Wed, 17 Nov
- 2021 14:28:36 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.18 via Frontend
- Transport; Wed, 17 Nov 2021 14:28:36 -0800
-Received: from localhost.localdomain (unknown [10.110.150.170])
-        by maili.marvell.com (Postfix) with ESMTP id 7AD075B694C;
-        Wed, 17 Nov 2021 14:28:36 -0800 (PST)
-From:   Wojciech Bartczak <wbartczak@marvell.com>
-To:     <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <beanhuo@micron.com>,
-        <tanxiaofei@huawei.com>, <robh+dt@kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <wbartczak@marvell.com>
-Subject: [PATCH 0/2] mmc: cavium: Fix MMC supply switching for cards
-Date:   Wed, 17 Nov 2021 14:27:59 -0800
-Message-ID: <cover.1637186803.git.wbartczak@marvell.com>
-X-Mailer: git-send-email 2.17.1
+        id S241607AbhKQXdE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 Nov 2021 18:33:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39324 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240122AbhKQXc7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Nov 2021 18:32:59 -0500
+Received: from mail-il1-x135.google.com (mail-il1-x135.google.com [IPv6:2607:f8b0:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 444F8C061570
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 15:29:59 -0800 (PST)
+Received: by mail-il1-x135.google.com with SMTP id a15so1501591ilj.8
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 15:29:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=DtcDFCZbcERHHSxWFXRQr28Y3mh0GMhw13+aKbu47TA=;
+        b=Q+Ky95Jvj1lLrhhol1CQeQ6zUWp4cV/CHc3TOyLHj7DpUKwWNf5YgMJFvOy9y6pA/h
+         9twUuTw8MJGee8mNKAhZf+5AWfKWwNWjNrf/GiUZpWdcZnWMdkeOCP3HeOCURq4sqGLp
+         PlhdtCrt694GBBU2/4S7wiYeFKik3FfKEs2kS2YtlIhp33tQDZDiEdYLaJ/aYNTsnq6Q
+         4yE+vD7yttdQT1t7qoJ886FRPUaE0v1fhkLmLWJpj4i3Kv50NqurwLHwt39cgbmXDqx2
+         zDOb5mgMAAQYwBnHLR7dzQc641eyRnXE8JNqiIzXPlRNsxuIE/yGbl2SA4VzCARX5P+d
+         0QcA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=DtcDFCZbcERHHSxWFXRQr28Y3mh0GMhw13+aKbu47TA=;
+        b=Tdu/JS8zA3ztr0LLqTObytPayLTukw6lTbPEniTlxPNtT/mWiu5V3XQ3nvFVWyDV3T
+         Bf4EtDQt9ywMqZqTV5UtSj+Wb70PPz2XTW5r4APw7l78blDMlNjYl8lKgHGbtwzfkCCS
+         cZfckG2SbGNZWUYujQXbR7ZfC8PnWFLYcymVl5LJY+Rat6oC6FeRPOXerjhvQVUrYKsb
+         5zIDBU04no+1OQZb+Hvqbuy7lSjFg4V1uHW8onArXNl2xS/7AFFZfn4LY6woXoBv5Uwq
+         xrNCM46qbaP8wzEljoNnmO6z94owhuL0Fb6LUDgj0tiVOt1sFCuPgpQWyJvSWlpSYqWB
+         QiGg==
+X-Gm-Message-State: AOAM532he972BTjWi+RjlruzpfG15jG/XLJI5UQSehBltVBPj111j+6Z
+        dxwOhoG/RTTFMeSdn2b5PGaN6O7kOy0Pqpbw4DT82Q==
+X-Google-Smtp-Source: ABdhPJxB9+Ujn/PXWi/o+VzfIRdn1miuwOUm35QJMKaLE4ytdmVY01EQf5RlEUgVUSR1nNbFEhP958jP3BvGW+xm8xQ=
+X-Received: by 2002:a05:6e02:1a67:: with SMTP id w7mr12368256ilv.165.1637191798270;
+ Wed, 17 Nov 2021 15:29:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Proofpoint-ORIG-GUID: DOWX3jR2RXP6AOZA8rJD7Yn5WLCw1shw
-X-Proofpoint-GUID: DOWX3jR2RXP6AOZA8rJD7Yn5WLCw1shw
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.0.607.475
- definitions=2021-11-17_08,2021-11-17_01,2020-04-07_01
+References: <20211117160859.8732-1-marten.lindahl@axis.com>
+In-Reply-To: <20211117160859.8732-1-marten.lindahl@axis.com>
+From:   Doug Anderson <dianders@google.com>
+Date:   Wed, 17 Nov 2021 15:29:46 -0800
+Message-ID: <CAD=FV=WWF9W=cXQWkcvQAgXjGZjBzgvV3jB90nZ35JYdi8YA-w@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: dw_mmc: Allow lower TMOUT value than maximum
+To:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kernel@axis.com,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Following series of patches fix code related to switching
-voltage regulators used by multiple cards in Octeon/OcteonTX2
-systems.
+Hi,
 
-Change is necessary to support cards with different voltages,
-which is common case in modern configuration where the mix of SD cards
-and MMC memory chips is used as main storage.
+On Wed, Nov 17, 2021 at 8:09 AM M=C3=A5rten Lindahl <marten.lindahl@axis.co=
+m> wrote:
+>
+> The TMOUT register is always set with a full value for every transfer,
+> which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
+> This is normally good enough to complete the request, but setting a full
+> value makes it impossible to test shorter timeouts, when for example
+> testing data read times on different SD cards.
+>
+> Add a function to set any value smaller than the maximum of 0xFFFFFF.
+>
+> Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
+> ---
+>
+> v2:
+>  - Calculate new value before checking boundaries
+>  - Include CLKDIV register to get proper value
+>
+> v3:
+>  - Use 'if-else' instead of 'goto'
+>  - Don't touch response field when maximize data field
+>
+> v4:
+>  - Prevent 32bit divider overflow by splitting the operation
+>  - Changed %06x to %#08x as suggested by Doug
+>  - Rephrased commit msg as suggested by Doug
+>
+>  drivers/mmc/host/dw_mmc.c | 28 +++++++++++++++++++++++++++-
+>  1 file changed, 27 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index d977f34f6b55..8e9d33e1b96c 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1283,6 +1283,32 @@ static void dw_mci_setup_bus(struct dw_mci_slot *s=
+lot, bool force_clkinit)
+>         mci_writel(host, CTYPE, (slot->ctype << slot->id));
+>  }
+>
+> +static void dw_mci_set_data_timeout(struct dw_mci *host,
+> +                                   unsigned int timeout_ns)
+> +{
+> +       unsigned int clk_div, tmp, tmout;
 
-Aside custom system, the change is required to support reference designs
-for CN96xx and CN98xx systems.
+didn't notice before, but nit that I usually make it a policy that
+things that represent cpu registers are the "sized" types. Thus I'd
+rather see these locals as u32 even though the parameter (which
+represents a logical value and not a CPU register) stays as "unsigned
+int").
 
-First patch contains mid-size rework of do_switch() routine that
-includes:
-- separation of vmmc/vqmmc switch logic
-- separation of register accesses to functions for better readibility
-- forming do_switch() as high-level function that controls the flow of
-  switch operation.
 
-Second patch adds extended description of device-tree usage to
-enable code contained in former patch.
+> +       clk_div =3D (mci_readl(host, CLKDIV) & 0xFF) * 2;
+> +       if (clk_div =3D=3D 0)
+> +               clk_div =3D 1;
+> +
+> +       tmp =3D DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz, NSEC_PER=
+_SEC);
+> +       tmp =3D DIV_ROUND_UP(tmp, clk_div);
 
-Wojciech Bartczak (2):
-  mmc: cavium: Fix voltage reg. switching for card slots
-  dt-bindings: mmc: Add vmmc/vqmmc for Cavium driver
+I guess in some extreme cases you still have an overflow. Not sure how
+many people really use "div", but...
 
- .../devicetree/bindings/mmc/cavium-mmc.txt    |  47 ++++-
- drivers/mmc/host/cavium.c                     | 168 ++++++++++++++++--
- drivers/mmc/host/cavium.h                     |   8 +-
- 3 files changed, 202 insertions(+), 21 deletions(-)
+The case I'm thinking of is if the timeout is 80 ms, the bus_hz is 200
+MHz, and clk_div is 20 (register contains 10). I think that would mean
+you're feeding the controller a 4GHz clock which it probably couldn't
+_really_ handle, so maybe this isn't super realistic. In any case, I
+think the first statement would be the equivalent of 80 * 200MHz =3D
+0x3b9aca000 and that blows out the 32-bit "tmp" variable.
 
--- 
-2.17.1
+Why not just keep it as 64-bit until you're done dividing to be safe?
 
+-Doug
