@@ -2,105 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B99B4C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 09:37:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FB1BC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 09:40:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9DBE7619E5
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 09:37:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2505861357
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 09:40:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235266AbhKQJj6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 Nov 2021 04:39:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46214 "EHLO
+        id S235685AbhKQJnT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 Nov 2021 04:43:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46616 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235217AbhKQJj5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Nov 2021 04:39:57 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4068EC061570
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 01:36:59 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id 13so4774795ljj.11
-        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 01:36:59 -0800 (PST)
+        with ESMTP id S235473AbhKQJmt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Nov 2021 04:42:49 -0500
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22A05C0613B9
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 01:39:01 -0800 (PST)
+Received: by mail-lf1-x132.google.com with SMTP id t26so5644611lfk.9
+        for <linux-mmc@vger.kernel.org>; Wed, 17 Nov 2021 01:39:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=OzDGWpE8Xkh6MkfGrduT5RxR6FF+JkpXqd6pdp832EI=;
-        b=qZ1X4IeqaalMpioV74hHQpqMiyqd4d2toccPhHW+I4Yu9tn5VMhUfRo55awifbY5h9
-         PP5wQ2z6heTzgrmM6bb2sumAQ/FFvubvbBt2XeNa5wxBLMO9UY2Q8clDp7LQOEyRIDCw
-         qR5UAjl32dB1ddrWmGqbOxaVSyW4+9lRW1aJrJxefkYSITz5d64KBWOPoa7AbHkoizLG
-         SPl+JMP1fPWjulRg6G1OU4Bxk6GxEGMa9HDIb8nveiJilKVOH8oWuf0y0zGritUz5RtL
-         JOjvee6Jv6fn6CUxU1GVGEZShLcEWTb4keYE4m3Y0NhUUwugxXwcvpacHRGrEkoB/wpT
-         zEBQ==
+         :cc;
+        bh=nF18X5vZYkhk4OJypfVIyb8nEMJdnaXodq1rSCybrkw=;
+        b=BgRwpgHdsbSu2DNjPc5pJIwJRAXhfmZsp7n/wVgitJw8w2DAv+eiPhlitYM6m0qsgQ
+         SRQE+vGDduAAnSYxhq/WbKQoIvFmXrFEnqFsMEFwAWKPCjaWXlZKDckdbUvvJW7zwkIn
+         G5tv75J38ZWRshTiWdFN1x29i5CNvMnXb8ewP/MUgq7zLR2IqCm2XlvcZnFNhy0pfaXa
+         8NqkjyaZ8t5ZDXVee6E0y90BkH+gU4xSOXa00QMF5Zkgb1No+MMutAXuHigrJheNOK+B
+         BkKwF5sov3tLrJ8NSnfY9wVXpLyDmBSdmJPi0E/QHVoHZdfzYXpsVb5wfwCR5qng1olA
+         tNBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=OzDGWpE8Xkh6MkfGrduT5RxR6FF+JkpXqd6pdp832EI=;
-        b=T7A+BACEmP57lGHGZGyI639N8ezNqGBSi3SBmIH7HXgk/RW/abq/2DEDgbgKAsjvkG
-         kI7TmY9dYvkNp5zDyyqCclK74+XmTkUFdCXNwWHoGKnPVG7GdJ36X66Zb+dl8qVAX/da
-         ic61YfobwbQEzT9quZGlDi9/14YGE+SXxtKIw6iM3TcYV388K4e/Q8ktxUQzo3tEAmJl
-         wVmxswIfthx26b6H3Dk60w1RO4PPqy4w280I3QUVGYyxm4wo6Q9uHnVt+4FO5HtGD/G+
-         KLQegpiwS+1Go2ByuqttgvuaaAcYXJaYGkMYK5+YiXrmiVVHXUkdHppEViKb7+Mlv3Io
-         9goQ==
-X-Gm-Message-State: AOAM533+dr3kmlQ9cosP+RliojKEBg4kwcu5yLGoPBsJ6xLdCoZ/7D2v
-        9SOU4pQeo5Bzd6y7TEBUv0qdXunzsJxHAmYlOCnTXQ==
-X-Google-Smtp-Source: ABdhPJyu8uzQotpkSKmSCF418T4vjD98z7xjQQXYuvyv3DlPStOFCtploEjHMofLR/wxuFacd4QfwYs5OYj/KE7LDsc=
-X-Received: by 2002:a2e:a22a:: with SMTP id i10mr6466687ljm.16.1637141817265;
- Wed, 17 Nov 2021 01:36:57 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=nF18X5vZYkhk4OJypfVIyb8nEMJdnaXodq1rSCybrkw=;
+        b=d6lCQC4Xmh1jUe2fZitJZLn9riwhtuqRAk/fRIR7MeFZDQwu90MQa3GveXc+cUjXv2
+         28WBxSY4puDVfwPYapcLmjL56wlRFurJBQwDhB6Wezak/YYZ0XGlJAq3DhadSirf70q6
+         /lhx7a8XWtyDzlDO+zt/QU/gHrYTFSr5aH4OD7CtAXE5VD6pdPuup5asMRWk5W2ssrKR
+         N7jMTr2fJERw4gZQik1NP4aBWbChoyXoWg5sn2V7r4n8a13Q/nedU7FBUw4y3kE4CYpE
+         nDUJViIUMDTetxi0+tl9k/dXfp59u3vY30KGdo2zTCOWdbdVf0pb6CA8woVRbLfZGCVH
+         dqcA==
+X-Gm-Message-State: AOAM532mtVgh7vQr0etCBQUNcC7dZM2w9Z5SIRUe6MNT/AVZDSH5JkOu
+        xgdho2eLmsJ6B71l2qIDBMolDuSVTjaNXDoocj5Jx4UR9d8=
+X-Google-Smtp-Source: ABdhPJy0GW6hOn54FO5eacU/9Yz2eW4F0WXc4CyM4/FqKHp7W2O9dNw3tlUdt6fjDP2QWxUzMMwePrVUIsb2PGDgH5M=
+X-Received: by 2002:a05:6512:1113:: with SMTP id l19mr13953699lfg.184.1637141939557;
+ Wed, 17 Nov 2021 01:38:59 -0800 (PST)
 MIME-Version: 1.0
-References: <20211110110500.4105-1-marten.lindahl@axis.com>
- <CAPDyKFpKbKEePYyb1fQ_cxjtJS6JuF1qFKh2KKfXpM23nvkH+g@mail.gmail.com> <20211116165949.GA32249@axis.com>
-In-Reply-To: <20211116165949.GA32249@axis.com>
+References: <20211115082345.802238-1-adrian.hunter@intel.com>
+ <CAPDyKFrADwgb_xeVDmdPETcFnbqRqvKKav_Gr+oGf-4E3Tfj6w@mail.gmail.com> <8a76ac63-48a8-e36c-5138-ad8b4cade179@intel.com>
+In-Reply-To: <8a76ac63-48a8-e36c-5138-ad8b4cade179@intel.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 17 Nov 2021 10:36:21 +0100
-Message-ID: <CAPDyKFrDfUEg0rHS2VVYbMLUaL-oOFFPU9V+A=W1m5S6sYTGBQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: Allow lower TMOUT value than maximum
-To:     Marten Lindahl <martenli@axis.com>
-Cc:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Doug Anderson <dianders@google.com>, kernel <kernel@axis.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date:   Wed, 17 Nov 2021 10:38:23 +0100
+Message-ID: <CAPDyKFpsJ2tvtPqa_tPgKM9p8AG=9uZNfmHxO=vq87UoUz94Ag@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Fix ADMA for PAGE_SIZE >= 64KiB
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Bough Chen <haibo.chen@nxp.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 16 Nov 2021 at 17:59, Marten Lindahl <martenli@axis.com> wrote:
+On Tue, 16 Nov 2021 at 09:14, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> On Mon, Nov 15, 2021 at 03:54:19PM +0100, Ulf Hansson wrote:
-> > On Wed, 10 Nov 2021 at 12:05, M=C3=A5rten Lindahl <marten.lindahl@axis.=
-com> wrote:
-> > >
-> > > The TMOUT register is always set with a full value for every transfer=
-,
-> > > which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds=
-.
-> > > Since the software dto_timer acts as a backup in cases when this time=
-out
-> > > is not long enough, it is normally not a problem. But setting a full
-> > > value makes it impossible to test shorter timeouts, when for example
-> > > testing data read times on different SD cards.
-> > >
-> > > Add a function to set any value smaller than the maximum of 0xFFFFFF.
-> > >
-> > > Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
+> On 15/11/2021 16:54, Ulf Hansson wrote:
+> > On Mon, 15 Nov 2021 at 09:24, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>
+> >> The block layer forces a minimum segment size of PAGE_SIZE, so a segment
+> >> can be too big for the ADMA table, if PAGE_SIZE >= 64KiB. Fix by writing
+> >> multiple descriptors, noting that the ADMA table is sized for 4KiB chunks
+> >> anyway, so it will be big enough.
+> >>
+> >> Reported-and-tested-by: Bough Chen <haibo.chen@nxp.com>
+> >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > >
 > > Applied for next, thanks!
 > >
-> > Kind regards
-> > Uffe
-> >
+> > Should we perhaps tag this for stable and/or queue it as a fix for v5.16?
 >
-> Hi Ulf!
->
-> During tests on some units I found that there is a potential overflow
-> of the 32bit divider in this patch (if clk_div > 4).
->
-> Is it possible to stop this patch, until I created a new version of it?
-> I guess it's better to update this patch, in favour of sending a new
-> correction patch for it?
+> Could do.  I thought I would leave it up to Haibo Chen.
 
-I have dropped the patch from my next branch. Please send a v4.
+I have moved it to the fixes branch and added a stable tag. Haibo,
+please tell me if you think that isn't needed.
 
 [...]
 
