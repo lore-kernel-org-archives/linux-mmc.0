@@ -2,398 +2,234 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC8D2C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 07:45:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33A9CC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 08:19:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 851AB6187F
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 07:45:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1AAE161545
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Nov 2021 08:19:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231713AbhKQHr5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 Nov 2021 02:47:57 -0500
-Received: from mga04.intel.com ([192.55.52.120]:13823 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229973AbhKQHr5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 17 Nov 2021 02:47:57 -0500
-X-IronPort-AV: E=McAfee;i="6200,9189,10170"; a="232620910"
-X-IronPort-AV: E=Sophos;i="5.87,240,1631602800"; 
-   d="scan'208";a="232620910"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Nov 2021 23:44:59 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.87,240,1631602800"; 
-   d="scan'208";a="506806782"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga008.jf.intel.com with ESMTP; 16 Nov 2021 23:44:54 -0800
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat sysfs
- entry
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        riteshh@codeaurora.org, asutoshd@quicinc.com,
-        ulf.hansson@linaro.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     stummala@codeaurora.org, vbadigan@codeaurora.org,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        sartgarg@codeaurora.org, nitirawa@codeaurora.org,
-        sayalil@codeaurora.org
-References: <1637130012-21846-1-git-send-email-quic_c_sbhanu@quicinc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <c90754b9-37bb-7b4e-4130-05f62b2881fd@intel.com>
-Date:   Wed, 17 Nov 2021 09:44:53 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S234462AbhKQIW1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 Nov 2021 03:22:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56490 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233313AbhKQIW0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Nov 2021 03:22:26 -0500
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A100BC061570;
+        Wed, 17 Nov 2021 00:19:27 -0800 (PST)
+Received: by mail-lj1-x22f.google.com with SMTP id d11so4407629ljg.8;
+        Wed, 17 Nov 2021 00:19:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=Bgs8iyUy89PkKvzl321W/UAXVH57vSKrzyQqzOIg/uo=;
+        b=TnY11PkOecu9gptvsD5iv0+wmUGir99GjK9/k3tBZOwew4wfLpIG+zbAeVl5x4W7b1
+         Cpbedg//+UfgYiaDeyfO+0Zks+5y0YWrPFFTtbgV8Xr1x2HQ0ecKJDub0wCyWoKocNEN
+         38KH36jveNOf7cJQr7FIUMQV6YxDJ+MowxaWyWZ+1kWDMYhb8GIoCylopTPKHpj8iOya
+         RTHhc4guieXR93jZ1lPD0xFXzcX4WQDsAj3jourJuWohtzFksx5r6ltkFVqhZyJVSvxB
+         PZyvkTQX1jECPp//Z5ioTLZ5INdVutYbz5r+cw9Rtrjfp1q+MW15iVAlmWVLiIH+OCeB
+         gl3Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Bgs8iyUy89PkKvzl321W/UAXVH57vSKrzyQqzOIg/uo=;
+        b=Td2/awECVBwh7E4uPpkWkKWfqSASaBD3SqT/k+wA4EiE/NNBN7uq3IMOgq3f0AgTXJ
+         aiGy8uNXOsz8Wl9yn6chVHzSzVKTkyRYg63GfURF2Xfgk0hMwGl53AE3xUEERr6QfB8x
+         XtT/NU0vKzc3qbodSocXAy9c3e0n/nPA9DFiOEnwfcLswK1jXBhERqlyj50jsMP0bx1T
+         DYLxe72VrfIEsrd8UJ9OXfeD52RvnUXJjoYM7l/KmSKcvELOJhbkU5+7D5nRhCsbK/rY
+         jI/VSwm0hQetx1QmSsboEApDLKuzR2bXfBDT4d0L/mjZEaPrbwZAWTD2JVsBgrctwVFi
+         kqhA==
+X-Gm-Message-State: AOAM533ClO/FaVIddofO1SaOjYL4EJ+CldjsGWm3qVWVbCf0L10GzJO5
+        ZlxTP95VKGfnAIOl4OTVrn8=
+X-Google-Smtp-Source: ABdhPJzXiZb7AbiLv4mX/n1uVupgxzrFrsNr8u0D38JXKOqnjBNQXe1nkF/X9hhJXvlEYO752Wd4PA==
+X-Received: by 2002:a05:651c:179b:: with SMTP id bn27mr3019354ljb.444.1637137165798;
+        Wed, 17 Nov 2021 00:19:25 -0800 (PST)
+Received: from mobilestation ([95.79.188.236])
+        by smtp.gmail.com with ESMTPSA id c21sm2044020lfv.29.2021.11.17.00.19.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 17 Nov 2021 00:19:25 -0800 (PST)
+Date:   Wed, 17 Nov 2021 11:19:22 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <brad@pensando.io>
+Cc:     Rob Herring <robh@kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH v3 05/11] spi: dw: Add Pensando Elba SoC SPI Controller
+ bindings
+Message-ID: <20211117081922.nnqsr5zzzydurq5t@mobilestation>
+References: <20211025015156.33133-1-brad@pensando.io>
+ <20211025015156.33133-6-brad@pensando.io>
+ <20211028074945.rv2j5kgzk7yc2srr@mobilestation>
+ <CAK9rFnw396xK+u3qUpgbnGNw7WDJPJm0L3o4nPAcFeqQjBDbXg@mail.gmail.com>
+ <20211116112907.lbwdcz5pmgxqzv55@mobilestation>
+ <CAK9rFny7zQRpvGOVK0+01hKQNu7XCMOz8vTfbHPs6gMR10muDw@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1637130012-21846-1-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAK9rFny7zQRpvGOVK0+01hKQNu7XCMOz8vTfbHPs6gMR10muDw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/11/2021 08:20, Shaik Sajida Bhanu wrote:
-> Add sysfs entry to query eMMC and SD card errors statistics.
-> This feature is useful for debug and testing.
+On Tue, Nov 16, 2021 at 03:11:53PM -0800, Brad Larson wrote:
+> Hi Sergey,
+> 
+> On Tue, Nov 16, 2021 at 3:29 AM Serge Semin <fancer.lancer@gmail.com> wrote:
+> >
+> > > > AFAICS from the driver-part of the patchset it's not enough. You've
+> > > > also got the syscon phandle, which needs to be reflected in the
+> > > > bindings. That also makes me thinking that you didn't perform the
+> > > > "dtbs_check" on the dts-files you were going to submit, but for some
+> > > > reason discarded from this series (btw why?). If you did you would
+> > > > have got an error of an unevaluated property detection.
+> > >
+> > > I ran the checks below and didn't get errors.  Rob provided some info
+> > > and I found the server did not have yamllint installed (not flagged by
+> > > tool).  Also dt-schema was not the latest.  I'm re-doing this and
+> > > including "DT_CHECKER_FLAGS=-m" as that is new with v5.13.
+> > >
+> >
+> > > make ARCH=arm64 dtbs_check
+> > > DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > > make ARCH=arm64 dtbs_check
+> > > DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+> > > make ARCH=arm64 dtbs_check
+> > > DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> > > make ARCH=arm64 dtbs_check
+> > > DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
+> > > make ARCH=arm64 dtbs_check
+> > > DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/pensando,elba.yaml
+> >
+> > Hmm, that's weird. Rob, does dtschema tool have the
+> > "unevaluatedProperties" property support?
+> >
+> > Brad, anyway you still need to add the syscon-property (pensando,*spics)
+> > requirement in the snps,dw-apb-ssi.yaml schema. See the way it's done there
+> > for instance for "baikal,bt1-sys-ssi" when it comes to the
+> > vendor-specific properties definition in the allOf composition block.
+> > You'll need to define a custom phandle property there in case if a
+> > DT-node is compatible with you SPI controller.
+> 
+> Updating and adding only this bindings update to file
+> snps,dw-apb-ssi.yaml in 5.16.0-rc1 (next-20211116):
+> 
+> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> index d7e08b03e204..99deb587a47b 100644
+> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> @@ -37,6 +37,21 @@ allOf:
+>      else:
+>        required:
+>          - interrupts
+> +  - if:
+> +      properties:
 
-Did you consider making it part of cqhci.c so that all drivers using
-cqhci could benefit?
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - pensando,elba-spics
+
+I was wrong using that construction here (fixup patch would be very
+welcome) seeing the "snps,dw-apb-ssi" doesn't permit having a generic
+"snps,dw*" compatible string. So just const-compatible property should
+be enough:
+
++        compatible:
++          const: pensando,elba-spics
+
+
+> +    then:
+> +      properties:
+> +        pensando,spics:
+> +          $ref: /schemas/types.yaml#/definitions/phandle
+> +          description:
+> +            Phandle to the system control device node which provides access to
+> +            the spics control register
+> +      required:
+
+> +        - pensando,spics
+
+Please note, I've asked to be more specific in this property naming.
+Something like this should be fine
+"pensando,elba-syscon-spics"/"pensando,syscon-spics".
 
 > 
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> ---
->  drivers/mmc/host/cqhci.h     |   1 +
->  drivers/mmc/host/sdhci-msm.c | 192 +++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci.c     |  17 ++++
->  drivers/mmc/host/sdhci.h     |   1 +
->  include/linux/mmc/host.h     |   1 +
->  5 files changed, 212 insertions(+)
+>  properties:
+>    compatible:
+> @@ -73,6 +88,8 @@ properties:
+>                - renesas,r9a06g032-spi # RZ/N1D
+>                - renesas,r9a06g033-spi # RZ/N1S
+>            - const: renesas,rzn1-spi   # RZ/N1
+> +      - description: Pensando Elba SoC SPI Controller
+> +        const: pensando,elba-spics
 > 
-> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-> index ba9387e..f72a1d6 100644
-> --- a/drivers/mmc/host/cqhci.h
-> +++ b/drivers/mmc/host/cqhci.h
-> @@ -286,6 +286,7 @@ struct cqhci_host_ops {
->  				 u64 *data);
->  	void (*pre_enable)(struct mmc_host *mmc);
->  	void (*post_disable)(struct mmc_host *mmc);
-> +	void (*err_stats)(struct mmc_host *mmc, unsigned long flags);
->  #ifdef CONFIG_MMC_CRYPTO
->  	int (*program_key)(struct cqhci_host *cq_host,
->  			   const union cqhci_crypto_cfg_entry *cfg, int slot);
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 50c71e0..e1dcd2d 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -242,6 +242,23 @@ struct sdhci_msm_variant_ops {
->  			u32 offset);
->  };
->  
-> +enum {
-> +	MMC_ERR_CMD_TIMEOUT,
-> +	MMC_ERR_CMD_CRC,
-> +	MMC_ERR_DAT_TIMEOUT,
-> +	MMC_ERR_DAT_CRC,
-> +	MMC_ERR_AUTO_CMD,
-> +	MMC_ERR_ADMA,
-> +	MMC_ERR_TUNING,
-> +	MMC_ERR_CMDQ_RED,
-> +	MMC_ERR_CMDQ_GCE,
-> +	MMC_ERR_CMDQ_ICCE,
-> +	MMC_ERR_REQ_TIMEOUT,
-> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
-> +	MMC_ERR_ICE_CFG,
-> +	MMC_ERR_MAX,
-> +};
-> +
->  /*
->   * From V5, register spaces have changed. Wrap this info in a structure
->   * and choose the data_structure based on version info mentioned in DT.
-> @@ -285,6 +302,8 @@ struct sdhci_msm_host {
->  	u32 dll_config;
->  	u32 ddr_config;
->  	bool vqmmc_enabled;
-> +	bool err_occurred;
-> +	u32  err_stats[MMC_ERR_MAX];
->  };
->  
->  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct sdhci_host *host)
-> @@ -2106,9 +2125,20 @@ static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *c
->  		host->data_timeout = 22LL * NSEC_PER_SEC;
->  }
->  
-> +void sdhci_msm_cqe_err_stats(struct mmc_host *mmc, unsigned long flags)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	if (flags & BIT(0))
-> +		msm_host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]++;
-> +}
-> +
->  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
->  	.enable		= sdhci_msm_cqe_enable,
->  	.disable	= sdhci_msm_cqe_disable,
-> +	.err_stats	= sdhci_msm_cqe_err_stats,
->  #ifdef CONFIG_MMC_CRYPTO
->  	.program_key	= sdhci_msm_program_key,
->  #endif
-> @@ -2403,6 +2433,46 @@ static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
->  		readl_relaxed(host->ioaddr +
->  			msm_offset->core_vendor_spec_func2),
->  		readl_relaxed(host->ioaddr + msm_offset->core_vendor_spec3));
-> +	msm_host->err_occurred = true;
-> +}
-> +
-> +void sdhci_msm_err_stats(struct sdhci_host *host, u32 intmask)
-> +{
-> +	int command;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	if (!msm_host->err_occurred)
-> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
-> +
-> +	if (host && host->mmc && host->mmc->timer) {
-> +		msm_host->err_stats[MMC_ERR_REQ_TIMEOUT]++;
-> +		host->mmc->timer = false;
-> +	}
-> +
-> +	if (intmask & SDHCI_INT_CRC) {
-> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-> +		if (command != MMC_SEND_TUNING_BLOCK ||
-> +		    command != MMC_SEND_TUNING_BLOCK_HS200)
-> +			msm_host->err_stats[MMC_ERR_CMD_CRC]++;
-> +	} else if ((intmask & SDHCI_INT_TIMEOUT) ||
-> +		(intmask & SDHCI_INT_DATA_TIMEOUT))
-> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT]++;
-> +	else if (intmask & SDHCI_INT_DATA_CRC) {
-> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-> +		if (command != MMC_SEND_TUNING_BLOCK ||
-> +		    command != MMC_SEND_TUNING_BLOCK_HS200)
-> +			msm_host->err_stats[MMC_ERR_DAT_CRC]++;
-> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT)
-> +		msm_host->err_stats[MMC_ERR_DAT_TIMEOUT]++;
-> +	else if (intmask & CQHCI_IS_RED)
-> +		msm_host->err_stats[MMC_ERR_CMDQ_RED]++;
-> +	else if (intmask & CQHCI_IS_GCE)
-> +		msm_host->err_stats[MMC_ERR_CMDQ_GCE]++;
-> +	else if (intmask & CQHCI_IS_ICCE)
-> +		msm_host->err_stats[MMC_ERR_CMDQ_ICCE]++;
-> +	else if (intmask & SDHCI_INT_ADMA_ERROR)
-> +		msm_host->err_stats[MMC_ERR_ADMA]++;
->  }
->  
->  static const struct sdhci_msm_variant_ops mci_var_ops = {
-> @@ -2456,6 +2526,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
->  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
->  	.set_power = sdhci_set_power_noreg,
->  	.set_timeout = sdhci_msm_set_timeout,
-> +	.err_stats = sdhci_msm_err_stats,
->  };
->  
->  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-> @@ -2482,6 +2553,125 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
->  	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
->  }
->  
-> +static ssize_t err_state_show(struct device *dev,
-> +			struct device_attribute *attr, char *buf)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	if (!host || !host->mmc)
-> +		return -EINVAL;
-> +
-> +	return scnprintf(buf, PAGE_SIZE, "%d\n", !!msm_host->err_occurred);
-> +}
-> +
-> +static ssize_t err_state_store(struct device *dev,
-> +				struct device_attribute *attr,
-> +				const char *buf, size_t count)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	unsigned int val;
-> +
-> +	if (kstrtouint(buf, 0, &val))
-> +		return -EINVAL;
-> +	if (!host || !host->mmc)
-> +		return -EINVAL;
-> +
-> +	msm_host->err_occurred = !!val;
-> +	if (!val)
-> +		memset(msm_host->err_stats, 0, sizeof(msm_host->err_stats));
-> +
-> +	return count;
-> +}
-> +static DEVICE_ATTR_RW(err_state);
-> +
-> +static ssize_t err_stats_show(struct device *dev,
-> +				struct device_attribute *attr, char *buf)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	char tmp[100];
-> +
-> +	if (!host || !host->mmc)
-> +		return -EINVAL;
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Command Timeout Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT]);
-> +	strlcpy(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Command CRC Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_CMD_CRC]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Data Timeout Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_DAT_TIMEOUT]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Data CRC Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_DAT_CRC]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Auto-Cmd Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_ADMA]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# ADMA Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_ADMA]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Tuning Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_TUNING]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# CMDQ RED Errors: %d\n",
-> +		msm_host->err_stats[MMC_ERR_CMDQ_RED]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# CMDQ GCE Errors: %d\n",
-> +		msm_host->err_stats[MMC_ERR_CMDQ_GCE]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# CMDQ ICCE Errors: %d\n",
-> +		msm_host->err_stats[MMC_ERR_CMDQ_ICCE]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# CMDQ Request Timedout: %d\n",
-> +		msm_host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	scnprintf(tmp, sizeof(tmp), "# Request Timedout Error: %d\n",
-> +		msm_host->err_stats[MMC_ERR_REQ_TIMEOUT]);
-> +	strlcat(buf, tmp, PAGE_SIZE);
-> +
-> +	return strlen(buf);
-> +}
-> +static DEVICE_ATTR_RO(err_stats);
-> +
-> +static struct attribute *sdhci_msm_sysfs_attrs[] = {
-> +	&dev_attr_err_state.attr,
-> +	&dev_attr_err_stats.attr,
-> +	NULL
-> +};
-> +
-> +static const struct attribute_group sdhci_msm_sysfs_group = {
-> +	.name = "qcom",
-> +	.attrs = sdhci_msm_sysfs_attrs,
-> +};
-> +
-> +static int sdhci_msm_init_sysfs(struct platform_device *pdev)
-> +{
-> +	int ret;
-> +
-> +	ret = sysfs_create_group(&pdev->dev.kobj, &sdhci_msm_sysfs_group);
-> +	if (ret)
-> +		dev_err(&pdev->dev, "%s: Failed sdhci_msm sysfs group err=%d\n",
-> +			__func__, ret);
-> +	return ret;
-> +}
->  
->  static int sdhci_msm_probe(struct platform_device *pdev)
->  {
-> @@ -2734,6 +2924,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto pm_runtime_disable;
->  
-> +	sdhci_msm_init_sysfs(pdev);
-> +
->  	pm_runtime_mark_last_busy(&pdev->dev);
->  	pm_runtime_put_autosuspend(&pdev->dev);
->  
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 07c6da1..f82a3eff 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3159,6 +3159,13 @@ static void sdhci_timeout_timer(struct timer_list *t)
->  	spin_lock_irqsave(&host->lock, flags);
->  
->  	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
-> +		if (host->ops->err_stats) {
-> +			u32 intmask;
-> +
-> +			host->mmc->timer = true;
-> +			intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-> +			host->ops->err_stats(host, intmask);
-> +		}
->  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
->  		       mmc_hostname(host->mmc));
->  		sdhci_dumpregs(host);
-> @@ -3181,6 +3188,13 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
->  
->  	if (host->data || host->data_cmd ||
->  	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
-> +		if (host->ops->err_stats) {
-> +			u32 intmask;
-> +
-> +			host->mmc->timer = true;
-> +			intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-> +			host->ops->err_stats(host, intmask);
-> +		}
->  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
->  		       mmc_hostname(host->mmc));
->  		sdhci_dumpregs(host);
-> @@ -3466,6 +3480,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  	}
->  
->  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
-> +	if (host->ops->err_stats)
-> +		host->ops->err_stats(host, intmask);
-> +
->  	if (!intmask || intmask == 0xffffffff) {
->  		result = IRQ_NONE;
->  		goto out;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index d7929d7..a1546b3 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -658,6 +658,7 @@ struct sdhci_ops {
->  	void	(*request_done)(struct sdhci_host *host,
->  				struct mmc_request *mrq);
->  	void    (*dump_vendor_regs)(struct sdhci_host *host);
-> +	void	(*err_stats)(struct sdhci_host *host, u32 intmask);
->  };
->  
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 7afb57c..33186ff 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -492,6 +492,7 @@ struct mmc_host {
->  	int			cqe_qdepth;
->  	bool			cqe_enabled;
->  	bool			cqe_on;
-> +	bool                    timer;
->  
->  	/* Inline encryption support */
->  #ifdef CONFIG_MMC_CRYPTO
+>    reg:
+>      minItems: 1
+> 
+> $ make ARCH=arm64 defconfig
+> ...
 > 
 
+> $ make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+
+I am kind of surprised that this command is still evaluating all
+the schemas. Compiling only the depended DT-schemas would much
+better... Anyway that's why you are getting unrelated to the
+snps,dw-apb-ssi.yaml errors.
+
+> ...
+>   DTEX    Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.example.dts
+>   DTC     Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.example.dt.yaml
+>   CHECK   Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.example.dt.yaml
+> Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.example.dt.yaml:0:0:
+> /example-0/spi@fff00000/flash@1: failed to match any schema with
+> compatible: ['spi-nand']
+
+That means there is no bindings defined for the "spi-nand"-compatible
+node. AFAICS it doesn't make the tool to fail though. Anyway fixing this
+part would be a subject of additional patches (which would be very
+appreciated). That would concern converting the
+Documentation/devicetree/bindings/mtd/spi-nand.txt legacy bindings to
+the DT-schema. It's not enough though. Seeing that file lacks of
+the NAND Flash specific DT-property description, you'd need to detach
+ones (described by the "^nand@[a-f0-9]$"-pattern property) from the
+Documentation/devicetree/bindings/mtd/nand-controller.yaml schema and
+place them into a separate DT-schema file for generic nand-flashes
+Documentation/devicetree/bindings/mtd/nand-flash.yaml in a framework
+of a pre-requisite patch. Than in the legacy bindings conversion patch
+you'd need to use it to correctly evaluate a generic NAND flash node.
+Adding some example properties to the DT-schema would be also
+required.
+
+-Sergey
+
+> 
+> The spi-nand schema match failure happens before I make any change.
+> The tool also throws errors for these files which are unrelated
+> 
+> Documentation/devicetree/bindings/net/qcom,ipa.yaml: ignoring, error
+> in schema: properties: qcom,smem-state-names
+> Documentation/devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml:
+> ignoring, error in schema: patternProperties: ^filter@[0-9]+$:
+> properties: st,adc-channel-names
+> Documentation/devicetree/bindings/interconnect/qcom,rpmh.yaml:
+> ignoring, error in schema: properties: qcom,bcm-voter-names
+> 
+> Thanks,
+> Brad
