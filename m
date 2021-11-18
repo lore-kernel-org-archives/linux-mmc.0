@@ -2,146 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCFB8C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 Nov 2021 10:51:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E7A2C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 Nov 2021 11:09:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B53FC61B29
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 Nov 2021 10:51:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 00B8261A3D
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 Nov 2021 11:09:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343543AbhKRKyW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 Nov 2021 05:54:22 -0500
-Received: from smtp2.axis.com ([195.60.68.18]:38086 "EHLO smtp2.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1343539AbhKRKyP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 18 Nov 2021 05:54:15 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1637232675;
-  x=1668768675;
-  h=date:to:cc:subject:message-id:references:mime-version:
-   content-transfer-encoding:in-reply-to:from;
-  bh=rIgrlw/pN9WZgQsPO1JjFWXJZrf2Pt1b2/OWKm0R9nM=;
-  b=GzSv6h4Y38nw1p4LzAtsMPKyqlM6TgDf09CBNPnUP20Mh8icoAvq/HCN
-   eqpf1wQqIN+vXrTowsOHYn/QFCiOEp30YU6/p0rRIuPoYOAN7Xu1zpxmL
-   4cqO/3nf2LPpoRy9OvjZdBNdThNELOY/JXWmhmZCwsfTdgcswwNBHdJmB
-   IZZ+hCE3zZ4eESWsZCwdjzj6Fyjohtah5ZEFDAUuWNvQHf2Q7rNgwo175
-   Kd6n1kj6hM7qeaNkZKePpWGHHzGuU9yzobeplS1QkN4VYfCYJToxqdoiI
-   qIdLsM+gZN+wFPsQan6CF6B97Nsd8cMMmUQV2+C3Ul16EcvqIrStQ7yuB
-   Q==;
-Date:   Thu, 18 Nov 2021 11:51:13 +0100
-To:     Doug Anderson <dianders@google.com>
-CC:     =?iso-8859-1?Q?M=E5rten?= Lindahl <Marten.Lindahl@axis.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kernel <kernel@axis.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH v4] mmc: dw_mmc: Allow lower TMOUT value than maximum
-Message-ID: <20211118105113.GA3708@axis.com>
-References: <20211117160859.8732-1-marten.lindahl@axis.com>
- <CAD=FV=WWF9W=cXQWkcvQAgXjGZjBzgvV3jB90nZ35JYdi8YA-w@mail.gmail.com>
+        id S1343792AbhKRLMu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 Nov 2021 06:12:50 -0500
+Received: from mail-ot1-f49.google.com ([209.85.210.49]:33765 "EHLO
+        mail-ot1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1343650AbhKRLLf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Nov 2021 06:11:35 -0500
+Received: by mail-ot1-f49.google.com with SMTP id h12-20020a056830034c00b0055c8458126fso10378013ote.0;
+        Thu, 18 Nov 2021 03:08:35 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=yWgYNrUmMljpo7Y7JutxYTC8Cvzbn+L/BGR+AUjM/C8=;
+        b=OVqQQNK+0V2fom0nNKQgjN8rN8mO8c7EvmYbk1tXz69Gym/Ya9qrPqaXwHmM51rwkp
+         FPAcV9krvwjZI4nSZ2eBBYvDZSWNykYG8w1sK++RqnFu34XBK1AV285vJ8Dw60QErJ+9
+         uiHp7a/wz2EYDNM97TQchtrrwsDZscgsMtJLJO3qasbi4/H6szoz2B4cHgbHlxv7p8P7
+         Lj1bi+BxS01g5/Jvy6edTMf5qXd7dXdD1XQ1cOxPQ+5xY88fMdDBdk4UYsr1a8H77JhI
+         I77DWXvs36mmHds3ICyneklp2XLmn8ihbq46V9xokqE98xfkzPW5ZxRXiJUsRjjhk1bd
+         ATqw==
+X-Gm-Message-State: AOAM532G/z0RSkJbVcjekTVQriKR8WqgUI+akOOYHpg/9z3PEi7Comug
+        o0o2eeVmGN54K+nHuV0qHJ0eafL//yQ84vBOOjo=
+X-Google-Smtp-Source: ABdhPJz8fgTSjmX7h3ucHvoP5LfNQ/bF+MNlcYGYKMlggPTQ8sXQJrBDTCIS1XUfJQXT5WiujgVQF+HLNFJdxsyBOWw=
+X-Received: by 2002:a9d:a64:: with SMTP id 91mr20183159otg.198.1637233714146;
+ Thu, 18 Nov 2021 03:08:34 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAD=FV=WWF9W=cXQWkcvQAgXjGZjBzgvV3jB90nZ35JYdi8YA-w@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-From:   Marten Lindahl <martenli@axis.com>
+References: <20211117220118.408953-1-hdegoede@redhat.com>
+In-Reply-To: <20211117220118.408953-1-hdegoede@redhat.com>
+From:   "Rafael J. Wysocki" <rafael@kernel.org>
+Date:   Thu, 18 Nov 2021 12:08:22 +0100
+Message-ID: <CAJZ5v0hDWN4cKh+ZcB__wrWHChm=FjhwvCShXzseECQOFotM6w@mail.gmail.com>
+Subject: Re: [PATCH 5.16 regression fix 0/5] ACPI: scan: Skip turning off some
+ unused objects during scan
+To:     Hans de Goede <hdegoede@redhat.com>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Len Brown <lenb@kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 18, 2021 at 12:29:46AM +0100, Doug Anderson wrote:
-
-Hi Doug!
-
-> Hi,
-> 
-> On Wed, Nov 17, 2021 at 8:09 AM Mårten Lindahl <marten.lindahl@axis.com> wrote:
-> >
-> > The TMOUT register is always set with a full value for every transfer,
-> > which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
-> > This is normally good enough to complete the request, but setting a full
-> > value makes it impossible to test shorter timeouts, when for example
-> > testing data read times on different SD cards.
-> >
-> > Add a function to set any value smaller than the maximum of 0xFFFFFF.
-> >
-> > Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
-> > ---
-> >
-> > v2:
-> >  - Calculate new value before checking boundaries
-> >  - Include CLKDIV register to get proper value
-> >
-> > v3:
-> >  - Use 'if-else' instead of 'goto'
-> >  - Don't touch response field when maximize data field
-> >
-> > v4:
-> >  - Prevent 32bit divider overflow by splitting the operation
-> >  - Changed %06x to %#08x as suggested by Doug
-> >  - Rephrased commit msg as suggested by Doug
-> >
-> >  drivers/mmc/host/dw_mmc.c | 28 +++++++++++++++++++++++++++-
-> >  1 file changed, 27 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> > index d977f34f6b55..8e9d33e1b96c 100644
-> > --- a/drivers/mmc/host/dw_mmc.c
-> > +++ b/drivers/mmc/host/dw_mmc.c
-> > @@ -1283,6 +1283,32 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
-> >         mci_writel(host, CTYPE, (slot->ctype << slot->id));
-> >  }
-> >
-> > +static void dw_mci_set_data_timeout(struct dw_mci *host,
-> > +                                   unsigned int timeout_ns)
-> > +{
-> > +       unsigned int clk_div, tmp, tmout;
-> 
-> didn't notice before, but nit that I usually make it a policy that
-> things that represent cpu registers are the "sized" types. Thus I'd
-> rather see these locals as u32 even though the parameter (which
-> represents a logical value and not a CPU register) stays as "unsigned
-> int").
+On Wed, Nov 17, 2021 at 11:01 PM Hans de Goede <hdegoede@redhat.com> wrote:
 >
+> Hi Rafael,
+>
+> Commit c10383e8ddf4 ("ACPI: scan: Release PM resources blocked by
+> unused objects") adds a:
+>
+>         bus_for_each_dev(&acpi_bus_type, NULL, NULL, acpi_dev_turn_off_if_unused);
+>
+> call to acpi_scan_init(). On some devices with buggy DSDTs calling
+> _PS3 for one device may result in it turning off another device.
 
-Thanks, will fix.
+Well, I'm going to revert this commit.  I'm sending a pull request
+with the revert later today.
 
-> 
-> > +       clk_div = (mci_readl(host, CLKDIV) & 0xFF) * 2;
-> > +       if (clk_div == 0)
-> > +               clk_div = 1;
-> > +
-> > +       tmp = DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz, NSEC_PER_SEC);
-> > +       tmp = DIV_ROUND_UP(tmp, clk_div);
-> 
-> I guess in some extreme cases you still have an overflow. Not sure how
-> many people really use "div", but...
-> 
-> The case I'm thinking of is if the timeout is 80 ms, the bus_hz is 200
-> MHz, and clk_div is 20 (register contains 10). I think that would mean
-> you're feeding the controller a 4GHz clock which it probably couldn't
-> _really_ handle, so maybe this isn't super realistic. In any case, I
-> think the first statement would be the equivalent of 80 * 200MHz =
-> 0x3b9aca000 and that blows out the 32-bit "tmp" variable.
+> Specifically the DSDT of the GPD win and GPD pocket devices has a
+> "\\_SB_.PCI0.SDHB.BRC1" device for a non existing SDIO wifi module
+> which _PS3 method sets a GPIO causing the PCI wifi card to turn off.
+>
+> I've an earlier, in some ways simpler, fix for this here:
+> https://fedorapeople.org/~jwrdegoede/0001-ACPI-scan-Skip-turning-off-some-unused-objects-durin.patch
+>
+> But the sdhci-acpi.c MMC host code already has an older workaround
+> for it to not toggle power on this broken ACPI object; and this
+> simpler fix would require keeping that workaround. So then we would
+> have 2 workarounds for the same issue in the kernel.
+>
+> Thus instead I've come up with a slightly different approach which
+> IMHO has ended up pretty well.
+>
+> Patches 1-3 of this series are this different approach and assuming
+> they are considered ok must be merged into 5.16 to fix the regression
+> caused by commit c10383e8ddf4 on these devices.
 
-I'm sorry but I fail to follow your calculation here. With 80ms timeout
-and 200MHz bus_hz, I get:
+So I'll have a look at these and if they look good, we can do that
+instead of the problematic commit in 5.17.
 
-80000000 * 200000000 / 1000000000 = 0xF42400
+> Patch 4 removes the now no longer necessary workaround for the same
+> issue from the sdhci-acpi.c code. Once 1-3 are merged this could
+> also go to 5.16 but 5.17 is fine too.
+>
+> Patch 5 is a small bonus cleanup to the sdhci-acpi.c code.
 
-The only way I manage to get an overflow of tmp is with:
-
-timeout = INT_MAX * bus_hz = (value greater than 1000000000) / 1000000000
-
-So my reasoning is that tmp = DIV_ROUND_UP(tmp, clk_div) is safe within
-these values, but I can of course make tmp an unsigned long, and in that
-case do the clk_div division as:
-
-tmp = DIV_ROUND_UP_ULL(tmp, clk_div)
-
-Kind regards
-Mårten
-
-> 
-> Why not just keep it as 64-bit until you're done dividing to be safe?
-> 
-> -Doug
+Thanks!
