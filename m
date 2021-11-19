@@ -1,105 +1,152 @@
 Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7C5EC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 16:39:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6D86611F0
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 16:39:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28829C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 21:48:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236520AbhKSQmn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Nov 2021 11:42:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33152 "EHLO
+        id S232097AbhKSVvr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Nov 2021 16:51:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230179AbhKSQmn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Nov 2021 11:42:43 -0500
-Received: from mail-io1-xd2e.google.com (mail-io1-xd2e.google.com [IPv6:2607:f8b0:4864:20::d2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA0E6C061574
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 08:39:41 -0800 (PST)
-Received: by mail-io1-xd2e.google.com with SMTP id m9so13597581iop.0
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 08:39:41 -0800 (PST)
+        with ESMTP id S231736AbhKSVvr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Nov 2021 16:51:47 -0500
+Received: from mail-io1-xd32.google.com (mail-io1-xd32.google.com [IPv6:2607:f8b0:4864:20::d32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF1EEC06173E
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 13:48:44 -0800 (PST)
+Received: by mail-io1-xd32.google.com with SMTP id k21so14573478ioh.4
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 13:48:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
+        d=chromium.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=IMGoSMGc4yeb1poVKk3YdIGT043vy+yP4wpuLEmff38=;
-        b=QTxGeUMx82UWWiH/NKxY7SJmDbky4nCBZ5bqzvwhcbOrVILUgQkXy6RFXmPJME1eDs
-         jmBkLKwZlzxc+lpGBPVjHDD8eB5AQ9aV1cp1EoYEOx9FzjHmMfvwfY7Vfh3kk01WZQJA
-         LZfU3oxzCdVtd0QcggYMaNsMO3t4YjgTSptBqpl2dgz8TBYh8WoBlMAmzeqGigqXiuX3
-         iFlveMdZmXgSOyUTLDDvT8g5mBTNqiWQWXZQJowTuteGJeEZTcwtWZpfkYzXDVTQZEdh
-         YFnbbSfSYwEbIvsHwjCHcxmAtGaJIfzJdKUHl+PdQZ5NiuD6U5rrApJw7YCSBNNWYX5Z
-         VUjg==
+         :cc;
+        bh=f0Jjnsc5W0ZRgdIM3rUP5BZ3A9WvESp7bI0/hjoIiwg=;
+        b=X+O4nVgLAZEiY7jEpqEI502St8G7C+CedgFQ3icEgghqhzNYz+CxKcIq7ALipS52Vh
+         Z+Jjce/vzPbJUMTPMD+abKsZZtLopXf/54eGX4IocOJH0dw/oXiEI0sjjcrnEUsAqGv2
+         6Y+t6QKshVE9/w9XELwcZQQjmYySx6BxVhtrw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=IMGoSMGc4yeb1poVKk3YdIGT043vy+yP4wpuLEmff38=;
-        b=s12OnH0hfioT6SMVScxoTKhxrWEwKgD0aKvqjHfvXn4bxhnnrS/rwuZj5jXY5I7/SY
-         /FA+Jp4CCSPaRaGjnQgQDlV2OgbaAETD2wd47GRP+9kT/uflchKoLFjJ0XgyfZeXwwQS
-         9+HLkHSOQul4nNp24kY6BNKjM0ohMcbGBCj3Jz/ybKcCtwddTEU7AV9XDn6BKhWb7Y++
-         zPGEqdq+t8nFc8RGLAgP/R64j5Kq+sZedBT9gr20pFZvJAEbDz4AHrjU+uyRrGBnpLBB
-         aZ8aA64iaaBY7JDVJsE5jYSc1s7X/wMSX6ZldYbvzjmTDsGD+XXfyptK1hgQmeybW5OO
-         yiXQ==
-X-Gm-Message-State: AOAM5338MvnXN+t+tXJDkNSuT4231JTK7jP+BNuDNe3PmmX59t24x2vg
-        2zObCtcFo0ESDtSx1Jc2j0IlU5QMW3m6+kW8cGRKg7T2kh0J5Ykh
-X-Google-Smtp-Source: ABdhPJz6YyefxHoZm2pxUidbhI6QraT56n1Rdctub/Iv0iHaecQ7wN4AZ96CSAexxeu6hvVFItfeM3IYcuCj1/C+j1U=
-X-Received: by 2002:a05:6638:190f:: with SMTP id p15mr29090424jal.82.1637339980871;
- Fri, 19 Nov 2021 08:39:40 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=f0Jjnsc5W0ZRgdIM3rUP5BZ3A9WvESp7bI0/hjoIiwg=;
+        b=AReGXTPR/2cNYg2bMVQwnLt91B4WV1eLsLwA81VWgz9eFShHjrlMWfOS6NCnZV7wDH
+         Sk8B/Mk9wnrscpkCq+p7F2aDxE5Eq25uQOEAa0yGgVeXmba/sPq5VLweFkifUytwUOWj
+         D5QQrVmJuLNnmAAuC5UdtNq5XBttsbi2Txt/mBmK1Kjq+e7zbNDaSgT3RxDmes/+hrQn
+         oG/SOxhsQdY9Xkdh8I2+Xb3UqHI29WxrMxhzq36AH/q+t6JocCw3lOj6/dPYIkm3EWdF
+         pt+n9ILFgId7ClyjCey5TdWAB+UJqsTWp4hlU3Y8iRT1YsHPI5unAOOTg+434s1dwtzt
+         LB2Q==
+X-Gm-Message-State: AOAM531e43rMMOaGM+YSJThBvPioJ9pFlf/b6nMKAP32BxNY2xCbUuGm
+        OqVvD8uOp7xT6Jbizq4wgPT7D1l8+8YZew==
+X-Google-Smtp-Source: ABdhPJwuZMuvj5b8WwTctwowcI+aTd7+TVrhG27HJVp5Q7Y5/Qkp8/cvl2a1wGyoKVzi1eH0/Eb+zQ==
+X-Received: by 2002:a05:6638:2487:: with SMTP id x7mr30845854jat.94.1637358523638;
+        Fri, 19 Nov 2021 13:48:43 -0800 (PST)
+Received: from mail-il1-f169.google.com (mail-il1-f169.google.com. [209.85.166.169])
+        by smtp.gmail.com with ESMTPSA id g8sm795348ilf.33.2021.11.19.13.48.43
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 19 Nov 2021 13:48:43 -0800 (PST)
+Received: by mail-il1-f169.google.com with SMTP id j21so6019802ila.5
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 13:48:43 -0800 (PST)
+X-Received: by 2002:a05:6e02:18ce:: with SMTP id s14mr6796507ilu.142.1637358522720;
+ Fri, 19 Nov 2021 13:48:42 -0800 (PST)
 MIME-Version: 1.0
-References: <20211119155337.14341-1-marten.lindahl@axis.com>
-In-Reply-To: <20211119155337.14341-1-marten.lindahl@axis.com>
-From:   Doug Anderson <dianders@google.com>
-Date:   Fri, 19 Nov 2021 08:39:28 -0800
-Message-ID: <CAD=FV=Vk2VUsazkBctfxFq5tik0m0RoyXpxz+_2P6fQhUueYNQ@mail.gmail.com>
-Subject: Re: [PATCH v6] mmc: dw_mmc: Allow lower TMOUT value than maximum
-To:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kernel@axis.com,
-        linux-mmc@vger.kernel.org
+References: <CAA=hcWT_dmKU1Uj4YmJ_rxZ+HsCVOEYJLSH-h3B3qqNhC1xi-g@mail.gmail.com>
+In-Reply-To: <CAA=hcWT_dmKU1Uj4YmJ_rxZ+HsCVOEYJLSH-h3B3qqNhC1xi-g@mail.gmail.com>
+From:   Doug Anderson <dianders@chromium.org>
+Date:   Fri, 19 Nov 2021 13:48:31 -0800
+X-Gmail-Original-Message-ID: <CAD=FV=V3n95DNXFd4mHpkAAKapCs5UWZXUkw=1vWpfn6oXfouA@mail.gmail.com>
+Message-ID: <CAD=FV=V3n95DNXFd4mHpkAAKapCs5UWZXUkw=1vWpfn6oXfouA@mail.gmail.com>
+Subject: Re: mwifiex reset buggy
+To:     Jupiter <jupiter.hce@gmail.com>
+Cc:     linux-wireless <linux-wireless@vger.kernel.org>,
+        Amitkumar Karwar <akarwar@marvell.com>,
+        Ganapathi Bhat <gbhat@marvell.com>,
+        Brian Norris <briannorris@chromium.org>,
+        Abhishek Pandit-Subedi <abhishekpandit@chromium.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi,
 
-On Fri, Nov 19, 2021 at 7:53 AM M=C3=A5rten Lindahl <marten.lindahl@axis.co=
-m> wrote:
+On Fri, Nov 19, 2021 at 1:36 PM Jupiter <jupiter.hce@gmail.com> wrote:
 >
-> The TMOUT register is always set with a full value for every transfer,
-> which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
-> This is normally good enough to complete the request, but setting a full
-> value makes it impossible to test shorter timeouts, when for example
-> testing data read times on different SD cards.
+> Hi,
 >
-> Add a function to set any value smaller than the maximum of 0xFFFFFF.
+> After days debugging, enabled CONFIG_MMC_DEBUG=y, I suspect the
+> mwifiex reset issue could still  be a mwifiex bug.
 >
-> Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
-> ---
+> I use firmware sd8801_uapsta.bin, it is able to connect to the WiFi
+> network, but  reset either from WiFi modem or following command killed
+> WiFi, disabled mwifiex and wiped off /sys/kernel/debug/mwifiex/mlan0:
 >
-> v2:
->  - Calculate new value before checking boundaries
->  - Include CLKDIV register to get proper value
+> # echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
 >
-> v3:
->  - Use 'if-else' instead of 'goto'
->  - Don't touch response field when maximize data field
+> [  416.311114] mwifiex_sdio mmc0:0001:1: Resetting per request
+> [  416.333491] mwifiex_sdio mmc0:0001:1: info: successfully
+> disconnected from 34:08:04:12:b1:a2: reason code 3
+> [  416.366368] mwifiex_sdio mmc0:0001:1: info: shutdown mwifiex...
+> [  416.374812] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.381431] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
+> [  416.387455] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.393423] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
+> [  416.399401] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.405364] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
+> [  416.411332] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.417410] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
+> [  416.423293] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.429349] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
+> root@solar:~# [  416.546386] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.583278] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
+> [  416.888906] IPv6: ADDRCONF(NETDEV_UP): sit0: link is not ready
+> [  416.894822] IPv6: ADDRCONF(NETDEV_UP): wwan0: link is not ready
+> [  417.302781] mwifiex_sdio mmc0:0001:1: WLAN FW already running! Skip FW dnld
+> [  417.310149] mwifiex_sdio mmc0:0001:1: WLAN FW is active
+> [  427.490344] mwifiex_sdio mmc0:0001:1: mwifiex_cmd_timeout_func:
+> Timeout cmd id = 0xa9, act = 0x0
+> [  427.499732] mwifiex_sdio mmc0:0001:1: num_data_h2c_failure = 0
+> [  427.505825] mwifiex_sdio mmc0:0001:1: num_cmd_h2c_failure = 0
+> [  427.511751] mwifiex_sdio mmc0:0001:1: is_cmd_timedout = 1
+> [  427.517216] mwifiex_sdio mmc0:0001:1: num_tx_timeout = 0
+> [  427.522686] mwifiex_sdio mmc0:0001:1: last_cmd_index = 1
+> [  427.528063] mwifiex_sdio mmc0:0001:1: last_cmd_id: 28 00 a9 00 07
+> 01 07 01 24 00
+> [  427.535612] mwifiex_sdio mmc0:0001:1: last_cmd_act: 13 00 00 00 00
+> 00 00 00 34 08
+> [  427.543248] mwifiex_sdio mmc0:0001:1: last_cmd_resp_index = 0
+> [  427.549058] mwifiex_sdio mmc0:0001:1: last_cmd_resp_id: 28 80 07 81
+> 07 81 07 81 24 80
+> [  427.557033] mwifiex_sdio mmc0:0001:1: last_event_index = 3
+> [  427.562670] mwifiex_sdio mmc0:0001:1: last_event: 0b 00 0a 00 0b 00
+> 0a 00 0a 00
+> [  427.570045] mwifiex_sdio mmc0:0001:1: data_sent=0 cmd_sent=0
+> [  427.575852] mwifiex_sdio mmc0:0001:1: ps_mode=0 ps_state=0
+> [  427.591087] mwifiex_sdio mmc0:0001:1: info: _mwifiex_fw_dpc:
+> unregister device
 >
-> v4:
->  - Prevent 32bit divider overflow by splitting the operation
->  - Changed %06x to %#08x as suggested by Doug
->  - Rephrased commit msg as suggested by Doug
+> The /sys/kernel/debug/mwifiex/mlan0 was deleted:
 >
-> v5:
->  - Use u32 type for CPU reg access
->  - Make tmp 64bit to handle INT_MAX parameters
+> # ls /sys/kernel/debug/mwifiex/
 >
-> v6:
->  - Use u64 type for tmp
->
->  drivers/mmc/host/dw_mmc.c | 29 ++++++++++++++++++++++++++++-
->  1 file changed, 28 insertions(+), 1 deletion(-)
+> Looked at Douglas Anderson post "Fix Marvell WiFi reset by adding SDIO
+> API to replug card"
+> https://patchwork.kernel.org/project/linux-mmc/cover/20190716164209.62320-1-dianders@chromium.org/,
+> I believe mwifiex should be able to replug card after reset, is it
+> still buggy or is it the firmware sd8801_uapsta.bin problem?
 
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
+I think I blocked most of this stuff out of my mind and it's also been
+over 2 years. ;-) ...but any chance that Bluetooth could somehow be
+involved, too? I seem to remember that things got complicated because
+we could have both functions going at once. I think I advocated for
+keeping it simple and always doing a full unplug / replug of the card
+to reset it, but from notes I guess upstream landed it so you need to
+handle the two cases (just WiFi vs WiFi+BT) in totally different ways.
+
+It looks like there's ongoing discussion going on in
+https://issuetracker.google.com/172214846. Maybe something there would
+be helpful?
+
+-Doug
