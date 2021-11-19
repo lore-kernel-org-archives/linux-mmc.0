@@ -2,126 +2,154 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BAE39C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 11:12:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA2A9C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 14:06:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 99AA660F9B
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 11:12:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB20B6121D
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 14:06:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232671AbhKSLPS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Nov 2021 06:15:18 -0500
-Received: from smtp2.axis.com ([195.60.68.18]:54985 "EHLO smtp2.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232004AbhKSLPS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 19 Nov 2021 06:15:18 -0500
+        id S235358AbhKSOJv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Nov 2021 09:09:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54278 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235634AbhKSOJv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Nov 2021 09:09:51 -0500
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8AB30C06173E
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 06:06:49 -0800 (PST)
+Received: by mail-lf1-x129.google.com with SMTP id z34so44018144lfu.8
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 06:06:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1637320335;
-  x=1668856335;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=8WeFC/KT9JBpt3ETrMVAMNY4OtPvnB0kYgQOsjKEQAQ=;
-  b=WqJ8RqWfu5ZWH8X5UDYOAKl9ChOBNxF0F+bFXHhDetDQtq4LwaYDU/4c
-   qoBFnUoQUOgWdS2/59O+P2BjrsdwJ7u9Vb1RFoOlPoV5//BZIJtKQAgdm
-   TS+ItMn+QZYtNWFtS1cdWU0eQF/NQIKTlK6cgGqM7jQb8bnM0HZDGXl71
-   wxwHSSeOlQ/sNUJq3ofsj8HWKZFJ3pqI1cPd+KSavl1wv2csRgDhrxfYB
-   Zpad+Ip9AGusS+VMfIgVdx1NkNq6K3f5Tcjk7ZN9fzUzGY5wLlN+asrQK
-   YR4FAU7ohYUGg4Epk15X/FAkD2ufMxG84XR8X/sdO6zwB9wj106C1nw+6
-   w==;
-From:   =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-To:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Doug Anderson <dianders@google.com>, <kernel@axis.com>,
-        <linux-mmc@vger.kernel.org>,
-        =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-Subject: [PATCH v5] mmc: dw_mmc: Allow lower TMOUT value than maximum
-Date:   Fri, 19 Nov 2021 12:12:01 +0100
-Message-ID: <20211119111201.1823-1-marten.lindahl@axis.com>
-X-Mailer: git-send-email 2.20.1
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=p/p7LzZgnhIc3Hls3ppZXC5lo3Y6+VGNPzWmpnyjNbY=;
+        b=Jz8TGdTQquyFyf7C8JZDfWYklF6AStjiEpGw0cJd3w5dAyax7bQJvG17dDAF8o8uWK
+         L2l5naPSPIawPn67w3c3BUC9+Ne7oti9IiNurfl3z16wRToYL22Q1gckYIspO8fahDJu
+         FZWRgCvi6pbdJmlwOgQOyPrzXoBQgVy/8Vws1E2bsdArcgZW3dzblXP9jnXoTJoGDdCT
+         OJxgef3sV7RN5qnCC6uHIL+0bcpHufTelEEDt/2qDSKQO+4CMd1IvpO864bSNldt7iFV
+         F2XqqUDpoAzPpfui2Mp8HsLQQBREneywnDc7F2kGjx87Vxz9906o0IkS7vO/yg5pLfVT
+         d/IA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=p/p7LzZgnhIc3Hls3ppZXC5lo3Y6+VGNPzWmpnyjNbY=;
+        b=LLW+ufgR8AToXqyRD/YT/GJ4vXqPyRdU8d4jjpcQwEldb6gU/gjuA95E6ErSiZsd6h
+         wbwp+VAMQS184vSgefrRREV6P/XYiBf+XT54zvxMD7IE0NMe2wAcM6UyBFNcmqVmCDmv
+         8F7mNDm/HsnwO7RJj61v29bKGdX7p1jsu1MWVygxMfTL7nGEBeXLtHe2IKhJeK9WuOLE
+         UUxez8kVrLVzSg/wGMZF4qboW/rwZ5kjcJtcMXWAfvM5iGusxxY/c/CJ0lVCIs/Xud7U
+         8n3yBP2dNuG5QqM5dzMujlMSrwFsBLKnYXlKlyo94HwDaWfYSkTCc6Ic5/QxpeslcPGm
+         9uvQ==
+X-Gm-Message-State: AOAM532bBPvJbAsfMCU4nRSnJalKUbrDdwCO7PY8nGn+xi+kTmj9W+/i
+        FLDWwW5ZxUhJGzvzogQ5a9RSHgRRMSPUg3m4bL/16w==
+X-Google-Smtp-Source: ABdhPJxyfsCECkBAJmpBN2ThSM9Ag+16VJM/mGeASZ5VdhV4tLZyVRXlEKeqFuNQpWIH0BvA5HbyjS4F5zUUUdJKRHI=
+X-Received: by 2002:a05:6512:10c4:: with SMTP id k4mr13787353lfg.373.1637330807775;
+ Fri, 19 Nov 2021 06:06:47 -0800 (PST)
 MIME-Version: 1.0
+References: <22161945.a8.17d061e089f.Coremail.sensor1010@163.com>
+ <20211112150036.6lhhoak4uk5hhgqt@pengutronix.de> <3b92f2f6.791c.17d3839dd51.Coremail.sensor1010@163.com>
+In-Reply-To: <3b92f2f6.791c.17d3839dd51.Coremail.sensor1010@163.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 19 Nov 2021 15:06:11 +0100
+Message-ID: <CAPDyKFq0Kn28SfE15WyHR_HrCT1PDoDiqNFBu-qEUoNQYxjzRw@mail.gmail.com>
+Subject: Re: Re: drivers/mmc/cor/bus: Delete redundant match function
+To:     lizhe <sensor1010@163.com>
+Cc:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        "srinivas.pandruvada@linux.intel.com" 
+        <srinivas.pandruvada@linux.intel.com>, pali@kernel.org,
+        TheSven73@gmail.com, lznuaa@gmail.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The TMOUT register is always set with a full value for every transfer,
-which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
-This is normally good enough to complete the request, but setting a full
-value makes it impossible to test shorter timeouts, when for example
-testing data read times on different SD cards.
+On Fri, 19 Nov 2021 at 13:45, lizhe <sensor1010@163.com> wrote:
+>
+>
+> HI :
+>         Does this patch need to be changed? If  need to modify something,=
+ please let me know and I will fix it soon
+>
+>                                                                          =
+                                                                           =
+                       Thanks
+>                                                                          =
+                                                                           =
+                        lizhe
 
-Add a function to set any value smaller than the maximum of 0xFFFFFF.
+Hi Lizhe,
 
-Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
----
+Please read Documentation/process/submitting-patches.rst carefully. It
+guides you through the process of how to submit a patch.
 
-v2:
- - Calculate new value before checking boundaries
- - Include CLKDIV register to get proper value
+For example, you need to use "git send-email" and we only use plain text em=
+ails.
 
-v3:
- - Use 'if-else' instead of 'goto'
- - Don't touch response field when maximize data field
+Kind regards
+Uffe
 
-v4:
- - Prevent 32bit divider overflow by splitting the operation
- - Changed %06x to %#08x as suggested by Doug
- - Rephrased commit msg as suggested by Doug
-
-v5:
- - Use u32 type for CPU reg access
- - Make tmp 64bit to handle INT_MAX parameters
-
- drivers/mmc/host/dw_mmc.c | 29 ++++++++++++++++++++++++++++-
- 1 file changed, 28 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index d977f34f6b55..210252d33b95 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1283,6 +1283,33 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 	mci_writel(host, CTYPE, (slot->ctype << slot->id));
- }
- 
-+static void dw_mci_set_data_timeout(struct dw_mci *host,
-+				    unsigned int timeout_ns)
-+{
-+	u32 clk_div, tmout;
-+	unsigned long tmp;
-+
-+	clk_div = (mci_readl(host, CLKDIV) & 0xFF) * 2;
-+	if (clk_div == 0)
-+		clk_div = 1;
-+
-+	tmp = DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz, NSEC_PER_SEC);
-+	tmp = DIV_ROUND_UP_ULL(tmp, clk_div);
-+
-+	/* TMOUT[7:0] (RESPONSE_TIMEOUT) */
-+	tmout = 0xFF; /* Set maximum */
-+
-+	/* TMOUT[31:8] (DATA_TIMEOUT) */
-+	if (!tmp || tmp > 0xFFFFFF)
-+		tmout |= (0xFFFFFF << 8);
-+	else
-+		tmout |= (tmp & 0xFFFFFF) << 8;
-+
-+	mci_writel(host, TMOUT, tmout);
-+	dev_dbg(host->dev, "timeout_ns: %u => TMOUT[31:8]: 0x%#08x",
-+		timeout_ns, tmout >> 8);
-+}
-+
- static void __dw_mci_start_request(struct dw_mci *host,
- 				   struct dw_mci_slot *slot,
- 				   struct mmc_command *cmd)
-@@ -1303,7 +1330,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 
- 	data = cmd->data;
- 	if (data) {
--		mci_writel(host, TMOUT, 0xFFFFFFFF);
-+		dw_mci_set_data_timeout(host, data->timeout_ns);
- 		mci_writel(host, BYTCNT, data->blksz*data->blocks);
- 		mci_writel(host, BLKSIZ, data->blksz);
- 	}
--- 
-2.20.1
-
+>
+>
+>
+>
+>
+>
+> At 2021-11-12 23:00:36, "Uwe Kleine-K=C3=B6nig" <u.kleine-koenig@pengutro=
+nix.de> wrote:
+> >On Wed, Nov 10, 2021 at 03:12:51AM +0800, =E6=9D=8E=E5=93=B2 wrote:
+> >> HI=EF=BC=9A
+> >>      I failed to send kernel patch mail with git sendmail,
+> >>     could  you help me take a look at the submitted patch?
+> >>     the attachment is a patch file,
+> >>     For convenience, I put the content of the patch in the body of the=
+ email
+> >>
+> >>
+> >>                                                                       =
+                      thanks.
+> >>                                                                       =
+                      lizhe
+> >> patch :
+> >> |
+> >> From 40577316f4dbcf35061a14f27f7a777c2f4199a1 Mon Sep 17 00:00:00 2001
+> >> From: lizhe <sensor1010@163.com>
+> >> Date: Tue, 9 Nov 2021 10:13:43 -0800
+> >> Subject: [PATCH] drivers/mmc/cor/bus: Delete redundant match function
+> >>
+> >>
+> >> When the device and the driver are matching,
+> >> if the device or the bus to which the device driver belongs
+> >> does not provide a match function,
+> >> then the device and the driver are matched by default.
+> >> function 'driver_match_device' illustrates this mechanism.
+> >> Because the return value of mmc_bus_match is 1,
+> >> even if this function is not provided,
+> >> the function 'driver_match_device' returns 1,
+> >> so function 'mmc_bus_match' is redundant.
+> >>
+> >>
+> >> Signed-off-by: lizhe <sensor1010@163.com>
+> >
+> >Acked-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> >
+> >Apart from how the patch is put in the mail, a maintainer responsible
+> >for picking patches up in this area will probably refuse because the
+> >name in the From line of your mail doesn't match the name used in the
+> >Signed-off-by: line.
+> >
+> >Best regards
+> >Uwe
+> >
+> >--
+> >Pengutronix e.K.                           | Uwe Kleine-K=C3=B6nig      =
+      |
+> >Industrial Linux Solutions                 | https://www.pengutronix.de/=
+ |
+>
+>
+>
+>
