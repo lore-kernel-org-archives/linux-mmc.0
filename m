@@ -2,65 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28829C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Nov 2021 21:48:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 473C4C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat, 20 Nov 2021 00:16:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232097AbhKSVvr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Nov 2021 16:51:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46366 "EHLO
+        id S236679AbhKTATv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Nov 2021 19:19:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51548 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231736AbhKSVvr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Nov 2021 16:51:47 -0500
-Received: from mail-io1-xd32.google.com (mail-io1-xd32.google.com [IPv6:2607:f8b0:4864:20::d32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF1EEC06173E
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 13:48:44 -0800 (PST)
-Received: by mail-io1-xd32.google.com with SMTP id k21so14573478ioh.4
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 13:48:44 -0800 (PST)
+        with ESMTP id S233135AbhKTATu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Nov 2021 19:19:50 -0500
+Received: from mail-vk1-xa2f.google.com (mail-vk1-xa2f.google.com [IPv6:2607:f8b0:4864:20::a2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C16DC061757;
+        Fri, 19 Nov 2021 16:16:46 -0800 (PST)
+Received: by mail-vk1-xa2f.google.com with SMTP id k83so6838497vke.7;
+        Fri, 19 Nov 2021 16:16:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
+        d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=f0Jjnsc5W0ZRgdIM3rUP5BZ3A9WvESp7bI0/hjoIiwg=;
-        b=X+O4nVgLAZEiY7jEpqEI502St8G7C+CedgFQ3icEgghqhzNYz+CxKcIq7ALipS52Vh
-         Z+Jjce/vzPbJUMTPMD+abKsZZtLopXf/54eGX4IocOJH0dw/oXiEI0sjjcrnEUsAqGv2
-         6Y+t6QKshVE9/w9XELwcZQQjmYySx6BxVhtrw=
+        bh=GDjafyM9XoUKTQu0bLhImEMbQzcwNVRdVAghZ4NG51E=;
+        b=RPkBqMr/avR5YL9/Y1NEnHje4VLopd3IPscNzZWwTCjydizd7ZecF0tp1kkSNGljCF
+         hUjUGUJZGxkfuGXT67OpQdheEg8PG/kyvVK1pub27ay/K9HUCEtLmORZRxDJfXqZ4w2w
+         EpijSqEvpcgCnLilXHpPEFvLS9Ss6TZIxqMLTLVclg32/NGSs7VKGMidRs43nY8IbhNq
+         FoTIndQBoAITLXOv3mYBo9IH/W/elPXsA45QcMRhJAANCv11KLqOmNYUE0WzIoKiP6BK
+         K3AMSIdupEubPMlwTA+yAL/o/SfRbfqS5xMXJ6tAdOa9xxj/DkVUln46iIrG/qlA7xt4
+         xaQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=f0Jjnsc5W0ZRgdIM3rUP5BZ3A9WvESp7bI0/hjoIiwg=;
-        b=AReGXTPR/2cNYg2bMVQwnLt91B4WV1eLsLwA81VWgz9eFShHjrlMWfOS6NCnZV7wDH
-         Sk8B/Mk9wnrscpkCq+p7F2aDxE5Eq25uQOEAa0yGgVeXmba/sPq5VLweFkifUytwUOWj
-         D5QQrVmJuLNnmAAuC5UdtNq5XBttsbi2Txt/mBmK1Kjq+e7zbNDaSgT3RxDmes/+hrQn
-         oG/SOxhsQdY9Xkdh8I2+Xb3UqHI29WxrMxhzq36AH/q+t6JocCw3lOj6/dPYIkm3EWdF
-         pt+n9ILFgId7ClyjCey5TdWAB+UJqsTWp4hlU3Y8iRT1YsHPI5unAOOTg+434s1dwtzt
-         LB2Q==
-X-Gm-Message-State: AOAM531e43rMMOaGM+YSJThBvPioJ9pFlf/b6nMKAP32BxNY2xCbUuGm
-        OqVvD8uOp7xT6Jbizq4wgPT7D1l8+8YZew==
-X-Google-Smtp-Source: ABdhPJwuZMuvj5b8WwTctwowcI+aTd7+TVrhG27HJVp5Q7Y5/Qkp8/cvl2a1wGyoKVzi1eH0/Eb+zQ==
-X-Received: by 2002:a05:6638:2487:: with SMTP id x7mr30845854jat.94.1637358523638;
-        Fri, 19 Nov 2021 13:48:43 -0800 (PST)
-Received: from mail-il1-f169.google.com (mail-il1-f169.google.com. [209.85.166.169])
-        by smtp.gmail.com with ESMTPSA id g8sm795348ilf.33.2021.11.19.13.48.43
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 19 Nov 2021 13:48:43 -0800 (PST)
-Received: by mail-il1-f169.google.com with SMTP id j21so6019802ila.5
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Nov 2021 13:48:43 -0800 (PST)
-X-Received: by 2002:a05:6e02:18ce:: with SMTP id s14mr6796507ilu.142.1637358522720;
- Fri, 19 Nov 2021 13:48:42 -0800 (PST)
+        bh=GDjafyM9XoUKTQu0bLhImEMbQzcwNVRdVAghZ4NG51E=;
+        b=eIe5F9C/hlRLiZgkz2avQehSGvkTBou8VvsiXe71XEBT/mRxDQ1i9vK70JoXB1tfvW
+         mhzl3TMlxmfRBZ4A1hr/ERWLYJEeNHeuBuMye/8KaeY9oXGBQfULOMLvvWf4gzoHtw25
+         GuuM0dRAEMMVUgK84AS+NQ2Y9Frp0SgjnHnHvmZuDKvd9k6hCPwcbGp/ZB6rtWoLWVfM
+         hP+yvgGx3wJIuVgp3TT8uGnCV4OaewVOJ6KJE12k1GbDWzBJMS4Kb9no8G4OOGPWHPYN
+         oY8LoalDz6lqalfkXiXr7FA7aKJ56c97TZzKtms1+vKZweRy1jlCUSmzbR8bXIX2+UP5
+         LM6g==
+X-Gm-Message-State: AOAM531vACSTm2mye6xDFzY3xv0akljKpxIgvJle8FREOuMrpoTnMVrA
+        lg/YwTPMdlXks0ECm6rwdUMFTHmCdSaOUz9XcGM=
+X-Google-Smtp-Source: ABdhPJyEZqvr7KpCYWkNDymJxnNqyMbRXh09Vn6NtqXovMfLf+UCE19UaNarjTzcCElW/luuVEUHwnDIyCaRT3CaZQc=
+X-Received: by 2002:a1f:18cb:: with SMTP id 194mr125262568vky.16.1637367404498;
+ Fri, 19 Nov 2021 16:16:44 -0800 (PST)
 MIME-Version: 1.0
 References: <CAA=hcWT_dmKU1Uj4YmJ_rxZ+HsCVOEYJLSH-h3B3qqNhC1xi-g@mail.gmail.com>
-In-Reply-To: <CAA=hcWT_dmKU1Uj4YmJ_rxZ+HsCVOEYJLSH-h3B3qqNhC1xi-g@mail.gmail.com>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Fri, 19 Nov 2021 13:48:31 -0800
-X-Gmail-Original-Message-ID: <CAD=FV=V3n95DNXFd4mHpkAAKapCs5UWZXUkw=1vWpfn6oXfouA@mail.gmail.com>
-Message-ID: <CAD=FV=V3n95DNXFd4mHpkAAKapCs5UWZXUkw=1vWpfn6oXfouA@mail.gmail.com>
+ <CAD=FV=V3n95DNXFd4mHpkAAKapCs5UWZXUkw=1vWpfn6oXfouA@mail.gmail.com>
+In-Reply-To: <CAD=FV=V3n95DNXFd4mHpkAAKapCs5UWZXUkw=1vWpfn6oXfouA@mail.gmail.com>
+From:   Jupiter <jupiter.hce@gmail.com>
+Date:   Sat, 20 Nov 2021 11:16:08 +1100
+Message-ID: <CAA=hcWS91uL4kRK8r1uJ_2YLXi1ZuB067ACVPTDZKnF53jgrRQ@mail.gmail.com>
 Subject: Re: mwifiex reset buggy
-To:     Jupiter <jupiter.hce@gmail.com>
+To:     Doug Anderson <dianders@chromium.org>
 Cc:     linux-wireless <linux-wireless@vger.kernel.org>,
-        Amitkumar Karwar <akarwar@marvell.com>,
-        Ganapathi Bhat <gbhat@marvell.com>,
+        Amitkumar Karwar <amitkumar.karwar@nxp.com>,
+        Ganapathi Bhat <ganapathi.bhat@nxp.com>,
         Brian Norris <briannorris@chromium.org>,
         Abhishek Pandit-Subedi <abhishekpandit@chromium.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
@@ -70,83 +64,35 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Doug,
 
-On Fri, Nov 19, 2021 at 1:36 PM Jupiter <jupiter.hce@gmail.com> wrote:
->
-> Hi,
->
-> After days debugging, enabled CONFIG_MMC_DEBUG=y, I suspect the
-> mwifiex reset issue could still  be a mwifiex bug.
->
-> I use firmware sd8801_uapsta.bin, it is able to connect to the WiFi
-> network, but  reset either from WiFi modem or following command killed
-> WiFi, disabled mwifiex and wiped off /sys/kernel/debug/mwifiex/mlan0:
->
-> # echo 1 > /sys/kernel/debug/mwifiex/mlan0/reset
->
-> [  416.311114] mwifiex_sdio mmc0:0001:1: Resetting per request
-> [  416.333491] mwifiex_sdio mmc0:0001:1: info: successfully
-> disconnected from 34:08:04:12:b1:a2: reason code 3
-> [  416.366368] mwifiex_sdio mmc0:0001:1: info: shutdown mwifiex...
-> [  416.374812] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.381431] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
-> [  416.387455] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.393423] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
-> [  416.399401] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.405364] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
-> [  416.411332] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.417410] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
-> [  416.423293] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.429349] mwifiex_sdio mmc0:0001:1: deleting the crypto keys
-> root@solar:~# [  416.546386] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.583278] mwifiex_sdio mmc0:0001:1: PREP_CMD: card is removed
-> [  416.888906] IPv6: ADDRCONF(NETDEV_UP): sit0: link is not ready
-> [  416.894822] IPv6: ADDRCONF(NETDEV_UP): wwan0: link is not ready
-> [  417.302781] mwifiex_sdio mmc0:0001:1: WLAN FW already running! Skip FW dnld
-> [  417.310149] mwifiex_sdio mmc0:0001:1: WLAN FW is active
-> [  427.490344] mwifiex_sdio mmc0:0001:1: mwifiex_cmd_timeout_func:
-> Timeout cmd id = 0xa9, act = 0x0
-> [  427.499732] mwifiex_sdio mmc0:0001:1: num_data_h2c_failure = 0
-> [  427.505825] mwifiex_sdio mmc0:0001:1: num_cmd_h2c_failure = 0
-> [  427.511751] mwifiex_sdio mmc0:0001:1: is_cmd_timedout = 1
-> [  427.517216] mwifiex_sdio mmc0:0001:1: num_tx_timeout = 0
-> [  427.522686] mwifiex_sdio mmc0:0001:1: last_cmd_index = 1
-> [  427.528063] mwifiex_sdio mmc0:0001:1: last_cmd_id: 28 00 a9 00 07
-> 01 07 01 24 00
-> [  427.535612] mwifiex_sdio mmc0:0001:1: last_cmd_act: 13 00 00 00 00
-> 00 00 00 34 08
-> [  427.543248] mwifiex_sdio mmc0:0001:1: last_cmd_resp_index = 0
-> [  427.549058] mwifiex_sdio mmc0:0001:1: last_cmd_resp_id: 28 80 07 81
-> 07 81 07 81 24 80
-> [  427.557033] mwifiex_sdio mmc0:0001:1: last_event_index = 3
-> [  427.562670] mwifiex_sdio mmc0:0001:1: last_event: 0b 00 0a 00 0b 00
-> 0a 00 0a 00
-> [  427.570045] mwifiex_sdio mmc0:0001:1: data_sent=0 cmd_sent=0
-> [  427.575852] mwifiex_sdio mmc0:0001:1: ps_mode=0 ps_state=0
-> [  427.591087] mwifiex_sdio mmc0:0001:1: info: _mwifiex_fw_dpc:
-> unregister device
->
-> The /sys/kernel/debug/mwifiex/mlan0 was deleted:
->
-> # ls /sys/kernel/debug/mwifiex/
->
-> Looked at Douglas Anderson post "Fix Marvell WiFi reset by adding SDIO
-> API to replug card"
-> https://patchwork.kernel.org/project/linux-mmc/cover/20190716164209.62320-1-dianders@chromium.org/,
-> I believe mwifiex should be able to replug card after reset, is it
-> still buggy or is it the firmware sd8801_uapsta.bin problem?
+Thank you for your kindly response.
 
-I think I blocked most of this stuff out of my mind and it's also been
-over 2 years. ;-) ...but any chance that Bluetooth could somehow be
-involved, too? I seem to remember that things got complicated because
-we could have both functions going at once. I think I advocated for
-keeping it simple and always doing a full unplug / replug of the card
-to reset it, but from notes I guess upstream landed it so you need to
-handle the two cases (just WiFi vs WiFi+BT) in totally different ways.
+> I think I blocked most of this stuff out of my mind and it's also been
+> over 2 years. ;-) ...but any chance that Bluetooth could somehow be
+> involved, too? I seem to remember that things got complicated because
+> we could have both functions going at once. I think I advocated for
+> keeping it simple and always doing a full unplug / replug of the card
+> to reset it, but from notes I guess upstream landed it so you need to
+> handle the two cases (just WiFi vs WiFi+BT) in totally different ways.
 
-It looks like there's ongoing discussion going on in
-https://issuetracker.google.com/172214846. Maybe something there would
-be helpful?
+I think the main issue is many of you tested the mwifiex reset on
+Marvell card (or BT?), unfortunately I am using uBlox Lily module
+which is a WiFi only no Bluetooth, it is a iMX6ULL custom design, MMC
+and SDIO are based on iMX6ULL EVK. I don't think anyone tested mwifiex
+reset on that card, to make it worse, I am new to mwifiex, I might be
+able to assist with debugging, but certainly not in the position to
+contribute to fixing it.
 
--Doug
+> It looks like there's ongoing discussion going on in
+> https://issuetracker.google.com/172214846. Maybe something there would
+> be helpful?
+
+I am using mwifiex on kernel upstream v4.19.75, does that include your
+fix? Do you have a patch I can add to my Yocto build? Should I make
+comments to the discussion at
+https://issuetracker.google.com/172214846?
+
+Thank you very much Doug.
+
+- JH
