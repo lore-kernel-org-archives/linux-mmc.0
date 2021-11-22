@@ -2,29 +2,29 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2235FC43219
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:55:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 374B7C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:55:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240084AbhKVP6T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 10:58:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37376 "EHLO
+        id S240120AbhKVP6U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 10:58:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240126AbhKVP6M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:58:12 -0500
-Received: from albert.telenet-ops.be (albert.telenet-ops.be [IPv6:2a02:1800:110:4::f00:1a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E701C061761
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:55:04 -0800 (PST)
+        with ESMTP id S240174AbhKVP6P (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:58:15 -0500
+Received: from michel.telenet-ops.be (michel.telenet-ops.be [IPv6:2a02:1800:110:4::f00:18])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28AA9C061758
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:55:08 -0800 (PST)
 Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed20:e4da:38c:79e9:48bf])
-        by albert.telenet-ops.be with bizsmtp
-        id MTuJ2600p4yPVd606TuKqy; Mon, 22 Nov 2021 16:55:02 +0100
+        by michel.telenet-ops.be with bizsmtp
+        id MTuK2600Z4yPVd606TuK7s; Mon, 22 Nov 2021 16:55:06 +0100
 Received: from rox.of.borg ([192.168.97.57])
         by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe6-00EL3N-Dk; Mon, 22 Nov 2021 16:54:18 +0100
+        id 1mpBe6-00EL3u-UU; Mon, 22 Nov 2021 16:54:18 +0100
 Received: from geert by rox.of.borg with local (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe5-00HGyL-DD; Mon, 22 Nov 2021 16:54:17 +0100
+        id 1mpBe5-00HH2O-V9; Mon, 22 Nov 2021 16:54:17 +0100
 From:   Geert Uytterhoeven <geert+renesas@glider.be>
 To:     Tony Lindgren <tony@atomide.com>,
         Russell King <linux@armlinux.org.uk>,
@@ -69,9 +69,9 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
         alsa-devel@alsa-project.org,
         Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH/RFC 03/17] soc: renesas: Use bitfield helpers
-Date:   Mon, 22 Nov 2021 16:53:56 +0100
-Message-Id: <c5025ab8336469110c6d3ef7ccb049e60c34ef42.1637592133.git.geert+renesas@glider.be>
+Subject: [PATCH/RFC 17/17] rtw89: Use bitfield helpers
+Date:   Mon, 22 Nov 2021 16:54:10 +0100
+Message-Id: <f7b81122f7596fa004188bfae68f25a68c2d2392.1637592133.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <cover.1637592133.git.geert+renesas@glider.be>
 References: <cover.1637592133.git.geert+renesas@glider.be>
@@ -81,42 +81,110 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the field_get() helper, instead of open-coding the same operation.
+Use the field_{get,prep}() helpers, instead of open-coding the same
+operations.
 
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
-This depends on "[PATCH] soc: renesas: Consolidate product register
-handling"
-(https://lore.kernel.org/linux-renesas-soc/057721f46c7499de4133135488f0f3da7fb39265.1636570669.git.geert+renesas@glider.be)
-
+Compile-tested only.
 Marked RFC, as this depends on [PATCH 01/17], but follows a different
 path to upstream.
 ---
- drivers/soc/renesas/renesas-soc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/net/wireless/realtek/rtw89/core.h | 38 ++++-------------------
+ 1 file changed, 6 insertions(+), 32 deletions(-)
 
-diff --git a/drivers/soc/renesas/renesas-soc.c b/drivers/soc/renesas/renesas-soc.c
-index 97957d5d7dafbe2a..33940258f37eef03 100644
---- a/drivers/soc/renesas/renesas-soc.c
-+++ b/drivers/soc/renesas/renesas-soc.c
-@@ -5,6 +5,7 @@
-  * Copyright (C) 2014-2016 Glider bvba
-  */
+diff --git a/drivers/net/wireless/realtek/rtw89/core.h b/drivers/net/wireless/realtek/rtw89/core.h
+index c2885e4dd882f045..f9c0300ec373aaf2 100644
+--- a/drivers/net/wireless/realtek/rtw89/core.h
++++ b/drivers/net/wireless/realtek/rtw89/core.h
+@@ -2994,81 +2994,55 @@ rtw89_write32_clr(struct rtw89_dev *rtwdev, u32 addr, u32 bit)
+ static inline u32
+ rtw89_read32_mask(struct rtw89_dev *rtwdev, u32 addr, u32 mask)
+ {
+-	u32 shift = __ffs(mask);
+-	u32 orig;
+-	u32 ret;
+-
+-	orig = rtw89_read32(rtwdev, addr);
+-	ret = (orig & mask) >> shift;
+-
+-	return ret;
++	return field_get(mask, rtw89_read32(rtwdev, addr));
+ }
  
-+#include <linux/bitfield.h>
- #include <linux/io.h>
- #include <linux/of.h>
- #include <linux/of_address.h>
-@@ -434,8 +435,7 @@ static int __init renesas_soc_init(void)
- 			eslo = product & 0xf;
- 		}
+ static inline u16
+ rtw89_read16_mask(struct rtw89_dev *rtwdev, u32 addr, u32 mask)
+ {
+-	u32 shift = __ffs(mask);
+-	u32 orig;
+-	u32 ret;
+-
+-	orig = rtw89_read16(rtwdev, addr);
+-	ret = (orig & mask) >> shift;
+-
+-	return ret;
++	return field_get(mask, rtw89_read16(rtwdev, addr));
+ }
  
--		if (soc->id &&
--		    ((product & id->mask) >> __ffs(id->mask)) != soc->id) {
-+		if (soc->id && field_get(id->mask, product) != soc->id) {
- 			pr_warn("SoC mismatch (product = 0x%x)\n", product);
- 			return -ENODEV;
- 		}
+ static inline u8
+ rtw89_read8_mask(struct rtw89_dev *rtwdev, u32 addr, u32 mask)
+ {
+-	u32 shift = __ffs(mask);
+-	u32 orig;
+-	u32 ret;
+-
+-	orig = rtw89_read8(rtwdev, addr);
+-	ret = (orig & mask) >> shift;
+-
+-	return ret;
++	return field_get(mask, rtw89_read8(rtwdev, addr));
+ }
+ 
+ static inline void
+ rtw89_write32_mask(struct rtw89_dev *rtwdev, u32 addr, u32 mask, u32 data)
+ {
+-	u32 shift = __ffs(mask);
+ 	u32 orig;
+ 	u32 set;
+ 
+ 	WARN(addr & 0x3, "should be 4-byte aligned, addr = 0x%08x\n", addr);
+ 
+ 	orig = rtw89_read32(rtwdev, addr);
+-	set = (orig & ~mask) | ((data << shift) & mask);
++	set = (orig & ~mask) | field_prep(mask, data);
+ 	rtw89_write32(rtwdev, addr, set);
+ }
+ 
+ static inline void
+ rtw89_write16_mask(struct rtw89_dev *rtwdev, u32 addr, u32 mask, u16 data)
+ {
+-	u32 shift;
+ 	u16 orig, set;
+ 
+ 	mask &= 0xffff;
+-	shift = __ffs(mask);
+ 
+ 	orig = rtw89_read16(rtwdev, addr);
+-	set = (orig & ~mask) | ((data << shift) & mask);
++	set = (orig & ~mask) | field_prep(mask, data);
+ 	rtw89_write16(rtwdev, addr, set);
+ }
+ 
+ static inline void
+ rtw89_write8_mask(struct rtw89_dev *rtwdev, u32 addr, u32 mask, u8 data)
+ {
+-	u32 shift;
+ 	u8 orig, set;
+ 
+ 	mask &= 0xff;
+-	shift = __ffs(mask);
+ 
+ 	orig = rtw89_read8(rtwdev, addr);
+-	set = (orig & ~mask) | ((data << shift) & mask);
++	set = (orig & ~mask) | field_prep(mask, data);
+ 	rtw89_write8(rtwdev, addr, set);
+ }
+ 
 -- 
 2.25.1
 
