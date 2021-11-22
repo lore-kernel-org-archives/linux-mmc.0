@@ -2,29 +2,29 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 082B3C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:55:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2235FC43219
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:55:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240071AbhKVP6N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 10:58:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37354 "EHLO
+        id S240084AbhKVP6T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 10:58:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240022AbhKVP6M (ORCPT
+        with ESMTP id S240126AbhKVP6M (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:58:12 -0500
-Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [IPv6:2a02:1800:110:4::f00:19])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9929AC061756
+Received: from albert.telenet-ops.be (albert.telenet-ops.be [IPv6:2a02:1800:110:4::f00:1a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E701C061761
         for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:55:04 -0800 (PST)
 Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed20:e4da:38c:79e9:48bf])
-        by laurent.telenet-ops.be with bizsmtp
-        id MTuK2600N4yPVd601TuKeF; Mon, 22 Nov 2021 16:55:02 +0100
+        by albert.telenet-ops.be with bizsmtp
+        id MTuJ2600p4yPVd606TuKqy; Mon, 22 Nov 2021 16:55:02 +0100
 Received: from rox.of.borg ([192.168.97.57])
         by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe6-00EL3q-UU; Mon, 22 Nov 2021 16:54:18 +0100
+        id 1mpBe6-00EL3N-Dk; Mon, 22 Nov 2021 16:54:18 +0100
 Received: from geert by rox.of.borg with local (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe5-00HH2H-UD; Mon, 22 Nov 2021 16:54:17 +0100
+        id 1mpBe5-00HGyL-DD; Mon, 22 Nov 2021 16:54:17 +0100
 From:   Geert Uytterhoeven <geert+renesas@glider.be>
 To:     Tony Lindgren <tony@atomide.com>,
         Russell King <linux@armlinux.org.uk>,
@@ -69,9 +69,9 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
         alsa-devel@alsa-project.org,
         Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH/RFC 16/17] ALSA: ice1724: Use bitfield helpers
-Date:   Mon, 22 Nov 2021 16:54:09 +0100
-Message-Id: <45fa162856814176045ffbb49ee64cf0ea7e00bc.1637592133.git.geert+renesas@glider.be>
+Subject: [PATCH/RFC 03/17] soc: renesas: Use bitfield helpers
+Date:   Mon, 22 Nov 2021 16:53:56 +0100
+Message-Id: <c5025ab8336469110c6d3ef7ccb049e60c34ef42.1637592133.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <cover.1637592133.git.geert+renesas@glider.be>
 References: <cover.1637592133.git.geert+renesas@glider.be>
@@ -81,119 +81,42 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the field_{get,prep}() helpers, instead of open-coding the same
-operations.
+Use the field_get() helper, instead of open-coding the same operation.
 
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
-Compile-tested only.
+This depends on "[PATCH] soc: renesas: Consolidate product register
+handling"
+(https://lore.kernel.org/linux-renesas-soc/057721f46c7499de4133135488f0f3da7fb39265.1636570669.git.geert+renesas@glider.be)
+
 Marked RFC, as this depends on [PATCH 01/17], but follows a different
 path to upstream.
 ---
- sound/pci/ice1712/wm8766.c | 14 +++++++-------
- sound/pci/ice1712/wm8776.c | 14 +++++++-------
- 2 files changed, 14 insertions(+), 14 deletions(-)
+ drivers/soc/renesas/renesas-soc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/sound/pci/ice1712/wm8766.c b/sound/pci/ice1712/wm8766.c
-index fe3e243b38549035..3e4d7f8f692785b0 100644
---- a/sound/pci/ice1712/wm8766.c
-+++ b/sound/pci/ice1712/wm8766.c
-@@ -7,6 +7,7 @@
-  *	Copyright (c) 2012 Ondrej Zary <linux@rainbow-software.org>
+diff --git a/drivers/soc/renesas/renesas-soc.c b/drivers/soc/renesas/renesas-soc.c
+index 97957d5d7dafbe2a..33940258f37eef03 100644
+--- a/drivers/soc/renesas/renesas-soc.c
++++ b/drivers/soc/renesas/renesas-soc.c
+@@ -5,6 +5,7 @@
+  * Copyright (C) 2014-2016 Glider bvba
   */
  
 +#include <linux/bitfield.h>
- #include <linux/delay.h>
- #include <sound/core.h>
- #include <sound/control.h>
-@@ -212,11 +213,10 @@ static int snd_wm8766_ctl_get(struct snd_kcontrol *kcontrol,
- 	if (wm->ctl[n].get)
- 		wm->ctl[n].get(wm, &val1, &val2);
- 	else {
--		val1 = wm->regs[wm->ctl[n].reg1] & wm->ctl[n].mask1;
--		val1 >>= __ffs(wm->ctl[n].mask1);
-+		val1 = field_get(wm->ctl[n].mask1, wm->regs[wm->ctl[n].reg1]);
- 		if (wm->ctl[n].flags & WM8766_FLAG_STEREO) {
--			val2 = wm->regs[wm->ctl[n].reg2] & wm->ctl[n].mask2;
--			val2 >>= __ffs(wm->ctl[n].mask2);
-+			val2 = field_get(wm->ctl[n].mask2,
-+					 wm->regs[wm->ctl[n].reg2]);
- 			if (wm->ctl[n].flags & WM8766_FLAG_VOL_UPDATE)
- 				val2 &= ~WM8766_VOL_UPDATE;
+ #include <linux/io.h>
+ #include <linux/of.h>
+ #include <linux/of_address.h>
+@@ -434,8 +435,7 @@ static int __init renesas_soc_init(void)
+ 			eslo = product & 0xf;
  		}
-@@ -251,19 +251,19 @@ static int snd_wm8766_ctl_put(struct snd_kcontrol *kcontrol,
- 		wm->ctl[n].set(wm, regval1, regval2);
- 	else {
- 		val = wm->regs[wm->ctl[n].reg1] & ~wm->ctl[n].mask1;
--		val |= regval1 << __ffs(wm->ctl[n].mask1);
-+		val |= field_prep(wm->ctl[n].mask1, regval1);
- 		/* both stereo controls in one register */
- 		if (wm->ctl[n].flags & WM8766_FLAG_STEREO &&
- 				wm->ctl[n].reg1 == wm->ctl[n].reg2) {
- 			val &= ~wm->ctl[n].mask2;
--			val |= regval2 << __ffs(wm->ctl[n].mask2);
-+			val |= field_prep(wm->ctl[n].mask2, regval2);
- 		}
- 		snd_wm8766_write(wm, wm->ctl[n].reg1, val);
- 		/* stereo controls in different registers */
- 		if (wm->ctl[n].flags & WM8766_FLAG_STEREO &&
- 				wm->ctl[n].reg1 != wm->ctl[n].reg2) {
- 			val = wm->regs[wm->ctl[n].reg2] & ~wm->ctl[n].mask2;
--			val |= regval2 << __ffs(wm->ctl[n].mask2);
-+			val |= field_prep(wm->ctl[n].mask2, regval2);
- 			if (wm->ctl[n].flags & WM8766_FLAG_VOL_UPDATE)
- 				val |= WM8766_VOL_UPDATE;
- 			snd_wm8766_write(wm, wm->ctl[n].reg2, val);
-diff --git a/sound/pci/ice1712/wm8776.c b/sound/pci/ice1712/wm8776.c
-index 6eda86119dff60b3..b4edf8a03c342351 100644
---- a/sound/pci/ice1712/wm8776.c
-+++ b/sound/pci/ice1712/wm8776.c
-@@ -7,6 +7,7 @@
-  *	Copyright (c) 2012 Ondrej Zary <linux@rainbow-software.org>
-  */
  
-+#include <linux/bitfield.h>
- #include <linux/delay.h>
- #include <sound/core.h>
- #include <sound/control.h>
-@@ -486,11 +487,10 @@ static int snd_wm8776_ctl_get(struct snd_kcontrol *kcontrol,
- 	if (wm->ctl[n].get)
- 		wm->ctl[n].get(wm, &val1, &val2);
- 	else {
--		val1 = wm->regs[wm->ctl[n].reg1] & wm->ctl[n].mask1;
--		val1 >>= __ffs(wm->ctl[n].mask1);
-+		val1 = field_get(wm->ctl[n].mask1, wm->regs[wm->ctl[n].reg1]);
- 		if (wm->ctl[n].flags & WM8776_FLAG_STEREO) {
--			val2 = wm->regs[wm->ctl[n].reg2] & wm->ctl[n].mask2;
--			val2 >>= __ffs(wm->ctl[n].mask2);
-+			val2 = field_get(wm->ctl[n].mask2,
-+					 wm->regs[wm->ctl[n].reg2]);
- 			if (wm->ctl[n].flags & WM8776_FLAG_VOL_UPDATE)
- 				val2 &= ~WM8776_VOL_UPDATE;
+-		if (soc->id &&
+-		    ((product & id->mask) >> __ffs(id->mask)) != soc->id) {
++		if (soc->id && field_get(id->mask, product) != soc->id) {
+ 			pr_warn("SoC mismatch (product = 0x%x)\n", product);
+ 			return -ENODEV;
  		}
-@@ -525,19 +525,19 @@ static int snd_wm8776_ctl_put(struct snd_kcontrol *kcontrol,
- 		wm->ctl[n].set(wm, regval1, regval2);
- 	else {
- 		val = wm->regs[wm->ctl[n].reg1] & ~wm->ctl[n].mask1;
--		val |= regval1 << __ffs(wm->ctl[n].mask1);
-+		val |= field_prep(wm->ctl[n].mask1, regval1);
- 		/* both stereo controls in one register */
- 		if (wm->ctl[n].flags & WM8776_FLAG_STEREO &&
- 				wm->ctl[n].reg1 == wm->ctl[n].reg2) {
- 			val &= ~wm->ctl[n].mask2;
--			val |= regval2 << __ffs(wm->ctl[n].mask2);
-+			val |= field_prep(wm->ctl[n].mask2, regval2);
- 		}
- 		snd_wm8776_write(wm, wm->ctl[n].reg1, val);
- 		/* stereo controls in different registers */
- 		if (wm->ctl[n].flags & WM8776_FLAG_STEREO &&
- 				wm->ctl[n].reg1 != wm->ctl[n].reg2) {
- 			val = wm->regs[wm->ctl[n].reg2] & ~wm->ctl[n].mask2;
--			val |= regval2 << __ffs(wm->ctl[n].mask2);
-+			val |= field_prep(wm->ctl[n].mask2, regval2);
- 			if (wm->ctl[n].flags & WM8776_FLAG_VOL_UPDATE)
- 				val |= WM8776_VOL_UPDATE;
- 			snd_wm8776_write(wm, wm->ctl[n].reg2, val);
 -- 
 2.25.1
 
