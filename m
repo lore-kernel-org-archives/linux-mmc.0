@@ -2,29 +2,29 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4D73C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:56:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89E06C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:56:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240327AbhKVP7T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 10:59:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37592 "EHLO
+        id S240346AbhKVP7g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 10:59:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240299AbhKVP64 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:58:56 -0500
+        with ESMTP id S240430AbhKVP73 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:59:29 -0500
 Received: from albert.telenet-ops.be (albert.telenet-ops.be [IPv6:2a02:1800:110:4::f00:1a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 496D9C061757
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:55:42 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9F87C061757
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:56:16 -0800 (PST)
 Received: from ramsan.of.borg ([84.195.186.194])
         by albert.telenet-ops.be with bizsmtp
-        id MTuz260014C55Sk06Tuzyl; Mon, 22 Nov 2021 16:55:40 +0100
+        id MTvb260044C55Sk06Tvb5d; Mon, 22 Nov 2021 16:56:16 +0100
 Received: from rox.of.borg ([192.168.97.57])
         by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe6-00EL3g-9G; Mon, 22 Nov 2021 16:54:18 +0100
+        id 1mpBe6-00EL3k-Le; Mon, 22 Nov 2021 16:54:18 +0100
 Received: from geert by rox.of.borg with local (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe5-00HGz8-Ni; Mon, 22 Nov 2021 16:54:17 +0100
+        id 1mpBe5-00HH0g-SI; Mon, 22 Nov 2021 16:54:17 +0100
 From:   Geert Uytterhoeven <geert+renesas@glider.be>
 To:     Tony Lindgren <tony@atomide.com>,
         Russell King <linux@armlinux.org.uk>,
@@ -69,9 +69,9 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
         alsa-devel@alsa-project.org,
         Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH/RFC 10/17] media: ti-vpe: cal: Use bitfield helpers
-Date:   Mon, 22 Nov 2021 16:54:03 +0100
-Message-Id: <d0ec5ecf5681cc36e0b86f8b35dde5d4a79dd5e8.1637592133.git.geert+renesas@glider.be>
+Subject: [PATCH/RFC 14/17] regulator: ti-abb: Use bitfield helpers
+Date:   Mon, 22 Nov 2021 16:54:07 +0100
+Message-Id: <c8508cae36c52c750dbb12493dd44d92fcf51ad4.1637592133.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <cover.1637592133.git.geert+renesas@glider.be>
 References: <cover.1637592133.git.geert+renesas@glider.be>
@@ -81,7 +81,8 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the field_prep() helper, instead of open-coding the same operation.
+Use the field_{get,prep}() helpers, instead of open-coding the same
+operations.
 
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
@@ -89,31 +90,48 @@ Compile-tested only.
 Marked RFC, as this depends on [PATCH 01/17], but follows a different
 path to upstream.
 ---
- drivers/media/platform/ti-vpe/cal.h | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/regulator/ti-abb-regulator.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/media/platform/ti-vpe/cal.h b/drivers/media/platform/ti-vpe/cal.h
-index 527e22d022f300b7..5fcf1b55ff2879ac 100644
---- a/drivers/media/platform/ti-vpe/cal.h
-+++ b/drivers/media/platform/ti-vpe/cal.h
-@@ -303,7 +303,7 @@ static inline void cal_write_field(struct cal_dev *cal, u32 offset, u32 value,
- 	u32 val = cal_read(cal, offset);
+diff --git a/drivers/regulator/ti-abb-regulator.c b/drivers/regulator/ti-abb-regulator.c
+index 2931a0b89bffbf7a..3bc6ca5c382a4273 100644
+--- a/drivers/regulator/ti-abb-regulator.c
++++ b/drivers/regulator/ti-abb-regulator.c
+@@ -17,6 +17,7 @@
+  * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  */
++#include <linux/bitfield.h>
+ #include <linux/clk.h>
+ #include <linux/delay.h>
+ #include <linux/err.h>
+@@ -132,7 +133,7 @@ static inline u32 ti_abb_rmw(u32 mask, u32 value, void __iomem *reg)
  
+ 	val = readl(reg);
  	val &= ~mask;
 -	val |= (value << __ffs(mask)) & mask;
 +	val |= field_prep(mask, value);
- 	cal_write(cal, offset, val);
- }
+ 	writel(val, reg);
  
-@@ -312,7 +312,7 @@ static inline void cal_set_field(u32 *valp, u32 field, u32 mask)
- 	u32 val = *valp;
+ 	return val;
+@@ -229,7 +230,7 @@ static void ti_abb_program_ldovbb(struct device *dev, const struct ti_abb *abb,
+ 	case TI_ABB_SLOW_OPP:
+ 	case TI_ABB_FAST_OPP:
+ 		val |= abb->ldovbb_override_mask;
+-		val |= info->vset << __ffs(abb->ldovbb_vset_mask);
++		val |= field_prep(abb->ldovbb_vset_mask, info->vset);
+ 		break;
+ 	}
  
- 	val &= ~mask;
--	val |= (field << __ffs(mask)) & mask;
-+	val |= field_prep(mask, field);
- 	*valp = val;
- }
- 
+@@ -606,7 +607,7 @@ static int ti_abb_init_table(struct device *dev, struct ti_abb *abb,
+ 					pname, *volt_table, vset_mask);
+ 			continue;
+ 		}
+-		info->vset = (efuse_val & vset_mask) >> __ffs(vset_mask);
++		info->vset = field_get(vset_mask, efuse_val);
+ 		dev_dbg(dev, "[%d]v=%d vset=%x\n", i, *volt_table, info->vset);
+ check_abb:
+ 		switch (info->opp_sel) {
 -- 
 2.25.1
 
