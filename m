@@ -2,29 +2,29 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37B13C4167E
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:57:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C916C4167D
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:57:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240497AbhKVQAO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 11:00:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37966 "EHLO
+        id S240301AbhKVQAP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 11:00:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240473AbhKVQAG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 11:00:06 -0500
-Received: from baptiste.telenet-ops.be (baptiste.telenet-ops.be [IPv6:2a02:1800:120:4::f00:13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C45CC0613D7
+        with ESMTP id S240221AbhKVQAI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 11:00:08 -0500
+Received: from andre.telenet-ops.be (andre.telenet-ops.be [IPv6:2a02:1800:120:4::f00:15])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 133A1C0613F1
         for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:56:59 -0800 (PST)
 Received: from ramsan.of.borg ([84.195.186.194])
-        by baptiste.telenet-ops.be with bizsmtp
-        id MTwG2600F4C55Sk01TwGVb; Mon, 22 Nov 2021 16:56:57 +0100
+        by andre.telenet-ops.be with bizsmtp
+        id MTwG2600C4C55Sk01TwGyn; Mon, 22 Nov 2021 16:56:58 +0100
 Received: from rox.of.borg ([192.168.97.57])
         by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe6-00EL3m-Lm; Mon, 22 Nov 2021 16:54:18 +0100
+        id 1mpBe5-00EL3M-Q1; Mon, 22 Nov 2021 16:54:17 +0100
 Received: from geert by rox.of.borg with local (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe5-00HH1L-TK; Mon, 22 Nov 2021 16:54:17 +0100
+        id 1mpBe5-00HGyE-C8; Mon, 22 Nov 2021 16:54:17 +0100
 From:   Geert Uytterhoeven <geert+renesas@glider.be>
 To:     Tony Lindgren <tony@atomide.com>,
         Russell King <linux@armlinux.org.uk>,
@@ -69,9 +69,9 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
         alsa-devel@alsa-project.org,
         Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH/RFC 15/17] thermal/ti-soc-thermal: Use bitfield helpers
-Date:   Mon, 22 Nov 2021 16:54:08 +0100
-Message-Id: <37efc6013a24653e316215424b160d613f42dcd5.1637592133.git.geert+renesas@glider.be>
+Subject: [PATCH 02/17] clk: renesas: Use bitfield helpers
+Date:   Mon, 22 Nov 2021 16:53:55 +0100
+Message-Id: <c6e4bfbf798a8fcb4d8c02861a0c1b029f2f5cb1.1637592133.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <cover.1637592133.git.geert+renesas@glider.be>
 References: <cover.1637592133.git.geert+renesas@glider.be>
@@ -81,63 +81,123 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the field_{get,prep}() helpers, instead of open-coding the same
+Use the FIELD_{GET,PREP}() and field_{get,prep}() helpers for const
+respective non-const bitfields, instead of open-coding the same
 operations.
 
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
-Compile-tested only.
-Marked RFC, as this depends on [PATCH 01/17], but follows a different
-path to upstream.
----
- drivers/thermal/ti-soc-thermal/ti-bandgap.c | 11 +++++------
- 1 file changed, 5 insertions(+), 6 deletions(-)
+ drivers/clk/renesas/clk-div6.c          |  6 +++---
+ drivers/clk/renesas/r8a779a0-cpg-mssr.c |  9 +++------
+ drivers/clk/renesas/rcar-gen3-cpg.c     | 15 +++++----------
+ 3 files changed, 11 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/thermal/ti-soc-thermal/ti-bandgap.c b/drivers/thermal/ti-soc-thermal/ti-bandgap.c
-index ea0603b59309f5f0..83a34d698414b177 100644
---- a/drivers/thermal/ti-soc-thermal/ti-bandgap.c
-+++ b/drivers/thermal/ti-soc-thermal/ti-bandgap.c
-@@ -9,6 +9,7 @@
-  *   Eduardo Valentin <eduardo.valentin@ti.com>
+diff --git a/drivers/clk/renesas/clk-div6.c b/drivers/clk/renesas/clk-div6.c
+index 3abd6e5400aded6a..f7b827b5e9b2dd32 100644
+--- a/drivers/clk/renesas/clk-div6.c
++++ b/drivers/clk/renesas/clk-div6.c
+@@ -7,6 +7,7 @@
+  * Contact: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
   */
  
 +#include <linux/bitfield.h>
- #include <linux/clk.h>
- #include <linux/cpu_pm.h>
- #include <linux/device.h>
-@@ -80,10 +81,10 @@ do {								\
- 	struct temp_sensor_registers *t;			\
- 	u32 r;							\
- 								\
--	t = bgp->conf->sensors[(id)].registers;		\
-+	t = bgp->conf->sensors[(id)].registers;			\
- 	r = ti_bandgap_readl(bgp, t->reg);			\
- 	r &= ~t->mask;						\
--	r |= (val) << __ffs(t->mask);				\
-+	r |= field_prep(t->mask, val);				\
- 	ti_bandgap_writel(bgp, r, t->reg);			\
- } while (0)
+ #include <linux/clk-provider.h>
+ #include <linux/init.h>
+ #include <linux/io.h>
+@@ -171,8 +172,7 @@ static u8 cpg_div6_clock_get_parent(struct clk_hw *hw)
+ 	if (clock->src_mask == 0)
+ 		return 0;
  
-@@ -342,8 +343,7 @@ static void ti_bandgap_read_counter(struct ti_bandgap *bgp, int id,
+-	hw_index = (readl(clock->reg) & clock->src_mask) >>
+-		   __ffs(clock->src_mask);
++	hw_index = field_get(clock->src_mask, readl(clock->reg));
+ 	for (i = 0; i < clk_hw_get_num_parents(hw); i++) {
+ 		if (clock->parents[i] == hw_index)
+ 			return i;
+@@ -191,7 +191,7 @@ static int cpg_div6_clock_set_parent(struct clk_hw *hw, u8 index)
+ 	if (index >= clk_hw_get_num_parents(hw))
+ 		return -EINVAL;
  
- 	tsr = bgp->conf->sensors[id].registers;
- 	time = ti_bandgap_readl(bgp, tsr->bgap_counter);
--	time = (time & tsr->counter_mask) >>
--					__ffs(tsr->counter_mask);
-+	time = field_get(tsr->counter_mask, time);
- 	time = time * 1000 / bgp->clk_rate;
- 	*interval = time;
+-	src = clock->parents[index] << __ffs(clock->src_mask);
++	src = field_prep(clock->src_mask, clock->parents[index]);
+ 	writel((readl(clock->reg) & ~clock->src_mask) | src, clock->reg);
+ 	return 0;
  }
-@@ -363,8 +363,7 @@ static void ti_bandgap_read_counter_delay(struct ti_bandgap *bgp, int id,
- 	tsr = bgp->conf->sensors[id].registers;
+diff --git a/drivers/clk/renesas/r8a779a0-cpg-mssr.c b/drivers/clk/renesas/r8a779a0-cpg-mssr.c
+index 7df86743c5491292..f716e739d138b722 100644
+--- a/drivers/clk/renesas/r8a779a0-cpg-mssr.c
++++ b/drivers/clk/renesas/r8a779a0-cpg-mssr.c
+@@ -302,11 +302,7 @@ static unsigned long cpg_z_clk_recalc_rate(struct clk_hw *hw,
+ 					   unsigned long parent_rate)
+ {
+ 	struct cpg_z_clk *zclk = to_z_clk(hw);
+-	unsigned int mult;
+-	u32 val;
+-
+-	val = readl(zclk->reg) & zclk->mask;
+-	mult = 32 - (val >> __ffs(zclk->mask));
++	unsigned int mult = 32 - field_get(zclk->mask, readl(zclk->reg));
  
- 	reg_val = ti_bandgap_readl(bgp, tsr->bgap_mask_ctrl);
--	reg_val = (reg_val & tsr->mask_counter_delay_mask) >>
--				__ffs(tsr->mask_counter_delay_mask);
-+	reg_val = field_get(tsr->mask_counter_delay_mask, reg_val);
- 	switch (reg_val) {
- 	case 0:
- 		*interval = 0;
+ 	return DIV_ROUND_CLOSEST_ULL((u64)parent_rate * mult,
+ 				     32 * zclk->fixed_div);
+@@ -357,7 +353,8 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
+ 	if (readl(zclk->kick_reg) & CPG_FRQCRB_KICK)
+ 		return -EBUSY;
+ 
+-	cpg_reg_modify(zclk->reg, zclk->mask, (32 - mult) << __ffs(zclk->mask));
++	cpg_reg_modify(zclk->reg, zclk->mask,
++		       field_prep(zclk->mask, 32 - mult));
+ 
+ 	/*
+ 	 * Set KICK bit in FRQCRB to update hardware setting and wait for
+diff --git a/drivers/clk/renesas/rcar-gen3-cpg.c b/drivers/clk/renesas/rcar-gen3-cpg.c
+index a9816b1beabb2582..30bbe8418e018153 100644
+--- a/drivers/clk/renesas/rcar-gen3-cpg.c
++++ b/drivers/clk/renesas/rcar-gen3-cpg.c
+@@ -54,10 +54,8 @@ static unsigned long cpg_pll_clk_recalc_rate(struct clk_hw *hw,
+ {
+ 	struct cpg_pll_clk *pll_clk = to_pll_clk(hw);
+ 	unsigned int mult;
+-	u32 val;
+ 
+-	val = readl(pll_clk->pllcr_reg) & CPG_PLLnCR_STC_MASK;
+-	mult = (val >> __ffs(CPG_PLLnCR_STC_MASK)) + 1;
++	mult = FIELD_GET(CPG_PLLnCR_STC_MASK, readl(pll_clk->pllcr_reg)) + 1;
+ 
+ 	return parent_rate * mult * pll_clk->fixed_mult;
+ }
+@@ -94,7 +92,7 @@ static int cpg_pll_clk_set_rate(struct clk_hw *hw, unsigned long rate,
+ 
+ 	val = readl(pll_clk->pllcr_reg);
+ 	val &= ~CPG_PLLnCR_STC_MASK;
+-	val |= (mult - 1) << __ffs(CPG_PLLnCR_STC_MASK);
++	val |= FIELD_PREP(CPG_PLLnCR_STC_MASK, mult - 1);
+ 	writel(val, pll_clk->pllcr_reg);
+ 
+ 	for (i = 1000; i; i--) {
+@@ -176,11 +174,7 @@ static unsigned long cpg_z_clk_recalc_rate(struct clk_hw *hw,
+ 					   unsigned long parent_rate)
+ {
+ 	struct cpg_z_clk *zclk = to_z_clk(hw);
+-	unsigned int mult;
+-	u32 val;
+-
+-	val = readl(zclk->reg) & zclk->mask;
+-	mult = 32 - (val >> __ffs(zclk->mask));
++	unsigned int mult = 32 - field_get(zclk->mask, readl(zclk->reg));
+ 
+ 	return DIV_ROUND_CLOSEST_ULL((u64)parent_rate * mult,
+ 				     32 * zclk->fixed_div);
+@@ -231,7 +225,8 @@ static int cpg_z_clk_set_rate(struct clk_hw *hw, unsigned long rate,
+ 	if (readl(zclk->kick_reg) & CPG_FRQCRB_KICK)
+ 		return -EBUSY;
+ 
+-	cpg_reg_modify(zclk->reg, zclk->mask, (32 - mult) << __ffs(zclk->mask));
++	cpg_reg_modify(zclk->reg, zclk->mask,
++		       field_prep(zclk->mask, 32 - mult));
+ 
+ 	/*
+ 	 * Set KICK bit in FRQCRB to update hardware setting and wait for
 -- 
 2.25.1
 
