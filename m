@@ -2,47 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B84DFC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 17:06:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97477C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 17:06:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237494AbhKVRJI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 12:09:08 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:58601 "EHLO
+        id S237867AbhKVRJL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 12:09:11 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:23061 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S238000AbhKVRJG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 12:09:06 -0500
+        by vger.kernel.org with ESMTP id S237880AbhKVRJJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 12:09:09 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1637600759;
+        s=mimecast20190719; t=1637600762;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=2s1W7LYNo7F5VI7Tuu2S8EzNnflmNuHMDeh+PGBi2FU=;
-        b=Wh+avR9Ll169XipO+VwildjBRMptW8ZK0PK4C+hfr9qWiyUMIu5y7OV+yHLQ++qyrOLQ/K
-        xygKQtAc/cLamzbT2O2UpxEgMMS8/FkWlUkRbUT4ZtWI2Xk+NpNb7+xKXcW4znJHtz2vh5
-        QM9bMfP5tI49leoWTvf6jiqkLgat7L4=
+        bh=VmVklH+IaL1BbsO+6jNr8NlRCKg2nfcFyO4zpvxC92w=;
+        b=QhobhpdVg32f0g4g/ruhk8DlA2xXM3fjDvomA+2rU+wjQzXW9sGezb48Yq4K00fBTVVN6N
+        +0tsihDAxxHlCRJj7sZNvHgt2lbqCrHDu6esDW6FJyGdUV1nGGuIwOJJEtsjsseTpt5yeW
+        1cF3HCfvTTREFl+mhSjDSlUQdKYEqDM=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
  (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-357-Y7HE_f-nNLWntJIMzk0o3w-1; Mon, 22 Nov 2021 12:05:55 -0500
-X-MC-Unique: Y7HE_f-nNLWntJIMzk0o3w-1
+ us-mta-176-MM0irJMYNIWGATEb1gL7TA-1; Mon, 22 Nov 2021 12:06:00 -0500
+X-MC-Unique: MM0irJMYNIWGATEb1gL7TA-1
 Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 32A5184F209;
-        Mon, 22 Nov 2021 17:05:54 +0000 (UTC)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id AEA5287D541;
+        Mon, 22 Nov 2021 17:05:59 +0000 (UTC)
 Received: from x1.localdomain (unknown [10.39.192.226])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C48CC5D6D5;
-        Mon, 22 Nov 2021 17:05:52 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 464385D6D5;
+        Mon, 22 Nov 2021 17:05:58 +0000 (UTC)
 From:   Hans de Goede <hdegoede@redhat.com>
 To:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Hans de Goede <hdegoede@redhat.com>, Len Brown <lenb@kernel.org>,
         linux-acpi@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v2 3/7] ACPI / x86: Allow specifying acpi_device_override_status() quirks by path
-Date:   Mon, 22 Nov 2021 18:05:32 +0100
-Message-Id: <20211122170536.7725-4-hdegoede@redhat.com>
+Subject: [PATCH v2 6/7] mmc: sdhci-acpi: Remove special handling for GPD win/pocket devices
+Date:   Mon, 22 Nov 2021 18:05:35 +0100
+Message-Id: <20211122170536.7725-7-hdegoede@redhat.com>
 In-Reply-To: <20211122170536.7725-1-hdegoede@redhat.com>
 References: <20211122170536.7725-1-hdegoede@redhat.com>
 MIME-Version: 1.0
@@ -52,103 +52,124 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Not all ACPI-devices have a HID + UID, allow specifying quirks for
-acpi_device_override_status() by path too.
+Remove the special sdhci_acpi_no_fixup_child_power() helper which was
+added to avoid triggering an ACPI tables bug on the GPD win/pocket
+devices.
 
-Note this moves the path/HID+UID check to after the CPU + DMI checks
-since the path lookup is somewhat costly.
-
-This way this lookup is only done on devices where the other checks
-match.
+The ACPI child-device triggering this bug has now been added to the
+acpi_device_override_status() quirk table, so that its status
+field is set to all 0 (instead of the wrong return value from the _STA
+ACPI method). This removes the need for the special handling in
+the sdhci-acpi code.
 
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
 Changes in v2:
 - No changes in v2 of this patch-series
 ---
- drivers/acpi/x86/utils.c | 42 ++++++++++++++++++++++++++++++----------
- 1 file changed, 32 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-acpi.c | 61 ++---------------------------------
+ 1 file changed, 3 insertions(+), 58 deletions(-)
 
-diff --git a/drivers/acpi/x86/utils.c b/drivers/acpi/x86/utils.c
-index edb4f3fd93dc..190bfc2ab3f2 100644
---- a/drivers/acpi/x86/utils.c
-+++ b/drivers/acpi/x86/utils.c
-@@ -38,22 +38,30 @@ struct override_status_id {
- 	struct x86_cpu_id cpu_ids[2];
- 	struct dmi_system_id dmi_ids[2]; /* Optional */
- 	const char *uid;
-+	const char *path;
- 	unsigned long long status;
- };
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index f1ef0d28b0dd..1461aae13c19 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -34,7 +34,6 @@
+ #include <asm/cpu_device_id.h>
+ #include <asm/intel-family.h>
+ #include <asm/iosf_mbi.h>
+-#include <linux/pci.h>
+ #endif
  
--#define ENTRY(status, hid, uid, cpu_model, dmi...) {			\
-+#define ENTRY(status, hid, uid, path, cpu_model, dmi...) {		\
- 	{ { hid, }, {} },						\
- 	{ X86_MATCH_INTEL_FAM6_MODEL(cpu_model, NULL), {} },		\
- 	{ { .matches = dmi }, {} },					\
- 	uid,								\
-+	path,								\
- 	status,								\
+ #include "sdhci.h"
+@@ -250,16 +249,6 @@ static bool sdhci_acpi_byt(void)
+ 	return x86_match_cpu(byt);
  }
  
- #define PRESENT_ENTRY_HID(hid, uid, cpu_model, dmi...) \
--	ENTRY(ACPI_STA_DEFAULT, hid, uid, cpu_model, dmi)
-+	ENTRY(ACPI_STA_DEFAULT, hid, uid, NULL, cpu_model, dmi)
- 
- #define NOT_PRESENT_ENTRY_HID(hid, uid, cpu_model, dmi...) \
--	ENTRY(0, hid, uid, cpu_model, dmi)
-+	ENTRY(0, hid, uid, NULL, cpu_model, dmi)
-+
-+#define PRESENT_ENTRY_PATH(path, cpu_model, dmi...) \
-+	ENTRY(ACPI_STA_DEFAULT, "", NULL, path, cpu_model, dmi)
-+
-+#define NOT_PRESENT_ENTRY_PATH(path, cpu_model, dmi...) \
-+	ENTRY(0, "", NULL, path, cpu_model, dmi)
- 
- static const struct override_status_id override_status_ids[] = {
- 	/*
-@@ -120,13 +128,6 @@ bool acpi_device_override_status(struct acpi_device *adev, unsigned long long *s
- 	unsigned int i;
- 
- 	for (i = 0; i < ARRAY_SIZE(override_status_ids); i++) {
--		if (acpi_match_device_ids(adev, override_status_ids[i].hid))
--			continue;
+-static bool sdhci_acpi_cht(void)
+-{
+-	static const struct x86_cpu_id cht[] = {
+-		X86_MATCH_INTEL_FAM6_MODEL(ATOM_AIRMONT, NULL),
+-		{}
+-	};
 -
--		if (!adev->pnp.unique_id ||
--		    strcmp(adev->pnp.unique_id, override_status_ids[i].uid))
--			continue;
+-	return x86_match_cpu(cht);
+-}
 -
- 		if (!x86_match_cpu(override_status_ids[i].cpu_ids))
- 			continue;
+ #define BYT_IOSF_SCCEP			0x63
+ #define BYT_IOSF_OCP_NETCTRL0		0x1078
+ #define BYT_IOSF_OCP_TIMEOUT_BASE	GENMASK(10, 8)
+@@ -304,43 +293,6 @@ static bool sdhci_acpi_byt_defer(struct device *dev)
+ 	return false;
+ }
  
-@@ -134,6 +135,27 @@ bool acpi_device_override_status(struct acpi_device *adev, unsigned long long *s
- 		    !dmi_check_system(override_status_ids[i].dmi_ids))
- 			continue;
+-static bool sdhci_acpi_cht_pci_wifi(unsigned int vendor, unsigned int device,
+-				    unsigned int slot, unsigned int parent_slot)
+-{
+-	struct pci_dev *dev, *parent, *from = NULL;
+-
+-	while (1) {
+-		dev = pci_get_device(vendor, device, from);
+-		pci_dev_put(from);
+-		if (!dev)
+-			break;
+-		parent = pci_upstream_bridge(dev);
+-		if (ACPI_COMPANION(&dev->dev) && PCI_SLOT(dev->devfn) == slot &&
+-		    parent && PCI_SLOT(parent->devfn) == parent_slot &&
+-		    !pci_upstream_bridge(parent)) {
+-			pci_dev_put(dev);
+-			return true;
+-		}
+-		from = dev;
+-	}
+-
+-	return false;
+-}
+-
+-/*
+- * GPDwin uses PCI wifi which conflicts with SDIO's use of
+- * acpi_device_fix_up_power() on child device nodes. Identifying GPDwin is
+- * problematic, but since SDIO is only used for wifi, the presence of the PCI
+- * wifi card in the expected slot with an ACPI companion node, is used to
+- * indicate that acpi_device_fix_up_power() should be avoided.
+- */
+-static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+-{
+-	return sdhci_acpi_cht() &&
+-	       acpi_dev_hid_uid_match(adev, "80860F14", "2") &&
+-	       sdhci_acpi_cht_pci_wifi(0x14e4, 0x43ec, 0, 28);
+-}
+-
+ #else
  
-+		if (override_status_ids[i].path) {
-+			struct acpi_buffer path = { ACPI_ALLOCATE_BUFFER, NULL };
-+			bool match;
-+
-+			if (acpi_get_name(adev->handle, ACPI_FULL_PATHNAME, &path))
-+				continue;
-+
-+			match = strcmp((char *)path.pointer, override_status_ids[i].path) == 0;
-+			kfree(path.pointer);
-+
-+			if (!match)
-+				continue;
-+		} else {
-+			if (acpi_match_device_ids(adev, override_status_ids[i].hid))
-+				continue;
-+
-+			if (!adev->pnp.unique_id ||
-+			    strcmp(adev->pnp.unique_id, override_status_ids[i].uid))
-+				continue;
-+		}
-+
- 		*status = override_status_ids[i].status;
- 		ret = true;
- 		break;
+ static inline void sdhci_acpi_byt_setting(struct device *dev)
+@@ -352,11 +304,6 @@ static inline bool sdhci_acpi_byt_defer(struct device *dev)
+ 	return false;
+ }
+ 
+-static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+-{
+-	return false;
+-}
+-
+ #endif
+ 
+ static int bxt_get_cd(struct mmc_host *mmc)
+@@ -861,11 +808,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 
+ 	/* Power on the SDHCI controller and its children */
+ 	acpi_device_fix_up_power(device);
+-	if (!sdhci_acpi_no_fixup_child_power(device)) {
+-		list_for_each_entry(child, &device->children, node)
+-			if (child->status.present && child->status.enabled)
+-				acpi_device_fix_up_power(child);
+-	}
++	list_for_each_entry(child, &device->children, node)
++		if (child->status.present && child->status.enabled)
++			acpi_device_fix_up_power(child);
+ 
+ 	if (sdhci_acpi_byt_defer(dev))
+ 		return -EPROBE_DEFER;
 -- 
 2.33.1
 
