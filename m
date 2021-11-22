@@ -2,29 +2,29 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1552C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:55:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2AA3C28CFB
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 15:55:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240147AbhKVP6q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 10:58:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37552 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240041AbhKVP6p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:58:45 -0500
+        id S240312AbhKVP65 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 10:58:57 -0500
+Received: from leibniz.telenet-ops.be ([195.130.137.77]:50604 "EHLO
+        leibniz.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240130AbhKVP6r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 10:58:47 -0500
 Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [IPv6:2a02:1800:110:4::f00:19])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4A6FC061748
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 07:55:38 -0800 (PST)
+        by leibniz.telenet-ops.be (Postfix) with ESMTPS id 4HyX1726fvzMqwYm
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 16:55:39 +0100 (CET)
 Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed20:e4da:38c:79e9:48bf])
         by laurent.telenet-ops.be with bizsmtp
-        id MTux2600K4yPVd601Tuxk9; Mon, 22 Nov 2021 16:55:38 +0100
+        id MTux2600m4yPVd601TuykH; Mon, 22 Nov 2021 16:55:39 +0100
 Received: from rox.of.borg ([192.168.97.57])
         by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
         (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe6-00EL3j-Vr; Mon, 22 Nov 2021 16:54:18 +0100
+        id 1mpBe5-00EL3L-Rf; Mon, 22 Nov 2021 16:54:17 +0100
 Received: from geert by rox.of.borg with local (Exim 4.93)
         (envelope-from <geert@linux-m68k.org>)
-        id 1mpBe5-00HGzT-Qs; Mon, 22 Nov 2021 16:54:17 +0100
+        id 1mpBe5-00HGy7-BC; Mon, 22 Nov 2021 16:54:17 +0100
 From:   Geert Uytterhoeven <geert+renesas@glider.be>
 To:     Tony Lindgren <tony@atomide.com>,
         Russell King <linux@armlinux.org.uk>,
@@ -69,9 +69,9 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
         alsa-devel@alsa-project.org,
         Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH/RFC 13/17] pinctl: ti: iodelay: Use bitfield helpers
-Date:   Mon, 22 Nov 2021 16:54:06 +0100
-Message-Id: <60257a3c5b567fb5b14d6f9adb770899bce88f7a.1637592133.git.geert+renesas@glider.be>
+Subject: [PATCH 01/17] bitfield: Add non-constant field_{prep,get}() helpers
+Date:   Mon, 22 Nov 2021 16:53:54 +0100
+Message-Id: <3a54a6703879d10f08cf0275a2a69297ebd2b1d4.1637592133.git.geert+renesas@glider.be>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <cover.1637592133.git.geert+renesas@glider.be>
 References: <cover.1637592133.git.geert+renesas@glider.be>
@@ -81,113 +81,93 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the field_{get,prep}() helpers, instead of defining a custom
-function, or open-coding the same operations.
+The existing FIELD_{GET,PREP}() macros are limited to compile-time
+constants.  However, it is very common to prepare or extract bitfield
+elements where the bitfield mask is not a compile-time constant.
+
+To avoid this limitation, the AT91 clock driver already has its own
+field_{prep,get}() macros.  Make them available for general use by
+moving them to <linux/bitfield.h>, and improve them slightly:
+  1. Avoid evaluating macro parameters more than once,
+  2. Replace "ffs() - 1" by "__ffs()", as the latter operates on
+     "unsigned long", just like BIT() and GENMASK().
 
 Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 ---
-Compile-tested only.
-Marked RFC, as this depends on [PATCH 01/17], but follows a different
-path to upstream.
+Using __ffs() actually reduces code size (16 bytes for each of
+drivers/clk/at91/clk-{generated,peripheral}.o), as __ffs() doesn't
+need to verify that the value passed is non-zero.
 ---
- drivers/pinctrl/ti/pinctrl-ti-iodelay.c | 35 +++++++------------------
- 1 file changed, 10 insertions(+), 25 deletions(-)
+ drivers/clk/at91/clk-peripheral.c |  1 +
+ drivers/clk/at91/pmc.h            |  3 ---
+ include/linux/bitfield.h          | 30 ++++++++++++++++++++++++++++++
+ 3 files changed, 31 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/pinctrl/ti/pinctrl-ti-iodelay.c b/drivers/pinctrl/ti/pinctrl-ti-iodelay.c
-index 4e2382778d38f557..b220dcd9215520db 100644
---- a/drivers/pinctrl/ti/pinctrl-ti-iodelay.c
-+++ b/drivers/pinctrl/ti/pinctrl-ti-iodelay.c
-@@ -9,6 +9,7 @@
-  * warranty of any kind, whether express or implied.
+diff --git a/drivers/clk/at91/clk-peripheral.c b/drivers/clk/at91/clk-peripheral.c
+index e14fa5ac734cead7..e2f33498139a1b8c 100644
+--- a/drivers/clk/at91/clk-peripheral.c
++++ b/drivers/clk/at91/clk-peripheral.c
+@@ -3,6 +3,7 @@
+  *  Copyright (C) 2013 Boris BREZILLON <b.brezillon@overkiz.com>
   */
  
 +#include <linux/bitfield.h>
- #include <linux/err.h>
- #include <linux/init.h>
- #include <linux/io.h>
-@@ -155,18 +156,6 @@ struct ti_iodelay_device {
- 	struct ti_iodelay_reg_values reg_init_conf_values;
+ #include <linux/bitops.h>
+ #include <linux/clk-provider.h>
+ #include <linux/clkdev.h>
+diff --git a/drivers/clk/at91/pmc.h b/drivers/clk/at91/pmc.h
+index 3a1bf6194c287d09..1256e1ab91526a25 100644
+--- a/drivers/clk/at91/pmc.h
++++ b/drivers/clk/at91/pmc.h
+@@ -114,9 +114,6 @@ struct at91_clk_pms {
+ 	unsigned int parent;
  };
  
--/**
-- * ti_iodelay_extract() - extract bits for a field
-- * @val: Register value
-- * @mask: Mask
-- *
-- * Return: extracted value which is appropriately shifted
-- */
--static inline u32 ti_iodelay_extract(u32 val, u32 mask)
--{
--	return (val & mask) >> __ffs(mask);
--}
+-#define field_get(_mask, _reg) (((_reg) & (_mask)) >> (ffs(_mask) - 1))
+-#define field_prep(_mask, _val) (((_val) << (ffs(_mask) - 1)) & (_mask))
 -
- /**
-  * ti_iodelay_compute_dpe() - Compute equation for delay parameter
-  * @period: Period to use
-@@ -233,10 +222,10 @@ static int ti_iodelay_pinconf_set(struct ti_iodelay_device *iod,
- 	}
+ #define ndck(a, s) (a[s - 1].id + 1)
+ #define nck(a) (a[ARRAY_SIZE(a) - 1].id + 1)
+ struct pmc_data *pmc_data_allocate(unsigned int ncore, unsigned int nsystem,
+diff --git a/include/linux/bitfield.h b/include/linux/bitfield.h
+index 4e035aca6f7e6000..f03b0712e4babec1 100644
+--- a/include/linux/bitfield.h
++++ b/include/linux/bitfield.h
+@@ -156,4 +156,34 @@ __MAKE_OP(64)
+ #undef __MAKE_OP
+ #undef ____MAKE_OP
  
- 	reg_mask = reg->signature_mask;
--	reg_val = reg->signature_value << __ffs(reg->signature_mask);
-+	reg_val = field_prep(reg->signature_mask, reg->signature_value);
- 
- 	reg_mask |= reg->binary_data_coarse_mask;
--	tmp_val = c_elements << __ffs(reg->binary_data_coarse_mask);
-+	tmp_val = field_prep(reg->binary_data_coarse_mask, c_elements);
- 	if (tmp_val & ~reg->binary_data_coarse_mask) {
- 		dev_err(dev, "Masking overflow of coarse elements %08x\n",
- 			tmp_val);
-@@ -245,7 +234,7 @@ static int ti_iodelay_pinconf_set(struct ti_iodelay_device *iod,
- 	reg_val |= tmp_val;
- 
- 	reg_mask |= reg->binary_data_fine_mask;
--	tmp_val = f_elements << __ffs(reg->binary_data_fine_mask);
-+	tmp_val = field_prep(reg->binary_data_fine_mask, f_elements);
- 	if (tmp_val & ~reg->binary_data_fine_mask) {
- 		dev_err(dev, "Masking overflow of fine elements %08x\n",
- 			tmp_val);
-@@ -260,7 +249,7 @@ static int ti_iodelay_pinconf_set(struct ti_iodelay_device *iod,
- 	 * impacting iodelay configuration. Use with care!
- 	 */
- 	reg_mask |= reg->lock_mask;
--	reg_val |= reg->unlock_val << __ffs(reg->lock_mask);
-+	reg_val |= field_prep(reg->lock_mask, reg->unlock_val);
- 	r = regmap_update_bits(iod->regmap, cfg->offset, reg_mask, reg_val);
- 
- 	dev_dbg(dev, "Set reg 0x%x Delay(a: %d g: %d), Elements(C=%d F=%d)0x%x\n",
-@@ -296,16 +285,14 @@ static int ti_iodelay_pinconf_init_dev(struct ti_iodelay_device *iod)
- 	r = regmap_read(iod->regmap, reg->reg_refclk_offset, &val);
- 	if (r)
- 		return r;
--	ival->ref_clk_period = ti_iodelay_extract(val, reg->refclk_period_mask);
-+	ival->ref_clk_period = field_get(reg->refclk_period_mask, val);
- 	dev_dbg(dev, "refclk_period=0x%04x\n", ival->ref_clk_period);
- 
- 	r = regmap_read(iod->regmap, reg->reg_coarse_offset, &val);
- 	if (r)
- 		return r;
--	ival->coarse_ref_count =
--	    ti_iodelay_extract(val, reg->coarse_ref_count_mask);
--	ival->coarse_delay_count =
--	    ti_iodelay_extract(val, reg->coarse_delay_count_mask);
-+	ival->coarse_ref_count = field_get(reg->coarse_ref_count_mask, val);
-+	ival->coarse_delay_count = field_get(reg->coarse_delay_count_mask, val);
- 	if (!ival->coarse_delay_count) {
- 		dev_err(dev, "Invalid Coarse delay count (0) (reg=0x%08x)\n",
- 			val);
-@@ -326,10 +313,8 @@ static int ti_iodelay_pinconf_init_dev(struct ti_iodelay_device *iod)
- 	r = regmap_read(iod->regmap, reg->reg_fine_offset, &val);
- 	if (r)
- 		return r;
--	ival->fine_ref_count =
--	    ti_iodelay_extract(val, reg->fine_ref_count_mask);
--	ival->fine_delay_count =
--	    ti_iodelay_extract(val, reg->fine_delay_count_mask);
-+	ival->fine_ref_count = field_get(reg->fine_ref_count_mask, val);
-+	ival->fine_delay_count = field_get(reg->fine_delay_count_mask, val);
- 	if (!ival->fine_delay_count) {
- 		dev_err(dev, "Invalid Fine delay count (0) (reg=0x%08x)\n",
- 			val);
++/**
++ * field_prep() - prepare a bitfield element
++ * @_mask: shifted mask defining the field's length and position
++ * @_val:  value to put in the field
++ *
++ * field_prep() masks and shifts up the value.  The result should be
++ * combined with other fields of the bitfield using logical OR.
++ * Unlike FIELD_PREP(), @_mask is not limited to a compile-time constant.
++ */
++#define field_prep(_mask, _val)						\
++	({								\
++		typeof(_mask) ___mask = (_mask);			\
++		(((_val) << __ffs(___mask)) & (___mask));		\
++	})
++
++/**
++ * field_get() - extract a bitfield element
++ * @_mask: shifted mask defining the field's length and position
++ * @_reg:  value of entire bitfield
++ *
++ * field_get() extracts the field specified by @_mask from the
++ * bitfield passed in as @_reg by masking and shifting it down.
++ * Unlike FIELD_GET(), @_mask is not limited to a compile-time constant.
++ */
++#define field_get(_mask, _reg)						\
++	({								\
++		typeof(_mask) ___mask = _mask;				\
++		(((_reg) & (___mask)) >> __ffs(___mask));		\
++	})
++
+ #endif
 -- 
 2.25.1
 
