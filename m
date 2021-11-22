@@ -2,91 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0512C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 10:39:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAFA7C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 10:47:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239287AbhKVKmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 05:42:35 -0500
-Received: from relmlor2.renesas.com ([210.160.252.172]:40635 "EHLO
-        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S235098AbhKVKmf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 05:42:35 -0500
-X-IronPort-AV: E=Sophos;i="5.87,254,1631545200"; 
-   d="scan'208";a="101414932"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 22 Nov 2021 19:39:28 +0900
-Received: from localhost.localdomain (unknown [10.226.92.178])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 8CD6C4004199;
-        Mon, 22 Nov 2021 19:39:25 +0900 (JST)
-From:   Biju Das <biju.das.jz@bp.renesas.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        id S239357AbhKVKuG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 05:50:06 -0500
+Received: from www.zeus03.de ([194.117.254.33]:52438 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239253AbhKVKuF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 22 Nov 2021 05:50:05 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=oghwl1qnDj75n7yfdlvKbT8CzK4L
+        du0DzUS85sTtTRw=; b=yBmUWFyrHEQfyPvHSFMC7c6EXnJAXtJs06UYTrr6HVvs
+        LN9i9NQ+Tc08o38ChAMHXo5SAPKn2u49Tr/JPloGv+vtiP74h8ADr8/MTRrsbwP0
+        LFKA+lpwhrAcqrupb5XeV6HzvYEBLKHt5ote8ZosqKkRp1gpG4DxHYx/AF+GYeE=
+Received: (qmail 761530 invoked from network); 22 Nov 2021 11:46:57 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Nov 2021 11:46:57 +0100
+X-UD-Smtp-Session: l3s3148p1@PMIBWF7RetsgAwDPXwnCAFkDAkP2hjT7
+Date:   Mon, 22 Nov 2021 11:46:56 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Biju Das <biju.das.jz@bp.renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
         Geert Uytterhoeven <geert+renesas@glider.be>,
         Chris Paterson <Chris.Paterson2@renesas.com>,
         Biju Das <biju.das@bp.renesas.com>,
         Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         linux-renesas-soc@vger.kernel.org
-Subject: [PATCH 1/2] dt-bindings: mmc: renesas,sdhi: Rename RZ/G2L clocks
-Date:   Mon, 22 Nov 2021 10:39:04 +0000
-Message-Id: <20211122103905.14439-2-biju.das.jz@bp.renesas.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20211122103905.14439-1-biju.das.jz@bp.renesas.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: renesas,sdhi: Rename RZ/G2L clocks
+Message-ID: <YZt1IGvXr8sO3Rvc@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        linux-renesas-soc@vger.kernel.org
 References: <20211122103905.14439-1-biju.das.jz@bp.renesas.com>
+ <20211122103905.14439-2-biju.das.jz@bp.renesas.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="zm34zFuq44kjVJ62"
+Content-Disposition: inline
+In-Reply-To: <20211122103905.14439-2-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Rename the below RZ/G2L clocks to match with the clock names used in
-R-Car Gen2 and later generations.
 
- imclk->core
- clk_hs->clkh
- imclk2->cd
+--zm34zFuq44kjVJ62
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-This changes will avoid using fallback for RZ/G2L high speed clock,
-if "clkh" is not used in device tree and also the code changes in
-driver related to this clocks.
+On Mon, Nov 22, 2021 at 10:39:04AM +0000, Biju Das wrote:
+> Rename the below RZ/G2L clocks to match with the clock names used in
+> R-Car Gen2 and later generations.
+>=20
+>  imclk->core
+>  clk_hs->clkh
+>  imclk2->cd
+>=20
+> This changes will avoid using fallback for RZ/G2L high speed clock,
+> if "clkh" is not used in device tree and also the code changes in
+> driver related to this clocks.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
----
-Note:
- This patch series based on renesas-devel and depend upon [1]
+The bindings match what we discussed. Thanks!
 
- [1] https://git.kernel.org/pub/scm/linux/kernel/git/geert/renesas-devel.git/commit/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml?id=e051025efac3929ca7e3e2f2c8860d3447366ebc
----
- .../devicetree/bindings/mmc/renesas,sdhi.yaml          | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index f5107a641790..9ce6e06c19db 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -113,17 +113,17 @@ allOf:
-         clocks:
-           items:
-             - description: IMCLK, SDHI channel main clock1.
-+            - description: CLK_HS, SDHI channel High speed clock which operates
-+                           4 times that of SDHI channel main clock1.
-             - description: IMCLK2, SDHI channel main clock2. When this clock is
-                            turned off, external SD card detection cannot be
-                            detected.
--            - description: CLK_HS, SDHI channel High speed clock which operates
--                           4 times that of SDHI channel main clock1.
-             - description: ACLK, SDHI channel bus clock.
-         clock-names:
-           items:
--            - const: imclk
--            - const: imclk2
--            - const: clk_hs
-+            - const: core
-+            - const: clkh
-+            - const: cd
-             - const: aclk
-       required:
-         - clock-names
--- 
-2.17.1
 
+--zm34zFuq44kjVJ62
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmGbdR0ACgkQFA3kzBSg
+KbYq9w/+PwY4hCRYAXEb6Rt9RLvUzYi379L2WM8FXggj4EtpN4NkjITBaF6xPsw4
+aLMvieOhk7PO9kd5+5b/T6YMzNnMV+bDqwtNBQPza30sQlh06vO8dnFzJnI4/3cA
+mUKNu/tC0W0ZZGiCvtGEA9UvMK+KV+fdxSHlbleEYFiY9vsfoX61/IC+DmkgwFxI
+iANui2BbmB5c7MtS5EwmTOxsZ13ayR4QgMLKrdnHvnfcyvWjkTYHflVj94jkSJpU
+bz4HNjrFmrRG2/q5nRUUDtirqs2bvwz45F7GM0kzxGiJaAaLZEQ0CsXOxmbcIVb6
+wWZ7dXjnxYn0Q9Y4wJ7VVfBIbhneTCsXhCg/o+7nzvp/8jBSmkmf4UEZ3r6fiwOw
+5smdLqP3pFfkiOomMYIzVA2pY/qN/rUUs/mXeOKs+5vxlWF1ns9jwUp+MeqsyQQN
+vg0O0t0rnetrT6GFot4UF1OlJWKwyGMEpul4x7pnX2/c+oEGxRv7gmIdBGVQHqfW
+7Y8pmC2IChg9k5lIpRArIet1SuvXGRI4Bf+ufIBBkLqMt+NkN0EkDnK4y8hHP0n5
+rwLqaxDIR+LIPjSaaSVHbb4QySzweBOeHVO3HdJ91LD1yV3isI+PIere4QMYEzj/
+/ceILluQT6QXfY8PZtxa6D0gEFPskex6k53xBg205thjY48ZSqQ=
+=Bz4w
+-----END PGP SIGNATURE-----
+
+--zm34zFuq44kjVJ62--
