@@ -2,95 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 298E9C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 11:28:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B79E3C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Nov 2021 13:06:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239119AbhKVLb3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 06:31:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32810 "EHLO
+        id S233325AbhKVNJg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 08:09:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239113AbhKVLb0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 06:31:26 -0500
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C1EAC06173E
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 03:28:19 -0800 (PST)
-Received: by mail-lf1-x134.google.com with SMTP id b40so79243762lfv.10
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Nov 2021 03:28:19 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=IagQM63R+rDjhJUw1VMPJDDpFazIAHieWAnQRQyFphA=;
-        b=PFAOxEbUA29b30rxhBtR8jpeMFz07/eFFDDQJAnKfBtRCskpZSpEbXpH0xchxq1vX6
-         ObDxcAJdeilTRvGEDpDffya6n9VnUGLW/jItJ0gK3pigN1UpiYMpaqpgSoJudZjtUBCE
-         FH4yJ9f2n9A+mQ+y0WJkrxjJk9Cbrj+nCvr9ECf9q1DfbOBIGzzx2uOqesFUOzl7MD5P
-         HPTfRtw+XQEbqYzgpL/eYbVxlVikndmIEZ+ApJfNT2S9VDjiR6cq6LCcQ/0O8jVxCi2A
-         I9fcmoC3xOdgA+zfvZMnX7rZZefpEQUQOWDDgCUu63ND6vGFsoeAc10oxDb7x4Fn77bW
-         97wA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=IagQM63R+rDjhJUw1VMPJDDpFazIAHieWAnQRQyFphA=;
-        b=YwFg4XQ2TNZgwldxWtocUi+djBv32lDWw3+Ie/KsHy7asOZA3zsf2OXOnB2yB5mO1J
-         JnQyNJMpi+uZvCI7bKujKEBEV8Lrl2QRsLmy0wcO7knNOAP2bUTFkdKqL4Q1wgzrlEiU
-         u+wqbTsxFjnmMT2ndnFBj8nuyujuOHsJInI0/jjZ/GmWffKROtNtKgNWj/Ad+WXIweQo
-         mK50xRxsoc+S8OEVOoGdldbt4enSPeXk0sRSX1Mr3CNn8ZsPM6SMInuPU82s232eYFSs
-         iVrnbHorXn3po8IYcJLPEPNbOOr1XEJ9ZrSlhwObuDeUjIIWRBl+DCKPiq5qDKqm/jtt
-         /62g==
-X-Gm-Message-State: AOAM530F5I5l8QfB1S4ArKUyEmu3Xju/Wyag18ht/ksvPTd+nt/UXNwO
-        ddz+FRTqfWSDZhthX0LuB2PVWMkUwKMA7tu8wn2UCQQ1/KNw4A==
-X-Google-Smtp-Source: ABdhPJy3c024rax53YED/h5qShT7smb1J1xSLFa5vpqATOSqXWQ6zzjj3kRnEy9P+bc+FTkRM8LPPqCdRz857mHRdrY=
-X-Received: by 2002:ac2:4bc1:: with SMTP id o1mr57271385lfq.254.1637580497906;
- Mon, 22 Nov 2021 03:28:17 -0800 (PST)
+        with ESMTP id S229797AbhKVNJg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Nov 2021 08:09:36 -0500
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79BBCC061574;
+        Mon, 22 Nov 2021 05:06:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=M0AE+ZplCG2vjHuG8BzMEuw7b+ZVgcj/t/lpsJgxGc4=; b=IWFNx6Of/NY/pZDFOc5W+F7qHu
+        FH8Jyq1Dxm4uaYFWacBeOBfZU1yfsX4sXTjxuv/xBaqlWxQ7qoZ1m2403HQ9P2+0bQEuKsUOGJP6I
+        nZqlyUuDRHGAJQiv7ofh7Cv+cpngte6QBea8oEnF39HmRigGsDgNXt93yVxMsuYii2IYbam60Fdqo
+        fm7L3wLh1BKMuZM8vz7D8gYKU+kIerIEztew9MqVhVsp2NoiHZ6ihbFrS2BQ1bJ25HL/qFFc3hc8l
+        GA/VaNN4Au+UnlMkKifQH+F/x+aKYe+5ic7NI1Vb5vssFi7GVbEkYpEYt3u0QWY4Yc6dNqxNUHlSz
+        rECUybfg==;
+Received: from [2001:4bb8:180:22b2:9649:4579:dcf9:9fb2] (helo=localhost)
+        by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mp91e-00CrqS-0H; Mon, 22 Nov 2021 13:06:27 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-block@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: cleanup and simplify the gendisk flags
+Date:   Mon, 22 Nov 2021 14:06:11 +0100
+Message-Id: <20211122130625.1136848-1-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-References: <20211122103905.14439-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20211122103905.14439-1-biju.das.jz@bp.renesas.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 22 Nov 2021 12:27:42 +0100
-Message-ID: <CAPDyKFrcCHBrh9JUDXkMyuURgnnh8uxjcGp_DLKMDz7zw0pWWQ@mail.gmail.com>
-Subject: Re: [PATCH 0/2] Rename RZ/G2L SDHI clocks
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <chris.paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 22 Nov 2021 at 11:39, Biju Das <biju.das.jz@bp.renesas.com> wrote:
->
-> RZ/G2L SDHI has 4 clocks which is controlled by PM frame work and is using
-> Gen3 compatible string. Now the clock factorisation happened on highspeed
-> clock handling and it changes to fallback by getting parent clock, if
-> "clkh" is not specified in device tree.
->
-> This path series rename the clocks to match with the clock names used in
-> R-Car Gen2 and later generations. This will avoid driver changes related
-> to clock names.
->
-> This patch series based on renesas-devel
+Ho Jens,
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+the gendisk flags have been a complete mess for a while.  This series
+tries to untangle them as much as easily possible.
 
-Kind regards
-Uffe
-
->
-> Biju Das (2):
->   dt-bindings: mmc: renesas,sdhi: Rename RZ/G2L clocks
->   arm64: dts: renesas: r9a07g044: Rename SDHI clocks
->
->  .../devicetree/bindings/mmc/renesas,sdhi.yaml          | 10 +++++-----
->  arch/arm64/boot/dts/renesas/r9a07g044.dtsi             |  8 ++++----
->  2 files changed, 9 insertions(+), 9 deletions(-)
->
-> --
-> 2.17.1
->
+Diffstat:
+ block/bdev.c                       |    5 --
+ block/blk.h                        |    1 
+ block/genhd.c                      |   41 +++++++----------
+ block/ioctl.c                      |   31 ++-----------
+ block/partitions/core.c            |   24 ++++------
+ drivers/block/amiflop.c            |    1 
+ drivers/block/ataflop.c            |    1 
+ drivers/block/brd.c                |    1 
+ drivers/block/drbd/drbd_main.c     |    1 
+ drivers/block/floppy.c             |    1 
+ drivers/block/loop.c               |    9 +--
+ drivers/block/n64cart.c            |    2 
+ drivers/block/null_blk/main.c      |    1 
+ drivers/block/paride/pcd.c         |    3 -
+ drivers/block/paride/pf.c          |    1 
+ drivers/block/pktcdvd.c            |    2 
+ drivers/block/ps3vram.c            |    1 
+ drivers/block/rbd.c                |    6 --
+ drivers/block/sunvdc.c             |   17 +++----
+ drivers/block/swim.c               |    1 
+ drivers/block/swim3.c              |    2 
+ drivers/block/virtio_blk.c         |    1 
+ drivers/block/xen-blkback/xenbus.c |    2 
+ drivers/block/xen-blkfront.c       |   26 ++++-------
+ drivers/block/z2ram.c              |    1 
+ drivers/block/zram/zram_drv.c      |    1 
+ drivers/cdrom/gdrom.c              |    1 
+ drivers/md/dm.c                    |    1 
+ drivers/md/md.c                    |    5 --
+ drivers/mmc/core/block.c           |    4 -
+ drivers/mtd/ubi/block.c            |    1 
+ drivers/scsi/sd.c                  |    1 
+ drivers/scsi/sr.c                  |    6 +-
+ include/linux/genhd.h              |   85 +++++++++----------------------------
+ 34 files changed, 104 insertions(+), 183 deletions(-)
