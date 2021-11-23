@@ -2,158 +2,250 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A9C4C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 19:41:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1379C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 20:09:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237455AbhKWToL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 14:44:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52178 "EHLO
+        id S240267AbhKWUNG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 15:13:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58734 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234047AbhKWToK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 14:44:10 -0500
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ECEEC061574
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 11:41:02 -0800 (PST)
-Received: by mail-lf1-x134.google.com with SMTP id m27so730632lfj.12
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 11:41:01 -0800 (PST)
+        with ESMTP id S238621AbhKWUNF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 15:13:05 -0500
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 833DCC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 12:09:56 -0800 (PST)
+Received: by mail-lj1-x22e.google.com with SMTP id e11so454757ljo.13
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 12:09:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=JVDHi0leLa3tR6MyaGMKNAgXUzJaQfccRWXCKJgel14=;
-        b=Vecn+r/eOzhRF2WzqenNn4zQTVh5v2W19Gg8y4d/533OxOQxTIzySB3yE6kR/BgNPj
-         aSJYB1HLgGsH7IPXwksOAAQN2qNCh5aGpem03tesK9N6MSD7zyNnlnA+DLMV/XZ0b5Ev
-         lN64WupSiLIqXT8EbLbTiVP1H3HGiFdbUvDWgZF4PUVEoSHCA/TpHCo1FukLVSD6T/Sa
-         6IlfUWejYcPpL+HXD25mEHk4HAqyUFm8bkC7p9XiLL0j/grcYtQc/09YemCBETmQOSdo
-         Ru+AuumVM2mWyUrEk25WRsw2TzLJeHoCOz0rb/dTVfPJxZAfRCM2ggPpnNCEGWjPpuMK
-         Julw==
+         :cc;
+        bh=RUVHvpDWEBEfs1rA1nDK27iWUayqNQz0QB3zyVMeGIw=;
+        b=Gx8xj3XG561BXhcV10Wx+2ZauEdGbJUODP+0YCMfQFUvND++0mS6GfxiLEtSqDytvv
+         AnvzW96dqJ4x8MlyvHzsiG58VHxfO3ZNsI8g+VoABqaB9ozhKW0GxtuPIA/Jn++EqFQX
+         GwgF37tbnSboXj8kJ7Zu8p690+UVMvkniEX62Q24H8dVp3K6IWQPlaOnHT0gfl/AaEFy
+         Zh8/2zCkLBq4QR3+EeW3ZY7yJk0CQkLQZncIUqOdk3p0SADh4du5ZIcLAlH1BXB04py0
+         WDyhVvuiYOvBMrZyhdq/IfSx/JqQuSGkIbQY+b9bb5f1VBLzqmyPvzq3Gkvk3Fja5HpN
+         +rbA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=JVDHi0leLa3tR6MyaGMKNAgXUzJaQfccRWXCKJgel14=;
-        b=JyFa2xe5xJzFuaCMf5HTxdbitM5pJvXZgQWDssKU5CAOeUONexh6iSNd57JQ8RE0dg
-         8oVAUH+ZFM3CAGwvEzvutV66h/a6L5pOGHtxhuBdrSwbtDpfDnVBi6aLs3+Pkdqc7/eW
-         5VI/iaN1P8HA2zzQieuO8zh7FBCth8PIEFPzyXqqkN8dwluNnFl+pnA0yXWDRhMTIViD
-         ef34xmXKjevih/AYo6bmAsi9sRX6VWIS/b7AmIpbiPb3tQm/Soq3YTqmIPDg/9GD7832
-         5t2U3lCZjx67Mc9Relj9UmADaiChlJtuqYrH86oUZE5bfN8uI5vAH3QkRBMfZFqZlwvu
-         g8EQ==
-X-Gm-Message-State: AOAM532wsRrcmSCH33UWwJdMHTNs5Eiocw3YVBQF28BZYB4HkZceRTar
-        bKKdDfIwnGV5KQPanvPIFPsJTRlsxWVxD+EO/tsCog==
-X-Google-Smtp-Source: ABdhPJw9lHTL+F8I+tH4dgc7ITl9ZJv/KEduWqmIgsQgzoQRAmOFudTjc6eNZsusURtFc4beiTMylwY1wENk23nyFXA=
-X-Received: by 2002:ac2:5607:: with SMTP id v7mr7562929lfd.71.1637696460348;
- Tue, 23 Nov 2021 11:41:00 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=RUVHvpDWEBEfs1rA1nDK27iWUayqNQz0QB3zyVMeGIw=;
+        b=raSyFiocQz5DLsVrcUoH4SFzDAp10wqd/sEa2Y2cSU9VXodEIhiCBnhVRTBM7Xczt1
+         X9iFv7iFHHPJ6lynPhuJCEoJGP2nKbjkkELbfrwEWrAtezgm4/BhjVhB6nFz5msSd6GH
+         MZ/nUXETPNdNo4sE5ugTG/B3tYMTNe+LVSE6LrOhkJ9sPt4AOkE734XyvhBsCMgJGPve
+         8RwtRzn9cRBRr2E7AR/YJsmFqUtj6ig87kql8C5c5ETM0qQLz1QvRfCPXZt8hzwjt1UG
+         pGTTpR3O1jXHYr9MIkgFMERCN7f3SdTj2xqiSZYYxBSgQ+ty5RUnNvEJejiEvqx1+uZH
+         Mq3g==
+X-Gm-Message-State: AOAM530ERM5JB5R4P5nqO5FDMctTU3hdsOJ8k1gWHFUMbndQ7SLXUdhp
+        3elt1HLmqQGAL1O5KiFq3i+iTqmmOieMS1MBjPn4fA==
+X-Google-Smtp-Source: ABdhPJzaZfhmzYFEL5qRSvRdg1nJ4rAMNq2jR2Fsv3IFyKJnFZ25EBoa+LBAimt2uhaFYazqObYuevCozI5jPymVS9k=
+X-Received: by 2002:a2e:a22a:: with SMTP id i10mr8650725ljm.16.1637698194349;
+ Tue, 23 Nov 2021 12:09:54 -0800 (PST)
 MIME-Version: 1.0
-References: <20211119155337.14341-1-marten.lindahl@axis.com>
-In-Reply-To: <20211119155337.14341-1-marten.lindahl@axis.com>
+References: <20211120112318.10474-1-kmcopper@danwin1210.me>
+In-Reply-To: <20211120112318.10474-1-kmcopper@danwin1210.me>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Nov 2021 20:40:24 +0100
-Message-ID: <CAPDyKFoRmRuFRd4ZubkwkPCPuT1zAbx_YFqPm5iV4zyv8REg6w@mail.gmail.com>
-Subject: Re: [PATCH v6] mmc: dw_mmc: Allow lower TMOUT value than maximum
-To:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <marten.lindahl@axis.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Doug Anderson <dianders@google.com>, kernel@axis.com,
-        linux-mmc@vger.kernel.org
+Date:   Tue, 23 Nov 2021 21:09:18 +0100
+Message-ID: <CAPDyKFrwnL4-XhwVXVvVk2ZXJF+FPEvaMmzPN4HvHs1s760FyA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: arasan: add runtime power management support
+To:     Kyle Copperfield <kmcopper@danwin1210.me>
+Cc:     Michal Simek <michal.simek@xilinx.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Manish Narani <manish.narani@xilinx.com>,
+        Dragan Simic <dragan.simic@gmail.com>,
+        Ondrej Jirman <megous@megous.com>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 19 Nov 2021 at 16:53, M=C3=A5rten Lindahl <marten.lindahl@axis.com>=
- wrote:
+On Sat, 20 Nov 2021 at 12:23, Kyle Copperfield <kmcopper@danwin1210.me> wrote:
 >
-> The TMOUT register is always set with a full value for every transfer,
-> which (with a 200MHz clock) will give a full DRTO of ~84 milliseconds.
-> This is normally good enough to complete the request, but setting a full
-> value makes it impossible to test shorter timeouts, when for example
-> testing data read times on different SD cards.
+> Add runtime power management support in Arasan SDHCI driver.
 >
-> Add a function to set any value smaller than the maximum of 0xFFFFFF.
+> This patch is largely based on the original Arasan PM patch from
+> https://lore.kernel.org/linux-mmc/1537283046-13985-1-git-send-email-manish.narani@xilinx.com/
+> that was left abandoned since 2018 for an unknown reason.
 >
-> Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
+> Changes made to the original patch include reducing the runtime
+> suspend timeout to 50 ms and reusing the runtime PM configuration
+> found in sdhci-of-at91 driver.
+>
+> Power consumption is measurably reduced on the Pinebook Pro and
+> PinePhone Pro, on which the patch was tested.  More precisely,
+> a reduction of about 200 mW was measured on the latter.
+>
+> Originally-by: Manish Narani <manish.narani@xilinx.com>
+> Reviewed-by: Dragan Simic <dragan.simic@gmail.com>
+> Tested-by: Ondrej Jirman <megous@megous.com>
+> Signed-off-by: Kyle Copperfield <kmcopper@danwin1210.me>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 88 +++++++++++++++++++++++++++++-
+>  1 file changed, 86 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 737e2bfdedc2..63095d91a672 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -19,6 +19,7 @@
+>  #include <linux/mfd/syscon.h>
+>  #include <linux/module.h>
+>  #include <linux/of_device.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/phy/phy.h>
+>  #include <linux/regmap.h>
+>  #include <linux/of.h>
+> @@ -27,6 +28,7 @@
+>  #include "cqhci.h"
+>  #include "sdhci-pltfm.h"
+>
+> +#define SDHCI_ARASAN_AUTOSUSPEND_DELAY 50 /* ms */
+>  #define SDHCI_ARASAN_VENDOR_REGISTER   0x78
+>
+>  #define SDHCI_ARASAN_ITAPDLY_REGISTER  0xF0F8
+> @@ -456,6 +458,70 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
+>                         SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>  };
+>
+> +static int __maybe_unused sdhci_arasan_runtime_suspend(struct device *dev)
+> +{
+> +       struct platform_device *pdev = to_platform_device(dev);
+> +       struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+> +
+> +       if (sdhci_arasan->has_cqe) {
+> +               ret = cqhci_suspend(host->mmc);
+> +               if (ret)
+> +                       return ret;
+> +       }
+> +
+> +       ret = sdhci_runtime_suspend_host(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> +               mmc_retune_needed(host->mmc);
+> +
+> +       clk_disable(pltfm_host->clk);
+> +       clk_disable(sdhci_arasan->clk_ahb);
 
-Applied for next, thanks!
+These should be clk_disable_unprepare() - and the corresponding
+clk_enable() below, needs to be converted to clk_prepare_enable().
+
+Moreover, I am wondering about why the phy is to be turned off with
+phy_power_off() during system suspend, but not during runtime suspend?
+
+When is it safe to turn off the phy?
+
+> +
+> +       return 0;
+> +}
+> +
+> +static int __maybe_unused sdhci_arasan_runtime_resume(struct device *dev)
+> +{
+> +       struct platform_device *pdev = to_platform_device(dev);
+> +       struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       int ret;
+> +
+> +       ret = clk_enable(sdhci_arasan->clk_ahb);
+> +       if (ret) {
+> +               dev_err(dev, "Cannot enable AHB clock: %d\n", ret);
+> +               return ret;
+> +       }
+> +
+> +       ret = clk_enable(pltfm_host->clk);
+> +       if (ret) {
+> +               dev_err(dev, "Cannot enable SD clock: %d\n", ret);
+> +               goto err_clk_ahb;
+> +       }
+> +
+> +       ret = sdhci_runtime_resume_host(host, 0);
+> +       if (ret)
+> +               goto err_clk_disable;
+> +
+> +       if (sdhci_arasan->has_cqe)
+> +               return cqhci_resume(host->mmc);
+> +
+> +       return 0;
+> +
+> +err_clk_disable:
+> +       clk_disable(pltfm_host->clk);
+> +err_clk_ahb:
+> +       clk_disable(sdhci_arasan->clk_ahb);
+> +
+> +       return ret;
+> +}
+> +
+>  #ifdef CONFIG_PM_SLEEP
+>  /**
+>   * sdhci_arasan_suspend - Suspend method for the driver
+> @@ -552,8 +618,10 @@ static int sdhci_arasan_resume(struct device *dev)
+>  }
+>  #endif /* ! CONFIG_PM_SLEEP */
+>
+> -static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
+> -                        sdhci_arasan_resume);
+> +static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend, sdhci_arasan_resume)
+
+In sdhci_arasan_suspend() we assume that the clocks, etc are turned
+on. This may not be the case anymore, as
+sdhci_arasan_runtime_suspend() may already have done that.
+
+There are a couple of options to deal with that, like using
+pm_runtime_force_suspend|resume(). But then don't forget that you may
+need to manage system wakeups, if that is supported.
+
+> +       SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
+> +                          sdhci_arasan_runtime_resume, NULL) };
+>
+>  /**
+>   * sdhci_arasan_sdcardclk_recalc_rate - Return the card clock rate
+> @@ -1681,13 +1749,25 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                         host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+>         }
+>
+> +       pm_runtime_get_noresume(&pdev->dev);
+> +       pm_runtime_set_active(&pdev->dev);
+> +       pm_runtime_enable(&pdev->dev);
+> +       pm_runtime_set_autosuspend_delay(&pdev->dev, SDHCI_ARASAN_AUTOSUSPEND_DELAY);
+> +       pm_runtime_use_autosuspend(&pdev->dev);
+> +
+>         ret = sdhci_arasan_add_host(sdhci_arasan);
+>         if (ret)
+>                 goto err_add_host;
+>
+> +       pm_runtime_put_autosuspend(&pdev->dev);
+> +
+>         return 0;
+>
+>  err_add_host:
+> +       pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_set_suspended(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+> +
+>         if (!IS_ERR(sdhci_arasan->phy))
+>                 phy_exit(sdhci_arasan->phy);
+>  unreg_clk:
+> @@ -1715,6 +1795,10 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+>                 phy_exit(sdhci_arasan->phy);
+>         }
+>
+> +       pm_runtime_get_sync(&pdev->dev);
+> +       pm_runtime_disable(&pdev->dev);
+> +       pm_runtime_put_noidle(&pdev->dev);
+> +
+>         sdhci_arasan_unregister_sdclk(&pdev->dev);
+>
+>         ret = sdhci_pltfm_unregister(pdev);
 
 Kind regards
 Uffe
-
-
-> ---
->
-> v2:
->  - Calculate new value before checking boundaries
->  - Include CLKDIV register to get proper value
->
-> v3:
->  - Use 'if-else' instead of 'goto'
->  - Don't touch response field when maximize data field
->
-> v4:
->  - Prevent 32bit divider overflow by splitting the operation
->  - Changed %06x to %#08x as suggested by Doug
->  - Rephrased commit msg as suggested by Doug
->
-> v5:
->  - Use u32 type for CPU reg access
->  - Make tmp 64bit to handle INT_MAX parameters
->
-> v6:
->  - Use u64 type for tmp
->
->  drivers/mmc/host/dw_mmc.c | 29 ++++++++++++++++++++++++++++-
->  1 file changed, 28 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index d977f34f6b55..f310d9438dff 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1283,6 +1283,33 @@ static void dw_mci_setup_bus(struct dw_mci_slot *s=
-lot, bool force_clkinit)
->         mci_writel(host, CTYPE, (slot->ctype << slot->id));
->  }
->
-> +static void dw_mci_set_data_timeout(struct dw_mci *host,
-> +                                   unsigned int timeout_ns)
-> +{
-> +       u32 clk_div, tmout;
-> +       u64 tmp;
-> +
-> +       clk_div =3D (mci_readl(host, CLKDIV) & 0xFF) * 2;
-> +       if (clk_div =3D=3D 0)
-> +               clk_div =3D 1;
-> +
-> +       tmp =3D DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz, NSEC_PER=
-_SEC);
-> +       tmp =3D DIV_ROUND_UP_ULL(tmp, clk_div);
-> +
-> +       /* TMOUT[7:0] (RESPONSE_TIMEOUT) */
-> +       tmout =3D 0xFF; /* Set maximum */
-> +
-> +       /* TMOUT[31:8] (DATA_TIMEOUT) */
-> +       if (!tmp || tmp > 0xFFFFFF)
-> +               tmout |=3D (0xFFFFFF << 8);
-> +       else
-> +               tmout |=3D (tmp & 0xFFFFFF) << 8;
-> +
-> +       mci_writel(host, TMOUT, tmout);
-> +       dev_dbg(host->dev, "timeout_ns: %u =3D> TMOUT[31:8]: 0x%#08x",
-> +               timeout_ns, tmout >> 8);
-> +}
-> +
->  static void __dw_mci_start_request(struct dw_mci *host,
->                                    struct dw_mci_slot *slot,
->                                    struct mmc_command *cmd)
-> @@ -1303,7 +1330,7 @@ static void __dw_mci_start_request(struct dw_mci *h=
-ost,
->
->         data =3D cmd->data;
->         if (data) {
-> -               mci_writel(host, TMOUT, 0xFFFFFFFF);
-> +               dw_mci_set_data_timeout(host, data->timeout_ns);
->                 mci_writel(host, BYTCNT, data->blksz*data->blocks);
->                 mci_writel(host, BLKSIZ, data->blksz);
->         }
-> --
-> 2.20.1
->
