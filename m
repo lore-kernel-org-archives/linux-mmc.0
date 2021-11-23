@@ -2,123 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DB67C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 19:35:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75D6CC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 19:40:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238939AbhKWTiM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 14:38:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50736 "EHLO
+        id S234801AbhKWToG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 14:44:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234894AbhKWTiH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 14:38:07 -0500
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA7D4C061574
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 11:34:58 -0800 (PST)
-Received: by mail-lj1-x229.google.com with SMTP id d11so329160ljg.8
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 11:34:58 -0800 (PST)
+        with ESMTP id S231629AbhKWToG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 14:44:06 -0500
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7C75C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 11:40:57 -0800 (PST)
+Received: by mail-lf1-x136.google.com with SMTP id f18so806783lfv.6
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 11:40:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=eAMWwENTmC7DzHcgX7E/tW+4+EEPwisOX8kGjUdddTY=;
-        b=YF6gOICxsFKSGsCKGEnlRdknU4T7rQ2D+vR7fhPq+flRWwgs8jYEWXZ3RrOY0m23cP
-         jyRrELQ4i1OwvAxclElGmeuj8dmIaPKHwE5LtTdTiwyc9qMwCn20KvjSMqG80b71Y/SO
-         hYUJ/gQaLNHZprcrlKRehj9zm5fE9Bye4W2yEKpuBQfRw2cMCMLYgjHE416JiwCWHr68
-         NJsIaObwr6s61lfkEnSurC9kEcuvAaOvgY2g7YE2CFk9SXI3zEi8ZdSWV3e4CNxIwz+c
-         +CVOrkFegJlJBfGlQq+4yScr0gMVdlTps0usPOWCov/Tnm7Ys0im+RYvR0mIGD3M35rM
-         6Npg==
+        bh=QKototm+ggjsnUIU+FMdClkd9TByERSoA+0AnaJd+Rs=;
+        b=r+0oR66fWwZZGCS12XCPkrDbW1OWMDO9LBoAUcBHkn3XFkoHGEfkJMjbXYDaQXygyb
+         v1ZVGxxD1QieCxmUZZhEUbQf/XCqNTHTYS/jhPz3eNDfA3hWyZRxO/ErigfrtSn36qNr
+         vMFCNtOcQ6E7JpMAb1HK2qLMdB1zBjbw4OzNJaTNktcSbSp97WnnulF0WUIlZvmuGywL
+         H9nH2w3yf9gP+fxjGlON7BYnX0qcSHCGXZqiw5GovTQHeKwBQxAXekiZ4oeYkDGCnxRA
+         Nn1jsk/8LLepU/MdD9mBjzXPyB8ZNtvy6ZITFxXte7O+pgq8nFqAPVqkwgSD/lHjo+mb
+         Jt7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=eAMWwENTmC7DzHcgX7E/tW+4+EEPwisOX8kGjUdddTY=;
-        b=ixCDgTxTnNU4/zHD6wcGG5BBrAeP901JjVDRCn4pH5FdEBYKiXiUTEi0GSpOMxi1Cu
-         geSelzIJHYmT93EAdK1psb0/1Qg6QKSs/sECymFUTIUu0XIixiwsa+EjzjQtRkItqNHL
-         oe1iuJqPlJy2mU7ZyTnQFXyxdqjpLdCEbaV02MJB6NY+awOtbIIHSkcbmxwipb4uzyn6
-         k554/4nvO4R1ZmTCqgcydXHjpPFTN7DLK75e1F5bgfJI7U4YGxsoAnCMLUZZ3dX2IX3c
-         9VbX3Q6jRvAWuFt40KhSpYeep0/elsH2/AKJKSAEoICoGdFwyRGW8yNttMRyWpGI5PR6
-         I50w==
-X-Gm-Message-State: AOAM530kBYMiQ+2tvD3adIE2vO9apCm1ZdoJxT2SaVAR1TkfjHpbP5AV
-        MRfmz1NtqWICtDNM2oVDQWW21bk7/5DxMk2/EpdeMA==
-X-Google-Smtp-Source: ABdhPJwrjHz86W+VahcN/ogSmg3g2k2OHcHKcRD40FmzVFDWnMKV0fz6haEETY3J8bDF4QtQN9WFXdVoWSBwT7iGa6k=
-X-Received: by 2002:a2e:a5c8:: with SMTP id n8mr8391990ljp.367.1637696097076;
- Tue, 23 Nov 2021 11:34:57 -0800 (PST)
+        bh=QKototm+ggjsnUIU+FMdClkd9TByERSoA+0AnaJd+Rs=;
+        b=wvm/QtZj+MEl4RVQIhmGNZEnV/0oQfeffBLxt2x2Fqyd15Z0z8Jdo/JYlAu5z5aheT
+         3I6M/o+/foVRN1ovRljMJvHMPY84XRt/gO+QDfeHh+Drlfvc8oSC1JyaokSJ2LcpOd5/
+         8debk68Ub86/J1QUefuH2r2l6PvJ/Z0lNpyTBc3slpvLXsRW0UW3ss4zcVlMmxyfvqSm
+         CZiUTXuAaXreAU9Mc2m2ZOqlsXKdb9DvHDfwaoMK9mByeQwhv3o/7WQQJd1lBQurze93
+         5qn/H3xWjoEmm30gLDwnztaBHQVaWgNJ/rjtFWryT4uzzTzKkyr36H0PgvGbEdyMHdE4
+         1Jzg==
+X-Gm-Message-State: AOAM532Q94gvcz2C44Vgm7f2c//e6EVShsd1W9LvoEgs+k328mqytcPj
+        pTxsYokxyZ0MuUOoCGz9DESuxlLZhY1Z/v7snp9ocrdweGU=
+X-Google-Smtp-Source: ABdhPJxL4+9NfGeW1Em0Th9DeYYs3AFY6QNVvav2iJ6duv5bPeq45Y4JCbu2TGr4oOuoCwa6FCpUfQ+Ps4M4MiTSKew=
+X-Received: by 2002:a05:6512:3d07:: with SMTP id d7mr7640142lfv.233.1637696455966;
+ Tue, 23 Nov 2021 11:40:55 -0800 (PST)
 MIME-Version: 1.0
-References: <20211116190244.1417591-1-john@metanate.com> <20211116190244.1417591-3-john@metanate.com>
-In-Reply-To: <20211116190244.1417591-3-john@metanate.com>
+References: <20211115113813.238044-1-jonathanh@nvidia.com>
+In-Reply-To: <20211115113813.238044-1-jonathanh@nvidia.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Nov 2021 20:34:20 +0100
-Message-ID: <CAPDyKFp1zMBUfK7LteW0yEfTpqtU+P+EybLsJBFx_r54HwFdMg@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: use standard "mmc" alias stem
-To:     John Keeping <john@metanate.com>
+Date:   Tue, 23 Nov 2021 20:40:19 +0100
+Message-ID: <CAPDyKFor-vf00nc+beshcq-N+L7jPWSLaN754gCCsqNHSxYKzQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: spi: Add device-tree SPI IDs
+To:     Jon Hunter <jonathanh@nvidia.com>
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Jaehoon Chung <jh80.chung@samsung.com>
+        linux-tegra@vger.kernel.org, Mark Brown <broonie@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 16 Nov 2021 at 20:02, John Keeping <john@metanate.com> wrote:
+On Mon, 15 Nov 2021 at 12:38, Jon Hunter <jonathanh@nvidia.com> wrote:
 >
-> The standard stem for MMC aliases is "mmc" and this is used by the MMC
-> core to set the slot index.
-
-This isn't the correct description of the mmc aliases. The below text
-is copied from the DT doc:
-
-"It is possible to assign a fixed index mmcN to an MMC host controller
-(and the corresponding mmcblkN devices) by defining an alias in the
-/aliases device tree node."
-
+> Commit 5fa6863ba692 ("spi: Check we have a spi_device_id for each DT
+> compatible") added a test to check that every SPI driver has a
+> spi_device_id for each DT compatiable string defined by the driver
+> and warns if the spi_device_id is missing. The spi_device_id is
+> missing for the MMC SPI driver and the following warning is now seen.
 >
-> Use this in preference to the non-standard "mshc" stem when setting the
-> controller ID to avoid needing two aliases for each MMC device in order
-> to cover both the core and dw_mmc-specific functionality.
+>  WARNING KERN SPI driver mmc_spi has no spi_device_id for mmc-spi-slot
 >
-> The old "mshc" lookup is kept for backwards compatibility.
+> Fix this by adding the necessary spi_device_id.
+>
+> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
 
-The mshc alias is really weird!
-
-It looks like some leftover from when the dw_mmc controller supported
-multiple slots. This support was dropped a long time ago, simply
-because it never really worked - and it was not worth trying to. Only
-one slot per controller is supported.
-
-Rather than re-using the mmc alias in the same weird way as the mshc
-alias, I suggest we try to remove parsing of the mshc aliases
-completely. By looking at the corresponding code and in combination
-with the DTS files, it certainly looks doable to me. Do you want to
-have a look at it?
-
-Additionally, there is no need to deprecate the mshc alias binding, as
-it seems like it has never been documented. :-)
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
->
-> Signed-off-by: John Keeping <john@metanate.com>
+
 > ---
->  drivers/mmc/host/dw_mmc.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/mmc_spi.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 37af1245304b..6ffaa354410a 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -112,7 +112,11 @@ int dw_mci_of_alias_get_id(struct dw_mci *host)
->         if (WARN_ON(!host->dev->of_node))
->                 return 0;
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index f4c8e1a61f53..b431cdd27353 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -1514,6 +1514,12 @@ static int mmc_spi_remove(struct spi_device *spi)
+>         return 0;
+>  }
 >
-> -       ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
-> +       ctrl_id = of_alias_get_id(host->dev->of_node, "mmc");
+> +static const struct spi_device_id mmc_spi_dev_ids[] = {
+> +       { "mmc-spi-slot"},
+> +       { },
+> +};
+> +MODULE_DEVICE_TABLE(spi, mmc_spi_dev_ids);
 > +
-> +       /* Compatibility fallback for old device trees. */
-> +       if (ctrl_id < 0)
-> +               ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
->
->         if (ctrl_id < 0)
->                 ctrl_id = 0;
+>  static const struct of_device_id mmc_spi_of_match_table[] = {
+>         { .compatible = "mmc-spi-slot", },
+>         {},
+> @@ -1525,6 +1531,7 @@ static struct spi_driver mmc_spi_driver = {
+>                 .name =         "mmc_spi",
+>                 .of_match_table = mmc_spi_of_match_table,
+>         },
+> +       .id_table =     mmc_spi_dev_ids,
+>         .probe =        mmc_spi_probe,
+>         .remove =       mmc_spi_remove,
+>  };
 > --
-> 2.34.0
+> 2.25.1
 >
