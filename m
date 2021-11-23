@@ -2,145 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2860C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 16:10:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8AEB6C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 16:15:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237744AbhKWQNd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 11:13:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58258 "EHLO
+        id S238882AbhKWQSO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 11:18:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236174AbhKWQNd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 11:13:33 -0500
-Received: from mail-io1-xd35.google.com (mail-io1-xd35.google.com [IPv6:2607:f8b0:4864:20::d35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBED4C061714
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 08:10:24 -0800 (PST)
-Received: by mail-io1-xd35.google.com with SMTP id y16so28558562ioc.8
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 08:10:24 -0800 (PST)
+        with ESMTP id S238844AbhKWQSL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 11:18:11 -0500
+Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0EFDC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 08:15:02 -0800 (PST)
+Received: by mail-lj1-x22b.google.com with SMTP id k23so12261029lje.1
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 08:15:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:in-reply-to:references:subject:message-id:date
-         :mime-version:content-transfer-encoding;
-        bh=BBzlLrTrS/IeOvojVG6B2YAMmVNucDgXMCrBKUQHp3A=;
-        b=KM9m/9NO16jrFQdtSOl7VuCSuvSZnB0mKzK6rU/bX1rphB9E6lzkSgXDh98JB1wXiT
-         jN8i5gQJ04SZpipP/jqEUSJs8hZVP2kl4oH6rUEuy4hiE0LVCtJzlqKjRcodnFw30AiK
-         3Dr3YQ3kZk3fxDHP7R3lg3zLIG0VxbQos3Ac9OoObyFe3b9kZZ8C97gsHsJjAW2BIxwq
-         UxxRgHSkcvj6Od6dIRNmLO3ysIjIGdJRa4IcCF++BlNZKlCFKWZpRJa5AESVI7y/0rov
-         UPjGSFN6LS7XZEkH4aS0UFRyyGqYxrtYD9bxy6SCJ6/K1RbF694f6ZK6qK/UtpkpZbgK
-         UJKQ==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=1/M8/TbMw2+bg8CP1g2Qa/yEQ2sPxMoDxHHt0iItv3k=;
+        b=sKybRDpkGeiFZMJgsGd9hp98heI5epsxXD/mRJsUdUkSM1IE+uycLqAQHeWYLI2/Cd
+         EVVTYBwBx5fBXJeqhTbEwcZgUc+n7yK9xxJwDDZe+I4qm5k1CB080RAnps/y9axGsWTw
+         lth9H5D3KalF+QUvatCE/ShPEmO7pXoaVV1dVogwpOhhOHjukOKM3FJQfG5qe+esqzVS
+         z+gVApA+thXSXmnI2Ft8EvAnvrbwMsmuCYS4/onlzWe7Y35b159ntRSETK562DEkuJOA
+         nQwsoRrygoxJsORI35hN4vLznToYf8CQ9wFiUU9lJoWDnzpY41enooiTQt4opquOrNTl
+         8XJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject
-         :message-id:date:mime-version:content-transfer-encoding;
-        bh=BBzlLrTrS/IeOvojVG6B2YAMmVNucDgXMCrBKUQHp3A=;
-        b=xXQikt/zdRZy86s4nGtsWJ88wCuZN3m96blmD+Nz1O19ByHMkjT3GY0kiceOrgxBvi
-         u0BzyX79tx3kxBKwhDkXC64+1EqzuU6eBmKcVyB4/sTVJm+t7yQD63FoGCTnTgGWimLB
-         qN4f8InRS/julV9Ro9PgzH7JRxQXWdFBX7k2wGVx6fP4TbV1/78Q2ybKlmDIKL6CXrQu
-         7TZIp1vQ66GAXzhEadwisveo5nmv/iOUcDu86enateVFJy5p1iea6BdVUOupzwGvSsxg
-         6GzDfgF5LiejTKk2gZeO018E3adu4RRx8+gXvojhQibe3tivnor/oeTWBS+RiDcw80SU
-         +mkA==
-X-Gm-Message-State: AOAM531SqLENDiDFGdlJ9fDrt8dUYErcaTQbgKQ6tdH8nc9XZhBmUxmE
-        /I0KuGQpoflhkVeulq0f+WDyDg==
-X-Google-Smtp-Source: ABdhPJz026wQv9Aw2uRTbLzf/nFtsrGS58vFhx0zbszKyXiSWAlSuNrIsMrQqy/FSQgRny8ysi2nUw==
-X-Received: by 2002:a5e:8a41:: with SMTP id o1mr7092945iom.131.1637683824237;
-        Tue, 23 Nov 2021 08:10:24 -0800 (PST)
-Received: from [127.0.1.1] ([207.135.234.126])
-        by smtp.gmail.com with ESMTPSA id a13sm7538001ilc.34.2021.11.23.08.10.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Nov 2021 08:10:23 -0800 (PST)
-From:   Jens Axboe <axboe@kernel.dk>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     linux-block@vger.kernel.org, linux-scsi@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-In-Reply-To: <20211122130625.1136848-1-hch@lst.de>
-References: <20211122130625.1136848-1-hch@lst.de>
-Subject: Re: cleanup and simplify the gendisk flags
-Message-Id: <163768382336.322883.1673932002776910278.b4-ty@kernel.dk>
-Date:   Tue, 23 Nov 2021 09:10:23 -0700
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=1/M8/TbMw2+bg8CP1g2Qa/yEQ2sPxMoDxHHt0iItv3k=;
+        b=QEPmM4oyK6rps4pAFYC14Xi/MHnyvc8azb02k5zy4RC7EkD8iukyF2OCt0sHqwM3rS
+         DoezwC15AFP3mzIRnzcn6AOkqK1cm8+P1AiCzGY9kCrhJWRFPYg/8c8YMpX099K/Z/8/
+         XbLJT/BCvu8Q93GQcLezrB9lxt8zuUszKX9sDaPDciv5waaPnil2ppBOlOvoPhtEYrCn
+         XmV+2GI7HiJ7ZVFdyLdquj2UJVaiXsCL+WA+WnK/6pSg9ZJ3B6UZi7BRtbLHRQo93jgO
+         BYpyj0pklUTEKKmQeGkervE/V1FMedLjrZaGPX8wyjFRatYLN6xiDZGQFWGa/6wlDarg
+         crkw==
+X-Gm-Message-State: AOAM532GCisXrT1+QUm996kcatJT0fHPHs51IMyWrKHdi5QXpO8xVFxD
+        GP6GFtKCnNi6Ln4/P+XNlTbR9UEe4yp/fpfOvCtPwz6Qgt16AQ==
+X-Google-Smtp-Source: ABdhPJz2OQIkPHuviN3voFUT32CIBpBVvOS0Emtx3t3DGrqeSJ91ZMgzgYmaIa86pU/AY+h65EDCq0IwQjz7L7+T8L0=
+X-Received: by 2002:a2e:a5c8:: with SMTP id n8mr6705979ljp.367.1637684101255;
+ Tue, 23 Nov 2021 08:15:01 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+References: <20211115160226.20885-1-wbartczak@marvell.com>
+In-Reply-To: <20211115160226.20885-1-wbartczak@marvell.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 23 Nov 2021 17:14:24 +0100
+Message-ID: <CAPDyKFrkLQaFp_L0uZzB_KWnNkehg8ECK4cnf8o1yGCB9UZkBQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: cavium: Ensure proper mapping between request and interrupt
+To:     Wojciech Bartczak <wbartczak@marvell.com>
+Cc:     linux-mmc@vger.kernel.org, rric@kernel.org, beanhuo@micron.com,
+        tanxiaofei@huawei.com, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 22 Nov 2021 14:06:11 +0100, Christoph Hellwig wrote:
-> Ho Jens,
-> 
-> the gendisk flags have been a complete mess for a while.  This series
-> tries to untangle them as much as easily possible.
-> 
-> Diffstat:
->  block/bdev.c                       |    5 --
->  block/blk.h                        |    1
->  block/genhd.c                      |   41 +++++++----------
->  block/ioctl.c                      |   31 ++-----------
->  block/partitions/core.c            |   24 ++++------
->  drivers/block/amiflop.c            |    1
->  drivers/block/ataflop.c            |    1
->  drivers/block/brd.c                |    1
->  drivers/block/drbd/drbd_main.c     |    1
->  drivers/block/floppy.c             |    1
->  drivers/block/loop.c               |    9 +--
->  drivers/block/n64cart.c            |    2
->  drivers/block/null_blk/main.c      |    1
->  drivers/block/paride/pcd.c         |    3 -
->  drivers/block/paride/pf.c          |    1
->  drivers/block/pktcdvd.c            |    2
->  drivers/block/ps3vram.c            |    1
->  drivers/block/rbd.c                |    6 --
->  drivers/block/sunvdc.c             |   17 +++----
->  drivers/block/swim.c               |    1
->  drivers/block/swim3.c              |    2
->  drivers/block/virtio_blk.c         |    1
->  drivers/block/xen-blkback/xenbus.c |    2
->  drivers/block/xen-blkfront.c       |   26 ++++-------
->  drivers/block/z2ram.c              |    1
->  drivers/block/zram/zram_drv.c      |    1
->  drivers/cdrom/gdrom.c              |    1
->  drivers/md/dm.c                    |    1
->  drivers/md/md.c                    |    5 --
->  drivers/mmc/core/block.c           |    4 -
->  drivers/mtd/ubi/block.c            |    1
->  drivers/scsi/sd.c                  |    1
->  drivers/scsi/sr.c                  |    6 +-
->  include/linux/genhd.h              |   85 +++++++++----------------------------
->  34 files changed, 104 insertions(+), 183 deletions(-)
-> 
-> [...]
+On Mon, 15 Nov 2021 at 17:04, Wojciech Bartczak <wbartczak@marvell.com> wrote:
+>
+> The MMC block in octeontx2 uses architecture, where data lines are
+> shared between up to three supported cards. To keep the track of the
+> request hardware reports bus_id for the command complete interrupt.
+> At the same time the driver keeps information about the request on the
+> fly. This change combines these information to ensure proper mapping
+> between the request and the response.
+>
+> Signed-off-by: Wojciech Bartczak <wbartczak@marvell.com>
+> ---
+>  drivers/mmc/host/cavium.c | 19 ++++++++++++++++++-
+>  1 file changed, 18 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+> index 95a41983c6c0..24ea03f5a7c0 100644
+> --- a/drivers/mmc/host/cavium.c
+> +++ b/drivers/mmc/host/cavium.c
+> @@ -438,6 +438,8 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+>         struct mmc_request *req;
+>         u64 emm_int, rsp_sts;
+>         bool host_done;
+> +       struct cvm_mmc_slot *slot;
+> +       int bus_id;
+>
+>         if (host->need_irq_handler_lock)
+>                 spin_lock(&host->irq_handler_lock);
+> @@ -455,7 +457,19 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+>         if (!req)
+>                 goto out;
+>
+> +       slot = mmc_priv(req->host);
+> +
+> +       /* Get response */
+>         rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
+> +       /* Map request to cvm_mmc_slot */
+> +       bus_id = FIELD_GET(MIO_EMM_RSP_STS_BUS_ID, rsp_sts);
+> +       if (bus_id != slot->bus_id) {
+> +               dev_err(mmc_classdev(slot->mmc),
+> +                       "Remapping, request for slot %d, interrupt for %d!\n",
+> +                       slot->bus_id, bus_id);
+> +               slot = host->slot[bus_id];
+> +       }
+> +
+>         /*
+>          * dma_val set means DMA is still in progress. Don't touch
+>          * the request and wait for the interrupt indicating that
+> @@ -493,8 +507,9 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
+>             (rsp_sts & MIO_EMM_RSP_STS_DMA_PEND))
+>                 cleanup_dma(host, rsp_sts);
+>
+> +       if (mrq->done)
+> +               mrq->done(mrq);
+>         host->current_req = NULL;
+> -       req->done(req);
 
-Applied, thanks!
+This looks unrelated, please drop this from @subject patch.
 
-[01/14] block: move GENHD_FL_NATIVE_CAPACITY to disk->state
-        (no commit info)
-[02/14] block: move GENHD_FL_BLOCK_EVENTS_ON_EXCL_WRITE to disk->event_flags
-        (no commit info)
-[03/14] block: remove GENHD_FL_CD
-        (no commit info)
-[04/14] block: remove a dead check in show_partition
-        (no commit info)
-[05/14] block: merge disk_scan_partitions and blkdev_reread_part
-        (no commit info)
-[06/14] block: rename GENHD_FL_NO_PART_SCAN to GENHD_FL_NO_PART
-        (no commit info)
-[07/14] block: remove the GENHD_FL_HIDDEN check in blkdev_get_no_open
-        (no commit info)
-[08/14] null_blk: don't suppress partitioning information
-        (no commit info)
-[09/14] mmc: don't set GENHD_FL_SUPPRESS_PARTITION_INFO
-        (no commit info)
-[10/14] block: remove GENHD_FL_SUPPRESS_PARTITION_INFO
-        (no commit info)
-[11/14] block: remove GENHD_FL_EXT_DEVT
-        (no commit info)
-[12/14] block: don't set GENHD_FL_NO_PART for hidden gendisks
-        (no commit info)
-[13/14] block: cleanup the GENHD_FL_* definitions
-        (no commit info)
-[14/14] sr: set GENHD_FL_REMOVABLE earlier
-        (no commit info)
+>
+>  no_req_done:
+>         if (host->dmar_fixup_done)
+> @@ -669,6 +684,7 @@ static void cvm_mmc_dma_request(struct mmc_host *mmc,
+>                 set_wdog(slot, data->timeout_ns);
+>
+>         WARN_ON(host->current_req);
+> +       mrq->host = mmc;
 
-Best regards,
--- 
-Jens Axboe
+Please, no. We don't want the host driver to update the mrq->host. If
+that should be done, which is kind of questionable to me, that should
+be managed by the core layer.
 
+In this particular case, an option could be to store the bus-id that
+corresponds to the slot for the request that is about to be started.
+Along the lines of how we store host->current_req, below.
 
+>         host->current_req = mrq;
+>
+>         emm_dma = prepare_ext_dma(mmc, mrq);
+> @@ -776,6 +792,7 @@ static void cvm_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         mods = cvm_mmc_get_cr_mods(cmd);
+>
+>         WARN_ON(host->current_req);
+> +       mrq->host = mmc;
+>         host->current_req = mrq;
+>
+>         if (cmd->data) {
+
+Kind regards
+Uffe
