@@ -2,143 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D694C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 14:00:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F881C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 14:33:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230354AbhKWODw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 09:03:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56104 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229808AbhKWODw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 09:03:52 -0500
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28AECC061714
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 06:00:44 -0800 (PST)
-Received: by mail-lf1-x134.google.com with SMTP id bi37so91312219lfb.5
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 06:00:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=M5qj5wwgDDOjYxs26fOkrwGqoqUS/daI8VCa+zgPh2o=;
-        b=IM7a8kgtMvTyRtufIbIt7g+DOLQ50st+d8LZTnl3NaJZBq8aL026C3acFsQk5B49jQ
-         Knn1o7zc18/ZvrYwkqhesY1s5YGw/1aNOUgeiyA0NBBM2Ds3/Pyk70mhYPS1GweZM9AQ
-         nggBbwjyGcI3+Owva3hmR8YBGJrhP85/yj+KFSe48zdWSj3o6kVyyzPOHgCsbNVCIENs
-         1AvHmk3H6r5PnEKsEdwXS61GJVmK1kG4zyBqxhToujhANwCWq/91Arb1XJaaMg0pg1OA
-         YeozW+Ig1FxjN/8jbXA1+MHbwQvsa8EnPyUwSw9Q0AWeZCTxqWbJj7MsF/Km+EtrPoOj
-         kDQw==
+        id S238033AbhKWOgm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 09:36:42 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:29369 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234867AbhKWOgk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 09:36:40 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1637678012;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=GlQ7neAf3vKotnvHgathjuTef4jE0oGqHMBfZ9Tq9gs=;
+        b=M7vd6TdgNLE6feVKjrcuq6rGMx3s8FeofrgjAE7Sv39tADQJRJ9gqVcTLBQZXAydnPmZEQ
+        1FbVAkjBM3CFFgx9Gj57RIDMWhUs6HareVchoFM1JeEGTnj7ZW0vbikC1NB2T4nb9hNtVu
+        Lg0RD/aTteBZkETkuwk2cU2gXR5pjnQ=
+Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com
+ [209.85.208.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-506-esT_Bew1MYeQi-4XKxfKWQ-1; Tue, 23 Nov 2021 09:33:31 -0500
+X-MC-Unique: esT_Bew1MYeQi-4XKxfKWQ-1
+Received: by mail-ed1-f72.google.com with SMTP id b15-20020aa7c6cf000000b003e7cf0f73daso17882267eds.22
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 06:33:30 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=M5qj5wwgDDOjYxs26fOkrwGqoqUS/daI8VCa+zgPh2o=;
-        b=WvK68I8+C6qFZKSuG3tgaZFSwhPHi3djVVyyTh6rXArJs6i2kd5Fw+w/eqClEEC1Cr
-         U2w5bN4QOahjZhJBcKOyPSenQ3WPiSrmUXSkeRzZL5zZbR2Pp90pZPaHGld9AIrtSUAh
-         PwOz6dGgqoW9qddreUd8+UYMEL7UVbTQ8UgVo+PPMh1fPxd/xE9LmPL1zEX/DZRHx/J/
-         0OrokEslV2COKF1sSgoyN7IIXSjsdi4MYQLECUjXP6C2gSbB/wWVN37Ukr1DCMubsjeN
-         5yVgGdVpaGfGq9KJSi6fUzx/R3t/GrEGHZGuyL+hf3/dE7lbo+nbmluOU5FffA3vE4b0
-         0BPA==
-X-Gm-Message-State: AOAM530Z7Ex+yb4bNem0cSKgH08xo87MnztPOuai/7H4Sxdc21P4I+YE
-        l1LDvbjOyYbsoa5aLwkBBOdtTNnFLnQnHNyAnFq7kA==
-X-Google-Smtp-Source: ABdhPJw3+BjoP79/Y1fE1CQYBaOTAtfhTURZ68IcYhBbZql//bpUU/iUeD1dgtOyMHfcDiXS+5EkEr2br4fcG5CDuKI=
-X-Received: by 2002:ac2:5607:: with SMTP id v7mr4972841lfd.71.1637676040864;
- Tue, 23 Nov 2021 06:00:40 -0800 (PST)
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=GlQ7neAf3vKotnvHgathjuTef4jE0oGqHMBfZ9Tq9gs=;
+        b=wRz7HoxshKAdwa0Gj3vBjN34SAnvzQU35pT1hKK6PqZcIlnGlquhLYiFCK+rJ/ojh9
+         bZj0qpmMiqE+4eJAQkfGdh8HCR2Bw8jt2vUwjVuXhKZ/UlRdAq+6Mu1gudN8OrAwBIaH
+         a2jWkQdhyKO+8S3YfBi5Dhf3B7gYe16OgND92CFwa71h1SLbR8/Z69rW7YWHcbBYwu/9
+         NLRpl2SUYCAUuV2I9Ujmd6PV/SXPsJmcV2Sxms+cM1Ej3pvNKs7DmrCh6d7dJwtPSfIR
+         1gaarMyoMb3DuKxyu3a/SP4hLzUKEEEmt2LWolsg7PTpsQBC6i4cueV7LfRM7faRZLEm
+         8J7Q==
+X-Gm-Message-State: AOAM532Jt08zz77P2Q4dW48TBqsCKXpatcpASS7lospK6dyUdGVsdK/Y
+        QSD0UuUK7ABN0gVqHyRLrPABZ7v7P/rX87xeYNUh9HwcQJW5sXgg0o41PhAErV1ci6dqX+prJW6
+        xdIElF9cY9vzCy6lCqCV/
+X-Received: by 2002:aa7:dbca:: with SMTP id v10mr10033203edt.280.1637678009883;
+        Tue, 23 Nov 2021 06:33:29 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJwM6sZDBXNvZq21GD8hv0D76i/zF6xqLU6SZULsUuPnIhoUpAz2DY/y8mTaNSapofDR9nNcwg==
+X-Received: by 2002:aa7:dbca:: with SMTP id v10mr10033173edt.280.1637678009731;
+        Tue, 23 Nov 2021 06:33:29 -0800 (PST)
+Received: from ?IPV6:2001:1c00:c1e:bf00:1054:9d19:e0f0:8214? (2001-1c00-0c1e-bf00-1054-9d19-e0f0-8214.cable.dynamic.v6.ziggo.nl. [2001:1c00:c1e:bf00:1054:9d19:e0f0:8214])
+        by smtp.gmail.com with ESMTPSA id eg8sm5836080edb.75.2021.11.23.06.33.29
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 23 Nov 2021 06:33:29 -0800 (PST)
+Message-ID: <471c7587-4b45-8540-45ec-9a1fcd03caab@redhat.com>
+Date:   Tue, 23 Nov 2021 15:33:28 +0100
 MIME-Version: 1.0
-References: <20211115211533.6971-1-wbartczak@marvell.com> <20211115215426.1554-1-wbartczak@marvell.com>
-In-Reply-To: <20211115215426.1554-1-wbartczak@marvell.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Nov 2021 15:00:04 +0100
-Message-ID: <CAPDyKFoe2MgGcsMXPKPsFNtiBwQ=u6ZNCy_59rYoyAWa2ip2cQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: cavium: Improve request handling by proper use of API
-To:     Wojciech Bartczak <wbartczak@marvell.com>
-Cc:     linux-mmc@vger.kernel.org, rric@kernel.org, beanhuo@micron.com,
-        tanxiaofei@huawei.com, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.0
+Subject: Re: [PATCH v2 0/7] ACPI: acpi_device_override_status() changes
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20211122170536.7725-1-hdegoede@redhat.com>
+ <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
+From:   Hans de Goede <hdegoede@redhat.com>
+In-Reply-To: <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 15 Nov 2021 at 22:54, Wojciech Bartczak <wbartczak@marvell.com> wrote:
->
-> The driver for cavium/marvell platforms uses directly mrq->done() callback
-> to signalize the request completion. This method to finalize request
-> processing is not correct.
->
-> Following fix introduces proper use of mmc_request_done() API for
-> all paths involved into handling MMC core requests.
->
-> Changes v1 => v2:
-> - Added missing variable slot and functionality to retrive
->   slot base on bus_id contained in response status register.
+Hi,
 
-Version history is great, but should come outside the actual commit
-message. See below.
+On 11/23/21 12:13, Ulf Hansson wrote:
+> On Mon, 22 Nov 2021 at 18:05, Hans de Goede <hdegoede@redhat.com> wrote:
+>>
+>> Hi Rafael,
+>>
+>> As requested here is a v2 of my series previously titled:
+>> "ACPI: scan: Skip turning off some unused objects during scan"
+>>
+>> Which was a regression fix series for the commit c10383e8ddf4
+>> ("ACPI: scan: Release PM resources blocked by unused objects")
+>> change, but that has been reverted now. So as requested here is
+>> a v2 changing the wording of various commit messages since these
+>> changes are still useful to have regardless.
+>>
+>> Patch 1/7 is a v2/resend of the "ACPI / x86: Drop PWM2 device on
+>> Lenovo Yoga Book from always present table" patch. You requested
+>> changing the commit message of this one a bit to make it sound
+>> less like a regression fix (which it is not). But you already
+>> have the previous version of this patch in your bleeding-edge
+>> branch, with a "Cc: 5.1+ <stable@vger.kernel.org> # 5.1+"
+>> added ?  So depending on which version you want you can either
+>> skip this patch when applying this series, or replace it with
+>> the version from this series.
+>>
+>> Patches 2-4 are the main changes to make the always_present
+>> quirk handling more flexible, changing it into a status_override
+>> mechanism + adding a quirk for the GPD win and pocket to fix
+>> an issue with those in a more elegant matter then the current
+>> kludge in the sdhci-acpi code.
+>>
+>> Patch 5 is an unrelated patch which touches the override-status
+>> quirk table, so it needed to be rebased and I decided to add it
+>> to this series to make it clear that its v2 needs to be applied
+>> on top of the other ACPI changes from this series.
+>>
+>> Patches 6+7 cleanup the sdhci-acpi code, removing the now no
+>> longer needed ugly kludge for the GPD win/pocket. These can
+>> be merged independently from patches 1-5, through the mmc
+>> tree, as long as they get send to Linus during the same
+>> kernel cycle as the ACPI bits.
+> 
+> This sounds like the mmc changes are really not that independent after
+> all. What about bisectability?
 
->
-> Signed-off-by: Wojciech Bartczak <wbartczak@marvell.com>
-> ---
+Merging the ACPI and mmc bits separately does indeed have a 50% chance
+of causing an issue where during a bisect the wifi might stop working
+on the GPD win / pocket. But only on those 2 models, so it won't be
+a general bisect break; and it will only break wifi, without causing
+other side-effects.
 
-Version history should come here along with other information. Then
-add the below three dashes to end the section.
+So I believe this really is mostly a theoretical issue. With that
+said merging the entire set to one tree of course is fine too,
+maybe even better because it keeps the related ACPI and sdhci
+commit close together in the history.
 
----
+> An option is to funnel the sdhci patches together with the ACPI
+> patches through Rafael's tree. You have my ack for this, but let's
+> wait for Adrian's ack too.
 
->  drivers/mmc/host/cavium.c | 9 ++++++---
->  1 file changed, 6 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-> index 95a41983c6c0..674cfaf5d64e 100644
-> --- a/drivers/mmc/host/cavium.c
-> +++ b/drivers/mmc/host/cavium.c
-> @@ -435,8 +435,10 @@ static void cleanup_dma(struct cvm_mmc_host *host, u64 rsp_sts)
->  irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
->  {
->         struct cvm_mmc_host *host = dev_id;
-> +       struct cvm_mmc_slot *slot;
->         struct mmc_request *req;
->         u64 emm_int, rsp_sts;
-> +       int bus_id;
->         bool host_done;
->
->         if (host->need_irq_handler_lock)
-> @@ -456,6 +458,8 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
->                 goto out;
->
->         rsp_sts = readq(host->base + MIO_EMM_RSP_STS(host));
-> +       bus_id = get_bus_id(rsp_sts);
-> +       slot = host->slot[bus_id];  /* bus_id is in a range 0..2 */
->         /*
->          * dma_val set means DMA is still in progress. Don't touch
->          * the request and wait for the interrupt indicating that
-> @@ -493,8 +497,8 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
->             (rsp_sts & MIO_EMM_RSP_STS_DMA_PEND))
->                 cleanup_dma(host, rsp_sts);
->
+Thanks.
 
-> +       mmc_request_done(slot->mmc, req);
->         host->current_req = NULL;
-> -       req->done(req);
+Regards,
 
-Flipping the order doesn't really matter here, as cvm_mmc_request() is
-protected with the ->acquire_bus() lock.
+Hans
 
-However, I think it's good practise from the mmc core point of view,
-to clear host->current_req prior to calling mmc_request_done(). Can
-you please change this.
-
->
->  no_req_done:
->         if (host->dmar_fixup_done)
-> @@ -699,8 +703,7 @@ static void cvm_mmc_dma_request(struct mmc_host *mmc,
->
->  error:
->         mrq->cmd->error = -EINVAL;
-> -       if (mrq->done)
-> -               mrq->done(mrq);
-> +       mmc_request_done(mmc, mrq);
->         host->release_bus(host);
->  }
->
-
-Kind regards
-Uffe
