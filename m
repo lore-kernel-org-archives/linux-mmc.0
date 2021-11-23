@@ -2,88 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C96CC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 00:00:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF4CDC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 01:17:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232477AbhKWAD5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Nov 2021 19:03:57 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44224 "EHLO mail.kernel.org"
+        id S232223AbhKWBUv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Nov 2021 20:20:51 -0500
+Received: from mail.kernel.org ([198.145.29.99]:53542 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232678AbhKWADo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 22 Nov 2021 19:03:44 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id CF3DB61027;
-        Tue, 23 Nov 2021 00:00:30 +0000 (UTC)
+        id S229776AbhKWBUt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 22 Nov 2021 20:20:49 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 7D9BC60FE7;
+        Tue, 23 Nov 2021 01:17:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1637625635;
-        bh=01cYwVbEdh0X7Ig5gVg6S/mgZIzXX2UFJSaD0Nf/IgU=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=U1nmBoWjhnKgcYW1P9S5O0K0Rs11K/69Wj8qIMIwjMYyqTSq9SSAFIvwKX46MCafv
-         bzKXJmvlxQfZ96AyBeB+jN1NZHMYBe1gJ7eNUTWvU7RFnJQFeQsHUNTWr2I2h6zLDs
-         gH6aaEAr75ufBXmH79TfSd8EAGD3NX716TmMcNtk8csTCVWeFZkWmIzJBBp9k7ASdG
-         K2PuMIsmI99E0MK1tlq8fKQ5hQrpmALZjV5BmVplWZXNKDZaIKvK4uNe8TxtotADZv
-         H2Sln2ND0ACs8GbYP6iiLLWccxe9xFzttrBoEXugXv3gYH6EuehNCPKvRhbOQeOHqf
-         Uta6pbTYeOIbA==
-From:   Mark Brown <broonie@kernel.org>
-To:     robh+dt@kernel.org, aisheng.dong@nxp.com, shawnguo@kernel.org,
-        wim@linux-watchdog.org, s.hauer@pengutronix.de,
-        "Peng Fan (OSS)" <peng.fan@oss.nxp.com>, ulf.hansson@linaro.org,
-        linux@rempel-privat.de, linux@roeck-us.net
-Cc:     kernel@pengutronix.de, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, daniel.lezcano@linaro.org,
-        linux-imx@nxp.com, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        festevam@gmail.com, Peng Fan <peng.fan@nxp.com>,
-        linux-kernel@vger.kernel.org
-In-Reply-To: <20211120113454.785997-1-peng.fan@oss.nxp.com>
-References: <20211120113454.785997-1-peng.fan@oss.nxp.com>
-Subject: Re: (subset) [PATCH V5 0/8] dt-bindinds/dts: support i.MX8ULP
-Message-Id: <163762563048.2472045.8052329194047350725.b4-ty@kernel.org>
-Date:   Tue, 23 Nov 2021 00:00:30 +0000
+        s=k20201202; t=1637630262;
+        bh=aoZBtBydzk0bAevU49rnDfe9zlt/fW7CJBCoU7dRxYA=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=DP4A1u9wNAGb4TisYL/xclxXLCsu2eYg5z5kmYiYSKFhn68ml1u5EecsH0UtRKHqf
+         6WSeXmftsKJnT0cJoC45C1J/DRKEkyY8ZtRnMG5HUdipvmpB5FFIlmEIJvncTHRUsl
+         ZJL0QNbzVlJaWzKiVHfmtZTk38Yn3TlLB2z6CLXnGmgwi//WUT0SYP6cVTF8nOAJxN
+         15rOBhxuQkabwtldmp65OfJNj5TeFJmkuLPCAwUI0Dna0FEvAJIm2JVOaykJdOmzdN
+         ItdPFw828/65BBT1WXG3h6a2jxgAjBQ+Bbe/D392jq/wYgwXj4sze1/1CQib/FK9DM
+         tH9oaaLRu5SxA==
+Date:   Mon, 22 Nov 2021 17:17:39 -0800
+From:   Jakub Kicinski <kuba@kernel.org>
+To:     Johannes Berg <johannes@sipsolutions.net>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        Paul Walmsley <paul@pwsan.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Tero Kristo <kristo@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Lorenzo Bianconi <lorenzo.bianconi83@gmail.com>,
+        Benoit Parrot <bparrot@ti.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Ping-Ke Shih <pkshih@realtek.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Eduardo Valentin <edubezval@gmail.com>,
+        Keerthy <j-keerthy@ti.com>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Subject: Re: [PATCH 01/17] bitfield: Add non-constant field_{prep,get}()
+ helpers
+Message-ID: <20211122171739.03848154@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
+In-Reply-To: <01b44b38c087c151171f8d45a2090474c2559306.camel@sipsolutions.net>
+References: <cover.1637592133.git.geert+renesas@glider.be>
+        <3a54a6703879d10f08cf0275a2a69297ebd2b1d4.1637592133.git.geert+renesas@glider.be>
+        <01b44b38c087c151171f8d45a2090474c2559306.camel@sipsolutions.net>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 20 Nov 2021 19:34:46 +0800, Peng Fan (OSS) wrote:
-> From: Peng Fan <peng.fan@nxp.com>
+On Mon, 22 Nov 2021 17:32:43 +0100 Johannes Berg wrote:
+> On Mon, 2021-11-22 at 16:53 +0100, Geert Uytterhoeven wrote:
+> > The existing FIELD_{GET,PREP}() macros are limited to compile-time
+> > constants.  However, it is very common to prepare or extract bitfield
+> > elements where the bitfield mask is not a compile-time constant.
 > 
+> I'm not sure it's really a good idea to add a third API here?
+
++1
+
+> We have the upper-case (constant) versions, and already
+> {u32,...}_get_bits()/etc.
 > 
-> V5:
->  only fix patch 8/8 "arm64: dts: imx8ulp: Add the basic dts for imx8ulp evk board"
->   - Correct bus-width to 8 for eMMC
->   - Drop pinctrl enet which no user
->  Drop patch 1/9 in V4, since in merged in linux-next
->  Add A-b/R-b tag
+> Also, you're using __ffs(), which doesn't work for 64-bit on 32-bit
+> architectures (afaict), so that seems a bit awkward.
 > 
-> [...]
+> Maybe we can make {u32,...}_get_bits() be doing compile-time only checks
+> if it is indeed a constant? The __field_overflow() usage is already only
+> done if __builtin_constant_p(v), so I guess we can do the same with
+> __bad_mask()?
 
-Applied to
-
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
-
-Thanks!
-
-[3/8] dt-bindings: spi: fsl-lpspi: Add imx8ulp compatible string
-      commit: 49cd1eb37b487036f51bd57b591f7b5760a10e02
-
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
-
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
-
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
-
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
-
-Thanks,
-Mark
+Either that or add decomposition macros. Are compilers still really bad
+at passing small structs by value?
