@@ -2,112 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07EB8C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 11:14:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD185C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 11:19:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231689AbhKWLR3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 06:17:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45614 "EHLO
+        id S235125AbhKWLW1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 06:22:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231405AbhKWLR2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 06:17:28 -0500
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96EE6C061714
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 03:14:20 -0800 (PST)
-Received: by mail-lf1-x132.google.com with SMTP id c32so90218496lfv.4
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 03:14:20 -0800 (PST)
+        with ESMTP id S234136AbhKWLW0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 06:22:26 -0500
+Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27444C061748
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 03:19:18 -0800 (PST)
+Received: by mail-lj1-x233.google.com with SMTP id e11so10319663ljo.13
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 03:19:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=d2vpqtZzJw20Et8gdSKZ5+LZSgorGMpscNsnyF4iAFU=;
-        b=oIS8T4jNlyyNbTML+PmFXPAndBXTHil4AJo0BjaeUiF2OhQlzglcdrFVy/fyOi7qfy
-         Cloh8kwczPLdgpYPEXiJNulzojyVu/DUqElCIDKaP577c7927/tItDxrCoGpc3Dm9zor
-         9kIdFWqiKxCDrCxdKxUrvBW9jHBnohivV/x5nraVwKF0LrorL8SvCL2FxKv9yuHzMdz2
-         AVxdovdMjs2LMcBIWitlGB+VsT5Syc/8bn7juJdEnrbvveMiiTp9d96zvrK80M4/DbwD
-         AleOGWs9+sQ2Dz14fq2Dnv5Emuv2xD8OjltdX+2ATgdS4Nn/vCzYGLlV0NWh5euBWjkJ
-         RkkA==
+        bh=w+ogjWxG1DbsOOSKAdBRBvdcSf1vlOMjAXY68aT/3+U=;
+        b=g2Y3CYQC1NcCLavzUvr4ErWMQvZ4fzsgBv6CCbmTOoZcOun8WjSds54sZrtzeYEA0U
+         N5KF7mJ3kl8nFIULnhlxeAUeFZAuCfq+uX5Urd7Y31Xp8cHxNzCxkkp6HS46EZb3D6jZ
+         c7TwybE0YdC9woGghm+c/KCOlK35CIfDZrYTO7zFljpZaTHjklc27An1TOol1n/1idvS
+         kCKfDejnDdUw+aN2JJNNmUQf32+SP4pOXJVkzxhNH+rbEkLFMLkjE8yfz5ElxThNneaF
+         SJXtBIs1DuxaYn0676eJKdryXGQlku5s0UQEwOdM0oGilYhXoK+2140z6YDVV15iHy6a
+         9PQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=d2vpqtZzJw20Et8gdSKZ5+LZSgorGMpscNsnyF4iAFU=;
-        b=6+dpCjmu/gK0yprJKOCYmPOG3RyfeVOPmATJjp2KlAiu8hMtlGVp36iC0z828G2WqU
-         s02eFC9C0l3FVwfpnm6z4N8vS7F1//aHVF8Vzbaf8uOxj/agGoasJbIo3PGMt+PXlYXb
-         pmDzqM9osdd5RznCizubf0Jx+HOUBc0jtYrOo1Vs+MKrLvy0eb0/C2GvJKs5J/0S+p3O
-         al3gwNAcxp721/PD0wHftlXHVGTlSGaZjUFNZB369fveKndDDAkd6BORdlotGaRWTfqA
-         YvqHuyolKE2oDIUDVpgpklu9c7u+vMAMqnMv+snDcMC19v6/kN8FfxtDS+4WFRhVqnOc
-         5zuw==
-X-Gm-Message-State: AOAM5312ECCpJLKztmjunEmugmplGlEFS7KdlTKg28zc8aKQ7S7mjn6A
-        MGuMuMElGH0xlS4RBH0gI7nZ9IKQOZzJL0l/rMNzUw==
-X-Google-Smtp-Source: ABdhPJzbwCtHfNPPkgln/I4+w+Qu3sIY5e+oPQhe3uSrc+ijbL6b7R0IZJVSbNvmQWYRKcNMXeboQ6LB5h6XEUyGK6c=
-X-Received: by 2002:a05:6512:3d07:: with SMTP id d7mr3937129lfv.233.1637666058738;
- Tue, 23 Nov 2021 03:14:18 -0800 (PST)
+        bh=w+ogjWxG1DbsOOSKAdBRBvdcSf1vlOMjAXY68aT/3+U=;
+        b=aZObvLrsf5anN34LEd7V3UGSfy/r769eeRJpqRrk0HBybUA7/MHwSm2sCK6Bth01RO
+         eciZqulEkUcx1HHOqn/G33kAp9eUe6500z8NIfdpuvIhdO8b++6CeA4Gb5d2toOIFq2R
+         jWUTmGTvdcS00dHA/PhMmX3uPdJ2Zc/Nad/pCjZD9AZjfeE9QfLKG03q1sFtwIV7ioKI
+         b1f/FJcFtnzVzgw5jDKfMb3G3cTKUAc/R2F+sF+AhaLCSnJmqC8UoMcMIvk+0qBdjw48
+         3MwsZzeEkSRYrKA6YLxVVklyZha3ySfZqSbfW9/RlLFkOcqhFcjsB4//czZ4/h3869qX
+         LwuA==
+X-Gm-Message-State: AOAM532DUOsjTon9v6D3RykCQYh+Pkpjmp6pif0Lz9sHaeRMRZ0OCSNm
+        uKbSbU57sBz3CbXko/mLowUWcOeOSvx6fg5vFydyAA==
+X-Google-Smtp-Source: ABdhPJxH+dIDF8nBsp8fxznpkoFe9y9Zmc/xUzjvp4Mfv2L5TNuCMH6djlHGcQ7ManpwMDd1PzQBcWJG8pF2EVa/HSY=
+X-Received: by 2002:a05:651c:1507:: with SMTP id e7mr4381662ljf.300.1637666356182;
+ Tue, 23 Nov 2021 03:19:16 -0800 (PST)
 MIME-Version: 1.0
-References: <20211122170536.7725-1-hdegoede@redhat.com>
-In-Reply-To: <20211122170536.7725-1-hdegoede@redhat.com>
+References: <20211122222203.4103644-1-arnd@kernel.org> <20211122222203.4103644-5-arnd@kernel.org>
+In-Reply-To: <20211122222203.4103644-5-arnd@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Nov 2021 12:13:42 +0100
-Message-ID: <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
-Subject: Re: [PATCH v2 0/7] ACPI: acpi_device_override_status() changes
-To:     Hans de Goede <hdegoede@redhat.com>
-Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
-        linux-mmc@vger.kernel.org
+Date:   Tue, 23 Nov 2021 12:18:40 +0100
+Message-ID: <CAPDyKFrCOoFWuM_6Renu+M5SHotyuzXeyH99WZb69G1PFQ1z5A@mail.gmail.com>
+Subject: Re: [PATCH v2 04/11] mmc: bcm2835: stop setting chan_config->slave_id
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Vinod Koul <vkoul@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Andy Gross <agross@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Hyun Kwon <hyun.kwon@xilinx.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Laxman Dewangan <ldewangan@nvidia.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Scott Branden <sbranden@broadcom.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        alsa-devel@alsa-project.org, bcm-kernel-feedback-list@broadcom.com,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-rpi-kernel@lists.infradead.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
+        linux-tegra@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 22 Nov 2021 at 18:05, Hans de Goede <hdegoede@redhat.com> wrote:
+On Mon, 22 Nov 2021 at 23:23, Arnd Bergmann <arnd@kernel.org> wrote:
 >
-> Hi Rafael,
+> From: Arnd Bergmann <arnd@arndb.de>
 >
-> As requested here is a v2 of my series previously titled:
-> "ACPI: scan: Skip turning off some unused objects during scan"
+> The field is not interpreted by the DMA engine driver, as all the data
+> is passed from devicetree instead. Remove the assignment so the field
+> can eventually be deleted.
 >
-> Which was a regression fix series for the commit c10383e8ddf4
-> ("ACPI: scan: Release PM resources blocked by unused objects")
-> change, but that has been reverted now. So as requested here is
-> a v2 changing the wording of various commit messages since these
-> changes are still useful to have regardless.
->
-> Patch 1/7 is a v2/resend of the "ACPI / x86: Drop PWM2 device on
-> Lenovo Yoga Book from always present table" patch. You requested
-> changing the commit message of this one a bit to make it sound
-> less like a regression fix (which it is not). But you already
-> have the previous version of this patch in your bleeding-edge
-> branch, with a "Cc: 5.1+ <stable@vger.kernel.org> # 5.1+"
-> added ?  So depending on which version you want you can either
-> skip this patch when applying this series, or replace it with
-> the version from this series.
->
-> Patches 2-4 are the main changes to make the always_present
-> quirk handling more flexible, changing it into a status_override
-> mechanism + adding a quirk for the GPD win and pocket to fix
-> an issue with those in a more elegant matter then the current
-> kludge in the sdhci-acpi code.
->
-> Patch 5 is an unrelated patch which touches the override-status
-> quirk table, so it needed to be rebased and I decided to add it
-> to this series to make it clear that its v2 needs to be applied
-> on top of the other ACPI changes from this series.
->
-> Patches 6+7 cleanup the sdhci-acpi code, removing the now no
-> longer needed ugly kludge for the GPD win/pocket. These can
-> be merged independently from patches 1-5, through the mmc
-> tree, as long as they get send to Linus during the same
-> kernel cycle as the ACPI bits.
+> Reviewed-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-This sounds like the mmc changes are really not that independent after
-all. What about bisectability?
+I think I acked the previous version, but nevermind:
 
-An option is to funnel the sdhci patches together with the ACPI
-patches through Rafael's tree. You have my ack for this, but let's
-wait for Adrian's ack too.
-
-[...]
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/bcm2835.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/bcm2835.c b/drivers/mmc/host/bcm2835.c
+> index 8c2361e66277..463b707d9e99 100644
+> --- a/drivers/mmc/host/bcm2835.c
+> +++ b/drivers/mmc/host/bcm2835.c
+> @@ -1293,14 +1293,12 @@ static int bcm2835_add_host(struct bcm2835_host *host)
+>
+>                 host->dma_cfg_tx.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+>                 host->dma_cfg_tx.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+> -               host->dma_cfg_tx.slave_id = 13;         /* DREQ channel */
+>                 host->dma_cfg_tx.direction = DMA_MEM_TO_DEV;
+>                 host->dma_cfg_tx.src_addr = 0;
+>                 host->dma_cfg_tx.dst_addr = host->phys_addr + SDDATA;
+>
+>                 host->dma_cfg_rx.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+>                 host->dma_cfg_rx.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+> -               host->dma_cfg_rx.slave_id = 13;         /* DREQ channel */
+>                 host->dma_cfg_rx.direction = DMA_DEV_TO_MEM;
+>                 host->dma_cfg_rx.src_addr = host->phys_addr + SDDATA;
+>                 host->dma_cfg_rx.dst_addr = 0;
+> --
+> 2.29.2
+>
