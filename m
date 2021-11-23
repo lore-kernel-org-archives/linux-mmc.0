@@ -2,90 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94417C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 09:31:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07EB8C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 11:14:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235015AbhKWJe1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 04:34:27 -0500
-Received: from mail-ua1-f47.google.com ([209.85.222.47]:33398 "EHLO
-        mail-ua1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234982AbhKWJe0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 04:34:26 -0500
-Received: by mail-ua1-f47.google.com with SMTP id x14so1833446uao.0;
-        Tue, 23 Nov 2021 01:31:18 -0800 (PST)
+        id S231689AbhKWLR3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 06:17:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45614 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231405AbhKWLR2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 06:17:28 -0500
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96EE6C061714
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 03:14:20 -0800 (PST)
+Received: by mail-lf1-x132.google.com with SMTP id c32so90218496lfv.4
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 03:14:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=d2vpqtZzJw20Et8gdSKZ5+LZSgorGMpscNsnyF4iAFU=;
+        b=oIS8T4jNlyyNbTML+PmFXPAndBXTHil4AJo0BjaeUiF2OhQlzglcdrFVy/fyOi7qfy
+         Cloh8kwczPLdgpYPEXiJNulzojyVu/DUqElCIDKaP577c7927/tItDxrCoGpc3Dm9zor
+         9kIdFWqiKxCDrCxdKxUrvBW9jHBnohivV/x5nraVwKF0LrorL8SvCL2FxKv9yuHzMdz2
+         AVxdovdMjs2LMcBIWitlGB+VsT5Syc/8bn7juJdEnrbvveMiiTp9d96zvrK80M4/DbwD
+         AleOGWs9+sQ2Dz14fq2Dnv5Emuv2xD8OjltdX+2ATgdS4Nn/vCzYGLlV0NWh5euBWjkJ
+         RkkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ka+eO5aFCWtseuMTQkGg3kQstjMkO2UGRuVElhrFmmM=;
-        b=AqoMPjosaeAuIwhIeh25M6X3onwq49iAUE1xgrKE9aShqfnY4TalEyARAXOoz3mVIo
-         Dpj9pbeANGScFhzGyqnOUfXYgzJXufjuvQ+ffjXlCoeVvn1Mh1ShM7Rb1ONBf9oTCnKB
-         NNiQ9k54iszV0IoWXYSiPxpQEJe44x844tpsaKErDqvZ+qfl6zy9jQvh6JAozRi3GF81
-         hBvXZUwGRt9uWg0Tq1SSiowUQpzcQdL4uQWg2aYu5snvymwLz6/lHNoo4lT5Pu2LUYkK
-         zfzkIIt78R/MzTD8u98If8OCbXPTBOmt2Z5P9pVUAOftF3e7yqmo1pdRFcE9Ayo+oqGM
-         DCwg==
-X-Gm-Message-State: AOAM531iYDw6XBgZ9BoP/NDPcHKXhlujpVzMhL3VOe5+L8+uH5YcnYhw
-        2TPapVv5tmQ7QBc2EubqY210ApES1232Vw==
-X-Google-Smtp-Source: ABdhPJzAFHLg5OgIayJsm7amIrLNz1zxMRXi37ItbyLwm7Tv9LWtHSWvniPWBrVfr/i393u1P2h0lA==
-X-Received: by 2002:a05:6102:e82:: with SMTP id l2mr6909155vst.37.1637659878385;
-        Tue, 23 Nov 2021 01:31:18 -0800 (PST)
-Received: from mail-ua1-f47.google.com (mail-ua1-f47.google.com. [209.85.222.47])
-        by smtp.gmail.com with ESMTPSA id f7sm5831004vkm.31.2021.11.23.01.31.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 23 Nov 2021 01:31:17 -0800 (PST)
-Received: by mail-ua1-f47.google.com with SMTP id i6so42366690uae.6;
-        Tue, 23 Nov 2021 01:31:17 -0800 (PST)
-X-Received: by 2002:a67:af0a:: with SMTP id v10mr6077943vsl.35.1637659877515;
- Tue, 23 Nov 2021 01:31:17 -0800 (PST)
+        bh=d2vpqtZzJw20Et8gdSKZ5+LZSgorGMpscNsnyF4iAFU=;
+        b=6+dpCjmu/gK0yprJKOCYmPOG3RyfeVOPmATJjp2KlAiu8hMtlGVp36iC0z828G2WqU
+         s02eFC9C0l3FVwfpnm6z4N8vS7F1//aHVF8Vzbaf8uOxj/agGoasJbIo3PGMt+PXlYXb
+         pmDzqM9osdd5RznCizubf0Jx+HOUBc0jtYrOo1Vs+MKrLvy0eb0/C2GvJKs5J/0S+p3O
+         al3gwNAcxp721/PD0wHftlXHVGTlSGaZjUFNZB369fveKndDDAkd6BORdlotGaRWTfqA
+         YvqHuyolKE2oDIUDVpgpklu9c7u+vMAMqnMv+snDcMC19v6/kN8FfxtDS+4WFRhVqnOc
+         5zuw==
+X-Gm-Message-State: AOAM5312ECCpJLKztmjunEmugmplGlEFS7KdlTKg28zc8aKQ7S7mjn6A
+        MGuMuMElGH0xlS4RBH0gI7nZ9IKQOZzJL0l/rMNzUw==
+X-Google-Smtp-Source: ABdhPJzbwCtHfNPPkgln/I4+w+Qu3sIY5e+oPQhe3uSrc+ijbL6b7R0IZJVSbNvmQWYRKcNMXeboQ6LB5h6XEUyGK6c=
+X-Received: by 2002:a05:6512:3d07:: with SMTP id d7mr3937129lfv.233.1637666058738;
+ Tue, 23 Nov 2021 03:14:18 -0800 (PST)
 MIME-Version: 1.0
-References: <540d803d31bf9aa1d0f78f431cae0ccd05387edc.1637069733.git.geert+renesas@glider.be>
- <CAPDyKFphP-Zx878DOw9YaVKE8EvBPhtq9SdJNK5HEDiW8Ly50g@mail.gmail.com>
-In-Reply-To: <CAPDyKFphP-Zx878DOw9YaVKE8EvBPhtq9SdJNK5HEDiW8Ly50g@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 23 Nov 2021 10:31:06 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUa5J5bpCck9tBy4bA0wBU0YJ3ze1ry56bYM5j5bJKCag@mail.gmail.com>
-Message-ID: <CAMuHMdUa5J5bpCck9tBy4bA0wBU0YJ3ze1ry56bYM5j5bJKCag@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: Use devm_clk_get_optional() to obtain
- CD clock
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>
+References: <20211122170536.7725-1-hdegoede@redhat.com>
+In-Reply-To: <20211122170536.7725-1-hdegoede@redhat.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 23 Nov 2021 12:13:42 +0100
+Message-ID: <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
+Subject: Re: [PATCH v2 0/7] ACPI: acpi_device_override_status() changes
+To:     Hans de Goede <hdegoede@redhat.com>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
+        linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On Mon, Nov 22, 2021 at 12:26 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On Tue, 16 Nov 2021 at 14:36, Geert Uytterhoeven
-> <geert+renesas@glider.be> wrote:
-> >
-> > Use the existing devm_clk_get_optional() helper to obtain the optional
-> > Card Detect clock, instead of open-coding the same operation.
-> > a side effect, real errors will now be handled correctly instead of
-> > being ignored.
-> >
-> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+On Mon, 22 Nov 2021 at 18:05, Hans de Goede <hdegoede@redhat.com> wrote:
 >
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Hi Rafael,
+>
+> As requested here is a v2 of my series previously titled:
+> "ACPI: scan: Skip turning off some unused objects during scan"
+>
+> Which was a regression fix series for the commit c10383e8ddf4
+> ("ACPI: scan: Release PM resources blocked by unused objects")
+> change, but that has been reverted now. So as requested here is
+> a v2 changing the wording of various commit messages since these
+> changes are still useful to have regardless.
+>
+> Patch 1/7 is a v2/resend of the "ACPI / x86: Drop PWM2 device on
+> Lenovo Yoga Book from always present table" patch. You requested
+> changing the commit message of this one a bit to make it sound
+> less like a regression fix (which it is not). But you already
+> have the previous version of this patch in your bleeding-edge
+> branch, with a "Cc: 5.1+ <stable@vger.kernel.org> # 5.1+"
+> added ?  So depending on which version you want you can either
+> skip this patch when applying this series, or replace it with
+> the version from this series.
+>
+> Patches 2-4 are the main changes to make the always_present
+> quirk handling more flexible, changing it into a status_override
+> mechanism + adding a quirk for the GPD win and pocket to fix
+> an issue with those in a more elegant matter then the current
+> kludge in the sdhci-acpi code.
+>
+> Patch 5 is an unrelated patch which touches the override-status
+> quirk table, so it needed to be rebased and I decided to add it
+> to this series to make it clear that its v2 needs to be applied
+> on top of the other ACPI changes from this series.
+>
+> Patches 6+7 cleanup the sdhci-acpi code, removing the now no
+> longer needed ugly kludge for the GPD win/pocket. These can
+> be merged independently from patches 1-5, through the mmc
+> tree, as long as they get send to Linus during the same
+> kernel cycle as the ACPI bits.
 
-Thanks!
+This sounds like the mmc changes are really not that independent after
+all. What about bisectability?
 
-> I guess it's best if you continue to funnel renesas_sdhi changes
-> through your tree for the current cycle, to avoid conflicts. Right?
+An option is to funnel the sdhci patches together with the ACPI
+patches through Rafael's tree. You have my ack for this, but let's
+wait for Adrian's ack too.
 
-Sure, will queue in renesas-clk-for-v5.17.
+[...]
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Kind regards
+Uffe
