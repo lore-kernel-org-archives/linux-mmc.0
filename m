@@ -2,250 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1379C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 20:09:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1106C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Nov 2021 23:35:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240267AbhKWUNG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Nov 2021 15:13:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58734 "EHLO
+        id S240551AbhKWXis (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Nov 2021 18:38:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238621AbhKWUNF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 15:13:05 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 833DCC061574
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 12:09:56 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id e11so454757ljo.13
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 12:09:56 -0800 (PST)
+        with ESMTP id S239666AbhKWXip (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Nov 2021 18:38:45 -0500
+Received: from mail-ot1-x333.google.com (mail-ot1-x333.google.com [IPv6:2607:f8b0:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DE76C061756
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 15:35:36 -0800 (PST)
+Received: by mail-ot1-x333.google.com with SMTP id r10-20020a056830080a00b0055c8fd2cebdso1310643ots.6
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Nov 2021 15:35:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=RUVHvpDWEBEfs1rA1nDK27iWUayqNQz0QB3zyVMeGIw=;
-        b=Gx8xj3XG561BXhcV10Wx+2ZauEdGbJUODP+0YCMfQFUvND++0mS6GfxiLEtSqDytvv
-         AnvzW96dqJ4x8MlyvHzsiG58VHxfO3ZNsI8g+VoABqaB9ozhKW0GxtuPIA/Jn++EqFQX
-         GwgF37tbnSboXj8kJ7Zu8p690+UVMvkniEX62Q24H8dVp3K6IWQPlaOnHT0gfl/AaEFy
-         Zh8/2zCkLBq4QR3+EeW3ZY7yJk0CQkLQZncIUqOdk3p0SADh4du5ZIcLAlH1BXB04py0
-         WDyhVvuiYOvBMrZyhdq/IfSx/JqQuSGkIbQY+b9bb5f1VBLzqmyPvzq3Gkvk3Fja5HpN
-         +rbA==
+        bh=Fmou/wuLUJUD4zJclGcPIdJu1KVjJ7yuzM0jDRLa/jU=;
+        b=M1kOjxYtgXgq09yG/Tpxoql00WqAEf+/obBrTLesDBofwRUa7GWFazzYfDKZsB30ME
+         LP42xJGdAe5cnwer5SKD8Etmug0Nt6ulXzhr/sIoE9xx2sYU5ALDWZXfWHpEvjhc83X4
+         /EddGPPSnA96tKQr0ixoO9Iif78PSZQtfyiC4pLlvI90GT05IGmxb/4bv7ckDscOFVa0
+         j8mh7s4sgr6HP2CGrSy/5EINAIynCtUbqRAKwELOEpj3OmmDipt7FyRZkcV3y0yyaOqi
+         RMMwVrDE6PwHAX73yXnvFMVjk1xx32TWcnMG5ytYScelO405R1gRZUvoyiVzX+mFaqbl
+         +gIQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=RUVHvpDWEBEfs1rA1nDK27iWUayqNQz0QB3zyVMeGIw=;
-        b=raSyFiocQz5DLsVrcUoH4SFzDAp10wqd/sEa2Y2cSU9VXodEIhiCBnhVRTBM7Xczt1
-         X9iFv7iFHHPJ6lynPhuJCEoJGP2nKbjkkELbfrwEWrAtezgm4/BhjVhB6nFz5msSd6GH
-         MZ/nUXETPNdNo4sE5ugTG/B3tYMTNe+LVSE6LrOhkJ9sPt4AOkE734XyvhBsCMgJGPve
-         8RwtRzn9cRBRr2E7AR/YJsmFqUtj6ig87kql8C5c5ETM0qQLz1QvRfCPXZt8hzwjt1UG
-         pGTTpR3O1jXHYr9MIkgFMERCN7f3SdTj2xqiSZYYxBSgQ+ty5RUnNvEJejiEvqx1+uZH
-         Mq3g==
-X-Gm-Message-State: AOAM530ERM5JB5R4P5nqO5FDMctTU3hdsOJ8k1gWHFUMbndQ7SLXUdhp
-        3elt1HLmqQGAL1O5KiFq3i+iTqmmOieMS1MBjPn4fA==
-X-Google-Smtp-Source: ABdhPJzaZfhmzYFEL5qRSvRdg1nJ4rAMNq2jR2Fsv3IFyKJnFZ25EBoa+LBAimt2uhaFYazqObYuevCozI5jPymVS9k=
-X-Received: by 2002:a2e:a22a:: with SMTP id i10mr8650725ljm.16.1637698194349;
- Tue, 23 Nov 2021 12:09:54 -0800 (PST)
+        bh=Fmou/wuLUJUD4zJclGcPIdJu1KVjJ7yuzM0jDRLa/jU=;
+        b=lx4hK8qh9KCx34HUI7KMSed62wKo3e4/8oTSnD9fkwAl7KuG0aqj7a6ttcr39CbqgN
+         sJi1xbqi+HhX2OqDMCoj83j/ujZgRVLU8GrGOtLvFCy2b5ShzC0cIBNM2RWcNcAVV9rb
+         OcuCuClf9OV4OBmsdIBQ1ZFgx1zh0+s8T/HMWziVcKw91ipgIKeF1c6UpQvCF0KrRrm7
+         GCguP0W8CcW/ORONrVcFbA4LPNkIfcbxKH0seLtvDQsKtSi5uJDrCdrFJF7/yfFPsqvq
+         a6cnQIaUP0PR8rO7d4XaM6ReFS9jZufZ1COJKBMnd8WCAFsXVo26HJRf1+4iICIfKh3v
+         VWVw==
+X-Gm-Message-State: AOAM533q1ZJ4MjF21qMc93/Bq9cjNB8mPKkLVzx5XFWQLVEAMgo2Pi88
+        FyPqzoPSk7Gqpf60GOzycTbWuDg4bnNEEmElRhJOhg==
+X-Google-Smtp-Source: ABdhPJzM/xqGhHncEHhl2AIgExbTLI27yZdnho4Z+I5VLuYNi5uSlNeNxRyIKiu1OCuHPC8HqiuPUo4+VogT8mYjGlE=
+X-Received: by 2002:a9d:74d0:: with SMTP id a16mr8027979otl.237.1637710535722;
+ Tue, 23 Nov 2021 15:35:35 -0800 (PST)
 MIME-Version: 1.0
-References: <20211120112318.10474-1-kmcopper@danwin1210.me>
-In-Reply-To: <20211120112318.10474-1-kmcopper@danwin1210.me>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Nov 2021 21:09:18 +0100
-Message-ID: <CAPDyKFrwnL4-XhwVXVvVk2ZXJF+FPEvaMmzPN4HvHs1s760FyA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: arasan: add runtime power management support
-To:     Kyle Copperfield <kmcopper@danwin1210.me>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
+References: <cover.1637592133.git.geert+renesas@glider.be> <afb895b597037a635acc4a1dc44b88598268a19b.1637592133.git.geert+renesas@glider.be>
+In-Reply-To: <afb895b597037a635acc4a1dc44b88598268a19b.1637592133.git.geert+renesas@glider.be>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 24 Nov 2021 00:35:23 +0100
+Message-ID: <CACRpkdZAA_XZQ7KXOsod8r5EZ0F9f1qaz3+FLsuyPfeD_mO5Dw@mail.gmail.com>
+Subject: Re: [PATCH/RFC 07/17] iio: st_sensors: Use bitfield helpers
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        Paul Walmsley <paul@pwsan.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Tero Kristo <kristo@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Lorenzo Bianconi <lorenzo.bianconi83@gmail.com>,
+        Benoit Parrot <bparrot@ti.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Manish Narani <manish.narani@xilinx.com>,
-        Dragan Simic <dragan.simic@gmail.com>,
-        Ondrej Jirman <megous@megous.com>,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+        Andrew Jeffery <andrew@aj.id.au>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Ping-Ke Shih <pkshih@realtek.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Eduardo Valentin <edubezval@gmail.com>,
+        Keerthy <j-keerthy@ti.com>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
+        alsa-devel@alsa-project.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 20 Nov 2021 at 12:23, Kyle Copperfield <kmcopper@danwin1210.me> wrote:
->
-> Add runtime power management support in Arasan SDHCI driver.
->
-> This patch is largely based on the original Arasan PM patch from
-> https://lore.kernel.org/linux-mmc/1537283046-13985-1-git-send-email-manish.narani@xilinx.com/
-> that was left abandoned since 2018 for an unknown reason.
->
-> Changes made to the original patch include reducing the runtime
-> suspend timeout to 50 ms and reusing the runtime PM configuration
-> found in sdhci-of-at91 driver.
->
-> Power consumption is measurably reduced on the Pinebook Pro and
-> PinePhone Pro, on which the patch was tested.  More precisely,
-> a reduction of about 200 mW was measured on the latter.
->
-> Originally-by: Manish Narani <manish.narani@xilinx.com>
-> Reviewed-by: Dragan Simic <dragan.simic@gmail.com>
-> Tested-by: Ondrej Jirman <megous@megous.com>
-> Signed-off-by: Kyle Copperfield <kmcopper@danwin1210.me>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 88 +++++++++++++++++++++++++++++-
->  1 file changed, 86 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 737e2bfdedc2..63095d91a672 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -19,6 +19,7 @@
->  #include <linux/mfd/syscon.h>
->  #include <linux/module.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/phy/phy.h>
->  #include <linux/regmap.h>
->  #include <linux/of.h>
-> @@ -27,6 +28,7 @@
->  #include "cqhci.h"
->  #include "sdhci-pltfm.h"
->
-> +#define SDHCI_ARASAN_AUTOSUSPEND_DELAY 50 /* ms */
->  #define SDHCI_ARASAN_VENDOR_REGISTER   0x78
->
->  #define SDHCI_ARASAN_ITAPDLY_REGISTER  0xF0F8
-> @@ -456,6 +458,70 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
->                         SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
->  };
->
-> +static int __maybe_unused sdhci_arasan_runtime_suspend(struct device *dev)
-> +{
-> +       struct platform_device *pdev = to_platform_device(dev);
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
-> +
-> +       if (sdhci_arasan->has_cqe) {
-> +               ret = cqhci_suspend(host->mmc);
-> +               if (ret)
-> +                       return ret;
-> +       }
-> +
-> +       ret = sdhci_runtime_suspend_host(host);
-> +       if (ret)
-> +               return ret;
-> +
-> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
-> +               mmc_retune_needed(host->mmc);
-> +
-> +       clk_disable(pltfm_host->clk);
-> +       clk_disable(sdhci_arasan->clk_ahb);
+On Mon, Nov 22, 2021 at 4:55 PM Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
 
-These should be clk_disable_unprepare() - and the corresponding
-clk_enable() below, needs to be converted to clk_prepare_enable().
-
-Moreover, I am wondering about why the phy is to be turned off with
-phy_power_off() during system suspend, but not during runtime suspend?
-
-When is it safe to turn off the phy?
-
-> +
-> +       return 0;
-> +}
-> +
-> +static int __maybe_unused sdhci_arasan_runtime_resume(struct device *dev)
-> +{
-> +       struct platform_device *pdev = to_platform_device(dev);
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +       int ret;
-> +
-> +       ret = clk_enable(sdhci_arasan->clk_ahb);
-> +       if (ret) {
-> +               dev_err(dev, "Cannot enable AHB clock: %d\n", ret);
-> +               return ret;
-> +       }
-> +
-> +       ret = clk_enable(pltfm_host->clk);
-> +       if (ret) {
-> +               dev_err(dev, "Cannot enable SD clock: %d\n", ret);
-> +               goto err_clk_ahb;
-> +       }
-> +
-> +       ret = sdhci_runtime_resume_host(host, 0);
-> +       if (ret)
-> +               goto err_clk_disable;
-> +
-> +       if (sdhci_arasan->has_cqe)
-> +               return cqhci_resume(host->mmc);
-> +
-> +       return 0;
-> +
-> +err_clk_disable:
-> +       clk_disable(pltfm_host->clk);
-> +err_clk_ahb:
-> +       clk_disable(sdhci_arasan->clk_ahb);
-> +
-> +       return ret;
-> +}
-> +
->  #ifdef CONFIG_PM_SLEEP
->  /**
->   * sdhci_arasan_suspend - Suspend method for the driver
-> @@ -552,8 +618,10 @@ static int sdhci_arasan_resume(struct device *dev)
->  }
->  #endif /* ! CONFIG_PM_SLEEP */
+> Use the field_prep() helper, instead of open-coding the same operation.
 >
-> -static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
-> -                        sdhci_arasan_resume);
-> +static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend, sdhci_arasan_resume)
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-In sdhci_arasan_suspend() we assume that the clocks, etc are turned
-on. This may not be the case anymore, as
-sdhci_arasan_runtime_suspend() may already have done that.
+Clever!
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-There are a couple of options to deal with that, like using
-pm_runtime_force_suspend|resume(). But then don't forget that you may
-need to manage system wakeups, if that is supported.
-
-> +       SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
-> +                          sdhci_arasan_runtime_resume, NULL) };
->
->  /**
->   * sdhci_arasan_sdcardclk_recalc_rate - Return the card clock rate
-> @@ -1681,13 +1749,25 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->                         host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
->         }
->
-> +       pm_runtime_get_noresume(&pdev->dev);
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, SDHCI_ARASAN_AUTOSUSPEND_DELAY);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +
->         ret = sdhci_arasan_add_host(sdhci_arasan);
->         if (ret)
->                 goto err_add_host;
->
-> +       pm_runtime_put_autosuspend(&pdev->dev);
-> +
->         return 0;
->
->  err_add_host:
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_set_suspended(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         if (!IS_ERR(sdhci_arasan->phy))
->                 phy_exit(sdhci_arasan->phy);
->  unreg_clk:
-> @@ -1715,6 +1795,10 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
->                 phy_exit(sdhci_arasan->phy);
->         }
->
-> +       pm_runtime_get_sync(&pdev->dev);
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         sdhci_arasan_unregister_sdclk(&pdev->dev);
->
->         ret = sdhci_pltfm_unregister(pdev);
-
-Kind regards
-Uffe
+Yours,
+Linus Walleij
