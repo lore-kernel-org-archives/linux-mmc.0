@@ -2,148 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D745C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 08:24:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46570C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 09:48:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241312AbhKXI1c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Nov 2021 03:27:32 -0500
-Received: from m43-7.mailgun.net ([69.72.43.7]:17085 "EHLO m43-7.mailgun.net"
+        id S229932AbhKXJwC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Nov 2021 04:52:02 -0500
+Received: from mga04.intel.com ([192.55.52.120]:39511 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S241310AbhKXI13 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 24 Nov 2021 03:27:29 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1637742260; h=Content-Type: MIME-Version: Message-ID:
- In-Reply-To: Date: References: Subject: Cc: To: From: Sender;
- bh=DLx8xZfugkoYBeo1v25B565K1wJJHlGolp3uooimdG4=; b=bNsxTrQyq9uGwuB3f2LyEcxsvAp9kD/C4fNIuYqL7wdR0INGNqkdkYAL6AQiYP+HKysGkv73
- CYHsPEgeVXDeFd7bJYmMA7Oz/1YUg44l72wHEEI5ntB8TnM3GEkzY/SvktnbEJA3SoSt3f0S
- PcTzk1aHGKk317FKx2i3qMH1ytk=
-X-Mailgun-Sending-Ip: 69.72.43.7
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n04.prod.us-east-1.postgun.com with SMTP id
- 619df6b3e7d68470afb0244b (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 24 Nov 2021 08:24:19
- GMT
-Sender: kvalo=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id EBD19C4338F; Wed, 24 Nov 2021 08:24:18 +0000 (UTC)
-Received: from tykki (tynnyri.adurom.net [51.15.11.48])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 02E23C4338F;
-        Wed, 24 Nov 2021 08:24:05 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.4.1 smtp.codeaurora.org 02E23C4338F
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=codeaurora.org
-From:   Kalle Valo <kvalo@codeaurora.org>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Johannes Berg <johannes@sipsolutions.net>,
-        Tony Lindgren <tony@atomide.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        Paul Walmsley <paul@pwsan.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Tero Kristo <kristo@kernel.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Lorenzo Bianconi <lorenzo.bianconi83@gmail.com>,
-        Benoit Parrot <bparrot@ti.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Ping-Ke Shih <pkshih@realtek.com>,
-        "David S . Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        Eduardo Valentin <edubezval@gmail.com>,
-        Keerthy <j-keerthy@ti.com>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>,
-        linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
-        alsa-devel@alsa-project.org
-Subject: Re: [PATCH 01/17] bitfield: Add non-constant field_{prep,get}() helpers
-References: <cover.1637592133.git.geert+renesas@glider.be>
-        <3a54a6703879d10f08cf0275a2a69297ebd2b1d4.1637592133.git.geert+renesas@glider.be>
-        <01b44b38c087c151171f8d45a2090474c2559306.camel@sipsolutions.net>
-        <CAMuHMdUnBgFpqhgjf5AA0LH9MZOFALeC=YinZ4Tv_V+Y9hkRSg@mail.gmail.com>
-Date:   Wed, 24 Nov 2021 10:24:02 +0200
-In-Reply-To: <CAMuHMdUnBgFpqhgjf5AA0LH9MZOFALeC=YinZ4Tv_V+Y9hkRSg@mail.gmail.com>
-        (Geert Uytterhoeven's message of "Tue, 23 Nov 2021 09:30:14 +0100")
-Message-ID: <87sfvm55ct.fsf@codeaurora.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        id S229840AbhKXJwC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 Nov 2021 04:52:02 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10177"; a="233966599"
+X-IronPort-AV: E=Sophos;i="5.87,260,1631602800"; 
+   d="scan'208";a="233966599"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2021 01:48:53 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,260,1631602800"; 
+   d="scan'208";a="571428681"
+Received: from ahunter-desktop.fi.intel.com ([10.237.72.76])
+  by fmsmga004.fm.intel.com with ESMTP; 24 Nov 2021 01:48:51 -0800
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Subject: [PATCH] mmc: sdhci-pci: Add PCI ID for Intel ADL
+Date:   Wed, 24 Nov 2021 11:48:50 +0200
+Message-Id: <20211124094850.1783220-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Geert Uytterhoeven <geert@linux-m68k.org> writes:
+Add PCI ID for Intel ADL eMMC host controller.
 
-> Hi Johannes,
->
-> On Mon, Nov 22, 2021 at 5:33 PM Johannes Berg <johannes@sipsolutions.net> wrote:
->> On Mon, 2021-11-22 at 16:53 +0100, Geert Uytterhoeven wrote:
->> > The existing FIELD_{GET,PREP}() macros are limited to compile-time
->> > constants.  However, it is very common to prepare or extract bitfield
->> > elements where the bitfield mask is not a compile-time constant.
->> >
->>
->> I'm not sure it's really a good idea to add a third API here?
->>
->> We have the upper-case (constant) versions, and already
->> {u32,...}_get_bits()/etc.
->
-> These don't work for non-const masks.
->
->> Also, you're using __ffs(), which doesn't work for 64-bit on 32-bit
->> architectures (afaict), so that seems a bit awkward.
->
-> That's a valid comment. Can be fixed by using a wrapper macro
-> that checks if typeof(mask) == u64, and uses an __ffs64() version when
-> needed.
->
->> Maybe we can make {u32,...}_get_bits() be doing compile-time only checks
->> if it is indeed a constant? The __field_overflow() usage is already only
->> done if __builtin_constant_p(v), so I guess we can do the same with
->> __bad_mask()?
->
-> Are all compilers smart enough to replace the division by
-> field_multiplier(field) by a shift?
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org
+---
+ drivers/mmc/host/sdhci-pci-core.c | 1 +
+ drivers/mmc/host/sdhci-pci.h      | 1 +
+ 2 files changed, 2 insertions(+)
 
-It looks like the answer is no as few weeks back I received a comment
-internally that a team is seeing a slow down with u32_get_bits():
-
-"Time taken for executing both the macros/inline function (in terms of microseconds)
-(out of 3 Trails)
-FIELD_GET	: 32, 31, 32
-u32_get_bits	: 6379, 6664, 6558"
-
-Sadly I didn't realise to ask what compiler they were using. But I still
-prefer {u32,...}_get_bits() over FIELD_GET(), they are just so much
-cleaner to use.
-
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 6f9877546830..ed53276f6ad9 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1866,6 +1866,7 @@ static const struct pci_device_id pci_ids[] = {
+ 	SDHCI_PCI_DEVICE(INTEL, JSL_SD,    intel_byt_sd),
+ 	SDHCI_PCI_DEVICE(INTEL, LKF_EMMC,  intel_glk_emmc),
+ 	SDHCI_PCI_DEVICE(INTEL, LKF_SD,    intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, ADL_EMMC,  intel_glk_emmc),
+ 	SDHCI_PCI_DEVICE(O2, 8120,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8220,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8221,     o2),
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 5e3193278ff9..3661a224fb04 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -59,6 +59,7 @@
+ #define PCI_DEVICE_ID_INTEL_JSL_SD	0x4df8
+ #define PCI_DEVICE_ID_INTEL_LKF_EMMC	0x98c4
+ #define PCI_DEVICE_ID_INTEL_LKF_SD	0x98f8
++#define PCI_DEVICE_ID_INTEL_ADL_EMMC	0x54c4
+ 
+ #define PCI_DEVICE_ID_SYSKONNECT_8000	0x8000
+ #define PCI_DEVICE_ID_VIA_95D0		0x95d0
 -- 
-https://patchwork.kernel.org/project/linux-wireless/list/
+2.25.1
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
