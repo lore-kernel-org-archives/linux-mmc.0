@@ -2,135 +2,167 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 807E6C43219
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 14:41:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD303C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 15:14:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354301AbhKXOpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Nov 2021 09:45:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50464 "EHLO
+        id S232619AbhKXPRm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Nov 2021 10:17:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354152AbhKXOpA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2021 09:45:00 -0500
-Received: from sipsolutions.net (s3.sipsolutions.net [IPv6:2a01:4f8:191:4433::2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EEC2C22459D;
-        Wed, 24 Nov 2021 06:09:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=sipsolutions.net; s=mail; h=Content-Transfer-Encoding:MIME-Version:
-        Content-Type:References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Sender
-        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:Resent-To:
-        Resent-Cc:Resent-Message-ID; bh=ehMa9pgWHBM7TnvPMQnjh4s1Rj7IHG2tDkzpNOpErAk=;
-        t=1637762985; x=1638972585; b=MthxQG5X8zlcOYtgAwIU9XAMBQI61ts+APPLEFUMJz+6PiG
-        zUIDfprGfp4uITF1NHPqp59IOvbY2qbQvKsmKrAmOSyiRTJpvAzSI8dI7IczyJlHDF7LVP9OPgfvr
-        eJua/j9ZHIfCEKXrFs5QtXVPratkZb/y48R6jsbkq2eHfWNKOYqAkayzyCNoWrikwedZPxLKnZpJr
-        GQw4lIzPBkRJ52WXlcSFsGmXXuplrTEHAqT43Fh6JprXcW/w9LbOp2ChgZP8eY2U6fJIU/s3AtWPD
-        UbnXANwy5qujn3tf/p5fy/5XkPe4bNiFltzNVIlqVW+Px02LqlsM+PWowW2L7x2A==;
-Received: by sipsolutions.net with esmtpsa (TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
-        (Exim 4.95)
-        (envelope-from <johannes@sipsolutions.net>)
-        id 1mpsw9-002JSq-Fw;
-        Wed, 24 Nov 2021 15:07:49 +0100
-Message-ID: <eea90adf2d51326f6d0bf0b97834063752a35c3f.camel@sipsolutions.net>
-Subject: Re: [PATCH 01/17] bitfield: Add non-constant field_{prep,get}()
- helpers
-From:   Johannes Berg <johannes@sipsolutions.net>
-To:     Jakub Kicinski <kuba@kernel.org>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Tony Lindgren <tony@atomide.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        Paul Walmsley <paul@pwsan.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Tero Kristo <kristo@kernel.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Lorenzo Bianconi <lorenzo.bianconi83@gmail.com>,
-        Benoit Parrot <bparrot@ti.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Ping-Ke Shih <pkshih@realtek.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        Eduardo Valentin <edubezval@gmail.com>,
-        Keerthy <j-keerthy@ti.com>,
-        "Rafael J . Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>,
-        linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
-        alsa-devel@alsa-project.org
-Date:   Wed, 24 Nov 2021 15:07:47 +0100
-In-Reply-To: <20211124055935.416dc472@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-References: <cover.1637592133.git.geert+renesas@glider.be>
-         <3a54a6703879d10f08cf0275a2a69297ebd2b1d4.1637592133.git.geert+renesas@glider.be>
-         <01b44b38c087c151171f8d45a2090474c2559306.camel@sipsolutions.net>
-         <20211122171739.03848154@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-         <CAMuHMdWAAGrQUZN18cnDTDUUhuPNTZTFkRMe2Sbf+s7CedPSxA@mail.gmail.com>
-         <637a4183861a1f2cdab52b7652bfa7ed33fbcdd2.camel@sipsolutions.net>
-         <20211123154922.600fd3b5@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-         <05d4673a0343bfd83824d307e9cf8bf92e3814a6.camel@sipsolutions.net>
-         <20211124055935.416dc472@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.42.1 (3.42.1-1.fc35) 
+        with ESMTP id S231393AbhKXPRm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2021 10:17:42 -0500
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70285C061714
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2021 07:14:32 -0800 (PST)
+Received: by mail-lf1-x133.google.com with SMTP id b40so8074148lfv.10
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2021 07:14:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Yh9xoOuRaAJaKPW0jaTHe+4M3+KDpw2IcSI6hj23fJM=;
+        b=GBof6E+0Gw3K8zrHDaQGHMJnQz8w+W2GZLPn7BHTMiwc6ITlkuTF1OEV9OQsc40mKx
+         RtRz7bKBuVzmm2RSm31gHNx7+9acY2KRGBqu55rCXmRMhmL9fvLQN6WqvW5S7o2fAhXx
+         G9GJlV5PacmgEKwuX6IK+fQvrt1GzXMuSQC2AtXIpmeXyS5PKmXj0qInc8lxlkCCKh6M
+         +hl5cnByZa9xiE7B1ShyrQ2+vGSWqpCJRwDpUCyBdeyAEA9hBUKJ2UkklJavptMuXdwj
+         WwG6Dh5YFhSvyIYKhacFnMfEThrDobO55JQX6iOR9OH8tiR8uuMp95efEyUMuZJOq16m
+         hiZg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Yh9xoOuRaAJaKPW0jaTHe+4M3+KDpw2IcSI6hj23fJM=;
+        b=XPF7xvi/W2+t4eia1u61T9PeXOzmmaC6B3Kd/FYmcL1rBGe3oO3DpToL4Z41FwUe8f
+         xSDUuFsYSJjb4Pw05og6wf58MYGxKGMiOzKueMZfHcvwxZKqIBFzOwbCeuW1ofFzkIGM
+         8nWJYkJwTGnYy1VmihZmdZQuxTQyiwkinFZwRra0cfjBMVQMzvHvp47Z3c/sF0fURj/b
+         PjqKs76FHSB0uZyq5p1PXhL/IYWpuJLHyHhGrRbtRdy0UrNZzZMwysoTHxKaXMXWnL6I
+         1yYMxwOEXq8ZL4pX7677w81eCp58XrZPsbZy/eYNg2T7L1AtmRDpYa6WUT/6L+L4c4m/
+         Xtmg==
+X-Gm-Message-State: AOAM5339oKnZc2oiM/JKGvx11JXCFau54yW1sKCzHyWlcGvJrH+mRRUA
+        pNZMh79mU2l084XkvZzueAY6ScS8wBlIUqitKNx5keuvnQHMAg==
+X-Google-Smtp-Source: ABdhPJzNHVBwEhKAjZxgHBhiKcUY54rgPx2CslP5nbiVgbQJZVuekP1z2micFZS+P43WqeGDYm4YxRjmnOs3kwzhyo4=
+X-Received: by 2002:a05:6512:10c4:: with SMTP id k4mr15601143lfg.373.1637766870290;
+ Wed, 24 Nov 2021 07:14:30 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-malware-bazaar: not-scanned
+References: <20211116190244.1417591-1-john@metanate.com> <20211116190244.1417591-3-john@metanate.com>
+ <CGME20211123193506epcas1p49d0d0a2d66c6e560ee26077da9c0202b@epcas1p4.samsung.com>
+ <CAPDyKFp1zMBUfK7LteW0yEfTpqtU+P+EybLsJBFx_r54HwFdMg@mail.gmail.com>
+ <315972c2-2253-ad10-b712-2d2c96b3da26@samsung.com> <YZ4wQOcHEDHdCGlY@donbot>
+In-Reply-To: <YZ4wQOcHEDHdCGlY@donbot>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 24 Nov 2021 16:13:54 +0100
+Message-ID: <CAPDyKFoweEnqRWRBUsBgmApKoY30QuNp1C7f9gW5uCJbBk6A4w@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: use standard "mmc" alias stem
+To:     John Keeping <john@metanate.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2021-11-24 at 05:59 -0800, Jakub Kicinski wrote:
-> 
-> FWIW I never found the be/le versions useful. Most of the time the data
-> comes from bus accessors which swap or is unaligned so you have to do
-> be/le_get_unaligned, which swaps. Plus if you access/set multiple
-> fields you'd swap them one by one which seems wasteful.
+On Wed, 24 Nov 2021 at 13:29, John Keeping <john@metanate.com> wrote:
+>
+> On Wed, Nov 24, 2021 at 06:54:12PM +0900, Jaehoon Chung wrote:
+> > On 11/24/21 4:34 AM, Ulf Hansson wrote:
+> > > On Tue, 16 Nov 2021 at 20:02, John Keeping <john@metanate.com> wrote:
+> > >>
+> > >> The standard stem for MMC aliases is "mmc" and this is used by the MMC
+> > >> core to set the slot index.
+> > >
+> > > This isn't the correct description of the mmc aliases. The below text
+> > > is copied from the DT doc:
+> > >
+> > > "It is possible to assign a fixed index mmcN to an MMC host controller
+> > > (and the corresponding mmcblkN devices) by defining an alias in the
+> > > /aliases device tree node."
+> > >
+> > >>
+> > >> Use this in preference to the non-standard "mshc" stem when setting the
+> > >> controller ID to avoid needing two aliases for each MMC device in order
+> > >> to cover both the core and dw_mmc-specific functionality.
+> > >>
+> > >> The old "mshc" lookup is kept for backwards compatibility.
+> > >
+> > > The mshc alias is really weird!
+> > >
+> > > It looks like some leftover from when the dw_mmc controller supported
+> > > multiple slots. This support was dropped a long time ago, simply
+> > > because it never really worked - and it was not worth trying to. Only
+> > > one slot per controller is supported.
+> >
+> > As Ulf mentioned, dw_mmc controller can be supported multiple slot.
+> > But I didn't see its case to use multiple slot. And I had been done to drop a long time ago.
+> >
+> > mshc was used because of Mobile Storage Host Controller.
+> >
+> > >
+> > > Rather than re-using the mmc alias in the same weird way as the mshc
+> > > alias, I suggest we try to remove parsing of the mshc aliases
+> > > completely. By looking at the corresponding code and in combination
+> > > with the DTS files, it certainly looks doable to me. Do you want to
+> > > have a look at it?
+> >
+> > If possible to remove mshc, it's best.
+> > I will check that removing mshc parsing in dw_mmc.c.
+>
+> Unfortunately it doesn't look like it's easy to remove as there is some
+> behaviour depending on this via dw_mci_drv_data::caps, as well as
+> different timing setup in dw_mmc-k3.c which uses
+> dw_mci_of_alias_get_id() to identify SD and SDIO hosts.
+>
+> Looking across the dw_mmc-*.c files that use dw_mci_drv_data::caps to
+> set capabilities per host controller:
+>
+> - dw_mmc-exynos.c sets additional capabilities for mshc0, although both
+>   MMC_CAP_1_8V_DDR and MMC_CAP_8_BIT_DATA should be set via DT (in fact
+>   in some cases it looks like device trees are setting bus-width = <4>
+>   so MMC_CAP_8_BIT_DATA seems wrong!); I can't see any device trees
+>   setting mmc-ddr-1_8v for these devices at the moment though, so
+>   removing that is a change in behaviour
 
-Oh, we use them all the time in wifi!
+Of course we need to be careful to not break anything. But having some
+clever fallback methods could work.
 
-I'm not sure I'm too concerned about wasteful - actually in wifi most of
-the time it's little endian to start with, which matches the CPU for all
-practical uses of wifi (**), and often we just access one field or so.
-And anyway if we extract more than a single bit we need to swap anyway,
-and I hope if it's just a single bit the compiler will optimize since
-the one side is a constant? But whatever ...
+For example, for an SD/SDIO card slot it shouldn't matter if
+MMC_CAP_8_BIT_DATA gets set. But I didn't look that closely if that
+could be an option.
 
-(**) I had a fight with big-endian ARM a few years ago just to get wifi
-tested on big-endian ...
+>
+> - dw_mmc-k3.c sets different capabilities for mshc2 and, as mentioned
+>   above, uses the alias index to select timing parameters and change
+>   voltage switching behaviour
 
+Yeah, the timing thingy looks harder to get rid of for the k3 variant.
 
-> Right now it seems the uppercase macros are more prevalent.
-> 
+Although, if we could limit the alias parsing to the k3 variant, that
+would still be a nice cleanup and improvement.
 
-Not in my world ;-)
+As a next step we could look at introducing some new DT properties for
+k3, to specify the timing thingy - and then make the mshc alias
+deprecated.
 
-$ git grep FIELD_GET -- ... | wc -l
-20
-$ git grep le32_get_bits -- ... | wc -l
-44
-$ git grep le16_get_bits -- ... | wc -l
-12
-$ git grep u8_get_bits -- ... | wc -l
-17
+>
+> - dw_mmc-hi3798cv200.c and dw_mmc-rockchip.c set the same caps for all
+>   slots, so can easily remove the dependency on the alias
 
-:-)
+Great.
 
-johannes
+>
+>
+> I'm mostly interested in Rockchip myself, which is one of the easy ones,
+> so I'm not that familiar with Exynos or K3 - I'd guess the Exynos
+> version can remove its dependency on the mshc alias pretty easily, but
+> the use in dw_mmc-k3.c looks much more difficult given that I can't see
+> any other way to derive the necessary info from the current device
+> trees.
+
+Right. I will try to get some time to help clean this up.
+
+>
+>
+> Regards,
+> John
+
+Kind regards
+Uffe
