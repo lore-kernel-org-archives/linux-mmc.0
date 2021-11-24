@@ -2,167 +2,171 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD303C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 15:14:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8783AC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 15:16:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232619AbhKXPRm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Nov 2021 10:17:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58666 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231393AbhKXPRm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2021 10:17:42 -0500
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70285C061714
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2021 07:14:32 -0800 (PST)
-Received: by mail-lf1-x133.google.com with SMTP id b40so8074148lfv.10
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2021 07:14:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Yh9xoOuRaAJaKPW0jaTHe+4M3+KDpw2IcSI6hj23fJM=;
-        b=GBof6E+0Gw3K8zrHDaQGHMJnQz8w+W2GZLPn7BHTMiwc6ITlkuTF1OEV9OQsc40mKx
-         RtRz7bKBuVzmm2RSm31gHNx7+9acY2KRGBqu55rCXmRMhmL9fvLQN6WqvW5S7o2fAhXx
-         G9GJlV5PacmgEKwuX6IK+fQvrt1GzXMuSQC2AtXIpmeXyS5PKmXj0qInc8lxlkCCKh6M
-         +hl5cnByZa9xiE7B1ShyrQ2+vGSWqpCJRwDpUCyBdeyAEA9hBUKJ2UkklJavptMuXdwj
-         WwG6Dh5YFhSvyIYKhacFnMfEThrDobO55JQX6iOR9OH8tiR8uuMp95efEyUMuZJOq16m
-         hiZg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Yh9xoOuRaAJaKPW0jaTHe+4M3+KDpw2IcSI6hj23fJM=;
-        b=XPF7xvi/W2+t4eia1u61T9PeXOzmmaC6B3Kd/FYmcL1rBGe3oO3DpToL4Z41FwUe8f
-         xSDUuFsYSJjb4Pw05og6wf58MYGxKGMiOzKueMZfHcvwxZKqIBFzOwbCeuW1ofFzkIGM
-         8nWJYkJwTGnYy1VmihZmdZQuxTQyiwkinFZwRra0cfjBMVQMzvHvp47Z3c/sF0fURj/b
-         PjqKs76FHSB0uZyq5p1PXhL/IYWpuJLHyHhGrRbtRdy0UrNZzZMwysoTHxKaXMXWnL6I
-         1yYMxwOEXq8ZL4pX7677w81eCp58XrZPsbZy/eYNg2T7L1AtmRDpYa6WUT/6L+L4c4m/
-         Xtmg==
-X-Gm-Message-State: AOAM5339oKnZc2oiM/JKGvx11JXCFau54yW1sKCzHyWlcGvJrH+mRRUA
-        pNZMh79mU2l084XkvZzueAY6ScS8wBlIUqitKNx5keuvnQHMAg==
-X-Google-Smtp-Source: ABdhPJzNHVBwEhKAjZxgHBhiKcUY54rgPx2CslP5nbiVgbQJZVuekP1z2micFZS+P43WqeGDYm4YxRjmnOs3kwzhyo4=
-X-Received: by 2002:a05:6512:10c4:: with SMTP id k4mr15601143lfg.373.1637766870290;
- Wed, 24 Nov 2021 07:14:30 -0800 (PST)
+        id S233150AbhKXPTZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Nov 2021 10:19:25 -0500
+Received: from mga02.intel.com ([134.134.136.20]:43962 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230158AbhKXPTY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 Nov 2021 10:19:24 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10178"; a="222517019"
+X-IronPort-AV: E=Sophos;i="5.87,260,1631602800"; 
+   d="scan'208";a="222517019"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2021 07:16:13 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,260,1631602800"; 
+   d="scan'208";a="741221507"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by fmsmga006.fm.intel.com with ESMTP; 24 Nov 2021 07:16:11 -0800
+Subject: Re: [PATCH v2 6/7] mmc: sdhci-acpi: Remove special handling for GPD
+ win/pocket devices
+To:     Hans de Goede <hdegoede@redhat.com>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20211122170536.7725-1-hdegoede@redhat.com>
+ <20211122170536.7725-7-hdegoede@redhat.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <a26356f7-16e7-8d57-af1f-a087354df728@intel.com>
+Date:   Wed, 24 Nov 2021 17:16:09 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-References: <20211116190244.1417591-1-john@metanate.com> <20211116190244.1417591-3-john@metanate.com>
- <CGME20211123193506epcas1p49d0d0a2d66c6e560ee26077da9c0202b@epcas1p4.samsung.com>
- <CAPDyKFp1zMBUfK7LteW0yEfTpqtU+P+EybLsJBFx_r54HwFdMg@mail.gmail.com>
- <315972c2-2253-ad10-b712-2d2c96b3da26@samsung.com> <YZ4wQOcHEDHdCGlY@donbot>
-In-Reply-To: <YZ4wQOcHEDHdCGlY@donbot>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 24 Nov 2021 16:13:54 +0100
-Message-ID: <CAPDyKFoweEnqRWRBUsBgmApKoY30QuNp1C7f9gW5uCJbBk6A4w@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: use standard "mmc" alias stem
-To:     John Keeping <john@metanate.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20211122170536.7725-7-hdegoede@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 24 Nov 2021 at 13:29, John Keeping <john@metanate.com> wrote:
->
-> On Wed, Nov 24, 2021 at 06:54:12PM +0900, Jaehoon Chung wrote:
-> > On 11/24/21 4:34 AM, Ulf Hansson wrote:
-> > > On Tue, 16 Nov 2021 at 20:02, John Keeping <john@metanate.com> wrote:
-> > >>
-> > >> The standard stem for MMC aliases is "mmc" and this is used by the MMC
-> > >> core to set the slot index.
-> > >
-> > > This isn't the correct description of the mmc aliases. The below text
-> > > is copied from the DT doc:
-> > >
-> > > "It is possible to assign a fixed index mmcN to an MMC host controller
-> > > (and the corresponding mmcblkN devices) by defining an alias in the
-> > > /aliases device tree node."
-> > >
-> > >>
-> > >> Use this in preference to the non-standard "mshc" stem when setting the
-> > >> controller ID to avoid needing two aliases for each MMC device in order
-> > >> to cover both the core and dw_mmc-specific functionality.
-> > >>
-> > >> The old "mshc" lookup is kept for backwards compatibility.
-> > >
-> > > The mshc alias is really weird!
-> > >
-> > > It looks like some leftover from when the dw_mmc controller supported
-> > > multiple slots. This support was dropped a long time ago, simply
-> > > because it never really worked - and it was not worth trying to. Only
-> > > one slot per controller is supported.
-> >
-> > As Ulf mentioned, dw_mmc controller can be supported multiple slot.
-> > But I didn't see its case to use multiple slot. And I had been done to drop a long time ago.
-> >
-> > mshc was used because of Mobile Storage Host Controller.
-> >
-> > >
-> > > Rather than re-using the mmc alias in the same weird way as the mshc
-> > > alias, I suggest we try to remove parsing of the mshc aliases
-> > > completely. By looking at the corresponding code and in combination
-> > > with the DTS files, it certainly looks doable to me. Do you want to
-> > > have a look at it?
-> >
-> > If possible to remove mshc, it's best.
-> > I will check that removing mshc parsing in dw_mmc.c.
->
-> Unfortunately it doesn't look like it's easy to remove as there is some
-> behaviour depending on this via dw_mci_drv_data::caps, as well as
-> different timing setup in dw_mmc-k3.c which uses
-> dw_mci_of_alias_get_id() to identify SD and SDIO hosts.
->
-> Looking across the dw_mmc-*.c files that use dw_mci_drv_data::caps to
-> set capabilities per host controller:
->
-> - dw_mmc-exynos.c sets additional capabilities for mshc0, although both
->   MMC_CAP_1_8V_DDR and MMC_CAP_8_BIT_DATA should be set via DT (in fact
->   in some cases it looks like device trees are setting bus-width = <4>
->   so MMC_CAP_8_BIT_DATA seems wrong!); I can't see any device trees
->   setting mmc-ddr-1_8v for these devices at the moment though, so
->   removing that is a change in behaviour
+On 22/11/2021 19:05, Hans de Goede wrote:
+> Remove the special sdhci_acpi_no_fixup_child_power() helper which was
+> added to avoid triggering an ACPI tables bug on the GPD win/pocket
+> devices.
+> 
+> The ACPI child-device triggering this bug has now been added to the
+> acpi_device_override_status() quirk table, so that its status
+> field is set to all 0 (instead of the wrong return value from the _STA
+> ACPI method). This removes the need for the special handling in
+> the sdhci-acpi code.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 
-Of course we need to be careful to not break anything. But having some
-clever fallback methods could work.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-For example, for an SD/SDIO card slot it shouldn't matter if
-MMC_CAP_8_BIT_DATA gets set. But I didn't look that closely if that
-could be an option.
+> ---
+> Changes in v2:
+> - No changes in v2 of this patch-series
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 61 ++---------------------------------
+>  1 file changed, 3 insertions(+), 58 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index f1ef0d28b0dd..1461aae13c19 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -34,7 +34,6 @@
+>  #include <asm/cpu_device_id.h>
+>  #include <asm/intel-family.h>
+>  #include <asm/iosf_mbi.h>
+> -#include <linux/pci.h>
+>  #endif
+>  
+>  #include "sdhci.h"
+> @@ -250,16 +249,6 @@ static bool sdhci_acpi_byt(void)
+>  	return x86_match_cpu(byt);
+>  }
+>  
+> -static bool sdhci_acpi_cht(void)
+> -{
+> -	static const struct x86_cpu_id cht[] = {
+> -		X86_MATCH_INTEL_FAM6_MODEL(ATOM_AIRMONT, NULL),
+> -		{}
+> -	};
+> -
+> -	return x86_match_cpu(cht);
+> -}
+> -
+>  #define BYT_IOSF_SCCEP			0x63
+>  #define BYT_IOSF_OCP_NETCTRL0		0x1078
+>  #define BYT_IOSF_OCP_TIMEOUT_BASE	GENMASK(10, 8)
+> @@ -304,43 +293,6 @@ static bool sdhci_acpi_byt_defer(struct device *dev)
+>  	return false;
+>  }
+>  
+> -static bool sdhci_acpi_cht_pci_wifi(unsigned int vendor, unsigned int device,
+> -				    unsigned int slot, unsigned int parent_slot)
+> -{
+> -	struct pci_dev *dev, *parent, *from = NULL;
+> -
+> -	while (1) {
+> -		dev = pci_get_device(vendor, device, from);
+> -		pci_dev_put(from);
+> -		if (!dev)
+> -			break;
+> -		parent = pci_upstream_bridge(dev);
+> -		if (ACPI_COMPANION(&dev->dev) && PCI_SLOT(dev->devfn) == slot &&
+> -		    parent && PCI_SLOT(parent->devfn) == parent_slot &&
+> -		    !pci_upstream_bridge(parent)) {
+> -			pci_dev_put(dev);
+> -			return true;
+> -		}
+> -		from = dev;
+> -	}
+> -
+> -	return false;
+> -}
+> -
+> -/*
+> - * GPDwin uses PCI wifi which conflicts with SDIO's use of
+> - * acpi_device_fix_up_power() on child device nodes. Identifying GPDwin is
+> - * problematic, but since SDIO is only used for wifi, the presence of the PCI
+> - * wifi card in the expected slot with an ACPI companion node, is used to
+> - * indicate that acpi_device_fix_up_power() should be avoided.
+> - */
+> -static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+> -{
+> -	return sdhci_acpi_cht() &&
+> -	       acpi_dev_hid_uid_match(adev, "80860F14", "2") &&
+> -	       sdhci_acpi_cht_pci_wifi(0x14e4, 0x43ec, 0, 28);
+> -}
+> -
+>  #else
+>  
+>  static inline void sdhci_acpi_byt_setting(struct device *dev)
+> @@ -352,11 +304,6 @@ static inline bool sdhci_acpi_byt_defer(struct device *dev)
+>  	return false;
+>  }
+>  
+> -static inline bool sdhci_acpi_no_fixup_child_power(struct acpi_device *adev)
+> -{
+> -	return false;
+> -}
+> -
+>  #endif
+>  
+>  static int bxt_get_cd(struct mmc_host *mmc)
+> @@ -861,11 +808,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  
+>  	/* Power on the SDHCI controller and its children */
+>  	acpi_device_fix_up_power(device);
+> -	if (!sdhci_acpi_no_fixup_child_power(device)) {
+> -		list_for_each_entry(child, &device->children, node)
+> -			if (child->status.present && child->status.enabled)
+> -				acpi_device_fix_up_power(child);
+> -	}
+> +	list_for_each_entry(child, &device->children, node)
+> +		if (child->status.present && child->status.enabled)
+> +			acpi_device_fix_up_power(child);
+>  
+>  	if (sdhci_acpi_byt_defer(dev))
+>  		return -EPROBE_DEFER;
+> 
 
->
-> - dw_mmc-k3.c sets different capabilities for mshc2 and, as mentioned
->   above, uses the alias index to select timing parameters and change
->   voltage switching behaviour
-
-Yeah, the timing thingy looks harder to get rid of for the k3 variant.
-
-Although, if we could limit the alias parsing to the k3 variant, that
-would still be a nice cleanup and improvement.
-
-As a next step we could look at introducing some new DT properties for
-k3, to specify the timing thingy - and then make the mshc alias
-deprecated.
-
->
-> - dw_mmc-hi3798cv200.c and dw_mmc-rockchip.c set the same caps for all
->   slots, so can easily remove the dependency on the alias
-
-Great.
-
->
->
-> I'm mostly interested in Rockchip myself, which is one of the easy ones,
-> so I'm not that familiar with Exynos or K3 - I'd guess the Exynos
-> version can remove its dependency on the mshc alias pretty easily, but
-> the use in dw_mmc-k3.c looks much more difficult given that I can't see
-> any other way to derive the necessary info from the current device
-> trees.
-
-Right. I will try to get some time to help clean this up.
-
->
->
-> Regards,
-> John
-
-Kind regards
-Uffe
