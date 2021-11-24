@@ -2,126 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 619BEC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 14:17:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 807E6C43219
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 14:41:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349803AbhKXOVG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Nov 2021 09:21:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44446 "EHLO
+        id S1354301AbhKXOpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Nov 2021 09:45:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50464 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353236AbhKXOSo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2021 09:18:44 -0500
-Received: from metanate.com (unknown [IPv6:2001:8b0:1628:5005::111])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C25CC098770;
-        Wed, 24 Nov 2021 04:29:57 -0800 (PST)
+        with ESMTP id S1354152AbhKXOpA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2021 09:45:00 -0500
+Received: from sipsolutions.net (s3.sipsolutions.net [IPv6:2a01:4f8:191:4433::2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EEC2C22459D;
+        Wed, 24 Nov 2021 06:09:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=metanate.com; s=stronger; h=In-Reply-To:Content-Type:References:Message-ID:
-        Subject:Cc:To:From:Date:Reply-To:Content-Transfer-Encoding:Content-ID:
-        Content-Description; bh=9+IhnhZkeGeP3d3+paaerLIadQ5w4iduEImB/rgB1WA=; b=3a7MW
-        mWmTgpFBgZT86bDzr5fnZd/OMYxslaVS+9JWm3M/wHb3PUyH2IM59c+QY7S5vtgUn5ij1k16gNk19
-        vbTNmxU8OeTpbUr2zaKyfoH+LNFs1LJldMLziMejnvGPmiP4zPa3YlxkEZ49W4SNuyjn7Cp7xJ/FU
-        pJCFi9umswPkuHxMQHWOYTO8/RznXlzuJST3Y7rCCxJoI77t1foOVL7CqtplAxKZ48wUj1lWMGbwx
-        lHYFbM7O7XZKD77NRV/TSODrmOdOz77FZAsQREgQmiWtgoEHpHIzJgeDy3Bs3DcZnguQYWvWocfDr
-        gME50F0neKQFoCt+WnjSRb4GUCZQQ==;
-Received: from [81.174.171.191] (helo=donbot)
-        by email.metanate.com with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
-        (Exim 4.93)
-        (envelope-from <john@metanate.com>)
-        id 1mprPO-0003p9-3u; Wed, 24 Nov 2021 12:29:54 +0000
-Date:   Wed, 24 Nov 2021 12:29:52 +0000
-From:   John Keeping <john@metanate.com>
-To:     Jaehoon Chung <jh80.chung@samsung.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: use standard "mmc" alias stem
-Message-ID: <YZ4wQOcHEDHdCGlY@donbot>
-References: <20211116190244.1417591-1-john@metanate.com>
- <20211116190244.1417591-3-john@metanate.com>
- <CGME20211123193506epcas1p49d0d0a2d66c6e560ee26077da9c0202b@epcas1p4.samsung.com>
- <CAPDyKFp1zMBUfK7LteW0yEfTpqtU+P+EybLsJBFx_r54HwFdMg@mail.gmail.com>
- <315972c2-2253-ad10-b712-2d2c96b3da26@samsung.com>
+        d=sipsolutions.net; s=mail; h=Content-Transfer-Encoding:MIME-Version:
+        Content-Type:References:In-Reply-To:Date:Cc:To:From:Subject:Message-ID:Sender
+        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:Resent-To:
+        Resent-Cc:Resent-Message-ID; bh=ehMa9pgWHBM7TnvPMQnjh4s1Rj7IHG2tDkzpNOpErAk=;
+        t=1637762985; x=1638972585; b=MthxQG5X8zlcOYtgAwIU9XAMBQI61ts+APPLEFUMJz+6PiG
+        zUIDfprGfp4uITF1NHPqp59IOvbY2qbQvKsmKrAmOSyiRTJpvAzSI8dI7IczyJlHDF7LVP9OPgfvr
+        eJua/j9ZHIfCEKXrFs5QtXVPratkZb/y48R6jsbkq2eHfWNKOYqAkayzyCNoWrikwedZPxLKnZpJr
+        GQw4lIzPBkRJ52WXlcSFsGmXXuplrTEHAqT43Fh6JprXcW/w9LbOp2ChgZP8eY2U6fJIU/s3AtWPD
+        UbnXANwy5qujn3tf/p5fy/5XkPe4bNiFltzNVIlqVW+Px02LqlsM+PWowW2L7x2A==;
+Received: by sipsolutions.net with esmtpsa (TLS1.3:ECDHE_SECP256R1__RSA_PSS_RSAE_SHA256__AES_256_GCM:256)
+        (Exim 4.95)
+        (envelope-from <johannes@sipsolutions.net>)
+        id 1mpsw9-002JSq-Fw;
+        Wed, 24 Nov 2021 15:07:49 +0100
+Message-ID: <eea90adf2d51326f6d0bf0b97834063752a35c3f.camel@sipsolutions.net>
+Subject: Re: [PATCH 01/17] bitfield: Add non-constant field_{prep,get}()
+ helpers
+From:   Johannes Berg <johannes@sipsolutions.net>
+To:     Jakub Kicinski <kuba@kernel.org>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Rajendra Nayak <rnayak@codeaurora.org>,
+        Paul Walmsley <paul@pwsan.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Tero Kristo <kristo@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Lorenzo Bianconi <lorenzo.bianconi83@gmail.com>,
+        Benoit Parrot <bparrot@ti.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Ping-Ke Shih <pkshih@realtek.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Eduardo Valentin <edubezval@gmail.com>,
+        Keerthy <j-keerthy@ti.com>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-pm@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Date:   Wed, 24 Nov 2021 15:07:47 +0100
+In-Reply-To: <20211124055935.416dc472@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
+References: <cover.1637592133.git.geert+renesas@glider.be>
+         <3a54a6703879d10f08cf0275a2a69297ebd2b1d4.1637592133.git.geert+renesas@glider.be>
+         <01b44b38c087c151171f8d45a2090474c2559306.camel@sipsolutions.net>
+         <20211122171739.03848154@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
+         <CAMuHMdWAAGrQUZN18cnDTDUUhuPNTZTFkRMe2Sbf+s7CedPSxA@mail.gmail.com>
+         <637a4183861a1f2cdab52b7652bfa7ed33fbcdd2.camel@sipsolutions.net>
+         <20211123154922.600fd3b5@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
+         <05d4673a0343bfd83824d307e9cf8bf92e3814a6.camel@sipsolutions.net>
+         <20211124055935.416dc472@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.42.1 (3.42.1-1.fc35) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <315972c2-2253-ad10-b712-2d2c96b3da26@samsung.com>
-X-Authenticated: YES
+Content-Transfer-Encoding: 7bit
+X-malware-bazaar: not-scanned
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 24, 2021 at 06:54:12PM +0900, Jaehoon Chung wrote:
-> On 11/24/21 4:34 AM, Ulf Hansson wrote:
-> > On Tue, 16 Nov 2021 at 20:02, John Keeping <john@metanate.com> wrote:
-> >>
-> >> The standard stem for MMC aliases is "mmc" and this is used by the MMC
-> >> core to set the slot index.
-> > 
-> > This isn't the correct description of the mmc aliases. The below text
-> > is copied from the DT doc:
-> > 
-> > "It is possible to assign a fixed index mmcN to an MMC host controller
-> > (and the corresponding mmcblkN devices) by defining an alias in the
-> > /aliases device tree node."
-> > 
-> >>
-> >> Use this in preference to the non-standard "mshc" stem when setting the
-> >> controller ID to avoid needing two aliases for each MMC device in order
-> >> to cover both the core and dw_mmc-specific functionality.
-> >>
-> >> The old "mshc" lookup is kept for backwards compatibility.
-> > 
-> > The mshc alias is really weird!
-> > 
-> > It looks like some leftover from when the dw_mmc controller supported
-> > multiple slots. This support was dropped a long time ago, simply
-> > because it never really worked - and it was not worth trying to. Only
-> > one slot per controller is supported.
+On Wed, 2021-11-24 at 05:59 -0800, Jakub Kicinski wrote:
 > 
-> As Ulf mentioned, dw_mmc controller can be supported multiple slot.
-> But I didn't see its case to use multiple slot. And I had been done to drop a long time ago.
+> FWIW I never found the be/le versions useful. Most of the time the data
+> comes from bus accessors which swap or is unaligned so you have to do
+> be/le_get_unaligned, which swaps. Plus if you access/set multiple
+> fields you'd swap them one by one which seems wasteful.
+
+Oh, we use them all the time in wifi!
+
+I'm not sure I'm too concerned about wasteful - actually in wifi most of
+the time it's little endian to start with, which matches the CPU for all
+practical uses of wifi (**), and often we just access one field or so.
+And anyway if we extract more than a single bit we need to swap anyway,
+and I hope if it's just a single bit the compiler will optimize since
+the one side is a constant? But whatever ...
+
+(**) I had a fight with big-endian ARM a few years ago just to get wifi
+tested on big-endian ...
+
+
+> Right now it seems the uppercase macros are more prevalent.
 > 
-> mshc was used because of Mobile Storage Host Controller.
-> 
-> > 
-> > Rather than re-using the mmc alias in the same weird way as the mshc
-> > alias, I suggest we try to remove parsing of the mshc aliases
-> > completely. By looking at the corresponding code and in combination
-> > with the DTS files, it certainly looks doable to me. Do you want to
-> > have a look at it?
-> 
-> If possible to remove mshc, it's best.
-> I will check that removing mshc parsing in dw_mmc.c.
 
-Unfortunately it doesn't look like it's easy to remove as there is some
-behaviour depending on this via dw_mci_drv_data::caps, as well as
-different timing setup in dw_mmc-k3.c which uses
-dw_mci_of_alias_get_id() to identify SD and SDIO hosts.
+Not in my world ;-)
 
-Looking across the dw_mmc-*.c files that use dw_mci_drv_data::caps to
-set capabilities per host controller:
+$ git grep FIELD_GET -- ... | wc -l
+20
+$ git grep le32_get_bits -- ... | wc -l
+44
+$ git grep le16_get_bits -- ... | wc -l
+12
+$ git grep u8_get_bits -- ... | wc -l
+17
 
-- dw_mmc-exynos.c sets additional capabilities for mshc0, although both
-  MMC_CAP_1_8V_DDR and MMC_CAP_8_BIT_DATA should be set via DT (in fact
-  in some cases it looks like device trees are setting bus-width = <4>
-  so MMC_CAP_8_BIT_DATA seems wrong!); I can't see any device trees
-  setting mmc-ddr-1_8v for these devices at the moment though, so
-  removing that is a change in behaviour
+:-)
 
-- dw_mmc-k3.c sets different capabilities for mshc2 and, as mentioned
-  above, uses the alias index to select timing parameters and change
-  voltage switching behaviour
-
-- dw_mmc-hi3798cv200.c and dw_mmc-rockchip.c set the same caps for all
-  slots, so can easily remove the dependency on the alias
-
-
-I'm mostly interested in Rockchip myself, which is one of the easy ones,
-so I'm not that familiar with Exynos or K3 - I'd guess the Exynos
-version can remove its dependency on the mshc alias pretty easily, but
-the use in dw_mmc-k3.c looks much more difficult given that I can't see
-any other way to derive the necessary info from the current device
-trees.
-
-
-Regards,
-John
+johannes
