@@ -2,120 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E18F8C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 09:35:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2789FC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 09:53:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346259AbhKYJiP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Nov 2021 04:38:15 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34420 "EHLO mail.kernel.org"
+        id S1344779AbhKYJ4r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 04:56:47 -0500
+Received: from mga17.intel.com ([192.55.52.151]:49063 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1354097AbhKYJgO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 25 Nov 2021 04:36:14 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 04266610CF;
-        Thu, 25 Nov 2021 09:33:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1637832782;
-        bh=LtCgSeMq4Nj9aV36OofJNPQSpqKGjBfqvw+CtKS+Z6w=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=NQW4ZkLIde1LF6/Kgj4Y10Q26D1aFtiFkWyIgWlbVVBUyQDsdkZT2krgwUnQ4XKqd
-         qR5r9uqIks2Upg5Ze9MGmeXdyanTMsQUPErkL9WsjCqUm7PIJ3IY3RQqaNz54/hrQP
-         QHDD4zXUFiDEoygsfUIYtW0vpOe+t6JeLy2Wyz3v4jj2Tnq7V3WKG+g16KsrwCEv5c
-         8Y/N/U3cco7PnPgR8W6jhiSP4yql+efFOFLttYP61kKD1bUyuy3bE5L9k7EigkDT/w
-         A+0hpw+Pop1w/NKnHrbDqGchdUorJJw76ES7D28z+g77QTEwDrfWub91q/NheLOVtb
-         F+i3gV7aCMQ8g==
-Date:   Thu, 25 Nov 2021 10:32:58 +0100
-From:   Wolfram Sang <wsa@kernel.org>
-To:     Peng Fan <peng.fan@nxp.com>
-Cc:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        Aisheng Dong <aisheng.dong@nxp.com>,
-        "shawnguo@kernel.org" <shawnguo@kernel.org>,
-        "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "linux@roeck-us.net" <linux@roeck-us.net>,
-        "wim@linux-watchdog.org" <wim@linux-watchdog.org>,
-        "linux@rempel-privat.de" <linux@rempel-privat.de>,
-        "kernel@pengutronix.de" <kernel@pengutronix.de>,
-        "festevam@gmail.com" <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "daniel.lezcano@linaro.org" <daniel.lezcano@linaro.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>,
-        "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>,
-        "linux-watchdog@vger.kernel.org" <linux-watchdog@vger.kernel.org>
-Subject: Re: [PATCH V5 0/8] dt-bindinds/dts: support i.MX8ULP
-Message-ID: <YZ9YSkdpXIK/LwKh@kunai>
-Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
-        Peng Fan <peng.fan@nxp.com>,
-        "Peng Fan (OSS)" <peng.fan@oss.nxp.com>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        Aisheng Dong <aisheng.dong@nxp.com>,
-        "shawnguo@kernel.org" <shawnguo@kernel.org>,
-        "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "linux@roeck-us.net" <linux@roeck-us.net>,
-        "wim@linux-watchdog.org" <wim@linux-watchdog.org>,
-        "linux@rempel-privat.de" <linux@rempel-privat.de>,
-        "kernel@pengutronix.de" <kernel@pengutronix.de>,
-        "festevam@gmail.com" <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "daniel.lezcano@linaro.org" <daniel.lezcano@linaro.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>,
-        "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>,
-        "linux-watchdog@vger.kernel.org" <linux-watchdog@vger.kernel.org>
-References: <20211120113454.785997-1-peng.fan@oss.nxp.com>
- <DU0PR04MB9417A88AC1808CBEE76A27E188629@DU0PR04MB9417.eurprd04.prod.outlook.com>
- <DU0PR04MB94178AB147B5DA8C32F1531388629@DU0PR04MB9417.eurprd04.prod.outlook.com>
+        id S1348015AbhKYJyr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Nov 2021 04:54:47 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10178"; a="216193450"
+X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
+   d="scan'208";a="216193450"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Nov 2021 01:51:36 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
+   d="scan'208";a="498012157"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by orsmga007.jf.intel.com with ESMTP; 25 Nov 2021 01:51:33 -0800
+Subject: Re: [PATCH v2 0/7] ACPI: acpi_device_override_status() changes
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Hans de Goede <hdegoede@redhat.com>
+Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20211122170536.7725-1-hdegoede@redhat.com>
+ <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <cecea505-9a30-7114-3d3e-80856cccb6c4@intel.com>
+Date:   Thu, 25 Nov 2021 11:51:32 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="Tsd6oFXSzdI9VGy6"
-Content-Disposition: inline
-In-Reply-To: <DU0PR04MB94178AB147B5DA8C32F1531388629@DU0PR04MB9417.eurprd04.prod.outlook.com>
+In-Reply-To: <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 23/11/2021 13:13, Ulf Hansson wrote:
+> On Mon, 22 Nov 2021 at 18:05, Hans de Goede <hdegoede@redhat.com> wrote:
+>>
+>> Hi Rafael,
+>>
+>> As requested here is a v2 of my series previously titled:
+>> "ACPI: scan: Skip turning off some unused objects during scan"
+>>
+>> Which was a regression fix series for the commit c10383e8ddf4
+>> ("ACPI: scan: Release PM resources blocked by unused objects")
+>> change, but that has been reverted now. So as requested here is
+>> a v2 changing the wording of various commit messages since these
+>> changes are still useful to have regardless.
+>>
+>> Patch 1/7 is a v2/resend of the "ACPI / x86: Drop PWM2 device on
+>> Lenovo Yoga Book from always present table" patch. You requested
+>> changing the commit message of this one a bit to make it sound
+>> less like a regression fix (which it is not). But you already
+>> have the previous version of this patch in your bleeding-edge
+>> branch, with a "Cc: 5.1+ <stable@vger.kernel.org> # 5.1+"
+>> added ?  So depending on which version you want you can either
+>> skip this patch when applying this series, or replace it with
+>> the version from this series.
+>>
+>> Patches 2-4 are the main changes to make the always_present
+>> quirk handling more flexible, changing it into a status_override
+>> mechanism + adding a quirk for the GPD win and pocket to fix
+>> an issue with those in a more elegant matter then the current
+>> kludge in the sdhci-acpi code.
+>>
+>> Patch 5 is an unrelated patch which touches the override-status
+>> quirk table, so it needed to be rebased and I decided to add it
+>> to this series to make it clear that its v2 needs to be applied
+>> on top of the other ACPI changes from this series.
+>>
+>> Patches 6+7 cleanup the sdhci-acpi code, removing the now no
+>> longer needed ugly kludge for the GPD win/pocket. These can
+>> be merged independently from patches 1-5, through the mmc
+>> tree, as long as they get send to Linus during the same
+>> kernel cycle as the ACPI bits.
+> 
+> This sounds like the mmc changes are really not that independent after
+> all. What about bisectability?
+> 
+> An option is to funnel the sdhci patches together with the ACPI
+> patches through Rafael's tree. You have my ack for this, but let's
+> wait for Adrian's ack too.
 
---Tsd6oFXSzdI9VGy6
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Looks OK to me.
 
-
-> Seems there is conflict after Abel's patchset in next tree, I'll rebase.
-
-True also for the I2C patch. A rebase would be great!
-
-
---Tsd6oFXSzdI9VGy6
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmGfWEcACgkQFA3kzBSg
-KbbaCg/+NnWT4wcaSbbzPB7BWeiyRxc347BdDa5okGckaD5+rWvtgMTNQ5/lyOWI
-VjfrLFYmCBLx2rznwcs6nX4ZITripFyIoDe65VMH7zcXLt/2A/LgOq544eCkbu5p
-d+NmSV7O1RhdxpRtJqm3ZtrXWZC6aq6Cbh4DJRSWkFumICD9L1HvhR5rwgLYQKRN
-wrWP4Uh1GVNqm1xZU31sScYqTykNL06Hih1xsJVGN4HFCLRJ1DsB9Bb2944WviN9
-3/NEonimQfP3n7+3jS+xS029y0P40pERJg2riauWtzgUtYaOw+JSFpWRkrIl6gz4
-OAQBeUP3hsePkHP426BJWxOKoNIUmEYkxgqDKYIaq9ahZjJe6E2amd+2rOzOdg+M
-p/fTKPg+zgQ1xKyT31cHqT9fbva0Z+dn0gGhFujWpzEHDTk6GNEeP+0ruwLavtVW
-kYmu5Bjho/ly7VtmZwRQ3/qqW87HdX9rtBQcNFQhCBQVxl+zyI0N03zXRMTmuXYa
-Y5ZhZqHUG5al40IGDPfYG0gp+JPkmyIRby7iUNP9I2VWQPvdiIq8MS7VWUsHZz21
-LINJOQ9/YqEAd3h1ufi2jOYBc0Jgx4EMshxxyFp0VuAsWEzW1TS72nnK30nF4Hl2
-fS+y5rpZkxjIIUTYLGF0m2ypjkvw4ffxFDDsaBkqoM87/DI/i4g=
-=8HuN
------END PGP SIGNATURE-----
-
---Tsd6oFXSzdI9VGy6--
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
