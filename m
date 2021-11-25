@@ -2,104 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C89DC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 13:40:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43CF6C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 16:16:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355603AbhKYNnz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Nov 2021 08:43:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49428 "EHLO
+        id S1356448AbhKYQTV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 11:19:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353909AbhKYNly (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 08:41:54 -0500
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20120C061763
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 05:31:03 -0800 (PST)
-Received: by mail-lj1-x22d.google.com with SMTP id k2so12565658lji.4
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 05:31:03 -0800 (PST)
+        with ESMTP id S243513AbhKYQRV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 11:17:21 -0500
+Received: from mail-il1-x134.google.com (mail-il1-x134.google.com [IPv6:2607:f8b0:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46232C0619D9
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 08:02:47 -0800 (PST)
+Received: by mail-il1-x134.google.com with SMTP id i6so6353910ila.0
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 08:02:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=W99VDr/uXXoqmoSqUiOQmZpQjn4jb8DokYK8Ns8t9TQ=;
-        b=ROaixL6GG/skenOqGk8XXStB+8ZS59DslkTuAs/FiK9h0rXwR1XxXFoNMk13FVo1zp
-         k2lNH0n0dUz2PXx21IqWNd+rfqbfICAevga7zLZGJrvZ9CICJSK4jEsqgBbtnXIUoict
-         UlW/zn6+WsCYTQ7aM/9+MK01R3rfFFzkzm+8quS+n6dhcWksejpaDb6bF//SguyRRaW3
-         5/mB5s2mujNVY1l/u3BEtb2VefJcgFGU2QKDd8fw4NRRfW78gQWAHxxCs5d7wx4daBfu
-         PR6TJJgaM1EGFR6kVpc6aEXbbyHRcshG1tQKu71w8aIPNRljssHw4wqSn7RU61Nz+z0S
-         Eo6Q==
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
+        h=from:to:cc:in-reply-to:references:subject:message-id:date
+         :mime-version:content-transfer-encoding;
+        bh=0qAsEjnbb+VBv+AENbl+pjNbqQq05jQJQ3B0sc5CN1o=;
+        b=xoIVEah/yh6mbI/sTwuQBY2+5aG7QjEShDVHENIHR6HMi2eWgKaYjeuFYemOjMYwFn
+         y/sdFbjOLN96YrH9DUbfuONrnJXfRJuJSGOZXquDQXbWXHGtcdo7SVfwo7einHnKcX7Y
+         /OkK0gJqmVtl85aPQbFH7x/pzIvs/D5ry+1/KbFBm+If/pugrl4M5l0UHfum5G8MZFs3
+         0bXMOV7BFM4j7Ay4trnMhdbqXM9OztUG57C6pGSKZxjmVbpZz7bhvd7yNreBam1ZV7tu
+         dRI8XEMnmpCIbkjikuapV38wB1KVPG7IFPeC6Ck2478/keOqm0PAybExAQvRjmdROth1
+         ZowQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=W99VDr/uXXoqmoSqUiOQmZpQjn4jb8DokYK8Ns8t9TQ=;
-        b=LP4RzIsbOEwfaxwZQRiM+ZHEdYopRFBona/Msfx6wAfToHTa1LefPip6hFzXNtTPYh
-         cffDJwd3Ca+tmKJSOR48cAl6eBin0q3iq9umTdWzYS1ckWpomnq8+CoMJtuP33zf1RkD
-         wQuWElEVm2LmBzvixqoo6UFyJAa5YNKjKjmHvOeYXn1jav/65DDyPO1fmIDjEzUsBFfK
-         7fqQSg4k+x5TFVm+D6ikVeSJw81ncnz7rnA5h9IRcdlsJBfdu45TR8rrXCc3J08PITKt
-         4vdga32QpDv+D9LEDMgMRCvtPcFzRDZ4eb2q477XAGF8BXHleuP8GGXZlzZQRm48hT1d
-         /ngQ==
-X-Gm-Message-State: AOAM531QqmPIS69xH5SLFKNloLISVDex8cvTX0XBMH5zCZbdv0mshk3S
-        3afabsAgeHhMPFfhE+zyDdXHbfTVZ8l6Xe60pHOODQ==
-X-Google-Smtp-Source: ABdhPJyYqrNXA9Jp/auzbHG8nUKhEpqjD6vu9em0QwNP1xMh7lwdO2R4cKTkHqtKm/HtAu4g8W5fxt6stHu/Hb3pVTc=
-X-Received: by 2002:a2e:93c4:: with SMTP id p4mr9910424ljh.367.1637847061364;
- Thu, 25 Nov 2021 05:31:01 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject
+         :message-id:date:mime-version:content-transfer-encoding;
+        bh=0qAsEjnbb+VBv+AENbl+pjNbqQq05jQJQ3B0sc5CN1o=;
+        b=bqf7V6nWZBCWUOnroYx/U6XPuuxtiP/5GycaINw8iqgkEar5ayRu5vAZz/OkvZBILr
+         QkaZ5UInPoY9d6dlqLw7zRVpFeY1cpuMKA5u+G3pM4WZkG1bH7IsArjLtY3U+iVO8mYT
+         /UfJbaWLwOhrZeRCzBh8C9r8jqcVs7BbaFWmN/6tM2px4Re7vNxSeSXiJPOZatw3VUos
+         htqC4J3wpjwXMNyxMjTj1GIAcOGmRvU+jcTNuTiNdCmzYIvfPQk+udAgNUTUTHqZn10N
+         JtSVrq1DaoZ3SD1fheGU6DUPk5LmnBJ9d01fq3M2oza4JdbZ2SBlKP4ixG8AKtDkb8sw
+         4lOQ==
+X-Gm-Message-State: AOAM532vLoP/HLhL+gQpDbzW5LlP1rCWZ9X0tHWRHKNmnR0VnOgo2VCU
+        5un1Vr5TGe31qHSS5pIZ4amCOA==
+X-Google-Smtp-Source: ABdhPJyixIBxXmOozDydsBZA2OLvJCu4BqZVnzvh5NVkni2M5UbdJ7H0NHuxx7ZbmashZSux8a1gEw==
+X-Received: by 2002:a05:6e02:1945:: with SMTP id x5mr15135285ilu.287.1637856166608;
+        Thu, 25 Nov 2021 08:02:46 -0800 (PST)
+Received: from [127.0.1.1] ([66.219.217.159])
+        by smtp.gmail.com with ESMTPSA id 11sm1737108ilt.63.2021.11.25.08.02.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 25 Nov 2021 08:02:46 -0800 (PST)
+From:   Jens Axboe <axboe@kernel.dk>
+To:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, tglx@linutronix.de,
+        Christoph Hellwig <hch@infradead.org>
+In-Reply-To: <20211025070658.1565848-1-bigeasy@linutronix.de>
+References: <20211025070658.1565848-1-bigeasy@linutronix.de>
+Subject: Re: [PATCH v3 0/2] blk-mq: Allow to complete requests directly
+Message-Id: <163785616389.524013.4459386805250526075.b4-ty@kernel.dk>
+Date:   Thu, 25 Nov 2021 09:02:43 -0700
 MIME-Version: 1.0
-References: <20211116105109.3830-1-oleg@kaa.org.ua>
-In-Reply-To: <20211116105109.3830-1-oleg@kaa.org.ua>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 25 Nov 2021 14:30:24 +0100
-Message-ID: <CAPDyKFpD4rfYn9B23+bS7WU_V6vrBdwa2RMnhOKuiSdT35fLUg@mail.gmail.com>
-Subject: Re: [PATCH] Fix strncpy() usage
-To:     Oleh Kravchenko <oleg@kaa.org.ua>,
-        Avri Altman <avri.altman@wdc.com>,
-        "Bean Huo (beanhuo)" <beanhuo@micron.com>
-Cc:     linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Avri, Bean
+On Mon, 25 Oct 2021 09:06:56 +0200, Sebastian Andrzej Siewior wrote:
+> v2…v3:
+>  - Align arguments with the begin of the function name
+>    (blk_mq_complete_request_direct).
+> 
+> v1…v2:
+>  - Drop the SCSI patch for now.
+>  - Make blk_mq_complete_request_direct() call the completion handler
+>    directly instead going through struct chain (Jens and hch might had
+>    the same in mind).
+> 
+> [...]
+
+Applied, thanks!
+
+[1/2] blk-mq: Add blk_mq_complete_request_direct()
+      commit: f783a8cc7d0701bcfb1ee0989a2227250c847178
+[2/2] mmc: core: Use blk_mq_complete_request_direct().
+      commit: a5d6aee0c81f86fc83950567b8b6988bf8ca6ff1
+
+Best regards,
+-- 
+Jens Axboe
 
 
-On Tue, 16 Nov 2021 at 11:51, Oleh Kravchenko <oleg@kaa.org.ua> wrote:
->
-> Manpage of strncpy() says:
-> If there is no null byte among the first n bytes of src,
-> the string placed in dest will not be null-terminated.
->
-> Put \0 to the end of the buffer to ensure that
-> the destination string is NULL-terminated.
->
-> This patch also fixes a compile error with a newer version of GCC.
->
-> Signed-off-by: Oleh Kravchenko <oleg@kaa.org.ua>
-> ---
->  mmc_cmds.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index 73bd32a..016fe70 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -1834,8 +1834,8 @@ int do_read_extcsd(int nargs, char **argv)
->         }
->
->         if (ext_csd_rev >= 7) {
-> -                memset(lbuf, 0, sizeof(lbuf));
-> -               strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
-> +               strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], sizeof(lbuf) - 1);
-
-This may look better, but is actually making it worse. lbuf is 10
-bytes long, while the ext_csd is 8 bytes.
-
-> +               lbuf[sizeof(lbuf) - 1] = 0;
->                 printf("eMMC Firmware Version: %s\n", lbuf);
->                 printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
->                         ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
-> --
-> 2.32.0
->
-
-Kind regards
-Uffe
