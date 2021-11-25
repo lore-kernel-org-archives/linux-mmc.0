@@ -2,276 +2,172 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E3F9C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 22:21:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 662D8C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 23:38:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242667AbhKYWYi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Nov 2021 17:24:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50402 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232830AbhKYWWi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 17:22:38 -0500
-Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CE21C06173E;
-        Thu, 25 Nov 2021 14:19:26 -0800 (PST)
-Received: by mail-qk1-x72e.google.com with SMTP id de30so13111667qkb.0;
-        Thu, 25 Nov 2021 14:19:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=Jzu3IGp/+NtN4KbWEJ7SKM9mTl27O4zRYj7bMTCcrDE=;
-        b=OjE3fyUCfvqLCfwTy5oIDirKOGtUiPlm61xh/sjmS8fkEGNT33LdV81wdUB26kbtD+
-         o8zIRbchPNkvhSf82WqVy5cR98VkXUL3DUtCs351sPiQsuLzkzpFRBuV+3yPC9MuKi6w
-         ztjTUmlFr7zgqMeQbvXhCFSvV9tUHahyGpaVEuposSRCXhJL1BEIHoZfJ9nq99Xa5mL0
-         iqlDbGv8MrD6mEQYXgnWOIO7h++bdHD9ETNLZDJhtjpgdzXfMdDeIER6ssS7mJIZveQT
-         OHfPxHMFSGuDUT9msVDJ0QMAOhe4RPz9NmE+MFV0Qbx0CrnoTfZL2xlHs1nyTwC7ZpKn
-         AOLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=Jzu3IGp/+NtN4KbWEJ7SKM9mTl27O4zRYj7bMTCcrDE=;
-        b=dyc1jJoVjpacnvHuoQg1jENWFiQJbAd3nMOzRU9nR6Zlss7KTyeveILQZH/7Vj43v3
-         wlp+TDiFNMfoDkVBEFaK9Jkn1zMqOg3/6BjfaUYaAv0LE9Iax7SXII0BgxHsP+HUUzrA
-         r9oYIcoSDaqFTGySROWpz7T7u+KKHHffMrwdDN8dabkpWElvFUtCkvhL5ajFTXgU2I8S
-         Vc8P1Mjm/gTxkDDqM0e7EyzOCahJrSS+V9BvAVsptinH3MUelF2R1wAElM8V2+lY/bv4
-         MZthnHQKlYHpunWFBPpnoHLEGkssxb8gvQ6ntGG0j7Rgv+OPAmrR9ZsNEzTyOxw8ni9V
-         uRlg==
-X-Gm-Message-State: AOAM530SReP5lXov5Vo/WmIRS4AgUshU1SqVUbr2vFVjg16Oe8F7Whx0
-        +SDvt3Pdavz9rzviISo9EfI=
-X-Google-Smtp-Source: ABdhPJxTOSRJIXYg48NDzBO2Igr258AXSKndwwjJmfQt6W5u0VUgTJ2R8cUwxHqE9Pp/9WV8nyLzhQ==
-X-Received: by 2002:a05:620a:2955:: with SMTP id n21mr11102232qkp.586.1637878765420;
-        Thu, 25 Nov 2021 14:19:25 -0800 (PST)
-Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id d5sm2347779qte.27.2021.11.25.14.19.24
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 25 Nov 2021 14:19:25 -0800 (PST)
-Message-ID: <2801d9c2-f922-5cc7-4e43-c9a8db3004ba@gmail.com>
-Date:   Thu, 25 Nov 2021 17:19:23 -0500
+        id S1347146AbhKYXlq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 18:41:46 -0500
+Received: from mailout1.samsung.com ([203.254.224.24]:53550 "EHLO
+        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231987AbhKYXjp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 18:39:45 -0500
+Received: from epcas1p2.samsung.com (unknown [182.195.41.46])
+        by mailout1.samsung.com (KnoxPortal) with ESMTP id 20211125233632epoutp018f47bbc5c7ce61f7466f39dd2215147e~67kRlNQuh1644716447epoutp01k
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 23:36:32 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20211125233632epoutp018f47bbc5c7ce61f7466f39dd2215147e~67kRlNQuh1644716447epoutp01k
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1637883392;
+        bh=wqQlhFmow9NJsLwo4Hs+yu4XE4eS1ibv8LCu/XI780s=;
+        h=Subject:To:Cc:From:Date:In-Reply-To:References:From;
+        b=NyMdrsaAZ33U3c+Nhsf93sUpQ7w5HfgQrWJZGo8pubRNHysmFGk/EScBDCTs01roC
+         EBdpLxFqsfyIUsgvjA1HxZ4V0l4nsxHPWcGFpjSgQSkoPeW7DPXsvec8lIhpuH7ZnO
+         0IsEomnAtL7KXIXsLuevMmOKB9QBA3txftRUO694=
+Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
+        epcas1p4.samsung.com (KnoxPortal) with ESMTP id
+        20211125233631epcas1p4fe598af73a061d367f82fc54c49a7ffa~67kRN_yGy0653206532epcas1p4F;
+        Thu, 25 Nov 2021 23:36:31 +0000 (GMT)
+Received: from epsmges1p1.samsung.com (unknown [182.195.38.235]) by
+        epsnrtp3.localdomain (Postfix) with ESMTP id 4J0Z5S4cmPz4x9Pw; Thu, 25 Nov
+        2021 23:36:28 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+        epsmges1p1.samsung.com (Symantec Messaging Gateway) with SMTP id
+        0F.F8.64085.22E10A16; Fri, 26 Nov 2021 08:37:06 +0900 (KST)
+Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
+        epcas1p1.samsung.com (KnoxPortal) with ESMTPA id
+        20211125233619epcas1p17cb72c8dea2b762ad0fc649d56907d09~67kGDQNs71069210692epcas1p1y;
+        Thu, 25 Nov 2021 23:36:19 +0000 (GMT)
+Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
+        epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
+        20211125233619epsmtrp28607e7b99ef69e0b364794737571bcb0~67kGCat2M2269222692epsmtrp2e;
+        Thu, 25 Nov 2021 23:36:19 +0000 (GMT)
+X-AuditID: b6c32a35-9c3ff7000000fa55-8d-61a01e22f211
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        9B.4A.08738.3FD10A16; Fri, 26 Nov 2021 08:36:19 +0900 (KST)
+Received: from [10.113.113.235] (unknown [10.113.113.235]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20211125233619epsmtip2def06e7e7c0fd3cc103deac0bb12657f~67kFznxZS1071110711epsmtip2Y;
+        Thu, 25 Nov 2021 23:36:19 +0000 (GMT)
+Subject: Re: [PATCH 1/4] mmc: dw_mmc: add common capabilities to replace
+ caps
+To:     John Keeping <john@metanate.com>, linux-mmc@vger.kernel.org
+Cc:     Heiko Stuebner <heiko@sntech.de>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-rockchip@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>
+From:   Jaehoon Chung <jh80.chung@samsung.com>
+Message-ID: <ee596652-68f8-ddd4-4dcd-1bdb3a8a056b@samsung.com>
+Date:   Fri, 26 Nov 2021 08:37:01 +0900
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+        Thunderbird/78.14.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH v3 13/13] ARM: imxrt_defconfig: add i.MXRT family
- defconfig
+In-Reply-To: <20211124184603.3897245-2-john@metanate.com>
 Content-Language: en-US
-To:     Arnd Bergmann <arnd@arndb.de>
-Cc:     NXP Linux Team <linux-imx@nxp.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Stefan Agner <stefan@agner.ch>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        gregkh <gregkh@linuxfoundation.org>,
-        Olof Johansson <olof@lixom.net>, SoC Team <soc@kernel.org>,
-        Russell King - ARM Linux <linux@armlinux.org.uk>,
-        Abel Vesa <abel.vesa@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        giulio.benetti@benettiengineering.com,
-        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
-References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com>
- <20211125211443.1150135-14-Mr.Bossman075@gmail.com>
- <CAK8P3a3dwwBt21o7LDY-CLDdVmOknxDF7sgO_dfiTj8_u4Tx=A@mail.gmail.com>
-From:   Jesse Taube <mr.bossman075@gmail.com>
-In-Reply-To: <CAK8P3a3dwwBt21o7LDY-CLDdVmOknxDF7sgO_dfiTj8_u4Tx=A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrGJsWRmVeSWpSXmKPExsWy7bCmvq6S3IJEg3v97Bb/H71mtXi/aQqr
+        xca3P5gsNj2+xmpxedccNosj//sZLT49+M9sMeP8PiaL42vDHTg9ZjX0snncubaHzWPzknqP
+        TVNusXpsvzaP2ePzJrkAtqhsm4zUxJTUIoXUvOT8lMy8dFsl7+B453hTMwNDXUNLC3MlhbzE
+        3FRbJRefAF23zBygm5QUyhJzSoFCAYnFxUr6djZF+aUlqQoZ+cUltkqpBSk5BaYFesWJucWl
+        eel6eaklVoYGBkamQIUJ2RldR1eyFjwRqNjY/oW5gfEabxcjJ4eEgInE7x+b2LsYuTiEBHYw
+        Sky6spIZwvnEKPHnYx8jSJWQwGdGiRuXk2A6jh1cxwJRtItR4tf+bjYI5z2jxP0ja1hBqoQF
+        /CUm7v7OAmKLCNhLdL14zwZiMwtMYZLYsN8dxGYT0JHY/u04E4jNK2An8edPF1g9i4CqxP15
+        z9hBbFGBSIn7P5azQ9QISpyc+QSshlPAUmLO/zUsEDPFJW49mc8EYctLbH87B+wFCYGlHBIf
+        195ihzjbRWLy6zXMELawxKvjW6DiUhKf3+1lg2hYxihx5/ZfKGc9o8SB7UvYIKqMJfYvnQy0
+        ggNohabE+l36EGFFiZ2/5zJCbOaTePe1hxWkREKAV6KjTQiiREXi0uuXTDC77j75zwphe0jM
+        X9DCMoFRcRaS32Yh+WcWkn9mISxewMiyilEstaA4Nz212LDAEB7dyfm5mxjBCVbLdAfjxLcf
+        9A4xMnEwHmKU4GBWEuF1DpyfKMSbklhZlVqUH19UmpNafIjRFBjaE5mlRJPzgSk+ryTe0MTS
+        wMTMyNjEwtDMUEmc94X/9EQhgfTEktTs1NSC1CKYPiYOTqkGJq9/FlrBhnucrxZNtt1vbraY
+        eZn/w5U87M0PNIp9LqaIiHs/7v0vOOV8QpbylplL4vdFXg+UuLpBKfZWTHXWxN0rp6+xXdcq
+        97/5QtUL1zt+GbK/1ey0NK7Ux5vXCHkp3238cEWDa91DdouVv6J1nT3Nhe9YVfZlrl/95Fzj
+        dMkFDudd+NYw5wkdSZE0KJb2Zl0XWvF1l8y+mvaW/vuPfLn+ar+9JvuFReX719QDE3ZOilba
+        Hn61hzNrz+Rb2Wf2LdthavNJZvXJzwoHy606YrJ2f94xe2VndFz0fov93U6b+hb75crGes8V
+        vL68IXD1wvjAfiGxGC25W09du8/5p/++PH9Ko8IdKZWVM8UnKbEUZyQaajEXFScCAMIDvyg5
+        BAAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmphkeLIzCtJLcpLzFFi42LZdlhJXvez7IJEg29LlCz+P3rNavF+0xRW
+        i41vfzBZbHp8jdXi8q45bBZH/vczWnx68J/ZYsb5fUwWx9eGO3B6zGroZfO4c20Pm8fmJfUe
+        m6bcYvXYfm0es8fnTXIBbFFcNimpOZllqUX6dglcGV1HV7IWPBGo2Nj+hbmB8RpvFyMnh4SA
+        icSxg+tYuhi5OIQEdjBKLN3WxwyRkJL4/HQqWxcjB5AtLHH4cDFIWEjgLaPEvC8lILawgK/E
+        7tu7mEBsEQF7ia4X79lA5jALTGOS+Lr2MRPE0N2MEhNPXmYBqWIT0JHY/u04WAevgJ3Enz9d
+        YHEWAVWJ+/OesYPYogKREuuOL2OHqBGUODnzCVgNp4ClxJz/a8BsZgF1iT/zLjFD2OISt57M
+        Z4Kw5SW2v53DPIFRaBaS9llIWmYhaZmFpGUBI8sqRsnUguLc9NxiwwKjvNRyveLE3OLSvHS9
+        5PzcTYzgiNLS2sG4Z9UHvUOMTByMhxglOJiVRHidA+cnCvGmJFZWpRblxxeV5qQWH2KU5mBR
+        Eue90HUyXkggPbEkNTs1tSC1CCbLxMEp1cC0yi1X7370Q4Ez5oLmClX3vnJPrs7ts8vLnyHq
+        sObEJLUFwSa9Ud8YeCrCD3dtq865eqeks4WvbvLMKyJmMa+CvFb//brSirdPTfY9/8s4bTYN
+        V7c8Vpc3kR/2m8ml3DJNn6x33z37II9i28HnqhNnxsoteG3bsWzf+mnL9kRe13OerBVQNLHr
+        vfeaW+t/yazjKs7bLDvfdGb5Wy2eyWZn1z1KE72mz9ufuk3BKS6e+/87hXsr5dm+XH8V4btr
+        wasba6tt5ZLbffu/2e70vv64XW9C8PG8C8cd+Kwubpe8OyP7j6eilLmICkv3Annt6av2mQTc
+        zkjLz/h9uzlrq6ISj6CS6fwTk1abnk8rrVBiKc5INNRiLipOBAA5C3u9FwMAAA==
+X-CMS-MailID: 20211125233619epcas1p17cb72c8dea2b762ad0fc649d56907d09
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20211124184620epcas1p4aab50870ced2308d40873bd8c7de32d3
+References: <20211124184603.3897245-1-john@metanate.com>
+        <CGME20211124184620epcas1p4aab50870ced2308d40873bd8c7de32d3@epcas1p4.samsung.com>
+        <20211124184603.3897245-2-john@metanate.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 11/25/21 3:45 AM, John Keeping wrote:
+> The caps field depends on the mshcN alias ID but for some devices this
+> is unnecessary as the capabilities are the same for all instances
+> sharing the same compatible.
+> 
+> Add a common_caps field for this case which updates the host's
+> capabilities without needing the mshcN alias ID.
+> 
+> Signed-off-by: John Keeping <john@metanate.com>
 
+Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-On 11/25/21 16:42, Arnd Bergmann wrote:
-> On Thu, Nov 25, 2021 at 10:14 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
->>
->> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
->>
->> Add generic i.MXRT family defconfig.
->>
->> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
->> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
-> 
-> I see a lot of things in here that probably should not be part of the kernel,
-> either because they are rather obscure, or they take valuable memory:
-> 
->> ---
->>   arch/arm/configs/imxrt_defconfig | 157 +++++++++++++++++++++++++++++++
->>   1 file changed, 157 insertions(+)
->>   create mode 100644 arch/arm/configs/imxrt_defconfig
->>
->> diff --git a/arch/arm/configs/imxrt_defconfig b/arch/arm/configs/imxrt_defconfig
->> new file mode 100644
->> index 000000000000..d673745a5462
->> --- /dev/null
->> +++ b/arch/arm/configs/imxrt_defconfig
->> @@ -0,0 +1,157 @@
->> +# CONFIG_LOCALVERSION_AUTO is not set
->> +CONFIG_SYSVIPC=y
->> +CONFIG_USELIB=y
-> 
-> You almost certainly won't want USELIB, and SYSVIPC support
-> would only be useful for certain applications that you probably
-> won't run.
-> 
->> +CONFIG_BSD_PROCESS_ACCT=y
->> +CONFIG_BSD_PROCESS_ACCT_V3=y
->> +CONFIG_PSI=y
->> +CONFIG_IKCONFIG=y
->> +CONFIG_IKCONFIG_PROC=y
-> 
-> Probably nonen of these are helpful here.
-> 
->> +CONFIG_MEMCG=y
->> +CONFIG_BLK_CGROUP=y
->> +CONFIG_CFS_BANDWIDTH=y
->> +CONFIG_CGROUP_PIDS=y
->> +CONFIG_CGROUP_RDMA=y
->> +CONFIG_CGROUP_FREEZER=y
->> +CONFIG_CGROUP_DEVICE=y
->> +CONFIG_CGROUP_CPUACCT=y
->> +CONFIG_CGROUP_PERF=y
->> +CONFIG_CGROUP_BPF=y
->> +CONFIG_NAMESPACES=y
->> +CONFIG_USER_NS=y
->> +CONFIG_CHECKPOINT_RESTORE=y
-> 
-> Same for control groups overall as well as checkpoint_restore
-> 
->> +CONFIG_RELAY=y
-> 
-> There are a few drivers using CONFIG_RELAY, but I don't see you enable
-> any of them,
-> so this is not actually used.
-> 
-this makes scene will change
->> +CONFIG_EXPERT=y
-> 
-> Are you losing anything without EXPERT? If not, remove that
-> 
->> +CONFIG_SGETMASK_SYSCALL=y
->> +# CONFIG_FUTEX is not set
-> 
-> Futex is probably one of the things you /do/ want.
-> 
-There is a weird bug in futexs that reads from null_ptr, otherwise if 
-you hard code that access isn't allowed it works. This seems to be a 
-problem on other no-MMU platforms. I changed it to not have futexs like 
-the stm32s, CONFIG_EXPERT is required for this option. If you want I can 
-explain more about this but, i was going to do that as a separate patch.
+Best Regards,
+Jaehoon Chung
 
->> +CONFIG_KALLSYMS_ALL=y
->> +CONFIG_PC104=y
+> ---
+>  drivers/mmc/host/dw_mmc.c | 3 +++
+>  drivers/mmc/host/dw_mmc.h | 3 +++
+>  2 files changed, 6 insertions(+)
 > 
-> Turning off KALLSYMS_ALL may save a noticeable amount of RAM.
-Intresting
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 195f2b2434b0..f2a14a434bef 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2856,6 +2856,9 @@ static int dw_mci_init_slot_caps(struct dw_mci_slot *slot)
+>  	if (host->pdata->pm_caps)
+>  		mmc->pm_caps = host->pdata->pm_caps;
+>  
+> +	if (drv_data)
+> +		mmc->caps |= drv_data->common_caps;
+> +
+>  	if (host->dev->of_node) {
+>  		ctrl_id = of_alias_get_id(host->dev->of_node, "mshc");
+>  		if (ctrl_id < 0)
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index ce05d81477d9..771d5afa3136 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -550,6 +550,8 @@ struct dw_mci_slot {
+>   * dw_mci driver data - dw-mshc implementation specific driver data.
+>   * @caps: mmc subsystem specified capabilities of the controller(s).
+>   * @num_caps: number of capabilities specified by @caps.
+> + * @common_caps: mmc subsystem specified capabilities applicable to all of
+> + *	the controllers
+>   * @init: early implementation specific initialization.
+>   * @set_ios: handle bus specific extensions.
+>   * @parse_dt: parse implementation specific device tree properties.
+> @@ -562,6 +564,7 @@ struct dw_mci_slot {
+>  struct dw_mci_drv_data {
+>  	unsigned long	*caps;
+>  	u32		num_caps;
+> +	u32		common_caps;
+>  	int		(*init)(struct dw_mci *host);
+>  	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+>  	int		(*parse_dt)(struct dw_mci *host);
 > 
-> PC104 isn't actually that big, but it seems unlikely that you have
-> that hardware.
-> 
->> +CONFIG_PARAVIRT=y
-> 
-> You don't seem to enable XEN, so I don't think PARAVIRT is useful by itself.
-> 
->> +# CONFIG_ATAGS is not set
->> +CONFIG_CMDLINE="console=ttyS0 root=/dev/mmcblk0p2 rw earlycon rootwait"
-> 
-> The command line should come from the boot loader, users probably have
-> a different root device.
-Presumably this will never be used but I have it there as an example for 
-others, I can remove it if necessary.
-> 
->> +CONFIG_BLK_DEV_BSGLIB=y
->> +CONFIG_BLK_DEV_INTEGRITY=y
->> +CONFIG_BLK_DEV_ZONED=y
->> +CONFIG_BLK_DEV_THROTTLING=y
->> +CONFIG_BLK_WBT=y
->> +CONFIG_BLK_SED_OPAL=y
->> +CONFIG_PARTITION_ADVANCED=y
->> +CONFIG_BSD_DISKLABEL=y
->> +CONFIG_MINIX_SUBPARTITION=y
->> +CONFIG_SOLARIS_X86_PARTITION=y
->> +CONFIG_UNIXWARE_DISKLABEL=y
->> +CONFIG_LDM_PARTITION=y
-> 
-> I don't see you using OPAL or any of the 1990's partition formats.
-> ot set
-> 
->> +CONFIG_BINFMT_FLAT=y
-> 
-> For the defconfig, you should probably have ELF_FDPIC enabled,
-> not just FLAT.
-> 
->> +CONFIG_CLEANCACHE=y
->> +CONFIG_ZPOOL=y
->> +CONFIG_ZBUD=y
->> +CONFIG_Z3FOLD=y
-> 
-> Do these work as expected on NOMMU?
-> 
->> +CONFIG_BLK_DEV_LOOP=y
->> +CONFIG_BLK_DEV_RAM=y
->> +CONFIG_BLK_DEV_RAM_COUNT=1
->> +CONFIG_BLK_DEV_RAM_SIZE=65536
-> 
-> I don't think you can have a ramdisk larger than RAM ;-)
-> 
-Oh that's funny I left that from testing something I will remove it.
->> +CONFIG_MEMORY=y
-> 
-> No need to enable the subsystem when you don't enable any
-> of its drivers.
-> 
->> +CONFIG_EXT2_FS=y
->> +CONFIG_EXT2_FS_XATTR=y
->> +CONFIG_EXT2_FS_POSIX_ACL=y
->> +CONFIG_EXT2_FS_SECURITY=y
->> +CONFIG_EXT3_FS=y
->> +CONFIG_EXT3_FS_POSIX_ACL=y
->> +CONFIG_EXT3_FS_SECURITY=y
-> 
-> Never use EXT3 on eMMC, just use EXT4 instead to make
-> the device actually live longer. You probably don't need to enable
-> EXT2 support separately.
-> 
->> +# CONFIG_FILE_LOCKING is not set
->> +# CONFIG_DNOTIFY is not set
->> +CONFIG_QUOTA=y
-> 
-> dnotify and locking seem more useful than quota here
-> 
->> +# CONFIG_PRINT_QUOTA_WARNING is not set
->> +CONFIG_AUTOFS4_FS=y
-> 
->> +CONFIG_CONFIGFS_FS=y
-> 
-> I don't see anything using configfs
-> 
->> +CONFIG_LSM="yama,loadpin,integrity,apparmor"
-> 
-> None of these are actually enabled as far as I can tell.
-> 
->> +CONFIG_DEBUG_INFO=y
->> +CONFIG_DEBUG_INFO_DWARF4=y
-> 
-> If you use DWARF4, you probably want DEBUG_INFO_SPLIT as well,
-> to reduce the vmlinux size.
-> 
->         Arnd
-> 
-Thx for telling me about this i will try to use only the necessary ones.
+
