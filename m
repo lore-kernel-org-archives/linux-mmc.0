@@ -2,422 +2,224 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93CB0C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 07:59:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F06B5C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 09:13:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349446AbhKYICN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Nov 2021 03:02:13 -0500
-Received: from mga18.intel.com ([134.134.136.126]:37491 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236412AbhKYIAM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 25 Nov 2021 03:00:12 -0500
-X-IronPort-AV: E=McAfee;i="6200,9189,10178"; a="222338817"
-X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
-   d="scan'208";a="222338817"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2021 23:57:01 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
-   d="scan'208";a="497980157"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga007.jf.intel.com with ESMTP; 24 Nov 2021 23:56:57 -0800
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat sysfs
- entry
-To:     "Sajida Bhanu (Temp) (QUIC)" <quic_c_sbhanu@quicinc.com>,
-        "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
-        "Asutosh Das (asd)" <asutoshd@quicinc.com>,
+        id S1350952AbhKYJQg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 04:16:36 -0500
+Received: from mail-eopbgr50059.outbound.protection.outlook.com ([40.107.5.59]:7061
+        "EHLO EUR03-VE1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S235766AbhKYJOf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Nov 2021 04:14:35 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=FVafO05vA2DO5YjyQSVGQmO4LSjEae9/lE71a8xe0LBymMhGkCwe+WaW6r6Wx5RmA+N5mhX95g/J7wCaJ5c1lOOqJaklw2Grzc2rb+R/ttePRHTxsGDmSGF3h0ZmimbtRDoI8cJF+8IiZi7ymxvhs8fkGizdGJP3p9sxv65qBD4MA7Erz4Mc7ooMczrx4NUPDbE5vNPryiNw3EojHIQRVYB545lPUN4oFvfuzrYoNnPTPmJ5XNM6jA3SOcPxfDwXnrXXue0WrOwmMkOVIuDt+PVnHtkBuDRIyV0fHTF5sUQMfMRpsEQKMBECsRiSKT12Z7zuZZu30Wrbpqb65NiWig==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=5m60DqPis5oS3pyf9CpjSOjUU3bcidr3uHiGgFiMLbw=;
+ b=kYM+8V2eoJAmF7rE5kXkAfjxTJDlgVtl/C72YKRpc5APaFTyuSnhncDIUtAIk9u8RV5byfm9PtJ+vjHOabJPyRmfxigt2SWWXUYiLCO3yNebeaWpi/yT7lKrqAzqt0Grg37uz6pSM7BnHMhtc0ed3Zud8F/3W5Bx9ArTvdX1UnE+rX+AaH+gb+ihX2+EmyueAmjDVTv3nRStT6KLwRDA8cQE/C9BsisRO6nsHn+1vvp95I3U4ciAES5X+KsnhFWh+I2Bhqbz1A+DWHFiWXuTZlOtGFZsYwmtKATRSZfCiQR51Mhq1C1ImUGxW35i6mbLwRE90U5tPIdPgpENrBL0sQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=5m60DqPis5oS3pyf9CpjSOjUU3bcidr3uHiGgFiMLbw=;
+ b=M+E3XrHITMZ4rdP0LtOM8c6xVngzX+4XLxcyrv8YhpOt7FQir56HmOKnsE/EVqtPhTeMawpUL+WcAzpl2jYpb9ZOZPSeNAF5p2pfUg2ZYwZmjKA8qSR4ZMMI3Awi89ONZG/A3Hs9Q1vW3d5bA3mKFkZEJOEALjFmJdWhhEOjsDQ=
+Received: from DU0PR04MB9417.eurprd04.prod.outlook.com (2603:10a6:10:358::11)
+ by DU2PR04MB8533.eurprd04.prod.outlook.com (2603:10a6:10:2d4::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4713.22; Thu, 25 Nov
+ 2021 09:11:20 +0000
+Received: from DU0PR04MB9417.eurprd04.prod.outlook.com
+ ([fe80::82e:6ad2:dd1d:df43]) by DU0PR04MB9417.eurprd04.prod.outlook.com
+ ([fe80::82e:6ad2:dd1d:df43%9]) with mapi id 15.20.4713.027; Thu, 25 Nov 2021
+ 09:11:20 +0000
+From:   Peng Fan <peng.fan@nxp.com>
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        Aisheng Dong <aisheng.dong@nxp.com>,
+        "shawnguo@kernel.org" <shawnguo@kernel.org>,
+        "s.hauer@pengutronix.de" <s.hauer@pengutronix.de>,
         "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "agross@kernel.org" <agross@kernel.org>,
-        "bjorn.andersson@linaro.org" <bjorn.andersson@linaro.org>,
+        "broonie@kernel.org" <broonie@kernel.org>,
+        "linux@roeck-us.net" <linux@roeck-us.net>,
+        "wim@linux-watchdog.org" <wim@linux-watchdog.org>,
+        "linux@rempel-privat.de" <linux@rempel-privat.de>
+CC:     "kernel@pengutronix.de" <kernel@pengutronix.de>,
+        "festevam@gmail.com" <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        "daniel.lezcano@linaro.org" <daniel.lezcano@linaro.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc:     "stummala@codeaurora.org" <stummala@codeaurora.org>,
-        "vbadigan@codeaurora.org" <vbadigan@codeaurora.org>,
-        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
-        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
-        "sartgarg@codeaurora.org" <sartgarg@codeaurora.org>,
-        "nitirawa@codeaurora.org" <nitirawa@codeaurora.org>,
-        "sayalil@codeaurora.org" <sayalil@codeaurora.org>
-References: <1637130012-21846-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <c90754b9-37bb-7b4e-4130-05f62b2881fd@intel.com>
- <SJ0PR02MB8449BC60FA635E61162A6383CD9F9@SJ0PR02MB8449.namprd02.prod.outlook.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <ea06e091-9ba9-3cb5-121c-a04bdce6dede@intel.com>
-Date:   Thu, 25 Nov 2021 09:56:56 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
-MIME-Version: 1.0
-In-Reply-To: <SJ0PR02MB8449BC60FA635E61162A6383CD9F9@SJ0PR02MB8449.namprd02.prod.outlook.com>
-Content-Type: text/plain; charset=utf-8
+        "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>,
+        "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>,
+        "linux-watchdog@vger.kernel.org" <linux-watchdog@vger.kernel.org>
+Subject: RE: [PATCH V5 0/8] dt-bindinds/dts: support i.MX8ULP
+Thread-Topic: [PATCH V5 0/8] dt-bindinds/dts: support i.MX8ULP
+Thread-Index: AQHX3gLDA+/GY3Dq60eK/KNA/FmZzqwT/MmQ
+Date:   Thu, 25 Nov 2021 09:11:20 +0000
+Message-ID: <DU0PR04MB9417A88AC1808CBEE76A27E188629@DU0PR04MB9417.eurprd04.prod.outlook.com>
+References: <20211120113454.785997-1-peng.fan@oss.nxp.com>
+In-Reply-To: <20211120113454.785997-1-peng.fan@oss.nxp.com>
+Accept-Language: en-US
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 87aa098e-c757-4ca4-7218-08d9aff38bb3
+x-ms-traffictypediagnostic: DU2PR04MB8533:
+x-microsoft-antispam-prvs: <DU2PR04MB85336E36ABCE7749C14C2DDD88629@DU2PR04MB8533.eurprd04.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8882;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: w1pWPTbCF8hdbZvT3aD4sS8XY99/Ar0xyowXCzINeq3uM89eNhFel/EAckBnf1U59h7A1mR5DyA2b4txVVEg4VPa4WeP9TAakPDBvCAW0gRGkns175ifBfNx0GiZHv3rhA0ElZnAnrJBGNVybEdJxUaFJxangG+ygQX1SJ9GnSREFUuuBj432YqtFMo6wDHDtr/D7FsPncvLX7D4lBU5wx22jV25p9eqHwuKqgdpgl4AhA9eovfXOwg7Dj2ybDEY9I0kfRJMXWgNMtgMgsEvx2cZ/eGSnpSQ5fQc0dsCE3mdI9W1j+y1Jc+aQa26i9g4dhFSiXA2u3N8lLtrYcGAN47pPZ6NS8ltfNhewnWSURq3Uy+uDUqPRDgwERGC0O42YdMwKYjtss2AhK+jUrDTxZ4BjnhKwhtJnZvobxNy/uJD7RnAHVjpBPM4rTm50EFBAVL2TQYkV0DazreGDxH6qlK5A9pZOYuTyhbIbDk0jTS5jsUUfURvwr/hpLBe29jPFKvjnnT0zOGgMKT/ftD9vpdJD1TSqA9mdWPxa/QFWTajawmA8x7siGglahHDFcGCPioRk7zPhSvsdUesbaZggar8dr/OyHFUj/uebfk2K+FETfYhophFLyDqEQ0qQSBX6witDwAojg7ylYU7bcfke8foOOpfftwK/4o6/P4wJoLXWe23qWR1zADP5qY1H9c+MT7ZwNV5Ki3uzFbi6ZIPxJ4KVh6SBUS5UQsRN4libnHKtMWnoZQo4+ODJRkThVDq+3Xw8FHOLZH6VyWVr+476TuBh/+0s4w/fUiOxxZzfcqNg0LsA+wt/YxX0izhTDsh/Ldnr9ixXIhOaOqtnpHalm1s5i1BdalS4zCuRCCEgZA=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9417.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(83380400001)(55016003)(4326008)(38070700005)(71200400001)(186003)(9686003)(508600001)(8676002)(122000001)(7696005)(8936002)(2906002)(26005)(76116006)(66556008)(66476007)(44832011)(66446008)(64756008)(38100700002)(66946007)(54906003)(966005)(921005)(110136005)(7416002)(6506007)(52536014)(316002)(86362001)(5660300002)(33656002);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?1wxXtqSDZYhqUrsi/ZzwVLErkOFz300sVnkD1ALnLpTjXm5THGKSdJX6ShvD?=
+ =?us-ascii?Q?EGUjjIkGY1Rul+TPIAiKGUM0naLJizGd8rdacNy5BxbHbARZzX6xattDyyFi?=
+ =?us-ascii?Q?8nGGV14k5scvKIsGOyFnMYYZySKtx7sssNcNASBTYMtW/uefew/8+PdShuY8?=
+ =?us-ascii?Q?o6lxAjrZ9DBQAWXa64DpaWdGD0QRy1e0ZZBn+IVQbgkxa+dPOLqxiLrCwUmN?=
+ =?us-ascii?Q?/IbGCz44+hX2AApjYzuebyZtIQq7PLh69s6Rc6A7MP5605O54PGX1AnhxhBh?=
+ =?us-ascii?Q?8LoG8jqy/RO8yGpeMG/2JQSObivSIxe6FvzATtDJGTbaHC9wn+QK0IOemRYi?=
+ =?us-ascii?Q?Gv36cI0nD3NDDR3c/eO53y4lXg7/HNQ7doDjS81tNddYnxDBI5KVKAdUvXrp?=
+ =?us-ascii?Q?VwOfw0xXDSfE6li1Oy/M3DgEkH+rYn+3XPBP+CpycmuJiMZ30Nrp88ylflWF?=
+ =?us-ascii?Q?13DiI8KBjN7KvXUwQ0sfKCiqZ41LG6m/VoMGpgMBIY/mkyLP+t/LQ0Ph1Tyu?=
+ =?us-ascii?Q?pRkSZkjsVA3Xc5VsLCmwkgZcAVP/zYlRh2649ICRnf/10Sz6o17j6SAfqBNZ?=
+ =?us-ascii?Q?i6FeFUZEt6fFZwT7p2NCB/TKgod61YHOtNY9YuV4pGc4/SXDeZaa7QrN5ZeW?=
+ =?us-ascii?Q?N4GLHZRYVKjxKpPgSiobiqwK0qvX4vMiQ354ec45fL2pth5pvBk1BFHD4aCE?=
+ =?us-ascii?Q?2ZD6216M0jOGP2bMwzbe0LdlEQ9h2TNXhHt2kuHVKrW15h+KJc+s5UbQOoU2?=
+ =?us-ascii?Q?rJU6+HeS0WYbu9Qg41NHrNfV/AWGfMCymiS/yszen/wUfr8QxB6SnYLBIYVD?=
+ =?us-ascii?Q?3Tec6ty0PujTPcBBiV43lN2Nf4+jKunZWysHrR9MLRO/4/5ONqGfZLwF4DHt?=
+ =?us-ascii?Q?4yTWTG8CNEndU2todLkE14EiIYq8LgyEjHvkYAmmCTzbGGhml3r1Y2z9UILs?=
+ =?us-ascii?Q?mkMPXJKw/8cfj8t8IxQn1NWUCLBVKiEQNFb2ZSix7Gk0Fi7wGi8DHdskYCkv?=
+ =?us-ascii?Q?HEGS7rZkaii55M33vpuZH08E6HIWHYuv8qK4BysC860jZeT9tWTfSCv4i24l?=
+ =?us-ascii?Q?JRV3RfKMYiBHC8VpVoVquXz2pnw5yNvb9z5ncIW3i3eM18sgtYI+oKMDCNEZ?=
+ =?us-ascii?Q?rLWG3sGPE2cvz00pnXU7DAK4Z2A6DMw3hCbls1IlBkXTLyTNxINbUY3lqtoM?=
+ =?us-ascii?Q?9bseEdgsbt9TZp1fEwjVJVJOjo9wW64s+uEjuDVokyF3mHJYCm4W95SAAcSl?=
+ =?us-ascii?Q?bklMdjVKepufLgyIVCpVVrFo+/ript1b9zngtDORAhtam5VZF+m4OjkEcsiQ?=
+ =?us-ascii?Q?MxfkMxwfSVuInHkv00lN6xlmP3p5QyxqMvlwcJRX2Inf+Z3sa1dN1OjeBdya?=
+ =?us-ascii?Q?ZXkYJRbQy5nbD3nA6dJ8jRtzOQ2rVaX6fc4xoFKH6C3LG0cl19FfgoIMpyAi?=
+ =?us-ascii?Q?CGO7mrkOQ1cx2HwMVdAbbO0udRHWIbXQBW1UP+piGoDJ9c45ugAa3cZ3T4nI?=
+ =?us-ascii?Q?LAwFsSI2HkAzZx8Ib0kfwOtKET38mdwoWyh6ixbQ0IB1K0Bh0CxH3PPyPa1D?=
+ =?us-ascii?Q?7v6/dGcaRl8fTdo0WsyR4gCkXWvGe8BZmuwYCX/1QPvVnX5M0/pSqWN5NvU5?=
+ =?us-ascii?Q?g+txICyXK3KHHj69bKC7Vb8=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9417.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 87aa098e-c757-4ca4-7218-08d9aff38bb3
+X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Nov 2021 09:11:20.4098
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: BT4WhuVRo69po18wE2JaS2+MMjV3ID7TX+vtxA5PAwCmAVRHdmdF3x+tnyP0SK3z2Ncsp6CAO0blKV29xXx1PA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DU2PR04MB8533
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 22/11/2021 12:05, Sajida Bhanu (Temp) (QUIC) wrote:
-> Please find the inline comments.
-> 
-> -----Original Message-----
-> From: Adrian Hunter <adrian.hunter@intel.com> 
-> Sent: Wednesday, November 17, 2021 1:15 PM
-> To: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>; riteshh@codeaurora.org; Asutosh Das (asd) <asutoshd@quicinc.com>; ulf.hansson@linaro.org; agross@kernel.org; bjorn.andersson@linaro.org; linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-kernel@vger.kernel.org
-> Cc: stummala@codeaurora.org; vbadigan@codeaurora.org; Ram Prakash Gupta (QUIC) <quic_rampraka@quicinc.com>; Pradeep Pragallapati (QUIC) <quic_pragalla@quicinc.com>; sartgarg@codeaurora.org; nitirawa@codeaurora.org; sayalil@codeaurora.org
-> Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat sysfs entry
-> 
-> On 17/11/2021 08:20, Shaik Sajida Bhanu wrote:
->> Add sysfs entry to query eMMC and SD card errors statistics.
->> This feature is useful for debug and testing.
-> 
-> Did you consider making it part of cqhci.c so that all drivers using cqhci could benefit?
-> 
-> Hi Adrian,
-> 
-> Thanks for the review.
-> We are enabling  this changes for both eMMC and SD card as well. So , if we include these changes in cqhci.c then changes will not effect for SD card right.
+Hi Shawn,
 
-Seems like something mmc core could support perhaps, with drivers calling mmc core functions to add their stats.
-Needs Ulf to comment.
+> Subject: [PATCH V5 0/8] dt-bindinds/dts: support i.MX8ULP
+>=20
+> From: Peng Fan <peng.fan@nxp.com>
+>=20
+>=20
+> V5:
+>  only fix patch 8/8 "arm64: dts: imx8ulp: Add the basic dts for imx8ulp e=
+vk
+> board"
+>   - Correct bus-width to 8 for eMMC
+>   - Drop pinctrl enet which no user
+>  Drop patch 1/9 in V4, since in merged in linux-next  Add A-b/R-b tag
+>=20
+> V4:
+>=20
+> https://lists.infradead.org/pipermail/linux-arm-kernel/2021-November/6960
+> 20.html
+>=20
+> I just pick-up Jacky's work, rebase and send out V4 based on Jacky's V3
+> patchset.
+>=20
+> If you prefer to split the patchset and send single patches, I could rese=
+nd one
+> by one.
+>=20
+> Note: the V3 has a gpio bindings patch, it has been separated and sent to=
+ gpio
+> list in a single one per Linus requested.
+>=20
+> This patchset is to add i.MX8ULP in dt-bindings, introduce basic i.MX8ULP=
+ dtsi
+> and basic evk board support.
+>=20
+> The detailed version changes are in each patch.
+>=20
+> There is checkpatch error in patch 8, but that is for device tree macro a=
+nd we
+> could use use "(xx)".
+>=20
+> In V4, the changes are in patch 8, 9 when rebasing to linux-next/master ,=
+fix
+> build errors after the clk driver in tree and drop a few nodes that not h=
+ave
+> bindings.
+>=20
+> Tested with CONFIG_CLK_IMX8ULP and CONFIG_PINCTRL_IMX8ULP
+> enabled.
+>=20
+> V3:
+>=20
+> https://lore.kernel.org/linux-arm-kernel/20210625011355.3468586-6-ping.b
+> ai@nxp.com/T/
+>=20
+> Jacky Bai (8):
+>   dt-bindings: i2c: imx-lpi2c: Add imx8ulp compatible string
+>   dt-bindings: serial: fsl-lpuart: Add imx8ulp compatible string
+>   dt-bindings: spi: fsl-lpspi: Add imx8ulp compatible string
+>   dt-bindings: timer: tpm-timer: Add imx8ulp compatible string
+>   dt-bindings: watchdog: imx7ulp-wdt: Add imx8ulp compatible string
+>   dt-bindings: arm: fsl: Add binding for imx8ulp evk
+>   arm64: dts: imx8ulp: Add the basic dtsi file for imx8ulp
+>   arm64: dts: imx8ulp: Add the basic dts for imx8ulp evk board
 
-Alternatively, SDHCI could do it which would at least give support to other SDHCI drivers.
+For the several dt-bindings, patch 3 has been taken by SPI maintainer,=20
 
-> 
-> Thanks,
-> Sajida
->>
->> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
->> ---
->>  drivers/mmc/host/cqhci.h     |   1 +
->>  drivers/mmc/host/sdhci-msm.c | 192 +++++++++++++++++++++++++++++++++++++++++++
->>  drivers/mmc/host/sdhci.c     |  17 ++++
->>  drivers/mmc/host/sdhci.h     |   1 +
->>  include/linux/mmc/host.h     |   1 +
->>  5 files changed, 212 insertions(+)
->>
->> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h index 
->> ba9387e..f72a1d6 100644
->> --- a/drivers/mmc/host/cqhci.h
->> +++ b/drivers/mmc/host/cqhci.h
->> @@ -286,6 +286,7 @@ struct cqhci_host_ops {
->>  				 u64 *data);
->>  	void (*pre_enable)(struct mmc_host *mmc);
->>  	void (*post_disable)(struct mmc_host *mmc);
->> +	void (*err_stats)(struct mmc_host *mmc, unsigned long flags);
->>  #ifdef CONFIG_MMC_CRYPTO
->>  	int (*program_key)(struct cqhci_host *cq_host,
->>  			   const union cqhci_crypto_cfg_entry *cfg, int slot); diff --git 
->> a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c index 
->> 50c71e0..e1dcd2d 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -242,6 +242,23 @@ struct sdhci_msm_variant_ops {
->>  			u32 offset);
->>  };
->>  
->> +enum {
->> +	MMC_ERR_CMD_TIMEOUT,
->> +	MMC_ERR_CMD_CRC,
->> +	MMC_ERR_DAT_TIMEOUT,
->> +	MMC_ERR_DAT_CRC,
->> +	MMC_ERR_AUTO_CMD,
->> +	MMC_ERR_ADMA,
->> +	MMC_ERR_TUNING,
->> +	MMC_ERR_CMDQ_RED,
->> +	MMC_ERR_CMDQ_GCE,
->> +	MMC_ERR_CMDQ_ICCE,
->> +	MMC_ERR_REQ_TIMEOUT,
->> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
->> +	MMC_ERR_ICE_CFG,
->> +	MMC_ERR_MAX,
->> +};
->> +
->>  /*
->>   * From V5, register spaces have changed. Wrap this info in a structure
->>   * and choose the data_structure based on version info mentioned in DT.
->> @@ -285,6 +302,8 @@ struct sdhci_msm_host {
->>  	u32 dll_config;
->>  	u32 ddr_config;
->>  	bool vqmmc_enabled;
->> +	bool err_occurred;
->> +	u32  err_stats[MMC_ERR_MAX];
->>  };
->>  
->>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct 
->> sdhci_host *host) @@ -2106,9 +2125,20 @@ static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *c
->>  		host->data_timeout = 22LL * NSEC_PER_SEC;  }
->>  
->> +void sdhci_msm_cqe_err_stats(struct mmc_host *mmc, unsigned long 
->> +flags) {
->> +	struct sdhci_host *host = mmc_priv(mmc);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +
->> +	if (flags & BIT(0))
->> +		msm_host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]++;
->> +}
->> +
->>  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
->>  	.enable		= sdhci_msm_cqe_enable,
->>  	.disable	= sdhci_msm_cqe_disable,
->> +	.err_stats	= sdhci_msm_cqe_err_stats,
->>  #ifdef CONFIG_MMC_CRYPTO
->>  	.program_key	= sdhci_msm_program_key,
->>  #endif
->> @@ -2403,6 +2433,46 @@ static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
->>  		readl_relaxed(host->ioaddr +
->>  			msm_offset->core_vendor_spec_func2),
->>  		readl_relaxed(host->ioaddr + msm_offset->core_vendor_spec3));
->> +	msm_host->err_occurred = true;
->> +}
->> +
->> +void sdhci_msm_err_stats(struct sdhci_host *host, u32 intmask) {
->> +	int command;
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +
->> +	if (!msm_host->err_occurred)
->> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
->> +
->> +	if (host && host->mmc && host->mmc->timer) {
->> +		msm_host->err_stats[MMC_ERR_REQ_TIMEOUT]++;
->> +		host->mmc->timer = false;
->> +	}
->> +
->> +	if (intmask & SDHCI_INT_CRC) {
->> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
->> +		if (command != MMC_SEND_TUNING_BLOCK ||
->> +		    command != MMC_SEND_TUNING_BLOCK_HS200)
->> +			msm_host->err_stats[MMC_ERR_CMD_CRC]++;
->> +	} else if ((intmask & SDHCI_INT_TIMEOUT) ||
->> +		(intmask & SDHCI_INT_DATA_TIMEOUT))
->> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT]++;
->> +	else if (intmask & SDHCI_INT_DATA_CRC) {
->> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
->> +		if (command != MMC_SEND_TUNING_BLOCK ||
->> +		    command != MMC_SEND_TUNING_BLOCK_HS200)
->> +			msm_host->err_stats[MMC_ERR_DAT_CRC]++;
->> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT)
->> +		msm_host->err_stats[MMC_ERR_DAT_TIMEOUT]++;
->> +	else if (intmask & CQHCI_IS_RED)
->> +		msm_host->err_stats[MMC_ERR_CMDQ_RED]++;
->> +	else if (intmask & CQHCI_IS_GCE)
->> +		msm_host->err_stats[MMC_ERR_CMDQ_GCE]++;
->> +	else if (intmask & CQHCI_IS_ICCE)
->> +		msm_host->err_stats[MMC_ERR_CMDQ_ICCE]++;
->> +	else if (intmask & SDHCI_INT_ADMA_ERROR)
->> +		msm_host->err_stats[MMC_ERR_ADMA]++;
->>  }
->>  
->>  static const struct sdhci_msm_variant_ops mci_var_ops = { @@ -2456,6 
->> +2526,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
->>  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
->>  	.set_power = sdhci_set_power_noreg,
->>  	.set_timeout = sdhci_msm_set_timeout,
->> +	.err_stats = sdhci_msm_err_stats,
->>  };
->>  
->>  static const struct sdhci_pltfm_data sdhci_msm_pdata = { @@ -2482,6 
->> +2553,125 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
->>  	of_property_read_u32(node, "qcom,dll-config", 
->> &msm_host->dll_config);  }
->>  
->> +static ssize_t err_state_show(struct device *dev,
->> +			struct device_attribute *attr, char *buf) {
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +
->> +	if (!host || !host->mmc)
->> +		return -EINVAL;
->> +
->> +	return scnprintf(buf, PAGE_SIZE, "%d\n", !!msm_host->err_occurred); 
->> +}
->> +
->> +static ssize_t err_state_store(struct device *dev,
->> +				struct device_attribute *attr,
->> +				const char *buf, size_t count)
->> +{
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	unsigned int val;
->> +
->> +	if (kstrtouint(buf, 0, &val))
->> +		return -EINVAL;
->> +	if (!host || !host->mmc)
->> +		return -EINVAL;
->> +
->> +	msm_host->err_occurred = !!val;
->> +	if (!val)
->> +		memset(msm_host->err_stats, 0, sizeof(msm_host->err_stats));
->> +
->> +	return count;
->> +}
->> +static DEVICE_ATTR_RW(err_state);
->> +
->> +static ssize_t err_stats_show(struct device *dev,
->> +				struct device_attribute *attr, char *buf) {
->> +	struct sdhci_host *host = dev_get_drvdata(dev);
->> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> +	char tmp[100];
->> +
->> +	if (!host || !host->mmc)
->> +		return -EINVAL;
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Command Timeout Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT]);
->> +	strlcpy(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Command CRC Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_CMD_CRC]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Data Timeout Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_DAT_TIMEOUT]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Data CRC Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_DAT_CRC]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Auto-Cmd Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_ADMA]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# ADMA Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_ADMA]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Tuning Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_TUNING]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# CMDQ RED Errors: %d\n",
->> +		msm_host->err_stats[MMC_ERR_CMDQ_RED]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# CMDQ GCE Errors: %d\n",
->> +		msm_host->err_stats[MMC_ERR_CMDQ_GCE]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# CMDQ ICCE Errors: %d\n",
->> +		msm_host->err_stats[MMC_ERR_CMDQ_ICCE]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# CMDQ Request Timedout: %d\n",
->> +		msm_host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	scnprintf(tmp, sizeof(tmp), "# Request Timedout Error: %d\n",
->> +		msm_host->err_stats[MMC_ERR_REQ_TIMEOUT]);
->> +	strlcat(buf, tmp, PAGE_SIZE);
->> +
->> +	return strlen(buf);
->> +}
->> +static DEVICE_ATTR_RO(err_stats);
->> +
->> +static struct attribute *sdhci_msm_sysfs_attrs[] = {
->> +	&dev_attr_err_state.attr,
->> +	&dev_attr_err_stats.attr,
->> +	NULL
->> +};
->> +
->> +static const struct attribute_group sdhci_msm_sysfs_group = {
->> +	.name = "qcom",
->> +	.attrs = sdhci_msm_sysfs_attrs,
->> +};
->> +
->> +static int sdhci_msm_init_sysfs(struct platform_device *pdev) {
->> +	int ret;
->> +
->> +	ret = sysfs_create_group(&pdev->dev.kobj, &sdhci_msm_sysfs_group);
->> +	if (ret)
->> +		dev_err(&pdev->dev, "%s: Failed sdhci_msm sysfs group err=%d\n",
->> +			__func__, ret);
->> +	return ret;
->> +}
->>  
->>  static int sdhci_msm_probe(struct platform_device *pdev)  { @@ 
->> -2734,6 +2924,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>  	if (ret)
->>  		goto pm_runtime_disable;
->>  
->> +	sdhci_msm_init_sysfs(pdev);
->> +
->>  	pm_runtime_mark_last_busy(&pdev->dev);
->>  	pm_runtime_put_autosuspend(&pdev->dev);
->>  
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 
->> 07c6da1..f82a3eff 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -3159,6 +3159,13 @@ static void sdhci_timeout_timer(struct timer_list *t)
->>  	spin_lock_irqsave(&host->lock, flags);
->>  
->>  	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
->> +		if (host->ops->err_stats) {
->> +			u32 intmask;
->> +
->> +			host->mmc->timer = true;
->> +			intmask = sdhci_readl(host, SDHCI_INT_STATUS);
->> +			host->ops->err_stats(host, intmask);
->> +		}
->>  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
->>  		       mmc_hostname(host->mmc));
->>  		sdhci_dumpregs(host);
->> @@ -3181,6 +3188,13 @@ static void sdhci_timeout_data_timer(struct 
->> timer_list *t)
->>  
->>  	if (host->data || host->data_cmd ||
->>  	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
->> +		if (host->ops->err_stats) {
->> +			u32 intmask;
->> +
->> +			host->mmc->timer = true;
->> +			intmask = sdhci_readl(host, SDHCI_INT_STATUS);
->> +			host->ops->err_stats(host, intmask);
->> +		}
->>  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
->>  		       mmc_hostname(host->mmc));
->>  		sdhci_dumpregs(host);
->> @@ -3466,6 +3480,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->>  	}
->>  
->>  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
->> +	if (host->ops->err_stats)
->> +		host->ops->err_stats(host, intmask);
->> +
->>  	if (!intmask || intmask == 0xffffffff) {
->>  		result = IRQ_NONE;
->>  		goto out;
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index 
->> d7929d7..a1546b3 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -658,6 +658,7 @@ struct sdhci_ops {
->>  	void	(*request_done)(struct sdhci_host *host,
->>  				struct mmc_request *mrq);
->>  	void    (*dump_vendor_regs)(struct sdhci_host *host);
->> +	void	(*err_stats)(struct sdhci_host *host, u32 intmask);
->>  };
->>  
->>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h index 
->> 7afb57c..33186ff 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -492,6 +492,7 @@ struct mmc_host {
->>  	int			cqe_qdepth;
->>  	bool			cqe_enabled;
->>  	bool			cqe_on;
->> +	bool                    timer;
->>  
->>  	/* Inline encryption support */
->>  #ifdef CONFIG_MMC_CRYPTO
->>
-> 
+All patches have got R-b or A-b tag.
+
+would you pick others bindings or they should go through subsystem
+maintainer's tree?
+
+Thanks,
+Peng.
+
+>=20
+>  .../devicetree/bindings/arm/fsl.yaml          |   6 +
+>  .../bindings/i2c/i2c-imx-lpi2c.yaml           |   4 +-
+>  .../bindings/serial/fsl-lpuart.yaml           |   4 +-
+>  .../bindings/spi/spi-fsl-lpspi.yaml           |  11 +-
+>  .../bindings/timer/nxp,tpm-timer.yaml         |   6 +-
+>  .../bindings/watchdog/fsl-imx7ulp-wdt.yaml    |   7 +-
+>  arch/arm64/boot/dts/freescale/Makefile        |   1 +
+>  arch/arm64/boot/dts/freescale/imx8ulp-evk.dts |  64 ++
+>  .../boot/dts/freescale/imx8ulp-pinfunc.h      | 978 ++++++++++++++++++
+>  arch/arm64/boot/dts/freescale/imx8ulp.dtsi    | 396 +++++++
+>  10 files changed, 1468 insertions(+), 9 deletions(-)  create mode 100644
+> arch/arm64/boot/dts/freescale/imx8ulp-evk.dts
+>  create mode 100755 arch/arm64/boot/dts/freescale/imx8ulp-pinfunc.h
+>  create mode 100644 arch/arm64/boot/dts/freescale/imx8ulp.dtsi
+>=20
+> --
+> 2.25.1
 
