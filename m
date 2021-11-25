@@ -2,97 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2789FC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 09:53:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8ED69C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 11:19:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344779AbhKYJ4r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Nov 2021 04:56:47 -0500
-Received: from mga17.intel.com ([192.55.52.151]:49063 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1348015AbhKYJyr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 25 Nov 2021 04:54:47 -0500
-X-IronPort-AV: E=McAfee;i="6200,9189,10178"; a="216193450"
-X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
-   d="scan'208";a="216193450"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Nov 2021 01:51:36 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
-   d="scan'208";a="498012157"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga007.jf.intel.com with ESMTP; 25 Nov 2021 01:51:33 -0800
-Subject: Re: [PATCH v2 0/7] ACPI: acpi_device_override_status() changes
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Hans de Goede <hdegoede@redhat.com>
-Cc:     "Rafael J . Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>, linux-acpi@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-References: <20211122170536.7725-1-hdegoede@redhat.com>
- <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <cecea505-9a30-7114-3d3e-80856cccb6c4@intel.com>
-Date:   Thu, 25 Nov 2021 11:51:32 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S233028AbhKYLWb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 06:22:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44252 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235199AbhKYLUb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 06:20:31 -0500
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2280EC061574
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 03:13:36 -0800 (PST)
+Received: by mail-lf1-x12e.google.com with SMTP id bi37so15413794lfb.5
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Nov 2021 03:13:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=5c7pv3lk/v/XxOqcblkhHM0Fv6juVYyeJis54FfJJJ0=;
+        b=Spgx8gRrnJQabsSfsYpL2V3TJ6SMDzH2+uAYmqg7V4o/fJP2/z9RPUv8w1Pusvf7Vb
+         NMYqNLdLzya6E8TR3s6RUzIoWwsoDJzOXi9QzjClny6e0UxsCqlxYEOoz3o9jqfsKR+w
+         lH2f/yM+Te5VnYAPsUFGP+QpOJE6XhzOorbElB6kVgfH5dr0+r2VsWQ5eL/+hdUrUVGt
+         XNicYDwsrVXeqrvXCQjyHZkKR0kJ3ye2TEhuwC8NPaqod1H6k/OXg5MP9kyaog3WI2X4
+         a3zxQYD47pySVq4rSh1/Sb3KNztgDnrLj7HX/wo3ouvWeMIM3LSd2J3QCWvmq0K3y2lp
+         FhUw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=5c7pv3lk/v/XxOqcblkhHM0Fv6juVYyeJis54FfJJJ0=;
+        b=7W66zshbZ+HxbUDFP/kY6dLnK5Z3MBaIKccAwCyg2l28X8x/yKReCWhvwe4fIvX09s
+         opDPnpIh92YsVPHqc5CHI1oi3Jc9j9Iz3rTtcIHXAixrL2jjud2iAYF5ztPohzd/e/Cz
+         JC2SDvJQC4LdCzNqoFl+FyAuRbutVhon8dMXYUyFUYeWXvi8oGZvXUs2uI8X/Qf03Ndt
+         xpIghdCH8l1CUQ2Gg8E7Sx84Zb7HsvgHvlmyyEtSjpLxHy7/pN/GPtvWczOFgffDGrFY
+         HSDvFBRN6V5mXVg+/w+nNKq82XZiOtTdNV4mm6QrT7wlQz8R27R1pZeq7TA7fQX2CaFA
+         quKQ==
+X-Gm-Message-State: AOAM533M15+j5FfUf81ovcSckR1X7ecJhYX97ChAl148TkaJKkc1P/Bs
+        Pxg4XnW74+DyVRaVUILw3iDicjhL3XxNjSe+40+dNQ==
+X-Google-Smtp-Source: ABdhPJw2c1S1y6Kjvq0IaBVy77W/XbZBvp2Gyei6hzdxk7BLXof+v5OKUFfR4LpAO1ViPNPpdwkgoOomud9/Dd+VB7Q=
+X-Received: by 2002:a05:6512:10c4:: with SMTP id k4mr22932741lfg.373.1637838814256;
+ Thu, 25 Nov 2021 03:13:34 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20211124094850.1783220-1-adrian.hunter@intel.com>
+In-Reply-To: <20211124094850.1783220-1-adrian.hunter@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 25 Nov 2021 12:12:58 +0100
+Message-ID: <CAPDyKFrAwo2aJRgsovzDbt8Herx48LfD9f0muBYQ8Z7q68VamQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Add PCI ID for Intel ADL
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/11/2021 13:13, Ulf Hansson wrote:
-> On Mon, 22 Nov 2021 at 18:05, Hans de Goede <hdegoede@redhat.com> wrote:
->>
->> Hi Rafael,
->>
->> As requested here is a v2 of my series previously titled:
->> "ACPI: scan: Skip turning off some unused objects during scan"
->>
->> Which was a regression fix series for the commit c10383e8ddf4
->> ("ACPI: scan: Release PM resources blocked by unused objects")
->> change, but that has been reverted now. So as requested here is
->> a v2 changing the wording of various commit messages since these
->> changes are still useful to have regardless.
->>
->> Patch 1/7 is a v2/resend of the "ACPI / x86: Drop PWM2 device on
->> Lenovo Yoga Book from always present table" patch. You requested
->> changing the commit message of this one a bit to make it sound
->> less like a regression fix (which it is not). But you already
->> have the previous version of this patch in your bleeding-edge
->> branch, with a "Cc: 5.1+ <stable@vger.kernel.org> # 5.1+"
->> added ?  So depending on which version you want you can either
->> skip this patch when applying this series, or replace it with
->> the version from this series.
->>
->> Patches 2-4 are the main changes to make the always_present
->> quirk handling more flexible, changing it into a status_override
->> mechanism + adding a quirk for the GPD win and pocket to fix
->> an issue with those in a more elegant matter then the current
->> kludge in the sdhci-acpi code.
->>
->> Patch 5 is an unrelated patch which touches the override-status
->> quirk table, so it needed to be rebased and I decided to add it
->> to this series to make it clear that its v2 needs to be applied
->> on top of the other ACPI changes from this series.
->>
->> Patches 6+7 cleanup the sdhci-acpi code, removing the now no
->> longer needed ugly kludge for the GPD win/pocket. These can
->> be merged independently from patches 1-5, through the mmc
->> tree, as long as they get send to Linus during the same
->> kernel cycle as the ACPI bits.
-> 
-> This sounds like the mmc changes are really not that independent after
-> all. What about bisectability?
-> 
-> An option is to funnel the sdhci patches together with the ACPI
-> patches through Rafael's tree. You have my ack for this, but let's
-> wait for Adrian's ack too.
+On Wed, 24 Nov 2021 at 10:48, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> Add PCI ID for Intel ADL eMMC host controller.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: stable@vger.kernel.org
 
-Looks OK to me.
+Applied for next, thanks!
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 1 +
+>  drivers/mmc/host/sdhci-pci.h      | 1 +
+>  2 files changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 6f9877546830..ed53276f6ad9 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -1866,6 +1866,7 @@ static const struct pci_device_id pci_ids[] = {
+>         SDHCI_PCI_DEVICE(INTEL, JSL_SD,    intel_byt_sd),
+>         SDHCI_PCI_DEVICE(INTEL, LKF_EMMC,  intel_glk_emmc),
+>         SDHCI_PCI_DEVICE(INTEL, LKF_SD,    intel_byt_sd),
+> +       SDHCI_PCI_DEVICE(INTEL, ADL_EMMC,  intel_glk_emmc),
+>         SDHCI_PCI_DEVICE(O2, 8120,     o2),
+>         SDHCI_PCI_DEVICE(O2, 8220,     o2),
+>         SDHCI_PCI_DEVICE(O2, 8221,     o2),
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 5e3193278ff9..3661a224fb04 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -59,6 +59,7 @@
+>  #define PCI_DEVICE_ID_INTEL_JSL_SD     0x4df8
+>  #define PCI_DEVICE_ID_INTEL_LKF_EMMC   0x98c4
+>  #define PCI_DEVICE_ID_INTEL_LKF_SD     0x98f8
+> +#define PCI_DEVICE_ID_INTEL_ADL_EMMC   0x54c4
+>
+>  #define PCI_DEVICE_ID_SYSKONNECT_8000  0x8000
+>  #define PCI_DEVICE_ID_VIA_95D0         0x95d0
+> --
+> 2.25.1
+>
