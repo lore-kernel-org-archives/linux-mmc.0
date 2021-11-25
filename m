@@ -2,258 +2,245 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 340A4C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 21:18:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32007C43219
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 21:45:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357505AbhKYVVl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Nov 2021 16:21:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35786 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231940AbhKYVTl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 16:19:41 -0500
-Received: from mail-qv1-xf31.google.com (mail-qv1-xf31.google.com [IPv6:2607:f8b0:4864:20::f31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A53C4C06175C;
-        Thu, 25 Nov 2021 13:15:11 -0800 (PST)
-Received: by mail-qv1-xf31.google.com with SMTP id jo22so5568368qvb.13;
-        Thu, 25 Nov 2021 13:15:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=4AThbRggRLPCMV/N3nL2kC8vnyLVdQodJCWqkQnV+Eo=;
-        b=Ub/vxMgIEXLhLZHnJdj9JsRdUIPuagf8JYVXMKz1LOifK/6NyGSAr2ZxDwlZ0bKS9W
-         JBnYWF8bJSw63RfpZUJqj5lll4ByVEjraZn/XO1pDeLbghvMkFe6S7Upd1bavoNSweJN
-         y6fulW7JdzLwvoagHw7jMylYHTF3vPHF4z6fUcWLFG8HgPUag0RX0rQnjcdx+STPBcso
-         7gJwMQB2LKGTrPwhZbdp9LtZg1OStE9ZDfSdvwAe8kMjpEOWV3JJVijI8HWH7Pga43Ja
-         +IkFlphIQA/UDC6mZVKL79MEwJYxVeI9Z/xT0vL9ac9EJWs0eFP6Xgyuo2cCEi10RFxR
-         Vsog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=4AThbRggRLPCMV/N3nL2kC8vnyLVdQodJCWqkQnV+Eo=;
-        b=z0sJ7Fjz39On574aSV+7HJQIi80H9MMhTAZpxZXmO5R2nWo7aRX7NcOteXWi9Y4fo+
-         WoDw9QPwDpfO4RODOeJcWSRb5j69y6QJoE/GeETW0uL45hQqnmVE1c1k6FiBWOdvU9z+
-         kzEVyJZ6qDuzgE1pUiSVo9bX/oe0O/9w/E8Cm1Z4uWba9iSGYn5B51368ztQyg9Bw990
-         vhTrgF3WrBmJ4vvf1S5mwIWvzYWpY3nOjjeuUUN7N0cyHmW3QJeTa7PBWHZyQWzsxxcT
-         7XAmZfUXs8PykF/d8TjkderrwSLVjLpXbYc9kymClIQYfSxeNAWUlGf4x6pZ/0HUqZ1r
-         DM0g==
-X-Gm-Message-State: AOAM5328v5DjEfLsLXVEXCzHnPQNpPZPpB7xtTqtvv488zyC5qtbvMvP
-        t1LcXty0b4tkguHkTnvoJWA=
-X-Google-Smtp-Source: ABdhPJzD95rpVLiPB9eW9vNdZIvkEDDkYezGCoL70Zp28wCOaWTU2zJdh1O4HXYuJJeHDx5Rp43MOQ==
-X-Received: by 2002:a05:6214:c6f:: with SMTP id t15mr21402121qvj.6.1637874910829;
-        Thu, 25 Nov 2021 13:15:10 -0800 (PST)
-Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id j22sm2068175qko.68.2021.11.25.13.15.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 25 Nov 2021 13:15:09 -0800 (PST)
-From:   Jesse Taube <mr.bossman075@gmail.com>
-X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
-To:     linux-imx@nxp.com
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
-        stefan@agner.ch, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
-        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
-        adrian.hunter@intel.com, jirislaby@kernel.org,
-        giulio.benetti@benettiengineering.com,
-        nobuhiro1.iwamatsu@toshiba.co.jp, Mr.Bossman075@gmail.com,
-        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org
-Subject: [PATCH v3 13/13] ARM: imxrt_defconfig: add i.MXRT family defconfig
-Date:   Thu, 25 Nov 2021 16:14:43 -0500
-Message-Id: <20211125211443.1150135-14-Mr.Bossman075@gmail.com>
-X-Mailer: git-send-email 2.34.0
-In-Reply-To: <20211125211443.1150135-1-Mr.Bossman075@gmail.com>
-References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com>
+        id S241687AbhKYVs3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 16:48:29 -0500
+Received: from mout.kundenserver.de ([217.72.192.75]:33677 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1351387AbhKYVq3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Nov 2021 16:46:29 -0500
+Received: from mail-wr1-f50.google.com ([209.85.221.50]) by
+ mrelayeu.kundenserver.de (mreue108 [213.165.67.113]) with ESMTPSA (Nemesis)
+ id 1MEV7U-1moloX0GnS-00G06i; Thu, 25 Nov 2021 22:43:15 +0100
+Received: by mail-wr1-f50.google.com with SMTP id o13so14309241wrs.12;
+        Thu, 25 Nov 2021 13:43:14 -0800 (PST)
+X-Gm-Message-State: AOAM531mNV9pKP5rRN+V+1xqPGFQhWhbyWtsyoeUqwrDEJR/ImtuoE75
+        GxVYb8uRXTI/GT1+x2hoOV1vGwgK/I/N+0CrwTw=
+X-Google-Smtp-Source: ABdhPJwjKapht7W/sukRuCfcX+lckyEPy1NdAnaERzdim0N17M/wef+Nllp0lT2Vmf332KaJEcKdDsO7PSXmL6JXu0w=
+X-Received: by 2002:a5d:64ea:: with SMTP id g10mr10262560wri.137.1637876594530;
+ Thu, 25 Nov 2021 13:43:14 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com> <20211125211443.1150135-14-Mr.Bossman075@gmail.com>
+In-Reply-To: <20211125211443.1150135-14-Mr.Bossman075@gmail.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Thu, 25 Nov 2021 22:42:58 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a3dwwBt21o7LDY-CLDdVmOknxDF7sgO_dfiTj8_u4Tx=A@mail.gmail.com>
+Message-ID: <CAK8P3a3dwwBt21o7LDY-CLDdVmOknxDF7sgO_dfiTj8_u4Tx=A@mail.gmail.com>
+Subject: Re: [PATCH v3 13/13] ARM: imxrt_defconfig: add i.MXRT family defconfig
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     NXP Linux Team <linux-imx@nxp.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dong Aisheng <aisheng.dong@nxp.com>,
+        Stefan Agner <stefan@agner.ch>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        gregkh <gregkh@linuxfoundation.org>,
+        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
+        SoC Team <soc@kernel.org>,
+        Russell King - ARM Linux <linux@armlinux.org.uk>,
+        Abel Vesa <abel.vesa@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        giulio.benetti@benettiengineering.com,
+        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:9F1HmoWqAz0eILnTfnh1h6cvsqim0DA76W87jivWA2xvAi4HeaW
+ h7scqcNGj1atWyUUkF6OogKEfwq1D1iv9+vmiaTItFZ3qT5Rl27Zt1DUh/qQN757atQdiu1
+ VcDKlBcWYrLU8IEKemf2kiD5RzQKKyJZhnRU+MSYZOp/trlQpuIOr6iYbtNaoGuGa6zjACZ
+ aIbhiPddPPARMcYW7NYBg==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:Yz/1iYbOgPI=:F81e9KRFfoBNchdd179cgq
+ aef64Jl/PNTfK4bq4LVyKvxDeeVx0HYXFJ/+lpYVd5j6m/H+1s969WnsdhuTQz25w+6PELdrm
+ a5WF4/TP334wHbOeV8rg+DVHCi9kOp/oFySryVu+ef3Bg3Bm04VpGd068F4zPrrpWw9FM0DgM
+ Ot1P5IuBzpL8C30bsx5uPPTcmspNdovPXvR8sFCrTK9koiD+GLY/YO16auhg3xiZsiOEuJTL7
+ +Hwu0EousHqmCUWAlwNECrLg2KjhGnlDQU8wYznfpkaHHefvmzRmlNcFYJdnfz4Rfw7TPBAUf
+ IUiCaYWZERea5X00X2T49khvNfAB+91c3FpZThcb9Pp8cPUmpHNeKEPlRG7PsTvl1bJczKvbG
+ XwE4AG62LElp8GGWwyYivSt2/MeZqbwO2Zk62uetyfS9uTrM3OktfRzwZskx/vQzbL5Z5sTs/
+ cfGaui/rM4hltp9MMLJpxviwODrPVkOHZvOBnofjObl+AWaLSYry51aZGOKwTvuWmmfsyAbhC
+ Byecw3GzzgexHh6Kdt5BBv7G9EBxt/vvmYqJfzjQM+sVg6Cr0z+MwMFB/SID0njUP+7VyU5bk
+ ZtO/1CQbPdepyAwdSssLxSB1mnEtUlLi0SraO/Udo3xMmaXjullZHulRfmulLmi0VrTcp/AzB
+ ZvB7x+c5kev0OdqeJqjpoKU6Ozg0w6G3gpQZoDFhBxaH72YMgVexmazg2hcPYD9xY/GXZC0p1
+ JTCeawzr6I32D99vKvKu1n5M7zzcUE21khY/YZYgEF6U57UjnpfXDjRusggrrIlH7FPeCogo/
+ dLLEPDEizWPh8zF5Noh4sp0tUmYHBNbeW+MtXmU7DtiVV3CR4k=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Giulio Benetti <giulio.benetti@benettiengineering.com>
+On Thu, Nov 25, 2021 at 10:14 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
+>
+> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
+>
+> Add generic i.MXRT family defconfig.
+>
+> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
 
-Add generic i.MXRT family defconfig.
+I see a lot of things in here that probably should not be part of the kernel,
+either because they are rather obscure, or they take valuable memory:
 
-Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
-Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
----
-V1->V2:
-* Nothing done
-V2->V3:
-* Nothing done
----
- arch/arm/configs/imxrt_defconfig | 157 +++++++++++++++++++++++++++++++
- 1 file changed, 157 insertions(+)
- create mode 100644 arch/arm/configs/imxrt_defconfig
+> ---
+>  arch/arm/configs/imxrt_defconfig | 157 +++++++++++++++++++++++++++++++
+>  1 file changed, 157 insertions(+)
+>  create mode 100644 arch/arm/configs/imxrt_defconfig
+>
+> diff --git a/arch/arm/configs/imxrt_defconfig b/arch/arm/configs/imxrt_defconfig
+> new file mode 100644
+> index 000000000000..d673745a5462
+> --- /dev/null
+> +++ b/arch/arm/configs/imxrt_defconfig
+> @@ -0,0 +1,157 @@
+> +# CONFIG_LOCALVERSION_AUTO is not set
+> +CONFIG_SYSVIPC=y
+> +CONFIG_USELIB=y
 
-diff --git a/arch/arm/configs/imxrt_defconfig b/arch/arm/configs/imxrt_defconfig
-new file mode 100644
-index 000000000000..d673745a5462
---- /dev/null
-+++ b/arch/arm/configs/imxrt_defconfig
-@@ -0,0 +1,157 @@
-+# CONFIG_LOCALVERSION_AUTO is not set
-+CONFIG_SYSVIPC=y
-+CONFIG_USELIB=y
-+CONFIG_NO_HZ=y
-+CONFIG_HIGH_RES_TIMERS=y
-+CONFIG_BPF_SYSCALL=y
-+CONFIG_PREEMPT_VOLUNTARY=y
-+CONFIG_BSD_PROCESS_ACCT=y
-+CONFIG_BSD_PROCESS_ACCT_V3=y
-+CONFIG_PSI=y
-+CONFIG_IKCONFIG=y
-+CONFIG_IKCONFIG_PROC=y
-+CONFIG_LOG_BUF_SHIFT=18
-+CONFIG_MEMCG=y
-+CONFIG_BLK_CGROUP=y
-+CONFIG_CFS_BANDWIDTH=y
-+CONFIG_CGROUP_PIDS=y
-+CONFIG_CGROUP_RDMA=y
-+CONFIG_CGROUP_FREEZER=y
-+CONFIG_CGROUP_DEVICE=y
-+CONFIG_CGROUP_CPUACCT=y
-+CONFIG_CGROUP_PERF=y
-+CONFIG_CGROUP_BPF=y
-+CONFIG_NAMESPACES=y
-+CONFIG_USER_NS=y
-+CONFIG_CHECKPOINT_RESTORE=y
-+CONFIG_SCHED_AUTOGROUP=y
-+CONFIG_RELAY=y
-+CONFIG_BLK_DEV_INITRD=y
-+CONFIG_EXPERT=y
-+CONFIG_SGETMASK_SYSCALL=y
-+# CONFIG_FUTEX is not set
-+CONFIG_KALLSYMS_ALL=y
-+CONFIG_PC104=y
-+# CONFIG_SLUB_DEBUG is not set
-+# CONFIG_COMPAT_BRK is not set
-+CONFIG_SLAB_FREELIST_RANDOM=y
-+CONFIG_SLAB_FREELIST_HARDENED=y
-+CONFIG_PROFILING=y
-+# CONFIG_MMU is not set
-+CONFIG_ARCH_MXC=y
-+CONFIG_SOC_IMXRT=y
-+# CONFIG_ARM_DMA_MEM_BUFFERABLE is not set
-+CONFIG_SET_MEM_PARAM=y
-+CONFIG_DRAM_BASE=0x80000000
-+CONFIG_DRAM_SIZE=0x02000000
-+CONFIG_HZ_250=y
-+CONFIG_FORCE_MAX_ZONEORDER=14
-+CONFIG_PARAVIRT=y
-+# CONFIG_ATAGS is not set
-+CONFIG_CMDLINE="console=ttyS0 root=/dev/mmcblk0p2 rw earlycon rootwait"
-+CONFIG_BLK_DEV_BSGLIB=y
-+CONFIG_BLK_DEV_INTEGRITY=y
-+CONFIG_BLK_DEV_ZONED=y
-+CONFIG_BLK_DEV_THROTTLING=y
-+CONFIG_BLK_WBT=y
-+CONFIG_BLK_SED_OPAL=y
-+CONFIG_PARTITION_ADVANCED=y
-+CONFIG_BSD_DISKLABEL=y
-+CONFIG_MINIX_SUBPARTITION=y
-+CONFIG_SOLARIS_X86_PARTITION=y
-+CONFIG_UNIXWARE_DISKLABEL=y
-+CONFIG_LDM_PARTITION=y
-+CONFIG_CMDLINE_PARTITION=y
-+# CONFIG_MQ_IOSCHED_KYBER is not set
-+CONFIG_BINFMT_FLAT=y
-+CONFIG_CLEANCACHE=y
-+CONFIG_ZPOOL=y
-+CONFIG_ZBUD=y
-+CONFIG_Z3FOLD=y
-+CONFIG_UEVENT_HELPER=y
-+CONFIG_DEVTMPFS=y
-+CONFIG_DEVTMPFS_MOUNT=y
-+# CONFIG_STANDALONE is not set
-+CONFIG_FW_LOADER_USER_HELPER=y
-+CONFIG_FW_LOADER_USER_HELPER_FALLBACK=y
-+CONFIG_IMX_WEIM=y
-+CONFIG_BLK_DEV_LOOP=y
-+CONFIG_BLK_DEV_RAM=y
-+CONFIG_BLK_DEV_RAM_COUNT=1
-+CONFIG_BLK_DEV_RAM_SIZE=65536
-+# CONFIG_INPUT_KEYBOARD is not set
-+# CONFIG_INPUT_MOUSE is not set
-+# CONFIG_SERIO is not set
-+CONFIG_LEGACY_PTY_COUNT=2
-+CONFIG_SERIAL_FSL_LPUART=y
-+CONFIG_SERIAL_FSL_LPUART_CONSOLE=y
-+CONFIG_SERIAL_NONSTANDARD=y
-+CONFIG_SERIAL_DEV_BUS=y
-+CONFIG_TTY_PRINTK=y
-+CONFIG_TTY_PRINTK_LEVEL=7
-+CONFIG_PINCTRL_IMXRT1050=y
-+CONFIG_GPIO_SYSFS=y
-+CONFIG_GPIO_MXC=y
-+# CONFIG_HWMON is not set
-+# CONFIG_HID is not set
-+# CONFIG_USB_SUPPORT is not set
-+CONFIG_MMC=y
-+CONFIG_MMC_SDHCI=y
-+CONFIG_MMC_SDHCI_PLTFM=y
-+CONFIG_MMC_SDHCI_ESDHC_IMX=y
-+CONFIG_DMADEVICES=y
-+CONFIG_FSL_EDMA=y
-+# CONFIG_MX3_IPU is not set
-+# CONFIG_VIRTIO_MENU is not set
-+# CONFIG_VHOST_MENU is not set
-+CONFIG_MEMORY=y
-+CONFIG_EXT2_FS=y
-+CONFIG_EXT2_FS_XATTR=y
-+CONFIG_EXT2_FS_POSIX_ACL=y
-+CONFIG_EXT2_FS_SECURITY=y
-+CONFIG_EXT3_FS=y
-+CONFIG_EXT3_FS_POSIX_ACL=y
-+CONFIG_EXT3_FS_SECURITY=y
-+# CONFIG_FILE_LOCKING is not set
-+# CONFIG_DNOTIFY is not set
-+CONFIG_QUOTA=y
-+# CONFIG_PRINT_QUOTA_WARNING is not set
-+CONFIG_AUTOFS4_FS=y
-+CONFIG_VFAT_FS=y
-+CONFIG_FAT_DEFAULT_UTF8=y
-+CONFIG_EXFAT_FS=y
-+CONFIG_CONFIGFS_FS=y
-+# CONFIG_MISC_FILESYSTEMS is not set
-+CONFIG_NLS_DEFAULT="cp437"
-+CONFIG_NLS_CODEPAGE_437=y
-+CONFIG_NLS_ASCII=y
-+CONFIG_NLS_ISO8859_1=y
-+CONFIG_NLS_UTF8=y
-+CONFIG_LSM="yama,loadpin,integrity,apparmor"
-+# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set
-+# CONFIG_CRYPTO_HW is not set
-+CONFIG_PRINTK_TIME=y
-+CONFIG_CONSOLE_LOGLEVEL_DEFAULT=15
-+CONFIG_CONSOLE_LOGLEVEL_QUIET=15
-+CONFIG_MESSAGE_LOGLEVEL_DEFAULT=7
-+CONFIG_DYNAMIC_DEBUG=y
-+# CONFIG_DEBUG_BUGVERBOSE is not set
-+CONFIG_DEBUG_INFO=y
-+CONFIG_DEBUG_INFO_DWARF4=y
-+CONFIG_GDB_SCRIPTS=y
-+CONFIG_MAGIC_SYSRQ=y
-+CONFIG_MAGIC_SYSRQ_DEFAULT_ENABLE=0x01b6
-+CONFIG_DEBUG_FS=y
-+CONFIG_PAGE_POISONING=y
-+CONFIG_SCHED_STACK_END_CHECK=y
-+CONFIG_SOFTLOCKUP_DETECTOR=y
-+CONFIG_DEFAULT_HUNG_TASK_TIMEOUT=1
-+# CONFIG_SCHED_DEBUG is not set
-+CONFIG_SCHEDSTATS=y
-+CONFIG_STACKTRACE=y
-+CONFIG_DEBUG_USER=y
-+CONFIG_DEBUG_LL=y
-+CONFIG_DEBUG_UNCOMPRESS=y
-+CONFIG_EARLY_PRINTK=y
-+# CONFIG_RUNTIME_TESTING_MENU is not set
-+CONFIG_MEMTEST=y
--- 
-2.34.0
+You almost certainly won't want USELIB, and SYSVIPC support
+would only be useful for certain applications that you probably
+won't run.
 
+> +CONFIG_BSD_PROCESS_ACCT=y
+> +CONFIG_BSD_PROCESS_ACCT_V3=y
+> +CONFIG_PSI=y
+> +CONFIG_IKCONFIG=y
+> +CONFIG_IKCONFIG_PROC=y
+
+Probably nonen of these are helpful here.
+
+> +CONFIG_MEMCG=y
+> +CONFIG_BLK_CGROUP=y
+> +CONFIG_CFS_BANDWIDTH=y
+> +CONFIG_CGROUP_PIDS=y
+> +CONFIG_CGROUP_RDMA=y
+> +CONFIG_CGROUP_FREEZER=y
+> +CONFIG_CGROUP_DEVICE=y
+> +CONFIG_CGROUP_CPUACCT=y
+> +CONFIG_CGROUP_PERF=y
+> +CONFIG_CGROUP_BPF=y
+> +CONFIG_NAMESPACES=y
+> +CONFIG_USER_NS=y
+> +CONFIG_CHECKPOINT_RESTORE=y
+
+Same for control groups overall as well as checkpoint_restore
+
+> +CONFIG_RELAY=y
+
+There are a few drivers using CONFIG_RELAY, but I don't see you enable
+any of them,
+so this is not actually used.
+
+> +CONFIG_EXPERT=y
+
+Are you losing anything without EXPERT? If not, remove that
+
+> +CONFIG_SGETMASK_SYSCALL=y
+> +# CONFIG_FUTEX is not set
+
+Futex is probably one of the things you /do/ want.
+
+> +CONFIG_KALLSYMS_ALL=y
+> +CONFIG_PC104=y
+
+Turning off KALLSYMS_ALL may save a noticeable amount of RAM.
+
+PC104 isn't actually that big, but it seems unlikely that you have
+that hardware.
+
+> +CONFIG_PARAVIRT=y
+
+You don't seem to enable XEN, so I don't think PARAVIRT is useful by itself.
+
+> +# CONFIG_ATAGS is not set
+> +CONFIG_CMDLINE="console=ttyS0 root=/dev/mmcblk0p2 rw earlycon rootwait"
+
+The command line should come from the boot loader, users probably have
+a different root device.
+
+> +CONFIG_BLK_DEV_BSGLIB=y
+> +CONFIG_BLK_DEV_INTEGRITY=y
+> +CONFIG_BLK_DEV_ZONED=y
+> +CONFIG_BLK_DEV_THROTTLING=y
+> +CONFIG_BLK_WBT=y
+> +CONFIG_BLK_SED_OPAL=y
+> +CONFIG_PARTITION_ADVANCED=y
+> +CONFIG_BSD_DISKLABEL=y
+> +CONFIG_MINIX_SUBPARTITION=y
+> +CONFIG_SOLARIS_X86_PARTITION=y
+> +CONFIG_UNIXWARE_DISKLABEL=y
+> +CONFIG_LDM_PARTITION=y
+
+I don't see you using OPAL or any of the 1990's partition formats.
+ot set
+
+> +CONFIG_BINFMT_FLAT=y
+
+For the defconfig, you should probably have ELF_FDPIC enabled,
+not just FLAT.
+
+> +CONFIG_CLEANCACHE=y
+> +CONFIG_ZPOOL=y
+> +CONFIG_ZBUD=y
+> +CONFIG_Z3FOLD=y
+
+Do these work as expected on NOMMU?
+
+> +CONFIG_BLK_DEV_LOOP=y
+> +CONFIG_BLK_DEV_RAM=y
+> +CONFIG_BLK_DEV_RAM_COUNT=1
+> +CONFIG_BLK_DEV_RAM_SIZE=65536
+
+I don't think you can have a ramdisk larger than RAM ;-)
+
+> +CONFIG_MEMORY=y
+
+No need to enable the subsystem when you don't enable any
+of its drivers.
+
+> +CONFIG_EXT2_FS=y
+> +CONFIG_EXT2_FS_XATTR=y
+> +CONFIG_EXT2_FS_POSIX_ACL=y
+> +CONFIG_EXT2_FS_SECURITY=y
+> +CONFIG_EXT3_FS=y
+> +CONFIG_EXT3_FS_POSIX_ACL=y
+> +CONFIG_EXT3_FS_SECURITY=y
+
+Never use EXT3 on eMMC, just use EXT4 instead to make
+the device actually live longer. You probably don't need to enable
+EXT2 support separately.
+
+> +# CONFIG_FILE_LOCKING is not set
+> +# CONFIG_DNOTIFY is not set
+> +CONFIG_QUOTA=y
+
+dnotify and locking seem more useful than quota here
+
+> +# CONFIG_PRINT_QUOTA_WARNING is not set
+> +CONFIG_AUTOFS4_FS=y
+
+> +CONFIG_CONFIGFS_FS=y
+
+I don't see anything using configfs
+
+> +CONFIG_LSM="yama,loadpin,integrity,apparmor"
+
+None of these are actually enabled as far as I can tell.
+
+> +CONFIG_DEBUG_INFO=y
+> +CONFIG_DEBUG_INFO_DWARF4=y
+
+If you use DWARF4, you probably want DEBUG_INFO_SPLIT as well,
+to reduce the vmlinux size.
+
+       Arnd
