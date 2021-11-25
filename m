@@ -2,105 +2,422 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D46F5C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Nov 2021 19:25:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93CB0C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Nov 2021 07:59:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245588AbhKXT2u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Nov 2021 14:28:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60450 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245493AbhKXT2p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Nov 2021 14:28:45 -0500
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7366DC061748
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2021 11:25:35 -0800 (PST)
-Received: by mail-lf1-x12c.google.com with SMTP id m27so9938384lfj.12
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Nov 2021 11:25:35 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=KeS8gzA/xfPhh34ugNpumxJ4yVD03DKGSAXtYcv0CNY=;
-        b=SAc/SLcjr/Co2yuN16R4GlaVzZSj3SGoLB+z8GEtc5h3aU8zidJIe+uJIfa5Bt3D1m
-         nuadLC4dAavDlWMr1PeQuweQd+2WdTckNNsIconSEReAJErSpN6N4gfv9qVsidgXYX4W
-         DgLzz9OtmsjjUCln49Mp1puk5J/PS0oP5pNQGW6/PODbWKgIQA2683kIWTMVDF2u1GaU
-         zUk/hBrZv/Y5JYpAKGEZV59d7yKkGNXiC8ECZpl5WSyDCfVqbJatNNvZekBqH872CrLv
-         DnkBT6Ag/Y+r1nbhQmm3dynY5ZAPZOqTB78XiVuqR4zUUwyampX0urGluugIt56Dj2tu
-         WlHQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=KeS8gzA/xfPhh34ugNpumxJ4yVD03DKGSAXtYcv0CNY=;
-        b=x/3tIthjRaEG/Jmj4wKQNiB/4C8Aw3/Rrt7t2ZDJUuLBkQf4i7PBi07d/eumU3b6cU
-         JoTax4kCA0BKETg4K4v3keLU7BCaHdhca5U2aJ+bYfJe0Quaght6rX568USTu3AQs3zK
-         a20u4qNZ9M1am8n6LS2ywY5gnTXxfu74nZ18tP2cctXQwonyCE4SxMyZNQVGQfHlFgrI
-         6f/qSXe2x93ucTEkWtGue4UOzYLBZN7OEr9TMBMW8wDXtLXr7ZtoPBwEXTm5lPp3HNz7
-         yy/9RqCApwXRLTwN3LQUyIv7sUjAD202jWafgiALyijTkP/283aD35BIAgKrLA3CReWy
-         vssA==
-X-Gm-Message-State: AOAM532D7LtF1Sz94T3BFgF32ocV8fXPDGQZknvXKic12+5Y2qXc18rj
-        k2sI6La+fVxjBIMk5j+m/iateI04Pf2kd8MBXYQ3Z/BKYDk=
-X-Google-Smtp-Source: ABdhPJzSEYCURJSiTw//vdik61HAkzTY0+VAOHaDC/VmX4bo1DEpc6xicGzGrpeh42Ukrn7jGcsGzS4EiBrSWD3re9Y=
-X-Received: by 2002:ac2:5a46:: with SMTP id r6mr18103844lfn.358.1637781932136;
- Wed, 24 Nov 2021 11:25:32 -0800 (PST)
+        id S1349446AbhKYICN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Nov 2021 03:02:13 -0500
+Received: from mga18.intel.com ([134.134.136.126]:37491 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236412AbhKYIAM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Nov 2021 03:00:12 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10178"; a="222338817"
+X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
+   d="scan'208";a="222338817"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2021 23:57:01 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,262,1631602800"; 
+   d="scan'208";a="497980157"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by orsmga007.jf.intel.com with ESMTP; 24 Nov 2021 23:56:57 -0800
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat sysfs
+ entry
+To:     "Sajida Bhanu (Temp) (QUIC)" <quic_c_sbhanu@quicinc.com>,
+        "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
+        "Asutosh Das (asd)" <asutoshd@quicinc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "agross@kernel.org" <agross@kernel.org>,
+        "bjorn.andersson@linaro.org" <bjorn.andersson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc:     "stummala@codeaurora.org" <stummala@codeaurora.org>,
+        "vbadigan@codeaurora.org" <vbadigan@codeaurora.org>,
+        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
+        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
+        "sartgarg@codeaurora.org" <sartgarg@codeaurora.org>,
+        "nitirawa@codeaurora.org" <nitirawa@codeaurora.org>,
+        "sayalil@codeaurora.org" <sayalil@codeaurora.org>
+References: <1637130012-21846-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <c90754b9-37bb-7b4e-4130-05f62b2881fd@intel.com>
+ <SJ0PR02MB8449BC60FA635E61162A6383CD9F9@SJ0PR02MB8449.namprd02.prod.outlook.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <ea06e091-9ba9-3cb5-121c-a04bdce6dede@intel.com>
+Date:   Thu, 25 Nov 2021 09:56:56 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-References: <20211124184603.3897245-1-john@metanate.com>
-In-Reply-To: <20211124184603.3897245-1-john@metanate.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 24 Nov 2021 20:24:56 +0100
-Message-ID: <CAPDyKFr=ok3uKXS8bWtZPvyLOeA2cF_4Z2c7ROcoMfBF2G1uhA@mail.gmail.com>
-Subject: Re: [PATCH 0/4] mmc: dw_mmc: start deprecating mshcN aliases
-To:     John Keeping <john@metanate.com>
-Cc:     linux-mmc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-rockchip@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <SJ0PR02MB8449BC60FA635E61162A6383CD9F9@SJ0PR02MB8449.namprd02.prod.outlook.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 24 Nov 2021 at 19:46, John Keeping <john@metanate.com> wrote:
->
-> This series is prompted by discussion on a previous patch set [1] but is
-> a totally different approach and only a partial solution.
->
-> With these patches, the dependency on the mshcN alias is totally removed
-> from dw_mmc-hi3798cv200 and dw_mmc-rockchip and dw_mmc-exynos moves
-> towards being able to consider the mshcN aliases deprecated.
->
-> I haven't changed dw_mci_hi6220_caps here, although it looks like it's
-> possible to apply MMC_CAP_CMD23 to all controllers there with no change
-> in behaviour as the final entry is SDIO for which CMD23 is not
-> applicable IIUC.  But I'm not familiar with that hardware and don't feel
-> confident making that change.
->
-> [1] https://lore.kernel.org/all/20211116190244.1417591-1-john@metanate.com/
->
-> John Keeping (4):
->   mmc: dw_mmc: add common capabilities to replace caps
->   mmc: dw_mmc: hi3798cv200: use common_caps
->   mmc: dw_mmc: rockchip: use common_caps
->   mmc: dw_mmc: exynos: use common_caps
->
->  drivers/mmc/host/dw_mmc-exynos.c      |  9 +++++----
->  drivers/mmc/host/dw_mmc-hi3798cv200.c |  9 +--------
->  drivers/mmc/host/dw_mmc-rockchip.c    | 11 +----------
->  drivers/mmc/host/dw_mmc.c             |  3 +++
->  drivers/mmc/host/dw_mmc.h             |  3 +++
->  5 files changed, 13 insertions(+), 22 deletions(-)
->
-> --
-> 2.34.0
->
+On 22/11/2021 12:05, Sajida Bhanu (Temp) (QUIC) wrote:
+> Please find the inline comments.
+> 
+> -----Original Message-----
+> From: Adrian Hunter <adrian.hunter@intel.com> 
+> Sent: Wednesday, November 17, 2021 1:15 PM
+> To: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>; riteshh@codeaurora.org; Asutosh Das (asd) <asutoshd@quicinc.com>; ulf.hansson@linaro.org; agross@kernel.org; bjorn.andersson@linaro.org; linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-kernel@vger.kernel.org
+> Cc: stummala@codeaurora.org; vbadigan@codeaurora.org; Ram Prakash Gupta (QUIC) <quic_rampraka@quicinc.com>; Pradeep Pragallapati (QUIC) <quic_pragalla@quicinc.com>; sartgarg@codeaurora.org; nitirawa@codeaurora.org; sayalil@codeaurora.org
+> Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat sysfs entry
+> 
+> On 17/11/2021 08:20, Shaik Sajida Bhanu wrote:
+>> Add sysfs entry to query eMMC and SD card errors statistics.
+>> This feature is useful for debug and testing.
+> 
+> Did you consider making it part of cqhci.c so that all drivers using cqhci could benefit?
+> 
+> Hi Adrian,
+> 
+> Thanks for the review.
+> We are enabling  this changes for both eMMC and SD card as well. So , if we include these changes in cqhci.c then changes will not effect for SD card right.
 
-This looks good to me, I intend to apply this later this week, unless
-objections of course.
+Seems like something mmc core could support perhaps, with drivers calling mmc core functions to add their stats.
+Needs Ulf to comment.
 
-In the meantime, I will continue to look at what we can do to resolve
-the exynos/k3 issues around this.
+Alternatively, SDHCI could do it which would at least give support to other SDHCI drivers.
 
-Kind regards
-Uffe
+> 
+> Thanks,
+> Sajida
+>>
+>> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+>> ---
+>>  drivers/mmc/host/cqhci.h     |   1 +
+>>  drivers/mmc/host/sdhci-msm.c | 192 +++++++++++++++++++++++++++++++++++++++++++
+>>  drivers/mmc/host/sdhci.c     |  17 ++++
+>>  drivers/mmc/host/sdhci.h     |   1 +
+>>  include/linux/mmc/host.h     |   1 +
+>>  5 files changed, 212 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h index 
+>> ba9387e..f72a1d6 100644
+>> --- a/drivers/mmc/host/cqhci.h
+>> +++ b/drivers/mmc/host/cqhci.h
+>> @@ -286,6 +286,7 @@ struct cqhci_host_ops {
+>>  				 u64 *data);
+>>  	void (*pre_enable)(struct mmc_host *mmc);
+>>  	void (*post_disable)(struct mmc_host *mmc);
+>> +	void (*err_stats)(struct mmc_host *mmc, unsigned long flags);
+>>  #ifdef CONFIG_MMC_CRYPTO
+>>  	int (*program_key)(struct cqhci_host *cq_host,
+>>  			   const union cqhci_crypto_cfg_entry *cfg, int slot); diff --git 
+>> a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c index 
+>> 50c71e0..e1dcd2d 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -242,6 +242,23 @@ struct sdhci_msm_variant_ops {
+>>  			u32 offset);
+>>  };
+>>  
+>> +enum {
+>> +	MMC_ERR_CMD_TIMEOUT,
+>> +	MMC_ERR_CMD_CRC,
+>> +	MMC_ERR_DAT_TIMEOUT,
+>> +	MMC_ERR_DAT_CRC,
+>> +	MMC_ERR_AUTO_CMD,
+>> +	MMC_ERR_ADMA,
+>> +	MMC_ERR_TUNING,
+>> +	MMC_ERR_CMDQ_RED,
+>> +	MMC_ERR_CMDQ_GCE,
+>> +	MMC_ERR_CMDQ_ICCE,
+>> +	MMC_ERR_REQ_TIMEOUT,
+>> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
+>> +	MMC_ERR_ICE_CFG,
+>> +	MMC_ERR_MAX,
+>> +};
+>> +
+>>  /*
+>>   * From V5, register spaces have changed. Wrap this info in a structure
+>>   * and choose the data_structure based on version info mentioned in DT.
+>> @@ -285,6 +302,8 @@ struct sdhci_msm_host {
+>>  	u32 dll_config;
+>>  	u32 ddr_config;
+>>  	bool vqmmc_enabled;
+>> +	bool err_occurred;
+>> +	u32  err_stats[MMC_ERR_MAX];
+>>  };
+>>  
+>>  static const struct sdhci_msm_offset *sdhci_priv_msm_offset(struct 
+>> sdhci_host *host) @@ -2106,9 +2125,20 @@ static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *c
+>>  		host->data_timeout = 22LL * NSEC_PER_SEC;  }
+>>  
+>> +void sdhci_msm_cqe_err_stats(struct mmc_host *mmc, unsigned long 
+>> +flags) {
+>> +	struct sdhci_host *host = mmc_priv(mmc);
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +	if (flags & BIT(0))
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]++;
+>> +}
+>> +
+>>  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+>>  	.enable		= sdhci_msm_cqe_enable,
+>>  	.disable	= sdhci_msm_cqe_disable,
+>> +	.err_stats	= sdhci_msm_cqe_err_stats,
+>>  #ifdef CONFIG_MMC_CRYPTO
+>>  	.program_key	= sdhci_msm_program_key,
+>>  #endif
+>> @@ -2403,6 +2433,46 @@ static void sdhci_msm_dump_vendor_regs(struct sdhci_host *host)
+>>  		readl_relaxed(host->ioaddr +
+>>  			msm_offset->core_vendor_spec_func2),
+>>  		readl_relaxed(host->ioaddr + msm_offset->core_vendor_spec3));
+>> +	msm_host->err_occurred = true;
+>> +}
+>> +
+>> +void sdhci_msm_err_stats(struct sdhci_host *host, u32 intmask) {
+>> +	int command;
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +	if (!msm_host->err_occurred)
+>> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
+>> +
+>> +	if (host && host->mmc && host->mmc->timer) {
+>> +		msm_host->err_stats[MMC_ERR_REQ_TIMEOUT]++;
+>> +		host->mmc->timer = false;
+>> +	}
+>> +
+>> +	if (intmask & SDHCI_INT_CRC) {
+>> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
+>> +		if (command != MMC_SEND_TUNING_BLOCK ||
+>> +		    command != MMC_SEND_TUNING_BLOCK_HS200)
+>> +			msm_host->err_stats[MMC_ERR_CMD_CRC]++;
+>> +	} else if ((intmask & SDHCI_INT_TIMEOUT) ||
+>> +		(intmask & SDHCI_INT_DATA_TIMEOUT))
+>> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT]++;
+>> +	else if (intmask & SDHCI_INT_DATA_CRC) {
+>> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
+>> +		if (command != MMC_SEND_TUNING_BLOCK ||
+>> +		    command != MMC_SEND_TUNING_BLOCK_HS200)
+>> +			msm_host->err_stats[MMC_ERR_DAT_CRC]++;
+>> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT)
+>> +		msm_host->err_stats[MMC_ERR_DAT_TIMEOUT]++;
+>> +	else if (intmask & CQHCI_IS_RED)
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_RED]++;
+>> +	else if (intmask & CQHCI_IS_GCE)
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_GCE]++;
+>> +	else if (intmask & CQHCI_IS_ICCE)
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_ICCE]++;
+>> +	else if (intmask & SDHCI_INT_ADMA_ERROR)
+>> +		msm_host->err_stats[MMC_ERR_ADMA]++;
+>>  }
+>>  
+>>  static const struct sdhci_msm_variant_ops mci_var_ops = { @@ -2456,6 
+>> +2526,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+>>  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
+>>  	.set_power = sdhci_set_power_noreg,
+>>  	.set_timeout = sdhci_msm_set_timeout,
+>> +	.err_stats = sdhci_msm_err_stats,
+>>  };
+>>  
+>>  static const struct sdhci_pltfm_data sdhci_msm_pdata = { @@ -2482,6 
+>> +2553,125 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
+>>  	of_property_read_u32(node, "qcom,dll-config", 
+>> &msm_host->dll_config);  }
+>>  
+>> +static ssize_t err_state_show(struct device *dev,
+>> +			struct device_attribute *attr, char *buf) {
+>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +
+>> +	if (!host || !host->mmc)
+>> +		return -EINVAL;
+>> +
+>> +	return scnprintf(buf, PAGE_SIZE, "%d\n", !!msm_host->err_occurred); 
+>> +}
+>> +
+>> +static ssize_t err_state_store(struct device *dev,
+>> +				struct device_attribute *attr,
+>> +				const char *buf, size_t count)
+>> +{
+>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +	unsigned int val;
+>> +
+>> +	if (kstrtouint(buf, 0, &val))
+>> +		return -EINVAL;
+>> +	if (!host || !host->mmc)
+>> +		return -EINVAL;
+>> +
+>> +	msm_host->err_occurred = !!val;
+>> +	if (!val)
+>> +		memset(msm_host->err_stats, 0, sizeof(msm_host->err_stats));
+>> +
+>> +	return count;
+>> +}
+>> +static DEVICE_ATTR_RW(err_state);
+>> +
+>> +static ssize_t err_stats_show(struct device *dev,
+>> +				struct device_attribute *attr, char *buf) {
+>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>> +	char tmp[100];
+>> +
+>> +	if (!host || !host->mmc)
+>> +		return -EINVAL;
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Command Timeout Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_CMD_TIMEOUT]);
+>> +	strlcpy(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Command CRC Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_CMD_CRC]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Data Timeout Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_DAT_TIMEOUT]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Data CRC Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_DAT_CRC]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Auto-Cmd Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_ADMA]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# ADMA Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_ADMA]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Tuning Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_TUNING]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# CMDQ RED Errors: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_RED]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# CMDQ GCE Errors: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_GCE]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# CMDQ ICCE Errors: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_ICCE]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# CMDQ Request Timedout: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	scnprintf(tmp, sizeof(tmp), "# Request Timedout Error: %d\n",
+>> +		msm_host->err_stats[MMC_ERR_REQ_TIMEOUT]);
+>> +	strlcat(buf, tmp, PAGE_SIZE);
+>> +
+>> +	return strlen(buf);
+>> +}
+>> +static DEVICE_ATTR_RO(err_stats);
+>> +
+>> +static struct attribute *sdhci_msm_sysfs_attrs[] = {
+>> +	&dev_attr_err_state.attr,
+>> +	&dev_attr_err_stats.attr,
+>> +	NULL
+>> +};
+>> +
+>> +static const struct attribute_group sdhci_msm_sysfs_group = {
+>> +	.name = "qcom",
+>> +	.attrs = sdhci_msm_sysfs_attrs,
+>> +};
+>> +
+>> +static int sdhci_msm_init_sysfs(struct platform_device *pdev) {
+>> +	int ret;
+>> +
+>> +	ret = sysfs_create_group(&pdev->dev.kobj, &sdhci_msm_sysfs_group);
+>> +	if (ret)
+>> +		dev_err(&pdev->dev, "%s: Failed sdhci_msm sysfs group err=%d\n",
+>> +			__func__, ret);
+>> +	return ret;
+>> +}
+>>  
+>>  static int sdhci_msm_probe(struct platform_device *pdev)  { @@ 
+>> -2734,6 +2924,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>  	if (ret)
+>>  		goto pm_runtime_disable;
+>>  
+>> +	sdhci_msm_init_sysfs(pdev);
+>> +
+>>  	pm_runtime_mark_last_busy(&pdev->dev);
+>>  	pm_runtime_put_autosuspend(&pdev->dev);
+>>  
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index 
+>> 07c6da1..f82a3eff 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -3159,6 +3159,13 @@ static void sdhci_timeout_timer(struct timer_list *t)
+>>  	spin_lock_irqsave(&host->lock, flags);
+>>  
+>>  	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
+>> +		if (host->ops->err_stats) {
+>> +			u32 intmask;
+>> +
+>> +			host->mmc->timer = true;
+>> +			intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+>> +			host->ops->err_stats(host, intmask);
+>> +		}
+>>  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
+>>  		       mmc_hostname(host->mmc));
+>>  		sdhci_dumpregs(host);
+>> @@ -3181,6 +3188,13 @@ static void sdhci_timeout_data_timer(struct 
+>> timer_list *t)
+>>  
+>>  	if (host->data || host->data_cmd ||
+>>  	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
+>> +		if (host->ops->err_stats) {
+>> +			u32 intmask;
+>> +
+>> +			host->mmc->timer = true;
+>> +			intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+>> +			host->ops->err_stats(host, intmask);
+>> +		}
+>>  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
+>>  		       mmc_hostname(host->mmc));
+>>  		sdhci_dumpregs(host);
+>> @@ -3466,6 +3480,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>>  	}
+>>  
+>>  	intmask = sdhci_readl(host, SDHCI_INT_STATUS);
+>> +	if (host->ops->err_stats)
+>> +		host->ops->err_stats(host, intmask);
+>> +
+>>  	if (!intmask || intmask == 0xffffffff) {
+>>  		result = IRQ_NONE;
+>>  		goto out;
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index 
+>> d7929d7..a1546b3 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -658,6 +658,7 @@ struct sdhci_ops {
+>>  	void	(*request_done)(struct sdhci_host *host,
+>>  				struct mmc_request *mrq);
+>>  	void    (*dump_vendor_regs)(struct sdhci_host *host);
+>> +	void	(*err_stats)(struct sdhci_host *host, u32 intmask);
+>>  };
+>>  
+>>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h index 
+>> 7afb57c..33186ff 100644
+>> --- a/include/linux/mmc/host.h
+>> +++ b/include/linux/mmc/host.h
+>> @@ -492,6 +492,7 @@ struct mmc_host {
+>>  	int			cqe_qdepth;
+>>  	bool			cqe_enabled;
+>>  	bool			cqe_on;
+>> +	bool                    timer;
+>>  
+>>  	/* Inline encryption support */
+>>  #ifdef CONFIG_MMC_CRYPTO
+>>
+> 
+
