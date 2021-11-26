@@ -2,73 +2,65 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08C3AC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Nov 2021 14:50:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EC41C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Nov 2021 18:43:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350399AbhKZOx3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Nov 2021 09:53:29 -0500
-Received: from smtp.220.in.ua ([89.184.67.205]:32779 "EHLO smtp.220.in.ua"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1347485AbhKZOv2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 26 Nov 2021 09:51:28 -0500
-Received: from oleh-pc.lan (unknown [95.67.115.55])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        id S242420AbhKZSqu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Nov 2021 13:46:50 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:50848 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242379AbhKZSou (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Nov 2021 13:44:50 -0500
+X-Greylist: delayed 377 seconds by postgrey-1.27 at vger.kernel.org; Fri, 26 Nov 2021 13:44:49 EST
+Received: from mail.kernel.org (unknown [198.145.29.99])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp.220.in.ua (Postfix) with ESMTPSA id B37F11A21FBE;
-        Fri, 26 Nov 2021 16:48:13 +0200 (EET)
-From:   Oleh Kravchenko <oleg@kaa.org.ua>
-To:     linux-mmc@vger.kernel.org, chrisball@gmail.com,
-        ulf.hansson@linaro.org, patchwork-bot@kernel.org
-Cc:     Oleh Kravchenko <oleg@kaa.org.ua>
-Subject: [PATCH v2] Replace strncpy() usage by printf()
-Date:   Fri, 26 Nov 2021 16:47:51 +0200
-Message-Id: <20211126144750.11537-1-oleg@kaa.org.ua>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20211116105109.3830-1-oleg@kaa.org.ua>
-References: <20211116105109.3830-1-oleg@kaa.org.ua>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        by ams.source.kernel.org (Postfix) with ESMTPS id D3EDAB8285E;
+        Fri, 26 Nov 2021 18:35:16 +0000 (UTC)
+Received: by mail.kernel.org (Postfix) with ESMTPS id 4B3B0601FA;
+        Fri, 26 Nov 2021 18:35:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1637951715;
+        bh=nHvLSDsMSum4XIzaG0wnvFxuR3N7HkPRnHuGHl7mECA=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=N4FxuhSZEKpuypLASqAv53tj9a1n4JYqhhv70/SM7UwXnErKlo2cPrn+pTV6N9oLE
+         MI77vaBkCFvzY0PineMJldztlQxcnpePUYp1QunEshHLNTcd7jSzBNaukhHB+Nf8FB
+         iwVLDd6X48GWnomULrot1V06eyXPvJ2kuQMqu1IzDloqiQwWoo6WtzRmlc6QhpWl4/
+         CpzKJp1+csRpKkR9mwB86dIcyinPNr2CbIhE4q4p0SXL31OHbRo082Q7YlpAnRQ+7u
+         oDUzaxe9DM5ZHpWpZrIOfHB6PZRiKCEDQWEQTyAQEPlfqDod6+nIK8gnfs8tldTDxQ
+         i05Y91p514obQ==
+Received: from pdx-korg-docbuild-2.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by pdx-korg-docbuild-2.ci.codeaurora.org (Postfix) with ESMTP id 459FC609D5;
+        Fri, 26 Nov 2021 18:35:15 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v5.16-rc3
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20211126133055.27138-1-ulf.hansson@linaro.org>
+References: <20211126133055.27138-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20211126133055.27138-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc1
+X-PR-Tracked-Commit-Id: 5f719948b5d43eb39356e94e8d0b462568915381
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: d3e647926c0dd120612b2f9e698ee38d6156d17d
+Message-Id: <163795171527.22939.439907213482730919.pr-tracker-bot@kernel.org>
+Date:   Fri, 26 Nov 2021 18:35:15 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Manpage of strncpy() says:
-If there is no null byte among the first n bytes of src,
-the string placed in dest will not be null-terminated.
+The pull request you sent on Fri, 26 Nov 2021 14:30:55 +0100:
 
-Put \0 to the end of the buffer to ensure that
-the destination string is NULL-terminated.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc1
 
-This patch also fixes a compile error with a newer version of GCC.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/d3e647926c0dd120612b2f9e698ee38d6156d17d
 
-Signed-off-by: Oleh Kravchenko <oleg@kaa.org.ua>
----
- mmc_cmds.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+Thank you!
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 73bd32a..753fcd9 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1392,7 +1392,6 @@ int do_read_extcsd(int nargs, char **argv)
- 	__u32 regl;
- 	int fd, ret;
- 	char *device;
--	char lbuf[10];
- 	const char *str;
- 
- 	if (nargs != 2) {
-@@ -1834,9 +1833,7 @@ int do_read_extcsd(int nargs, char **argv)
- 	}
- 
- 	if (ext_csd_rev >= 7) {
--                memset(lbuf, 0, sizeof(lbuf));
--		strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
--		printf("eMMC Firmware Version: %s\n", lbuf);
-+		printf("eMMC Firmware Version: %.*s\n", 8, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
- 		printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
- 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
- 		printf("eMMC Life Time Estimation B [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x%02x\n",
 -- 
-2.32.0
-
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
