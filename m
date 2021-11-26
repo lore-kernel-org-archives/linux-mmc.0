@@ -2,106 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5E15C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Nov 2021 14:17:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E317AC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Nov 2021 14:19:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353426AbhKZOUa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Nov 2021 09:20:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60294 "EHLO
+        id S1353668AbhKZOWW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Nov 2021 09:22:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33336 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353113AbhKZOSa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Nov 2021 09:18:30 -0500
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73A72C061A29
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Nov 2021 05:30:58 -0800 (PST)
-Received: by mail-lf1-x12e.google.com with SMTP id l22so24320195lfg.7
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Nov 2021 05:30:58 -0800 (PST)
+        with ESMTP id S1349251AbhKZOUV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Nov 2021 09:20:21 -0500
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F85FC08EAC1
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Nov 2021 05:32:21 -0800 (PST)
+Received: by mail-lj1-x231.google.com with SMTP id e11so18710793ljo.13
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Nov 2021 05:32:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=62NaGXZNye+bcc6pSUDR9xhQdjuQpfBa9IJfATJov2w=;
-        b=FGauSmJK9pSXkAuRZndXjue/La7270gVYI/JbuE30p6quJNAX2ITfoFGoYmfD+vDRU
-         hLHfe4C0sUhEel02tblqpjWWgV2AexAkRDeoK4/dfirR1MBUVqs+K2PIqocn//oWkcI5
-         hO2leBCa8PMeEEvVH8SVxqTq1QKF6E9Vi+S/eW/QFLut+3e59QkKiaJBT+JgQuFFfc2F
-         9/ElRZVwsD7S61pvRSS5iFlfLasd9gooEfazSKZl4axhdiI79dH5CQ3km5Ktiy3qTd30
-         NrZi6GSdxCGDIDS63ssaQSQASGeAA7gsEy7JE8Lt9hKNVM6DXSjl/FJ89jsYxMVrJ3d8
-         Ay7Q==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=BihJj1qpi6FzzYvrNJZtab4h849IlijBgKxFTqdVcok=;
+        b=lE+PYnpDr4XYfE0rLaRAQtWaz2Ks2mMu9n1rZVymx2rgHoJAITvz559plBVApGYtUZ
+         5INIqFHDmCIP9B/+nDcxBK28yZiP6c8COBl7Aa0hcA5X5B3jL+HCF+3qHnaEquoLrwdz
+         aMnCviANj/UutBT84isZSwj3tz8Yt4qD+Y2YOVWzf6D8AZL0xAr8lvG9Zn7JegsUqeU2
+         5mn9kTy0lPf34z/6whn0mN3eQcxWdds2i+mORvr6lTpxL161CTeKsZVkyTA8WKy0G6IN
+         tBGjA4e+W3F+K+thIQ7cHZRMFUNkf9qUb3Gpapa+HwOPMOXdnqeKS3cCoFqg6zJCgYUC
+         532w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=62NaGXZNye+bcc6pSUDR9xhQdjuQpfBa9IJfATJov2w=;
-        b=2nw8iFYGXN7H3U77dwviQoX8oexWaNQSq+m4nGsFsFo98wLIZIQmYZs5/Rs7NW6TPF
-         zOViqbJGsU5vtAzYdXzLcffk0FKIXv71Yrx7Ck4zH32/0ntTNsZeuHwIpOgVwducFmQy
-         vR4zQlKo1a3GgHqFbJ/q1qfgZb4vtYb/nRnxD668cmDGlIEg4yoF5aPlJz+mPguSmcM6
-         wgg4fHtKQ1dIYPsakAnfL3Ixmcxjcd8lB1NjXU9L+LlaGMEHV1aN95Lco0JwPLAyGX1p
-         w7LWeaX5OHB6MLOLKyN/essJCtS+ilg73TKUx54EPZPzhkpc48c9qC0w9vAWnA2Lse2j
-         kyfw==
-X-Gm-Message-State: AOAM531rneJoY1Log6KIklnzWcJMPhG0R+FsOwwY2m1wwtwSrI5KoDmY
-        8eT+hTFLuMQ6XPT30oPs6p4ywQ==
-X-Google-Smtp-Source: ABdhPJx+/bC09tHBA4qIQHPKQok//NIwCa54vbaeUguUqhbDTNVfdUZBgbGq87t5I4HwKkHnSvvu+g==
-X-Received: by 2002:a05:6512:3d09:: with SMTP id d9mr31342444lfv.481.1637933456796;
-        Fri, 26 Nov 2021 05:30:56 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-21.NA.cust.bahnhof.se. [155.4.129.21])
-        by smtp.gmail.com with ESMTPSA id c11sm505961lfj.34.2021.11.26.05.30.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Nov 2021 05:30:56 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.16-rc3
-Date:   Fri, 26 Nov 2021 14:30:55 +0100
-Message-Id: <20211126133055.27138-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=BihJj1qpi6FzzYvrNJZtab4h849IlijBgKxFTqdVcok=;
+        b=EA+Ivf6FP69TrzYPXLOEPw0UwKxpwl9+hI1hFJzKVpZ8sNg2p9Fb2A9zWVd5I7C8M6
+         BlAT3qvUrIgwTb7biFF8W1a1srYLOOp7M8cmzZZn6okN83rLSk66nW9gRsRuD4rQrFyV
+         U0VCBe/zuAv/ceWdfUNBwSqK6HkVxTEjq+iap2WpsO2yediDBEhdnmGHLWKRUm1j2OPL
+         DpKosqPalHt3hwUecYQwp3PPXhySvrLZJAm6BUDdaSno9f0kGDajoU3kF1qbDbf0FwmS
+         F87gy8eA+sfPu49l3j/ErCGKBBkHp5Q3zlCdSzpiFSCm/mJ38cg92G4UbM99l/+Owj5K
+         JLGQ==
+X-Gm-Message-State: AOAM533KOuSHfmqX/CL7uDbYY9meyQ93rlva9RwaEMsoWvD3T5yIqGEx
+        W9as0rGPUkE+7NHzogX1ATG40cbCDUGOFlpfSf8ukw==
+X-Google-Smtp-Source: ABdhPJzywiDDQKC6yFc3WwKw4jiKbh02+WUllDWYJLGKGv2knX9b5u54YH9Xh2KPDV4cD5Ewh2BWBkykMbYrS9LL70c=
+X-Received: by 2002:a2e:a22a:: with SMTP id i10mr31783402ljm.16.1637933539553;
+ Fri, 26 Nov 2021 05:32:19 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20211124184603.3897245-1-john@metanate.com> <CAPDyKFr=ok3uKXS8bWtZPvyLOeA2cF_4Z2c7ROcoMfBF2G1uhA@mail.gmail.com>
+In-Reply-To: <CAPDyKFr=ok3uKXS8bWtZPvyLOeA2cF_4Z2c7ROcoMfBF2G1uhA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 26 Nov 2021 14:31:43 +0100
+Message-ID: <CAPDyKFo8c51KR+1ju+WCp2xk7_uYKzS+_vBjWxnB7Y3zGYasFg@mail.gmail.com>
+Subject: Re: [PATCH 0/4] mmc: dw_mmc: start deprecating mshcN aliases
+To:     John Keeping <john@metanate.com>
+Cc:     linux-mmc@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-rockchip@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Wed, 24 Nov 2021 at 20:24, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Wed, 24 Nov 2021 at 19:46, John Keeping <john@metanate.com> wrote:
+> >
+> > This series is prompted by discussion on a previous patch set [1] but is
+> > a totally different approach and only a partial solution.
+> >
+> > With these patches, the dependency on the mshcN alias is totally removed
+> > from dw_mmc-hi3798cv200 and dw_mmc-rockchip and dw_mmc-exynos moves
+> > towards being able to consider the mshcN aliases deprecated.
+> >
+> > I haven't changed dw_mci_hi6220_caps here, although it looks like it's
+> > possible to apply MMC_CAP_CMD23 to all controllers there with no change
+> > in behaviour as the final entry is SDIO for which CMD23 is not
+> > applicable IIUC.  But I'm not familiar with that hardware and don't feel
+> > confident making that change.
+> >
+> > [1] https://lore.kernel.org/all/20211116190244.1417591-1-john@metanate.com/
+> >
+> > John Keeping (4):
+> >   mmc: dw_mmc: add common capabilities to replace caps
+> >   mmc: dw_mmc: hi3798cv200: use common_caps
+> >   mmc: dw_mmc: rockchip: use common_caps
+> >   mmc: dw_mmc: exynos: use common_caps
+> >
+> >  drivers/mmc/host/dw_mmc-exynos.c      |  9 +++++----
+> >  drivers/mmc/host/dw_mmc-hi3798cv200.c |  9 +--------
+> >  drivers/mmc/host/dw_mmc-rockchip.c    | 11 +----------
+> >  drivers/mmc/host/dw_mmc.c             |  3 +++
+> >  drivers/mmc/host/dw_mmc.h             |  3 +++
+> >  5 files changed, 13 insertions(+), 22 deletions(-)
+> >
+> > --
+> > 2.34.0
+> >
+>
+> This looks good to me, I intend to apply this later this week, unless
+> objections of course.
+>
+> In the meantime, I will continue to look at what we can do to resolve
+> the exynos/k3 issues around this.
 
-Here's a PR with a couple of MMC fixes intended for v5.16-rc3. Details about the
-highlights are as usual found in the signed tag.
+Let's consider additional changes to be on top of this, as this is
+certainly a nice step forward.
 
-Please pull this in!
+So, applied for next, thanks!
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit fa55b7dcdc43c1aa1ba12bca9d2dd4318c2a0dbf:
-
-  Linux 5.16-rc1 (2021-11-14 13:56:52 -0800)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc1
-
-for you to fetch changes up to 5f719948b5d43eb39356e94e8d0b462568915381:
-
-  mmc: spi: Add device-tree SPI IDs (2021-11-23 12:32:28 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - mmc_spi: Add SPI IDs to silence warning
- - sdhci: Fix ADMA for PAGE_SIZE >= 64KiB
- - sdhci-esdhc-imx: Disable broken CMDQ for imx8qm/imx8qxp/imx8mm
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: sdhci: Fix ADMA for PAGE_SIZE >= 64KiB
-
-Jon Hunter (1):
-      mmc: spi: Add device-tree SPI IDs
-
-Tim Harvey (1):
-      mmc: sdhci-esdhc-imx: disable CMDQ support
-
- drivers/mmc/host/mmc_spi.c         |  7 +++++++
- drivers/mmc/host/sdhci-esdhc-imx.c |  2 --
- drivers/mmc/host/sdhci.c           | 21 ++++++++++++++++++---
- drivers/mmc/host/sdhci.h           |  4 +++-
- 4 files changed, 28 insertions(+), 6 deletions(-)
+Uffe
