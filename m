@@ -2,167 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0490C4332F
-	for <linux-mmc@archiver.kernel.org>; Sun, 28 Nov 2021 08:16:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2F7AC43217
+	for <linux-mmc@archiver.kernel.org>; Sun, 28 Nov 2021 16:30:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343525AbhK1ITv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 28 Nov 2021 03:19:51 -0500
-Received: from ams.source.kernel.org ([145.40.68.75]:44782 "EHLO
-        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356950AbhK1IRu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Nov 2021 03:17:50 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 7EBF6B80B5F;
-        Sun, 28 Nov 2021 08:14:33 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD3F1C004E1;
-        Sun, 28 Nov 2021 08:14:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1638087272;
-        bh=39xPZMfe1ibuiHjcR8GPwApROOOXNw4PxPfnXkQy+GA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=bTVi1qpOMK3snj3/5ngTGJBwNOtzVHs6mmhM7bpLN2Ylw7BStAeJBwg+ljnNqImWZ
-         GJF0n6LGABUqLnff6dpEUz3OopAoWIvmyR+6cd/4B3EaStgj6mJ/iqaWRy/CM3Fh7s
-         YIqq4s/fj/XxocPyvN10jawk/Ii1e5eiWoNokMBg=
-Date:   Sun, 28 Nov 2021 09:14:28 +0100
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-api@vger.kernel.org, linux-scsi@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 3/3] blk-crypto: show crypto capabilities in sysfs
-Message-ID: <YaM6ZJUByYXaI3/X@kroah.com>
-References: <20211126212514.173334-1-ebiggers@kernel.org>
- <20211126212514.173334-4-ebiggers@kernel.org>
- <YaH1CmHClx5WvDWD@kroah.com>
- <YaKZUu0tQc8bblmI@sol.localdomain>
+        id S1344726AbhK1Qdb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 28 Nov 2021 11:33:31 -0500
+Received: from mail-oi1-f176.google.com ([209.85.167.176]:39687 "EHLO
+        mail-oi1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1346525AbhK1Qb0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Nov 2021 11:31:26 -0500
+Received: by mail-oi1-f176.google.com with SMTP id bf8so29701586oib.6;
+        Sun, 28 Nov 2021 08:28:09 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=79L1FhRS5XEOX5R5nEMf/lvv08mrxVNOpVcZgr1MEfY=;
+        b=FLtqHrBqF71U5AVhiWzVHt1xCnv2mtvTXGJbcx+ZMbgt6/Xw2Z4k1Nyo1qfdPdI6m/
+         Td9+filksV5HmSHlApbZ1+3bvU0FjQQqtCWQYZUDOPCalYCaZ0Jobkn8VSdkKx1PUMtP
+         f7/9jpf1ebk/kSQF+Pe95hR4SXkcZpixOxhzrySV8n7EAy9jNiMpDF7zRwvrYO8hCbpb
+         8NDyovT4uhvaBVT0/PZCvPSdoKPXbEtQeDN3KjVIKkR9oyls6EHSi1bsSe4xFkzcS3y6
+         yTOLT6Jvp+PY/b+8gd9hWM873DXM4RS2bSgYpsIJeIgzB5sKDJ333sszo6FrpRbe9xB5
+         sZFw==
+X-Gm-Message-State: AOAM531VP42sIHt4FaQ88sPgoZpSUUAHMncZC0G1qEb0ci/+VM8cpfbA
+        55dfY+sgFAwhwfr1ggzpvA==
+X-Google-Smtp-Source: ABdhPJwJSNQgSXnyMASxwUktIvTauJ3kBkmHFKXq+CmvAOIDEc4lsBMGmPRvMOed7vH4kEIKhzkZyg==
+X-Received: by 2002:a54:4e0c:: with SMTP id a12mr35498823oiy.12.1638116889487;
+        Sun, 28 Nov 2021 08:28:09 -0800 (PST)
+Received: from robh.at.kernel.org ([2607:fb90:20d6:afc8:f6e9:d57a:3e26:ee41])
+        by smtp.gmail.com with ESMTPSA id b1sm2193901otj.5.2021.11.28.08.28.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Nov 2021 08:28:08 -0800 (PST)
+Received: (nullmailer pid 2669481 invoked by uid 1000);
+        Sun, 28 Nov 2021 16:28:04 -0000
+Date:   Sun, 28 Nov 2021 10:28:04 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     linux-imx@nxp.com, mturquette@baylibre.com, sboyd@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
+        stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
+        adrian.hunter@intel.com, jirislaby@kernel.org,
+        giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
+Subject: Re: [PATCH v3 05/13] dt-bindings: imx: Add clock binding for
+ i.MXRT1050
+Message-ID: <YaOuFGhNzGVxdF03@robh.at.kernel.org>
+References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com>
+ <20211125211443.1150135-6-Mr.Bossman075@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <YaKZUu0tQc8bblmI@sol.localdomain>
+In-Reply-To: <20211125211443.1150135-6-Mr.Bossman075@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Nov 27, 2021 at 12:47:14PM -0800, Eric Biggers wrote:
-> Hi Greg, thanks for the review!
+On Thu, Nov 25, 2021 at 04:14:35PM -0500, Jesse Taube wrote:
+> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
 > 
-> On Sat, Nov 27, 2021 at 10:06:18AM +0100, Greg KH wrote:
-> > > diff --git a/Documentation/block/queue-sysfs.rst b/Documentation/block/queue-sysfs.rst
-> > > index 3f569d5324857..252939f340459 100644
-> > > --- a/Documentation/block/queue-sysfs.rst
-> > > +++ b/Documentation/block/queue-sysfs.rst
-> > 
-> > Why is all of this information not in Documentation/ABI/ like the rest
-> > of the kernel's sysfs information?  When it is there it can be
-> > automatically tested as well.
-> > 
-> > Please don't add new entries to the wrong place if at all possible.
+> Add the clock binding doc for i.MXRT1050.
 > 
-> Some of the block queue attributes are documented in
-> Documentation/ABI/testing/sysfs-block, but Documentation/block/queue-sysfs.rst
-> seems to be the authoritative source in practice.  I checked all QUEUE_*_ENTRY
-> in block/blk-sysfs.c, and I got:
+> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> [Giulio: added all clocks up to IMXRT1050_CLK_USBOH3]
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> [Jesse: added clocks from IMXRT1050_CLK_IPG_PDOF to
+> IMXRT1050_CLK_DMA_MUX and moved IMXRT1050_CLK_END on]
+> ---
+> V1->V2:
+> * Nothing done
+> V2->V3:
+> * Added GPT binding
+> ---
+>  include/dt-bindings/clock/imxrt1050-clock.h | 73 +++++++++++++++++++++
+>  1 file changed, 73 insertions(+)
+>  create mode 100644 include/dt-bindings/clock/imxrt1050-clock.h
 > 
-> - 16 attributes are documented in both places
-> - 23 attributes are documented in Documentation/block/ only
-> - 0 attributes are documented in Documentation/ABI/ only
-> - 2 attributes ("virt_boundary_mask" and "stable_writes") not documented in
->   either place
+> diff --git a/include/dt-bindings/clock/imxrt1050-clock.h b/include/dt-bindings/clock/imxrt1050-clock.h
+> new file mode 100644
+> index 000000000000..9811676d100b
+> --- /dev/null
+> +++ b/include/dt-bindings/clock/imxrt1050-clock.h
+> @@ -0,0 +1,73 @@
+> +/* SPDX-License-Identifier: GPL-2.0+ */
+
+Dual license matching the rest of i.MX.
+
+> +/*
+> + * Copyright(C) 2019
+> + * Author(s): Giulio Benetti <giulio.benetti@benettiengineering.com>
+> + */
+> +
+> +#ifndef __DT_BINDINGS_CLOCK_IMXRT1050_H
+> +#define __DT_BINDINGS_CLOCK_IMXRT1050_H
+> +
+> +#define IMXRT1050_CLK_DUMMY			0
+> +#define IMXRT1050_CLK_CKIL			1
+> +#define IMXRT1050_CLK_CKIH			2
+> +#define IMXRT1050_CLK_OSC			3
+> +#define IMXRT1050_CLK_PLL2_PFD0_352M		4
+> +#define IMXRT1050_CLK_PLL2_PFD1_594M		5
+> +#define IMXRT1050_CLK_PLL2_PFD2_396M		6
+> +#define IMXRT1050_CLK_PLL3_PFD0_720M		7
+> +#define IMXRT1050_CLK_PLL3_PFD1_664_62M		8
+> +#define IMXRT1050_CLK_PLL3_PFD2_508_24M		9
+> +#define IMXRT1050_CLK_PLL3_PFD3_454_74M		10
+> +#define IMXRT1050_CLK_PLL2_198M			11
+> +#define IMXRT1050_CLK_PLL3_120M			12
+> +#define IMXRT1050_CLK_PLL3_80M			13
+> +#define IMXRT1050_CLK_PLL3_60M			14
+> +#define IMXRT1050_CLK_PLL1_BYPASS		15
+> +#define IMXRT1050_CLK_PLL2_BYPASS		16
+> +#define IMXRT1050_CLK_PLL3_BYPASS		17
+> +#define IMXRT1050_CLK_PLL5_BYPASS		19
+> +#define IMXRT1050_CLK_PLL1_REF_SEL		20
+> +#define IMXRT1050_CLK_PLL2_REF_SEL		21
+> +#define IMXRT1050_CLK_PLL3_REF_SEL		22
+> +#define IMXRT1050_CLK_PLL5_REF_SEL		23
+> +#define IMXRT1050_CLK_PRE_PERIPH_SEL		24
+> +#define IMXRT1050_CLK_PERIPH_SEL		25
+> +#define IMXRT1050_CLK_SEMC_ALT_SEL		26
+> +#define IMXRT1050_CLK_SEMC_SEL			27
+> +#define IMXRT1050_CLK_USDHC1_SEL		28
+> +#define IMXRT1050_CLK_USDHC2_SEL		29
+> +#define IMXRT1050_CLK_LPUART_SEL		30
+> +#define IMXRT1050_CLK_LCDIF_SEL			31
+> +#define IMXRT1050_CLK_VIDEO_POST_DIV_SEL	32
+> +#define IMXRT1050_CLK_VIDEO_DIV			33
+> +#define IMXRT1050_CLK_ARM_PODF			34
+> +#define IMXRT1050_CLK_LPUART_PODF		35
+> +#define IMXRT1050_CLK_USDHC1_PODF		36
+> +#define IMXRT1050_CLK_USDHC2_PODF		37
+> +#define IMXRT1050_CLK_SEMC_PODF			38
+> +#define IMXRT1050_CLK_AHB_PODF			39
+> +#define IMXRT1050_CLK_LCDIF_PRED		40
+> +#define IMXRT1050_CLK_LCDIF_PODF		41
+> +#define IMXRT1050_CLK_USDHC1			42
+> +#define IMXRT1050_CLK_USDHC2			43
+> +#define IMXRT1050_CLK_LPUART1			44
+> +#define IMXRT1050_CLK_SEMC			45
+> +#define IMXRT1050_CLK_LCDIF_APB			46
+> +#define IMXRT1050_CLK_PLL1_ARM			47
+> +#define IMXRT1050_CLK_PLL2_SYS			48
+> +#define IMXRT1050_CLK_PLL3_USB_OTG		49
+> +#define IMXRT1050_CLK_PLL4_AUDIO		50
+> +#define IMXRT1050_CLK_PLL5_VIDEO		51
+> +#define IMXRT1050_CLK_PLL6_ENET			52
+> +#define IMXRT1050_CLK_PLL7_USB_HOST		53
+> +#define IMXRT1050_CLK_LCDIF_PIX			54
+> +#define IMXRT1050_CLK_USBOH3			55
+> +#define IMXRT1050_CLK_IPG_PDOF			56
+> +#define IMXRT1050_CLK_PER_CLK_SEL		57
+> +#define IMXRT1050_CLK_PER_PDOF			58
+> +#define IMXRT1050_CLK_DMA			59
+> +#define IMXRT1050_CLK_DMA_MUX			60
+> +#define IMXRT1050_CLK_GPT			70
+> +#define IMXRT1050_CLK_END			71
+> +
+> +#endif /* __DT_BINDINGS_CLOCK_IMXRT1050_H */
+> -- 
+> 2.34.0
 > 
-> So most block queue attributes are documented only in Documentation/block/.  And
-> if I added my new attributes to Documentation/ABI/ only, as you're requesting,
-> they would be the only block queue attributes that would be documented in only
-> that place.  I think that would make things worse, as then there would be no
-> authoritative source anymore.
-
-I agree, it should all move to the proper location in Documentation/ABI/
-as that is where all sysfs attributes need to be documented.  Block
-queues are not special here.
-
-> If both you and the block people agree that *all* block queue attributes should
-> be documented in Documentation/ABI/ only, I'd be glad to send a separate patch
-> that adds anything missing to Documentation/ABI/testing/sysfs-block, then
-> removes Documentation/block/queue-sysfs.rst.  (BTW, shouldn't it really be in
-> Documentation/ABI/stable/?  This ABI has been around a long time, so surely
-> users are relying on it.)  But it doesn't seem fair to block this patch on that.
-
-"stable" is fine with me, people abuse "testing" by throwing everything
-into it.
-
 > 
-> > > +static ssize_t blk_crypto_max_dun_bits_show(struct blk_crypto_profile *profile,
-> > > +					    struct blk_crypto_attr *attr,
-> > > +					    char *page)
-> > > +{
-> > > +	return sprintf(page, "%u\n", 8 * profile->max_dun_bytes_supported);
-> > 
-> > sysfs_emit() please, for this, and all other show functions.
-> 
-> Sure.  Note that in .show() functions kernel-wide, it appears that sprintf() is
-> much more commonly used than sysfs_emit().  Is there any plan to convert these?
-> As-is, if people use existing code as a reference, it will be "wrong" most of
-> the time, which is unfortunate.
-
-Doing a wholesale replacement across the kernel is a pain and disruptive
-and not really needed.  But for all new code, please use the new
-functions.  If you want to convert your driver/subsystem to the new
-functions, no objection from me!
-
-> > > +}
-> > > +
-> > > +static ssize_t blk_crypto_num_keyslots_show(struct blk_crypto_profile *profile,
-> > > +					    struct blk_crypto_attr *attr,
-> > > +					    char *page)
-> > > +{
-> > > +	return sprintf(page, "%u\n", profile->num_slots);
-> > > +}
-> > > +
-> > > +#define BLK_CRYPTO_RO_ATTR(_name)			\
-> > > +static struct blk_crypto_attr blk_crypto_##_name = {	\
-> > > +	.attr	= { .name = #_name, .mode = 0444 },	\
-> > 
-> > __ATTR_RO()?
-> 
-> Sure.  This would require removing the "blk_crypto_" prefix from the .show()
-> functions, which I'd prefer to have, but it doesn't really matter.
-
-Ah, you are right, but I think using the default macros sometimes can be
-nicer as they are easier to verify you are doing things correctly.
-
-> > > +static const struct attribute_group *blk_crypto_attr_groups[] = {
-> > > +	&blk_crypto_attr_group,
-> > > +	&blk_crypto_modes_attr_group,
-> > > +	NULL,
-> > > +};
-> > 
-> > ATTRIBUTE_GROUP()?
-> > 
-> > Hm, maybe not, but I think it could be used here.
-> 
-> ATTRIBUTE_GROUP() doesn't exist; probably you're referring to
-> ATTRIBUTE_GROUPS()?  ATTRIBUTE_GROUPS() is only usable when there is only one
-> attribute group.  In this case, there are two attribute groups.
-
-You are right, sorry.
-
-> > > +static int __init blk_crypto_sysfs_init(void)
-> > > +{
-> > > +	int i;
-> > > +
-> > > +	BUILD_BUG_ON(BLK_ENCRYPTION_MODE_INVALID != 0);
-> > > +	for (i = 1; i < BLK_ENCRYPTION_MODE_MAX; i++) {
-> > > +		struct blk_crypto_attr *attr = &__blk_crypto_mode_attrs[i];
-> > 
-> > sysfs_attr_init() might be needed here, have you run with lockdep
-> > enabled?
-> 
-> It's not needed because __blk_crypto_mode_attrs isn't dynamically allocated
-> memory.  Yes, I've run with lockdep enabled.
-
-Ok, good, just checking.
-
-thanks,
-
-greg k-h
