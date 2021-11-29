@@ -2,166 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A95DC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Nov 2021 01:56:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BC62C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Nov 2021 08:45:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233868AbhK2CAC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 28 Nov 2021 21:00:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44356 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231851AbhK2B6C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Nov 2021 20:58:02 -0500
-Received: from mail-qv1-xf2f.google.com (mail-qv1-xf2f.google.com [IPv6:2607:f8b0:4864:20::f2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D50BC061574;
-        Sun, 28 Nov 2021 17:54:45 -0800 (PST)
-Received: by mail-qv1-xf2f.google.com with SMTP id m17so12995999qvx.8;
-        Sun, 28 Nov 2021 17:54:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=7MaKgHWKheFJxrj1uWy9VXOHQvwGLYHTJJDUwnT5qBg=;
-        b=Nw8U4Nh1acnHpjcd3TP0eUKlOTKgUcZahWOSyhCAb3yHOlEdJ17O2gO6qgdEKwTa6Q
-         gSsLL1gEzdyFYBknHxFyuzLyDvRMao53dpLtZuhVNSTzHr/aZRJpNNcEkRU4B/TI4IB1
-         JXVCvtR5DEXpm90y13qPNGMZdDQdyhF3Pbmq495t+xRBOsk7TwUfC9tvV6xL1IUVrsxB
-         D5ExKlsAsKUPMlx5PdLDg3vzEJC6M6pPdPA4HRp33AQM2ZiXHE9/WW9WKbxLs5cgrFsP
-         2uwQ5CMiRz4jHw3LuGRXLXqwvn8S6JQESz2pVvtGz+BV4bGsvo8l76tXEUq2LcNJ5bfo
-         bYHw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=7MaKgHWKheFJxrj1uWy9VXOHQvwGLYHTJJDUwnT5qBg=;
-        b=Mxz7xlpfTO8GAM/iPOPEknTZt6Wj0VLAXBqE0QXlsd7tEpAJdH3Ol4IH8HVUccMIEb
-         o3rxR0RfHd1/IDq3qmBdRUviC9cruzAVjKtsiy91orvsnx88DZ4aCM/a8HgVPG5+Kj9a
-         FIpfgU3oU0EbQGdzON6pQmw/2UbkaZdUsMVGj66s9X9EBQhriwu30ueb0TPRcwJXMNg4
-         wajEERcrT7YiWs/0SoAJMZihSl4m+oSvmI5ie+Kv4/z3pS8XtBMfyVgHwpjzI3XdxbPR
-         U/XuTFKyolLNIUgcXMwyFk3PzODa89TvLyYPNNTLuDoiuiZdD+E9FJMcjc1eSEcGB3dg
-         JCug==
-X-Gm-Message-State: AOAM533kstJMbwnfZIrL35etIueD/nNn2pxgvdZX/kSsd+kqxq3Y5Ijq
-        rCfkl0vuiuMgd5iDXvvBhH0=
-X-Google-Smtp-Source: ABdhPJy8P5wGLR5qlwlUnmOoPab1PnL6Y6pKQU9VYozKNDseX9QhhAKbzXifVxoKlDW/T2V8qG2A8g==
-X-Received: by 2002:ad4:5ba7:: with SMTP id 7mr28358496qvq.109.1638150884300;
-        Sun, 28 Nov 2021 17:54:44 -0800 (PST)
-Received: from [10.4.10.5] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id j19sm7580997qkp.28.2021.11.28.17.54.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 28 Nov 2021 17:54:44 -0800 (PST)
-Message-ID: <f65ac2c7-3f37-3740-fd7a-4d11cabb9892@gmail.com>
-Date:   Sun, 28 Nov 2021 20:54:42 -0500
+        id S244085AbhK2Isn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Nov 2021 03:48:43 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:58096 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1349934AbhK2Iql (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Nov 2021 03:46:41 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id D04B5B80DFF;
+        Mon, 29 Nov 2021 08:43:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ADFEDC004E1;
+        Mon, 29 Nov 2021 08:43:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1638175400;
+        bh=OixLDAXpSBxsXxksHXG7qO5MHN4k5qolbw7dRTlvO6U=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ox5RYRKJswmVjrm6oqkS0sNRRi/xiLhfXeHIViF+l+yylNI1L/Iavs+9S7BfiOU6S
+         Sp1/BEEbT2imRngMlMTbMVrmZcXX2yY6Ut/i2Vk6gywu9+ccQQqrz1ELWH6rkmaSzt
+         anqOT7HJqDGFVQ2r+WZNwYp/IrVYiz44wmtFD9KGNIkr0avPpt+iiSf/KriygNN5Fd
+         uJM5h579F8hidbkad4Bcw8TPt3p75R7bBQ7mkGha5RlrN4sSjtFczi3JmIyRqwNTzD
+         aW6VdapvsdSqVm4r1gwHG1GdTcjjQwqibi9yxA1XJBVE9IEOaTcLy3KYugOB7p1Yzl
+         kxBUm4r6X8niQ==
+Date:   Mon, 29 Nov 2021 09:43:17 +0100
+From:   Wolfram Sang <wsa@kernel.org>
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+Cc:     robh+dt@kernel.org, aisheng.dong@nxp.com, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, ulf.hansson@linaro.org, broonie@kernel.org,
+        linux@roeck-us.net, wim@linux-watchdog.org, linux@rempel-privat.de,
+        kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+        daniel.lezcano@linaro.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, Jacky Bai <ping.bai@nxp.com>,
+        Rob Herring <robh@kernel.org>, Peng Fan <peng.fan@nxp.com>
+Subject: Re: [PATCH V6 1/7] dt-bindings: i2c: imx-lpi2c: Add imx8ulp
+ compatible string
+Message-ID: <YaSSpd9yENnPyxzp@kunai>
+Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
+        "Peng Fan (OSS)" <peng.fan@oss.nxp.com>, robh+dt@kernel.org,
+        aisheng.dong@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
+        ulf.hansson@linaro.org, broonie@kernel.org, linux@roeck-us.net,
+        wim@linux-watchdog.org, linux@rempel-privat.de,
+        kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+        daniel.lezcano@linaro.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, Jacky Bai <ping.bai@nxp.com>,
+        Rob Herring <robh@kernel.org>, Peng Fan <peng.fan@nxp.com>
+References: <20211126074002.1535696-1-peng.fan@oss.nxp.com>
+ <20211126074002.1535696-2-peng.fan@oss.nxp.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH v3 13/13] ARM: imxrt_defconfig: add i.MXRT family
- defconfig
-Content-Language: en-US
-To:     Giulio Benetti <giulio.benetti@benettiengineering.com>,
-        linux-imx@nxp.com
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
-        stefan@agner.ch, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
-        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
-        adrian.hunter@intel.com, jirislaby@kernel.org,
-        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
-References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com>
- <20211125211443.1150135-14-Mr.Bossman075@gmail.com>
- <95252a9e-76fc-0770-8e7b-90d8755298eb@benettiengineering.com>
-From:   Jesse Taube <mr.bossman075@gmail.com>
-In-Reply-To: <95252a9e-76fc-0770-8e7b-90d8755298eb@benettiengineering.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="4iqRmJHmds4/+yS2"
+Content-Disposition: inline
+In-Reply-To: <20211126074002.1535696-2-peng.fan@oss.nxp.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
+--4iqRmJHmds4/+yS2
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On 11/28/21 20:21, Giulio Benetti wrote:
-> Hi Jesse,
-> 
-> On 25/11/21 22:14, Jesse Taube wrote:
->> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
->>
->> Add generic i.MXRT family defconfig.
->>
->> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
->> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
->> ---
->> V1->V2:
->> * Nothing done
->> V2->V3:
->> * Nothing done
->> ---
->>    arch/arm/configs/imxrt_defconfig | 157 +++++++++++++++++++++++++++++++
->>    1 file changed, 157 insertions(+)
->>    create mode 100644 arch/arm/configs/imxrt_defconfig
->>
->> diff --git a/arch/arm/configs/imxrt_defconfig b/arch/arm/configs/imxrt_defconfig
->> new file mode 100644
->> index 000000000000..d673745a5462
->> --- /dev/null
->> +++ b/arch/arm/configs/imxrt_defconfig
->> @@ -0,0 +1,157 @@
->> +# CONFIG_LOCALVERSION_AUTO is not set
->> +CONFIG_SYSVIPC=y
->> +CONFIG_USELIB=y
->> +CONFIG_NO_HZ=y
->> +CONFIG_HIGH_RES_TIMERS=y
->> +CONFIG_BPF_SYSCALL=y
->> +CONFIG_PREEMPT_VOLUNTARY=y
->> +CONFIG_BSD_PROCESS_ACCT=y
->> +CONFIG_BSD_PROCESS_ACCT_V3=y
->> +CONFIG_PSI=y
->> +CONFIG_IKCONFIG=y
->> +CONFIG_IKCONFIG_PROC=y
->> +CONFIG_LOG_BUF_SHIFT=18
->> +CONFIG_MEMCG=y
->> +CONFIG_BLK_CGROUP=y
->> +CONFIG_CFS_BANDWIDTH=y
->> +CONFIG_CGROUP_PIDS=y
->> +CONFIG_CGROUP_RDMA=y
->> +CONFIG_CGROUP_FREEZER=y
->> +CONFIG_CGROUP_DEVICE=y
->> +CONFIG_CGROUP_CPUACCT=y
->> +CONFIG_CGROUP_PERF=y
->> +CONFIG_CGROUP_BPF=y
->> +CONFIG_NAMESPACES=y
->> +CONFIG_USER_NS=y
->> +CONFIG_CHECKPOINT_RESTORE=y
->> +CONFIG_SCHED_AUTOGROUP=y
->> +CONFIG_RELAY=y
->> +CONFIG_BLK_DEV_INITRD=y
->> +CONFIG_EXPERT=y
->> +CONFIG_SGETMASK_SYSCALL=y
->> +# CONFIG_FUTEX is not set
->> +CONFIG_KALLSYMS_ALL=y
->> +CONFIG_PC104=y
->> +# CONFIG_SLUB_DEBUG is not set
->> +# CONFIG_COMPAT_BRK is not set
->> +CONFIG_SLAB_FREELIST_RANDOM=y
->> +CONFIG_SLAB_FREELIST_HARDENED=y
->> +CONFIG_PROFILING=y
->> +# CONFIG_MMU is not set
->> +CONFIG_ARCH_MXC=y
->> +CONFIG_SOC_IMXRT=y
->> +# CONFIG_ARM_DMA_MEM_BUFFERABLE is not set
->> +CONFIG_SET_MEM_PARAM=y
->> +CONFIG_DRAM_BASE=0x80000000
->> +CONFIG_DRAM_SIZE=0x02000000
-> 
-> While debugging I've found that both CONFIG_DRAM_* get their default
-> value because CONFIG_SET_MEM_PARAM is not enabled. This can work but
-> leads problems while debugging and in any case those 2 options are
-> ignored. So please add on top of them:
-> CONFIG_SET_MEM_PARAM=y
-> 
-oops i accidentally deleted that thx, im confused as to how it still 
-worked...
-> Thank you
-> 
+On Fri, Nov 26, 2021 at 03:39:56PM +0800, Peng Fan (OSS) wrote:
+> From: Jacky Bai <ping.bai@nxp.com>
+>=20
+> Add the compatible for i.MX8ULP.
+>=20
+> Reviewed-by: Dong Aisheng <aisheng.dong@nxp.com>
+> Acked-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Jacky Bai <ping.bai@nxp.com>
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+
+Applied to for-next, thanks!
+
+
+--4iqRmJHmds4/+yS2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmGkkqUACgkQFA3kzBSg
+KbbT3RAAikYPcjsi+jX0pSwthDtUkz0JCgBtIprTRsoQxHHMn/3MmgtvC8q3HKCu
+5C+u6I2hIZ6Fvi0rt1rH9MCvQzsE8DqQkKI58XCrNO4AbjVhwZbZRSkEsYYCm0ID
+Pqj+rkhRKtRHB9XIuuIts7F1UbmztpvLdV0EKC4ItyBzIYSRNkrbRL3zbXKyXs5U
++j6HhIL1PjmbRx1+iUX6yfa9Iz9hh41DCEYvHHIDik14VOjQiO7bUswR+mvOX97W
+k0kaulmMlQhok4sLgc2vltz2IucoWBS2jZv/OGXwXCW4X4N0Z3J3ML11JxWkY7pB
+3yhnvEnLrDoKMCMyNmXyCEtTDgDfspUX++eN/4vo3qcr7iFFUfTfOiokyJ/w/oPK
+SpdDo5IVToA8edoyDWN+NJsC0LjeGZkPVEr07xcsax9xlx5ARDGEZiYzX+Lq70Cp
+Ivq0IDQdEjEHgvvwAMUg7ZIozp9k1zB7gpqLBvF8p0liktIWVBKy5RI2fuuGlE5y
+ZREl2BW4GN3utcpER/2eB+pAdEicJMWFa80k2DJSSeWF8miB3qLMS2lM4Ms5gQix
+aowgCti5aF2oL5vvaCZoVxx3sqwKPEbAad+O2JbGpT3KH8Y+hKbx6257gA9gmEsc
+y2SJ8FbCcyY5InCbHvC8+TZ/LqORBgdaDnG/td7tYSuDoMW05JQ=
+=eonB
+-----END PGP SIGNATURE-----
+
+--4iqRmJHmds4/+yS2--
