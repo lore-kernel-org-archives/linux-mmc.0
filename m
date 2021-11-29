@@ -2,136 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4662C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Nov 2021 11:13:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9B80C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Nov 2021 12:44:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353728AbhK2LQR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Nov 2021 06:16:17 -0500
-Received: from mail-dm6nam11on2066.outbound.protection.outlook.com ([40.107.223.66]:60000
-        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1377515AbhK2LOQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 29 Nov 2021 06:14:16 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=d3GTzH4MG7rEiun1CLRG6JfRGVjKSWsaqywFZxt07twlElK2Ji/ePry5WAqQk8tLApXB0cBVLOz76pMyTtgsLW5VwUP3b4uXTRzNAU8YlmytTsQFItFrBtSmCLMtsvK0HzdV6kAYq5xvTXd3RD/PgB4Dr8eoKU1RAiZq6koU2yn9r2hpCSark89fBUJUfDpvMESPfuYMvKrvV73qoz1ZWTCkvhk0lqm7ZW6tKNDKocvSbbDJ24fLfZyWSNUzR/SoJIztSyeBG5D3rSf3pRgZPr7xwRkd4wKK1O3YZg6O7rle/KTDi4HFMA1LMENTiul2Ku+yzAVyKd332Jsbz9tj+A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=alyEU86dkOxvLx875lzJsYqt1M9oKg6gcUwO6YTfhtY=;
- b=TVA+FrpvHL3TuAYSPhSlkzuHZ2FIucneW7WhjWWpwhTpS3sl3qDNIhfIXo+xKHD5ryDvB5eTRpmM/Nq5uj0VskgQH3SzRau9VbauIas+r97P/7a8s/AW26ZvHFcdhHfUY9Qdg+OlMRsZqoe6Cml28q7DSAC7PZZoMFGZTZESE/7vNBUY0uT0ADbSYf8h0wixX59JumENFTSzxkEZI1WpmPkezeLGa1AIaJEKCuVnerv8yyG0S54uehR1q6WpqFfGFzh/PQEOEFVrEeV/qD34fxN80YsFeKvlEQLDZYRKYSkH5ZfJCRDPazBKE25M73SDf/+5Qz37fSFwsp+n/qpgqQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 216.228.112.36) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=nvidia.com;
- dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
- header.from=nvidia.com; dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=alyEU86dkOxvLx875lzJsYqt1M9oKg6gcUwO6YTfhtY=;
- b=AfeoFiYtGj26RscTGKpLnQ4w+SeTPuzI15qbpGM98o06IWn3z/l8/EDRqMRPGxTSuxb8S6+g01k7qMIlD0322MxgD+lNjbkAWLeVbzQVOlxhkZ8Y9sKxlkTVT8Kv4141ikMmzUt20qTiDSNYG25otOcYnh69tW2wXNU4j+t6T6ovw3y9zfzJm+cxJcT+bW7FoSjbX89dUPegYGr2OxoInAr9v152QqvBByoXMa/nMH5cOh0R0sdURY9yPwDVuU3DzzPUZzTOWCU5Qq4UhYPCuk3mqC3Dw7+uy5rlba87MWShSdnP07eQjhg6x+/b13tHXq8k8/RobC/T7nfefvhZRw==
-Received: from MWHPR08CA0059.namprd08.prod.outlook.com (2603:10b6:300:c0::33)
- by BN8PR12MB2883.namprd12.prod.outlook.com (2603:10b6:408:98::22) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.23; Mon, 29 Nov
- 2021 11:10:57 +0000
-Received: from CO1NAM11FT032.eop-nam11.prod.protection.outlook.com
- (2603:10b6:300:c0:cafe::39) by MWHPR08CA0059.outlook.office365.com
- (2603:10b6:300:c0::33) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.21 via Frontend
- Transport; Mon, 29 Nov 2021 11:10:57 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.112.36)
- smtp.mailfrom=nvidia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nvidia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
- 216.228.112.36 as permitted sender) receiver=protection.outlook.com;
- client-ip=216.228.112.36; helo=mail.nvidia.com;
-Received: from mail.nvidia.com (216.228.112.36) by
- CO1NAM11FT032.mail.protection.outlook.com (10.13.174.218) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- 15.20.4734.22 via Frontend Transport; Mon, 29 Nov 2021 11:10:57 +0000
-Received: from HQMAIL105.nvidia.com (172.20.187.12) by HQMAIL101.nvidia.com
- (172.20.187.10) with Microsoft SMTP Server (TLS) id 15.0.1497.18; Mon, 29 Nov
- 2021 11:10:56 +0000
-Received: from pshete-ubuntu.nvidia.com (172.20.187.5) by mail.nvidia.com
- (172.20.187.12) with Microsoft SMTP Server id 15.0.1497.18 via Frontend
- Transport; Mon, 29 Nov 2021 11:10:53 +0000
-From:   Prathamesh Shete <pshete@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
-        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
-        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-CC:     <pshete@nvidia.com>, <anrao@nvidia.com>
-Subject: [PATCH] mmc: sdhci-tegra: Add support to enumerate in HS400ES mode
-Date:   Mon, 29 Nov 2021 16:40:47 +0530
-Message-ID: <20211129111047.5299-1-pshete@nvidia.com>
-X-Mailer: git-send-email 2.17.1
+        id S231934AbhK2MrX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Nov 2021 07:47:23 -0500
+Received: from smtp.220.in.ua ([89.184.67.205]:36038 "EHLO smtp.220.in.ua"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233199AbhK2MpX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 29 Nov 2021 07:45:23 -0500
+Received: from oleh-pc.lan (unknown [95.67.115.55])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.220.in.ua (Postfix) with ESMTPSA id 54F051A20871;
+        Mon, 29 Nov 2021 14:42:03 +0200 (EET)
+From:   Oleh Kravchenko <oleg@kaa.org.ua>
+To:     Avri Altman <avri.altman@wdc.com>,
+        Chris Ball <chrisball@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, patchwork-bot@kernel.org
+Cc:     Oleh Kravchenko <oleg@kaa.org.ua>
+Subject: [PATCH v3] Use printf() to extract and print fw version
+Date:   Mon, 29 Nov 2021 14:41:43 +0200
+Message-Id: <20211129124142.15012-1-oleg@kaa.org.ua>
+X-Mailer: git-send-email 2.32.0
+In-Reply-To: <20211116105109.3830-1-oleg@kaa.org.ua>
+References: <20211116105109.3830-1-oleg@kaa.org.ua>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: e7863385-f600-4c5c-c684-08d9b328eb2e
-X-MS-TrafficTypeDiagnostic: BN8PR12MB2883:
-X-Microsoft-Antispam-PRVS: <BN8PR12MB28833493DF2FF6F7F70D467FB7669@BN8PR12MB2883.namprd12.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:2201;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: aUQlhObVwHqMgetAF47ZmGibG9pzekHPfmB9KCX8Yk8Hj3LAPJZtV8PAsemi0qKu/zAQqMM7U8txwpAfwE2q2ngzzcmwu7IC1h/21Fpb+H1Lz5gg2s1QdcZRwl1I9AcVK3iNEncgCOmRSHl/Klr1xtH2W7zGNThCF9pvFhBTndNIvGuWWohcQVYZAlz5loid6gu/xJgB6jQrDzvooDSy1lejMeONTAXkucaPpLziz2pKbivSmBdwFuDa45fjP0uXEoOBmuht9vpwTMz33e1439YYw8nuLp+Rb/CkcOPLo2cqdOc9VoGu55Ai+iS+Hujpazz7bYNcnK83AxQoWvwWW6npWuraOd9FGnRaAYRAQpcqRoiDaLnVq4zn90XaHcC8CHA6nOC5S2a3z3ldliElwTkN1Cr6m6dSY2ghL/xhthNu2SVDEjTQ4A+O/5//fEw/ySE91H78pVo87BLegJCeXTptScjFqcCkMpfXPV2BXA38fVlE4e1Ffcl4bQN7Y5r9IO5vPlXlJ5yyi3gLhu74+3t1iSdH2XWOftptbcZKMYK1bX+bxeKMo0WfWSi4ChfUMTtTtW6nZrTGwYkti29VCvsp/tHMVRZe6P7aqyTwI5CIrtKhnBtskmrDQC6sei8PgrgmZW8SuSLIV/F9Eqxd2o88cacxy2xg3JGETVxDcDyGP/BnVlZFE0wr9F5eDX/WC67cjBt879nmfcSbycdsoQ==
-X-Forefront-Antispam-Report: CIP:216.228.112.36;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:schybrid05.nvidia.com;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(36756003)(2906002)(1076003)(83380400001)(5660300002)(8676002)(70586007)(426003)(336012)(107886003)(70206006)(6666004)(8936002)(110136005)(316002)(26005)(54906003)(86362001)(186003)(36860700001)(82310400004)(7696005)(7636003)(2616005)(4326008)(47076005)(356005)(508600001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Nov 2021 11:10:57.4241
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: e7863385-f600-4c5c-c684-08d9b328eb2e
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.112.36];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT032.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN8PR12MB2883
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When CMD13 is sent after switching to HS400 mode, the bus
-is operating at either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
-To meet Tegra SDHCI requirement at HS400 mode, force SDHCI
-interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
-controller CAR clock and the interface clock are rate matched.
+This patch also fixes a compile error with a newer version of GCC:
+error: '__builtin_strncpy' output may be truncated copying 8 bytes from
+a string of length 511 [-Werror=stringop-truncation]
 
-Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+Signed-off-by: Oleh Kravchenko <oleg@kaa.org.ua>
 ---
- drivers/mmc/host/sdhci-tegra.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ mmc_cmds.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 387ce9cdbd7c..d800396d1112 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -123,6 +123,8 @@
- 					 SDHCI_TRNS_BLK_CNT_EN | \
- 					 SDHCI_TRNS_DMA)
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 73bd32a..e07ec94 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1392,7 +1392,6 @@ int do_read_extcsd(int nargs, char **argv)
+ 	__u32 regl;
+ 	int fd, ret;
+ 	char *device;
+-	char lbuf[10];
+ 	const char *str;
  
-+static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
-+
- struct sdhci_tegra_soc_data {
- 	const struct sdhci_pltfm_data *pdata;
- 	u64 dma_mask;
-@@ -369,6 +371,16 @@ static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 	if (nargs != 2) {
+@@ -1834,9 +1833,7 @@ int do_read_extcsd(int nargs, char **argv)
+ 	}
  
- 	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
- 
-+	/*
-+	 * When CMD13 is sent after switching to HS400 mode, the bus
-+	 * is operating at either MMC_HIGH_26_MAX_DTR or
-+	 * MMC_HIGH_52_MAX_DTR.
-+	 * To meet Tegra SDHCI requirement at HS400 mode, force SDHCI
-+	 * interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
-+	 * controller CAR clock and the interface clock are rate matched.
-+	 */
-+	tegra_sdhci_set_clock(host, MMC_HS200_MAX_DTR);
-+
- }
- 
- static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ 	if (ext_csd_rev >= 7) {
+-                memset(lbuf, 0, sizeof(lbuf));
+-		strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
+-		printf("eMMC Firmware Version: %s\n", lbuf);
++		printf("eMMC Firmware Version: %.8s\n", (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
+ 		printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
+ 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
+ 		printf("eMMC Life Time Estimation B [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x%02x\n",
 -- 
-2.17.1
+2.32.0
 
