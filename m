@@ -2,167 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64CA9C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Nov 2021 19:57:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEC09C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 04:05:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1379883AbhK2UBJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Nov 2021 15:01:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53742 "EHLO
+        id S238080AbhK3EIn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Nov 2021 23:08:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237213AbhK2T67 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Nov 2021 14:58:59 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF8BDC07CA30;
-        Mon, 29 Nov 2021 08:30:08 -0800 (PST)
+        with ESMTP id S230427AbhK3EIm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Nov 2021 23:08:42 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61076C061574;
+        Mon, 29 Nov 2021 20:05:24 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 905CB615A2;
-        Mon, 29 Nov 2021 16:30:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F41E6C53FCD;
-        Mon, 29 Nov 2021 16:30:07 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 2516DB811FF;
+        Tue, 30 Nov 2021 04:05:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A9180C53FC1;
+        Tue, 30 Nov 2021 04:05:21 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1638203408;
-        bh=0nM9Zmi/0tmh4ZVUo4rPDNni8qv7d4dpBNcM+KHsuro=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=CZ0zEE9TX/82bzK6mWwweNQckfEOej/XhUxQ8k0cme0RRBnP0QrDFWmFGE6+tsSTj
-         hCu7cflNmo5g95cbOp+ysjmY8Zh8RYIiQysAkja0ps2EvT5+F0dtYcCM6CxKfKf5aO
-         VNE+niu+eEgcGdSVmQEV5z6vk2m5EWUxAogMuL+JZL0jGsO7mIPkroJ0rFVGvkyZPt
-         +3UhVh2TRG83DQBqMxZPhvwFqW8qJwf8YNB3LXbeUZFTgqqHGaPGAj3MOUhvyHo+Sp
-         Zsmudql/15T/ywV0IqW/tLd1o4WDlqqfbUQtBPSGETCMZ4oWePo8Z9Pofqyxl7tEeS
-         SYfKJPFf25T+A==
-Received: by mail-ed1-f46.google.com with SMTP id z5so9184529edd.3;
-        Mon, 29 Nov 2021 08:30:07 -0800 (PST)
-X-Gm-Message-State: AOAM533oVq4uKMgd0GZEv/PYeCMsp0F0/MXnvicoWby6WrPpZFwF+fsZ
-        6K+MLnqgCDDOkLzZidPXCHvlF7mmzO4MHNfkIg==
-X-Google-Smtp-Source: ABdhPJwdi2obd94NfZySI0D4j9hUUyc1bSXXDIqrRsdfdsaKo0dvxFRXe6oTS5gvFLyxMSrK1FPA3wGf7etLHoFZGRM=
-X-Received: by 2002:a17:906:fcbb:: with SMTP id qw27mr60632167ejb.320.1638203406208;
- Mon, 29 Nov 2021 08:30:06 -0800 (PST)
+        s=k20201202; t=1638245121;
+        bh=a1liu2Lo3sMfRhCcP9f3gWfgoXAydt5G60CI7Sx/zkI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=EUR9YgE8gOCFkseE2T9VubdkQlpzKqiCFRjZhcDlQ0ajPbaD2bYnY9Lmk63AZCJcw
+         KqpoGKRUwVGuU+eFvEhp44poaIzAR/wl0xODYqy1BmRaLZlXAzDLFGMYqQ2WU9A/mu
+         pIkSNRvWYGAPGNSZ0y5spllEimYnzwa08wYwtfC+pNi2cBiIuLqMHbRPesTNAQ8cEh
+         OhJZqXlGYIm0Iu/kaWdQRUE0bmk3qESF4pTijllTvnPXNxxhotag/kYP0pFkw58TMv
+         20ONYzB2fXvOHl/cY+L8YivHKBCynSc87nEpvvJFLKYwTg9dr0ESMyuZys+VjVmU3z
+         IdV7YhScBC9BA==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-block@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Bart Van Assche <bvanassche@acm.org>
+Subject: [PATCH v2 1/3] block: simplify calling convention of elv_unregister_queue()
+Date:   Mon, 29 Nov 2021 20:03:04 -0800
+Message-Id: <20211130040306.148925-2-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20211130040306.148925-1-ebiggers@kernel.org>
+References: <20211130040306.148925-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-References: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
- <1636444705-17883-1-git-send-email-lh.kuo@sunplus.com> <1636444705-17883-3-git-send-email-lh.kuo@sunplus.com>
- <YaQu3dCQD4FG7ete@robh.at.kernel.org> <f5607fa7ad9c49a7bfcce02eac834838@sphcmbx02.sunplus.com.tw>
-In-Reply-To: <f5607fa7ad9c49a7bfcce02eac834838@sphcmbx02.sunplus.com.tw>
-From:   Rob Herring <robh@kernel.org>
-Date:   Mon, 29 Nov 2021 10:29:53 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqK=7ma_LwMMoW7yfVoBfPN0hBJsPbp4ojtk0kt3k=+O1w@mail.gmail.com>
-Message-ID: <CAL_JsqK=7ma_LwMMoW7yfVoBfPN0hBJsPbp4ojtk0kt3k=+O1w@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] devicetree bindings mmc Add bindings doc for
- Sunplus SP7021
-To:     =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
-Cc:     "LH.Kuo" <lhjeff911@gmail.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "daniel.thompson@linaro.org" <daniel.thompson@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "qinjian@cqplus1.com" <qinjian@cqplus1.com>,
-        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Nov 28, 2021 at 11:30 PM Lh Kuo =E9=83=AD=E5=8A=9B=E8=B1=AA <lh.Kuo=
-@sunplus.com> wrote:
->
-> > > +
-> > > +properties:
-> > > +  compatible:
-> > > +    enum:
-> > > +      - sunplus,sp7021-card1
-> > > +      - sunplus,sp7021-sdio
-> >
-> > What's the difference between these 2 blocks?
-> >
->
-> One for SD card One for SDIO
+From: Eric Biggers <ebiggers@google.com>
 
-If the programming model is the same, then it should be the same
-compatible string. We have various properties to handle differences
-like bus width, card detect or not, etc.
+Make elv_unregister_queue() a no-op if q->elevator is NULL or is not
+registered.
 
-> > > +  reg:
-> > > +    items:
-> > > +      - description: Base address and length of the SD/SDIO register=
-s
-> >
-> > Just 'maxItems: 1' is sufficient.
-> >
-> > > +
-> > > +  interrupts:
-> > > +    maxItems: 1
-> > > +
-> > > +  clocks:
-> > > +    maxItems: 1
-> > > +
-> > > +  resets:
-> > > +    maxItems: 1
-> > > +
-> > > +  pinctrl-names:
-> > > +    description:
-> > > +      A pinctrl state named "default" must be defined.
-> > > +    const: default
-> > > +
-> > > +  pinctrl-0:
-> > > +    description:
-> > > +      A phandle to the default pinctrl state.
-> > > +
-> > > +  max-frequency: true
-> > > +
-> > > +allOf:
-> > > +  - $ref: "mmc-controller.yaml"
-> > > +
-> > > +required:
-> > > +  - compatible
-> > > +  - reg
-> > > +  - interrupts
-> > > +  - clocks
-> > > +  - resets
-> > > +  - pinctrl-names
-> > > +  - pinctrl-0
-> > > +
-> > > +additionalProperties: false
-> > > +
-> > > +examples:
-> > > +  - |
-> > > +    #include <dt-bindings/clock/sp-sp7021.h>
-> > > +    #include <dt-bindings/reset/sp-sp7021.h>
-> > > +    #include <dt-bindings/interrupt-controller/irq.h>
-> > > +    mmc1: mmc@9C003e80 {
-> >
-> > Use lower case hex.
->
-> Do you mean as follows? ?
->
-> mmc1: mmc@3e80 {
+This simplifies the existing callers, as well as the future caller in
+the error path of blk_register_queue().
 
-No, 'mmc@9c003e80 {'
+Also don't bother checking whether q is NULL, since it never is.
 
-You also don't need 'mmc1'.
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ block/blk-sysfs.c | 3 +--
+ block/elevator.c  | 8 ++++----
+ 2 files changed, 5 insertions(+), 6 deletions(-)
 
-> > > +       compatible =3D "sunplus,sp7021-card1";
-> > > +       reg =3D <0x9c003e80 0x280>;
-> > > +       interrupts =3D <21 IRQ_TYPE_LEVEL_HIGH>;
-> > > +       clocks =3D <&clkc CARD_CTL1>;
-> > > +       resets =3D <&rstc RST_CARD_CTL1>;
-> > > +       pinctrl-names =3D "default";
-> > > +       pinctrl-0 =3D <&mmc1_mux &mmc1_mux_cd>;
-> > > +       max-frequency =3D <52000000>;
-> > > +    };
-> > > +    sdio: mmc@9C008400 {
-> >
->
-> Do you mean as follows? ?
->
-> mmc1: mmc@8400 {
->
->
-> > Use lower case hex.
-> >
-> > > +       compatible =3D "sunplus,sp7021-sdio";
->
+diff --git a/block/blk-sysfs.c b/block/blk-sysfs.c
+index 4622da4bb9927..91d3805a6ec6b 100644
+--- a/block/blk-sysfs.c
++++ b/block/blk-sysfs.c
+@@ -957,8 +957,7 @@ void blk_unregister_queue(struct gendisk *disk)
+ 	blk_trace_remove_sysfs(disk_to_dev(disk));
+ 
+ 	mutex_lock(&q->sysfs_lock);
+-	if (q->elevator)
+-		elv_unregister_queue(q);
++	elv_unregister_queue(q);
+ 	disk_unregister_independent_access_ranges(disk);
+ 	mutex_unlock(&q->sysfs_lock);
+ 	mutex_unlock(&q->sysfs_dir_lock);
+diff --git a/block/elevator.c b/block/elevator.c
+index ec98aed39c4f5..b062c5bc10b9a 100644
+--- a/block/elevator.c
++++ b/block/elevator.c
+@@ -516,9 +516,11 @@ int elv_register_queue(struct request_queue *q, bool uevent)
+ 
+ void elv_unregister_queue(struct request_queue *q)
+ {
++	struct elevator_queue *e = q->elevator;
++
+ 	lockdep_assert_held(&q->sysfs_lock);
+ 
+-	if (q) {
++	if (e && e->registered) {
+ 		struct elevator_queue *e = q->elevator;
+ 
+ 		kobject_uevent(&e->kobj, KOBJ_REMOVE);
+@@ -593,9 +595,7 @@ int elevator_switch_mq(struct request_queue *q,
+ 	lockdep_assert_held(&q->sysfs_lock);
+ 
+ 	if (q->elevator) {
+-		if (q->elevator->registered)
+-			elv_unregister_queue(q);
+-
++		elv_unregister_queue(q);
+ 		ioc_clear_queue(q);
+ 		blk_mq_sched_free_rqs(q);
+ 		elevator_exit(q);
+-- 
+2.34.1
+
