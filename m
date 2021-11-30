@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87BC1C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 23:30:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4AB9C43219
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 23:30:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233134AbhK3Xdv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Nov 2021 18:33:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38962 "EHLO
+        id S238857AbhK3Xdw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Nov 2021 18:33:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38936 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345267AbhK3X1a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 18:27:30 -0500
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D2A1C061758;
-        Tue, 30 Nov 2021 15:24:09 -0800 (PST)
-Received: by mail-lf1-x12d.google.com with SMTP id k37so57963198lfv.3;
-        Tue, 30 Nov 2021 15:24:09 -0800 (PST)
+        with ESMTP id S1345220AbhK3X11 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 18:27:27 -0500
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 829BEC061746;
+        Tue, 30 Nov 2021 15:24:07 -0800 (PST)
+Received: by mail-lf1-x136.google.com with SMTP id b40so57918628lfv.10;
+        Tue, 30 Nov 2021 15:24:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=0viRjOQF0Ax+rzz8bC6yvOeB7K8CXYve6QiZOkHaJyo=;
-        b=Yeu9/hnAmBO7bA/Y8acW+JUqChaiKaLRtdTb0ORNUKzvE5hJ+Dg67Rjq3k5f322N3J
-         JKHDVgJeuUelz/VTIx1hq2VdVpr2yjSPxHcjwOXZXQ6m4SdtnTSrnMTn2BYzz6mNIJvF
-         ipZtEE+iQH5Wqm/htLwXrgQRCXWdgZJEr9CI18WfYknOcE1PqUljmyA+fL/53bbiDyVP
-         hscKmmn8GlmgPhBB8pvsRG9m67hUzroPgdBsvjDd7QuDjHCbL5XOL58zn1089VTkwrZw
-         A59Ldk2Upy8QOsCLN/QgIMplvF3UFcz8m/UYENVQWpLJg8EkNocTEbYYBcuspIHHzN2W
-         icaQ==
+        bh=ICJnk3FwYhvBb3ZzWnvNkPNXyskDbLEUXbJt1XZit8o=;
+        b=X+yTWYpAAEzzZ0MPCyEBN0girAa4u+nRe66ItjmQHKXh6l/IsBrJhaIv3vSd6TMRR/
+         62e3Bbrq7A8a+8wTjxmyPNATt98pPKirmFYP92LAWUTNCCIPEYXI0IYkd7ToreOkJ86d
+         z6KxRsXpX1OwM1FmpJ9U8Az+pwv85H330dyad2bmvZcaKyHR14jzIxowIgwQob2GDpVF
+         3158IW0KPMsZ7uMB2GtLNcc++jWnNoaQG0LMtlfMEYp2TPpyznw/6OPHQDsUzKL1Y12S
+         jIY3Y7r36CyXgIo+ynrHcbnPe3rI+eSmxBOfmAhzpwvrlc7IUTy956FV8kf0bGiEvk9C
+         zp9A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=0viRjOQF0Ax+rzz8bC6yvOeB7K8CXYve6QiZOkHaJyo=;
-        b=aSVAQzxIDuBzNP0POcUrF5hvyO3bQgd63OpEafCOVzBhAB9vIRySQPZvDQBXgo50sq
-         BSqvEwhgaQLsQfn/s6jcppJeakZ9yXXVqvlucADcLam/KKNGowIuXvNVrziHLAtgrJ0s
-         CpAAdxT+IDXw5VZ2+38//izXBjXtSqqgLloGNMBv5AOfcjAbw4+EcDgZ4V3R1X/gnUBa
-         Hv+660NCGq0bdHbSowieYeqNhzm1PXr0WhEE9PcpmTowHTMOUi6YBeRbX50IyKCMObij
-         6n3tkbKo044SrOGd6o5C/y4vyaW+BRBThn/ENhSosHDMLUwyhPJLiV5u43G51HMyRwjV
-         fvyw==
-X-Gm-Message-State: AOAM530UUlf0eyA2J99n0StdIv203T2jLOOyKlciD+rfCxcPSXDJU5WU
-        +Zk8y/mpJPNPdr10fY8X8fQ=
-X-Google-Smtp-Source: ABdhPJw6BO8hyK+k+8MQNowsSHXqPekghN1ylm++HwWA5SXXCyKAbfgFe3/C9TeLICNhnh9BQrG4dg==
-X-Received: by 2002:a05:6512:3fa5:: with SMTP id x37mr2204133lfa.536.1638314647959;
-        Tue, 30 Nov 2021 15:24:07 -0800 (PST)
+        bh=ICJnk3FwYhvBb3ZzWnvNkPNXyskDbLEUXbJt1XZit8o=;
+        b=XohEbZkGjX8bQKYsBLn0H2Vgvx7Gut5f6Nzt8MJJ3X0Ir09jOoS/bsDm7ZeavEcG/p
+         UOOZF+Ki8Chd7KHLjeywAfzWJpTjo9J92KQ5LMGAuDAUS0G2e0AYjVSNfwJx98aRGKMb
+         rWJeni+NKxd1Ui46q03mO0oogEgxJqDgivjuHCe9Iyeyl4CWD2wmTkB2zFmweNhPNuey
+         DxRO4EOEMW/MdrqC+9C18mDHxxSXR7XCFtd7Gfichvp90X0WpmWleu04kz+u8riWJngx
+         7p8Lh1CBvZ3Ti0iC32Wj7Uq1Ca2C/eeBC8GvyZhdQIRD+/IO3NBkV65ZZOtMkzxp8OsN
+         CeAQ==
+X-Gm-Message-State: AOAM532F+vhJbl2eyfc1MVh37OHXmm8UicpCTGDDdH6xBP15E1qogJ4A
+        gGxkkSlL13LBxxtFzr2bJXA=
+X-Google-Smtp-Source: ABdhPJwGSBDqYX5ilFH58KTzc0EOSr5ocGDAIJKTE5f6EPmFGBJry+nOoQGvI55SX64HX2f7h/pQlA==
+X-Received: by 2002:ac2:4d29:: with SMTP id h9mr2173173lfk.633.1638314645871;
+        Tue, 30 Nov 2021 15:24:05 -0800 (PST)
 Received: from localhost.localdomain (94-29-46-111.dynamic.spd-mgts.ru. [94.29.46.111])
-        by smtp.gmail.com with ESMTPSA id x199sm1860735lff.284.2021.11.30.15.24.06
+        by smtp.gmail.com with ESMTPSA id x199sm1860735lff.284.2021.11.30.15.24.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Nov 2021 15:24:07 -0800 (PST)
+        Tue, 30 Nov 2021 15:24:05 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -64,9 +64,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
         linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-Subject: [PATCH v16 13/40] drm/tegra: gr2d: Support generic power domain and runtime PM
-Date:   Wed,  1 Dec 2021 02:23:20 +0300
-Message-Id: <20211130232347.950-14-digetx@gmail.com>
+Subject: [PATCH v16 11/40] drm/tegra: dc: Support OPP and SoC core voltage scaling
+Date:   Wed,  1 Dec 2021 02:23:18 +0300
+Message-Id: <20211130232347.950-12-digetx@gmail.com>
 X-Mailer: git-send-email 2.33.1
 In-Reply-To: <20211130232347.950-1-digetx@gmail.com>
 References: <20211130232347.950-1-digetx@gmail.com>
@@ -76,7 +76,9 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add runtime power management and support generic power domains.
+Add OPP and SoC core voltage scaling support to the display controller
+driver. This is required for enabling system-wide DVFS on pre-Tegra186
+SoCs.
 
 Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
@@ -85,323 +87,151 @@ Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
 Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/gpu/drm/tegra/gr2d.c | 184 ++++++++++++++++++++++++++++-------
- 1 file changed, 148 insertions(+), 36 deletions(-)
+ drivers/gpu/drm/tegra/dc.c | 79 ++++++++++++++++++++++++++++++++++++++
+ drivers/gpu/drm/tegra/dc.h |  2 +
+ 2 files changed, 81 insertions(+)
 
-diff --git a/drivers/gpu/drm/tegra/gr2d.c b/drivers/gpu/drm/tegra/gr2d.c
-index ba3722f1b865..2382def93923 100644
---- a/drivers/gpu/drm/tegra/gr2d.c
-+++ b/drivers/gpu/drm/tegra/gr2d.c
-@@ -8,12 +8,21 @@
- #include <linux/iommu.h>
+diff --git a/drivers/gpu/drm/tegra/dc.c b/drivers/gpu/drm/tegra/dc.c
+index a457ee954a49..eb70eee8992a 100644
+--- a/drivers/gpu/drm/tegra/dc.c
++++ b/drivers/gpu/drm/tegra/dc.c
+@@ -11,9 +11,12 @@
+ #include <linux/interconnect.h>
  #include <linux/module.h>
  #include <linux/of_device.h>
-+#include <linux/pm_runtime.h>
++#include <linux/pm_domain.h>
++#include <linux/pm_opp.h>
+ #include <linux/pm_runtime.h>
  #include <linux/reset.h>
  
 +#include <soc/tegra/common.h>
-+
- #include "drm.h"
- #include "gem.h"
- #include "gr2d.h"
+ #include <soc/tegra/pmc.h>
  
-+enum {
-+	RST_MC,
-+	RST_GR2D,
-+	RST_GR2D_MAX,
-+};
-+
- struct gr2d_soc {
- 	unsigned int version;
- };
-@@ -21,9 +30,11 @@ struct gr2d_soc {
- struct gr2d {
- 	struct tegra_drm_client client;
- 	struct host1x_channel *channel;
--	struct reset_control *rst;
- 	struct clk *clk;
- 
-+	struct reset_control_bulk_data resets[RST_GR2D_MAX];
-+	unsigned int nresets;
-+
- 	const struct gr2d_soc *soc;
- 
- 	DECLARE_BITMAP(addr_regs, GR2D_NUM_REGS);
-@@ -59,15 +70,22 @@ static int gr2d_init(struct host1x_client *client)
- 		goto free;
- 	}
- 
-+	pm_runtime_enable(client->dev);
-+	pm_runtime_use_autosuspend(client->dev);
-+	pm_runtime_set_autosuspend_delay(client->dev, 200);
-+
- 	err = tegra_drm_register_client(dev->dev_private, drm);
- 	if (err < 0) {
- 		dev_err(client->dev, "failed to register client: %d\n", err);
--		goto detach;
-+		goto disable_rpm;
- 	}
- 
- 	return 0;
- 
--detach:
-+disable_rpm:
-+	pm_runtime_dont_use_autosuspend(client->dev);
-+	pm_runtime_force_suspend(client->dev);
-+
- 	host1x_client_iommu_detach(client);
- free:
- 	host1x_syncpt_put(client->syncpts[0]);
-@@ -88,10 +106,15 @@ static int gr2d_exit(struct host1x_client *client)
- 	if (err < 0)
- 		return err;
- 
-+	pm_runtime_dont_use_autosuspend(client->dev);
-+	pm_runtime_force_suspend(client->dev);
-+
- 	host1x_client_iommu_detach(client);
- 	host1x_syncpt_put(client->syncpts[0]);
- 	host1x_channel_put(gr2d->channel);
- 
-+	gr2d->channel = NULL;
-+
+ #include <drm/drm_atomic.h>
+@@ -1834,6 +1837,52 @@ int tegra_dc_state_setup_clock(struct tegra_dc *dc,
  	return 0;
  }
  
-@@ -104,10 +127,17 @@ static int gr2d_open_channel(struct tegra_drm_client *client,
- 			     struct tegra_drm_context *context)
- {
- 	struct gr2d *gr2d = to_gr2d(client);
-+	int err;
-+
-+	err = pm_runtime_resume_and_get(client->base.dev);
-+	if (err)
-+		return err;
- 
- 	context->channel = host1x_channel_get(gr2d->channel);
--	if (!context->channel)
-+	if (!context->channel) {
-+		pm_runtime_put(client->base.dev);
- 		return -ENOMEM;
-+	}
- 
- 	return 0;
- }
-@@ -115,6 +145,7 @@ static int gr2d_open_channel(struct tegra_drm_client *client,
- static void gr2d_close_channel(struct tegra_drm_context *context)
- {
- 	host1x_channel_put(context->channel);
-+	pm_runtime_put(context->client->base.dev);
- }
- 
- static int gr2d_is_addr_reg(struct device *dev, u32 class, u32 offset)
-@@ -193,6 +224,27 @@ static const u32 gr2d_addr_regs[] = {
- 	GR2D_VA_BASE_ADDR_SB,
- };
- 
-+static int gr2d_get_resets(struct device *dev, struct gr2d *gr2d)
++static void tegra_dc_update_voltage_state(struct tegra_dc *dc,
++					  struct tegra_dc_state *state)
 +{
++	unsigned long rate, pstate;
++	struct dev_pm_opp *opp;
 +	int err;
 +
-+	gr2d->resets[RST_MC].id = "mc";
-+	gr2d->resets[RST_GR2D].id = "2d";
-+	gr2d->nresets = RST_GR2D_MAX;
++	if (!dc->has_opp_table)
++		return;
 +
-+	err = devm_reset_control_bulk_get_optional_exclusive_released(
-+				dev, gr2d->nresets, gr2d->resets);
-+	if (err) {
-+		dev_err(dev, "failed to get reset: %d\n", err);
-+		return err;
-+	}
++	/* calculate actual pixel clock rate which depends on internal divider */
++	rate = DIV_ROUND_UP(clk_get_rate(dc->clk) * 2, state->div + 2);
 +
-+	if (WARN_ON(!gr2d->resets[RST_GR2D].rstc))
-+		return -ENOENT;
-+
-+	return 0;
-+}
-+
- static int gr2d_probe(struct platform_device *pdev)
- {
- 	struct device *dev = &pdev->dev;
-@@ -205,37 +257,23 @@ static int gr2d_probe(struct platform_device *pdev)
- 	if (!gr2d)
- 		return -ENOMEM;
- 
-+	platform_set_drvdata(pdev, gr2d);
-+
- 	gr2d->soc = of_device_get_match_data(dev);
- 
- 	syncpts = devm_kzalloc(dev, sizeof(*syncpts), GFP_KERNEL);
- 	if (!syncpts)
- 		return -ENOMEM;
- 
--	gr2d->rst = devm_reset_control_get(dev, NULL);
--	if (IS_ERR(gr2d->rst)) {
--		dev_err(dev, "cannot get reset\n");
--		return PTR_ERR(gr2d->rst);
--	}
--
- 	gr2d->clk = devm_clk_get(dev, NULL);
- 	if (IS_ERR(gr2d->clk)) {
- 		dev_err(dev, "cannot get clock\n");
- 		return PTR_ERR(gr2d->clk);
- 	}
- 
--	err = clk_prepare_enable(gr2d->clk);
--	if (err) {
--		dev_err(dev, "cannot turn on clock\n");
-+	err = gr2d_get_resets(dev, gr2d);
-+	if (err)
- 		return err;
--	}
--
--	usleep_range(2000, 4000);
--
--	err = reset_control_deassert(gr2d->rst);
--	if (err < 0) {
--		dev_err(dev, "failed to deassert reset: %d\n", err);
--		goto disable_clk;
--	}
- 
- 	INIT_LIST_HEAD(&gr2d->client.base.list);
- 	gr2d->client.base.ops = &gr2d_client_ops;
-@@ -248,26 +286,21 @@ static int gr2d_probe(struct platform_device *pdev)
- 	gr2d->client.version = gr2d->soc->version;
- 	gr2d->client.ops = &gr2d_ops;
- 
-+	err = devm_tegra_core_dev_init_opp_table_common(dev);
-+	if (err)
-+		return err;
-+
- 	err = host1x_client_register(&gr2d->client.base);
- 	if (err < 0) {
- 		dev_err(dev, "failed to register host1x client: %d\n", err);
--		goto assert_rst;
-+		return err;
- 	}
- 
- 	/* initialize address register map */
- 	for (i = 0; i < ARRAY_SIZE(gr2d_addr_regs); i++)
- 		set_bit(gr2d_addr_regs[i], gr2d->addr_regs);
- 
--	platform_set_drvdata(pdev, gr2d);
--
- 	return 0;
--
--assert_rst:
--	(void)reset_control_assert(gr2d->rst);
--disable_clk:
--	clk_disable_unprepare(gr2d->clk);
--
--	return err;
- }
- 
- static int gr2d_remove(struct platform_device *pdev)
-@@ -282,21 +315,100 @@ static int gr2d_remove(struct platform_device *pdev)
- 		return err;
- 	}
- 
--	err = reset_control_assert(gr2d->rst);
--	if (err < 0)
--		dev_err(&pdev->dev, "failed to assert reset: %d\n", err);
-+	return 0;
-+}
- 
--	usleep_range(2000, 4000);
-+static int __maybe_unused gr2d_runtime_suspend(struct device *dev)
-+{
-+	struct gr2d *gr2d = dev_get_drvdata(dev);
-+	int err;
-+
-+	host1x_channel_stop(gr2d->channel);
-+	reset_control_bulk_release(gr2d->nresets, gr2d->resets);
++	/* find suitable OPP for the rate */
++	opp = dev_pm_opp_find_freq_ceil(dc->dev, &rate);
 +
 +	/*
-+	 * GR2D module shouldn't be reset while hardware is idling, otherwise
-+	 * host1x's cmdproc will stuck on trying to access any G2 register
-+	 * after reset. GR2D module could be either hot-reset or reset after
-+	 * power-gating of the HEG partition. Hence we will put in reset only
-+	 * the memory client part of the module, the HEG GENPD will take care
-+	 * of resetting GR2D module across power-gating.
-+	 *
-+	 * On Tegra20 there is no HEG partition, but it's okay to have
-+	 * undetermined h/w state since userspace is expected to reprogram
-+	 * the state on each job submission anyways.
++	 * Very high resolution modes may results in a clock rate that is
++	 * above the characterized maximum. In this case it's okay to fall
++	 * back to the characterized maximum.
 +	 */
-+	err = reset_control_acquire(gr2d->resets[RST_MC].rstc);
-+	if (err) {
-+		dev_err(dev, "failed to acquire MC reset: %d\n", err);
-+		goto acquire_reset;
++	if (opp == ERR_PTR(-ERANGE))
++		opp = dev_pm_opp_find_freq_floor(dc->dev, &rate);
++
++	if (IS_ERR(opp)) {
++		dev_err(dc->dev, "failed to find OPP for %luHz: %pe\n",
++			rate, opp);
++		return;
 +	}
 +
-+	err = reset_control_assert(gr2d->resets[RST_MC].rstc);
-+	reset_control_release(gr2d->resets[RST_MC].rstc);
-+	if (err) {
-+		dev_err(dev, "failed to assert MC reset: %d\n", err);
-+		goto acquire_reset;
-+	}
- 
- 	clk_disable_unprepare(gr2d->clk);
- 
- 	return 0;
++	pstate = dev_pm_opp_get_required_pstate(opp, 0);
++	dev_pm_opp_put(opp);
 +
-+acquire_reset:
-+	reset_control_bulk_acquire(gr2d->nresets, gr2d->resets);
-+	reset_control_bulk_deassert(gr2d->nresets, gr2d->resets);
-+
-+	return err;
++	/*
++	 * The minimum core voltage depends on the pixel clock rate (which
++	 * depends on internal clock divider of the CRTC) and not on the
++	 * rate of the display controller clock. This is why we're not using
++	 * dev_pm_opp_set_rate() API and instead controlling the power domain
++	 * directly.
++	 */
++	err = dev_pm_genpd_set_performance_state(dc->dev, pstate);
++	if (err)
++		dev_err(dc->dev, "failed to set power domain state to %lu: %d\n",
++			pstate, err);
 +}
 +
-+static int __maybe_unused gr2d_runtime_resume(struct device *dev)
-+{
-+	struct gr2d *gr2d = dev_get_drvdata(dev);
-+	int err;
+ static void tegra_dc_set_clock_rate(struct tegra_dc *dc,
+ 				    struct tegra_dc_state *state)
+ {
+@@ -1867,6 +1916,8 @@ static void tegra_dc_set_clock_rate(struct tegra_dc *dc,
+ 	DRM_DEBUG_KMS("rate: %lu, div: %u\n", clk_get_rate(dc->clk),
+ 		      state->div);
+ 	DRM_DEBUG_KMS("pclk: %lu\n", state->pclk);
 +
-+	err = reset_control_bulk_acquire(gr2d->nresets, gr2d->resets);
-+	if (err) {
-+		dev_err(dev, "failed to acquire reset: %d\n", err);
-+		return err;
-+	}
-+
-+	err = clk_prepare_enable(gr2d->clk);
-+	if (err) {
-+		dev_err(dev, "failed to enable clock: %d\n", err);
-+		goto release_reset;
-+	}
-+
-+	usleep_range(2000, 4000);
-+
-+	/* this is a reset array which deasserts both 2D MC and 2D itself */
-+	err = reset_control_bulk_deassert(gr2d->nresets, gr2d->resets);
-+	if (err) {
-+		dev_err(dev, "failed to deassert reset: %d\n", err);
-+		goto disable_clk;
-+	}
-+
-+	return 0;
-+
-+disable_clk:
-+	clk_disable_unprepare(gr2d->clk);
-+release_reset:
-+	reset_control_bulk_release(gr2d->nresets, gr2d->resets);
-+
-+	return err;
++	tegra_dc_update_voltage_state(dc, state);
  }
  
-+static const struct dev_pm_ops tegra_gr2d_pm = {
-+	SET_RUNTIME_PM_OPS(gr2d_runtime_suspend, gr2d_runtime_resume, NULL)
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+				pm_runtime_force_resume)
-+};
+ static void tegra_dc_stop(struct tegra_dc *dc)
+@@ -2057,6 +2108,13 @@ static void tegra_crtc_atomic_disable(struct drm_crtc *crtc,
+ 	err = host1x_client_suspend(&dc->client);
+ 	if (err < 0)
+ 		dev_err(dc->dev, "failed to suspend: %d\n", err);
 +
- struct platform_driver tegra_gr2d_driver = {
- 	.driver = {
- 		.name = "tegra-gr2d",
- 		.of_match_table = gr2d_match,
-+		.pm = &tegra_gr2d_pm,
- 	},
- 	.probe = gr2d_probe,
- 	.remove = gr2d_remove,
++	if (dc->has_opp_table) {
++		err = dev_pm_genpd_set_performance_state(dc->dev, 0);
++		if (err)
++			dev_err(dc->dev,
++				"failed to clear power domain state: %d\n", err);
++	}
+ }
+ 
+ static void tegra_crtc_atomic_enable(struct drm_crtc *crtc,
+@@ -3058,6 +3116,23 @@ static int tegra_dc_couple(struct tegra_dc *dc)
+ 	return 0;
+ }
+ 
++static int tegra_dc_init_opp_table(struct tegra_dc *dc)
++{
++	struct tegra_core_opp_params opp_params = {};
++	int err;
++
++	err = devm_tegra_core_dev_init_opp_table(dc->dev, &opp_params);
++	if (err && err != -ENODEV)
++		return err;
++
++	if (err)
++		dc->has_opp_table = false;
++	else
++		dc->has_opp_table = true;
++
++	return 0;
++}
++
+ static int tegra_dc_probe(struct platform_device *pdev)
+ {
+ 	u64 dma_mask = dma_get_mask(pdev->dev.parent);
+@@ -3123,6 +3198,10 @@ static int tegra_dc_probe(struct platform_device *pdev)
+ 		tegra_powergate_power_off(dc->powergate);
+ 	}
+ 
++	err = tegra_dc_init_opp_table(dc);
++	if (err < 0)
++		return err;
++
+ 	dc->regs = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(dc->regs))
+ 		return PTR_ERR(dc->regs);
+diff --git a/drivers/gpu/drm/tegra/dc.h b/drivers/gpu/drm/tegra/dc.h
+index c9c4c45c0518..3f91a10ea6c7 100644
+--- a/drivers/gpu/drm/tegra/dc.h
++++ b/drivers/gpu/drm/tegra/dc.h
+@@ -101,6 +101,8 @@ struct tegra_dc {
+ 	struct drm_info_list *debugfs_files;
+ 
+ 	const struct tegra_dc_soc_info *soc;
++
++	bool has_opp_table;
+ };
+ 
+ static inline struct tegra_dc *
 -- 
 2.33.1
 
