@@ -2,189 +2,668 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18AD2C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 07:42:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1A52C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 08:07:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239172AbhK3HqE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Nov 2021 02:46:04 -0500
-Received: from esa3.hgst.iphmx.com ([216.71.153.141]:12559 "EHLO
-        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239146AbhK3HqD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 02:46:03 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1638258163; x=1669794163;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=ybllfgVjyd8QK+22eXF3pZGIXczrqlVBrMQfbSlirQU=;
-  b=mfBH+dwIVWysEiTVkWRoNtLEmWjjFxl4zKOz5Ng3kuZon4GI301I1DB5
-   6b2p02qLkng3tYhuOreJlnsYJAMpAvCW3Ug/2uMgcVtEY6+zKJKDlfspn
-   NmMD2UsLYkz6AbJamQVXIqaXLEfYDIJPpe15SAiHGVwJ9byFciCgpvT2p
-   y/CjLm3iBIodqhhcUv6htVxqJbjoZWR2AQWmchnWQNNAXKcz0NvMMDoel
-   gGZUyQVnmAdMwKOpidk6m5BryF5QC7UCN4rTtgMUlmtVjVvfBg71pml0M
-   NPmskKJACw8zZgTNwbn+GUAF5nw65hpkAvcUeMeMQLAHktRNsGLt94UNK
-   g==;
-X-IronPort-AV: E=Sophos;i="5.87,275,1631548800"; 
-   d="scan'208";a="191818907"
-Received: from mail-mw2nam10lp2102.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.102])
-  by ob1.hgst.iphmx.com with ESMTP; 30 Nov 2021 15:42:42 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ReI8o0rVl5ugkNCpwocVhFe0NtgJvF/LqBpmHUxG0MtzUEPNFMasvGJV7GoYdUCPpWwy0vWtJtEFWxyWnq+ECtLQiGfCTJvETsUuCbIzIJQO0o5UI3ierlnRErV6Vb5c2pLtAWHtFUtty1TkarB9vCLjumXVn7KkQ0bmecydYo6lhUaaz1jUdtH/jNwdpSbGPEELiPewnzi2YGoAgQ5JhHWGC+lsIoXMlqiscDEb66W2wVm4oqdFiel+7qDmyteBQM8cAMBG6uvEBwmMy2gyDTvxZp3BPKFA4pnwBXuM1SdehbY/bL7jvaX/6w7e3phF4Njai1YMk5XBR/OxPtEU+g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=igL8cx09U+YMgtO5UKILG9NeLXJh5yF82b3iIW0LPBI=;
- b=RLhz5sYPU14ViVLEeI92Jj2EL9+X77SnOA9oZOHQris812USRIRRPPnMrZ7RNclnO2Z2fuUPkdMJ3rs0Tq7xPnLKJ2SXMCkDCfu4LNiWJ/fzQpOfaVbTmts/6efVdKYsoZ2uJgiCAKlgelaOM8oaWEPrsDuP7enzP0Pi8ezC2CIjjknB0XQYbLAUw/+6Ti88XCtLm+h/+B7fVsAkOrrtgKWHFYyYQsH72ozApVI3KF2tMUqeuxy2g0onT43oM8J7f9VJd6zgNBWB6dAWQN55jyasu6kunN/P8GzOvq4KS4Y+3xHL+2pwgAb708ueXes70JoFT7OM4FtxcySbYv/MYQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+        id S239513AbhK3IKX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Nov 2021 03:10:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50738 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239502AbhK3IKX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 03:10:23 -0500
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CC19C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Nov 2021 00:07:04 -0800 (PST)
+Received: by mail-yb1-xb2e.google.com with SMTP id d10so50189435ybe.3
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Nov 2021 00:07:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=igL8cx09U+YMgtO5UKILG9NeLXJh5yF82b3iIW0LPBI=;
- b=UNMgJ5lsQrSK1pVcYgAC6LCD6/mqaUUIa28O+SjLmfsjzXUsOSWZ+sc77gmradi2wf1odhCqaTHCpe1looaOrE+JFlVoT+cFxjrtzMaYH0sxy4VPMAG8a48c7iJTbD0mywk7chX9zuEWr8e+QsnwU+71pkoFJdYOpmxC25Rs+3k=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM6PR04MB5820.namprd04.prod.outlook.com (2603:10b6:5:167::30) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4734.23; Tue, 30 Nov 2021 07:42:42 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::e42a:f71d:aab2:59c9]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::e42a:f71d:aab2:59c9%3]) with mapi id 15.20.4734.024; Tue, 30 Nov 2021
- 07:42:42 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Oleh Kravchenko <oleg@kaa.org.ua>,
-        Chris Ball <chrisball@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "patchwork-bot@kernel.org" <patchwork-bot@kernel.org>
-CC:     Bean Huo <beanhuo@micron.com>
-Subject: RE: [PATCH v4] mmc-utils: Use printf() to extract and print fw
- version
-Thread-Topic: [PATCH v4] mmc-utils: Use printf() to extract and print fw
- version
-Thread-Index: AQHX5TiVRd1bztH+Yk+Rqwk6Em6/76wbrvnQ
-Date:   Tue, 30 Nov 2021 07:42:42 +0000
-Message-ID: <DM6PR04MB657569E423F95B4151E56C80FC679@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20211116105109.3830-1-oleg@kaa.org.ua>
- <20211129154826.23595-1-oleg@kaa.org.ua>
-In-Reply-To: <20211129154826.23595-1-oleg@kaa.org.ua>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: a53de258-0f93-4d68-085e-08d9b3d4fe14
-x-ms-traffictypediagnostic: DM6PR04MB5820:
-x-microsoft-antispam-prvs: <DM6PR04MB582061DAF5C20057F6D84859FC679@DM6PR04MB5820.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:6790;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: a5dFqjvVbRH14SRjUTdRM12kQ+G9v32664kLFXx3YgVIKlSsfi9CmvFuWr0EgcCiyWH9Sfb9KDB9Q+1tSq51MQ86nGqbcb5CRcd67I4Nherp4SImpX7sxRYyP9/B8xXcRh5feEbkhGwzN086p9fe1A5vRPz5bX0fM+qJLsZBtOzVp7bMcJB6i689c33HcDXBB8qNdeWpZqxXtkPaR0hSD4AWGcH+vEYtWb/I0xhEs0JGPFsOyOUYhbm03iPusvK8DVMXFjA6iSrUVCvrPLgjBsgXCVYBASfoel7b/tYhMdZMP9T/ah2YjAWwrCAvPACQ2S9n6Xwx4Wb9Je146p8CR9sU9sDMgaWEtAiOWgpFmaGr32jR7B7wYO3krFiBNaEHQxx+oJbIIFC+TVJ6Gkww1+bXu+JMCtyYfK1XYIRB4K2tk18q5n7XVwziBW7ruOFxQ51wIYGteP9CPy7w98bV090GkMEBKTlk9YfGYTEIi8CPeCZfbulSH9UVBWh8uPkYn/aKrD3M4QGSaYGcUmSHRJyi38TaS+3qlp7b1SfoC/GMnMZwW8ChZfysE3b4e6VugshWdR+JzrZLSsVc1CDWrdhNy05ZwlxVoLCDNVz4OD9A2ftNT92NnvJdajv+Ve6bQQYsyiRhD/wl3zaVralQTlQetUAJY8C/K9VxeJvVJr+L8LRLyPD1xxC6bpIWMplxUUh80Od5+16LS7NZiYVjV5SeyumxvkWyDbuTW2QSoPYU57mMdD45vIuPbYNC3ywZBtf2yxSlux/jb3XDmHmYs86UkIvZ17FdRsihHH24ouI=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(38100700002)(966005)(508600001)(122000001)(8936002)(38070700005)(26005)(86362001)(7696005)(2906002)(82960400001)(83380400001)(186003)(316002)(71200400001)(5660300002)(55016003)(52536014)(110136005)(66556008)(76116006)(66946007)(66476007)(66446008)(8676002)(64756008)(6506007)(4326008)(33656002)(9686003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?2F6kxurdEc9nsgsMwsqCpnjPunZ4yfm6ucuDWOBaDFvSczVeI/jFo8HpaSYu?=
- =?us-ascii?Q?gL9UNIwtRJYocmWdpQJZUd+AmRFVoqrH748+OKM/tFhDQSonT9L9O9cYbDEa?=
- =?us-ascii?Q?CdwiM0JKT2vgu5kS5pdtsOkgCtGvrz65GWkB8hmkyJ71MZ3AvDZGS2qXWR9T?=
- =?us-ascii?Q?g+7EldeR4cH691zfoHYzSgGhK7Msl0WhX/lqrWRQ5IoiW6aG1mHZ5/QzIYMQ?=
- =?us-ascii?Q?xha9pGlPpl6jpe0f0COgeTVKIEX4pjjyiW8wItXhX0Q+mD8/AGclC6XWN3D9?=
- =?us-ascii?Q?p25FmEdlVbPr+ZYtUuy6sgSMJfqEzSQnI9O6Y3SuhJvFoHVICuGZL9mdeF03?=
- =?us-ascii?Q?VOi+0yU2fmYw0hSGgckaNFzqyDs+WebAcQYvV7aVpZoVEPS8EIT2UPWmKsDx?=
- =?us-ascii?Q?J6I6WGBRh1aOO2haaxSxUhCo65Ymh/Ru9z6Ole0dJcYKkjXUTArpO/EBehyA?=
- =?us-ascii?Q?E3ag+bm+zBr8oIfnn+jIh6KTqh9AcA2MrIxBRE31fBY3UjiPKAxg1e/sJWll?=
- =?us-ascii?Q?AM9A9xABZpVGWzsnAxY0tsabveST1T3wP1N8/BwV3ZqZmcEL0OASjv8CxP/O?=
- =?us-ascii?Q?wDYseUZak2JRGh0L49ocm2CZSp1guDW1gjR11xSue2OTogMFuDCQnNuWAHBN?=
- =?us-ascii?Q?OQDv78ke2mIml7jMDfWm7aqXMW/sAzI6Cw+zj2IV/Lieg83TeQAbKrbHf4kx?=
- =?us-ascii?Q?Jh2o7bu6sTKEJx6WzOYO+4DYfh/klutAptpdfqElsa/ku3BJ4R1JZ4TTaAQH?=
- =?us-ascii?Q?rWRv982pGDaDJKw/PirYkWR+7J+nCakk+lKU2SEiBE128/JJLYSggU68G5dU?=
- =?us-ascii?Q?A8igMG8LiA62dF7jGlD+yqq3iY09O8PvjGuZmW7VUctRm3I6xmKJx2OpCctx?=
- =?us-ascii?Q?vSPzFml2Ab4tmJdW1gbIqzaiBMIIZRMPACesCtsG4O3SeOs31ubvt1jLI4BV?=
- =?us-ascii?Q?L3kiU71TCPg++IMvKagdc823ktHdVfWU+XgDQKub+mRB0+VnbaemN6VpVFND?=
- =?us-ascii?Q?diYAFbT706Y35B/8ARQ1zGgOFBbX312LU0DHG9R6SLdh/OtQzvmSbcTHC3g2?=
- =?us-ascii?Q?hjafagpYzRescDLuxcZACvEGBT/q6GqJxRPeAVlySf0+U8f6dFWnoEyK8hoH?=
- =?us-ascii?Q?aqH/OtZO76KTriKGzbzXFOK/dHB2VEx4ZedTpeHCLTdEx8Jhu0B/MkskyeTw?=
- =?us-ascii?Q?OwvCbLlE3/rXov6blGcR886QTTZ1yUX38FhxJwTzCFPEtH4Fsal6xSbBajUb?=
- =?us-ascii?Q?kCtszByZ92s9w3L+SzdHroadybK3S7wE8oOQ9kpU3oWxxQLNortQL0UOjDGI?=
- =?us-ascii?Q?6t6BaVMjkm7tMVJTs6KUUxkLkog8FCE42Inj/K4Zyd7N7I/FyJ+XEXh42+eD?=
- =?us-ascii?Q?rHHzQ8C/kvusIB+S9IDznR0xZt9NcUPsEU1b6ogx1p524BzHgIrcmIoyzQ2U?=
- =?us-ascii?Q?uI1ubhxPN1uGHmpO+0t3CIpOoOoyZ/bV5j2snenoruacrrzfiDdNiBmPcZdt?=
- =?us-ascii?Q?OK0sw4olKFJ76HxPz1WMfbsa2Egk2GdZwuwofxgIdw7mUrMcasHgnRxpj2ur?=
- =?us-ascii?Q?hnASTBHnym4rXeK16qGTG88EtKCqjyysS9etfjZX60DctvM+FHT7NI2PkFvp?=
- =?us-ascii?Q?gA=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=qSij28nB3wBelLtuDui1SptkhddE/h2anUQuiZCNXUw=;
+        b=USd0Sa5S5wlj11L+ZNOLrDZe9FLvUSoaMbNVBXkTvPi2iCJyt1kYqbPI4ke4ETmMzG
+         dy+y5j1UrO3XKa2hurDJR7is3jDpUWrvRrP+NUAtGpCUTXw2++GhVgsGy+qXg3/lXO1S
+         acDi7dvk7gIuP8Cb2NzZ0ybDgdX68KR+aZp52n5GmyoMQJX7MJwG5YOxmGJjIFLexHoi
+         +6i2zIn5ZotC14yeotNgRlm1CYyhqopWbODDGg5mJdl5Bw43dEYJeFpNPbYnDb9rx/yK
+         eBWBawgu1yCgYPG+i77Kacbdwt3ZxKqLzlMO/Vm37+slC7sn9KrStObDLqyPLgh2oXPW
+         aEAA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=qSij28nB3wBelLtuDui1SptkhddE/h2anUQuiZCNXUw=;
+        b=dD/2GgjnveSTItK7WrIscl8o5yJBDuwRkQpW4susrd1ClJ2MPqW5QsGdaTTgSdDlh8
+         OwUQUKYW40T5C5WEvojlxOE5N7LVHDZb4bM1SV/q3rmyiRWUciCB0uvgw3pLmzScIqaF
+         KW3ZOAKlcpCBKxkLpuaHxfJrVXor93m45nRp1l5ioLKp4zF9QxYo0Wt3hdYSXHs6jROt
+         yjuBuZ0e/hBafwPc+zFlRamww7MCtJurp4FeLPIadmgTtPF3mmclBBRbN1HDnZOCboAU
+         B9i1VEF4+MQ7SYEy/48UNhonRdgWK+6Weu2iQ3vhd2B3zevnDPyDtPXKfxLlhgiZaS0w
+         s2lg==
+X-Gm-Message-State: AOAM5308YQZcv6wkNJAFpMKVuMjZkxnGfJ1L8IPBmpJ3pn26EimNfJBH
+        QclEmVPAdlRPWArQQqgXFaYBx91zk8sT1decEjGRD3/Es3k=
+X-Google-Smtp-Source: ABdhPJw3yFxmmEuIazqzW3gY1ViDJM6Zto3ikgouZAcNgbRvNlGR5FoJ5aypyFzJpen62I5AlTAKWAfL6IqPvDtO8g0=
+X-Received: by 2002:a25:d17:: with SMTP id 23mr12075203ybn.652.1638259623355;
+ Tue, 30 Nov 2021 00:07:03 -0800 (PST)
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a53de258-0f93-4d68-085e-08d9b3d4fe14
-X-MS-Exchange-CrossTenant-originalarrivaltime: 30 Nov 2021 07:42:42.4998
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Ues0H2xj4UBHY2AbEze4HyhJZWxtg7JWr18S/Fu3CX3NeIOHbB0zsL2JSzPsGGknHa0zSdgcgS3w+WS0au2DJQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB5820
+References: <20210831110227.50780-1-jasonlai.genesyslogic@gmail.com> <CAPDyKFpqCtj03YZEU=m8yJ6KPWgYub5O_icqg29FnsppvbhKYg@mail.gmail.com>
+In-Reply-To: <CAPDyKFpqCtj03YZEU=m8yJ6KPWgYub5O_icqg29FnsppvbhKYg@mail.gmail.com>
+From:   Lai Jason <jasonlai.genesyslogic@gmail.com>
+Date:   Tue, 30 Nov 2021 16:06:52 +0800
+Message-ID: <CAG0XXUEibYuKcO0-yKY0wZcPmjreFz-XzZZNszk3VA6iMAp+yQ@mail.gmail.com>
+Subject: Re: [PATCH 6/7] mmc: core: Implement content of UHS-II card
+ initialization functions
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Takahiro Akashi <takahiro.akashi@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jason Lai <jason.lai@genesyslogic.com.tw>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
->=20
-> This patch also fixes a compile error with a newer version of GCC:
-> error: '__builtin_strncpy' output may be truncated copying 8 bytes from a
-> string of length 511 [-Werror=3Dstringop-truncation]
-You are reverting commit 0eea71e4f2 (mmc-utils: Fix for Firmware Version st=
-ring printing).
-Please use git revert and add an explanation in your commit log.
+Hi Ulf,
+ Next version of UHS-II patch is going to be submitted.
+Most of your comments are applied except 2 items.
+Please see details below.
 
-You might also would like to take a look at the correspondence concerning a=
- different approach to the same issue here - https://lore.kernel.org/lkml/2=
-0211114204331.39555-2-huobean@gmail.com/
+On Thu, Sep 9, 2021 at 10:29 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Tue, 31 Aug 2021 at 13:02, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
+> >
+> > From: Jason Lai <jason.lai@genesyslogic.com.tw>
+> >
+> > From: Jason Lai <jason.lai@genesyslogic.com.tw>
+> >
+> > UHS-II card initialization flow is divided into 2 categories: PHY & Card.
+> > Part 1 - PHY Initialization:
+> >          Every host controller may need their own avtivation operation
+> >          to establish LINK between controller and card. So we add a new
+> >          member function(uhs2_detect_init) in struct mmc_host_ops for host
+> >          controller use.
+> > Part 2 - Card Initialization:
+> >          This part can be divided into 6 substeps.
+> >          1. Send UHS-II CCMD DEVICE_INIT to card.
+> >          2. Send UHS-II CCMD ENUMERATE to card.
+> >          3. Send UHS-II Native Read CCMD to obtain capabilities in CFG_REG
+> >             of card.
+> >          4. Host compares capabilities of host controller and  card,
+> >             then write the negotiated values to Setting field in CFG_REG
+> >             of card through UHS-II Native Write CCMD.
+> >          5. Switch host controller's clock to Range B if it is supported
+> >             by both host controller and card.
+> >          6. Execute legacy SD initialization flow.
+> >
+> > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/core/sd_uhs2.c | 918 +++++++++++++++++++++++++++++++++++--
+> >  1 file changed, 868 insertions(+), 50 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
+> > index 24aa51a6d..d9ceee20d 100644
+> > --- a/drivers/mmc/core/sd_uhs2.c
+> > +++ b/drivers/mmc/core/sd_uhs2.c
+> > @@ -3,6 +3,7 @@
+> >   * Copyright (C) 2021 Linaro Ltd
+> >   *
+> >   * Author: Ulf Hansson <ulf.hansson@linaro.org>
+> > + * Author: Jason Lai <jason.lai@genesyslogic.com.tw>
+> >   *
+> >   * Support for SD UHS-II cards
+> >   */
+> > @@ -10,29 +11,37 @@
+> >
+> >  #include <linux/mmc/host.h>
+> >  #include <linux/mmc/card.h>
+> > +#include <linux/mmc/sd_uhs2.h>
+> >
+> >  #include "core.h"
+> >  #include "bus.h"
+> >  #include "sd.h"
+> >  #include "mmc_ops.h"
+> > +#include "sd_uhs2.h"
+> >
+> >  static const unsigned int sd_uhs2_freqs[] = { 52000000, 26000000 };
+> >
+> > -static int sd_uhs2_set_ios(struct mmc_host *host)
+> > +static void sd_uhs2_set_ios(struct mmc_host *host)
+> >  {
+> >         struct mmc_ios *ios = &host->ios;
+> >
+> > -       return host->ops->uhs2_set_ios(host, ios);
+> > +       pr_debug("%s: clock=%uHz, bus_mode=%u, power_mode=%u, ",
+> > +                mmc_hostname(host), ios->clock, ios->bus_mode,
+> > +                ios->power_mode);
+> > +       pr_debug("cs=%u, Vdd=%u, width=%u, timing=%u\n",
+> > +                ios->chip_select, ios->vdd, 1 << ios->bus_width,
+> > +                ios->timing);
+>
+> I see that you are enjoying a lot of debug code. I guess those have
+> been useful during development, but please - we don't need all of
+> these. Try to be a little more selective and keep only a small subset
+> of them. This applies to the whole series, of course.
+>
+> > +
+> > +       host->ops->uhs2_set_ios(host, ios);
+>
+> I would expect that this host ops can fail. Therefore, please don't
+> convert functions to void, unless there are really good reasons to.
+>
 
-Thanks,
-Avri
+There is only one action inside uhs2_set_ios(host, ios) :
+host->ops->set_ios(host, ios);
+In this case, the real function be called is:
+    void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios) in
+./drivers/mmc/host/sdhci.c
+That's why uhs2_set_ios(host, ios) returned VOID.
 
->=20
-> Signed-off-by: Oleh Kravchenko <oleg@kaa.org.ua>
-> Reviewed-by: Bean Huo <beanhuo@micron.com>
-> ---
->  mmc_cmds.c | 5 +----
->  1 file changed, 1 insertion(+), 4 deletions(-)
->=20
-> PATCH v4
-> Update commit message.
->=20
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index 73bd32a..e07ec94 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -1392,7 +1392,6 @@ int do_read_extcsd(int nargs, char **argv)
->         __u32 regl;
->         int fd, ret;
->         char *device;
-> -       char lbuf[10];
->         const char *str;
->=20
->         if (nargs !=3D 2) {
-> @@ -1834,9 +1833,7 @@ int do_read_extcsd(int nargs, char **argv)
->         }
->=20
->         if (ext_csd_rev >=3D 7) {
-> -                memset(lbuf, 0, sizeof(lbuf));
-> -               strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], =
-8);
-> -               printf("eMMC Firmware Version: %s\n", lbuf);
-> +               printf("eMMC Firmware Version: %.8s\n",
-> + (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
->                 printf("eMMC Life Time Estimation A
-> [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
->                         ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
->                 printf("eMMC Life Time Estimation B
-> [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x%02x\n",
-> --
-> 2.32.0
+> >  }
+> >
+> > -static int sd_uhs2_power_up(struct mmc_host *host)
+> > +static void sd_uhs2_power_up(struct mmc_host *host)
+> >  {
+> >         host->ios.vdd = fls(host->ocr_avail) - 1;
+> >         host->ios.clock = host->f_init;
+> >         host->ios.timing = MMC_TIMING_SD_UHS2;
+> >         host->ios.power_mode = MMC_POWER_UP;
+> >
+> > -       return sd_uhs2_set_ios(host);
+> > +       sd_uhs2_set_ios(host);
+>
+> Ditto.
 
+The same as above.
+
+> >  }
+> >
+> >  static void sd_uhs2_power_off(struct mmc_host *host)
+> > @@ -45,6 +54,43 @@ static void sd_uhs2_power_off(struct mmc_host *host)
+> >         sd_uhs2_set_ios(host);
+> >  }
+> >
+> > +/*
+> > + * uhs2_cmd_assemble - assemble and build up uhs2 command
+> > + * @cmd:       MMC command
+> > + * @uhs2_cmd:  UHS2 command
+> > + * @header:    Value of packet header
+> > + * @arg:       Argument of packet
+> > + * @payload:   Payload of packet
+> > + * @plen:      Payload length
+> > + * @resp:      Buffer for response
+> > + * @resp_len:  Response buffer length
+> > + *
+> > + * resp is inputted outside which should be a variable created by caller
+> > + * so caller should handle it. For SD command, there is no uhs2_resp and
+> > + * response should be stored in resp of mmc_command.
+>
+> Please, try to rephrase this section. It's really hard to understand
+> what is expected from the caller here.
+>
+> Additionally, it's good practice to describe what the function really
+> does. Please add that as well.
+>
+> > + */
+> > +static void uhs2_cmd_assemble(struct mmc_command *cmd,
+> > +                             struct uhs2_command *uhs2_cmd,
+> > +                             u16 header, u16 arg,
+> > +                             u32 *payload, u8 plen, u8 *resp, u8 resp_len)
+> > +{
+> > +       uhs2_cmd->header = header;
+> > +       uhs2_cmd->arg = arg;
+> > +       uhs2_cmd->payload = payload;
+> > +       uhs2_cmd->payload_len = plen * sizeof(u32);
+> > +       uhs2_cmd->packet_len = uhs2_cmd->payload_len + 4;
+> > +
+> > +       cmd->uhs2_cmd = uhs2_cmd;
+> > +       cmd->uhs2_resp = resp;
+> > +       cmd->uhs2_resp_len = resp_len;
+> > +
+> > +       pr_debug("%s: uhs2_cmd: header=0x%x arg=0x%x\n",
+> > +                __func__, uhs2_cmd->header, uhs2_cmd->arg);
+> > +       pr_debug("%s:           payload_len=%d packet_len=%d resp_len=%d\n",
+> > +                __func__, uhs2_cmd->payload_len, uhs2_cmd->packet_len,
+> > +                cmd->uhs2_resp_len);
+>
+> Debug again. I will stop commenting on this from now on, you get the point.
+>
+> > +}
+> > +
+> >  /*
+> >   * Run the phy initialization sequence, which mainly relies on the UHS-II host
+> >   * to check that we reach the expected electrical state, between the host and
+> > @@ -52,16 +98,104 @@ static void sd_uhs2_power_off(struct mmc_host *host)
+> >   */
+> >  static int sd_uhs2_phy_init(struct mmc_host *host)
+> >  {
+> > +       int err = 0;
+> > +
+> > +       /*
+> > +        * Every host controller can assign its own function which is used
+> > +        * to initialize PHY.
+> > +        */
+> > +       if (host->ops->uhs2_detect_init) {
+>
+> You certainly need to add a few host ops, but I wonder if this one
+> should be optional?
+>
+> > +               err = host->ops->uhs2_detect_init(host)
+> > +               if (err) {
+> > +                       pr_err("%s: fail to detect UHS2!\n",
+> > +                              mmc_hostname(host));
+> > +                       err = UHS2_PHY_INIT_ERR;
+>
+> Please don't use UHS-II specific error codes in this way. If possible,
+> please stick with standard error codes that get returned from the
+> ->uhs2_detect_init() ops.
+>
+> > +               }
+> > +       }
+> > +
+>
+> So, you return 0 below and just ignore the error code from
+> host->ops->uhs2_detect_init(). That looks weird.
+>
+> >         return 0;
+> >  }
+> >
+> >  /*
+> >   * Do the early initialization of the card, by sending the device init
+> > -roadcast
+> > - * command and wait for the process to be completed.
+> > + * broadcast command and wait for the process to be completed.
+>
+> If there is a spelling error or some other things that looks wrong in
+> my original patch(es), please fix those instead (and add your
+> signed-off-by tag), rather than doing it on top as here.
+>
+> >   */
+> >  static int sd_uhs2_dev_init(struct mmc_host *host)
+> >  {
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u32 cnt;
+> > +       u32 dap, gap, gap1;
+> > +       u16 header = 0, arg = 0;
+> > +       u32 payload[1];
+> > +       u8 plen = 1;
+> > +       u8 gd = 0, cf = 1;
+>
+> It's good practice to use self-explanatory names of variables, simply
+> because it helps to understand the code. Would you mind improving some
+> of the variable names above?
+>
+
+The variable naming is the same as described in UHS-II Addendum specification.
+Using the same name will make it easier to find them in specification.
+
+> > +       u8 resp[6] = {0};
+> > +       u8 resp_len = 6;
+> > +       int err;
+> > +
+> > +       dap = host->uhs2_caps.dap;
+> > +       gap = host->uhs2_caps.gap;
+> > +
+> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD;
+> > +       arg = ((UHS2_DEV_CMD_DEVICE_INIT & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CMD_DEVICE_INIT >> 8);
+> > +
+> > +       /* need this for some cards */
+> > +       cmd.busy_timeout = 1000;
+>
+> If you could refer to the SD spec about what timeout that should be
+> used that would be great.
+>
+> Moreover, if nothing is specified about this, then state that too, so
+> we know what goes on here.
+>
+> > +
+> > +       for (cnt = 0; cnt < 30; cnt++) {
+>
+> Why loop for 30 times? Is there something that you can refer to in the
+> SD spec about this - or it's just empirically tested?
+>
+> > +               payload[0] = ((dap & 0xF) << 12) |
+> > +                       (cf << 11)         |
+> > +                       ((gd & 0xF) << 4)  |
+> > +                       (gap & 0xF);
+> > +
+>
+> It would be nice to understand (just put a comment here somewhere) of
+> what kind of payload you build here. Perhaps better variable names
+> would help, as stated above.
+>
+> > +               uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg,
+>
+> Please use sd_uhs2* as prefix for all functions related to UHS-II.
+> Consistency makes it easier to review and maintain code.
+>
+> > +                                 payload, plen, resp, resp_len);
+> > +
+> > +               DBG("Begin DEVICE_INIT, header=0x%x, arg=0x%x, payload=0x%x.\n",
+> > +                   header, arg, payload[0]);
+> > +
+> > +               DBG("Sending DEVICE_INIT. Count = %d\n", cnt);
+> > +               err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +
+> > +               if (err) {
+> > +                       pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                              mmc_hostname(host), __func__, err);
+> > +                       return -EIO;
+> > +               }
+> > +
+> > +               if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+>
+> Please drop this. Use pr_debug or dev_dbg, that should be sufficient.
+>
+> > +                       int i;
+> > +
+> > +                       pr_warn("%s: DEVICE_INIT response is: ",
+> > +                               mmc_hostname(host));
+> > +                       for (i = 0; i < resp_len; i++)
+> > +                               pr_warn("0x%x ", resp[i]);
+> > +                       pr_warn("\n");
+> > +               }
+> > +
+> > +               if (resp[3] != (UHS2_DEV_CMD_DEVICE_INIT & 0xFF)) {
+> > +                       pr_err("%s: DEVICE_INIT response is wrong!\n",
+> > +                              mmc_hostname(host));
+> > +                       return -EIO;
+> > +               }
+> > +
+> > +               if (resp[5] & 0x8) {
+> > +                       DBG("CF is set, device is initialized!\n");
+> > +                       host->group_desc = gd;
+> > +                       break;
+> > +               }
+> > +               gap1 = resp[4] & 0x0F;
+> > +               if (gap == gap1)
+> > +                       gd++;
+> > +       }
+> > +       if (cnt == 30) {
+>
+> Looks like a do-while loop may be better suited above, so this can be
+> skipped. Please give it a try and see if that improves the code a bit.
+>
+> > +               pr_err("%s: DEVICE_INIT fail, already 30 times!\n",
+> > +                      mmc_hostname(host));
+> > +               return -EIO;
+> > +       }
+> > +
+> >         return 0;
+> >  }
+> >
+> > @@ -70,8 +204,60 @@ static int sd_uhs2_dev_init(struct mmc_host *host)
+> >   * Note that, we currently support only the point to point connection, which
+> >   * means only one card can be attached per host/slot.
+> >   */
+> > -static int sd_uhs2_enum(struct mmc_host *host, u32 *node_id)
+> > +static int sd_uhs2_enum(struct mmc_host *host)
+>
+> I am not sure why I added the node_id, probably for a good reason.
+> Anyway, if you think it isn't needed please update the original
+> patch2.
+>
+> >  {
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u16 header = 0, arg = 0;
+> > +       u32 payload[1];
+> > +       u8 plen = 1;
+> > +       u8 id_f = 0xF, id_l = 0x0;
+>
+> Again, please improve variable names. I am stopping from commenting on
+> this again, it applies to the whole series.
+>
+> > +       u8 resp[8] = {0};
+> > +       u8 resp_len = 8;
+> > +       int err;
+> > +
+> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD;
+> > +       arg = ((UHS2_DEV_CMD_ENUMERATE & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_WRITE |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CMD_ENUMERATE >> 8);
+> > +
+> > +       payload[0] = (id_f << 4) | id_l;
+> > +
+> > +       DBG("Begin ENUMERATE, header=0x%x, arg=0x%x, payload=0x%x.\n",
+> > +           header, arg, payload[0]);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen,
+> > +                         resp, resp_len);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: ENUMERATE response is: ", mmc_hostname(host));
+> > +               for (i = 0; i < resp_len; i++)
+> > +                       pr_warn("0x%x ", resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       if (resp[3] != (UHS2_DEV_CMD_ENUMERATE & 0xFF)) {
+> > +               pr_err("%s: ENUMERATE response is wrong!\n",
+> > +                      mmc_hostname(host));
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       id_f = (resp[4] >> 4) & 0xF;
+> > +       id_l = resp[4] & 0xF;
+> > +       DBG("id_f = %d, id_l = %d.\n", id_f, id_l);
+> > +       DBG("Enumerate Cmd Completed. No. of Devices connected = %d\n",
+> > +           id_l - id_f + 1);
+> > +       host->uhs2_dev_prop.node_id = id_f;
+> > +
+> >         return 0;
+> >  }
+> >
+> > @@ -80,8 +266,158 @@ static int sd_uhs2_enum(struct mmc_host *host, u32 *node_id)
+> >   * commands and by parsing the responses. Store a copy of the relevant data in
+> >   * card->uhs2_config.
+> >   */
+> > -static int sd_uhs2_config_read(struct mmc_host *host, struct mmc_card *card)
+> > +static int sd_uhs2_config_read(struct mmc_host *host)
+>
+> The idea with passing the *card as an in-parameter is to allow it to
+> fill uhs2 cap/config. I guess that becomes obvious, when you look at
+> my comment for patch5.
+>
+> Card specific data belongs in the struct mmc_card, not in the mmc_host.
+>
+> >  {
+> > +       struct mmc_command cmd = {0};
+> > +       struct uhs2_command uhs2_cmd = {};
+> > +       u16 header = 0, arg = 0;
+> > +       u32 cap;
+> > +       int err;
+> > +
+> > +       DBG("INQUIRY_CFG: read Generic Caps.\n");
+> > +       header = UHS2_NATIVE_PACKET |
+> > +                UHS2_PACKET_TYPE_CCMD |
+> > +                host->uhs2_dev_prop.node_id;
+> > +       arg = ((UHS2_DEV_CONFIG_GEN_CAPS & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_READ |
+> > +               UHS2_NATIVE_CMD_PLEN_4B |
+> > +               (UHS2_DEV_CONFIG_GEN_CAPS >> 8);
+> > +
+> > +       pr_debug("Begin INQUIRY_CFG, header=0x%x, arg=0x%x.\n", header, arg);
+> > +       /* There is no payload because per spec, there should be
+> > +        * no payload field for read CCMD.
+> > +        * Plen is set in arg. Per spec, plen for read CCMD
+> > +        * represents the len of read data which is assigned in payload
+> > +        * of following RES (p136).
+> > +        */
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+>
+> There is no reason to override the error code from mmc_wait_for_cmd().
+> Please just use that instead. That applies to many other places below
+> and above as well. Please fix them all.
+>
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: INQUIRY_CFG generic response is: ",
+> > +                       mmc_hostname(host));
+> > +               for (i = 0; i < 2; i++)
+> > +                       pr_warn("0x%x ", cmd.resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       cap = cmd.resp[0];
+> > +       pr_debug("Device Generic Caps (0-31) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.n_lanes = (cap >> UHS2_DEV_CONFIG_N_LANES_POS) &
+> > +                                       UHS2_DEV_CONFIG_N_LANES_MASK;
+> > +       host->uhs2_dev_prop.dadr_len = (cap >> UHS2_DEV_CONFIG_DADR_POS) &
+> > +                                       UHS2_DEV_CONFIG_DADR_MASK;
+> > +       host->uhs2_dev_prop.app_type = (cap >> UHS2_DEV_CONFIG_APP_POS) &
+> > +                                       UHS2_DEV_CONFIG_APP_MASK;
+> > +
+> > +       pr_debug("INQUIRY_CFG: read PHY Caps.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_PHY_CAPS & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_READ |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_PHY_CAPS >> 8);
+> > +
+> > +       pr_debug("Begin INQUIRY_CFG, header=0x%x, arg=0x%x.\n", header, arg);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: INQUIRY_CFG PHY response is: ",
+> > +                       mmc_hostname(host));
+> > +               for (i = 0; i < 2; i++)
+> > +                       pr_warn("0x%x ", cmd.resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       cap = cmd.resp[0];
+> > +       pr_debug("Device PHY Caps (0-31) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.phy_minor_rev = cap &
+> > +                                       UHS2_DEV_CONFIG_PHY_MINOR_MASK;
+> > +       host->uhs2_dev_prop.phy_major_rev = (cap >>
+> > +                                       UHS2_DEV_CONFIG_PHY_MAJOR_POS) &
+> > +                                       UHS2_DEV_CONFIG_PHY_MAJOR_MASK;
+> > +       host->uhs2_dev_prop.can_hibernate = (cap >>
+> > +                                       UHS2_DEV_CONFIG_CAN_HIBER_POS) &
+> > +                                       UHS2_DEV_CONFIG_CAN_HIBER_MASK;
+> > +
+> > +       cap = cmd.resp[1];
+> > +       pr_debug("Device PHY Caps (32-63) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.n_lss_sync = cap & UHS2_DEV_CONFIG_N_LSS_SYN_MASK;
+> > +       host->uhs2_dev_prop.n_lss_dir = (cap >>
+> > +                                       UHS2_DEV_CONFIG_N_LSS_DIR_POS) &
+> > +                                       UHS2_DEV_CONFIG_N_LSS_DIR_MASK;
+> > +       if (host->uhs2_dev_prop.n_lss_sync == 0)
+> > +               host->uhs2_dev_prop.n_lss_sync = 16 << 2;
+> > +       else
+> > +               host->uhs2_dev_prop.n_lss_sync <<= 2;
+> > +
+> > +       if (host->uhs2_dev_prop.n_lss_dir == 0)
+> > +               host->uhs2_dev_prop.n_lss_dir = 16 << 3;
+> > +       else
+> > +               host->uhs2_dev_prop.n_lss_dir <<= 3;
+> > +
+> > +       pr_debug("INQUIRY_CFG: read LINK-TRAN Caps.\n");
+> > +       arg = ((UHS2_DEV_CONFIG_LINK_TRAN_CAPS & 0xFF) << 8) |
+> > +               UHS2_NATIVE_CMD_READ |
+> > +               UHS2_NATIVE_CMD_PLEN_8B |
+> > +               (UHS2_DEV_CONFIG_LINK_TRAN_CAPS >> 8);
+> > +
+> > +       pr_debug("Begin INQUIRY_CFG, header=0x%x, arg=0x%x.\n", header, arg);
+> > +       uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
+> > +
+> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
+> > +       if (err) {
+> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
+> > +                      mmc_hostname(host), __func__, err);
+> > +               return -EIO;
+> > +       }
+> > +
+> > +       if (IS_ENABLED(CONFIG_MMC_DEBUG)) {
+> > +               int i;
+> > +
+> > +               pr_warn("%s: INQUIRY_CFG Link-Tran response is: ",
+> > +                       mmc_hostname(host));
+> > +               for (i = 0; i < 2; i++)
+> > +                       pr_warn("0x%x ", cmd.resp[i]);
+> > +               pr_warn("\n");
+> > +       }
+> > +
+> > +       cap = cmd.resp[0];
+> > +       DBG("Device LINK-TRAN Caps (0-31) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.link_minor_rev = cap &
+> > +                                       UHS2_DEV_CONFIG_LT_MINOR_MASK;
+> > +       host->uhs2_dev_prop.link_major_rev = (cap >>
+> > +                                       UHS2_DEV_CONFIG_LT_MAJOR_POS) &
+> > +                                       UHS2_DEV_CONFIG_LT_MAJOR_MASK;
+> > +       host->uhs2_dev_prop.n_fcu = (cap >> UHS2_DEV_CONFIG_N_FCU_POS) &
+> > +                                       UHS2_DEV_CONFIG_N_FCU_MASK;
+> > +       host->uhs2_dev_prop.dev_type = (cap >> UHS2_DEV_CONFIG_DEV_TYPE_POS) &
+> > +                                       UHS2_DEV_CONFIG_DEV_TYPE_MASK;
+> > +       host->uhs2_dev_prop.maxblk_len = (cap >>
+> > +                                       UHS2_DEV_CONFIG_MAX_BLK_LEN_POS) &
+> > +                                       UHS2_DEV_CONFIG_MAX_BLK_LEN_MASK;
+> > +
+> > +       cap = cmd.resp[1];
+> > +       DBG("Device LINK-TRAN Caps (32-63) is: 0x%x.\n", cap);
+> > +       host->uhs2_dev_prop.n_data_gap = cap & UHS2_DEV_CONFIG_N_DATA_GAP_MASK;
+> > +       if (host->uhs2_dev_prop.n_fcu == 0)
+> > +               host->uhs2_dev_prop.n_fcu = 256;
+> > +
+> >         return 0;
+> >  }
+> >
+> > @@ -89,15 +425,393 @@ static int sd_uhs2_config_read(struct mmc_host *host, struct mmc_card *card)
+> >   * Based on the card's and host's UHS-II capabilities, let's update the
+> >   * configuration of the card and the host. This may also include to move to a
+> >   * greater speed range/mode. Depending on the updated configuration, we may
+> > -eed
+> > - * to do a soft reset of the card via sending it a GO_DORMANT_STATE command.
+> > + * need to do a soft reset of the card via sending it a GO_DORMANT_STATE command.
+> >   *
+> > - * In the final step, let's check if the card signals "config completion",
+> > -hich
+> > - * indicates that the card has moved from config state into active state.
+> > + * In the final step, let's check if the card signals "config completion",
+> > + * which indicates that the card has moved from config state into active state.
+> >   */
+> > -static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
+> > +static int sd_uhs2_config_write(struct mmc_host *host)
+>
+> Again, the struct mmc_card is passed here for a reason. It should
+> contain the config/caps for the card.
+>
+> I think I will just stop reviewing here - as it looks like you have
+> quite some cleanups to fix at this point.
+>
+> I am looking forward to reviewing your next version.
+>
+> [...]
+>
+> Kind regards
+> Uffe
