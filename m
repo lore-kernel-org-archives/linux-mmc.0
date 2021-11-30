@@ -2,32 +2,32 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 232E1C43217
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 14:54:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CB25C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 15:03:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242746AbhK3O55 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Nov 2021 09:57:57 -0500
-Received: from sin.source.kernel.org ([145.40.73.55]:59426 "EHLO
-        sin.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243024AbhK3Ozq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 09:55:46 -0500
+        id S245724AbhK3PGp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Nov 2021 10:06:45 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:51916 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S243588AbhK3O5h (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 09:57:37 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id D21D2CE1A69;
-        Tue, 30 Nov 2021 14:52:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 47D48C8D185;
-        Tue, 30 Nov 2021 14:52:23 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 09EC2B81A21;
+        Tue, 30 Nov 2021 14:54:14 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EDB26C53FCF;
+        Tue, 30 Nov 2021 14:54:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1638283944;
-        bh=8Lyi+Zy2+dtrZ3otjcmH0W5e3EP2u373+I1bwNvzey0=;
+        s=k20201202; t=1638284052;
+        bh=Qqwpqs1P4RB8XLiDq9NEORR5zJ582JHVP48kdWjhepo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=LeFiBbkxrONlOi6H4VO40WlQVaO2eBL5K/2nAzeJ2HbTEVTCNynbszn5e7rvHMsfr
-         L/4Wgnf8TyA+BBaHtRnGP4pRlpMdifc3NXNu7zD9Rzw2s9MMls7lVn6WyxnMQ8Fwg5
-         6FKjty5y5hzIjtqtMEaTTdrH48hiBLarzhX6XVp84W3L7HDiyYhWK1pO4Vjk/PNAaD
-         /Id3iS39hng6MVeN2jdZiG3rSxu9WcYozPMRl4uH/Rz1yJZX9l2ocVyihXtpdHpBYq
-         qJ2LsPzvnwy5WrzrEH+/ZJc/EHtYE5IDLahfuxaHw4D1nV4o5W5uD3SRMqoCWcZIes
-         adACeK7J7Lx0A==
+        b=dN6Z4Oynk/DR1DXBgzBJE/JHVYtYmJPlVnY3cE38p1q32d9yLE1YL4PLUNDVvfDqv
+         r0a+0snI4WZ+l1n5+vPm+PiHGCixZmPQB34XsXoEYonKBcIk8w8MqkRpTWcwdU3hWX
+         AcdtCYCV4Csxy77ktvS6rdPvkoR9RC8W6OUO5lhEgY1wybUUZif9SrXbaCFwZRuKeu
+         WeFj+JCaQ9fAgeZY3SkjlHCcsAZ1x2V821bW04m96WXkAyYRfViWJuS2xB/Jj3cxGH
+         aTamssI7LIUCbtvYQvhutdzqVltStchAgUPWPygC1G3UxGg85YxLrj4qarhF1LIhyD
+         RxZU1ov2i1Ifg==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Jon Hunter <jonathanh@nvidia.com>,
@@ -35,12 +35,12 @@ Cc:     Jon Hunter <jonathanh@nvidia.com>,
         Sasha Levin <sashal@kernel.org>,
         andriy.shevchenko@linux.intel.com, akpm@linux-foundation.org,
         linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 13/25] mmc: spi: Add device-tree SPI IDs
-Date:   Tue, 30 Nov 2021 09:51:43 -0500
-Message-Id: <20211130145156.946083-13-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 5/9] mmc: spi: Add device-tree SPI IDs
+Date:   Tue, 30 Nov 2021 09:53:58 -0500
+Message-Id: <20211130145402.947049-5-sashal@kernel.org>
 X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20211130145156.946083-1-sashal@kernel.org>
-References: <20211130145156.946083-1-sashal@kernel.org>
+In-Reply-To: <20211130145402.947049-1-sashal@kernel.org>
+References: <20211130145402.947049-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -72,10 +72,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 7 insertions(+)
 
 diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 7083d8ddd4951..2694b15b09bfa 100644
+index b52489a67097e..a3e049248be8d 100644
 --- a/drivers/mmc/host/mmc_spi.c
 +++ b/drivers/mmc/host/mmc_spi.c
-@@ -1507,6 +1507,12 @@ static int mmc_spi_remove(struct spi_device *spi)
+@@ -1523,6 +1523,12 @@ static int mmc_spi_remove(struct spi_device *spi)
  	return 0;
  }
  
@@ -88,7 +88,7 @@ index 7083d8ddd4951..2694b15b09bfa 100644
  static const struct of_device_id mmc_spi_of_match_table[] = {
  	{ .compatible = "mmc-spi-slot", },
  	{},
-@@ -1518,6 +1524,7 @@ static struct spi_driver mmc_spi_driver = {
+@@ -1534,6 +1540,7 @@ static struct spi_driver mmc_spi_driver = {
  		.name =		"mmc_spi",
  		.of_match_table = mmc_spi_of_match_table,
  	},
