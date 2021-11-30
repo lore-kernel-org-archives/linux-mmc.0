@@ -2,76 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF4A3C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 14:27:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26DCDC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 14:51:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242159AbhK3Oar (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Nov 2021 09:30:47 -0500
-Received: from smtp.220.in.ua ([89.184.67.205]:51681 "EHLO smtp.220.in.ua"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237590AbhK3Oaq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 30 Nov 2021 09:30:46 -0500
-Received: from oleh-pc.lan (unknown [95.67.115.55])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        id S242684AbhK3Oyq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Nov 2021 09:54:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60218 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242908AbhK3Ox1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 09:53:27 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B11AC061394;
+        Tue, 30 Nov 2021 06:48:51 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by smtp.220.in.ua (Postfix) with ESMTPSA id B374B1A20D5B;
-        Tue, 30 Nov 2021 16:27:24 +0200 (EET)
-From:   Oleh Kravchenko <oleg@kaa.org.ua>
-To:     Avri Altman <avri.altman@wdc.com>,
-        Chris Ball <chrisball@gmail.com>,
+        by ams.source.kernel.org (Postfix) with ESMTPS id E7553B81A1F;
+        Tue, 30 Nov 2021 14:48:49 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D9601C53FCD;
+        Tue, 30 Nov 2021 14:48:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1638283728;
+        bh=iS9fDsftsI3iXhp1kgyJaPiOoC/iRiK0tMDzNVV4m4A=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=tbFXGgCwUxGhT4PpvPxshcNexuvco3e4rvyxT5L3FYWXtOcCcNBUIT/N8FyEYUkqH
+         YpoCJUYpLwX3/Om0YZGUA7NyOuPYtCQkQQ7v55Oq2DA6BnqwQd834eZ/KMpJpDgthy
+         MM59D4vPIQzaljkuBQosxgsYHxD7/sUPS1h+wpWHt6QIBrT1pd0iDXR7RHu/DhV5SF
+         9dd2Nmy8S8Jgxs99CZ1cZLW86NVxkrZIG9/eyAdTJdksQUoXiDYN6Smdu8dxK1IWJv
+         Fzsbk43N8Nzt/tAH47EbBKojH5dFqjGz3RdfYJCXHspRBWcKGTWKyGADH4mKoiiobv
+         xWadEDGteepkw==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Jon Hunter <jonathanh@nvidia.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, patchwork-bot@kernel.org
-Cc:     Oleh Kravchenko <oleg@kaa.org.ua>, Bean Huo <beanhuo@micron.com>
-Subject: [PATCH v5] mmc-utils: Use printf() to extract and print fw version
-Date:   Tue, 30 Nov 2021 16:27:15 +0200
-Message-Id: <20211130142715.11014-1-oleg@kaa.org.ua>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20211116105109.3830-1-oleg@kaa.org.ua>
-References: <20211116105109.3830-1-oleg@kaa.org.ua>
+        Sasha Levin <sashal@kernel.org>,
+        andriy.shevchenko@linux.intel.com, akpm@linux-foundation.org,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.15 36/68] mmc: spi: Add device-tree SPI IDs
+Date:   Tue, 30 Nov 2021 09:46:32 -0500
+Message-Id: <20211130144707.944580-36-sashal@kernel.org>
+X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20211130144707.944580-1-sashal@kernel.org>
+References: <20211130144707.944580-1-sashal@kernel.org>
 MIME-Version: 1.0
+X-stable: review
+X-Patchwork-Hint: Ignore
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch also fixes a compile error with a newer version of GCC:
-error: '__builtin_strncpy' output may be truncated copying 8 bytes from
-a string of length 511 [-Werror=stringop-truncation]
+From: Jon Hunter <jonathanh@nvidia.com>
 
-Signed-off-by: Oleh Kravchenko <oleg@kaa.org.ua>
-Reviewed-by: Bean Huo <beanhuo@micron.com>
-Fixes: 0eea71e4f22a (mmc-utils: Fix for Firmware Version string printing)
+[ Upstream commit 5f719948b5d43eb39356e94e8d0b462568915381 ]
+
+Commit 5fa6863ba692 ("spi: Check we have a spi_device_id for each DT
+compatible") added a test to check that every SPI driver has a
+spi_device_id for each DT compatiable string defined by the driver
+and warns if the spi_device_id is missing. The spi_device_id is
+missing for the MMC SPI driver and the following warning is now seen.
+
+ WARNING KERN SPI driver mmc_spi has no spi_device_id for mmc-spi-slot
+
+Fix this by adding the necessary spi_device_id.
+
+Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+Link: https://lore.kernel.org/r/20211115113813.238044-1-jonathanh@nvidia.com
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- mmc_cmds.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+ drivers/mmc/host/mmc_spi.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-PATCH v5
-Updating commit message.
-Adding Fixes: 0eea71e4f22a
-
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 73bd32a..e07ec94 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1392,7 +1392,6 @@ int do_read_extcsd(int nargs, char **argv)
- 	__u32 regl;
- 	int fd, ret;
- 	char *device;
--	char lbuf[10];
- 	const char *str;
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index f4c8e1a61f537..b431cdd27353b 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -1514,6 +1514,12 @@ static int mmc_spi_remove(struct spi_device *spi)
+ 	return 0;
+ }
  
- 	if (nargs != 2) {
-@@ -1834,9 +1833,7 @@ int do_read_extcsd(int nargs, char **argv)
- 	}
- 
- 	if (ext_csd_rev >= 7) {
--                memset(lbuf, 0, sizeof(lbuf));
--		strncpy(lbuf, (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION], 8);
--		printf("eMMC Firmware Version: %s\n", lbuf);
-+		printf("eMMC Firmware Version: %.8s\n", (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
- 		printf("eMMC Life Time Estimation A [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]: 0x%02x\n",
- 			ext_csd[EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_A]);
- 		printf("eMMC Life Time Estimation B [EXT_CSD_DEVICE_LIFE_TIME_EST_TYP_B]: 0x%02x\n",
++static const struct spi_device_id mmc_spi_dev_ids[] = {
++	{ "mmc-spi-slot"},
++	{ },
++};
++MODULE_DEVICE_TABLE(spi, mmc_spi_dev_ids);
++
+ static const struct of_device_id mmc_spi_of_match_table[] = {
+ 	{ .compatible = "mmc-spi-slot", },
+ 	{},
+@@ -1525,6 +1531,7 @@ static struct spi_driver mmc_spi_driver = {
+ 		.name =		"mmc_spi",
+ 		.of_match_table = mmc_spi_of_match_table,
+ 	},
++	.id_table =	mmc_spi_dev_ids,
+ 	.probe =	mmc_spi_probe,
+ 	.remove =	mmc_spi_remove,
+ };
 -- 
-2.32.0
+2.33.0
 
