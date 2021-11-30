@@ -2,69 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26DE2C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 13:23:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51441C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 14:25:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239960AbhK3N0g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Nov 2021 08:26:36 -0500
-Received: from www.zeus03.de ([194.117.254.33]:37848 "EHLO mail.zeus03.de"
+        id S237547AbhK3O2v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Nov 2021 09:28:51 -0500
+Received: from smtp.220.in.ua ([89.184.67.205]:51509 "EHLO smtp.220.in.ua"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239822AbhK3N0f (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 30 Nov 2021 08:26:35 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=kevkKnStG1oCLnGIIxBhmraeJZ0
-        XXWYIfjzozQrJ+uw=; b=evkvPRTfW0Z+uDzYG6mNQbi9PQgM/Xh9y5fXvwtvE35
-        ZqvuneqKBluL3rPGfLO6tj2nAslgOpQQAo7CMCcvl1JItF8ePwdnSjrsMLFg24+c
-        q0boWYfk3ykmprfIu2DiwnBpwMFVIlOYILN4EqunAa6nVSxncu5yFD6KSabRWaqY
-        =
-Received: (qmail 3810498 invoked from network); 30 Nov 2021 14:23:15 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Nov 2021 14:23:15 +0100
-X-UD-Smtp-Session: l3s3148p1@aSuwdQHS/OggAwDPXxCYAODRq/Cv/3uh
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [PATCH] mmc: renesas_sdhi: initialize variable properly when tuning
-Date:   Tue, 30 Nov 2021 14:23:09 +0100
-Message-Id: <20211130132309.18246-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.2
+        id S236374AbhK3O2v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 30 Nov 2021 09:28:51 -0500
+Received: from [10.30.18.189] (unknown [149.255.131.2])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by smtp.220.in.ua (Postfix) with ESMTPSA id F0F891A20D5B;
+        Tue, 30 Nov 2021 16:25:27 +0200 (EET)
+Message-ID: <6864fb7a-aa1a-c2d8-e494-60779cf80326@kaa.org.ua>
+Date:   Tue, 30 Nov 2021 16:25:23 +0200
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.1
+Subject: Re: [PATCH v4] mmc-utils: Use printf() to extract and print fw
+ version
+Content-Language: uk-UA
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Avri Altman <avri.altman@wdc.com>, Bean Huo <beanhuo@micron.com>,
+        Chris Ball <chrisball@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <20211116105109.3830-1-oleg@kaa.org.ua>
+ <20211129154826.23595-1-oleg@kaa.org.ua>
+ <DM6PR04MB657569E423F95B4151E56C80FC679@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <42135dd8-c326-7607-acc9-3d55e9b98dad@kaa.org.ua>
+ <CAPDyKFqrTvV5BSerNwXT4tQNWwFdSZferccdMWGOe_RCC8hkCg@mail.gmail.com>
+From:   Oleh Kravchenko <oleg@kaa.org.ua>
+In-Reply-To: <CAPDyKFqrTvV5BSerNwXT4tQNWwFdSZferccdMWGOe_RCC8hkCg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-'cmd_error' is not necessarily initialized on some error paths in
-mmc_send_tuning(). Initialize it.
+Hello Ulf,
 
-Fixes: 2c9017d0b5d3 ("mmc: renesas_sdhi: abort tuning when timeout detected")
-Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+30.11.21 14:14, Ulf Hansson пише:
+> On Tue, 30 Nov 2021 at 13:07, Oleh Kravchenko <oleg@kaa.org.ua> wrote:
+>> Hello Avri!
+>>
+>> 30.11.21 09:42, Avri Altman пише:
+>>> Hi,
+>>>> This patch also fixes a compile error with a newer version of GCC:
+>>>> error: '__builtin_strncpy' output may be truncated copying 8 bytes from a
+>>>> string of length 511 [-Werror=stringop-truncation]
+>>> You are reverting commit 0eea71e4f2 (mmc-utils: Fix for Firmware Version string printing).
+>>> Please use git revert and add an explanation in your commit log.
+>> I'm not reverting this commit.
+>> It's similar but not.
+> Right, this time we limit the print to 8 chars, which avoids garbage
+> from a non-NULL terminated string.
+>
+> Perhaps we should add (similar to what we do for kernel commits):
+> Fixes: 0eea71e4f22a ("mmc-utils: Fix for Firmware Version string printing")
 
-Tested on a Salvator-XS (R-Car M3N), tuning still works.
+Good point!
 
-Ulf, this is a bugfix, can you take it via your tree for this cycle
-please?
-
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index a4407f391f66..f5b2684ad805 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -673,7 +673,7 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 	/* Issue CMD19 twice for each tap */
- 	for (i = 0; i < 2 * priv->tap_num; i++) {
--		int cmd_error;
-+		int cmd_error = 0;
- 
- 		/* Set sampling clock position */
- 		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, i % priv->tap_num);
--- 
-2.30.2
-
+>
+> [...]
+>
+> Kind regards
+> Uffe
