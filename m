@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60EE8C43219
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 23:24:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B45E5C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Nov 2021 23:25:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345532AbhK3X2O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Nov 2021 18:28:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39078 "EHLO
+        id S1345539AbhK3X2P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Nov 2021 18:28:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39092 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345430AbhK3X1t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 18:27:49 -0500
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0527C061758;
-        Tue, 30 Nov 2021 15:24:26 -0800 (PST)
-Received: by mail-lf1-x12f.google.com with SMTP id t26so57885623lfk.9;
-        Tue, 30 Nov 2021 15:24:26 -0800 (PST)
+        with ESMTP id S1345442AbhK3X1u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Nov 2021 18:27:50 -0500
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67DFCC061574;
+        Tue, 30 Nov 2021 15:24:30 -0800 (PST)
+Received: by mail-lj1-x230.google.com with SMTP id e11so44186801ljo.13;
+        Tue, 30 Nov 2021 15:24:30 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=/BgSCMMMjImw4OC6XX4I1D4jJZR1bPLAq5CznL/tG6k=;
-        b=oZMjcopCsYiqbZp4/XOOVzs3uI0UgVvg1HxSmygyjHnuAmVEzFCZHE3NnyvR3kzK+l
-         XGpmZXTMlKjr4CFlK8Dssww/+5skXIBeF9P1HlC7mZY653Y50isOLEjJPm3CtvsFuemL
-         BUizIFplEUvls19ORkvmhksN6JY5Qr1+SJw2Ex/JjOgZfZlUOPkrdDzGQ8AU4auEFrL1
-         ayyWKqvE7tBRUXkYQkDkT38M2mflsCSi/Ty8qNvUepitGBCFmwf8g1jw9FHMIGGoI1ll
-         3OZGZlvlssaAxIaXWwpBtPVTDeQYx8vMdNOEnreSHehARb1XcJ/ZVcSBkBrRPphKelCq
-         ltmQ==
+        bh=nDfKTCKLqf9G6JM8mpqxRAZhh67bMGPfUrf1PMFZnmE=;
+        b=fhpWDE/W8BPbpYc6LrT3Sd3tL3GRIqLrzCk59WClqm4rHNchu4CExjdl/yfsM6OXDi
+         GW7PMw8GvZh5/M28Qh7yeE/PnCVnvTBw3xoaNaJ/bUDC8GUNstcex8ucbctDFUPhlg96
+         XbROgohEdgTo8uryBLF23Ou2EqYu7n22+wkAFeSCbBfCaZX0LHMcTfXnfnm5vkG5Asnk
+         itNiMnbDj7fRLFLdUlH8U5icIUkUeCio2KfDYw4BNJBeIgeatjNLCUU5bcONLTxWLIQb
+         k5IzhApWb39vbgOAeeYilHZa1gM9hjZTLN1R0uYknT/wM2DSquHyZiZBVwYBcS1QhFJx
+         0Uqw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=/BgSCMMMjImw4OC6XX4I1D4jJZR1bPLAq5CznL/tG6k=;
-        b=YGxkRR1UHkO7sGGYCD/vCAkEG2t+SDjaPQJqQB7PAWDHDb6oVA20Wy28/Xy4O+VkNn
-         dMqQdnPdTZbZB+Zvh3+m5XMSNR+v3o1b/egTkeb0kHPi1rZEl8thBg28KQg5zmJgkfvR
-         ni1ia6N6ItD2SJwQWyYf2YQMyYllt9RzafKvgkerXpBEuxeqaX796SjFkCUwnecSZ6Jz
-         xt143ELPOjp78oBgph6hST6ZEHITbPnGhOhNSvpl38+7K5a+nXKkxjxl7YdYEA71S0t2
-         J9zB2R3jVIDbzFjU6ThDJ/QJxJOn9Kt7oikxophCs0T9wgnUHCd/ih70p0zXYJyFspBu
-         QN/A==
-X-Gm-Message-State: AOAM533yN0MGUVfkezQz3rnfQiFNYPEEyxOaIu9d4+XlU0P4+Cl1oGHF
-        1ou3eHQVjTJvaeviGEQw9Wk=
-X-Google-Smtp-Source: ABdhPJyvoCavnDOlzlzD+43SO0WW3kZbv7iDlx4saMAl9TdN0YElvSyajZbUXOg8f8WQDZAJhkFjTQ==
-X-Received: by 2002:a05:6512:1148:: with SMTP id m8mr2122108lfg.456.1638314665009;
-        Tue, 30 Nov 2021 15:24:25 -0800 (PST)
+        bh=nDfKTCKLqf9G6JM8mpqxRAZhh67bMGPfUrf1PMFZnmE=;
+        b=rnpn9hR9HRAlTSTd8jz09WzAZTwm8Nn0XZcJYBNtHZrMB1iT0SOlgT2MRGN68MLQmF
+         SEFNkxO2Lvlm8SdzIvD+czB66wQWgJDg44VYEMB4d91k3Hnp9xqn5hoYdM3DcnV02aT2
+         S77ZIzC0gO10IBdl/McNnMm8Pm/MvSiXZGyHXvvEW9GolSHOjKLTSgFLgxlzh5eY+LzU
+         G0RVpZUp4efCIaZoaOv5xPZCRRxmDLKiKfVXWKGv2STZrnofkOfYdkvQWM6Z43QPeUDB
+         SlnClBEItP8Jg1/vaD/bKx7koKkmDKLPc2NqJavhDXs7er+b5Sl1dNtUgbym5BmJI7fE
+         kjhA==
+X-Gm-Message-State: AOAM533ggrhUI9a5yO5P2b1G89d8zmK5CNSV7LPIthTh5cCZXDatebyQ
+        WhUkOYni9tTmu7/NZPIw+bE=
+X-Google-Smtp-Source: ABdhPJxFExIlRTXbP3roDYpHOtAksUcXMnHB8sB6CKOzUF0kjCrj0HK7HUUphnePINzZFTW2y05wyw==
+X-Received: by 2002:a2e:9b17:: with SMTP id u23mr1975761lji.258.1638314668747;
+        Tue, 30 Nov 2021 15:24:28 -0800 (PST)
 Received: from localhost.localdomain (94-29-46-111.dynamic.spd-mgts.ru. [94.29.46.111])
-        by smtp.gmail.com with ESMTPSA id x199sm1860735lff.284.2021.11.30.15.24.24
+        by smtp.gmail.com with ESMTPSA id x199sm1860735lff.284.2021.11.30.15.24.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Nov 2021 15:24:24 -0800 (PST)
+        Tue, 30 Nov 2021 15:24:28 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -64,9 +64,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
         linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-Subject: [PATCH v16 31/40] soc/tegra: pmc: Rename 3d power domains
-Date:   Wed,  1 Dec 2021 02:23:38 +0300
-Message-Id: <20211130232347.950-32-digetx@gmail.com>
+Subject: [PATCH v16 35/40] ARM: tegra: Add 500MHz entry to Tegra30 memory OPP table
+Date:   Wed,  1 Dec 2021 02:23:42 +0300
+Message-Id: <20211130232347.950-36-digetx@gmail.com>
 X-Mailer: git-send-email 2.33.1
 In-Reply-To: <20211130232347.950-1-digetx@gmail.com>
 References: <20211130232347.950-1-digetx@gmail.com>
@@ -76,57 +76,50 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Device-tree schema doesn't allow domain name to start with a number.
-We don't use 3d domain yet in device-trees, so rename it to the name
-used by Tegra TRMs: TD, TD2.
+Extend memory OPPs with 500MHz entry. This clock rate is used by ASUS
+Transformer tablets.
 
-Reported-by: David Heidelberg <david@ixit.cz>
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/soc/tegra/pmc.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ arch/arm/boot/dts/tegra30-peripherals-opp.dtsi | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
-index 1a55b8319d63..e1fae1a5e36a 100644
---- a/drivers/soc/tegra/pmc.c
-+++ b/drivers/soc/tegra/pmc.c
-@@ -2992,7 +2992,7 @@ static SIMPLE_DEV_PM_OPS(tegra_pmc_pm_ops, tegra_pmc_suspend, tegra_pmc_resume);
+diff --git a/arch/arm/boot/dts/tegra30-peripherals-opp.dtsi b/arch/arm/boot/dts/tegra30-peripherals-opp.dtsi
+index ff25350869b3..af9640401402 100644
+--- a/arch/arm/boot/dts/tegra30-peripherals-opp.dtsi
++++ b/arch/arm/boot/dts/tegra30-peripherals-opp.dtsi
+@@ -216,6 +216,18 @@ opp-450000000-1250 {
+ 			opp-supported-hw = <0x0008>;
+ 		};
  
- static const char * const tegra20_powergates[] = {
- 	[TEGRA_POWERGATE_CPU] = "cpu",
--	[TEGRA_POWERGATE_3D] = "3d",
-+	[TEGRA_POWERGATE_3D] = "td",
- 	[TEGRA_POWERGATE_VENC] = "venc",
- 	[TEGRA_POWERGATE_VDEC] = "vdec",
- 	[TEGRA_POWERGATE_PCIE] = "pcie",
-@@ -3100,7 +3100,7 @@ static const struct tegra_pmc_soc tegra20_pmc_soc = {
++		opp-500000000-1200 {
++			opp-microvolt = <1200000 1200000 1350000>;
++			opp-hz = /bits/ 64 <500000000>;
++			opp-supported-hw = <0x0007>;
++		};
++
++		opp-500000000-1250 {
++			opp-microvolt = <1250000 1250000 1350000>;
++			opp-hz = /bits/ 64 <500000000>;
++			opp-supported-hw = <0x0008>;
++		};
++
+ 		opp-533000000-1200 {
+ 			opp-microvolt = <1200000 1200000 1350000>;
+ 			opp-hz = /bits/ 64 <533000000>;
+@@ -347,6 +359,12 @@ opp-450000000 {
+ 			opp-peak-kBps = <3600000>;
+ 		};
  
- static const char * const tegra30_powergates[] = {
- 	[TEGRA_POWERGATE_CPU] = "cpu0",
--	[TEGRA_POWERGATE_3D] = "3d0",
-+	[TEGRA_POWERGATE_3D] = "td",
- 	[TEGRA_POWERGATE_VENC] = "venc",
- 	[TEGRA_POWERGATE_VDEC] = "vdec",
- 	[TEGRA_POWERGATE_PCIE] = "pcie",
-@@ -3112,7 +3112,7 @@ static const char * const tegra30_powergates[] = {
- 	[TEGRA_POWERGATE_CPU2] = "cpu2",
- 	[TEGRA_POWERGATE_CPU3] = "cpu3",
- 	[TEGRA_POWERGATE_CELP] = "celp",
--	[TEGRA_POWERGATE_3D1] = "3d1",
-+	[TEGRA_POWERGATE_3D1] = "td2",
- };
- 
- static const u8 tegra30_cpu_powergates[] = {
-@@ -3161,7 +3161,7 @@ static const struct tegra_pmc_soc tegra30_pmc_soc = {
- 
- static const char * const tegra114_powergates[] = {
- 	[TEGRA_POWERGATE_CPU] = "crail",
--	[TEGRA_POWERGATE_3D] = "3d",
-+	[TEGRA_POWERGATE_3D] = "td",
- 	[TEGRA_POWERGATE_VENC] = "venc",
- 	[TEGRA_POWERGATE_VDEC] = "vdec",
- 	[TEGRA_POWERGATE_MPE] = "mpe",
++		opp-500000000 {
++			opp-hz = /bits/ 64 <500000000>;
++			opp-supported-hw = <0x000F>;
++			opp-peak-kBps = <4000000>;
++		};
++
+ 		opp-533000000 {
+ 			opp-hz = /bits/ 64 <533000000>;
+ 			opp-supported-hw = <0x000F>;
 -- 
 2.33.1
 
