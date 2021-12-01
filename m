@@ -2,101 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73F43C4167D
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Dec 2021 15:38:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0B95C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Dec 2021 19:16:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351078AbhLAPlw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Dec 2021 10:41:52 -0500
-Received: from smtp2.axis.com ([195.60.68.18]:17640 "EHLO smtp2.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1350676AbhLAPlv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 1 Dec 2021 10:41:51 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1638373111;
-  x=1669909111;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=NeRpLsWyPIeNTXYAGIU96z1OBWXWfVQIvsePl4gHj9M=;
-  b=fHASomY4GU3ZzBQf75XYjJSL/37kC//KhEbSXDndOjDr2prdja1/2bSc
-   3WVT1ITxEA+QNLMP3EHjW6qN+lW0XJtKz5f3CH8bLmBH09PsAKaEU8UB4
-   89K4/JFLdIhkwaoUkhKmACGIyhAfwN2+QmGeS4DvLFz74mvMTmj0UsH6v
-   0BW9In852l7J69hUdg1DL0YMmrxBJ08h1XUJNrmur60K6nvSdDrCaOXIL
-   RbOLtcTbTb6DuXn3/pMJkYWHTGsAoFNEu6lb9fyF7CdHuE0Up3pPgU6V5
-   1ii7sUNarz5+k4/TZyF2C7tpODHW6ipIuEnzqU+xuMTsY9PTkMCvVJDDv
-   w==;
-From:   =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>
-CC:     Doug Anderson <dianders@google.com>, <kernel@axis.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-samsung-soc@vger.kernel.org>,
-        =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-Subject: [PATCH 4/4] mmc: dw_mmc: Do not wait for DTO in case of error
-Date:   Wed, 1 Dec 2021 16:38:04 +0100
-Message-ID: <20211201153804.27655-5-marten.lindahl@axis.com>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20211201153804.27655-1-marten.lindahl@axis.com>
-References: <20211201153804.27655-1-marten.lindahl@axis.com>
+        id S239479AbhLATT1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Dec 2021 14:19:27 -0500
+Received: from mail-oi1-f170.google.com ([209.85.167.170]:46037 "EHLO
+        mail-oi1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232082AbhLATT0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Dec 2021 14:19:26 -0500
+Received: by mail-oi1-f170.google.com with SMTP id 7so50552582oip.12;
+        Wed, 01 Dec 2021 11:16:05 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=/OBdGMq4dd6q5ULNQxzUbPqXvw17CH5bFY6zNdVF51c=;
+        b=G7fpR2mDxcC6cdNc1n818EhFqUklCoObSavNenUS4ZLIlrRIC66YvbcUKHVqRpTU2O
+         +q3rMw3gzaz7/Jlq6+RY6mhRHaljdoGqQA6QnssneoEKUjJxDdlH6IKJjZ53unRE3ejg
+         7yb1vFnPonVoKR+h0leZ9k/S4JlXqc1ILZvrJHEj1cuQNJrHHCFzSP/EXwi4L1UNEQZY
+         xnP7ltkD3FE3BYtrPwR9avRuZaDAxKnfwMtiuDkpXB8EkojncSmQHwMLwxb6UI2cNs5h
+         Edo/eQFn0wIc6Dnw4/6A0HCgT8GBTdVnGgHho02YXLphJ+KNKr5tAr6OJFJLo0fcKJnl
+         vnog==
+X-Gm-Message-State: AOAM533j8u1eM17f+Y6e7SHu0pm8yRGRJZrBe18hptEDyHkeOSkQMKdV
+        lSGCaljYJScymASBIuBphrZolRmwvPNrfixC2Ts=
+X-Google-Smtp-Source: ABdhPJzgpzdAoG8LxmgbxgA7nvJ0OQ3laiKyn2wRiL1HzJJ/jOWok40Q8xE7Hm8OUnKft2B+tANH8yz/Za6C1gZ64D4=
+X-Received: by 2002:aca:eb0b:: with SMTP id j11mr110266oih.51.1638386165436;
+ Wed, 01 Dec 2021 11:16:05 -0800 (PST)
 MIME-Version: 1.0
+References: <20211122170536.7725-1-hdegoede@redhat.com> <CAPDyKFqtYJ2aT+brhAG9r-VTuK=-25nEAXhw_M7yWhUSJN=BXg@mail.gmail.com>
+ <cecea505-9a30-7114-3d3e-80856cccb6c4@intel.com>
+In-Reply-To: <cecea505-9a30-7114-3d3e-80856cccb6c4@intel.com>
+From:   "Rafael J. Wysocki" <rafael@kernel.org>
+Date:   Wed, 1 Dec 2021 20:15:54 +0100
+Message-ID: <CAJZ5v0jOtWRtf-iHG30+tw_BDibBOn4o7ROyokh=On4J5=R_2A@mail.gmail.com>
+Subject: Re: [PATCH v2 0/7] ACPI: acpi_device_override_status() changes
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Hans de Goede <hdegoede@redhat.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
+        Len Brown <lenb@kernel.org>,
+        ACPI Devel Maling List <linux-acpi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When running the ARTPEC-8 DWMMC IP version, and a data error interrupt
-comes during a data read transfer, there is no guarantee for the data
-transfer over interrupt (DTO) to come within the specified data timeout.
-This case is handled by the dto_timer handler which will complete the
-request with the comment:
+On Thu, Nov 25, 2021 at 10:53 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 23/11/2021 13:13, Ulf Hansson wrote:
+> > On Mon, 22 Nov 2021 at 18:05, Hans de Goede <hdegoede@redhat.com> wrote:
+> >>
+> >> Hi Rafael,
+> >>
+> >> As requested here is a v2 of my series previously titled:
+> >> "ACPI: scan: Skip turning off some unused objects during scan"
+> >>
+> >> Which was a regression fix series for the commit c10383e8ddf4
+> >> ("ACPI: scan: Release PM resources blocked by unused objects")
+> >> change, but that has been reverted now. So as requested here is
+> >> a v2 changing the wording of various commit messages since these
+> >> changes are still useful to have regardless.
+> >>
+> >> Patch 1/7 is a v2/resend of the "ACPI / x86: Drop PWM2 device on
+> >> Lenovo Yoga Book from always present table" patch. You requested
+> >> changing the commit message of this one a bit to make it sound
+> >> less like a regression fix (which it is not). But you already
+> >> have the previous version of this patch in your bleeding-edge
+> >> branch, with a "Cc: 5.1+ <stable@vger.kernel.org> # 5.1+"
+> >> added ?  So depending on which version you want you can either
+> >> skip this patch when applying this series, or replace it with
+> >> the version from this series.
+> >>
+> >> Patches 2-4 are the main changes to make the always_present
+> >> quirk handling more flexible, changing it into a status_override
+> >> mechanism + adding a quirk for the GPD win and pocket to fix
+> >> an issue with those in a more elegant matter then the current
+> >> kludge in the sdhci-acpi code.
+> >>
+> >> Patch 5 is an unrelated patch which touches the override-status
+> >> quirk table, so it needed to be rebased and I decided to add it
+> >> to this series to make it clear that its v2 needs to be applied
+> >> on top of the other ACPI changes from this series.
+> >>
+> >> Patches 6+7 cleanup the sdhci-acpi code, removing the now no
+> >> longer needed ugly kludge for the GPD win/pocket. These can
+> >> be merged independently from patches 1-5, through the mmc
+> >> tree, as long as they get send to Linus during the same
+> >> kernel cycle as the ACPI bits.
+> >
+> > This sounds like the mmc changes are really not that independent after
+> > all. What about bisectability?
+> >
+> > An option is to funnel the sdhci patches together with the ACPI
+> > patches through Rafael's tree. You have my ack for this, but let's
+> > wait for Adrian's ack too.
+>
+> Looks OK to me.
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
- /*
-  * If DTO interrupt does NOT come in sending data state,
-  * we should notify the driver to terminate current transfer
-  * and report a data timeout to the core.
-  */
-
-But since the ARTPEC-8 DWMMC IP version, supports an extended TMOUT
-register which allows longer timeouts than the non ARTPEC-8 version
-does, waiting for the dto_timer to complete the request in error cases
-may cause the request to take significantly longer time than necessary.
-This is specifically true for the failing steps during tuning of a
-device.
-
-Fix this by completing the request when the error interrupt comes.
-
-Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
----
- drivers/mmc/host/dw_mmc.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 45ea9fd97a6a..d6b76f47b1a2 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2777,11 +2777,19 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
- 			spin_lock(&host->irq_lock);
- 
-+			if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
-+				del_timer(&host->dto_timer);
-+
- 			/* if there is an error report DATA_ERROR */
- 			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
- 			host->data_status = pending;
- 			smp_wmb(); /* drain writebuffer */
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
-+
-+			if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
-+				/* In case of error, we cannot expect a DTO */
-+				set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
-+
- 			tasklet_schedule(&host->tasklet);
- 
- 			spin_unlock(&host->irq_lock);
--- 
-2.20.1
-
+All patches in the series applied as 5.17 material, thanks!
