@@ -2,261 +2,223 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5270C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 08:16:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F105DC43217
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 08:39:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356080AbhLBIUD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Dec 2021 03:20:03 -0500
-Received: from mga03.intel.com ([134.134.136.65]:42611 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1356065AbhLBIUB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 2 Dec 2021 03:20:01 -0500
-X-IronPort-AV: E=McAfee;i="6200,9189,10185"; a="236594211"
-X-IronPort-AV: E=Sophos;i="5.87,281,1631602800"; 
-   d="scan'208";a="236594211"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2021 00:16:38 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.87,281,1631602800"; 
-   d="scan'208";a="602636502"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by fmsmga002.fm.intel.com with ESMTP; 02 Dec 2021 00:16:33 -0800
-Subject: Re: [PATCH v16 22/40] mmc: sdhci-tegra: Add runtime PM and OPP
- support
-To:     Dmitry Osipenko <digetx@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Michael Turquette <mturquette@baylibre.com>
-Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-References: <20211130232347.950-1-digetx@gmail.com>
- <20211130232347.950-23-digetx@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <fc60f593-cd74-558d-785f-5f0d2ba179cf@intel.com>
-Date:   Thu, 2 Dec 2021 10:16:32 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S1345714AbhLBIm6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Dec 2021 03:42:58 -0500
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:47234
+        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1345662AbhLBImz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2021 03:42:55 -0500
+Received: from mail-lf1-f72.google.com (mail-lf1-f72.google.com [209.85.167.72])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id B0AB83F1EF
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Dec 2021 08:39:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1638434372;
+        bh=bzHPDCQxivWPQ9IWDe85z++O9zhlMxtBFGzHj4yUahI=;
+        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+         In-Reply-To:Content-Type;
+        b=JgxLBl1sSbuKFYSMie2j5k+UiGdvwO70sgAZqu6bWcccGWQ91PZ93hd2p71DQ6w9O
+         Vmd0teYK9Y8pUu/nfLbD+4tdymJPSD8u2RC9NSK9Dc1+pB4ZvWWh/A/xE9/GLznSLe
+         uQg241mmk5gM9WxD37sKE3y8gMYXIimxGu9nPgIWm3y+894E7wX11WqYghzgTNPeKg
+         adA+vq6oxOi772XQoywM5cUukqMVs+m8XedNVUdUj70fAMa/9SMQs5n5WlGOmocKjE
+         OiTHuyqrE780IHZITjDYpfJnWKYjHncMkCP9tFPMkRY19JC6f6u37hzd6S5HkA47jP
+         wwnzrfGP/VdNg==
+Received: by mail-lf1-f72.google.com with SMTP id t9-20020a056512068900b00417ba105469so8610624lfe.4
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Dec 2021 00:39:32 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=bzHPDCQxivWPQ9IWDe85z++O9zhlMxtBFGzHj4yUahI=;
+        b=WeTZoogcdStj5siEkmWcxmTVQrzH8hqdRy8lb9bJuYhbOHC+wbNmNaPeIuA1B8U5NH
+         VIM4y0C/+tloTsF+AgsE4mhGFzOOzicIqKBBe6qdemtSG+ZWU03+Trjp4KAZ1VBG0e+a
+         5/io/01dhWl3vmITy33pH6PXu9+Zjw28iGtOxQq0FD0UETLpOZqPWgIrzN5QUrgdzDes
+         EnkDz5lcVVkssTJlomptCpoXuOUmJR/tYBouC/WU/hlIhZQHK4Z6IH8PwQmLDJiNwu4r
+         OjPTnbtnHuvFrOepLMfoSMPK2+xu18wpqi7zon2B+XBKhDFnf0HzEzIkMK7MW5HXd8EQ
+         latw==
+X-Gm-Message-State: AOAM530GoHHhY71gKsCSkeblTg9tjtAXwiuMC/8uXOwZVT/lnh5egnZX
+        S7D+iWU6/kaDKghZYIwXUYvtXRjbgZ8gtA0zngcUC8/sCxLjGDTmpWsAC9S5OR1iLN6xvVSTw7k
+        9n9YAgOt47ey/dk0rJzBjLvvApBDfi4JQEujBWg==
+X-Received: by 2002:a05:6512:3322:: with SMTP id l2mr10573104lfe.556.1638434371888;
+        Thu, 02 Dec 2021 00:39:31 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJza7lLCAo9zxOj1HYXolUOQdlHjybMWwBpr86P/vqEMZGuzy2NQ5lsVP5PlD1kw9r9I8wo+IA==
+X-Received: by 2002:a05:6512:3322:: with SMTP id l2mr10573087lfe.556.1638434371687;
+        Thu, 02 Dec 2021 00:39:31 -0800 (PST)
+Received: from [192.168.3.67] (89-77-68-124.dynamic.chello.pl. [89.77.68.124])
+        by smtp.gmail.com with ESMTPSA id z14sm260458lfg.173.2021.12.02.00.39.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 02 Dec 2021 00:39:31 -0800 (PST)
+Message-ID: <2875d5c8-dc98-0e3c-41b8-c71bd439ced4@canonical.com>
+Date:   Thu, 2 Dec 2021 09:39:30 +0100
 MIME-Version: 1.0
-In-Reply-To: <20211130232347.950-23-digetx@gmail.com>
-Content-Type: text/plain; charset=utf-8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.1
+Subject: Re: [PATCH 3/4] mmc: dw_mmc: Add quirk for extended data read timeout
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+To:     =?UTF-8?Q?M=c3=a5rten_Lindahl?= <marten.lindahl@axis.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>
+Cc:     Doug Anderson <dianders@google.com>, kernel@axis.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org
+References: <20211201153804.27655-1-marten.lindahl@axis.com>
+ <20211201153804.27655-4-marten.lindahl@axis.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+In-Reply-To: <20211201153804.27655-4-marten.lindahl@axis.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 01/12/2021 01:23, Dmitry Osipenko wrote:
-> The SDHCI on Tegra belongs to the core power domain and we're going to
-> enable GENPD support for the core domain. Now SDHCI must be resumed using
-> runtime PM API in order to initialize the SDHCI power state. The SDHCI
-> clock rate must be changed using OPP API that will reconfigure the power
-> domain performance state in accordance to the rate. Add runtime PM and OPP
-> support to the SDHCI driver.
+On 01/12/2021 16:38, Mårten Lindahl wrote:
+> Current dw_mci driver supports a TMOUT register which consists of a 24
+> bit field (TMOUT[31:8]) for the DATA_TIMEOUT. The maximum value of this
+> field is 0xFFFFFF, which with a 200MHz clock will give a full DRTO of:
 > 
-> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+> 0xFFFFFF / 200000000 => ~84 ms
+> 
+> However, the ARTPEC-8 SoC DWMMC IP version has a TMOUT register with an
+> extended DATA_TIMEOUT field, which supports longer timers for the DRTO.
+> In this version the DATA_TIMEOUT field is split into two, which with the
+> same 200MHz clock as above will allow a maximum timeout of:
+> 
+> ((TMOUT[10:8] -1) * 0xFFFFFF + TMOUT[31:11] * 8) / 200000000 => ~587 ms
+> 
+> Add a quirk to support this. The quirk is enabled for ARTPEC-8 SoCs.
+> 
+> Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 81 +++++++++++++++++++++++++++-------
->  1 file changed, 65 insertions(+), 16 deletions(-)
+>  drivers/mmc/host/dw_mmc-exynos.c |  5 +++++
+>  drivers/mmc/host/dw_mmc.c        | 33 ++++++++++++++++++++++++++++----
+>  drivers/mmc/host/dw_mmc.h        |  7 +++++++
+>  3 files changed, 41 insertions(+), 4 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index a5001875876b..6435a75142a6 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -15,6 +15,8 @@
->  #include <linux/of.h>
->  #include <linux/of_device.h>
->  #include <linux/pinctrl/consumer.h>
-> +#include <linux/pm_opp.h>
-> +#include <linux/pm_runtime.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/reset.h>
->  #include <linux/mmc/card.h>
-> @@ -24,6 +26,8 @@
->  #include <linux/gpio/consumer.h>
->  #include <linux/ktime.h>
->  
-> +#include <soc/tegra/common.h>
-> +
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
->  
-> @@ -760,7 +764,9 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> +	struct device *dev = mmc_dev(host->mmc);
->  	unsigned long host_clk;
-> +	int err;
->  
->  	if (!clock)
->  		return sdhci_set_clock(host, clock);
-> @@ -778,7 +784,12 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  	 * from clk_get_rate() is used.
->  	 */
->  	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
-> -	clk_set_rate(pltfm_host->clk, host_clk);
-> +
-> +	err = dev_pm_opp_set_rate(dev, host_clk);
-> +	if (err)
-> +		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
-> +			host_clk, err);
-> +
->  	tegra_host->curr_clk_rate = host_clk;
->  	if (tegra_host->ddr_signaling)
->  		host->max_clk = host_clk;
-> @@ -1705,7 +1716,6 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  				   "failed to get clock\n");
->  		goto err_clk_get;
->  	}
-> -	clk_prepare_enable(clk);
->  	pltfm_host->clk = clk;
->  
->  	tegra_host->rst = devm_reset_control_get_exclusive(&pdev->dev,
-> @@ -1716,15 +1726,24 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  		goto err_rst_get;
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index cae7c94b5d6e..6ae9c0ec1282 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -127,6 +127,11 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  				DQS_CTRL_GET_RD_DELAY(priv->saved_strobe_ctrl);
 >  	}
 >  
-> -	rc = reset_control_assert(tegra_host->rst);
-> +	rc = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
->  	if (rc)
->  		goto err_rst_get;
->  
-> +	pm_runtime_enable(&pdev->dev);
-> +	rc = pm_runtime_resume_and_get(&pdev->dev);
-> +	if (rc)
-> +		goto err_pm_get;
-> +
-> +	rc = reset_control_assert(tegra_host->rst);
-> +	if (rc)
-> +		goto err_rst_assert;
-> +
->  	usleep_range(2000, 4000);
->  
->  	rc = reset_control_deassert(tegra_host->rst);
->  	if (rc)
-> -		goto err_rst_get;
-> +		goto err_rst_assert;
->  
->  	usleep_range(2000, 4000);
->  
-> @@ -1736,8 +1755,11 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  
->  err_add_host:
->  	reset_control_assert(tegra_host->rst);
-> +err_rst_assert:
-> +	pm_runtime_put_sync_suspend(&pdev->dev);
-> +err_pm_get:
-> +	pm_runtime_disable(&pdev->dev);
->  err_rst_get:
-> -	clk_disable_unprepare(pltfm_host->clk);
->  err_clk_get:
->  	clk_disable_unprepare(tegra_host->tmclk);
->  err_power_req:
-> @@ -1756,19 +1778,38 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
->  
->  	reset_control_assert(tegra_host->rst);
->  	usleep_range(2000, 4000);
-> -	clk_disable_unprepare(pltfm_host->clk);
-> -	clk_disable_unprepare(tegra_host->tmclk);
->  
-> +	pm_runtime_put_sync_suspend(&pdev->dev);
-> +	pm_runtime_force_suspend(&pdev->dev);
-> +
-> +	clk_disable_unprepare(tegra_host->tmclk);
->  	sdhci_pltfm_free(pdev);
->  
->  	return 0;
->  }
->  
-> -#ifdef CONFIG_PM_SLEEP
-> -static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
-> +static int __maybe_unused sdhci_tegra_runtime_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +
-> +	return 0;
-> +}
-> +
-> +static int __maybe_unused sdhci_tegra_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +	return clk_prepare_enable(pltfm_host->clk);
-> +}
-> +
-> +#ifdef CONFIG_PM_SLEEP
-> +static int sdhci_tegra_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
->  	int ret;
->  
->  	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-> @@ -1783,17 +1824,22 @@ static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
->  		return ret;
->  	}
->  
-> -	clk_disable_unprepare(pltfm_host->clk);
-> +	ret = pm_runtime_force_suspend(dev);
-> +	if (ret) {
-> +		sdhci_resume_host(host);
-> +		cqhci_resume(host->mmc);
-> +		return ret;
+> +	if (priv->ctrl_type == DW_MCI_TYPE_ARTPEC8) {
+> +		/* Quirk needed for ARTPEC-8 SoCs */
+> +		host->quirks |= DW_MMC_QUIRK_EXTENDED_TMOUT;
 > +	}
 > +
+>  	host->bus_hz /= (priv->ciu_div + 1);
+>  
 >  	return 0;
->  }
->  
-> -static int __maybe_unused sdhci_tegra_resume(struct device *dev)
-> +static int sdhci_tegra_resume(struct device *dev)
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index f2a14a434bef..45ea9fd97a6a 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1289,6 +1289,7 @@ static void dw_mci_set_data_timeout(struct dw_mci *host,
 >  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	int ret;
+>  	u32 clk_div, tmout;
+>  	u64 tmp;
+> +	unsigned int tmp2;
 >  
-> -	ret = clk_prepare_enable(pltfm_host->clk);
-> +	ret = pm_runtime_force_resume(dev);
->  	if (ret)
->  		return ret;
+>  	clk_div = (mci_readl(host, CLKDIV) & 0xFF) * 2;
+>  	if (clk_div == 0)
+> @@ -1301,10 +1302,28 @@ static void dw_mci_set_data_timeout(struct dw_mci *host,
+>  	tmout = 0xFF; /* Set maximum */
 >  
-> @@ -1812,13 +1858,16 @@ static int __maybe_unused sdhci_tegra_resume(struct device *dev)
->  suspend_host:
->  	sdhci_suspend_host(host);
->  disable_clk:
-> -	clk_disable_unprepare(pltfm_host->clk);
-> +	pm_runtime_force_suspend(dev);
->  	return ret;
->  }
->  #endif
+>  	/* TMOUT[31:8] (DATA_TIMEOUT) */
+> -	if (!tmp || tmp > 0xFFFFFF)
+> -		tmout |= (0xFFFFFF << 8);
+> -	else
+> -		tmout |= (tmp & 0xFFFFFF) << 8;
+> +	if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT) {
+> +		/*
+> +		 * Extended HW timer (max = 0x6FFFFF2):
+> +		 * ((TMOUT[10:8] - 1) * 0xFFFFFF + TMOUT[31:11] * 8)
+> +		 */
+> +		if (!tmp || tmp > 0x6FFFFF2)
+> +			tmout |= (0xFFFFFF << 8);
+> +		else {
+> +			/* TMOUT[10:8] */
+> +			tmp2 = (((unsigned int)tmp / 0xFFFFFF) + 1) & 0x7;
+> +			tmout |= tmp2 << 8;
+> +
+> +			/* TMOUT[31:11] */
+> +			tmp = tmp - ((tmp2 - 1) * 0xFFFFFF);
+> +			tmout |= (tmp & 0xFFFFF8) << 8;
+> +		}
+> +	} else {
+> +		if (!tmp || tmp > 0xFFFFFF)
+> +			tmout |= (0xFFFFFF << 8);
+> +		else
+> +			tmout |= (tmp & 0xFFFFFF) << 8;
+> +	}
 >  
-> -static SIMPLE_DEV_PM_OPS(sdhci_tegra_dev_pm_ops, sdhci_tegra_suspend,
-> -			 sdhci_tegra_resume);
-> +static const struct dev_pm_ops sdhci_tegra_dev_pm_ops = {
-> +	SET_RUNTIME_PM_OPS(sdhci_tegra_runtime_suspend, sdhci_tegra_runtime_resume,
-> +			   NULL)
-> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_tegra_suspend, sdhci_tegra_resume)
-> +};
+>  	mci_writel(host, TMOUT, tmout);
+>  	dev_dbg(host->dev, "timeout_ns: %u => TMOUT[31:8]: 0x%#08x",
+> @@ -2005,9 +2024,15 @@ static void dw_mci_set_drto(struct dw_mci *host)
+>  	if (drto_div == 0)
+>  		drto_div = 1;
 >  
->  static struct platform_driver sdhci_tegra_driver = {
->  	.driver		= {
+> +	if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
+> +		drto_clks = (((drto_clks & 0x7) - 1) * 0xFFFFFF) +
+> +			((drto_clks & 0xFFFFF8));
+> +
+>  	drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
+>  				   host->bus_hz);
+>  
+> +	dev_dbg(host->dev, "drto_ms: %u\n", drto_ms);
+> +
+>  	/* add a bit spare time */
+>  	drto_ms += 10;
+>  
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 771d5afa3136..071f4479f166 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -118,6 +118,7 @@ struct dw_mci_dma_slave {
+>   * @part_buf: Simple buffer for partial fifo reads/writes.
+>   * @push_data: Pointer to FIFO push function.
+>   * @pull_data: Pointer to FIFO pull function.
+> + * @quirks: Set of quirks that apply to specific versions of the IP.
+>   * @vqmmc_enabled: Status of vqmmc, should be true or false.
+>   * @irq_flags: The flags to be passed to request_irq.
+>   * @irq: The irq value to be passed to request_irq.
+> @@ -223,6 +224,9 @@ struct dw_mci {
+>  	void (*push_data)(struct dw_mci *host, void *buf, int cnt);
+>  	void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
+>  
+> +	/* Workaround flags */
+
+No need for this comment - you already described the field in kerneldoc.
+
+> +	u32			quirks;
+> +
+>  	bool			vqmmc_enabled;
+>  	unsigned long		irq_flags; /* IRQ flags */
+>  	int			irq;
+> @@ -274,6 +278,9 @@ struct dw_mci_board {
+>  	struct dma_pdata *data;
+>  };
+>  
+> +/* Support for longer data read timeout */
+> +#define DW_MMC_QUIRK_EXTENDED_TMOUT	(1<<0)
+
+BIT()
+
+> +
+>  #define DW_MMC_240A		0x240a
+>  #define DW_MMC_280A		0x280a
+>  
 > 
 
+
+Best regards,
+Krzysztof
