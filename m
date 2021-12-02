@@ -2,55 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1170EC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 01:31:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D1FBC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 01:33:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345763AbhLBBeh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Dec 2021 20:34:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58374 "EHLO
+        id S1344355AbhLBBhC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Dec 2021 20:37:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58572 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236502AbhLBBeh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Dec 2021 20:34:37 -0500
-Received: from mail-ot1-x32a.google.com (mail-ot1-x32a.google.com [IPv6:2607:f8b0:4864:20::32a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 768B1C061574
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Dec 2021 17:31:15 -0800 (PST)
-Received: by mail-ot1-x32a.google.com with SMTP id n104-20020a9d2071000000b005799790cf0bso37894820ota.5
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Dec 2021 17:31:15 -0800 (PST)
+        with ESMTP id S1344316AbhLBBfX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Dec 2021 20:35:23 -0500
+Received: from mail-ot1-x329.google.com (mail-ot1-x329.google.com [IPv6:2607:f8b0:4864:20::329])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 866AEC061756
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Dec 2021 17:32:01 -0800 (PST)
+Received: by mail-ot1-x329.google.com with SMTP id r10-20020a056830080a00b0055c8fd2cebdso37808347ots.6
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Dec 2021 17:32:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=945C8FwdjlJfOzVlhpCF8zuWn7v4UFq1IxocPRUBqQ8=;
-        b=JFAJUL9tZY0QdGu7L1QL+kV3PVnwwsUhZwZaH1jXVPBYYSHQ8c21YFx7WAGzAeNejS
-         lUTNQw+jJ9+mk5C2NdJcGH3FDJ4wj/y7LYFpS7S68YC35IuO/pxhO7AAkzFbIEqL/t43
-         tSgP1s16uFsjO6rBYXIKaWY5e3hiHLLXf7phQNMF7g1PyZYeOp2sIl3Q7oUOyxLg4YkM
-         keipBpfYPh61GNreSuoaILjyu4vho5xHBydpsoY2ZmjVxXYT9nKQDsQI/UYMH/GQfQ/C
-         Q0QnjWxjxHY8p2fKMA0KBGe78IYr09XQRcDnOApMv2bO6ENjFEtIOZCaXnzDX3r5E2s7
-         Hk8g==
+        bh=eVbRuKvcYz8AuHjLMnmwWWcthb2yF6TQ0KJocuhiso8=;
+        b=GrJrq18VwUkgj1pL7epo3ZZ6SnuAd05gDtoKKnKYDh+F6AbvfjS0qATlGPqZ6/ZVRc
+         mAzJyJuFMgLLlAUyw/zGeGHyDcWBU4ILxwB1Go1Q1vsKXp1b7nXAUSqgKw1tvhGAt9f3
+         skzgj4QTppkSffVCxJ814cm7m0sWH/4PP9Ek4cHZrE9lfj1Vpt0QZVyh2KMZrkToCSEu
+         4wPfF6esot0G+kNWfZN87L9205PfEjJ8617b0KRuMWmwuqifVPxJzY4LBCUEDMG3Qyin
+         /ZHjiuaRnhsfGm2nITYQc0A0R+OqJdOe/vhE7bB/fnjPgIl/8QV6/oJMM9xwl27adyAA
+         OfFw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=945C8FwdjlJfOzVlhpCF8zuWn7v4UFq1IxocPRUBqQ8=;
-        b=hMIosudL4W/aF7d9X27q6/qSbETd/X9ybgC6r325JP4I6q1npHQJdJjHI4NIbzJ1U1
-         EAKSG4pUmSmy4FIQ9tCmUO/jNk9bwO1hDYvXVYWGzfWkr4nA/WWoXT0nadjQ81q/26cL
-         kdiqQ+2q/6XfFpzdcu+S99/eoLO6VjmTQtghnq91iscM5zMT2m3GwgNwjFBgjp//55x4
-         qB6ZC6JsMlK3P6c+GHdDwyHn+Z0RupDTMAzAwAwa0mYJg2lHoVtzsFxqjkDwXJ250O/I
-         9WO7Wazo1IdxfOpV0svJzOkM3ZHeHxdIUqMUzdL2LKQbI/0NjDXTUVe6s3gcGKbqdYnq
-         9MNA==
-X-Gm-Message-State: AOAM533bHoX1vkCT7RPseDJ7D8cVB0F97yecAhkEvakcQwkusTS4A2hp
-        KFdGa1yucsd4TRMgpxS+411mN42JE+0MD/IKslXVzA==
-X-Google-Smtp-Source: ABdhPJynptUzdZ0deeCIJ/1/8Dd0Z3OuhIfbUUA5FzgOArxFCd4yyXkW1vAPE8tq+yRQ8JFHGxYe2+8Pk+7uruR1Uzg=
-X-Received: by 2002:a9d:a42:: with SMTP id 60mr9321141otg.179.1638408673941;
- Wed, 01 Dec 2021 17:31:13 -0800 (PST)
+        bh=eVbRuKvcYz8AuHjLMnmwWWcthb2yF6TQ0KJocuhiso8=;
+        b=aqsk3pLe9uDJHkZ3DXJ6RsiwoZIMZIP1bzwkK9eXVucPfWOHNNLsFM9eKwXyXAVmNW
+         C6a7AEdZGCU5xwSiwm3D+L4qTKtfXa9K70qVZrdN4LsHLKm9Y4FhSXj9dXVYHGa8kVsk
+         SgJZkammD5tn+7+rL9ZI06RzngUgPLqefko5Vwqlpu+UB6jpWXpzjBQur3y3I+UdzRgC
+         J/8f9QF7Pb3sCfP0OM4DQhFwa7TE5Wk4qILqh1Vs8vx6evur57KJn8kbJquBTPJGmrBw
+         4YV9IWaVgqiczITSq3fe4JAy32GRvbCrJ3M8pvF6PxEes2npz5fcsijCP4qKK0Piq4Eg
+         b56A==
+X-Gm-Message-State: AOAM530k/sEbn4+N351+cQBpOM8lG9cdDucmMf2LvuCB+SfE1nIhfcSo
+        mKGfwAos+IgxSW6qQEW8910ATVbx5/wB3Y6+gH5few==
+X-Google-Smtp-Source: ABdhPJwyLdZ/F6szrsoT0MsoHuDbALu4MPwuISdCMt7O2AkJiofhGn6t9NOXmZkAcyUEGrTCiSAE7G6YB4B+QiEYdGA=
+X-Received: by 2002:a9d:ed6:: with SMTP id 80mr9048514otj.35.1638408720916;
+ Wed, 01 Dec 2021 17:32:00 -0800 (PST)
 MIME-Version: 1.0
-References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com> <20211125211443.1150135-5-Mr.Bossman075@gmail.com>
-In-Reply-To: <20211125211443.1150135-5-Mr.Bossman075@gmail.com>
+References: <20211125211443.1150135-1-Mr.Bossman075@gmail.com> <20211125211443.1150135-4-Mr.Bossman075@gmail.com>
+In-Reply-To: <20211125211443.1150135-4-Mr.Bossman075@gmail.com>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 2 Dec 2021 02:31:02 +0100
-Message-ID: <CACRpkdb+W2o5Ca5jthau1yOK1n-1SNHUqCWwwjwu_S0bBuS26w@mail.gmail.com>
-Subject: Re: [PATCH v3 04/13] pinctrl: freescale: Add i.MXRT1050 pinctrl
- driver support
+Date:   Thu, 2 Dec 2021 02:31:49 +0100
+Message-ID: <CACRpkdab25qv+NQj9oSxHX2W+dWNWMzWXJjg97Qmci23CM0RMw@mail.gmail.com>
+Subject: Re: [PATCH v3 03/13] ARM: dts: imxrt1050-pinfunc: Add pinctrl binding header
 To:     Jesse Taube <mr.bossman075@gmail.com>
 Cc:     linux-imx@nxp.com, mturquette@baylibre.com, sboyd@kernel.org,
         robh+dt@kernel.org, shawnguo@kernel.org, s.hauer@pengutronix.de,
@@ -70,14 +69,17 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Thu, Nov 25, 2021 at 10:14 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
 
-> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> From: Jesse Taube <mr.bossman075@gmail.com>
 >
-> Add the pinctrl driver support for i.MXRT1050.
+> Add binding header for i.MXRT1050 pinctrl device tree.
 >
 > Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
 > Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> [Jesse: move pinfunc from dt-bindings to dts folder]
 
-Patch applied to the pinctrl tree.
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
+
+Please apply this to the ARM SoC tree.
 
 Yours,
 Linus Walleij
