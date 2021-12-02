@@ -2,208 +2,261 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFE3BC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 08:06:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5270C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 08:16:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345375AbhLBIJX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Dec 2021 03:09:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32874 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241117AbhLBIJW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2021 03:09:22 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A59DC061756
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Dec 2021 00:06:00 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id f18so69507441lfv.6
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Dec 2021 00:06:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=aluHyp/G7aUqVf+8EbDwLQk4Mm65sEVYc28AHHhMT+8=;
-        b=srBlte0h/pIE8eIgDEkNIA/w/mb8T7IpDroBQMg/hXjMAoakC0zuJy8+giEG9Yyr4c
-         3RqpVEeBJ4QwmqooPfGY0OIYfOQpr0bH56AAOkba/OsyPPZyaYT1hnd/agXI3q5YqL4u
-         vIki7SZWbElHq6UdjjS+IiO+VZaF7d+zmhtK9K8NKVwbYbLVtz3R2kTXQUveW6PXQyCL
-         L7/WYsJjlQhPBbcf6NiHyzFuHH7S9G6LnX3v2Y+xeyR0FGHD1YoTj2yOKBbvwqwYSXnH
-         aU+QvrVHDxOAZO5EPftvXqU4PE0kOuprf5a7Wqf5bneJzkQp6Uol8Co2hZUUWJJ9VXLt
-         jwAg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=aluHyp/G7aUqVf+8EbDwLQk4Mm65sEVYc28AHHhMT+8=;
-        b=1zvXlxLYGG4dumlJlbLwvhZTbJQtCuvO2P8bC6VA/9YI7mefdaqwWHUD2vfk/DHFr1
-         gYY47bz2SenCRvLbmNbTgszVA4SckZyWQE2pDZxZmndC8sySksh75gAdki5xfDlsbdFI
-         K1/T2cGAGJMDEoCP3fN2eRWahEzM6a4hJUYeBJe+gUTLw2FQdCgsaJbT6OSeDpf+IY6h
-         X1oOAuf0e1FPi7iUMBX6gyzhsIVECvVS3Rxi+mbEEG5b5uITpXlm7vZadSIlknyDUsHS
-         /5APQKiUCcZCvj5KF3yxbB4B8DOMsroBai9mNbnReUFkdya6SWIoQl0/H4nRPHDB9Pbt
-         iYgA==
-X-Gm-Message-State: AOAM530ZAMBT2QuvfNhRPDgQTYVdnj1zn0YO+qJ5uLLpSJxFrJIcs8iV
-        RFIrlXFuMJKucK5FqSZ61Zr40RlST2tcp/XELlPv1g==
-X-Google-Smtp-Source: ABdhPJzSU0H7g5qn7iqaj5X7GydiJkdxhePjijCTTqN7hbpHePmUUPTn1a8wODRmyW2kwN9Xtrx3iyUzRkSqs1mXXVw=
-X-Received: by 2002:a05:6512:3d07:: with SMTP id d7mr11143471lfv.233.1638432358467;
- Thu, 02 Dec 2021 00:05:58 -0800 (PST)
+        id S1356080AbhLBIUD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Dec 2021 03:20:03 -0500
+Received: from mga03.intel.com ([134.134.136.65]:42611 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1356065AbhLBIUB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 2 Dec 2021 03:20:01 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10185"; a="236594211"
+X-IronPort-AV: E=Sophos;i="5.87,281,1631602800"; 
+   d="scan'208";a="236594211"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2021 00:16:38 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,281,1631602800"; 
+   d="scan'208";a="602636502"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by fmsmga002.fm.intel.com with ESMTP; 02 Dec 2021 00:16:33 -0800
+Subject: Re: [PATCH v16 22/40] mmc: sdhci-tegra: Add runtime PM and OPP
+ support
+To:     Dmitry Osipenko <digetx@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Nishanth Menon <nm@ti.com>,
+        Michael Turquette <mturquette@baylibre.com>
+Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
+References: <20211130232347.950-1-digetx@gmail.com>
+ <20211130232347.950-23-digetx@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <fc60f593-cd74-558d-785f-5f0d2ba179cf@intel.com>
+Date:   Thu, 2 Dec 2021 10:16:32 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-References: <1637130012-21846-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <CAPDyKFqd9ThDUPAYom32w4D8nZYxbvYnJgA9dmQnFu2qEhhMig@mail.gmail.com>
- <SJ0PR02MB8449A2533CEFE1B7EAFEA023CD639@SJ0PR02MB8449.namprd02.prod.outlook.com>
- <SJ0PR02MB8449B93CD2752DC3263DD529CD699@SJ0PR02MB8449.namprd02.prod.outlook.com>
- <f178a0db-c978-42cf-1335-09b19d9574cc@intel.com>
-In-Reply-To: <f178a0db-c978-42cf-1335-09b19d9574cc@intel.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 2 Dec 2021 09:05:21 +0100
-Message-ID: <CAPDyKFpihKExf2qiPuHtbJitP-q21rFCY-MNMdvAvbQd1C2_jA@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat sysfs entry
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     "Sajida Bhanu (Temp) (QUIC)" <quic_c_sbhanu@quicinc.com>,
-        "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
-        "Asutosh Das (asd)" <asutoshd@quicinc.com>,
-        "agross@kernel.org" <agross@kernel.org>,
-        "bjorn.andersson@linaro.org" <bjorn.andersson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "stummala@codeaurora.org" <stummala@codeaurora.org>,
-        "vbadigan@codeaurora.org" <vbadigan@codeaurora.org>,
-        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
-        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
-        "sartgarg@codeaurora.org" <sartgarg@codeaurora.org>,
-        "nitirawa@codeaurora.org" <nitirawa@codeaurora.org>,
-        "sayalil@codeaurora.org" <sayalil@codeaurora.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20211130232347.950-23-digetx@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2 Dec 2021 at 08:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 02/12/2021 08:42, Sajida Bhanu (Temp) (QUIC) wrote:
-> > Gentle Reminder.
-> >
-> > Thanks,
-> > Sajida
-> > -----Original Message-----
-> > From: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>
-> > Sent: Friday, November 26, 2021 10:54 AM
-> > To: Ulf Hansson <ulf.hansson@linaro.org>; Sajida Bhanu (Temp) (QUIC) <q=
-uic_c_sbhanu@quicinc.com>
-> > Cc: adrian.hunter@intel.com; riteshh@codeaurora.org; Asutosh Das (asd) =
-<asutoshd@quicinc.com>; agross@kernel.org; bjorn.andersson@linaro.org; linu=
-x-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-kernel@vger.ker=
-nel.org; stummala@codeaurora.org; vbadigan@codeaurora.org; Ram Prakash Gupt=
-a (QUIC) <quic_rampraka@quicinc.com>; Pradeep Pragallapati (QUIC) <quic_pra=
-galla@quicinc.com>; sartgarg@codeaurora.org; nitirawa@codeaurora.org; sayal=
-il@codeaurora.org
-> > Subject: RE: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat s=
-ysfs entry
-> >
-> >
-> >
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Thursday, November 25, 2021 5:01 PM
-> > To: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>
-> > Cc: adrian.hunter@intel.com; riteshh@codeaurora.org; Asutosh Das (asd) =
-<asutoshd@quicinc.com>; agross@kernel.org; bjorn.andersson@linaro.org; linu=
-x-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-kernel@vger.ker=
-nel.org; stummala@codeaurora.org; vbadigan@codeaurora.org; Ram Prakash Gupt=
-a (QUIC) <quic_rampraka@quicinc.com>; Pradeep Pragallapati (QUIC) <quic_pra=
-galla@quicinc.com>; sartgarg@codeaurora.org; nitirawa@codeaurora.org; sayal=
-il@codeaurora.org
-> > Subject: Re: [PATCH V1] mmc: sdhci-msm: Add eMMC and SD card err_stat s=
-ysfs entry
-> >
-> > On Wed, 17 Nov 2021 at 07:20, Shaik Sajida Bhanu <quic_c_sbhanu@quicinc=
-.com> wrote:
-> >>
-> >> Add sysfs entry to query eMMC and SD card errors statistics.
-> >> This feature is useful for debug and testing.
-> >>
-> >> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> >> ---
-> >>  drivers/mmc/host/cqhci.h     |   1 +
-> >>  drivers/mmc/host/sdhci-msm.c | 192 ++++++++++++++++++++++++++++++++++=
-+++++++++
-> >>  drivers/mmc/host/sdhci.c     |  17 ++++
-> >>  drivers/mmc/host/sdhci.h     |   1 +
-> >>  include/linux/mmc/host.h     |   1 +
-> >>  5 files changed, 212 insertions(+)
-> >
-> > To allow an easier review, I strongly suggest splitting up the changes =
-in smaller pieces. Maybe in three steps: add interfaces, implement them, ad=
-d sysfs - or something along those lines.
-> >
-> > I am also trying to understand the benefit of having these stats availa=
-ble. Can you perhaps share a little bit of background on how they are usabl=
-e for you? Is it for debug purpose or does it have other purposes too?
-> >
-> > If it turns out that we agree on finding these stats valuable for us, t=
-hen I am inclined to think that this should be integrated closer with the m=
-mc core.
-> >
-> > The error codes that are propagated to the core from failed requests ar=
-e common error codes, so we should be able to use that information from the=
- core itself, I think.
-> >
-> > Kind regards
-> > Uffe
-> >
-> > Hi Ulf,
-> >
-> > Thanks for the review
-> >
-> > I am also trying to understand the benefit of having these stats availa=
-ble. Can you perhaps share a little bit of background on how they are usabl=
-e for you? Is it for debug purpose or does it have other purposes too?
-> >
-> >>>>>>>>>>>>> These changes for debug purpose only .. if any errors occur=
-red while testing eMMC and SD card those will be captured in these sysfs en=
-tries ,  we can directly go and check the sysfs entries and get to know wha=
-t is the error occurred in driver level.
->
-> I would suggest using debugfs and adding support in mmc host debugfs
-> e.g.
->
-> static inline void mmc_debugfs_err_stats_enable(struct mmc_host *mmc)
-> {
->         mmc->err_stats_enabled =3D true;
-> }
->
-> enum mmc_err_stat {
->         MMC_ERR_CMD_TIMEOUT,
->         MMC_ERR_CMD_CRC,
->         MMC_ERR_DAT_TIMEOUT,
->         MMC_ERR_DAT_CRC,
->         MMC_ERR_AUTO_CMD,
->         MMC_ERR_ADMA,
->         MMC_ERR_TUNING,
->         MMC_ERR_CMDQ_RED,
->         MMC_ERR_CMDQ_GCE,
->         MMC_ERR_CMDQ_ICCE,
->         MMC_ERR_REQ_TIMEOUT,
->         MMC_ERR_CMDQ_REQ_TIMEOUT,
->         MMC_ERR_ICE_CFG,
->         MMC_ERR_MAX,
-> };
->
-> static inline void mmc_debugfs_err_stats_inc(struct mmc_host *mmc, enum m=
-mc_err_stat stat)
-> {
->         mmc->err_stats[stat] +=3D 1;
-> }
->
-> And amend mmc_add_host_debugfs() to create the err_stats file etc.
->
-> sdhci.c could call mmc_debugfs_err_stats_enable() and mmc_debugfs_err_sta=
-ts_inc() as needed.
-> cqhci.c could call mmc_debugfs_err_stats_inc() as needed.
->
-> Ulf, does that sound reasonable?
+On 01/12/2021 01:23, Dmitry Osipenko wrote:
+> The SDHCI on Tegra belongs to the core power domain and we're going to
+> enable GENPD support for the core domain. Now SDHCI must be resumed using
+> runtime PM API in order to initialize the SDHCI power state. The SDHCI
+> clock rate must be changed using OPP API that will reconfigure the power
+> domain performance state in accordance to the rate. Add runtime PM and OPP
+> support to the SDHCI driver.
+> 
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 
-Yes, it does! Thanks for having a closer look!
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-[...]
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 81 +++++++++++++++++++++++++++-------
+>  1 file changed, 65 insertions(+), 16 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index a5001875876b..6435a75142a6 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -15,6 +15,8 @@
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+>  #include <linux/pinctrl/consumer.h>
+> +#include <linux/pm_opp.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/reset.h>
+>  #include <linux/mmc/card.h>
+> @@ -24,6 +26,8 @@
+>  #include <linux/gpio/consumer.h>
+>  #include <linux/ktime.h>
+>  
+> +#include <soc/tegra/common.h>
+> +
+>  #include "sdhci-pltfm.h"
+>  #include "cqhci.h"
+>  
+> @@ -760,7 +764,9 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> +	struct device *dev = mmc_dev(host->mmc);
+>  	unsigned long host_clk;
+> +	int err;
+>  
+>  	if (!clock)
+>  		return sdhci_set_clock(host, clock);
+> @@ -778,7 +784,12 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	 * from clk_get_rate() is used.
+>  	 */
+>  	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
+> -	clk_set_rate(pltfm_host->clk, host_clk);
+> +
+> +	err = dev_pm_opp_set_rate(dev, host_clk);
+> +	if (err)
+> +		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
+> +			host_clk, err);
+> +
+>  	tegra_host->curr_clk_rate = host_clk;
+>  	if (tegra_host->ddr_signaling)
+>  		host->max_clk = host_clk;
+> @@ -1705,7 +1716,6 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>  				   "failed to get clock\n");
+>  		goto err_clk_get;
+>  	}
+> -	clk_prepare_enable(clk);
+>  	pltfm_host->clk = clk;
+>  
+>  	tegra_host->rst = devm_reset_control_get_exclusive(&pdev->dev,
+> @@ -1716,15 +1726,24 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>  		goto err_rst_get;
+>  	}
+>  
+> -	rc = reset_control_assert(tegra_host->rst);
+> +	rc = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
+>  	if (rc)
+>  		goto err_rst_get;
+>  
+> +	pm_runtime_enable(&pdev->dev);
+> +	rc = pm_runtime_resume_and_get(&pdev->dev);
+> +	if (rc)
+> +		goto err_pm_get;
+> +
+> +	rc = reset_control_assert(tegra_host->rst);
+> +	if (rc)
+> +		goto err_rst_assert;
+> +
+>  	usleep_range(2000, 4000);
+>  
+>  	rc = reset_control_deassert(tegra_host->rst);
+>  	if (rc)
+> -		goto err_rst_get;
+> +		goto err_rst_assert;
+>  
+>  	usleep_range(2000, 4000);
+>  
+> @@ -1736,8 +1755,11 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>  
+>  err_add_host:
+>  	reset_control_assert(tegra_host->rst);
+> +err_rst_assert:
+> +	pm_runtime_put_sync_suspend(&pdev->dev);
+> +err_pm_get:
+> +	pm_runtime_disable(&pdev->dev);
+>  err_rst_get:
+> -	clk_disable_unprepare(pltfm_host->clk);
+>  err_clk_get:
+>  	clk_disable_unprepare(tegra_host->tmclk);
+>  err_power_req:
+> @@ -1756,19 +1778,38 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
+>  
+>  	reset_control_assert(tegra_host->rst);
+>  	usleep_range(2000, 4000);
+> -	clk_disable_unprepare(pltfm_host->clk);
+> -	clk_disable_unprepare(tegra_host->tmclk);
+>  
+> +	pm_runtime_put_sync_suspend(&pdev->dev);
+> +	pm_runtime_force_suspend(&pdev->dev);
+> +
+> +	clk_disable_unprepare(tegra_host->tmclk);
+>  	sdhci_pltfm_free(pdev);
+>  
+>  	return 0;
+>  }
+>  
+> -#ifdef CONFIG_PM_SLEEP
+> -static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
+> +static int __maybe_unused sdhci_tegra_runtime_suspend(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +	clk_disable_unprepare(pltfm_host->clk);
+> +
+> +	return 0;
+> +}
+> +
+> +static int __maybe_unused sdhci_tegra_runtime_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +
+> +	return clk_prepare_enable(pltfm_host->clk);
+> +}
+> +
+> +#ifdef CONFIG_PM_SLEEP
+> +static int sdhci_tegra_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>  	int ret;
+>  
+>  	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+> @@ -1783,17 +1824,22 @@ static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
+>  		return ret;
+>  	}
+>  
+> -	clk_disable_unprepare(pltfm_host->clk);
+> +	ret = pm_runtime_force_suspend(dev);
+> +	if (ret) {
+> +		sdhci_resume_host(host);
+> +		cqhci_resume(host->mmc);
+> +		return ret;
+> +	}
+> +
+>  	return 0;
+>  }
+>  
+> -static int __maybe_unused sdhci_tegra_resume(struct device *dev)
+> +static int sdhci_tegra_resume(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>  	int ret;
+>  
+> -	ret = clk_prepare_enable(pltfm_host->clk);
+> +	ret = pm_runtime_force_resume(dev);
+>  	if (ret)
+>  		return ret;
+>  
+> @@ -1812,13 +1858,16 @@ static int __maybe_unused sdhci_tegra_resume(struct device *dev)
+>  suspend_host:
+>  	sdhci_suspend_host(host);
+>  disable_clk:
+> -	clk_disable_unprepare(pltfm_host->clk);
+> +	pm_runtime_force_suspend(dev);
+>  	return ret;
+>  }
+>  #endif
+>  
+> -static SIMPLE_DEV_PM_OPS(sdhci_tegra_dev_pm_ops, sdhci_tegra_suspend,
+> -			 sdhci_tegra_resume);
+> +static const struct dev_pm_ops sdhci_tegra_dev_pm_ops = {
+> +	SET_RUNTIME_PM_OPS(sdhci_tegra_runtime_suspend, sdhci_tegra_runtime_resume,
+> +			   NULL)
+> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_tegra_suspend, sdhci_tegra_resume)
+> +};
+>  
+>  static struct platform_driver sdhci_tegra_driver = {
+>  	.driver		= {
+> 
 
-Kind regards
-Uffe
