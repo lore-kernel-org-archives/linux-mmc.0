@@ -2,288 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6D2AC4167B
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 16:01:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B2C1C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 16:19:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347805AbhLBQEX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Dec 2021 11:04:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58128 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229817AbhLBQER (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2021 11:04:17 -0500
-Received: from mail-ua1-x92b.google.com (mail-ua1-x92b.google.com [IPv6:2607:f8b0:4864:20::92b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2AB3C06174A;
-        Thu,  2 Dec 2021 08:00:54 -0800 (PST)
-Received: by mail-ua1-x92b.google.com with SMTP id n6so56819328uak.1;
-        Thu, 02 Dec 2021 08:00:54 -0800 (PST)
+        id S1359376AbhLBQW5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Dec 2021 11:22:57 -0500
+Received: from mail-eopbgr00041.outbound.protection.outlook.com ([40.107.0.41]:11583
+        "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1359409AbhLBQW5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 2 Dec 2021 11:22:57 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=lZQ6WelFzEWb7pEo5sKvalnF7NrjIj0t6oMjo94ScfuwfaW3g8N9AQRJgHMOk9uhgaSRzdMGsr75sDElN9uqODzBy0TJALwngq7ljQjip22elAdKBdlMuA7gMO5FSkqialwttZ6CQO6KfIfVRNtlvP8ujONOQ4grx/7KLwW/HGk3urAlGbfpG/j1JeLlW12INWtvsiVPl68y1cRpGleV4g+dNPBFimErbwBq/pTZZPIXyPEf6t417lt1/IR2C3+CsifD66aUULLXN0XVmv3Ow1I6YvE3thNss4Tv9AQZCpc2A4NC4BRm8sRoY5/Xf3GwIcHYVCscbP8qjWNFEjCJ4A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=802ril0btSk8eLrwP3Gy7ojs/4ULMHe0jyWukiHkaTw=;
+ b=aVmdNuB5W7K8tsYCT/vyBckTRrBj/omiwxqLS/JHlB9fBunXBYqeuSDWmF/ufOhMR3QzYc48CfeL22D/qYYN+ZdmhQazL7VYURlzCaO0S5PWDQd++1bCBiy0yeSz7pLLxT57Rsi1ccwU205EeQ/P3h4lttIsa25xkQN9Og4opRjesG/pfIgn4aatHynmR7F9hWRnIs3EWLBkE0eI3ip0mggqE462ExnbCoiVaL4FKKdWhPri7OoWLeQvezsMIHya4N8BHlt3kZhWo8zNR1+kg2JFIJlZg7EHcCoJq1KpRPv+De6w2DA0py22Ku+pWkQN8hMfGLn53//7uHbycivQZQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=theobroma-systems.com; dmarc=pass action=none
+ header.from=theobroma-systems.com; dkim=pass header.d=theobroma-systems.com;
+ arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=U2sZPQd798weph9knxMPMeinCmRojfS8Pfapl2giXJM=;
-        b=jzpN2txMKcqDve7u5vuRi2+S6p2VzSDwNSmwgr2/5gAHntXTVsO8sG16S0sfqGyEUK
-         i5x27dvhK+nePQ8Yv1FdSGF/aNukodMSRBjErWtEoehmr5hBVhIJR+8fxfg19jP0VmLF
-         kDLyA3Rcf/hL1qOS1mxoSB8r7ot6uNKvV7zfnrN4auV/nXuMVm9ZJkxGibAMDmn/SoBe
-         ROrk7jYNBy4vRtneCuKrpYlAlXLqbg6VPDloVm3HCa7hmqiu7kasCokZzPej4vufQLcm
-         C103EOF/74+rSPWk4wyF6S+J+jQQ02uAbpL/QaSvdMcka5dyzJ3Tk3nenPYbgspH8T3x
-         7IvQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=U2sZPQd798weph9knxMPMeinCmRojfS8Pfapl2giXJM=;
-        b=HRZ3wB4So2gPSE9p3PGj91dZ32K3lvzrb4NYqR0D3dhitPorDeKlwtxAW7rQW0OMGn
-         aijsNxew002ftVOAutuVn3Z3FFYJAYFmUbZQinOWgZqHA7Ucwjb4DOl7WepV6FdPMsVd
-         2p+ZLCA+JoMVdY9jFkBwvrqCm/AG45qyX5PKTXmYqhzxTVJK8M/utfFs6iEpnIp1Jhoh
-         sjTrwkyU2bhK0o9slrhIt556uW4qUz1DgG36+tjrEwOb14Rd/ZEzvTVcwHKCzeJjotUU
-         yWw28KoWYqhGo4K+MN8+jH7A2MdSxIJL5c/Rf5OpcV0fpXNK0BSaQRZY2E7VIxo0ejTS
-         44RA==
-X-Gm-Message-State: AOAM530hese71zCkqrBBUAZbUNYt/GciqMDW2cJ22x9UMV2CGeebhavF
-        ktIsvDhUevpGeD0FvTfafVp21jofAmoM9laPd60=
-X-Google-Smtp-Source: ABdhPJybAreaEhSuo2y2Tbo1YdlgTaiMlhDNtXg5D8QWfVW6+flBljZULwo/BbqpU2HaLcu7I83aSoQSfdCygG1zQUs=
-X-Received: by 2002:ab0:45a8:: with SMTP id u37mr15834000uau.24.1638460853923;
- Thu, 02 Dec 2021 08:00:53 -0800 (PST)
+ d=cherrycloud.onmicrosoft.com; s=selector2-cherrycloud-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=802ril0btSk8eLrwP3Gy7ojs/4ULMHe0jyWukiHkaTw=;
+ b=esjTAY26Sp1p4g46PxCqbJmJyYfOpXHeqmj5HGbYjcQzJHAoxkr+dT79c2nX7smsuAGyx2Yqc/ALVmQGkUXHjdenProlwONN9End7CHZU4O5a+BHJ23PtQJ/JLbPQM98Z/Y34ustk3QGTsXT28UZDssdJ9WlfPV3rCj4JEbjOIA=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=theobroma-systems.com;
+Received: from AM0PR0402MB3348.eurprd04.prod.outlook.com
+ (2603:10a6:208:24::24) by AM9PR04MB8100.eurprd04.prod.outlook.com
+ (2603:10a6:20b:3e3::12) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.11; Thu, 2 Dec
+ 2021 16:19:31 +0000
+Received: from AM0PR0402MB3348.eurprd04.prod.outlook.com
+ ([fe80::d56f:ec59:3bd0:6d7a]) by AM0PR0402MB3348.eurprd04.prod.outlook.com
+ ([fe80::d56f:ec59:3bd0:6d7a%5]) with mapi id 15.20.4755.016; Thu, 2 Dec 2021
+ 16:19:31 +0000
+From:   Quentin Schulz <quentin.schulz@theobroma-systems.com>
+Cc:     linux-mmc@vger.kernel.org,
+        Quentin Schulz <quentin.schulz@theobroma-systems.com>,
+        Quentin Schulz <foss+kernel@0leil.net>
+Subject: [PATCH] mmc_cmds: add HS400 data rates
+Date:   Thu,  2 Dec 2021 17:19:10 +0100
+Message-Id: <20211202161910.3944640-1-quentin.schulz@theobroma-systems.com>
+X-Mailer: git-send-email 2.33.1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+X-ClientProxiedBy: AS8PR07CA0054.eurprd07.prod.outlook.com
+ (2603:10a6:20b:459::32) To AM0PR0402MB3348.eurprd04.prod.outlook.com
+ (2603:10a6:208:24::24)
 MIME-Version: 1.0
-References: <20211201205110.41656-1-f.fainelli@gmail.com> <20211201205110.41656-6-f.fainelli@gmail.com>
-In-Reply-To: <20211201205110.41656-6-f.fainelli@gmail.com>
-From:   Gregory Fong <gregory.0xf0@gmail.com>
-Date:   Thu, 2 Dec 2021 08:00:00 -0800
-Message-ID: <CADtm3G7wiNdDq2fagWeSDd_RV_dyfrNy+5e-VL9OKjwGAWzNtg@mail.gmail.com>
-Subject: Re: [PATCH 05/14] dt-bindings: gpio: Convert Broadcom STB GPIO to YAML
-To:     Florian Fainelli <f.fainelli@gmail.com>
-Cc:     devicetree@vger.kernel.org,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        "maintainer:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Matt Mackall <mpm@selenic.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Markus Mayer <mmayer@broadcom.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Al Cooper <alcooperx@gmail.com>,
-        Doug Berger <opendmb@gmail.com>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
-        <linux-mmc@vger.kernel.org>,
-        "open list:PWM SUBSYSTEM" <linux-pwm@vger.kernel.org>,
-        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
-        <linux-crypto@vger.kernel.org>,
-        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
-        <linux-rtc@vger.kernel.org>,
-        "open list:THERMAL" <linux-pm@vger.kernel.org>,
-        "open list:USB SUBSYSTEM" <linux-usb@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Received: from localhost.localdomain (92.42.140.82) by AS8PR07CA0054.eurprd07.prod.outlook.com (2603:10a6:20b:459::32) with Microsoft SMTP Server (version=TLS1_2, cipher=) via Frontend Transport; Thu, 2 Dec 2021 16:19:31 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 24576705-ecc8-4cb0-7f14-08d9b5af8567
+X-MS-TrafficTypeDiagnostic: AM9PR04MB8100:
+X-Microsoft-Antispam-PRVS: <AM9PR04MB8100B71888D8930622F1E6A8C2699@AM9PR04MB8100.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:2733;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: B0wmnIDdMwcxVpAkzlOX+x70nyDTGyrV6+HsgygCyuqCEPW5l6CPYpie9RNI3svoMYFKCAouNajkwEp8kw33L8vvHWNUwjwSP/NuAUI/Q0YeEXjrUp9gtP4XyzdmAZN7VvIGOrXjAAJcEO/LmAGoXDOsrUzNqrZ3mH3l38pw9jSWlwAcddtVJrJHwC/KDHkL9etJbGMgCm5kh/6GpJDdrum/09zsEUDZjXhI/splpBvI/VIuc7VpitQzr7wlJxRy/6uiuFzR1MokfedHVEEieIPjFTj7QgnTM9O6EplzzBEWp43qY/4dE19nX23rfbNbMQDFJRXtgjltljaLxxiTem/MbqmJ7yxYdm2wJqEYmNGVAOH1V7/6iAylrT/lFk+QtidZAjBBdEpZPabagOQO+tlA+tiDQFR7S3mKXDiRPPK9bvWWgrT+GOy4VEFZSfauA7197sgCgvQlusGWTJnZ5gDH5056lGYuuKcBTrUvWXUAmhGTVVV/zgeGeJ8vM4Us+WTDupHKytBL+knDHlSwERBpnJtjhQxTEX6dHufBUVQ6fDUIZrl3F+hiFuvLtd37PiRMvdnctOSHu7508RjTE6ROMEHvjU5yZ7PyM74hl/wSnYJ7nv+Ii/PuLEkbwO+ftVE6a8MVZu0EKjRVg1zJspxIn1/nowPjqo9wI+8OjtAWwkv2xa170zgBniY+ps/Yb5mQesfp5O4X2Lmz3SBhEHhyzqXqvMajMIk0XpAnDBg=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM0PR0402MB3348.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(508600001)(5660300002)(36756003)(6486002)(86362001)(52116002)(109986005)(316002)(1076003)(54906003)(38100700002)(2906002)(38350700002)(8676002)(44832011)(956004)(8936002)(26005)(66476007)(66556008)(66946007)(6512007)(2616005)(6506007)(4326008)(186003)(6666004)(266003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?SmZDc0N5Uys4d3FRb0k2ZExPdCtyLzB1cGVyQ2NvRHltYVpBdy9Ea25Ha0h2?=
+ =?utf-8?B?TTdvNlE5blJTT1FleEhyLzNkeUZUMTlHcWFsbkZmV0hoNHlFdER3N01mYjg5?=
+ =?utf-8?B?Q1R0UHdKejVUekQxWWxLVGZPbjFZa203Q1JHcmgzUW9SdExSKzJDY3RvdFlD?=
+ =?utf-8?B?SktUUFVxYnNVWFlxTjJBM0twQXU3ZEJ0ZnA4dTN3Y3kzYVQ5dkE0Vys5b2hr?=
+ =?utf-8?B?MEJrVm1oVkYrWmdGbFMyM2w5Mm9RUFpDTUdRckFGbytzWFlmM3grNkt6WDRn?=
+ =?utf-8?B?SFk3UDlLNDJxb2hvRk1YbnBWQlI4d0lHTFQ1ZStZTFM4NjFXVGRRUzFtVFFF?=
+ =?utf-8?B?clpYUENyVFFNeE9pK1RObDBsanNJYk5Fc2UyOUNJTnhUcjlkNnVEMGhVN3hN?=
+ =?utf-8?B?Zkt0TnhER084MjBRRVBGamZnZWxQc2xKUVh3bVViaFFreFovc1NZa3lqdWth?=
+ =?utf-8?B?N3hwUzZuSnBFa1gwNjE1S1Z0YWxiSmE3Wmt3UnlZZDAyTE42emlIb3NIRVE2?=
+ =?utf-8?B?eGtQN21aUTVKbmVyUHdtTHh1cGJ5TDhJcHhqNnpkTUlqUTBFbzBlN0JCcExy?=
+ =?utf-8?B?MWtqaVFBTFBpOXc2NmhRVWdvMEljTnBQaXp5Nk9LVmVWQjIzekQ4QkZBaGdt?=
+ =?utf-8?B?QjFFTjVVWmo2NCt2QVorQzBsdjJydnp6Y2x3aC9hb3V1elM2NnBjUExLVXIx?=
+ =?utf-8?B?d09tdFNiOStoaVN3MlVjSXh6clQwQ1I3VzVjQ1pQRUwyMjlsWjg4cVZ0aFFy?=
+ =?utf-8?B?YXdiS0hnVEdNc1F2dGg1bk5CYVJiL25Idk55MWlXRXlUSHZ0TUlpckl3bXJD?=
+ =?utf-8?B?YWpZRVFGcS85NGdqWTJCUHpqVlRqdDBCVWNwQ0JoNFN4RWRHblZjd0dIdVpp?=
+ =?utf-8?B?NW1tc3drektBNlpaYjBjQXVBRGhkeXlWQ2NPcVRrUkQ3a2NDK0FnbTNHcHl4?=
+ =?utf-8?B?S3JCZWlCL1Z0ZzFkRkFIMmovaVRwdE1uV05vdXFrMjU0cThKMjFTejQwZXZQ?=
+ =?utf-8?B?VEtzNXBiUjVra3FSVDRGdGUxaTRuUVBOWEduQnVGS0RWM1dLQ1BpUXdsdzIz?=
+ =?utf-8?B?STM3dWJ6RkhTODQ2WnRkUURaSUxqcGRQMisyOHBnZlp4dkN2UnlVREZYa2RY?=
+ =?utf-8?B?akdWbWM0N05qNGNqeDhLa25wOTFEOUwxVlorOWp4WEwxdElsTm42OHdwQ2sy?=
+ =?utf-8?B?Vmc3UC93dFZrRGRLZThidmxtQUlubGF1SW52M1llL1EwcTJQSjZzSUhBNTAr?=
+ =?utf-8?B?YXYrbTRscXZTbnBSbEpORmV6NTd3U3pwOWZJY2RMVTlVazRydFgwZWpiOU1w?=
+ =?utf-8?B?U1VvY2tDcWc5Wlpod01lYmNjWlV0b3hYT2o1Q1VCdmVpT1E4cVgrWUh2Kzdh?=
+ =?utf-8?B?SmNqTXZESVF4aGJSV0pQVlJTemFnbmNDYjBYUk1hTllkdUZzOEVzU3BDQ1pY?=
+ =?utf-8?B?ZGs3RGhRNEprU1VsaGkvL3NQY2JSNUxnblBkSnVHK25IUkpCb0xLbFF2NG5M?=
+ =?utf-8?B?dklLTEFiU2xwa3pFb29RZHBRbFovc2FwQXd4bDRTVk5aTXkxOTZGY2dkVFZE?=
+ =?utf-8?B?OHpwN3pCRnZkbXZ4RTQ4Vm1pK3Fvc1g0Mm9RMWhPVTJYd3d1UVFyUUhrcjRz?=
+ =?utf-8?B?RUsyMk1HZFRiMVVTc3Jab3kzcFp5R2NYRWlWWEd3YzBFZXVCZEwzcnh4WFZj?=
+ =?utf-8?B?SElCS08wUXh1RVFhWXhFblVOeVlVTmZGdXpudGxScFNXcDVkZzJtOEQ1bEkr?=
+ =?utf-8?B?aVVpa0o5aHhDQ0kwM3pPYkkzWkp4WXZRWDUrSm84cSsxaXZPQWVlMzNYVElP?=
+ =?utf-8?B?aE5MOElxSmhxY1c3bVZwUTRBWCs2OU1JNjVtTkUzVG4wT3VBOGJhMnk2cVVh?=
+ =?utf-8?B?eGJncS9uT011TXRyRzBVS2YrYzlaQjJka0VPTE83dHRIdDdYcFdzR1NzUXdU?=
+ =?utf-8?B?elhOa0NyeVM5RFlBSXdISUpOVWNVbEpGTDZZYzRzV1B1YWtYU0JRNzlwZ01H?=
+ =?utf-8?B?dE94QTBYRmIreE16VHpNY3VxT3VnZ01pUzBTeFNSYitSSm1nOEp5eThzWUt4?=
+ =?utf-8?B?eGtlY2EzQXp5NGtpcWJYRVFycHhxVitVU2tuVUpTNVlzaTRQVkI2emNkTzd2?=
+ =?utf-8?B?ajhCODJpaHlZSFhibkNpeHppTTM2ZC85TDN2anhXZHVET280aDdZWWI0MGJr?=
+ =?utf-8?B?a2t6SWJURU5uSjg0R2Y5Z1BESTFBNzdlVExnVG8vRytudkJzVjJxUVY1bkNC?=
+ =?utf-8?B?bzJjSUw2eHl5aDcwcXBQMUdsSWhXZElPVnBBdXdRT09ISm1BSGh4SnBkMzFk?=
+ =?utf-8?B?K3ZHUTFzYW94bnlqa2MxcDYzaTJWV2VCeXZKanVVay8wbHZORC9yZz09?=
+X-OriginatorOrg: theobroma-systems.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 24576705-ecc8-4cb0-7f14-08d9b5af8567
+X-MS-Exchange-CrossTenant-AuthSource: AM0PR0402MB3348.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Dec 2021 16:19:31.2552
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 5e0e1b52-21b5-4e7b-83bb-514ec460677e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: +AC3pecI7VgJVbDBSIp4cPWOxU9WdCJ+mFdf2zl0iQ76XuyWaJw7K0mA3uwKZRBb7UWWS3+7f2zdRtZZfVFBYE7sLYaa8vz269cse75HsIdI5OPkp/KTlWnM92q688mi
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM9PR04MB8100
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Florian,
+JEDEC 5.1 JESD84-B50.1 DEVICE_TYPE [196] specifies that bit 6 is for
+"HS400 Dual Data Rate e•MMC at 200 MHz – 1.8 V I/O" and bit 7 for
+"HS400 Dual Data Rate e•MMC at 200 MHz – 1.2 V I/O" so let's add those.
 
-I haven't kept up with the new yaml format, so not entirely sure I
-know what I'm talking about yet, but here are a few comments:
+Cc: Quentin Schulz <foss+kernel@0leil.net>
+Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
+---
+ mmc_cmds.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-On Wed, Dec 1, 2021 at 12:51 PM Florian Fainelli <f.fainelli@gmail.com> wrote:
->
-> Convert the Broadcom STB GPIO Device Tree binding to YAML to help with
-> validation.
->
-> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
-> ---
->  .../bindings/gpio/brcm,brcmstb-gpio.txt       |  83 --------------
->  .../bindings/gpio/brcm,brcmstb-gpio.yaml      | 104 ++++++++++++++++++
->  MAINTAINERS                                   |   2 +-
->  3 files changed, 105 insertions(+), 84 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
->  create mode 100644 Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
->
-> diff --git a/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt b/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
-> deleted file mode 100644
-> index 5d468ecd1809..000000000000
-> --- a/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
-> +++ /dev/null
-> @@ -1,83 +0,0 @@
-> [snip]
-> -
-> -- interrupts-extended:
-> -    Alternate form of specifying interrupts and parents that allows for
-> -    multiple parents.  This takes precedence over 'interrupts' and
-> -    'interrupt-parent'.  Wakeup-capable GPIO controllers often route their
-> -    wakeup interrupt lines through a different interrupt controller than the
-> -    primary interrupt line, making this property necessary.
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 73bd32a..769e317 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1613,6 +1613,8 @@ int do_read_extcsd(int nargs, char **argv)
+ 	/* DEVICE_TYPE in A45, CARD_TYPE in A441 */
+ 	reg = ext_csd[196];
+ 	printf("Card Type [CARD_TYPE: 0x%02x]\n", reg);
++	if (reg & 0x80) printf(" HS400 Dual Data Rate eMMC @200MHz 1.2VI/O\n");
++	if (reg & 0x40) printf(" HS400 Dual Data Rate eMMC @200MHz 1.8VI/O\n");
+ 	if (reg & 0x20) printf(" HS200 Single Data Rate eMMC @200MHz 1.2VI/O\n");
+ 	if (reg & 0x10) printf(" HS200 Single Data Rate eMMC @200MHz 1.8VI/O\n");
+ 	if (reg & 0x08) printf(" HS Dual Data Rate eMMC @52MHz 1.2VI/O\n");
+-- 
+2.33.1
 
-It looks like interrupts-extended was removed from the new docs, I'm
-assuming that was intentional?
-
-> [snip]
-> diff --git a/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml b/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
-> new file mode 100644
-> index 000000000000..4b7309dc74dc
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
-> @@ -0,0 +1,104 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Broadcom STB "UPG GIO" GPIO controller
-> +
-> +description: >
-> +  The controller's registers are organized as sets of eight 32-bit
-> +  registers with each set controlling a bank of up to 32 pins.  A single
-> +  interrupt is shared for all of the banks handled by the controller.
-> +
-> +maintainers:
-> +  - Doug Berger <opendmb@gmail.com>
-> +  - Florian Fainelli <f.fainelli@gmail.com>
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - items:
-> +          - enum:
-> +              - brcm,bcm7445-gpio
-> +          - const: brcm,brcmstb-gpio
-> +
-> +  reg:
-> +    maxItems: 1
-> +    description:
-
-Missing folded block scalar marker ('>') above
-
-> +      Define the base and range of the I/O address space containing
-> +      the brcmstb GPIO controller registers
-> +
-> +  "#gpio-cells":
-> +    const: 2
-> +    description: >
-> +      The first cell is the pin number (within the controller's
-> +      pin space), and the second is used for the following:
-> +      bit[0]: polarity (0 for active-high, 1 for active-low)
-> +
-> +  gpio-controller: true
-> +
-> +  "brcm,gpio-bank-widths":
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
-> +    description:
-
-Same here
-
-> +      Number of GPIO lines for each bank.  Number of elements must
-> +      correspond to number of banks suggested by the 'reg' property.
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +    description:
-
-While it's not necessary while this is only one line, consider adding
-'>' here too.
-
-> +      The interrupt shared by all GPIO lines for this controller.
-> +
-> +  "#interrupt-cells":
-> +    const: 2
-> +    description: >
-
-This next block could get formatted strangely with '>'; recommend
-using '|' instead
-
-> +      The first cell is the GPIO number, the second should specify
-> +      flags.  The following subset of flags is supported:
-> +      - bits[3:0] trigger type and level flags
-> +        1 = low-to-high edge triggered
-> +        2 = high-to-low edge triggered
-> +        4 = active high level-sensitive
-> +        8 = active low level-sensitive
-> +      Valid combinations are 1, 2, 3, 4, 8.
-> +
-> +  interrupt-controller: true
-> +
-> +  wakeup-source:
-> +    type: boolean
-> +    description: >
-> +      GPIOs for this controller can be used as a wakeup source
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - gpio-controller
-> +  - "#gpio-cells"
-
-Need to add required property "brcm,gpio-bank-widths"
-
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    upg_gio: gpio@f040a700 {
-> +        #gpio-cells = <2>;
-> +        #interrupt-cells = <2>;
-> +        compatible = "brcm,bcm7445-gpio", "brcm,brcmstb-gpio";
-> +        gpio-controller;
-> +        interrupt-controller;
-> +        reg = <0xf040a700 0x80>;
-> +        interrupt-parent = <&irq0_intc>;
-> +        interrupts = <0x6>;
-> +        brcm,gpio-bank-widths = <32 32 32 24>;
-> +    };
-> +
-> +    upg_gio_aon: gpio@f04172c0 {
-> +        #gpio-cells = <2>;
-> +        #interrupt-cells = <2>;
-> +        compatible = "brcm,bcm7445-gpio", "brcm,brcmstb-gpio";
-> +        gpio-controller;
-> +        interrupt-controller;
-> +        reg = <0xf04172c0 0x40>;
-> +        interrupt-parent = <&irq0_aon_intc>;
-> +        interrupts = <0x6>;
-> +        wakeup-source;
-> +        brcm,gpio-bank-widths = <18 4>;
-> +    };
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 913856599623..78161abc384f 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -3772,7 +3772,7 @@ BROADCOM BRCMSTB GPIO DRIVER
->  M:     Gregory Fong <gregory.0xf0@gmail.com>
-
-Not really related to this patch, but I should probably update this
-entry to reflect current reality. Should that be you and/or Doug?
-
->  L:     bcm-kernel-feedback-list@broadcom.com
->  S:     Supported
-> -F:     Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
-> +F:     Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
->  F:     drivers/gpio/gpio-brcmstb.c
->
->  BROADCOM BRCMSTB I2C DRIVER
-> --
-> 2.25.1
->
-
-Best regards,
-Gregory
