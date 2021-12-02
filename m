@@ -2,184 +2,306 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB70AC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 17:28:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6942FC43217
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 21:24:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376323AbhLBRcP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Dec 2021 12:32:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49998 "EHLO
+        id S1377057AbhLBV1w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Dec 2021 16:27:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376262AbhLBRcO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2021 12:32:14 -0500
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A83B9C06174A
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Dec 2021 09:28:51 -0800 (PST)
-Received: by mail-pl1-x634.google.com with SMTP id n8so216743plf.4
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Dec 2021 09:28:51 -0800 (PST)
+        with ESMTP id S242942AbhLBV1v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2021 16:27:51 -0500
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A9ACC06174A;
+        Thu,  2 Dec 2021 13:24:28 -0800 (PST)
+Received: by mail-pj1-x1036.google.com with SMTP id p18-20020a17090ad31200b001a78bb52876so3526165pju.3;
+        Thu, 02 Dec 2021 13:24:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google;
+        d=gmail.com; s=20210112;
         h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to;
-        bh=8VTQL60rzJDc/LrREUdVAbjEAww+UiLY78xp2AAE8F4=;
-        b=fvJGAm0G6yLggTIRjjsiI2XcLKIi4cb0tgAzp5H+5XKL1iTJtxpAOTtrXBIZa/7B0g
-         ta62oMz0GJRrw45+xFGH78mWZp/FVwep1+O+yJdnMfXWVAR2YCy8g5Fb4aoLPQatGh0o
-         zlsLxJz/1A3SVk/80z77dEarxzDROcoabHJDU=
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=+BkUAqxoN5Fy8yjLt+FU0EZ0cX0yYjSMs8+EtuSBhk0=;
+        b=Cd6RK4cQTZRM/IqvHQkZhLCqCs/8jMcF4lppy7tucbr5Vp+FR3+HUnoFq4tqBtf/D1
+         Kev3XDjfu5qg71ZDDrO+4/H+O7T81BV9RXOmklrDVL82HW7YhD/aw26FBAPMTtAlPDcd
+         c6GUG5i/ZaWpi0KH/rW6w/88XjB1cl94v3vN9eKoSMEPaAwHLZNuq/XUPlHCn7AYgx21
+         swoaFqRhA93KhPICqW/XVxobDUglQqVH6mgpQovw3rJOtSbwe2asZcHjLteUP/swflpp
+         9PGMgk31ZwykW6bqfotRQbIgFtc5UD4JJ6J7XrU8U38PzhO+MIoVWG1A10pdfBOFKlT4
+         pRHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to;
-        bh=8VTQL60rzJDc/LrREUdVAbjEAww+UiLY78xp2AAE8F4=;
-        b=PF67FWnw0u3dbrRRTep3yv7He7uaDR4Xi5p4mekcikphlxwihAITaBV3VWMfLcsdow
-         CkqQwq+KL507HaCFo9WwpiqFVJhvug0hAbFdNnEB0T5vYAuG1NM5jQ71hV7zpsYGbWvH
-         c24Xyy6aAyhGT61/9RenR18PKNZ09y4YCnvbtbiCpI7PPi9WYlGIufD1ghMqDWT8ZPRr
-         DB2jofmtS1TBMwiIMbg8M7ne5x4qjNGK0s3HT5UT3tgHivlPgTbAhzA34whUQyvoC7H8
-         RPeZ3O8mIvJuN9E/BwsgB0F5VzOFJfmx76sLoKqL7zMiIs5SPeMQhX+Teod89c6SipC3
-         UeNg==
-X-Gm-Message-State: AOAM530cdOAVB1xJQKnuRYz60cAML+8K0dvxxGcOXuBoY3forGQBYx36
-        yPduKTIpnICdPyzqxag9Wr55RQ==
-X-Google-Smtp-Source: ABdhPJynqpm+ACePC6XXqju7sLq9VWRcAQe/BYC/UlUoAgraI+CoPNu1KUT1/EnmeS/ZvFFqrmCm/A==
-X-Received: by 2002:a17:902:b78b:b0:143:baac:2ebc with SMTP id e11-20020a170902b78b00b00143baac2ebcmr16634221pls.77.1638466130993;
-        Thu, 02 Dec 2021 09:28:50 -0800 (PST)
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=+BkUAqxoN5Fy8yjLt+FU0EZ0cX0yYjSMs8+EtuSBhk0=;
+        b=7+4xXSshssLvb+DGgS7Kq0ica3kufMQskUJw+4GP4cLADIw0OdQ2rJEazSURz8lA0D
+         P9KNZ2HMgx+vH00vcNeL6c6AcPBA7zXkYmLKCPrEnK74XN2rUoP1zt0x9nwN8Z48fHhQ
+         vyTG0OAx3++jtsiCDguXEnwdYvQOhBi25yIA1cKH5MvMa8+gvgAAO7tXAPe1MUVUDNDs
+         +G0JGp/PhwE9lESE1KKeJPYCCHwwqa4NW1z1sJjnB8jRaOkMYWZE7/nTGPpDKiKi5W7i
+         LUn01fxkKMghwxgIQGhethM7WSANOeG11FNenRMyvy5yTd8QSq6QLTyVbtWbP1U4D5Y6
+         pjEA==
+X-Gm-Message-State: AOAM532oG9ERPaBB8DsWIMaWCyaq/g96kOxHOI+rml2or8MfbomWlYjY
+        BKIQLRdDewcWl5Hd80nzc/31FveAJMA=
+X-Google-Smtp-Source: ABdhPJzQfHwdite6wq1wX6654rl7VFWnhrkbBLVs9Lw+py7iIKCDVj2Guu8Qn+ylTh2ccdjXn0MrpQ==
+X-Received: by 2002:a17:902:e88a:b0:141:dfde:eed7 with SMTP id w10-20020a170902e88a00b00141dfdeeed7mr18172144plg.17.1638480267230;
+        Thu, 02 Dec 2021 13:24:27 -0800 (PST)
 Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id x9sm3026370pjq.50.2021.12.02.09.28.49
+        by smtp.googlemail.com with ESMTPSA id mr2sm402399pjb.25.2021.12.02.13.24.25
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Dec 2021 09:28:49 -0800 (PST)
-Subject: Re: [PATCH 2/2] mmc: sdhci-brcmstb: "mmc1: Internal clock never
- stabilised." seen on 72113
-To:     Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        bcm-kernel-feedback-list@broadcom.com,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Thu, 02 Dec 2021 13:24:26 -0800 (PST)
+Subject: Re: [PATCH 05/14] dt-bindings: gpio: Convert Broadcom STB GPIO to
+ YAML
+To:     Gregory Fong <gregory.0xf0@gmail.com>,
+        Florian Fainelli <f.fainelli@gmail.com>
+Cc:     devicetree@vger.kernel.org,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        "maintainer:BROADCOM BCM7XXX ARM ARCHITECTURE" 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Lee Jones <lee.jones@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Matt Mackall <mpm@selenic.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
         Ray Jui <rjui@broadcom.com>,
         Scott Branden <sbranden@broadcom.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-References: <20211202163050.46810-1-alcooperx@gmail.com>
- <20211202163050.46810-2-alcooperx@gmail.com>
-From:   Florian Fainelli <florian.fainelli@broadcom.com>
-Message-ID: <faab7fad-8c42-5ad8-f5f5-f1f2996b54c6@broadcom.com>
-Date:   Thu, 2 Dec 2021 09:28:48 -0800
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Markus Mayer <mmayer@broadcom.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Al Cooper <alcooperx@gmail.com>,
+        Doug Berger <opendmb@gmail.com>,
+        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
+        <linux-ide@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
+        <linux-mmc@vger.kernel.org>,
+        "open list:PWM SUBSYSTEM" <linux-pwm@vger.kernel.org>,
+        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
+        <linux-crypto@vger.kernel.org>,
+        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
+        <linux-rtc@vger.kernel.org>,
+        "open list:THERMAL" <linux-pm@vger.kernel.org>,
+        "open list:USB SUBSYSTEM" <linux-usb@vger.kernel.org>
+References: <20211201205110.41656-1-f.fainelli@gmail.com>
+ <20211201205110.41656-6-f.fainelli@gmail.com>
+ <CADtm3G7wiNdDq2fagWeSDd_RV_dyfrNy+5e-VL9OKjwGAWzNtg@mail.gmail.com>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+Message-ID: <f96c346a-0d17-6148-0924-72744dd5c34d@gmail.com>
+Date:   Thu, 2 Dec 2021 13:24:23 -0800
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.14.0
 MIME-Version: 1.0
-In-Reply-To: <20211202163050.46810-2-alcooperx@gmail.com>
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="000000000000bd9a9805d22d1f99"
+In-Reply-To: <CADtm3G7wiNdDq2fagWeSDd_RV_dyfrNy+5e-VL9OKjwGAWzNtg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---000000000000bd9a9805d22d1f99
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-
-On 12/2/21 8:30 AM, Al Cooper wrote:
-> The problem is in the .shutdown callback that was added to the
-> sdhci-iproc and sdhci-brcmstb drivers to save power in S5. The
-> shutdown callback will just call the sdhci_pltfm_suspend() function
-> to suspend the lower level driver and then stop the sdhci system
-> clock. The problem is that in some cases there can be a worker
-> thread in the "system_freezable_wq" work queue that is scanning
-> for a device every second. In normal system suspend, this queue
-> is suspended before the driver suspend is called. In shutdown the
-> queue is not suspended and the thread my run after we stop the
-> sdhci clock in the shutdown callback which will cause the "clock
-> never stabilised" error. The solution will be to have the shutdown
-> callback cancel the worker thread before calling suspend (and
-> stopping the sdhci clock).
+On 12/2/21 8:00 AM, Gregory Fong wrote:
+> Hi Florian,
 > 
-> NOTE: This is only happening on systems with the Legacy RPi SDIO
-> core because that's the only controller that doesn't have the
-> presence signal and needs to use a worker thread to do a 1 second
-> poll loop.
+> I haven't kept up with the new yaml format, so not entirely sure I
+> know what I'm talking about yet, but here are a few comments:
 > 
-> Fixes: 5b191dcba719 ("mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend")
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+> On Wed, Dec 1, 2021 at 12:51 PM Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>
+>> Convert the Broadcom STB GPIO Device Tree binding to YAML to help with
+>> validation.
+>>
+>> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+>> ---
+>>  .../bindings/gpio/brcm,brcmstb-gpio.txt       |  83 --------------
+>>  .../bindings/gpio/brcm,brcmstb-gpio.yaml      | 104 ++++++++++++++++++
+>>  MAINTAINERS                                   |   2 +-
+>>  3 files changed, 105 insertions(+), 84 deletions(-)
+>>  delete mode 100644 Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
+>>  create mode 100644 Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
+>>
+>> diff --git a/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt b/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
+>> deleted file mode 100644
+>> index 5d468ecd1809..000000000000
+>> --- a/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.txt
+>> +++ /dev/null
+>> @@ -1,83 +0,0 @@
+>> [snip]
+>> -
+>> -- interrupts-extended:
+>> -    Alternate form of specifying interrupts and parents that allows for
+>> -    multiple parents.  This takes precedence over 'interrupts' and
+>> -    'interrupt-parent'.  Wakeup-capable GPIO controllers often route their
+>> -    wakeup interrupt lines through a different interrupt controller than the
+>> -    primary interrupt line, making this property necessary.
+> 
+> It looks like interrupts-extended was removed from the new docs, I'm
+> assuming that was intentional?
 
-Acked-by: Florian Fainelli <f.fainelli@gmail.com>
+Yes that is intentional, since this is a core property there is an
+expectation that it is documented and used outside of the scope of this
+binding.
+
+> 
+>> [snip]
+>> diff --git a/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml b/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
+>> new file mode 100644
+>> index 000000000000..4b7309dc74dc
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/gpio/brcm,brcmstb-gpio.yaml
+>> @@ -0,0 +1,104 @@
+>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+>> +%YAML 1.2
+>> +---
+>> +$id: http://devicetree.org/schemas/gpio/brcm,brcmstb-gpio.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: Broadcom STB "UPG GIO" GPIO controller
+>> +
+>> +description: >
+>> +  The controller's registers are organized as sets of eight 32-bit
+>> +  registers with each set controlling a bank of up to 32 pins.  A single
+>> +  interrupt is shared for all of the banks handled by the controller.
+>> +
+>> +maintainers:
+>> +  - Doug Berger <opendmb@gmail.com>
+>> +  - Florian Fainelli <f.fainelli@gmail.com>
+>> +
+>> +properties:
+>> +  compatible:
+>> +    oneOf:
+>> +      - items:
+>> +          - enum:
+>> +              - brcm,bcm7445-gpio
+>> +          - const: brcm,brcmstb-gpio
+>> +
+>> +  reg:
+>> +    maxItems: 1
+>> +    description:
+> 
+> Missing folded block scalar marker ('>') above
+
+Done.
+
+> 
+>> +      Define the base and range of the I/O address space containing
+>> +      the brcmstb GPIO controller registers
+>> +
+>> +  "#gpio-cells":
+>> +    const: 2
+>> +    description: >
+>> +      The first cell is the pin number (within the controller's
+>> +      pin space), and the second is used for the following:
+>> +      bit[0]: polarity (0 for active-high, 1 for active-low)
+>> +
+>> +  gpio-controller: true
+>> +
+>> +  "brcm,gpio-bank-widths":
+>> +    $ref: /schemas/types.yaml#/definitions/uint32-array
+>> +    description:
+> 
+> Same here
+> 
+>> +      Number of GPIO lines for each bank.  Number of elements must
+>> +      correspond to number of banks suggested by the 'reg' property.
+>> +
+>> +  interrupts:
+>> +    maxItems: 1
+>> +    description:
+> 
+> While it's not necessary while this is only one line, consider adding
+> '>' here too.
+> 
+>> +      The interrupt shared by all GPIO lines for this controller.
+>> +
+>> +  "#interrupt-cells":
+>> +    const: 2
+>> +    description: >
+> 
+> This next block could get formatted strangely with '>'; recommend
+> using '|' instead
+
+Yes good point.
+
+> 
+>> +      The first cell is the GPIO number, the second should specify
+>> +      flags.  The following subset of flags is supported:
+>> +      - bits[3:0] trigger type and level flags
+>> +        1 = low-to-high edge triggered
+>> +        2 = high-to-low edge triggered
+>> +        4 = active high level-sensitive
+>> +        8 = active low level-sensitive
+>> +      Valid combinations are 1, 2, 3, 4, 8.
+>> +
+>> +  interrupt-controller: true
+>> +
+>> +  wakeup-source:
+>> +    type: boolean
+>> +    description: >
+>> +      GPIOs for this controller can be used as a wakeup source
+>> +
+>> +required:
+>> +  - compatible
+>> +  - reg
+>> +  - gpio-controller
+>> +  - "#gpio-cells"
+> 
+> Need to add required property "brcm,gpio-bank-widths"
+
+Indeed, done.
+
+> 
+>> +
+>> +additionalProperties: false
+>> +
+>> +examples:
+>> +  - |
+>> +    upg_gio: gpio@f040a700 {
+>> +        #gpio-cells = <2>;
+>> +        #interrupt-cells = <2>;
+>> +        compatible = "brcm,bcm7445-gpio", "brcm,brcmstb-gpio";
+>> +        gpio-controller;
+>> +        interrupt-controller;
+>> +        reg = <0xf040a700 0x80>;
+>> +        interrupt-parent = <&irq0_intc>;
+>> +        interrupts = <0x6>;
+>> +        brcm,gpio-bank-widths = <32 32 32 24>;
+>> +    };
+>> +
+>> +    upg_gio_aon: gpio@f04172c0 {
+>> +        #gpio-cells = <2>;
+>> +        #interrupt-cells = <2>;
+>> +        compatible = "brcm,bcm7445-gpio", "brcm,brcmstb-gpio";
+>> +        gpio-controller;
+>> +        interrupt-controller;
+>> +        reg = <0xf04172c0 0x40>;
+>> +        interrupt-parent = <&irq0_aon_intc>;
+>> +        interrupts = <0x6>;
+>> +        wakeup-source;
+>> +        brcm,gpio-bank-widths = <18 4>;
+>> +    };
+>> diff --git a/MAINTAINERS b/MAINTAINERS
+>> index 913856599623..78161abc384f 100644
+>> --- a/MAINTAINERS
+>> +++ b/MAINTAINERS
+>> @@ -3772,7 +3772,7 @@ BROADCOM BRCMSTB GPIO DRIVER
+>>  M:     Gregory Fong <gregory.0xf0@gmail.com>
+> 
+> Not really related to this patch, but I should probably update this
+> entry to reflect current reality. Should that be you and/or Doug?
+
+If you could add both of us that would be great, thanks!
 -- 
 Florian
-
---000000000000bd9a9805d22d1f99
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-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
-riBJ/K1AFUjRAjFhGV64l++td7dkmnq/X8ET75ti+w1s4FRpFqkD2m7pg5NxdsZphYIXAgMBAAGj
-QjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBSP8Et/qC5FJK5N
-UPpjmove4t0bvDANBgkqhkiG9w0BAQsFAAOCAQEAS0DbwFCq/sgM7/eWVEVJu5YACUGssxOGhigH
-M8pr5nS5ugAtrqQK0/Xx8Q+Kv3NnSoPHRHt44K9ubG8DKY4zOUXDjuS5V2yq/BKW7FPGLeQkbLmU
-Y/vcU2hnVj6DuM81IcPJaP7O2sJTqsyQiunwXUaMld16WCgaLx3ezQA3QY/tRG3XUyiXfvNnBB4V
-14qWtNPeTCekTBtzc3b0F5nCH3oO4y0IrQocLP88q1UOD5F+NuvDV0m+4S4tfGCLw0FREyOdzvcy
-a5QBqJnnLDMfOjsl0oZAzjsshnjJYS8Uuu7bVW/fhO4FCU29KNhyztNiUGUe65KXgzHZs7XKR1g/
-XzCCBVgwggRAoAMCAQICDHG7gDNoanCGtqaNhjANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJC
-RTEZMBcGA1UEChMQR2xvYmFsU2lnbiBudi1zYTExMC8GA1UEAxMoR2xvYmFsU2lnbiBHQ0MgUjMg
-UGVyc29uYWxTaWduIDIgQ0EgMjAyMDAeFw0yMTAyMjIwNjU3MTBaFw0yMjA5MDUwNzA3MjNaMIGW
-MQswCQYDVQQGEwJJTjESMBAGA1UECBMJS2FybmF0YWthMRIwEAYDVQQHEwlCYW5nYWxvcmUxFjAU
-BgNVBAoTDUJyb2FkY29tIEluYy4xGTAXBgNVBAMTEEZsb3JpYW4gRmFpbmVsbGkxLDAqBgkqhkiG
-9w0BCQEWHWZsb3JpYW4uZmFpbmVsbGlAYnJvYWRjb20uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOC
-AQ8AMIIBCgKCAQEAu10WSl35INx8Ma97NH54zM3XKzx8Lo/KErWP5HPBtIxzYjBL20TDg9Jmnnbs
-rZjwEVNKY30HiBRJcooDpalBATQpdw3kdYEgojrrXjVz4a+YaWhLbV0OwQ54QAkwKsdYTnuUX0B4
-YLYGuUBDXYkcFWZv5BiAF4L97ClbTnUUCry8bhV9SP8b/tbivOhWUSjHLsQ9gEjuLhVId3Xgs9dA
-TtoyOTJVs6HDth0+/13gxSrB3BwSY4wtw7EPHshswD1fzSV1fZf7QUQedadjH8BMBaKKseIieb6M
-bhjsippX2btWEJOuUFS5RkK5HFFkzcGtIQd+gltZHQHohAcopF+cSwIDAQABo4IB3jCCAdowDgYD
-VR0PAQH/BAQDAgWgMIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3Vy
-ZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEG
-CCsGAQUFBzABhjVodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWdu
-MmNhMjAyMDBNBgNVHSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93
-d3cuZ2xvYmFsc2lnbi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6
-hjhodHRwOi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNy
-bDAoBgNVHREEITAfgR1mbG9yaWFuLmZhaW5lbGxpQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggr
-BgEFBQcDBDAfBgNVHSMEGDAWgBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUIDZLMN77
-IWw6rnhSvGm2V4nv3AowDQYJKoZIhvcNAQELBQADggEBADVdzyh3BQZiABHSdL7LQPNr6/6OQwg7
-65j9Ggyr2Rdl2RnQIifKtGGodVlJ8e9XCYt5rCNU8PriYstIk4jlMJp6SziSN0CLE+A+FujmTqZJ
-X8vEct7sdLXqdlBvR23TLvnkxbS3RwED7FDDTxpIv5j87o78e+wrZOPvDskdrYXVWGUu23xmd2IS
-kYMLAXNeGrVe6HovEKCJPw07+B35iJvwdpZBXiti5hFa3q1L0+K5nGMpceIrj4dOOkSNB2ipHR6H
-Q5HbB0UbWMkRv1PYpxf5eMjyDqxNigsE2JIFa1nk8ckA8hoTKbypCoALjcSuNqdZZyOnMBSKguHJ
-Zz4bBBwxggJtMIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52
-LXNhMTEwLwYDVQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgxx
-u4AzaGpwhramjYYwDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEICWik3DScGUDpzai
-/KVaIqObROKbmYaH5zizDtESeNwSMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcN
-AQkFMQ8XDTIxMTIwMjE3Mjg1MVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZI
-AWUDBAEWMAsGCWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEH
-MAsGCWCGSAFlAwQCATANBgkqhkiG9w0BAQEFAASCAQCTkTLc+XbYBsKpqx6K1pvXDLNNdv3mLUiM
-9Xw+J3WGj+3dsEFeUwO/cU2IrSd28JruQEnzDDpOeccv/RPr2nalLoZ8T2FGPdWkeQ3gVRLeYCGI
-WC0gv22KnIQvkGz/or3xUyuRfmJLwmpEjvA0fI2DZeR56yt1OkRFZQSvaGeFHpyjXtyK4aspTKna
-7hiM8K2R4lueyxO4BrxCpd/knEGkQLZKG6/7M847/mcHeN1R7PsPeLrZmHjr/c3nyfC7hyU3UMWO
-tUvz5kEz15yB7S05tMx8bgmYGZvgMAw/FWiuguk259U+B1l8k8Lc9nnUHdYBDWkCHPsX6FHjJodG
-Omq1
---000000000000bd9a9805d22d1f99--
