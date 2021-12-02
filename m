@@ -2,108 +2,169 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0003AC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 08:41:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE96AC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Dec 2021 13:50:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356276AbhLBIov (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Dec 2021 03:44:51 -0500
-Received: from smtp-relay-internal-0.canonical.com ([185.125.188.122]:47960
-        "EHLO smtp-relay-internal-0.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1356269AbhLBIob (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Dec 2021 03:44:31 -0500
-Received: from mail-lj1-f200.google.com (mail-lj1-f200.google.com [209.85.208.200])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id A2B924003C
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Dec 2021 08:41:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1638434467;
-        bh=FIwRIWabElMuSh13dNs8xwk0guQGLGLYUJ8I7QxS5UA=;
-        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-         In-Reply-To:Content-Type;
-        b=SumPOPsmyhEdvmd/bWWtffs0kQIDv4VD6P1/ao6wC7LrzuBRiZeVosav+SjoBrNzR
-         nmGo3Sgolrhx0xFIzY8fP+KTXpqeCxlckP/QL6ljCrxUTyoHdTDyvvZOf1j2LIecfS
-         FBbB+PWtI5W2AixwVXu28wXeuxPIg6pY9v3GJVceajTQMrTWHWMRLJVzCEI4PE6xQx
-         PBBLpxBCLpOTlC+bZTRVg1seXsiAEKCqAk1PmlJFGo4mLZbcK6ltVj3L4Ox4wsHZn7
-         ENW91J3ROE5i49x3Rod0IHnBUQv0w+7pImcaamqUS6Sl76UxUvtmpmdmJxdq7F5NQW
-         8x7iBCnFdsiXw==
-Received: by mail-lj1-f200.google.com with SMTP id s16-20020a2ea710000000b0021b674e9347so9332323lje.8
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Dec 2021 00:41:07 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=FIwRIWabElMuSh13dNs8xwk0guQGLGLYUJ8I7QxS5UA=;
-        b=bSQEcnppXF968Ysb6OalP+Ms66wtKJBc2M9Bpst+7MCF2X2HOL36r51+xdePtj6t2f
-         t0QxcuhkkRmNdxf9iGziw2l23B3gj3li4ZwlgY9oF5PcJU35uGuwJsadojr8oeHG16ej
-         NU+GSNcs2+qe4puc0w1eynjCZc3O5RH7x7rWCNkFoi5Jlti9RimWMmgP44nivFPrx2CP
-         Er1S9l4QyVltLfwfdQvVY11qmSMRatju7GcYspXQ7dISaysQPijQ2Q1jtZlhKIglTQOk
-         xgP0NYD6Y1XuwHTruGikUa53fMcUmIXhKGWHTrKdyf5Z5wO153OV8GHdKeyZfhSLLDHk
-         ZOcg==
-X-Gm-Message-State: AOAM530BRSUCbgw8Tt1trgzUC0E1eVM/J7hWSuuZ6ZVT2kzOCmSLrSPA
-        t1hwq9mLZ75+8Lsoc48b2LM8NM3HtiJM6Ku4puDb7BFEYZn8b3UErD/B7TtXja/tCmFBMcH1LXy
-        MzE4g/WDX9BABq/2EaH8dCTkKSqHH6vEJnu+7VA==
-X-Received: by 2002:a2e:8691:: with SMTP id l17mr10288230lji.119.1638434467077;
-        Thu, 02 Dec 2021 00:41:07 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwOzAYA0rXNf6qxmuG4HJayRcLcb2MW0+iM9hyKq55/nQxtJmM0dNWEAgdHZ4YJPVsPd578gA==
-X-Received: by 2002:a2e:8691:: with SMTP id l17mr10288212lji.119.1638434466896;
-        Thu, 02 Dec 2021 00:41:06 -0800 (PST)
-Received: from [192.168.3.67] (89-77-68-124.dynamic.chello.pl. [89.77.68.124])
-        by smtp.gmail.com with ESMTPSA id cf34sm260062lfb.222.2021.12.02.00.41.06
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Dec 2021 00:41:06 -0800 (PST)
-Message-ID: <c6a44fd1-ad48-06cc-4a96-818ca124afca@canonical.com>
-Date:   Thu, 2 Dec 2021 09:41:05 +0100
+        id S1358015AbhLBNx0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Dec 2021 08:53:26 -0500
+Received: from mail-dm6nam11on2089.outbound.protection.outlook.com ([40.107.223.89]:25633
+        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S237001AbhLBNxZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 2 Dec 2021 08:53:25 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=YwgmCkgmbN0DpGCEmtCrDlaZ3lfPNyfv22bjSYkXzMPPGurSb8BOBaDZ5EF6K1MbVtCLMVEEHsOpjnabD9R8TMZnIdypm9yM9sGpJzxxiE2gMQyHX3jQoVItKxSQjrybL4q6XWW+kySKhGqs/FjK4dVuxqFx7nB4LlopiXzmfvyQjj93YOsF1prls8CcqoXdzo975mtqTyarydXuxzVy05/UjBI+EWgjJ/7FCUADNukl5ykOYwHDyZ9zzrX5yTPI+vL+dZ0crJdZ531Y3A1+DtFCEZ7yytBaWajwOv5muGzvjgZcwV33A0gQrMrxWDVF2pQzK9346t42OYUajp39yw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=FDAmaJPXuYyjLoauYEyuDfYDiDkshJH1ivCsxmjP6iQ=;
+ b=BhF9f37bqP1U929zv41cCe9mB3RVYB82pMnlv58BkOy2NaljqbaPc8KxrvVwEbvN8h7c73D1G18i8P88A/bFbzVE14TtQg0h9PvvpPiWUXIOHFQslpmQm4TH+e1v+oO+1F2Qg8bKGeqZGJ/zRXyeDJ/0O37hBj0OZN2Vj7V+yfArPEZBgrnfLP/R5o+xB07M3LvE2vsvZ+wdWMevU7JSRMjPm0fFipyHK4Hw08e3DQmVHxMDDqeX21G80pvpMwv+oqKdR8Fzo2u6dhxk3klJnFOsHV/Y9nWslPTX23kXhgWrVajnlaiC/mjcUpxjVLGqfSPF/0k4lOj4IN/DKTN+Mg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.112.34) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
+ header.from=nvidia.com; dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=FDAmaJPXuYyjLoauYEyuDfYDiDkshJH1ivCsxmjP6iQ=;
+ b=G5gr4+686Ich4a6uKMXWKmEkMQuSTpQXUYBTLsJpVRcJig2C2WDHwcLug98NClGttnVCHpk+QayutHfmiDzrVAO9vMKgPcKHi8vf/XeucweWm9FLNXBItynjHVIvfhBR0ObdsmzrJRpKrDMaKTDt1sPn04MDwyHkHOwWdeakmvEhoe9ayl6dnwZ4PB1Wjtdcnxsocn0M8hok3MYEGR0wZhHA9Dn0asOtX+4qwOdkvG3Ci2dRKqx+NeAEf7SqHiUm909uJntyljA2sXg5Y/aGxfrHOrEY+kpydRNGa9SHFF15RV94v58I62xydTMSHbSycEKCgpMJGR+NsG350zbdSg==
+Received: from BN8PR04CA0030.namprd04.prod.outlook.com (2603:10b6:408:70::43)
+ by MWHPR12MB1680.namprd12.prod.outlook.com (2603:10b6:301:10::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.23; Thu, 2 Dec
+ 2021 13:50:00 +0000
+Received: from BN8NAM11FT059.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:70:cafe::21) by BN8PR04CA0030.outlook.office365.com
+ (2603:10b6:408:70::43) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.23 via Frontend
+ Transport; Thu, 2 Dec 2021 13:49:58 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.112.34)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.112.34 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.112.34; helo=mail.nvidia.com;
+Received: from mail.nvidia.com (216.228.112.34) by
+ BN8NAM11FT059.mail.protection.outlook.com (10.13.177.120) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.20.4755.13 via Frontend Transport; Thu, 2 Dec 2021 13:49:57 +0000
+Received: from HQMAIL101.nvidia.com (172.20.187.10) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1497.18; Thu, 2 Dec
+ 2021 13:49:55 +0000
+Received: from pshete-ubuntu.nvidia.com (172.20.187.5) by mail.nvidia.com
+ (172.20.187.10) with Microsoft SMTP Server id 15.0.1497.18 via Frontend
+ Transport; Thu, 2 Dec 2021 13:49:52 +0000
+From:   Prathamesh Shete <pshete@nvidia.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
+        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC:     <pshete@nvidia.com>, <anrao@nvidia.com>, <smangipudi@nvidia.com>
+Subject: [PATCH v2] mmc: sdhci-tegra: Fix switch to HS400ES mode
+Date:   Thu, 2 Dec 2021 19:19:48 +0530
+Message-ID: <20211202134948.18448-1-pshete@nvidia.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <0a8368f9-8ca2-f01b-2f9e-0c91e3b946f5@intel.com>
+References: <0a8368f9-8ca2-f01b-2f9e-0c91e3b946f5@intel.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.1
-Subject: Re: [PATCH 1/4] dt-bindings: mmc: exynos-dw-mshc: Add support for
- ARTPEC-8
-Content-Language: en-US
-To:     =?UTF-8?Q?M=c3=a5rten_Lindahl?= <marten.lindahl@axis.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>
-Cc:     Doug Anderson <dianders@google.com>, kernel@axis.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org
-References: <20211201153804.27655-1-marten.lindahl@axis.com>
- <20211201153804.27655-2-marten.lindahl@axis.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20211201153804.27655-2-marten.lindahl@axis.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 2767baa1-dee4-4dbf-45e4-08d9b59aa0ec
+X-MS-TrafficTypeDiagnostic: MWHPR12MB1680:
+X-Microsoft-Antispam-PRVS: <MWHPR12MB168004728AE10A7F0E2EE23EB7699@MWHPR12MB1680.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3044;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: sJzJ27hBFZO4rgA6ttnKLD4YZFuXmtKWo4GlQHqhdI4a/hHfV8MRMa1YrF+gJOJ1hLvLXs49CD/El2Y3mKezqwueI1Kr+SZKqujAkUhUmkjpHqZzZajIR1O/O6UFs+dfkIW9ZxkXoD6AILToW+fmsS65FGUDYuymNAOK/fJbtwfk/yaJcJBVOrsjiykwFLE4QRjtgOvr/OjVuIUElPRtjVmE8CjT2TLJrqbvoN7c9vf/vt17vRGksFoNeF8VcLVa+X4waVHwPkmSoY15p07qeCNFVgdM5eHMJgFtrmEJCmgVmpfU228HPATsr8q/GLyeZcgZJvsG9DPSG3MAxcHidznoV4dJ2lzZ5tYvQLUeGQ/k82WTKtLsn7Jp3e/8UolZR/2k28rEAu64Oxnj5OybBS2E5rLNycty+QnzPqKmjhjG7QTZdqV1ovWhwEyw+V4NBMio57m1FR2+X/4sRhK3K7Km4D4+rdozMWA18/AYY1viGi5YG1/68Kc7hFJRvc8iKE+v/h4MZTij+Z2f2kumvL95HgabXERq/eZRdkh1dY7//cMlCGQhonwWFCdXoj98Aqwnn7uKlR8pIhCaeWCmWiP0RSZCeK8DYo+H0UK15aRy9BB9ZqgKI8Nr0JjMOjOHJruLZ45XQDE+Df1h5LtcEjKVRwZ/PFeBzsGFGhXtYisqetjkzUovBVzkbu1c0zq31ppNX0BJUF2GJlHja11vGBBto6AD6dqvlVBb/A7V1E8yu1XzWjhROtTTE4o3orewl3CGfv/GCX9Zfe+hg8E35Q==
+X-Forefront-Antispam-Report: CIP:216.228.112.34;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:schybrid03.nvidia.com;CAT:NONE;SFS:(4636009)(46966006)(36840700001)(40470700001)(6666004)(8676002)(356005)(54906003)(2616005)(86362001)(82310400004)(1076003)(36860700001)(5660300002)(110136005)(186003)(36756003)(7696005)(316002)(70206006)(107886003)(83380400001)(508600001)(26005)(47076005)(8936002)(2906002)(4326008)(426003)(7636003)(336012)(40460700001)(70586007);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 02 Dec 2021 13:49:57.7304
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2767baa1-dee4-4dbf-45e4-08d9b59aa0ec
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.112.34];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT059.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR12MB1680
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 01/12/2021 16:38, Mårten Lindahl wrote:
-> The ARTPEC-8 SoC has a DWMMC controller that is compatible with the
-> Exynos 7 version v2.70a. The main differences from Exynos 7 is that it
-> does not support HS400 and has extended data read timeout.
-> 
-> Add compatibility string "samsung,artpec8-dw-mshc" for ARTPEC-8.
-> 
-> Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
-> ---
->  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt | 2 ++
->  1 file changed, 2 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> index 0419a63f73a0..161be451a1f0 100644
-> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> @@ -22,6 +22,8 @@ Required Properties:
->  	  specific extensions.
->  	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
->  	  specific extensions having an SMU.
-> +	- "samsung,artpec8-dw-mshc": for controllers with ARTPEC-8 specific
-> +	  extensions.
+When CMD13 is sent after switching to HS400ES mode, the bus
+is operating at either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
+To meet Tegra SDHCI requirement at HS400ES mode, force SDHCI
+interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
+controller CAR clock and the interface clock are rate matched.
 
-Artpec8 does not look like Samsung, so vendor prefix does not match.
+Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 43 ++++++++++++++++++++--------------
+ 1 file changed, 26 insertions(+), 17 deletions(-)
 
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 387ce9cdbd7c..ca261cce9b37 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -354,23 +354,6 @@ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+ 	}
+ }
+ 
+-static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
+-					      struct mmc_ios *ios)
+-{
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	u32 val;
+-
+-	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
+-
+-	if (ios->enhanced_strobe)
+-		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
+-	else
+-		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
+-
+-	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
+-
+-}
+-
+ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -791,6 +774,32 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ }
+ 
++static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
++					      struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	u32 val;
++
++	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
++
++	if (ios->enhanced_strobe)
++		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
++	else
++		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
++
++	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
++
++	/*
++	 * When CMD13 is sent from mmc_select_hs400es() after
++	 * switching to HS400ES mode, the bus is operating at
++	 * either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
++	 * To meet Tegra SDHCI requirement at HS400ES mode, force SDHCI
++	 * interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
++	 * controller CAR clock and the interface clock are rate matched.
++	 */
++	tegra_sdhci_set_clock(host, MMC_HS200_MAX_DTR);
++}
++
+ static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-- 
+2.17.1
+
