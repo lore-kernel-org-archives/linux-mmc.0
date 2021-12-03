@@ -2,212 +2,169 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91307C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Dec 2021 10:43:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45FC5C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Dec 2021 10:51:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1380110AbhLCKqw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Dec 2021 05:46:52 -0500
-Received: from rtits2.realtek.com ([211.75.126.72]:53175 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1380109AbhLCKqv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2021 05:46:51 -0500
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 1B3AhK6l9030331, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36504.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.71/5.88) with ESMTPS id 1B3AhK6l9030331
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Fri, 3 Dec 2021 18:43:20 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36504.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Fri, 3 Dec 2021 18:43:20 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Fri, 3 Dec 2021 02:43:19 -0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::38af:5429:2b43:3b95]) by
- RTEXMBS01.realtek.com.tw ([fe80::38af:5429:2b43:3b95%5]) with mapi id
- 15.01.2308.015; Fri, 3 Dec 2021 18:43:19 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        Ricky WU <ricky_wu@realtek.com>,
-        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
-        "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: [PATCH] mmc: rtsx: improve rw performance
-Thread-Topic: [PATCH] mmc: rtsx: improve rw performance
-Thread-Index: AQHX6DEYTJKGBpnS2UOXrkrK9OF1Rg==
-Date:   Fri, 3 Dec 2021 10:43:19 +0000
-Message-ID: <5a38e5eb9fdc4b53ba4a11602e2cef0d@realtek.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.22.88.222]
-x-kse-serverinfo: RTEXDAG01.realtek.com.tw, 9
-x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
- rules found
-x-kse-antivirus-interceptor-info: scan successful
-x-kse-antivirus-info: =?big5?B?Q2xlYW4sIGJhc2VzOiAyMDIxLzEyLzMgpFekyCAwODo0MTowMA==?=
-x-kse-bulkmessagesfiltering-scan-result: protection disabled
-Content-Type: text/plain; charset="big5"
-Content-Transfer-Encoding: base64
+        id S1352031AbhLCKye (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Dec 2021 05:54:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59354 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1351999AbhLCKyd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2021 05:54:33 -0500
+Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 558B8C06173E
+        for <linux-mmc@vger.kernel.org>; Fri,  3 Dec 2021 02:51:10 -0800 (PST)
+Received: by mail-pg1-x52c.google.com with SMTP id q16so2613937pgq.10
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Dec 2021 02:51:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZqIEpJFBu65X9hDb8NxCHPjeJJOh6BhtHH1b4rCA9RE=;
+        b=oCNN57cGbmN7fBavs6z3WlhS/Pc7jj8H2Z7bDt2EvlgNACNPjE29Fv/1faGPTuOCzl
+         VHmxVsjq1x5bnbMWY3GZd/WEfII1x7zaINBd/8cSyYuHriF1i7b9SkdfewNl1UtgV4we
+         etaceQ4wFJ3Lz8Dm/536D+JIBDU/BlvnaoSrm0uvA4owLfcsrylKwmmgdrwVrUXMcNet
+         7pTUHxGS41Axy09JPwxm9FJU7MNhP5Ttk3jC9ZQlLO1/ax5R+VmBDbn5FHS2NyDtR6mu
+         90TRpnN037fYc2cPjVkuJ8hVfDra48pQsjoZJ80LKzdNao7FZJqcCs5ZtD1PxrX9TrAQ
+         rhIQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZqIEpJFBu65X9hDb8NxCHPjeJJOh6BhtHH1b4rCA9RE=;
+        b=lx5pPVx8LTrm/vSHbW9j+q69/lLFWjtgriEbPyLwSJ3VlyIFYPx2HxFlEYr3QoUc3Z
+         TMPiHxfc9KhvbJs5BaSZ1FyvTK7tjxWFv1AVXU9nkUUuz54RmWNvbgMygRJVUqvlfm9P
+         FrXEWwIg/K0fBZqs6YN38wZBGtSvE2CQcuUE3QGpIkJc7dsc2dAiWHcqRqxoRB1G3NQc
+         0DhfC7kcl0OyeAfURXw5wXCqTIqRILGRsLdqn5iy5iI8ZrVCzeFSqFfrfHdE56bhpVfj
+         RRl7hXoxaRyIc4DIu1gPdoPCk1yevqMPZMr6QW64KziFstkkDEngqc/w0rV33eVPdTRQ
+         qzYQ==
+X-Gm-Message-State: AOAM530R9cW7ezuAu8/iM/srKKk/+gYJcDqjLZbo1syI5Q9EqKdWtgwZ
+        RxE8xWNpTzl5/pok3lyjvjc=
+X-Google-Smtp-Source: ABdhPJyKKyMzMX0sSU9EXj5j0V3e/1ghZfO/Fk8D89GiRgocnan4iF601kx0kcKco2cH+mAW3bER+Q==
+X-Received: by 2002:aa7:8d0a:0:b0:4a2:82d7:1695 with SMTP id j10-20020aa78d0a000000b004a282d71695mr18892951pfe.86.1638528669793;
+        Fri, 03 Dec 2021 02:51:09 -0800 (PST)
+Received: from jason-z170xgaming7.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id x18sm2868699pfh.210.2021.12.03.02.51.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Dec 2021 02:51:09 -0800 (PST)
+From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
+To:     ulf.hansson@linaro.org, takahiro.akashi@linaro.org,
+        adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
+        greg.tu@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
+        otis.wu@genesyslogic.com.tw, benchuanggli@gmail.com,
+        Jason Lai <jasonlai.genesyslogic@gmail.com>
+Subject: [PATCH 0/7] Preparations to support SD UHS-II cards
+Date:   Fri,  3 Dec 2021 18:50:56 +0800
+Message-Id: <20211203105103.11306-1-jasonlai.genesyslogic@gmail.com>
+X-Mailer: git-send-email 2.34.0
 MIME-Version: 1.0
-X-KSE-ServerInfo: RTEXH36504.realtek.com.tw, 9
-X-KSE-Attachment-Filter-Triggered-Rules: Clean
-X-KSE-Attachment-Filter-Triggered-Filters: Clean
-X-KSE-BulkMessagesFiltering-Scan-Result: protection disabled
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-c2RfY2hlY2tfc2VxKCkgdG8gZGlzdGluZ3Vpc2ggc2VxdWVudGlhbCBydyBvciBub3JtYWwgcncN
-CmlmIHRoaXMgZGF0YSBpcyBzZXF1ZW50aWFsIGNhbGwgdG8gc2Rfcndfc2VxdWVudGlhbCgpDQoN
-ClNpZ25lZC1vZmYtYnk6IFJpY2t5IFd1IDxyaWNreV93dUByZWFsdGVrLmNvbT4NCi0tLQ0KIGRy
-aXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYyB8IDE4NSArKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKy0NCiAxIGZpbGUgY2hhbmdlZCwgMTgwIGluc2VydGlvbnMoKyksIDUgZGVsZXRp
-b25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMg
-Yi9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMNCmluZGV4IDU4Y2ZhZmZhM2MyZC4u
-OWViNDMzYjFmNmY4IDEwMDY0NA0KLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1t
-Yy5jDQorKysgYi9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMNCkBAIC0yMiw2ICsy
-Miw4IEBADQogI2luY2x1ZGUgPGFzbS91bmFsaWduZWQuaD4NCiAjaW5jbHVkZSA8bGludXgvcG1f
-cnVudGltZS5oPg0KIA0KK2VudW0gUldfTU9ERQl7Tk9STUFMX1JXLCBTRVFfUld9Ow0KKw0KIHN0
-cnVjdCByZWFsdGVrX3BjaV9zZG1tYyB7DQogCXN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UJKnBkZXY7
-DQogCXN0cnVjdCBydHN4X3BjcgkJKnBjcjsNCkBAIC0zMSw2ICszMyw3IEBAIHN0cnVjdCByZWFs
-dGVrX3BjaV9zZG1tYyB7DQogDQogCXN0cnVjdCB3b3JrX3N0cnVjdAl3b3JrOw0KIAlzdHJ1Y3Qg
-bXV0ZXgJCWhvc3RfbXV0ZXg7DQorCXN0cnVjdCBkZWxheWVkX3dvcmsJCXJ3X2lkbGVfd29yazsN
-CiANCiAJdTgJCQlzc2NfZGVwdGg7DQogCXVuc2lnbmVkIGludAkJY2xvY2s7DQpAQCAtNDYsNiAr
-NDksMTIgQEAgc3RydWN0IHJlYWx0ZWtfcGNpX3NkbW1jIHsNCiAJczMyCQkJY29va2llOw0KIAlp
-bnQJCQljb29raWVfc2dfY291bnQ7DQogCWJvb2wJCQl1c2luZ19jb29raWU7DQorDQorCWVudW0g
-UldfTU9ERQkJcndfbW9kZTsNCisJdTgJCXByZXZfZGlyOw0KKwl1OAkJY3VyX2RpcjsNCisJdTY0
-CQlwcmV2X3NlY19hZGRyOw0KKwl1MzIJCXByZXZfc2VjX2NudDsNCiB9Ow0KIA0KIHN0YXRpYyBp
-bnQgc2RtbWNfaW5pdF9zZF9leHByZXNzKHN0cnVjdCBtbWNfaG9zdCAqbW1jLCBzdHJ1Y3QgbW1j
-X2lvcyAqaW9zKTsNCkBAIC0yMjYsNiArMjM1LDE0IEBAIHN0YXRpYyB2b2lkIHNkX3NlbmRfY21k
-X2dldF9yc3Aoc3RydWN0IHJlYWx0ZWtfcGNpX3NkbW1jICpob3N0LA0KIAlkZXZfZGJnKHNkbW1j
-X2Rldihob3N0KSwgIiVzOiBTRC9NTUMgQ01EICVkLCBhcmcgPSAweCUwOHhcbiIsDQogCQkJX19m
-dW5jX18sIGNtZF9pZHgsIGFyZyk7DQogDQorCWlmIChjbWRfaWR4ID09IE1NQ19TRU5EX1NUQVRV
-UyAmJiBob3N0LT5yd19tb2RlID09IFNFUV9SVykgew0KKwkJY21kLT5yZXNwWzBdID0gUjFfUkVB
-RFlfRk9SX0RBVEEgfCAoUjFfU1RBVEVfVFJBTiA8PCA5KTsNCisJCWdvdG8gb3V0Ow0KKwl9DQor
-DQorCWlmICghbW1jX29wX211bHRpKGNtZC0+b3Bjb2RlKSkNCisJCWhvc3QtPnJ3X21vZGUgPSBO
-T1JNQUxfUlc7DQorDQogCXJzcF90eXBlID0gc2RfcmVzcG9uc2VfdHlwZShjbWQpOw0KIAlpZiAo
-cnNwX3R5cGUgPCAwKQ0KIAkJZ290byBvdXQ7DQpAQCAtNTQyLDYgKzU1OSw5MyBAQCBzdGF0aWMg
-aW50IHNkX3dyaXRlX2xvbmdfZGF0YShzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMgKmhvc3QsDQog
-CXJldHVybiAwOw0KIH0NCiANCitzdGF0aWMgaW50IHNkX3J3X3NlcXVlbnRpYWwoc3RydWN0IHJl
-YWx0ZWtfcGNpX3NkbW1jICpob3N0LCBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkNCit7DQorCXN0
-cnVjdCBydHN4X3BjciAqcGNyID0gaG9zdC0+cGNyOw0KKwlzdHJ1Y3QgbW1jX2hvc3QgKm1tYyA9
-IGhvc3QtPm1tYzsNCisJc3RydWN0IG1tY19jYXJkICpjYXJkID0gbW1jLT5jYXJkOw0KKwlzdHJ1
-Y3QgbW1jX2RhdGEgKmRhdGEgPSBtcnEtPmRhdGE7DQorCWludCB1aHMgPSBtbWNfY2FyZF91aHMo
-Y2FyZCk7DQorCXU4IGNmZzI7DQorCWludCBlcnI7DQorCXNpemVfdCBkYXRhX2xlbiA9IGRhdGEt
-PmJsa3N6ICogZGF0YS0+YmxvY2tzOw0KKw0KKwljZmcyID0gU0RfTk9fQ0FMQ1VMQVRFX0NSQzcg
-fCBTRF9DSEVDS19DUkMxNiB8DQorCQlTRF9OT19XQUlUX0JVU1lfRU5EIHwgU0RfTk9fQ0hFQ0tf
-Q1JDNyB8IFNEX1JTUF9MRU5fMDsNCisNCisJaWYgKCF1aHMpDQorCQljZmcyIHw9IFNEX05PX0NI
-RUNLX1dBSVRfQ1JDX1RPOw0KKw0KKwlydHN4X3BjaV9pbml0X2NtZChwY3IpOw0KKwlzZF9jbWRf
-c2V0X2RhdGFfbGVuKHBjciwgZGF0YS0+YmxvY2tzLCBkYXRhLT5ibGtzeik7DQorCXJ0c3hfcGNp
-X2FkZF9jbWQocGNyLCBXUklURV9SRUdfQ01ELCBJUlFTVEFUMCwNCisJCQlETUFfRE9ORV9JTlQs
-IERNQV9ET05FX0lOVCk7DQorCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBXUklURV9SRUdfQ01ELCBE
-TUFUQzMsDQorCQkweEZGLCAodTgpKGRhdGFfbGVuID4+IDI0KSk7DQorCXJ0c3hfcGNpX2FkZF9j
-bWQocGNyLCBXUklURV9SRUdfQ01ELCBETUFUQzIsDQorCQkweEZGLCAodTgpKGRhdGFfbGVuID4+
-IDE2KSk7DQorCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBXUklURV9SRUdfQ01ELCBETUFUQzEsDQor
-CQkweEZGLCAodTgpKGRhdGFfbGVuID4+IDgpKTsNCisJcnRzeF9wY2lfYWRkX2NtZChwY3IsIFdS
-SVRFX1JFR19DTUQsIERNQVRDMCwgMHhGRiwgKHU4KWRhdGFfbGVuKTsNCisNCisJaWYgKGhvc3Qt
-PmN1cl9kaXIgPT0gRE1BX0RJUl9GUk9NX0NBUkQpDQorCQlydHN4X3BjaV9hZGRfY21kKHBjciwg
-V1JJVEVfUkVHX0NNRCwgRE1BQ1RMLA0KKwkJCTB4MDMgfCBETUFfUEFDS19TSVpFX01BU0ssDQor
-CQkJRE1BX0RJUl9GUk9NX0NBUkQgfCBETUFfRU4gfCBETUFfNTEyKTsNCisJZWxzZQ0KKwkJcnRz
-eF9wY2lfYWRkX2NtZChwY3IsIFdSSVRFX1JFR19DTUQsIERNQUNUTCwNCisJCQkweDAzIHwgRE1B
-X1BBQ0tfU0laRV9NQVNLLA0KKwkJCURNQV9ESVJfVE9fQ0FSRCB8IERNQV9FTiB8IERNQV81MTIp
-Ow0KKw0KKwlydHN4X3BjaV9hZGRfY21kKHBjciwgV1JJVEVfUkVHX0NNRCwgQ0FSRF9EQVRBX1NP
-VVJDRSwNCisJCQkweDAxLCBSSU5HX0JVRkZFUik7DQorCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBX
-UklURV9SRUdfQ01ELCBTRF9DRkcyLCAweEZGLCBjZmcyKTsNCisNCisJaWYgKGhvc3QtPmN1cl9k
-aXIgPT0gRE1BX0RJUl9GUk9NX0NBUkQpDQorCQlydHN4X3BjaV9hZGRfY21kKHBjciwgV1JJVEVf
-UkVHX0NNRCwgU0RfVFJBTlNGRVIsIDB4RkYsDQorCQkJCVNEX1RSQU5TRkVSX1NUQVJUIHwgU0Rf
-VE1fQVVUT19SRUFEXzMpOw0KKwllbHNlDQorCQlydHN4X3BjaV9hZGRfY21kKHBjciwgV1JJVEVf
-UkVHX0NNRCwgU0RfVFJBTlNGRVIsIDB4RkYsDQorCQkJCVNEX1RSQU5TRkVSX1NUQVJUIHwgU0Rf
-VE1fQVVUT19XUklURV8zKTsNCisNCisJcnRzeF9wY2lfYWRkX2NtZChwY3IsIENIRUNLX1JFR19D
-TUQsIFNEX1RSQU5TRkVSLA0KKwkJCVNEX1RSQU5TRkVSX0VORCwgU0RfVFJBTlNGRVJfRU5EKTsN
-CisJcnRzeF9wY2lfc2VuZF9jbWRfbm9fd2FpdChwY3IpOw0KKw0KKwlpZiAoaG9zdC0+Y3VyX2Rp
-ciA9PSBETUFfRElSX0ZST01fQ0FSRCkNCisJCWVyciA9IHJ0c3hfcGNpX2RtYV90cmFuc2Zlcihw
-Y3IsIGRhdGEtPnNnLCBob3N0LT5zZ19jb3VudCwgMSwgMTAwMDApOw0KKwllbHNlDQorCQllcnIg
-PSBydHN4X3BjaV9kbWFfdHJhbnNmZXIocGNyLCBkYXRhLT5zZywgaG9zdC0+c2dfY291bnQsIDAs
-IDEwMDAwKTsNCisNCisJaWYgKGVyciA8IDApIHsNCisJCXNkX2NsZWFyX2Vycm9yKGhvc3QpOw0K
-KwkJcmV0dXJuIGVycjsNCisJfQ0KKw0KKwlyZXR1cm4gMDsNCit9DQorDQorc3RhdGljIGludCBz
-ZF9zdG9wX3NlcXVlbnRpYWwoc3RydWN0IHJlYWx0ZWtfcGNpX3NkbW1jICpob3N0LCBzdHJ1Y3Qg
-bW1jX3JlcXVlc3QgKm1ycSkNCit7DQorCXN0cnVjdCBydHN4X3BjciAqcGNyID0gaG9zdC0+cGNy
-Ow0KKwlzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNtZDsNCisNCisJY21kID0ga3phbGxvYyhzaXplb2Yo
-KmNtZCksIEdGUF9LRVJORUwpOw0KKw0KKwljbWQtPm9wY29kZSA9IE1NQ19TVE9QX1RSQU5TTUlT
-U0lPTjsNCisJY21kLT5hcmcgPSAwOw0KKwljbWQtPmJ1c3lfdGltZW91dCA9IDA7DQorCWlmICho
-b3N0LT5jdXJfZGlyID09IERNQV9ESVJfRlJPTV9DQVJEKQ0KKwkJY21kLT5mbGFncyA9IE1NQ19S
-U1BfU1BJX1IxIHwgTU1DX1JTUF9SMSB8IE1NQ19DTURfQUM7DQorCWVsc2UNCisJCWNtZC0+Zmxh
-Z3MgPSBNTUNfUlNQX1NQSV9SMUIgfCBNTUNfUlNQX1IxQiB8IE1NQ19DTURfQUM7DQorCXNkX3Nl
-bmRfY21kX2dldF9yc3AoaG9zdCwgY21kKTsNCisJdWRlbGF5KDUwKTsNCisJcnRzeF9wY2lfd3Jp
-dGVfcmVnaXN0ZXIocGNyLCBSQkNUTCwgUkJfRkxVU0gsIFJCX0ZMVVNIKTsNCisJa2ZyZWUoY21k
-KTsNCisJcmV0dXJuIDA7DQorfQ0KKw0KIHN0YXRpYyBpbmxpbmUgdm9pZCBzZF9lbmFibGVfaW5p
-dGlhbF9tb2RlKHN0cnVjdCByZWFsdGVrX3BjaV9zZG1tYyAqaG9zdCkNCiB7DQogCXJ0c3hfcGNp
-X3dyaXRlX3JlZ2lzdGVyKGhvc3QtPnBjciwgU0RfQ0ZHMSwNCkBAIC03OTYsNiArOTAwLDQ1IEBA
-IHN0YXRpYyBpbmxpbmUgaW50IHNkX3J3X2NtZChzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNtZCkNCiAJ
-CShjbWQtPm9wY29kZSA9PSBNTUNfV1JJVEVfQkxPQ0spOw0KIH0NCiANCitzdGF0aWMgdm9pZCBz
-ZF9yd19pZGxlX3dvcmsoc3RydWN0IHdvcmtfc3RydWN0ICp3b3JrKQ0KK3sNCisJc3RydWN0IGRl
-bGF5ZWRfd29yayAqZHdvcmsgPSB0b19kZWxheWVkX3dvcmsod29yayk7DQorCXN0cnVjdCByZWFs
-dGVrX3BjaV9zZG1tYyAqaG9zdCA9IGNvbnRhaW5lcl9vZihkd29yaywNCisJCQlzdHJ1Y3QgcmVh
-bHRla19wY2lfc2RtbWMsIHJ3X2lkbGVfd29yayk7DQorCXN0cnVjdCBtbWNfY29tbWFuZCAqY21k
-Ow0KKw0KKwljbWQgPSBremFsbG9jKHNpemVvZigqY21kKSwgR0ZQX0tFUk5FTCk7DQorDQorCWNt
-ZC0+b3Bjb2RlID0gTU1DX1NUT1BfVFJBTlNNSVNTSU9OOw0KKwljbWQtPmFyZyA9IDA7DQorCWNt
-ZC0+YnVzeV90aW1lb3V0ID0gMDsNCisJaWYgKGhvc3QtPmN1cl9kaXIgPT0gRE1BX0RJUl9GUk9N
-X0NBUkQpDQorCQljbWQtPmZsYWdzID0gTU1DX1JTUF9TUElfUjEgfCBNTUNfUlNQX1IxIHwgTU1D
-X0NNRF9BQzsNCisJZWxzZQ0KKwkJY21kLT5mbGFncyA9IE1NQ19SU1BfU1BJX1IxQiB8IE1NQ19S
-U1BfUjFCIHwgTU1DX0NNRF9BQzsNCisNCisJc2Rfc2VuZF9jbWRfZ2V0X3JzcChob3N0LCBjbWQp
-Ow0KKwlob3N0LT5yd19tb2RlID0gTk9STUFMX1JXOw0KKwlrZnJlZShjbWQpOw0KK30NCisNCitz
-dGF0aWMgaW50IHNkX2NoZWNrX3NlcShzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMgKmhvc3QsIHN0
-cnVjdCBtbWNfcmVxdWVzdCAqbXJxKQ0KK3sNCisJc3RydWN0IG1tY19jb21tYW5kICpjbWQgPSBt
-cnEtPmNtZDsNCisJc3RydWN0IG1tY19kYXRhICpkYXRhID0gbXJxLT5kYXRhOw0KKw0KKwlpZiAo
-IW1tY19vcF9tdWx0aShjbWQtPm9wY29kZSkpDQorCQlyZXR1cm4gMDsNCisNCisJaWYgKGhvc3Qt
-PnByZXZfZGlyICE9IGhvc3QtPmN1cl9kaXIpDQorCQlyZXR1cm4gMDsNCisNCisJaWYgKChob3N0
-LT5wcmV2X3NlY19hZGRyICsgaG9zdC0+cHJldl9zZWNfY250KSAhPSBkYXRhLT5ibGtfYWRkcikN
-CisJCXJldHVybiAwOw0KKw0KKwlyZXR1cm4gMTsNCit9DQorDQogc3RhdGljIHZvaWQgc2RfcmVx
-dWVzdChzdHJ1Y3Qgd29ya19zdHJ1Y3QgKndvcmspDQogew0KIAlzdHJ1Y3QgcmVhbHRla19wY2lf
-c2RtbWMgKmhvc3QgPSBjb250YWluZXJfb2Yod29yaywNCkBAIC04NDEsMTIgKzk4NCwzNiBAQCBz
-dGF0aWMgdm9pZCBzZF9yZXF1ZXN0KHN0cnVjdCB3b3JrX3N0cnVjdCAqd29yaykNCiAJaWYgKCFk
-YXRhX3NpemUpIHsNCiAJCXNkX3NlbmRfY21kX2dldF9yc3AoaG9zdCwgY21kKTsNCiAJfSBlbHNl
-IGlmIChzZF9yd19jbWQoY21kKSB8fCBzZGlvX2V4dGJsb2NrX2NtZChjbWQsIGRhdGEpKSB7DQot
-CQljbWQtPmVycm9yID0gc2RfcndfbXVsdGkoaG9zdCwgbXJxKTsNCi0JCWlmICghaG9zdC0+dXNp
-bmdfY29va2llKQ0KLQkJCXNkbW1jX3Bvc3RfcmVxKGhvc3QtPm1tYywgaG9zdC0+bXJxLCAwKTsN
-CisJCS8qIENoZWNrIHNlcSBmdW5jdGlvbiovDQorCQlpZiAoZGF0YS0+ZmxhZ3MgJiBNTUNfREFU
-QV9SRUFEKQ0KKwkJCWhvc3QtPmN1cl9kaXIgPSBETUFfRElSX0ZST01fQ0FSRDsNCisJCWVsc2UN
-CisJCQlob3N0LT5jdXJfZGlyID0gRE1BX0RJUl9UT19DQVJEOw0KKw0KKwkJaWYgKGhvc3QtPnJ3
-X21vZGUgPT0gU0VRX1JXKSB7DQorCQkJY2FuY2VsX2RlbGF5ZWRfd29yaygmaG9zdC0+cndfaWRs
-ZV93b3JrKTsNCisJCQlpZiAoIXNkX2NoZWNrX3NlcShob3N0LCBtcnEpKSB7DQorCQkJCXNkX3N0
-b3Bfc2VxdWVudGlhbChob3N0LCBtcnEpOw0KKwkJCQlob3N0LT5yd19tb2RlID0gTk9STUFMX1JX
-Ow0KKwkJCX0NCisJCX0NCisNCisJCWlmIChob3N0LT5yd19tb2RlID09IFNFUV9SVykNCisJCQlj
-bWQtPmVycm9yID0gc2Rfcndfc2VxdWVudGlhbChob3N0LCBtcnEpOw0KKwkJZWxzZSB7DQorCQkJ
-aWYgKG1tY19vcF9tdWx0aShjbWQtPm9wY29kZSkpDQorCQkJCWhvc3QtPnJ3X21vZGUgPSBTRVFf
-Ulc7DQorCQkJY21kLT5lcnJvciA9IHNkX3J3X211bHRpKGhvc3QsIG1ycSk7DQorCQkJaWYgKCFo
-b3N0LT51c2luZ19jb29raWUpDQorCQkJCXNkbW1jX3Bvc3RfcmVxKGhvc3QtPm1tYywgaG9zdC0+
-bXJxLCAwKTsNCisJCX0NCisNCisJCWlmIChjbWQtPmVycm9yKQ0KKwkJCWhvc3QtPnJ3X21vZGUg
-PSBOT1JNQUxfUlc7DQorDQorCQlpZiAobW1jX29wX211bHRpKGNtZC0+b3Bjb2RlKSAmJiBob3N0
-LT5yd19tb2RlID09IFNFUV9SVykNCisJCQltb2RfZGVsYXllZF93b3JrKHN5c3RlbV93cSwgJmhv
-c3QtPnJ3X2lkbGVfd29yaywgbXNlY3NfdG9famlmZmllcygxNTApKTsNCiANCi0JCWlmIChtbWNf
-b3BfbXVsdGkoY21kLT5vcGNvZGUpICYmIG1ycS0+c3RvcCkNCi0JCQlzZF9zZW5kX2NtZF9nZXRf
-cnNwKGhvc3QsIG1ycS0+c3RvcCk7DQogCX0gZWxzZSB7DQogCQlzZF9ub3JtYWxfcncoaG9zdCwg
-bXJxKTsNCiAJfQ0KQEAgLTg2Nyw2ICsxMDM0LDExIEBAIHN0YXRpYyB2b2lkIHNkX3JlcXVlc3Qo
-c3RydWN0IHdvcmtfc3RydWN0ICp3b3JrKQ0KIAl9DQogDQogCW11dGV4X2xvY2soJmhvc3QtPmhv
-c3RfbXV0ZXgpOw0KKwlpZiAoc2RfcndfY21kKGNtZCkgfHwgc2Rpb19leHRibG9ja19jbWQoY21k
-LCBkYXRhKSkgew0KKwkJaG9zdC0+cHJldl9kaXIgPSBob3N0LT5jdXJfZGlyOw0KKwkJaG9zdC0+
-cHJldl9zZWNfYWRkciA9IGRhdGEtPmJsa19hZGRyOw0KKwkJaG9zdC0+cHJldl9zZWNfY250ID0g
-ZGF0YS0+YmxvY2tzOw0KKwl9DQogCWhvc3QtPm1ycSA9IE5VTEw7DQogCW11dGV4X3VubG9jaygm
-aG9zdC0+aG9zdF9tdXRleCk7DQogDQpAQCAtMTQ1Nyw2ICsxNjI5LDcgQEAgc3RhdGljIHZvaWQg
-cnRzeF9wY2lfc2RtbWNfY2FyZF9ldmVudChzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0K
-IAlzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMgKmhvc3QgPSBwbGF0Zm9ybV9nZXRfZHJ2ZGF0YShw
-ZGV2KTsNCiANCiAJaG9zdC0+Y29va2llID0gLTE7DQorCWhvc3QtPnJ3X21vZGUgPSBOT1JNQUxf
-Ulc7DQogCW1tY19kZXRlY3RfY2hhbmdlKGhvc3QtPm1tYywgMCk7DQogfQ0KIA0KQEAgLTE0ODcs
-NiArMTY2MCw3IEBAIHN0YXRpYyBpbnQgcnRzeF9wY2lfc2RtbWNfZHJ2X3Byb2JlKHN0cnVjdCBw
-bGF0Zm9ybV9kZXZpY2UgKnBkZXYpDQogCWhvc3QtPmNvb2tpZSA9IC0xOw0KIAlob3N0LT5wb3dl
-cl9zdGF0ZSA9IFNETU1DX1BPV0VSX09GRjsNCiAJSU5JVF9XT1JLKCZob3N0LT53b3JrLCBzZF9y
-ZXF1ZXN0KTsNCisJSU5JVF9ERUxBWUVEX1dPUksoJmhvc3QtPnJ3X2lkbGVfd29yaywgc2Rfcndf
-aWRsZV93b3JrKTsNCiAJcGxhdGZvcm1fc2V0X2RydmRhdGEocGRldiwgaG9zdCk7DQogCXBjci0+
-c2xvdHNbUlRTWF9TRF9DQVJEXS5wX2RldiA9IHBkZXY7DQogCXBjci0+c2xvdHNbUlRTWF9TRF9D
-QVJEXS5jYXJkX2V2ZW50ID0gcnRzeF9wY2lfc2RtbWNfY2FyZF9ldmVudDsNCkBAIC0xNTI2LDYg
-KzE3MDAsNyBAQCBzdGF0aWMgaW50IHJ0c3hfcGNpX3NkbW1jX2Rydl9yZW1vdmUoc3RydWN0IHBs
-YXRmb3JtX2RldmljZSAqcGRldikNCiAJCXBtX3J1bnRpbWVfZGlzYWJsZSgmcGRldi0+ZGV2KTsN
-CiAJfQ0KIA0KKwljYW5jZWxfZGVsYXllZF93b3JrX3N5bmMoJmhvc3QtPnJ3X2lkbGVfd29yayk7
-DQogCWNhbmNlbF93b3JrX3N5bmMoJmhvc3QtPndvcmspOw0KIA0KIAltdXRleF9sb2NrKCZob3N0
-LT5ob3N0X211dGV4KTsNCi0tIA0KMi4yNS4xDQo=
+From: Jason Lai <jason.lai@genesyslogic.com.tw>
+
+Series [1] that has been posted by Ulf Hansson which provided some guidance
+and an overall structure.
+
+Series [2] focused on UHS-II card control side to address Ulf's intention
+regarding to "modularising" sd_uhs2.c.
+
+This series is the successor version of post [2], which adopts Ulf's
+comments about series [2]:
+1. Remove unnecessary debug print.
+2. Rephrase description about uhs2_cmd_assemble() in sd_uhs2.c
+3. Place UHS-II variables in the appropriate structure.
+
+Kind regards
+Jason Lai
+
+[1]
+https://patchwork.kernel.org/project/linux-mmc/list/?series=438509
+
+[2]
+https://patchwork.kernel.org/project/linux-mmc/list/?series=539737
+
+Jason Lai (3):
+  mmc: add UHS-II related definitions in headers
+  mmc: Implement content of UHS-II card initialization functions
+  mmc: core: Support UHS-II card access
+
+Ulf Hansson (4):
+  mmc: core: Cleanup printing of speed mode at card insertion
+  mmc: core: Prepare to support SD UHS-II cards
+  mmc: core: Announce successful insertion of an SD UHS-II card
+  mmc: core: Extend support for mmc regulators with a vqmmc2
+
+ drivers/mmc/core/Makefile    |    2 +-
+ drivers/mmc/core/bus.c       |   38 +-
+ drivers/mmc/core/core.c      |   43 +-
+ drivers/mmc/core/core.h      |    1 +
+ drivers/mmc/core/host.h      |    4 +
+ drivers/mmc/core/regulator.c |   34 ++
+ drivers/mmc/core/sd_uhs2.c   | 1081 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/sd_uhs2.h   |   18 +
+ include/linux/mmc/card.h     |   35 ++
+ include/linux/mmc/core.h     |    4 +-
+ include/linux/mmc/host.h     |   52 ++
+ include/linux/mmc/sd_uhs2.h  |  196 ++++++
+ 12 files changed, 1485 insertions(+), 23 deletions(-)
+ create mode 100644 drivers/mmc/core/sd_uhs2.c
+ create mode 100644 drivers/mmc/core/sd_uhs2.h
+ create mode 100644 include/linux/mmc/sd_uhs2.h
+
+
+------ original cover letter from Ulf's series ------
+A series [1] that has been collaborative worked upon by Takahiro Akashi
+(Linaro) and Ben Chuang (Genesys Logic) is targeting to add SD UHS-II
+support
+to the mmc subsystem.
+
+Throughout the reviews, we realized that the changes affecting the mmc core
+to
+support the UHS-II interface/protocol might not be entirely straightforward
+to
+implement. Especially, I expressed some concerns about the code that
+manages
+power on/off, initialization and power management of a SD UHS-II card.
+
+Therefore, I have posted this small series to try to help to put some of
+the
+foundation in the mmc core in place. Hopefully this can provide some
+guidance
+and an overall structure, of how I think the code could evolve.
+
+More details are available in the commit messages and through comments in
+the
+code, for each path.
+
+Kind regards
+Uffe
+
+[1]
+https://lkml.org/lkml/2020/11/5/1472
+
+
+Ulf Hansson (4):
+  mmc: core: Cleanup printing of speed mode at card insertion
+  mmc: core: Prepare to support SD UHS-II cards
+  mmc: core: Announce successful insertion of an SD UHS-II card
+  mmc: core: Extend support for mmc regulators with a vqmmc2
+
+ drivers/mmc/core/Makefile    |   2 +-
+ drivers/mmc/core/bus.c       |  38 +++--
+ drivers/mmc/core/core.c      |  17 ++-
+ drivers/mmc/core/core.h      |   1 +
+ drivers/mmc/core/host.h      |   5 +
+ drivers/mmc/core/regulator.c |  34 +++++
+ drivers/mmc/core/sd_uhs2.c   | 289 +++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h     |   6 +
+ include/linux/mmc/host.h     |  30 ++++
+ 9 files changed, 404 insertions(+), 18 deletions(-)
+ create mode 100644 drivers/mmc/core/sd_uhs2.c
+
+-- 
+2.34.0
+
