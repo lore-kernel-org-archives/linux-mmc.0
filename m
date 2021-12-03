@@ -2,348 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 613A2C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Dec 2021 14:33:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0749C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Dec 2021 23:42:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230247AbhLCOgq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Dec 2021 09:36:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54402 "EHLO
+        id S1354351AbhLCXpa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Dec 2021 18:45:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1381356AbhLCOgp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2021 09:36:45 -0500
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F814C061353
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Dec 2021 06:33:21 -0800 (PST)
-Received: by mail-lj1-x229.google.com with SMTP id z8so6501294ljz.9
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Dec 2021 06:33:21 -0800 (PST)
+        with ESMTP id S1354148AbhLCXp3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2021 18:45:29 -0500
+Received: from mail-qk1-x731.google.com (mail-qk1-x731.google.com [IPv6:2607:f8b0:4864:20::731])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38CCEC061751;
+        Fri,  3 Dec 2021 15:42:05 -0800 (PST)
+Received: by mail-qk1-x731.google.com with SMTP id de30so5242652qkb.0;
+        Fri, 03 Dec 2021 15:42:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=30XWWxC0kkpPR2EoyZvjIKn6vdwWUcPtgALDZaimukk=;
-        b=ADXEVq/8kvuZViPX/vfElXNYJtxtLjNJ/1fckDOKf3TBGBRzHEAcFKGMLgsFlN0MHX
-         7bhhkb5VKiBIJzQD4pGAQA57NV9N9ptz8ZKjaQLLtbw8APi7DQ1in0c8Sn36BItucdYC
-         9E1DDAaq3Wgmv2eTGQedSzMTYlSxrqGiuYppg//mVujAsBu2LKv9JXXuHEPJ3yJPYpsV
-         6rMlCVSbDK0plsFaiNGANW2TMnD6x62eClS86gZHQdEY55mP5nEl5qmyJUNGFpzWP1W2
-         524MZsTdiDPYInvRZdCGiw5oYYFB2GusDoLDiryOmKJ+o5rIFcbv2W12Gro6G+jmDAKb
-         Q2Dw==
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=uzp86XPX2kW/kV6occNAL8wfs1hQn3/ET8LFdxMxKJI=;
+        b=iEwP66hquh5xRMsUyCE0sOSZy0Fit76MzKhzNpKFWSvdb7a6ugQYDJsfPUYBwFog4w
+         Cc1eb3tXW0Z6K1ApsX4C/KpXK7Cx5fpPQjocxBbk/kCfPU00S3kVT0cCOW8Fj8ecLcTy
+         ofnILoKFL3C6Ju63wDkm5qKXhQcmmUnftSBvyvqkcfVu8vxuYC3CYEU6a1MK95Vfokoe
+         VYDBiQOQYXh/ffKmwOE6L5KZr6SJSnaZGgYz0JjxJfi9fBYIV7GaGELjJHBiiC5wQpi9
+         KwwUIGyt29u6ueDbTFxA++LTYE9TUOM2xiVopqM/Of7xoqq5y2duiNYM1FO1oF7SXb6R
+         YZlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=30XWWxC0kkpPR2EoyZvjIKn6vdwWUcPtgALDZaimukk=;
-        b=eOGam2EiO1nJNopN2aFm7+BbsjiNe1fNE0gb3xSRhKDvw/vDOUloTFM0mYQDaCZdkD
-         cTLis8CS4Zck+QRRkZz6ZxqAr59tDlQJmZU9c4mZl76YZoXPZD5HclzU/9k9XNmFCI1m
-         GHcPJMufTfcZztAXoTG74q7RUHrqlb6v7zE4K6G5C72tGp1SbS0i0isOxzmO4IRx4rEv
-         BJH2LvDOomtg5EPnz5tpslEJQsv4xKltkhf0+1RWUGSZatvx0bsx5wMpBuBuHBXtUprU
-         j6DWZ9miT1Tf8dg7b7yFKSHfk9lTxa5wTUstYoqSWv2H1xxNCoxuoxoQlaQ+y12fD+ox
-         6SPQ==
-X-Gm-Message-State: AOAM532WmOZMkBtZ6u8kmLWvv0uyn6iT0lwzNml5mXS674CaBLxE3qeS
-        ffTU1bXO5evXBrVgMVeubOW+5t57ZiJgzCiEQU2xQQ==
-X-Google-Smtp-Source: ABdhPJw85fjN1I9XVcSBSFVkqq/GxtDVdnT2edk5Sz4QU9isSC1mm9UB0DnoHFW01V0i/ohQKb6xLDcrShlo3pbJoOA=
-X-Received: by 2002:a2e:a22a:: with SMTP id i10mr18974655ljm.16.1638541999509;
- Fri, 03 Dec 2021 06:33:19 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=uzp86XPX2kW/kV6occNAL8wfs1hQn3/ET8LFdxMxKJI=;
+        b=VA6GDxXrAteNmKuSN1kn5JA4aqvqSp7EhpQIUW68Oct5Dn6NAOTurSSMmvZZgRAgXj
+         OTFXGPSHSVkr7dtM0ZKl5jczJ563wqVWoyJjoKUdqKq/U2Zd4FIVbYqpL6GjBNbTsa75
+         SSOROS8YoCpDGTJe8ovdmQkNrx45doOyxkIFbCEbOk3vZOgj7y9bdFymAtX8lkyikGh8
+         Mx8ZoK2afLT2fuG2w+NKa8AbhESh0sQ2/lneqcOCN++jReMmOQv2ip0AfTGpGfXfiUcJ
+         DGLL8ioY7Q4tPPCv0Orav/1ckOCY8QQxWK33miLlN944WAo1oW+f/15n7k44I++H2pLd
+         0d6g==
+X-Gm-Message-State: AOAM533NnZrsdMfKBpP+4n/ocxZSKmr9gh8IuAFHb/Ra1gYwcr3u196b
+        RANeAG9ZW+Z5bJZTvrOG0AdspodWNTY=
+X-Google-Smtp-Source: ABdhPJwwRseXLAdKZxWot5CI4xILtt5LFTnCQvHPxEhS5ZchC/ailDs/or2cbrzZMLW1Z8+y6nYf0Q==
+X-Received: by 2002:a05:620a:4116:: with SMTP id j22mr20932530qko.410.1638574924189;
+        Fri, 03 Dec 2021 15:42:04 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id d15sm3495111qtd.70.2021.12.03.15.42.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Dec 2021 15:42:03 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr
+Subject: [PATCH v1 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Fri,  3 Dec 2021 18:41:52 -0500
+Message-Id: <20211203234155.2319803-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <5a38e5eb9fdc4b53ba4a11602e2cef0d@realtek.com>
-In-Reply-To: <5a38e5eb9fdc4b53ba4a11602e2cef0d@realtek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 3 Dec 2021 15:32:43 +0100
-Message-ID: <CAPDyKFrC1JGCAAQZOOKe4VZS7g2Sg4MZKXr9WyMPeYDdQ3ht8g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rtsx: improve rw performance
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
-        "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 3 Dec 2021 at 11:43, Ricky WU <ricky_wu@realtek.com> wrote:
->
-> sd_check_seq() to distinguish sequential rw or normal rw
-> if this data is sequential call to sd_rw_sequential()
+Add support for the LiteX SD-Card device, LiteSDCard.
 
-Can you please extend this commit message? This doesn't answer why or
-what this change really does, please try to do that, as to help me to
-review this.
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
-Kind regards
-Uffe
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
 
->
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 185 +++++++++++++++++++++++++++++-
->  1 file changed, 180 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 58cfaffa3c2d..9eb433b1f6f8 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -22,6 +22,8 @@
->  #include <asm/unaligned.h>
->  #include <linux/pm_runtime.h>
->
-> +enum RW_MODE   {NORMAL_RW, SEQ_RW};
-> +
->  struct realtek_pci_sdmmc {
->         struct platform_device  *pdev;
->         struct rtsx_pcr         *pcr;
-> @@ -31,6 +33,7 @@ struct realtek_pci_sdmmc {
->
->         struct work_struct      work;
->         struct mutex            host_mutex;
-> +       struct delayed_work             rw_idle_work;
->
->         u8                      ssc_depth;
->         unsigned int            clock;
-> @@ -46,6 +49,12 @@ struct realtek_pci_sdmmc {
->         s32                     cookie;
->         int                     cookie_sg_count;
->         bool                    using_cookie;
-> +
-> +       enum RW_MODE            rw_mode;
-> +       u8              prev_dir;
-> +       u8              cur_dir;
-> +       u64             prev_sec_addr;
-> +       u32             prev_sec_cnt;
->  };
->
->  static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios);
-> @@ -226,6 +235,14 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
->         dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d, arg = 0x%08x\n",
->                         __func__, cmd_idx, arg);
->
-> +       if (cmd_idx == MMC_SEND_STATUS && host->rw_mode == SEQ_RW) {
-> +               cmd->resp[0] = R1_READY_FOR_DATA | (R1_STATE_TRAN << 9);
-> +               goto out;
-> +       }
-> +
-> +       if (!mmc_op_multi(cmd->opcode))
-> +               host->rw_mode = NORMAL_RW;
-> +
->         rsp_type = sd_response_type(cmd);
->         if (rsp_type < 0)
->                 goto out;
-> @@ -542,6 +559,93 @@ static int sd_write_long_data(struct realtek_pci_sdmmc *host,
->         return 0;
->  }
->
-> +static int sd_rw_sequential(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
-> +{
-> +       struct rtsx_pcr *pcr = host->pcr;
-> +       struct mmc_host *mmc = host->mmc;
-> +       struct mmc_card *card = mmc->card;
-> +       struct mmc_data *data = mrq->data;
-> +       int uhs = mmc_card_uhs(card);
-> +       u8 cfg2;
-> +       int err;
-> +       size_t data_len = data->blksz * data->blocks;
-> +
-> +       cfg2 = SD_NO_CALCULATE_CRC7 | SD_CHECK_CRC16 |
-> +               SD_NO_WAIT_BUSY_END | SD_NO_CHECK_CRC7 | SD_RSP_LEN_0;
-> +
-> +       if (!uhs)
-> +               cfg2 |= SD_NO_CHECK_WAIT_CRC_TO;
-> +
-> +       rtsx_pci_init_cmd(pcr);
-> +       sd_cmd_set_data_len(pcr, data->blocks, data->blksz);
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, IRQSTAT0,
-> +                       DMA_DONE_INT, DMA_DONE_INT);
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC3,
-> +               0xFF, (u8)(data_len >> 24));
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC2,
-> +               0xFF, (u8)(data_len >> 16));
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC1,
-> +               0xFF, (u8)(data_len >> 8));
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC0, 0xFF, (u8)data_len);
-> +
-> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
-> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
-> +                       0x03 | DMA_PACK_SIZE_MASK,
-> +                       DMA_DIR_FROM_CARD | DMA_EN | DMA_512);
-> +       else
-> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
-> +                       0x03 | DMA_PACK_SIZE_MASK,
-> +                       DMA_DIR_TO_CARD | DMA_EN | DMA_512);
-> +
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
-> +                       0x01, RING_BUFFER);
-> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG2, 0xFF, cfg2);
-> +
-> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
-> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
-> +                               SD_TRANSFER_START | SD_TM_AUTO_READ_3);
-> +       else
-> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
-> +                               SD_TRANSFER_START | SD_TM_AUTO_WRITE_3);
-> +
-> +       rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, SD_TRANSFER,
-> +                       SD_TRANSFER_END, SD_TRANSFER_END);
-> +       rtsx_pci_send_cmd_no_wait(pcr);
-> +
-> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
-> +               err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, 1, 10000);
-> +       else
-> +               err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, 0, 10000);
-> +
-> +       if (err < 0) {
-> +               sd_clear_error(host);
-> +               return err;
-> +       }
-> +
-> +       return 0;
-> +}
-> +
-> +static int sd_stop_sequential(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
-> +{
-> +       struct rtsx_pcr *pcr = host->pcr;
-> +       struct mmc_command *cmd;
-> +
-> +       cmd = kzalloc(sizeof(*cmd), GFP_KERNEL);
-> +
-> +       cmd->opcode = MMC_STOP_TRANSMISSION;
-> +       cmd->arg = 0;
-> +       cmd->busy_timeout = 0;
-> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
-> +               cmd->flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-> +       else
-> +               cmd->flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> +       sd_send_cmd_get_rsp(host, cmd);
-> +       udelay(50);
-> +       rtsx_pci_write_register(pcr, RBCTL, RB_FLUSH, RB_FLUSH);
-> +       kfree(cmd);
-> +       return 0;
-> +}
-> +
->  static inline void sd_enable_initial_mode(struct realtek_pci_sdmmc *host)
->  {
->         rtsx_pci_write_register(host->pcr, SD_CFG1,
-> @@ -796,6 +900,45 @@ static inline int sd_rw_cmd(struct mmc_command *cmd)
->                 (cmd->opcode == MMC_WRITE_BLOCK);
->  }
->
-> +static void sd_rw_idle_work(struct work_struct *work)
-> +{
-> +       struct delayed_work *dwork = to_delayed_work(work);
-> +       struct realtek_pci_sdmmc *host = container_of(dwork,
-> +                       struct realtek_pci_sdmmc, rw_idle_work);
-> +       struct mmc_command *cmd;
-> +
-> +       cmd = kzalloc(sizeof(*cmd), GFP_KERNEL);
-> +
-> +       cmd->opcode = MMC_STOP_TRANSMISSION;
-> +       cmd->arg = 0;
-> +       cmd->busy_timeout = 0;
-> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
-> +               cmd->flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-> +       else
-> +               cmd->flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> +
-> +       sd_send_cmd_get_rsp(host, cmd);
-> +       host->rw_mode = NORMAL_RW;
-> +       kfree(cmd);
-> +}
-> +
-> +static int sd_check_seq(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
-> +{
-> +       struct mmc_command *cmd = mrq->cmd;
-> +       struct mmc_data *data = mrq->data;
-> +
-> +       if (!mmc_op_multi(cmd->opcode))
-> +               return 0;
-> +
-> +       if (host->prev_dir != host->cur_dir)
-> +               return 0;
-> +
-> +       if ((host->prev_sec_addr + host->prev_sec_cnt) != data->blk_addr)
-> +               return 0;
-> +
-> +       return 1;
-> +}
-> +
->  static void sd_request(struct work_struct *work)
->  {
->         struct realtek_pci_sdmmc *host = container_of(work,
-> @@ -841,12 +984,36 @@ static void sd_request(struct work_struct *work)
->         if (!data_size) {
->                 sd_send_cmd_get_rsp(host, cmd);
->         } else if (sd_rw_cmd(cmd) || sdio_extblock_cmd(cmd, data)) {
-> -               cmd->error = sd_rw_multi(host, mrq);
-> -               if (!host->using_cookie)
-> -                       sdmmc_post_req(host->mmc, host->mrq, 0);
-> +               /* Check seq function*/
-> +               if (data->flags & MMC_DATA_READ)
-> +                       host->cur_dir = DMA_DIR_FROM_CARD;
-> +               else
-> +                       host->cur_dir = DMA_DIR_TO_CARD;
-> +
-> +               if (host->rw_mode == SEQ_RW) {
-> +                       cancel_delayed_work(&host->rw_idle_work);
-> +                       if (!sd_check_seq(host, mrq)) {
-> +                               sd_stop_sequential(host, mrq);
-> +                               host->rw_mode = NORMAL_RW;
-> +                       }
-> +               }
-> +
-> +               if (host->rw_mode == SEQ_RW)
-> +                       cmd->error = sd_rw_sequential(host, mrq);
-> +               else {
-> +                       if (mmc_op_multi(cmd->opcode))
-> +                               host->rw_mode = SEQ_RW;
-> +                       cmd->error = sd_rw_multi(host, mrq);
-> +                       if (!host->using_cookie)
-> +                               sdmmc_post_req(host->mmc, host->mrq, 0);
-> +               }
-> +
-> +               if (cmd->error)
-> +                       host->rw_mode = NORMAL_RW;
-> +
-> +               if (mmc_op_multi(cmd->opcode) && host->rw_mode == SEQ_RW)
-> +                       mod_delayed_work(system_wq, &host->rw_idle_work, msecs_to_jiffies(150));
->
-> -               if (mmc_op_multi(cmd->opcode) && mrq->stop)
-> -                       sd_send_cmd_get_rsp(host, mrq->stop);
->         } else {
->                 sd_normal_rw(host, mrq);
->         }
-> @@ -867,6 +1034,11 @@ static void sd_request(struct work_struct *work)
->         }
->
->         mutex_lock(&host->host_mutex);
-> +       if (sd_rw_cmd(cmd) || sdio_extblock_cmd(cmd, data)) {
-> +               host->prev_dir = host->cur_dir;
-> +               host->prev_sec_addr = data->blk_addr;
-> +               host->prev_sec_cnt = data->blocks;
-> +       }
->         host->mrq = NULL;
->         mutex_unlock(&host->host_mutex);
->
-> @@ -1457,6 +1629,7 @@ static void rtsx_pci_sdmmc_card_event(struct platform_device *pdev)
->         struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
->
->         host->cookie = -1;
-> +       host->rw_mode = NORMAL_RW;
->         mmc_detect_change(host->mmc, 0);
->  }
->
-> @@ -1487,6 +1660,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
->         host->cookie = -1;
->         host->power_state = SDMMC_POWER_OFF;
->         INIT_WORK(&host->work, sd_request);
-> +       INIT_DELAYED_WORK(&host->rw_idle_work, sd_rw_idle_work);
->         platform_set_drvdata(pdev, host);
->         pcr->slots[RTSX_SD_CARD].p_dev = pdev;
->         pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
-> @@ -1526,6 +1700,7 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
->                 pm_runtime_disable(&pdev->dev);
->         }
->
-> +       cancel_delayed_work_sync(&host->rw_idle_work);
->         cancel_work_sync(&host->work);
->
->         mutex_lock(&host->host_mutex);
-> --
-> 2.25.1
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  63 ++
+ MAINTAINERS                                   |   2 +
+ drivers/mmc/host/Kconfig                      |   6 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 677 ++++++++++++++++++
+ 5 files changed, 749 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
+
+-- 
+2.31.1
+
