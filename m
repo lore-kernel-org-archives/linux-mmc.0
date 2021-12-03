@@ -2,150 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 632D8C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Dec 2021 03:58:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0A6EC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Dec 2021 07:59:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243269AbhLCEBk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Dec 2021 23:01:40 -0500
-Received: from mail-mw2nam08on2115.outbound.protection.outlook.com ([40.107.101.115]:4684
-        "EHLO NAM04-MW2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231266AbhLCEBk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 2 Dec 2021 23:01:40 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=NHk8OT57CxZzQmRtyF+fmQBy0d9dFHBV2+CtGdCcUb+zqB3l0yu/dopaaejv7RB3Na7w4J9Dn7AOFVg1ffId+KTBGiiopbOg+yHNdR+UeqVUZsL3PMbxboWDEWtPy9v4ic+c8lc3/Q5Z+Zqu03zHX37KqsAL65wmZW4J3pLUs0IfhqL1pHUaaQSJVhtAbQCDph/PKBMsHySuhqZbFgyeV7cYMA1Txq0aZv+yWpSGRsHrtxEdHZSPTkwUoW8pxy7juK/J/KqaOWiPxyawv/ajddTnSlrqm81FKongwF8lkTH/nBP/1PmqHfru1KMXNiAi3NfeLlknGmxzzDbHlRd2+Q==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DyHif4U7NCYif4EevF9nuQj9xQojF+jwkBTZ1jdjKFY=;
- b=SaamsKn2hcD0JKb7qGo2AAi25ZLglCU06pzm1dKmEUmbZt+7fMmmL4B10IOMgAWTO+OrXvQ96GmBUydKwktR9SKaCaMD/sxFsK1freMsnZ6NT8lFkuVC9Bn/JJFnW3XYEIKa6TtcF7kXasvp71KTuupigtp2Hby5En5edqn7stCH9ojxrIK/MG41sEWnEFukYj8Z8hFmSlal1M19I6urJQk5+JVT+7AaYwxjqrjQ28EZcRqHhngno01geW0cZU00QMIPppMzkIeMFn2OCHb+ZQ8dYWcQSyoSNcuc3LA2oZtMlue4nRvdFXvVk/vGhhWpkYwqkHAUVk/HvP8b9JvEkQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bayhubtech.com; dmarc=pass action=none
- header.from=bayhubtech.com; dkim=pass header.d=bayhubtech.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=towerbridgetechnology.onmicrosoft.com;
- s=selector2-towerbridgetechnology-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DyHif4U7NCYif4EevF9nuQj9xQojF+jwkBTZ1jdjKFY=;
- b=W8RtFx5xfVM74MxrO1ouum+HYcAjmYSQcy6CAn5BqAs8ErkFjTYTiIk2yWFVvdTgy10J8qQW+H8xVEfEv4Yd9fPSam6/wKG2Hz7U89tqSpId1c1r3bYI7sG05X+C66+wopolduLWpF/jTcSWc0R16T+E4brcpIc+MRX6mQKw95E=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bayhubtech.com;
-Received: from BL3PR16MB4570.namprd16.prod.outlook.com (2603:10b6:208:349::24)
- by BL3PR16MB4443.namprd16.prod.outlook.com (2603:10b6:208:342::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.16; Fri, 3 Dec
- 2021 03:58:16 +0000
-Received: from BL3PR16MB4570.namprd16.prod.outlook.com
- ([fe80::d867:83af:5891:8dff]) by BL3PR16MB4570.namprd16.prod.outlook.com
- ([fe80::d867:83af:5891:8dff%8]) with mapi id 15.20.4713.027; Fri, 3 Dec 2021
- 03:58:16 +0000
-From:   fred <fred.ai@bayhubtech.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
-        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
-        fred.ai@bayhubtech.com
-Subject: [PATCH V1 2/2] mmc:sdhci-pci-o2micro:Change implementation of setting corresponding PLL frequency according to card mode
-Date:   Thu,  2 Dec 2021 19:57:59 -0800
-Message-Id: <20211203035759.2183-2-fred.ai@bayhubtech.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20211203035759.2183-1-fred.ai@bayhubtech.com>
-References: <20211203035759.2183-1-fred.ai@bayhubtech.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: HK2PR0401CA0003.apcprd04.prod.outlook.com
- (2603:1096:202:2::13) To BL3PR16MB4570.namprd16.prod.outlook.com
- (2603:10b6:208:349::24)
+        id S1379033AbhLCICj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Dec 2021 03:02:39 -0500
+Received: from mga14.intel.com ([192.55.52.115]:34396 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1350800AbhLCICj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 3 Dec 2021 03:02:39 -0500
+X-IronPort-AV: E=McAfee;i="6200,9189,10186"; a="237158712"
+X-IronPort-AV: E=Sophos;i="5.87,283,1631602800"; 
+   d="scan'208";a="237158712"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2021 23:59:15 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.87,283,1631602800"; 
+   d="scan'208";a="561582959"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by fmsmga008.fm.intel.com with ESMTP; 02 Dec 2021 23:59:13 -0800
+Subject: Re: [PATCH 1/2] mmc: sdhci-iproc: "mmc1: Internal clock never
+ stabilised." seen on 72113
+To:     Al Cooper <alcooperx@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     bcm-kernel-feedback-list@broadcom.com,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        linux-kernel@vger.kernel.org
+References: <20211202163050.46810-1-alcooperx@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <632d1979-261f-2486-6a25-bab89797616f@intel.com>
+Date:   Fri, 3 Dec 2021 09:59:12 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-Received: from DESKTOP-G2V7PLK.localdomain (2001:b011:4001:97c5:5199:8767:2528:dc2d) by HK2PR0401CA0003.apcprd04.prod.outlook.com (2603:1096:202:2::13) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4734.24 via Frontend Transport; Fri, 3 Dec 2021 03:58:13 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 51331a9a-6667-4e8e-955f-08d9b6112253
-X-MS-TrafficTypeDiagnostic: BL3PR16MB4443:
-X-Microsoft-Antispam-PRVS: <BL3PR16MB444391E0B481BE9AF0EE153F996A9@BL3PR16MB4443.namprd16.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:3044;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: u0jsreOmMRvpjKwm7Kp5DkpUoRYAzWMN5Gcz35plT5555MQ2jMFe8z4Yi/0D12/4FpJGJ3uZrnFtlPfStCXyeNdPmeY7P+fgEGyN6hlQulM5K8Q6ohDjVCA8XzMgYs47e2elhU3BAzCw1RcgBpafqmOT3CoCt5Fb9rty8f7gmTo4wUPxyPShV6O3va9avsei1Q//0qOWDf/0VzMrIztr8QqrjkFCngAGpE8CFqdjvAndeRJnlosfeci5sMBjQC2LjvsMvP88f83m0O8yBGGl6rgJi1C3fJwWkw8Vh3cLdFyEvYB2PLxOsReljZPXsUOunjDje1Z0YvAVIPhpO5ZTYSvYwvYRbx3NgNfRRAoUk++KZUKwF389/NlL4YlK1EvoAzvaWwqZXtpG/QGOkJGsX/+ll+mR6ByzwhtQepLwbzn2e+5gb/FOmriRXr6KQUl2u3y8udspDFZOTKDD8eELDzNWm5AaiArNBANMtXM3Q8A4FQNtxJKF/I75q8FsxMuk26/se3IKMjZQIw2Z/TP1xnoFLFuM2mPnv9bktPKpAJZbCO8He0ieIMQabuVo82xDhfEfQ/lV3aEdUzVp5SiUswlV4bBAiq+rKxWaOCYcJEk43SJMfu5c+L6wjM5qbR/G81i3Gn8miycQenL3Vh2Sig==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BL3PR16MB4570.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(39830400003)(376002)(396003)(346002)(136003)(366004)(107886003)(1076003)(83380400001)(8936002)(6506007)(38100700002)(66556008)(316002)(186003)(66946007)(4326008)(52116002)(66476007)(508600001)(6666004)(2906002)(36756003)(8676002)(6512007)(6486002)(2616005)(86362001)(5660300002);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?/ZIEhHaqkjsenKunaG2Q1i+FAzd6hzjmPdIGNcxFqtFPx4jBzXJUTtkNfXaQ?=
- =?us-ascii?Q?3P3dSGPzRQgawe3Ac9IfwGOh7VHTBvn+nzxuAwhnVPgCINm0VG3FFHTTr0A/?=
- =?us-ascii?Q?+Mvcq4HBy/61zMiAFMKYi0NYmYdJHcOqCIOzOz6uAC32A4I+Eod3QgMKRzut?=
- =?us-ascii?Q?kRcyrwJsYaSjJzDehhg78ndL5Y7hn//qeDf/jCT210VcSlF/utHJAwgUAXhh?=
- =?us-ascii?Q?iiKlzjJQUaoD1hJHe1BlFjB3seenl4tQWJfD2a8laiUzkg0qSPonDbjLDFnf?=
- =?us-ascii?Q?RAFTOx4s9IAL0zo9Iamh2+tJt+tPPUWAoyo8G36yIyc42q+7yhe5a5yW7K8q?=
- =?us-ascii?Q?IiGGj97Q5witTznZsa7PMbi34Y105pB3Tt0ZVwolzFMtf3gjd1OJLcSzjVzm?=
- =?us-ascii?Q?dtQSHHMc+LAPR+aBZbgX42sq+dAJXieZt5+sZ76FRXT+xplem5JW2irTR+1T?=
- =?us-ascii?Q?o34wC3g8GydXqRETw3tYQ6MHWi7OUAZFEAJmOQu1vL+9A4YnArdTRiCiWZ36?=
- =?us-ascii?Q?mH48N+x3+9BsouLxwc7tY0nhVLhbwNgRQUhV3uOj8o+1//FdKBR4Ey84mHxM?=
- =?us-ascii?Q?UcQOUuNEFiLeCQ7qZ+pXLhNKNGqDLxU1Idu0uuuMv4VlEDTrG+ev9M0McbZe?=
- =?us-ascii?Q?G1x3UWvwhIw3O2bY59pzjANLX0+M0AaB1v61yuZQTbXDIkVeFNG1vvFJNAVe?=
- =?us-ascii?Q?ZjPqFNc6OAV8VcUWwi71cl/2SeRliIiyJ9lrkOvgtS4Vbr+OjIkI4xI7abBk?=
- =?us-ascii?Q?7FbNuRJytKec437nWHhUYZ8sj1H9A6y+5NxufU0ciS0wqFICFKux3tbiLOlr?=
- =?us-ascii?Q?4PEm9EBI1KRZ36EfFK4nPSLHPqXbWwLzn5MlKvrJIZ0REoLUE195415dBoUi?=
- =?us-ascii?Q?61Jm4jpM2bdizVFb+JRVwyqKahmH6/UgzNRRDpKKvPt9z9exPDhYFunQ2tbg?=
- =?us-ascii?Q?RD7rntMxknIi14E1dV4yGBgApKQS1KA6/ezSIpKK4OvnkhlORNQFaol8PT6+?=
- =?us-ascii?Q?whUTXOQLkQHEE/JDAi6MwbpeXhIn+qhYBTQg8mlo2JRpfF3VZ10yakus1nV7?=
- =?us-ascii?Q?oh7kFlrMExOMH8pmOVjboJUjHLZbZm3ytQ+xSWyB9WekVbnOQwCYdmPVC6jC?=
- =?us-ascii?Q?lZilRQhr54BzEdhGvDjmHdtx9uAxI/qg1wZsxkCbSqUuP/ZOe1/PTEQw/RTq?=
- =?us-ascii?Q?BmKgBjDzzWJIPQBMbtqpbbiatufkK76PFdAprjCNDKmAvpmu73ECNYeQ7DuF?=
- =?us-ascii?Q?orDGrZy0IvNi2nwXdR5VuE4Qzsd8h89eKcvbGyUarbQDq3iQIR76a+3qJSPF?=
- =?us-ascii?Q?NZJfd1x49HuBERxFOj+d6ShDNae7nKMq1rZ8TZ+vJDd7KGoKi1U7lGroiVzw?=
- =?us-ascii?Q?BDxvE1752JbhV5jatOZt1uuq+9B+qhqvnsr/TT+F70r+cmcaaTHcnsqC6e4W?=
- =?us-ascii?Q?JJXASad51zu8C3SukRgllxAyf2e3+NYBN14B+80WW/vqQDeB+snG2ilqEn1u?=
- =?us-ascii?Q?gtoLS65yZrJaq6iUq/eMZgYCsCG6ujRKqht+fWIWhhdl66LnjCKb6wpYWLCB?=
- =?us-ascii?Q?ydNk77NlJ3UTzbP+1tSBJ3Ds8DlEILFyOvPv2NbQfC837LeA4UvfzYez+ftR?=
- =?us-ascii?Q?VM9xsSwE0iTeeSuAVp/stCiQehMwTChRKAJ+Galc/LWaZqWhug+anyfTnEWX?=
- =?us-ascii?Q?fgQcUEe06YttRZhI59EXrKeLK6M=3D?=
-X-OriginatorOrg: bayhubtech.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 51331a9a-6667-4e8e-955f-08d9b6112253
-X-MS-Exchange-CrossTenant-AuthSource: BL3PR16MB4570.namprd16.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Dec 2021 03:58:15.9563
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 0a7aae2b-8f2e-44df-ba2f-42de7f93c642
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: VOjRFMGqUkdXi10a6fRHONa8+Riwy2sIoLLpTNdwsezWwFvbBitF0QrDyCsW3VGVLX2Q9KtCcXF2LMRSa1X+Aw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL3PR16MB4443
+In-Reply-To: <20211202163050.46810-1-alcooperx@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-1.SDR104 card mode PLL frequency is 0x2c28.
-2.SD2.0/SDR50 card mode PLL frequency is 0X2510.
+On 02/12/2021 18:30, Al Cooper wrote:
+> The problem is in the .shutdown callback that was added to the
+> sdhci-iproc and sdhci-brcmstb drivers to save power in S5. The
+> shutdown callback will just call the sdhci_pltfm_suspend() function
+> to suspend the lower level driver and then stop the sdhci system
+> clock. The problem is that in some cases there can be a worker
+> thread in the "system_freezable_wq" work queue that is scanning
+> for a device every second. In normal system suspend, this queue
+> is suspended before the driver suspend is called. In shutdown the
+> queue is not suspended and the thread my run after we stop the
+> sdhci clock in the shutdown callback which will cause the "clock
+> never stabilised" error. The solution will be to have the shutdown
+> callback cancel the worker thread before calling suspend (and
+> stopping the sdhci clock).
+> 
+> NOTE: This is only happening on systems with the Legacy RPi SDIO
+> core because that's the only controller that doesn't have the
+> presence signal and needs to use a worker thread to do a 1 second
+> poll loop.
+> 
+> Fixes: 98b5ce4c08ca ("mmc: sdhci-iproc: Add support for the legacy sdhci controller on the BCM7211")
+> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-iproc.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index 032bf852397f..05db768edcfc 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -428,6 +428,10 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
+>  
+>  static void sdhci_iproc_shutdown(struct platform_device *pdev)
+>  {
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +
+> +	/* Cancel possible rescan worker thread */
+> +	cancel_delayed_work_sync(&host->mmc->detect);
+>  	sdhci_pltfm_suspend(&pdev->dev);
+>  }
+>  
+> 
+> base-commit: 58e1100fdc5990b0cc0d4beaf2562a92e621ac7d
+> 
 
-Signed-off-by: fred<fred.ai@bayhubtech.com>
+I wonder if mmc core should handle this instead. e.g.
 
-change in v1:
-When SD2.0/SDR50 card mode,driver need to set PLL frequency 0x2510.
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index bac3f0f8185b..32a8ef874efa 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -568,9 +568,17 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
- 	if ((host->timing == MMC_TIMING_UHS_SDR104) && (clock == 200000000)) {
- 		pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 240c5af793dc..55c509442659 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2264,15 +2264,21 @@ void mmc_start_host(struct mmc_host *host)
+ 	_mmc_detect_change(host, 0, false);
+ }
  
-+		/*SDR104 card mode PLL frequency value is 0x2c28*/
- 		if ((scratch_32 & 0xFFFF0000) != 0x2c280000)
- 			o2_pci_set_baseclk(chip, 0x2c280000);
+-void mmc_stop_host(struct mmc_host *host)
++void mmc_quiesce_host(struct mmc_host *host)
+ {
+-	if (host->slot.cd_irq >= 0) {
++	if (host->slot.cd_irq >= 0 && host->slot.irq_enabled) {
+ 		mmc_gpio_set_cd_wake(host, false);
+ 		disable_irq(host->slot.cd_irq);
++		host->slot.irq_enabled = false;
+ 	}
  
-+	} else {
-+		pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
+ 	host->rescan_disable = 1;
+ 	cancel_delayed_work_sync(&host->detect);
++}
 +
-+		/*SD2.0,SDR50 card mode PLL DMDN value is 0X2510*/
-+		if ((scratch_32 & 0xFFFF0000) != 0x2510000)
-+			o2_pci_set_baseclk(chip, 0x25100000);
++void mmc_stop_host(struct mmc_host *host)
++{
++	mmc_quiesce_host(host);
+ 
+ 	/* clear pm flags now and let card drivers set them as needed */
+ 	host->pm_flags = 0;
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 7931a4f0137d..dcee28eec9a6 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -71,6 +71,7 @@ static inline void mmc_delay(unsigned int ms)
+ void mmc_rescan(struct work_struct *work);
+ void mmc_start_host(struct mmc_host *host);
+ void mmc_stop_host(struct mmc_host *host);
++void mmc_quiesce_host(struct mmc_host *host);
+ 
+ void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+ 			bool cd_irq);
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index d4683b1d263f..5b272f938558 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -80,9 +80,18 @@ static void mmc_host_classdev_release(struct device *dev)
+ 	kfree(host);
+ }
+ 
++static int mmc_host_shutdown_pre(struct device *dev)
++{
++	struct mmc_host *host = cls_dev_to_mmc_host(dev);
 +
- 		/*If not SDR104 card mode, set 0x354 value 0*/
- 		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
- 		scratch_32 &= ~(1 << 16);
--- 
-2.32.0
++	mmc_quiesce_host(host);
++	return 0;
++}
++
+ static struct class mmc_host_class = {
+ 	.name		= "mmc_host",
+ 	.dev_release	= mmc_host_classdev_release,
++	.shutdown_pre	= mmc_host_shutdown_pre,
+ 	.pm		= MMC_HOST_CLASS_DEV_PM_OPS,
+ };
+ 
+diff --git a/drivers/mmc/core/slot-gpio.c b/drivers/mmc/core/slot-gpio.c
+index dd2a4b6ab6ad..4967f0b15806 100644
+--- a/drivers/mmc/core/slot-gpio.c
++++ b/drivers/mmc/core/slot-gpio.c
+@@ -110,6 +110,8 @@ void mmc_gpiod_request_cd_irq(struct mmc_host *host)
+ 			ctx->cd_label, host);
+ 		if (ret < 0)
+ 			irq = ret;
++		else
++			host->slot.irq_enabled = true;
+ 	}
+ 
+ 	host->slot.cd_irq = irq;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7afb57cab00b..d1fd9b05274b 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -263,6 +263,7 @@ struct mmc_async_req {
+ struct mmc_slot {
+ 	int cd_irq;
+ 	bool cd_wake_enabled;
++	bool irq_enabled;
+ 	void *handler_priv;
+ };
+ 
+
 
