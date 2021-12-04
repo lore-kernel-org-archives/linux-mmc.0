@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AFA4C4321E
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 06:11:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3496C433EF
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 06:11:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1384232AbhLDGO2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 4 Dec 2021 01:14:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37856 "EHLO
+        id S1384251AbhLDGOb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 4 Dec 2021 01:14:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37890 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242140AbhLDGOU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 01:14:20 -0500
-Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14647C061751;
-        Fri,  3 Dec 2021 22:10:55 -0800 (PST)
-Received: by mail-qt1-x82a.google.com with SMTP id 8so5646928qtx.5;
-        Fri, 03 Dec 2021 22:10:55 -0800 (PST)
+        with ESMTP id S1384188AbhLDGOZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 01:14:25 -0500
+Received: from mail-qv1-xf2f.google.com (mail-qv1-xf2f.google.com [IPv6:2607:f8b0:4864:20::f2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5EA8C061D5F;
+        Fri,  3 Dec 2021 22:10:57 -0800 (PST)
+Received: by mail-qv1-xf2f.google.com with SMTP id m17so4922159qvx.8;
+        Fri, 03 Dec 2021 22:10:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=uIXLxIuMwC34QjAguBG050yUt+MXx4od/4nSlb5Y1Es=;
-        b=IUV0fnXjH+J/b5a+Gm9BG+QE1RsI2H/6QL0hIuEi2jtA2xd5WWoecNNngIpLvETvmc
-         CBUk66TmUvKtoc1chh6r2noNvyB8NfQ6+pBtoTreIYMeiQCbm53OCsUM/ypOg4Enm7ZK
-         B/ECKZIOUbUh61cZJYXxUeUd1zZ3PdL/zkxy8DuDOeDc3gASXABP15np6Bd+RQHxoKNQ
-         St7pNWRBYF0Qp69MSsh+DMFtku6T2G67WEKF6L7jCEuF5X/5kA1g6tU1B5vQTNiocbpB
-         yC7bENjrd3L8FxLx9QC2zvhoFU/uyYdK/30T/B0nN4s7E3A9PAet3A83rg+H9dsNm3Ys
-         yh8A==
+        bh=OlA3SRDh8Lj1S0TYSsQxoHgqVKUSBF5/ViXVM/bBDp8=;
+        b=TtesSlYKU/KqnKBFS25VdgJXKqndSIcuzO2weuxUGi0rzjR9bOoviObo/pprjwI25n
+         689/bFh0gZnuhyEmoX1yyIxCxnoyUIG3dHJFyY3BZnyRyhoCQK5vuKwyc8V83GoAUJQX
+         y2X8zeGagVyw3x0MpPqSc5FBNOdLX/Q0HN8mKuSpw1cOODdMQyV6cvmfGZUHH8b3Pl5E
+         UVTvUUrwmmTVtjVlzQUOJ4DpsLgB4qZbluGY6vltZRNH7u/HiILUt6TXlJkSJcbnNAuj
+         OnqfYGs83E77E0cuBsn0YfeUANQlLLGf7YyUUIYSXxUi2khSJdKYzhuzMS0faxfJh+ls
+         6ggQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=uIXLxIuMwC34QjAguBG050yUt+MXx4od/4nSlb5Y1Es=;
-        b=0HoXTENA+3gfrw+RPVfUOVlK0KZsSiFfL6IxBweKq41EAlOwDRNB2AzsbMFqBe3+dc
-         dUZDEZwdvpyACHGD4tcnaxnO+MqnxoQcFqROeHBfF9IIPKHUMmVZsuoKD/OLfaqgjEBD
-         kNO7Ce3PoSgnanJT/XPyU2LF/NRZ4eMkXHEhvQZVBKKpVYxfH5xHkvT9USZlEu1rH9+X
-         dgzg79hh11Oxf+B77h/UhZi+8w1Uf4iz2JQmhT51L/2P3B3GaHZy8mFoXL3B81iIc1zt
-         U0PPFgQEG27Gj2xQoeFnNIYFmRsiZjhpvhEgGSkts7yAHJkneFzn/t0ihi7bHQbS0MxZ
-         L/rQ==
-X-Gm-Message-State: AOAM530iJNTHdDzEeXo4N1z41jivaW+Fr0FwfL96hjtVP3VwbcyXJqvx
-        LsU/6oWlPe3knqMfv7TIAeQ=
-X-Google-Smtp-Source: ABdhPJwD2SVpXtEskCG7P11vgva5D+ze3xEsZ+kEWMqsTfo+qt0ZE4/shIWKS3wjRzAOBM5fmMTmAQ==
-X-Received: by 2002:a05:622a:4cf:: with SMTP id q15mr26073106qtx.543.1638598254286;
-        Fri, 03 Dec 2021 22:10:54 -0800 (PST)
+        bh=OlA3SRDh8Lj1S0TYSsQxoHgqVKUSBF5/ViXVM/bBDp8=;
+        b=wid+RkCYvNQIpndlREcPeDlzCvSo6AX5FuEfXYl2ZwlV/j/GDa0IG0qm2URZmyR0lz
+         Wsig2t4VXFBk1NiIHJLnuAHdLJKKLRWkCFJVAVpTlo8yFZSbmzskEjaor0ZhTMGIgzLW
+         s4epeyp0cO9cUCRjZnQvCySpaxyD9XG0WB5X9N47xM7+J8L6/VUFOPxCs2BIrHoRtNmV
+         ixOWikFfQR1OIjwSXyeIFezC7NWaQnvs+hanGvH0++3z94EHksVBGL8NSXp4lsgX25VX
+         7tbwP9/hqRHKlVmLvBpEAUNMuGrCXR15+Fkjjr34pL0xMDzxKKXuDQmhKtCOiqvtW6um
+         GETg==
+X-Gm-Message-State: AOAM532CzIs6FWyhMi9x/XHRLicXiOSecCz6TIZlueWISSFHAaI3EC5V
+        L0fIr7XGdBhgkkdPjNO5kXg=
+X-Google-Smtp-Source: ABdhPJxJndG4d+9CcgqNpYBw+OJgcqd7kTs5AL/U/yr5dldZ7HGLihzkWCEfLBXqolgcVLNyGbdnpA==
+X-Received: by 2002:a05:6214:1c0b:: with SMTP id u11mr23581628qvc.2.1638598257088;
+        Fri, 03 Dec 2021 22:10:57 -0800 (PST)
 Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id l1sm3500913qkp.125.2021.12.03.22.10.52
+        by smtp.gmail.com with ESMTPSA id l1sm3500913qkp.125.2021.12.03.22.10.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 03 Dec 2021 22:10:54 -0800 (PST)
+        Fri, 03 Dec 2021 22:10:56 -0800 (PST)
 From:   Jesse Taube <mr.bossman075@gmail.com>
 X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
 To:     linux-imx@nxp.com
@@ -65,9 +65,9 @@ Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
         linux-serial@vger.kernel.org,
         Jesse Taube <mr.bossman075@gmail.com>,
         Rob Herring <robh@kernel.org>
-Subject: [PATCH v4 06/13] dt-bindings: clock: imx: Add documentation for i.MXRT clock
-Date:   Sat,  4 Dec 2021 01:10:35 -0500
-Message-Id: <20211204061042.1248028-7-Mr.Bossman075@gmail.com>
+Subject: [PATCH v4 08/13] dt-bindings: serial: fsl-lpuart: add i.MXRT compatible
+Date:   Sat,  4 Dec 2021 01:10:37 -0500
+Message-Id: <20211204061042.1248028-9-Mr.Bossman075@gmail.com>
 X-Mailer: git-send-email 2.34.0
 In-Reply-To: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
 References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
@@ -79,101 +79,34 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Jesse Taube <mr.bossman075@gmail.com>
 
-Add DT binding documentation for i.MXRT clock driver.
+Add i.MXRT documentation for compatible string.
 
 Cc: Giulio Benetti <giulio.benetti@benettiengineering.com>
 Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
 Reviewed-by: Rob Herring <robh@kernel.org>
 ---
 V1->V2:
-* Replace macros with values
+* Nothing done
 V2->V3:
-* Remove anatop
-* Use lpuart not gpt
-* include imxrt1050-clock.h
-* 2 space tabs to 4
-* Remove oneOf enum
-* Change maxItems to 2
+* Rename imxrt to imxrt1050
 V3->V4:
 * Nothing done
 ---
- .../bindings/clock/imxrt-clock.yaml           | 67 +++++++++++++++++++
- 1 file changed, 67 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/clock/imxrt-clock.yaml
+ Documentation/devicetree/bindings/serial/fsl-lpuart.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/clock/imxrt-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
-new file mode 100644
-index 000000000000..8af48c59ff99
---- /dev/null
-+++ b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
-@@ -0,0 +1,67 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/clock/imxrt-clock.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Clock bindings for Freescale i.MXRT
-+
-+maintainers:
-+  - Giulio Benetti <giulio.benetti@benettiengineering.com>
-+  - Jesse Taube <Mr.Bossman075@gmail.com>
-+
-+description: |
-+  The clock consumer should specify the desired clock by having the clock
-+  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
-+  for the full list of i.MXRT clock IDs.
-+
-+properties:
-+  compatible:
-+    const: fsl,imxrt1050-ccm
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 2
-+
-+  clocks:
-+    minItems: 1
-+
-+  clock-names:
-+    minItems: 1
-+
-+  '#clock-cells':
-+    const: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - '#clock-cells'
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/imxrt1050-clock.h>
-+
-+    ccm@400fc000 {
-+        compatible = "fsl,imxrt1050-ccm";
-+        reg = <0x400fc000 0x4000>;
-+        interrupts = <95>, <96>;
-+        clocks = <&osc>;
-+        clock-names = "osc";
-+        #clock-cells = <1>;
-+    };
-+
-+
-+    lpuart1: serial@40184000 {
-+        compatible = "fsl,imxrt1050-lpuart";
-+        reg = <0x40184000 0x4000>;
-+        interrupts = <20>;
-+        clocks = <&clks IMXRT1050_CLK_LPUART1>;
-+        clock-names = "ipg";
-+    };
+diff --git a/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml b/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
+index a90c971b4f1f..c37085804c5c 100644
+--- a/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
++++ b/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
+@@ -21,6 +21,7 @@ properties:
+           - fsl,ls1028a-lpuart
+           - fsl,imx7ulp-lpuart
+           - fsl,imx8qm-lpuart
++          - fsl,imxrt1050-lpuart
+       - items:
+           - const: fsl,imx8qxp-lpuart
+           - const: fsl,imx7ulp-lpuart
 -- 
 2.34.0
 
