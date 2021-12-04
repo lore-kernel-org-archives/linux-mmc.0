@@ -2,75 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAB29C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 00:21:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77DDBC433F5
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 00:33:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383761AbhLDAZA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Dec 2021 19:25:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46784 "EHLO
+        id S1383587AbhLDAhH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Dec 2021 19:37:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1383797AbhLDAY5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2021 19:24:57 -0500
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD6B0C0698C6;
-        Fri,  3 Dec 2021 16:21:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:Content-Type:
-        In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender
-        :Reply-To:Content-ID:Content-Description;
-        bh=M+BqA3rXZtwt3zvm2Ce0wZmvZqrcJ5BQBRxgNgeLfYY=; b=Q/qFEbDwrJlie4IzpJKcaWx3FC
-        qiuYDb4Oj+ucW9qJ65P3PpMN7i5PYrLCdoUdmwrS+FMFCwg/iM278WySuS9xjjSYmBitQISsOUt5X
-        4HvNfqh/urxc9xe8wqQ/XOi3LlrjE4ZQ83X8GV/j8cMRvezx5Thd2VzhR03ZwCrBJfaBJAljfPxmW
-        tusb02nlMc0gZ+qqZr2MTVDIa2sLAAG47vEB9FxkS16U9dKWOW2tAZqaduMc8j1JyYm3b5o0Y73Mt
-        bLokosQGwQQ4DZLOi/99G44jL6/YSXHTUZ42Q4iGjlmix6wGaIeYIN/0pBug6hsVOpvTHMe927P5T
-        WEB7gq3Q==;
-Received: from [2601:1c0:6280:3f0::aa0b]
-        by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mtInY-00At13-Kv; Sat, 04 Dec 2021 00:21:05 +0000
-Message-ID: <d63edcb7-18c0-06fb-2216-2b1ed3b0215b@infradead.org>
-Date:   Fri, 3 Dec 2021 16:20:59 -0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Content-Language: en-US
-To:     Gabriel Somlo <gsomlo@gmail.com>, linux-kernel@vger.kernel.org
-Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        with ESMTP id S1354317AbhLDAhG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Dec 2021 19:37:06 -0500
+Received: from mail-qt1-x835.google.com (mail-qt1-x835.google.com [IPv6:2607:f8b0:4864:20::835])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4122BC061751;
+        Fri,  3 Dec 2021 16:33:42 -0800 (PST)
+Received: by mail-qt1-x835.google.com with SMTP id v22so5095676qtx.8;
+        Fri, 03 Dec 2021 16:33:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=ChPZyK2J3G2xrsSkvqwsURSEru8MTcJbhKW9sp4ILzw=;
+        b=gLONs0rqq8xkM9NpyriGAlkctCRlbka3iBky7GyHO567Ht7RKfAuLrwMHHwB4XCKA2
+         D5iOwaCfFGM1SEIpDyRcRQVFPzQdiOBhz0XTqx/RAJS+bVYf/QrUIsv4v7ZbsHN1hkKQ
+         kaGi9y3STnvBXSeVXTA3FdnWqVb5036xRH6/OQd5eScrs50Yx3gW7USGS2Zf4fL36QVS
+         bA5hizXtMUK0sBmSTFr5oitRIxbKQa6Qbk77f3obo1kyj4vKEL3DJqE9miX7nhe0tqcj
+         kRjN6jJfGqZw95ErWCOH2wtQl5GbxOYI3ulfnUYesWqQDvmUV2ia5lfbLEcg7+1BTgxQ
+         tTIA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=ChPZyK2J3G2xrsSkvqwsURSEru8MTcJbhKW9sp4ILzw=;
+        b=F8haUsy6UfBt9usO0ZsD/lJL8I5U4Mzc4ZY+3ldXp8FKQNL4L2Jhts0dgHjHcEZyTS
+         T4l3YEQn2/EgTrrpDqZKA1Qx8Vr25QRjJTE3lo8VGO/3JUlKtpE80EBD8jvjlKSgGCP6
+         LNiBPi9RMWkRrLG8yJ3d4oRDrcmjn6pqbJJpYfqEf5Z//HUB+sp+zDO1mJLefjNN5ld3
+         HTcv6wBbaG9QV/XZw5w8kCfCeClZlpWpoBPEvW2qFwwxfc1y1mkrOFqgbl6jNc4LaylA
+         LU6bAyuqv/hbyXSqHIhwgzdNvaKod7G8AR6gWfHErAXAZCVkW7vObDbWahj1Lj8BWqfv
+         YCoQ==
+X-Gm-Message-State: AOAM531Y1bN0NOVWA2d2R8jlPXxF1WfCPvv+spwuVUDUBg7zoZ4C2r4W
+        JMrxSDJvE/UrdujVhZGBPRg=
+X-Google-Smtp-Source: ABdhPJwTRmDQJpAIWvv5G96c1Bkao8jqFQcn1mzuuQaIfOsUw2jYkEqaGYYfLly01b5VAAv88tniIw==
+X-Received: by 2002:a05:622a:1310:: with SMTP id v16mr24231070qtk.431.1638578021419;
+        Fri, 03 Dec 2021 16:33:41 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id j21sm2971381qkk.27.2021.12.03.16.33.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Dec 2021 16:33:41 -0800 (PST)
+Date:   Fri, 3 Dec 2021 19:33:35 -0500
+From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
+To:     Randy Dunlap <rdunlap@infradead.org>
+Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
+        devicetree@vger.kernel.org, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, kgugala@antmicro.com,
+        mholenko@antmicro.com, krakoczy@antmicro.com,
         mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
         shorne@gmail.com, geert@linux-m68k.org,
         david.abdurachmanov@sifive.com, florent@enjoy-digital.fr
+Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Message-ID: <Yaq3X2IlOIX/KEoB@glsvmlin.ini.cmu.edu>
 References: <20211203234155.2319803-1-gsomlo@gmail.com>
  <20211203234155.2319803-4-gsomlo@gmail.com>
-From:   Randy Dunlap <rdunlap@infradead.org>
-In-Reply-To: <20211203234155.2319803-4-gsomlo@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+ <d63edcb7-18c0-06fb-2216-2b1ed3b0215b@infradead.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <d63edcb7-18c0-06fb-2216-2b1ed3b0215b@infradead.org>
+X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi--
+On Fri, Dec 03, 2021 at 04:20:59PM -0800, Randy Dunlap wrote:
+> Hi--
+> 
+> On 12/3/21 15:41, Gabriel Somlo wrote:
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index 5af8494c31b5..84c64e72195d 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -1093,3 +1093,9 @@ config MMC_OWL
+> >  
+> >  config MMC_SDHCI_EXTERNAL_DMA
+> >  	bool
+> > +
+> > +config MMC_LITEX
+> > +	tristate "Support for the MMC Controller in LiteX SOCs"
+> > +	depends on OF && LITEX
+> > +	help
+> > +	  Generic MCC driver for LiteX
+> 
+> 	          MMC            LiteX.
 
-On 12/3/21 15:41, Gabriel Somlo wrote:
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5af8494c31b5..84c64e72195d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -1093,3 +1093,9 @@ config MMC_OWL
->  
->  config MMC_SDHCI_EXTERNAL_DMA
->  	bool
-> +
-> +config MMC_LITEX
-> +	tristate "Support for the MMC Controller in LiteX SOCs"
-> +	depends on OF && LITEX
-> +	help
-> +	  Generic MCC driver for LiteX
-
-	          MMC            LiteX.
-
-
--- 
-~Randy
+Heh... tackled at the one... :) I'll have that fixed in v2 -- thanks!
+--Gabriel
