@@ -2,109 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F664C4332F
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 10:47:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DD8FC433EF
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 20:41:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1384671AbhLDKul (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 4 Dec 2021 05:50:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41652 "EHLO
+        id S235569AbhLDUoz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 4 Dec 2021 15:44:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351571AbhLDKuk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 05:50:40 -0500
-Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47C66C061751;
-        Sat,  4 Dec 2021 02:47:15 -0800 (PST)
-Received: by mail-ed1-x52a.google.com with SMTP id x6so21827088edr.5;
-        Sat, 04 Dec 2021 02:47:15 -0800 (PST)
+        with ESMTP id S231146AbhLDUoy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 15:44:54 -0500
+Received: from mail-qk1-x733.google.com (mail-qk1-x733.google.com [IPv6:2607:f8b0:4864:20::733])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFDC8C061751;
+        Sat,  4 Dec 2021 12:41:28 -0800 (PST)
+Received: by mail-qk1-x733.google.com with SMTP id m192so7301204qke.2;
+        Sat, 04 Dec 2021 12:41:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=d77EM0tE3JUwSxHiDu+PhK1bKg9re3Pgc3NQ6IiDdU0=;
-        b=QREKril2aVYAeeErWGoUn7QGA7lzEfM8Bnfjg66RWZUwJmgfoNOH3BG8L9AxQPF6pJ
-         AvGgyjTeu8vqYR6+vSr3AwNS+BmJOjGSfLEf/EUDWeIKUQ7erkhAavWUsQJ3ZWn7mGys
-         mh7cNCCvpWRMx5iloQoly5kzF2tFucLZ7tiQyq3EUDIz4R1LFIynn2G3YFR9NiAUa8fb
-         iIdiX3mEsvJUXmWlt5RNrVvaHlM6yBG5Ej6fVjyU8OoqWTkaU94YMCe3yX3iVjtVIorW
-         pm8esUmh7dKNsphuRyVrmuozykq2O3iJyIL5YQ2CHLpY4Vdg3Nc/50LS+bRVVvYnVsci
-         XwaA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=B4wio9mhnl+MlwdkQlum2dK1xXAcJhYay2PVxS3uez4=;
+        b=RVyCAhmq1vSyDDEtRmnL+fZOHrPhVJ2Vq6nc3ZAbD5i7RlGUGxkr0+N6hqyTFU2tN8
+         agbHyGEXZW6GINl/ZXQSjTA6kO778tUXdyjK97oZTmGk9iIyzHCVyy7lwjJioojNq6mz
+         8sSaHpxzntsGzwlyvWvrChQ21S8LtvKNn1ug0Q2IwS8uiq5qZu0qtujeRtq4HGIoHi+j
+         /NFPpEWoxaaquo5V2uqF0pmMZyVcCIC2GJr4EwOyuWj+qGsiFVblRT5zDWfCmGAozNjc
+         LDoUZqjkaq2+4dYFjsiKgrUsY8Ztr7tzsJ4jfMwLaRSxs5ZAKZPtOvzYhF6TKlI2Mc8L
+         Zblg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=d77EM0tE3JUwSxHiDu+PhK1bKg9re3Pgc3NQ6IiDdU0=;
-        b=pVaz0Dlr7wMe+vA1C9li3I7rttV6wPObfLjomzEMZqgETpZrP4Y1DB3hsRQC35Iiu7
-         tPut9dUTOFfHiQEFSDpJk4688R9vI3PfdeNJ9dngQ0H3lQB0dBZ1dAbUJ5tX+xbS1XId
-         oWNkjA6qbmZg3PaoC+FlFV8bRumfRu9YzLfd/MAyVo6Hd1EJjR+ig6TbWHm+BS8ZydQm
-         qrixLuMOmw2dz+Rnq0uELq5xuM8nwD2gIQP+eDOoxRy3pneVOwTvFvCNiz/u6rl36umH
-         SCFka1jZAmD+WVAFaUdV2nfYFMWu96VyAKMPDtAgkml0fFnQyJHDfAPN1vrNR5Wsi5Hp
-         h7SA==
-X-Gm-Message-State: AOAM532ZM0B1+iTrW9pnP+coHxCZ9826BwTsqJOQNK8C82hWxJXxmZo1
-        YIGVYbYMDvqvaeVAVpJBQo5rxazswteUnDw4Ulk=
-X-Google-Smtp-Source: ABdhPJzjNMGKt1kskPkry21udVYUmkbii2mprzGh/hM7XWBm/ujHf1wyM5vRF8TshW0guQMFwG8dkpaCrs1muwTCrMk=
-X-Received: by 2002:a17:907:1689:: with SMTP id hc9mr29466609ejc.445.1638614833775;
- Sat, 04 Dec 2021 02:47:13 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=B4wio9mhnl+MlwdkQlum2dK1xXAcJhYay2PVxS3uez4=;
+        b=noip3lc5nfue7GtjhUTCIdf2APdOmY7J/1dc3xGjlY5NnQ8QWcMRnUnZl+Sve3dSs4
+         PmG1yPn2FckGpyGShrBwojysJUhT40j4ARlyc/fAtkxtYiMwo8prbyZXdFWV1duATQ2K
+         7IdD+bb5cQf3VewUKY8UG8IyntYwq90juy1Qk+F1GLa1jEJkNnPcOnovMho9zDRp3LMP
+         SJUhxmppvI+r5Kq1RkmragMlx2a2uscb7ksFRsnTqVBmsN1Idu82PO18L4kvbs43omuu
+         cE/Zj9t+tzjENPcUbV+KctwlHkqznsOXf/gUzi2Es2DoCu/lBY+P5zzQ+HiL5hHnvU3G
+         YqIA==
+X-Gm-Message-State: AOAM530sB1FcCjR3S7m9ydIJ9kz/+zpcozOTlDPEf3sBJM2JPvY1oMir
+        6kzQfnv5ws51QSocdhkMGLPfPmTVW36kQQ==
+X-Google-Smtp-Source: ABdhPJxSHk3BgpMzf5OOYDgcwljEQixmNDGV0JIZ3yhCuGjkVuIQcqTtEWlFgNIDMn0QpBvMatrPqA==
+X-Received: by 2002:a05:620a:4092:: with SMTP id f18mr23458179qko.629.1638650487752;
+        Sat, 04 Dec 2021 12:41:27 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id c22sm4862480qtd.76.2021.12.04.12.41.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 04 Dec 2021 12:41:27 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org
+Subject: [PATCH v2 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Sat,  4 Dec 2021 15:41:18 -0500
+Message-Id: <20211204204121.2367127-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
-In-Reply-To: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
-From:   Fabio Estevam <festevam@gmail.com>
-Date:   Sat, 4 Dec 2021 07:47:02 -0300
-Message-ID: <CAOMZO5B15PqGZcGi6zneiqAmaA7y9-tELpeV7xRFYJm0SPLYqA@mail.gmail.com>
-Subject: Re: [PATCH v4 00/13] Add initial support for the i.MXRTxxxx SoC
- family starting from i.IMXRT1050 SoC.
-To:     Jesse Taube <mr.bossman075@gmail.com>
-Cc:     NXP Linux Team <linux-imx@nxp.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Stefan Agner <stefan@agner.ch>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
-        soc@kernel.org, Russell King - ARM Linux <linux@armlinux.org.uk>,
-        Abel Vesa <abel.vesa@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Giulio Benetti <giulio.benetti@benettiengineering.com>,
-        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-serial@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Jesse,
+Add support for the LiteX SD-Card device, LiteSDCard.
 
-On Sat, Dec 4, 2021 at 3:10 AM Jesse Taube <mr.bossman075@gmail.com> wrote:
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
-> Giulio Benetti (5):
->   ARM: imx: add initial support for i.MXRT10xx family
->   pinctrl: freescale: Add i.MXRT1050 pinctrl driver support
->   dt-bindings: imx: Add clock binding for i.MXRT1050
->   ARM: dts: imx: add i.MXRT1050-EVK support
->   ARM: imxrt1050_defconfig: add i.MXRT1050 defconfig
->
-> Jesse Taube (8):
->   dt-bindings: pinctrl: add i.MXRT1050 pinctrl binding doc
->   ARM: dts: imxrt1050-pinfunc: Add pinctrl binding header
->   dt-bindings: clock: imx: Add documentation for i.MXRT clock
->   clk: imx: Add initial support for i.MXRT clock driver
->   dt-bindings: serial: fsl-lpuart: add i.MXRT compatible
->   tty: serial: fsl_lpuart: add i.MXRT support
->   dt-bindings: mmc: fsl-imx-esdhc: add i.MXRT compatible string
->   mmc: sdhci-esdhc-imx: Add sdhc support for i.MXRT series
+New in v2:
+  - reword info message in litex_set_clk()
+  - streamline code in litex_map_status()
+  - fix typos in Kconfig (thanks Randy Dunlap <rdunlap@infradead.org>)
+  - improvements suggested by Stafford Horne <shorne@gmail.com>
+    - allow COMPILE_TEST in Kconfig
+    - use read_poll_timeout() when waiting for cmd/data/DMA
+      xfer completion
+  - include interrupt.h (thanks kernel test robot <lkp@intel.com>)
 
-The emmc and pinctrl patches have already been applied and they are available
-in linux-next. No need to resend them.
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
+
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  63 ++
+ MAINTAINERS                                   |   2 +
+ drivers/mmc/host/Kconfig                      |   7 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 670 ++++++++++++++++++
+ 5 files changed, 743 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
+
+-- 
+2.31.1
+
