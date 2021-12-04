@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3496C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 06:11:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D12B8C35269
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 06:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1384251AbhLDGOb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 4 Dec 2021 01:14:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37890 "EHLO
+        id S1384261AbhLDGOc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 4 Dec 2021 01:14:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1384188AbhLDGOZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 01:14:25 -0500
-Received: from mail-qv1-xf2f.google.com (mail-qv1-xf2f.google.com [IPv6:2607:f8b0:4864:20::f2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5EA8C061D5F;
-        Fri,  3 Dec 2021 22:10:57 -0800 (PST)
-Received: by mail-qv1-xf2f.google.com with SMTP id m17so4922159qvx.8;
-        Fri, 03 Dec 2021 22:10:57 -0800 (PST)
+        with ESMTP id S1384196AbhLDGO0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 01:14:26 -0500
+Received: from mail-qk1-x732.google.com (mail-qk1-x732.google.com [IPv6:2607:f8b0:4864:20::732])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 950EFC061751;
+        Fri,  3 Dec 2021 22:11:00 -0800 (PST)
+Received: by mail-qk1-x732.google.com with SMTP id t83so5825883qke.8;
+        Fri, 03 Dec 2021 22:11:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=OlA3SRDh8Lj1S0TYSsQxoHgqVKUSBF5/ViXVM/bBDp8=;
-        b=TtesSlYKU/KqnKBFS25VdgJXKqndSIcuzO2weuxUGi0rzjR9bOoviObo/pprjwI25n
-         689/bFh0gZnuhyEmoX1yyIxCxnoyUIG3dHJFyY3BZnyRyhoCQK5vuKwyc8V83GoAUJQX
-         y2X8zeGagVyw3x0MpPqSc5FBNOdLX/Q0HN8mKuSpw1cOODdMQyV6cvmfGZUHH8b3Pl5E
-         UVTvUUrwmmTVtjVlzQUOJ4DpsLgB4qZbluGY6vltZRNH7u/HiILUt6TXlJkSJcbnNAuj
-         OnqfYGs83E77E0cuBsn0YfeUANQlLLGf7YyUUIYSXxUi2khSJdKYzhuzMS0faxfJh+ls
-         6ggQ==
+        bh=RFI6Hwm2cozY9KFaKPS+db9qh1JW0JzTLHG991yW9HU=;
+        b=V5OvZw01aDhPy1jgV9zz53pKIqUCsjS+d6hEXLI/ENaqvVY1BUFrlnSIAySJDTqWrs
+         WkTJJ9ptXPaZ/ULjTU7PoCrav7gWzQPBiD48YKaIT1aCHaO2/Dn6bmWL9ZqNB7jJASnX
+         1LLN4qoFNSQEiYqNh7eFWDoBM3YQ7P2JDR21s3FMQ3ecu6rPePa2Qd8mrlWhn79Fz9Rg
+         994QMLdkunNviLRdnJ4CcJ7Wkwja0VxO1KppZIfvyVccmfTeCBKIDYMPUiwYZC5eDAvC
+         kONul944oVl+Mq23z2HWie78MId+gv32ueQBAIM2R0x33ayLqWQyvRPATbBTam/HTauD
+         fK9A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=OlA3SRDh8Lj1S0TYSsQxoHgqVKUSBF5/ViXVM/bBDp8=;
-        b=wid+RkCYvNQIpndlREcPeDlzCvSo6AX5FuEfXYl2ZwlV/j/GDa0IG0qm2URZmyR0lz
-         Wsig2t4VXFBk1NiIHJLnuAHdLJKKLRWkCFJVAVpTlo8yFZSbmzskEjaor0ZhTMGIgzLW
-         s4epeyp0cO9cUCRjZnQvCySpaxyD9XG0WB5X9N47xM7+J8L6/VUFOPxCs2BIrHoRtNmV
-         ixOWikFfQR1OIjwSXyeIFezC7NWaQnvs+hanGvH0++3z94EHksVBGL8NSXp4lsgX25VX
-         7tbwP9/hqRHKlVmLvBpEAUNMuGrCXR15+Fkjjr34pL0xMDzxKKXuDQmhKtCOiqvtW6um
-         GETg==
-X-Gm-Message-State: AOAM532CzIs6FWyhMi9x/XHRLicXiOSecCz6TIZlueWISSFHAaI3EC5V
-        L0fIr7XGdBhgkkdPjNO5kXg=
-X-Google-Smtp-Source: ABdhPJxJndG4d+9CcgqNpYBw+OJgcqd7kTs5AL/U/yr5dldZ7HGLihzkWCEfLBXqolgcVLNyGbdnpA==
-X-Received: by 2002:a05:6214:1c0b:: with SMTP id u11mr23581628qvc.2.1638598257088;
-        Fri, 03 Dec 2021 22:10:57 -0800 (PST)
+        bh=RFI6Hwm2cozY9KFaKPS+db9qh1JW0JzTLHG991yW9HU=;
+        b=rvTxjzNme/VqxE82a59Fa8MomjWiLC2MFHxXQfAxgErNl+IY5KK+nJXpkDQqjJsXN/
+         dbqTpkeNxXV/09m0QPvfjPZ0pk8Ytl8bd5AwHjAT14E0L4fkx3hQij2aZh4wcqibNI6M
+         1iP3UBdiRzDdW3ErFUpMRZLY85rVEfoWuVsJvfF+1r7Z5lmVBBPE6eFpwevn5v8bMpRC
+         QKwNYV6qL+OPEpfrrL9VMQ8H6RIc5+bnmsgoa1pUvAVnxR/tAFHGi/BegAuzEf+Gi1xH
+         ktKjFTtf2Qjt3PbF0v5cgCd9PZMKcY+ZSkksL/klhireX+CPuvrj5fnHxNTegqtNGOX9
+         T0Cg==
+X-Gm-Message-State: AOAM5332zGvY38/c0l4CUfsTSg6RJVRBZoTZqFJgnqN2Hj9X2ueIdcBu
+        pAQdvSYuO6Q7O05c+h7Tpd8=
+X-Google-Smtp-Source: ABdhPJzJHYPgvoPkYu9fKpWodxkkzl7c4qjcH+7Y1XMpysETBsdh8oqWhPRMbd9uWE35BXXdZKmvYg==
+X-Received: by 2002:a05:620a:2886:: with SMTP id j6mr21563682qkp.316.1638598259809;
+        Fri, 03 Dec 2021 22:10:59 -0800 (PST)
 Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id l1sm3500913qkp.125.2021.12.03.22.10.55
+        by smtp.gmail.com with ESMTPSA id l1sm3500913qkp.125.2021.12.03.22.10.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 03 Dec 2021 22:10:56 -0800 (PST)
+        Fri, 03 Dec 2021 22:10:59 -0800 (PST)
 From:   Jesse Taube <mr.bossman075@gmail.com>
 X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
 To:     linux-imx@nxp.com
@@ -65,9 +65,9 @@ Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
         linux-serial@vger.kernel.org,
         Jesse Taube <mr.bossman075@gmail.com>,
         Rob Herring <robh@kernel.org>
-Subject: [PATCH v4 08/13] dt-bindings: serial: fsl-lpuart: add i.MXRT compatible
-Date:   Sat,  4 Dec 2021 01:10:37 -0500
-Message-Id: <20211204061042.1248028-9-Mr.Bossman075@gmail.com>
+Subject: [PATCH v4 10/13] dt-bindings: mmc: fsl-imx-esdhc: add i.MXRT compatible string
+Date:   Sat,  4 Dec 2021 01:10:39 -0500
+Message-Id: <20211204061042.1248028-11-Mr.Bossman075@gmail.com>
 X-Mailer: git-send-email 2.34.0
 In-Reply-To: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
 References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
@@ -92,21 +92,21 @@ V2->V3:
 V3->V4:
 * Nothing done
 ---
- Documentation/devicetree/bindings/serial/fsl-lpuart.yaml | 1 +
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml b/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
-index a90c971b4f1f..c37085804c5c 100644
---- a/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
-+++ b/Documentation/devicetree/bindings/serial/fsl-lpuart.yaml
-@@ -21,6 +21,7 @@ properties:
-           - fsl,ls1028a-lpuart
-           - fsl,imx7ulp-lpuart
-           - fsl,imx8qm-lpuart
-+          - fsl,imxrt1050-lpuart
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index 19621a2f8beb..0912055b4089 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -34,6 +34,7 @@ properties:
+           - fsl,imx6ull-usdhc
+           - fsl,imx7d-usdhc
+           - fsl,imx7ulp-usdhc
++          - fsl,imxrt1050-usdhc
+           - nxp,s32g2-usdhc
        - items:
-           - const: fsl,imx8qxp-lpuart
-           - const: fsl,imx7ulp-lpuart
+           - enum:
 -- 
 2.34.0
 
