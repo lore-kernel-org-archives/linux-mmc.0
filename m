@@ -2,256 +2,175 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E384C433F5
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 04:42:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C101BC43219
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Dec 2021 06:10:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233688AbhLDEqC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Dec 2021 23:46:02 -0500
-Received: from mga09.intel.com ([134.134.136.24]:52118 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S238601AbhLDEqA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 3 Dec 2021 23:46:00 -0500
-X-IronPort-AV: E=McAfee;i="6200,9189,10187"; a="236908588"
-X-IronPort-AV: E=Sophos;i="5.87,286,1631602800"; 
-   d="scan'208";a="236908588"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Dec 2021 20:42:34 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.87,286,1631602800"; 
-   d="scan'208";a="610642327"
-Received: from lkp-server02.sh.intel.com (HELO 9e1e9f9b3bcb) ([10.239.97.151])
-  by orsmga004.jf.intel.com with ESMTP; 03 Dec 2021 20:42:31 -0800
-Received: from kbuild by 9e1e9f9b3bcb with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1mtMsY-000ITk-U1; Sat, 04 Dec 2021 04:42:30 +0000
-Date:   Sat, 4 Dec 2021 12:41:47 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Gabriel Somlo <gsomlo@gmail.com>, linux-kernel@vger.kernel.org
-Cc:     kbuild-all@lists.01.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, kgugala@antmicro.com,
-        mholenko@antmicro.com, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org
-Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <202112041255.X6DL0sKx-lkp@intel.com>
-References: <20211203234155.2319803-4-gsomlo@gmail.com>
+        id S238473AbhLDGOL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 4 Dec 2021 01:14:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37800 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233865AbhLDGOK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 01:14:10 -0500
+Received: from mail-qt1-x831.google.com (mail-qt1-x831.google.com [IPv6:2607:f8b0:4864:20::831])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3ACCAC061751;
+        Fri,  3 Dec 2021 22:10:45 -0800 (PST)
+Received: by mail-qt1-x831.google.com with SMTP id n15so5718314qta.0;
+        Fri, 03 Dec 2021 22:10:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=2y+NRJ7svIZ+rgMQarZRA08rcjgtgtlNK005rFTBnO8=;
+        b=oCW5h9YbVD3xWTwD/r6FDGB6pVZSXrsNXcDZ4vToSs318kVcBqr+5LzUuE7h56xI/c
+         mHULahNy/eanaoCEOKfH6xl8snMIGR2ucioL3GrL3SiBuh+RpE9rm7l9m23p2Cyn5Bxn
+         IeVhTKyS9ykH27GJizJLOYIg8BEYdqllpsaSYFnlGtJFq7va+Iho7KK4jqBKtsu/525f
+         cgxAwG2YFVKgDMLlcQMySH7Nsm5sfhXA6GzxMR2pmE2NjiblDcuK4qrypThhf9bG6NAV
+         Igag/JHukF8iwV0d2fRZTFUq9J8WkVTsLcpmNWedogWDVD5QSkYaKeqowVHO3y5GWIhC
+         FvSA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=2y+NRJ7svIZ+rgMQarZRA08rcjgtgtlNK005rFTBnO8=;
+        b=KJ+KPfFq2C9XC6TF+oTUWl+hZeDYBgDNW3IpysVaBoThWa+ODHgXfhqZEpd+c4bMRS
+         h7wJe42VzD9PzOOEP6N5VZtjoiCV++vyl0zVA12MBDRsA4A8cd2QxE7PfOO3FulQxCaP
+         1ktuf0scIZpEd9oXO40M7f+O4dj7+ttMLLicZykLbhHnuegoDHKtHP3liuEZRm6NAX/M
+         zcBcqfpPSPdJUg/VzXiP6KRy5SeYuWCRsubq2HUCYrLjSKoclK5/UuLALEdN8BC0DCuO
+         gpadJpOG9FHnChEHq7DjGpuj+XhWWnRbQl/FaXosPqux/zva+yhhaHNruZ4I00XXbQy8
+         L9ag==
+X-Gm-Message-State: AOAM532Q55TY6WuOznVN6jpOgqP20rrGXz2zDRCfsUFvTUit2JIcCidg
+        cEp0vwhxfirbYoacC+P2y3k=
+X-Google-Smtp-Source: ABdhPJzbdfO1SVtq8ihUjdqgA3IO6zUvebShhKS4AAh4E8/m5BHSo6LWcukk6nx/eXMq14zfFDvwzQ==
+X-Received: by 2002:ac8:5fc5:: with SMTP id k5mr25847656qta.502.1638598244298;
+        Fri, 03 Dec 2021 22:10:44 -0800 (PST)
+Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
+        by smtp.gmail.com with ESMTPSA id l1sm3500913qkp.125.2021.12.03.22.10.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Dec 2021 22:10:43 -0800 (PST)
+From:   Jesse Taube <mr.bossman075@gmail.com>
+X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
+To:     linux-imx@nxp.com
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
+        stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
+        adrian.hunter@intel.com, jirislaby@kernel.org,
+        giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, Mr.Bossman075@gmail.com,
+        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org
+Subject: [PATCH v4 00/13] Add initial support for the i.MXRTxxxx SoC family starting from i.IMXRT1050 SoC.
+Date:   Sat,  4 Dec 2021 01:10:29 -0500
+Message-Id: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
+X-Mailer: git-send-email 2.34.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211203234155.2319803-4-gsomlo@gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gabriel,
+This patchset contains:
+- i.MXRT10xx family infrastructure
+- i.MXRT1050 pinctrl driver adaption
+- i.MXRT1050 clock driver adaption
+- i.MXRT1050 sd-card driver adaption
+- i.MXRT1050 uart driver adaption
+- i.MXRT1050-evk basic support
 
-I love your patch! Yet something to improve:
+The i.MXRTxxxx family that could have support by Linux actually spreads
+from i.MXRT1020 to i.MXRT1170 with the first one supporting 1 USB OTG &
+100M ethernet with a cortex-M7@500Mhz up to the latter with i.MXRT1170
+with cortex-M7@1Ghz and cortex-M4@400Mhz, 2MB of internal SRAM, 2D GPU,
+2x 1Gb and 1x 100Mb ENET. The i.MXRT family is NXP's answer to
+STM32F7XX, as it uses only simple SDRAM, it gives the chance of a 4 or
+less layer PCBs. Seeing that these chips are comparable to the
+STM32F7XXs which have linux ported to them it seems reasonable to add
+support for them.
 
-[auto build test ERROR on robh/for-next]
-[also build test ERROR on linux/master ulf-hansson-mmc-mirror/next linus/master v5.16-rc3 next-20211203]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch]
+Giving Linux support to this family should ease the development process,
+instead of using a RTOS they could use Embedded Linux allowing for more
+portability, ease of design and will broaden the scope of people using
+embedded linux.
 
-url:    https://github.com/0day-ci/linux/commits/Gabriel-Somlo/mmc-Add-LiteSDCard-mmc-driver/20211204-074318
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-config: sh-allmodconfig (https://download.01.org/0day-ci/archive/20211204/202112041255.X6DL0sKx-lkp@intel.com/config)
-compiler: sh4-linux-gcc (GCC) 11.2.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/0day-ci/linux/commit/f967027b6ffe6f577773d3607edcf6677f7e56c5
-        git remote add linux-review https://github.com/0day-ci/linux
-        git fetch --no-tags linux-review Gabriel-Somlo/mmc-Add-LiteSDCard-mmc-driver/20211204-074318
-        git checkout f967027b6ffe6f577773d3607edcf6677f7e56c5
-        # save the config file to linux build tree
-        mkdir build_dir
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross O=build_dir ARCH=sh SHELL=/bin/bash drivers/mmc/host/
+The EVK has very little SDRAM, generally 32MB starting from
+i.MXRT1020(the lowest P/N), although the i.MXRT1160/70 provide instead
+64MB of SDRAM for more functionality.
 
-If you fix the issue, kindly add following tag as appropriate
-Reported-by: kernel test robot <lkp@intel.com>
+At the moment we do not support XIP for either u-boot or Linux but it
+should be done in the future. XIP will also save SDRAM.
 
-All errors (new ones prefixed by >>):
+Another interesting fact is the amount of internal SRAM, as the P/N
+increases the SRAM will reach up to 2MB(some could be for cache and
+some would be for video).
 
-   drivers/mmc/host/litex_mmc.c: In function 'litex_mmc_probe':
->> drivers/mmc/host/litex_mmc.c:617:23: error: implicit declaration of function 'request_irq'; did you mean 'request_key'? [-Werror=implicit-function-declaration]
-     617 |                 ret = request_irq(host->irq, litex_mmc_interrupt, 0,
-         |                       ^~~~~~~~~~~
-         |                       request_key
-   drivers/mmc/host/litex_mmc.c: In function 'litex_mmc_remove':
->> drivers/mmc/host/litex_mmc.c:651:17: error: implicit declaration of function 'free_irq' [-Werror=implicit-function-declaration]
-     651 |                 free_irq(host->irq, host->mmc);
-         |                 ^~~~~~~~
-   cc1: some warnings being treated as errors
+Also, some parts have embed flash of 4MB that can be used for
+u-boot/Linux, if both correctly sized it will leave the SDRAM free.
 
+External flash can be Quad SPI and HyperFlash, so throughput would be
+decent.
 
-vim +617 drivers/mmc/host/litex_mmc.c
+The i.MXRT11xx series supports MIPI interface too.
 
-   496	
-   497	static int
-   498	litex_mmc_probe(struct platform_device *pdev)
-   499	{
-   500		struct litex_mmc_host *host;
-   501		struct mmc_host *mmc;
-   502		struct device_node *cpu;
-   503		int ret;
-   504	
-   505		mmc = mmc_alloc_host(sizeof(struct litex_mmc_host), &pdev->dev);
-   506		/* NOTE: defaults to max_[req,seg]_size=PAGE_SIZE, max_blk_size=512,
-   507		 * and max_blk_count accordingly set to 8;
-   508		 * If for some reason we need to modify max_blk_count, we must also
-   509		 * re-calculate `max_[req,seg]_size = max_blk_size * max_blk_count;`
-   510		 */
-   511		if (!mmc)
-   512			return -ENOMEM;
-   513	
-   514		host = mmc_priv(mmc);
-   515		host->mmc = mmc;
-   516		host->dev = pdev;
-   517	
-   518		host->clock = 0;
-   519		cpu = of_get_next_cpu_node(NULL);
-   520		ret = of_property_read_u32(cpu, "clock-frequency", &host->freq);
-   521		of_node_put(cpu);
-   522		if (ret) {
-   523			dev_err(&pdev->dev, "No \"clock-frequency\" property in DT\n");
-   524			goto err_free_host;
-   525		}
-   526	
-   527		init_completion(&host->cmd_done);
-   528		host->irq = platform_get_irq(pdev, 0);
-   529		if (host->irq < 0)
-   530			dev_err(&pdev->dev, "Failed to get IRQ, using polling\n");
-   531	
-   532		/* LiteSDCard only supports 4-bit bus width; therefore, we MUST inject
-   533		 * a SET_BUS_WIDTH (acmd6) before the very first data transfer, earlier
-   534		 * than when the mmc subsystem would normally get around to it!
-   535		 */
-   536		host->is_bus_width_set = false;
-   537		host->app_cmd = false;
-   538	
-   539		ret = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
-   540		if (ret)
-   541			goto err_free_host;
-   542	
-   543		host->buf_size = mmc->max_req_size * 2;
-   544		host->buffer = dma_alloc_coherent(&pdev->dev, host->buf_size,
-   545						  &host->dma, GFP_DMA);
-   546		if (host->buffer == NULL) {
-   547			ret = -ENOMEM;
-   548			goto err_free_host;
-   549		}
-   550	
-   551		host->sdphy = devm_platform_ioremap_resource_byname(pdev, "phy");
-   552		if (IS_ERR(host->sdphy)) {
-   553			ret = PTR_ERR(host->sdphy);
-   554			goto err_free_dma;
-   555		}
-   556	
-   557		host->sdcore = devm_platform_ioremap_resource_byname(pdev, "core");
-   558		if (IS_ERR(host->sdcore)) {
-   559			ret = PTR_ERR(host->sdcore);
-   560			goto err_free_dma;
-   561		}
-   562	
-   563		host->sdreader = devm_platform_ioremap_resource_byname(pdev, "reader");
-   564		if (IS_ERR(host->sdreader)) {
-   565			ret = PTR_ERR(host->sdreader);
-   566			goto err_free_dma;
-   567		}
-   568	
-   569		host->sdwriter = devm_platform_ioremap_resource_byname(pdev, "writer");
-   570		if (IS_ERR(host->sdwriter)) {
-   571			ret = PTR_ERR(host->sdwriter);
-   572			goto err_free_dma;
-   573		}
-   574	
-   575		if (host->irq > 0) {
-   576			host->sdirq = devm_platform_ioremap_resource_byname(pdev, "irq");
-   577			if (IS_ERR(host->sdirq)) {
-   578				ret = PTR_ERR(host->sdirq);
-   579				goto err_free_dma;
-   580			}
-   581		}
-   582	
-   583		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-   584		mmc->ops = &litex_mmc_ops;
-   585	
-   586		mmc->f_min = 12.5e6;
-   587		mmc->f_max = 50e6;
-   588	
-   589		ret = mmc_of_parse(mmc);
-   590		if (ret)
-   591			goto err_free_dma;
-   592	
-   593		/* force 4-bit bus_width (only width supported by hardware) */
-   594		mmc->caps &= ~MMC_CAP_8_BIT_DATA;
-   595		mmc->caps |= MMC_CAP_4_BIT_DATA;
-   596	
-   597		/* set default capabilities */
-   598		mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
-   599			     MMC_CAP_DRIVER_TYPE_D |
-   600			     MMC_CAP_CMD23;
-   601		mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT |
-   602			      MMC_CAP2_FULL_PWR_CYCLE |
-   603			      MMC_CAP2_NO_SDIO;
-   604	
-   605		platform_set_drvdata(pdev, host);
-   606	
-   607		ret = mmc_add_host(mmc);
-   608		if (ret < 0)
-   609			goto err_free_dma;
-   610	
-   611		/* ensure DMA bus masters are disabled */
-   612		litex_write8(host->sdreader + LITEX_BLK2MEM_ENA, 0);
-   613		litex_write8(host->sdwriter + LITEX_MEM2BLK_ENA, 0);
-   614	
-   615		/* set up interrupt handler */
-   616		if (host->irq > 0) {
- > 617			ret = request_irq(host->irq, litex_mmc_interrupt, 0,
-   618					  "litex-mmc", mmc);
-   619			if (ret < 0) {
-   620				dev_err(&pdev->dev,
-   621					"irq setup error %d, using polling\n", ret);
-   622				host->irq = 0;
-   623			}
-   624		}
-   625	
-   626		/* enable card-change interrupts, or else ask for polling */
-   627		if (host->irq > 0) {
-   628			litex_write32(host->sdirq + LITEX_IRQ_PENDING,
-   629				      SDIRQ_CARD_DETECT);	/* clears it */
-   630			litex_write32(host->sdirq + LITEX_IRQ_ENABLE,
-   631				      SDIRQ_CARD_DETECT);
-   632		} else {
-   633			mmc->caps |= MMC_CAP_NEEDS_POLL;
-   634		}
-   635	
-   636		return 0;
-   637	
-   638	err_free_dma:
-   639		dma_free_coherent(&pdev->dev, host->buf_size, host->buffer, host->dma);
-   640	err_free_host:
-   641		mmc_free_host(mmc);
-   642		return ret;
-   643	}
-   644	
-   645	static int
-   646	litex_mmc_remove(struct platform_device *pdev)
-   647	{
-   648		struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
-   649	
-   650		if (host->irq > 0)
- > 651			free_irq(host->irq, host->mmc);
-   652		mmc_remove_host(host->mmc);
-   653		dma_free_coherent(&pdev->dev, host->buf_size, host->buffer, host->dma);
-   654		mmc_free_host(host->mmc);
-   655	
-   656		return 0;
-   657	}
-   658	
+The family in general provide CAN bus, audio I/O, 1 or more
+USB(otg/host), 1 or more 100Mb/1Gb ethernet, camera interface, sd-card.
 
----
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+All this can be used for simple GUIs, web-servers, point-of-sale
+stations, etc.
+
+Giulio Benetti (5):
+  ARM: imx: add initial support for i.MXRT10xx family
+  pinctrl: freescale: Add i.MXRT1050 pinctrl driver support
+  dt-bindings: imx: Add clock binding for i.MXRT1050
+  ARM: dts: imx: add i.MXRT1050-EVK support
+  ARM: imxrt1050_defconfig: add i.MXRT1050 defconfig
+
+Jesse Taube (8):
+  dt-bindings: pinctrl: add i.MXRT1050 pinctrl binding doc
+  ARM: dts: imxrt1050-pinfunc: Add pinctrl binding header
+  dt-bindings: clock: imx: Add documentation for i.MXRT clock
+  clk: imx: Add initial support for i.MXRT clock driver
+  dt-bindings: serial: fsl-lpuart: add i.MXRT compatible
+  tty: serial: fsl_lpuart: add i.MXRT support
+  dt-bindings: mmc: fsl-imx-esdhc: add i.MXRT compatible string
+  mmc: sdhci-esdhc-imx: Add sdhc support for i.MXRT series
+
+ .../bindings/clock/imxrt-clock.yaml           |  67 ++
+ .../bindings/mmc/fsl-imx-esdhc.yaml           |   1 +
+ .../bindings/pinctrl/fsl,imxrt1050.yaml       |  79 ++
+ .../bindings/serial/fsl-lpuart.yaml           |   1 +
+ arch/arm/boot/dts/Makefile                    |   2 +
+ arch/arm/boot/dts/imxrt1050-evk.dts           |  72 ++
+ arch/arm/boot/dts/imxrt1050-pinfunc.h         | 993 ++++++++++++++++++
+ arch/arm/boot/dts/imxrt1050.dtsi              | 154 +++
+ arch/arm/configs/imxrt_defconfig              |  35 +
+ arch/arm/mach-imx/Kconfig                     |   7 +
+ arch/arm/mach-imx/Makefile                    |   2 +
+ arch/arm/mach-imx/mach-imxrt.c                |  19 +
+ drivers/clk/imx/Kconfig                       |   5 +
+ drivers/clk/imx/Makefile                      |   1 +
+ drivers/clk/imx/clk-imxrt1050.c               | 156 +++
+ drivers/mmc/host/sdhci-esdhc-imx.c            |   4 +
+ drivers/pinctrl/freescale/Kconfig             |   7 +
+ drivers/pinctrl/freescale/Makefile            |   1 +
+ drivers/pinctrl/freescale/pinctrl-imxrt1050.c | 349 ++++++
+ drivers/tty/serial/fsl_lpuart.c               |   8 +
+ include/dt-bindings/clock/imxrt1050-clock.h   |  73 ++
+ 21 files changed, 2036 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/imxrt-clock.yaml
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/fsl,imxrt1050.yaml
+ create mode 100644 arch/arm/boot/dts/imxrt1050-evk.dts
+ create mode 100644 arch/arm/boot/dts/imxrt1050-pinfunc.h
+ create mode 100644 arch/arm/boot/dts/imxrt1050.dtsi
+ create mode 100644 arch/arm/configs/imxrt_defconfig
+ create mode 100644 arch/arm/mach-imx/mach-imxrt.c
+ create mode 100644 drivers/clk/imx/clk-imxrt1050.c
+ create mode 100644 drivers/pinctrl/freescale/pinctrl-imxrt1050.c
+ create mode 100644 include/dt-bindings/clock/imxrt1050-clock.h
+
+-- 
+2.34.0
+
