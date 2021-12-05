@@ -2,180 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F4A0C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Dec 2021 19:10:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD90AC433F5
+	for <linux-mmc@archiver.kernel.org>; Sun,  5 Dec 2021 21:39:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237731AbhLETOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 5 Dec 2021 14:14:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40516 "EHLO
+        id S239394AbhLEVnI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 5 Dec 2021 16:43:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232195AbhLETOX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2021 14:14:23 -0500
-Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9820DC061714;
-        Sun,  5 Dec 2021 11:10:56 -0800 (PST)
-Received: by mail-pg1-x52d.google.com with SMTP id 133so8365524pgc.12;
-        Sun, 05 Dec 2021 11:10:56 -0800 (PST)
+        with ESMTP id S232165AbhLEVnH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2021 16:43:07 -0500
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28F9EC061714;
+        Sun,  5 Dec 2021 13:39:40 -0800 (PST)
+Received: by mail-pj1-x1035.google.com with SMTP id x7so6296112pjn.0;
+        Sun, 05 Dec 2021 13:39:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id;
-        bh=7PKgcD6CRCuYFewb9iDJgPShfY4HlviRqF3QruuqdzA=;
-        b=qfIwd3xDhzKU0oh3atB+ZSXfCDuF7515eeR7AmkbLjsNQIyrkrwn8LbtT9GqoZaA6t
-         KVuusEqUvYJwxPvftL85ChNLYpwO9hYhQhm+Oog2X0M73Pj/+4IWqnVErXYtMl9/UDZD
-         ELC4Xe8+WnhIqCbuossb7tfZfYoUKM5h5KSFxZIbF6/u4ZkKGrOIWMuF4zP/lO0gOBeC
-         KoI3Y/lZjah04JQu4dMze6L38D4fVmiDheI9Jc331a3csP86O3qN4piGI46Rxee6s0wh
-         6T02e6X1D3+Dz11SMe3QoghMvojjwC1I+DVONOjUOstfVSWjmRu3VUD+c4yARob0Gv6v
-         Mylg==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=nJ+Pla7ZGvHQEHUB3DSoauogXISC+UwH9TH03jV2caw=;
+        b=Qu1A6lJOOwziop+bTtc3cOXfWdWTDsa3dc9dlGvErHl24bKZY0yUOGeJX3GEfdOLg7
+         R8z/DLAZFKXvHQsvZOsHzy/aBqYotqU8B2g5jAi+/7TBUG37f85ZR8H93ZUdU/E7rJqu
+         XTuxzVFk5Do3MtQ4XO5VG73SWtYhhkFO4lXGrDKBTWumxIYLS+bJgUj8ehJe0o4DlOol
+         6snfjGiaC5tYFMw2+jUKMwlW/w0Hikok4dPOZIsZtMdPAASV35LJZj2i+1r6O4d/bLI4
+         Dxv1u80vSeTPlgmW/sKK+qd7h4mnIJnn6bfMwn4ZWJzeOATv2KpJuQcK6gfWtO/deV6t
+         c3bg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=7PKgcD6CRCuYFewb9iDJgPShfY4HlviRqF3QruuqdzA=;
-        b=am8RkJ9Uw1t0cPOfgct2SFRXBMOeCA9QGj6tzOGrPerpzGVM+qPttZOGq+VGmtcxOq
-         rwxpvyU2DbBJ5fqTYJ6OKMdU1rK0mS9zCVjbhvsGUKD5SpBO1JWVaV/QWUZVfg1wpJ2K
-         CV62JhdUBzB/N5wEF2o0ijemEGahGtLgU1zUWiZLSMuudevydXt/MpXMoP30u1rH7RUK
-         Imw6SzUEASSdRVtP85UzGHKAHwZZm4BhvLvs/wxYSXOZcJUdNw9uGaYWYAB+S1gI8AMF
-         Xj+o638Fq87Ww+/XQ/eefWxG0wb16K13U6mwwrBJWfMyYJSXQabuJK7nIvUrCA2svwfF
-         wALA==
-X-Gm-Message-State: AOAM533GDc71BqKajwYjLNxMlsb7+sCrMicf6f4iNT5PiobUEZWtU0o+
-        0VD+l/MSduqstUJP7s11aNFqfDDT8AXdTdUQHkQ=
-X-Google-Smtp-Source: ABdhPJxkWomqIVIog9yiMR7bm0QA1Ot51gkjyKc2c+3MHOQJpj6lt3TxALWaZS79ERgAAc36BtTxww==
-X-Received: by 2002:a05:6a00:10d2:b0:4a8:3613:c475 with SMTP id d18-20020a056a0010d200b004a83613c475mr32327924pfu.0.1638731456032;
-        Sun, 05 Dec 2021 11:10:56 -0800 (PST)
-Received: from localhost.localdomain ([49.207.207.227])
-        by smtp.gmail.com with ESMTPSA id t7sm10720797pjs.45.2021.12.05.11.10.50
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=nJ+Pla7ZGvHQEHUB3DSoauogXISC+UwH9TH03jV2caw=;
+        b=TUPJSvGDS4/GsyWkPUWqIBEHObK2sWMNIcQNaIS25Wy5/thCStjYFn74g/U+Ljfr3t
+         rbeYf1N4NbLN3S0auYAAC/jgeefeIA45kuRDLK7Tw+UbLMpUgT4tnCmgFx2zfBDlVQue
+         TdSHZl3VWh02zvInN96WdzugvNd1ZMM//mquSly3z0lL1iAEmBx8kSFyqKogpOyS1DPc
+         VEEEdbOfAkPYbMJyuqFLP4Ab56HhU2H11L93sgDvjFYNrvLJkhlHaMq7qJ2Jj+gmDhkv
+         sR1rddPsgyoRGMi2x1cMhOzm7/UX5hnryvTReDWhnbrTTfRAHTo1AbVBm8wwSMpq1bfF
+         diMQ==
+X-Gm-Message-State: AOAM531/yBuA1G+vIGOf8TC0jKNpUDtlajxNrDpcUiTqihU6sKtLLTiU
+        EhPk4ikbRXpflDl/C4KI5Gc=
+X-Google-Smtp-Source: ABdhPJywN0CepSJUH0wjIwIrZ3rw8E0BK/gq2Ajuc86GPVBeZ7JkGYLHgMeH+DFvYhicvdNwkCM7gw==
+X-Received: by 2002:a17:90b:4c02:: with SMTP id na2mr32444046pjb.94.1638740379199;
+        Sun, 05 Dec 2021 13:39:39 -0800 (PST)
+Received: from localhost ([2409:10:24a0:4700:e8ad:216a:2a9d:6d0c])
+        by smtp.gmail.com with ESMTPSA id il7sm8365725pjb.54.2021.12.05.13.39.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Dec 2021 11:10:55 -0800 (PST)
-From:   Nishad Kamdar <nishadkamdar@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bean Huo <beanhuo@micron.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Huijin Park <huijin.park@samsung.com>,
-        Yue Hu <huyue2@yulong.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Nishad Kamdar <nishadkamdar@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: core: Add support for the eMMC RTC feature in mmc_ops
-Date:   Mon,  6 Dec 2021 00:40:08 +0530
-Message-Id: <20211205191009.32454-1-nishadkamdar@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        Sun, 05 Dec 2021 13:39:38 -0800 (PST)
+Date:   Mon, 6 Dec 2021 06:39:36 +0900
+From:   Stafford Horne <shorne@gmail.com>
+To:     Gabriel Somlo <gsomlo@gmail.com>
+Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
+        devicetree@vger.kernel.org, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, kgugala@antmicro.com,
+        mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        geert@linux-m68k.org, david.abdurachmanov@sifive.com,
+        florent@enjoy-digital.fr
+Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Message-ID: <Ya0xmCTrp7BJmiBs@antec>
+References: <20211203234155.2319803-1-gsomlo@gmail.com>
+ <20211203234155.2319803-4-gsomlo@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211203234155.2319803-4-gsomlo@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch adds support to set the RTC information in
-the eMMC device. This is based on the JEDEC specification.
+On Fri, Dec 03, 2021 at 06:41:55PM -0500, Gabriel Somlo wrote:
+> LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
+> that targets FPGAs. LiteSDCard is a small footprint, configurable
+> SDCard core commonly used in LiteX designs.
+> 
+> The driver was first written in May 2020 and has been maintained
+> cooperatively by the LiteX community. Thanks to all contributors!
+> 
+> Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
+> Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
+> Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
+> Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
+> Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
+> Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
+> Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+> Cc: Mateusz Holenko <mholenko@antmicro.com>
+> Cc: Karol Gugala <kgugala@antmicro.com>
+> Cc: Joel Stanley <joel@jms.id.au>
+> Cc: Stafford Horne <shorne@gmail.com>
+> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+> Cc: David Abdurachmanov <david.abdurachmanov@sifive.com>
+> Cc: Florent Kermarrec <florent@enjoy-digital.fr>
+> ---
+>  drivers/mmc/host/Kconfig     |   6 +
+>  drivers/mmc/host/Makefile    |   1 +
+>  drivers/mmc/host/litex_mmc.c | 677 +++++++++++++++++++++++++++++++++++
+>  3 files changed, 684 insertions(+)
+>  create mode 100644 drivers/mmc/host/litex_mmc.c
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 5af8494c31b5..84c64e72195d 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -1093,3 +1093,9 @@ config MMC_OWL
+>  
+>  config MMC_SDHCI_EXTERNAL_DMA
+>  	bool
+> +
+> +config MMC_LITEX
+> +	tristate "Support for the MMC Controller in LiteX SOCs"
+> +	depends on OF && LITEX
+> +	help
+> +	  Generic MCC driver for LiteX
 
-There is no way however, to read the RTC time from the
-device. Hence we rely on the response of the CMD49 to
-confirm the completion of the operation.
+I just noticed this while configuring the kernel.  This doesn't really follow
+the pattern of other drivers, we should think of putting "Litex" near the
+beginning of the line. It makes it easier to spot in menuconfig.
 
-This patch has been tested successfully with the ioctl
-interface. This patch has also been tested suceessfully
-with all the three RTC_INFO_TYPEs.
+For example:
 
-Signed-off-by: Nishad Kamdar <nishadkamdar@gmail.com>
----
- drivers/mmc/core/mmc_ops.c | 59 ++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/mmc_ops.h |  2 ++
- include/linux/mmc/mmc.h    |  1 +
- 3 files changed, 62 insertions(+)
+LiteX MMC Controller support
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index d63d1c735335..490372341b3b 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -1063,3 +1063,62 @@ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms)
- 	return err;
- }
- EXPORT_SYMBOL_GPL(mmc_sanitize);
-+
-+int mmc_set_time(struct mmc_card *card, struct mmc_host *host,
-+		 u8 rtc_info_type, u64 seconds)
-+{
-+	struct mmc_request mrq = {};
-+	struct mmc_command cmd = {};
-+	struct mmc_data data = {};
-+	struct scatterlist sg;
-+	int err = 0;
-+	u8 *data_buf;
-+
-+	data_buf = kzalloc(512, GFP_KERNEL);
-+	if (!data_buf)
-+		return -ENOMEM;
-+
-+	if (rtc_info_type == 0x01 || rtc_info_type == 0x02 ||
-+	    rtc_info_type == 0x03) {
-+		data_buf[0] = 0x01;
-+		data_buf[1] = rtc_info_type;
-+		memcpy(&data_buf[2], &seconds, sizeof(u64));
-+	} else {
-+		pr_err("%s: invalid rtc_info_type %d\n",
-+		       mmc_hostname(host), rtc_info_type);
-+		kfree(data_buf);
-+		return -EINVAL;
-+	}
-+
-+	mrq.cmd = &cmd;
-+	mrq.data = &data;
-+
-+	cmd.opcode = MMC_SET_TIME;
-+	cmd.arg = 0;
-+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	data.blksz = 512;
-+	data.blocks = 1;
-+	data.flags = MMC_DATA_WRITE;
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+	sg_init_one(&sg, data_buf, 512);
-+
-+	mmc_set_data_timeout(&data, card);
-+
-+	mmc_wait_for_req(host, &mrq);
-+
-+	if (cmd.error) {
-+		err = cmd.error;
-+		goto out;
-+	}
-+
-+	if (data.error) {
-+		err = data.error;
-+		goto out;
-+	}
-+out:
-+	kfree(data_buf);
-+	return err;
-+}
-+EXPORT_SYMBOL_GPL(mmc_set_time);
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 9c813b851d0b..0c8695d1b363 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -55,6 +55,8 @@ void mmc_run_bkops(struct mmc_card *card);
- int mmc_cmdq_enable(struct mmc_card *card);
- int mmc_cmdq_disable(struct mmc_card *card);
- int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms);
-+int mmc_set_time(struct mmc_card *card, struct mmc_host *host,
-+		 u8 rtc_info_type, u64 seconds);
- 
- #endif
- 
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index d9a65c6a8816..52a3bf873d50 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -64,6 +64,7 @@
- #define MMC_WRITE_MULTIPLE_BLOCK 25   /* adtc                    R1  */
- #define MMC_PROGRAM_CID          26   /* adtc                    R1  */
- #define MMC_PROGRAM_CSD          27   /* adtc                    R1  */
-+#define MMC_SET_TIME	         49   /* adtc                    R1  */
- 
-   /* class 6 */
- #define MMC_SET_WRITE_PROT       28   /* ac   [31:0] data addr   R1b */
--- 
-2.17.1
+This selects support for the MMC Host Controller found in LiteX SOCs.
 
+It unsure, say N.
+
+-Stafford
