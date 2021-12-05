@@ -2,135 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA26CC433EF
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Dec 2021 01:37:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F4A0C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun,  5 Dec 2021 19:10:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230468AbhLEBk6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 4 Dec 2021 20:40:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38704 "EHLO
+        id S237731AbhLETOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 5 Dec 2021 14:14:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230204AbhLEBk6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Dec 2021 20:40:58 -0500
-Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99B65C061751;
-        Sat,  4 Dec 2021 17:37:31 -0800 (PST)
-Received: by mail-qt1-x833.google.com with SMTP id p19so7352651qtw.12;
-        Sat, 04 Dec 2021 17:37:31 -0800 (PST)
+        with ESMTP id S232195AbhLETOX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Dec 2021 14:14:23 -0500
+Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9820DC061714;
+        Sun,  5 Dec 2021 11:10:56 -0800 (PST)
+Received: by mail-pg1-x52d.google.com with SMTP id 133so8365524pgc.12;
+        Sun, 05 Dec 2021 11:10:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=4XnN3BtFVU8ghBOYYkiMwp/csK2JKCL9fo3KK/aQk7k=;
-        b=fCuL/VEp2R3hi5iSgCP7KywisRaM7G0wmX3+tXzPOiO79pPKjThNL6qIfaYF6aTble
-         0pr6ysnd3FPghZLnaiB6/QhjbUYLqHtcXlE0j+JZ/FfD6AYkGRtzOdrvsWwvqrI9XeoT
-         +h2jJPrGQEWX2mtvt2KCCgCYoAYVSl3QgDGs/Qj6SaUcO8mmKYzBHz31UfJt1nqz//UN
-         PgRTpgQ97uN5hX5ZzEWrcdUAozEokD6LCEpEUCp0lto+E4ojWjO5ozH6nnneaufs4Iik
-         nyNjMhYFk/7hx6QMVFRtFoipDGCNWYjYb/ohVqj7ucTeOJM4szEqo5cCfr/o2OK/TdMt
-         UZ9g==
+        h=from:to:cc:subject:date:message-id;
+        bh=7PKgcD6CRCuYFewb9iDJgPShfY4HlviRqF3QruuqdzA=;
+        b=qfIwd3xDhzKU0oh3atB+ZSXfCDuF7515eeR7AmkbLjsNQIyrkrwn8LbtT9GqoZaA6t
+         KVuusEqUvYJwxPvftL85ChNLYpwO9hYhQhm+Oog2X0M73Pj/+4IWqnVErXYtMl9/UDZD
+         ELC4Xe8+WnhIqCbuossb7tfZfYoUKM5h5KSFxZIbF6/u4ZkKGrOIWMuF4zP/lO0gOBeC
+         KoI3Y/lZjah04JQu4dMze6L38D4fVmiDheI9Jc331a3csP86O3qN4piGI46Rxee6s0wh
+         6T02e6X1D3+Dz11SMe3QoghMvojjwC1I+DVONOjUOstfVSWjmRu3VUD+c4yARob0Gv6v
+         Mylg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=4XnN3BtFVU8ghBOYYkiMwp/csK2JKCL9fo3KK/aQk7k=;
-        b=2Dc21ZDVqiAnxpH3gNx28Lr0HkNk0R/BPT9Q0+A6ktVEu+fv0LsCt8CSG7xT70zzPc
-         EakNPTHuQVgwthpwOYGMfV26N4rankloSvHB7Op7jD1uaPjvd3t/3F2iW+f/VH8iLU4E
-         tMthYFAZrZBJXo7y/cJDizl1fkjvfkziifkx9z5zId1jvBMQIbFJWSrzhFWBi+dX3PyG
-         1+z8XlSf8bUaV9KF9dTHMkjShB+tnImRxm63w7FtQ7l0XkKj8XX1aAj9q9lmSYxLQP3Q
-         3jri8Pe3y5o6B6K7L48q7QiGbGBMCS2CQHdSFZXSie3bY0w4je1i5+zMTIaWE/vyk+5L
-         ud6A==
-X-Gm-Message-State: AOAM5300VtQPJlfKMfT6EV1hRLktC1PSYGzzz9qarwvBdd/oifRjPsxy
-        oKwnCyVZuRRvqRXrEu38FIg=
-X-Google-Smtp-Source: ABdhPJwdcd6NoupRoRqC9vjxhs8CpzPE21N9vtEI52hr8riGPIPhrn0+Xuvk6R2SkQPvFGemRVPK5A==
-X-Received: by 2002:ac8:5b82:: with SMTP id a2mr30216325qta.519.1638668250697;
-        Sat, 04 Dec 2021 17:37:30 -0800 (PST)
-Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
-        by smtp.gmail.com with ESMTPSA id j126sm4609048qke.103.2021.12.04.17.37.29
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=7PKgcD6CRCuYFewb9iDJgPShfY4HlviRqF3QruuqdzA=;
+        b=am8RkJ9Uw1t0cPOfgct2SFRXBMOeCA9QGj6tzOGrPerpzGVM+qPttZOGq+VGmtcxOq
+         rwxpvyU2DbBJ5fqTYJ6OKMdU1rK0mS9zCVjbhvsGUKD5SpBO1JWVaV/QWUZVfg1wpJ2K
+         CV62JhdUBzB/N5wEF2o0ijemEGahGtLgU1zUWiZLSMuudevydXt/MpXMoP30u1rH7RUK
+         Imw6SzUEASSdRVtP85UzGHKAHwZZm4BhvLvs/wxYSXOZcJUdNw9uGaYWYAB+S1gI8AMF
+         Xj+o638Fq87Ww+/XQ/eefWxG0wb16K13U6mwwrBJWfMyYJSXQabuJK7nIvUrCA2svwfF
+         wALA==
+X-Gm-Message-State: AOAM533GDc71BqKajwYjLNxMlsb7+sCrMicf6f4iNT5PiobUEZWtU0o+
+        0VD+l/MSduqstUJP7s11aNFqfDDT8AXdTdUQHkQ=
+X-Google-Smtp-Source: ABdhPJxkWomqIVIog9yiMR7bm0QA1Ot51gkjyKc2c+3MHOQJpj6lt3TxALWaZS79ERgAAc36BtTxww==
+X-Received: by 2002:a05:6a00:10d2:b0:4a8:3613:c475 with SMTP id d18-20020a056a0010d200b004a83613c475mr32327924pfu.0.1638731456032;
+        Sun, 05 Dec 2021 11:10:56 -0800 (PST)
+Received: from localhost.localdomain ([49.207.207.227])
+        by smtp.gmail.com with ESMTPSA id t7sm10720797pjs.45.2021.12.05.11.10.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 04 Dec 2021 17:37:30 -0800 (PST)
-Date:   Sat, 4 Dec 2021 20:37:22 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Randy Dunlap <rdunlap@infradead.org>
-Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, kgugala@antmicro.com,
-        mholenko@antmicro.com, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
-        shorne@gmail.com, geert@linux-m68k.org,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr
-Subject: Re: [PATCH v2 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <YawX0qne+wRTXMeY@glsvmlin.ini.cmu.edu>
-References: <20211204204121.2367127-1-gsomlo@gmail.com>
- <20211204204121.2367127-4-gsomlo@gmail.com>
- <e99ad542-14f6-2a06-a83e-c5f4e945303c@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e99ad542-14f6-2a06-a83e-c5f4e945303c@infradead.org>
-X-Clacks-Overhead: GNU Terry Pratchett
+        Sun, 05 Dec 2021 11:10:55 -0800 (PST)
+From:   Nishad Kamdar <nishadkamdar@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Huijin Park <huijin.park@samsung.com>,
+        Yue Hu <huyue2@yulong.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Nishad Kamdar <nishadkamdar@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: core: Add support for the eMMC RTC feature in mmc_ops
+Date:   Mon,  6 Dec 2021 00:40:08 +0530
+Message-Id: <20211205191009.32454-1-nishadkamdar@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Randy,
+This patch adds support to set the RTC information in
+the eMMC device. This is based on the JEDEC specification.
 
-Thanks for the feedback!
+There is no way however, to read the RTC time from the
+device. Hence we rely on the response of the CMD49 to
+confirm the completion of the operation.
 
-On Sat, Dec 04, 2021 at 12:57:32PM -0800, Randy Dunlap wrote:
-> Hi Gabriel--
-> 
-> On 12/4/21 12:41, Gabriel Somlo wrote:
-> > +MODULE_DESCRIPTION("LiteX SDCard driver");
-> > +MODULE_AUTHOR("Antmicro <www.antmicro.com>");
-> 
-> Admittedly it's not documented, but we would prefer to have some contact info
-> in MODULE_AUTHOR(), like an email address or a person's name.
-> 
-> <linux/module.h> says:
-> 
-> /*
->  * Author(s), use "Name <email>" or just "Name", for multiple
->  * authors use multiple MODULE_AUTHOR() statements/lines.
->  */
-> #define MODULE_AUTHOR(_author) MODULE_INFO(author, _author)
+This patch has been tested successfully with the ioctl
+interface. This patch has also been tested suceessfully
+with all the three RTC_INFO_TYPEs.
 
-OK, so my plan is to add the following MODULE_AUTHOR() statements:
+Signed-off-by: Nishad Kamdar <nishadkamdar@gmail.com>
+---
+ drivers/mmc/core/mmc_ops.c | 59 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/mmc_ops.h |  2 ++
+ include/linux/mmc/mmc.h    |  1 +
+ 3 files changed, 62 insertions(+)
 
-	MODULE_AUTHOR("Antmicro <contact@antmicro.com>");
-	MODULE_AUTHOR("Kamil Rakoczy <krakoczy@antmicro.com>");
-	MODULE_AUTHOR("Maciej Dudek <mdudek@internships.antmicro.com>");
-	MODULE_AUTHOR("Paul Mackerras <paulus@ozlabs.org>");
-	MODULE_AUTHOR("Gabriel Somlo <gsomlo@gmail.com>");
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index d63d1c735335..490372341b3b 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -1063,3 +1063,62 @@ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms)
+ 	return err;
+ }
+ EXPORT_SYMBOL_GPL(mmc_sanitize);
++
++int mmc_set_time(struct mmc_card *card, struct mmc_host *host,
++		 u8 rtc_info_type, u64 seconds)
++{
++	struct mmc_request mrq = {};
++	struct mmc_command cmd = {};
++	struct mmc_data data = {};
++	struct scatterlist sg;
++	int err = 0;
++	u8 *data_buf;
++
++	data_buf = kzalloc(512, GFP_KERNEL);
++	if (!data_buf)
++		return -ENOMEM;
++
++	if (rtc_info_type == 0x01 || rtc_info_type == 0x02 ||
++	    rtc_info_type == 0x03) {
++		data_buf[0] = 0x01;
++		data_buf[1] = rtc_info_type;
++		memcpy(&data_buf[2], &seconds, sizeof(u64));
++	} else {
++		pr_err("%s: invalid rtc_info_type %d\n",
++		       mmc_hostname(host), rtc_info_type);
++		kfree(data_buf);
++		return -EINVAL;
++	}
++
++	mrq.cmd = &cmd;
++	mrq.data = &data;
++
++	cmd.opcode = MMC_SET_TIME;
++	cmd.arg = 0;
++	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	data.blksz = 512;
++	data.blocks = 1;
++	data.flags = MMC_DATA_WRITE;
++	data.sg = &sg;
++	data.sg_len = 1;
++	sg_init_one(&sg, data_buf, 512);
++
++	mmc_set_data_timeout(&data, card);
++
++	mmc_wait_for_req(host, &mrq);
++
++	if (cmd.error) {
++		err = cmd.error;
++		goto out;
++	}
++
++	if (data.error) {
++		err = data.error;
++		goto out;
++	}
++out:
++	kfree(data_buf);
++	return err;
++}
++EXPORT_SYMBOL_GPL(mmc_set_time);
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 9c813b851d0b..0c8695d1b363 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -55,6 +55,8 @@ void mmc_run_bkops(struct mmc_card *card);
+ int mmc_cmdq_enable(struct mmc_card *card);
+ int mmc_cmdq_disable(struct mmc_card *card);
+ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms);
++int mmc_set_time(struct mmc_card *card, struct mmc_host *host,
++		 u8 rtc_info_type, u64 seconds);
+ 
+ #endif
+ 
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index d9a65c6a8816..52a3bf873d50 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -64,6 +64,7 @@
+ #define MMC_WRITE_MULTIPLE_BLOCK 25   /* adtc                    R1  */
+ #define MMC_PROGRAM_CID          26   /* adtc                    R1  */
+ #define MMC_PROGRAM_CSD          27   /* adtc                    R1  */
++#define MMC_SET_TIME	         49   /* adtc                    R1  */
+ 
+   /* class 6 */
+ #define MMC_SET_WRITE_PROT       28   /* ac   [31:0] data addr   R1b */
+-- 
+2.17.1
 
-Antmicro folks: Kamil, Maciej, Mateusz, Karol: I'm not exactly clear
-on how you all prefer to be credited but I could either:
-
-	1. leave just the first line for Antmicro-the-company, with the
-	   "contact@..." email instead of the website URL, or
-
-	2. leave just the developer lines (Kamil and Maciej), or
-
-	3. leave all three lines as currently shown above.
-
-I'll queue that up for v3, once I hear back from you.
-
-> > +MODULE_LICENSE("GPL v2");
-> 
-> 
-> Also, it's up to the MMC maintainer (Ulf), but the function signature
-> style that is used in this driver is not the preferred style.
-> 
-> E.g.:
-> 
-> +static int
-> +litex_set_bus_width(struct litex_mmc_host *host)
-> +{
-> 
-> should be
-> 
-> +static int litex_set_bus_width(struct litex_mmc_host *host)
-> +{
-
-Done, and also queued up for v3.
-
-Thanks again,
---Gabriel
