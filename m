@@ -2,56 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 166EDC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Dec 2021 23:51:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BD76C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 00:00:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377606AbhLFXzH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 18:55:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39626 "EHLO
+        id S1351413AbhLGAD3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 19:03:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377635AbhLFXzG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 18:55:06 -0500
-Received: from mail-qv1-xf2c.google.com (mail-qv1-xf2c.google.com [IPv6:2607:f8b0:4864:20::f2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74B80C061746;
-        Mon,  6 Dec 2021 15:51:37 -0800 (PST)
-Received: by mail-qv1-xf2c.google.com with SMTP id m17so11449060qvx.8;
-        Mon, 06 Dec 2021 15:51:37 -0800 (PST)
+        with ESMTP id S238201AbhLGAD3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 19:03:29 -0500
+Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 357F2C061746;
+        Mon,  6 Dec 2021 16:00:00 -0800 (PST)
+Received: by mail-qk1-x72e.google.com with SMTP id g28so12922393qkk.9;
+        Mon, 06 Dec 2021 16:00:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=jms.id.au; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=irxdvYSeAdtdlqYqZPtlOv4U0i5Fz2HAUzP2/GQnZ7o=;
-        b=NarHRNNY3zmdDjao/09C3SOmn/+Ta3Pdhvyo9ztKamruOrHXEicP5DSpy6YzI3Cigj
-         yum/jpZfNhtj1XVeRSX3sy8IYol8JOJZdT57sB8801Z0DzX3GPO98IPMQbIHuiuL8MuF
-         DYI6DFmiZVm6HGtc7Byu2amBgL5EGYoHKfZxQ=
+        bh=vH+EyTSx02n/9sSrzkW48FfgfH64lJ0ZkjvaQbTUsms=;
+        b=HwPZwxYQ/1r7+8pP9NqaVMVsf+U/zbhb0l4xtYxZi5nV3vU0+/G+FR+ckKCb6EZAtn
+         14s62nfBw8hYGdYJLmIj6del6MZWJNBZsmUk5XllJjmLaav18s8wrAC4MBS1dVp8l2uo
+         UQLLdfZOM/4ZOgoHRoCFC/KAKYRcQKmQcbiRc=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=irxdvYSeAdtdlqYqZPtlOv4U0i5Fz2HAUzP2/GQnZ7o=;
-        b=iKnNp/24SBmnb+/f3E0f4PQc/dCBR1IgM/9XScyH7xqX6egUTLmp7fXXvTECHqTEwR
-         vIqrr3G1aTqEhxUhDUHp96TG3LokAXN+2xKzbKKHNEutf8WgedaixQyagsDgh1FmlL3U
-         Y4/rQOzbWpqKjlV2mEM0LDBnxkDzAoFocVq+Kk3jTINyasSI2aHJxfE/lrRzSZHNagw9
-         RlLAPG+8OHuXH2CTKW+tvjDdg2GPVrRlm33D6bnY9A1HMHnFelyOZfV9OTwXgqKDldO0
-         oOeo2kNcE3jEt7riOtTqOQAqDnhe1ZZbk9BLRw5MhcDIAkiO403+zXHQgN0ox09PsaSj
-         0NjA==
-X-Gm-Message-State: AOAM5303rkIDb0omN4d/Oe5tgP5nQG0VhZYHovlNnM0KJM3/meq8X7zH
-        OefbA6v0xwEfDe3SDeAUppKjRJ2of24DARmePQE=
-X-Google-Smtp-Source: ABdhPJzm8mA7wmNlXOpZ/141+GMdDuCroCHT1aZ4XA3yEiqKTvaonCc/SHd8mjMJ+tONbkBnaVC/ADrd6mTnhNm9puY=
-X-Received: by 2002:ad4:5ce8:: with SMTP id iv8mr41121845qvb.21.1638834696527;
- Mon, 06 Dec 2021 15:51:36 -0800 (PST)
+        bh=vH+EyTSx02n/9sSrzkW48FfgfH64lJ0ZkjvaQbTUsms=;
+        b=2lPKM6xRYYCVzArrwkJexN3LR4RC5Z704dlgK5eHjIpgbkyo+Js0nYmewf0OG/joG0
+         lgEGL1ppveM+Y1w1QcOmdEAfZgnM7hs1hnH23LlfkX1ldpUcOOaxW2R0qqdBADKag/6S
+         GfcuAzqy5OWXE6Le3hsdUZg7YFOIspBKeZ9WXcB/1WMMzgep+3hMd7Z//nyYL5j2Qes0
+         yJi/SKuSXVe5QnHILIw+rTaQwrDSfOjOxuAqfEUW+8+8T0ql3b1yK6jN8ViYgPVIqLPA
+         931Ype6X7Be/FyHBtP1LyPh+0+kOWrO+RmvltKnrxVMD/BNiqPbGIXw8KcTqLKVGjEO1
+         BgWA==
+X-Gm-Message-State: AOAM5325jBOqfo0iQ2GwDkYS1S/184PllIcxMQvmhZaHDEbCxh5VSVnx
+        66QWJxpFXJNPSsUlmBhSxRgSNyitSB0io7THYrg=
+X-Google-Smtp-Source: ABdhPJzJQG5wzaIUOqemw1mDUPRPbTFXQ444i5aqc/kbmA+TsdoCASPXa977dxSKPOxI8d6QayqyYYpSEUR7L4YE6a4=
+X-Received: by 2002:a05:620a:1004:: with SMTP id z4mr35939762qkj.243.1638835199182;
+ Mon, 06 Dec 2021 15:59:59 -0800 (PST)
 MIME-Version: 1.0
-References: <20211203234155.2319803-1-gsomlo@gmail.com> <20211203234155.2319803-4-gsomlo@gmail.com>
- <CACPK8XfO_8=vgedmZddz1YmWbyxiM1-azF_j88wEBHzXnP6y_g@mail.gmail.com> <CAMuHMdXxO-CP0Ao8q8r4Gw5e5FzCznhSxt2JWz13zbnt2tnzVQ@mail.gmail.com>
-In-Reply-To: <CAMuHMdXxO-CP0Ao8q8r4Gw5e5FzCznhSxt2JWz13zbnt2tnzVQ@mail.gmail.com>
+References: <20211204204121.2367127-1-gsomlo@gmail.com> <20211204204121.2367127-2-gsomlo@gmail.com>
+In-Reply-To: <20211204204121.2367127-2-gsomlo@gmail.com>
 From:   Joel Stanley <joel@jms.id.au>
-Date:   Mon, 6 Dec 2021 23:51:22 +0000
-Message-ID: <CACPK8XdF6WQDj9X1Nr0Hf6EzPkQtXBo75dj_WPsFq6nzfWPUrA@mail.gmail.com>
-Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>
-Cc:     Gabriel Somlo <gsomlo@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+Date:   Mon, 6 Dec 2021 23:59:47 +0000
+Message-ID: <CACPK8XcNHwGanjyxeRxQU55FXQCv6aizOa33qbD93G7-GizVmw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] MAINTAINERS: co-maintain LiteX platform
+To:     Gabriel Somlo <gsomlo@gmail.com>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -62,44 +59,86 @@ Cc:     Gabriel Somlo <gsomlo@gmail.com>,
         mdudek@internships.antmicro.com,
         Paul Mackerras <paulus@ozlabs.org>,
         Stafford Horne <shorne@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
         david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>
+        Florent Kermarrec <florent@enjoy-digital.fr>,
+        Randy Dunlap <rdunlap@infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 6 Dec 2021 at 12:16, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-
-> > > +       depends on OF && LITEX
-> >
-> > I don't like having litex drivers depend on the LITEX kconfig. The
-> > symbol is not user visible, and to enable it we need to build in the
-> > litex controller driver, which platforms may or may not have.
-> >
-> > The microwatt platform is an example of a SoC that embeds some LITEX
-> > IP, but may or may not be a litex SoC.
+On Sat, 4 Dec 2021 at 20:41, Gabriel Somlo <gsomlo@gmail.com> wrote:
 >
-> I do like the LITEX dependency, as it allows us to gate off a bunch of
-> related drivers, and avoid annoying users with questions about them,
-> using a single symbol.
+> Add the litex_mmc (LiteSDCard) driver to the list of files maintained
+> under LiteX, and add myself as co-maintainer. I've helped develop some
+> of the existing drivers, and am currently curating the out-of-tree
+> drivers as they are tested and prepared for upstream submission.
+>
+> Cc: Karol Gugala <kgugala@antmicro.com>
+> Cc: Mateusz Holenko <mholenko@antmicro.com>
+> Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
 
-I appreciate your concern.
+Acked-by: Joel Stanley <joel@jms.id.au>
 
-We could do this:
+If this is going to be a catch all for the drivers as well as the
+platform, we're probably missing a few entries:
 
-        depends on PPC_MICROWATT || LITEX || COMPILE_TEST
+$ git grep -l litex
+Documentation/admin-guide/kernel-parameters.txt
+Documentation/devicetree/bindings/net/litex,liteeth.yaml
+Documentation/devicetree/bindings/serial/litex,liteuart.yaml
+Documentation/devicetree/bindings/soc/litex/litex,soc-controller.yaml
+Documentation/devicetree/bindings/vendor-prefixes.yaml
+Documentation/sphinx/kfigure.py
+MAINTAINERS
+arch/openrisc/boot/dts/or1klitex.dts
+arch/openrisc/configs/or1klitex_defconfig
+arch/powerpc/boot/dts/microwatt.dts
+drivers/net/ethernet/Kconfig
+drivers/net/ethernet/Makefile
+drivers/net/ethernet/litex/Makefile
+drivers/net/ethernet/litex/litex_liteeth.c
+drivers/soc/Kconfig
+drivers/soc/Makefile
+drivers/soc/litex/Kconfig
+drivers/soc/litex/Makefile
+drivers/soc/litex/litex_soc_ctrl.c
+drivers/tty/serial/liteuart.c
+include/linux/litex.h
+scripts/clang-tools/gen_compile_commands.py
 
-It's unfortunate that kconfig doesn't let us describe the difference
-between "this driver requires this symbol" as it won't build and "this
-driver is only useful when this symbol is enabled". Traditionally I
-write kconfig to represent only the former, whereas you prefer both.
+I think we could add these entries to maintainers:
 
-> Originally, people told me the system controller is always present,
-> hence the current logic to have LITEX_SOC_CONTROLLER visible, and
-> an invisible LITEX (which is shorter to type) for individual drivers
-> to depend on.
++F:     drivers/soc/litex/*
++F:     drivers/net/ethernet/litex/*
++N:     litex
 
-That's another option. I think LITEX either needs to become visible,
-become selected by microwatt, or we adopt the proposal I made above
-for the litex drivers that the microwatt soc uses.
+I would also add my name there.
+
+> ---
+>  MAINTAINERS | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index faa9c34d837d..5fc65d4c4969 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -11012,12 +11012,14 @@ F:    lib/list-test.c
+>  LITEX PLATFORM
+>  M:     Karol Gugala <kgugala@antmicro.com>
+>  M:     Mateusz Holenko <mholenko@antmicro.com>
+> +M:     Gabriel Somlo <gsomlo@gmail.com>
+>  S:     Maintained
+>  F:     Documentation/devicetree/bindings/*/litex,*.yaml
+>  F:     arch/openrisc/boot/dts/or1klitex.dts
+>  F:     drivers/soc/litex/litex_soc_ctrl.c
+>  F:     drivers/tty/serial/liteuart.c
+>  F:     include/linux/litex.h
+> +F:     drivers/mmc/host/litex_mmc.c
+>
+>  LIVE PATCHING
+>  M:     Josh Poimboeuf <jpoimboe@redhat.com>
+> --
+> 2.31.1
+>
