@@ -2,50 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A481C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Dec 2021 12:25:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3548C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Dec 2021 12:35:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243108AbhLFM2d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 07:28:33 -0500
-Received: from mail-ua1-f53.google.com ([209.85.222.53]:44652 "EHLO
-        mail-ua1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243054AbhLFM2b (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 07:28:31 -0500
-Received: by mail-ua1-f53.google.com with SMTP id p2so19064732uad.11;
-        Mon, 06 Dec 2021 04:25:02 -0800 (PST)
+        id S243239AbhLFMjD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 07:39:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46298 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S243141AbhLFMjC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 07:39:02 -0500
+Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09C00C061746;
+        Mon,  6 Dec 2021 04:35:34 -0800 (PST)
+Received: by mail-qt1-x830.google.com with SMTP id v22so10549473qtx.8;
+        Mon, 06 Dec 2021 04:35:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=bHMT8E9fImkfAoYBjXVpAXPBP4Ehi0VCPzqml/KFYCg=;
+        b=gnVJ3p0EsdLu5f/hdHhrL9pYCb0eu5/3p+2GCU2aRgcwUcYr7t3eowfYbSL9pO6tXS
+         MHHunaoGBMbfJT+YAHiC2EuN2OFc1IxqBNsYetLy3GbSM/qcLfemodCXhLO6PVy2kCiB
+         nmtD7+X/7vGen29BCyNWcyhhVO94d5W8/t5Wcft8IJOddH1KImXZRpKfxk6sNF4KsDwT
+         /RrbIPllTSH6909E6E+3TED1zi4xeWa2OG7Xldv2FBxqkg4j27wk1EmT9v6P0PYIeRK9
+         NbqqrE6zDsWVLxSjrbwQdtWbkoOyrbrsHSUHcFuXKptgnInQmNbvt0W4zhf3aktKnVzI
+         8o3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=0pgLWD4rU3sbBIUNHmWzCgR9e6k+oT6xFT9MN28bnto=;
-        b=1Zuv1i5du31tjgd0ZJyxWv3sHJ5fPQS8hbqV58KO1VnSHEKzYlOZW8P/cNb/Q18dIE
-         J29wMjg8W0XfK+q9e8MDMQLmfGFNwyBDkpnojwckF3dYr9ncDBWmL7uZ67cl7Gmd21A3
-         jc1VXZb/penBKq4O6Hod/pWlzEepX8kLy1zbeQ/gUcch4qob1CQSK7A6GleE8Yj9PrsI
-         Yqq7bbqIDMJNC1QP8CzD0vKe87/rGlyBJbiVCXlNdQ+SLxa5qwVpkn8H+k0sgp2AtqUs
-         kYL2bCVSup3fLDlUFP8O4npkg0UVO+LsyJjuSgJaepcE21NTbHZeFSb8t+yXlJ/CCWY9
-         5W7A==
-X-Gm-Message-State: AOAM531+97+WHtuF8lCCJRV9xL8QMN1c4h6yQ8KlvULcjbqoPaOyBgnG
-        yuLyCB9PTtILae8PiTVRF7ckEjXY6pEWBw==
-X-Google-Smtp-Source: ABdhPJwoqFGcOkuQcX/pcvHiF8ydvpeA89sya2f5HnXY5SNJ6nxXV6O8WO8TYLpyDuRxDk5pciyp2Q==
-X-Received: by 2002:a05:6102:3053:: with SMTP id w19mr31242273vsa.60.1638793501684;
-        Mon, 06 Dec 2021 04:25:01 -0800 (PST)
-Received: from mail-vk1-f177.google.com (mail-vk1-f177.google.com. [209.85.221.177])
-        by smtp.gmail.com with ESMTPSA id g28sm3992429vkl.16.2021.12.06.04.25.00
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Dec 2021 04:25:00 -0800 (PST)
-Received: by mail-vk1-f177.google.com with SMTP id s1so6618187vks.9;
-        Mon, 06 Dec 2021 04:25:00 -0800 (PST)
-X-Received: by 2002:a1f:9f04:: with SMTP id i4mr39914732vke.33.1638793500250;
- Mon, 06 Dec 2021 04:25:00 -0800 (PST)
-MIME-Version: 1.0
-References: <20211204204121.2367127-1-gsomlo@gmail.com> <20211204204121.2367127-4-gsomlo@gmail.com>
-In-Reply-To: <20211204204121.2367127-4-gsomlo@gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 6 Dec 2021 13:24:49 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdXkmJ8qxk48AaiC=o0x4manGrL2-J3W0v8GkTaoFoAXuw@mail.gmail.com>
-Message-ID: <CAMuHMdXkmJ8qxk48AaiC=o0x4manGrL2-J3W0v8GkTaoFoAXuw@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     Gabriel Somlo <gsomlo@gmail.com>
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=bHMT8E9fImkfAoYBjXVpAXPBP4Ehi0VCPzqml/KFYCg=;
+        b=tU/mWGs5JVT4kSY4XCWQmsQ/MYW+SaKHJoM9VWSLU+RI+oKq3fW/zGaIQrFik1jlWE
+         8iYKZW52N8jnJGOsl9j9nf5FdzxYrQVgvqwH9eoWnDfrJ5m2CgU2hjIyITuBWDsmSpBV
+         sEtNXrT1pSnLBoEFfy5peF6puBkvmwMY7/GHPfdYkp6JWehbGTWwWpnqcuPEdYKQ50/M
+         SzbEFXG3vhgK76omuqlqs2bahmE2J7vfGnWda4+9ViVU7kXDuYrnOUmdtN016Xebm0DT
+         IAuD5aP39U0+MM7EZ9MnZvnx6rGyUJ8DlkFPYzE/8TAfTHxDXZlORbC52Ynpu4bJw0V2
+         OFWA==
+X-Gm-Message-State: AOAM533N3mgAX0FW5UpWCf2y9S3CBlUUIYNNhVuEHDEB0O5OOMu/og07
+        RmIonCP0BdkpPQ2EVukzlRk=
+X-Google-Smtp-Source: ABdhPJzjUBq4Z5Lq71j4c0mIlippjySRf4t5Whw5GG4up3YjB9xND+C9kuKz0sK7AUXSG3VByXQ16g==
+X-Received: by 2002:ac8:5742:: with SMTP id 2mr38986321qtx.554.1638794133143;
+        Mon, 06 Dec 2021 04:35:33 -0800 (PST)
+Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
+        by smtp.gmail.com with ESMTPSA id y73sm6213811qkb.113.2021.12.06.04.35.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Dec 2021 04:35:32 -0800 (PST)
+Date:   Mon, 6 Dec 2021 07:35:30 -0500
+From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
 Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
@@ -57,111 +61,118 @@ Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         mdudek@internships.antmicro.com, paulus@ozlabs.org,
         Joel Stanley <joel@jms.id.au>,
         Stafford Horne <shorne@gmail.com>,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        Randy Dunlap <rdunlap@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr
+Subject: Re: [PATCH v1 2/3] dt-bindings: mmc: Add bindings for LiteSDCard
+Message-ID: <Ya4DkhOafBOxZbz4@errol.ini.cmu.edu>
+References: <20211203234155.2319803-1-gsomlo@gmail.com>
+ <20211203234155.2319803-3-gsomlo@gmail.com>
+ <CAMuHMdU7ZVpStBeS3eqFaHmyv+KoVmddn8DNTMqOoTxe61xf6Q@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdU7ZVpStBeS3eqFaHmyv+KoVmddn8DNTMqOoTxe61xf6Q@mail.gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gabriel,
+On Mon, Dec 06, 2021 at 10:38:07AM +0100, Geert Uytterhoeven wrote:
+> Hi Gabriel,
+> 
+> On Sat, Dec 4, 2021 at 12:42 AM Gabriel Somlo <gsomlo@gmail.com> wrote:
+> > LiteSDCard is a small footprint, configurable SDCard core for FPGA
+> > based system on chips.
+> >
+> > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+> 
+> Thanks for your patch!
+> 
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+> > @@ -0,0 +1,63 @@
+> > +# SPDX-License-Identifier: GPL-2.0-or-later OR BSD-2-Clause
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/mmc/litex,mmc.yaml#
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: LiteX LiteSDCard device
+> > +
+> > +maintainers:
+> > +  - Gabriel Somlo <gsomlo@gmail.com>
+> > +
+> > +description: |
+> > +  LiteSDCard is a small footprint, configurable SDCard core for FPGA based
+> > +  system on chips.
+> > +
+> > +  The hardware source is Open Source and can be found on at
+> > +  https://github.com/enjoy-digital/litesdcard/.
+> > +
+> > +allOf:
+> > +  - $ref: mmc-controller.yaml#
+> > +
+> > +properties:
+> > +  compatible:
+> > +    const: litex,mmc
+> > +
+> > +  reg:
+> > +    items:
+> > +      - description: PHY registers
+> > +      - description: CORE registers
+> > +      - description: DMA Reader buffer
+> > +      - description: DMA Writer buffer
+> > +      - description: IRQ registers
+> > +
+> > +  reg-names:
+> > +    items:
+> > +      - const: phy
+> > +      - const: core
+> > +      - const: reader
+> > +      - const: writer
+> > +      - const: irq
+> > +
+> > +  interrupts:
+> > +    maxItems: 1
+> > +
+> > +required:
+> > +  - compatible
+> > +  - reg
+> 
+> reg-names?
+> 
+> (and updating litex/tools/litex_json2dts_linux.py to add it)
 
-On Sat, Dec 4, 2021 at 9:41 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> that targets FPGAs. LiteSDCard is a small footprint, configurable
-> SDCard core commonly used in LiteX designs.
->
-> The driver was first written in May 2020 and has been maintained
-> cooperatively by the LiteX community. Thanks to all contributors!
->
-> Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
-> Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
-> Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+Thanks, I missed `reg-names` originally, and have added it to the
+list. And yes, once we agree on all this, I'll submit a matching
+update to litex_json2dts_linux.py 
 
-> --- /dev/null
-> +++ b/drivers/mmc/host/litex_mmc.c
-
-> +static void
-> +litex_set_clk(struct litex_mmc_host *host, unsigned int clk_freq)
-> +{
-> +       u32 div = clk_freq ? host->freq / clk_freq : 256;
-> +
-> +       div = roundup_pow_of_two(div);
-> +       div = min_t(u32, max_t(u32, div, 2), 256);
-> +       dev_info(&host->dev->dev, "sdclk_freq=%d: set to %d via div=%d\n",
-> +                clk_freq, host->freq / div, div);
-> +       litex_write16(host->sdphy + LITEX_PHY_CLOCKERDIV, div);
-> +}
-> +
-> +static void
-> +litex_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +       struct litex_mmc_host *host = mmc_priv(mmc);
-> +
-> +       /* NOTE: Ignore any ios->bus_width updates; they occur right after
-> +        * the mmc core sends its own acmd6 bus-width change notification,
-> +        * which is redundant since we snoop on the command flow and inject
-> +        * an early acmd6 before the first data transfer command is sent!
-> +        */
-> +
-> +       /* update sdcard clock */
-> +       if (ios->clock != host->clock) {
-> +               litex_set_clk(host, ios->clock);
-> +               host->clock = ios->clock;
-
-It might be better to move the assignment to host->clock into the callee,
-to avoid it becoming out-of-sync when a second caller is introduced.
-
-> +       }
-> +}
-
-> +static int
-> +litex_mmc_probe(struct platform_device *pdev)
-> +{
-> +       struct litex_mmc_host *host;
-> +       struct mmc_host *mmc;
-> +       struct device_node *cpu;
-> +       int ret;
-> +
-> +       mmc = mmc_alloc_host(sizeof(struct litex_mmc_host), &pdev->dev);
-> +       /* NOTE: defaults to max_[req,seg]_size=PAGE_SIZE, max_blk_size=512,
-> +        * and max_blk_count accordingly set to 8;
-> +        * If for some reason we need to modify max_blk_count, we must also
-> +        * re-calculate `max_[req,seg]_size = max_blk_size * max_blk_count;`
-> +        */
-> +       if (!mmc)
-> +               return -ENOMEM;
-> +
-> +       host = mmc_priv(mmc);
-> +       host->mmc = mmc;
-> +       host->dev = pdev;
-> +
-> +       host->clock = 0;
-> +       cpu = of_get_next_cpu_node(NULL);
-> +       ret = of_property_read_u32(cpu, "clock-frequency", &host->freq);
-> +       of_node_put(cpu);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "No \"clock-frequency\" property in DT\n");
-> +               goto err_free_host;
-> +       }
-
-This looks fragile.
-Shouldn't the clock be obtained from a clock property in the mmc
-device node, pointing to a clock provider?
-How does the real clock tree look like?
-
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Thanks,
+--Gabriel
+ 
+> > +  - interrupts
+> > +
+> > +additionalProperties: false
+> > +
+> > +examples:
+> > +  - |
+> > +    mmc: mmc@12005000 {
+> > +        compatible = "litex,mmc";
+> > +        reg = <0x12005000 0x100>,
+> > +              <0x12003800 0x100>,
+> > +              <0x12003000 0x100>,
+> > +              <0x12004800 0x100>,
+> > +              <0x12004000 0x100>;
+> > +        reg-names = "phy", "core", "reader", "writer", "irq";
+> > +        interrupts = <4>;
+> > +    };
+> 
+> Gr{oetje,eeting}s,
+> 
+>                         Geert
+> 
+> --
+> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+> 
+> In personal conversations with technical people, I call myself a hacker. But
+> when I'm talking to journalists I just say "programmer" or something like that.
+>                                 -- Linus Torvalds
