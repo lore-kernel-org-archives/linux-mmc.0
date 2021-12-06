@@ -2,198 +2,169 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4490FC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Dec 2021 14:07:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AA6EC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Dec 2021 14:08:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241944AbhLFOKY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 09:10:24 -0500
-Received: from mail-dm6nam08on2070.outbound.protection.outlook.com ([40.107.102.70]:37308
-        "EHLO NAM04-DM6-obe.outbound.protection.outlook.com"
+        id S245408AbhLFOLs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 09:11:48 -0500
+Received: from mail-mw2nam12on2051.outbound.protection.outlook.com ([40.107.244.51]:56513
+        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S245598AbhLFOKD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 6 Dec 2021 09:10:03 -0500
+        id S245505AbhLFOLl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 6 Dec 2021 09:11:41 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Ygj/CO8C4MZTpBpdXhmzj0YWNue0uNsYTUMp9bh987LIbbRL8cD0MdkurBypiGxUIU/b7kog8w8/lvZkrrHn4ZPsG70YoXmrCL7OVfcnQbyln2hkN3t9XbOLAX+59fRBw6BXz88/IHCQtKzp7gTXXRg514O37v9Z7kyT9+FHEw3Q6QsWSMQS3VJhESVlGTyPC2ElMdNrwK0F3euyX1IPzpwJlKxxBhWVdnHn7orZPJIKFF2CCQmeHQUWaww4Cm9cmfrwwZKqTqjr3JzyjcH+/KLjhUc/MxHTcHpr2psBM1lFhN0O5Q2W0ihLehPs68fYJrnChVtLjZEkauH2t7zJ1g==
+ b=Vrzp0wi4SCvJ+6CfIIL06hc93tUfj6GGBgpoIaF9Zc1VUCwZZXsxpqOnnaU0Uou3VD5ICYBhROBHQ6shfopoPYlsI0ve4m6C5N4QCGwdJ/zTj2AyJUHb4ZaxlpN8Ri4c/6EwxkiraO10m+Ieg2m9Jq+DjMgVl9Z6QhafIRlTKfq/zWSxtl9zdS6QSaMr4PrMzAKrJhupu9hzXq27lmR09zCXnnE5BflfGGHp8pVviao+hs+AZFKJFtEneKIsL0sxt86g6a6AQqyjhfIH1fCrXeigCtrgU1Re86KSYPR09X139Nm3/xCVYsamfxysn/iO36tXJYDM9wH0OJwB+fqqdg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=bUwhfwsxtOJNa1ae3LMSii+KCEw60M3OhMXM2HVWQJM=;
- b=ThbB8S+IGdYGjIPEzjrNvAA29kpDt61ZAbZYCfJnaWjB4xypN7rMPY9Gv0/Zkh8zAWMzmYNjbPeyFI/Tr/2iDyhRoHTrukeFPQKmicTpmTvVoVaMUbUhZjyhOOrQN1lPZCqZukJCauFNAyT/ThIQvBvyZi5yqFm5HMyVe/mccf0uVcKdfGg5722gPJK9DlHwXmE+tbnNSug6ytuciamiG4xCF+2twGQ7M1RkDvAmJPXY61xhDA7JQv3i6eeM1f5LmOpmo5Ts2KiWYRVo9MeOutx4AT5rFIV3txeMC1wk8mO16kAbUDwBQzbs4dc292+OtNo1ODg5uZVNU2dr+50OEQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
+ bh=woNyZCiC7JmxGyUsn8ZpV0UJnuw59WQypiTQV8Q9OHA=;
+ b=NpvklaD5gL9TgdGsAgo6NfOuSztE2GAZ/QbhwYhDY3vVrAiD50foxpKmnfxfn42awxxH9EBGYl+eC6fTLCsiqZ9w0NYPYqSZOhmsSOZyX1bOGzAYBcpF0ltG7KJEBMRD/0geqfeTblspFus6dZEEv+BgcoXsrtJkmNKAjcTjNv3ssohrh8zoR5qGb/NrTwoRJoiyTP9eREztHigZ8JB4AEuJesV1IztyteX8U8tH6Wm6Xtfr6enFqixDG7fAkrldeFqakA69o7o+muSMHBRd5nexGtfXgVZoiqYVHgD2MF4qhNT7jqKeXA5ua9iQ2MdkvgDDVUtS59NBl4PZc31cmg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.112.34) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
+ header.from=nvidia.com; dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=bUwhfwsxtOJNa1ae3LMSii+KCEw60M3OhMXM2HVWQJM=;
- b=EkWV9+Yn843gQzQGgXlUCz0A6JvK9S0UHzJnDcQtUX23kJNcpeLKJsft+DKNd5ksUBpVsyb6qJzxVxmon7k3a9WRSKjgqzHgRVZVmhtY4d+zXHSZCkdAO/36yGY2GbVCXdnAJ0PwN75Alh3TwnyO1EACZkP3QgFT0FY7lOBdkN36E+FQw5WBx3aMhobcJBBRnWmng4MzHA3QKtjWWsAWrDkrP7xi14hjPpNwA9gZEUWLfTmxomRUY+o0KnpQnz2MOjL7l3iF9xODm3H1dXm0QQo5MMlJZcU3LPKgpSF7a1CqrFfeB1fTdF5ve4X8x3fvfRB25MOldRuYm3zoTx9dbQ==
-Received: from DM5PR12MB2406.namprd12.prod.outlook.com (2603:10b6:4:b7::23) by
- DM6PR12MB4106.namprd12.prod.outlook.com (2603:10b6:5:221::7) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4755.21; Mon, 6 Dec 2021 14:06:33 +0000
-Received: from DM5PR12MB2406.namprd12.prod.outlook.com
- ([fe80::5926:d2bb:5b4b:1b99]) by DM5PR12MB2406.namprd12.prod.outlook.com
- ([fe80::5926:d2bb:5b4b:1b99%6]) with mapi id 15.20.4713.031; Mon, 6 Dec 2021
- 14:06:33 +0000
+ bh=woNyZCiC7JmxGyUsn8ZpV0UJnuw59WQypiTQV8Q9OHA=;
+ b=ChxgV/NS32HQbF1DZ22KtIGPJiPFMQ5LKABjdnbw73C8avLKUyCblW44Oaa7zIbUSaFVf1dLLoMWUM8se8EoaVUl9cxFHgR2/mmJzszN7N4uGpjwci6kCgtK2JErstKCrNcZLqG7GmYUx6YULvdD3YYFa43tHAQjz5w/8XqK9btEV+flKoRIO9+nbDraob5FNKgXZnyXuCxrAkHg2YklC/U3vupIrRi2zT1xUrqznSHmcFejkP0d2AEp3EIv/q63owhEBMxGK2EvCY8fLHSDIZ0NjnM6X+HlaeggX7lnOFuL6WpKgtRC1gE02I/3+DJzW5ALwkOdZqouSlcPq/9Mpw==
+Received: from BN9PR03CA0379.namprd03.prod.outlook.com (2603:10b6:408:f7::24)
+ by BY5PR12MB3924.namprd12.prod.outlook.com (2603:10b6:a03:1af::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.14; Mon, 6 Dec
+ 2021 14:08:10 +0000
+Received: from BN8NAM11FT060.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:f7:cafe::46) by BN9PR03CA0379.outlook.office365.com
+ (2603:10b6:408:f7::24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4755.21 via Frontend
+ Transport; Mon, 6 Dec 2021 14:08:10 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.112.34)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.112.34 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.112.34; helo=mail.nvidia.com;
+Received: from mail.nvidia.com (216.228.112.34) by
+ BN8NAM11FT060.mail.protection.outlook.com (10.13.177.211) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.20.4755.13 via Frontend Transport; Mon, 6 Dec 2021 14:07:10 +0000
+Received: from HQMAIL111.nvidia.com (172.20.187.18) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1497.18; Mon, 6 Dec
+ 2021 14:05:47 +0000
+Received: from pshete-ubuntu.nvidia.com (172.20.187.5) by mail.nvidia.com
+ (172.20.187.18) with Microsoft SMTP Server id 15.0.1497.18 via Frontend
+ Transport; Mon, 6 Dec 2021 14:05:43 +0000
 From:   Prathamesh Shete <pshete@nvidia.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "thierry.reding@gmail.com" <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-CC:     Aniruddha Tvs Rao <anrao@nvidia.com>,
-        Suresh Mangipudi <smangipudi@nvidia.com>
-Subject: RE: [PATCH v2] mmc: sdhci-tegra: Fix switch to HS400ES mode
-Thread-Topic: [PATCH v2] mmc: sdhci-tegra: Fix switch to HS400ES mode
-Thread-Index: AQHX54N9NcX7kZCj8UGkcwuX7RZCaawfRIsAgAZAROA=
-Date:   Mon, 6 Dec 2021 14:06:33 +0000
-Message-ID: <DM5PR12MB24060A90DC0DBB154FD75123B76D9@DM5PR12MB2406.namprd12.prod.outlook.com>
-References: <0a8368f9-8ca2-f01b-2f9e-0c91e3b946f5@intel.com>
- <20211202134948.18448-1-pshete@nvidia.com>
- <bf629e1b-c61d-37e7-8802-b6d778f89c21@intel.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
+        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC:     <pshete@nvidia.com>, <anrao@nvidia.com>, <smangipudi@nvidia.com>
+Subject: [PATCH v3] mmc: sdhci-tegra: Fix switch to HS400ES mode
+Date:   Mon, 6 Dec 2021 19:35:41 +0530
+Message-ID: <20211206140541.17148-1-pshete@nvidia.com>
+X-Mailer: git-send-email 2.17.1
 In-Reply-To: <bf629e1b-c61d-37e7-8802-b6d778f89c21@intel.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 5aff401c-d3b3-4ff8-9ca2-08d9b8c19c0a
-x-ms-traffictypediagnostic: DM6PR12MB4106:EE_
-x-microsoft-antispam-prvs: <DM6PR12MB4106ECAF5C20998D629825F8B76D9@DM6PR12MB4106.namprd12.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:6790;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: lm6kBcPenwoKtO6kaB53wIhNLrlnJvqsJHWdmo+1k6VXXlZSZaPfefQfxMwCQnj8J3/PXsASWQ00PdWTx5m/pKLfa61SjaDIsX0yNdC1nDniOGEFomXF3O0nDTfFYBY5zPwruNT+SxTS9ucHD4WVh06uXMUoVJLnybpRuf19LpwlTNmGzC2CBvuqDjSgEmwEtorep5J+Z/E6WDCPS8zc0RlA+ddVyNZtThRa+gJ66HdUAqp/QcDXH1Pt+KllFFSYubZcDmg/oa3OR8SrkCImtxhzmiG5NgBQ1e4zg5p77tSkwJ3ApR64YEspb2Rl8EMRGYl6weyxaZ342ue3CJVxy5RwbOmNVqcngMI98xQrTxVyqfPOMBlwHzgTseeQ5MGi6vK6lM1jCriE5LvCwXwiRnEX23hs55H9n0qhoayeGouio30XpuoSh1OFYAI2gJnmKfvrIQRruNwrqACK77pT6XUshDJfmOy0nK6ySjjwyw8YsONnlK+7pndQ1K4evZSa+oJx9TtiJQHkag13ErGJOB0gSKe3MOp09hgJmfZEx2jdoQOSLT3cLCWAr+oTfBJrSjl1MGRfMvf7SqepoiyZ2SmrEuKz5ub5ene5jxrYNcEev3MgrxswqlTmoJU/0Ol9k2pAsM1M3soqyTMvK5OaJYmIrJ5F9RDi+CjaxedOmfIZ4s3wAukSOhc82mryQ8C0yPKFw8Ox/NcTR3SyYIbM+A==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM5PR12MB2406.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(6506007)(83380400001)(66446008)(8936002)(4326008)(53546011)(55016003)(2906002)(122000001)(38100700002)(66556008)(86362001)(316002)(64756008)(66476007)(38070700005)(66946007)(7696005)(9686003)(110136005)(26005)(54906003)(52536014)(186003)(5660300002)(107886003)(71200400001)(508600001)(33656002)(8676002)(76116006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?VGNRNzhQd3Y0SXJvUjJSNGtFeWIyUWRRR0tML0pURnYyK3VVK2VGWW9iTDdD?=
- =?utf-8?B?MHZYTi9wVWdicS9jOXlqSmFoR09kWHN2M3NNSjAwQjR1bmJHbDFBT01iV3NO?=
- =?utf-8?B?MVg5dHBoK2d4dTBTSU9lSFVJS3ZTRFZSdjhURXVFTDRyalZFQXVHblp1bWxx?=
- =?utf-8?B?UTl1Z2svNmJHTjlrZ1VFRlVUckM4cFE4SmJuS1pwdTU4RXI2bVNIYy9JaVBq?=
- =?utf-8?B?bjVFaVUxT20zcHBMSGYxUUU4UDl2akJaTm9XVU9CRjFNbG50OFlRSkhONEZJ?=
- =?utf-8?B?MFhiQkZQSmNZaFYwWWFQR1NYdzY2L1Q1RXlQdVFrYzhJbEpGZ2FTZkJmS3lW?=
- =?utf-8?B?eDFET3djc2ZseEVmbS91NTNCVk04eFNPdE9EYkZVUDlmd3ZJalplWkJ1Skhx?=
- =?utf-8?B?WTdOR3RFbitzQ2JjVjc2anp2UThEQXVJWno1aUtiVlMzYnZiTGJKaEJ5aG5M?=
- =?utf-8?B?NXp6TUwyck84UW5OcFcxYkhSWE1ROTBxYkc1S2h5ZjJhNERBOWRFeWNzQWhw?=
- =?utf-8?B?MzNvZ3hnSGRBcFV5cFRIc3BYa1kvNVlDc2duL3FtY0NyZUNXemgzL0sveGF3?=
- =?utf-8?B?TkpJaGVIeTdEdjFROVcyQlc2OW1LUlVNdXBkMEQxeEtqWDFySkoreWk5M2hy?=
- =?utf-8?B?QjA4ZUpmMlV6NGJ6b0kvM0pyUm1zYU5MK0x0elBYTkd0NzdNVVZHck5JY1dE?=
- =?utf-8?B?RmIyR01aRDhydU9OMmFMNDhhUEVJNWFFN25BZXd6MDRLTS9VdThSVy9GVDU0?=
- =?utf-8?B?S2N5aFl1bE90U3hsM0w0amJzUTk1RUtTWWFsYmxqRlNha1RGNks0SEpHdytD?=
- =?utf-8?B?Zm1aanRkZkFITUhRMmgxNmNkcnJMUkdESUZKTXNOTUYybjVmQ1o5UnZGNERD?=
- =?utf-8?B?VWdCS2NZejQ3UWpHSDNPSG5mZWZFVWR6WHI3VmczeU1IZzZEdHppVXZvTTFV?=
- =?utf-8?B?VnZweWhOUmVxQkpiVmNiZGtLSEhkRFFvdzVDZnBURk82RUd2OS9jV2xCVC96?=
- =?utf-8?B?eVo5bzFHZTFSYVRTelc4UlFXVjJwQnBPeWIwWGk2K3FRc2ZTVnRFUnRCRWNq?=
- =?utf-8?B?M29WenN6QnpXNjVwVm16NXh3TkQ4YlNYaTVRRVZLUmhiRFZZTDFSc0c5Szdz?=
- =?utf-8?B?MnRKb3lCMHp5Q29Uc3NrNTZPcjVZRUVKdHhYSW8xTnhLeGNLU1ZGNmVWRTBx?=
- =?utf-8?B?cnlzZVZjMnh2SGQ4RFcybUFjNkVIaEVkVXNQS0Z4elV5Rm1mS1R3aGVGVGQ1?=
- =?utf-8?B?eDdlM1NaL09CUDNlTzN4a29ZM1krYXJtbXhnRVk5dUJicURPNytxYUZDNU90?=
- =?utf-8?B?ZGovSTBxU2VzYnpBK29XQ3ZhdnRGVjAyZnVnUHA4T0N6Zy9IYWo4MUpMeWph?=
- =?utf-8?B?RW80d0tqTDFGTUN0K2ZjMHpYbW54RG1DbGdKVFU4aDVyUVpoTGpHQ2ZlU3dT?=
- =?utf-8?B?NjF6VHlRQ0RWcDN6MjE3T2U1WDdHN2thSnJhb0RMSGtOL2YvSWNubU53ZUhx?=
- =?utf-8?B?ZzF2Z3lwNzVZSFJyNDlZSjRsSThIcmhVaEE3RXpUalNhVVRqVTVEV1ljWEwz?=
- =?utf-8?B?TEh4Wmc2cFVFV01rZVo0TlhHK05PU2pRdEplMmxGZXl6SHNqa1N3aWdHazcy?=
- =?utf-8?B?Q3NhYXBCUEk2UHVQRGQ5ZkM4VzhzektjQmdUVHI0R2dGUUlEaUlVS0RxZGw1?=
- =?utf-8?B?dGFQNDdFSXNDRHhZYjJGYk9od28vY29BWVRkbjNJcTJvRjd6ZnVGd2NYU0xG?=
- =?utf-8?B?ZzZ2M1dTc2VBYlExNUZFTG12dnlxT0lQM1Ewc2VnS3NFRzd3R0Y5R3pnNDU1?=
- =?utf-8?B?UFZNcVB2Ui9xcjBKbGdwSEI0dU12NlFZMDNCRU5xWDc0bjFLSWdHZHZsS1Nl?=
- =?utf-8?B?NmNmRHR2enlicHg5bS82Vmw1blB1ckxkbWRESUttdGE5ZDUwT2RjMGtNTmJj?=
- =?utf-8?B?NGNPNllNUEFucFVKSmxFQ3F2VmlER2k4T2czZWpBM2ttU3RWYWxweEVRUUlo?=
- =?utf-8?B?bldUZEE3ZmR4T0FIME95bVRiemZHMWtMM25OSU9GZDJxK0hzNmNja1ZUTTEx?=
- =?utf-8?B?V1htbFdycmc5amwrNUxYTDlvYkxiWXVqTXl5ZjFmQ2RFTGFFa3lzbUsxT1Rm?=
- =?utf-8?B?MGhRQ0RXWU9VMmR1YlF6VWZHY21aL1JkTDRyczVIR1lrVE5xU3JwUmxaTGhm?=
- =?utf-8?B?cGc9PQ==?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+References: <bf629e1b-c61d-37e7-8802-b6d778f89c21@intel.com>
 MIME-Version: 1.0
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: a47afdad-65a5-49b6-4d16-08d9b8c1d5b2
+X-MS-TrafficTypeDiagnostic: BY5PR12MB3924:EE_
+X-Microsoft-Antispam-PRVS: <BY5PR12MB392467AC5DB155FC7CEDDCFBB76D9@BY5PR12MB3924.namprd12.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3044;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: XDzgy/JzkvUPHMUORQnwf+r2NsuhQiJgMeQyPlEzzlubfkM+Z7MxcwAlr6n/PHzCNz29ccBi4N0qWsdJdJJiX/elVRXGa+7IRuLyNTdUt5bNxBjsxPgZ43jgh6wSQNmNsZq5fzA1dPxe5xIL+x8Cee8D/8mTFopwcHY0oEZunQOYVdhHOjcvta/+SfjdISLcUK4okUajuZyosHAC0nMU6CQexo8a1ZmicsJmVy569HVPZ8+tBI7f9rwuMMcxPOK+GYxSjGo4751lRVu/0FTbJv0S7VS9t33hnO8CZh1HiFvt3Q4vkJNO4yDxqb3itvYwJQouSCSX7jq8GepDg/R9SFjt8tTvXqinBhufrzHfx9/h6DSfHIBq9/vuN3/nhco7APtCG/EQrnNNhKYr2RnbNLke10fHu9nDvvoLjJ4WuW5c1aWC8wRGArOxHDHn6rTyyVaVRW+oPNenEUa98LuD3kZ4/9G/jpvmT4HQeKds80dkPXRsWjIs2CAwTRWlq+Ta21avG4yMXFNybQOh9pgJGPPICGALKo16c8+7Mc5qw5KhO12t4Oi8j3SWwq6KSL3NJlPpqwAHYTlww++uhNMfqQpilZop0nn3f9vrxhnU56IKEX4u1fA2FY4hzJW65LtSb+JQtYQ4EamTViR+130YPLY/KR14yuzONJU1/U6qefamvsrALpLXMMCJnQ7uEi6c4NevDyikOrfXXjbTiSgpcABqeGRd0uMiupb6ie4L01zdyl2OPQpxOrg9UoPl9/xRYNOfclbdm7DcgJ65xvX5BA==
+X-Forefront-Antispam-Report: CIP:216.228.112.34;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:schybrid03.nvidia.com;CAT:NONE;SFS:(4636009)(36840700001)(46966006)(40470700001)(316002)(47076005)(8936002)(107886003)(508600001)(26005)(36756003)(83380400001)(5660300002)(186003)(426003)(336012)(4326008)(110136005)(2616005)(7636003)(70586007)(70206006)(2906002)(40460700001)(7696005)(1076003)(356005)(86362001)(54906003)(82310400004)(8676002)(36860700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM5PR12MB2406.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5aff401c-d3b3-4ff8-9ca2-08d9b8c19c0a
-X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Dec 2021 14:06:33.4106
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Dec 2021 14:07:10.0438
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: TtvOeaP1Da44gOmKcPIDbHd9skxoW8bQSDyxM5EKIG0WlNKxDb6gxwm+Gk0bX4XqOH+TalowNDY9NpIAbk7YgA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4106
+X-MS-Exchange-CrossTenant-Network-Message-Id: a47afdad-65a5-49b6-4d16-08d9b8c1d5b2
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.112.34];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT060.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB3924
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGZvciByZXZpZXchDQpVcGRhdGVkIHRoZSBwcm9ncmFtbWluZyBzZXF1ZW5jZSBhbmQg
-UHVzaGVkIHZlcnNpb24gdjMuDQoNClRoYW5rcw0KUHJhdGhhbWVzaC4NCg0KPiAtLS0tLU9yaWdp
-bmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGlu
-dGVsLmNvbT4NCj4gU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDIsIDIwMjEgODowNSBQTQ0KPiBU
-bzogUHJhdGhhbWVzaCBTaGV0ZSA8cHNoZXRlQG52aWRpYS5jb20+OyB1bGYuaGFuc3NvbkBsaW5h
-cm8ub3JnOw0KPiB0aGllcnJ5LnJlZGluZ0BnbWFpbC5jb207IEpvbmF0aGFuIEh1bnRlciA8am9u
-YXRoYW5oQG52aWRpYS5jb20+Ow0KPiBwLnphYmVsQHBlbmd1dHJvbml4LmRlOyBsaW51eC1tbWNA
-dmdlci5rZXJuZWwub3JnOyBsaW51eC0NCj4gdGVncmFAdmdlci5rZXJuZWwub3JnOyBsaW51eC1r
-ZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+IENjOiBBbmlydWRkaGEgVHZzIFJhbyA8YW5yYW9AbnZp
-ZGlhLmNvbT47IFN1cmVzaCBNYW5naXB1ZGkNCj4gPHNtYW5naXB1ZGlAbnZpZGlhLmNvbT4NCj4g
-U3ViamVjdDogUmU6IFtQQVRDSCB2Ml0gbW1jOiBzZGhjaS10ZWdyYTogRml4IHN3aXRjaCB0byBI
-UzQwMEVTIG1vZGUNCj4gDQo+IEV4dGVybmFsIGVtYWlsOiBVc2UgY2F1dGlvbiBvcGVuaW5nIGxp
-bmtzIG9yIGF0dGFjaG1lbnRzDQo+IA0KPiANCj4gT24gMDIvMTIvMjAyMSAxNTo0OSwgUHJhdGhh
-bWVzaCBTaGV0ZSB3cm90ZToNCj4gPiBXaGVuIENNRDEzIGlzIHNlbnQgYWZ0ZXIgc3dpdGNoaW5n
-IHRvIEhTNDAwRVMgbW9kZSwgdGhlIGJ1cyBpcw0KPiA+IG9wZXJhdGluZyBhdCBlaXRoZXIgTU1D
-X0hJR0hfMjZfTUFYX0RUUiBvciBNTUNfSElHSF81Ml9NQVhfRFRSLg0KPiA+IFRvIG1lZXQgVGVn
-cmEgU0RIQ0kgcmVxdWlyZW1lbnQgYXQgSFM0MDBFUyBtb2RlLCBmb3JjZSBTREhDSSBpbnRlcmZh
-Y2UNCj4gPiBjbG9jayB0byBNTUNfSFMyMDBfTUFYX0RUUiAoMjAwIE1Ieikgc28gdGhhdCBob3N0
-IGNvbnRyb2xsZXIgQ0FSIGNsb2NrDQo+ID4gYW5kIHRoZSBpbnRlcmZhY2UgY2xvY2sgYXJlIHJh
-dGUgbWF0Y2hlZC4NCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFByYXRoYW1lc2ggU2hldGUgPHBz
-aGV0ZUBudmlkaWEuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLXRl
-Z3JhLmMgfCA0Mw0KPiA+ICsrKysrKysrKysrKysrKysrKysrLS0tLS0tLS0tLS0tLS0NCj4gPiAg
-MSBmaWxlIGNoYW5nZWQsIDI2IGluc2VydGlvbnMoKyksIDE3IGRlbGV0aW9ucygtKQ0KPiA+DQo+
-ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktdGVncmEuYw0KPiA+IGIvZHJp
-dmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jIGluZGV4IDM4N2NlOWNkYmQ3Yy4uY2EyNjFjY2U5
-YjM3DQo+ID4gMTAwNjQ0DQo+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5j
-DQo+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS10ZWdyYS5jDQo+ID4gQEAgLTM1NCwy
-MyArMzU0LDYgQEAgc3RhdGljIHZvaWQgdGVncmFfc2RoY2lfc2V0X3RhcChzdHJ1Y3Qgc2RoY2lf
-aG9zdA0KPiAqaG9zdCwgdW5zaWduZWQgaW50IHRhcCkNCj4gPiAgICAgICB9DQo+ID4gIH0NCj4g
-Pg0KPiA+IC1zdGF0aWMgdm9pZCB0ZWdyYV9zZGhjaV9oczQwMF9lbmhhbmNlZF9zdHJvYmUoc3Ry
-dWN0IG1tY19ob3N0ICptbWMsDQo+ID4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICBzdHJ1Y3QgbW1jX2lvcyAqaW9zKQ0KPiA+IC17DQo+ID4gLSAgICAgc3RydWN0
-IHNkaGNpX2hvc3QgKmhvc3QgPSBtbWNfcHJpdihtbWMpOw0KPiA+IC0gICAgIHUzMiB2YWw7DQo+
-ID4gLQ0KPiA+IC0gICAgIHZhbCA9IHNkaGNpX3JlYWRsKGhvc3QsIFNESENJX1RFR1JBX1ZFTkRP
-Ul9TWVNfU1dfQ1RSTCk7DQo+ID4gLQ0KPiA+IC0gICAgIGlmIChpb3MtPmVuaGFuY2VkX3N0cm9i
-ZSkNCj4gPiAtICAgICAgICAgICAgIHZhbCB8PSBTREhDSV9URUdSQV9TWVNfU1dfQ1RSTF9FTkhB
-TkNFRF9TVFJPQkU7DQo+ID4gLSAgICAgZWxzZQ0KPiA+IC0gICAgICAgICAgICAgdmFsICY9IH5T
-REhDSV9URUdSQV9TWVNfU1dfQ1RSTF9FTkhBTkNFRF9TVFJPQkU7DQo+ID4gLQ0KPiA+IC0gICAg
-IHNkaGNpX3dyaXRlbChob3N0LCB2YWwsIFNESENJX1RFR1JBX1ZFTkRPUl9TWVNfU1dfQ1RSTCk7
-DQo+ID4gLQ0KPiA+IC19DQo+ID4gLQ0KPiA+ICBzdGF0aWMgdm9pZCB0ZWdyYV9zZGhjaV9yZXNl
-dChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdTggbWFzaykgIHsNCj4gPiAgICAgICBzdHJ1Y3Qg
-c2RoY2lfcGx0Zm1faG9zdCAqcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYoaG9zdCk7IEBADQo+ID4g
-LTc5MSw2ICs3NzQsMzIgQEAgc3RhdGljIHZvaWQgdGVncmFfc2RoY2lfc2V0X2Nsb2NrKHN0cnVj
-dCBzZGhjaV9ob3N0ICpob3N0LA0KPiB1bnNpZ25lZCBpbnQgY2xvY2spDQo+ID4gICAgICAgfQ0K
-PiA+ICB9DQo+ID4NCj4gPiArc3RhdGljIHZvaWQgdGVncmFfc2RoY2lfaHM0MDBfZW5oYW5jZWRf
-c3Ryb2JlKHN0cnVjdCBtbWNfaG9zdCAqbW1jLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgc3RydWN0IG1tY19pb3MgKmlvcykgew0KPiA+ICsgICAgIHN0
-cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0gbW1jX3ByaXYobW1jKTsNCj4gPiArICAgICB1MzIgdmFs
-Ow0KPiA+ICsNCj4gPiArICAgICB2YWwgPSBzZGhjaV9yZWFkbChob3N0LCBTREhDSV9URUdSQV9W
-RU5ET1JfU1lTX1NXX0NUUkwpOw0KPiA+ICsNCj4gPiArICAgICBpZiAoaW9zLT5lbmhhbmNlZF9z
-dHJvYmUpDQo+ID4gKyAgICAgICAgICAgICB2YWwgfD0gU0RIQ0lfVEVHUkFfU1lTX1NXX0NUUkxf
-RU5IQU5DRURfU1RST0JFOw0KPiA+ICsgICAgIGVsc2UNCj4gPiArICAgICAgICAgICAgIHZhbCAm
-PSB+U0RIQ0lfVEVHUkFfU1lTX1NXX0NUUkxfRU5IQU5DRURfU1RST0JFOw0KPiA+ICsNCj4gPiAr
-ICAgICBzZGhjaV93cml0ZWwoaG9zdCwgdmFsLCBTREhDSV9URUdSQV9WRU5ET1JfU1lTX1NXX0NU
-UkwpOw0KPiA+ICsNCj4gPiArICAgICAvKg0KPiA+ICsgICAgICAqIFdoZW4gQ01EMTMgaXMgc2Vu
-dCBmcm9tIG1tY19zZWxlY3RfaHM0MDBlcygpIGFmdGVyDQo+ID4gKyAgICAgICogc3dpdGNoaW5n
-IHRvIEhTNDAwRVMgbW9kZSwgdGhlIGJ1cyBpcyBvcGVyYXRpbmcgYXQNCj4gPiArICAgICAgKiBl
-aXRoZXIgTU1DX0hJR0hfMjZfTUFYX0RUUiBvciBNTUNfSElHSF81Ml9NQVhfRFRSLg0KPiA+ICsg
-ICAgICAqIFRvIG1lZXQgVGVncmEgU0RIQ0kgcmVxdWlyZW1lbnQgYXQgSFM0MDBFUyBtb2RlLCBm
-b3JjZSBTREhDSQ0KPiA+ICsgICAgICAqIGludGVyZmFjZSBjbG9jayB0byBNTUNfSFMyMDBfTUFY
-X0RUUiAoMjAwIE1Ieikgc28gdGhhdCBob3N0DQo+ID4gKyAgICAgICogY29udHJvbGxlciBDQVIg
-Y2xvY2sgYW5kIHRoZSBpbnRlcmZhY2UgY2xvY2sgYXJlIHJhdGUgbWF0Y2hlZC4NCj4gDQo+IFN0
-aWxsIGRvZXNuJ3QgZXhwbGFpbiB3aHkgeW91IHdhbnQgdG8gc2V0IE1NQ19IUzIwMF9NQVhfRFRS
-IHdoZW4NCj4gaW9zLT5lbmhhbmNlZF9zdHJvYmUgaXMgZmFsc2UgZS5nLiBtbWNfc2V0X2luaXRp
-YWxfc3RhdGUoKQ0KVGhhdOKAmXMgYSBnb29kIGNhdGNoLiBVcGRhdGVkIHRoZSBjb2RlIHNlcXVl
-bmNlIGFuZCBwdXNoZWQgdjMuDQoNCg0KPiA+ICsgICAgICAqLw0KPiA+ICsgICAgIHRlZ3JhX3Nk
-aGNpX3NldF9jbG9jayhob3N0LCBNTUNfSFMyMDBfTUFYX0RUUik7IH0NCj4gPiArDQo+ID4gIHN0
-YXRpYyB1bnNpZ25lZCBpbnQgdGVncmFfc2RoY2lfZ2V0X21heF9jbG9jayhzdHJ1Y3Qgc2RoY2lf
-aG9zdA0KPiA+ICpob3N0KSAgew0KPiA+ICAgICAgIHN0cnVjdCBzZGhjaV9wbHRmbV9ob3N0ICpw
-bHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsNCj4gPg0KDQo=
+When CMD13 is sent after switching to HS400ES mode, the bus
+is operating at either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
+To meet Tegra SDHCI requirement at HS400ES mode, force SDHCI
+interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
+controller CAR clock and the interface clock are rate matched.
+
+Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 43 ++++++++++++++++++++--------------
+ 1 file changed, 26 insertions(+), 17 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 387ce9cdbd7c..ddaa3d9000f6 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -354,23 +354,6 @@ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
+ 	}
+ }
+ 
+-static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
+-					      struct mmc_ios *ios)
+-{
+-	struct sdhci_host *host = mmc_priv(mmc);
+-	u32 val;
+-
+-	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
+-
+-	if (ios->enhanced_strobe)
+-		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
+-	else
+-		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
+-
+-	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
+-
+-}
+-
+ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -791,6 +774,32 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ }
+ 
++static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
++					      struct mmc_ios *ios)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	u32 val;
++
++	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
++
++	if (ios->enhanced_strobe) {
++		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
++	/*
++	 * When CMD13 is sent from mmc_select_hs400es() after
++	 * switching to HS400ES mode, the bus is operating at
++	 * either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
++	 * To meet Tegra SDHCI requirement at HS400ES mode, force SDHCI
++	 * interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
++	 * controller CAR clock and the interface clock are rate matched.
++	 */
++	tegra_sdhci_set_clock(host, MMC_HS200_MAX_DTR);
++	} else {
++		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
++	}
++
++	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
++}
++
+ static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-- 
+2.17.1
+
