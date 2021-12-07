@@ -2,220 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E991C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 02:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 723DAC4167B
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 03:42:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229691AbhLGCts (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 21:49:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50942 "EHLO
+        id S234364AbhLGDp1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 22:45:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35154 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229449AbhLGCtr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 21:49:47 -0500
-Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17438C061746;
-        Mon,  6 Dec 2021 18:46:18 -0800 (PST)
-Received: by mail-qk1-x734.google.com with SMTP id p4so13296101qkm.7;
-        Mon, 06 Dec 2021 18:46:18 -0800 (PST)
+        with ESMTP id S234282AbhLGDp0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 22:45:26 -0500
+Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4279BC061746;
+        Mon,  6 Dec 2021 19:41:57 -0800 (PST)
+Received: by mail-ua1-x92e.google.com with SMTP id l24so23994291uak.2;
+        Mon, 06 Dec 2021 19:41:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=jms.id.au; s=google;
+        d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=SElHe6V0YIn8colM6BdilzON7/VtRRQaE57fWBbme4w=;
-        b=j+HfX+x3n+d58EEidEQwNvGEmYKdyLpokG49/XjKUfTHUGXs31CRN0OQOlZke/zeWo
-         p1wLIblH0iNthwvMeStNAqsf5J3QsY+7Jt1yzrH9Pl0uZDOTKtJW/+ki+soBQDRSzTqe
-         3XXyTjJbf3tYvad0LbqKQyNJy8Z0/K/j37Ojw=
+        bh=+WjCLq5iyPbhZoOVbo+nvWb9Wp/JdlLnIPR31C337C8=;
+        b=mZiJ1JWBFc1OWU2CphwdToWib2Fs7VeoMvRyd6OGAUdTYE7JuVX3y18pFnbL9d0SYR
+         qnkGAcFy4HWByFCmfen3y9B+gsUBd2Z4vpiAY8cExnT/X6456PRBzYpHz5lzE8xWOBLE
+         /Opn0hwl+/WEjMpD3cFa2zhWfG+2VM8IZAoAwDwKw4uis+328EKo2LCeWhkZKeKEAT9k
+         n3UXrAemi7nOM0I+lBZxbPlnpXZXWks7fOWw21TwqOUg6+DtBOdhLAZp7S1avVtceNWO
+         6hIZiEiJ4irNSwTkZ0WAOuxz06b1U7vebIqVBU87ZImLwZxD31NuI/0Q7jK48HpCxsG6
+         jbJQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=SElHe6V0YIn8colM6BdilzON7/VtRRQaE57fWBbme4w=;
-        b=tNOxLnqJGDJtjXk+9IACQ6ObRdgTiNinYOPOUISIzydxvnAnkwrTGcXSmZFeiH6X/A
-         ohMGaSTphB4trBOikPziIyCzgJLUArXc/BuQhZHm2nmTVzhoypANAyU7U9SxxB5qc2Oj
-         hzIlo7AX2Yr1OPVIJui2koACXuEEYqXjPBnMP5ep80hz+m8FGOXTt1Am0445V5JlTAhH
-         +rh/Nke2F1+ZCwpPRGZMYx/FkFaDELeVz9FloZt+2gVt3E+ZfqhZkFevne3AEYeMZIE/
-         3MO402vjKC9OFt1CV+43qIOHfLWF2MP4HSVN5s0Kd3H0vuW8p06XXzLsufmyEXJ3IScC
-         c7Lw==
-X-Gm-Message-State: AOAM532XfVvEVWD38M78ExG/Oh7DeY1ZimzQVXoPFKxnx9gz0GSeaGiG
-        ZrRZr510AhcLtZwyvRXk/jMJFwNkDhumjmAI+6A=
-X-Google-Smtp-Source: ABdhPJxdO+vcgbH9/n5MHHody6QQzCajhH0mrh7jeXVqDcyalUyocJUw/GB0vHySRmA4DDXXHyGt6XppaSYhFtUTB4s=
-X-Received: by 2002:a05:620a:4081:: with SMTP id f1mr36607665qko.165.1638845177061;
- Mon, 06 Dec 2021 18:46:17 -0800 (PST)
+        bh=+WjCLq5iyPbhZoOVbo+nvWb9Wp/JdlLnIPR31C337C8=;
+        b=5b7/eFbJEOeL9ZNIuyZyAlpO52UWbGZLaf1bg2jfeQ4GVl9evTE4oJzyD9m1cSI9P/
+         DVPyXnB3/68ID+cisJSTq0toGmcK37hgecZUF+s5nTmSNshi7xyjIvERRCANsf5p2Cef
+         yJcC3400mMfT63OzCTqBEdCLqzU8xaCSeUwhc4bGPHFTFKW2b3+ptNWmWBzWiIc0kMa9
+         vZG8GfYGc42M+t896RoqpVEKnJpiKiqgug+D23TQaG32kECWATHpfW8SP/GLfqEUa5hf
+         WwNhY9eNgtRg13me9cjXzUQuEuMd15/WNRvBlpPMtNKPGOv6A2JBl3sGakYnONJo0rIu
+         Ki8w==
+X-Gm-Message-State: AOAM532t6a257QWxIXJkyZ7p6GAsPVSWe/vD+jR6CfEsncfkwhk3ZcV8
+        X+LhJLOcsUU2w0747qhtduReT7g/GebIhBzAkg0d1blr0+c=
+X-Google-Smtp-Source: ABdhPJx6RQZ3n6olyV3sCz9AbKmYBKhNAk0yZ773fOAPjf8R3q9XrHTi0PcC2P6/Zcqz0XN+NMNLS7cMSGYejK/S3F0=
+X-Received: by 2002:ab0:6813:: with SMTP id z19mr46872879uar.28.1638848516162;
+ Mon, 06 Dec 2021 19:41:56 -0800 (PST)
 MIME-Version: 1.0
-References: <20211203234155.2319803-1-gsomlo@gmail.com> <20211203234155.2319803-4-gsomlo@gmail.com>
- <CACPK8XfO_8=vgedmZddz1YmWbyxiM1-azF_j88wEBHzXnP6y_g@mail.gmail.com> <Ya63gv21Dmhi6J0s@errol.ini.cmu.edu>
-In-Reply-To: <Ya63gv21Dmhi6J0s@errol.ini.cmu.edu>
-From:   Joel Stanley <joel@jms.id.au>
-Date:   Tue, 7 Dec 2021 02:46:03 +0000
-Message-ID: <CACPK8Xeg2UoAqp55R+UrRLFJqerc1Kqrubh3BiEpSon+Q6bGyQ@mail.gmail.com>
-Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+References: <20211206182616.2089677-1-f.fainelli@gmail.com> <20211206182616.2089677-6-f.fainelli@gmail.com>
+In-Reply-To: <20211206182616.2089677-6-f.fainelli@gmail.com>
+From:   Gregory Fong <gregory.0xf0@gmail.com>
+Date:   Mon, 6 Dec 2021 19:41:29 -0800
+Message-ID: <CADtm3G5Sh5sFhq7ye=aJbzd0v_FiqOPt_RAE3v_qWFQ+jH5bEQ@mail.gmail.com>
+Subject: Re: [PATCH v2 05/14] dt-bindings: gpio: Convert Broadcom STB GPIO to YAML
+To:     Florian Fainelli <f.fainelli@gmail.com>
+Cc:     devicetree@vger.kernel.org,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
         Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        "maintainer:BROADCOM BCM7XXX ARM ARCHITECTURE" 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
-        Kamil Rakoczy <krakoczy@antmicro.com>,
-        mdudek@internships.antmicro.com,
-        Paul Mackerras <paulus@ozlabs.org>,
-        Stafford Horne <shorne@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Markus Mayer <mmayer@broadcom.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Al Cooper <alcooperx@gmail.com>,
+        Doug Berger <opendmb@gmail.com>,
+        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
+        <linux-ide@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
+        <linux-mmc@vger.kernel.org>,
+        "open list:PWM SUBSYSTEM" <linux-pwm@vger.kernel.org>,
+        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
+        <linux-crypto@vger.kernel.org>,
+        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
+        <linux-rtc@vger.kernel.org>,
+        "open list:THERMAL" <linux-pm@vger.kernel.org>,
+        "open list:USB SUBSYSTEM" <linux-usb@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 7 Dec 2021 at 01:23, Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> I can remove dependency on "LITEX" and, with that, succesfully build
-> the driver as a module -- same principle as the LiteETH driver.
-> I'm queueing that up for the long promised v3, soon as I clear up a
-> few remaining questions... :)
-
-If we have the driver as a 'tristate' we should make sure it loads and
-works as a module.
-
+On Mon, Dec 6, 2021 at 10:26 AM Florian Fainelli <f.fainelli@gmail.com> wrote:
 >
-> Right now I have:
+> Convert the Broadcom STB GPIO Device Tree binding to YAML to help with
+> validation.
 >
->         depends on OF || COMPILE_TEST
+> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
 
-The OF dependency is a requirement for the symbols you're using. See
-the discussion I had with Greet, I think going with this is reasonable
-for the first pass:
-
- depends on OF
- depends on PPC_MICROWATT || LITEX || COMPILE_TEST
-
-> > > +static int
-> > > +litex_get_cd(struct mmc_host *mmc)
-> > > +{
-> > > +       struct litex_mmc_host *host = mmc_priv(mmc);
-> > > +       int ret;
-> > > +
-> > > +       if (!mmc_card_is_removable(mmc))
-> > > +               return 1;
-> > > +
-> > > +       ret = mmc_gpio_get_cd(mmc);
-> >
-> > Bindings.
->
-> This was part of the original Antmicro version of the driver, but I
-> have never actually used gpio based card detection. I'm inclined to
-> remove it from this submission entirely (and keep it around as an
-> out-of-tree fixup patch) until someone with the appropriate hardware
-> setup can provide a "tested-by" (and preferably an example on how to
-> configure it in DT).
-
-Agreed, if it's untested and unused then delete it.
-
-> > > +static u32
-> > > +litex_response_len(struct mmc_command *cmd)
-
-something else I noticed when re-reading the code; we can put the
-return arguments on the same line as the functions. The kernel has a
-nice long column limit now, so there's no need to shorten lines
-unncessarily. Feel free to go through the driver and fix that up.
-
-> > Can you put all of the irq handling together? Move the hardware sanity
-> > checking up higher and put it together too:
-
-> I moved it all as close together as possible, but it has to all go
-> *after* all of the `dev_platform_ioremap_resource[_byname]()` calls,
-> since those pointers are all used when calling `litex_write*()`.
-
-Makes sense.
-
-> I'll have it in v3, and you can let me know then if it's OK or still
-> needs yet more work.
-
-> > > +
-> > > +       ret = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
-> >
-> > Is this going to be true on all platforms? How do we handle those
-> > where it's not true?
->
-> I'll need to do a bit of digging here, unless anyone has ideas ready
-> to go...
-
-I'm not an expert either, so let's consult the docs:
-
-Documentation/core-api/dma-api-howto.rst
-
-This suggests we should be using dma_set_mask_and_coherent?
-
-But we're setting the mask to 32, which is the default, so perhaps we
-don't need this call at all?
-
-(I was thinking of the microwatt soc, which is a 64 bit soc but the
-peripherals are on a 32 bit bus, and some of the devices are behind a
-smaller bus again. But I think we're ok, as the DMA wishbone is
-32-bit).
-
->
-> > > +       if (ret)
-> > > +               goto err_free_host;
-> > > +
-> > > +       host->buf_size = mmc->max_req_size * 2;
-> > > +       host->buffer = dma_alloc_coherent(&pdev->dev, host->buf_size,
-> > > +                                         &host->dma, GFP_DMA);
-> >
-> > dmam_alloc_coherent?
->
-> Does this mean I no longer have to `dma[m]_free_coherent()` at [1] and
-> [2] below, since it's automatically handled by the "managed" bits?
-
-Yep spot on.
-
-> > > +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > > +       mmc->ops = &litex_mmc_ops;
-> > > +
-> > > +       mmc->f_min = 12.5e6;
-> > > +       mmc->f_max = 50e6;
-> >
-> > How did you pick these?
-> >
-> > Are these always absolute? (wouldn't they depend on the system they
-> > are in? host clocks?)
->
-> They are the minimum and maximum frequency empirically observed to work
-> on typical sdcard media with LiteSDCard, in the wild. I can state that
-> in a comment (after I do another pass of double-checking, crossing Ts
-> and dotting Is), hope that's what you were looking for.
-
-Lets add a comment describing that.
-
-> > > +
-> > > +       return 0;
-> > > +
-> > > +err_free_dma:
-> > > +       dma_free_coherent(&pdev->dev, host->buf_size, host->buffer, host->dma);
->
-> [1] is this made optional by having used `dmam_alloc_coherent()` above?
-
-Yes, we can remove this.
-
-> > > +err_free_host:
-> > > +       mmc_free_host(mmc);
-> > > +       return ret;
-> > > +}
-> > > +
-> > > +static int
-> > > +litex_mmc_remove(struct platform_device *pdev)
-> > > +{
-> > > +       struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
-> > > +
-> > > +       if (host->irq > 0)
-> > > +               free_irq(host->irq, host->mmc);
-> > > +       mmc_remove_host(host->mmc);
-> > > +       dma_free_coherent(&pdev->dev, host->buf_size, host->buffer, host->dma);
->
-> [2] ditto?
-
-Yep.
-
-> Thanks again for all the help and advice!
-
-No problem. Thanks for taking the time to upstream the code.
+Acked-by: Gregory Fong <gregory.0xf0@gmail.com>
