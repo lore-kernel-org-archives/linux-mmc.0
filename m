@@ -2,40 +2,40 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4ECE8C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 07:35:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B084FC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 07:50:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230442AbhLGHjF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Dec 2021 02:39:05 -0500
-Received: from mailgw02.mediatek.com ([210.61.82.184]:44848 "EHLO
+        id S231480AbhLGHyF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 02:54:05 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:40820 "EHLO
         mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S230429AbhLGHjE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 02:39:04 -0500
-X-UUID: e3bd06823cc245cab226ff17ab211d3c-20211207
-X-UUID: e3bd06823cc245cab226ff17ab211d3c-20211207
-Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw02.mediatek.com
+        with ESMTP id S231486AbhLGHyF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 02:54:05 -0500
+X-UUID: 2be38e4284fd4345875d49023e9974bc-20211207
+X-UUID: 2be38e4284fd4345875d49023e9974bc-20211207
+Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw02.mediatek.com
         (envelope-from <wenbin.mei@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1411742270; Tue, 07 Dec 2021 15:35:33 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Tue, 7 Dec 2021 15:35:32 +0800
+        with ESMTP id 973175977; Tue, 07 Dec 2021 15:50:32 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by
+ mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.2.792.15; Tue, 7 Dec 2021 15:50:30 +0800
 Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
- mtkcas10.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
- 15.0.1497.2 via Frontend Transport; Tue, 7 Dec 2021 15:35:31 +0800
+ mtkcas11.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.0.1497.2 via Frontend Transport; Tue, 7 Dec 2021 15:50:27 +0800
 From:   Wenbin Mei <wenbin.mei@mediatek.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 CC:     Matthias Brugger <matthias.bgg@gmail.com>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
         <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>,
-        <srv_heupstream@mediatek.com>,
-        "Wenbin Mei" <wenbin.mei@mediatek.com>
-Subject: [PATCH v1] mmc: mediatek: free the ext_csd when mmc_get_ext_csd success
-Date:   Tue, 7 Dec 2021 15:35:24 +0800
-Message-ID: <20211207073524.22707-1-wenbin.mei@mediatek.com>
+        <srv_heupstream@mediatek.com>, <stable@vger.kernel.org>
+Subject: [RESEND PATCH v1] mmc: mediatek: free the ext_csd when mmc_get_ext_csd success
+Date:   Tue, 7 Dec 2021 15:50:13 +0800
+Message-ID: <20211207075013.22911-1-wenbin.mei@mediatek.com>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
@@ -49,6 +49,8 @@ If mmc_get_ext_csd success, the ext_csd are not freed.
 Add the missing kfree() calls.
 
 Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+Fixes: c4ac38c6539b ("mmc: mtk-sd: Add HS400 online tuning support")
+Cc: stable@vger.kernel.org
 ---
  drivers/mmc/host/mtk-sd.c | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
