@@ -2,116 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B268AC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 09:41:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2C0FC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 09:45:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229510AbhLGJpN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Dec 2021 04:45:13 -0500
-Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:60518
-        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234157AbhLGJpH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 04:45:07 -0500
-Received: from mail-lf1-f72.google.com (mail-lf1-f72.google.com [209.85.167.72])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id E6C353F1B7
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Dec 2021 09:41:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1638870095;
-        bh=qLCDTAsKhjfBLk9Ve3yIdzH9fR1aqVaxiH+88h3GaWI=;
-        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-         In-Reply-To:Content-Type;
-        b=Irx9o6VQpcEcNGsRfw34l9OMCN2X9fvfJQcMPFaXvndcKQCNFO+qO2Iu4pKpVy52W
-         gFA4z+CS+r6kctf9M7Usw4LfCRVFtjb9AljREAfSjWmmaCE3Ja97yTa+0NhwssADrU
-         YDAjqBA85ZScBLQ7GivNPZpwNxvRiyISXKYjrlGmOfwI6Bx279Xs5LS5xmd6tsnTTk
-         8NO1CyljoWoRe4RO9cEG/fyNVaPCgtZvpQnAh5TwxSM4sZH67l5xs0+7wWIj6CC/7h
-         kOzYXZPGs821FtpxGTSMtPIAUCXMmla8oCWU8daE42h/vx0g+5x45QA4xVLG2OyB66
-         Qmy4exgGgWMpg==
-Received: by mail-lf1-f72.google.com with SMTP id j9-20020a05651231c900b004037efe9fddso5092246lfe.18
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Dec 2021 01:41:35 -0800 (PST)
+        id S229881AbhLGJs6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 04:48:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33700 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234297AbhLGJqz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 04:46:55 -0500
+Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5921C061574;
+        Tue,  7 Dec 2021 01:43:25 -0800 (PST)
+Received: by mail-pl1-x630.google.com with SMTP id y8so9055136plg.1;
+        Tue, 07 Dec 2021 01:43:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=M26x5UvlFo70PWzW7kaxBf+q+G00WQfZ+Q0ntnHnbLY=;
+        b=pGJmJ0NP1NOGZ2NPAQfIIES/ZDzgnLdpK4WXWUmiiuAQIXkrZn07+L/wjHmJoR2jkQ
+         tB2pyBNdeXpH4lj08vqJQx606notQkjiIbwYXgkOLJGX2wNnbR93MyyTqt3QrjFYDl+E
+         7do9zYIm/5vb9PrQicEylejphIisuVjIMrxvzfuek0CI6p4qZ/ZiMWQDCTsadfl6JCE4
+         GVE39JSnzOZsKSF0S95d9vwcMGWlY4Dn2NBy89Iwb/g9vXlH3G2Yghjkf4Nsb/TJQ4U0
+         ESrD9rU/ixXx/wLatDHIwsfVk0y9BS+s9JRwUvSij+09CRyvyoc3LF2w4Qlz2NlOHswo
+         MIJQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=qLCDTAsKhjfBLk9Ve3yIdzH9fR1aqVaxiH+88h3GaWI=;
-        b=PdAaJpvooDUPFqib3B7Oti3YnRschcfyAVoWplSoftNfH5xup9/TgrqB8Di/tSFOX9
-         jnLFdoRuxcy9EI8Sp0CAS2KFhBLNTJoCl7Cnv7BTrSigulzReM9QNmM6jk59X80VzH67
-         XR0Dvf7uUi2NS5xPKFi2NA2WkfG86A13o3RllRFfH9Q0+5U+ZMnDoPnzB8YXjUvmrqV3
-         Ig/UWZFNnmbIk/HSYn7SEwKRZ3iL4lE2pVU8N0k0PfERCsZoI6gR083qoRiSnX+uY5gc
-         kzmD2V37KTdTOZ7+//hPLoh4AzEEJ+aF+ymvUHXy6XoXRBMzh1bep/1JRDbMuxNRUMec
-         wzvQ==
-X-Gm-Message-State: AOAM532lfxBdTeL/KCtNiyeKj9fNne5/50IzAGIZnbkkiN7sRbRbae9h
-        3UR5sIauAJAI34Nvxo9n3IkGmOLL0ge4OvZoKB0BGJIn/19w97IoZtsbs1Luu3XSV3FNkHsxToH
-        VfUb9Rk3hEA2EPXnUlj0oaU4m8afQP9xe3XKSyQ==
-X-Received: by 2002:a2e:b88b:: with SMTP id r11mr41747246ljp.280.1638870095359;
-        Tue, 07 Dec 2021 01:41:35 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwTIIHv+OTH72uTn3pxiMOlzQZ3JgtLIY2GTKOhXzdm0Y5VXk7QWDAiHXPLov1dDK7gUn1uEA==
-X-Received: by 2002:a2e:b88b:: with SMTP id r11mr41747234ljp.280.1638870095183;
-        Tue, 07 Dec 2021 01:41:35 -0800 (PST)
-Received: from [192.168.3.67] (89-77-68-124.dynamic.chello.pl. [89.77.68.124])
-        by smtp.gmail.com with ESMTPSA id f14sm1790586lfv.180.2021.12.07.01.41.33
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 07 Dec 2021 01:41:34 -0800 (PST)
-Message-ID: <59812744-9335-62de-11a3-8d321d66f335@canonical.com>
-Date:   Tue, 7 Dec 2021 10:41:33 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.1
-Subject: Re: [PATCH v2 3/4] mmc: dw_mmc: Add quirk for extended data read
- timeout
-Content-Language: en-US
-To:     =?UTF-8?Q?M=c3=a5rten_Lindahl?= <marten.lindahl@axis.com>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=M26x5UvlFo70PWzW7kaxBf+q+G00WQfZ+Q0ntnHnbLY=;
+        b=qgwDC5DCS2hf4HAF7s/wsBADavMrbM+R/YlS4TGL/kERFdo9EsCsEx/q9dC4a2HMIk
+         N6Fg0WDCP6PRuBLSw5q7Izfku49oOHDCZcfIJt5HyYLZs2YcM5wqwF8iNyqqNlDIVr40
+         uyljG+hX2TKDCnPgS6sa24O1/ohfJj8UiqIqyICXl8SIqv/Iz7y0UH9pxhVlEt0d3X/W
+         fqSUwxi26eiaAR8uTAn69QSNpPJu2aar7uP9iJ6a0KTtOM/1XsxVSKQhVjwYeUjjdawk
+         xyRsxdsIu7cMppQJHlzv20P00P3yvaHe2ptjdZ311425N9wv+Nh20cbgvEsyx1A4Yr1W
+         I23A==
+X-Gm-Message-State: AOAM531zEv5Zo2TebE8eCJeXRP0mgLqzY6GNnu4M4jvPwDXwTpsnmUkX
+        dOotNUdWz/fRRpF7s4XeM1M=
+X-Google-Smtp-Source: ABdhPJwanBlcrErgErWcvGEOvkGFOtcjtqkyktDf0f+ooTR3yIBhwa/jruKeOP4U0Yw//j7yD5OhZA==
+X-Received: by 2002:a17:902:d2cf:b0:141:b347:df9d with SMTP id n15-20020a170902d2cf00b00141b347df9dmr49432164plc.37.1638870205352;
+        Tue, 07 Dec 2021 01:43:25 -0800 (PST)
+Received: from nishad ([2406:7400:61:6687:fd10:b36d:bcea:520])
+        by smtp.gmail.com with ESMTPSA id fs21sm2095731pjb.1.2021.12.07.01.43.16
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 07 Dec 2021 01:43:24 -0800 (PST)
+Date:   Tue, 7 Dec 2021 15:13:08 +0530
+From:   Nishad Kamdar <nishadkamdar@gmail.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>
-Cc:     Doug Anderson <dianders@google.com>, kernel@axis.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org
-References: <20211206142929.26729-1-marten.lindahl@axis.com>
- <20211206142929.26729-4-marten.lindahl@axis.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20211206142929.26729-4-marten.lindahl@axis.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        Jens Axboe <axboe@kernel.dk>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Huijin Park <huijin.park@samsung.com>,
+        Yue Hu <huyue2@yulong.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Christian =?utf-8?B?TMO2aGxl?= <CLoehle@hyperstone.com>
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        nishadkamdar@gmail.com
+Subject: Re: [PATCH] mmc: core: Add support for the eMMC RTC feature in
+ mmc_ops
+Message-ID: <20211207094304.GA11969@nishad>
+References: <20211205191009.32454-1-nishadkamdar@gmail.com>
+ <DM6PR04MB657527FCF325EA9760032DA5FC6E9@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <20211207093009.GA11794@nishad>
+ <DM6PR04MB6575BF4FC2DE49885D0EEDF0FC6E9@DM6PR04MB6575.namprd04.prod.outlook.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DM6PR04MB6575BF4FC2DE49885D0EEDF0FC6E9@DM6PR04MB6575.namprd04.prod.outlook.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/12/2021 15:29, Mårten Lindahl wrote:
-> Current dw_mci driver supports a TMOUT register which consists of a 24
-> bit field (TMOUT[31:8]) for the DATA_TIMEOUT. The maximum value of this
-> field is 0xFFFFFF, which with a 200MHz clock will give a full DRTO of:
-> 
-> 0xFFFFFF / 200000000 => ~84 ms
-> 
-> However, the ARTPEC-8 SoC DWMMC IP version has a TMOUT register with an
-> extended DATA_TIMEOUT field, which supports longer timers for the DRTO.
-> In this version the DATA_TIMEOUT field is split into two, which with the
-> same 200MHz clock as above will allow a maximum timeout of:
-> 
-> ((TMOUT[10:8] -1) * 0xFFFFFF + TMOUT[31:11] * 8) / 200000000 => ~587 ms
-> 
-> Add a quirk to support this. The quirk is enabled for ARTPEC-8 SoCs.
-> 
-> Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
-> ---
-> 
-> v2:
->  - Removed unnecessary comment
->  - Change 1<<0 to BIT(0)
-> 
->  drivers/mmc/host/dw_mmc-exynos.c |  5 +++++
->  drivers/mmc/host/dw_mmc.c        | 33 ++++++++++++++++++++++++++++----
->  drivers/mmc/host/dw_mmc.h        |  6 ++++++
->  3 files changed, 40 insertions(+), 4 deletions(-)
-> 
+On Tue, Dec 07, 2021 at 09:33:46AM +0000, Avri Altman wrote:
+> > On Tue, Dec 07, 2021 at 08:28:42AM +0000, Avri Altman wrote:
+> > >
+> > > > This patch adds support to set the RTC information in the eMMC
+> > > > device. This is based on the JEDEC specification.
+> > > >
+> > > > There is no way however, to read the RTC time from the device. Hence
+> > > > we rely on the response of the CMD49 to confirm the completion of
+> > > > the operation.
+> > > >
+> > > > This patch has been tested successfully with the ioctl interface.
+> > > > This patch has also been tested suceessfully with all the three
+> > > > RTC_INFO_TYPEs.
+> > > If this is triggered from user-space via ioctl anyway, Why do we need
+> > > this command to be implemented in the kernel?
+> > > Why not just add this to mmc-utils?
+> > >
+> > > Thanks,
+> > > Avri
+> > As per the spec, B51: Section 6.6.35:
+> > Providing RTC info may be useful for internal maintainance operations.
+> > And the host should send it on the following events:
+> > - power-up
+> > - wake-up
+> > - Periodically
+> > Hence IMO, the Kernel would be the right place of peforming this operation.
+> But your patch doesn't do that, is it?
+>
+Yes, That's because this operation may be device specific. In order to know when
+to call this function may require eMMC firmware info.
+This patch only adds support so that if the info is made available
+in the future, a separate patch can be added to introduce the calling mechanism.
 
+Thanks and Regards,
+Nishad
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-
-
-Best regards,
-Krzysztof
+> Thanks,
+> Avri
