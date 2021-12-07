@@ -2,80 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15792C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 00:24:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D07F7C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 00:53:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233557AbhLGA2C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 19:28:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47160 "EHLO
+        id S1378819AbhLGA4t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 19:56:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232085AbhLGA2C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 19:28:02 -0500
-Received: from desiato.infradead.org (desiato.infradead.org [IPv6:2001:8b0:10b:1:d65d:64ff:fe57:4e05])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBF05C061746;
-        Mon,  6 Dec 2021 16:24:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=desiato.20200630; h=Content-Transfer-Encoding:Content-Type
-        :In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:
-        Sender:Reply-To:Content-ID:Content-Description;
-        bh=7UgHLxAwB+zONRj21LgECxYuL6NnuK4jfF/f8ftEa0c=; b=nxZWrU5Y8KGF29cav9NBxYV1Y/
-        eCcz82NJcSyiM3U9yfnuHsm8iezcOmuTAv7+TSxhg7GNZEAs7vKojk2fbw18BvnorWilRaxtJJIST
-        boxuKvkk9ynu6deI0W6oFZxK6TKTQJ02O7QXlxbarzrPzQQvXGnXu1l6BNL1ikQZvOXIFemak1T+Q
-        g7YFqSE+3wcvCj37a+kavJOQxyow+NeBC9eIwKarkopmD48VgXi53bdf/2yB2RZP8iKlFZrJfmTjY
-        qyzo49RV8zNte1gtnsQAcp1iEgAvYd2ussGi2XTEM5+1Emaf2mp3y6Z0UH3oSLjR1Sz63drX3vHLN
-        knYDdv8A==;
-Received: from [2601:1c0:6280:3f0::aa0b]
-        by desiato.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1muOHW-002fCg-3n; Tue, 07 Dec 2021 00:24:30 +0000
-Message-ID: <6605ed9e-7cae-fd65-e39c-bc708d1df7ef@infradead.org>
-Date:   Mon, 6 Dec 2021 16:24:22 -0800
+        with ESMTP id S233971AbhLGA4s (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 19:56:48 -0500
+Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83F1EC061746;
+        Mon,  6 Dec 2021 16:53:19 -0800 (PST)
+Received: by mail-qk1-x730.google.com with SMTP id 193so13035471qkh.10;
+        Mon, 06 Dec 2021 16:53:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=Z1q2/3rib5uzRhPpLfMtQIk1fNI3yt29/dY5pBavfIU=;
+        b=PFaIc7ofJK6M47ZFm/IlVSwE5OaYDmpHxknxg9DpnDkyIJ1vrRPjWw+FIycOO5oW1f
+         goAvTcwfTScAr92mULOpYI05BqcZT4ELckOTKHQ+YR4+8ggkBLjzxBn+MLfeiNR7uBu1
+         Unn0Z+/dGwhNqBLy6OgV5ffEuuRjQIWsNhqmQLmvzEzl4vlRPY+e1IH5KDZyjjaKNkVR
+         ltDbf0i9myEt9Ulv+/e332gPkZ9ZB80Ns+wQNTlL6Pk1wxg60iZAY0SiS89cCLdM5zm5
+         Cc0rzyrIWMsPb3UB/AJjTyIKrm1r3XmXZNLCn4IWD1t53rbtHtPYxle3uk6jzUigDj1r
+         ic3Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Z1q2/3rib5uzRhPpLfMtQIk1fNI3yt29/dY5pBavfIU=;
+        b=dwCGnQYOQxjlpqA40ec6Jy/NB/yDTvCTPFDmkUd2Y9ggPVVxmrzrXelYyBgmIThHRi
+         ty7zxsGY9kg19FybqkUIliWudMAnGkUSNngbV3k5co7AGkcGLjfrmzieo3Ubv25enR2H
+         VphHSuziQY7viUSGdt35xZ71INsZff1v00ZqBS3vQi4TiuZ0UHAILwLvyPtgb6yQQv4+
+         occc/aydRmhlJgg9RrN5fgjz3nyQ34wkzCbOXvXRodtboByGTzR3S5Ne0e8ISe5Bnqpf
+         NggH6poQNyh/BALmOeZ2kpQFXKNnjuhcLnb65b1amWDj0wA/uXJ7YHbjqcr27bWzZfJx
+         iTlQ==
+X-Gm-Message-State: AOAM532wb4Vv9qrOD90oZH7D7ZkReGkHvwJ9lqN9qpRVwKCSnc+5m8Bs
+        P3sSNYtHPFVix7QzzHFglZo=
+X-Google-Smtp-Source: ABdhPJwflO/MvFpOBrMourZpNEWwPQaz7F2yHFCuNh2CYOw4xjzDenD+GKaVJKt9DATGMoJbosSz0g==
+X-Received: by 2002:a37:a5d3:: with SMTP id o202mr37520355qke.384.1638838398623;
+        Mon, 06 Dec 2021 16:53:18 -0800 (PST)
+Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
+        by smtp.gmail.com with ESMTPSA id j14sm7355288qkp.28.2021.12.06.16.53.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Dec 2021 16:53:18 -0800 (PST)
+Date:   Mon, 6 Dec 2021 19:53:16 -0500
+From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
+To:     Joel Stanley <joel@jms.id.au>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Karol Gugala <kgugala@antmicro.com>,
+        Mateusz Holenko <mholenko@antmicro.com>,
+        Kamil Rakoczy <krakoczy@antmicro.com>,
+        mdudek@internships.antmicro.com,
+        Paul Mackerras <paulus@ozlabs.org>,
+        Stafford Horne <shorne@gmail.com>,
+        david.abdurachmanov@sifive.com,
+        Florent Kermarrec <florent@enjoy-digital.fr>
+Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Message-ID: <Ya6wfKLohLYs+aNc@errol.ini.cmu.edu>
+References: <20211203234155.2319803-1-gsomlo@gmail.com>
+ <20211203234155.2319803-4-gsomlo@gmail.com>
+ <CACPK8XfO_8=vgedmZddz1YmWbyxiM1-azF_j88wEBHzXnP6y_g@mail.gmail.com>
+ <CAMuHMdXxO-CP0Ao8q8r4Gw5e5FzCznhSxt2JWz13zbnt2tnzVQ@mail.gmail.com>
+ <CACPK8XdF6WQDj9X1Nr0Hf6EzPkQtXBo75dj_WPsFq6nzfWPUrA@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH 01/10] soc: qcom: new common library for ICE functionality
-Content-Language: en-US
-To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
-        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, thara.gopinath@linaro.org,
-        quic_neersoni@quicinc.com, dineshg@quicinc.com
-References: <20211206225725.77512-1-quic_gaurkash@quicinc.com>
- <20211206225725.77512-2-quic_gaurkash@quicinc.com>
-From:   Randy Dunlap <rdunlap@infradead.org>
-In-Reply-To: <20211206225725.77512-2-quic_gaurkash@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CACPK8XdF6WQDj9X1Nr0Hf6EzPkQtXBo75dj_WPsFq6nzfWPUrA@mail.gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Mon, Dec 06, 2021 at 11:51:22PM +0000, Joel Stanley wrote:
+> On Mon, 6 Dec 2021 at 12:16, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> 
+> > > > +       depends on OF && LITEX
+> > >
+> > > I don't like having litex drivers depend on the LITEX kconfig. The
+> > > symbol is not user visible, and to enable it we need to build in the
+> > > litex controller driver, which platforms may or may not have.
+> > >
+> > > The microwatt platform is an example of a SoC that embeds some LITEX
+> > > IP, but may or may not be a litex SoC.
+> >
+> > I do like the LITEX dependency, as it allows us to gate off a bunch of
+> > related drivers, and avoid annoying users with questions about them,
+> > using a single symbol.
+> 
+> I appreciate your concern.
+> 
+> We could do this:
+> 
+>         depends on PPC_MICROWATT || LITEX || COMPILE_TEST
 
-Since I have no idea what "ICE" means in this context:
+What about the current OF dependency? Is that covered by COMPILE_TEST,
+or do we need an additional `depends on` line for it?
 
-On 12/6/21 14:57, Gaurav Kashyap wrote:
-> diff --git a/drivers/soc/qcom/Kconfig b/drivers/soc/qcom/Kconfig
-> index 79b568f82a1c..a900f5ab6263 100644
-> --- a/drivers/soc/qcom/Kconfig
-> +++ b/drivers/soc/qcom/Kconfig
-> @@ -209,4 +209,11 @@ config QCOM_APR
->  	  application processor and QDSP6. APR is
->  	  used by audio driver to configure QDSP6
->  	  ASM, ADM and AFE modules.
-> +
-> +config QTI_ICE_COMMON
-> +	tristate "QTI common ICE functionality"
+Thanks,
+--G
 
-please do something like (just an example!):
-
-	tristate "QTI common ICE (internal compiler error) functionality"
-
-> +	depends on ARCH_QCOM
-> +	help
-> +	  Enable the common ICE library that can be used
-> +	  by UFS and EMMC drivers for ICE functionality.
->  endmenu
-
-thanks.
--- 
-~Randy
+> It's unfortunate that kconfig doesn't let us describe the difference
+> between "this driver requires this symbol" as it won't build and "this
+> driver is only useful when this symbol is enabled". Traditionally I
+> write kconfig to represent only the former, whereas you prefer both.
+> 
+> > Originally, people told me the system controller is always present,
+> > hence the current logic to have LITEX_SOC_CONTROLLER visible, and
+> > an invisible LITEX (which is shorter to type) for individual drivers
+> > to depend on.
+> 
+> That's another option. I think LITEX either needs to become visible,
+> become selected by microwatt, or we adopt the proposal I made above
+> for the litex drivers that the microwatt soc uses.
