@@ -2,89 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D6EBC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 09:52:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB92EC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 13:05:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234457AbhLGJzt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Dec 2021 04:55:49 -0500
-Received: from m12-18.163.com ([220.181.12.18]:10535 "EHLO m12-18.163.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232311AbhLGJzs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 7 Dec 2021 04:55:48 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
-        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=Ta/wF
-        WP7wx/GbOe/PU6XzVZ7kIW7mTON1PaHIqq+Y9o=; b=CdgN2VC79T//s8mekft1l
-        WUgscf6Ruhp2aQoHrh4KNo9DhFivzYYnL6GTGcytgmmP1uB/rfS0zGzjROEeks0E
-        vmhgg8E8HK5B9CJnMeuwC1na6uDiR55UY3hnd6FkBvZE1y5DxyC22DbSkESHOUn7
-        RE4vc8VXfYAuEVHHzYDt9o=
-Received: from localhost.localdomain (unknown [120.243.49.111])
-        by smtp14 (Coremail) with SMTP id EsCowADntPFnLq9hY61kAw--.50424S4;
-        Tue, 07 Dec 2021 17:51:14 +0800 (CST)
-From:   lizhe <sensor1010@163.com>
-To:     ulf.hansson@linaro.org, u.kleine-koenig@pengutronix.de,
-        srinivas.pandruvada@linux.intel.com, pali@kernel.org,
-        TheSven73@gmail.com, lznuaa@gmail.com, sensor1010@163.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] drivers/mmc/core/bus: Remove redundant driver match function
-Date:   Tue,  7 Dec 2021 01:50:29 -0800
-Message-Id: <20211207095029.96387-1-sensor1010@163.com>
-X-Mailer: git-send-email 2.25.1
+        id S236832AbhLGNJY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 08:09:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53124 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232599AbhLGNJY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 08:09:24 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09663C061574
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Dec 2021 05:05:54 -0800 (PST)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1muaAA-0007ZU-Oh; Tue, 07 Dec 2021 14:05:42 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1muaA8-003EEC-Ka; Tue, 07 Dec 2021 14:05:39 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1muaA7-0004ej-Fz; Tue, 07 Dec 2021 14:05:39 +0100
+Date:   Tue, 7 Dec 2021 14:05:39 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     lizhe <sensor1010@163.com>
+Cc:     ulf.hansson@linaro.org, srinivas.pandruvada@linux.intel.com,
+        pali@kernel.org, TheSven73@gmail.com, lznuaa@gmail.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] drivers/mmc/core/bus: Remove redundant driver match
+ function
+Message-ID: <20211207130539.r4zdbyh76kiiid4o@pengutronix.de>
+References: <20211207095029.96387-1-sensor1010@163.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: EsCowADntPFnLq9hY61kAw--.50424S4
-X-Coremail-Antispam: 1Uf129KBjvJXoW7AFWDCF48AFW7tw17JF1fWFg_yoW8JFW3pF
-        ZxXFy2kryUKa13Z3s7CFWkuFySk3y8Kry0grW8K3sY9a17CrnrJFyvy34jyF98uFy5CF4S
-        qryqvryrCFy8ArDanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07Uha9fUUUUU=
-X-Originating-IP: [120.243.49.111]
-X-CM-SenderInfo: 5vhq20jurqiii6rwjhhfrp/xtbBXhtiq1aD9jTE-gAAsh
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="kgftqftmrcsxvhor"
+Content-Disposition: inline
+In-Reply-To: <20211207095029.96387-1-sensor1010@163.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If there is no driver match function, the driver core assumes
-that each candidate pair (driver, device) matches. See function
-driver_match_device().
 
-Drop the mmc bus's match function that always returned 1 and
-so implements the same behaviour as when there is no match
-function.
+--kgftqftmrcsxvhor
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: lizhe <sensor1010@163.com>
----
- drivers/mmc/core/bus.c | 11 -----------
- 1 file changed, 11 deletions(-)
+On Tue, Dec 07, 2021 at 01:50:29AM -0800, lizhe wrote:
+> If there is no driver match function, the driver core assumes
+> that each candidate pair (driver, device) matches. See function
+> driver_match_device().
+>=20
+> Drop the mmc bus's match function that always returned 1 and
+> so implements the same behaviour as when there is no match
+> function.
+>=20
+> Signed-off-by: lizhe <sensor1010@163.com>
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index f6b7a9c5bbff..096ae624be9a 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -53,16 +53,6 @@ static struct attribute *mmc_dev_attrs[] = {
- };
- ATTRIBUTE_GROUPS(mmc_dev);
- 
--/*
-- * This currently matches any MMC driver to any MMC card - drivers
-- * themselves make the decision whether to drive this card in their
-- * probe method.
-- */
--static int mmc_bus_match(struct device *dev, struct device_driver *drv)
--{
--	return 1;
--}
--
- static int
- mmc_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
- {
-@@ -226,7 +216,6 @@ static const struct dev_pm_ops mmc_bus_pm_ops = {
- static struct bus_type mmc_bus_type = {
- 	.name		= "mmc",
- 	.dev_groups	= mmc_dev_groups,
--	.match		= mmc_bus_match,
- 	.uevent		= mmc_bus_uevent,
- 	.probe		= mmc_bus_probe,
- 	.remove		= mmc_bus_remove,
--- 
-2.25.1
+Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
 
+If you want to make it easier for maintainers to take your patches,
+consider using -v2 for git send-email (or git format-patch) the next
+time.
 
+Best regards and thanks
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--kgftqftmrcsxvhor
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmGvXBUACgkQwfwUeK3K
+7AlKBwf9FxVQIGM6u2nURsuCrG1EH0cROtww75N7Vh3nYFI5/FMdHliUpsmnHPDo
+Y4McC5H/KG9PUAIrUM8lRRG3DSi8t3KG6lL0N6OXrLKuiKighSlMTDrwSwLCcdMB
+FPlHceGZe4JjEFnaIv85prtb7v3Kb4G+4Yuj6kwU9hwyhoX/XkVB5L+bEsP7kHxI
+f3V0xE+jszjLraH0OE5W/8+6AUhUisZ7kDqaDDqI43KDv6z00NCcknkXSsQ7tUfM
+B6OJdHrJQsv8ExI1ZWem3kiSVIk8gfUAVgdZ/oVwd83FE5BFsmsehK/Alxb6xwh2
+kHjeUhXABkZ1pwTFr3sk7DBApPr7ZA==
+=5y5l
+-----END PGP SIGNATURE-----
+
+--kgftqftmrcsxvhor--
