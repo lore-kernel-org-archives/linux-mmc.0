@@ -2,133 +2,196 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7635FC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 18:51:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E164DC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 21:30:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236067AbhLGSy7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Dec 2021 13:54:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51808 "EHLO
+        id S237221AbhLGVd6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 16:33:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34180 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236052AbhLGSy7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 13:54:59 -0500
-Received: from mail-qk1-x72b.google.com (mail-qk1-x72b.google.com [IPv6:2607:f8b0:4864:20::72b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B03A5C061574;
-        Tue,  7 Dec 2021 10:51:28 -0800 (PST)
-Received: by mail-qk1-x72b.google.com with SMTP id t83so15641075qke.8;
-        Tue, 07 Dec 2021 10:51:28 -0800 (PST)
+        with ESMTP id S231451AbhLGVd6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 16:33:58 -0500
+Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E038C061574;
+        Tue,  7 Dec 2021 13:30:27 -0800 (PST)
+Received: by mail-qv1-xf32.google.com with SMTP id a24so601193qvb.5;
+        Tue, 07 Dec 2021 13:30:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=cSWJVy3Qek8jdmG8QIzpHbMKdFfl7J7QDZ7fULdlY1s=;
-        b=fcUqtoJRKONoB+Rm6NeF8NLsI0tPZUiFdDizKcNmF2+08E42HOAUTfZR0K8N2BMZ9l
-         9kXuRIQeX1VV/N+OsYN8vvnl6P5N3uoHWCxeBoL2xvS20aY1wDdxicwdYH7ZqToAcvIx
-         IX45xtQEQN9X+HaqaXI3CtIrlwLh7IdM+5VIYTge4JkZGCFmgL8WwjztYNCw7odzVgCJ
-         vBpm9EfQEgIMKnC5EnDbsNhvoh15kxHPjD+RZu4S5GbnymUfibChfskPfyMu5zTu4QTa
-         qhJzpZoUxpncjiunB5ep2vTRtxKxMRcEjrBVXJuPqakQUlh1BxGotGC6kiJAUObhgpys
-         eFXA==
+        bh=1IIAz09JDyX4/iq8SzmPb8VQdcf32xZWSPgq4leGxpQ=;
+        b=nnzlfUwM9c+qv3amXYwxTqiTH4PrIiXjFKvL6rYsgNOo7szWPv50RSTPBI2XB1RCvY
+         gsdlzTvc1jbdQbehEw1mYdVKhWss3xF3av/TIVA91Y9fEqGAGX0liRFw0mFNyi3SVqnf
+         +Z30QzmIovAggggqnkxFDVNyOpcdT1sRqbEfvV9WQc/U2RkkuQxZpC/p1g8UCp2aSxFF
+         LrvDXB3DM9MJryxW1sjdSIgSOs+NTxmvzIgnP/H0P6FZwQXAC/00j0HXMe64nL04netX
+         NIRum7rBbzAPuQoerIBOstYRiQUp7rlvpNvtp9Z1ewM4cYkpD9vjMRmUE4QfRieCeQex
+         iE4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=cSWJVy3Qek8jdmG8QIzpHbMKdFfl7J7QDZ7fULdlY1s=;
-        b=jxSLmqD/SlzDLijYRpPPaZgth1njZ64uZ2KGOIfX6g5xg4ENitK35TUlKD8yo80XDx
-         eLEKYuY3OJ3uqAQmzoHF4YsC2hvTiElG4NzEL7XWNEOzrHvyZVCxRB4eP0kUlQzzQm/A
-         K1EMuJP57hTHlNoeKW2peG1ygG+Pjz8nBQjfNTxW95liktICKfFB0pBLl6SunX9xV8NX
-         FyHVH/ZWGuBGSpYvxj1BZ1dcTOv4X/gCjPYKUz3yFMevVz/B2wwfLQijkNPRhPfT0YjL
-         S0S/hWI1KoLYQ198ozY6rZs5ThBJp0U9A7X3K60cU3SYeVV/1ItIsRfrehSc96QuYjFi
-         Byhg==
-X-Gm-Message-State: AOAM530zL9IQsbZorPrlOQvzfYjj+gYk1t08mdu4ZTTnK69znLKWBLbG
-        yF/zSPAztwfywj7g9Sr6txo=
-X-Google-Smtp-Source: ABdhPJyFCG4ijT/B741AVvwG7qx4iLLq2KBtdAH45c1K3ulMd2Ov6nrSILSk0YC7oh0fcpIJ1ne/+Q==
-X-Received: by 2002:a37:502:: with SMTP id 2mr1156992qkf.701.1638903087896;
-        Tue, 07 Dec 2021 10:51:27 -0800 (PST)
+        bh=1IIAz09JDyX4/iq8SzmPb8VQdcf32xZWSPgq4leGxpQ=;
+        b=nxTiNdwGZnCvBJgqyarNB2WC5YyU4EzHTW//vOfRZtEzT+8gcvUoe+wHQzC44dNAKx
+         NA7vlxE6UAOfl0JxDdYXscskhFZ2t24wGY+yqLLldAeU2u8iTDFeQqi73bVG29+CBFIM
+         tEO/cASUCaEHf/2Ef/5dsnXXSv93UJfS1D1bP4YW8viaNKSNUsPEFJt/ewhr9hqfCOc5
+         bspNGMpN9zuUjkJKY7pLD8eZqoydZmaLMKpG2rDgnepKsLbuzeL3WOQjjj0QYOX5P8/h
+         1wIKDpDFaTDsmoVL+FPnYCDF0QN11Ar8ag7gjHENyRETaRnJA0OfICqfcyYQF38Z/dAA
+         SZMg==
+X-Gm-Message-State: AOAM530fYpELVFkr5fRyeREtW1lDOxt+qTUNzCZYCzhfUpaXi4yjCuKJ
+        sfkWGIqUE0atuvsuEMDx52Q=
+X-Google-Smtp-Source: ABdhPJyai9WcFbjHyukVP4BFgo1ifRMxvpfnjRZ+tFtZgjXQQU/RKioO7JCSTaqiuy2FuPiOhcSb6A==
+X-Received: by 2002:a05:6214:234a:: with SMTP id hu10mr2366260qvb.55.1638912626322;
+        Tue, 07 Dec 2021 13:30:26 -0800 (PST)
 Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id t6sm249736qkj.33.2021.12.07.10.51.26
+        by smtp.gmail.com with ESMTPSA id c7sm582078qtc.32.2021.12.07.13.30.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Dec 2021 10:51:27 -0800 (PST)
-Date:   Tue, 7 Dec 2021 13:51:25 -0500
+        Tue, 07 Dec 2021 13:30:25 -0800 (PST)
+Date:   Tue, 7 Dec 2021 16:30:23 -0500
 From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Joel Stanley <joel@jms.id.au>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
 Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
         Karol Gugala <kgugala@antmicro.com>,
         Mateusz Holenko <mholenko@antmicro.com>,
         Kamil Rakoczy <krakoczy@antmicro.com>,
         mdudek@internships.antmicro.com,
         Paul Mackerras <paulus@ozlabs.org>,
+        Joel Stanley <joel@jms.id.au>,
         Stafford Horne <shorne@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
         david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>
-Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <Ya+tLfsaPd/EFppJ@errol.ini.cmu.edu>
-References: <20211203234155.2319803-1-gsomlo@gmail.com>
- <20211203234155.2319803-4-gsomlo@gmail.com>
- <CACPK8XfO_8=vgedmZddz1YmWbyxiM1-azF_j88wEBHzXnP6y_g@mail.gmail.com>
- <Ya63gv21Dmhi6J0s@errol.ini.cmu.edu>
- <CACPK8Xeg2UoAqp55R+UrRLFJqerc1Kqrubh3BiEpSon+Q6bGyQ@mail.gmail.com>
+        Florent Kermarrec <florent@enjoy-digital.fr>,
+        Randy Dunlap <rdunlap@infradead.org>
+Subject: Re: [PATCH v2 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Message-ID: <Ya/SbwzYUD3gwwOL@errol.ini.cmu.edu>
+References: <20211204204121.2367127-1-gsomlo@gmail.com>
+ <20211204204121.2367127-4-gsomlo@gmail.com>
+ <CAMuHMdXkmJ8qxk48AaiC=o0x4manGrL2-J3W0v8GkTaoFoAXuw@mail.gmail.com>
+ <Ya9rSz4KJTwiy830@errol.ini.cmu.edu>
+ <CAMuHMdWQryaYmbaakx3oFHMcuN4==ScPJBmxzbp+ewVqiqnbDQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CACPK8Xeg2UoAqp55R+UrRLFJqerc1Kqrubh3BiEpSon+Q6bGyQ@mail.gmail.com>
+In-Reply-To: <CAMuHMdWQryaYmbaakx3oFHMcuN4==ScPJBmxzbp+ewVqiqnbDQ@mail.gmail.com>
 X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Joel,
+Hi Geert,
 
-On Tue, Dec 07, 2021 at 02:46:03AM +0000, Joel Stanley wrote:
-> On Tue, 7 Dec 2021 at 01:23, Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> > > > [...]
-> > > > +
-> > > > +       ret = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
+I think I figured out a solution, see below:
+
+On Tue, Dec 07, 2021 at 03:16:22PM +0100, Geert Uytterhoeven wrote:
+> On Tue, Dec 7, 2021 at 3:10 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> > On Mon, Dec 06, 2021 at 01:24:49PM +0100, Geert Uytterhoeven wrote:
+> > > On Sat, Dec 4, 2021 at 9:41 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
+> > > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
+> > > > that targets FPGAs. LiteSDCard is a small footprint, configurable
+> > > > SDCard core commonly used in LiteX designs.
+> > > >
+> > > > The driver was first written in May 2020 and has been maintained
+> > > > cooperatively by the LiteX community. Thanks to all contributors!
+> > > >
+> > > > Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
+> > > > Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
+> > > > Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
+> > > > Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
+> > > > Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
+> > > > Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
+> > > > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+> 
+> > > > +       host->clock = 0;
+> > > > +       cpu = of_get_next_cpu_node(NULL);
+> > > > +       ret = of_property_read_u32(cpu, "clock-frequency", &host->freq);
+> > > > +       of_node_put(cpu);
+> > > > +       if (ret) {
+> > > > +               dev_err(&pdev->dev, "No \"clock-frequency\" property in DT\n");
+> > > > +               goto err_free_host;
+> > > > +       }
 > > >
-> > > Is this going to be true on all platforms? How do we handle those
-> > > where it's not true?
+> > > This looks fragile.
+> > > Shouldn't the clock be obtained from a clock property in the mmc
+> > > device node, pointing to a clock provider?
+> > > How does the real clock tree look like?
 > >
-> > I'll need to do a bit of digging here, unless anyone has ideas ready
-> > to go...
+> > In a full LiteX SoC, the main sys_clock is used for cpu, buses, and as a
+> > input source for peripherals such as LiteSDCard (which then further
+> > subdivides it to obtain a 12.5--50.0 MHz sd_clock.
+> >
+> > But since we're considering supporting LiteSDCard as an independent IP
+> > block, the "source clock" frequency should indeed be specified as a DT
+> > property in the MMC device node. (I'll have to add that to the list of
+> > updates for litex_json2dts_linux.py as well, once we settle on what it
+> > will look like -- I'll try to make the change and corresponding update
+> > to the devicetree bindings doc for v3).
+> >
+> > LMK what you think.
 > 
-> I'm not an expert either, so let's consult the docs:
+> Ideally there should be a "clocks" property with a phandle pointing to a
+> clock controller node (compatible with "litex,clk").
 > 
-> Documentation/core-api/dma-api-howto.rst
-> 
-> This suggests we should be using dma_set_mask_and_coherent?
-> 
-> But we're setting the mask to 32, which is the default, so perhaps we
-> don't need this call at all?
-> 
-> (I was thinking of the microwatt soc, which is a 64 bit soc but the
-> peripherals are on a 32 bit bus, and some of the devices are behind a
-> smaller bus again. But I think we're ok, as the DMA wishbone is
-> 32-bit).
- 
-So I did a bit of digging, and as it turns out the LiteX DMA base
-registers are 64-bit wide, which I think means that they can
-essentially do `xlen` bits of DMA addressing, at least when used
-as part of a LiteX SoC (no idea what additional quirks occur if/when
-LiteSDCard, or any other 64-bit-DMA-capable LiteX IP block would be
-used as a standalone component in a different system).
+> How does drivers/tty/serial/liteuart.c handle this? Oh, it doesn't ;-)
 
-Does this mean that, depending on maybe CONFIG_ARCH_DMA_ADDR_T_64BIT
-or something similar, we should actually set DMA_BIT_MASK(64)? Maybe
-something like:
+Assuming LiteX's `litex_json2dts_linux.py` is modified to include:
 
-#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	ret = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));
-	if (ret)
-		goto err;
-#endif
+        ...
+        clocks {
+                sys_clk: litex_sys_clk {
+                        #clock-cells = <0>;
+                        compatible = "fixed-clock";
+                        clock-frequency = <50000000>;
+                };
+        };
+        ...
 
-Leave it to the default 32 unless we're on a 64-bit-DMA capable
-system, in which case it's safe to assume we need the above setting?
+in the generated .dts (where `clock-frequency` is whatever the sys_clk
+happens to be for that particular SoC gateware), we can then write the
+mmc node like so:
 
-What do you think, does that make sense?
+	soc {
+		...
+                mmc0: mmc@12005000 {
+                        compatible = "litex,mmc";
+                        reg = <0x12005000 0x100>,
+                                <0x12003800 0x100>,
+                                <0x12003000 0x100>,
+                                <0x12004800 0x100>,
+                                <0x12004000 0x100>;
+                        reg-names = "phy", "core", "reader", "writer", "irq";
+                        clocks = <&sys_clk>;
+                        interrupt-parent = <&L1>;
+                        interrupts = <4>;
+                };
+		...
+        };
 
-Thanks,
+The LiteSDCard clock initialization can then look like this:
+
+	...
+        /* initialize clock source */
+        clk = devm_clk_get(&pdev->dev, NULL);
+        if (IS_ERR(clk)) {
+                ret = PTR_ERR(clk);
+                dev_err(&pdev->dev, "can't get clock: %d\n", ret);
+                goto err;
+        }
+        host->freq = clk_get_rate(clk); /* source (sys_clock) frequency */
+        host->clock = 0;		/* calculated sdclock frequency */
+	...
+
+As discussed before, I'll post a `litex_json2dts_linux.py` patch once
+we've settled on a mutually agreeable solution, but I think this might
+be it. If you agree, I'll also update the DT binding document to
+require `clocks` as part of the mmc node.
+
+I tested this in my v3 candidate, and it seems to be working OK.
+
+LMK what you think, and/or if you have any suggestions for additional
+improvements.
+
+Thanks again,
 --Gabriel
