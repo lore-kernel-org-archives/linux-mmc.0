@@ -2,101 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF70CC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 07:23:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4ECE8C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 07:35:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229874AbhLGH1M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Dec 2021 02:27:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56430 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229710AbhLGH1M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 02:27:12 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B640BC061746
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Dec 2021 23:23:42 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1muUoy-0002tU-KX; Tue, 07 Dec 2021 08:23:28 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1muUow-003B4K-Aa; Tue, 07 Dec 2021 08:23:25 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1muUov-0002Ab-Ah; Tue, 07 Dec 2021 08:23:25 +0100
-Date:   Tue, 7 Dec 2021 08:23:22 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     lizhe <sensor1010@163.com>
-Cc:     ulf.hansson@linaro.org, srinivas.pandruvada@linux.intel.com,
-        pali@kernel.org, TheSven73@gmail.com, lznuaa@gmail.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        kernel@pengutronix.de
-Subject: Re: [PATCH] drivers/mmc/core/bus: Delete redundant match function
-Message-ID: <20211207072322.37dljknm24nk5vk4@pengutronix.de>
-References: <20211206165038.123107-1-sensor1010@163.com>
+        id S230442AbhLGHjF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 02:39:05 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:44848 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S230429AbhLGHjE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 02:39:04 -0500
+X-UUID: e3bd06823cc245cab226ff17ab211d3c-20211207
+X-UUID: e3bd06823cc245cab226ff17ab211d3c-20211207
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw02.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 1411742270; Tue, 07 Dec 2021 15:35:33 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Tue, 7 Dec 2021 15:35:32 +0800
+Received: from mhfsdcap04.gcn.mediatek.inc (10.17.3.154) by
+ mtkcas10.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.0.1497.2 via Frontend Transport; Tue, 7 Dec 2021 15:35:31 +0800
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <srv_heupstream@mediatek.com>,
+        "Wenbin Mei" <wenbin.mei@mediatek.com>
+Subject: [PATCH v1] mmc: mediatek: free the ext_csd when mmc_get_ext_csd success
+Date:   Tue, 7 Dec 2021 15:35:24 +0800
+Message-ID: <20211207073524.22707-1-wenbin.mei@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="ysum2g76sywc3bhf"
-Content-Disposition: inline
-In-Reply-To: <20211206165038.123107-1-sensor1010@163.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+If mmc_get_ext_csd success, the ext_csd are not freed.
+Add the missing kfree() calls.
 
---ysum2g76sywc3bhf
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Hello,
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 943940b44e83..632775217d35 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -2291,8 +2291,10 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
+ 			sdr_set_field(host->base + PAD_DS_TUNE,
+ 				      PAD_DS_TUNE_DLY1, i);
+ 		ret = mmc_get_ext_csd(card, &ext_csd);
+-		if (!ret)
++		if (!ret) {
+ 			result_dly1 |= (1 << i);
++			kfree(ext_csd);
++		}
+ 	}
+ 	host->hs400_tuning = false;
+ 
+-- 
+2.25.1
 
-On Mon, Dec 06, 2021 at 08:50:38AM -0800, lizhe wrote:
-> 	When the device and device driver are matching,
-> 	if the device or the bus to which the device driver belongs
-> 	does not provide a match function,
-> 	then the device and device driver arae matched by default.
-
-s/arae/are/, but maybe the overall wording could be improved. Something
-like:
-
-	drivers/mmc/core/bus: Remove redundant driver match function
-
-	If there is no driver match function, the driver core assumes
-	that each candidate pair (driver, device) matches. See function
-	driver_match_device().
-
-	Drop the mmc bus's match function that always returned 1 and
-	so implements the same behaviour as when there is no match
-	function.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---ysum2g76sywc3bhf
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmGvC+cACgkQwfwUeK3K
-7AncNggAhFfG/OPMU7Ubjd4aVJOPRjEgjSGBTTl90a2W0W/FtcvxU0CkA27A0Qjj
-fkQfnrZ+1uvZtqi1sEUK8VPZ99GZPAbGNEkByyKiD33X1Pm9fypuDqURZzKPn5hz
-8x1hoqCXz3IrW6lfdXgaCQBTJ3qjUPDD3ZSbORXsI+6cjYGtrSwtjmnRHEbUyCsM
-7JuAfFKUuJd57nXBJaSizesFB3q+A3IcfTRFYehymcdHRjiFPqCN9SEoKudFHISs
-yKN4reE9kDSs17fqay88rb29tP/dnCT2F5FcZyG+DMvUz4cf7EoQZPQbEwsTzabQ
-VGm+h4sBSiWDp0Paf4xrmkEZlLO66Q==
-=BwLS
------END PGP SIGNATURE-----
-
---ysum2g76sywc3bhf--
