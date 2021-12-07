@@ -2,176 +2,220 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D21FC43219
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 02:32:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E991C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 02:46:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243599AbhLGCg0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 21:36:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47930 "EHLO
+        id S229691AbhLGCts (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 21:49:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243541AbhLGCgZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 21:36:25 -0500
-Received: from mail-qt1-x833.google.com (mail-qt1-x833.google.com [IPv6:2607:f8b0:4864:20::833])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 406D7C061746;
-        Mon,  6 Dec 2021 18:32:56 -0800 (PST)
-Received: by mail-qt1-x833.google.com with SMTP id p19so12866690qtw.12;
-        Mon, 06 Dec 2021 18:32:56 -0800 (PST)
+        with ESMTP id S229449AbhLGCtr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 21:49:47 -0500
+Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17438C061746;
+        Mon,  6 Dec 2021 18:46:18 -0800 (PST)
+Received: by mail-qk1-x734.google.com with SMTP id p4so13296101qkm.7;
+        Mon, 06 Dec 2021 18:46:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=QQzMbHoCIHQcabSUmv+A+cuD+7qIgSkwyMRvoh0L3Gs=;
-        b=h7KB6b3EX6ARdK4WUecjmEHeiKvtwdiOJ7RqH4PFeXYLLgP5MFzWNcJCmTMsW2Qo9e
-         CxdPOqBqWoCHISCIxvSQ0ZrXeU25dZarYGcdEbiNY3YIS7IRhpvfPclamQsoo72hliNM
-         +Sf+15JVxmE7F4MdCgG+wpcrZYcyr+er6kzGOCYufjK8QdcK1QuGeKaeK7+Rl6/hoFYn
-         Zx9vsSuzXJGAnzjB4Up5+6FxQ/U6XwLVENAv2jdmqWeuqqGNg9lTY7V2yNtCAJYSXWu5
-         f9mlC+tPdrnFk+OSsHHemX5Z6RX15/hRvxG4cphtCyNBmT758Co+yb2EabAy2C14lxym
-         TVwg==
+        d=jms.id.au; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=SElHe6V0YIn8colM6BdilzON7/VtRRQaE57fWBbme4w=;
+        b=j+HfX+x3n+d58EEidEQwNvGEmYKdyLpokG49/XjKUfTHUGXs31CRN0OQOlZke/zeWo
+         p1wLIblH0iNthwvMeStNAqsf5J3QsY+7Jt1yzrH9Pl0uZDOTKtJW/+ki+soBQDRSzTqe
+         3XXyTjJbf3tYvad0LbqKQyNJy8Z0/K/j37Ojw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=QQzMbHoCIHQcabSUmv+A+cuD+7qIgSkwyMRvoh0L3Gs=;
-        b=AJVlwyi/l52Rxc/dq7la/vfuB47U1gG2PUIBPSDmB5VZB9qDfQ7nRBpTfLNRmfpLBg
-         74Rh9OGWS2MsUkkaV0n7V/R1VXEdy8rz74iOJdtF+SPpDCj3hQAvc8iIi8mQNIpYSpf2
-         eBLTT2NkxVlpjNHVtblMOR8IJzuK/hEfIM01wsefCPytcdPpjymFvKTC1ODgK1LA2a5b
-         JNwpYjWhetsQigwsywCxDzGIIvoErwSzmP2ecoTZhnbS5tBltTe4vDOrH6TEwVfocpDu
-         GLCZtQ1sHNk1pg+lMyy+BYOZfRH2Vh32bw89+kkJKHDCsN29KsOes7+Vt9Jr/ZYBZxT8
-         OZUA==
-X-Gm-Message-State: AOAM531ykmHq3HWf8fFYTuQD156CVLtZh/b/76fDA9rYw8pCweHRyI04
-        3nwFdKmKzBMuaNFEfZBarDf1tlIkOPc7jw==
-X-Google-Smtp-Source: ABdhPJz9gAnjJaTSLqSBU8V1XbG1Ba11WfK8eAbaVVjxdKkz3fPB9mJLRZ4pHrpc7sQIC5T8EkI3Mg==
-X-Received: by 2002:ac8:4a0e:: with SMTP id x14mr45094726qtq.345.1638844375373;
-        Mon, 06 Dec 2021 18:32:55 -0800 (PST)
-Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id t9sm7520523qkp.110.2021.12.06.18.32.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Dec 2021 18:32:54 -0800 (PST)
-Message-ID: <9dab64ca-0d91-3bea-f873-3c2da6ef1645@gmail.com>
-Date:   Mon, 6 Dec 2021 21:32:52 -0500
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=SElHe6V0YIn8colM6BdilzON7/VtRRQaE57fWBbme4w=;
+        b=tNOxLnqJGDJtjXk+9IACQ6ObRdgTiNinYOPOUISIzydxvnAnkwrTGcXSmZFeiH6X/A
+         ohMGaSTphB4trBOikPziIyCzgJLUArXc/BuQhZHm2nmTVzhoypANAyU7U9SxxB5qc2Oj
+         hzIlo7AX2Yr1OPVIJui2koACXuEEYqXjPBnMP5ep80hz+m8FGOXTt1Am0445V5JlTAhH
+         +rh/Nke2F1+ZCwpPRGZMYx/FkFaDELeVz9FloZt+2gVt3E+ZfqhZkFevne3AEYeMZIE/
+         3MO402vjKC9OFt1CV+43qIOHfLWF2MP4HSVN5s0Kd3H0vuW8p06XXzLsufmyEXJ3IScC
+         c7Lw==
+X-Gm-Message-State: AOAM532XfVvEVWD38M78ExG/Oh7DeY1ZimzQVXoPFKxnx9gz0GSeaGiG
+        ZrRZr510AhcLtZwyvRXk/jMJFwNkDhumjmAI+6A=
+X-Google-Smtp-Source: ABdhPJxdO+vcgbH9/n5MHHody6QQzCajhH0mrh7jeXVqDcyalUyocJUw/GB0vHySRmA4DDXXHyGt6XppaSYhFtUTB4s=
+X-Received: by 2002:a05:620a:4081:: with SMTP id f1mr36607665qko.165.1638845177061;
+ Mon, 06 Dec 2021 18:46:17 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.3.2
-Subject: Re: [PATCH v4 06/13] dt-bindings: clock: imx: Add documentation for
- i.MXRT clock
-Content-Language: en-US
-To:     Stephen Boyd <sboyd@kernel.org>, linux-imx@nxp.com
-Cc:     mturquette@baylibre.com, robh+dt@kernel.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        ulf.hansson@linaro.org, aisheng.dong@nxp.com, stefan@agner.ch,
-        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
-        arnd@arndb.de, olof@lixom.net, soc@kernel.org,
-        linux@armlinux.org.uk, abel.vesa@nxp.com, adrian.hunter@intel.com,
-        jirislaby@kernel.org, giulio.benetti@benettiengineering.com,
-        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org,
-        Rob Herring <robh@kernel.org>
-References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
- <20211204061042.1248028-7-Mr.Bossman075@gmail.com>
- <20211206223849.554F6C341C6@smtp.kernel.org>
-From:   Jesse Taube <mr.bossman075@gmail.com>
-In-Reply-To: <20211206223849.554F6C341C6@smtp.kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20211203234155.2319803-1-gsomlo@gmail.com> <20211203234155.2319803-4-gsomlo@gmail.com>
+ <CACPK8XfO_8=vgedmZddz1YmWbyxiM1-azF_j88wEBHzXnP6y_g@mail.gmail.com> <Ya63gv21Dmhi6J0s@errol.ini.cmu.edu>
+In-Reply-To: <Ya63gv21Dmhi6J0s@errol.ini.cmu.edu>
+From:   Joel Stanley <joel@jms.id.au>
+Date:   Tue, 7 Dec 2021 02:46:03 +0000
+Message-ID: <CACPK8Xeg2UoAqp55R+UrRLFJqerc1Kqrubh3BiEpSon+Q6bGyQ@mail.gmail.com>
+Subject: Re: [PATCH v1 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Karol Gugala <kgugala@antmicro.com>,
+        Mateusz Holenko <mholenko@antmicro.com>,
+        Kamil Rakoczy <krakoczy@antmicro.com>,
+        mdudek@internships.antmicro.com,
+        Paul Mackerras <paulus@ozlabs.org>,
+        Stafford Horne <shorne@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        david.abdurachmanov@sifive.com,
+        Florent Kermarrec <florent@enjoy-digital.fr>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 7 Dec 2021 at 01:23, Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> I can remove dependency on "LITEX" and, with that, succesfully build
+> the driver as a module -- same principle as the LiteETH driver.
+> I'm queueing that up for the long promised v3, soon as I clear up a
+> few remaining questions... :)
 
+If we have the driver as a 'tristate' we should make sure it loads and
+works as a module.
 
-On 12/6/21 17:38, Stephen Boyd wrote:
-> Quoting Jesse Taube (2021-12-03 22:10:35)
->> diff --git a/Documentation/devicetree/bindings/clock/imxrt-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
->> new file mode 100644
->> index 000000000000..8af48c59ff99
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
->> @@ -0,0 +1,67 @@
->> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/clock/imxrt-clock.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: Clock bindings for Freescale i.MXRT
->> +
->> +maintainers:
->> +  - Giulio Benetti <giulio.benetti@benettiengineering.com>
->> +  - Jesse Taube <Mr.Bossman075@gmail.com>
->> +
->> +description: |
->> +  The clock consumer should specify the desired clock by having the clock
->> +  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
->> +  for the full list of i.MXRT clock IDs.
->> +
->> +properties:
->> +  compatible:
->> +    const: fsl,imxrt1050-ccm
->> +
->> +  reg:
->> +    maxItems: 1
->> +
->> +  interrupts:
->> +    maxItems: 2
->> +
->> +  clocks:
->> +    minItems: 1
->> +
->> +  clock-names:
->> +    minItems: 1
-> 
-> Why minitems vs. exactly 1 for osc?
-because i don't understand yaml yet.
-I'll look into this.
+>
+> Right now I have:
+>
+>         depends on OF || COMPILE_TEST
 
->> +
->> +  '#clock-cells':
->> +    const: 1
->> +
->> +required:
->> +  - compatible
->> +  - reg
->> +  - interrupts
->> +  - clocks
->> +  - clock-names
->> +  - '#clock-cells'
->> +
->> +additionalProperties: false
->> +
->> +examples:
->> +  - |
->> +    #include <dt-bindings/clock/imxrt1050-clock.h>
->> +
->> +    ccm@400fc000 {
-> 
-> s/ccm/clock-controller/
+The OF dependency is a requirement for the symbols you're using. See
+the discussion I had with Greet, I think going with this is reasonable
+for the first pass:
 
-This made my day!
+ depends on OF
+ depends on PPC_MICROWATT || LITEX || COMPILE_TEST
 
-> 
->> +        compatible = "fsl,imxrt1050-ccm";
->> +        reg = <0x400fc000 0x4000>;
->> +        interrupts = <95>, <96>;
->> +        clocks = <&osc>;
->> +        clock-names = "osc";
->> +        #clock-cells = <1>;
->> +    };
->> +
->> +
-> 
-> Nitpick: Drop extra newline
-sorry will fix.
-> 
->> +    lpuart1: serial@40184000 {
->> +        compatible = "fsl,imxrt1050-lpuart";
->> +        reg = <0x40184000 0x4000>;
->> +        interrupts = <20>;
->> +        clocks = <&clks IMXRT1050_CLK_LPUART1>;
->> +        clock-names = "ipg";
->> +    };
->> -- 
->> 2.34.0
->>
+> > > +static int
+> > > +litex_get_cd(struct mmc_host *mmc)
+> > > +{
+> > > +       struct litex_mmc_host *host = mmc_priv(mmc);
+> > > +       int ret;
+> > > +
+> > > +       if (!mmc_card_is_removable(mmc))
+> > > +               return 1;
+> > > +
+> > > +       ret = mmc_gpio_get_cd(mmc);
+> >
+> > Bindings.
+>
+> This was part of the original Antmicro version of the driver, but I
+> have never actually used gpio based card detection. I'm inclined to
+> remove it from this submission entirely (and keep it around as an
+> out-of-tree fixup patch) until someone with the appropriate hardware
+> setup can provide a "tested-by" (and preferably an example on how to
+> configure it in DT).
+
+Agreed, if it's untested and unused then delete it.
+
+> > > +static u32
+> > > +litex_response_len(struct mmc_command *cmd)
+
+something else I noticed when re-reading the code; we can put the
+return arguments on the same line as the functions. The kernel has a
+nice long column limit now, so there's no need to shorten lines
+unncessarily. Feel free to go through the driver and fix that up.
+
+> > Can you put all of the irq handling together? Move the hardware sanity
+> > checking up higher and put it together too:
+
+> I moved it all as close together as possible, but it has to all go
+> *after* all of the `dev_platform_ioremap_resource[_byname]()` calls,
+> since those pointers are all used when calling `litex_write*()`.
+
+Makes sense.
+
+> I'll have it in v3, and you can let me know then if it's OK or still
+> needs yet more work.
+
+> > > +
+> > > +       ret = dma_set_mask(&pdev->dev, DMA_BIT_MASK(32));
+> >
+> > Is this going to be true on all platforms? How do we handle those
+> > where it's not true?
+>
+> I'll need to do a bit of digging here, unless anyone has ideas ready
+> to go...
+
+I'm not an expert either, so let's consult the docs:
+
+Documentation/core-api/dma-api-howto.rst
+
+This suggests we should be using dma_set_mask_and_coherent?
+
+But we're setting the mask to 32, which is the default, so perhaps we
+don't need this call at all?
+
+(I was thinking of the microwatt soc, which is a 64 bit soc but the
+peripherals are on a 32 bit bus, and some of the devices are behind a
+smaller bus again. But I think we're ok, as the DMA wishbone is
+32-bit).
+
+>
+> > > +       if (ret)
+> > > +               goto err_free_host;
+> > > +
+> > > +       host->buf_size = mmc->max_req_size * 2;
+> > > +       host->buffer = dma_alloc_coherent(&pdev->dev, host->buf_size,
+> > > +                                         &host->dma, GFP_DMA);
+> >
+> > dmam_alloc_coherent?
+>
+> Does this mean I no longer have to `dma[m]_free_coherent()` at [1] and
+> [2] below, since it's automatically handled by the "managed" bits?
+
+Yep spot on.
+
+> > > +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> > > +       mmc->ops = &litex_mmc_ops;
+> > > +
+> > > +       mmc->f_min = 12.5e6;
+> > > +       mmc->f_max = 50e6;
+> >
+> > How did you pick these?
+> >
+> > Are these always absolute? (wouldn't they depend on the system they
+> > are in? host clocks?)
+>
+> They are the minimum and maximum frequency empirically observed to work
+> on typical sdcard media with LiteSDCard, in the wild. I can state that
+> in a comment (after I do another pass of double-checking, crossing Ts
+> and dotting Is), hope that's what you were looking for.
+
+Lets add a comment describing that.
+
+> > > +
+> > > +       return 0;
+> > > +
+> > > +err_free_dma:
+> > > +       dma_free_coherent(&pdev->dev, host->buf_size, host->buffer, host->dma);
+>
+> [1] is this made optional by having used `dmam_alloc_coherent()` above?
+
+Yes, we can remove this.
+
+> > > +err_free_host:
+> > > +       mmc_free_host(mmc);
+> > > +       return ret;
+> > > +}
+> > > +
+> > > +static int
+> > > +litex_mmc_remove(struct platform_device *pdev)
+> > > +{
+> > > +       struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
+> > > +
+> > > +       if (host->irq > 0)
+> > > +               free_irq(host->irq, host->mmc);
+> > > +       mmc_remove_host(host->mmc);
+> > > +       dma_free_coherent(&pdev->dev, host->buf_size, host->buffer, host->dma);
+>
+> [2] ditto?
+
+Yep.
+
+> Thanks again for all the help and advice!
+
+No problem. Thanks for taking the time to upstream the code.
