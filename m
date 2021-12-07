@@ -2,107 +2,172 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 723DAC4167B
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 03:42:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12051C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 05:27:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234364AbhLGDp1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 22:45:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35154 "EHLO
+        id S233658AbhLGFa3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 00:30:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234282AbhLGDp0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 22:45:26 -0500
-Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4279BC061746;
-        Mon,  6 Dec 2021 19:41:57 -0800 (PST)
-Received: by mail-ua1-x92e.google.com with SMTP id l24so23994291uak.2;
-        Mon, 06 Dec 2021 19:41:57 -0800 (PST)
+        with ESMTP id S232346AbhLGFa3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 00:30:29 -0500
+Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E166DC061746;
+        Mon,  6 Dec 2021 21:26:59 -0800 (PST)
+Received: by mail-pj1-x102d.google.com with SMTP id y14-20020a17090a2b4e00b001a5824f4918so1033822pjc.4;
+        Mon, 06 Dec 2021 21:26:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=+WjCLq5iyPbhZoOVbo+nvWb9Wp/JdlLnIPR31C337C8=;
-        b=mZiJ1JWBFc1OWU2CphwdToWib2Fs7VeoMvRyd6OGAUdTYE7JuVX3y18pFnbL9d0SYR
-         qnkGAcFy4HWByFCmfen3y9B+gsUBd2Z4vpiAY8cExnT/X6456PRBzYpHz5lzE8xWOBLE
-         /Opn0hwl+/WEjMpD3cFa2zhWfG+2VM8IZAoAwDwKw4uis+328EKo2LCeWhkZKeKEAT9k
-         n3UXrAemi7nOM0I+lBZxbPlnpXZXWks7fOWw21TwqOUg6+DtBOdhLAZp7S1avVtceNWO
-         6hIZiEiJ4irNSwTkZ0WAOuxz06b1U7vebIqVBU87ZImLwZxD31NuI/0Q7jK48HpCxsG6
-         jbJQ==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=9ovNqKLM8DfKM0dll8ggaH/2TM9J/6RL9ZGDKw88N+4=;
+        b=f+jCUAm+bCAy+8ipqGWFQ8UZ7oMKbwNiPL6NYNzURwixp/bTFbwtc+JfTfs9EnebMX
+         jOhzpRAoqTu8nqDB2OeuH9Q/pb8jOaBTyMiXu8th+pBFg+/7ElvTLhqXbKZMEzQOgLmC
+         ZowcQk8RLCLA5qo6bmYx/Sx3FRj5rYuS96QZZqzNyK/urbUAw4V53BR9xuh5tmv/Vbyq
+         CinpgBt6pD5uNxTFjCf5xy2+w/0nIHgYdvTaaYZxlCzCyJWpnrwjYlhwgt2Ii0gdqfI5
+         +2An7yaVhVVrk1nNjgCH8917qNuicDHGW4rqwhTRsgzZLnQvOvAVm57/0LAyWxo9GC2F
+         iQyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=+WjCLq5iyPbhZoOVbo+nvWb9Wp/JdlLnIPR31C337C8=;
-        b=5b7/eFbJEOeL9ZNIuyZyAlpO52UWbGZLaf1bg2jfeQ4GVl9evTE4oJzyD9m1cSI9P/
-         DVPyXnB3/68ID+cisJSTq0toGmcK37hgecZUF+s5nTmSNshi7xyjIvERRCANsf5p2Cef
-         yJcC3400mMfT63OzCTqBEdCLqzU8xaCSeUwhc4bGPHFTFKW2b3+ptNWmWBzWiIc0kMa9
-         vZG8GfYGc42M+t896RoqpVEKnJpiKiqgug+D23TQaG32kECWATHpfW8SP/GLfqEUa5hf
-         WwNhY9eNgtRg13me9cjXzUQuEuMd15/WNRvBlpPMtNKPGOv6A2JBl3sGakYnONJo0rIu
-         Ki8w==
-X-Gm-Message-State: AOAM532t6a257QWxIXJkyZ7p6GAsPVSWe/vD+jR6CfEsncfkwhk3ZcV8
-        X+LhJLOcsUU2w0747qhtduReT7g/GebIhBzAkg0d1blr0+c=
-X-Google-Smtp-Source: ABdhPJx6RQZ3n6olyV3sCz9AbKmYBKhNAk0yZ773fOAPjf8R3q9XrHTi0PcC2P6/Zcqz0XN+NMNLS7cMSGYejK/S3F0=
-X-Received: by 2002:ab0:6813:: with SMTP id z19mr46872879uar.28.1638848516162;
- Mon, 06 Dec 2021 19:41:56 -0800 (PST)
-MIME-Version: 1.0
-References: <20211206182616.2089677-1-f.fainelli@gmail.com> <20211206182616.2089677-6-f.fainelli@gmail.com>
-In-Reply-To: <20211206182616.2089677-6-f.fainelli@gmail.com>
-From:   Gregory Fong <gregory.0xf0@gmail.com>
-Date:   Mon, 6 Dec 2021 19:41:29 -0800
-Message-ID: <CADtm3G5Sh5sFhq7ye=aJbzd0v_FiqOPt_RAE3v_qWFQ+jH5bEQ@mail.gmail.com>
-Subject: Re: [PATCH v2 05/14] dt-bindings: gpio: Convert Broadcom STB GPIO to YAML
-To:     Florian Fainelli <f.fainelli@gmail.com>
-Cc:     devicetree@vger.kernel.org,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        "maintainer:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=9ovNqKLM8DfKM0dll8ggaH/2TM9J/6RL9ZGDKw88N+4=;
+        b=NfZTtyzbA8s0ZZEE62sLYLaAST9wPYcliuCON6SBV4t1yU2JHwXPmkWIrpWoDmW66h
+         QyUUCDD+DOVHXFqibzymr4vdHF7xFmNemSrt+gVy/bVzXcWZcSiWCopzS0gtVXSPMulS
+         khU7RKu46QBQI4nP7cBBZr6fKmyTCwSKRboEMoVdGYEItZTTztClp0LqDgkmmjQLv5la
+         zH3jipVx879nX//PYyRo3Vox1udfN/rfwJj8a9dOsufv5XjYuZL7YIj/lus9Kn3r+EcZ
+         8bbawT1nWa4eVvhuFHPG7OPdmvR8x3zIeBdrcBCKeHYhBCe85bL7uW9tP1EnMkJFgHq/
+         HW8w==
+X-Gm-Message-State: AOAM530g6YBSb7fc5fpGRsETA8q3Q9eAqcc1TqeXiSySXq5ZvGNgugAV
+        lsK/H66HNBIpuBTCez8GHm4=
+X-Google-Smtp-Source: ABdhPJyvBMcy8o3j6kEQNUJJKDyOgUfCeelyb/aoKIIPW95tG2vyOX883bN6/QFfi7JpT5cUV5Qv2w==
+X-Received: by 2002:a17:902:b7c8:b0:141:9ddb:33e7 with SMTP id v8-20020a170902b7c800b001419ddb33e7mr49141097plz.60.1638854819212;
+        Mon, 06 Dec 2021 21:26:59 -0800 (PST)
+Received: from nishad ([2406:7400:61:6687:fd10:b36d:bcea:520])
+        by smtp.gmail.com with ESMTPSA id e4sm11452187pgi.21.2021.12.06.21.26.54
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Mon, 06 Dec 2021 21:26:58 -0800 (PST)
+Date:   Tue, 7 Dec 2021 10:56:48 +0530
+From:   Nishad Kamdar <nishadkamdar@gmail.com>
+To:     Stephen Boyd <swboyd@chromium.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Markus Mayer <mmayer@broadcom.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Al Cooper <alcooperx@gmail.com>,
-        Doug Berger <opendmb@gmail.com>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
-        <linux-mmc@vger.kernel.org>,
-        "open list:PWM SUBSYSTEM" <linux-pwm@vger.kernel.org>,
-        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
-        <linux-crypto@vger.kernel.org>,
-        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
-        <linux-rtc@vger.kernel.org>,
-        "open list:THERMAL" <linux-pm@vger.kernel.org>,
-        "open list:USB SUBSYSTEM" <linux-usb@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Jens Axboe <axboe@kernel.dk>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Huijin Park <huijin.park@samsung.com>,
+        Yue Hu <huyue2@yulong.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: core: Add support for the eMMC RTC feature in
+ mmc_ops
+Message-ID: <20211207052647.GA5700@nishad>
+References: <20211205191009.32454-1-nishadkamdar@gmail.com>
+ <CAE-0n515qDr95A5PgbhpYer+UT053VzbaDKrxe6zjVgAQwpcEw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAE-0n515qDr95A5PgbhpYer+UT053VzbaDKrxe6zjVgAQwpcEw@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 6, 2021 at 10:26 AM Florian Fainelli <f.fainelli@gmail.com> wrote:
->
-> Convert the Broadcom STB GPIO Device Tree binding to YAML to help with
-> validation.
->
-> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+On Mon, Dec 06, 2021 at 12:44:14PM -0800, Stephen Boyd wrote:
+> Quoting Nishad Kamdar (2021-12-05 11:10:08)
+> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> > index d63d1c735335..490372341b3b 100644
+> > --- a/drivers/mmc/core/mmc_ops.c
+> > +++ b/drivers/mmc/core/mmc_ops.c
+> > @@ -1063,3 +1063,62 @@ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms)
+> >         return err;
+> >  }
+> >  EXPORT_SYMBOL_GPL(mmc_sanitize);
+> > +
+> > +int mmc_set_time(struct mmc_card *card, struct mmc_host *host,
+> > +                u8 rtc_info_type, u64 seconds)
+> > +{
+> > +       struct mmc_request mrq = {};
+> > +       struct mmc_command cmd = {};
+> > +       struct mmc_data data = {};
+> > +       struct scatterlist sg;
+> > +       int err = 0;
+> > +       u8 *data_buf;
+> > +
+> > +       data_buf = kzalloc(512, GFP_KERNEL);
+> 
+> Use some #define for 512 because it's used three times in here?
+ok, but there is not #define for 512 as it is the variable block size
+value. Hence, other functions in the same file like mmc_get_ext_csd() also use
+the 512 value directly.
 
-Acked-by: Gregory Fong <gregory.0xf0@gmail.com>
+> > +       if (!data_buf)
+> > +               return -ENOMEM;
+> > +
+> > +       if (rtc_info_type == 0x01 || rtc_info_type == 0x02 ||
+> > +           rtc_info_type == 0x03) {
+> > +               data_buf[0] = 0x01;
+> > +               data_buf[1] = rtc_info_type;
+> > +               memcpy(&data_buf[2], &seconds, sizeof(u64));
+> 
+> Use sizeof(seconds) instead?
+> 
+ok, I will do that.
+
+> > +       } else {
+> > +               pr_err("%s: invalid rtc_info_type %d\n",
+> > +                      mmc_hostname(host), rtc_info_type);
+> > +               kfree(data_buf);
+> > +               return -EINVAL;
+> > +       }
+> > +
+> > +       mrq.cmd = &cmd;
+> > +       mrq.data = &data;
+> > +
+> > +       cmd.opcode = MMC_SET_TIME;
+> > +       cmd.arg = 0;
+> > +       cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+> > +
+> > +       data.blksz = 512;
+> > +       data.blocks = 1;
+> > +       data.flags = MMC_DATA_WRITE;
+> > +       data.sg = &sg;
+> > +       data.sg_len = 1;
+> > +       sg_init_one(&sg, data_buf, 512);
+> > +
+> > +       mmc_set_data_timeout(&data, card);
+> > +
+> > +       mmc_wait_for_req(host, &mrq);
+> > +
+> > +       if (cmd.error) {
+> > +               err = cmd.error;
+> > +               goto out;
+> > +       }
+> > +
+> > +       if (data.error) {
+> > +               err = data.error;
+> > +               goto out;
+> > +       }
+> 
+> Why not
+> 
+> 	if (cmd.error) {
+> 		err = cmd.error;
+> 	} else if (data.error) {
+> 		err = data.error;
+> 	} else {
+> 		err = 0;
+> 	}
+> 
+> > +out:
+> 
+> And then drop out: and the assignment of err to 0 up above?
+ok, I will do that.
+
+> 
+> > +       kfree(data_buf);
+> > +       return err;
+> > +}
+> > +EXPORT_SYMBOL_GPL(mmc_set_time);
