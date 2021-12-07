@@ -2,196 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E164DC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 21:30:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 957EEC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 22:11:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237221AbhLGVd6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Dec 2021 16:33:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34180 "EHLO
+        id S233530AbhLGWO6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Dec 2021 17:14:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43738 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231451AbhLGVd6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 16:33:58 -0500
-Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E038C061574;
-        Tue,  7 Dec 2021 13:30:27 -0800 (PST)
-Received: by mail-qv1-xf32.google.com with SMTP id a24so601193qvb.5;
-        Tue, 07 Dec 2021 13:30:27 -0800 (PST)
+        with ESMTP id S231497AbhLGWO6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Dec 2021 17:14:58 -0500
+Received: from mail-qv1-xf35.google.com (mail-qv1-xf35.google.com [IPv6:2607:f8b0:4864:20::f35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C01AC061746;
+        Tue,  7 Dec 2021 14:11:27 -0800 (PST)
+Received: by mail-qv1-xf35.google.com with SMTP id j9so656847qvm.10;
+        Tue, 07 Dec 2021 14:11:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=1IIAz09JDyX4/iq8SzmPb8VQdcf32xZWSPgq4leGxpQ=;
-        b=nnzlfUwM9c+qv3amXYwxTqiTH4PrIiXjFKvL6rYsgNOo7szWPv50RSTPBI2XB1RCvY
-         gsdlzTvc1jbdQbehEw1mYdVKhWss3xF3av/TIVA91Y9fEqGAGX0liRFw0mFNyi3SVqnf
-         +Z30QzmIovAggggqnkxFDVNyOpcdT1sRqbEfvV9WQc/U2RkkuQxZpC/p1g8UCp2aSxFF
-         LrvDXB3DM9MJryxW1sjdSIgSOs+NTxmvzIgnP/H0P6FZwQXAC/00j0HXMe64nL04netX
-         NIRum7rBbzAPuQoerIBOstYRiQUp7rlvpNvtp9Z1ewM4cYkpD9vjMRmUE4QfRieCeQex
-         iE4A==
+        bh=YeqMcRL24uU8L8jSYtK9oZvCSTZuod3lCl978cM0i7k=;
+        b=LNgGhSb/djRR9C9Jc5srWNfenVVSycx4zZRLZ2tUWReIZzwpSibNv3yH2WfKu4PuLK
+         l+G1V0xSlLQmgpOEHYU/FgA5Djd4IX6dZnO6fcOf4oPu8NsMoF/joDo9ExNnZKjAkcvq
+         H5DGoPWJX6udP5lMBVa/56Z5K+37akhI3mAiKvV+pUEoQXRN622A0svI8RpUV5p2NoeA
+         OLhNNj0ktyKoWtOitqOO48fd5vBgWnirM6FuUbBBCbhsb5tJ/2R6FEgx7G6Yt5tYGJRo
+         GGfUkcjZkJxUfwJzBdffK17zsImLk4/e3Dc6z3MUgrcULBtwa/+8mBvgP6W2si79+/Za
+         PO1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=1IIAz09JDyX4/iq8SzmPb8VQdcf32xZWSPgq4leGxpQ=;
-        b=nxTiNdwGZnCvBJgqyarNB2WC5YyU4EzHTW//vOfRZtEzT+8gcvUoe+wHQzC44dNAKx
-         NA7vlxE6UAOfl0JxDdYXscskhFZ2t24wGY+yqLLldAeU2u8iTDFeQqi73bVG29+CBFIM
-         tEO/cASUCaEHf/2Ef/5dsnXXSv93UJfS1D1bP4YW8viaNKSNUsPEFJt/ewhr9hqfCOc5
-         bspNGMpN9zuUjkJKY7pLD8eZqoydZmaLMKpG2rDgnepKsLbuzeL3WOQjjj0QYOX5P8/h
-         1wIKDpDFaTDsmoVL+FPnYCDF0QN11Ar8ag7gjHENyRETaRnJA0OfICqfcyYQF38Z/dAA
-         SZMg==
-X-Gm-Message-State: AOAM530fYpELVFkr5fRyeREtW1lDOxt+qTUNzCZYCzhfUpaXi4yjCuKJ
-        sfkWGIqUE0atuvsuEMDx52Q=
-X-Google-Smtp-Source: ABdhPJyai9WcFbjHyukVP4BFgo1ifRMxvpfnjRZ+tFtZgjXQQU/RKioO7JCSTaqiuy2FuPiOhcSb6A==
-X-Received: by 2002:a05:6214:234a:: with SMTP id hu10mr2366260qvb.55.1638912626322;
-        Tue, 07 Dec 2021 13:30:26 -0800 (PST)
+        bh=YeqMcRL24uU8L8jSYtK9oZvCSTZuod3lCl978cM0i7k=;
+        b=QZ4jnyLqoCWcLVaiEO8JpMwSLV5Z9Pv19vlUldoXNtPQOu6meUJnDDJlgvFB6Xqcw8
+         0GdDJJ9AV4kF/ranOGh/Jewt6YISBNcjW4EuFF8XcGy8IdvbJONQEF9xo/DuwVoHakd4
+         yvrulP2DbYP9hU1UENKCeiYobtxbz/NagO01VaHM5VhQpmntyxMUIqDQ0IXzfRbu6o3Z
+         ICrDnRBZGoYSDQ7m110ZOpCnCKIFyLRw391P79Xx3I9oj/4cVK/I3f9G2JOUAQS4MSpO
+         pSfXjUopYgBGMqzmlUIcvqn7OYPOxyfBNeuQLEyJvTRlHzrlsAIYrGXqa2Y/dpSNGdCH
+         N6XQ==
+X-Gm-Message-State: AOAM532nNggKkPk44Qi48XX/cTCX5fzQtucuq87EcwvWePpkoGhxS5go
+        4MLh6cuVW+6GeG4FAlvm27k=
+X-Google-Smtp-Source: ABdhPJyqKFe5Q47dThDEhsq7dALEbqeNtCZlIrkjFouZd/hQz0goq4RmikUEva4dav6PZqtnEWX47w==
+X-Received: by 2002:a0c:e84b:: with SMTP id l11mr2643533qvo.25.1638915086163;
+        Tue, 07 Dec 2021 14:11:26 -0800 (PST)
 Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id c7sm582078qtc.32.2021.12.07.13.30.24
+        by smtp.gmail.com with ESMTPSA id d23sm462958qkl.70.2021.12.07.14.11.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Dec 2021 13:30:25 -0800 (PST)
-Date:   Tue, 7 Dec 2021 16:30:23 -0500
+        Tue, 07 Dec 2021 14:11:25 -0800 (PST)
+Date:   Tue, 7 Dec 2021 17:11:23 -0500
 From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
+To:     Joel Stanley <joel@jms.id.au>
 Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
         Karol Gugala <kgugala@antmicro.com>,
         Mateusz Holenko <mholenko@antmicro.com>,
         Kamil Rakoczy <krakoczy@antmicro.com>,
         mdudek@internships.antmicro.com,
         Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>,
         Stafford Horne <shorne@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
         david.abdurachmanov@sifive.com,
         Florent Kermarrec <florent@enjoy-digital.fr>,
         Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH v2 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <Ya/SbwzYUD3gwwOL@errol.ini.cmu.edu>
+Subject: Re: [PATCH v2 1/3] MAINTAINERS: co-maintain LiteX platform
+Message-ID: <Ya/cC+8ewBa7HG9J@errol.ini.cmu.edu>
 References: <20211204204121.2367127-1-gsomlo@gmail.com>
- <20211204204121.2367127-4-gsomlo@gmail.com>
- <CAMuHMdXkmJ8qxk48AaiC=o0x4manGrL2-J3W0v8GkTaoFoAXuw@mail.gmail.com>
- <Ya9rSz4KJTwiy830@errol.ini.cmu.edu>
- <CAMuHMdWQryaYmbaakx3oFHMcuN4==ScPJBmxzbp+ewVqiqnbDQ@mail.gmail.com>
+ <20211204204121.2367127-2-gsomlo@gmail.com>
+ <CACPK8XcNHwGanjyxeRxQU55FXQCv6aizOa33qbD93G7-GizVmw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAMuHMdWQryaYmbaakx3oFHMcuN4==ScPJBmxzbp+ewVqiqnbDQ@mail.gmail.com>
+In-Reply-To: <CACPK8XcNHwGanjyxeRxQU55FXQCv6aizOa33qbD93G7-GizVmw@mail.gmail.com>
 X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Geert,
-
-I think I figured out a solution, see below:
-
-On Tue, Dec 07, 2021 at 03:16:22PM +0100, Geert Uytterhoeven wrote:
-> On Tue, Dec 7, 2021 at 3:10 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> > On Mon, Dec 06, 2021 at 01:24:49PM +0100, Geert Uytterhoeven wrote:
-> > > On Sat, Dec 4, 2021 at 9:41 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> > > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > > > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > > > SDCard core commonly used in LiteX designs.
-> > > >
-> > > > The driver was first written in May 2020 and has been maintained
-> > > > cooperatively by the LiteX community. Thanks to all contributors!
-> > > >
-> > > > Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> > > > Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> > > > Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> > > > Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> > > > Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
-> > > > Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
-> > > > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
-> 
-> > > > +       host->clock = 0;
-> > > > +       cpu = of_get_next_cpu_node(NULL);
-> > > > +       ret = of_property_read_u32(cpu, "clock-frequency", &host->freq);
-> > > > +       of_node_put(cpu);
-> > > > +       if (ret) {
-> > > > +               dev_err(&pdev->dev, "No \"clock-frequency\" property in DT\n");
-> > > > +               goto err_free_host;
-> > > > +       }
-> > >
-> > > This looks fragile.
-> > > Shouldn't the clock be obtained from a clock property in the mmc
-> > > device node, pointing to a clock provider?
-> > > How does the real clock tree look like?
+On Mon, Dec 06, 2021 at 11:59:47PM +0000, Joel Stanley wrote:
+> On Sat, 4 Dec 2021 at 20:41, Gabriel Somlo <gsomlo@gmail.com> wrote:
 > >
-> > In a full LiteX SoC, the main sys_clock is used for cpu, buses, and as a
-> > input source for peripherals such as LiteSDCard (which then further
-> > subdivides it to obtain a 12.5--50.0 MHz sd_clock.
+> > Add the litex_mmc (LiteSDCard) driver to the list of files maintained
+> > under LiteX, and add myself as co-maintainer. I've helped develop some
+> > of the existing drivers, and am currently curating the out-of-tree
+> > drivers as they are tested and prepared for upstream submission.
 > >
-> > But since we're considering supporting LiteSDCard as an independent IP
-> > block, the "source clock" frequency should indeed be specified as a DT
-> > property in the MMC device node. (I'll have to add that to the list of
-> > updates for litex_json2dts_linux.py as well, once we settle on what it
-> > will look like -- I'll try to make the change and corresponding update
-> > to the devicetree bindings doc for v3).
-> >
-> > LMK what you think.
+> > Cc: Karol Gugala <kgugala@antmicro.com>
+> > Cc: Mateusz Holenko <mholenko@antmicro.com>
+> > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
 > 
-> Ideally there should be a "clocks" property with a phandle pointing to a
-> clock controller node (compatible with "litex,clk").
+> Acked-by: Joel Stanley <joel@jms.id.au>
 > 
-> How does drivers/tty/serial/liteuart.c handle this? Oh, it doesn't ;-)
+> If this is going to be a catch all for the drivers as well as the
+> platform, we're probably missing a few entries:
+> 
+> $ git grep -l litex
+> Documentation/admin-guide/kernel-parameters.txt
+> Documentation/devicetree/bindings/net/litex,liteeth.yaml
+> Documentation/devicetree/bindings/serial/litex,liteuart.yaml
+> Documentation/devicetree/bindings/soc/litex/litex,soc-controller.yaml
+> Documentation/devicetree/bindings/vendor-prefixes.yaml
+> Documentation/sphinx/kfigure.py
+> MAINTAINERS
+> arch/openrisc/boot/dts/or1klitex.dts
+> arch/openrisc/configs/or1klitex_defconfig
+> arch/powerpc/boot/dts/microwatt.dts
+> drivers/net/ethernet/Kconfig
+> drivers/net/ethernet/Makefile
+> drivers/net/ethernet/litex/Makefile
+> drivers/net/ethernet/litex/litex_liteeth.c
+> drivers/soc/Kconfig
+> drivers/soc/Makefile
+> drivers/soc/litex/Kconfig
+> drivers/soc/litex/Makefile
+> drivers/soc/litex/litex_soc_ctrl.c
+> drivers/tty/serial/liteuart.c
+> include/linux/litex.h
+> scripts/clang-tools/gen_compile_commands.py
+> 
+> I think we could add these entries to maintainers:
+> 
+> +F:     drivers/soc/litex/*
+> +F:     drivers/net/ethernet/litex/*
+> +N:     litex
 
-Assuming LiteX's `litex_json2dts_linux.py` is modified to include:
+Done.
+ 
+> I would also add my name there.
 
-        ...
-        clocks {
-                sys_clk: litex_sys_clk {
-                        #clock-cells = <0>;
-                        compatible = "fixed-clock";
-                        clock-frequency = <50000000>;
-                };
-        };
-        ...
+Added you as proposed co-maintainer, will publish soon as part
+of [PATCH v3] series.
 
-in the generated .dts (where `clock-frequency` is whatever the sys_clk
-happens to be for that particular SoC gateware), we can then write the
-mmc node like so:
-
-	soc {
-		...
-                mmc0: mmc@12005000 {
-                        compatible = "litex,mmc";
-                        reg = <0x12005000 0x100>,
-                                <0x12003800 0x100>,
-                                <0x12003000 0x100>,
-                                <0x12004800 0x100>,
-                                <0x12004000 0x100>;
-                        reg-names = "phy", "core", "reader", "writer", "irq";
-                        clocks = <&sys_clk>;
-                        interrupt-parent = <&L1>;
-                        interrupts = <4>;
-                };
-		...
-        };
-
-The LiteSDCard clock initialization can then look like this:
-
-	...
-        /* initialize clock source */
-        clk = devm_clk_get(&pdev->dev, NULL);
-        if (IS_ERR(clk)) {
-                ret = PTR_ERR(clk);
-                dev_err(&pdev->dev, "can't get clock: %d\n", ret);
-                goto err;
-        }
-        host->freq = clk_get_rate(clk); /* source (sys_clock) frequency */
-        host->clock = 0;		/* calculated sdclock frequency */
-	...
-
-As discussed before, I'll post a `litex_json2dts_linux.py` patch once
-we've settled on a mutually agreeable solution, but I think this might
-be it. If you agree, I'll also update the DT binding document to
-require `clocks` as part of the mmc node.
-
-I tested this in my v3 candidate, and it seems to be working OK.
-
-LMK what you think, and/or if you have any suggestions for additional
-improvements.
-
-Thanks again,
+Thanks much,
 --Gabriel
+ 
+> > ---
+> >  MAINTAINERS | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/MAINTAINERS b/MAINTAINERS
+> > index faa9c34d837d..5fc65d4c4969 100644
+> > --- a/MAINTAINERS
+> > +++ b/MAINTAINERS
+> > @@ -11012,12 +11012,14 @@ F:    lib/list-test.c
+> >  LITEX PLATFORM
+> >  M:     Karol Gugala <kgugala@antmicro.com>
+> >  M:     Mateusz Holenko <mholenko@antmicro.com>
+> > +M:     Gabriel Somlo <gsomlo@gmail.com>
+> >  S:     Maintained
+> >  F:     Documentation/devicetree/bindings/*/litex,*.yaml
+> >  F:     arch/openrisc/boot/dts/or1klitex.dts
+> >  F:     drivers/soc/litex/litex_soc_ctrl.c
+> >  F:     drivers/tty/serial/liteuart.c
+> >  F:     include/linux/litex.h
+> > +F:     drivers/mmc/host/litex_mmc.c
+> >
+> >  LIVE PATCHING
+> >  M:     Josh Poimboeuf <jpoimboe@redhat.com>
+> > --
+> > 2.31.1
+> >
