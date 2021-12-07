@@ -2,78 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06FEFC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 00:21:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15792C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Dec 2021 00:24:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378304AbhLGAZS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Dec 2021 19:25:18 -0500
-Received: from aposti.net ([89.234.176.197]:52512 "EHLO aposti.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1378271AbhLGAZS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 6 Dec 2021 19:25:18 -0500
-From:   Paul Cercueil <paul@crapouillou.net>
-To:     "Rafael J . Wysocki" <rafael@kernel.org>,
-        Pavel Machek <pavel@ucw.cz>, Len Brown <len.brown@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Jonathan Cameron <jic23@kernel.org>
-Cc:     list@opendingux.net, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        netdev@vger.kernel.org, linux-pm@vger.kernel.org,
-        Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH 5/5] mmc: mxc: Use the new PM macros
-Date:   Tue,  7 Dec 2021 00:21:02 +0000
-Message-Id: <20211207002102.26414-6-paul@crapouillou.net>
-In-Reply-To: <20211207002102.26414-1-paul@crapouillou.net>
-References: <20211207002102.26414-1-paul@crapouillou.net>
+        id S233557AbhLGA2C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Dec 2021 19:28:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47160 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232085AbhLGA2C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Dec 2021 19:28:02 -0500
+Received: from desiato.infradead.org (desiato.infradead.org [IPv6:2001:8b0:10b:1:d65d:64ff:fe57:4e05])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBF05C061746;
+        Mon,  6 Dec 2021 16:24:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=desiato.20200630; h=Content-Transfer-Encoding:Content-Type
+        :In-Reply-To:From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:
+        Sender:Reply-To:Content-ID:Content-Description;
+        bh=7UgHLxAwB+zONRj21LgECxYuL6NnuK4jfF/f8ftEa0c=; b=nxZWrU5Y8KGF29cav9NBxYV1Y/
+        eCcz82NJcSyiM3U9yfnuHsm8iezcOmuTAv7+TSxhg7GNZEAs7vKojk2fbw18BvnorWilRaxtJJIST
+        boxuKvkk9ynu6deI0W6oFZxK6TKTQJ02O7QXlxbarzrPzQQvXGnXu1l6BNL1ikQZvOXIFemak1T+Q
+        g7YFqSE+3wcvCj37a+kavJOQxyow+NeBC9eIwKarkopmD48VgXi53bdf/2yB2RZP8iKlFZrJfmTjY
+        qyzo49RV8zNte1gtnsQAcp1iEgAvYd2ussGi2XTEM5+1Emaf2mp3y6Z0UH3oSLjR1Sz63drX3vHLN
+        knYDdv8A==;
+Received: from [2601:1c0:6280:3f0::aa0b]
+        by desiato.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1muOHW-002fCg-3n; Tue, 07 Dec 2021 00:24:30 +0000
+Message-ID: <6605ed9e-7cae-fd65-e39c-bc708d1df7ef@infradead.org>
+Date:   Mon, 6 Dec 2021 16:24:22 -0800
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.2
+Subject: Re: [PATCH 01/10] soc: qcom: new common library for ICE functionality
+Content-Language: en-US
+To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>,
+        linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, thara.gopinath@linaro.org,
+        quic_neersoni@quicinc.com, dineshg@quicinc.com
+References: <20211206225725.77512-1-quic_gaurkash@quicinc.com>
+ <20211206225725.77512-2-quic_gaurkash@quicinc.com>
+From:   Randy Dunlap <rdunlap@infradead.org>
+In-Reply-To: <20211206225725.77512-2-quic_gaurkash@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use DEFINE_SIMPLE_DEV_PM_OPS() instead of the SIMPLE_DEV_PM_OPS()
-macro, along with using pm_sleep_ptr() as this driver doesn't handle
-runtime PM. This makes it possible to remove the #ifdef CONFIG_PM
-guard around the suspend/resume functions.
+Hi,
 
-Signed-off-by: Paul Cercueil <paul@crapouillou.net>
----
- drivers/mmc/host/mxcmmc.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+Since I have no idea what "ICE" means in this context:
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 2fe6fcdbb1b3..98c218bd6669 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1183,7 +1183,6 @@ static int mxcmci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
--#ifdef CONFIG_PM_SLEEP
- static int mxcmci_suspend(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
-@@ -1210,9 +1209,8 @@ static int mxcmci_resume(struct device *dev)
- 
- 	return ret;
- }
--#endif
- 
--static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
-+DEFINE_SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
- 
- static struct platform_driver mxcmci_driver = {
- 	.probe		= mxcmci_probe,
-@@ -1220,7 +1218,7 @@ static struct platform_driver mxcmci_driver = {
- 	.driver		= {
- 		.name		= DRIVER_NAME,
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
--		.pm	= &mxcmci_pm_ops,
-+		.pm	= pm_sleep_ptr(&mxcmci_pm_ops),
- 		.of_match_table	= mxcmci_of_match,
- 	}
- };
+On 12/6/21 14:57, Gaurav Kashyap wrote:
+> diff --git a/drivers/soc/qcom/Kconfig b/drivers/soc/qcom/Kconfig
+> index 79b568f82a1c..a900f5ab6263 100644
+> --- a/drivers/soc/qcom/Kconfig
+> +++ b/drivers/soc/qcom/Kconfig
+> @@ -209,4 +209,11 @@ config QCOM_APR
+>  	  application processor and QDSP6. APR is
+>  	  used by audio driver to configure QDSP6
+>  	  ASM, ADM and AFE modules.
+> +
+> +config QTI_ICE_COMMON
+> +	tristate "QTI common ICE functionality"
+
+please do something like (just an example!):
+
+	tristate "QTI common ICE (internal compiler error) functionality"
+
+> +	depends on ARCH_QCOM
+> +	help
+> +	  Enable the common ICE library that can be used
+> +	  by UFS and EMMC drivers for ICE functionality.
+>  endmenu
+
+thanks.
 -- 
-2.33.0
-
+~Randy
