@@ -2,129 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E235DC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Dec 2021 13:03:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F95C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Dec 2021 13:20:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233975AbhLHNHU convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Dec 2021 08:07:20 -0500
-Received: from mail4.swissbit.com ([176.95.1.100]:39764 "EHLO
-        mail4.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232257AbhLHNHU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2021 08:07:20 -0500
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 65F3C122D74;
-        Wed,  8 Dec 2021 14:03:47 +0100 (CET)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 52B431212FB;
-        Wed,  8 Dec 2021 14:03:47 +0100 (CET)
-X-TM-AS-ERS: 10.149.2.84-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
-        by mail4.swissbit.com (Postfix) with ESMTPS;
-        Wed,  8 Dec 2021 14:03:47 +0100 (CET)
-Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
- (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.14; Wed, 8 Dec 2021
- 14:03:46 +0100
-Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
- sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
- 15.02.0986.014; Wed, 8 Dec 2021 14:03:46 +0100
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-CC:     "johan@kernel.org" <johan@kernel.org>,
-        "sudeep.holla@arm.com" <sudeep.holla@arm.com>,
-        "linux@dominikbrodowski.net" <linux@dominikbrodowski.net>
-Subject: Re: [PATCH] mmc: bus: Log bus width info when attaching card
-Thread-Topic: [PATCH] mmc: bus: Log bus width info when attaching card
-Thread-Index: AQHX7DLvbfJedhQ2P06N1hRDzW4jFKwoj1Ci
-Date:   Wed, 8 Dec 2021 13:03:46 +0000
-Message-ID: <aac0cdefbd2a43329b50a803b7c46959@hyperstone.com>
-References: <c207948f590d4e88945a314bf8299f87@hyperstone.com>
-In-Reply-To: <c207948f590d4e88945a314bf8299f87@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.154.1.4]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        id S231381AbhLHNYX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Dec 2021 08:24:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53614 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229646AbhLHNYX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2021 08:24:23 -0500
+Received: from mail-qt1-x82f.google.com (mail-qt1-x82f.google.com [IPv6:2607:f8b0:4864:20::82f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3A88C061746;
+        Wed,  8 Dec 2021 05:20:51 -0800 (PST)
+Received: by mail-qt1-x82f.google.com with SMTP id l8so2128943qtk.6;
+        Wed, 08 Dec 2021 05:20:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Vnumgp1YM0raJKUkErg+UDdgq13UlSoZRnKXeW6D/XQ=;
+        b=NqTyXb0F+lsHO2JwF3OIdYYNB6pX9GW9bJk9Dy5O0mMOh4vx3BHRsbDayVUemulsyF
+         xselFfzupHtiH2P7RlcfBTN4ZM9NVsM8FzSvN4SSSxcB0vCKhQ69amiOZdKB/eUTNdlO
+         bMhYlaCLGowDee7Gds7nuNUDqbE5rmmAlRxu1YM1aYGBd98OTgO9/1y8q5L1koZG0yLG
+         D3sCYrj9SZ3fiFwBI6d9uAhCOT5y0vxoub7eWMMtbhew3WJLW/yHriNZHE07vFUQPCwN
+         KC1YXeT9U9B2AtKmJt2ElojYyiXanFXZLYsaz5hMdF/SnjaN/jVVhml79a7+zVnYaatV
+         CdzA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Vnumgp1YM0raJKUkErg+UDdgq13UlSoZRnKXeW6D/XQ=;
+        b=hbAIOM66t2T/t90rLu9MYEFl498cR35FsiKMKmR9FGLCwg4IsEN+Ia/hbXhDj68V42
+         d/YvKLN4KQkdBVhpfbToeE1Cguo4yYk9i0Xrs6BfVyNWXXdXTFD4GVJJy0x+3KKephjd
+         7dJ0V1QNDeU4Wp9E2uRtFT+Q6lQLSJdZbG1j1Pbt5jpvM55dPPLROZSIJw4ZyqUDydkf
+         jFDckfT9M70/OjpE6xD0r4FeT0Ew4hcDVj5RrMUV/uo0uYGJPSPv8qsV7AlEbKVkidEu
+         CxK+saz0up0wmP9fmlKng1VJ9Dm49kbdY+0cG3MzHT1gjs0MlfaMda4b6KbKo/CB5njG
+         9+wA==
+X-Gm-Message-State: AOAM533gIW7xLKFP2tdtg4xnGbMqkIf/NfZJaupfjCajkoGw775uFXDJ
+        O0RPwGVl8iMTFbfaSaU/z/BvW6SfRwiOCw==
+X-Google-Smtp-Source: ABdhPJxxMisDNNOiYTd7LHEn3DLOGCwAG3geVXC+gyNwZ4lSz/NI2pOUuK5njdQQNQ//9KCdGYH1OA==
+X-Received: by 2002:a05:622a:1207:: with SMTP id y7mr8315165qtx.626.1638969650628;
+        Wed, 08 Dec 2021 05:20:50 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id d6sm1544132qtq.15.2021.12.08.05.20.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Dec 2021 05:20:50 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org
+Subject: [PATCH v3 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Wed,  8 Dec 2021 08:20:39 -0500
+Message-Id: <20211208132042.3226275-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-8.6.1018-26576.007
-X-TMASE-Result: 10--0.005000-10.000000
-X-TMASE-MatchedRID: LVkZzMT5mErUL3YCMmnG4glbhYSnc4eqAgvM6h73BtqZLRO16GOkkipW
-        pWaEQSv6yRqCtVa3YnUGNK8lZNdEETQdOVb9/jgP9u1rQ4BgXPIBDya2JbH/+rTxVectWz+o2Uw
-        BLM8az1RD6DWt+2Yy8Lh3m/0ECTO27yClTVv2c3aqFx2c/3V5cTmVJJLME0WY5PvoRjNp0nvP6y
-        uf4c2Uy0EPIKaT97viLyVaVKT0PhEsaaYlMvaOHAPZZctd3P4BKQNhMboqZloRxZBQI0dbZ83qh
-        pIE26kvgSLH1kq78w6ui0EVZK4raGgwIvLATTKBC24oEZ6SpSkj80Za3RRg8HgKtONKpYWx+RYv
-        e4FJSen6Wcr/wwk63Kbvtk6/mg2Z1810qjhCn6c=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: a9228e58-01b9-4e3d-8002-b488d583455d-0-0-200-0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Might seem unecessary to print the bus width and a bit confusing, but it is the only 'bus info' that is not printed in that line.
-So I suggest adding it.
+Add support for the LiteX SD-Card device, LiteSDCard.
 
-Regards,
-Christian
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
+New in v3:
 
+  MAINTAINERS:
 
+  - picked up acked-by Joel
+  - added listing for liteeth driver
+  - added Joel as additional co-maintainer (thanks!)
 
-From: Christian Löhle
-Sent: Wednesday, December 8, 2021 2:02 PM
-To: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; Ulf Hansson; Christian Löhle
-Cc: johan@kernel.org; sudeep.holla@arm.com; linux@dominikbrodowski.net
-Subject: [PATCH] mmc: bus: Log bus width info when attaching card
-    
-Add info about bus width of the attached card to the bring-up message
+  Doc/dt/bindings/mmc/litex,mmc.yaml:
 
-For both MMC and SD cards the bus width that is used might
-not be obvious to a user. For MMC this might be 1, 4 or 8,
-for SD only 1 and 4. In both cases this would be a restriction
-by the host (setup). Like using an MMC in an SD slot or an
-eMMC to SD adapter.
+  - picked up r/b Geert Uytterhoeven <geert@linux-m68k.org> in DT
+    bindings document (please let me know if that was premature, and
+    happy to take further review if needed :)
+  - add dedicated DT property for source clock frequency
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/bus.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+  drivers/mmc/host/litex_mmc.c:
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index f6b7a9c5bbff..71a675dcd9b7 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -358,7 +358,7 @@ int mmc_add_card(struct mmc_card *card)
-                         mmc_card_ddr52(card) ? "DDR " : "",
-                         type);
-         } else {
--               pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
-+               pr_info("%s: new %s%s%s%s%s%s %u-bit card at address %04x\n",
-                         mmc_hostname(card->host),
-                         mmc_card_uhs(card) ? "ultra high speed " :
-                         (mmc_card_hs(card) ? "high speed " : ""),
-@@ -366,7 +366,8 @@ int mmc_add_card(struct mmc_card *card)
-                         (mmc_card_hs200(card) ? "HS200 " : ""),
-                         mmc_card_hs400es(card) ? "Enhanced strobe " : "",
-                         mmc_card_ddr52(card) ? "DDR " : "",
--                       uhs_bus_speed_mode, type, card->rca);
-+                       uhs_bus_speed_mode, type,
-+                       1<<card->host->ios.bus_width, card->rca);
-         }
- 
- #ifdef CONFIG_DEBUG_FS
+  - fixed function signature (no line split), and naming (litex_mmc_*)
+  - more informative MODULE_AUTHOR() entries
+    - also added matching "Copyright" entries in file header
+  - fixed description in Kconfig
+  - fixed DT documentation
+  - removed magic constants
+  - removed litex_map_status(), have sdcard_wait_done() return *real*
+    error codes directly instead.
+  - streamlined litex_mmc_reponse_len()
+  - call litex_mmc_set_bus_width() only once, and ensure it returns
+    correct error code(s)
+  - use readx_poll_timeout() -- more concise -- instead of
+    read_poll_timeout()
+  - use dev_err() in litex_mmc_send_cmd() (instead of pr_err())
+  - litex_mmc_setclk() will update host->clock before returning
+  - separate irq initialization into its own function,
+    litex_mmc_irq_init()
+  - document rationale for f_min, f_max
+  - use dmam_alloc_coherent(), which simplifies cleanup significantly
+  - large `if (data) { ... }` block in litex_mmc_request() left as-is,
+    there are too many variables shared with the rest of the parent
+    function body to easily separate (e.g., `len`, `transfer`, `direct`).
+    If this is indeed a blocker, I can take another shot at refactoring
+    it in a future revision!
+  - bump dma_set_mask_and_coherent() to 64-bits on suitable
+    architectures
+  - clock source picked up from dedicated DT clock reference property
+  - remove gpio card-detect logic (needs testing and a dt binding
+    example before being eligible for upstream inclusion)
+
+> New in v2:
+>   - reword info message in litex_set_clk()
+>   - streamline code in litex_map_status()
+>   - fix typos in Kconfig (thanks Randy Dunlap <rdunlap@infradead.org>)
+>   - improvements suggested by Stafford Horne <shorne@gmail.com>
+>     - allow COMPILE_TEST in Kconfig
+>     - use read_poll_timeout() when waiting for cmd/data/DMA
+>       xfer completion
+>   - include interrupt.h (thanks kernel test robot <lkp@intel.com>)
+
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
+
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  72 ++
+ MAINTAINERS                                   |   9 +-
+ drivers/mmc/host/Kconfig                      |   9 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 644 ++++++++++++++++++
+ 5 files changed, 733 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
+
 -- 
-2.34.1
-    =
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+2.31.1
 
