@@ -2,203 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EA4DC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Dec 2021 09:35:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CD9FC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Dec 2021 10:14:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230181AbhLHJjL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Dec 2021 04:39:11 -0500
-Received: from mail-ua1-f42.google.com ([209.85.222.42]:34353 "EHLO
-        mail-ua1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229449AbhLHJjK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2021 04:39:10 -0500
-Received: by mail-ua1-f42.google.com with SMTP id n6so3647451uak.1;
-        Wed, 08 Dec 2021 01:35:39 -0800 (PST)
+        id S231363AbhLHKSM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Dec 2021 05:18:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37934 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231358AbhLHKSL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2021 05:18:11 -0500
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD1ABC061746
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Dec 2021 02:14:39 -0800 (PST)
+Received: by mail-lf1-x12b.google.com with SMTP id b1so4501527lfs.13
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Dec 2021 02:14:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=g7Z5c7aKBZUUzga1QLAfT9e8HwYMJaeNWhpQsx7LGD8=;
+        b=viPYo2dtN8sCnearjyag+x3flaK23RnbCWkekmwCQVC+jXEntgOyHp6W5BAhPuAJti
+         QVc3Y4hU71q1oX33K9Ml80eKoDEgOTT+c4fwVvNoLRArmANYGwgycOfKumo3P+CgDTvF
+         TiB8s89HwJUeaKmql52vs7Er8I1gnxVejYBs9ERMRUiV2BM7p1Q6VXJiWL342wK0NCLZ
+         5BNZqNTjUoe3Idji5EhMNZchGbaTSbKNzL0spLR76s7QfmRDhRnirm6RkCAgxMcU9qYX
+         4DZ/IpdMu3Nuwm3Y7BkHr6oZaPxjVcw98Ns/S+SuL8GgfIJ5T1F5lLvmj3Ln9toLQSmH
+         FprQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ZvTD69XJxS18ehgvPHba0VP69gYvcD1gn33TndAh+h4=;
-        b=omBOX9bBtopmUScdkT/uMJSDpkJ20z6XmMZc/cuvW2Q7g8FwlYYj571wVe741f6L2D
-         jU8/yaOgj2wxhBndLLzpuNXJbwIfoaOXFNuMB92IpCiB2OOxA1KOlp/4UYxKrtt2TPvN
-         0Few9DRvRmdvUqPnVvE1H+8tyVB4kNP9hr65S2iXQdlbRfVzwbgQ8pj07XnMx3V4FlMG
-         jpCYvj+cP9f6HPERRemhbuFvLNAG2EpnjDs/In0MTqhvhyiUo5DEquxDIC1h9B8WwVIj
-         mGmo6FWNRsHHuyaBHORAe5jXsLf8i3rQq6KGEQkw7iCdPYGapSPWDlc6vMWZlQLn3/BX
-         +9NQ==
-X-Gm-Message-State: AOAM533GveE1YmlK1Xis8KdyS/kd00oHHN9tczJMk2LqWoN10suPjPW5
-        LikmjAClxnI9BABSdYwnTivZtZSPE0+U9w==
-X-Google-Smtp-Source: ABdhPJxgHe/XB3CzJK5Q++jXvfeFpRK1f83XicK5Pg7Vi6MiuKUnHRTBYq/PSbWJXjc/EJcveIoBcA==
-X-Received: by 2002:a67:d994:: with SMTP id u20mr51380410vsj.12.1638956138397;
-        Wed, 08 Dec 2021 01:35:38 -0800 (PST)
-Received: from mail-ua1-f54.google.com (mail-ua1-f54.google.com. [209.85.222.54])
-        by smtp.gmail.com with ESMTPSA id e13sm1432029vkd.21.2021.12.08.01.35.37
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Dec 2021 01:35:37 -0800 (PST)
-Received: by mail-ua1-f54.google.com with SMTP id a14so3713943uak.0;
-        Wed, 08 Dec 2021 01:35:37 -0800 (PST)
-X-Received: by 2002:a67:c106:: with SMTP id d6mr53071891vsj.77.1638956137319;
- Wed, 08 Dec 2021 01:35:37 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=g7Z5c7aKBZUUzga1QLAfT9e8HwYMJaeNWhpQsx7LGD8=;
+        b=z9TZX9BV0WSAAIVwxwezIoex2++8zY79orpOhYqAVfeFY2DKPSTfUkU10OU0VNfLYc
+         y368fG3C8QNq65qklHjVzaNrffU2iKECxbRLkuNzWxNR96XMnYp6h8F4arQo7TOhX5Oz
+         VE3W/lgYSW6hxTbWHyya4iZabWp1aw0YFLHzxGBqGh6E2y75apxOVlVJuULBdWDXEh0t
+         H8nZJVbUBrEb5pa/lvNIy4l9Y2DtVOjwbCXqt70edYyWVRufnNFtbPb8CBRC3QeafyN8
+         phkEcqHpWCiUdEBAfXD0n/62CcVqKLpn8VyuCwj/AQBa/B1LEbU+Uwu5Vthm0pBaF7a5
+         qE/g==
+X-Gm-Message-State: AOAM5318Y2i0zfUVzLenzpnvJVpLPxKI2iryO9Ir4qAE0ovM+xda/eI2
+        RVlyIMzgXyUSXDWRA562gjXn6Y1V01f9Dl9dFhVaNw==
+X-Google-Smtp-Source: ABdhPJzTHvcUYv6SqoQDTlr46wOIW5wwA3in3uWwt1y4o14KtU3b/Dn28K/7HNn/LRB9lzjW6jQGeUdGvJ/cCGBy07k=
+X-Received: by 2002:a05:6512:1113:: with SMTP id l19mr47078910lfg.184.1638958478064;
+ Wed, 08 Dec 2021 02:14:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20211204204121.2367127-1-gsomlo@gmail.com> <20211204204121.2367127-4-gsomlo@gmail.com>
- <CAMuHMdXkmJ8qxk48AaiC=o0x4manGrL2-J3W0v8GkTaoFoAXuw@mail.gmail.com>
- <Ya9rSz4KJTwiy830@errol.ini.cmu.edu> <CAMuHMdWQryaYmbaakx3oFHMcuN4==ScPJBmxzbp+ewVqiqnbDQ@mail.gmail.com>
- <Ya/SbwzYUD3gwwOL@errol.ini.cmu.edu>
-In-Reply-To: <Ya/SbwzYUD3gwwOL@errol.ini.cmu.edu>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 8 Dec 2021 10:35:26 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdXm=FNJ7-4emwDPdd3cpCneXL3EiGGzZNqt0DCQOS+pag@mail.gmail.com>
-Message-ID: <CAMuHMdXm=FNJ7-4emwDPdd3cpCneXL3EiGGzZNqt0DCQOS+pag@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
-        Kamil Rakoczy <krakoczy@antmicro.com>,
-        mdudek@internships.antmicro.com,
-        Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
+References: <20211202161910.3944640-1-quentin.schulz@theobroma-systems.com>
+In-Reply-To: <20211202161910.3944640-1-quentin.schulz@theobroma-systems.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 8 Dec 2021 11:14:01 +0100
+Message-ID: <CAPDyKFoVyqR6h6oy7uhCfReQKk3_ErQF9iBG6bwDrxzSAY2HPg@mail.gmail.com>
+Subject: Re: [PATCH] mmc_cmds: add HS400 data rates
+To:     Quentin Schulz <quentin.schulz@theobroma-systems.com>,
+        Avri Altman <avri.altman@wdc.com>
+Cc:     linux-mmc@vger.kernel.org, Quentin Schulz <foss+kernel@0leil.net>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gabriel,
++ Avri
 
-On Tue, Dec 7, 2021 at 10:30 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> On Tue, Dec 07, 2021 at 03:16:22PM +0100, Geert Uytterhoeven wrote:
-> > On Tue, Dec 7, 2021 at 3:10 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> > > On Mon, Dec 06, 2021 at 01:24:49PM +0100, Geert Uytterhoeven wrote:
-> > > > On Sat, Dec 4, 2021 at 9:41 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> > > > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > > > > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > > > > SDCard core commonly used in LiteX designs.
-> > > > >
-> > > > > The driver was first written in May 2020 and has been maintained
-> > > > > cooperatively by the LiteX community. Thanks to all contributors!
-> > > > >
-> > > > > Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> > > > > Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> > > > > Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> > > > > Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> > > > > Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
-> > > > > Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
-> > > > > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
-> >
-> > > > > +       host->clock = 0;
-> > > > > +       cpu = of_get_next_cpu_node(NULL);
-> > > > > +       ret = of_property_read_u32(cpu, "clock-frequency", &host->freq);
-> > > > > +       of_node_put(cpu);
-> > > > > +       if (ret) {
-> > > > > +               dev_err(&pdev->dev, "No \"clock-frequency\" property in DT\n");
-> > > > > +               goto err_free_host;
-> > > > > +       }
-> > > >
-> > > > This looks fragile.
-> > > > Shouldn't the clock be obtained from a clock property in the mmc
-> > > > device node, pointing to a clock provider?
-> > > > How does the real clock tree look like?
-> > >
-> > > In a full LiteX SoC, the main sys_clock is used for cpu, buses, and as a
-> > > input source for peripherals such as LiteSDCard (which then further
-> > > subdivides it to obtain a 12.5--50.0 MHz sd_clock.
-> > >
-> > > But since we're considering supporting LiteSDCard as an independent IP
-> > > block, the "source clock" frequency should indeed be specified as a DT
-> > > property in the MMC device node. (I'll have to add that to the list of
-> > > updates for litex_json2dts_linux.py as well, once we settle on what it
-> > > will look like -- I'll try to make the change and corresponding update
-> > > to the devicetree bindings doc for v3).
-> > >
-> > > LMK what you think.
-> >
-> > Ideally there should be a "clocks" property with a phandle pointing to a
-> > clock controller node (compatible with "litex,clk").
-> >
-> > How does drivers/tty/serial/liteuart.c handle this? Oh, it doesn't ;-)
+On Thu, 2 Dec 2021 at 17:19, Quentin Schulz
+<quentin.schulz@theobroma-systems.com> wrote:
 >
-> Assuming LiteX's `litex_json2dts_linux.py` is modified to include:
+> JEDEC 5.1 JESD84-B50.1 DEVICE_TYPE [196] specifies that bit 6 is for
+> "HS400 Dual Data Rate e=E2=80=A2MMC at 200 MHz =E2=80=93 1.8 V I/O" and b=
+it 7 for
+> "HS400 Dual Data Rate e=E2=80=A2MMC at 200 MHz =E2=80=93 1.2 V I/O" so le=
+t's add those.
 >
->         ...
->         clocks {
->                 sys_clk: litex_sys_clk {
->                         #clock-cells = <0>;
->                         compatible = "fixed-clock";
->                         clock-frequency = <50000000>;
->                 };
->         };
->         ...
+> Cc: Quentin Schulz <foss+kernel@0leil.net>
+
+Future wise, please don't use this to cc yourself another email. No
+need to resend this time.
+
+> Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
+
+Even if the patch is trivial and looks good to me, I have added Avri
+who helps to maintain mmc-utils, to make sure there are no objections.
+
+Kind regards
+Uffe
+
+> ---
+>  mmc_cmds.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> in the generated .dts (where `clock-frequency` is whatever the sys_clk
-> happens to be for that particular SoC gateware), we can then write the
-> mmc node like so:
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 73bd32a..769e317 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -1613,6 +1613,8 @@ int do_read_extcsd(int nargs, char **argv)
+>         /* DEVICE_TYPE in A45, CARD_TYPE in A441 */
+>         reg =3D ext_csd[196];
+>         printf("Card Type [CARD_TYPE: 0x%02x]\n", reg);
+> +       if (reg & 0x80) printf(" HS400 Dual Data Rate eMMC @200MHz 1.2VI/=
+O\n");
+> +       if (reg & 0x40) printf(" HS400 Dual Data Rate eMMC @200MHz 1.8VI/=
+O\n");
+>         if (reg & 0x20) printf(" HS200 Single Data Rate eMMC @200MHz 1.2V=
+I/O\n");
+>         if (reg & 0x10) printf(" HS200 Single Data Rate eMMC @200MHz 1.8V=
+I/O\n");
+>         if (reg & 0x08) printf(" HS Dual Data Rate eMMC @52MHz 1.2VI/O\n"=
+);
+> --
+> 2.33.1
 >
->         soc {
->                 ...
->                 mmc0: mmc@12005000 {
->                         compatible = "litex,mmc";
->                         reg = <0x12005000 0x100>,
->                                 <0x12003800 0x100>,
->                                 <0x12003000 0x100>,
->                                 <0x12004800 0x100>,
->                                 <0x12004000 0x100>;
->                         reg-names = "phy", "core", "reader", "writer", "irq";
->                         clocks = <&sys_clk>;
->                         interrupt-parent = <&L1>;
->                         interrupts = <4>;
->                 };
->                 ...
->         };
-
-LGTM.
-
-> The LiteSDCard clock initialization can then look like this:
->
->         ...
->         /* initialize clock source */
->         clk = devm_clk_get(&pdev->dev, NULL);
->         if (IS_ERR(clk)) {
->                 ret = PTR_ERR(clk);
->                 dev_err(&pdev->dev, "can't get clock: %d\n", ret);
-
-Please use
-
-    ret = dev_err_probe(&pdev->dev, PTR_ERR(clk), "can't get clock\n");
-
-to avoid printing the error in case of probe deferral.
-
->                 goto err;
->         }
->         host->freq = clk_get_rate(clk); /* source (sys_clock) frequency */
->         host->clock = 0;                /* calculated sdclock frequency */
->         ...
->
-> As discussed before, I'll post a `litex_json2dts_linux.py` patch once
-> we've settled on a mutually agreeable solution, but I think this might
-> be it. If you agree, I'll also update the DT binding document to
-> require `clocks` as part of the mmc node.
->
-> I tested this in my v3 candidate, and it seems to be working OK.
->
-> LMK what you think, and/or if you have any suggestions for additional
-> improvements.
-
-Nice, that's a good solution, until the full clock tree is exposed in
-the DTS. Thanks a lot!
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
