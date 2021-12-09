@@ -2,148 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 646B6C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 18:25:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01802C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 18:27:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237957AbhLIS2n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Dec 2021 13:28:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35502 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229710AbhLIS2m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 13:28:42 -0500
-Received: from mail-qt1-x82f.google.com (mail-qt1-x82f.google.com [IPv6:2607:f8b0:4864:20::82f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3697C061746;
-        Thu,  9 Dec 2021 10:25:08 -0800 (PST)
-Received: by mail-qt1-x82f.google.com with SMTP id m25so6093470qtq.13;
-        Thu, 09 Dec 2021 10:25:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=tY3Uj57fP/HW8NzRsCUcgjaQafL0bIk8XDbY/Pd7ACE=;
-        b=QryBhz3Xqfd4fQ0HZA1L9YeanmPSAQPQQccArGMyyDF2W+7UyhDWjPiK7yky70y0cW
-         VqPV9XOFn+DD26ZOViHGxYHFnnRUuZDodtNlNyyRh15siVli3AzUdrcuL1z9UC6jdgIv
-         bUoHyL6IuVd94gjcpa0KWRm8QZEb79P/+S1rOG7wmzugvZjyNSd6+uflDF0gRVe617tT
-         XwaBmoTwvmii51heLs05d7KTSELlQ4MkK4QGkWDyG0toEXLTWRZwztoUAX4JokN7yamI
-         cNwuDC8DDYgrHvQqdKjv2WILMCmzQofK//+a/lkwFu1WOvDMTSb6nrNVx+9bC6l+p7GG
-         H+TA==
+        id S243329AbhLISbC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Dec 2021 13:31:02 -0500
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:58404
+        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S243309AbhLISbC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 13:31:02 -0500
+Received: from mail-lj1-f200.google.com (mail-lj1-f200.google.com [209.85.208.200])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id EABCB3F1BC
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Dec 2021 18:27:27 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1639074447;
+        bh=7MMZq0hIb3eR8oUwilVI+A8i34AgFBxa5Ka85QzcfFY=;
+        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
+         In-Reply-To:Content-Type;
+        b=lmZ/+Pcf9J+jIMTbMywzzvjooWzRH43kZx0ahc4YMzXwwN+InCT1pgjPaN6fwLRk0
+         D6VjiKgeZf9Mu1Yzks6nMRBrbz3GWUR43bRtjtU0p53l3tG75vlBigIjLASpIWxgS4
+         sut9QovFbW54LrotajFkd4b3W+S28HUhCGnjuhBepJM2uIW/fm84dqYbU3Nlz3iCn4
+         tbV3WQTQk3bfzn0C+tkLLi2xLhfZOm/9qQlFI8453zb85QEloyTGBs9PvfLT90QLNm
+         dO6hSVn3xDAZZWsrAGXD+crYHwHUVhXSUDps+fWygWX+R0rzH3MnjjP3/ThDnF0ApJ
+         CupmhUht95y2w==
+Received: by mail-lj1-f200.google.com with SMTP id y11-20020a2e978b000000b00218df7f76feso2195247lji.11
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Dec 2021 10:27:27 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=tY3Uj57fP/HW8NzRsCUcgjaQafL0bIk8XDbY/Pd7ACE=;
-        b=w+2nAaY1P0+QZhw3F9vqgolIg/hDnxG2cOlOrk8urQ9/h2bQR8L230QMrmO8r0+3F7
-         KmPdPZlnoeWzLSCTc37+L58pgUyeQvSkFQWPKQQRFftiorNIr9/0tl35/pUEvs/G4bxj
-         Q2bPRo7p5J816VDEnsu0Y3Zx5GwSadFVc9a4pv+RNgeaxeZjTkc+r8I71PHD/5Lf1TaT
-         PQHjmUxYpfqjva1ntJs7XL7MNVXMkYKdIMAR8y8H+izmrSfCWSAtar8GVhc8q+o05AXm
-         1UmmL+qkXUl2mfm7NAr7o1XYClroM5iIEXWAftwnJkB84G2L2TdpOTxW0S6QoHypZwB+
-         9TJQ==
-X-Gm-Message-State: AOAM533tEpGcZMWELovV3K5agHe7AbWdC1Sq95OA6izjWZAQ6yUEFxOf
-        EgM8QIflayKd0xvDr9yUCzU=
-X-Google-Smtp-Source: ABdhPJw9rRcXu4b7ubdzWIhDayDhLG2/5CbNs1jDNpnbUQyq3/1A3IHPJP1WWUvPycpWEFqW1fwa0g==
-X-Received: by 2002:ac8:588e:: with SMTP id t14mr19589500qta.437.1639074307876;
-        Thu, 09 Dec 2021 10:25:07 -0800 (PST)
-Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id m9sm309862qtn.73.2021.12.09.10.25.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Dec 2021 10:25:07 -0800 (PST)
-Date:   Thu, 9 Dec 2021 13:25:01 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Rob Herring <robh@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        mdudek@internships.antmicro.com,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>, david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Stafford Horne <shorne@gmail.com>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        Kamil Rakoczy <krakoczy@antmicro.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Mateusz Holenko <mholenko@antmicro.com>
-Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: Add bindings for LiteSDCard
-Message-ID: <YbJJ/UqCeFJa5HGF@errol.ini.cmu.edu>
-References: <20211208132042.3226275-1-gsomlo@gmail.com>
- <20211208132042.3226275-3-gsomlo@gmail.com>
- <1639004806.166681.596177.nullmailer@robh.at.kernel.org>
- <YbFXERe0K3rfzZem@glsvmlin.ini.cmu.edu>
- <CAMuHMdVJZdzRMedn9L_Jb=0MYB_Bxs90v+iH7UaDBzup-qzp8A@mail.gmail.com>
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=7MMZq0hIb3eR8oUwilVI+A8i34AgFBxa5Ka85QzcfFY=;
+        b=kPyUgwBQvumluFlSK93nUgFcPJIM5ZKVZD2KDOxs0gAXie6Gjz089msC6+R4dDJh+P
+         UUh0zXWEyCbA00otImtAWbq6FPLNheVU6h7JSDIxLSVfUXtF4J10n705XK2/LWrlCoY7
+         nhmHYgPtaRdAOG+BJle0pZyPYBTF2HzM+wf5MHPmw4igG8U9GrBd6fAXTtgbnxos4UtE
+         r37fRB1+YuOLAVxlZCXG8V+0HvZsZNITT0trOngBVop114e/u3AjPIPkw/Mh2e4WmOIA
+         vBeQN2XWtoOBYp+d3qMXWOMORJYknyTBYmZoKcBe+4b0jm3X2eqsVr9FFAma3dSmbvbQ
+         qrLg==
+X-Gm-Message-State: AOAM530kgyebpEyl6e1ind41sETyp5wq+urCZUG2Da0CjE2Go3af/oPz
+        7G3o2sU8Xxu4067mTPx7HoairokEYf711MopfMOkm7InjDpPJOTAtnnkT1V7s5PJIyMudUgNld+
+        x1ptcqGtGMFWDUTr7rZ26AvYy5ygiAsjHmQNtEQ==
+X-Received: by 2002:a05:6512:3084:: with SMTP id z4mr7402045lfd.330.1639074447357;
+        Thu, 09 Dec 2021 10:27:27 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJzFTHICovFbRNrnIcqijBCIzldopHWrU33OIjD8u3dhRnkf0VqswJDI7rEJaO6c3iWhQ46Bdg==
+X-Received: by 2002:a05:6512:3084:: with SMTP id z4mr7402032lfd.330.1639074447186;
+        Thu, 09 Dec 2021 10:27:27 -0800 (PST)
+Received: from [192.168.3.67] (89-77-68-124.dynamic.chello.pl. [89.77.68.124])
+        by smtp.gmail.com with ESMTPSA id x15sm50007ljc.124.2021.12.09.10.27.26
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 09 Dec 2021 10:27:26 -0800 (PST)
+Message-ID: <5f74a62f-fb94-72d3-341c-e2921faa4282@canonical.com>
+Date:   Thu, 9 Dec 2021 19:27:25 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdVJZdzRMedn9L_Jb=0MYB_Bxs90v+iH7UaDBzup-qzp8A@mail.gmail.com>
-X-Clacks-Overhead: GNU Terry Pratchett
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.3.1
+Subject: Re: [PATCH v3 1/4] dt-bindings: mmc: exynos-dw-mshc: Add support for
+ ARTPEC-8
+Content-Language: en-US
+To:     =?UTF-8?Q?M=c3=a5rten_Lindahl?= <marten.lindahl@axis.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>
+Cc:     Doug Anderson <dianders@google.com>, kernel@axis.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org
+References: <20211209164558.13729-1-marten.lindahl@axis.com>
+ <20211209164558.13729-2-marten.lindahl@axis.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+In-Reply-To: <20211209164558.13729-2-marten.lindahl@axis.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Dec 09, 2021 at 09:37:27AM +0100, Geert Uytterhoeven wrote:
-> Hi Gabriel,
+On 09/12/2021 17:45, Mårten Lindahl wrote:
+> The ARTPEC-8 SoC has a DWMMC controller that is compatible with the
+> Exynos 7 version v2.70a. The main differences from Exynos 7 is that it
+> does not support HS400 and has extended data read timeout.
 > 
-> On Thu, Dec 9, 2021 at 2:08 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> > ... which took care of the bulk of the error messages reported. However,
-> > I'm still getting the one below, whether or not I leave the `maxItems 1`
-> > line there under `clocks:`
-> >
-> > $ make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-  dt_binding_check
-> >   LINT    Documentation/devicetree/bindings
-> >   CHKDT   Documentation/devicetree/bindings/processed-schema-examples.json
-> > /home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: properties:clock-output-names: {'description': 'List of strings of clock output signal names indexed by the first cell in the clock specifier.', 'minItems': 1, 'maxItems': 7, 'items': [{'const': 'CLKOUT0'}, {'const': 'CLKOUT1'}, {'const': 'CLKOUT2'}, {'const': 'CLKOUT3'}, {'const': 'CLKOUT4'}, {'const': 'CLKOUT5'}, {'const': 'CLKOUT6'}]} should not be valid under {'required': ['maxItems']}
-> >         hint: "maxItems" is not needed with an "items" list
-> >         from schema $id: http://devicetree.org/meta-schemas/items.yaml#
-> >   SCHEMA  Documentation/devicetree/bindings/processed-schema-examples.json
-> > /home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: ignoring, error in schema: properties: clock-output-names
-> > warning: no schema found in file: ./Documentation/devicetree/bindings/clock/litex,clock.yaml
-> >   DTEX    Documentation/devicetree/bindings/mmc/litex,mmc.example.dts
-> >   DTEX    Documentation/devicetree/bindings/media/renesas,imr.example.dts
-> >   ...
+> Add compatibility string "axis,artpec8-dw-mshc" for ARTPEC-8.
 > 
-> --- a/Documentation/devicetree/bindings/clock/litex,clock.yaml
-> +++ b/Documentation/devicetree/bindings/clock/litex,clock.yaml
-> @@ -45,7 +45,6 @@ properties:
->        List of strings of clock output signal names indexed
->        by the first cell in the clock specifier.
->      minItems: 1
-> -    maxItems: 7
->      items:
->        - const: CLKOUT0
->        - const: CLKOUT1
+> Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+> ---
 > 
-> I have that in my local tree, but hadn't sent it to you yet, because
-> litex,clock definitely need more work.
+> v2:
+>  - Change compatible string vendor prefix
 > 
-> > It appears as though `make dt_binding_check` is trying to read from
-> > `Documentation/devicetree/bindings/clock/litex,clock.yaml`, which
-> > does not exist. The clock reference I'm talking about could be *any*
+>  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> Oh, it does exist in your tree ;-)
-> To check the examples, it has to apply all other binding files that
-> might apply, hence some checks are always run.
-> 
-> You can avoid some (but not all) such checks by adding
-> 
->     DT_SCHEMA_FILES=Documentation/devicetree/bindings/path/to/binding.yaml
-> 
-> > clock elsewhere in the dts!
-> >
-> > This wasn't part of the originally reported errors, not sure why I'm
-> > seeing it now. Also, not sure what (if anything) I still need to do
-> > about it, any advice much appreciated!
-> 
-> Of course, as Rob doesn't have that file in his tree.
+> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> index 0419a63f73a0..753e9d7d8956 100644
+> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> @@ -22,6 +22,8 @@ Required Properties:
+>  	  specific extensions.
+>  	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
+>  	  specific extensions having an SMU.
+> +	- "axis,artpec8-dw-mshc": for controllers with ARTPEC-8 specific
+> +	  extensions.
+>  
 
-Oh, I'm working on the `litex-rebase` branch, which does have the
-litex,clock file. Running the check on the Linus master with litex_mmc
-v4 on top now passes the check without any errors or warnings. I'll
-incorporate the fixes pointed out by Rob when I publish v4.
+Any reason why you ignored my tag?
 
-Sorry for the misunderstanding, thanks Geert for pointing out the
-source of my confusion -- I think all's well now on the dt-bindings
-front w.r.t. litex_mmc... :)
 
-Cheers,
---Gabriel
+Best regards,
+Krzysztof
