@@ -2,138 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5B81C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 08:32:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00716C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 08:38:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232632AbhLIIfg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Dec 2021 03:35:36 -0500
-Received: from mail-ua1-f52.google.com ([209.85.222.52]:40890 "EHLO
-        mail-ua1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234117AbhLIIfg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 03:35:36 -0500
-Received: by mail-ua1-f52.google.com with SMTP id y5so9320791ual.7;
-        Thu, 09 Dec 2021 00:32:02 -0800 (PST)
+        id S234976AbhLIIlz convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Dec 2021 03:41:55 -0500
+Received: from mail-ua1-f50.google.com ([209.85.222.50]:33625 "EHLO
+        mail-ua1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234997AbhLIIlN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 03:41:13 -0500
+Received: by mail-ua1-f50.google.com with SMTP id a14so9465030uak.0;
+        Thu, 09 Dec 2021 00:37:39 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=20DGLvWObAYzP6IPMGk3JRlyueFT8HhxOF7N0eTqzKE=;
-        b=pOvb/P9iLWkdgc54RZoJTMtIlxa4UXUJlFd1q/jFTw0irup8VmKjgN1a2V30MYCUVv
-         1qXVSujFOA5lAIslG/aWrKi19RWEjDqPKZZlhrjUMKxPpwDLzVOrQ6wzTUbMvHg/BzwP
-         6OCqxFgrlaYGMObkiJrRjJMiZ/AF1ahu4Bi+/sjac303qgFRtYnx9Nz93vp+r1PvX7tT
-         k/1NGisle3k8XVXJDXymYMWnMBNU7lSv+cqnVixvTJILoBIqnLL3TSI5U/B+dD1/+bPY
-         hUKmltJnGUJkky+Id2Vd7tWLQFmHcuL+xxAqQyjZ7y4HgqwP4V2gGYnJD3ZIcnkZ4NPu
-         Y5NQ==
-X-Gm-Message-State: AOAM5332dMcwT0NQ/44sCIkk3djXqC63/MdP9t2cWkYehmAGHcHYKlpy
-        pZVFObZ5sco94wtaBSmhC31znSioaCQVGw==
-X-Google-Smtp-Source: ABdhPJyjirEh/J0pZiPBHcYax/UdU0k/+LCwIVn/BH1o9f9aJx0mLHUPjSiOsy9RJ5nMACsgEoZvOA==
-X-Received: by 2002:a67:e90d:: with SMTP id c13mr5791508vso.12.1639038721986;
-        Thu, 09 Dec 2021 00:32:01 -0800 (PST)
-Received: from mail-ua1-f51.google.com (mail-ua1-f51.google.com. [209.85.222.51])
-        by smtp.gmail.com with ESMTPSA id f26sm3380674vkl.51.2021.12.09.00.32.01
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=/wHJKw72IgLDQBov78fTqhQ5wmrHUQsgonD8JrpOVc0=;
+        b=nNVyCZItkQB6t0PxUpdQqno4RTxV1HcmPXFb8Zm06syLcue/y5Csyc3kDBs/C4Uf/D
+         SBBNGQFYvdbNCCVubLG+EZAX21pslPS7JX7CMO9LET8aOnEnM6GdMm48mPZbyvXDU4k/
+         CDd/u/LIeX9RplhfymLptmwru04Y0IqhM5eWTFiRNZS4uu7hyzO8x5M0STOkN6uVziVm
+         h/oBIx31KZolXnpx37pj/q2KK3o9YdOIwcFXFAaroqEzVL1XFn7F7v2ganpVKlhn/1TH
+         QcZ7yyHZKIA2YhhW4ComOLFHZ8DCQPzG2oQVUnuK+U7LHuePNrsZGmEP1JuGieXMJh8B
+         7OYw==
+X-Gm-Message-State: AOAM530cxmCaEhUvt9S8tT0aJIm49X7iRY/Zx7ahoQ6z+GUhz8sPSAdP
+        4352gl3LMp9VyUO1kL2l7nHg1V4xZ8CHlw==
+X-Google-Smtp-Source: ABdhPJwbCkbduIdqNrb1k4q817zDR8z5HkgwiI7O7a6DY7GEyzlrguZexBsOBQQEQ75c9KecMvwdbQ==
+X-Received: by 2002:a67:fdc3:: with SMTP id l3mr5815925vsq.42.1639039059186;
+        Thu, 09 Dec 2021 00:37:39 -0800 (PST)
+Received: from mail-vk1-f181.google.com (mail-vk1-f181.google.com. [209.85.221.181])
+        by smtp.gmail.com with ESMTPSA id j19sm903vka.4.2021.12.09.00.37.38
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Dec 2021 00:32:01 -0800 (PST)
-Received: by mail-ua1-f51.google.com with SMTP id i6so9325160uae.6;
-        Thu, 09 Dec 2021 00:32:01 -0800 (PST)
-X-Received: by 2002:a67:c106:: with SMTP id d6mr5561941vsj.77.1639038721148;
- Thu, 09 Dec 2021 00:32:01 -0800 (PST)
+        Thu, 09 Dec 2021 00:37:38 -0800 (PST)
+Received: by mail-vk1-f181.google.com with SMTP id s1so3242919vks.9;
+        Thu, 09 Dec 2021 00:37:38 -0800 (PST)
+X-Received: by 2002:a05:6122:2193:: with SMTP id j19mr6958885vkd.7.1639039058208;
+ Thu, 09 Dec 2021 00:37:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20211204204121.2367127-1-gsomlo@gmail.com> <20211204204121.2367127-4-gsomlo@gmail.com>
- <CAMuHMdXh6YfRdGi8gYc4hJuTwogme6+Esn9Mf1vr9MFO=f8mAg@mail.gmail.com> <YbESHK06Tpw3typS@errol.ini.cmu.edu>
-In-Reply-To: <YbESHK06Tpw3typS@errol.ini.cmu.edu>
+References: <20211208132042.3226275-1-gsomlo@gmail.com> <20211208132042.3226275-3-gsomlo@gmail.com>
+ <1639004806.166681.596177.nullmailer@robh.at.kernel.org> <YbFXERe0K3rfzZem@glsvmlin.ini.cmu.edu>
+In-Reply-To: <YbFXERe0K3rfzZem@glsvmlin.ini.cmu.edu>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 9 Dec 2021 09:31:49 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdV6fttX6Jn06WJacNh+1pLz1RfYf82B2fB1D+=Kb9FmMA@mail.gmail.com>
-Message-ID: <CAMuHMdV6fttX6Jn06WJacNh+1pLz1RfYf82B2fB1D+=Kb9FmMA@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Date:   Thu, 9 Dec 2021 09:37:27 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdVJZdzRMedn9L_Jb=0MYB_Bxs90v+iH7UaDBzup-qzp8A@mail.gmail.com>
+Message-ID: <CAMuHMdVJZdzRMedn9L_Jb=0MYB_Bxs90v+iH7UaDBzup-qzp8A@mail.gmail.com>
+Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: Add bindings for LiteSDCard
 To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
+Cc:     Rob Herring <robh@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
-        Kamil Rakoczy <krakoczy@antmicro.com>,
         mdudek@internships.antmicro.com,
+        Randy Dunlap <rdunlap@infradead.org>,
         Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        david.abdurachmanov@sifive.com,
+        Joel Stanley <joel@jms.id.au>, david.abdurachmanov@sifive.com,
         Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Stafford Horne <shorne@gmail.com>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Kamil Rakoczy <krakoczy@antmicro.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mateusz Holenko <mholenko@antmicro.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Gabriel,
 
-On Wed, Dec 8, 2021 at 9:14 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> I did *some* of this for v3, but since figured out how to use `pahole` :)
-
-Right, pahole.
-
-> On Mon, Dec 06, 2021 at 11:07:56AM +0100, Geert Uytterhoeven wrote:
-> > > +struct litex_mmc_host {
-> > > +       struct mmc_host *mmc;
-> > > +       struct platform_device *dev;
-> > > +
-> > > +       void __iomem *sdphy;
-> > > +       void __iomem *sdcore;
-> > > +       void __iomem *sdreader;
-> > > +       void __iomem *sdwriter;
-> > > +       void __iomem *sdirq;
-> > > +
-> > > +       u32 resp[4];
-> > > +       u16 rca;
-> > > +
-> > > +       void *buffer;
-> > > +       size_t buf_size;
-> > > +       dma_addr_t dma;
-> > > +
-> > > +       unsigned int freq;
-> > > +       unsigned int clock;
-> > > +       bool is_bus_width_set;
-> > > +       bool app_cmd;
-> > > +
-> > > +       int irq;
-> > > +       struct completion cmd_done;
-> >
-> > You may want to reorder the members to avoid implicit gaps
-> > (i.e. structs first, followed by integral types in decreasing size).
+On Thu, Dec 9, 2021 at 2:08 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> ... which took care of the bulk of the error messages reported. However,
+> I'm still getting the one below, whether or not I leave the `maxItems 1`
+> line there under `clocks:`
 >
-> So, for v4, I'll have it looking like this, which `pahole` says is
-> optimally packed:
->
-> struct litex_mmc_host {
->         struct mmc_host *          mmc;                  /*     0     8 */
->         struct platform_device *   dev;                  /*     8     8 */
->         void *                     sdphy;                /*    16     8 */
->         void *                     sdcore;               /*    24     8 */
->         void *                     sdreader;             /*    32     8 */
->         void *                     sdwriter;             /*    40     8 */
->         void *                     sdirq;                /*    48     8 */
->         void *                     buffer;               /*    56     8 */
->         /* --- cacheline 1 boundary (64 bytes) --- */
->         size_t                     buf_size;             /*    64     8 */
+> $ make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-  dt_binding_check
+>   LINT    Documentation/devicetree/bindings
+>   CHKDT   Documentation/devicetree/bindings/processed-schema-examples.json
+> /home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: properties:clock-output-names: {'description': 'List of strings of clock output signal names indexed by the first cell in the clock specifier.', 'minItems': 1, 'maxItems': 7, 'items': [{'const': 'CLKOUT0'}, {'const': 'CLKOUT1'}, {'const': 'CLKOUT2'}, {'const': 'CLKOUT3'}, {'const': 'CLKOUT4'}, {'const': 'CLKOUT5'}, {'const': 'CLKOUT6'}]} should not be valid under {'required': ['maxItems']}
+>         hint: "maxItems" is not needed with an "items" list
+>         from schema $id: http://devicetree.org/meta-schemas/items.yaml#
+>   SCHEMA  Documentation/devicetree/bindings/processed-schema-examples.json
+> /home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: ignoring, error in schema: properties: clock-output-names
+> warning: no schema found in file: ./Documentation/devicetree/bindings/clock/litex,clock.yaml
+>   DTEX    Documentation/devicetree/bindings/mmc/litex,mmc.example.dts
+>   DTEX    Documentation/devicetree/bindings/media/renesas,imr.example.dts
+>   ...
 
-size_t is 32-bit on RV32, so you may want to move it below cmd_done.
+--- a/Documentation/devicetree/bindings/clock/litex,clock.yaml
++++ b/Documentation/devicetree/bindings/clock/litex,clock.yaml
+@@ -45,7 +45,6 @@ properties:
+       List of strings of clock output signal names indexed
+       by the first cell in the clock specifier.
+     minItems: 1
+-    maxItems: 7
+     items:
+       - const: CLKOUT0
+       - const: CLKOUT1
 
->         dma_addr_t                 dma;                  /*    72     8 */
->         struct completion          cmd_done;             /*    80    32 */
->         int                        irq;                  /*   112     4 */
->         unsigned int               ref_clk;              /*   116     4 */
->         unsigned int               sd_clk;               /*   120     4 */
->         u32                        resp[4];              /*   124    16 */
->         /* --- cacheline 2 boundary (128 bytes) was 12 bytes ago --- */
->         u16                        rca;                  /*   140     2 */
->         bool                       is_bus_width_set;     /*   142     1 */
->         bool                       app_cmd;              /*   143     1 */
+I have that in my local tree, but hadn't sent it to you yet, because
+litex,clock definitely need more work.
+
+> It appears as though `make dt_binding_check` is trying to read from
+> `Documentation/devicetree/bindings/clock/litex,clock.yaml`, which
+> does not exist. The clock reference I'm talking about could be *any*
+
+Oh, it does exist in your tree ;-)
+To check the examples, it has to apply all other binding files that
+might apply, hence some checks are always run.
+
+You can avoid some (but not all) such checks by adding
+
+    DT_SCHEMA_FILES=Documentation/devicetree/bindings/path/to/binding.yaml
+
+> clock elsewhere in the dts!
 >
->         /* size: 144, cachelines: 3, members: 18 */
->         /* last cacheline: 16 bytes */
-> };
+> This wasn't part of the originally reported errors, not sure why I'm
+> seeing it now. Also, not sure what (if anything) I still need to do
+> about it, any advice much appreciated!
+
+Of course, as Rob doesn't have that file in his tree.
 
 Gr{oetje,eeting}s,
 
