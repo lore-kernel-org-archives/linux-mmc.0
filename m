@@ -2,65 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01802C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 18:27:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D35ECC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 18:28:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243329AbhLISbC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Dec 2021 13:31:02 -0500
-Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:58404
+        id S243347AbhLISbw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Dec 2021 13:31:52 -0500
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:58434
         "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S243309AbhLISbC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 13:31:02 -0500
-Received: from mail-lj1-f200.google.com (mail-lj1-f200.google.com [209.85.208.200])
+        by vger.kernel.org with ESMTP id S243338AbhLISbu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 13:31:50 -0500
+Received: from mail-lf1-f71.google.com (mail-lf1-f71.google.com [209.85.167.71])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id EABCB3F1BC
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Dec 2021 18:27:27 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 584F93F1B7
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Dec 2021 18:28:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1639074447;
-        bh=7MMZq0hIb3eR8oUwilVI+A8i34AgFBxa5Ka85QzcfFY=;
+        s=20210705; t=1639074495;
+        bh=0TOWgoinpB6HsHC3TLB9+WhBd19PoQ1CpE+6d8HXmNI=;
         h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
          In-Reply-To:Content-Type;
-        b=lmZ/+Pcf9J+jIMTbMywzzvjooWzRH43kZx0ahc4YMzXwwN+InCT1pgjPaN6fwLRk0
-         D6VjiKgeZf9Mu1Yzks6nMRBrbz3GWUR43bRtjtU0p53l3tG75vlBigIjLASpIWxgS4
-         sut9QovFbW54LrotajFkd4b3W+S28HUhCGnjuhBepJM2uIW/fm84dqYbU3Nlz3iCn4
-         tbV3WQTQk3bfzn0C+tkLLi2xLhfZOm/9qQlFI8453zb85QEloyTGBs9PvfLT90QLNm
-         dO6hSVn3xDAZZWsrAGXD+crYHwHUVhXSUDps+fWygWX+R0rzH3MnjjP3/ThDnF0ApJ
-         CupmhUht95y2w==
-Received: by mail-lj1-f200.google.com with SMTP id y11-20020a2e978b000000b00218df7f76feso2195247lji.11
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Dec 2021 10:27:27 -0800 (PST)
+        b=ilG0zfwsbTRBuHtbBcKW1jvBPedMk/ZsqZFZAsGJMMAJMRZtYDLMSdAWBtj+pJ5UI
+         q7nwdT63xXnib2O/z7zpAfOXW+obyu4exYunhQGHVxgoJxTj8d2ujZcrZzVNaGdFbt
+         R1mSHfA1oHUirDuyooKNGLRJDPRSzI3mXdRF6O8Q1s/W8tLQpne1dfWohQGlHZW8oE
+         bWeGsFnLGvRhb7oLxJ9k7pYJa3MAsRMl08KEqdDMjU/iWpa862dzLYhYIWP0Zbtdqz
+         vt4N9z5y3AezByqBqlEgnZIdw9EKeR6asxyeoIUjYCdV63/K6LFvhA1GnPBcb+v8Jq
+         tuIIz5UiqLugw==
+Received: by mail-lf1-f71.google.com with SMTP id d2-20020a0565123d0200b0040370d0d2fbso2963435lfv.23
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Dec 2021 10:28:15 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
          :content-language:to:cc:references:from:in-reply-to
          :content-transfer-encoding;
-        bh=7MMZq0hIb3eR8oUwilVI+A8i34AgFBxa5Ka85QzcfFY=;
-        b=kPyUgwBQvumluFlSK93nUgFcPJIM5ZKVZD2KDOxs0gAXie6Gjz089msC6+R4dDJh+P
-         UUh0zXWEyCbA00otImtAWbq6FPLNheVU6h7JSDIxLSVfUXtF4J10n705XK2/LWrlCoY7
-         nhmHYgPtaRdAOG+BJle0pZyPYBTF2HzM+wf5MHPmw4igG8U9GrBd6fAXTtgbnxos4UtE
-         r37fRB1+YuOLAVxlZCXG8V+0HvZsZNITT0trOngBVop114e/u3AjPIPkw/Mh2e4WmOIA
-         vBeQN2XWtoOBYp+d3qMXWOMORJYknyTBYmZoKcBe+4b0jm3X2eqsVr9FFAma3dSmbvbQ
-         qrLg==
-X-Gm-Message-State: AOAM530kgyebpEyl6e1ind41sETyp5wq+urCZUG2Da0CjE2Go3af/oPz
-        7G3o2sU8Xxu4067mTPx7HoairokEYf711MopfMOkm7InjDpPJOTAtnnkT1V7s5PJIyMudUgNld+
-        x1ptcqGtGMFWDUTr7rZ26AvYy5ygiAsjHmQNtEQ==
-X-Received: by 2002:a05:6512:3084:: with SMTP id z4mr7402045lfd.330.1639074447357;
-        Thu, 09 Dec 2021 10:27:27 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJzFTHICovFbRNrnIcqijBCIzldopHWrU33OIjD8u3dhRnkf0VqswJDI7rEJaO6c3iWhQ46Bdg==
-X-Received: by 2002:a05:6512:3084:: with SMTP id z4mr7402032lfd.330.1639074447186;
-        Thu, 09 Dec 2021 10:27:27 -0800 (PST)
+        bh=0TOWgoinpB6HsHC3TLB9+WhBd19PoQ1CpE+6d8HXmNI=;
+        b=KK8pbCY1HMwZICl+7YxChZc5/8o3nRAkWo8nvKYDCzarHRDNqysK3WTmZsv49qbRux
+         lr6GHcbrCDR5NKcj6soh2Uv9cL7ckF5SMc9T7gvATvY1f7ZuxJyzLxXxZiP3WX74ACSK
+         XdUr91heCloD5sHAhKZtCfJjiSxZhJrzxiI9O0nBqYts1pIveCSvPU8x49H5LY7yHUhv
+         PlQk3E/7pfrehsoem0uO0bf/WI98ACNwACz7ADeBZe/eYpA0q27iqosx1kN6hg3nSxRO
+         mqwnRkLNBH5Ol+cq6ply+aEDqDSpiFLuqRjbmYiu4zEDo6oFAqp97NmNAf7se8AWT/+F
+         0L8g==
+X-Gm-Message-State: AOAM530KbzmCVxdbEYznaSkc3UvqPgJ0vdIyMVNcVmVcnJbFb9GOHYDX
+        +ytkRlEcOehx5W9N0FFsjsiB4mMSU67JPaUsUl8uI04YlhUtOZVBoHNVBt4fcQKxfrrVaESBUpI
+        iiZatahbnnNWUicu0UEdwQ7EVK26m6Q06rabvKQ==
+X-Received: by 2002:a2e:a4a5:: with SMTP id g5mr8158024ljm.176.1639074494589;
+        Thu, 09 Dec 2021 10:28:14 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJzupGrl6vs/wISAHYhPkhki2lDaNP+ZXwbOBSA2s8njyGVfFR6m2hmzQdsCGiDZrJd/tqxzVg==
+X-Received: by 2002:a2e:a4a5:: with SMTP id g5mr8158006ljm.176.1639074494392;
+        Thu, 09 Dec 2021 10:28:14 -0800 (PST)
 Received: from [192.168.3.67] (89-77-68-124.dynamic.chello.pl. [89.77.68.124])
-        by smtp.gmail.com with ESMTPSA id x15sm50007ljc.124.2021.12.09.10.27.26
+        by smtp.gmail.com with ESMTPSA id u3sm56397lfs.256.2021.12.09.10.28.13
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Dec 2021 10:27:26 -0800 (PST)
-Message-ID: <5f74a62f-fb94-72d3-341c-e2921faa4282@canonical.com>
-Date:   Thu, 9 Dec 2021 19:27:25 +0100
+        Thu, 09 Dec 2021 10:28:13 -0800 (PST)
+Message-ID: <cf76cbaa-5ea8-ebf1-73eb-7b99dc02f2c0@canonical.com>
+Date:   Thu, 9 Dec 2021 19:28:12 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.3.1
-Subject: Re: [PATCH v3 1/4] dt-bindings: mmc: exynos-dw-mshc: Add support for
- ARTPEC-8
+Subject: Re: [PATCH v3 2/4] mmc: dw_mmc-exynos: Add support for ARTPEC-8
 Content-Language: en-US
 To:     =?UTF-8?Q?M=c3=a5rten_Lindahl?= <marten.lindahl@axis.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -71,9 +70,9 @@ Cc:     Doug Anderson <dianders@google.com>, kernel@axis.com,
         linux-arm-kernel@lists.infradead.org,
         linux-samsung-soc@vger.kernel.org
 References: <20211209164558.13729-1-marten.lindahl@axis.com>
- <20211209164558.13729-2-marten.lindahl@axis.com>
+ <20211209164558.13729-3-marten.lindahl@axis.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20211209164558.13729-2-marten.lindahl@axis.com>
+In-Reply-To: <20211209164558.13729-3-marten.lindahl@axis.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -85,7 +84,8 @@ On 09/12/2021 17:45, Mårten Lindahl wrote:
 > Exynos 7 version v2.70a. The main differences from Exynos 7 is that it
 > does not support HS400 and has extended data read timeout.
 > 
-> Add compatibility string "axis,artpec8-dw-mshc" for ARTPEC-8.
+> This patch adds compatibility string "axis,artpec8-dw-mshc" for
+> ARTPEC-8, and DW_MCI_TYPE_ARTPEC8 is added to the dw_mci_exynos_type.
 > 
 > Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
 > ---
@@ -93,23 +93,11 @@ On 09/12/2021 17:45, Mårten Lindahl wrote:
 > v2:
 >  - Change compatible string vendor prefix
 > 
->  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt | 2 ++
->  1 file changed, 2 insertions(+)
+>  drivers/mmc/host/dw_mmc-exynos.c | 47 ++++++++++++++++++++++++--------
+>  1 file changed, 36 insertions(+), 11 deletions(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> index 0419a63f73a0..753e9d7d8956 100644
-> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-> @@ -22,6 +22,8 @@ Required Properties:
->  	  specific extensions.
->  	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
->  	  specific extensions having an SMU.
-> +	- "axis,artpec8-dw-mshc": for controllers with ARTPEC-8 specific
-> +	  extensions.
->  
 
-Any reason why you ignored my tag?
-
+Here you dropped my tag as well.
 
 Best regards,
 Krzysztof
