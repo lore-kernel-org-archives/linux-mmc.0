@@ -2,106 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CD39C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 10:06:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC306C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 10:06:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232340AbhLIKJ5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Dec 2021 05:09:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56916 "EHLO
+        id S232331AbhLIKKD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Dec 2021 05:10:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232290AbhLIKJz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 05:09:55 -0500
+        with ESMTP id S232333AbhLIKKB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 05:10:01 -0500
 Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1110C061746
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Dec 2021 02:06:21 -0800 (PST)
-Received: by mail-lj1-x22c.google.com with SMTP id z8so8134045ljz.9
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Dec 2021 02:06:21 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 895C0C061353
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Dec 2021 02:06:28 -0800 (PST)
+Received: by mail-lj1-x22c.google.com with SMTP id k2so8168407lji.4
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Dec 2021 02:06:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=4lFATsequWOiCgnpZ4p/6BBWla14PJU5Wf+t9BaVSeE=;
-        b=D8Gx/46XuC+G4SdL3UPnzw5BJbgf55Qxd5JmtotiY1ynfDNb8RtTnulE65G9a6uho+
-         NhC+AXr42MKR8uh/is+sgaXRdtZ/LChoW2Bpb836OIT2anUdS3ZqJnyGU9af/xG5Varj
-         z4259F+PM/GID9nAYLcKnbZgytkDHyjp6eNha/0fRTrEkAQmuUoXDDAsAwus00otIPa7
-         Dmd2W2WF+G+KgVyXPwjD6jDk21D/NcY4L/qZTKZ8dxaCxazDt9O7t2eLTPuQEtW8SJ1q
-         pla4kcIbGWrlQikz2EeZy2ME21VcQmNN0vA9To2AHNHtkfbUjlI5GOgVzoUFqQAXKhOd
-         CKZg==
+        bh=yKMvGFlBW3AWdPaA2xmuCR4hyEmUTzTC0PY59n64gTk=;
+        b=e8OVmzhKr4HtldNf0mMJ4dwaio7Z3ZvJXr7Xkm5IcDOctn2ViN/cwCgTBZZHy0NpDt
+         r/QiSN4MBiAnzvwR0O+SqWItG5n7t4pDBsiKO0z50hqDtkGWoyC3XO13YypSygZ9J8FK
+         vAPF+N7iihjdPksYzBbvZLXs3/N5PVFDRg7yOMu0aN+DXAUKF5nz2k2NuhzOtAypqTDr
+         0QJQ0Gj8DtUPA0eDwdIPzS1snU2X+vKWngyiIHlSKZU9Zp4bVXfuLyJ+Gu1QkQWoPrAx
+         HOmj0GgVHmzIONMJfD4FqgYpikJTVjRCMUu5rP+zq835zAUWeME1UtliRcu5QuEHjxOi
+         2eag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=4lFATsequWOiCgnpZ4p/6BBWla14PJU5Wf+t9BaVSeE=;
-        b=GYOMKZ323FsWQZXT2uBWf7UtH8b72OUaQP5VZnYZTkBPneOW/VGA73veYDCDCTSPSj
-         GintEedZ2Z5/IPEXHSvqpS//w94plfZeRAiuwL4rCXaQ52XjFs2NRHVkVCrlAlT7CDVY
-         nPOM1JufyX2zhHjMfJZpUpJrq5so2hUPeFAlEMWtrx/MiM6vLCrHL0O1WrRMpXHnakWK
-         kfr+mQG1HT0bAwuxfwtyMWDRf0eIUqByMGX1eZxKqPCqzlfkR2RIHzbXN6JUMe1mjboI
-         X2S5djhG7EIk7CJnDaDHK+CE0HOw7EgDWWi0w74uSmLQo8npf4xVinKJGD0cUbbgxAZA
-         SoyA==
-X-Gm-Message-State: AOAM533lLerEiUXhOhyITOxcDS2xrvwDcVxWegVHMtpp1cahMbYv/5np
-        kFuwsRUNjxmt9PeDdrVeUJ5q6saJ9yw1LQESaxtagQ==
-X-Google-Smtp-Source: ABdhPJxH23WdQ4mT6uTrJq9zH7lO81XwGmaOOoonGOh9qQI9zjkuCKnUu+dh8lkJjj41ieGjwixrLVBJQTLbcM6lrTs=
-X-Received: by 2002:a05:651c:1507:: with SMTP id e7mr5619180ljf.300.1639044380237;
- Thu, 09 Dec 2021 02:06:20 -0800 (PST)
+        bh=yKMvGFlBW3AWdPaA2xmuCR4hyEmUTzTC0PY59n64gTk=;
+        b=hhl5UnOots/hGPn0iQ+7+QgKzQDgWse8uNNEaiYGAUHwjBxzWWvjUpMArLCzMb1eAu
+         zWzXZ41IFXM6MEd6kLgJ+MrSDtyWKp4wfoAP5l0/fG95e8pFabDFM3oJIZvyTQ5sQZJP
+         OGaLvjCP4YPZPn5XcYqtZd44xhVxZ23zvdT8LxXayw5FSviDPZUhjPxIBHG4bugNcEaZ
+         Twz9zXoL4dKI5ZHtFErx5IGZRqctglTPKV579QEtl7sePM/LNdI6cEO6pdhuNUVMAp0I
+         FbZpaoorzyfO1htq98UCcYX7IjG749wgRpdDo1vhXnZXSPMuwfwDfuheLxKW3SUEtq+t
+         zNRA==
+X-Gm-Message-State: AOAM533BFWqn7DeNbgrTJ8zTdLS3MWHJVxhxp4frINkaIrc+ZLapmN5c
+        e90O8s7fezMQ219A0kzkIPYcpK+67umirXma64KgdQ==
+X-Google-Smtp-Source: ABdhPJxcWvgf7bImrcCmZVAd+G9GHaJ3NHzEg6XZV2qwHK9WQa+fZcFPznmaKW+e9jytoGVRdzl1gaEasbvMtrhhjP0=
+X-Received: by 2002:a2e:b6d1:: with SMTP id m17mr5178113ljo.273.1639044386848;
+ Thu, 09 Dec 2021 02:06:26 -0800 (PST)
 MIME-Version: 1.0
-References: <20211207075013.22911-1-wenbin.mei@mediatek.com>
-In-Reply-To: <20211207075013.22911-1-wenbin.mei@mediatek.com>
+References: <20211207095029.96387-1-sensor1010@163.com>
+In-Reply-To: <20211207095029.96387-1-sensor1010@163.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Dec 2021 11:05:43 +0100
-Message-ID: <CAPDyKFqakV8FiQohbvh8h9UCpO14XJFDETPojSmdDUCeC1Kj8Q@mail.gmail.com>
-Subject: Re: [RESEND PATCH v1] mmc: mediatek: free the ext_csd when
- mmc_get_ext_csd success
-To:     Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com,
-        stable@vger.kernel.org
+Date:   Thu, 9 Dec 2021 11:05:50 +0100
+Message-ID: <CAPDyKFriijPB5s6D-jorVj=1+VRzJzh10Mmu6nvMjpoXkfQZrA@mail.gmail.com>
+Subject: Re: [PATCH] drivers/mmc/core/bus: Remove redundant driver match function
+To:     lizhe <sensor1010@163.com>
+Cc:     u.kleine-koenig@pengutronix.de,
+        srinivas.pandruvada@linux.intel.com, pali@kernel.org,
+        TheSven73@gmail.com, lznuaa@gmail.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 7 Dec 2021 at 08:50, Wenbin Mei <wenbin.mei@mediatek.com> wrote:
+On Tue, 7 Dec 2021 at 10:51, lizhe <sensor1010@163.com> wrote:
 >
-> If mmc_get_ext_csd success, the ext_csd are not freed.
-> Add the missing kfree() calls.
+> If there is no driver match function, the driver core assumes
+> that each candidate pair (driver, device) matches. See function
+> driver_match_device().
 >
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> Fixes: c4ac38c6539b ("mmc: mtk-sd: Add HS400 online tuning support")
-> Cc: stable@vger.kernel.org
+> Drop the mmc bus's match function that always returned 1 and
+> so implements the same behaviour as when there is no match
+> function.
+>
+> Signed-off-by: lizhe <sensor1010@163.com>
 
-We don't need the stable tag in this case, as commit c4ac38c6539b was
-introduced in v5.16-rc1. In any case, thanks for adding the fixes tag,
-it certainly helps!
-
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/mtk-sd.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/mmc/core/bus.c | 11 -----------
+>  1 file changed, 11 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 943940b44e83..632775217d35 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -2291,8 +2291,10 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
->                         sdr_set_field(host->base + PAD_DS_TUNE,
->                                       PAD_DS_TUNE_DLY1, i);
->                 ret = mmc_get_ext_csd(card, &ext_csd);
-> -               if (!ret)
-> +               if (!ret) {
->                         result_dly1 |= (1 << i);
-> +                       kfree(ext_csd);
-> +               }
->         }
->         host->hs400_tuning = false;
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index f6b7a9c5bbff..096ae624be9a 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -53,16 +53,6 @@ static struct attribute *mmc_dev_attrs[] = {
+>  };
+>  ATTRIBUTE_GROUPS(mmc_dev);
 >
+> -/*
+> - * This currently matches any MMC driver to any MMC card - drivers
+> - * themselves make the decision whether to drive this card in their
+> - * probe method.
+> - */
+> -static int mmc_bus_match(struct device *dev, struct device_driver *drv)
+> -{
+> -       return 1;
+> -}
+> -
+>  static int
+>  mmc_bus_uevent(struct device *dev, struct kobj_uevent_env *env)
+>  {
+> @@ -226,7 +216,6 @@ static const struct dev_pm_ops mmc_bus_pm_ops = {
+>  static struct bus_type mmc_bus_type = {
+>         .name           = "mmc",
+>         .dev_groups     = mmc_dev_groups,
+> -       .match          = mmc_bus_match,
+>         .uevent         = mmc_bus_uevent,
+>         .probe          = mmc_bus_probe,
+>         .remove         = mmc_bus_remove,
 > --
 > 2.25.1
+>
 >
