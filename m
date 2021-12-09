@@ -2,192 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55920C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 01:08:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFDCDC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 02:54:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241618AbhLIBMT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Dec 2021 20:12:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47990 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234907AbhLIBMS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2021 20:12:18 -0500
-Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09EA6C061746;
-        Wed,  8 Dec 2021 17:08:46 -0800 (PST)
-Received: by mail-qv1-xf36.google.com with SMTP id u16so3834164qvk.4;
-        Wed, 08 Dec 2021 17:08:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=bQfC/GjazGM6i3ob6YqlN4SlMkdDBtM8EjnGT/4dlHA=;
-        b=n5KQPA9KckKPDYCGROCtWZ7JDe9N0w1yHfaF4JKcmcQRoFQ9zmED72mSjErMvXSNBO
-         nlQmP/UxVlNwJhJkCfAfDeISKRdobvvBBdROq0aDOI1C7oWcFKC5lLW9NiiHaXYlEVrl
-         2qGeQxnsl5nujBvbXDyuLDnIzgpr+scmg6B13xVLqgNVwjLM+yZzUAdsN7mCyWJToPQs
-         12BL2tbmTFqnkN6F6JCgdFc71kmU8S92egLuvkrMqagdG0AEiQhlRfLD42rv7VRg/3UX
-         BAZL/7MrRwc7iMFGNUZ+kNmgA04Mgk7X3F1tR1lDqXvxmutFLNyd06FHvpPaoXJgWu7/
-         0y/A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=bQfC/GjazGM6i3ob6YqlN4SlMkdDBtM8EjnGT/4dlHA=;
-        b=qQIIqj4Ne7WdX3LEMChoWCNPPTnuvshJuzdLuLQx/dcLDr3UbrEUbdDq2Pz10gf60q
-         FIcA33IIO2bPuEPxJPUOG20oNJkLD0qHWR9CzVpE9XKFfxNMXKMIvjotJ/tJrIhJRtTp
-         pYGYS7NdsWuixUMVvrjV6RfGjWo+gLRau00Y/c8Eam9Bw2Vvc0iSkNU5cWOyjZoAwQFN
-         llh63THaIM1X7QcJ5ftWP3Y4LNYXeMOw2sHI2f/NW1vAmTxxFRLSk9plLGaJIQ2go5Nf
-         4zSaXvfgr3NFT2y0UX9Km7OLO2o0iktN0koTNBtAp3X1GLjWabJNFBUA88uy5UqepH/3
-         ZIOA==
-X-Gm-Message-State: AOAM532UFSjMsLAo/4Uv+n0de1eMbdZSq6s3ftyl4lWxCAr67tC9YVlX
-        8euGTzYEbJ4cx3opKeBPEW8lXESaZYruMw==
-X-Google-Smtp-Source: ABdhPJxJdFHNn8qL8IGdjSDFKRLcBH1y5qpJE6kmuOrHiZQ1byqi6q+7qQf6gL8D+Qhd6zFeI/rI3Q==
-X-Received: by 2002:a0c:ef03:: with SMTP id t3mr11648614qvr.32.1639012121554;
-        Wed, 08 Dec 2021 17:08:41 -0800 (PST)
-Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
-        by smtp.gmail.com with ESMTPSA id l2sm2682113qtk.41.2021.12.08.17.08.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Dec 2021 17:08:41 -0800 (PST)
-Date:   Wed, 8 Dec 2021 20:08:33 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Rob Herring <robh@kernel.org>
-Cc:     linux-kernel@vger.kernel.org, kgugala@antmicro.com,
-        mdudek@internships.antmicro.com, rdunlap@infradead.org,
-        paulus@ozlabs.org, joel@jms.id.au, geert@linux-m68k.org,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        linux-mmc@vger.kernel.org, shorne@gmail.com,
-        devicetree@vger.kernel.org, robh+dt@kernel.org,
-        krakoczy@antmicro.com, ulf.hansson@linaro.org,
-        mholenko@antmicro.com
-Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: Add bindings for LiteSDCard
-Message-ID: <YbFXERe0K3rfzZem@glsvmlin.ini.cmu.edu>
-References: <20211208132042.3226275-1-gsomlo@gmail.com>
- <20211208132042.3226275-3-gsomlo@gmail.com>
- <1639004806.166681.596177.nullmailer@robh.at.kernel.org>
+        id S230519AbhLIC6M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Dec 2021 21:58:12 -0500
+Received: from rtits2.realtek.com ([211.75.126.72]:54893 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230516AbhLIC6M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Dec 2021 21:58:12 -0500
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 1B92sXKS1032755, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36504.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.71/5.88) with ESMTPS id 1B92sXKS1032755
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
+        Thu, 9 Dec 2021 10:54:33 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXH36504.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.20; Thu, 9 Dec 2021 10:54:33 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXMBS01.realtek.com.tw (172.21.6.94) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.15; Thu, 9 Dec 2021 10:54:33 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::38af:5429:2b43:3b95]) by
+ RTEXMBS01.realtek.com.tw ([fe80::38af:5429:2b43:3b95%5]) with mapi id
+ 15.01.2308.015; Thu, 9 Dec 2021 10:54:33 +0800
+From:   Ricky WU <ricky_wu@realtek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH] mmc: rtsx: improve rw performance
+Thread-Topic: [PATCH] mmc: rtsx: improve rw performance
+Thread-Index: AQHX6DEYTJKGBpnS2UOXrkrK9OF1RqwgTsWAgAUMTOCAAorBAIABmDNg
+Date:   Thu, 9 Dec 2021 02:54:33 +0000
+Message-ID: <a0326e747a09429a867727762074276e@realtek.com>
+References: <5a38e5eb9fdc4b53ba4a11602e2cef0d@realtek.com>
+ <CAPDyKFrC1JGCAAQZOOKe4VZS7g2Sg4MZKXr9WyMPeYDdQ3ht8g@mail.gmail.com>
+ <b55390bd4a9942f3b37bd5bb8245ab25@realtek.com>
+ <CAPDyKFpAACVTNcf5ckAVqn53envxDaG6x=RvNq=hGW7mEn+9MA@mail.gmail.com>
+In-Reply-To: <CAPDyKFpAACVTNcf5ckAVqn53envxDaG6x=RvNq=hGW7mEn+9MA@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.22.88.113]
+x-kse-serverinfo: RTEXMBS01.realtek.com.tw, 9
+x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
+ rules found
+x-kse-antivirus-interceptor-info: scan successful
+x-kse-antivirus-info: =?utf-8?B?Q2xlYW4sIGJhc2VzOiAyMDIxLzEyLzgg5LiL5Y2IIDExOjM3OjAw?=
+x-kse-bulkmessagesfiltering-scan-result: protection disabled
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1639004806.166681.596177.nullmailer@robh.at.kernel.org>
-X-Clacks-Overhead: GNU Terry Pratchett
+X-KSE-ServerInfo: RTEXH36504.realtek.com.tw, 9
+X-KSE-Attachment-Filter-Triggered-Rules: Clean
+X-KSE-Attachment-Filter-Triggered-Filters: Clean
+X-KSE-BulkMessagesFiltering-Scan-Result: protection disabled
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 08, 2021 at 05:06:46PM -0600, Rob Herring wrote:
-> On Wed, 08 Dec 2021 08:20:41 -0500, Gabriel Somlo wrote:
-> > LiteSDCard is a small footprint, configurable SDCard core for FPGA
-> > based system on chips.
-> > 
-> > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
-> > Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> > ---
-> > 
-> > New in v3:
-> >   - picked up r/b Geert Uytterhoeven <geert@linux-m68k.org> in DT
-> >     bindings document (please let me know if that was premature, and
-> >     happy to take further review if needed :)
-> >   - add dedicated DT property for source clock frequency
-> > 
-> >  .../devicetree/bindings/mmc/litex,mmc.yaml    | 72 +++++++++++++++++++
-> >  1 file changed, 72 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
-> > 
-> 
-> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-> on your patch (DT_CHECKER_FLAGS is new in v5.13):
-> 
-> yamllint warnings/errors:
-> 
-> dtschema/dtc warnings/errors:
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/litex,mmc.yaml: properties:reg-names:items: 'oneOf' conditional failed, one must be fixed:
-> 	[{'const': 'phy'}, {'const': 'core'}, {'const': 'reader'}, {'const': 'writer'}, {'const': 'irq (optional)'}] is not of type 'object'
-> 	'irq (optional)' does not match '^[a-zA-Z0-9,.\\-_ #+/]+$'
-> 	from schema $id: http://devicetree.org/meta-schemas/string-array.yaml#
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/litex,mmc.yaml: properties:reg: {'items': [{'description': 'PHY registers'}, {'description': 'CORE registers'}, {'description': 'DMA Reader buffer'}, {'description': 'DMA Writer buffer'}, {'description': 'IRQ registers (optional)'}], 'minItems': 4, 'maxItems': 5} should not be valid under {'required': ['maxItems']}
-> 	hint: "maxItems" is not needed with an "items" list
-> 	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/litex,mmc.yaml: properties:reg-names: {'items': [{'const': 'phy'}, {'const': 'core'}, {'const': 'reader'}, {'const': 'writer'}, {'const': 'irq (optional)'}], 'minItems': 4, 'maxItems': 5} should not be valid under {'required': ['maxItems']}
-> 	hint: "maxItems" is not needed with an "items" list
-> 	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/litex,mmc.yaml: ignoring, error in schema: properties: reg-names: items
-> warning: no schema found in file: ./Documentation/devicetree/bindings/mmc/litex,mmc.yaml
-> Documentation/devicetree/bindings/mmc/litex,mmc.example.dt.yaml:0:0: /example-0/mmc@12005000: failed to match any schema with compatible: ['litex,mmc']
-> 
-> doc reference errors (make refcheckdocs):
-> 
-> 
-> See https://patchwork.ozlabs.org/patch/1565210
-> 
-> This check can fail if there are any dependencies. The base for a patch
-> series is generally the most recent rc1.
-> 
-> If you already ran 'make dt_binding_check' and didn't see the above
-> error(s), then make sure 'yamllint' is installed and dt-schema is up to
-> date:
-> 
-> pip3 install dtschema --upgrade
-> 
-> Please check and re-submit.
-> 
-
-Thanks! 
-
-I made the following changes:
-
---- a/Documentation/devicetree/bindings/mmc/litex,mmc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/litex,mmc.yaml
-@@ -29,9 +29,8 @@ properties:
-       - description: CORE registers
-       - description: DMA Reader buffer
-       - description: DMA Writer buffer
--      - description: IRQ registers (optional)
-+      - description: IRQ registers
-     minItems: 4
--    maxItems: 5
-
-   reg-names:
-     items:
-@@ -39,12 +38,13 @@ properties:
-       - const: core
-       - const: reader
-       - const: writer
--      - const: irq (optional)
-+      - const: irq
-     minItems: 4
--    maxItems: 5
-
-   clocks:
-     maxItems: 1
-+    description:
-+      Handle to reference clock.
-
-   interrupts:
-     maxItems: 1
-
-... which took care of the bulk of the error messages reported. However,
-I'm still getting the one below, whether or not I leave the `maxItems 1`
-line there under `clocks:`
-
-$ make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-  dt_binding_check
-  LINT    Documentation/devicetree/bindings
-  CHKDT   Documentation/devicetree/bindings/processed-schema-examples.json
-/home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: properties:clock-output-names: {'description': 'List of strings of clock output signal names indexed by the first cell in the clock specifier.', 'minItems': 1, 'maxItems': 7, 'items': [{'const': 'CLKOUT0'}, {'const': 'CLKOUT1'}, {'const': 'CLKOUT2'}, {'const': 'CLKOUT3'}, {'const': 'CLKOUT4'}, {'const': 'CLKOUT5'}, {'const': 'CLKOUT6'}]} should not be valid under {'required': ['maxItems']}
-	hint: "maxItems" is not needed with an "items" list
-	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
-  SCHEMA  Documentation/devicetree/bindings/processed-schema-examples.json
-/home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: ignoring, error in schema: properties: clock-output-names
-warning: no schema found in file: ./Documentation/devicetree/bindings/clock/litex,clock.yaml
-  DTEX    Documentation/devicetree/bindings/mmc/litex,mmc.example.dts
-  DTEX    Documentation/devicetree/bindings/media/renesas,imr.example.dts
-  ...
-
-It appears as though `make dt_binding_check` is trying to read from
-`Documentation/devicetree/bindings/clock/litex,clock.yaml`, which
-does not exist. The clock reference I'm talking about could be *any*
-clock elsewhere in the dts!
-
-This wasn't part of the originally reported errors, not sure why I'm
-seeing it now. Also, not sure what (if anything) I still need to do
-about it, any advice much appreciated!
-
-Thanks,
---Gabriel
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiA8dWxmLmhh
+bnNzb25AbGluYXJvLm9yZz4NCj4gU2VudDogV2VkbmVzZGF5LCBEZWNlbWJlciA4LCAyMDIxIDY6
+MjcgUE0NCj4gVG86IFJpY2t5IFdVIDxyaWNreV93dUByZWFsdGVrLmNvbT4NCj4gQ2M6IGdyZWdr
+aEBsaW51eGZvdW5kYXRpb24ub3JnOyB0b21teWhlYmJAZ21haWwuY29tOw0KPiBsaW51eC1tbWNA
+dmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6
+IFJlOiBbUEFUQ0hdIG1tYzogcnRzeDogaW1wcm92ZSBydyBwZXJmb3JtYW5jZQ0KPiANCj4gT24g
+TW9uLCA2IERlYyAyMDIxIGF0IDEzOjA5LCBSaWNreSBXVSA8cmlja3lfd3VAcmVhbHRlay5jb20+
+IHdyb3RlOg0KPiA+DQo+ID4NCj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0N
+Cj4gPiA+IEZyb206IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KPiA+ID4g
+U2VudDogRnJpZGF5LCBEZWNlbWJlciAzLCAyMDIxIDEwOjMzIFBNDQo+ID4gPiBUbzogUmlja3kg
+V1UgPHJpY2t5X3d1QHJlYWx0ZWsuY29tPg0KPiA+ID4gQ2M6IGdyZWdraEBsaW51eGZvdW5kYXRp
+b24ub3JnOyB0b21teWhlYmJAZ21haWwuY29tOw0KPiA+ID4gbGludXgtbW1jQHZnZXIua2VybmVs
+Lm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZw0KPiA+ID4gU3ViamVjdDogUmU6IFtQ
+QVRDSF0gbW1jOiBydHN4OiBpbXByb3ZlIHJ3IHBlcmZvcm1hbmNlDQo+ID4gPg0KPiA+ID4gT24g
+RnJpLCAzIERlYyAyMDIxIGF0IDExOjQzLCBSaWNreSBXVSA8cmlja3lfd3VAcmVhbHRlay5jb20+
+IHdyb3RlOg0KPiA+ID4gPg0KPiA+ID4gPiBzZF9jaGVja19zZXEoKSB0byBkaXN0aW5ndWlzaCBz
+ZXF1ZW50aWFsIHJ3IG9yIG5vcm1hbCBydyBpZiB0aGlzDQo+ID4gPiA+IGRhdGEgaXMgc2VxdWVu
+dGlhbCBjYWxsIHRvIHNkX3J3X3NlcXVlbnRpYWwoKQ0KPiA+ID4NCj4gPiA+IENhbiB5b3UgcGxl
+YXNlIGV4dGVuZCB0aGlzIGNvbW1pdCBtZXNzYWdlPyBUaGlzIGRvZXNuJ3QgYW5zd2VyIHdoeQ0K
+PiA+ID4gb3Igd2hhdCB0aGlzIGNoYW5nZSByZWFsbHkgZG9lcywgcGxlYXNlIHRyeSB0byBkbyB0
+aGF0LCBhcyB0byBoZWxwIG1lIHRvDQo+IHJldmlldyB0aGlzLg0KPiA+ID4NCj4gPg0KPiA+IFRo
+aXMgcGF0Y2ggaXMgZm9yIGltcHJvdmluZyBzZXF1ZW50aWFsIHJlYWQvd3JpdGUgcGVyZm9ybWFu
+Y2UuDQo+IA0KPiBJIHdvdWxkIG5vdCB1c2UgdGhlIHRlcm0gInNlcXVlbnRpYWwiLCBidXQgcmF0
+aGVyICJtdWx0aS1ibG9jayByZWFkL3dyaXRlcyIuDQo+IA0KPiA+IEJlZm9yZSB0aGlzLCB3aGV0
+aGVyIENNRCBpcyBtdXRpLVJXIG9yIHNpbmdsZS1SVyB0aGUgZHJpdmVyIGRvIHRoZSBzYW1lDQo+
+IGZsb3cuDQo+ID4gVGhpcyBwYXRjaCBkaXN0aW5ndWlzaGVzIHRoZSB0d28gYW5kIGRvIGRpZmZl
+cmVudCBmbG93IHRvIGdldCBtb3JlDQo+ID4gcGVyZm9ybWFuY2Ugb24gc2VxdWVudGlhbCBSVy4N
+Cj4gDQo+IEFscmlnaHQsIHRoYW5rcyBmb3IgY2xhcmlmeWluZy4NCj4gDQo+IFNvIHRvIGJlIGNs
+ZWFyLCBwbGVhc2UgdXBkYXRlIHRoZSBjb21taXQgbWVzc2FnZSB0byBzYXkgdGhhdCBpdCdzIGlt
+cHJvdmluZw0KPiBwZXJmb3JtYW5jZSBmb3IgbXVsdGktYmxvY2sgcmVhZC93cml0ZS4gVGhlbiBw
+bGVhc2UgYWRkIGFsc28gc29tZQ0KPiBpbmZvcm1hdGlvbiBhYm91dCBob3cgdGhhdCBpcyBhY2hp
+ZXZlZC4NCj4gDQo+IE1vcmVvdmVyLCBwbGVhc2UgcmVuYW1lIHRoZSBmdW5jdGlvbnMgaW4gdGhl
+IGNvZGUgYWNjb3JkaW5nIHRvIHRoaXMgYXMgd2VsbCwgYXMNCj4gdG8gbWFrZSBpdCBtb3JlIGNs
+ZWFyLiBGb3IgZXhhbXBsZSwgdXNlIHNkX3J3X211bHRpKCkgKGFuZA0KPiBzZF9yd19zaW5nbGUo
+KSBpZiB0aGF0IGlzIG5lZWRlZCksIHJhdGhlciB0aGFuIHNkX3J3X3NlcXVlbnRpYWwoKS4NCj4g
+DQo+ID4gc2RfY2hlY2tfc2VxKCkgdG8gZGlzdGluZ3Vpc2ggc2VxdWVudGlhbCBSVyAoQ01EIDE4
+LzI1KSBvciBub3JtYWwgUlcNCj4gPiAoQ01EIDE3LzI0KSBpZiB0aGUgZGF0YSBpcyBzZXF1ZW50
+aWFsIGNhbGwgdG8gc2Rfcndfc2VxdWVudGlhbCgpDQo+IA0KPiBJIHdpbGwgd2FpdCBmb3IgYSB2
+MiBmcm9tIHlvdSwgdGhlbiBJIHdpbGwgZ2l2ZSBpdCBhbm90aGVyIHRyeSB0byByZXZpZXcuDQo+
+IA0KDQpPaywgSSB3aWxsIGRvIHRoZSB2MiBwYXRjaC4NCkFuZCBJIG5lZWQgdG8gY2xhcmlmeSwg
+dGhpcyBwYXRjaCBpcyBpbXByb3ZpbmcgcGVyZm9ybWFuY2UgDQp0aGF0IHRoZSBDTUQgaXMgbXVs
+dGktYmxvY2sgYW5kIHRoZSBkYXRlIGlzIHNlcXVlbnRpYWwuIA0KSSB3aWxsIGNoYW5nZSB0aGUg
+ZnVuY3Rpb24gbmFtZSBmb3IgbW9yZSBjbGFyaXR5Lg0KDQo+IFsuLi5dDQo+IA0KPiBLaW5kIHJl
+Z2FyZHMNCj4gVWZmZQ0KPiAtLS0tLS1QbGVhc2UgY29uc2lkZXIgdGhlIGVudmlyb25tZW50IGJl
+Zm9yZSBwcmludGluZyB0aGlzIGUtbWFpbC4NCg==
