@@ -2,156 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8595C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 16:46:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 646B6C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Dec 2021 18:25:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241259AbhLIQtm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Dec 2021 11:49:42 -0500
-Received: from smtp1.axis.com ([195.60.68.17]:29391 "EHLO smtp1.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237817AbhLIQtl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 9 Dec 2021 11:49:41 -0500
+        id S237957AbhLIS2n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Dec 2021 13:28:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35502 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229710AbhLIS2m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Dec 2021 13:28:42 -0500
+Received: from mail-qt1-x82f.google.com (mail-qt1-x82f.google.com [IPv6:2607:f8b0:4864:20::82f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3697C061746;
+        Thu,  9 Dec 2021 10:25:08 -0800 (PST)
+Received: by mail-qt1-x82f.google.com with SMTP id m25so6093470qtq.13;
+        Thu, 09 Dec 2021 10:25:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1639068369;
-  x=1670604369;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=Tfd8JzoTNty+dgBSO5PshmUJLY9QA3r2dO3VaUEjoeY=;
-  b=k72tFwlZceGcAzpSAoEf9RNp0jEFBJW/tRWw78/Zt98aCKRQvpXhmHY9
-   35M45vl8gLIl6flqJZjmHJ1YIsyJIFAiuYNdQEkTHk+bxrUiqo7DVinLG
-   vzGE7+JcRI/oskSzBO45/3DBAsTGbNZQdlHL5ptLoVNwvAjYkGeN1/eav
-   LM3d484/ggVY/NEvaaSSWwD0dNACTaFPi0/8+nbcG0a9sstrASx+8V1rd
-   kVR/S+rar9+mdojYWH/IL8nTetI3c7o7giVeL8IPG8YFzK1LWtYIkjoOt
-   a7gKcpPRpsqY61PHiAOwt7vV11EhfRRXv+upeQAKFB+51caBpGv3gutuN
-   Q==;
-From:   =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>
-CC:     Doug Anderson <dianders@google.com>, <kernel@axis.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-samsung-soc@vger.kernel.org>,
-        =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-Subject: [PATCH v3 4/4] mmc: dw_mmc: Do not wait for DTO in case of error
-Date:   Thu, 9 Dec 2021 17:45:58 +0100
-Message-ID: <20211209164558.13729-5-marten.lindahl@axis.com>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20211209164558.13729-1-marten.lindahl@axis.com>
-References: <20211209164558.13729-1-marten.lindahl@axis.com>
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=tY3Uj57fP/HW8NzRsCUcgjaQafL0bIk8XDbY/Pd7ACE=;
+        b=QryBhz3Xqfd4fQ0HZA1L9YeanmPSAQPQQccArGMyyDF2W+7UyhDWjPiK7yky70y0cW
+         VqPV9XOFn+DD26ZOViHGxYHFnnRUuZDodtNlNyyRh15siVli3AzUdrcuL1z9UC6jdgIv
+         bUoHyL6IuVd94gjcpa0KWRm8QZEb79P/+S1rOG7wmzugvZjyNSd6+uflDF0gRVe617tT
+         XwaBmoTwvmii51heLs05d7KTSELlQ4MkK4QGkWDyG0toEXLTWRZwztoUAX4JokN7yamI
+         cNwuDC8DDYgrHvQqdKjv2WILMCmzQofK//+a/lkwFu1WOvDMTSb6nrNVx+9bC6l+p7GG
+         H+TA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=tY3Uj57fP/HW8NzRsCUcgjaQafL0bIk8XDbY/Pd7ACE=;
+        b=w+2nAaY1P0+QZhw3F9vqgolIg/hDnxG2cOlOrk8urQ9/h2bQR8L230QMrmO8r0+3F7
+         KmPdPZlnoeWzLSCTc37+L58pgUyeQvSkFQWPKQQRFftiorNIr9/0tl35/pUEvs/G4bxj
+         Q2bPRo7p5J816VDEnsu0Y3Zx5GwSadFVc9a4pv+RNgeaxeZjTkc+r8I71PHD/5Lf1TaT
+         PQHjmUxYpfqjva1ntJs7XL7MNVXMkYKdIMAR8y8H+izmrSfCWSAtar8GVhc8q+o05AXm
+         1UmmL+qkXUl2mfm7NAr7o1XYClroM5iIEXWAftwnJkB84G2L2TdpOTxW0S6QoHypZwB+
+         9TJQ==
+X-Gm-Message-State: AOAM533tEpGcZMWELovV3K5agHe7AbWdC1Sq95OA6izjWZAQ6yUEFxOf
+        EgM8QIflayKd0xvDr9yUCzU=
+X-Google-Smtp-Source: ABdhPJw9rRcXu4b7ubdzWIhDayDhLG2/5CbNs1jDNpnbUQyq3/1A3IHPJP1WWUvPycpWEFqW1fwa0g==
+X-Received: by 2002:ac8:588e:: with SMTP id t14mr19589500qta.437.1639074307876;
+        Thu, 09 Dec 2021 10:25:07 -0800 (PST)
+Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
+        by smtp.gmail.com with ESMTPSA id m9sm309862qtn.73.2021.12.09.10.25.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 09 Dec 2021 10:25:07 -0800 (PST)
+Date:   Thu, 9 Dec 2021 13:25:01 -0500
+From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Rob Herring <robh@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Karol Gugala <kgugala@antmicro.com>,
+        mdudek@internships.antmicro.com,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Paul Mackerras <paulus@ozlabs.org>,
+        Joel Stanley <joel@jms.id.au>, david.abdurachmanov@sifive.com,
+        Florent Kermarrec <florent@enjoy-digital.fr>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Stafford Horne <shorne@gmail.com>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Kamil Rakoczy <krakoczy@antmicro.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mateusz Holenko <mholenko@antmicro.com>
+Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: Add bindings for LiteSDCard
+Message-ID: <YbJJ/UqCeFJa5HGF@errol.ini.cmu.edu>
+References: <20211208132042.3226275-1-gsomlo@gmail.com>
+ <20211208132042.3226275-3-gsomlo@gmail.com>
+ <1639004806.166681.596177.nullmailer@robh.at.kernel.org>
+ <YbFXERe0K3rfzZem@glsvmlin.ini.cmu.edu>
+ <CAMuHMdVJZdzRMedn9L_Jb=0MYB_Bxs90v+iH7UaDBzup-qzp8A@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdVJZdzRMedn9L_Jb=0MYB_Bxs90v+iH7UaDBzup-qzp8A@mail.gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When running the ARTPEC-8 DWMMC IP version, and a data error interrupt
-comes during a data read transfer, there is no guarantee for the data
-transfer over interrupt (DTO) to come within the specified data timeout.
-This case is handled by the dto_timer handler which will complete the
-request with the comment:
+On Thu, Dec 09, 2021 at 09:37:27AM +0100, Geert Uytterhoeven wrote:
+> Hi Gabriel,
+> 
+> On Thu, Dec 9, 2021 at 2:08 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> > ... which took care of the bulk of the error messages reported. However,
+> > I'm still getting the one below, whether or not I leave the `maxItems 1`
+> > line there under `clocks:`
+> >
+> > $ make ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-  dt_binding_check
+> >   LINT    Documentation/devicetree/bindings
+> >   CHKDT   Documentation/devicetree/bindings/processed-schema-examples.json
+> > /home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: properties:clock-output-names: {'description': 'List of strings of clock output signal names indexed by the first cell in the clock specifier.', 'minItems': 1, 'maxItems': 7, 'items': [{'const': 'CLKOUT0'}, {'const': 'CLKOUT1'}, {'const': 'CLKOUT2'}, {'const': 'CLKOUT3'}, {'const': 'CLKOUT4'}, {'const': 'CLKOUT5'}, {'const': 'CLKOUT6'}]} should not be valid under {'required': ['maxItems']}
+> >         hint: "maxItems" is not needed with an "items" list
+> >         from schema $id: http://devicetree.org/meta-schemas/items.yaml#
+> >   SCHEMA  Documentation/devicetree/bindings/processed-schema-examples.json
+> > /home/somlo/linux/Documentation/devicetree/bindings/clock/litex,clock.yaml: ignoring, error in schema: properties: clock-output-names
+> > warning: no schema found in file: ./Documentation/devicetree/bindings/clock/litex,clock.yaml
+> >   DTEX    Documentation/devicetree/bindings/mmc/litex,mmc.example.dts
+> >   DTEX    Documentation/devicetree/bindings/media/renesas,imr.example.dts
+> >   ...
+> 
+> --- a/Documentation/devicetree/bindings/clock/litex,clock.yaml
+> +++ b/Documentation/devicetree/bindings/clock/litex,clock.yaml
+> @@ -45,7 +45,6 @@ properties:
+>        List of strings of clock output signal names indexed
+>        by the first cell in the clock specifier.
+>      minItems: 1
+> -    maxItems: 7
+>      items:
+>        - const: CLKOUT0
+>        - const: CLKOUT1
+> 
+> I have that in my local tree, but hadn't sent it to you yet, because
+> litex,clock definitely need more work.
+> 
+> > It appears as though `make dt_binding_check` is trying to read from
+> > `Documentation/devicetree/bindings/clock/litex,clock.yaml`, which
+> > does not exist. The clock reference I'm talking about could be *any*
+> 
+> Oh, it does exist in your tree ;-)
+> To check the examples, it has to apply all other binding files that
+> might apply, hence some checks are always run.
+> 
+> You can avoid some (but not all) such checks by adding
+> 
+>     DT_SCHEMA_FILES=Documentation/devicetree/bindings/path/to/binding.yaml
+> 
+> > clock elsewhere in the dts!
+> >
+> > This wasn't part of the originally reported errors, not sure why I'm
+> > seeing it now. Also, not sure what (if anything) I still need to do
+> > about it, any advice much appreciated!
+> 
+> Of course, as Rob doesn't have that file in his tree.
 
- /*
-  * If DTO interrupt does NOT come in sending data state,
-  * we should notify the driver to terminate current transfer
-  * and report a data timeout to the core.
-  */
+Oh, I'm working on the `litex-rebase` branch, which does have the
+litex,clock file. Running the check on the Linus master with litex_mmc
+v4 on top now passes the check without any errors or warnings. I'll
+incorporate the fixes pointed out by Rob when I publish v4.
 
-But since the ARTPEC-8 DWMMC IP version, supports an extended TMOUT
-register which allows longer timeouts than the non ARTPEC-8 version
-does, waiting for the dto_timer to complete the request in error cases
-may cause the request to take significantly longer time than necessary.
-This is specifically true for the failing steps during tuning of a
-device.
+Sorry for the misunderstanding, thanks Geert for pointing out the
+source of my confusion -- I think all's well now on the dt-bindings
+front w.r.t. litex_mmc... :)
 
-Fix this by completing the request when the error interrupt comes. Since
-this fix is specific for the ARTPEC-8, a quirk is added.
-
-Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
----
-
-v3:
- - Define DW_MMC_QUIRK_EXTENDED_TMOUT.
- - Implement DW_MMC_QUIRK_EXTENDED_TMOUT for the ARTPEC-8 SoC.
-
- drivers/mmc/host/dw_mmc-exynos.c | 5 +++++
- drivers/mmc/host/dw_mmc.c        | 9 +++++++++
- drivers/mmc/host/dw_mmc.h        | 5 +++++
- 3 files changed, 19 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 4e5612d04504..70ff7597f2b0 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -127,6 +127,11 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
- 				DQS_CTRL_GET_RD_DELAY(priv->saved_strobe_ctrl);
- 	}
- 
-+	if (priv->ctrl_type == DW_MCI_TYPE_ARTPEC8) {
-+		/* Quirk needed for the ARTPEC-8 SoC */
-+		host->quirks |= DW_MMC_QUIRK_EXTENDED_TMOUT;
-+	}
-+
- 	host->bus_hz /= (priv->ciu_div + 1);
- 
- 	return 0;
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a7745e193afa..da09a06898c9 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2762,11 +2762,20 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
- 			spin_lock(&host->irq_lock);
- 
-+			if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
-+				del_timer(&host->dto_timer);
-+
- 			/* if there is an error report DATA_ERROR */
- 			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
- 			host->data_status = pending;
- 			smp_wmb(); /* drain writebuffer */
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
-+
-+			if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
-+				/* In case of error, we cannot expect a DTO */
-+				set_bit(EVENT_DATA_COMPLETE,
-+					&host->pending_events);
-+
- 			tasklet_schedule(&host->tasklet);
- 
- 			spin_unlock(&host->irq_lock);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 0a85d05eaf12..7f1e38621d13 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -118,6 +118,7 @@ struct dw_mci_dma_slave {
-  * @part_buf: Simple buffer for partial fifo reads/writes.
-  * @push_data: Pointer to FIFO push function.
-  * @pull_data: Pointer to FIFO pull function.
-+ * @quirks: Set of quirks that apply to specific versions of the IP.
-  * @vqmmc_enabled: Status of vqmmc, should be true or false.
-  * @irq_flags: The flags to be passed to request_irq.
-  * @irq: The irq value to be passed to request_irq.
-@@ -223,6 +224,7 @@ struct dw_mci {
- 	void (*push_data)(struct dw_mci *host, void *buf, int cnt);
- 	void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
- 
-+	u32			quirks;
- 	bool			vqmmc_enabled;
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-@@ -274,6 +276,9 @@ struct dw_mci_board {
- 	struct dma_pdata *data;
- };
- 
-+/* Support for longer data read timeout */
-+#define DW_MMC_QUIRK_EXTENDED_TMOUT            BIT(0)
-+
- #define DW_MMC_240A		0x240a
- #define DW_MMC_280A		0x280a
- 
--- 
-2.20.1
-
+Cheers,
+--Gabriel
