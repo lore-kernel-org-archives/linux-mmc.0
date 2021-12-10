@@ -2,67 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C251C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 19:58:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89113C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 20:12:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234152AbhLJUC0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Dec 2021 15:02:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50570 "EHLO
+        id S1344076AbhLJUQX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Dec 2021 15:16:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243533AbhLJUCZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 15:02:25 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42DF4C061746;
-        Fri, 10 Dec 2021 11:58:49 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 2D7B9CE2D35;
-        Fri, 10 Dec 2021 19:58:47 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 5A252C341C5;
-        Fri, 10 Dec 2021 19:58:45 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1639166325;
-        bh=70sWYcreaG+6agipBidXoRKWuJTjPSAR4lQz2JJekuI=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=p1soJfKtCnKnb3D+Yt8KFmvsjlPttyLo8k/lQa0hNZiMsQHX7TgN/799PLg8Vy0qe
-         Yq3oWp9t/DWm4f13/rE7tjz3tfNPFO8zMb10fwYqbhNKG6YY+DNOV7TcbsLgZDbF6y
-         pG1kSAfunGhaeuoj8zGyM/wtdQiwHbDdLB/zd0isaL95IgPdBiBYtIP49xnXQeqRdN
-         EPO41fhsJJNwJ4KGX61yTegkzp/Oka3XCuHX0rWy1gSJ9LM2dsHh6TSJ2QxC33bO/6
-         in0A3Yf1HkfGfyaRQROnzHS/1lubHKyivb/16NpwXaLT5Va8tuu2Va4V2ZFmB+HjWK
-         C9I1LiOLcDUKQ==
-Received: from pdx-korg-docbuild-2.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by pdx-korg-docbuild-2.ci.codeaurora.org (Postfix) with ESMTP id 46176609EB;
-        Fri, 10 Dec 2021 19:58:45 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.16-rc5
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20211210095431.63667-1-ulf.hansson@linaro.org>
-References: <20211210095431.63667-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20211210095431.63667-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc3
-X-PR-Tracked-Commit-Id: d594b35d3b31bc04b6ef36589f38135d3acb8df5
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 2ca4b65169b3e6f5cfd114f63b613c2b67569d6e
-Message-Id: <163916632528.27955.14170833328820098979.pr-tracker-bot@kernel.org>
-Date:   Fri, 10 Dec 2021 19:58:45 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S1344066AbhLJUQW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 15:16:22 -0500
+Received: from mail-oi1-x22a.google.com (mail-oi1-x22a.google.com [IPv6:2607:f8b0:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 723FAC0617A1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 12:12:47 -0800 (PST)
+Received: by mail-oi1-x22a.google.com with SMTP id o4so14721181oia.10
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 12:12:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=slzGBePYCrgaDRnlPEDIBIMYbsbR6khnbp5/bRRqlbA=;
+        b=cgXPDoiQUDpeq4SoOZku+p8ATEz18iL0zuiQKUBqGKXZmWLg7N1xkBU7LxNzEr5n9C
+         NlSafWcjVHHsq/jSot7wUqy68WmnXBHH7t2G0ORUHaCHWjrNaJn8tdeT+eEzlaC/dGXv
+         Zh+4PNLER4mqQ0AxF+WAX0Lz/opfSGHBLeB8jPEA62LRIEzPwu3W9KuDQXpk7EytOcTI
+         CjX0JWg9VsIt497fo1SNCZBUfS5NmHy17dcyghuw7wFYB+nEUP98Yc/TvX7VWGj+Z06N
+         wu0Y471tKEkarz22PSdgrFT/Z5/8hGbuVhiTi6lpEV3/IgE1lXLji6ATu9jzOulRAPik
+         x8RQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=slzGBePYCrgaDRnlPEDIBIMYbsbR6khnbp5/bRRqlbA=;
+        b=FB7Z13mFlA0KQJBuomGFMOi/l8tjl5qA9OZrSF2ACE2nGaU5rw6K1LSBgd16FG18mI
+         Uy63kWtFAYsE/bMqFmICEhsh2MSrVIEBJjkf5+UblZuL2SzPRSSCaP0q8MdS8bKQ7s9k
+         aKt5h0rHnwA7J6WTrjVOSduS5GUS6Xs+hpV3cdpOoJdD7Lc7U7lwgDsy4PCMtcOO1guo
+         eBim8yv58QyZApI3JXvijY8bW5IvLj60nZhK2LvgO4jBgrv3USc3l7Y4IrTr2jBPqN2y
+         +tub6PCh/t0PRtZsjkJUuk5p/wAihvAcI7AKUV6Dt+c/BKCN24Veg1B4QF418HjVwQQv
+         r4Lg==
+X-Gm-Message-State: AOAM533oj3AH1lXFJC/4dJef2KCwX40JCCePGIPulWxmiERwUgmFGoxb
+        AG2xGRrhDbH18pQeVMB1XcYfCZvkIF+m8a5cnYSWsQ==
+X-Google-Smtp-Source: ABdhPJzMR2vznEDF8swuHq63lynTYGhs4v11eF+LAnUSFHWHggwuzwRmt93CPGXvBFj9Zfzps2o47kI7iQ/XPRY7uE4=
+X-Received: by 2002:a05:6808:60e:: with SMTP id y14mr13991533oih.162.1639167166807;
+ Fri, 10 Dec 2021 12:12:46 -0800 (PST)
+MIME-Version: 1.0
+References: <20211210091834.28958-1-yann.gautier@foss.st.com>
+In-Reply-To: <20211210091834.28958-1-yann.gautier@foss.st.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 10 Dec 2021 21:12:34 +0100
+Message-ID: <CACRpkdZtRqr0xnS849ZEsDGMtnDNKgOZu=7ww5H_fvxoTDQpag@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: add st,stm32-sdmmc2 compatible
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        loic.pallardy@foss.st.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 10 Dec 2021 10:54:31 +0100:
+On Fri, Dec 10, 2021 at 10:19 AM Yann Gautier <yann.gautier@foss.st.com> wrote:
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc3
+> Although this compatible is not used in kernel, as we use the common
+> MMCI driver, it is used by bootloaders. The U-Boot driver was merged
+> before the kernel driver and uses this compatible.
+> To avoid issues when aligning device tree files between kernel and
+> boot loader, the ST dedicated compatible is added to bindings file.
+>
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/2ca4b65169b3e6f5cfd114f63b613c2b67569d6e
+Why not
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thank you!
+> +      - description: Entry for STMicroelectronics variant of PL18x.
+> +          This dedicated compatible is used by bootloaders.
+> +        items:
+> +          - const: st,stm32-sdmmc2
+> +          - const: arm,pl18x
+> +          - const: arm,primecell
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+You *could* mark it deprecated if it's not supposed to be used.
+But no strong opinion.
+
+Yours,
+Linus Walleij
