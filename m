@@ -2,90 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53D9EC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 09:19:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B8A6C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 09:54:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239171AbhLJJWw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Dec 2021 04:22:52 -0500
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:50628 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S239158AbhLJJWw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 04:22:52 -0500
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1BA8MGn8003616;
-        Fri, 10 Dec 2021 10:19:05 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-type; s=selector1;
- bh=GD0iSo1NTLYV7EasCiFxi5eaAvDCn7ZEjTnRKBW5Tus=;
- b=o+UG4VnFhk8QXeC4zOjkOKWogeHRU3Z49ToFV7PUu9ytngitiQHAadYAlf99xc2O1YdJ
- qTsHtmt5/IJuo9XUrDKDXonZLIgQ3nAaWjqgKK9UGo/B3WskCewOIog7i1kP60wFh+CO
- CBxothr50iptMW4QZHaa6Pt2gcgFj4n3z84/b0A4jw92e5qIwUEt0BPFDvdCigK2nKIS
- +ybTaM05cU/Noc8fj6cubz71EmnWzvf7rByGX8hZ98aE0izLJ6s22OCrjlOhtgLqcrP3
- sQqnX4PWqkAd/MjpdQIl+d23FdpcUS8r/JT0AxRmgs8g99sZ1yo+gxZX9EF7GEQOAURZ FQ== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3cv3asrbk0-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 10 Dec 2021 10:19:05 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 324E310002A;
-        Fri, 10 Dec 2021 10:19:04 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 26DCC2224BC;
-        Fri, 10 Dec 2021 10:19:04 +0100 (CET)
-Received: from localhost (10.75.127.44) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Fri, 10 Dec 2021 10:19:03
- +0100
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <loic.pallardy@foss.st.com>
-CC:     <yann.gautier@foss.st.com>
-Subject: [PATCH] mmc: mmci: add st,stm32-sdmmc2 compatible
-Date:   Fri, 10 Dec 2021 10:18:34 +0100
-Message-ID: <20211210091834.28958-1-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.17.1
+        id S239655AbhLJJ6K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Dec 2021 04:58:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48410 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239633AbhLJJ6J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 04:58:09 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95143C0617A1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 01:54:34 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id b1so16947733lfs.13
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 01:54:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=m8N1QoomSDHcA8D1T8Tv1TTr0YRk/oLQcu27sC+kmuc=;
+        b=XkCisJCEtNeNlUcARJfgK8lAUuGTX8V0RgWLLmy3rHtYvOWlNVSS7bF29eAp/RCADg
+         SD9iDqH2813CT+2j0foeTTgPFKqpQgcHrUsViWgXSnI755Uki2fIkHlyjAX0BBXNYtxG
+         PaN+zPU1HH7o92dXwLpFfFUMKlqdDV9cpEoBeRZ8DkwP4O2yatG0eC7y3kS5BOvlW1yy
+         XlfEnD1pPgg1fsO5KDPLoe3BAGSxtX5oZKbS2989ELBN1cyN9eTpU2PwL2lr3IeYyeeP
+         brzbRriIg+nyxCRjQAF4qIExrLAJK+8ISr8tPsuKD/OubSz+jAbbORv3oYQ9YGjTmzP0
+         UKYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=m8N1QoomSDHcA8D1T8Tv1TTr0YRk/oLQcu27sC+kmuc=;
+        b=et2CoDSRcUMO8ZVLcZWATvKv2ar4SedFsgI686spWZ7Az5Aj/71ukZux+ywcualJSZ
+         TR4XD9gzVK+Pv1a8LQK7taSmF5U6DxQLRdoPGu2qemb63LxFLuj90EHv49Tz53Yl+AVG
+         DDc31D2pPFlS4ykujfNZI8Wy9Gw0SAiCHhiUlcxllAQvjVIC6Mx3Zxmi/Pe/5LDY1zcZ
+         0Zyi+BScreE/qnv/WT3dtCKN6b/NX7Ryxsdhet3tm7lz4VzFQYpJVTJYFuN4XCcSlhpS
+         mN2fMz3n8mQYciVE0eUbkotZFm8FlT+MIbNkbQHJjYzc5sb+2Cxp+Y58E5aaWUu35iW3
+         U9AQ==
+X-Gm-Message-State: AOAM5301G3Pfrh8qBPijqiUHM3zgtVflWzv/TR8vTR0CksBK/XhkApqP
+        ITUAbvKThhzQmRkEYZR+eSJb6w==
+X-Google-Smtp-Source: ABdhPJxMtCRcg2pLipCeOwRT+EWiXBB1vSlr3YCbOx9Y3LWEahEOmkN4UttF75CaFKwSXPdc/8bb4A==
+X-Received: by 2002:a19:c352:: with SMTP id t79mr11305464lff.251.1639130072797;
+        Fri, 10 Dec 2021 01:54:32 -0800 (PST)
+Received: from localhost.localdomain (h-155-4-129-21.NA.cust.bahnhof.se. [155.4.129.21])
+        by smtp.gmail.com with ESMTPSA id h17sm262875lfv.62.2021.12.10.01.54.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 Dec 2021 01:54:32 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.16-rc5
+Date:   Fri, 10 Dec 2021 10:54:31 +0100
+Message-Id: <20211210095431.63667-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.75.127.44]
-X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.11.62.513
- definitions=2021-12-10_03,2021-12-08_01,2021-12-02_01
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Although this compatible is not used in kernel, as we use the common
-MMCI driver, it is used by bootloaders. The U-Boot driver was merged
-before the kernel driver and uses this compatible.
-To avoid issues when aligning device tree files between kernel and
-boot loader, the ST dedicated compatible is added to bindings file.
+Hi Linus,
 
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
----
- Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 6 ++++++
- 1 file changed, 6 insertions(+)
+Here's a PR with a couple of MMC fixes intended for v5.16-rc5. Details about the
+highlights are as usual found in the signed tag.
 
-diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-index 47595cb483be..eed54bee7665 100644
---- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-+++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-@@ -53,6 +53,12 @@ properties:
-         items:
-           - const: arm,pl18x
-           - const: arm,primecell
-+      - description: Entry for STMicroelectronics variant of PL18x.
-+          This dedicated compatible is used by bootloaders.
-+        items:
-+          - const: st,stm32-sdmmc2
-+          - const: arm,pl18x
-+          - const: arm,primecell
- 
-   clocks:
-     description: One or two clocks, the "apb_pclk" and the "MCLK"
--- 
-2.17.1
+Please pull this in!
 
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit d58071a8a76d779eedab38033ae4c821c30295a5:
+
+  Linux 5.16-rc3 (2021-11-28 14:09:19 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc3
+
+for you to fetch changes up to d594b35d3b31bc04b6ef36589f38135d3acb8df5:
+
+  mmc: mediatek: free the ext_csd when mmc_get_ext_csd success (2021-12-09 10:30:11 +0100)
+
+----------------------------------------------------------------
+MMC host:
+ - mtk-sd: Fix memory leak during tuning
+ - renesas_sdhi: Initialize variable properly when tuning
+
+----------------------------------------------------------------
+Wenbin Mei (1):
+      mmc: mediatek: free the ext_csd when mmc_get_ext_csd success
+
+Wolfram Sang (1):
+      mmc: renesas_sdhi: initialize variable properly when tuning
+
+ drivers/mmc/host/mtk-sd.c            | 4 +++-
+ drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
