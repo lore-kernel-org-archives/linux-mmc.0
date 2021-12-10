@@ -2,100 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B8A6C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 09:54:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42D5AC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 14:54:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239655AbhLJJ6K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Dec 2021 04:58:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48410 "EHLO
+        id S242443AbhLJO6O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Dec 2021 09:58:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33432 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239633AbhLJJ6J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 04:58:09 -0500
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95143C0617A1
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 01:54:34 -0800 (PST)
-Received: by mail-lf1-x131.google.com with SMTP id b1so16947733lfs.13
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 01:54:34 -0800 (PST)
+        with ESMTP id S242434AbhLJO6N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 09:58:13 -0500
+Received: from mail-qv1-xf29.google.com (mail-qv1-xf29.google.com [IPv6:2607:f8b0:4864:20::f29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 792B0C0617A1;
+        Fri, 10 Dec 2021 06:54:38 -0800 (PST)
+Received: by mail-qv1-xf29.google.com with SMTP id s9so8134707qvk.12;
+        Fri, 10 Dec 2021 06:54:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=m8N1QoomSDHcA8D1T8Tv1TTr0YRk/oLQcu27sC+kmuc=;
-        b=XkCisJCEtNeNlUcARJfgK8lAUuGTX8V0RgWLLmy3rHtYvOWlNVSS7bF29eAp/RCADg
-         SD9iDqH2813CT+2j0foeTTgPFKqpQgcHrUsViWgXSnI755Uki2fIkHlyjAX0BBXNYtxG
-         PaN+zPU1HH7o92dXwLpFfFUMKlqdDV9cpEoBeRZ8DkwP4O2yatG0eC7y3kS5BOvlW1yy
-         XlfEnD1pPgg1fsO5KDPLoe3BAGSxtX5oZKbS2989ELBN1cyN9eTpU2PwL2lr3IeYyeeP
-         brzbRriIg+nyxCRjQAF4qIExrLAJK+8ISr8tPsuKD/OubSz+jAbbORv3oYQ9YGjTmzP0
-         UKYw==
+        bh=Wf4BKyY2V/pYVycdF/iVPuxJUBo+0n5Ukb8K0eQFB9k=;
+        b=O9jMv+DstPd3YNF26JQDDo67u8zqEd2XnFDpn1ktGI+Xb5ZhccxA1VRgCeLpy+3i+q
+         Vfq2tVQFGLY2YqJGjvwYrSztXsPjVNSVb9szMcOH0ilZxHYc0vcNxiRnvEzmrHpVAuqY
+         mRpdERRm1vyioWpxaAcCjeS1yAfjTJm9Ep68JMBJOliNlmtzUrz47yvGY3cKX84DQ22C
+         qCOiJb6bSO7qgKvcgdi41vpTe3ffHVHDgbwMtSo/O9b5IG5yYZ92mARCfFGclJy7ZNeL
+         lMDQynyDd7FcHsIwRTuB+Oet2JjCoRukKyDN0+EDz2bRyPjJTL6UPaXOkExDdumOE+eA
+         yfmA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=m8N1QoomSDHcA8D1T8Tv1TTr0YRk/oLQcu27sC+kmuc=;
-        b=et2CoDSRcUMO8ZVLcZWATvKv2ar4SedFsgI686spWZ7Az5Aj/71ukZux+ywcualJSZ
-         TR4XD9gzVK+Pv1a8LQK7taSmF5U6DxQLRdoPGu2qemb63LxFLuj90EHv49Tz53Yl+AVG
-         DDc31D2pPFlS4ykujfNZI8Wy9Gw0SAiCHhiUlcxllAQvjVIC6Mx3Zxmi/Pe/5LDY1zcZ
-         0Zyi+BScreE/qnv/WT3dtCKN6b/NX7Ryxsdhet3tm7lz4VzFQYpJVTJYFuN4XCcSlhpS
-         mN2fMz3n8mQYciVE0eUbkotZFm8FlT+MIbNkbQHJjYzc5sb+2Cxp+Y58E5aaWUu35iW3
-         U9AQ==
-X-Gm-Message-State: AOAM5301G3Pfrh8qBPijqiUHM3zgtVflWzv/TR8vTR0CksBK/XhkApqP
-        ITUAbvKThhzQmRkEYZR+eSJb6w==
-X-Google-Smtp-Source: ABdhPJxMtCRcg2pLipCeOwRT+EWiXBB1vSlr3YCbOx9Y3LWEahEOmkN4UttF75CaFKwSXPdc/8bb4A==
-X-Received: by 2002:a19:c352:: with SMTP id t79mr11305464lff.251.1639130072797;
-        Fri, 10 Dec 2021 01:54:32 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-21.NA.cust.bahnhof.se. [155.4.129.21])
-        by smtp.gmail.com with ESMTPSA id h17sm262875lfv.62.2021.12.10.01.54.31
+        bh=Wf4BKyY2V/pYVycdF/iVPuxJUBo+0n5Ukb8K0eQFB9k=;
+        b=D/OFIsxCRrxWLV9L6aYQwYea+Yuxm/WeUjQTqYuDmest8DLuoxv6ckg3yA2wlzohIY
+         1PZ9rPAySkTbxQFMtLjM135FlbaP4sp5F+yUgntaLLSWE/yCIQ7EH7BTkEux5AJYeVS8
+         i279bDPREG1lKv9m23aVd6rq012lrPGqGhkia6FF7n+E1HNtGzYU2973TvMVCoVfY2Op
+         dV+LwwW5pg0prbjl++Xzf4+K5PMkcjL9P3DjcsZts/+Jmp300AQeVDV8rBddwlaYAZVC
+         IhQglyGBj/hNqUi4n6HZyTnLcqEo4/LmYY0qfJ5hY7EOopHW0YcyjMHrWvisXSqQVEtg
+         G20w==
+X-Gm-Message-State: AOAM531s8b9cpFwSVPL+00pcQ9aCWWukMrFoPD/4NF1nieyKNwtqrDLX
+        NSXp8HYvtR0sioIPJFdp+DYIgWTVGSqjJQ==
+X-Google-Smtp-Source: ABdhPJxYBPATqlm2AedtfAOqYyiUmxASWxP4cwy6gkN25/SShjIaSq39miYc93hPB8rjQZ7154Jo6w==
+X-Received: by 2002:a05:6214:1c85:: with SMTP id ib5mr26507493qvb.72.1639148077376;
+        Fri, 10 Dec 2021 06:54:37 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id a3sm2054681qtx.59.2021.12.10.06.54.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Dec 2021 01:54:32 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.16-rc5
-Date:   Fri, 10 Dec 2021 10:54:31 +0100
-Message-Id: <20211210095431.63667-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        Fri, 10 Dec 2021 06:54:36 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org
+Subject: [PATCH v4 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Fri, 10 Dec 2021 09:54:27 -0500
+Message-Id: <20211210145430.3707463-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+Add support for the LiteX SD-Card device, LiteSDCard.
 
-Here's a PR with a couple of MMC fixes intended for v5.16-rc5. Details about the
-highlights are as usual found in the signed tag.
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
-Please pull this in!
+New in v4:
 
-Kind regards
-Ulf Hansson
+Doc/dt/bindings/mmc/litex,mmc.yaml:
 
+  - fixed `dt_binding_check` errors uncovered by Rob's script
 
-The following changes since commit d58071a8a76d779eedab38033ae4c821c30295a5:
+drivers/mmc/host/litex_mmc.c:
 
-  Linux 5.16-rc3 (2021-11-28 14:09:19 -0800)
+  - struct litex_mmc_host fields re-ordered so that `pahole` reports
+    no holes in either 32- or 64-bit builds
+  - litex_mmc_set_bus_width() now encapsulates check for
+    host->is_bus_width_set
+  - litex_mmc_request() - factor out dma data setup into separate
+    helper function: litex_mmc_do_dma()
 
-are available in the Git repository at:
+>New in v3:
+>
+>  MAINTAINERS:
+>
+>  - picked up acked-by Joel
+>  - added listing for liteeth driver
+>  - added Joel as additional co-maintainer (thanks!)
+>
+>  Doc/dt/bindings/mmc/litex,mmc.yaml:
+>
+>  - picked up r/b Geert Uytterhoeven <geert@linux-m68k.org> in DT
+>    bindings document (please let me know if that was premature, and
+>    happy to take further review if needed :)
+>  - add dedicated DT property for source clock frequency
+>
+>  drivers/mmc/host/litex_mmc.c:
+>
+>  - fixed function signature (no line split), and naming (litex_mmc_*)
+>  - more informative MODULE_AUTHOR() entries
+>    - also added matching "Copyright" entries in file header
+>  - fixed description in Kconfig
+>  - fixed DT documentation
+>  - removed magic constants
+>  - removed litex_map_status(), have sdcard_wait_done() return *real*
+>    error codes directly instead.
+>  - streamlined litex_mmc_reponse_len()
+>  - call litex_mmc_set_bus_width() only once, and ensure it returns
+>    correct error code(s)
+>  - use readx_poll_timeout() -- more concise -- instead of
+>    read_poll_timeout()
+>  - use dev_err() in litex_mmc_send_cmd() (instead of pr_err())
+>  - litex_mmc_setclk() will update host->clock before returning
+>  - separate irq initialization into its own function,
+>    litex_mmc_irq_init()
+>  - document rationale for f_min, f_max
+>  - use dmam_alloc_coherent(), which simplifies cleanup significantly
+>  - large `if (data) { ... }` block in litex_mmc_request() left as-is,
+>    there are too many variables shared with the rest of the parent
+>    function body to easily separate (e.g., `len`, `transfer`, `direct`).
+>    If this is indeed a blocker, I can take another shot at refactoring
+>    it in a future revision!
+>  - bump dma_set_mask_and_coherent() to 64-bits on suitable
+>    architectures
+>  - clock source picked up from dedicated DT clock reference property
+>  - remove gpio card-detect logic (needs testing and a dt binding
+>    example before being eligible for upstream inclusion)
+>
+>> New in v2:
+>>   - reword info message in litex_set_clk()
+>>   - streamline code in litex_map_status()
+>>   - fix typos in Kconfig (thanks Randy Dunlap <rdunlap@infradead.org>)
+>>   - improvements suggested by Stafford Horne <shorne@gmail.com>
+>>     - allow COMPILE_TEST in Kconfig
+>>     - use read_poll_timeout() when waiting for cmd/data/DMA
+>>       xfer completion
+>>   - include interrupt.h (thanks kernel test robot <lkp@intel.com>)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc3
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
 
-for you to fetch changes up to d594b35d3b31bc04b6ef36589f38135d3acb8df5:
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  72 ++
+ MAINTAINERS                                   |   9 +-
+ drivers/mmc/host/Kconfig                      |   9 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 654 ++++++++++++++++++
+ 5 files changed, 743 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
 
-  mmc: mediatek: free the ext_csd when mmc_get_ext_csd success (2021-12-09 10:30:11 +0100)
+-- 
+2.31.1
 
-----------------------------------------------------------------
-MMC host:
- - mtk-sd: Fix memory leak during tuning
- - renesas_sdhi: Initialize variable properly when tuning
-
-----------------------------------------------------------------
-Wenbin Mei (1):
-      mmc: mediatek: free the ext_csd when mmc_get_ext_csd success
-
-Wolfram Sang (1):
-      mmc: renesas_sdhi: initialize variable properly when tuning
-
- drivers/mmc/host/mtk-sd.c            | 4 +++-
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- 2 files changed, 4 insertions(+), 2 deletions(-)
