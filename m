@@ -2,86 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89113C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 20:12:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14793C43217
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Dec 2021 21:25:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344076AbhLJUQX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Dec 2021 15:16:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54100 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344066AbhLJUQW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 15:16:22 -0500
-Received: from mail-oi1-x22a.google.com (mail-oi1-x22a.google.com [IPv6:2607:f8b0:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 723FAC0617A1
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 12:12:47 -0800 (PST)
-Received: by mail-oi1-x22a.google.com with SMTP id o4so14721181oia.10
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Dec 2021 12:12:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=slzGBePYCrgaDRnlPEDIBIMYbsbR6khnbp5/bRRqlbA=;
-        b=cgXPDoiQUDpeq4SoOZku+p8ATEz18iL0zuiQKUBqGKXZmWLg7N1xkBU7LxNzEr5n9C
-         NlSafWcjVHHsq/jSot7wUqy68WmnXBHH7t2G0ORUHaCHWjrNaJn8tdeT+eEzlaC/dGXv
-         Zh+4PNLER4mqQ0AxF+WAX0Lz/opfSGHBLeB8jPEA62LRIEzPwu3W9KuDQXpk7EytOcTI
-         CjX0JWg9VsIt497fo1SNCZBUfS5NmHy17dcyghuw7wFYB+nEUP98Yc/TvX7VWGj+Z06N
-         wu0Y471tKEkarz22PSdgrFT/Z5/8hGbuVhiTi6lpEV3/IgE1lXLji6ATu9jzOulRAPik
-         x8RQ==
+        id S1344224AbhLJV2e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Dec 2021 16:28:34 -0500
+Received: from mail-ot1-f41.google.com ([209.85.210.41]:46043 "EHLO
+        mail-ot1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237368AbhLJV2d (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Dec 2021 16:28:33 -0500
+Received: by mail-ot1-f41.google.com with SMTP id a23-20020a9d4717000000b0056c15d6d0caso10878251otf.12;
+        Fri, 10 Dec 2021 13:24:58 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=slzGBePYCrgaDRnlPEDIBIMYbsbR6khnbp5/bRRqlbA=;
-        b=FB7Z13mFlA0KQJBuomGFMOi/l8tjl5qA9OZrSF2ACE2nGaU5rw6K1LSBgd16FG18mI
-         Uy63kWtFAYsE/bMqFmICEhsh2MSrVIEBJjkf5+UblZuL2SzPRSSCaP0q8MdS8bKQ7s9k
-         aKt5h0rHnwA7J6WTrjVOSduS5GUS6Xs+hpV3cdpOoJdD7Lc7U7lwgDsy4PCMtcOO1guo
-         eBim8yv58QyZApI3JXvijY8bW5IvLj60nZhK2LvgO4jBgrv3USc3l7Y4IrTr2jBPqN2y
-         +tub6PCh/t0PRtZsjkJUuk5p/wAihvAcI7AKUV6Dt+c/BKCN24Veg1B4QF418HjVwQQv
-         r4Lg==
-X-Gm-Message-State: AOAM533oj3AH1lXFJC/4dJef2KCwX40JCCePGIPulWxmiERwUgmFGoxb
-        AG2xGRrhDbH18pQeVMB1XcYfCZvkIF+m8a5cnYSWsQ==
-X-Google-Smtp-Source: ABdhPJzMR2vznEDF8swuHq63lynTYGhs4v11eF+LAnUSFHWHggwuzwRmt93CPGXvBFj9Zfzps2o47kI7iQ/XPRY7uE4=
-X-Received: by 2002:a05:6808:60e:: with SMTP id y14mr13991533oih.162.1639167166807;
- Fri, 10 Dec 2021 12:12:46 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=8MM7Mqy4LVhqQo1WtAnEZHBAScofrOdZmMSPjQZ2muY=;
+        b=bAIXQgEUZfBMhYHPkSr7Q+ptZx62u/N9xYlsNjmMTxN4aYBx5bJyStVMA9wp3YmJ3H
+         y7+sZGVmw5DuhsCxvomRrFdncZvN/W5Uz1rwMU4UhNhyE51jPtU/tHIHPynIIJtOaeUq
+         omsQ59dMc97gf4Mf00E4VeDQ5gejHU4EBo1sYjmUqyjkAFHzxq3kEghCxLMs55Vzn0ys
+         3RO8PlBNSg0vMQSgGliy2ynLII1IMfzmbYMoSH7r9GgfpK1HsnhTHwLUq9cJpXRO4wUP
+         3vzgsqZHEfqAaCfXrqK7rfhWevrK2zaNjBlVXaG2nHVaaloICaQmnOoz18nYiWAG9qM3
+         BBNg==
+X-Gm-Message-State: AOAM532DYrdeo92ahRVbizoPb1WBJ8ckYvDsO9uxzgu4tFiMN7ZxzkiD
+        6AGcL+TC9hO9rN7po6RpLw==
+X-Google-Smtp-Source: ABdhPJyTn5sR0JkqUstumnB93RnMCqtBd+uULYV15dK0CVTcCdcT8gfqCXalGgl6VqPsJd0DE5LuYQ==
+X-Received: by 2002:a05:6830:1216:: with SMTP id r22mr13577934otp.10.1639171496337;
+        Fri, 10 Dec 2021 13:24:56 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id r25sm722169ote.73.2021.12.10.13.24.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 Dec 2021 13:24:55 -0800 (PST)
+Received: (nullmailer pid 1925851 invoked by uid 1000);
+        Fri, 10 Dec 2021 21:24:54 -0000
+Date:   Fri, 10 Dec 2021 15:24:54 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     olof@lixom.net, s.hauer@pengutronix.de, linux-clk@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, ulf.hansson@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org,
+        linux-gpio@vger.kernel.org, linus.walleij@linaro.org,
+        adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
+        jirislaby@kernel.org, stefan@agner.ch,
+        linux-serial@vger.kernel.org, arnd@arndb.de,
+        giulio.benetti@benettiengineering.com, gregkh@linuxfoundation.org,
+        linux-mmc@vger.kernel.org, Mr.Bossman075@gmail.com,
+        festevam@gmail.com, shawnguo@kernel.org, kernel@pengutronix.de,
+        abel.vesa@nxp.com, linux@armlinux.org.uk, aisheng.dong@nxp.com,
+        devicetree@vger.kernel.org, soc@kernel.org, robh+dt@kernel.org
+Subject: Re: [PATCH v4 05/13] dt-bindings: imx: Add clock binding for
+ i.MXRT1050
+Message-ID: <YbPFpt/EXjSBVBib@robh.at.kernel.org>
+References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
+ <20211204061042.1248028-6-Mr.Bossman075@gmail.com>
 MIME-Version: 1.0
-References: <20211210091834.28958-1-yann.gautier@foss.st.com>
-In-Reply-To: <20211210091834.28958-1-yann.gautier@foss.st.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 10 Dec 2021 21:12:34 +0100
-Message-ID: <CACRpkdZtRqr0xnS849ZEsDGMtnDNKgOZu=7ww5H_fvxoTDQpag@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: add st,stm32-sdmmc2 compatible
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        loic.pallardy@foss.st.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211204061042.1248028-6-Mr.Bossman075@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 10, 2021 at 10:19 AM Yann Gautier <yann.gautier@foss.st.com> wrote:
+On Sat, 04 Dec 2021 01:10:34 -0500, Jesse Taube wrote:
+> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> 
+> Add the clock binding doc for i.MXRT1050.
+> 
+> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> [Giulio: added all clocks up to IMXRT1050_CLK_USBOH3]
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> [Jesse: added clocks from IMXRT1050_CLK_IPG_PDOF to
+> IMXRT1050_CLK_DMA_MUX and moved IMXRT1050_CLK_END on]
+> ---
+> V1->V2:
+> * Nothing done
+> V2->V3:
+> * Added GPT binding
+> V3->V4:
+> * Change License to MIT or GPL-2
+> ---
+>  include/dt-bindings/clock/imxrt1050-clock.h | 73 +++++++++++++++++++++
+>  1 file changed, 73 insertions(+)
+>  create mode 100644 include/dt-bindings/clock/imxrt1050-clock.h
+> 
 
-> Although this compatible is not used in kernel, as we use the common
-> MMCI driver, it is used by bootloaders. The U-Boot driver was merged
-> before the kernel driver and uses this compatible.
-> To avoid issues when aligning device tree files between kernel and
-> boot loader, the ST dedicated compatible is added to bindings file.
->
-> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-
-Why not
-Acked-by: Linus Walleij <linus.walleij@linaro.org>
-
-> +      - description: Entry for STMicroelectronics variant of PL18x.
-> +          This dedicated compatible is used by bootloaders.
-> +        items:
-> +          - const: st,stm32-sdmmc2
-> +          - const: arm,pl18x
-> +          - const: arm,primecell
-
-You *could* mark it deprecated if it's not supposed to be used.
-But no strong opinion.
-
-Yours,
-Linus Walleij
+Acked-by: Rob Herring <robh@kernel.org>
