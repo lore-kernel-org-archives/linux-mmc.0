@@ -2,76 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC2DFC433F5
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Dec 2021 07:05:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF035C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Dec 2021 15:00:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229619AbhLLHFy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Dec 2021 02:05:54 -0500
-Received: from marcansoft.com ([212.63.210.85]:60066 "EHLO mail.marcansoft.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229533AbhLLHFy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 12 Dec 2021 02:05:54 -0500
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: marcan@marcan.st)
-        by mail.marcansoft.com (Postfix) with ESMTPSA id 426E042598;
-        Sun, 12 Dec 2021 07:05:51 +0000 (UTC)
-Subject: Re: [PATCH v2 0/2] (mmc: sdhci-pci-gli: GL9755: Quirks for Apple ARM
- platforms)
-To:     Ben Chuang <benchuanggli@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Sven Peter <sven@svenpeter.dev>, Marc Zyngier <maz@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-References: <20211212070210.141664-1-marcan@marcan.st>
-From:   Hector Martin <marcan@marcan.st>
-Message-ID: <99496d50-bbf0-ec73-a97e-7c1be59e21cd@marcan.st>
-Date:   Sun, 12 Dec 2021 16:05:48 +0900
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        id S231138AbhLLPAQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Dec 2021 10:00:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48494 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231124AbhLLPAQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Dec 2021 10:00:16 -0500
+Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06649C061714;
+        Sun, 12 Dec 2021 07:00:16 -0800 (PST)
+Received: by mail-wr1-x433.google.com with SMTP id v11so22983811wrw.10;
+        Sun, 12 Dec 2021 07:00:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=+XKpi1Nw/K0WwguHbm8TyEDZ13WyLeSnzDDVy8OBGh0=;
+        b=BbcEfHrxsflbtHwJaZkG3PwLNz7LaNIlm8ci1p6MU0ofHz22aTuqYTxsEFnTKQP8cM
+         vM13Ir+W4lAOibTy/sioVVfDEY6VlreL5tuWit3/D68RJi1s97PUS/pGugsRrFE+hHuh
+         ke0XGkzLVW3Oh310JSntNVoJ8SYPAy+buFww99kf98SGR70kjJETkHaJMgS3Cb9QOb6e
+         uhtUAhg0T4Kq7giWtd/nleWouGZYmVt0E4vYy1RLhmneeGjzlzLf8Ttm/NnU2eO7Yw9N
+         HAT6vtFW3UyY3nC5bWNAOIoyA6ck4834KmL7DIBqKSZw57Yer827Mn1JhiYFOk1IuY35
+         /bIg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=+XKpi1Nw/K0WwguHbm8TyEDZ13WyLeSnzDDVy8OBGh0=;
+        b=CXUMIi+OCZ7mRkizxO6EWOFkGCmcHXQeoPM8sO7Ezd4z8oE2H95b+TJh49R8OBhGf9
+         Df8ajqYInemGJnQ5NxYlI8lX6kX896E2tBiEHyoovV6QG71F/vHny9e9RLLD0yfQgH1A
+         kEQzO3s4jTQt4tkwbY0RQSbwARUh3Xizw/TdSkPSG1o7poJ/bXN2AJwSGjzl4PL+dl27
+         paiydFefXUdferEpX4O6jTokIM05i0jEw03Syh2y/frv7ZLG+T00cFo3p0NxE8H6w2gu
+         6SxXfYyuacfLqAfAOU9dSqBRBKszcS5WyzFcDHJM/gu8YXAV+3Xv1xCAD6szvWaH2qnO
+         YDNg==
+X-Gm-Message-State: AOAM531O+52IijdmTYxIb5K6AqrhSdSIVIWbIE+3gedz+pemYKOaToW0
+        CwfpRcnaaPaLCx8R6hPBTApsn3i7NEo=
+X-Google-Smtp-Source: ABdhPJzTZpsZI1BAw5ZZwfPMws34vaAaoaZIAhFAGIM+aq5rlwXlEZPax6qRx+/jcnN6isMRKWD0oQ==
+X-Received: by 2002:adf:ce08:: with SMTP id p8mr26313464wrn.154.1639321214331;
+        Sun, 12 Dec 2021 07:00:14 -0800 (PST)
+Received: from localhost.localdomain (dynamic-2a01-0c22-6ebc-0100-f22f-74ff-fe21-0725.c22.pool.telefonica.de. [2a01:c22:6ebc:100:f22f:74ff:fe21:725])
+        by smtp.googlemail.com with ESMTPSA id v6sm4284789wmh.8.2021.12.12.07.00.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 12 Dec 2021 07:00:14 -0800 (PST)
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+To:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        ulf.hansson@linaro.org,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: [PATCH v1 0/2] mmc: meson-mx-sdhc: two fixes
+Date:   Sun, 12 Dec 2021 15:59:54 +0100
+Message-Id: <20211212145956.1423755-1-martin.blumenstingl@googlemail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-In-Reply-To: <20211212070210.141664-1-marcan@marcan.st>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: es-ES
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/12/2021 16.02, Hector Martin wrote:
-> Hi folks,
-> 
-> This short series adds a few quirks needed to make the card readers in
-> Apple M1 Pro/Max MacBook laptops work properly.
-> 
-> The first patch should be straightforward; it just allows configuring
-> the CD/WP polarity based on device tree settings. There is already a
-> standard DT binding for this.
-> 
-> The second patch works around an issue with 8/16-bit MMIO reads that
-> only affects these platforms, for some reason.
-> 
-> Changes since v1:
-> 
-> - Also applied workaround to GL9750
-> - Fixed checkpatch warnings
-> 
-> Hector Martin (2):
->    mmc: sdhci-pci-gli: GL9755: Support for CD/WP inversion on OF
->      platforms
->    mmc: sdhci-pci-gli: GL975[50]: Issue 8/16-bit MMIO reads as 32-bit
->      reads.
-> 
->   drivers/mmc/host/sdhci-pci-gli.c | 42 ++++++++++++++++++++++++++++++--
->   1 file changed, 40 insertions(+), 2 deletions(-)
-> 
+The first patch in this series fixes Broadcom SDIO wifi cards (using
+the brcmfmac driver) on Meson8 SoCs. Meson8b with Realtek (RTL8723BS)
+SDIO wifi is unaffected by this (it worked fine before). Testing was
+done (on the S82 board) in private by a user who wants to remain
+anonymous.
 
-Argh, sorry about the bad subject. Copy&paste mishap while editing the
-cover letter. Not doing great on the emailing for this one... :(
+The second patch in this series is a minor cleanup which I found when
+working on the first patch.
+
+
+Martin Blumenstingl (2):
+  mmc: meson-mx-sdhc: Set MANUAL_STOP for multi-block SDIO commands
+  mmc: meson-mx-sdhc: Drop unused MESON_SDHC_NUM_BUILTIN_CLKS macro
+
+ drivers/mmc/host/meson-mx-sdhc-clkc.c | 2 --
+ drivers/mmc/host/meson-mx-sdhc-mmc.c  | 9 +++++++++
+ 2 files changed, 9 insertions(+), 2 deletions(-)
 
 -- 
-Hector Martin (marcan@marcan.st)
-Public Key: https://mrcn.st/pub
+2.34.1
+
