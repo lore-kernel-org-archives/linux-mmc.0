@@ -2,79 +2,65 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42EE0C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat, 11 Dec 2021 10:50:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25A7FC433F5
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Dec 2021 07:02:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230384AbhLKKuW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 11 Dec 2021 05:50:22 -0500
-Received: from sin.source.kernel.org ([145.40.73.55]:53448 "EHLO
-        sin.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229977AbhLKKuW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Dec 2021 05:50:22 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        id S229554AbhLLHCW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Dec 2021 02:02:22 -0500
+Received: from marcansoft.com ([212.63.210.85]:59154 "EHLO mail.marcansoft.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229545AbhLLHCV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 12 Dec 2021 02:02:21 -0500
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id C2591CE2F5A;
-        Sat, 11 Dec 2021 10:50:19 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EA3EC341C6;
-        Sat, 11 Dec 2021 10:50:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1639219817;
-        bh=oULXXNjKX1XrkECFAxfwuHzkSGlYBJuKuwLL+fq0ybU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lCuk5L40IwsyzelUSyACjQrrJkVNXgI7MGWK/RCMTsn5u/O9rRUVhOJ34Lqzsly46
-         6NBR8M2iFMo8pKARNaMazD1OxhxP/1QUcP2QbAWTGyX1r42djjr35cR1irS1793dDg
-         ihHd4lnlq3G2z6rhWuquWigmawyvNOrI6iYk4bEM=
-Date:   Sat, 11 Dec 2021 11:50:11 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Bart Van Assche <bvanassche@acm.org>
-Cc:     Eric Biggers <ebiggers@kernel.org>, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Hannes Reinecke <hare@suse.de>
-Subject: Re: [PATCH v3 3/3] blk-crypto: show crypto capabilities in sysfs
-Message-ID: <YbSCYyAv1SmYy7mz@kroah.com>
-References: <20211208013534.136590-1-ebiggers@kernel.org>
- <20211208013534.136590-4-ebiggers@kernel.org>
- <6ff4d074-7508-4f4c-de06-f36899668168@acm.org>
- <YbKT/lcp6iZ+lD4n@sol.localdomain>
- <YbL2uUqV0GWFOitE@kroah.com>
- <cb29756b-8b21-5b4d-f107-b5573945d7ab@acm.org>
+        (Authenticated sender: hector@marcansoft.com)
+        by mail.marcansoft.com (Postfix) with ESMTPSA id 4D6E642598;
+        Sun, 12 Dec 2021 07:02:15 +0000 (UTC)
+From:   Hector Martin <marcan@marcan.st>
+To:     Ben Chuang <benchuanggli@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Hector Martin <marcan@marcan.st>, Sven Peter <sven@svenpeter.dev>,
+        Marc Zyngier <maz@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Subject: [PATCH v2 0/2] Hi folks,
+Date:   Sun, 12 Dec 2021 16:02:08 +0900
+Message-Id: <20211212070210.141664-1-marcan@marcan.st>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <cb29756b-8b21-5b4d-f107-b5573945d7ab@acm.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 10, 2021 at 09:29:41AM -0800, Bart Van Assche wrote:
-> On 12/9/21 10:42 PM, Greg Kroah-Hartman wrote:
-> > A single hex value makes sense to me.
-> 
-> Hi Greg,
-> 
-> I'm not enthusiast about this approach because:
-> (a) A single hex value can be confused with a number. Reporting a bitfield in
->     hex format is not sufficient to prevent confusion with a number.
+Hi folks,
 
-Each sysfs file has their own "units" or values, or whatever.  So a hex
-number or bitfield or something else is fine.
+This short series adds a few quirks needed to make the card readers in
+Apple M1 Pro/Max MacBook laptops work properly.
 
-Again, single value, no need to parse, is the key here.
+The first patch should be straightforward; it just allows configuring
+the CD/WP polarity based on device tree settings. There is already a
+standard DT binding for this.
 
-> (b) No other block layer sysfs attribute follows this encoding scheme.
+The second patch works around an issue with 8/16-bit MMIO reads that
+only affects these platforms, for some reason.
 
-Then follow what they do.  Do they have multiple values in a single
-file?  If so, they are broken and we should change that.
+Changes since v1:
 
-> (c) This encoding enforces the restriction that data unit sizes are a power of
->     two. Is there anything fundamental in encryption that restricts data unit
->     sizes to a power of two? I don't know the answer myself.
+- Also applied workaround to GL9750
+- Fixed checkpatch warnings
 
-Again, you all can pick the rules you want for this file, if you want to
-have bitfields, wonderful!  If you want to make it an enum, wonderful!
+Hector Martin (2):
+  mmc: sdhci-pci-gli: GL9755: Support for CD/WP inversion on OF
+    platforms
+  mmc: sdhci-pci-gli: GL975[50]: Issue 8/16-bit MMIO reads as 32-bit
+    reads.
 
-thanks,
+ drivers/mmc/host/sdhci-pci-gli.c | 42 ++++++++++++++++++++++++++++++--
+ 1 file changed, 40 insertions(+), 2 deletions(-)
 
-greg k-h
+-- 
+2.33.0
+
