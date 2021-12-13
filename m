@@ -2,146 +2,182 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED179C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 13:25:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0624C43219
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 18:55:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237468AbhLMNZt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Dec 2021 08:25:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52776 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233368AbhLMNZs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Dec 2021 08:25:48 -0500
-Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 004E4C061574
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Dec 2021 05:25:47 -0800 (PST)
-Received: by mail-wr1-x436.google.com with SMTP id u1so26942828wru.13
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Dec 2021 05:25:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=references:user-agent:from:to:cc:subject:date:in-reply-to
-         :message-id:mime-version;
-        bh=RGPKFGhr5F/E/uf8UwQ+T3hkhLoaT6Ka+qKxD0TAy+M=;
-        b=JRkDFvB8MdbonLD5orH08ZpszbX+Hsq3f2nwGXw96fpGnPaqFoDrqvRETDKF5sU6KK
-         xv3lQs9hvrmLFrUwoek0ZdOCHIuojptCQ1yWZHykSwAgLE/SK6SBW8pbq4FqAu6g9nWv
-         924DpmYSw9ztdMDswaJf/WeLEqNSOOnxXB79SMBeaPNt8+ZkHgAD3h7s6ihu2/KyXDHx
-         vg3QHBv5UPPh3eocemTtBBTTBzaqVjFJQV3N5wg3P+YsDm+0LqQNe1yuhHyH/jGmUPsq
-         Z9s8l5gopJr2ohzjBHONWx2A7IsPSOM+b/Ws8sScQj3jhDNEsgf+fPLbKBmk1rPPAI0D
-         0Evw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject:date
-         :in-reply-to:message-id:mime-version;
-        bh=RGPKFGhr5F/E/uf8UwQ+T3hkhLoaT6Ka+qKxD0TAy+M=;
-        b=sIsBvzq4DwD9MfV7R4HU611Fw6ss6JUXRerN7pPvpB3T4jFOxlsSYsDWPnu9B/hA40
-         gE7rmUR7M47d7ulIC+Yv1mYw7ATPlkervdb61f3ezxDGiUiliMW350LzTkBwGir5p+xw
-         k9OmqsYTFNhMTN3WrmfSkVR+ni34Qnt1Jy5mBzTHY72XRYHNjwYR/KpKoBkc2cSQ3u6h
-         lzY63CwVlhrecm57yi2IT4SBCfg8g3qhxUoM0+W4LdD4NP4SP2AFoDx5DgHKBdtLxjB3
-         UAySOKIm0+lhjY3hfYvJxp8q8n0xvRqJIO6KudsogRxVNp7Nl8WX+nW1DbhwrtykvWxb
-         o4aQ==
-X-Gm-Message-State: AOAM531VH9Q8tA6cNDlIH1AzxWMa2g0JKP9XDLC/rtvoVAGtBINv/tXZ
-        /U8Gm6s+Uu9TRNZPkHfPSaNjcg==
-X-Google-Smtp-Source: ABdhPJxzzui67Mz+e62UPdxoEnqUeAe7pmkET3SPW+dmE86hGQS6DQJSsCelC6Y5tYdI7kls55z4kg==
-X-Received: by 2002:adf:eb0f:: with SMTP id s15mr15577018wrn.690.1639401946598;
-        Mon, 13 Dec 2021 05:25:46 -0800 (PST)
-Received: from localhost (laubervilliers-658-1-213-31.w90-63.abo.wanadoo.fr. [90.63.244.31])
-        by smtp.gmail.com with ESMTPSA id g198sm8086757wme.23.2021.12.13.05.25.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Dec 2021 05:25:46 -0800 (PST)
-References: <20211213070330.3351505-1-rong.chen@amlogic.com>
- <2021121319503910358221@amlogic.com>
-User-agent: mu4e 1.6.10; emacs 27.1
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     "rong.chen@amlogic.com" <rong.chen@amlogic.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        --to=1131046452 <--to=1131046452@qq.com>,
-        45581586 <45581586@qq.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-amlogic <linux-amlogic@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: meson: initial ocr available by default value
-Date:   Mon, 13 Dec 2021 14:22:25 +0100
-In-reply-to: <2021121319503910358221@amlogic.com>
-Message-ID: <1j7dc83acm.fsf@starbuckisacylon.baylibre.com>
+        id S239347AbhLMSzx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Dec 2021 13:55:53 -0500
+Received: from smtpcmd15176.aruba.it ([62.149.156.176]:40185 "EHLO
+        smtpcmd15176.aruba.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240596AbhLMSzw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Dec 2021 13:55:52 -0500
+Received: from [192.168.50.18] ([146.241.138.59])
+        by Aruba Outgoing Smtp  with ESMTPSA
+        id wqUEmOI9uz3hmwqUEm7d6Y; Mon, 13 Dec 2021 19:55:49 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
+        t=1639421749; bh=Cb8yDKe+vKl1iJIq7lyfihTS5kSTk9qVqiQ2TP9bKF0=;
+        h=Subject:To:From:Date:MIME-Version:Content-Type;
+        b=MZ5tsXl45hVfQziw4jd0nMMP2wL7noXBbFtUEMuoL7ZimqHLAra4JKxeB5lpu77sn
+         1g88864uAndW1V+oa5Tv+YsofEn30xfCWTWDwZpox5gxZt7BA7jGEaBhLu/0w3uWMO
+         G6HLEID4rWdLX94zR91E5tpy/TEdQQutiVe+npVgaoVEeYkzkjpQQjjfNd+QE5Ap8z
+         95TjI1uZj4nog49abAeseaChfIBZ0zuKT899+oNy3ACKQfxawkkKsxOZKaPyDcnnrK
+         MEkCn73Sa7euX/+gR02oXb8IAtzRG+lMo+2pz6ZfiOD2DxNB800UYfPDcA6HjuZyuE
+         U+JtUEbu4OVDg==
+Subject: Re: [PATCH v4 06/13] dt-bindings: clock: imx: Add documentation for
+ i.MXRT clock
+To:     Jesse Taube <mr.bossman075@gmail.com>,
+        Stephen Boyd <sboyd@kernel.org>, linux-imx@nxp.com
+Cc:     mturquette@baylibre.com, robh+dt@kernel.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        ulf.hansson@linaro.org, aisheng.dong@nxp.com, stefan@agner.ch,
+        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
+        arnd@arndb.de, olof@lixom.net, soc@kernel.org,
+        linux@armlinux.org.uk, abel.vesa@nxp.com, adrian.hunter@intel.com,
+        jirislaby@kernel.org, nobuhiro1.iwamatsu@toshiba.co.jp,
+        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org, Rob Herring <robh@kernel.org>
+References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
+ <20211204061042.1248028-7-Mr.Bossman075@gmail.com>
+ <20211206223849.554F6C341C6@smtp.kernel.org>
+ <9dab64ca-0d91-3bea-f873-3c2da6ef1645@gmail.com>
+From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
+Message-ID: <08719926-e550-c401-bf9a-4fa161062afe@benettiengineering.com>
+Date:   Mon, 13 Dec 2021 19:55:46 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.14.0
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <9dab64ca-0d91-3bea-f873-3c2da6ef1645@gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-CMAE-Envelope: MS4xfLyqWYqoqNtgmolppAqUYOcTI+ioV02UCgPm3Ar5zGAo8hDVSujJh1zalj+zthf+Npu0j52doK1X+8VEUqn4ktLzPCvWWPMx4AjPvjnhU/ldZn+kJF4I
+ gKBe9PBC2q5hHcmd5xg2Cvyo4s51glbHSbregp7Jo/HOXy+HlZ0VOZOt1AfhGqYftDiIi94AGpUNiLivmPsQEhwyMYxKUnfKvc2bKC23cjH9xJLqE6+H8LsB
+ Ct44a13pr4YidE4nm2xznmlOTMnsmb8kMfeJJV/UTO2xaHO/ypOnrwV/d9gwXlrRwA+Gw9D3pZGKARngC3jYnNEUxraGnq5kBeNPPjI1HTvlE2u3qVdzQmcZ
+ fZHQovdAERxYiq3/ehYkmc7a4aw8LUTWDTN+NobfPI9w6/3xZmLdZXksiqOo5R2i6oj+Y9ClI6Y9ghtvmj5ERT/uTbjo0e8kHlmCBoLXvh7h6z7V77a9UbfD
+ Ac4iv7ra6vr4w+VTc7Rk1NWAWL0FyyZGIQ1P02fXy4kopRxPErO5hBnB4tmlkaql5leG5TMEIdNcu1DR/J4gzsOZ4tbPzY3+VeZSOjxm+VUgQrA76BquDp/n
+ 8UUHMcs13rhHaQEuxmmGiCXq2SvUaeoYno11WHYdAz6PJqiQKQsod+AwT956LL6foU0NXVhCN3Ye4B0Z0m+ehZ6o2LA2Mtwl7BZog/KtqnuIvtXJ3icg/uzf
+ mUNqvVRo4UqxuSghAOlTXBx1+ROA0kG6npWvTtSLyKwjx9KHUWwXNhCBtRZYNtg/25GTI2MFpYDfF+XjYrQP/Y6iwUPjuEkr+6VaBTo6kIIM2EXjufosOm4j
+ U+iHFW1hHAz3Ag29EY4Zxg7Wr3PrLeagSp48NfdIhVgm37dbZPzvPHGhTDJCmGKIFiNErG00qbw7hyVovD+s+OQUdtaGSzOKFmGEdv7DOqmy87rdLFowuPYQ
+ fbpii8ZP8jooWjvFKpSft0yJanQCNVySJAuP5MBT8fiVbnnhJB2KhTP/lw1Z2yTKUIh7AM7UMYL9re4/J0lyLWhMXUG1CW8E9Oy4hV3oLwZDKZ/7iGf4MQsW
+ qtmdkN8kpmh4+8FPblpO4LAXaFUsWP2BzRp5h6V/NUlAgvSF0vBTjDjfbYybuC71vCyMIdR++Q6BX/9Y9CDnEgbyJN2BpSAiPohL5cMeka7L2sbnt8tcZ6rI
+ vE60pXeh9Ivqx/lzEKLXBg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Jesse,
 
-On Mon 13 Dec 2021 at 19:50, "rong.chen@amlogic.com" <rong.chen@amlogic.com> wrote:
+On 07/12/21 03:32, Jesse Taube wrote:
+> 
+> 
+> On 12/6/21 17:38, Stephen Boyd wrote:
+>> Quoting Jesse Taube (2021-12-03 22:10:35)
+>>> diff --git a/Documentation/devicetree/bindings/clock/imxrt-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
+>>> new file mode 100644
+>>> index 000000000000..8af48c59ff99
+>>> --- /dev/null
+>>> +++ b/Documentation/devicetree/bindings/clock/imxrt-clock.yaml
 
-> Hello,
-> If 3.3V always-on power source for vmmc is supplied by hardware boards fixed, don't need regulator in software, so  .dts unnecessary the link between regulator
-> and MMC controller vmmc/vqmmc. 
+here the file name should be imxrt1050-clock.yaml
 
-Controllable or not, your vmmc/vqmmc regulators should be described in
-DT.
+>>> @@ -0,0 +1,67 @@
+>>> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+>>> +%YAML 1.2
+>>> +---
+>>> +$id: http://devicetree.org/schemas/clock/imxrt-clock.yaml#
+>>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>>> +
+>>> +title: Clock bindings for Freescale i.MXRT
+>>> +
+>>> +maintainers:
+>>> +  - Giulio Benetti <giulio.benetti@benettiengineering.com>
+>>> +  - Jesse Taube <Mr.Bossman075@gmail.com>
+>>> +
+>>> +description: |
+>>> +  The clock consumer should specify the desired clock by having the clock
+>>> +  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
+>>> +  for the full list of i.MXRT clock IDs.
+>>> +
+>>> +properties:
+>>> +  compatible:
+>>> +    const: fsl,imxrt1050-ccm
+>>> +
+>>> +  reg:
+>>> +    maxItems: 1
+>>> +
+>>> +  interrupts:
+>>> +    maxItems: 2
+>>> +
+>>> +  clocks:
+>>> +    minItems: 1
+>>> +
+>>> +  clock-names:
+>>> +    minItems: 1
+>>
+>> Why minitems vs. exactly 1 for osc?
+> because i don't understand yaml yet.
+> I'll look into this.
 
-There are several examples of this in arch/arm64/boot/dts/amlogic/*.dts
+on clocks and clock-names you have to specify the only available clocks 
+that can be an input to ccm, in our case only "osc", which description 
+will be "24m osc".
 
+Check this file as reference:
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/devicetree/bindings/clock/imx6ul-clock.yaml
 
->
-> ------------------------------------------------------------------------------------------------------------------------------------------------------
-> rong.chen@amlogic.com
->
->   
->  From: Martin Blumenstingl
->  Date: 2021-12-13 16:00
->  To: Rong Chen
->  CC: Ulf Hansson; Neil Armstrong; Kevin Hilman; Jerome Brunet; --to=1131046452; 45581586; linux-mmc; linux-arm-kernel; linux-amlogic; linux-kernel
->  Subject: Re: [PATCH] mmc: meson: initial ocr available by default value
->  [ EXTERNAL EMAIL ]
->   
->  Hello,
->   
->  On Mon, Dec 13, 2021 at 8:03 AM Rong Chen <rong.chen@amlogic.com> wrote:
->  >
->  > The patch will add a value of ocr supported by the controller,
->  > to specify some of voltage values are supported.
->  Can you please share some details on this topic?
->   
->  We already have many boards upstreamed which work fine without
->  manually setting ocr_avail in the driver.
->  In general there's two types of boards:
->  1) boards where the regulator can switch between different voltages.
->  One example is the Odroid-C2, see meson-gxbb-odroidc2.dts [0]
->  Here we specify:
->    vmmc-supply = <&tflash_vdd>;
->    vqmmc-supply = <&tf_io>;
->  &tflash_vdd is either turned off or at 3.3V when turned on.
->  &tf_io can be either turned off, 1.8V or 3.3V.
->   
->  2) boards where the voltages are fixed.
->  One example is Radxa Zero, see meson-g12a-radxa-zero.dts [1]
->  For the SD card the board uses:
->    vmmc-supply = <&vddao_3v3>;
->    vqmmc-supply = <&vddao_3v3>;
->  (meaning fixed 3.3V always-on power source for both VMMC and VQMMC)
->  and for eMMC the board uses:
->    vmmc-supply = <&vcc_3v3>;
->    vqmmc-supply = <&vcc_1v8>;
->  (meaning: 3.3V always-on power source for vmmc and 1.8V always-on
->  power source for VQMMC)
->   
->  With the information from the regulators the MMC core will
->  automatically detect ocr_avail in Linux.
->  Or in other words: your .dts may be missing the link between regulator
->  and MMC controller vmmc/vqmmc.
->  Can you please double-check this?
->   
->   
->  Best regards,
->  Martin
->   
->   
->  [0]
->  https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts?id=2585cf9dfaaddf00b069673f27bb3f8530e2039c#n354
->  
->  [1]
->  https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts?id=2585cf9dfaaddf00b069673f27bb3f8530e2039c#n333
+Kind regards
+-- 
+Giulio Benetti
+Benetti Engineering sas
+
+>>> +
+>>> +  '#clock-cells':
+>>> +    const: 1
+>>> +
+>>> +required:
+>>> +  - compatible
+>>> +  - reg
+>>> +  - interrupts
+>>> +  - clocks
+>>> +  - clock-names
+>>> +  - '#clock-cells'
+>>> +
+>>> +additionalProperties: false
+>>> +
+>>> +examples:
+>>> +  - |
+>>> +    #include <dt-bindings/clock/imxrt1050-clock.h>
+>>> +
+>>> +    ccm@400fc000 {
+>>
+>> s/ccm/clock-controller/
+> 
+> This made my day!
+> 
+>>
+>>> +        compatible = "fsl,imxrt1050-ccm";
+>>> +        reg = <0x400fc000 0x4000>;
+>>> +        interrupts = <95>, <96>;
+>>> +        clocks = <&osc>;
+>>> +        clock-names = "osc";
+>>> +        #clock-cells = <1>;
+>>> +    };
+>>> +
+>>> +
+>>
+>> Nitpick: Drop extra newline
+> sorry will fix.
+>>
+>>> +    lpuart1: serial@40184000 {
+>>> +        compatible = "fsl,imxrt1050-lpuart";
+>>> +        reg = <0x40184000 0x4000>;
+>>> +        interrupts = <20>;
+>>> +        clocks = <&clks IMXRT1050_CLK_LPUART1>;
+>>> +        clock-names = "ipg";
+>>> +    };
+>>> -- 
+>>> 2.34.0
+>>>
 
