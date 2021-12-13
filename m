@@ -2,163 +2,338 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF224C43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 09:48:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0D71C43219
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 11:30:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235493AbhLMJsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Dec 2021 04:48:39 -0500
-Received: from mail-eopbgr10070.outbound.protection.outlook.com ([40.107.1.70]:42885
-        "EHLO EUR02-HE1-obe.outbound.protection.outlook.com"
+        id S235902AbhLMLaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Dec 2021 06:30:17 -0500
+Received: from mail-am6eur05on2079.outbound.protection.outlook.com ([40.107.22.79]:34016
+        "EHLO EUR05-AM6-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S234581AbhLMJpU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 13 Dec 2021 04:45:20 -0500
+        id S232734AbhLMLaP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 13 Dec 2021 06:30:15 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=AtolGTj0xkbhmBFfO/CUpdu93DQ/4baZsBLWiLLw/H191N77xukXADMsvcf7/D0RzwYN/tisQwXF6ZbJC/h9cXB3vYmvGxcPxLOZRZ3bcxhJrPU9LVvkyos89fZnLIwmNDQ1bDDNK3u9mjZFQanXkkqcnlcFPImoRJhrbexjP6/ufKXNu2DLCK215bvxPzCK4smaezfLvv5BICcWNqooqtLOI0s7kEgPlna4eVkXWJOh57392Pv6AFn601ELQsXReRXl5jN6bF5CpVVU/M2nTTGUTSvkXe0u6S+e9D3xeXUs0SEmfyhoeExT9DolgH3NdVcaoEpCH1Gnzc36cN2paQ==
+ b=G5J12HXYL/na/qfeVY7RV7YrgZ5m40GDSC+Sg/0DabXfh2SApWdxIRqNTLxIQmBxg9Uko47me56UrX19ejgwmUdWtgLMz8A194+0/IVq2Ex/rLSQ3Y16d+jcnRw6YPuNisgxby9RPO7FDov/iyO2U5XGagPI6QPWKFBPFF2A0eYDzqkT2O3UIqZhu4oQ/UhGNrgRuZ1aPCF83/6RBBvMqZDBtk6bAj3JFXkdzjhSXVc0kzRi/7EwnimyFUph5GHqzsKppN3T5Ix1B5dXTbfGaBuULsCc4pa1I8TZqoubqF+WMcKm57bjE8lC+K86YioXq/FVOsF9OJnYbEuiBF5tpw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=+mQBNJi9RufuM8RvcE1bfiRCJil/mBdAEuZcF6DMvL0=;
- b=j5clwwn46GFywfZYL5hlZIh8nNXLMnSLOeob5BTzVezMeurdk7Ia7QCzz8hj84qR/8CNxON6VfpA9spRsjXXo3hKq9aYEoDP/+qwyHc/Ovp+OpYhOw7OGOD73Pw4pmJqz5t9z7I3UO7kTAImG0R1nmLqpFFtS4zQLaaTsSOOTE0jpO3FW/0s9jki6xyi9k3/mkAMnePmYSxIGBfyHrtDEFazRwp50M4cx+15QYegLUy3mX4CcUrtFentby1SV5h8AwML7xRJIP1ZN/NIfdmPCQOJfWjz4FHyFi/Da0AuSPwIVN93Xo5B5nhS+ToXTTBvh25fEO5ct8LpirKfaJ1krA==
+ bh=GzecVdSFV71KDBTsEfao5NIEEruj7C/0CdIEnfO1H6I=;
+ b=F2rw/LQDJF9alh87cNGLHLh5DbPB0Wk2hyleMlde8TrNgmA8NeImG9N+4tweQeP2nHHhs+ecly5czb/AysxEGormIp1ZkJHdF6ZeNFC0/mPCqosW9j3w+au8UgVPpszn7h3IaQE6o/4vsjIpYMYjm+3HVCosmWQwzRV8TtTFiIeza6sk9viJwN0T+L8fJ8iGLzWRC7FOrGjA2BOfCE+BYwr2i8F3E/f95c/K6aztV0RkLhjCptKweR5SyyJS26JzrwnnCU5WEjIUTLhznMsAHx4vYgh5mgYWBigf7sfJDhBnYY2dG3Wono/HS6LtvtN5uj5kVWncRjjo5rfMlxkcMg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=theobroma-systems.com; dmarc=pass action=none
- header.from=theobroma-systems.com; dkim=pass header.d=theobroma-systems.com;
- arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=cherrycloud.onmicrosoft.com; s=selector2-cherrycloud-onmicrosoft-com;
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+mQBNJi9RufuM8RvcE1bfiRCJil/mBdAEuZcF6DMvL0=;
- b=px8hELj5cc4VpyUJlfPQ+NMvxqi9at+1gzwev2bBtGozxiZY2CkhOUxukodldGIpURZdcGP8YZETyjKQHWv9+sTdTzj6bnoS8HNgxO2aUFYADnd3MD/2YecP9x/p+AdQJTbGFmt3d/FMi3X0Ls/TpeTL4BfdMn2pFKsjWRU0Xbs=
+ bh=GzecVdSFV71KDBTsEfao5NIEEruj7C/0CdIEnfO1H6I=;
+ b=FTamKKzY84YOvORFRYATtbzsAuuWik7NyHtf5UUiq/V8RWDFkm3dF0v0b5snsnX7Cl9AAeOo+qg3SSHOO2fHWvb85X6cS1PKHi+ldFOmCks7mO5dY4n7sNbMcwK7Z6INWPbLe9vBfaC1zWeXmT1t+lxhpM2QyXPAoAaJcbfAhYE=
 Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=theobroma-systems.com;
-Received: from HE1PR0402MB3355.eurprd04.prod.outlook.com (2603:10a6:7:81::28)
- by HE1PR0402MB3594.eurprd04.prod.outlook.com (2603:10a6:7:82::20) with
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from VI1PR04MB4688.eurprd04.prod.outlook.com (2603:10a6:803:6a::30)
+ by VI1PR04MB3966.eurprd04.prod.outlook.com (2603:10a6:803:4e::24) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4778.12; Mon, 13 Dec
- 2021 09:45:17 +0000
-Received: from HE1PR0402MB3355.eurprd04.prod.outlook.com
- ([fe80::905c:4765:6fc:3c66]) by HE1PR0402MB3355.eurprd04.prod.outlook.com
- ([fe80::905c:4765:6fc:3c66%5]) with mapi id 15.20.4755.021; Mon, 13 Dec 2021
- 09:45:17 +0000
-Date:   Mon, 13 Dec 2021 10:45:14 +0100
-From:   Quentin Schulz <quentin.schulz@theobroma-systems.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org,
-        Quentin Schulz <foss+kernel@0leil.net>
-Subject: Re: [PATCH] mmc_cmds: add HS400 data rates
-Message-ID: <20211213094514.rzalbzlgedpctekw@fedora>
-References: <20211202161910.3944640-1-quentin.schulz@theobroma-systems.com>
- <CAPDyKFoVyqR6h6oy7uhCfReQKk3_ErQF9iBG6bwDrxzSAY2HPg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4778.17; Mon, 13 Dec
+ 2021 11:30:12 +0000
+Received: from VI1PR04MB4688.eurprd04.prod.outlook.com
+ ([fe80::4c4c:f2b2:addb:841]) by VI1PR04MB4688.eurprd04.prod.outlook.com
+ ([fe80::4c4c:f2b2:addb:841%6]) with mapi id 15.20.4755.028; Mon, 13 Dec 2021
+ 11:30:12 +0000
+Date:   Mon, 13 Dec 2021 13:30:09 +0200
+From:   Abel Vesa <abel.vesa@nxp.com>
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     linux-imx@nxp.com, mturquette@baylibre.com, sboyd@kernel.org,
+        robh+dt@kernel.org, shawnguo@kernel.org, s.hauer@pengutronix.de,
+        kernel@pengutronix.de, festevam@gmail.com, ulf.hansson@linaro.org,
+        aisheng.dong@nxp.com, stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, adrian.hunter@intel.com,
+        jirislaby@kernel.org, giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
+Subject: Re: [PATCH v4 07/13] clk: imx: Add initial support for i.MXRT clock
+ driver
+Message-ID: <YbcuweQlw3inhye1@ryzen>
+References: <20211204061042.1248028-1-Mr.Bossman075@gmail.com>
+ <20211204061042.1248028-8-Mr.Bossman075@gmail.com>
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAPDyKFoVyqR6h6oy7uhCfReQKk3_ErQF9iBG6bwDrxzSAY2HPg@mail.gmail.com>
-X-ClientProxiedBy: AM5PR0301CA0012.eurprd03.prod.outlook.com
- (2603:10a6:206:14::25) To HE1PR0402MB3355.eurprd04.prod.outlook.com
- (2603:10a6:7:81::28)
+In-Reply-To: <20211204061042.1248028-8-Mr.Bossman075@gmail.com>
+X-ClientProxiedBy: VI1PR03CA0051.eurprd03.prod.outlook.com
+ (2603:10a6:803:50::22) To VI1PR04MB4688.eurprd04.prod.outlook.com
+ (2603:10a6:803:6a::30)
 MIME-Version: 1.0
-Received: from fedora (92.42.140.82) by AM5PR0301CA0012.eurprd03.prod.outlook.com (2603:10a6:206:14::25) with Microsoft SMTP Server (version=TLS1_2, cipher=) via Frontend Transport; Mon, 13 Dec 2021 09:45:16 +0000
+Received: from ryzen (188.25.169.131) by VI1PR03CA0051.eurprd03.prod.outlook.com (2603:10a6:803:50::22) with Microsoft SMTP Server (version=TLS1_2, cipher=) via Frontend Transport; Mon, 13 Dec 2021 11:30:11 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: dcec19bb-87bf-4ead-7fcd-08d9be1d449d
-X-MS-TrafficTypeDiagnostic: HE1PR0402MB3594:EE_
-X-Microsoft-Antispam-PRVS: <HE1PR0402MB35949501F8968E2B37ACAAE8C2749@HE1PR0402MB3594.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
+X-MS-Office365-Filtering-Correlation-Id: 52ebcb3c-13b0-4d9f-bea6-08d9be2bece5
+X-MS-TrafficTypeDiagnostic: VI1PR04MB3966:EE_
+X-Microsoft-Antispam-PRVS: <VI1PR04MB396610F9B60546D1B2ED4278F6749@VI1PR04MB3966.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:663;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: GzSADp/yIUZMwQhfoKIN8G9jgd8zAZjIHLRrfI6Uc+ikr6koz3+ybfVvwmS6auZJmE6WPE5OVWE2ZlOVGLtbYMqKKX0duZ/LqDh+tjhRxXuMg8wvlyN3a9HwOtahFk9eABu4WV25qgEmmvOnsFor76APicMVc7eyv12F5ce/9YXGZdYJckzYNVH9qdFS5t13doihku6h313w2Ctsa4FTFZn8/bRDFMkRR/CokaS6X7TWfzdaoAnfSwMYgaMcW30Z21ZnKApB5e9z0zqpU7HFUMeXFKQEmmZSLZhz1FlhVN2X6uj5d53GA/uTVJv7spx6XdYNGttFiIvSVKLbsXC+ZGe/EwC31wHx5m/hx7v//SokGGAI2mGfJYnv8PUJ64HF4Sm/B1Pe6iwwUsdJOePMq7s8w3OVNAQu9kbbqkhnvcoCooLeZtZP/W2KlxaKLnETt31/L9GvdeiLmEPxtWPnlidVTvFRn5r8L+nS7OTq5BsqxDV6IzjphNtnmGBgz/Kr2Ct7wdOBE/kUygN80/SP4cDtUfkbglBoOo2ApxkAhH4I/m/C95qDYm3ZgateqOUvXAOtVpL7nIsLCL1Pm0T0Slyx/htyf+9u3Raydt3aCU0t1UPHL7WYdK4RPhI+Zurv+okswkhv6HwG/UMwHjrUhu7ewtMxShHEXiJ0brRkeIWQszLfAfNZ/Unovx/FIwbKaxayEOfN9zeGQhtUnbZX2g==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:HE1PR0402MB3355.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(54906003)(186003)(52116002)(2906002)(316002)(6496006)(6916009)(9576002)(4326008)(38100700002)(66476007)(5660300002)(26005)(55016003)(38350700002)(8676002)(1076003)(9686003)(8936002)(66946007)(3716004)(33716001)(44832011)(956004)(86362001)(66556008)(508600001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: vlzyzrSSr5IjiYHOhgOuwaKZZ2FVkISpvS+dWjZvaeQZwgkah+UDau+2x8fd+HILv2fhTKMuQbpEj4RnliTOgHwvL4s7uww5kSaLkPY9GThsgqXoJDOaqwSsAxd2AoPwH+bOyTl0x5R277vvHiwVcD8TVi1hYq3xzpI6drwTCdQ9Ugwy2tVrV1wbWHawVkagCLp7lzEP+bCNNrD5w9VAyENoT6ff9GWbpX0e7IAtcWj+wx7xDtC4amSXliwgYK3f18sPQlpVfmI+PuERCqWOsOdB1Eh2p4t4bEY3LXSFmaRs7VV+cKaT0a2xFlr0cwiCTzzFE9IVYTECDpAK3okjJBpxwKV5uKtIrhdCEx2YdnCwjZIERBJviBoNLI9URaPy0ktIXLH7tuzANWTBevweaLePrnDmdX/vP3U7bF4z3D+hSFy0b75tqnBaRGWt6eDbcoc4gGtqCWJ0HRj84MPgtJgl3RZoqWtz+v5dHxle/zlGCOKThkRV5fPk7gwpIJVLg4k2/iAYGrF4tQzgnoqHMiOAJNDlsqUrjFtwqhFPjfRGFVxOvM9NQwgY90CoLCpraoXw6nNCHDCkGK7r4w3V4SRnQi1ClPSOIE2wG+UX1XdAb5wMNFxZVQ2eMAz2TUW8m9vA88BMcwZYKuZf8WrQGoVkm3kuw4xcHwR7+o/beYsrSwttpugA9Lgai2rbuwu7qHBCRFOusFpe9ovXojClEg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR04MB4688.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(53546011)(316002)(8676002)(7416002)(55016003)(6916009)(6496006)(52116002)(86362001)(4326008)(83380400001)(956004)(66476007)(9686003)(9576002)(508600001)(5660300002)(44832011)(2906002)(186003)(38350700002)(30864003)(38100700002)(8936002)(33716001)(26005)(66556008)(66946007);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?WTRsVk5TdXQwaUp3d0ZINmRQV2NnWm1OMnRhWHNFWW1oM0dmd0dXYm9kTzdq?=
- =?utf-8?B?TWoxempLSHRkRTNJT1BIMG0zeE93SS80Y1lrbXVUcytWZTY2MjkybzBwU3lC?=
- =?utf-8?B?ejA2bW1WOENnZ2c3Q1hqR2NVK1NzRUtDSG1aNStJTm82bklPaDdMNGllQ0tm?=
- =?utf-8?B?L3BiSjNwZ2tpNlNDbkNoeVdKdnNRS01wOWQ1Y0JrZ3VoaEdwQ3VlUTcvTWRE?=
- =?utf-8?B?WmdhSGNxSGhxWm5LUEhGZk1HUWhWY09HeVR6U1cvZjR6aUdyV3hTRFd1VnBy?=
- =?utf-8?B?TTdmMjdCWGNOUUIzUHlCd1VyQTdSZ1J3ckhPVVJYR1J6UEF1eE9MZzIrZVFv?=
- =?utf-8?B?T0dZNFh4N3g2SytrMlhvYmtMWkVrckFUWTQrc0RoNXFIZnRMR0UwcEJrSGpK?=
- =?utf-8?B?bEFPL2NGaUVEeEZyWXJ3aWVMMlhpREZoUVA1Vm82VXFnaitHWlhUbjVLcVJp?=
- =?utf-8?B?SXNRaWxHYTFIM1pOTFFxclVBVU1iY0ZHSmRYOXNsTmVydHFQN0FpdExKdVBo?=
- =?utf-8?B?TEplUW1GTy9MM1hCTzBIbGkwRVBKRitRd2VwTC9TVnBNNzdCcHJsRUJiMVRE?=
- =?utf-8?B?TEdvdHI1MUdscW1hckpxTTJwTERUZVp1K3dyRjc2cHpCQWFBakJnaU9aZUpZ?=
- =?utf-8?B?dHBSVXpGUTJWb1ZQSWRSeXFTdUFGRStWSkZ1OE8vdyt1TThId3F4L1J4bmVk?=
- =?utf-8?B?NUpnMjg2SGlkVCtzMkg1WmJRK0RxOFFjcGZhVDI1bDhSdnBiNXhOV2lzQyt0?=
- =?utf-8?B?ZEZSTEhnYU83WlJYalVaaXlvRGpBejVnNUZ3N0pVV1JVYlVYQVJFR1ZhdUs0?=
- =?utf-8?B?by9YdzZIT1BzekVOSVp2TUM3VWpuSjZMeStGQUxUdEtldEsvWGgvS3BZWjZ6?=
- =?utf-8?B?V1UwV0R2SG1wcncxRXdXTWsybWZQU0l4djlRemNiR3kzQUVUYjZudytkQzM3?=
- =?utf-8?B?NDhXV1o1TE9oMkZ2SzNCb1l3emJ5Vk84eDdQT3FyVEsyVTVldFNJV2xZSm8r?=
- =?utf-8?B?R2hlTGM5UXo0ZG5XQmI3MndiR2xoaEZZNWUzL1p3b1RaQ1dVck1id0xxbGFK?=
- =?utf-8?B?WkcrOWEyWjY4MUg2SVUyR21WOW1UcVVPTmFQbERzcUorMUQrOUx2UUpZWHVN?=
- =?utf-8?B?WUMyZUQzVVlsTnJjcjIwRHBBOWlNbjNJYUZ0dUdJWEFDRFBNeWI2bENWRmd4?=
- =?utf-8?B?RVovSGZJdEJHb3dVREpFTUtMNENjRWFwZnJVZUc4eE83eC9tTjhCZmdHLzV6?=
- =?utf-8?B?dUFsSmVJZW5SVFhSeHFCaUxud2ZjbkFPY3JnWWNiOEF4SDBYU2dZOXAydkRN?=
- =?utf-8?B?Q0tKbGpCK3EyNlhTc1J4NzZ4YkQ4eEdlNHB2dEZBOEk2MjJML1o2OTluY0pG?=
- =?utf-8?B?TXJFWkhjajd1RXp4cm85LzFYYTdjamRhTlBUTnI1ckJrQ00xV2FLbnpVb1U4?=
- =?utf-8?B?SENFN1h5YW9PZkhsclM1azZTV2ZQcGtQRi8ycDdxcmpDbkJIakV1d3IvOVRV?=
- =?utf-8?B?WkhJVXBaN1JLM1VGM2xmc1F1ZmIrYmw2eUJrSzdvbGxDcTN2OUZYWnFRem1t?=
- =?utf-8?B?bnlJOUNyenVIV1ZhU21KQ0ZCMEQ4dXFEQ1BjbWdvZDlpR2paQ0FmTTA1dG5G?=
- =?utf-8?B?QjMyWmx2YW9rbUxGandRSkVlcVlhdmNKRVNRa0Q0QjQrVldxZUhmd0M4SnU2?=
- =?utf-8?B?TVZleG1NR3p3U0ZlZDdzcVI2VWpZZUMzZVhmNnZLdVhaMmI1aGh4L3FmR3hZ?=
- =?utf-8?B?RmR1UFFNdkZXSTRWQ2Vuc1BOZ2RJVjFFdTNMY0JFZ1VmdnlTc1FtbTVoM3pW?=
- =?utf-8?B?dmpsTUVxRjFiWGU0YUZnWmZldnpOUVRpK25yekhBMWpOZVFCT3J5Qk1leEdx?=
- =?utf-8?B?Wm1UREtJYXhQQmJXbXRBV2dpSUM2KzhqZ3NRc1Y4dHZoOTlxanlZc0ZqUHpj?=
- =?utf-8?B?QU94eVZYclErd3ppT2pkVDhsdmRyTERMcTZ5U1k4aW9LcjBDc0YyNzZqdjEw?=
- =?utf-8?B?QS9OeGNOUTdDcEErVjBSOG9KU3pSUEYzRmV0SFkvNEpKdFpPd3pZWmNnRkZl?=
- =?utf-8?B?Lyt2ejV5UGg1a3NyMzN1c2JyTzBxclV5UUpQN0xLVVdBSWI1b2JRSGQxazhG?=
- =?utf-8?B?aVU2eVJmS21aNGdOK2gxVkJNYXNuR1BNdHNIc3RkajBoUk9hazFhVEk1eHpN?=
- =?utf-8?B?d2llVTJEVlRDWXlQWTRwV0k1dk9lQUdtUy9BSnZZZmU0bzB5STRLQzJmOStI?=
- =?utf-8?B?SlFPVURGd0tzNTR6Sk1uMm05SnBkNE9jUGJDM09VYXgzcC9OczllWlFlVHlX?=
- =?utf-8?B?TUtzVTcxMEFJYUxRMk1qNlMycVorVmkvcmE4aFZObnNuWllxOUFkZz09?=
-X-OriginatorOrg: theobroma-systems.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: dcec19bb-87bf-4ead-7fcd-08d9be1d449d
-X-MS-Exchange-CrossTenant-AuthSource: HE1PR0402MB3355.eurprd04.prod.outlook.com
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?nIbMsSoRkJKN8j12O+XlcoD9t7V5jOexbG8oLVxM+FDBgajMsIrQ8P2R7Xrg?=
+ =?us-ascii?Q?/uO00V1SrVuZsRJ+CWO36T+l1CD5m2eRgnSNm/yxIgQrk18omf5kn/GBdr74?=
+ =?us-ascii?Q?hh1S2Zezo9/BrHlqTh+VBrrXVadKQfjRF4G7i9LE7GGKYWBabSILxfgMxhYW?=
+ =?us-ascii?Q?5t1REU5bvNKwSPcoER99N/94t/3sHWkwwaBciKlxUZm1fEhocC5U3tBnzcYu?=
+ =?us-ascii?Q?Y5KGU4eKklZ716sNrZzG/1n6IJY9ZWBsO++NOdhi8jKpAtkEg3a6+Edud121?=
+ =?us-ascii?Q?AXthJN8HB/boz2ijNz1vp9K4/6XRUQwRvCqwlAFUubTbzgRI4uqYgjdbTZzF?=
+ =?us-ascii?Q?fGZtWJnqgbq6w2iDf4fu0HWP6wYIXIj3oMWHtFYSbr0DITeQBT9hSt2u0zAn?=
+ =?us-ascii?Q?TiAFTLIVNNa103bpueOPwtZFTaNTQbeMIPGQsFvY7ZuLAHcMXbnQOY0WZwyD?=
+ =?us-ascii?Q?8XHRLYr4ZV3ThHD4s7ThOiMhn1cW6nd7BehHN4KaNtEK9QsMqAwyjl0uRDLT?=
+ =?us-ascii?Q?uelM8kAV0X0i9Q6jAHhu7DxnmAfA0tGxivF0HcbkNTviTekJOaUFaBl9rY2I?=
+ =?us-ascii?Q?3evYGHDMrA8a5JVkvztI6NUJlhf8zMVwal4S5CJhFzm04Nb97YB0eKspxSdy?=
+ =?us-ascii?Q?Nht8bFxneysjLE8S4qSxBsZ2LWnx3RGB3wzigUwd8F2LMuvBtQWU8zIPFm1i?=
+ =?us-ascii?Q?mTrwZvLvg10c2fKcb0YWn04lQ40EHHLut0q2Zw+bVvIghM1ojBuFmkDiqVdz?=
+ =?us-ascii?Q?g4HVhcdGexCOGmhc0LVD4QqbybQKrrT3KHGg3BUDUC35lQ/B3CDSMHlEpOsq?=
+ =?us-ascii?Q?hqtKQ4NuiVruI7ER18yAGcq5xRxKGk/sCNknv8gU+/8+9yVrIovCc44YRHH+?=
+ =?us-ascii?Q?BbP8EDb9mDlTFRct2EY9KUvh2nad/0ItKxF6tRcTj/spsi2yfaOJ/aTEBaA+?=
+ =?us-ascii?Q?b3JRbsQaGRmwFQdI84UqsXfSvDh57rIp5IirpRyhS17ClLUas6keHUYF65o8?=
+ =?us-ascii?Q?7p3z01KSTv6KAFSP2aFfxSfyo2bD83Fi3X0aCKI0ccBZF94TULKNdwpga0TH?=
+ =?us-ascii?Q?lH7f3cO/0bcr40DKQ8rjznUlhRSnChOkZBTxvbVhF83L8er90P1qi2KZTgmC?=
+ =?us-ascii?Q?5POQcCPEVFvpPDbjOnE27y5rD/SvRfcE2z0tPnHhRVWAwu9Xu01eQ4hdx2om?=
+ =?us-ascii?Q?I/TmEdUV5VxrOS5mvbJMdGpIpdZZnvE3SYoRlM8RtwEQgyeKRRLGbhocknYf?=
+ =?us-ascii?Q?IJI+pEngER11NcqfZPs3YLouHwf7wkQytL41qamcZplZjfmPnTXpnD5IBx5s?=
+ =?us-ascii?Q?6m1zQXAiEQrkzeBtnejAIgsCcBGEHe/CI303n/GtqRPjz1Yr8Ydx3Eq2+ZNE?=
+ =?us-ascii?Q?CNbAoVUIYEy6SiHRxtx+rroAi6HVlDUUo+3u0gQ5yAZFd7PyqF/P+1liVm2P?=
+ =?us-ascii?Q?AswD714T8+VsgKFZVOFWEGJoVLJZsHzpce+nOgCX/B1phRJ9hsLdLn5WQMH8?=
+ =?us-ascii?Q?+uwxw00fLm3h3/aUH/RwdUd4iaEwlem8SnQ9tJT9/gGmYLOeSV//zMDrSe1x?=
+ =?us-ascii?Q?5Fa9ebEoPLwL7ocgkhzCjrFqJOwyZkgu9BwxNGJISnYca0qZ8u+ADu+3HfLe?=
+ =?us-ascii?Q?dxJLyu1R2soAy2Q3ZpvFHLc=3D?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 52ebcb3c-13b0-4d9f-bea6-08d9be2bece5
+X-MS-Exchange-CrossTenant-AuthSource: VI1PR04MB4688.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Dec 2021 09:45:17.0230
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Dec 2021 11:30:11.9345
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 5e0e1b52-21b5-4e7b-83bb-514ec460677e
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 9M/NS+nKceX6velpGqRNeTGzYNAKR/89baPUQ8M7XHXUZ8n0FTUFQtq4wSp7VEVE4UEe5uc2reIReLIydGDtYfiT8DVzX1UoaEazkro7jjJLpWQLmm3sA7to5s6h9EJX
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: HE1PR0402MB3594
+X-MS-Exchange-CrossTenant-UserPrincipalName: adz9LLwAoY0mrj0iUdTgfHKf4KUD3wPwdtV+Uyu/E/fU1804MlUkr/LQiPdTjkeC8vPJgBLQYYzRG5P/8+NX4A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB3966
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On Wed, Dec 08, 2021 at 11:14:01AM +0100, Ulf Hansson wrote:
-> + Avri
+On 21-12-04 01:10:36, Jesse Taube wrote:
+> Add clock driver support for i.MXRT1***s starting with the i.MXRT1050.
 > 
-> On Thu, 2 Dec 2021 at 17:19, Quentin Schulz
-> <quentin.schulz@theobroma-systems.com> wrote:
-> >
-> > JEDEC 5.1 JESD84-B50.1 DEVICE_TYPE [196] specifies that bit 6 is for
-> > "HS400 Dual Data Rate e•MMC at 200 MHz – 1.8 V I/O" and bit 7 for
-> > "HS400 Dual Data Rate e•MMC at 200 MHz – 1.2 V I/O" so let's add those.
-> >
-> > Cc: Quentin Schulz <foss+kernel@0leil.net>
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> Suggested-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> ---
+> V1->V2:
+> * Kconfig: Add new line
+> * clk-imxrt.c: Remove unused const
+> * clk-imxrt.c: Remove set parents
+> * clk-imxrt.c: Use fsl,imxrt-anatop for anatop base address
+> V2->V3:
+> * Remove unused ANATOP_BASE_ADDR
+> * Move to hw API
+> * Add GPT's own clock
+> * Add SEMC clocks to set muxing to CRITICAL
+> V3->V4:
+> * Rename clk-imxrt.c to clk-imxrt1050.c
+> * Rename CONFIG_CLK_IMXRT to CONFIG_CLK_IMXRT1050
+> * Make CONFIG_CLK_IMXRT1050 selectable
+> ---
+>  drivers/clk/imx/Kconfig         |   5 +
+>  drivers/clk/imx/Makefile        |   1 +
+>  drivers/clk/imx/clk-imxrt1050.c | 156 ++++++++++++++++++++++++++++++++
+>  3 files changed, 162 insertions(+)
+>  create mode 100644 drivers/clk/imx/clk-imxrt1050.c
 > 
-> Future wise, please don't use this to cc yourself another email. No
-> need to resend this time.
-> 
+> diff --git a/drivers/clk/imx/Kconfig b/drivers/clk/imx/Kconfig
+> index c08edbd04d22..f697652ab19c 100644
+> --- a/drivers/clk/imx/Kconfig
+> +++ b/drivers/clk/imx/Kconfig
+> @@ -105,3 +105,8 @@ config CLK_IMX8ULP
+>  	select MXC_CLK
+>  	help
+>  	    Build the driver for i.MX8ULP CCM Clock Driver
+> +
+> +config CLK_IMXRT1050
+> +	bool "IMXRT1050 CCM Clock Driver"
+> +	depends on SOC_IMXRT
+> +	select MXC_CLK
+> diff --git a/drivers/clk/imx/Makefile b/drivers/clk/imx/Makefile
+> index b5e040026dfb..3d9a1e3b5fc6 100644
+> --- a/drivers/clk/imx/Makefile
+> +++ b/drivers/clk/imx/Makefile
+> @@ -47,3 +47,4 @@ obj-$(CONFIG_CLK_IMX6UL) += clk-imx6ul.o
+>  obj-$(CONFIG_CLK_IMX7D)  += clk-imx7d.o
+>  obj-$(CONFIG_CLK_IMX7ULP) += clk-imx7ulp.o
+>  obj-$(CONFIG_CLK_VF610)  += clk-vf610.o
+> +obj-$(CONFIG_CLK_IMXRT1050)  += clk-imxrt1050.o
+> diff --git a/drivers/clk/imx/clk-imxrt1050.c b/drivers/clk/imx/clk-imxrt1050.c
+> new file mode 100644
+> index 000000000000..85ba1a240335
+> --- /dev/null
+> +++ b/drivers/clk/imx/clk-imxrt1050.c
+> @@ -0,0 +1,156 @@
+> +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+> +/*
+> + * Copyright (C) 2021
+> + * Author(s):
+> + * Jesse Taube <Mr.Bossman075@gmail.com>
+> + * Giulio Benetti <giulio.benetti@benettiengineering.com>
+> + */
+> +#include <linux/mm.h>
+> +#include <linux/delay.h>
+> +#include <linux/clk.h>
+> +#include <linux/io.h>
+> +#include <linux/clkdev.h>
+> +#include <linux/clk-provider.h>
+> +#include <linux/err.h>
+> +#include <linux/of.h>
+> +#include <linux/of_address.h>
+> +#include <linux/of_irq.h>
+> +#include <linux/sizes.h>
+> +#include <soc/imx/revision.h>
+> +#include <dt-bindings/clock/imxrt1050-clock.h>
+> +
+> +#include "clk.h"
+> +
+> +static const char * const pll_ref_sels[] = {"osc", "dummy", };
+> +static const char * const per_sels[] = {"ipg_pdof", "osc", };
+> +static const char * const pll1_bypass_sels[] = {"pll1_arm", "pll1_arm_ref_sel", };
+> +static const char * const pll2_bypass_sels[] = {"pll2_sys", "pll2_sys_ref_sel", };
+> +static const char * const pll3_bypass_sels[] = {"pll3_usb_otg", "pll3_usb_otg_ref_sel", };
+> +static const char * const pll5_bypass_sels[] = {"pll5_video", "pll5_video_ref_sel", };
+> +static const char *const pre_periph_sels[] = {
+> +	"pll2_sys", "pll2_pfd2_396m", "pll2_pfd0_352m", "arm_podf", };
+> +static const char *const periph_sels[] = { "pre_periph_sel", "todo", };
+> +static const char *const usdhc_sels[] = { "pll2_pfd2_396m", "pll2_pfd0_352m", };
+> +static const char *const lpuart_sels[] = { "pll3_80m", "osc", };
+> +static const char *const lcdif_sels[] = {
+> +	"pll2_sys", "pll3_pfd3_454_74m", "pll5_video", "pll2_pfd0_352m",
+> +	"pll2_pfd1_594m", "pll3_pfd1_664_62m", };
+> +static const char *const semc_alt_sels[] = { "pll2_pfd2_396m", "pll3_pfd1_664_62m", };
+> +static const char *const semc_sels[] = { "periph_sel", "semc_alt_sel", };
+> +
+> +static struct clk_hw **hws;
+> +static struct clk_hw_onecell_data *clk_hw_data;
+> +
+> +static void __init imxrt_clocks_common_init(void __iomem *base)
+> +{
+> +	/* Anatop clocks */
+> +	hws[IMXRT1050_CLK_DUMMY] = imx_clk_hw_fixed("dummy", 0UL);
+> +
+> +	hws[IMXRT1050_CLK_PLL1_REF_SEL] = imx_clk_hw_mux("pll1_arm_ref_sel",
+> +		base + 0x0, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+> +	hws[IMXRT1050_CLK_PLL2_REF_SEL] = imx_clk_hw_mux("pll2_sys_ref_sel",
+> +		base + 0x30, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+> +	hws[IMXRT1050_CLK_PLL3_REF_SEL] = imx_clk_hw_mux("pll3_usb_otg_ref_sel",
+> +		base + 0x10, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+> +	hws[IMXRT1050_CLK_PLL5_REF_SEL] = imx_clk_hw_mux("pll5_video_ref_sel",
+> +		base + 0xa0, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+> +
+> +	hws[IMXRT1050_CLK_PLL1_ARM] = imx_clk_hw_pllv3(IMX_PLLV3_SYS, "pll1_arm",
+> +		"pll1_arm_ref_sel", base + 0x0, 0x7f);
+> +	hws[IMXRT1050_CLK_PLL2_SYS] = imx_clk_hw_pllv3(IMX_PLLV3_GENERIC, "pll2_sys",
+> +		"pll2_sys_ref_sel", base + 0x30, 0x1);
+> +	hws[IMXRT1050_CLK_PLL3_USB_OTG] = imx_clk_hw_pllv3(IMX_PLLV3_USB, "pll3_usb_otg",
+> +		"pll3_usb_otg_ref_sel", base + 0x10, 0x1);
+> +	hws[IMXRT1050_CLK_PLL5_VIDEO] = imx_clk_hw_pllv3(IMX_PLLV3_AV, "pll5_video",
+> +		"pll5_video_ref_sel", base + 0xa0, 0x7f);
+> +
+> +	/* PLL bypass out */
+> +	hws[IMXRT1050_CLK_PLL1_BYPASS] = imx_clk_hw_mux_flags("pll1_bypass", base + 0x0, 16, 1,
+> +		pll1_bypass_sels, ARRAY_SIZE(pll1_bypass_sels), CLK_SET_RATE_PARENT);
+> +	hws[IMXRT1050_CLK_PLL2_BYPASS] = imx_clk_hw_mux_flags("pll2_bypass", base + 0x30, 16, 1,
+> +		pll2_bypass_sels, ARRAY_SIZE(pll2_bypass_sels), CLK_SET_RATE_PARENT);
+> +	hws[IMXRT1050_CLK_PLL3_BYPASS] = imx_clk_hw_mux_flags("pll3_bypass", base + 0x10, 16, 1,
+> +		pll3_bypass_sels, ARRAY_SIZE(pll3_bypass_sels), CLK_SET_RATE_PARENT);
+> +	hws[IMXRT1050_CLK_PLL5_BYPASS] = imx_clk_hw_mux_flags("pll5_bypass", base + 0xa0, 16, 1,
+> +		pll5_bypass_sels, ARRAY_SIZE(pll5_bypass_sels), CLK_SET_RATE_PARENT);
+> +
+> +	hws[IMXRT1050_CLK_VIDEO_POST_DIV_SEL] = imx_clk_hw_divider("video_post_div_sel",
+> +		"pll5_video", base + 0xa0, 19, 2);
+> +	hws[IMXRT1050_CLK_VIDEO_DIV] = imx_clk_hw_divider("video_div",
+> +		"video_post_div_sel", base + 0x170, 30, 2);
+> +
+> +	hws[IMXRT1050_CLK_PLL3_80M] = imx_clk_hw_fixed_factor("pll3_80m",  "pll3_usb_otg", 1, 6);
+> +
+> +	hws[IMXRT1050_CLK_PLL2_PFD0_352M] = imx_clk_hw_pfd("pll2_pfd0_352m", "pll2_sys", base + 0x100, 0);
+> +	hws[IMXRT1050_CLK_PLL2_PFD1_594M] = imx_clk_hw_pfd("pll2_pfd1_594m", "pll2_sys", base + 0x100, 1);
+> +	hws[IMXRT1050_CLK_PLL2_PFD2_396M] = imx_clk_hw_pfd("pll2_pfd2_396m", "pll2_sys", base + 0x100, 2);
+> +	hws[IMXRT1050_CLK_PLL3_PFD1_664_62M] = imx_clk_hw_pfd("pll3_pfd1_664_62m", "pll3_usb_otg", base + 0xf0, 1);
+> +	hws[IMXRT1050_CLK_PLL3_PFD3_454_74M] = imx_clk_hw_pfd("pll3_pfd3_454_74m", "pll3_usb_otg", base + 0xf0, 3);
+> +}
+> +
+> +static void __init imxrt1050_clocks_init(struct device_node *np)
+> +{
+> +	void __iomem *ccm_base;
+> +	void __iomem *pll_base;
+> +	struct device_node *anp;
+> +
+> +	clk_hw_data = kzalloc(struct_size(clk_hw_data, hws,
+> +					  IMXRT1050_CLK_END), GFP_KERNEL);
+> +	if (WARN_ON(!clk_hw_data))
+> +		return;
+> +
+> +	clk_hw_data->num = IMXRT1050_CLK_END;
+> +	hws = clk_hw_data->hws;
+> +
+> +	hws[IMXRT1050_CLK_OSC] = __clk_get_hw(of_clk_get_by_name(np, "osc"));
+> +
+> +	anp = of_find_compatible_node(NULL, NULL, "fsl,imxrt-anatop");
+> +	pll_base = of_iomap(anp, 0);
+> +	WARN_ON(!pll_base);
+> +	imxrt_clocks_common_init(pll_base);
+> +	/* CCM clocks */
+> +	ccm_base = of_iomap(np, 0);
+> +	WARN_ON(!ccm_base);
+> +
+> +	hws[IMXRT1050_CLK_ARM_PODF] = imx_clk_hw_divider("arm_podf", "pll1_arm", ccm_base + 0x10, 0, 3);
+> +	hws[IMXRT1050_CLK_PRE_PERIPH_SEL] = imx_clk_hw_mux("pre_periph_sel", ccm_base + 0x18, 18, 2,
+> +		pre_periph_sels, ARRAY_SIZE(pre_periph_sels));
+> +	hws[IMXRT1050_CLK_PERIPH_SEL] = imx_clk_hw_mux("periph_sel", ccm_base + 0x14, 25, 1,
+> +		periph_sels, ARRAY_SIZE(periph_sels));
+> +	hws[IMXRT1050_CLK_USDHC1_SEL] = imx_clk_hw_mux("usdhc1_sel", ccm_base + 0x1c, 16, 1,
+> +		usdhc_sels, ARRAY_SIZE(usdhc_sels));
+> +	hws[IMXRT1050_CLK_USDHC2_SEL] = imx_clk_hw_mux("usdhc2_sel", ccm_base + 0x1c, 17, 1,
+> +		usdhc_sels, ARRAY_SIZE(usdhc_sels));
+> +	hws[IMXRT1050_CLK_LPUART_SEL] = imx_clk_hw_mux("lpuart_sel", ccm_base + 0x24, 6, 1,
+> +		lpuart_sels, ARRAY_SIZE(lpuart_sels));
+> +	hws[IMXRT1050_CLK_LCDIF_SEL] = imx_clk_hw_mux("lcdif_sel", ccm_base + 0x38, 15, 3,
+> +		lcdif_sels, ARRAY_SIZE(lcdif_sels));
+> +	hws[IMXRT1050_CLK_PER_CLK_SEL] = imx_clk_hw_mux("per_sel", ccm_base + 0x1C, 6, 1,
+> +		per_sels, ARRAY_SIZE(per_sels));
+> +	hws[IMXRT1050_CLK_SEMC_ALT_SEL] = imx_clk_hw_mux("semc_alt_sel", ccm_base + 0x14, 7, 1,
+> +		semc_alt_sels, ARRAY_SIZE(semc_alt_sels));
+> +	hws[IMXRT1050_CLK_SEMC_SEL] = imx_clk_hw_mux_flags("semc_sel", ccm_base + 0x14, 6, 1,
+> +		semc_sels, ARRAY_SIZE(semc_sels), CLK_IS_CRITICAL);
+> +
+> +	hws[IMXRT1050_CLK_AHB_PODF] = imx_clk_hw_divider("ahb", "periph_sel", ccm_base + 0x14, 10, 3);
+> +	hws[IMXRT1050_CLK_IPG_PDOF] = imx_clk_hw_divider("ipg", "ahb", ccm_base + 0x14, 8, 2);
+> +	hws[IMXRT1050_CLK_PER_PDOF] = imx_clk_hw_divider("per", "per_sel", ccm_base + 0x1C, 0, 5);
+> +
+> +	hws[IMXRT1050_CLK_USDHC1_PODF] = imx_clk_hw_divider("usdhc1_podf", "usdhc1_sel", ccm_base + 0x24, 11, 3);
+> +	hws[IMXRT1050_CLK_USDHC2_PODF] = imx_clk_hw_divider("usdhc2_podf", "usdhc2_sel", ccm_base + 0x24, 16, 3);
+> +	hws[IMXRT1050_CLK_LPUART_PODF] = imx_clk_hw_divider("lpuart_podf", "lpuart_sel", ccm_base + 0x24, 0, 6);
+> +	hws[IMXRT1050_CLK_LCDIF_PRED] = imx_clk_hw_divider("lcdif_pred", "lcdif_sel", ccm_base + 0x38, 12, 3);
+> +	hws[IMXRT1050_CLK_LCDIF_PODF] = imx_clk_hw_divider("lcdif_podf", "lcdif_pred", ccm_base + 0x18, 23, 3);
+> +
+> +	hws[IMXRT1050_CLK_USDHC1] = imx_clk_hw_gate2("usdhc1", "usdhc1_podf", ccm_base + 0x80, 2);
+> +	hws[IMXRT1050_CLK_USDHC2] = imx_clk_hw_gate2("usdhc2", "usdhc2_podf", ccm_base + 0x80, 4);
+> +	hws[IMXRT1050_CLK_LPUART1] = imx_clk_hw_gate2("lpuart1", "lpuart_podf", ccm_base + 0x7c, 24);
+> +	hws[IMXRT1050_CLK_LCDIF_APB] = imx_clk_hw_gate2("lcdif", "lcdif_podf", ccm_base + 0x74, 10);
+> +	hws[IMXRT1050_CLK_DMA] = imx_clk_hw_gate("dma", "ipg", ccm_base + 0x7C, 6);
+> +	hws[IMXRT1050_CLK_DMA_MUX] = imx_clk_hw_gate("dmamux0", "ipg", ccm_base + 0x7C, 7);
+> +	hws[IMXRT1050_CLK_GPT] = imx_clk_hw_fixed_factor("gpt", "osc", 1, 8);
+> +	imx_check_clk_hws(hws, IMXRT1050_CLK_END);
+> +
+> +	of_clk_add_hw_provider(np, of_clk_hw_onecell_get, clk_hw_data);
+> +}
+> +CLK_OF_DECLARE(imxrt_ccm, "fsl,imxrt1050-ccm", imxrt1050_clocks_init);
 
-I've contributed to OSS projects with three different companies, each
-obviously having a different mail address.
+I would suggest module platform driver instead.
 
-The point of the Cc was to be nice and give a way to contact me, were my
-mail address in the SoB to bounce in a few years.
+Sorry for the late review.
 
-How do you usually handle that? or do you not care that much? Being
-curious how different project tackle this kind of issues.
-
-> > Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
-> 
-> Even if the patch is trivial and looks good to me, I have added Avri
-> who helps to maintain mmc-utils, to make sure there are no objections.
-> 
-
-Thanks for forwarding to the appropriate people.
-
-BTW, I struggled to find how to contribute to mmc-utils, would anyone be
-ok with adding a CONTRIBUTING or README at the root of the project?
-
-Kind regards,
-Quentin
+> -- 
+> 2.34.0
+>
