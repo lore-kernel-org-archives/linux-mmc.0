@@ -2,97 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19419C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 04:59:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93AE3C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 07:18:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231773AbhLME7S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Dec 2021 23:59:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47958 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229990AbhLME7S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Dec 2021 23:59:18 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2B5CC06173F;
-        Sun, 12 Dec 2021 20:59:17 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 15254B80D7C;
-        Mon, 13 Dec 2021 04:59:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7897CC00446;
-        Mon, 13 Dec 2021 04:59:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1639371554;
-        bh=uqDkjyi1DAG2WVFI7Iu0TC2w+GaDC3EmWkInyLpcGtE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=mVDRCny15VHJlA+o7pFyvRO+fGTVY2J3x91BIqcOwy4cryBFjZQyaHtyPhgW6KO28
-         HCKopx8WXOVlRdPjhEOrjN2VBJ1zFB8NRnGb5EUdfofWdRrki7ZlorlrhKm0n81/la
-         3mN9IpyIgfzc1/r0ZuBokeJT/zwaGH17foE/YzWMrXovh2MCpsiNQwWNaKLY5YRyFy
-         blW8ncTTX15Q1zUIMmgSzOFg2mWmU6KWhkXrs65ZUlMvc/lyG3K8k5h5nInsBLDfjW
-         SlpMqgTcrrDN8iKQSo2q7ad2+NbXTwlELLLoqff2K0DHg43fpfYsWOz0ibzpD4QupX
-         V/h6/iJ4bdVAQ==
-Date:   Mon, 13 Dec 2021 10:29:10 +0530
-From:   Vinod Koul <vkoul@kernel.org>
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Andy Gross <agross@kernel.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Baolin Wang <baolin.wang7@gmail.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Hyun Kwon <hyun.kwon@xilinx.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Jon Hunter <jonathanh@nvidia.com>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Laxman Dewangan <ldewangan@nvidia.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Scott Branden <sbranden@broadcom.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        alsa-devel@alsa-project.org, bcm-kernel-feedback-list@broadcom.com,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-rpi-kernel@lists.infradead.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
-        linux-tegra@vger.kernel.org
-Subject: Re: [PATCH v2 00/11] dmaengine: kill off dma_slave_config->slave_id
-Message-ID: <YbbTHo+Wfpl30ZUH@matsya>
-References: <20211122222203.4103644-1-arnd@kernel.org>
+        id S231213AbhLMHSh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Dec 2021 02:18:37 -0500
+Received: from mail-sz.amlogic.com ([211.162.65.117]:30320 "EHLO
+        mail-sz.amlogic.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229695AbhLMHSg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Dec 2021 02:18:36 -0500
+X-Greylist: delayed 903 seconds by postgrey-1.27 at vger.kernel.org; Mon, 13 Dec 2021 02:18:36 EST
+Received: from rd02-sz.amlogic.software (10.28.8.43) by mail-sz.amlogic.com
+ (10.28.11.5) with Microsoft SMTP Server id 15.1.2176.2; Mon, 13 Dec 2021
+ 15:03:32 +0800
+From:   Rong Chen <rong.chen@amlogic.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        <--to=1131046452@qq.com>
+CC:     <45581586@qq.com>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-amlogic@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, Rong Chen <rong.chen@amlogic.com>
+Subject: [PATCH] mmc: meson: initial ocr available by default value
+Date:   Mon, 13 Dec 2021 15:03:30 +0800
+Message-ID: <20211213070330.3351505-1-rong.chen@amlogic.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211122222203.4103644-1-arnd@kernel.org>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.28.8.43]
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 22-11-21, 23:21, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> I recently came across some new uses of the 'slave_id' field that
-> I had (almost) removed a few years ago. There are no legitimate
-> uses of this field in the kernel, only a few stale references and
-> two drivers that abuse the field as a side-channel between the
-> dmaengine driver and its client.
-> 
-> Let's change the xilinx and qualcomm drivers to use the documented
-> side-channel (peripheral_data) instead, and remove the remnants of
-> it to prevent new users from coming in.
-> 
-> I think I got all the necessary Acks on v1 already, so if there are
-> no further concerns, please merge this through the dmaengine tree
-> for v5.17, or pull from
+The patch will add a value of ocr supported by the controller,
+to specify some of voltage values are supported.
 
-Arnd, Thanks for the cleanup. I have applied and folder the fix you sent
-in this
+Ocr_avail should place an initial value to avoid uncertain
+value for the platform that unsupport regulator such as S4.
 
+Signed-off-by: Rong Chen <rong.chen@amlogic.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 8f36536cb1b6..c339e12d5516 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -4,6 +4,9 @@
+  *
+  * Copyright (c) 2016 BayLibre, SAS.
+  * Author: Kevin Hilman <khilman@baylibre.com>
++ *
++ * Copyright (c) 2021 Amlogic, inc.
++ * Author: Rong Chen <Rong.Chen@amlogic.com>
+  */
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+@@ -130,6 +133,7 @@
+ #define SD_EMMC_DESC_CHAIN_MODE BIT(1)
+ 
+ #define MUX_CLK_NUM_PARENTS 2
++#define SD_EMMC_OCR_AVAIL 0x200080
+ 
+ struct meson_mmc_data {
+ 	unsigned int tx_delay_mask;
+@@ -1150,6 +1154,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	host->dram_access_quirk = device_property_read_bool(&pdev->dev,
+ 					"amlogic,dram-access-quirk");
+ 
++	mmc->ocr_avail = SD_EMMC_OCR_AVAIL;
+ 	/* Get regulators and the supported OCR mask */
+ 	host->vqmmc_enabled = false;
+ 	ret = mmc_regulator_get_supply(mmc);
+
+base-commit: 141edd9e99eb91393e8a4d97742bd98328bff724
 -- 
-~Vinod
+2.25.1
+
