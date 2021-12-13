@@ -2,101 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F406BC43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 12:42:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4406BC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Dec 2021 13:01:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236873AbhLMMmM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Dec 2021 07:42:12 -0500
-Received: from smtpcmd03117.aruba.it ([62.149.158.117]:35449 "EHLO
-        smtpcmd03117.aruba.it" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236880AbhLMMmL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Dec 2021 07:42:11 -0500
-Received: from smtpclient.apple ([146.241.138.59])
-        by Aruba Outgoing Smtp  with ESMTPA
-        id wkeYmWeD7Ni3cwkeZm3tZn; Mon, 13 Dec 2021 13:42:09 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
-        t=1639399329; bh=HW8jnezXIp3XT9vHzTfAeit8KDYul5E/X+S8lIqCFzA=;
-        h=Content-Type:From:Mime-Version:Subject:Date:To;
-        b=bW3CLmmFgM9n0qt/F1+oAVzlHW1KaA7xfMT070F5NMPjdRZ5hWmmBluO4pAjko8/4
-         0uQHuJHjh2temvPV2ixXykmgaKp4IuDnV7gyp6WvpshPPBH7XffP5lgdr/CEV+xQvs
-         dGCIyTBvKycd3okFGdmY8kZuYnk2/Ar+gseo4RnbaYCFbiRd8KB/PmgD04lQXHspju
-         6cc4BH/0hG5VQM7uCpunOlqgsDdH+zcT3ImLxsVZiUY1F2J73gtL9re2/L1gnyIrSx
-         scXub6a9KanbmbW1+eyNhYCxSney0v5U9RrZp8H7htgb7Z76RSAL//kbtebRcm4oIx
-         8NJSNbOKo71qw==
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
-Mime-Version: 1.0 (1.0)
-Subject: Re: [PATCH v4 07/13] clk: imx: Add initial support for i.MXRT clock driver
-Date:   Mon, 13 Dec 2021 13:42:02 +0100
-Message-Id: <3109BC68-D1F8-4972-9480-F26606085ECD@benettiengineering.com>
-References: <CAOMZO5D9ytHBACojwk3mtaypdc4s5gWT7ctJQiUzmmP15hzGww@mail.gmail.com>
-Cc:     Abel Vesa <abel.vesa@nxp.com>,
-        Jesse Taube <mr.bossman075@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Stefan Agner <stefan@agner.ch>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
-        soc@kernel.org, Russell King - ARM Linux <linux@armlinux.org.uk>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-serial@vger.kernel.org
-In-Reply-To: <CAOMZO5D9ytHBACojwk3mtaypdc4s5gWT7ctJQiUzmmP15hzGww@mail.gmail.com>
-To:     Fabio Estevam <festevam@gmail.com>
-X-Mailer: iPhone Mail (19B74)
-X-CMAE-Envelope: MS4wfPDFt+eQTTflaIECVpAthF57sEYmn4Q2RvQhp7B+4VH2gu3iPMFODYUJjPPdHcfy0G6Olr6hvCyb7WbX68JVtMjscZHWb2lZHmJjosX1cRt7ibrFNqkx
- yF4kBPlqZgYTMtUOcVITfQfiy8VN4ivJgsklw/wIfMFkAaz5W4l+GIk5DlnbnTKasmv8O1VOWWFvDB9xXJ9rs7cKmMBXSZqagQ+7bcGB8eJmRs8pt4c7BBP5
- h8jwR/Xvwg/l0J0Sse6morf+GOhc4gtceJsUYyxByex/TN6/8sg6ndnpGsvIEwngpHu1kbO9dxv3CTGNYWHPufEbxudq34t0e/h5yHqf75HBf0cl3fDNjUzP
- vuCw1NQxNTL070XUcwWKHJHv25LhfHdbqbmWgDNh3rfg/WioktumTv17QRmidJM4cwyZ7xIrFda/3mLcYoHtjzLPui8KhJZAUrohDju+malebuF6Yx409YuS
- tf6InUpQg6WS07uIRu96HGDbpY80pOmkk/+4oBPuvHe1dQNJLwWO/M2kIZ06Jl6zLXSqIL+CjCBmdGdeaW/YNcS/ZF8MpU1FPi0ZEVvUS+BFeNscbVqVoP/T
- oI9igbJe+gzbmG9oSUOng9LZVe8tJ9+3ra1S3HioTmsF9xV+4E/qsDucSg+2JmXFMcaQLDpEliHoyJOwPpWSegkMpVumYTXcZQTkKcuShJa41AwKinGtORjc
- yz7Yo8ByOADmKT6C7zPiigPbKclb3VoEQvHo1VC0/R/kdeLtmyevT9v7KqrwQUZXLRfp7sInHHi0TE4gGKHaRX0tL7/Y5fwvADXrWe4SnpkUwLXvbmh6WUXC
- mmxOm9wVGMQsQ8J/AOE5zHu/xaGBMIkAHKCkBDIiTVCTuycnJsl8msxybTbFdnD3dO0iaN+cCDqv2kukEKc4WzBSYx22mUvptrinTtEtI5m8v3F2vwRF2E0i
- nA5lw7ar99z1ELSnw4lOzhVik6K9W/PWVQ+MRGCUUd3kXFXbQoJDMzwYr1tRlAe3o21zoA/IoQhOOU4BgfW7ogB28mKV0UFdD1PUjL2EWoz6qvkyGUfGTqGq
- DVRGthEjuA7rVNjOX+LkyY7aA3c0b0kBU1nrOoeXdDbzQT4QPcUxc+tTsiOGtwuhenm9GhKHEOoig7xzgy3CHtnrjIqH+w+S3hE=
+        id S233300AbhLMNBu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Dec 2021 08:01:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46976 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233282AbhLMNBu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Dec 2021 08:01:50 -0500
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92610C06173F
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Dec 2021 05:01:49 -0800 (PST)
+Received: by mail-lj1-x22a.google.com with SMTP id l7so23600878lja.2
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Dec 2021 05:01:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=mmZqoM0VKk19CgkjkqT2/mS1Wzq4NBD9qkKtBMLqLss=;
+        b=CXhNuATQd8iDGZZytbWfLcg2yXtENnNCTKsNdZ1fZIz+RkCQDT2d8Yg5go8/P1d/c4
+         wCDwchO9A63guwAOxxpmkrCXlkj8l94hZURQbhdTiA8ubNeK8kFVH+E5wZscpY7ZOO+3
+         Op8xfaKGNiwSis5xYtXFSX7NW22UB+nyUknCHmGgniM4zQ4EZmoNaZA07WU9or+gVpg+
+         1CYTnGCgEeZatVJ4KiscXfHqfpl/3vlyru7JgkzhHOb3nMwrumn337EVox8W0BdZ1v/G
+         P7B7jwwpGbXjuqd/XoGfWZeHIMevRS4txQr6jxI+f+44dlx8w/Y33+6v97q64LsSO6WO
+         UfXw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=mmZqoM0VKk19CgkjkqT2/mS1Wzq4NBD9qkKtBMLqLss=;
+        b=T6I2qepP32p4ITy9sD1PD/WfU460MJgq9QUR/+pi+aG1NHTtvV9DxrZnSwuif18NJG
+         o4ZbO+VWfLPORGXi3URophjX6ZCp48GQFXA9imAtnNvSgGBvxDEgypK2bmTUZ+ejsXR9
+         uhViH/Cq+ApOgG9dGGkwUU0AXlkv04avkl/jWO7aZtM60zZ4rhwFzNGZHROhO5FwAxWV
+         YxzB/HHqAWE2yqAMO9thF6x5mDkOItio2ox96ncASSSjOG6/5KIxU2hapZnHsHzS2U14
+         ApfaqJmiSgYs1poW7DzpwNGCTU4U6YxW38vcjZe7Al1PZa4SIhUvSdhFS2K7hPgTEDjZ
+         yyyQ==
+X-Gm-Message-State: AOAM5325aPUFbuBBeNb/G87M4sZSg+gornBktBCT+y/9432CXPZifbDi
+        uD95f+mZuQDPqT72VFfVbQy6aV+pAHqZiR3nxEi97w==
+X-Google-Smtp-Source: ABdhPJwDPCbxiPnhThYyhmTadFojAvuJfukt/vgX9gGHkV9OErrpCAyUIo/lXKbMSSPm5smSXRJojyNJL0Ju04uDV1I=
+X-Received: by 2002:a2e:7114:: with SMTP id m20mr29570182ljc.229.1639400506261;
+ Mon, 13 Dec 2021 05:01:46 -0800 (PST)
+MIME-Version: 1.0
+References: <20211212145956.1423755-1-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20211212145956.1423755-1-martin.blumenstingl@googlemail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 13 Dec 2021 14:01:09 +0100
+Message-ID: <CAPDyKFoqGFJQ=i301+xXvP1he-tzL8pzZO3q6P+tERYFUNZskA@mail.gmail.com>
+Subject: Re: [PATCH v1 0/2] mmc: meson-mx-sdhc: two fixes
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Fabio,
+On Sun, 12 Dec 2021 at 16:00, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> The first patch in this series fixes Broadcom SDIO wifi cards (using
+> the brcmfmac driver) on Meson8 SoCs. Meson8b with Realtek (RTL8723BS)
+> SDIO wifi is unaffected by this (it worked fine before). Testing was
+> done (on the S82 board) in private by a user who wants to remain
+> anonymous.
+>
+> The second patch in this series is a minor cleanup which I found when
+> working on the first patch.
+>
+>
+> Martin Blumenstingl (2):
+>   mmc: meson-mx-sdhc: Set MANUAL_STOP for multi-block SDIO commands
+>   mmc: meson-mx-sdhc: Drop unused MESON_SDHC_NUM_BUILTIN_CLKS macro
+>
+>  drivers/mmc/host/meson-mx-sdhc-clkc.c | 2 --
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c  | 9 +++++++++
+>  2 files changed, 9 insertions(+), 2 deletions(-)
+>
 
-> Il giorno 13 dic 2021, alle ore 13:15, Fabio Estevam <festevam@gmail.com> h=
-a scritto:
->=20
-> =EF=BB=BFHi Giulio,
->=20
-> On Mon, Dec 13, 2021 at 9:06 AM Giulio Benetti
-> <giulio.benetti@benettiengineering.com> wrote:
->=20
->>> I would suggest module platform driver instead.
->>=20
->> Can you please point us an example?
->=20
-> Here is an example of a commit that converts the imx8mm clk driver to
-> platform driver:
-> https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/commit/?h=
-=3Dv5.15.7&id=3Daf7e7ee0e4280c29c41b6ec64b892bb53987a997
+Hi Martin,
 
-Thanks a lot, this ease us
+I noticed that you didn't cc the Maintainers from Baylibre, perhaps
+the amlogic list is good enough?
 
-Best regards
-Giulio=
-
+Kind regards
+Uffe
