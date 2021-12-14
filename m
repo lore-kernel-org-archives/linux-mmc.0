@@ -2,138 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A821C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 12:06:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9821C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 12:56:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233787AbhLNMGZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Dec 2021 07:06:25 -0500
-Received: from mga05.intel.com ([192.55.52.43]:26111 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229494AbhLNMGW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Dec 2021 07:06:22 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1639483582; x=1671019582;
-  h=subject:to:cc:references:from:message-id:date:
-   mime-version:in-reply-to:content-transfer-encoding;
-  bh=iIWYR91VbYEqQX+iN3rz0mKbS7VG6StqBEl02zH+MNc=;
-  b=kyBjPZ1zNp8EDHvl4fCoNaOAk4juEhJ5eudmAs9fdR1abIZDDX6Gl5Do
-   u3cFbZi4LFH1SBDVqs4jtoJhpmHXL3y8FIMRFh5uovOLqc6Gxrs+LKD+3
-   cmyn4Gp5vN3Va8JegsuT9sZN5hkiyo4yqS4le9Pn70mpJD+GGrzVys09c
-   eXCwEGA3KwDIDr+UJNR/Fa4j3syc8CQ2pdbRxA+iI4JhbH6d/BIs/rPWB
-   8RP2h5lKQMCS4wOkxSV7q1zNdO6lB5wdDLnS6XgZo3RTxZge+mrNACT8q
-   oc4jvt2Ia6wVKqxgiPJtUvDUIlGwUVq5n4GGYn1O8EzlbO326BPuRrA/6
-   A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10197"; a="325239247"
-X-IronPort-AV: E=Sophos;i="5.88,205,1635231600"; 
-   d="scan'208";a="325239247"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2021 04:06:22 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.88,205,1635231600"; 
-   d="scan'208";a="465057184"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga006.jf.intel.com with ESMTP; 14 Dec 2021 04:06:18 -0800
-Subject: Re: [PATCH v4] mmc: sdhci-tegra: Fix switch to HS400ES mode
-To:     Prathamesh Shete <pshete@nvidia.com>, ulf.hansson@linaro.org,
-        thierry.reding@gmail.com, jonathanh@nvidia.com,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     anrao@nvidia.com, smangipudi@nvidia.com
-References: <3dd2473a-00ca-4c62-e17f-9392cf74cda4@intel.com>
- <20211214113653.4631-1-pshete@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <58312188-d9fd-4bba-2be6-bb208c8b4d63@intel.com>
-Date:   Tue, 14 Dec 2021 14:06:17 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S234185AbhLNM4x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Dec 2021 07:56:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39176 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231674AbhLNM4w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 07:56:52 -0500
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 342F9C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Dec 2021 04:56:52 -0800 (PST)
+Received: by mail-lj1-x22f.google.com with SMTP id a37so27083285ljq.13
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Dec 2021 04:56:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=1FZZTetR/P0RMkY/shAktrybjzcJ8UfjNoMI6QX58FM=;
+        b=Ews8P+oQzUpY9YsC0wxRiXck0o5RWmsD3N+6+WUUzVbFva2bR27cg2vJ2YylCcCV1N
+         wpJfZ06+U3jAGcpaSgFZ1pqKRvTPb4gVv3vHGBHpVcr5wVJPXFWQ37lB/mmzrPepe9rz
+         4m3BtVkh3mexS+7tMDTiBTsOfh0fI2AaXT5TR9r3OliFlzSCtnvANWz5Cp6uPq07PAnN
+         paPOZVASmUlg0o0pvWlY+NA3Ztq5BAFYnBU8XBNaW0ShveuV+1THCnCNauvMWApgr7jx
+         YbrlqtH22F6yey8OfvAqZPjIQb0hxQFgIgR60nufHogXFYXUs2e5lwOwHqjOCZ6zdfLh
+         KVQg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=1FZZTetR/P0RMkY/shAktrybjzcJ8UfjNoMI6QX58FM=;
+        b=6/zSS09oFvZkmkPSrcT+DVBU1xl9eC84mMkdgFoJkWag6K0vkbJ+WrzTGfG/19ckVf
+         96f8p+QbchNKBL+XX38BnN61l2zbKP5OE4CraFxIyCrP4UbFQkSE0VhpTw/sleRkZKVH
+         Cc8YSdSKNWLN+Fpq86m3cbeT6GoEvwSdEKDT3j5wUjMPprFxHIA9+aYNCBeqWcrZ1Jmx
+         tNTvpFON58X292norNixEG9vu8N5XP1oG2o9Vr0QYghVCFzSjWF7oHdPhUTr6Wam7xxG
+         xorGq8OjlcuT90M1fuhLiTdiphZjXs+qU+ze1eFgDc7KfYIbRtqptyDKiLDO8fMDZhdB
+         dlug==
+X-Gm-Message-State: AOAM532B+LpUhVoixP0x1OZmiS40L0PJP4CNpMm5U/egZt2KINCeYuXZ
+        ngf+K6eiz/N3ID+e1Z5p3mbzLGbxx2lLHuQzMY1CzrSGqME=
+X-Google-Smtp-Source: ABdhPJzrNtoGy0rnwehohPas/v2xADVqPllBrQlIuB1dIOL2xy//vexYOeXCwxEHJ7TAcGbl6oAlPp4Byh5m7bWd5wU=
+X-Received: by 2002:a05:651c:1507:: with SMTP id e7mr4985570ljf.300.1639486610431;
+ Tue, 14 Dec 2021 04:56:50 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20211214113653.4631-1-pshete@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20211202161910.3944640-1-quentin.schulz@theobroma-systems.com>
+ <CAPDyKFoVyqR6h6oy7uhCfReQKk3_ErQF9iBG6bwDrxzSAY2HPg@mail.gmail.com> <20211213094514.rzalbzlgedpctekw@fedora>
+In-Reply-To: <20211213094514.rzalbzlgedpctekw@fedora>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 14 Dec 2021 13:56:14 +0100
+Message-ID: <CAPDyKFqLA2o9bYEiZDvaSQ7mHGuaa-94ROGDCBLuq8fJkdkqJQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc_cmds: add HS400 data rates
+To:     Quentin Schulz <quentin.schulz@theobroma-systems.com>
+Cc:     Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org,
+        Quentin Schulz <foss+kernel@0leil.net>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/12/2021 13:36, Prathamesh Shete wrote:
-> When CMD13 is sent after switching to HS400ES mode, the bus
-> is operating at either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
-> To meet Tegra SDHCI requirement at HS400ES mode, force SDHCI
-> interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
-> controller CAR clock and the interface clock are rate matched.
-> 
-> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+On Mon, 13 Dec 2021 at 10:45, Quentin Schulz
+<quentin.schulz@theobroma-systems.com> wrote:
+>
+> Hi Ulf,
+>
+> On Wed, Dec 08, 2021 at 11:14:01AM +0100, Ulf Hansson wrote:
+> > + Avri
+> >
+> > On Thu, 2 Dec 2021 at 17:19, Quentin Schulz
+> > <quentin.schulz@theobroma-systems.com> wrote:
+> > >
+> > > JEDEC 5.1 JESD84-B50.1 DEVICE_TYPE [196] specifies that bit 6 is for
+> > > "HS400 Dual Data Rate e=E2=80=A2MMC at 200 MHz =E2=80=93 1.8 V I/O" a=
+nd bit 7 for
+> > > "HS400 Dual Data Rate e=E2=80=A2MMC at 200 MHz =E2=80=93 1.2 V I/O" s=
+o let's add those.
+> > >
+> > > Cc: Quentin Schulz <foss+kernel@0leil.net>
+> >
+> > Future wise, please don't use this to cc yourself another email. No
+> > need to resend this time.
+> >
+>
+> I've contributed to OSS projects with three different companies, each
+> obviously having a different mail address.
+>
+> The point of the Cc was to be nice and give a way to contact me, were my
+> mail address in the SoB to bounce in a few years.
+>
+> How do you usually handle that? or do you not care that much? Being
+> curious how different project tackle this kind of issues.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Well, honestly I don't know how to best manage this.
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 43 ++++++++++++++++++++--------------
->  1 file changed, 26 insertions(+), 17 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 387ce9cdbd7c..7be6674eebd5 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -354,23 +354,6 @@ static void tegra_sdhci_set_tap(struct sdhci_host *host, unsigned int tap)
->  	}
->  }
->  
-> -static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
-> -					      struct mmc_ios *ios)
-> -{
-> -	struct sdhci_host *host = mmc_priv(mmc);
-> -	u32 val;
-> -
-> -	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
-> -
-> -	if (ios->enhanced_strobe)
-> -		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
-> -	else
-> -		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
-> -
-> -	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
-> -
-> -}
-> -
->  static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -791,6 +774,32 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  	}
->  }
->  
-> +static void tegra_sdhci_hs400_enhanced_strobe(struct mmc_host *mmc,
-> +					      struct mmc_ios *ios)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	u32 val;
-> +
-> +	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
-> +
-> +	if (ios->enhanced_strobe) {
-> +		val |= SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
-> +		/*
-> +		 * When CMD13 is sent from mmc_select_hs400es() after
-> +		 * switching to HS400ES mode, the bus is operating at
-> +		 * either MMC_HIGH_26_MAX_DTR or MMC_HIGH_52_MAX_DTR.
-> +		 * To meet Tegra SDHCI requirement at HS400ES mode, force SDHCI
-> +		 * interface clock to MMC_HS200_MAX_DTR (200 MHz) so that host
-> +		 * controller CAR clock and the interface clock are rate matched.
-> +		 */
-> +		tegra_sdhci_set_clock(host, MMC_HS200_MAX_DTR);
-> +	} else {
-> +		val &= ~SDHCI_TEGRA_SYS_SW_CTRL_ENHANCED_STROBE;
-> +	}
-> +
-> +	sdhci_writel(host, val, SDHCI_TEGRA_VENDOR_SYS_SW_CTRL);
-> +}
-> +
->  static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -- 2.17.1
-> 
+Some people move into using a personal stable email, even for work
+related issues, but it's not really ideal and it simply isn't a good
+fit for all cases.
 
+As I don't have a good answer for you, let's keep your cc, then we can
+come back how to deal with this.
+
+>
+> > > Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
+> >
+> > Even if the patch is trivial and looks good to me, I have added Avri
+> > who helps to maintain mmc-utils, to make sure there are no objections.
+> >
+>
+> Thanks for forwarding to the appropriate people.
+>
+> BTW, I struggled to find how to contribute to mmc-utils, would anyone be
+> ok with adding a CONTRIBUTING or README at the root of the project?
+
+That's certainly a good idea. Do you want to send a patch? Or just
+tell me and I can do it.
+
+We are more or less trying to follow the principles of how to
+contribute to the kernel.
+Avri acts as a reviewer and I take care of the git tree.
+
+>
+> Kind regards,
+> Quentin
+
+Kind regards
+Uffe
