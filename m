@@ -2,115 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55EEDC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 18:29:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00DB8C43219
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 18:35:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237008AbhLNS3A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Dec 2021 13:29:00 -0500
-Received: from mail-ot1-f52.google.com ([209.85.210.52]:34420 "EHLO
-        mail-ot1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230203AbhLNS26 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 13:28:58 -0500
-Received: by mail-ot1-f52.google.com with SMTP id x19-20020a9d7053000000b0055c8b39420bso21893205otj.1;
-        Tue, 14 Dec 2021 10:28:58 -0800 (PST)
+        id S237099AbhLNSfo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Dec 2021 13:35:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34860 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237043AbhLNSfn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 13:35:43 -0500
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97B92C061574;
+        Tue, 14 Dec 2021 10:35:42 -0800 (PST)
+Received: by mail-ed1-x536.google.com with SMTP id z7so5095809edc.11;
+        Tue, 14 Dec 2021 10:35:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=2VijXhAq7PPoIytUtJiQziDQ+1sJ+YxGcblV5fEQi9Y=;
+        b=kMyj5kZcDc7vJ0G0r+olqpiyY+QcqHR82Kjmsy2TqzRUSyDQAFMeYsu0mozg71xDUp
+         Svz12WMWd9pJGQ8APIcDkva/fS10xPUOUpE7YNVoVQpTMIlBDlhwF7RgPPP9IlI6Rb7S
+         DwbdL3oeDqHbh6eHct5T5UEk0F+eHvhM/ckwPlp2YHso1C54xD+kEPFyPMTmRlwfsCia
+         DLu79no4dm6dAAs0l+tSK4xoNUSuAeiom17BfHzjCMkYfE3J9ZIxqvSbV0ceiWrWO9bs
+         5HWtaWf0iedK+rhSpTdUdOLSuzjAmlhkBXQG6dZSkjzDNl/FALqd+Pe0dU9GGKu/wfnk
+         DLmw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=ec7FIqDV1eh0nWs0ieSF7kRvELIz9yZoti3SZMyr6Z4=;
-        b=Yb8VtNnlDrON1A+So8NwWB0vKHt5rFGe4uGT1nvRq6ewd7x3LZT3aDKMP2OjkOLZxS
-         /xeIMxyHGVT87njQyPDYNHieQl0xnNqbuvFGG28C5Uv14NgjAYXjMkqFvIzcwF5DGo/j
-         HFfFQePw9vOkkKBdDE3aGf/9NK6ax7wfckuMY5xB8C9q+bkaaBLi8Fi0tn54P6TufdP6
-         OGOMfPIVHY8kJEY+wGM5ijXL1VA/dmvcyIVwMn/s7z4mAX2kCjZMhgndVWiqjIgSQw/B
-         uaF4snfVSLwG38V4d93f3yMDjgG8BZSkda3vc5jEouAKEMqS+vEc18NKe6HyNpK0sOXf
-         G9xg==
-X-Gm-Message-State: AOAM533ACC+4r+V3Sf0emdFyEQ3udBmszBdCnn9PrznwU7qQ1uZChgth
-        sCxnR+SA/J8QM6yoHhnkPA==
-X-Google-Smtp-Source: ABdhPJzUem8yjSvP+Lgu17uRUc1SGESD4X7Fx0l1fGs6fceVyZYQPmbVY5NFkIQsvgkwjlyGy+WB2g==
-X-Received: by 2002:a05:6830:4428:: with SMTP id q40mr5526277otv.171.1639506537308;
-        Tue, 14 Dec 2021 10:28:57 -0800 (PST)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id 16sm112932oix.46.2021.12.14.10.28.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Dec 2021 10:28:56 -0800 (PST)
-Received: (nullmailer pid 3683781 invoked by uid 1000);
-        Tue, 14 Dec 2021 18:28:54 -0000
-Date:   Tue, 14 Dec 2021 12:28:54 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Florian Fainelli <f.fainelli@gmail.com>
-Cc:     Alessandro Zummo <a.zummo@towertech.it>, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Markus Mayer <mmayer@broadcom.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Ray Jui <rjui@broadcom.com>, Amit Kucheria <amitk@kernel.org>,
-        bcm-kernel-feedback-list@broadcom.com,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-pm@vger.kernel.org, Doug Berger <opendmb@gmail.com>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>, linux-usb@vger.kernel.org,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-ide@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
-        Scott Branden <sbranden@broadcom.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Gregory Fong <gregory.0xf0@gmail.com>,
-        linux-rtc@vger.kernel.org,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Marc Zyngier <maz@kernel.org>, linux-kernel@vger.kernel.org,
-        linux-crypto@vger.kernel.org, Zhang Rui <rui.zhang@intel.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH v3 13/15] dt-bindings: ata: Convert Broadcom SATA to YAML
-Message-ID: <YbjiZkK4HpWq90oG@robh.at.kernel.org>
-References: <20211208003727.3596577-1-f.fainelli@gmail.com>
- <20211208003727.3596577-14-f.fainelli@gmail.com>
- <1638971068.770579.3857735.nullmailer@robh.at.kernel.org>
- <dd170216-fedd-45a1-a3a5-efc99b9f6197@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=2VijXhAq7PPoIytUtJiQziDQ+1sJ+YxGcblV5fEQi9Y=;
+        b=AtOkUBMz/q0b6NQfxD3wECwmYPSs2uxyezKLn48sRP0VZLbDrHb3QupdgPHKbd8KtO
+         VWbP/KBZ/Kq7GM3rw/dOZh805WP1QarHMXth/3daSDEUWoSkeVCmTcA59GZGdmoM5vYy
+         DfVw3Wx0DBXeIUEc22LwmLlX0eMnLNn+HRPepMPrBD1MDGmQPncpM8qprUq5lnMYCG6b
+         0u9aPj1ceI0CHxvLvaewuRlYup32VAEeh7BzJXqnWmZ/qXWOEfweoVFSWAR/81DfWXKQ
+         8tnKyOoTK3PnLryZiZcz3EQWQGNEl8hU9aHAE6iCo6qysiVsjAqCo/3gyMf8TfQhjLX6
+         XRMQ==
+X-Gm-Message-State: AOAM533wu8iprzhozhONOJvhLDuCoiCaUHCTvWRxpZjJCJ5K3wUH3CZm
+        y5PeH/jFK+Vfmd21jQ8XyXSR3Zj1Re8EoE3dm/5SOcvMa4U=
+X-Google-Smtp-Source: ABdhPJwN6qcuf6GilYEfxAcZRtvCiadUaXxDhk3n5lxZR+XInneXofDN2QeZQvdrNkCKp/577fNwvOUg1LNfeU1DZPw=
+X-Received: by 2002:aa7:c5c4:: with SMTP id h4mr10095409eds.386.1639506941061;
+ Tue, 14 Dec 2021 10:35:41 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <dd170216-fedd-45a1-a3a5-efc99b9f6197@gmail.com>
+References: <20211212145956.1423755-1-martin.blumenstingl@googlemail.com>
+ <20211212145956.1423755-2-martin.blumenstingl@googlemail.com> <CAPDyKFq4Q2M=MimXAERtBy+UY79NwLQs8afGWvvXatOrP_LB7w@mail.gmail.com>
+In-Reply-To: <CAPDyKFq4Q2M=MimXAERtBy+UY79NwLQs8afGWvvXatOrP_LB7w@mail.gmail.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Tue, 14 Dec 2021 19:35:30 +0100
+Message-ID: <CAFBinCAD1guDgrFW5Y3H7YBMKFFiDK92AzyoxnDoAPRsPV8xwQ@mail.gmail.com>
+Subject: Re: [PATCH v1 1/2] mmc: meson-mx-sdhc: Set MANUAL_STOP for
+ multi-block SDIO commands
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 08, 2021 at 09:33:38AM -0800, Florian Fainelli wrote:
-> On 12/8/21 5:44 AM, Rob Herring wrote:
-> > On Tue, 07 Dec 2021 16:37:24 -0800, Florian Fainelli wrote:
-> >> Convert the Broadcom SATA3 AHCI controller Device Tree binding to YAML
-> >> to help with validation.
-> >>
-> >> Acked-by: Damien Le Moal <damien.lemoal@opensource.wdc.com>
-> >> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
-> >> ---
-> >>  .../bindings/ata/brcm,sata-brcm.txt           | 45 ---------
-> >>  .../bindings/ata/brcm,sata-brcm.yaml          | 98 +++++++++++++++++++
-> >>  2 files changed, 98 insertions(+), 45 deletions(-)
-> >>  delete mode 100644 Documentation/devicetree/bindings/ata/brcm,sata-brcm.txt
-> >>  create mode 100644 Documentation/devicetree/bindings/ata/brcm,sata-brcm.yaml
-> >>
-> > 
-> > Running 'make dtbs_check' with the schema in this patch gives the
-> > following warnings. Consider if they are expected or the schema is
-> > incorrect. These may not be new warnings.
-> > 
-> > Note that it is not yet a requirement to have 0 warnings for dtbs_check.
-> > This will change in the future.
-> > 
-> > Full log is available here: https://patchwork.ozlabs.org/patch/1565011
-> 
-> Likewise, those indicate that the preceding patch which renames the sata
-> controller unit name has not been applied.
+Hi Ulf,
 
-I looked at that, but it was the unevaluated properties I was worried 
-about. However, the example has the same thing, but no errors. I think 
-running with DT_SCHEMA_FILES means sata-common.yaml is not included. 
-I'll have to look into that.
+On Tue, Dec 14, 2021 at 2:21 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+[...]
+> > +
+>
+> Maybe add a comment to explain a bit about this workaround here?
+sure, I'll add a paragraph for v2 because this workaround/fix is not obvious
 
-Rob
+> > +               manual_stop = cmd->data->blocks > 1 &&
+> > +                             (cmd->opcode == SD_IO_RW_DIRECT ||
+>
+> SD_IO_RW_DIRECT doesn't have cmd->data, so checking for that command
+> doesn't make sense.
+This also means that you found a bug in the vendor driver :-)
+I'll drop SD_IO_RW_DIRECT, do another round of testing and then send
+an updated version.
 
+Thank you for taking a closer look!
+
+
+Best regards,
+Martin
