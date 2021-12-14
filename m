@@ -2,127 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9821C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 12:56:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 521F7C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 13:21:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234185AbhLNM4x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Dec 2021 07:56:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39176 "EHLO
+        id S234337AbhLNNVN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Dec 2021 08:21:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231674AbhLNM4w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 07:56:52 -0500
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 342F9C061574
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Dec 2021 04:56:52 -0800 (PST)
-Received: by mail-lj1-x22f.google.com with SMTP id a37so27083285ljq.13
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Dec 2021 04:56:52 -0800 (PST)
+        with ESMTP id S232112AbhLNNVN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 08:21:13 -0500
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8FB5C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Dec 2021 05:21:12 -0800 (PST)
+Received: by mail-lj1-x22a.google.com with SMTP id u22so28236181lju.7
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Dec 2021 05:21:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=1FZZTetR/P0RMkY/shAktrybjzcJ8UfjNoMI6QX58FM=;
-        b=Ews8P+oQzUpY9YsC0wxRiXck0o5RWmsD3N+6+WUUzVbFva2bR27cg2vJ2YylCcCV1N
-         wpJfZ06+U3jAGcpaSgFZ1pqKRvTPb4gVv3vHGBHpVcr5wVJPXFWQ37lB/mmzrPepe9rz
-         4m3BtVkh3mexS+7tMDTiBTsOfh0fI2AaXT5TR9r3OliFlzSCtnvANWz5Cp6uPq07PAnN
-         paPOZVASmUlg0o0pvWlY+NA3Ztq5BAFYnBU8XBNaW0ShveuV+1THCnCNauvMWApgr7jx
-         YbrlqtH22F6yey8OfvAqZPjIQb0hxQFgIgR60nufHogXFYXUs2e5lwOwHqjOCZ6zdfLh
-         KVQg==
+         :cc;
+        bh=M9Wl5lITTts8KnryH+o6/rjfKY83qkpib99rnG6MLKU=;
+        b=bwceb9iKmYVq/D+jBiFE3KXrNwiPRMQzWXwF3DPLI2Cps7rZlOfLcgmBc+W+42pqkF
+         8Bf6F7ojcsAQ4nKKUw0zriAvgNrs2vVt1YTo8F9JbC2qidPIhYCXlT2h2pC2gqsm6yrg
+         MV2FCr4hBidsRw+8dCkw85U7vYvO+m0apaiudFlcMGTdlSKo/jeHtQg1pqsRi3dhbEHa
+         5YGo+ceVI+zoFCTyYfMlDElus2IpanFsbK5g289TcdphgVtkXIXtiWoa7aKY8vMCzUFV
+         y/l7L2IcUNTHlht25MaL0TEWFlDXoG+IzAHhqHIfgQ9GPvhM6m7X7YDhvEynOQZfCaxT
+         FXZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=1FZZTetR/P0RMkY/shAktrybjzcJ8UfjNoMI6QX58FM=;
-        b=6/zSS09oFvZkmkPSrcT+DVBU1xl9eC84mMkdgFoJkWag6K0vkbJ+WrzTGfG/19ckVf
-         96f8p+QbchNKBL+XX38BnN61l2zbKP5OE4CraFxIyCrP4UbFQkSE0VhpTw/sleRkZKVH
-         Cc8YSdSKNWLN+Fpq86m3cbeT6GoEvwSdEKDT3j5wUjMPprFxHIA9+aYNCBeqWcrZ1Jmx
-         tNTvpFON58X292norNixEG9vu8N5XP1oG2o9Vr0QYghVCFzSjWF7oHdPhUTr6Wam7xxG
-         xorGq8OjlcuT90M1fuhLiTdiphZjXs+qU+ze1eFgDc7KfYIbRtqptyDKiLDO8fMDZhdB
-         dlug==
-X-Gm-Message-State: AOAM532B+LpUhVoixP0x1OZmiS40L0PJP4CNpMm5U/egZt2KINCeYuXZ
-        ngf+K6eiz/N3ID+e1Z5p3mbzLGbxx2lLHuQzMY1CzrSGqME=
-X-Google-Smtp-Source: ABdhPJzrNtoGy0rnwehohPas/v2xADVqPllBrQlIuB1dIOL2xy//vexYOeXCwxEHJ7TAcGbl6oAlPp4Byh5m7bWd5wU=
-X-Received: by 2002:a05:651c:1507:: with SMTP id e7mr4985570ljf.300.1639486610431;
- Tue, 14 Dec 2021 04:56:50 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=M9Wl5lITTts8KnryH+o6/rjfKY83qkpib99rnG6MLKU=;
+        b=wjSL7Zpd589/qTuSv6vz/qOOTaNR8nRD0gxA7wUE4IVmlMsVjCTuRQBLrDFv0mCUdt
+         GIyVvmuQ5FgPsU/jzqn8lTAnYoM9JW3+O5Oh3ajO5hdfqyqEsnXnb5R4AjqV0BqoSEx3
+         gne+kGLPwuQDEZsfFKNPgE+r+pJO5Ig6BbaVpLqDc4ZQxQLBOBr2zrS0QjO7YEqHco3G
+         oa34/fUZqw0sjUYhmv24wfVvMKK5ZrEezQULupvQNTa5Dh0CtTE9OMdg9QhURkJWljkJ
+         aAPafNpFdneQWRr/0XSnRj81/pc75/XwTVoNgyLrVV2E16VmIj4sMaBdB9VzKfm2gOsU
+         8ujQ==
+X-Gm-Message-State: AOAM531f/IahWYG0s0o0UwZ59SQQBktiOtcSSh+KfJmghpR2rfFSXxZl
+        rWcNvWdTdpDMWobvqkWtR3GjktttBIq2iVE2oQJUmb1W66Q=
+X-Google-Smtp-Source: ABdhPJwhGEndahGW68SqTRlSvysT3YExx60q46MfQeoplF9RHvnSnojc8WHIF0sOtUQk2EbReAF7vuu+x2t31V3fF80=
+X-Received: by 2002:a2e:a22a:: with SMTP id i10mr5018537ljm.16.1639488070994;
+ Tue, 14 Dec 2021 05:21:10 -0800 (PST)
 MIME-Version: 1.0
-References: <20211202161910.3944640-1-quentin.schulz@theobroma-systems.com>
- <CAPDyKFoVyqR6h6oy7uhCfReQKk3_ErQF9iBG6bwDrxzSAY2HPg@mail.gmail.com> <20211213094514.rzalbzlgedpctekw@fedora>
-In-Reply-To: <20211213094514.rzalbzlgedpctekw@fedora>
+References: <20211212145956.1423755-1-martin.blumenstingl@googlemail.com> <20211212145956.1423755-2-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20211212145956.1423755-2-martin.blumenstingl@googlemail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Dec 2021 13:56:14 +0100
-Message-ID: <CAPDyKFqLA2o9bYEiZDvaSQ7mHGuaa-94ROGDCBLuq8fJkdkqJQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc_cmds: add HS400 data rates
-To:     Quentin Schulz <quentin.schulz@theobroma-systems.com>
-Cc:     Avri Altman <avri.altman@wdc.com>, linux-mmc@vger.kernel.org,
-        Quentin Schulz <foss+kernel@0leil.net>
+Date:   Tue, 14 Dec 2021 14:20:34 +0100
+Message-ID: <CAPDyKFq4Q2M=MimXAERtBy+UY79NwLQs8afGWvvXatOrP_LB7w@mail.gmail.com>
+Subject: Re: [PATCH v1 1/2] mmc: meson-mx-sdhc: Set MANUAL_STOP for
+ multi-block SDIO commands
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Dec 2021 at 10:45, Quentin Schulz
-<quentin.schulz@theobroma-systems.com> wrote:
+On Sun, 12 Dec 2021 at 16:00, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
 >
-> Hi Ulf,
+> The vendor driver implements special handling for multi-block
+> SD_IO_RW_DIRECT and SD_IO_RW_EXTENDED commands. It sets the MANUAL_STOP
+> bit in the MESON_SDHC_MISC register for these commands. In All other
+> cases this bit is cleared.
 >
-> On Wed, Dec 08, 2021 at 11:14:01AM +0100, Ulf Hansson wrote:
-> > + Avri
-> >
-> > On Thu, 2 Dec 2021 at 17:19, Quentin Schulz
-> > <quentin.schulz@theobroma-systems.com> wrote:
-> > >
-> > > JEDEC 5.1 JESD84-B50.1 DEVICE_TYPE [196] specifies that bit 6 is for
-> > > "HS400 Dual Data Rate e=E2=80=A2MMC at 200 MHz =E2=80=93 1.8 V I/O" a=
-nd bit 7 for
-> > > "HS400 Dual Data Rate e=E2=80=A2MMC at 200 MHz =E2=80=93 1.2 V I/O" s=
-o let's add those.
-> > >
-> > > Cc: Quentin Schulz <foss+kernel@0leil.net>
-> >
-> > Future wise, please don't use this to cc yourself another email. No
-> > need to resend this time.
-> >
+> This fixes SDIO wifi using the brcmfmac driver which reported the
+> following error without this change on a Netxeon S82 board using a
+> Meson8 (S802) SoC:
+>   brcmf_fw_alloc_request: using brcm/brcmfmac43362-sdio for chip
+>                           BCM43362/1
+>   brcmf_sdiod_ramrw: membytes transfer failed
+>   brcmf_sdio_download_code_file: error -110 on writing 219557 membytes
+>                                  at 0x00000000
+>   brcmf_sdio_download_firmware: dongle image file download failed
 >
-> I've contributed to OSS projects with three different companies, each
-> obviously having a different mail address.
+> And with this change:
+>   brcmf_fw_alloc_request: using brcm/brcmfmac43362-sdio for chip
+>                           BCM43362/1
+>   brcmf_c_process_clm_blob: no clm_blob available (err=-2), device may
+>                             have limited channels available
+>   brcmf_c_preinit_dcmds: Firmware: BCM43362/1 wl0: Apr 22 2013 14:50:00
+>                          version 5.90.195.89.6 FWID 01-b30a427d
 >
-> The point of the Cc was to be nice and give a way to contact me, were my
-> mail address in the SoB to bounce in a few years.
+> Fixes: e4bf1b0970ef96 ("mmc: host: meson-mx-sdhc: new driver for the Amlogic Meson SDHC host")
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> ---
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
 >
-> How do you usually handle that? or do you not care that much? Being
-> curious how different project tackle this kind of issues.
+> diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+> index 7cd9c0ec2fcf..a89190d479cf 100644
+> --- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
+> +++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
+> @@ -135,6 +135,7 @@ static void meson_mx_sdhc_start_cmd(struct mmc_host *mmc,
+>                                     struct mmc_command *cmd)
+>  {
+>         struct meson_mx_sdhc_host *host = mmc_priv(mmc);
+> +       bool manual_stop = false;
+>         u32 ictl, send;
+>         int pack_len;
+>
+> @@ -172,12 +173,20 @@ static void meson_mx_sdhc_start_cmd(struct mmc_host *mmc,
+>                 else
+>                         /* software flush: */
+>                         ictl |= MESON_SDHC_ICTL_DATA_XFER_OK;
+> +
 
-Well, honestly I don't know how to best manage this.
+Maybe add a comment to explain a bit about this workaround here?
 
-Some people move into using a personal stable email, even for work
-related issues, but it's not really ideal and it simply isn't a good
-fit for all cases.
+> +               manual_stop = cmd->data->blocks > 1 &&
+> +                             (cmd->opcode == SD_IO_RW_DIRECT ||
 
-As I don't have a good answer for you, let's keep your cc, then we can
-come back how to deal with this.
+SD_IO_RW_DIRECT doesn't have cmd->data, so checking for that command
+doesn't make sense.
 
+> +                              cmd->opcode == SD_IO_RW_EXTENDED);
+>         } else {
+>                 pack_len = 0;
 >
-> > > Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
-> >
-> > Even if the patch is trivial and looks good to me, I have added Avri
-> > who helps to maintain mmc-utils, to make sure there are no objections.
-> >
+>                 ictl |= MESON_SDHC_ICTL_RESP_OK;
+>         }
 >
-> Thanks for forwarding to the appropriate people.
+> +       regmap_update_bits(host->regmap, MESON_SDHC_MISC,
+> +                          MESON_SDHC_MISC_MANUAL_STOP,
+> +                          manual_stop ? MESON_SDHC_MISC_MANUAL_STOP : 0);
+> +
+>         if (cmd->opcode == MMC_STOP_TRANSMISSION)
+>                 send |= MESON_SDHC_SEND_DATA_STOP;
 >
-> BTW, I struggled to find how to contribute to mmc-utils, would anyone be
-> ok with adding a CONTRIBUTING or README at the root of the project?
-
-That's certainly a good idea. Do you want to send a patch? Or just
-tell me and I can do it.
-
-We are more or less trying to follow the principles of how to
-contribute to the kernel.
-Avri acts as a reviewer and I take care of the git tree.
-
+> --
+> 2.34.1
 >
-> Kind regards,
-> Quentin
 
 Kind regards
 Uffe
