@@ -2,76 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C282CC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 02:04:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28A02C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 05:04:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243920AbhLNCE5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Dec 2021 21:04:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33116 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243875AbhLNCEz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Dec 2021 21:04:55 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75FE5C061574;
-        Mon, 13 Dec 2021 18:04:55 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1FF17612FA;
-        Tue, 14 Dec 2021 02:04:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 46A1EC34603;
-        Tue, 14 Dec 2021 02:04:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1639447494;
-        bh=UPsBsbPQs/kwfYKXLqfJN2VwsqD4UNmhnl6cOthFoR4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Z75uRFaRl/lU86lcMIB2+BRFLb0z1Bece9e1BIQY2jVnhbOAKmLLaO7ZisGmiq7EK
-         DjjRqyLIkzSjSvseYlGq/BTmUMjMtJMOzzGJmzbSNZGgDHEV/xWCWED7fDZU4FHUdX
-         7cIIErMtNi/0gR9TSH0jVBoh9uYCg34kXejgEQeIRd7fQ1aQee946aqbg1pJAevyX7
-         i6dcAJACqOLWBwMWLB9lctA3/IJPGVmYp/dbo8bjkNcuqZ8FLcnk8WyyQJ93LA7K2q
-         AMI0U3o0Utx6zEQt91MgU4YQQF3RZ92NgkeG8BJLTuGpHHTISRZrK2pn01vPZ5iuFG
-         bg4a/rhS+yPpQ==
-Date:   Mon, 13 Dec 2021 18:04:52 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>
-Cc:     linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, thara.gopinath@linaro.org,
-        quic_neersoni@quicinc.com, dineshg@quicinc.com
-Subject: Re: [PATCH 09/10] soc: qcom: support for generate, import and
- prepare key
-Message-ID: <Ybf7xI3YDF3B0zAf@gmail.com>
-References: <20211206225725.77512-1-quic_gaurkash@quicinc.com>
- <20211206225725.77512-10-quic_gaurkash@quicinc.com>
+        id S229721AbhLNFEe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Dec 2021 00:04:34 -0500
+Received: from mail-pl1-f176.google.com ([209.85.214.176]:47023 "EHLO
+        mail-pl1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229775AbhLNFEd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 00:04:33 -0500
+Received: by mail-pl1-f176.google.com with SMTP id p18so12712660plf.13;
+        Mon, 13 Dec 2021 21:04:32 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=c2eV4osFi0ukdYwPMjLg4N3OH2klHkHbVnzvE6IHZ0A=;
+        b=wEqEV+/9CiNSZYZGSClvtFvEZalNUojZKZ8P8ayPuH+rE0zK0mAOAOx+wejIDryIYW
+         Xwqb/jaaxisYe8FhrUD9u6hbsjm01W9NTjt/KrU1DfC0LG0/yoA/8ZQgDrrpBJseIWS2
+         mWkR6q+5D0MtR5namKw9PrjYWDSVp5NsRa7Nk2ngu9cpjmtGdkUOr/m0oIPSWW/Ff1s8
+         gQNUkoBHRuX0moXura+ciwLptS7U/O4/bhbW4IFaQnVNqLbFzs4O3d61yjLtYtwSiMfo
+         j0ryFnaYBPXDmRHxHtmkObbFYvsqCtFfxsC8bqanTuYS+2NbOUUTcgNkH0yOlmbvZHYv
+         NV/Q==
+X-Gm-Message-State: AOAM533XgXoDd+09MvA8mPVBxyFp3+wRmP1GD87w4XHYPiZIPDKd0Mqd
+        Aqm2thvZjDhTq16EYH1AdpI=
+X-Google-Smtp-Source: ABdhPJwtMlRpUdDYK54zZy9LApP/DL9N5L+IrnomqaNOXiFC+OMI9PifWtvDjkZweUk0AUMLjAtr2A==
+X-Received: by 2002:a17:902:9f98:b0:144:e777:f88e with SMTP id g24-20020a1709029f9800b00144e777f88emr3021815plq.31.1639458272383;
+        Mon, 13 Dec 2021 21:04:32 -0800 (PST)
+Received: from ?IPV6:2601:647:4000:d7:feaa:14ff:fe9d:6dbd? ([2601:647:4000:d7:feaa:14ff:fe9d:6dbd])
+        by smtp.gmail.com with ESMTPSA id me3sm688683pjb.35.2021.12.13.21.04.30
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 13 Dec 2021 21:04:31 -0800 (PST)
+Message-ID: <a4b285ba-4a46-c94b-444e-d3c4f42c42c5@acm.org>
+Date:   Mon, 13 Dec 2021 21:04:29 -0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211206225725.77512-10-quic_gaurkash@quicinc.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.4.0
+Subject: Re: [PATCH v3 3/3] blk-crypto: show crypto capabilities in sysfs
+Content-Language: en-US
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Eric Biggers <ebiggers@kernel.org>, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Hannes Reinecke <hare@suse.de>
+References: <20211208013534.136590-1-ebiggers@kernel.org>
+ <20211208013534.136590-4-ebiggers@kernel.org>
+ <6ff4d074-7508-4f4c-de06-f36899668168@acm.org>
+ <YbKT/lcp6iZ+lD4n@sol.localdomain> <YbL2uUqV0GWFOitE@kroah.com>
+ <cb29756b-8b21-5b4d-f107-b5573945d7ab@acm.org> <YbSCYyAv1SmYy7mz@kroah.com>
+From:   Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <YbSCYyAv1SmYy7mz@kroah.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 06, 2021 at 02:57:24PM -0800, Gaurav Kashyap wrote:
-> Implements the vops for generate, prepare and import key
-> apis and hooks it up the scm calls defined for them.
-> Key management has to be done from Qualcomm Trustzone as only
-> it can interface with HWKM.
+On 12/11/21 02:50, Greg Kroah-Hartman wrote:
+> On Fri, Dec 10, 2021 at 09:29:41AM -0800, Bart Van Assche wrote:
+>> (b) No other block layer sysfs attribute follows this encoding scheme.
 > 
-> Signed-off-by: Gaurav Kashyap <quic_gaurkash@quicinc.com>
-> ---
->  drivers/scsi/ufs/ufs-qcom-ice.c   | 22 ++++++++
->  drivers/scsi/ufs/ufs-qcom.c       |  3 ++
->  drivers/scsi/ufs/ufs-qcom.h       | 12 +++++
->  drivers/soc/qcom/qti-ice-common.c | 89 ++++++++++++++++++++++++++++---
->  include/linux/qti-ice-common.h    |  8 +++
->  5 files changed, 128 insertions(+), 6 deletions(-)
+> Then follow what they do.  Do they have multiple values in a single
+> file?  If so, they are broken and we should change that.
 
-Similarly to patch 6, it would be preferable to change qti-ice-common in a
-separate patch that precedes the ufs-qcom changes, if it's possible.
+Hi Greg,
 
-If this is starting to result in too many patches, you might consider combining
-the patches that add generate/import/prepare with the patches that add
-derive_sw_secret.  Splitting up patches between subsystems (when possible) is
-more important than splitting up the wrapped key feature itself, IMO.
+The only other block layer sysfs attribute I know of that reports 
+multiple values is the queue/scheduler attribute. Here is an example of 
+the output that can be produced by reading that attribute:
 
-- Eric
+# cat /sys/block/sda/queue/scheduler
+[mq-deadline] kyber bfq none
+
+I don't think that changing the behavior of that attribute is an option 
+because that would break existing user space software, e.g. the 
+https://github.com/osandov/blktests/ test suite.
+
+Thanks,
+
+Bart.
