@@ -2,40 +2,40 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B606C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 10:41:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96B28C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Dec 2021 10:42:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233128AbhLNKll (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Dec 2021 05:41:41 -0500
-Received: from mga18.intel.com ([134.134.136.126]:8412 "EHLO mga18.intel.com"
+        id S230092AbhLNKml (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Dec 2021 05:42:41 -0500
+Received: from mga14.intel.com ([192.55.52.115]:12164 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233140AbhLNKll (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 14 Dec 2021 05:41:41 -0500
+        id S229752AbhLNKml (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 14 Dec 2021 05:42:41 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1639478501; x=1671014501;
+  t=1639478561; x=1671014561;
   h=subject:to:cc:references:from:message-id:date:
    mime-version:in-reply-to:content-transfer-encoding;
-  bh=nD1dWC4ja2jEDV7QrfC4Kkllk7voDyF5NiShZMOJOkE=;
-  b=JxQ9Jtd3/m/W2roMAzPZe3Sw1XR5iX8926rYsXtg3yYxHzmkLnkpjpyb
-   1rtoyvERVz23wAb0kG+cCP832U4HyKKBepdn9XKYYzT7oSzE+klmac+8K
-   Zl480ywDkTgsG2YkF9dMPB8OzOg7qK8t6nnJpb3TeFMCTjDdfnzmJV9RQ
-   fy7e58jhz21xyK1SmbyJ5uwdxXSpTS/YjQ8EbIJqNjbfXyMGJU1zQMpB5
-   RcxUO5LTueHVZ4Av9JM0/vWHCrp/ivuCfXaSiYA9Ju7XxrO7XnlMLxhe7
-   YafmrJidu2RNEEBDOn2sf2MSIyUizQLsw84j/6ebIXk25qCuYp4kUQWfn
+  bh=k6ZD6Mq3KcmcQkn7Bmfs9r1wBk3xW7vepalZr36D/9U=;
+  b=lD4jPRq7zK0DxL3lmPWGgiY20Qfn/5FOOTIqPgkRClHMjzUUeWWLqPZX
+   5276F8+NYFzf1prT2X4Lk1xgVerlJI3sR43hrn1O/d4p5DxSBS5cxIapq
+   KPwJ+ZORytiUEbswm+ib75l2A/pILZdjncImxe7uSib0b6E5BetQKvWE0
+   /Xh/2MTotUjjWWB8vZuUk3rfk83962VrZzTcz4wd2n4z5G7hn5Qo7vGQ4
+   Xpe6eZgLxUdM365Ub2NNWslT7yXd8zM02BlPBh42usmC27gDs/H0V6etr
+   hK7ch2h4emtqKshVnLcD5/YfR2jssfB7zNxyPwgH+d8NYBnJrpcRdIQXS
    A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10197"; a="225810798"
+X-IronPort-AV: E=McAfee;i="6200,9189,10197"; a="239174582"
 X-IronPort-AV: E=Sophos;i="5.88,205,1635231600"; 
-   d="scan'208";a="225810798"
+   d="scan'208";a="239174582"
 Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2021 02:41:40 -0800
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Dec 2021 02:42:25 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.88,205,1635231600"; 
-   d="scan'208";a="465030158"
+   d="scan'208";a="465030400"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga006.jf.intel.com with ESMTP; 14 Dec 2021 02:41:38 -0800
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-pci-gli: GL9755: Support for CD/WP
- inversion on OF platforms
+  by orsmga006.jf.intel.com with ESMTP; 14 Dec 2021 02:42:21 -0800
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-pci-gli: GL975[50]: Issue 8/16-bit MMIO
+ reads as 32-bit reads.
 To:     Hector Martin <marcan@marcan.st>,
         Ben Chuang <benchuanggli@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>
@@ -43,16 +43,16 @@ Cc:     Sven Peter <sven@svenpeter.dev>, Marc Zyngier <maz@kernel.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
 References: <20211212070210.141664-1-marcan@marcan.st>
- <20211212070210.141664-2-marcan@marcan.st>
+ <20211212070210.141664-3-marcan@marcan.st>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <72e29a9d-7e2a-5c2e-c44b-42172aae4f2d@intel.com>
-Date:   Tue, 14 Dec 2021 12:41:37 +0200
+Message-ID: <bd1387bf-f549-61f0-4498-7c79552af024@intel.com>
+Date:   Tue, 14 Dec 2021 12:42:21 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Firefox/78.0 Thunderbird/78.13.0
 MIME-Version: 1.0
-In-Reply-To: <20211212070210.141664-2-marcan@marcan.st>
+In-Reply-To: <20211212070210.141664-3-marcan@marcan.st>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -61,72 +61,60 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 12/12/2021 09:02, Hector Martin wrote:
-> This is required on some Apple ARM64 laptops using this controller.
-> As is typical on DT platforms, pull these quirks from the device tree
-> using the standard mmc bindings.
-> 
-> See Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> For some reason, <32-bit reads do not work on Apple ARM64 platforms with
+> these chips (even though they do on other PCIe devices). Issue them as
+> 32-bit reads instead. This is done unconditionally, as it shouldn't hurt
+> even if not necessary.
 > 
 > Signed-off-by: Hector Martin <marcan@marcan.st>
-
-A couple of kernel style issues, but fix those and you can add:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-pci-gli.c | 19 +++++++++++++++++--
->  1 file changed, 17 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-pci-gli.c | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index 4fd99c1e82ba..ad742743a494 100644
+> index ad742743a494..c6828e84db31 100644
 > --- a/drivers/mmc/host/sdhci-pci-gli.c
 > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -12,6 +12,7 @@
->  #include <linux/pci.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/delay.h>
-> +#include <linux/of.h>
->  #include "sdhci.h"
->  #include "sdhci-pci.h"
->  #include "cqhci.h"
-> @@ -114,8 +115,10 @@
->  #define   GLI_9755_WT_EN_OFF    0x0
+> @@ -906,7 +906,28 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+>  	return 0;
+>  }
 >  
->  #define PCI_GLI_9755_PECONF   0x44
-> -#define   PCI_GLI_9755_LFCLK    GENMASK(14, 12)
-> -#define   PCI_GLI_9755_DMACLK   BIT(29)
-> +#define   PCI_GLI_9755_LFCLK          GENMASK(14, 12)
-> +#define   PCI_GLI_9755_DMACLK         BIT(29)
-
-Please don't mix in white space changes.
-
-> +#define   PCI_GLI_9755_INVERT_CD      BIT(30)
-> +#define   PCI_GLI_9755_INVERT_WP      BIT(31)
+> +#define REG_OFFSET_IN_BITS(reg) ((reg) << 3 & 0x18)
+> +
+> +static u16 sdhci_gli_readw(struct sdhci_host *host, int reg)
+> +{
+> +	u32 val = readl(host->ioaddr + (reg & ~3));
+> +	u16 word;
+> +
+> +	word = (val >> REG_OFFSET_IN_BITS(reg)) & 0xffff;
+> +	return word;
+> +}
+> +
+> +static u8 sdhci_gli_readb(struct sdhci_host *host, int reg)
+> +{
+> +	u32 val = readl(host->ioaddr + (reg & ~3));
+> +	u8 byte = (val >> REG_OFFSET_IN_BITS(reg)) & 0xff;
+> +
+> +	return byte;
+> +}
+> +
+>  static const struct sdhci_ops sdhci_gl9755_ops = {
+> +	.read_w			= sdhci_gli_readw,
+> +	.read_b			= sdhci_gli_readb,
+>  	.set_clock		= sdhci_gl9755_set_clock,
+>  	.enable_dma		= sdhci_pci_enable_dma,
+>  	.set_bus_width		= sdhci_set_bus_width,
+> @@ -926,6 +947,8 @@ const struct sdhci_pci_fixes sdhci_gl9755 = {
+>  };
 >  
->  #define PCI_GLI_9755_CFG2          0x48
->  #define   PCI_GLI_9755_CFG2_L1DLY    GENMASK(28, 24)
-> @@ -570,6 +573,18 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
->  	gl9755_wt_on(pdev);
->  
->  	pci_read_config_dword(pdev, PCI_GLI_9755_PECONF, &value);
-> +#ifdef CONFIG_OF
-> +	if (pdev->dev.of_node) {
-
-As Robin wrote, please remove #ifdef and if (pdev->dev.of_node)
-because they are not needed.
-
-> +		/*
-> +		 * Apple ARM64 platforms using these chips may have
-> +		 * inverted CD/WP detection.
-> +		 */
-> +		if (of_property_read_bool(pdev->dev.of_node, "cd-inverted"))
-> +			value |= PCI_GLI_9755_INVERT_CD;
-> +		if (of_property_read_bool(pdev->dev.of_node, "wp-inverted"))
-> +			value |= PCI_GLI_9755_INVERT_WP;
-> +	}
-> +#endif
->  	value &= ~PCI_GLI_9755_LFCLK;
->  	value &= ~PCI_GLI_9755_DMACLK;
->  	pci_write_config_dword(pdev, PCI_GLI_9755_PECONF, value);
+>  static const struct sdhci_ops sdhci_gl9750_ops = {
+> +	.read_w			= sdhci_gli_readw,
+> +	.read_b			= sdhci_gli_readb,
+>  	.read_l                 = sdhci_gl9750_readl,
+>  	.set_clock		= sdhci_gl9750_set_clock,
+>  	.enable_dma		= sdhci_pci_enable_dma,
 > 
 
