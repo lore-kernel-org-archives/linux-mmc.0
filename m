@@ -2,101 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DE70C43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 14:18:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94EE8C35272
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 16:01:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243302AbhLOOSX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Dec 2021 09:18:23 -0500
-Received: from mx07-00178001.pphosted.com ([185.132.182.106]:60890 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S237613AbhLOOSX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2021 09:18:23 -0500
-Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1BFAOoxL015895;
-        Wed, 15 Dec 2021 15:17:56 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-type; s=selector1;
- bh=do/02SlyNQ2+a/wzGPh8B/PB1HnlUOgEgfqJOwrlJMQ=;
- b=NE9yFbuy++muTva/j7V/fjsq4AqxbMX3E3lC/Yfg+BTr9yuZjgwKiVYY0msnnL4gia4h
- i2rrKFBvO89NKtzHWFJ8oC9iPQdVzX+2Yj48c8vlUr0nE+waB8ick/slqdyt9Vdq/V8u
- Eghz7r0BD+pz+CsozE2b4YuMyAFok70V21stuolRUfjkukAOrWWgomLBqaIXUoLLJLs5
- DevNEslNESPmutRvu7Xpu0cvZNHQp8bIBfSUFoWSr/zsZXi3/K13VaZrNMUm+uoKTNSd
- G8X7t4j+LvYvJpXZBAFfjp1FCDk3Cqjb34TdMjDxZHAKJsR+9oe5ee0i85LSw48ItHan Ag== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3cyeka95m2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 15 Dec 2021 15:17:56 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 6AA2C10002A;
-        Wed, 15 Dec 2021 15:17:56 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 62B0D21EB8F;
-        Wed, 15 Dec 2021 15:17:56 +0100 (CET)
-Received: from localhost (10.75.127.44) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Wed, 15 Dec 2021 15:17:55
- +0100
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Vladimir Zapolskiy <vz@mleia.com>,
-        <u.kleine-koenig@pengutronix.de>, Marek Vasut <marex@denx.de>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
-CC:     Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH 3/4] mmc: mmci: stm32: clear DLYB_CR after sending tuning command
-Date:   Wed, 15 Dec 2021 15:17:26 +0100
-Message-ID: <20211215141727.4901-4-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20211215141727.4901-1-yann.gautier@foss.st.com>
-References: <20211215141727.4901-1-yann.gautier@foss.st.com>
+        id S244253AbhLOPzk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Dec 2021 10:55:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42212 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244245AbhLOPzj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2021 10:55:39 -0500
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB285C06173E;
+        Wed, 15 Dec 2021 07:55:38 -0800 (PST)
+Received: by mail-wr1-x42f.google.com with SMTP id a18so39013817wrn.6;
+        Wed, 15 Dec 2021 07:55:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=R67lTnWwXbUTzFzCGUUL+WExD12deXb0Qh98T1uTW0w=;
+        b=OhHVBsH+JSjXGRjWW3dS71NC/5sbYxFPZeF0Q4crce9RPU1G+fwh5oGbAJmZOtYSDn
+         yjuE+M/vGo+HcrEQy22dlJU89eYUIQKX9sy91E3wHpbdRpvBDG7E9pqh+KnpWWxUSq9v
+         PNF4kbB9qDszar6MdLFK6vUT3qHSmSkZinyZ9tTuRpB9k8dn911giQKHsHtqs8Ub7qfH
+         d+kpMd6Mn09M8+dSrQ6c/fZrNlAwgj2PLcnx4Skskb/YzyUvtGrwTTyqbbEG/OT3HkPf
+         3zJ8bhxulq+9LmiMbMGftBQwPezCtnNWvi9+c4T4qCyJR3jP+j7uHUtw5ctkZOex5L9X
+         70hQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=R67lTnWwXbUTzFzCGUUL+WExD12deXb0Qh98T1uTW0w=;
+        b=sHHcAsmUjlzPDcQmpUcHYEWzDHwclvEfs/QMK4iRWxkeFCQLhMnd1hSl1pZMh8AdR2
+         YIyxH57lgz0pVB2uTGAsHgo2ihxGo9EClg6HyXl2xzPMUJcBd528Znr0OzSHg4pToYeX
+         uuQjuGDDQ/Wz0bqeiNbhQAiVOTOohfEpLbnnVx32YT3Q/txiVzXRykczoYfjVyBuZA4A
+         dIWfBUqbc8XRjntCVQx6Nx5qwnRULtZ3jF/bKQmy8fffjJFJ+/vSXjjVKtc3uEqNqBHP
+         EtRXxf/x+SdSMKnY3h9FDEsIZ94nwSAlEFakeB6oPE2+HeMDVZBYuIkz/Q1i3XxBzd4N
+         8ctA==
+X-Gm-Message-State: AOAM533EILDOO9SFdZxZP07B661BqVHsly5rnNjGK/7/BZsEOUR4MQHy
+        yZ6KtbUR4syzhdnLBo1RNh0=
+X-Google-Smtp-Source: ABdhPJxHztDvenoHWfBqOVDnmyiUgaQWSSLPpt6XX3/VYHhw8RSChI7rhoZIlA+1HRtQtKu2hou5Tg==
+X-Received: by 2002:a5d:6488:: with SMTP id o8mr5000272wri.631.1639583737576;
+        Wed, 15 Dec 2021 07:55:37 -0800 (PST)
+Received: from orome ([193.209.96.43])
+        by smtp.gmail.com with ESMTPSA id n7sm2363354wro.68.2021.12.15.07.55.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 15 Dec 2021 07:55:36 -0800 (PST)
+Date:   Wed, 15 Dec 2021 16:55:32 +0100
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
+Subject: Re: [PATCH v16 00/40] NVIDIA Tegra power management patches for 5.17
+Message-ID: <YboP9IFMUrUnEzrU@orome>
+References: <20211130232347.950-1-digetx@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.75.127.44]
-X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.11.62.513
- definitions=2021-12-15_09,2021-12-14_01,2021-12-02_01
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="HWWUr3zWZyjxMtnU"
+Content-Disposition: inline
+In-Reply-To: <20211130232347.950-1-digetx@gmail.com>
+User-Agent: Mutt/2.1.3 (987dde4c) (2021-09-10)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-During test campaign, and especially after several unbind/bind sequences,
-it has been seen that the SD-card on SDMMC1 thread could freeze.
-The freeze always appear on a CMD23 following a CMD19.
-Checking SDMMC internal registers shows that the tuning command (CMD19)
-has failed.
-The freeze is then due to the delay block involved in the tuning sequence.
-To correct this, clear the delay block register DLYB_CR register after
-the tuning commands.
 
-Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
----
- drivers/mmc/host/mmci_stm32_sdmmc.c | 2 ++
- 1 file changed, 2 insertions(+)
+--HWWUr3zWZyjxMtnU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index fdaa11f92fe6..a75d3dd34d18 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -441,6 +441,8 @@ static int sdmmc_dlyb_phase_tuning(struct mmci_host *host, u32 opcode)
- 		return -EINVAL;
- 	}
- 
-+	writel_relaxed(0, dlyb->base + DLYB_CR);
-+
- 	phase = end_of_len - max_len / 2;
- 	sdmmc_dlyb_set_cfgr(dlyb, dlyb->unit, phase, false);
- 
--- 
-2.17.1
+On Wed, Dec 01, 2021 at 02:23:07AM +0300, Dmitry Osipenko wrote:
+> This series adds runtime PM support to Tegra drivers and enables core
+> voltage scaling for Tegra20/30 SoCs, resolving overheating troubles.
+>=20
+> All patches in this series are interdependent and should go via Tegra tree
+> for simplicity.
 
+So these can be applied in any order without breaking anything?
+
+Thierry
+
+--HWWUr3zWZyjxMtnU
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmG6D/QACgkQ3SOs138+
+s6HzZw//SGRlSbxYGcf2puc+SV4jxqHgVmBVp8biQjzJoeSIatV6B+8n7NAvS0x/
+qMBw7S5I7uFy8rqsIUHNQI929PW2XNbz2H8qid5UjtDVlUo5ir1qtVgvH8HYQruX
+l+PlVayuhBblIEemscYhMNeuyKgrAMeho9ZnnJjITvMVBKRGOxGp38RUgf+Tzrpc
+lF7KIxOcm9FoYTeLxAiVFKtI6Evkt+xJbEvqxkIpaNAzo/AvX6ognGeUQCg7USWu
+v2Km4gqjV0bvZUi+HlMPnYGAFpt3X9ws5NCR5ED4huHislttMacNlkfWGpHw/KkU
+/VJlYrSnlpJkppzOio+g91qdXXlTfXpa3g5ZHSOLqsNFOPFppN9PU9K2DhwFN3Ej
+mNIVbs8Oarq/bJdCftc6dX9saiL9AdKCD1MJO+XgsJuHtQ4FkJHnxMk/p8m9KH33
+HurZ3qmVir9YQh9kyE3MVT95o3gSR+M6hpPcSDiCf4g9XjwvEfJ+sDSg7B8lmM+0
+ZYOmkLu0iLKGOLOn/gBU9Z/Zw9Kw2iW2J/glHU4E5/GI2MNgs99GQPOwyFEq6AvQ
+B4V/SN10i1F0RzeuqsFacfr25c9UGwcXUDNxJqebib27ZRhcGkwu53tEBqYWXep9
+7MAMtQ8il969lajf/1tAlUVPR6AXLiuGcKgZZTEcDUReMvR4Dqk=
+=drq6
+-----END PGP SIGNATURE-----
+
+--HWWUr3zWZyjxMtnU--
