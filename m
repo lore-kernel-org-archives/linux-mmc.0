@@ -2,38 +2,39 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C149C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 14:18:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 893FEC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 14:18:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243306AbhLOOSY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Dec 2021 09:18:24 -0500
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:33394 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S237554AbhLOOSX (ORCPT
+        id S243299AbhLOOSZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Dec 2021 09:18:25 -0500
+Received: from mx07-00178001.pphosted.com ([185.132.182.106]:60906 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S243291AbhLOOSX (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2021 09:18:23 -0500
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1BF9DUax011325;
-        Wed, 15 Dec 2021 15:17:55 +0100
+Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1BFAOooD015669;
+        Wed, 15 Dec 2021 15:17:56 +0100
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-type; s=selector1;
- bh=YyNwvIlhQ54K6BfHJlIZ/f2Pz7aIwge6Xq8yYR8CYh4=;
- b=mgi+gfZjF0mC0/1JZyeYJR/dLlXwEqdcnlpcUhONxDxNgMno8kIfts32tdLe9pIvLuCH
- 0PK5njxbcY1zmBQiL7Gc+UIpIbYKVdymC8xd3N4UFmpc/3Aa18ZdK0SwMzW/rarrwgRc
- DV6DdF40hDrwUs8n2c+fSYrHHRg1H6KW9wy/u1V9X49eBe5e3qdZ+Fpu2cbF8udCejTa
- 4yQALaqpcYlR6qEFECxTnbMReCWiHGADZrw1Y8O+Cyby4sBFAcsje3PAY2wM3QHW1tsa
- JSLauNObpNpL25SkfjjzFuFSnZWdfULQwAD5XXwJdhTILZ9236nyweXpfP5HqfMvU9ap UQ== 
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-type; s=selector1;
+ bh=aLTUQlWYfOHOTGX+dtGdyYLjVVle0utawp5ro00t3MM=;
+ b=TWAiTlmutrUw51v6/3okVtvRChAVlgaN4yWhDbTo8YCBKIQ40H5yEeO17FR0oRLkMqi7
+ owYDfUpjql5M27LUqckYZXlZZTPmyQ/IRDrZa+zF47D6BuTVJdcgX9LtcruGVaJ9aYIM
+ m9cT2kE42qoA9bPi4boWCJrU4Wt6bhLMRBC71Ed7BiQT1VOhVhW0MVghdq2YvDrlY1vz
+ y0LkZE7oBDj8LbfTYAvMS03mMxMxH9MkhaOeTXiMrvhC/VZxJXY4mYk5T3oRTq0G9hAn
+ wyCrKCMcNwG/axFFEbOkaKxiRK50KXZz+nku3xwJbJOQb1NTrO4nyhrRDRKzifWniUoW 5Q== 
 Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3cy79j42k1-1
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3cyeka95m0-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 15 Dec 2021 15:17:55 +0100
+        Wed, 15 Dec 2021 15:17:56 +0100
 Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 3F7D510002A;
-        Wed, 15 Dec 2021 15:17:54 +0100 (CET)
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 99E22100039;
+        Wed, 15 Dec 2021 15:17:55 +0100 (CET)
 Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 1A8C521EB8F;
-        Wed, 15 Dec 2021 15:17:54 +0100 (CET)
-Received: from localhost (10.75.127.44) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Wed, 15 Dec 2021 15:17:53
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 91E2A21EB8F;
+        Wed, 15 Dec 2021 15:17:55 +0100 (CET)
+Received: from localhost (10.75.127.45) by SFHDAG2NODE2.st.com (10.75.127.5)
+ with Microsoft SMTP Server (TLS) id 15.0.1497.26; Wed, 15 Dec 2021 15:17:55
  +0100
 From:   Yann Gautier <yann.gautier@foss.st.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -50,13 +51,15 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         <linux-stm32@st-md-mailman.stormreply.com>,
         <linux-arm-kernel@lists.infradead.org>
 CC:     Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH 0/4] mmc: mmci: updates for STM32MP13
-Date:   Wed, 15 Dec 2021 15:17:23 +0100
-Message-ID: <20211215141727.4901-1-yann.gautier@foss.st.com>
+Subject: [PATCH 2/4] mmc: mmci: increase stm32 sdmmcv2 clock max freq
+Date:   Wed, 15 Dec 2021 15:17:25 +0100
+Message-ID: <20211215141727.4901-3-yann.gautier@foss.st.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20211215141727.4901-1-yann.gautier@foss.st.com>
+References: <20211215141727.4901-1-yann.gautier@foss.st.com>
 MIME-Version: 1.0
 Content-Type: text/plain
-X-Originating-IP: [10.75.127.44]
+X-Originating-IP: [10.75.127.45]
 X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
  (10.75.127.5)
 X-Proofpoint-Virus-Version: vendor=baseguard
@@ -66,20 +69,29 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The new STmicroelectronics STM32MP13 SoC embeds a new version
-of the SDMMC peripheral (v2.2).
-It supports SDR104 and HS200 modes.
+The variant->f_max is dependent on the IP, not on the SoC where it is
+embedded. Set the max frequency of its source clock to 267MHz.
+The frequency used will be limited by the IOs max frequency, set in the
+SoC device tree.
 
-Yann Gautier (4):
-  mmc: mmci: Add support for sdmmc variant revision v2.2
-  mmc: mmci: increase stm32 sdmmcv2 clock max freq
-  mmc: mmci: stm32: clear DLYB_CR after sending tuning command
-  mmc: mmci: add hs200 support for stm32 sdmmc
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+ drivers/mmc/host/mmci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- drivers/mmc/host/mmci.c             | 7 ++++++-
- drivers/mmc/host/mmci_stm32_sdmmc.c | 7 +++++--
- 2 files changed, 11 insertions(+), 3 deletions(-)
-
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index c0478dfa61b9..45b8608c935c 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -280,7 +280,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ static struct variant_data variant_stm32_sdmmcv2 = {
+ 	.fifosize		= 16 * 4,
+ 	.fifohalfsize		= 8 * 4,
+-	.f_max			= 208000000,
++	.f_max			= 267000000,
+ 	.stm32_clkdiv		= true,
+ 	.cmdreg_cpsm_enable	= MCI_CPSM_STM32_ENABLE,
+ 	.cmdreg_lrsp_crc	= MCI_CPSM_STM32_LRSP_CRC,
 -- 
 2.17.1
 
