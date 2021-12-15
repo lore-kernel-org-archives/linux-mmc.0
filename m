@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8473C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 22:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 620A0C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 22:06:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230424AbhLOWFy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Dec 2021 17:05:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45046 "EHLO
+        id S231151AbhLOWGG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Dec 2021 17:06:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45086 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230428AbhLOWFt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2021 17:05:49 -0500
-Received: from mail-qv1-xf2f.google.com (mail-qv1-xf2f.google.com [IPv6:2607:f8b0:4864:20::f2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A66EC06173F;
-        Wed, 15 Dec 2021 14:05:49 -0800 (PST)
-Received: by mail-qv1-xf2f.google.com with SMTP id m6so4466054qvh.10;
-        Wed, 15 Dec 2021 14:05:49 -0800 (PST)
+        with ESMTP id S230453AbhLOWFz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Dec 2021 17:05:55 -0500
+Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92664C06173E;
+        Wed, 15 Dec 2021 14:05:54 -0800 (PST)
+Received: by mail-qk1-x734.google.com with SMTP id 132so21519639qkj.11;
+        Wed, 15 Dec 2021 14:05:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=YKLnn1piTmjuFpvCctXoR3qG0POusuFbfw0ULlMi8Zk=;
-        b=SKORBTHiACk67BHgoaStl1hZV/YpqjLQKe8yZw2at4MGu5SUuc+grDTDl0l7t6OXt6
-         V8e8HPpfu4SyIQ3sreRn3YEjkyWc59PFNlRAvl6hHWUgTCHkhbFwUKSGuuWjZCb3MagA
-         HU/RYt/yVViVMO1cYrM9f6KVFeh79UqagTUc5iB6v+ap9FtB5qsLDXl6o3K7h8AtjpM+
-         NclXyyVgCz/rsartAFr0iGwrcQWBZy0ugDR5js+tMZyTEmuBxTZnfeAlFcfawytU8fHh
-         R+7Egt5qgBVc5cR1bOayOb5HinY7uQaP7MG/I2sIxy55nI/UR2W/XOyrFD5UlBj/3EqC
-         B4Xw==
+        bh=Nfw84skwDiWF0hVkBaCmIEgDDYUu9HQAVCA9TAQoLGM=;
+        b=HEgHrqcsFZ9SyjVnl/2KVYnV6dY+aDoDk2TnanqmRScBi8vs+gzIVf5lPF70JznrWD
+         8xror+R84Stijbs7TboPzeP7aeGYAwlCQTC/y2TEwLfXpvffNSD3FhY6WY83hV6YbD79
+         gebmbnvF7PZivHPKms+81IEdrN+aFx9I9OTvMpf8J97kbV6iUqg4Hzk6na79oMCq4hI1
+         rfIJ4VHRP8iN05/Fblc3yiNpCsYre7XKdB5ud4oSqNVjRzWCUO9k3ovWecuBFQYNL4US
+         mQ3nWHpO608quueK7Nqp3b9JUCY2C5o0tgdNsZ981rl+khoW/y00uBonxkzJGoWisb3V
+         Beeg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=YKLnn1piTmjuFpvCctXoR3qG0POusuFbfw0ULlMi8Zk=;
-        b=H+o7yAP1Os8b8aIEWtJwAY/XosE7mHUngFtx/QcxTFR9TGiI8f6yoT7hwPvH+oB+CZ
-         KLR8XQ6YZK7AzUvwZ9PlDpzVItrMlF69T2v92rmtv74VTBroyuYICSzltrw5RiAtUn0C
-         EWtXboKaf+kzKD/YK1d7sAPJmLkHpSH74ROD9TsyBa3a2SBfYKmqHT6a6vUU5qdt7OZZ
-         nc5zvDS7I9Fq34Le3fb3aKPiahyAUBSzw3M3p/fLnQaRx8RmSZ2ZgrM9fy3VHtraHCWb
-         53OohfRbx8SXTc7X9w6uvPoUA5LoWL96uS2Puz6EwNMR3EaUX7VaI+xL1mEn1xWOgLsI
-         S4Vw==
-X-Gm-Message-State: AOAM531HPZW4njzZh8S18TJQURfeqIWmm7+ujT7SRzTydO8muoOoVxZp
-        jMe9GFsr6gxOmPm3hw8nVDw=
-X-Google-Smtp-Source: ABdhPJzGFiGwKMG3U/uaEIJYKD99IjOP/Oy+eaDNCvt44EG1YKHkt2qo6JQdgQ+4S4RUcbs4r9qlEg==
-X-Received: by 2002:a05:6214:528f:: with SMTP id kj15mr4269275qvb.101.1639605948504;
-        Wed, 15 Dec 2021 14:05:48 -0800 (PST)
+        bh=Nfw84skwDiWF0hVkBaCmIEgDDYUu9HQAVCA9TAQoLGM=;
+        b=O8l8FVPO7ERGBwYHPx/uOOJv0zVxkn/bRbNLyW7Di2uWbxrHLwkw1LaHHMi8ZuglPe
+         P43tv9M11+mR/Y9HJy9yXm6IArKAjVUWsZTZvS8V34F8Yx3dvZysHLk6hxJVU01jzrjC
+         VokZ2OxWniYMOIu5rrVVSTnKHmXI88ubi13xAbrTtprzrMH72G4UNiIghTsvKpdyhmLf
+         ti/PHdc7n6xO7v2xvxHvzhAc4N0TI2Hc4CZ+6v7uCmZ/rd8dCXIrUu7w1wW+F6gVe+Vg
+         SyDODrSSaGLkmwdjMStWR7Z7bl1oiVS4oWDYMc8jPtktnQLhLgTqXobpAljunytOp808
+         sgkA==
+X-Gm-Message-State: AOAM532NMRhpRTKoyPncNZd65N8tumf0vJX7ocfVG3iou18NFSxrKx/1
+        uOQq6yAO5/pDNwxc6UEoSI0=
+X-Google-Smtp-Source: ABdhPJzA29KNN3tMeFW5WKmK5xkxdIu1YzBmNCfWdBVgQH2bUSqHaXTXn0/E2gHJsWlxZB7I34BWJg==
+X-Received: by 2002:a05:620a:c11:: with SMTP id l17mr10361187qki.493.1639605953742;
+        Wed, 15 Dec 2021 14:05:53 -0800 (PST)
 Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id s20sm2471592qtc.75.2021.12.15.14.05.46
+        by smtp.gmail.com with ESMTPSA id s20sm2471592qtc.75.2021.12.15.14.05.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Dec 2021 14:05:48 -0800 (PST)
+        Wed, 15 Dec 2021 14:05:53 -0800 (PST)
 From:   Jesse Taube <mr.bossman075@gmail.com>
 X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
 To:     linux-imx@nxp.com
@@ -63,9 +63,9 @@ Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
         linux-serial@vger.kernel.org, Jesse Taube <mr.bossman075@gmail.com>
-Subject: [PATCH v5 4/9] dt-bindings: clock: imx: Add documentation for i.MXRT1050 clock
-Date:   Wed, 15 Dec 2021 17:05:33 -0500
-Message-Id: <20211215220538.4180616-5-Mr.Bossman075@gmail.com>
+Subject: [PATCH v5 7/9] tty: serial: fsl_lpuart: Add i.MXRT1050 support
+Date:   Wed, 15 Dec 2021 17:05:36 -0500
+Message-Id: <20211215220538.4180616-8-Mr.Bossman075@gmail.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20211215220538.4180616-1-Mr.Bossman075@gmail.com>
 References: <20211215220538.4180616-1-Mr.Bossman075@gmail.com>
@@ -77,106 +77,63 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Jesse Taube <mr.bossman075@gmail.com>
 
-Add DT binding documentation for i.MXRT1050 clock driver.
+Add support for i.MXRT1050's uart.
 
 Cc: Giulio Benetti <giulio.benetti@benettiengineering.com>
 Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
 ---
 V1->V2:
-* Replace macros with values
+* Nothing done
 V2->V3:
-* Remove anatop
-* Use lpuart not gpt
-* include imxrt1050-clock.h
-* 2 space tabs to 4
-* Remove oneOf enum
-* Change maxItems to 2
+* Rename imxrt to imxrt1050
 V3->V4:
 * Nothing done
 V4->V5:
-* Remove extra newline
-* Rename ccm to clock-controller
-* Change minItems to const
-* Change minItems to description
-* Rename file to add 1050
 * Change commit description to just 1050
 ---
- .../bindings/clock/imxrt1050-clock.yaml       | 66 +++++++++++++++++++
- 1 file changed, 66 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+ drivers/tty/serial/fsl_lpuart.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
-new file mode 100644
-index 000000000000..8caf0572733b
---- /dev/null
-+++ b/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
-@@ -0,0 +1,66 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/clock/imxrt1050-clock.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Clock bindings for Freescale i.MXRT
-+
-+maintainers:
-+  - Giulio Benetti <giulio.benetti@benettiengineering.com>
-+  - Jesse Taube <Mr.Bossman075@gmail.com>
-+
-+description: |
-+  The clock consumer should specify the desired clock by having the clock
-+  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
-+  for the full list of i.MXRT clock IDs.
-+
-+properties:
-+  compatible:
-+    const: fsl,imxrt1050-ccm
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 2
-+
-+  clocks:
-+    description: 24m osc
-+
-+  clock-names:
-+    const: osc
-+
-+  '#clock-cells':
-+    const: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - '#clock-cells'
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/imxrt1050-clock.h>
-+
-+    clks: clock-controller@400fc000 {
-+        compatible = "fsl,imxrt1050-ccm";
-+        reg = <0x400fc000 0x4000>;
-+        interrupts = <95>, <96>;
-+        clocks = <&osc>;
-+        clock-names = "osc";
-+        #clock-cells = <1>;
-+    };
-+
-+    lpuart1: serial@40184000 {
-+        compatible = "fsl,imxrt1050-lpuart";
-+        reg = <0x40184000 0x4000>;
-+        interrupts = <20>;
-+        clocks = <&clks IMXRT1050_CLK_LPUART1>;
-+        clock-names = "ipg";
-+    };
+diff --git a/drivers/tty/serial/fsl_lpuart.c b/drivers/tty/serial/fsl_lpuart.c
+index 3affe52a364d..ce3e26144689 100644
+--- a/drivers/tty/serial/fsl_lpuart.c
++++ b/drivers/tty/serial/fsl_lpuart.c
+@@ -247,6 +247,7 @@ enum lpuart_type {
+ 	LS1028A_LPUART,
+ 	IMX7ULP_LPUART,
+ 	IMX8QXP_LPUART,
++	IMXRT1050_LPUART,
+ };
+ 
+ struct lpuart_port {
+@@ -310,6 +311,11 @@ static struct lpuart_soc_data imx8qxp_data = {
+ 	.iotype = UPIO_MEM32,
+ 	.reg_off = IMX_REG_OFF,
+ };
++static struct lpuart_soc_data imxrt1050_data = {
++	.devtype = IMXRT1050_LPUART,
++	.iotype = UPIO_MEM32,
++	.reg_off = IMX_REG_OFF,
++};
+ 
+ static const struct of_device_id lpuart_dt_ids[] = {
+ 	{ .compatible = "fsl,vf610-lpuart",	.data = &vf_data, },
+@@ -317,6 +323,7 @@ static const struct of_device_id lpuart_dt_ids[] = {
+ 	{ .compatible = "fsl,ls1028a-lpuart",	.data = &ls1028a_data, },
+ 	{ .compatible = "fsl,imx7ulp-lpuart",	.data = &imx7ulp_data, },
+ 	{ .compatible = "fsl,imx8qxp-lpuart",	.data = &imx8qxp_data, },
++	{ .compatible = "fsl,imxrt1050-lpuart",	.data = &imxrt1050_data},
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, lpuart_dt_ids);
+@@ -2626,6 +2633,7 @@ OF_EARLYCON_DECLARE(lpuart32, "fsl,ls1021a-lpuart", lpuart32_early_console_setup
+ OF_EARLYCON_DECLARE(lpuart32, "fsl,ls1028a-lpuart", ls1028a_early_console_setup);
+ OF_EARLYCON_DECLARE(lpuart32, "fsl,imx7ulp-lpuart", lpuart32_imx_early_console_setup);
+ OF_EARLYCON_DECLARE(lpuart32, "fsl,imx8qxp-lpuart", lpuart32_imx_early_console_setup);
++OF_EARLYCON_DECLARE(lpuart32, "fsl,imxrt1050-lpuart", lpuart32_imx_early_console_setup);
+ EARLYCON_DECLARE(lpuart, lpuart_early_console_setup);
+ EARLYCON_DECLARE(lpuart32, lpuart32_early_console_setup);
+ 
 -- 
 2.34.1
 
