@@ -2,52 +2,52 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1FAEC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 02:38:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 873FDC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Dec 2021 03:41:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232907AbhLOCiF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Dec 2021 21:38:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58956 "EHLO
+        id S239593AbhLODlk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Dec 2021 22:41:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44782 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229492AbhLOCiE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 21:38:04 -0500
-Received: from mail-qv1-xf29.google.com (mail-qv1-xf29.google.com [IPv6:2607:f8b0:4864:20::f29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7898FC061574;
-        Tue, 14 Dec 2021 18:38:04 -0800 (PST)
-Received: by mail-qv1-xf29.google.com with SMTP id kj6so3773292qvb.2;
-        Tue, 14 Dec 2021 18:38:04 -0800 (PST)
+        with ESMTP id S231547AbhLODlk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Dec 2021 22:41:40 -0500
+Received: from mail-qk1-x72a.google.com (mail-qk1-x72a.google.com [IPv6:2607:f8b0:4864:20::72a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB6A2C061574;
+        Tue, 14 Dec 2021 19:41:39 -0800 (PST)
+Received: by mail-qk1-x72a.google.com with SMTP id l25so9518875qkl.5;
+        Tue, 14 Dec 2021 19:41:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=jms.id.au; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=aRX4KSRpkz951cRNgWC/Zh6A7MKhtf470MiyyCfCPkI=;
-        b=Aw5+XL1niZL3nXdAL/I7GcxjTpxFQNxAMs/SaM//1TxjPaLqyEmzI86of++OTCC2di
-         //uGkroUBdUnD8N28TNsF0aMjaT6vf5DUKbx+O9yjoPlwlXOsPGZvmPPoYw1Z110ZKe4
-         NJ8PffooJa+YJf6r7EFQo5T6jDyAZPsjOobNI=
+        bh=VYou/sncx/ZOc90DTta97dk0tFp6wdjxFsde2cv+KuI=;
+        b=l3W1Skv3cttl6xmZPqh5VhNWfrvwvWNuIrISXSp+LbcsxWRIJj230CXHHv3yPUse0U
+         K3NAEntePVy00U5WFkymiOTD9Eju3I93WrQxt5hiT2OYtNzJ8kRuXBDXe53A1wB6/HG6
+         gK8E3ofRMtRVYmgvTdL6xvW6MshVBemcQZtuM=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=aRX4KSRpkz951cRNgWC/Zh6A7MKhtf470MiyyCfCPkI=;
-        b=5uKhFIsvh8ycHKVpC8wmyUQAz20A8l+qm+TPOv02APB+tG/aZA90Q6NzwOwECsDkpH
-         YWW5wKx8Dhk83+Sp5j+EJv+6OE38ooJVTyR0h/WFLqT3On204PwI3Y5ql/ZTrRbAEsEe
-         OKSvK19+YP16vKOSg0XAWlDkoifp2IREjpzP48bpufA8mb9TTaHnxDjcK3c11l9N6/UB
-         ZmsKe2ZIVV7H6Aq04YbZRegWF36gg1gwbN7u3805SUn4tyCCIEl23fwl88Ns9+4+IUmR
-         lJkS5VZug4t41RkSv78XiiSkAh0nPzuSZRq3GErwGxRNacLk+3gX5kDnJlaBRxX3VcH2
-         AxcA==
-X-Gm-Message-State: AOAM533sGVjCKWFuiKl0plCqTc62M3dz3dZjt4noz25W4MmHgxsGE3yZ
-        nSyeCTeGcbexCjdhrrpJT0lif1TDBjPnzuAleto=
-X-Google-Smtp-Source: ABdhPJyP/ptvKFOl4YsddVGK/L0Uh4+0SODOSdyOLoVHED3p2Oq0B1XjTAVlANjOepUgQhwo5JDycFvXJNddiBttYAU=
-X-Received: by 2002:a05:6214:2b0b:: with SMTP id jx11mr6103354qvb.130.1639535883329;
- Tue, 14 Dec 2021 18:38:03 -0800 (PST)
+        bh=VYou/sncx/ZOc90DTta97dk0tFp6wdjxFsde2cv+KuI=;
+        b=MhjyGLZAcOjS439Y6IrEhTWhJQoGS+FyF9X61JnmAsx3VtkNdDRaPI3ODmpv6icCzN
+         ADrU7Rhlq3Kd5NVkgYSJSdE/hNdtqqCkDuMpAVbrruTwB4vJ5QlU8s7fO8qETGTNMNw7
+         7YXCimfJFBylXCsm0t75lPaAizFYRxBAOp2xkz8lp2F7OtO9wgNcF9hPcx+oHeVInCHY
+         B3hgDYkDQUR4Lcuo2OssjIqY7wP0pd1pc50dHVXloHYoJmVU8EGSWhrlcheroUfU09o1
+         /OzLoiJxQ7I7JbbDqVX/AnM5LHvNCXK9MylGLsw4QPlRQb3CuO3NAbWZyEYSITN9WouY
+         IMOw==
+X-Gm-Message-State: AOAM530FLIStu8pNGHMuYbxTqt84mEIg08iedZY7VYRpMNeDcUw6n6XR
+        KiEsQWoW+r9cmCF0oz9wzraMqdLarduGXW61cKc=
+X-Google-Smtp-Source: ABdhPJz+D6MmqXy3uphrelmMYcf3x4xzGqNjbYJ9LVi3lQsti1ioJGdlxTlTy1QBYZ1VP9UL/KWAIX/qkvoEFc7l98U=
+X-Received: by 2002:a05:620a:4081:: with SMTP id f1mr7120860qko.165.1639539698999;
+ Tue, 14 Dec 2021 19:41:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20211210145430.3707463-4-gsomlo@gmail.com> <YbYhaAmHsSnLFlZ2@errol.ini.cmu.edu>
-In-Reply-To: <YbYhaAmHsSnLFlZ2@errol.ini.cmu.edu>
+References: <20211210145430.3707463-1-gsomlo@gmail.com> <20211210145430.3707463-3-gsomlo@gmail.com>
+In-Reply-To: <20211210145430.3707463-3-gsomlo@gmail.com>
 From:   Joel Stanley <joel@jms.id.au>
-Date:   Wed, 15 Dec 2021 02:37:51 +0000
-Message-ID: <CACPK8XdP2Zcv4=psoFZGK+pQC514m2wri15vGZS=hWreOWoqTQ@mail.gmail.com>
-Subject: Re: [PATCH v4 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
+Date:   Wed, 15 Dec 2021 03:41:26 +0000
+Message-ID: <CACPK8Xd=Qv_ePGXBTB2gYxSUqqte=MNcuDNgAoqqjecvzNKCPQ@mail.gmail.com>
+Subject: Re: [PATCH v4 2/3] dt-bindings: mmc: Add bindings for LiteSDCard
+To:     Gabriel Somlo <gsomlo@gmail.com>
 Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
@@ -68,50 +68,12 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 12 Dec 2021 at 16:21, Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+On Fri, 10 Dec 2021 at 14:54, Gabriel Somlo <gsomlo@gmail.com> wrote:
 >
-> Hi Joel,
+> LiteSDCard is a small footprint, configurable SDCard core for FPGA
+> based system on chips.
 >
-> On Fri, Dec 10, 2021 at 09:54:30AM -0500, Gabriel Somlo wrote:
-> > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > SDCard core commonly used in LiteX designs.
-> >
-> > The driver was first written in May 2020 and has been maintained
-> > cooperatively by the LiteX community. Thanks to all contributors!
-> >
-> > Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> > Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> > Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> > Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> > Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
-> > Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
-> > Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
-
-
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index 5af8494c31b5..c1b66d06d1c9 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -1093,3 +1093,12 @@ config MMC_OWL
-> >
-> >  config MMC_SDHCI_EXTERNAL_DMA
-> >       bool
-> > +
-> > +config MMC_LITEX
-> > +     tristate "LiteX MMC Host Controller support"
->
-> I remembered I still owe you an answer on whether this was ever
-> successfully tested as a module: The answer is *yes* -- if configured
-> as a loadable module, it loads OK with modprobe, works fine, and can
-> be unloaded (with `modprobe -r`) and re-loaded indefinitely.
-
-Very good.
-
-Thanks for following up on the suggestions I made.
+> Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+> Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
 
 Reviewed-by: Joel Stanley <joel@jms.id.au>
-
-Cheers,
-
-Joel
