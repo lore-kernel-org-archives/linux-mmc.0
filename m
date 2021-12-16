@@ -2,159 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6D4DC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 09:13:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B73F0C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 09:14:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232823AbhLPJNy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Dec 2021 04:13:54 -0500
-Received: from mout.kundenserver.de ([212.227.126.133]:59039 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235085AbhLPJNy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 04:13:54 -0500
-Received: from mail-ed1-f42.google.com ([209.85.208.42]) by
- mrelayeu.kundenserver.de (mreue010 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1N8GdE-1mTFMO1l9E-014CRe; Thu, 16 Dec 2021 10:13:52 +0100
-Received: by mail-ed1-f42.google.com with SMTP id x15so85404649edv.1;
-        Thu, 16 Dec 2021 01:13:52 -0800 (PST)
-X-Gm-Message-State: AOAM533Hn0yGgxJKC7vQNhn3WMbEGJb/Ztc5xNGqOhohsMr+uojVUJuX
-        fH5OnEWhVsUB25EY6rlaBQt/ii547xKMntQb3v4=
-X-Google-Smtp-Source: ABdhPJyiLKlnSiH9vlPQZqdh0l7qGixC2KbAXZ0E4zRdJ5+BDdSdAxMn6Pdgjctlm5ImC6il7N2keNj/IR12pl1ESbs=
-X-Received: by 2002:a05:6000:1aca:: with SMTP id i10mr8136773wry.407.1639643196246;
- Thu, 16 Dec 2021 00:26:36 -0800 (PST)
+        id S233085AbhLPJOv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Dec 2021 04:14:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53904 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232985AbhLPJOu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 04:14:50 -0500
+Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3B57C061574;
+        Thu, 16 Dec 2021 01:14:50 -0800 (PST)
+Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id 36F7181184;
+        Thu, 16 Dec 2021 10:14:46 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1639646087;
+        bh=4KGuTwhojZAMWLlAy5DjgLUqaT2ZYVoaf+TvkydJd6g=;
+        h=Date:Subject:To:References:From:In-Reply-To:From;
+        b=Ry1NwOreBD5Fe9kQOZopFc9TvTpmrIth2ygVZpeDfr6aTJx1VpTSKFVDxhmdMHb/4
+         TcrlwAE8nzgtFB+okKjLeukYCAh2I8v+jPXVXXrjZsxvC1so8XiJRXgZv3ha4e6IN+
+         1FwibcMnBppdrAl5dMInx4KoVz8VHCWVUB/wTXbNNmQyYgHO82aVf1RKJz0LBjDy8E
+         fTniyOFhZof+egJs8XoT5h6580xX6qpGop+ROnMIyUHq9VOhL0ki9jkTsqnkGHEi5f
+         S18AscO+GQJ85tpuHBu4LEto9Tkcuvfnp1kUSRl7Y7QmWreKz/Itq4xX302Ya9SL+v
+         jZ1q1G+adstkQ==
+Message-ID: <c4528bc5-a826-a4ed-c4d6-e0ab84651ea2@denx.de>
+Date:   Thu, 16 Dec 2021 10:14:45 +0100
 MIME-Version: 1.0
-References: <20211215220538.4180616-1-Mr.Bossman075@gmail.com>
-In-Reply-To: <20211215220538.4180616-1-Mr.Bossman075@gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Thu, 16 Dec 2021 09:26:20 +0100
-X-Gmail-Original-Message-ID: <CAK8P3a29tzgd_4WncippZBEJra9n0bQTysBkPBp_WA0sb28gTg@mail.gmail.com>
-Message-ID: <CAK8P3a29tzgd_4WncippZBEJra9n0bQTysBkPBp_WA0sb28gTg@mail.gmail.com>
-Subject: Re: [PATCH v5 0/9] Add initial support for the i.MXRTxxxx SoC family
- starting from i.IMXRT1050 SoC.
-To:     Jesse Taube <mr.bossman075@gmail.com>
-Cc:     NXP Linux Team <linux-imx@nxp.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.4.0
+Subject: Re: [PATCH 4/4] mmc: mmci: add hs200 support for stm32 sdmmc
+Content-Language: en-US
+To:     Yann Gautier <yann.gautier@foss.st.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Stefan Agner <stefan@agner.ch>,
+        Russell King <linux@armlinux.org.uk>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
         Linus Walleij <linus.walleij@linaro.org>,
-        gregkh <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
-        SoC Team <soc@kernel.org>,
-        Russell King - ARM Linux <linux@armlinux.org.uk>,
-        Abel Vesa <abel.vesa@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        giulio.benetti@benettiengineering.com,
-        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:boYRwNGGtvS6Ogv172avdBzLiox4MOw/C3OExYzNV0pJAzxljbt
- dWDHK2Jwxh4rulkjr4Ru4L4jEub8P8YvZ5AqmccoITdbtavkOosRTO9XLAsq4lOZ3EgxghG
- 6jiwbnYPi6pGnOzYs3Bofch1CFBb7SsFoEm+ZaJS61dFK+hay1i4YX0Schwy+m9mJHAu+MA
- 26KTclVsPUNtvwXI6UJjw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:/LHzhLCMwi4=:nxX2ISmR3ZcS545kCXvj/v
- pRhgYgH3wHetMOc9NekfHh/X6enGLE8oa1iILMv/ZZftppdM9YQam1p3TtxVOcuYoqKwvXGbn
- CLeqzI8WjF4giBf0CiYsOS559YNo9GwvGPZxDPv0Tkppo+24vIIlkUJX3GOq8uU1t4Yy0ThSx
- VKPmzMvoVVQyDa88KWXgIe1dPxS02W/KOgZM/9Ze99Dqn6V8HiJHhMYt0qHW+mh1yylGRg/04
- 4wlWHqT4kCa/uKSjVWvSK+Wuw36Uxi5Ex0ywtqYPBZRrqJ8PEuJSOVi0NwnQq4+EYMqQNpnc/
- EGvWojcFGPi9h0+Y8ZynH6JcXQHAYouLCfBfvOwUFmPOKLXkegadqfmY3ff/7GlL5EZhgE+A5
- snjCSLicUvlO8M9m0yhlSiD/x0Obj6FZaRgMbZUlTOpYycNxtRkK28An9BXzCe9J6dwYl18P3
- wT9LPTXykPuCJcxpc+zFquULGhjCLpcQPuciLOdsb1Kdip4UCjwMyncNTHYk8JtadksozBPGh
- RM+PpyLvyJfHRJDwMNcA48ZyOt4AA/QsJYBVe4zAxLxjLi66tLnhnVqFJWcovnQtzTs5gY9/z
- z2Wn7+QWUrIn8cjsoSJTEm9P72O4RHcz+AhQ7xk15/fc/vFSANV2X4YbVZ0T+wHF184Rggcq7
- W5nOZTVWE0Dlr23qygrIBEA27rwrwfDGrnlnfEkJTZtr+gGhz6a7a2te6V6mQnGjsctskKykW
- x1GGSqAmlGQzhKH9HPp1peDHwpecV96Q1vjf4CH+AKThkSi8/ry3Fj8B+I9tmRVCEwDVf5Wsa
- +xqXomH5lH3lsYUYVFADFUSZ9QwmlKhFnjIHeGe9TGvrqS5YFo=
+        Vladimir Zapolskiy <vz@mleia.com>,
+        u.kleine-koenig@pengutronix.de,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org
+References: <20211215141727.4901-1-yann.gautier@foss.st.com>
+ <20211215141727.4901-5-yann.gautier@foss.st.com>
+From:   Marek Vasut <marex@denx.de>
+In-Reply-To: <20211215141727.4901-5-yann.gautier@foss.st.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Virus-Scanned: clamav-milter 0.103.2 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 15, 2021 at 11:05 PM Jesse Taube <mr.bossman075@gmail.com> wrote:
->
-> This patchset contains:
-> - i.MXRT10xx family infrastructure
-> - i.MXRT1050 pinctrl driver adaption
-> - i.MXRT1050 clock driver adaption
-> - i.MXRT1050 sd-card driver adaption
-> - i.MXRT1050 uart driver adaption
-> - i.MXRT1050-evk basic support
->
-> The i.MXRTxxxx family that could have support by Linux actually spreads
-> from i.MXRT1020 to i.MXRT1170 with the first one supporting 1 USB OTG &
-> 100M ethernet with a cortex-M7@500Mhz up to the latter with i.MXRT1170
-> with cortex-M7@1Ghz and cortex-M4@400Mhz, 2MB of internal SRAM, 2D GPU,
-> 2x 1Gb and 1x 100Mb ENET. The i.MXRT family is NXP's answer to
-> STM32F7XX, as it uses only simple SDRAM, it gives the chance of a 4 or
-> less layer PCBs. Seeing that these chips are comparable to the
-> STM32F7XXs which have linux ported to them it seems reasonable to add
-> support for them.
->
-> Giving Linux support to this family should ease the development process,
-> instead of using a RTOS they could use Embedded Linux allowing for more
-> portability, ease of design and will broaden the scope of people using
-> embedded linux.
->
-> The EVK has very little SDRAM, generally 32MB starting from
-> i.MXRT1020(the lowest P/N), although the i.MXRT1160/70 provide instead
-> 64MB of SDRAM for more functionality.
->
-> At the moment we do not support XIP for either u-boot or Linux but it
-> should be done in the future. XIP will also save SDRAM.
->
-> Another interesting fact is the amount of internal SRAM, as the P/N
-> increases the SRAM will reach up to 2MB(some could be for cache and
-> some would be for video).
->
-> Also, some parts have embed flash of 4MB that can be used for
-> u-boot/Linux, if both correctly sized it will leave the SDRAM free.
->
-> External flash can be Quad SPI and HyperFlash, so throughput would be
-> decent.
->
-> The i.MXRT11xx series supports MIPI interface too.
->
-> The family in general provide CAN bus, audio I/O, 1 or more
-> USB(otg/host), 1 or more 100Mb/1Gb ethernet, camera interface, sd-card.
->
-> All this can be used for simple GUIs, web-servers, point-of-sale
-> stations, etc.
+On 12/15/21 15:17, Yann Gautier wrote:
+> Use feedback clock for HS200 mode, as for SDR104.
+> The HS200 mode can be enabled through DT by using mmc-hs200-1_8v.
+> It is possible to use it on STM32MP13, but not STM32MP15 platforms.
 
-This looks all good to me now, but the drivers need to be reviewed by the
-respective subsystem maintainers before we can merge it into the soc
-tree. As with other new SoCs, I'm happy to merge the support as a combined
-pull request that includes the drivers provided that the driver subsystem
-maintainers have reviewed them.
-
-Ideally the i.MX maintainers would pick up your series into a separate
-branch and send that to soc@kernel.org the same way as the other topic
-branches that are usually split out between DT, drivers, soc code etc.
-
-With the Christmas break coming up, the timing may not be sufficient
-before I'm off next week, so it may end up too late for 5.17 but should
-be fine for 5.18.
-
-As a more general comment, it's always nice to see newly added SoC
-platforms, especially when they are this well implemented and done
-by hobbyists. However, I do think you are being overly optimistic
-as to how useful this is going to be to other people: interest in NOMMU
-ARM platforms has dropped a lot over the past 5 years, and as far as I
-can tell, it is only being kept alive for existing stm32 customers
-as the economics do not favor Linux on Cortex-M for new products
-compare to Linux on Cortex-A or some RTOS on Cortex-M.
-
-The existing users will inevitably stop updating their kernels at some
-point, and then it's most likely just you and Vladimir Murzin that care.
-
-       Arnd
+HS200 is possible even on the MP15, it just doesn't yield any 
+(performance) benefits due to the slower bus clock (125 MHz or so?), so 
+it isn't worth enabling it on MP15. It is nice to see MP13 can do better.
