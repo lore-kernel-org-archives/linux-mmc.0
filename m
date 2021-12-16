@@ -2,128 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCAEAC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 14:19:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73002C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 15:58:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237855AbhLPOTL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Dec 2021 09:19:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41122 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229583AbhLPOTL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 09:19:11 -0500
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7554C061574;
-        Thu, 16 Dec 2021 06:19:10 -0800 (PST)
-Received: by mail-lf1-x12c.google.com with SMTP id t3so3560708lfe.12;
-        Thu, 16 Dec 2021 06:19:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=FHZhtH3DW7AMrBjP8iVuxcvAkwhLC1m6PQhYldA9iJU=;
-        b=kfQna7lwKWEWNyGl0m+WM04u4GvDzlfWdVJpaVjT3VLpr11FElsgNikURpISaLmqEB
-         gSnfcAyYPclS/JMQBjs4BWeC4liYjwwJhGaI2CLj9zwVCtQp20VEezdXRdvXOfU+rQv+
-         cvdiG+BIckrRWvJ5LmWc6gi1KqhH5V1mE4tW41nr4+IFwNca4fR7ttL4xlWwn74TndKS
-         G0whMZLLYcMsAAhjjKd4W8N2DSbx8f8iAVMtBkeyqMXniFfccMFxE6qkDTG53a+wbF/W
-         fUHDrFY0WxEr+0Me59Iq1ISBYx2DSYnRx5jkh9GCiG6ldF+F7h4CTLIk/j1S9Ue9eW4l
-         GW3g==
+        id S232941AbhLPP6I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Dec 2021 10:58:08 -0500
+Received: from mail-oi1-f169.google.com ([209.85.167.169]:38501 "EHLO
+        mail-oi1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230358AbhLPP6I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 10:58:08 -0500
+Received: by mail-oi1-f169.google.com with SMTP id r26so37017582oiw.5;
+        Thu, 16 Dec 2021 07:58:08 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=FHZhtH3DW7AMrBjP8iVuxcvAkwhLC1m6PQhYldA9iJU=;
-        b=EKww2pebI/8EdJ2mCFlg0xUlm5l1n0Sv0XJDK0pCnBHi/RVg6O18cKNBrrcUKaxS+Q
-         7KC2rm/YnIR+aHINg09IfFWdfD/agGbk9uMQesP1eOh1sJ3u62oS0M4lqoqC+bYBLqII
-         j4jAw0amS7Wjpbp1IY4Z5eIdrb+S1o/NTJ7A209n4BW6QIu25LA/UfCQN6TBwwwNl2gx
-         HdGpQkWNT5FqNMYOxI8ffFYbS1xyj/5U3bu02eiw7XjgzGvCLdQeWOsxPfraIuDYZFom
-         UQ58Tx1zCdMGzquE12BygpWzosJgyTe4nAHJgqVi0csXSuGzDG6c1FVEfM+yMwW8WvD8
-         VgPQ==
-X-Gm-Message-State: AOAM531y0OcgijHp5GgxhVXHW4hga+7QtuR2ZKpuBuJB6iBE/lXiJEaP
-        IKNyvDXGrI3RuEZ5ThhVzEA=
-X-Google-Smtp-Source: ABdhPJwTCLw6X+g8WZv+7SknvWAEs+qjM7J+ZiSnSsKS4sTnaSQels7ZUzqMKyR6w73ajpLDsSHcBA==
-X-Received: by 2002:a19:8c48:: with SMTP id i8mr14971511lfj.179.1639664349109;
-        Thu, 16 Dec 2021 06:19:09 -0800 (PST)
-Received: from [192.168.2.145] (94-29-63-156.dynamic.spd-mgts.ru. [94.29.63.156])
-        by smtp.googlemail.com with ESMTPSA id k14sm1148653ljk.57.2021.12.16.06.19.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 16 Dec 2021 06:19:08 -0800 (PST)
-Subject: Re: [PATCH v16 00/40] NVIDIA Tegra power management patches for 5.17
-To:     Thierry Reding <thierry.reding@gmail.com>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-References: <20211130232347.950-1-digetx@gmail.com> <YboP9IFMUrUnEzrU@orome>
- <6baf6013-fbb2-b42f-5b26-2d10a2ca9374@gmail.com> <Ybs7zKQY1uJCJ2f3@orome>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <f4ba1201-e3f4-d0cc-17df-9645783dee04@gmail.com>
-Date:   Thu, 16 Dec 2021 17:19:07 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=+fzbfD0CHCHcZI8DY35QBo25aGSKtXHSKqSLSMk0x8w=;
+        b=uc7xpUmocjS3gvRMwY9H5w7HnnYfokVjLuAIUPyVuFBT1u+XCd8oqzYaC2JLQdioEs
+         lhDy9KEIAeCeGOTxetg/NL/iWTsHNDjokcJVD1fy4QNwGwgdj+m1lobQW0XNJS5ZcycM
+         qKYIXnFvv/VycfmwIUo8XhLQQ1m+BTT1Jrr2uUvrieoZOZzCgOLArW/tjVgjA0uPIwmo
+         Kirx83pn6WNiyAWXWUp3UEI/1qPH93tH9FAFkbIdWVKaC1n2RI2Qb2vf/5PPFsjaWbri
+         SzpT4nQvCOQe4wrSuA4ESyDIJXav27ZSCCFN+rLN6qTReNqEMClUy82sQr0qhJno93UT
+         XEYQ==
+X-Gm-Message-State: AOAM5337I1duHd2B3VX9BzK8Io89EPaev/KSlen1eVpVH/4C3sbOfaSo
+        eBGkZLCzElNZkk3mCWw31Q==
+X-Google-Smtp-Source: ABdhPJwR/W9c0idlUUFwTUnVK1aHR+vR6mP87PEAo+XWvtX5jqFfuKZ69KQePrNkBHEO052l92GdjA==
+X-Received: by 2002:a05:6808:15a:: with SMTP id h26mr4515968oie.123.1639670287583;
+        Thu, 16 Dec 2021 07:58:07 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id e14sm1027527oie.7.2021.12.16.07.58.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 16 Dec 2021 07:58:06 -0800 (PST)
+Received: (nullmailer pid 293314 invoked by uid 1000);
+        Thu, 16 Dec 2021 15:58:05 -0000
+Date:   Thu, 16 Dec 2021 09:58:05 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     linux-imx@nxp.com, mturquette@baylibre.com, sboyd@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
+        stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
+        adrian.hunter@intel.com, jirislaby@kernel.org,
+        giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
+Subject: Re: [PATCH v5 4/9] dt-bindings: clock: imx: Add documentation for
+ i.MXRT1050 clock
+Message-ID: <YbtiDa3CpVmiCkto@robh.at.kernel.org>
+References: <20211215220538.4180616-1-Mr.Bossman075@gmail.com>
+ <20211215220538.4180616-5-Mr.Bossman075@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <Ybs7zKQY1uJCJ2f3@orome>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211215220538.4180616-5-Mr.Bossman075@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-16.12.2021 16:14, Thierry Reding пишет:
-> On Wed, Dec 15, 2021 at 07:11:53PM +0300, Dmitry Osipenko wrote:
->> 15.12.2021 18:55, Thierry Reding пишет:
->>> On Wed, Dec 01, 2021 at 02:23:07AM +0300, Dmitry Osipenko wrote:
->>>> This series adds runtime PM support to Tegra drivers and enables core
->>>> voltage scaling for Tegra20/30 SoCs, resolving overheating troubles.
->>>>
->>>> All patches in this series are interdependent and should go via Tegra tree
->>>> for simplicity.
->>>
->>> So these can be applied in any order without breaking anything?
->>
->> Please notice that the word is *inter* dependent, not *in* dependent.
->>
->> There is a build dependency for the patches. The first two "soc/tegra"
->> must be applied first.
+On Wed, Dec 15, 2021 at 05:05:33PM -0500, Jesse Taube wrote:
+> From: Jesse Taube <mr.bossman075@gmail.com>
 > 
-> Okay, so I've separated the first two patches out into a separate stable
-> branch that I can share between the Tegra and drm/tegra trees to pull in
-> the build dependency and then I've applied the driver patches to those
-> two trees and I've verified that the two branches build correctly. I've
-> not done any runtime testing, but I'll trust you on that.
+> Add DT binding documentation for i.MXRT1050 clock driver.
+> 
+> Cc: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> ---
+> V1->V2:
+> * Replace macros with values
+> V2->V3:
+> * Remove anatop
+> * Use lpuart not gpt
+> * include imxrt1050-clock.h
+> * 2 space tabs to 4
+> * Remove oneOf enum
+> * Change maxItems to 2
+> V3->V4:
+> * Nothing done
+> V4->V5:
+> * Remove extra newline
+> * Rename ccm to clock-controller
+> * Change minItems to const
+> * Change minItems to description
+> * Rename file to add 1050
+> * Change commit description to just 1050
+> ---
+>  .../bindings/clock/imxrt1050-clock.yaml       | 66 +++++++++++++++++++
+>  1 file changed, 66 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+> new file mode 100644
+> index 000000000000..8caf0572733b
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+> @@ -0,0 +1,66 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/clock/imxrt1050-clock.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Clock bindings for Freescale i.MXRT
+> +
+> +maintainers:
+> +  - Giulio Benetti <giulio.benetti@benettiengineering.com>
+> +  - Jesse Taube <Mr.Bossman075@gmail.com>
+> +
+> +description: |
+> +  The clock consumer should specify the desired clock by having the clock
+> +  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
+> +  for the full list of i.MXRT clock IDs.
+> +
+> +properties:
+> +  compatible:
+> +    const: fsl,imxrt1050-ccm
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 2
+> +
+> +  clocks:
+> +    description: 24m osc
 
-I only compile-tested VIC and NVDEC drivers, but they should be okay,
-and thus, everything should be good.
+maxItems: 1
 
->> The "soc/tegra: pmc: Enable core domain support for Tegra20 and Tegra30"
->> *must* be the last applied patch if we want to preserve bisectability.
->> The core voltage scaling can be enabled only once all the drivers got
->> the power management support.
->>
->> The rest could be applied out-of-order.
+With that,
+
+Reviewed-by: Rob Herring <robh@kernel.org>
+
+> +
+> +  clock-names:
+> +    const: osc
+> +
+> +  '#clock-cells':
+> +    const: 1
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - clock-names
+> +  - '#clock-cells'
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/clock/imxrt1050-clock.h>
+> +
+> +    clks: clock-controller@400fc000 {
+> +        compatible = "fsl,imxrt1050-ccm";
+> +        reg = <0x400fc000 0x4000>;
+> +        interrupts = <95>, <96>;
+> +        clocks = <&osc>;
+> +        clock-names = "osc";
+> +        #clock-cells = <1>;
+> +    };
+> +
+> +    lpuart1: serial@40184000 {
+> +        compatible = "fsl,imxrt1050-lpuart";
+> +        reg = <0x40184000 0x4000>;
+> +        interrupts = <20>;
+> +        clocks = <&clks IMXRT1050_CLK_LPUART1>;
+> +        clock-names = "ipg";
+> +    };
+> -- 
+> 2.34.1
 > 
-> One last remaining question: I don't think I can apply that one patch if
-> it requires that all the others are enabled first because it would
-> basically create a circular dependency.
 > 
-> Can I pick up the final 7 patches (the DT ones) independently of that
-> one patch without things breaking? If so, one option we could try is to
-> wait for both Tegra and drm/tegra trees to get merged into v5.17-rc1 and
-> then send that one patch (which is only a 4-line diff) right after
-> v5.17-rc1 so that it makes it into v5.17-rc2. That avoids the circular
-> dependency and should get everything enabled for v5.17.
-> 
-> Do you see any problems with that?
-Deferring that one patch till v5.17-rc2 will work, thank you.
