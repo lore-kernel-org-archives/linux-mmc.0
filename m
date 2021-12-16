@@ -2,42 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43F4DC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 09:44:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E0BFC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 09:49:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235510AbhLPJoo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Dec 2021 04:44:44 -0500
-Received: from mx07-00178001.pphosted.com ([185.132.182.106]:58250 "EHLO
+        id S230331AbhLPJtJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Dec 2021 04:49:09 -0500
+Received: from mx07-00178001.pphosted.com ([185.132.182.106]:38362 "EHLO
         mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232987AbhLPJoo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 04:44:44 -0500
-Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1BG4BBpb032006;
-        Thu, 16 Dec 2021 10:44:11 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to :
+        by vger.kernel.org with ESMTP id S230345AbhLPJtH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 04:49:07 -0500
+Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 1BG9AAwj021585;
+        Thu, 16 Dec 2021 10:48:56 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
  references : from : message-id : date : mime-version : in-reply-to :
  content-type : content-transfer-encoding; s=selector1;
- bh=V5ZIMz/aPi5v3BQ3aLEg97h6IbRb7qKQ5CfjX76CSD4=;
- b=JJkMGEWzDvhRE/iYKtH31anMVtaBskikUfsRvGvQYkZkF8jA0+J5dbmdpTlZ87B/waUZ
- 69l88X7SzgdeJSgNubggT5CUO3aVBAfYa4ME4258in8/LvpTWgEVyPx5HXSN6Z2rQXyM
- X41T/ZSZZRcPfedR1I3OUxUBI01L38Wp0EsfBcm9BqL6AmFABsa4px+9IgIvqTCIJgWB
- O8GE3/QFdYYO5siLhYz/JDmazb+JDALVk3mJ4gNrO0wh/bcJLsg9hPJIRY70Bg+rNY4V
- 5zDJmubei7Le6VW9MOPUjl3VlY50CtXHWE/qi91cuo6nXFlm952Fj0YgfC1I1MUIKuM2 IA== 
+ bh=LLN9sSigq+j2eNzjgy1QryZl+qL34fhAv1RfhNaTpPU=;
+ b=DD35Vny2lHI/MVlzRibb+MGp58oxZ65yvZNUyrxgpZaf+cnfQTojaRUOMG/vwNE+p4IO
+ 9SkY9HqRdK2JAgub5OA8Q8Z8DUaOGnYgUz44/E/cK9s4FXGtRlXecerkgvFRagd/8wsq
+ 2BuA8TElTHyfcMI3mYbRBRu6A4FpSzpmwy0ifE1rm/sHbu/WBJG1b7CcVQMo9cMn/o8p
+ oJYv4kDOFko2niCdU7p30OKWqd7md6pnVrZHb+pUilT1PT+HKK7mMu0NDUwIM5lG47X9
+ MuhvKJf1zwGdanwNXexhNjCQ/5WIxZNUyE0JfXeSaV4xA0h7RXFuR0eK6Rt0iVB5ALEc Iw== 
 Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3cyfpxnm0j-1
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3d02k9g8ta-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 16 Dec 2021 10:44:11 +0100
+        Thu, 16 Dec 2021 10:48:56 +0100
 Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 7E3B210002A;
-        Thu, 16 Dec 2021 10:44:10 +0100 (CET)
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id CB25610002A;
+        Thu, 16 Dec 2021 10:48:55 +0100 (CET)
 Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 741EB229A83;
-        Thu, 16 Dec 2021 10:44:10 +0100 (CET)
-Received: from lmecxl0504.lme.st.com (10.75.127.45) by SFHDAG2NODE2.st.com
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id C13AD229F8A;
+        Thu, 16 Dec 2021 10:48:55 +0100 (CET)
+Received: from lmecxl0504.lme.st.com (10.75.127.44) by SFHDAG2NODE2.st.com
  (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Thu, 16 Dec
- 2021 10:44:09 +0100
-Subject: Re: [PATCH 4/4] mmc: mmci: add hs200 support for stm32 sdmmc
-To:     Marek Vasut <marex@denx.de>, Ulf Hansson <ulf.hansson@linaro.org>,
+ 2021 10:48:55 +0100
+Subject: Re: [PATCH 3/4] mmc: mmci: stm32: clear DLYB_CR after sending tuning
+ command
+To:     Marek Vasut <marex@denx.de>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
         Russell King <linux@armlinux.org.uk>,
         Maxime Coquelin <mcoquelin.stm32@gmail.com>,
         Alexandre Torgue <alexandre.torgue@foss.st.com>,
@@ -46,25 +51,22 @@ To:     Marek Vasut <marex@denx.de>, Ulf Hansson <ulf.hansson@linaro.org>,
         Vladimir Zapolskiy <vz@mleia.com>,
         <u.kleine-koenig@pengutronix.de>,
         Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
+        Ludovic Barre <ludovic.barre@foss.st.com>
 References: <20211215141727.4901-1-yann.gautier@foss.st.com>
- <20211215141727.4901-5-yann.gautier@foss.st.com>
- <c4528bc5-a826-a4ed-c4d6-e0ab84651ea2@denx.de>
+ <20211215141727.4901-4-yann.gautier@foss.st.com>
+ <05ab7b52-190e-048f-3803-7bed51e2b09c@denx.de>
 From:   Yann Gautier <yann.gautier@foss.st.com>
-Message-ID: <b7ef5887-ce9e-9ba1-5819-765e68104cc5@foss.st.com>
-Date:   Thu, 16 Dec 2021 10:44:09 +0100
+Message-ID: <67c6d0be-078b-0726-698d-096c5e77b4ab@foss.st.com>
+Date:   Thu, 16 Dec 2021 10:48:54 +0100
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.14.0
 MIME-Version: 1.0
-In-Reply-To: <c4528bc5-a826-a4ed-c4d6-e0ab84651ea2@denx.de>
+In-Reply-To: <05ab7b52-190e-048f-3803-7bed51e2b09c@denx.de>
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.45]
-X-ClientProxiedBy: SFHDAG1NODE3.st.com (10.75.127.3) To SFHDAG2NODE2.st.com
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.75.127.44]
+X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
  (10.75.127.5)
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.11.62.513
@@ -73,22 +75,49 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/16/21 10:14 AM, Marek Vasut wrote:
+On 12/16/21 10:13 AM, Marek Vasut wrote:
 > On 12/15/21 15:17, Yann Gautier wrote:
->> Use feedback clock for HS200 mode, as for SDR104.
->> The HS200 mode can be enabled through DT by using mmc-hs200-1_8v.
->> It is possible to use it on STM32MP13, but not STM32MP15 platforms.
+>> During test campaign, and especially after several unbind/bind sequences,
+>> it has been seen that the SD-card on SDMMC1 thread could freeze.
+>> The freeze always appear on a CMD23 following a CMD19.
+>> Checking SDMMC internal registers shows that the tuning command (CMD19)
+>> has failed.
+>> The freeze is then due to the delay block involved in the tuning 
+>> sequence.
+>> To correct this, clear the delay block register DLYB_CR register after
+>> the tuning commands.
+>>
+>> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+>> ---
+>>   drivers/mmc/host/mmci_stm32_sdmmc.c | 2 ++
+>>   1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c 
+>> b/drivers/mmc/host/mmci_stm32_sdmmc.c
+>> index fdaa11f92fe6..a75d3dd34d18 100644
+>> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
+>> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+>> @@ -441,6 +441,8 @@ static int sdmmc_dlyb_phase_tuning(struct 
+>> mmci_host *host, u32 opcode)
+>>           return -EINVAL;
+>>       }
+>> +    writel_relaxed(0, dlyb->base + DLYB_CR);
+>> +
+>>       phase = end_of_len - max_len / 2;
+>>       sdmmc_dlyb_set_cfgr(dlyb, dlyb->unit, phase, false);
 > 
-> HS200 is possible even on the MP15, it just doesn't yield any 
-> (performance) benefits due to the slower bus clock (125 MHz or so?), so 
-> it isn't worth enabling it on MP15. It is nice to see MP13 can do better.
+> Shouldn't this have a Fixes: tag and be CC stable ?
+> This seems like a bugfix, no ?
 
 Hi Marek,
 
-There is a limitation on MP15, please see errata sheet [1], chapter 2.3.19.
-HS200 (and SDR104) shouldn't be enabled on MP15.
+You're right, I should have added:
+Fixes: 1103f807a3b9 ("mmc: mmci_sdmmc: Add execute tuning with delay block")
+
+Ulf, could you manage that, or should I push a new version?
+
 
 Best regards,
 Yann
 
-[1] https://www.st.com/resource/en/errata_sheet/dm00516256.pdf
