@@ -2,46 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16C43C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 07:58:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B73A6C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 09:13:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232227AbhLPH61 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Dec 2021 02:58:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35892 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232196AbhLPH60 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 02:58:26 -0500
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9FECC061574
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Dec 2021 23:58:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=l2WBiCb5duYJRA9nKpihqrJOH1Qjg6utSrFiu8qAdtc=; b=grIzzDO/SyMOLb0KIkcAnpyTgu
-        WWv07JVAUsmM4j6nZFj7B/b9PsApHnmAUxoa8hES1cDeAyK+iTtRO+9+gDpGwSpxJmpjpQGxHxPjg
-        obE80vVF2H1zEXJVYjQdvGmOqFuNKaf45QIrDbbHtjIGAoHmew5FEyjSML62Id7zk3dBacW1VLor+
-        pMKwEw5OsIcxqMiSxTcMobg3JUx4KwLxRlvIz+r+CX1zMgyyrfarwXf/RkxrciJZy+uZxvBfUesyq
-        6o2uM/1MGVzwTwbl9ggJ4D6d01bUIbjXJi1hgsdwZafxRVij1ViuVU7NplHDV7KUVkvjF2EUk/hp3
-        btNvvG6g==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mxlei-0041ul-6Z; Thu, 16 Dec 2021 07:58:24 +0000
-Date:   Wed, 15 Dec 2021 23:58:24 -0800
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Joel Stanley <joel@jms.id.au>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: Fix blk_status_t handling
-Message-ID: <YbrxoP4PPWMin0KL@infradead.org>
-References: <20211215011336.194089-1-joel@jms.id.au>
+        id S233034AbhLPJNc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Dec 2021 04:13:32 -0500
+Received: from phobos.denx.de ([85.214.62.61]:48518 "EHLO phobos.denx.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233101AbhLPJNc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Dec 2021 04:13:32 -0500
+Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id CE52981184;
+        Thu, 16 Dec 2021 10:13:27 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1639646009;
+        bh=dICm1q4PWYye78j3bTjDPHLcvcI6iZNmCbGLRnoLBGI=;
+        h=Date:Subject:To:References:Cc:From:In-Reply-To:From;
+        b=qincm+ciIW5GL38TqrKgtHeLGDv6xlSWqOjbkvZviXLgi/dJ4iTcaNzvrC7A5mqnD
+         deLxZeqGFZOI/arnRK3JbI4F/wQETJfeJMTkYwvYM/fUYdJOdrWG1SUPYQ+Xfs7cj4
+         S0zAErG2PhgFO/h05MjWZA9BDe4X0Ie/1xNmYNjytpWNWbsvBDfTevAM6YDXEWSkIh
+         Yk0KcMuM3mMHuC07Q5szz5lCdkgWkGzQbzt6EKw3Z+RpLBmaNqB20U/qXSOxJd4jv1
+         dsJm/eyrr8BpV8oXhYvqwWFXJxUFJuGq92ThekbNaZrEkcH+bT3C9h4coviinqwG1V
+         0txiIUDgORTxQ==
+Message-ID: <05ab7b52-190e-048f-3803-7bed51e2b09c@denx.de>
+Date:   Thu, 16 Dec 2021 10:13:27 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211215011336.194089-1-joel@jms.id.au>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.4.0
+Subject: Re: [PATCH 3/4] mmc: mmci: stm32: clear DLYB_CR after sending tuning
+ command
+Content-Language: en-US
+To:     Yann Gautier <yann.gautier@foss.st.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org
+References: <20211215141727.4901-1-yann.gautier@foss.st.com>
+ <20211215141727.4901-4-yann.gautier@foss.st.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Vladimir Zapolskiy <vz@mleia.com>,
+        u.kleine-koenig@pengutronix.de,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Ludovic Barre <ludovic.barre@foss.st.com>
+From:   Marek Vasut <marex@denx.de>
+In-Reply-To: <20211215141727.4901-4-yann.gautier@foss.st.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Virus-Scanned: clamav-milter 0.103.2 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Looks good,
+On 12/15/21 15:17, Yann Gautier wrote:
+> During test campaign, and especially after several unbind/bind sequences,
+> it has been seen that the SD-card on SDMMC1 thread could freeze.
+> The freeze always appear on a CMD23 following a CMD19.
+> Checking SDMMC internal registers shows that the tuning command (CMD19)
+> has failed.
+> The freeze is then due to the delay block involved in the tuning sequence.
+> To correct this, clear the delay block register DLYB_CR register after
+> the tuning commands.
+> 
+> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> ---
+>   drivers/mmc/host/mmci_stm32_sdmmc.c | 2 ++
+>   1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> index fdaa11f92fe6..a75d3dd34d18 100644
+> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
+> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+> @@ -441,6 +441,8 @@ static int sdmmc_dlyb_phase_tuning(struct mmci_host *host, u32 opcode)
+>   		return -EINVAL;
+>   	}
+>   
+> +	writel_relaxed(0, dlyb->base + DLYB_CR);
+> +
+>   	phase = end_of_len - max_len / 2;
+>   	sdmmc_dlyb_set_cfgr(dlyb, dlyb->unit, phase, false);
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Shouldn't this have a Fixes: tag and be CC stable ?
+This seems like a bugfix, no ?
