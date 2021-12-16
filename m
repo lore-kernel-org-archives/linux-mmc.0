@@ -2,23 +2,23 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18A39C433F5
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82AA9C433EF
 	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 06:08:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233914AbhLPGIo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S231406AbhLPGIo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Thu, 16 Dec 2021 01:08:44 -0500
 Received: from mail-bn7nam10on2110.outbound.protection.outlook.com ([40.107.92.110]:49249
         "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231406AbhLPGIo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S230346AbhLPGIo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Thu, 16 Dec 2021 01:08:44 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ElZ10oXsoPf8DpnGhSI7cuz0GQuBKm8lTW2aieth8yKSm7yn3dS1VM/IhgBdp1+bIkPrsbUZioU2NVmCFp4mZzAXBTAN3xq21Kj/+Mvh22gOAOiuATj5Ftoh4WHOFWb6IO7JdRf1VoQPG/O/3V9bcMJgGijrLVqm23paaX7/OveOI13LgbEiNEonBL+7qAgq6vZ8RCC4C3F3iEejchQbZDhswxEX48cVP+Ade9nMzvxe6J/xxej28RTHAYt/wLE7MHlINphzCnzcc7RJbXOMnsbapWACx9oIpafbknQsVJKVVh5IDpWCNyvq4uGrP4ns0hY79/RR+7W9qbfjMCnNSQ==
+ b=nDM0oFN+qi6Wp+8kSqcQ0SxKV5KUb9ZCQbp/KYl2TaPZw5islnqdmXOvmH3VvGnvt0TnIL67Y1dChIgIZsBOCDvcYauq26bbUJkoZnrn192KTWot7ukXb9pvNIRrf52RqB6CJNPon021mLge4euJqJADqRoR7VUu9tolxftxWAEQs4ZwiDX8/Me9gWMjll4th2Z9bknBUmO/YQUM2RysYhD9+3gum3PCvIJoyDQ+ZaeldyMNq/l4DFk7F9szfmuO+YCZNtsRe4CKyzRudtF+4DJFDw03Gx38A+GGUCNlLNomQUEdfkmsrSDvE4oBzyjJb8luvnbugGp82i8pR8g7ew==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=RBu6wr49wKOLYP8eqq0Mg8RxorY1eYQD2qpcR5jnN68=;
- b=DsSgIBpbMDHUo8lVhWbCYRcdQtYPPPnn9gJSioIqqTupMdeFni+6kXihgvz8C82fi+6PvOs/A8rkvsNfTYwPm7eevRI8qJ9FdXP5X0V2T10xBM/jw0yMjvqRWoo0gl2ID2N1C8BOHr+yIlDjNCEdqb+ihXa0C+n84UGrjcxoOw7SZJ72rBx587wu8umq+YXYS/FukQe5aXwXzHyBHjnQ7/TF1+F8wsbJ3ti14wZmqtYLNbOG3CZ5evzym0I/2bLdv1u1Kd80w6OaGk1CLsc7AKsgDAIUFDKhCKkV6Ia6kyb87XPoOITh46x/7XFa+DYTiLQ1Cr7iPTh5ynccLvHcfw==
+ bh=f+6E+u+vDCJWVvwrUrdBvjReloiqh8Zrr6S3w0kfHEg=;
+ b=OHFxX10CQE3+N7xJURDEoVL262lVfte8D/ME4KQlWIX+dXhl5jP368bqk/rc2YpLEimETVocTeXdutH2BELbyA9+LwWm4Un88YVucFtRAibKqdWnMzCzpZVo284IQnEUwinPVkFfothVUl/Wj+clATlbVwxncXFqNwkBn1s4+v5UfpCC+ociSvanxA2lY+wZEnHCyM5k+VszXEhsOLBXdUVRnv+TqXntFJTlZCxpA4XzmU8mFjilkmiMbEu/aErIVEvPhJ/rHDdL0nQk0/FHqE7C+XXq9kBg7DCInLw9WmL1NB4953OxDYKjbD3MxEcOyR5WoWIhxgAPmusECykdoQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=bayhubtech.com; dmarc=pass action=none
  header.from=bayhubtech.com; dkim=pass header.d=bayhubtech.com; arc=none
@@ -26,29 +26,31 @@ DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=towerbridgetechnology.onmicrosoft.com;
  s=selector2-towerbridgetechnology-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=RBu6wr49wKOLYP8eqq0Mg8RxorY1eYQD2qpcR5jnN68=;
- b=WP1oy1hs5cua/+3LLSaZrXBKRYqRzrm5kzdGbU1cDHwAQPys8yzUU/nMLPuj5ODUf3hE8+6wZnDzl2W1of52RiukFFuAutMCh8Lb6oGVz/JJjaloAMsHVauCNRRSQB2ZDfuXyXXl4x59enj+oOssKkzc7+/X6DJkvDAaPByKibw=
+ bh=f+6E+u+vDCJWVvwrUrdBvjReloiqh8Zrr6S3w0kfHEg=;
+ b=b6egVFLOUmfRUVb7844+yCpg6/MSsdkOghOvadb/2g4ouZhOyoIfD0gvv756s03wLkZ0FreKQToRhrJvP7qVb9iPBb6oR8rNo78g9Oi1DtDDja5SXxnw7yCds8kAOCj12mgtxBcNyGIIWpvPtM5lt5a31vO2SKdBMtSNkXULNMg=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=bayhubtech.com;
 Received: from BL3PR16MB4570.namprd16.prod.outlook.com (2603:10b6:208:349::24)
  by BL3PR16MB4556.namprd16.prod.outlook.com (2603:10b6:208:34b::10) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4801.14; Thu, 16 Dec
- 2021 06:08:38 +0000
+ 2021 06:08:41 +0000
 Received: from BL3PR16MB4570.namprd16.prod.outlook.com
  ([fe80::9597:403c:22ad:5479]) by BL3PR16MB4570.namprd16.prod.outlook.com
  ([fe80::9597:403c:22ad:5479%9]) with mapi id 15.20.4778.018; Thu, 16 Dec 2021
- 06:08:38 +0000
+ 06:08:41 +0000
 From:   fred <fred.ai@bayhubtech.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org
 Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
         xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
         fred.ai@bayhubtech.com
-Subject: [PATCH V3 1/2] mmc:sdhci-pci-o2micro:Improve card input timing at SDR104/HS200 mode
-Date:   Wed, 15 Dec 2021 22:08:23 -0800
-Message-Id: <20211216060824.357-1-fred.ai@bayhubtech.com>
+Subject: [PATCH V3 2/2] mmc:sdhci-pci-o2micro:Make the SD clock's base clock frequency correctly according to different card mode
+Date:   Wed, 15 Dec 2021 22:08:24 -0800
+Message-Id: <20211216060824.357-2-fred.ai@bayhubtech.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20211216060824.357-1-fred.ai@bayhubtech.com>
+References: <20211216060824.357-1-fred.ai@bayhubtech.com>
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-ClientProxiedBy: HK2PR03CA0066.apcprd03.prod.outlook.com
@@ -56,55 +58,55 @@ X-ClientProxiedBy: HK2PR03CA0066.apcprd03.prod.outlook.com
  (2603:10b6:208:349::24)
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 1434616b-0be3-4e2a-2e5c-08d9c05a8012
+X-MS-Office365-Filtering-Correlation-Id: 7f703517-eafe-423e-efc9-08d9c05a81e5
 X-MS-TrafficTypeDiagnostic: BL3PR16MB4556:EE_
-X-Microsoft-Antispam-PRVS: <BL3PR16MB4556887010C0C69725C4A47F99779@BL3PR16MB4556.namprd16.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
+X-Microsoft-Antispam-PRVS: <BL3PR16MB4556FE3E3DCB81F65962EA1099779@BL3PR16MB4556.namprd16.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3513;
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 0Q8oSpJT4iu4Yhzb4B0XKXDYRdDnmhlma2PJqkbALMY3Nk+2ZGc4+JBfU3hW1cb+q+Z4NdpJkmeBvOe9xSctK2noHuvRm76lcfNoVwFXCbujN5uUEE5kpl5UPeTJD/nQKLNPByXqoL9iG3Z2AqGf0tBGFNEaxQ+MPgcwPgxdQIkxZimISwTkvCSWDN3yAlGfAvoQMuC3kOoACo3fQDt6NWsWUdQKhlujCbLFZWvX2adnzn8v9nqMvTrektHj+48IuE+8ITrvIhhFMUYU4yP2M4TJdahiQH8X7sbw8MFFfeXzqXbrQ5vnhzLLcFuTYNPVoR/jb5RkI/bpMzk3nAgfevgb5jY/n6nPyE1B2LOFFytKmdy5SNNcYFVTPm8v6aOXykuRg15pqtnFkPqqkMFoRxuHwsiHMz6UdOITahPTgoWI6Hna897YknQwCsMtOJYByWs5B3mtOPZqCBghX3uDEFxfa0UjD6Pv+hyyB7cHcgCBotf26WAdnu4AOOaFn1Jnrvdt5JEzoJucsrVMm2ewuCEPoqchLzn9oFT6Wpfy5QeW9MW9sYvXyWaYGGTveuNxgJf2V9IaLQOd8mSWBpod+zCARk3ILluqzN5wGwFV+mohOzU56rfoPUtMu9qGCtWEWWZhXzBIWg8dRoC/BfTmcQ==
+X-Microsoft-Antispam-Message-Info: q8O7BGIxuuBICJD4HbiVjAyLR1K5k+7w0PS1T1Dw4DkUP/R8RZhlJQUhPvi4ND8dpWDxeVCJ2oqrOmzWNLAPL8dsTQ0I95w8QY9Lge1iwMnDH4Ih28LJjCfdLY28FdogwJAKL/EJBS4ZwIOsMn+osyRLHyzx++2gUkRBlF30sa1us0LOX9LN2J6irwMn7lAbadcriU656PIfVY8JWWxk2yjMdKHY5XU8L9OXbcIvKGXs9RyRFeIrjx+3X4tWqIq7B8R7+OZUWr3an0bUJuI+sU/miivSum8FezFniHBjPfxKlvpg4W87UYK4psMOfRRfWne3ooHp+mIEd1ThgAL4VYuqBZNej1S8RgJtLapH1VO8E8+QTe8r+fHv8pVxXMqhfLj1aV3S4e4o6N6ijIkzFz629Bg/c0jGTpGJKZiOW3rd9UuHf6MwPsLVZ4I+ZpNisytGyv2WlPmBwbjEIi1+IcfcZPZfrHEVRKR8MN2acpQb4huB0WRYANENB9cHnV1Oa7TXILIgD1zFhm2V8r012Qu6qsNhC7VOQ9LsxrZeOgM5TGP9/PNBb/WsmKJy4r8KJeW9af6I+SB/9+dH7HM73kuC+mp4jQRIznFN8L7nHgnQ5z9/dFQQMGPcBs4VFqkMdHgLwUwTkFcm6DH4zWVRfw==
 X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BL3PR16MB4570.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(396003)(136003)(346002)(39830400003)(376002)(366004)(316002)(186003)(38100700002)(2906002)(8936002)(1076003)(508600001)(107886003)(66946007)(8676002)(83380400001)(66476007)(66556008)(52116002)(36756003)(4326008)(6666004)(5660300002)(6486002)(2616005)(6512007)(6506007)(86362001);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?xnNkRHBpaTi/3r/p0totEAZb3jdhhsZC5htELiT0gaGUt45o4Een7QzmB9pC?=
- =?us-ascii?Q?f6yay+GkkAorAR1NzbUYyKihvlbP5LUabrQJUviIbWP5IsZVM5z89/LEjXVk?=
- =?us-ascii?Q?Y1+8kA8nicl/DriZ4dQhv1uoLXN5tYGFLVkgBqcidxndi0LF4xtSKHx/PFuO?=
- =?us-ascii?Q?+v00JHCUJSEgL09t/Ekh8qpAIYUpj47pm6mMWD6BpRrW4WF4dXe7IivjLkv7?=
- =?us-ascii?Q?lk+5ga69SBwb2t9o8J9PJP+1ulkm8n3zqbL8R1MUR/3WgS163Z03EuiZ1SoW?=
- =?us-ascii?Q?jXKo2jWO2FrIRhcjb9Y8ZxVaWgHXEZaRkbhuc4uBi9vROdGrzGmxq460fu8V?=
- =?us-ascii?Q?5cR9eTy1qL+BgNxCmOgDiq7Qww8W1TGuIaHY18ulFgTave1utENC8JWCxAND?=
- =?us-ascii?Q?7q5KLMsGQa/Zk0k4zbspZ2ts842SDabO+sZ+ccXeZIDCcwQRdp9rltJafy5K?=
- =?us-ascii?Q?cLi3ZrK+EkZmxAscMJRNnRqGNvaN/tsHlrHfNQX4qkbAhKXjS83D9410BOBD?=
- =?us-ascii?Q?Q/nXxOmzROUWZMm0blwzbAGUwxkx566N5bbzmPYO/Nwdpn+ECfEYdVSE/3l3?=
- =?us-ascii?Q?K/1TJtXNcmgPWvpvjtPszvcGPwjunRLtOBNC1pstC8CVxgTAqVv1hQ8mDUal?=
- =?us-ascii?Q?8bTdU9zKhVz15DBekIzD5DVvOqwBrOPklRvmLh2cu85G8K3y25pbPeFkLNSo?=
- =?us-ascii?Q?yhwHLXAnmdhKWxGT2TG5CZJeW5aMNuNfb8WStuQinp2J8oJMGrENpeFEul12?=
- =?us-ascii?Q?Uja3lRB/XWtwJCTJGmgZ1v2BiAguKA8sD4jqlasl0s7Tf+r/5Wj1K6UyLijX?=
- =?us-ascii?Q?O2drBQ3W4g1a3gXUWK9v1fjcdjuo/d7/brByjYzYnGDCSgTaurVhmiwvhMOb?=
- =?us-ascii?Q?nJwrm2hbEwPhpqqlwIHvqVIcBd6cM6mf94K9UGognXGXzANjO4y4KcGvE70t?=
- =?us-ascii?Q?RhMvrcr/5417/eVpeuHnVVDocCd9YI3G/ItryqzJcQeFjjmc3aGSXXxa4Pbd?=
- =?us-ascii?Q?x3Hgy+WpXR457l5sa1utaTrB8yuhZWfh2OjMM2PgTqmHxxJFvvg2GZGn6tg0?=
- =?us-ascii?Q?gxYxGBgWkycQ7B+ZfqgaCymXFWemVkATML9HT5jwixKBZoJTSewn03lCeeE4?=
- =?us-ascii?Q?JsT/7uqaD2TGDkY1RuCvavl/7q8yLEMEefn9SclGNXRXYHGDPyVC1dav/jep?=
- =?us-ascii?Q?/O9zWCEtMpT0eP5nQZxakksJ5hpmnj956cjiCYmZiKPY4FEWj3gDAMTB9jmD?=
- =?us-ascii?Q?OMwFzn7x1berNPMX47hDAiSFQRk9JIlKKcdeCkV78xJ1WI21aegqODpDSER2?=
- =?us-ascii?Q?c3q+nKOAm2oA6STuw8uv2QzYFa0Bb95LlC9BWLGKO7lvjdCK4e1JNZMerJo0?=
- =?us-ascii?Q?+G2sBOQ04dsz9DDbgV8d4n+HNWG0vedrfreFTRUBnzc3pz/X6qmFeAKBhKTq?=
- =?us-ascii?Q?S0GLoJiVygQhPj33xYP5nRjk3mP2xMKm4tgEEjhsjqvlEHY38dRuLluMZptn?=
- =?us-ascii?Q?CZ6+H58vkz276aG/Kj563UWumoo769vjZ5A+bfjD3Hh01hmn83n2Ois/1DCK?=
- =?us-ascii?Q?mmZpeebSHsmSrwW/YPzhTK+yX0SSpTch5uTK3ZlHWNwI2cwTjwNVSsmznA1C?=
- =?us-ascii?Q?E3GYyPSc7jCUTqlsCzlKDf0PdjFcX5h1a48EyRTijJt0zwlb0D5FRb5HsGrF?=
- =?us-ascii?Q?zg4s8KaPAcfwQsxX0WkKBGdd/Js=3D?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?dS584o4tmW2SNzycjcsS+Xzqy6TK+Bl5rEHGn+5fchv7At8avSfOqtTU+yyW?=
+ =?us-ascii?Q?p10wnZboj29fmOwETsgnlNmbQDE+lqSdUuNeGbvDzmA7N+6jEmsgTlqnH/HV?=
+ =?us-ascii?Q?F4zWHjP7AHVIdSiYFYX7QfTr+JquKuNKnDHHQmZTG9lMNjARCzbwc7OG5UcY?=
+ =?us-ascii?Q?Q3d4XjrXabCvBQwNoVDEQYJsnbH1U5RKcciyP7FvhUsZb+FTPJVeemCVx8DS?=
+ =?us-ascii?Q?giJhgdukM6sHWJbxe44gj7znWi1Wo8YdTeGODxcN8U36IOe3sm/9MhGLJAkn?=
+ =?us-ascii?Q?wJaQNNgfSwO44qhopj6XoIkq+Mlub4UrYK5wQ3ubAl+0Wve5tkW7lCuK8qpx?=
+ =?us-ascii?Q?98OzpNa+Ri75GKAGISiqRTGTRgx9Y0y8JqzIH+HJT4rGKwar80k829QMX1Cz?=
+ =?us-ascii?Q?c+vW8maH5oVu41OctHmSY7M7F/dZxVvuAoQ0IgGL/1Rpm3bRAzVV3w3SSMdL?=
+ =?us-ascii?Q?wj7O0DuTf8kXlIbJdpN05khcHfmFiA+X76nWtJy2Q0yUKUoMSIcNczqn2r0b?=
+ =?us-ascii?Q?MurcGNM/bbm4zxzX9tzeFZk4aaNGwrQtXvYCLfE+pN01LlTFAObAKjQzSFty?=
+ =?us-ascii?Q?QhXKowqzASfSEn+nk042xa4PBccbsYgtes0XJaXvlKaRB+xqwabp05Mu+ghd?=
+ =?us-ascii?Q?vEVwhWy8PAFZuvI0dt2J2x16NhmlmaKWbP3j4g24X1Oy9pMZ2urTSFRJCxa5?=
+ =?us-ascii?Q?OciY/ss9exhVNm0tQhiBFBOs/PA7sVZ47Nwun7c+9j4rI2ZXPG6rCIMGWeLj?=
+ =?us-ascii?Q?VQSnL19+56lJ1OHeVxrXQv47G1RLj9DzM0KHNt3W9hmId213YHy/2kdyN449?=
+ =?us-ascii?Q?74g8IdqgJuqezmx9a3F4F0f/3UuDriF+zA4+ZivCmwXyHtvft4difnlWOLtq?=
+ =?us-ascii?Q?5qM3xL4d4Z5DWVBv7Y8lc7VfaQYEyoCrpV3rB0/8V8oGPHNJdNCS/rNo3QgX?=
+ =?us-ascii?Q?Hwhy+g2aGXGo0eYE3KROdYm+PIZiGTic1yhMr3C3mSHZNjsOGYJLuIx9VFDM?=
+ =?us-ascii?Q?WlqaSRHkkM5jD9i/bR/nRNHcLwiD360U2ydJebcC0BzISX4cg9xYQ2wd8Lu1?=
+ =?us-ascii?Q?f6fd4qa/XwZh5WeTKN8ldlgZ+F7petJMq7U0STccaMQlOtYUumeodDjqAf0K?=
+ =?us-ascii?Q?uJGEr8glv51poZh0SdsSpbzrrPUzr0dnyYmL2aSkZ+q/dwj2HM7BSALcH9lk?=
+ =?us-ascii?Q?Ywl1pIhJ3b2D3Im7iFCH/z0cF43De+zhJTlXPwZiEnr4AJ1KAGOAO7whvMIT?=
+ =?us-ascii?Q?M11G0kgG+NAjMAMYjr9krRKu6o4mxpjrhwkv8BhU3/f5cTDIFUkV8vGcIXZU?=
+ =?us-ascii?Q?tjiDtssimp34l8l6G58wiKPbK8ClsEPG7ftVnV8GZs8xQonpy2sROgQXDMsA?=
+ =?us-ascii?Q?WTJi9vdZAhJq+ilXwHvslorosD43K2Kv7qMNXlRtXR/gqzZznh9XQzJbhEDO?=
+ =?us-ascii?Q?201PUubaiUYNfv4VVloY8OdIp3moO0ele/0ZQ1hVcEv6UcUVDRQNu2AugmX9?=
+ =?us-ascii?Q?F9kafX3OJTXpVqm+pIxS7+yiq86jUlXZC3aXkP2x7VcQMknSkQLCxBVDvdOx?=
+ =?us-ascii?Q?AaCCAi70B8hLniYsptEgNGIBmVSpPcTHTauqgk7q/qgMZ8XC4DZG9Q1jcJcA?=
+ =?us-ascii?Q?Kr7wa3L7RElEEiLU+wsb6rmAdWeG/3+4IlAW/3CEOtA291P4fB+4gAih431v?=
+ =?us-ascii?Q?kKIOTRJCIRQDFFtEQ6uP70EOjlU=3D?=
 X-OriginatorOrg: bayhubtech.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1434616b-0be3-4e2a-2e5c-08d9c05a8012
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7f703517-eafe-423e-efc9-08d9c05a81e5
 X-MS-Exchange-CrossTenant-AuthSource: BL3PR16MB4570.namprd16.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 16 Dec 2021 06:08:38.1817
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 16 Dec 2021 06:08:41.2461
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 0a7aae2b-8f2e-44df-ba2f-42de7f93c642
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Y+mtN4pXpfdOkbTwsugFUjV0173RzosbzY3dB8jibEXdx6CbINk4HK2i53gwmuRxmz4jheY5Wehb/fbClpf1Hg==
+X-MS-Exchange-CrossTenant-UserPrincipalName: a+Dmx2qjPJqNjtCfBhpk8LqdnGr9gVd3mgl6baFVEpT3dtbx1EJUUEPMUyvOVuMptfJx3BnyQSVeVnSXW3KDnw==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL3PR16MB4556
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -112,120 +114,34 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Fred Ai <fred.ai@bayhubtech.com>
 
-Card input timing is margin, need to adjust the hold timing of card input.
+Remove SDR104 card, SD clock's base clock
+frequency is not right when insert SD2.0/SDR50 card
 
 Signed-off-by: Fred Ai <fred.ai@bayhubtech.com>
 ---
 Change in V3:
-1.Select suit DLL phase's output clock as SD interface clock at SDR104/HS200 mode.
-2.Deselect DLL output phase as SD interface clock before next card initialization.
+1.Set SD clock's base clock frequency to 208MHz when card mode is SDR104/HS200.
+2.Set SD clock's base clock frequency to 200MHz when card mode is SD2.0/SDR50.
 ---
- drivers/mmc/host/sdhci-pci-o2micro.c | 56 +++++++++++++++++++++++-----
- 1 file changed, 47 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-pci-o2micro.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index f045c1ee4667..f55602609f8c 100644
+index f55602609f8c..4ca1e8c5b631 100644
 --- a/drivers/mmc/host/sdhci-pci-o2micro.c
 +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -43,11 +43,15 @@
- #define O2_SD_CAP_REG0		0x334
- #define O2_SD_UHS1_CAP_SETTING	0x33C
- #define O2_SD_DELAY_CTRL	0x350
-+#define O2_SD_OUTPUT_CLK_SOURCE_SWITCH	0x354
- #define O2_SD_UHS2_L1_CTRL	0x35C
- #define O2_SD_FUNC_REG3		0x3E0
- #define O2_SD_FUNC_REG4		0x3E4
- #define O2_SD_LED_ENABLE	BIT(6)
- #define O2_SD_FREG0_LEDOFF	BIT(13)
-+#define O2_SD_SEL_DLL		BIT(16)
-+#define O2_SD_FIX_PHASE		(BIT(23) | BIT(20))
-+#define O2_SD_PHASE_MASK	GENMASK(23, 20)
- #define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
- 
- #define O2_SD_VENDOR_SETTING	0x110
-@@ -301,9 +305,13 @@ static int sdhci_o2_dll_recovery(struct sdhci_host *host)
- static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct sdhci_pci_chip *chip = slot->chip;
- 	int current_bus_width = 0;
- 	u32 scratch32 = 0;
- 	u16 scratch = 0;
-+	u8  scratch_8 = 0;
-+	u32 reg_val;
- 
- 	/*
- 	 * This handler only implements the eMMC tuning that is specific to
-@@ -322,6 +330,32 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	scratch |= O2_SD_PWR_FORCE_L0;
- 	sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
- 
-+	/* Stop clk */
-+	reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	reg_val &= ~SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
-+
-+	/* UnLock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-+	scratch_8 &= 0x7f;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+
-+	/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
-+	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
-+	reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
-+	reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
-+	pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
-+
-+	/* Lock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-+	scratch_8 |= 0x80;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+
-+	/* Start clk */
-+	reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	reg_val |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
-+
- 	/* wait DLL lock, timeout value 5ms */
- 	if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
- 		scratch32, (scratch32 & O2_DLL_LOCK_STATUS), 1, 5000))
-@@ -533,22 +567,26 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
- 	if (clock == 0)
- 		return;
- 
--	if ((host->timing == MMC_TIMING_UHS_SDR104) && (clock == 200000000)) {
--		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
--
--		scratch &= 0x7f;
--		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
-+	/* UnLock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
-+	scratch &= 0x7f;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
- 
-+	if ((host->timing == MMC_TIMING_UHS_SDR104) && (clock == 200000000)) {
- 		pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
+@@ -577,6 +577,11 @@ static void sdhci_pci_o2_set_clock(struct sdhci_host *host, unsigned int clock)
  
  		if ((scratch_32 & 0xFFFF0000) != 0x2c280000)
  			o2_pci_set_baseclk(chip, 0x2c280000);
-+	}
++	} else {
++		pci_read_config_dword(chip->pdev, O2_SD_PLL_SETTING, &scratch_32);
++
++		if ((scratch_32 & 0xFFFF0000) != 0x25100000)
++			o2_pci_set_baseclk(chip, 0x25100000);
+ 	}
  
--		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
-+	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
-+	scratch_32 &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
-+	pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, scratch_32);
- 
--		scratch |= 0x80;
--		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
--	}
-+    /* Lock WP */
-+	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
-+	scratch |= 0x80;
-+	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
- 
- 	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
- 	sdhci_o2_enable_clk(host, clk);
+ 	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &scratch_32);
 -- 
 2.32.0
 
