@@ -2,88 +2,243 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D1124C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 10:15:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21BF5C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Dec 2021 11:04:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235868AbhLPKP0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Dec 2021 05:15:26 -0500
-Received: from phobos.denx.de ([85.214.62.61]:33356 "EHLO phobos.denx.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235826AbhLPKPZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 16 Dec 2021 05:15:25 -0500
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        id S231938AbhLPLEX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Dec 2021 06:04:23 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:54336 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229995AbhLPLEX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Dec 2021 06:04:23 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 2579E80379;
-        Thu, 16 Dec 2021 11:15:23 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1639649724;
-        bh=gWD5WvNP5qs1hnWasMOEH8Rjn74OwFdzLcr9XdOSUp0=;
-        h=Date:Subject:To:References:Cc:From:In-Reply-To:From;
-        b=K0Mx3OJDZJHzglJP+mtN6vFpO+v486fMRpjhMh/ccx3mkBkyPLP2+Q2h7wkJbZIpr
-         xJQ7sQrHEkLIhcHWxn1eCfWOZjpYS9MPhtVByQEO6jIBCsr6w/cxVDLoUR260LZqao
-         ni+USkXSZfU1bY7xM7RYNU4dVhg+mtICHxealVei64E/rz7O5Mq5C9VLjzRlgpMvFC
-         kCRz6VUiKMxaC3OvszwtZP0w5yheJUnOV5P0sUHktFVuK7/W8hPcqicQrNbkUXbyyw
-         7u5Sf0Krst7Lviv/Zr6gPyNfodKaKW2FByUJ2DwQUbRfOwkHS5GuANE2X72XNiV8Sl
-         +cAgyCJGTa7bA==
-Message-ID: <7137d4a9-6830-959d-1222-e63f5f618859@denx.de>
-Date:   Thu, 16 Dec 2021 11:15:22 +0100
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7CA2261D49;
+        Thu, 16 Dec 2021 11:04:22 +0000 (UTC)
+Received: from jic23-huawei (cpc108967-cmbg20-2-0-cust86.5-4.cable.virginm.net [81.101.6.87])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by smtp.kernel.org (Postfix) with ESMTPSA id BCE44C36AE4;
+        Thu, 16 Dec 2021 11:04:17 +0000 (UTC)
+Date:   Thu, 16 Dec 2021 11:09:36 +0000
+From:   Jonathan Cameron <jic23@kernel.org>
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Pavel Machek <pavel@ucw.cz>, Len Brown <len.brown@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, list@opendingux.net,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-pm@vger.kernel.org
+Subject: Re: [PATCH 3/5] PM: core: Add new *_PM_OPS macros, deprecate old
+ ones
+Message-ID: <20211216110936.6ccd07d3@jic23-huawei>
+In-Reply-To: <20211207002102.26414-4-paul@crapouillou.net>
+References: <20211207002102.26414-1-paul@crapouillou.net>
+        <20211207002102.26414-4-paul@crapouillou.net>
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.30; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.4.0
-Subject: Re: [PATCH 4/4] mmc: mmci: add hs200 support for stm32 sdmmc
-Content-Language: en-US
-To:     Yann Gautier <yann.gautier@foss.st.com>
-References: <20211215141727.4901-1-yann.gautier@foss.st.com>
- <20211215141727.4901-5-yann.gautier@foss.st.com>
- <c4528bc5-a826-a4ed-c4d6-e0ab84651ea2@denx.de>
- <b7ef5887-ce9e-9ba1-5819-765e68104cc5@foss.st.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Vladimir Zapolskiy <vz@mleia.com>,
-        u.kleine-koenig@pengutronix.de,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <b7ef5887-ce9e-9ba1-5819-765e68104cc5@foss.st.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.2 at phobos.denx.de
-X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/16/21 10:44, Yann Gautier wrote:
-> On 12/16/21 10:14 AM, Marek Vasut wrote:
->> On 12/15/21 15:17, Yann Gautier wrote:
->>> Use feedback clock for HS200 mode, as for SDR104.
->>> The HS200 mode can be enabled through DT by using mmc-hs200-1_8v.
->>> It is possible to use it on STM32MP13, but not STM32MP15 platforms.
->>
->> HS200 is possible even on the MP15, it just doesn't yield any 
->> (performance) benefits due to the slower bus clock (125 MHz or so?), 
->> so it isn't worth enabling it on MP15. It is nice to see MP13 can do 
->> better.
-> 
-> Hi Marek,
-> 
-> There is a limitation on MP15, please see errata sheet [1], chapter 2.3.19.
-> HS200 (and SDR104) shouldn't be enabled on MP15.
-> 
-> Best regards,
-> Yann
-> 
-> [1] https://www.st.com/resource/en/errata_sheet/dm00516256.pdf
+On Tue,  7 Dec 2021 00:21:00 +0000
+Paul Cercueil <paul@crapouillou.net> wrote:
 
-Oh, I see, so I was lucky to even ever get it working at all.
+> This commit introduces the following macros:
+> SYSTEM_SLEEP_PM_OPS()
+> LATE_SYSTEM_SLEEP_PM_OPS()
+> NOIRQ_SYSTEM_SLEEP_PM_OPS()
+> RUNTIME_PM_OPS()
+> 
+> These new macros are very similar to their SET_*_PM_OPS() equivalent.
+> They however differ in the fact that the callbacks they set will always
+> be seen as referenced by the compiler. This means that the callback
+> functions don't need to be wrapped with a #ifdef CONFIG_PM guard, or
+> tagged with __maybe_unused, to prevent the compiler from complaining
+> about unused static symbols. The compiler will then simply evaluate at
+> compile time whether or not these symbols are dead code.
+> 
+> The callbacks that are only useful with CONFIG_PM_SLEEP is enabled, are
+> now also wrapped with a new pm_sleep_ptr() macro, which is inspired from
+> pm_ptr(). This is needed for drivers that use different callbacks for
+> sleep and runtime PM, to handle the case where CONFIG_PM is set and
+> CONFIG_PM_SLEEP is not.
+> 
+> This commit also deprecates the following macros:
+> SIMPLE_DEV_PM_OPS()
+> UNIVERSAL_DEV_PM_OPS()
+> 
+> And introduces the following macros:
+> DEFINE_SIMPLE_DEV_PM_OPS()
+> DEFINE_UNIVERSAL_DEV_PM_OPS()
+> 
+> These macros are similar to the functions they were created to replace,
+> with the following differences:
+> - They use the new macros introduced above, and as such always reference
+>   the provided callback functions;
+> - They are not tagged with __maybe_unused. They are meant to be used
+>   with pm_ptr() or pm_sleep_ptr() for DEFINE_UNIVERSAL_DEV_PM_OPS() and
+>   DEFINE_SIMPLE_DEV_PM_OPS() respectively.
+> - They declare the symbol static, since every driver seems to do that
+>   anyway; and if a non-static use-case is needed an indirection pointer
+>   could be used.
 
-Thanks for the info.
+There are non static usecases e.g. drivers/iio/ad7606.c
+where they are shared across a couple of different modules (typically when
+we have a core / i2c / spi module split for a driver or similar).
+As you say, there are ways of working around that.
+
+So I guess it's a question of what feels more natural + common kernel
+way of doing things.
+
+I'll defer to your (+ anyone else who wishes to comment) judgement.
+
+> 
+> The point of this change, is to progressively switch from a code model
+> where PM callbacks are all protected behind CONFIG_PM guards, to a code
+> model where the PM callbacks are always seen by the compiler, but
+> discarded if not used.
+> 
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+
+Great work btw. When the holiday season gets boring I'll redo my IIO
+set to use this + maybe the rest of IIO...
+
+Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+
+
+> ---
+>  include/linux/pm.h | 74 +++++++++++++++++++++++++++++++---------------
+>  1 file changed, 50 insertions(+), 24 deletions(-)
+> 
+> diff --git a/include/linux/pm.h b/include/linux/pm.h
+> index b88ac7dcf2a2..fc9691cb01b4 100644
+> --- a/include/linux/pm.h
+> +++ b/include/linux/pm.h
+> @@ -300,47 +300,59 @@ struct dev_pm_ops {
+>  	int (*runtime_idle)(struct device *dev);
+>  };
+>  
+> +#define SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +	.suspend = pm_sleep_ptr(suspend_fn), \
+> +	.resume = pm_sleep_ptr(resume_fn), \
+> +	.freeze = pm_sleep_ptr(suspend_fn), \
+> +	.thaw = pm_sleep_ptr(resume_fn), \
+> +	.poweroff = pm_sleep_ptr(suspend_fn), \
+> +	.restore = pm_sleep_ptr(resume_fn),
+> +
+> +#define LATE_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +	.suspend_late = pm_sleep_ptr(suspend_fn), \
+> +	.resume_early = pm_sleep_ptr(resume_fn), \
+> +	.freeze_late = pm_sleep_ptr(suspend_fn), \
+> +	.thaw_early = pm_sleep_ptr(resume_fn), \
+> +	.poweroff_late = pm_sleep_ptr(suspend_fn), \
+> +	.restore_early = pm_sleep_ptr(resume_fn),
+> +
+> +#define NOIRQ_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +	.suspend_noirq = pm_sleep_ptr(suspend_fn), \
+> +	.resume_noirq = pm_sleep_ptr(resume_fn), \
+> +	.freeze_noirq = pm_sleep_ptr(suspend_fn), \
+> +	.thaw_noirq = pm_sleep_ptr(resume_fn), \
+> +	.poweroff_noirq = pm_sleep_ptr(suspend_fn), \
+> +	.restore_noirq = pm_sleep_ptr(resume_fn),
+> +
+> +#define RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
+> +	.runtime_suspend = suspend_fn, \
+> +	.runtime_resume = resume_fn, \
+> +	.runtime_idle = idle_fn,
+> +
+>  #ifdef CONFIG_PM_SLEEP
+>  #define SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -	.suspend = suspend_fn, \
+> -	.resume = resume_fn, \
+> -	.freeze = suspend_fn, \
+> -	.thaw = resume_fn, \
+> -	.poweroff = suspend_fn, \
+> -	.restore = resume_fn,
+> +	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+>  #else
+>  #define SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+>  #endif
+>  
+>  #ifdef CONFIG_PM_SLEEP
+>  #define SET_LATE_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -	.suspend_late = suspend_fn, \
+> -	.resume_early = resume_fn, \
+> -	.freeze_late = suspend_fn, \
+> -	.thaw_early = resume_fn, \
+> -	.poweroff_late = suspend_fn, \
+> -	.restore_early = resume_fn,
+> +	LATE_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+>  #else
+>  #define SET_LATE_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+>  #endif
+>  
+>  #ifdef CONFIG_PM_SLEEP
+>  #define SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -	.suspend_noirq = suspend_fn, \
+> -	.resume_noirq = resume_fn, \
+> -	.freeze_noirq = suspend_fn, \
+> -	.thaw_noirq = resume_fn, \
+> -	.poweroff_noirq = suspend_fn, \
+> -	.restore_noirq = resume_fn,
+> +	NOIRQ_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+>  #else
+>  #define SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn)
+>  #endif
+>  
+>  #ifdef CONFIG_PM
+>  #define SET_RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
+> -	.runtime_suspend = suspend_fn, \
+> -	.runtime_resume = resume_fn, \
+> -	.runtime_idle = idle_fn,
+> +	RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn)
+>  #else
+>  #define SET_RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn)
+>  #endif
+> @@ -349,9 +361,9 @@ struct dev_pm_ops {
+>   * Use this if you want to use the same suspend and resume callbacks for suspend
+>   * to RAM and hibernation.
+>   */
+> -#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> -const struct dev_pm_ops __maybe_unused name = { \
+> -	SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +#define DEFINE_SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +static const struct dev_pm_ops name = { \
+> +	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+>  }
+>  
+>  /*
+> @@ -367,6 +379,19 @@ const struct dev_pm_ops __maybe_unused name = { \
+>   * .resume_early(), to the same routines as .runtime_suspend() and
+>   * .runtime_resume(), respectively (and analogously for hibernation).
+>   */
+> +#define DEFINE_UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+> +static const struct dev_pm_ops name = { \
+> +	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +	RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
+> +}
+> +
+> +/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> +#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +const struct dev_pm_ops __maybe_unused name = { \
+> +	SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +}
+> +
+> +/* Deprecated. Use DEFINE_UNIVERSAL_DEV_PM_OPS() instead. */
+>  #define UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+>  const struct dev_pm_ops __maybe_unused name = { \
+>  	SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> @@ -374,6 +399,7 @@ const struct dev_pm_ops __maybe_unused name = { \
+>  }
+>  
+>  #define pm_ptr(_ptr) PTR_IF(IS_ENABLED(CONFIG_PM), (_ptr))
+> +#define pm_sleep_ptr(_ptr) PTR_IF(IS_ENABLED(CONFIG_PM_SLEEP), (_ptr))
+>  
+>  /*
+>   * PM_EVENT_ messages
+
