@@ -2,38 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D28AC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Dec 2021 06:37:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4022DC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Dec 2021 06:38:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232300AbhLQGhQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Dec 2021 01:37:16 -0500
-Received: from mga11.intel.com ([192.55.52.93]:61727 "EHLO mga11.intel.com"
+        id S233421AbhLQGiy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Dec 2021 01:38:54 -0500
+Received: from mga01.intel.com ([192.55.52.88]:16328 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232212AbhLQGhP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 17 Dec 2021 01:37:15 -0500
+        id S233442AbhLQGiy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 17 Dec 2021 01:38:54 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1639723035; x=1671259035;
+  t=1639723134; x=1671259134;
   h=subject:to:cc:references:from:message-id:date:
    mime-version:in-reply-to:content-transfer-encoding;
-  bh=3bBEvhvgJyJWS6rvJwXkyXX6CV19lANTY+DVLGgqEWo=;
-  b=dChNXCwAvkGihB55SHaGiFCqEU+m84ZlsEuqlZitAUQCvf71h46woK6G
-   yziAFfdNXg4S9tGGNSo5HnG2NwpVzGkhW7hUXjqIvtFnjUb128/yO68tj
-   ZZpTLKM3qOkSGpI7ab59LAAYhzx5ck6EiZeMHS8lU6vBWMUngoIz+nmcu
-   5BX8nObx/37Z3Ktyo5vWjOX+01dNxc0CkbG/xPa6FbgVJlIaiGEQqDWBx
-   0V2qyuAQ/QUWarN+hmG7UIxJs34uf6zAbSRaCfcGVpRZ9laovy9dX5TuZ
-   D5UYmpr2m7qH8PJ+Ofhx4xhZd8ST7icMy0y6MhXiMSnfTytf4T94uU4U8
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10200"; a="237232346"
+  bh=RcphfbxGjoXkXZaTQJEQETQ+hOXHy+30z21aj+YG57Y=;
+  b=RLC6z9P79nHCloIqHPyZ2pjmq8e3W20y2123booe5jf8e4akoYWSMhbM
+   HZeBFAkZJXfazWOitm1tu6EmiH22lqyT+dufXO/d7QNuDcJHlNr2ptZhi
+   mRwoeg5Frqrjp6CEartgKBZsMC9sUMGzNckg/AeWB6UlAH73V51fS7tEs
+   tjbd7jS6zR6PjCDZV9CbukMPfYHh91ktZxYhoZKDjasXWXiNN6zlgfCt2
+   1IFS9dIqwC1Vph3sEY8rbXA7yed/3znFa8VAdKd4GppvfehyDXlgWm+pQ
+   J66boTP42xCvn7tr6O+yvdPj26J35mFVVdGZXBQMBdiLmbyn21PydovGD
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10200"; a="263864905"
 X-IronPort-AV: E=Sophos;i="5.88,213,1635231600"; 
-   d="scan'208";a="237232346"
+   d="scan'208";a="263864905"
 Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Dec 2021 22:37:15 -0800
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Dec 2021 22:38:54 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.88,213,1635231600"; 
-   d="scan'208";a="466396326"
+   d="scan'208";a="466396674"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga006.jf.intel.com with ESMTP; 16 Dec 2021 22:37:10 -0800
+  by orsmga006.jf.intel.com with ESMTP; 16 Dec 2021 22:38:51 -0800
 Subject: Re: [PATCH V3 1/2] mmc:sdhci-pci-o2micro:Improve card input timing at
  SDR104/HS200 mode
 To:     fred <fred.ai@bayhubtech.com>, ulf.hansson@linaro.org,
@@ -44,8 +44,8 @@ References: <20211216060824.357-1-fred.ai@bayhubtech.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <f5c5ac22-0f29-aa5f-1d13-83a152448f58@intel.com>
-Date:   Fri, 17 Dec 2021 08:37:09 +0200
+Message-ID: <2cd4e191-87eb-04fd-465d-bd567d87cf58@intel.com>
+Date:   Fri, 17 Dec 2021 08:38:50 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
@@ -88,13 +88,6 @@ On 16/12/2021 08:08, fred wrote:
 > +#define O2_SD_SEL_DLL		BIT(16)
 > +#define O2_SD_FIX_PHASE		(BIT(23) | BIT(20))
 > +#define O2_SD_PHASE_MASK	GENMASK(23, 20)
-
-Can use FIELD_PREP here e.g.
-
-#define O2_SD_PHASE_MASK	GENMASK(23, 20)
-#define O2_SD_FIX_PHASE		FIELD_PREP(O2_SD_PHASE_MASK, 0x9)
-
-
 >  #define O2_SD_FREG4_ENABLE_CLK_SET	BIT(22)
 >  
 >  #define O2_SD_VENDOR_SETTING	0x110
@@ -175,6 +168,9 @@ Can use FIELD_PREP here e.g.
 > -		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
 > -	}
 > +    /* Lock WP */
+
+Also please nudge this indent into line.
+
 > +	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch);
 > +	scratch |= 0x80;
 > +	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch);
