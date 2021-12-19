@@ -2,76 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4960EC433EF
-	for <linux-mmc@archiver.kernel.org>; Sat, 18 Dec 2021 23:22:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB020C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Dec 2021 15:34:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232075AbhLRXWB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 18 Dec 2021 18:22:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54766 "EHLO
+        id S236019AbhLSPe4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 19 Dec 2021 10:34:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229745AbhLRXWB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Dec 2021 18:22:01 -0500
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 019FDC061574
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Dec 2021 15:22:01 -0800 (PST)
-Received: by mail-ed1-x535.google.com with SMTP id j21so18137569edt.9
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Dec 2021 15:22:00 -0800 (PST)
+        with ESMTP id S231787AbhLSPez (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Dec 2021 10:34:55 -0500
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BBDDC061574;
+        Sun, 19 Dec 2021 07:34:55 -0800 (PST)
+Received: by mail-wr1-x436.google.com with SMTP id a9so14853618wrr.8;
+        Sun, 19 Dec 2021 07:34:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=googlemail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=jy0Ga3DpjlJg+/LuCD6N3Bii634vakq81RRGU8kR/lo=;
-        b=GXaYs/dYmFjCL9Hqi/k90Nn+qo8+Hm4uwztzbrnvz9onhQmw8FTTWvdc00sWatsuhK
-         cjVG2KCOOcw/tgJcPBYRpuBop4582yKmBYlDkGwHIG+6B6TuaPT7iq09g2imQHw/e39R
-         aQc6Lm1DHWFhnL9EYnSLDVTd9NUKBAWw7nupAuyrwQVxLvEq3cNFLMB42I5Hl5+smyTB
-         teLuwkg3eqrHdhAM7KOneTOrkfoOgzUwBWwutaIMRaYXgTOA+rRbEvk+lPzFEMXVs4Xu
-         y5rj4wV0BiXyQ663os0Nb5Hil1isgTnLGt3iyN0r9Fz0rHnMbaODtxvUuOcFRHyyWN7x
-         JrUA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=8dfUL1c2VpDlpvRYp5J5tnSJmcolhRv7cYP/WcyTXpE=;
+        b=P979BzXr3RvgooocRWemgZtMWBE1vmonRBBpWRWPBLJdnSm2YDpt5AWwBj942XdlRj
+         CdHrU58tMcKYZps7MJsO/Tjhf7jIT3CD+1nmQMAYYUpBtLG6bI3rkD+FA1RnIvihJlh1
+         KoZ0mvBbeJjBDttpkHy+yG1Ua4GCOI0xe6KeIlVXaphyFLTUVl80Z8hgQ8lECUy3d9to
+         aRT68rBoHzyiFk3wVutHwzoCTuljfqHZhLK7E2AITRHyMtbf2whuAXUyfKo5sDK0KK8+
+         nYeSCQhsX860SGCYBrkTJ5muXFaqNO/MqsDTpRSks60FCkFsPHRXTncZHeWvKjRZRvqa
+         VUkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=jy0Ga3DpjlJg+/LuCD6N3Bii634vakq81RRGU8kR/lo=;
-        b=2qOt4HmlybN100AyJUY3JidejjT9aHrRMbSrRHUHj+MyHAyat7PueEkuG4s1lIBm3k
-         tKlHwoRA9zUxWwhCtW5IZL+hYXcPvEl3FgyedfbltZ+I/wT0oifrMv7MlUitCi9nh0n8
-         EV/ogETToOqH3m2NoL5bICoVNBUJMY8icGZvm0J/kx1eA/NwhC7eJsKZs0RVvwLbtBNN
-         +lMPm1pzmiIj2kYzDtr+IALmgRNrwV80w3sFWFzIEmt0aaOKllnNzlEjiOVR5nQ28GuB
-         G0HnQQC6UdDCWuAnkEJZbwopqTSCVi1IMTq8OHi8CLUgkcV3qJwxu+kuGnE8XjermIaH
-         eMog==
-X-Gm-Message-State: AOAM532PJPeg+llcjzGt/lvPkGZcrFMSDzYSD1htbB4hucpwVYCz+EGg
-        VEM7wjZkg2W0ZLoz2WQm4+Gc2ieltPdHRAQLtskvjPaqM0k=
-X-Google-Smtp-Source: ABdhPJx/41M8w6QBX2nmKkkxnJ3pPd76IxUAUOmOiFQNl7SjjagIfd78bF2mSnVEepR76ZLv/E14js2hM6hUuPCyLrk=
-X-Received: by 2002:a17:906:341a:: with SMTP id c26mr7617881ejb.302.1639869719365;
- Sat, 18 Dec 2021 15:21:59 -0800 (PST)
-MIME-Version: 1.0
-References: <20211217202717.10041-1-s.shtylyov@omp.ru> <20211217202717.10041-3-s.shtylyov@omp.ru>
-In-Reply-To: <20211217202717.10041-3-s.shtylyov@omp.ru>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=8dfUL1c2VpDlpvRYp5J5tnSJmcolhRv7cYP/WcyTXpE=;
+        b=LV7/kaFZPNPNGYtjfAjNo1/i+HXyhnI9VeIo84tMzlxMlJy6E+TvkrkiSFX7vZ05j5
+         OlIdAgKfmbIikW9l7FQWaSt4qJMAVuqXU7gnzA7JT82ol6k8nBd6MWIxjFK9eSmmeVOC
+         aYslWzOYBKPecfEcIxgA+agzcc404Mj3CYCykMD13q3JBk/we4sfqZcl7bxBRjR2E5Xv
+         oP23FoUYPQEYaNRrabMr4ovAHs944lMVKh2ffkjH6EbTTxJb1v+oycBvWq5WGKNe1zn9
+         KFdzVPqrbmzSwDmsoNAVusiXOc64l30B86C3qhDuSzJa0O9SVe6kK1mHXm9sEjY1FGX+
+         Ihpg==
+X-Gm-Message-State: AOAM5324QezU5rbFVRiDh8Nbgvvyw0oSeJS/XQlMNMxh6zEdQbKCqBxE
+        rhCBPRQYZWEPAGGfkQ/i1qwwl4rfP+c=
+X-Google-Smtp-Source: ABdhPJwB7cEhF+bnXpjr5aVYXXD8l0Z47msYuTlJCyoYNFxn5ax7p6hw3dg5/wQrpgfhKAQvqdoASg==
+X-Received: by 2002:adf:bbd2:: with SMTP id z18mr10007446wrg.118.1639928093752;
+        Sun, 19 Dec 2021 07:34:53 -0800 (PST)
+Received: from localhost.localdomain (dynamic-2a01-0c22-721d-8f00-f22f-74ff-fe21-0725.c22.pool.telefonica.de. [2a01:c22:721d:8f00:f22f:74ff:fe21:725])
+        by smtp.googlemail.com with ESMTPSA id d2sm9262020wrw.26.2021.12.19.07.34.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 19 Dec 2021 07:34:53 -0800 (PST)
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 19 Dec 2021 00:21:48 +0100
-Message-ID: <CAFBinCCKokhAK=mK0WqVbNYqjB3iHDM1nm9QLEWtmUCFMfjK+g@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: meson-mx-sdio: add IRQ check
-To:     Sergey Shtylyov <s.shtylyov@omp.ru>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        ulf.hansson@linaro.org,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: [PATCH v2 0/2] mmc: meson-mx-sdhc: two fixes
+Date:   Sun, 19 Dec 2021 16:34:40 +0100
+Message-Id: <20211219153442.463863-1-martin.blumenstingl@googlemail.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 17, 2021 at 9:27 PM Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
->
-> The driver neglects to check the result of platform_get_irq()'s call and
-> blithely passes the negative error codes to devm_request_threaded_irq()
-> (which takes *unsigned* IRQ #), causing it to fail with -EINVAL, overriding
-> an original error code. Stop calling devm_request_threaded_irq() with the
-> invalid IRQ #s.
->
-> Fixes: ed80a13bb4c4 ("mmc: meson-mx-sdio: Add a driver for the Amlogic Meson8 and Meson8b SoC")
-> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
-Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+The first patch in this series fixes Broadcom SDIO wifi cards (using
+the brcmfmac driver) on Meson8 SoCs. Meson8b with Realtek (RTL8723BS)
+SDIO wifi is unaffected by this (it worked fine before). Testing was
+done (on the S82 board) in private by a user who wants to remain
+anonymous.
 
-Thank you for catching this and for submitting a fix!
+The second patch in this series is a minor cleanup which I found when
+working on the first patch.
+
+Changes since v1 [0]:
+- Drop SD_IO_RW_DIRECT from the first patch since it has nothing to do
+  with the actual problem. That command was carried over from the
+  vendor driver. The patch description was also updated accordingly.
+  Thanks to Ulf for spotting this!
+- Add a comment to the manual_stop variable as suggested by Ulf
+
+
+[0] https://patchwork.kernel.org/project/linux-amlogic/cover/20211212145956.1423755-1-martin.blumenstingl@googlemail.com/
+
+
+Martin Blumenstingl (2):
+  mmc: meson-mx-sdhc: Set MANUAL_STOP for multi-block SDIO commands
+  mmc: meson-mx-sdhc: Drop unused MESON_SDHC_NUM_BUILTIN_CLKS macro
+
+ drivers/mmc/host/meson-mx-sdhc-clkc.c |  2 --
+ drivers/mmc/host/meson-mx-sdhc-mmc.c  | 16 ++++++++++++++++
+ 2 files changed, 16 insertions(+), 2 deletions(-)
+
+-- 
+2.34.1
+
