@@ -2,89 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93BB0C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 19 Dec 2021 15:35:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79725C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Dec 2021 10:28:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236057AbhLSPe7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 19 Dec 2021 10:34:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37324 "EHLO
+        id S229951AbhLTK2A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Dec 2021 05:28:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236055AbhLSPe5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Dec 2021 10:34:57 -0500
-Received: from mail-wr1-x42c.google.com (mail-wr1-x42c.google.com [IPv6:2a00:1450:4864:20::42c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C55ECC061574;
-        Sun, 19 Dec 2021 07:34:56 -0800 (PST)
-Received: by mail-wr1-x42c.google.com with SMTP id a9so14853742wrr.8;
-        Sun, 19 Dec 2021 07:34:56 -0800 (PST)
+        with ESMTP id S229479AbhLTK2A (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Dec 2021 05:28:00 -0500
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C14FBC061574
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Dec 2021 02:27:59 -0800 (PST)
+Received: by mail-lf1-x12b.google.com with SMTP id o12so1308522lfk.1
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Dec 2021 02:27:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=sFsVzNxUTe0zVj2n7sBsxSG3rvMdpK3tm6ziU6/sth4=;
-        b=BZn8XdhsazbSm+T1KIeZYU/dJkqAURt9mI5DASsIbG2584MXsCyOVn+eR7/eUCVoPg
-         qaJn20CPCUTx/GM7scU6TfocKN+aekA2IlfAk5VYdkNlYFLCqrKrRU7Zfb9oD02u3Dkg
-         dDPrhwUiIDfgUILDUM8xyPol4M2+JAssF785XxRU/ibVvAADQDXoF32gTK+k2qashd4n
-         gCbsKWBVOZBvzYxul8E6AZRFdwfDKBCkO+RysFvGnSJ0jZfXzDBAMEwErjVOEj/Bmrws
-         ChdAONYUBqaDpmtKjUvAo9H6sD2scFhteoDVT8Z+kcDL7jQ9oXSctHh8QUjaUYfk7rAs
-         1aDQ==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=iv9ezRnnrzcHGD7Zb6emmI6B8JBj8Iod8EtTwFfPyKk=;
+        b=IU9FCUD6ZbT12fwfcmTgP3229sxley+tDcIVfiXETS1ySJMlCZVXeXgEeOeGzctNDF
+         HTGwAdxc6B+Om9p/DoKu+Gxi/BH5dfqs3Rv2oMxKa5VwwNiHgnWjuUft/SIIfjDucfv5
+         QWAiyDkaztoWvwmuWj9yuWoqBZJ6sk6JkNf2gFR2KwsmEuFyJ5/wT14zJDfuJ4ypT0qB
+         VO4OdAUaPFbjQqK/10Icg/oOwuakFhZw9fyfhOkm+7hrP4Yh3HHPp4i8NZh4EpxD0TZV
+         67QqXRnMW+NNuo75gd5SofLtSy596jh87wufPBa93Ske/GFz2A/kLfaqdcEt1tUNpBqx
+         0STQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=sFsVzNxUTe0zVj2n7sBsxSG3rvMdpK3tm6ziU6/sth4=;
-        b=pHytYst4w38RLuutXKz0BJl1hDUpITWaD0ECH6LbLqq3dSM9So8jgeqRHCzjE474/T
-         xk4XFdSZH7ZiCp1aChyHOTP0fz6m4B5rzekDff2ipMOwNYMF/VglA0cSNYoL8OqN9mn6
-         4tS1LAjhYgwtfEK/zvfgG54mXsVlDivO8D2RmWcmrvY/SfZfHVnFu6MxDU0Dv89G+LMA
-         uClTaiPIisjTJZ5HFWWNBjvlc3YKp25KknXM7cJ0+BIGr2OU3tdmTcE4yc6VAFGUio8a
-         zGYlXd0oQQHvT+zGnD9Ehh8/L3NUImdX5FLUt2ncEstXTTZE0dmTa5/4QhWNWD4lM+zN
-         NjSw==
-X-Gm-Message-State: AOAM530b13isFQ19I3dGZ0n7Pm0x/fGgwYsrYtuSIkrKaflf82MYPWkN
-        qJZFMxbKE1QimZDrx7EAxkBkKsQOsmo=
-X-Google-Smtp-Source: ABdhPJy8sqHQb8viceLhFm/W1Wh3gIVDSOpELbiSB6yK6CD2Q1AsC1doKHe8hShOvALzCDdj8Y8cNg==
-X-Received: by 2002:a5d:5988:: with SMTP id n8mr9933234wri.309.1639928095133;
-        Sun, 19 Dec 2021 07:34:55 -0800 (PST)
-Received: from localhost.localdomain (dynamic-2a01-0c22-721d-8f00-f22f-74ff-fe21-0725.c22.pool.telefonica.de. [2a01:c22:721d:8f00:f22f:74ff:fe21:725])
-        by smtp.googlemail.com with ESMTPSA id d2sm9262020wrw.26.2021.12.19.07.34.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Dec 2021 07:34:54 -0800 (PST)
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-To:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        ulf.hansson@linaro.org,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH v2 2/2] mmc: meson-mx-sdhc: Drop unused MESON_SDHC_NUM_BUILTIN_CLKS macro
-Date:   Sun, 19 Dec 2021 16:34:42 +0100
-Message-Id: <20211219153442.463863-3-martin.blumenstingl@googlemail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20211219153442.463863-1-martin.blumenstingl@googlemail.com>
-References: <20211219153442.463863-1-martin.blumenstingl@googlemail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=iv9ezRnnrzcHGD7Zb6emmI6B8JBj8Iod8EtTwFfPyKk=;
+        b=whogoXm4hSu3B92laChj2UW1JbncpmjUMYbBN6ipHIakCpJFEJUQNAnYiEuTMFxG47
+         0jCbCJ38JWl+LqbLwu/+0fEPyWnIc+xEDRHvQN0kss4XhE+/JMPdweINUK2U7MJ0CLv1
+         mH1ZRuPBLsqHbS+56bikuQK8mqR/Bq4B5bV2THneWXTJOroUyBm184w8Pg5ZVKlsK2rq
+         OqcuNl8ZO5ZMJNamxx7hDfkqlCJ9lpTXJcbWaDX9JFfZ4ocY/4S82tIXNcu5N57JdALM
+         ozhcwTgjGinv4BBNJwvSd2AvcX7bgXm/rk57tzm5JwIwT0QD0/yLa32WNwyiukvdkSBy
+         r+RQ==
+X-Gm-Message-State: AOAM531gO0leEPUYl3q2cMN33cMXFxPoeYCZs92sALM9JC3G1pBbBObb
+        aDcrA4RlOR2cYNx2IbZndOEO+Wkw26wlnGIRwXd6Ew==
+X-Google-Smtp-Source: ABdhPJzVD42zDGhQBZQ8mnNcZi4O56hS1KMRBbiRJIrt2G1Xnxk7kGTcitYeIsKqM4Iy7AgW5gqkRCEPzUVCypeQjAs=
+X-Received: by 2002:a05:6512:3d9e:: with SMTP id k30mr617624lfv.184.1639996078020;
+ Mon, 20 Dec 2021 02:27:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <c207948f590d4e88945a314bf8299f87@hyperstone.com> <aac0cdefbd2a43329b50a803b7c46959@hyperstone.com>
+In-Reply-To: <aac0cdefbd2a43329b50a803b7c46959@hyperstone.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 20 Dec 2021 11:27:21 +0100
+Message-ID: <CAPDyKFpoAwezgThhhWgApvfq0nfZFPV4mCJOWGF4ZFp27UhekA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: bus: Log bus width info when attaching card
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "johan@kernel.org" <johan@kernel.org>,
+        "sudeep.holla@arm.com" <sudeep.holla@arm.com>,
+        "linux@dominikbrodowski.net" <linux@dominikbrodowski.net>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Remove MESON_SDHC_NUM_BUILTIN_CLKS because it is not used anywhere in
-the driver.
+On Wed, 8 Dec 2021 at 14:03, Christian L=C3=B6hle <CLoehle@hyperstone.com> =
+wrote:
+>
+> Might seem unecessary to print the bus width and a bit confusing, but it =
+is the only 'bus info' that is not printed in that line.
+> So I suggest adding it.
 
-Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
----
- drivers/mmc/host/meson-mx-sdhc-clkc.c | 2 --
- 1 file changed, 2 deletions(-)
+Well, I am not sure I agree with this.
 
-diff --git a/drivers/mmc/host/meson-mx-sdhc-clkc.c b/drivers/mmc/host/meson-mx-sdhc-clkc.c
-index e1f29b279123..19200b7079a6 100644
---- a/drivers/mmc/host/meson-mx-sdhc-clkc.c
-+++ b/drivers/mmc/host/meson-mx-sdhc-clkc.c
-@@ -12,8 +12,6 @@
- 
- #include "meson-mx-sdhc.h"
- 
--#define MESON_SDHC_NUM_BUILTIN_CLKS	6
--
- struct meson_mx_sdhc_clkc {
- 	struct clk_mux			src_sel;
- 	struct clk_divider		div;
--- 
-2.34.1
+There is other information too, like the clock rate for example. But,
+I think it may be a bit too much to log everything. In particular as
+the information is already available via debugfs, for those that want
+more information.
 
+>
+> Regards,
+> Christian
+>
+
+Kind regards
+Uffe
+
+>
+>
+>
+> From: Christian L=C3=B6hle
+> Sent: Wednesday, December 8, 2021 2:02 PM
+> To: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; Ulf Hansson;=
+ Christian L=C3=B6hle
+> Cc: johan@kernel.org; sudeep.holla@arm.com; linux@dominikbrodowski.net
+> Subject: [PATCH] mmc: bus: Log bus width info when attaching card
+>
+> Add info about bus width of the attached card to the bring-up message
+>
+> For both MMC and SD cards the bus width that is used might
+> not be obvious to a user. For MMC this might be 1, 4 or 8,
+> for SD only 1 and 4. In both cases this would be a restriction
+> by the host (setup). Like using an MMC in an SD slot or an
+> eMMC to SD adapter.
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/bus.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index f6b7a9c5bbff..71a675dcd9b7 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -358,7 +358,7 @@ int mmc_add_card(struct mmc_card *card)
+>                          mmc_card_ddr52(card) ? "DDR " : "",
+>                          type);
+>          } else {
+> -               pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+> +               pr_info("%s: new %s%s%s%s%s%s %u-bit card at address %04x=
+\n",
+>                          mmc_hostname(card->host),
+>                          mmc_card_uhs(card) ? "ultra high speed " :
+>                          (mmc_card_hs(card) ? "high speed " : ""),
+> @@ -366,7 +366,8 @@ int mmc_add_card(struct mmc_card *card)
+>                          (mmc_card_hs200(card) ? "HS200 " : ""),
+>                          mmc_card_hs400es(card) ? "Enhanced strobe " : ""=
+,
+>                          mmc_card_ddr52(card) ? "DDR " : "",
+> -                       uhs_bus_speed_mode, type, card->rca);
+> +                       uhs_bus_speed_mode, type,
+> +                       1<<card->host->ios.bus_width, card->rca);
+>          }
+>
+>  #ifdef CONFIG_DEBUG_FS
+> --
+> 2.34.1
+>     =3D
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+>
