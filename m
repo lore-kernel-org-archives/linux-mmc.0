@@ -2,28 +2,28 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13ECCC4167E
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Dec 2021 11:30:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2BC9C41535
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Dec 2021 11:30:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231863AbhLTLao (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Dec 2021 06:30:44 -0500
-Received: from smtp2.axis.com ([195.60.68.18]:48924 "EHLO smtp2.axis.com"
+        id S231838AbhLTLam (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Dec 2021 06:30:42 -0500
+Received: from smtp2.axis.com ([195.60.68.18]:53786 "EHLO smtp2.axis.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231831AbhLTLan (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 20 Dec 2021 06:30:43 -0500
+        id S230476AbhLTLam (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 20 Dec 2021 06:30:42 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1639999843;
-  x=1671535843;
+  d=axis.com; q=dns/txt; s=axis-central1; t=1639999842;
+  x=1671535842;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=0SNKihJIxusapvakMuJ2Rl8gGEXUWqARlz6agx/hpEY=;
-  b=hJaq4XVa0crNbD5HbU+Hwpht1J7Sd7j9ditgzV8hQGprGaeJNnHsAsXr
-   gwVjxtEOa3VfDNUUfz5HitcoXpjPi0hzNi27n9Y5pWuHeZdG9Uf/NIvir
-   q/fn/roa/WDJQ9BYRNXXnuAeeJXR8D7EwYsguKS4jB7HP86koCmEitlKi
-   J8lsnWfDlNWPxA83a7PFDFeaIoNftmVAdFzy8ZA7oDLdlAZJ//Hxq2WRK
-   XsMj3bOxlTTHLwK2oShhhJPnAmDp5/twZl/vL2Rn0/OOSO/6wKsR7lifU
-   GnTPVzZzaAiZQD52nsMHFlIR/UmzW07V506lQ32JVOimhIQ8Ea/y8R9Nt
-   Q==;
+  bh=ZAhJD7nRuyjkg2Akls62NRSlukdDYrMZCbzmafmtA2M=;
+  b=S9QtL5mLa6VQrpe0d2l65i4y5Sa6SulFwN2rfYODUSpXXdPn47b0Z9P5
+   Llv9Hyn1a09YcU4Aycuz4hj2FmrXf5F+FiFdsIcWN7Y9Gglm4AKm59p+a
+   n+jAqIeHJk7u+jAzdpZxED0/igL1UucSWTizH9JMnfdZqHzUq/cUTKKGU
+   7h5XBy8BusTFyMv4u1e1mK8UNFv6PIyNLGBSFkmfsslvkxOHT8S92hEKr
+   ozxWWsNYDHgWH12gXRt+alSUv1Zwczr8OZdjVVWgzsTK3NPdyoE9dua6X
+   hiBxYYT9Il6eEh8Fb49AzKyjyAvQax406yaCntG4RyD2qojcYvl4/+HGW
+   A==;
 From:   =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -34,9 +34,9 @@ CC:     Doug Anderson <dianders@google.com>, <kernel@axis.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-samsung-soc@vger.kernel.org>,
         =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-Subject: [PATCH v5 4/4] mmc: dw_mmc: Do not wait for DTO in case of error
-Date:   Mon, 20 Dec 2021 12:30:26 +0100
-Message-ID: <20211220113026.21129-5-marten.lindahl@axis.com>
+Subject: [PATCH v5 3/4] mmc: dw_mmc: Add driver callbacks for data read timeout
+Date:   Mon, 20 Dec 2021 12:30:25 +0100
+Message-ID: <20211220113026.21129-4-marten.lindahl@axis.com>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20211220113026.21129-1-marten.lindahl@axis.com>
 References: <20211220113026.21129-1-marten.lindahl@axis.com>
@@ -47,111 +47,181 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When running the ARTPEC-8 DWMMC IP version, and a data error interrupt
-comes during a data read transfer, there is no guarantee for the data
-transfer over interrupt (DTO) to come within the specified data timeout.
-This case is handled by the dto_timer handler which will complete the
-request with the comment:
+Current dw_mci driver supports a TMOUT register which consists of a 24
+bit field (TMOUT[31:8]) for the DATA_TIMEOUT. The maximum value of this
+field is 0xFFFFFF, which with a 200MHz clock will give a full DRTO of:
 
- /*
-  * If DTO interrupt does NOT come in sending data state,
-  * we should notify the driver to terminate current transfer
-  * and report a data timeout to the core.
-  */
+0xFFFFFF / 200000000 => ~84 ms
 
-But since the ARTPEC-8 DWMMC IP version, supports an extended TMOUT
-register which allows longer timeouts than the non ARTPEC-8 version
-does, waiting for the dto_timer to complete the request in error cases
-may cause the request to take significantly longer time than necessary.
-This is specifically true for the failing steps during tuning of a
-device.
+However, the ARTPEC-8 SoC DWMMC IP version has a TMOUT register with an
+extended DATA_TIMEOUT field, which supports longer timers for the DRTO.
+In this version the DATA_TIMEOUT field is split into two, which with the
+same 200MHz clock as above will allow a maximum timeout of:
 
-Fix this by completing the request when the error interrupt comes. Since
-this fix is specific for the ARTPEC-8, a quirk is added.
+((TMOUT[10:8] -1) * 0xFFFFFF + TMOUT[31:11] * 8) / 200000000 => ~587 ms
+
+Add driver callbacks for implementation specific data timeout, and
+implement callback functions for the ARTPEC-8 SoC.
 
 Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 ---
 
-v3:
- - Define DW_MMC_QUIRK_EXTENDED_TMOUT.
- - Implement DW_MMC_QUIRK_EXTENDED_TMOUT for the ARTPEC-8 SoC.
+v2:
+ - Removed unnecessary comment
+ - Change 1<<0 to BIT(0)
 
- drivers/mmc/host/dw_mmc-exynos.c | 5 +++++
- drivers/mmc/host/dw_mmc.c        | 9 +++++++++
- drivers/mmc/host/dw_mmc.h        | 5 +++++
- 3 files changed, 19 insertions(+)
+v3:
+ - Add callback for implementation specific control of data timeout
+ - Add callback for implementation specific read of cycle count for
+   data timeout.
+ - Remove definition and use of DW_MMC_QUIRK_EXTENDED_TMOUT.
+
+v4:
+ - Add Krzysztof's Acked-by tag from v2
+
+v5:
+ - Remove redundant '0x' prefix from debug message
+
+ drivers/mmc/host/dw_mmc-exynos.c | 49 ++++++++++++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.c        | 12 +++++++-
+ drivers/mmc/host/dw_mmc.h        |  5 ++++
+ 3 files changed, 65 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 3914024cf415..ca5be4445ae0 100644
+index 86486e6659de..3914024cf415 100644
 --- a/drivers/mmc/host/dw_mmc-exynos.c
 +++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -127,6 +127,11 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
- 				DQS_CTRL_GET_RD_DELAY(priv->saved_strobe_ctrl);
- 	}
+@@ -539,6 +539,53 @@ static int dw_mci_exynos_prepare_hs400_tuning(struct dw_mci *host,
+ 	return 0;
+ }
  
-+	if (priv->ctrl_type == DW_MCI_TYPE_ARTPEC8) {
-+		/* Quirk needed for the ARTPEC-8 SoC */
-+		host->quirks |= DW_MMC_QUIRK_EXTENDED_TMOUT;
++static void dw_mci_exynos_set_data_timeout(struct dw_mci *host,
++					   unsigned int timeout_ns)
++{
++	u32 clk_div, tmout;
++	u64 tmp;
++	unsigned int tmp2;
++
++	clk_div = (mci_readl(host, CLKDIV) & 0xFF) * 2;
++	if (clk_div == 0)
++		clk_div = 1;
++
++	tmp = DIV_ROUND_UP_ULL((u64)timeout_ns * host->bus_hz, NSEC_PER_SEC);
++	tmp = DIV_ROUND_UP_ULL(tmp, clk_div);
++
++	/* TMOUT[7:0] (RESPONSE_TIMEOUT) */
++	tmout = 0xFF; /* Set maximum */
++
++	/*
++	 * Extended HW timer (max = 0x6FFFFF2):
++	 * ((TMOUT[10:8] - 1) * 0xFFFFFF + TMOUT[31:11] * 8)
++	 */
++	if (!tmp || tmp > 0x6FFFFF2)
++		tmout |= (0xFFFFFF << 8);
++	else {
++		/* TMOUT[10:8] */
++		tmp2 = (((unsigned int)tmp / 0xFFFFFF) + 1) & 0x7;
++		tmout |= tmp2 << 8;
++
++		/* TMOUT[31:11] */
++		tmp = tmp - ((tmp2 - 1) * 0xFFFFFF);
++		tmout |= (tmp & 0xFFFFF8) << 8;
 +	}
 +
- 	host->bus_hz /= (priv->ciu_div + 1);
- 
- 	return 0;
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index a7745e193afa..da09a06898c9 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2762,11 +2762,20 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
- 			spin_lock(&host->irq_lock);
- 
-+			if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
-+				del_timer(&host->dto_timer);
++	mci_writel(host, TMOUT, tmout);
++	dev_dbg(host->dev, "timeout_ns: %u => TMOUT[31:8]: %#08x",
++		timeout_ns, tmout >> 8);
++}
 +
- 			/* if there is an error report DATA_ERROR */
- 			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
- 			host->data_status = pending;
- 			smp_wmb(); /* drain writebuffer */
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
++static u32 dw_mci_exynos_get_drto_clks(struct dw_mci *host)
++{
++	u32 drto_clks;
 +
-+			if (host->quirks & DW_MMC_QUIRK_EXTENDED_TMOUT)
-+				/* In case of error, we cannot expect a DTO */
-+				set_bit(EVENT_DATA_COMPLETE,
-+					&host->pending_events);
++	drto_clks = mci_readl(host, TMOUT) >> 8;
 +
- 			tasklet_schedule(&host->tasklet);
- 
- 			spin_unlock(&host->irq_lock);
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 0a85d05eaf12..7f1e38621d13 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -118,6 +118,7 @@ struct dw_mci_dma_slave {
-  * @part_buf: Simple buffer for partial fifo reads/writes.
-  * @push_data: Pointer to FIFO push function.
-  * @pull_data: Pointer to FIFO pull function.
-+ * @quirks: Set of quirks that apply to specific versions of the IP.
-  * @vqmmc_enabled: Status of vqmmc, should be true or false.
-  * @irq_flags: The flags to be passed to request_irq.
-  * @irq: The irq value to be passed to request_irq.
-@@ -223,6 +224,7 @@ struct dw_mci {
- 	void (*push_data)(struct dw_mci *host, void *buf, int cnt);
- 	void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
- 
-+	u32			quirks;
- 	bool			vqmmc_enabled;
- 	unsigned long		irq_flags; /* IRQ flags */
- 	int			irq;
-@@ -274,6 +276,9 @@ struct dw_mci_board {
- 	struct dma_pdata *data;
++	return (((drto_clks & 0x7) - 1) * 0xFFFFFF) + ((drto_clks & 0xFFFFF8));
++}
++
+ /* Common capabilities of Exynos4/Exynos5 SoC */
+ static unsigned long exynos_dwmmc_caps[4] = {
+ 	MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA,
+@@ -564,6 +611,8 @@ static const struct dw_mci_drv_data artpec_drv_data = {
+ 	.set_ios		= dw_mci_exynos_set_ios,
+ 	.parse_dt		= dw_mci_exynos_parse_dt,
+ 	.execute_tuning		= dw_mci_exynos_execute_tuning,
++	.set_data_timeout		= dw_mci_exynos_set_data_timeout,
++	.get_drto_clks		= dw_mci_exynos_get_drto_clks,
  };
  
-+/* Support for longer data read timeout */
-+#define DW_MMC_QUIRK_EXTENDED_TMOUT            BIT(0)
-+
- #define DW_MMC_240A		0x240a
- #define DW_MMC_280A		0x280a
+ static const struct of_device_id dw_mci_exynos_match[] = {
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index f2a14a434bef..a7745e193afa 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1287,9 +1287,13 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ static void dw_mci_set_data_timeout(struct dw_mci *host,
+ 				    unsigned int timeout_ns)
+ {
++	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	u32 clk_div, tmout;
+ 	u64 tmp;
  
++	if (drv_data && drv_data->set_data_timeout)
++		return drv_data->set_data_timeout(host, timeout_ns);
++
+ 	clk_div = (mci_readl(host, CLKDIV) & 0xFF) * 2;
+ 	if (clk_div == 0)
+ 		clk_div = 1;
+@@ -1995,12 +1999,16 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
+ 
+ static void dw_mci_set_drto(struct dw_mci *host)
+ {
++	const struct dw_mci_drv_data *drv_data = host->drv_data;
+ 	unsigned int drto_clks;
+ 	unsigned int drto_div;
+ 	unsigned int drto_ms;
+ 	unsigned long irqflags;
+ 
+-	drto_clks = mci_readl(host, TMOUT) >> 8;
++	if (drv_data && drv_data->get_drto_clks)
++		drto_clks = drv_data->get_drto_clks(host);
++	else
++		drto_clks = mci_readl(host, TMOUT) >> 8;
+ 	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+ 	if (drto_div == 0)
+ 		drto_div = 1;
+@@ -2008,6 +2016,8 @@ static void dw_mci_set_drto(struct dw_mci *host)
+ 	drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
+ 				   host->bus_hz);
+ 
++	dev_dbg(host->dev, "drto_ms: %u\n", drto_ms);
++
+ 	/* add a bit spare time */
+ 	drto_ms += 10;
+ 
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index 771d5afa3136..0a85d05eaf12 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -556,6 +556,8 @@ struct dw_mci_slot {
+  * @set_ios: handle bus specific extensions.
+  * @parse_dt: parse implementation specific device tree properties.
+  * @execute_tuning: implementation specific tuning procedure.
++ * @set_data_timeout: implementation specific timeout.
++ * @get_drto_clks: implementation specific cycle count for data read timeout.
+  *
+  * Provide controller implementation specific extensions. The usage of this
+  * data structure is fully optional and usage of each member in this structure
+@@ -573,5 +575,8 @@ struct dw_mci_drv_data {
+ 						struct mmc_ios *ios);
+ 	int		(*switch_voltage)(struct mmc_host *mmc,
+ 					  struct mmc_ios *ios);
++	void		(*set_data_timeout)(struct dw_mci *host,
++					  unsigned int timeout_ns);
++	u32		(*get_drto_clks)(struct dw_mci *host);
+ };
+ #endif /* _DW_MMC_H_ */
 -- 
 2.20.1
 
