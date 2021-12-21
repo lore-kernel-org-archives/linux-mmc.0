@@ -2,227 +2,371 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4969C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 12:24:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40BCBC4321E
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 12:51:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237522AbhLUMYP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Dec 2021 07:24:15 -0500
-Received: from rtits2.realtek.com ([211.75.126.72]:59318 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230075AbhLUMYP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 07:24:15 -0500
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 1BLCO9Yl8018562, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36504.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.71/5.88) with ESMTPS id 1BLCO9Yl8018562
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Tue, 21 Dec 2021 20:24:09 +0800
-Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
- RTEXH36504.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Tue, 21 Dec 2021 20:24:09 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Tue, 21 Dec 2021 20:24:06 +0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::1939:37f0:5383:397d]) by
- RTEXMBS01.realtek.com.tw ([fe80::1939:37f0:5383:397d%5]) with mapi id
- 15.01.2308.015; Tue, 21 Dec 2021 20:24:06 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        Ricky WU <ricky_wu@realtek.com>,
-        "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
+        id S237873AbhLUMvx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Dec 2021 07:51:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51256 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237839AbhLUMvw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 07:51:52 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D438CC06173F
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 04:51:51 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id bt1so29017708lfb.13
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 04:51:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=3KIQh1tnaD1/aKMQLDBhc4lvWb3k0bagTSoVcq7LGG0=;
+        b=JAPd7zQg9u0DJhAbTTWJPKZo5ief8mvt4pm2efenUUP7QBxXbAGQ0NJiwjLfWq+dwO
+         SIb4zgE9IqlRZ2k3FVcfhjBMhB53dAXOKQ/57UUp949dgsEi6kzZ/+jSwJJgEl+lB1O6
+         9gUH31DqpM7xKFUk59ub9s/echGLghzxgjbM6BxgxrSHSoOUT8cn/sfU70B4KVzV4Pxy
+         BYIQ/WCDqwYykTDbyuDQXF/h4ex7K9H0CCw9Tp3KcW2DmAIiItFKozZtcJV7HkQQlHw+
+         jzOY7mYnJ5Mq2GrsqPB1TNC5V4OUM96xGa3Lhq1pPf3/Grak/yXMGqMQ9tVpVsrqcm5P
+         qBmA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=3KIQh1tnaD1/aKMQLDBhc4lvWb3k0bagTSoVcq7LGG0=;
+        b=oadkA6Tg5hACXq7qjZon8H4TVE9ygp3g2OdJIzfZEGEgwtWxnTF7I/4Zlcbw+d0wB8
+         6eD0+Bj6FwP3feH7RijVsmVByDVs6Yn4KhadX0GFYsmL/NEQ1aX4inz2VcRcJx6LwrLS
+         hgLm+8v68iqCHkFsnn6vCGkw3gQ00m6dmlzQFRbKvnc7xRcLiu74Ku/2wttlOvlrGyXr
+         wQ1cuM9O3j9/xVbzA2t07FSYY69cC+eVoxaeSvERSAfVu3a57rRZQrkxzu1qAkn2BfAB
+         +ez39XV8PQr5LEmCLS+Y6HxZdKl5UnwmVam/pq0aAdqpquuIWl9uj3seL7cq6qVEbpsH
+         7rFg==
+X-Gm-Message-State: AOAM531Imotlk1dpl9Xklz59hA7x/y3GuAPYQp4vHxLcD2vrwQbVy+gY
+        iriM1ws7Ze8DxrrYyrcqFGw3t14kJox7YVSestRrIA==
+X-Google-Smtp-Source: ABdhPJxw6pIY3kxnexH0cn1w7LImjOztf8Jy1ppYjlUbU/L4cr4eCfqgvY1VbmFlWJBWBThzFnUOqk45agw/in7gRKQ=
+X-Received: by 2002:ac2:5966:: with SMTP id h6mr2951335lfp.358.1640091110046;
+ Tue, 21 Dec 2021 04:51:50 -0800 (PST)
+MIME-Version: 1.0
+References: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com>
+In-Reply-To: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 21 Dec 2021 13:51:13 +0100
+Message-ID: <CAPDyKFrLpim75nUB7ksDie2edkWsnFSq6TbFSFFpw5cY5d4y1w@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi block rw
+To:     Ricky WU <ricky_wu@realtek.com>
+Cc:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-Thread-Topic: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-Thread-Index: AQHX9mTncx2NNhc4Hk2xCW7FootmXw==
-Date:   Tue, 21 Dec 2021 12:24:06 +0000
-Message-ID: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.22.88.222]
-x-kse-serverinfo: RTEXMBS06.realtek.com.tw, 9
-x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
- rules found
-x-kse-antivirus-interceptor-info: scan successful
-x-kse-antivirus-info: =?big5?B?Q2xlYW4sIGJhc2VzOiAyMDIxLzEyLzIxIKRXpMggMTA6MjU6MDA=?=
-x-kse-bulkmessagesfiltering-scan-result: protection disabled
-Content-Type: text/plain; charset="big5"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-KSE-ServerInfo: RTEXH36504.realtek.com.tw, 9
-X-KSE-Attachment-Filter-Triggered-Rules: Clean
-X-KSE-Attachment-Filter-Triggered-Filters: Clean
-X-KSE-BulkMessagesFiltering-Scan-Result: protection disabled
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SW1wcm92aW5nIHBlcmZvcm1hbmNlIGZvciB0aGUgQ01EIGlzIG11bHRpLWJsb2NrIHJlYWQvd3Jp
-dGUNCmFuZCB0aGUgZGF0YSBpcyBzZXF1ZW50aWFsLg0Kc2RfY2hlY2tfbXVsdGlfc2VxKCkgdG8g
-ZGlzdGluZ3Vpc2ggbXVsdGktYmxvY2sgUlcgKENNRCAxOC8yNSkNCm9yIG5vcm1hbCBSVyAoQ01E
-IDE3LzI0KSBpZiB0aGUgQ01EIGlzIG11bHRpLWJsb2NrIGFuZCB0aGUgZGF0YSBpcw0Kc2VxdWVu
-dGlhbCB0aGVuIGNhbGwgdG8gc2RfcndfbXVsdGlfc2VxKCkNCg0KVGhpcyBwYXRjaCBtYWlubHkg
-dG8gY29udHJvbCB0aGUgdGltaW5nIG9mIHJlcGx5IGF0IENNRCAxMi8xMy4NCk9yaWdpbmFsbHkg
-Y29kZSBkcml2ZXIgcmVwbHkgQ01EIDEyLzEzIGF0IGV2ZXJ5IFJXIChDTUQgMTgvMjUpLg0KVGhl
-IG5ldyBjb2RlIHRvIGRpc3Rpbmd1aXNoIG11bHRpLWJsb2NrIFJXKENNRCAxOC8yNSkgYW5kIHRo
-ZSBkYXRhIGlzDQpzZXF1ZW50aWFsIG9yIG5vdCwgaWYgdGhlIGRhdGEgaXMgc2VxdWVudGlhbCBS
-VyBkcml2ZXIgZG8gbm90IHNlbmQgQ01EIDEyDQphbmQgYnlwYXNzIENNRCAxMyB1bnRpbCB3YWl0
-IHRoZSBkaWZmZXJlbnQgZGlyZWN0aW9uIFJXIENNRA0Kb3IgdHJpZ2dlciB0aGUgZGVsYXlfd29y
-ayB0byBzZW50IENNRCAxMi4NCg0KcnVuIGJlbmNobWFyayByZXN1bHQgYXMgYmVsb3c6DQpTRCBD
-YXJkIDogU2Ftc3VtZyBQcm8gUGx1cyAxMjhHQg0KTnVtYmVyIG9mIFNhbXBsZXM6MTAwLCBTYW1w
-bGUgU2l6ZToxME1CDQo8QmVmb3JlPiBSZWFkIDogODYuOSBNQi9zLCBXcml0ZSA6IDM4LjMgTUIv
-cw0KPEFmdGVyPiAgUmVhZCA6IDkxLjUgTUIvcywgV3JpdGUgOiA1NS41IE1CL3MNCg0KU2lnbmVk
-LW9mZi1ieTogUmlja3kgV3UgPHJpY2t5X3d1QHJlYWx0ZWsuY29tPg0KLS0tDQp2MjoNCm1ha2Ug
-Y29tbWl0IG1lc3NhZ2UgbW9yZSBjbGFyaXR5DQpjaGFuZ2UgZnVuY3Rpb24gbmFtZSBmb3IgbW9y
-ZSBjbGFyaXR5DQp2MzoNCmFkZCBtb3JlIGNvbW1pdCBtZXNzYWdlIGFuZCBiZW5jaG1hcmsgcmVz
-dWx0DQotLS0NCiBkcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMgfCAxODUgKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKystDQogMSBmaWxlIGNoYW5nZWQsIDE4MCBpbnNlcnRpb25z
-KCspLCA1IGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9ydHN4
-X3BjaV9zZG1tYy5jIGIvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jDQppbmRleCA1
-OGNmYWZmYTNjMmQuLmVlMmIwZWVjNjQyMiAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qv
-cnRzeF9wY2lfc2RtbWMuYw0KKysrIGIvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5j
-DQpAQCAtMjIsNiArMjIsOCBAQA0KICNpbmNsdWRlIDxhc20vdW5hbGlnbmVkLmg+DQogI2luY2x1
-ZGUgPGxpbnV4L3BtX3J1bnRpbWUuaD4NCiANCitlbnVtIFJXX01PREUJe05PUk1BTF9SVywgU0VR
-X1JXfTsNCisNCiBzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMgew0KIAlzdHJ1Y3QgcGxhdGZvcm1f
-ZGV2aWNlCSpwZGV2Ow0KIAlzdHJ1Y3QgcnRzeF9wY3IJCSpwY3I7DQpAQCAtMzEsNiArMzMsNyBA
-QCBzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMgew0KIA0KIAlzdHJ1Y3Qgd29ya19zdHJ1Y3QJd29y
-azsNCiAJc3RydWN0IG11dGV4CQlob3N0X211dGV4Ow0KKwlzdHJ1Y3QgZGVsYXllZF93b3JrCQly
-d19pZGxlX3dvcms7DQogDQogCXU4CQkJc3NjX2RlcHRoOw0KIAl1bnNpZ25lZCBpbnQJCWNsb2Nr
-Ow0KQEAgLTQ2LDYgKzQ5LDEyIEBAIHN0cnVjdCByZWFsdGVrX3BjaV9zZG1tYyB7DQogCXMzMgkJ
-CWNvb2tpZTsNCiAJaW50CQkJY29va2llX3NnX2NvdW50Ow0KIAlib29sCQkJdXNpbmdfY29va2ll
-Ow0KKw0KKwllbnVtIFJXX01PREUJCXJ3X21vZGU7DQorCXU4CQlwcmV2X2RpcjsNCisJdTgJCWN1
-cl9kaXI7DQorCXU2NAkJcHJldl9zZWNfYWRkcjsNCisJdTMyCQlwcmV2X3NlY19jbnQ7DQogfTsN
-CiANCiBzdGF0aWMgaW50IHNkbW1jX2luaXRfc2RfZXhwcmVzcyhzdHJ1Y3QgbW1jX2hvc3QgKm1t
-Yywgc3RydWN0IG1tY19pb3MgKmlvcyk7DQpAQCAtMjI2LDYgKzIzNSwxNCBAQCBzdGF0aWMgdm9p
-ZCBzZF9zZW5kX2NtZF9nZXRfcnNwKHN0cnVjdCByZWFsdGVrX3BjaV9zZG1tYyAqaG9zdCwNCiAJ
-ZGV2X2RiZyhzZG1tY19kZXYoaG9zdCksICIlczogU0QvTU1DIENNRCAlZCwgYXJnID0gMHglMDh4
-XG4iLA0KIAkJCV9fZnVuY19fLCBjbWRfaWR4LCBhcmcpOw0KIA0KKwlpZiAoY21kX2lkeCA9PSBN
-TUNfU0VORF9TVEFUVVMgJiYgaG9zdC0+cndfbW9kZSA9PSBTRVFfUlcpIHsNCisJCWNtZC0+cmVz
-cFswXSA9IFIxX1JFQURZX0ZPUl9EQVRBIHwgKFIxX1NUQVRFX1RSQU4gPDwgOSk7DQorCQlnb3Rv
-IG91dDsNCisJfQ0KKw0KKwlpZiAoIW1tY19vcF9tdWx0aShjbWQtPm9wY29kZSkpDQorCQlob3N0
-LT5yd19tb2RlID0gTk9STUFMX1JXOw0KKw0KIAlyc3BfdHlwZSA9IHNkX3Jlc3BvbnNlX3R5cGUo
-Y21kKTsNCiAJaWYgKHJzcF90eXBlIDwgMCkNCiAJCWdvdG8gb3V0Ow0KQEAgLTU0Miw2ICs1NTks
-OTMgQEAgc3RhdGljIGludCBzZF93cml0ZV9sb25nX2RhdGEoc3RydWN0IHJlYWx0ZWtfcGNpX3Nk
-bW1jICpob3N0LA0KIAlyZXR1cm4gMDsNCiB9DQogDQorc3RhdGljIGludCBzZF9yd19tdWx0aV9z
-ZXEoc3RydWN0IHJlYWx0ZWtfcGNpX3NkbW1jICpob3N0LCBzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1y
-cSkNCit7DQorCXN0cnVjdCBydHN4X3BjciAqcGNyID0gaG9zdC0+cGNyOw0KKwlzdHJ1Y3QgbW1j
-X2hvc3QgKm1tYyA9IGhvc3QtPm1tYzsNCisJc3RydWN0IG1tY19jYXJkICpjYXJkID0gbW1jLT5j
-YXJkOw0KKwlzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEgPSBtcnEtPmRhdGE7DQorCWludCB1aHMgPSBt
-bWNfY2FyZF91aHMoY2FyZCk7DQorCXU4IGNmZzI7DQorCWludCBlcnI7DQorCXNpemVfdCBkYXRh
-X2xlbiA9IGRhdGEtPmJsa3N6ICogZGF0YS0+YmxvY2tzOw0KKw0KKwljZmcyID0gU0RfTk9fQ0FM
-Q1VMQVRFX0NSQzcgfCBTRF9DSEVDS19DUkMxNiB8DQorCQlTRF9OT19XQUlUX0JVU1lfRU5EIHwg
-U0RfTk9fQ0hFQ0tfQ1JDNyB8IFNEX1JTUF9MRU5fMDsNCisNCisJaWYgKCF1aHMpDQorCQljZmcy
-IHw9IFNEX05PX0NIRUNLX1dBSVRfQ1JDX1RPOw0KKw0KKwlydHN4X3BjaV9pbml0X2NtZChwY3Ip
-Ow0KKwlzZF9jbWRfc2V0X2RhdGFfbGVuKHBjciwgZGF0YS0+YmxvY2tzLCBkYXRhLT5ibGtzeik7
-DQorCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBXUklURV9SRUdfQ01ELCBJUlFTVEFUMCwNCisJCQlE
-TUFfRE9ORV9JTlQsIERNQV9ET05FX0lOVCk7DQorCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBXUklU
-RV9SRUdfQ01ELCBETUFUQzMsDQorCQkweEZGLCAodTgpKGRhdGFfbGVuID4+IDI0KSk7DQorCXJ0
-c3hfcGNpX2FkZF9jbWQocGNyLCBXUklURV9SRUdfQ01ELCBETUFUQzIsDQorCQkweEZGLCAodTgp
-KGRhdGFfbGVuID4+IDE2KSk7DQorCXJ0c3hfcGNpX2FkZF9jbWQocGNyLCBXUklURV9SRUdfQ01E
-LCBETUFUQzEsDQorCQkweEZGLCAodTgpKGRhdGFfbGVuID4+IDgpKTsNCisJcnRzeF9wY2lfYWRk
-X2NtZChwY3IsIFdSSVRFX1JFR19DTUQsIERNQVRDMCwgMHhGRiwgKHU4KWRhdGFfbGVuKTsNCisN
-CisJaWYgKGhvc3QtPmN1cl9kaXIgPT0gRE1BX0RJUl9GUk9NX0NBUkQpDQorCQlydHN4X3BjaV9h
-ZGRfY21kKHBjciwgV1JJVEVfUkVHX0NNRCwgRE1BQ1RMLA0KKwkJCTB4MDMgfCBETUFfUEFDS19T
-SVpFX01BU0ssDQorCQkJRE1BX0RJUl9GUk9NX0NBUkQgfCBETUFfRU4gfCBETUFfNTEyKTsNCisJ
-ZWxzZQ0KKwkJcnRzeF9wY2lfYWRkX2NtZChwY3IsIFdSSVRFX1JFR19DTUQsIERNQUNUTCwNCisJ
-CQkweDAzIHwgRE1BX1BBQ0tfU0laRV9NQVNLLA0KKwkJCURNQV9ESVJfVE9fQ0FSRCB8IERNQV9F
-TiB8IERNQV81MTIpOw0KKw0KKwlydHN4X3BjaV9hZGRfY21kKHBjciwgV1JJVEVfUkVHX0NNRCwg
-Q0FSRF9EQVRBX1NPVVJDRSwNCisJCQkweDAxLCBSSU5HX0JVRkZFUik7DQorCXJ0c3hfcGNpX2Fk
-ZF9jbWQocGNyLCBXUklURV9SRUdfQ01ELCBTRF9DRkcyLCAweEZGLCBjZmcyKTsNCisNCisJaWYg
-KGhvc3QtPmN1cl9kaXIgPT0gRE1BX0RJUl9GUk9NX0NBUkQpDQorCQlydHN4X3BjaV9hZGRfY21k
-KHBjciwgV1JJVEVfUkVHX0NNRCwgU0RfVFJBTlNGRVIsIDB4RkYsDQorCQkJCVNEX1RSQU5TRkVS
-X1NUQVJUIHwgU0RfVE1fQVVUT19SRUFEXzMpOw0KKwllbHNlDQorCQlydHN4X3BjaV9hZGRfY21k
-KHBjciwgV1JJVEVfUkVHX0NNRCwgU0RfVFJBTlNGRVIsIDB4RkYsDQorCQkJCVNEX1RSQU5TRkVS
-X1NUQVJUIHwgU0RfVE1fQVVUT19XUklURV8zKTsNCisNCisJcnRzeF9wY2lfYWRkX2NtZChwY3Is
-IENIRUNLX1JFR19DTUQsIFNEX1RSQU5TRkVSLA0KKwkJCVNEX1RSQU5TRkVSX0VORCwgU0RfVFJB
-TlNGRVJfRU5EKTsNCisJcnRzeF9wY2lfc2VuZF9jbWRfbm9fd2FpdChwY3IpOw0KKw0KKwlpZiAo
-aG9zdC0+Y3VyX2RpciA9PSBETUFfRElSX0ZST01fQ0FSRCkNCisJCWVyciA9IHJ0c3hfcGNpX2Rt
-YV90cmFuc2ZlcihwY3IsIGRhdGEtPnNnLCBob3N0LT5zZ19jb3VudCwgMSwgMTAwMDApOw0KKwll
-bHNlDQorCQllcnIgPSBydHN4X3BjaV9kbWFfdHJhbnNmZXIocGNyLCBkYXRhLT5zZywgaG9zdC0+
-c2dfY291bnQsIDAsIDEwMDAwKTsNCisNCisJaWYgKGVyciA8IDApIHsNCisJCXNkX2NsZWFyX2Vy
-cm9yKGhvc3QpOw0KKwkJcmV0dXJuIGVycjsNCisJfQ0KKw0KKwlyZXR1cm4gMDsNCit9DQorDQor
-c3RhdGljIGludCBzZF9zdG9wX3J3X211bHRpX3NlcShzdHJ1Y3QgcmVhbHRla19wY2lfc2RtbWMg
-Kmhvc3QsIHN0cnVjdCBtbWNfcmVxdWVzdCAqbXJxKQ0KK3sNCisJc3RydWN0IHJ0c3hfcGNyICpw
-Y3IgPSBob3N0LT5wY3I7DQorCXN0cnVjdCBtbWNfY29tbWFuZCAqY21kOw0KKw0KKwljbWQgPSBr
-emFsbG9jKHNpemVvZigqY21kKSwgR0ZQX0tFUk5FTCk7DQorDQorCWNtZC0+b3Bjb2RlID0gTU1D
-X1NUT1BfVFJBTlNNSVNTSU9OOw0KKwljbWQtPmFyZyA9IDA7DQorCWNtZC0+YnVzeV90aW1lb3V0
-ID0gMDsNCisJaWYgKGhvc3QtPmN1cl9kaXIgPT0gRE1BX0RJUl9GUk9NX0NBUkQpDQorCQljbWQt
-PmZsYWdzID0gTU1DX1JTUF9TUElfUjEgfCBNTUNfUlNQX1IxIHwgTU1DX0NNRF9BQzsNCisJZWxz
-ZQ0KKwkJY21kLT5mbGFncyA9IE1NQ19SU1BfU1BJX1IxQiB8IE1NQ19SU1BfUjFCIHwgTU1DX0NN
-RF9BQzsNCisJc2Rfc2VuZF9jbWRfZ2V0X3JzcChob3N0LCBjbWQpOw0KKwl1ZGVsYXkoNTApOw0K
-KwlydHN4X3BjaV93cml0ZV9yZWdpc3RlcihwY3IsIFJCQ1RMLCBSQl9GTFVTSCwgUkJfRkxVU0gp
-Ow0KKwlrZnJlZShjbWQpOw0KKwlyZXR1cm4gMDsNCit9DQorDQogc3RhdGljIGlubGluZSB2b2lk
-IHNkX2VuYWJsZV9pbml0aWFsX21vZGUoc3RydWN0IHJlYWx0ZWtfcGNpX3NkbW1jICpob3N0KQ0K
-IHsNCiAJcnRzeF9wY2lfd3JpdGVfcmVnaXN0ZXIoaG9zdC0+cGNyLCBTRF9DRkcxLA0KQEAgLTc5
-Niw2ICs5MDAsNDUgQEAgc3RhdGljIGlubGluZSBpbnQgc2RfcndfY21kKHN0cnVjdCBtbWNfY29t
-bWFuZCAqY21kKQ0KIAkJKGNtZC0+b3Bjb2RlID09IE1NQ19XUklURV9CTE9DSyk7DQogfQ0KIA0K
-K3N0YXRpYyB2b2lkIHNkX3J3X2lkbGVfd29yayhzdHJ1Y3Qgd29ya19zdHJ1Y3QgKndvcmspDQor
-ew0KKwlzdHJ1Y3QgZGVsYXllZF93b3JrICpkd29yayA9IHRvX2RlbGF5ZWRfd29yayh3b3JrKTsN
-CisJc3RydWN0IHJlYWx0ZWtfcGNpX3NkbW1jICpob3N0ID0gY29udGFpbmVyX29mKGR3b3JrLA0K
-KwkJCXN0cnVjdCByZWFsdGVrX3BjaV9zZG1tYywgcndfaWRsZV93b3JrKTsNCisJc3RydWN0IG1t
-Y19jb21tYW5kICpjbWQ7DQorDQorCWNtZCA9IGt6YWxsb2Moc2l6ZW9mKCpjbWQpLCBHRlBfS0VS
-TkVMKTsNCisNCisJY21kLT5vcGNvZGUgPSBNTUNfU1RPUF9UUkFOU01JU1NJT047DQorCWNtZC0+
-YXJnID0gMDsNCisJY21kLT5idXN5X3RpbWVvdXQgPSAwOw0KKwlpZiAoaG9zdC0+Y3VyX2RpciA9
-PSBETUFfRElSX0ZST01fQ0FSRCkNCisJCWNtZC0+ZmxhZ3MgPSBNTUNfUlNQX1NQSV9SMSB8IE1N
-Q19SU1BfUjEgfCBNTUNfQ01EX0FDOw0KKwllbHNlDQorCQljbWQtPmZsYWdzID0gTU1DX1JTUF9T
-UElfUjFCIHwgTU1DX1JTUF9SMUIgfCBNTUNfQ01EX0FDOw0KKw0KKwlzZF9zZW5kX2NtZF9nZXRf
-cnNwKGhvc3QsIGNtZCk7DQorCWhvc3QtPnJ3X21vZGUgPSBOT1JNQUxfUlc7DQorCWtmcmVlKGNt
-ZCk7DQorfQ0KKw0KK3N0YXRpYyBpbnQgc2RfY2hlY2tfbXVsdGlfc2VxKHN0cnVjdCByZWFsdGVr
-X3BjaV9zZG1tYyAqaG9zdCwgc3RydWN0IG1tY19yZXF1ZXN0ICptcnEpDQorew0KKwlzdHJ1Y3Qg
-bW1jX2NvbW1hbmQgKmNtZCA9IG1ycS0+Y21kOw0KKwlzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEgPSBt
-cnEtPmRhdGE7DQorDQorCWlmICghbW1jX29wX211bHRpKGNtZC0+b3Bjb2RlKSkNCisJCXJldHVy
-biAwOw0KKw0KKwlpZiAoaG9zdC0+cHJldl9kaXIgIT0gaG9zdC0+Y3VyX2RpcikNCisJCXJldHVy
-biAwOw0KKw0KKwlpZiAoKGhvc3QtPnByZXZfc2VjX2FkZHIgKyBob3N0LT5wcmV2X3NlY19jbnQp
-ICE9IGRhdGEtPmJsa19hZGRyKQ0KKwkJcmV0dXJuIDA7DQorDQorCXJldHVybiAxOw0KK30NCisN
-CiBzdGF0aWMgdm9pZCBzZF9yZXF1ZXN0KHN0cnVjdCB3b3JrX3N0cnVjdCAqd29yaykNCiB7DQog
-CXN0cnVjdCByZWFsdGVrX3BjaV9zZG1tYyAqaG9zdCA9IGNvbnRhaW5lcl9vZih3b3JrLA0KQEAg
-LTg0MSwxMiArOTg0LDM2IEBAIHN0YXRpYyB2b2lkIHNkX3JlcXVlc3Qoc3RydWN0IHdvcmtfc3Ry
-dWN0ICp3b3JrKQ0KIAlpZiAoIWRhdGFfc2l6ZSkgew0KIAkJc2Rfc2VuZF9jbWRfZ2V0X3JzcCho
-b3N0LCBjbWQpOw0KIAl9IGVsc2UgaWYgKHNkX3J3X2NtZChjbWQpIHx8IHNkaW9fZXh0YmxvY2tf
-Y21kKGNtZCwgZGF0YSkpIHsNCi0JCWNtZC0+ZXJyb3IgPSBzZF9yd19tdWx0aShob3N0LCBtcnEp
-Ow0KLQkJaWYgKCFob3N0LT51c2luZ19jb29raWUpDQotCQkJc2RtbWNfcG9zdF9yZXEoaG9zdC0+
-bW1jLCBob3N0LT5tcnEsIDApOw0KKwkJLyogQ2hlY2sgbXVsdGktYmxvY2sgYW5kIHNlcSBmdW5j
-dGlvbiovDQorCQlpZiAoZGF0YS0+ZmxhZ3MgJiBNTUNfREFUQV9SRUFEKQ0KKwkJCWhvc3QtPmN1
-cl9kaXIgPSBETUFfRElSX0ZST01fQ0FSRDsNCisJCWVsc2UNCisJCQlob3N0LT5jdXJfZGlyID0g
-RE1BX0RJUl9UT19DQVJEOw0KKw0KKwkJaWYgKGhvc3QtPnJ3X21vZGUgPT0gU0VRX1JXKSB7DQor
-CQkJY2FuY2VsX2RlbGF5ZWRfd29yaygmaG9zdC0+cndfaWRsZV93b3JrKTsNCisJCQlpZiAoIXNk
-X2NoZWNrX211bHRpX3NlcShob3N0LCBtcnEpKSB7DQorCQkJCXNkX3N0b3BfcndfbXVsdGlfc2Vx
-KGhvc3QsIG1ycSk7DQorCQkJCWhvc3QtPnJ3X21vZGUgPSBOT1JNQUxfUlc7DQorCQkJfQ0KKwkJ
-fQ0KKw0KKwkJaWYgKGhvc3QtPnJ3X21vZGUgPT0gU0VRX1JXKQ0KKwkJCWNtZC0+ZXJyb3IgPSBz
-ZF9yd19tdWx0aV9zZXEoaG9zdCwgbXJxKTsNCisJCWVsc2Ugew0KKwkJCWlmIChtbWNfb3BfbXVs
-dGkoY21kLT5vcGNvZGUpKQ0KKwkJCQlob3N0LT5yd19tb2RlID0gU0VRX1JXOw0KKwkJCWNtZC0+
-ZXJyb3IgPSBzZF9yd19tdWx0aShob3N0LCBtcnEpOw0KKwkJCWlmICghaG9zdC0+dXNpbmdfY29v
-a2llKQ0KKwkJCQlzZG1tY19wb3N0X3JlcShob3N0LT5tbWMsIGhvc3QtPm1ycSwgMCk7DQorCQl9
-DQorDQorCQlpZiAoY21kLT5lcnJvcikNCisJCQlob3N0LT5yd19tb2RlID0gTk9STUFMX1JXOw0K
-Kw0KKwkJaWYgKG1tY19vcF9tdWx0aShjbWQtPm9wY29kZSkgJiYgaG9zdC0+cndfbW9kZSA9PSBT
-RVFfUlcpDQorCQkJbW9kX2RlbGF5ZWRfd29yayhzeXN0ZW1fd3EsICZob3N0LT5yd19pZGxlX3dv
-cmssIG1zZWNzX3RvX2ppZmZpZXMoMTUwKSk7DQogDQotCQlpZiAobW1jX29wX211bHRpKGNtZC0+
-b3Bjb2RlKSAmJiBtcnEtPnN0b3ApDQotCQkJc2Rfc2VuZF9jbWRfZ2V0X3JzcChob3N0LCBtcnEt
-PnN0b3ApOw0KIAl9IGVsc2Ugew0KIAkJc2Rfbm9ybWFsX3J3KGhvc3QsIG1ycSk7DQogCX0NCkBA
-IC04NjcsNiArMTAzNCwxMSBAQCBzdGF0aWMgdm9pZCBzZF9yZXF1ZXN0KHN0cnVjdCB3b3JrX3N0
-cnVjdCAqd29yaykNCiAJfQ0KIA0KIAltdXRleF9sb2NrKCZob3N0LT5ob3N0X211dGV4KTsNCisJ
-aWYgKHNkX3J3X2NtZChjbWQpIHx8IHNkaW9fZXh0YmxvY2tfY21kKGNtZCwgZGF0YSkpIHsNCisJ
-CWhvc3QtPnByZXZfZGlyID0gaG9zdC0+Y3VyX2RpcjsNCisJCWhvc3QtPnByZXZfc2VjX2FkZHIg
-PSBkYXRhLT5ibGtfYWRkcjsNCisJCWhvc3QtPnByZXZfc2VjX2NudCA9IGRhdGEtPmJsb2NrczsN
-CisJfQ0KIAlob3N0LT5tcnEgPSBOVUxMOw0KIAltdXRleF91bmxvY2soJmhvc3QtPmhvc3RfbXV0
-ZXgpOw0KIA0KQEAgLTE0NTcsNiArMTYyOSw3IEBAIHN0YXRpYyB2b2lkIHJ0c3hfcGNpX3NkbW1j
-X2NhcmRfZXZlbnQoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCiAJc3RydWN0IHJlYWx0
-ZWtfcGNpX3NkbW1jICpob3N0ID0gcGxhdGZvcm1fZ2V0X2RydmRhdGEocGRldik7DQogDQogCWhv
-c3QtPmNvb2tpZSA9IC0xOw0KKwlob3N0LT5yd19tb2RlID0gTk9STUFMX1JXOw0KIAltbWNfZGV0
-ZWN0X2NoYW5nZShob3N0LT5tbWMsIDApOw0KIH0NCiANCkBAIC0xNDg3LDYgKzE2NjAsNyBAQCBz
-dGF0aWMgaW50IHJ0c3hfcGNpX3NkbW1jX2Rydl9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNl
-ICpwZGV2KQ0KIAlob3N0LT5jb29raWUgPSAtMTsNCiAJaG9zdC0+cG93ZXJfc3RhdGUgPSBTRE1N
-Q19QT1dFUl9PRkY7DQogCUlOSVRfV09SSygmaG9zdC0+d29yaywgc2RfcmVxdWVzdCk7DQorCUlO
-SVRfREVMQVlFRF9XT1JLKCZob3N0LT5yd19pZGxlX3dvcmssIHNkX3J3X2lkbGVfd29yayk7DQog
-CXBsYXRmb3JtX3NldF9kcnZkYXRhKHBkZXYsIGhvc3QpOw0KIAlwY3ItPnNsb3RzW1JUU1hfU0Rf
-Q0FSRF0ucF9kZXYgPSBwZGV2Ow0KIAlwY3ItPnNsb3RzW1JUU1hfU0RfQ0FSRF0uY2FyZF9ldmVu
-dCA9IHJ0c3hfcGNpX3NkbW1jX2NhcmRfZXZlbnQ7DQpAQCAtMTUyNiw2ICsxNzAwLDcgQEAgc3Rh
-dGljIGludCBydHN4X3BjaV9zZG1tY19kcnZfcmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2Ug
-KnBkZXYpDQogCQlwbV9ydW50aW1lX2Rpc2FibGUoJnBkZXYtPmRldik7DQogCX0NCiANCisJY2Fu
-Y2VsX2RlbGF5ZWRfd29ya19zeW5jKCZob3N0LT5yd19pZGxlX3dvcmspOw0KIAljYW5jZWxfd29y
-a19zeW5jKCZob3N0LT53b3JrKTsNCiANCiAJbXV0ZXhfbG9jaygmaG9zdC0+aG9zdF9tdXRleCk7
-DQotLSANCjIuMjUuMQ0K
+On Tue, 21 Dec 2021 at 13:24, Ricky WU <ricky_wu@realtek.com> wrote:
+>
+> Improving performance for the CMD is multi-block read/write
+> and the data is sequential.
+> sd_check_multi_seq() to distinguish multi-block RW (CMD 18/25)
+> or normal RW (CMD 17/24) if the CMD is multi-block and the data is
+> sequential then call to sd_rw_multi_seq()
+>
+> This patch mainly to control the timing of reply at CMD 12/13.
+> Originally code driver reply CMD 12/13 at every RW (CMD 18/25).
+> The new code to distinguish multi-block RW(CMD 18/25) and the data is
+> sequential or not, if the data is sequential RW driver do not send CMD 12
+> and bypass CMD 13 until wait the different direction RW CMD
+> or trigger the delay_work to sent CMD 12.
+>
+> run benchmark result as below:
+> SD Card : Samsumg Pro Plus 128GB
+> Number of Samples:100, Sample Size:10MB
+> <Before> Read : 86.9 MB/s, Write : 38.3 MB/s
+> <After>  Read : 91.5 MB/s, Write : 55.5 MB/s
+
+A much nicer commit message, thanks a lot! Would you mind running some
+additional tests, like random I/O read/writes?
+
+Also, please specify the benchmark tool and command you are using. In
+the meantime, I will continue to look at the code.
+
+Kind regards
+Uffe
+
+>
+> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+> ---
+> v2:
+> make commit message more clarity
+> change function name for more clarity
+> v3:
+> add more commit message and benchmark result
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 185 +++++++++++++++++++++++++++++-
+>  1 file changed, 180 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 58cfaffa3c2d..ee2b0eec6422 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -22,6 +22,8 @@
+>  #include <asm/unaligned.h>
+>  #include <linux/pm_runtime.h>
+>
+> +enum RW_MODE   {NORMAL_RW, SEQ_RW};
+> +
+>  struct realtek_pci_sdmmc {
+>         struct platform_device  *pdev;
+>         struct rtsx_pcr         *pcr;
+> @@ -31,6 +33,7 @@ struct realtek_pci_sdmmc {
+>
+>         struct work_struct      work;
+>         struct mutex            host_mutex;
+> +       struct delayed_work             rw_idle_work;
+>
+>         u8                      ssc_depth;
+>         unsigned int            clock;
+> @@ -46,6 +49,12 @@ struct realtek_pci_sdmmc {
+>         s32                     cookie;
+>         int                     cookie_sg_count;
+>         bool                    using_cookie;
+> +
+> +       enum RW_MODE            rw_mode;
+> +       u8              prev_dir;
+> +       u8              cur_dir;
+> +       u64             prev_sec_addr;
+> +       u32             prev_sec_cnt;
+>  };
+>
+>  static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios);
+> @@ -226,6 +235,14 @@ static void sd_send_cmd_get_rsp(struct realtek_pci_sdmmc *host,
+>         dev_dbg(sdmmc_dev(host), "%s: SD/MMC CMD %d, arg = 0x%08x\n",
+>                         __func__, cmd_idx, arg);
+>
+> +       if (cmd_idx == MMC_SEND_STATUS && host->rw_mode == SEQ_RW) {
+> +               cmd->resp[0] = R1_READY_FOR_DATA | (R1_STATE_TRAN << 9);
+> +               goto out;
+> +       }
+> +
+> +       if (!mmc_op_multi(cmd->opcode))
+> +               host->rw_mode = NORMAL_RW;
+> +
+>         rsp_type = sd_response_type(cmd);
+>         if (rsp_type < 0)
+>                 goto out;
+> @@ -542,6 +559,93 @@ static int sd_write_long_data(struct realtek_pci_sdmmc *host,
+>         return 0;
+>  }
+>
+> +static int sd_rw_multi_seq(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+> +{
+> +       struct rtsx_pcr *pcr = host->pcr;
+> +       struct mmc_host *mmc = host->mmc;
+> +       struct mmc_card *card = mmc->card;
+> +       struct mmc_data *data = mrq->data;
+> +       int uhs = mmc_card_uhs(card);
+> +       u8 cfg2;
+> +       int err;
+> +       size_t data_len = data->blksz * data->blocks;
+> +
+> +       cfg2 = SD_NO_CALCULATE_CRC7 | SD_CHECK_CRC16 |
+> +               SD_NO_WAIT_BUSY_END | SD_NO_CHECK_CRC7 | SD_RSP_LEN_0;
+> +
+> +       if (!uhs)
+> +               cfg2 |= SD_NO_CHECK_WAIT_CRC_TO;
+> +
+> +       rtsx_pci_init_cmd(pcr);
+> +       sd_cmd_set_data_len(pcr, data->blocks, data->blksz);
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, IRQSTAT0,
+> +                       DMA_DONE_INT, DMA_DONE_INT);
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC3,
+> +               0xFF, (u8)(data_len >> 24));
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC2,
+> +               0xFF, (u8)(data_len >> 16));
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC1,
+> +               0xFF, (u8)(data_len >> 8));
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMATC0, 0xFF, (u8)data_len);
+> +
+> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
+> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
+> +                       0x03 | DMA_PACK_SIZE_MASK,
+> +                       DMA_DIR_FROM_CARD | DMA_EN | DMA_512);
+> +       else
+> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, DMACTL,
+> +                       0x03 | DMA_PACK_SIZE_MASK,
+> +                       DMA_DIR_TO_CARD | DMA_EN | DMA_512);
+> +
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_DATA_SOURCE,
+> +                       0x01, RING_BUFFER);
+> +       rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_CFG2, 0xFF, cfg2);
+> +
+> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
+> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
+> +                               SD_TRANSFER_START | SD_TM_AUTO_READ_3);
+> +       else
+> +               rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, SD_TRANSFER, 0xFF,
+> +                               SD_TRANSFER_START | SD_TM_AUTO_WRITE_3);
+> +
+> +       rtsx_pci_add_cmd(pcr, CHECK_REG_CMD, SD_TRANSFER,
+> +                       SD_TRANSFER_END, SD_TRANSFER_END);
+> +       rtsx_pci_send_cmd_no_wait(pcr);
+> +
+> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
+> +               err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, 1, 10000);
+> +       else
+> +               err = rtsx_pci_dma_transfer(pcr, data->sg, host->sg_count, 0, 10000);
+> +
+> +       if (err < 0) {
+> +               sd_clear_error(host);
+> +               return err;
+> +       }
+> +
+> +       return 0;
+> +}
+> +
+> +static int sd_stop_rw_multi_seq(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+> +{
+> +       struct rtsx_pcr *pcr = host->pcr;
+> +       struct mmc_command *cmd;
+> +
+> +       cmd = kzalloc(sizeof(*cmd), GFP_KERNEL);
+> +
+> +       cmd->opcode = MMC_STOP_TRANSMISSION;
+> +       cmd->arg = 0;
+> +       cmd->busy_timeout = 0;
+> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
+> +               cmd->flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       else
+> +               cmd->flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +       sd_send_cmd_get_rsp(host, cmd);
+> +       udelay(50);
+> +       rtsx_pci_write_register(pcr, RBCTL, RB_FLUSH, RB_FLUSH);
+> +       kfree(cmd);
+> +       return 0;
+> +}
+> +
+>  static inline void sd_enable_initial_mode(struct realtek_pci_sdmmc *host)
+>  {
+>         rtsx_pci_write_register(host->pcr, SD_CFG1,
+> @@ -796,6 +900,45 @@ static inline int sd_rw_cmd(struct mmc_command *cmd)
+>                 (cmd->opcode == MMC_WRITE_BLOCK);
+>  }
+>
+> +static void sd_rw_idle_work(struct work_struct *work)
+> +{
+> +       struct delayed_work *dwork = to_delayed_work(work);
+> +       struct realtek_pci_sdmmc *host = container_of(dwork,
+> +                       struct realtek_pci_sdmmc, rw_idle_work);
+> +       struct mmc_command *cmd;
+> +
+> +       cmd = kzalloc(sizeof(*cmd), GFP_KERNEL);
+> +
+> +       cmd->opcode = MMC_STOP_TRANSMISSION;
+> +       cmd->arg = 0;
+> +       cmd->busy_timeout = 0;
+> +       if (host->cur_dir == DMA_DIR_FROM_CARD)
+> +               cmd->flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       else
+> +               cmd->flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +
+> +       sd_send_cmd_get_rsp(host, cmd);
+> +       host->rw_mode = NORMAL_RW;
+> +       kfree(cmd);
+> +}
+> +
+> +static int sd_check_multi_seq(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+> +{
+> +       struct mmc_command *cmd = mrq->cmd;
+> +       struct mmc_data *data = mrq->data;
+> +
+> +       if (!mmc_op_multi(cmd->opcode))
+> +               return 0;
+> +
+> +       if (host->prev_dir != host->cur_dir)
+> +               return 0;
+> +
+> +       if ((host->prev_sec_addr + host->prev_sec_cnt) != data->blk_addr)
+> +               return 0;
+> +
+> +       return 1;
+> +}
+> +
+>  static void sd_request(struct work_struct *work)
+>  {
+>         struct realtek_pci_sdmmc *host = container_of(work,
+> @@ -841,12 +984,36 @@ static void sd_request(struct work_struct *work)
+>         if (!data_size) {
+>                 sd_send_cmd_get_rsp(host, cmd);
+>         } else if (sd_rw_cmd(cmd) || sdio_extblock_cmd(cmd, data)) {
+> -               cmd->error = sd_rw_multi(host, mrq);
+> -               if (!host->using_cookie)
+> -                       sdmmc_post_req(host->mmc, host->mrq, 0);
+> +               /* Check multi-block and seq function*/
+> +               if (data->flags & MMC_DATA_READ)
+> +                       host->cur_dir = DMA_DIR_FROM_CARD;
+> +               else
+> +                       host->cur_dir = DMA_DIR_TO_CARD;
+> +
+> +               if (host->rw_mode == SEQ_RW) {
+> +                       cancel_delayed_work(&host->rw_idle_work);
+> +                       if (!sd_check_multi_seq(host, mrq)) {
+> +                               sd_stop_rw_multi_seq(host, mrq);
+> +                               host->rw_mode = NORMAL_RW;
+> +                       }
+> +               }
+> +
+> +               if (host->rw_mode == SEQ_RW)
+> +                       cmd->error = sd_rw_multi_seq(host, mrq);
+> +               else {
+> +                       if (mmc_op_multi(cmd->opcode))
+> +                               host->rw_mode = SEQ_RW;
+> +                       cmd->error = sd_rw_multi(host, mrq);
+> +                       if (!host->using_cookie)
+> +                               sdmmc_post_req(host->mmc, host->mrq, 0);
+> +               }
+> +
+> +               if (cmd->error)
+> +                       host->rw_mode = NORMAL_RW;
+> +
+> +               if (mmc_op_multi(cmd->opcode) && host->rw_mode == SEQ_RW)
+> +                       mod_delayed_work(system_wq, &host->rw_idle_work, msecs_to_jiffies(150));
+>
+> -               if (mmc_op_multi(cmd->opcode) && mrq->stop)
+> -                       sd_send_cmd_get_rsp(host, mrq->stop);
+>         } else {
+>                 sd_normal_rw(host, mrq);
+>         }
+> @@ -867,6 +1034,11 @@ static void sd_request(struct work_struct *work)
+>         }
+>
+>         mutex_lock(&host->host_mutex);
+> +       if (sd_rw_cmd(cmd) || sdio_extblock_cmd(cmd, data)) {
+> +               host->prev_dir = host->cur_dir;
+> +               host->prev_sec_addr = data->blk_addr;
+> +               host->prev_sec_cnt = data->blocks;
+> +       }
+>         host->mrq = NULL;
+>         mutex_unlock(&host->host_mutex);
+>
+> @@ -1457,6 +1629,7 @@ static void rtsx_pci_sdmmc_card_event(struct platform_device *pdev)
+>         struct realtek_pci_sdmmc *host = platform_get_drvdata(pdev);
+>
+>         host->cookie = -1;
+> +       host->rw_mode = NORMAL_RW;
+>         mmc_detect_change(host->mmc, 0);
+>  }
+>
+> @@ -1487,6 +1660,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+>         host->cookie = -1;
+>         host->power_state = SDMMC_POWER_OFF;
+>         INIT_WORK(&host->work, sd_request);
+> +       INIT_DELAYED_WORK(&host->rw_idle_work, sd_rw_idle_work);
+>         platform_set_drvdata(pdev, host);
+>         pcr->slots[RTSX_SD_CARD].p_dev = pdev;
+>         pcr->slots[RTSX_SD_CARD].card_event = rtsx_pci_sdmmc_card_event;
+> @@ -1526,6 +1700,7 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+>                 pm_runtime_disable(&pdev->dev);
+>         }
+>
+> +       cancel_delayed_work_sync(&host->rw_idle_work);
+>         cancel_work_sync(&host->work);
+>
+>         mutex_lock(&host->host_mutex);
+> --
+> 2.25.1
