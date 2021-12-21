@@ -2,102 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99FBDC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 13:03:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A26F4C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 13:03:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238064AbhLUNDj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Dec 2021 08:03:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54100 "EHLO
+        id S238029AbhLUNDn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Dec 2021 08:03:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54122 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238029AbhLUNDi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 08:03:38 -0500
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 378CEC061574
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:38 -0800 (PST)
-Received: by mail-lj1-x22b.google.com with SMTP id z8so21277830ljz.9
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:38 -0800 (PST)
+        with ESMTP id S235146AbhLUNDm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 08:03:42 -0500
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35A95C061401
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:42 -0800 (PST)
+Received: by mail-lf1-x12e.google.com with SMTP id k37so29233339lfv.3
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:42 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Lg/+YbNmnCRLvJQl5zgsP/kvT/R8Y/LG6eop4ZJ5kFg=;
-        b=wEKmzVyqX4fogXHuKl1kZVPbOJB+KXJ0rp/lZ0OcKlMA2yB0PM7CD2nXS4wq+I0N00
-         2ahwnlR+nLKqfwSvof+QkbS82AhfkSwfN8s3nnfQp6D9ulVfDEZLM99ETlEnvIm8QU0W
-         i0hWxmmYJ7ziRb0qTvly6vT41YzoJjlDFlHvcVYPCi3BfYWuxwHSM1Art+hMCk9ydDoB
-         Df8xA8MIstpnHe7E75hocjh436kvHlv9VtaAQgDgHhwjYe059T6iGaxeC/oiH/DOr9o2
-         KpTRd2cqmmZ2xB9e8RQntkBVGN1/5IMKhLuX4yug85kyJxeDZk1IENlChYQ6jN+NoiXJ
-         cjcA==
+        bh=t0Xg3orseU+YFr+9C6yP7N5i5w90bmFHlz28JSF7k/M=;
+        b=dS44wMzmgN92SH1GoeY5sHqQjlqo4Bm5r4ZXHFiW+SAkKnuXd93oMfKxWGG2ehBMNa
+         AJKSkU9MPdw7C6astpdL+7BbK5YvRjmsFwtv218435gNiSoPeSu+rmHqu5JN04Oq3qd5
+         Cdxk1nxVxsLL7ImtKC3iKBauwPQJ7YY3yf+tS0L/57uiX9uyPrCFFMWWxRE0pKFh5Pg2
+         6aNXvTN3KW7mc8MW7jpGUevhsWf0feJ9UpozwkfM0OiE6v/ISzGVYdsYATyacJXXtfLI
+         8yFvCezNVmOlZcXLmlDbdcxAhy2KckC5RF5jcCjzEiX6QsiiouZYNDmInjY+lEYQr1qZ
+         n93A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Lg/+YbNmnCRLvJQl5zgsP/kvT/R8Y/LG6eop4ZJ5kFg=;
-        b=4/wkpGz0FQEOdj5ZEmCf93II/w4MwQxwf0qqi5uWpzH8ixGH7X6UL+E/xZ5QUp21S4
-         qBbVQK/1kSWjR1Mo9kqrGqKSn0j0AhkE+Un5rQv9PUeOzDMaDIWtAKUqRHpC8z5UqI1X
-         ppXfypnlun493jMz1dR/XDbxJhDxNiJ6JL4khTBsR5diHXrO89RL7uv1BPEpWd4XSNfX
-         igiu/i6QED2RHSfxhUAOsr0c9VGUZDoVsYMpAvs4kOedvxFVQNLMbky6DpmwtZLSb8Ov
-         aQPzSmmLkrixEk/oDYcD6qKWBP91kvDnuYk0IkhZHEpqV/Ahau//atFinOteJR5QHEOh
-         shhA==
-X-Gm-Message-State: AOAM532X3FGPypBZ1HsPA66XLdXiFl2ddFcEajlA/CFm1QakYPWPoQhI
-        OzAZUlTbkneAyp137lQDEb8zbQvbVtGKHGbEkD31Kt9eLdc=
-X-Google-Smtp-Source: ABdhPJzQ9aEfXhZCcRlIkSlDjbGVACLwWgp6kfc1uq4FyOMyJdDQUz4JUU0KDLkcttu0+pLxlQq0GaK3eB5MuBUrg2k=
-X-Received: by 2002:a2e:9915:: with SMTP id v21mr2437966lji.273.1640091816235;
- Tue, 21 Dec 2021 05:03:36 -0800 (PST)
+        bh=t0Xg3orseU+YFr+9C6yP7N5i5w90bmFHlz28JSF7k/M=;
+        b=BUaoHkv4bwfNDz0mU7QSXeJxoQf28HN739lVDH/PNL9muq+gW+53fYU+gMPnj+DkVf
+         70b2Qncznq4Kn5innADI38lnsPkZisS4C7cl1rzjPyonOf2oq1RG+hVNaGgxzDCVQS3V
+         NUnmOqT3yXhV+5GxGOmUUqbaxcpmucDC1FLrBHG8LtlHpMXxjBKLM1zFT8bh2jGYLiID
+         j3OGhwWoYtyMxQMRSBIfeTTzNlQg4P5vvNXvWAD4LOi22T3tzYCPM29w0c24xjjPoCmQ
+         xD8Si0WWtrGYZpt84xG8peS8CFMNrjHk7qbx39fZoFHIbpNym69V+mgiNFibiSIjBcs0
+         376w==
+X-Gm-Message-State: AOAM531MCUA+TF7RRYMvQL7mrCipfCynxsl/K3WIMYwjeSvFEfq/xZwu
+        wM1cq1ML+u3k8lFBp1XB0RWHeFCwHlWTXRk62Zw0Vg==
+X-Google-Smtp-Source: ABdhPJxG3uHqZH08DUdXd3BNJXX2KbKVBHTRtUnPbDdcp5BZXQjy3wBHGptH5UNs341UHXUYM5ZmO8yNCUzrkWzfPD8=
+X-Received: by 2002:ac2:5966:: with SMTP id h6mr2989371lfp.358.1640091820496;
+ Tue, 21 Dec 2021 05:03:40 -0800 (PST)
 MIME-Version: 1.0
-References: <20211215011336.194089-1-joel@jms.id.au>
-In-Reply-To: <20211215011336.194089-1-joel@jms.id.au>
+References: <20211215161045.38843-1-marcan@marcan.st>
+In-Reply-To: <20211215161045.38843-1-marcan@marcan.st>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 21 Dec 2021 14:02:59 +0100
-Message-ID: <CAPDyKFoZ3Btj562pNDEzPL4icBD-wZ+9ykxCVceJ5FJm6ao41A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Fix blk_status_t handling
-To:     Joel Stanley <joel@jms.id.au>
-Cc:     linux-mmc@vger.kernel.org
+Date:   Tue, 21 Dec 2021 14:03:03 +0100
+Message-ID: <CAPDyKFoGEqBZ3XbGzc5E4QvWFcQN6nM7Envq5cM7Wmdp+jZSvw@mail.gmail.com>
+Subject: Re: [PATCH v3 0/2] mmc: sdhci-pci-gli: GL9755: Quirks for Apple ARM platforms
+To:     Hector Martin <marcan@marcan.st>
+Cc:     Ben Chuang <benchuanggli@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Robin Murphy <robin.murphy@arm.com>,
+        Sven Peter <sven@svenpeter.dev>, Marc Zyngier <maz@kernel.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Dec 2021 at 02:13, Joel Stanley <joel@jms.id.au> wrote:
+On Wed, 15 Dec 2021 at 17:16, Hector Martin <marcan@marcan.st> wrote:
 >
-> Sparse spits out this following warning:
+> Hi folks,
 >
-> drivers/mmc/core/queue.c:311:21: warning: incorrect type in assignment (different base types)
-> drivers/mmc/core/queue.c:311:21:    expected int ret
-> drivers/mmc/core/queue.c:311:21:    got restricted blk_status_t [usertype]
-> drivers/mmc/core/queue.c:314:21: warning: incorrect type in assignment (different base types)
-> drivers/mmc/core/queue.c:314:21:    expected int ret
-> drivers/mmc/core/queue.c:314:21:    got restricted blk_status_t [usertype]
-> drivers/mmc/core/queue.c:336:16: warning: incorrect type in return expression (different base types)
-> drivers/mmc/core/queue.c:336:16:    expected restricted blk_status_t
-> drivers/mmc/core/queue.c:336:16:    got int [assigned] ret
+> This short series adds a few quirks needed to make the card readers in
+> Apple M1 Pro/Max MacBook laptops work properly.
 >
-> ret is only used for blk_status_t types, so make it that type.
+> The first patch should be straightforward; it just allows configuring
+> the CD/WP polarity based on device tree settings. There is already a
+> standard DT binding for this.
 >
-> Signed-off-by: Joel Stanley <joel@jms.id.au>
+> The second patch works around an issue with 8/16-bit MMIO reads that
+> only affects these platforms, for some reason.
+>
+> Changes since v2:
+>  - Style fixes
+>
+> Hector Martin (2):
+>   mmc: sdhci-pci-gli: GL9755: Support for CD/WP inversion on OF
+>     platforms
+>   mmc: sdhci-pci-gli: GL975[50]: Issue 8/16-bit MMIO reads as 32-bit
+>     reads.
+>
+>  drivers/mmc/host/sdhci-pci-gli.c | 34 ++++++++++++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
+>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/core/queue.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index b15c034b42fb..c69b2d9df6f1 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -234,7 +234,7 @@ static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
->         enum mmc_issue_type issue_type;
->         enum mmc_issued issued;
->         bool get_card, cqe_retune_ok;
-> -       int ret;
-> +       blk_status_t ret;
->
->         if (mmc_card_removed(mq->card)) {
->                 req->rq_flags |= RQF_QUIET;
-> --
-> 2.34.1
->
