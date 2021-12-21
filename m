@@ -2,70 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95064C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 13:03:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0A2AC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 13:03:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234976AbhLUNDX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Dec 2021 08:03:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54016 "EHLO
+        id S238043AbhLUND2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Dec 2021 08:03:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54040 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238024AbhLUNDW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 08:03:22 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18A91C061574
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:22 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id bu9so7640109lfb.7
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:22 -0800 (PST)
+        with ESMTP id S238040AbhLUND1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 08:03:27 -0500
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7349C061401
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:26 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id p8so21297351ljo.5
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Dec 2021 05:03:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=EbFMqfLUV7jqbg8sJZLc2clgBzqbVKTSLl3KdaBAXZM=;
-        b=U8DREYfaMAZ0dbfgkMS4Up6G506OcBayGPwepAX98LgXHrPGUKa05zz8TLvojVHKnl
-         Sdj61ODtqDJhJQVxESkLRYQXETkYCozpuqQ9KNxSHaW9+pj7vs7Y/f/fDxepaOuDQpVN
-         NetS8jpTdck2zqqiiVfqm9tc9IaojIB9SOhfUWZUkbFz9l9qExgqRFwgjVuZB2wu3aAP
-         ylRNY58GUklfXnWjxJ4Vs7wzTwJpWvXZHEeQs38D/wIdyLfUqwrjH2ejhRu5sChshk9t
-         LnDNgx2kqu3kcT5/v7WTZjuPk02YfrrARdYf1Y9pdnYayUE0A1p/MdJr/EZTQt9Fk99c
-         67sQ==
+        bh=BklsEzYOKN5NzN+jKf42upOseZFcIPymlb6DwRKDDYM=;
+        b=tAm0b7OdnZ+KqS8rwrJsomM8RedG+2bL7ofKXwJCPK9fXLaQSsdZHl015C4qDo5Xzt
+         l5FHhW20LHhpchFvnBdgkQCtJRf/zuJeHxgwJp9RMRurlVCz3j3u+4xOR8wBzU+5uL7w
+         Brsn13Cr/PjCWgB+MkNcFCMhdVzC+/EdJKxcAyt0klMrxQ191irjl1V8A0SLr2Rj2wXF
+         mRCJa5L2UjS1fEgutUhDCeRf6bqiiTenjwgPxxVulAJ10wIpuohYI00K9YDZT/uINgUc
+         8fY5FKRuce+jjEfI63pM0fU/TkD4qGfHpUb1iASYtILZFJ0ghTmSOzm7rv9MRIngGYMo
+         SzuQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=EbFMqfLUV7jqbg8sJZLc2clgBzqbVKTSLl3KdaBAXZM=;
-        b=BE9BgiuwDmV1svisslGGO6To3pObhFqUitJa01nJZt5RYAgUHk2XTjeL0WbPh1Ap2E
-         VXXws/CFsFmnOrMk0edmKoQIro6PUOdhwU8i7J0a20CA2L4nESO6in+fS9kOcvJgHCi3
-         bGUNQXq2wUzCtKjpwlrDKA59uAZV+FGRsOaFVTdm2dUbG/BRWjeEgCiwHfvxpFg3p6Vn
-         wIUOvafiVjhoNLYFW+oSjJ2xrKMwprgOosKog2HJ7RlHw3Y8LDFmCY5aEwSSRNQJEHQs
-         LTnMVKO8KzP60TKOjb9CR0Y7r2+JsZ/Arj0L3HlID7HQ5l2JpDADvrcU6VRaNkP8HkSt
-         HMxA==
-X-Gm-Message-State: AOAM531Jc0oSpsqdIJbxlBCIEowj0DOcSHp5yBdu/8kNca9ePQrzrvJC
-        1Cu8MhN5pSnqtnj+CIFLli1NeSfUtuvOYl+peFZJlIg50+0=
-X-Google-Smtp-Source: ABdhPJyj2JiEdgIr2ylZYEDZ2Yav+CgsmjJXAaF1llCj1oEB9JMNfTLdHSw0NUdOMpsK1Wsgmg9lPE+EcZv+5rRY4cA=
-X-Received: by 2002:a05:6512:310e:: with SMTP id n14mr2985967lfb.167.1640091800421;
- Tue, 21 Dec 2021 05:03:20 -0800 (PST)
+        bh=BklsEzYOKN5NzN+jKf42upOseZFcIPymlb6DwRKDDYM=;
+        b=WC5Dk7f0pec6tV9ibhjK4MrAmVfEDiGlU1bZBPvVRYrXqKzGCXf9iCoh2LFrtRnIQC
+         4N8WTFMsCnVPouEg+SMjvS1YlnC8YjO5Mx6Zs1EHt810yRmGLkG0oq1FsJobBr/A/blH
+         a9rszBdK1wcb2IQ9eVjEBNj7ZMhMv2YRoJg04RrDd4VZxiuoy1SInRe9/rNxl4vtQ0iR
+         NYfyQ/xdp2s9x0RuCyffvcV/twkRdgqfSCy3l9923cS74DUk9fUK9OqUSmvHfHEBBokF
+         6lTumMx3Lcf/XQGQ726Q8npH/EpoQhlvCL7bap7sCkGzBLZMo4SaIG2TOWzlSNaVjjDX
+         x6AA==
+X-Gm-Message-State: AOAM533ORoyamkGzOI2EF0cSfjDFNmAM11eICjJuSihwozcLBSquOL9Y
+        fyz3TcmhBpHYWEZrZDdFcGy89uPfkVn/Pd6mPGQTiw==
+X-Google-Smtp-Source: ABdhPJyjzfFymKYCSVirNcz8GGdi6nI9/nsK/j+LZj4hEfP98GWY52IBMfalhcQ3xiRVY4rOQW8XpeOTfjSURLAw9SQ=
+X-Received: by 2002:a05:651c:10b1:: with SMTP id k17mr2419272ljn.463.1640091804957;
+ Tue, 21 Dec 2021 05:03:24 -0800 (PST)
 MIME-Version: 1.0
-References: <20211219153442.463863-1-martin.blumenstingl@googlemail.com> <20211219153442.463863-3-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20211219153442.463863-3-martin.blumenstingl@googlemail.com>
+References: <20211210091834.28958-1-yann.gautier@foss.st.com>
+In-Reply-To: <20211210091834.28958-1-yann.gautier@foss.st.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 21 Dec 2021 14:02:42 +0100
-Message-ID: <CAPDyKFrbWqMSTPvpsYD40yiHvowkVrTRDrjqpt-v3yhJZ9JRgQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: meson-mx-sdhc: Drop unused
- MESON_SDHC_NUM_BUILTIN_CLKS macro
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Date:   Tue, 21 Dec 2021 14:02:46 +0100
+Message-ID: <CAPDyKFqr1fx8hvqvdettPyUYtdVEN+9d1m7908Y-j9GjXzPXJg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: add st,stm32-sdmmc2 compatible
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, loic.pallardy@foss.st.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 19 Dec 2021 at 16:34, Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
+On Fri, 10 Dec 2021 at 10:19, Yann Gautier <yann.gautier@foss.st.com> wrote:
 >
-> Remove MESON_SDHC_NUM_BUILTIN_CLKS because it is not used anywhere in
-> the driver.
+> Although this compatible is not used in kernel, as we use the common
+> MMCI driver, it is used by bootloaders. The U-Boot driver was merged
+> before the kernel driver and uses this compatible.
+> To avoid issues when aligning device tree files between kernel and
+> boot loader, the ST dedicated compatible is added to bindings file.
 >
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 
 Applied for next, thanks!
 
@@ -74,22 +77,26 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/meson-mx-sdhc-clkc.c | 2 --
->  1 file changed, 2 deletions(-)
+>  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 6 ++++++
+>  1 file changed, 6 insertions(+)
 >
-> diff --git a/drivers/mmc/host/meson-mx-sdhc-clkc.c b/drivers/mmc/host/meson-mx-sdhc-clkc.c
-> index e1f29b279123..19200b7079a6 100644
-> --- a/drivers/mmc/host/meson-mx-sdhc-clkc.c
-> +++ b/drivers/mmc/host/meson-mx-sdhc-clkc.c
-> @@ -12,8 +12,6 @@
+> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> index 47595cb483be..eed54bee7665 100644
+> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> @@ -53,6 +53,12 @@ properties:
+>          items:
+>            - const: arm,pl18x
+>            - const: arm,primecell
+> +      - description: Entry for STMicroelectronics variant of PL18x.
+> +          This dedicated compatible is used by bootloaders.
+> +        items:
+> +          - const: st,stm32-sdmmc2
+> +          - const: arm,pl18x
+> +          - const: arm,primecell
 >
->  #include "meson-mx-sdhc.h"
->
-> -#define MESON_SDHC_NUM_BUILTIN_CLKS    6
-> -
->  struct meson_mx_sdhc_clkc {
->         struct clk_mux                  src_sel;
->         struct clk_divider              div;
+>    clocks:
+>      description: One or two clocks, the "apb_pclk" and the "MCLK"
 > --
-> 2.34.1
+> 2.17.1
 >
