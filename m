@@ -2,147 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FED3C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Dec 2021 10:49:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E9A4C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Dec 2021 11:17:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240110AbhLVKtx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Dec 2021 05:49:53 -0500
-Received: from foss.arm.com ([217.140.110.172]:43550 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239538AbhLVKtw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 22 Dec 2021 05:49:52 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3CC511FB;
-        Wed, 22 Dec 2021 02:49:52 -0800 (PST)
-Received: from donnerap.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id DF26B3F5A1;
-        Wed, 22 Dec 2021 02:49:50 -0800 (PST)
-Date:   Wed, 22 Dec 2021 10:49:47 +0000
-From:   Andre Przywara <andre.przywara@arm.com>
-To:     Michael Wu <michael@allwinnertech.com>
-Cc:     ulf.hansson@linaro.org, mripard@kernel.org, wens@csie.org,
-        samuel@sholland.org, jernej.skrabec@gmail.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-sunxi@lists.linux.dev, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 3/3] mmc: sunxi-mmc: use pll to increase clock speed
-Message-ID: <20211222104947.1d978864@donnerap.cambridge.arm.com>
-In-Reply-To: <20211222031557.34242-1-michael@allwinnertech.com>
-References: <20211222031557.34242-1-michael@allwinnertech.com>
-Organization: ARM
-X-Mailer: Claws Mail 3.17.5 (GTK+ 2.24.32; aarch64-unknown-linux-gnu)
+        id S244553AbhLVLRj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Dec 2021 06:17:39 -0500
+Received: from mout.kundenserver.de ([212.227.126.130]:40609 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244538AbhLVLRf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Dec 2021 06:17:35 -0500
+Received: from mail-wr1-f52.google.com ([209.85.221.52]) by
+ mrelayeu.kundenserver.de (mreue010 [213.165.67.97]) with ESMTPSA (Nemesis) id
+ 1Mzi3l-1mDXm12Pth-00vddY; Wed, 22 Dec 2021 12:17:32 +0100
+Received: by mail-wr1-f52.google.com with SMTP id j18so4215804wrd.2;
+        Wed, 22 Dec 2021 03:17:32 -0800 (PST)
+X-Gm-Message-State: AOAM531vWTHNTzykq4unpDUrfNwuUJ+/nOAAmKTnJ1uadF/vyhcAuVHH
+        RhuLOcWUL/S5AfsnTtruvuIoMug3jpXzbfwSXdc=
+X-Google-Smtp-Source: ABdhPJyaaVKk3ij7jkLGVaEFAO4sePbkYDGdbMYrYwErWCECxFNczxoRpepU5YVttAHlwzlBujezG7fVoMI9BRWHIQU=
+X-Received: by 2002:a5d:6989:: with SMTP id g9mr1764720wru.12.1640171852021;
+ Wed, 22 Dec 2021 03:17:32 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+References: <20211222015244.2464671-1-Mr.Bossman075@gmail.com>
+In-Reply-To: <20211222015244.2464671-1-Mr.Bossman075@gmail.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Wed, 22 Dec 2021 12:17:15 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a2TujT7u4Y2hOce0h9SyRWuQP9+8wbXhZEzgNp5FSTwSg@mail.gmail.com>
+Message-ID: <CAK8P3a2TujT7u4Y2hOce0h9SyRWuQP9+8wbXhZEzgNp5FSTwSg@mail.gmail.com>
+Subject: Re: [PATCH v6 0/7] dd initial support for the i.MXRTxxxx SoC family
+ starting from i.IMXRT1050 SoC.
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     NXP Linux Team <linux-imx@nxp.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dong Aisheng <aisheng.dong@nxp.com>,
+        Stefan Agner <stefan@agner.ch>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        gregkh <gregkh@linuxfoundation.org>,
+        Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olof@lixom.net>,
+        SoC Team <soc@kernel.org>,
+        Russell King - ARM Linux <linux@armlinux.org.uk>,
+        Abel Vesa <abel.vesa@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Giulio Benetti <giulio.benetti@benettiengineering.com>,
+        Nobuhiro Iwamatsu <nobuhiro1.iwamatsu@toshiba.co.jp>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:JSF0KGb40Rsnqn+Ec99D13zUGQFmbby/CsYvqtXFH0U2ucRnHpG
+ fOah2SnCbsQQZ5D4RLIy2JnSaIjR5maVUsfFxaYYl8BV2W2nfmRpprO27BqOqPJUvzcHZSp
+ f8yAOWapaolaUQfuv6wKIB9QaeG609kx9MgYPInFOsptOhTFl/2mC8HAgnELthnkzoPI8kq
+ Ah+iQhM8OkhMNl7wwxOpA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:Wi0as2i4V30=:KAiE78GeuH52oUCbNDM5+Z
+ +RGVpN0TuMOpzn2tUl+vksRaTJ9aPfACVN7TUTnEzimoeqh6H2OX+RkryQeyDrCQK6uLlKBgO
+ YIpW0cJuhLY2lseFit2K1icu6IkR1Cmmer17nfz5tnhyS3ABjNF3uCqaI41olK9k1fYEUmUDe
+ damZlhruOP3Z4vw7+O1/+ung+o0h34QNkDLngrKhNRU6WVTuJ9oAP2ms1kfbNHnftf58bKMPW
+ H6aTT+GBTz5V7zp+HNTnmEeDlpHr0Y3GesesEjmd6AVp2AzgOLC4HoqgAHSvqgUQ8ozNQ0jxy
+ jb7hW6bNqankFyD+zehzULqHpY5auhtx/EZDSqGAbaU4tS9bHfJInmdI1J3RhwfbabX5OWHxI
+ lpbaGiuOigUByMi5yhcK/7MRHGLpO2MC0eWeLLlEXRvjxgc/sLP9YPTCuWdJok24hNxSQ9f2T
+ fKAcBpmRzHGgIbwDHRcpf/ZFSS6IWKLAZ16vk88m7wSlVRImfY/uLPSyQLmQmIRJxp1Vc/1BN
+ 1C1M4L8a0djq4YwOPt8gFe0Hg5qR44JPDjEy2Xr21lpNTpf2Oo3sDFpuEr6Wmu8iR265KPFhr
+ y1AYrifgP+1gj/P9l87QYVtqNFeUsDQOP4aOnn6+oOIneLy819ZGz/zrbYI88Wsr8E/6WOiBB
+ CULsl5Zx1rO5oeoGCITn8/FkDuT2yqANECDhCqsl1hw4cOuL1xsEIpXraCF9Kw6GbdVJ9btqN
+ MP1NeQt+sKHqebH1Fijuch0gcPXB2Sx4Gk6tCJyI0wWMF5X94vQVh0S52zpJU6VHMw8KYazMM
+ 1GHmzyOqVFvfmaHPiBid1h1hNIUO+Co96Fbf2VkI6qk1WafIYY=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 22 Dec 2021 11:15:57 +0800
-Michael Wu <michael@allwinnertech.com> wrote:
+On Wed, Dec 22, 2021 at 2:52 AM Jesse Taube <mr.bossman075@gmail.com> wrote:
+>
+> This patchset contains:
+> - i.MXRT10xx family infrastructure
+> - i.MXRT1050 pinctrl driver adaption
+> - i.MXRT1050 clock driver adaption
+> - i.MXRT1050 sd-card driver adaption
+> - i.MXRT1050 uart driver adaption
+> - i.MXRT1050-evk basic support
+>
+> The i.MXRTxxxx family that could have support by Linux actually spreads
+> from i.MXRT1020 to i.MXRT1170 with the first one supporting 1 USB OTG &
+> 100M ethernet with a cortex-M7@500Mhz up to the latter with i.MXRT1170
+> with cortex-M7@1Ghz and cortex-M4@400Mhz, 2MB of internal SRAM, 2D GPU,
+> 2x 1Gb and 1x 100Mb ENET. The i.MXRT family is NXP's answer to
+> STM32F7XX, as it uses only simple SDRAM, it gives the chance of a 4 or
+> less layer PCBs. Seeing that these chips are comparable to the
+> STM32F7XXs which have linux ported to them it seems reasonable to add
+> support for them.
 
-Hi Michael,
+I'm in the process of finalizing the pull requests for 5.16, this came
+up since you
+have soc@kernel.org on Cc, but it looks like you don't have an Ack for the
+clock driver, and I have not heard from Shawn or Sasha about whether they
+want to pick it up in a separate branch or I should pick it up.
 
-> Default clock soucre is 24M,if we want clock over 24M
-> We should use pll as clock source
+I suggest we leave it for this time then, let's plan for 5.18 instead.
 
-Can you say what this patch actually fixes? What is the problem?
-
-As far as I know, we don't have any issues with MMC clock frequencies, and
-are basically always using the PLL as the clock source. This is
-handled automatically by the common clock framework, which knows about all
-possible muxes and their parents:
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/sunxi-ng/ccu-sun50i-a64.c#n417
-In fact that also probably explains the issue you address in patch 2/3.
-
-One more comment below.
-
-> 
-> Signed-off-by: Michael Wu <michael@allwinnertech.com>
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 57 +++++++++++++++++++++++++++++++++++-
->  1 file changed, 56 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 7b47ec453fb6..0039ee58b303 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -756,6 +756,57 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
->  	return 0;
->  }
->  
-> +/**
-> + *
-> + * sunxi_clk_get_parent() - get parent pll from dts
-> + * @host:		sunxi_mmc_host struct point
-> + * @@clock:		the clock frequency that requested
-> + *
-> + * Default clock source is 24M,if we want clock over 24M,We should use
-> + * pll as clock soure
-> + *
-> + * Return:the 0:ok,other:failed
-> + */
-> +static int sunxi_clk_get_parent(struct sunxi_mmc_host *host, u32 clock)
-> +{
-> +	struct clk *sclk = NULL;
-> +	char *sclk_name = NULL;
-> +	u32 src_clk = 0;
-> +	s32 err = 0;
-> +	struct device *dev = mmc_dev(host->mmc);
-> +
-> +	sclk = clk_get(dev, "osc24m");
-> +	sclk_name = "osc24m";
-
-This "getting clocks by their global name" is not the way it should work,
-you just reference clocks you get from your very own DT node (devm_clk_get()).
-This is probably something that the BSP kernel does very differently?
-
-Cheers,
-Andre
-
-> +
-> +	if (IS_ERR(sclk)) {
-> +		dev_err(mmc_dev(host->mmc), "Error to get source clock %s\n",
-> +				sclk_name);
-> +		return PTR_ERR(sclk);
-> +	}
-> +
-> +	src_clk = clk_get_rate(sclk);
-> +	if (clock > src_clk) {
-> +		clk_put(sclk);
-> +		sclk = clk_get(dev, "pll_periph");
-> +		sclk_name = "pll_periph";
-> +	}
-> +	if (IS_ERR(sclk)) {
-> +		dev_err(mmc_dev(host->mmc), "Error to get source clock %s\n",
-> +				sclk_name);
-> +		return PTR_ERR(sclk);
-> +	}
-> +
-> +	err = clk_set_parent(host->clk_mmc, sclk);
-> +	if (err) {
-> +		dev_err(mmc_dev(host->mmc), "set parent failed\n");
-> +		clk_put(sclk);
-> +		return err;
-> +	}
-> +	clk_put(sclk);
-> +	return 0;
-> +}
-> +
-> +
->  static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->  				  struct mmc_ios *ios)
->  {
-> @@ -801,7 +852,11 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->  			return ret;
->  		}
->  	}
-> -
-> +	/**
-> +	 * No check return value,because dts may not have osc24M, and pll_periph,
-> +	 * at that time,use default value from clk system
-> +	 */
-> +	sunxi_clk_get_parent(host, clock);
->  	rate = clk_round_rate(host->clk_mmc, clock);
->  	if (rate < 0) {
->  		dev_err(mmc_dev(mmc), "error rounding clk to %d: %ld\n",
-
+          Arnd
