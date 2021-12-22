@@ -2,154 +2,159 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98E8EC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Dec 2021 20:59:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 160D9C43219
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Dec 2021 01:52:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235552AbhLUU7C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Dec 2021 15:59:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52376 "EHLO
+        id S241379AbhLVBwt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Dec 2021 20:52:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235545AbhLUU7C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 15:59:02 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFADFC061574;
-        Tue, 21 Dec 2021 12:59:01 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id k21so673113lfu.0;
-        Tue, 21 Dec 2021 12:59:01 -0800 (PST)
+        with ESMTP id S241343AbhLVBwt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Dec 2021 20:52:49 -0500
+Received: from mail-qt1-x82e.google.com (mail-qt1-x82e.google.com [IPv6:2607:f8b0:4864:20::82e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 467C4C061574;
+        Tue, 21 Dec 2021 17:52:48 -0800 (PST)
+Received: by mail-qt1-x82e.google.com with SMTP id l17so607536qtk.7;
+        Tue, 21 Dec 2021 17:52:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=EMjej9HUtAXOcAMoyZw+nimK8vBoVTGCydufGYxXW3A=;
-        b=QBxyUvO5aXbxIR0XthlyHePXA11I979yfrf++6Y0YXUqD3swGqlQJM6N0SK/yeSF+N
-         oPD03Rnl39x+aXv/H/sdi+RAKmXkUy/P7qzmBLNwphVzzxjXMF2uhCvotIV9ESDHgQHu
-         SF8BPoPlscsudtTMuzetF1bNB+QRvQJzVOxCgUe2mVVbMlcoMvzYfM9GeHQyuEVNdsro
-         3u8bS2UuxWFsWIKF9oOCdJgkiptAxYRerVHbNFcYYTuAHFFyttwtE/I9WiYnIpH5Az1N
-         kkKHi4GRLrufxZTanpKnTmHxuoB0gY4w/VSml3M4Vauilk8+gRLJHbMrGLiVdQdsDjBh
-         QwjA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Lc/MTdHw8w2hgosWEnakgoAuLPp1GXkSGiA0tQorVkU=;
+        b=R7ellObNYoZZhvSi6Mj5U2BzNlr1It4Z0+HoNASJv0BPyN4haouDVv7tXJwYPeQtGq
+         EuWGiiWognusoqwStq9drFuQWE2J1h7QlW2YncGZsiNnGGwultWA0aq6vGIoSBnGCAjm
+         2kSNtbKnepWHq0lBEY+MQMOziDJMOhmSFkHO1dgE0aOzc/YmMKgZUmD1hakUHizfILMQ
+         IqJRefyOEtdpv58OcdjC0mSn1Ja4Y01ANYuHvYbVyW4eHbujzPIyK/hpkbtPHKKfwBjn
+         mMdy5GvMXJR7I54vNfPIzhngDVUDWHKCgjUIwqKNKUN4yRopyY3PY1XHExYTznO7KgZp
+         m+kQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=EMjej9HUtAXOcAMoyZw+nimK8vBoVTGCydufGYxXW3A=;
-        b=frv/BPzhdduZY0cCYvTinDekmVgJFc5K17/JthK+pudbVeYg/HQkIIsh80335+3K+Z
-         ciMT5Wgp1VmbCkf1wT3ufTgLHzaxROouVNjg5S/A5NCOk88Ql7jh2wCk1Sr5bUXB2Qzf
-         tEqwlMJHDTT/KESFVFiFBmF5lHT+5tryt11Uwf2ggTdxsl3xGZ137Qk2hHEmiNAvGlvW
-         vZyXqHfvkveTlVMBwUjipBVqfTdcrr0fuueTysxPueHLtLhXgNiV1EvirWJRDMfRyjS7
-         Rr61N+/unlChxYQjjXwI1MiN4ySdLP7jPMm/KFvnEDSBGCgH6ZOy2ZrxPhKe9OwrzEHh
-         DAnw==
-X-Gm-Message-State: AOAM531/wzcZ2ronBMktNKDU8wYVHVnNfXQfyc2cMHmOn+jpfKNdU5Nv
-        ZiQ+OdgfTTAsn2hXIPx2K2o=
-X-Google-Smtp-Source: ABdhPJyQqGTd/AQR3V4qGYEJ+lnA9nHyBoOuC+0UYbMfak9DWTHgpUTRFKkjLQB10viCSl/8d/IXNw==
-X-Received: by 2002:a05:6512:691:: with SMTP id t17mr125939lfe.55.1640120340186;
-        Tue, 21 Dec 2021 12:59:00 -0800 (PST)
-Received: from [192.168.2.145] (46-138-43-24.dynamic.spd-mgts.ru. [46.138.43.24])
-        by smtp.googlemail.com with ESMTPSA id bj11sm200ljb.62.2021.12.21.12.58.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 21 Dec 2021 12:58:59 -0800 (PST)
-Subject: Re: [PATCH v16 08/40] gpu: host1x: Add initial runtime PM and OPP
- support
-To:     Jon Hunter <jonathanh@nvidia.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>
-Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-References: <20211130232347.950-1-digetx@gmail.com>
- <20211130232347.950-9-digetx@gmail.com>
- <21212ddb-205f-71d6-0199-d75768eaf32c@nvidia.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <41edc53b-5ed1-d524-2546-c3d1ee6cdea4@gmail.com>
-Date:   Tue, 21 Dec 2021 23:58:58 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        bh=Lc/MTdHw8w2hgosWEnakgoAuLPp1GXkSGiA0tQorVkU=;
+        b=PV8WOLtbKH9iH90gbz5g2f0JZKiB0zoLh316NmjX8r3nJNEomKHTO2PhFixc0yoW4p
+         dASMmCfj6h5a26x/GtA+DMTV3ydGhTUcQB26DFIxLcsIZeNiHnmu5i6X8zy5BJj52qYv
+         8GMlmxZvp/nm94LU0erTachcfb6O6ju0hYeBEAjtJ5KsUJ/wQN261gnp7X/YMymEbe1s
+         44kbQ1VUrVJEycxGpgnOcugeZojkMFzk5F5/fz+2tcx2U1xTp9UWMbVfKNH2TrUrFl3T
+         HsE5N6od9dBIp2IurAt7Q1NPnKmff73S/xS7CGTfvyzMb0K3ehBsaz4Ieh4cLtpBWbsf
+         f/mg==
+X-Gm-Message-State: AOAM531ejEMFNXpToyKKwfSUzKhlgU+RMzZJXwh8WrX9VSQEulXaL/6N
+        MXv96wjRnpCxIN6AMXhcnK4=
+X-Google-Smtp-Source: ABdhPJw30wTn59z1W6Nzm0yuguVm/dcUmBERaT67Mf7UsZAWyRvBWggsNidAzER7qvfjCZIsAz/Gig==
+X-Received: by 2002:a05:622a:590:: with SMTP id c16mr741519qtb.289.1640137966915;
+        Tue, 21 Dec 2021 17:52:46 -0800 (PST)
+Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
+        by smtp.gmail.com with ESMTPSA id d4sm658161qkn.79.2021.12.21.17.52.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 21 Dec 2021 17:52:46 -0800 (PST)
+From:   Jesse Taube <mr.bossman075@gmail.com>
+X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
+To:     linux-imx@nxp.com
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
+        stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
+        adrian.hunter@intel.com, jirislaby@kernel.org,
+        giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, Mr.Bossman075@gmail.com,
+        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org
+Subject: [PATCH v6 0/7] dd initial support for the i.MXRTxxxx SoC family starting from i.IMXRT1050 SoC.
+Date:   Tue, 21 Dec 2021 20:52:37 -0500
+Message-Id: <20211222015244.2464671-1-Mr.Bossman075@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-In-Reply-To: <21212ddb-205f-71d6-0199-d75768eaf32c@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+This patchset contains:
+- i.MXRT10xx family infrastructure
+- i.MXRT1050 pinctrl driver adaption
+- i.MXRT1050 clock driver adaption
+- i.MXRT1050 sd-card driver adaption
+- i.MXRT1050 uart driver adaption
+- i.MXRT1050-evk basic support
 
-Thank you for testing it all.
+The i.MXRTxxxx family that could have support by Linux actually spreads
+from i.MXRT1020 to i.MXRT1170 with the first one supporting 1 USB OTG &
+100M ethernet with a cortex-M7@500Mhz up to the latter with i.MXRT1170
+with cortex-M7@1Ghz and cortex-M4@400Mhz, 2MB of internal SRAM, 2D GPU,
+2x 1Gb and 1x 100Mb ENET. The i.MXRT family is NXP's answer to
+STM32F7XX, as it uses only simple SDRAM, it gives the chance of a 4 or
+less layer PCBs. Seeing that these chips are comparable to the
+STM32F7XXs which have linux ported to them it seems reasonable to add
+support for them.
 
-21.12.2021 21:55, Jon Hunter пишет:
-> Hi Dmitry, Thierry,
-> 
-> On 30/11/2021 23:23, Dmitry Osipenko wrote:
->> Add runtime PM and OPP support to the Host1x driver. For the starter we
->> will keep host1x always-on because dynamic power management require a
->> major
->> refactoring of the driver code since lot's of code paths are missing the
->> RPM handling and we're going to remove some of these paths in the future.
-> 
-> 
-> Unfortunately, this change is breaking boot on Tegra186. Bisect points
-> to this and reverting on top of -next gets the board booting again.
-> Sadly, there is no panic or error reported, it is just a hard hang. I
-> will not have time to look at this this week and so we may need to
-> revert for the moment.
+Giving Linux support to this family should ease the development process,
+instead of using a RTOS they could use Embedded Linux allowing for more
+portability, ease of design and will broaden the scope of people using
+embedded linux.
 
-Only T186 broken? What about T194?
+The EVK has very little SDRAM, generally 32MB starting from
+i.MXRT1020(the lowest P/N), although the i.MXRT1160/70 provide instead
+64MB of SDRAM for more functionality.
 
-Which board model fails to boot? Is it running in hypervisor mode?
+At the moment we do not support XIP for either u-boot or Linux but it
+should be done in the future. XIP will also save SDRAM.
 
-Do you use any additional patches?
+Another interesting fact is the amount of internal SRAM, as the P/N
+increases the SRAM will reach up to 2MB(some could be for cache and
+some would be for video).
 
-Could you please test the below diff? I suspect that
-host1x_syncpt_save/restore may be entirely broken for T186 since we
-never used these funcs before.
+Also, some parts have embed flash of 4MB that can be used for
+u-boot/Linux, if both correctly sized it will leave the SDRAM free.
 
---- >8 ---
+External flash can be Quad SPI and HyperFlash, so throughput would be
+decent.
 
-diff --git a/drivers/gpu/host1x/dev.c b/drivers/gpu/host1x/dev.c
-index f5b4dcded088..fd5dfb875422 100644
---- a/drivers/gpu/host1x/dev.c
-+++ b/drivers/gpu/host1x/dev.c
-@@ -580,7 +580,6 @@ static int __maybe_unused
-host1x_runtime_suspend(struct device *dev)
- 	int err;
+The i.MXRT11xx series supports MIPI interface too.
 
- 	host1x_intr_stop(host);
--	host1x_syncpt_save(host);
+The family in general provide CAN bus, audio I/O, 1 or more
+USB(otg/host), 1 or more 100Mb/1Gb ethernet, camera interface, sd-card.
 
- 	err = reset_control_bulk_assert(host->nresets, host->resets);
- 	if (err) {
-@@ -596,9 +595,8 @@ static int __maybe_unused
-host1x_runtime_suspend(struct device *dev)
- 	return 0;
+All this can be used for simple GUIs, web-servers, point-of-sale
+stations, etc.
 
- resume_host1x:
--	host1x_setup_sid_table(host);
--	host1x_syncpt_restore(host);
- 	host1x_intr_start(host);
-+	host1x_setup_sid_table(host);
+Giulio Benetti (4):
+  ARM: imx: Add initial support for i.MXRT10xx family
+  dt-bindings: imx: Add clock binding for i.MXRT1050
+  ARM: dts: imx: Add i.MXRT1050-EVK support
+  ARM: imxrt_defconfig: Add i.MXRT family defconfig
 
- 	return err;
- }
-@@ -626,9 +624,8 @@ static int __maybe_unused
-host1x_runtime_resume(struct device *dev)
- 		goto disable_clk;
- 	}
+Jesse Taube (3):
+  ARM: dts: imxrt1050-pinfunc: Add pinctrl binding header
+  dt-bindings: clock: imx: Add documentation for i.MXRT1050 clock
+  clk: imx: Add initial support for i.MXRT1050 clock driver
 
--	host1x_setup_sid_table(host);
--	host1x_syncpt_restore(host);
- 	host1x_intr_start(host);
-+	host1x_setup_sid_table(host);
+ .../bindings/clock/imxrt1050-clock.yaml       |  67 ++
+ arch/arm/boot/dts/Makefile                    |   2 +
+ arch/arm/boot/dts/imxrt1050-evk.dts           |  72 ++
+ arch/arm/boot/dts/imxrt1050-pinfunc.h         | 993 ++++++++++++++++++
+ arch/arm/boot/dts/imxrt1050.dtsi              | 154 +++
+ arch/arm/configs/imxrt_defconfig              |  35 +
+ arch/arm/mach-imx/Kconfig                     |   7 +
+ arch/arm/mach-imx/Makefile                    |   2 +
+ arch/arm/mach-imx/mach-imxrt.c                |  19 +
+ drivers/clk/imx/Kconfig                       |   5 +
+ drivers/clk/imx/Makefile                      |   1 +
+ drivers/clk/imx/clk-imxrt1050.c               | 181 ++++
+ include/dt-bindings/clock/imxrt1050-clock.h   |  73 ++
+ 13 files changed, 1611 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+ create mode 100644 arch/arm/boot/dts/imxrt1050-evk.dts
+ create mode 100644 arch/arm/boot/dts/imxrt1050-pinfunc.h
+ create mode 100644 arch/arm/boot/dts/imxrt1050.dtsi
+ create mode 100644 arch/arm/configs/imxrt_defconfig
+ create mode 100644 arch/arm/mach-imx/mach-imxrt.c
+ create mode 100644 drivers/clk/imx/clk-imxrt1050.c
+ create mode 100644 include/dt-bindings/clock/imxrt1050-clock.h
 
- 	return 0;
+-- 
+2.34.1
 
