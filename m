@@ -2,64 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C0569C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Dec 2021 18:13:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2A22C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Dec 2021 18:45:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349739AbhLWSNN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Dec 2021 13:13:13 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:47990 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230484AbhLWSNM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2021 13:13:12 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6D86E61F3F;
-        Thu, 23 Dec 2021 18:13:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id C6F50C36AEA;
-        Thu, 23 Dec 2021 18:13:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1640283191;
-        bh=i+htNJbk26CF6fX5WfPE4sP4Zoki3X7RJA+OchfK5Rw=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=GQLEOt8ma0rJJ03I6DOoM2KVIa325mp4wFq1ODND5wku1/+lC8Z41Van6iVt98VsV
-         vzNYNR+z2qD4ciFQicIeYiD26FVxrfnGQk4SCvjBFeT4ojQpLkK5Pahb/v4Xe3gIN1
-         uda4UGuF0FBJDAFDsJMuAdi+ujG7XOq3puptoT1vxrhGXuZeuQeitiXKg0speIlbq9
-         2Ekr8YYXr4VR9aIJarUVTMqZQmjKqnK+Kb9DL5lxm/fLTuv69hKNZA0qbJGSqYPKpV
-         3wMw4GcShthKBa5x6YtMpiVyVYW05p0V6E7rutZdS5jy6F6RqIc5PJgINnmAFu76pM
-         rYO6CcP12XXog==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id B68E0EAC065;
-        Thu, 23 Dec 2021 18:13:11 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.16-rc7
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20211223131726.10956-1-ulf.hansson@linaro.org>
-References: <20211223131726.10956-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20211223131726.10956-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc5
-X-PR-Tracked-Commit-Id: ff31ee0a0f471776f67be5e5275c18d17736fc6b
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 0d81b5faa234e92a56df1bc8ef3dacb7d5203efd
-Message-Id: <164028319174.29771.17730196775919154719.pr-tracker-bot@kernel.org>
-Date:   Thu, 23 Dec 2021 18:13:11 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        id S1349881AbhLWSp2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Dec 2021 13:45:28 -0500
+Received: from mxout03.lancloud.ru ([45.84.86.113]:38060 "EHLO
+        mxout03.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244754AbhLWSp2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2021 13:45:28 -0500
+Received: from LanCloud
+DKIM-Filter: OpenDKIM Filter v2.11.0 mxout03.lancloud.ru 8296B20617B5
+Received: from LanCloud
+Received: from LanCloud
+Received: from LanCloud
+From:   Sergey Shtylyov <s.shtylyov@omp.ru>
+Subject: [PATCH] mmc: au1xmmc: propagate errors from platform_get_irq()
+To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
+CC:     Manuel Lauss <manuel.lauss@gmail.com>
+Organization: Open Mobile Platform
+Message-ID: <f642ef4d-6027-eb2e-0257-1c4f13911aed@omp.ru>
+Date:   Thu, 23 Dec 2021 21:45:21 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [192.168.11.198]
+X-ClientProxiedBy: LFEXT02.lancloud.ru (fd00:f066::142) To
+ LFEX1907.lancloud.ru (fd00:f066::207)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Thu, 23 Dec 2021 14:17:26 +0100:
+The driver overrides the error codes returned by platform_get_irq() to
+-ENODEV. Switch to propagating the error codes upstream.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.16-rc5
+Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/0d81b5faa234e92a56df1bc8ef3dacb7d5203efd
+---
+This patch is against the 'next' branch of Ulf Hansson's 'mmc.git' repo.
 
-Thank you!
+ drivers/mmc/host/au1xmmc.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Index: linux/drivers/mmc/host/au1xmmc.c
+===================================================================
+--- linux.orig/drivers/mmc/host/au1xmmc.c
++++ linux/drivers/mmc/host/au1xmmc.c
+@@ -969,8 +969,10 @@ static int au1xmmc_probe(struct platform
+ 	}
+ 
+ 	host->irq = platform_get_irq(pdev, 0);
+-	if (host->irq < 0)
++	if (host->irq < 0) {
++		ret = host->irq;
+ 		goto out3;
++	}
+ 
+ 	mmc->ops = &au1xmmc_ops;
+ 
