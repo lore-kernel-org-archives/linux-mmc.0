@@ -2,67 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB050C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Dec 2021 17:12:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0D4BC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Dec 2021 17:32:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349439AbhLWRMR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Dec 2021 12:12:17 -0500
-Received: from mxout03.lancloud.ru ([45.84.86.113]:34958 "EHLO
-        mxout03.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349401AbhLWRML (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2021 12:12:11 -0500
-Received: from LanCloud
-DKIM-Filter: OpenDKIM Filter v2.11.0 mxout03.lancloud.ru 2FA0F20326BE
-Received: from LanCloud
-Received: from LanCloud
-Received: from LanCloud
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
-        Viresh Kumar <vireshk@kernel.org>
-Subject: [PATCH RFC 10/13] mmc: sdhci-spear: fix deferred probing
-Date:   Thu, 23 Dec 2021 20:11:59 +0300
-Message-ID: <20211223171202.8224-11-s.shtylyov@omp.ru>
-X-Mailer: git-send-email 2.26.3
-In-Reply-To: <20211223171202.8224-1-s.shtylyov@omp.ru>
+        id S244471AbhLWRcm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Dec 2021 12:32:42 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:60376 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235248AbhLWRch (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Dec 2021 12:32:37 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B83A361EE9
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Dec 2021 17:32:36 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BA693C36AE9;
+        Thu, 23 Dec 2021 17:32:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1640280756;
+        bh=QMOb2xFvtVi3U3ng5z2XUO40wX+8YRmINn5LHBGfPRk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=eB+TAFQXRb35uiMLk4gHFZQrgfvvC75DGzbf6d5HDDktQUeYrN1d7NDG+PR/x8YAD
+         3xz/7Avzo7RrlzIce5mOwzr7JJOVs807qprBS4c+gkNvt7bMvu5iwY8fpMRHGDugel
+         q40duFZTm3Zep+RxpwaE9zyD57m8ggsTPzUF/WK7amE2xmahpOEW/WY7EWuavF2dWq
+         48Kk6ScQrutbnmXDPnmPGv0iP3zVuJ7AC5iM1JQbe9d05CW0pSYbKOPXrOdp5Ak/Ou
+         v1wystuDt6yZlp844LQRnALZ2C1iMkflldqRLn7d5oooDXmxgWgdradeI0P2+bCR/J
+         u1ZbZkxM8898A==
+Date:   Thu, 23 Dec 2021 23:02:30 +0530
+From:   Manivannan Sadhasivam <mani@kernel.org>
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
+        linux-actions@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH RFC 07/13] mmc: owl: fix deferred probing
+Message-ID: <20211223173230.GB5159@thinkpad>
 References: <20211223171202.8224-1-s.shtylyov@omp.ru>
+ <20211223171202.8224-8-s.shtylyov@omp.ru>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [192.168.11.198]
-X-ClientProxiedBy: LFEXT02.lancloud.ru (fd00:f066::142) To
- LFEX1907.lancloud.ru (fd00:f066::207)
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211223171202.8224-8-s.shtylyov@omp.ru>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The driver overrides the error codes and IRQ0 returned by platform_get_irq()
-to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
-permanently instead of the deferred probing. Switch to propagating the error
-codes upstream. IRQ0 is no longer returned by platform_get_irq(), so we now
-can safely ignore it...
+On Thu, Dec 23, 2021 at 08:11:56PM +0300, Sergey Shtylyov wrote:
+> The driver overrides the error codes returned by platform_get_irq() to
+> -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
+> permanently instead of the deferred probing. Switch to propagating the
+> error codes upstream.
+> 
+> Fixes: ff65ffe46d28 ("mmc: Add Actions Semi Owl SoCs SD/MMC driver")
+> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
-Fixes: 682798a596a6 ("mmc: sdhci-spear: Handle return value of platform_get_irq")
-Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
----
- drivers/mmc/host/sdhci-spear.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
 
-diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
-index d463e2fd5b1a..c79035727b20 100644
---- a/drivers/mmc/host/sdhci-spear.c
-+++ b/drivers/mmc/host/sdhci-spear.c
-@@ -65,8 +65,8 @@ static int sdhci_probe(struct platform_device *pdev)
- 	host->hw_name = "sdhci";
- 	host->ops = &sdhci_pltfm_ops;
- 	host->irq = platform_get_irq(pdev, 0);
--	if (host->irq <= 0) {
--		ret = -EINVAL;
-+	if (host->irq < 0) {
-+		ret = host->irq;
- 		goto err_host;
- 	}
- 	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
--- 
-2.26.3
+Thanks,
+Mani
 
+> ---
+>  drivers/mmc/host/owl-mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+> index 3dc143b03939..679b8b0b310e 100644
+> --- a/drivers/mmc/host/owl-mmc.c
+> +++ b/drivers/mmc/host/owl-mmc.c
+> @@ -638,7 +638,7 @@ static int owl_mmc_probe(struct platform_device *pdev)
+>  
+>  	owl_host->irq = platform_get_irq(pdev, 0);
+>  	if (owl_host->irq < 0) {
+> -		ret = -EINVAL;
+> +		ret = owl_host->irq;
+>  		goto err_release_channel;
+>  	}
+>  
+> -- 
+> 2.26.3
+> 
