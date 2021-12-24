@@ -2,72 +2,78 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ED4EC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Dec 2021 17:37:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A5E2C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Dec 2021 19:25:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344042AbhLXRhm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Dec 2021 12:37:42 -0500
-Received: from mxout02.lancloud.ru ([45.84.86.82]:35110 "EHLO
-        mxout02.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231372AbhLXRhm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Dec 2021 12:37:42 -0500
-Received: from LanCloud
-DKIM-Filter: OpenDKIM Filter v2.11.0 mxout02.lancloud.ru 4FE9E235CB5C
-Received: from LanCloud
-Received: from LanCloud
-Received: from LanCloud
-Subject: Re: [PATCH RFC 02/13] mmc: meson-gx: fix deferred probing
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-        "Neil Armstrong" <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        <linux-amlogic@lists.infradead.org>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20211223171202.8224-1-s.shtylyov@omp.ru>
- <20211223171202.8224-3-s.shtylyov@omp.ru>
- <CAFBinCAd4QTZ78S7QrT0Zsduvk=09rJa3gHHb15HLpwspQzuTw@mail.gmail.com>
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-Organization: Open Mobile Platform
-Message-ID: <a32767cb-9e6e-6d72-85e7-757399419916@omp.ru>
-Date:   Fri, 24 Dec 2021 20:37:37 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        id S231718AbhLXTZu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Dec 2021 14:25:50 -0500
+Received: from ixit.cz ([94.230.151.217]:49956 "EHLO ixit.cz"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229553AbhLXTZt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 24 Dec 2021 14:25:49 -0500
+Received: from localhost.localdomain (ip-89-176-96-70.net.upcbroadband.cz [89.176.96.70])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by ixit.cz (Postfix) with ESMTPSA id 182842243C;
+        Fri, 24 Dec 2021 20:25:47 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ixit.cz; s=dkim;
+        t=1640373947;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=uq+pd2cBQPP3mCP6SdirmaMt2hCmEe5DR66+la6dDTM=;
+        b=F1dT4Kx27/UiJH2WE9v8TvS9DlKDPAmPKlbljxy2W4wjbFeo20GSlf18WCV0AD2YSkBp8S
+        t8EzfVxAxC/A1arwAQ/ughhsWmoYKjupyySZGdIHbMsxeIgaSBIW09ohDcib9xsCdzHSqD
+        S4EiE+o7TnRUpPrjRNB4GZVOALMoS5k=
+From:   David Heidelberg <david@ixit.cz>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Thierry Reding <treding@nvidia.com>
+Cc:     ~okias/devicetree@lists.sr.ht, David Heidelberg <david@ixit.cz>,
+        Rob Herring <robh@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: PL18x stop relying on order of dma-names
+Date:   Fri, 24 Dec 2021 20:25:45 +0100
+Message-Id: <20211224192545.74528-1-david@ixit.cz>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-In-Reply-To: <CAFBinCAd4QTZ78S7QrT0Zsduvk=09rJa3gHHb15HLpwspQzuTw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [192.168.11.198]
-X-ClientProxiedBy: LFEXT02.lancloud.ru (fd00:f066::142) To
- LFEX1907.lancloud.ru (fd00:f066::207)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/24/21 8:35 PM, Martin Blumenstingl wrote:
+We don't care in which order are "rx" and "tx" DMA names supplied.
 
->> The driver overrides the error codes and IRQ0 returned by platform_get_irq()
->> to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
->> permanently instead of the deferred probing. Switch to propagating the error
->> codes upstream. IRQ0 is no longer returned by platform_get_irq(), so we now
->> can safely ignore it...
->>
->> Fixes: cbcaac6d7dd2 ("mmc: meson-gx-mmc: Fix platform_get_irq's error checking
->> ")
-> I suggest putting the ") on the previous line. Most "Fixes" tag I have
-> seen don't use any line-break at all, even if the line gets long.
+Fixes: 4df297aaeb9c ("dt-bindings: mmc: Add missing properties used in examples")
 
-   Sorry, was a cut & paste artifact that I didn't notice... :-/
+Signed-off-by: David Heidelberg <david@ixit.cz>
+---
+ Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
->> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
-> with above comment addressed you can add my:
-> Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+index f0a44b2cfa79..a4f74bec68a3 100644
+--- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
++++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+@@ -70,9 +70,13 @@ properties:
+     maxItems: 2
+ 
+   dma-names:
+-    items:
+-      - const: rx
+-      - const: tx
++    oneOf:
++      - items:
++          - const: tx
++          - const: rx
++      - items:
++          - const: rx
++          - const: tx
+ 
+   power-domains: true
+ 
+-- 
+2.34.1
 
-   Thank you!
-
-> Best regards,
-> Martin
-> 
-
-MBR, Sergey
