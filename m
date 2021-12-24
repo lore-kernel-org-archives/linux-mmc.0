@@ -2,49 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43B08C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Dec 2021 06:05:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D06BFC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Dec 2021 06:05:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351446AbhLXGFc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Dec 2021 01:05:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54620 "EHLO
+        id S1351476AbhLXGFj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Dec 2021 01:05:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245640AbhLXGFc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Dec 2021 01:05:32 -0500
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 539D7C061401;
-        Thu, 23 Dec 2021 22:05:32 -0800 (PST)
-Received: by mail-pj1-x1031.google.com with SMTP id gj24so6901381pjb.0;
-        Thu, 23 Dec 2021 22:05:32 -0800 (PST)
+        with ESMTP id S1351456AbhLXGFh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Dec 2021 01:05:37 -0500
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0215FC061401;
+        Thu, 23 Dec 2021 22:05:37 -0800 (PST)
+Received: by mail-pg1-x52f.google.com with SMTP id f125so6991206pgc.0;
+        Thu, 23 Dec 2021 22:05:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id;
-        bh=Pgij6bvbOy5I0W9pKQtp9mNH6BcgfIX0vw3kfjJYoYE=;
-        b=cOAlMQ/9Q9SOul+vQAF9kNQTFVTW2tTh7fv7V7C659InBAGcdyS5yOZ9W7sdBrbIG3
-         KuD+M8sPbO3yfhScppAPW8Y4WfYnPOa1LhQAr90Y0RC1Ul9yAKWJWgIv8Z2MyL6U7aMQ
-         b1ltFzPDiNBoFrRuh6ad04EtSyvm1Zpr3/ozhCqZwGXf+7ORsiAcHqSohNHiDnI834qC
-         TMqdFfxW2/7Ag6ofVeszWiXarVSZlthR29JuDxv5KDRZuehMIJIyW/Mj4E3K+G5rjcEw
-         VdXqRvCax/fJxCd1Fi/jiKvEMnMMMjKOM+oGgWAsckzxtbJT8FBn/zoDFhyayNXOnO9X
-         XNxg==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :in-reply-to:references;
+        bh=RigX7Ns/+Snrt8UrcXUuA0iJDA0F661A3lbO8ib7J24=;
+        b=l5Th39v8L5CbG7sXwIziiK522KwUbSaFEiYIdVHoOfyPxFqw7VyPnhCtKWioILYdxF
+         VGqqhYMBhCycrm8JehpNwgEN7yb5RIIZI5hVc72lCsyqw8g2beN8oIf1CBbc8np1kc/M
+         UwQmzd8Vl2Of5nRFCenH0L6qXh4A5XzyZ0D6gUkIbIFBMyrTGLfULnR1SF3/ZUQFIVbO
+         HqyRcy6ngC5qahw39OiIpupezHrRASoBwI7InSQeNwAED/tCxKceMUknXNk1vb9u//6l
+         asCrEw/G2LeQaSWDmR2iNVt5ilCkx2Iu2BlrLR5EoivYmvtruTamYbpAXGoia2GFkGSR
+         xeWA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=Pgij6bvbOy5I0W9pKQtp9mNH6BcgfIX0vw3kfjJYoYE=;
-        b=0tfAbdaI/6m4JesY7gIKf8hjhXLQyhpIQ+phMwVfhygzgMUiDFKTgQfTyE8Hwkyt0J
-         rUg2sKBEE8mD0wWKcQ7FdNzVPonTgClmQkCL+fWPy8+uHkhBLcT+9B3dXLWgz2OERavc
-         +6v+ZJtdTDpca5sRcdApoReq9FbBfgwnOdgqo48hjLVxz65pE6JoaSNHkfH3g6DXMv54
-         NsVsoHEcQzCfN75WqjHW0W7YcCQYvwGqvCqU7cMXIPDTgacrfzuiCNBMyE7DCtYIYjRL
-         bPNYOgIeRD73L+wIfBPIbIKgSeTAwE9OacusCrVdasU0cedfAgRrtyie5Om/4jcOsTRP
-         JADw==
-X-Gm-Message-State: AOAM530tmsc03ICuSu+ucDn+RaW4TK3gCS0IBszObnFl0WUdek4ULYAB
-        rHnZvmOYv6MIIjXMtH088s7ALNQ6a2ZOJA==
-X-Google-Smtp-Source: ABdhPJz2UWxL8nfb+Vphoy1XFn9Txc4/TbH99YWi75ruxi8wyID2L/hChofBkuK/FEliGBcZX38hMg==
-X-Received: by 2002:a17:90a:5d13:: with SMTP id s19mr6594790pji.117.1640325931726;
-        Thu, 23 Dec 2021 22:05:31 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:in-reply-to:references;
+        bh=RigX7Ns/+Snrt8UrcXUuA0iJDA0F661A3lbO8ib7J24=;
+        b=4pO5jL3pexaR2dE/2lB8ibLHH+ihzb2Pw34BW/pweOegnkAgFT0gsDyu7qv/XJA3GY
+         Iro9bxym4g+vYLo6GTW2Vp8s6q5dbu9E2549FsFEfa1pnzP9xmB5f5W19KvGdx5ygPM9
+         k2l1Blmh9Vqv8ztVhy9lWZHhbakDaVDzfVBQoRJn5FDpt0haEgXklpQeA+9eeVqADEsV
+         g3YIZTs5pCGQqd2tO6JWV3y2SCmSZ0Ouo/JF0DUM2u5Y1oC+my8HbHzYN8wOaHCldCkY
+         KH9+uPQj4AyvDEeLUK9/yAShrZI8uN4bTAjrWSDUPtji4oIojswOiOF3iDmqY8A+eHvf
+         z2Zw==
+X-Gm-Message-State: AOAM533UXXuBSfotgbDLFa7Sw/bHQk+aaXSVtMq81mS/74pM+hyLTLhG
+        x3roqzZLk1nfC84COUPLfIA=
+X-Google-Smtp-Source: ABdhPJyVFtvywx4KAl6kX7WiOwHtvzIbuBrIlYHVSmfp72GYA4CHhLkhJvTjYuH1APzCZMzXpFZRWQ==
+X-Received: by 2002:a63:c009:: with SMTP id h9mr4906351pgg.36.1640325936383;
+        Thu, 23 Dec 2021 22:05:36 -0800 (PST)
 Received: from scdiu3.sunplus.com ([113.196.136.192])
-        by smtp.googlemail.com with ESMTPSA id y128sm8234736pfb.24.2021.12.23.22.05.29
+        by smtp.googlemail.com with ESMTPSA id y128sm8234736pfb.24.2021.12.23.22.05.34
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 23 Dec 2021 22:05:31 -0800 (PST)
+        Thu, 23 Dec 2021 22:05:36 -0800 (PST)
 From:   Li-hao Kuo <lhjeff911@gmail.com>
 To:     p.zabel@pengutronix.de, daniel.thompson@linaro.org,
         lee.jones@linaro.org, u.kleine-koenig@pengutronix.de,
@@ -53,37 +55,123 @@ To:     p.zabel@pengutronix.de, daniel.thompson@linaro.org,
         devicetree@vger.kernel.org
 Cc:     lh.kuo@sunplus.com, wells.lu@sunplus.com,
         Li-hao Kuo <lhjeff911@gmail.com>
-Subject: [PATCH v3 0/2] Add SD/SDIO control driver for Sunplus SP7021 SoC       
-Date:   Fri, 24 Dec 2021 14:05:37 +0800
-Message-Id: <cover.1640325539.git.lhjeff911@gmail.com>
+Subject: [PATCH v3 2/2] devicetree bindings mmc Add bindings doc for Sunplus SP7021
+Date:   Fri, 24 Dec 2021 14:05:39 +0800
+Message-Id: <9da84bfbb6d4d086a8f905dd0d80fb81720987f7.1640325539.git.lhjeff911@gmail.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <cover.1640325539.git.lhjeff911@gmail.com>
+References: <cover.1640325539.git.lhjeff911@gmail.com>
+In-Reply-To: <cover.1640325539.git.lhjeff911@gmail.com>
+References: <cover.1640325539.git.lhjeff911@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-	This is a patch series for SD/SDIO driver for Sunplus SP7021 SoC.										
-											
-	Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates										
-	many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and										
-	etc.) into a single chip. It is designed for industrial control.										
-											
-	Refer to:										
-	https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview										
-	https://tibbo.com/store/plus1.html	
+Add devicetree bindings mmc Add bindings doc for Sunplus SP7021
 
-Li-hao Kuo (2):
-  mmc: Add SD/SDIO driver for Sunplus SP7021
-  devicetree bindings mmc Add bindings doc for Sunplus SP7021
+Signed-off-by: Li-hao Kuo <lhjeff911@gmail.com>
+---
+Changes in v3:
+ - Addressed all comments from Mr. Rob Herring
+ - Modified SD/SDIO driver.
 
- .../devicetree/bindings/mmc/sunplus-sd2.yaml       |   73 ++
- MAINTAINERS                                        |    7 +
- drivers/mmc/host/Kconfig                           |   12 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/sunplus_sd2.c                     | 1107 ++++++++++++++++++++
- 5 files changed, 1200 insertions(+)
+ .../devicetree/bindings/mmc/sunplus-sd2.yaml       | 73 ++++++++++++++++++++++
+ MAINTAINERS                                        |  1 +
+ 2 files changed, 74 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
- create mode 100644 drivers/mmc/host/sunplus_sd2.c
 
+diff --git a/Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml b/Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+new file mode 100644
+index 0000000..2f96e35
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+@@ -0,0 +1,73 @@
++# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
++# Copyright (C) Sunplus Co., Ltd.
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/sunplus-sd2.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Sunplus SD/SDIO controller
++
++maintainers:
++  - Li-hao Kuo <lhjeff911@gmail.com>
++
++properties:
++  compatible:
++    enum:
++      - sunplus,sp7021-card
++      - sunplus,sp7021-sdio
++
++  reg:
++    items:
++      - description: Base address and length of the SD/SDIO registers
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  resets:
++    maxItems: 1
++
++  max-frequency: true
++
++allOf:
++  - $ref: "mmc-controller.yaml"
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - resets
++  - pinctrl-names
++  - pinctrl-0
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/sp-sp7021.h>
++    #include <dt-bindings/reset/sp-sp7021.h>
++    #include <dt-bindings/interrupt-controller/irq.h>
++    sdcard: sdcard@9c003e80 {
++       compatible = "sunplus,sp7021-card";
++       reg = <0x9c003e80 0x280>;
++       interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
++       clocks = <&clkc CARD_CTL1>;
++       resets = <&rstc RST_CARD_CTL1>;
++       pinctrl-names = "default";
++       pinctrl-0 = <&mmc1_mux &mmc1_mux_cd>;
++       max-frequency = <52000000>;
++    };
++    sdio: mmc@9c008400 {
++       compatible = "sunplus,sp7021-sdio";
++       reg = <0x9c008400 0x280>;
++       interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
++       clocks = <&clkc CARD_CTL1>;
++       resets = <&rstc RST_CARD_CTL1>;
++       pinctrl-names = "default";
++       pinctrl-0 = <&pins_sdio>;
++       max-frequency = <52000000>;
++    };
++...
+\ No newline at end of file
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 2c1d9e8..297d512 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -18246,6 +18246,7 @@ SUNPLUS SD/SDIO HOST CONTROLLER INTERFACE DRIVER
+ M:	Li-hao Kuo <lhjeff911@gmail.com>
+ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
++F:	Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+ F:	drivers/mmc/host/sunplus_sd2.c
+ 
+ SUPERH
 -- 
 2.7.4
 
