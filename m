@@ -2,98 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49F64C43219
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Dec 2021 13:36:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A9F7C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Dec 2021 17:28:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237101AbhL0Ngm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Dec 2021 08:36:42 -0500
-Received: from smtp-relay-internal-0.canonical.com ([185.125.188.122]:39756
-        "EHLO smtp-relay-internal-0.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S237032AbhL0NgV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Dec 2021 08:36:21 -0500
-Received: from mail-lj1-f200.google.com (mail-lj1-f200.google.com [209.85.208.200])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 8E90C3F07F
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Dec 2021 13:36:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1640612176;
-        bh=JFavKQ4EpkcOZ7wQmRTeTvx/mZGmly/qZElot/QHLH0=;
-        h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
-         MIME-Version;
-        b=Z9U5rdJcOtHe9DMjh0otK6nZ77vPGZNAQQ15NecpofHYh+qJ796act2dZv2mc9Qbx
-         iVCBrfHGutb8zATIMRwlxEVW9gAprFZ8GbsGjOqekF8MJnjJb0iuOlbjBctl622wUq
-         u18x/LVEJ0KADUl7eY9n4v3IbzEwQpkTRUgFhaNVZHyyodIGPuYySo9t+eGRtYI9Vm
-         bR4ALx1VygOi+jFmeZNBkGEiENovx74yetlmfZxvczSXH5vRLlbj3C0IC+PNIWgNGu
-         mCD/0z/H59fmXfy8MNLQKHM9eTo4DjXPHvrZ2iac8rrMckGcyoBh35nWVlNMV7r6ST
-         g59QiQL5Brl5w==
-Received: by mail-lj1-f200.google.com with SMTP id k11-20020a05651c0a0b00b0022dc4d55f14so1984950ljq.22
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Dec 2021 05:36:16 -0800 (PST)
+        id S230191AbhL0R2c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Dec 2021 12:28:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35204 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229508AbhL0R2b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Dec 2021 12:28:31 -0500
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B5F4C06173E;
+        Mon, 27 Dec 2021 09:28:31 -0800 (PST)
+Received: by mail-ed1-x532.google.com with SMTP id w16so64148171edc.11;
+        Mon, 27 Dec 2021 09:28:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=fvswGQErb/IXWp0Ujxv53FZ/wcn6vDPizJMswGWYt8k=;
+        b=aEMf3nbv9x24qgp4OFEQiFZrAXHzGkp7M3MCwIk4+HnvH3pFPlLBWPibXCATBAB7DP
+         vdfVC5yi2yOPNyV8uSN4FQXnET0HHVlXNmBzYMsz5celB929zqcc+wq/DWXuLSiIo8XI
+         kn4uMfielj16oEo/6WczySrmt6COrDTwJyzXPqll3HP4tfqvwi+0I34rMInWidzeFqPK
+         EuWZRDPEJr6Un5PnLSlZSEF5pdYuUNfaH+kmOVtcAzGJ7pqh+XkJ3uLpC867HRXqX3Xe
+         oKSzX0mgDL4QlclhTiPS6tC08q6usMTM/aQCNgUrJnRNOTqkZ6R6HdJcgNeG5mSz2UE4
+         3XPg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=JFavKQ4EpkcOZ7wQmRTeTvx/mZGmly/qZElot/QHLH0=;
-        b=kPGK4UwkRgmEyYeC1ap+RcjitS4/iLIh+l6CbmWyJ5wGt53i2lCyNRFm10XFW+npgy
-         1XxmDlV9VVfLZ2O8689DXILos0Bfxu7iGtiycy29WnuDqozrFL2/aSAAthYkpvYPxDYL
-         /WtRu95kSA7/biRxD32n9UEQgqbyRF5LY6sr7Sm0tJFn7Ygy7iBQhvi1NmHFv0oQ49XP
-         cSgSaEfOfsy5qsNYiIpeaOG3QZS+YZOLWyKmLys9Mld79cHMZ1NWD+KOiEuwoB62cHOf
-         yfxTBXRlojwD3o1NwWj4/NYZBYazYPwxHYr+cDuUVi/JQMe6THfEb/D3Dcuzh6yKLSlE
-         ES6A==
-X-Gm-Message-State: AOAM530E3WhoaCAu11i4SU0QKMsp3W1yGKm5UKGnRvuhDBNQgpNfjX5r
-        gmto+fHUY7brHhB0eQ+3MO6G6319uA04cl/fvnXXV38kfHC8AqPOZu285961XqokwUIAF/+g5y+
-        hKtUJpsi748uEgMBMeV0GSgtOvE8IOO0UupAP7Q==
-X-Received: by 2002:a05:651c:612:: with SMTP id k18mr14341426lje.383.1640612176050;
-        Mon, 27 Dec 2021 05:36:16 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJyigWSTBhHMTJw9c+BMRCCqABSOCIw31rtBFtt3dBgwEbcNUZTxOPbnbqo+v1WaY9WCE71FlQ==
-X-Received: by 2002:a05:651c:612:: with SMTP id k18mr14341415lje.383.1640612175896;
-        Mon, 27 Dec 2021 05:36:15 -0800 (PST)
-Received: from krzk-bin.lan (89-77-68-124.dynamic.chello.pl. [89.77.68.124])
-        by smtp.gmail.com with ESMTPSA id g18sm800107ljj.124.2021.12.27.05.36.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Dec 2021 05:36:15 -0800 (PST)
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-To:     Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dinh Nguyen <dinguyen@kernel.org>, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Subject: [PATCH 18/19] arm64: dts: agilex: add board compatible for N5X DK
-Date:   Mon, 27 Dec 2021 14:35:57 +0100
-Message-Id: <20211227133558.135185-12-krzysztof.kozlowski@canonical.com>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20211227133131.134369-1-krzysztof.kozlowski@canonical.com>
-References: <20211227133131.134369-1-krzysztof.kozlowski@canonical.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=fvswGQErb/IXWp0Ujxv53FZ/wcn6vDPizJMswGWYt8k=;
+        b=MKdg5jsLh2jP7gee67uxQecmMLDqgTUId8tACahXFMkwy3W+PIQYJqnSG6XGPXE7vt
+         MTm8Y3qgLjacoS2sDwm/8E3S6jV//twmsf+/NawlIC9g5UcGLxcGnra6rELKibOxulIf
+         KG59MHLjVWbDty+307gsEgMPTuhUHvkLQ33O7AMXna+2c5R5m4b4hpxm/hENixwWb+Dn
+         ex/XaUfgYCti1Sj6jRCKljexDwZLafOIZyYfgUJ3y1GG1gtyt0Lvdj009xZHIwuQqjC3
+         X/aqWnlphQhjab1y5p5ekbhdnItb5kWd2yh79EFDNPn5OTeLvPev7kQbCGsMhaT1GA9P
+         w4Pw==
+X-Gm-Message-State: AOAM531FmcHoWr6hby63XS+C/vwuAjbb5XonhNpF7218YjJtPiJbNB4n
+        UKmSp58JViLwz+PiGv2x586Dw5/2y6/mGicWHNc=
+X-Google-Smtp-Source: ABdhPJwMGxE07ANpk+vQAh+chlk8FEfyr4VtcPtxTYO2uTEqvp91J9JDPq3tRLAak0uFSD/dsB9drtwjBOUh92a1XeY=
+X-Received: by 2002:a05:6402:2ce:: with SMTP id b14mr17294314edx.122.1640626110012;
+ Mon, 27 Dec 2021 09:28:30 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20211227083641.12538-1-axe.yang@mediatek.com> <20211227083641.12538-4-axe.yang@mediatek.com>
+In-Reply-To: <20211227083641.12538-4-axe.yang@mediatek.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Mon, 27 Dec 2021 19:27:53 +0200
+Message-ID: <CAHp75VcVx4Yf69TEoSy8GL-he9ZAW+yvoH8-DXAotQ3Mwx7n2A@mail.gmail.com>
+Subject: Re: [PATCH v1 3/3] mmc: mediatek: add support for SDIO eint irq
+To:     Axe Yang <axe.yang@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Intel SoCFPGA N5X SoC Development Kit is a board with
-Agilex, so it needs its own compatible.
+On Mon, Dec 27, 2021 at 6:46 PM Axe Yang <axe.yang@mediatek.com> wrote:
 
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
----
- arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts | 1 +
- 1 file changed, 1 insertion(+)
+...
 
-diff --git a/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts b/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts
-index f3c1310dae0a..5609d8df6729 100644
---- a/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts
-+++ b/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts
-@@ -6,6 +6,7 @@
- 
- / {
- 	model = "eASIC N5X SoCDK";
-+	compatible = "intel,n5x-socdk", "intel,socfpga-agilex";
- 
- 	aliases {
- 		serial0 = &uart0;
+> +       if (mmc->card && !mmc->card->cccr.enable_async_int) {
+> +               if (enb)
+
+Spell it fully, i.e. enable.
+
+
+> +                       pm_runtime_get_noresume(host->dev);
+> +               else
+> +                       pm_runtime_put_noidle(host->dev);
+> +       }
+
+...
+
+> +       int ret = 0;
+
+Redundant assignment, see below.
+
+...
+
+> +       desc = devm_gpiod_get_index(host->dev, "eint", 0, GPIOD_IN);
+
+Why _index variant? By default devm_gpiod_get() uses 0 for index.
+
+> +       if (IS_ERR(desc))
+> +               return PTR_ERR(desc);
+
+...
+
+> +       irq = gpiod_to_irq(desc);
+
+ret = ...
+if (ret < 0)
+  ...handle error...
+
+> +       if (irq >= 0) {
+
+(for the record, 0 is never returned by gpiod_to_irq() according to
+all its versions).
+
+> +               irq_set_status_flags(irq, IRQ_NOAUTOEN);
+
+Use corresponding flag:
+https://elixir.bootlin.com/linux/latest/source/include/linux/interrupt.h#L83
+
+> +               ret = devm_request_threaded_irq(host->dev, irq, NULL, msdc_sdio_eint_irq,
+> +                                               IRQF_TRIGGER_LOW | IRQF_ONESHOT,
+> +                                               "sdio-eint", host);
+> +       } else {
+> +               ret = irq;
+> +       }
+> +
+> +       host->eint_irq = irq;
+
+Is it okay if you assign garbage here in case of error?
+
+> +       return ret;
+
+...
+
+> +       host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
+> +       if (IS_ERR(host->pins_eint)) {
+> +               dev_dbg(&pdev->dev, "Cannot find pinctrl eint!\n");
+> +       } else {
+> +               host->pins_dat1 = pinctrl_lookup_state(host->pinctrl, "state_dat1");
+> +               if (IS_ERR(host->pins_dat1)) {
+
+> +                       ret = PTR_ERR(host->pins_dat1);
+> +                       dev_err(&pdev->dev, "Cannot find pinctrl dat1!\n");
+
+ret = dev_err_probe(...); ?
+
+> +                       goto host_free;
+> +               }
+> +       }
+
+...
+
+> +       if (!IS_ERR(host->pins_eint)) {
+
+I'm wondering if you can use a pattern "error check first"?
+
+> +               disable_irq(host->irq);
+> +               pinctrl_select_state(host->pinctrl, host->pins_eint);
+> +               spin_lock_irqsave(&host->lock, flags);
+> +               if (host->sdio_irq_cnt == 0) {
+> +                       enable_irq(host->eint_irq);
+> +                       enable_irq_wake(host->eint_irq);
+> +                       host->sdio_irq_cnt++;
+> +               }
+> +               sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> +               spin_unlock_irqrestore(&host->lock, flags);
+> +       }
+
 -- 
-2.32.0
-
+With Best Regards,
+Andy Shevchenko
