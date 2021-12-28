@@ -2,343 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C15EC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Dec 2021 16:16:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8C71C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Dec 2021 16:41:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235159AbhL1QQG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Dec 2021 11:16:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52008 "EHLO
+        id S231403AbhL1Qle (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Dec 2021 11:41:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57716 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235708AbhL1QQE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Dec 2021 11:16:04 -0500
+        with ESMTP id S231320AbhL1Qle (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Dec 2021 11:41:34 -0500
 Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9099C06173E
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 08:16:03 -0800 (PST)
-Received: by mail-lj1-x236.google.com with SMTP id by39so31474432ljb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 08:16:03 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE3CDC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 08:41:33 -0800 (PST)
+Received: by mail-lj1-x236.google.com with SMTP id by39so31578759ljb.2
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 08:41:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=4k4njwm7hK6Z45dckiCYbmCzLy/kr0ugHzYUGxbiInU=;
-        b=Ek1p4foThB+yuOnIzjsvfQr0fFSjQQbiQsGxSFJiUd5rHYVeapqJevPb/9EV2nu/sX
-         OKfWCPftZmWx7EaXMwLeJy7Zyb8qp+0Hvfi5OVPkBuO7l1LPehb9xKumZsXCpNocn5DV
-         8Ksiw5vFs4+EpTjsM0G+HaPQWiY3qGK6QQu1sgkluuLle+YYkZzYuympAB6sjyJjYe5R
-         EuRwoi5Fi3knGB29CgLT7eeP5o3jhQloStL+/7j+LaveK7oV0fGpJNIDETtMWOJfPG7B
-         NHgFuvCyU4lYGq7MTiUCxgW2h5/OZ64c6ArCfWQE/P0iOWw5Da8Zr02Rr2MTN4VVVas/
-         cETQ==
+        bh=sCSd08N8apttmGIqlZ5H59v2FEIrStRWMN8xIiicDhM=;
+        b=M9LcGIEr/DWRgc7C8F1wdgY2d1HGjZeolXixmmBH1/rWtTc3oEAW0AvZpnTYNY4ovi
+         uDhsuN9bK9ACnM1AShfgGvZezIE9VHglxDNVMfMwMbtXrEUmbdhDl3k5a4ox0Jbgt0Rf
+         zOyT43KnEAJbxA61YZduk1eiYHDsHrpN42Rm+daRg2rOhqH0uCgakjXYCVTOJU9CMFc+
+         UEO01z7v84xxf79/o3/pev+pGcL4IaX5J+jbe+ORKldU0+HtJ7+sxyFCoAlRSHGuSl6Y
+         Cz05QLbpJ/3AKMkiGNiGM7/PwLGxYA5Uput/WJCxNw3+yQ1NUAWEv+NJtIrDF2ztgG5v
+         dYpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=4k4njwm7hK6Z45dckiCYbmCzLy/kr0ugHzYUGxbiInU=;
-        b=u93uXK/M1tK/lpoTgRfssuLKxWBH1pWxPL3Vebgh3zP6JDuGDBtTHb/9JSObSna5c6
-         G8j35FMztWB77CL+QsMtjqyE7gG7HBVSsFHNFMOa7yr/lYpcVIE1CYUg/i53erhzkMhg
-         Dnk+9KY2m46/eruzFnemnv6RRIOXGDgLz45aMEfSNGwky7rUkUgvjuUqHYghQoCcz8tx
-         E4OF9IZE529RCWUqJ1wVNLiW7uK1lhHvRzVoqbJFsZq06jCDFW1qPGIjyacRmb6oKlhb
-         tgiAFANyJK2XGJKh2wdJWGv8piFrOmoNMbmKIuc8NkB+S6G77W8LnqTQ4IC3u0rmLaYp
-         Yhqw==
-X-Gm-Message-State: AOAM533r1jxzq/mtuig7w8qDx8KilRRgLT/ElXqCySquDn7n6dkLtKHd
-        hvUOP48uEMKRcDokWylVXo4APRucewe7au6/g00SAA==
-X-Google-Smtp-Source: ABdhPJz2MeuKH/Nzw6lbMyBsvACOeWh7uQV47y66mmJQhZsIRESHcyGkt6EGEiX3GcFZ29eJLYbs9f2LPwsdlGEzjSY=
-X-Received: by 2002:a2e:9659:: with SMTP id z25mr17154594ljh.16.1640708162009;
- Tue, 28 Dec 2021 08:16:02 -0800 (PST)
+        bh=sCSd08N8apttmGIqlZ5H59v2FEIrStRWMN8xIiicDhM=;
+        b=Xwun7UyShjuEsolXB5arhg122vDVdXRQk6fQV8g486RTr8h5wwXPQ9UtCpfuGII5Sy
+         JccI6sT5ARo9D957wjkbHqXILE20bvBHDnEMMuZQoHsLblp1Hdf0TiCi61KYpnGB5vW9
+         57nPY6GOQNa6N88D9EOLqDKH6Y6e/E2R/dJcahzhUq+RDUm7ar0uSoI1EJf+GKVRfb9G
+         5vggTtt8WtP5tGyNk+7xku/bEEXhn0AAxpb9rdM+GW6sBRQKInGIa2k6hW9KIZvFHL38
+         2CJp/Ff78Qz0h/ujKHa7XQSjd5s83+ASkZktiltLWIslLS5UZ5wU6jOXPoBUptWMRhus
+         IPvg==
+X-Gm-Message-State: AOAM532+VuFJNUbyxfSPW/HOgXlNmef8k5LdHVNDZUSZTEkQ3i5qnnGJ
+        mG5bayLFQ/rQsdPrP7pBiF85HUwMj7KUIfywP78EXWdNs2Bf5Q==
+X-Google-Smtp-Source: ABdhPJyJrD4RfXrnVr/rYSse9uSa1kC4/hW8bZv/sZ9ZkcTbWIBLTjmEAj1/TJAIZ8oRrxRsBbCqAuMi/cyK82o1Pns=
+X-Received: by 2002:a2e:93c4:: with SMTP id p4mr18463122ljh.367.1640709692068;
+ Tue, 28 Dec 2021 08:41:32 -0800 (PST)
 MIME-Version: 1.0
-References: <20211215130711.111186-1-gsomlo@gmail.com> <20211215130711.111186-4-gsomlo@gmail.com>
-In-Reply-To: <20211215130711.111186-4-gsomlo@gmail.com>
+References: <20211223171202.8224-1-s.shtylyov@omp.ru>
+In-Reply-To: <20211223171202.8224-1-s.shtylyov@omp.ru>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 28 Dec 2021 17:15:25 +0100
-Message-ID: <CAPDyKFqo5sZy8aVbOcfS_cxT9T5r214GKCL-FKRg_0P0yQJTFQ@mail.gmail.com>
-Subject: Re: [PATCH v5 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     Gabriel Somlo <gsomlo@gmail.com>
-Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
-        shorne@gmail.com, geert@linux-m68k.org,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        rdunlap@infradead.org
+Date:   Tue, 28 Dec 2021 17:40:55 +0100
+Message-ID: <CAPDyKFq+7YzNpO67JQuwqL11J43ZXFrfmo+QLBnY3v3a4etR-w@mail.gmail.com>
+Subject: Re: [PATCH RFC 0/13] Fix deferred probing in the MMC/SD drivers
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Dec 2021 at 14:09, Gabriel Somlo <gsomlo@gmail.com> wrote:
+On Thu, 23 Dec 2021 at 18:12, Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
 >
-> LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> that targets FPGAs. LiteSDCard is a small footprint, configurable
-> SDCard core commonly used in LiteX designs.
+> Here are 13 patches against the 'fixes' branch of Ulf Hansson's 'usb.git' repo.
+> The affected MMC/SD drivers call platform_get_irq() but override its result
+> in case of error which prevents the deferred probing from working. Some of
+> these patches logically depend on the previously posted (and yet unmerged)
+> patch:
 >
-> The driver was first written in May 2020 and has been maintained
-> cooperatively by the LiteX community. Thanks to all contributors!
->
-> Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
-> Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
-> Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
-> Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
-> Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
-> Cc: Mateusz Holenko <mholenko@antmicro.com>
-> Cc: Karol Gugala <kgugala@antmicro.com>
-> Cc: Joel Stanley <joel@jms.id.au>
-> Cc: Stafford Horne <shorne@gmail.com>
-> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-> Cc: David Abdurachmanov <david.abdurachmanov@sifive.com>
-> Cc: Florent Kermarrec <florent@enjoy-digital.fr>
-> Reviewed-by: Joel Stanley <joel@jms.id.au>
+> https://marc.info/?l=linux-kernel&m=163623041902285
 
-[...]
+Alright, so until we get some more progress on the above patch, I will
+simply defer this until later.
 
-> +
-> +static int litex_mmc_set_bus_width(struct litex_mmc_host *host)
-> +{
-> +       bool app_cmd_sent;
-> +       int ret;
-> +
-> +       if (host->is_bus_width_set)
-> +               return 0;
-> +
-> +       /* ensure 'app_cmd' precedes 'app_set_bus_width_cmd' */
-> +       app_cmd_sent = host->app_cmd; /* was preceding command app_cmd? */
-> +       if (!app_cmd_sent) {
-> +               ret = litex_mmc_send_app_cmd(host);
-> +               if (ret)
-> +                       return ret;
-> +       }
-> +
-> +       /* litesdcard only supports 4-bit bus width */
-> +       ret = litex_mmc_send_set_bus_w_cmd(host, MMC_BUS_WIDTH_4);
-> +       if (ret)
-> +               return ret;
-> +
-> +       /* re-send 'app_cmd' if necessary */
-> +       if (app_cmd_sent) {
-> +               ret = litex_mmc_send_app_cmd(host);
-> +               if (ret)
-> +                       return ret;
-> +       }
-
-I understand that you are trying to address the limitation that the
-controller supports 4-bit width only. In principle it looks like we
-may need to violate the SD spec to be able to initialise an SD card,
-right? Isn't that a concern for you?
-
-> +
-> +       host->is_bus_width_set = true;
-> +
-> +       return 0;
-> +}
-
-[...]
-
-> +
-> +static void litex_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +       struct litex_mmc_host *host = mmc_priv(mmc);
-> +       struct device *dev = mmc_dev(mmc);
-> +       struct mmc_command *cmd = mrq->cmd;
-> +       struct mmc_command *sbc = mrq->sbc;
-> +       struct mmc_data *data = mrq->data;
-> +       struct mmc_command *stop = mrq->stop;
-> +       unsigned int retries = cmd->retries;
-> +       unsigned int len = 0;
-> +       bool direct = false;
-> +       u32 response_len = litex_mmc_response_len(cmd);
-> +       u8 transfer = SD_CTL_DATA_XFER_NONE;
-> +
-> +       /* First check that the card is still there */
-> +       if (!litex_mmc_get_cd(mmc)) {
-> +               cmd->error = -ENOMEDIUM;
-> +               mmc_request_done(mmc, mrq);
-> +               return;
-> +       }
-> +
-> +       /* Send set-block-count command if needed */
-> +       if (sbc) {
-> +               sbc->error = litex_mmc_send_cmd(host, sbc->opcode, sbc->arg,
-> +                                               litex_mmc_response_len(sbc),
-> +                                               SD_CTL_DATA_XFER_NONE);
-> +               if (sbc->error) {
-> +                       host->is_bus_width_set = false;
-> +                       mmc_request_done(mmc, mrq);
-> +                       return;
-> +               }
-> +       }
-> +
-> +       if (data) {
-> +               /* LiteSDCard only supports 4-bit bus width; therefore, we MUST
-> +                * inject a SET_BUS_WIDTH (acmd6) before the very first data
-> +                * transfer, earlier than when the mmc subsystem would normally
-> +                * get around to it!
-
-This means that you may end up trying to switch bus-width, to a width
-that isn't supported by the card, for example.
-
-As also stated above, I wonder how this conforms to the SD spec from
-the initialization sequence point of view. Have you verified that this
-isn't a problem?
-
-> +                */
-> +               cmd->error = litex_mmc_set_bus_width(host);
-> +               if (cmd->error) {
-> +                       dev_err(dev, "Can't set bus width!\n");
-> +                       mmc_request_done(mmc, mrq);
-> +                       return;
-> +               }
-> +
-> +               litex_mmc_do_dma(host, data, &len, &direct, &transfer);
-> +       }
-> +
-> +       do {
-> +               cmd->error = litex_mmc_send_cmd(host, cmd->opcode, cmd->arg,
-> +                                               response_len, transfer);
-> +       } while (cmd->error && retries-- > 0);
-> +
-> +       if (cmd->error) {
-> +               /* card may be gone; don't assume bus width is still set */
-> +               host->is_bus_width_set = false;
-> +       }
-> +
-> +       if (response_len == SD_CTL_RESP_SHORT) {
-> +               /* pull short response fields from appropriate host registers */
-> +               cmd->resp[0] = host->resp[3];
-> +               cmd->resp[1] = host->resp[2] & 0xFF;
-> +       } else if (response_len == SD_CTL_RESP_LONG) {
-> +               cmd->resp[0] = host->resp[0];
-> +               cmd->resp[1] = host->resp[1];
-> +               cmd->resp[2] = host->resp[2];
-> +               cmd->resp[3] = host->resp[3];
-> +       }
-> +
-> +       /* Send stop-transmission command if required */
-> +       if (stop && (cmd->error || !sbc)) {
-> +               stop->error = litex_mmc_send_cmd(host, stop->opcode, stop->arg,
-> +                                                litex_mmc_response_len(stop),
-> +                                                SD_CTL_DATA_XFER_NONE);
-> +               if (stop->error)
-> +                       host->is_bus_width_set = false;
-> +       }
-> +
-> +       if (data) {
-> +               dma_unmap_sg(dev, data->sg, data->sg_len,
-> +                            mmc_get_dma_dir(data));
-> +       }
-> +
-> +       if (!cmd->error && transfer != SD_CTL_DATA_XFER_NONE) {
-> +               data->bytes_xfered = min(len, mmc->max_req_size);
-> +               if (transfer == SD_CTL_DATA_XFER_READ && !direct) {
-> +                       sg_copy_from_buffer(data->sg, sg_nents(data->sg),
-> +                                           host->buffer, data->bytes_xfered);
-> +               }
-> +       }
-> +
-> +       mmc_request_done(mmc, mrq);
-> +}
-> +
-
-[...]
-
-> +
-> +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-
-I noticed that you use these hard coded values and don't really care
-to manage voltage changes via ->set_ios().
-
-Rather than doing it like this, I would prefer if you can hook up a
-fixed vmmc regulator in the DTS. Then call mmc_regulator_get_supply()
-to fetch it from here, which will let the mmc core create the
-mmc->ocr_avail mask, based upon the voltage level the regulator
-supports.
-
-This becomes more generic and allows more flexibility for the platform
-configuration.
-
-> +       mmc->ops = &litex_mmc_ops;
-> +
-> +       /* set default sd_clk frequency range based on empirical observations
-> +        * of LiteSDCard gateware behavior on typical SDCard media
-> +        */
-> +       mmc->f_min = 12.5e6;
-> +       mmc->f_max = 50e6;
-> +
-> +       ret = mmc_of_parse(mmc);
-> +       if (ret)
-> +               goto err;
-> +
-> +       /* force 4-bit bus_width (only width supported by hardware) */
-> +       mmc->caps &= ~MMC_CAP_8_BIT_DATA;
-> +       mmc->caps |= MMC_CAP_4_BIT_DATA;
-> +
-> +       /* set default capabilities */
-> +       mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
-> +                    MMC_CAP_DRIVER_TYPE_D |
-> +                    MMC_CAP_CMD23;
-> +       mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT |
-> +                     MMC_CAP2_FULL_PWR_CYCLE |
-
-A full power cycle requires you to be able to power on/off the vmmc
-regulator (unless this is internally managed by the controller). Can
-you really do that?
-
-> +                     MMC_CAP2_NO_SDIO;
-
-We should add MMC_CAP2_NO_MMC here as well, as it looks like it can't
-be supported. Right?
-
-> +
-> +       platform_set_drvdata(pdev, host);
-> +
-> +       ret = mmc_add_host(mmc);
-> +       if (ret < 0)
-> +               goto err;
-> +
-> +       return 0;
-> +
-> +err:
-> +       mmc_free_host(mmc);
-> +       return ret;
-> +}
-> +
-> +static int litex_mmc_remove(struct platform_device *pdev)
-> +{
-> +       struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
-> +
-> +       if (host->irq > 0)
-> +               free_irq(host->irq, host->mmc);
-> +       mmc_remove_host(host->mmc);
-> +       mmc_free_host(host->mmc);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct of_device_id litex_match[] = {
-> +       { .compatible = "litex,mmc" },
-> +       { }
-> +};
-> +MODULE_DEVICE_TABLE(of, litex_match);
-> +
-> +static struct platform_driver litex_mmc_driver = {
-> +       .probe = litex_mmc_probe,
-> +       .remove = litex_mmc_remove,
-> +       .driver = {
-> +               .name = "litex-mmc",
-> +               .of_match_table = of_match_ptr(litex_match),
-> +       },
-> +};
-> +module_platform_driver(litex_mmc_driver);
-> +
-> +MODULE_DESCRIPTION("LiteX SDCard driver");
-> +MODULE_AUTHOR("Antmicro <contact@antmicro.com>");
-> +MODULE_AUTHOR("Kamil Rakoczy <krakoczy@antmicro.com>");
-> +MODULE_AUTHOR("Maciej Dudek <mdudek@internships.antmicro.com>");
-> +MODULE_AUTHOR("Paul Mackerras <paulus@ozlabs.org>");
-> +MODULE_AUTHOR("Gabriel Somlo <gsomlo@gmail.com>");
-> +MODULE_LICENSE("GPL v2");
-> --
-
-Other than the comments above, the code looks nice and was easy to
-review, thanks!
+Please re-submit the series, when it's ready to be picked up for me.
 
 Kind regards
 Uffe
+
+>
+> Because of that dependency the patches are marked as RFC.
+>
+> Sergey Shtylyov (13):
+>   mmc: bcm2835: fix deferred probing
+>   mmc: meson-gx: fix deferred probing
+>   mmc: mtk-sd: fix deferred probing
+>   mmc: mvsdio: fix deferred probing
+>   mmc: omap: fix deferred probing
+>   mmc: omap_hsmmc: fix deferred probing
+>   mmc: owl: fix deferred probing
+>   mmc: s3mci: fix deferred probing
+>   mmc: sdhci-acpi: fix deferred probing
+>   mmc: sdhci-spear: fix deferred probing
+>   mmc: sh_mmcif: fix deferred probing
+>   mmc: sunxi: fix deferred probing
+>   mmc: usdhi60rol0: fix deferred probing
+>
+>  drivers/mmc/host/bcm2835.c      | 4 ++--
+>  drivers/mmc/host/meson-gx-mmc.c | 4 ++--
+>  drivers/mmc/host/mtk-sd.c       | 2 +-
+>  drivers/mmc/host/mvsdio.c       | 2 +-
+>  drivers/mmc/host/omap.c         | 2 +-
+>  drivers/mmc/host/omap_hsmmc.c   | 6 ++++--
+>  drivers/mmc/host/owl-mmc.c      | 2 +-
+>  drivers/mmc/host/s3cmci.c       | 4 ++--
+>  drivers/mmc/host/sdhci-acpi.c   | 2 +-
+>  drivers/mmc/host/sdhci-spear.c  | 4 ++--
+>  drivers/mmc/host/sh_mmcif.c     | 2 +-
+>  drivers/mmc/host/sunxi-mmc.c    | 4 ++--
+>  drivers/mmc/host/usdhi6rol0.c   | 6 ++++--
+>  13 files changed, 24 insertions(+), 20 deletions(-)
+>
+> --
+> 2.26.3
+>
