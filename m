@@ -2,274 +2,343 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15CC1C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Dec 2021 14:05:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C15EC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Dec 2021 16:16:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233050AbhL1OFY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Dec 2021 09:05:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50840 "EHLO
+        id S235159AbhL1QQG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Dec 2021 11:16:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52008 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233035AbhL1OFX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Dec 2021 09:05:23 -0500
-Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBB35C06173E
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 06:05:22 -0800 (PST)
-Received: by mail-lj1-x233.google.com with SMTP id u22so30823590lju.7
-        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 06:05:22 -0800 (PST)
+        with ESMTP id S235708AbhL1QQE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Dec 2021 11:16:04 -0500
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9099C06173E
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 08:16:03 -0800 (PST)
+Received: by mail-lj1-x236.google.com with SMTP id by39so31474432ljb.2
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Dec 2021 08:16:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=4CD159WSDCNs1sJ+Mi35aaV09+ezYMaoFXLhOa2eMKw=;
-        b=MYXyDIE42LQuizMj9Ldvg3dFL0VfEe9ntOR/IaGaNGbwvlpszWnAkZEWYsA9z4l3St
-         b8LRla241M4Aj8pEjiippqi1ceJhhf339RafAGZ4bNm17AvPgbu0kr9nfYWcqXTwZpAd
-         mIGqDp1tQkdmesmzhIgYKKE9lF/g1qNZ/bZw4l9V3XaaRI2L5mzdOmlj7HqXNLIcDXFR
-         cs183YIUfxqMDUeh/s5VZ4H6FcNCmdNM63YqAF1UdWGJj/ItdvxTVFWmJRpUhg0Aq3Ir
-         JESwBOcwdumW61eZ/R+yd3MI/76t8Dc5zrC994TxVe1VZcWX3QvL8QmFBpIWL8xnFBZe
-         T/wQ==
+        bh=4k4njwm7hK6Z45dckiCYbmCzLy/kr0ugHzYUGxbiInU=;
+        b=Ek1p4foThB+yuOnIzjsvfQr0fFSjQQbiQsGxSFJiUd5rHYVeapqJevPb/9EV2nu/sX
+         OKfWCPftZmWx7EaXMwLeJy7Zyb8qp+0Hvfi5OVPkBuO7l1LPehb9xKumZsXCpNocn5DV
+         8Ksiw5vFs4+EpTjsM0G+HaPQWiY3qGK6QQu1sgkluuLle+YYkZzYuympAB6sjyJjYe5R
+         EuRwoi5Fi3knGB29CgLT7eeP5o3jhQloStL+/7j+LaveK7oV0fGpJNIDETtMWOJfPG7B
+         NHgFuvCyU4lYGq7MTiUCxgW2h5/OZ64c6ArCfWQE/P0iOWw5Da8Zr02Rr2MTN4VVVas/
+         cETQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=4CD159WSDCNs1sJ+Mi35aaV09+ezYMaoFXLhOa2eMKw=;
-        b=aXmq7ND9iCVAYMtH3NFdO2fpNqgYUhY/cG3eY3XB0U1otMqkg+cF8X6YLv4MGSLfKh
-         y/5EUoJRM2I0RqRdj8yGWTORQlMWf4uqNhkr6JVy0jts5CmgH6/wMbVnC6mrhmQX6TzW
-         G0zCOeaHruitT4iEnEpilh9ERMiEYa+MNCwayCtwzMmpEPn45BrNmdByRhToEvosuNPd
-         ZZnNcf8crTFY8N0pDQbd8lgv4dFF3UnkVYEqTmBmuEffKLr/Kc7ubcj1VAQpoVboVmE5
-         gr41iQNtFxV3AvKY1nD2I+cmS8pyM1lATjy4qyxTjn0rw/l/yjeiOaa5LQtJqYaHLTPX
-         tCGQ==
-X-Gm-Message-State: AOAM5334PQvC2HP7gwG8wPvJgkbz2XqzESdvWKzRxBa/vuMMvTZMueck
-        s5/6O6t7d8uv2/RAVcJnyLSsk3npww4xHheW9OKVJg==
-X-Google-Smtp-Source: ABdhPJyOYSQOipfIsJJxL2+gRAQQvmrYATzQAIb2Jc44rUK/M9/w/cJpNiLrEdNP005DFOZ3+nmCkCFEwPtbFYYAczI=
-X-Received: by 2002:a2e:968d:: with SMTP id q13mr17648935lji.463.1640700320842;
- Tue, 28 Dec 2021 06:05:20 -0800 (PST)
+        bh=4k4njwm7hK6Z45dckiCYbmCzLy/kr0ugHzYUGxbiInU=;
+        b=u93uXK/M1tK/lpoTgRfssuLKxWBH1pWxPL3Vebgh3zP6JDuGDBtTHb/9JSObSna5c6
+         G8j35FMztWB77CL+QsMtjqyE7gG7HBVSsFHNFMOa7yr/lYpcVIE1CYUg/i53erhzkMhg
+         Dnk+9KY2m46/eruzFnemnv6RRIOXGDgLz45aMEfSNGwky7rUkUgvjuUqHYghQoCcz8tx
+         E4OF9IZE529RCWUqJ1wVNLiW7uK1lhHvRzVoqbJFsZq06jCDFW1qPGIjyacRmb6oKlhb
+         tgiAFANyJK2XGJKh2wdJWGv8piFrOmoNMbmKIuc8NkB+S6G77W8LnqTQ4IC3u0rmLaYp
+         Yhqw==
+X-Gm-Message-State: AOAM533r1jxzq/mtuig7w8qDx8KilRRgLT/ElXqCySquDn7n6dkLtKHd
+        hvUOP48uEMKRcDokWylVXo4APRucewe7au6/g00SAA==
+X-Google-Smtp-Source: ABdhPJz2MeuKH/Nzw6lbMyBsvACOeWh7uQV47y66mmJQhZsIRESHcyGkt6EGEiX3GcFZ29eJLYbs9f2LPwsdlGEzjSY=
+X-Received: by 2002:a2e:9659:: with SMTP id z25mr17154594ljh.16.1640708162009;
+ Tue, 28 Dec 2021 08:16:02 -0800 (PST)
 MIME-Version: 1.0
-References: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com> <CAPDyKFrLpim75nUB7ksDie2edkWsnFSq6TbFSFFpw5cY5d4y1w@mail.gmail.com>
- <fabaed5751f04105a9719c1cb0390c98@realtek.com> <CAPDyKFr3NRUgfKtkb2DBrhziekFAB0jT_X3Fsfvjk_bGZLC9mA@mail.gmail.com>
- <fa10aa1c644241808c2ad880088240ab@realtek.com>
-In-Reply-To: <fa10aa1c644241808c2ad880088240ab@realtek.com>
+References: <20211215130711.111186-1-gsomlo@gmail.com> <20211215130711.111186-4-gsomlo@gmail.com>
+In-Reply-To: <20211215130711.111186-4-gsomlo@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 28 Dec 2021 15:04:44 +0100
-Message-ID: <CAPDyKFrtBKHHRgeF-JO27ANsbSmt8rdnhn-WNr5Je9okEgA29Q@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Date:   Tue, 28 Dec 2021 17:15:25 +0100
+Message-ID: <CAPDyKFqo5sZy8aVbOcfS_cxT9T5r214GKCL-FKRg_0P0yQJTFQ@mail.gmail.com>
+Subject: Re: [PATCH v5 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+To:     Gabriel Somlo <gsomlo@gmail.com>
+Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 24 Dec 2021 at 08:23, Ricky WU <ricky_wu@realtek.com> wrote:
+On Wed, 15 Dec 2021 at 14:09, Gabriel Somlo <gsomlo@gmail.com> wrote:
 >
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Thursday, December 23, 2021 6:37 PM
-> > To: Ricky WU <ricky_wu@realtek.com>
-> > Cc: tommyhebb@gmail.com; linux-mmc@vger.kernel.org;
-> > linux-kernel@vger.kernel.org
-> > Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-> >
-> > On Thu, 23 Dec 2021 at 11:27, Ricky WU <ricky_wu@realtek.com> wrote:
-> > >
-> > > > -----Original Message-----
-> > > > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > > > Sent: Tuesday, December 21, 2021 8:51 PM
-> > > > To: Ricky WU <ricky_wu@realtek.com>
-> > > > Cc: tommyhebb@gmail.com; linux-mmc@vger.kernel.org;
-> > > > linux-kernel@vger.kernel.org
-> > > > Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi
-> > > > block rw
-> > > >
-> > > > On Tue, 21 Dec 2021 at 13:24, Ricky WU <ricky_wu@realtek.com> wrote:
-> > > > >
-> > > > > Improving performance for the CMD is multi-block read/write and
-> > > > > the data is sequential.
-> > > > > sd_check_multi_seq() to distinguish multi-block RW (CMD 18/25) or
-> > > > > normal RW (CMD 17/24) if the CMD is multi-block and the data is
-> > > > > sequential then call to sd_rw_multi_seq()
-> > > > >
-> > > > > This patch mainly to control the timing of reply at CMD 12/13.
-> > > > > Originally code driver reply CMD 12/13 at every RW (CMD 18/25).
-> > > > > The new code to distinguish multi-block RW(CMD 18/25) and the data
-> > > > > is sequential or not, if the data is sequential RW driver do not
-> > > > > send CMD
-> > > > > 12 and bypass CMD 13 until wait the different direction RW CMD or
-> > > > > trigger the delay_work to sent CMD 12.
-> > > > >
-> > > > > run benchmark result as below:
-> > > > > SD Card : Samsumg Pro Plus 128GB
-> > > > > Number of Samples:100, Sample Size:10MB <Before> Read : 86.9 MB/s,
-> > > > > Write : 38.3 MB/s <After>  Read : 91.5 MB/s, Write : 55.5 MB/s
-> > > >
-> > > > A much nicer commit message, thanks a lot! Would you mind running
-> > > > some additional tests, like random I/O read/writes?
-> > > >
-> > > > Also, please specify the benchmark tool and command you are using.
-> > > > In the meantime, I will continue to look at the code.
-> > > >
-> > >
-> > > The Tool just use Ubuntu internal GUI benchmark Tool in the "Disks"
-> > > and the Tool don't have random I/O to choice...
-> > >
-> > > Do you have any suggestion for testing random I/O But we think random
-> > > I/O will not change much
-> >
-> > I would probably look into using fio, https://fio.readthedocs.io/en/latest/
-> >
+> LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
+> that targets FPGAs. LiteSDCard is a small footprint, configurable
+> SDCard core commonly used in LiteX designs.
 >
-> Filled random I/O data
-> Before the patch:
-> CMD (Randread):
-> sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=1M -rw=randread
+> The driver was first written in May 2020 and has been maintained
+> cooperatively by the LiteX community. Thanks to all contributors!
+>
+> Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
+> Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
+> Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
+> Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
+> Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
+> Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
+> Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+> Cc: Mateusz Holenko <mholenko@antmicro.com>
+> Cc: Karol Gugala <kgugala@antmicro.com>
+> Cc: Joel Stanley <joel@jms.id.au>
+> Cc: Stafford Horne <shorne@gmail.com>
+> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+> Cc: David Abdurachmanov <david.abdurachmanov@sifive.com>
+> Cc: Florent Kermarrec <florent@enjoy-digital.fr>
+> Reviewed-by: Joel Stanley <joel@jms.id.au>
 
-Thanks for running the tests! Overall, I would not expect an impact on
-the throughput when using a big blocksize like 1M. This is also pretty
-clear from the result you have provided.
+[...]
 
-However, especially for random writes and reads, we want to try with
-smaller blocksizes. Like 8k or 16k, would you mind running another
-round of tests to see how that works out?
+> +
+> +static int litex_mmc_set_bus_width(struct litex_mmc_host *host)
+> +{
+> +       bool app_cmd_sent;
+> +       int ret;
+> +
+> +       if (host->is_bus_width_set)
+> +               return 0;
+> +
+> +       /* ensure 'app_cmd' precedes 'app_set_bus_width_cmd' */
+> +       app_cmd_sent = host->app_cmd; /* was preceding command app_cmd? */
+> +       if (!app_cmd_sent) {
+> +               ret = litex_mmc_send_app_cmd(host);
+> +               if (ret)
+> +                       return ret;
+> +       }
+> +
+> +       /* litesdcard only supports 4-bit bus width */
+> +       ret = litex_mmc_send_set_bus_w_cmd(host, MMC_BUS_WIDTH_4);
+> +       if (ret)
+> +               return ret;
+> +
+> +       /* re-send 'app_cmd' if necessary */
+> +       if (app_cmd_sent) {
+> +               ret = litex_mmc_send_app_cmd(host);
+> +               if (ret)
+> +                       return ret;
+> +       }
 
-I haven't yet been able to provide you with comments on the code, but
-I am looking into it.
+I understand that you are trying to address the limitation that the
+controller supports 4-bit width only. In principle it looks like we
+may need to violate the SD spec to be able to initialise an SD card,
+right? Isn't that a concern for you?
+
+> +
+> +       host->is_bus_width_set = true;
+> +
+> +       return 0;
+> +}
+
+[...]
+
+> +
+> +static void litex_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> +{
+> +       struct litex_mmc_host *host = mmc_priv(mmc);
+> +       struct device *dev = mmc_dev(mmc);
+> +       struct mmc_command *cmd = mrq->cmd;
+> +       struct mmc_command *sbc = mrq->sbc;
+> +       struct mmc_data *data = mrq->data;
+> +       struct mmc_command *stop = mrq->stop;
+> +       unsigned int retries = cmd->retries;
+> +       unsigned int len = 0;
+> +       bool direct = false;
+> +       u32 response_len = litex_mmc_response_len(cmd);
+> +       u8 transfer = SD_CTL_DATA_XFER_NONE;
+> +
+> +       /* First check that the card is still there */
+> +       if (!litex_mmc_get_cd(mmc)) {
+> +               cmd->error = -ENOMEDIUM;
+> +               mmc_request_done(mmc, mrq);
+> +               return;
+> +       }
+> +
+> +       /* Send set-block-count command if needed */
+> +       if (sbc) {
+> +               sbc->error = litex_mmc_send_cmd(host, sbc->opcode, sbc->arg,
+> +                                               litex_mmc_response_len(sbc),
+> +                                               SD_CTL_DATA_XFER_NONE);
+> +               if (sbc->error) {
+> +                       host->is_bus_width_set = false;
+> +                       mmc_request_done(mmc, mrq);
+> +                       return;
+> +               }
+> +       }
+> +
+> +       if (data) {
+> +               /* LiteSDCard only supports 4-bit bus width; therefore, we MUST
+> +                * inject a SET_BUS_WIDTH (acmd6) before the very first data
+> +                * transfer, earlier than when the mmc subsystem would normally
+> +                * get around to it!
+
+This means that you may end up trying to switch bus-width, to a width
+that isn't supported by the card, for example.
+
+As also stated above, I wonder how this conforms to the SD spec from
+the initialization sequence point of view. Have you verified that this
+isn't a problem?
+
+> +                */
+> +               cmd->error = litex_mmc_set_bus_width(host);
+> +               if (cmd->error) {
+> +                       dev_err(dev, "Can't set bus width!\n");
+> +                       mmc_request_done(mmc, mrq);
+> +                       return;
+> +               }
+> +
+> +               litex_mmc_do_dma(host, data, &len, &direct, &transfer);
+> +       }
+> +
+> +       do {
+> +               cmd->error = litex_mmc_send_cmd(host, cmd->opcode, cmd->arg,
+> +                                               response_len, transfer);
+> +       } while (cmd->error && retries-- > 0);
+> +
+> +       if (cmd->error) {
+> +               /* card may be gone; don't assume bus width is still set */
+> +               host->is_bus_width_set = false;
+> +       }
+> +
+> +       if (response_len == SD_CTL_RESP_SHORT) {
+> +               /* pull short response fields from appropriate host registers */
+> +               cmd->resp[0] = host->resp[3];
+> +               cmd->resp[1] = host->resp[2] & 0xFF;
+> +       } else if (response_len == SD_CTL_RESP_LONG) {
+> +               cmd->resp[0] = host->resp[0];
+> +               cmd->resp[1] = host->resp[1];
+> +               cmd->resp[2] = host->resp[2];
+> +               cmd->resp[3] = host->resp[3];
+> +       }
+> +
+> +       /* Send stop-transmission command if required */
+> +       if (stop && (cmd->error || !sbc)) {
+> +               stop->error = litex_mmc_send_cmd(host, stop->opcode, stop->arg,
+> +                                                litex_mmc_response_len(stop),
+> +                                                SD_CTL_DATA_XFER_NONE);
+> +               if (stop->error)
+> +                       host->is_bus_width_set = false;
+> +       }
+> +
+> +       if (data) {
+> +               dma_unmap_sg(dev, data->sg, data->sg_len,
+> +                            mmc_get_dma_dir(data));
+> +       }
+> +
+> +       if (!cmd->error && transfer != SD_CTL_DATA_XFER_NONE) {
+> +               data->bytes_xfered = min(len, mmc->max_req_size);
+> +               if (transfer == SD_CTL_DATA_XFER_READ && !direct) {
+> +                       sg_copy_from_buffer(data->sg, sg_nents(data->sg),
+> +                                           host->buffer, data->bytes_xfered);
+> +               }
+> +       }
+> +
+> +       mmc_request_done(mmc, mrq);
+> +}
+> +
+
+[...]
+
+> +
+> +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+
+I noticed that you use these hard coded values and don't really care
+to manage voltage changes via ->set_ios().
+
+Rather than doing it like this, I would prefer if you can hook up a
+fixed vmmc regulator in the DTS. Then call mmc_regulator_get_supply()
+to fetch it from here, which will let the mmc core create the
+mmc->ocr_avail mask, based upon the voltage level the regulator
+supports.
+
+This becomes more generic and allows more flexibility for the platform
+configuration.
+
+> +       mmc->ops = &litex_mmc_ops;
+> +
+> +       /* set default sd_clk frequency range based on empirical observations
+> +        * of LiteSDCard gateware behavior on typical SDCard media
+> +        */
+> +       mmc->f_min = 12.5e6;
+> +       mmc->f_max = 50e6;
+> +
+> +       ret = mmc_of_parse(mmc);
+> +       if (ret)
+> +               goto err;
+> +
+> +       /* force 4-bit bus_width (only width supported by hardware) */
+> +       mmc->caps &= ~MMC_CAP_8_BIT_DATA;
+> +       mmc->caps |= MMC_CAP_4_BIT_DATA;
+> +
+> +       /* set default capabilities */
+> +       mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
+> +                    MMC_CAP_DRIVER_TYPE_D |
+> +                    MMC_CAP_CMD23;
+> +       mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT |
+> +                     MMC_CAP2_FULL_PWR_CYCLE |
+
+A full power cycle requires you to be able to power on/off the vmmc
+regulator (unless this is internally managed by the controller). Can
+you really do that?
+
+> +                     MMC_CAP2_NO_SDIO;
+
+We should add MMC_CAP2_NO_MMC here as well, as it looks like it can't
+be supported. Right?
+
+> +
+> +       platform_set_drvdata(pdev, host);
+> +
+> +       ret = mmc_add_host(mmc);
+> +       if (ret < 0)
+> +               goto err;
+> +
+> +       return 0;
+> +
+> +err:
+> +       mmc_free_host(mmc);
+> +       return ret;
+> +}
+> +
+> +static int litex_mmc_remove(struct platform_device *pdev)
+> +{
+> +       struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
+> +
+> +       if (host->irq > 0)
+> +               free_irq(host->irq, host->mmc);
+> +       mmc_remove_host(host->mmc);
+> +       mmc_free_host(host->mmc);
+> +
+> +       return 0;
+> +}
+> +
+> +static const struct of_device_id litex_match[] = {
+> +       { .compatible = "litex,mmc" },
+> +       { }
+> +};
+> +MODULE_DEVICE_TABLE(of, litex_match);
+> +
+> +static struct platform_driver litex_mmc_driver = {
+> +       .probe = litex_mmc_probe,
+> +       .remove = litex_mmc_remove,
+> +       .driver = {
+> +               .name = "litex-mmc",
+> +               .of_match_table = of_match_ptr(litex_match),
+> +       },
+> +};
+> +module_platform_driver(litex_mmc_driver);
+> +
+> +MODULE_DESCRIPTION("LiteX SDCard driver");
+> +MODULE_AUTHOR("Antmicro <contact@antmicro.com>");
+> +MODULE_AUTHOR("Kamil Rakoczy <krakoczy@antmicro.com>");
+> +MODULE_AUTHOR("Maciej Dudek <mdudek@internships.antmicro.com>");
+> +MODULE_AUTHOR("Paul Mackerras <paulus@ozlabs.org>");
+> +MODULE_AUTHOR("Gabriel Somlo <gsomlo@gmail.com>");
+> +MODULE_LICENSE("GPL v2");
+> --
+
+Other than the comments above, the code looks nice and was easy to
+review, thanks!
 
 Kind regards
 Uffe
-
->
-> mytest: (g=0): rw=randread, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
-> fio-3.16
-> Starting 1 thread
-> Jobs: 1 (f=1): [r(1)][100.0%][r=86.0MiB/s][r=86 IOPS][eta 00m:00s]
-> mytest: (groupid=0, jobs=1): err= 0: pid=2663: Fri Dec 24 14:28:33 2021
->   read: IOPS=85, BW=85.1MiB/s (89.3MB/s)(1024MiB/12026msec)
->     clat (usec): min=11253, max=34579, avg=11735.57, stdev=742.16
->      lat (usec): min=11254, max=34580, avg=11736.34, stdev=742.16
->     clat percentiles (usec):
->      |  1.00th=[11338],  5.00th=[11469], 10.00th=[11600], 20.00th=[11600],
->      | 30.00th=[11600], 40.00th=[11600], 50.00th=[11731], 60.00th=[11731],
->      | 70.00th=[11863], 80.00th=[11863], 90.00th=[11863], 95.00th=[11863],
->      | 99.00th=[11863], 99.50th=[12518], 99.90th=[15664], 99.95th=[34341],
->      | 99.99th=[34341]
->    bw (  KiB/s): min=81920, max=88064, per=99.91%, avg=87110.67, stdev=1467.81, samples=24
->    iops        : min=   80, max=   86, avg=85.00, stdev= 1.41, samples=24
->   lat (msec)   : 20=99.90%, 50=0.10%
->   cpu          : usr=0.17%, sys=1.26%, ctx=2048, majf=0, minf=256
->   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
->      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      issued rwts: total=1024,0,0,0 short=0,0,0,0 dropped=0,0,0,0
->      latency   : target=0, window=0, percentile=100.00%, depth=1
->
-> Run status group 0 (all jobs):
->    READ: bw=85.1MiB/s (89.3MB/s), 85.1MiB/s-85.1MiB/s (89.3MB/s-89.3MB/s), io=1024MiB (1074MB), run=12026-12026msec
->
-> Disk stats (read/write):
->   mmcblk0: ios=2026/0, merge=0/0, ticks=17612/0, in_queue=17612, util=99.23%
->
-> CMD (Randwrite):
-> sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=1M -rw=randwrite
->
-> mytest: (g=0): rw=randwrite, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
-> fio-3.16
-> Starting 1 thread
-> Jobs: 1 (f=1): [w(1)][100.0%][w=41.0MiB/s][w=41 IOPS][eta 00m:00s]
-> mytest: (groupid=0, jobs=1): err= 0: pid=2738: Fri Dec 24 14:30:05 2021
->   write: IOPS=38, BW=38.4MiB/s (40.2MB/s)(1024MiB/26695msec); 0 zone resets
->     clat (usec): min=18862, max=94708, avg=25990.34, stdev=9227.22
->      lat (usec): min=18910, max=94781, avg=26061.91, stdev=9228.04
->     clat percentiles (usec):
->      |  1.00th=[20579],  5.00th=[22414], 10.00th=[22676], 20.00th=[22938],
->      | 30.00th=[23200], 40.00th=[23462], 50.00th=[23462], 60.00th=[23725],
->      | 70.00th=[23725], 80.00th=[23987], 90.00th=[24773], 95.00th=[56361],
->      | 99.00th=[59507], 99.50th=[64226], 99.90th=[86508], 99.95th=[94897],
->      | 99.99th=[94897]
->    bw (  KiB/s): min=24576, max=43008, per=99.85%, avg=39221.13, stdev=3860.74, samples=53
->    iops        : min=   24, max=   42, avg=38.30, stdev= 3.77, samples=53
->   lat (msec)   : 20=0.98%, 50=92.38%, 100=6.64%
->   cpu          : usr=0.50%, sys=0.31%, ctx=1024, majf=0, minf=0
->   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
->      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      issued rwts: total=0,1024,0,0 short=0,0,0,0 dropped=0,0,0,0
->      latency   : target=0, window=0, percentile=100.00%, depth=1
->
-> Run status group 0 (all jobs):
->   WRITE: bw=38.4MiB/s (40.2MB/s), 38.4MiB/s-38.4MiB/s (40.2MB/s-40.2MB/s), io=1024MiB (1074MB), run=26695-26695msec
->
-> Disk stats (read/write):
->   mmcblk0: ios=52/2043, merge=0/0, ticks=81/39874, in_queue=39956, util=99.90%
->
->
-> After the patch:
->
-> CMD (Randread):
-> sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=1M -rw=randread
->
-> mytest: (g=0): rw=randread, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
-> fio-3.16
-> Starting 1 thread
-> Jobs: 1 (f=1): [r(1)][100.0%][r=87.0MiB/s][r=87 IOPS][eta 00m:00s]
-> mytest: (groupid=0, jobs=1): err= 0: pid=11614: Fri Dec 24 14:07:06 2021
->   read: IOPS=86, BW=86.6MiB/s (90.8MB/s)(1024MiB/11828msec)
->     clat (usec): min=11068, max=32423, avg=11543.12, stdev=733.86
->      lat (usec): min=11069, max=32424, avg=11543.85, stdev=733.87
->     clat percentiles (usec):
->      |  1.00th=[11076],  5.00th=[11338], 10.00th=[11469], 20.00th=[11469],
->      | 30.00th=[11469], 40.00th=[11469], 50.00th=[11469], 60.00th=[11600],
->      | 70.00th=[11600], 80.00th=[11600], 90.00th=[11600], 95.00th=[11600],
->      | 99.00th=[11600], 99.50th=[11731], 99.90th=[21627], 99.95th=[32375],
->      | 99.99th=[32375]
->    bw (  KiB/s): min=83968, max=90112, per=99.94%, avg=88598.26, stdev=1410.46, samples=23
->    iops        : min=   82, max=   88, avg=86.52, stdev= 1.38, samples=23
->   lat (msec)   : 20=99.80%, 50=0.20%
->   cpu          : usr=0.09%, sys=1.40%, ctx=2048, majf=0, minf=256
->   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
->      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      issued rwts: total=1024,0,0,0 short=0,0,0,0 dropped=0,0,0,0
->      latency   : target=0, window=0, percentile=100.00%, depth=1
->
-> Run status group 0 (all jobs):
->    READ: bw=86.6MiB/s (90.8MB/s), 86.6MiB/s-86.6MiB/s (90.8MB/s-90.8MB/s), io=1024MiB (1074MB), run=11828-11828msec
->
-> Disk stats (read/write):
->   mmcblk0: ios=2016/0, merge=0/0, ticks=17397/0, in_queue=17397, util=99.21%
->
-> CMD (Randwrite):
-> sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=1M -rw=randwrite
->
-> mytest: (g=0): rw=randwrite, bs=(R) 1024KiB-1024KiB, (W) 1024KiB-1024KiB, (T) 1024KiB-1024KiB, ioengine=psync, iodepth=1
-> fio-3.16
-> Starting 1 thread
-> Jobs: 1 (f=1): [w(1)][100.0%][w=50.0MiB/s][w=50 IOPS][eta 00m:00s]
-> mytest: (groupid=0, jobs=1): err= 0: pid=11668: Fri Dec 24 14:08:36 2021
->   write: IOPS=39, BW=39.3MiB/s (41.2MB/s)(1024MiB/26059msec); 0 zone resets
->     clat (msec): min=16, max=118, avg=25.37, stdev=16.34
->      lat (msec): min=16, max=118, avg=25.44, stdev=16.34
->     clat percentiles (msec):
->      |  1.00th=[   17],  5.00th=[   20], 10.00th=[   20], 20.00th=[   20],
->      | 30.00th=[   20], 40.00th=[   20], 50.00th=[   20], 60.00th=[   20],
->      | 70.00th=[   21], 80.00th=[   21], 90.00th=[   52], 95.00th=[   75],
->      | 99.00th=[   78], 99.50th=[  104], 99.90th=[  114], 99.95th=[  120],
->      | 99.99th=[  120]
->    bw (  KiB/s): min=20480, max=51200, per=99.93%, avg=40211.69, stdev=10498.00, samples=52
->    iops        : min=   20, max=   50, avg=39.27, stdev=10.25, samples=52
->   lat (msec)   : 20=72.95%, 50=16.80%, 100=9.57%, 250=0.68%
->   cpu          : usr=0.41%, sys=0.38%, ctx=1024, majf=0, minf=0
->   IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
->      submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
->      issued rwts: total=0,1024,0,0 short=0,0,0,0 dropped=0,0,0,0
->      latency   : target=0, window=0, percentile=100.00%, depth=1
->
-> Run status group 0 (all jobs):
->   WRITE: bw=39.3MiB/s (41.2MB/s), 39.3MiB/s-39.3MiB/s (41.2MB/s-41.2MB/s), io=1024MiB (1074MB), run=26059-26059msec
->
-> Disk stats (read/write):
->   mmcblk0: ios=51/2031, merge=0/0, ticks=84/40061, in_queue=40144, util=99.89%
->
-> BR,
-> Ricky
