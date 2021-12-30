@@ -2,138 +2,2629 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87AE8C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Dec 2021 08:35:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E5D2C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Dec 2021 09:25:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237717AbhL3IfC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Dec 2021 03:35:02 -0500
-Received: from mailout3.samsung.com ([203.254.224.33]:54282 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237672AbhL3IfB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Dec 2021 03:35:01 -0500
-Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
-        by mailout3.samsung.com (KnoxPortal) with ESMTP id 20211230083459epoutp03b86e3d51dc9d2ea6911ed3191c482dd7~Fe2Hn_STk0137601376epoutp03u
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Dec 2021 08:34:59 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20211230083459epoutp03b86e3d51dc9d2ea6911ed3191c482dd7~Fe2Hn_STk0137601376epoutp03u
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1640853299;
-        bh=LnnbCn1ikfbcquXeoSQU5csy8RCFh3bknsY3HDm1HxQ=;
-        h=Subject:To:Cc:From:Date:In-Reply-To:References:From;
-        b=PFapUeP6UjKXjmlF6AMzhBpSfw3137yDDEsEjXPuIAccppsULHLarnhRaDzV+RRzR
-         U8JqBy3KkCaYUXHrThIRD+2pwlG5wxkcOVdYilI0gkw5p06O9l35Eg/gGR7d0s1kEL
-         B6rbZ49J7vqfK8q3DCc8v34uiaqQYifI2gQXMODc=
-Received: from epsnrtp4.localdomain (unknown [182.195.42.165]) by
-        epcas1p1.samsung.com (KnoxPortal) with ESMTP id
-        20211230083459epcas1p1040e12a2ad28ed493b025415f9c55f3d~Fe2HVILdL0853208532epcas1p1H;
-        Thu, 30 Dec 2021 08:34:59 +0000 (GMT)
-Received: from epsmges1p2.samsung.com (unknown [182.195.38.235]) by
-        epsnrtp4.localdomain (Postfix) with ESMTP id 4JPhR22SgDz4x9Pq; Thu, 30 Dec
-        2021 08:34:54 +0000 (GMT)
-Received: from epcas1p4.samsung.com ( [182.195.41.48]) by
-        epsmges1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
-        05.4B.08277.82F6DC16; Thu, 30 Dec 2021 17:34:48 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-        epcas1p3.samsung.com (KnoxPortal) with ESMTPA id
-        20211230083447epcas1p329fef5fa40608c616910c9e57a11785f~Fe18mNXhm1066210662epcas1p3X;
-        Thu, 30 Dec 2021 08:34:47 +0000 (GMT)
-Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
-        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20211230083447epsmtrp18ad6729217873b68b2311c7215292299~Fe18lWzNw2434724347epsmtrp1P;
-        Thu, 30 Dec 2021 08:34:47 +0000 (GMT)
-X-AuditID: b6c32a36-1edff70000002055-a8-61cd6f288921
-Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        62.03.29871.72F6DC16; Thu, 30 Dec 2021 17:34:47 +0900 (KST)
-Received: from [10.113.113.235] (unknown [10.113.113.235]) by
-        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
-        20211230083447epsmtip2e5dc1fb27105b70d2c093108d6e89f45~Fe18aGYep0113401134epsmtip26;
-        Thu, 30 Dec 2021 08:34:47 +0000 (GMT)
-Subject: Re: [PATCH] mmc: dw_mmc: Fix potential null pointer risk
-To:     Wen Zhiwei <wenzhiwei@kylinos.cn>, ulf.hansson@linaro.org,
-        p.zabel@pengutronix.de
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-From:   Jaehoon Chung <jh80.chung@samsung.com>
-Message-ID: <beeb83e9-415c-cf36-9cec-f9bc277442ed@samsung.com>
-Date:   Thu, 30 Dec 2021 17:35:32 +0900
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
-        Thunderbird/78.14.0
+        id S238130AbhL3JZQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Dec 2021 04:25:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57056 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238109AbhL3JZP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Dec 2021 04:25:15 -0500
+Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F188C061574
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Dec 2021 01:25:15 -0800 (PST)
+Received: by mail-wr1-x42d.google.com with SMTP id s1so49283169wra.6
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Dec 2021 01:25:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=AH76ITo7xd4KmqorHdNOK1jOL1cFKjgGsXTOeMG6b8Q=;
+        b=U2QGuWv1h4XcAfs4xRRUH3gLWd809Cf0mfNpNfEBxsCHg9VTAXgqwsJD3JSIRxyNqM
+         dHrcCVhaMx6j7DLhYR+4Y0PWq51xbOMnUnF/Hq8K7fBYBoLG2mh78KxBCjO83Xq+DqV5
+         gt515zU63YO7Z5Jehdo0WxN937mmOcZhVpT+BTzFP7heJea+WBFEzFd0JE2ZeuVbzJrV
+         vEVLoaCbNm84prWXZMyouZnfsBQuQI0Qg0AqHGO8FesT1sXelx/VuTjMU0Xu36Cb2y/M
+         EUefdufRGZ0zJvdTqVRbtY4yJA7NVxwARv2pUBmmAqJG0BKxvmqshFYFteNYVS9iB/ny
+         aPfA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=AH76ITo7xd4KmqorHdNOK1jOL1cFKjgGsXTOeMG6b8Q=;
+        b=yAJMnSdEWheqWabSO/HHty0jWa8AL+86ugNxt95XI01Su5W5xtHJrQdt7a1Rr85210
+         VP+fDZbOVa958VWGqdAwYCpUMioNEbpF791zmbYvAt6HOVzdMU7dsdgIZRLUeyUsGt8X
+         Te25dlrCu2E4DT/9ou49UNkLaJVKja9KGBzX/G/aFMkvME10YcyY5VF1A+bBF+sveXJb
+         Uba1jAC+W4coNR3cHILOdgqAbDODUh+qMXa0YvAnbia8PsZ6PiOvF3F5I3bIOFJMSdRS
+         qYWZ6aM+UZZYrPvtKZm44onY48712ZeR/Yl0SWZHvwNwAqM4Fb9nF3s29oenmA1YHyk1
+         q5cQ==
+X-Gm-Message-State: AOAM531MYBWRP78VHzbhLb7BHvzAMU6BCEf2SGidSc7d74hLhxnBqB2j
+        vykWMjOmMAy4mwEGfUs1fFkMiOq140l9zw==
+X-Google-Smtp-Source: ABdhPJwTrCOmBiCVdGS2TeqQHEx8O3Y3lI3Hb007n8Zh2FCD8kjH+1XGoGPQi9K6sq2JBXYk+ZxaNQ==
+X-Received: by 2002:a5d:6d85:: with SMTP id l5mr24259861wrs.579.1640856313170;
+        Thu, 30 Dec 2021 01:25:13 -0800 (PST)
+Received: from ?IPV6:2a02:908:1980:7720::dea7? ([2a02:908:1980:7720::dea7])
+        by smtp.gmail.com with ESMTPSA id p15sm22434553wmj.46.2021.12.30.01.25.11
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 30 Dec 2021 01:25:12 -0800 (PST)
+Message-ID: <64b9f894-72e4-86c2-d60c-48140e2c2143@gmail.com>
+Date:   Thu, 30 Dec 2021 10:25:06 +0100
 MIME-Version: 1.0
-In-Reply-To: <20211229023814.53372-1-wenzhiwei@kylinos.cn>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.4.0
+Subject: Re: nothing happens upon SD card insertion (Asus Zenbook UM425IA,
+ RTS522A)
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpnk+LIzCtJLcpLzFFi42LZdljTQFcj/2yiwYJV7BaXd81hszjyv5/R
-        4u69EywWx9eGW+y/fInZgdVjS+s/Zo871/awefT/NfD4vEkugCUq2yYjNTEltUghNS85PyUz
-        L91WyTs43jne1MzAUNfQ0sJcSSEvMTfVVsnFJ0DXLTMHaKuSQlliTilQKCCxuFhJ386mKL+0
-        JFUhI7+4xFYptSAlp8C0QK84Mbe4NC9dLy+1xMrQwMDIFKgwITtj9tf/zAV72Su2Lupja2Cc
-        ydbFyMkhIWAi0bnoLTOILSSwg1Hi+OToLkYuIPsTo8TensmsEM43Rok/r1ayw3T0vDzDCJHY
-        yyix58luKOc9o8TiCQtZQaqEBRwlvvyeD9YhIhAu8W75TbA4s4C1xM8frWA2m4COxPZvx5m6
-        GDk4eAXsJPb1V4GEWQRUJR5cXgTWKioQKXH/x3Iwm1dAUOLkzCcsIDangJXEzF8PmCBGikvc
-        ejIfypaX2P52DjPIPRICX9klzi45wghxtYvE1g/TWCFsYYlXx7dAfSMl8bK/jR2iYRmjxJ3b
-        f9kgnPWMEge2L4GGkrHE/qWTwS5lFtCUWL9LHyKsKLHz91xGiM18Eu++9rCClEgI8Ep0tAlB
-        lKhIXHr9kglm190n/6Fu8JC4N2knywRGxVlIfpuF5J9ZSP6ZhbB4ASPLKkax1ILi3PTUYsMC
-        I3hsJ+fnbmIEp0gtsx2Mk95+0DvEyMTBeIhRgoNZSYR33bQziUK8KYmVValF+fFFpTmpxYcY
-        TYGhPZFZSjQ5H5ik80riDU0sDUzMjIxNLAzNDJXEeVdNO50oJJCeWJKanZpakFoE08fEwSnV
-        wGT+f8fBIlehvbPlf9a53/urUZYfdE5vUfyEF53nnTZUln/WqXZlibBguzb7mtgDm6TOg5cr
-        pi2Lqtgiff/44VTBI9vKv8ZF/sucO+Vf1ZrOV9wrbiXFFrSs1tY8EbAyoShpTu0PC8bFgjId
-        e5vEeu00ztc2etv9PuYeu3UZq1nv1tnt39e9tZxmfjlyysk889Aa+dKrz7v4OR9IrVI345I8
-        Gv1zqvQn2dfM+bfVnBvqzr43+//k8J8lZ2Xuz18UovK86USb/s2/yy6u3n3gTOfzXBd/Z43m
-        RUt3eu5eUHVnXsCd78InUs9UOUXvX1f7v1Wxu+6cbX7W4geZBw2zVUKlhHdJ/Crpvh4Ty5w/
-        rVeJpTgj0VCLuag4EQC33hv4GgQAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrKLMWRmVeSWpSXmKPExsWy7bCSvK56/tlEg8V9uhaXd81hszjyv5/R
-        4u69EywWx9eGW+y/fInZgdVjS+s/Zo871/awefT/NfD4vEkugCWKyyYlNSezLLVI3y6BK2P2
-        1//MBXvZK7Yu6mNrYJzJ1sXIySEhYCLR8/IMYxcjF4eQwG5GiWnflrNCJKQkPj+dClTEAWQL
-        Sxw+XAxR85ZRYvfzE+wgNcICjhJffs8Hs0UEwiV27vwN1sssYC3x80crK0RDL6PE/l/HGUES
-        bAI6Etu/HWcCGcorYCexr78KJMwioCrx4PIisDmiApES644vA7N5BQQlTs58wgJicwpYScz8
-        9YAJYr66xJ95l5ghbHGJW0/mQ8XlJba/ncM8gVFoFpL2WUhaZiFpmYWkZQEjyypGydSC4tz0
-        3GLDAsO81HK94sTc4tK8dL3k/NxNjOCY0NLcwbh91Qe9Q4xMHIyHGCU4mJVEeNdNO5MoxJuS
-        WFmVWpQfX1Sak1p8iFGag0VJnPdC18l4IYH0xJLU7NTUgtQimCwTB6dUA5Pme4Xr2nPkD/MI
-        rJXg1pioMG2X971XzF8LODZ+P5NVoD7DT+++uNP8TTX6B7f7/sqykde9tkH3up1UwxFd0xUH
-        zzxmfazvvVSusOK+ocHaLZusmVe2Mr8M+fvTs3vBVK1FGzJ1c43XP3b+mlXd3eOe7Z9/1W2m
-        X1B/rsjTZsknjg65rYKSMRfP5OaI7tmyX++icZzXt/Vs0/2yf7ZpHxVzbkrcabS+V2lCXIBz
-        +RPhe4cqWtb/UFmbxjz5wJGdvAkh5o/7tvx6tZpNa++/dfznW5d2p72fLpK6eOafLeuLbHdq
-        HYn1Zgvtc047EHamuW9Pm//X4Cylvbp2j+tLN/53DTu+65vEHYuIK9eEHiixFGckGmoxFxUn
-        AgBnxjz6+AIAAA==
-X-CMS-MailID: 20211230083447epcas1p329fef5fa40608c616910c9e57a11785f
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: SVC_REQ_APPROVE
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20211229023827epcas1p1c62596be323776d0abad266224c299e0
-References: <CGME20211229023827epcas1p1c62596be323776d0abad266224c299e0@epcas1p1.samsung.com>
-        <20211229023814.53372-1-wenzhiwei@kylinos.cn>
+To:     Ricky WU <ricky_wu@realtek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rui Feng <rui_feng@realsil.com.cn>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <sq6sp6$cs9$1@ciao.gmane.io>
+ <CAPDyKFon=yS81Nxyx30s4sgtMT8VdurRNOCSzM3pzZTWTBThyw@mail.gmail.com>
+ <1355e2bb760448268571554441a51748@realtek.com>
+ <a91b73ab-5f2f-f748-95aa-63fa2d7b576b@gmail.com>
+ <56424bcaea61409ead3075702b92bca1@realtek.com>
+From:   Julian Sikorski <belegdol@gmail.com>
+In-Reply-To: <56424bcaea61409ead3075702b92bca1@realtek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/29/21 11:38 AM, Wen Zhiwei wrote:
-> we previously assumed 'host->slot' could be null,
-> null pointer judgment should be added
+Hi Ricky,
+
+sure. It does not look like anything except runtime_active_time changes 
+unfortunately:
+- after resume:
+   $ cat /sys/bus/pci/devices/0000\:02\:00.0/power/runtime_*
+
+     7226344
+
+     active
+
+     0
+- card insertion:
+   $ cat /sys/bus/pci/devices/0000\:02\:00.0/power/runtime_*
+
+     7247553
+
+     active
+
+     0
+
+- lspci:
+   $ cat /sys/bus/pci/devices/0000\:02\:00.0/power/runtime_*
+
+     7285184
+
+     active
+
+     0
+- nautilus ejection:
+   $ cat /sys/bus/pci/devices/0000\:02\:00.0/power/runtime_*
+
+     7545970
+
+     active
+
+     0
+- sd card removed
+   $ cat /sys/bus/pci/devices/0000\:02\:00.0/power/runtime_*
+
+     7587779
+
+     active
+
+     0
+
+
+Could it be that the reader is suspended but the OS thinks it is not?
+
+Best regards,
+Julian
+
+Am 30.12.21 um 04:06 schrieb Ricky WU:
+> Hi Julian,
 > 
-> Signed-off-by: Wen Zhiwei <wenzhiwei@kylinos.cn>
-
-Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Beset Regards,
-Jaehoon Chung
-
-> ---
->  drivers/mmc/host/dw_mmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Can you help to check device power status when you insert the card and no action?
+> /sys/bus/pci/devices/WHERE-IS-RTS522A-PCI-PORT-LEVEL/power/runtime_*
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index d977f34f6b55..c9dc8c168efb 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3518,7 +3518,7 @@ int dw_mci_runtime_resume(struct device *dev)
->  	mci_writel(host, CTRL, SDMMC_CTRL_INT_ENABLE);
->  
->  
-> -	if (host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
-> +	if (host->slot && host->slot->mmc->pm_flags & MMC_PM_KEEP_POWER)
->  		dw_mci_set_ios(host->slot->mmc, &host->slot->mmc->ios);
->  
->  	/* Force setup bus to guarantee available clock output */
+> Ricky
 > 
-
+>> -----Original Message-----
+>> From: Julian Sikorski <belegdol@gmail.com>
+>> Sent: Wednesday, December 29, 2021 4:49 PM
+>> To: Ricky WU <ricky_wu@realtek.com>; Ulf Hansson <ulf.hansson@linaro.org>;
+>> Rui Feng <rui_feng@realsil.com.cn>
+>> Cc: linux-mmc@vger.kernel.org
+>> Subject: Re: nothing happens upon SD card insertion (Asus Zenbook UM425IA,
+>> RTS522A)
+>>
+>> Hi Ricky,
+>>
+>> thank you for looking into this. I have investigated a bit further and
+>> it appears that I can somewhat reliably trigger the sdcard detection
+>> during first insert after resume by calling lspci. As in:
+>> - insert card
+>> - wait 20 seconds, nothing happens
+>> - issue lspci
+>> - sdcard is detected
+>> If I eject and reinsert the card, however, lscpi will no longer help
+>> unless I suspend the machine, reboot would probably work as well.
+>>
+>> I enabled dynamic debugging and got the following output. You can see
+>> that there is a gap between 09:35:25 and 09:36:42 during which I
+>> inserted the card into the laptop.
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: : Realtek PCI-E
+>> Card Reader found at 0000:02:00.0 [10ec:522a] (rev 1)
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0:
+>> rtsx_pci_acquire_irq: pcr->msi_en = 1, pci->irq = 63
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: PID: 0x522a, IC
+>> version: 0x02
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: Cfg 0x724:
+>> 0xeeffffff
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: Cfg 0x814:
+>> 0x80000062
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: pcr->aspm_en = 0x2
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0:
+>> pcr->sd30_drive_sel_1v8 = 0x3
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0:
+>> pcr->sd30_drive_sel_3v3 = 0x3
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0:
+>> pcr->card_drive_sel = 0x41
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: pcr->flags = 0x0
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: RTSX_BIER:
+>> 0x36400000
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 0)
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: n = 118, div = 3
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: ssc_depth = 1
+>>
+>> Dez 29 09:35:25 snowball3 kernel: rtsx_pci 0000:02:00.0: -->
+>> rtsx_pci_idle_work
+>>
+>> Dez 29 09:36:42 snowball3 kernel: rtsx_pci 0000:02:00.0: -->
+>> rtsx_pci_card_detect
+>>
+>> Dez 29 09:36:42 snowball3 kernel: rtsx_pci 0000:02:00.0: irq_status:
+>> 0x00010000
+>>
+>> Dez 29 09:36:42 snowball3 kernel: rtsx_pci 0000:02:00.0: card_inserted:
+>> 0x10000, card_removed: 0x0
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: mmc0: cannot verify signal voltage switch
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 30MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 30MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 30)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: n = 98, div = 1
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: ssc_depth = 2
+>>
+>> Dez 29 09:36:43 snowball3 kernel: mmc0: new ultra high speed SDR50 SDHC
+>> card at address aaaa
+>>
+>> Dez 29 09:36:43 snowball3 kernel: mmcblk0: mmc0:aaaa SL32G 29.7 GiB
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedff000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel:  mmcblk0: p1
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedff000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2b000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb27000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92f000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb28000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb29000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf5000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93f000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93e000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93d000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93b000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93a000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce939000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce938000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce937000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce936000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce935000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce934000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce933000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce932000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92e000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92d000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92d000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92e000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce932000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce933000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce934000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce930000, Len: 0x2000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcec18000, Len: 0x6000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedc0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf720000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf730000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8c0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8d0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8e0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8f0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce934000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce933000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce932000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92e000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92d000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce935000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce936000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce937000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce938000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce939000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93a000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93b000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93d000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcec18000, Len: 0x8000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93e000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93f000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf5000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce930000, Len: 0x2000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf338000, Len: 0x6000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedc0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf720000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf730000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8c0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8d0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8e0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8f0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce880000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce890000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8a0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8b0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf1a0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf1b0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffd0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcea60000, Len: 0xd000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb1b000, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb1a200, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb19400, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf3000, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedfa200, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcec68400, Len: 0x7c00
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcff2c000, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf5000, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93f200, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf338400, Len: 0x7c00
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93f000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2c000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2d400, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2e600, Len: 0x200
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb2f800, Len: 0x800
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfebf000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffee000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfff0000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb1d000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb26000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb25000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb24000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede5000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfff4000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb23000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf9000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede9000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf1000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb07000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf0000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf5000, Len: 0x1000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce930000, Len: 0x2000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf338000, Len: 0x6000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedc0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf720000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf730000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8c0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8d0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8e0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8f0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce880000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce890000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8a0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8b0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf1a0000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf1b0000, Len: 0xf000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcea60000, Len: 0x10000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffd0000, Len: 0xd000
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:36:43 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf5000, Len: 0x1000
+>>
+>> Dez 29 09:36:44 snowball3 kernel: rtsx_pci 0000:02:00.0: -->
+>> rtsx_pci_idle_work
+>>
+>> The following gets printed if I click eject button in Nautilus. Please
+>> note that the card does not disappear as it should and subsequent clicks
+>> result in "No object for D-Bus interface" message.
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb20000, Len: 0x200
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf5000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb20000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93f000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf0000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb07000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf1000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb1e000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcff7f000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfff6000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb1f000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede9000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf9000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb23000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfff4000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede5000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf338000, Len: 0x8000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb24000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb25000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb26000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede2000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffe8000, Len: 0x2000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfecd0000, Len: 0x6000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcea40000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf2e0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf2f0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8c0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8d0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8e0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8f0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce880000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce890000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8a0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8b0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcec40000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcec50000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcff60000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfeca0000, Len: 0xd000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedfa000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb26000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel:  mmcblk0: p1
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcff2c000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffff000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfecca000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefc000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefd000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefe000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfeff000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf3000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfeb8000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede3000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfed98000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93c000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedfa000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93b000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce93a000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce939000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede4000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce938000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce937000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf4000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce936000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce935000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf2000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92c000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfff9000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92d000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce92e000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb1c000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce932000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce933000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb16000, Len: 0x2000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcea38000, Len: 0x6000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcea20000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf3c0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf3d0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8c0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8d0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8e0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8f0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb21000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce933000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedf6000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedee000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfedef000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefb000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfeccb000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb22000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce934000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb26000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefe000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefd000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcfefc000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfecca000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffff000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf338000, Len: 0x8000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcff2c000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb25000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xceb24000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede5000, Len: 0x1000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffe8000, Len: 0x2000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcec18000, Len: 0x6000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcffd0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf1a0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf1b0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8c0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8d0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8e0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8f0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce880000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce890000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8a0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xce8b0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf3c0000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcf3d0000, Len: 0xf000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xcea20000, Len: 0x10000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfed60000, Len: 0xd000
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Switch card
+>> clock to 100MHz
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: Internal SSC
+>> clock: 100MHz (cur_clock = 100)
+>>
+>> Dez 29 09:42:48 snowball3 kernel: rtsx_pci 0000:02:00.0: DMA addr:
+>> 0xfede5000, Len: 0x1000
+>>
+>> Dez 29 09:42:49 snowball3 kernel: rtsx_pci 0000:02:00.0: -->
+>> rtsx_pci_idle_work
+>>
+>> Let me know if I should enable more debugging, and if so, where.
+>>
+>> Best regards,
+>> Julian
+>>
+>> Am 29.12.21 um 04:36 schrieb Ricky WU:
+>>> Hi Julian，
+>>>
+>>> We can't reproduce this issue on our side
+>>> Can you check your socket is well and print more driver debug message?
+>>>
+>>> BR,
+>>> Ricky
+>>>> -----Original Message-----
+>>>> From: Ulf Hansson <ulf.hansson@linaro.org>
+>>>> Sent: Wednesday, December 29, 2021 1:07 AM
+>>>> To: Julian Sikorski <belegdol@gmail.com>; Ricky WU
+>> <ricky_wu@realtek.com>;
+>>>> Rui Feng <rui_feng@realsil.com.cn>
+>>>> Cc: linux-mmc@vger.kernel.org
+>>>> Subject: Re: nothing happens upon SD card insertion (Asus Zenbook
+>> UM425IA,
+>>>> RTS522A)
+>>>>
+>>>> + Ricky and Rui,
+>>>>
+>>>> On Sat, 25 Dec 2021 at 11:50, Julian Sikorski <belegdol@gmail.com> wrote:
+>>>>>
+>>>>> Hello,
+>>>>>
+>>>>> I have an Asus Zenbook UM425IA laptop with Realtek RTS522A card
+>> reader:
+>>>>>
+>>>>> 02:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd.
+>>>>> RTS522A PCI Express Card Reader (rev 01)
+>>>>
+>>>> Hi Julian,
+>>>>
+>>>> I assume that means you are using the
+>>>> drivers/mmc/host/rtsx_pci_sdmmc.c. So, I have looped in some of the main
+>>>> authors to this mmc/sd driver. Let's see if they can help in some way.
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>>
+>>>>>
+>>>>>
+>>>>> Almost every time when I insert a card into it, nothing happens - no
+>>>>> dmesg message or anything.
+>>>>>
+>>>>> echo 1 | sudo tee -a /sys/kernel/debug/tracing/events/mmc/enable
+>>>>>
+>>>>> sudo cat /sys/kernel/debug/tracing/trace_pipe > mmc_trace.txt
+>>>>>
+>>>>> also results in an empty file. If I am lucky, the card will be
+>>>>> detected after some delay and the following will appear in the log:
+>>>>>
+>>>>> Dez 25 11:34:41 snowball3 kernel: mmc0: cannot verify signal voltage
+>>>>> switch
+>>>>>
+>>>>> Dez 25 11:34:41 snowball3 kernel: mmc0: new ultra high speed SDR50
+>>>>> SDHC card at address aaaa
+>>>>>
+>>>>> Dez 25 11:34:41 snowball3 kernel: mmcblk0: mmc0:aaaa SL32G 29.7 GiB
+>>>>>
+>>>>> Dez 25 11:34:41 snowball3 kernel:  mmcblk0: p1
+>>>>>
+>>>>>
+>>>>> How can I investigate this further? As things stand now, the reader is
+>>>>> almost unusable. I am using 5.15.11-200.s0ix01.fc35.x86_64 kernel.
+>>>>> Thank you in advance.
+>>>>>
+>>>>> Best regards,
+>>>>> Julian
+>>>>>
+>>>> ------Please consider the environment before printing this e-mail.
