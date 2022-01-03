@@ -2,175 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A47EC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Dec 2021 12:15:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F18C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 08:25:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229489AbhLaMPK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Dec 2021 07:15:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41854 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230021AbhLaMPJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Dec 2021 07:15:09 -0500
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52E44C06173F
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Dec 2021 04:15:09 -0800 (PST)
-Received: by mail-lf1-x133.google.com with SMTP id u13so59872157lff.12
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Dec 2021 04:15:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qA48Fk3mQBHDUQYEpc8DXFnUfIf/OAvjGHgizTaa2Rs=;
-        b=Dd9Hc2hoiQD56GDie5hYLl56IxuoyREYBA/QBeDuW83mVjBF5S+ttDPs1ypjV4KY5n
-         qQu7LWeBnYgsbZSY2UxPPyQ3jo9jzhIttuWh1bOjR9cTe+8JsG8E7ZmtQftPeo5NXKHr
-         3rCPvkwjP0dw5HR3BOFRrrCMW+7TnJAPQtuh0FNkbPWMxaOxdGWNnKlS24qgWQx/X6H5
-         l1PJYZtl/omcNOe4fOlTxilJUGUOta8YRQHjLkVaL5meRIvLnnTnA2Ct3XVZmyZwS1U/
-         jEAZDY1ICBe35GQQcLdzEqftwDKpQXdJA31/eFYrBqrwT8NfUhGHeIQQGk9RHvF9l1eT
-         gW/A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qA48Fk3mQBHDUQYEpc8DXFnUfIf/OAvjGHgizTaa2Rs=;
-        b=WTbuvvl80O4BqieXPeA4cpjqnBTAFek84zmIKFwh6rpIN0LvcG+zU4kSGbOAalGxfh
-         amkwIMCfa2IrD9mQSSSMPinxwGyfhqs4zI4OtwkNWeuEg9XG83etvpnJS3RysaO9CRzm
-         d2u8IonDJ/t9Xe9bpjL88x2v7NCWyoGtrTlpAA0aSlVEkn697Va5aJfEWdCk/wY9Lbyl
-         f19v1JA/BKIVebjw7g+4QFA+Kt3oz+hy09P6XByZh2eSjHOeAtTqSUvmk5EcoBsiOgBR
-         wmP5yDXmw36WAGxssmVgBePlkAarpZXZeJsEJevFePF1D/IPHFFRC8yb5LuVb/ROc6+b
-         JAag==
-X-Gm-Message-State: AOAM530rWlhXjW4Q2vMIXpJK3v+LEscJAMValW5dS7ghN4OFanzYk3gT
-        TkMxP5pTonBoObDmdzj45F1XnINnRGLGsjKsYP0jiw==
-X-Google-Smtp-Source: ABdhPJxB39SYIrqnEbN1Ilx/4u6YrucaTYRt8Dnw/aiO1ez8cHGoyYDvdb9NnCiH6rmQEcuBQzLFiuVZRWuE+q1QEq8=
-X-Received: by 2002:a19:6748:: with SMTP id e8mr2099004lfj.358.1640952907072;
- Fri, 31 Dec 2021 04:15:07 -0800 (PST)
+        id S230488AbiACIZr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Jan 2022 03:25:47 -0500
+Received: from mga17.intel.com ([192.55.52.151]:50699 "EHLO mga17.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232071AbiACIZq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 3 Jan 2022 03:25:46 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1641198346; x=1672734346;
+  h=subject:to:references:from:message-id:date:mime-version:
+   in-reply-to:content-transfer-encoding;
+  bh=FnLeG+RVwwX07zEWpejGrN1LSdZCJY2+zDTyWhtdQfo=;
+  b=XFw9QwJoWtjxOmA0FD4L3xZpNi+2Ds0Lo4WNmm4agL44RLubX/ku5C5H
+   r8kSEicwbpwRLCUWS3pB4upyVuaqw4stzM5ub0UNeNT+2vJdwygG/kvvO
+   b5q6oXC75WKa7z+/z7w2ULSRK4FYeMSgbnDTJ4wOCVS0pDhhnISOhWp1Z
+   0oSL2MR/5OSO/igJ4nnsSGMh5es6Q0E2ByHmTrGhXWFMfh/e1GJdyoVCH
+   Kl3l1jUq9k+uoji2D+uhhBpB1nWmEW7dR0woO67/FgAMu6OPYUxKBfHwZ
+   XcNbtY3gQOuejC2j5Fq3BPvlPtMhemDEchX3+WoxhxpB0K7DGXFboIUJa
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10215"; a="222703239"
+X-IronPort-AV: E=Sophos;i="5.88,257,1635231600"; 
+   d="scan'208";a="222703239"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2022 00:25:45 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,257,1635231600"; 
+   d="scan'208";a="525481979"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga008.jf.intel.com with ESMTP; 03 Jan 2022 00:25:43 -0800
+Subject: Re: [PATCH RFC 09/13] mmc: sdhci-acpi: fix deferred probing
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+References: <20211223171202.8224-1-s.shtylyov@omp.ru>
+ <20211223171202.8224-10-s.shtylyov@omp.ru>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <7bc4f1ac-dab3-ad09-5f48-dccec6cd71e0@intel.com>
+Date:   Mon, 3 Jan 2022 10:25:42 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
-References: <20211222030634.33816-1-michael@allwinnertech.com>
- <CAPDyKFoNuWX76Haq0MfvukbHR8mMq0rX7qC+o_ZhEAxAwwpBbQ@mail.gmail.com> <2021123116275961132724@allwinnertech.com>
-In-Reply-To: <2021123116275961132724@allwinnertech.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 31 Dec 2021 13:14:30 +0100
-Message-ID: <CAPDyKFpnTk9Ky-zr-dakTZJr1N_65_6py9=3_78vwOR930apEQ@mail.gmail.com>
-Subject: Re: Re: [PATCH 1/3] mmc:sunxi-mmc:add support on discrete device
- power supply
-To:     "michael@allwinnertech.com" <michael@allwinnertech.com>
-Cc:     mripard <mripard@kernel.org>, wens <wens@csie.org>,
-        samuel <samuel@sholland.org>,
-        "andre.przywara" <andre.przywara@arm.com>,
-        "jernej.skrabec" <jernej.skrabec@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-sunxi <linux-sunxi@lists.linux.dev>,
-        linux-kernel <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20211223171202.8224-10-s.shtylyov@omp.ru>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 31 Dec 2021 at 09:28, michael@allwinnertech.com
-<michael@allwinnertech.com> wrote:
->
-> > From: Ulf Hansson
-> > Date: 2021-12-29 00:49
-> > To: Michael Wu
-> > CC: mripard; wens; samuel; andre.przywara; jernej.skrabec; linux-mmc; linux-arm-kernel; linux-sunxi; linux-kernel
-> > Subject: Re: [PATCH 1/3] mmc:sunxi-mmc:add support on discrete device power supply
-> > On Wed, 22 Dec 2021 at 04:07, Michael Wu <michael@allwinnertech.com> wrote:
-> > >
-> > > Because some platform has no regulator, only use discrete devices
-> > > to supply power,For this situation, to use sd/mmc card, we add ocr manually
-> > >
-> > > Signed-off-by: Michael Wu <michael@allwinnertech.com>
-> > > ---
-> > >  drivers/mmc/host/sunxi-mmc.c | 8 ++++++++
-> > >  1 file changed, 8 insertions(+)
-> > >
-> > > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> > > index 2702736a1c57..afeefead6501 100644
-> > > --- a/drivers/mmc/host/sunxi-mmc.c
-> > > +++ b/drivers/mmc/host/sunxi-mmc.c
-> > > @@ -1300,6 +1300,14 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
-> > >         if (ret)
-> > >                 return ret;
-> > >
-> > > +       /**
-> > > +        * Some platforms has no regulator. Discrete devices are used instead.
-> > > +        * To support sd/mmc card, we need to add ocr manually.
-> > > +        */
-> > > +       if (!host->mmc->ocr_avail)
-> > > +               host->mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > > +
-> >
-> > Rather than doing this, I suggest you hook up a fixed vmmc regulator in the DTS.
-> >
-> > Nevertheless, it seems reasonable to check that the ocr_avail gets set
-> > up correctly. And if it doesn't, perhaps we should print a warning and
-> > return an error code.
-> >
-> > > +
-> > >         host->reg_base = devm_platform_ioremap_resource(pdev, 0);
-> > >         if (IS_ERR(host->reg_base))
-> > >                 return PTR_ERR(host->reg_base);
-> >
-> > Kind regards
-> > Uffe
->
-> Dear Uffe,
-> Thanks for your suggestion. It is a better solution.
-> I've modified my patch. Please check if it's reasonable. If it is, I'll re-sumbit it later.
->
+On 23/12/2021 19:11, Sergey Shtylyov wrote:
+> The driver overrides the error codes returned by platform_get_irq() to
+> -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
+> permanently instead of the deferred probing. Switch to propagating the
+> error codes upstream.
+> 
+> Fixes: 1b7ba57ecc86 ("mmc: sdhci-acpi: Handle return value of platform_get_irq")
+> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
-> Subject: [PATCH v2] mmc: sunxi-mmc: check ocr_avail on resource request
->
-> Some platforms have no regulator, discrete power devices are used instead.
-> However, sunxi_mmc_probe does not catch this exception when regulator is
-> absent in DTS. This leads to sd or eMMC init failure.
-> To solve this, a fixed vmmc regulator must be hooked up in DTS, like this:
-> reg_dummy_vmmc: dummy_vmmc {
->         compatible = "regulator-fixed";
->         regulator-name = "dummy-vmmc";
->         regulator-min-microvolt = <500000>;
->         regulator-max-microvolt = <3500000>;
+>  drivers/mmc/host/sdhci-acpi.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index f1ef0d28b0dd..1fa1d2a7bfc9 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -898,7 +898,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+>  	host->ops	= &sdhci_acpi_ops_dflt;
+>  	host->irq	= platform_get_irq(pdev, 0);
+>  	if (host->irq < 0) {
+> -		err = -EINVAL;
+> +		err = host->irq;
+>  		goto err_free;
+>  	}
+>  
+> 
 
-The min/max should be set to the same value as you can't really change
-the voltage levels.
-
-If you know the voltage level that is supplied for your platform, then
-state this value - otherwise I would suggest picking 3.3V, which is
-rather commonly used for MMC/SD.
-
-> };
-> mmc0:mmc@4020000 {
->         compatible = "allwinner,sun50i-a100-emmc";
->         device_type = "mmc0";
->         vmmc-supply = <&reg_dummy_vmmc>;
-> }
-> In this patch, we print an error message and abort the probe process if
-> the regulator is not specified in DTS.
->
-> Signed-off-by: Michael Wu <michael@allwinnertech.com>
-> ---
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 2702736..0da74bd 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1300,6 +1300,11 @@
->         if (ret)
->                 return ret;
->
-> +       if (!host->mmc->ocr_avail) {
-> +               dev_err(&pdev->dev, "Could not get mmc regulator\n");
-> +               return -EINVAL;
-> +       }
-> +
->         host->reg_base = devm_platform_ioremap_resource(pdev, 0);
->         if (IS_ERR(host->reg_base))
->                 return PTR_ERR(host->reg_base);
->
-> Best Regards,
-> Michael Wu
-
-Yep, this looks good to me!
-
-Kind regards
-Uffe
