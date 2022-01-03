@@ -2,117 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D6C5C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 16:06:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32023C43217
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 23:39:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232923AbiACQGg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Jan 2022 11:06:36 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:50254 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231648AbiACQGg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Jan 2022 11:06:36 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B0B3D6115F;
-        Mon,  3 Jan 2022 16:06:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7806EC36AEB;
-        Mon,  3 Jan 2022 16:06:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641225995;
-        bh=DKwn2a4a8WstTrBz3YaW8iPlQgOGN/W5/nC7S2XFzZQ=;
-        h=Subject:To:References:From:Date:In-Reply-To:From;
-        b=Ynx9sCgtfBebo4tJlZiZKh0DkYZfGghQtMTz2vqmRzJbhuYU5Q2dSJMYKIbJ8i5sn
-         3nDeJDMCXg/jmxxFz/YY7YUUbQ5XfLTq5u1SZBBGb4HGvZtiWOlfpiUkHinsp2p5OJ
-         qrmXJsWNtkcTcgELDlHql50PV6PSfOnRynQbifGOXtK7GaLsUD6J8isnXK1ffazq+4
-         HMNeueW1n/hCAK1v8ilC5EztFgSGVRQUcbQDnBCEhBaWAgC38G6qS2SsNB3VlzMWwZ
-         c/QwuDjzZAxYrJzrbOaJsO/o2DNM11IRt17XGaaeuJOQk1Igtv2awQ5h+7QYmOEptl
-         uTKl/1G+H3kpg==
-Subject: Re: [PATCH 00/19] arm/arm64/dt-bindings: altera/intel: fix DTS and
- dtschema
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org
-References: <20211227133131.134369-1-krzysztof.kozlowski@canonical.com>
-From:   Dinh Nguyen <dinguyen@kernel.org>
-Message-ID: <32990891-1378-d20e-7caa-a807964aab36@kernel.org>
-Date:   Mon, 3 Jan 2022 10:06:26 -0600
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.14.0
+        id S231139AbiACXjz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Jan 2022 18:39:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51036 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229705AbiACXjy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Jan 2022 18:39:54 -0500
+Received: from mail-qt1-x831.google.com (mail-qt1-x831.google.com [IPv6:2607:f8b0:4864:20::831])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A48DC061761;
+        Mon,  3 Jan 2022 15:39:54 -0800 (PST)
+Received: by mail-qt1-x831.google.com with SMTP id 8so32487333qtx.5;
+        Mon, 03 Jan 2022 15:39:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ncIb+jsBpIyCNEYUkcWgxTVrjUDrQlT+MkVhne4ZvLE=;
+        b=AhNExDjlZr0Cr/wqfi4QgBYnjpLlj4w9ooRQGVL/HmDhwd3vOxI6aQCTLBNIpYdE2r
+         01xZMDT0W9oloVXiF037pq0bgpMYd6Zv4bAvqe9dtP9WkGCjWPiFN46GQUBmtO4XU1CW
+         7L8WlS8jIRVUzPYGVdQVHTgH4WH0lGoWchoWjupriPBWkCXi/vR+SkmJl860Vu6XpkE8
+         5PAms71xLgNRduWbSU+iAUgGDBY4sm2IUb6bIPaZBYRWVOgRJzpHT3U+JfiFgJRgCvFb
+         LXn7/biyJBAF9P2J8YVpOoom/cN5erMNdKlHe0VYzhQBbZUE3IhakJVJIqIPz02xHXCJ
+         sePg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ncIb+jsBpIyCNEYUkcWgxTVrjUDrQlT+MkVhne4ZvLE=;
+        b=J67aEEX9HSizlPViXlsXKvoBmtfP6dJnyZn0+WevnAjFspBzs3XPod0RPtt4kgKusg
+         WLRXD25nBEJn5w7YYH7xTKwvy2oE7valGhnpPp5lJFIwjkLB8JsPrOcPHCdNL0TZZjSQ
+         8wi/ZTwFSkfwv9ZGJn56nI5hCWx+e0Cqsfq4IWSNjo8GZTi5StYly/gdz9BSTXJyOJvG
+         VfY3exBTt0G2LDxrSmV47nvTrSWFy1I1tfwghYK5F/qx9pTPYekshNV9gT8aFw75ilzA
+         eF18+8hrAlYCW/zOiGPpfJ/EjjxUZhLO92F1RDtC2BZtSi44BEiRknLzDaWvzIkJA2iW
+         pvyA==
+X-Gm-Message-State: AOAM53020imWD0uINBbPfItUbdJ4eythsB6Kz8hOhR9s5hNEDQnbFG8o
+        JlKDQJF/e3tGfQa3qigwENI=
+X-Google-Smtp-Source: ABdhPJwyivGdR7q9+zaDnfGWeABqmK/GVvYLJN2XUeKHTqiNrQH8RZesfXihw6vh+4esqH/03amT0A==
+X-Received: by 2002:ac8:58cc:: with SMTP id u12mr42787952qta.385.1641253193349;
+        Mon, 03 Jan 2022 15:39:53 -0800 (PST)
+Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
+        by smtp.gmail.com with ESMTPSA id o5sm26965991qkp.132.2022.01.03.15.39.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 03 Jan 2022 15:39:53 -0800 (PST)
+From:   Jesse Taube <mr.bossman075@gmail.com>
+X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
+To:     linux-imx@nxp.com
+Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
+        stefan@agner.ch, linus.walleij@linaro.org,
+        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
+        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
+        adrian.hunter@intel.com, jirislaby@kernel.org,
+        giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, Mr.Bossman075@gmail.com,
+        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-serial@vger.kernel.org
+Subject: [PATCH v7 0/7] Add initial support for the i.MXRTxxxx SoC family starting from i.IMXRT1050 SoC.
+Date:   Mon,  3 Jan 2022 18:39:41 -0500
+Message-Id: <20220103233948.198119-1-Mr.Bossman075@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-In-Reply-To: <20211227133131.134369-1-krzysztof.kozlowski@canonical.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+This patchset contains:
+- i.MXRT10xx family infrastructure
+- i.MXRT1050 pinctrl driver adaption
+- i.MXRT1050 clock driver adaption
+- i.MXRT1050 sd-card driver adaption
+- i.MXRT1050 uart driver adaption
+- i.MXRT1050-evk basic support
+
+The i.MXRTxxxx family that could have support by Linux actually spreads
+from i.MXRT1020 to i.MXRT1170 with the first one supporting 1 USB OTG &
+100M ethernet with a cortex-M7@500Mhz up to the latter with i.MXRT1170
+with cortex-M7@1Ghz and cortex-M4@400Mhz, 2MB of internal SRAM, 2D GPU,
+2x 1Gb and 1x 100Mb ENET. The i.MXRT family is NXP's answer to
+STM32F7XX, as it uses only simple SDRAM, it gives the chance of a 4 or
+less layer PCBs. Seeing that these chips are comparable to the
+STM32F7XXs which have linux ported to them it seems reasonable to add
+support for them.
+
+Giving Linux support to this family should ease the development process,
+instead of using a RTOS they could use Embedded Linux allowing for more
+portability, ease of design and will broaden the scope of people using
+embedded linux.
+
+The EVK has very little SDRAM, generally 32MB starting from
+i.MXRT1020(the lowest P/N), although the i.MXRT1160/70 provide instead
+64MB of SDRAM for more functionality.
+
+At the moment we do not support XIP for either u-boot or Linux but it
+should be done in the future. XIP will also save SDRAM.
+
+Another interesting fact is the amount of internal SRAM, as the P/N
+increases the SRAM will reach up to 2MB(some could be for cache and
+some would be for video).
+
+Also, some parts have embed flash of 4MB that can be used for
+u-boot/Linux, if both correctly sized it will leave the SDRAM free.
+
+External flash can be Quad SPI and HyperFlash, so throughput would be
+decent.
+
+The i.MXRT11xx series supports MIPI interface too.
+
+The family in general provide CAN bus, audio I/O, 1 or more
+USB(otg/host), 1 or more 100Mb/1Gb ethernet, camera interface, sd-card.
+
+All this can be used for simple GUIs, web-servers, point-of-sale
+stations, etc.
 
 
-On 12/27/21 7:31 AM, Krzysztof Kozlowski wrote:
-> Hi,
-> 
-> Partial cleanup of Altera/Intel ARMv7 and ARMv8 DTS and bindings.
-> 
-> The patches are independent, unless touching same files (e.g.
-> bindings/arm/altera.yaml).
-> 
-> Best regards,
-> Krzysztof
-> 
-> Krzysztof Kozlowski (19):
->    dt-bindings: vendor-prefixes: add Enclustra
->    dt-bindings: altera: document existing Cyclone 5 board compatibles
->    dt-bindings: altera: document Arria 5 based board compatibles
->    dt-bindings: altera: document Arria 10 based board compatibles
->    dt-bindings: altera: document VT compatibles
->    dt-bindings: altera: document Stratix 10 based board compatibles
->    dt-bindings: intel: document Agilex based board compatibles
->    dt-bindings: clock: intel,stratix10: convert to dtschema
->    dt-bindings: mmc: synopsys-dw-mshc: integrate Altera and Imagination
->    ARM: dts: arria5: add board compatible for SoCFPGA DK
->    ARM: dts: arria10: add board compatible for Mercury AA1
->    ARM: dts: arria10: add board compatible for SoCFPGA DK
->    arm64: dts: stratix10: add board compatible for SoCFPGA DK
->    arm64: dts: stratix10: move ARM timer out of SoC node
->    arm64: dts: stratix10: align mmc node names with dtschema
->    arm64: dts: stratix10: align regulator node names with dtschema
->    arm64: dts: agilex: add board compatible for SoCFPGA DK
->    arm64: dts: agilex: add board compatible for N5X DK
->    arm64: dts: agilex: align mmc node names with dtschema
-> 
->   .../devicetree/bindings/arm/altera.yaml       | 46 ++++++++++++++++---
->   .../bindings/arm/intel,socfpga.yaml           | 26 +++++++++++
->   .../bindings/clock/intc_stratix10.txt         | 20 --------
->   .../bindings/clock/intel,stratix10.yaml       | 35 ++++++++++++++
->   .../devicetree/bindings/mmc/img-dw-mshc.txt   | 28 -----------
->   .../bindings/mmc/socfpga-dw-mshc.txt          | 23 ----------
->   .../bindings/mmc/synopsys-dw-mshc.yaml        |  5 +-
->   .../devicetree/bindings/vendor-prefixes.yaml  |  2 +
->   .../boot/dts/socfpga_arria10_mercury_aa1.dts  |  2 +-
->   arch/arm/boot/dts/socfpga_arria10_socdk.dtsi  |  2 +-
->   arch/arm/boot/dts/socfpga_arria5_socdk.dts    |  2 +-
->   .../boot/dts/altera/socfpga_stratix10.dtsi    | 21 +++++----
->   .../dts/altera/socfpga_stratix10_socdk.dts    |  3 +-
->   .../altera/socfpga_stratix10_socdk_nand.dts   |  3 +-
->   arch/arm64/boot/dts/intel/socfpga_agilex.dtsi |  2 +-
->   .../boot/dts/intel/socfpga_agilex_socdk.dts   |  1 +
->   .../dts/intel/socfpga_agilex_socdk_nand.dts   |  1 +
->   .../boot/dts/intel/socfpga_n5x_socdk.dts      |  1 +
->   18 files changed, 129 insertions(+), 94 deletions(-)
->   create mode 100644 Documentation/devicetree/bindings/arm/intel,socfpga.yaml
->   delete mode 100644 Documentation/devicetree/bindings/clock/intc_stratix10.txt
->   create mode 100644 Documentation/devicetree/bindings/clock/intel,stratix10.yaml
->   delete mode 100644 Documentation/devicetree/bindings/mmc/img-dw-mshc.txt
->   delete mode 100644 Documentation/devicetree/bindings/mmc/socfpga-dw-mshc.txt
-> 
+Giulio Benetti (4):
+  ARM: imx: Add initial support for i.MXRT10xx family
+  dt-bindings: imx: Add clock binding for i.MXRT1050
+  ARM: dts: imx: Add i.MXRT1050-EVK support
+  ARM: imxrt_defconfig: Add i.MXRT family defconfig
 
-Applied for all SoCFPGA patches.
+Jesse Taube (3):
+  ARM: dts: imxrt1050-pinfunc: Add pinctrl binding header
+  dt-bindings: clock: imx: Add documentation for i.MXRT1050 clock
+  clk: imx: Add initial support for i.MXRT1050 clock driver
 
-Thanks,
-Dinh
+ .../bindings/clock/imxrt1050-clock.yaml       |  67 ++
+ arch/arm/boot/dts/Makefile                    |   2 +
+ arch/arm/boot/dts/imxrt1050-evk.dts           |  72 ++
+ arch/arm/boot/dts/imxrt1050-pinfunc.h         | 993 ++++++++++++++++++
+ arch/arm/boot/dts/imxrt1050.dtsi              | 160 +++
+ arch/arm/configs/imxrt_defconfig              |  35 +
+ arch/arm/mach-imx/Kconfig                     |   7 +
+ arch/arm/mach-imx/Makefile                    |   2 +
+ arch/arm/mach-imx/mach-imxrt.c                |  19 +
+ drivers/clk/imx/Kconfig                       |   5 +
+ drivers/clk/imx/Makefile                      |   1 +
+ drivers/clk/imx/clk-imxrt1050.c               | 181 ++++
+ include/dt-bindings/clock/imxrt1050-clock.h   |  72 ++
+ 13 files changed, 1616 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+ create mode 100644 arch/arm/boot/dts/imxrt1050-evk.dts
+ create mode 100644 arch/arm/boot/dts/imxrt1050-pinfunc.h
+ create mode 100644 arch/arm/boot/dts/imxrt1050.dtsi
+ create mode 100644 arch/arm/configs/imxrt_defconfig
+ create mode 100644 arch/arm/mach-imx/mach-imxrt.c
+ create mode 100644 drivers/clk/imx/clk-imxrt1050.c
+ create mode 100644 include/dt-bindings/clock/imxrt1050-clock.h
+
+-- 
+2.34.1
+
