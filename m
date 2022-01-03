@@ -2,52 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F18C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 08:25:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4006C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 08:30:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230488AbiACIZr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Jan 2022 03:25:47 -0500
-Received: from mga17.intel.com ([192.55.52.151]:50699 "EHLO mga17.intel.com"
+        id S232168AbiACIaj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Jan 2022 03:30:39 -0500
+Received: from mga07.intel.com ([134.134.136.100]:19557 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232071AbiACIZq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 3 Jan 2022 03:25:46 -0500
+        id S232071AbiACIai (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 3 Jan 2022 03:30:38 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1641198346; x=1672734346;
-  h=subject:to:references:from:message-id:date:mime-version:
-   in-reply-to:content-transfer-encoding;
-  bh=FnLeG+RVwwX07zEWpejGrN1LSdZCJY2+zDTyWhtdQfo=;
-  b=XFw9QwJoWtjxOmA0FD4L3xZpNi+2Ds0Lo4WNmm4agL44RLubX/ku5C5H
-   r8kSEicwbpwRLCUWS3pB4upyVuaqw4stzM5ub0UNeNT+2vJdwygG/kvvO
-   b5q6oXC75WKa7z+/z7w2ULSRK4FYeMSgbnDTJ4wOCVS0pDhhnISOhWp1Z
-   0oSL2MR/5OSO/igJ4nnsSGMh5es6Q0E2ByHmTrGhXWFMfh/e1GJdyoVCH
-   Kl3l1jUq9k+uoji2D+uhhBpB1nWmEW7dR0woO67/FgAMu6OPYUxKBfHwZ
-   XcNbtY3gQOuejC2j5Fq3BPvlPtMhemDEchX3+WoxhxpB0K7DGXFboIUJa
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10215"; a="222703239"
+  t=1641198638; x=1672734638;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=MbFeihPsVRfpT3QKYZRaAoYZgfjIlElj1+7sWdPR7lQ=;
+  b=VAqp9zk38Q+tqHfxRMTtR8M4lfdbiVlBM9vEEiYxH665pX6uNrsKKhpG
+   1lu5t++eRrHhTMfFfeu1ixcNfFlNzs1hUGz+StTroZulIcLzxJI69EqDr
+   y+LKQPnq2uh2JLFTRigs5PhE6ZueLb6lGugPlr4Us1K49JdhZQoNe+av0
+   35lUdRaGL6WK6odS82l9S+JnUGWiVW79zxkjV7v/n7QTMGUjivC3QUXWI
+   vRgZy/WXQUdjVQpV2fe4PyFNfPil7lA0xrba+MHh4DrJCbtUuLzrWqYW7
+   17EfumwrtmCPXGuluXCopsg+sLasE0IsgQETNVzG0nnsBjVyJJ5sosmoS
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10215"; a="305386036"
 X-IronPort-AV: E=Sophos;i="5.88,257,1635231600"; 
-   d="scan'208";a="222703239"
+   d="scan'208";a="305386036"
 Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2022 00:25:45 -0800
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jan 2022 00:30:35 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.88,257,1635231600"; 
-   d="scan'208";a="525481979"
+   d="scan'208";a="525483629"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
-  by orsmga008.jf.intel.com with ESMTP; 03 Jan 2022 00:25:43 -0800
-Subject: Re: [PATCH RFC 09/13] mmc: sdhci-acpi: fix deferred probing
+  by orsmga008.jf.intel.com with ESMTP; 03 Jan 2022 00:30:33 -0800
+Subject: Re: [PATCH RFC 10/13] mmc: sdhci-spear: fix deferred probing
 To:     Sergey Shtylyov <s.shtylyov@omp.ru>,
         Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Viresh Kumar <vireshk@kernel.org>
 References: <20211223171202.8224-1-s.shtylyov@omp.ru>
- <20211223171202.8224-10-s.shtylyov@omp.ru>
+ <20211223171202.8224-11-s.shtylyov@omp.ru>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <7bc4f1ac-dab3-ad09-5f48-dccec6cd71e0@intel.com>
-Date:   Mon, 3 Jan 2022 10:25:42 +0200
+Message-ID: <b62c6cf2-7336-86a6-2007-8dc84209f0a7@intel.com>
+Date:   Mon, 3 Jan 2022 10:30:33 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
-In-Reply-To: <20211223171202.8224-10-s.shtylyov@omp.ru>
+In-Reply-To: <20211223171202.8224-11-s.shtylyov@omp.ru>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -56,32 +57,35 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 23/12/2021 19:11, Sergey Shtylyov wrote:
-> The driver overrides the error codes returned by platform_get_irq() to
-> -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
-> permanently instead of the deferred probing. Switch to propagating the
-> error codes upstream.
+> The driver overrides the error codes and IRQ0 returned by platform_get_irq()
+> to -EINVAL, so if it returns -EPROBE_DEFER, the driver will fail the probe
+> permanently instead of the deferred probing. Switch to propagating the error
+> codes upstream. IRQ0 is no longer returned by platform_get_irq(), so we now
+> can safely ignore it...
 > 
-> Fixes: 1b7ba57ecc86 ("mmc: sdhci-acpi: Handle return value of platform_get_irq")
+> Fixes: 682798a596a6 ("mmc: sdhci-spear: Handle return value of platform_get_irq")
 > Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-acpi.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-spear.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index f1ef0d28b0dd..1fa1d2a7bfc9 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -898,7 +898,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->  	host->ops	= &sdhci_acpi_ops_dflt;
->  	host->irq	= platform_get_irq(pdev, 0);
->  	if (host->irq < 0) {
-> -		err = -EINVAL;
-> +		err = host->irq;
->  		goto err_free;
+> diff --git a/drivers/mmc/host/sdhci-spear.c b/drivers/mmc/host/sdhci-spear.c
+> index d463e2fd5b1a..c79035727b20 100644
+> --- a/drivers/mmc/host/sdhci-spear.c
+> +++ b/drivers/mmc/host/sdhci-spear.c
+> @@ -65,8 +65,8 @@ static int sdhci_probe(struct platform_device *pdev)
+>  	host->hw_name = "sdhci";
+>  	host->ops = &sdhci_pltfm_ops;
+>  	host->irq = platform_get_irq(pdev, 0);
+> -	if (host->irq <= 0) {
+> -		ret = -EINVAL;
+> +	if (host->irq < 0) {
+> +		ret = host->irq;
+>  		goto err_host;
 >  	}
->  
+>  	host->quirks = SDHCI_QUIRK_BROKEN_ADMA;
 > 
 
