@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29BD1C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 23:40:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 523B6C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Jan 2022 23:40:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231259AbiACXkC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Jan 2022 18:40:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51040 "EHLO
+        id S231364AbiACXkG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Jan 2022 18:40:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51068 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229705AbiACXj4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Jan 2022 18:39:56 -0500
-Received: from mail-qk1-x733.google.com (mail-qk1-x733.google.com [IPv6:2607:f8b0:4864:20::733])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83E68C061761;
-        Mon,  3 Jan 2022 15:39:55 -0800 (PST)
-Received: by mail-qk1-x733.google.com with SMTP id f138so33213474qke.10;
-        Mon, 03 Jan 2022 15:39:55 -0800 (PST)
+        with ESMTP id S231221AbiACXkA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Jan 2022 18:40:00 -0500
+Received: from mail-qv1-xf33.google.com (mail-qv1-xf33.google.com [IPv6:2607:f8b0:4864:20::f33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 966B8C061761;
+        Mon,  3 Jan 2022 15:39:59 -0800 (PST)
+Received: by mail-qv1-xf33.google.com with SMTP id h5so32697817qvh.8;
+        Mon, 03 Jan 2022 15:39:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=rWpS/LLkdTWHr4VDJPdkSqGVLMUH0PoMwm1PB3AojO8=;
-        b=QP1xhk4sO6IUTlo3mrrgUxWBPAtxnd5aRpGkZL4FJOgtsBG1+JhJCNKhbbmU/0Epey
-         XIzJfmu7S2ifS7VjGRJ8bkEj0OgedEWduBNBnRnzIvFqv5j+575FS13WUafDkkB/Ldp0
-         X3Fa0cyMVTMutpwEeYqWlyG97d+t1Vz9Fvk2ZqFrF96a04504pBo4po8I0XCbWWX+uRa
-         /Bej7V07+8VsSjqoh27uVKdmnlKzTTAE04/HOQv77WbFE89/V/9Xy4ji0cuWIccpbroB
-         K6YnY0iMVErpry/Pb2k5uWHexuHXscmMWyPeFyLq/+Zc6oRelYx6i7exVQ21TZK61Oc1
-         MXvw==
+        bh=J9XtswLznY8/PDWy9Q49U0lzb9uDsaGNnebX2qgsJVs=;
+        b=B+LE8bvv1HdjVsmngH+MZr3wOZOo/J9KiuBh8uB6IFB/IOgRCVqIVvBJ8ZAdvrw/q0
+         XdbMTKpFEwsTwC9jAQEUpBDfUTAmvd1c0WvXN8bZLwmFdMja3WHsJylaB1GiYAV0v11y
+         45eoKmzaLOXAURl7r+gEUXnKGxBFApECPTVE0oIV16ChR65qXRKjlTOs5FpedNQ2duVK
+         i0Sbf7Y8iME0rbsn5sq5cj8BhElEOeMrHu3HS0Ix7dovSRvrWd26IcJ2fC+I+N8WAWtn
+         9Kvp+Mmt4BlJYl1viBImiJoKNvaMk3Vx2h5ztScJffblZcOecdGjrEe5myII848w+UpF
+         0v7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=rWpS/LLkdTWHr4VDJPdkSqGVLMUH0PoMwm1PB3AojO8=;
-        b=3RwqbAXcgt06kzEjdlOms+2Yqu/iT98kH/9lWg7Sd9SMZsmAs9tfjjpgfXTjm8nUQh
-         bQDDzmhw0h/USxF7xkbz/gXgrAwb39QhK/NFV66iG7bnqtipA6MLAMuZqVlCiX+nv8K2
-         pDpUvIshEUv/DtpEXfHP7AMwct1phYc/PGKf9Uffq6VYhD6Ggn3v/q7GZS2IkEfnEif/
-         tls9veTOOV4YCBzlfJQgwzaHZSrXX8hlgcooT/UtFNxX/DHQNy9LhORZ6AFQaBRHnNwX
-         QaVRyuyRxzmcsDukCfxpHR+ruzpgUqnlonN5y9SLEmYsohh0gxfysBF794poFMntwdJp
-         MbTg==
-X-Gm-Message-State: AOAM531dBrmrT6y6VnQ7Zn3AJal11+zw47sdVDO293h3rjJaGpDfoQcl
-        7J8ZCtxEynrmZlzRn0vDE+0=
-X-Google-Smtp-Source: ABdhPJxOOyprOondATFKTUrU6WANIm5Q+LOlC0cPBixoU9twJ49aHiUmfj+G6YwcxWk5s+3hE0sn+A==
-X-Received: by 2002:a05:620a:2796:: with SMTP id g22mr33145223qkp.341.1641253194722;
-        Mon, 03 Jan 2022 15:39:54 -0800 (PST)
+        bh=J9XtswLznY8/PDWy9Q49U0lzb9uDsaGNnebX2qgsJVs=;
+        b=7DaZeaGMuAPzFBMhX0+3rv84B9ZuvU3sX+CS/d47HlwCYKLmd5nmp3GHpFrizloTTM
+         SxgMLo24IYobbZ8CWyrdh8MmTL00hWCJC66RXVWZw1or8QS8uxyNcDMWA5vouUEHNtTH
+         I7PpqHQKGWvQLCZC1hSPzeROQA2VnXssTFpH3wxveNnnOXAapEqtpO8pBEjJTzhkECG4
+         zI0q11ZjNWXASGUuwLa1jNzrfwFHn2/qVQIj7j1nV2cUBtlLrz8Mmi2MFXiuV6WiY6G5
+         KZZWVytBfxNgMd6pDsqlP19CuzFztDeXnWc9GEHJUVMSoiLOK/vN1NUmDNoJPyUBe41V
+         BfnA==
+X-Gm-Message-State: AOAM532dr4O+wGDMuPNabus8q5sC+v88/7tcfwWByoYzFazEk2g5z8ZC
+        gRFgxN2purWPgmWtCuVkfOY=
+X-Google-Smtp-Source: ABdhPJzjQyZp+NAUW781RrdsRo4Nr7N/Dfi7gO7b/ChLSXaqxav3Q/zECWt3eKyqY0ooyA1Y63+fYA==
+X-Received: by 2002:a05:6214:2302:: with SMTP id gc2mr6668867qvb.126.1641253198735;
+        Mon, 03 Jan 2022 15:39:58 -0800 (PST)
 Received: from jesse-desktop.jtp-bos.lab (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id o5sm26965991qkp.132.2022.01.03.15.39.53
+        by smtp.gmail.com with ESMTPSA id o5sm26965991qkp.132.2022.01.03.15.39.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 03 Jan 2022 15:39:54 -0800 (PST)
+        Mon, 03 Jan 2022 15:39:58 -0800 (PST)
 From:   Jesse Taube <mr.bossman075@gmail.com>
 X-Google-Original-From: Jesse Taube <Mr.Bossman075@gmail.com>
 To:     linux-imx@nxp.com
@@ -62,10 +62,10 @@ Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
         linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-serial@vger.kernel.org
-Subject: [PATCH v7 1/7] ARM: imx: Add initial support for i.MXRT10xx family
-Date:   Mon,  3 Jan 2022 18:39:42 -0500
-Message-Id: <20220103233948.198119-2-Mr.Bossman075@gmail.com>
+        linux-serial@vger.kernel.org, Jesse Taube <mr.bossman075@gmail.com>
+Subject: [PATCH v7 4/7] dt-bindings: clock: imx: Add documentation for i.MXRT1050 clock
+Date:   Mon,  3 Jan 2022 18:39:45 -0500
+Message-Id: <20220103233948.198119-5-Mr.Bossman075@gmail.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20220103233948.198119-1-Mr.Bossman075@gmail.com>
 References: <20220103233948.198119-1-Mr.Bossman075@gmail.com>
@@ -75,95 +75,113 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Giulio Benetti <giulio.benetti@benettiengineering.com>
+From: Jesse Taube <mr.bossman075@gmail.com>
 
-The i.MXRT10xx family of processors features NXP's implementation of the
-Arm Cortex-M7 core and in some case the Arm Cortex-M4 core too.
+Add DT binding documentation for i.MXRT1050 clock driver.
 
-This patch aims to add an initial support for imxrt.
-
-Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+Cc: Giulio Benetti <giulio.benetti@benettiengineering.com>
 Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
-[Jesse: removed SOC_IMXRT's 'depends on ARCH_MULTI_V7' and 'select
-ARM_GIC if ARCH_MULTI_V7']
 ---
 V1->V2:
-* Remove depends ARCH_MULTI_V7
-* Remove select PINCTRL_IMXRT
-* Change commit description
+* Replace macros with values
 V2->V3:
-* Nothing done
+* Remove anatop
+* Use lpuart not gpt
+* include imxrt1050-clock.h
+* 2 space tabs to 4
+* Remove oneOf enum
+* Change maxItems to 2
 V3->V4:
 * Nothing done
 V4->V5:
-* Nothing done
+* Remove extra newline
+* Rename ccm to clock-controller
+* Change minItems to const
+* Change minItems to description
+* Rename file to add 1050
+* Change commit description to just 1050
 V5->V6:
-* Nothing done
+* Add maxItems for clocks description
 V6->V7:
 * Nothing done
 ---
- arch/arm/mach-imx/Kconfig      |  7 +++++++
- arch/arm/mach-imx/Makefile     |  2 ++
- arch/arm/mach-imx/mach-imxrt.c | 19 +++++++++++++++++++
- 3 files changed, 28 insertions(+)
- create mode 100644 arch/arm/mach-imx/mach-imxrt.c
+ .../bindings/clock/imxrt1050-clock.yaml       | 67 +++++++++++++++++++
+ 1 file changed, 67 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
 
-diff --git a/arch/arm/mach-imx/Kconfig b/arch/arm/mach-imx/Kconfig
-index b407b024dde3..5ad3a8b9b4b6 100644
---- a/arch/arm/mach-imx/Kconfig
-+++ b/arch/arm/mach-imx/Kconfig
-@@ -239,6 +239,13 @@ config SOC_IMX7ULP
- 	help
- 	  This enables support for Freescale i.MX7 Ultra Low Power processor.
- 
-+config SOC_IMXRT
-+	bool "i.MXRT support"
-+	depends on ARM_SINGLE_ARMV7M
-+	select ARMV7M_SYSTICK if ARM_SINGLE_ARMV7M
-+	help
-+	  This enables support for Freescale i.MXRT Crossover processor.
-+
- config SOC_VF610
- 	bool "Vybrid Family VF610 support"
- 	select ARM_GIC if ARCH_MULTI_V7
-diff --git a/arch/arm/mach-imx/Makefile b/arch/arm/mach-imx/Makefile
-index d1506ef7a537..3b1145722a44 100644
---- a/arch/arm/mach-imx/Makefile
-+++ b/arch/arm/mach-imx/Makefile
-@@ -65,6 +65,8 @@ obj-$(CONFIG_SOC_IMX50) += mach-imx50.o
- obj-$(CONFIG_SOC_IMX51) += mach-imx51.o
- obj-$(CONFIG_SOC_IMX53) += mach-imx53.o
- 
-+obj-$(CONFIG_SOC_IMXRT) += mach-imxrt.o
-+
- obj-$(CONFIG_SOC_VF610) += mach-vf610.o
- 
- obj-$(CONFIG_SOC_LS1021A) += mach-ls1021a.o
-diff --git a/arch/arm/mach-imx/mach-imxrt.c b/arch/arm/mach-imx/mach-imxrt.c
+diff --git a/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml b/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
 new file mode 100644
-index 000000000000..2063a3059c84
+index 000000000000..35fd08c143f4
 --- /dev/null
-+++ b/arch/arm/mach-imx/mach-imxrt.c
-@@ -0,0 +1,19 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (C) 2019
-+ * Author(s): Giulio Benetti <giulio.benetti@benettiengineering.com>
-+ */
++++ b/Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
+@@ -0,0 +1,67 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/clock/imxrt1050-clock.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+#include <linux/kernel.h>
-+#include <asm/mach/arch.h>
-+#include <asm/v7m.h>
++title: Clock bindings for Freescale i.MXRT
 +
-+static const char *const imxrt_compat[] __initconst = {
-+	"fsl,imxrt1050",
-+	NULL
-+};
++maintainers:
++  - Giulio Benetti <giulio.benetti@benettiengineering.com>
++  - Jesse Taube <Mr.Bossman075@gmail.com>
 +
-+DT_MACHINE_START(IMXRTDT, "IMXRT (Device Tree Support)")
-+	.dt_compat = imxrt_compat,
-+	.restart = armv7m_restart,
-+MACHINE_END
++description: |
++  The clock consumer should specify the desired clock by having the clock
++  ID in its "clocks" phandle cell. See include/dt-bindings/clock/imxrt*-clock.h
++  for the full list of i.MXRT clock IDs.
++
++properties:
++  compatible:
++    const: fsl,imxrt1050-ccm
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 2
++
++  clocks:
++    description: 24m osc
++    maxItems: 1
++
++  clock-names:
++    const: osc
++
++  '#clock-cells':
++    const: 1
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++  - '#clock-cells'
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/imxrt1050-clock.h>
++
++    clks: clock-controller@400fc000 {
++        compatible = "fsl,imxrt1050-ccm";
++        reg = <0x400fc000 0x4000>;
++        interrupts = <95>, <96>;
++        clocks = <&osc>;
++        clock-names = "osc";
++        #clock-cells = <1>;
++    };
++
++    lpuart1: serial@40184000 {
++        compatible = "fsl,imxrt1050-lpuart";
++        reg = <0x40184000 0x4000>;
++        interrupts = <20>;
++        clocks = <&clks IMXRT1050_CLK_LPUART1>;
++        clock-names = "ipg";
++    };
 -- 
 2.34.1
 
