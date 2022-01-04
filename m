@@ -2,110 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FEB8C4321E
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 19:08:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF37FC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 20:31:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236467AbiADTIB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Jan 2022 14:08:01 -0500
-Received: from mail-ot1-f47.google.com ([209.85.210.47]:39574 "EHLO
-        mail-ot1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234842AbiADTIA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 14:08:00 -0500
-Received: by mail-ot1-f47.google.com with SMTP id r10-20020a056830080a00b0055c8fd2cebdso48394529ots.6;
-        Tue, 04 Jan 2022 11:08:00 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Zol8RqhcqrOeExkKxHD6i/0eMcZgg4YGQ9xIXDGBZL0=;
-        b=PjW3z79RptREbGLfbP+x+XsFuASMO38iK4GD+0s8viJLQg73kyiDYHo7ueIu+LciFO
-         PNGK1YqTJOvhOiVI7gufSf6vw0l1cuGm/5Vk9WZoSY1v2LDE8GuA96PCS2oIEgK0whRG
-         dSglLdpMuQzCebFqhRkiRIV4wfjklJTcqHppZ4PHjITrkVs7YJmY/PSsSS9wM08ahFUL
-         zni7nUylYa8seGCosDSVne8jobjcf7QYzPmK/msVsPvXPNCp5g33tOxNapk8g+e9DqQV
-         6Fyu5fQxMrBTVjRJLiN0C9ywaKdZCRN23jUUPFcG/l+kQjcvPqDDefmgxav302ArcK/z
-         3TFg==
-X-Gm-Message-State: AOAM532Nb31/airPzf6jy9jxlzK9zoG3FDTHcldZ85/aXfxfpWmbFvIu
-        P04aJxwV3RgYtfuJdpxatT87Pls4ZQ==
-X-Google-Smtp-Source: ABdhPJwD6As9c1PJJ5b5sN3V+8tRevP6v+G+WluIcZqLUbDDpYLuCj4xh6m/A3masXZmj4ALYIcjWg==
-X-Received: by 2002:a9d:a55:: with SMTP id 79mr37401880otg.275.1641323279784;
-        Tue, 04 Jan 2022 11:07:59 -0800 (PST)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id x4sm10005968oiv.35.2022.01.04.11.07.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Jan 2022 11:07:59 -0800 (PST)
-Received: (nullmailer pid 1229576 invoked by uid 1000);
-        Tue, 04 Jan 2022 19:07:57 -0000
-Date:   Tue, 4 Jan 2022 13:07:57 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Jesse Taube <mr.bossman075@gmail.com>
-Cc:     linux@armlinux.org.uk, jirislaby@kernel.org,
-        linux-kernel@vger.kernel.org, festevam@gmail.com,
-        abel.vesa@nxp.com, olof@lixom.net, kernel@pengutronix.de,
-        stefan@agner.ch, ulf.hansson@linaro.org,
-        linux-gpio@vger.kernel.org, linux-imx@nxp.com,
-        Mr.Bossman075@gmail.com, linux-mmc@vger.kernel.org,
-        shawnguo@kernel.org, mturquette@baylibre.com,
-        nobuhiro1.iwamatsu@toshiba.co.jp,
-        linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
-        soc@kernel.org, gregkh@linuxfoundation.org, sboyd@kernel.org,
-        devicetree@vger.kernel.org, s.hauer@pengutronix.de,
-        adrian.hunter@intel.com, linus.walleij@linaro.org,
-        linux-serial@vger.kernel.org, robh+dt@kernel.org,
-        giulio.benetti@benettiengineering.com, linux-clk@vger.kernel.org,
-        aisheng.dong@nxp.com
-Subject: Re: [PATCH v7 4/7] dt-bindings: clock: imx: Add documentation for
- i.MXRT1050 clock
-Message-ID: <YdSbDTcA6qyZdJJv@robh.at.kernel.org>
-References: <20220103233948.198119-1-Mr.Bossman075@gmail.com>
- <20220103233948.198119-5-Mr.Bossman075@gmail.com>
+        id S232841AbiADUbq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Jan 2022 15:31:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53910 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232255AbiADUbp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 15:31:45 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2AF0C061761;
+        Tue,  4 Jan 2022 12:31:45 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 626DB6157D;
+        Tue,  4 Jan 2022 20:31:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CACCCC36AED;
+        Tue,  4 Jan 2022 20:31:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641328304;
+        bh=iAG8B3ZpKh/tvy6iG5URP7IbImgaSPzk9TUk4eHefQg=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Yi7zREne0VxnunBWcxx0IIhDo5zqKfxFv+Py2S+vGhxGTw/FYpPEbLQvZX3ziBhn8
+         Y65C5kuG0ZlxpPSA13cdcZRq4biW4S2KTPIqAPo5irHXzwQbhBk1cI8gN5zAqdtZ3a
+         mtpACCr6qjIHHQFcvrmlTlA7bx1KLDMK2VzI7wgfwNwZsyl9dmgk2/fIBtbyiXgRff
+         gplJGIzB1zvAXGH3KIqD6zXM8ZKbSFan8iRA5LBlc01fW1M2hTOMh9rbSeXLv4x83i
+         34A8yhmfRoJFRkjOHN86ajJXeY3BA4hVtSXpOUIw/hXa36Tkay9abdm04J0uSZHZMf
+         XwupkN9zxsmww==
+Received: by mail-ed1-f44.google.com with SMTP id j6so152991504edw.12;
+        Tue, 04 Jan 2022 12:31:44 -0800 (PST)
+X-Gm-Message-State: AOAM532HRPEY85LE+KWZnHSBM57JpWQ4yiUnE1ReeP9kRd5nluL3LmGI
+        gEr/Su55CXeoLtdUn0p4bmHo8i+n2VLguEWg+g==
+X-Google-Smtp-Source: ABdhPJwPtVu84Gbmxpg5haak5g6wrYjBHdIwwCb7MqqLp2qJ0r9HYDUdg3yiXzkAioz1RVciVqWCihfQlPWZviDmnPA=
+X-Received: by 2002:a17:906:eb04:: with SMTP id mb4mr39454430ejb.27.1641328303114;
+ Tue, 04 Jan 2022 12:31:43 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220103233948.198119-5-Mr.Bossman075@gmail.com>
+References: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
+ <1636444705-17883-1-git-send-email-lh.kuo@sunplus.com> <1636444705-17883-3-git-send-email-lh.kuo@sunplus.com>
+ <YaQu3dCQD4FG7ete@robh.at.kernel.org> <f5607fa7ad9c49a7bfcce02eac834838@sphcmbx02.sunplus.com.tw>
+ <CAL_JsqK=7ma_LwMMoW7yfVoBfPN0hBJsPbp4ojtk0kt3k=+O1w@mail.gmail.com> <1eb97e1aca9c4c8d8f1e17c51f2792ac@sphcmbx02.sunplus.com.tw>
+In-Reply-To: <1eb97e1aca9c4c8d8f1e17c51f2792ac@sphcmbx02.sunplus.com.tw>
+From:   Rob Herring <robh@kernel.org>
+Date:   Tue, 4 Jan 2022 14:31:31 -0600
+X-Gmail-Original-Message-ID: <CAL_JsqKJJutPpc-xRK0y+t8s=jpqkBmHMgaFK1mnEcxPT98vjQ@mail.gmail.com>
+Message-ID: <CAL_JsqKJJutPpc-xRK0y+t8s=jpqkBmHMgaFK1mnEcxPT98vjQ@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] devicetree bindings mmc Add bindings doc for
+ Sunplus SP7021
+To:     =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+Cc:     "LH.Kuo" <lhjeff911@gmail.com>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "daniel.thompson@linaro.org" <daniel.thompson@linaro.org>,
+        "lee.jones@linaro.org" <lee.jones@linaro.org>,
+        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "qinjian@cqplus1.com" <qinjian@cqplus1.com>,
+        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 03 Jan 2022 18:39:45 -0500, Jesse Taube wrote:
-> From: Jesse Taube <mr.bossman075@gmail.com>
-> 
-> Add DT binding documentation for i.MXRT1050 clock driver.
-> 
-> Cc: Giulio Benetti <giulio.benetti@benettiengineering.com>
-> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
-> ---
-> V1->V2:
-> * Replace macros with values
-> V2->V3:
-> * Remove anatop
-> * Use lpuart not gpt
-> * include imxrt1050-clock.h
-> * 2 space tabs to 4
-> * Remove oneOf enum
-> * Change maxItems to 2
-> V3->V4:
-> * Nothing done
-> V4->V5:
-> * Remove extra newline
-> * Rename ccm to clock-controller
-> * Change minItems to const
-> * Change minItems to description
-> * Rename file to add 1050
-> * Change commit description to just 1050
-> V5->V6:
-> * Add maxItems for clocks description
-> V6->V7:
-> * Nothing done
-> ---
->  .../bindings/clock/imxrt1050-clock.yaml       | 67 +++++++++++++++++++
->  1 file changed, 67 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
-> 
+On Tue, Nov 30, 2021 at 7:59 PM Lh Kuo =E9=83=AD=E5=8A=9B=E8=B1=AA <lh.Kuo@=
+sunplus.com> wrote:
+>
+> > > > > +properties:
+> > > > > +  compatible:
+> > > > > +    enum:
+> > > > > +      - sunplus,sp7021-card1
+> > > > > +      - sunplus,sp7021-sdio
+> > > >
+> > > > What's the difference between these 2 blocks?
+> > > >
+> > >
+> > > One for SD card One for SDIO
+> >
+> > If the programming model is the same, then it should be the same compat=
+ible string. We have various
+> > properties to handle differences like bus width, card detect or not, et=
+c.
+> >
+>
+> SDIO and SDCARD still need to set the date and CMD decoding differences.
 
+I still don't understand. A host controller should be able to
+initialize a card enough to tell what kind it is. And we have things
+defined in DT like 'no-sd' and 'no-mmc'.
 
-Please add Acked-by/Reviewed-by tags when posting new versions. However,
-there's no need to repost patches *only* to add the tags. The upstream
-maintainer will do that for acks received on the version they apply.
+Looking at the driver, the difference appears to be just setting a
+register to the mode (eMMC/SD/SDIO). That's not a difference in the
+h/w block which is when different compatibles would be appropriate. A
+property, if anything, is the right thing to do here.
 
-If a tag was not added on purpose, please state why and what changed.
-
+Rob
