@@ -2,101 +2,179 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF37FC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 20:31:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEB63C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 20:37:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232841AbiADUbq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Jan 2022 15:31:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53910 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232255AbiADUbp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 15:31:45 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2AF0C061761;
-        Tue,  4 Jan 2022 12:31:45 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 626DB6157D;
-        Tue,  4 Jan 2022 20:31:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CACCCC36AED;
-        Tue,  4 Jan 2022 20:31:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641328304;
-        bh=iAG8B3ZpKh/tvy6iG5URP7IbImgaSPzk9TUk4eHefQg=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=Yi7zREne0VxnunBWcxx0IIhDo5zqKfxFv+Py2S+vGhxGTw/FYpPEbLQvZX3ziBhn8
-         Y65C5kuG0ZlxpPSA13cdcZRq4biW4S2KTPIqAPo5irHXzwQbhBk1cI8gN5zAqdtZ3a
-         mtpACCr6qjIHHQFcvrmlTlA7bx1KLDMK2VzI7wgfwNwZsyl9dmgk2/fIBtbyiXgRff
-         gplJGIzB1zvAXGH3KIqD6zXM8ZKbSFan8iRA5LBlc01fW1M2hTOMh9rbSeXLv4x83i
-         34A8yhmfRoJFRkjOHN86ajJXeY3BA4hVtSXpOUIw/hXa36Tkay9abdm04J0uSZHZMf
-         XwupkN9zxsmww==
-Received: by mail-ed1-f44.google.com with SMTP id j6so152991504edw.12;
-        Tue, 04 Jan 2022 12:31:44 -0800 (PST)
-X-Gm-Message-State: AOAM532HRPEY85LE+KWZnHSBM57JpWQ4yiUnE1ReeP9kRd5nluL3LmGI
-        gEr/Su55CXeoLtdUn0p4bmHo8i+n2VLguEWg+g==
-X-Google-Smtp-Source: ABdhPJwPtVu84Gbmxpg5haak5g6wrYjBHdIwwCb7MqqLp2qJ0r9HYDUdg3yiXzkAioz1RVciVqWCihfQlPWZviDmnPA=
-X-Received: by 2002:a17:906:eb04:: with SMTP id mb4mr39454430ejb.27.1641328303114;
- Tue, 04 Jan 2022 12:31:43 -0800 (PST)
-MIME-Version: 1.0
-References: <1635487055-18494-1-git-send-email-lh.kuo@sunplus.com>
- <1636444705-17883-1-git-send-email-lh.kuo@sunplus.com> <1636444705-17883-3-git-send-email-lh.kuo@sunplus.com>
- <YaQu3dCQD4FG7ete@robh.at.kernel.org> <f5607fa7ad9c49a7bfcce02eac834838@sphcmbx02.sunplus.com.tw>
- <CAL_JsqK=7ma_LwMMoW7yfVoBfPN0hBJsPbp4ojtk0kt3k=+O1w@mail.gmail.com> <1eb97e1aca9c4c8d8f1e17c51f2792ac@sphcmbx02.sunplus.com.tw>
-In-Reply-To: <1eb97e1aca9c4c8d8f1e17c51f2792ac@sphcmbx02.sunplus.com.tw>
+        id S232670AbiADUhA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Jan 2022 15:37:00 -0500
+Received: from mail-oo1-f45.google.com ([209.85.161.45]:39624 "EHLO
+        mail-oo1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231175AbiADUg6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 15:36:58 -0500
+Received: by mail-oo1-f45.google.com with SMTP id t13-20020a4a760d000000b002dab4d502dfso11657211ooc.6;
+        Tue, 04 Jan 2022 12:36:57 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=nv0bgOiiS/Wu+H1BCtcmnc11mDx7WiCemyjztTm21Mw=;
+        b=x6qjUbKAgmzS3grnGrjATY8V2t/byjujNjnAVD3gY+BDSlZE7jMp0zZPY7kVSbnulQ
+         x2U/k7abCcxdd/FOGXr+4Lroey9bR6txIBVjsPtLbYi4fhTIIma3G+Lx8OlvAlYAouvz
+         ScQAnKAsEQSRHz7AwjZC7QJCvsd7JIyf//JPSxU0QfTsSb5DMU+Z6DmsRW1xTrcirFih
+         JjrJq/QWLS7RegmGkLao+cELPtrt91GfK5xPiFjW0VGgAXQSvhF9MxamGMw/vqOz3Cav
+         2DPrktN5sycj2EmzJt8CVdq5YzebN6cSLrz7GcYTb0qweTp55sEtKcrVkjTdIk+Oj6M4
+         G3rw==
+X-Gm-Message-State: AOAM531IOy3WlIhPwuEdghhslZ9M+fZDVOejoUdeXBlTZARw5hwogzzb
+        hTD48+KiAp2n3wPnc2+QGw==
+X-Google-Smtp-Source: ABdhPJzXPEcfT9GJOOYRk1n/ghzYHuu0N2mU0VfZIDsZkkPabESTUOgrAt1KKprLmE/mMlZPiyJrlg==
+X-Received: by 2002:a4a:d184:: with SMTP id j4mr32438054oor.72.1641328617311;
+        Tue, 04 Jan 2022 12:36:57 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id t26sm7918184ott.28.2022.01.04.12.36.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Jan 2022 12:36:56 -0800 (PST)
+Received: (nullmailer pid 1378686 invoked by uid 1000);
+        Tue, 04 Jan 2022 20:36:55 -0000
+Date:   Tue, 4 Jan 2022 14:36:55 -0600
 From:   Rob Herring <robh@kernel.org>
-Date:   Tue, 4 Jan 2022 14:31:31 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqKJJutPpc-xRK0y+t8s=jpqkBmHMgaFK1mnEcxPT98vjQ@mail.gmail.com>
-Message-ID: <CAL_JsqKJJutPpc-xRK0y+t8s=jpqkBmHMgaFK1mnEcxPT98vjQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] devicetree bindings mmc Add bindings doc for
+To:     Li-hao Kuo <lhjeff911@gmail.com>
+Cc:     p.zabel@pengutronix.de, daniel.thompson@linaro.org,
+        lee.jones@linaro.org, u.kleine-koenig@pengutronix.de,
+        ulf.hansson@linaro.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        lh.kuo@sunplus.com, wells.lu@sunplus.com
+Subject: Re: [PATCH v3 2/2] devicetree bindings mmc Add bindings doc for
  Sunplus SP7021
-To:     =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
-Cc:     "LH.Kuo" <lhjeff911@gmail.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "daniel.thompson@linaro.org" <daniel.thompson@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "qinjian@cqplus1.com" <qinjian@cqplus1.com>,
-        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Message-ID: <YdSv53g+js4MnkEY@robh.at.kernel.org>
+References: <cover.1640325539.git.lhjeff911@gmail.com>
+ <9da84bfbb6d4d086a8f905dd0d80fb81720987f7.1640325539.git.lhjeff911@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9da84bfbb6d4d086a8f905dd0d80fb81720987f7.1640325539.git.lhjeff911@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Nov 30, 2021 at 7:59 PM Lh Kuo =E9=83=AD=E5=8A=9B=E8=B1=AA <lh.Kuo@=
-sunplus.com> wrote:
->
-> > > > > +properties:
-> > > > > +  compatible:
-> > > > > +    enum:
-> > > > > +      - sunplus,sp7021-card1
-> > > > > +      - sunplus,sp7021-sdio
-> > > >
-> > > > What's the difference between these 2 blocks?
-> > > >
-> > >
-> > > One for SD card One for SDIO
-> >
-> > If the programming model is the same, then it should be the same compat=
-ible string. We have various
-> > properties to handle differences like bus width, card detect or not, et=
-c.
-> >
->
-> SDIO and SDCARD still need to set the date and CMD decoding differences.
+On Fri, Dec 24, 2021 at 02:05:39PM +0800, Li-hao Kuo wrote:
+> Add devicetree bindings mmc Add bindings doc for Sunplus SP7021
+> 
+> Signed-off-by: Li-hao Kuo <lhjeff911@gmail.com>
+> ---
+> Changes in v3:
+>  - Addressed all comments from Mr. Rob Herring
 
-I still don't understand. A host controller should be able to
-initialize a card enough to tell what kind it is. And we have things
-defined in DT like 'no-sd' and 'no-mmc'.
+No. The subject is still wrong and my comments on compatible still 
+remain. For the latter, I just replied on the original thread.
 
-Looking at the driver, the difference appears to be just setting a
-register to the mode (eMMC/SD/SDIO). That's not a difference in the
-h/w block which is when different compatibles would be appropriate. A
-property, if anything, is the right thing to do here.
+>  - Modified SD/SDIO driver.
 
-Rob
+Wrong patch. And modified how? You need to list the changes from the 
+last version one by one. This list should give the reviewer a clue as to 
+which parts need to be reviewed again so we don't have to review the 
+whole thing again nor remember what we said to change. The reviewer has 
+probably reviewed 10s to 100 patches since the last version and doesn't 
+remember what they said.
+
+> 
+>  .../devicetree/bindings/mmc/sunplus-sd2.yaml       | 73 ++++++++++++++++++++++
+>  MAINTAINERS                                        |  1 +
+>  2 files changed, 74 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml b/Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+> new file mode 100644
+> index 0000000..2f96e35
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+> @@ -0,0 +1,73 @@
+> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+> +# Copyright (C) Sunplus Co., Ltd.
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/sunplus-sd2.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Sunplus SD/SDIO controller
+> +
+> +maintainers:
+> +  - Li-hao Kuo <lhjeff911@gmail.com>
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - sunplus,sp7021-card
+> +      - sunplus,sp7021-sdio
+> +
+> +  reg:
+> +    items:
+> +      - description: Base address and length of the SD/SDIO registers
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 1
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  max-frequency: true
+> +
+> +allOf:
+> +  - $ref: "mmc-controller.yaml"
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - resets
+> +  - pinctrl-names
+> +  - pinctrl-0
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/clock/sp-sp7021.h>
+> +    #include <dt-bindings/reset/sp-sp7021.h>
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    sdcard: sdcard@9c003e80 {
+> +       compatible = "sunplus,sp7021-card";
+> +       reg = <0x9c003e80 0x280>;
+> +       interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
+> +       clocks = <&clkc CARD_CTL1>;
+> +       resets = <&rstc RST_CARD_CTL1>;
+> +       pinctrl-names = "default";
+> +       pinctrl-0 = <&mmc1_mux &mmc1_mux_cd>;
+> +       max-frequency = <52000000>;
+> +    };
+> +    sdio: mmc@9c008400 {
+> +       compatible = "sunplus,sp7021-sdio";
+> +       reg = <0x9c008400 0x280>;
+> +       interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
+> +       clocks = <&clkc CARD_CTL1>;
+> +       resets = <&rstc RST_CARD_CTL1>;
+> +       pinctrl-names = "default";
+> +       pinctrl-0 = <&pins_sdio>;
+> +       max-frequency = <52000000>;
+> +    };
+> +...
+> \ No newline at end of file
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 2c1d9e8..297d512 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -18246,6 +18246,7 @@ SUNPLUS SD/SDIO HOST CONTROLLER INTERFACE DRIVER
+>  M:	Li-hao Kuo <lhjeff911@gmail.com>
+>  L:	linux-mmc@vger.kernel.org
+>  S:	Maintained
+> +F:	Documentation/devicetree/bindings/mmc/sunplus-sd2.yaml
+>  F:	drivers/mmc/host/sunplus_sd2.c
+>  
+>  SUPERH
+> -- 
+> 2.7.4
+> 
+> 
