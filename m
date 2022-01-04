@@ -2,78 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FC7CC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 06:03:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAFE5C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 10:23:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231667AbiADGDd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Jan 2022 01:03:33 -0500
-Received: from out28-5.mail.aliyun.com ([115.124.28.5]:43073 "EHLO
-        out28-5.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230181AbiADGDc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 01:03:32 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1070646|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.00848475-0.00139035-0.990125;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047207;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=11;RT=11;SR=0;TI=SMTPD_---.MWR.1lZ_1641276209;
-Received: from sunxibot.allwinnertech.com(mailfrom:michael@allwinnertech.com fp:SMTPD_---.MWR.1lZ_1641276209)
-          by smtp.aliyun-inc.com(10.147.41.199);
-          Tue, 04 Jan 2022 14:03:29 +0800
-From:   Michael Wu <michael@allwinnertech.com>
-To:     ulf.hansson@linaro.org, mripard@kernel.org, wens@csie.org,
-        samuel@sholland.org, andre.przywara@arm.com
-Cc:     jernej.skrabec@gmail.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
-        linux-kernel@vger.kernel.org,
-        Michael Wu <michael@allwinnertech.com>
-Subject: [PATCH v2] mmc: sunxi-mmc: check ocr_avail on resource request
-Date:   Tue,  4 Jan 2022 14:03:25 +0800
-Message-Id: <20220104060325.3957-1-michael@allwinnertech.com>
-X-Mailer: git-send-email 2.29.0
+        id S229772AbiADKXz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Jan 2022 05:23:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53814 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231338AbiADKXy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 05:23:54 -0500
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6211CC061784;
+        Tue,  4 Jan 2022 02:23:54 -0800 (PST)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: kholk11)
+        with ESMTPSA id E76831F4187E
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1641291833;
+        bh=SaZEt38O25zeTTGlpimhN0QCyLQv6zCIHKxNVv3vt5w=;
+        h=Subject:To:Cc:References:From:Date:In-Reply-To:From;
+        b=fgyrQp1j8PEjCWV9ysz/CWKd3qIB3QGILpaIni5ejfh51ikLtvKvkA+1Cx8cHbzG6
+         N2j5vVX+z3JpyOPtuUh6dqmqo6VI2l3xrCAeF01yCjARyzC3FQzuPzrtTy6xX2zHZt
+         rX/2BX1GnzuL47LQmNsgspmwwiouYkLCcW9lBfaJW9y5N/IAKyxVHUQYAlrWbzuMkB
+         GMeu1PG3ee6YsCGxa2Y8Kre4TfzZiuieDMqkoZAFeVYKH7H/lie68RLp6WYcalVLrs
+         cZ2jdwxn6npHjIY7sC+VaqD4WKxQeEiIwJ43S4/r75wj/jMwgxqWuMror3qNiWuO63
+         DH0FbIHvYsopg==
+Subject: Re: [PATCH v1 2/3] mmc: core: Add support for SDIO async interrupt
+To:     Axe Yang <axe.yang@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+References: <20211227083641.12538-1-axe.yang@mediatek.com>
+ <20211227083641.12538-3-axe.yang@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+Message-ID: <a0eec26b-0148-a208-be67-888766b88137@collabora.com>
+Date:   Tue, 4 Jan 2022 11:23:49 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20211227083641.12538-3-axe.yang@mediatek.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some platforms have no regulator, discrete power devices are used instead.
-However, sunxi_mmc_probe does not catch this exception when regulator is
-absent in DTS. This leads to sd or eMMC init failure.
+Il 27/12/21 09:36, Axe Yang ha scritto:
+> If cap-sdio-async-int flag is set in host dts node, parse EAI
+> information from SDIO CCCR interrupt externsion segment. If async
+> interrupt is supported by SDIO card then send command to card to
+> enable it and set enable_async_int flag in sdio_cccr structure to 1.
+> The parse flow is implemented in sdio_read_cccr().
+> 
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 
-To solve this, a fixed vmmc regulator must be hooked up in DTS, like this:
-reg_dummy_vmmc: dummy_vmmc {
-	compatible = "regulator-fixed";
-	regulator-name = "dummy-vmmc";
-	regulator-min-microvolt = <3300000>;
-	regulator-max-microvolt = <3300000>;
-};
+Acked-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 
-mmc0:mmc@4020000 {
-	compatible = "allwinner,sun50i-a100-emmc";
-	device_type = "mmc0";
-	vmmc-supply = <&reg_dummy_vmmc>;
-}
+> ---
+>   drivers/mmc/core/host.c  |  2 ++
+>   drivers/mmc/core/sdio.c  | 17 +++++++++++++++++
+>   include/linux/mmc/card.h |  3 ++-
+>   include/linux/mmc/host.h |  1 +
+>   include/linux/mmc/sdio.h |  5 +++++
+>   5 files changed, 27 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index d4683b1d263f..7ad60fab099a 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -401,6 +401,8 @@ int mmc_of_parse(struct mmc_host *host)
+>   	if (device_property_read_bool(dev, "no-mmc-hs400"))
+>   		host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
+>   				 MMC_CAP2_HS400_ES);
+> +	if (device_property_read_bool(dev, "cap-sdio-async-int"))
+> +		host->caps2 |= MMC_CAP2_SDIO_ASYNC_INT;
+>   
+>   	/* Must be after "non-removable" check */
+>   	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 68edf7a615be..335e4ada733a 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -225,6 +225,23 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
+>   				card->sw_caps.sd3_drv_type |= SD_DRIVER_TYPE_C;
+>   			if (data & SDIO_DRIVE_SDTD)
+>   				card->sw_caps.sd3_drv_type |= SD_DRIVER_TYPE_D;
+> +
+> +			if (card->host->caps2 & MMC_CAP2_SDIO_ASYNC_INT) {
+> +				ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTERRUPT_EXT, 0,
+> +						       &data);
+> +				if (ret)
+> +					goto out;
+> +
+> +				if (data & SDIO_INTERRUPT_EXT_SAI) {
+> +					data |= SDIO_INTERRUPT_EXT_EAI;
+> +					ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_INTERRUPT_EXT,
+> +							       data, NULL);
+> +					if (ret)
+> +						goto out;
+> +
+> +					card->cccr.enable_async_int = 1;
+> +				}
+> +			}
+>   		}
+>   
+>   		/* if no uhs mode ensure we check for high speed */
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 37f975875102..b0deb8ca8eeb 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -219,7 +219,8 @@ struct sdio_cccr {
+>   				wide_bus:1,
+>   				high_power:1,
+>   				high_speed:1,
+> -				disable_cd:1;
+> +				disable_cd:1,
+> +				enable_async_int:1;
+>   };
+>   
+>   struct sdio_cis {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 0c0c9a0fdf57..60c8ebe1a5e8 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -399,6 +399,7 @@ struct mmc_host {
+>   #define MMC_CAP2_CRYPTO		0
+>   #endif
+>   #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
+> +#define MMC_CAP2_SDIO_ASYNC_INT	(1 << 29)	/* SDIO host supports asynchronous interrupt */
+>   
+>   	int			fixed_drv_type;	/* fixed driver type for non-removable media */
+>   
+> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+> index 2a05d1ac4f0e..1ef400f28642 100644
+> --- a/include/linux/mmc/sdio.h
+> +++ b/include/linux/mmc/sdio.h
+> @@ -159,6 +159,11 @@
+>   #define  SDIO_DTSx_SET_TYPE_A	(1 << SDIO_DRIVE_DTSx_SHIFT)
+>   #define  SDIO_DTSx_SET_TYPE_C	(2 << SDIO_DRIVE_DTSx_SHIFT)
+>   #define  SDIO_DTSx_SET_TYPE_D	(3 << SDIO_DRIVE_DTSx_SHIFT)
+> +
+> +#define SDIO_CCCR_INTERRUPT_EXT	0x16
+> +#define SDIO_INTERRUPT_EXT_SAI	(1 << 0)
+> +#define SDIO_INTERRUPT_EXT_EAI	(1 << 1)
+> +
+>   /*
+>    * Function Basic Registers (FBR)
+>    */
+> 
 
-In this patch, we print an error message and abort the probe process if
-the regulator is not specified in DTS.
-
-Signed-off-by: Michael Wu <michael@allwinnertech.com>
----
- drivers/mmc/host/sunxi-mmc.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 2702736a1c57..0da74bddaf87 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1300,6 +1300,11 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 	if (ret)
- 		return ret;
- 
-+	if (!host->mmc->ocr_avail) {
-+		dev_err(&pdev->dev, "Could not get mmc regulator\n");
-+		return -EINVAL;
-+	}
-+
- 	host->reg_base = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(host->reg_base))
- 		return PTR_ERR(host->reg_base);
--- 
-2.29.0
 
