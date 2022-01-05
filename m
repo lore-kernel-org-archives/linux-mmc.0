@@ -2,75 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA64FC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 09:41:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D2BDC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 09:52:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234244AbiAEJl2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Jan 2022 04:41:28 -0500
-Received: from smtp23.cstnet.cn ([159.226.251.23]:43818 "EHLO cstnet.cn"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229645AbiAEJl1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 5 Jan 2022 04:41:27 -0500
-Received: from localhost.localdomain (unknown [124.16.138.126])
-        by APP-03 (Coremail) with SMTP id rQCowAAXH1uxZ9VhYjYkBQ--.26384S2;
-        Wed, 05 Jan 2022 17:41:05 +0800 (CST)
-From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Jiasheng Jiang <jiasheng@iscas.ac.cn>
-Subject: [PATCH] mmc: sh_mmcif: Check for null res pointer
-Date:   Wed,  5 Jan 2022 17:41:04 +0800
-Message-Id: <20220105094104.2457423-1-jiasheng@iscas.ac.cn>
-X-Mailer: git-send-email 2.25.1
+        id S239085AbiAEJwu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Jan 2022 04:52:50 -0500
+Received: from frasgout.his.huawei.com ([185.176.79.56]:4335 "EHLO
+        frasgout.his.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229755AbiAEJwt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 04:52:49 -0500
+Received: from fraeml704-chm.china.huawei.com (unknown [172.18.147.200])
+        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4JTPqG33Ygz67XhV;
+        Wed,  5 Jan 2022 17:50:18 +0800 (CST)
+Received: from lhreml710-chm.china.huawei.com (10.201.108.61) by
+ fraeml704-chm.china.huawei.com (10.206.15.53) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.2308.20; Wed, 5 Jan 2022 10:52:46 +0100
+Received: from localhost (10.47.83.118) by lhreml710-chm.china.huawei.com
+ (10.201.108.61) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.1.2308.20; Wed, 5 Jan
+ 2022 09:52:45 +0000
+Date:   Wed, 5 Jan 2022 09:52:52 +0000
+From:   Jonathan Cameron <Jonathan.Cameron@Huawei.com>
+To:     Paul Cercueil <paul@crapouillou.net>
+CC:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        "Lars-Peter Clausen" <lars@metafoo.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        "Arnd Bergmann" <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
+        Pavel Machek <pavel@ucw.cz>, <list@opendingux.net>,
+        <linux-iio@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mips@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-pm@vger.kernel.org>
+Subject: Re: [PATCH 1/8] PM: core: Remove DEFINE_UNIVERSAL_DEV_PM_OPS()
+ macro
+Message-ID: <20220105095252.00007f7f@Huawei.com>
+In-Reply-To: <20220104214214.198843-2-paul@crapouillou.net>
+References: <20220104214214.198843-1-paul@crapouillou.net>
+        <20220104214214.198843-2-paul@crapouillou.net>
+Organization: Huawei Technologies Research and Development (UK) Ltd.
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.29; i686-w64-mingw32)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: rQCowAAXH1uxZ9VhYjYkBQ--.26384S2
-X-Coremail-Antispam: 1UD129KBjvdXoWrtFW3ur4DXF13KF15JF47Arb_yoWfWFXEka
-        43Xr1DGr9Fkr9Y93WxtryfCryYvas8Wr4Fga1FgFWa934rXrn7Aw1v93s5Jr48WryxAFZx
-        Cws3C34rA347ZjkaLaAFLSUrUUUUUb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
-        9fnUUIcSsGvfJTRUUUbcAFF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2IYs7xG
-        6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8w
-        A2z4x0Y4vE2Ix0cI8IcVAFwI0_Ar0_tr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Gr1j
-        6F4UJwA2z4x0Y4vEx4A2jsIE14v26rxl6s0DM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
-        Cq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
-        I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Gr0_Cr1lOx8S6xCaFVCjc4AY6r1j6r
-        4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwCY02Avz4vE14v_GFWl
-        42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJV
-        WUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1DMIIYrxkI7VAK
-        I48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r1j6r
-        4UMIIF0xvE42xK8VAvwI8IcIk0rVWrJr0_WFyUJwCI42IY6I8E87Iv67AKxVWUJVW8JwCI
-        42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfUbgAFDUUUU
-X-Originating-IP: [124.16.138.126]
-X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.47.83.118]
+X-ClientProxiedBy: lhreml704-chm.china.huawei.com (10.201.108.53) To
+ lhreml710-chm.china.huawei.com (10.201.108.61)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If there is no suitable resource, platform_get_resource() will return
-NULL.
-Therefore in order to avoid the dereference of the NULL pointer, it
-should be better to check the 'res'.
+On Tue, 4 Jan 2022 21:42:07 +0000
+Paul Cercueil <paul@crapouillou.net> wrote:
 
-Fixes: 27cbd7e815a8 ("mmc: sh_mmcif: rework dma channel handling")
-Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
----
- drivers/mmc/host/sh_mmcif.c | 3 +++
- 1 file changed, 3 insertions(+)
+> The deprecated UNIVERSAL_DEV_PM_OPS() macro uses the provided callbacks
+> for both runtime PM and system sleep, which is very likely to be a
+> mistake, as a system sleep can be triggered while a given device is
+> already PM-suspended, which would cause the suspend callback to be
+> called twice.
+> 
+> The amount of users of UNIVERSAL_DEV_PM_OPS() is also tiny (16
+> occurences) compared to the number of places where
+> SET_SYSTEM_SLEEP_PM_OPS() is used with pm_runtime_force_suspend() and
+> pm_runtime_force_resume(), which makes me think that none of these cases
+> are actually valid.
+> 
+> As this macro is currently unused, remove it before someone starts to
+> use it in yet another invalid case.
+> 
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+I suspect there are cases where calling suspend twice doesn't matter, but
+it does seem unlikely to be particularly helpful.
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index e5e457037235..45dfa3b0be9c 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -405,6 +405,9 @@ static int sh_mmcif_dma_slave_config(struct sh_mmcif_host *host,
- 	struct dma_slave_config cfg = { 0, };
- 
- 	res = platform_get_resource(host->pd, IORESOURCE_MEM, 0);
-+	if (!res)
-+		return -EINVAL;
-+
- 	cfg.direction = direction;
- 
- 	if (direction == DMA_DEV_TO_MEM) {
--- 
-2.25.1
+So, makes sense to drop this unless there is some subtlety I'm missing.
+Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+
+> ---
+>  include/linux/pm.h | 19 ++++++-------------
+>  1 file changed, 6 insertions(+), 13 deletions(-)
+> 
+> diff --git a/include/linux/pm.h b/include/linux/pm.h
+> index e1e9402180b9..31bbaafb06d2 100644
+> --- a/include/linux/pm.h
+> +++ b/include/linux/pm.h
+> @@ -366,6 +366,12 @@ static const struct dev_pm_ops name = { \
+>  	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+>  }
+>  
+> +/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> +#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +const struct dev_pm_ops __maybe_unused name = { \
+> +	SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +}
+> +
+>  /*
+>   * Use this for defining a set of PM operations to be used in all situations
+>   * (system suspend, hibernation or runtime PM).
+> @@ -379,19 +385,6 @@ static const struct dev_pm_ops name = { \
+>   * .resume_early(), to the same routines as .runtime_suspend() and
+>   * .runtime_resume(), respectively (and analogously for hibernation).
+>   */
+> -#define DEFINE_UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+> -static const struct dev_pm_ops name = { \
+> -	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -	RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
+> -}
+> -
+> -/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> -#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> -const struct dev_pm_ops __maybe_unused name = { \
+> -	SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -}
+> -
+> -/* Deprecated. Use DEFINE_UNIVERSAL_DEV_PM_OPS() instead. */
+>  #define UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+>  const struct dev_pm_ops __maybe_unused name = { \
+>  	SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
 
