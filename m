@@ -2,99 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5EBDC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 10:49:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D6E1C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 16:32:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239507AbiAEKtu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Jan 2022 05:49:50 -0500
-Received: from frasgout.his.huawei.com ([185.176.79.56]:4345 "EHLO
-        frasgout.his.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235372AbiAEKtr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 05:49:47 -0500
-Received: from fraeml741-chm.china.huawei.com (unknown [172.18.147.226])
-        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4JTR2D2hY9z67vlM;
-        Wed,  5 Jan 2022 18:44:52 +0800 (CST)
-Received: from lhreml710-chm.china.huawei.com (10.201.108.61) by
- fraeml741-chm.china.huawei.com (10.206.15.222) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Wed, 5 Jan 2022 11:49:45 +0100
-Received: from localhost (10.47.83.118) by lhreml710-chm.china.huawei.com
- (10.201.108.61) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.1.2308.20; Wed, 5 Jan
- 2022 10:49:44 +0000
-Date:   Wed, 5 Jan 2022 10:49:50 +0000
-From:   Jonathan Cameron <Jonathan.Cameron@Huawei.com>
-To:     Paul Cercueil <paul@crapouillou.net>
-CC:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        id S241928AbiAEQcd convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Jan 2022 11:32:33 -0500
+Received: from aposti.net ([89.234.176.197]:52366 "EHLO aposti.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S241912AbiAEQcb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 5 Jan 2022 11:32:31 -0500
+Date:   Wed, 05 Jan 2022 16:32:17 +0000
+From:   Paul Cercueil <paul@crapouillou.net>
+Subject: Re: [PATCH 0/8] DEV_PM_OPS macros rework
+To:     Jonathan Cameron <Jonathan.Cameron@Huawei.com>
+Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Jonathan Cameron <jic23@kernel.org>,
-        "Lars-Peter Clausen" <lars@metafoo.de>,
+        Lars-Peter Clausen <lars@metafoo.de>,
         Linus Walleij <linus.walleij@linaro.org>,
-        "Arnd Bergmann" <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
-        Pavel Machek <pavel@ucw.cz>, <list@opendingux.net>,
-        <linux-iio@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mips@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-pm@vger.kernel.org>
-Subject: Re: [PATCH 5/8] PM: runtime: Add EXPORT[_GPL]_RUNTIME_DEV_PM_OPS
- macros
-Message-ID: <20220105104950.00001d6f@Huawei.com>
-In-Reply-To: <20220105100723.00001958@Huawei.com>
+        Arnd Bergmann <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
+        Pavel Machek <pavel@ucw.cz>, list@opendingux.net,
+        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pm@vger.kernel.org
+Message-Id: <TLW85R.NW4VI31QKSEJ3@crapouillou.net>
+In-Reply-To: <20220105101737.00000957@Huawei.com>
 References: <20220104214214.198843-1-paul@crapouillou.net>
-        <20220104214214.198843-6-paul@crapouillou.net>
-        <20220105100723.00001958@Huawei.com>
-Organization: Huawei Technologies Research and Development (UK) Ltd.
-X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.29; i686-w64-mingw32)
+        <20220105101737.00000957@Huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.47.83.118]
-X-ClientProxiedBy: lhreml704-chm.china.huawei.com (10.201.108.53) To
- lhreml710-chm.china.huawei.com (10.201.108.61)
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=iso-8859-1; format=flowed
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 5 Jan 2022 10:07:23 +0000
-Jonathan Cameron <Jonathan.Cameron@Huawei.com> wrote:
 
-> On Tue, 4 Jan 2022 21:42:11 +0000
+
+Le mer., janv. 5 2022 at 10:17:37 +0000, Jonathan Cameron 
+<Jonathan.Cameron@Huawei.com> a écrit :
+> On Tue, 4 Jan 2022 21:42:06 +0000
 > Paul Cercueil <paul@crapouillou.net> wrote:
 > 
-> > Similar to EXPORT[_GPL]_SIMPLE_DEV_PM_OPS, but for users with runtime-PM
-> > suspend/resume callbacks.
-> > 
-> > Signed-off-by: Paul Cercueil <paul@crapouillou.net>  
-> Follow up earlier comment.  I think you want pm_ptr() around all the
-> entries for RUNTIME_PM_OPS
+>>  Hi,
+>> 
+>>  This set of commits rework a bit the *_DEV_PM_OPS() macros that were
+>>  introduced recently.
+>> 
+>>  - Remove the DEFINE_UNIVERSAL_DEV_PM_OPS() macro, since I highly 
+>> doubt
+>>    anything is going to use it. The macro it replaces
+>>    (UNIVERSAL_DEV_PM_OPS) seems to only be used incorrectly in code 
+>> that
+>>    hasn't been updated in ages.
+>> 
+>>  - Remove the static qualifier in DEFINE_SIMPLE_DEV_PM_OPS, so that 
+>> the
+>>    macro is more in line with what's done elsewhere in the kernel.
+>> 
+>>  - Add a DEFINE_RUNTIME_DEV_PM_OPS() macro, for use with drivers 
+>> that use
+>>    runtime PM, and use 
+>> runtime_pm_force_suspend/runtime_pm_force_resume
+>>    as their system sleep callbacks.
+>> 
+>>  - Add EXPORT_*_DEV_PM_OPS macros, which can be used for when the
+>>    underlying dev_pm_ops is to be exported. With CONFIG_PM set, the
+>>    symbol is exported as you would expect. With CONFIG_PM disabled, 
+>> the
+>>    dev_pm_ops is garbage-collected along with the suspend/resume
+>>    callbacks.
+>> 
+>>  - Update the two places which used DEFINE_SIMPLE_DEV_PM_OPS, to add 
+>> back
+>>    the "static" qualifier that was stripped from the macro.
+>> 
+>>  - Update one driver to use EXPORT_RUNTIME_DEV_PM_OPS(), just to 
+>> showcase
+>>    how to use this macro in the case where a dev_pm_ops is to be
+>>    exported.
+>>    Note that the driver itself is GPL, and the symbol is only used 
+>> within
+>>    a GPL driver, so I would assume the symbol would be exported as 
+>> GPL.
+>>    But it was not the case in the original code, so I did not change 
+>> the
+>>    behaviour.
+>> 
+>>  Feedback welcome.
 > 
+> Comments on individual patches (in particular bad pick for that final 
+> example ;)
+> 
+> Given how late we are in the cycle, I'd argue we 'need' patches 2 (+ 
+> 5,6 which
+> should probably be all one patch to avoid introducing then fixing a 
+> warning in
+> different patches).  The others could wait for the following cycle if 
+> needed.
 
-That issue didn't exist... 
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Ok, should I V2 with patches 2/5/6 merged together?
 
+-Paul
+
+> It would slow down a few patches I have queued up behind this, but 
+> most of them
+> would be unaffected so it wouldn't annoy me too much. Can't speak for 
+> others
+> however!
+> 
 > Jonathan
 > 
-> > ---
-> >  include/linux/pm_runtime.h | 7 +++++++
-> >  1 file changed, 7 insertions(+)
-> > 
-> > diff --git a/include/linux/pm_runtime.h b/include/linux/pm_runtime.h
-> > index 4af454d29281..a7f862a26c03 100644
-> > --- a/include/linux/pm_runtime.h
-> > +++ b/include/linux/pm_runtime.h
-> > @@ -36,6 +36,13 @@
-> >  			   pm_runtime_force_resume, suspend_fn, \
-> >  			   resume_fn, idle_fn)
-> >  
-> > +#define EXPORT_RUNTIME_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
-> > +	_EXPORT_DEV_PM_OPS(name, pm_runtime_force_suspend, pm_runtime_force_resume, \
-> > +			   suspend_fn, resume_fn, idle_fn, "")
-> > +#define EXPORT_GPL_RUNTIME_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
-> > +	_EXPORT_DEV_PM_OPS(name, pm_runtime_force_suspend, pm_runtime_force_resume, \
-> > +			   suspend_fn, resume_fn, idle_fn, "_gpl")
-> > +
-> >  #ifdef CONFIG_PM
-> >  extern struct workqueue_struct *pm_wq;
-> >    
+>> 
+>>  Cheers,
+>>  -Paul
+>> 
+>> 
+>>  Paul Cercueil (8):
+>>    PM: core: Remove DEFINE_UNIVERSAL_DEV_PM_OPS() macro
+>>    PM: core: Remove static qualifier in DEFINE_SIMPLE_DEV_PM_OPS 
+>> macro
+>>    PM: core: Add EXPORT[_GPL]_SIMPLE_DEV_PM_OPS macros
+>>    PM: runtime: Add DEFINE_RUNTIME_DEV_PM_OPS() macro
+>>    PM: runtime: Add EXPORT[_GPL]_RUNTIME_DEV_PM_OPS macros
+>>    mmc: mxc: Make dev_pm_ops struct static
+>>    mmc: jz4740: Make dev_pm_ops struct static
+>>    iio: gyro: mpu3050: Use new PM macros
+>> 
+>>   drivers/iio/gyro/mpu3050-core.c | 13 +++-----
+>>   drivers/iio/gyro/mpu3050-i2c.c  |  2 +-
+>>   drivers/mmc/host/jz4740_mmc.c   |  4 +--
+>>   drivers/mmc/host/mxcmmc.c       |  2 +-
+>>   include/linux/pm.h              | 53 
+>> +++++++++++++++++++++++----------
+>>   include/linux/pm_runtime.h      | 21 +++++++++++++
+>>   6 files changed, 67 insertions(+), 28 deletions(-)
+>> 
 > 
+
 
