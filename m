@@ -2,104 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39413C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Jan 2022 22:33:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D5FCC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 05:20:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235557AbiADWdK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Jan 2022 17:33:10 -0500
-Received: from mail-oo1-f53.google.com ([209.85.161.53]:35609 "EHLO
-        mail-oo1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234182AbiADWdK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Jan 2022 17:33:10 -0500
-Received: by mail-oo1-f53.google.com with SMTP id e17-20020a4a8291000000b002c5ee0645e7so12045473oog.2;
-        Tue, 04 Jan 2022 14:33:09 -0800 (PST)
+        id S233390AbiAEFUt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Jan 2022 00:20:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58616 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233204AbiAEFUs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 00:20:48 -0500
+Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 848B1C061761;
+        Tue,  4 Jan 2022 21:20:48 -0800 (PST)
+Received: by mail-pl1-x633.google.com with SMTP id p14so28565546plf.3;
+        Tue, 04 Jan 2022 21:20:48 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id;
+        bh=3THBOt4+Je34kiFSuTjJhmdhvQDSlELOuWF7/HxfB9A=;
+        b=kIE8KPJ+tl2xGT8oZuFqjAI+U4S7G/qRYyd6v/XPFS+JHtpD4DU4mIYF8Bj8DocXzP
+         WscMGEgz/VQB9tdXumHAkPximFDohBL3CgnDSt45xF+OxtjDm+3rAxfNWJUygEriM5fz
+         jC74Q1TVCyZ+zYTkacAJt9rIG6oaD2JuKzTSkPYz5YAAE9aOkhMid/MWB0zdPx3FMf2J
+         plJxmPugXPk8cE6jEIOlAhg/3tBY16jrFO/umfY9M97UOcb5iW4qboY47b/5xp88r+q/
+         SOJltZZhLY6F6Bf0NUrfC20ZfLatMqI3vwM2N0ADdSl0QgNhoaUbCKc/7qWoPY1dOZ9Y
+         BwjQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=vyp0ZlymfUBJlUAVtIOpIrm/4K+CwyVLR4ySvnMgQQs=;
-        b=xkLlXcu3vHLbPNC+qowedWT1g8V6rcl+dpQ1BfeBj+ZSOWkS3fehu56c2BX71MiLKV
-         STV06ldvQ0aJ6E34DafArY1FPS7HfBTQJ/e/6kwhO7UAv6tp5McotGTZ3EChzZhXlGYl
-         rqHCn8G/Pc9NLZPaP6SRAYjkeTevlQlOR4rs4kDpSV5Yt6wfL1gjB2mXrF5aAFUT53HM
-         AzM9KTBYn+UYjOWBvIcYL20mTYML0fhy+W7xM7UHIBsSVGuQs1b2YYF7lQQrjGeddQEt
-         ePCJCG2klcDB3fgRSkfGF3gsohV1lvC2Z/o3E3/ggeclopTCpqGgbj7qlkiGaB2oZT5Y
-         QTWA==
-X-Gm-Message-State: AOAM532bPXLNCk0nXK+VkPVDyqOUShHYv9Yn5wnEOstGFjr6/xTdpOVk
-        TPNz94fpOiFiE3Pz8j1M9g==
-X-Google-Smtp-Source: ABdhPJzNpFrcI/rkXMcHtDq7VDwS73qIpjhsYqKdPBLPM3cpBiZjkTX+V0DOvCWOkIvFUhaA/aESKw==
-X-Received: by 2002:a4a:cf09:: with SMTP id l9mr31402830oos.89.1641335589318;
-        Tue, 04 Jan 2022 14:33:09 -0800 (PST)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id g12sm6073845otp.45.2022.01.04.14.33.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Jan 2022 14:33:08 -0800 (PST)
-Received: (nullmailer pid 1569633 invoked by uid 1000);
-        Tue, 04 Jan 2022 22:33:07 -0000
-Date:   Tue, 4 Jan 2022 16:33:07 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org
-Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: add cap-sdio-async-int flag
-Message-ID: <YdTLI/Nms4JiNutt@robh.at.kernel.org>
-References: <20211227083641.12538-1-axe.yang@mediatek.com>
- <20211227083641.12538-2-axe.yang@mediatek.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211227083641.12538-2-axe.yang@mediatek.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=3THBOt4+Je34kiFSuTjJhmdhvQDSlELOuWF7/HxfB9A=;
+        b=VOk3839Km+3aReNcg7Yy+mlvlg6+gWBFLwi3j/kFxoQl8CBpoZWTesEazFj5N6+3dn
+         s/31xYDYWD0HgtgA/ZoJbL4BKnMp6Wu34lITe9NSQnHEY+CdneI5XCGcaBDJjAQCaVWX
+         lSqe2E9ga5ou8Pq/MGew2ycUE1TgNQIoN2CUir61FdUkx0Msi1V/4aGFwOPvze0RgbGi
+         1RepklL306JLwLm2azyZaqbtXxwAXYPuzlnarx8FGS5OTqrvtDPnYc4SrBU44z6UwNwL
+         CF9o5xzyyHuamx3YTa8QSvgPoKCTX8jafK6tuZrQGrX2oYAor7TnXP5hNFREipfNB2dw
+         vFyw==
+X-Gm-Message-State: AOAM532crLt+MmE5ps1naCyJbYU3W+j95K/admQT4k/CkUs1YPm82Vvp
+        chkaHz42o3LiER8ctHhVTeg=
+X-Google-Smtp-Source: ABdhPJxe5SzsnmicQyhLO3YyQwLt+E/jjKTYfelDHVI63X+I9pYPvGHLY0U1NsJ+4sOZ+wKv65uoCA==
+X-Received: by 2002:a17:90b:3903:: with SMTP id ob3mr2188296pjb.178.1641360048084;
+        Tue, 04 Jan 2022 21:20:48 -0800 (PST)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id 6sm34427187pgc.90.2022.01.04.21.20.46
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 04 Jan 2022 21:20:47 -0800 (PST)
+From:   Tony Huang <tonyhuang.sunplus@gmail.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kerenl.org,
+        linux-kernel@vger.kernel.org, p.zabel@pengutronix.de
+Cc:     tony.huang@sunplus.com, wells.lu@sunplus.com,
+        Tony Huang <tonyhuang.sunplus@gmail.com>
+Subject: [PATCH v2 0/2] Add mmc driver for Sunplus SP7021 SOC
+Date:   Wed,  5 Jan 2022 13:20:55 +0800
+Message-Id: <cover.1641354285.git.tonyhuang.sunplus@gmail.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 27, 2021 at 04:36:39PM +0800, Axe Yang wrote:
-> Asynchronous interrupt is a mechanism that allow SDIO devices alarm
-> interrupt when host stop providing clock to card. Add a DT flag to
-> enable this feature if it is supported by SDIO card.
+This is a patch series for mmc driver for Sunplus SP7021 SOC.
 
-A card property should be in the card node. Is this not discoverable?
+Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
+many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
+etc.) into a single chip. It is designed for industrial control.
 
-> 
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index 25ac8e200970..7230421583c6 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -165,6 +165,11 @@ properties:
->      description:
->        eMMC hardware reset is supported
->  
-> +  cap-sdio-async-int:
+Refer to:
+https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
+https://tibbo.com/store/plus1.html
 
-Perhaps be consistent with the next property and use 'irq'.
+Tony Huang (2):
+  dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+  mmc: Add mmc driver for Sunplus SP7021
 
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      SDIO async interrupt is supported.
-> +
->    cap-sdio-irq:
->      $ref: /schemas/types.yaml#/definitions/flag
->      description:
-> -- 
-> 2.25.1
-> 
-> 
+ .../devicetree/bindings/mmc/sunplus-mmc.yaml       |   60 +
+ MAINTAINERS                                        |    6 +
+ drivers/mmc/host/sunplus_mmc.c                     | 1204 ++++++++++++++++++++
+ 3 files changed, 1270 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
+ create mode 100644 drivers/mmc/host/sunplus_mmc.c
+
+-- 
+2.7.4
+
