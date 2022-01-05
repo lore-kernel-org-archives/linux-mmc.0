@@ -2,252 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73C25C43219
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 16:39:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97C63C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 16:43:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241962AbiAEQjS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Jan 2022 11:39:18 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:56836 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231463AbiAEQjR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 11:39:17 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8F2B761807;
-        Wed,  5 Jan 2022 16:39:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EAF7EC36AF6;
-        Wed,  5 Jan 2022 16:39:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641400756;
-        bh=x1d4jr/+fx6ugz5GA/Jkyo7ittb6atO1cNRYg8TyyoU=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=Q4B8H4Kxi1NqUvGtv7KQQ1pHjjLQRWWpMjMcjBa+/9HWY9Qs0GSMCRP73R2G1q+Jr
-         eCfVA/y6l9v4B6WgcaFrWQ1R4yWwhK6IxV+tS4X2TiB1Zf2K6V2OGjqm8nB9tJyO5i
-         sfSjdJs6/y0jPBCifqHsQZiYNuBOv35Ro+2auUg+b8E1K7s2959IWujJBlyVz+90UG
-         ++d8U4ll4VE3MwszIsp5BOKuIBet75Ag1+/dOAPoe27YNLKJSJm28Tih3wHOSgjwPe
-         fVNvgmmYJfviX7Y1sJi02S1MFqJjAqfXxXPe0wmPUsjcpWabgPIY6L5SAioHAoRVu0
-         VisTHJ8Sv2VZA==
-Received: by mail-ed1-f50.google.com with SMTP id j6so164245810edw.12;
-        Wed, 05 Jan 2022 08:39:15 -0800 (PST)
-X-Gm-Message-State: AOAM533vxfaB9ntbOmdyb3cQk5OA687cM+yyhM4obvmX0FX+QgUGsWGv
-        0tufWhmDtRYlQwzXb4DrxS9FMGinak+uMLJxiQ==
-X-Google-Smtp-Source: ABdhPJx0xFMDNamZPUImxbepZLgOYZlha4IHe2F7Hkoj3uMjPftdotFuxc2dp8/E2n3dnwtfRNVsYRDwLcPhykr5Ej4=
-X-Received: by 2002:a17:906:5284:: with SMTP id c4mr42991464ejm.423.1641400754134;
- Wed, 05 Jan 2022 08:39:14 -0800 (PST)
+        id S241982AbiAEQni convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Jan 2022 11:43:38 -0500
+Received: from mail4.swissbit.com ([176.95.1.100]:40850 "EHLO
+        mail4.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235747AbiAEQni (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 11:43:38 -0500
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 40B6F1231A8;
+        Wed,  5 Jan 2022 17:43:36 +0100 (CET)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 3032D122E00;
+        Wed,  5 Jan 2022 17:43:36 +0100 (CET)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Wed,  5 Jan 2022 17:43:36 +0100 (CET)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.14; Wed, 5 Jan 2022
+ 17:43:35 +0100
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0986.014; Wed, 5 Jan 2022 17:43:35 +0100
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+CC:     Avri Altman <Avri.Altman@wdc.com>
+Subject: [PATCH] mmc: block: fix read single on recovery logic
+Thread-Topic: [PATCH] mmc: block: fix read single on recovery logic
+Thread-Index: AQHYAlL02lgrcWpb+EOcEaPCcQdJlw==
+Date:   Wed, 5 Jan 2022 16:43:35 +0000
+Message-ID: <5e5f2e45d0a14a55a8b7a9357846114b@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.154.1.4]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-References: <20211208003727.3596577-1-f.fainelli@gmail.com> <20211208003727.3596577-2-f.fainelli@gmail.com>
-In-Reply-To: <20211208003727.3596577-2-f.fainelli@gmail.com>
-From:   Rob Herring <robh+dt@kernel.org>
-Date:   Wed, 5 Jan 2022 10:39:02 -0600
-X-Gmail-Original-Message-ID: <CAL_Jsq+0E8CPeAegp0mV_qBTVcoLuywppRiOvCtHGp6_cOxH3Q@mail.gmail.com>
-Message-ID: <CAL_Jsq+0E8CPeAegp0mV_qBTVcoLuywppRiOvCtHGp6_cOxH3Q@mail.gmail.com>
-Subject: Re: [PATCH v3 01/15] dt-bindings: mmc: Convert Broadcom STB SDHCI
- binding to YAML
-To:     Florian Fainelli <f.fainelli@gmail.com>
-Cc:     devicetree@vger.kernel.org,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        "maintainer:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Gregory Fong <gregory.0xf0@gmail.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Markus Mayer <mmayer@broadcom.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Al Cooper <alcooperx@gmail.com>,
-        Doug Berger <opendmb@gmail.com>,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
-        <linux-mmc@vger.kernel.org>,
-        "open list:PWM SUBSYSTEM" <linux-pwm@vger.kernel.org>,
-        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
-        <linux-crypto@vger.kernel.org>,
-        "open list:REAL TIME CLOCK (RTC) SUBSYSTEM" 
-        <linux-rtc@vger.kernel.org>,
-        "open list:THERMAL" <linux-pm@vger.kernel.org>,
-        "open list:USB SUBSYSTEM" <linux-usb@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+X-TMASE-Version: DDEI-5.1-8.6.1018-26636.001
+X-TMASE-Result: 10--2.408700-10.000000
+X-TMASE-MatchedRID: GBgFBUqwD4F0/jNwxBmuZiyKzJY7d2nbunSyiaV8TbOUCwv1X+STMl2d
+        sxCRbuoB8FHDcHdF1rYVKH14MhLRlzdhl84+mwvCqg0gbtLVIa9uchTq5J5u9LytS1u1Z7z6a3A
+        6hcNu8nD0YXQzpNvE/P5nI8KIHQ65o1cymYpfRxUzL6MySEJ0VvmoZ6x4ZgCU+frbXg+Uc4XbJM
+        bTT9K/Ta3aC25avUua2v4PzRk1tzI5s4xK97Sm/8cAZFxtq8nGfrTt+hmA5bKTsyhw1KPqkJyoU
+        xokiBvh4vM1YF6AJbZ0uL0K7fOJNyAHAopEd76vRiK5VgwNkzoXKKE/gxfQuw/o6vK5qgcSrdc8
+        vz7URqK3qhmDdxKBFQ==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 29473343-c73e-473e-a9cf-b5bcb904cece-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Dec 7, 2021 at 6:37 PM Florian Fainelli <f.fainelli@gmail.com> wrote:
->
-> Convert the Broadcom STB SDHCI controller Device Tree binding to YAML.
->
-> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
-> ---
->  .../bindings/mmc/brcm,sdhci-brcmstb.txt       |  53 ----------
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 100 ++++++++++++++++++
->  2 files changed, 100 insertions(+), 53 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
->
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
-> deleted file mode 100644
-> index ae2074184528..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
-> +++ /dev/null
-> @@ -1,53 +0,0 @@
-> -* BROADCOM BRCMSTB/BMIPS SDHCI Controller
-> -
-> -This file documents differences between the core properties in mmc.txt
-> -and the properties used by the sdhci-brcmstb driver.
-> -
-> -NOTE: The driver disables all UHS speed modes by default and depends
-> -on Device Tree properties to enable them for SoC/Board combinations
-> -that support them.
-> -
-> -Required properties:
-> -- compatible: should be one of the following
-> -  - "brcm,bcm7425-sdhci"
-> -  - "brcm,bcm7445-sdhci"
-> -  - "brcm,bcm7216-sdhci"
-> -
-> -Refer to clocks/clock-bindings.txt for generic clock consumer properties.
-> -
-> -Example:
-> -
-> -       sdhci@84b0000 {
-> -               sd-uhs-sdr50;
-> -               sd-uhs-ddr50;
-> -               sd-uhs-sdr104;
-> -               sdhci,auto-cmd12;
-> -               compatible = "brcm,bcm7216-sdhci",
-> -                          "brcm,bcm7445-sdhci",
-> -                          "brcm,sdhci-brcmstb";
-> -               reg = <0x84b0000 0x260 0x84b0300 0x200>;
-> -               reg-names = "host", "cfg";
-> -               interrupts = <0x0 0x26 0x4>;
-> -               interrupt-names = "sdio0_0";
-> -               clocks = <&scmi_clk 245>;
-> -               clock-names = "sw_sdio";
-> -       };
-> -
-> -       sdhci@84b1000 {
-> -               mmc-ddr-1_8v;
-> -               mmc-hs200-1_8v;
-> -               mmc-hs400-1_8v;
-> -               mmc-hs400-enhanced-strobe;
-> -               supports-cqe;
-> -               non-removable;
-> -               bus-width = <0x8>;
-> -               compatible = "brcm,bcm7216-sdhci",
-> -                          "brcm,bcm7445-sdhci",
-> -                          "brcm,sdhci-brcmstb";
-> -               reg = <0x84b1000 0x260 0x84b1300 0x200>;
-> -               reg-names = "host", "cfg";
-> -               interrupts = <0x0 0x27 0x4>;
-> -               interrupt-names = "sdio1_0";
-> -               clocks = <&scmi_clk 245>;
-> -               clock-names = "sw_sdio";
-> -       };
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> new file mode 100644
-> index 000000000000..dccd5ad96981
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> @@ -0,0 +1,100 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/brcm,sdhci-brcmstb.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Broadcom BRCMSTB/BMIPS SDHCI Controller binding
-> +
-> +maintainers:
-> +  - Al Cooper <alcooperx@gmail.com>
-> +  - Florian Fainelli <f.fainelli@gmail.com>
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - items:
-> +          - enum:
-> +              - brcm,bcm7216-sdhci
-> +          - const: brcm,bcm7445-sdhci
-> +          - const: brcm,sdhci-brcmstb
-> +      - items:
-> +          - enum:
-> +              - brcm,bcm7445-sdhci
-> +          - const: brcm,sdhci-brcmstb
-> +      - items:
-> +          - enum:
-> +              - brcm,bcm7425-sdhci
-> +          - const: brcm,sdhci-brcmstb
-> +
-> +  reg:
-> +    minItems: 2
-> +
-> +  reg-names:
-> +    items:
-> +      - const: host
-> +      - const: cfg
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +    description:
-> +      handle to core clock for the sdhci controller.
-> +
-> +  clock-names:
-> +    items:
-> +      - const: sw_sdio
-> +
-> +  sdhci,auto-cmd12:
-> +    type: boolean
-> +    description: Specifies that controller should use auto CMD12
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    mmc@84b0000 {
-> +      sd-uhs-sdr50;
-> +      sd-uhs-ddr50;
-> +      sd-uhs-sdr104;
-> +      sdhci,auto-cmd12;
-> +      compatible = "brcm,bcm7216-sdhci",
-> +                   "brcm,bcm7445-sdhci",
-> +                   "brcm,sdhci-brcmstb";
-> +      reg = <0x84b0000 0x260>, <0x84b0300 0x200>;
-> +      reg-names = "host", "cfg";
-> +      interrupts = <0x0 0x26 0x4>;
-> +      interrupt-names = "sdio0_0";
+On reads with MMC_READ_MULTIPLE_BLOCK that fail,
+the recovery handler will use MMC_READ_SINGLE_BLOCK for
+each of the blocks, up to MMC_READ_SINGLE_RETRIES times each.
+The logic for this is fixed to never report unsuccessful reads
+as success to the block layer.
 
-Not documented.
+On command error with retries remaining, blk_update_request was
+called with whatever value error was set last to.
+In case it was last set to BLK_STS_OK (default), the read will be
+reported as success, even though there was no data read from the device.
+This could happen on a CRC mismatch for the response,
+a card rejecting the command (e.g. again due to a CRC mismatch).
+In case it was last set to BLK_STS_IOERR, the error is reported correctly,
+but no retries will be attempted.
 
-Rob
+The patch now will count both command and data errors as retries and
+send BLK_STS_IOERR if there are no retries remaining,
+or BLK_STS_OK if the single read was successful in the meantime.
+
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ drivers/mmc/core/block.c | 28 ++++++++++++++--------------
+ 1 file changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 90e1bcd03b46..d7d880ce0f8a 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1682,31 +1682,31 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_card *card = mq->card;
+ 	struct mmc_host *host = card->host;
+ 	blk_status_t error = BLK_STS_OK;
+-	int retries = 0;
+ 
+ 	do {
+ 		u32 status;
+ 		int err;
++		int retries = 0;
+ 
+-		mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
++		while (retries++ < MMC_READ_SINGLE_RETRIES) {
++			mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
+ 
+-		mmc_wait_for_req(host, mrq);
++			mmc_wait_for_req(host, mrq);
+ 
+-		err = mmc_send_status(card, &status);
+-		if (err)
+-			goto error_exit;
+-
+-		if (!mmc_host_is_spi(host) &&
+-		    !mmc_ready_for_data(status)) {
+-			err = mmc_blk_fix_state(card, req);
++			err = mmc_send_status(card, &status);
+ 			if (err)
+ 				goto error_exit;
+-		}
+ 
+-		if (mrq->cmd->error && retries++ < MMC_READ_SINGLE_RETRIES)
+-			continue;
++			if (!mmc_host_is_spi(host) &&
++			    !mmc_ready_for_data(status)) {
++				err = mmc_blk_fix_state(card, req);
++				if (err)
++					goto error_exit;
++			}
+ 
+-		retries = 0;
++			if (!mrq->cmd->error && !mrq->data->error)
++				break;
++		}
+ 
+ 		if (mrq->cmd->error ||
+ 		    mrq->data->error ||
+-- 
+2.34.1
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
