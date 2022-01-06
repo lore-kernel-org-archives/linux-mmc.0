@@ -2,159 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD69CC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 18:55:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6011C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 19:48:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243100AbiAFSzn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 13:55:43 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:46242 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243061AbiAFSzl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 13:55:41 -0500
+        id S243415AbiAFTsC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Jan 2022 14:48:02 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:34368 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S243403AbiAFTsB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 14:48:01 -0500
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id F22DA61DC2;
-        Thu,  6 Jan 2022 18:55:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68643C36AEB;
-        Thu,  6 Jan 2022 18:55:40 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 1BCAEB82390;
+        Thu,  6 Jan 2022 19:48:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 89D1BC36AE3;
+        Thu,  6 Jan 2022 19:47:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641495340;
-        bh=hUSBuncfdYSMo8JYah8e80uOyS1OIGFpsNc2vV+EOuo=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=OXdd6Z0116/9Sx5fcHmCnUWOjkYlE+rfSgQ3/vq1G42Pmvu6g/SJF6ELx2+huB91g
-         XoLKXn4Zc3hhOAkggWalI25A2HrPo+LLy+ZzK/ci6L9axJqtZOGneYNF/3tT4Vsuxv
-         rJ1HnD34j7hq4+z1XNHWUltg8nO7EULrVBqsbSlgTw4HL8n2tpnaEOEoQBUII5gGlE
-         uqj93jY/Pkk7BwhUE/CtCGmVBlHbsFBDcD4/SpKcTrzpe6j6WtsePgFm8qY5aCOOM6
-         uWxalChD6rY1aOhnzsJqcHl7AMFlUckyr3t70wGuYuF4wOkVlzoVMki3IB9vClXEIR
-         MiFwHRj8lOEKg==
-Received: by mail-ed1-f50.google.com with SMTP id q25so4451865edb.2;
-        Thu, 06 Jan 2022 10:55:40 -0800 (PST)
-X-Gm-Message-State: AOAM53134R4b6+evWffGty7j5HUqV1a5SaQprjBoSkgMmU1Z6SF2W+VS
-        icmQO4foSS4IpFHfxpJpXPwIcz7V57ZkdwIIxQ==
-X-Google-Smtp-Source: ABdhPJw9WxLjYgVOSm32VR2+V+3X6pv+18TJ2gujjOSgM+fLMn8xkbFnouhimP1Rqm6xeCbe28L+fy93zOCBGcPfc30=
-X-Received: by 2002:aa7:d5c7:: with SMTP id d7mr2854351eds.280.1641495338714;
- Thu, 06 Jan 2022 10:55:38 -0800 (PST)
+        s=k20201202; t=1641498478;
+        bh=qG4P24v3rmLtQVZ3+9ve8/eqf1rVrXsPHnG9nhgApC0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=KrJ0kcx0NyoXAwr90aY0RBzRaQre/3bXHridHFAgDUq9ZXQt7ScnYGEouRVmTHaCS
+         chWRZ2HIE+AOIQO7mR71i2psYYeUUVms2cUZs2oJ1auYHkguHNanzBbARYsTUyhfta
+         qRRATijRtCLfxbK6gskf7D0HWlsfyYRc+5jcyFxX+DdRniNa/e8RhFroTngeOFt1yE
+         nwD1YIbg3DWXjc2+9wKbSmwQS2Q+a3HUqUjGf7qdMunErvKGTG0GBN3Qye2/yY5IKF
+         EPm4u7ZWGRbhuCEDngy3AOSrHenY7DbYOLUXOSjzSjBZJNSd+XQUNCEwmBTrfL7/46
+         fQQbrcBPdiiIw==
+Date:   Thu, 6 Jan 2022 11:47:57 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Gaurav Kashyap <quic_gaurkash@quicinc.com>
+Cc:     linux-scsi@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, thara.gopinath@linaro.org,
+        quic_neersoni@quicinc.com, dineshg@quicinc.com
+Subject: Re: [PATCH 00/10] Add wrapped key support for Qualcomm ICE
+Message-ID: <YddHbRx2UGeAOhji@sol.localdomain>
+References: <20211206225725.77512-1-quic_gaurkash@quicinc.com>
 MIME-Version: 1.0
-References: <cover.1641354285.git.tonyhuang.sunplus@gmail.com> <1d946b61174adf4216c79728d56dcc1eb8a86b38.1641354285.git.tonyhuang.sunplus@gmail.com>
-In-Reply-To: <1d946b61174adf4216c79728d56dcc1eb8a86b38.1641354285.git.tonyhuang.sunplus@gmail.com>
-From:   Rob Herring <robh+dt@kernel.org>
-Date:   Thu, 6 Jan 2022 12:55:25 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqLtP+2BaHUxTpYUBtCY13UHY8hs677PPBtZD20Vdwq65g@mail.gmail.com>
-Message-ID: <CAL_JsqLtP+2BaHUxTpYUBtCY13UHY8hs677PPBtZD20Vdwq65g@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
-To:     Tony Huang <tonyhuang.sunplus@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        =?UTF-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>,
-        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211206225725.77512-1-quic_gaurkash@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 4, 2022 at 11:20 PM Tony Huang <tonyhuang.sunplus@gmail.com> wrote:
->
-> Add mmc yaml file for Sunplus SP7021
+Hi Gaurav,
 
-There's a typo in the DT list address. Please resend so checks run.
-Looks fine otherwise.
+On Mon, Dec 06, 2021 at 02:57:15PM -0800, Gaurav Kashyap wrote:
+> Testing:
+> Test platform: SM8350 HDK/MTP
+> Engineering trustzone image (based on sm8350) is required to test
+> this feature. This is because of version changes of HWKM.
+> HWKM version 2 and moving forward has a lot of restrictions on the
+> key management due to which the launched SM8350 solution (based on v1)
+> cannot be used and some modifications are required in trustzone.
 
->
-> Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
-> ---
-> Changes in v2:
->  - Modify maintainers e-mail address.
->
->  .../devicetree/bindings/mmc/sunplus-mmc.yaml       | 60 ++++++++++++++++++++++
->  MAINTAINERS                                        |  5 ++
->  2 files changed, 65 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml b/Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
-> new file mode 100644
-> index 0000000..1c39af2
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
-> @@ -0,0 +1,60 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +# Copyright (C) Sunplus Ltd. Co. 2021
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/sunplus-mmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: sunplus MMC controller
-> +
-> +allOf:
-> +  - $ref: "mmc-controller.yaml"
-> +
-> +maintainers:
-> +  - Tony Huang <tonyhuang.sunplus@gmail.com>
-> +
-> +properties:
-> +  compatible:
-> +    const: sunplus,sp7021-emmc
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    minItems: 1
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - resets
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    mmc0: mmc@9c003b00 {
-> +        compatible = "sunplus,sp7021-emmc";
-> +        reg = <0x9c003b00 0x180>;
-> +        interrupts = <20 IRQ_TYPE_LEVEL_HIGH>;
-> +        clocks = <&clkc 0x4e>;
-> +        resets = <&rstc 0x3e>;
-> +        bus-width = <8>;
-> +        max-frequency = <52000000>;
-> +        non-removable;
-> +        disable-wp;
-> +        cap-mmc-highspeed;
-> +        mmc-ddr-3_3v;
-> +        no-sdio;
-> +        no-sd;
-> +    };
-> +...
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index fb18ce7..01ed57a 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -18242,6 +18242,11 @@ L:     netdev@vger.kernel.org
->  S:     Maintained
->  F:     drivers/net/ethernet/dlink/sundance.c
->
-> +SUNPLUS MMC DRIVER
-> +M:     Tony Huang <tonyhuang.sunplus@gmail.com>
-> +S:     Maintained
-> +F:     Documentation/devicetree/bindings/mmcc/sunplu-mmc.yaml
-> +
->  SUPERH
->  M:     Yoshinori Sato <ysato@users.sourceforge.jp>
->  M:     Rich Felker <dalias@libc.org>
-> --
-> 2.7.4
->
+I've been trying to test this patchset on a SM8350 HDK using the TrustZone image
+you provided, but it's not completely working yet.
+
+This is the kernel branch I'm using:
+https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/log/?h=wip-wrapped-keys.
+It has my v4 patchset with your patchset rebased on top of it, some qcom_scm.c
+fixes I had to make (see below), and some extra logging messages.
+
+This is how I'm building and booting a kernel on the board:
+https://github.com/ebiggers/fscryptctl/blob/wip-wrapped-keys/scripts/sm8350-buildkernel.sh
+
+And this is the test script I'm running:
+https://github.com/ebiggers/fscryptctl/blob/wip-wrapped-keys/scripts/wrappedkey-test.sh.
+It imports or generates a hardware-wrapped key, then tries to set up a directory
+on an ext4 filesystem that is encrypted with that key.   This uses new
+'fscryptctl' commands to access the new blk-crypto ioctls; the version of
+'fscryptctl' on the branch the scripts are on has all the needed changes.
+
+QCOM_SCM_ES_IMPORT_ICE_KEY, QCOM_SCM_ES_GENERATE_ICE_KEY,
+QCOM_SCM_ES_PREPARE_ICE_KEY, all seem to work.  However,
+QCOM_SCM_ES_DERIVE_SW_SECRET doesn't work; it always returns -EINVAL.
+
+For example:
+
+Importing hardware-wrapped key
+[  187.606109] blk-crypto: entering BLKCRYPTOCREATEKEY
+[  187.611648] calling QCOM_SCM_ES_IMPORT_ICE_KEY; raw_key=5858585858585858585858585858585858585858585858585858585858585858
+[  187.628180] QCOM_SCM_ES_IMPORT_ICE_KEY succeeded; longterm_wrapped_key=fab51aa07fb6c2bf2fea60a8120e8d35a9e53865b594e0fb6279e7951a34864591f1c1c4e26f9421039377c1ac311ff9241a0152030000000000000000000000
+[  187.646433] blk-crypto: exiting BLKCRYPTOCREATEKEY; ret=0
+Preparing hardware-wrapped key
+[  187.653129] blk-crypto: entering BLKCRYPTOPREPAREKEY
+[  187.660356] calling QCOM_SCM_ES_PREPARE_ICE_KEY; longterm_wrapped_key=fab51aa07fb6c2bf2fea60a8120e8d35a9e53865b594e0fb6279e7951a34864591f1c1c4e26f9421039377c1ac311ff9241a0152030000000000000000000000
+[  187.680420] QCOM_SCM_ES_PREPARE_ICE_KEY succeeded; ephemeral_wrapped_key=1fbf5d501854858d6faaf52c9d22bebc576012e40485ba75e7d19e88f74b3400eb1a8836e28232939e990df6007659b1241a0152030000000000000000000000
+[  187.698791] blk-crypto: exiting BLKCRYPTOPREPAREKEY; ret=0
+Adding hardware-wrapped key
+[  187.705515] calling blk_crypto_derive_sw_secret(); wrapped_key_size=68
+[  187.714075] in qti_ice_derive_sw_secret()
+[  187.718212] calling qti_ice_hwkm_init()
+[  187.722157] calling qti_ice_hwkm_init_sequence(version=1)
+[  187.727715] setting standard mode
+[  187.731134] checking BIST status
+[  187.734464] configuring ICE registers
+[  187.738230] disabling CRC check
+[  187.741479] setting RSP_FIFO_FULL bit
+[  187.745247] calling qcom_scm_derive_sw_secret()
+[  187.749920] calling QCOM_SCM_ES_DERIVE_SW_SECRET; wrapped_key=1fbf5d501854858d6faaf52c9d22bebc576012e40485ba75e7d19e88f74b3400eb1a8836e28232939e990df6007659b1241a0152030000000000000000000000, secret_size=32
+[  187.768834] QCOM_SCM_ES_DERIVE_SW_SECRET failed with error -22
+[  187.774838] blk_crypto_derive_sw_secret() returned -22
+error: adding key to /mnt: Invalid argument
+
+
+You can see that the wrapped_key being passed to QCOM_SCM_ES_DERIVE_SW_SECRET
+matches the ephemeral_wrapped_key that was returned earlier by
+QCOM_SCM_ES_PREPARE_ICE_KEY, and that secret_size is 32.  So the arguments are
+as expected.  However, QCOM_SCM_ES_DERIVE_SW_SECRET still fails.
+
+This still occurs if QCOM_SCM_ES_GENERATE_ICE_KEY is used instead of
+QCOM_SCM_ES_IMPORT_ICE_KEY.
+
+Have you tested that QCOM_SCM_ES_DERIVE_SW_SECRET is working properly?
+
+For reference, these are the fixes I had to apply to qcom_scm.c to get things
+working until that point.  This included fixing the direction of the first
+arguments to the SCM calls, and fixing the return values.  Note, I also tested
+leaving QCOM_SCM_ES_DERIVE_SW_SECRET using QCOM_SCM_RO instead of QCOM_SCM_RW,
+but the result was still the same --- it still returned -EINVAL.
+
+diff --git a/drivers/firmware/qcom_scm.c b/drivers/firmware/qcom_scm.c
+index d57f52015640..002b57a1473d 100644
+--- a/drivers/firmware/qcom_scm.c
++++ b/drivers/firmware/qcom_scm.c
+@@ -1087,7 +1087,7 @@ int qcom_scm_derive_sw_secret(const u8 *wrapped_key, u32 wrapped_key_size,
+ 	struct qcom_scm_desc desc = {
+ 		.svc = QCOM_SCM_SVC_ES,
+ 		.cmd =  QCOM_SCM_ES_DERIVE_SW_SECRET,
+-		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RO,
++		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
+ 					 QCOM_SCM_VAL, QCOM_SCM_RW,
+ 					 QCOM_SCM_VAL),
+ 		.args[1] = wrapped_key_size,
+@@ -1148,7 +1148,7 @@ EXPORT_SYMBOL(qcom_scm_derive_sw_secret);
+  * This SCM calls adds support for the generate key IOCTL to interface
+  * with the secure environment to generate and return a wrapped key..
+  *
+- * Return: 0 on success; -errno on failure.
++ * Return: size of the resulting key on success; -errno on failure.
+  */
+ int qcom_scm_generate_ice_key(u8 *longterm_wrapped_key,
+ 			    u32 longterm_wrapped_key_size)
+@@ -1188,7 +1188,7 @@ int qcom_scm_generate_ice_key(u8 *longterm_wrapped_key,
+ 	dma_free_coherent(__scm->dev, longterm_wrapped_key_size,
+ 			  longterm_wrapped_keybuf, longterm_wrapped_key_phys);
+ 
+-	return ret;
++	return ret ?: longterm_wrapped_key_size;
+ }
+ EXPORT_SYMBOL(qcom_scm_generate_ice_key);
+ 
+@@ -1209,7 +1209,7 @@ EXPORT_SYMBOL(qcom_scm_generate_ice_key);
+  * with the secure environment to rewrap the wrapped key with an
+  * ephemeral wrapping key.
+  *
+- * Return: 0 on success; -errno on failure.
++ * Return: size of the resulting key on success; -errno on failure.
+  */
+ int qcom_scm_prepare_ice_key(const u8 *longterm_wrapped_key,
+ 			     u32 longterm_wrapped_key_size,
+@@ -1219,7 +1219,7 @@ int qcom_scm_prepare_ice_key(const u8 *longterm_wrapped_key,
+ 	struct qcom_scm_desc desc = {
+ 		.svc = QCOM_SCM_SVC_ES,
+ 		.cmd =  QCOM_SCM_ES_PREPARE_ICE_KEY,
+-		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RO,
++		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
+ 					 QCOM_SCM_VAL, QCOM_SCM_RW,
+ 					 QCOM_SCM_VAL),
+ 		.args[1] = longterm_wrapped_key_size,
+@@ -1270,7 +1270,7 @@ int qcom_scm_prepare_ice_key(const u8 *longterm_wrapped_key,
+ 	dma_free_coherent(__scm->dev, longterm_wrapped_key_size,
+ 			  longterm_wrapped_keybuf, longterm_wrapped_key_phys);
+ 
+-	return ret;
++	return ret ?: ephemeral_wrapped_key_size;
+ }
+ EXPORT_SYMBOL(qcom_scm_prepare_ice_key);
+ 
+@@ -1289,7 +1289,7 @@ EXPORT_SYMBOL(qcom_scm_prepare_ice_key);
+  * the secure environment to import a raw key and generate a longterm
+  * wrapped key.
+  *
+- * Return: 0 on success; -errno on failure.
++ * Return: size of the resulting key on success; -errno on failure.
+  */
+ int qcom_scm_import_ice_key(const u8 *imported_key, u32 imported_key_size,
+ 			    u8 *longterm_wrapped_key,
+@@ -1298,7 +1298,7 @@ int qcom_scm_import_ice_key(const u8 *imported_key, u32 imported_key_size,
+ 	struct qcom_scm_desc desc = {
+ 		.svc = QCOM_SCM_SVC_ES,
+ 		.cmd =  QCOM_SCM_ES_IMPORT_ICE_KEY,
+-		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RO,
++		.arginfo = QCOM_SCM_ARGS(4, QCOM_SCM_RW,
+ 					 QCOM_SCM_VAL, QCOM_SCM_RW,
+ 					 QCOM_SCM_VAL),
+ 		.args[1] = imported_key_size,
+@@ -1344,7 +1344,7 @@ int qcom_scm_import_ice_key(const u8 *imported_key, u32 imported_key_size,
+ 	dma_free_coherent(__scm->dev, imported_key_size, imported_keybuf,
+ 			  imported_key_phys);
+ 
+-	return ret;
++	return ret ?: longterm_wrapped_key_size;
+ }
+ EXPORT_SYMBOL(qcom_scm_import_ice_key);
