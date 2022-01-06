@@ -2,278 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F7F1C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 18:20:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8028AC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 18:25:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242112AbiAFSUR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 13:20:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53330 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240698AbiAFSUQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 13:20:16 -0500
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B1C9C061245;
-        Thu,  6 Jan 2022 10:20:16 -0800 (PST)
-Received: by mail-ed1-x531.google.com with SMTP id u25so12807308edf.1;
-        Thu, 06 Jan 2022 10:20:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=aGef8Iic5mds3qfFclDmLiPy9AA+HpUFywGh5Pl0aL8=;
-        b=qVing2t2LMVUpjVzUiTLgC3uw+yYdc3FWIsHTfG+tVEIAhRxnTXbR3troRhME2VO81
-         H3udCejkhMQ9rlOSE82idRs+8MjETTSkuV/6gSl9FXLCILLO0s+/STuIm6FkqF1zuhWy
-         Z+3w3ZoMwWKqxtSpWHjg9yV8jxUXbpWcCcjQlOwo6xDrSru6pUJA0vSssBpQ8QWBovKc
-         Dx1KWJjI4F2QWxHO82wbiW5w5Puqf0XCSCYLgTMhso/i5kO24oZETgV+gkMVPriZW0ov
-         tUY3A6exZziohWYAH8HyDway5zIOC2kt/5qrkIVslxqvWmGmGtL/uJdnIF4z0edsj4Hj
-         fsaA==
+        id S242816AbiAFSZh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Jan 2022 13:25:37 -0500
+Received: from mail-oo1-f52.google.com ([209.85.161.52]:36513 "EHLO
+        mail-oo1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242786AbiAFSZf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 13:25:35 -0500
+Received: by mail-oo1-f52.google.com with SMTP id k15-20020a4a850f000000b002dc3cdb0256so448146ooh.3;
+        Thu, 06 Jan 2022 10:25:35 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=aGef8Iic5mds3qfFclDmLiPy9AA+HpUFywGh5Pl0aL8=;
-        b=STT+YIcK29lJhpeFN5z4Pkwzv/P7mwHl4a9Q4TAQcDqcvUsyPrCfWahfUKtjrrS92u
-         Dgtnkek0FQop8UUmlTJ6KtDmn+MsQr8vPuqdJgWaTn2vt7OXHlpIZY63pTpvnpj+ZP9l
-         ApzOhD1luWSxgDBuhjF36mwkvBujqbFz7rh1ZRGZppp6/Bo4WI1ET/OXvQSRZQe8uB7S
-         rnmusJEMk4py5Rwvnq7OjSoyq4G6y6BJzg+LRHTwBvw/WkudItTErutS5RiBP+H6g2wo
-         NFKBXWEvm+VyNeFLHku+w82+hPavFZvktFaxDFkGQpZnmrxEFt1MPvSMwohJzJOQAbt7
-         NiRQ==
-X-Gm-Message-State: AOAM531W/G2MJUbCKpGVwPRd55sjJqIuwa2Wu5CFeDsAwTZP/tW+ec1O
-        gfrESIb+OIs4idLOizRIXBnsxvKOg+C2KGOGdeo=
-X-Google-Smtp-Source: ABdhPJwvFPlF47cspLoKBSLFdSJQDE0uFLqstbjcjJUgwuNLFfM5hdQrBxBDWpSHhqc5ctiCOiN25kHA1AEWgJXHpfU=
-X-Received: by 2002:a05:6402:4301:: with SMTP id m1mr57412885edc.125.1641493215125;
- Thu, 06 Jan 2022 10:20:15 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=fiswExMz6XFGwtuBLNXXr8Y61t2eLKYq11RSjSYGFgI=;
+        b=Gd/H38f/3UqJXiwoHcBsgrqqq4zm3keBeAlaXw8gmXASHW8N49b87od4eO4LrjTNlx
+         PrtNGclheQ6J7+VeNh36PyjFXWzjq5GDE+9+w3Rrs1OB7LlOLELpanSa48JHKDmn6PiH
+         Oxqk1zeKV+3Pd7rIw8/6vdmyIXWQgwIBsxe+0VScAUOFam2v29eKGvoiYuqorx4aZaHd
+         AfR7mkaqnIZc1Nfi0ykkaN5jEvX73OJ2NRWM94SvwxOj1OUsPitjH77QqUKEc+PVd2ZY
+         Ni/T6tMPnTwsSKhDw5U2OUfqTzdu8u+kuBIJdrlU1DNB4yveoKb/XDG2+3U+ewVl3UCC
+         wvLQ==
+X-Gm-Message-State: AOAM5300oVzo6msdNLkuKcisIhTdWrPFlma0oheymU4Azs9gOGNbnhzK
+        CFaPS68ei7Ly+aa1RaPQYQ==
+X-Google-Smtp-Source: ABdhPJwB9iT6Wzc4bAEqj5n+FhrYY/F4LxNj/hGK1fvAB2ejuvOQ7IDy/GkuKITHAGLet0tK5Citsw==
+X-Received: by 2002:a4a:7c85:: with SMTP id v127mr38877986ooc.79.1641493534925;
+        Thu, 06 Jan 2022 10:25:34 -0800 (PST)
+Received: from xps15.herring.priv (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.googlemail.com with ESMTPSA id r13sm484949oth.21.2022.01.06.10.25.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 06 Jan 2022 10:25:34 -0800 (PST)
+From:   Rob Herring <robh@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: arm,pl18x: Make each example a separate entry
+Date:   Thu,  6 Jan 2022 12:25:14 -0600
+Message-Id: <20220106182518.1435497-6-robh@kernel.org>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
-References: <20220106174803.1773876-1-gsomlo@gmail.com> <20220106174803.1773876-4-gsomlo@gmail.com>
-In-Reply-To: <20220106174803.1773876-4-gsomlo@gmail.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Thu, 6 Jan 2022 20:19:39 +0200
-Message-ID: <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com>
-Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     Gabriel Somlo <gsomlo@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        Randy Dunlap <rdunlap@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 6, 2022 at 7:48 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
->
-> LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> that targets FPGAs. LiteSDCard is a small footprint, configurable
-> SDCard core commonly used in LiteX designs.
->
-> The driver was first written in May 2020 and has been maintained
-> cooperatively by the LiteX community. Thanks to all contributors!
+Each independent example should be a separate entry. This and dropping
+'interrupt-parent' allows for 'interrupts' to have different cell sizes.
 
-> +config MMC_LITEX
-> +       tristate "LiteX MMC Host Controller support"
-> +       depends on OF
-> +       depends on PPC_MICROWATT || LITEX || COMPILE_TEST
-> +       help
-> +         This selects support for the MMC Host Controller found in LiteX SoCs.
-> +
-> +         If unsure, say N.
+Signed-off-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-What would be the module name if built as a module?
-
-...
-
-> +/*
-> + * LiteX LiteSDCard driver
-> + *
-> + * Copyright (C) 2019-2020 Antmicro <contact@antmicro.com>
-> + * Copyright (C) 2019-2020 Kamil Rakoczy <krakoczy@antmicro.com>
-> + * Copyright (C) 2019-2020 Maciej Dudek <mdudek@internships.antmicro.com>
-> + * Copyright (C) 2020 Paul Mackerras <paulus@ozlabs.org>
-> + * Copyright (C) 2020-2021 Gabriel Somlo <gsomlo@gmail.com>
-
-> + *
-
-Redundant blank line.
-
-> + */
-
-...
-
-> +#include <linux/module.h>
-> +#include <linux/litex.h>
-> +#include <linux/of.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/clk.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/iopoll.h>
-> +#include <linux/mmc/sd.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/delay.h>
-> +#include <linux/dma-mapping.h>
-
-Perhaps keep it sorted?
-It will easily show, for example, absence of bits.h.
-
-...
-
-> +       ret = readx_poll_timeout(litex_read8, reg, evt, (evt & SD_BIT_DONE),
-
-Too many parentheses.
-
-> +                                SD_SLEEP_US, SD_TIMEOUT_US);
-
-> +       if (ret || (evt & SD_BIT_TIMEOUT))
-
-Redundant second condition. If you want +1 iteration, increase timeout.
-
-> +               return -ETIMEDOUT;
-
-Why shadowed error code?
-
-...
-
-> +       pr_err("%s: unknown error evt=%x\n", __func__, evt);
-
-Use dev_err().
-
-...
-
-> +       /* Wait for an interrupt if we have an interrupt and either there is
-> +        * data to be transferred, or if the card can report busy via DAT0.
-> +        */
-
-This comment style is for the net subsystem, for others we use
-/*
- * Starting here...
- */
-
-Fix it everywhere in your code.
-
-...
-
-> +               reg = host->sdcore + LITEX_CORE_CMDRSP;
-> +               for (i = 0; i < 4; i++) {
-> +                       host->resp[i] = litex_read32(reg);
-> +                       reg += sizeof(u32);
-> +               }
-
-Isn't it memcpy_fromio()?
-
-...
-
-> +       if (!host->app_cmd && cmd == SD_SEND_RELATIVE_ADDR)
-> +               host->rca = (host->resp[3] >> 16) & 0xffff;
-
-Are you expecting a 32-bit value to be bigger than 2^32-1?
-
-...
-
-> +       div = min(max(div, 2U), 256U);
-
-clamp_t() / clamp_val() ?
-
-...
-
-> +       ret = platform_get_irq_optional(host->dev, 0);
-> +       if (ret == -ENXIO || ret == 0) {
-> +               dev_warn(dev, "Failed to get IRQ, using polling\n");
-> +               goto use_polling;
-> +       }
-> +       if (ret < 0)
-> +               return ret; /* e.g., deferred probe */
-> +       host->irq = ret;
-
-Can it be rather written as
-
-       ret = platform_get_irq_optional(host->dev, 0);
-       if (ret < 0 && ret != -ENXIO)
-         return ret;
-       if (ret > 0)
-         host->irq = ret;
-       else {
-               dev_warn(dev, "Failed to get IRQ, using polling\n");
-               goto use_polling;
-       }
-
-?
-
-...
-
-> +use_polling:
-> +       host->mmc->caps |= MMC_CAP_NEEDS_POLL;
-
-> +       host->irq = 0;
-
-Isn't it 0 by default?
-
-...
-
-> +       mmc = mmc_alloc_host(sizeof(struct litex_mmc_host), &pdev->dev);
-
-> +       /* NOTE: defaults to max_[req,seg]_size=PAGE_SIZE, max_blk_size=512,
-> +        * and max_blk_count accordingly set to 8;
-> +        * If for some reason we need to modify max_blk_count, we must also
-> +        * re-calculate `max_[req,seg]_size = max_blk_size * max_blk_count;`
-> +        */
-
-Can you rather not split code by this comment. It makes sense to be above, no?
-
-> +       if (!mmc)
-> +               return -ENOMEM;
-
-...
-
-> +       /* set default sd_clk frequency range based on empirical observations
-> +        * of LiteSDCard gateware behavior on typical SDCard media
-> +        */
-
-Start sentences from capital letters and keep proper style of
-multi-line comments.
-
-...
-
-> +err:
-> +       mmc_free_host(mmc);
-> +       return ret;
-
-This...
-
-> +}
-> +
-> +static int litex_mmc_remove(struct platform_device *pdev)
-> +{
-> +       struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
-> +
-> +       if (host->irq > 0)
-> +               free_irq(host->irq, host->mmc);
-> +       mmc_remove_host(host->mmc);
-> +       mmc_free_host(host->mmc);
-
-...and this have ordering issues. You mixed devm_*() with non-devm_*()
-APIs in the wrong way.
-
-Also, I haven't noticed the free_irq() call in the error path of
-->probe(). Isn't it missed?
-
-> +       return 0;
-> +}
-
-...
-
-> +               .of_match_table = of_match_ptr(litex_match),
-
-Wrong usage of of_match_ptr().
-
+diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+index 47595cb483be..2a64cffbe6ad 100644
+--- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
++++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+@@ -167,6 +167,9 @@ examples:
+       clock-names = "mclk", "apb_pclk";
+     };
+ 
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++
+     mmc@80126000 {
+       compatible = "arm,pl18x", "arm,primecell";
+       reg = <0x80126000 0x1000>;
+@@ -188,12 +191,12 @@ examples:
+       vqmmc-supply = <&vmmci>;
+     };
+ 
++  - |
+     mmc@101f6000 {
+       compatible = "arm,pl18x", "arm,primecell";
+       reg = <0x101f6000 0x1000>;
+       clocks = <&sdiclk>, <&pclksdi>;
+       clock-names = "mclk", "apb_pclk";
+-      interrupt-parent = <&vica>;
+       interrupts = <22>;
+       max-frequency = <400000>;
+       bus-width = <4>;
+@@ -208,6 +211,7 @@ examples:
+       vmmc-supply = <&vmmc_regulator>;
+     };
+ 
++  - |
+     mmc@52007000 {
+       compatible = "arm,pl18x", "arm,primecell";
+       arm,primecell-periphid = <0x10153180>;
 -- 
-With Best Regards,
-Andy Shevchenko
+2.32.0
+
