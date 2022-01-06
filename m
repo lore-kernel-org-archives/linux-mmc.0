@@ -2,62 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 706D6C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 00:34:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14FFFC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 02:17:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343826AbiAFAeR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Jan 2022 19:34:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39678 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343830AbiAFAeN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 19:34:13 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70380C061245;
-        Wed,  5 Jan 2022 16:34:12 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 10D216193C;
-        Thu,  6 Jan 2022 00:34:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66E81C36AE9;
-        Thu,  6 Jan 2022 00:34:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641429251;
-        bh=jMICUvfWqDl6yU+e1z03F+e1bc2tGxcy1cr8nmpYT9s=;
-        h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
-        b=V7sw9/ItzULOjdm7rsvyOr+0aqNy0gBiS2gW2BvNiAbEwpXBTUJc5gFgRVeLTdYfF
-         GaTJ/J1S4cagCkxUS8Y8X6UWWLZ+td6NUyTHHbdhyB3E11GsFQjpHpe61kW8ji+3iY
-         eFVqSFfIOkR1VgrnE8jfx9/sRR3CgZepKrTj03RxgslpyLGzHYeWz7IurSx2h4Pr0e
-         7G7g8aeFqqRuoXhGTaNflOkBjoUCs36DB2z0Dg4675TGIW7KvUnCvOd166zAnpeRB7
-         UZbaJnqWRp9nGAmyjf2zQAgLjNBgejNCci4qCj3LM/YbLc63ojF7ahB2bS4cyBAS8T
-         WEQvDRANotLKA==
-Content-Type: text/plain; charset="utf-8"
+        id S1344649AbiAFCRJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Jan 2022 21:17:09 -0500
+Received: from smtp25.cstnet.cn ([159.226.251.25]:58116 "EHLO cstnet.cn"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1344590AbiAFCRG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 5 Jan 2022 21:17:06 -0500
+Received: from localhost.localdomain (unknown [124.16.138.126])
+        by APP-05 (Coremail) with SMTP id zQCowADn7AAHUdZhnw2wBQ--.50564S2;
+        Thu, 06 Jan 2022 10:16:39 +0800 (CST)
+From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Jiasheng Jiang <jiasheng@iscas.ac.cn>
+Subject: [PATCH] mmc: sdhci-of-esdhc: Check for error num after setting mask
+Date:   Thu,  6 Jan 2022 10:16:38 +0800
+Message-Id: <20220106021638.2527426-1-jiasheng@iscas.ac.cn>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <20211227133558.135185-2-krzysztof.kozlowski@canonical.com>
-References: <20211227133131.134369-1-krzysztof.kozlowski@canonical.com> <20211227133558.135185-2-krzysztof.kozlowski@canonical.com>
-Subject: Re: [PATCH 08/19] dt-bindings: clock: intel,stratix10: convert to dtschema
-From:   Stephen Boyd <sboyd@kernel.org>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-To:     Dinh Nguyen <dinguyen@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Date:   Wed, 05 Jan 2022 16:34:10 -0800
-User-Agent: alot/0.9.1
-Message-Id: <20220106003411.66E81C36AE9@smtp.kernel.org>
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID: zQCowADn7AAHUdZhnw2wBQ--.50564S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7uw4UJr1ktFWxCF1rJFWxtFb_yoW8Cr13pa
+        yrWFyFkrWfXr1rWrZ3Za1UZF1UKr48trW5K3y7Wan2vwn8JryjkF1xCFyYvF1DJFyrGw4S
+        vFW2yF15C3y8J3DanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDU0xBIdaVrnRJUUUkC14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+        rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+        1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
+        6F4UM28EF7xvwVC2z280aVAFwI0_Gr1j6F4UJwA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gr
+        1j6F4UJwAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv
+        7VC0I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r
+        1j6r4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwCY02Avz4vE14v_
+        Gr1l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxV
+        WUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1DMIIYrxkI
+        7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r
+        1j6r4UMIIF0xvE42xK8VAvwI8IcIk0rVWrJr0_WFyUJwCI42IY6I8E87Iv67AKxVWUJVW8
+        JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfU5vtCUU
+        UUU
+X-Originating-IP: [124.16.138.126]
+X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Krzysztof Kozlowski (2021-12-27 05:35:47)
-> Convert the Intel Stratix 10 clock controller bindings to DT schema forma=
-t.
->=20
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-> ---
+Because of the possible failure of the dma_supported(), the
+dma_set_mask_and_coherent() may return error num.
+Therefore, it should be better to check it and return the error if
+fails.
+Also, the caller, esdhc_of_resume(), should deal with the return value.
+Moreover, as the sdhci_esdhc_driver has not been used, it does not need to
+be considered.
 
-Acked-by: Stephen Boyd <sboyd@kernel.org>
+Fixes: 5552d7ad596c ("mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips")
+Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index a593b1fbd69e..bedfc7bb5174 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -524,12 +524,16 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+ 
+ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ {
++	int ret;
+ 	u32 value;
+ 	struct device *dev = mmc_dev(host->mmc);
+ 
+ 	if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
+-	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
+-		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
++	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc")) {
++		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
++		if (ret)
++			return ret;
++	}
+ 
+ 	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+ 
+@@ -1245,7 +1249,10 @@ static int esdhc_of_resume(struct device *dev)
+ 
+ 	if (ret == 0) {
+ 		/* Isn't this already done by sdhci_resume_host() ? --rmk */
+-		esdhc_of_enable_dma(host);
++		ret = esdhc_of_enable_dma(host);
++		if (ret)
++			return ret;
++
+ 		sdhci_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
+ 	}
+ 	return ret;
+-- 
+2.25.1
+
