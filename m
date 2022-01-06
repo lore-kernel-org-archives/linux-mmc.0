@@ -2,109 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E709AC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Jan 2022 18:31:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 706D6C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 00:34:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243004AbiAESbl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Jan 2022 13:31:41 -0500
-Received: from aposti.net ([89.234.176.197]:41922 "EHLO aposti.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S243023AbiAESbR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 5 Jan 2022 13:31:17 -0500
-From:   Paul Cercueil <paul@crapouillou.net>
-To:     "Rafael J . Wysocki" <rafael@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
-        Pavel Machek <pavel@ucw.cz>, list@opendingux.net,
-        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pm@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH v2 6/6] iio: pressure: bmp280: Use new PM macros
-Date:   Wed,  5 Jan 2022 18:29:39 +0000
-Message-Id: <20220105182939.106885-7-paul@crapouillou.net>
-In-Reply-To: <20220105182939.106885-1-paul@crapouillou.net>
-References: <20220105182939.106885-1-paul@crapouillou.net>
+        id S1343826AbiAFAeR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Jan 2022 19:34:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39678 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1343830AbiAFAeN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Jan 2022 19:34:13 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70380C061245;
+        Wed,  5 Jan 2022 16:34:12 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 10D216193C;
+        Thu,  6 Jan 2022 00:34:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 66E81C36AE9;
+        Thu,  6 Jan 2022 00:34:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641429251;
+        bh=jMICUvfWqDl6yU+e1z03F+e1bc2tGxcy1cr8nmpYT9s=;
+        h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+        b=V7sw9/ItzULOjdm7rsvyOr+0aqNy0gBiS2gW2BvNiAbEwpXBTUJc5gFgRVeLTdYfF
+         GaTJ/J1S4cagCkxUS8Y8X6UWWLZ+td6NUyTHHbdhyB3E11GsFQjpHpe61kW8ji+3iY
+         eFVqSFfIOkR1VgrnE8jfx9/sRR3CgZepKrTj03RxgslpyLGzHYeWz7IurSx2h4Pr0e
+         7G7g8aeFqqRuoXhGTaNflOkBjoUCs36DB2z0Dg4675TGIW7KvUnCvOd166zAnpeRB7
+         UZbaJnqWRp9nGAmyjf2zQAgLjNBgejNCci4qCj3LM/YbLc63ojF7ahB2bS4cyBAS8T
+         WEQvDRANotLKA==
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20211227133558.135185-2-krzysztof.kozlowski@canonical.com>
+References: <20211227133131.134369-1-krzysztof.kozlowski@canonical.com> <20211227133558.135185-2-krzysztof.kozlowski@canonical.com>
+Subject: Re: [PATCH 08/19] dt-bindings: clock: intel,stratix10: convert to dtschema
+From:   Stephen Boyd <sboyd@kernel.org>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+To:     Dinh Nguyen <dinguyen@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        devicetree@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Date:   Wed, 05 Jan 2022 16:34:10 -0800
+User-Agent: alot/0.9.1
+Message-Id: <20220106003411.66E81C36AE9@smtp.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the new EXPORT_RUNTIME_DEV_PM_OPS() macro. It allows the underlying
-dev_pm_ops struct as well as the suspend/resume callbacks to be detected
-as dead code in the case where CONFIG_PM is disabled, without having to
-wrap everything inside #ifdef CONFIG_PM guards.
+Quoting Krzysztof Kozlowski (2021-12-27 05:35:47)
+> Convert the Intel Stratix 10 clock controller bindings to DT schema forma=
+t.
+>=20
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+> ---
 
-Signed-off-by: Paul Cercueil <paul@crapouillou.net>
----
-
-Notes:
-    v2: New patch
-
- drivers/iio/pressure/bmp280-core.c | 11 ++---------
- drivers/iio/pressure/bmp280-i2c.c  |  2 +-
- drivers/iio/pressure/bmp280-spi.c  |  2 +-
- 3 files changed, 4 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/iio/pressure/bmp280-core.c b/drivers/iio/pressure/bmp280-core.c
-index 6b7da40f99c8..bf8167f43c56 100644
---- a/drivers/iio/pressure/bmp280-core.c
-+++ b/drivers/iio/pressure/bmp280-core.c
-@@ -1138,7 +1138,6 @@ int bmp280_common_probe(struct device *dev,
- }
- EXPORT_SYMBOL(bmp280_common_probe);
- 
--#ifdef CONFIG_PM
- static int bmp280_runtime_suspend(struct device *dev)
- {
- 	struct iio_dev *indio_dev = dev_get_drvdata(dev);
-@@ -1159,15 +1158,9 @@ static int bmp280_runtime_resume(struct device *dev)
- 	usleep_range(data->start_up_time, data->start_up_time + 100);
- 	return data->chip_info->chip_config(data);
- }
--#endif /* CONFIG_PM */
- 
--const struct dev_pm_ops bmp280_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
--				pm_runtime_force_resume)
--	SET_RUNTIME_PM_OPS(bmp280_runtime_suspend,
--			   bmp280_runtime_resume, NULL)
--};
--EXPORT_SYMBOL(bmp280_dev_pm_ops);
-+EXPORT_RUNTIME_DEV_PM_OPS(bmp280_dev_pm_ops, bmp280_runtime_suspend,
-+			  bmp280_runtime_resume, NULL);
- 
- MODULE_AUTHOR("Vlad Dogaru <vlad.dogaru@intel.com>");
- MODULE_DESCRIPTION("Driver for Bosch Sensortec BMP180/BMP280 pressure and temperature sensor");
-diff --git a/drivers/iio/pressure/bmp280-i2c.c b/drivers/iio/pressure/bmp280-i2c.c
-index 8b03ea15c0d0..35045bd92846 100644
---- a/drivers/iio/pressure/bmp280-i2c.c
-+++ b/drivers/iio/pressure/bmp280-i2c.c
-@@ -58,7 +58,7 @@ static struct i2c_driver bmp280_i2c_driver = {
- 	.driver = {
- 		.name	= "bmp280",
- 		.of_match_table = bmp280_of_i2c_match,
--		.pm = &bmp280_dev_pm_ops,
-+		.pm = pm_ptr(&bmp280_dev_pm_ops),
- 	},
- 	.probe		= bmp280_i2c_probe,
- 	.id_table	= bmp280_i2c_id,
-diff --git a/drivers/iio/pressure/bmp280-spi.c b/drivers/iio/pressure/bmp280-spi.c
-index 625b86878ad8..41f6cc56d229 100644
---- a/drivers/iio/pressure/bmp280-spi.c
-+++ b/drivers/iio/pressure/bmp280-spi.c
-@@ -109,7 +109,7 @@ static struct spi_driver bmp280_spi_driver = {
- 	.driver = {
- 		.name = "bmp280",
- 		.of_match_table = bmp280_of_spi_match,
--		.pm = &bmp280_dev_pm_ops,
-+		.pm = pm_ptr(&bmp280_dev_pm_ops),
- 	},
- 	.id_table = bmp280_spi_id,
- 	.probe = bmp280_spi_probe,
--- 
-2.34.1
-
+Acked-by: Stephen Boyd <sboyd@kernel.org>
