@@ -2,107 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8262C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 10:54:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3576C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 13:42:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238174AbiAFKy5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 05:54:57 -0500
-Received: from mail-sz.amlogic.com ([211.162.65.117]:36616 "EHLO
-        mail-sz.amlogic.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238102AbiAFKy4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 05:54:56 -0500
-Received: from rd02-sz.amlogic.software (10.28.8.43) by mail-sz.amlogic.com
- (10.28.11.5) with Microsoft SMTP Server id 15.1.2176.2; Thu, 6 Jan 2022
- 18:54:55 +0800
-From:   Rong Chen <rong.chen@amlogic.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        <1131046452@qq.com>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-amlogic@lists.infradead.org>, <linux-kernel@vger.kernel.org>
-CC:     <45581586@qq.com>, Rong Chen <rong.chen@amlogic.com>
-Subject: [PATCH] mmc: meson: Fix usage of meson_mmc_post_req()
-Date:   Thu, 6 Jan 2022 18:54:53 +0800
-Message-ID: <20220106105453.3875119-1-rong.chen@amlogic.com>
-X-Mailer: git-send-email 2.25.1
+        id S239638AbiAFNm1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Jan 2022 08:42:27 -0500
+Received: from frasgout.his.huawei.com ([185.176.79.56]:4354 "EHLO
+        frasgout.his.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230323AbiAFNmY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 08:42:24 -0500
+Received: from fraeml707-chm.china.huawei.com (unknown [172.18.147.206])
+        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4JV6sf4pLnz67Vhh;
+        Thu,  6 Jan 2022 21:39:50 +0800 (CST)
+Received: from lhreml710-chm.china.huawei.com (10.201.108.61) by
+ fraeml707-chm.china.huawei.com (10.206.15.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2308.20; Thu, 6 Jan 2022 14:42:22 +0100
+Received: from localhost (10.47.27.61) by lhreml710-chm.china.huawei.com
+ (10.201.108.61) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2308.20; Thu, 6 Jan
+ 2022 13:42:21 +0000
+Date:   Thu, 6 Jan 2022 13:42:23 +0000
+From:   Jonathan Cameron <Jonathan.Cameron@Huawei.com>
+To:     Paul Cercueil <paul@crapouillou.net>
+CC:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        "Lars-Peter Clausen" <lars@metafoo.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        "Arnd Bergmann" <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
+        Pavel Machek <pavel@ucw.cz>, <list@opendingux.net>,
+        <linux-iio@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mips@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-pm@vger.kernel.org>
+Subject: Re: [PATCH v2 6/6] iio: pressure: bmp280: Use new PM macros
+Message-ID: <20220106134223.00006a9f@Huawei.com>
+In-Reply-To: <20220105182939.106885-7-paul@crapouillou.net>
+References: <20220105182939.106885-1-paul@crapouillou.net>
+        <20220105182939.106885-7-paul@crapouillou.net>
+Organization: Huawei Technologies Research and Development (UK) Ltd.
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.29; i686-w64-mingw32)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.28.8.43]
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.47.27.61]
+X-ClientProxiedBy: lhreml721-chm.china.huawei.com (10.201.108.72) To
+ lhreml710-chm.china.huawei.com (10.201.108.61)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To ensure the DMA moves data correctly from memory to
-peripherals, DMA unmapping when the MMC request done
-with calls meson_mmc_post_req().
+On Wed, 5 Jan 2022 18:29:39 +0000
+Paul Cercueil <paul@crapouillou.net> wrote:
 
-Signed-off-by: Rong Chen <rong.chen@amlogic.com>
----
- drivers/mmc/host/meson-gx-mmc.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+> Use the new EXPORT_RUNTIME_DEV_PM_OPS() macro. It allows the underlying
+> dev_pm_ops struct as well as the suspend/resume callbacks to be detected
+> as dead code in the case where CONFIG_PM is disabled, without having to
+> wrap everything inside #ifdef CONFIG_PM guards.
+> 
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 8f36536cb1b6..6a9554ae4b1c 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -173,6 +173,7 @@ struct meson_host {
- 	int irq;
- 
- 	bool vqmmc_enabled;
-+	bool needs_pre_post_req;
- };
- 
- #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
-@@ -663,6 +664,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
- 	struct meson_host *host = mmc_priv(mmc);
- 
- 	host->cmd = NULL;
-+	if (host->needs_pre_post_req)
-+		meson_mmc_post_req(mmc, mrq, 0);
- 	mmc_request_done(host->mmc, mrq);
- }
- 
-@@ -880,7 +883,7 @@ static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data
- static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct meson_host *host = mmc_priv(mmc);
--	bool needs_pre_post_req = mrq->data &&
-+	host->needs_pre_post_req = mrq->data &&
- 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
- 
- 	/*
-@@ -896,22 +899,19 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 		}
- 	}
- 
--	if (needs_pre_post_req) {
-+	if (host->needs_pre_post_req) {
- 		meson_mmc_get_transfer_mode(mmc, mrq);
- 		if (!meson_mmc_desc_chain_mode(mrq->data))
--			needs_pre_post_req = false;
-+			host->needs_pre_post_req = false;
- 	}
- 
--	if (needs_pre_post_req)
-+	if (host->needs_pre_post_req)
- 		meson_mmc_pre_req(mmc, mrq);
- 
- 	/* Stop execution */
- 	writel(0, host->regs + SD_EMMC_START);
- 
- 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
--
--	if (needs_pre_post_req)
--		meson_mmc_post_req(mmc, mrq, 0);
- }
- 
- static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+Thanks
 
-base-commit: 356f3f2c5756bbb67a515760966a40fc7043cdda
--- 
-2.25.1
+> ---
+> 
+> Notes:
+>     v2: New patch
+> 
+>  drivers/iio/pressure/bmp280-core.c | 11 ++---------
+>  drivers/iio/pressure/bmp280-i2c.c  |  2 +-
+>  drivers/iio/pressure/bmp280-spi.c  |  2 +-
+>  3 files changed, 4 insertions(+), 11 deletions(-)
+> 
+> diff --git a/drivers/iio/pressure/bmp280-core.c b/drivers/iio/pressure/bmp280-core.c
+> index 6b7da40f99c8..bf8167f43c56 100644
+> --- a/drivers/iio/pressure/bmp280-core.c
+> +++ b/drivers/iio/pressure/bmp280-core.c
+> @@ -1138,7 +1138,6 @@ int bmp280_common_probe(struct device *dev,
+>  }
+>  EXPORT_SYMBOL(bmp280_common_probe);
+>  
+> -#ifdef CONFIG_PM
+>  static int bmp280_runtime_suspend(struct device *dev)
+>  {
+>  	struct iio_dev *indio_dev = dev_get_drvdata(dev);
+> @@ -1159,15 +1158,9 @@ static int bmp280_runtime_resume(struct device *dev)
+>  	usleep_range(data->start_up_time, data->start_up_time + 100);
+>  	return data->chip_info->chip_config(data);
+>  }
+> -#endif /* CONFIG_PM */
+>  
+> -const struct dev_pm_ops bmp280_dev_pm_ops = {
+> -	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> -				pm_runtime_force_resume)
+> -	SET_RUNTIME_PM_OPS(bmp280_runtime_suspend,
+> -			   bmp280_runtime_resume, NULL)
+> -};
+> -EXPORT_SYMBOL(bmp280_dev_pm_ops);
+> +EXPORT_RUNTIME_DEV_PM_OPS(bmp280_dev_pm_ops, bmp280_runtime_suspend,
+> +			  bmp280_runtime_resume, NULL);
+>  
+>  MODULE_AUTHOR("Vlad Dogaru <vlad.dogaru@intel.com>");
+>  MODULE_DESCRIPTION("Driver for Bosch Sensortec BMP180/BMP280 pressure and temperature sensor");
+> diff --git a/drivers/iio/pressure/bmp280-i2c.c b/drivers/iio/pressure/bmp280-i2c.c
+> index 8b03ea15c0d0..35045bd92846 100644
+> --- a/drivers/iio/pressure/bmp280-i2c.c
+> +++ b/drivers/iio/pressure/bmp280-i2c.c
+> @@ -58,7 +58,7 @@ static struct i2c_driver bmp280_i2c_driver = {
+>  	.driver = {
+>  		.name	= "bmp280",
+>  		.of_match_table = bmp280_of_i2c_match,
+> -		.pm = &bmp280_dev_pm_ops,
+> +		.pm = pm_ptr(&bmp280_dev_pm_ops),
+>  	},
+>  	.probe		= bmp280_i2c_probe,
+>  	.id_table	= bmp280_i2c_id,
+> diff --git a/drivers/iio/pressure/bmp280-spi.c b/drivers/iio/pressure/bmp280-spi.c
+> index 625b86878ad8..41f6cc56d229 100644
+> --- a/drivers/iio/pressure/bmp280-spi.c
+> +++ b/drivers/iio/pressure/bmp280-spi.c
+> @@ -109,7 +109,7 @@ static struct spi_driver bmp280_spi_driver = {
+>  	.driver = {
+>  		.name = "bmp280",
+>  		.of_match_table = bmp280_of_spi_match,
+> -		.pm = &bmp280_dev_pm_ops,
+> +		.pm = pm_ptr(&bmp280_dev_pm_ops),
+>  	},
+>  	.id_table = bmp280_spi_id,
+>  	.probe = bmp280_spi_probe,
 
