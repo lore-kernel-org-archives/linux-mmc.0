@@ -2,329 +2,351 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16397C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 21:14:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2488CC43217
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 21:22:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244174AbiAFVOj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 16:14:39 -0500
-Received: from esa.hc3962-90.iphmx.com ([216.71.142.165]:30863 "EHLO
-        esa.hc3962-90.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244206AbiAFVOi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 16:14:38 -0500
+        id S244199AbiAFVWr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Jan 2022 16:22:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38528 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244185AbiAFVWq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 16:22:46 -0500
+Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75C88C061245;
+        Thu,  6 Jan 2022 13:22:46 -0800 (PST)
+Received: by mail-qk1-x730.google.com with SMTP id r139so3988248qke.9;
+        Thu, 06 Jan 2022 13:22:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=qti.qualcomm.com; i=@qti.qualcomm.com; q=dns/txt;
-  s=qccesdkim1; t=1641503677; x=1642108477;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=WG/q1tXPyLgpggfkRoXnzAjgXwP616TvYs/OIllVgGk=;
-  b=qD1oOWgAV6DTBEnaiDLciLPOZNOFRnLKGptezTitQ+N1k5sXAZl0U3ng
-   nMWG+3LnysfvwC0zLm2eEJSY7VUKomeQQMUXJmXOGAS3CwjM7zF/C0FP2
-   ShC0mATedy+sWO9qbhqASxfEE7bQC+5iuJxpfjPtPQnHh2QYAOTHXNL7b
-   A=;
-Received: from mail-mw2nam10lp2107.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.107])
-  by ob1.hc3962-90.iphmx.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jan 2022 21:14:36 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=HLFM5vJz/7I5yH+qXAfwpsTKKyPszT1KYjaUaPls6MXiMr6jH+lPULgfNzjwZ3wCaSkm13+FTWX445OnFbu5TQ897pfxUXfA5/fLPxNAQ81xqwlmiaCYq6tu1PwyLzm04OiovDamGz8RhMlwmB6qU4AoXMWQU1aPM7vX2NhIH3jFODKMxY5k03PtGueVyJ9JD3eeKnvP0pmrtfQhfmBSkD5Mfpup/Y2ejisuL+RoW+EsbrWNgMt72mRcHmWQwD9sG3m5WroLICNGwoLJnIADD8TB2K9ymO6v3QXYELlnRionP1Kb+zrxiD+55OmxVPiAjNehU5J3ouojMQ2AsFaLLg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=WG/q1tXPyLgpggfkRoXnzAjgXwP616TvYs/OIllVgGk=;
- b=Mu/citFn1LibkoydaejVRVnOWnELJ7sKY6/2S+dHHLYqY/islMPl333S3KaDoJWVZvU3fe7gzp3eTcN6hOPLyuMFxzw5QC0JmPA6u+Ps1lJdEQI4ePLe7g9FEXXmtn/A0H5R6/9IPQpIuxZbFuv43b0fi+owem6PdpxUh79Do5pGND+a+76e2p/rE5igS83d+beqkB1DVyypYpL+V0dqNMhftS886a4/WJ6Q9msiaoMWU6pe1D8soyVhh1pXlmzOJ0X8UzZ9SruBY+RmuP5WlY5iYrw2f8nBC5ocg5WVXf2Fce/7oU+QDPRTaSOHMV5eWqTUPKYLGl/dcbimG2faIg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=qti.qualcomm.com; dmarc=pass action=none
- header.from=qti.qualcomm.com; dkim=pass header.d=qti.qualcomm.com; arc=none
-Received: from BYAPR02MB4071.namprd02.prod.outlook.com (2603:10b6:a02:fc::23)
- by BYAPR02MB5720.namprd02.prod.outlook.com (2603:10b6:a03:118::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4867.7; Thu, 6 Jan
- 2022 21:14:22 +0000
-Received: from BYAPR02MB4071.namprd02.prod.outlook.com
- ([fe80::890e:17ec:b473:b381]) by BYAPR02MB4071.namprd02.prod.outlook.com
- ([fe80::890e:17ec:b473:b381%7]) with mapi id 15.20.4844.016; Thu, 6 Jan 2022
- 21:14:22 +0000
-From:   Gaurav Kashyap <gaurkash@qti.qualcomm.com>
-To:     Eric Biggers <ebiggers@kernel.org>,
-        "Gaurav Kashyap (QUIC)" <quic_gaurkash@quicinc.com>
-CC:     "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
-        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-fscrypt@vger.kernel.org" <linux-fscrypt@vger.kernel.org>,
-        "thara.gopinath@linaro.org" <thara.gopinath@linaro.org>,
-        "Neeraj Soni (QUIC)" <quic_neersoni@quicinc.com>,
-        Dinesh Garg <dineshg@quicinc.com>
-Subject: RE: [PATCH 00/10] Add wrapped key support for Qualcomm ICE
-Thread-Topic: [PATCH 00/10] Add wrapped key support for Qualcomm ICE
-Thread-Index: AQHX6vTNJgaGQVw0vkWvN4ZRGoC2raxWlrGAgAAWnPA=
-Date:   Thu, 6 Jan 2022 21:14:22 +0000
-Message-ID: <BYAPR02MB4071D51F6DFB371E46E424ACE24C9@BYAPR02MB4071.namprd02.prod.outlook.com>
-References: <20211206225725.77512-1-quic_gaurkash@quicinc.com>
- <YddHbRx2UGeAOhji@sol.localdomain>
-In-Reply-To: <YddHbRx2UGeAOhji@sol.localdomain>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=qti.qualcomm.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 65ac1e1f-50db-472a-81bd-08d9d15982db
-x-ms-traffictypediagnostic: BYAPR02MB5720:EE_
-x-ld-processed: 98e9ba89-e1a1-4e38-9007-8bdabc25de1d,ExtAddr
-x-microsoft-antispam-prvs: <BYAPR02MB5720D0352EDC28FF3EDE3B2EE24C9@BYAPR02MB5720.namprd02.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7219;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: MWxl1TAuFEleWpvidqH6tXzKokMkSsEJPdUt16qXMuodifjv/SomvUX6/KbaQp6QBE7hW5kFIv6boBRjo968Bb5IKGZ1fXYFNo0GAior8ckMH4CxOYqiTZdAOpQ8vwhhp0utOmL1SP2xR2xCaOS/fTbKw3uEX88UTRaV/vVS/3dQyIR0Z5pvwaZ1au4wALLLPh7MXmObjrZjxnym5VQ5JhjfmdkXeLQvzzYdCogNAEAxe8c2qD6tY8Hw++A25DFDEmXmQY9Tno++jwCrQBGWMyhbKQQ1U1UqBQMR0mWb7afgQuyBsm2GUA4rxpVrZiTaYEOM9csS4jWT6dORlKIeTJ4QTRrv83bHm8MZFgwhnQMSk2yMCQa22a8b4bKPVCso43APfDwHTpEPzanqpdrw+JYdgaUkF+IVv7dZEB4AUGlZ1ogeoj8PfbebUf1V/geNJUPR5Zaofd8YMrS8yp1qRkLdpQdUymRmKtfa68ga5SLP4PRMfZNk4FizZ/i0qDjCjmnzBHSxEQWE4VaWumJ20+XlqIMeV0jDutKmIjoEhB7pd9CI6hPquBu45/ixVJuPF5nI553P3nBQFXLGKCyAd1eQsBM3JsZq+QYhI6K7DjX2bXq9tANjVDJkfxLmfnwG7AVdwnzi/DUv5lzwrmZbSRmnHYShwUrTMrVMBDnoiX844iUqVSARUnCHt8Hput6jBekjSZL5SIeTyJhjZ4YI5uhUxUV6RectFhSyN/B8GTdyRalfmkDVeF3dkVZmvnJ7WazKqJ8aGs53gDMKAwJish4w6pwbMogMP2SHkX9kD1uUrvx2QDXtaUo+FhEnXMcJRpPynWfeHUvcOTbCWzSUPg==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR02MB4071.namprd02.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(8676002)(38070700005)(66446008)(66946007)(7696005)(966005)(64756008)(508600001)(110136005)(5660300002)(2906002)(9686003)(71200400001)(76116006)(54906003)(33656002)(66556008)(186003)(8936002)(53546011)(107886003)(55016003)(83380400001)(6506007)(66476007)(4326008)(316002)(38100700002)(86362001)(122000001)(52536014);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?bLK0hGErgjhnYvGsQVXhxLAh1D2LKERtsQKMIWB/KouvKHDn+yAiaLUjC4qI?=
- =?us-ascii?Q?uOnfN9XAzLLUzsGT0z2Q9LLhFgApyZA9kQwjwHb+yUVwt3/isOoVKpNGwKvE?=
- =?us-ascii?Q?QKuyV0FC2CbhGKxhpevDY8QCP3eUQZslF3WQxB01SX0e1+BPLz5yjb9TmtRU?=
- =?us-ascii?Q?Fpcm8nLc/A7y1JwwgDWSFcMKMc6rt98wRa0PxBWOwjyCjBO7QPSjM7/RtvQp?=
- =?us-ascii?Q?Shqa8hlyZ2DDGF+1Em9fFux+y1+CACcCFUp7jIrwpVtz7IyVcweCZqaGsJa8?=
- =?us-ascii?Q?ASmbZyDr22jkIBhT5wgxnpH3w7OGGjXO+UtTKzrIzT6addWNfew4YOIoQuzM?=
- =?us-ascii?Q?ZHeaEEsmWD8sxgMZZ62XbbhTqu3aX0fC45mSoOTROBu8aSKekZeCihQGAlAB?=
- =?us-ascii?Q?B1A0y4uU59wF8sOnRKE6xLMxCgZutHWZKCa8NomOdp3ao7ItGRwshiEik0mZ?=
- =?us-ascii?Q?4arzdrweZNH2HCqIOuVmoe8zlKJxwavmzTA1VrZmrC+DQFXZf3lCyCrfWbkh?=
- =?us-ascii?Q?EKaOrRHCAqHM+77pSQE9vXa5iV1bIMQfbjLBlpYeJb6ONQ2mXUhJr8cx+YdZ?=
- =?us-ascii?Q?06ETT1TwK4iIVH69UySQ/fJJOXgdkMQYKWxh6/JrwjCv1LuaGiHVH07A6zOG?=
- =?us-ascii?Q?TV3mnfWOkS23uI56MovTYkwJiKQtZiF+hyRIZp69WrSoxU9QxtKDxTXY9sGz?=
- =?us-ascii?Q?pWij+qZY5GUxZyIxfTNtpS47OHyvizLiGtyd7F29YwssZ9s34Ro/44CfL1AA?=
- =?us-ascii?Q?6yoFxe8YAi9C5hmSrVxEOPWERf/g7e2fEpqRuB70qYxO9AWiAQYdpb+GN5D/?=
- =?us-ascii?Q?V27m6QA3PSCMdNclzB/zhldchwvLgHrP2Bk2BqcwyfFmIPTY4OwBa/QmcCTc?=
- =?us-ascii?Q?8Bb9DN0jXqAsGOOSERT5GnbkrIEttq/OTTlHW59uEeylAleg4Xun76upnT2s?=
- =?us-ascii?Q?sTnRTSG+Ejy4tZBwv0TOJiXxLV2Otiiw9L1LVPfBnsoK9BSakAGzHAuOuG06?=
- =?us-ascii?Q?E6fE65i7cT2v6Q7FGJ9qQwmGl5yiEK6ATb/3A/F/VJvBRZHzlxXswCBfnHno?=
- =?us-ascii?Q?GFfJh6RzPb35HeR0wr0uYIDVfpqH1+dH5SkS9jeyslPfOth1MFyTf8bg/3Oe?=
- =?us-ascii?Q?2F9t9C3rTFMemI9gyQYbrMk/gmpQx8l8+PR0zu1T64x2ydLDFWTx7iRqzFDx?=
- =?us-ascii?Q?tEo4WrWBJLmSeB6OxsGGn3qqVWM+bsfo5pXPIP0HxxHqnySv1QGlnHz4LvLh?=
- =?us-ascii?Q?rbaY7yZH1Jqn6knqQOl/JokCFAAFwTWVggTBhNSjtk+yDCUZ4yocBQu8Agoj?=
- =?us-ascii?Q?6b48krlnbhbl7kYwlqHjXoXABjiZKwhdDRQqH4skuLtYmzB80CGiaw+crHKW?=
- =?us-ascii?Q?X6vhNGC3wwEGR1kG2ZrsAwo/W+G4lK10b1i5ENPi7rbNxT0jBj/HDmorHFcF?=
- =?us-ascii?Q?RuroEOg9MXEy1lNDXw5ENm/aN/bozeQhXn9m+p5crsU1rR7AbCda0C5tCyl9?=
- =?us-ascii?Q?aZwWgizJHNIXJdMcGdoSsKqjp94uc2A4LnKyVCPdaPi4MKBsHd3ov1QlpqfM?=
- =?us-ascii?Q?d7Cq+NJ0TDsIjIeeuA5RribKf33GSqdf1O5GjxYPSUKPQoj5V3YwiD9sOzX6?=
- =?us-ascii?Q?kTE1FvwevU8LHbuCoQ7yenI4eoUUfklV2xKT5XYSEBO8V1odKflSTzNQolNi?=
- =?us-ascii?Q?pixE3k4BFNpx0VRSuL7BVtnPw3em4uQ12aggE5/pATOaRSN0eweCkKr7AGlV?=
- =?us-ascii?Q?8DclKjJSzw=3D=3D?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=H4/YLOv2pt9NctQhJ2CgH4upwyD4QtHYJjq0MzypaLE=;
+        b=RKbKNCoUB+RKO3R0BVnHvjjVyCArwBIr7Vs457P8FVhpP7AwbfWQAVCCegPpbBoPV6
+         7POZAA1o9xSe6Me+cpu5WVOiPa7op6BtXYDvPePv0chMUF9k6qxz/GfnrmyLtlmx5EmO
+         T9DpbKtE2p1E1Bj1s+mb/2Sdht8Y2bDWb/7mEVPzFeteGVgCnC6w3dWfobeeWu9oB93U
+         scBZEYCxPGOPxKlT91fnM8Wv72+p/+zaQWO6oHI8EJSKak+c+5UEcjIiCMZ/yg3XuAgc
+         7ZTSDPZZ/MgOihk30uAU4w5mKyaE3LXT/n2xbH+jn5H/DgUFMClK7iifQpPDW+xItXA4
+         V2cg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=H4/YLOv2pt9NctQhJ2CgH4upwyD4QtHYJjq0MzypaLE=;
+        b=8O/n9PaNlZPtQUTznbFrZKlgihB6st2K87UEhrcv2gZ9ieQ4U1GzaUdAUd3U1Tj2z+
+         fYYyHbzR/UU2UdumEdW4zlcyKNvE8PDUIt5wSUXrwaFFRA8djfZSv4OoeP4zfqd6h4hE
+         kzxya+kVn2IY67288BUfYZNRahLU9L3Z7OVfoF8vNZaoqY8izS8FG22IM+vsxx16TVCS
+         IJnRpXj6S8Dp10MShuy1QTxMAE1Pw8JZDyl3nsfh8CZfE3sTQui7Dv8/wlhSmPr9Bq9m
+         6KUNCOllEp0hkl6ZKphHGO8ONNEt0w0dOaDlNOaw/NYAUPLB3Eqiygd/s1plXeC16vpF
+         1YyA==
+X-Gm-Message-State: AOAM5303nxNE1DTtyxCDKBLhp/nC09Hv/n4QXrdZYKDRjJdnIRdu7krN
+        0VUVNKomWMJbC1ipABZ2g/Q=
+X-Google-Smtp-Source: ABdhPJwCg4Orn3XNKg3fqqsy4zQE3iKQXTQ7X5ty0xVG3p7v3gUeiekMNNL8T5JizupUUFMo8azj1g==
+X-Received: by 2002:a37:e112:: with SMTP id c18mr39432691qkm.508.1641504165554;
+        Thu, 06 Jan 2022 13:22:45 -0800 (PST)
+Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
+        by smtp.gmail.com with ESMTPSA id e15sm2145647qtq.83.2022.01.06.13.22.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 06 Jan 2022 13:22:45 -0800 (PST)
+Message-ID: <dd4c5107-bf11-4c72-602b-597d2e3db732@gmail.com>
+Date:   Thu, 6 Jan 2022 16:22:40 -0500
 MIME-Version: 1.0
-X-OriginatorOrg: qti.qualcomm.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: BYAPR02MB4071.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 65ac1e1f-50db-472a-81bd-08d9d15982db
-X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Jan 2022 21:14:22.6104
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 98e9ba89-e1a1-4e38-9007-8bdabc25de1d
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: cvi5iS7SfB73YKPxzmu996N1JxJefybEs64cOJMzLcu7GPxePcuHl6QDdXrdMxsc3+vqXkFav9/mbkv38jRel0x2Tl5dVsE/t2u8bRywH8M=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR02MB5720
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.4.0
+Subject: Re: [PATCH v7 5/7] clk: imx: Add initial support for i.MXRT1050 clock
+ driver
+Content-Language: en-US
+To:     Stephen Boyd <sboyd@kernel.org>, linux-imx@nxp.com
+Cc:     mturquette@baylibre.com, robh+dt@kernel.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        ulf.hansson@linaro.org, aisheng.dong@nxp.com, stefan@agner.ch,
+        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
+        arnd@arndb.de, olof@lixom.net, soc@kernel.org,
+        linux@armlinux.org.uk, abel.vesa@nxp.com, adrian.hunter@intel.com,
+        jirislaby@kernel.org, giulio.benetti@benettiengineering.com,
+        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
+References: <20220103233948.198119-1-Mr.Bossman075@gmail.com>
+ <20220103233948.198119-6-Mr.Bossman075@gmail.com>
+ <20220105235157.8ED80C36AEB@smtp.kernel.org>
+From:   Jesse Taube <mr.bossman075@gmail.com>
+In-Reply-To: <20220105235157.8ED80C36AEB@smtp.kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hey Eric
-
-Have you tested that QCOM_SCM_ES_DERIVE_SW_SECRET is working properly?
-
-- You will need updated trustzone build for that (as I was missing a minor =
-detail in the original one pertaining to SW secret) , please request again =
-on the same ticket for the updated build.
-- I have reminded the people in Qualcomm too to provide you the build.
-- Note that with the new build you should be using the correct directions, =
-i.e QCOM_SCM_RO where intended
-
-Warm Regards
-Gaurav Kashyap
-
------Original Message-----
-From: Eric Biggers <ebiggers@kernel.org>=20
-Sent: Thursday, January 6, 2022 11:48 AM
-To: Gaurav Kashyap (QUIC) <quic_gaurkash@quicinc.com>
-Cc: linux-scsi@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-mmc@vg=
-er.kernel.org; linux-block@vger.kernel.org; linux-fscrypt@vger.kernel.org; =
-thara.gopinath@linaro.org; Neeraj Soni (QUIC) <quic_neersoni@quicinc.com>; =
-Dinesh Garg <dineshg@quicinc.com>
-Subject: Re: [PATCH 00/10] Add wrapped key support for Qualcomm ICE
-
-WARNING: This email originated from outside of Qualcomm. Please be wary of =
-any links or attachments, and do not enable macros.
-
-Hi Gaurav,
-
-On Mon, Dec 06, 2021 at 02:57:15PM -0800, Gaurav Kashyap wrote:
-> Testing:
-> Test platform: SM8350 HDK/MTP
-> Engineering trustzone image (based on sm8350) is required to test this=20
-> feature. This is because of version changes of HWKM.
-> HWKM version 2 and moving forward has a lot of restrictions on the key=20
-> management due to which the launched SM8350 solution (based on v1)=20
-> cannot be used and some modifications are required in trustzone.
-
-I've been trying to test this patchset on a SM8350 HDK using the TrustZone =
-image you provided, but it's not completely working yet.
-
-This is the kernel branch I'm using:
-https://git.kernel.org/pub/scm/fs/fscrypt/fscrypt.git/log/?h=3Dwip-wrapped-=
-keys.
-It has my v4 patchset with your patchset rebased on top of it, some qcom_sc=
-m.c fixes I had to make (see below), and some extra logging messages.
-
-This is how I'm building and booting a kernel on the board:
-https://github.com/ebiggers/fscryptctl/blob/wip-wrapped-keys/scripts/sm8350=
--buildkernel.sh
-
-And this is the test script I'm running:
-https://github.com/ebiggers/fscryptctl/blob/wip-wrapped-keys/scripts/wrappe=
-dkey-test.sh.
-It imports or generates a hardware-wrapped key, then tries to set up a dire=
-ctory
-on an ext4 filesystem that is encrypted with that key.   This uses new
-'fscryptctl' commands to access the new blk-crypto ioctls; the version of '=
-fscryptctl' on the branch the scripts are on has all the needed changes.
-
-QCOM_SCM_ES_IMPORT_ICE_KEY, QCOM_SCM_ES_GENERATE_ICE_KEY, QCOM_SCM_ES_PREPA=
-RE_ICE_KEY, all seem to work.  However, QCOM_SCM_ES_DERIVE_SW_SECRET doesn'=
-t work; it always returns -EINVAL.
-
-For example:
-
-Importing hardware-wrapped key
-[  187.606109] blk-crypto: entering BLKCRYPTOCREATEKEY [  187.611648] calli=
-ng QCOM_SCM_ES_IMPORT_ICE_KEY; raw_key=3D5858585858585858585858585858585858=
-585858585858585858585858585858
-[  187.628180] QCOM_SCM_ES_IMPORT_ICE_KEY succeeded; longterm_wrapped_key=
-=3Dfab51aa07fb6c2bf2fea60a8120e8d35a9e53865b594e0fb6279e7951a34864591f1c1c4=
-e26f9421039377c1ac311ff9241a0152030000000000000000000000
-[  187.646433] blk-crypto: exiting BLKCRYPTOCREATEKEY; ret=3D0 Preparing ha=
-rdware-wrapped key [  187.653129] blk-crypto: entering BLKCRYPTOPREPAREKEY =
-[  187.660356] calling QCOM_SCM_ES_PREPARE_ICE_KEY; longterm_wrapped_key=3D=
-fab51aa07fb6c2bf2fea60a8120e8d35a9e53865b594e0fb6279e7951a34864591f1c1c4e26=
-f9421039377c1ac311ff9241a0152030000000000000000000000
-[  187.680420] QCOM_SCM_ES_PREPARE_ICE_KEY succeeded; ephemeral_wrapped_key=
-=3D1fbf5d501854858d6faaf52c9d22bebc576012e40485ba75e7d19e88f74b3400eb1a8836=
-e28232939e990df6007659b1241a0152030000000000000000000000
-[  187.698791] blk-crypto: exiting BLKCRYPTOPREPAREKEY; ret=3D0 Adding hard=
-ware-wrapped key [  187.705515] calling blk_crypto_derive_sw_secret(); wrap=
-ped_key_size=3D68 [  187.714075] in qti_ice_derive_sw_secret() [  187.71821=
-2] calling qti_ice_hwkm_init() [  187.722157] calling qti_ice_hwkm_init_seq=
-uence(version=3D1)
-[  187.727715] setting standard mode
-[  187.731134] checking BIST status
-[  187.734464] configuring ICE registers [  187.738230] disabling CRC check=
- [  187.741479] setting RSP_FIFO_FULL bit [  187.745247] calling qcom_scm_d=
-erive_sw_secret() [  187.749920] calling QCOM_SCM_ES_DERIVE_SW_SECRET; wrap=
-ped_key=3D1fbf5d501854858d6faaf52c9d22bebc576012e40485ba75e7d19e88f74b3400e=
-b1a8836e28232939e990df6007659b1241a0152030000000000000000000000, secret_siz=
-e=3D32 [  187.768834] QCOM_SCM_ES_DERIVE_SW_SECRET failed with error -22 [ =
- 187.774838] blk_crypto_derive_sw_secret() returned -22
-error: adding key to /mnt: Invalid argument
 
 
-You can see that the wrapped_key being passed to QCOM_SCM_ES_DERIVE_SW_SECR=
-ET matches the ephemeral_wrapped_key that was returned earlier by QCOM_SCM_=
-ES_PREPARE_ICE_KEY, and that secret_size is 32.  So the arguments are as ex=
-pected.  However, QCOM_SCM_ES_DERIVE_SW_SECRET still fails.
+On 1/5/22 18:51, Stephen Boyd wrote:
+> Quoting Jesse Taube (2022-01-03 15:39:46)
+>> Add clock driver support for i.MXRT1050.
+>>
+>> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+>> Suggested-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> 
+> What is suggested by for a new driver?
+Uh as far is im aware sugessed by means that he gave the idea/insight 
+for this driver.
+Basicly he gave me tips on what to do and how i would look into porting 
+this soc. I asked him how he should be given credit this was agreed on.
 
-This still occurs if QCOM_SCM_ES_GENERATE_ICE_KEY is used instead of QCOM_S=
-CM_ES_IMPORT_ICE_KEY.
+https://www.kernel.org/doc/html/latest/process/submitting-patches.html#using-reported-by-tested-by-reviewed-by-suggested-by-and-fixes
+> 
+>> ---
+>> diff --git a/drivers/clk/imx/Kconfig b/drivers/clk/imx/Kconfig
+>> --- a/drivers/clk/imx/Kconfig
+>> +++ b/drivers/clk/imx/Kconfig
+>> @@ -105,3 +105,8 @@ config CLK_IMX8ULP
+>>          select MXC_CLK
+>>          help
+>>              Build the driver for i.MX8ULP CCM Clock Driver
+>> +
+>> +config CLK_IMXRT1050
+>> +       bool "IMXRT1050 CCM Clock Driver"
+>> +       depends on SOC_IMXRT
+>> +       select MXC_CLK
+> 
+> Please add some help text here.
+> 
+Will do.
+>> diff --git a/drivers/clk/imx/Makefile b/drivers/clk/imx/Makefile
+>> index b5e040026dfb..3d9a1e3b5fc6 100644
+>> --- a/drivers/clk/imx/Makefile
+>> +++ b/drivers/clk/imx/Makefile
+>> @@ -47,3 +47,4 @@ obj-$(CONFIG_CLK_IMX6UL) += clk-imx6ul.o
+>>   obj-$(CONFIG_CLK_IMX7D)  += clk-imx7d.o
+>>   obj-$(CONFIG_CLK_IMX7ULP) += clk-imx7ulp.o
+>>   obj-$(CONFIG_CLK_VF610)  += clk-vf610.o
+>> +obj-$(CONFIG_CLK_IMXRT1050)  += clk-imxrt1050.o
+> 
+> Please keep this sorted, maybe on config symbol name?
+Ah sorry this happend when I rebased I will fix it.
+>> diff --git a/drivers/clk/imx/clk-imxrt1050.c b/drivers/clk/imx/clk-imxrt1050.c
+>> new file mode 100644
+>> index 000000000000..a2f0e8663030
+>> --- /dev/null
+>> +++ b/drivers/clk/imx/clk-imxrt1050.c
+>> @@ -0,0 +1,181 @@
+>> +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
+>> +/*
+>> + * Copyright (C) 2021
+>> + * Author(s):
+>> + * Jesse Taube <Mr.Bossman075@gmail.com>
+>> + * Giulio Benetti <giulio.benetti@benettiengineering.com>
+>> + */
+>> +#include <linux/mm.h>
+>> +#include <linux/delay.h>
+>> +#include <linux/clk.h>
+> 
+> Is this include used?
+> 
+>> +#include <linux/io.h>
+>> +#include <linux/clkdev.h>
+> 
+> Drop unused includes.
+> 
+>> +#include <linux/clk-provider.h>
+>> +#include <linux/err.h>
+>> +#include <linux/of.h>
+>> +#include <linux/of_address.h>
+>> +#include <linux/of_irq.h>
+> 
+> Used?
+> 
+>> +#include <linux/sizes.h>
+>> +#include <linux/platform_device.h>
+>> +#include <soc/imx/revision.h>
+> 
+> Is this used?
+I will sort out posibly unused includes thx for pointing it out.
+>> +#include <dt-bindings/clock/imxrt1050-clock.h>
+>> +
+>> +#include "clk.h"
+>> +
+>> +static const char * const pll_ref_sels[] = {"osc", "dummy", };
+>> +static const char * const per_sels[] = {"ipg_pdof", "osc", };
+>> +static const char * const pll1_bypass_sels[] = {"pll1_arm", "pll1_arm_ref_sel", };
+>> +static const char * const pll2_bypass_sels[] = {"pll2_sys", "pll2_sys_ref_sel", };
+>> +static const char * const pll3_bypass_sels[] = {"pll3_usb_otg", "pll3_usb_otg_ref_sel", };
+>> +static const char * const pll5_bypass_sels[] = {"pll5_video", "pll5_video_ref_sel", };
+>> +static const char *const pre_periph_sels[] = {
+>> +       "pll2_sys", "pll2_pfd2_396m", "pll2_pfd0_352m", "arm_podf", };
+>> +static const char *const periph_sels[] = { "pre_periph_sel", "todo", };
+>> +static const char *const usdhc_sels[] = { "pll2_pfd2_396m", "pll2_pfd0_352m", };
+>> +static const char *const lpuart_sels[] = { "pll3_80m", "osc", };
+>> +static const char *const lcdif_sels[] = {
+>> +       "pll2_sys", "pll3_pfd3_454_74m", "pll5_video", "pll2_pfd0_352m",
+>> +       "pll2_pfd1_594m", "pll3_pfd1_664_62m", };
+>> +static const char *const semc_alt_sels[] = { "pll2_pfd2_396m", "pll3_pfd1_664_62m", };
+>> +static const char *const semc_sels[] = { "periph_sel", "semc_alt_sel", };
+> 
+> Any chance this can use clk_parent_data instead of string names for
+> parents?
+I copied this from imx8 but if nessasary I will do that.
+>> +
+>> +static struct clk_hw **hws;
+>> +static struct clk_hw_onecell_data *clk_hw_data;
+>> +
+>> +static void __init imxrt_clocks_common_init(void __iomem *base)
+> 
+> Drop __init and preferably inline this to the callsite.
+Will do.
+>> +{
+>> +       /* Anatop clocks */
+>> +       hws[IMXRT1050_CLK_DUMMY] = imx_clk_hw_fixed("dummy", 0UL);
+>> +
+>> +       hws[IMXRT1050_CLK_PLL1_REF_SEL] = imx_clk_hw_mux("pll1_arm_ref_sel",
+>> +               base + 0x0, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+>> +       hws[IMXRT1050_CLK_PLL2_REF_SEL] = imx_clk_hw_mux("pll2_sys_ref_sel",
+>> +               base + 0x30, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+>> +       hws[IMXRT1050_CLK_PLL3_REF_SEL] = imx_clk_hw_mux("pll3_usb_otg_ref_sel",
+>> +               base + 0x10, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+>> +       hws[IMXRT1050_CLK_PLL5_REF_SEL] = imx_clk_hw_mux("pll5_video_ref_sel",
+>> +               base + 0xa0, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
+>> +
+>> +       hws[IMXRT1050_CLK_PLL1_ARM] = imx_clk_hw_pllv3(IMX_PLLV3_SYS, "pll1_arm",
+>> +               "pll1_arm_ref_sel", base + 0x0, 0x7f);
+>> +       hws[IMXRT1050_CLK_PLL2_SYS] = imx_clk_hw_pllv3(IMX_PLLV3_GENERIC, "pll2_sys",
+>> +               "pll2_sys_ref_sel", base + 0x30, 0x1);
+>> +       hws[IMXRT1050_CLK_PLL3_USB_OTG] = imx_clk_hw_pllv3(IMX_PLLV3_USB, "pll3_usb_otg",
+>> +               "pll3_usb_otg_ref_sel", base + 0x10, 0x1);
+>> +       hws[IMXRT1050_CLK_PLL5_VIDEO] = imx_clk_hw_pllv3(IMX_PLLV3_AV, "pll5_video",
+>> +               "pll5_video_ref_sel", base + 0xa0, 0x7f);
+>> +
+>> +       /* PLL bypass out */
+>> +       hws[IMXRT1050_CLK_PLL1_BYPASS] = imx_clk_hw_mux_flags("pll1_bypass", base + 0x0, 16, 1,
+>> +               pll1_bypass_sels, ARRAY_SIZE(pll1_bypass_sels), CLK_SET_RATE_PARENT);
+>> +       hws[IMXRT1050_CLK_PLL2_BYPASS] = imx_clk_hw_mux_flags("pll2_bypass", base + 0x30, 16, 1,
+>> +               pll2_bypass_sels, ARRAY_SIZE(pll2_bypass_sels), CLK_SET_RATE_PARENT);
+>> +       hws[IMXRT1050_CLK_PLL3_BYPASS] = imx_clk_hw_mux_flags("pll3_bypass", base + 0x10, 16, 1,
+>> +               pll3_bypass_sels, ARRAY_SIZE(pll3_bypass_sels), CLK_SET_RATE_PARENT);
+>> +       hws[IMXRT1050_CLK_PLL5_BYPASS] = imx_clk_hw_mux_flags("pll5_bypass", base + 0xa0, 16, 1,
+>> +               pll5_bypass_sels, ARRAY_SIZE(pll5_bypass_sels), CLK_SET_RATE_PARENT);
+>> +
+>> +       hws[IMXRT1050_CLK_VIDEO_POST_DIV_SEL] = imx_clk_hw_divider("video_post_div_sel",
+>> +               "pll5_video", base + 0xa0, 19, 2);
+>> +       hws[IMXRT1050_CLK_VIDEO_DIV] = imx_clk_hw_divider("video_div",
+>> +               "video_post_div_sel", base + 0x170, 30, 2);
+>> +
+>> +       hws[IMXRT1050_CLK_PLL3_80M] = imx_clk_hw_fixed_factor("pll3_80m",  "pll3_usb_otg", 1, 6);
+>> +
+>> +       hws[IMXRT1050_CLK_PLL2_PFD0_352M] = imx_clk_hw_pfd("pll2_pfd0_352m", "pll2_sys", base + 0x100, 0);
+>> +       hws[IMXRT1050_CLK_PLL2_PFD1_594M] = imx_clk_hw_pfd("pll2_pfd1_594m", "pll2_sys", base + 0x100, 1);
+>> +       hws[IMXRT1050_CLK_PLL2_PFD2_396M] = imx_clk_hw_pfd("pll2_pfd2_396m", "pll2_sys", base + 0x100, 2);
+>> +       hws[IMXRT1050_CLK_PLL3_PFD1_664_62M] = imx_clk_hw_pfd("pll3_pfd1_664_62m", "pll3_usb_otg", base + 0xf0, 1);
+>> +       hws[IMXRT1050_CLK_PLL3_PFD3_454_74M] = imx_clk_hw_pfd("pll3_pfd3_454_74m", "pll3_usb_otg", base + 0xf0, 3);
+>> +}
+>> +
+>> +static int imxrt1050_clocks_probe(struct platform_device *pdev)
+>> +{
+>> +       void __iomem *ccm_base;
+>> +       void __iomem *pll_base;
+>> +       struct device *dev = &pdev->dev;
+>> +       struct device_node *np = dev->of_node;
+>> +       struct device_node *anp;
+>> +       int ret;
+>> +
+>> +       clk_hw_data = kzalloc(struct_size(clk_hw_data, hws,
+>> +                                         IMXRT1050_CLK_END), GFP_KERNEL);
+>> +       if (WARN_ON(!clk_hw_data))
+>> +               return -ENOMEM;
+>> +
+>> +       clk_hw_data->num = IMXRT1050_CLK_END;
+>> +       hws = clk_hw_data->hws;
+>> +
+>> +       hws[IMXRT1050_CLK_OSC] = __clk_get_hw(of_clk_get_by_name(np, "osc"));
+> 
+> Use clk_parent_data instead and reference the binding name with .fw_name
+> 
+>> +
+>> +       anp = of_find_compatible_node(NULL, NULL, "fsl,imxrt-anatop");
+>> +       pll_base = of_iomap(anp, 0);
+>> +       of_node_put(anp);
+>> +       if (WARN_ON(!pll_base))
+>> +               return -ENOMEM;
+>> +       imxrt_clocks_common_init(pll_base);
+>> +       /* CCM clocks */
+>> +       ccm_base = devm_platform_ioremap_resource(pdev, 0);
+>> +       if (WARN_ON(IS_ERR(ccm_base)))
+>> +               return PTR_ERR(ccm_base);
+>> +
+>> +       hws[IMXRT1050_CLK_ARM_PODF] = imx_clk_hw_divider("arm_podf", "pll1_arm", ccm_base + 0x10, 0, 3);
+>> +       hws[IMXRT1050_CLK_PRE_PERIPH_SEL] = imx_clk_hw_mux("pre_periph_sel", ccm_base + 0x18, 18, 2,
+>> +               pre_periph_sels, ARRAY_SIZE(pre_periph_sels));
+>> +       hws[IMXRT1050_CLK_PERIPH_SEL] = imx_clk_hw_mux("periph_sel", ccm_base + 0x14, 25, 1,
+>> +               periph_sels, ARRAY_SIZE(periph_sels));
+>> +       hws[IMXRT1050_CLK_USDHC1_SEL] = imx_clk_hw_mux("usdhc1_sel", ccm_base + 0x1c, 16, 1,
+>> +               usdhc_sels, ARRAY_SIZE(usdhc_sels));
+>> +       hws[IMXRT1050_CLK_USDHC2_SEL] = imx_clk_hw_mux("usdhc2_sel", ccm_base + 0x1c, 17, 1,
+>> +               usdhc_sels, ARRAY_SIZE(usdhc_sels));
+>> +       hws[IMXRT1050_CLK_LPUART_SEL] = imx_clk_hw_mux("lpuart_sel", ccm_base + 0x24, 6, 1,
+>> +               lpuart_sels, ARRAY_SIZE(lpuart_sels));
+>> +       hws[IMXRT1050_CLK_LCDIF_SEL] = imx_clk_hw_mux("lcdif_sel", ccm_base + 0x38, 15, 3,
+>> +               lcdif_sels, ARRAY_SIZE(lcdif_sels));
+>> +       hws[IMXRT1050_CLK_PER_CLK_SEL] = imx_clk_hw_mux("per_sel", ccm_base + 0x1C, 6, 1,
+>> +               per_sels, ARRAY_SIZE(per_sels));
+>> +       hws[IMXRT1050_CLK_SEMC_ALT_SEL] = imx_clk_hw_mux("semc_alt_sel", ccm_base + 0x14, 7, 1,
+>> +               semc_alt_sels, ARRAY_SIZE(semc_alt_sels));
+>> +       hws[IMXRT1050_CLK_SEMC_SEL] = imx_clk_hw_mux_flags("semc_sel", ccm_base + 0x14, 6, 1,
+>> +               semc_sels, ARRAY_SIZE(semc_sels), CLK_IS_CRITICAL);
+>> +
+>> +       hws[IMXRT1050_CLK_AHB_PODF] = imx_clk_hw_divider("ahb", "periph_sel", ccm_base + 0x14, 10, 3);
+>> +       hws[IMXRT1050_CLK_IPG_PDOF] = imx_clk_hw_divider("ipg", "ahb", ccm_base + 0x14, 8, 2);
+>> +       hws[IMXRT1050_CLK_PER_PDOF] = imx_clk_hw_divider("per", "per_sel", ccm_base + 0x1C, 0, 5);
+>> +
+>> +       hws[IMXRT1050_CLK_USDHC1_PODF] = imx_clk_hw_divider("usdhc1_podf", "usdhc1_sel", ccm_base + 0x24, 11, 3);
+>> +       hws[IMXRT1050_CLK_USDHC2_PODF] = imx_clk_hw_divider("usdhc2_podf", "usdhc2_sel", ccm_base + 0x24, 16, 3);
+>> +       hws[IMXRT1050_CLK_LPUART_PODF] = imx_clk_hw_divider("lpuart_podf", "lpuart_sel", ccm_base + 0x24, 0, 6);
+>> +       hws[IMXRT1050_CLK_LCDIF_PRED] = imx_clk_hw_divider("lcdif_pred", "lcdif_sel", ccm_base + 0x38, 12, 3);
+>> +       hws[IMXRT1050_CLK_LCDIF_PODF] = imx_clk_hw_divider("lcdif_podf", "lcdif_pred", ccm_base + 0x18, 23, 3);
+>> +
+>> +       hws[IMXRT1050_CLK_USDHC1] = imx_clk_hw_gate2("usdhc1", "usdhc1_podf", ccm_base + 0x80, 2);
+>> +       hws[IMXRT1050_CLK_USDHC2] = imx_clk_hw_gate2("usdhc2", "usdhc2_podf", ccm_base + 0x80, 4);
+>> +       hws[IMXRT1050_CLK_LPUART1] = imx_clk_hw_gate2("lpuart1", "lpuart_podf", ccm_base + 0x7c, 24);
+>> +       hws[IMXRT1050_CLK_LCDIF_APB] = imx_clk_hw_gate2("lcdif", "lcdif_podf", ccm_base + 0x74, 10);
+>> +       hws[IMXRT1050_CLK_DMA] = imx_clk_hw_gate("dma", "ipg", ccm_base + 0x7C, 6);
+>> +       hws[IMXRT1050_CLK_DMA_MUX] = imx_clk_hw_gate("dmamux0", "ipg", ccm_base + 0x7C, 7);
+>> +       imx_check_clk_hws(hws, IMXRT1050_CLK_END);
+>> +
+>> +       ret = of_clk_add_hw_provider(np, of_clk_hw_onecell_get, clk_hw_data);
+>> +       if (ret < 0) {
+>> +               dev_err(dev, "Failed to register clks for i.MXRT1050.\n");
+>> +               imx_unregister_hw_clocks(hws, IMXRT1050_CLK_END);
+>> +               return ret;
+> 
+> Drop return
+> 
+>> +       }
+> 
+> Newline here please
+> 
+>> +       return 0;
+> 
+> return ret;
+Ah makes sence.
+>> +}.
+>> +static const struct of_device_id imxrt1050_clk_of_match[] = {
+>> +       { .compatible = "fsl,imxrt1050-ccm" },
+>> +       { /* Sentinel */ },
+> 
+> Drop comma please so nothing can come after without causing compile fail.
+Okay makes sence, but its copied from imx8.
+>> +};
+>> +MODULE_DEVICE_TABLE(of, imxrt1050_clk_of_match);
+>> +
+>> +static struct platform_driver imxrt1050_clk_driver = {
+>> +       .probe = imxrt1050_clocks_probe,
+>> +       .driver = {
+>> +               .name = "imxrt1050-ccm",
+>> +               .of_match_table = imxrt1050_clk_of_match,
+>> +       },
+>> +};
+>> +module_platform_driver(imxrt1050_clk_driver);
+> 
+> It's not a module though, unless the Kconfig is made into a tristate.
+Ah okay will look into this.
 
-Have you tested that QCOM_SCM_ES_DERIVE_SW_SECRET is working properly?
-
-For reference, these are the fixes I had to apply to qcom_scm.c to get thin=
-gs working until that point.  This included fixing the direction of the fir=
-st arguments to the SCM calls, and fixing the return values.  Note, I also =
-tested leaving QCOM_SCM_ES_DERIVE_SW_SECRET using QCOM_SCM_RO instead of QC=
-OM_SCM_RW, but the result was still the same --- it still returned -EINVAL.
-
-diff --git a/drivers/firmware/qcom_scm.c b/drivers/firmware/qcom_scm.c inde=
-x d57f52015640..002b57a1473d 100644
---- a/drivers/firmware/qcom_scm.c
-+++ b/drivers/firmware/qcom_scm.c
-@@ -1087,7 +1087,7 @@ int qcom_scm_derive_sw_secret(const u8 *wrapped_key, =
-u32 wrapped_key_size,
-        struct qcom_scm_desc desc =3D {
-                .svc =3D QCOM_SCM_SVC_ES,
-                .cmd =3D  QCOM_SCM_ES_DERIVE_SW_SECRET,
--               .arginfo =3D QCOM_SCM_ARGS(4, QCOM_SCM_RO,
-+               .arginfo =3D QCOM_SCM_ARGS(4, QCOM_SCM_RW,
-                                         QCOM_SCM_VAL, QCOM_SCM_RW,
-                                         QCOM_SCM_VAL),
-                .args[1] =3D wrapped_key_size, @@ -1148,7 +1148,7 @@ EXPORT=
-_SYMBOL(qcom_scm_derive_sw_secret);
-  * This SCM calls adds support for the generate key IOCTL to interface
-  * with the secure environment to generate and return a wrapped key..
-  *
-- * Return: 0 on success; -errno on failure.
-+ * Return: size of the resulting key on success; -errno on failure.
-  */
- int qcom_scm_generate_ice_key(u8 *longterm_wrapped_key,
-                            u32 longterm_wrapped_key_size) @@ -1188,7 +1188=
-,7 @@ int qcom_scm_generate_ice_key(u8 *longterm_wrapped_key,
-        dma_free_coherent(__scm->dev, longterm_wrapped_key_size,
-                          longterm_wrapped_keybuf, longterm_wrapped_key_phy=
-s);
-
--       return ret;
-+       return ret ?: longterm_wrapped_key_size;
- }
- EXPORT_SYMBOL(qcom_scm_generate_ice_key);
-
-@@ -1209,7 +1209,7 @@ EXPORT_SYMBOL(qcom_scm_generate_ice_key);
-  * with the secure environment to rewrap the wrapped key with an
-  * ephemeral wrapping key.
-  *
-- * Return: 0 on success; -errno on failure.
-+ * Return: size of the resulting key on success; -errno on failure.
-  */
- int qcom_scm_prepare_ice_key(const u8 *longterm_wrapped_key,
-                             u32 longterm_wrapped_key_size, @@ -1219,7 +121=
-9,7 @@ int qcom_scm_prepare_ice_key(const u8 *longterm_wrapped_key,
-        struct qcom_scm_desc desc =3D {
-                .svc =3D QCOM_SCM_SVC_ES,
-                .cmd =3D  QCOM_SCM_ES_PREPARE_ICE_KEY,
--               .arginfo =3D QCOM_SCM_ARGS(4, QCOM_SCM_RO,
-+               .arginfo =3D QCOM_SCM_ARGS(4, QCOM_SCM_RW,
-                                         QCOM_SCM_VAL, QCOM_SCM_RW,
-                                         QCOM_SCM_VAL),
-                .args[1] =3D longterm_wrapped_key_size, @@ -1270,7 +1270,7 =
-@@ int qcom_scm_prepare_ice_key(const u8 *longterm_wrapped_key,
-        dma_free_coherent(__scm->dev, longterm_wrapped_key_size,
-                          longterm_wrapped_keybuf, longterm_wrapped_key_phy=
-s);
-
--       return ret;
-+       return ret ?: ephemeral_wrapped_key_size;
- }
- EXPORT_SYMBOL(qcom_scm_prepare_ice_key);
-
-@@ -1289,7 +1289,7 @@ EXPORT_SYMBOL(qcom_scm_prepare_ice_key);
-  * the secure environment to import a raw key and generate a longterm
-  * wrapped key.
-  *
-- * Return: 0 on success; -errno on failure.
-+ * Return: size of the resulting key on success; -errno on failure.
-  */
- int qcom_scm_import_ice_key(const u8 *imported_key, u32 imported_key_size,
-                            u8 *longterm_wrapped_key, @@ -1298,7 +1298,7 @@=
- int qcom_scm_import_ice_key(const u8 *imported_key, u32 imported_key_size,
-        struct qcom_scm_desc desc =3D {
-                .svc =3D QCOM_SCM_SVC_ES,
-                .cmd =3D  QCOM_SCM_ES_IMPORT_ICE_KEY,
--               .arginfo =3D QCOM_SCM_ARGS(4, QCOM_SCM_RO,
-+               .arginfo =3D QCOM_SCM_ARGS(4, QCOM_SCM_RW,
-                                         QCOM_SCM_VAL, QCOM_SCM_RW,
-                                         QCOM_SCM_VAL),
-                .args[1] =3D imported_key_size, @@ -1344,7 +1344,7 @@ int q=
-com_scm_import_ice_key(const u8 *imported_key, u32 imported_key_size,
-        dma_free_coherent(__scm->dev, imported_key_size, imported_keybuf,
-                          imported_key_phys);
-
--       return ret;
-+       return ret ?: longterm_wrapped_key_size;
- }
- EXPORT_SYMBOL(qcom_scm_import_ice_key);
