@@ -2,174 +2,188 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24A51C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 17:09:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 734D8C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 17:48:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241513AbiAFRJA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 12:09:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36392 "EHLO
+        id S242332AbiAFRsM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Jan 2022 12:48:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241500AbiAFRJA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 12:09:00 -0500
-Received: from mail-qk1-x734.google.com (mail-qk1-x734.google.com [IPv6:2607:f8b0:4864:20::734])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47742C061245;
-        Thu,  6 Jan 2022 09:08:59 -0800 (PST)
-Received: by mail-qk1-x734.google.com with SMTP id 131so3324212qkk.2;
-        Thu, 06 Jan 2022 09:08:59 -0800 (PST)
+        with ESMTP id S242286AbiAFRsL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 12:48:11 -0500
+Received: from mail-qt1-x829.google.com (mail-qt1-x829.google.com [IPv6:2607:f8b0:4864:20::829])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88948C061245;
+        Thu,  6 Jan 2022 09:48:11 -0800 (PST)
+Received: by mail-qt1-x829.google.com with SMTP id q14so3004942qtx.10;
+        Thu, 06 Jan 2022 09:48:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=0ffbZyelwVvcZOIYODcrnmkTQwb0Fc+dU7F9GmkYnRI=;
-        b=Mx7XYnmbPntyXUsLTn58042IWp/amYAaH2yL2ihBvgpM+cn1vQjocj0PQF14jnipee
-         wwko1oqjag3GPiNarDwzOpx1ba7r6+lJj/Ef58j8kqu3YxzDa/1FOyWhO0JERjmGsC5Z
-         gYmDPTHCfuoVFEfCzyllDnfyOHe+TGQe4ScdQv8/TpdLivMRvCoH+gBlT0M1Cd3LV0Pl
-         dp7c5Af2UwYhYCd7d3hfNXXGda+PwPl5Rjd3gcoEZbYGup91fzUaD+c46sy3oCev0wN/
-         ylGPBX3szvS1PqwK2uVdFuWmCvcip3oZSFByuFUF3icM4yBYQ/BaNLtxzmARL4J+5blw
-         JnwQ==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=JzeqOhWeVQiSHelvYCvShiD3mFgyW2CwssuqprC+wZc=;
+        b=idGNcipYL7yVkj1KzDHsazAHCepCXgh/Bo2nuVTxkrM9Bziv1HKEOT5SQqW/pwvnpc
+         yRiefEmmyfh1sePVatXXthUrqrHYXtj8isuXkfSMdeQDpSI6DS79XI7U9F8SQQndCgOu
+         vZ/wkUf6LSRfwe1CIwl+p0/hZ5xq6tRO2+moHyGCOg6epczgFoD2zFHaU4BieAIAQ9zK
+         zf1uOlRAdIqXLT5pMG4jKbiFoKwtVIS4sM92/OVgeVnpGOmlOJDB4j7Z9uOzZ2HoApdE
+         gotUV7BDJoj6k6V6FyBajvKhf5XdM+oA0NYG7RSuLmoA5wblnghtO7SMCJJWq7mT7hdZ
+         mXUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=0ffbZyelwVvcZOIYODcrnmkTQwb0Fc+dU7F9GmkYnRI=;
-        b=YEtzxAKPGZsmgtACm/7hmBn9sArmwrfxs84Df9q1j9VbTvsu9zfdD9a+q1UdPDnbhc
-         cXScsvokksrkB4cFhjKOFWqnWbqxARI9dSKzroTLe8VVNdnJ2hVu2Tc16tzPdOup7/Z3
-         l8xCIbFCWrmJgc4kB5yDJgveAkoHbAwrv0K2/piFyo6LV6PT63c3srreXlqg70ETNNwf
-         3UcovtU8eNX1yksZPKPz4rPhN3QHxYCKwwXsc2IENy4OgfAlsBz0zZ/oB/2odwsD0sYW
-         0x6J6b6jmmBqPn1d6/opi1a7cSsrZcfS8ArmZbX64Wjfi/ndGMdZY0Tur+UaGDGyCx3k
-         WVzg==
-X-Gm-Message-State: AOAM531i7q9Ce10RUAKMHOqcwfMt2Z7bXS6KHvGAfSXi+JSrMTziZXPd
-        Cr+4F8cPrdH5qVJ5UNiq57U3VHXgE37day/W
-X-Google-Smtp-Source: ABdhPJyN+75YEjW3ZYbCv/LIAc0ohUnLmHCiKT74pomgFmvxDoj2o/G8RtMMOszjWhJa/CUKg1RH6A==
-X-Received: by 2002:a05:620a:440e:: with SMTP id v14mr38550869qkp.164.1641488938302;
-        Thu, 06 Jan 2022 09:08:58 -0800 (PST)
-Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id d11sm1769944qtj.4.2022.01.06.09.08.57
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=JzeqOhWeVQiSHelvYCvShiD3mFgyW2CwssuqprC+wZc=;
+        b=zXbnjDaCw6V8x7SvAMF6/oP6OwfjdvqBlmgsH6xYQ0e6/grIeMR4H2AqGJFaqcN8uD
+         idBAiItuB3kCou4dvt7wJGw35uTylO17om+5py7WEqj16emC9bUZC3RqJeeEEKIsH+4Y
+         OL1uyWpvtpY53TxSa0ohC+4oUo+BLtR3GAUQhJz5+nTWNb95TsC1bWOhDkO7d6W0Qdz2
+         vjOKvyGSrVMqbbG+J/ShQtMQf2pzKeqISfqMOo8s33T2HJJTHExkflGY83zNllWgqLmA
+         0Oyy0zpxF93zHU28FiTBQXvIJWm4aiY6l8fftT2hC5YmxeNLZm411ukpyA5bedHNQ3gd
+         9XNg==
+X-Gm-Message-State: AOAM531urMBRLJx/jOXWqqPIFoJXz1/RuyZm+vkJFnL7sKeFf+IIZha+
+        TfsiKBxtPr179IesGSKoCrVhdhyKNZGpYQ==
+X-Google-Smtp-Source: ABdhPJxy81icM8T2h1gX796roVS9zK67zGnXuHaXxmfAAYS9UyrQ8kHbjxVbW6iV2h9TgzYC2YJVLg==
+X-Received: by 2002:ac8:5f84:: with SMTP id j4mr53732481qta.271.1641491290443;
+        Thu, 06 Jan 2022 09:48:10 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id u19sm1709227qke.1.2022.01.06.09.48.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Jan 2022 09:08:57 -0800 (PST)
-Date:   Thu, 6 Jan 2022 12:08:55 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Thu, 06 Jan 2022 09:48:10 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
         kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
         mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
         shorne@gmail.com, geert@linux-m68k.org,
         david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        rdunlap@infradead.org
-Subject: Re: [PATCH v5 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <YdciJ2kVHzXCoq4r@errol.ini.cmu.edu>
-References: <20211215130711.111186-1-gsomlo@gmail.com>
- <20211215130711.111186-4-gsomlo@gmail.com>
- <CAPDyKFqo5sZy8aVbOcfS_cxT9T5r214GKCL-FKRg_0P0yQJTFQ@mail.gmail.com>
- <YdOUbYpGFNyxz3iD@errol.ini.cmu.edu>
+        rdunlap@infradead.org, andy.shevchenko@gmail.com
+Subject: [PATCH v6 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Thu,  6 Jan 2022 12:48:00 -0500
+Message-Id: <20220106174803.1773876-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YdOUbYpGFNyxz3iD@errol.ini.cmu.edu>
-X-Clacks-Overhead: GNU Terry Pratchett
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jan 03, 2022 at 07:27:28PM -0500, Gabriel L. Somlo wrote:
-> On Tue, Dec 28, 2021 at 05:15:25PM +0100, Ulf Hansson wrote:
-> > I noticed that you use these hard coded values and don't really care
-> > to manage voltage changes via ->set_ios().
-> > 
-> > Rather than doing it like this, I would prefer if you can hook up a
-> > fixed vmmc regulator in the DTS. Then call mmc_regulator_get_supply()
-> > to fetch it from here, which will let the mmc core create the
-> > mmc->ocr_avail mask, based upon the voltage level the regulator
-> > supports.
-> > 
-> > This becomes more generic and allows more flexibility for the platform
-> > configuration.
-> 
-> The LiteSDCard "hardware" (i.e., *gateware*) does not allow modification
-> or selection of voltage from the software side. When a CMD8 is issued,
-> the "voltage supplied" bit pattern is expected to be '0001b', which per
-> the spec means "2.7-3.6V". 
-> 
-> I tried adding this to the overall DTS:
-> 
-> 	vreg_mmc: vreg_mmc_3v {
-> 		compatible = "regulator-fixed";
-> 		regulator-min-microvolt = <3300000>;
-> 		regulator-max-microvolt = <3300000>;
-> 	};
-> 
-> and then added a reference to it to the LiteSDCard "mmc0" node in DTS,
-> like so:
-> 
-> 	mmc0: mmc@12005000 {
-> 		compatible = "litex,mmc";
-> 		reg = <0x12005000 0x100>,
-> 			<0x12003800 0x100>,
-> 			<0x12003000 0x100>,
-> 			<0x12004800 0x100>,
-> 			<0x12004000 0x100>;
-> 		reg-names = "phy", "core", "reader", "writer", "irq";
-> 		clocks = <&sys_clk>;
-> 		vmmc-supply = <&vreg_mmc>; /* <-------- HERE !!! */
-> 		interrupt-parent = <&L1>;
-> 		interrupts = <4>;
-> 	};
-> 
-> Finally, I replaced the hardcoded setting of `mmc->ocr_avail` with a
-> call to `mmc_regulator_get_supply(mmc)`. Now, I get a bunch of timeouts
-> during attempts to send e.g., CMD8 and CMD55.
-> (going for 3200000 and 3400000 for min- and max-microvolt, respectively,
->  -- or anything else in the allowed 2.7-3.6 range -- doesn't help either).
-> 
-> I might be doing something subtly wrong in the way I set things up
-> above, but it feels a bit overengineered, and IMHO fragile.
-> 
-> OTOH, going all out and setting:
-> 
->         /* allow for generic 2.7-3.6V range, no software tuning available */
->         mmc->ocr_avail = MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 |
->                          MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 |
->                          MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36;
-> 
-> seems to work just fine... :) Please do let me know what you think!
-  
-I dug around `drivers/mmc/core/regulator.c` a bit more, and it turns
-out `mmc_regulator_get_supply()` is allowed to return 0 even if not
-all regulators have been found, "because they all are optional", and
-I still need to write additional code to check if my regulator got
-populated -- I assume that means checking if `mmc->ocr_avail` was set
-to something useful, or whether it's still 0.
+Add support for the LiteX SD-Card device, LiteSDCard.
 
-In my case, with the above-mentioned modifications in DTS, I still end
-up with `mmc->ocr_avail == 0` after calling `mmc_regulator_get_supply()`,
-which explains why the card doesnoesn't work correctly after being
-probed.
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
-Not quite sure what to do in that situation -- any ideas?
+New in v6:
 
-I still think it's a bit overkill to set up a dummy regulator in DTS
-and probe for it when the "hardware" doesn't actually support
-variable/configurable voltages or dynamic changes in voltage -- a
-hard-coded constant somehow feels more appropriate, wouldn't you
-agree?
+drivers/mmc/host/litex_mmc.c:
+  - fix handling of deferred probe vs. platform_get_irq_optional()
+  - don't #ifdef dma_set_mask_and_coherent(), since it automatically
+    does the right thing on both 32- and 64-bit DMA capable arches
+  - remove MMC_CAP2_FULL_PWR_CYCLE, add MMC_CAP2_NO_MMC to list of
+    hardcoded capabilities during litex_mmc_probe()
+  - hardcode mmc->ocr_avail to the full 2.7-3.6V range allowed by the
+    SDCard spec (the LiteSDCard device doesn't accept software
+    configuration)
 
-IMHO, it makes more sense to define the entire generic/standard range
-described in the SDCard specification (2.7-3.6V) as a constant, e.g.:
+>New in v5:
+>
+>MAINTAINERS:
+>
+>  - picked up a/b Mateusz
+>
+>Doc/dt/bindings/mmc/litex,mmc.yaml:
+>
+>  - picked up r/b Rob, Joel
+>
+>drivers/mmc/host/litex_mmc.c:
+>
+>  - shorten #define constant names (cosmetic, make them less unwieldy)
+>  - picked up r/b Joel
+>
+>>New in v4:
+>>
+>>Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>
+>>  - fixed `dt_binding_check` errors uncovered by Rob's script
+>>
+>>drivers/mmc/host/litex_mmc.c:
+>>
+>>  - struct litex_mmc_host fields re-ordered so that `pahole` reports
+>>    no holes in either 32- or 64-bit builds
+>>  - litex_mmc_set_bus_width() now encapsulates check for
+>>    host->is_bus_width_set
+>>  - litex_mmc_request() - factor out dma data setup into separate
+>>    helper function: litex_mmc_do_dma()
+>>
+>>>New in v3:
+>>>
+>>>  MAINTAINERS:
+>>>
+>>>  - picked up acked-by Joel
+>>>  - added listing for liteeth driver
+>>>  - added Joel as additional co-maintainer (thanks!)
+>>>
+>>>  Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>
+>>>  - picked up r/b Geert Uytterhoeven <geert@linux-m68k.org> in DT
+>>>    bindings document (please let me know if that was premature, and
+>>>    happy to take further review if needed :)
+>>>  - add dedicated DT property for source clock frequency
+>>>
+>>>  drivers/mmc/host/litex_mmc.c:
+>>>
+>>>  - fixed function signature (no line split), and naming (litex_mmc_*)
+>>>  - more informative MODULE_AUTHOR() entries
+>>>    - also added matching "Copyright" entries in file header
+>>>  - fixed description in Kconfig
+>>>  - fixed DT documentation
+>>>  - removed magic constants
+>>>  - removed litex_map_status(), have sdcard_wait_done() return *real*
+>>>    error codes directly instead.
+>>>  - streamlined litex_mmc_reponse_len()
+>>>  - call litex_mmc_set_bus_width() only once, and ensure it returns
+>>>    correct error code(s)
+>>>  - use readx_poll_timeout() -- more concise -- instead of
+>>>    read_poll_timeout()
+>>>  - use dev_err() in litex_mmc_send_cmd() (instead of pr_err())
+>>>  - litex_mmc_setclk() will update host->clock before returning
+>>>  - separate irq initialization into its own function,
+>>>    litex_mmc_irq_init()
+>>>  - document rationale for f_min, f_max
+>>>  - use dmam_alloc_coherent(), which simplifies cleanup significantly
+>>>  - large `if (data) { ... }` block in litex_mmc_request() left as-is,
+>>>    there are too many variables shared with the rest of the parent
+>>>    function body to easily separate (e.g., `len`, `transfer`, `direct`).
+>>>    If this is indeed a blocker, I can take another shot at refactoring
+>>>    it in a future revision!
+>>>  - bump dma_set_mask_and_coherent() to 64-bits on suitable
+>>>    architectures
+>>>  - clock source picked up from dedicated DT clock reference property
+>>>  - remove gpio card-detect logic (needs testing and a dt binding
+>>>    example before being eligible for upstream inclusion)
+>>>
+>>>> New in v2:
+>>>>   - reword info message in litex_set_clk()
+>>>>   - streamline code in litex_map_status()
+>>>>   - fix typos in Kconfig (thanks Randy Dunlap <rdunlap@infradead.org>)
+>>>>   - improvements suggested by Stafford Horne <shorne@gmail.com>
+>>>>     - allow COMPILE_TEST in Kconfig
+>>>>     - use read_poll_timeout() when waiting for cmd/data/DMA
+>>>>       xfer completion
+>>>>   - include interrupt.h (thanks kernel test robot <lkp@intel.com>)
 
-#define LITEX_MMC_OCR (MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 | \
-                       MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 | \
-                       MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36)
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
 
-and then initialize `mmc->ocr_avail = LITEX_MMC_OCR` to that instead.
-This is how they do it in drivers/mmc/host/au1xmmc.c, for instance.
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  72 ++
+ MAINTAINERS                                   |   9 +-
+ drivers/mmc/host/Kconfig                      |   9 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 659 ++++++++++++++++++
+ 5 files changed, 748 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
 
-I'm happy to learn more about why going the DTS-dummy-regulator
-configurable route is better, so let me know what you think. I'm going
-to send out v6 with the hard-coded constant version above soon, unless
-I hear back from you before then. But we can always go another round
-(i.e., v7) unless you agree with my argument -- please let me know
-either way! :)
+-- 
+2.31.1
 
-Thanks again,
---Gabriel
