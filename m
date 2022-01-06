@@ -2,96 +2,159 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8028AC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 18:25:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD69CC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 18:55:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242816AbiAFSZh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 13:25:37 -0500
-Received: from mail-oo1-f52.google.com ([209.85.161.52]:36513 "EHLO
-        mail-oo1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242786AbiAFSZf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 13:25:35 -0500
-Received: by mail-oo1-f52.google.com with SMTP id k15-20020a4a850f000000b002dc3cdb0256so448146ooh.3;
-        Thu, 06 Jan 2022 10:25:35 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=fiswExMz6XFGwtuBLNXXr8Y61t2eLKYq11RSjSYGFgI=;
-        b=Gd/H38f/3UqJXiwoHcBsgrqqq4zm3keBeAlaXw8gmXASHW8N49b87od4eO4LrjTNlx
-         PrtNGclheQ6J7+VeNh36PyjFXWzjq5GDE+9+w3Rrs1OB7LlOLELpanSa48JHKDmn6PiH
-         Oxqk1zeKV+3Pd7rIw8/6vdmyIXWQgwIBsxe+0VScAUOFam2v29eKGvoiYuqorx4aZaHd
-         AfR7mkaqnIZc1Nfi0ykkaN5jEvX73OJ2NRWM94SvwxOj1OUsPitjH77QqUKEc+PVd2ZY
-         Ni/T6tMPnTwsSKhDw5U2OUfqTzdu8u+kuBIJdrlU1DNB4yveoKb/XDG2+3U+ewVl3UCC
-         wvLQ==
-X-Gm-Message-State: AOAM5300oVzo6msdNLkuKcisIhTdWrPFlma0oheymU4Azs9gOGNbnhzK
-        CFaPS68ei7Ly+aa1RaPQYQ==
-X-Google-Smtp-Source: ABdhPJwB9iT6Wzc4bAEqj5n+FhrYY/F4LxNj/hGK1fvAB2ejuvOQ7IDy/GkuKITHAGLet0tK5Citsw==
-X-Received: by 2002:a4a:7c85:: with SMTP id v127mr38877986ooc.79.1641493534925;
-        Thu, 06 Jan 2022 10:25:34 -0800 (PST)
-Received: from xps15.herring.priv (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.googlemail.com with ESMTPSA id r13sm484949oth.21.2022.01.06.10.25.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Jan 2022 10:25:34 -0800 (PST)
-From:   Rob Herring <robh@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: arm,pl18x: Make each example a separate entry
-Date:   Thu,  6 Jan 2022 12:25:14 -0600
-Message-Id: <20220106182518.1435497-6-robh@kernel.org>
-X-Mailer: git-send-email 2.32.0
+        id S243100AbiAFSzn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Jan 2022 13:55:43 -0500
+Received: from dfw.source.kernel.org ([139.178.84.217]:46242 "EHLO
+        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S243061AbiAFSzl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 13:55:41 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id F22DA61DC2;
+        Thu,  6 Jan 2022 18:55:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68643C36AEB;
+        Thu,  6 Jan 2022 18:55:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641495340;
+        bh=hUSBuncfdYSMo8JYah8e80uOyS1OIGFpsNc2vV+EOuo=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=OXdd6Z0116/9Sx5fcHmCnUWOjkYlE+rfSgQ3/vq1G42Pmvu6g/SJF6ELx2+huB91g
+         XoLKXn4Zc3hhOAkggWalI25A2HrPo+LLy+ZzK/ci6L9axJqtZOGneYNF/3tT4Vsuxv
+         rJ1HnD34j7hq4+z1XNHWUltg8nO7EULrVBqsbSlgTw4HL8n2tpnaEOEoQBUII5gGlE
+         uqj93jY/Pkk7BwhUE/CtCGmVBlHbsFBDcD4/SpKcTrzpe6j6WtsePgFm8qY5aCOOM6
+         uWxalChD6rY1aOhnzsJqcHl7AMFlUckyr3t70wGuYuF4wOkVlzoVMki3IB9vClXEIR
+         MiFwHRj8lOEKg==
+Received: by mail-ed1-f50.google.com with SMTP id q25so4451865edb.2;
+        Thu, 06 Jan 2022 10:55:40 -0800 (PST)
+X-Gm-Message-State: AOAM53134R4b6+evWffGty7j5HUqV1a5SaQprjBoSkgMmU1Z6SF2W+VS
+        icmQO4foSS4IpFHfxpJpXPwIcz7V57ZkdwIIxQ==
+X-Google-Smtp-Source: ABdhPJw9WxLjYgVOSm32VR2+V+3X6pv+18TJ2gujjOSgM+fLMn8xkbFnouhimP1Rqm6xeCbe28L+fy93zOCBGcPfc30=
+X-Received: by 2002:aa7:d5c7:: with SMTP id d7mr2854351eds.280.1641495338714;
+ Thu, 06 Jan 2022 10:55:38 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <cover.1641354285.git.tonyhuang.sunplus@gmail.com> <1d946b61174adf4216c79728d56dcc1eb8a86b38.1641354285.git.tonyhuang.sunplus@gmail.com>
+In-Reply-To: <1d946b61174adf4216c79728d56dcc1eb8a86b38.1641354285.git.tonyhuang.sunplus@gmail.com>
+From:   Rob Herring <robh+dt@kernel.org>
+Date:   Thu, 6 Jan 2022 12:55:25 -0600
+X-Gmail-Original-Message-ID: <CAL_JsqLtP+2BaHUxTpYUBtCY13UHY8hs677PPBtZD20Vdwq65g@mail.gmail.com>
+Message-ID: <CAL_JsqLtP+2BaHUxTpYUBtCY13UHY8hs677PPBtZD20Vdwq65g@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+To:     Tony Huang <tonyhuang.sunplus@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        =?UTF-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>,
+        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Each independent example should be a separate entry. This and dropping
-'interrupt-parent' allows for 'interrupts' to have different cell sizes.
+On Tue, Jan 4, 2022 at 11:20 PM Tony Huang <tonyhuang.sunplus@gmail.com> wrote:
+>
+> Add mmc yaml file for Sunplus SP7021
 
-Signed-off-by: Rob Herring <robh@kernel.org>
----
- Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+There's a typo in the DT list address. Please resend so checks run.
+Looks fine otherwise.
 
-diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-index 47595cb483be..2a64cffbe6ad 100644
---- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-+++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-@@ -167,6 +167,9 @@ examples:
-       clock-names = "mclk", "apb_pclk";
-     };
- 
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+
-     mmc@80126000 {
-       compatible = "arm,pl18x", "arm,primecell";
-       reg = <0x80126000 0x1000>;
-@@ -188,12 +191,12 @@ examples:
-       vqmmc-supply = <&vmmci>;
-     };
- 
-+  - |
-     mmc@101f6000 {
-       compatible = "arm,pl18x", "arm,primecell";
-       reg = <0x101f6000 0x1000>;
-       clocks = <&sdiclk>, <&pclksdi>;
-       clock-names = "mclk", "apb_pclk";
--      interrupt-parent = <&vica>;
-       interrupts = <22>;
-       max-frequency = <400000>;
-       bus-width = <4>;
-@@ -208,6 +211,7 @@ examples:
-       vmmc-supply = <&vmmc_regulator>;
-     };
- 
-+  - |
-     mmc@52007000 {
-       compatible = "arm,pl18x", "arm,primecell";
-       arm,primecell-periphid = <0x10153180>;
--- 
-2.32.0
-
+>
+> Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
+> ---
+> Changes in v2:
+>  - Modify maintainers e-mail address.
+>
+>  .../devicetree/bindings/mmc/sunplus-mmc.yaml       | 60 ++++++++++++++++++++++
+>  MAINTAINERS                                        |  5 ++
+>  2 files changed, 65 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml b/Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
+> new file mode 100644
+> index 0000000..1c39af2
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
+> @@ -0,0 +1,60 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (C) Sunplus Ltd. Co. 2021
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/sunplus-mmc.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: sunplus MMC controller
+> +
+> +allOf:
+> +  - $ref: "mmc-controller.yaml"
+> +
+> +maintainers:
+> +  - Tony Huang <tonyhuang.sunplus@gmail.com>
+> +
+> +properties:
+> +  compatible:
+> +    const: sunplus,sp7021-emmc
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    minItems: 1
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - resets
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    mmc0: mmc@9c003b00 {
+> +        compatible = "sunplus,sp7021-emmc";
+> +        reg = <0x9c003b00 0x180>;
+> +        interrupts = <20 IRQ_TYPE_LEVEL_HIGH>;
+> +        clocks = <&clkc 0x4e>;
+> +        resets = <&rstc 0x3e>;
+> +        bus-width = <8>;
+> +        max-frequency = <52000000>;
+> +        non-removable;
+> +        disable-wp;
+> +        cap-mmc-highspeed;
+> +        mmc-ddr-3_3v;
+> +        no-sdio;
+> +        no-sd;
+> +    };
+> +...
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index fb18ce7..01ed57a 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -18242,6 +18242,11 @@ L:     netdev@vger.kernel.org
+>  S:     Maintained
+>  F:     drivers/net/ethernet/dlink/sundance.c
+>
+> +SUNPLUS MMC DRIVER
+> +M:     Tony Huang <tonyhuang.sunplus@gmail.com>
+> +S:     Maintained
+> +F:     Documentation/devicetree/bindings/mmcc/sunplu-mmc.yaml
+> +
+>  SUPERH
+>  M:     Yoshinori Sato <ysato@users.sourceforge.jp>
+>  M:     Rich Felker <dalias@libc.org>
+> --
+> 2.7.4
+>
