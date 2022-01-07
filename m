@@ -2,54 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 656E5C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 16:26:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BD7CC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 16:27:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239927AbiAGQ0q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 11:26:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42568 "EHLO
+        id S1348220AbiAGQ1i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 11:27:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42778 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233408AbiAGQ0q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 11:26:46 -0500
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACB42C061574
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Jan 2022 08:26:45 -0800 (PST)
-Received: by mail-lf1-x136.google.com with SMTP id r4so17373267lfe.7
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Jan 2022 08:26:45 -0800 (PST)
+        with ESMTP id S1348216AbiAGQ1i (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 11:27:38 -0500
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED388C06173F
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Jan 2022 08:27:37 -0800 (PST)
+Received: by mail-lf1-x134.google.com with SMTP id g26so17360561lfv.11
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Jan 2022 08:27:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=4Wx8vb4BLG+DDO7rJPIEbH27WUURa/Qd6ietWG6WiTA=;
-        b=kip4fAu6AOvdI/hgmyaP2ZkUZLdRk1u5qdrt+qzHKZO1vBFbyBqKMWs0S5MxRVOOEr
-         WHlSHuVuY3wnX7GgX+gPrFRAfOhoPkdE6rSOMKPUmsmuNuN1JQl1+zl4eEUuJwT24h5e
-         BFYmWBhOCRLzIQVbWiZ5ccSAVwu1VfzINav9YzegtskifHvW70kEFNs4l5uEb2UVtUjW
-         9w/yxNXShxWS2E06MP5HLMbO0MgBQFM+k/7sLMZgQMhs7hM4PHq9IdBraWeFDjnRuax+
-         WQlG51ziBaQEbUCwLtiwf7QqjmBItEKzQ9D8ZvrtjPrP0Lz9c9g8RlDw/bFrOtGzGKgj
-         DXoQ==
+        bh=3Ee5TfAm0O/7oOb78wyCjsPYvF8t2d2cn5OSORbvHz4=;
+        b=lmfhs9Unvsa0JVwr+yaavqdMLXSMvPihFC7wUcl6yCbJcnP0sFhBerazGYto6B26Zk
+         KK3OVtuvUihYmuzhn/qpgNTREg2O7nsPzH4kUhK8/9oczN33tSDJIgw5FxF5m+9BiSly
+         OxxTOhmP8F8IrV3fMvbECCze5UKO5VBxfDPw+1Hqb07dM4OGoHvFpk3mBBhif9mg+fO+
+         B835IdCFKazt6ho3NGidHRsNauOS2vpWWF4VtD7h5UN0pMBNbyCDBXaY94wmj2/spkvf
+         60pheYdvVwpZ+v6ONxehFkPfz5mx/QnbeYVbo+8T01rcyyrpbXSxF5cm4iFJ0X4eQQnD
+         eIUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=4Wx8vb4BLG+DDO7rJPIEbH27WUURa/Qd6ietWG6WiTA=;
-        b=1+AWAchR3w1MoMQdbnU30qjitbrBIs/cWd65GY903WZBWrWmA6gTts1laYPoAUdX1G
-         NL+2AzKHLlkiyaOHHioOPJxKRAxP6XsBEKQA4RG/bJwPefvh70vWn/StFCsEU9F4JoG2
-         IQtQrUptZY4ZdNuxVpbrZrd2qiMTT/zmwMmoCeSxogokKODZngeB2uSsqHHDFLSVUqnZ
-         mblXPxlOQCWR1ZujVuAvW1rhY6dy7h4KgU1quvTcDHK6huZ8Qb9JkurN4gSKKISKoYSu
-         rIxljbXu2ZU9j3glOhnLG0C7q7ZG9cil7Q7R2hYScCn09U4SFt9dcJH6ayfYC0qjB4ol
-         cWYQ==
-X-Gm-Message-State: AOAM531Jyf3x1BCP90Em8hpnmQU+ZdGGoCM3TqkB/frjqCDTHmWKM8uP
-        UTl7fWwbpSSEaJnKob0ha7cGkTOLg/k0ruoa0KrjrQ==
-X-Google-Smtp-Source: ABdhPJxoyZIKjIKAy0vsM+Q9YLUcHyiT1i/rcFqzeHrV03xqmKlXiwgDQU8UZOFEvDKB4fVVjM97MAq7llbdE9aZfKg=
-X-Received: by 2002:a05:6512:3d9e:: with SMTP id k30mr56148357lfv.184.1641572803993;
- Fri, 07 Jan 2022 08:26:43 -0800 (PST)
+        bh=3Ee5TfAm0O/7oOb78wyCjsPYvF8t2d2cn5OSORbvHz4=;
+        b=wFRKmNkzSeVwnp/6VugXVydILPtpucvQf04RZUknnDrvZzUc1N+8rmUEVWyecWopnY
+         UA1yNtfd8AQdFb+ghCW+2hvUO2ei7b7z7HNdEzm9MVdeTvvpLwrJz1O92WIfywphOv5G
+         Uh0fedrcu+QSR6XfXRcLHcdErJL/Y3VsPHs9M0wykSdoslGNqhLfEr8ia0/ykM6O27fh
+         qszKmk1u7ROCMTshjnom4jFa5HlUeq8JBnZzIuU8njHKVabjLTvlS+CM8A4vVoXwXoGV
+         E48xv6Ay11tTrKwBZe+gbz3weh4/aVGRMzr0UrUwKm2kSebMbiEqqSErsonhLoTw6kSM
+         P2qQ==
+X-Gm-Message-State: AOAM5312Jf2eq3FMa5JJ06Wb6ffHfRQ9Pqdtd/N8YtEATqs2ZWp3dO9c
+        dN2iewXcXgGp3WWfyCGqg4/fEtBx+1yMG6M9CEWonw==
+X-Google-Smtp-Source: ABdhPJxDUAV+onrE/eFRssYk5Hxo7+8TSlBh+dLnXGAN2nXCchIxKEPDtRv+bPiA77beRzI9qDcWSo60rl1Uw1PsG+8=
+X-Received: by 2002:a2e:9659:: with SMTP id z25mr51179931ljh.16.1641572856161;
+ Fri, 07 Jan 2022 08:27:36 -0800 (PST)
 MIME-Version: 1.0
-References: <20220105182939.106885-1-paul@crapouillou.net> <20220105182939.106885-2-paul@crapouillou.net>
-In-Reply-To: <20220105182939.106885-2-paul@crapouillou.net>
+References: <20220105182939.106885-1-paul@crapouillou.net> <20220105182939.106885-3-paul@crapouillou.net>
+In-Reply-To: <20220105182939.106885-3-paul@crapouillou.net>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 7 Jan 2022 17:26:07 +0100
-Message-ID: <CAPDyKFqiVTcsr03SqCzZsTraivrnM4YxKxPQ7dMmt14dT1uiCQ@mail.gmail.com>
-Subject: Re: [PATCH v2 1/6] PM: core: Remove DEFINE_UNIVERSAL_DEV_PM_OPS() macro
+Date:   Fri, 7 Jan 2022 17:26:59 +0100
+Message-ID: <CAPDyKFppBN3R5pMx0MDhbn119+JeSdrduR5csNBMfRcT=f2pzw@mail.gmail.com>
+Subject: Re: [PATCH v2 2/6] PM: core: Remove static qualifier in
+ DEFINE_SIMPLE_DEV_PM_OPS macro
 To:     Paul Cercueil <paul@crapouillou.net>
 Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
         Jonathan Cameron <jic23@kernel.org>,
@@ -68,78 +69,72 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Wed, 5 Jan 2022 at 19:29, Paul Cercueil <paul@crapouillou.net> wrote:
 >
-> The deprecated UNIVERSAL_DEV_PM_OPS() macro uses the provided callbacks
-> for both runtime PM and system sleep, which is very likely to be a
-> mistake, as a system sleep can be triggered while a given device is
-> already PM-suspended, which would cause the suspend callback to be
-> called twice.
+> Keep this macro in line with the other ones. This makes it possible to
+> use them in the cases where the underlying dev_pm_ops structure is
+> exported.
 >
-> The amount of users of UNIVERSAL_DEV_PM_OPS() is also tiny (16
-> occurences) compared to the number of places where
-> SET_SYSTEM_SLEEP_PM_OPS() is used with pm_runtime_force_suspend() and
-> pm_runtime_force_resume(), which makes me think that none of these cases
-> are actually valid.
->
-> As this macro is currently unused, remove it before someone starts to
-> use it in yet another invalid case.
-
-I assume you refer to DEFINE_UNIVERSAL_DEV_PM_OPS here. Can you
-perhaps make that more clear?
-
+> Restore the "static" qualifier in the two drivers where the
+> DEFINE_SIMPLE_DEV_PM_OPS macro was used.
 >
 > Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 > Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
-> ---
->
-> Notes:
->     v2: No change
->
->  include/linux/pm.h | 19 ++++++-------------
->  1 file changed, 6 insertions(+), 13 deletions(-)
->
-> diff --git a/include/linux/pm.h b/include/linux/pm.h
-> index e1e9402180b9..31bbaafb06d2 100644
-> --- a/include/linux/pm.h
-> +++ b/include/linux/pm.h
-> @@ -366,6 +366,12 @@ static const struct dev_pm_ops name = { \
->         SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
->  }
->
-> +/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
-> +#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
-> +const struct dev_pm_ops __maybe_unused name = { \
-> +       SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
-> +}
-> +
->  /*
->   * Use this for defining a set of PM operations to be used in all situations
->   * (system suspend, hibernation or runtime PM).
-> @@ -379,19 +385,6 @@ static const struct dev_pm_ops name = { \
->   * .resume_early(), to the same routines as .runtime_suspend() and
->   * .runtime_resume(), respectively (and analogously for hibernation).
->   */
-> -#define DEFINE_UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
-> -static const struct dev_pm_ops name = { \
-> -       SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
-> -       RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
-> -}
-> -
-> -/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
-> -#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
-> -const struct dev_pm_ops __maybe_unused name = { \
-> -       SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
-> -}
-> -
-> -/* Deprecated. Use DEFINE_UNIVERSAL_DEV_PM_OPS() instead. */
 
-Shouldn't this macro be deprecated any more?
-
->  #define UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
->  const struct dev_pm_ops __maybe_unused name = { \
->         SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
-> --
-> 2.34.1
->
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>
+> Notes:
+>     v2: Merge the driver changes to make the commit atomic
+>
+>  drivers/mmc/host/jz4740_mmc.c | 4 ++--
+>  drivers/mmc/host/mxcmmc.c     | 2 +-
+>  include/linux/pm.h            | 2 +-
+>  3 files changed, 4 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index 7693236c946f..7ab1b38a7be5 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -1128,8 +1128,8 @@ static int jz4740_mmc_resume(struct device *dev)
+>         return pinctrl_select_default_state(dev);
+>  }
+>
+> -DEFINE_SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
+> -       jz4740_mmc_resume);
+> +static DEFINE_SIMPLE_DEV_PM_OPS(jz4740_mmc_pm_ops, jz4740_mmc_suspend,
+> +                               jz4740_mmc_resume);
+>
+>  static struct platform_driver jz4740_mmc_driver = {
+>         .probe = jz4740_mmc_probe,
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index 98c218bd6669..40b6878bea6c 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -1210,7 +1210,7 @@ static int mxcmci_resume(struct device *dev)
+>         return ret;
+>  }
+>
+> -DEFINE_SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
+> +static DEFINE_SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
+>
+>  static struct platform_driver mxcmci_driver = {
+>         .probe          = mxcmci_probe,
+> diff --git a/include/linux/pm.h b/include/linux/pm.h
+> index 31bbaafb06d2..389e600df233 100644
+> --- a/include/linux/pm.h
+> +++ b/include/linux/pm.h
+> @@ -362,7 +362,7 @@ struct dev_pm_ops {
+>   * to RAM and hibernation.
+>   */
+>  #define DEFINE_SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> -static const struct dev_pm_ops name = { \
+> +const struct dev_pm_ops name = { \
+>         SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+>  }
+>
+> --
+> 2.34.1
+>
