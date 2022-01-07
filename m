@@ -2,52 +2,56 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF2E4C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 09:36:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A1C6C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 10:12:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346500AbiAGJgk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 04:36:40 -0500
-Received: from mail-ua1-f46.google.com ([209.85.222.46]:34308 "EHLO
-        mail-ua1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346482AbiAGJgZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 04:36:25 -0500
-Received: by mail-ua1-f46.google.com with SMTP id y4so9213305uad.1;
-        Fri, 07 Jan 2022 01:36:25 -0800 (PST)
+        id S237222AbiAGKMq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 05:12:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42376 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237200AbiAGKMq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 05:12:46 -0500
+Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA24EC061245;
+        Fri,  7 Jan 2022 02:12:45 -0800 (PST)
+Received: by mail-pg1-x534.google.com with SMTP id 8so5054830pgc.10;
+        Fri, 07 Jan 2022 02:12:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=GvY4vt56fm3e5p8Ggdgh9xo2+Oq2fCsoWWoisZ3FiqE=;
+        b=RxXldgoyRe2ydVKDlBCwp7yrOL5ePCqb2mWoEgq87tul7KsMtCf/G0sd08pYxmCEMZ
+         3shiQbTYdEM6rwxjQvQvxQVRJ4irXPDWbhdQfE5IGEcdC5IFZ2+dOawla54S9LUDxnx6
+         q7ZRP6lPfEwfc8jfkG+hG6KY1YVTvPiOMWZe4AxrZmxlEiZ0vIIghQZyUgKhRubmJUQI
+         DQbrbsZZFSKTR2v6TBUstupmUyNwcaYMU7LM5uTOsQd+JRN3zieh2yLjqsyA38OC+wMi
+         lw9iv3ijZ/xyXjez17/cdXmBzYrMVXiIQj8tcv8fCIjDtTnb2hjN1ecG5rCWznc6PXEP
+         NRig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=xs5sARW7mpfzDA0KwWiz8yZyJQ7czca4eMuvBIQUrKc=;
-        b=zoaa7OyJa1OgsfkA4h6N2EnPfJ99FtaL2s/ybK/hz1ZIczbYjrfKFhNfJeBGqCgyZj
-         tNBkaB+EjjbevED0wKtUX4Vf5SYDzSQH2wBr1qFjtzxVYpLXj7CeoxQNRmcC8oEJX1GH
-         JdQkSiOtRkn2WiUg3eH7omcGWOhDV3HWu0xyo1NlA59dJsQpCLPfrtPEdOWG9LW7xvB4
-         BzqM60Y8u7UzcbkTkPIH7FkQsmlpfGf+Xfdh9P6peKE1PpheAL3UBZhM2sktVPtG33WK
-         a+eoFEZ8d/pizOwvjIgInLEIsta6I1N6mCn4+LxeYijM2yk00k3p2qnnV8imURm7F6au
-         As3g==
-X-Gm-Message-State: AOAM533ZSjclzHdkXsaD1UTMFT/05dKPoZFqv2Nc/+J1Tdyx8qXFHRNM
-        wgjphB5/NFKToUwOV0/TteKPnHr5/d3wEg==
-X-Google-Smtp-Source: ABdhPJwYFwF4jsFgKBpxI/AHtYDqxp0T1psqtf+9OE/vDHWVlpF03Griu5wja/kSDL4ozhSj64UJWg==
-X-Received: by 2002:a05:6102:38ce:: with SMTP id k14mr20332637vst.70.1641548184771;
-        Fri, 07 Jan 2022 01:36:24 -0800 (PST)
-Received: from mail-vk1-f181.google.com (mail-vk1-f181.google.com. [209.85.221.181])
-        by smtp.gmail.com with ESMTPSA id k15sm3211134vsj.3.2022.01.07.01.36.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Jan 2022 01:36:24 -0800 (PST)
-Received: by mail-vk1-f181.google.com with SMTP id o2so3360135vkn.0;
-        Fri, 07 Jan 2022 01:36:23 -0800 (PST)
-X-Received: by 2002:a05:6122:189e:: with SMTP id bi30mr6708723vkb.0.1641548183865;
- Fri, 07 Jan 2022 01:36:23 -0800 (PST)
-MIME-Version: 1.0
-References: <20220106174803.1773876-1-gsomlo@gmail.com> <20220106174803.1773876-4-gsomlo@gmail.com>
- <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com> <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
-In-Reply-To: <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 7 Jan 2022 10:36:12 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
-Message-ID: <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
-Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=GvY4vt56fm3e5p8Ggdgh9xo2+Oq2fCsoWWoisZ3FiqE=;
+        b=S9lBi1ls9oczta0V+Xu2/+D9qed7t/mJBFnlvKTtbbguyzKHkRosoGV/leOBOtwWw/
+         dEAMgXAsJEgg8Yc0YtaQ8Zz/4ypr4qohn0E3onTx5iQjR2E9kLDIVHOZdunmCucKu9YZ
+         WphC3kLQSot6IVi1gCa14BOZ+qJUkW/JGpYTPbg8TtVcxmvtnt/VrTAPY6+5MiQ0i1Sd
+         NnAHl65RZtqZ++kRcSa2zGdoztw4XQ0EBGXtG/j/C1VeRBTSKaFDX3FHzw8rW8iFgP42
+         jS8Z0JLWQlTCVmsqIcSGAvoepk6MUJfnpBzwwx88uxSuUB3M7YtYr3lpLn2Pjt/vcDW4
+         /WNw==
+X-Gm-Message-State: AOAM532MWhzK8FBuLn9Cm2b7Z6lvfMtqkO6xDOb1pQkLLse7uzmRqVH6
+        gsXrxRQzT3C6+xdOv/6J8lc=
+X-Google-Smtp-Source: ABdhPJxEe59R7f1yd0nnfNfbIgTGjP5ENry+WrsJM7dMmtP1jgE8n03JXguNJ0J2hWSFFLyGJdf+TA==
+X-Received: by 2002:a05:6a00:17a7:b0:4ba:baf6:995f with SMTP id s39-20020a056a0017a700b004babaf6995fmr63792605pfg.68.1641550365384;
+        Fri, 07 Jan 2022 02:12:45 -0800 (PST)
+Received: from localhost ([2409:10:24a0:4700:e8ad:216a:2a9d:6d0c])
+        by smtp.gmail.com with ESMTPSA id g6sm5751665pfj.156.2022.01.07.02.12.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Jan 2022 02:12:44 -0800 (PST)
+Date:   Fri, 7 Jan 2022 19:12:43 +0900
+From:   Stafford Horne <shorne@gmail.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     "Gabriel L. Somlo" <gsomlo@gmail.com>,
+        Andy Shevchenko <andy.shevchenko@gmail.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
@@ -58,62 +62,68 @@ Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
         Kamil Rakoczy <krakoczy@antmicro.com>,
         mdudek@internships.antmicro.com,
         Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        david.abdurachmanov@sifive.com,
+        Joel Stanley <joel@jms.id.au>, david.abdurachmanov@sifive.com,
         Florent Kermarrec <florent@enjoy-digital.fr>,
         Randy Dunlap <rdunlap@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Message-ID: <YdgSG7t2eG9YzkaG@antec>
+References: <20220106174803.1773876-1-gsomlo@gmail.com>
+ <20220106174803.1773876-4-gsomlo@gmail.com>
+ <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com>
+ <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
+ <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gabriel,
-
-On Thu, Jan 6, 2022 at 11:50 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> On Thu, Jan 06, 2022 at 08:19:39PM +0200, Andy Shevchenko wrote:
-> > On Thu, Jan 6, 2022 at 7:48 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
+On Fri, Jan 07, 2022 at 10:36:12AM +0100, Geert Uytterhoeven wrote:
+> Hi Gabriel,
+> 
+> On Thu, Jan 6, 2022 at 11:50 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> > On Thu, Jan 06, 2022 at 08:19:39PM +0200, Andy Shevchenko wrote:
+> > > On Thu, Jan 6, 2022 at 7:48 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
+> > > >
+> > > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
+> > > > that targets FPGAs. LiteSDCard is a small footprint, configurable
+> > > > SDCard core commonly used in LiteX designs.
+> > > >
+> > > > The driver was first written in May 2020 and has been maintained
+> > > > cooperatively by the LiteX community. Thanks to all contributors!
 > > >
-> > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > > SDCard core commonly used in LiteX designs.
+> > > > +config MMC_LITEX
+> > > > +       tristate "LiteX MMC Host Controller support"
+> > > > +       depends on OF
+> > > > +       depends on PPC_MICROWATT || LITEX || COMPILE_TEST
+> > > > +       help
+> > > > +         This selects support for the MMC Host Controller found in LiteX SoCs.
+> > > > +
+> > > > +         If unsure, say N.
 > > >
-> > > The driver was first written in May 2020 and has been maintained
-> > > cooperatively by the LiteX community. Thanks to all contributors!
+> > > What would be the module name if built as a module?
 > >
-> > > +config MMC_LITEX
-> > > +       tristate "LiteX MMC Host Controller support"
-> > > +       depends on OF
-> > > +       depends on PPC_MICROWATT || LITEX || COMPILE_TEST
-> > > +       help
-> > > +         This selects support for the MMC Host Controller found in LiteX SoCs.
-> > > +
-> > > +         If unsure, say N.
-> >
-> > What would be the module name if built as a module?
->
-> litex_mmc.ko -- why are you asking? I.e., should I mention that anywhere
-> in the Kconfig blurb (I don't see other blurbs doing that, fwiw)?
+> > litex_mmc.ko -- why are you asking? I.e., should I mention that anywhere
+> > in the Kconfig blurb (I don't see other blurbs doing that, fwiw)?
+> 
+> Many (most?) blurbs do mention the module name.
 
-Many (most?) blurbs do mention the module name.
+I was doubting this as well, but I searched and its true.  The text 'module will
+be called' shows up many times, there is also different text.
 
-> > > +       div = min(max(div, 2U), 256U);
-> >
-> > clamp_t() / clamp_val() ?
->
-> OK, changed to `div = clamp_val(div, 2U, 256U);`
+ $ grep -r 'module will be called' drivers/ | wc
+   1347    9023   9086
 
-Please use clamp() instead of clamp_val(), as all three parameters
-have the same type (clamp_val() uses casts to align all parameters;
-casts are evil).
+ $ grep -r 'tristate \"' drivers/ | wc
+   7169   47486  521795
 
-Gr{oetje,eeting}s,
+So maybe >10% have module name in the blurb.  Example:
 
-                        Geert
+          To compile this driver as a module, choose M here: the
+          module will be called tifm_sd.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+Thanks,
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+-Stafford
