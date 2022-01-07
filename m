@@ -2,116 +2,118 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC5B9C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 08:20:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF2E4C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 09:36:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236387AbiAGIUA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 03:20:00 -0500
-Received: from mailgw01.mediatek.com ([60.244.123.138]:51544 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229747AbiAGIT7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 03:19:59 -0500
-X-UUID: e9acf4ff940041b7899a31d39b7fe6e8-20220107
-X-UUID: e9acf4ff940041b7899a31d39b7fe6e8-20220107
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 608333862; Fri, 07 Jan 2022 16:19:57 +0800
-Received: from mtkexhb02.mediatek.inc (172.21.101.103) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Fri, 7 Jan 2022 16:19:56 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by mtkexhb02.mediatek.inc
- (172.21.101.103) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Fri, 7 Jan
- 2022 16:19:55 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Fri, 7 Jan 2022 16:19:54 +0800
-Message-ID: <21ba4c9d2f3a7a3d8c12b303fc6bea4b19ef092f.camel@mediatek.com>
-Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: add cap-sdio-async-int flag
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        "Eric Biggers" <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        "Stephen Boyd" <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>
-Date:   Fri, 7 Jan 2022 16:19:54 +0800
-In-Reply-To: <YdTLI/Nms4JiNutt@robh.at.kernel.org>
-References: <20211227083641.12538-1-axe.yang@mediatek.com>
-         <20211227083641.12538-2-axe.yang@mediatek.com>
-         <YdTLI/Nms4JiNutt@robh.at.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        id S1346500AbiAGJgk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 04:36:40 -0500
+Received: from mail-ua1-f46.google.com ([209.85.222.46]:34308 "EHLO
+        mail-ua1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1346482AbiAGJgZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 04:36:25 -0500
+Received: by mail-ua1-f46.google.com with SMTP id y4so9213305uad.1;
+        Fri, 07 Jan 2022 01:36:25 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=xs5sARW7mpfzDA0KwWiz8yZyJQ7czca4eMuvBIQUrKc=;
+        b=zoaa7OyJa1OgsfkA4h6N2EnPfJ99FtaL2s/ybK/hz1ZIczbYjrfKFhNfJeBGqCgyZj
+         tNBkaB+EjjbevED0wKtUX4Vf5SYDzSQH2wBr1qFjtzxVYpLXj7CeoxQNRmcC8oEJX1GH
+         JdQkSiOtRkn2WiUg3eH7omcGWOhDV3HWu0xyo1NlA59dJsQpCLPfrtPEdOWG9LW7xvB4
+         BzqM60Y8u7UzcbkTkPIH7FkQsmlpfGf+Xfdh9P6peKE1PpheAL3UBZhM2sktVPtG33WK
+         a+eoFEZ8d/pizOwvjIgInLEIsta6I1N6mCn4+LxeYijM2yk00k3p2qnnV8imURm7F6au
+         As3g==
+X-Gm-Message-State: AOAM533ZSjclzHdkXsaD1UTMFT/05dKPoZFqv2Nc/+J1Tdyx8qXFHRNM
+        wgjphB5/NFKToUwOV0/TteKPnHr5/d3wEg==
+X-Google-Smtp-Source: ABdhPJwYFwF4jsFgKBpxI/AHtYDqxp0T1psqtf+9OE/vDHWVlpF03Griu5wja/kSDL4ozhSj64UJWg==
+X-Received: by 2002:a05:6102:38ce:: with SMTP id k14mr20332637vst.70.1641548184771;
+        Fri, 07 Jan 2022 01:36:24 -0800 (PST)
+Received: from mail-vk1-f181.google.com (mail-vk1-f181.google.com. [209.85.221.181])
+        by smtp.gmail.com with ESMTPSA id k15sm3211134vsj.3.2022.01.07.01.36.23
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 07 Jan 2022 01:36:24 -0800 (PST)
+Received: by mail-vk1-f181.google.com with SMTP id o2so3360135vkn.0;
+        Fri, 07 Jan 2022 01:36:23 -0800 (PST)
+X-Received: by 2002:a05:6122:189e:: with SMTP id bi30mr6708723vkb.0.1641548183865;
+ Fri, 07 Jan 2022 01:36:23 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+References: <20220106174803.1773876-1-gsomlo@gmail.com> <20220106174803.1773876-4-gsomlo@gmail.com>
+ <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com> <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
+In-Reply-To: <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 7 Jan 2022 10:36:12 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
+Message-ID: <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
+Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
+Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Karol Gugala <kgugala@antmicro.com>,
+        Mateusz Holenko <mholenko@antmicro.com>,
+        Kamil Rakoczy <krakoczy@antmicro.com>,
+        mdudek@internships.antmicro.com,
+        Paul Mackerras <paulus@ozlabs.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Stafford Horne <shorne@gmail.com>,
+        david.abdurachmanov@sifive.com,
+        Florent Kermarrec <florent@enjoy-digital.fr>,
+        Randy Dunlap <rdunlap@infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 2022-01-04 at 16:33 -0600, Rob Herring wrote:
-> On Mon, Dec 27, 2021 at 04:36:39PM +0800, Axe Yang wrote:
-> > Asynchronous interrupt is a mechanism that allow SDIO devices alarm
-> > interrupt when host stop providing clock to card. Add a DT flag to
-> > enable this feature if it is supported by SDIO card.
-> 
-> A card property should be in the card node. Is this not discoverable?
+Hi Gabriel,
 
-Thank you for your comment.
-Async interrupt is not a 'card property', but more like a protocol.
-The intention of this flag is to decide whether to support this feature
-on SDIO host side.
-Before that, host need to confirm that async interrupt is supported on
-card side(by read and parse Support Async Interrupt segment in CCCR
-from card).
+On Thu, Jan 6, 2022 at 11:50 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> On Thu, Jan 06, 2022 at 08:19:39PM +0200, Andy Shevchenko wrote:
+> > On Thu, Jan 6, 2022 at 7:48 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
+> > >
+> > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
+> > > that targets FPGAs. LiteSDCard is a small footprint, configurable
+> > > SDCard core commonly used in LiteX designs.
+> > >
+> > > The driver was first written in May 2020 and has been maintained
+> > > cooperatively by the LiteX community. Thanks to all contributors!
+> >
+> > > +config MMC_LITEX
+> > > +       tristate "LiteX MMC Host Controller support"
+> > > +       depends on OF
+> > > +       depends on PPC_MICROWATT || LITEX || COMPILE_TEST
+> > > +       help
+> > > +         This selects support for the MMC Host Controller found in LiteX SoCs.
+> > > +
+> > > +         If unsure, say N.
+> >
+> > What would be the module name if built as a module?
+>
+> litex_mmc.ko -- why are you asking? I.e., should I mention that anywhere
+> in the Kconfig blurb (I don't see other blurbs doing that, fwiw)?
 
-> 
-> > 
-> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5
-> > +++++
-> >  1 file changed, 5 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-
-> > controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-
-> > controller.yaml
-> > index 25ac8e200970..7230421583c6 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> > @@ -165,6 +165,11 @@ properties:
-> >      description:
-> >        eMMC hardware reset is supported
-> >  
-> > +  cap-sdio-async-int:
-> 
-> Perhaps be consistent with the next property and use 'irq'.
+Many (most?) blurbs do mention the module name.
 
-Will fix it in next version.
+> > > +       div = min(max(div, 2U), 256U);
+> >
+> > clamp_t() / clamp_val() ?
+>
+> OK, changed to `div = clamp_val(div, 2U, 256U);`
 
-> 
-> > +    $ref: /schemas/types.yaml#/definitions/flag
-> > +    description:
-> > +      SDIO async interrupt is supported.
-> > +
-> >    cap-sdio-irq:
-> >      $ref: /schemas/types.yaml#/definitions/flag
-> >      description:
-> > -- 
-> > 2.25.1
-> > 
-> > 
+Please use clamp() instead of clamp_val(), as all three parameters
+have the same type (clamp_val() uses casts to align all parameters;
+casts are evil).
 
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
