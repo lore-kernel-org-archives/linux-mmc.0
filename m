@@ -2,135 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C32BBC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 14:07:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 656E5C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 16:26:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238808AbiAGOHh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 09:07:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39584 "EHLO
+        id S239927AbiAGQ0q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 11:26:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238405AbiAGOHg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 09:07:36 -0500
-Received: from mail-qt1-x835.google.com (mail-qt1-x835.google.com [IPv6:2607:f8b0:4864:20::835])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82D40C061574;
-        Fri,  7 Jan 2022 06:07:36 -0800 (PST)
-Received: by mail-qt1-x835.google.com with SMTP id o17so5648130qtk.1;
-        Fri, 07 Jan 2022 06:07:36 -0800 (PST)
+        with ESMTP id S233408AbiAGQ0q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 11:26:46 -0500
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACB42C061574
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Jan 2022 08:26:45 -0800 (PST)
+Received: by mail-lf1-x136.google.com with SMTP id r4so17373267lfe.7
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Jan 2022 08:26:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=FJJ1LAlT5E3uZAj6xXc02sELHd35X1xfWRcV/TcHKyQ=;
-        b=GzuyF7B38fXpEOReZ1eWI3OqrIeF/bazKd+0TDEoeEIXrl2atlWYSK881D/NSZO64/
-         42T+Dgh8Q4ubzsEX4WCQuta+IljJMhcYpxv8VmaweBLPDi930RB5HhMZF4LtXYjAbOTi
-         gYJYn7Q76Y5DuLJKEbzI3oFl2HR1cQlvwtVOTzwWxOV6sPKHoef1QQzzG9rTYxGXRl71
-         R62squAyfGZv9sCY2stkWcNjaBjvFtQaaYYaUYYaBZTeWeZlhbkB4Sdjpx+uXolZmMSL
-         5Qxg7Kx0K/TgcbEfmQN0NJR6f2TTDFVL/BftyrJYRRhN0bGvtEbbhbbZ/O9a5aNNZe+b
-         rmfw==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=4Wx8vb4BLG+DDO7rJPIEbH27WUURa/Qd6ietWG6WiTA=;
+        b=kip4fAu6AOvdI/hgmyaP2ZkUZLdRk1u5qdrt+qzHKZO1vBFbyBqKMWs0S5MxRVOOEr
+         WHlSHuVuY3wnX7GgX+gPrFRAfOhoPkdE6rSOMKPUmsmuNuN1JQl1+zl4eEUuJwT24h5e
+         BFYmWBhOCRLzIQVbWiZ5ccSAVwu1VfzINav9YzegtskifHvW70kEFNs4l5uEb2UVtUjW
+         9w/yxNXShxWS2E06MP5HLMbO0MgBQFM+k/7sLMZgQMhs7hM4PHq9IdBraWeFDjnRuax+
+         WQlG51ziBaQEbUCwLtiwf7QqjmBItEKzQ9D8ZvrtjPrP0Lz9c9g8RlDw/bFrOtGzGKgj
+         DXoQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=FJJ1LAlT5E3uZAj6xXc02sELHd35X1xfWRcV/TcHKyQ=;
-        b=zSPoP4/zw6802jsD4J6NvOnJos+qG1AbTAcJoz88hT3AlEl5ZdqbS2X4n9wNcMYI6U
-         Ii3ZTyg9Oc/gQrvnkFATaVjxum1g+mXDNsOaD1vQQP4OXRQq0jOs0LGHQHTwIzyPErBp
-         BjbAM7uBYGo3ZhQwRG2rG4kyRoqwiyHs19yQw+UUb5etd3v6unz9aafOzvOoV4xfDpVp
-         N8yR461VJXEsvSRwwkHOQ3cm/BTBIk/G7kUQpJVtyj9/zrKBcc6cwkxM7ZdKaZk9VxwP
-         iIGSJ1AELC2fVyH+G+7lP98dL8Sg9IBfJvv9k8r8vmK6E9RZToU7WdUjeS+M3ZwOArax
-         30hw==
-X-Gm-Message-State: AOAM530I7idwWpB8W0gmZAHpiTJrqf7oJ62a0JVNKMpQpCryQX4teBdg
-        Al5Cai8F4PPEJShpSz+Au64=
-X-Google-Smtp-Source: ABdhPJzvnOyS6iYuZgw/Wk2Zl9kVviqNKZNs9DSnyYMpQM6sZCAXyv/eIHQPkylQ0psgdH/+fRvEYA==
-X-Received: by 2002:ac8:5bc9:: with SMTP id b9mr55839476qtb.599.1641564455622;
-        Fri, 07 Jan 2022 06:07:35 -0800 (PST)
-Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id n11sm3535247qtk.44.2022.01.07.06.07.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Jan 2022 06:07:35 -0800 (PST)
-Date:   Fri, 7 Jan 2022 09:07:33 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Stafford Horne <shorne@gmail.com>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Andy Shevchenko <andy.shevchenko@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
-        Kamil Rakoczy <krakoczy@antmicro.com>,
-        mdudek@internships.antmicro.com,
-        Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>, david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <YdhJJd2DJUIKJuv1@errol.ini.cmu.edu>
-References: <20220106174803.1773876-1-gsomlo@gmail.com>
- <20220106174803.1773876-4-gsomlo@gmail.com>
- <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com>
- <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
- <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
- <YdgSG7t2eG9YzkaG@antec>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=4Wx8vb4BLG+DDO7rJPIEbH27WUURa/Qd6ietWG6WiTA=;
+        b=1+AWAchR3w1MoMQdbnU30qjitbrBIs/cWd65GY903WZBWrWmA6gTts1laYPoAUdX1G
+         NL+2AzKHLlkiyaOHHioOPJxKRAxP6XsBEKQA4RG/bJwPefvh70vWn/StFCsEU9F4JoG2
+         IQtQrUptZY4ZdNuxVpbrZrd2qiMTT/zmwMmoCeSxogokKODZngeB2uSsqHHDFLSVUqnZ
+         mblXPxlOQCWR1ZujVuAvW1rhY6dy7h4KgU1quvTcDHK6huZ8Qb9JkurN4gSKKISKoYSu
+         rIxljbXu2ZU9j3glOhnLG0C7q7ZG9cil7Q7R2hYScCn09U4SFt9dcJH6ayfYC0qjB4ol
+         cWYQ==
+X-Gm-Message-State: AOAM531Jyf3x1BCP90Em8hpnmQU+ZdGGoCM3TqkB/frjqCDTHmWKM8uP
+        UTl7fWwbpSSEaJnKob0ha7cGkTOLg/k0ruoa0KrjrQ==
+X-Google-Smtp-Source: ABdhPJxoyZIKjIKAy0vsM+Q9YLUcHyiT1i/rcFqzeHrV03xqmKlXiwgDQU8UZOFEvDKB4fVVjM97MAq7llbdE9aZfKg=
+X-Received: by 2002:a05:6512:3d9e:: with SMTP id k30mr56148357lfv.184.1641572803993;
+ Fri, 07 Jan 2022 08:26:43 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YdgSG7t2eG9YzkaG@antec>
-X-Clacks-Overhead: GNU Terry Pratchett
+References: <20220105182939.106885-1-paul@crapouillou.net> <20220105182939.106885-2-paul@crapouillou.net>
+In-Reply-To: <20220105182939.106885-2-paul@crapouillou.net>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 7 Jan 2022 17:26:07 +0100
+Message-ID: <CAPDyKFqiVTcsr03SqCzZsTraivrnM4YxKxPQ7dMmt14dT1uiCQ@mail.gmail.com>
+Subject: Re: [PATCH v2 1/6] PM: core: Remove DEFINE_UNIVERSAL_DEV_PM_OPS() macro
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
+        Pavel Machek <pavel@ucw.cz>, list@opendingux.net,
+        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pm@vger.kernel.org,
+        Jonathan Cameron <jonathan.cameron@huawei.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 07, 2022 at 07:12:43PM +0900, Stafford Horne wrote:
-> On Fri, Jan 07, 2022 at 10:36:12AM +0100, Geert Uytterhoeven wrote:
-> > Hi Gabriel,
-> > 
-> > On Thu, Jan 6, 2022 at 11:50 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> > > On Thu, Jan 06, 2022 at 08:19:39PM +0200, Andy Shevchenko wrote:
-> > > > On Thu, Jan 6, 2022 at 7:48 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> > > > >
-> > > > > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > > > > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > > > > SDCard core commonly used in LiteX designs.
-> > > > >
-> > > > > The driver was first written in May 2020 and has been maintained
-> > > > > cooperatively by the LiteX community. Thanks to all contributors!
-> > > >
-> > > > > +config MMC_LITEX
-> > > > > +       tristate "LiteX MMC Host Controller support"
-> > > > > +       depends on OF
-> > > > > +       depends on PPC_MICROWATT || LITEX || COMPILE_TEST
-> > > > > +       help
-> > > > > +         This selects support for the MMC Host Controller found in LiteX SoCs.
-> > > > > +
-> > > > > +         If unsure, say N.
-> > > >
-> > > > What would be the module name if built as a module?
-> > >
-> > > litex_mmc.ko -- why are you asking? I.e., should I mention that anywhere
-> > > in the Kconfig blurb (I don't see other blurbs doing that, fwiw)?
-> > 
-> > Many (most?) blurbs do mention the module name.
-> 
-> I was doubting this as well, but I searched and its true.  The text 'module will
-> be called' shows up many times, there is also different text.
-> 
->  $ grep -r 'module will be called' drivers/ | wc
->    1347    9023   9086
-> 
->  $ grep -r 'tristate \"' drivers/ | wc
->    7169   47486  521795
+On Wed, 5 Jan 2022 at 19:29, Paul Cercueil <paul@crapouillou.net> wrote:
+>
+> The deprecated UNIVERSAL_DEV_PM_OPS() macro uses the provided callbacks
+> for both runtime PM and system sleep, which is very likely to be a
+> mistake, as a system sleep can be triggered while a given device is
+> already PM-suspended, which would cause the suspend callback to be
+> called twice.
+>
+> The amount of users of UNIVERSAL_DEV_PM_OPS() is also tiny (16
+> occurences) compared to the number of places where
+> SET_SYSTEM_SLEEP_PM_OPS() is used with pm_runtime_force_suspend() and
+> pm_runtime_force_resume(), which makes me think that none of these cases
+> are actually valid.
+>
+> As this macro is currently unused, remove it before someone starts to
+> use it in yet another invalid case.
 
-OK, so initially I quickly looked at a few entries before LiteX in the
-drivers/mmc/host/Kconfig file, and saw nothing useful, and asked a
-follow-up question... :)
+I assume you refer to DEFINE_UNIVERSAL_DEV_PM_OPS here. Can you
+perhaps make that more clear?
 
-Knowing the magic "module will be called" incantation to grep for helped,
-and now I created a similar one for LiteSDCard's Kconfig entry, and lined
-it up for v7.
+>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+> Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+> ---
+>
+> Notes:
+>     v2: No change
+>
+>  include/linux/pm.h | 19 ++++++-------------
+>  1 file changed, 6 insertions(+), 13 deletions(-)
+>
+> diff --git a/include/linux/pm.h b/include/linux/pm.h
+> index e1e9402180b9..31bbaafb06d2 100644
+> --- a/include/linux/pm.h
+> +++ b/include/linux/pm.h
+> @@ -366,6 +366,12 @@ static const struct dev_pm_ops name = { \
+>         SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+>  }
+>
+> +/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> +#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +const struct dev_pm_ops __maybe_unused name = { \
+> +       SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +}
+> +
+>  /*
+>   * Use this for defining a set of PM operations to be used in all situations
+>   * (system suspend, hibernation or runtime PM).
+> @@ -379,19 +385,6 @@ static const struct dev_pm_ops name = { \
+>   * .resume_early(), to the same routines as .runtime_suspend() and
+>   * .runtime_resume(), respectively (and analogously for hibernation).
+>   */
+> -#define DEFINE_UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+> -static const struct dev_pm_ops name = { \
+> -       SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -       RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
+> -}
+> -
+> -/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> -#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> -const struct dev_pm_ops __maybe_unused name = { \
+> -       SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -}
+> -
+> -/* Deprecated. Use DEFINE_UNIVERSAL_DEV_PM_OPS() instead. */
 
-Thanks to everyone who chimed in!
+Shouldn't this macro be deprecated any more?
 
-Best,
---Gabriel
+>  #define UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+>  const struct dev_pm_ops __maybe_unused name = { \
+>         SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> --
+> 2.34.1
+>
+
+Kind regards
+Uffe
