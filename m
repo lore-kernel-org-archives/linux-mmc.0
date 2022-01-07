@@ -2,425 +2,559 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BE4AC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Jan 2022 22:50:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12B30C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 07:42:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245265AbiAFWu2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Jan 2022 17:50:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58932 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245167AbiAFWu2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Jan 2022 17:50:28 -0500
-Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CC0AC061245;
-        Thu,  6 Jan 2022 14:50:28 -0800 (PST)
-Received: by mail-qv1-xf2a.google.com with SMTP id p12so3799847qvj.6;
-        Thu, 06 Jan 2022 14:50:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=5HD5jrCjT+x7XnYXC71lELec8Zqrw2up8ZrlifTIXOs=;
-        b=KGhi7VVpCzgeAxzdJwi4oxGgs0x8bCiwOYXy40NR0VHyGjKnw0lmrW1xMhpb5w8q/C
-         SGDvGqNLOdW9Z4+JJvOKYB7dvkhSJoohqEYw2Izxjyz+2Lee3AEn5JRMCftDAwzcQhA1
-         r9EpHQvjcMyHS778+27YI7K4IbxelM0/4YLo2FTehxx/n1ZDc6yi3o+Rpvn/X5Gmoxum
-         616LUMYqthfp7ifPIjratj/g2Ip23UTS4b5irvVemorDMGQ0KHy8/0+9wVZfKZeCowH1
-         adhJUFOWiSsciaYtBWoOL0RCc9jVCrEOiG7w7rfY9BEJlg+TkPoGVhTg6KxciPOu8xOA
-         287w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=5HD5jrCjT+x7XnYXC71lELec8Zqrw2up8ZrlifTIXOs=;
-        b=MLNcAuALhonLF+h6bvkxJjRlDSJ0C9GLjq0CSUPGSFgRekcy3jnVbrwXjpdS4XbjmW
-         I9IIUVlCgdZE2hfRLZsxK9DzIL+FY+UHMbr+IZYGpFrG0qqR20VY0Jzn5AIPSktADg0X
-         ZkatlrnOFOj/NmEbw5QINFp5vamH4Ubb/7eI4ikHSOZQf/LgWg2VXxvFWRrvJEraB5dB
-         D9f1rIn+nd9glN340TUTWa+7PPgr3eGWFr9gjCiPrS4i0UsfAkcyoa/qfizH50WUxFzX
-         Uf3ACuoP0tV7P9agYkePPs+2dgujRW/DmoXJoY1c/kWOxWXqwtL8/Dmm0FijbeitjkYk
-         bBsg==
-X-Gm-Message-State: AOAM530huo3GDp6noknjg0fIFKzgCZVoS/SnS6XI62t0ymKAymef7UCC
-        oumvw/zgeUl3G2WM2b7MuGE=
-X-Google-Smtp-Source: ABdhPJwY6nrI4FW495UD+zuKJMZ8cuqnTzBUUc8N1dl8Pb7OXHltDH7QzaYxTjHSR8EV3pqvJZW9UQ==
-X-Received: by 2002:a05:6214:258f:: with SMTP id fq15mr55413470qvb.100.1641509427125;
-        Thu, 06 Jan 2022 14:50:27 -0800 (PST)
-Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id e2sm2433705qty.14.2022.01.06.14.50.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 06 Jan 2022 14:50:26 -0800 (PST)
-Date:   Thu, 6 Jan 2022 17:50:24 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu>
-References: <20220106174803.1773876-1-gsomlo@gmail.com>
- <20220106174803.1773876-4-gsomlo@gmail.com>
- <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com>
+        id S235641AbiAGHmn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 02:42:43 -0500
+Received: from mga05.intel.com ([192.55.52.43]:13529 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232885AbiAGHmn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 7 Jan 2022 02:42:43 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1641541362; x=1673077362;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=3QPRiM5XEAtbZSYJ+PmPPfPnYMzdcs0OV7QConeKuNo=;
+  b=b6BexnO2UxQmKnvuWtPqTTElW31Kg/TbxYGVn3SiAxdG14BH40rQlMpo
+   rNzat5F/+Gsq8/KpFD6a+z096COBMo8IcA6HRY9KtboULZ97tO4h8LolQ
+   Qt2nMRWZtsc/UBKelX0NW+DS/ic+gEWkTiSfAs+c3Hd4j/8ywsPrIrf84
+   zdgaUz8a5rwSXci5Ck+iB3FlP4aJSEk81fU9uemrBbJW6bt+MAi2o+9OU
+   qJQETx/FAfxyk8fut5tzvwLQmv6mQRC1WPPj2Yw4VM5Q3cdep2HNDs8Za
+   bYMGK4vAXhFMIN9cLyIMH7yxukAIt9Y8QnTnYUmigv6KyjSwLkxiOkV42
+   w==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10219"; a="329168735"
+X-IronPort-AV: E=Sophos;i="5.88,269,1635231600"; 
+   d="scan'208";a="329168735"
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Jan 2022 23:42:42 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,269,1635231600"; 
+   d="scan'208";a="473233113"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga006.jf.intel.com with ESMTP; 06 Jan 2022 23:42:37 -0800
+Subject: Re: [PATCH V2] mmc: debugfs: add error statistics
+To:     "Sajida Bhanu (Temp) (QUIC)" <quic_c_sbhanu@quicinc.com>,
+        "riteshh@codeaurora.org" <riteshh@codeaurora.org>,
+        "Asutosh Das (asd)" <asutoshd@quicinc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "agross@kernel.org" <agross@kernel.org>,
+        "bjorn.andersson@linaro.org" <bjorn.andersson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc:     "stummala@codeaurora.org" <stummala@codeaurora.org>,
+        "vbadigan@codeaurora.org" <vbadigan@codeaurora.org>,
+        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
+        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
+        "sartgarg@codeaurora.org" <sartgarg@codeaurora.org>,
+        "nitirawa@codeaurora.org" <nitirawa@codeaurora.org>,
+        "sayalil@codeaurora.org" <sayalil@codeaurora.org>
+References: <1639492863-7053-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <9fbec373-e667-b4a5-4b92-741f9dd2b7ee@intel.com>
+ <SJ0PR02MB84499B152C13E541E19DBFB4CD7C9@SJ0PR02MB8449.namprd02.prod.outlook.com>
+ <4ba587c1-2092-285c-c13c-e3ed69fec403@intel.com>
+ <SJ0PR02MB84491721325B71098AFD5E91CD4A9@SJ0PR02MB8449.namprd02.prod.outlook.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <116af24d-d508-5d3d-097c-4145b56758bc@intel.com>
+Date:   Fri, 7 Jan 2022 09:42:36 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com>
-X-Clacks-Overhead: GNU Terry Pratchett
+In-Reply-To: <SJ0PR02MB84491721325B71098AFD5E91CD4A9@SJ0PR02MB8449.namprd02.prod.outlook.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Andy,
-
-Thanks again, replies and follow-up questions inline below:
-
-On Thu, Jan 06, 2022 at 08:19:39PM +0200, Andy Shevchenko wrote:
-> On Thu, Jan 6, 2022 at 7:48 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> >
-> > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > SDCard core commonly used in LiteX designs.
-> >
-> > The driver was first written in May 2020 and has been maintained
-> > cooperatively by the LiteX community. Thanks to all contributors!
+On 04/01/2022 17:02, Sajida Bhanu (Temp) (QUIC) wrote:
+> Hi Adrian,
 > 
-> > +config MMC_LITEX
-> > +       tristate "LiteX MMC Host Controller support"
-> > +       depends on OF
-> > +       depends on PPC_MICROWATT || LITEX || COMPILE_TEST
-> > +       help
-> > +         This selects support for the MMC Host Controller found in LiteX SoCs.
-> > +
-> > +         If unsure, say N.
+> Thanks for the review.
 > 
-> What would be the module name if built as a module?
-
-litex_mmc.ko -- why are you asking? I.e., should I mention that anywhere
-in the Kconfig blurb (I don't see other blurbs doing that, fwiw)?
- 
-> ...
+> Please find the inline comments.
 > 
-> > +/*
-> > + * LiteX LiteSDCard driver
-> > + *
-> > + * Copyright (C) 2019-2020 Antmicro <contact@antmicro.com>
-> > + * Copyright (C) 2019-2020 Kamil Rakoczy <krakoczy@antmicro.com>
-> > + * Copyright (C) 2019-2020 Maciej Dudek <mdudek@internships.antmicro.com>
-> > + * Copyright (C) 2020 Paul Mackerras <paulus@ozlabs.org>
-> > + * Copyright (C) 2020-2021 Gabriel Somlo <gsomlo@gmail.com>
+> Thanks,
+> Sajida
 > 
-> > + *
+> -----Original Message-----
+> From: Adrian Hunter <adrian.hunter@intel.com> 
+> Sent: Monday, January 3, 2022 3:20 PM
+> To: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>; riteshh@codeaurora.org; Asutosh Das (asd) <asutoshd@quicinc.com>; ulf.hansson@linaro.org; agross@kernel.org; bjorn.andersson@linaro.org; linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-kernel@vger.kernel.org
+> Cc: stummala@codeaurora.org; vbadigan@codeaurora.org; Ram Prakash Gupta (QUIC) <quic_rampraka@quicinc.com>; Pradeep Pragallapati (QUIC) <quic_pragalla@quicinc.com>; sartgarg@codeaurora.org; nitirawa@codeaurora.org; sayalil@codeaurora.org
+> Subject: Re: [PATCH V2] mmc: debugfs: add error statistics
 > 
-> Redundant blank line.
+> On 21/12/2021 09:16, Sajida Bhanu (Temp) (QUIC) wrote:
+>> Hi Adrian,
+>>
+>> Thanks for the review.
+>>
+>> Please find the inline comments.
+> 
+> I find the way the inline comments are done a bit difficult to follow, since what I wrote is not quoted, and what you wrote is quoted.  Normally it is the other way around.
+> 
+>>
+>> Thanks,
+>> Sajida
+>>
+>> -----Original Message-----
+>> From: Adrian Hunter <adrian.hunter@intel.com>
+>> Sent: Wednesday, December 15, 2021 7:33 PM
+>> To: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>; 
+>> riteshh@codeaurora.org; Asutosh Das (asd) <asutoshd@quicinc.com>; 
+>> ulf.hansson@linaro.org; agross@kernel.org; bjorn.andersson@linaro.org; 
+>> linux-mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; 
+>> linux-kernel@vger.kernel.org
+>> Cc: stummala@codeaurora.org; vbadigan@codeaurora.org; Ram Prakash 
+>> Gupta (QUIC) <quic_rampraka@quicinc.com>; Pradeep Pragallapati (QUIC) 
+>> <quic_pragalla@quicinc.com>; sartgarg@codeaurora.org; 
+>> nitirawa@codeaurora.org; sayalil@codeaurora.org
+>> Subject: Re: [PATCH V2] mmc: debugfs: add error statistics
+>>
+>> On 14/12/2021 16:41, Shaik Sajida Bhanu wrote:
+>>> Add debugfs entry to query eMMC and SD card errors statistics.
+>>> This feature is useful for debug and testing
+>>>
+>>> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+>>> ---
+>>>
+>>> Changes since V1:
+>>> 	-Removed sysfs entry for eMMC and SD card error statistics and added
+>>> 	 debugfs entry as suggested by Adrian Hunter and Ulf Hansson.
+>>
+>> Thanks for doing this.
+>>
+>>> ---
+>>>  drivers/mmc/core/debugfs.c | 106 +++++++++++++++++++++++++++++++++++++++++++++
+>>>  drivers/mmc/core/queue.c   |   2 +
+>>>  drivers/mmc/host/sdhci.c   |  53 ++++++++++++++++++-----
+>>>  include/linux/mmc/host.h   |  37 ++++++++++++++++
+>>>  4 files changed, 186 insertions(+), 12 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c 
+>>> index 3fdbc80..40210c34 100644
+>>> --- a/drivers/mmc/core/debugfs.c
+>>> +++ b/drivers/mmc/core/debugfs.c
+>>> @@ -223,6 +223,107 @@ static int mmc_clock_opt_set(void *data, u64
+>>> val)  DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+>>>  	"%llu\n");
+>>>  
+>>> +static int mmc_err_state_get(void *data, u64 *val) {
+>>> +	struct mmc_host *host = data;
+>>> +
+>>> +	if (!host)
+>>> +		return -EINVAL;
+>>> +
+>>> +	*val = host->err_state ? 1 : 0;
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int mmc_err_state_clear(void *data, u64 val) {
+>>> +	struct mmc_host *host = data;
+>>> +
+>>> +	if (!host)
+>>> +		return -EINVAL;
+>>> +
+>>> +	host->err_state = false;
+>>
+>> Is there much reason to disable err stats from userspace?
+>>
+>>>>>>> Yes , while debugging we can go and check err_state , It is false means no errors happened in driver level and true means errors happened in driver level and then we can go and check err_stats[] to know more on error details like data CRC , command CRC etc.
+> 
+> That is not exectly how it is programmed.  "err_state is false" means no errors have been recorded, not that no errors happended.
+> 
+>>>>>>> If user wants to explicitly clear then he can use this.
 
-OK, removed.
+Seems over compilicated.  A user can just diff the old and new values:
+
+cat /sys/kernel/debug/mmc0/err_stats > /tmp/old-stats
+...later...
+cat /sys/kernel/debug/mmc0/err_stats > /tmp/new-stats
+diff /tmp/old-stats /tmp/new-stats
+mv /tmp/new-stats /tmp/old-stats
+
+I suggest just outputting the stats
 
 > 
-> > + */
+>>
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +DEFINE_SIMPLE_ATTRIBUTE(mmc_err_state, mmc_err_state_get,
+>>> +		mmc_err_state_clear, "%llu\n");
+>>> +
+>>> +static int mmc_err_stats_show(struct seq_file *file, void *data) {
+>>> +	struct mmc_host *host = (struct mmc_host *)file->private;
+>>> +
+>>> +	if (!host)
+>>> +		return -EINVAL;
+>>
+>> I was thinking we needed a way to determine whether stats were being collected because not all drivers would support it at least initially e.g.
+>>
+>> 	if (!host->err_stats_enabled) {
+>> 		seq_printf(file, "Not supported by driver\n");
+>> 		return 0;
+>> 	}
+>>
+>>>>>>>>> You mean declare another variable (err_stats_enabled) and enable it in probe?
 > 
-> ...
+> Yes, although it is not clear if this is the same as what you want from err_state, i.e. is err_state different from err_stats_enabled?
 > 
-> > +#include <linux/module.h>
-> > +#include <linux/litex.h>
-> > +#include <linux/of.h>
-> > +#include <linux/platform_device.h>
-> > +#include <linux/clk.h>
-> > +#include <linux/interrupt.h>
-> > +#include <linux/iopoll.h>
-> > +#include <linux/mmc/sd.h>
-> > +#include <linux/mmc/mmc.h>
-> > +#include <linux/mmc/host.h>
-> > +#include <linux/delay.h>
-> > +#include <linux/dma-mapping.h>
+>>>>>> Yes, err_state and err_stats_enabled both are different.  err_state will be set if any errors happened in driver level. 
+>  err_stats_enabled will be set  if err_stats feature enabled,  if any vendor wants to use err_stats feature they will set this err_stats_enabled in their vendor specific file.
 > 
-> Perhaps keep it sorted?
-
-OK, sorted. Now looks like this:
-
-#include <linux/clk.h>
-#include <linux/delay.h>
-#include <linux/dma-mapping.h>
-#include <linux/interrupt.h>
-#include <linux/iopoll.h>
-#include <linux/litex.h>
-#include <linux/module.h>
-#include <linux/mmc/host.h>
-#include <linux/mmc/mmc.h>
-#include <linux/mmc/sd.h>
-#include <linux/mmc/slot-gpio.h>
-#include <linux/of.h>
-#include <linux/platform_device.h>
-
-> It will easily show, for example, absence of bits.h.
- 
-I'm not getting any errors or warnings re. missing bits.h -- why are
-you mentioning it explicitly? (for the record, I try not to explicitly
-include anything unless I absolutely have to, so I try to avoid
-including headers included via other headers I already *have* to
-include explicitly!)
-
-I'm expecting you're going to tell me that's wrong, but then I'm much
-less confident of a clean canonical way of determining exactly what
-headers must be mentioned explicitly in a driver -- please advise! :)
-
+>>
+>>> +
+>>> +	seq_printf(file, "# Command Timeout Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_CMD_TIMEOUT]);
+>>
+>> Maybe put the descriptions in an array and iterate e.g.
+>>
+>> 	const char *desc[MMC_ERR_MAX] = {
+>> 		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
+>> 		etc
+>> 	};
+>> 	int i;
+>>
+>> 	if (!host)
+>> 		return -EINVAL;
+>>
+>> 	for (i = 0; i < MMC_ERR_MAX; i++) {
+>> 		if (desc[i])
+>> 			seq_printf(file, "# %s:\t %d\n",
+>> 				   desc[1], host->err_stats[i]);
+>> 	}
+>>
+>>>>>>>>> Sure
+>>
+>>> +
+>>> +	seq_printf(file, "# Command CRC Errors Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_CMD_CRC]);
+>>> +
+>>> +	seq_printf(file, "# Data Timeout Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_DAT_TIMEOUT]);
+>>> +
+>>> +	seq_printf(file, "# Data CRC Errors Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_DAT_CRC]);
+>>> +
+>>> +	seq_printf(file, "# Auto-Cmd Error Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_ADMA]);
+>>> +
+>>> +	seq_printf(file, "# ADMA Error Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_ADMA]);
+>>> +
+>>> +	seq_printf(file, "# Tuning Error Occurred:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_TUNING]);
+>>> +
+>>> +	seq_printf(file, "# CMDQ RED Errors:\t\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_CMDQ_RED]);
+>>> +
+>>> +	seq_printf(file, "# CMDQ GCE Errors:\t\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_CMDQ_GCE]);
+>>> +
+>>> +	seq_printf(file, "# CMDQ ICCE Errors:\t\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_CMDQ_ICCE]);
+>>> +
+>>> +	seq_printf(file, "# Request Timedout:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_REQ_TIMEOUT]);
+>>> +
+>>> +	seq_printf(file, "# CMDQ Request Timedout:\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]);
+>>> +
+>>> +	seq_printf(file, "# ICE Config Errors:\t\t %d\n",
+>>> +		   host->err_stats[MMC_ERR_ICE_CFG]);
+>>> +
+>>> +	return 0;
+>>> +}
+>>> +
+>>> +static int mmc_err_stats_open(struct inode *inode, struct file 
+>>> +*file) {
+>>> +	return single_open(file, mmc_err_stats_show, inode->i_private); }
+>>> +
+>>> +static ssize_t mmc_err_stats_write(struct file *filp, const char __user *ubuf,
+>>> +				   size_t cnt, loff_t *ppos)
+>>> +{
+>>> +	struct mmc_host *host = filp->f_mapping->host->i_private;
+>>> +
+>>> +	if (!host)
+>>> +		return -EINVAL;
+>>> +
+>>> +	pr_debug("%s: Resetting MMC error statistics\n", __func__);
+>>> +	memset(host->err_stats, 0, sizeof(host->err_stats));
+>>> +
+>>> +	return cnt;
+>>> +}
+>>> +
+>>> +static const struct file_operations mmc_err_stats_fops = {
+>>> +	.open	= mmc_err_stats_open,
+>>> +	.read	= seq_read,
+>>> +	.write	= mmc_err_stats_write,
+>>> +};
+>>> +
+>>>  void mmc_add_host_debugfs(struct mmc_host *host)  {
+>>>  	struct dentry *root;
+>>> @@ -236,6 +337,11 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+>>>  	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
+>>>  				   &mmc_clock_fops);
+>>>  
+>>> +	debugfs_create_file("err_state", 0600, root, host,
+>>> +		&mmc_err_state);
+>>> +	debugfs_create_file("err_stats", 0600, root, host,
+>>> +		&mmc_err_stats_fops);
+>>> +
+>>>  #ifdef CONFIG_FAIL_MMC_REQUEST
+>>>  	if (fail_request)
+>>>  		setup_fault_attr(&fail_default_attr, fail_request); diff --git 
+>>> a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c index
+>>> b15c034..5243929 100644
+>>> --- a/drivers/mmc/core/queue.c
+>>> +++ b/drivers/mmc/core/queue.c
+>>> @@ -100,6 +100,8 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct request *req)
+>>>  	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
+>>>  	bool recovery_needed = false;
+>>>  
+>>> +	mmc_debugfs_err_stats_inc(host, MMC_ERR_CMDQ_REQ_TIMEOUT);
+>>> +
+>>>  	switch (issue_type) {
+>>>  	case MMC_ISSUE_ASYNC:
+>>>  	case MMC_ISSUE_DCMD:
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>
+>> I think the core changes should be a separate patch from sdhci.
+>> I would probably split into 4:
+>> 	mmc core
+>> 	mmc block driver
+>> 	cqhci driver
+>> 	sdhci driver
+>>
+>>>>>> Sure
+>>
+>>> index 07c6da1..d742051 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -113,6 +113,7 @@ void sdhci_dumpregs(struct sdhci_host *host)
+>>>  	if (host->ops->dump_vendor_regs)
+>>>  		host->ops->dump_vendor_regs(host);
+>>>  
+>>> +	mmc_debugfs_err_stats_enable(host->mmc);
+>>
+>> Why here and not in e.g. __sdhci_add_host() ?
+>>
+>>>>>> If any errors happened  in driver level then we will call sdhci_dumpregs() right( err_state true means some errors happened in driver level ).  So it is better to call mmc_debugfs_err_stats_enable() here.
 > 
-> > +       ret = readx_poll_timeout(litex_read8, reg, evt, (evt & SD_BIT_DONE),
+> Registers are not dumped for most errors.  Please move this to __sdhci_add_host().
 > 
-> Too many parentheses.
-
-OK, removed (from both occurrences of `readx_poll_timeout()`).
-
+>>>>> err_state is true means errors happened in driver level and for most of the errors we are dumping the registers, so I am thinking it is better to have this call in sdhci_dumpregs() only.
 > 
-> > +                                SD_SLEEP_US, SD_TIMEOUT_US);
+>>
+>>>  	SDHCI_DUMP("============================================\n");
+>>>  }
+>>>  EXPORT_SYMBOL_GPL(sdhci_dumpregs);
+>>> @@ -3159,6 +3160,7 @@ static void sdhci_timeout_timer(struct timer_list *t)
+>>>  	spin_lock_irqsave(&host->lock, flags);
+>>>  
+>>>  	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_REQ_TIMEOUT);
+>>>  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
+>>>  		       mmc_hostname(host->mmc));
+>>>  		sdhci_dumpregs(host);
+>>> @@ -3181,6 +3183,7 @@ static void sdhci_timeout_data_timer(struct 
+>>> timer_list *t)
+>>>  
+>>>  	if (host->data || host->data_cmd ||
+>>>  	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_REQ_TIMEOUT);
+>>>  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
+>>>  		       mmc_hostname(host->mmc));
+>>>  		sdhci_dumpregs(host);
+>>> @@ -3240,11 +3243,15 @@ static void sdhci_cmd_irq(struct sdhci_host 
+>>> *host, u32 intmask, u32 *intmask_p)
+>>>  
+>>>  	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
+>>>  		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
+>>> -		if (intmask & SDHCI_INT_TIMEOUT)
+>>> +		if (intmask & SDHCI_INT_TIMEOUT) {
+>>>  			host->cmd->error = -ETIMEDOUT;
+>>> -		else
+>>> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_TIMEOUT);
+>>> +		} else {
+>>>  			host->cmd->error = -EILSEQ;
+>>> -
+>>> +			if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
+>>> +					host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
+>>> +				mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_CRC);
+>>> +		}
+>>>  		/* Treat data command CRC error the same as data CRC error */
+>>>  		if (host->cmd->data &&
+>>>  		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) == @@ -3266,6
+>>> +3273,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 
+>>> +intmask, u32 *intmask_p)
+>>>  			  -ETIMEDOUT :
+>>>  			  -EILSEQ;
+>>>  
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_AUTO_CMD);
+>>>  		if (sdhci_auto_cmd23(host, mrq)) {
+>>>  			mrq->sbc->error = err;
+>>>  			__sdhci_finish_mrq(host, mrq);
+>>> @@ -3342,6 +3350,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>>  			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+>>>  				host->data_cmd = NULL;
+>>>  				data_cmd->error = -ETIMEDOUT;
+>>> +				mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_TIMEOUT);
+>>>  				__sdhci_finish_mrq(host, data_cmd->mrq);
+>>>  				return;
+>>>  			}
+>>> @@ -3375,18 +3384,25 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>>  		return;
+>>>  	}
+>>>  
+>>> -	if (intmask & SDHCI_INT_DATA_TIMEOUT)
+>>> +	if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+>>>  		host->data->error = -ETIMEDOUT;
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_TIMEOUT);
+>>> +	}
+>>>  	else if (intmask & SDHCI_INT_DATA_END_BIT)
+>>>  		host->data->error = -EILSEQ;
+>>>  	else if ((intmask & SDHCI_INT_DATA_CRC) &&
+>>>  		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
+>>> -			!= MMC_BUS_TEST_R)
+>>> +			!= MMC_BUS_TEST_R) {
+>>>  		host->data->error = -EILSEQ;
+>>> +		if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
+>>> +				host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
+>>> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_CRC);
+>>> +	}
+>>>  	else if (intmask & SDHCI_INT_ADMA_ERROR) {
+>>>  		pr_err("%s: ADMA error: 0x%08x\n", mmc_hostname(host->mmc),
+>>>  		       intmask);
+>>>  		sdhci_adma_show_error(host);
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_ADMA);
+>>>  		host->data->error = -EIO;
+>>>  		if (host->ops->adma_workaround)
+>>>  			host->ops->adma_workaround(host, intmask); @@ -3905,20 +3921,33 
+>>> @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>>>  	if (!host->cqe_on)
+>>>  		return false;
+>>>  
+>>> -	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
+>>> +	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | 
+>>> +SDHCI_INT_CRC)) {
+>>>  		*cmd_error = -EILSEQ;
+>>> -	else if (intmask & SDHCI_INT_TIMEOUT)
+>>> +		if (intmask & SDHCI_INT_CRC) {
+>>> +			if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
+>>> +					host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
+>>> +				mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_CRC);
+>>> +		}
+>>> +	} else if (intmask & SDHCI_INT_TIMEOUT) {
+>>>  		*cmd_error = -ETIMEDOUT;
+>>> -	else
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_TIMEOUT);
+>>> +	} else
+>>>  		*cmd_error = 0;
+>>>  
+>>> -	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
+>>> +	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
+>>>  		*data_error = -EILSEQ;
+>>> -	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
+>>> +		if (intmask & SDHCI_INT_DATA_CRC) {
+>>> +			if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
+>>> +					host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
+>>> +				mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_CRC);
+>>> +		}
+>>> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+>>>  		*data_error = -ETIMEDOUT;
+>>> -	else if (intmask & SDHCI_INT_ADMA_ERROR)
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_TIMEOUT);
+>>> +	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
+>>>  		*data_error = -EIO;
+>>> -	else
+>>> +		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_ADMA);
+>>> +	} else
+>>>  		*data_error = 0;
+>>>  
+>>>  	/* Clear selected interrupts. */
+>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h 
+>>> index 7afb57c..c263f8f 100644
+>>> --- a/include/linux/mmc/host.h
+>>> +++ b/include/linux/mmc/host.h
+>>> @@ -93,6 +93,23 @@ struct mmc_clk_phase_map {
+>>>  
+>>>  struct mmc_host;
+>>>  
+>>> +enum mmc_err_stat {
+>>> +	MMC_ERR_CMD_TIMEOUT,
+>>> +	MMC_ERR_CMD_CRC,
+>>> +	MMC_ERR_DAT_TIMEOUT,
+>>> +	MMC_ERR_DAT_CRC,
+>>> +	MMC_ERR_AUTO_CMD,
+>>> +	MMC_ERR_ADMA,
+>>> +	MMC_ERR_TUNING,
+>>> +	MMC_ERR_CMDQ_RED,
+>>> +	MMC_ERR_CMDQ_GCE,
+>>> +	MMC_ERR_CMDQ_ICCE,
+>>> +	MMC_ERR_REQ_TIMEOUT,
+>>> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
+>>> +	MMC_ERR_ICE_CFG,
+>>> +	MMC_ERR_MAX,
+>>> +};
+>>> +
+>>>  struct mmc_host_ops {
+>>>  	/*
+>>>  	 * It is optional for the host to implement pre_req and post_req in 
+>>> @@ -500,6 +517,8 @@ struct mmc_host {
+>>>  
+>>>  	/* Host Software Queue support */
+>>>  	bool			hsq_enabled;
+>>> +	u32                     err_stats[MMC_ERR_MAX];
+>>
+>> If you make it u64 then we don't have to think about the value overflowing.
+>>
+>>>>> Sure
+>>
+>>> +	bool			err_state;
+>>>  
+>>>  	unsigned long		private[] ____cacheline_aligned;
+>>>  };
+>>> @@ -635,6 +654,24 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
+>>>  	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : 
+>>> DMA_FROM_DEVICE;  }
+>>>  
+>>> +static inline void mmc_debugfs_err_stats_enable(struct mmc_host 
+>>> +*mmc) {
+>>> +	mmc->err_state = true;
+>>> +}
+>>> +
+>>> +static inline void mmc_debugfs_err_stats_inc(struct mmc_host *mmc,
+>>> +		enum mmc_err_stat stat) {
+>>> +
+>>> +	/*
+>>> +	 * Ignore the command timeout errors observed during
+>>> +	 * the card init as those are excepted.
+>>> +	 */
+>>> +	if (!mmc->err_state)
+>>> +		mmc->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
+>>
+>> This would be better handled in the card init code somewhere, not here.
+>>
+>>>>>> Sure.
+>>
+>>> +
+>>> +	mmc->err_stats[stat] += 1;
+>>> +}
+>>> +
+>>>  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int 
+>>> *cmd_error);  int mmc_send_abort_tuning(struct mmc_host *host, u32 
+>>> opcode);  int mmc_get_ext_csd(struct mmc_card *card, u8 
+>>> **new_ext_csd);
+>>>
+>>
 > 
-> > +       if (ret || (evt & SD_BIT_TIMEOUT))
-> 
-> Redundant second condition. If you want +1 iteration, increase timeout.
 
-Well, readx_poll_timeout() returns -ETIMEDOUT or 0, depending on whether
-or not it read the SD_BIT_DONE bit from the provided register reg.
-But even if it did return 0, the hardware might have returned its own
-timeout flag (SD_BIT_TIMEOUT) before readx_poll_timeout() decided to
-give up on polling the register. So we can time out in one of two
-different ways, and we need to check for both.
- 
-> > +               return -ETIMEDOUT;
-> 
-> Why shadowed error code?
-
-See above -- if readx_poll_timeout returned 0, we should still return
--ETIMEDOUT in case the hardware set the SD_BIT_TIMEOUT flag. I figured
-I'd deal with all timeout scenarios in one place, but we can definitely
-split that out to avoid confusion, something like this:
-
-	...
-        ret = readx_poll_timeout(litex_read8, reg, evt, evt & SD_BIT_DONE,
-                                 SD_SLEEP_US, SD_TIMEOUT_US);
-	if (ret)
-                return ret;
-        if (evt == SD_BIT_DONE)
-                return 0;
-        if (evt & SD_BIT_WR_ERR)
-                return -EIO;
-        if (evt & SD_BIT_TIMEOUT)	// <<< HERE
-                return -ETIMEDOUT;
-        if (evt & SD_BIT_CRC_ERR)
-                return -EILSEQ;
-	...
-
-> ...
-> 
-> > +       pr_err("%s: unknown error evt=%x\n", __func__, evt);
-> 
-> Use dev_err().
-
-OK, done.
-
-> ...
-> 
-> > +       /* Wait for an interrupt if we have an interrupt and either there is
-> > +        * data to be transferred, or if the card can report busy via DAT0.
-> > +        */
-> 
-> This comment style is for the net subsystem, for others we use
-> /*
->  * Starting here...
->  */
-> 
-> Fix it everywhere in your code.
-
-OK, multi-line comment style updated across the entire file.
-
-> ...
-> 
-> > +               reg = host->sdcore + LITEX_CORE_CMDRSP;
-> > +               for (i = 0; i < 4; i++) {
-> > +                       host->resp[i] = litex_read32(reg);
-> > +                       reg += sizeof(u32);
-> > +               }
-> 
-> Isn't it memcpy_fromio()?
-
-Yes, that appears to be the case. Looking at `litex_read32()`
-(in include/linux/litex.h), it's defined as
-
-	le32_to_cpu((__le32 __force)readl(addr))
-
-which counts as a "__raw_readl()", i.e., without the byteswap occurring
-on BE architectures. It looks like memcpy_fromio() doesn't play byteswap
-games on BE either, so they should be equivalent. With the caveat that
-I only have the ability to test on LE!
-
-For now, based on the above observations, I think it's safe to use
-memcpy_fromio() here.
-
-> ...
-> 
-> > +       if (!host->app_cmd && cmd == SD_SEND_RELATIVE_ADDR)
-> > +               host->rca = (host->resp[3] >> 16) & 0xffff;
-> 
-> Are you expecting a 32-bit value to be bigger than 2^32-1?
-
-Fair enough :)
-
-> ...
-> 
-> > +       div = min(max(div, 2U), 256U);
-> 
-> clamp_t() / clamp_val() ?
-
-OK, changed to `div = clamp_val(div, 2U, 256U);`
-
-> ...
-> 
-> > +       ret = platform_get_irq_optional(host->dev, 0);
-> > +       if (ret == -ENXIO || ret == 0) {
-> > +               dev_warn(dev, "Failed to get IRQ, using polling\n");
-> > +               goto use_polling;
-> > +       }
-> > +       if (ret < 0)
-> > +               return ret; /* e.g., deferred probe */
-> > +       host->irq = ret;
-> 
-> Can it be rather written as
-> 
->        ret = platform_get_irq_optional(host->dev, 0);
->        if (ret < 0 && ret != -ENXIO)
->          return ret;
->        if (ret > 0)
->          host->irq = ret;
->        else {
->                dev_warn(dev, "Failed to get IRQ, using polling\n");
->                goto use_polling;
->        }
-> 
-> ?
-
-OK, done.
-
-> ...
-> 
-> > +use_polling:
-> > +       host->mmc->caps |= MMC_CAP_NEEDS_POLL;
-> 
-> > +       host->irq = 0;
-> 
-> Isn't it 0 by default?
-
-Yes, because of kzalloc() by way of mmc_alloc_host(). So I don't have to
-set it to 0 explicitly -- Done.
-
-> ...
-> 
-> > +       mmc = mmc_alloc_host(sizeof(struct litex_mmc_host), &pdev->dev);
-> 
-> > +       /* NOTE: defaults to max_[req,seg]_size=PAGE_SIZE, max_blk_size=512,
-> > +        * and max_blk_count accordingly set to 8;
-> > +        * If for some reason we need to modify max_blk_count, we must also
-> > +        * re-calculate `max_[req,seg]_size = max_blk_size * max_blk_count;`
-> > +        */
-> 
-> Can you rather not split code by this comment. It makes sense to be above, no?
-
-OK -- Done.
-
-> > +       if (!mmc)
-> > +               return -ENOMEM;
-> 
-> ...
-> 
-> > +       /* set default sd_clk frequency range based on empirical observations
-> > +        * of LiteSDCard gateware behavior on typical SDCard media
-> > +        */
-> 
-> Start sentences from capital letters and keep proper style of
-> multi-line comments.
-
-Multi-line comment style fixed per your earlier observation.
-
-I also went and capitalized the first letter of each comment throughout
-the source.
-
-> ...
-> 
-> > +err:
-> > +       mmc_free_host(mmc);
-> > +       return ret;
-> 
-> This...
-> 
-> > +}
-> > +
-> > +static int litex_mmc_remove(struct platform_device *pdev)
-> > +{
-> > +       struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
-> > +
-> > +       if (host->irq > 0)
-> > +               free_irq(host->irq, host->mmc);
-> > +       mmc_remove_host(host->mmc);
-> > +       mmc_free_host(host->mmc);
-> 
-> ...and this have ordering issues. You mixed devm_*() with non-devm_*()
-> APIs in the wrong way.
-> 
-> Also, I haven't noticed the free_irq() call in the error path of
-> ->probe(). Isn't it missed?
-
-OK, I've reordered everything (and added the missing free_irq() call
-like so:
-
-	static int litex_mmc_probe(struct platform_device *pdev)
-	{
-		...
-		...
-		return 0;
-
-	err:
-	        if (host->irq > 0)
-	                free_irq(host->irq, host->mmc);
-	        mmc_free_host(mmc);
-	        return ret;
-	}
-
-	static int litex_mmc_remove(struct platform_device *pdev)
-	{
-	        struct litex_mmc_host *host = dev_get_drvdata(&pdev->dev);
-
-	        mmc_remove_host(host->mmc);
-	        if (host->irq > 0)
-	                free_irq(host->irq, host->mmc);
-	        mmc_free_host(host->mmc);
-
-	        return 0;
-	}
-
-Looking at other examples in drivers/mmc/host/* I'm not sure if/what
-other ordering issues or devm/non-devm mixing violations I'm
-perpetrating: if there are any left, could you please point them out
-in a bit more detail?
- 
-> > +       return 0;
-> > +}
-> 
-> ...
-> 
-> > +               .of_match_table = of_match_ptr(litex_match),
-> 
-> Wrong usage of of_match_ptr().
-
-Huh? It's consistent with how a whole bunch of other files in
-drivers/mmc/host/*.c are using it, can you please elaborate?
-
-Thanks much for taking the time to review the driver, much appreciated!
-I'll send out a v7 as soon as I get some clarity on the portions above
-that I'm still confused about... :)
-
-Thanks again,
---Gabriel
