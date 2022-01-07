@@ -2,56 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B356C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 21:14:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5598C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 21:23:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229803AbiAGVOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 16:14:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51508 "EHLO
+        id S229849AbiAGVXx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 16:23:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53604 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229504AbiAGVOY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 16:14:24 -0500
-Received: from mail-qk1-x732.google.com (mail-qk1-x732.google.com [IPv6:2607:f8b0:4864:20::732])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6797C061574;
-        Fri,  7 Jan 2022 13:14:23 -0800 (PST)
-Received: by mail-qk1-x732.google.com with SMTP id t66so7241489qkb.4;
-        Fri, 07 Jan 2022 13:14:23 -0800 (PST)
+        with ESMTP id S229846AbiAGVXw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 16:23:52 -0500
+Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78484C061574;
+        Fri,  7 Jan 2022 13:23:52 -0800 (PST)
+Received: by mail-qt1-x82a.google.com with SMTP id f9so6067803qtk.3;
+        Fri, 07 Jan 2022 13:23:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=86bmCUO4/U0a6rfe/ONoJYDT8UB9ddOMRY07QyBxd1o=;
-        b=GCOwZzZ5W5BcbBib85Vqi1ujWWtcLE27iRT9Z8cnGyPMWqFnLHljYYSZUgeo1JFxeb
-         eNJmKJrWjdGcokG+SOoq+HZ8J2XRJ1ZtssqdjUyT1FphndgWYCSA0n0iJ3sy3ax5Oyth
-         IHQ6iUz4LjxD7+l28sGBRxFbBQdtAtwuYA33Pq1QyMO+UBSWMgmAeSMTjyV0v50n4vtj
-         l3E31iBUyriNNLalaLv9tzIwyC/hDsVwVmGKGmQ+Fr+ilsJ82fzJLkB6ARW1RD4+N99f
-         bA8cL28Jargge43xh8U/ufeVzYtO9H37Fb67Z4dBPRv9ljPzX8HSYGUGD8gp8UDVzpJ7
-         PjSQ==
+        bh=JDIG8hlIPSgos1AEwZopFYwplEZE2Io0p9+mhy5BWpI=;
+        b=DlTvOvYQdHxBwp9EYa8ixtLXU+8FnKJVOGqoNFqX9mFTUP5WsDGxZa4dl1VKu27xzD
+         dKrbGfqL0Vk4INEoWjqzoCx70v49siHQqHmAPhYXFM5Jp6Ms9gChervONUPnspBn9OzR
+         HuOJOEzAvxf/LxQjHVr21ErNt+2iwSDlJK+m6NpP+RRHxNxNE0Aay2DRpPQLVwrNkBav
+         ZrtxcIOOgQ6DUsOH/zf9kZOnfnsN53QyPkEbJp0GJrGq/ubX+mdj+v+Ook2MunMgo2TB
+         vuDlvzLI7oQHMPvf4/S4ujEpEx2vD3o9YKEmyzDzXR/IZ5fl/R7G+geFvL8xO/cEYnIy
+         mBQw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=86bmCUO4/U0a6rfe/ONoJYDT8UB9ddOMRY07QyBxd1o=;
-        b=kG12YE7FcHwBl5o26vBm3CekyE0S70culeZuiUDry1EOsY6D8YD4N7n+pV8GQqHQVe
-         +NG1NJ6n2w5AXyoGRd3ozSOfZNS4I8I/nPPUb8eEIaXyAJMhFFp18BSwoWgeQsS0FsiC
-         wNYX6spoR8GtpgIWsf7JIi5DPcLam70oDJvgbYKj5MYsNCZvwXAr3tZFkKpwvRXMjoqD
-         vOSA5fWM9HayXK9eFMyPNa/t8s6WdlfkEGFTwBbA1WO9NRbNVhw4dmhtAYWfQI2Ukkzh
-         HYW5LOZZYjxIR4X60BfF2/cZnvfWuEDWrQruQiuW+B2Sxk9FZN6SPeliOZtBYKqlkWeX
-         liUw==
-X-Gm-Message-State: AOAM5327QCiUAMuS9cUciiEh2rw91jE6hPX5Fna0yx4W2LstDZKicRS7
-        ZX58v7+5loa4UdinwtgilwU=
-X-Google-Smtp-Source: ABdhPJxzmpCCj8uBAD4V5Nc9xbRrIiVMpXkV/b1Xv5womCk1laqHpqgz34wR9fupkQM+rf23/11QNg==
-X-Received: by 2002:a05:620a:430e:: with SMTP id u14mr46230836qko.286.1641590062961;
-        Fri, 07 Jan 2022 13:14:22 -0800 (PST)
+        bh=JDIG8hlIPSgos1AEwZopFYwplEZE2Io0p9+mhy5BWpI=;
+        b=z5D2TsdoHWRWaITKid0/duamTzIkUgT0pMbDPv5tfv//D85pE7Q7db58FK+KUvDvLZ
+         eSfvyqbVPiuTpUG1UotK00DAHtyl76yydLxSPk2NbkQeW8Dov1n5ASPvgZf5zgtz+DsF
+         gez0oqOcSQTvhp/NnwYVg8FMELGTIVgUCRrKyJId1p8v5yrDYR+Qv8txKxjIItMRjH4O
+         4zPa5kOdRMPziZM1pmqPpKJngZseFeuje1baGw+xxWrvZ2z+O+491QLUuRgGmPXDx5gh
+         ZLCZvaNHGIsaQPXKa8ru8DhIrLJ0mDVg4hoiR8V51udJdCiGpcWPucoOSPNXyfwpbNKg
+         MYAA==
+X-Gm-Message-State: AOAM532ksX+KhGUTcEfhHANQAojLpcPhxCHM7t6TpDpmJuTlyI2euanB
+        aQIVwfp/IZlBgCccMsUSR+E=
+X-Google-Smtp-Source: ABdhPJyVNaqir9sjtRIE4vGqirwi2DyZw6Ta3kbEyPc0E3zFKWOFjGobWKR13SKYFNgBrdtwx8Ivpg==
+X-Received: by 2002:a05:622a:1996:: with SMTP id u22mr57750521qtc.268.1641590631647;
+        Fri, 07 Jan 2022 13:23:51 -0800 (PST)
 Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id s9sm4219123qki.99.2022.01.07.13.14.21
+        by smtp.gmail.com with ESMTPSA id c25sm4309221qkp.31.2022.01.07.13.23.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Jan 2022 13:14:22 -0800 (PST)
-Date:   Fri, 7 Jan 2022 16:14:20 -0500
+        Fri, 07 Jan 2022 13:23:51 -0800 (PST)
+Date:   Fri, 7 Jan 2022 16:23:49 -0500
 From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
 To:     Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
+Cc:     Rob Herring <robh+dt@kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
@@ -65,68 +64,46 @@ Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
         david.abdurachmanov@sifive.com,
         Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
+        Randy Dunlap <rdunlap@infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Subject: Re: [PATCH v7 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <YditLMRpj0BaG9O0@errol.ini.cmu.edu>
+Message-ID: <YdivZYknD2IQ1Wzy@errol.ini.cmu.edu>
 References: <20220107170616.2041589-1-gsomlo@gmail.com>
  <20220107170616.2041589-4-gsomlo@gmail.com>
- <CAHp75VfBUomALtdhRXN-Z12RDAvLUiNHzazK0Mit6ExzRUTtRw@mail.gmail.com>
+ <YdhzmE8eBsvkRCBn@errol.ini.cmu.edu>
+ <CAHp75Ve5T-yNV-BJww_kN+6y8P9FyHodKfZ4nfi2POynp6BPVg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAHp75VfBUomALtdhRXN-Z12RDAvLUiNHzazK0Mit6ExzRUTtRw@mail.gmail.com>
+In-Reply-To: <CAHp75Ve5T-yNV-BJww_kN+6y8P9FyHodKfZ4nfi2POynp6BPVg@mail.gmail.com>
 X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 07, 2022 at 10:54:12PM +0200, Andy Shevchenko wrote:
-> On Fri, Jan 7, 2022 at 7:06 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
+On Fri, Jan 07, 2022 at 10:50:02PM +0200, Andy Shevchenko wrote:
+> > > +             .of_match_table = of_match_ptr(litex_match),
 > >
-> > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > SDCard core commonly used in LiteX designs.
-> >
-> > The driver was first written in May 2020 and has been maintained
-> > cooperatively by the LiteX community. Thanks to all contributors!
+> > You said "Wrong usage of of_match_ptr()" here, and all I have to go by
+> > is a bunch of other `drivers/mmc/host/*.c` files that use it in a
+> > similar way, so can you please clarify and/or provide an example of how
+> > to do it properly?
 > 
-> ...
-> 
-> > +// SPDX-License-Identifier: GPL-2.0
-> > +/*
-> > + * LiteX LiteSDCard driver
-> > + *
-> > + * Copyright (C) 2019-2020 Antmicro <contact@antmicro.com>
-> > + * Copyright (C) 2019-2020 Kamil Rakoczy <krakoczy@antmicro.com>
-> > + * Copyright (C) 2019-2020 Maciej Dudek <mdudek@internships.antmicro.com>
-> > + * Copyright (C) 2020 Paul Mackerras <paulus@ozlabs.org>
-> > + * Copyright (C) 2020-2021 Gabriel Somlo <gsomlo@gmail.com>
-> 
-> > + *
-> 
-> I guess I have commented on this and there was no discussion about the
-> necessity of this blank line. I dunno what else has been ignored, so I
-> will wait either for the continuation of the discussion (as per v6) or
-> amending code in v8.
+> First of all, you have a dependency to OF, try to remove it and
+> compile with OF=n and you will immediately see the issue. You may also
+> go for  `git log --no-merges --grep of_match_ptr` and analyze the
+> result.
 
-Yeah, not sure how that got lost, it "should have" been in v7 already,
-but will definitely be in v8... :)
- 
-BTW, I also added the `bit.h` include per your explanation, and removed
-all the `Cc:` lines from the commit blurb (not sure when it's actually
-appropriate to put those in vs. just cc-ing people from `git send-email`,
-but I have no strong feelings about it of my own :)
+Ah, grepping for "of_match_ptr" was *never* going to show me the
+"right way of using of_match_ptr()" :)
 
-> > + */
-> 
-> ...
-> 
-> On top of that it might still be the ordering issues in the error path
-> of ->probe() and in ->remove(). I believe we will likely see v8.
+OTOH, grepping for "of_match_table" (and of course the commits
+returned by your command line) suggests that I simply should *not*
+use it at all, and assign its argument directly to .of_match_table.
 
-I'll need to follow your bread crumbs on ordering and `of_match_table`
-(also in some of the other emails you've sent in this thread),
-and will send out v8 once I've made some sense of it all...
+Got it, fixed it, thanks!
 
-Thanks much,
---Gabriel
+Now, on to the probe ordering issue... :)
+
+Thanks,
+--G
