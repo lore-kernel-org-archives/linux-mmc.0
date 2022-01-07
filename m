@@ -2,57 +2,57 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 385A1C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 20:54:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0435C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 20:59:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229579AbiAGUyu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 15:54:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47124 "EHLO
+        id S229650AbiAGU7T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 15:59:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229486AbiAGUyu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 15:54:50 -0500
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6F81C061574;
-        Fri,  7 Jan 2022 12:54:49 -0800 (PST)
-Received: by mail-ed1-x52c.google.com with SMTP id j6so26504839edw.12;
-        Fri, 07 Jan 2022 12:54:49 -0800 (PST)
+        with ESMTP id S229486AbiAGU7S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 15:59:18 -0500
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE89DC061574;
+        Fri,  7 Jan 2022 12:59:17 -0800 (PST)
+Received: by mail-ed1-x534.google.com with SMTP id u25so26738949edf.1;
+        Fri, 07 Jan 2022 12:59:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=PYqun+LwcFZngeUshoTPTihl/JBvURcYFS+g3dFr7pY=;
-        b=JmeQL+nQXNozJbExGxXiex7Z2lWmVrtO5jQd2GIF1Cs/LpIekKoxfAXcGOeeeUeJoW
-         Ju70RuLvrys6cGD2dvAMj+2J/M34hu1JcNlyooeifO6BG1qhdYBDNddYpKYB97Gq2JeW
-         m3mSZm7Pzvxy89rRjVQuXakRW/9LuDJbCMInmh7vyKN+CdV0BpGf2d7w0JX7VkzNf6Dz
-         KH+bu/cvolM+ZrTnNiZ3LRYldSdUnHKxyi+9WBMIQD2HX7xGiL5wCv+lGv+E3F9xcZsq
-         DB3UT055T4CcG8sffjs1G0FUGugnWprHwlozwB32xImqMH4Gu1rqN/ngwKPAnbkvGNJu
-         ZH8A==
+        bh=rj4r6CMIhOurl71mbmpns9s+/GLT2l4z4KhNgTh1A9E=;
+        b=PUGVVPHPIJeKZjCox9JgFlyMlUZiJi45DVm2R2L0eLOHL+uL7VD9Z67lLbRFYPE9iM
+         RNa64jlUO9FCgJGSm7xDge0I4oa5qcG9qnrypAq/m8f39mjG8BF2x1glDwQhBMQROV1I
+         TDUpEJRhCJlMiDYv6Dz98IXPJltSUy9ogmf8Y9TTOxTkNwRPzdwH0UGqe1llkOmmUm1s
+         uFOTA88A3ZkQhFgQbfNptGuyCllzKjcvuWYOZPLC+yqtlYrqPddawMaIsqn5XY7t+GWt
+         KGtV16sFbxGf2u8rbe/6Iv2J7OKk6mRzd3cq+VxYcIqLNON6bENzfulUQ1dpoShdCwkS
+         sk8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=PYqun+LwcFZngeUshoTPTihl/JBvURcYFS+g3dFr7pY=;
-        b=pW0ltc6XME27CMiKWyIP4DmAEAH/p+/JkG3Vn1dV/OnJw3+sxxoCNa7eEDTDX6inUB
-         De+9+rIXD3P/BfgZ+EbnLvP8Ohq+HlLGb2sxOkvy+KxW/IRB5VoBF8eotAk1pF7R3Tqr
-         who1oTJsIjacRdyK702srV/mJhA++Bgh46DvS35+YJa/UO3FmAwHMQbsjxqMJTFRpbyP
-         rTg1TEGXkP9sJ8aN0h0q2GYajSpIP/0ENL/6fdypmPVMjxjD+wrlXjZejHMVe1vAMs6h
-         /D7aWUvHJ37SRPTTqmTHsid0LtCXUVVL53yzTdTo0Yt9AlebpxZ7vkTBSx4OcXP13Puf
-         cyGw==
-X-Gm-Message-State: AOAM530PxasoUn67w3rRj/FVkLow6FgaO0PDzyCnXoWTcJpWiQm1ft5B
-        YEVGDc1ZQvwPUW7trPzbHUXlFPIUAv3vOfKKwvY=
-X-Google-Smtp-Source: ABdhPJw4kjvtMSCN/EYkF9HQv+yinFPUdFSWCQCaD0VtTsfhAU4vzaDMumOlD/8dnaiaNaBdAXVAsEp5WqwMU7joCYY=
-X-Received: by 2002:a05:6402:12c4:: with SMTP id k4mr62289532edx.218.1641588888229;
- Fri, 07 Jan 2022 12:54:48 -0800 (PST)
+        bh=rj4r6CMIhOurl71mbmpns9s+/GLT2l4z4KhNgTh1A9E=;
+        b=MTX5rpBFLFsz+7wAEIzat2e4UzBZKuEOXdnKGNdUB0zBO1zYtQutD9i/0AnOMLn09W
+         u6XhOZrkhXeesasUX9d9C/hbeOZvMzigIyhFwcAt1ITfSrHDB9wU3F8Kx8cOn1xmAKRn
+         8dR1rbiUrKzaPVzd+U+oT4CoOPcKxMeW0gvNfgDTiw2fMj9u2h+pteqfXpmuZR1HU0Ij
+         f0HVrGM5hOT/pu2O6qrMi4k8W6Zsz+rme6C97yag2zZ+ibk/eGCveT4MySRdRhP6BEKv
+         ChA2gjjHm6PtrJvJnIQwIKse2Oa7ZU4cwZu9VC0Z1Q+324+tRm2sIL0x+rCE8b+lnI8y
+         v4SQ==
+X-Gm-Message-State: AOAM5321L1dw7FIYTJfokgp0RcammrwyXo3be9yBNVx58lzZcr+KIsmS
+        mwA2e4bCLto03n/Ze1rBPn+1H+gNor3CEEgMW/OjhtexaUA=
+X-Google-Smtp-Source: ABdhPJxoXuckBMfWUW0vbbBRZK4m2UTve8Y25D7Nk3+Fv7D5ieD47ro52n2ASDPU0+AQhDurEFM9P0EOOWyd/GMVDTA=
+X-Received: by 2002:a17:907:968c:: with SMTP id hd12mr3431352ejc.639.1641589156444;
+ Fri, 07 Jan 2022 12:59:16 -0800 (PST)
 MIME-Version: 1.0
 References: <20220107170616.2041589-1-gsomlo@gmail.com> <20220107170616.2041589-4-gsomlo@gmail.com>
-In-Reply-To: <20220107170616.2041589-4-gsomlo@gmail.com>
+ <YdhzmE8eBsvkRCBn@errol.ini.cmu.edu> <CAHp75Ve5T-yNV-BJww_kN+6y8P9FyHodKfZ4nfi2POynp6BPVg@mail.gmail.com>
+In-Reply-To: <CAHp75Ve5T-yNV-BJww_kN+6y8P9FyHodKfZ4nfi2POynp6BPVg@mail.gmail.com>
 From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Fri, 7 Jan 2022 22:54:12 +0200
-Message-ID: <CAHp75VfBUomALtdhRXN-Z12RDAvLUiNHzazK0Mit6ExzRUTtRw@mail.gmail.com>
+Date:   Fri, 7 Jan 2022 22:58:40 +0200
+Message-ID: <CAHp75VdnvdurRbL+aqTDhmQkHJU-mhNWFKRdVqPCh9mMV2h+6g@mail.gmail.com>
 Subject: Re: [PATCH v7 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     Gabriel Somlo <gsomlo@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
+To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
@@ -66,46 +66,66 @@ Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
         david.abdurachmanov@sifive.com,
         Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
+        Randy Dunlap <rdunlap@infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 7, 2022 at 7:06 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
->
-> LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> that targets FPGAs. LiteSDCard is a small footprint, configurable
-> SDCard core commonly used in LiteX designs.
->
-> The driver was first written in May 2020 and has been maintained
-> cooperatively by the LiteX community. Thanks to all contributors!
+On Fri, Jan 7, 2022 at 10:50 PM Andy Shevchenko
+<andy.shevchenko@gmail.com> wrote:
+> On Fri, Jan 7, 2022 at 7:08 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+> > On Fri, Jan 07, 2022 at 12:06:16PM -0500, Gabriel Somlo wrote:
 
 ...
 
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * LiteX LiteSDCard driver
-> + *
-> + * Copyright (C) 2019-2020 Antmicro <contact@antmicro.com>
-> + * Copyright (C) 2019-2020 Kamil Rakoczy <krakoczy@antmicro.com>
-> + * Copyright (C) 2019-2020 Maciej Dudek <mdudek@internships.antmicro.com>
-> + * Copyright (C) 2020 Paul Mackerras <paulus@ozlabs.org>
-> + * Copyright (C) 2020-2021 Gabriel Somlo <gsomlo@gmail.com>
+> > Any more ordering or devm vs. non-devm mixing violations here? If so,
+> > can you please link me to an example or some docs where I ould figure
+> > out what it is I'm still doing wrong?
+>
+> Device managed resources are attached to the instance of the device
+> object and removed in the order they have been attached to, but with
+> the caveat that they have no clue about non-managed calls in between.
+> Now you may figure out what happens. Ex.:
+>
+> probe()
+>   A
+>   devm_B
+>   C
+>   devm_D
+>
+> remove()
+>   un_C
+>   un_A
+>
+> WRONG!
 
-> + *
+For the sake of comprehensivity of the examples the right one(s) depicted below:
 
-I guess I have commented on this and there was no discussion about the
-necessity of this blank line. I dunno what else has been ignored, so I
-will wait either for the continuation of the discussion (as per v6) or
-amending code in v8.
+->probe()
 
-> + */
+1)
+  devm_A
+  devm_B
+  C
+  D
 
-...
+2)
+  A
+  B
+  C
+  D
 
-On top of that it might still be the ordering issues in the error path
-of ->probe() and in ->remove(). I believe we will likely see v8.
+3)
+  devm_A
+  devm_B
+  devm_C
+  devm_D
+
+Hint:
+`git log --no-merges --grep devm_add_action_or_reset`
+
 
 -- 
 With Best Regards,
