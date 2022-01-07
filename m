@@ -2,59 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D350C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 10:25:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02175C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Jan 2022 10:29:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237322AbiAGKZC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Jan 2022 05:25:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45056 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232248AbiAGKZC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 05:25:02 -0500
-Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3037C061245;
-        Fri,  7 Jan 2022 02:25:01 -0800 (PST)
-Received: by mail-ed1-x534.google.com with SMTP id z9so20260481edm.10;
-        Fri, 07 Jan 2022 02:25:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qmkH4HduGuDqN56JXHqEKJBLN+FBRsxZyV1qZNn/vGI=;
-        b=R+7oVNEt7WbifMQOMsewUjqj9ff3qjy2u35LIVMmh2ObEXcuKRT10Bib026YKKD94C
-         dwDcZ1GxbD+MzeOnjuqYyNLHWGWOQ0O+G513GMDgWThNbCgK8BbK+R+gumLxGFlENbN8
-         MH2gB/XUv9jvGWtSJef6HH5zkjBCdFxzo5vfjKE1SoXwXEpxk2d8+IlopQAW72PzxIA7
-         ppawoDPM7JVi2dgqe2JpQ0IgA8CVrYSjDM/FyZ88l5bziaI7/qBPhjI8wpAFDvcWPXtt
-         gJmcGUSCPST/Fl5d8H960+FW9rcNPzFWBbgJE3cVCdLAOE/vs3Em9DIG3eRkMBWPdAl3
-         F3SQ==
+        id S1346797AbiAGK3e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Jan 2022 05:29:34 -0500
+Received: from mail-ua1-f54.google.com ([209.85.222.54]:33569 "EHLO
+        mail-ua1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1346799AbiAGK31 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Jan 2022 05:29:27 -0500
+Received: by mail-ua1-f54.google.com with SMTP id u6so9459499uaq.0;
+        Fri, 07 Jan 2022 02:29:26 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=qmkH4HduGuDqN56JXHqEKJBLN+FBRsxZyV1qZNn/vGI=;
-        b=i6dWYC/rmmpQizd5AaM+zPxriPhGmKWUUO8IGtUmBZ14PZ8nXJA5LdQ9MzZLeVkxpj
-         bXiXz+6Keo5Dj2HVAu8hUJRr6tFquT220Aw9fXrIY+ECHHOBYg1rfM2YL+Zu+K3lJ8U9
-         /lGFjtVXvZ9eUrl7AeZl9Cr1mOzo5ZaWM+il7owH6hqwgL/laO8m/37IpSIrrgd7tjWF
-         XRyfv2dGbpLsuKzIb3uQq+hP6ACf6Emd0nNzqDkAlo2FYfssTW+FOD+zWIemHHyWvslU
-         JWxfN34dUBZaBR9HMdNazwqJ3bkKhAyDDLEXW2X+/T4twwq1KYId/W+QK/f7HsR7wZzV
-         olXg==
-X-Gm-Message-State: AOAM533KYvUZif1mVHiuppEJx07DczxNQEf9JqrS5kUP0B3MrnMAgGZN
-        4+5VggW1FLAcK8Wtsc0DJOteRFedOabgOCULR8Gf6M+llCV7mQ==
-X-Google-Smtp-Source: ABdhPJwY1QWSUINg7cruSSBn6h8xxuURGw+5jNlvUGuofk536vAhkZSweQDZGB2f5QcjXzDZpjqUzS8UpMZ6glQYs4E=
-X-Received: by 2002:a05:6402:518a:: with SMTP id q10mr58704139edd.29.1641551100325;
- Fri, 07 Jan 2022 02:25:00 -0800 (PST)
+        bh=Io2bK2EB9BrWpLhpSRU2u5xHS0wL/UWmqIaJGQJ1nnU=;
+        b=HynvkoVVs8DIjDHaHwje+Kt8nkp/Yo0XbMPpaWZMA7m3oT1YssQzmkHjfzrJ7tI00a
+         F38IM45brkv9D01uQa+/1QKfN9UwL40d5P8CKrj6m42OlM4vZ6LUa0fsRQpq2JpBnBhS
+         IZe+PNYiJMQ546Y3m42Ew5cUfA6vStw2tp6WKLp9qyPh1zolhFqccTmd3mcvJ1bL9dF8
+         R2bn+bG4lnyPl7QpUhTPZEe1dlvxdkbcY0oWhNnf9QIPW4zV93VtF6gNxpDRtuCwP7tZ
+         T2tjffiXClegdRAVLyv44gFFdaFWgi5HXwx3P14/StXwWqIqvEzGQPgtCndqNG1X6LXX
+         XaSA==
+X-Gm-Message-State: AOAM533WpQ5sUB24Ye2O/drWWls4xShjFWaBdfnvd9nlezmkpfEPi1Tj
+        Jh8CXwbqXnUKpYVrkw1jhLusvktuTopPgg==
+X-Google-Smtp-Source: ABdhPJzCzN5LGUpoo3Y564wS/N/dmHy/og0EyjsSqIWSHCNxbCNjtWuAIhNuSFbdRtiPDdX8gr70AQ==
+X-Received: by 2002:ab0:3148:: with SMTP id e8mr21920845uam.62.1641551366198;
+        Fri, 07 Jan 2022 02:29:26 -0800 (PST)
+Received: from mail-vk1-f174.google.com (mail-vk1-f174.google.com. [209.85.221.174])
+        by smtp.gmail.com with ESMTPSA id u7sm2919855vkf.12.2022.01.07.02.29.24
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 07 Jan 2022 02:29:24 -0800 (PST)
+Received: by mail-vk1-f174.google.com with SMTP id d189so3406508vkg.3;
+        Fri, 07 Jan 2022 02:29:24 -0800 (PST)
+X-Received: by 2002:ac5:c853:: with SMTP id g19mr23105681vkm.20.1641551364177;
+ Fri, 07 Jan 2022 02:29:24 -0800 (PST)
 MIME-Version: 1.0
 References: <20220106174803.1773876-1-gsomlo@gmail.com> <20220106174803.1773876-4-gsomlo@gmail.com>
  <CAHp75Ve_jWmo3+Es0G5SyMpcdC_=hWfxHoa866Difd+X3F0uxg@mail.gmail.com>
  <YddyMI7hJE7u0jQ/@errol.ini.cmu.edu> <CAMuHMdX2ujViu9GivVHtgAqC6AdiL3CvdJM58pVteJe9KdvdqQ@mail.gmail.com>
- <YdgSG7t2eG9YzkaG@antec>
-In-Reply-To: <YdgSG7t2eG9YzkaG@antec>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Fri, 7 Jan 2022 12:24:23 +0200
-Message-ID: <CAHp75VdjP4jmUQHUV=eF2Ot+s=3==ZqUS7BFxMoPDw=NkCBm6Q@mail.gmail.com>
+ <YdgSG7t2eG9YzkaG@antec> <CAHp75VdjP4jmUQHUV=eF2Ot+s=3==ZqUS7BFxMoPDw=NkCBm6Q@mail.gmail.com>
+In-Reply-To: <CAHp75VdjP4jmUQHUV=eF2Ot+s=3==ZqUS7BFxMoPDw=NkCBm6Q@mail.gmail.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 7 Jan 2022 11:29:13 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdU1UqwKzE=tT4fdJb9EjJRJTsG2fGoLrBSOs_K22rY-sQ@mail.gmail.com>
+Message-ID: <CAMuHMdU1UqwKzE=tT4fdJb9EjJRJTsG2fGoLrBSOs_K22rY-sQ@mail.gmail.com>
 Subject: Re: [PATCH v6 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     Stafford Horne <shorne@gmail.com>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc:     Stafford Horne <shorne@gmail.com>,
         "Gabriel L. Somlo" <gsomlo@gmail.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -74,37 +69,51 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 7, 2022 at 12:12 PM Stafford Horne <shorne@gmail.com> wrote:
-> On Fri, Jan 07, 2022 at 10:36:12AM +0100, Geert Uytterhoeven wrote:
-> > On Thu, Jan 6, 2022 at 11:50 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
+Hi Andy,
 
-...
-
-> > Many (most?) blurbs do mention the module name.
+On Fri, Jan 7, 2022 at 11:25 AM Andy Shevchenko
+<andy.shevchenko@gmail.com> wrote:
+> On Fri, Jan 7, 2022 at 12:12 PM Stafford Horne <shorne@gmail.com> wrote:
+> > On Fri, Jan 07, 2022 at 10:36:12AM +0100, Geert Uytterhoeven wrote:
+> > > On Thu, Jan 6, 2022 at 11:50 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
 >
-> I was doubting this as well, but I searched and its true.  The text 'module will
-> be called' shows up many times, there is also different text.
+> ...
 >
->  $ grep -r 'module will be called' drivers/ | wc
->    1347    9023   9086
+> > > Many (most?) blurbs do mention the module name.
+> >
+> > I was doubting this as well, but I searched and its true.  The text 'module will
+> > be called' shows up many times, there is also different text.
+> >
+> >  $ grep -r 'module will be called' drivers/ | wc
+> >    1347    9023   9086
+> >
+> >  $ grep -r 'tristate \"' drivers/ | wc
+> >    7169   47486  521795
 >
->  $ grep -r 'tristate \"' drivers/ | wc
->    7169   47486  521795
+> Just a side note: `git grep ...` is much faster in the Git trees.
 
-Just a side note: `git grep ...` is much faster in the Git trees.
+Indeed.
 
-And for this particular case I dare to advertise a script I wrote [1]
-to help with recursive searches.
-
-[1]: https://github.com/andy-shev/home-bin-tools/blob/master/gl4func.sh
-
-> So maybe >10% have module name in the blurb.  Example:
+> And for this particular case I dare to advertise a script I wrote [1]
+> to help with recursive searches.
 >
->           To compile this driver as a module, choose M here: the
->           module will be called tifm_sd.
+> [1]: https://github.com/andy-shev/home-bin-tools/blob/master/gl4func.sh
 
+Cool!
 
+My fingers are used to type
 
--- 
-With Best Regards,
-Andy Shevchenko
+    git grep -w <pat1> -- $(git grep -lw <pat2> -- ...)
+
+;-)
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
