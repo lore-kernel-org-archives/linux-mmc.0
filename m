@@ -2,119 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B30FDC433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Jan 2022 17:48:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22B4AC4332F
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Jan 2022 17:55:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229972AbiAHRsM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Jan 2022 12:48:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38754 "EHLO
+        id S233577AbiAHRz3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Jan 2022 12:55:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229928AbiAHRsL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Jan 2022 12:48:11 -0500
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8140C06173F;
-        Sat,  8 Jan 2022 09:48:10 -0800 (PST)
-Received: by mail-ed1-x530.google.com with SMTP id j6so35265213edw.12;
-        Sat, 08 Jan 2022 09:48:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=HKLi8ROSD1N0wXToisA4xUpZ4tz7KIbvKJEjlY+zaMA=;
-        b=PcqwM7NAXcRYpLPiEYfz8ZW5rmZxpmtXiai7y6zR+n4NY3My0rbQigrJBCedZ/3eOu
-         wI/l1T+lA0cMqcOenXQCOSVOVy8wUMIn4j+kys9sbU01qzjmrSNfk9Hx4u2VN5PktxSd
-         s9h1Ztclpvqx0V8qlFfWyJiE0OilijmlZ9tpsRiiyz4MX+XLIR+Kss1QFd6RU/ETrANN
-         /j7PuJmGhgKufed9GjyC7hJlcDPe7gfnPWde1f7ZRcU+qxKOP8JgKGDMdf4d7rP7DOq8
-         kWXs9BnYca0Kvhu+hztSbUUswZ/0Z6YzQfMw0aKfnRqsG6nB/vs2qo4EnhJ6ia+mxe7l
-         NHKg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=HKLi8ROSD1N0wXToisA4xUpZ4tz7KIbvKJEjlY+zaMA=;
-        b=a5oQaB6GJPLnysoScdF2s3l3BdWuanLFO9R57h2/4vSN6Pv4aW/N4mnu4q6TtmeNaw
-         ueizkgOaP4VCmyOLdesqQ2BTCMDUK9czMesZxVIgSl+a/pCJeVkrMbkOtAP2WRgbgis5
-         jbgE9+WmS/K7wWDhPlgWFkOS2D+7LIprgFdzTHofN/Tqa3HNihtRo2cI9/JJ79EL/OvX
-         vleENNF16rNoXHyt5lXXPB1SLwrqgUREcmZBG2i150aU93dORlV5JmK3y4GZ8oZ7AqpY
-         DzsqBFNA90rq0xWKECACmE0cQSW8i2LW8zNfdZNLFxFB7O6qsoVE70oLWLYqlrZgr2Xv
-         IIgA==
-X-Gm-Message-State: AOAM530ZsT4/ihUpEpwsxHUOR/SLFVpFjShqBmNCOmjeOz7uggwIAJ/r
-        sFNBv2Fl0Xw9+n92dsTgjwPW0zdjDW9lF/2Jd+c=
-X-Google-Smtp-Source: ABdhPJyanEkx9eiDlQV1xTggUJn4Revs/1UtDujKoh9WRgpTMrFstm6S1BQMKo9gsk+Y+tQTRTagKlu9TPLuX8AsFnk=
-X-Received: by 2002:a17:906:3ed0:: with SMTP id d16mr52555537ejj.636.1641664089284;
- Sat, 08 Jan 2022 09:48:09 -0800 (PST)
+        with ESMTP id S230249AbiAHRz3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Jan 2022 12:55:29 -0500
+X-Greylist: delayed 1332 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 08 Jan 2022 09:55:28 PST
+Received: from balrog.mythic-beasts.com (balrog.mythic-beasts.com [IPv6:2a00:1098:0:82:1000:0:2:1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A058C061401;
+        Sat,  8 Jan 2022 09:55:28 -0800 (PST)
+Received: from [81.101.6.87] (port=34286 helo=jic23-huawei)
+        by balrog.mythic-beasts.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92.3)
+        (envelope-from <jic23@jic23.retrosnub.co.uk>)
+        id 1n6Faq-0001DM-Oj; Sat, 08 Jan 2022 17:33:33 +0000
+Date:   Sat, 8 Jan 2022 17:38:51 +0000
+From:   Jonathan Cameron <jic23@jic23.retrosnub.co.uk>
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
+        Pavel Machek <pavel@ucw.cz>, list@opendingux.net,
+        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pm@vger.kernel.org,
+        Jonathan Cameron <Jonathan.Cameron@huawei.com>
+Subject: Re: [PATCH v3 3/6] PM: core: Add EXPORT[_GPL]_SIMPLE_DEV_PM_OPS
+ macros
+Message-ID: <20220108173825.08ebf8ba@jic23-huawei>
+In-Reply-To: <20220107181723.54392-4-paul@crapouillou.net>
+References: <20220107181723.54392-1-paul@crapouillou.net>
+        <20220107181723.54392-4-paul@crapouillou.net>
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.31; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-References: <20220107233458.2326512-1-gsomlo@gmail.com> <20220107233458.2326512-4-gsomlo@gmail.com>
- <CAHp75VcHnHpX1=ojmFnujqkf55aS1ePiVW4kKydTJQe=dXbwbQ@mail.gmail.com>
- <YdjvlA7rqQoZe44F@errol.ini.cmu.edu> <CAHp75Vf7o1g0FTAd+Zo6TMzDN3C2nGLhbDo0OJ9Cmwcxm=Kc8Q@mail.gmail.com>
- <YdmPho2GpVcvWUgU@errol.ini.cmu.edu>
-In-Reply-To: <YdmPho2GpVcvWUgU@errol.ini.cmu.edu>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Sat, 8 Jan 2022 19:47:32 +0200
-Message-ID: <CAHp75VcSenjpZdA_wujKju5rHr8bAw2VjfL8RMKb7RW6Zmz4QA@mail.gmail.com>
-Subject: Re: [PATCH v8 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "kgugala@antmicro.com" <kgugala@antmicro.com>,
-        "mholenko@antmicro.com" <mholenko@antmicro.com>,
-        "krakoczy@antmicro.com" <krakoczy@antmicro.com>,
-        "mdudek@internships.antmicro.com" <mdudek@internships.antmicro.com>,
-        "paulus@ozlabs.org" <paulus@ozlabs.org>,
-        "joel@jms.id.au" <joel@jms.id.au>,
-        "shorne@gmail.com" <shorne@gmail.com>,
-        "geert@linux-m68k.org" <geert@linux-m68k.org>,
-        "david.abdurachmanov@sifive.com" <david.abdurachmanov@sifive.com>,
-        "florent@enjoy-digital.fr" <florent@enjoy-digital.fr>,
-        "rdunlap@infradead.org" <rdunlap@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-BlackCat-Spam-Score: 19
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Jan 8, 2022 at 3:20 PM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> On Sat, Jan 08, 2022 at 01:26:08PM +0200, Andy Shevchenko wrote:
-> > On Sat, Jan 8, 2022 at 3:57 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> > > On Sat, Jan 08, 2022 at 01:54:07AM +0200, Andy Shevchenko wrote:
-> > > > On Saturday, January 8, 2022, Gabriel Somlo <gsomlo@gmail.com> wrote:
+On Fri,  7 Jan 2022 18:17:20 +0000
+Paul Cercueil <paul@crapouillou.net> wrote:
 
-...
+> These macros are defined conditionally, according to CONFIG_PM:
+> - if CONFIG_PM is enabled, these macros resolve to
+>   DEFINE_SIMPLE_DEV_PM_OPS(), and the dev_pm_ops symbol will be
+>   exported.
+> 
+> - if CONFIG_PM is disabled, these macros will result in a dummy static
+>   dev_pm_ops to be created with the __maybe_unused flag. The dev_pm_ops
+>   will then be discarded by the compiler, along with the provided
+>   callback functions if they are not used anywhere else.
+> 
+> In the second case, the symbol is not exported, which should be
+> perfectly fine - users of the symbol should all use the pm_ptr() or
+> pm_sleep_ptr() macro, so the dev_pm_ops marked as "extern" in the
+> client's code will never be accessed.
+> 
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+> Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
 
-> > > >     +       u32 div;
-> > > >     +
-> > > >     +       div = freq ? host->ref_clk / freq : 256U;
-> > > >
-> > > >     +       div = roundup_pow_of_two(div);
-> > > >     +       div = clamp(div, 2U, 256U);
-> > > >
-> > > > Logically seems to me that you may join these two together, because clamped
-> > > > range is power-of-2 one.
-> > >
-> > > `div` needs to be a power-of-2 when written to the LITEX_PHY_CLOCKERDIV
-> > > register (below). And clamp() will just enforce a min/max range, so if
-> > > (div = ref_clk / freq) ends up e.g., 5, I need both roundup_pow_of_two()
-> > > to bump it to 8, and clamp() to enforce that it's between 2 and 256.
-> > >
-> > > Unless you mean I should simply write it like:
-> > >
-> > >         div = clamp(roundup_pow_of_two(div), 2U, 256U);
-> > >
-> > > ... as a single line?
-> >
-> > Yes, that's what I meant.
->
-> Turns out, clamp really hates being passed roundup_pow_of_two()
-> directly (see below). I think it's probably better if we leave
-> them as-is, to avoid going the explicit cast route which Geert
-> recommended against.
+Hi Paul,
 
-I see, then ignore my comment on this matter in v9.
-Perhaps add a comment in the code explaining that roundup_pow_of_two()
-may not be unified with clamp()?
+Can definitely be a follow up rather than needing to be in this series
+but an EXPORT_NS_[_GPL]_SIMPLE_DEV_PM_OPS() will be needed as I suspect
+a lot of the places that export pm_ops structures will have their exports
+moved to a namespace at somepoint.
 
--- 
-With Best Regards,
-Andy Shevchenko
+That can easily go in with the first user though rather than needing
+to be rushed in now.
+
+Jonathan
+
+> ---
+> 
+> Notes:
+>     v2: Remove useless empty line
+>     v3: - Reorder the code to have non-private macros together in the file
+>         - Add comment about the necesity to use the new export macro when
+>           the dev_pm_ops has to be exported
+> 
+>  include/linux/pm.h | 35 ++++++++++++++++++++++++++++++++---
+>  1 file changed, 32 insertions(+), 3 deletions(-)
+> 
+> diff --git a/include/linux/pm.h b/include/linux/pm.h
+> index 8e13387e70ec..8279af2c538a 100644
+> --- a/include/linux/pm.h
+> +++ b/include/linux/pm.h
+> @@ -8,6 +8,7 @@
+>  #ifndef _LINUX_PM_H
+>  #define _LINUX_PM_H
+>  
+> +#include <linux/export.h>
+>  #include <linux/list.h>
+>  #include <linux/workqueue.h>
+>  #include <linux/spinlock.h>
+> @@ -357,14 +358,42 @@ struct dev_pm_ops {
+>  #define SET_RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn)
+>  #endif
+>  
+> +#define _DEFINE_DEV_PM_OPS(name, \
+> +			   suspend_fn, resume_fn, \
+> +			   runtime_suspend_fn, runtime_resume_fn, idle_fn) \
+> +const struct dev_pm_ops name = { \
+> +	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +	RUNTIME_PM_OPS(runtime_suspend_fn, runtime_resume_fn, idle_fn) \
+> +}
+> +
+> +#ifdef CONFIG_PM
+> +#define _EXPORT_DEV_PM_OPS(name, suspend_fn, resume_fn, runtime_suspend_fn, \
+> +			   runtime_resume_fn, idle_fn, sec) \
+> +	_DEFINE_DEV_PM_OPS(name, suspend_fn, resume_fn, runtime_suspend_fn, \
+> +			   runtime_resume_fn, idle_fn); \
+> +	_EXPORT_SYMBOL(name, sec)
+> +#else
+> +#define _EXPORT_DEV_PM_OPS(name, suspend_fn, resume_fn, runtime_suspend_fn, \
+> +			   runtime_resume_fn, idle_fn, sec) \
+> +static __maybe_unused _DEFINE_DEV_PM_OPS(__static_##name, suspend_fn, \
+> +					 resume_fn, runtime_suspend_fn, \
+> +					 runtime_resume_fn, idle_fn)
+> +#endif
+> +
+>  /*
+>   * Use this if you want to use the same suspend and resume callbacks for suspend
+>   * to RAM and hibernation.
+> + *
+> + * If the underlying dev_pm_ops struct symbol has to be exported, use
+> + * EXPORT_SIMPLE_DEV_PM_OPS() or EXPORT_GPL_SIMPLE_DEV_PM_OPS() instead.
+>   */
+>  #define DEFINE_SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> -const struct dev_pm_ops name = { \
+> -	SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -}
+> +	_DEFINE_DEV_PM_OPS(name, suspend_fn, resume_fn, NULL, NULL, NULL)
+> +
+> +#define EXPORT_SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +	_EXPORT_DEV_PM_OPS(name, suspend_fn, resume_fn, NULL, NULL, NULL, "")
+> +#define EXPORT_GPL_SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +	_EXPORT_DEV_PM_OPS(name, suspend_fn, resume_fn, NULL, NULL, NULL, "_gpl")
+>  
+>  /* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+>  #define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+
