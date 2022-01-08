@@ -2,57 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCACAC433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Jan 2022 11:29:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A24E2C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Jan 2022 13:20:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231526AbiAHL3o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Jan 2022 06:29:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40954 "EHLO
+        id S234230AbiAHNUK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Jan 2022 08:20:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231493AbiAHL3n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Jan 2022 06:29:43 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72D12C061574;
-        Sat,  8 Jan 2022 03:29:43 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id b13so32344232edd.8;
-        Sat, 08 Jan 2022 03:29:43 -0800 (PST)
+        with ESMTP id S232663AbiAHNUK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Jan 2022 08:20:10 -0500
+Received: from mail-qt1-x832.google.com (mail-qt1-x832.google.com [IPv6:2607:f8b0:4864:20::832])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 252A6C061574;
+        Sat,  8 Jan 2022 05:20:10 -0800 (PST)
+Received: by mail-qt1-x832.google.com with SMTP id y17so8507326qtx.9;
+        Sat, 08 Jan 2022 05:20:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=5GBKJ0A5I0bhF88Zy/1ednkbaWbx1kIE9t9dGEaqgso=;
-        b=FAQvWddGDbtVfXSTKqv/I4cS2cM8NkH0EELclVZ22595mxuPNfYzrNweFA9rJ+CiFt
-         HChSG2e08pFlEmHQ2/K3CcCFb6GqIzrAfujJ8733CaU50PwTTibYvQrh/oS2OUX7b0g/
-         XP48rxhG3s5MIjNB5S0tSbUqc4M+9ZqIVb3nIRKokErlehH7hzRGfjtsIve3UjRbOCbd
-         o/kanxyldApuPr4KpAgTbCwo2dtwQnorvvpZH1BAFMAua3RbXHh5nODzIGfPZ5TrXkTN
-         WF/0IahSG9Ah1T1ZKoZjGXMZhUrAj57cC4DdySW6uM9BK1H3YxCyim+ZkO0/GMlIT4Ms
-         2kmQ==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=3HthMCsPfkm3D+hK+w8i9XluI2ffJu/FapjeqvptUDQ=;
+        b=DYmYsl60KfGzH+6NoHO2TMGRrW7UuJB1FTtVmuGk1UWgDMFBPt7Uqh37us7fHDPBBR
+         5w3y4SxcTTx/uBUopJIo1EHE80hynyXlyM8x9MupmvGJM+RVOf1FXEj0PRoLigq52e1J
+         57kpmgDhiR8/q9h44pNtl70zrwgLgbP9VUiBsY7AV0/Hyk6dRzPKvd14dvqRwb2zSh0G
+         gCFYdzcYe9GwJ1nFgf6nXXyxPssg1SkjwaQRjfXPehqpKmlkiH3cX9wTD3VNkgoi92Se
+         j8iW4Ib8XkvTgNqcrc4ktzvB4xGGDhtX8ON9weGFFQczPsK0q9nj+mhtwGMSlP6AxO5b
+         AC7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=5GBKJ0A5I0bhF88Zy/1ednkbaWbx1kIE9t9dGEaqgso=;
-        b=LbaRl1J6XWn8Up3uktHCDwsHsbAaFL7swYU28Bq8XqPNzBxE6YIDtjZR5T74EWslpD
-         v9sjjndgf5vU0bGy8/ZBw6vSMFp5xmMniMCZoiTY2/JzwBUv1B5GNKrHetK6OdtuQPyQ
-         U66BrVINPb1eQXgTFHkBcAoX/fvmtOHz+rpBE0gIZUyKn8wP/4gVK54tVOzkQHPRhvRX
-         oiPlCzSrYp0j3wSKIu9CCAAeS2G3n/WWYXtl5kVMPIbITqdQx9aX/Nu0Dqdcw6f2GkXy
-         UkUlqmW/TioomgV/aVrABzXGkLkFhGeK64z6WohwjkqNKgS5j4q89LOhKstcObYR27G5
-         YV5A==
-X-Gm-Message-State: AOAM531pHoKCaVVCEmGBbhHTsYCDxLCX/UsMV6E18tmAqf+K3mcafVL4
-        9U5VlVQS8chTOiJFxhCfKu6fUa3b/VWG/CjMCXs=
-X-Google-Smtp-Source: ABdhPJwXyRyL1+7AYxidQnqpoWQAfL2jqRFrS06B7xdpsa8+E452fbluaAwqhG5/8gwi/hCEGB46S/IMjtO6d6pdk0o=
-X-Received: by 2002:a05:6402:4301:: with SMTP id m1mr64464838edc.125.1641641381459;
- Sat, 08 Jan 2022 03:29:41 -0800 (PST)
-MIME-Version: 1.0
-References: <20220107233458.2326512-1-gsomlo@gmail.com> <20220107233458.2326512-4-gsomlo@gmail.com>
- <CAHp75VcHnHpX1=ojmFnujqkf55aS1ePiVW4kKydTJQe=dXbwbQ@mail.gmail.com>
- <YdjvlA7rqQoZe44F@errol.ini.cmu.edu> <Ydj3mmdWILBWHkAh@glsvmlin.ini.cmu.edu>
-In-Reply-To: <Ydj3mmdWILBWHkAh@glsvmlin.ini.cmu.edu>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Sat, 8 Jan 2022 13:29:05 +0200
-Message-ID: <CAHp75VcsdYtFiPaL-rS-a4t4mBRasatnDLc+7ig0qhZi6U4gsg@mail.gmail.com>
-Subject: Re: [PATCH v8 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=3HthMCsPfkm3D+hK+w8i9XluI2ffJu/FapjeqvptUDQ=;
+        b=MCySfMYviH3oEAlsiJ39BU11PbnnmMacLz0KaDEvapzadj87uCowJJCjJ5b6fD5jYB
+         e0wLWiVQZczLzuzr+fbUzaGf4O+6um009YoVJ0HUtrpCWCl8dFLr3Mexq82ClZso9tYq
+         y3yRFDbhcJ1T/K1BIInEH4KL+U8kEtZ67vMRBezfuy8/z3DDQvfa1C5cwlUbcwpzQAO+
+         Vby/uc0GWvJjZuYewoauGE1qmtLYr37CZeSm8kR5A9/5y1ILK85vjyy+k7ZXTWDAHqsZ
+         eNjREIw3anu5j6YLRjY2piJuGXXLI4m9fHpVQh0jEgypcGWlevs3DIzli5qIeGJDJe3v
+         t+fA==
+X-Gm-Message-State: AOAM531RkXh8xKroF0hT5KPeYCRisFcPS68Flpx70naYoq27l07w4EPj
+        baGNhdkLIaWIY3U5VJTxUWM=
+X-Google-Smtp-Source: ABdhPJwioTNVKTIrfAj6ShEKx75QzL0MhQveklvkKUzU/02IT1QJyXQnDTMjwVTCTzTONFje8GiUdQ==
+X-Received: by 2002:a05:622a:1206:: with SMTP id y6mr59734519qtx.356.1641648009181;
+        Sat, 08 Jan 2022 05:20:09 -0800 (PST)
+Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
+        by smtp.gmail.com with ESMTPSA id u10sm1028717qtx.3.2022.01.08.05.20.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 08 Jan 2022 05:20:08 -0800 (PST)
+Date:   Sat, 8 Jan 2022 08:20:06 -0500
+From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
 Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "robh+dt@kernel.org" <robh+dt@kernel.org>,
         "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
@@ -69,55 +66,254 @@ Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "david.abdurachmanov@sifive.com" <david.abdurachmanov@sifive.com>,
         "florent@enjoy-digital.fr" <florent@enjoy-digital.fr>,
         "rdunlap@infradead.org" <rdunlap@infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH v8 3/3] mmc: Add driver for LiteX's LiteSDCard interface
+Message-ID: <YdmPho2GpVcvWUgU@errol.ini.cmu.edu>
+References: <20220107233458.2326512-1-gsomlo@gmail.com>
+ <20220107233458.2326512-4-gsomlo@gmail.com>
+ <CAHp75VcHnHpX1=ojmFnujqkf55aS1ePiVW4kKydTJQe=dXbwbQ@mail.gmail.com>
+ <YdjvlA7rqQoZe44F@errol.ini.cmu.edu>
+ <CAHp75Vf7o1g0FTAd+Zo6TMzDN3C2nGLhbDo0OJ9Cmwcxm=Kc8Q@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHp75Vf7o1g0FTAd+Zo6TMzDN3C2nGLhbDo0OJ9Cmwcxm=Kc8Q@mail.gmail.com>
+X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Jan 8, 2022 at 4:32 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> On Fri, Jan 07, 2022 at 08:57:43PM -0500, Gabriel L. Somlo wrote:
+On Sat, Jan 08, 2022 at 01:26:08PM +0200, Andy Shevchenko wrote:
+> On Sat, Jan 8, 2022 at 3:57 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
 > > On Sat, Jan 08, 2022 at 01:54:07AM +0200, Andy Shevchenko wrote:
 > > > On Saturday, January 8, 2022, Gabriel Somlo <gsomlo@gmail.com> wrote:
-
-...
-
-> > >     +       mmc = mmc_alloc_host(sizeof(struct litex_mmc_host), &pdev->dev);
+> 
+> > >     +       u32 div;
+> > >     +
+> > >     +       div = freq ? host->ref_clk / freq : 256U;
 > > >
-> > > Should be devm or you may not use devm at all. See hint in one of the previous
-> > > messages in v7 discussion.
+> > >     +       div = roundup_pow_of_two(div);
+> > >     +       div = clamp(div, 2U, 256U);
+> > >
+> > > Logically seems to me that you may join these two together, because clamped
+> > > range is power-of-2 one.
 > >
-> > And here I think I'm in trouble... :)
+> > `div` needs to be a power-of-2 when written to the LITEX_PHY_CLOCKERDIV
+> > register (below). And clamp() will just enforce a min/max range, so if
+> > (div = ref_clk / freq) ends up e.g., 5, I need both roundup_pow_of_two()
+> > to bump it to 8, and clamp() to enforce that it's between 2 and 256.
 > >
-> > None of the examples retrieved via
+> > Unless you mean I should simply write it like:
 > >
-> > `git log --no-merges --grep devm_add_action_or_reset`
+> >         div = clamp(roundup_pow_of_two(div), 2U, 256U);
 > >
-> > are from "drivers/mmc/host/*", and *all* of the mmc drivers there,
-> > including the ones that make extensive use of devm_*, use
-> > mmc_alloc_host(), and there doesn't appear to be a devm-ified version
-> > of mmc_alloc_host() available! How do they all get away with it?
-> >
-> > I'm really confused now -- any additional clue(s) much appreciated!
->
-> I found drivers/mmc/host/meson-mx-sdhc-mmc.c, which uses
-> devm_add_action_or_reset() right after mmc_alloc_host() to enlist the
-> subsequent call to mmc_free_host(), see here:
->
-> https://github.com/torvalds/linux/blob/master/drivers/mmc/host/meson-mx-sdhc-mmc.c#L791
->
-> This would mean that I no longer have to call mmc_free_host(), neither
-> on probe()'s error path, nor during remove().
->
-> Does that count as canonically correct, or am I still missing
-> something?
+> > ... as a single line?
+> 
+> Yes, that's what I meant.
 
-Yes, this is one of the options you may use.
+Turns out, clamp really hates being passed roundup_pow_of_two()
+directly (see below). I think it's probably better if we leave
+them as-is, to avoid going the explicit cast route which Geert
+recommended against.
 
-Since it will be a second (?) driver with the same idea, perhaps in
-the future it would make sense to provide devm_mmc_alloc_host() or
-analogue (in the latter it means more complex solution like the input
-subsystem is using, see devm_input_... API implementations).
+I'll send out v9 later today with everything else, including
+devm_add_action_or_reset().
 
--- 
-With Best Regards,
-Andy Shevchenko
+Thanks,
+--Gabriel
+
+drivers/mmc/host/litex_mmc.c: In function 'litex_mmc_setclk':
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:52:25: note: in expansion of macro '__careful_cmp'
+   52 | #define max(x, y)       __careful_cmp(x, y, >)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:45: note: in expansion of macro 'max'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                                             ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+In file included from ./include/linux/bits.h:5,
+                 from drivers/mmc/host/litex_mmc.c:12:
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/const.h:12:55: note: in definition of macro '__is_constexpr'
+   12 |         (sizeof(int) == sizeof(*(8 ? ((void *)((long)(x) * 0l)) : (int *)8)))
+      |                                                       ^
+./include/linux/minmax.h:26:39: note: in expansion of macro '__no_side_effects'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                                       ^~~~~~~~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:52:25: note: in expansion of macro '__careful_cmp'
+   52 | #define max(x, y)       __careful_cmp(x, y, >)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:45: note: in expansion of macro 'max'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                                             ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+In file included from ./include/linux/kernel.h:17,
+                 from ./include/linux/clk.h:13,
+                 from drivers/mmc/host/litex_mmc.c:13:
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/minmax.h:28:27: note: in definition of macro '__cmp'
+   28 | #define __cmp(x, y, op) ((x) op (y) ? (x) : (y))
+      |                           ^
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:52:25: note: in expansion of macro '__careful_cmp'
+   52 | #define max(x, y)       __careful_cmp(x, y, >)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:45: note: in expansion of macro 'max'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                                             ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/minmax.h:28:40: note: in definition of macro '__cmp'
+   28 | #define __cmp(x, y, op) ((x) op (y) ? (x) : (y))
+      |                                        ^
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:52:25: note: in expansion of macro '__careful_cmp'
+   52 | #define max(x, y)       __careful_cmp(x, y, >)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:45: note: in expansion of macro 'max'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                                             ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/minmax.h:31:24: note: in definition of macro '__cmp_once'
+   31 |                 typeof(x) unique_x = (x);               \
+      |                        ^
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:52:25: note: in expansion of macro '__careful_cmp'
+   52 | #define max(x, y)       __careful_cmp(x, y, >)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:45: note: in expansion of macro 'max'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                                             ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+./include/linux/minmax.h:20:35: warning: comparison of distinct pointer types lacks a cast
+   20 |         (!!(sizeof((typeof(x) *)1 == (typeof(y) *)1)))
+      |                                   ^~
+./include/linux/minmax.h:31:39: note: in definition of macro '__cmp_once'
+   31 |                 typeof(x) unique_x = (x);               \
+      |                                       ^
+./include/linux/minmax.h:45:25: note: in expansion of macro '__careful_cmp'
+   45 | #define min(x, y)       __careful_cmp(x, y, <)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:28: note: in expansion of macro 'min'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                            ^~~
+./include/linux/minmax.h:26:18: note: in expansion of macro '__typecheck'
+   26 |                 (__typecheck(x, y) && __no_side_effects(x, y))
+      |                  ^~~~~~~~~~~
+./include/linux/minmax.h:36:31: note: in expansion of macro '__safe_cmp'
+   36 |         __builtin_choose_expr(__safe_cmp(x, y), \
+      |                               ^~~~~~~~~~
+./include/linux/minmax.h:52:25: note: in expansion of macro '__careful_cmp'
+   52 | #define max(x, y)       __careful_cmp(x, y, >)
+      |                         ^~~~~~~~~~~~~
+./include/linux/minmax.h:89:45: note: in expansion of macro 'max'
+   89 | #define clamp(val, lo, hi) min((typeof(val))max(val, lo), hi)
+      |                                             ^~~
+drivers/mmc/host/litex_mmc.c:448:15: note: in expansion of macro 'clamp'
+  448 |         div = clamp(roundup_pow_of_two(div), 2U, 256U);
+      |               ^~~~~
+
