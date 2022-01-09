@@ -2,246 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 547BCC433FE
-	for <linux-mmc@archiver.kernel.org>; Sun,  9 Jan 2022 00:26:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B4D1C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun,  9 Jan 2022 04:19:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235038AbiAIA0I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Jan 2022 19:26:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40304 "EHLO
+        id S231218AbiAIETO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Jan 2022 23:19:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230433AbiAIA0H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Jan 2022 19:26:07 -0500
-Received: from mail-qv1-xf2c.google.com (mail-qv1-xf2c.google.com [IPv6:2607:f8b0:4864:20::f2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CCB4C06173F;
-        Sat,  8 Jan 2022 16:26:07 -0800 (PST)
-Received: by mail-qv1-xf2c.google.com with SMTP id a9so10075997qvd.12;
-        Sat, 08 Jan 2022 16:26:07 -0800 (PST)
+        with ESMTP id S232702AbiAIETO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Jan 2022 23:19:14 -0500
+Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F17EEC06173F;
+        Sat,  8 Jan 2022 20:19:13 -0800 (PST)
+Received: by mail-qv1-xf2b.google.com with SMTP id q3so10630291qvc.7;
+        Sat, 08 Jan 2022 20:19:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:mime-version:content-disposition
-         :in-reply-to;
-        bh=uo8kcmFKOJnBHc39R815DUsjkRzM7D7xbUUaMw6memM=;
-        b=EoXHNjiiKBcy91GeKimqGnoWZntDkrxWNdEmn+oW22t4UEbXZkMT4AbbvGVNp4GeZg
-         ToK9LENP4SPehAxXnuwfUEcrIkdT4lTvGrsoy3D+wITwURS7DELWhsUzZ6yZJIpOUhnE
-         reTqLcNABf3O8p+BlFP54OWNBlw4gSAKqkva6sHGkAQMs0eBVPMQjtAlOzJSqbPyuG/n
-         c3bLksz89Iwip6MYLaPx1mPTIm/CRPA4f05Ih6ZzWOs/Ad7yl0kBsc2ZobdRYM/8X78X
-         3HLJs6HISGEAKOufgji4Xy+qlxBRO3y7WaMQGqfekgW/MDhENx+515JUEjP24AsZLb89
-         kKtA==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=Pv1VMB3UK5CE8tf/eD+Si73gNpKIJQe0lW8e2LuK7OA=;
+        b=KA0XOyBS24UXGIoDjBBsqVRIpGbnE09XxMfnWoU4dzJNawi3xI3EzTkws4qDOYogMU
+         6oDcLXGQruLxVP5kd8bL1bH0DCeU3UZN7+dIce9Y7NCNAn0TA9n1+B39xLMRsMRBxXlE
+         TGRCX9vq3kv1BaoGGpY2CqreAqpQi9nAZvao2BRMpnszweMiM02uhFS8NCzwrYwEn3uq
+         UPp67ge/YouYGFTXegYhk6kXOsL4pK+sJjhrTYqtXu5tKMm7ZCMJeoZcMQcCTYo9d2mz
+         yxOyR0J9qAnt4T1iIfnPSm7F+9YN2ul3H4a9gr4QtTirjMkzPDgo4DjT7Hym+3wryLns
+         itpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
-         :content-disposition:in-reply-to;
-        bh=uo8kcmFKOJnBHc39R815DUsjkRzM7D7xbUUaMw6memM=;
-        b=bG/QOmR6qF/593av3olZAViqAhMv6Me8lyA0BTmXoZ9MOEr5CUDmShT0iv0tc2wQfX
-         hEs5EobqDeQ1dQTC5fGKZ4YSSg45u0UY9pK+jXtW3f05mPgowtgAOP9CKZhJMBrcXzZQ
-         /QUDeQLEFThvU8IUbNAxBLSDjVwYxwqI4OoKzOCU2apbRd1o5t2PUbBUbO7niGMTF8pj
-         8a5Sk0/nm4ZtOtEwtZfXv+Gjt1gHXEMUx5GZjLbT91lGj37F7KZIAmHUzWV/vZBUpbUy
-         uG+fHqJoa+HED5R98MwpZl939nw46yFXMDftavTbhDxPgiHg6mynL5Ru1BLsJM7hLeeq
-         fkCw==
-X-Gm-Message-State: AOAM5331Nq6ST0DrXoWJyb2Fy8EkuesGcIYvYM73MTKFKbzOw5W6QA5a
-        5IJcy+obOGtU8MJhEfn6GV0=
-X-Google-Smtp-Source: ABdhPJyEBo2yuJD71y+e5WKS7p9R3BlNRqfxN9IVAkWtu0B2o/l4Mi8GF3otVV5ltJA3nThtB1owBg==
-X-Received: by 2002:a05:6214:5018:: with SMTP id jo24mr62795026qvb.114.1641687966378;
-        Sat, 08 Jan 2022 16:26:06 -0800 (PST)
-Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id y11sm1919688qta.6.2022.01.08.16.26.04
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Pv1VMB3UK5CE8tf/eD+Si73gNpKIJQe0lW8e2LuK7OA=;
+        b=Ljw6dXQuq3w7NnRJ4qpcMrw8+F4mErfsBPgmwlsVROk/ODlfhb9fWhDgJvqG67hfA2
+         j7ZcgLo8+w5hk/mIK/KY8h0nYEZaR74anrHJDoNhZO8t8xIrfcBMJpAFqc3pZPIsd5cE
+         /Mw3mMRzyXicjqTBPXYJWUTfgfl7l/pu9aH8CQon18kPUTRgBGbglMzQDRRYvwt2Uqab
+         G3n+QujJBpfjDaRfMekJTSbqcNkttzfouBH+pjA2kGFwXTBWDUEzDMqWee9Mc4Givj0R
+         HOeQni+OgHcEp5GnbynZ9h58Dkbak0/jrDYfqWMgtCKXEh4fkC73ayI4vrwuE/DgVum4
+         pwqQ==
+X-Gm-Message-State: AOAM5331332L+ojX2/WiwHWhXXPhlgCcY79haWSLnVAxwQyi4rTzCLyc
+        SltmoZIuDofIkSLQu6V2ABX5w9ccJ3c1bg==
+X-Google-Smtp-Source: ABdhPJyUHziSgOWO472h30fHVOjV7z4WhGGiABOcemLxocK2U3SiZq6DIbG1uHbE6l4B/NXcwPeFug==
+X-Received: by 2002:a05:6214:20e8:: with SMTP id 8mr60396985qvk.67.1641701952989;
+        Sat, 08 Jan 2022 20:19:12 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id v12sm2142965qkl.50.2022.01.08.20.19.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 08 Jan 2022 16:26:05 -0800 (PST)
-Date:   Sat, 8 Jan 2022 19:26:03 -0500
+        Sat, 08 Jan 2022 20:19:12 -0800 (PST)
+Date:   Sat, 8 Jan 2022 23:19:05 -0500
 From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
+To:     Hillf Danton <hdanton@sina.com>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         Kamil Rakoczy <krakoczy@antmicro.com>,
-        mdudek@internships.antmicro.com,
-        Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
+        Maciej Dudek <mdudek@internships.antmicro.com>,
+        Paul Mackerras <paulus@ozlabs.org>, rdunlap@infradead.org,
+        andy.shevchenko@gmail.com
 Subject: Re: [PATCH v9 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <Ydorm5HirY2i/RCg@errol.ini.cmu.edu>
+Message-ID: <YdpiOaJLJN7lOadu@glsvmlin.ini.cmu.edu>
+References: <20220108161134.2419279-1-gsomlo@gmail.com>
+ <20220109025042.1537-1-hdanton@sina.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAHp75VeEvT-_47gKFAYdz-BR9y=KLEw2uMbRxYKo1rLQSQEfyg@mail.gmail.com>
+In-Reply-To: <20220109025042.1537-1-hdanton@sina.com>
 X-Clacks-Overhead: GNU Terry Pratchett
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Jan 08, 2022 at 07:43:19PM +0200, Andy Shevchenko wrote:
-> On Sat, Jan 8, 2022 at 6:11 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> >
-> > LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-> > that targets FPGAs. LiteSDCard is a small footprint, configurable
-> > SDCard core commonly used in LiteX designs.
-> >
-> > The driver was first written in May 2020 and has been maintained
-> > cooperatively by the LiteX community. Thanks to all contributors!
-> 
-> Thanks for an update, my comments below.
-> 
-> ...
-> 
-> > +#include <linux/bits.h>
-> > +#include <linux/clk.h>
-> > +#include <linux/delay.h>
-> > +#include <linux/dma-mapping.h>
-> > +#include <linux/interrupt.h>
-> > +#include <linux/iopoll.h>
-> > +#include <linux/litex.h>
-> > +#include <linux/mod_devicetable.h>
-> > +#include <linux/module.h>
-> 
-> > +#include <linux/mmc/host.h>
-> > +#include <linux/mmc/mmc.h>
-> > +#include <linux/mmc/sd.h>
-> 
-> I would move this group of headers...
-> 
-> > +#include <linux/platform_device.h>
+On Sun, Jan 09, 2022 at 10:50:42AM +0800, Hillf Danton wrote:
+> On Sat,  8 Jan 2022 11:11:34 -0500 Gabriel Somlo wrote:
 > > +
-> 
-> ...somewhere here to show that this driver belongs to the MMC subsystem.
-
-OK, lined up for v10
- 
-> ...
-> 
-> > +#define LITEX_MMC_OCR (MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 | \
-> > +                      MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 | \
-> > +                      MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36)
-> 
-> Seems to me this is identical to
-> https://elixir.bootlin.com/linux/latest/source/drivers/mmc/host/au1xmmc.c#L72
-> 
-> And may be reused in
-> https://elixir.bootlin.com/linux/latest/source/drivers/mmc/host/vub300.c#L2168.
-> 
-> Perhaps it makes sense to have
-> 
-> #define MMC_VDD_27_36 ...
-> 
-> in mmc.h?
-> 
-> In any case, it can be postponed, just a side note for the future improvements.
-
-I'm awaiting follow-up advice from Ulf Hansson, who originally suggested
-this should be dynamically configured through a dummy voltage regulator
-in DTS. Since LiteSDCard doesn't a (current or planned) option to
-adaptively configure voltages via software, I think hard-coding the
-valid range in the driver (in the exact way as au1xmmc.c) might be
-cleaner, and if we end up agreeing on that, there might be opportunity
-for factoring it out in the way you describe.
-
-> 
-> ...
-> 
-> > +       /* Ensure bus width will be set (again) upon card (re)insertion */
-> > +       if (ret == 0)
-> > +               host->is_bus_width_set = false;
+> > +	/* LiteSDCard can support 64-bit DMA addressing */
+> > +	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+> > +	if (ret)
+> > +		return ret;
 > > +
-> > +       return ret;
+> > +	host->buf_size = mmc->max_req_size * 2;
+> > +	host->buffer = dmam_alloc_coherent(dev, host->buf_size,
+> > +					   &host->dma, GFP_DMA);
 > 
-> Please, switch to standard pattern, i.e.
-> 
->   if (ret)
->     return ret;
->   ...
->   return 0;
+> GFP_DMA can not make much sence given the above comment.
 
-OK, lined up for v10
-
-> ...
-> 
-> > +       u32 div;
-> > +
-> > +       div = freq ? host->ref_clk / freq : 256U;
-> 
-> > +       div = roundup_pow_of_two(div);
-> > +       div = clamp(div, 2U, 256U);
-> 
-> Not sure why it becomes two lines again.
-
-Per my previous email, I have:
-
-        div = clamp((u32)roundup_pow_of_two(div), 2U, 256U);
-
-... lined up for v10 (pending also Geert's OK on the (u32) cast
-to shut up compiler warnings) :)
-
-> ...
-> 
-> > +       ret = devm_add_action_or_reset(dev,
-> > +                                      (void(*)(void *))mmc_free_host, mmc);
-> 
-> One line?
-> An actually preferable way is to define a separate wrapper function
-> and use it here without any casting.
-
-Done and lined up for v10:
-
-    /* wrapper for use with devm_add_action_or_reset(), below */
-    static void litex_mmc_free_host_wrapper(void *ptr)
-    {
-        mmc_free_host((struct mmc_host *)ptr);
-    }
-
-    static int litex_mmc_probe(struct platform_device *pdev)
-    {
-        ...
-        ret = devm_add_action_or_reset(dev, litex_mmc_free_host_wrapper, mmc);
-        ...
-    }
-
-> > +       if (ret) {
-> 
-> > +               dev_err(dev, "Failed to register mmc_free_host action\n");
-> > +               return ret;
-> 
-> return dev_err_probe(...);
-
-OK.
- 
-> > +       }
-> 
-> ...
-> 
-> > +       clk = devm_clk_get(dev, NULL);
-> > +       if (IS_ERR(clk)) {
-> 
-> > +               ret = dev_err_probe(dev, PTR_ERR(clk), "can't get clock\n");
-> > +               return ret;
-> 
->     return dev_err_probe(...);
-
-OK.
-
-> > +       }
-> 
-> ...
-> 
-> > +       ret = mmc_add_host(mmc);
-> > +
-> > +       return ret;
-> 
-> It's now
-> 
->     return mmc_add_host(...);
-
-OK.
-
-I'll wait till sometime tomorrow for additional feedback on clamp()
-casting and voltage range hard-coding vs. regulators, before I send
-out v10 so we can continue from there.
-
-Thanks, as always,
+I'll change it to GFP_KERNEL in v10. Thanks for catching that,
 --Gabriel
