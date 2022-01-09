@@ -2,182 +2,246 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAA1AC43217
-	for <linux-mmc@archiver.kernel.org>; Sun,  9 Jan 2022 19:07:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73A35C433FE
+	for <linux-mmc@archiver.kernel.org>; Sun,  9 Jan 2022 23:20:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234586AbiAITHr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 9 Jan 2022 14:07:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56226 "EHLO
+        id S232063AbiAIXUM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 9 Jan 2022 18:20:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234570AbiAITHr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2022 14:07:47 -0500
-Received: from mail-qk1-x72c.google.com (mail-qk1-x72c.google.com [IPv6:2607:f8b0:4864:20::72c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E135BC06173F;
-        Sun,  9 Jan 2022 11:07:46 -0800 (PST)
-Received: by mail-qk1-x72c.google.com with SMTP id u23so146569qku.5;
-        Sun, 09 Jan 2022 11:07:46 -0800 (PST)
+        with ESMTP id S229995AbiAIXUM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Jan 2022 18:20:12 -0500
+Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0BEFC06173F;
+        Sun,  9 Jan 2022 15:20:10 -0800 (PST)
+Received: by mail-qt1-x82b.google.com with SMTP id y17so12614379qtx.9;
+        Sun, 09 Jan 2022 15:20:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=LIuUJEhpYyiWk5SC4KmPzkhX52Ed+ueySMLZ3ZhnSEk=;
-        b=TtMMW6PSKK4lVCx9+fMTxUzSLfQtUAm/w1mkSQDtnL5cWcht9+mxwbS4mTnNTizPpv
-         FXIIxyXErbEf9uPZVS7CjHE0JhHZrWf0XjRWuvPOhx5prJDLMbasZ4gvRu7qJ27DlbSP
-         6GxKPHp7nCNaIR9S9e5kTcFEsp5EcX/jopf51NbotX5kOXt8EZXNYnLTULgFseLO5V/a
-         i2YA4FEiKn6hSrM9+QwQ/X3JE/kewcmYtfFeJn+P4JXLe6YEoLG0pzfLjA1k32dv4umj
-         lEKrgLZz04j0MBEJdGnmC3xz22oAvw4j8aDNkd3zQ8h83uKgV/7moULU09RisQlz3DmM
-         Nibw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=C9OtapxLXL+qkI6pv7/+xsuUHuYjazLA/L35dUEozPI=;
+        b=TDyjzV+zRmNzG7UJjvHM8jI66IvAKr3ivQd9fPjzms0HEVxrz9kZKy/lp+FmWOOBuS
+         x1ePcr0M/j7dbf6Tpj/oJYWyPvQ54pNV5ozQidYYBhWTlaYl1ZJQhCqM5eQnnn35ehxW
+         N/+TWRao5WFMJtO67BX+c2FcMamws/Cb8VB8gQphW+k6SBQAYbEwJoDKCjLAL8fzaggL
+         sxtNmOeJc6dRCxofSDRpHQU2ePPMi9qFVg/qCpCejYnnYn8SL564tbt9nUiEg3P/EjNO
+         nd1o0PReDjHuwzaTwoMRb8AZn4Zcm1rV04bK66ZcoXs8dofMlnBOGgsNdWuLwWSz0lIU
+         zbaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=LIuUJEhpYyiWk5SC4KmPzkhX52Ed+ueySMLZ3ZhnSEk=;
-        b=ye4GdtCxHDuPfcJaAZZvXCC7WuUSoXhHO+90fZpy+6qZcqpsK3zTUE1ewQibXwBDAd
-         vfBloE9iJ0J+W92aaSMByvSzEUmf/F/D2f260I4h5+4GoDoMVNkqSKel0vDQsqX4dUcj
-         m7o/KiCgpV+gFXLXE+QU10heuQDQ8YzeFqqlKQR9VoeCpX3F/TVx2PXqXhgweg6Efe6l
-         MrnpoLk/o6YBUtNkvQ28BDRCZBtiEWOoNr7lL//Aqb1o8yz9vuVC1CKYoF/w1cAjZkGf
-         oBgafuxt7zRMJBsDbVVl5/6/0XdaMxP37s1ouRiEi0exiCI9eZx7bFfLeTSLWIJont0Y
-         LLAA==
-X-Gm-Message-State: AOAM530QBDj02Tve2uZ4vxd0tYm2agDyS/KuxSvXINVSOezZDfagR2QI
-        QZdM/D1St5+c+MOpLe0pp/0=
-X-Google-Smtp-Source: ABdhPJz8ma6DoK2QLPKid3Ugn7xuBVtSTf8DbubDXxK/pwWaX/AMeOn71DOoBCeEq/YsBqZlTl8Byg==
-X-Received: by 2002:a05:620a:1452:: with SMTP id i18mr12576732qkl.557.1641755265978;
-        Sun, 09 Jan 2022 11:07:45 -0800 (PST)
-Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id h18sm280121qkn.62.2022.01.09.11.07.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 09 Jan 2022 11:07:45 -0800 (PST)
-Message-ID: <89046151-e44e-6828-ad76-8574fba4fca8@gmail.com>
-Date:   Sun, 9 Jan 2022 14:07:42 -0500
+        bh=C9OtapxLXL+qkI6pv7/+xsuUHuYjazLA/L35dUEozPI=;
+        b=tYpMbhEQWFMKgR01DqUHj5x/arVQ0QIm7fSZ0dkNCNNmrXNIInriG5ImoEfEeePNbv
+         eKnS2Ai9jkTtBxCMFrySRQa6gHz/cKLj4d0tj+JB+u+6PKP9PdyeqN8+EA/pCvr6hDLo
+         dFryF4bcEigcX406OWZQu+HBEf8YTVVoZdJzV8gE1eb8vI1gNzCcNvicsIEbK5bxIWDP
+         UGjGU61q2XUvo0PPw30gFQ2C65aFR/8A1Ufz8932gwTHKWG/ljjwT+p1Pt9GbjQWVKxn
+         n/nuRrNBDgPwbAZ170S54ppwK7NYu+VwrM0hcv28j0zkgm9WVZAtm/G6Bs+lXvHgQk8g
+         MYZw==
+X-Gm-Message-State: AOAM531Br29ViMnA+d3TSju+SGlrT3cSaimhFr5g4kGIirpzJHW7nNiB
+        RtfxMPSqaTKRvqyhdxrd2iRjISV7Kvgy2Q==
+X-Google-Smtp-Source: ABdhPJy9/sQflEQsCCgqWvijk9f+1rLxm5Ml+bevCyUCLsWzkdRjJn9gxq5cTY4je+WbiMWrzr+kUg==
+X-Received: by 2002:ac8:7406:: with SMTP id p6mr64690545qtq.245.1641770409494;
+        Sun, 09 Jan 2022 15:20:09 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id h9sm96061qkn.60.2022.01.09.15.20.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 09 Jan 2022 15:20:09 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org, andy.shevchenko@gmail.com, hdanton@sina.com
+Subject: [PATCH v11 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Sun,  9 Jan 2022 18:20:00 -0500
+Message-Id: <20220109232003.2573924-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.4.0
-Subject: Re: [PATCH v7 5/7] clk: imx: Add initial support for i.MXRT1050 clock
- driver
-Content-Language: en-US
-To:     Stephen Boyd <sboyd@kernel.org>, linux-imx@nxp.com
-Cc:     mturquette@baylibre.com, robh+dt@kernel.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        ulf.hansson@linaro.org, aisheng.dong@nxp.com, stefan@agner.ch,
-        linus.walleij@linaro.org, gregkh@linuxfoundation.org,
-        arnd@arndb.de, olof@lixom.net, soc@kernel.org,
-        linux@armlinux.org.uk, abel.vesa@nxp.com, adrian.hunter@intel.com,
-        jirislaby@kernel.org, giulio.benetti@benettiengineering.com,
-        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
-References: <20220103233948.198119-1-Mr.Bossman075@gmail.com>
- <20220103233948.198119-6-Mr.Bossman075@gmail.com>
- <20220105235157.8ED80C36AEB@smtp.kernel.org>
-From:   Jesse Taube <mr.bossman075@gmail.com>
-In-Reply-To: <20220105235157.8ED80C36AEB@smtp.kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Add support for the LiteX SD-Card device, LiteSDCard.
 
->> +static const char * const pll_ref_sels[] = {"osc", "dummy", };
->> +static const char * const per_sels[] = {"ipg_pdof", "osc", };
->> +static const char * const pll1_bypass_sels[] = {"pll1_arm", "pll1_arm_ref_sel", };
->> +static const char * const pll2_bypass_sels[] = {"pll2_sys", "pll2_sys_ref_sel", };
->> +static const char * const pll3_bypass_sels[] = {"pll3_usb_otg", "pll3_usb_otg_ref_sel", };
->> +static const char * const pll5_bypass_sels[] = {"pll5_video", "pll5_video_ref_sel", };
->> +static const char *const pre_periph_sels[] = {
->> +       "pll2_sys", "pll2_pfd2_396m", "pll2_pfd0_352m", "arm_podf", };
->> +static const char *const periph_sels[] = { "pre_periph_sel", "todo", };
->> +static const char *const usdhc_sels[] = { "pll2_pfd2_396m", "pll2_pfd0_352m", };
->> +static const char *const lpuart_sels[] = { "pll3_80m", "osc", };
->> +static const char *const lcdif_sels[] = {
->> +       "pll2_sys", "pll3_pfd3_454_74m", "pll5_video", "pll2_pfd0_352m",
->> +       "pll2_pfd1_594m", "pll3_pfd1_664_62m", };
->> +static const char *const semc_alt_sels[] = { "pll2_pfd2_396m", "pll3_pfd1_664_62m", };
->> +static const char *const semc_sels[] = { "periph_sel", "semc_alt_sel", };
-> 
-> Any chance this can use clk_parent_data instead of string names for
-> parents?
-> 
->> +
->> +static struct clk_hw **hws;
->> +static struct clk_hw_onecell_data *clk_hw_data;
->> +
->> +static void __init imxrt_clocks_common_init(void __iomem *base)
-> 
-> Drop __init and preferably inline this to the callsite.
-> 
->> +{
->> +       /* Anatop clocks */
->> +       hws[IMXRT1050_CLK_DUMMY] = imx_clk_hw_fixed("dummy", 0UL);
->> +
->> +       hws[IMXRT1050_CLK_PLL1_REF_SEL] = imx_clk_hw_mux("pll1_arm_ref_sel",
->> +               base + 0x0, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
->> +       hws[IMXRT1050_CLK_PLL2_REF_SEL] = imx_clk_hw_mux("pll2_sys_ref_sel",
->> +               base + 0x30, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
->> +       hws[IMXRT1050_CLK_PLL3_REF_SEL] = imx_clk_hw_mux("pll3_usb_otg_ref_sel",
->> +               base + 0x10, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
->> +       hws[IMXRT1050_CLK_PLL5_REF_SEL] = imx_clk_hw_mux("pll5_video_ref_sel",
->> +               base + 0xa0, 14, 2, pll_ref_sels, ARRAY_SIZE(pll_ref_sels));
->> +
->> +       hws[IMXRT1050_CLK_PLL1_ARM] = imx_clk_hw_pllv3(IMX_PLLV3_SYS, "pll1_arm",
->> +               "pll1_arm_ref_sel", base + 0x0, 0x7f);
->> +       hws[IMXRT1050_CLK_PLL2_SYS] = imx_clk_hw_pllv3(IMX_PLLV3_GENERIC, "pll2_sys",
->> +               "pll2_sys_ref_sel", base + 0x30, 0x1);
->> +       hws[IMXRT1050_CLK_PLL3_USB_OTG] = imx_clk_hw_pllv3(IMX_PLLV3_USB, "pll3_usb_otg",
->> +               "pll3_usb_otg_ref_sel", base + 0x10, 0x1);
->> +       hws[IMXRT1050_CLK_PLL5_VIDEO] = imx_clk_hw_pllv3(IMX_PLLV3_AV, "pll5_video",
->> +               "pll5_video_ref_sel", base + 0xa0, 0x7f);
->> +
->> +       /* PLL bypass out */
->> +       hws[IMXRT1050_CLK_PLL1_BYPASS] = imx_clk_hw_mux_flags("pll1_bypass", base + 0x0, 16, 1,
->> +               pll1_bypass_sels, ARRAY_SIZE(pll1_bypass_sels), CLK_SET_RATE_PARENT);
->> +       hws[IMXRT1050_CLK_PLL2_BYPASS] = imx_clk_hw_mux_flags("pll2_bypass", base + 0x30, 16, 1,
->> +               pll2_bypass_sels, ARRAY_SIZE(pll2_bypass_sels), CLK_SET_RATE_PARENT);
->> +       hws[IMXRT1050_CLK_PLL3_BYPASS] = imx_clk_hw_mux_flags("pll3_bypass", base + 0x10, 16, 1,
->> +               pll3_bypass_sels, ARRAY_SIZE(pll3_bypass_sels), CLK_SET_RATE_PARENT);
->> +       hws[IMXRT1050_CLK_PLL5_BYPASS] = imx_clk_hw_mux_flags("pll5_bypass", base + 0xa0, 16, 1,
->> +               pll5_bypass_sels, ARRAY_SIZE(pll5_bypass_sels), CLK_SET_RATE_PARENT);
->> +
->> +       hws[IMXRT1050_CLK_VIDEO_POST_DIV_SEL] = imx_clk_hw_divider("video_post_div_sel",
->> +               "pll5_video", base + 0xa0, 19, 2);
->> +       hws[IMXRT1050_CLK_VIDEO_DIV] = imx_clk_hw_divider("video_div",
->> +               "video_post_div_sel", base + 0x170, 30, 2);
->> +
->> +       hws[IMXRT1050_CLK_PLL3_80M] = imx_clk_hw_fixed_factor("pll3_80m",  "pll3_usb_otg", 1, 6);
->> +
->> +       hws[IMXRT1050_CLK_PLL2_PFD0_352M] = imx_clk_hw_pfd("pll2_pfd0_352m", "pll2_sys", base + 0x100, 0);
->> +       hws[IMXRT1050_CLK_PLL2_PFD1_594M] = imx_clk_hw_pfd("pll2_pfd1_594m", "pll2_sys", base + 0x100, 1);
->> +       hws[IMXRT1050_CLK_PLL2_PFD2_396M] = imx_clk_hw_pfd("pll2_pfd2_396m", "pll2_sys", base + 0x100, 2);
->> +       hws[IMXRT1050_CLK_PLL3_PFD1_664_62M] = imx_clk_hw_pfd("pll3_pfd1_664_62m", "pll3_usb_otg", base + 0xf0, 1);
->> +       hws[IMXRT1050_CLK_PLL3_PFD3_454_74M] = imx_clk_hw_pfd("pll3_pfd3_454_74m", "pll3_usb_otg", base + 0xf0, 3);
->> +}
->> +
->> +static int imxrt1050_clocks_probe(struct platform_device *pdev)
->> +{
->> +       void __iomem *ccm_base;
->> +       void __iomem *pll_base;
->> +       struct device *dev = &pdev->dev;
->> +       struct device_node *np = dev->of_node;
->> +       struct device_node *anp;
->> +       int ret;
->> +
->> +       clk_hw_data = kzalloc(struct_size(clk_hw_data, hws,
->> +                                         IMXRT1050_CLK_END), GFP_KERNEL);
->> +       if (WARN_ON(!clk_hw_data))
->> +               return -ENOMEM;
->> +
->> +       clk_hw_data->num = IMXRT1050_CLK_END;
->> +       hws = clk_hw_data->hws;
->> +
->> +       hws[IMXRT1050_CLK_OSC] = __clk_get_hw(of_clk_get_by_name(np, "osc"));
-> 
-> Use clk_parent_data instead and reference the binding name with .fw_name
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
-Hi Stephen, sorry to bother you again.
-I'm wondering if adding `clk_parent_data` is necessary as it seems like 
-it wold be a big change and the other IMX boards haven't implemented 
-this yet would it be okay if I don't do this, or if it is necessary 
-could you link to a patch set to change it.
+New in v11:
+  - picked up r/b from Andy
+drivers/mmc/host/litex_mmc.c:
+  - defensive coding of litex_mmc_interrupt() return logic
+  - remove `dev` member of `struct litex_mmc_host`, only used during probe
+
+>New in v10:
+>drivers/mmc/host/litex_mmc.c:
+>  - group `linux/mmc/*` includes by themselves
+>  - clean-up of `return` style (multiple locations throughout source)
+>  - create `mmc_free_host()` wrapper for use with
+>    `devm_add_action_or_reset()`
+>  - use GFP_KERNEL with `dmam_alloc_coherent()`
+>
+>>New in v9:
+>>drivers/mmc/host/Kconfig:
+>>  - fix OF dependency
+>>drivers/mmc/host/litex_mmc.c:
+>>  - remove `linux/of.h` include, no longer needed since dropping
+>>    `of_match_ptr()`
+>>  - add `linux/mod_devicetable.h` include
+>>  - use devm_action_or_reset() to devm-ify mmc_alloc_host(), and obviate
+>>    the need to call mmc_free_host() explicitly during either probe()
+>>    error path or during remove()
+>>
+>>>New in v8:
+>>>commit blurbs:
+>>>  - cosmetic editing of descriptions
+>>>  - removed `Cc:` lines
+>>>drivers/mmc/host/litex_mmc.c:
+>>>  - fix file header comment (for real, this time)
+>>>  - add explicit `bits.h` include
+>>>  - remove `of_match_ptr()` wrapper from around .of_match_table argument
+>>>  - fix devm ordering issues: use `devm_request_irq()`, which precludes
+>>>    the need to call `free_irq()` on `probe()` error path or from `remove()`
+>>>
+>>>>New in v7:
+>>>>
+>>>>drivers/mmc/host/Kconfig:
+>>>>  - added module name in LiteSDCard Kconfig entry
+>>>>
+>>>>drivers/mmc/host/litex_mmc.c:
+>>>>  - fixed comment formatting, ordering, and capitalization throughout
+>>>>    the entire file
+>>>>  - sorted header #include statements
+>>>>  - removed redundant parantheses in readx_poll_timeout() condition
+>>>>  - explicit handling of readx_poll_timeout() timeout scenarios
+>>>>  - dev_err() used in litex_mmc_sdcard_wait_done()
+>>>>  - use memcpy_fromio() to grab command response
+>>>>  - no need to apply 0xffff mask to a 32-bit value right-shifted by 16
+>>>>    (host->resp[3])
+>>>>  - use clamp() instead of min(max(...)...)
+>>>>  - reworked platform_get_irq_optional() error handling logic
+>>>>  - no need to explicitly zero host->irq, kzalloc() does that already
+>>>>  - added missing free_irq() in litex_mmc_probe() error path
+>>>>  - reordered calls inside litex_mmc_remove() (calling mmc_free_host()
+>>>>    before free_irq()
+>>>>
+>>>>>New in v6:
+>>>>>
+>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>  - fix handling of deferred probe vs. platform_get_irq_optional()
+>>>>>  - don't #ifdef dma_set_mask_and_coherent(), since it automatically
+>>>>>    does the right thing on both 32- and 64-bit DMA capable arches
+>>>>>  - remove MMC_CAP2_FULL_PWR_CYCLE, add MMC_CAP2_NO_MMC to list of
+>>>>>    hardcoded capabilities during litex_mmc_probe()
+>>>>>  - hardcode mmc->ocr_avail to the full 2.7-3.6V range allowed by the
+>>>>>    SDCard spec (the LiteSDCard device doesn't accept software
+>>>>>    configuration)
+>>>>>
+>>>>>>New in v5:
+>>>>>>
+>>>>>>MAINTAINERS:
+>>>>>>
+>>>>>>  - picked up a/b Mateusz
+>>>>>>
+>>>>>>Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>>>>
+>>>>>>  - picked up r/b Rob, Joel
+>>>>>>
+>>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>>
+>>>>>>  - shorten #define constant names (cosmetic, make them less unwieldy)
+>>>>>>  - picked up r/b Joel
+>>>>>>
+>>>>>>>New in v4:
+>>>>>>>
+>>>>>>>Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>>>>>
+>>>>>>>  - fixed `dt_binding_check` errors uncovered by Rob's script
+>>>>>>>
+>>>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>>>
+>>>>>>>  - struct litex_mmc_host fields re-ordered so that `pahole` reports
+>>>>>>>    no holes in either 32- or 64-bit builds
+>>>>>>>  - litex_mmc_set_bus_width() now encapsulates check for
+>>>>>>>    host->is_bus_width_set
+>>>>>>>  - litex_mmc_request() - factor out dma data setup into separate
+>>>>>>>    helper function: litex_mmc_do_dma()
+>>>>>>>
+>>>>>>>>New in v3:
+>>>>>>>>
+>>>>>>>>  MAINTAINERS:
+>>>>>>>>
+>>>>>>>>  - picked up acked-by Joel
+>>>>>>>>  - added listing for liteeth driver
+>>>>>>>>  - added Joel as additional co-maintainer (thanks!)
+>>>>>>>>
+>>>>>>>>  Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>>>>>>
+>>>>>>>>  - picked up r/b Geert Uytterhoeven <geert@linux-m68k.org> in DT
+>>>>>>>>    bindings document (please let me know if that was premature, and
+>>>>>>>>    happy to take further review if needed :)
+>>>>>>>>  - add dedicated DT property for source clock frequency
+>>>>>>>>
+>>>>>>>>  drivers/mmc/host/litex_mmc.c:
+>>>>>>>>
+>>>>>>>>  - fixed function signature (no line split), and naming (litex_mmc_*)
+>>>>>>>>  - more informative MODULE_AUTHOR() entries
+>>>>>>>>    - also added matching "Copyright" entries in file header
+>>>>>>>>  - fixed description in Kconfig
+>>>>>>>>  - fixed DT documentation
+>>>>>>>>  - removed magic constants
+>>>>>>>>  - removed litex_map_status(), have sdcard_wait_done() return *real*
+>>>>>>>>    error codes directly instead.
+>>>>>>>>  - streamlined litex_mmc_reponse_len()
+>>>>>>>>  - call litex_mmc_set_bus_width() only once, and ensure it returns
+>>>>>>>>    correct error code(s)
+>>>>>>>>  - use readx_poll_timeout() -- more concise -- instead of
+>>>>>>>>    read_poll_timeout()
+>>>>>>>>  - use dev_err() in litex_mmc_send_cmd() (instead of pr_err())
+>>>>>>>>  - litex_mmc_setclk() will update host->clock before returning
+>>>>>>>>  - separate irq initialization into its own function,
+>>>>>>>>    litex_mmc_irq_init()
+>>>>>>>>  - document rationale for f_min, f_max
+>>>>>>>>  - use dmam_alloc_coherent(), which simplifies cleanup significantly
+>>>>>>>>  - large `if (data) { ... }` block in litex_mmc_request() left as-is,
+>>>>>>>>    there are too many variables shared with the rest of the parent
+>>>>>>>>    function body to easily separate (e.g., `len`, `transfer`, `direct`).
+>>>>>>>>    If this is indeed a blocker, I can take another shot at refactoring
+>>>>>>>>    it in a future revision!
+>>>>>>>>  - bump dma_set_mask_and_coherent() to 64-bits on suitable
+>>>>>>>>    architectures
+>>>>>>>>  - clock source picked up from dedicated DT clock reference property
+>>>>>>>>  - remove gpio card-detect logic (needs testing and a dt binding
+>>>>>>>>    example before being eligible for upstream inclusion)
+>>>>>>>>
+>>>>>>>>> New in v2:
+>>>>>>>>>   - reword info message in litex_set_clk()
+>>>>>>>>>   - streamline code in litex_map_status()
+>>>>>>>>>   - fix typos in Kconfig (thanks Randy Dunlap <rdunlap@infradead.org>)
+>>>>>>>>>   - improvements suggested by Stafford Horne <shorne@gmail.com>
+>>>>>>>>>     - allow COMPILE_TEST in Kconfig
+>>>>>>>>>     - use read_poll_timeout() when waiting for cmd/data/DMA
+>>>>>>>>>       xfer completion
+>>>>>>>>>   - include interrupt.h (thanks kernel test robot <lkp@intel.com>)
+
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
+
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  72 ++
+ MAINTAINERS                                   |   9 +-
+ drivers/mmc/host/Kconfig                      |   9 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 657 ++++++++++++++++++
+ 5 files changed, 746 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
+
+-- 
+2.31.1
 
