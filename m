@@ -2,113 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A274BC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Jan 2022 08:26:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B489C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Jan 2022 11:58:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240414AbiAJI0O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Jan 2022 03:26:14 -0500
-Received: from mail-ua1-f52.google.com ([209.85.222.52]:38846 "EHLO
-        mail-ua1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240397AbiAJI0L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2022 03:26:11 -0500
-Received: by mail-ua1-f52.google.com with SMTP id h11so86470uar.5;
-        Mon, 10 Jan 2022 00:26:10 -0800 (PST)
+        id S245099AbiAJL6w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Jan 2022 06:58:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55714 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230296AbiAJL6v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Jan 2022 06:58:51 -0500
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1F93C061751
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jan 2022 03:58:50 -0800 (PST)
+Received: by mail-lf1-x132.google.com with SMTP id o12so43486431lfk.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Jan 2022 03:58:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=vAXIYuNH/ABiPfxXuFwD6hgcp+PMFzZ1M3jPIGte8RQ=;
+        b=NJ/1KfGQ48zcYiEWUDeXEubmTWTNVNFMx+ELOnyY6J+LpNXaV8IC5nwRla3xErpV/s
+         TD3hTj+tjN5UDqdhhH1Fwv1KeGp+wSi9yu/hUyLr13SBtxex8FCmU0IkQcz4NZA3haNA
+         sskjdqxUaOqcgQl1CXZrfiNtUG4RvqEFEydULZ9huWWhkfyUcuOITbZ/wXmBEgjIMtEe
+         dkjXZE0Bn6DsBearqgyC3xlueG6vynTLnXe8Ymf+I3pkfAVZkNv0dnAWWg1Byc3UYwRA
+         3PefZz7HTTY6TmTTSy5bWJGzXf6+/dtgPJzNuuoh5iIm+mroxAgS/jfW4o1aLrqxU9hN
+         o0EQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=sInr+joEp/exnuFtoXKUR1JFErKpOSHvuvlIYhoSkyY=;
-        b=2RSQZBTgwj1SNCyW3+315t6QI6Ke0+sJc4j+O92k/B22W+hQskRy7oRqtacm5g/ikn
-         sCCDl4/d2enQjpgH3UwR0Q7jBmw+4QzGfHNmeTRorC1nEF/qdxU2Gw6uzFIAkkcoUYcb
-         UcJqbeFbzY9JLf9spFkuWBv9ff5RS5agUwP0GGMW2edc+C42yRo3JLCFv97doL39CQ7a
-         LxGFg8M8208KB6pAmLg1IFpuMgBJO3YegMjUqf9jIphWFszHdjtm/sl7+N8VcowqlIAG
-         0HSY4fL5ja//PrXc3Lk8WQ6Cj7T3zGqikNYTAwwDVo+m89iVoxfnt0k1GJIkXv2eHLi2
-         MmwQ==
-X-Gm-Message-State: AOAM533NEb5ltG+rj2hS49iIS+tBh3MZ3V8LAK62ufHzqMTz/dBhybDu
-        IshMDJxo2w56jqjapz3qur4H2ZgU/97/IQ==
-X-Google-Smtp-Source: ABdhPJynWikk/LCf89nrhhMH/vkMLMdL4UFtp9VDRXFqN6ufu31IPPQYxBKCyr8gDLkymecZC/q0Bw==
-X-Received: by 2002:a67:e88c:: with SMTP id x12mr430910vsn.34.1641803170341;
-        Mon, 10 Jan 2022 00:26:10 -0800 (PST)
-Received: from mail-ua1-f53.google.com (mail-ua1-f53.google.com. [209.85.222.53])
-        by smtp.gmail.com with ESMTPSA id l202sm2170374vkl.40.2022.01.10.00.26.09
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 10 Jan 2022 00:26:09 -0800 (PST)
-Received: by mail-ua1-f53.google.com with SMTP id l15so10558453uai.11;
-        Mon, 10 Jan 2022 00:26:09 -0800 (PST)
-X-Received: by 2002:ab0:2118:: with SMTP id d24mr24987663ual.78.1641803169401;
- Mon, 10 Jan 2022 00:26:09 -0800 (PST)
+        bh=vAXIYuNH/ABiPfxXuFwD6hgcp+PMFzZ1M3jPIGte8RQ=;
+        b=ylQmCR8Ts2A1xBs9fIyozV0z2xJXTwyK40FISb6FvjZinhipuy4KXx9ZxfuyEOyE7o
+         ioBngO9rZFePCluKZimxsi1pgLObM18XkQVLA2FeB7BBS8ixTRAzc9e/uDYh+Uzd3vPV
+         aISr/1qi9Zooc9wMs2fLdpgBl/+I2+tzxeQwgnNCUpOBiQgxle95sX/zCLelHWaJbRcQ
+         gQs5d1qO5RauS+h1FwXzVcyBgsziPQ+jYycAFAb/70bZBfQbJMPhVB2UK6cM5C4Tnq3c
+         1u2/kvfbmppMg6Ptgv+8LEDwiUL54mHsnQFWqIhrGYElpPqqrDaP4ryyDV4Dby1bpCA7
+         428w==
+X-Gm-Message-State: AOAM530HV3vEye0H7rm0SXwnn92CBHCFIKhAuJt37z0DO32iUla/zwUz
+        9JmqbnMHOy+Q6cy3XBUJyFdQe2ZBpbGo++dSPdspWA==
+X-Google-Smtp-Source: ABdhPJyvU0aPWAbZNBBTFMu8lAzaFaDMBdxzeezJqVEtf7JUnEGWH30MbzadfScGxijR2bznfgG5kndzKGGMa/VaCeE=
+X-Received: by 2002:a05:6512:4021:: with SMTP id br33mr4147162lfb.233.1641815928741;
+ Mon, 10 Jan 2022 03:58:48 -0800 (PST)
 MIME-Version: 1.0
-References: <CAHp75VeEvT-_47gKFAYdz-BR9y=KLEw2uMbRxYKo1rLQSQEfyg@mail.gmail.com>
- <Ydorm5HirY2i/RCg@errol.ini.cmu.edu>
-In-Reply-To: <Ydorm5HirY2i/RCg@errol.ini.cmu.edu>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 10 Jan 2022 09:25:58 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdWzMaKyG84CBt4S1xy4Jd+y85LG+KhbR4QvJ09PcU-f3A@mail.gmail.com>
-Message-ID: <CAMuHMdWzMaKyG84CBt4S1xy4Jd+y85LG+KhbR4QvJ09PcU-f3A@mail.gmail.com>
-Subject: Re: [PATCH v9 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Karol Gugala <kgugala@antmicro.com>,
-        Mateusz Holenko <mholenko@antmicro.com>,
-        Kamil Rakoczy <krakoczy@antmicro.com>,
-        mdudek@internships.antmicro.com,
-        Paul Mackerras <paulus@ozlabs.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Stafford Horne <shorne@gmail.com>,
-        david.abdurachmanov@sifive.com,
-        Florent Kermarrec <florent@enjoy-digital.fr>,
-        Randy Dunlap <rdunlap@infradead.org>
+References: <20220107181723.54392-1-paul@crapouillou.net> <20220107181723.54392-2-paul@crapouillou.net>
+In-Reply-To: <20220107181723.54392-2-paul@crapouillou.net>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 10 Jan 2022 12:58:12 +0100
+Message-ID: <CAPDyKFobtZ_WGtbzhHdBRDT4RjQ8M_NXF+FmqXg2ZHTX=Z1frg@mail.gmail.com>
+Subject: Re: [PATCH v3 1/6] PM: core: Remove DEFINE_UNIVERSAL_DEV_PM_OPS() macro
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Len Brown <len.brown@intel.com>,
+        Pavel Machek <pavel@ucw.cz>, list@opendingux.net,
+        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pm@vger.kernel.org,
+        Jonathan Cameron <jonathan.cameron@huawei.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gabriel,
-
-On Sun, Jan 9, 2022 at 1:26 AM Gabriel L. Somlo <gsomlo@gmail.com> wrote:
-> On Sat, Jan 08, 2022 at 07:43:19PM +0200, Andy Shevchenko wrote:
-> > On Sat, Jan 8, 2022 at 6:11 PM Gabriel Somlo <gsomlo@gmail.com> wrote:
-> > > +       u32 div;
-> > > +
-> > > +       div = freq ? host->ref_clk / freq : 256U;
-> >
-> > > +       div = roundup_pow_of_two(div);
-> > > +       div = clamp(div, 2U, 256U);
-> >
-> > Not sure why it becomes two lines again.
+On Fri, 7 Jan 2022 at 19:17, Paul Cercueil <paul@crapouillou.net> wrote:
 >
-> Per my previous email, I have:
+> The deprecated UNIVERSAL_DEV_PM_OPS() macro uses the provided callbacks
+> for both runtime PM and system sleep, which is very likely to be a
+> mistake, as a system sleep can be triggered while a given device is
+> already PM-suspended, which would cause the suspend callback to be
+> called twice.
 >
->         div = clamp((u32)roundup_pow_of_two(div), 2U, 256U);
+> The amount of users of UNIVERSAL_DEV_PM_OPS() is also tiny (16
+> occurences) compared to the number of places where
+> SET_SYSTEM_SLEEP_PM_OPS() is used with pm_runtime_force_suspend() and
+> pm_runtime_force_resume(), which makes me think that none of these cases
+> are actually valid.
 >
-> ... lined up for v10 (pending also Geert's OK on the (u32) cast
-> to shut up compiler warnings) :)
+> As the new macro DEFINE_UNIVERSAL_DEV_PM_OPS() which was introduced to
+> replace UNIVERSAL_DEV_PM_OPS() is currently unused, remove it before
+> someone starts to use it in yet another invalid case.
+>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+> Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
 
-JFY (as you decided to keep the two separate lines), this is
-exactly why clamp_t()exists: to avoid the explicit cast.
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-i.e.
+Kind regards
+Uffe
 
-    div = clamp_t(u32, roundup_pow_of_two(div), 2U, 256U);
 
-or
-
-    div = clamp_t(u32, roundup_pow_of_two(div), 2, 256);
-
-(the implicit cast is applied to all parameters).
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+> ---
+>
+> Notes:
+>     v2: No change
+>     v3: - Keep UNIVERSAL_DEV_PM_OPS deprecated
+>         - Rework commit message
+>
+>  include/linux/pm.h | 21 ++++++++-------------
+>  1 file changed, 8 insertions(+), 13 deletions(-)
+>
+> diff --git a/include/linux/pm.h b/include/linux/pm.h
+> index e1e9402180b9..02f059d814bb 100644
+> --- a/include/linux/pm.h
+> +++ b/include/linux/pm.h
+> @@ -366,6 +366,12 @@ static const struct dev_pm_ops name = { \
+>         SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+>  }
+>
+> +/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> +#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> +const struct dev_pm_ops __maybe_unused name = { \
+> +       SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> +}
+> +
+>  /*
+>   * Use this for defining a set of PM operations to be used in all situations
+>   * (system suspend, hibernation or runtime PM).
+> @@ -378,20 +384,9 @@ static const struct dev_pm_ops name = { \
+>   * suspend and "early" resume callback pointers, .suspend_late() and
+>   * .resume_early(), to the same routines as .runtime_suspend() and
+>   * .runtime_resume(), respectively (and analogously for hibernation).
+> + *
+> + * Deprecated. You most likely don't want this macro.
+>   */
+> -#define DEFINE_UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+> -static const struct dev_pm_ops name = { \
+> -       SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -       RUNTIME_PM_OPS(suspend_fn, resume_fn, idle_fn) \
+> -}
+> -
+> -/* Deprecated. Use DEFINE_SIMPLE_DEV_PM_OPS() instead. */
+> -#define SIMPLE_DEV_PM_OPS(name, suspend_fn, resume_fn) \
+> -const struct dev_pm_ops __maybe_unused name = { \
+> -       SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> -}
+> -
+> -/* Deprecated. Use DEFINE_UNIVERSAL_DEV_PM_OPS() instead. */
+>  #define UNIVERSAL_DEV_PM_OPS(name, suspend_fn, resume_fn, idle_fn) \
+>  const struct dev_pm_ops __maybe_unused name = { \
+>         SET_SYSTEM_SLEEP_PM_OPS(suspend_fn, resume_fn) \
+> --
+> 2.34.1
+>
