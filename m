@@ -2,172 +2,249 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36FB5C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jan 2022 21:57:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1AE9C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jan 2022 22:20:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242194AbiAKV5r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Jan 2022 16:57:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49686 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230508AbiAKV5q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jan 2022 16:57:46 -0500
-Received: from mail-qk1-x731.google.com (mail-qk1-x731.google.com [IPv6:2607:f8b0:4864:20::731])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF443C06173F;
-        Tue, 11 Jan 2022 13:57:46 -0800 (PST)
-Received: by mail-qk1-x731.google.com with SMTP id h16so406144qkp.3;
-        Tue, 11 Jan 2022 13:57:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=tAICFwgK+5loeH6T2WZmu2JcAthYSYGSu13AnEoNjNo=;
-        b=fu4Ru7hpqv2MN1GE7X5Z3Yv5Iy511hZj7DD6BAf57927si2x3BZBW2nMIeOvUGbBUc
-         rGsNOTrsbFcKZaoopAV518MvWttifE9a7k43KazdqQeoWPpfs/oAE3tZoOrRnbya0QgT
-         CBrnkz08m0SVDhNBAVVepWaL6YOI7BHez6Y9I83lGBNT/+KPkSDzlHrcfLvK11OikIPy
-         1COTr9fJev3Ak4Afq+vFvAApjPWYn8HGdcGzxpBYXmHRjQicFA5rDUmgsS9pkieQubar
-         fO7DsnREFVGz2mKFKCxZiF2HU6JA/6bqKaByttjUC3IAtDs1R2Un9I4LmRd1PSfnQH+R
-         +E4w==
+        id S1346136AbiAKWUA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Jan 2022 17:20:00 -0500
+Received: from mail-oi1-f180.google.com ([209.85.167.180]:40870 "EHLO
+        mail-oi1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1346108AbiAKWT7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jan 2022 17:19:59 -0500
+Received: by mail-oi1-f180.google.com with SMTP id w188so999151oib.7;
+        Tue, 11 Jan 2022 14:19:58 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=tAICFwgK+5loeH6T2WZmu2JcAthYSYGSu13AnEoNjNo=;
-        b=eJTtGYWPemRpS2jl8J256moWewny6zBYBhuw3rAuVd4KJ9Vg2aOkjwCWha8gIUIgdG
-         uvEAsMuj8FIpiS2fB+bv2jNpf6L4sVhTGqC3kkI4Vkdw/4MUJgF05yfdwUGnlAhNUAZc
-         MqoNUNFg+/JvCAAd48pLh3X4M+04CLjHfoJitRPFi8DiBr8ONdIJrSquodZFFhlFt+yu
-         4/WxEl/ZEiVgYd37iXtvkg5l/YUJkksbNgG3ZkkABwHjecEK4YXTinyWnrpPUTR+ezW9
-         WG3bBSjGjAb28wHGvT9jiTShqW7aDzGWXPkx+oN8eeYumxcbjbBP93vyMZcAfEUvcZU7
-         cuUw==
-X-Gm-Message-State: AOAM53090kinnDkjralEYghbcJbUnOZHkQiYnCIJIwkuobvE/RI4ItlE
-        FFMWkdSlm4zkiaZ26xcxakw=
-X-Google-Smtp-Source: ABdhPJxGF2boBf45RLlVY7W/rjQ/EenPnnKU3Yl1sJb7Tyb7flGCBD30h037BkXfrIZQB0I1TRKIMQ==
-X-Received: by 2002:a05:620a:1b:: with SMTP id j27mr4553408qki.308.1641938265879;
-        Tue, 11 Jan 2022 13:57:45 -0800 (PST)
-Received: from [10.4.10.38] (146-115-144-188.s4282.c3-0.nwt-cbr1.sbo-nwt.ma.cable.rcncustomer.com. [146.115.144.188])
-        by smtp.gmail.com with ESMTPSA id n129sm7050881qkn.64.2022.01.11.13.57.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 11 Jan 2022 13:57:45 -0800 (PST)
-Message-ID: <fc0169c3-eea7-e067-784b-eebeccee13b8@gmail.com>
-Date:   Tue, 11 Jan 2022 16:57:42 -0500
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=506v6Xprj7syTiQqAlY2fnFjDQjng6ljCNvJOQAD9zo=;
+        b=EfuBbydSdJ2Q49g4zcCb4qYUX8Xo2xnGanyXr7q5WqSPp7ClfLACBW1hUunDCCkQKK
+         SrqL3SeG/O0dfl3jQP6ZDmI4SwWk5Zq/GNH9qWjVlOK05lNdeub1tAbLaChxXGevetVy
+         f04S3m5ZsyKKFhuMpsCm6/x6KVLZtq58sXm9NxNBh5HX6zaMvQwwCLBActx/KrBva+Gg
+         iiRpb9KVV54DvAvu/1sol708+Nil7OUAWUemQDL3udm0gYnCUw8P5Wjw+p1H119krXrM
+         LMOaXAqcfXazTt/ghUYG+T1KpkynY3VwQ9HdOCXlGbvgA1bA3UyCNErJwRhERd1NfVAy
+         snhg==
+X-Gm-Message-State: AOAM533YJGUaPbRPLBW5bA2BBSbiap4ocCjr7OuCFPr4UpLRHWlB1tYR
+        7FlHDmdh9sM0UF0o+Fdo/A==
+X-Google-Smtp-Source: ABdhPJwlX38O3DGL+NuOlvDakdHxI9C2ckidPXRJYVTVfZQQ2Xe2mIuLqk3juKG5iI2Ir2d7KTBkKA==
+X-Received: by 2002:a05:6808:48a:: with SMTP id z10mr3208208oid.137.1641939598502;
+        Tue, 11 Jan 2022 14:19:58 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id g25sm2134008oou.12.2022.01.11.14.19.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 Jan 2022 14:19:57 -0800 (PST)
+Received: (nullmailer pid 3605690 invoked by uid 1000);
+        Tue, 11 Jan 2022 22:19:56 -0000
+Date:   Tue, 11 Jan 2022 16:19:56 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        Kalle Valo <kvalo@codeaurora.org>, devel@driverdev.osuosl.org,
+        linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v9 02/24] dt-bindings: introduce silabs,wfx.yaml
+Message-ID: <Yd4CjAM+3/PmLSyY@robh.at.kernel.org>
+References: <20220111171424.862764-1-Jerome.Pouiller@silabs.com>
+ <20220111171424.862764-3-Jerome.Pouiller@silabs.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.4.0
-Subject: Re: [PATCH v7 0/7] Add initial support for the i.MXRTxxxx SoC family
- starting from i.IMXRT1050 SoC.
-Content-Language: en-US
-To:     linux-imx@nxp.com
-Cc:     mturquette@baylibre.com, sboyd@kernel.org, robh+dt@kernel.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com,
-        stefan@agner.ch, linus.walleij@linaro.org,
-        gregkh@linuxfoundation.org, arnd@arndb.de, olof@lixom.net,
-        soc@kernel.org, linux@armlinux.org.uk, abel.vesa@nxp.com,
-        adrian.hunter@intel.com, jirislaby@kernel.org,
-        giulio.benetti@benettiengineering.com,
-        nobuhiro1.iwamatsu@toshiba.co.jp, linux-clk@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org
-References: <20220111212606.2072669-1-Mr.Bossman075@gmail.com>
-From:   Jesse Taube <mr.bossman075@gmail.com>
-In-Reply-To: <20220111212606.2072669-1-Mr.Bossman075@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220111171424.862764-3-Jerome.Pouiller@silabs.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Jan 11, 2022 at 06:14:02PM +0100, Jerome Pouiller wrote:
+> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> 
+> Prepare the inclusion of the wfx driver in the kernel.
+> 
+> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> ---
+>  .../bindings/net/wireless/silabs,wfx.yaml     | 138 ++++++++++++++++++
+>  1 file changed, 138 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml b/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+> new file mode 100644
+> index 000000000000..d12f262868cf
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+> @@ -0,0 +1,138 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (c) 2020, Silicon Laboratories, Inc.
+> +%YAML 1.2
+> +---
+> +
+> +$id: http://devicetree.org/schemas/net/wireless/silabs,wfx.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Silicon Labs WFxxx devicetree bindings
+> +
+> +maintainers:
+> +  - Jérôme Pouiller <jerome.pouiller@silabs.com>
+> +
+> +description: >
+> +  Support for the Wifi chip WFxxx from Silicon Labs. Currently, the only device
+> +  from the WFxxx series is the WF200 described here:
+> +     https://www.silabs.com/documents/public/data-sheets/wf200-datasheet.pdf
+> +
+> +  The WF200 can be connected via SPI or via SDIO.
+> +
+> +  For SDIO:
+> +
+> +    Declaring the WFxxx chip in device tree is mandatory (usually, the VID/PID is
+> +    sufficient for the SDIO devices).
+> +
+> +    It is recommended to declare a mmc-pwrseq on SDIO host above WFx. Without
+> +    it, you may encounter issues during reboot. The mmc-pwrseq should be
+> +    compatible with mmc-pwrseq-simple. Please consult
+> +    Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml for more
+> +    information.
+> +
+> +  For SPI:
+> +
+> +    In add of the properties below, please consult
+> +    Documentation/devicetree/bindings/spi/spi-controller.yaml for optional SPI
+> +    related properties.
+> +
+> +properties:
+> +  compatible:
+> +    anyOf:
+> +      - const: silabs,wf200    # Chip alone without antenna
+> +      - const: silabs,brd4001a # WGM160P Evaluation Board
+> +      - const: silabs,brd8022a # WF200 Evaluation Board
+> +      - const: silabs,brd8023a # WFM200 Evaluation Board
 
+This still defines that compatible is a single entry. You need something 
+like:
 
-On 1/11/22 16:25, Jesse Taube wrote:
-> This patchset contains:
-> - i.MXRT10xx family infrastructure
-> - i.MXRT1050 pinctrl driver adaption
-> - i.MXRT1050 clock driver adaption
-> - i.MXRT1050 sd-card driver adaption
-> - i.MXRT1050 uart driver adaption
-> - i.MXRT1050-evk basic support
-> 
-> The i.MXRTxxxx family that could have support by Linux actually spreads
-> from i.MXRT1020 to i.MXRT1170 with the first one supporting 1 USB OTG &
-> 100M ethernet with a cortex-M7@500Mhz up to the latter with i.MXRT1170
-> with cortex-M7@1Ghz and cortex-M4@400Mhz, 2MB of internal SRAM, 2D GPU,
-> 2x 1Gb and 1x 100Mb ENET. The i.MXRT family is NXP's answer to
-> STM32F7XX, as it uses only simple SDRAM, it gives the chance of a 4 or
-> less layer PCBs. Seeing that these chips are comparable to the
-> STM32F7XXs which have linux ported to them it seems reasonable to add
-> support for them.
-> 
-> Giving Linux support to this family should ease the development process,
-> instead of using a RTOS they could use Embedded Linux allowing for more
-> portability, ease of design and will broaden the scope of people using
-> embedded linux.
-> 
-> The EVK has very little SDRAM, generally 32MB starting from
-> i.MXRT1020(the lowest P/N), although the i.MXRT1160/70 provide instead
-> 64MB of SDRAM for more functionality.
-> 
-> At the moment we do not support XIP for either u-boot or Linux but it
-> should be done in the future. XIP will also save SDRAM.
-> 
-> Another interesting fact is the amount of internal SRAM, as the P/N
-> increases the SRAM will reach up to 2MB(some could be for cache and
-> some would be for video).
-> 
-> Also, some parts have embed flash of 4MB that can be used for
-> u-boot/Linux, if both correctly sized it will leave the SDRAM free.
-> 
-> External flash can be Quad SPI and HyperFlash, so throughput would be
-> decent.
-> 
-> The i.MXRT11xx series supports MIPI interface too.
-> 
-> The family in general provide CAN bus, audio I/O, 1 or more
-> USB(otg/host), 1 or more 100Mb/1Gb ethernet, camera interface, sd-card.
-> 
-> All this can be used for simple GUIs, web-servers, point-of-sale
-> stations, etc.
-> 
-> 
-> Giulio Benetti (4):
->    ARM: imx: Add initial support for i.MXRT10xx family
->    dt-bindings: imx: Add clock binding for i.MXRT1050
->    ARM: dts: imx: Add i.MXRT1050-EVK support
->    ARM: imxrt_defconfig: Add i.MXRT family defconfig
-> 
-> Jesse Taube (3):
->    ARM: dts: imxrt1050-pinfunc: Add pinctrl binding header
->    dt-bindings: clock: imx: Add documentation for i.MXRT1050 clock
->    clk: imx: Add initial support for i.MXRT1050 clock driver
-> 
->   .../bindings/clock/imxrt1050-clock.yaml       |  67 ++
->   arch/arm/boot/dts/Makefile                    |   2 +
->   arch/arm/boot/dts/imxrt1050-evk.dts           |  72 ++
->   arch/arm/boot/dts/imxrt1050-pinfunc.h         | 993 ++++++++++++++++++
->   arch/arm/boot/dts/imxrt1050.dtsi              | 160 +++
->   arch/arm/configs/imxrt_defconfig              |  35 +
->   arch/arm/mach-imx/Kconfig                     |   7 +
->   arch/arm/mach-imx/Makefile                    |   2 +
->   arch/arm/mach-imx/mach-imxrt.c                |  19 +
->   drivers/clk/imx/Kconfig                       |   7 +
->   drivers/clk/imx/Makefile                      |   1 +
->   drivers/clk/imx/clk-imxrt1050.c               | 168 +++
->   include/dt-bindings/clock/imxrt1050-clock.h   |  72 ++
->   13 files changed, 1605 insertions(+)
->   create mode 100644 Documentation/devicetree/bindings/clock/imxrt1050-clock.yaml
->   create mode 100644 arch/arm/boot/dts/imxrt1050-evk.dts
->   create mode 100644 arch/arm/boot/dts/imxrt1050-pinfunc.h
->   create mode 100644 arch/arm/boot/dts/imxrt1050.dtsi
->   create mode 100644 arch/arm/configs/imxrt_defconfig
->   create mode 100644 arch/arm/mach-imx/mach-imxrt.c
->   create mode 100644 drivers/clk/imx/clk-imxrt1050.c
->   create mode 100644 include/dt-bindings/clock/imxrt1050-clock.h
-> 
+items:
+  - enum:
+      - silabs,brd4001a
+      - silabs,brd8022a
+      - silabs,brd8023a
+  - const: silabs,wf200
 
-Oh No!
-I'm very sorry I sent v8 under the wrong version number. I sent it again...
+You need a separate 'items' list for different number of compatible 
+entries (e.g. if a single string is valid) and that is when you need to 
+use 'oneOf'. Plenty of examples in the tree.
 
-Sincerely,
-	Jesse Taube
+> +
+> +  reg:
+> +    description:
+> +      When used on SDIO bus, <reg> must be set to 1. When used on SPI bus, it is
+> +      the chip select address of the device as defined in the SPI devices
+> +      bindings.
+> +    maxItems: 1
+> +
+> +  spi-max-frequency: true
+> +
+> +  interrupts:
+> +    description: The interrupt line. Triggers IRQ_TYPE_LEVEL_HIGH and
+> +      IRQ_TYPE_EDGE_RISING are both supported by the chip and the driver. When
 
+Unless there is a mode you can configure, supporting both is wrong even 
+though edge will mostly work for a device that is really level.
+
+What a driver supports is not relevant to the binding.
+
+> +      SPI is used, this property is required. When SDIO is used, the "in-band"
+> +      interrupt provided by the SDIO bus is used unless an interrupt is defined
+> +      in the Device Tree.
+> +    maxItems: 1
+> +
+> +  reset-gpios:
+> +    description: (SPI only) Phandle of gpio that will be used to reset chip
+> +      during probe. Without this property, you may encounter issues with warm
+> +      boot. (For legacy purpose, the gpio in inverted when compatible ==
+> +      "silabs,wfx-spi")
+
+What legacy? This is a new binding.
+
+> +
+> +      For SDIO, the reset gpio should declared using a mmc-pwrseq.
+> +    maxItems: 1
+> +
+> +  wakeup-gpios:
+> +    description: Phandle of gpio that will be used to wake-up chip. Without this
+> +      property, driver will disable most of power saving features.
+> +    maxItems: 1
+> +
+> +  silabs,antenna-config-file:
+> +    $ref: /schemas/types.yaml#/definitions/string
+> +    description: Use an alternative file for antenna configuration (aka
+> +      "Platform Data Set" in Silabs jargon). Default depends of "compatible"
+> +      string. For "silabs,wf200", the default is 'wf200.pds'.
+> +
+> +  local-mac-address: true
+> +
+> +  mac-address: true
+> +
+> +additionalProperties: false
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/gpio/gpio.h>
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +
+> +    spi0 {
+
+spi {
+
+> +        #address-cells = <1>;
+> +        #size-cells = <0>;
+> +
+> +        wifi@0 {
+> +            compatible = "silabs,brd4001a", "silabs,wf200";
+> +            pinctrl-names = "default";
+> +            pinctrl-0 = <&wfx_irq &wfx_gpios>;
+> +            reg = <0>;
+> +            interrupts-extended = <&gpio 16 IRQ_TYPE_EDGE_RISING>;
+> +            wakeup-gpios = <&gpio 12 GPIO_ACTIVE_HIGH>;
+> +            reset-gpios = <&gpio 13 GPIO_ACTIVE_LOW>;
+> +            spi-max-frequency = <42000000>;
+> +        };
+> +    };
+> +
+> +  - |
+> +    #include <dt-bindings/gpio/gpio.h>
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +
+> +    wfx_pwrseq: wfx_pwrseq {
+> +        compatible = "mmc-pwrseq-simple";
+> +        pinctrl-names = "default";
+> +        pinctrl-0 = <&wfx_reset>;
+> +        reset-gpios = <&gpio 13 GPIO_ACTIVE_LOW>;
+> +    };
+> +
+> +    mmc0 {
+
+mmc {
+
+> +        mmc-pwrseq = <&wfx_pwrseq>;
+> +        #address-cells = <1>;
+> +        #size-cells = <0>;
+> +
+> +        wifi@1 {
+> +            compatible = "silabs,brd8022a", "silabs,wf200";
+> +            pinctrl-names = "default";
+> +            pinctrl-0 = <&wfx_wakeup>;
+> +            reg = <1>;
+> +            wakeup-gpios = <&gpio 12 GPIO_ACTIVE_HIGH>;
+> +        };
+> +    };
+> +...
+> -- 
+> 2.34.1
+> 
