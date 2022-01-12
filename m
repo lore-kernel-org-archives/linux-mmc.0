@@ -2,219 +2,202 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF9DEC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 10:25:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C460C4167B
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 10:27:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352496AbiALKZN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 05:25:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48036 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352494AbiALKZN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 05:25:13 -0500
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EADEFC061751
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jan 2022 02:25:12 -0800 (PST)
-Received: by mail-lf1-x12e.google.com with SMTP id br17so6399283lfb.6
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jan 2022 02:25:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=xhrM6Xen3w5qUruPad5ixHkqDWpBwQZqIzJeR1EkW4E=;
-        b=RrVI1hzaVukuM5jtpwWPW6kvbDwe97qGvtj8c6Kkh4uL25y89y1eaw4SgLu10ZyFnt
-         t59ET0KgYfpVvBwCrIzadJrU99X9i1l2UebcR6QOgdZTvtql7y8pHKh1ZTAm2y7PRZat
-         RC+E/JcyRya3YR2Y3FrTzYYmW+EB4PbKmqLtZmWcF9QDqhz1RzY6G+KzJ+Cwiz/jver1
-         kSIEZ5PEekwjccgRbPsJRxCojbEoFAmYA5F6UPU2YJKxfgIfQtkNciJPVPoyADPxwQu1
-         87HhyXzWf2xjB9fqqkuZwdKuDWcVFc3e9cGVRPH05U5F9h7G/nycnTDCAR7v6PVTHM/u
-         Nw5Q==
+        id S1352514AbiALK1U convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 05:27:20 -0500
+Received: from mail-ua1-f44.google.com ([209.85.222.44]:41930 "EHLO
+        mail-ua1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239335AbiALK1S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 05:27:18 -0500
+Received: by mail-ua1-f44.google.com with SMTP id p37so3799118uae.8;
+        Wed, 12 Jan 2022 02:27:17 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=xhrM6Xen3w5qUruPad5ixHkqDWpBwQZqIzJeR1EkW4E=;
-        b=jwvt2ks5YWtx84/yEjfDQmQm90vRPF7lPShesVPeDzDmCZ0MzLtlBjH0dQRhG7Azag
-         NtEaxSyzLxTeSl5IihMArvIhkj4IbxH+NKl4UrjJ7hIqN1SyMwXrBSxQ402KYf+MX8ij
-         XTX4TcFnCtcaL4VzBKHqMhVEugauK32rNREu6RHQhFtsbe/7f80pXnLIGP3rlUQYshyM
-         u6iZSQwXMbBpT2HDl1K7hT+lIOvKRr6NaFN8+CFbeZJZ5wFPp65LY1ORkbyBJNM5DOvA
-         bsaDj3HkQ6B/VuxnVHKnkDriKbF+rr64LodlWUnb5fuv+vYYsuuHHlMR45c4EB9Thigp
-         swQg==
-X-Gm-Message-State: AOAM5312Ju/Q3j9Bh4/UTv0Abl7jEzS4aHR60Upf1vILR/zajA/s9mfK
-        4W9Q6TEgCYlBD4SlzvA3nVKBc7/A6+x6tNWOLEIQFg==
-X-Google-Smtp-Source: ABdhPJzoW2RQRNQJQZl+DxH2f6NELnVGEYgf+jGNvBCSTIRuWkvMAKnEMBSiHeW7eK9vFeSqeaEVLgBU/N//RxMxMUA=
-X-Received: by 2002:a2e:947:: with SMTP id 68mr2958964ljj.300.1641983111123;
- Wed, 12 Jan 2022 02:25:11 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=bq/EV5whRByTBzcA7NkMG0ZHqS/XeQEEEioGL5IxVZo=;
+        b=mxzSyfrU8iycdk9S9/jrAZvnR8hEGprGOwr/08lzaZlTw5/J6kavgPF9ZzrfVNLIzG
+         P7dQYHcWu0/vAGa45uyXC6a+sqtVLhhncsSCGE3RoSQOzvJ8HiHpqYnRSR/0nhV0JCT0
+         KEQbgFF0BeyPDG0P1um8J8jEzItzA5z/BGBH1euUb/HSQ0jHXH9deWkL2AESaPq4lDvF
+         URresB7v7p3/KXiI8hZnQdptFbaQizJ8erVysOLR+oR5KiVUkSHCZfLeAOk00w/oSwgn
+         BAcrPrqEuDr6t2V9mc6fsVTFXkeC4Og+r9Oznuy1xDD+wB5wpuXjsd7rMwdjGvrh9ww5
+         t5WA==
+X-Gm-Message-State: AOAM531/qcYDI+mLGOtzlm5qIEZZeWyhZJt168BJfrc2CCOSHuBS8DAM
+        cSX0j9l9h6AmYCmTklQdH9y78hf34Rv19Tay
+X-Google-Smtp-Source: ABdhPJzW97cz+iHtzbS3cGrOou77jysR40GtKoHkBfdaDUtOQfjGlRg+dPc9J8qUabKlvsh5wOvv/A==
+X-Received: by 2002:a05:6102:241b:: with SMTP id j27mr133180vsi.66.1641983236805;
+        Wed, 12 Jan 2022 02:27:16 -0800 (PST)
+Received: from mail-ua1-f44.google.com (mail-ua1-f44.google.com. [209.85.222.44])
+        by smtp.gmail.com with ESMTPSA id b8sm7758709vsl.19.2022.01.12.02.27.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 12 Jan 2022 02:27:15 -0800 (PST)
+Received: by mail-ua1-f44.google.com with SMTP id p37so3798919uae.8;
+        Wed, 12 Jan 2022 02:27:14 -0800 (PST)
+X-Received: by 2002:a05:6102:21dc:: with SMTP id r28mr3809205vsg.57.1641983234508;
+ Wed, 12 Jan 2022 02:27:14 -0800 (PST)
 MIME-Version: 1.0
-References: <20211215130711.111186-1-gsomlo@gmail.com> <20211215130711.111186-4-gsomlo@gmail.com>
- <CAPDyKFqo5sZy8aVbOcfS_cxT9T5r214GKCL-FKRg_0P0yQJTFQ@mail.gmail.com>
- <YdOUbYpGFNyxz3iD@errol.ini.cmu.edu> <CAPDyKFohOHYu_bdXsAYvDmMLqnGUW=9pG+yJDwP5-db1B6F1Dw@mail.gmail.com>
- <Yd4JdBArPn9rBj5b@errol.ini.cmu.edu>
-In-Reply-To: <Yd4JdBArPn9rBj5b@errol.ini.cmu.edu>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 12 Jan 2022 11:24:34 +0100
-Message-ID: <CAPDyKFq18AWsaWHcEkU6H1Sh4NsqRfUeQhbRz9MorGfnKzxHwQ@mail.gmail.com>
-Subject: Re: [PATCH v5 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-To:     "Gabriel L. Somlo" <gsomlo@gmail.com>
-Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
-        shorne@gmail.com, geert@linux-m68k.org,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        rdunlap@infradead.org, andy.shevchenko@gmail.com, hdanton@sina.com
+References: <20220110195449.12448-1-s.shtylyov@omp.ru> <20220110195449.12448-2-s.shtylyov@omp.ru>
+ <20220110201014.mtajyrfcfznfhyqm@pengutronix.de> <YdyilpjC6rtz6toJ@lunn.ch>
+ <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com> <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+In-Reply-To: <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 12 Jan 2022 11:27:02 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
+Message-ID: <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
+To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>
+Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        KVM list <kvm@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        linux-phy@lists.infradead.org, Jiri Slaby <jirislaby@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Khuong Dinh <khuong@os.amperecomputing.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Tony Luck <tony.luck@intel.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        platform-driver-x86@vger.kernel.org,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        Saravanan Sekar <sravanhome@gmail.com>,
+        Corey Minyard <minyard@acm.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Eric Auger <eric.auger@redhat.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        openipmi-developer@lists.sourceforge.net,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Benson Leung <bleung@chromium.org>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-edac@vger.kernel.org, Sergey Shtylyov <s.shtylyov@omp.ru>,
+        Richard Weinberger <richard@nod.at>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        James Morse <james.morse@arm.com>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Sebastian Reichel <sre@kernel.org>,
+        =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        linux-mediatek@lists.infradead.org,
+        Brian Norris <computersforpeace@gmail.com>,
+        netdev@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+Hi Uwe,
 
-> > > > [...]
+On Wed, Jan 12, 2022 at 9:51 AM Uwe Kleine-König
+<u.kleine-koenig@pengutronix.de> wrote:
+> On Wed, Jan 12, 2022 at 09:33:48AM +0100, Geert Uytterhoeven wrote:
+> > On Mon, Jan 10, 2022 at 10:20 PM Andrew Lunn <andrew@lunn.ch> wrote:
+> > > On Mon, Jan 10, 2022 at 09:10:14PM +0100, Uwe Kleine-König wrote:
+> > > > On Mon, Jan 10, 2022 at 10:54:48PM +0300, Sergey Shtylyov wrote:
+> > > > > This patch is based on the former Andy Shevchenko's patch:
+> > > > >
+> > > > > https://lore.kernel.org/lkml/20210331144526.19439-1-andriy.shevchenko@linux.intel.com/
+> > > > >
+> > > > > Currently platform_get_irq_optional() returns an error code even if IRQ
+> > > > > resource simply has not been found. It prevents the callers from being
+> > > > > error code agnostic in their error handling:
+> > > > >
+> > > > >     ret = platform_get_irq_optional(...);
+> > > > >     if (ret < 0 && ret != -ENXIO)
+> > > > >             return ret; // respect deferred probe
+> > > > >     if (ret > 0)
+> > > > >             ...we get an IRQ...
+> > > > >
+> > > > > All other *_optional() APIs seem to return 0 or NULL in case an optional
+> > > > > resource is not available. Let's follow this good example, so that the
+> > > > > callers would look like:
+> > > > >
+> > > > >     ret = platform_get_irq_optional(...);
+> > > > >     if (ret < 0)
+> > > > >             return ret;
+> > > > >     if (ret > 0)
+> > > > >             ...we get an IRQ...
 > > > >
-> > > > > +
-> > > > > +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+> > > > The difference to gpiod_get_optional (and most other *_optional) is that
+> > > > you can use the NULL value as if it were a valid GPIO.
 > > > >
-> > > > I noticed that you use these hard coded values and don't really care
-> > > > to manage voltage changes via ->set_ios().
-> > > >
-> > > > Rather than doing it like this, I would prefer if you can hook up a
-> > > > fixed vmmc regulator in the DTS. Then call mmc_regulator_get_supply()
-> > > > to fetch it from here, which will let the mmc core create the
-> > > > mmc->ocr_avail mask, based upon the voltage level the regulator
-> > > > supports.
-> > > >
-> > > > This becomes more generic and allows more flexibility for the platform
-> > > > configuration.
+> > > > As this isn't given with for irqs, I don't think changing the return
+> > > > value has much sense.
 > > >
-> > > The LiteSDCard "hardware" (i.e., *gateware*) does not allow modification
-> > > or selection of voltage from the software side. When a CMD8 is issued,
-> > > the "voltage supplied" bit pattern is expected to be '0001b', which per
-> > > the spec means "2.7-3.6V".
+> > > We actually want platform_get_irq_optional() to look different to all
+> > > the other _optional() methods because it is not equivalent. If it
+> > > looks the same, developers will assume it is the same, and get
+> > > themselves into trouble.
 > >
-> > If you provide a range (2.7-3.6V), that means that your hardware
-> > supports the entire range, not just one single part of it.
+> > Developers already assume it is the same, and thus forget they have
+> > to check against -ENXIO instead of zero.
 >
-> The "gateware" (open source migen/verilog at
-> https://github.com/enjoy-digital/litesdcard)
-> supports any value provided by the underlying FPGA dev board
-> (typically 3.3v) -- by not attempting to manage it in any way.
->
-> SD media presumably doesn't care as long as voltage is somewhere
-> within 2.7-3.6V (at least that's how I read the spec, there's only
-> one register value representing anything within that range).
->
-> > >
-> > > I tried adding this to the overall DTS:
-> > >
-> > >         vreg_mmc: vreg_mmc_3v {
-> > >                 compatible = "regulator-fixed";
-> > >                 regulator-min-microvolt = <3300000>;
-> > >                 regulator-max-microvolt = <3300000>;
-> > >         };
-> > >
-> > > and then added a reference to it to the LiteSDCard "mmc0" node in DTS,
-> > > like so:
-> > >
-> > >         mmc0: mmc@12005000 {
-> > >                 compatible = "litex,mmc";
-> > >                 reg = <0x12005000 0x100>,
-> > >                         <0x12003800 0x100>,
-> > >                         <0x12003000 0x100>,
-> > >                         <0x12004800 0x100>,
-> > >                         <0x12004000 0x100>;
-> > >                 reg-names = "phy", "core", "reader", "writer", "irq";
-> > >                 clocks = <&sys_clk>;
-> > >                 vmmc-supply = <&vreg_mmc>; /* <-------- HERE !!! */
-> > >                 interrupt-parent = <&L1>;
-> > >                 interrupts = <4>;
-> > >         };
-> > >
-> > > Finally, I replaced the hardcoded setting of `mmc->ocr_avail` with a
-> > > call to `mmc_regulator_get_supply(mmc)`. Now, I get a bunch of timeouts
-> > > during attempts to send e.g., CMD8 and CMD55.
-> > > (going for 3200000 and 3400000 for min- and max-microvolt, respectively,
-> > >  -- or anything else in the allowed 2.7-3.6 range -- doesn't help either).
-> > >
-> > > I might be doing something subtly wrong in the way I set things up
-> > > above, but it feels a bit overengineered, and IMHO fragile.
-> >
-> > At a quick glance, the above looks correct to me. Maybe there is
-> > something wrong with the code in the driver instead?
->
-> After some more hacking, I learned that:
->
->         - an additional `regulator-name` line
->           (e.g. `regulator-name = "vreg_mmc";`) is required
->
->         - setting `regulator-always-on;` seems to help reduce attempts
->           by the kernel to "manage" the regulator, but does not appear
->           to be required
->
-> In other words:
->
->         ...
->         vreg_mmc: vreg_mmc {
->                 compatible = "regulator-fixed";
->                 regulator-name = "vreg_mmc";
->                 regulator-min-microvolt = <3300000>;
->                 regulator-max-microvolt = <3300000>;
->                 regulator-always-on;
->         };
->         ...
->
-> Additionally, CONFIG_REGULATOR=y and CONFIG_REGULATOR_FIXED_VOLTAGE=y
-> *MUST* be enabled in the kernel's .config file, to prevent either
-> litex_mmc_probe() from being deferred, or mmc_regulator_get_supply()
-> from simply returning 0 without having set mmc->ocr_avail to anything
-> at all!
->
-> Presumably this would also mean either `select REGULATOR_FIXED_VOLTAGE`
-> or `depends on REGULATOR_FIXED_VOLTAGE` in the mmc driver's Kconfig
-> entry.
+> Is this an ack for renaming platform_get_irq_optional() to
+> platform_get_irq_silent()?
 
-Yep, that's correct.
+No it isn't ;-)
 
-If you don't like to manage that dependency in the Kconfig, an option
-is to check if mmc->ocr_avail is zero and if so, we could log a
-message *and* assign mmc->ocr_avail a default value.
+If an optional IRQ is not present, drivers either just ignore it (e.g.
+for devices that can have multiple interrupts or a single muxed IRQ),
+or they have to resort to polling. For the latter, fall-back handling
+is needed elsewhere in the driver.
+To me it sounds much more logical for the driver to check if an
+optional irq is non-zero (available) or zero (not available), than to
+sprinkle around checks for -ENXIO. In addition, you have to remember
+that this one returns -ENXIO, while other APIs use -ENOENT or -ENOSYS
+(or some other error code) to indicate absence. I thought not having
+to care about the actual error code was the main reason behind the
+introduction of the *_optional() APIs.
 
->
-> Predictably, the "regulator-[min|max]-microvolt = <3300000>" setting
-> gets us
->
->         ocr_avail == MMC_VDD_32_33 | MMC_VDD_33_34
->
-> > >
-> > > OTOH, going all out and setting:
-> > >
-> > >         /* allow for generic 2.7-3.6V range, no software tuning available */
-> > >         mmc->ocr_avail = MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 |
-> > >                          MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 |
-> > >                          MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36;
-> > >
-> > > seems to work just fine... :) Please do let me know what you think!
-> >
-> > No, this isn't the way we want it to work. That's because it means
-> > that we would lie to the card about what voltage range the HW actually
-> > supports.
-> >
-> > It's better to let the DTS file give that information about the HW.
->
-> I may be needlessly concerned, but it feels a bit weird to me to drag
-> in CONFIG_REGULATOR_FIXED_VOLTAGE as an added dependency for what is
-> ultimately a roundabout way of setting a constant... :)
+Gr{oetje,eeting}s,
 
-The point is, it shouldn't really be a constant set by the driver,
-because it would mean initialising a card under potentially wrong
-conditions.
+                        Geert
 
-However, I am fine assigning it a default value as a fallback and best
-effort, if it turns out that DT didn't provide us information about
-what the HW is capable of.
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
->
-> Thanks in advance for any additional clue!
-
-Looks like there are two options, just pick one of them, then I am happy. :-)
-
-Kind regards
-Uffe
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
