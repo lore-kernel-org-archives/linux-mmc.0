@@ -2,160 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19FB3C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 07:50:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5353C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 08:17:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235128AbiALHuD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 02:50:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40630 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231359AbiALHuD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 02:50:03 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95AC1C06173F;
-        Tue, 11 Jan 2022 23:50:02 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 4C87CB81E02;
-        Wed, 12 Jan 2022 07:50:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0B24C36AEA;
-        Wed, 12 Jan 2022 07:49:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641973800;
-        bh=/zzr28pbn0mYUQ3C33VgJ093abXpWPwu5+XYGnZ7HOI=;
-        h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
-        b=gOqryZE8ISgc3MSbb89OPqbHB6lIMKLRTWkJZLRLlDZHEJA/FQtD3G2PIsejf5vyO
-         lxWl5kHtlDWx+2yc/6CJmmQfiG8ge1a5br3t/cLssV7rpwVrhnob4JaBH1U0JI8tgp
-         25eSYGvcuqTn0fJwoecvD18TO+bpXoyGmxgE6J843NfM0Dl99XRgKTfhkiHWwudeGs
-         7D+149LV6SKMnsY02KSCXxco7iYDswVneC5OEeIwsKfK+dPeBzBigILcjGp/cDqASq
-         Qk5EMf32ZCO+TMplE91xnTN6iWxt2tL1yHcc5CzTv9Khp2Z5z2siK7vZ+2n2awVCAr
-         2SY6QAcVjlhug==
-From:   Kalle Valo <kvalo@kernel.org>
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org,
-        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v9 23/24] wfx: remove from the staging area
-References: <20220111171424.862764-1-Jerome.Pouiller@silabs.com>
-        <20220111171424.862764-24-Jerome.Pouiller@silabs.com>
-Date:   Wed, 12 Jan 2022 09:49:54 +0200
-In-Reply-To: <20220111171424.862764-24-Jerome.Pouiller@silabs.com> (Jerome
-        Pouiller's message of "Tue, 11 Jan 2022 18:14:23 +0100")
-Message-ID: <874k69jsv1.fsf@tynnyri.adurom.net>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        id S237603AbiALIRg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 03:17:36 -0500
+Received: from smtp25.cstnet.cn ([159.226.251.25]:56092 "EHLO cstnet.cn"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1351524AbiALIRf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Jan 2022 03:17:35 -0500
+Received: from localhost.localdomain (unknown [124.16.138.126])
+        by APP-05 (Coremail) with SMTP id zQCowAAH6RWNjt5hKiMSBg--.14500S2;
+        Wed, 12 Jan 2022 16:17:17 +0800 (CST)
+From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Jiasheng Jiang <jiasheng@iscas.ac.cn>
+Subject: Re: Re: [PATCH] mmc: sdhci-of-esdhc: Check for error num after setting mask
+Date:   Wed, 12 Jan 2022 16:17:15 +0800
+Message-Id: <20220112081715.692436-1-jiasheng@iscas.ac.cn>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID: zQCowAAH6RWNjt5hKiMSBg--.14500S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7CF1rCr1fKw1UAF1xAF1xGrg_yoW8AF1fp3
+        yFgwn0yrs5WryF9rsrZw1UAF4YyrWrArZ8twsxWa42v3s8Crn0kr18Kan0qF1DCFn3Kw4I
+        vrW2y3WUG34qqa7anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDU0xBIdaVrnRJUUUkv14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+        rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+        1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
+        6F4UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
+        Cq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
+        I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r
+        4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwCY02Avz4vE14v_GFyl
+        42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJV
+        WUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1DMIIYrxkI7VAK
+        I48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r1j6r
+        4UMIIF0xvE42xK8VAvwI8IcIk0rVWrZr1j6s0DMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF
+        0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0JUIzuXUUUUU=
+X-Originating-IP: [124.16.138.126]
+X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
-
-> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+On Wed, Jan 12, 2022 at 02:45:13PM +0800, Adrian Hunter wrote:
+>> Because of the possible failure of the dma_supported(), the
+>> dma_set_mask_and_coherent() may return error num.
+>> Therefore, it should be better to check it and return the error if
+>> fails.
+>> Also, the caller, esdhc_of_resume(), should deal with the return
+>> value.
+>> Moreover, as the sdhci_esdhc_driver has not been used, it does not
+>> need to
+>> be considered.
 >
-> Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
-> ---
->  .../bindings/net/wireless/silabs,wfx.yaml     | 125 ---
->  drivers/staging/wfx/Kconfig                   |   8 -
->  drivers/staging/wfx/Makefile                  |  25 -
->  drivers/staging/wfx/bh.c                      | 330 -------
->  drivers/staging/wfx/bh.h                      |  33 -
->  drivers/staging/wfx/bus.h                     |  38 -
->  drivers/staging/wfx/bus_sdio.c                | 272 ------
->  drivers/staging/wfx/bus_spi.c                 | 271 ------
->  drivers/staging/wfx/data_rx.c                 |  94 --
->  drivers/staging/wfx/data_rx.h                 |  18 -
->  drivers/staging/wfx/data_tx.c                 | 596 -------------
->  drivers/staging/wfx/data_tx.h                 |  68 --
->  drivers/staging/wfx/debug.c                   | 365 --------
->  drivers/staging/wfx/debug.h                   |  19 -
->  drivers/staging/wfx/fwio.c                    | 405 ---------
->  drivers/staging/wfx/fwio.h                    |  15 -
->  drivers/staging/wfx/hif_api_cmd.h             | 555 ------------
->  drivers/staging/wfx/hif_api_general.h         | 262 ------
->  drivers/staging/wfx/hif_api_mib.h             | 346 --------
->  drivers/staging/wfx/hif_rx.c                  | 416 ---------
->  drivers/staging/wfx/hif_rx.h                  |  17 -
->  drivers/staging/wfx/hif_tx.c                  | 513 -----------
->  drivers/staging/wfx/hif_tx.h                  |  60 --
->  drivers/staging/wfx/hif_tx_mib.c              | 324 -------
->  drivers/staging/wfx/hif_tx_mib.h              |  49 --
->  drivers/staging/wfx/hwio.c                    | 352 --------
->  drivers/staging/wfx/hwio.h                    |  75 --
->  drivers/staging/wfx/key.c                     | 241 -----
->  drivers/staging/wfx/key.h                     |  20 -
->  drivers/staging/wfx/main.c                    | 506 -----------
->  drivers/staging/wfx/main.h                    |  43 -
->  drivers/staging/wfx/queue.c                   | 307 -------
->  drivers/staging/wfx/queue.h                   |  45 -
->  drivers/staging/wfx/scan.c                    | 149 ----
->  drivers/staging/wfx/scan.h                    |  22 -
->  drivers/staging/wfx/sta.c                     | 833 ------------------
->  drivers/staging/wfx/sta.h                     |  73 --
->  drivers/staging/wfx/traces.h                  | 501 -----------
->  drivers/staging/wfx/wfx.h                     | 164 ----
->  39 files changed, 8555 deletions(-)
->  delete mode 100644 drivers/staging/wfx/Documentation/devicetree/bindings=
-/net/wireless/silabs,wfx.yaml
->  delete mode 100644 drivers/staging/wfx/Kconfig
->  delete mode 100644 drivers/staging/wfx/Makefile
->  delete mode 100644 drivers/staging/wfx/bh.c
->  delete mode 100644 drivers/staging/wfx/bh.h
->  delete mode 100644 drivers/staging/wfx/bus.h
->  delete mode 100644 drivers/staging/wfx/bus_sdio.c
->  delete mode 100644 drivers/staging/wfx/bus_spi.c
->  delete mode 100644 drivers/staging/wfx/data_rx.c
->  delete mode 100644 drivers/staging/wfx/data_rx.h
->  delete mode 100644 drivers/staging/wfx/data_tx.c
->  delete mode 100644 drivers/staging/wfx/data_tx.h
->  delete mode 100644 drivers/staging/wfx/debug.c
->  delete mode 100644 drivers/staging/wfx/debug.h
->  delete mode 100644 drivers/staging/wfx/fwio.c
->  delete mode 100644 drivers/staging/wfx/fwio.h
->  delete mode 100644 drivers/staging/wfx/hif_api_cmd.h
->  delete mode 100644 drivers/staging/wfx/hif_api_general.h
->  delete mode 100644 drivers/staging/wfx/hif_api_mib.h
->  delete mode 100644 drivers/staging/wfx/hif_rx.c
->  delete mode 100644 drivers/staging/wfx/hif_rx.h
->  delete mode 100644 drivers/staging/wfx/hif_tx.c
->  delete mode 100644 drivers/staging/wfx/hif_tx.h
->  delete mode 100644 drivers/staging/wfx/hif_tx_mib.c
->  delete mode 100644 drivers/staging/wfx/hif_tx_mib.h
->  delete mode 100644 drivers/staging/wfx/hwio.c
->  delete mode 100644 drivers/staging/wfx/hwio.h
->  delete mode 100644 drivers/staging/wfx/key.c
->  delete mode 100644 drivers/staging/wfx/key.h
->  delete mode 100644 drivers/staging/wfx/main.c
->  delete mode 100644 drivers/staging/wfx/main.h
->  delete mode 100644 drivers/staging/wfx/queue.c
->  delete mode 100644 drivers/staging/wfx/queue.h
->  delete mode 100644 drivers/staging/wfx/scan.c
->  delete mode 100644 drivers/staging/wfx/scan.h
->  delete mode 100644 drivers/staging/wfx/sta.c
->  delete mode 100644 drivers/staging/wfx/sta.h
->  delete mode 100644 drivers/staging/wfx/traces.h
->  delete mode 100644 drivers/staging/wfx/wfx.h
+> Apologies, but that last sentence I don't understand.  Can you clarify
+> it a bit.
+> What doesn't need to be considered and why?
 
-I'm not sure what's your plan here, but with staging wireless drivers
-there's usually a simple simple move (git mv) of the driver from
-drivers/staging to drivers/net/wireless. An example here:
+Thanks, because the original esdhc_of_enable_dma() only returns 0, the
+caller may not consider to check the return value.
+I also notice that the esdhc_of_enable_dma() is assigned to
+sdhci_esdhc_le_pdata and sdhci_esdhc_be_pdata, which is only used by
+sdhci_esdhc_driver.
+And now the sdhci_esdhc_driver only have 'probe' and 'remove', without
+other action.
+So we should not consider to check whether there is a caller for
+esdhc_of_enable_dma() in sdhci_esdhc_driver.
 
-https://git.kernel.org/linus/5625f965d764
+>>  	if (ret == 0) {
+>>  		/* Isn't this already done by sdhci_resume_host() ?
+>>  		--rmk */
+>> -		esdhc_of_enable_dma(host);
+>> +		ret = esdhc_of_enable_dma(host);
+>> +		if (ret)
+>> +			return ret;
+>> +
+>
+> This is already done by sdhci_resume_host(), which assumes there can be
+> no
+> error if DMA has been enabled previously i.e. -> enable_dma() is called
+> at setup and the return value checked then.  If it is possible that DMA
+> support can disappear later, then it would be better to address that in
+> SDHCI so that all SDHCI drivers get the benefit.
 
-What you seem to do here is that you add a new driver to
-drivers/net/wireless and then remove the old driver from
-drivers/staging. And I'm guessing these two drivers are not identical
-and have differences?
+Fine, since it is already checked in setup, I think it is no need to
+check later.
 
---=20
-https://patchwork.kernel.org/project/linux-wireless/list/
+I will send a v2 without the change of esdhc_of_resume().
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
-hes
+Sincerely thanks,
+Jiang
+
