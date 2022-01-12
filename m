@@ -2,38 +2,39 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CA05C433F5
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBE4CC433FE
 	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 16:32:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355219AbiALQct (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 11:32:49 -0500
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:44714 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1349855AbiALQct (ORCPT
+        id S1355228AbiALQcu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 11:32:50 -0500
+Received: from mx07-00178001.pphosted.com ([185.132.182.106]:58146 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1349875AbiALQct (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 11:32:49 -0500
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 20CBGCPj019089;
-        Wed, 12 Jan 2022 17:32:33 +0100
+Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 20CBMfov006161;
+        Wed, 12 Jan 2022 17:32:38 +0100
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-type; s=selector1;
- bh=nJFFg7Jg5nwGSZI7zTj0mF4qnxKp4dp2BsQXGHK2x1Q=;
- b=YxLVdyrTPlAlEgOnlj6octXuB8eH7jxiTb151QaR07OwTIkxKtutY0KmU278cnXSVCtw
- LYBj3NsIuYzOhM9rJajTdiffmVeXHzx0k2AcGYiwjhp3DtUW27T14BWb+BLhYeMLkGqL
- aPbISc8luhrNp9/AL3iCz/HCbXUNZfvrYsrqUKwNqJSGsHB0ATN2o8aB5iX5CFh6Ihaf
- CB24RWDZcVhSYzTrt9TqKLe3lZlvBC/U0Ww1lrOLpv1nkuaNlX92fzu9oAP66uIwLFZh
- kg0IRpXfviir2bke16thGRFHBQkF+mOBVtYEW/R4Dus+BODa5k/rRovywriShJEPI2XS Cg== 
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-type; s=selector1;
+ bh=UEoFitwBC/dy0nJmnKOvH0eLgY3gYv73PlMlSu/o0qk=;
+ b=QCn6OXlUhDf8rH4vNW1WqQFIFdyAltra2U6/17Qo65u64RTt9Pnip4XshKEgeuXinI9I
+ IIJL1xp9fA9Zb/EefmSPa+Omye5RpJNcRx77H1MopV5NHpHRL5F8kVDKUYqZYLoXsebp
+ EmXKxySXXxzZNltMRD1OYRmYrW3FFBb2tuXZ/DnwpAOTakZvOsKo3+hkaRB5ErgvKvHM
+ OL8IxIE2/Bz5s46UniAaTgsjpJJnG8Zs85A8hrVtJliew3YUs7l9YRZjGdEwox4f4uMm
+ N7A7gLSAWlCcrTx932FJK4W6a8YDwUoT8lkWY3hITLjiWkshPL0y5+PjRzBfLVBX91uh wg== 
 Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3dhtg9u810-1
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3dhtft32bc-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 12 Jan 2022 17:32:33 +0100
+        Wed, 12 Jan 2022 17:32:38 +0100
 Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 2E31A100034;
-        Wed, 12 Jan 2022 17:32:33 +0100 (CET)
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id EBB0D100038;
+        Wed, 12 Jan 2022 17:32:37 +0100 (CET)
 Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 24E5F24B8B1;
-        Wed, 12 Jan 2022 17:32:33 +0100 (CET)
-Received: from localhost (10.75.127.50) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Wed, 12 Jan 2022 17:32:32
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id E454E24B8B1;
+        Wed, 12 Jan 2022 17:32:37 +0100 (CET)
+Received: from localhost (10.75.127.49) by SFHDAG2NODE2.st.com (10.75.127.5)
+ with Microsoft SMTP Server (TLS) id 15.0.1497.26; Wed, 12 Jan 2022 17:32:37
  +0100
 From:   Yann Gautier <yann.gautier@foss.st.com>
 To:     Rob Herring <robh+dt@kernel.org>,
@@ -44,14 +45,16 @@ To:     Rob Herring <robh+dt@kernel.org>,
         <linux-arm-kernel@lists.infradead.org>
 CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH 00/10] ARM: dts: stm32: update sdmmc nodes
-Date:   Wed, 12 Jan 2022 17:32:16 +0100
-Message-ID: <20220112163226.25384-1-yann.gautier@foss.st.com>
+Subject: [PATCH 07/10] ARM: dts: stm32: add sdmmc sleep config for STM32MP135F-DK
+Date:   Wed, 12 Jan 2022 17:32:23 +0100
+Message-ID: <20220112163226.25384-8-yann.gautier@foss.st.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20220112163226.25384-1-yann.gautier@foss.st.com>
+References: <20220112163226.25384-1-yann.gautier@foss.st.com>
 MIME-Version: 1.0
 Content-Type: text/plain
-X-Originating-IP: [10.75.127.50]
-X-ClientProxiedBy: SFHDAG2NODE1.st.com (10.75.127.4) To SFHDAG2NODE2.st.com
+X-Originating-IP: [10.75.127.49]
+X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE2.st.com
  (10.75.127.5)
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.205,Aquarius:18.0.790,Hydra:6.0.425,FMLib:17.11.62.513
@@ -60,37 +63,29 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patches series brings updates for SDMMC nodes on STM32MP13
-(max frequency, pins slew-rates, sleep pins, and controller version).
-The sdmmc2 node is also added as STM32MP13 embeds 2 SDMMC controllers.
+Add sleep properties in pinctrl config for SDMMC1.
 
-The compatible for sdmmc nodes is also updated for both STM32MP13
-and STM32MP15, to align with bootloaders DT, and after arm,pl18x.yaml
-has been updated [1].
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+ arch/arm/boot/dts/stm32mp135f-dk.dts | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-[1] commit 552bc46484b3 ("dt-bindings: mmc: mmci: Add st,stm32-sdmmc2
-    compatible")
-
-Gerald Baeza (1):
-  ARM: dts: stm32: update sdmmc slew-rate in stm32mp13 pinctrl
-
-Yann Gautier (9):
-  ARM: dts: stm32: add st,stm32-sdmmc2 compatible on stm32mp151
-  ARM: dts: stm32: add st,stm32-sdmmc2 compatible on stm32mp131
-  ARM: dts: stm32: increase SDMMC max-frequency for STM32MP13
-  ARM: dts: stm32: update SDMMC clock slew-rate on STM32MP135F-DK board
-  ARM: dts: stm32: add sdmmc sleep pins for STM32MP13
-  ARM: dts: stm32: add sdmmc sleep config for STM32MP135F-DK
-  ARM: dts: stm32: update SDMMC version for STM32MP13
-  ARM: dts: stm32: add SDMMC2 in STM32MP13 DT
-  ARM: dts: stm32: add sdmmc2 pins for STM32MP13
-
- arch/arm/boot/dts/stm32mp13-pinctrl.dtsi | 81 ++++++++++++++++++++----
- arch/arm/boot/dts/stm32mp131.dtsi        | 20 +++++-
- arch/arm/boot/dts/stm32mp135f-dk.dts     |  7 +-
- arch/arm/boot/dts/stm32mp151.dtsi        |  6 +-
- 4 files changed, 94 insertions(+), 20 deletions(-)
-
+diff --git a/arch/arm/boot/dts/stm32mp135f-dk.dts b/arch/arm/boot/dts/stm32mp135f-dk.dts
+index aae8d3512f4b..ee100d108ea2 100644
+--- a/arch/arm/boot/dts/stm32mp135f-dk.dts
++++ b/arch/arm/boot/dts/stm32mp135f-dk.dts
+@@ -38,9 +38,10 @@
+ };
+ 
+ &sdmmc1 {
+-	pinctrl-names = "default", "opendrain";
++	pinctrl-names = "default", "opendrain", "sleep";
+ 	pinctrl-0 = <&sdmmc1_b4_pins_a &sdmmc1_clk_pins_a>;
+ 	pinctrl-1 = <&sdmmc1_b4_od_pins_a &sdmmc1_clk_pins_a>;
++	pinctrl-2 = <&sdmmc1_b4_sleep_pins_a>;
+ 	broken-cd;
+ 	disable-wp;
+ 	st,neg-edge;
 -- 
 2.17.1
 
