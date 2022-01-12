@@ -2,183 +2,261 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FBE9C43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 21:45:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2EA2C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 22:27:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233514AbiALVps (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 16:45:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36070 "EHLO
+        id S231233AbiALW1y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 17:27:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230245AbiALVpq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 16:45:46 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2A93C06173F;
-        Wed, 12 Jan 2022 13:45:45 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id AA6BCB8211C;
-        Wed, 12 Jan 2022 21:45:44 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C6540C36AE5;
-        Wed, 12 Jan 2022 21:45:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642023943;
-        bh=Rl4cYWMV8h1J8XxpmCmzqZfaoBMwLhpNARBfd20DoT4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Khszb13U1jmu+m7bsIzdnnnT1iCYGXg5GGE42/oJuMQsK9Yn6UuauPQmmihxCed8g
-         I1F6FNxWdahiv8HObXLZ1MgG9aNbNh1vuWd5lPBPEE8jOf+os+a0Eg3ZNc61OeDpAd
-         oG1pZPxuhBAj0VIDmNNIk5GiF3ZYFM98qq+jWT/t93oYg9ih3f230JowrUn42Y60WL
-         bkt6CNPh+5WsNOS7M+9MpTJWTFF/zRWDIyY+MuNMqob1T2eWMhLpwtYRPlw8g7cffu
-         gO+N6rZqa7cTguyMABuPC7x4dDwKst9lAVidnA7ik+1nWq+j4fbnhftwUHOLMDmzq6
-         MQ+g/36gi+i7A==
-Date:   Wed, 12 Jan 2022 21:45:25 +0000
-From:   Mark Brown <broonie@kernel.org>
-To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        KVM list <kvm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org, netdev@vger.kernel.org,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        openipmi-developer@lists.sourceforge.net,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Linux PWM List <linux-pwm@vger.kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        John Garry <john.garry@huawei.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Sebastian Reichel <sre@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        platform-driver-x86@vger.kernel.org,
-        Benson Leung <bleung@chromium.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Vinod Koul <vkoul@kernel.org>,
-        James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Richard Weinberger <richard@nod.at>,
-        Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>,
-        linux-mediatek@lists.infradead.org,
-        Brian Norris <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
-Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
-Message-ID: <Yd9L9SZ+g13iyKab@sirena.org.uk>
-References: <20220110195449.12448-1-s.shtylyov@omp.ru>
- <20220110195449.12448-2-s.shtylyov@omp.ru>
- <20220110201014.mtajyrfcfznfhyqm@pengutronix.de>
- <YdyilpjC6rtz6toJ@lunn.ch>
- <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
- <20220112085009.dbasceh3obfok5dc@pengutronix.de>
- <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
- <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
+        with ESMTP id S229602AbiALW1y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 17:27:54 -0500
+Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2677BC06173F;
+        Wed, 12 Jan 2022 14:27:54 -0800 (PST)
+Received: by mail-qt1-x830.google.com with SMTP id q24so1018567qtp.5;
+        Wed, 12 Jan 2022 14:27:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Q3OdirfIJoEYtOHPGDEbpbbAM4qDtJHCixs5P/ODlz8=;
+        b=gjDWS53rbeLHGQAKSn/bs0Ru55dcoGoku4ftK5MJayQLfPhMDdBAgQGpcQSOLiaCQF
+         ZzzEIOZJn1gG7pJ5YzWFn8HeU/gRLplytlFI6IRfnDva7N2f+gIGFldEeK6b4yBV/bKZ
+         YYCCTlBezMv4f8+ptbY461Q27UipfGmjcdayklpdEz4/dSB5t4UP3NN+e9R6Y3DB8Te1
+         JGZKKEnK3JACNvw6UgAiO6VqFNWKQ70w3pPj+MrIN0CuBfpNz7yk+9YJxhyAnPGOT8Eq
+         xt89bU7pgHPK1/BAUUlDx1iLcjbbXF3uIrNXqRCbaUS1d4XT6PhY6ak4mtKiY0XvV46I
+         nqyw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Q3OdirfIJoEYtOHPGDEbpbbAM4qDtJHCixs5P/ODlz8=;
+        b=kDK5BK3hLZFQ/KY3R21Shhj8k32b9i7YWJCzdiuRiXEAKBV0BdJbwZ6Mp0yrAX0cxA
+         PKpwvksCIdcM0meXSRViCy39dtBwLce6XZ6pChr+QaJwhBry2SukY7X2436c8l79y/u9
+         mZhgASpdYdOyFMwrdlD0590liPB4tS2+pN4Pvwx+jZowa0gLpc6NS5KPoTUbrglPXy3B
+         YidOWGrUY1RVncY1WhakOM6KFnL0WkORbXkMLBCG0nE9Ts51IDWCDRhOHW4kqHF6PCXt
+         +7MfUsEH0rg1tgtEc6N5SnUHYCqQoAfwAmVAl1vZmY6WzqCB/67wcM4MxkUEe157oFZU
+         1KmQ==
+X-Gm-Message-State: AOAM530zy2LSzj1lLsymt1HP3z+0IlMiUaARxVqoqouzCjdDkLYA/7oi
+        2ld0j6Sxjv1Z5dG8DSWi35ftHjxG8bnkdw==
+X-Google-Smtp-Source: ABdhPJwmmaBpG3RdmDwupVI8AcQwNkMYSbnOXB+Sc0oNNpymoyAaI5IPP9PpgVvtxbyZc2V5kqwCLQ==
+X-Received: by 2002:ac8:5944:: with SMTP id 4mr1551077qtz.19.1642026472966;
+        Wed, 12 Jan 2022 14:27:52 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id q27sm611842qki.100.2022.01.12.14.27.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 12 Jan 2022 14:27:52 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org, andy.shevchenko@gmail.com, hdanton@sina.com
+Subject: [PATCH v13 0/3] mmc: Add LiteSDCard mmc driver
+Date:   Wed, 12 Jan 2022 17:27:44 -0500
+Message-Id: <20220112222747.3135585-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="bKSGz4pQDpFpvPus"
-Content-Disposition: inline
-In-Reply-To: <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
-X-Cookie: Bridge ahead.  Pay troll.
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Add support for the LiteX SD-Card device, LiteSDCard.
 
---bKSGz4pQDpFpvPus
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+LiteSDCard is a simple SD-Card interface available as part of the LiteX
+environment, used with various RISC-V and other FPGA based SoCs.
 
-On Wed, Jan 12, 2022 at 10:31:21PM +0100, Uwe Kleine-K=F6nig wrote:
-> On Wed, Jan 12, 2022 at 11:27:02AM +0100, Geert Uytterhoeven wrote:
+New in v13:
+Documentation/devicetree/bindings/mmc/litex,mmc.yaml:
+  - add `vmmc-supply` requirement
+drivers/mmc/host/Kconfig:
+  - add dependency on REGULATOR, REGULATOR_FIXED_VOLTAGE
+drivers/mmc/host/litex_mmc.c:
+  - use `mmc_regulator_get_supply()`, with fallback to hardcoded 3.3V
 
-(Do we really need *all* the CCs here?)
+>New in v12:
+>drivers/mmc/host/Kconfig:
+>  - add dependency on HAVE_CLK for litex_mmc driver
+>  - (re)add "If unsure, say N" to the litex_mmc driver help message
+>drivers/mmc/host/litex_mmc.c:
+>  - prints message using dev_info() before returning success from probe()
+>
+>>New in v11:
+>>  - picked up r/b from Andy
+>>drivers/mmc/host/litex_mmc.c:
+>>  - defensive coding of litex_mmc_interrupt() return logic
+>>  - remove `dev` member of `struct litex_mmc_host`, only used during probe
+>>
+>>>New in v10:
+>>>drivers/mmc/host/litex_mmc.c:
+>>>  - group `linux/mmc/*` includes by themselves
+>>>  - clean-up of `return` style (multiple locations throughout source)
+>>>  - create `mmc_free_host()` wrapper for use with
+>>>    `devm_add_action_or_reset()`
+>>>  - use GFP_KERNEL with `dmam_alloc_coherent()`
+>>>
+>>>>New in v9:
+>>>>drivers/mmc/host/Kconfig:
+>>>>  - fix OF dependency
+>>>>drivers/mmc/host/litex_mmc.c:
+>>>>  - remove `linux/of.h` include, no longer needed since dropping
+>>>>    `of_match_ptr()`
+>>>>  - add `linux/mod_devicetable.h` include
+>>>>  - use devm_action_or_reset() to devm-ify mmc_alloc_host(), and obviate
+>>>>    the need to call mmc_free_host() explicitly during either probe()
+>>>>    error path or during remove()
+>>>>
+>>>>>New in v8:
+>>>>>commit blurbs:
+>>>>>  - cosmetic editing of descriptions
+>>>>>  - removed `Cc:` lines
+>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>  - fix file header comment (for real, this time)
+>>>>>  - add explicit `bits.h` include
+>>>>>  - remove `of_match_ptr()` wrapper from around .of_match_table argument
+>>>>>  - fix devm ordering issues: use `devm_request_irq()`, which precludes
+>>>>>    the need to call `free_irq()` on `probe()` error path or from `remove()`
+>>>>>
+>>>>>>New in v7:
+>>>>>>
+>>>>>>drivers/mmc/host/Kconfig:
+>>>>>>  - added module name in LiteSDCard Kconfig entry
+>>>>>>
+>>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>>  - fixed comment formatting, ordering, and capitalization throughout
+>>>>>>    the entire file
+>>>>>>  - sorted header #include statements
+>>>>>>  - removed redundant parantheses in readx_poll_timeout() condition
+>>>>>>  - explicit handling of readx_poll_timeout() timeout scenarios
+>>>>>>  - dev_err() used in litex_mmc_sdcard_wait_done()
+>>>>>>  - use memcpy_fromio() to grab command response
+>>>>>>  - no need to apply 0xffff mask to a 32-bit value right-shifted by 16
+>>>>>>    (host->resp[3])
+>>>>>>  - use clamp() instead of min(max(...)...)
+>>>>>>  - reworked platform_get_irq_optional() error handling logic
+>>>>>>  - no need to explicitly zero host->irq, kzalloc() does that already
+>>>>>>  - added missing free_irq() in litex_mmc_probe() error path
+>>>>>>  - reordered calls inside litex_mmc_remove() (calling mmc_free_host()
+>>>>>>    before free_irq()
+>>>>>>
+>>>>>>>New in v6:
+>>>>>>>
+>>>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>>>  - fix handling of deferred probe vs. platform_get_irq_optional()
+>>>>>>>  - don't #ifdef dma_set_mask_and_coherent(), since it automatically
+>>>>>>>    does the right thing on both 32- and 64-bit DMA capable arches
+>>>>>>>  - remove MMC_CAP2_FULL_PWR_CYCLE, add MMC_CAP2_NO_MMC to list of
+>>>>>>>    hardcoded capabilities during litex_mmc_probe()
+>>>>>>>  - hardcode mmc->ocr_avail to the full 2.7-3.6V range allowed by the
+>>>>>>>    SDCard spec (the LiteSDCard device doesn't accept software
+>>>>>>>    configuration)
+>>>>>>>
+>>>>>>>>New in v5:
+>>>>>>>>
+>>>>>>>>MAINTAINERS:
+>>>>>>>>
+>>>>>>>>  - picked up a/b Mateusz
+>>>>>>>>
+>>>>>>>>Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>>>>>>
+>>>>>>>>  - picked up r/b Rob, Joel
+>>>>>>>>
+>>>>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>>>>
+>>>>>>>>  - shorten #define constant names (cosmetic, make them less unwieldy)
+>>>>>>>>  - picked up r/b Joel
+>>>>>>>>
+>>>>>>>>>New in v4:
+>>>>>>>>>
+>>>>>>>>>Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>>>>>>>
+>>>>>>>>>  - fixed `dt_binding_check` errors uncovered by Rob's script
+>>>>>>>>>
+>>>>>>>>>drivers/mmc/host/litex_mmc.c:
+>>>>>>>>>
+>>>>>>>>>  - struct litex_mmc_host fields re-ordered so that `pahole` reports
+>>>>>>>>>    no holes in either 32- or 64-bit builds
+>>>>>>>>>  - litex_mmc_set_bus_width() now encapsulates check for
+>>>>>>>>>    host->is_bus_width_set
+>>>>>>>>>  - litex_mmc_request() - factor out dma data setup into separate
+>>>>>>>>>    helper function: litex_mmc_do_dma()
+>>>>>>>>>
+>>>>>>>>>>New in v3:
+>>>>>>>>>>
+>>>>>>>>>>  MAINTAINERS:
+>>>>>>>>>>
+>>>>>>>>>>  - picked up acked-by Joel
+>>>>>>>>>>  - added listing for liteeth driver
+>>>>>>>>>>  - added Joel as additional co-maintainer (thanks!)
+>>>>>>>>>>
+>>>>>>>>>>  Doc/dt/bindings/mmc/litex,mmc.yaml:
+>>>>>>>>>>
+>>>>>>>>>>  - picked up r/b Geert Uytterhoeven <geert@linux-m68k.org> in DT
+>>>>>>>>>>    bindings document (please let me know if that was premature, and
+>>>>>>>>>>    happy to take further review if needed :)
+>>>>>>>>>>  - add dedicated DT property for source clock frequency
+>>>>>>>>>>
+>>>>>>>>>>  drivers/mmc/host/litex_mmc.c:
+>>>>>>>>>>
+>>>>>>>>>>  - fixed function signature (no line split), and naming (litex_mmc_*)
+>>>>>>>>>>  - more informative MODULE_AUTHOR() entries
+>>>>>>>>>>    - also added matching "Copyright" entries in file header
+>>>>>>>>>>  - fixed description in Kconfig
+>>>>>>>>>>  - fixed DT documentation
+>>>>>>>>>>  - removed magic constants
+>>>>>>>>>>  - removed litex_map_status(), have sdcard_wait_done() return *real*
+>>>>>>>>>>    error codes directly instead.
+>>>>>>>>>>  - streamlined litex_mmc_reponse_len()
+>>>>>>>>>>  - call litex_mmc_set_bus_width() only once, and ensure it returns
+>>>>>>>>>>    correct error code(s)
+>>>>>>>>>>  - use readx_poll_timeout() -- more concise -- instead of
+>>>>>>>>>>    read_poll_timeout()
+>>>>>>>>>>  - use dev_err() in litex_mmc_send_cmd() (instead of pr_err())
+>>>>>>>>>>  - litex_mmc_setclk() will update host->clock before returning
+>>>>>>>>>>  - separate irq initialization into its own function,
+>>>>>>>>>>    litex_mmc_irq_init()
+>>>>>>>>>>  - document rationale for f_min, f_max
+>>>>>>>>>>  - use dmam_alloc_coherent(), which simplifies cleanup significantly
+>>>>>>>>>>  - large `if (data) { ... }` block in litex_mmc_request() left as-is,
+>>>>>>>>>>    there are too many variables shared with the rest of the parent
+>>>>>>>>>>    function body to easily separate (e.g., `len`, `transfer`, `direct`).
+>>>>>>>>>>    If this is indeed a blocker, I can take another shot at refactoring
+>>>>>>>>>>    it in a future revision!
+>>>>>>>>>>  - bump dma_set_mask_and_coherent() to 64-bits on suitable
+>>>>>>>>>>    architectures
+>>>>>>>>>>  - clock source picked up from dedicated DT clock reference property
+>>>>>>>>>>  - remove gpio card-detect logic (needs testing and a dt binding
+>>>>>>>>>>    example before being eligible for upstream inclusion)
+>>>>>>>>>>
+>>>>>>>>>>> New in v2:
+>>>>>>>>>>>   - reword info message in litex_set_clk()
+>>>>>>>>>>>   - streamline code in litex_map_status()
+>>>>>>>>>>>   - fix typos in Kconfig (thanks Randy Dunlap <rdunlap@infradead.org>)
+>>>>>>>>>>>   - improvements suggested by Stafford Horne <shorne@gmail.com>
+>>>>>>>>>>>     - allow COMPILE_TEST in Kconfig
+>>>>>>>>>>>     - use read_poll_timeout() when waiting for cmd/data/DMA
+>>>>>>>>>>>       xfer completion
+>>>>>>>>>>>   - include interrupt.h (thanks kernel test robot <lkp@intel.com>)
 
-> That convinces me, that platform_get_irq_optional() is a bad name. The
-> only difference to platform_get_irq is that it's silent. And returning
-> a dummy irq value (which would make it aligned with the other _optional
-> functions) isn't possible.
+Gabriel Somlo (3):
+  MAINTAINERS: co-maintain LiteX platform
+  dt-bindings: mmc: Add bindings for LiteSDCard
+  mmc: Add driver for LiteX's LiteSDCard interface
 
-There is regulator_get_optional() which is I believe the earliest of
-these APIs, it doesn't return a dummy either (and is silent too) - this
-is because regulator_get() does return a dummy since it's the vastly
-common case that regulators must be physically present and them not
-being found is due to there being an error in the system description.
-It's unfortunate that we've ended up with these two different senses for
-_optional(), people frequently get tripped up by it.
+ .../devicetree/bindings/mmc/litex,mmc.yaml    |  77 ++
+ MAINTAINERS                                   |   9 +-
+ drivers/mmc/host/Kconfig                      |  13 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/litex_mmc.c                  | 661 ++++++++++++++++++
+ 5 files changed, 759 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
 
-> > To me it sounds much more logical for the driver to check if an
-> > optional irq is non-zero (available) or zero (not available), than to
-> > sprinkle around checks for -ENXIO. In addition, you have to remember
-> > that this one returns -ENXIO, while other APIs use -ENOENT or -ENOSYS
-> > (or some other error code) to indicate absence. I thought not having
-> > to care about the actual error code was the main reason behind the
-> > introduction of the *_optional() APIs.
+-- 
+2.31.1
 
-> No, the main benefit of gpiod_get_optional() (and clk_get_optional()) is
-> that you can handle an absent GPIO (or clk) as if it were available.
-
-Similarly for the regulator API, kind of.
-
---bKSGz4pQDpFpvPus
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmHfS/QACgkQJNaLcl1U
-h9BO/wf/X52fQIYQFCYJDsHS4pHQDXMDv8aCyyoEen4dO7d7t6fuflAYrOGj/MXP
-UkHWhHmjH5EJrD5XQQmsOLQV5qXKD/mmvAuXQzNA/aUITdBah/r9xt3Y2nYb4+zR
-Nm3ZzFmvTZVLATEdRt39LZxBwD/gCkwQpEd1tSBKsiNsq2k9eyGs6zff3Aj5xUzC
-+9zfg/GCQOESdU+jRATqvdl69QGdA5N6dPgzgIQEtecGNmx02jn8bEqmaN0SX1NZ
-zQXn1ChOAI4lWDhW4uAEnD4aF8hUN//xR2DiHIjNuGFgb7vTKdJgbI0iG2iH30Nm
-zgsgo5YMgTHurpX6yL8pMaJC54r/Pg==
-=MHmO
------END PGP SIGNATURE-----
-
---bKSGz4pQDpFpvPus--
