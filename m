@@ -2,96 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5353C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 08:17:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FC92C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 08:32:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237603AbiALIRg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 03:17:36 -0500
-Received: from smtp25.cstnet.cn ([159.226.251.25]:56092 "EHLO cstnet.cn"
+        id S1349434AbiALIcS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 03:32:18 -0500
+Received: from smtp25.cstnet.cn ([159.226.251.25]:59394 "EHLO cstnet.cn"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1351524AbiALIRf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 12 Jan 2022 03:17:35 -0500
+        id S238074AbiALIcR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Jan 2022 03:32:17 -0500
 Received: from localhost.localdomain (unknown [124.16.138.126])
-        by APP-05 (Coremail) with SMTP id zQCowAAH6RWNjt5hKiMSBg--.14500S2;
-        Wed, 12 Jan 2022 16:17:17 +0800 (CST)
+        by APP-05 (Coremail) with SMTP id zQCowADHzQH9kd5hTlcSBg--.19832S2;
+        Wed, 12 Jan 2022 16:31:57 +0800 (CST)
 From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Jiasheng Jiang <jiasheng@iscas.ac.cn>
-Subject: Re: Re: [PATCH] mmc: sdhci-of-esdhc: Check for error num after setting mask
-Date:   Wed, 12 Jan 2022 16:17:15 +0800
-Message-Id: <20220112081715.692436-1-jiasheng@iscas.ac.cn>
+Subject: [PATCH v2] mmc: sdhci-of-esdhc: Check for error num after setting mask
+Date:   Wed, 12 Jan 2022 16:31:56 +0800
+Message-Id: <20220112083156.1124782-1-jiasheng@iscas.ac.cn>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: zQCowAAH6RWNjt5hKiMSBg--.14500S2
-X-Coremail-Antispam: 1UD129KBjvJXoW7CF1rCr1fKw1UAF1xAF1xGrg_yoW8AF1fp3
-        yFgwn0yrs5WryF9rsrZw1UAF4YyrWrArZ8twsxWa42v3s8Crn0kr18Kan0qF1DCFn3Kw4I
-        vrW2y3WUG34qqa7anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDU0xBIdaVrnRJUUUkv14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+X-CM-TRANSID: zQCowADHzQH9kd5hTlcSBg--.19832S2
+X-Coremail-Antispam: 1UD129KBjvJXoW7uw4UJr1ktFWxCF1rJFWxtFb_yoW8Wr17pa
+        1rWFyFkrWfJr1ru39av3WUZFyYqw1ktFWrt3y7Wan2v343JryjqFyxAFyjvF1kJFyrtw1f
+        XFWjyr1ru3y8J3DanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDU0xBIdaVrnRJUUUkm14x267AKxVWUJVW8JwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
         rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
-        1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
+        1l84ACjcxK6xIIjxv20xvE14v26r4j6ryUM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26r4j
         6F4UM28EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVW0oV
         Cq3wAS0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0
-        I7IYx2IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r
+        I7IYx2IY67AKxVWUGVWUXwAv7VC2z280aVAFwI0_Jr0_Gr1lOx8S6xCaFVCjc4AY6r1j6r
         4UM4x0Y48IcxkI7VAKI48JM4x0x7Aq67IIx4CEVc8vx2IErcIFxwCY02Avz4vE14v_GFyl
         42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJV
         WUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r126r1DMIIYrxkI7VAK
         I48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r1j6r
-        4UMIIF0xvE42xK8VAvwI8IcIk0rVWrZr1j6s0DMIIF0xvEx4A2jsIE14v26r1j6r4UMIIF
-        0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU0xZFpf9x0JUIzuXUUUUU=
+        4UMIIF0xvE42xK8VAvwI8IcIk0rVWrJr0_WFyUJwCI42IY6I8E87Iv67AKxVWUJVW8JwCI
+        42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfUepBTUUUUU
 X-Originating-IP: [124.16.138.126]
 X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jan 12, 2022 at 02:45:13PM +0800, Adrian Hunter wrote:
->> Because of the possible failure of the dma_supported(), the
->> dma_set_mask_and_coherent() may return error num.
->> Therefore, it should be better to check it and return the error if
->> fails.
->> Also, the caller, esdhc_of_resume(), should deal with the return
->> value.
->> Moreover, as the sdhci_esdhc_driver has not been used, it does not
->> need to
->> be considered.
->
-> Apologies, but that last sentence I don't understand.  Can you clarify
-> it a bit.
-> What doesn't need to be considered and why?
+Because of the possible failure of the dma_supported(), the
+dma_set_mask_and_coherent() may return error num.
+Therefore, it should be better to check it and return the error if
+fails.
+And since the sdhci_setup_host() has already checked the return value of
+the enable_dma, we need not check it in sdhci_resume_host() again.
 
-Thanks, because the original esdhc_of_enable_dma() only returns 0, the
-caller may not consider to check the return value.
-I also notice that the esdhc_of_enable_dma() is assigned to
-sdhci_esdhc_le_pdata and sdhci_esdhc_be_pdata, which is only used by
-sdhci_esdhc_driver.
-And now the sdhci_esdhc_driver only have 'probe' and 'remove', without
-other action.
-So we should not consider to check whether there is a caller for
-esdhc_of_enable_dma() in sdhci_esdhc_driver.
+Fixes: 5552d7ad596c ("mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips")
+Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
+---
+Changelog
 
->>  	if (ret == 0) {
->>  		/* Isn't this already done by sdhci_resume_host() ?
->>  		--rmk */
->> -		esdhc_of_enable_dma(host);
->> +		ret = esdhc_of_enable_dma(host);
->> +		if (ret)
->> +			return ret;
->> +
->
-> This is already done by sdhci_resume_host(), which assumes there can be
-> no
-> error if DMA has been enabled previously i.e. -> enable_dma() is called
-> at setup and the return value checked then.  If it is possible that DMA
-> support can disappear later, then it would be better to address that in
-> SDHCI so that all SDHCI drivers get the benefit.
+v1 -> v2
 
-Fine, since it is already checked in setup, I think it is no need to
-check later.
+* Change 1. Remove the change of esdhc_of_resume and refine the commit
+* message.
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-I will send a v2 without the change of esdhc_of_resume().
-
-Sincerely thanks,
-Jiang
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index a593b1fbd69e..0f3658b36513 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -524,12 +524,16 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+ 
+ static int esdhc_of_enable_dma(struct sdhci_host *host)
+ {
++	int ret;
+ 	u32 value;
+ 	struct device *dev = mmc_dev(host->mmc);
+ 
+ 	if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
+-	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
+-		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
++	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc")) {
++		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
++		if (ret)
++			return ret;
++	}
+ 
+ 	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+ 
+-- 
+2.25.1
 
