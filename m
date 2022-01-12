@@ -2,175 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53AE4C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 12:47:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C3AAC4321E
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 13:40:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353253AbiALMq4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 07:46:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51704 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353244AbiALMqx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 07:46:53 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0616DC06173F;
-        Wed, 12 Jan 2022 04:46:53 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id CDD9AB81EA7;
-        Wed, 12 Jan 2022 12:46:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D21E9C36AE5;
-        Wed, 12 Jan 2022 12:46:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1641991610;
-        bh=Q/J6JEZ3cVVSxVKhadTn858ZM/rd91mNJYmHU4mHfIg=;
-        h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
-        b=U99u+zmreZJOhJq8CvvcY3iyLgFI7JS44DRn2ZOoCDBLKbVGB+V+wefuIa5P+6tMd
-         Z63P3JKuM0hvrMiwhdqbSum6Q5Tr2iXCESBA1+B7JQDpHc2JdFIKK42w1QYp3nX6P3
-         3E2o4lGzX2U7DVtHqoxoxW2C67YXo+fQY/qnnSLs6ebPr7qoHxREtZbmLSPsnW7tfy
-         TDVq1UkNUinYPY45wIyIFnwUa4vflxV79OZDSLrd2wN62SDGbBzHKijWPjibK1i6XP
-         Xm788dUZigBXNZsUm931/h06vq9Qwg4TM6SYf67Cp49Gaq5rymFNeiUzl5nW/V3eOR
-         ky0AECcvhk9eA==
-From:   Kalle Valo <kvalo@kernel.org>
-To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
-Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        id S1353665AbiALNkS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 08:40:18 -0500
+Received: from vps0.lunn.ch ([185.16.172.187]:34014 "EHLO vps0.lunn.ch"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S241154AbiALNkR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Jan 2022 08:40:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
+        s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
+        Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
+        Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
+        bh=S/pA7bUX6e4VB1GHe3hlypsDdeFRt4oGL0831NNCTJM=; b=REJii9uMw/mNDMEDkaB6nMl41t
+        HVia+zgOKIfzuMj09o6jQ+IaM7PowDfcCzSXN02NEw/KiBFCm/WUr1uWHbYcv6vi03Q5vZQPWTCZw
+        kZaHOnCDnZ4glu9pEOOBCeugcwmvyPmDFDeJp1Ck0ttEnrICihUcMQo96DS7dmh4ziSA=;
+Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
+        (envelope-from <andrew@lunn.ch>)
+        id 1n7dpl-001CDK-PQ; Wed, 12 Jan 2022 14:38:37 +0100
+Date:   Wed, 12 Jan 2022 14:38:37 +0100
+From:   Andrew Lunn <andrew@lunn.ch>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        KVM list <kvm@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        linux-phy@lists.infradead.org, Jiri Slaby <jirislaby@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Khuong Dinh <khuong@os.amperecomputing.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Tony Luck <tony.luck@intel.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        platform-driver-x86@vger.kernel.org,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        Saravanan Sekar <sravanhome@gmail.com>,
+        Corey Minyard <minyard@acm.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Eric Auger <eric.auger@redhat.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        openipmi-developer@lists.sourceforge.net,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Benson Leung <bleung@chromium.org>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-edac@vger.kernel.org, Sergey Shtylyov <s.shtylyov@omp.ru>,
+        Richard Weinberger <richard@nod.at>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        Hans de Goede <hdegoede@redhat.com>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org,
-        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v9 23/24] wfx: remove from the staging area
-References: <20220111171424.862764-1-Jerome.Pouiller@silabs.com>
-        <20220111171424.862764-24-Jerome.Pouiller@silabs.com>
-        <874k69jsv1.fsf@tynnyri.adurom.net> <65681266.04G08nq4u0@pc-42>
-Date:   Wed, 12 Jan 2022 14:46:46 +0200
-In-Reply-To: <65681266.04G08nq4u0@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
- Pouiller"'s message of "Wed,
-        12 Jan 2022 10:32:41 +0100")
-Message-ID: <87fsptt93d.fsf@kernel.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        James Morse <james.morse@arm.com>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Sebastian Reichel <sre@kernel.org>,
+        Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>,
+        linux-mediatek@lists.infradead.org,
+        Brian Norris <computersforpeace@gmail.com>,
+        netdev@vger.kernel.org
+Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
+Message-ID: <Yd7Z3Qwevb/lEwQZ@lunn.ch>
+References: <20220110195449.12448-1-s.shtylyov@omp.ru>
+ <20220110195449.12448-2-s.shtylyov@omp.ru>
+ <20220110201014.mtajyrfcfznfhyqm@pengutronix.de>
+ <YdyilpjC6rtz6toJ@lunn.ch>
+ <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
+ <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+ <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
+> If an optional IRQ is not present, drivers either just ignore it (e.g.
+> for devices that can have multiple interrupts or a single muxed IRQ),
+> or they have to resort to polling. For the latter, fall-back handling
+> is needed elsewhere in the driver.
+> To me it sounds much more logical for the driver to check if an
+> optional irq is non-zero (available) or zero (not available), than to
+> sprinkle around checks for -ENXIO. In addition, you have to remember
+> that this one returns -ENXIO, while other APIs use -ENOENT or -ENOSYS
+> (or some other error code) to indicate absence. I thought not having
+> to care about the actual error code was the main reason behind the
+> introduction of the *_optional() APIs.
 
-> On Wednesday 12 January 2022 08:49:54 CET Kalle Valo wrote:
->> Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
->>=20
->> > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
->> >
->> > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
->> > ---
->> >  .../bindings/net/wireless/silabs,wfx.yaml     | 125 ---
->> >  drivers/staging/wfx/Kconfig                   |   8 -
->> >  drivers/staging/wfx/Makefile                  |  25 -
->> >  drivers/staging/wfx/bh.c                      | 330 -------
->> >  drivers/staging/wfx/bh.h                      |  33 -
->> >  drivers/staging/wfx/bus.h                     |  38 -
->> >  drivers/staging/wfx/bus_sdio.c                | 272 ------
->> >  drivers/staging/wfx/bus_spi.c                 | 271 ------
->> >  drivers/staging/wfx/data_rx.c                 |  94 --
->> >  drivers/staging/wfx/data_rx.h                 |  18 -
->> >  drivers/staging/wfx/data_tx.c                 | 596 -------------
->> >  drivers/staging/wfx/data_tx.h                 |  68 --
->> >  drivers/staging/wfx/debug.c                   | 365 --------
->> >  drivers/staging/wfx/debug.h                   |  19 -
->> >  drivers/staging/wfx/fwio.c                    | 405 ---------
->> >  drivers/staging/wfx/fwio.h                    |  15 -
->> >  drivers/staging/wfx/hif_api_cmd.h             | 555 ------------
->> >  drivers/staging/wfx/hif_api_general.h         | 262 ------
->> >  drivers/staging/wfx/hif_api_mib.h             | 346 --------
->> >  drivers/staging/wfx/hif_rx.c                  | 416 ---------
->> >  drivers/staging/wfx/hif_rx.h                  |  17 -
->> >  drivers/staging/wfx/hif_tx.c                  | 513 -----------
->> >  drivers/staging/wfx/hif_tx.h                  |  60 --
->> >  drivers/staging/wfx/hif_tx_mib.c              | 324 -------
->> >  drivers/staging/wfx/hif_tx_mib.h              |  49 --
->> >  drivers/staging/wfx/hwio.c                    | 352 --------
->> >  drivers/staging/wfx/hwio.h                    |  75 --
->> >  drivers/staging/wfx/key.c                     | 241 -----
->> >  drivers/staging/wfx/key.h                     |  20 -
->> >  drivers/staging/wfx/main.c                    | 506 -----------
->> >  drivers/staging/wfx/main.h                    |  43 -
->> >  drivers/staging/wfx/queue.c                   | 307 -------
->> >  drivers/staging/wfx/queue.h                   |  45 -
->> >  drivers/staging/wfx/scan.c                    | 149 ----
->> >  drivers/staging/wfx/scan.h                    |  22 -
->> >  drivers/staging/wfx/sta.c                     | 833=20
-> ------------------
->> >  drivers/staging/wfx/sta.h                     |  73 --
->> >  drivers/staging/wfx/traces.h                  | 501 -----------
->> >  drivers/staging/wfx/wfx.h                     | 164 ----
->> >  39 files changed, 8555 deletions(-)
->> >  delete mode 100644 drivers/staging/wfx/Documentation/devicetree/
-> bindings/net/wireless/silabs,wfx.yaml
->> >  delete mode 100644 drivers/staging/wfx/Kconfig
->> >  delete mode 100644 drivers/staging/wfx/Makefile
->> >  delete mode 100644 drivers/staging/wfx/bh.c
->> >  delete mode 100644 drivers/staging/wfx/bh.h
->> >  delete mode 100644 drivers/staging/wfx/bus.h
->> >  delete mode 100644 drivers/staging/wfx/bus_sdio.c
->> >  delete mode 100644 drivers/staging/wfx/bus_spi.c
->> >  delete mode 100644 drivers/staging/wfx/data_rx.c
->> >  delete mode 100644 drivers/staging/wfx/data_rx.h
->> >  delete mode 100644 drivers/staging/wfx/data_tx.c
->> >  delete mode 100644 drivers/staging/wfx/data_tx.h
->> >  delete mode 100644 drivers/staging/wfx/debug.c
->> >  delete mode 100644 drivers/staging/wfx/debug.h
->> >  delete mode 100644 drivers/staging/wfx/fwio.c
->> >  delete mode 100644 drivers/staging/wfx/fwio.h
->> >  delete mode 100644 drivers/staging/wfx/hif_api_cmd.h
->> >  delete mode 100644 drivers/staging/wfx/hif_api_general.h
->> >  delete mode 100644 drivers/staging/wfx/hif_api_mib.h
->> >  delete mode 100644 drivers/staging/wfx/hif_rx.c
->> >  delete mode 100644 drivers/staging/wfx/hif_rx.h
->> >  delete mode 100644 drivers/staging/wfx/hif_tx.c
->> >  delete mode 100644 drivers/staging/wfx/hif_tx.h
->> >  delete mode 100644 drivers/staging/wfx/hif_tx_mib.c
->> >  delete mode 100644 drivers/staging/wfx/hif_tx_mib.h
->> >  delete mode 100644 drivers/staging/wfx/hwio.c
->> >  delete mode 100644 drivers/staging/wfx/hwio.h
->> >  delete mode 100644 drivers/staging/wfx/key.c
->> >  delete mode 100644 drivers/staging/wfx/key.h
->> >  delete mode 100644 drivers/staging/wfx/main.c
->> >  delete mode 100644 drivers/staging/wfx/main.h
->> >  delete mode 100644 drivers/staging/wfx/queue.c
->> >  delete mode 100644 drivers/staging/wfx/queue.h
->> >  delete mode 100644 drivers/staging/wfx/scan.c
->> >  delete mode 100644 drivers/staging/wfx/scan.h
->> >  delete mode 100644 drivers/staging/wfx/sta.c
->> >  delete mode 100644 drivers/staging/wfx/sta.h
->> >  delete mode 100644 drivers/staging/wfx/traces.h
->> >  delete mode 100644 drivers/staging/wfx/wfx.h
->>=20
->> I'm not sure what's your plan here, but with staging wireless drivers
->> there's usually a simple simple move (git mv) of the driver from
->> drivers/staging to drivers/net/wireless. An example here:
->>=20
->> https://git.kernel.org/linus/5625f965d764
->>=20
->> What you seem to do here is that you add a new driver to
->> drivers/net/wireless and then remove the old driver from
->> drivers/staging. And I'm guessing these two drivers are not identical
->> and have differences?
->
-> Until v7, I have more or less kept in sync this PR and the staging tree.=
-=20
-> I have been a bit lazy from the v8.
->
-> However, I still have the patches in my local tree. I am going to
-> clean-up them and send them to staging.
+The *_optional() functions return an error code if there has been a
+real error which should be reported up the call stack. This excludes
+whatever error code indicates the requested resource does not exist,
+which can be -ENODEV etc. If the device does not exist, a magic cookie
+is returned which appears to be a valid resources but in fact is
+not. So the users of these functions just need to check for an error
+code, and fail the probe if present.
 
-Very good, thanks.
+You seems to be suggesting in binary return value: non-zero
+(available) or zero (not available)
 
---=20
-https://patchwork.kernel.org/project/linux-wireless/list/
+This discards the error code when something goes wrong. That is useful
+information to have, so we should not be discarding it.
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
-hes
+IRQ don't currently have a magic cookie value. One option would be to
+add such a magic cookie to the subsystem. Otherwise, since 0 is
+invalid, return 0 to indicate the IRQ does not exist.
+
+The request for a script checking this then makes sense. However, i
+don't know how well coccinelle/sparse can track values across function
+calls. They probably can check for:
+
+   ret = irq_get_optional()
+   if (ret < 0)
+      return ret;
+
+A missing if < 0 statement somewhere later is very likely to be an
+error. A comparison of <= 0 is also likely to be an error. A check for
+> 0 before calling any other IRQ functions would be good. I'm
+surprised such a check does not already existing in the IRQ API, but
+there are probably historical reasons for that.
+
+      Andrew
