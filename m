@@ -2,200 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D424BC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 08:54:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5B09C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 09:10:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351776AbiALIyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 03:54:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55358 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351769AbiALIyA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 03:54:00 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C8DCC061751
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Jan 2022 00:53:59 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n7ZLN-0005mh-UE; Wed, 12 Jan 2022 09:50:57 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n7ZL6-009rFV-QA; Wed, 12 Jan 2022 09:50:40 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n7ZL5-00061g-Dl; Wed, 12 Jan 2022 09:50:39 +0100
-Date:   Wed, 12 Jan 2022 09:50:09 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>, kvm@vger.kernel.org,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org, Jiri Slaby <jirislaby@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Tony Luck <tony.luck@intel.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-serial@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        platform-driver-x86@vger.kernel.org, linux-pwm@vger.kernel.org,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>, linux-pm@vger.kernel.org,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        John Garry <john.garry@huawei.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>, linux-gpio@vger.kernel.org,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Borislav Petkov <bp@alien8.de>,
-        Eric Auger <eric.auger@redhat.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        openipmi-developer@lists.sourceforge.net,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Benson Leung <bleung@chromium.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-arm-kernel@lists.infradead.org, linux-edac@vger.kernel.org,
-        Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Richard Weinberger <richard@nod.at>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>, linux-mmc@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-spi@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Vinod Koul <vkoul@kernel.org>,
-        James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Sebastian Reichel <sre@kernel.org>,
-        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        linux-mediatek@lists.infradead.org,
-        Brian Norris <computersforpeace@gmail.com>,
-        netdev@vger.kernel.org
-Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
-Message-ID: <20220112085009.dbasceh3obfok5dc@pengutronix.de>
-References: <20220110195449.12448-1-s.shtylyov@omp.ru>
- <20220110195449.12448-2-s.shtylyov@omp.ru>
- <20220110201014.mtajyrfcfznfhyqm@pengutronix.de>
- <YdyilpjC6rtz6toJ@lunn.ch>
- <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
+        id S1351955AbiALJKY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 04:10:24 -0500
+Received: from mga14.intel.com ([192.55.52.115]:38920 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1351954AbiALJKW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Jan 2022 04:10:22 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1641978622; x=1673514622;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=tOleNNII3LcX22NThqepoEH8by+M+skaN1NYX5+X33s=;
+  b=YmYAcar0JIi1y1vd/aR0M21fb42xIDRA9Izx9JGCZNi7xLpCyHW+rkVP
+   SGYrbDAo3K2xfZBe2jD2PqxcDK1czFmsKzsq+4qf4PCKC7PQL7E/fLKTA
+   jtaw90W+tqM7zPflx14JnTzozqJHEDJvfQKdiKt79AFts/DF0wIKcx6aE
+   shlxo94rZjN9mGpFDLkL+f0bzjtfEmvjU1uLBL3DEelPW+2pXJfBK4lX8
+   9soN6EWRPwsCUhXXPgegbVsYybKOS2fcw8feWHIll3WqILuWJeedKddeQ
+   gsg62rEqtRHdAxIBvPoiX7UyIdacxNtN7+KXrNaYwycs0YT0me8bnMAfw
+   w==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10224"; a="243895608"
+X-IronPort-AV: E=Sophos;i="5.88,282,1635231600"; 
+   d="scan'208";a="243895608"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jan 2022 01:10:21 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,282,1635231600"; 
+   d="scan'208";a="472765889"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga003.jf.intel.com with ESMTP; 12 Jan 2022 01:10:19 -0800
+Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: Check for error num after setting
+ mask
+To:     Jiasheng Jiang <jiasheng@iscas.ac.cn>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220112083156.1124782-1-jiasheng@iscas.ac.cn>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <87a5b5d2-d980-bbac-913b-0d9d4bd521a2@intel.com>
+Date:   Wed, 12 Jan 2022 11:10:18 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="xmww6gsp5dtrk3ed"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+In-Reply-To: <20220112083156.1124782-1-jiasheng@iscas.ac.cn>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 12/01/2022 10:31, Jiasheng Jiang wrote:
+> Because of the possible failure of the dma_supported(), the
+> dma_set_mask_and_coherent() may return error num.
+> Therefore, it should be better to check it and return the error if
+> fails.
+> And since the sdhci_setup_host() has already checked the return value of
+> the enable_dma, we need not check it in sdhci_resume_host() again.
+> 
+> Fixes: 5552d7ad596c ("mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips")
+> Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
 
---xmww6gsp5dtrk3ed
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-On Wed, Jan 12, 2022 at 09:33:48AM +0100, Geert Uytterhoeven wrote:
-> Hi Andrew,
->=20
-> On Mon, Jan 10, 2022 at 10:20 PM Andrew Lunn <andrew@lunn.ch> wrote:
-> > On Mon, Jan 10, 2022 at 09:10:14PM +0100, Uwe Kleine-K=F6nig wrote:
-> > > On Mon, Jan 10, 2022 at 10:54:48PM +0300, Sergey Shtylyov wrote:
-> > > > This patch is based on the former Andy Shevchenko's patch:
-> > > >
-> > > > https://lore.kernel.org/lkml/20210331144526.19439-1-andriy.shevchen=
-ko@linux.intel.com/
-> > > >
-> > > > Currently platform_get_irq_optional() returns an error code even if=
- IRQ
-> > > > resource simply has not been found. It prevents the callers from be=
-ing
-> > > > error code agnostic in their error handling:
-> > > >
-> > > >     ret =3D platform_get_irq_optional(...);
-> > > >     if (ret < 0 && ret !=3D -ENXIO)
-> > > >             return ret; // respect deferred probe
-> > > >     if (ret > 0)
-> > > >             ...we get an IRQ...
-> > > >
-> > > > All other *_optional() APIs seem to return 0 or NULL in case an opt=
-ional
-> > > > resource is not available. Let's follow this good example, so that =
-the
-> > > > callers would look like:
-> > > >
-> > > >     ret =3D platform_get_irq_optional(...);
-> > > >     if (ret < 0)
-> > > >             return ret;
-> > > >     if (ret > 0)
-> > > >             ...we get an IRQ...
-> > >
-> > > The difference to gpiod_get_optional (and most other *_optional) is t=
-hat
-> > > you can use the NULL value as if it were a valid GPIO.
-> > >
-> > > As this isn't given with for irqs, I don't think changing the return
-> > > value has much sense.
-> >
-> > We actually want platform_get_irq_optional() to look different to all
-> > the other _optional() methods because it is not equivalent. If it
-> > looks the same, developers will assume it is the same, and get
-> > themselves into trouble.
->=20
-> Developers already assume it is the same, and thus forget they have
-> to check against -ENXIO instead of zero.
+> ---
+> Changelog
+> 
+> v1 -> v2
+> 
+> * Change 1. Remove the change of esdhc_of_resume and refine the commit
+> * message.
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index a593b1fbd69e..0f3658b36513 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -524,12 +524,16 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+>  
+>  static int esdhc_of_enable_dma(struct sdhci_host *host)
+>  {
+> +	int ret;
+>  	u32 value;
+>  	struct device *dev = mmc_dev(host->mmc);
+>  
+>  	if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
+> -	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
+> -		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+> +	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc")) {
+> +		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+> +		if (ret)
+> +			return ret;
+> +	}
+>  
+>  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+>  
+> 
 
-Is this an ack for renaming platform_get_irq_optional() to
-platform_get_irq_silent()?
-
-And then a coccinelle or sparse or ... hook that catches people testing
-the return value against 0 would be great.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---xmww6gsp5dtrk3ed
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmHeljYACgkQwfwUeK3K
-7AljMgf/RPunUgCLZTRo6HVoWGaeXoeKF+2cGlwuAsz4Z00TAkiSHfoaeZtHOlTi
-q5shu1KHHU618Mhtt6XvXodObLXVJs41ty1v6SytKsW7BJQt5naWkyRnggT5tFWu
-ggmVGMBXOmKX/wp2DCDa7dah1/SOrnFqP53whp6ZTB6oejvTyXmM97J3490sqGq5
-MsUAM2Z9/yyDuSZevN858NdTs3OZGSfWvvhFoG4EurYBcNo4znZgjQ6JgBbg3L5J
-/m2yKP4XrG0hiM86Q5XlzUdX3r5ERS4K78HS9ywkjsC/gmXD3i3XQGIjcG5VMN7F
-HGppnegV30H+5MPW7Ws6xs2xopwryw==
-=d8xy
------END PGP SIGNATURE-----
-
---xmww6gsp5dtrk3ed--
