@@ -2,119 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55ECDC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 07:06:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19FB3C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 07:50:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348320AbiALHGi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Jan 2022 02:06:38 -0500
-Received: from mga05.intel.com ([192.55.52.43]:33619 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237328AbiALHGi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 12 Jan 2022 02:06:38 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1641971198; x=1673507198;
-  h=subject:to:cc:references:from:message-id:date:
-   mime-version:in-reply-to:content-transfer-encoding;
-  bh=w1S6Ea3urNn5/maW8twjQA1LVYjr4EJNP9bamJwc15Y=;
-  b=UuPxU7y8SQi8k7vdZ/zTXb01ntsy0BYrKWC7CBKrBZmmQ+W8LvPXf+tK
-   gRRIubLn2HVrdHGxnvm/hv19GOin+GUA06umEeeoN+yfYwNsoIdgYvhbx
-   hAATAyDtNug0ZBRX0cNc6Vt8QqELIzAYWRe8ksnMku0ZHSjeTjsMWezPZ
-   nMCPzL6GE0q6FjFapNh35okJypgFJLjGvqUw19KLti/9TCDIzA2fIyUDs
-   szHFnn3aRw/vwcjL2EdNRe5bZddpKIF7453jhu73iy2iRhfdayp4jqRWf
-   tgIwLEz7NYUcS9j4sDDqGS84cfRCXXnVLiOraVp68JMYJXhae26MKzmxe
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10224"; a="330022111"
-X-IronPort-AV: E=Sophos;i="5.88,282,1635231600"; 
-   d="scan'208";a="330022111"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2022 23:06:38 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.88,282,1635231600"; 
-   d="scan'208";a="472736893"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
-  by orsmga003.jf.intel.com with ESMTP; 11 Jan 2022 23:06:36 -0800
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: Check for error num after setting
- mask
-To:     Jiasheng Jiang <jiasheng@iscas.ac.cn>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20220106021638.2527426-1-jiasheng@iscas.ac.cn>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <ae5373d2-372a-5eb6-1b2a-7b1dae888355@intel.com>
-Date:   Wed, 12 Jan 2022 09:06:35 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.14.0
+        id S235128AbiALHuD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 02:50:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40630 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231359AbiALHuD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Jan 2022 02:50:03 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95AC1C06173F;
+        Tue, 11 Jan 2022 23:50:02 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 4C87CB81E02;
+        Wed, 12 Jan 2022 07:50:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D0B24C36AEA;
+        Wed, 12 Jan 2022 07:49:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1641973800;
+        bh=/zzr28pbn0mYUQ3C33VgJ093abXpWPwu5+XYGnZ7HOI=;
+        h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
+        b=gOqryZE8ISgc3MSbb89OPqbHB6lIMKLRTWkJZLRLlDZHEJA/FQtD3G2PIsejf5vyO
+         lxWl5kHtlDWx+2yc/6CJmmQfiG8ge1a5br3t/cLssV7rpwVrhnob4JaBH1U0JI8tgp
+         25eSYGvcuqTn0fJwoecvD18TO+bpXoyGmxgE6J843NfM0Dl99XRgKTfhkiHWwudeGs
+         7D+149LV6SKMnsY02KSCXxco7iYDswVneC5OEeIwsKfK+dPeBzBigILcjGp/cDqASq
+         Qk5EMf32ZCO+TMplE91xnTN6iWxt2tL1yHcc5CzTv9Khp2Z5z2siK7vZ+2n2awVCAr
+         2SY6QAcVjlhug==
+From:   Kalle Valo <kvalo@kernel.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v9 23/24] wfx: remove from the staging area
+References: <20220111171424.862764-1-Jerome.Pouiller@silabs.com>
+        <20220111171424.862764-24-Jerome.Pouiller@silabs.com>
+Date:   Wed, 12 Jan 2022 09:49:54 +0200
+In-Reply-To: <20220111171424.862764-24-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Tue, 11 Jan 2022 18:14:23 +0100")
+Message-ID: <874k69jsv1.fsf@tynnyri.adurom.net>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-In-Reply-To: <20220106021638.2527426-1-jiasheng@iscas.ac.cn>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/01/2022 04:16, Jiasheng Jiang wrote:
-> Because of the possible failure of the dma_supported(), the
-> dma_set_mask_and_coherent() may return error num.
-> Therefore, it should be better to check it and return the error if
-> fails.
-> Also, the caller, esdhc_of_resume(), should deal with the return value.
-> Moreover, as the sdhci_esdhc_driver has not been used, it does not need to
-> be considered.
+Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 
-Apologies, but that last sentence I don't understand.  Can you clarify it a bit.
-What doesn't need to be considered and why?
-
-> 
-> Fixes: 5552d7ad596c ("mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips")
-> Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
+> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+>
+> Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 13 ++++++++++---
->  1 file changed, 10 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index a593b1fbd69e..bedfc7bb5174 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -524,12 +524,16 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
->  
->  static int esdhc_of_enable_dma(struct sdhci_host *host)
->  {
-> +	int ret;
->  	u32 value;
->  	struct device *dev = mmc_dev(host->mmc);
->  
->  	if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
-> -	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
-> -		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
-> +	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc")) {
-> +		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
-> +		if (ret)
-> +			return ret;
-> +	}
->  
->  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
->  
-> @@ -1245,7 +1249,10 @@ static int esdhc_of_resume(struct device *dev)
->  
->  	if (ret == 0) {
->  		/* Isn't this already done by sdhci_resume_host() ? --rmk */
-> -		esdhc_of_enable_dma(host);
-> +		ret = esdhc_of_enable_dma(host);
-> +		if (ret)
-> +			return ret;
-> +
+>  .../bindings/net/wireless/silabs,wfx.yaml     | 125 ---
+>  drivers/staging/wfx/Kconfig                   |   8 -
+>  drivers/staging/wfx/Makefile                  |  25 -
+>  drivers/staging/wfx/bh.c                      | 330 -------
+>  drivers/staging/wfx/bh.h                      |  33 -
+>  drivers/staging/wfx/bus.h                     |  38 -
+>  drivers/staging/wfx/bus_sdio.c                | 272 ------
+>  drivers/staging/wfx/bus_spi.c                 | 271 ------
+>  drivers/staging/wfx/data_rx.c                 |  94 --
+>  drivers/staging/wfx/data_rx.h                 |  18 -
+>  drivers/staging/wfx/data_tx.c                 | 596 -------------
+>  drivers/staging/wfx/data_tx.h                 |  68 --
+>  drivers/staging/wfx/debug.c                   | 365 --------
+>  drivers/staging/wfx/debug.h                   |  19 -
+>  drivers/staging/wfx/fwio.c                    | 405 ---------
+>  drivers/staging/wfx/fwio.h                    |  15 -
+>  drivers/staging/wfx/hif_api_cmd.h             | 555 ------------
+>  drivers/staging/wfx/hif_api_general.h         | 262 ------
+>  drivers/staging/wfx/hif_api_mib.h             | 346 --------
+>  drivers/staging/wfx/hif_rx.c                  | 416 ---------
+>  drivers/staging/wfx/hif_rx.h                  |  17 -
+>  drivers/staging/wfx/hif_tx.c                  | 513 -----------
+>  drivers/staging/wfx/hif_tx.h                  |  60 --
+>  drivers/staging/wfx/hif_tx_mib.c              | 324 -------
+>  drivers/staging/wfx/hif_tx_mib.h              |  49 --
+>  drivers/staging/wfx/hwio.c                    | 352 --------
+>  drivers/staging/wfx/hwio.h                    |  75 --
+>  drivers/staging/wfx/key.c                     | 241 -----
+>  drivers/staging/wfx/key.h                     |  20 -
+>  drivers/staging/wfx/main.c                    | 506 -----------
+>  drivers/staging/wfx/main.h                    |  43 -
+>  drivers/staging/wfx/queue.c                   | 307 -------
+>  drivers/staging/wfx/queue.h                   |  45 -
+>  drivers/staging/wfx/scan.c                    | 149 ----
+>  drivers/staging/wfx/scan.h                    |  22 -
+>  drivers/staging/wfx/sta.c                     | 833 ------------------
+>  drivers/staging/wfx/sta.h                     |  73 --
+>  drivers/staging/wfx/traces.h                  | 501 -----------
+>  drivers/staging/wfx/wfx.h                     | 164 ----
+>  39 files changed, 8555 deletions(-)
+>  delete mode 100644 drivers/staging/wfx/Documentation/devicetree/bindings=
+/net/wireless/silabs,wfx.yaml
+>  delete mode 100644 drivers/staging/wfx/Kconfig
+>  delete mode 100644 drivers/staging/wfx/Makefile
+>  delete mode 100644 drivers/staging/wfx/bh.c
+>  delete mode 100644 drivers/staging/wfx/bh.h
+>  delete mode 100644 drivers/staging/wfx/bus.h
+>  delete mode 100644 drivers/staging/wfx/bus_sdio.c
+>  delete mode 100644 drivers/staging/wfx/bus_spi.c
+>  delete mode 100644 drivers/staging/wfx/data_rx.c
+>  delete mode 100644 drivers/staging/wfx/data_rx.h
+>  delete mode 100644 drivers/staging/wfx/data_tx.c
+>  delete mode 100644 drivers/staging/wfx/data_tx.h
+>  delete mode 100644 drivers/staging/wfx/debug.c
+>  delete mode 100644 drivers/staging/wfx/debug.h
+>  delete mode 100644 drivers/staging/wfx/fwio.c
+>  delete mode 100644 drivers/staging/wfx/fwio.h
+>  delete mode 100644 drivers/staging/wfx/hif_api_cmd.h
+>  delete mode 100644 drivers/staging/wfx/hif_api_general.h
+>  delete mode 100644 drivers/staging/wfx/hif_api_mib.h
+>  delete mode 100644 drivers/staging/wfx/hif_rx.c
+>  delete mode 100644 drivers/staging/wfx/hif_rx.h
+>  delete mode 100644 drivers/staging/wfx/hif_tx.c
+>  delete mode 100644 drivers/staging/wfx/hif_tx.h
+>  delete mode 100644 drivers/staging/wfx/hif_tx_mib.c
+>  delete mode 100644 drivers/staging/wfx/hif_tx_mib.h
+>  delete mode 100644 drivers/staging/wfx/hwio.c
+>  delete mode 100644 drivers/staging/wfx/hwio.h
+>  delete mode 100644 drivers/staging/wfx/key.c
+>  delete mode 100644 drivers/staging/wfx/key.h
+>  delete mode 100644 drivers/staging/wfx/main.c
+>  delete mode 100644 drivers/staging/wfx/main.h
+>  delete mode 100644 drivers/staging/wfx/queue.c
+>  delete mode 100644 drivers/staging/wfx/queue.h
+>  delete mode 100644 drivers/staging/wfx/scan.c
+>  delete mode 100644 drivers/staging/wfx/scan.h
+>  delete mode 100644 drivers/staging/wfx/sta.c
+>  delete mode 100644 drivers/staging/wfx/sta.h
+>  delete mode 100644 drivers/staging/wfx/traces.h
+>  delete mode 100644 drivers/staging/wfx/wfx.h
 
-This is already done by sdhci_resume_host(), which assumes there can be no
-error if DMA has been enabled previously i.e. -> enable_dma() is called
-at setup and the return value checked then.  If it is possible that DMA
-support can disappear later, then it would be better to address that in
-SDHCI so that all SDHCI drivers get the benefit.
+I'm not sure what's your plan here, but with staging wireless drivers
+there's usually a simple simple move (git mv) of the driver from
+drivers/staging to drivers/net/wireless. An example here:
 
->  		sdhci_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
->  	}
->  	return ret;
-> 
+https://git.kernel.org/linus/5625f965d764
 
+What you seem to do here is that you add a new driver to
+drivers/net/wireless and then remove the old driver from
+drivers/staging. And I'm guessing these two drivers are not identical
+and have differences?
+
+--=20
+https://patchwork.kernel.org/project/linux-wireless/list/
+
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
