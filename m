@@ -2,350 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E077C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Jan 2022 22:49:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55ECDC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Jan 2022 07:06:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346636AbiAKWt3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Jan 2022 17:49:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33690 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230248AbiAKWt3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Jan 2022 17:49:29 -0500
-Received: from mail-qt1-x836.google.com (mail-qt1-x836.google.com [IPv6:2607:f8b0:4864:20::836])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBC67C06173F;
-        Tue, 11 Jan 2022 14:49:28 -0800 (PST)
-Received: by mail-qt1-x836.google.com with SMTP id f17so982117qtf.8;
-        Tue, 11 Jan 2022 14:49:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=iTcC7ukfxrtH+w7Bwnh+J1yNooIJCj1oppyVXmV9pHg=;
-        b=LXprke5L/5ujM8g45DpQKFSR8YKLrm+AjgO0EvFDO03LYRKaL8xP5E6l2vnVewYEg9
-         sL3R8uwL5kWxPPaT1j6IHq4zBXYEIOrAfeNxfCPaCAZXXFiYwpawDrlxzWEA7R0yTzm7
-         4qCQ5r1E6sS6HpP3G3Ya9m425Yxd/G4IL20wIop7ZMQ3JPAKtN5hpctvIxz4VD3DIu1V
-         hLugQ2apCvzUxtJ9hgA9pWfryssgTXH1xrVQcJL2rOSzbL5tE8Kc8n8KkfMW/X2fgBYl
-         Ls02pcYiSSAbs+iS1rUIjyvP5a9JVLByLfgQir18FeBZgeJzMTAEm2cZjSe87oVfgo1x
-         IeNA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=iTcC7ukfxrtH+w7Bwnh+J1yNooIJCj1oppyVXmV9pHg=;
-        b=qYMsmgrevDSmkBajm+8GIdLGNgmGBFlrPrWSRG7AOMO3pEU2WoEUGCOGE9GFFkznan
-         E8dR34p1yYNYgh3WnSIaPufxAOpHcg6/3lBb1+HR+ylimHOARTBOQjzylGopeoiyPL4w
-         4fucoYykddkfMjr40BTz2pP4f9iQm/7CZPDqk57hpYWoFFsEBj7L1YUxwLX9DIqt8CNN
-         lBKr18ys3Lo/4+yrlnoCqd81e9Z0XcRrdvVdvrI0Q7EpbNmbXsmjKHQZuRYbxuBkrsc6
-         PfPWP7ojo55Hgc7AAHsXvxICgS9IL3GWAP6nfCXBdcPYv40vCzMOWn049st8FXL1Muua
-         WAug==
-X-Gm-Message-State: AOAM532HcuKZoAnqykzRLyxjwuFJgGoxcQT8dYyP+mOY1LebR/tujZhO
-        b7iw6AOIFLka7gP/Rpd4w2A=
-X-Google-Smtp-Source: ABdhPJyE9e8DDpNlk542pc33EmxHDARJ1PAGTN7UYA3Tgk5mJGsgQK1gwlIMRDd4zMaELWS3GBQw8w==
-X-Received: by 2002:a05:622a:1b20:: with SMTP id bb32mr2284572qtb.291.1641941368026;
-        Tue, 11 Jan 2022 14:49:28 -0800 (PST)
-Received: from errol.ini.cmu.edu (pool-108-39-235-221.pitbpa.fios.verizon.net. [108.39.235.221])
-        by smtp.gmail.com with ESMTPSA id j14sm7513544qkp.28.2022.01.11.14.49.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Jan 2022 14:49:27 -0800 (PST)
-Date:   Tue, 11 Jan 2022 17:49:24 -0500
-From:   "Gabriel L. Somlo" <gsomlo@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
-        shorne@gmail.com, geert@linux-m68k.org,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        rdunlap@infradead.org, andy.shevchenko@gmail.com, hdanton@sina.com
-Subject: Re: [PATCH v5 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Message-ID: <Yd4JdBArPn9rBj5b@errol.ini.cmu.edu>
-References: <20211215130711.111186-1-gsomlo@gmail.com>
- <20211215130711.111186-4-gsomlo@gmail.com>
- <CAPDyKFqo5sZy8aVbOcfS_cxT9T5r214GKCL-FKRg_0P0yQJTFQ@mail.gmail.com>
- <YdOUbYpGFNyxz3iD@errol.ini.cmu.edu>
- <CAPDyKFohOHYu_bdXsAYvDmMLqnGUW=9pG+yJDwP5-db1B6F1Dw@mail.gmail.com>
+        id S1348320AbiALHGi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Jan 2022 02:06:38 -0500
+Received: from mga05.intel.com ([192.55.52.43]:33619 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S237328AbiALHGi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 12 Jan 2022 02:06:38 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1641971198; x=1673507198;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=w1S6Ea3urNn5/maW8twjQA1LVYjr4EJNP9bamJwc15Y=;
+  b=UuPxU7y8SQi8k7vdZ/zTXb01ntsy0BYrKWC7CBKrBZmmQ+W8LvPXf+tK
+   gRRIubLn2HVrdHGxnvm/hv19GOin+GUA06umEeeoN+yfYwNsoIdgYvhbx
+   hAATAyDtNug0ZBRX0cNc6Vt8QqELIzAYWRe8ksnMku0ZHSjeTjsMWezPZ
+   nMCPzL6GE0q6FjFapNh35okJypgFJLjGvqUw19KLti/9TCDIzA2fIyUDs
+   szHFnn3aRw/vwcjL2EdNRe5bZddpKIF7453jhu73iy2iRhfdayp4jqRWf
+   tgIwLEz7NYUcS9j4sDDqGS84cfRCXXnVLiOraVp68JMYJXhae26MKzmxe
+   w==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10224"; a="330022111"
+X-IronPort-AV: E=Sophos;i="5.88,282,1635231600"; 
+   d="scan'208";a="330022111"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2022 23:06:38 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,282,1635231600"; 
+   d="scan'208";a="472736893"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga003.jf.intel.com with ESMTP; 11 Jan 2022 23:06:36 -0800
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: Check for error num after setting
+ mask
+To:     Jiasheng Jiang <jiasheng@iscas.ac.cn>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220106021638.2527426-1-jiasheng@iscas.ac.cn>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <ae5373d2-372a-5eb6-1b2a-7b1dae888355@intel.com>
+Date:   Wed, 12 Jan 2022 09:06:35 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.14.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFohOHYu_bdXsAYvDmMLqnGUW=9pG+yJDwP5-db1B6F1Dw@mail.gmail.com>
-X-Clacks-Overhead: GNU Terry Pratchett
+In-Reply-To: <20220106021638.2527426-1-jiasheng@iscas.ac.cn>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uffe,
+On 06/01/2022 04:16, Jiasheng Jiang wrote:
+> Because of the possible failure of the dma_supported(), the
+> dma_set_mask_and_coherent() may return error num.
+> Therefore, it should be better to check it and return the error if
+> fails.
+> Also, the caller, esdhc_of_resume(), should deal with the return value.
+> Moreover, as the sdhci_esdhc_driver has not been used, it does not need to
+> be considered.
 
-On Tue, Jan 11, 2022 at 04:47:07PM +0100, Ulf Hansson wrote:
-> [...]
+Apologies, but that last sentence I don't understand.  Can you clarify it a bit.
+What doesn't need to be considered and why?
+
 > 
-> > > > +
-> > > > +static void litex_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> > > > +{
-> > > > +       struct litex_mmc_host *host = mmc_priv(mmc);
-> > > > +       struct device *dev = mmc_dev(mmc);
-> > > > +       struct mmc_command *cmd = mrq->cmd;
-> > > > +       struct mmc_command *sbc = mrq->sbc;
-> > > > +       struct mmc_data *data = mrq->data;
-> > > > +       struct mmc_command *stop = mrq->stop;
-> > > > +       unsigned int retries = cmd->retries;
-> > > > +       unsigned int len = 0;
-> > > > +       bool direct = false;
-> > > > +       u32 response_len = litex_mmc_response_len(cmd);
-> > > > +       u8 transfer = SD_CTL_DATA_XFER_NONE;
-> > > > +
-> > > > +       /* First check that the card is still there */
-> > > > +       if (!litex_mmc_get_cd(mmc)) {
-> > > > +               cmd->error = -ENOMEDIUM;
-> > > > +               mmc_request_done(mmc, mrq);
-> > > > +               return;
-> > > > +       }
-> > > > +
-> > > > +       /* Send set-block-count command if needed */
-> > > > +       if (sbc) {
-> > > > +               sbc->error = litex_mmc_send_cmd(host, sbc->opcode, sbc->arg,
-> > > > +                                               litex_mmc_response_len(sbc),
-> > > > +                                               SD_CTL_DATA_XFER_NONE);
-> > > > +               if (sbc->error) {
-> > > > +                       host->is_bus_width_set = false;
-> > > > +                       mmc_request_done(mmc, mrq);
-> > > > +                       return;
-> > > > +               }
-> > > > +       }
-> > > > +
-> > > > +       if (data) {
-> > > > +               /* LiteSDCard only supports 4-bit bus width; therefore, we MUST
-> > > > +                * inject a SET_BUS_WIDTH (acmd6) before the very first data
-> > > > +                * transfer, earlier than when the mmc subsystem would normally
-> > > > +                * get around to it!
-> > >
-> > > This means that you may end up trying to switch bus-width, to a width
-> > > that isn't supported by the card, for example.
-> > >
-> > > As also stated above, I wonder how this conforms to the SD spec from
-> > > the initialization sequence point of view. Have you verified that this
-> > > isn't a problem?
-> >
-> > During litex_mmc_probe(), I have:
-> >
-> >         ...
-> >         ret = mmc_of_parse(mmc);
-> >         if (ret)
-> >                 goto err;
-> >
-> >         /* force 4-bit bus_width (only width supported by hardware) */
-> >         mmc->caps &= ~MMC_CAP_8_BIT_DATA;
-> >         mmc->caps |= MMC_CAP_4_BIT_DATA;
-> >         ...
-> >
-> > This ensures no bus-width switches to anything other than 4-bit data
-> > should ever occur. As far as I understand the SDcard spec, it's legal
-> > to both send multiple redundant bus-width-set commands, and to start
-> > doing so before the very first data transfer request is processed
-> > (regardless of the fact that linux typically does a few 1-bit-wide
-> > data transfers during card initialization before switching to a wider
-> > mode, if available).
-> >
-> > This driver simply ensures that any time we ever have a data transfer,
-> > the bus width is set to 4 *before* said transfer is acted upon.
-> >
-> > As I mentioned earlier, if we get a "weird" SDcard that can't support
-> > 4-bit data transfers, its initialization should fail shortly after
-> > detection, and that's all there is to it, as far as I can tell.
+> Fixes: 5552d7ad596c ("mmc: sdhci-of-esdhc: set proper dma mask for ls104x chips")
+> Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 13 ++++++++++---
+>  1 file changed, 10 insertions(+), 3 deletions(-)
 > 
-> Alright, I get the point. I guess it should work. I will have another
-> closer look at the corresponding code from your last submitted
-> version.
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index a593b1fbd69e..bedfc7bb5174 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -524,12 +524,16 @@ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+>  
+>  static int esdhc_of_enable_dma(struct sdhci_host *host)
+>  {
+> +	int ret;
+>  	u32 value;
+>  	struct device *dev = mmc_dev(host->mmc);
+>  
+>  	if (of_device_is_compatible(dev->of_node, "fsl,ls1043a-esdhc") ||
+> -	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc"))
+> -		dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+> +	    of_device_is_compatible(dev->of_node, "fsl,ls1046a-esdhc")) {
+> +		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(40));
+> +		if (ret)
+> +			return ret;
+> +	}
+>  
+>  	value = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+>  
+> @@ -1245,7 +1249,10 @@ static int esdhc_of_resume(struct device *dev)
+>  
+>  	if (ret == 0) {
+>  		/* Isn't this already done by sdhci_resume_host() ? --rmk */
+> -		esdhc_of_enable_dma(host);
+> +		ret = esdhc_of_enable_dma(host);
+> +		if (ret)
+> +			return ret;
+> +
 
-Thanks -- it's now on v12 :)
- 
-> >
-> > > > +                */
-> > > > +               cmd->error = litex_mmc_set_bus_width(host);
-> > > > +               if (cmd->error) {
-> > > > +                       dev_err(dev, "Can't set bus width!\n");
-> > > > +                       mmc_request_done(mmc, mrq);
-> > > > +                       return;
-> > > > +               }
-> > > > +
-> > > > +               litex_mmc_do_dma(host, data, &len, &direct, &transfer);
-> > > > +       }
-> > > > +
-> > > > +       do {
-> > > > +               cmd->error = litex_mmc_send_cmd(host, cmd->opcode, cmd->arg,
-> > > > +                                               response_len, transfer);
-> > > > +       } while (cmd->error && retries-- > 0);
-> > > > +
-> > > > +       if (cmd->error) {
-> > > > +               /* card may be gone; don't assume bus width is still set */
-> > > > +               host->is_bus_width_set = false;
-> > > > +       }
-> > > > +
-> > > > +       if (response_len == SD_CTL_RESP_SHORT) {
-> > > > +               /* pull short response fields from appropriate host registers */
-> > > > +               cmd->resp[0] = host->resp[3];
-> > > > +               cmd->resp[1] = host->resp[2] & 0xFF;
-> > > > +       } else if (response_len == SD_CTL_RESP_LONG) {
-> > > > +               cmd->resp[0] = host->resp[0];
-> > > > +               cmd->resp[1] = host->resp[1];
-> > > > +               cmd->resp[2] = host->resp[2];
-> > > > +               cmd->resp[3] = host->resp[3];
-> > > > +       }
-> > > > +
-> > > > +       /* Send stop-transmission command if required */
-> > > > +       if (stop && (cmd->error || !sbc)) {
-> > > > +               stop->error = litex_mmc_send_cmd(host, stop->opcode, stop->arg,
-> > > > +                                                litex_mmc_response_len(stop),
-> > > > +                                                SD_CTL_DATA_XFER_NONE);
-> > > > +               if (stop->error)
-> > > > +                       host->is_bus_width_set = false;
-> > > > +       }
-> > > > +
-> > > > +       if (data) {
-> > > > +               dma_unmap_sg(dev, data->sg, data->sg_len,
-> > > > +                            mmc_get_dma_dir(data));
-> > > > +       }
-> > > > +
-> > > > +       if (!cmd->error && transfer != SD_CTL_DATA_XFER_NONE) {
-> > > > +               data->bytes_xfered = min(len, mmc->max_req_size);
-> > > > +               if (transfer == SD_CTL_DATA_XFER_READ && !direct) {
-> > > > +                       sg_copy_from_buffer(data->sg, sg_nents(data->sg),
-> > > > +                                           host->buffer, data->bytes_xfered);
-> > > > +               }
-> > > > +       }
-> > > > +
-> > > > +       mmc_request_done(mmc, mrq);
-> > > > +}
-> > > > +
-> > >
-> > > [...]
-> > >
-> > > > +
-> > > > +       mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-> > >
-> > > I noticed that you use these hard coded values and don't really care
-> > > to manage voltage changes via ->set_ios().
-> > >
-> > > Rather than doing it like this, I would prefer if you can hook up a
-> > > fixed vmmc regulator in the DTS. Then call mmc_regulator_get_supply()
-> > > to fetch it from here, which will let the mmc core create the
-> > > mmc->ocr_avail mask, based upon the voltage level the regulator
-> > > supports.
-> > >
-> > > This becomes more generic and allows more flexibility for the platform
-> > > configuration.
-> >
-> > The LiteSDCard "hardware" (i.e., *gateware*) does not allow modification
-> > or selection of voltage from the software side. When a CMD8 is issued,
-> > the "voltage supplied" bit pattern is expected to be '0001b', which per
-> > the spec means "2.7-3.6V".
+This is already done by sdhci_resume_host(), which assumes there can be no
+error if DMA has been enabled previously i.e. -> enable_dma() is called
+at setup and the return value checked then.  If it is possible that DMA
+support can disappear later, then it would be better to address that in
+SDHCI so that all SDHCI drivers get the benefit.
+
+>  		sdhci_writel(host, esdhc_proctl, SDHCI_HOST_CONTROL);
+>  	}
+>  	return ret;
 > 
-> If you provide a range (2.7-3.6V), that means that your hardware
-> supports the entire range, not just one single part of it.
 
-The "gateware" (open source migen/verilog at
-https://github.com/enjoy-digital/litesdcard)
-supports any value provided by the underlying FPGA dev board
-(typically 3.3v) -- by not attempting to manage it in any way.
-
-SD media presumably doesn't care as long as voltage is somewhere
-within 2.7-3.6V (at least that's how I read the spec, there's only
-one register value representing anything within that range).
-
-> >
-> > I tried adding this to the overall DTS:
-> >
-> >         vreg_mmc: vreg_mmc_3v {
-> >                 compatible = "regulator-fixed";
-> >                 regulator-min-microvolt = <3300000>;
-> >                 regulator-max-microvolt = <3300000>;
-> >         };
-> >
-> > and then added a reference to it to the LiteSDCard "mmc0" node in DTS,
-> > like so:
-> >
-> >         mmc0: mmc@12005000 {
-> >                 compatible = "litex,mmc";
-> >                 reg = <0x12005000 0x100>,
-> >                         <0x12003800 0x100>,
-> >                         <0x12003000 0x100>,
-> >                         <0x12004800 0x100>,
-> >                         <0x12004000 0x100>;
-> >                 reg-names = "phy", "core", "reader", "writer", "irq";
-> >                 clocks = <&sys_clk>;
-> >                 vmmc-supply = <&vreg_mmc>; /* <-------- HERE !!! */
-> >                 interrupt-parent = <&L1>;
-> >                 interrupts = <4>;
-> >         };
-> >
-> > Finally, I replaced the hardcoded setting of `mmc->ocr_avail` with a
-> > call to `mmc_regulator_get_supply(mmc)`. Now, I get a bunch of timeouts
-> > during attempts to send e.g., CMD8 and CMD55.
-> > (going for 3200000 and 3400000 for min- and max-microvolt, respectively,
-> >  -- or anything else in the allowed 2.7-3.6 range -- doesn't help either).
-> >
-> > I might be doing something subtly wrong in the way I set things up
-> > above, but it feels a bit overengineered, and IMHO fragile.
-> 
-> At a quick glance, the above looks correct to me. Maybe there is
-> something wrong with the code in the driver instead?
-
-After some more hacking, I learned that:
-
-	- an additional `regulator-name` line
-	  (e.g. `regulator-name = "vreg_mmc";`) is required
-
-	- setting `regulator-always-on;` seems to help reduce attempts
-	  by the kernel to "manage" the regulator, but does not appear
-	  to be required
-
-In other words:
-
-	...
-        vreg_mmc: vreg_mmc {
-                compatible = "regulator-fixed";
-                regulator-name = "vreg_mmc";
-                regulator-min-microvolt = <3300000>;
-                regulator-max-microvolt = <3300000>;
-                regulator-always-on;
-        };
-	...
-
-Additionally, CONFIG_REGULATOR=y and CONFIG_REGULATOR_FIXED_VOLTAGE=y
-*MUST* be enabled in the kernel's .config file, to prevent either
-litex_mmc_probe() from being deferred, or mmc_regulator_get_supply()
-from simply returning 0 without having set mmc->ocr_avail to anything
-at all!
-
-Presumably this would also mean either `select REGULATOR_FIXED_VOLTAGE`
-or `depends on REGULATOR_FIXED_VOLTAGE` in the mmc driver's Kconfig
-entry.
-
-Predictably, the "regulator-[min|max]-microvolt = <3300000>" setting
-gets us
-
-	ocr_avail == MMC_VDD_32_33 | MMC_VDD_33_34
-
-> >
-> > OTOH, going all out and setting:
-> >
-> >         /* allow for generic 2.7-3.6V range, no software tuning available */
-> >         mmc->ocr_avail = MMC_VDD_27_28 | MMC_VDD_28_29 | MMC_VDD_29_30 |
-> >                          MMC_VDD_30_31 | MMC_VDD_31_32 | MMC_VDD_32_33 |
-> >                          MMC_VDD_33_34 | MMC_VDD_34_35 | MMC_VDD_35_36;
-> >
-> > seems to work just fine... :) Please do let me know what you think!
-> 
-> No, this isn't the way we want it to work. That's because it means
-> that we would lie to the card about what voltage range the HW actually
-> supports.
-> 
-> It's better to let the DTS file give that information about the HW.
-
-I may be needlessly concerned, but it feels a bit weird to me to drag
-in CONFIG_REGULATOR_FIXED_VOLTAGE as an added dependency for what is
-ultimately a roundabout way of setting a constant... :)
-
-Thanks in advance for any additional clue!
-
-Best,
---Gabriel
