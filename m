@@ -2,90 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8162C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 09:44:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8BF8C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 10:49:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233660AbiAMJol (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jan 2022 04:44:41 -0500
-Received: from relay12.mail.gandi.net ([217.70.178.232]:36849 "EHLO
-        relay12.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233535AbiAMJod (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 04:44:33 -0500
-Received: (Authenticated sender: foss@0leil.net)
-        by relay12.mail.gandi.net (Postfix) with ESMTPSA id 6110F20000B;
-        Thu, 13 Jan 2022 09:44:25 +0000 (UTC)
-From:   quentin.schulz@theobroma-systems.com
-To:     linux-mmc@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, avri.altman@wdc.com,
-        Quentin Schulz <quentin.schulz@theobroma-systems.com>,
-        Quentin Schulz <foss+kernel@0leil.net>
-Subject: [PATCH v2] add README
-Date:   Thu, 13 Jan 2022 10:44:04 +0100
-Message-Id: <20220113094404.64510-1-quentin.schulz@theobroma-systems.com>
-X-Mailer: git-send-email 2.34.1
+        id S231387AbiAMKtO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jan 2022 05:49:14 -0500
+Received: from mga02.intel.com ([134.134.136.20]:5804 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229635AbiAMKtN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 13 Jan 2022 05:49:13 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1642070953; x=1673606953;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=UTYhz+JLVLGh52BwP1c/i/glpIIbyehr0ElDLiBRGfE=;
+  b=N7ehVD3OVNtNd2u/wPc5RpAvWtWARGUSiYAdYeCNWBsnL8AAWsLXNJXC
+   V5TB5S5aKpq40jk+7ebBVW2zYJtNag6xIp2oXrJJ5zhyGQ5IiCQscuwwh
+   XwHV8C5whEho9NXHfMThvzZ5ky26K7ygv4oQcwIcFNqaXUHF5YsN0IEV9
+   lB5T/LohROQ9JdQ3YpLaMT3TSZEBCxAIAxPLe5Y2nkI3cLwXi0RqoE5eH
+   idYsJPiOP3qJGaHcqpxeX8uPgjc+seX1mwn6W/Z6Enn6D4QQUrd8XbAFY
+   Imh68lrbTiyhPt1OtPDAbNgu8aIvzGECdQqzjEhG4alKOL6W4sbliQf08
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10225"; a="231326202"
+X-IronPort-AV: E=Sophos;i="5.88,284,1635231600"; 
+   d="scan'208";a="231326202"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Jan 2022 02:49:12 -0800
+X-IronPort-AV: E=Sophos;i="5.88,284,1635231600"; 
+   d="scan'208";a="593310113"
+Received: from smile.fi.intel.com ([10.237.72.61])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Jan 2022 02:49:07 -0800
+Received: from andy by smile.fi.intel.com with local (Exim 4.95)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1n7xe5-00A9zW-RM;
+        Thu, 13 Jan 2022 12:47:53 +0200
+Date:   Thu, 13 Jan 2022 12:47:53 +0200
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Axe Yang <axe.yang@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+Subject: Re: [PATCH v2 3/3] mmc: mediatek: add support for SDIO eint irq
+Message-ID: <YeADWXPGPW253ssR@smile.fi.intel.com>
+References: <20220111014046.5864-1-axe.yang@mediatek.com>
+ <20220111014046.5864-4-axe.yang@mediatek.com>
+ <Yd1uJ+dX2CTEJfYY@smile.fi.intel.com>
+ <83670f12a4eda1d8aecde3c0bf225642106d1267.camel@mediatek.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <83670f12a4eda1d8aecde3c0bf225642106d1267.camel@mediatek.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Quentin Schulz <quentin.schulz@theobroma-systems.com>
+On Thu, Jan 13, 2022 at 03:58:52PM +0800, Axe Yang wrote:
 
-This adds a README to the project so that the contribution process is
-explicit as well as the licenses that apply to the source code.
+> But for the comment for 'dev_dbg', can you explain more about that?
 
-Cc: Quentin Schulz <foss+kernel@0leil.net>
-Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
----
+Sure.
 
-v2:
- - added Avri to the list of maintainers
- - fixed aboive typo
- - updated license to only mention GPL-2.0-only as BSD-3-Clause is
- compatible with GPL-2.0-only projects, as mentioned in
- 3rdparty/hmac_sha/ files
+> On Tue, 2022-01-11 at 13:46 +0200, Andy Shevchenko wrote:
+> > On Tue, Jan 11, 2022 at 09:40:46AM +0800, Axe Yang wrote:
 
- README | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
- create mode 100644 README
+...
 
-diff --git a/README b/README
-new file mode 100644
-index 0000000..71a4e7d
---- /dev/null
-+++ b/README
-@@ -0,0 +1,31 @@
-+MMC tools (mmc-utils)
-+=====================
-+
-+mmc-utils is a tool for configuring MMC storage devices from userspace.
-+
-+Contribution guidelines
-+-----------------------
-+
-+The project works using a mailing list patch submission process, similar to the
-+process used for the Linux kernel itself.
-+
-+One can document themselves by reading how to submit a patch in the official
-+Linux kernel documentation:
-+https://www.kernel.org/doc/html/latest/process/submitting-patches.html
-+
-+Not all sections apply but it should be a good way to get started.
-+
-+A patch should be sent as a mail (not as an attachement, see documentation
-+above) to the linux-mmc@vger.kernel.org mailing list with maintainers as
-+Cc recipients.
-+
-+Maintainers
-+-----------
-+
-+Avri Altman <avri.altman@wdc.com>
-+Ulf Hansson <ulf.hansson@linaro.org>
-+
-+License
-+-------
-+
-+This project is licensed under GPL-2.0-only.
+> > > +		host->pins_eint = pinctrl_lookup_state(host->pinctrl,
+> > > "state_eint");
+> > > +		if (IS_ERR(host->pins_eint)) {
+> > > +			dev_dbg(&pdev->dev, "Cannot find pinctrl
+> > > eint!\n");
+> > 
+> > In debug mode of pin control this will bring a duplicate message.
+> 
+> Can you explain more about this comment?
+> I don't understand what the 'duplicate message' refers for.
+
+Have you chance to read the implementation of pinctrl_lookup_state()?
+
 -- 
-2.34.1
+With Best Regards,
+Andy Shevchenko
+
 
