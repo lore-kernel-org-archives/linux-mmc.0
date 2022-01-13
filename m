@@ -2,203 +2,139 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9A00C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 11:10:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 684D8C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 12:07:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233992AbiAMLKE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jan 2022 06:10:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46582 "EHLO
+        id S234353AbiAMMHr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jan 2022 07:07:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233996AbiAMLKA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 06:10:00 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7006EC061756
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 03:09:59 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n7xyF-0006Q7-HJ; Thu, 13 Jan 2022 12:08:43 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n7xy5-00A3Hi-BT; Thu, 13 Jan 2022 12:08:32 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n7xy3-0005lb-Nu; Thu, 13 Jan 2022 12:08:31 +0100
-Date:   Thu, 13 Jan 2022 12:08:31 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        KVM list <kvm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org, Jiri Slaby <jirislaby@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
-        Zhang Rui <rui.zhang@intel.com>,
-        platform-driver-x86@vger.kernel.org,
-        Linux PWM List <linux-pwm@vger.kernel.org>,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        John Garry <john.garry@huawei.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Borislav Petkov <bp@alien8.de>,
-        Eric Auger <eric.auger@redhat.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        openipmi-developer@lists.sourceforge.net,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Benson Leung <bleung@chromium.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>,
-        Richard Weinberger <richard@nod.at>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        netdev@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Sebastian Reichel <sre@kernel.org>,
-        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        linux-mediatek@lists.infradead.org,
-        Brian Norris <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
-Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
-Message-ID: <20220113110831.wvwbm75hbfysbn2d@pengutronix.de>
-References: <20220110195449.12448-1-s.shtylyov@omp.ru>
- <20220110195449.12448-2-s.shtylyov@omp.ru>
- <20220110201014.mtajyrfcfznfhyqm@pengutronix.de>
- <YdyilpjC6rtz6toJ@lunn.ch>
- <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
- <20220112085009.dbasceh3obfok5dc@pengutronix.de>
- <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
- <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
- <Yd9L9SZ+g13iyKab@sirena.org.uk>
+        with ESMTP id S232762AbiAMMHq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 07:07:46 -0500
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00AE2C061756
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 04:07:46 -0800 (PST)
+Received: by mail-lf1-x12e.google.com with SMTP id d3so18549082lfv.13
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 04:07:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=yAP1FMAcpDzFu2Al3uF90uC2rPxA7nQ6In3o8LmKt5s=;
+        b=qpmGhEHzag2mgXSZKa5TAnx3QaK1NbGnAER0oaVqrs4235lfxcPYEu6RkZZSJCOoPv
+         fPoBNLE1aUJ9aRcwT7ubxdZ7LLxN9JWAOCAia51t3hCZHXDctKsSq3DKxK4DrIxUroFK
+         tjjKbu+vV2oHJuYMHZGk5ky3D5wThluYs7C+51WPc9XiU8XOBH+0iAYGryx20S8qu6Ku
+         fy1xI80rk8VYsjWTdipBraXmPvbtN/ESxHap5ICZG+ZMzrtbCQMbgG+QXs2kT1r39Cm2
+         eHBQPtVFcE/nACv6lSC5hfV2IXGd7VAmKmLMtwIVSX/nhteT4iwRZNtmmqVQGnlKqNfn
+         7oPQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=yAP1FMAcpDzFu2Al3uF90uC2rPxA7nQ6In3o8LmKt5s=;
+        b=3MfIENGXGBFIEyUNkDVE8S6lfgamIMYtPnPZsAZiede8ls5Ja19qWT2SxjylQwNafD
+         yMxswL0Ppugm/pZqm7Fa4xGW6WQIur/Z0NtWOAj14c8p1KA01EXuBtKaiDAS1dHjYJic
+         uZ9LZsq+Rnbp4gqO1yL8/s+lfby6olbbbViKDAPszjCQe2XfbQoUKik+V/OP2tPXiSqo
+         hkRZ3x7EM0e3hF45agdjJ0PEfBWdZGZkyG9jND7hyufi7mg1XViRzyKhXuY5tK8BxWe/
+         3PVanlzylkervUzXBtjjiCfA5z+sdRLAIWnz3+mAHfV8PphYMFHmOjr3IPyBhdztwCGu
+         DQNg==
+X-Gm-Message-State: AOAM532OKOaxvOYRAV+EUzKzR9dD1gFiO82C7ClOptlM4u1YRC4opvPF
+        Np9GJ2doiQ8SI37cyXrBI284vhcFZLnupzKp7aGqcg==
+X-Google-Smtp-Source: ABdhPJzxAe/t75YtFir2L4jJA4G2mrPispiMgqp0nFdc982lOD9tckYYL9T6XUM9QO4bDrmKBqAue0W3sTdc9U0ygKE=
+X-Received: by 2002:a05:6512:20ca:: with SMTP id u10mr3035788lfr.71.1642075664297;
+ Thu, 13 Jan 2022 04:07:44 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="zcdy7nemyxfoojub"
-Content-Disposition: inline
-In-Reply-To: <Yd9L9SZ+g13iyKab@sirena.org.uk>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20220111171424.862764-1-Jerome.Pouiller@silabs.com>
+ <2680707.qJCEgCfB62@pc-42> <20220112174848.db5osolurllpc7du@pali> <1655654.vHqhSpDN13@pc-42>
+In-Reply-To: <1655654.vHqhSpDN13@pc-42>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 13 Jan 2022 13:07:06 +0100
+Message-ID: <CAPDyKFpP-Ta=wUuOE1m4wqsoKACV564nhJ=c2OeL0H5LjG2yrg@mail.gmail.com>
+Subject: Re: [PATCH v9 08/24] wfx: add bus_sdio.c
+To:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <Jerome.Pouiller@silabs.com>
+Cc:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        Kalle Valo <kvalo@codeaurora.org>, devel@driverdev.osuosl.org,
+        linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed, 12 Jan 2022 at 19:24, J=C3=A9r=C3=B4me Pouiller
+<jerome.pouiller@silabs.com> wrote:
+>
+> On Wednesday 12 January 2022 18:48:48 CET Pali Roh=C3=A1r wrote:
+> > CAUTION: This email originated from outside of the organization. Do not=
+ click links or open attachments unless you recognize the sender and know t=
+he content is safe.
+> >
+> >
+> > On Wednesday 12 January 2022 17:45:45 J=C3=A9r=C3=B4me Pouiller wrote:
+> > > On Wednesday 12 January 2022 12:43:32 CET Pali Roh=C3=A1r wrote:
+> > > >
+> > > > On Wednesday 12 January 2022 12:18:58 J=C3=A9r=C3=B4me Pouiller wro=
+te:
+> > > > > On Wednesday 12 January 2022 11:58:59 CET Pali Roh=C3=A1r wrote:
+> > > > > > On Tuesday 11 January 2022 18:14:08 Jerome Pouiller wrote:
+> > > > > > > +static const struct sdio_device_id wfx_sdio_ids[] =3D {
+> > > > > > > +     { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SIL=
+ABS_WF200) },
+> > > > > > > +     { },
+> > > > > > > +};
+> > > > > >
+> > > > > > Hello! Is this table still required?
+> > > > >
+> > > > > As far as I understand, if the driver does not provide an id_tabl=
+e, the
+> > > > > probe function won't be never called (see sdio_match_device()).
+> > > > >
+> > > > > Since, we rely on the device tree, we could replace SDIO_VENDOR_I=
+D_SILABS
+> > > > > and SDIO_DEVICE_ID_SILABS_WF200 by SDIO_ANY_ID. However, it does =
+not hurt
+> > > > > to add an extra filter here.
+> > > >
+> > > > Now when this particular id is not required, I'm thinking if it is =
+still
+> > > > required and it is a good idea to define these SDIO_VENDOR_ID_SILAB=
+S
+> > > > macros into kernel include files. As it would mean that other broke=
+n
+> > > > SDIO devices could define these bogus numbers too... And having the=
+m in
+> > > > common kernel includes files can cause issues... e.g. other develop=
+ers
+> > > > could think that it is correct to use them as they are defined in c=
+ommon
+> > > > header files. But as these numbers are not reliable (other broken c=
+ards
+> > > > may have same ids as wf200) and their usage may cause issues in fut=
+ure.
+> > >
+> > > In order to make SDIO_VENDOR_ID_SILABS less official, do you prefer t=
+o
+> > > define it in wfx/bus_sdio.c instead of mmc/sdio_ids.h?
+> > >
+> > > Or even not defined at all like:
+> > >
+> > >     static const struct sdio_device_id wfx_sdio_ids[] =3D {
+> > >          /* WF200 does not have official VID/PID */
+> > >          { SDIO_DEVICE(0x0000, 0x1000) },
+> > >          { },
+> > >     };
+> >
+> > This has advantage that it is explicitly visible that this device does
+> > not use any officially assigned ids.
+>
+> Ulf, are you also agree?
 
---zcdy7nemyxfoojub
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Sure, that works for me too.
 
-On Wed, Jan 12, 2022 at 09:45:25PM +0000, Mark Brown wrote:
-> On Wed, Jan 12, 2022 at 10:31:21PM +0100, Uwe Kleine-K=F6nig wrote:
-> > On Wed, Jan 12, 2022 at 11:27:02AM +0100, Geert Uytterhoeven wrote:
->=20
-> (Do we really need *all* the CCs here?)
-
-It's probably counteractive to finding an agreement because there are
-too many opinions on that matter. But I didn't dare to strip it down,
-too :-)
-
-> > That convinces me, that platform_get_irq_optional() is a bad name. The
-> > only difference to platform_get_irq is that it's silent. And returning
-> > a dummy irq value (which would make it aligned with the other _optional
-> > functions) isn't possible.
->=20
-> There is regulator_get_optional() which is I believe the earliest of
-> these APIs, it doesn't return a dummy either (and is silent too) - this
-> is because regulator_get() does return a dummy since it's the vastly
-> common case that regulators must be physically present and them not
-> being found is due to there being an error in the system description.
-> It's unfortunate that we've ended up with these two different senses for
-> _optional(), people frequently get tripped up by it.
-
-Yeah, I tripped over that one already, too. And according to my counting
-this results in three different senses now :-\ :
-
- a) regulator
-    regulator_get returns a dummy, regulator_get_optional returns ERR_PTR(-=
-ENODEV)
- b) clk + gpiod
-    ..._get returns ERR_PTR(-ENODEV), ..._get_optional returns a dummy
- c) platform_get_irq()
-    platform_get_irq_optional() is just a silent variant of
-    platform_get_irq(); the return values are identical.
-   =20
-This is all very unfortunate. In my eyes b) is the most sensible
-sense, but the past showed that we don't agree here. (The most annoying
-part of regulator_get is the warning that is emitted that regularily
-makes customers ask what happens here and if this is fixable.)
-
-I think at least c) is easy to resolve because
-platform_get_irq_optional() isn't that old yet and mechanically
-replacing it by platform_get_irq_silent() should be easy and safe.
-And this is orthogonal to the discussion if -ENOXIO is a sensible return
-value and if it's as easy as it could be to work with errors on irq
-lookups.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---zcdy7nemyxfoojub
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmHgCCsACgkQwfwUeK3K
-7AktbAf/UzNin6+fnXTmkdrTvXWaXCV8TB76EIUtIdNWwJEjmXxWes5jyBpp/jXj
-7gSmYT3gi4oK0wjB6dKmqF6jba5/RPL4cdS6/8iQDp32Xey0hzWymBPENLc/Nxt5
-Ge81cdot6EFxqSkuW1Zbe55wzmNUmEsez7+e+8gJAviPB6zQndDE/zAkwxczzb04
-GfD6Uixgm4a29NwXNIignwNm8pACez/px2A8cVhILZ8135X0rdwYM17BiQtfM5Uq
-s2hZsLfxWm9ZvdyxA7gGvsfefPmiPfS3k/HWagHMDB8nQq4vqnMmPTu01YJs34dM
-+ycJZkglW3eJnCZ9Fr5sjnuP6uLExw==
-=5Hn7
------END PGP SIGNATURE-----
-
---zcdy7nemyxfoojub--
+Kind regards
+Uffe
