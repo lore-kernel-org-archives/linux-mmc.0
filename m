@@ -2,273 +2,189 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BFB4EC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 23:07:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B6EAC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 23:34:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238179AbiAMXHa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jan 2022 18:07:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40802 "EHLO
+        id S232235AbiAMXeL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jan 2022 18:34:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46702 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238186AbiAMXH1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 18:07:27 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01B5EC06173E
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 15:07:27 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n89An-0001YX-LN; Fri, 14 Jan 2022 00:06:25 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n89Ai-00A99J-Gv; Fri, 14 Jan 2022 00:06:19 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1n89Ah-0001rZ-FS; Fri, 14 Jan 2022 00:06:19 +0100
-Date:   Fri, 14 Jan 2022 00:06:19 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Florian Fainelli <f.fainelli@gmail.com>
-Cc:     Mark Brown <broonie@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
+        with ESMTP id S230181AbiAMXeK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 18:34:10 -0500
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B27BC061574;
+        Thu, 13 Jan 2022 15:34:10 -0800 (PST)
+Received: by mail-wr1-x429.google.com with SMTP id t20so5397225wrb.4;
+        Thu, 13 Jan 2022 15:34:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=v0aH7RBRzcewEmYCwu3uGeEjeaqQRZNrix/y1VoAsYU=;
+        b=ZM0VXB+1QCk0Wwy1FOMCF6LHzhROcbV+NXM4NQKGsvy30mb1pX2s5Ng0WElC9a4Kb2
+         h4GFFQkDamyai3w0Pn2Lh21ykCcDT5o31Q7GLSzcgoD0oGcxpMCMnrXgbNjeKrK/EI9j
+         cq/klbFRPHQFmDntS31cdcr/TOXnlKIoIl5uITBLltWyjIoXo572VoJfYPerxMiGh2vS
+         uevazuGDULfmzwbrcHp2jFg6MvUai+VmLwwksooNedeg1a/AuVyfKFS1pqZAMvRshBA4
+         ZVqL5V1mGoqbp/bEHCoMxdp0Rj2qzu/uQn8YUM/p9frB9Ztncq9IM38IhbYdT4gQkpqm
+         YBqw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=v0aH7RBRzcewEmYCwu3uGeEjeaqQRZNrix/y1VoAsYU=;
+        b=2b7SHQbE4cb1xX91AsVZXKS3lRxthnijSUrlilyvRsiP/o+LaPimgJ9PTAICzvwXXt
+         XTINFj8xiKiJabWObABrx7+8uMQKzumB323U9n7rDAJe0MuXSf8PLKLgJx9QZ0EMwr4m
+         EX4muIP/xSHW3bTMO11oyL09SGjQjO7IrM8JUytOQxiWcQKKHDeeTUSv/APxMZt03AN8
+         GeykTxPjRmGCeA+yTj5hetZOji20LvKAqnxaNIQITGqQ616/cc77lASv4QIA8aFq4AM5
+         Km2HdZri9ElrTd47H2E/gqlViSgGCYLA75WtLMU5R5S1y3LFggjunJqZslNkOSVntyRe
+         8sag==
+X-Gm-Message-State: AOAM530mMDDAHyVXU/hxcYHhGMi2OEzFDoQvFhN/h6bIOtuDByiQ06WO
+        P1mhgRRFwOacehKn4lqPoUQKBCiVRCWjwQ==
+X-Google-Smtp-Source: ABdhPJyqHgsQFJofWmWm5tZcBTbwBbVQ2/YNZOl2oS6X2GR4l6IzZ3V9qrUt6hsRY1iMm+qzjkcDTQ==
+X-Received: by 2002:adf:eec9:: with SMTP id a9mr5792635wrp.178.1642116848690;
+        Thu, 13 Jan 2022 15:34:08 -0800 (PST)
+Received: from dell5510.arch.suse.de (gw1.ms-free.net. [185.243.124.10])
+        by smtp.gmail.com with ESMTPSA id u17sm3724748wrt.37.2022.01.13.15.34.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Jan 2022 15:34:08 -0800 (PST)
+From:   Petr Vorel <petr.vorel@gmail.com>
+To:     linux-arm-msm@vger.kernel.org
+Cc:     Petr Vorel <petr.vorel@gmail.com>,
+        Konrad Dybcio <konradybcio@gmail.com>,
+        Jean Thomas <virgule@jeanthomas.me>,
+        Alexey Minnekhanov <alexeymin@postmarketos.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        KVM list <kvm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org, netdev@vger.kernel.org,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
-        Zhang Rui <rui.zhang@intel.com>,
-        platform-driver-x86@vger.kernel.org,
-        Linux PWM List <linux-pwm@vger.kernel.org>,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        John Garry <john.garry@huawei.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Borislav Petkov <bp@alien8.de>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        openipmi-developer@lists.sourceforge.net,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Benson Leung <bleung@chromium.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>,
-        Richard Weinberger <richard@nod.at>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Sebastian Reichel <sre@kernel.org>,
-        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        linux-mediatek@lists.infradead.org,
-        Brian Norris <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
-Subject: Re: [PATCH] driver core: platform: Rename
- platform_get_irq_optional() to platform_get_irq_silent()
-Message-ID: <20220113230619.m736tqd6u44vhuu5@pengutronix.de>
-References: <YdyilpjC6rtz6toJ@lunn.ch>
- <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
- <20220112085009.dbasceh3obfok5dc@pengutronix.de>
- <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
- <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
- <Yd9L9SZ+g13iyKab@sirena.org.uk>
- <20220113110831.wvwbm75hbfysbn2d@pengutronix.de>
- <YeA7CjOyJFkpuhz/@sirena.org.uk>
- <20220113194358.xnnbhsoyetihterb@pengutronix.de>
- <745c601f-c782-0904-f786-c9bfced8f11c@gmail.com>
+        Douglas Anderson <dianders@chromium.org>,
+        Taniya Das <tdas@codeaurora.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH 0/6] msm8994-huawei-angler and msm8992-lg-bullhead sdhc1 fixes
+Date:   Fri, 14 Jan 2022 00:33:52 +0100
+Message-Id: <20220113233358.17972-1-petr.vorel@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="ea4rbv6vfrsr5m67"
-Content-Disposition: inline
-In-Reply-To: <745c601f-c782-0904-f786-c9bfced8f11c@gmail.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi,
 
---ea4rbv6vfrsr5m67
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Besides fixing sdhc1 for msm8994-huawei-angler and msm8992-lg-bullhead
+I also rebased and reposted Jean's patches (Makefile didn't apply on
+current for-next) and also rename angler's DTS.
 
-On Thu, Jan 13, 2022 at 01:42:57PM -0800, Florian Fainelli wrote:
->=20
->=20
-> On 1/13/2022 11:43 AM, Uwe Kleine-K=F6nig wrote:
-> > The subsystems regulator, clk and gpio have the concept of a dummy
-> > resource. For regulator, clk and gpio there is a semantic difference
-> > between the regular _get() function and the _get_optional() variant.
-> > (One might return the dummy resource, the other won't. Unfortunately
-> > which one implements which isn't the same for these three.) The
-> > difference between platform_get_irq() and platform_get_irq_optional() is
-> > only that the former might emit an error message and the later won't.
-> >=20
-> > To prevent people's expectations that there is a semantic difference
-> > between these too, rename platform_get_irq_optional() to
-> > platform_get_irq_silent() to make the actual difference more obvious.
-> >=20
-> > The #define for the old name can and should be removed once all patches
-> > currently in flux still relying on platform_get_irq_optional() are
-> > fixed.
-> >=20
-> > Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-> > ---
-> > Hello,
-> >=20
-> > On Thu, Jan 13, 2022 at 02:45:30PM +0000, Mark Brown wrote:
-> > > On Thu, Jan 13, 2022 at 12:08:31PM +0100, Uwe Kleine-K=F6nig wrote:
-> > >=20
-> > > > This is all very unfortunate. In my eyes b) is the most sensible
-> > > > sense, but the past showed that we don't agree here. (The most anno=
-ying
-> > > > part of regulator_get is the warning that is emitted that regularily
-> > > > makes customers ask what happens here and if this is fixable.)
-> > >=20
-> > > Fortunately it can be fixed, and it's safer to clearly specify things.
-> > > The prints are there because when the description is wrong enough to
-> > > cause things to blow up we can fail to boot or run messily and
-> > > forgetting to describe some supplies (or typoing so they haven't done
-> > > that) and people were having a hard time figuring out what might've
-> > > happened.
-> >=20
-> > Yes, that's right. I sent a patch for such a warning in 2019 and pinged
-> > occationally. Still waiting for it to be merged :-\
-> > (https://lore.kernel.org/r/20190625100412.11815-1-u.kleine-koenig@pengu=
-tronix.de)
-> >=20
-> > > > I think at least c) is easy to resolve because
-> > > > platform_get_irq_optional() isn't that old yet and mechanically
-> > > > replacing it by platform_get_irq_silent() should be easy and safe.
-> > > > And this is orthogonal to the discussion if -ENOXIO is a sensible r=
-eturn
-> > > > value and if it's as easy as it could be to work with errors on irq
-> > > > lookups.
-> > >=20
-> > > It'd certainly be good to name anything that doesn't correspond to one
-> > > of the existing semantics for the API (!) something different rather
-> > > than adding yet another potentially overloaded meaning.
-> >=20
-> > It seems we're (at least) three who agree about this. Here is a patch
-> > fixing the name.
->=20
-> From an API naming perspective this does not make much sense anymore with
-> the name chosen, it is understood that whent he function is called
-> platform_get_irq_optional(), optional applies to the IRQ. An optional IRQ=
- is
-> something people can reason about because it makes sense.
+sdhc1 (i.e. mmc0) is working on both, but there are overclocking
+warnings. I suspected issue similar to using clk_rcg2_ops instead of
+clk_rcg2_floor_ops (i.e. 3f905469c8ce ("clk: qcom: gcc: Use floor ops
+for SDCC clocks") or 148ddaa89d4a ("clk: qcom: gcc-sc7180: Use floor ops
+for the correct sdcc1 clk"), but it looks to be correct for gcc-msm8994.c.
 
-The problem I see is that the semantic is different to the other
-available *_get_optional() functions. And this isn't fixable for irqs.
-So better don't use that naming scheme.
+Kind regards,
+Petr
 
-> What is a a "silent" IRQ however? It does not apply to the object it is
-> trying to fetch to anymore, but to the message that may not be printed in
-> case the resource failed to be obtained, because said resource is optiona=
-l.
-> Woah, that's quite a stretch.
+* angler
+angler downstream
+qcom,bus-speed-mode = "HS400_1p8v", "HS200_1p8v", "DDR_1p8v";
+[90] SDHC Running in DDR mode
+[    8.837072] sdhci: Secure Digital Host Controller Interface driver
+[    8.843203] sdhci: Copyright(c) Pierre Ossman
+[    8.847536] sdhci-pltfm: SDHCI platform and OF driver helper
+[    8.858043] mmc0: no vqmmc regulator found
+[    8.861168] mmc0: no vmmc regulator found
+[    8.865359] mmc0: SDHCI controller on f9824900.sdhci [f9824900.sdhci] using 32-bit ADMA
+[    8.920815] mmc1: no vqmmc regulator found
+[    8.923917] mmc1: no vmmc regulator found
+[    8.928123] mmc1: SDHCI controller on f98a4900.sdhci [f98a4900.sdhci] using 32-bit ADMA
+[    9.018117] mmc0: BKOPS_EN bit = 0
+[    9.039550] mmc0: new HS400 MMC card at address 0001
+[    9.043971] mmcblk0: mmc0:0001 064G70 58.2 GiB
+[    9.048185] mmcblk0rpmb: mmc0:0001 064G70 partition 3 4.00 MiB
+[    9.056974] GPT:partition_entry_array_crc32 values don't match: 0x4aa75f3b != 0xe3345ddf
+[    9.064044] GPT: Use GNU Parted to correct GPT errors.
+[    9.069247]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26 p27 p28 p29 p30 p31 p32 p33 p34 p35 p36 p37 p38 p39 p40 p41 p42 p43 p44
 
-I'm surprised that the semantic isn't obvious, but ok, I can accept
-that.Can you maek a constructive suggestion here? What name pair would
-you choose for the two functions functions under discussion?
+angler mainline (with this patchset)
+using mmc-hs400-1_8v (this patchset)
+[    1.825962] mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+[    1.826043] mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+[    1.839502] mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+[    1.840203] mmc0: Card appears overclocked; req 400000000 Hz, actual 768000000 Hz
+Trying to mount subpartitions for 10 seconds...[    1.855276] mmc0: Card appears overclocked; req 400000000 Hz, actual 768000000 Hz
+[    1.860454] mmc0: new HS400 MMC card at address 0001
 
-(BTW, my favourite would be that platform_get_irq() doesn't emit an
-error message and the caller is reliable for emitting that. But I think
-it's too late for this approach.)
+[    1.878747] mmcblk0: mmc0:0001 064G70 58.2 GiB
+[    1.883175] GPT:partition_entry_array_crc32 values don't match: 0x4aa75f3b != 0xe3345ddf
+[    1.883234] GPT: Use GNU Parted to correct GPT errors.
+[    1.894514]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26 p27 p28 p29 p30 p31 p32 p33 p34 p35 p36 p37 p38 p39 p40 p41 p42 p43 p44
+[    1.905939] mmcblk0boot0: mmc0:0001 064G70 4.00 MiB
+[    1.926200] mmcblk0boot1: mmc0:0001 064G70 4.00 MiB
+[    1.928880] mmcblk0rpmb: mmc0:0001 064G70 4.00 MiB, chardev (234:0)
 
-> Following the discussion and original 2 patches set from Sergey, it is not
-> entirely clear to me anymore what is it that we are trying to fix.
+using mmc-ddr-1_8v (and mmc-hs200-1_8v)
+[    1.825991] mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+[    1.826071] mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+[    1.837905] mmc0: new HS200 MMC card at address 0001
+[    1.846269] mmcblk0: mmc0:0001 064G70 58.2 GiB
+[    1.850916] GPT:partition_entry_array_crc32 values don't match: 0x4aa75f3b != 0xe3345ddf
+[    1.850976] GPT: Use GNU Parted to correct GPT errors.
+Trying to mount subpartitions for 10 seconds...[    1.863540]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26 p27 p28 p29 p30 p31 p32 p33 p34 p35 p36 p37 p38 p39 p40 p41 p42 p43 p44
+[    1.879858] mmcblk0boot0: mmc0:0001 064G70 4.00 MiB
 
-(I think) Sergey's focus is:
+[    1.894920] mmcblk0boot1: mmc0:0001 064G70 4.00 MiB
+[    1.899991] mmcblk0rpmb: mmc0:0001 064G70 4.00 MiB, chardev (234:0)
 
-	platform_get_irq_optional() returning -ENXIO is ugly, other
-	functions return -ENOENT and other *_get_optional() functions
-	return NULL for "This resource doesn't exist". So let's return 0
-	in this case.
+* bullhead 1.01
+bullhead downstream
+[70] SDHC Running in HS400 mode
+[    7.069617] sdhci: Secure Digital Host Controller Interface driver
+[    7.075741] sdhci: Copyright(c) Pierre Ossman
+[    7.080081] sdhci-pltfm: SDHCI platform and OF driver helper
+[    7.091419] mmc0: no vqmmc regulator found
+[    7.094508] mmc0: no vmmc regulator found
+[    7.098731] mmc0: SDHCI controller on f9824900.sdhci [f9824900.sdhci] using 32-bit ADMA
+[    7.250588] mmc0: BKOPS_EN bit = 0
+[    7.269765] mmc0: new HS400 MMC card at address 0001
+[    7.274242] mmcblk0: mmc0:0001 032G74 29.1 GiB
+[    7.278448] mmcblk0rpmb: mmc0:0001 032G74 partition 3 4.00 MiB
+[    7.286719]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26 p27 p28 p29 p30 p31 p32 p33 p34 p35 p36 p37 p38 p39 p40 p41 p42 p43 p44 p45 p46
 
-My focus is:
+bullhead mainline (with this patchset)
+[    1.961228] mmc0: Card appears overclocked; req 200000000 Hz, actual 343999999 Hz
+[    1.961312] mmc0: Card appears overclocked; req 200000000 Hz, actual 343999999 Hz
+[    1.968060] mmc0: Card appears overclocked; req 400000000 Hz, actual 687999999 Hz
+Configuring kernel firmware image search path
+/init: line 56: can't create /proc/sys/kernel/hotplug: nonexistent directory
+[    1.988240] mmc0: Card appears overclocked; req 200000000 Hz, actual 343999999 Hz
+[    1.998602] mmc0: Card appears overclocked; req 400000000 Hz, actual 687999999 Hz
+[    2.001919] mmc0: Card appears overclocked; req 400000000 Hz, actual 687999999 Hz
+[    2.018628] mmc0: new HS400 MMC card at address 0001
 
-	There cannot be an "optional irq" where the driver doesn't have
-	to care if the irq actually exist or not. So the pattern with
-	*_get_optional() isn't sensible for irqs and if changing the
-	returned value meaning "This resource doesn't exist" is sensible
-	for platform_get_irq_optional(), I claim it's sensible for
-	platform_get_irq(), too.
+Jean THOMAS (2):
+  arm64: dts: qcom: msm8992-lg-bullhead: Place LG Bullhead generic code
+    into a DTSI file
+  arm64: dts: qcom: msm8992-lg-bullhead: Add support for LG Bullhead rev
+    1.0
 
-	So the semantic difference between platform_get_irq() and
-	platform_get_irq_optional() is only that one emits an error
-	message and the other doesn't. So this function pair should use
-	a different naming than get + get_optional as this naming evokes
-	expectations that must be wrong as there cannot be a dummy irq
-	value.
+Petr Vorel (4):
+  arm64: dts: qcom: msm8994: Provide missing "xo_board" and "sleep_clk"
+    to GCC
+  arm64: dts: qcom: msm8994-huawei-angler: Add vendor name huawei
+  arm64: dts: qcom: msm8994-huawei-angler: Add sdhc{1,2} definitions
+  arm64: dts: qcom: msm8992-lg-bullhead: Disable sdhc2
 
-> I nearly forgot, I would paint it blue, sky blue, not navy blue, not light
-> blue ;)
+ arch/arm64/boot/dts/qcom/Makefile                |  5 +++--
+ .../boot/dts/qcom/msm8992-lg-bullhead-rev-10.dts | 14 ++++++++++++++
+ .../dts/qcom/msm8992-lg-bullhead-rev-101.dts     | 14 ++++++++++++++
+ ...head-rev-101.dts => msm8992-lg-bullhead.dtsi} |  7 +++++--
+ ...101.dts => msm8994-huawei-angler-rev-101.dts} | 16 ++++++++++++++++
+ arch/arm64/boot/dts/qcom/msm8994.dtsi            |  3 +++
+ 6 files changed, 55 insertions(+), 4 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8992-lg-bullhead-rev-10.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8992-lg-bullhead-rev-101.dts
+ rename arch/arm64/boot/dts/qcom/{msm8992-bullhead-rev-101.dts => msm8992-lg-bullhead.dtsi} (98%)
+ rename arch/arm64/boot/dts/qcom/{msm8994-angler-rev-101.dts => msm8994-huawei-angler-rev-101.dts} (75%)
 
-no way. green is the ultimate blue for platform_get_irq() :-)
+-- 
+2.34.1
 
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---ea4rbv6vfrsr5m67
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmHgsGcACgkQwfwUeK3K
-7AmCGgf+KUjAbnx/+md2hoJgWXkf2TARYfElER6NhM1xxoNKhleR2n9Y2SomZoh7
-GcsuunNU5jXbVHMH53qA3p34MwFiUjtH8qugReIosuYo9kAjJHcR/uAXVZVx8a5W
-593KJ+wnpGGjBIajlW4L9XKhKUGIgCjx5n9pZTnS/9TD0T5RY7pvpN1XdyHhqHzO
-owFdQFBvf7vN9Md4mdzl3usr15hf3ZFkobzBuDjMwour/CoOVu6yOVe+ihkXfa4o
-SQua8+L+ooV6dgRrG0kq9oYU/xDTMEPJCK1Ap8ff2rb9KDCaRwljavHmmk6Thff9
-7uYWNCwmj3gTXd6TD4b3BK+FIBMfSQ==
-=oNtc
------END PGP SIGNATURE-----
-
---ea4rbv6vfrsr5m67--
