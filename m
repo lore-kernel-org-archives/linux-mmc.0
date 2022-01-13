@@ -2,107 +2,226 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F9C4C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 06:44:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A052C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 07:59:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230107AbiAMGoP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jan 2022 01:44:15 -0500
-Received: from mga14.intel.com ([192.55.52.115]:14266 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231876AbiAMGoN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 13 Jan 2022 01:44:13 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1642056253; x=1673592253;
-  h=subject:to:cc:references:from:message-id:date:
-   mime-version:in-reply-to:content-transfer-encoding;
-  bh=Z4HhKchxZusULm7Y/UuoDfzSQXkgGXkyTX7IePL/d9c=;
-  b=ffiPvoIOKA2u6Z5WhJe29PdQgrkyO1r31NtPmPtPA7BN8ILZugt5VMls
-   bPGakQBFl5xbyVyqmhY7di+6oRE2R1oSqe40jiqRAIGU4h67Q2Z/JTpG+
-   DjePYMLh0F6ymeauJPCgQ8PAsoSZpTcNRIppTeMt4poRA+D+xysauGfwv
-   Z2ChTvb35+ZkA2IVOET0k+8kC5zp8C6Yku1s9eFGCi/+UhnQCK8k+h/H4
-   /ZgA+VjAFZvJnjNl8cqaCPzZ6EzkuQMMhy4X3JiUe0pCEhuJRt50yPc/W
-   6Ef4tYmocx0ed8sePbYnrQ64ZFtjymKRtzLNH4qS339pLYAZP6C0ihERh
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10225"; a="244148621"
-X-IronPort-AV: E=Sophos;i="5.88,284,1635231600"; 
-   d="scan'208";a="244148621"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jan 2022 22:44:12 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.88,284,1635231600"; 
-   d="scan'208";a="529541897"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
-  by orsmga008.jf.intel.com with ESMTP; 12 Jan 2022 22:44:09 -0800
-Subject: Re: [PATCH] mmc: tegra: Enable wake on SD card event
-To:     Aniruddha Rao <anrao@nvidia.com>, ulf.hansson@linaro.org,
-        thierry.reding@gmail.com, jonathanh@nvidia.com,
-        p.zabel@pengutronix.de
-Cc:     linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <1642050969-21152-1-git-send-email-anrao@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <4108cce3-ed97-faa7-41a3-8ffbd8473525@intel.com>
-Date:   Thu, 13 Jan 2022 08:44:08 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.14.0
+        id S230241AbiAMH67 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jan 2022 02:58:59 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:59944 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229991AbiAMH67 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 02:58:59 -0500
+X-UUID: 7b4a774f1a2b4abb957ef1b2f881ed9f-20220113
+X-UUID: 7b4a774f1a2b4abb957ef1b2f881ed9f-20220113
+Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 1854924994; Thu, 13 Jan 2022 15:58:56 +0800
+Received: from mtkexhb01.mediatek.inc (172.21.101.102) by
+ mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.2.792.15; Thu, 13 Jan 2022 15:58:55 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by mtkexhb01.mediatek.inc
+ (172.21.101.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 13 Jan
+ 2022 15:58:55 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Thu, 13 Jan 2022 15:58:52 +0800
+Message-ID: <83670f12a4eda1d8aecde3c0bf225642106d1267.camel@mediatek.com>
+Subject: Re: [PATCH v2 3/3] mmc: mediatek: add support for SDIO eint irq
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "Yoshihiro Shimoda" <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "Lucas Stach" <dev@lynxeye.de>, Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>
+Date:   Thu, 13 Jan 2022 15:58:52 +0800
+In-Reply-To: <Yd1uJ+dX2CTEJfYY@smile.fi.intel.com>
+References: <20220111014046.5864-1-axe.yang@mediatek.com>
+         <20220111014046.5864-4-axe.yang@mediatek.com>
+         <Yd1uJ+dX2CTEJfYY@smile.fi.intel.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-In-Reply-To: <1642050969-21152-1-git-send-email-anrao@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/01/2022 07:16, Aniruddha Rao wrote:
-> Enable GPIO wake source on SD card detect line.
-> Physical card insertion/removal event should wake the system
-> from suspend.
-> 
-> Signed-off-by: Aniruddha Rao <anrao@nvidia.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Andy, thank you for the review.
+But for the comment for 'dev_dbg', can you explain more about that?
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
+On Tue, 2022-01-11 at 13:46 +0200, Andy Shevchenko wrote:
+> On Tue, Jan 11, 2022 at 09:40:46AM +0800, Axe Yang wrote:
+> > Add support for eint irq when MSDC is used as an SDIO host. This
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 35ebba0..5c84bd5 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1673,6 +1673,9 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	/* HW busy detection is supported, but R1B responses are required. */
->  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
->  
-> +	/* GPIO CD can be set as a wakeup source */
-> +	host->mmc->caps |= MMC_CAP_CD_WAKE;
-> +
->  	tegra_sdhci_parse_dt(host);
->  
->  	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
-> @@ -1840,7 +1843,7 @@ static int sdhci_tegra_suspend(struct device *dev)
->  		return ret;
->  	}
->  
-> -	return 0;
-> +	return mmc_gpio_set_cd_wake(host->mmc, true);
->  }
->  
->  static int sdhci_tegra_resume(struct device *dev)
-> @@ -1848,6 +1851,10 @@ static int sdhci_tegra_resume(struct device *dev)
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	int ret;
->  
-> +	ret = mmc_gpio_set_cd_wake(host->mmc, false);
-> +	if (ret)
-> +		return ret;
-> +
->  	ret = pm_runtime_force_resume(dev);
->  	if (ret)
->  		return ret;
+> IRQ
+> 
+> > feature requires SDIO device support async irq function. With this
+> 
+> IRQ
+> 
+> > feature,SDIO host can be awakened by SDIO card in suspend state,
+> 
+> feature, SDIO
+> 
+> > without additional pin.
+> > 
+> > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> > resume, switch GPIO function back to DAT1 mode then turn on clock.
+> > 
+> > Some device tree property should be added or modified in msdc node
+> 
+> MSDC
+> 
+> > to support SDIO eint irq. Pinctrls named state_dat1 and state_eint
+> 
+> IRQ
+> 
+> > are mandatory. And cap-sdio-async-irq flag is necessary since this
+> > feature depends on asynchronous interrupt:
+> >         &mmcX {
+> >                 ...
+> >                 pinctrl-names = "default", "state_uhs",
+> > "state_eint",
+> >                                 "state_dat1";
+> >                 ...
+> >                 pinctrl-2 = <&mmc2_pins_eint>;
+> >                 pinctrl-3 = <&mmc2_pins_dat1>;
+> >                 ...
+> >                 cap-sdio-async-irq;
+> >                 ...
+> >         };
+> 
+> ...
+> 
+> > - * Copyright (c) 2014-2015 MediaTek Inc.
+> > + * Copyright (c) 2014-2022 MediaTek Inc.
+> 
+> Shouldn't it be rather like
+> 
+>  * Copyright (c) 2014-2015,2022 MediaTek Inc.
+> 
+> ?
+> 
+> ...
+> 
+> > +static irqreturn_t msdc_sdio_eint_irq(int irq, void *dev_id)
+> > +{
+> > +	unsigned long flags;
+> > +	struct msdc_host *host = (struct msdc_host *)dev_id;
+> 
+> No casting is needed.
+> 
+> > +	struct mmc_host *mmc = mmc_from_priv(host);
+> 
+> Perhaps reversed xmas tree order
+> 
+> 	struct msdc_host *host = dev_id;
+> 	struct mmc_host *mmc = mmc_from_priv(host);
+> 	unsigned long flags;
+> 
+> ?
+> 
+> But hey, why do you need flags?
+> 
+> > +	spin_lock_irqsave(&host->lock, flags);
+> > +	if (likely(host->sdio_irq_cnt > 0)) {
+> > +		disable_irq_nosync(host->eint_irq);
+> > +		disable_irq_wake(host->eint_irq);
+> > +		host->sdio_irq_cnt--;
+> > +	}
+> > +	spin_unlock_irqrestore(&host->lock, flags);
+> > +
+> > +	sdio_signal_irq(mmc);
+> > +
+> > +	return IRQ_HANDLED;
+> > +}
+> 
+> ...
+> 
+> > +static int msdc_request_dat1_eint_irq(struct msdc_host *host)
+> > +{
+> > +	struct gpio_desc *desc;
+> > +	int irq, ret;
+> > +
+> > +	desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
+> > +	if (IS_ERR(desc))
+> > +		return PTR_ERR(desc);
+> > +
+> > +	ret = gpiod_to_irq(desc);
+> > +	if (ret < 0)
+> > +		return ret;
+> > +
+> > +	irq = ret;
+> > +	ret = devm_request_threaded_irq(host->dev, irq, NULL,
+> > msdc_sdio_eint_irq,
+> > +					IRQF_TRIGGER_LOW | IRQF_ONESHOT
+> > | IRQF_NO_AUTOEN,
+> > +					"sdio-eint", host);
+> > +
+> 
+> Redundant blank line.
+> 
+> > +	if (!ret)
+> > +		host->eint_irq = irq;
+> > +
+> > +	return ret;
+> 
+> I guess I have already commented on this, i.e. use standard pattern
+> 
+> 	if (ret)
+> 		return ret;
+> 
+> 	...
+> 	return 0;
+> 
+> > +}
+> 
+> ...
+> 
+> > +		host->pins_eint = pinctrl_lookup_state(host->pinctrl,
+> > "state_eint");
+> > +		if (IS_ERR(host->pins_eint)) {
+> > +			dev_dbg(&pdev->dev, "Cannot find pinctrl
+> > eint!\n");
+> 
+> In debug mode of pin control this will bring a duplicate message.
+
+Can you explain more about this comment? 
+I don't understand what the 'duplicate message' refers for.
+
+> 
+> > +		} else {
+> > +			host->pins_dat1 = pinctrl_lookup_state(host-
+> > >pinctrl, "state_dat1");
+> > +			if (IS_ERR(host->pins_dat1)) {
+> > +				ret = dev_err_probe(&pdev->dev,
+> > PTR_ERR(host->pins_dat1),
+> > +						    "Cannot find
+> > pinctrl dat1!\n");
+> > +				goto host_free;
+> > +			}
+> > +
+> > +			host->sdio_eint_ready = true;
+> > +		}
+> > +	}
+> 
 > 
 
