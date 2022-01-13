@@ -2,918 +2,1242 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F169BC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 17:03:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1225C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 19:46:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233518AbiAMRDT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jan 2022 12:03:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43500 "EHLO
+        id S236495AbiAMTqK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jan 2022 14:46:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231950AbiAMRDR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 12:03:17 -0500
-Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B283BC06161C;
-        Thu, 13 Jan 2022 09:03:16 -0800 (PST)
-Received: by mail-qt1-x82a.google.com with SMTP id 14so163064qty.2;
-        Thu, 13 Jan 2022 09:03:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=FoasePZxmKOKWWApqYwOGRG6H9y9yPlYGflsyGkaBAk=;
-        b=q7gdXzVo61wrZ+ruTcuVMb4EAGJDW/mQ51FsqHuEVmE8e464vJ3+ogR+VSSb7h4+Uj
-         IpKtiV9+GikdIYvwchN0+aiHWnpKd3VWQLMZb4AqGkirsLygNaZdMciLAvxXLvepxhAo
-         sjr5qejZGImReUtPWhP70lIkRmTe2j6qHQdLCZnohXSynkogJtCvJW7JusBsdA79oS2U
-         NuZRz0HU0DdcpdXqNIe9Fm8NDr3pmATh4Y0ugHW17pkrcAejXnwMkC5HrKzEuIMzV+NU
-         CQTRpahfaJWlu0c8dAhgFLB7CghQ1XFoec7xNmKprLwNDiTQ49GdXb1MfZ00Kvy4gTdc
-         m1Ww==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=FoasePZxmKOKWWApqYwOGRG6H9y9yPlYGflsyGkaBAk=;
-        b=sLTM+TN2XGawjp4dRWZcLhCNl7EcGruL7UoaRpI+YtfK+aBdhSG3oXVGgYwLXWCOR3
-         zq7Atj9oBHCwyryqhOXDvQmiLxXpjYJZnECa0iI93xJKNvc5BHhQPCYM/uacpFMXaxXo
-         STGPyR1lNO0sz1e5B/uPeljvUTUYmDxl/L0D3+8b7dW0BvvMR9uQrSIkRptHgoM6ZEpT
-         j1ie9KaiGpTg08pmYxMLJz+THGA9M+2vHlvscLiVquVLzSKYneLNzIlqACGiLZT2w4mw
-         F+JeWNeVb6tV2zei0sbvNt0oIpMEy2ilp8IF4G+jxwmY/5iMzASUZKJ+M+srI8z8sIe9
-         1lxg==
-X-Gm-Message-State: AOAM532BF2ZBLuQXWjx+DLaWi3cXXCd6YmcH8NQnfxgHlQdAKe6HX8nM
-        P/UhVLMgYQHhWfwgbGlrRGFbFu//sQjfkA==
-X-Google-Smtp-Source: ABdhPJyFFRAgmEilLIM09ep1ZvRs5z4YmXtXwY10vyd8r+FOfothzUF7mUk9wLk4fKIeQ68LzomaMA==
-X-Received: by 2002:a05:622a:3ca:: with SMTP id k10mr4453824qtx.130.1642093395213;
-        Thu, 13 Jan 2022 09:03:15 -0800 (PST)
-Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
-        by smtp.gmail.com with ESMTPSA id j22sm2021931qko.117.2022.01.13.09.03.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Jan 2022 09:03:14 -0800 (PST)
-From:   Gabriel Somlo <gsomlo@gmail.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     robh+dt@kernel.org, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
-        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
-        shorne@gmail.com, geert@linux-m68k.org,
-        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
-        rdunlap@infradead.org, andy.shevchenko@gmail.com, hdanton@sina.com
-Subject: [PATCH v14 3/3] mmc: Add driver for LiteX's LiteSDCard interface
-Date:   Thu, 13 Jan 2022 12:03:00 -0500
-Message-Id: <20220113170300.3555651-4-gsomlo@gmail.com>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20220113170300.3555651-1-gsomlo@gmail.com>
-References: <20220113170300.3555651-1-gsomlo@gmail.com>
+        with ESMTP id S236502AbiAMTqI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 14:46:08 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58C45C061749
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 11:46:07 -0800 (PST)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1n8617-0007S6-5a; Thu, 13 Jan 2022 20:44:13 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1n860u-00A7iq-8L; Thu, 13 Jan 2022 20:43:59 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1n860t-0007s2-6A; Thu, 13 Jan 2022 20:43:59 +0100
+Date:   Thu, 13 Jan 2022 20:43:58 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Mark Brown <broonie@kernel.org>
+Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        KVM list <kvm@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        linux-phy@lists.infradead.org, Jiri Slaby <jirislaby@kernel.org>,
+        openipmi-developer@lists.sourceforge.net,
+        "David S. Miller" <davem@davemloft.net>,
+        Khuong Dinh <khuong@os.amperecomputing.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        Saravanan Sekar <sravanhome@gmail.com>,
+        Corey Minyard <minyard@acm.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Tony Luck <tony.luck@intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Sebastian Reichel <sre@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        platform-driver-x86@vger.kernel.org,
+        Benson Leung <bleung@chromium.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-edac@vger.kernel.org, Sergey Shtylyov <s.shtylyov@omp.ru>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        Eric Auger <eric.auger@redhat.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        James Morse <james.morse@arm.com>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Richard Weinberger <richard@nod.at>,
+        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        linux-mediatek@lists.infradead.org,
+        Brian Norris <computersforpeace@gmail.com>,
+        netdev@vger.kernel.org
+Subject: [PATCH] driver core: platform: Rename platform_get_irq_optional() to
+ platform_get_irq_silent()
+Message-ID: <20220113194358.xnnbhsoyetihterb@pengutronix.de>
+References: <20220110195449.12448-2-s.shtylyov@omp.ru>
+ <20220110201014.mtajyrfcfznfhyqm@pengutronix.de>
+ <YdyilpjC6rtz6toJ@lunn.ch>
+ <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
+ <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+ <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
+ <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
+ <Yd9L9SZ+g13iyKab@sirena.org.uk>
+ <20220113110831.wvwbm75hbfysbn2d@pengutronix.de>
+ <YeA7CjOyJFkpuhz/@sirena.org.uk>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="u67rejkufwyzfqj2"
+Content-Disposition: inline
+In-Reply-To: <YeA7CjOyJFkpuhz/@sirena.org.uk>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-LiteX (https://github.com/enjoy-digital/litex) is a SoC framework
-that targets FPGAs. LiteSDCard is a small footprint, configurable
-SDCard core commonly used in LiteX designs.
 
-The driver was first written in May 2020 and has been maintained
-cooperatively by the LiteX community. Thanks to all contributors!
+--u67rejkufwyzfqj2
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Co-developed-by: Kamil Rakoczy <krakoczy@antmicro.com>
-Signed-off-by: Kamil Rakoczy <krakoczy@antmicro.com>
-Co-developed-by: Maciej Dudek <mdudek@internships.antmicro.com>
-Signed-off-by: Maciej Dudek <mdudek@internships.antmicro.com>
-Co-developed-by: Paul Mackerras <paulus@ozlabs.org>
-Signed-off-by: Paul Mackerras <paulus@ozlabs.org>
-Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
-Reviewed-by: Joel Stanley <joel@jms.id.au>
-Reviewed-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+The subsystems regulator, clk and gpio have the concept of a dummy
+resource. For regulator, clk and gpio there is a semantic difference
+between the regular _get() function and the _get_optional() variant.
+(One might return the dummy resource, the other won't. Unfortunately
+which one implements which isn't the same for these three.) The
+difference between platform_get_irq() and platform_get_irq_optional() is
+only that the former might emit an error message and the later won't.
+
+To prevent people's expectations that there is a semantic difference
+between these too, rename platform_get_irq_optional() to
+platform_get_irq_silent() to make the actual difference more obvious.
+
+The #define for the old name can and should be removed once all patches
+currently in flux still relying on platform_get_irq_optional() are
+fixed.
+
+Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
 ---
+Hello,
 
-New in v14:
-  n/a
+On Thu, Jan 13, 2022 at 02:45:30PM +0000, Mark Brown wrote:
+> On Thu, Jan 13, 2022 at 12:08:31PM +0100, Uwe Kleine-K=F6nig wrote:
+>=20
+> > This is all very unfortunate. In my eyes b) is the most sensible
+> > sense, but the past showed that we don't agree here. (The most annoying
+> > part of regulator_get is the warning that is emitted that regularily
+> > makes customers ask what happens here and if this is fixable.)
+>=20
+> Fortunately it can be fixed, and it's safer to clearly specify things.
+> The prints are there because when the description is wrong enough to
+> cause things to blow up we can fail to boot or run messily and
+> forgetting to describe some supplies (or typoing so they haven't done
+> that) and people were having a hard time figuring out what might've
+> happened.
 
->New in v13:
->drivers/mmc/host/Kconfig:
->  - add dependency on REGULATOR, REGULATOR_FIXED_VOLTAGE
->drivers/mmc/host/litex_mmc.c:
->  - use `mmc_regulator_get_supply()`, with fallback to hardcoded 3.3V
->
->>New in v12:
->>drivers/mmc/host/Kconfig:
->>  - add dependency on HAVE_CLK for litex_mmc driver
->>  - (re) add "If unsure, say N" to the litex_mmc driver help message
->>drivers/mmc/host/litex_mmc.c:
->>  - prints message using dev_info() before returning success from probe()
->>
->>>New in v11:
->>>  - picked up r/b from Andy
->>>drivers/mmc/host/litex_mmc.c:
->>>  - defensive coding of litex_mmc_interrupt() return logic
->>>  - remove `dev` member of `struct litex_mmc_host`, only used during probe
->>>
->>>>New in v10:
->>>>drivers/mmc/host/litex_mmc.c:
->>>>  - group `linux/mmc/*` includes by themselves
->>>>  - clean-up of `return` style (multiple locations throughout source)
->>>>  - create `mmc_free_host()` wrapper for use with 
->>>>    `devm_add_action_or_reset()`
->>>>  - use GFP_KERNEL with `dmam_alloc_coherent()`
->>>>
->>>>>New in v9:
->>>>>drivers/mmc/host/Kconfig:
->>>>>  - fix OF dependency
->>>>>drivers/mmc/host/litex_mmc.c:
->>>>>  - remove `linux/of.h` include, no longer needed since dropping
->>>>>    `of_match_ptr()`
->>>>>  - add `linux/mod_devicetable.h` include
->>>>>  - use devm_action_or_reset() to devm-ify mmc_alloc_host(), and obviate
->>>>>    the need to call mmc_free_host() explicitly during either probe()
->>>>>    error path or during remove()
->>>>>
->>>>>>New in v8:
->>>>>>  - remove `Cc:` lines from commit blurb
->>>>>>drivers/mmc/host/litex_mmc.c:
->>>>>>  - fix file header comment (for real, this time)
->>>>>>  - add explicit `bits.h` include
->>>>>>  - remove `of_match_ptr()` wrapper from around .of_match_table argument
->>>>>>  - fix devm ordering issues: use `devm_request_irq()`, which precludes
->>>>>>    the need to call `free_irq()` on `probe()` error path or from `remove()`
->>>>>>
->>>>>>>New in v7:
->>>>>>>drivers/mmc/host/Kconfig:
->>>>>>>  - added module name in LiteSDCard Kconfig entry
->>>>>>>drivers/mmc/host/litex_mmc.c:
->>>>>>>  - fixed comment formatting, ordering, and capitalization throughout
->>>>>>>    the entire file
->>>>>>>  - sorted header #include statements
->>>>>>>  - removed redundant parantheses in readx_poll_timeout() condition
->>>>>>>  - explicit handling of readx_poll_timeout() timeout scenarios
->>>>>>>  - dev_err() used in litex_mmc_sdcard_wait_done()
->>>>>>>  - use memcpy_fromio() to grab command response
->>>>>>>  - no need to apply 0xffff mask to a 32-bit value right-shifted by 16
->>>>>>>    (host->resp[3])
->>>>>>>  - use clamp() instead of min(max(...)...)
->>>>>>>  - reworked platform_get_irq_optional() error handling logic
->>>>>>>  - no need to explicitly zero host->irq, kzalloc() does that already
->>>>>>>  - added missing free_irq() in litex_mmc_probe() error path
->>>>>>>  - reordered calls inside litex_mmc_remove() (calling mmc_free_host()
->>>>>>>    before free_irq()
->>>>>>>
->>>>>>>>New in v6:
->>>>>>>>  - fix handling of deferred probe vs. platform_get_irq_optional()
->>>>>>>>  - don't #ifdef dma_set_mask_and_coherent(), since it automatically
->>>>>>>>    does the right thing on both 32- and 64-bit DMA capable arches
->>>>>>>>  - remove MMC_CAP2_FULL_PWR_CYCLE, add MMC_CAP2_NO_MMC to list of
->>>>>>>>    hardcoded capabilities during litex_mmc_probe()
->>>>>>>>  - hardcode mmc->ocr_avail to the full 2.7-3.6V range allowed by the
->>>>>>>>    SDCard spec (the LiteSDCard device doesn't accept software
->>>>>>>>    configuration)
->>>>>>>>
->>>>>>>>>New in v5:
->>>>>>>>>  - shorter #define constant names (cosmetic, make them less unwieldy)
->>>>>>>>>  - picked up reviewed-by Joel
->>>>>>>>>
->>>>>>>>>>New in v4:
->>>>>>>>>>  - struct litex_mmc_host fields re-ordered so that `pahole` reports
->>>>>>>>>>    no holes on either 32- or 64-bit builds
->>>>>>>>>>  - litex_mmc_set_bus_width() now encapsulates check for
->>>>>>>>>>    host->is_bus_width_set
->>>>>>>>>>  - litex_mmc_request() - factor out dma data setup into separate
->>>>>>>>>>    helper function: litex_mmc_do_dma()
->>>>>>>>>>
->>>>>>>>>>> New in v3:
->>>>>>>>>>>   - fixed function signature (no line split), and naming (litex_mmc_*)
->>>>>>>>>>>   - more informative MODULE_AUTHOR() entries
->>>>>>>>>>>     - also added matching "Copyright" entries in file header
->>>>>>>>>>>   - fixed description and dependencies in Kconfig
->>>>>>>>>>>   - removed magic constants
->>>>>>>>>>>   - removed litex_map_status(), have sdcard_wait_done() return *real*
->>>>>>>>>>>     error codes directly instead.
->>>>>>>>>>>   - streamlined litex_mmc_reponse_len()
->>>>>>>>>>>   - call litex_mmc_set_bus_width() only once, and ensure it returns
->>>>>>>>>>>     correct error code(s)
->>>>>>>>>>>   - use readx_poll_timeout() -- more concise -- instead of
->>>>>>>>>>>     read_poll_timeout()
->>>>>>>>>>>   - use dev_err() in litex_mmc_send_cmd() (instead of pr_err())
->>>>>>>>>>>   - litex_mmc_setclk() will update host->clock before returning
->>>>>>>>>>>   - separate irq initialization into its own function,
->>>>>>>>>>>     litex_mmc_irq_init()
->>>>>>>>>>>   - document rationale for f_min, f_max
->>>>>>>>>>>   - use dmam_alloc_coherent(), which simplifies cleanup significantly
->>>>>>>>>>>   - bump dma_set_mask_and_coherent() to 64-bits on suitable
->>>>>>>>>>>     architectures
->>>>>>>>>>>   - clock source picked up from dedicated DT clock reference property
->>>>>>>>>>>   - remove gpio card-detect logic (needs testing and a dt binding
->>>>>>>>>>>     example before being eligible for upstream inclusion)
->>>>>>>>>>>   - large `if (data) { ... }` block in litex_mmc_request() left as-is,
->>>>>>>>>>>     there are too many variables shared with the rest of the parent
->>>>>>>>>>>     function body to easily separate (e.g., `len`, `transfer`, `direct`).
->>>>>>>>>>>     If this is indeed a blocker, I can take another shot at refactoring
->>>>>>>>>>>     it in a future revision!
+Yes, that's right. I sent a patch for such a warning in 2019 and pinged
+occationally. Still waiting for it to be merged :-\
+(https://lore.kernel.org/r/20190625100412.11815-1-u.kleine-koenig@pengutron=
+ix.de)
 
- drivers/mmc/host/Kconfig     |  13 +
- drivers/mmc/host/Makefile    |   1 +
- drivers/mmc/host/litex_mmc.c | 661 +++++++++++++++++++++++++++++++++++
- 3 files changed, 675 insertions(+)
- create mode 100644 drivers/mmc/host/litex_mmc.c
+> > I think at least c) is easy to resolve because
+> > platform_get_irq_optional() isn't that old yet and mechanically
+> > replacing it by platform_get_irq_silent() should be easy and safe.
+> > And this is orthogonal to the discussion if -ENOXIO is a sensible return
+> > value and if it's as easy as it could be to work with errors on irq
+> > lookups.
+>=20
+> It'd certainly be good to name anything that doesn't correspond to one
+> of the existing semantics for the API (!) something different rather
+> than adding yet another potentially overloaded meaning.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 52b0b27a6839..af6c3c329076 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1094,3 +1094,16 @@ config MMC_OWL
- 
- config MMC_SDHCI_EXTERNAL_DMA
- 	bool
+It seems we're (at least) three who agree about this. Here is a patch
+fixing the name.
+
+Best regards
+Uwe
+
+ drivers/base/platform.c                           | 12 ++++++------
+ drivers/char/ipmi/bt-bmc.c                        |  2 +-
+ drivers/char/ipmi/ipmi_si_platform.c              |  4 ++--
+ drivers/char/tpm/tpm_tis.c                        |  2 +-
+ drivers/counter/interrupt-cnt.c                   |  2 +-
+ drivers/cpufreq/qcom-cpufreq-hw.c                 |  2 +-
+ drivers/dma/mmp_pdma.c                            |  2 +-
+ drivers/edac/xgene_edac.c                         |  2 +-
+ drivers/gpio/gpio-altera.c                        |  2 +-
+ drivers/gpio/gpio-dwapb.c                         |  2 +-
+ drivers/gpio/gpio-mvebu.c                         |  2 +-
+ drivers/gpio/gpio-realtek-otto.c                  |  2 +-
+ drivers/gpio/gpio-tqmx86.c                        |  2 +-
+ drivers/gpio/gpio-xilinx.c                        |  2 +-
+ drivers/gpu/drm/v3d/v3d_irq.c                     |  2 +-
+ drivers/i2c/busses/i2c-brcmstb.c                  |  2 +-
+ drivers/i2c/busses/i2c-ocores.c                   |  2 +-
+ drivers/i2c/busses/i2c-pca-platform.c             |  2 +-
+ drivers/irqchip/irq-renesas-intc-irqpin.c         |  2 +-
+ drivers/irqchip/irq-renesas-irqc.c                |  2 +-
+ drivers/mfd/intel_pmc_bxt.c                       |  2 +-
+ drivers/mmc/host/sh_mmcif.c                       |  2 +-
+ drivers/mtd/nand/raw/brcmnand/brcmnand.c          |  2 +-
+ drivers/mtd/nand/raw/renesas-nand-controller.c    |  2 +-
+ drivers/net/ethernet/broadcom/genet/bcmgenet.c    |  2 +-
+ drivers/net/ethernet/davicom/dm9000.c             |  2 +-
+ drivers/net/ethernet/freescale/fec_ptp.c          |  2 +-
+ drivers/net/ethernet/marvell/mvmdio.c             |  2 +-
+ drivers/net/ethernet/ti/davinci_emac.c            |  2 +-
+ drivers/net/ethernet/xilinx/xilinx_axienet_main.c |  4 ++--
+ drivers/perf/arm_smmuv3_pmu.c                     |  2 +-
+ drivers/phy/renesas/phy-rcar-gen3-usb2.c          |  2 +-
+ drivers/pinctrl/bcm/pinctrl-iproc-gpio.c          |  2 +-
+ drivers/pinctrl/intel/pinctrl-baytrail.c          |  2 +-
+ drivers/pinctrl/intel/pinctrl-lynxpoint.c         |  2 +-
+ drivers/pinctrl/pinctrl-keembay.c                 |  2 +-
+ drivers/pinctrl/samsung/pinctrl-samsung.c         |  2 +-
+ drivers/platform/chrome/cros_ec_lpc.c             |  2 +-
+ drivers/platform/x86/hp_accel.c                   |  2 +-
+ drivers/platform/x86/intel/punit_ipc.c            |  2 +-
+ drivers/platform/x86/intel_scu_pltdrv.c           |  2 +-
+ drivers/power/supply/mp2629_charger.c             |  2 +-
+ drivers/rtc/rtc-m48t59.c                          |  2 +-
+ drivers/spi/spi-hisi-sfc-v3xx.c                   |  2 +-
+ drivers/spi/spi-mtk-nor.c                         |  2 +-
+ drivers/thermal/rcar_gen3_thermal.c               |  2 +-
+ drivers/tty/serial/8250/8250_mtk.c                |  2 +-
+ drivers/tty/serial/altera_jtaguart.c              |  2 +-
+ drivers/tty/serial/altera_uart.c                  |  2 +-
+ drivers/tty/serial/imx.c                          |  4 ++--
+ drivers/tty/serial/qcom_geni_serial.c             |  2 +-
+ drivers/tty/serial/sh-sci.c                       |  2 +-
+ drivers/uio/uio_pdrv_genirq.c                     |  2 +-
+ drivers/usb/phy/phy-tegra-usb.c                   |  2 +-
+ drivers/vfio/platform/vfio_platform.c             |  2 +-
+ drivers/watchdog/dw_wdt.c                         |  2 +-
+ drivers/watchdog/orion_wdt.c                      |  4 ++--
+ drivers/watchdog/qcom-wdt.c                       |  2 +-
+ include/linux/platform_device.h                   |  9 ++++++++-
+ sound/soc/dwc/dwc-i2s.c                           |  2 +-
+ sound/soc/intel/keembay/kmb_platform.c            |  2 +-
+ 61 files changed, 77 insertions(+), 70 deletions(-)
+
+diff --git a/drivers/base/platform.c b/drivers/base/platform.c
+index 6cb04ac48bf0..acb9962b9889 100644
+--- a/drivers/base/platform.c
++++ b/drivers/base/platform.c
+@@ -149,7 +149,7 @@ EXPORT_SYMBOL_GPL(devm_platform_ioremap_resource_byname=
+);
+ #endif /* CONFIG_HAS_IOMEM */
+=20
+ /**
+- * platform_get_irq_optional - get an optional IRQ for a device
++ * platform_get_irq_silent - get an optional IRQ for a device
+  * @dev: platform device
+  * @num: IRQ number index
+  *
+@@ -160,13 +160,13 @@ EXPORT_SYMBOL_GPL(devm_platform_ioremap_resource_byna=
+me);
+  *
+  * For example::
+  *
+- *		int irq =3D platform_get_irq_optional(pdev, 0);
++ *		int irq =3D platform_get_irq_silent(pdev, 0);
+  *		if (irq < 0)
+  *			return irq;
+  *
+  * Return: non-zero IRQ number on success, negative error number on failur=
+e.
+  */
+-int platform_get_irq_optional(struct platform_device *dev, unsigned int nu=
+m)
++int platform_get_irq_silent(struct platform_device *dev, unsigned int num)
+ {
+ 	int ret;
+ #ifdef CONFIG_SPARC
+@@ -234,7 +234,7 @@ int platform_get_irq_optional(struct platform_device *d=
+ev, unsigned int num)
+ 	WARN(ret =3D=3D 0, "0 is an invalid IRQ number\n");
+ 	return ret;
+ }
+-EXPORT_SYMBOL_GPL(platform_get_irq_optional);
++EXPORT_SYMBOL_GPL(platform_get_irq_silent);
+=20
+ /**
+  * platform_get_irq - get an IRQ for a device
+@@ -257,7 +257,7 @@ int platform_get_irq(struct platform_device *dev, unsig=
+ned int num)
+ {
+ 	int ret;
+=20
+-	ret =3D platform_get_irq_optional(dev, num);
++	ret =3D platform_get_irq_silent(dev, num);
+ 	if (ret < 0)
+ 		return dev_err_probe(&dev->dev, ret,
+ 				     "IRQ index %u not found\n", num);
+@@ -276,7 +276,7 @@ int platform_irq_count(struct platform_device *dev)
+ {
+ 	int ret, nr =3D 0;
+=20
+-	while ((ret =3D platform_get_irq_optional(dev, nr)) >=3D 0)
++	while ((ret =3D platform_get_irq_silent(dev, nr)) >=3D 0)
+ 		nr++;
+=20
+ 	if (ret =3D=3D -EPROBE_DEFER)
+diff --git a/drivers/char/ipmi/bt-bmc.c b/drivers/char/ipmi/bt-bmc.c
+index 7450904e330a..73bdbc59c9d0 100644
+--- a/drivers/char/ipmi/bt-bmc.c
++++ b/drivers/char/ipmi/bt-bmc.c
+@@ -379,7 +379,7 @@ static int bt_bmc_config_irq(struct bt_bmc *bt_bmc,
+ 	int rc;
+ 	u32 reg;
+=20
+-	bt_bmc->irq =3D platform_get_irq_optional(pdev, 0);
++	bt_bmc->irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (bt_bmc->irq < 0)
+ 		return bt_bmc->irq;
+=20
+diff --git a/drivers/char/ipmi/ipmi_si_platform.c b/drivers/char/ipmi/ipmi_=
+si_platform.c
+index 505cc978c97a..4c666eed24d9 100644
+--- a/drivers/char/ipmi/ipmi_si_platform.c
++++ b/drivers/char/ipmi/ipmi_si_platform.c
+@@ -192,7 +192,7 @@ static int platform_ipmi_probe(struct platform_device *=
+pdev)
+ 	else
+ 		io.slave_addr =3D slave_addr;
+=20
+-	io.irq =3D platform_get_irq_optional(pdev, 0);
++	io.irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (io.irq > 0)
+ 		io.irq_setup =3D ipmi_std_irq_setup;
+ 	else
+@@ -368,7 +368,7 @@ static int acpi_ipmi_probe(struct platform_device *pdev)
+ 		io.irq =3D tmp;
+ 		io.irq_setup =3D acpi_gpe_irq_setup;
+ 	} else {
+-		int irq =3D platform_get_irq_optional(pdev, 0);
++		int irq =3D platform_get_irq_silent(pdev, 0);
+=20
+ 		if (irq > 0) {
+ 			io.irq =3D irq;
+diff --git a/drivers/char/tpm/tpm_tis.c b/drivers/char/tpm/tpm_tis.c
+index d3f2e5364c27..3e6785ad62f2 100644
+--- a/drivers/char/tpm/tpm_tis.c
++++ b/drivers/char/tpm/tpm_tis.c
+@@ -318,7 +318,7 @@ static int tpm_tis_plat_probe(struct platform_device *p=
+dev)
+ 	}
+ 	tpm_info.res =3D *res;
+=20
+-	tpm_info.irq =3D platform_get_irq_optional(pdev, 0);
++	tpm_info.irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (tpm_info.irq <=3D 0) {
+ 		if (pdev !=3D force_pdev)
+ 			tpm_info.irq =3D -1;
+diff --git a/drivers/counter/interrupt-cnt.c b/drivers/counter/interrupt-cn=
+t.c
+index 8514a87fcbee..65b9254e63a9 100644
+--- a/drivers/counter/interrupt-cnt.c
++++ b/drivers/counter/interrupt-cnt.c
+@@ -155,7 +155,7 @@ static int interrupt_cnt_probe(struct platform_device *=
+pdev)
+ 	if (!priv)
+ 		return -ENOMEM;
+=20
+-	priv->irq =3D platform_get_irq_optional(pdev,  0);
++	priv->irq =3D platform_get_irq_silent(pdev,  0);
+ 	if (priv->irq =3D=3D -ENXIO)
+ 		priv->irq =3D 0;
+ 	else if (priv->irq < 0)
+diff --git a/drivers/cpufreq/qcom-cpufreq-hw.c b/drivers/cpufreq/qcom-cpufr=
+eq-hw.c
+index 05f3d7876e44..3d1fe9ba98a7 100644
+--- a/drivers/cpufreq/qcom-cpufreq-hw.c
++++ b/drivers/cpufreq/qcom-cpufreq-hw.c
+@@ -374,7 +374,7 @@ static int qcom_cpufreq_hw_lmh_init(struct cpufreq_poli=
+cy *policy, int index)
+ 	 * Look for LMh interrupt. If no interrupt line is specified /
+ 	 * if there is an error, allow cpufreq to be enabled as usual.
+ 	 */
+-	data->throttle_irq =3D platform_get_irq_optional(pdev, index);
++	data->throttle_irq =3D platform_get_irq_silent(pdev, index);
+ 	if (data->throttle_irq =3D=3D -ENXIO)
+ 		return 0;
+ 	if (data->throttle_irq < 0)
+diff --git a/drivers/dma/mmp_pdma.c b/drivers/dma/mmp_pdma.c
+index a23563cd118b..707ac21652a6 100644
+--- a/drivers/dma/mmp_pdma.c
++++ b/drivers/dma/mmp_pdma.c
+@@ -1059,7 +1059,7 @@ static int mmp_pdma_probe(struct platform_device *op)
+ 	pdev->dma_channels =3D dma_channels;
+=20
+ 	for (i =3D 0; i < dma_channels; i++) {
+-		if (platform_get_irq_optional(op, i) > 0)
++		if (platform_get_irq_silent(op, i) > 0)
+ 			irq_num++;
+ 	}
+=20
+diff --git a/drivers/edac/xgene_edac.c b/drivers/edac/xgene_edac.c
+index 2ccd1db5e98f..87aa537f3b72 100644
+--- a/drivers/edac/xgene_edac.c
++++ b/drivers/edac/xgene_edac.c
+@@ -1916,7 +1916,7 @@ static int xgene_edac_probe(struct platform_device *p=
+dev)
+ 		int i;
+=20
+ 		for (i =3D 0; i < 3; i++) {
+-			irq =3D platform_get_irq_optional(pdev, i);
++			irq =3D platform_get_irq_silent(pdev, i);
+ 			if (irq < 0) {
+ 				dev_err(&pdev->dev, "No IRQ resource\n");
+ 				rc =3D -EINVAL;
+diff --git a/drivers/gpio/gpio-altera.c b/drivers/gpio/gpio-altera.c
+index b59fae993626..a1a7d8c0ef13 100644
+--- a/drivers/gpio/gpio-altera.c
++++ b/drivers/gpio/gpio-altera.c
+@@ -266,7 +266,7 @@ static int altera_gpio_probe(struct platform_device *pd=
+ev)
+ 	altera_gc->mmchip.gc.owner		=3D THIS_MODULE;
+ 	altera_gc->mmchip.gc.parent		=3D &pdev->dev;
+=20
+-	altera_gc->mapped_irq =3D platform_get_irq_optional(pdev, 0);
++	altera_gc->mapped_irq =3D platform_get_irq_silent(pdev, 0);
+=20
+ 	if (altera_gc->mapped_irq < 0)
+ 		goto skip_irq;
+diff --git a/drivers/gpio/gpio-dwapb.c b/drivers/gpio/gpio-dwapb.c
+index b0f3aca61974..133153a40808 100644
+--- a/drivers/gpio/gpio-dwapb.c
++++ b/drivers/gpio/gpio-dwapb.c
+@@ -543,7 +543,7 @@ static void dwapb_get_irq(struct device *dev, struct fw=
+node_handle *fwnode,
+=20
+ 	for (j =3D 0; j < pp->ngpio; j++) {
+ 		if (has_acpi_companion(dev))
+-			irq =3D platform_get_irq_optional(to_platform_device(dev), j);
++			irq =3D platform_get_irq_silent(to_platform_device(dev), j);
+ 		else
+ 			irq =3D fwnode_irq_get(fwnode, j);
+ 		if (irq > 0)
+diff --git a/drivers/gpio/gpio-mvebu.c b/drivers/gpio/gpio-mvebu.c
+index 4c1f9e1091b7..eaaf6fd54d79 100644
+--- a/drivers/gpio/gpio-mvebu.c
++++ b/drivers/gpio/gpio-mvebu.c
+@@ -1291,7 +1291,7 @@ static int mvebu_gpio_probe(struct platform_device *p=
+dev)
+ 	 * pins.
+ 	 */
+ 	for (i =3D 0; i < 4; i++) {
+-		int irq =3D platform_get_irq_optional(pdev, i);
++		int irq =3D platform_get_irq_silent(pdev, i);
+=20
+ 		if (irq < 0)
+ 			continue;
+diff --git a/drivers/gpio/gpio-realtek-otto.c b/drivers/gpio/gpio-realtek-o=
+tto.c
+index bd75401b549d..b945049c1a39 100644
+--- a/drivers/gpio/gpio-realtek-otto.c
++++ b/drivers/gpio/gpio-realtek-otto.c
+@@ -289,7 +289,7 @@ static int realtek_gpio_probe(struct platform_device *p=
+dev)
+ 	ctrl->gc.ngpio =3D ngpios;
+ 	ctrl->gc.owner =3D THIS_MODULE;
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (!(dev_flags & GPIO_INTERRUPTS_DISABLED) && irq > 0) {
+ 		girq =3D &ctrl->gc.irq;
+ 		girq->chip =3D &realtek_gpio_irq_chip;
+diff --git a/drivers/gpio/gpio-tqmx86.c b/drivers/gpio/gpio-tqmx86.c
+index 5b103221b58d..16afb563f813 100644
+--- a/drivers/gpio/gpio-tqmx86.c
++++ b/drivers/gpio/gpio-tqmx86.c
+@@ -236,7 +236,7 @@ static int tqmx86_gpio_probe(struct platform_device *pd=
+ev)
+ 	struct resource *res;
+ 	int ret, irq;
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq < 0 && irq !=3D -ENXIO)
+ 		return irq;
+=20
+diff --git a/drivers/gpio/gpio-xilinx.c b/drivers/gpio/gpio-xilinx.c
+index b6d3a57e27ed..a451bd19d501 100644
+--- a/drivers/gpio/gpio-xilinx.c
++++ b/drivers/gpio/gpio-xilinx.c
+@@ -658,7 +658,7 @@ static int xgpio_probe(struct platform_device *pdev)
+=20
+ 	xgpio_save_regs(chip);
+=20
+-	chip->irq =3D platform_get_irq_optional(pdev, 0);
++	chip->irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (chip->irq <=3D 0)
+ 		goto skip_irq;
+=20
+diff --git a/drivers/gpu/drm/v3d/v3d_irq.c b/drivers/gpu/drm/v3d/v3d_irq.c
+index e714d5318f30..8c88a1958fd4 100644
+--- a/drivers/gpu/drm/v3d/v3d_irq.c
++++ b/drivers/gpu/drm/v3d/v3d_irq.c
+@@ -214,7 +214,7 @@ v3d_irq_init(struct v3d_dev *v3d)
+ 		V3D_CORE_WRITE(core, V3D_CTL_INT_CLR, V3D_CORE_IRQS);
+ 	V3D_WRITE(V3D_HUB_INT_CLR, V3D_HUB_IRQS);
+=20
+-	irq1 =3D platform_get_irq_optional(v3d_to_pdev(v3d), 1);
++	irq1 =3D platform_get_irq_silent(v3d_to_pdev(v3d), 1);
+ 	if (irq1 =3D=3D -EPROBE_DEFER)
+ 		return irq1;
+ 	if (irq1 > 0) {
+diff --git a/drivers/i2c/busses/i2c-brcmstb.c b/drivers/i2c/busses/i2c-brcm=
+stb.c
+index 490ee3962645..0e53d149a207 100644
+--- a/drivers/i2c/busses/i2c-brcmstb.c
++++ b/drivers/i2c/busses/i2c-brcmstb.c
+@@ -646,7 +646,7 @@ static int brcmstb_i2c_probe(struct platform_device *pd=
+ev)
+ 		int_name =3D NULL;
+=20
+ 	/* Get the interrupt number */
+-	dev->irq =3D platform_get_irq_optional(pdev, 0);
++	dev->irq =3D platform_get_irq_silent(pdev, 0);
+=20
+ 	/* disable the bsc interrupt line */
+ 	brcmstb_i2c_enable_disable_irq(dev, INT_DISABLE);
+diff --git a/drivers/i2c/busses/i2c-ocores.c b/drivers/i2c/busses/i2c-ocore=
+s.c
+index a0af027db04c..c6d21b833964 100644
+--- a/drivers/i2c/busses/i2c-ocores.c
++++ b/drivers/i2c/busses/i2c-ocores.c
+@@ -682,7 +682,7 @@ static int ocores_i2c_probe(struct platform_device *pde=
+v)
+=20
+ 	init_waitqueue_head(&i2c->wait);
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	/*
+ 	 * Since the SoC does have an interrupt, its DT has an interrupt
+ 	 * property - But this should be bypassed as the IRQ logic in this
+diff --git a/drivers/i2c/busses/i2c-pca-platform.c b/drivers/i2c/busses/i2c=
+-pca-platform.c
+index 86d4f75ef8d3..783b474097f7 100644
+--- a/drivers/i2c/busses/i2c-pca-platform.c
++++ b/drivers/i2c/busses/i2c-pca-platform.c
+@@ -138,7 +138,7 @@ static int i2c_pca_pf_probe(struct platform_device *pde=
+v)
+ 	int ret =3D 0;
+ 	int irq;
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	/* If irq is 0, we do polling. */
+ 	if (irq < 0)
+ 		irq =3D 0;
+diff --git a/drivers/irqchip/irq-renesas-intc-irqpin.c b/drivers/irqchip/ir=
+q-renesas-intc-irqpin.c
+index 37f9a4499fdb..934669b20d0d 100644
+--- a/drivers/irqchip/irq-renesas-intc-irqpin.c
++++ b/drivers/irqchip/irq-renesas-intc-irqpin.c
+@@ -417,7 +417,7 @@ static int intc_irqpin_probe(struct platform_device *pd=
+ev)
+=20
+ 	/* allow any number of IRQs between 1 and INTC_IRQPIN_MAX */
+ 	for (k =3D 0; k < INTC_IRQPIN_MAX; k++) {
+-		ret =3D platform_get_irq_optional(pdev, k);
++		ret =3D platform_get_irq_silent(pdev, k);
+ 		if (ret =3D=3D -ENXIO)
+ 			break;
+ 		if (ret < 0)
+diff --git a/drivers/irqchip/irq-renesas-irqc.c b/drivers/irqchip/irq-renes=
+as-irqc.c
+index 909325f88239..95ff42746e95 100644
+--- a/drivers/irqchip/irq-renesas-irqc.c
++++ b/drivers/irqchip/irq-renesas-irqc.c
+@@ -141,7 +141,7 @@ static int irqc_probe(struct platform_device *pdev)
+=20
+ 	/* allow any number of IRQs between 1 and IRQC_IRQ_MAX */
+ 	for (k =3D 0; k < IRQC_IRQ_MAX; k++) {
+-		ret =3D platform_get_irq_optional(pdev, k);
++		ret =3D platform_get_irq_silent(pdev, k);
+ 		if (ret =3D=3D -ENXIO)
+ 			break;
+ 		if (ret < 0)
+diff --git a/drivers/mfd/intel_pmc_bxt.c b/drivers/mfd/intel_pmc_bxt.c
+index 9f01d38acc7f..dc58dfd87043 100644
+--- a/drivers/mfd/intel_pmc_bxt.c
++++ b/drivers/mfd/intel_pmc_bxt.c
+@@ -309,7 +309,7 @@ static int intel_pmc_get_resources(struct platform_devi=
+ce *pdev,
+ 	struct resource *res;
+ 	int ret;
+=20
+-	scu_data->irq =3D platform_get_irq_optional(pdev, 0);
++	scu_data->irq =3D platform_get_irq_silent(pdev, 0);
+=20
+ 	res =3D platform_get_resource(pdev, IORESOURCE_MEM,
+ 				    PLAT_RESOURCE_IPC_INDEX);
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index bcc595c70a9f..aa5579520b06 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1396,7 +1396,7 @@ static int sh_mmcif_probe(struct platform_device *pde=
+v)
+ 	const char *name;
+=20
+ 	irq[0] =3D platform_get_irq(pdev, 0);
+-	irq[1] =3D platform_get_irq_optional(pdev, 1);
++	irq[1] =3D platform_get_irq_silent(pdev, 1);
+ 	if (irq[0] < 0)
+ 		return -ENXIO;
+=20
+diff --git a/drivers/mtd/nand/raw/brcmnand/brcmnand.c b/drivers/mtd/nand/ra=
+w/brcmnand/brcmnand.c
+index f75929783b94..2aa10a1755ba 100644
+--- a/drivers/mtd/nand/raw/brcmnand/brcmnand.c
++++ b/drivers/mtd/nand/raw/brcmnand/brcmnand.c
+@@ -2955,7 +2955,7 @@ static int brcmnand_edu_setup(struct platform_device =
+*pdev)
+ 		/* initialize edu */
+ 		brcmnand_edu_init(ctrl);
+=20
+-		ctrl->edu_irq =3D platform_get_irq_optional(pdev, 1);
++		ctrl->edu_irq =3D platform_get_irq_silent(pdev, 1);
+ 		if (ctrl->edu_irq < 0) {
+ 			dev_warn(dev,
+ 				 "FLASH EDU enabled, using ctlrdy irq\n");
+diff --git a/drivers/mtd/nand/raw/renesas-nand-controller.c b/drivers/mtd/n=
+and/raw/renesas-nand-controller.c
+index 428e08362956..c33958bda059 100644
+--- a/drivers/mtd/nand/raw/renesas-nand-controller.c
++++ b/drivers/mtd/nand/raw/renesas-nand-controller.c
+@@ -1354,7 +1354,7 @@ static int rnandc_probe(struct platform_device *pdev)
+ 		goto disable_hclk;
+=20
+ 	rnandc_dis_interrupts(rnandc);
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq =3D=3D -EPROBE_DEFER) {
+ 		ret =3D irq;
+ 		goto disable_eclk;
+diff --git a/drivers/net/ethernet/broadcom/genet/bcmgenet.c b/drivers/net/e=
+thernet/broadcom/genet/bcmgenet.c
+index 226f4403cfed..4cfc62a5380a 100644
+--- a/drivers/net/ethernet/broadcom/genet/bcmgenet.c
++++ b/drivers/net/ethernet/broadcom/genet/bcmgenet.c
+@@ -3989,7 +3989,7 @@ static int bcmgenet_probe(struct platform_device *pde=
+v)
+ 		err =3D priv->irq1;
+ 		goto err;
+ 	}
+-	priv->wol_irq =3D platform_get_irq_optional(pdev, 2);
++	priv->wol_irq =3D platform_get_irq_silent(pdev, 2);
+=20
+ 	priv->base =3D devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(priv->base)) {
+diff --git a/drivers/net/ethernet/davicom/dm9000.c b/drivers/net/ethernet/d=
+avicom/dm9000.c
+index 0985ab216566..43f181e13bab 100644
+--- a/drivers/net/ethernet/davicom/dm9000.c
++++ b/drivers/net/ethernet/davicom/dm9000.c
+@@ -1508,7 +1508,7 @@ dm9000_probe(struct platform_device *pdev)
+ 		goto out;
+ 	}
+=20
+-	db->irq_wake =3D platform_get_irq_optional(pdev, 1);
++	db->irq_wake =3D platform_get_irq_silent(pdev, 1);
+ 	if (db->irq_wake >=3D 0) {
+ 		dev_dbg(db->dev, "wakeup irq %d\n", db->irq_wake);
+=20
+diff --git a/drivers/net/ethernet/freescale/fec_ptp.c b/drivers/net/etherne=
+t/freescale/fec_ptp.c
+index af99017a5453..dc65bb1caad4 100644
+--- a/drivers/net/ethernet/freescale/fec_ptp.c
++++ b/drivers/net/ethernet/freescale/fec_ptp.c
+@@ -612,7 +612,7 @@ void fec_ptp_init(struct platform_device *pdev, int irq=
+_idx)
+=20
+ 	irq =3D platform_get_irq_byname_optional(pdev, "pps");
+ 	if (irq < 0)
+-		irq =3D platform_get_irq_optional(pdev, irq_idx);
++		irq =3D platform_get_irq_silent(pdev, irq_idx);
+ 	/* Failure to get an irq is not fatal,
+ 	 * only the PTP_CLOCK_PPS clock events should stop
+ 	 */
+diff --git a/drivers/net/ethernet/marvell/mvmdio.c b/drivers/net/ethernet/m=
+arvell/mvmdio.c
+index ef878973b859..cdf4ff41bd66 100644
+--- a/drivers/net/ethernet/marvell/mvmdio.c
++++ b/drivers/net/ethernet/marvell/mvmdio.c
+@@ -349,7 +349,7 @@ static int orion_mdio_probe(struct platform_device *pde=
+v)
+ 	}
+=20
+=20
+-	dev->err_interrupt =3D platform_get_irq_optional(pdev, 0);
++	dev->err_interrupt =3D platform_get_irq_silent(pdev, 0);
+ 	if (dev->err_interrupt > 0 &&
+ 	    resource_size(r) < MVMDIO_ERR_INT_MASK + 4) {
+ 		dev_err(&pdev->dev,
+diff --git a/drivers/net/ethernet/ti/davinci_emac.c b/drivers/net/ethernet/=
+ti/davinci_emac.c
+index 31df3267a01a..30d5a785d485 100644
+--- a/drivers/net/ethernet/ti/davinci_emac.c
++++ b/drivers/net/ethernet/ti/davinci_emac.c
+@@ -1455,7 +1455,7 @@ static int emac_dev_open(struct net_device *ndev)
+=20
+ 	/* Request IRQ */
+ 	if (dev_of_node(&priv->pdev->dev)) {
+-		while ((ret =3D platform_get_irq_optional(priv->pdev, res_num)) !=3D -EN=
+XIO) {
++		while ((ret =3D platform_get_irq_silent(priv->pdev, res_num)) !=3D -ENXI=
+O) {
+ 			if (ret < 0)
+ 				goto rollback;
+=20
+diff --git a/drivers/net/ethernet/xilinx/xilinx_axienet_main.c b/drivers/ne=
+t/ethernet/xilinx/xilinx_axienet_main.c
+index 23ac353b35fe..5be7e93d4087 100644
+--- a/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
++++ b/drivers/net/ethernet/xilinx/xilinx_axienet_main.c
+@@ -1961,13 +1961,13 @@ static int axienet_probe(struct platform_device *pd=
+ev)
+ 		lp->rx_irq =3D irq_of_parse_and_map(np, 1);
+ 		lp->tx_irq =3D irq_of_parse_and_map(np, 0);
+ 		of_node_put(np);
+-		lp->eth_irq =3D platform_get_irq_optional(pdev, 0);
++		lp->eth_irq =3D platform_get_irq_silent(pdev, 0);
+ 	} else {
+ 		/* Check for these resources directly on the Ethernet node. */
+ 		lp->dma_regs =3D devm_platform_get_and_ioremap_resource(pdev, 1, NULL);
+ 		lp->rx_irq =3D platform_get_irq(pdev, 1);
+ 		lp->tx_irq =3D platform_get_irq(pdev, 0);
+-		lp->eth_irq =3D platform_get_irq_optional(pdev, 2);
++		lp->eth_irq =3D platform_get_irq_silent(pdev, 2);
+ 	}
+ 	if (IS_ERR(lp->dma_regs)) {
+ 		dev_err(&pdev->dev, "could not map DMA regs\n");
+diff --git a/drivers/perf/arm_smmuv3_pmu.c b/drivers/perf/arm_smmuv3_pmu.c
+index c49108a72865..c4a709470398 100644
+--- a/drivers/perf/arm_smmuv3_pmu.c
++++ b/drivers/perf/arm_smmuv3_pmu.c
+@@ -852,7 +852,7 @@ static int smmu_pmu_probe(struct platform_device *pdev)
+ 		smmu_pmu->reloc_base =3D smmu_pmu->reg_base;
+ 	}
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq > 0)
+ 		smmu_pmu->irq =3D irq;
+=20
+diff --git a/drivers/phy/renesas/phy-rcar-gen3-usb2.c b/drivers/phy/renesas=
+/phy-rcar-gen3-usb2.c
+index 9de617ca9daa..9cbd4e396f0f 100644
+--- a/drivers/phy/renesas/phy-rcar-gen3-usb2.c
++++ b/drivers/phy/renesas/phy-rcar-gen3-usb2.c
+@@ -672,7 +672,7 @@ static int rcar_gen3_phy_usb2_probe(struct platform_dev=
+ice *pdev)
+=20
+ 	channel->obint_enable_bits =3D USB2_OBINT_BITS;
+ 	/* get irq number here and request_irq for OTG in phy_init */
+-	channel->irq =3D platform_get_irq_optional(pdev, 0);
++	channel->irq =3D platform_get_irq_silent(pdev, 0);
+ 	channel->dr_mode =3D rcar_gen3_get_dr_mode(dev->of_node);
+ 	if (channel->dr_mode !=3D USB_DR_MODE_UNKNOWN) {
+ 		int ret;
+diff --git a/drivers/pinctrl/bcm/pinctrl-iproc-gpio.c b/drivers/pinctrl/bcm=
+/pinctrl-iproc-gpio.c
+index 52fa2f4cd618..1acf9355ab44 100644
+--- a/drivers/pinctrl/bcm/pinctrl-iproc-gpio.c
++++ b/drivers/pinctrl/bcm/pinctrl-iproc-gpio.c
+@@ -848,7 +848,7 @@ static int iproc_gpio_probe(struct platform_device *pde=
+v)
+ 							"gpio-ranges");
+=20
+ 	/* optional GPIO interrupt support */
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq > 0) {
+ 		struct irq_chip *irqc;
+ 		struct gpio_irq_chip *girq;
+diff --git a/drivers/pinctrl/intel/pinctrl-baytrail.c b/drivers/pinctrl/int=
+el/pinctrl-baytrail.c
+index 4c01333e1406..cc5a74aea6e5 100644
+--- a/drivers/pinctrl/intel/pinctrl-baytrail.c
++++ b/drivers/pinctrl/intel/pinctrl-baytrail.c
+@@ -1568,7 +1568,7 @@ static int byt_gpio_probe(struct intel_pinctrl *vg)
+ #endif
+=20
+ 	/* set up interrupts  */
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq > 0) {
+ 		struct gpio_irq_chip *girq;
+=20
+diff --git a/drivers/pinctrl/intel/pinctrl-lynxpoint.c b/drivers/pinctrl/in=
+tel/pinctrl-lynxpoint.c
+index 561fa322b0b4..984c5c0b4304 100644
+--- a/drivers/pinctrl/intel/pinctrl-lynxpoint.c
++++ b/drivers/pinctrl/intel/pinctrl-lynxpoint.c
+@@ -879,7 +879,7 @@ static int lp_gpio_probe(struct platform_device *pdev)
+ 	gc->parent =3D dev;
+=20
+ 	/* set up interrupts  */
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq > 0) {
+ 		struct gpio_irq_chip *girq;
+=20
+diff --git a/drivers/pinctrl/pinctrl-keembay.c b/drivers/pinctrl/pinctrl-ke=
+embay.c
+index 152c35bce8ec..628f642ec220 100644
+--- a/drivers/pinctrl/pinctrl-keembay.c
++++ b/drivers/pinctrl/pinctrl-keembay.c
+@@ -1490,7 +1490,7 @@ static int keembay_gpiochip_probe(struct keembay_pinc=
+trl *kpc,
+ 		struct keembay_gpio_irq *kmb_irq =3D &kpc->irq[i];
+ 		int irq;
+=20
+-		irq =3D platform_get_irq_optional(pdev, i);
++		irq =3D platform_get_irq_silent(pdev, i);
+ 		if (irq <=3D 0)
+ 			continue;
+=20
+diff --git a/drivers/pinctrl/samsung/pinctrl-samsung.c b/drivers/pinctrl/sa=
+msung/pinctrl-samsung.c
+index 0f6e9305fec5..47160ec0407c 100644
+--- a/drivers/pinctrl/samsung/pinctrl-samsung.c
++++ b/drivers/pinctrl/samsung/pinctrl-samsung.c
+@@ -1108,7 +1108,7 @@ static int samsung_pinctrl_probe(struct platform_devi=
+ce *pdev)
+ 	}
+ 	drvdata->dev =3D dev;
+=20
+-	ret =3D platform_get_irq_optional(pdev, 0);
++	ret =3D platform_get_irq_silent(pdev, 0);
+ 	if (ret < 0 && ret !=3D -ENXIO)
+ 		return ret;
+ 	if (ret > 0)
+diff --git a/drivers/platform/chrome/cros_ec_lpc.c b/drivers/platform/chrom=
+e/cros_ec_lpc.c
+index d6306d2a096f..30f06d4b6ad8 100644
+--- a/drivers/platform/chrome/cros_ec_lpc.c
++++ b/drivers/platform/chrome/cros_ec_lpc.c
+@@ -397,7 +397,7 @@ static int cros_ec_lpc_probe(struct platform_device *pd=
+ev)
+ 	 * Some boards do not have an IRQ allotted for cros_ec_lpc,
+ 	 * which makes ENXIO an expected (and safe) scenario.
+ 	 */
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq > 0)
+ 		ec_dev->irq =3D irq;
+ 	else if (irq !=3D -ENXIO) {
+diff --git a/drivers/platform/x86/hp_accel.c b/drivers/platform/x86/hp_acce=
+l.c
+index e9f852f7c27f..bffc9093a629 100644
+--- a/drivers/platform/x86/hp_accel.c
++++ b/drivers/platform/x86/hp_accel.c
+@@ -305,7 +305,7 @@ static int lis3lv02d_probe(struct platform_device *devi=
+ce)
+ 	lis3_dev.write =3D lis3lv02d_acpi_write;
+=20
+ 	/* obtain IRQ number of our device from ACPI */
+-	ret =3D platform_get_irq_optional(device, 0);
++	ret =3D platform_get_irq_silent(device, 0);
+ 	if (ret > 0)
+ 		lis3_dev.irq =3D ret;
+=20
+diff --git a/drivers/platform/x86/intel/punit_ipc.c b/drivers/platform/x86/=
+intel/punit_ipc.c
+index 66bb39fd0ef9..2f22d5de767a 100644
+--- a/drivers/platform/x86/intel/punit_ipc.c
++++ b/drivers/platform/x86/intel/punit_ipc.c
+@@ -277,7 +277,7 @@ static int intel_punit_ipc_probe(struct platform_device=
+ *pdev)
+=20
+ 	platform_set_drvdata(pdev, punit_ipcdev);
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq < 0) {
+ 		dev_warn(&pdev->dev, "Invalid IRQ, using polling mode\n");
+ 	} else {
+diff --git a/drivers/platform/x86/intel_scu_pltdrv.c b/drivers/platform/x86=
+/intel_scu_pltdrv.c
+index 56ec6ae4c824..2d3e5174da8e 100644
+--- a/drivers/platform/x86/intel_scu_pltdrv.c
++++ b/drivers/platform/x86/intel_scu_pltdrv.c
+@@ -23,7 +23,7 @@ static int intel_scu_platform_probe(struct platform_devic=
+e *pdev)
+ 	struct intel_scu_ipc_dev *scu;
+ 	const struct resource *res;
+=20
+-	scu_data.irq =3D platform_get_irq_optional(pdev, 0);
++	scu_data.irq =3D platform_get_irq_silent(pdev, 0);
+ 	res =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!res)
+ 		return -ENOMEM;
+diff --git a/drivers/power/supply/mp2629_charger.c b/drivers/power/supply/m=
+p2629_charger.c
+index bdf924b73e47..e279a4bdf6a4 100644
+--- a/drivers/power/supply/mp2629_charger.c
++++ b/drivers/power/supply/mp2629_charger.c
+@@ -580,7 +580,7 @@ static int mp2629_charger_probe(struct platform_device =
+*pdev)
+ 	charger->dev =3D dev;
+ 	platform_set_drvdata(pdev, charger);
+=20
+-	irq =3D platform_get_irq_optional(to_platform_device(dev->parent), 0);
++	irq =3D platform_get_irq_silent(to_platform_device(dev->parent), 0);
+ 	if (irq < 0) {
+ 		dev_err(dev, "get irq fail: %d\n", irq);
+ 		return irq;
+diff --git a/drivers/rtc/rtc-m48t59.c b/drivers/rtc/rtc-m48t59.c
+index f0f6b9b6daec..aebc8a73acfe 100644
+--- a/drivers/rtc/rtc-m48t59.c
++++ b/drivers/rtc/rtc-m48t59.c
+@@ -421,7 +421,7 @@ static int m48t59_rtc_probe(struct platform_device *pde=
+v)
+ 	/* Try to get irq number. We also can work in
+ 	 * the mode without IRQ.
+ 	 */
+-	m48t59->irq =3D platform_get_irq_optional(pdev, 0);
++	m48t59->irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (m48t59->irq <=3D 0)
+ 		m48t59->irq =3D NO_IRQ;
+=20
+diff --git a/drivers/spi/spi-hisi-sfc-v3xx.c b/drivers/spi/spi-hisi-sfc-v3x=
+x.c
+index d3a23b1c2a4c..76f4934a23e7 100644
+--- a/drivers/spi/spi-hisi-sfc-v3xx.c
++++ b/drivers/spi/spi-hisi-sfc-v3xx.c
+@@ -451,7 +451,7 @@ static int hisi_sfc_v3xx_probe(struct platform_device *=
+pdev)
+ 		goto err_put_master;
+ 	}
+=20
+-	host->irq =3D platform_get_irq_optional(pdev, 0);
++	host->irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (host->irq =3D=3D -EPROBE_DEFER) {
+ 		ret =3D -EPROBE_DEFER;
+ 		goto err_put_master;
+diff --git a/drivers/spi/spi-mtk-nor.c b/drivers/spi/spi-mtk-nor.c
+index 5c93730615f8..64aec31355bb 100644
+--- a/drivers/spi/spi-mtk-nor.c
++++ b/drivers/spi/spi-mtk-nor.c
+@@ -828,7 +828,7 @@ static int mtk_nor_probe(struct platform_device *pdev)
+=20
+ 	mtk_nor_init(sp);
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+=20
+ 	if (irq < 0) {
+ 		dev_warn(sp->dev, "IRQ not available.");
+diff --git a/drivers/thermal/rcar_gen3_thermal.c b/drivers/thermal/rcar_gen=
+3_thermal.c
+index 43eb25b167bc..ef6c6880a943 100644
+--- a/drivers/thermal/rcar_gen3_thermal.c
++++ b/drivers/thermal/rcar_gen3_thermal.c
+@@ -429,7 +429,7 @@ static int rcar_gen3_thermal_request_irqs(struct rcar_g=
+en3_thermal_priv *priv,
+ 	int ret, irq;
+=20
+ 	for (i =3D 0; i < 2; i++) {
+-		irq =3D platform_get_irq_optional(pdev, i);
++		irq =3D platform_get_irq_silent(pdev, i);
+ 		if (irq < 0)
+ 			return irq;
+=20
+diff --git a/drivers/tty/serial/8250/8250_mtk.c b/drivers/tty/serial/8250/8=
+250_mtk.c
+index fb65dc601b23..1f4cbe37627e 100644
+--- a/drivers/tty/serial/8250/8250_mtk.c
++++ b/drivers/tty/serial/8250/8250_mtk.c
+@@ -585,7 +585,7 @@ static int mtk8250_probe(struct platform_device *pdev)
+ 		goto err_pm_disable;
+ 	}
+=20
+-	data->rx_wakeup_irq =3D platform_get_irq_optional(pdev, 1);
++	data->rx_wakeup_irq =3D platform_get_irq_silent(pdev, 1);
+=20
+ 	return 0;
+=20
+diff --git a/drivers/tty/serial/altera_jtaguart.c b/drivers/tty/serial/alte=
+ra_jtaguart.c
+index 37bffe406b18..1cd2bdee3d40 100644
+--- a/drivers/tty/serial/altera_jtaguart.c
++++ b/drivers/tty/serial/altera_jtaguart.c
+@@ -439,7 +439,7 @@ static int altera_jtaguart_probe(struct platform_device=
+ *pdev)
+ 	else
+ 		return -ENODEV;
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq < 0 && irq !=3D -ENXIO)
+ 		return irq;
+ 	if (irq > 0)
+diff --git a/drivers/tty/serial/altera_uart.c b/drivers/tty/serial/altera_u=
+art.c
+index 64a352b40197..415883ccfbbd 100644
+--- a/drivers/tty/serial/altera_uart.c
++++ b/drivers/tty/serial/altera_uart.c
+@@ -576,7 +576,7 @@ static int altera_uart_probe(struct platform_device *pd=
+ev)
+ 	else
+ 		return -EINVAL;
+=20
+-	ret =3D platform_get_irq_optional(pdev, 0);
++	ret =3D platform_get_irq_silent(pdev, 0);
+ 	if (ret < 0 && ret !=3D -ENXIO)
+ 		return ret;
+ 	if (ret > 0)
+diff --git a/drivers/tty/serial/imx.c b/drivers/tty/serial/imx.c
+index df8a0c8b8b29..8791f51e52cb 100644
+--- a/drivers/tty/serial/imx.c
++++ b/drivers/tty/serial/imx.c
+@@ -2258,8 +2258,8 @@ static int imx_uart_probe(struct platform_device *pde=
+v)
+ 	rxirq =3D platform_get_irq(pdev, 0);
+ 	if (rxirq < 0)
+ 		return rxirq;
+-	txirq =3D platform_get_irq_optional(pdev, 1);
+-	rtsirq =3D platform_get_irq_optional(pdev, 2);
++	txirq =3D platform_get_irq_silent(pdev, 1);
++	rtsirq =3D platform_get_irq_silent(pdev, 2);
+=20
+ 	sport->port.dev =3D &pdev->dev;
+ 	sport->port.mapbase =3D res->start;
+diff --git a/drivers/tty/serial/qcom_geni_serial.c b/drivers/tty/serial/qco=
+m_geni_serial.c
+index aedc38893e6c..893922e520a9 100644
+--- a/drivers/tty/serial/qcom_geni_serial.c
++++ b/drivers/tty/serial/qcom_geni_serial.c
+@@ -1406,7 +1406,7 @@ static int qcom_geni_serial_probe(struct platform_dev=
+ice *pdev)
+ 	uport->has_sysrq =3D IS_ENABLED(CONFIG_SERIAL_QCOM_GENI_CONSOLE);
+=20
+ 	if (!console)
+-		port->wakeup_irq =3D platform_get_irq_optional(pdev, 1);
++		port->wakeup_irq =3D platform_get_irq_silent(pdev, 1);
+=20
+ 	if (of_property_read_bool(pdev->dev.of_node, "rx-tx-swap"))
+ 		port->rx_tx_swap =3D true;
+diff --git a/drivers/tty/serial/sh-sci.c b/drivers/tty/serial/sh-sci.c
+index 968967d722d4..f2fb298b3aed 100644
+--- a/drivers/tty/serial/sh-sci.c
++++ b/drivers/tty/serial/sh-sci.c
+@@ -2860,7 +2860,7 @@ static int sci_init_single(struct platform_device *de=
+v,
+=20
+ 	for (i =3D 0; i < ARRAY_SIZE(sci_port->irqs); ++i) {
+ 		if (i)
+-			sci_port->irqs[i] =3D platform_get_irq_optional(dev, i);
++			sci_port->irqs[i] =3D platform_get_irq_silent(dev, i);
+ 		else
+ 			sci_port->irqs[i] =3D platform_get_irq(dev, i);
+ 	}
+diff --git a/drivers/uio/uio_pdrv_genirq.c b/drivers/uio/uio_pdrv_genirq.c
+index 63258b6accc4..a2673a8ebd3f 100644
+--- a/drivers/uio/uio_pdrv_genirq.c
++++ b/drivers/uio/uio_pdrv_genirq.c
+@@ -160,7 +160,7 @@ static int uio_pdrv_genirq_probe(struct platform_device=
+ *pdev)
+ 	priv->pdev =3D pdev;
+=20
+ 	if (!uioinfo->irq) {
+-		ret =3D platform_get_irq_optional(pdev, 0);
++		ret =3D platform_get_irq_silent(pdev, 0);
+ 		uioinfo->irq =3D ret;
+ 		if (ret =3D=3D -ENXIO)
+ 			uioinfo->irq =3D UIO_IRQ_NONE;
+diff --git a/drivers/usb/phy/phy-tegra-usb.c b/drivers/usb/phy/phy-tegra-us=
+b.c
+index 68cd4b68e3a2..5237c62f60f0 100644
+--- a/drivers/usb/phy/phy-tegra-usb.c
++++ b/drivers/usb/phy/phy-tegra-usb.c
+@@ -1353,7 +1353,7 @@ static int tegra_usb_phy_probe(struct platform_device=
+ *pdev)
+ 		return -ENOMEM;
+=20
+ 	tegra_phy->soc_config =3D of_device_get_match_data(&pdev->dev);
+-	tegra_phy->irq =3D platform_get_irq_optional(pdev, 0);
++	tegra_phy->irq =3D platform_get_irq_silent(pdev, 0);
+=20
+ 	res =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!res) {
+diff --git a/drivers/vfio/platform/vfio_platform.c b/drivers/vfio/platform/=
+vfio_platform.c
+index 68a1c87066d7..60b4f5ce5aa1 100644
+--- a/drivers/vfio/platform/vfio_platform.c
++++ b/drivers/vfio/platform/vfio_platform.c
+@@ -33,7 +33,7 @@ static int get_platform_irq(struct vfio_platform_device *=
+vdev, int i)
+ {
+ 	struct platform_device *pdev =3D (struct platform_device *) vdev->opaque;
+=20
+-	return platform_get_irq_optional(pdev, i);
++	return platform_get_irq_silent(pdev, i);
+ }
+=20
+ static int vfio_platform_probe(struct platform_device *pdev)
+diff --git a/drivers/watchdog/dw_wdt.c b/drivers/watchdog/dw_wdt.c
+index cd578843277e..9c792ab66a83 100644
+--- a/drivers/watchdog/dw_wdt.c
++++ b/drivers/watchdog/dw_wdt.c
+@@ -617,7 +617,7 @@ static int dw_wdt_drv_probe(struct platform_device *pde=
+v)
+ 	 * pending either until the next watchdog kick event or up to the
+ 	 * system reset.
+ 	 */
+-	ret =3D platform_get_irq_optional(pdev, 0);
++	ret =3D platform_get_irq_silent(pdev, 0);
+ 	if (ret > 0) {
+ 		ret =3D devm_request_irq(dev, ret, dw_wdt_irq,
+ 				       IRQF_SHARED | IRQF_TRIGGER_RISING,
+diff --git a/drivers/watchdog/orion_wdt.c b/drivers/watchdog/orion_wdt.c
+index 127eefc9161d..c533fbb37895 100644
+--- a/drivers/watchdog/orion_wdt.c
++++ b/drivers/watchdog/orion_wdt.c
+@@ -602,7 +602,7 @@ static int orion_wdt_probe(struct platform_device *pdev)
+ 		set_bit(WDOG_HW_RUNNING, &dev->wdt.status);
+=20
+ 	/* Request the IRQ only after the watchdog is disabled */
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq > 0) {
+ 		/*
+ 		 * Not all supported platforms specify an interrupt for the
+@@ -617,7 +617,7 @@ static int orion_wdt_probe(struct platform_device *pdev)
+ 	}
+=20
+ 	/* Optional 2nd interrupt for pretimeout */
+-	irq =3D platform_get_irq_optional(pdev, 1);
++	irq =3D platform_get_irq_silent(pdev, 1);
+ 	if (irq > 0) {
+ 		orion_wdt_info.options |=3D WDIOF_PRETIMEOUT;
+ 		ret =3D devm_request_irq(&pdev->dev, irq, orion_wdt_pre_irq,
+diff --git a/drivers/watchdog/qcom-wdt.c b/drivers/watchdog/qcom-wdt.c
+index 0d2209c5eaca..f1bbfed047a1 100644
+--- a/drivers/watchdog/qcom-wdt.c
++++ b/drivers/watchdog/qcom-wdt.c
+@@ -257,7 +257,7 @@ static int qcom_wdt_probe(struct platform_device *pdev)
+ 	}
+=20
+ 	/* check if there is pretimeout support */
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (data->pretimeout && irq > 0) {
+ 		ret =3D devm_request_irq(dev, irq, qcom_wdt_isr, 0,
+ 				       "wdt_bark", &wdt->wdd);
+diff --git a/include/linux/platform_device.h b/include/linux/platform_devic=
+e.h
+index 7c96f169d274..6d495f15f717 100644
+--- a/include/linux/platform_device.h
++++ b/include/linux/platform_device.h
+@@ -69,7 +69,14 @@ extern void __iomem *
+ devm_platform_ioremap_resource_byname(struct platform_device *pdev,
+ 				      const char *name);
+ extern int platform_get_irq(struct platform_device *, unsigned int);
+-extern int platform_get_irq_optional(struct platform_device *, unsigned in=
+t);
++extern int platform_get_irq_silent(struct platform_device *, unsigned int);
 +
-+config MMC_LITEX
-+	tristate "LiteX MMC Host Controller support"
-+	depends on ((PPC_MICROWATT || LITEX) && OF && HAVE_CLK) || COMPILE_TEST
-+	select REGULATOR
-+	select REGULATOR_FIXED_VOLTAGE
-+	help
-+	  This selects support for the MMC Host Controller found in LiteX SoCs.
-+
-+	  To compile this driver as a module, choose M here: the
-+	  module will be called litex_mmc.
-+
-+	  If unsure, say N.
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index ea36d379bd3c..4e4ceb32c4b4 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -101,6 +101,7 @@ obj-$(CONFIG_MMC_CQHCI)			+= cqhci.o
- cqhci-y					+= cqhci-core.o
- cqhci-$(CONFIG_MMC_CRYPTO)		+= cqhci-crypto.o
- obj-$(CONFIG_MMC_HSQ)			+= mmc_hsq.o
-+obj-$(CONFIG_MMC_LITEX)			+= litex_mmc.o
- 
- ifeq ($(CONFIG_CB710_DEBUG),y)
- 	CFLAGS-cb710-mmc	+= -DDEBUG
-diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
-new file mode 100644
-index 000000000000..6ba0d63b8c07
---- /dev/null
-+++ b/drivers/mmc/host/litex_mmc.c
-@@ -0,0 +1,661 @@
-+// SPDX-License-Identifier: GPL-2.0
 +/*
-+ * LiteX LiteSDCard driver
-+ *
-+ * Copyright (C) 2019-2020 Antmicro <contact@antmicro.com>
-+ * Copyright (C) 2019-2020 Kamil Rakoczy <krakoczy@antmicro.com>
-+ * Copyright (C) 2019-2020 Maciej Dudek <mdudek@internships.antmicro.com>
-+ * Copyright (C) 2020 Paul Mackerras <paulus@ozlabs.org>
-+ * Copyright (C) 2020-2022 Gabriel Somlo <gsomlo@gmail.com>
++ * platform_get_irq_optional was recently renamed to platform_get_irq_sile=
+nt.
++ * Fixup users to not break patches that were created before the rename.
 + */
-+
-+#include <linux/bits.h>
-+#include <linux/clk.h>
-+#include <linux/delay.h>
-+#include <linux/dma-mapping.h>
-+#include <linux/interrupt.h>
-+#include <linux/iopoll.h>
-+#include <linux/litex.h>
-+#include <linux/mod_devicetable.h>
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/sd.h>
-+
-+#define LITEX_PHY_CARDDETECT  0x00
-+#define LITEX_PHY_CLOCKERDIV  0x04
-+#define LITEX_PHY_INITIALIZE  0x08
-+#define LITEX_PHY_WRITESTATUS 0x0C
-+#define LITEX_CORE_CMDARG     0x00
-+#define LITEX_CORE_CMDCMD     0x04
-+#define LITEX_CORE_CMDSND     0x08
-+#define LITEX_CORE_CMDRSP     0x0C
-+#define LITEX_CORE_CMDEVT     0x1C
-+#define LITEX_CORE_DATEVT     0x20
-+#define LITEX_CORE_BLKLEN     0x24
-+#define LITEX_CORE_BLKCNT     0x28
-+#define LITEX_BLK2MEM_BASE    0x00
-+#define LITEX_BLK2MEM_LEN     0x08
-+#define LITEX_BLK2MEM_ENA     0x0C
-+#define LITEX_BLK2MEM_DONE    0x10
-+#define LITEX_BLK2MEM_LOOP    0x14
-+#define LITEX_MEM2BLK_BASE    0x00
-+#define LITEX_MEM2BLK_LEN     0x08
-+#define LITEX_MEM2BLK_ENA     0x0C
-+#define LITEX_MEM2BLK_DONE    0x10
-+#define LITEX_MEM2BLK_LOOP    0x14
-+#define LITEX_MEM2BLK         0x18
-+#define LITEX_IRQ_STATUS      0x00
-+#define LITEX_IRQ_PENDING     0x04
-+#define LITEX_IRQ_ENABLE      0x08
-+
-+#define SD_CTL_DATA_XFER_NONE  0
-+#define SD_CTL_DATA_XFER_READ  1
-+#define SD_CTL_DATA_XFER_WRITE 2
-+
-+#define SD_CTL_RESP_NONE       0
-+#define SD_CTL_RESP_SHORT      1
-+#define SD_CTL_RESP_LONG       2
-+#define SD_CTL_RESP_SHORT_BUSY 3
-+
-+#define SD_BIT_DONE    BIT(0)
-+#define SD_BIT_WR_ERR  BIT(1)
-+#define SD_BIT_TIMEOUT BIT(2)
-+#define SD_BIT_CRC_ERR BIT(3)
-+
-+#define SD_SLEEP_US       5
-+#define SD_TIMEOUT_US 20000
-+
-+#define SDIRQ_CARD_DETECT    1
-+#define SDIRQ_SD_TO_MEM_DONE 2
-+#define SDIRQ_MEM_TO_SD_DONE 4
-+#define SDIRQ_CMD_DONE       8
-+
-+struct litex_mmc_host {
-+	struct mmc_host *mmc;
-+
-+	void __iomem *sdphy;
-+	void __iomem *sdcore;
-+	void __iomem *sdreader;
-+	void __iomem *sdwriter;
-+	void __iomem *sdirq;
-+
-+	void *buffer;
-+	size_t buf_size;
-+	dma_addr_t dma;
-+
-+	struct completion cmd_done;
-+	int irq;
-+
-+	unsigned int ref_clk;
-+	unsigned int sd_clk;
-+
-+	u32 resp[4];
-+	u16 rca;
-+
-+	bool is_bus_width_set;
-+	bool app_cmd;
-+};
-+
-+static int litex_mmc_sdcard_wait_done(void __iomem *reg, struct device *dev)
-+{
-+	u8 evt;
-+	int ret;
-+
-+	ret = readx_poll_timeout(litex_read8, reg, evt, evt & SD_BIT_DONE,
-+				 SD_SLEEP_US, SD_TIMEOUT_US);
-+	if (ret)
-+		return ret;
-+	if (evt == SD_BIT_DONE)
-+		return 0;
-+	if (evt & SD_BIT_WR_ERR)
-+		return -EIO;
-+	if (evt & SD_BIT_TIMEOUT)
-+		return -ETIMEDOUT;
-+	if (evt & SD_BIT_CRC_ERR)
-+		return -EILSEQ;
-+	dev_err(dev, "%s: unknown error (evt=%x)\n", __func__, evt);
-+	return -EINVAL;
-+}
-+
-+static int litex_mmc_send_cmd(struct litex_mmc_host *host,
-+			      u8 cmd, u32 arg, u8 response_len, u8 transfer)
-+{
-+	struct device *dev = mmc_dev(host->mmc);
-+	void __iomem *reg;
-+	int ret;
-+	u8 evt;
-+
-+	litex_write32(host->sdcore + LITEX_CORE_CMDARG, arg);
-+	litex_write32(host->sdcore + LITEX_CORE_CMDCMD,
-+		      cmd << 8 | transfer << 5 | response_len);
-+	litex_write8(host->sdcore + LITEX_CORE_CMDSND, 1);
-+
-+	/*
-+	 * Wait for an interrupt if we have an interrupt and either there is
-+	 * data to be transferred, or if the card can report busy via DAT0.
-+	 */
-+	if (host->irq > 0 &&
-+	    (transfer != SD_CTL_DATA_XFER_NONE ||
-+	     response_len == SD_CTL_RESP_SHORT_BUSY)) {
-+		reinit_completion(&host->cmd_done);
-+		litex_write32(host->sdirq + LITEX_IRQ_ENABLE,
-+			      SDIRQ_CMD_DONE | SDIRQ_CARD_DETECT);
-+		wait_for_completion(&host->cmd_done);
-+	}
-+
-+	ret = litex_mmc_sdcard_wait_done(host->sdcore + LITEX_CORE_CMDEVT, dev);
-+	if (ret) {
-+		dev_err(dev, "Command (cmd %d) error, status %d\n", cmd, ret);
-+		return ret;
-+	}
-+
-+	if (response_len != SD_CTL_RESP_NONE) {
-+		/*
-+		 * NOTE: this matches the semantics of litex_read32()
-+		 * regardless of underlying arch endianness!
-+		 */
-+		memcpy_fromio(host->resp,
-+			      host->sdcore + LITEX_CORE_CMDRSP, 0x10);
-+	}
-+
-+	if (!host->app_cmd && cmd == SD_SEND_RELATIVE_ADDR)
-+		host->rca = (host->resp[3] >> 16);
-+
-+	host->app_cmd = (cmd == MMC_APP_CMD);
-+
-+	if (transfer == SD_CTL_DATA_XFER_NONE)
-+		return ret; /* OK from prior litex_mmc_sdcard_wait_done() */
-+
-+	ret = litex_mmc_sdcard_wait_done(host->sdcore + LITEX_CORE_DATEVT, dev);
-+	if (ret) {
-+		dev_err(dev, "Data xfer (cmd %d) error, status %d\n", cmd, ret);
-+		return ret;
-+	}
-+
-+	/* Wait for completion of (read or write) DMA transfer */
-+	reg = (transfer == SD_CTL_DATA_XFER_READ) ?
-+		host->sdreader + LITEX_BLK2MEM_DONE :
-+		host->sdwriter + LITEX_MEM2BLK_DONE;
-+	ret = readx_poll_timeout(litex_read8, reg, evt, evt & SD_BIT_DONE,
-+				 SD_SLEEP_US, SD_TIMEOUT_US);
-+	if (ret)
-+		dev_err(dev, "DMA timeout (cmd %d)\n", cmd);
-+
-+	return ret;
-+}
-+
-+static int litex_mmc_send_app_cmd(struct litex_mmc_host *host)
-+{
-+	return litex_mmc_send_cmd(host, MMC_APP_CMD, host->rca << 16,
-+				  SD_CTL_RESP_SHORT, SD_CTL_DATA_XFER_NONE);
-+}
-+
-+static int litex_mmc_send_set_bus_w_cmd(struct litex_mmc_host *host, u32 width)
-+{
-+	return litex_mmc_send_cmd(host, SD_APP_SET_BUS_WIDTH, width,
-+				  SD_CTL_RESP_SHORT, SD_CTL_DATA_XFER_NONE);
-+}
-+
-+static int litex_mmc_set_bus_width(struct litex_mmc_host *host)
-+{
-+	bool app_cmd_sent;
-+	int ret;
-+
-+	if (host->is_bus_width_set)
-+		return 0;
-+
-+	/* Ensure 'app_cmd' precedes 'app_set_bus_width_cmd' */
-+	app_cmd_sent = host->app_cmd; /* was preceding command app_cmd? */
-+	if (!app_cmd_sent) {
-+		ret = litex_mmc_send_app_cmd(host);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	/* LiteSDCard only supports 4-bit bus width */
-+	ret = litex_mmc_send_set_bus_w_cmd(host, MMC_BUS_WIDTH_4);
-+	if (ret)
-+		return ret;
-+
-+	/* Re-send 'app_cmd' if necessary */
-+	if (app_cmd_sent) {
-+		ret = litex_mmc_send_app_cmd(host);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	host->is_bus_width_set = true;
-+
-+	return 0;
-+}
-+
-+static int litex_mmc_get_cd(struct mmc_host *mmc)
-+{
-+	struct litex_mmc_host *host = mmc_priv(mmc);
-+	int ret;
-+
-+	if (!mmc_card_is_removable(mmc))
-+		return 1;
-+
-+	ret = !litex_read8(host->sdphy + LITEX_PHY_CARDDETECT);
-+	if (ret)
-+		return ret;
-+
-+	/* Ensure bus width will be set (again) upon card (re)insertion */
-+	host->is_bus_width_set = false;
-+
-+	return 0;
-+}
-+
-+static irqreturn_t litex_mmc_interrupt(int irq, void *arg)
-+{
-+	struct mmc_host *mmc = arg;
-+	struct litex_mmc_host *host = mmc_priv(mmc);
-+	u32 pending = litex_read32(host->sdirq + LITEX_IRQ_PENDING);
-+	irqreturn_t ret = IRQ_NONE;
-+
-+	/* Check for card change interrupt */
-+	if (pending & SDIRQ_CARD_DETECT) {
-+		litex_write32(host->sdirq + LITEX_IRQ_PENDING,
-+			      SDIRQ_CARD_DETECT);
-+		mmc_detect_change(mmc, msecs_to_jiffies(10));
-+		ret = IRQ_HANDLED;
-+	}
-+
-+	/* Check for command completed */
-+	if (pending & SDIRQ_CMD_DONE) {
-+		/* Disable it so it doesn't keep interrupting */
-+		litex_write32(host->sdirq + LITEX_IRQ_ENABLE,
-+			      SDIRQ_CARD_DETECT);
-+		complete(&host->cmd_done);
-+		ret = IRQ_HANDLED;
-+	}
-+
-+	return ret;
-+}
-+
-+static u32 litex_mmc_response_len(struct mmc_command *cmd)
-+{
-+	if (cmd->flags & MMC_RSP_136)
-+		return SD_CTL_RESP_LONG;
-+	if (!(cmd->flags & MMC_RSP_PRESENT))
-+		return SD_CTL_RESP_NONE;
-+	if (cmd->flags & MMC_RSP_BUSY)
-+		return SD_CTL_RESP_SHORT_BUSY;
-+	return SD_CTL_RESP_SHORT;
-+}
-+
-+static void litex_mmc_do_dma(struct litex_mmc_host *host, struct mmc_data *data,
-+			     unsigned int *len, bool *direct, u8 *transfer)
-+{
-+	struct device *dev = mmc_dev(host->mmc);
-+	dma_addr_t dma;
-+	int sg_count;
-+
-+	/*
-+	 * Try to DMA directly to/from the data buffer.
-+	 * We can do that if the buffer can be mapped for DMA
-+	 * in one contiguous chunk.
-+	 */
-+	dma = host->dma;
-+	*len = data->blksz * data->blocks;
-+	sg_count = dma_map_sg(dev, data->sg, data->sg_len,
-+			      mmc_get_dma_dir(data));
-+	if (sg_count == 1) {
-+		dma = sg_dma_address(data->sg);
-+		*len = sg_dma_len(data->sg);
-+		*direct = true;
-+	} else if (*len > host->buf_size)
-+		*len = host->buf_size;
-+
-+	if (data->flags & MMC_DATA_READ) {
-+		litex_write8(host->sdreader + LITEX_BLK2MEM_ENA, 0);
-+		litex_write64(host->sdreader + LITEX_BLK2MEM_BASE, dma);
-+		litex_write32(host->sdreader + LITEX_BLK2MEM_LEN, *len);
-+		litex_write8(host->sdreader + LITEX_BLK2MEM_ENA, 1);
-+		*transfer = SD_CTL_DATA_XFER_READ;
-+	} else if (data->flags & MMC_DATA_WRITE) {
-+		if (!*direct)
-+			sg_copy_to_buffer(data->sg, data->sg_len,
-+					  host->buffer, *len);
-+		litex_write8(host->sdwriter + LITEX_MEM2BLK_ENA, 0);
-+		litex_write64(host->sdwriter + LITEX_MEM2BLK_BASE, dma);
-+		litex_write32(host->sdwriter + LITEX_MEM2BLK_LEN, *len);
-+		litex_write8(host->sdwriter + LITEX_MEM2BLK_ENA, 1);
-+		*transfer = SD_CTL_DATA_XFER_WRITE;
-+	} else {
-+		dev_warn(dev, "Data present w/o read or write flag.\n");
-+		/* Continue: set cmd status, mark req done */
-+	}
-+
-+	litex_write16(host->sdcore + LITEX_CORE_BLKLEN, data->blksz);
-+	litex_write32(host->sdcore + LITEX_CORE_BLKCNT, data->blocks);
-+}
-+
-+static void litex_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	struct litex_mmc_host *host = mmc_priv(mmc);
-+	struct device *dev = mmc_dev(mmc);
-+	struct mmc_command *cmd = mrq->cmd;
-+	struct mmc_command *sbc = mrq->sbc;
-+	struct mmc_data *data = mrq->data;
-+	struct mmc_command *stop = mrq->stop;
-+	unsigned int retries = cmd->retries;
-+	unsigned int len = 0;
-+	bool direct = false;
-+	u32 response_len = litex_mmc_response_len(cmd);
-+	u8 transfer = SD_CTL_DATA_XFER_NONE;
-+
-+	/* First check that the card is still there */
-+	if (!litex_mmc_get_cd(mmc)) {
-+		cmd->error = -ENOMEDIUM;
-+		mmc_request_done(mmc, mrq);
-+		return;
-+	}
-+
-+	/* Send set-block-count command if needed */
-+	if (sbc) {
-+		sbc->error = litex_mmc_send_cmd(host, sbc->opcode, sbc->arg,
-+						litex_mmc_response_len(sbc),
-+						SD_CTL_DATA_XFER_NONE);
-+		if (sbc->error) {
-+			host->is_bus_width_set = false;
-+			mmc_request_done(mmc, mrq);
-+			return;
-+		}
-+	}
-+
-+	if (data) {
-+		/*
-+		 * LiteSDCard only supports 4-bit bus width; therefore, we MUST
-+		 * inject a SET_BUS_WIDTH (acmd6) before the very first data
-+		 * transfer, earlier than when the mmc subsystem would normally
-+		 * get around to it!
-+		 */
-+		cmd->error = litex_mmc_set_bus_width(host);
-+		if (cmd->error) {
-+			dev_err(dev, "Can't set bus width!\n");
-+			mmc_request_done(mmc, mrq);
-+			return;
-+		}
-+
-+		litex_mmc_do_dma(host, data, &len, &direct, &transfer);
-+	}
-+
-+	do {
-+		cmd->error = litex_mmc_send_cmd(host, cmd->opcode, cmd->arg,
-+						response_len, transfer);
-+	} while (cmd->error && retries-- > 0);
-+
-+	if (cmd->error) {
-+		/* Card may be gone; don't assume bus width is still set */
-+		host->is_bus_width_set = false;
-+	}
-+
-+	if (response_len == SD_CTL_RESP_SHORT) {
-+		/* Pull short response fields from appropriate host registers */
-+		cmd->resp[0] = host->resp[3];
-+		cmd->resp[1] = host->resp[2] & 0xFF;
-+	} else if (response_len == SD_CTL_RESP_LONG) {
-+		cmd->resp[0] = host->resp[0];
-+		cmd->resp[1] = host->resp[1];
-+		cmd->resp[2] = host->resp[2];
-+		cmd->resp[3] = host->resp[3];
-+	}
-+
-+	/* Send stop-transmission command if required */
-+	if (stop && (cmd->error || !sbc)) {
-+		stop->error = litex_mmc_send_cmd(host, stop->opcode, stop->arg,
-+						 litex_mmc_response_len(stop),
-+						 SD_CTL_DATA_XFER_NONE);
-+		if (stop->error)
-+			host->is_bus_width_set = false;
-+	}
-+
-+	if (data) {
-+		dma_unmap_sg(dev, data->sg, data->sg_len,
-+			     mmc_get_dma_dir(data));
-+	}
-+
-+	if (!cmd->error && transfer != SD_CTL_DATA_XFER_NONE) {
-+		data->bytes_xfered = min(len, mmc->max_req_size);
-+		if (transfer == SD_CTL_DATA_XFER_READ && !direct) {
-+			sg_copy_from_buffer(data->sg, sg_nents(data->sg),
-+					    host->buffer, data->bytes_xfered);
-+		}
-+	}
-+
-+	mmc_request_done(mmc, mrq);
-+}
-+
-+static void litex_mmc_setclk(struct litex_mmc_host *host, unsigned int freq)
-+{
-+	struct device *dev = mmc_dev(host->mmc);
-+	u32 div;
-+
-+	div = freq ? host->ref_clk / freq : 256U;
-+	div = roundup_pow_of_two(div);
-+	div = clamp(div, 2U, 256U);
-+	dev_dbg(dev, "sd_clk_freq=%d: set to %d via div=%d\n",
-+		freq, host->ref_clk / div, div);
-+	litex_write16(host->sdphy + LITEX_PHY_CLOCKERDIV, div);
-+	host->sd_clk = freq;
-+}
-+
-+static void litex_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct litex_mmc_host *host = mmc_priv(mmc);
-+
-+	/*
-+	 * NOTE: Ignore any ios->bus_width updates; they occur right after
-+	 * the mmc core sends its own acmd6 bus-width change notification,
-+	 * which is redundant since we snoop on the command flow and inject
-+	 * an early acmd6 before the first data transfer command is sent!
-+	 */
-+
-+	/* Update sd_clk */
-+	if (ios->clock != host->sd_clk)
-+		litex_mmc_setclk(host, ios->clock);
-+}
-+
-+static const struct mmc_host_ops litex_mmc_ops = {
-+	.get_cd = litex_mmc_get_cd,
-+	.request = litex_mmc_request,
-+	.set_ios = litex_mmc_set_ios,
-+};
-+
-+static int litex_mmc_irq_init(struct platform_device *pdev,
-+			      struct litex_mmc_host *host)
-+{
-+	struct device *dev = mmc_dev(host->mmc);
-+	int ret;
-+
-+	ret = platform_get_irq_optional(pdev, 0);
-+	if (ret < 0 && ret != -ENXIO)
-+		return ret;
-+	if (ret > 0)
-+		host->irq = ret;
-+	else {
-+		dev_warn(dev, "Failed to get IRQ, using polling\n");
-+		goto use_polling;
-+	}
-+
-+	host->sdirq = devm_platform_ioremap_resource_byname(pdev, "irq");
-+	if (IS_ERR(host->sdirq))
-+		return PTR_ERR(host->sdirq);
-+
-+	ret = devm_request_irq(dev, host->irq, litex_mmc_interrupt, 0,
-+			       "litex-mmc", host->mmc);
-+	if (ret < 0) {
-+		dev_warn(dev, "IRQ request error %d, using polling\n", ret);
-+		goto use_polling;
-+	}
-+
-+	/* Clear & enable card-change interrupts */
-+	litex_write32(host->sdirq + LITEX_IRQ_PENDING, SDIRQ_CARD_DETECT);
-+	litex_write32(host->sdirq + LITEX_IRQ_ENABLE, SDIRQ_CARD_DETECT);
-+
-+	return 0;
-+
-+use_polling:
-+	host->mmc->caps |= MMC_CAP_NEEDS_POLL;
-+	return 0;
-+}
-+
-+static void litex_mmc_free_host_wrapper(void *mmc)
-+{
-+	mmc_free_host(mmc);
-+}
-+
-+static int litex_mmc_probe(struct platform_device *pdev)
-+{
-+	struct device *dev = &pdev->dev;
-+	struct litex_mmc_host *host;
-+	struct mmc_host *mmc;
-+	struct clk *clk;
-+	int ret;
-+
-+	/*
-+	 * NOTE: defaults to max_[req,seg]_size=PAGE_SIZE, max_blk_size=512,
-+	 * and max_blk_count accordingly set to 8;
-+	 * If for some reason we need to modify max_blk_count, we must also
-+	 * re-calculate `max_[req,seg]_size = max_blk_size * max_blk_count;`
-+	 */
-+	mmc = mmc_alloc_host(sizeof(struct litex_mmc_host), dev);
-+	if (!mmc)
-+		return -ENOMEM;
-+
-+	ret = devm_add_action_or_reset(dev, litex_mmc_free_host_wrapper, mmc);
-+	if (ret)
-+		return dev_err_probe(dev, ret,
-+				     "Can't register mmc_free_host action\n");
-+
-+	host = mmc_priv(mmc);
-+	host->mmc = mmc;
-+
-+	/* Initialize clock source */
-+	clk = devm_clk_get(dev, NULL);
-+	if (IS_ERR(clk))
-+		return dev_err_probe(dev, PTR_ERR(clk), "can't get clock\n");
-+	host->ref_clk = clk_get_rate(clk);
-+	host->sd_clk = 0;
-+
-+	/*
-+	 * LiteSDCard only supports 4-bit bus width; therefore, we MUST inject
-+	 * a SET_BUS_WIDTH (acmd6) before the very first data transfer, earlier
-+	 * than when the mmc subsystem would normally get around to it!
-+	 */
-+	host->is_bus_width_set = false;
-+	host->app_cmd = false;
-+
-+	/* LiteSDCard can support 64-bit DMA addressing */
-+	ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-+	if (ret)
-+		return ret;
-+
-+	host->buf_size = mmc->max_req_size * 2;
-+	host->buffer = dmam_alloc_coherent(dev, host->buf_size,
-+					   &host->dma, GFP_KERNEL);
-+	if (host->buffer == NULL)
-+		return -ENOMEM;
-+
-+	host->sdphy = devm_platform_ioremap_resource_byname(pdev, "phy");
-+	if (IS_ERR(host->sdphy))
-+		return PTR_ERR(host->sdphy);
-+
-+	host->sdcore = devm_platform_ioremap_resource_byname(pdev, "core");
-+	if (IS_ERR(host->sdcore))
-+		return PTR_ERR(host->sdcore);
-+
-+	host->sdreader = devm_platform_ioremap_resource_byname(pdev, "reader");
-+	if (IS_ERR(host->sdreader))
-+		return PTR_ERR(host->sdreader);
-+
-+	host->sdwriter = devm_platform_ioremap_resource_byname(pdev, "writer");
-+	if (IS_ERR(host->sdwriter))
-+		return PTR_ERR(host->sdwriter);
-+
-+	/* Ensure DMA bus masters are disabled */
-+	litex_write8(host->sdreader + LITEX_BLK2MEM_ENA, 0);
-+	litex_write8(host->sdwriter + LITEX_MEM2BLK_ENA, 0);
-+
-+	init_completion(&host->cmd_done);
-+	ret = litex_mmc_irq_init(pdev, host);
-+	if (ret)
-+		return ret;
-+
-+	mmc->ops = &litex_mmc_ops;
-+
-+	ret = mmc_regulator_get_supply(mmc);
-+	if (ret || mmc->ocr_avail == 0) {
-+		dev_warn(dev, "can't get voltage, defaulting to 3.3V\n");
-+		mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
-+	}
-+
-+	/*
-+	 * Set default sd_clk frequency range based on empirical observations
-+	 * of LiteSDCard gateware behavior on typical SDCard media
-+	 */
-+	mmc->f_min = 12.5e6;
-+	mmc->f_max = 50e6;
-+
-+	ret = mmc_of_parse(mmc);
-+	if (ret)
-+		return ret;
-+
-+	/* Force 4-bit bus_width (only width supported by hardware) */
-+	mmc->caps &= ~MMC_CAP_8_BIT_DATA;
-+	mmc->caps |= MMC_CAP_4_BIT_DATA;
-+
-+	/* Set default capabilities */
-+	mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
-+		     MMC_CAP_DRIVER_TYPE_D |
-+		     MMC_CAP_CMD23;
-+	mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT |
-+		      MMC_CAP2_NO_SDIO |
-+		      MMC_CAP2_NO_MMC;
-+
-+	platform_set_drvdata(pdev, host);
-+
-+	ret = mmc_add_host(mmc);
-+	if (ret)
-+		return ret;
-+
-+	dev_info(dev, "LiteX MMC controller initialized.\n");
-+	return 0;
-+}
-+
-+static int litex_mmc_remove(struct platform_device *pdev)
-+{
-+	struct litex_mmc_host *host = platform_get_drvdata(pdev);
-+
-+	mmc_remove_host(host->mmc);
-+	return 0;
-+}
-+
-+static const struct of_device_id litex_match[] = {
-+	{ .compatible = "litex,mmc" },
-+	{ }
-+};
-+MODULE_DEVICE_TABLE(of, litex_match);
-+
-+static struct platform_driver litex_mmc_driver = {
-+	.probe = litex_mmc_probe,
-+	.remove = litex_mmc_remove,
-+	.driver = {
-+		.name = "litex-mmc",
-+		.of_match_table = litex_match,
-+	},
-+};
-+module_platform_driver(litex_mmc_driver);
-+
-+MODULE_DESCRIPTION("LiteX SDCard driver");
-+MODULE_AUTHOR("Antmicro <contact@antmicro.com>");
-+MODULE_AUTHOR("Kamil Rakoczy <krakoczy@antmicro.com>");
-+MODULE_AUTHOR("Maciej Dudek <mdudek@internships.antmicro.com>");
-+MODULE_AUTHOR("Paul Mackerras <paulus@ozlabs.org>");
-+MODULE_AUTHOR("Gabriel Somlo <gsomlo@gmail.com>");
-+MODULE_LICENSE("GPL v2");
--- 
-2.31.1
++#define platform_get_irq_optional(pdev, index) platform_get_irq_silent(pde=
+v, index)
++
+ extern int platform_irq_count(struct platform_device *);
+ extern int devm_platform_get_irqs_affinity(struct platform_device *dev,
+ 					   struct irq_affinity *affd,
+diff --git a/sound/soc/dwc/dwc-i2s.c b/sound/soc/dwc/dwc-i2s.c
+index 5cb58929090d..f7cfe8f7cce0 100644
+--- a/sound/soc/dwc/dwc-i2s.c
++++ b/sound/soc/dwc/dwc-i2s.c
+@@ -642,7 +642,7 @@ static int dw_i2s_probe(struct platform_device *pdev)
+=20
+ 	dev->dev =3D &pdev->dev;
+=20
+-	irq =3D platform_get_irq_optional(pdev, 0);
++	irq =3D platform_get_irq_silent(pdev, 0);
+ 	if (irq >=3D 0) {
+ 		ret =3D devm_request_irq(&pdev->dev, irq, i2s_irq_handler, 0,
+ 				pdev->name, dev);
+diff --git a/sound/soc/intel/keembay/kmb_platform.c b/sound/soc/intel/keemb=
+ay/kmb_platform.c
+index a6fb74ba1c42..ee0159b7e9f6 100644
+--- a/sound/soc/intel/keembay/kmb_platform.c
++++ b/sound/soc/intel/keembay/kmb_platform.c
+@@ -882,7 +882,7 @@ static int kmb_plat_dai_probe(struct platform_device *p=
+dev)
+ 	kmb_i2s->use_pio =3D !(of_property_read_bool(np, "dmas"));
+=20
+ 	if (kmb_i2s->use_pio) {
+-		irq =3D platform_get_irq_optional(pdev, 0);
++		irq =3D platform_get_irq_silent(pdev, 0);
+ 		if (irq > 0) {
+ 			ret =3D devm_request_irq(dev, irq, kmb_i2s_irq_handler, 0,
+ 					       pdev->name, kmb_i2s);
+--=20
+2.34.1
 
+
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--u67rejkufwyzfqj2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmHggPsACgkQwfwUeK3K
+7AkQ0ggAmYGfLkcv911g8AhJOuJtPCaT3GEZfzXpkvfFp6U/6L4RxD8ogQIx39zI
+CAqHMaZJ7RI3zFATUlcwjOSocrQ2u1XpLtr7SOSdcOUUJgT67MqeUXZn+Y9x7nzC
+g5gfdqgDq+yPvoSJidZNShrqKxQ1rbfjrfT4YZvevznZ9pvgNtX764BaSqyhpuAk
+kWj/+Z50vbOVXzp21bWPMWzdHnWSRL+H5AqfNoA7OdYYjY8l/lPoQ9r1bTGpihRx
+wRGFnOA5g0tDhsYkIO4Q6w1/jp73XtdIrIQbdHIkkn+pIht+oYPEVLC/MNmqa/pA
+tM8xVbCdHHNb1QpZnCkGynRKYCpUWA==
+=83gy
+-----END PGP SIGNATURE-----
+
+--u67rejkufwyzfqj2--
