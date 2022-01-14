@@ -2,138 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00465C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Jan 2022 23:40:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C453C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jan 2022 03:01:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238290AbiAMXk3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Jan 2022 18:40:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48140 "EHLO
+        id S238934AbiANDBV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Jan 2022 22:01:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238317AbiAMXkZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 18:40:25 -0500
-Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47D4FC06174E;
-        Thu, 13 Jan 2022 15:40:25 -0800 (PST)
-Received: by mail-wm1-x336.google.com with SMTP id c66so4956246wma.5;
-        Thu, 13 Jan 2022 15:40:25 -0800 (PST)
+        with ESMTP id S238933AbiANDBV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Jan 2022 22:01:21 -0500
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A52EC061574
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 19:01:21 -0800 (PST)
+Received: by mail-yb1-xb2e.google.com with SMTP id g14so20497604ybs.8
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Jan 2022 19:01:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:reply-to:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=RV5F3FqCXi+NwINgWAYn5+b4Y9WVF4vPA6sEn9RTVx4=;
-        b=fMUmrcUPjnemWFIHY+nKdlAj0nlLxUChgPYcmPCS8uV9/o5dKPx54z3kSf6ZoiwFRD
-         C3+id1E2Um24sE0NGjbl49Wlr+70CnR6c4Eq09rejhELq87eZI9pSNskULnFmKjMH+Wn
-         VPVDr4UwCwDuTKhjKCRtCLcBt+HN294MxAvlYcmN5CUTX6njPtt0jnZHyshvXkBKuLwX
-         Oit8UKzP9ABEo2+fSjRu8bEgM8Hwtq7pRcKMM85xJZyELiBnmLanYu5Flx5Mf6Djf6Uu
-         QMdX81/jPDEKwVdB3d3ChZfo7y4slcXnxXQiRFlWE01C5+UZVO7s3FH/4wYm42zPraPZ
-         y5CA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=oH0gUBb3QDrNsal3W2+Ys6ZDI/In6DtlTK3KPAg2Wlk=;
+        b=Y856G4E9FsP6ZxEU8laekcuDjxH+3nlxv2a4l0rtfK9AQlilAb89c3vXpk/NryMFq1
+         2vDTM9EwenflHhHA8Cskb0NhmKOiWgDBf2Dr7cZ/x/ixFU0XzlG1YHYP5igsh+sjBShw
+         kIbQyv/64wZrlDODGvSr6oq/aszho6+BZew/YB6BuinHshSI1+e04de7/C2saCRB/02z
+         Gc/KnzeKw6oPBDr8zNAqkU6QqrKy5vsL/FSgTjL9W/rdezKVf2W/4mXQ7k/qQQnf35Gd
+         2LNgsF6YMYvzsphW9Yn5JZ0vypeuEDNKhY7BlHpheM5XWVAhZan0jW/IhkPDeY4kLjAc
+         ouxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:reply-to
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=RV5F3FqCXi+NwINgWAYn5+b4Y9WVF4vPA6sEn9RTVx4=;
-        b=eF4lQf77HIhjoiQvSiitl8tm1PkIzkrNt/WCDZ/U+13YmSIb1emDostf9IG6kAPmyM
-         qLFVmGblgSUGQhp0RuD8IsWKlETxKpEOtkQfNmrW+KDkyCUS1N2W9JOpif0PvKrRebnZ
-         8OqODc2fAXDjrcwql4Z0JyPA1zcC+k8crf4Ob/rYidG4j8DlbpyKwBg1dXtPVBpanLwr
-         I2zUUgDzrdrr/YQQSnCwRmCAZLnv2kxBUZsxYnh8RkaAZGBHV8FgImFtH080Wfqb9neF
-         uO1KjJnyo+LgnT7PK76HaDDhVtfBn5QAOnDMr1M9KfjbjYSNhs96K1ALw1Jnq8ZRIYBr
-         xfjg==
-X-Gm-Message-State: AOAM533VkqwoevAkddPhq6bLrfIcvd1Gny2uh3djVJvgOOjUL1dHYUsY
-        6Lf9PJ2/EPw+v+Wm/Pe/IJY9WvC2w3dD5g==
-X-Google-Smtp-Source: ABdhPJzqh0OdeDN1zK0eU9F1rckK5M6NB/sULPhRONZMZSuXZbk3qlsrlqjYWiiW93cbVyfhhVfVRw==
-X-Received: by 2002:a7b:cbc3:: with SMTP id n3mr6026265wmi.12.1642117223715;
-        Thu, 13 Jan 2022 15:40:23 -0800 (PST)
-Received: from pevik (gw1.ms-free.net. [185.243.124.10])
-        by smtp.gmail.com with ESMTPSA id d22sm3762191wrb.83.2022.01.13.15.40.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Jan 2022 15:40:23 -0800 (PST)
-Date:   Fri, 14 Jan 2022 00:40:19 +0100
-From:   Petr Vorel <petr.vorel@gmail.com>
-To:     linux-arm-msm@vger.kernel.org
-Cc:     Konrad Dybcio <konradybcio@gmail.com>,
-        Jean Thomas <virgule@jeanthomas.me>,
-        Alexey Minnekhanov <alexeymin@postmarketos.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Douglas Anderson <dianders@chromium.org>,
-        Taniya Das <tdas@codeaurora.org>, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 5/6] arm64: dts: qcom: msm8994-huawei-angler: Add
- sdhc{1,2} definitions
-Message-ID: <YeC4Y+rZrNpubxhR@pevik>
-Reply-To: Petr Vorel <petr.vorel@gmail.com>
-References: <20220113233358.17972-1-petr.vorel@gmail.com>
- <20220113233358.17972-6-petr.vorel@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=oH0gUBb3QDrNsal3W2+Ys6ZDI/In6DtlTK3KPAg2Wlk=;
+        b=v9PCSymD6asIj5zOUQJxnHgx7LSB0PEUNSM+egGVBMgPrL81hm4eL/W9+/K38AOPoY
+         1mzK4lrEhiJ4T5fZly7vC46rfc9GQ8Um+Kp0iu9EuOCjlAVeecJ+BQ39my5fBu2sto3O
+         4b0uIEYlT3w+gszdrd4vkDyPXH3pKYoLpKyUIrxmf42kc+kJqs/raZK9nEvJBwyBUbar
+         AhTdEUmPxzc9ZAWkW2R5EfNRIcZKuH5M4SIKniTqlN7xpJLEiwuYFLzCyvv5bgqSsM0K
+         hFxhvGBs04Qn5ZPIPB02LGoTDgqqf7K8X5I+Zz0P/KnIefeRpCa5X+TIKY+Xhg0Neos3
+         uu7Q==
+X-Gm-Message-State: AOAM532jzebXGyDrjunlcDk3bUX1FyG0dfi6PIz3sBaC+Q5izYjFXdDk
+        p6hAuXp0mDw3PmemayFY38y0Way2jbdX8YnnMpWwvZP79/g=
+X-Google-Smtp-Source: ABdhPJxgRFpe022hgP0TBmI0+Jq6JCN70LVDObPZAk3yiBYFULgatIvE4XRsKekFuYQiW0VO/MetjlXzEpydKuQ4YVg=
+X-Received: by 2002:a25:cc87:: with SMTP id l129mr11129324ybf.144.1642129280352;
+ Thu, 13 Jan 2022 19:01:20 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220113233358.17972-6-petr.vorel@gmail.com>
+References: <20211203105103.11306-1-jasonlai.genesyslogic@gmail.com>
+ <20211203105103.11306-6-jasonlai.genesyslogic@gmail.com> <CAPDyKFp2mv5Z+0e8ckKnhyE-XvGYcuda-z=vJoz0crnTVa9ZVw@mail.gmail.com>
+ <CAG0XXUFXTHh-tbLG1WQ8-AtNUtTykPzj4sFUK0PT9aigy-S0Lw@mail.gmail.com>
+In-Reply-To: <CAG0XXUFXTHh-tbLG1WQ8-AtNUtTykPzj4sFUK0PT9aigy-S0Lw@mail.gmail.com>
+From:   Lai Jason <jasonlai.genesyslogic@gmail.com>
+Date:   Fri, 14 Jan 2022 11:01:09 +0800
+Message-ID: <CAG0XXUEEqou0OkavO-_GeaCmjYNTpzWr=YDBh91V3QKe0JvLSw@mail.gmail.com>
+Subject: Re: [PATCH 5/7] mmc: add UHS-II related definitions in headers
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>,
+        Jason Lai <Jason.Lai@genesyslogic.com.tw>,
+        otis.wu@genesyslogic.com.tw,
+        =?UTF-8?B?6I6K5pm66YeP?= <benchuanggli@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi all,
+On Thu, Jan 6, 2022 at 4:37 PM Lai Jason
+<jasonlai.genesyslogic@gmail.com> wrote:
+>
+> On Tue, Dec 14, 2021 at 9:37 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Fri, 3 Dec 2021 at 11:51, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
+> > >
+> > > From: Jason Lai <jason.lai@genesyslogic.com.tw>
+> > >
+> > > All LINK layer messages, registers and SD-TRAN command packet described in
+> > > 'Part 1 UHS-II Addendum Ver 1.01' are defined in include/linux/mmc/sd_uhs2.h
+> > >
+> > > drivers/mmc/core/sd_uhs2.h contains exported function prototype.
+> > >
+> > > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> > > ---
+> > >  drivers/mmc/core/sd_uhs2.h  |  18 ++++
+> > >  include/linux/mmc/card.h    |  30 +++++-
+> > >  include/linux/mmc/core.h    |   4 +-
+> > >  include/linux/mmc/host.h    |  27 ++++-
+> > >  include/linux/mmc/sd_uhs2.h | 196 ++++++++++++++++++++++++++++++++++++
+> > >  5 files changed, 268 insertions(+), 7 deletions(-)
+> > >  create mode 100644 drivers/mmc/core/sd_uhs2.h
+> > >  create mode 100644 include/linux/mmc/sd_uhs2.h
+> > >
 
-> Although downstream supports HS400, there are overclocking warnings when
-> using mmc-hs400-1_8v:
+[...]
 
-> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
-> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
-> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
-> mmc0: Card appears overclocked; req 400000000 Hz, actual 768000000 Hz
-> mmc0: Card appears overclocked; req 400000000 Hz, actual 768000000 Hz
-> mmc0: new HS400 MMC card at address 0001
+> > > diff --git a/include/linux/mmc/sd_uhs2.h b/include/linux/mmc/sd_uhs2.h
+> > > new file mode 100644
+> > > index 000000000..5d12fb9d0
+> > > --- /dev/null
+> > > +++ b/include/linux/mmc/sd_uhs2.h
+> > > @@ -0,0 +1,196 @@
 
-> Using HS200 (i.e. mmc-hs200-1_8v or mmc-ddr-1_8v) would reduce them:
+[...]
 
-> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
-> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
-> mmc0: new HS200 MMC card at address 0001
+> > > +enum uhs2_act {
+> > > +        SET_CONFIG,
+> > > +        ENABLE_INT,
+> > > +        DISABLE_INT,
+> > > +        SET_SPEED_B,
+> > > +        CHECK_DORMANT,
+> > > +        UHS2_SW_RESET,
+> > > +};
+> >
+> > Perhaps uhs2_action is more clear?
 
-> But as the problem is probably elsewhere (bullhead behaves the same),
-> keep mmc-hs400-1_8v.
+In order to integrate all UHS2 host callback functions into a single function:
+uhs2_host_operation(host, uhs2_action). I add 5 actions to
+uhs2_action{}:
+        enum uhs2_action {
+                SET_CONFIG,
+                ENABLE_INT,
+                DISABLE_INT,
+                SET_SPEED_B,
+                CHECK_DORMANT,
+                SW_RESET,
+                SET_REGISTER,    // callback function: uhs2_set_reg(host, act)
+                DETECT_INIT,     // callback function: uhs2_detect_init(host)
+                DISABLE_CLK,     // callback function: uhs2_disable_clk(host)
+                ENABLE_CLK,      // callback function: uhs2_enable_clk(host)
+                POST_ATTACH_SD   // callback function: uhs2_post_attach_sd(host)
+        };
+Do you prefer to add prefix "UHS2_" to each action in uhs2_action?
 
-> Angler does not have SD card, thus explicitly disable sdhc2.
+ kind regards,
+ Jason Lai
+>
 
-> Signed-off-by: Petr Vorel <petr.vorel@gmail.com>
-> ---
->  .../dts/qcom/msm8994-huawei-angler-rev-101.dts   | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
+[...]
 
-> diff --git a/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts b/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts
-> index 0e3dd48f0dbf..5ce3dc169bb4 100644
-> --- a/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts
-> +++ b/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts
-> @@ -7,6 +7,7 @@
->  /dts-v1/;
-
->  #include "msm8994.dtsi"
-> +#include <dt-bindings/gpio/gpio.h>
-
->  /* Angler's firmware does not report where the memory is allocated */
->  /delete-node/ &cont_splash_mem;
-> @@ -41,3 +42,18 @@ serial@f991e000 {
->  &tlmm {
->  	gpio-reserved-ranges = <85 4>;
->  };
-> +
-> +/*
-> + * Although downstream supports also HS400 there are fewer overclocking
-> + * warnings when used DDR, also LK bootloader reports DDR mode.
-> + */
-This is a left over from experimenting with mmc-ddr-1_8v.
-But maybe it can stay (unless I manage solve the problem).
-
-Kind regards,
-Petr
-
-> +&sdhc1 {
-> +	status = "okay";
-> +
-> +	mmc-hs400-1_8v;
-> +};
-> +
-> +/* Angler does not have SD card */
-> +&sdhc2 {
-> +	status = "disabled";
-> +};
+> >
+> > Kind regards
+> > Uffe
