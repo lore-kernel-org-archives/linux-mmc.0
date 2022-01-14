@@ -2,100 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB8CDC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jan 2022 07:59:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B553C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jan 2022 08:02:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234333AbiANH7l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jan 2022 02:59:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45118 "EHLO
+        id S235095AbiANICP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jan 2022 03:02:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234249AbiANH7k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jan 2022 02:59:40 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E548C061574;
-        Thu, 13 Jan 2022 23:59:40 -0800 (PST)
+        with ESMTP id S235076AbiANICO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jan 2022 03:02:14 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F052C061574
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jan 2022 00:02:14 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 59F66B82429;
-        Fri, 14 Jan 2022 07:59:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7F3B5C36AEA;
-        Fri, 14 Jan 2022 07:59:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1642147178;
-        bh=6gx+Rodw8cvBoMVxE+Y4vZD/tVT81r9J3THpcB3YR0Q=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ifG4g1Z5D8niC9jSd62XffyPrxPTPWZQa23pmX0b7EUOwK5MuPJjjSwh7Elt2kvRQ
-         3fss1wTzG2rCTGM9RQUhIij47guoFhdrvd1S5qhW9+8CaUQ+bf+j6JfWt0YQQTNPRw
-         8RnmbFTR6VdOszcDgaDHat7W8P3vZ4Y8kwU/6xlM=
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Xiyu Yang <xiyuyang19@fudan.edu.cn>,
-        Xin Xiong <xiongx18@fudan.edu.cn>,
-        Xin Tan <tanxin.ctf@gmail.com>,
-        Tony Lindgren <tony@atomide.com>,
-        Yang Li <yang.lee@linux.alibaba.com>,
-        linux-mmc@vger.kernel.org, stable <stable@vger.kernel.org>,
-        whitehat002 <hackyzh002@gmail.com>
-Subject: [PATCH] moxart: fix potential use-after-free on remove path
-Date:   Fri, 14 Jan 2022 08:59:34 +0100
-Message-Id: <20220114075934.302464-1-gregkh@linuxfoundation.org>
-X-Mailer: git-send-email 2.34.1
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B9A2261DEC
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Jan 2022 08:02:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 971ADC36AEA;
+        Fri, 14 Jan 2022 08:02:12 +0000 (UTC)
+Date:   Fri, 14 Jan 2022 09:02:10 +0100
+From:   Greg KH <greg@kroah.com>
+To:     Marcus Meissner <meissner@suse.de>,
+        whitehat002 whitehat002 <hackyzh002@gmail.com>,
+        security@kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org, xiyuyang19@fudan.edu.cn, tony@atomide.com,
+        yang.lee@linux.alibaba.com, colin.king@intel.com,
+        xiongx18@fudan.edu.cn, security@suse.com
+Subject: Re: UAF in moxart_remove
+Message-ID: <YeEuAiUuwyBpdx60@kroah.com>
+References: <CAF6NKdZ6FOhJAXkFMgcr-+UcnfxoDc_p69nFxABHu+7b=FW36A@mail.gmail.com>
+ <20220111083511.GA12379@suse.de>
+ <Yd1zy5wUnrFp7xic@kroah.com>
+ <Yd15h1ifACm8zyI/@kroah.com>
 MIME-Version: 1.0
-X-Developer-Signature: v=1; a=openpgp-sha256; l=1710; h=from:subject; bh=6gx+Rodw8cvBoMVxE+Y4vZD/tVT81r9J3THpcB3YR0Q=; b=owGbwMvMwCRo6H6F97bub03G02pJDIkPdZM/TjgqdvP12rD3HOXWN4ojdmyKY6l4NeH1m7qIZ5Pc TXsjO2JZGASZGGTFFFm+bOM5ur/ikKKXoe1pmDmsTCBDGLg4BWAik50Y5mkfFwjVKqvWsYqqE+pRSf hVET1/NcNstugZ12/M77TJmZK1vab9wqQkl4VTAA==
-X-Developer-Key: i=gregkh@linuxfoundation.org; a=openpgp; fpr=F4B60CC5BF78C2214A313DCB3147D40DDB2DFB29
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yd15h1ifACm8zyI/@kroah.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It was reported that the mmc host structure could be accessed after it
-was freed in moxart_remove(), so fix this by saving the base register of
-the device and using it instead of the pointer dereference.
+On Tue, Jan 11, 2022 at 01:35:19PM +0100, Greg KH wrote:
+> On Tue, Jan 11, 2022 at 01:10:51PM +0100, Greg KH wrote:
+> > On Tue, Jan 11, 2022 at 09:35:11AM +0100, Marcus Meissner wrote:
+> > > Hi whitehat002,
+> > > 
+> > > SUSE currently does not build the moxart driver, let me defer you to
+> > > security@kernel.org and the MMC maintainers.
+> > > 
+> > > i also opened a bug in our bugzilla just for tracking
+> > > https://bugzilla.suse.com/show_bug.cgi?id=1194516
+> > > 
+> > > Ciao, Marcus
+> > > On Tue, Jan 11, 2022 at 02:30:32PM +0800, whitehat002 whitehat002 wrote:
+> > > > Hello suse security team,
+> > > > 
+> > > > There is a UAF in drivers/mmc/host/moxart-mmc.c
+> > > > This is similar with
+> > > > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=42933c8aa14be1caa9eda41f65cde8a3a95d3e39
+> > > > 
+> > > > 
+> > > > 
+> > > > static int moxart_remove(struct platform_device *pdev)
+> > > > {
+> > > > struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
+> > > > struct moxart_host *host = mmc_priv(mmc);
+> > > > 
+> > > > dev_set_drvdata(&pdev->dev, NULL);
+> > > > 
+> > > > if (!IS_ERR_OR_NULL(host->dma_chan_tx))
+> > > > dma_release_channel(host->dma_chan_tx);
+> > > > if (!IS_ERR_OR_NULL(host->dma_chan_rx))
+> > > > dma_release_channel(host->dma_chan_rx);
+> > > > mmc_remove_host(mmc);
+> > > > mmc_free_host(mmc);   //[0] free
+> > > > 
+> > > > writel(0, host->base + REG_INTERRUPT_MASK); //[1] host is private data from
+> > > > mmc_host UAF
+> > > > writel(0, host->base + REG_POWER_CONTROL);
+> > > > writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+> > > >        host->base + REG_CLOCK_CONTROL);
+> > > > 
+> > > > return 0;
+> > > > }
+> > > > 
+> > 
+> > Can you write a patch to fix this so that you can get proper credit for
+> > fixing it as well as finding it?
+> 
+> Here's a untested patch that "should" be correct, can someone test it
+> please?
+> 
+> thanks,
+> 
+> greg k-h
+> 
+> 
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index 16d1c7a43d33..fe05ae81afd9 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -704,14 +704,14 @@ static int moxart_remove(struct platform_device *pdev)
+>  		dma_release_channel(host->dma_chan_tx);
+>  	if (!IS_ERR_OR_NULL(host->dma_chan_rx))
+>  		dma_release_channel(host->dma_chan_rx);
+> -	mmc_remove_host(mmc);
+> -	mmc_free_host(mmc);
+> -
+>  	writel(0, host->base + REG_INTERRUPT_MASK);
+>  	writel(0, host->base + REG_POWER_CONTROL);
+>  	writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+>  	       host->base + REG_CLOCK_CONTROL);
+>  
+> +	mmc_remove_host(mmc);
+> +	mmc_free_host(mmc);
+> +
+>  	return 0;
+>  }
+>  
 
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Xiyu Yang <xiyuyang19@fudan.edu.cn>
-Cc: Xin Xiong <xiongx18@fudan.edu.cn>
-Cc: Xin Tan <tanxin.ctf@gmail.com>
-Cc: Tony Lindgren <tony@atomide.com>
-Cc: Yang Li <yang.lee@linux.alibaba.com>
-Cc: linux-mmc@vger.kernel.org
-Cc: stable <stable@vger.kernel.org>
-Reported-by: whitehat002 <hackyzh002@gmail.com>
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- drivers/mmc/host/moxart-mmc.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+I've sent a "better" version of this patch upstream for inclusion now:
+	https://lore.kernel.org/all/20220114075934.302464-1-gregkh@linuxfoundation.org/
 
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index 16d1c7a43d33..f5d96940a9b8 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -697,6 +697,7 @@ static int moxart_remove(struct platform_device *pdev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
- 	struct moxart_host *host = mmc_priv(mmc);
-+	void __iomem *base = host->base;
- 
- 	dev_set_drvdata(&pdev->dev, NULL);
- 
-@@ -707,10 +708,10 @@ static int moxart_remove(struct platform_device *pdev)
- 	mmc_remove_host(mmc);
- 	mmc_free_host(mmc);
- 
--	writel(0, host->base + REG_INTERRUPT_MASK);
--	writel(0, host->base + REG_POWER_CONTROL);
--	writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
--	       host->base + REG_CLOCK_CONTROL);
-+	writel(0, base + REG_INTERRUPT_MASK);
-+	writel(0, base + REG_POWER_CONTROL);
-+	writel(readl(base + REG_CLOCK_CONTROL) | CLK_OFF,
-+	       base + REG_CLOCK_CONTROL);
- 
- 	return 0;
- }
--- 
-2.34.1
+As this path can only be hit if you have root privileges to unload the
+module, it's not really that much of a "security" issue.
 
+thanks,
+
+greg k-h
