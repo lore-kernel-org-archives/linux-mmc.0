@@ -2,114 +2,185 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CB69C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jan 2022 13:40:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5618DC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Jan 2022 17:55:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232190AbiANNkc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Jan 2022 08:40:32 -0500
-Received: from mga11.intel.com ([192.55.52.93]:62826 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230472AbiANNkc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 14 Jan 2022 08:40:32 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1642167632; x=1673703632;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=POdeD4+1G0JKY0mLHWhbQ3GjB8ZbNAHvQrtkU1zviNg=;
-  b=KxxnBzWjLxD4x/MqI916eAtVBZyNZ/YP9HvKyV3EHY8EGKJAaJl4B4xu
-   qpt/x+QKKH2GvKcZvxNb2H+A73kEsCgOQf/Kjt82Nv6+Q76/79K1uTV87
-   grmUqU1SwpdrYasJR2DV6nHX4wy1NQV/Vbbe9ERQaADnri4IStuZKrl6f
-   U1Wr28VT/PY5Z9x8ohFl3oAh+mYnnfnIZqR7xEG2QxAizBjWy2QzIFuPB
-   wA/cTUTYSDN07T+N7IWHuFlD/oFxH46Q/z1qHGOYBG79ocaER5sWIHkPX
-   YpeEgzRi4GRHiA0JVmgZCsZakv9byWRzKRr/WzFaaWd/4q1yBDwnqCSvk
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10226"; a="241807206"
-X-IronPort-AV: E=Sophos;i="5.88,288,1635231600"; 
-   d="scan'208";a="241807206"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jan 2022 05:40:32 -0800
-X-IronPort-AV: E=Sophos;i="5.88,288,1635231600"; 
-   d="scan'208";a="614341875"
-Received: from smile.fi.intel.com ([10.237.72.61])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jan 2022 05:40:27 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.95)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1n8Mn4-00AcqY-Hh;
-        Fri, 14 Jan 2022 15:38:50 +0200
-Date:   Fri, 14 Jan 2022 15:38:27 +0200
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        id S244000AbiANRzW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Jan 2022 12:55:22 -0500
+Received: from mxout02.lancloud.ru ([45.84.86.82]:37634 "EHLO
+        mxout02.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244005AbiANRzR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Jan 2022 12:55:17 -0500
+Received: from LanCloud
+DKIM-Filter: OpenDKIM Filter v2.11.0 mxout02.lancloud.ru 02F2120606E9
+Received: from LanCloud
+Received: from LanCloud
+Received: from LanCloud
+Subject: Re: [PATCH] driver core: platform: Rename platform_get_irq_optional()
+ to platform_get_irq_silent()
+To:     Florian Fainelli <f.fainelli@gmail.com>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Mark Brown <broonie@kernel.org>
+CC:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        KVM list <kvm@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        <linux-iio@vger.kernel.org>,
+        "Linus Walleij" <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        "ALSA Development Mailing List" <alsa-devel@alsa-project.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        <linux-phy@lists.infradead.org>, Jiri Slaby <jirislaby@kernel.org>,
+        <openipmi-developer@lists.sourceforge.net>,
+        "David S. Miller" <davem@davemloft.net>,
+        Khuong Dinh <khuong@os.amperecomputing.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        "Geert Uytterhoeven" <geert@linux-m68k.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org
-Subject: Re: [PATCH v2 3/3] mmc: mediatek: add support for SDIO eint irq
-Message-ID: <YeF806Ucigo5vWmx@smile.fi.intel.com>
-References: <20220111014046.5864-1-axe.yang@mediatek.com>
- <20220111014046.5864-4-axe.yang@mediatek.com>
- <Yd1uJ+dX2CTEJfYY@smile.fi.intel.com>
- <83670f12a4eda1d8aecde3c0bf225642106d1267.camel@mediatek.com>
- <YeADWXPGPW253ssR@smile.fi.intel.com>
- <52901ebe0db555f8e58dc0d59cfd703c5a0fc2de.camel@mediatek.com>
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        Saravanan Sekar <sravanhome@gmail.com>,
+        Corey Minyard <minyard@acm.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        "William Breathitt Gray" <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Tony Luck <tony.luck@intel.com>,
+        "Borislav Petkov" <bp@alien8.de>,
+        Sebastian Reichel <sre@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        <platform-driver-x86@vger.kernel.org>,
+        Benson Leung <bleung@chromium.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        <linux-edac@vger.kernel.org>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        "Eric Auger" <eric.auger@redhat.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Cornelia Huck <cohuck@redhat.com>,
+        "Linux MMC List" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        James Morse <james.morse@arm.com>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Richard Weinberger <richard@nod.at>,
+        =?UTF-8?Q?Niklas_S=c3=b6derlund?= <niklas.soderlund@ragnatech.se>,
+        <linux-mediatek@lists.infradead.org>,
+        "Brian Norris" <computersforpeace@gmail.com>,
+        <netdev@vger.kernel.org>
+References: <20220110195449.12448-2-s.shtylyov@omp.ru>
+ <20220110201014.mtajyrfcfznfhyqm@pengutronix.de> <YdyilpjC6rtz6toJ@lunn.ch>
+ <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
+ <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+ <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
+ <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
+ <Yd9L9SZ+g13iyKab@sirena.org.uk>
+ <20220113110831.wvwbm75hbfysbn2d@pengutronix.de>
+ <YeA7CjOyJFkpuhz/@sirena.org.uk>
+ <20220113194358.xnnbhsoyetihterb@pengutronix.de>
+ <745c601f-c782-0904-f786-c9bfced8f11c@gmail.com>
+From:   Sergey Shtylyov <s.shtylyov@omp.ru>
+Organization: Open Mobile Platform
+Message-ID: <cae0b73e-46df-a491-4a8e-415205038c2c@omp.ru>
+Date:   Fri, 14 Jan 2022 20:55:07 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <52901ebe0db555f8e58dc0d59cfd703c5a0fc2de.camel@mediatek.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+In-Reply-To: <745c601f-c782-0904-f786-c9bfced8f11c@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [192.168.11.198]
+X-ClientProxiedBy: LFEXT02.lancloud.ru (fd00:f066::142) To
+ LFEX1907.lancloud.ru (fd00:f066::207)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 14, 2022 at 11:06:36AM +0800, Axe Yang wrote:
-> On Thu, 2022-01-13 at 12:47 +0200, Andy Shevchenko wrote:
-> > On Thu, Jan 13, 2022 at 03:58:52PM +0800, Axe Yang wrote:
-> > > On Tue, 2022-01-11 at 13:46 +0200, Andy Shevchenko wrote:
-> > > > On Tue, Jan 11, 2022 at 09:40:46AM +0800, Axe Yang wrote:
+On 1/14/22 12:42 AM, Florian Fainelli wrote:
 
-...
-
-> > > > > +		host->pins_eint = pinctrl_lookup_state(host-
-> > > > > >pinctrl,
-> > > > > "state_eint");
-> > > > > +		if (IS_ERR(host->pins_eint)) {
-> > > > > +			dev_dbg(&pdev->dev, "Cannot find
-> > > > > pinctrl
-> > > > > eint!\n");
-> > > > 
-> > > > In debug mode of pin control this will bring a duplicate message.
-> > > 
-> > > Can you explain more about this comment?
-> > > I don't understand what the 'duplicate message' refers for.
-> > 
-> > Have you chance to read the implementation of pinctrl_lookup_state()?
+>> The subsystems regulator, clk and gpio have the concept of a dummy
+>> resource. For regulator, clk and gpio there is a semantic difference
+>> between the regular _get() function and the _get_optional() variant.
+>> (One might return the dummy resource, the other won't. Unfortunately
+>> which one implements which isn't the same for these three.) The
+>> difference between platform_get_irq() and platform_get_irq_optional() is
+>> only that the former might emit an error message and the later won't.
+>>
+>> To prevent people's expectations that there is a semantic difference
+>> between these too, rename platform_get_irq_optional() to
+>> platform_get_irq_silent() to make the actual difference more obvious.
+>>
+>> The #define for the old name can and should be removed once all patches
+>> currently in flux still relying on platform_get_irq_optional() are
+>> fixed.
+>>
+>> Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+[...]
+>>>> I think at least c) is easy to resolve because
+>>>> platform_get_irq_optional() isn't that old yet and mechanically
+>>>> replacing it by platform_get_irq_silent() should be easy and safe.
+>>>> And this is orthogonal to the discussion if -ENOXIO is a sensible return
+>>>> value and if it's as easy as it could be to work with errors on irq
+>>>> lookups.
+>>>
+>>> It'd certainly be good to name anything that doesn't correspond to one
+>>> of the existing semantics for the API (!) something different rather
+>>> than adding yet another potentially overloaded meaning.
+>>
+>> It seems we're (at least) three who agree about this. Here is a patch
+>> fixing the name.
 > 
-> I have read pinctrl_lookup_state(), and if the 'duplicate message' you
-> were talking about is 'using pinctrl dummy state...':
-> 
-> https://elixir.bootlin.com/linux/latest/source/drivers/pinctrl/core.c#L1214
-> No, this message will not appear in debug mode if pins_eint not found
-> because pinctrl_dummy_state is always FALSE. MTK Soc do not need dummy
-> state support.
+> From an API naming perspective this does not make much sense anymore with the name chosen,
+> it is understood that whent he function is called platform_get_irq_optional(), optional applies
+> to the IRQ. An optional IRQ is something people can reason about because it makes sense.
 
-I see, thanks for explanation. I'm wondering how good or bad would be
-the idea of adding a debug message on the !pinctrl_dummy_state case.
+   Right! :-)
 
--- 
-With Best Regards,
-Andy Shevchenko
+> What is a a "silent" IRQ however? It does not apply to the object it is trying to fetch to
+> anymore, but to the message that may not be printed in case the resource failed to be obtained,
+> because said resource is optional. Woah, that's quite a stretch.
 
+   Right again! :-)
 
+> Following the discussion and original 2 patches set from Sergey, it is not entirely clear to me
+> anymore what is it that we are trying to fix.
+
+   Andy and me tried to fix the platform_get_irq[_byname]_optional() value, corresponding to
+a missing (optional) IRQ resource from -ENXIO to 0, in order to keep the callers error code
+agnostic. This change completely aligns e.g. platform_get_irq_optional() with clk_get_optional()
+and gpiod_get_optional()...
+   Unforunately, we can't "fix" request_irq() and company to treat 0 as missing IRQ -- they have
+to keep the ability to get called from the arch/ code (that doesn't use platform_get_irq(), etc.
+
+> I nearly forgot, I would paint it blue, sky blue, not navy blue, not light blue ;)
+
+   :-)
+
+PS: Florian, something was wrong with your mail client -- I had to manually wrap your quotes,
+else there were super long unbroken paragraphs...
