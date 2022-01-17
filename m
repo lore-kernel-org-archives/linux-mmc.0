@@ -2,223 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33EA3C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 07:36:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8457C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 08:14:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237548AbiAQHgB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jan 2022 02:36:01 -0500
-Received: from mailgw01.mediatek.com ([60.244.123.138]:34772 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232208AbiAQHgA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 02:36:00 -0500
-X-UUID: 0248352516b94cd1a40ba274f513aa84-20220117
-X-UUID: 0248352516b94cd1a40ba274f513aa84-20220117
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
+        id S235396AbiAQION (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jan 2022 03:14:13 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:59660 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S230028AbiAQIOM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 03:14:12 -0500
+X-UUID: 51f31bc786b24f499ee097c30bf01df9-20220117
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:CC:To:Subject; bh=MLngfimllDjAWxvbO5d7nuFB2Pcu+gxeE6ZEyPxU+7k=;
+        b=oJ1ut0EVW/7ybuC1pUxz7bcqzFDICJKPtXNBizQ6zeD63gwOARw7E/b8t18dTk6SwbHE7Amb6bAahQP/WaSALqi7A2ZXrMWhNjYKuU8si6OPF1KJtQemAvXxjw0DmEmOnJimoAUEgLZQfGU0+5JPRMpCuvkygkmkaA/IwxyB0yQ=;
+X-UUID: 51f31bc786b24f499ee097c30bf01df9-20220117
+Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
+        (envelope-from <macpaul.lin@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1741393476; Mon, 17 Jan 2022 15:35:55 +0800
+        with ESMTP id 698620270; Mon, 17 Jan 2022 16:14:01 +0800
 Received: from mtkcas11.mediatek.inc (172.21.101.40) by
  mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Mon, 17 Jan 2022 15:35:54 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
+ Mon, 17 Jan 2022 16:14:00 +0800
+Received: from [172.21.84.99] (172.21.84.99) by mtkcas11.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 17 Jan 2022 15:35:53 +0800
-Message-ID: <2205eedc9ecd10f83994138974b261baa0aee55a.camel@mediatek.com>
-Subject: Re: [PATCH v2 3/3] mmc: mediatek: add support for SDIO eint irq
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+ Transport; Mon, 17 Jan 2022 16:14:00 +0800
+Subject: Re: [PATCH 2/3] mmc: core: Add support for SDIO async interrupt
+To:     Axe Yang <axe.yang@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
+        =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
+        <Chaotian.Jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "Yoshihiro Shimoda" <yoshihiro.shimoda.uh@renesas.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "Lucas Stach" <dev@lynxeye.de>, Eric Biggers <ebiggers@google.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
         Andrew Jeffery <andrew@aj.id.au>,
         Stephen Boyd <swboyd@chromium.org>,
         Kiwoong Kim <kwmad.kim@samsung.com>,
         Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
+        "angelogioacchino.delregno@collabora.com" 
+        <angelogioacchino.delregno@collabora.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
         <linux-arm-kernel@lists.infradead.org>,
+        "linux-mediatek@lists.infradead.org" 
         <linux-mediatek@lists.infradead.org>
-Date:   Mon, 17 Jan 2022 15:35:53 +0800
-In-Reply-To: <Yd1uJ+dX2CTEJfYY@smile.fi.intel.com>
-References: <20220111014046.5864-1-axe.yang@mediatek.com>
-         <20220111014046.5864-4-axe.yang@mediatek.com>
-         <Yd1uJ+dX2CTEJfYY@smile.fi.intel.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+References: <20220117071220.17330-1-axe.yang@mediatek.com>
+ <20220117071220.17330-3-axe.yang@mediatek.com>
+From:   Macpaul Lin <macpaul.lin@mediatek.com>
+Message-ID: <60f3d381-1af4-d002-e179-9550672dae5b@mediatek.com>
+Date:   Mon, 17 Jan 2022 16:14:00 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+In-Reply-To: <20220117071220.17330-3-axe.yang@mediatek.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Andy, patchset v3 is uploaded. I fixed most of the defect you pointed
-out.
-And in msdc_sdio_eint_irq(), you asked why do we need flags, the flags
-is for spin lock irq save/restore, so I keep it.
-
-On Tue, 2022-01-11 at 13:46 +0200, Andy Shevchenko wrote:
-> On Tue, Jan 11, 2022 at 09:40:46AM +0800, Axe Yang wrote:
-> > Add support for eint irq when MSDC is used as an SDIO host. This
-> 
-> IRQ
-> 
-> > feature requires SDIO device support async irq function. With this
-> 
-> IRQ
-> 
-> > feature,SDIO host can be awakened by SDIO card in suspend state,
-> 
-> feature, SDIO
-> 
-> > without additional pin.
-> > 
-> > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> > resume, switch GPIO function back to DAT1 mode then turn on clock.
-> > 
-> > Some device tree property should be added or modified in msdc node
-> 
-> MSDC
-> 
-> > to support SDIO eint irq. Pinctrls named state_dat1 and state_eint
-> 
-> IRQ
-> 
-> > are mandatory. And cap-sdio-async-irq flag is necessary since this
-> > feature depends on asynchronous interrupt:
-> >         &mmcX {
-> >                 ...
-> >                 pinctrl-names = "default", "state_uhs",
-> > "state_eint",
-> >                                 "state_dat1";
-> >                 ...
-> >                 pinctrl-2 = <&mmc2_pins_eint>;
-> >                 pinctrl-3 = <&mmc2_pins_dat1>;
-> >                 ...
-> >                 cap-sdio-async-irq;
-> >                 ...
-> >         };
-> 
-> ...
-> 
-> > - * Copyright (c) 2014-2015 MediaTek Inc.
-> > + * Copyright (c) 2014-2022 MediaTek Inc.
-> 
-> Shouldn't it be rather like
-> 
->  * Copyright (c) 2014-2015,2022 MediaTek Inc.
-> 
-> ?
-> 
-> ...
-> 
-> > +static irqreturn_t msdc_sdio_eint_irq(int irq, void *dev_id)
-> > +{
-> > +	unsigned long flags;
-> > +	struct msdc_host *host = (struct msdc_host *)dev_id;
-> 
-> No casting is needed.
-> 
-> > +	struct mmc_host *mmc = mmc_from_priv(host);
-> 
-> Perhaps reversed xmas tree order
-> 
-> 	struct msdc_host *host = dev_id;
-> 	struct mmc_host *mmc = mmc_from_priv(host);
-> 	unsigned long flags;
-> 
-> ?
-> 
-> But hey, why do you need flags?
-
-falgs is for spin lock irq save/restore. 
-
-> 
-> > +	spin_lock_irqsave(&host->lock, flags);
-> > +	if (likely(host->sdio_irq_cnt > 0)) {
-> > +		disable_irq_nosync(host->eint_irq);
-> > +		disable_irq_wake(host->eint_irq);
-> > +		host->sdio_irq_cnt--;
-> > +	}
-> > +	spin_unlock_irqrestore(&host->lock, flags);
-> > +
-> > +	sdio_signal_irq(mmc);
-> > +
-> > +	return IRQ_HANDLED;
-> > +}
-> 
-> ...
-> 
-> > +static int msdc_request_dat1_eint_irq(struct msdc_host *host)
-> > +{
-> > +	struct gpio_desc *desc;
-> > +	int irq, ret;
-> > +
-> > +	desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
-> > +	if (IS_ERR(desc))
-> > +		return PTR_ERR(desc);
-> > +
-> > +	ret = gpiod_to_irq(desc);
-> > +	if (ret < 0)
-> > +		return ret;
-> > +
-> > +	irq = ret;
-> > +	ret = devm_request_threaded_irq(host->dev, irq, NULL,
-> > msdc_sdio_eint_irq,
-> > +					IRQF_TRIGGER_LOW | IRQF_ONESHOT
-> > | IRQF_NO_AUTOEN,
-> > +					"sdio-eint", host);
-> > +
-> 
-> Redundant blank line.
-> 
-> > +	if (!ret)
-> > +		host->eint_irq = irq;
-> > +
-> > +	return ret;
-> 
-> I guess I have already commented on this, i.e. use standard pattern
-> 
-> 	if (ret)
-> 		return ret;
-> 
-> 	...
-> 	return 0;
-> 
-> > +}
-> 
-> ...
-> 
-> > +		host->pins_eint = pinctrl_lookup_state(host->pinctrl,
-> > "state_eint");
-> > +		if (IS_ERR(host->pins_eint)) {
-> > +			dev_dbg(&pdev->dev, "Cannot find pinctrl
-> > eint!\n");
-> 
-> In debug mode of pin control this will bring a duplicate message.
-> 
-> > +		} else {
-> > +			host->pins_dat1 = pinctrl_lookup_state(host-
-> > >pinctrl, "state_dat1");
-> > +			if (IS_ERR(host->pins_dat1)) {
-> > +				ret = dev_err_probe(&pdev->dev,
-> > PTR_ERR(host->pins_dat1),
-> > +						    "Cannot find
-> > pinctrl dat1!\n");
-> > +				goto host_free;
-> > +			}
-> > +
-> > +			host->sdio_eint_ready = true;
-> > +		}
-> > +	}
-> 
-> 
+T24gMS8xNy8yMiAzOjEyIFBNLCBBeGUgWWFuZyB3cm90ZToNCj4gSWYgY2FwLXNkaW8tYXN5bmMt
+aXJxIGZsYWcgaXMgc2V0IGluIGhvc3QgZHRzIG5vZGUsIHBhcnNlIEVBSQ0KPiBpbmZvcm1hdGlv
+biBmcm9tIFNESU8gQ0NDUiBpbnRlcnJ1cHQgZXh0ZXJuc2lvbiBzZWdtZW50LiBJZiBhc3luYw0K
+PiBpbnRlcnJ1cHQgaXMgc3VwcG9ydGVkIGJ5IFNESU8gY2FyZCB0aGVuIHNlbmQgY29tbWFuZCB0
+byBjYXJkIHRvDQo+IGVuYWJsZSBpdCBhbmQgc2V0IGVuYWJsZV9hc3luY19pcnEgZmxhZyBpbiBz
+ZGlvX2NjY3Igc3RydWN0dXJlIHRvIDEuDQo+IFRoZSBwYXJzZSBmbG93IGlzIGltcGxlbWVudGVk
+IGluIHNkaW9fcmVhZF9jY2NyKCkuDQo+IA0KPiBBY2tlZC1ieTogQW5nZWxvR2lvYWNjaGlubyBE
+ZWwgUmVnbm8gPGFuZ2Vsb2dpb2FjY2hpbm8uZGVscmVnbm9AY29sbGFib3JhLmNvbT4NCj4gU2ln
+bmVkLW9mZi1ieTogQXhlIFlhbmcgPGF4ZS55YW5nQG1lZGlhdGVrLmNvbT4NCg0KW2RlbGV0ZWQu
+Li5dDQoNCkl0IHNlZW1zIHRoZSBwcmVmaXggIltQQVRDSCB2M10iIGRpZG4ndCBhcHBsaWVkIHRv
+IHN1YmplY3Qgb2YgZWFjaCBwYXRjaCANCmluIHYzIHNlcmllcy4gUGxlYXNlIHJlbWVtYmVyIHRv
+IGtlZXAgdGhlIHZlcnNpb24gYWxpZ25lZCBpbiB0aGUgc2FtZSANCnBhdGNoIHNldC4gVXNlICJn
+aXQgZm9ybWF0LXBhdGNoIC0tc3ViamVjdC1wcmVmaXg9W1BBVENIIHYzXSIgdG8gaGVscCANCnlv
+dSB0byBrZWVwIHRoZSB2ZXJzaW9uIG51bWJlciBhbGlnbmVkIGlzIHN1Z2dlc3RlZC4NCg0KVGhh
+bmtzIQ0KTWFjcGF1bCBMaW4=
 
