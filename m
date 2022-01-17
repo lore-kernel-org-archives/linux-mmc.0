@@ -2,28 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29ABBC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 07:12:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38F5DC43217
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 07:12:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233822AbiAQHMd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S235258AbiAQHMd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 17 Jan 2022 02:12:33 -0500
-Received: from mailgw01.mediatek.com ([60.244.123.138]:46508 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S230158AbiAQHMc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 02:12:32 -0500
-X-UUID: 1b5f3415358b483bbce865f53155abbd-20220117
-X-UUID: 1b5f3415358b483bbce865f53155abbd-20220117
-Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
+Received: from mailgw02.mediatek.com ([210.61.82.184]:58738 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S232341AbiAQHMd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 02:12:33 -0500
+X-UUID: 4a43cb50abd64d0691766e5f0ec830cd-20220117
+X-UUID: 4a43cb50abd64d0691766e5f0ec830cd-20220117
+Received: from mtkexhb02.mediatek.inc [(172.21.101.103)] by mailgw02.mediatek.com
         (envelope-from <axe.yang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1353151460; Mon, 17 Jan 2022 15:12:29 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by
+        with ESMTP id 196156975; Mon, 17 Jan 2022 15:12:28 +0800
+Received: from mtkexhb01.mediatek.inc (172.21.101.102) by
  mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Mon, 17 Jan 2022 15:12:28 +0800
+ Mon, 17 Jan 2022 15:12:27 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by mtkexhb01.mediatek.inc
+ (172.21.101.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Mon, 17 Jan
+ 2022 15:12:27 +0800
 Received: from localhost.localdomain (10.17.3.154) by mtkcas11.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 17 Jan 2022 15:12:27 +0800
+ Transport; Mon, 17 Jan 2022 15:12:25 +0800
 From:   Axe Yang <axe.yang@mediatek.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -45,12 +48,10 @@ CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>
-Subject: [PATCH v3 1/3] dt-bindings: mmc: add cap-sdio-async-irq flag
-Date:   Mon, 17 Jan 2022 15:12:18 +0800
-Message-ID: <20220117071220.17330-2-axe.yang@mediatek.com>
+Subject: [PATCH v3 0/3]mmc: mediatek: add support for SDIO async IRQ 
+Date:   Mon, 17 Jan 2022 15:12:17 +0800
+Message-ID: <20220117071220.17330-1-axe.yang@mediatek.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220117071220.17330-1-axe.yang@mediatek.com>
-References: <20220117071220.17330-1-axe.yang@mediatek.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
@@ -59,31 +60,29 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Asynchronous interrupt is a mechanism that allow SDIO devices alarm
-interrupt when host stop providing clock to card. Add a DT flag to
-enable this feature if it is supported by SDIO card.
 
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
----
- Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 +++++
- 1 file changed, 5 insertions(+)
+Changes in v3:
+- correct abbreviations with capital letters in commit message
+- replace copyright year with 2022 in mtk-sd.c
+- remove unnessary pointer casting
+- adjust variable order to reversed xmas tree
+- remove a redundant blank line
+- refine if statement, following standard pattern
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-index 513f3c8758aa..16fb06f88471 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-@@ -165,6 +165,11 @@ properties:
-     description:
-       eMMC hardware reset is supported
- 
-+  cap-sdio-async-irq:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description:
-+      SDIO async interrupt is supported.
-+
-   cap-sdio-irq:
-     $ref: /schemas/types.yaml#/definitions/flag
-     description:
+Axe Yang (3):
+  dt-bindings: mmc: add cap-sdio-async-irq flag
+  mmc: core: Add support for SDIO async interrupt
+  mmc: mediatek: add support for SDIO eint IRQ
+
+ .../bindings/mmc/mmc-controller.yaml          |   5 +
+ drivers/mmc/core/host.c                       |   2 +
+ drivers/mmc/core/sdio.c                       |  17 +++
+ drivers/mmc/host/mtk-sd.c                     | 125 ++++++++++++++++--
+ include/linux/mmc/card.h                      |   3 +-
+ include/linux/mmc/host.h                      |   1 +
+ include/linux/mmc/sdio.h                      |   5 +
+ 7 files changed, 149 insertions(+), 9 deletions(-)
+
 -- 
 2.25.1
 
