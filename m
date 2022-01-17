@@ -2,87 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8457C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 08:14:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC40FC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 08:25:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235396AbiAQION (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jan 2022 03:14:13 -0500
-Received: from mailgw02.mediatek.com ([210.61.82.184]:59660 "EHLO
+        id S235408AbiAQIZ5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jan 2022 03:25:57 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:51266 "EHLO
         mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S230028AbiAQIOM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 03:14:12 -0500
-X-UUID: 51f31bc786b24f499ee097c30bf01df9-20220117
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:CC:To:Subject; bh=MLngfimllDjAWxvbO5d7nuFB2Pcu+gxeE6ZEyPxU+7k=;
-        b=oJ1ut0EVW/7ybuC1pUxz7bcqzFDICJKPtXNBizQ6zeD63gwOARw7E/b8t18dTk6SwbHE7Amb6bAahQP/WaSALqi7A2ZXrMWhNjYKuU8si6OPF1KJtQemAvXxjw0DmEmOnJimoAUEgLZQfGU0+5JPRMpCuvkygkmkaA/IwxyB0yQ=;
-X-UUID: 51f31bc786b24f499ee097c30bf01df9-20220117
+        with ESMTP id S235385AbiAQIZ5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 03:25:57 -0500
+X-UUID: 932fd13d24d444daa94e6d1715a38995-20220117
+X-UUID: 932fd13d24d444daa94e6d1715a38995-20220117
 Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
-        (envelope-from <macpaul.lin@mediatek.com>)
+        (envelope-from <axe.yang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 698620270; Mon, 17 Jan 2022 16:14:01 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Mon, 17 Jan 2022 16:14:00 +0800
-Received: from [172.21.84.99] (172.21.84.99) by mtkcas11.mediatek.inc
+        with ESMTP id 1866584063; Mon, 17 Jan 2022 16:25:54 +0800
+Received: from mtkexhb01.mediatek.inc (172.21.101.102) by
+ mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Mon, 17 Jan 2022 16:25:53 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by mtkexhb01.mediatek.inc
+ (172.21.101.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Mon, 17 Jan
+ 2022 16:25:53 +0800
+Received: from localhost.localdomain (10.17.3.154) by mtkcas11.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 17 Jan 2022 16:14:00 +0800
-Subject: Re: [PATCH 2/3] mmc: core: Add support for SDIO async interrupt
-To:     Axe Yang <axe.yang@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+ Transport; Mon, 17 Jan 2022 16:25:51 +0800
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
-        <Chaotian.Jing@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>
 CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Satya Tangirala <satyat@google.com>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
+        Axe Yang <axe.yang@mediatek.com>, Lucas Stach <dev@lynxeye.de>,
         Eric Biggers <ebiggers@google.com>,
         Andrew Jeffery <andrew@aj.id.au>,
         Stephen Boyd <swboyd@chromium.org>,
         Kiwoong Kim <kwmad.kim@samsung.com>,
         Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        "angelogioacchino.delregno@collabora.com" 
         <angelogioacchino.delregno@collabora.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
-        "linux-mediatek@lists.infradead.org" 
         <linux-mediatek@lists.infradead.org>
-References: <20220117071220.17330-1-axe.yang@mediatek.com>
- <20220117071220.17330-3-axe.yang@mediatek.com>
-From:   Macpaul Lin <macpaul.lin@mediatek.com>
-Message-ID: <60f3d381-1af4-d002-e179-9550672dae5b@mediatek.com>
-Date:   Mon, 17 Jan 2022 16:14:00 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+Subject: [RESEND v3 0/3] mmc: mediatek: add support for SDIO eint IRQ 
+Date:   Mon, 17 Jan 2022 16:25:36 +0800
+Message-ID: <20220117082539.18713-1-axe.yang@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20220117071220.17330-3-axe.yang@mediatek.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gMS8xNy8yMiAzOjEyIFBNLCBBeGUgWWFuZyB3cm90ZToNCj4gSWYgY2FwLXNkaW8tYXN5bmMt
-aXJxIGZsYWcgaXMgc2V0IGluIGhvc3QgZHRzIG5vZGUsIHBhcnNlIEVBSQ0KPiBpbmZvcm1hdGlv
-biBmcm9tIFNESU8gQ0NDUiBpbnRlcnJ1cHQgZXh0ZXJuc2lvbiBzZWdtZW50LiBJZiBhc3luYw0K
-PiBpbnRlcnJ1cHQgaXMgc3VwcG9ydGVkIGJ5IFNESU8gY2FyZCB0aGVuIHNlbmQgY29tbWFuZCB0
-byBjYXJkIHRvDQo+IGVuYWJsZSBpdCBhbmQgc2V0IGVuYWJsZV9hc3luY19pcnEgZmxhZyBpbiBz
-ZGlvX2NjY3Igc3RydWN0dXJlIHRvIDEuDQo+IFRoZSBwYXJzZSBmbG93IGlzIGltcGxlbWVudGVk
-IGluIHNkaW9fcmVhZF9jY2NyKCkuDQo+IA0KPiBBY2tlZC1ieTogQW5nZWxvR2lvYWNjaGlubyBE
-ZWwgUmVnbm8gPGFuZ2Vsb2dpb2FjY2hpbm8uZGVscmVnbm9AY29sbGFib3JhLmNvbT4NCj4gU2ln
-bmVkLW9mZi1ieTogQXhlIFlhbmcgPGF4ZS55YW5nQG1lZGlhdGVrLmNvbT4NCg0KW2RlbGV0ZWQu
-Li5dDQoNCkl0IHNlZW1zIHRoZSBwcmVmaXggIltQQVRDSCB2M10iIGRpZG4ndCBhcHBsaWVkIHRv
-IHN1YmplY3Qgb2YgZWFjaCBwYXRjaCANCmluIHYzIHNlcmllcy4gUGxlYXNlIHJlbWVtYmVyIHRv
-IGtlZXAgdGhlIHZlcnNpb24gYWxpZ25lZCBpbiB0aGUgc2FtZSANCnBhdGNoIHNldC4gVXNlICJn
-aXQgZm9ybWF0LXBhdGNoIC0tc3ViamVjdC1wcmVmaXg9W1BBVENIIHYzXSIgdG8gaGVscCANCnlv
-dSB0byBrZWVwIHRoZSB2ZXJzaW9uIG51bWJlciBhbGlnbmVkIGlzIHN1Z2dlc3RlZC4NCg0KVGhh
-bmtzIQ0KTWFjcGF1bCBMaW4=
+
+Changes in v3:
+- correct abbreviations with capital letters in commit message
+- replace copyright year with 2022 in mtk-sd.c
+- remove unnessary pointer casting
+- adjust variable order to reversed xmas tree
+- remove a redundant blank line
+- refine if statement, following standard pattern
+
+Axe Yang (3):
+  dt-bindings: mmc: add cap-sdio-async-irq flag
+  mmc: core: Add support for SDIO async interrupt
+  mmc: mediatek: add support for SDIO eint IRQ
+
+ .../bindings/mmc/mmc-controller.yaml          |   5 +
+ drivers/mmc/core/host.c                       |   2 +
+ drivers/mmc/core/sdio.c                       |  17 +++
+ drivers/mmc/host/mtk-sd.c                     | 125 ++++++++++++++++--
+ include/linux/mmc/card.h                      |   3 +-
+ include/linux/mmc/host.h                      |   1 +
+ include/linux/mmc/sdio.h                      |   5 +
+ 7 files changed, 149 insertions(+), 9 deletions(-)
+
+-- 
+2.25.1
 
