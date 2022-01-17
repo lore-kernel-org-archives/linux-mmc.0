@@ -2,243 +2,339 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E8A3C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 10:36:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A2D6C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Jan 2022 10:50:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236111AbiAQKgJ convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jan 2022 05:36:09 -0500
-Received: from mail-vk1-f178.google.com ([209.85.221.178]:44866 "EHLO
-        mail-vk1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235751AbiAQKgI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 05:36:08 -0500
-Received: by mail-vk1-f178.google.com with SMTP id b77so10050961vka.11;
-        Mon, 17 Jan 2022 02:36:06 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=8wbyaDOKHzyncR/a8atHHiwf57S6QrlnXekhvOqZ5Zc=;
-        b=LSqfAKSEMaEAYGbunuoNsuAo80Rk3bWRnbog4vmP3JZLEh9uYSltN70uJc84BpJSr7
-         JJnirAVOJlzWKyDEIR2Diay0j4XTt0t62ENC9pifrHEO7FBWiHhHxuDK1WzAc8e6ELXR
-         kQ9mlj4U0HJfB2+KW8z5oG8eumwZ7pBma/5Dw/MfcUBQY6urYwF8smbH7H3q2qCyOWnZ
-         WMftrgtX96eKLAO99UHB4hY/TEZK/0NkFFeXjMqVUQZMRIBvb4IgC5k585TkQC90Pjjl
-         OCO4TUh6V49qlC5LMsMRqBmcDWSn9b1oJydqBYMjT6BdgJQWG8UIu4fo3Rdo+xKpbYJ/
-         vCYw==
-X-Gm-Message-State: AOAM5305tSrFltxA7gBSd0tqguB9hBRHUBFEH4OLNLs0dzL4jrmjEiQD
-        BXv/dJZDl/cDrQpuSMLa9PFd1Pet6ZxLZku3
-X-Google-Smtp-Source: ABdhPJy0WUl6ljrrNQay/fQ0XF0Z1LDo996FsF8bsiQ2Edql4XjhP64FvczIhYIxWKkP7rQimMMsaw==
-X-Received: by 2002:a1f:2c54:: with SMTP id s81mr4062257vks.38.1642415766251;
-        Mon, 17 Jan 2022 02:36:06 -0800 (PST)
-Received: from mail-ua1-f45.google.com (mail-ua1-f45.google.com. [209.85.222.45])
-        by smtp.gmail.com with ESMTPSA id b14sm3226412vkk.22.2022.01.17.02.36.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 17 Jan 2022 02:36:04 -0800 (PST)
-Received: by mail-ua1-f45.google.com with SMTP id c36so29466451uae.13;
-        Mon, 17 Jan 2022 02:36:04 -0800 (PST)
-X-Received: by 2002:ab0:4d42:: with SMTP id k2mr5738849uag.78.1642415764003;
- Mon, 17 Jan 2022 02:36:04 -0800 (PST)
-MIME-Version: 1.0
-References: <20220112085009.dbasceh3obfok5dc@pengutronix.de>
- <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
- <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de> <Yd9L9SZ+g13iyKab@sirena.org.uk>
- <29f0c65d-77f2-e5b2-f6cc-422add8a707d@omp.ru> <20220114092557.jrkfx7ihg26ekzci@pengutronix.de>
- <61b80939-357d-14f5-df99-b8d102a4e1a1@omp.ru> <20220114202226.ugzklxv4wzr6egwj@pengutronix.de>
- <c9026f17-2b3f-ee94-0ea3-5630f981fbc1@omp.ru> <CAMuHMdXVbRudGs69f9ZzaP1PXhteDNZiXA658eMFAwP4nr9r3w@mail.gmail.com>
- <20220117092444.opoedfcf5k5u6otq@pengutronix.de>
-In-Reply-To: <20220117092444.opoedfcf5k5u6otq@pengutronix.de>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 17 Jan 2022 11:35:52 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUgZUeraHadRAi2Z=DV+NuNBrKPkmAKsvFvir2MuquVoA@mail.gmail.com>
-Message-ID: <CAMuHMdUgZUeraHadRAi2Z=DV+NuNBrKPkmAKsvFvir2MuquVoA@mail.gmail.com>
-Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>, Andrew Lunn <andrew@lunn.ch>,
+        id S238759AbiAQKuj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jan 2022 05:50:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44588 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231277AbiAQKuj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 05:50:39 -0500
+Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA264C061574;
+        Mon, 17 Jan 2022 02:50:38 -0800 (PST)
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (Authenticated sender: kholk11)
+        with ESMTPSA id 65E1A1F42063
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1642416637;
+        bh=ptiEFjXjhoBJsX0S13oN/2lvPYOFqtq8gyPRviCgm60=;
+        h=Subject:To:Cc:References:From:Date:In-Reply-To:From;
+        b=FAEGTZraxddVLjoujpmzgnSd9KLr7FjNwLAV+yAVPuClpARIKHBMsOh88ehA+L2wh
+         dHlXJJveXAvt4RLAPcPesyOeKew9lEp/oDUV0pszTBhSMFiER5h8AMZGEHknf3MXQk
+         9VOHG91RQaO2i2UxtGbs3Xgv81febwN8b0fDsv6prWFwpXeui1I9/WMjV1297JlSCB
+         7bzZCVCJtbPgHaWrq9jOZorTTJOR+aB3kC35KYpNa/DDa7Bzk1J/PCfguV3EvJoLu/
+         GF4FVoxZHbBFs4vKcVBW0k8ezmHPmQdEFlt6vVi7sHs7rH681frfna3h58rqpt//BA
+         sGLUXDUSXr8kw==
+Subject: Re: [PATCH 3/3] mmc: mediatek: add support for SDIO eint IRQ
+To:     Axe Yang <axe.yang@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        KVM list <kvm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org, netdev <netdev@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        platform-driver-x86@vger.kernel.org,
-        Linux PWM List <linux-pwm@vger.kernel.org>,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        John Garry <john.garry@huawei.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Borislav Petkov <bp@alien8.de>, Takashi Iwai <tiwai@suse.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        openipmi-developer@lists.sourceforge.net,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Benson Leung <bleung@chromium.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>,
-        Richard Weinberger <richard@nod.at>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Sebastian Reichel <sre@kernel.org>,
-        =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org,
-        Brian Norris <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+        Yong Mao <yong.mao@mediatek.com>
+References: <20220117071220.17330-1-axe.yang@mediatek.com>
+ <20220117071220.17330-4-axe.yang@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+Message-ID: <754779eb-71f9-2083-a204-1d98b4a04a08@collabora.com>
+Date:   Mon, 17 Jan 2022 11:50:33 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
+MIME-Version: 1.0
+In-Reply-To: <20220117071220.17330-4-axe.yang@mediatek.com>
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uwe,
+Il 17/01/22 08:12, Axe Yang ha scritto:
+> Add support for eint IRQ when MSDC is used as an SDIO host. This
+> feature requires SDIO device support async IRQ function. With this
+> feature, SDIO host can be awakened by SDIO card in suspend state,
+> without additional pin.
+> 
+> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> resume, switch GPIO function back to DAT1 mode then turn on clock.
+> 
+> Some device tree property should be added or modified in MSDC node
+> to support SDIO eint IRQ. Pinctrls named state_dat1 and state_eint
+> are mandatory. And cap-sdio-async-irq flag is necessary since this
+> feature depends on asynchronous interrupt:
+>          &mmcX {
+>                  ...
+>                  pinctrl-names = "default", "state_uhs", "state_eint",
+>                                  "state_dat1";
+>                  ...
+>                  pinctrl-2 = <&mmc2_pins_eint>;
+>                  pinctrl-3 = <&mmc2_pins_dat1>;
+>                  ...
+>                  cap-sdio-async-irq;
+>                  ...
+>          };
+> 
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> ---
+>   drivers/mmc/host/mtk-sd.c | 125 +++++++++++++++++++++++++++++++++++---
+>   1 file changed, 117 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 65037e1d7723..cbdbcce99fd9 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1,6 +1,6 @@
+>   // SPDX-License-Identifier: GPL-2.0-only
+>   /*
+> - * Copyright (c) 2014-2015 MediaTek Inc.
+> + * Copyright (c) 2022 MediaTek Inc.
+>    * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+>    */
+>   
+> @@ -9,6 +9,7 @@
+>   #include <linux/clk.h>
+>   #include <linux/delay.h>
+>   #include <linux/dma-mapping.h>
+> +#include <linux/gpio/consumer.h>
+>   #include <linux/iopoll.h>
+>   #include <linux/ioport.h>
+>   #include <linux/irq.h>
+> @@ -440,8 +441,12 @@ struct msdc_host {
+>   	struct pinctrl *pinctrl;
+>   	struct pinctrl_state *pins_default;
+>   	struct pinctrl_state *pins_uhs;
+> +	struct pinctrl_state *pins_eint;
+> +	struct pinctrl_state *pins_dat1;
+>   	struct delayed_work req_timeout;
+>   	int irq;		/* host interrupt */
+> +	int eint_irq;		/* device interrupt */
+> +	int sdio_irq_cnt;	/* irq enable cnt */
+>   	struct reset_control *reset;
+>   
+>   	struct clk *src_clk;	/* msdc source clock */
+> @@ -465,6 +470,7 @@ struct msdc_host {
+>   	bool hs400_tuning;	/* hs400 mode online tuning */
+>   	bool internal_cd;	/* Use internal card-detect logic */
+>   	bool cqhci;		/* support eMMC hw cmdq */
+> +	bool sdio_eint_ready;	/* Ready to support SDIO eint interrupt */
+>   	struct msdc_save_para save_para; /* used when gate HCLK */
+>   	struct msdc_tune_para def_tune_para; /* default tune setting */
+>   	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
+> @@ -1527,10 +1533,12 @@ static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>   	__msdc_enable_sdio_irq(host, enb);
+>   	spin_unlock_irqrestore(&host->lock, flags);
+>   
+> -	if (enb)
+> -		pm_runtime_get_noresume(host->dev);
+> -	else
+> -		pm_runtime_put_noidle(host->dev);
+> +	if (mmc->card && !mmc->card->cccr.enable_async_irq) {
+> +		if (enb)
+> +			pm_runtime_get_noresume(host->dev);
+> +		else
+> +			pm_runtime_put_noidle(host->dev);
+> +	}
+>   }
+>   
+>   static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
+> @@ -2461,6 +2469,50 @@ static const struct mmc_host_ops mt_msdc_ops = {
+>   	.hw_reset = msdc_hw_reset,
+>   };
+>   
+> +static irqreturn_t msdc_sdio_eint_irq(int irq, void *dev_id)
+> +{
+> +	struct msdc_host *host = dev_id;
+> +	struct mmc_host *mmc = mmc_from_priv(host);
+> +	unsigned long flags;
+> +
+> +	spin_lock_irqsave(&host->lock, flags);
+> +	if (likely(host->sdio_irq_cnt > 0)) {
+> +		disable_irq_nosync(host->eint_irq);
+> +		disable_irq_wake(host->eint_irq);
+> +		host->sdio_irq_cnt--;
+> +	}
+> +	spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +	sdio_signal_irq(mmc);
+> +
+> +	return IRQ_HANDLED;
+> +}
+> +
+> +static int msdc_request_dat1_eint_irq(struct msdc_host *host)
+> +{
+> +	struct gpio_desc *desc;
+> +	int irq, ret;
+> +
+> +	desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
+> +	if (IS_ERR(desc))
+> +		return PTR_ERR(desc);
+> +
+> +	ret = gpiod_to_irq(desc);
+> +	if (ret < 0)
+> +		return ret;
+> +
+> +	irq = ret;
+> +	ret = devm_request_threaded_irq(host->dev, irq, NULL, msdc_sdio_eint_irq,
+> +					IRQF_TRIGGER_LOW | IRQF_ONESHOT | IRQF_NO_AUTOEN,
+> +					"sdio-eint", host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	host->eint_irq = irq;
+> +
+> +	return 0;
+> +}
+> +
+>   static const struct cqhci_host_ops msdc_cmdq_ops = {
+>   	.enable         = msdc_cqe_enable,
+>   	.disable        = msdc_cqe_disable,
+> @@ -2631,6 +2683,23 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>   		goto host_free;
+>   	}
+>   
+> +	if (!(mmc->caps2 & MMC_CAP2_NO_SDIO)) {
 
-On Mon, Jan 17, 2022 at 10:24 AM Uwe Kleine-König
-<u.kleine-koenig@pengutronix.de> wrote:
-> On Mon, Jan 17, 2022 at 09:41:42AM +0100, Geert Uytterhoeven wrote:
-> > On Sat, Jan 15, 2022 at 9:22 PM Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
-> > > On 1/14/22 11:22 PM, Uwe Kleine-König wrote:
-> > > > You have to understand that for clk (and regulator and gpiod) NULL is a
-> > > > valid descriptor that can actually be used, it just has no effect. So
-> > > > this is a convenience value for the case "If the clk/regulator/gpiod in
-> > > > question isn't available, there is nothing to do". This is what makes
-> > > > clk_get_optional() and the others really useful and justifies their
-> > > > existence. This doesn't apply to platform_get_irq_optional().
-> > >
-> > >    I do understand that. However, IRQs are a different beast with their
-> > > own justifications...
-> >
-> > > > clk_get_optional() is sane and sensible for cases where the clk might be
-> > > > absent and it helps you because you don't have to differentiate between
-> > > > "not found" and "there is an actual resource".
-> > > >
-> > > > The reason for platform_get_irq_optional()'s existence is just that
-> > > > platform_get_irq() emits an error message which is wrong or suboptimal
-> > >
-> > >    I think you are very wrong here. The real reason is to simplify the
-> > > callers.
-> >
-> > Indeed.
->
-> The commit that introduced platform_get_irq_optional() said:
->
->         Introduce a new platform_get_irq_optional() that works much like
->         platform_get_irq() but does not output an error on failure to
->         find the interrupt.
->
-> So the author of 8973ea47901c81a1912bd05f1577bed9b5b52506 failed to
-> mention the real reason? Or look at
-> 31a8d8fa84c51d3ab00bf059158d5de6178cf890:
->
->         [...] use platform_get_irq_optional() to get second/third IRQ
->         which are optional to avoid below error message during probe:
->         [...]
->
-> Look through the output of
->
->         git log -Splatform_get_irq_optional
->
-> to find several more of these.
+Please, also check for the async irq capability here:
 
-Commit 8973ea47901c81a1 ("driver core: platform: Introduce
-platform_get_irq_optional()") and the various fixups fixed the ugly
-printing of error messages that were not applicable.
-In hindsight, probably commit 7723f4c5ecdb8d83 ("driver core:
-platform: Add an error message to platform_get_irq*()") should have
-been reverted instead, until a platform_get_irq_optional() with proper
-semantics was introduced.  But as we were all in a hurry to kill
-the non-applicable error message, we went for the quick and dirty fix.
+if (!(mmc->caps2 & MMC_CAP2_NO_SDIO) && (mmc->caps2 & MMC_CAP2_SDIO_ASYNC_IRQ)) {
 
-> Also I fail to see how a caller of (today's) platform_get_irq_optional()
-> is simpler than a caller of platform_get_irq() given that there is no
-> semantic difference between the two. Please show me a single
-> conversion from platform_get_irq to platform_get_irq_optional that
-> yielded a simplification.
+...because if we have "state_eint" specified in DT, but we didn't *also* specify
+cap-sdio-async-irq, then clearly we don't want to use this functionality - hence
+it becomes useless to register the interrupt handler for that because we're never
+enabling the CCCR_INTERRUPT_EXT on the card (from drivers/mmc/core/host.c).
 
-That's exactly why we want to change the latter to return 0 ;-)
+Regards,
+Angelo
 
-> So you need some more effort to convince me of your POV.
->
-> > Even for clocks, you cannot assume that you can always blindly use
-> > the returned dummy (actually a NULL pointer) to call into the clk
-> > API.  While this works fine for simple use cases, where you just
-> > want to enable/disable an optional clock (clk_prepare_enable() and
-> > clk_disable_unprepare()), it does not work for more complex use cases.
->
-> Agreed. But for clks and gpiods and regulators the simple case is quite
-> usual. For irqs it isn't.
+> +		/* Support for SDIO eint irq */
+> +		host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
+> +		if (IS_ERR(host->pins_eint)) {
+> +			dev_dbg(&pdev->dev, "Cannot find pinctrl eint!\n");
+> +		} else {
+> +			host->pins_dat1 = pinctrl_lookup_state(host->pinctrl, "state_dat1");
+> +			if (IS_ERR(host->pins_dat1)) {
+> +				ret = dev_err_probe(&pdev->dev, PTR_ERR(host->pins_dat1),
+> +						    "Cannot find pinctrl dat1!\n");
+> +				goto host_free;
+> +			}
+> +
+> +			host->sdio_eint_ready = true;
+> +		}
+> +	}
+> +
+>   	msdc_of_property_parse(pdev, host);
+>   
+>   	host->dev = &pdev->dev;
+> @@ -2722,6 +2791,16 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>   	if (ret)
+>   		goto release;
+>   
+> +	if (host->sdio_eint_ready) {
+> +		ret = msdc_request_dat1_eint_irq(host);
+> +		if (ret) {
+> +			dev_err(host->dev, "Failed to register data1 eint irq!\n");
+> +			goto release;
+> +		}
+> +
+> +		pinctrl_select_state(host->pinctrl, host->pins_dat1);
+> +	}
+> +
+>   	pm_runtime_set_active(host->dev);
+>   	pm_runtime_set_autosuspend_delay(host->dev, MTK_MMC_AUTOSUSPEND_DELAY);
+>   	pm_runtime_use_autosuspend(host->dev);
+> @@ -2841,16 +2920,31 @@ static void msdc_restore_reg(struct msdc_host *host)
+>   
+>   static int __maybe_unused msdc_runtime_suspend(struct device *dev)
+>   {
+> +	unsigned long flags;
+>   	struct mmc_host *mmc = dev_get_drvdata(dev);
+>   	struct msdc_host *host = mmc_priv(mmc);
+>   
+>   	msdc_save_reg(host);
+> +
+> +	if (host->sdio_eint_ready) {
+> +		disable_irq(host->irq);
+> +		pinctrl_select_state(host->pinctrl, host->pins_eint);
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		if (host->sdio_irq_cnt == 0) {
+> +			enable_irq(host->eint_irq);
+> +			enable_irq_wake(host->eint_irq);
+> +			host->sdio_irq_cnt++;
+> +		}
+> +		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +	}
+>   	msdc_gate_clock(host);
+>   	return 0;
+>   }
+>   
+>   static int __maybe_unused msdc_runtime_resume(struct device *dev)
+>   {
+> +	unsigned long flags;
+>   	struct mmc_host *mmc = dev_get_drvdata(dev);
+>   	struct msdc_host *host = mmc_priv(mmc);
+>   	int ret;
+> @@ -2860,10 +2954,25 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
+>   		return ret;
+>   
+>   	msdc_restore_reg(host);
+> +
+> +	if (host->sdio_eint_ready) {
+> +		spin_lock_irqsave(&host->lock, flags);
+> +		if (host->sdio_irq_cnt > 0) {
+> +			disable_irq_nosync(host->eint_irq);
+> +			disable_irq_wake(host->eint_irq);
+> +			host->sdio_irq_cnt--;
+> +			sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> +		} else {
+> +			sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
+> +		}
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +		pinctrl_select_state(host->pinctrl, host->pins_uhs);
+> +		enable_irq(host->irq);
+> +	}
+>   	return 0;
+>   }
+>   
+> -static int __maybe_unused msdc_suspend(struct device *dev)
+> +static int __maybe_unused msdc_suspend_noirq(struct device *dev)
+>   {
+>   	struct mmc_host *mmc = dev_get_drvdata(dev);
+>   	int ret;
+> @@ -2877,13 +2986,13 @@ static int __maybe_unused msdc_suspend(struct device *dev)
+>   	return pm_runtime_force_suspend(dev);
+>   }
+>   
+> -static int __maybe_unused msdc_resume(struct device *dev)
+> +static int __maybe_unused msdc_resume_noirq(struct device *dev)
+>   {
+>   	return pm_runtime_force_resume(dev);
+>   }
+>   
+>   static const struct dev_pm_ops msdc_dev_pm_ops = {
+> -	SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
+> +	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(msdc_suspend_noirq, msdc_resume_noirq)
+>   	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
+>   };
+>   
+> 
 
-It is for devices that can have either separate interrupts, or a single
-multiplexed interrupt.
 
-The logic in e.g. drivers/tty/serial/sh-sci.c and
-drivers/spi/spi-rspi.c could be simplified and improved (currently
-it doesn't handle deferred probe) if platform_get_irq_optional()
-would return 0 instead of -ENXIO.
-
-> And if you cannot blindly use the dummy, then you're not the targetted
-> caller of *_get_optional() and should better use *_get() and handle
-> -ENODEV explicitly.
-
-No, because the janitors tend to consolidate error message handling,
-by moving the printing up, inside the *_get() methods.  That's exactly
-what happened here.
-So there are three reasons: because the absence of an optional IRQ
-is not an error, and thus that should not cause (a) an error code
-to be returned, and (b) an error message to be printed, and (c)
-because it can simplify the logic in device drivers.
-
-Commit 8973ea47901c81a1 ("driver core: platform: Introduce
-platform_get_irq_optional()") fixed (b), but didn't address (a) and
-(c).
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
