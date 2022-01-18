@@ -2,139 +2,245 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFCC7C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Jan 2022 18:49:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF557C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Jan 2022 20:22:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244566AbiARStG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Jan 2022 13:49:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32834 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245136AbiARStG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2022 13:49:06 -0500
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E45F2C06161C
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Jan 2022 10:49:05 -0800 (PST)
-Received: by mail-lf1-x130.google.com with SMTP id x11so48814080lfa.2
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Jan 2022 10:49:05 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=W7gSIAjEMMHVPzUY9IiyGaokpzvzLkdxvFC2XtksEpw=;
-        b=jv5BMnRBMuhUA/XUaApRCcjspumfl+fNK6m4jaI3SAy+kGzSt4Mx1GJULcYoOFrFh8
-         AEvrIeNsMWBb7bHjLblMkgrER6sznueruOay8Xn0g56/ahOESSMJFj2Nb6xi9PPHKk3p
-         dXPxn/IQNoj7ygHl+pxX2dDVBqwPhsvf9IocFrb6M6FipWRzOVULy32vUT+cPtYJgOqa
-         1Fh15DblTMV56QmkelIsdvvb1rbG07mVoSqLmyQ6iy82tgXUCXXqNjFZndqvaQTFqLrq
-         Ny6DQZbyCUGzpgJR7iMBeWR5uTtedzEDSifwFGn3lS+X6rsLkedZM3ydxSfz0xBbU7z8
-         /7mQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=W7gSIAjEMMHVPzUY9IiyGaokpzvzLkdxvFC2XtksEpw=;
-        b=05i9MhRRz61XPkSGmQrjChDiXRu5T2MN1ecNIZlsGXFn/zoxq5fpjJ9Yn0ZBgDQI9y
-         wBtgOqzA/RQqaoH1pcQWZP6yKbLBG2s/U//Pql7zQRJLYjKJGUpRcbXWOxMYi5pUP16f
-         4wjDMCoBEzK+pRF2wuIOpy6TJIz42MBxjFa4qV8jfpDflAEOeWhsGqi2oNSyIvwAf6pU
-         PTCa/YTV7bij6imdWMUTs9ElUwqhloSJ0xAMvnKjEHj58v7c0sJQwjeNWmFuLZrP+tlK
-         yjdUFLLyh77qlwECt1OmNboaFkPBYrRXXalt7COCe1v1LqjKkWF21Ljv4HdJMg2ZPdt2
-         ES6A==
-X-Gm-Message-State: AOAM531f+qmhuOsKbBBL94KxXYCVk7jsX/6jUBbGPGTIg7lTKzIRMZ29
-        a3U2dWQH/BCfpJUiX1+SpPDm8m5/sho/DZFB0pzXDA==
-X-Google-Smtp-Source: ABdhPJywArf49Dw2UNrWxqMejJ7TLW9Hh1LFYNUhrgeX9EXHvoP0U5m2M1Yqidzc0d71+5BkmvBWTHMOVV1QUXgXhi8=
-X-Received: by 2002:a05:6512:20ca:: with SMTP id u10mr22309044lfr.71.1642531744269;
- Tue, 18 Jan 2022 10:49:04 -0800 (PST)
+        id S1349159AbiARUWA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Jan 2022 15:22:00 -0500
+Received: from mxout03.lancloud.ru ([45.84.86.113]:41690 "EHLO
+        mxout03.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233125AbiARUV4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2022 15:21:56 -0500
+Received: from LanCloud
+DKIM-Filter: OpenDKIM Filter v2.11.0 mxout03.lancloud.ru 291BD20A4270
+Received: from LanCloud
+Received: from LanCloud
+Received: from LanCloud
+Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
+To:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>
+CC:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        KVM list <kvm@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        <linux-iio@vger.kernel.org>,
+        "Linus Walleij" <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        "ALSA Development Mailing List" <alsa-devel@alsa-project.org>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        <linux-phy@lists.infradead.org>, <netdev@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Khuong Dinh <khuong@os.amperecomputing.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        "Kishon Vijay Abraham I" <kishon@ti.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        Zhang Rui <rui.zhang@intel.com>,
+        <platform-driver-x86@vger.kernel.org>,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        "Saravanan Sekar" <sravanhome@gmail.com>,
+        Corey Minyard <minyard@acm.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        "Mauro Carvalho Chehab" <mchehab@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        "William Breathitt Gray" <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
+        "Borislav Petkov" <bp@alien8.de>, Jakub Kicinski <kuba@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        <openipmi-developer@lists.sourceforge.net>,
+        "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
+        Benson Leung <bleung@chromium.org>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        "Linux ARM" <linux-arm-kernel@lists.infradead.org>,
+        <linux-edac@vger.kernel.org>, Tony Luck <tony.luck@intel.com>,
+        Richard Weinberger <richard@nod.at>,
+        "Mun Yew Tham" <mun.yew.tham@intel.com>,
+        Eric Auger <eric.auger@redhat.com>,
+        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        "Linux MMC List" <linux-mmc@vger.kernel.org>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        "James Morse" <james.morse@arm.com>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        "Sebastian Reichel" <sre@kernel.org>,
+        =?UTF-8?Q?Niklas_S=c3=b6derlund?= <niklas.soderlund@ragnatech.se>,
+        <linux-mediatek@lists.infradead.org>,
+        "Brian Norris" <computersforpeace@gmail.com>,
+        "David S. Miller" <davem@davemloft.net>
+References: <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
+ <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+ <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
+ <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
+ <Yd9L9SZ+g13iyKab@sirena.org.uk>
+ <29f0c65d-77f2-e5b2-f6cc-422add8a707d@omp.ru>
+ <20220114092557.jrkfx7ihg26ekzci@pengutronix.de>
+ <61b80939-357d-14f5-df99-b8d102a4e1a1@omp.ru>
+ <20220114202226.ugzklxv4wzr6egwj@pengutronix.de>
+ <57af1851-9341-985e-7b28-d2ba86770ecb@omp.ru>
+ <20220117084732.cdy2sash5hxp4lwo@pengutronix.de>
+From:   Sergey Shtylyov <s.shtylyov@omp.ru>
+Organization: Open Mobile Platform
+Message-ID: <68d3bb7a-7572-7495-d295-e1d512ef509e@omp.ru>
+Date:   Tue, 18 Jan 2022 23:21:45 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-References: <20220115121447.641524-1-andrej.skvortzov@gmail.com>
-In-Reply-To: <20220115121447.641524-1-andrej.skvortzov@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 18 Jan 2022 19:48:28 +0100
-Message-ID: <CAPDyKFr_9kfAns2p6fsUck93s3peyrHvCtv5M9E3fnxLmHbRqQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Wait for command setting 'Power Off
- Notification' bit to complete
-To:     Andrey Skvortsov <andrej.skvortzov@gmail.com>
-Cc:     Arnaud Ferraris <arnaud.ferraris@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Huijin Park <huijin.park@samsung.com>,
-        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
-        Yue Hu <huyue2@yulong.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20220117084732.cdy2sash5hxp4lwo@pengutronix.de>
+Content-Type: text/plain; charset="windows-1252"
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [192.168.11.198]
+X-ClientProxiedBy: LFEXT01.lancloud.ru (fd00:f066::141) To
+ LFEX1907.lancloud.ru (fd00:f066::207)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 15 Jan 2022 at 13:15, Andrey Skvortsov
-<andrej.skvortzov@gmail.com> wrote:
->
-> SD card is allowed to signal busy on DAT0 up to 1s after the
-> CMD49. According to SD spec (version 6.0 section 5.8.1.3) first host
-> waits until busy of CMD49 is released and only then polls Power
-> Management Status register up to 1s until the card indicates ready to
-> power off.
->
-> Without waiting for busy before polling status register sometimes card
-> becomes unresponsive and system fails to suspend:
->
->   [  205.907459] Freezing remaining freezable tasks ... (elapsed 0.001 seconds) done.
->   [  206.421274] sunxi-mmc 1c0f000.mmc: data error, sending stop command
->   [  206.421321] sunxi-mmc 1c0f000.mmc: send stop command failed
->   [  206.421347] mmc0: error -110 reading status reg of PM func
->   [  206.421366] PM: dpm_run_callback(): mmc_bus_suspend+0x0/0x74 returns -110
->   [  206.421402] mmcblk mmc0:aaaa: PM: failed to suspend async: error -110
->   [  206.437064] PM: Some devices failed to suspend, or early wake event detected
+Hello!
 
-Thanks for your patch!
+On 1/17/22 11:47 AM, Uwe Kleine-König wrote:
 
-I recall I was hesitating on adding another busy completion check for
-this, but thought polling the status register for the power management
-function should be sufficient.
+[...]
+>>>>>>>>> To me it sounds much more logical for the driver to check if an
+>>>>>>>>> optional irq is non-zero (available) or zero (not available), than to
+>>>>>>>>> sprinkle around checks for -ENXIO. In addition, you have to remember
+>>>>>>>>> that this one returns -ENXIO, while other APIs use -ENOENT or -ENOSYS
+>>>>>>>>> (or some other error code) to indicate absence. I thought not having
+>>>>>>>>> to care about the actual error code was the main reason behind the
+>>>>>>>>> introduction of the *_optional() APIs.
+>>>>>>>
+>>>>>>>> No, the main benefit of gpiod_get_optional() (and clk_get_optional()) is
+>>>>>>>> that you can handle an absent GPIO (or clk) as if it were available.
+>>>>>>
+>>>>>>    Hm, I've just looked at these and must note that they match 1:1 with
+>>>>>> platform_get_irq_optional(). Unfortunately, we can't however behave the
+>>>>>> same way in request_irq() -- because it has to support IRQ0 for the sake
+>>>>>> of i8253 drivers in arch/...
+>>>>>
+>>>>> Let me reformulate your statement to the IMHO equivalent:
+>>>>>
+>>>>> 	If you set aside the differences between
+>>>>> 	platform_get_irq_optional() and gpiod_get_optional(),
+>>>>
+>>>>    Sorry, I should make it clear this is actually the diff between a would-be
+>>>> platform_get_irq_optional() after my patch, not the current code...
+>>>
+>>> The similarity is that with your patch both gpiod_get_optional() and
+>>> platform_get_irq_optional() return NULL and 0 on not-found. The relevant
+>>> difference however is that for a gpiod NULL is a dummy value, while for
+>>> irqs it's not. So the similarity is only syntactically, but not
+>>> semantically.
+>>
+>>    I have noting to say here, rather than optional IRQ could well have a different
+>> meaning than for clk/gpio/etc.
+>>
+>> [...]
+>>>>> However for an interupt this cannot work. You will always have to check
+>>>>> if the irq is actually there or not because if it's not you cannot just
+>>>>> ignore that. So there is no benefit of an optional irq.
+>>>>>
+>>>>> Leaving error message reporting aside, the introduction of
+>>>>> platform_get_irq_optional() allows to change
+>>>>>
+>>>>> 	irq = platform_get_irq(...);
+>>>>> 	if (irq < 0 && irq != -ENXIO) {
+>>>>> 		return irq;
+>>>>> 	} else if (irq >= 0) {
+>>>>
+>>>>    Rather (irq > 0) actually, IRQ0 is considered invalid (but still returned).
+>>>
+>>> This is a topic I don't feel strong for, so I'm sloppy here. If changing
+>>> this is all that is needed to convince you of my point ...
+>>
+>>    Note that we should absolutely (and first of all) stop returning 0 from platform_get_irq()
+>> on a "real" IRQ0. Handling that "still good" zero absolutely doesn't scale e.g. for the subsystems
+>> (like libata) which take 0 as an indication that the polling mode should be used... We can't afford
+>> to be sloppy here. ;-)
+> 
+> Then maybe do that really first?
 
->
-> Tested with Sandisk Extreme PRO A2 64GB on Allwinner A64 system.
+   I'm doing it first already:
 
-I will give this patch a try too, to make sure it still works on my
-side. Assuming that works fine, I will queue this up for fixes and by
-adding a fixes/stable tag.
+https://lore.kernel.org/all/5e001ec1-d3f1-bcb8-7f30-a6301fd9930c@omp.ru/
 
->
-> Signed-off-by: Andrey Skvortsov <andrej.skvortzov@gmail.com>
+   This series is atop of the above patch...
 
-Kind regards
-Uffe
+> I didn't recheck, but is this what the
+> driver changes in your patch is about?
 
-> ---
->  drivers/mmc/core/sd.c | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index e223275bbad1..842b886bdd4e 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -66,7 +66,7 @@ static const unsigned int sd_au_size[] = {
->                 __res & __mask;                                         \
->         })
->
-> -#define SD_POWEROFF_NOTIFY_TIMEOUT_MS 2000
-> +#define SD_POWEROFF_NOTIFY_TIMEOUT_MS 1000
->  #define SD_WRITE_EXTR_SINGLE_TIMEOUT_MS 1000
->
->  struct sd_busy_data {
-> @@ -1663,6 +1663,13 @@ static int sd_poweroff_notify(struct mmc_card *card)
->                 goto out;
->         }
->
-> +       /* Find out when the command is completed. */
-> +       err = mmc_poll_for_busy(card, SD_POWEROFF_NOTIFY_TIMEOUT_MS, false,
-> +                               MMC_BUSY_EXTR_SINGLE);
-> +
-> +       if (err)
-> +               goto out;
-> +
->         cb_data.card = card;
->         cb_data.reg_buf = reg_buf;
->         err = __mmc_poll_for_busy(card->host, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
-> --
-> 2.34.1
->
+   Partly, yes. We can afford to play with the meaning of 0 after the above patch.
+
+> After some more thoughts I wonder if your focus isn't to align
+> platform_get_irq_optional to (clk|gpiod|regulator)_get_optional, but to
+> simplify return code checking. Because with your change we have:
+> 
+>  - < 0 -> error
+>  - == 0 -> no irq
+>  - > 0 -> irq
+
+   Mainly, yes. That's why the code examples were given in the description.
+
+> For my part I'd say this doesn't justify the change, but at least I
+> could better life with the reasoning. If you start at:
+> 
+> 	irq = platform_get_irq_optional(...)
+> 	if (irq < 0 && irq != -ENXIO)
+> 		return irq
+> 	else if (irq > 0)
+> 		setup_irq(irq);
+> 	else
+> 		setup_polling()
+> 
+> I'd change that to
+> 
+> 	irq = platform_get_irq_optional(...)
+> 	if (irq > 0) /* or >= 0 ? */
+
+   Not >= 0, no...
+
+> 		setup_irq(irq)
+> 	else if (irq == -ENXIO)
+> 		setup_polling()
+> 	else
+> 		return irq
+> 
+> This still has to mention -ENXIO, but this is ok and checking for 0 just
+> hardcodes a different return value.
+
+   I think comparing with 0 is simpler (and shorter) than with -ENXIO, if you
+consider the RISC CPUs, like e.g. MIPS...
+
+> Anyhow, I think if you still want to change platform_get_irq_optional
+> you should add a few patches converting some drivers which demonstrates
+> the improvement for the callers.
+
+   Mhm, I did include all the drivers where the IRQ checks have to be modified,
+not sure what else you want me to touch...
+
+> Best regards
+> Uwe
+
+MBR, Sergey
