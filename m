@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62A75C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Jan 2022 12:44:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A201C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Jan 2022 12:44:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237496AbiARMoR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Jan 2022 07:44:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60438 "EHLO
+        id S237989AbiARMoX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Jan 2022 07:44:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237436AbiARMoR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2022 07:44:17 -0500
-Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40BECC061574
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Jan 2022 04:44:17 -0800 (PST)
-Received: by mail-pj1-x102a.google.com with SMTP id o3so23194774pjs.1
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Jan 2022 04:44:17 -0800 (PST)
+        with ESMTP id S237770AbiARMoV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Jan 2022 07:44:21 -0500
+Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38C66C06161C
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Jan 2022 04:44:21 -0800 (PST)
+Received: by mail-pl1-x632.google.com with SMTP id b3so15163465plc.7
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Jan 2022 04:44:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=jHdvJyYLqG4Cn517SGttmcCII1kWlh0ajHYNiJDKCx0=;
-        b=U6emVYpXi8uVld16nBGFB1Kc54HHfibYaOU0rOXQiZmMkT6VqT5bYRWdkT2+QaQttG
-         cioj29n3rfeh+BsBynlBxPown3dN9M4u2nnBaFMMGGbru+qKmMGQmw8Bn+31u1mbYvCC
-         rS4qA/KsnBDY5u+yn7QFDPetPTWUJDJNetVFy0XzGKQZKkHFgjc8bRFLi+DBhqHndmY1
-         pH9ztRJLc7CslT9gtnMqvDxFAjxBwkaAXgYUPD4GMfIsVTUOKpRnaGBI2/p2jqWvJZ7r
-         XvpQ10tgPDXsxsksFDRhtem4JDrT1aZCfSnf7/poTVos4MMBgCjibKraltifixdcFSCe
-         YaQw==
+        bh=4i6vQaoV3DjwHFO2PmOCtUq+/IFC+1oV80n6E6OJqos=;
+        b=TVR33fZujaiioly8Ds0P1A0e2Xa9F/XhrVHptxG1wgQVF7iRdmYU5Q0qFoe+XLji8T
+         4pwbdtXdgGldPDKF5eG2op+yxBZ8xFmko4ZYhrHMAHG4bzsSdn7KDCKVvZfCsoKCxgAS
+         2omr6hUxxi2bdy6HqvcXG4pFW8Pvwat7+1m1/iiBFq08atP51ttTOB+YpbqX/DXh/c6/
+         V+sJYf7TwH1n6ExWNhk+bHSf0rOtFtpEAtrEcHOU6370U4NHpf4Cg9a/DNI7eNDY6LKX
+         /vKDvDA+G+9ssseweJVyFsLgD3gwLT6/GzA+d2SK8+JZAmIQm1hgqj0b6G1cvvBqg/uJ
+         cnVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=jHdvJyYLqG4Cn517SGttmcCII1kWlh0ajHYNiJDKCx0=;
-        b=V+aJe0SF3fVAiDduzfwVxKhFw/aFoY5mcXFaQiUFRp9CodRHk2ODv4CEZjZP3ZdnC6
-         KEJImPqRzsKNUvTGt2Ks0Vbn2Q2BzUK8JO9h6L1rt/gHgwta0fwBBgYJMfGupTocIheM
-         +YWpEI7rd19YLQDFnpRUlrxghfOVzwAwy9Uty0Nbkxvj4ylrE1lQYzWqE00N0HJtI8pB
-         FcnbSZUga+936wCdHPzRon5hf+rGSQlyjYJXPeB4v4t1snnVYFIqJ4ono3DKZdpLsxkp
-         6JmpB7PSb+4nQ6qB4qAYBTyKK3Cco3tpoji/HwPHOIrhafR1RKcIsmec6aswsyrKbtC+
-         RHag==
-X-Gm-Message-State: AOAM531ygXxJgel3kDdZxlhswHm7useKg8j89+EuGvyvXhYto92liCK4
-        wpDNBCyEArFYh+lnp08Jsms=
-X-Google-Smtp-Source: ABdhPJzc6AGiV4/91oXFw1v0gm8mY3rABRlPcH1r63RlDaXmsBfjCpAFuO15gQ7ii720fbJGsKUe9Q==
-X-Received: by 2002:a17:902:a404:b0:148:b897:c658 with SMTP id p4-20020a170902a40400b00148b897c658mr27258771plq.71.1642509856792;
-        Tue, 18 Jan 2022 04:44:16 -0800 (PST)
+        bh=4i6vQaoV3DjwHFO2PmOCtUq+/IFC+1oV80n6E6OJqos=;
+        b=Lz7qHA3li9HMX2l/jTK0x1mYX/CFS5aIXrwXW4cHv1wZV/dHgLyENmFaAKSwUtazT9
+         +Tam/hBWrvn+EMTTQncs33/IkXEQooURB1DMB7W7siISUVrR9Q0fa/rlzXATzQzwWfeN
+         E03uAYZ4dVvCr962Ft3hNkMYsxqHfc4F72uJVrYl736AXeNppyTd76aHj8M6p/eAWLsb
+         KR3xqy0QfO1C5/0PcthHDVmhb5Bi8sZU7gbNVeNiR8OILyzJ9Sae4x4/zbL6YykNnxIZ
+         nbMSqdm3jMTfsOBZXnbFPkTNNK/H8dlHO3bXhuck6jtC+nmcOsk4Wkve4Jsr5LuKdhNT
+         pf6w==
+X-Gm-Message-State: AOAM531iq3ES4h2wFVQ9rG0KibkjMqfUvbZiBO5z0ARVtMUIdToZSLV9
+        8fp+Hv4Dkzn1hX78S8ljazI=
+X-Google-Smtp-Source: ABdhPJxS9MrN+y7Jobf6QOl5iQ5fCGXqPed8XN/xThJY2kPfzhjsrecutdVTg2w+H3jhNhDTABijCQ==
+X-Received: by 2002:a17:903:120a:b0:149:8b16:ee19 with SMTP id l10-20020a170903120a00b001498b16ee19mr27412033plh.11.1642509860783;
+        Tue, 18 Jan 2022 04:44:20 -0800 (PST)
 Received: from jason-z170xgaming7.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id n10sm362005pfj.120.2022.01.18.04.44.15
+        by smtp.gmail.com with ESMTPSA id n10sm362005pfj.120.2022.01.18.04.44.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Jan 2022 04:44:16 -0800 (PST)
+        Tue, 18 Jan 2022 04:44:20 -0800 (PST)
 From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
 To:     ulf.hansson@linaro.org, takahiro.akashi@linaro.org,
         adrian.hunter@intel.com
@@ -54,9 +54,9 @@ Cc:     linux-mmc@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
         greg.tu@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
         otis.wu@genesyslogic.com.tw,
         Jason Lai <jasonlai.genesyslogic@gmail.com>
-Subject: [PATCH v2 5/7] mmc: add UHS-II related definitions in headers
-Date:   Tue, 18 Jan 2022 20:43:53 +0800
-Message-Id: <20220118124355.167552-6-jasonlai.genesyslogic@gmail.com>
+Subject: [PATCH v2 7/7] mmc: core: Support UHS-II card access
+Date:   Tue, 18 Jan 2022 20:43:55 +0800
+Message-Id: <20220118124355.167552-8-jasonlai.genesyslogic@gmail.com>
 X-Mailer: git-send-email 2.34.0
 In-Reply-To: <20220118124355.167552-1-jasonlai.genesyslogic@gmail.com>
 References: <20220118124355.167552-1-jasonlai.genesyslogic@gmail.com>
@@ -68,137 +68,92 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Jason Lai <jason.lai@genesyslogic.com.tw>
 
-All LINK layer messages, registers and SD-TRAN command packet described in
-'Part 1 UHS-II Addendum Ver 1.01' are defined in include/linux/mmc/sd_uhs2.h
-
-drivers/mmc/core/sd_uhs2.h contains exported function prototype.
+Embed UHS-II access functionality into the MMC request processing flow.
 
 Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
 ---
- include/linux/mmc/card.h | 30 ++++++++++++++++++++++++++++-
- include/linux/mmc/core.h |  1 +
- include/linux/mmc/host.h | 41 ++++++++++++++++++++++++++++++++++++++--
- 3 files changed, 69 insertions(+), 3 deletions(-)
+ drivers/mmc/core/core.c | 26 ++++++++++++++++++++++++--
+ 1 file changed, 24 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 82b07eac1..ee9fbeadb 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -212,7 +212,35 @@ struct sd_ext_reg {
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 19b409179..e00569df2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -31,6 +31,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sd.h>
+ #include <linux/mmc/slot-gpio.h>
++#include <linux/mmc/sd_uhs2.h>
  
- struct sd_uhs2_config {
- 	u32			node_id;
--	/* TODO: Extend with more register configs. */
-+
-+	u32			dap;
-+	u32			gap;
-+	u32			n_fcu;
-+	u32			maxblk_len;
-+	u8			n_lanes;
-+	u8			dadr_len;
-+	u8			app_type;
-+	u8			phy_minor_rev;
-+	u8			phy_major_rev;
-+	u8			can_hibernate;
-+	u8			n_lss_sync;
-+	u8			n_lss_dir;
-+	u8			link_minor_rev;
-+	u8			link_major_rev;
-+	u8			dev_type;
-+	u8			n_data_gap;
-+
-+	u32			n_fcu_set;
-+	u32			maxblk_len_set;
-+	u8			n_lanes_set;
-+	u8			speed_range_set;
-+	u8			n_lss_sync_set;
-+	u8			n_lss_dir_set;
-+	u8			n_data_gap_set;
-+	u8			pwrctrl_mode_set;
-+	u8			max_retry_set;
-+
-+	u8			cfg_complete;
- };
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/mmc.h>
+@@ -42,6 +43,7 @@
+ #include "host.h"
+ #include "sdio_bus.h"
+ #include "pwrseq.h"
++#include "sd_uhs2.h"
  
- struct sdio_cccr {
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index ab19245e9..c85d5aeb7 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -2,6 +2,7 @@
- /*
-  *  linux/include/linux/mmc/core.h
+ #include "mmc_ops.h"
+ #include "sd_ops.h"
+@@ -335,6 +337,8 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ {
++	struct uhs2_command uhs2_cmd;
++	u32 payload[4]; /* for maximum size */
+ 	int err;
+ 
+ 	init_completion(&mrq->cmd_completion);
+@@ -352,6 +356,13 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		return err;
+ 
++	if (host->uhs2_caps.flags & MMC_UHS2_SUPPORT &&
++	    host->uhs2_caps.flags & MMC_UHS2_INITIALIZED) {
++		uhs2_cmd.payload = payload;
++		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++		sd_uhs2_prepare_cmd(host, mrq);
++	}
++
+ 	led_trigger_event(host->led, LED_FULL);
+ 	__mmc_start_request(host, mrq);
+ 
+@@ -431,6 +442,8 @@ EXPORT_SYMBOL(mmc_wait_for_req_done);
   */
-+
- #ifndef LINUX_MMC_CORE_H
- #define LINUX_MMC_CORE_H
+ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
++	struct uhs2_command uhs2_cmd;
++	u32 payload[4]; /* for maximum size */
+ 	int err;
  
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 69f8c8a8f..640c4bc81 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -96,7 +96,37 @@ struct mmc_clk_phase_map {
- };
- 
- struct sd_uhs2_caps {
--	/* TODO: Add UHS-II capabilities for the host. */
-+	int			flags;
-+#define MMC_UHS2_SUPPORT	(1 << 0)
-+#define MMC_UHS2_INITIALIZED	(1 << 1)
-+#define MMC_UHS2_2L_HD		(1 << 2)
-+#define MMC_UHS2_APP_CMD	(1 << 3)
-+#define MMC_UHS2_SPEED_B	(1 << 4)
-+#define MMC_SUPPORT_ADMA3	(1 << 5)
-+
-+	u32	dap;
-+	u32	gap;
-+	u32	maxblk_len;
-+	u32	n_fcu;
-+	u8	n_lanes;
-+	u8	addr64;
-+	u8	card_type;
-+	u8	phy_rev;
-+	u8	speed_range;
-+	u8	can_hibernate;
-+	u8	n_lss_sync;
-+	u8	n_lss_dir;
-+	u8	link_rev;
-+	u8	host_type;
-+	u8	n_data_gap;
-+
-+	u32	maxblk_len_set;
-+	u32	n_fcu_set;
-+	u8	n_lanes_set;
-+	u8	n_lss_sync_set;
-+	u8	n_lss_dir_set;
-+	u8	n_data_gap_set;
-+	u8	max_retry_set;
- };
- 
- struct mmc_host;
-@@ -145,7 +175,6 @@ struct mmc_host_ops {
- 	 */
- 	int	(*uhs2_set_ios)(struct mmc_host *host, struct mmc_ios *ios);
- 
--
  	/*
- 	 * Return values for the get_ro callback should be:
- 	 *   0 for a read/write card
-@@ -210,6 +239,14 @@ struct mmc_host_ops {
+@@ -451,6 +464,13 @@ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		goto out_err;
  
- 	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
- 	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
++	if (host->uhs2_caps.flags & MMC_UHS2_SUPPORT &&
++	    host->uhs2_caps.flags & MMC_UHS2_INITIALIZED) {
++		uhs2_cmd.payload = payload;
++		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++		sd_uhs2_prepare_cmd(host, mrq);
++	}
 +
-+	/* UHS2 interfaces */
-+	/*
-+	 * Every host controller can assign its own actions to set up their
-+	 * controller.
-+	 */
-+	int	(*uhs2_host_operation)(struct mmc_host *host,
-+				       enum uhs2_action act);
- };
+ 	err = host->cqe_ops->cqe_request(host, mrq);
+ 	if (err)
+ 		goto out_err;
+@@ -899,8 +919,10 @@ static inline void mmc_set_ios(struct mmc_host *host)
+  */
+ void mmc_set_chip_select(struct mmc_host *host, int mode)
+ {
+-	host->ios.chip_select = mode;
+-	mmc_set_ios(host);
++	if (!(host->uhs2_caps.flags & MMC_UHS2_INITIALIZED)) {
++		host->ios.chip_select = mode;
++		mmc_set_ios(host);
++	}
+ }
  
- struct mmc_cqe_ops {
+ /*
 -- 
 2.34.0
 
