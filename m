@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D22CC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Jan 2022 03:13:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1148CC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Jan 2022 03:41:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345795AbiARDNO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Jan 2022 22:13:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37368 "EHLO
+        id S1353878AbiARDlU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Jan 2022 22:41:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350417AbiARC5q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 21:57:46 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70E05C061367;
-        Mon, 17 Jan 2022 18:46:01 -0800 (PST)
+        with ESMTP id S1353881AbiARDEr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Jan 2022 22:04:47 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0835BC02198C;
+        Mon, 17 Jan 2022 18:48:15 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 09CD5612F3;
-        Tue, 18 Jan 2022 02:46:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 79440C36AE3;
-        Tue, 18 Jan 2022 02:45:59 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 7AA4AB811CF;
+        Tue, 18 Jan 2022 02:48:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 423F3C36AE3;
+        Tue, 18 Jan 2022 02:48:11 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1642473960;
-        bh=d5GVjZ6obPglEZpSjEHJXfWgYTRRMgBBCLUNr9063mc=;
+        s=k20201202; t=1642474092;
+        bh=bcyqNo0NbCUEzoPj0YJny32qZtQ0miUb3cUF438ngTI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Ztp0qEiuFsDNlzeAiswSH6/ZftP2qttrx4OcgRNR5QYdUr6cF4TjiiiTINjkIsD18
-         ggpDy84t3ovintIRoBwIdBDMXmkTJZm1zKaBA+JFb8zhKf2cSUCiXglS9sHDgdkGTG
-         7pwfw3wWI4PKpFv0r2EX9P9ctUiTU3EZj5K2KCDZnwTxSUsdphMemS83oXi1Ww8HTy
-         hqZpE81JEEEZwey58GymbBZTeX/fo/cF5fl1HDTjd80soXk8dB+8yTSBLwGu91TPts
-         Eu5d7NjLtVFia9nKxwirBGPYJQh8KEAzgQ6tZFFBa9LR7CZsOmVem2cJnrax8R8aYt
-         sDvcgvJ5uy0PQ==
+        b=Q2AyuizxrtEvg5qZ1utb8p0k+oWWPwkazY5TT8h7xYMkocO8vZSO4XMuDzVDZnoQm
+         8ZLA2hg4IeHl61XlwNUsalmWC/u01lgh9FU/0jxUvJkyVtAXTNpi9WArvCBnVr6ny/
+         MICTfSm/5NBY/Eosb+ofsItGY9Hbk623Z1Uj+SNsk0ncCc6IPujL++Wglc/4mME15N
+         zkSobVMRDmcg1oIvYB4bH+bDyMOnawj8DHylE9+T+I1qJEGfepXq2i/GAs2kq7hfQd
+         9MDC3SITfKzkrSIbToJb4IH4+wrTKXlgLtSkKgnVdfAjaYvxuA7TB+KucEu/l6giVv
+         JRcBza3IdawRg==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         "H . Nikolaus Schaller" <hns@goldelico.com>,
-        Sasha Levin <sashal@kernel.org>, tiantao6@hisilicon.com,
-        huyue2@yulong.com, linus.walleij@linaro.org,
+        Sasha Levin <sashal@kernel.org>, huyue2@yulong.com,
+        tiantao6@hisilicon.com, kwmad.kim@samsung.com,
         linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 42/73] mmc: core: Fixup storing of OCR for MMC_QUIRK_NONSTD_SDIO
-Date:   Mon, 17 Jan 2022 21:44:01 -0500
-Message-Id: <20220118024432.1952028-42-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 32/59] mmc: core: Fixup storing of OCR for MMC_QUIRK_NONSTD_SDIO
+Date:   Mon, 17 Jan 2022 21:46:33 -0500
+Message-Id: <20220118024701.1952911-32-sashal@kernel.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220118024432.1952028-1-sashal@kernel.org>
-References: <20220118024432.1952028-1-sashal@kernel.org>
+In-Reply-To: <20220118024701.1952911-1-sashal@kernel.org>
+References: <20220118024701.1952911-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -80,10 +80,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 0bf33786fc5c5..9e0791332ef38 100644
+index 4e72ad24322f7..5f1ee88aa7615 100644
 --- a/drivers/mmc/core/sdio.c
 +++ b/drivers/mmc/core/sdio.c
-@@ -626,6 +626,8 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+@@ -634,6 +634,8 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
  	if (host->ops->init_card)
  		host->ops->init_card(host, card);
  
@@ -92,9 +92,9 @@ index 0bf33786fc5c5..9e0791332ef38 100644
  	/*
  	 * If the host and card support UHS-I mode request the card
  	 * to switch to 1.8V signaling level.  No 1.8v signalling if
-@@ -738,7 +740,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
- 			goto mismatch;
- 		}
+@@ -740,7 +742,7 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
+ 
+ 		card = oldcard;
  	}
 -	card->ocr = ocr_card;
 +
