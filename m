@@ -2,49 +2,46 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 493EEC43219
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 19:15:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 154ACC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 19:18:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237833AbiASTO7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 14:14:59 -0500
-Received: from mga17.intel.com ([192.55.52.151]:44491 "EHLO mga17.intel.com"
+        id S236150AbiASTSP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 14:18:15 -0500
+Received: from mga07.intel.com ([134.134.136.100]:3778 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230121AbiASTO5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Jan 2022 14:14:57 -0500
+        id S229482AbiASTSN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Jan 2022 14:18:13 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1642619697; x=1674155697;
+  t=1642619893; x=1674155893;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:content-transfer-encoding:in-reply-to;
-  bh=UxCJC6eWdEdNah12KsCkH6nSMwzBaq9zmFaRweUROSw=;
-  b=LAc+xMae98biOIe5+1js4+13ymMtQfOZSUQURTlSus0gzNjipYYXMVRV
-   NyUait10iKdR/90KFN5Y1m05QCfp6q3qzq7aMUxV770tU54G7cYAhQtgv
-   pVX9FLJ0gZMdqxMkdJ7QwAtl/ocGGTqCzwLfUnZfBNXYBI0aw53UzRHZQ
-   htJvPpqnvZya6hmULFQD4Y5jo22ao12AxEHZ9RcdHd8qayiqfi6f/Vn+H
-   HDDeAnxl7jb2W+TuQI/wswZl5zM/+T11pBUstVIHHX+nQ191zFUOLeEu4
-   6a2gQVcdPCcvCyM7pE+7iucp6314FpQtnvO2DoPSUNQBK5Y2BdxezH8ST
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10231"; a="225834857"
+  bh=kxRfIA4D62784M70rCIvvyS5N+0IFzqyS/xs1UeIcLQ=;
+  b=JsrTTmwRI6CKWZJ2CS2EPZNo78q+ZTqjXk2EuajVWVzEWaAwo6RB8Y2z
+   p2q9PqGToDTUKnC+20lv+CIeQWBQXrWVoAu+66tbDUCDD2kVimNcmi+o1
+   NI4uUv2QzLLWoxZwGqYce838fGV25siRy7TkCtV0kEjntqXFMVq5KkxkO
+   Qypx2zj4CEq2cNbQdX5t0VuYkYsO/VxT6QMsGmF082dWEiGGwNdFTNTbX
+   PfDUm/IwzNOuRH71jXP7iAuDLexE1zsCCvdFAmMndcXpk+OJbcIB3Rfpz
+   aTAvP/lyeSwJWCuLsJkR1IYry0wPAsSHazovH/AdnE+nf2AI+fzjcT7zX
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10231"; a="308502424"
 X-IronPort-AV: E=Sophos;i="5.88,300,1635231600"; 
-   d="scan'208";a="225834857"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jan 2022 10:38:30 -0800
+   d="scan'208";a="308502424"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jan 2022 10:52:59 -0800
 X-IronPort-AV: E=Sophos;i="5.88,300,1635231600"; 
-   d="scan'208";a="518285423"
+   d="scan'208";a="672273577"
 Received: from smile.fi.intel.com ([10.237.72.61])
-  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jan 2022 10:38:09 -0800
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jan 2022 10:52:42 -0800
 Received: from andy by smile.fi.intel.com with local (Exim 4.95)
         (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1nAFpH-00CDps-NH;
-        Wed, 19 Jan 2022 20:36:55 +0200
-Date:   Wed, 19 Jan 2022 20:36:55 +0200
+        id 1nAG3N-00CE3S-Uj;
+        Wed, 19 Jan 2022 20:51:29 +0200
+Date:   Wed, 19 Jan 2022 20:51:29 +0200
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
         <u.kleine-koenig@pengutronix.de>
-Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Mark Brown <broonie@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
         Vignesh Raghavendra <vigneshr@ti.com>,
         KVM list <kvm@vger.kernel.org>,
         "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
@@ -62,7 +59,7 @@ Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
         linux-spi <linux-spi@vger.kernel.org>,
         Jiri Slaby <jirislaby@kernel.org>,
         Khuong Dinh <khuong@os.amperecomputing.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
         Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
         Kamal Dasu <kdasu.kdev@gmail.com>,
         Lee Jones <lee.jones@linaro.org>,
@@ -87,10 +84,12 @@ Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
         Mark Gross <markgross@kernel.org>,
         Hans de Goede <hdegoede@redhat.com>,
         Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
         Borislav Petkov <bp@alien8.de>,
         Jakub Kicinski <kuba@kernel.org>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         openipmi-developer@lists.sourceforge.net,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
         Benson Leung <bleung@chromium.org>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>,
@@ -105,6 +104,7 @@ Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
         Joakim Zhang <qiangqing.zhang@nxp.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Sergey Shtylyov <s.shtylyov@omp.ru>,
         Vinod Koul <vkoul@kernel.org>,
         James Morse <james.morse@arm.com>,
         Zha Qipeng <qipeng.zha@intel.com>,
@@ -116,44 +116,56 @@ Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
         "David S. Miller" <davem@davemloft.net>
 Subject: Re: [PATCH] driver core: platform: Rename
  platform_get_irq_optional() to platform_get_irq_silent()
-Message-ID: <YehaRwIe4LjymMhS@smile.fi.intel.com>
-References: <20220112085009.dbasceh3obfok5dc@pengutronix.de>
+Message-ID: <YehdsUPiOTwgZywq@smile.fi.intel.com>
+References: <CAMuHMdWK3RKVXRzMASN4HaYfLckdS7rBvSopafq+iPADtGEUzA@mail.gmail.com>
+ <20220112085009.dbasceh3obfok5dc@pengutronix.de>
  <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
  <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
  <Yd9L9SZ+g13iyKab@sirena.org.uk>
  <20220113110831.wvwbm75hbfysbn2d@pengutronix.de>
  <YeA7CjOyJFkpuhz/@sirena.org.uk>
  <20220113194358.xnnbhsoyetihterb@pengutronix.de>
- <745c601f-c782-0904-f786-c9bfced8f11c@gmail.com>
- <cae0b73e-46df-a491-4a8e-415205038c2c@omp.ru>
- <20220115135550.dr4ngiz2c6rfs2rl@pengutronix.de>
+ <YeF05vBOzkN+xYCq@smile.fi.intel.com>
+ <20220115154539.j3tsz5ioqexq2yuu@pengutronix.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220115135550.dr4ngiz2c6rfs2rl@pengutronix.de>
+In-Reply-To: <20220115154539.j3tsz5ioqexq2yuu@pengutronix.de>
 Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Jan 15, 2022 at 02:55:50PM +0100, Uwe Kleine-König wrote:
-> On Fri, Jan 14, 2022 at 08:55:07PM +0300, Sergey Shtylyov wrote:
-> > On 1/14/22 12:42 AM, Florian Fainelli wrote:
+On Sat, Jan 15, 2022 at 04:45:39PM +0100, Uwe Kleine-König wrote:
+> On Fri, Jan 14, 2022 at 03:04:38PM +0200, Andy Shevchenko wrote:
+> > On Thu, Jan 13, 2022 at 08:43:58PM +0100, Uwe Kleine-König wrote:
+> > > > It'd certainly be good to name anything that doesn't correspond to one
+> > > > of the existing semantics for the API (!) something different rather
+> > > > than adding yet another potentially overloaded meaning.
+> > > 
+> > > It seems we're (at least) three who agree about this. Here is a patch
+> > > fixing the name.
+> > 
+> > And similar number of people are on the other side.
+> 
+> If someone already opposed to the renaming (and not only the name) I
+> must have missed that.
+> 
+> So you think it's a good idea to keep the name
+> platform_get_irq_optional() despite the "not found" value returned by it
+> isn't usable as if it were a normal irq number?
 
-> So you oppose to the name chosen, but not the renaming as such.
+I meant that on the other side people who are in favour of Sergey's patch.
+Since that I commented already that I opposed the renaming being a standalone
+change.
 
-I oppose the name change. The unneeded churn right now since it won't fix
-the issues with the underneath API (platform_get_irq() in this case) and
-will require one more iteration over callers again.
+Do you agree that we have several issues with platform_get_irq*() APIs?
 
-The main issue that platform_get_irq*() returns magic error code while
-treating 0 in a very special way (issuing WARN() and considering it as
-a successful cookie) and this all is quite confusing.
+1. The unfortunate naming
+2. The vIRQ0 handling: a) WARN() followed by b) returned value 0
+3. The specific cookie for "IRQ not found, while no error happened" case
 
-If you are going to fix the underlying issue, welcome! Now I see only
-the step to somewhere. I.o.w. this change _standalone_ makes no sense
-to me.
 
 -- 
 With Best Regards,
