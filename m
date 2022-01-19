@@ -2,210 +2,376 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DF36C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 07:55:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4475BC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 10:09:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345628AbiASHz1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 02:55:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38756 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345447AbiASHyT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 02:54:19 -0500
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE446C061748;
-        Tue, 18 Jan 2022 23:54:18 -0800 (PST)
-Received: by mail-pf1-x433.google.com with SMTP id p37so1825809pfh.4;
-        Tue, 18 Jan 2022 23:54:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=tDrXwcXiPuocleeGwMZcb0Ux64jdkepdRHT9ym5PgXc=;
-        b=Dd2jA8EtlZr59DCwPlPHGIomnZTLBe+3srsl5A/iBhV04X/1yR/JD+rpOxF1NYlQEG
-         sd3ZErPbAZNDwkLmDM4Mm2Y1/CiHJB4ewpmdF6K0jtiv2LDt+FAy2PV2oyN5H0b5Ako+
-         oUgDiUno7aZJfJ97/1ewz0gAKvSPXr7lSizoxWCUU8VXhAxLPxWR8ERJVvdD86+W0rp5
-         eFhoiru7hImNmK+p5CwQwoSXOHjaKbZAosfNBFdT9fGCELzkG8WAUOWdcV1pX1ACeuZv
-         4PK+wLpMiXl+BkoKQJYmQ/7cr5MvuHAuQJu60iY/VFPk4J4AJOoJylXc9Kfg8qF+z0yK
-         Grcw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=tDrXwcXiPuocleeGwMZcb0Ux64jdkepdRHT9ym5PgXc=;
-        b=clg+J7RyjmPXz9HD+CwYNIqi11tQ7SENRnFVhm1OpjQ0IbQzJ6ZnWb20IxBKHZ7/Tm
-         xcxnxFvJh6APPApCoowYUzQbB33qTLlKS9S7F2ccbka7hHml9TTgg6GTP746bmsAGTKA
-         /2o4/uxiuP2umVML9RJtQnlkLjSc6+C9ZEotH2ppTp85rDBz2N1zO2DzU8C9qAxLx82h
-         23q9G6LjQDOqG2GgdOR8JnPei/Ovs/ylx5tK3Jt70Bc7g4y22sXU0AQP5yPrbeY/QR5r
-         KMFTeG/XGWTj4W6sYXb69GYWgJJKFOsAmSgQsbV1kh4CbXfNnVOblFspOeJ/rw6o0FWx
-         oa6w==
-X-Gm-Message-State: AOAM530yRH74jA+XqthpdpDvbCug66RN3tL7n/0RnuTTw8X0FvnTRGVF
-        q3CC1UQs0I406v21ouKStDs=
-X-Google-Smtp-Source: ABdhPJw4zCcJ/pEmSHKAJ3TLZrErP/nCp7dS7s73OmABlaWSl8GlNA4GelRxfzkjixLIguF1wZKJoQ==
-X-Received: by 2002:a63:7258:: with SMTP id c24mr26790437pgn.11.1642578858477;
-        Tue, 18 Jan 2022 23:54:18 -0800 (PST)
-Received: from localhost.localdomain (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id y1sm17380058pgs.4.2022.01.18.23.54.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Jan 2022 23:54:18 -0800 (PST)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
-        SeanHY.Chen@genesyslogic.com.tw,
-        Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH 3/3] mmc: sdhci-pci-gli: Add a switch to enable/disable SSC for GL9750 and GL9755
-Date:   Wed, 19 Jan 2022 15:54:06 +0800
-Message-Id: <20220119075406.36321-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.34.1
+        id S1353188AbiASKJA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 05:09:00 -0500
+Received: from mailgw01.mediatek.com ([60.244.123.138]:37144 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S235647AbiASKJA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 05:09:00 -0500
+X-UUID: 49d83384142440208d0a257734441af4-20220119
+X-UUID: 49d83384142440208d0a257734441af4-20220119
+Received: from mtkexhb02.mediatek.inc [(172.21.101.103)] by mailgw01.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 386561848; Wed, 19 Jan 2022 18:08:57 +0800
+Received: from mtkexhb02.mediatek.inc (172.21.101.103) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Wed, 19 Jan 2022 18:08:56 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by mtkexhb02.mediatek.inc
+ (172.21.101.103) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 19 Jan
+ 2022 18:08:55 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Wed, 19 Jan 2022 18:08:54 +0800
+Message-ID: <923906efde997b1ad338c1f5d7748acd078e2438.camel@mediatek.com>
+Subject: Re: [PATCH 3/3] mmc: mediatek: add support for SDIO eint IRQ
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "Chaotian Jing" <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        Yong Mao <yong.mao@mediatek.com>
+Date:   Wed, 19 Jan 2022 18:08:54 +0800
+In-Reply-To: <754779eb-71f9-2083-a204-1d98b4a04a08@collabora.com>
+References: <20220117071220.17330-1-axe.yang@mediatek.com>
+         <20220117071220.17330-4-axe.yang@mediatek.com>
+         <754779eb-71f9-2083-a204-1d98b4a04a08@collabora.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+On Mon, 2022-01-17 at 11:50 +0100, AngeloGioacchino Del Regno wrote:
+> Il 17/01/22 08:12, Axe Yang ha scritto:
+> > Add support for eint IRQ when MSDC is used as an SDIO host. This
+> > feature requires SDIO device support async IRQ function. With this
+> > feature, SDIO host can be awakened by SDIO card in suspend state,
+> > without additional pin.
+> > 
+> > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> > resume, switch GPIO function back to DAT1 mode then turn on clock.
+> > 
+> > Some device tree property should be added or modified in MSDC node
+> > to support SDIO eint IRQ. Pinctrls named state_dat1 and state_eint
+> > are mandatory. And cap-sdio-async-irq flag is necessary since this
+> > feature depends on asynchronous interrupt:
+> >          &mmcX {
+> >                  ...
+> >                  pinctrl-names = "default", "state_uhs",
+> > "state_eint",
+> >                                  "state_dat1";
+> >                  ...
+> >                  pinctrl-2 = <&mmc2_pins_eint>;
+> >                  pinctrl-3 = <&mmc2_pins_dat1>;
+> >                  ...
+> >                  cap-sdio-async-irq;
+> >                  ...
+> >          };
+> > 
+> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> > ---
+> >   drivers/mmc/host/mtk-sd.c | 125
+> > +++++++++++++++++++++++++++++++++++---
+> >   1 file changed, 117 insertions(+), 8 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > index 65037e1d7723..cbdbcce99fd9 100644
+> > --- a/drivers/mmc/host/mtk-sd.c
+> > +++ b/drivers/mmc/host/mtk-sd.c
+> > @@ -1,6 +1,6 @@
+> >   // SPDX-License-Identifier: GPL-2.0-only
+> >   /*
+> > - * Copyright (c) 2014-2015 MediaTek Inc.
+> > + * Copyright (c) 2022 MediaTek Inc.
+> >    * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+> >    */
+> >   
+> > @@ -9,6 +9,7 @@
+> >   #include <linux/clk.h>
+> >   #include <linux/delay.h>
+> >   #include <linux/dma-mapping.h>
+> > +#include <linux/gpio/consumer.h>
+> >   #include <linux/iopoll.h>
+> >   #include <linux/ioport.h>
+> >   #include <linux/irq.h>
+> > @@ -440,8 +441,12 @@ struct msdc_host {
+> >   	struct pinctrl *pinctrl;
+> >   	struct pinctrl_state *pins_default;
+> >   	struct pinctrl_state *pins_uhs;
+> > +	struct pinctrl_state *pins_eint;
+> > +	struct pinctrl_state *pins_dat1;
+> >   	struct delayed_work req_timeout;
+> >   	int irq;		/* host interrupt */
+> > +	int eint_irq;		/* device interrupt */
+> > +	int sdio_irq_cnt;	/* irq enable cnt */
+> >   	struct reset_control *reset;
+> >   
+> >   	struct clk *src_clk;	/* msdc source clock */
+> > @@ -465,6 +470,7 @@ struct msdc_host {
+> >   	bool hs400_tuning;	/* hs400 mode online tuning */
+> >   	bool internal_cd;	/* Use internal card-detect logic */
+> >   	bool cqhci;		/* support eMMC hw cmdq */
+> > +	bool sdio_eint_ready;	/* Ready to support SDIO eint
+> > interrupt */
+> >   	struct msdc_save_para save_para; /* used when gate HCLK */
+> >   	struct msdc_tune_para def_tune_para; /* default tune setting */
+> >   	struct msdc_tune_para saved_tune_para; /* tune result of
+> > CMD21/CMD19 */
+> > @@ -1527,10 +1533,12 @@ static void msdc_enable_sdio_irq(struct
+> > mmc_host *mmc, int enb)
+> >   	__msdc_enable_sdio_irq(host, enb);
+> >   	spin_unlock_irqrestore(&host->lock, flags);
+> >   
+> > -	if (enb)
+> > -		pm_runtime_get_noresume(host->dev);
+> > -	else
+> > -		pm_runtime_put_noidle(host->dev);
+> > +	if (mmc->card && !mmc->card->cccr.enable_async_irq) {
+> > +		if (enb)
+> > +			pm_runtime_get_noresume(host->dev);
+> > +		else
+> > +			pm_runtime_put_noidle(host->dev);
+> > +	}
+> >   }
+> >   
+> >   static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32
+> > intsts)
+> > @@ -2461,6 +2469,50 @@ static const struct mmc_host_ops mt_msdc_ops
+> > = {
+> >   	.hw_reset = msdc_hw_reset,
+> >   };
+> >   
+> > +static irqreturn_t msdc_sdio_eint_irq(int irq, void *dev_id)
+> > +{
+> > +	struct msdc_host *host = dev_id;
+> > +	struct mmc_host *mmc = mmc_from_priv(host);
+> > +	unsigned long flags;
+> > +
+> > +	spin_lock_irqsave(&host->lock, flags);
+> > +	if (likely(host->sdio_irq_cnt > 0)) {
+> > +		disable_irq_nosync(host->eint_irq);
+> > +		disable_irq_wake(host->eint_irq);
+> > +		host->sdio_irq_cnt--;
+> > +	}
+> > +	spin_unlock_irqrestore(&host->lock, flags);
+> > +
+> > +	sdio_signal_irq(mmc);
+> > +
+> > +	return IRQ_HANDLED;
+> > +}
+> > +
+> > +static int msdc_request_dat1_eint_irq(struct msdc_host *host)
+> > +{
+> > +	struct gpio_desc *desc;
+> > +	int irq, ret;
+> > +
+> > +	desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
+> > +	if (IS_ERR(desc))
+> > +		return PTR_ERR(desc);
+> > +
+> > +	ret = gpiod_to_irq(desc);
+> > +	if (ret < 0)
+> > +		return ret;
+> > +
+> > +	irq = ret;
+> > +	ret = devm_request_threaded_irq(host->dev, irq, NULL,
+> > msdc_sdio_eint_irq,
+> > +					IRQF_TRIGGER_LOW | IRQF_ONESHOT
+> > | IRQF_NO_AUTOEN,
+> > +					"sdio-eint", host);
+> > +	if (ret)
+> > +		return ret;
+> > +
+> > +	host->eint_irq = irq;
+> > +
+> > +	return 0;
+> > +}
+> > +
+> >   static const struct cqhci_host_ops msdc_cmdq_ops = {
+> >   	.enable         = msdc_cqe_enable,
+> >   	.disable        = msdc_cqe_disable,
+> > @@ -2631,6 +2683,23 @@ static int msdc_drv_probe(struct
+> > platform_device *pdev)
+> >   		goto host_free;
+> >   	}
+> >   
+> > +	if (!(mmc->caps2 & MMC_CAP2_NO_SDIO)) {
+> 
+> Please, also check for the async irq capability here:
+> 
+> if (!(mmc->caps2 & MMC_CAP2_NO_SDIO) && (mmc->caps2 &
+> MMC_CAP2_SDIO_ASYNC_IRQ)) {
+> 
+> ...because if we have "state_eint" specified in DT, but we didn't
+> *also* specify
+> cap-sdio-async-irq, then clearly we don't want to use this
+> functionality - hence
+> it becomes useless to register the interrupt handler for that because
+> we're never
+> enabling the CCCR_INTERRUPT_EXT on the card (from
+> drivers/mmc/core/host.c).
+> 
+> Regards,
+> Angelo
 
-Add a vendor-specific bit at the bit26 of GL9750's register 878h and
-GL9755's register 78h to decide whether to disable SSC function. If
-this bit is set, the SSC function will be disabled.
+Thanks, will fix this in next version.
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
----
- drivers/mmc/host/sdhci-pci-gli.c | 66 ++++++++++++++++++++++++++------
- 1 file changed, 54 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 9de3d91283af..b8cd7a365ec2 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -62,6 +62,7 @@
- #define   GLI_9750_MISC_RX_INV_OFF       0x0
- #define   GLI_9750_MISC_RX_INV_VALUE     GLI_9750_MISC_RX_INV_OFF
- #define   GLI_9750_MISC_TX1_DLY_VALUE    0x5
-+#define   SDHCI_GLI_9750_MISC_SSC_OFF    BIT(26)
- 
- #define SDHCI_GLI_9750_TUNING_CONTROL	          0x540
- #define   SDHCI_GLI_9750_TUNING_CONTROL_EN          BIT(4)
-@@ -134,6 +135,9 @@
- #define PCI_GLI_9755_SerDes  0x70
- #define PCI_GLI_9755_SCP_DIS   BIT(19)
- 
-+#define PCI_GLI_9755_MISC	    0x78
-+#define   PCI_GLI_9755_MISC_SSC_OFF    BIT(26)
-+
- #define GLI_MAX_TUNING_LOOP 40
- 
- /* Genesys Logic chipset */
-@@ -368,6 +372,19 @@ static void gl9750_set_pll(struct sdhci_host *host, u8 dir, u16 ldiv, u8 pdiv)
- 	mdelay(1);
- }
- 
-+static bool gl9750_ssc_enable(struct sdhci_host *host)
-+{
-+	u32 misc;
-+	u8 off;
-+
-+	gl9750_wt_on(host);
-+	misc = sdhci_readl(host, SDHCI_GLI_9750_MISC);
-+	off = FIELD_GET(SDHCI_GLI_9750_MISC_SSC_OFF, misc);
-+	gl9750_wt_off(host);
-+
-+	return !off;
-+}
-+
- static void gl9750_set_ssc(struct sdhci_host *host, u8 enable, u8 step, u16 ppm)
- {
- 	u32 pll;
-@@ -389,22 +406,28 @@ static void gl9750_set_ssc(struct sdhci_host *host, u8 enable, u8 step, u16 ppm)
- 
- static void gl9750_set_ssc_pll_205mhz(struct sdhci_host *host)
- {
--	/* set pll to 205MHz and enable ssc */
--	gl9750_set_ssc(host, 0x1, 0xF, 0x5A1D);
-+	bool enable = gl9750_ssc_enable(host);
-+
-+	/* set pll to 205MHz and ssc */
-+	gl9750_set_ssc(host, enable, 0xF, 0x5A1D);
- 	gl9750_set_pll(host, 0x1, 0x246, 0x0);
- }
- 
- static void gl9750_set_ssc_pll_100mhz(struct sdhci_host *host)
- {
--	/* set pll to 100MHz and enable ssc */
--	gl9750_set_ssc(host, 0x1, 0xE, 0x51EC);
-+	bool enable = gl9750_ssc_enable(host);
-+
-+	/* set pll to 100MHz and ssc */
-+	gl9750_set_ssc(host, enable, 0xE, 0x51EC);
- 	gl9750_set_pll(host, 0x1, 0x244, 0x1);
- }
- 
- static void gl9750_set_ssc_pll_50mhz(struct sdhci_host *host)
- {
--	/* set pll to 50MHz and enable ssc */
--	gl9750_set_ssc(host, 0x1, 0xE, 0x51EC);
-+	bool enable = gl9750_ssc_enable(host);
-+
-+	/* set pll to 50MHz and ssc */
-+	gl9750_set_ssc(host, enable, 0xE, 0x51EC);
- 	gl9750_set_pll(host, 0x1, 0x244, 0x3);
- }
- 
-@@ -529,6 +552,19 @@ static void gl9755_set_pll(struct pci_dev *pdev, u8 dir, u16 ldiv, u8 pdiv)
- 	mdelay(1);
- }
- 
-+static bool gl9755_ssc_enable(struct pci_dev *pdev)
-+{
-+	u32 misc;
-+	u8 off;
-+
-+	gl9755_wt_on(pdev);
-+	pci_read_config_dword(pdev, PCI_GLI_9755_MISC, &misc);
-+	off = FIELD_GET(PCI_GLI_9755_MISC_SSC_OFF, misc);
-+	gl9755_wt_off(pdev);
-+
-+	return !off;
-+}
-+
- static void gl9755_set_ssc(struct pci_dev *pdev, u8 enable, u8 step, u16 ppm)
- {
- 	u32 pll;
-@@ -550,22 +586,28 @@ static void gl9755_set_ssc(struct pci_dev *pdev, u8 enable, u8 step, u16 ppm)
- 
- static void gl9755_set_ssc_pll_205mhz(struct pci_dev *pdev)
- {
--	/* set pll to 205MHz and enable ssc */
--	gl9755_set_ssc(pdev, 0x1, 0xF, 0x5A1D);
-+	bool enable = gl9755_ssc_enable(pdev);
-+
-+	/* set pll to 205MHz and ssc */
-+	gl9755_set_ssc(pdev, enable, 0xF, 0x5A1D);
- 	gl9755_set_pll(pdev, 0x1, 0x246, 0x0);
- }
- 
- static void gl9755_set_ssc_pll_100mhz(struct pci_dev *pdev)
- {
--	/* set pll to 100MHz and enable ssc */
--	gl9755_set_ssc(pdev, 0x1, 0xE, 0x51EC);
-+	bool enable = gl9755_ssc_enable(pdev);
-+
-+	/* set pll to 100MHz and ssc */
-+	gl9755_set_ssc(pdev, enable, 0xE, 0x51EC);
- 	gl9755_set_pll(pdev, 0x1, 0x244, 0x1);
- }
- 
- static void gl9755_set_ssc_pll_50mhz(struct pci_dev *pdev)
- {
--	/* set pll to 50MHz and enable ssc */
--	gl9755_set_ssc(pdev, 0x1, 0xE, 0x51EC);
-+	bool enable = gl9755_ssc_enable(pdev);
-+
-+	/* set pll to 50MHz and ssc */
-+	gl9755_set_ssc(pdev, enable, 0xE, 0x51EC);
- 	gl9755_set_pll(pdev, 0x1, 0x244, 0x3);
- }
- 
--- 
-2.34.1
+> 
+> > +		/* Support for SDIO eint irq */
+> > +		host->pins_eint = pinctrl_lookup_state(host->pinctrl,
+> > "state_eint");
+> > +		if (IS_ERR(host->pins_eint)) {
+> > +			dev_dbg(&pdev->dev, "Cannot find pinctrl
+> > eint!\n");
+> > +		} else {
+> > +			host->pins_dat1 = pinctrl_lookup_state(host-
+> > >pinctrl, "state_dat1");
+> > +			if (IS_ERR(host->pins_dat1)) {
+> > +				ret = dev_err_probe(&pdev->dev,
+> > PTR_ERR(host->pins_dat1),
+> > +						    "Cannot find
+> > pinctrl dat1!\n");
+> > +				goto host_free;
+> > +			}
+> > +
+> > +			host->sdio_eint_ready = true;
+> > +		}
+> > +	}
+> > +
+> >   	msdc_of_property_parse(pdev, host);
+> >   
+> >   	host->dev = &pdev->dev;
+> > @@ -2722,6 +2791,16 @@ static int msdc_drv_probe(struct
+> > platform_device *pdev)
+> >   	if (ret)
+> >   		goto release;
+> >   
+> > +	if (host->sdio_eint_ready) {
+> > +		ret = msdc_request_dat1_eint_irq(host);
+> > +		if (ret) {
+> > +			dev_err(host->dev, "Failed to register data1
+> > eint irq!\n");
+> > +			goto release;
+> > +		}
+> > +
+> > +		pinctrl_select_state(host->pinctrl, host->pins_dat1);
+> > +	}
+> > +
+> >   	pm_runtime_set_active(host->dev);
+> >   	pm_runtime_set_autosuspend_delay(host->dev,
+> > MTK_MMC_AUTOSUSPEND_DELAY);
+> >   	pm_runtime_use_autosuspend(host->dev);
+> > @@ -2841,16 +2920,31 @@ static void msdc_restore_reg(struct
+> > msdc_host *host)
+> >   
+> >   static int __maybe_unused msdc_runtime_suspend(struct device
+> > *dev)
+> >   {
+> > +	unsigned long flags;
+> >   	struct mmc_host *mmc = dev_get_drvdata(dev);
+> >   	struct msdc_host *host = mmc_priv(mmc);
+> >   
+> >   	msdc_save_reg(host);
+> > +
+> > +	if (host->sdio_eint_ready) {
+> > +		disable_irq(host->irq);
+> > +		pinctrl_select_state(host->pinctrl, host->pins_eint);
+> > +		spin_lock_irqsave(&host->lock, flags);
+> > +		if (host->sdio_irq_cnt == 0) {
+> > +			enable_irq(host->eint_irq);
+> > +			enable_irq_wake(host->eint_irq);
+> > +			host->sdio_irq_cnt++;
+> > +		}
+> > +		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
+> > +		spin_unlock_irqrestore(&host->lock, flags);
+> > +	}
+> >   	msdc_gate_clock(host);
+> >   	return 0;
+> >   }
+> >   
+> >   static int __maybe_unused msdc_runtime_resume(struct device *dev)
+> >   {
+> > +	unsigned long flags;
+> >   	struct mmc_host *mmc = dev_get_drvdata(dev);
+> >   	struct msdc_host *host = mmc_priv(mmc);
+> >   	int ret;
+> > @@ -2860,10 +2954,25 @@ static int __maybe_unused
+> > msdc_runtime_resume(struct device *dev)
+> >   		return ret;
+> >   
+> >   	msdc_restore_reg(host);
+> > +
+> > +	if (host->sdio_eint_ready) {
+> > +		spin_lock_irqsave(&host->lock, flags);
+> > +		if (host->sdio_irq_cnt > 0) {
+> > +			disable_irq_nosync(host->eint_irq);
+> > +			disable_irq_wake(host->eint_irq);
+> > +			host->sdio_irq_cnt--;
+> > +			sdr_set_bits(host->base + SDC_CFG,
+> > SDC_CFG_SDIOIDE);
+> > +		} else {
+> > +			sdr_clr_bits(host->base + MSDC_INTEN,
+> > MSDC_INTEN_SDIOIRQ);
+> > +		}
+> > +		spin_unlock_irqrestore(&host->lock, flags);
+> > +		pinctrl_select_state(host->pinctrl, host->pins_uhs);
+> > +		enable_irq(host->irq);
+> > +	}
+> >   	return 0;
+> >   }
+> >   
+> > -static int __maybe_unused msdc_suspend(struct device *dev)
+> > +static int __maybe_unused msdc_suspend_noirq(struct device *dev)
+> >   {
+> >   	struct mmc_host *mmc = dev_get_drvdata(dev);
+> >   	int ret;
+> > @@ -2877,13 +2986,13 @@ static int __maybe_unused
+> > msdc_suspend(struct device *dev)
+> >   	return pm_runtime_force_suspend(dev);
+> >   }
+> >   
+> > -static int __maybe_unused msdc_resume(struct device *dev)
+> > +static int __maybe_unused msdc_resume_noirq(struct device *dev)
+> >   {
+> >   	return pm_runtime_force_resume(dev);
+> >   }
+> >   
+> >   static const struct dev_pm_ops msdc_dev_pm_ops = {
+> > -	SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
+> > +	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(msdc_suspend_noirq,
+> > msdc_resume_noirq)
+> >   	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume,
+> > NULL)
+> >   };
+> >   
+> > 
+> 
+> 
 
