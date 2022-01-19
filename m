@@ -2,146 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D89C8C4321E
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 11:42:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EA29C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 12:00:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234676AbiASLmZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 06:42:25 -0500
-Received: from mxout03.lancloud.ru ([45.84.86.113]:32826 "EHLO
-        mxout03.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236274AbiASLmT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 06:42:19 -0500
-Received: from LanCloud
-DKIM-Filter: OpenDKIM Filter v2.11.0 mxout03.lancloud.ru 3B47720D46BF
-Received: from LanCloud
-Received: from LanCloud
-Received: from LanCloud
-Subject: Re: [PATCH 1/2] platform: make platform_get_irq_optional() optional
- (summary)
-To:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>
-CC:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>, <kvm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        <linux-iio@vger.kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        <alsa-devel@alsa-project.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        <linux-mtd@lists.infradead.org>, <linux-i2c@vger.kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        <linux-phy@lists.infradead.org>, <linux-spi@vger.kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        <openipmi-developer@lists.sourceforge.net>,
-        "Khuong Dinh" <khuong@os.amperecomputing.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        "Jiri Slaby" <jirislaby@kernel.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        "Daniel Lezcano" <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        <bcm-kernel-feedback-list@broadcom.com>,
-        <linux-serial@vger.kernel.org>, Jakub Kicinski <kuba@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        "Jaroslav Kysela" <perex@perex.cz>, <linux-pwm@vger.kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>, <linux-pm@vger.kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        "John Garry" <john.garry@huawei.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        "William Breathitt Gray" <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Borislav Petkov <bp@alien8.de>,
-        "Sebastian Reichel" <sre@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        "Takashi Iwai" <tiwai@suse.com>,
-        <platform-driver-x86@vger.kernel.org>,
-        Benson Leung <bleung@chromium.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-edac@vger.kernel.org>, Tony Luck <tony.luck@intel.com>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Eric Auger <eric.auger@redhat.com>, <netdev@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>, <linux-mmc@vger.kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-renesas-soc@vger.kernel.org>,
-        "Vinod Koul" <vkoul@kernel.org>, James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Richard Weinberger <richard@nod.at>,
-        =?UTF-8?Q?Niklas_S=c3=b6derlund?= <niklas.soderlund@ragnatech.se>,
-        <linux-mediatek@lists.infradead.org>,
-        "Brian Norris" <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
-References: <20220110195449.12448-1-s.shtylyov@omp.ru>
- <20220110195449.12448-2-s.shtylyov@omp.ru>
- <20220115183643.6zxalxqxrhkfgdfq@pengutronix.de> <YeQpWu2sUVOSaT9I@kroah.com>
- <20220118091819.zzxpffrxbckoxiys@pengutronix.de>
- <b6038ec2-da4a-de92-b845-cac2be0efcd1@omp.ru>
- <20220119113314.tpqfdgi6nurmzfun@pengutronix.de>
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-Organization: Open Mobile Platform
-Message-ID: <a42e1c8b-2c3d-e3f2-e48c-ad145322ad3d@omp.ru>
-Date:   Wed, 19 Jan 2022 14:42:09 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        id S1354390AbiASMAc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 07:00:32 -0500
+Received: from smtp25.cstnet.cn ([159.226.251.25]:39520 "EHLO cstnet.cn"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1354369AbiASMAa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Jan 2022 07:00:30 -0500
+Received: from localhost.localdomain (unknown [124.16.138.126])
+        by APP-05 (Coremail) with SMTP id zQCowAB3fABH_edh8lGFBg--.55616S2;
+        Wed, 19 Jan 2022 20:00:07 +0800 (CST)
+From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Jiasheng Jiang <jiasheng@iscas.ac.cn>
+Subject: [PATCH v2] mmc: sh_mmcif: Check for null res pointer
+Date:   Wed, 19 Jan 2022 20:00:06 +0800
+Message-Id: <20220119120006.1426964-1-jiasheng@iscas.ac.cn>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20220119113314.tpqfdgi6nurmzfun@pengutronix.de>
-Content-Type: text/plain; charset="windows-1252"
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-X-Originating-IP: [192.168.11.198]
-X-ClientProxiedBy: LFEXT02.lancloud.ru (fd00:f066::142) To
- LFEX1907.lancloud.ru (fd00:f066::207)
+X-CM-TRANSID: zQCowAB3fABH_edh8lGFBg--.55616S2
+X-Coremail-Antispam: 1UD129KBjvdXoWrtFW3ur4rAFyfGr15Ar1fZwb_yoWfZrcEka
+        45Xr1DGr9Fkr9Y9a1xtry3uryYyF98ur4rWa1IgFWav34rJrnxZw1kuwn5Jr4xWry7AFZx
+        Crs3CryrA347ujkaLaAFLSUrUUUUUb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
+        9fnUUIcSsGvfJTRUUUbc8FF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2IYs7xG
+        6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8w
+        A2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Cr0_
+        Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s
+        0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xII
+        jxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr
+        1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7MxkIecxEwVAFwVW5JwCF
+        04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r
+        18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_JF0_Jw1lIxkGc2Ij64vI
+        r41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Jr0_Gr
+        1lIxAIcVCF04k26cxKx2IYs7xG6rW3Jr0E3s1lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAI
+        cVC2z280aVCY1x0267AKxVWUJVW8JbIYCTnIWIevJa73UjIFyTuYvjfU0CJPDUUUU
+X-Originating-IP: [124.16.138.126]
+X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/19/22 2:33 PM, Uwe Kleine-König wrote:
+If there is no suitable resource, platform_get_resource() will return
+NULL.
+Therefore in order to avoid the dereference of the NULL pointer, it
+should be better to check the 'res'.
 
-[...]
->>>>> A possible compromise: We can have both. We rename
->>>>> platform_get_irq_optional() to platform_get_irq_silent() (or
->>>>> platform_get_irq_silently() if this is preferred) and once all users are
->>>>> are changed (which can be done mechanically), we reintroduce a
->>>>> platform_get_irq_optional() with Sergey's suggested semantic (i.e.
->>>>> return 0 on not-found, no error message printking).
->>>>
->>>> Please do not do that as anyone trying to forward-port an old driver
->>>> will miss the abi change of functionality and get confused.  Make
->>>> build-breaking changes, if the way a function currently works is
->>>> changed in order to give people a chance.
->>>
->>> Fine for me. I assume this is a Nack for Sergey's patch?
->>
->>    Which patch do you mean? I'm starting to get really muddled... :-(
-> 
-> I'm talking about "[PATCH 1/2] platform: make
-> platform_get_irq_optional() optional"
+Fixes: df0cc57e057f ("Linux 5.16")
+Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
+---
+Changelog
 
-   I thought GregKH was talking about your renaming patch... :-/
+v1 -> v2
 
-> because "trying to forward-port an
-> old driver will miss the abi" applies to it.
+* Change 1. Change the fixes tag to v5.16.
+---
+ drivers/mmc/host/sh_mmcif.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-   Mhm... why not tell me right from the start? Jr even tell that to Andy
-instead of merging his patch, so I wouldn't get sucked into this work? 
-I wouldn't bother with v2 and it would have saved a lot of time spent on
-email... :-(
-   Do we also remember that "the stable API is a nonsense" thing? :-)
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index e5e457037235..45dfa3b0be9c 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -405,6 +405,9 @@ static int sh_mmcif_dma_slave_config(struct sh_mmcif_host *host,
+ 	struct dma_slave_config cfg = { 0, };
+ 
+ 	res = platform_get_resource(host->pd, IORESOURCE_MEM, 0);
++	if (!res)
++		return -EINVAL;
++
+ 	cfg.direction = direction;
+ 
+ 	if (direction == DMA_DEV_TO_MEM) {
+-- 
+2.25.1
 
-> Best regards
-> Uwe
-
-MBR, Sergey
