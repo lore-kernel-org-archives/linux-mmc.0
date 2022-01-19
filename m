@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E234BC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 07:54:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E497CC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 07:55:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344500AbiASHy4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 02:54:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38580 "EHLO
+        id S1352208AbiASHz0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 02:55:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352349AbiASHxd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 02:53:33 -0500
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AA57C06173E;
-        Tue, 18 Jan 2022 23:53:33 -0800 (PST)
-Received: by mail-pj1-x1033.google.com with SMTP id s61-20020a17090a69c300b001b4d0427ea2so5232226pjj.4;
-        Tue, 18 Jan 2022 23:53:33 -0800 (PST)
+        with ESMTP id S1352224AbiASHx6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 02:53:58 -0500
+Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E99BC06161C;
+        Tue, 18 Jan 2022 23:53:58 -0800 (PST)
+Received: by mail-pl1-x635.google.com with SMTP id n8so1411497plc.3;
+        Tue, 18 Jan 2022 23:53:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=PSCDM8d3/49w8i9Xs5Framf9Ts8Oz7CfeiqrrYTy54w=;
-        b=khMVw+QYJ8NTt4bpMMhLFhnE589FkWnFng18I/cjEueQq2gbAAF5IgQGPZZRXAdBGf
-         uiWkw3OWhv1lzDqordEMZqRVrjApjn4Cl5eheELZLbxDAi7n7S3/vdeZqUn8nylqTQIX
-         4chUfdwSPC4wGDU8xyXV07fy3xIK+iy+asEwbwGvEeiy8l9L/XrUMMITJSJ5MfYFEa9p
-         Qyt7LkEDb1Ow1sbdzXGk3jgqZV2IXr3xdoKCmvZLG53z/0pg6GAPEfk3H8x0Rp2yxvKd
-         PA2WOT6Vi94onI2e5tyQ982AYQVMdxtua9wD8Vam6VQ5L2Pxm2NrkU1MYZgh6KSOAdFH
-         Qx0A==
+        bh=eGTV7k/9KlsGlhJhC3+qf1SZQHZ1AgQDlHwtlaXEH4k=;
+        b=MOH7hW71ZmpeZx9L9svAVUI39Zxb9ee4StrNsd8l1x8bkaT3nmmBAByKwhgUXDhMvE
+         5txZWDZwHUxWtxj+TD7gCdj09wF2NGzlTZ1h40+6op+ShNYeEehc/yvcHy8WFpCq5uR6
+         Jj4ywji08dMAZXfTD5Ufiuv257MxqILe9niXkJjIf64Dc0bniBIYSf0Z2v6Du5rihJKM
+         o/rGkDOFSbtrrQMxXm9IX5Uu2OKL/8fLxlwDjYXg7QkhN0+97jgLMsUxJBJpz7BUg7GG
+         uL0UWRHXnLAp0uVSJyJ2iukqNKm2RMQzMVcfAc9YAJupIlwymmRPm8556u5xK7VMo5GO
+         P81Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=PSCDM8d3/49w8i9Xs5Framf9Ts8Oz7CfeiqrrYTy54w=;
-        b=f+UT637KA9qZeWV5IRnO541FZhwiaW2BGeBdplTZqrrIMnnj1ZvtY+dTPqb6n9HKB6
-         7ybvRe6ihw89PIFZdFTM8AKYZAJxnkjFNNyeOZ4Xfr6wQv5I1fyI6wLLospUCn0Ypk44
-         eDMjBq3iVYAQ1V55sHJoxccYJVBr8NeZFRyusophcYxIZ385XgI7VqnJw3KJt+lSNubm
-         43KdrFTATzFFftAI0GUHHk18vBGe4Td+ARDk1J4miPxLRMgmdVON99/RGtcRlOrfYSSp
-         AJrDeZofGHR8QS2XRerIv2rmxw9gfL2MwijPazaKkLDf0Mw1zkgRTiUvv40VCKFCFYpn
-         Gq9g==
-X-Gm-Message-State: AOAM531wPHB4LFZJpi7QCStQcdud3Z5UwGNa1W72TvEfDVRMBR1nnz18
-        rtvFrAHI4m3j0WoBFujYAyg=
-X-Google-Smtp-Source: ABdhPJyxmFOYwwSSZuNBZh0uK6G9XpoYXiyCiVs/8l8Pw2RNqfzomeAuPUunRdv17lZiU4U3R2YWGA==
-X-Received: by 2002:a17:903:41cf:b0:14a:f1af:15cc with SMTP id u15-20020a17090341cf00b0014af1af15ccmr1250446ple.122.1642578812420;
-        Tue, 18 Jan 2022 23:53:32 -0800 (PST)
+        bh=eGTV7k/9KlsGlhJhC3+qf1SZQHZ1AgQDlHwtlaXEH4k=;
+        b=yywep1Wilc8P+Krm3EmmHlg3ARGytsrC7CJaKlcPLbNopXxSZnMoQySoilFqd7jmOO
+         oYvBoRXRhB9f3ZO6IU2n2cWYWVuQxwwLlN7tLcQleZoYGY3VMK6aalosyBB3Gv4lxS7x
+         4f47/0rWg3Br0frkwIvxCwq1DAVn5/1eEfVYgTLnxNSHszZ/D129f9P6N/RiYZHVX7pI
+         NLsYJFVdVqyHn7O1dej7hVIlfqAQF1EaS3o+AoYbwTpaxPM4UDWgLM9piCqLdd+9OpPO
+         WumsZm4sfYt7CBqXIcE8Edtf8uYoFfdOMwmDyMskMkY3P9DdPJ+9K8ivgNcPJqaMaJ+V
+         c6Eg==
+X-Gm-Message-State: AOAM532J7XT8IW36gClgeSDMcY/8FkK8d77rRVtL99ubEeDjvsGHvf6N
+        PGYRp7e04YnjAihH+QZRQ8Y=
+X-Google-Smtp-Source: ABdhPJyxQtgfpxyIC0tT0W/yuJqQobYoafYdL7wHxyxwLZoeDG5Cob3T8qA2YtoxuTsFGwYeH+xx8A==
+X-Received: by 2002:a17:903:247:b0:149:b6f1:3c8b with SMTP id j7-20020a170903024700b00149b6f13c8bmr31984839plh.83.1642578837606;
+        Tue, 18 Jan 2022 23:53:57 -0800 (PST)
 Received: from localhost.localdomain (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id x1sm16890561pgh.44.2022.01.18.23.53.30
+        by smtp.gmail.com with ESMTPSA id 5sm5378530pjf.34.2022.01.18.23.53.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Jan 2022 23:53:32 -0800 (PST)
+        Tue, 18 Jan 2022 23:53:57 -0800 (PST)
 From:   Ben Chuang <benchuanggli@gmail.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
         SeanHY.Chen@genesyslogic.com.tw,
         Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH 1/3] mmc: sdhci-pci-gli: Reduce the SSC value at 205MHz for GL9750 and GL9755
-Date:   Wed, 19 Jan 2022 15:53:06 +0800
-Message-Id: <20220119075306.36262-1-benchuanggli@gmail.com>
+Subject: [PATCH 2/3] mmc: sdhci-pci-gli: Enable SSC at 50MHz and 100MHz for GL9750 and GL9755
+Date:   Wed, 19 Jan 2022 15:53:39 +0800
+Message-Id: <20220119075339.36281-1-benchuanggli@gmail.com>
 X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -65,36 +65,81 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-The SSC value is 0xFFE7 at 205MHz and may be saturated. Reduce the SSC
-value to 0x5A1D at 205MHz to reduce this situation for GL9750 and GL9755.
+Enable SSC function at 50MHz and 100MHz for GL9750 and GL9755.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 ---
- drivers/mmc/host/sdhci-pci-gli.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-pci-gli.c | 36 ++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 4fd99c1e82ba..9ead32d73447 100644
+index 9ead32d73447..9de3d91283af 100644
 --- a/drivers/mmc/host/sdhci-pci-gli.c
 +++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -390,7 +390,7 @@ static void gl9750_set_ssc(struct sdhci_host *host, u8 enable, u8 step, u16 ppm)
- static void gl9750_set_ssc_pll_205mhz(struct sdhci_host *host)
- {
- 	/* set pll to 205MHz and enable ssc */
--	gl9750_set_ssc(host, 0x1, 0x1F, 0xFFE7);
-+	gl9750_set_ssc(host, 0x1, 0xF, 0x5A1D);
+@@ -394,6 +394,20 @@ static void gl9750_set_ssc_pll_205mhz(struct sdhci_host *host)
  	gl9750_set_pll(host, 0x1, 0x246, 0x0);
  }
  
-@@ -533,7 +533,7 @@ static void gl9755_set_ssc(struct pci_dev *pdev, u8 enable, u8 step, u16 ppm)
- static void gl9755_set_ssc_pll_205mhz(struct pci_dev *pdev)
++static void gl9750_set_ssc_pll_100mhz(struct sdhci_host *host)
++{
++	/* set pll to 100MHz and enable ssc */
++	gl9750_set_ssc(host, 0x1, 0xE, 0x51EC);
++	gl9750_set_pll(host, 0x1, 0x244, 0x1);
++}
++
++static void gl9750_set_ssc_pll_50mhz(struct sdhci_host *host)
++{
++	/* set pll to 50MHz and enable ssc */
++	gl9750_set_ssc(host, 0x1, 0xE, 0x51EC);
++	gl9750_set_pll(host, 0x1, 0x244, 0x3);
++}
++
+ static void sdhci_gl9750_set_clock(struct sdhci_host *host, unsigned int clock)
  {
- 	/* set pll to 205MHz and enable ssc */
--	gl9755_set_ssc(pdev, 0x1, 0x1F, 0xFFE7);
-+	gl9755_set_ssc(pdev, 0x1, 0xF, 0x5A1D);
+ 	struct mmc_ios *ios = &host->mmc->ios;
+@@ -411,6 +425,10 @@ static void sdhci_gl9750_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
+ 		host->mmc->actual_clock = 205000000;
+ 		gl9750_set_ssc_pll_205mhz(host);
++	} else if (clock == 100000000) {
++		gl9750_set_ssc_pll_100mhz(host);
++	} else if (clock == 50000000) {
++		gl9750_set_ssc_pll_50mhz(host);
+ 	}
+ 
+ 	sdhci_enable_clk(host, clk);
+@@ -537,6 +555,20 @@ static void gl9755_set_ssc_pll_205mhz(struct pci_dev *pdev)
  	gl9755_set_pll(pdev, 0x1, 0x246, 0x0);
  }
  
++static void gl9755_set_ssc_pll_100mhz(struct pci_dev *pdev)
++{
++	/* set pll to 100MHz and enable ssc */
++	gl9755_set_ssc(pdev, 0x1, 0xE, 0x51EC);
++	gl9755_set_pll(pdev, 0x1, 0x244, 0x1);
++}
++
++static void gl9755_set_ssc_pll_50mhz(struct pci_dev *pdev)
++{
++	/* set pll to 50MHz and enable ssc */
++	gl9755_set_ssc(pdev, 0x1, 0xE, 0x51EC);
++	gl9755_set_pll(pdev, 0x1, 0x244, 0x3);
++}
++
+ static void sdhci_gl9755_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pci_slot *slot = sdhci_priv(host);
+@@ -557,6 +589,10 @@ static void sdhci_gl9755_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
+ 		host->mmc->actual_clock = 205000000;
+ 		gl9755_set_ssc_pll_205mhz(pdev);
++	} else if (clock == 100000000) {
++		gl9755_set_ssc_pll_100mhz(pdev);
++	} else if (clock == 50000000) {
++		gl9755_set_ssc_pll_50mhz(pdev);
+ 	}
+ 
+ 	sdhci_enable_clk(host, clk);
 -- 
 2.34.1
 
