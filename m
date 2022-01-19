@@ -2,125 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 885EBC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 06:49:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E234BC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 07:54:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239311AbiASGtj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 01:49:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52456 "EHLO
+        id S1344500AbiASHy4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 02:54:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345647AbiASGte (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 01:49:34 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0EF8C061574;
-        Tue, 18 Jan 2022 22:49:33 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id m1so5373100lfq.4;
-        Tue, 18 Jan 2022 22:49:33 -0800 (PST)
+        with ESMTP id S1352349AbiASHxd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 02:53:33 -0500
+Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AA57C06173E;
+        Tue, 18 Jan 2022 23:53:33 -0800 (PST)
+Received: by mail-pj1-x1033.google.com with SMTP id s61-20020a17090a69c300b001b4d0427ea2so5232226pjj.4;
+        Tue, 18 Jan 2022 23:53:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:mail-followup-to:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=4qGM2PfWPk6RGTVLrrFSHYqmCik/v9iLb4ZUp6ZvJnw=;
-        b=NnxaFzVW7dVtK/7bDW/MwUcZfru0yFMo1fnaIQZHCUiblkQmRt/V5WqnrtmbuX2w/v
-         5zgYuqibtmKjNA4Fh1AB+tkKs/Z/bcf6BrB0nut9GhN2JJjSAaZWqesrMAHYQR+5ZJ0Q
-         3kYPRJEXHSiAick74qhTVLnNxLL5SBiaDPbySbuG7YkvafPWrHeMOONUhdjmCuLBICqr
-         tPNOf1qsnivsLVQtUMXwC5Mh9cGVlfNcm1H+y/Ed1PjExvhBxY3cAqskg/90Ckm89hVy
-         5l/xh2EGQgMC006XiLoIFn4Wexx+JLO0tE3h4cGgcCFWgItZuG9es2UpT2YTEQu4I7ZO
-         1BTw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=PSCDM8d3/49w8i9Xs5Framf9Ts8Oz7CfeiqrrYTy54w=;
+        b=khMVw+QYJ8NTt4bpMMhLFhnE589FkWnFng18I/cjEueQq2gbAAF5IgQGPZZRXAdBGf
+         uiWkw3OWhv1lzDqordEMZqRVrjApjn4Cl5eheELZLbxDAi7n7S3/vdeZqUn8nylqTQIX
+         4chUfdwSPC4wGDU8xyXV07fy3xIK+iy+asEwbwGvEeiy8l9L/XrUMMITJSJ5MfYFEa9p
+         Qyt7LkEDb1Ow1sbdzXGk3jgqZV2IXr3xdoKCmvZLG53z/0pg6GAPEfk3H8x0Rp2yxvKd
+         PA2WOT6Vi94onI2e5tyQ982AYQVMdxtua9wD8Vam6VQ5L2Pxm2NrkU1MYZgh6KSOAdFH
+         Qx0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=4qGM2PfWPk6RGTVLrrFSHYqmCik/v9iLb4ZUp6ZvJnw=;
-        b=yFEo2I69A//phjAnIjRjFHU9nM9wnipePNq8T1MKNQaPKHnlFwwBiRC0j97QKujgpz
-         DM2+f/gW3eco0VNRTmy7Nzjsw/pB83I9uiypVAnMVW+IzpBWJ9Zg//oGXVPzAgWEv51D
-         CrUQJE46bpZmL+2457JNuJ+28ll7jzXB2NXM/Wq208dwSerbWCREg8WAuZjZTE6XL/gi
-         NmKi5dS8zfe814vngAmbEJeVDJSZoy4C/0uAZ6jZGsNJ/QLw9OgnzZDIh8GVhHfeQiAt
-         ocrc7aSh7PpynRArBvJNMr6rXS1SXb+k5g6aANq11CBMgD8DKipKJw7pwojlZYCIy06D
-         r+Bg==
-X-Gm-Message-State: AOAM530bwrhtIvlQl0BZYnqWBe4JidFnpCwEqIK7xkk81sBYT/tB4dMo
-        FyaYg8Tfd3cvJI+qBYexP28=
-X-Google-Smtp-Source: ABdhPJxbU8IfDu3SpJWUT2eTInv3+sMu15J2Fqypqq8yvoUkpJqf1uIPFt/Ebj0L/92FbMSZnudvBg==
-X-Received: by 2002:a05:6512:787:: with SMTP id x7mr25529594lfr.647.1642574971753;
-        Tue, 18 Jan 2022 22:49:31 -0800 (PST)
-Received: from localhost ([2a05:3580:f312:6c01:1b6d:df4d:cbec:e4a2])
-        by smtp.gmail.com with ESMTPSA id b23sm1756726lfv.22.2022.01.18.22.49.30
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=PSCDM8d3/49w8i9Xs5Framf9Ts8Oz7CfeiqrrYTy54w=;
+        b=f+UT637KA9qZeWV5IRnO541FZhwiaW2BGeBdplTZqrrIMnnj1ZvtY+dTPqb6n9HKB6
+         7ybvRe6ihw89PIFZdFTM8AKYZAJxnkjFNNyeOZ4Xfr6wQv5I1fyI6wLLospUCn0Ypk44
+         eDMjBq3iVYAQ1V55sHJoxccYJVBr8NeZFRyusophcYxIZ385XgI7VqnJw3KJt+lSNubm
+         43KdrFTATzFFftAI0GUHHk18vBGe4Td+ARDk1J4miPxLRMgmdVON99/RGtcRlOrfYSSp
+         AJrDeZofGHR8QS2XRerIv2rmxw9gfL2MwijPazaKkLDf0Mw1zkgRTiUvv40VCKFCFYpn
+         Gq9g==
+X-Gm-Message-State: AOAM531wPHB4LFZJpi7QCStQcdud3Z5UwGNa1W72TvEfDVRMBR1nnz18
+        rtvFrAHI4m3j0WoBFujYAyg=
+X-Google-Smtp-Source: ABdhPJyxmFOYwwSSZuNBZh0uK6G9XpoYXiyCiVs/8l8Pw2RNqfzomeAuPUunRdv17lZiU4U3R2YWGA==
+X-Received: by 2002:a17:903:41cf:b0:14a:f1af:15cc with SMTP id u15-20020a17090341cf00b0014af1af15ccmr1250446ple.122.1642578812420;
+        Tue, 18 Jan 2022 23:53:32 -0800 (PST)
+Received: from localhost.localdomain (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id x1sm16890561pgh.44.2022.01.18.23.53.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Jan 2022 22:49:31 -0800 (PST)
-Date:   Wed, 19 Jan 2022 09:49:30 +0300
-From:   Andrey Skvortsov <andrej.skvortzov@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Arnaud Ferraris <arnaud.ferraris@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Huijin Park <huijin.park@samsung.com>,
-        Christian =?utf-8?B?TMO2aGxl?= <CLoehle@hyperstone.com>,
-        Yue Hu <huyue2@yulong.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: Wait for command setting 'Power Off
- Notification' bit to complete
-Message-ID: <Yee0ejAQeL+wSRsz@skv.local>
-Mail-Followup-To: Andrey Skvortsov <andrej.skvortzov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnaud Ferraris <arnaud.ferraris@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Huijin Park <huijin.park@samsung.com>,
-        Christian =?utf-8?B?TMO2aGxl?= <CLoehle@hyperstone.com>,
-        Yue Hu <huyue2@yulong.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20220115121447.641524-1-andrej.skvortzov@gmail.com>
- <CAPDyKFr_9kfAns2p6fsUck93s3peyrHvCtv5M9E3fnxLmHbRqQ@mail.gmail.com>
+        Tue, 18 Jan 2022 23:53:32 -0800 (PST)
+From:   Ben Chuang <benchuanggli@gmail.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+        SeanHY.Chen@genesyslogic.com.tw,
+        Ben Chuang <benchuanggli@gmail.com>
+Subject: [PATCH 1/3] mmc: sdhci-pci-gli: Reduce the SSC value at 205MHz for GL9750 and GL9755
+Date:   Wed, 19 Jan 2022 15:53:06 +0800
+Message-Id: <20220119075306.36262-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFr_9kfAns2p6fsUck93s3peyrHvCtv5M9E3fnxLmHbRqQ@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Ulf
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-On 22-01-18 19:48, Ulf Hansson wrote:
-> On Sat, 15 Jan 2022 at 13:15, Andrey Skvortsov
-> <andrej.skvortzov@gmail.com> wrote:
-> >
-> > SD card is allowed to signal busy on DAT0 up to 1s after the
-> > CMD49. According to SD spec (version 6.0 section 5.8.1.3) first host
-> > waits until busy of CMD49 is released and only then polls Power
-> > Management Status register up to 1s until the card indicates ready to
-> > power off.
-> >
-> > Without waiting for busy before polling status register sometimes card
-> > becomes unresponsive and system fails to suspend:
-> >
-> >   [  205.907459] Freezing remaining freezable tasks ... (elapsed 0.001 seconds) done.
-> >   [  206.421274] sunxi-mmc 1c0f000.mmc: data error, sending stop command
-> >   [  206.421321] sunxi-mmc 1c0f000.mmc: send stop command failed
-> >   [  206.421347] mmc0: error -110 reading status reg of PM func
-> >   [  206.421366] PM: dpm_run_callback(): mmc_bus_suspend+0x0/0x74 returns -110
-> >   [  206.421402] mmcblk mmc0:aaaa: PM: failed to suspend async: error -110
-> >   [  206.437064] PM: Some devices failed to suspend, or early wake event detected
-> 
-> Thanks for your patch!
-> 
-> I recall I was hesitating on adding another busy completion check for
-> this, but thought polling the status register for the power management
-> function should be sufficient.
-> 
-> >
-> > Tested with Sandisk Extreme PRO A2 64GB on Allwinner A64 system.
-> 
-> I will give this patch a try too, to make sure it still works on my
-> side. Assuming that works fine, I will queue this up for fixes and by
-> adding a fixes/stable tag.
+The SSC value is 0xFFE7 at 205MHz and may be saturated. Reduce the SSC
+value to 0x5A1D at 205MHz to reduce this situation for GL9750 and GL9755.
 
-Thank you! More testing would be certainly great, because only one of my SD-cards
-supports "Power Notification".
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 4fd99c1e82ba..9ead32d73447 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -390,7 +390,7 @@ static void gl9750_set_ssc(struct sdhci_host *host, u8 enable, u8 step, u16 ppm)
+ static void gl9750_set_ssc_pll_205mhz(struct sdhci_host *host)
+ {
+ 	/* set pll to 205MHz and enable ssc */
+-	gl9750_set_ssc(host, 0x1, 0x1F, 0xFFE7);
++	gl9750_set_ssc(host, 0x1, 0xF, 0x5A1D);
+ 	gl9750_set_pll(host, 0x1, 0x246, 0x0);
+ }
+ 
+@@ -533,7 +533,7 @@ static void gl9755_set_ssc(struct pci_dev *pdev, u8 enable, u8 step, u16 ppm)
+ static void gl9755_set_ssc_pll_205mhz(struct pci_dev *pdev)
+ {
+ 	/* set pll to 205MHz and enable ssc */
+-	gl9755_set_ssc(pdev, 0x1, 0x1F, 0xFFE7);
++	gl9755_set_ssc(pdev, 0x1, 0xF, 0x5A1D);
+ 	gl9755_set_pll(pdev, 0x1, 0x246, 0x0);
+ }
+ 
 -- 
-Best regards,
-Andrey Skvortsov
+2.34.1
+
