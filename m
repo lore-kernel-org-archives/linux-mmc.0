@@ -2,81 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EA29C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 12:00:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B4A6C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 12:04:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354390AbiASMAc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 07:00:32 -0500
-Received: from smtp25.cstnet.cn ([159.226.251.25]:39520 "EHLO cstnet.cn"
+        id S1349070AbiASMEj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 07:04:39 -0500
+Received: from smtp25.cstnet.cn ([159.226.251.25]:41182 "EHLO cstnet.cn"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1354369AbiASMAa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Jan 2022 07:00:30 -0500
+        id S240915AbiASMEh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 Jan 2022 07:04:37 -0500
 Received: from localhost.localdomain (unknown [124.16.138.126])
-        by APP-05 (Coremail) with SMTP id zQCowAB3fABH_edh8lGFBg--.55616S2;
-        Wed, 19 Jan 2022 20:00:07 +0800 (CST)
+        by APP-05 (Coremail) with SMTP id zQCowAA3PABB_udhWluFBg--.43483S2;
+        Wed, 19 Jan 2022 20:04:17 +0800 (CST)
 From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
 To:     ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Jiasheng Jiang <jiasheng@iscas.ac.cn>
-Subject: [PATCH v2] mmc: sh_mmcif: Check for null res pointer
-Date:   Wed, 19 Jan 2022 20:00:06 +0800
-Message-Id: <20220119120006.1426964-1-jiasheng@iscas.ac.cn>
+Subject: Re: Re: [PATCH] mmc: sh_mmcif: Check for null res pointer
+Date:   Wed, 19 Jan 2022 20:04:16 +0800
+Message-Id: <20220119120416.1427018-1-jiasheng@iscas.ac.cn>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: zQCowAB3fABH_edh8lGFBg--.55616S2
-X-Coremail-Antispam: 1UD129KBjvdXoWrtFW3ur4rAFyfGr15Ar1fZwb_yoWfZrcEka
-        45Xr1DGr9Fkr9Y9a1xtry3uryYyF98ur4rWa1IgFWav34rJrnxZw1kuwn5Jr4xWry7AFZx
-        Crs3CryrA347ujkaLaAFLSUrUUUUUb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
-        9fnUUIcSsGvfJTRUUUbc8FF20E14v26r1j6r4UM7CY07I20VC2zVCF04k26cxKx2IYs7xG
-        6rWj6s0DM7CIcVAFz4kK6r1j6r18M28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8w
-        A2z4x0Y4vE2Ix0cI8IcVAFwI0_tr0E3s1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Cr0_
-        Gr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I0E14v26rxl6s
-        0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40Ex7xfMcIj6xII
-        jxv20xvE14v26r1j6r18McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x0Yz7v_Jr0_Gr
-        1lF7xvr2IYc2Ij64vIr41lF7I21c0EjII2zVCS5cI20VAGYxC7MxkIecxEwVAFwVW5JwCF
-        04k20xvY0x0EwIxGrwCFx2IqxVCFs4IE7xkEbVWUJVW8JwC20s026c02F40E14v26r1j6r
-        18MI8I3I0E7480Y4vE14v26r106r1rMI8E67AF67kF1VAFwI0_JF0_Jw1lIxkGc2Ij64vI
-        r41lIxAIcVC0I7IYx2IY67AKxVWUJVWUCwCI42IY6xIIjxv20xvEc7CjxVAFwI0_Jr0_Gr
-        1lIxAIcVCF04k26cxKx2IYs7xG6rW3Jr0E3s1lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAI
-        cVC2z280aVCY1x0267AKxVWUJVW8JbIYCTnIWIevJa73UjIFyTuYvjfU0CJPDUUUU
+X-CM-TRANSID: zQCowAA3PABB_udhWluFBg--.43483S2
+X-Coremail-Antispam: 1UD129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73
+        VFW2AGmfu7bjvjm3AaLaJ3UjIYCTnIWjp_UUUYe7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E
+        6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AEw4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28Cjx
+        kF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8I
+        cVCY1x0267AKxVWxJVW8Jr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2js
+        IEc7CjxVAFwI0_GcCE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE
+        5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_JrI_JrylYx0Ex4A2jsIE14v26r1j6r4UMcvjeV
+        CFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1l
+        c2xSY4AK67AK6ryUMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I
+        0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWU
+        AVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcV
+        CY1x0267AKxVWUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Zr0_Wr1UMIIF0xvEx4A2jsIE
+        14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43ZEXa
+        7VUb8sqJUUUUU==
 X-Originating-IP: [124.16.138.126]
 X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If there is no suitable resource, platform_get_resource() will return
-NULL.
-Therefore in order to avoid the dereference of the NULL pointer, it
-should be better to check the 'res'.
+On wed, Jan 19, 2022 at 02:13:13AM +0800, Ulf Hansson wrote:
+>> Fixes: 27cbd7e815a8 ("mmc: sh_mmcif: rework dma channel handling")
+>
+> I think this fixes tag is wrong. The problem seems to have been there
+> way before this point.
+>
+> I suggest we instead just tag it for stable - and then let it be
+> applied to whatever kernel version it can. Does it make sense to you?
 
-Fixes: df0cc57e057f ("Linux 5.16")
-Signed-off-by: Jiasheng Jiang <jiasheng@iscas.ac.cn>
----
-Changelog
+Thanks, I have already changed the fixes tag to 'v5.16' and sent a v2.
 
-v1 -> v2
-
-* Change 1. Change the fixes tag to v5.16.
----
- drivers/mmc/host/sh_mmcif.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index e5e457037235..45dfa3b0be9c 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -405,6 +405,9 @@ static int sh_mmcif_dma_slave_config(struct sh_mmcif_host *host,
- 	struct dma_slave_config cfg = { 0, };
- 
- 	res = platform_get_resource(host->pd, IORESOURCE_MEM, 0);
-+	if (!res)
-+		return -EINVAL;
-+
- 	cfg.direction = direction;
- 
- 	if (direction == DMA_DEV_TO_MEM) {
--- 
-2.25.1
+Sincerely thanks,
+Jiang
 
