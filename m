@@ -2,60 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B4A6C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 12:04:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EFCCC43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 14:05:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349070AbiASMEj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 07:04:39 -0500
-Received: from smtp25.cstnet.cn ([159.226.251.25]:41182 "EHLO cstnet.cn"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S240915AbiASMEh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Jan 2022 07:04:37 -0500
-Received: from localhost.localdomain (unknown [124.16.138.126])
-        by APP-05 (Coremail) with SMTP id zQCowAA3PABB_udhWluFBg--.43483S2;
-        Wed, 19 Jan 2022 20:04:17 +0800 (CST)
-From:   Jiasheng Jiang <jiasheng@iscas.ac.cn>
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Jiasheng Jiang <jiasheng@iscas.ac.cn>
-Subject: Re: Re: [PATCH] mmc: sh_mmcif: Check for null res pointer
-Date:   Wed, 19 Jan 2022 20:04:16 +0800
-Message-Id: <20220119120416.1427018-1-jiasheng@iscas.ac.cn>
-X-Mailer: git-send-email 2.25.1
+        id S1355023AbiASOFe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Jan 2022 09:05:34 -0500
+Received: from mail-ot1-f42.google.com ([209.85.210.42]:36445 "EHLO
+        mail-ot1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1350177AbiASOFd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Jan 2022 09:05:33 -0500
+Received: by mail-ot1-f42.google.com with SMTP id l64-20020a9d1b46000000b005983a0a8aaaso3234801otl.3;
+        Wed, 19 Jan 2022 06:05:32 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=bA4lXk3bs4g992PO5jXPShXJCU4RdXIJFPt9TWuZvi8=;
+        b=Lo6knvrEtX/KFxyzA+UatqyecN5QpsDx2jKbnR1JQMxQ3bcNJo2x7FK73GNXu5GXKJ
+         yYKgWYLv3Bat1xQyACduvR5yesnyxdLIJfPRBbevYtjGJsI8kYT/DOOYXjL4eHBBbO+R
+         PLniaDtYQ3EnG1myqvhtQ9umRFjZiBTV9NmLO55lvCDwusqs/bUeElRp1FFgrQfTDGdY
+         8TLqyog2EgnFi0R7fgBlahwrkhILuvZfoneSBbGHBwdr49kCMrv9LuLonkP8wmVhid9G
+         LrC4t4Vfu7eWUshQDt5zg/W0OFja7Agx6wEVdsLyyXhbsHORSnKbbu/FijTfSa3Q8HTv
+         jOHg==
+X-Gm-Message-State: AOAM533yzZCwRxbFMdylPqi/P2zCj4YKcGZvxEJierkhhM8qc7yIHZyq
+        DfAcTMxlnUx7ejQu/JXr8w==
+X-Google-Smtp-Source: ABdhPJz+nPpKZ1wx/9MZBe3c2PWe70YAUIasbvLv9Mx8j0isWcefeBYdwrdxEdCzSxpX+Pr8JGIYZw==
+X-Received: by 2002:a9d:e88:: with SMTP id 8mr6044843otj.276.1642601132546;
+        Wed, 19 Jan 2022 06:05:32 -0800 (PST)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id 186sm10018818oig.28.2022.01.19.06.05.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 19 Jan 2022 06:05:31 -0800 (PST)
+Received: (nullmailer pid 3480173 invoked by uid 1000);
+        Wed, 19 Jan 2022 14:05:27 -0000
+Date:   Wed, 19 Jan 2022 08:05:27 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jesse Taube <mr.bossman075@gmail.com>
+Cc:     aisheng.dong@nxp.com, nobuhiro1.iwamatsu@toshiba.co.jp,
+        Mr.Bossman075@gmail.com, linux-kernel@vger.kernel.org,
+        kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org,
+        arnd@arndb.de, gregkh@linuxfoundation.org, adrian.hunter@intel.com,
+        abel.vesa@nxp.com, linux-serial@vger.kernel.org,
+        shawnguo@kernel.org, olof@lixom.net,
+        giulio.benetti@benettiengineering.com, linux-gpio@vger.kernel.org,
+        linux-clk@vger.kernel.org, linus.walleij@linaro.org,
+        festevam@gmail.com, sboyd@kernel.org, linux@armlinux.org.uk,
+        mturquette@baylibre.com, robh+dt@kernel.org,
+        ulf.hansson@linaro.org, stefan@agner.ch, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, soc@kernel.org, jirislaby@kernel.org,
+        linux-imx@nxp.com, s.hauer@pengutronix.de
+Subject: Re: [PATCH v8 2/7] ARM: dts: imxrt1050-pinfunc: Add pinctrl binding
+ header
+Message-ID: <YegapycPxDdgTlXQ@robh.at.kernel.org>
+References: <20220111212606.2072669-1-Mr.Bossman075@gmail.com>
+ <20220111215415.2075257-1-Mr.Bossman075@gmail.com>
+ <20220111215415.2075257-3-Mr.Bossman075@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: zQCowAA3PABB_udhWluFBg--.43483S2
-X-Coremail-Antispam: 1UD129KBjDUn29KB7ZKAUJUUUUU529EdanIXcx71UUUUU7v73
-        VFW2AGmfu7bjvjm3AaLaJ3UjIYCTnIWjp_UUUYe7AC8VAFwI0_Jr0_Gr1l1xkIjI8I6I8E
-        6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AEw4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28Cjx
-        kF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8I
-        cVCY1x0267AKxVWxJVW8Jr1l84ACjcxK6I8E87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2js
-        IEc7CjxVAFwI0_GcCE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE
-        5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_JrI_JrylYx0Ex4A2jsIE14v26r1j6r4UMcvjeV
-        CFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1l
-        c2xSY4AK67AK6ryUMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I
-        0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWU
-        AVWUtwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcV
-        CY1x0267AKxVWUJVW8JwCI42IY6xAIw20EY4v20xvaj40_Zr0_Wr1UMIIF0xvEx4A2jsIE
-        14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Jr0_GrUvcSsGvfC2KfnxnUUI43ZEXa
-        7VUb8sqJUUUUU==
-X-Originating-IP: [124.16.138.126]
-X-CM-SenderInfo: pmld2xxhqjqxpvfd2hldfou0/
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220111215415.2075257-3-Mr.Bossman075@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On wed, Jan 19, 2022 at 02:13:13AM +0800, Ulf Hansson wrote:
->> Fixes: 27cbd7e815a8 ("mmc: sh_mmcif: rework dma channel handling")
->
-> I think this fixes tag is wrong. The problem seems to have been there
-> way before this point.
->
-> I suggest we instead just tag it for stable - and then let it be
-> applied to whatever kernel version it can. Does it make sense to you?
+On Tue, 11 Jan 2022 16:54:10 -0500, Jesse Taube wrote:
+> From: Jesse Taube <mr.bossman075@gmail.com>
+> 
+> Add binding header for i.MXRT1050 pinctrl device tree.
+> 
+> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> Signed-off-by: Jesse Taube <Mr.Bossman075@gmail.com>
+> [Jesse: move pinfunc from dt-bindings to dts folder]
+> ---
+> V1->V2:
+> * Move pinfunc from dt-binding to dts
+> * Change subject and description
+> * Change licence to "GPL-2.0+ OR MIT"
+> V2->V3:
+> * Change License comment style
+> V3->V4:
+> * Nothing done
+> V4->V5:
+> * Nothing done
+> V5->V6:
+> * Nothing done
+> V6->V7:
+> * Nothing done
+> V7->V8:
+> * Nothing done
+> ---
+>  arch/arm/boot/dts/imxrt1050-pinfunc.h | 993 ++++++++++++++++++++++++++
+>  1 file changed, 993 insertions(+)
+>  create mode 100644 arch/arm/boot/dts/imxrt1050-pinfunc.h
+> 
 
-Thanks, I have already changed the fixes tag to 'v5.16' and sent a v2.
-
-Sincerely thanks,
-Jiang
-
+Acked-by: Rob Herring <robh@kernel.org>
