@@ -2,179 +2,185 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB02AC43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Jan 2022 20:56:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F01A3C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Jan 2022 05:34:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245073AbiASU4j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Jan 2022 15:56:39 -0500
-Received: from mga17.intel.com ([192.55.52.151]:54135 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229541AbiASU4h (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 19 Jan 2022 15:56:37 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1642625797; x=1674161797;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=Zn3K2EdVeDLJCMJ0xbcykPqu/tTiNlke9kM/JdHhcyA=;
-  b=UKP5BPWQ+uw2sBH+BM1UqeeTghbHvgaSjb/HR8XqV2m/L0x+YVEmxOGG
-   flhgx042uwtvDmyFlbH1w3PHokLzPGv6z+k+i45vi98jaPXt+vr175APx
-   AbZt1GcjiOufYlT52vxr4qzItwd0SVdtcN8WG3VZf89UFYd8sgki/FTZ0
-   nAJVaJF3b9itTPyNWKR/tIDClRlUTOZwB+qhiCz2ulEGjz2iqqn3ekqLu
-   wBY0+mwl9tNWjORFuFbtJE0r88oQiNJ8px6dZJvxRVbsCoXYnnCWjk+qF
-   bKdDmFFe8Dlc4vZoy0A9phMp1kTFErGo9dZCebUQjx5RAQ/pMMDiEL2gZ
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10231"; a="225862988"
-X-IronPort-AV: E=Sophos;i="5.88,300,1635231600"; 
-   d="scan'208";a="225862988"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jan 2022 12:56:37 -0800
-X-IronPort-AV: E=Sophos;i="5.88,300,1635231600"; 
-   d="scan'208";a="615845335"
-Received: from smile.fi.intel.com ([10.237.72.61])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Jan 2022 12:56:21 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.95)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1nAHz3-00CGxM-Ht;
-        Wed, 19 Jan 2022 22:55:09 +0200
-Date:   Wed, 19 Jan 2022 22:55:09 +0200
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Sergey Shtylyov <s.shtylyov@omp.ru>
-Cc:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Andrew Lunn <andrew@lunn.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        KVM list <kvm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        Linux I2C <linux-i2c@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org, netdev@vger.kernel.org,
-        linux-spi <linux-spi@vger.kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Khuong Dinh <khuong@os.amperecomputing.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
-        Zhang Rui <rui.zhang@intel.com>,
-        platform-driver-x86@vger.kernel.org,
-        Linux PWM List <linux-pwm@vger.kernel.org>,
-        Robert Richter <rric@kernel.org>,
-        Saravanan Sekar <sravanhome@gmail.com>,
-        Corey Minyard <minyard@acm.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        John Garry <john.garry@huawei.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Borislav Petkov <bp@alien8.de>,
-        Jakub Kicinski <kuba@kernel.org>,
+        id S1358592AbiATFeO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Jan 2022 00:34:14 -0500
+Received: from mailgw01.mediatek.com ([60.244.123.138]:60516 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229989AbiATFeO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Jan 2022 00:34:14 -0500
+X-UUID: 79d0c64fb85748de93dbc62341103159-20220120
+X-UUID: 79d0c64fb85748de93dbc62341103159-20220120
+Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw01.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 1240064530; Thu, 20 Jan 2022 13:34:11 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Thu, 20 Jan 2022 13:34:09 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Thu, 20 Jan 2022 13:34:08 +0800
+Message-ID: <0b6ef0ce05bb92cd458043be2441101e20166242.camel@mediatek.com>
+Subject: Re: [PATCH v4 3/3] mmc: mediatek: add support for SDIO eint IRQ
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        openipmi-developer@lists.sourceforge.net,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Benson Leung <bleung@chromium.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>,
-        Richard Weinberger <richard@nod.at>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        James Morse <james.morse@arm.com>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Sebastian Reichel <sre@kernel.org>,
-        Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>,
-        linux-mediatek@lists.infradead.org,
-        Brian Norris <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
-Subject: Re: [PATCH] driver core: platform: Rename
- platform_get_irq_optional() to platform_get_irq_silent()
-Message-ID: <Yeh6rdBjEMiavLfh@smile.fi.intel.com>
-References: <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
- <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de>
- <Yd9L9SZ+g13iyKab@sirena.org.uk>
- <20220113110831.wvwbm75hbfysbn2d@pengutronix.de>
- <YeA7CjOyJFkpuhz/@sirena.org.uk>
- <20220113194358.xnnbhsoyetihterb@pengutronix.de>
- <YeF05vBOzkN+xYCq@smile.fi.intel.com>
- <20220115154539.j3tsz5ioqexq2yuu@pengutronix.de>
- <YehdsUPiOTwgZywq@smile.fi.intel.com>
- <b7edb713-dd91-14e7-34ff-d8fb559e8e92@omp.ru>
+        Satya Tangirala <satyat@google.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "Lucas Stach" <dev@lynxeye.de>, Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        Yong Mao <yong.mao@mediatek.com>
+Date:   Thu, 20 Jan 2022 13:34:08 +0800
+In-Reply-To: <Yehq7L36yfJ8D/j2@smile.fi.intel.com>
+References: <20220119103212.13158-1-axe.yang@mediatek.com>
+         <20220119103212.13158-4-axe.yang@mediatek.com>
+         <Yehq7L36yfJ8D/j2@smile.fi.intel.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <b7edb713-dd91-14e7-34ff-d8fb559e8e92@omp.ru>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jan 19, 2022 at 10:47:06PM +0300, Sergey Shtylyov wrote:
-> On 1/19/22 9:51 PM, Andy Shevchenko wrote:
-
-> >>>>> It'd certainly be good to name anything that doesn't correspond to one
-> >>>>> of the existing semantics for the API (!) something different rather
-> >>>>> than adding yet another potentially overloaded meaning.
-> >>>>
-> >>>> It seems we're (at least) three who agree about this. Here is a patch
-> >>>> fixing the name.
-> >>>
-> >>> And similar number of people are on the other side.
-> >>
-> >> If someone already opposed to the renaming (and not only the name) I
-> >> must have missed that.
-> >>
-> >> So you think it's a good idea to keep the name
-> >> platform_get_irq_optional() despite the "not found" value returned by it
-> >> isn't usable as if it were a normal irq number?
+On Wed, 2022-01-19 at 21:47 +0200, Andy Shevchenko wrote:
+> On Wed, Jan 19, 2022 at 06:32:12PM +0800, Axe Yang wrote:
+> > Add support for eint IRQ when MSDC is used as an SDIO host. This
+> > feature requires SDIO device support async IRQ function. With this
+> > feature, SDIO host can be awakened by SDIO card in suspend state,
+> > without additional pin.
 > > 
-> > I meant that on the other side people who are in favour of Sergey's patch.
-> > Since that I commented already that I opposed the renaming being a standalone
-> > change.
+> > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> > resume, switch GPIO function back to DAT1 mode then turn on clock.
 > > 
-> > Do you agree that we have several issues with platform_get_irq*() APIs?
+> > Some device tree property should be added or modified in MSDC node
+> > to support SDIO eint IRQ. Pinctrls named state_dat1 and state_eint
+> > are mandatory. And cap-sdio-async-irq flag is necessary since this
+> > feature depends on asynchronous interrupt:
+> >         &mmcX {
+> >                 ...
+> >                 pinctrl-names = "default", "state_uhs",
+> > "state_eint",
+> >                                 "state_dat1";
+> >                 ...
+> >                 pinctrl-2 = <&mmc2_pins_eint>;
+> >                 pinctrl-3 = <&mmc2_pins_dat1>;
+> >                 ...
+> >                 cap-sdio-async-irq;
+> >                 ...
+> >         };
 > > 
-> > 1. The unfortunate naming
+> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 > 
->    Mmm, "what's in a name?"... is this the topmost prio issue?
-
-The order is arbitrary.
-
-> > 2. The vIRQ0 handling: a) WARN() followed by b) returned value 0
+> The submitters SoB must be last among all SoB tags. Please, read
+> Submitting
+> Patches document carefully.
 > 
->    This is the most severe issue, I think...
+> > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
 > 
-> > 3. The specific cookie for "IRQ not found, while no error happened" case
+> Who is they, why their SoB appeared here?
+> 
 
--- 
-With Best Regards,
-Andy Shevchenko
+Yong Mao is the co-developer of this patch, I will reorder the SoB
+chains.
+
+> ...
+> 
+> >  /*
+> > - * Copyright (c) 2014-2015 MediaTek Inc.
+> > + * Copyright (c) 2022 MediaTek Inc.
+> 
+> This doesn't feel right. Why did you remove old years?
+
+I should keep the publish year 2014 of this driver.
+But I still think range 2014-2022 is the most appropriate way to change
+the copyright time. Over these years, mediatek is keeping maintaining
+this driver continuously. What do you think?
+
+> 
+> >   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+> >   */
+> 
+> ...
+> 
+> > +	desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
+> > +	if (IS_ERR(desc))
+> > +		return PTR_ERR(desc);
+> > +	ret = gpiod_to_irq(desc);
+> > +	if (ret < 0)
+> > +		return ret;
+> > +
+> > +	irq = ret;
+> 
+> Since both of them are local variables and there is no specific use
+> of the
+> returned value, I believe it's fine just to
+> 
+> 	irq = gpiod_to_irq(desc);
+> 	...
+
+I agree, will fix in next version.
+
+> Hmm... I was wondering if you can use fwnode_irq_get_byname().
+> Ah, it's not (yet) in upstream.
+> 
+> ...
+> 
+> >  static int __maybe_unused msdc_runtime_suspend(struct device *dev)
+> >  {
+> > +	unsigned long flags;
+> 
+> Can you keep reversed xmas tree order?
+> 
+> >  	struct mmc_host *mmc = dev_get_drvdata(dev);
+> >  	struct msdc_host *host = mmc_priv(mmc);
+> 
+> (it means to add new variable here)
+
+Will fix it in next version.
+
+> 
+> >  	return 0;
+> >  }
+> 
+> ...
+> 
+> >  static int __maybe_unused msdc_runtime_resume(struct device *dev)
+> >  {
+> > +	unsigned long flags;
+> 
+> Ditto.
+
+Will fix it in next version.
+
+> 
+> >  	struct mmc_host *mmc = dev_get_drvdata(dev);
+> >  	struct msdc_host *host = mmc_priv(mmc);
+> >  	int ret;
+> >  	return 0;
+> >  }
+> 
+
+--
+Best Regard,
+Axe Yang
 
 
