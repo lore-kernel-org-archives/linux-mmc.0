@@ -2,179 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD5C0C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jan 2022 07:10:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C786C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jan 2022 07:19:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378852AbiAUHKY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jan 2022 02:10:24 -0500
-Received: from mga11.intel.com ([192.55.52.93]:4714 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1378849AbiAUHKX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 21 Jan 2022 02:10:23 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1642749023; x=1674285023;
-  h=subject:to:cc:references:from:message-id:date:
-   mime-version:in-reply-to:content-transfer-encoding;
-  bh=cM6sqe1tElQ75X6OU6MbVxnvuy1jBR7apqeVeis91xo=;
-  b=aFlt8xfE+nQ8If20tCm2aIPGiAuIk+hgBRwpo9fsCZaCTwZiNdJFLS2A
-   1u6HoPRZU55mz7gdHRsJt5JRuXtnK33Wt+tnfweg4Pdj4ivXm1vtwDh1W
-   zmklA3eJy8IE3GB5V8J5kXc4KtnoJ2A0o5HrMJKERq3lKQat9KBknh78o
-   0keSK/zoKOhjiejvdy+yXeTGS5B6+FLRp0q2JSTCs3vfFqnwehpKd+j2I
-   49xjNokR5HGfvv82JFVplVvWBVOOCIkfos5RdY2USLnLZwNZczV+NK5gP
-   B7EjPW28a+8Cmr3tUvnrLuODA2uOeI8NG6DWyDOzMhO8EZ2bdGWY/wQ3g
-   A==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10233"; a="243179422"
-X-IronPort-AV: E=Sophos;i="5.88,304,1635231600"; 
-   d="scan'208";a="243179422"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jan 2022 23:10:23 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.88,304,1635231600"; 
-   d="scan'208";a="694541074"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
-  by orsmga005.jf.intel.com with ESMTP; 20 Jan 2022 23:10:18 -0800
-Subject: Re: [PATCH V3 2/4] mmc: debugfs: Add debug fs entry for mmc driver
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        quic_asutoshd@quicinc.com, ulf.hansson@linaro.org,
-        agross@kernel.org, bjorn.andersson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     stummala@codeaurora.org, vbadigan@codeaurora.org,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        sartgarg@codeaurora.org, nitirawa@codeaurora.org,
-        sayalil@codeaurora.org, Liangliang Lu <luliang@codeaurora.org>,
-        "Bao D . Nguyen" <nguyenb@codeaurora.org>
-References: <1642699582-14785-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <1642699582-14785-3-git-send-email-quic_c_sbhanu@quicinc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <0886f705-562f-6c8d-f396-60c2244b6375@intel.com>
-Date:   Fri, 21 Jan 2022 09:10:17 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.14.0
+        id S1348671AbiAUHTv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jan 2022 02:19:51 -0500
+Received: from mailgw01.mediatek.com ([60.244.123.138]:51670 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S235247AbiAUHTu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2022 02:19:50 -0500
+X-UUID: 42695048824645668bc5d0c9549dad1f-20220121
+X-UUID: 42695048824645668bc5d0c9549dad1f-20220121
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 468471931; Fri, 21 Jan 2022 15:19:46 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.2.792.15; Fri, 21 Jan 2022 15:19:45 +0800
+Received: from localhost.localdomain (10.17.3.154) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Fri, 21 Jan 2022 15:19:43 +0800
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Axe Yang <axe.yang@mediatek.com>, Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>
+Subject: [PATCH v5 0/3] mmc: mediatek: add support for SDIO async IRQ 
+Date:   Fri, 21 Jan 2022 15:19:39 +0800
+Message-ID: <20220121071942.11601-1-axe.yang@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <1642699582-14785-3-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/01/2022 19:26, Shaik Sajida Bhanu wrote:
-> Add debug fs entry to query eMMC and SD card errors statistics
-> 
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> Signed-off-by: Liangliang Lu <luliang@codeaurora.org>
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-> Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
-> ---
->  drivers/mmc/core/debugfs.c | 81 ++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 81 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index 3fdbc80..f4cb594 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -223,6 +223,82 @@ static int mmc_clock_opt_set(void *data, u64 val)
->  DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
->  	"%llu\n");
->  
-> +static int mmc_err_state_get(void *data, u64 *val)
-> +{
-> +	struct mmc_host *host = data;
-> +
-> +	if (!host)
-> +		return -EINVAL;
-> +
-> +	*val = host->err_state ? 1 : 0;
-> +
-> +	return 0;
-> +}
-> +
-> +DEFINE_SIMPLE_ATTRIBUTE(mmc_err_state, mmc_err_state_get, NULL, "%llu\n");
-> +
-> +static int mmc_err_stats_show(struct seq_file *file, void *data)
-> +{
-> +	struct mmc_host *host = (struct mmc_host *)file->private;
-> +	const char *desc[MMC_ERR_MAX] = {
-> +		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
-> +		[MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
-> +		[MMC_ERR_DAT_TIMEOUT] = "Data Timeout Occurred",
-> +		[MMC_ERR_DAT_CRC] = "Data CRC Errors Occurred",
-> +		[MMC_ERR_AUTO_CMD] = "Auto-Cmd Error Occurred",
-> +		[MMC_ERR_ADMA] = "ADMA Error Occurred",
-> +		[MMC_ERR_TUNING] = "Tuning Error Occurred",
-> +		[MMC_ERR_CMDQ_RED] = "CMDQ RED Errors",
-> +		[MMC_ERR_CMDQ_GCE] = "CMDQ GCE Errors",
-> +		[MMC_ERR_CMDQ_ICCE] = "CMDQ ICCE Errors",
-> +		[MMC_ERR_REQ_TIMEOUT] = "Request Timedout",
-> +		[MMC_ERR_CMDQ_REQ_TIMEOUT] = "CMDQ Request Timedout",
-> +		[MMC_ERR_ICE_CFG] = "ICE Config Errors",
-> +	};
-> +	int i;
-> +
-> +	if (!host)
-> +		return -EINVAL;
-> +
-> +	if (!host->err_stats_enabled) {
-> +		seq_printf(file, "Not supported by driver\n");
-> +		return 0;
-> +	}
-> +
-> +	for (i = 0; i < MMC_ERR_MAX; i++) {
-> +		if (desc[i])
-> +			seq_printf(file, "# %s:\t %d\n",
-> +					desc[i], host->err_stats[i]);
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +static int mmc_err_stats_open(struct inode *inode, struct file *file)
-> +{
-> +	return single_open(file, mmc_err_stats_show, inode->i_private);
-> +}
-> +
-> +static ssize_t mmc_err_stats_write(struct file *filp, const char __user *ubuf,
-> +				   size_t cnt, loff_t *ppos)
-> +{
-> +	struct mmc_host *host = filp->f_mapping->host->i_private;
-> +
-> +	if (!host)
-> +		return -EINVAL;
-> +
-> +	pr_debug("%s: Resetting MMC error statistics\n", __func__);
-> +	memset(host->err_stats, 0, sizeof(host->err_stats));
-> +
-> +	return cnt;
-> +}
-> +
-> +static const struct file_operations mmc_err_stats_fops = {
-> +	.open	= mmc_err_stats_open,
-> +	.read	= seq_read,
-> +	.write	= mmc_err_stats_write,
-> +};
-> +
->  void mmc_add_host_debugfs(struct mmc_host *host)
->  {
->  	struct dentry *root;
-> @@ -236,6 +312,11 @@ void mmc_add_host_debugfs(struct mmc_host *host)
->  	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
->  				   &mmc_clock_fops);
->  
-> +	debugfs_create_file("err_state", 0600, root, host,
-> +		&mmc_err_state);
+Change in v5:
+- resort variables to reversed xmas tree order
+- restore old copyright year range and add current year back
 
-Please, let's drop err_state for now
+Change in v4:
+- add MMC_CAP2_SDIO_ASYNC_IRQ judge before lookup eint pinctrl
+- replace spin_lock_irqsave() variant with spin_lock() in eint irq handler
 
-> +	debugfs_create_file("err_stats", 0600, root, host,
-> +		&mmc_err_stats_fops);
-> +
->  #ifdef CONFIG_FAIL_MMC_REQUEST
->  	if (fail_request)
->  		setup_fault_attr(&fail_default_attr, fail_request);
-> 
+Changes in v3:
+- correct abbreviations with capital letters in commit message
+- replace copyright year with 2022 in mtk-sd.c
+- remove unnessary pointer casting
+- adjust variable order to reversed xmas tree
+- remove a redundant blank line
+- refine if statement, following standard pattern
+
+Change in v2:
+- change flag name from 'cap-sdio-async-int' to 'cap-sdio-async-irq'
+- change corresponding macro names from xxx_INT to xxx_IRQ
+- resort new member in msdc_host structure
+- refine function msdc_request_dat1_eint_irq()
+- rename msdc_{suspend,resume} function names, add suffix '_noirq'
+- add MMC_CAP2_NO_SDIO judgement before parse eint related pin setting
+
+Axe Yang (3):
+  dt-bindings: mmc: add cap-sdio-async-irq flag
+  mmc: core: Add support for SDIO async interrupt
+  mmc: mediatek: add support for SDIO eint IRQ
+
+ .../bindings/mmc/mmc-controller.yaml          |   5 +
+ drivers/mmc/core/host.c                       |   2 +
+ drivers/mmc/core/sdio.c                       |  17 +++
+ drivers/mmc/host/mtk-sd.c                     | 123 ++++++++++++++++--
+ include/linux/mmc/card.h                      |   3 +-
+ include/linux/mmc/host.h                      |   1 +
+ include/linux/mmc/sdio.h                      |   5 +
+ 7 files changed, 147 insertions(+), 9 deletions(-)
+
+-- 
+2.25.1
+
 
