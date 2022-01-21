@@ -2,105 +2,76 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13D15C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jan 2022 18:51:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE52FC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jan 2022 20:38:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229518AbiAUSvM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jan 2022 13:51:12 -0500
-Received: from mga03.intel.com ([134.134.136.65]:46622 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230029AbiAUSvH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 21 Jan 2022 13:51:07 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1642791064; x=1674327064;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=lt5/Oi2mP9bz3yAmfCJghuUssAFKa9GcwZolpGn47YQ=;
-  b=c5+skyMYH3Zdf1eLR2mgmpt+/1HpaibIcQq+8OMChYoF22YGH2FM9Kmy
-   NnX0G9xqizfGqF2HjP31CuFaVR33q9mqVL97DnbXUsLHZJyJplwSV95Nm
-   y7Hq0oKc0P6Hi/0bAY3+DYSDK0NmecneW+43B8Jsx4ebZ6wB6rSPqwEu3
-   zI/2by8wn/0xBAEuOldelv3JJIEOKonnBS3SV5CYe0nJ8KceEc50CGP09
-   +Aq22JMEhcdS4rSEdxxE9mRE+vCheRsZk4oazJjB5M+bpeciPBVREtTvz
-   rB7T1oVkOdD7YM0rl/N1FpEHBhcZ7V9qGH4kr2Li71HB2wXMv4uZ2k8Qf
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10234"; a="245667692"
-X-IronPort-AV: E=Sophos;i="5.88,306,1635231600"; 
-   d="scan'208";a="245667692"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jan 2022 10:51:04 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.88,306,1635231600"; 
-   d="scan'208";a="623415270"
-Received: from lkp-server01.sh.intel.com (HELO 276f1b88eecb) ([10.239.97.150])
-  by fmsmga002.fm.intel.com with ESMTP; 21 Jan 2022 10:51:01 -0800
-Received: from kbuild by 276f1b88eecb with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1nAz00-000FaM-K6; Fri, 21 Jan 2022 18:51:00 +0000
-Date:   Sat, 22 Jan 2022 02:50:42 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Chevron Li <chevron.li@bayhubtech.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     kbuild-all@lists.01.org, shirley.her@bayhubtech.com,
-        fred.ai@bayhubtech.com, xiaoguang.yu@bayhubtech.com
-Subject: Re: [PATCH 2/2] mmc:sdhci-bayhub:provide a solution to improve sd
- host card compatibility
-Message-ID: <202201220201.tDKCGfmj-lkp@intel.com>
-References: <20220121110909.104-2-chevron.li@bayhubtech.com>
+        id S230265AbiAUUii (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jan 2022 15:38:38 -0500
+Received: from mxout03.lancloud.ru ([45.84.86.113]:35522 "EHLO
+        mxout03.lancloud.ru" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232988AbiAUUih (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2022 15:38:37 -0500
+Received: from LanCloud
+DKIM-Filter: OpenDKIM Filter v2.11.0 mxout03.lancloud.ru 4DFBD2061795
+Received: from LanCloud
+Received: from LanCloud
+Received: from LanCloud
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-mmc@vger.kernel.org>
+From:   Sergey Shtylyov <s.shtylyov@omp.ru>
+Subject: [PATCH] mmc: renesas_sdhi_sys_dmac: use DMA_SLAVE_BUSWIDTH_UNDEFINED
+Organization: Open Mobile Platform
+Message-ID: <5e22c587-5698-e132-4429-48674a6ddbb7@omp.ru>
+Date:   Fri, 21 Jan 2022 23:38:33 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220121110909.104-2-chevron.li@bayhubtech.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [192.168.11.198]
+X-ClientProxiedBy: LFEXT01.lancloud.ru (fd00:f066::141) To
+ LFEX1907.lancloud.ru (fd00:f066::207)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Chevron,
+The 'dma_slave_config::{src|dst}_addr_width' fields have the *enum* type
+which isn't isomorphic with the *bool* type, however is used as a boolean
+expression. Use the *enum* dma_slave_buswidth's value corresponding to 0
+instead.
 
-Thank you for the patch! Yet something to improve:
+Found by Linux Verification Center (linuxtesting.org) with the SVACE static
+analysis tool.
 
-[auto build test ERROR on c9e6606c7fe92b50a02ce51dda82586ebdf99b48]
-
-url:    https://github.com/0day-ci/linux/commits/Chevron-Li/mmc-sdhci-msm-fix-Qualcomm-sd-host-7180-SD-card-compatibility-issue/20220121-191113
-base:   c9e6606c7fe92b50a02ce51dda82586ebdf99b48
-config: arm-defconfig (https://download.01.org/0day-ci/archive/20220122/202201220201.tDKCGfmj-lkp@intel.com/config)
-compiler: arm-linux-gnueabi-gcc (GCC) 11.2.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/0day-ci/linux/commit/8916351ffe4bd538ba3bf2c5e16a151fb47674fe
-        git remote add linux-review https://github.com/0day-ci/linux
-        git fetch --no-tags linux-review Chevron-Li/mmc-sdhci-msm-fix-Qualcomm-sd-host-7180-SD-card-compatibility-issue/20220121-191113
-        git checkout 8916351ffe4bd538ba3bf2c5e16a151fb47674fe
-        # save the config file to linux build tree
-        mkdir build_dir
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross O=build_dir ARCH=arm SHELL=/bin/bash
-
-If you fix the issue, kindly add following tag as appropriate
-Reported-by: kernel test robot <lkp@intel.com>
-
-All errors (new ones prefixed by >>):
-
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_decode_cid':
-   sdhci-msm.c:(.text+0x8640): multiple definition of `mmc_decode_cid'; drivers/mmc/core/sd.o:sd.c:(.text+0x1720): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_switch_hs':
-   sdhci-msm.c:(.text+0x86c0): multiple definition of `mmc_sd_switch_hs'; drivers/mmc/core/sd.o:sd.c:(.text+0x17a0): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_get_cid':
-   sdhci-msm.c:(.text+0x87a4): multiple definition of `mmc_sd_get_cid'; drivers/mmc/core/sd.o:sd.c:(.text+0x1884): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_get_csd':
-   sdhci-msm.c:(.text+0x8900): multiple definition of `mmc_sd_get_csd'; drivers/mmc/core/sd.o:sd.c:(.text+0x19e0): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_setup_card':
-   sdhci-msm.c:(.text+0x8924): multiple definition of `mmc_sd_setup_card'; drivers/mmc/core/sd.o:sd.c:(.text+0x1a04): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_get_max_clock':
-   sdhci-msm.c:(.text+0x99ac): multiple definition of `mmc_sd_get_max_clock'; drivers/mmc/core/sd.o:sd.c:(.text+0x2208): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_attach_sd':
-   sdhci-msm.c:(.text+0x99c8): multiple definition of `mmc_attach_sd'; drivers/mmc/core/sd.o:sd.c:(.text+0x2224): first defined here
-   arm-linux-gnueabi-ld: drivers/mmc/host/sdhci-msm.o: in function `.LANCHOR0':
->> sdhci-msm.c:(.data+0xd8): multiple definition of `sd_type'; drivers/mmc/core/sd.o:sd.c:(.data+0x70): first defined here
+Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
 ---
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+This patch is against the 'next' branch of Ulf Hansson's 'mmc.git' repo.
+
+drivers/mmc/host/renesas_sdhi_sys_dmac.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+Index: mmc/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+===================================================================
+--- mmc.orig/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ mmc/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -370,7 +370,7 @@ static void renesas_sdhi_sys_dmac_reques
+ 		cfg.dst_addr = res->start +
+ 			(CTL_SD_DATA_PORT << host->bus_shift);
+ 		cfg.dst_addr_width = priv->dma_priv.dma_buswidth;
+-		if (!cfg.dst_addr_width)
++		if (cfg.dst_addr_width == DMA_SLAVE_BUSWIDTH_UNDEFINED)
+ 			cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+ 		cfg.src_addr = 0;
+ 		ret = dmaengine_slave_config(host->chan_tx, &cfg);
+@@ -389,7 +389,7 @@ static void renesas_sdhi_sys_dmac_reques
+ 		cfg.direction = DMA_DEV_TO_MEM;
+ 		cfg.src_addr = cfg.dst_addr + host->pdata->dma_rx_offset;
+ 		cfg.src_addr_width = priv->dma_priv.dma_buswidth;
+-		if (!cfg.src_addr_width)
++		if (cfg.src_addr_width == DMA_SLAVE_BUSWIDTH_UNDEFINED)
+ 			cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+ 		cfg.dst_addr = 0;
+ 		ret = dmaengine_slave_config(host->chan_rx, &cfg);
