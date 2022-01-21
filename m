@@ -2,143 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2209C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jan 2022 16:56:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 904BCC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Jan 2022 18:02:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1379957AbiAUQ4t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Jan 2022 11:56:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49676 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1380007AbiAUQzS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Jan 2022 11:55:18 -0500
-Received: from mail-ot1-x332.google.com (mail-ot1-x332.google.com [IPv6:2607:f8b0:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C72DC061756;
-        Fri, 21 Jan 2022 08:55:03 -0800 (PST)
-Received: by mail-ot1-x332.google.com with SMTP id l64-20020a9d1b46000000b005983a0a8aaaso12528714otl.3;
-        Fri, 21 Jan 2022 08:55:03 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=//qkdexdYIAffr/wUpysgq4KHDNS4hLAy6zYf5Zu0v0=;
-        b=OSxN7qu75Jl6Ebypga9EB+rplXL2NknX3v4hf6fdfBKRFxnzpNYg+gtEDRUJTspnNY
-         kTwMubX5Osq+gG0ozYv5J1+mfyiuQoGQH/OAU0XLabU/xitBEHrV25rvFJyLpopYC2qI
-         WT94JRxDJECeNsRXFsx/cv2LpFTwt+rhh9PEY5ypRwDUQ9GoxjRJeC9434EFhq9dzfwx
-         2uhCO3G6gMl/MVRzOhxZ2RZMEExqltWLaKq4cn+sm3Zwt9+slU6u7ifmmAYWmCbEQQf7
-         wL+7KNo8KcKA4dwGpoGlNJIXNzPjgv7VTBnRA1dcMvHBqykqPMmfIX6lqlZZ8OTy9myu
-         /NzA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=//qkdexdYIAffr/wUpysgq4KHDNS4hLAy6zYf5Zu0v0=;
-        b=4sHEBAlGpgqvaAfnACkn7R8xBI7ulCVZcXhZX4+t+NUFJFPzFjF24/hZ092ev8u/na
-         +R6ztxuaktFtYx6mN+v069+nFIgq0GI7Ow1E0XISYu5QLFDy/4fRj3mCpDkNbZ+7HeCK
-         xojQmjRqBpUDsk/coSi1oNgpD9oyG54jmToir377joarnkupOplpidqPKnAOAfHh93dR
-         jYrq4MKFlk1+B+kiNc99OiDLsLDIMPFzvFVDMOhPZNOWT7cMAecCOeva4B2v/Z3EvNNM
-         vhMiFEYtNmLe7U0Gr/7N4mUMeh1CQuXH+PAF+iWV4syL5wutG82I86PFd2xDZS7SsEfx
-         QZJA==
-X-Gm-Message-State: AOAM532K5Vk71RQnXf7zNWQBbEPYjQP321Yqlf4lNSY5upjZYHE/xSzZ
-        o1jXwJihueWNa9DW8wKyHf8=
-X-Google-Smtp-Source: ABdhPJwLwqGU0n96VjHoplzG9X99JN+vvV5vjYkOWtZbXe7dcfTezy+ooVZ/MdX9vggOI9EvsoDRwA==
-X-Received: by 2002:a9d:27c1:: with SMTP id c59mr3457166otb.150.1642784102699;
-        Fri, 21 Jan 2022 08:55:02 -0800 (PST)
-Received: from thinkpad.localdomain ([2804:14d:5cd1:5d03:cf72:4317:3105:f6e5])
-        by smtp.gmail.com with ESMTPSA id y8sm1089271oou.23.2022.01.21.08.55.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 21 Jan 2022 08:55:02 -0800 (PST)
-From:   Luiz Sampaio <sampaio.ime@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-kernel@vger.kernel.org, Luiz Sampaio <sampaio.ime@gmail.com>,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH 13/31] mmc: changing LED_* from enum led_brightness to actual value
-Date:   Fri, 21 Jan 2022 13:54:18 -0300
-Message-Id: <20220121165436.30956-14-sampaio.ime@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220121165436.30956-1-sampaio.ime@gmail.com>
-References: <20220121165436.30956-1-sampaio.ime@gmail.com>
+        id S241924AbiAUSCq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Jan 2022 13:02:46 -0500
+Received: from mga02.intel.com ([134.134.136.20]:65286 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1382074AbiAUSCp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 21 Jan 2022 13:02:45 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1642788165; x=1674324165;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=kVr133G4QQEACtNcARQL4cMXIgv0co62FF/BdQCLGCU=;
+  b=hYdGJWf66CEpI25k9NeCm1Cl17++HwqaIM+hX29ii5cpgOwweh+XiDRO
+   YEImHLRzmbnYlHLQuuGWeoDutASooNnwMtqsXLUvy5VjvsrAvKAKw85k1
+   8U3Z29+ok5VAjTg+X7tpQUL4I2CEFbkYKm8FBCG8zBfwf6FF7WW6SWVZJ
+   RfRSNDY8QAkQpKJbforJYyKwFpk8gIdx7l9VN+S823Jdc+CDm+T38vRI7
+   7xAl/N0ejwJdolwXoYt/NWvSzTp+xMu/V5BXRMGGyJiuahVEyWpDk1iAD
+   KPwkFPva2yRDUEyb/uZ3YlRhXdKA4j1ktK243pFA83cEZFtkSG8zGLkZp
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10234"; a="233069471"
+X-IronPort-AV: E=Sophos;i="5.88,306,1635231600"; 
+   d="scan'208";a="233069471"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jan 2022 10:00:03 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,306,1635231600"; 
+   d="scan'208";a="765775155"
+Received: from lkp-server01.sh.intel.com (HELO 276f1b88eecb) ([10.239.97.150])
+  by fmsmga006.fm.intel.com with ESMTP; 21 Jan 2022 10:00:00 -0800
+Received: from kbuild by 276f1b88eecb with local (Exim 4.92)
+        (envelope-from <lkp@intel.com>)
+        id 1nAyCd-000FXx-IG; Fri, 21 Jan 2022 17:59:59 +0000
+Date:   Sat, 22 Jan 2022 01:59:31 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Chevron Li <chevron.li@bayhubtech.com>, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, agross@kernel.org,
+        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     kbuild-all@lists.01.org, shirley.her@bayhubtech.com,
+        fred.ai@bayhubtech.com, xiaoguang.yu@bayhubtech.com
+Subject: Re: [PATCH 2/2] mmc:sdhci-bayhub:provide a solution to improve sd
+ host card compatibility
+Message-ID: <202201220136.LTeGkEsu-lkp@intel.com>
+References: <20220121110909.104-2-chevron.li@bayhubtech.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220121110909.104-2-chevron.li@bayhubtech.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The enum led_brightness, which contains the declaration of LED_OFF,
-LED_ON, LED_HALF and LED_FULL is obsolete, as the led class now supports
-max_brightness.
+Hi Chevron,
+
+Thank you for the patch! Yet something to improve:
+
+[auto build test ERROR on c9e6606c7fe92b50a02ce51dda82586ebdf99b48]
+
+url:    https://github.com/0day-ci/linux/commits/Chevron-Li/mmc-sdhci-msm-fix-Qualcomm-sd-host-7180-SD-card-compatibility-issue/20220121-191113
+base:   c9e6606c7fe92b50a02ce51dda82586ebdf99b48
+config: mips-allyesconfig (https://download.01.org/0day-ci/archive/20220122/202201220136.LTeGkEsu-lkp@intel.com/config)
+compiler: mips-linux-gcc (GCC) 11.2.0
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # https://github.com/0day-ci/linux/commit/8916351ffe4bd538ba3bf2c5e16a151fb47674fe
+        git remote add linux-review https://github.com/0day-ci/linux
+        git fetch --no-tags linux-review Chevron-Li/mmc-sdhci-msm-fix-Qualcomm-sd-host-7180-SD-card-compatibility-issue/20220121-191113
+        git checkout 8916351ffe4bd538ba3bf2c5e16a151fb47674fe
+        # save the config file to linux build tree
+        mkdir build_dir
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross O=build_dir ARCH=mips SHELL=/bin/bash
+
+If you fix the issue, kindly add following tag as appropriate
+Reported-by: kernel test robot <lkp@intel.com>
+
+All errors (new ones prefixed by >>):
+
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_decode_cid':
+>> sdhci-msm.c:(.text.mmc_decode_cid+0x0): multiple definition of `mmc_decode_cid'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_decode_cid+0x0): first defined here
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_switch_hs':
+>> sdhci-msm.c:(.text.mmc_sd_switch_hs+0x0): multiple definition of `mmc_sd_switch_hs'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_sd_switch_hs+0x0): first defined here
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_get_cid':
+>> sdhci-msm.c:(.text.mmc_sd_get_cid+0x0): multiple definition of `mmc_sd_get_cid'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_sd_get_cid+0x0): first defined here
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_get_csd':
+>> sdhci-msm.c:(.text.mmc_sd_get_csd+0x0): multiple definition of `mmc_sd_get_csd'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_sd_get_csd+0x0): first defined here
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_setup_card':
+>> sdhci-msm.c:(.text.mmc_sd_setup_card+0x0): multiple definition of `mmc_sd_setup_card'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_sd_setup_card+0x0): first defined here
+>> mips-linux-ld: drivers/mmc/host/sdhci-msm.o:(.data.sd_type+0x0): multiple definition of `sd_type'; drivers/mmc/core/sd.o:(.data.sd_type+0x0): first defined here
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_sd_get_max_clock':
+>> sdhci-msm.c:(.text.mmc_sd_get_max_clock+0x0): multiple definition of `mmc_sd_get_max_clock'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_sd_get_max_clock+0x0): first defined here
+   mips-linux-ld: drivers/mmc/host/sdhci-msm.o: in function `mmc_attach_sd':
+>> sdhci-msm.c:(.text.mmc_attach_sd+0x0): multiple definition of `mmc_attach_sd'; drivers/mmc/core/sd.o:sd.c:(.text.mmc_attach_sd+0x0): first defined here
+
 ---
- drivers/mmc/core/core.c           | 4 ++--
- drivers/mmc/host/rtsx_usb_sdmmc.c | 4 ++--
- drivers/mmc/host/sdhci.c          | 4 ++--
- 3 files changed, 6 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 368f10405e13..66bc9c780e06 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -175,7 +175,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 		mmc_should_fail_request(host, mrq);
- 
- 		if (!host->ongoing_mrq)
--			led_trigger_event(host->led, LED_OFF);
-+			led_trigger_event(host->led, 0);
- 
- 		if (mrq->sbc) {
- 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
-@@ -352,7 +352,7 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	if (err)
- 		return err;
- 
--	led_trigger_event(host->led, LED_FULL);
-+	led_trigger_event(host->led, 255);
- 	__mmc_start_request(host, mrq);
- 
- 	return 0;
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 5fe4528e296e..64fe7a75f401 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1287,7 +1287,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
- 	if (host->power_mode == MMC_POWER_OFF)
- 		goto out;
- 
--	if (host->led.brightness == LED_OFF)
-+	if (host->led.brightness == 0)
- 		rtsx_usb_turn_off_led(ucr);
- 	else
- 		rtsx_usb_turn_on_led(ucr);
-@@ -1357,7 +1357,7 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
- 	snprintf(host->led_name, sizeof(host->led_name),
- 		"%s::", mmc_hostname(mmc));
- 	host->led.name = host->led_name;
--	host->led.brightness = LED_OFF;
-+	host->led.brightness = 0;
- 	host->led.default_trigger = mmc_hostname(mmc);
- 	host->led.brightness_set = rtsx_usb_led_control;
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 07c6da1f2f0f..ddc58a8f0c4f 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -395,7 +395,7 @@ static void sdhci_led_control(struct led_classdev *led,
- 	if (host->runtime_suspended)
- 		goto out;
- 
--	if (brightness == LED_OFF)
-+	if (brightness == 0)
- 		__sdhci_led_deactivate(host);
- 	else
- 		__sdhci_led_activate(host);
-@@ -414,7 +414,7 @@ static int sdhci_led_register(struct sdhci_host *host)
- 		 "%s::", mmc_hostname(mmc));
- 
- 	host->led.name = host->led_name;
--	host->led.brightness = LED_OFF;
-+	host->led.brightness = 0;
- 	host->led.default_trigger = mmc_hostname(mmc);
- 	host->led.brightness_set = sdhci_led_control;
- 
--- 
-2.34.1
-
+0-DAY CI Kernel Test Service, Intel Corporation
+https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
