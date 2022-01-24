@@ -2,32 +2,32 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A17C8C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Jan 2022 05:48:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DECF4C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Jan 2022 07:28:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235230AbiAXFsX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Jan 2022 00:48:23 -0500
-Received: from smtp-relay-canonical-0.canonical.com ([185.125.188.120]:44920
-        "EHLO smtp-relay-canonical-0.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234326AbiAXFsX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2022 00:48:23 -0500
+        id S241713AbiAXH2U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Jan 2022 02:28:20 -0500
+Received: from smtp-relay-canonical-1.canonical.com ([185.125.188.121]:41178
+        "EHLO smtp-relay-canonical-1.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S235814AbiAXH2T (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2022 02:28:19 -0500
 Received: from HP-EliteBook-840-G7.. (36-229-235-192.dynamic-ip.hinet.net [36.229.235.192])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-canonical-0.canonical.com (Postfix) with ESMTPSA id 8E80C40D2E;
-        Mon, 24 Jan 2022 05:48:18 +0000 (UTC)
+        by smtp-relay-canonical-1.canonical.com (Postfix) with ESMTPSA id EA0E74193F;
+        Mon, 24 Jan 2022 07:28:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1643003301;
-        bh=MTEebZVG4mHTovnEEXPYqb1F1yUzU9S01t10v+4llng=;
+        s=20210705; t=1643009293;
+        bh=rtVWjFJKAvvnl8xU8H14gP8fEvLwhgPN2JAgsP0zh4g=;
         h=From:To:Cc:Subject:Date:Message-Id:In-Reply-To:References:
          MIME-Version;
-        b=VZePhUFpLrk4loGdTG82NC29WeGyq1xXGyw5X5prr+RnTlS0HMAZZIBUiPL6YhXEF
-         Oh1ZLOG3FnCW6Eoc1mook5FNF1hoBJ9Y648ZoJ52poXuHl7ThafjroKX6OA7wEIbBa
-         /7C0G5vAehQBaA/iKivJjRMEk+A6jISJ7XT2zX+HZewcLcKxg12EOKG7uXLx/tmuI4
-         9l9iSEPrh/4jjw6KYesCUx2voafKGRfVfoNHIexu0vBALGe5XhDLOsrfhsGnkaYfWB
-         7QmGdTQQbveX4LzV9re81kWW1q+9HWjUAOvRScJnD199ZoLLt4nfRSTHbjhoibAfgi
-         H2hrlcRkKjqKQ==
+        b=TXlBFpHrR5u6W59iZD/RMpaOKHPful1oUA5x6SDPhq/FwMrr3a7+QSnlfzshBShfA
+         1Xn52vQyNy0ihzHOn9+uaeyDynwqSeDWcizU8dz6Ey76TgonQGhfa/tG0U+alUKQDb
+         qgj63k93qmaGKZohafD+SoEKFA3Y6rt/xTEL+H+o7A17IwyVCsG1y4H93LdWJ7ezz8
+         8+qJHyJcmBRWTRlWZnXSa/R7WOVG0eQqbg0fs5zGzhB2VYIL1HQZbw58MRe8hriVxL
+         hJoTz+pS6L+eW4q7vLpL3LuKcncPo159BU+usNgCXRjrWPwi3QcHuxfz++c0D6JqRT
+         yWR/aT2uZg4qw==
 From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
 To:     arnd@arndb.de, gregkh@linuxfoundation.org, ulf.hansson@linaro.org
 Cc:     linux-pm@vger.kernel.org,
@@ -35,9 +35,9 @@ Cc:     linux-pm@vger.kernel.org,
         Ricky WU <ricky_wu@realtek.com>,
         Thomas Hebb <tommyhebb@gmail.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v4 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle runtime PM
-Date:   Mon, 24 Jan 2022 13:47:38 +0800
-Message-Id: <20220124054743.1800655-1-kai.heng.feng@canonical.com>
+Subject: [PATCH v5 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle runtime PM
+Date:   Mon, 24 Jan 2022 15:28:00 +0800
+Message-Id: <20220124072804.1811690-1-kai.heng.feng@canonical.com>
 X-Mailer: git-send-email 2.33.1
 In-Reply-To: <20220121014039.1693208-1-kai.heng.feng@canonical.com>
 References: <20220121014039.1693208-1-kai.heng.feng@canonical.com>
@@ -54,13 +54,13 @@ weird tricks to keep it from runtime suspending.
 
 So use those helpers at right places to properly manage runtime PM.
 
-Since rtsx_pci will handle the real power management, remove
-MMC_CAP_AGGRESSIVE_PM to avoid doing duplicate work.
-
 Fixes: 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM")
 Cc: Ricky WU <ricky_wu@realtek.com>
 Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
 ---
+v5:
+ - Revert back to v3 as Realtek suggested.
+
 v4:
  - Decrease the autosuspend delay to 200ms for more power saving.
 
@@ -68,11 +68,11 @@ v3:
 v2:
  - No change.
 
- drivers/mmc/host/rtsx_pci_sdmmc.c | 47 ++++++++++++++++++++++---------
- 1 file changed, 33 insertions(+), 14 deletions(-)
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 44 +++++++++++++++++++++++--------
+ 1 file changed, 33 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 58cfaffa3c2d8..4c7931b053aad 100644
+index 58cfaffa3c2d8..2656dc840a3a5 100644
 --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
 +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
 @@ -806,6 +806,7 @@ static void sd_request(struct work_struct *work)
@@ -225,24 +225,7 @@ index 58cfaffa3c2d8..4c7931b053aad 100644
  	mutex_unlock(&pcr->pcr_mutex);
  
  	return err;
-@@ -1427,7 +1451,6 @@ static void init_extra_caps(struct realtek_pci_sdmmc *host)
- static void realtek_init_host(struct realtek_pci_sdmmc *host)
- {
- 	struct mmc_host *mmc = host->mmc;
--	struct rtsx_pcr *pcr = host->pcr;
- 
- 	mmc->f_min = 250000;
- 	mmc->f_max = 208000000;
-@@ -1435,8 +1458,6 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
- 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
- 		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
- 		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
--	if (pcr->rtd3_en)
--		mmc->caps = mmc->caps | MMC_CAP_AGGRESSIVE_PM;
- 	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE |
- 		MMC_CAP2_NO_SDIO;
- 	mmc->max_current_330 = 400;
-@@ -1495,12 +1516,12 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+@@ -1495,12 +1519,12 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
  
  	realtek_init_host(host);
  
@@ -255,13 +238,13 @@ index 58cfaffa3c2d8..4c7931b053aad 100644
 +	pm_runtime_no_callbacks(&pdev->dev);
 +	pm_runtime_set_active(&pdev->dev);
 +	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 200);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 5000);
 +	pm_runtime_mark_last_busy(&pdev->dev);
 +	pm_runtime_use_autosuspend(&pdev->dev);
  
  	mmc_add_host(mmc);
  
-@@ -1521,11 +1542,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+@@ -1521,11 +1545,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
  	pcr->slots[RTSX_SD_CARD].card_event = NULL;
  	mmc = host->mmc;
  
@@ -273,7 +256,7 @@ index 58cfaffa3c2d8..4c7931b053aad 100644
  	cancel_work_sync(&host->work);
  
  	mutex_lock(&host->host_mutex);
-@@ -1548,6 +1564,9 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+@@ -1548,6 +1567,9 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
  
  	flush_work(&host->work);
  
