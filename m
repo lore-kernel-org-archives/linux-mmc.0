@@ -2,210 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CDEEC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Jan 2022 12:24:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D1FCC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Jan 2022 14:41:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239407AbiAXMYE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Jan 2022 07:24:04 -0500
-Received: from mailgw01.mediatek.com ([60.244.123.138]:52336 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S239140AbiAXMYE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2022 07:24:04 -0500
-X-UUID: 7495296568a1467ab7ba9ce6c7b92a5f-20220124
-X-UUID: 7495296568a1467ab7ba9ce6c7b92a5f-20220124
-Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw01.mediatek.com
-        (envelope-from <derong.liu@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1179741836; Mon, 24 Jan 2022 20:24:00 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Mon, 24 Jan 2022 20:23:59 +0800
-Received: from mbjsdccf07.mediatek.inc (10.15.20.246) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 24 Jan 2022 20:23:58 +0800
-From:   Derong Liu <derong.liu@mediatek.com>
-To:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>
-CC:     <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <wsp_upstream@mediatek.com>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Derong Liu <derong.liu@mediatek.com>
-Subject: [PATCH] mmc: mediatek: Add cmd polling mode
-Date:   Mon, 24 Jan 2022 20:18:14 +0800
-Message-ID: <20220124121814.17452-1-derong.liu@mediatek.com>
-X-Mailer: git-send-email 2.18.0
+        id S238687AbiAXOla (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Jan 2022 09:41:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39814 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238329AbiAXOl3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2022 09:41:29 -0500
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84291C061401
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jan 2022 06:41:29 -0800 (PST)
+Received: by mail-lf1-x12e.google.com with SMTP id p27so50024799lfa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Jan 2022 06:41:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=aXy37d4XDPWa6rl+fssLb79KAEtEH3NcZpEw3dhV2sc=;
+        b=CYmOyiueadc7oPZC42g8yUASMCna1tx/Dqc57iAKHKguEipAC9PhRU8OJQ1S3WEw8Y
+         lIsIN4unXm5UhxLvOjPndzHa8qNlpO8gMtFerpapyTfDKGK0flQvnWvGitoa9jOH6353
+         lU3ZqPCqW9F1lUZHuPre4Kc/1+9ZpCRLbh5XQJm+EsshvUy66MnYtYW/Lds0p+nk/kQ8
+         p0W8UlrWN8SpS1TmD6krCVdgV69NfoYIwxKj1syEl+aXJv+6UBv/TbKJ1bA1eccHrNCW
+         hIryF+530Qtam0LXybnDvJcnQ0sijoZESQ3zkc1CbXlfzHvFRy+Fu3Amq5UCbgiI7bkP
+         Pd8A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=aXy37d4XDPWa6rl+fssLb79KAEtEH3NcZpEw3dhV2sc=;
+        b=EertSrTqwJEmPXfI1IfACOR/mWvhclko2jJYsdcbg9RrhIOAkbEYt3MDtxkHnC19EJ
+         fZXr0EnS9DPfWxDEGvMthk6UJ2Jy3G//zBvLZB/Sl4v/vQqBxBi5jve9HhIMq/witTnS
+         gAbr8G8SHPPYqOnvon+u+u+uAUlHj3aGE4xge6OfMI3TVmj3OeBiC03m9gpWvLFyiKaf
+         yzM7Dyz0cvvo61fbxvmchZilalsPLaH8TDJga54MkoIZQKuPi4unyoWPUErLbX2UE89+
+         R/QTseJCVKTJf27Qrj2zZURo2XpRRpjSpPyf34KSbfvaHnetRVTOsOHXKwsi46I9gqy2
+         zMVA==
+X-Gm-Message-State: AOAM530Tw6H+qB3P29i4CW5D5iH/ojl0YwGgy+ltmkKlkPX7Of40uGfx
+        UXCygpatCMZ2AUMk1wc67vZ0hiCzIfX6nZfJPytmPA==
+X-Google-Smtp-Source: ABdhPJypBPpHOmQGPutmK8yhtxPplmuDP64mDi+gR8RQXoiGgBHLdK+MDDFSYIxODnIFjvAlvqNcTQ1h40QgvhekwtU=
+X-Received: by 2002:a2e:a233:: with SMTP id i19mr6265411ljm.16.1643035287561;
+ Mon, 24 Jan 2022 06:41:27 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20220113170300.3555651-1-gsomlo@gmail.com>
+In-Reply-To: <20220113170300.3555651-1-gsomlo@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 24 Jan 2022 15:40:51 +0100
+Message-ID: <CAPDyKFrYiRYioSgS5Dy8YWKpp5xqFtgnez7g3598RB_oar+sbw@mail.gmail.com>
+Subject: Re: [PATCH v14 0/3] mmc: Add LiteSDCard mmc driver
+To:     Gabriel Somlo <gsomlo@gmail.com>
+Cc:     linux-kernel@vger.kernel.org, robh+dt@kernel.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, krakoczy@antmicro.com,
+        mdudek@internships.antmicro.com, paulus@ozlabs.org, joel@jms.id.au,
+        shorne@gmail.com, geert@linux-m68k.org,
+        david.abdurachmanov@sifive.com, florent@enjoy-digital.fr,
+        rdunlap@infradead.org, andy.shevchenko@gmail.com, hdanton@sina.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-We found sdcard can gain more read/write performance
-when using cmd polling mode instead of interrupt mode, in the meantime,
-there are much more devices have equipped with high frequency cpu,
-so it is necessary to support cmd polling mode.
+On Thu, 13 Jan 2022 at 18:03, Gabriel Somlo <gsomlo@gmail.com> wrote:
+>
+> Add support for the LiteX SD-Card device, LiteSDCard.
+>
+> LiteSDCard is a simple SD-Card interface available as part of the LiteX
+> environment, used with various RISC-V and other FPGA based SoCs.
+>
+> New in v14:
+> Documentation/devicetree/bindings/mmc/litex,mmc.yaml:
+>   - add missing `vmmc-supply = ...` property to example section
 
-Signed-off-by: Derong Liu <derong.liu@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 92 +++++++++++++++++++++++++++++++++++----
- 1 file changed, 83 insertions(+), 9 deletions(-)
+This v14 series applied for next, thanks!
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 65037e1d7723..612f5115ca4b 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -465,6 +465,7 @@ struct msdc_host {
- 	bool hs400_tuning;	/* hs400 mode online tuning */
- 	bool internal_cd;	/* Use internal card-detect logic */
- 	bool cqhci;		/* support eMMC hw cmdq */
-+	bool cmd_polling_mode;	/* support cmd polling mode */
- 	struct msdc_save_para save_para; /* used when gate HCLK */
- 	struct msdc_tune_para def_tune_para; /* default tune setting */
- 	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-@@ -1250,6 +1251,63 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
- 	return true;
- }
- 
-+static inline int use_cmd_polling_mode(struct msdc_host *host,
-+	struct mmc_command *cmd)
-+{
-+	/* R1B use interrupt mode */
-+	return (host->cmd_polling_mode &&
-+			((mmc_from_priv(host))->caps2 & MMC_CAP2_NO_SDIO) &&
-+			(mmc_resp_type(cmd) != MMC_RSP_R1B));
-+}
-+
-+static bool msdc_command_resp_polling(struct msdc_host *host,
-+	struct mmc_request *mrq, struct mmc_command *cmd,
-+	unsigned long timeout)
-+{
-+	bool ret = false;
-+	unsigned long tmo;
-+	int events;
-+	unsigned long flags;
-+
-+	if (!use_cmd_polling_mode(host, cmd))
-+		goto exit;
-+
-+retry:
-+	tmo = jiffies + timeout;
-+	while (1) {
-+		spin_lock_irqsave(&host->lock, flags);
-+		events = readl(host->base + MSDC_INT);
-+		if (events & cmd_ints_mask) {
-+			/* clear all int flag */
-+			events &= cmd_ints_mask;
-+			writel(events, host->base + MSDC_INT);
-+			spin_unlock_irqrestore(&host->lock, flags);
-+			break;
-+		}
-+		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		if (time_after(jiffies, tmo) &&
-+			((events & cmd_ints_mask) == 0)) {
-+			dev_info(host->dev, "[%s]: CMD<%d> polling_for_completion timeout ARG<0x%.8x>\n",
-+				__func__, cmd->opcode, cmd->arg);
-+			ret = msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq, cmd);
-+			goto exit;
-+		}
-+	}
-+
-+	if (cmd) {
-+		ret = msdc_cmd_done(host, events, mrq, cmd);
-+		/* if only autocmd23 done,
-+		 * it needs to polling the continue read/write cmd directly.
-+		 */
-+		if (!ret)
-+			goto retry;
-+	}
-+
-+exit:
-+	return ret;
-+}
-+
- static void msdc_start_command(struct msdc_host *host,
- 		struct mmc_request *mrq, struct mmc_command *cmd)
- {
-@@ -1273,7 +1331,10 @@ static void msdc_start_command(struct msdc_host *host,
- 	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
- 
- 	spin_lock_irqsave(&host->lock, flags);
--	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-+	if (use_cmd_polling_mode(host, cmd))
-+		sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
-+	else
-+		sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	writel(cmd->arg, host->base + SDC_ARG);
-@@ -1290,9 +1351,11 @@ static void msdc_cmd_next(struct msdc_host *host,
- 	       host->hs400_tuning))) ||
- 	    (mrq->sbc && mrq->sbc->error))
- 		msdc_request_done(host, mrq);
--	else if (cmd == mrq->sbc)
-+	else if (cmd == mrq->sbc) {
- 		msdc_start_command(host, mrq, mrq->cmd);
--	else if (!cmd->data)
-+		msdc_command_resp_polling(host, mrq,
-+				mrq->cmd, CMD_TIMEOUT);
-+	} else if (!cmd->data)
- 		msdc_request_done(host, mrq);
- 	else
- 		msdc_start_data(host, cmd, cmd->data);
-@@ -1314,10 +1377,15 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	 * use HW option,  otherwise use SW option
- 	 */
- 	if (mrq->sbc && (!mmc_card_mmc(mmc->card) ||
--	    (mrq->sbc->arg & 0xFFFF0000)))
-+	    (mrq->sbc->arg & 0xFFFF0000))) {
- 		msdc_start_command(host, mrq, mrq->sbc);
--	else
-+		msdc_command_resp_polling(host, mrq,
-+				mrq->sbc, CMD_TIMEOUT);
-+	} else {
- 		msdc_start_command(host, mrq, mrq->cmd);
-+		msdc_command_resp_polling(host, mrq,
-+				mrq->cmd, CMD_TIMEOUT);
-+	}
- }
- 
- static void msdc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
-@@ -1350,9 +1418,11 @@ static void msdc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- static void msdc_data_xfer_next(struct msdc_host *host, struct mmc_request *mrq)
- {
- 	if (mmc_op_multi(mrq->cmd->opcode) && mrq->stop && !mrq->stop->error &&
--	    !mrq->sbc)
-+	    !mrq->sbc) {
- 		msdc_start_command(host, mrq, mrq->stop);
--	else
-+		msdc_command_resp_polling(host, mrq,
-+				mrq->stop, CMD_TIMEOUT);
-+	} else
- 		msdc_request_done(host, mrq);
- }
- 
-@@ -2492,11 +2562,15 @@ static void msdc_of_property_parse(struct platform_device *pdev,
- 	else
- 		host->hs400_cmd_resp_sel_rising = false;
- 
--	if (of_property_read_bool(pdev->dev.of_node,
--				  "supports-cqe"))
-+	if (of_property_read_bool(pdev->dev.of_node, "supports-cqe"))
- 		host->cqhci = true;
- 	else
- 		host->cqhci = false;
-+
-+	if (of_property_read_bool(pdev->dev.of_node, "mediatek,cmd-polling-mode"))
-+		host->cmd_polling_mode = true;
-+	else
-+		host->cmd_polling_mode = false;
- }
- 
- static int msdc_of_clock_parse(struct platform_device *pdev,
--- 
-2.18.0
+[...]
 
+> Gabriel Somlo (3):
+>   MAINTAINERS: co-maintain LiteX platform
+>   dt-bindings: mmc: Add bindings for LiteSDCard
+>   mmc: Add driver for LiteX's LiteSDCard interface
+>
+>  .../devicetree/bindings/mmc/litex,mmc.yaml    |  78 +++
+>  MAINTAINERS                                   |   9 +-
+>  drivers/mmc/host/Kconfig                      |  13 +
+>  drivers/mmc/host/Makefile                     |   1 +
+>  drivers/mmc/host/litex_mmc.c                  | 661 ++++++++++++++++++
+>  5 files changed, 760 insertions(+), 2 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+>  create mode 100644 drivers/mmc/host/litex_mmc.c
+>
+
+Kind regards
+Uffe
