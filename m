@@ -2,183 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A93CC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jan 2022 17:30:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBFEDC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jan 2022 17:31:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1384164AbiAYRa1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Jan 2022 12:30:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50804 "EHLO
+        id S1588358AbiAYRbM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Jan 2022 12:31:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51444 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1384211AbiAYR3J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2022 12:29:09 -0500
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A9C9C06175F
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Jan 2022 09:29:07 -0800 (PST)
-Received: by mail-lj1-x22a.google.com with SMTP id z7so13553532ljj.4
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Jan 2022 09:29:07 -0800 (PST)
+        with ESMTP id S1588309AbiAYR3v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2022 12:29:51 -0500
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC603C061747
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jan 2022 09:29:50 -0800 (PST)
+Received: by mail-lf1-x12b.google.com with SMTP id z19so21464859lfq.13
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Jan 2022 09:29:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=aOdLoZb6zxcFKBR0egQ6Rt2GSJrFCeoRgvKzrW6EbSs=;
-        b=kEwXPp2wyswluxqWFHtjE6AS/BWzcPasWFxcdiIgMYI5ieb5w3PUUoDfRks8ifV3za
-         UHwV2auqRNPkVZDuFdUpvKEL5l0sozgeAriZT1x45J2xEPObOiMKNFDPnMBE1PCVzKjc
-         0V/rpa9YrbKxrEC7XOiHfMRqwmP3r2//ncQV88QTANGvHml7dz959AMpssgQknqvXzaI
-         dP6Zd6LoVm/cWHGsQR7yrfq21mKFPsaqZPiX28L6jCPuf/N9gWSyMtRZdWQikR3BxVrS
-         WtdIiHtrCFQk4WvtI7tk/qf29L2GrLD0IB1cNCQpdpv6WXzo8WB2NU8hsbF1biv+x752
-         TSxQ==
+        bh=pQwgp48lKGhsHaoFh8Uisi3uUWmDyLIMjsFztI0K/Po=;
+        b=vvrRPqhmBIEym3CvXBIi1lasPvXtzsCZo6cARX5i/YsVM30VvZoE1L4ZCtoX1+PttS
+         oOSPJvk4Tr35cBEWR33lWnCwI12bjRNzCB34XiyB11yTQ7S0inpqA8jbv/wngWSjthgl
+         yigM9KScQRDAEGjEAcfZVcEuLyShddHgkGfvaca+9LuxGvox9lgTGiM7otXB4oC3FfGS
+         e7HmVdJxRYIZ2IdW0GOLUoU3SR+hA89LEpmNwWIth/X1REH8d2VHPGCjofD6RppOC+84
+         J5tSlGNctkKWSM2xvlLQfTg9xtsjYTAxAUOx+yrQg5Koce/9p4ypRNtlZBaFNKptWQrm
+         VpbQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=aOdLoZb6zxcFKBR0egQ6Rt2GSJrFCeoRgvKzrW6EbSs=;
-        b=BEqclzrhl3sdlj71ytf2hvMrFhpTGLo/kYHqz5mU5JQfNYcFw51smMxciJZFKwBdXO
-         dOz+iMbl/gD+ews2LorL3vWIj/Ib0tg1mR+G9+2kwR+eouW61bOjPd5klKK4C79zPmA5
-         dgISMZQ8dQew/DXXhDJTfRxpgAf3/Nh5LvgnTcyGb9/Co1VNCbP7E+e+2a/uZ+sTNo61
-         ZXH/T0bdF5dUEVxB2X5ZSgKpeOOld3xmx4TINjBXxL0v9agoW4/rR7Bc4UAtsX1KfM5L
-         gLVqXHieABng6RV2YMJcsY+J9zVvf9MmG0aLc4g0qCKmPH9unxa9JqGzZENh2kj80q+R
-         FS3g==
-X-Gm-Message-State: AOAM531GtvlaSGfGppWSuVCKQJTm4QLniQI3lfWx6GLWdZ3rNZYTuXp0
-        G3eBkG+prkjfRSPoQ7PsYxQLfgSy2ui86+21dAErRw==
-X-Google-Smtp-Source: ABdhPJzbfxMrOSdh4rN+u2oChAFzokN48rb112dQKUiMWvZ2mmPPYkoBnUZrGGSG+RwUe0yrMuBeitE6c315D3EWeEg=
-X-Received: by 2002:a2e:9001:: with SMTP id h1mr10080525ljg.273.1643131745774;
- Tue, 25 Jan 2022 09:29:05 -0800 (PST)
+        bh=pQwgp48lKGhsHaoFh8Uisi3uUWmDyLIMjsFztI0K/Po=;
+        b=bm9nT6NaIqBlyL/HC59RpUCmFsGnDXGvOEF+x7d6vOpAkvoSMFZQAWfnnrGuheobDo
+         iaZUvs26fds4utp/r8SLokxw2Oj07UmKN4ZjvxDNNW92x/glZtPtRahE6o2V7EAuMY9E
+         2DvUl2eCRWb6ryy8Q8OQ83eIvomvsOzLkAc7be9CJt3dLwC2hmib5MDCJpiwPEUpIcLs
+         H1S1154rZEFWVvMjT11gUAa+UukW+ezkyMMy2XsEEh0tDOJBV/A4WILkoOUADlkRpWxP
+         RHmlH10kbfHEFxlR0u3MYLrycsl8ZZyWG41KHo6nZbPoEPUMh10QDNWNk7igxkkbV+4m
+         2VGw==
+X-Gm-Message-State: AOAM530XFVU5q/7T2Vow1xHq4AcbYfv2QgMrSvOXGNdqFeXK5Kyr0kEK
+        H1bfr1ICox5/I2n8j71smRUVRjUsHwTKaEIRrPcZGg==
+X-Google-Smtp-Source: ABdhPJwRrLX3A/HcZ9ZssQ8V6JvhHCQttum4X6h1JaUG8+vmEjURJZeoNNAvZiUoIaGzgcaF+nK780mJNMQRhhEsPiM=
+X-Received: by 2002:a05:6512:2348:: with SMTP id p8mr6210097lfu.71.1643131788978;
+ Tue, 25 Jan 2022 09:29:48 -0800 (PST)
 MIME-Version: 1.0
-References: <CGME20211224112224epcas5p185573caf2548a464f9aac191c25d01f3@epcas5p1.samsung.com>
- <20211224111917.707440-1-shankar.ma@samsung.com> <20211224111917.707440-2-shankar.ma@samsung.com>
-In-Reply-To: <20211224111917.707440-2-shankar.ma@samsung.com>
+References: <20220113094404.64510-1-quentin.schulz@theobroma-systems.com>
+In-Reply-To: <20220113094404.64510-1-quentin.schulz@theobroma-systems.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 25 Jan 2022 18:28:29 +0100
-Message-ID: <CAPDyKFqwz8cB1nqAotybYMpp7ioD6d_vQNVTQ0DWkTqKBHKvpQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] Enhancement to do_status_get() function for detailed
- Response info
-To:     Shankar Athanikar <shankar.ma@samsung.com>
-Cc:     linux-mmc@vger.kernel.org, avri.altman@wdc.com, chris@printf.net,
-        puneet.5@samsung.com, sumeet.paul@samsung.com,
-        mohanraj.v@samsung.com
+Date:   Tue, 25 Jan 2022 18:29:12 +0100
+Message-ID: <CAPDyKFrfUbPWPKsBoctWdg+afoUgzNjMM9197U3KROTPx531kA@mail.gmail.com>
+Subject: Re: [PATCH v2] add README
+To:     quentin.schulz@theobroma-systems.com
+Cc:     linux-mmc@vger.kernel.org, avri.altman@wdc.com,
+        Quentin Schulz <foss+kernel@0leil.net>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 24 Dec 2021 at 12:23, Shankar Athanikar <shankar.ma@samsung.com> wrote:
+On Thu, 13 Jan 2022 at 10:44, <quentin.schulz@theobroma-systems.com> wrote:
 >
-> This enhancement covers detailed status register decoding with ERROR/STATUS information when host sends CMD13(with SQS=0)
+> From: Quentin Schulz <quentin.schulz@theobroma-systems.com>
 >
-> Signed-off-by : shankar.ma@samsaung.com
-> Reviewed-by: mohanraj.v@samsung.com
-
-Please add proper names here and fix the S-o-B tag.
-
-Additionally, you may run checkpatch to get more formatting details
-about the patch.
-
-> ---
->  mmc_cmds.c | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 64 insertions(+), 1 deletion(-)
+> This adds a README to the project so that the contribution process is
+> explicit as well as the licenses that apply to the source code.
 >
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index 5e5e79e..f9f1d52 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -848,6 +848,8 @@ int do_status_get(int nargs, char **argv)
->         __u32 response;
->         int fd, ret;
->         char *device;
-> +       const char *str;
-> +       __u8 state;
->
->         if (nargs != 2) {
->                 fprintf(stderr, "Usage: mmc status get </path/to/mmcblkX>\n");
-> @@ -869,7 +871,68 @@ int do_status_get(int nargs, char **argv)
->         }
->
->         printf("SEND_STATUS response: 0x%08x\n", response);
-> -
-> +       if((response >> 31) & 0x01) printf("ERROR: ADDRESS_OUT_OF_RANGE\n");
+> Cc: Quentin Schulz <foss+kernel@0leil.net>
+> Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
 
-Rather than having these magic numbers sprinkled across the code, can
-you please add defines for them - and use those instead when
-comparing.
-
-Along the lines of what is being done for "R1_SWITCH_ERROR" already.
-
-> +       if((response >> 30) & 0x01) printf("ERROR: ADDRESS_MISALIGN\n");
-> +       if((response >> 29) & 0x01) printf("ERROR: BLOCK_LEN_ERROR\n");
-> +       if((response >> 28) & 0x01) printf("ERROR: ERASE_SEQ_ERROR\n");
-> +       if((response >> 27) & 0x01) printf("ERROR: ERASE_PARAM_ERROR\n");
-> +       if((response >> 26) & 0x01) printf("ERROR: WP_VOILATION\n");
-> +       if((response >> 25) & 0x01) printf("STATUS: DEVICE_IS_LOCKED\n");
-> +       if((response >> 24) & 0x01) printf("ERROR: LOCK_UNLOCK_IS_FAILED\n");
-> +       if((response >> 23) & 0x01) printf("ERROR: COM_CRC_ERROR\n");
-> +       if((response >> 22) & 0x01) printf("ERROR: ILLEGAL_COMMAND\n");
-> +       if((response >> 21) & 0x01) printf("ERROR: DEVICE_ECC_FAILED\n");
-> +       if((response >> 20) & 0x01) printf("ERROR: CC_ERROR\n");
-> +       if((response >> 19) & 0x01) printf("ERROR: ERROR\n");
-> +       if((response >> 16) & 0x01) printf("ERROR: CID/CSD OVERWRITE\n");
-> +       if((response >> 15) & 0x01) printf("ERROR: WP_ERASE_SKIP\n");
-> +       if((response >> 13) & 0x01) printf("ERROR: ERASE_RESET\n");
-
-Please add a newline here.
-
-> +       state = (response >> 9)& 0xF;
-> +       switch(state)
-> +       {
-> +               case 0:
-> +                       str = "IDLE";
-> +                       break;
-> +               case 1:
-> +                       str = "READY";
-> +                       break;
-> +               case 2:
-> +                       str = "IDENT";
-> +                       break;
-> +               case 3:
-> +                       str = "STDBY";
-> +                       break;
-> +               case 4:
-> +                       str = "TRANS";
-> +                       break;
-> +               case 5:
-> +                       str = "DATA";
-> +                       break;
-> +               case 6:
-> +                       str = "RCV";
-> +                       break;
-> +               case 7:
-> +                       str = "PRG";
-> +                       break;
-> +               case 8:
-> +                       str = " DIS";
-
-Whitespace.
-
-> +                       break;
-> +               case 9:
-> +                       str = "BTST";
-> +                       break;
-> +               case 10:
-> +                       str = "SLP" ;
-> +                       break;
-> +               default:
-> +                       printf("Attention : Device state is INVALID: Kindly check the Response\n");
-> +                       goto out_free;
-> +       }
-
-Please add a newline here.
-
-> +       printf("DEVICE STATE: %s\n",str);
-> +       if((response >> 8) & 0x01) printf("STATUS: READY_FOR_DATA\n");
-> +       if((response >> 7) & 0x01) printf("ERROR: SWITCH_ERROR\n");
-> +       if((response >> 6) & 0x01) printf("STATUS: EXCEPTION_EVENT\n");  /* Check EXCEPTION_EVENTS_STATUS field to understand what further actions are needed*/
-> +       if((response >> 5) & 0x01) printf("STATUS: APP_CMD\n");
-> +out_free:
->         close(fd);
->         return ret;
->  }
-> --
-> 2.25.1
->
+Applied to git.kernel.org/pub/scm//utils/mmc/mmc-utils.git master, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+> v2:
+>  - added Avri to the list of maintainers
+>  - fixed aboive typo
+>  - updated license to only mention GPL-2.0-only as BSD-3-Clause is
+>  compatible with GPL-2.0-only projects, as mentioned in
+>  3rdparty/hmac_sha/ files
+>
+>  README | 31 +++++++++++++++++++++++++++++++
+>  1 file changed, 31 insertions(+)
+>  create mode 100644 README
+>
+> diff --git a/README b/README
+> new file mode 100644
+> index 0000000..71a4e7d
+> --- /dev/null
+> +++ b/README
+> @@ -0,0 +1,31 @@
+> +MMC tools (mmc-utils)
+> +=====================
+> +
+> +mmc-utils is a tool for configuring MMC storage devices from userspace.
+> +
+> +Contribution guidelines
+> +-----------------------
+> +
+> +The project works using a mailing list patch submission process, similar to the
+> +process used for the Linux kernel itself.
+> +
+> +One can document themselves by reading how to submit a patch in the official
+> +Linux kernel documentation:
+> +https://www.kernel.org/doc/html/latest/process/submitting-patches.html
+> +
+> +Not all sections apply but it should be a good way to get started.
+> +
+> +A patch should be sent as a mail (not as an attachement, see documentation
+> +above) to the linux-mmc@vger.kernel.org mailing list with maintainers as
+> +Cc recipients.
+> +
+> +Maintainers
+> +-----------
+> +
+> +Avri Altman <avri.altman@wdc.com>
+> +Ulf Hansson <ulf.hansson@linaro.org>
+> +
+> +License
+> +-------
+> +
+> +This project is licensed under GPL-2.0-only.
+> --
+> 2.34.1
+>
