@@ -2,316 +2,208 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84506C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jan 2022 06:40:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11CBDC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jan 2022 08:36:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355354AbiAYGkN convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Jan 2022 01:40:13 -0500
-Received: from rtits2.realtek.com ([211.75.126.72]:45513 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1354099AbiAYGhx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2022 01:37:53 -0500
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 20P6bSwY5011973, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36504.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.71/5.88) with ESMTPS id 20P6bSwY5011973
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Tue, 25 Jan 2022 14:37:28 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36504.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.20; Tue, 25 Jan 2022 14:37:27 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2308.21; Mon, 24 Jan 2022 22:37:27 -0800
-Received: from RTEXMBS01.realtek.com.tw ([fe80::472:6d76:b35d:421e]) by
- RTEXMBS01.realtek.com.tw ([fe80::472:6d76:b35d:421e%5]) with mapi id
- 15.01.2308.020; Tue, 25 Jan 2022 14:37:27 +0800
-From:   Ricky WU <ricky_wu@realtek.com>
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-CC:     "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>,
-        Thomas Hebb <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH v6 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle runtime PM
-Thread-Topic: [PATCH v6 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle
- runtime PM
-Thread-Index: AQHYEa903hqeGpf0tUOwpFCX1CCXxKxzRdPQ
-Date:   Tue, 25 Jan 2022 06:37:27 +0000
-Message-ID: <e17921f54f3640bdba3212803b020ae0@realtek.com>
-References: <20220121014039.1693208-1-kai.heng.feng@canonical.com>
- <20220125055010.1866563-1-kai.heng.feng@canonical.com>
-In-Reply-To: <20220125055010.1866563-1-kai.heng.feng@canonical.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.22.81.97]
-x-kse-serverinfo: RTEXDAG01.realtek.com.tw, 9
-x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
- rules found
-x-kse-antivirus-interceptor-info: scan successful
-x-kse-antivirus-info: =?us-ascii?Q?Clean,_bases:_2022/1/25_=3F=3F_03:54:00?=
-x-kse-bulkmessagesfiltering-scan-result: protection disabled
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+        id S1450063AbiAYIgA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Jan 2022 03:36:00 -0500
+Received: from mail-qv1-f51.google.com ([209.85.219.51]:38608 "EHLO
+        mail-qv1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1378752AbiAYIb3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Jan 2022 03:31:29 -0500
+Received: by mail-qv1-f51.google.com with SMTP id b12so4529982qvz.5;
+        Tue, 25 Jan 2022 00:31:21 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=0nj3tQtaS2Jftix8pFrL2+Rvw9SRm0Q+IWJ3wAkzl0s=;
+        b=WB9h79SHkFBh8zEGcIeB7E5HjafQdfpc08WU2JJUiiPYqy9M9KJ/1Obbo3AoYDuZM1
+         L1ZQ35GjmvhlgLfu/XAavya6XuAAD+5NoospC4UKkm5iDbh8x7/5myPjkvSpHJx+1S1t
+         MJoJYqGdK7EVegPvSwcyshqEkzm5FfysYVYEy17n9KIBsqKUHA751y1SqRy7fxRZTJIJ
+         XwSLmmOSBQVCaiCt5Lp+1+6RoKze+67Ygj9GhfzsJEBTjeJWUcv/cptoSXjrRnyPWrD9
+         Bp/hDQh9OiCwjzfUPD47V6Yg/M2Hs5SNbYhyiB9BDtvD2gf0W0vSHVNHDpyLrrFV4q7J
+         DrAg==
+X-Gm-Message-State: AOAM533jz79E3Mb70YzDiCSOaQNE/eMwJqeM8QoYVLs1gyCdu9MFvtXH
+        rBe1oSOzAy87kimGpLjSGZsXQpf32NMPiu/s
+X-Google-Smtp-Source: ABdhPJxcd215HVffZw8fBf1K2zIojl7li593qA7bzWJqK/5Jrw3HmZ2JtI9Yl6fpG+4KjmAtaakXdQ==
+X-Received: by 2002:a05:6214:3006:: with SMTP id ke6mr15873363qvb.59.1643099481113;
+        Tue, 25 Jan 2022 00:31:21 -0800 (PST)
+Received: from mail-qv1-f50.google.com (mail-qv1-f50.google.com. [209.85.219.50])
+        by smtp.gmail.com with ESMTPSA id d8sm8722166qtd.70.2022.01.25.00.31.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 25 Jan 2022 00:31:21 -0800 (PST)
+Received: by mail-qv1-f50.google.com with SMTP id k4so24225123qvt.6;
+        Tue, 25 Jan 2022 00:31:20 -0800 (PST)
+X-Received: by 2002:a05:6102:a04:: with SMTP id t4mr1874173vsa.77.1643099137125;
+ Tue, 25 Jan 2022 00:25:37 -0800 (PST)
 MIME-Version: 1.0
-X-KSE-ServerInfo: RTEXH36504.realtek.com.tw, 9
-X-KSE-Attachment-Filter-Triggered-Rules: Clean
-X-KSE-Attachment-Filter-Triggered-Filters: Clean
-X-KSE-BulkMessagesFiltering-Scan-Result: protection disabled
+References: <CAMuHMdWsMGPiQaPS0-PJ_+Mc5VQ37YdLfbHr_aS40kB+SfW-aw@mail.gmail.com>
+ <20220112213121.5ruae5mxwj6t3qiy@pengutronix.de> <Yd9L9SZ+g13iyKab@sirena.org.uk>
+ <20220113110831.wvwbm75hbfysbn2d@pengutronix.de> <YeA7CjOyJFkpuhz/@sirena.org.uk>
+ <20220113194358.xnnbhsoyetihterb@pengutronix.de> <YeF05vBOzkN+xYCq@smile.fi.intel.com>
+ <20220115154539.j3tsz5ioqexq2yuu@pengutronix.de> <YehdsUPiOTwgZywq@smile.fi.intel.com>
+ <20220120075718.5qtrpc543kkykaow@pengutronix.de> <Ye6/NgfxsZnpXE09@smile.fi.intel.com>
+ <15796e57-f7d4-9c66-3b53-0b026eaf31d8@omp.ru>
+In-Reply-To: <15796e57-f7d4-9c66-3b53-0b026eaf31d8@omp.ru>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 25 Jan 2022 09:25:25 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdXouECKa43OwUgQ6dA+gNeOqEZHZgOmQzqknzYiA924YA@mail.gmail.com>
+Message-ID: <CAMuHMdXouECKa43OwUgQ6dA+gNeOqEZHZgOmQzqknzYiA924YA@mail.gmail.com>
+Subject: Re: [PATCH] driver core: platform: Rename platform_get_irq_optional()
+ to platform_get_irq_silent()
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Andrew Lunn <andrew@lunn.ch>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        KVM list <kvm@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        linux-phy@lists.infradead.org, Jiri Slaby <jirislaby@kernel.org>,
+        openipmi-developer@lists.sourceforge.net,
+        Khuong Dinh <khuong@os.amperecomputing.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        bcm-kernel-feedback-list <bcm-kernel-feedback-list@broadcom.com>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        Robert Richter <rric@kernel.org>,
+        Saravanan Sekar <sravanhome@gmail.com>,
+        Corey Minyard <minyard@acm.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
+        Borislav Petkov <bp@alien8.de>,
+        Sebastian Reichel <sre@kernel.org>,
+        Eric Auger <eric.auger@redhat.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        platform-driver-x86@vger.kernel.org,
+        Benson Leung <bleung@chromium.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-edac@vger.kernel.org, Tony Luck <tony.luck@intel.com>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        Hans de Goede <hdegoede@redhat.com>, netdev@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        James Morse <james.morse@arm.com>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Richard Weinberger <richard@nod.at>,
+        =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        linux-mediatek@lists.infradead.org,
+        Brian Norris <computersforpeace@gmail.com>,
+        "David S. Miller" <davem@davemloft.net>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: Kai-Heng Feng <kai.heng.feng@canonical.com>
-> Sent: Tuesday, January 25, 2022 1:50 PM
-> To: arnd@arndb.de; gregkh@linuxfoundation.org; ulf.hansson@linaro.org
-> Cc: linux-pm@vger.kernel.org; Kai-Heng Feng <kai.heng.feng@canonical.com>;
-> Ricky WU <ricky_wu@realtek.com>; Thomas Hebb <tommyhebb@gmail.com>;
-> linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
-> Subject: [PATCH v6 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle
-> runtime PM
-> 
-> Commit 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM") doesn't use
-> pm_runtime_{get,put}() helpers when it should, so the RPM refcount keeps at
-> zero, hence its parent driver, rtsx_pci, has to do lots of weird tricks to keep it
-> from runtime suspending.
-> 
-> So use those helpers at right places to properly manage runtime PM.
-> 
-> Fixes: 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM")
-> Cc: Ricky WU <ricky_wu@realtek.com>
-Tested-by: Ricky WU <ricky_wu@realtek.com>
-> Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
-> ---
-> v6:
->  - Change the auto suspend delay to 200ms as Realtek suggested.
-> 
-> v5:
->  - Revert back to v3 as Realtek suggested.
-> 
-> v4:
->  - Decrease the autosuspend delay to 200ms for more power saving.
-> 
-> v3:
-> v2:
->  - No change.
-> 
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 44 +++++++++++++++++++++++--------
->  1 file changed, 33 insertions(+), 11 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 58cfaffa3c2d8..2a3f14afe9f83 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -806,6 +806,7 @@ static void sd_request(struct work_struct *work)
->  	struct mmc_request *mrq = host->mrq;
->  	struct mmc_command *cmd = mrq->cmd;
->  	struct mmc_data *data = mrq->data;
-> +	struct device *dev = &host->pdev->dev;
-> 
->  	unsigned int data_size = 0;
->  	int err;
-> @@ -822,6 +823,7 @@ static void sd_request(struct work_struct *work)
->  	}
-> 
->  	mutex_lock(&pcr->pcr_mutex);
-> +	pm_runtime_get_sync(dev);
-> 
->  	rtsx_pci_start_run(pcr);
-> 
-> @@ -858,6 +860,8 @@ static void sd_request(struct work_struct *work)
->  			data->bytes_xfered = data->blocks * data->blksz;
->  	}
-> 
-> +	pm_runtime_mark_last_busy(dev);
-> +	pm_runtime_put_autosuspend(dev);
->  	mutex_unlock(&pcr->pcr_mutex);
-> 
->  finish:
-> @@ -1080,6 +1084,7 @@ static void sdmmc_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)  {
->  	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
->  	struct rtsx_pcr *pcr = host->pcr;
-> +	struct device *dev = &host->pdev->dev;
-> 
->  	if (host->eject)
->  		return;
-> @@ -1088,6 +1093,7 @@ static void sdmmc_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
->  		return;
-> 
->  	mutex_lock(&pcr->pcr_mutex);
-> +	pm_runtime_get_sync(dev);
-> 
->  	rtsx_pci_start_run(pcr);
-> 
-> @@ -1121,6 +1127,8 @@ static void sdmmc_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
->  	rtsx_pci_switch_clock(pcr, ios->clock, host->ssc_depth,
->  			host->initial_mode, host->double_clk, host->vpclk);
-> 
-> +	pm_runtime_mark_last_busy(dev);
-> +	pm_runtime_put_autosuspend(dev);
->  	mutex_unlock(&pcr->pcr_mutex);
->  }
-> 
-> @@ -1128,6 +1136,7 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
-> {
->  	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
->  	struct rtsx_pcr *pcr = host->pcr;
-> +	struct device *dev = &host->pdev->dev;
->  	int ro = 0;
->  	u32 val;
-> 
-> @@ -1135,6 +1144,7 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
->  		return -ENOMEDIUM;
-> 
->  	mutex_lock(&pcr->pcr_mutex);
-> +	pm_runtime_get_sync(dev);
-> 
->  	rtsx_pci_start_run(pcr);
-> 
-> @@ -1144,6 +1154,8 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
->  	if (val & SD_WRITE_PROTECT)
->  		ro = 1;
-> 
-> +	pm_runtime_mark_last_busy(dev);
-> +	pm_runtime_put_autosuspend(dev);
->  	mutex_unlock(&pcr->pcr_mutex);
-> 
->  	return ro;
-> @@ -1153,6 +1165,7 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
-> {
->  	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
->  	struct rtsx_pcr *pcr = host->pcr;
-> +	struct device *dev = &host->pdev->dev;
->  	int cd = 0;
->  	u32 val;
-> 
-> @@ -1160,6 +1173,7 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
->  		return cd;
-> 
->  	mutex_lock(&pcr->pcr_mutex);
-> +	pm_runtime_get_sync(dev);
-> 
->  	rtsx_pci_start_run(pcr);
-> 
-> @@ -1169,6 +1183,8 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
->  	if (val & SD_EXIST)
->  		cd = 1;
-> 
-> +	pm_runtime_mark_last_busy(dev);
-> +	pm_runtime_put_autosuspend(dev);
->  	mutex_unlock(&pcr->pcr_mutex);
-> 
->  	return cd;
-> @@ -1251,6 +1267,7 @@ static int sdmmc_switch_voltage(struct mmc_host
-> *mmc, struct mmc_ios *ios)  {
->  	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
->  	struct rtsx_pcr *pcr = host->pcr;
-> +	struct device *dev = &host->pdev->dev;
->  	int err = 0;
->  	u8 voltage;
-> 
-> @@ -1265,6 +1282,7 @@ static int sdmmc_switch_voltage(struct mmc_host
-> *mmc, struct mmc_ios *ios)
->  		return err;
-> 
->  	mutex_lock(&pcr->pcr_mutex);
-> +	pm_runtime_get_sync(dev);
-> 
->  	rtsx_pci_start_run(pcr);
-> 
-> @@ -1294,6 +1312,8 @@ static int sdmmc_switch_voltage(struct mmc_host
-> *mmc, struct mmc_ios *ios)
->  	err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
->  			SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
-> 
-> +	pm_runtime_mark_last_busy(dev);
-> +	pm_runtime_put_autosuspend(dev);
->  	mutex_unlock(&pcr->pcr_mutex);
-> 
->  	return err;
-> @@ -1303,6 +1323,7 @@ static int sdmmc_execute_tuning(struct mmc_host
-> *mmc, u32 opcode)  {
->  	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
->  	struct rtsx_pcr *pcr = host->pcr;
-> +	struct device *dev = &host->pdev->dev;
->  	int err = 0;
-> 
->  	if (host->eject)
-> @@ -1313,6 +1334,7 @@ static int sdmmc_execute_tuning(struct mmc_host
-> *mmc, u32 opcode)
->  		return err;
-> 
->  	mutex_lock(&pcr->pcr_mutex);
-> +	pm_runtime_get_sync(dev);
-> 
->  	rtsx_pci_start_run(pcr);
-> 
-> @@ -1345,6 +1367,8 @@ static int sdmmc_execute_tuning(struct mmc_host
-> *mmc, u32 opcode)
->  		err = sd_change_phase(host, DDR50_RX_PHASE(pcr), true);
-> 
->  out:
-> +	pm_runtime_mark_last_busy(dev);
-> +	pm_runtime_put_autosuspend(dev);
->  	mutex_unlock(&pcr->pcr_mutex);
-> 
->  	return err;
-> @@ -1495,12 +1519,12 @@ static int rtsx_pci_sdmmc_drv_probe(struct
-> platform_device *pdev)
-> 
->  	realtek_init_host(host);
-> 
-> -	if (pcr->rtd3_en) {
-> -		pm_runtime_set_autosuspend_delay(&pdev->dev, 5000);
-> -		pm_runtime_use_autosuspend(&pdev->dev);
-> -		pm_runtime_enable(&pdev->dev);
-> -	}
-> -
-> +	pm_runtime_no_callbacks(&pdev->dev);
-> +	pm_runtime_set_active(&pdev->dev);
-> +	pm_runtime_enable(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 200);
-> +	pm_runtime_mark_last_busy(&pdev->dev);
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> 
->  	mmc_add_host(mmc);
-> 
-> @@ -1521,11 +1545,6 @@ static int rtsx_pci_sdmmc_drv_remove(struct
-> platform_device *pdev)
->  	pcr->slots[RTSX_SD_CARD].card_event = NULL;
->  	mmc = host->mmc;
-> 
-> -	if (pcr->rtd3_en) {
-> -		pm_runtime_dont_use_autosuspend(&pdev->dev);
-> -		pm_runtime_disable(&pdev->dev);
-> -	}
-> -
->  	cancel_work_sync(&host->work);
-> 
->  	mutex_lock(&host->host_mutex);
-> @@ -1548,6 +1567,9 @@ static int rtsx_pci_sdmmc_drv_remove(struct
-> platform_device *pdev)
-> 
->  	flush_work(&host->work);
-> 
-> +	pm_runtime_dont_use_autosuspend(&pdev->dev);
-> +	pm_runtime_disable(&pdev->dev);
-> +
->  	mmc_free_host(mmc);
-> 
->  	dev_dbg(&(pdev->dev),
-> --
-> 2.33.1
+Hi Sergey,
 
+On Mon, Jan 24, 2022 at 10:02 PM Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
+> On 1/24/22 6:01 PM, Andy Shevchenko wrote:
+> >>>>>>> It'd certainly be good to name anything that doesn't correspond to one
+> >>>>>>> of the existing semantics for the API (!) something different rather
+> >>>>>>> than adding yet another potentially overloaded meaning.
+> >>>>>>
+> >>>>>> It seems we're (at least) three who agree about this. Here is a patch
+> >>>>>> fixing the name.
+> >>>>>
+> >>>>> And similar number of people are on the other side.
+> >>>>
+> >>>> If someone already opposed to the renaming (and not only the name) I
+> >>>> must have missed that.
+> >>>>
+> >>>> So you think it's a good idea to keep the name
+> >>>> platform_get_irq_optional() despite the "not found" value returned by it
+> >>>> isn't usable as if it were a normal irq number?
+> >>>
+> >>> I meant that on the other side people who are in favour of Sergey's patch.
+> >>> Since that I commented already that I opposed the renaming being a standalone
+> >>> change.
+> >>>
+> >>> Do you agree that we have several issues with platform_get_irq*() APIs?
+> [...]
+> >>> 2. The vIRQ0 handling: a) WARN() followed by b) returned value 0
+> >>
+> >> I'm happy with the vIRQ0 handling. Today platform_get_irq() and it's
+> >> silent variant returns either a valid and usuable irq number or a
+> >> negative error value. That's totally fine.
+> >
+> > It might return 0.
+> > Actually it seems that the WARN() can only be issued in two cases:
+> > - SPARC with vIRQ0 in one of the array member
+> > - fallback to ACPI for GPIO IRQ resource with index 0
+>
+>    You have probably missed the recent discovery that arch/sh/boards/board-aps4*.c
+> causes IRQ0 to be passed as a direct IRQ resource?
+
+So far no one reported seeing the big fat warning ;-)
+
+> > The bottom line here is the SPARC case. Anybody familiar with the platform
+> > can shed a light on this. If there is no such case, we may remove warning
+> > along with ret = 0 case from platfrom_get_irq().
+>
+>    I'm afraid you're too fast here... :-)
+>    We'll have a really hard time if we continue to allow IRQ0 to be returned by
+> platform_get_irq() -- we'll have oto fileter it out in the callers then...
+
+So far no one reported seeing the big fat warning?
+
+> >>> 3. The specific cookie for "IRQ not found, while no error happened" case
+> >>
+> >> Not sure what you mean here. I have no problem that a situation I can
+> >> cope with is called an error for the query function. I just do error
+> >> handling and continue happily. So the part "while no error happened" is
+> >> irrelevant to me.
+> >
+> > I meant that instead of using special error code, 0 is very much good for
+> > the cases when IRQ is not found. It allows to distinguish -ENXIO from the
+> > low layer from -ENXIO with this magic meaning.
+>
+>    I don't see how -ENXIO can trickle from the lower layers, frankly...
+
+It might one day, leading to very hard to track bugs.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
