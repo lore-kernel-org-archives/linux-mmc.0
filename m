@@ -2,159 +2,239 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD3F4C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jan 2022 02:47:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46E34C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Jan 2022 04:42:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237500AbiAYCrR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Jan 2022 21:47:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36874 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S3407937AbiAYAVN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2022 19:21:13 -0500
-Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4745FC036BC8
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jan 2022 14:05:19 -0800 (PST)
-Received: by mail-pf1-x430.google.com with SMTP id w190so11208175pfw.7
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Jan 2022 14:05:19 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:subject:in-reply-to:references:date:message-id
-         :mime-version;
-        bh=t2/pVCkMGUvGOAzHtcsjzXK8+5zE14NO4NddvkDqj9w=;
-        b=zgQsj3L6OSg50dgEyhI8VbLJQG2U1v8YozGt0iCNFUM1VD44MdEEHw1TSHFiiFusYm
-         KDxrEiMMuxae+sOtjt1EAf0QRiHYPBqrWfrqeoKDDcS9C6HEE8Yc+eiMecOXPMVj7yBn
-         vR6x7/Nxu9rUwbIaPs6BeMj7O0HmKhccqmGffa7QrvZQpq6IeST+8ublmUmvRAE0oJYn
-         AdMckgD861YXcZiqZQjGz7k0XtXBU9eYrbKNJx0axcLK9lsZTYS39AsDHHQjpRxksUAV
-         NzMsZ/b68MBEQWFupMhFjbLnuTikjDakneYKyipvasoYBv/IYV2UBa0nLqwjNKUeungZ
-         2D2A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:in-reply-to:references:date
-         :message-id:mime-version;
-        bh=t2/pVCkMGUvGOAzHtcsjzXK8+5zE14NO4NddvkDqj9w=;
-        b=XAMdR8byzkmYxd3hJtNL7lyVn2wR8/6TpyTRe2qNzlyuv7aplEGH3wOHM9QCydyMkl
-         LBuBYc4cSDnpWwwwLnBb4+/jMqL3bJ3goPCQBwuYlTmLLbPLi3eYVaitIVKL3jWrH62D
-         V1QBurWZDcUtV1gYXXSx7VGo1X/3YGcGhUPOMoXLeTd38kIxC5Aer1RxhmTQyYmJHiva
-         jxKahEMlwKr4+Crq87zXuxlWYRqfBKyuxEb2WAYpRGCZzaS+egx3tIfJjt+rZhEv6Lga
-         Zt6f5Svb8b86trD+wQNNUTp11BPIUPznFLxwzrQjcNe+1O5cmaaccPKrzQLNbxNhByxf
-         lCzQ==
-X-Gm-Message-State: AOAM531x+C6oSW64W4eFFXDv6ZTxs1j7yhNoWxAMg9+7U1nAw3z99mnl
-        Gg/vqZxFiF5Nylkpt9myDUlngw==
-X-Google-Smtp-Source: ABdhPJxjC87yai3OmklySQg2guTsUaM+Gp8LsOyFaNfbg6oSqG4pZdEJrXLL3UYim1KqqbXZDdEcOw==
-X-Received: by 2002:a05:6a00:114f:b0:4c5:72f6:d0b5 with SMTP id b15-20020a056a00114f00b004c572f6d0b5mr15521818pfm.61.1643061918766;
-        Mon, 24 Jan 2022 14:05:18 -0800 (PST)
-Received: from localhost (c-71-197-186-152.hsd1.wa.comcast.net. [71.197.186.152])
-        by smtp.gmail.com with ESMTPSA id g12sm16231227pfm.119.2022.01.24.14.05.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Jan 2022 14:05:18 -0800 (PST)
-From:   Kevin Hilman <khilman@baylibre.com>
-To:     Rong Chen <rong.chen@amlogic.com>,
+        id S3421424AbiAYEmP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Jan 2022 23:42:15 -0500
+Received: from mailgw01.mediatek.com ([60.244.123.138]:36520 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1324739AbiAYDdr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Jan 2022 22:33:47 -0500
+X-UUID: 27967c8e90634ea090afe0d3355cd65b-20220125
+X-UUID: 27967c8e90634ea090afe0d3355cd65b-20220125
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
+        (envelope-from <chaotian.jing@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 938173205; Tue, 25 Jan 2022 11:33:37 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Tue, 25 Jan 2022 11:33:35 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 25 Jan 2022 11:33:35 +0800
+Message-ID: <f66964a5afd960fee6a2fecaf74fa902bb76a8d9.camel@mediatek.com>
+Subject: Re: [PATCH] mmc: mediatek: Add cmd polling mode
+From:   Chaotian Jing <chaotian.jing@mediatek.com>
+To:     Derong Liu <derong.liu@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        1131046452@qq.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Cc:     45581586@qq.com, Rong Chen <rong.chen@amlogic.com>
-Subject: Re: [PATCH] mmc: meson: Fix usage of meson_mmc_post_req()
-In-Reply-To: <20220106105453.3875119-1-rong.chen@amlogic.com>
-References: <20220106105453.3875119-1-rong.chen@amlogic.com>
-Date:   Mon, 24 Jan 2022 14:05:17 -0800
-Message-ID: <7htudsx00y.fsf@baylibre.com>
+        Matthias Brugger <matthias.bgg@gmail.com>
+CC:     <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <wsp_upstream@mediatek.com>,
+        Peng Zhou <peng.zhou@mediatek.com>
+Date:   Tue, 25 Jan 2022 11:33:35 +0800
+In-Reply-To: <20220124121814.17452-1-derong.liu@mediatek.com>
+References: <20220124121814.17452-1-derong.liu@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Rong,
+On Mon, 2022-01-24 at 20:18 +0800, Derong Liu wrote:
+> We found sdcard can gain more read/write performance
+> when using cmd polling mode instead of interrupt mode, in the
+> meantime,
+> there are much more devices have equipped with high frequency cpu,
+> so it is necessary to support cmd polling mode.
+> 
+Hi, I think you have not found the root cause of performace drop. if
+the sdcard read/write performance is 100MB/s, which means that it can
+complete 512KB of data xfer within 5ms, and if performance drop is 5%,
+then means that your interrupt mode will take more than 250us.
+Is it possible to clarify if the interrupt mode really takes 250us?
 
-First, thank you finding the issue and for submitting a fix!
-
-Rong Chen <rong.chen@amlogic.com> writes:
-
-> To ensure the DMA moves data correctly from memory to
-> peripherals, DMA unmapping when the MMC request done
-> with calls meson_mmc_post_req().
->
-> Signed-off-by: Rong Chen <rong.chen@amlogic.com>
-
-The patch looks correct, but I think I think the changelog could be
-improved.  If I understand the code correctly, I think what you're doing
-is:
-
-"""
-Currently meson_mmc_post_req() is called in meson_mmc_request() right
-after _start_cmd().  This could lead to DMA unmapping before the request
-is actually finished.
-
-To fix, ton't call meson_mmc_post_req() until _request_done().
-"""
-
-Kevin
-
+And, if you find that the polling mode is readlly fast then interrupt
+mode and has no side effect(ie. cpu loading issue), then, We will drop
+the interrupt mode of waiting response.
+> Signed-off-by: Derong Liu <derong.liu@mediatek.com>
 > ---
->  drivers/mmc/host/meson-gx-mmc.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 8f36536cb1b6..6a9554ae4b1c 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -173,6 +173,7 @@ struct meson_host {
->  	int irq;
->  
->  	bool vqmmc_enabled;
-> +	bool needs_pre_post_req;
->  };
->  
->  #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
-> @@ -663,6 +664,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
->  	struct meson_host *host = mmc_priv(mmc);
->  
->  	host->cmd = NULL;
-> +	if (host->needs_pre_post_req)
-> +		meson_mmc_post_req(mmc, mrq, 0);
->  	mmc_request_done(host->mmc, mrq);
+>  drivers/mmc/host/mtk-sd.c | 92 +++++++++++++++++++++++++++++++++++
+> ----
+>  1 file changed, 83 insertions(+), 9 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 65037e1d7723..612f5115ca4b 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -465,6 +465,7 @@ struct msdc_host {
+>  	bool hs400_tuning;	/* hs400 mode online tuning */
+>  	bool internal_cd;	/* Use internal card-detect logic */
+>  	bool cqhci;		/* support eMMC hw cmdq */
+> +	bool cmd_polling_mode;	/* support cmd polling mode */
+>  	struct msdc_save_para save_para; /* used when gate HCLK */
+>  	struct msdc_tune_para def_tune_para; /* default tune setting */
+>  	struct msdc_tune_para saved_tune_para; /* tune result of
+> CMD21/CMD19 */
+> @@ -1250,6 +1251,63 @@ static inline bool msdc_cmd_is_ready(struct
+> msdc_host *host,
+>  	return true;
 >  }
 >  
-> @@ -880,7 +883,7 @@ static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data
->  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> +static inline int use_cmd_polling_mode(struct msdc_host *host,
+> +	struct mmc_command *cmd)
+> +{
+> +	/* R1B use interrupt mode */
+> +	return (host->cmd_polling_mode &&
+> +			((mmc_from_priv(host))->caps2 &
+> MMC_CAP2_NO_SDIO) &&
+> +			(mmc_resp_type(cmd) != MMC_RSP_R1B));
+> +}
+> +
+> +static bool msdc_command_resp_polling(struct msdc_host *host,
+> +	struct mmc_request *mrq, struct mmc_command *cmd,
+> +	unsigned long timeout)
+> +{
+> +	bool ret = false;
+> +	unsigned long tmo;
+> +	int events;
+> +	unsigned long flags;
+> +
+> +	if (!use_cmd_polling_mode(host, cmd))
+> +		goto exit;
+> +
+> +retry:
+> +	tmo = jiffies + timeout;
+> +	while (1) {
+> +		spin_lock_irqsave(&host->lock, flags);
+why need spin lock ? if there are no SDIO device irq, then there is no
+race conditon of access MSDC register.
+> +		events = readl(host->base + MSDC_INT);
+> +		if (events & cmd_ints_mask) {
+> +			/* clear all int flag */
+> +			events &= cmd_ints_mask;
+> +			writel(events, host->base + MSDC_INT);
+> +			spin_unlock_irqrestore(&host->lock, flags);
+> +			break;
+> +		}
+> +		spin_unlock_irqrestore(&host->lock, flags);
+> +
+> +		if (time_after(jiffies, tmo) &&
+> +			((events & cmd_ints_mask) == 0)) {
+> +			dev_info(host->dev, "[%s]: CMD<%d>
+> polling_for_completion timeout ARG<0x%.8x>\n",
+> +				__func__, cmd->opcode, cmd->arg);
+> +			ret = msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq,
+> cmd);
+> +			goto exit;
+> +		}
+> +	}
+> +
+> +	if (cmd) {
+> +		ret = msdc_cmd_done(host, events, mrq, cmd);
+> +		/* if only autocmd23 done,
+> +		 * it needs to polling the continue read/write cmd
+> directly.
+> +		 */
+> +		if (!ret)
+> +			goto retry;
+> +	}
+> +
+> +exit:
+> +	return ret;
+> +}
+> +
+>  static void msdc_start_command(struct msdc_host *host,
+>  		struct mmc_request *mrq, struct mmc_command *cmd)
 >  {
->  	struct meson_host *host = mmc_priv(mmc);
-> -	bool needs_pre_post_req = mrq->data &&
-> +	host->needs_pre_post_req = mrq->data &&
->  			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+> @@ -1273,7 +1331,10 @@ static void msdc_start_command(struct
+> msdc_host *host,
+>  	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
 >  
->  	/*
-> @@ -896,22 +899,19 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		}
->  	}
+>  	spin_lock_irqsave(&host->lock, flags);
+> -	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
+> +	if (use_cmd_polling_mode(host, cmd))
+> +		sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
+> +	else
+> +		sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
+>  	spin_unlock_irqrestore(&host->lock, flags);
 >  
-> -	if (needs_pre_post_req) {
-> +	if (host->needs_pre_post_req) {
->  		meson_mmc_get_transfer_mode(mmc, mrq);
->  		if (!meson_mmc_desc_chain_mode(mrq->data))
-> -			needs_pre_post_req = false;
-> +			host->needs_pre_post_req = false;
->  	}
->  
-> -	if (needs_pre_post_req)
-> +	if (host->needs_pre_post_req)
->  		meson_mmc_pre_req(mmc, mrq);
->  
->  	/* Stop execution */
->  	writel(0, host->regs + SD_EMMC_START);
->  
->  	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
-> -
-> -	if (needs_pre_post_req)
-> -		meson_mmc_post_req(mmc, mrq, 0);
+>  	writel(cmd->arg, host->base + SDC_ARG);
+> @@ -1290,9 +1351,11 @@ static void msdc_cmd_next(struct msdc_host
+> *host,
+>  	       host->hs400_tuning))) ||
+>  	    (mrq->sbc && mrq->sbc->error))
+>  		msdc_request_done(host, mrq);
+> -	else if (cmd == mrq->sbc)
+> +	else if (cmd == mrq->sbc) {
+>  		msdc_start_command(host, mrq, mrq->cmd);
+> -	else if (!cmd->data)
+> +		msdc_command_resp_polling(host, mrq,
+> +				mrq->cmd, CMD_TIMEOUT);
+> +	} else if (!cmd->data)
+>  		msdc_request_done(host, mrq);
+>  	else
+>  		msdc_start_data(host, cmd, cmd->data);
+> @@ -1314,10 +1377,15 @@ static void msdc_ops_request(struct mmc_host
+> *mmc, struct mmc_request *mrq)
+>  	 * use HW option,  otherwise use SW option
+>  	 */
+>  	if (mrq->sbc && (!mmc_card_mmc(mmc->card) ||
+> -	    (mrq->sbc->arg & 0xFFFF0000)))
+> +	    (mrq->sbc->arg & 0xFFFF0000))) {
+>  		msdc_start_command(host, mrq, mrq->sbc);
+> -	else
+> +		msdc_command_resp_polling(host, mrq,
+> +				mrq->sbc, CMD_TIMEOUT);
+> +	} else {
+>  		msdc_start_command(host, mrq, mrq->cmd);
+> +		msdc_command_resp_polling(host, mrq,
+> +				mrq->cmd, CMD_TIMEOUT);
+> +	}
 >  }
 >  
->  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
->
-> base-commit: 356f3f2c5756bbb67a515760966a40fc7043cdda
-> -- 
-> 2.25.1
+>  static void msdc_pre_req(struct mmc_host *mmc, struct mmc_request
+> *mrq)
+> @@ -1350,9 +1418,11 @@ static void msdc_post_req(struct mmc_host
+> *mmc, struct mmc_request *mrq,
+>  static void msdc_data_xfer_next(struct msdc_host *host, struct
+> mmc_request *mrq)
+>  {
+>  	if (mmc_op_multi(mrq->cmd->opcode) && mrq->stop && !mrq->stop-
+> >error &&
+> -	    !mrq->sbc)
+> +	    !mrq->sbc) {
+>  		msdc_start_command(host, mrq, mrq->stop);
+> -	else
+> +		msdc_command_resp_polling(host, mrq,
+> +				mrq->stop, CMD_TIMEOUT);
+> +	} else
+>  		msdc_request_done(host, mrq);
+>  }
+>  
+> @@ -2492,11 +2562,15 @@ static void msdc_of_property_parse(struct
+> platform_device *pdev,
+>  	else
+>  		host->hs400_cmd_resp_sel_rising = false;
+>  
+> -	if (of_property_read_bool(pdev->dev.of_node,
+> -				  "supports-cqe"))
+> +	if (of_property_read_bool(pdev->dev.of_node, "supports-cqe"))
+>  		host->cqhci = true;
+>  	else
+>  		host->cqhci = false;
+> +
+> +	if (of_property_read_bool(pdev->dev.of_node, "mediatek,cmd-
+> polling-mode"))
+> +		host->cmd_polling_mode = true;
+> +	else
+> +		host->cmd_polling_mode = false;
+>  }
+>  
+>  static int msdc_of_clock_parse(struct platform_device *pdev,
+
