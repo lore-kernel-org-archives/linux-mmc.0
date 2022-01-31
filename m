@@ -2,111 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DE5CC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jan 2022 15:46:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9403EC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jan 2022 16:07:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377698AbiAaPqP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Jan 2022 10:46:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54348 "EHLO
+        id S1380034AbiAaQHx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Jan 2022 11:07:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350284AbiAaPqO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jan 2022 10:46:14 -0500
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8797C061714
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 07:46:13 -0800 (PST)
-Received: by mail-lf1-x12e.google.com with SMTP id z4so27726190lft.3
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 07:46:13 -0800 (PST)
+        with ESMTP id S1349615AbiAaQHv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jan 2022 11:07:51 -0500
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFAD0C061744
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 08:07:48 -0800 (PST)
+Received: by mail-lf1-x133.google.com with SMTP id o12so27790114lfg.12
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 08:07:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=+RRqSJJn09Nz7vur4CDO+wfsgCCFJSKAUUo5VMt5QBo=;
-        b=o+HrXbzs0dBDHEZpU0ICK1TFCor6ztr1/jZCjYXTmEOVanZ2Q01NNuWJgw+xxFG2+3
-         YIzUEnf1CC4FnBlMZ+KS3qMUup2Kd1kf1NGYCmGVVNMAL/ELy5+Arump/fwrqbYCHmFV
-         gF7dWR9KGVS6WjyjnVez27yGExs1iJ0eVWXtL9DjfZSlTv+mwuMN8AOPxUisS+TEaCYP
-         6fdfrA6Y0UWGmPzM3W9s2PnF+OKBAzTk8wjj7I/yw95N7kNVTsuL6xYr96+aT5Kklnm3
-         uG4VY+tfBr9x2wC3OJYS1H853NdC+AcIhdM1ZjCxOckcThU+J0HajSyGcYZsXa87aMBQ
-         dYWQ==
+        bh=qc5uFheXk0XaZTfYuE1nZxBYJ9/v+WsFBLbPDZbz7PY=;
+        b=U/vrkJJUjzjB48elBk2hfP4kNGT8ELSVcRs0TQlT2Jo+OJ8OFgrw0UblWt2i8Ma9zV
+         Kkf3ftSRxkBUe1/9hQUhl3BuvhKY+NU7000oD1Ec0EEOV3sniK1FX+8q/Lu21M/CgJOL
+         NTM+uOyd/aKmEvHoTYfy6kCrYlZciBRl6HZVPsEX9jodm4OWL5eHwH8++W8L64sOAqOf
+         9j/6u7ytlc8Gi5RBsp758nPJc/AeM8v1RfPnwQ78KljKz+BouG9lNddOhwchnxBbgq16
+         QSILW/VPSHzkhk5VWvS4Xtrk9SG0G0fcos926IQ7d1196tE4czaOlUvXSqoxzitXvnv4
+         tnow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=+RRqSJJn09Nz7vur4CDO+wfsgCCFJSKAUUo5VMt5QBo=;
-        b=JQV4/iKwG4HXvFli95OGbcpxuIJxAq8ovUM41hQv9ZeW86Aa0crAyZHDMcm89ZktFB
-         6nnE6RmYS7Uscrqipnf9/ar+o3fnYvM+uXW6TUw1Vo5aLIxWKnbLWTmm0Pliw9rWqgGL
-         5gLRRqOxR/6GyjdTAAR03pXxByGRV6/+5E7TgFikfoGZRNwJvnip+pJ2L2M9+G9m7u1t
-         vbG2VaaHaqRg/jxo/jH3TVyEr9ooRwXJUeRZitskKfz7ufb+xlIZrCCnHinButT3zUW2
-         OQaRZ2kMdoWuSDI+68OsX1TbnubXNm3I7GqkkAWo5BoPz/4L4YnTjszUnlInymr+vjuX
-         YypA==
-X-Gm-Message-State: AOAM531DqbBgkDqciWJgaW+tJSnvhpCA0E46CKLXjADrY4ZZ5GkXNx44
-        BrFyhPTOaJTH3fTq/L8ABDrihjBn95PwQ/7V5deRWw==
-X-Google-Smtp-Source: ABdhPJwP7VR1T0E9THzLZcEhqU9tJdN2MvSRg+Efi9ua8Zp7Lq5q0wg8SnZJLM/f4/yku7Fs71T6U8MLZx+GdWY7xZc=
-X-Received: by 2002:ac2:5f71:: with SMTP id c17mr15676613lfc.167.1643643971878;
- Mon, 31 Jan 2022 07:46:11 -0800 (PST)
+        bh=qc5uFheXk0XaZTfYuE1nZxBYJ9/v+WsFBLbPDZbz7PY=;
+        b=AGXWsSqvvlrGuBbrxkVcKzGS+zhRhITNFaMozag1DK8RAexsBtXDAAaBVqWoXm2G2K
+         l6CsBTIDgbLy6Un8Qu7w3k995yMDVscUTtTk+u38dLSfafhdHXH1ZInmGSQGSLpiMJ1d
+         oq8WrsELobvWBBfpeGwuTg1XK/SWu+bO4yvq7oAaeoMJwU52cWrEBwHrAPvpSu1WTdND
+         RKGNVOYCvQJM3SvUFlsniRDRIs4SgRAlPxWXS206wNNXeBDjF0qGIkT2lrnVYE+UUxdG
+         UvIVUjRuwrsrDgrR8Pczr5ER6AYSdkf8wUzUtuNKOVdr7rQEZlO60GtIq0cWuxpJiz9j
+         p0XA==
+X-Gm-Message-State: AOAM5333RsQe7puBMWmp/IcwOj0tJoD5jViWYYITk0t5PVXdi7lWgR+w
+        ozvsVD3E4Z/0Fh+dX5o5cXBrLxM6cnqjlnniVkFhQQ==
+X-Google-Smtp-Source: ABdhPJw/LzqcIwGx3pWlTx8PycHS7Obn8n9Ru3sYnGrV+l2mRnMI+4mOkzlAV/1B8+vSTp8P1jiek1IavKASEg5IwQU=
+X-Received: by 2002:ac2:4c08:: with SMTP id t8mr15582685lfq.358.1643645267227;
+ Mon, 31 Jan 2022 08:07:47 -0800 (PST)
 MIME-Version: 1.0
-References: <CAGETcx_4ATDk3nNfu6kBwUVN4nfxcHHUMnCKYsLTDoA1TFLmrw@mail.gmail.com>
-In-Reply-To: <CAGETcx_4ATDk3nNfu6kBwUVN4nfxcHHUMnCKYsLTDoA1TFLmrw@mail.gmail.com>
+References: <20220123183925.1052919-1-yury.norov@gmail.com> <20220123183925.1052919-31-yury.norov@gmail.com>
+In-Reply-To: <20220123183925.1052919-31-yury.norov@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 31 Jan 2022 16:45:35 +0100
-Message-ID: <CAPDyKFqUiydk3hHiKZ92e-W2tC4yv-XhGSz20KYYsTuZu0rWuQ@mail.gmail.com>
-Subject: Re: Relation between MMC_CAP_WAIT_WHILE_BUSY and card_busy()
-To:     Saravana Kannan <saravanak@google.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Android Kernel Team <kernel-team@android.com>
+Date:   Mon, 31 Jan 2022 17:07:10 +0100
+Message-ID: <CAPDyKFoJ=1nTYh6rNUQV2X68qE+jJX3OEindnTN_2_J54UVqkA@mail.gmail.com>
+Subject: Re: [PATCH 30/54] drivers/memstick: replace bitmap_weight with
+ bitmap_weight_eq where appropriate
+To:     Yury Norov <yury.norov@gmail.com>
+Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        David Laight <david.laight@aculab.com>,
+        Joe Perches <joe@perches.com>, Dennis Zhou <dennis@kernel.org>,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        linux-kernel@vger.kernel.org,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, Jens Axboe <axboe@kernel.dk>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Colin Ian King <colin.king@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
+        linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 26 Jan 2022 at 04:46, Saravana Kannan <saravanak@google.com> wrote:
+On Sun, 23 Jan 2022 at 19:41, Yury Norov <yury.norov@gmail.com> wrote:
 >
-> I'm trying to understand the MMC suspend path a bit.
+> msb_validate_used_block_bitmap() calls bitmap_weight() to compare the
+> weight of bitmap with a given number. We can do it more efficiently with
+> bitmap_weight_eq because conditional bitmap_weight may stop traversing the
+> bitmap earlier, as soon as condition is met.
 >
-> I looked at the commit message of 6fa79651cc808f68db6f6f297be5a950ccd5dffb.
->
-> IIUC, if MMC_CAP_WAIT_WHILE_BUSY is set then the mmc framework is
-> going to depend on the card_busy() op to ensure correctness instead of
-> using the S_A_TIMEOUT value from the card.
+> Signed-off-by: Yury Norov <yury.norov@gmail.com>
 
-MMC_CAP_WAIT_WHILE_BUSY indicates whether the mmc controller supports
-IRQ based busy detection completion. In other words, the mmc host
-driver can receive an IRQ when busy signaling is completed on DAT0 by
-the eMMC card.
-
-However, to avoid waiting for the IRQ forever, there is a maximum
-timeout that is specified by the mmc core, for the particular command
-in question. For eMMC sleep, the S_A_TIMEOUT.
-
->
-> But I see a lot of mmc host drivers that implement card_busy() but
-> don't set the MMC_CAP_WAIT_WHILE_BUSY flag. That doesn't seem right to
-> me if my understanding is correct.
-
-That's perfectly okay. MMC_CAP_WAIT_WHILE_BUSY is IRQ based, while the
-->card_busy() ops is used to poll for busy completion.
-
->
-> If it's supposed to be "we'll use card_busy() if
-> MMC_CAP_WAIT_WHILE_BUSY isn't set", then why do we have some mmc host
-> drivers that have both?
->
-> What am I misunderstanding?
-
-There are some additional complexity for the corresponding code. This
-has mostly ended up there because we also need to deal with mmc
-controller's HW limitations around this feature.
-
-For example, some mmc controllers have a HW limit for the length of
-the timeout that can be set. If the needed timeout is longer than what
-can be supported, we can't use IRQ based busy completion.
-
-Did this make it more clear?
-
->
-> -Saravana
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/memstick/core/ms_block.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+> index 0cda6c6baefc..5cdd987e78f7 100644
+> --- a/drivers/memstick/core/ms_block.c
+> +++ b/drivers/memstick/core/ms_block.c
+> @@ -155,8 +155,8 @@ static int msb_validate_used_block_bitmap(struct msb_data *msb)
+>         for (i = 0; i < msb->zone_count; i++)
+>                 total_free_blocks += msb->free_block_count[i];
+>
+> -       if (msb->block_count - bitmap_weight(msb->used_blocks_bitmap,
+> -                                       msb->block_count) == total_free_blocks)
+> +       if (bitmap_weight_eq(msb->used_blocks_bitmap, msb->block_count,
+> +                               msb->block_count - total_free_blocks))
+>                 return 0;
+>
+>         pr_err("BUG: free block counts don't match the bitmap");
+> --
+> 2.30.2
+>
