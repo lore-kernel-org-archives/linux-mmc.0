@@ -2,141 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 589EBC43219
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jan 2022 20:39:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C4D5C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jan 2022 22:43:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1376662AbiAaUji (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Jan 2022 15:39:38 -0500
-Received: from dfw.source.kernel.org ([139.178.84.217]:37656 "EHLO
-        dfw.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343999AbiAaUjh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jan 2022 15:39:37 -0500
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D4412614C2;
-        Mon, 31 Jan 2022 20:39:36 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 37D95C340E8;
-        Mon, 31 Jan 2022 20:39:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1643661576;
-        bh=LlCWcmjo9XBLXtkZjmaUu+sQAjNy8t3wD356RhDm6+8=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=dbIvvaZtUtglyEdPJeUXqJeRCSK+nQ6All4q5LCLeHNekPbJGzAd5HBkBDMUdPyEX
-         aLGoz9yVDcpb77joBuHGnfcQ20RTksmJJA8Y7SrJ9Rew6tW4rcMIZRXV5cttCSPQ0D
-         HkEINXYQFrsUCNmd3iD1ToriUf9adNj2trOKs5EHQpQh2ZgYg2jkD+SsyjO4qmwmJU
-         upmD5OlqmrXdrSY7oYrS3dOZxgV98KvJJ3JFZxzIEf0AVbUnMz0iuLBk8UlKNXkBOk
-         lpi4tu/p3npuGwGoPD/pO37vgzqDNONpZMMhn8MfAwiO9zjbATlOiIceIevlZ9aNye
-         Lvr+4f0EY7Kbg==
-Received: from disco-boy.misterjones.org ([51.254.78.96] helo=www.loen.fr)
-        by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <maz@kernel.org>)
-        id 1nEdSX-004Ugn-LI; Mon, 31 Jan 2022 20:39:33 +0000
-MIME-Version: 1.0
-Date:   Mon, 31 Jan 2022 20:39:33 +0000
-From:   Marc Zyngier <maz@kernel.org>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Jon Hunter <jonathanh@nvidia.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
+        id S234440AbiAaWni (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Jan 2022 17:43:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38334 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229870AbiAaWni (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jan 2022 17:43:38 -0500
+Received: from mail-oo1-xc36.google.com (mail-oo1-xc36.google.com [IPv6:2607:f8b0:4864:20::c36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50E87C06173B
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 14:43:38 -0800 (PST)
+Received: by mail-oo1-xc36.google.com with SMTP id c7-20020a4ad207000000b002e7ab4185d2so3575479oos.6
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 14:43:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=yX/YWQ2F2e81Xwl7jttAWwJX0hjqq2GEo6RpoBFupaE=;
+        b=vfFnO0qBgoNjcKKMsAi/QdbQDYRqVl+e0ovhz1YJEmfDXIJTHFLajFCfy4a/29VKiK
+         dCquWo1ULDCUPxTlldxNc+tt8SXRztecqlSswaH+6ta/g8TxE6LAX7cOpYyDMx3Ux8wF
+         PDdy0mfS4w2MZfWV94dvZWPDCavyZ8a92IzrMJ2BxgXKKmEcYLtELACElRAkkVagd0AE
+         3oWAuqlMHxwy/xFshv34BToc/9x2Aw7b14u2szcGtcqrrxYDbtBHgMTxV7BRFy9iVC70
+         +u4Claci5p6RTS3K8Ow4IpkFMs/Ah+9lnAMG30eqGldxYGVp3V6NZiUD+cBE+akEEurO
+         c39w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=yX/YWQ2F2e81Xwl7jttAWwJX0hjqq2GEo6RpoBFupaE=;
+        b=mD7qqZiSu2UyIzyLJgirTt7t/vsE493TPe5/gdyx9aCqdjEnJyPjvOoaahFL/QG4dU
+         CiWViKQz8kmI2e3mHLS/uSlpak35TzkbkQFT37vFKQGA9m89yP5/d1V64kUmMKA4ES7v
+         lzgojNZiTN/XSYGmGLZk1g4LwVLpClu7+tIB248msLje5M7ScUmIEfsKoQcyVyiSQU4f
+         4Ot/SmRi82jItNhzAxcfs90jNEdSDwS5x9Ewm14tyuLkaHl7a34CKIQSiwJC3q8PvsMb
+         L2fnP2v73vIBt6YplPA/OskoQqCFCLpGKQuKxo8TQ+g1qIJh/4w+hTTBj9zBX2hR5fwr
+         trmA==
+X-Gm-Message-State: AOAM5309XvbNtWjo9nzs0+tu9hf0bMHPefpYrM7RsENESyM0c6pb05t3
+        yx/hR/oGULIEdM3gV/blnWo1xA==
+X-Google-Smtp-Source: ABdhPJw0/vA1k6EMzBnpDb3zSUhXhlmDS2Ml8ZV6QIGWT9ZbfXaCadYTGpIHmQ2Vbq0owZnAxdAkEA==
+X-Received: by 2002:a4a:e0d8:: with SMTP id e24mr11256827oot.56.1643669017662;
+        Mon, 31 Jan 2022 14:43:37 -0800 (PST)
+Received: from builder.lan ([2600:1700:a0:3dc8:3697:f6ff:fe85:aac9])
+        by smtp.gmail.com with ESMTPSA id c26sm7516092otn.34.2022.01.31.14.43.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 31 Jan 2022 14:43:37 -0800 (PST)
+Date:   Mon, 31 Jan 2022 16:43:35 -0600
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Petr Vorel <petr.vorel@gmail.com>
+Cc:     linux-arm-msm@vger.kernel.org,
+        Konrad Dybcio <konradybcio@gmail.com>,
+        Jean Thomas <virgule@jeanthomas.me>,
+        Alexey Minnekhanov <alexeymin@postmarketos.org>,
+        Andy Gross <agross@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?U?= =?UTF-8?Q?we_Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
-Subject: Re: [PATCH v16 08/40] gpu: host1x: Add initial runtime PM and OPP
- support
-In-Reply-To: <40983f6e-92ee-40d4-861f-06faea0113fc@gmail.com>
-References: <20211130232347.950-1-digetx@gmail.com>
- <20211130232347.950-9-digetx@gmail.com>
- <21212ddb-205f-71d6-0199-d75768eaf32c@nvidia.com>
- <41edc53b-5ed1-d524-2546-c3d1ee6cdea4@gmail.com>
- <6652ac84-36f5-0e43-65fa-04786f384f21@nvidia.com>
- <56dce9c7-397d-75b0-b5b8-18ce1084e72b@nvidia.com>
- <6dbc8205-5669-8b08-16b8-fe5e1acdd06f@gmail.com>
- <796eb3f7-80e2-bc55-fd52-43e76220f8c2@nvidia.com>
- <40983f6e-92ee-40d4-861f-06faea0113fc@gmail.com>
-User-Agent: Roundcube Webmail/1.4.13
-Message-ID: <6adda63b4de6b55d11426ecbb08d6c51@kernel.org>
-X-Sender: maz@kernel.org
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-X-SA-Exim-Connect-IP: 51.254.78.96
-X-SA-Exim-Rcpt-To: digetx@gmail.com, jonathanh@nvidia.com, thierry.reding@gmail.com, ulf.hansson@linaro.org, vireshk@kernel.org, sboyd@kernel.org, pdeschrijver@nvidia.com, mperttunen@nvidia.com, lee.jones@linaro.org, u.kleine-koenig@pengutronix.de, nm@ti.com, adrian.hunter@intel.com, mturquette@baylibre.com, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org, linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-clk@vger.kernel.org, david@ixit.cz
-X-SA-Exim-Mail-From: maz@kernel.org
-X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
+        Douglas Anderson <dianders@chromium.org>,
+        Taniya Das <tdas@codeaurora.org>, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 5/6] arm64: dts: qcom: msm8994-huawei-angler: Add
+ sdhc{1,2} definitions
+Message-ID: <YfhmF6FKV9/6YfAL@builder.lan>
+References: <20220113233358.17972-1-petr.vorel@gmail.com>
+ <20220113233358.17972-6-petr.vorel@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220113233358.17972-6-petr.vorel@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi all,
+On Thu 13 Jan 17:33 CST 2022, Petr Vorel wrote:
 
-On 2021-12-22 19:31, Dmitry Osipenko wrote:
-> 22.12.2021 22:30, Jon Hunter пишет:
->> 
->> On 22/12/2021 19:01, Dmitry Osipenko wrote:
->> 
->> ...
->> 
->>> diff --git a/drivers/gpu/host1x/syncpt.c 
->>> b/drivers/gpu/host1x/syncpt.c
->>> index e08e331e46ae..8194826c9ce3 100644
->>> --- a/drivers/gpu/host1x/syncpt.c
->>> +++ b/drivers/gpu/host1x/syncpt.c
->>> @@ -137,6 +137,15 @@ void host1x_syncpt_restore(struct host1x *host)
->>>       struct host1x_syncpt *sp_base = host->syncpt;
->>>       unsigned int i;
->>> 
->>> +    for (i = 0; i < host->info->nb_pts; i++) {
->>> +        /*
->>> +         * Unassign syncpt from channels for purposes of Tegra186
->>> +         * syncpoint protection. This prevents any channel from
->>> +         * accessing it until it is reassigned.
->>> +         */
->>> +        host1x_hw_syncpt_assign_to_channel(host, sp_base + i, NULL);
->>> +    }
->>> +
->>>       for (i = 0; i < host1x_syncpt_nb_pts(host); i++)
->>>           host1x_hw_syncpt_restore(host, sp_base + i);
->>> 
->>> @@ -352,13 +361,6 @@ int host1x_syncpt_init(struct host1x *host)
->>>       for (i = 0; i < host->info->nb_pts; i++) {
->>>           syncpt[i].id = i;
->>>           syncpt[i].host = host;
->>> -
->>> -        /*
->>> -         * Unassign syncpt from channels for purposes of Tegra186
->>> -         * syncpoint protection. This prevents any channel from
->>> -         * accessing it until it is reassigned.
->>> -         */
->>> -        host1x_hw_syncpt_assign_to_channel(host, &syncpt[i], NULL);
->>>       }
->>> 
->>>       for (i = 0; i < host->info->nb_bases; i++)
->>> 
->> 
->> 
->> Thanks! This fixed it!
+> Although downstream supports HS400, there are overclocking warnings when
+> using mmc-hs400-1_8v:
 > 
-> I'll prepare proper patch with yours t-b, thank you.
+> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+> mmc0: Card appears overclocked; req 400000000 Hz, actual 768000000 Hz
+> mmc0: Card appears overclocked; req 400000000 Hz, actual 768000000 Hz
+> mmc0: new HS400 MMC card at address 0001
+> 
+> Using HS200 (i.e. mmc-hs200-1_8v or mmc-ddr-1_8v) would reduce them:
+> 
+> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+> mmc0: Card appears overclocked; req 200000000 Hz, actual 384000000 Hz
+> mmc0: new HS200 MMC card at address 0001
+> 
+> But as the problem is probably elsewhere (bullhead behaves the same),
+> keep mmc-hs400-1_8v.
+> 
+> Angler does not have SD card, thus explicitly disable sdhc2.
+> 
+> Signed-off-by: Petr Vorel <petr.vorel@gmail.com>
+> ---
+>  .../dts/qcom/msm8994-huawei-angler-rev-101.dts   | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts b/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts
+> index 0e3dd48f0dbf..5ce3dc169bb4 100644
+> --- a/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts
+> +++ b/arch/arm64/boot/dts/qcom/msm8994-huawei-angler-rev-101.dts
+> @@ -7,6 +7,7 @@
+>  /dts-v1/;
+>  
+>  #include "msm8994.dtsi"
+> +#include <dt-bindings/gpio/gpio.h>
+>  
+>  /* Angler's firmware does not report where the memory is allocated */
+>  /delete-node/ &cont_splash_mem;
+> @@ -41,3 +42,18 @@ serial@f991e000 {
+>  &tlmm {
+>  	gpio-reserved-ranges = <85 4>;
+>  };
+> +
+> +/*
+> + * Although downstream supports also HS400 there are fewer overclocking
+> + * warnings when used DDR, also LK bootloader reports DDR mode.
+> + */
+> +&sdhc1 {
+> +	status = "okay";
+> +
+> +	mmc-hs400-1_8v;
+> +};
+> +
+> +/* Angler does not have SD card */
+> +&sdhc2 {
 
-The fix has been in -next for some time now, but it still hasn't
-made it into Linus' tree (at least not in -rc2).
+But isn't &sdhc2 already disabled from msm8992.dtsi and msm8994.dtsi?
 
-Any hope for this to land -rc3?
+Regards,
+Bjorn
 
-Thanks,
-
-      M.
--- 
-Jazz is not dead. It just smells funny...
+> +	status = "disabled";
+> +};
+> -- 
+> 2.34.1
+> 
