@@ -2,114 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9403EC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jan 2022 16:07:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60A1FC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Jan 2022 16:14:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1380034AbiAaQHx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Jan 2022 11:07:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59422 "EHLO
+        id S1349709AbiAaQO5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Jan 2022 11:14:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349615AbiAaQHv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jan 2022 11:07:51 -0500
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFAD0C061744
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 08:07:48 -0800 (PST)
-Received: by mail-lf1-x133.google.com with SMTP id o12so27790114lfg.12
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 08:07:48 -0800 (PST)
+        with ESMTP id S244114AbiAaQO5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Jan 2022 11:14:57 -0500
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3DDDC061714
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 08:14:56 -0800 (PST)
+Received: by mail-lj1-x22f.google.com with SMTP id bx31so8412706ljb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 08:14:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=qc5uFheXk0XaZTfYuE1nZxBYJ9/v+WsFBLbPDZbz7PY=;
-        b=U/vrkJJUjzjB48elBk2hfP4kNGT8ELSVcRs0TQlT2Jo+OJ8OFgrw0UblWt2i8Ma9zV
-         Kkf3ftSRxkBUe1/9hQUhl3BuvhKY+NU7000oD1Ec0EEOV3sniK1FX+8q/Lu21M/CgJOL
-         NTM+uOyd/aKmEvHoTYfy6kCrYlZciBRl6HZVPsEX9jodm4OWL5eHwH8++W8L64sOAqOf
-         9j/6u7ytlc8Gi5RBsp758nPJc/AeM8v1RfPnwQ78KljKz+BouG9lNddOhwchnxBbgq16
-         QSILW/VPSHzkhk5VWvS4Xtrk9SG0G0fcos926IQ7d1196tE4czaOlUvXSqoxzitXvnv4
-         tnow==
+        bh=R8hJ+b/S6oDD8opxH+BCjcxxD51acaIbT9j2/yd5ncc=;
+        b=CQ3sqssCFwEUVItVX0VdSHh9VGjFqOFxf7WjBe2ocgb/ROK/uNOOqJc146vSqMMYZR
+         iAA5ydHzd1XNkdBv5gt8pAK1/upAhmWVzLP+SsZtoA1C3NgTjt08dXIbX7NNYhI14hda
+         vrwZZiCJZsfsY3DsxOEaveAkc97+x0azhR+NPR5fkMvm56AWSr+XPS0FbEu0lTq9mBuF
+         SVUdGP2hQejJDusWt7XeX4FIP3XDLthUxiTpnXiccAthbGIsn7s55i2m/pDivwnxm0cp
+         TiZ396xPWL8eS2gZP8MNrHjlPabOAdZgg69RdhYDO/irlw0ebWpSuhOMpNNfZ4JtTyuN
+         kqbw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=qc5uFheXk0XaZTfYuE1nZxBYJ9/v+WsFBLbPDZbz7PY=;
-        b=AGXWsSqvvlrGuBbrxkVcKzGS+zhRhITNFaMozag1DK8RAexsBtXDAAaBVqWoXm2G2K
-         l6CsBTIDgbLy6Un8Qu7w3k995yMDVscUTtTk+u38dLSfafhdHXH1ZInmGSQGSLpiMJ1d
-         oq8WrsELobvWBBfpeGwuTg1XK/SWu+bO4yvq7oAaeoMJwU52cWrEBwHrAPvpSu1WTdND
-         RKGNVOYCvQJM3SvUFlsniRDRIs4SgRAlPxWXS206wNNXeBDjF0qGIkT2lrnVYE+UUxdG
-         UvIVUjRuwrsrDgrR8Pczr5ER6AYSdkf8wUzUtuNKOVdr7rQEZlO60GtIq0cWuxpJiz9j
-         p0XA==
-X-Gm-Message-State: AOAM5333RsQe7puBMWmp/IcwOj0tJoD5jViWYYITk0t5PVXdi7lWgR+w
-        ozvsVD3E4Z/0Fh+dX5o5cXBrLxM6cnqjlnniVkFhQQ==
-X-Google-Smtp-Source: ABdhPJw/LzqcIwGx3pWlTx8PycHS7Obn8n9Ru3sYnGrV+l2mRnMI+4mOkzlAV/1B8+vSTp8P1jiek1IavKASEg5IwQU=
-X-Received: by 2002:ac2:4c08:: with SMTP id t8mr15582685lfq.358.1643645267227;
- Mon, 31 Jan 2022 08:07:47 -0800 (PST)
+        bh=R8hJ+b/S6oDD8opxH+BCjcxxD51acaIbT9j2/yd5ncc=;
+        b=AfuR0MxhGkaGj0dD+S2hk8qtDM1ken62OnQRZZv+zkFmcXdtOR5wgY4VfhIrF9W7TK
+         u8zZU/9XS3RWOhNaMv7t8SLty0ocIIY+Sug7NzWHX3gMxSsgO6aHah1FQ8KHhvVFgZ/+
+         pZFChOV0D/32h0fNTjMZnF+IX1j+4XpWxhVASM6uXxEQpmixI2nf2rVpAUNNZkXZPhXk
+         6YOjDeMgzw+uyE4LPE4vJo2IAJXtE8qzuDuEjnKwBR4fqJRUBU8zWMl2nHg9tVr0twGQ
+         d0dw3XhwbvsVqo2rxJ02HLG8sv4feMX8GfJHEU01/RdUc2PDjESV5Nrc+UuviAuLNe2W
+         90wA==
+X-Gm-Message-State: AOAM530/S2AQyU35+Y7nVEx5rblgguZwxwvZEnjTtOd/R7sCuSRG/gkC
+        aLU5NeZ57nFIVP7dKUXdaVZUCJEkQ0aoeqfMGeXGcZ1kfiXnYg==
+X-Google-Smtp-Source: ABdhPJxG0oUeWh5Ez9bFaqi2jteFhhcQ06lp0xXCfsTfB53DpUeafa1P4fk6+O04CRcbSyUtEe1BQP2QnFXLm9yjkmM=
+X-Received: by 2002:a05:651c:179c:: with SMTP id bn28mr13949832ljb.4.1643645695036;
+ Mon, 31 Jan 2022 08:14:55 -0800 (PST)
 MIME-Version: 1.0
-References: <20220123183925.1052919-1-yury.norov@gmail.com> <20220123183925.1052919-31-yury.norov@gmail.com>
-In-Reply-To: <20220123183925.1052919-31-yury.norov@gmail.com>
+References: <b0d9cdda-33f3-1eb0-a76e-26125089e5c5@omp.ru>
+In-Reply-To: <b0d9cdda-33f3-1eb0-a76e-26125089e5c5@omp.ru>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 31 Jan 2022 17:07:10 +0100
-Message-ID: <CAPDyKFoJ=1nTYh6rNUQV2X68qE+jJX3OEindnTN_2_J54UVqkA@mail.gmail.com>
-Subject: Re: [PATCH 30/54] drivers/memstick: replace bitmap_weight with
- bitmap_weight_eq where appropriate
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        David Laight <david.laight@aculab.com>,
-        Joe Perches <joe@perches.com>, Dennis Zhou <dennis@kernel.org>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Nicholas Piggin <npiggin@gmail.com>,
-        Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        linux-kernel@vger.kernel.org,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, Jens Axboe <axboe@kernel.dk>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Colin Ian King <colin.king@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
-        linux-mmc@vger.kernel.org
+Date:   Mon, 31 Jan 2022 17:14:18 +0100
+Message-ID: <CAPDyKFpCH_0Hiq_FhmoUdgY0BXfnK0=jdB+zHQ8e16WKFNJfjA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: use sysfs_emit() in #define sdio_info_attr()
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 23 Jan 2022 at 19:41, Yury Norov <yury.norov@gmail.com> wrote:
+On Thu, 27 Jan 2022 at 22:01, Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
 >
-> msb_validate_used_block_bitmap() calls bitmap_weight() to compare the
-> weight of bitmap with a given number. We can do it more efficiently with
-> bitmap_weight_eq because conditional bitmap_weight may stop traversing the
-> bitmap earlier, as soon as condition is met.
+> sprintf() (still used in #define sdio_info_attr()) is vulnerable to the
+> buffer overflow.  Use the new-fangled sysfs_emit() instead.
 >
-> Signed-off-by: Yury Norov <yury.norov@gmail.com>
+> While at it, add spaces around the minus sign...
+>
+> Found by Linux Verification Center (linuxtesting.org) with the SVACE static
+> analysis tool.
+>
+> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Thanks for fixing this!
+
+However, rather than applying these piece by piece, would you mind
+squashing these "sysfs_emit" fixes into one patch for the mmc core? It
+would be easier for me to handle - and it should still be an easy
+backport, I think.
 
 Kind regards
 Uffe
 
+>
 > ---
->  drivers/memstick/core/ms_block.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> This patch is against the 'next' branch of Ulf Hansson's 'mmc.git' repo.
 >
-> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-> index 0cda6c6baefc..5cdd987e78f7 100644
-> --- a/drivers/memstick/core/ms_block.c
-> +++ b/drivers/memstick/core/ms_block.c
-> @@ -155,8 +155,8 @@ static int msb_validate_used_block_bitmap(struct msb_data *msb)
->         for (i = 0; i < msb->zone_count; i++)
->                 total_free_blocks += msb->free_block_count[i];
+> Changes in version 2:
+> - added the same macro change in drivers/mmc/corfe/sdio[_bus].c;
+> - updated the patch subject.
 >
-> -       if (msb->block_count - bitmap_weight(msb->used_blocks_bitmap,
-> -                                       msb->block_count) == total_free_blocks)
-> +       if (bitmap_weight_eq(msb->used_blocks_bitmap, msb->block_count,
-> +                               msb->block_count - total_free_blocks))
->                 return 0;
+>  drivers/mmc/core/sd.c       |    4 ++--
+>  drivers/mmc/core/sdio.c     |    4 ++--
+>  drivers/mmc/core/sdio_bus.c |    4 ++--
+>  3 files changed, 6 insertions(+), 6 deletions(-)
 >
->         pr_err("BUG: free block counts don't match the bitmap");
-> --
-> 2.30.2
+> Index: mmc/drivers/mmc/core/sd.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/sd.c
+> +++ mmc/drivers/mmc/core/sd.c
+> @@ -735,9 +735,9 @@ static ssize_t info##num##_show(struct d
+>                                                                                                 \
+>         if (num > card->num_info)                                                               \
+>                 return -ENODATA;                                                                \
+> -       if (!card->info[num-1][0])                                                              \
+> +       if (!card->info[num - 1][0])                                                            \
+>                 return 0;                                                                       \
+> -       return sprintf(buf, "%s\n", card->info[num-1]);                                         \
+> +       return sysfs_emit(buf, "%s\n", card->info[num - 1]);                                    \
+>  }                                                                                              \
+>  static DEVICE_ATTR_RO(info##num)
+>
+> Index: mmc/drivers/mmc/core/sdio.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/sdio.c
+> +++ mmc/drivers/mmc/core/sdio.c
+> @@ -40,9 +40,9 @@ static ssize_t info##num##_show(struct d
+>                                                                                                 \
+>         if (num > card->num_info)                                                               \
+>                 return -ENODATA;                                                                \
+> -       if (!card->info[num-1][0])                                                              \
+> +       if (!card->info[num - 1][0])                                                            \
+>                 return 0;                                                                       \
+> -       return sprintf(buf, "%s\n", card->info[num-1]);                                         \
+> +       return sysfs_emit(buf, "%s\n", card->info[num - 1]);                                    \
+>  }                                                                                              \
+>  static DEVICE_ATTR_RO(info##num)
+>
+> Index: mmc/drivers/mmc/core/sdio_bus.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/sdio_bus.c
+> +++ mmc/drivers/mmc/core/sdio_bus.c
+> @@ -52,9 +52,9 @@ static ssize_t info##num##_show(struct d
+>                                                                                                 \
+>         if (num > func->num_info)                                                               \
+>                 return -ENODATA;                                                                \
+> -       if (!func->info[num-1][0])                                                              \
+> +       if (!func->info[num - 1][0])                                                            \
+>                 return 0;                                                                       \
+> -       return sprintf(buf, "%s\n", func->info[num-1]);                                         \
+> +       return sysfs_emit(buf, "%s\n", func->info[num - 1]);                                            \
+>  }                                                                                              \
+>  static DEVICE_ATTR_RO(info##num)
 >
