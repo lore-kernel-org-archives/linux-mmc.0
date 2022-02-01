@@ -2,93 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F10FC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Feb 2022 05:21:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33E80C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Feb 2022 08:24:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234800AbiBAFVo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Feb 2022 00:21:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42248 "EHLO
+        id S233508AbiBAIYp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Feb 2022 03:24:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234211AbiBAFUs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Feb 2022 00:20:48 -0500
-Received: from mail-oi1-x231.google.com (mail-oi1-x231.google.com [IPv6:2607:f8b0:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4C50C06178A
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 21:20:45 -0800 (PST)
-Received: by mail-oi1-x231.google.com with SMTP id m10so6179338oie.2
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Jan 2022 21:20:45 -0800 (PST)
+        with ESMTP id S235364AbiBAIYo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Feb 2022 03:24:44 -0500
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 115E8C06173E
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Feb 2022 00:24:44 -0800 (PST)
+Received: by mail-lf1-x129.google.com with SMTP id u6so32141877lfm.10
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Feb 2022 00:24:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=/gc4d+mJV9MCv7yDWAF73c6XrdPx3pGuNA/L39Cbelk=;
-        b=VCTxRN4Dl4Ev68KzOliMDp//TYysmXy6rDK7ijEX+ofZrPY62R+kYV1dwDx+Hwl9Ka
-         T2p7cW8n5wMFbwELYwsa+qWFwHaV4INU12dUzT36paFAU0+G5YnLwwHuctEXRSUPNz94
-         rHMMViKEI1esVgd2uOIoUcgHh97BvSTc0GEdij8qFHDuQtkgZ2+U4EgXSEw8RceCZXk8
-         j8jKi/uhtVEN1Q83017dvGCc/O9xOaoQRzkhrMvO0JhwCRixIYbNIN4ESFo0mjxWXsQT
-         LT/TWT8pu5pYdpbh/mE09DFKE3CKfPcZ/1SYnjcyM7zo5OnQznhHLVIgKa18sYurJ5j+
-         W6Aw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=02qCsJMd/Qw+tzewIH8FBMwDC4vihqf0hW0clvJ/c+8=;
+        b=uBcqRsmm3g98X+qlI/ExrASREBFgHY/y9plhtW+HUz1g8cEnsOqcntsJrJxERTZ8xy
+         cnewujR8OpUNZa7XX0OHdS6M3/VG9UZ9ZMSMbkI0m34bb7JLSqNOcfp9gXYfo/Xn4Pty
+         Ih+wEcHNpbsC7QzkUAjg9xFpbzm+064DJ3++V6BrZfncAroVEKghBMYXCt+cIaKaIs71
+         iv8iGFciN2YQ9U5mIpoELrxA74vDVqVblzerf0tJ8rqJ9VJ+x/soc3nRu9cTtBOl3op/
+         gpOXlBGGsHlN9s8wXZbfWGTNx/pC5wba5eITIuHErHsigEKL3+XYu+7xegF33oSb7NIX
+         gC4Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=/gc4d+mJV9MCv7yDWAF73c6XrdPx3pGuNA/L39Cbelk=;
-        b=BMfwyWJ8xTCxfsENwcQ3x7yCRAP31+OVjWqS8FPF7jvshYLh6uoH+hfcTidvzkKHKe
-         6GLR2zRStWKOkHrAXyqjTEsBNG5cLGaK1gB89sqO0ntWn3Kza+GfY0/iH5isKnqeXZSe
-         O9cjH9AvXHOKH5/VF8vv+b2/afcgQaKNp32DSXRKT/f3OVCTCUEYcsQ2AdNVksh4bqFe
-         kDeVhIo5XD98ukDY2sV222ABhme0GJVuptzfEEumm1w9+u9hIwAqq8J9kk5YDL0EqIed
-         JvQl6st1mxaqPRqkuqAKcu591dZou4dNqJtSDvnG79SQWwbS81JPUTKtCy3/tDYSamSy
-         GZ6g==
-X-Gm-Message-State: AOAM532mnRfGTwb1LXMnOYtHU0FGbsLfwYLrwElki997tK5oSGwizfTx
-        0fwesigF+qJ1Tpxk9le+DCxdUg==
-X-Google-Smtp-Source: ABdhPJxEy/ZQUv6tV8wHl/M+IhTQ4d7SBK2g4W2+2RLY7rILhOEij+iloYKhfY2X2kLY5B4Mcllmng==
-X-Received: by 2002:a05:6808:e85:: with SMTP id k5mr224125oil.238.1643692845088;
-        Mon, 31 Jan 2022 21:20:45 -0800 (PST)
-Received: from builder.lan ([2600:1700:a0:3dc8:3697:f6ff:fe85:aac9])
-        by smtp.gmail.com with ESMTPSA id u3sm8193107ooh.19.2022.01.31.21.20.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 31 Jan 2022 21:20:44 -0800 (PST)
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     linux-arm-msm@vger.kernel.org, Petr Vorel <petr.vorel@gmail.com>
-Cc:     Konrad Dybcio <konradybcio@gmail.com>,
-        Taniya Das <tdas@codeaurora.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Douglas Anderson <dianders@chromium.org>,
-        Andy Gross <agross@kernel.org>, linux-mmc@vger.kernel.org,
-        Jean Thomas <virgule@jeanthomas.me>,
-        Alexey Minnekhanov <alexeymin@postmarketos.org>
-Subject: Re: (subset) [PATCH 0/6] msm8994-huawei-angler and msm8992-lg-bullhead sdhc1 fixes
-Date:   Mon, 31 Jan 2022 23:19:54 -0600
-Message-Id: <164369277345.3095904.15450214704701068210.b4-ty@linaro.org>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20220113233358.17972-1-petr.vorel@gmail.com>
-References: <20220113233358.17972-1-petr.vorel@gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=02qCsJMd/Qw+tzewIH8FBMwDC4vihqf0hW0clvJ/c+8=;
+        b=YXp1lEDJLLYx7oQ51krtHkmjwC/DXsF8Sse8gcDRvyBt8+LBZeQ4X1ZK8h2JVO0tvV
+         WIB5H7ikvkUg6gZeYgO6maIHVuOK4ZfcsY0E+sJ/UAE/5Ogp8kblU7zBZOG381t6JKfn
+         5uEETFeC5aUDy7d1Jq0yBcKM/b7eU8b63IUOfZE6OtuY9X/8HB6T5I/FKIziQrB7wLnn
+         EiZUwLQY0DP6k5YLX5KcnByJHBMnSrdN5uBrPwAArzX/j+eqKQfegzpR+f4dSZWGt968
+         lirYiYQjXEYad6zLRGUTDJuOFtADVTIE8+TqaScpA0tWOfgpTndPXuwk09HllPdkvhlB
+         tTTw==
+X-Gm-Message-State: AOAM530vVr0oj+JPtbMGQlSYGJmfEMlSxh194v7ZUoOWKbPjnsMHAOQ3
+        gSgpC3lEHae2Kzcv68w+8xcNk+SYV3GS3ZPv6aYQzw==
+X-Google-Smtp-Source: ABdhPJydVmJZJJqnrsxbGNdSJfgAZbgMKyRPvGeBfMnl6MzLe1H1ulkKn7LpGV9XQ04MpiucaNSNhqyLfVE7c5m/Eu0=
+X-Received: by 2002:a05:6512:3e10:: with SMTP id i16mr3859555lfv.184.1643703882410;
+ Tue, 01 Feb 2022 00:24:42 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+References: <CAGETcx_4ATDk3nNfu6kBwUVN4nfxcHHUMnCKYsLTDoA1TFLmrw@mail.gmail.com>
+ <CAPDyKFqUiydk3hHiKZ92e-W2tC4yv-XhGSz20KYYsTuZu0rWuQ@mail.gmail.com> <CAGETcx9fz31x20ZAcwtvmnBcfswv2O=5UNCQhZngT2BEzm6ShQ@mail.gmail.com>
+In-Reply-To: <CAGETcx9fz31x20ZAcwtvmnBcfswv2O=5UNCQhZngT2BEzm6ShQ@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 1 Feb 2022 09:24:05 +0100
+Message-ID: <CAPDyKFr1OhTCsgu64_3sBPdOaCk0HLHrhj+PJH_NB-ZY8srkNg@mail.gmail.com>
+Subject: Re: Relation between MMC_CAP_WAIT_WHILE_BUSY and card_busy()
+To:     Saravana Kannan <saravanak@google.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        Android Kernel Team <kernel-team@android.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 14 Jan 2022 00:33:52 +0100, Petr Vorel wrote:
-> Besides fixing sdhc1 for msm8994-huawei-angler and msm8992-lg-bullhead
-> I also rebased and reposted Jean's patches (Makefile didn't apply on
-> current for-next) and also rename angler's DTS.
-> 
-> sdhc1 (i.e. mmc0) is working on both, but there are overclocking
-> warnings. I suspected issue similar to using clk_rcg2_ops instead of
-> clk_rcg2_floor_ops (i.e. 3f905469c8ce ("clk: qcom: gcc: Use floor ops
-> for SDCC clocks") or 148ddaa89d4a ("clk: qcom: gcc-sc7180: Use floor ops
-> for the correct sdcc1 clk"), but it looks to be correct for gcc-msm8994.c.
-> 
-> [...]
+On Mon, 31 Jan 2022 at 21:15, Saravana Kannan <saravanak@google.com> wrote:
+>
+> On Mon, Jan 31, 2022 at 7:46 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Wed, 26 Jan 2022 at 04:46, Saravana Kannan <saravanak@google.com> wrote:
+> > >
+> > > I'm trying to understand the MMC suspend path a bit.
+> > >
+> > > I looked at the commit message of 6fa79651cc808f68db6f6f297be5a950ccd5dffb.
+> > >
+> > > IIUC, if MMC_CAP_WAIT_WHILE_BUSY is set then the mmc framework is
+> > > going to depend on the card_busy() op to ensure correctness instead of
+> > > using the S_A_TIMEOUT value from the card.
+> >
+> > MMC_CAP_WAIT_WHILE_BUSY indicates whether the mmc controller supports
+> > IRQ based busy detection completion. In other words, the mmc host
+> > driver can receive an IRQ when busy signaling is completed on DAT0 by
+> > the eMMC card.
+> >
+> > However, to avoid waiting for the IRQ forever, there is a maximum
+> > timeout that is specified by the mmc core, for the particular command
+> > in question. For eMMC sleep, the S_A_TIMEOUT.
+>
+> Ah ok, thanks for the explanation.
+>
+> >
+> > >
+> > > But I see a lot of mmc host drivers that implement card_busy() but
+> > > don't set the MMC_CAP_WAIT_WHILE_BUSY flag. That doesn't seem right to
+> > > me if my understanding is correct.
+> >
+> > That's perfectly okay. MMC_CAP_WAIT_WHILE_BUSY is IRQ based, while the
+> > ->card_busy() ops is used to poll for busy completion.
+>
+> Yeah, it makes sense now.
+>
+> One thing I noticed when playing with some hardware is that during
+> suspend, when MMC_CAP_WAIT_WHILE_BUSY isn't set and we have a
+> card_busy() implementation, we don't seem to be using card_busy() op
+> and just always using the timeout from S_A_TIMEOUT. To be more
+> specific, I'm talking about this code path:
+> _mmc_suspend() -> mmc_sleep() -> mmc_delay() -> msleep()
+>
+> I'd think card_busy() could be used here if it's implemented. Is there
+> a reason for not using it in this path?
 
-Applied, thanks!
+That was exactly what commit 6fa79651cc80 ("mmc: core: Enable eMMC
+sleep commands to use HW busy polling") implemented. The commit was
+introduced in v5.14.
 
-[3/6] arm64: dts: qcom: msm8994: Provide missing "xo_board" and "sleep_clk" to GCC
-      commit: 4dd1ad6192748523878463a285346db408b34a02
-[4/6] arm64: dts: qcom: msm8994-huawei-angler: Add vendor name huawei
-      commit: 8af90d6daa36a7180a2cd6aad874136aade27412
+If it doesn't work, there is a bug somewhere.
 
-Best regards,
--- 
-Bjorn Andersson <bjorn.andersson@linaro.org>
+[...]
+
+Kind regards
+Uffe
