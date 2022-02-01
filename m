@@ -2,114 +2,58 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26669C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 04:20:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 078BDC4167E
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 11:02:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244504AbiBBEUV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Feb 2022 23:20:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45866 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244517AbiBBEUP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Feb 2022 23:20:15 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BCE9C06173E
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Feb 2022 20:13:56 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 77469616D2
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Feb 2022 04:13:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1E33CC004E1;
-        Wed,  2 Feb 2022 04:13:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1643775235;
-        bh=Xx9B1zi+n/cstmxZQ6vEJuDkGxcEsV4uBlMIkUUId+I=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=smNOygxqhj6Ohp8rWrenjj2xlJubfoSeEgC5bszwiIRF12sfNii/2JT1tcCHm+B1X
-         vwLkeBm4UxviWDIX+mlFocMX2RKAVeFCXreWmHcvUfUj8T46GRFW+J5WfhqnVKfQU7
-         3cS5lHdzZsKPxK4GRuogiMb31BkE2bSIEuK4En5/xr8HEEZVW6qEY1uGyFxx3etFTQ
-         F6bNiF5U/SXLd202v1reE6BgoTpfxBATLzdFhsxEsdogM+WY9uOT1hp+nwaVWT5JDN
-         GoT56bcEGjTKcOF6NyPyKBIjPjP8NxoF2eziqPk0PUSChBOkBQlrswsKeUvEJ8i0U9
-         +YdwDqkTi3wiQ==
-Date:   Wed, 2 Feb 2022 09:43:51 +0530
-From:   Vinod Koul <vkoul@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: renesas_sdhi_sys_dmac: use
- DMA_SLAVE_BUSWIDTH_UNDEFINED
-Message-ID: <YfoE//tsrv8rrzA1@matsya>
-References: <5e22c587-5698-e132-4429-48674a6ddbb7@omp.ru>
- <CAPDyKFrm5==gBSZBuPWYU+AcNxYz8K_=X_=5k6JnHN+3a9-bug@mail.gmail.com>
+        id S232670AbiBBLCM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Feb 2022 06:02:12 -0500
+Received: from mail.profitfirm24.com.pl ([212.237.10.110]:58956 "EHLO
+        mail.profitfirm24.com.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1343629AbiBBLCL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 06:02:11 -0500
+Received: by mail.profitfirm24.com.pl (Postfix, from userid 1001)
+        id 04B14AA829; Tue,  1 Feb 2022 09:17:34 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=profitfirm24.com.pl;
+        s=mail; t=1643707238;
+        bh=M1ZVeu3q6Upppe+FUx/3rgI7MKJXh389NZDbgCK1SX4=;
+        h=Date:From:To:Subject:From;
+        b=yQOuWFwiC6u7r37Z1/VvV2aNmvzpM5FU940CiS6nVE3iMrtBmGe14WUBBo9FdPRis
+         Gt7FT6XVOaV68DJnftN3jQf2k9QXo95i5SvkqVOZGd0/k1AVvCJVizzkOZddgTLZ+Z
+         dvERIesQtOkVgG0kyZCleUH/py+dYgt5v0mPunPQlpQSjtcLjXa7kK6AeUhwzG6EF2
+         AikcQh+VgyRqBYgI4o8j2lrEt/mAdoGexO+AMSBch59VSFVCmAD7A8T/65poDSfpy0
+         6xfUWO1SbiLqYydZsGk06NVi4k2yzU7QbxHFnUDUTypbB4mz+CxRNSJjXdDrlAVkFi
+         /kmJ8u/JL8Zwg==
+Received: by profitfirm24.com.pl for <linux-mmc@vger.kernel.org>; Tue,  1 Feb 2022 09:17:20 GMT
+Message-ID: <20220201074652-0.1.b.2ywi.0.5sj28nqnx6@profitfirm24.com.pl>
+Date:   Tue,  1 Feb 2022 09:17:20 GMT
+From:   =?UTF-8?Q? "Arkadiusz_Soko=C5=82owski" ?= 
+        <arkadiusz.sokolowski@profitfirm24.com.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: Koszty instalacji fotowoltaicznej
+X-Mailer: mail.profitfirm24.com.pl
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrm5==gBSZBuPWYU+AcNxYz8K_=X_=5k6JnHN+3a9-bug@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 31-01-22, 17:26, Ulf Hansson wrote:
-> + Vinod
-> 
-> On Fri, 21 Jan 2022 at 21:38, Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
-> >
-> > The 'dma_slave_config::{src|dst}_addr_width' fields have the *enum* type
-> > which isn't isomorphic with the *bool* type, however is used as a boolean
-> > expression. Use the *enum* dma_slave_buswidth's value corresponding to 0
-> > instead.
-> >
-> > Found by Linux Verification Center (linuxtesting.org) with the SVACE static
-> > analysis tool.
-> 
-> I have no strong opinion, but just wanted to make sure this is inline
-> with what Vinod wants.
-> 
-> There are not so many users checking DMA_SLAVE_BUSWIDTH_UNDEFINED,
-> perhaps we should simply drop it and instead leave the checks below as
-> is?
+Dzie=C5=84 dobry,
 
-DMA_SLAVE_BUSWIDTH_UNDEFINED was defined as 0.
-I think it might be overkill and should be fine to keep the check as
-is..
+stworzyli=C5=9Bmy specjaln=C4=85 ofert=C4=99 dla firm, na kompleksow=C4=85=
+ obs=C5=82ug=C4=99 inwestycji w fotowoltaik=C4=99. =20
 
-> 
-> >
-> > Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
-> 
-> Kind regards
-> Uffe
-> 
-> >
-> > ---
-> > This patch is against the 'next' branch of Ulf Hansson's 'mmc.git' repo.
-> >
-> > drivers/mmc/host/renesas_sdhi_sys_dmac.c |    4 ++--
-> >  1 file changed, 2 insertions(+), 2 deletions(-)
-> >
-> > Index: mmc/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > ===================================================================
-> > --- mmc.orig/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > +++ mmc/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-> > @@ -370,7 +370,7 @@ static void renesas_sdhi_sys_dmac_reques
-> >                 cfg.dst_addr = res->start +
-> >                         (CTL_SD_DATA_PORT << host->bus_shift);
-> >                 cfg.dst_addr_width = priv->dma_priv.dma_buswidth;
-> > -               if (!cfg.dst_addr_width)
-> > +               if (cfg.dst_addr_width == DMA_SLAVE_BUSWIDTH_UNDEFINED)
-> >                         cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
-> >                 cfg.src_addr = 0;
-> >                 ret = dmaengine_slave_config(host->chan_tx, &cfg);
-> > @@ -389,7 +389,7 @@ static void renesas_sdhi_sys_dmac_reques
-> >                 cfg.direction = DMA_DEV_TO_MEM;
-> >                 cfg.src_addr = cfg.dst_addr + host->pdata->dma_rx_offset;
-> >                 cfg.src_addr_width = priv->dma_priv.dma_buswidth;
-> > -               if (!cfg.src_addr_width)
-> > +               if (cfg.src_addr_width == DMA_SLAVE_BUSWIDTH_UNDEFINED)
-> >                         cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
-> >                 cfg.dst_addr = 0;
-> >                 ret = dmaengine_slave_config(host->chan_rx, &cfg);
+Specjalizujemy si=C4=99 w zakresie doboru, monta=C5=BCu i serwisie instal=
+acji fotowoltaicznych, dysponujemy najnowocze=C5=9Bniejszymi rozwi=C4=85z=
+ania, kt=C3=B3re zapewni=C4=85 Pa=C5=84stwu oczekiwane rezultaty.
 
--- 
-~Vinod
+Mo=C5=BCemy przygotowa=C4=87 dla Pa=C5=84stwa wst=C4=99pn=C4=85 kalkulacj=
+=C4=99 i przeanalizowa=C4=87 efekty mo=C5=BCliwe do osi=C4=85gni=C4=99cia=
+=2E
+
+Czy s=C4=85 Pa=C5=84stwo otwarci na wst=C4=99pn=C4=85 rozmow=C4=99 w tym =
+temacie?
+
+
+Pozdrawiam
+Arkadiusz Soko=C5=82owski
