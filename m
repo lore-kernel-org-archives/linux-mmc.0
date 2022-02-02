@@ -2,58 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 078BDC4167E
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 11:02:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4210EC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 14:27:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232670AbiBBLCM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Feb 2022 06:02:12 -0500
-Received: from mail.profitfirm24.com.pl ([212.237.10.110]:58956 "EHLO
-        mail.profitfirm24.com.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343629AbiBBLCL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 06:02:11 -0500
-Received: by mail.profitfirm24.com.pl (Postfix, from userid 1001)
-        id 04B14AA829; Tue,  1 Feb 2022 09:17:34 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=profitfirm24.com.pl;
-        s=mail; t=1643707238;
-        bh=M1ZVeu3q6Upppe+FUx/3rgI7MKJXh389NZDbgCK1SX4=;
-        h=Date:From:To:Subject:From;
-        b=yQOuWFwiC6u7r37Z1/VvV2aNmvzpM5FU940CiS6nVE3iMrtBmGe14WUBBo9FdPRis
-         Gt7FT6XVOaV68DJnftN3jQf2k9QXo95i5SvkqVOZGd0/k1AVvCJVizzkOZddgTLZ+Z
-         dvERIesQtOkVgG0kyZCleUH/py+dYgt5v0mPunPQlpQSjtcLjXa7kK6AeUhwzG6EF2
-         AikcQh+VgyRqBYgI4o8j2lrEt/mAdoGexO+AMSBch59VSFVCmAD7A8T/65poDSfpy0
-         6xfUWO1SbiLqYydZsGk06NVi4k2yzU7QbxHFnUDUTypbB4mz+CxRNSJjXdDrlAVkFi
-         /kmJ8u/JL8Zwg==
-Received: by profitfirm24.com.pl for <linux-mmc@vger.kernel.org>; Tue,  1 Feb 2022 09:17:20 GMT
-Message-ID: <20220201074652-0.1.b.2ywi.0.5sj28nqnx6@profitfirm24.com.pl>
-Date:   Tue,  1 Feb 2022 09:17:20 GMT
-From:   =?UTF-8?Q? "Arkadiusz_Soko=C5=82owski" ?= 
-        <arkadiusz.sokolowski@profitfirm24.com.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Koszty instalacji fotowoltaicznej
-X-Mailer: mail.profitfirm24.com.pl
+        id S238355AbiBBO1T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Feb 2022 09:27:19 -0500
+Received: from ams.source.kernel.org ([145.40.68.75]:59336 "EHLO
+        ams.source.kernel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237320AbiBBO1S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 09:27:18 -0500
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 29FA1B83104;
+        Wed,  2 Feb 2022 14:27:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 28731C340EB;
+        Wed,  2 Feb 2022 14:27:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1643812035;
+        bh=Py5hbDI7QFg9kVgjWXWbp00X8G2g7PgLmwuqyEPZHcE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Y6WNv3ThAYd/x/EDjfwGovlFMA408t9XdMxIed4ZEGXGGpud+xxJI10oeC77BeuxT
+         a8D20GPdAXdKobH+GNm/wjm4/k84/hKbkkVpcr/8Ain/mfz3ouSWBV/HxVZpE3aTDh
+         8oTVBs/oGBCEGCGFlwtdEbxD2NsOsDGuRcNMDL38Y0IoqkriqecZJrcpI7TO7OCcu0
+         BfKet0eHIx60TX4k7cyj770tBbY09hCqcDa1Xh5eeE0wTqxiYyxAjUG++Ios4P0O0f
+         PRf6TuUm6Qf5Eq9CHvgVAI4MlGgFRGGs81AWgSF1iDDxccoxLJaxdZw+bBui1IESoC
+         76Phn4iNqZyiA==
+Date:   Wed, 2 Feb 2022 19:57:12 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     "allen-kh.cheng" <allen-kh.cheng@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>, hsinyi@chromium.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-mediatek@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, linux-iio@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH v3 5/7] dt-bindings: phy: Add compatible for Mediatek
+ MT8186
+Message-ID: <YfqUwO16KxmBE7vP@matsya>
+References: <20220128062050.23978-1-allen-kh.cheng@mediatek.com>
+ <20220128062050.23978-6-allen-kh.cheng@mediatek.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220128062050.23978-6-allen-kh.cheng@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,
+On 28-01-22, 14:20, allen-kh.cheng wrote:
+> From: Allen-KH Cheng <Allen-KH.Cheng@mediatek.com>
+> 
+> This commit adds dt-binding documentation of T-Phy for Mediatek MT8186 SoC
+> Platform.
 
-stworzyli=C5=9Bmy specjaln=C4=85 ofert=C4=99 dla firm, na kompleksow=C4=85=
- obs=C5=82ug=C4=99 inwestycji w fotowoltaik=C4=99. =20
+Applied, thanks
 
-Specjalizujemy si=C4=99 w zakresie doboru, monta=C5=BCu i serwisie instal=
-acji fotowoltaicznych, dysponujemy najnowocze=C5=9Bniejszymi rozwi=C4=85z=
-ania, kt=C3=B3re zapewni=C4=85 Pa=C5=84stwu oczekiwane rezultaty.
-
-Mo=C5=BCemy przygotowa=C4=87 dla Pa=C5=84stwa wst=C4=99pn=C4=85 kalkulacj=
-=C4=99 i przeanalizowa=C4=87 efekty mo=C5=BCliwe do osi=C4=85gni=C4=99cia=
-=2E
-
-Czy s=C4=85 Pa=C5=84stwo otwarci na wst=C4=99pn=C4=85 rozmow=C4=99 w tym =
-temacie?
-
-
-Pozdrawiam
-Arkadiusz Soko=C5=82owski
+-- 
+~Vinod
