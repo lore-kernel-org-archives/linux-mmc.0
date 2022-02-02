@@ -2,102 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79D04C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 18:07:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BCA1C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 18:24:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346474AbiBBSHJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Feb 2022 13:07:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36186 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346491AbiBBSHF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 13:07:05 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6E3FC06173B;
-        Wed,  2 Feb 2022 10:07:04 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id m11so251817edi.13;
-        Wed, 02 Feb 2022 10:07:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=tdNoO+0JES8dypYccGmpRy+mfWGQ7BG4TFVZPkHwt0k=;
-        b=qUTIybu3JdNyGhZcyTKiqhGmVbuXefceqr9jzgLMKZh47ybfHa7MHRtJx6EcHGutpe
-         qzJG9facXuolXfaDZSPpPEMKaIY0rAbtjDV+iSRR3eGWGCi+tMKNmSq692TnkQWadU+n
-         1XZzDAsfZJCPPkJ+qKL1YcZhpIHhLcVh8I99mILd1sOopogfJN1fmh5F1c1BMEjay9V5
-         gbQGtK5gkDpuWfSvbBGzoZSIoEC42am9yvXLkWN2IMrcvOMJjhWSRGk1UX5zfI0u7JSq
-         2ep3xKhrXQRlpG5WqUxtOePEbVTNzQsoZ1SSsHaspsy/A5o/OUVrjJL/DIOl7MyEAmud
-         jkXg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=tdNoO+0JES8dypYccGmpRy+mfWGQ7BG4TFVZPkHwt0k=;
-        b=LlrKH07w1Q+9K3P/vAQ7Zealvhi5sQcE45C0b8OC58aObmWtk8VwZiDDnDwPYVi74+
-         WEabOyJmyNGM5wSSYSi+EEOlPyZ5pJUhYY2OgR/Dq26oisSCJKxYcZTeKrF/CofilAUG
-         OgI0dLGO9VWZwLxWwDt4zOgYYturT8kVQjWXlTRN7cBiG16ihM3+w9jjPCep4cpH38zn
-         TWHcq5v5J1jP3RgMBbI5uLBQCPhHfaWE35ImbjrvxHxQtvIkqJ7l9vbSdSf8sSooyM+1
-         f1aAgJBBKUKq5K109217fqfnx2QkEhPhpsiPzdOGFvs+RxxCELHxuyhgMJ9pTkEWKfpD
-         YuMw==
-X-Gm-Message-State: AOAM531lbyCQ9EbFo2yyKHpFi14eGj8rMWdnd4Ok8PtdsUxFvycBDcWf
-        DpHzKDOO3o2tNOjFIBYm+2k=
-X-Google-Smtp-Source: ABdhPJw7Uing6mDjKEv7mKYBUgrEE/xCQOm1tXwNrv5PCY8iz1M3OafxhmqHvlUpfPdOUvaxoBU1ng==
-X-Received: by 2002:a05:6402:430a:: with SMTP id m10mr31084761edc.67.1643825223423;
-        Wed, 02 Feb 2022 10:07:03 -0800 (PST)
-Received: from localhost.localdomain (p4fd5939b.dip0.t-ipconnect.de. [79.213.147.155])
-        by smtp.gmail.com with ESMTPSA id ee37sm3223005edb.106.2022.02.02.10.07.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Feb 2022 10:07:03 -0800 (PST)
-From:   Bean Huo <huobean@gmail.com>
-To:     ulf.hansson@linaro.org, eugen.hristev@microchip.com,
-        adrian.hunter@intel.com, nicolas.ferre@microchip.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     beanhuo@micron.com
-Subject: [PATCH 5/5] mmc: davinci: Use of_device_get_match_data() helper
-Date:   Wed,  2 Feb 2022 19:06:48 +0100
-Message-Id: <20220202180648.1252154-6-huobean@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220202180648.1252154-1-huobean@gmail.com>
-References: <20220202180648.1252154-1-huobean@gmail.com>
+        id S1346628AbiBBSYl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Feb 2022 13:24:41 -0500
+Received: from mga07.intel.com ([134.134.136.100]:56229 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1346617AbiBBSYl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Feb 2022 13:24:41 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1643826281; x=1675362281;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=DPfe9S7gsr3XHu4Wjcofqz2TIxLgJSBh0vUtgBSr5RM=;
+  b=bLG2Dgb+gWanVKYq65gi+agM4SLh6ssO0DJMNTEP7G3+VlNOOZHT63Hs
+   lxpu2SlK+N4qUo+2CK03RHmPUbStyqdr+GnQUQfhv6HYzaZ3BlJvLt+tH
+   m77E6VARgr1+BEeeXXlI4ea55SZ+b1k3L3AAHYryvrcHB4TuVSXvwJh/N
+   Lgvmljzf6xhgRuwBVh6Ue423o6ZRbAcurkJyHb0vF0DLTttjdqS6r6X9R
+   ZDaBfgVoPnQBVNTo9Y1+DpK8anmpDxSXbew5NsaWQ231qGmP7RnA+FDwV
+   ZuBv6wbZpoQCF3x0g4bS4tvQu6htfGhxBliYMiLUzpa1AhsJAL0NT9coF
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10246"; a="311297740"
+X-IronPort-AV: E=Sophos;i="5.88,337,1635231600"; 
+   d="scan'208";a="311297740"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2022 10:24:40 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,337,1635231600"; 
+   d="scan'208";a="566088755"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by orsmga001.jf.intel.com with ESMTP; 02 Feb 2022 10:24:39 -0800
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+        id 9779C3B7; Wed,  2 Feb 2022 20:24:53 +0200 (EET)
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 1/1] mmc: dw_mmc: Use device_property_string_array_count()
+Date:   Wed,  2 Feb 2022 20:24:50 +0200
+Message-Id: <20220202182450.54925-1-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Bean Huo <beanhuo@micron.com>
+Use device_property_string_array_count() to get number of strings
+in a string array property.
 
-Only the device data is needed, not the entire struct of_device_id.
-Use of_device_get_match_data() instead of of_match_device().
-
-Signed-off-by: Bean Huo <beanhuo@micron.com>
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/davinci_mmc.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 2a757c88f9d2..0cf646ec9a80 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -1189,7 +1189,6 @@ static int mmc_davinci_parse_pdata(struct mmc_host *mmc)
- 
- static int davinci_mmcsd_probe(struct platform_device *pdev)
- {
--	const struct of_device_id *match;
- 	struct mmc_davinci_host *host = NULL;
- 	struct mmc_host *mmc = NULL;
- 	struct resource *r, *mem = NULL;
-@@ -1235,9 +1234,8 @@ static int davinci_mmcsd_probe(struct platform_device *pdev)
- 
- 	host->mmc_input_clk = clk_get_rate(host->clk);
- 
--	match = of_match_device(davinci_mmc_dt_ids, &pdev->dev);
--	if (match) {
--		pdev->id_entry = match->data;
-+	pdev->id_entry = of_device_get_match_data(&pdev->dev);
-+	if (pdev->id_entry) {
- 		ret = mmc_of_parse(mmc);
- 		if (ret) {
- 			dev_err_probe(&pdev->dev, ret,
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 99b201921954..3420a7ad6098 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3057,8 +3057,7 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 		dev_info(host->dev, "Using internal DMA controller.\n");
+ 	} else {
+ 		/* TRANS_MODE_EDMAC: check dma bindings again */
+-		if ((device_property_read_string_array(dev, "dma-names",
+-						       NULL, 0) < 0) ||
++		if ((device_property_string_array_count(dev, "dma-names") < 0) ||
+ 		    !device_property_present(dev, "dmas")) {
+ 			goto no_dma;
+ 		}
 -- 
-2.25.1
+2.34.1
 
