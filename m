@@ -2,59 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57603C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 18:07:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAD55C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Feb 2022 18:07:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231880AbiBBSHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Feb 2022 13:07:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36166 "EHLO
+        id S235872AbiBBSHE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Feb 2022 13:07:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36176 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229790AbiBBSHC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 13:07:02 -0500
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CB5EC061714;
-        Wed,  2 Feb 2022 10:07:01 -0800 (PST)
-Received: by mail-ej1-x632.google.com with SMTP id ka4so65813ejc.11;
-        Wed, 02 Feb 2022 10:07:01 -0800 (PST)
+        with ESMTP id S230512AbiBBSHD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 13:07:03 -0500
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4241CC061714;
+        Wed,  2 Feb 2022 10:07:03 -0800 (PST)
+Received: by mail-ej1-x630.google.com with SMTP id jx6so249774ejb.0;
+        Wed, 02 Feb 2022 10:07:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=oqTmB0axPVxCTS0sxTTWZlHegO1uPd5y6swwpolQnGc=;
-        b=P8jc1aWcY/XL+b7QzCSCota0C9bBW2ksXIMnw3cZizHXrVzdVkJ/aBQ2bgRjJEBIsP
-         zQJXucoZaRzhET2d54m1slInWOrbdUBRpnpzTmAwCQczXA/tIWPn1QjFN0a/JvkeAznJ
-         JhDTRsLIy9iYhrWyn1su135zmHPebTBtfcgQCSsBQZDwwYa+RL5Um0be+zCu+6pHhDQ+
-         giez63aK7Zx4J/VcBcKawe41fSwRrtKX45K50VRbY+Tjj+IF+VSHwp6qUiimZ22OA+Gy
-         ny4LvBrGHgvXkGhl71jx9IxF2rBUzJHmkJvfknmfdNpbdex2buTEOGxdg+G5gDQ7e3as
-         2ZsA==
+        bh=DAIcuwwi2BP4NiFyHqKe0BCgP8mtwzjUa/ZfXGkPZks=;
+        b=GOMfXIy6GygS0cMun5y2V4/XiJph+7Lvpo1R7S60UziS3zp3BmAGhWPdW6ZLs2Vly7
+         nb9b0ERNumAQEbrKKCVwZXd4PdGpmJJkPw+z/QmzTgklWLU3FtdMaHkQeFSLZlY79nmt
+         NthTUFUQM7YS9Dt1UhqNsnYSsZ4CJrJu5REHsKB1LugbyQ+r7FVtww/eVJvKsD/bE583
+         d8KvEHhislw3WdAx6KBholYbaGHcrSfCkBEONVjQCsP5duEbidt+vOQqsQ9pJw0EVpIy
+         AVM25riavAnLOWFIB8FAafNXQTpBAUAupLu9f/jIxYv8DICIwwsjxsRv9ZpKMF7t/L6K
+         ob0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=oqTmB0axPVxCTS0sxTTWZlHegO1uPd5y6swwpolQnGc=;
-        b=q4lWvhqL1IWzlqksWc2O0MvgVB+CGYXwz3BuxaeR2W38XhMeWLG2LHfApqSgqnN2yP
-         W1L8AFNNqPG32ivwgM9pC4h7j+i6CT2NMAW/QGPPdocich7XYkI4g/3JYlYwvzNHKUg7
-         uD9w0IgJIvixEbShXcaSvfaeHT7e9cz19WIqwt0KWRKJA1QoU5xl+GwdMjdca75Gv5gQ
-         skpLdv2milkPWVhcOrJe9S3XYUxJLkF7U+ZonoSA3msD34fB4sKdI2R7xHp1zRMAo1+G
-         2NCSIq/Cbhf+7186JcqHrYeHZ3zxM8WNPM/VxxALhYyJV3drtFvJwDqjOP8m9/wQDEvy
-         w5pg==
-X-Gm-Message-State: AOAM530NI8AJV3koFzdIyEdTz2/3qC3PwBgLMrxykcaJEoP1oUFrGsO5
-        2v4xSH7TfGnfXyQCQujlsms=
-X-Google-Smtp-Source: ABdhPJw/vxEGYkblydj48bZS2rASRw0MuODJxDJoFc58voLMjHalgIzxCNmfpPlt/b9B/RBgN2Exww==
-X-Received: by 2002:a17:907:2ce4:: with SMTP id hz4mr18280325ejc.261.1643825220235;
-        Wed, 02 Feb 2022 10:07:00 -0800 (PST)
+        bh=DAIcuwwi2BP4NiFyHqKe0BCgP8mtwzjUa/ZfXGkPZks=;
+        b=xJ7bfI2jusJvqIevL/8dyAbMmgA6Uxh8OFEl57Kne+wi+lHofcEjmeQOUZEm21kw8P
+         4IQWAjlbHJxZi94xWIaPzPvNmgR5oSfixGoTBlDPMlSM80Bls70mr1D/DVWPtuZpQ/sI
+         QP6mevR/gxobE2hvL3B/n689cxi+engM2E7vLEMqVb8/xR0yMDM3oAo2J9itTnt15aHp
+         HgXzm5GGN7ifOdm5R2aZyEJ7wf3fD4/UavaAYuKnYueH8IBbsuQyBWM7bfaMpIb1LVEJ
+         QMqP4tPnNP5e9NIy4FkTC9yVSyTtUXeE7580R7+dqWof+N5+YuXwi9M7efdX5+JtKGpv
+         NBjA==
+X-Gm-Message-State: AOAM533bSn3R+NnFUZvuiSnsb2DT/T5QD+a3/C9tdy+prZ+6VJ34fN6+
+        d4k/5AqZbwH1W/j4W4PnX0c=
+X-Google-Smtp-Source: ABdhPJxXPFfWWd175RQTh36iz0OTKrKqHNDt2PC8RAWyRPjuvciz6Sl9XGdZYPtCr7t3wd2eaW7Bvg==
+X-Received: by 2002:a17:907:7286:: with SMTP id dt6mr26104656ejc.285.1643825221869;
+        Wed, 02 Feb 2022 10:07:01 -0800 (PST)
 Received: from localhost.localdomain (p4fd5939b.dip0.t-ipconnect.de. [79.213.147.155])
-        by smtp.gmail.com with ESMTPSA id ee37sm3223005edb.106.2022.02.02.10.06.59
+        by smtp.gmail.com with ESMTPSA id ee37sm3223005edb.106.2022.02.02.10.07.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Feb 2022 10:06:59 -0800 (PST)
+        Wed, 02 Feb 2022 10:07:01 -0800 (PST)
 From:   Bean Huo <huobean@gmail.com>
 To:     ulf.hansson@linaro.org, eugen.hristev@microchip.com,
         adrian.hunter@intel.com, nicolas.ferre@microchip.com,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc:     beanhuo@micron.com
-Subject: [PATCH 1/5] mmc: wmt-sdmmc: Use of_device_get_match_data() helper
-Date:   Wed,  2 Feb 2022 19:06:44 +0100
-Message-Id: <20220202180648.1252154-2-huobean@gmail.com>
+Subject: [PATCH 3/5] mmc: sdhci-omap: Use of_device_get_match_data() helper
+Date:   Wed,  2 Feb 2022 19:06:46 +0100
+Message-Id: <20220202180648.1252154-4-huobean@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220202180648.1252154-1-huobean@gmail.com>
 References: <20220202180648.1252154-1-huobean@gmail.com>
@@ -66,40 +66,36 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Bean Huo <beanhuo@micron.com>
 
-Only the device data is needed, not the whole struct of_device_id.
-Use of_device_get_match_data() instead of open coding of of_match_device().
+Only the device data is needed, not the entire struct of_device_id.
+Use of_device_get_match_data() instead of open coding of_match_device().
 
 Signed-off-by: Bean Huo <beanhuo@micron.com>
 ---
- drivers/mmc/host/wmt-sdmmc.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index cf10949fb0ac..163ac9df8cca 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -751,19 +751,16 @@ static int wmt_mci_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 64e27c2821f9..676e3cbbfc95 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -1219,16 +1219,11 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_omap_host *omap_host;
  	struct mmc_host *mmc;
- 	struct wmt_mci_priv *priv;
- 	struct device_node *np = pdev->dev.of_node;
--	const struct of_device_id *of_id =
--		of_match_device(wmt_mci_dt_ids, &pdev->dev);
- 	const struct wmt_mci_caps *wmt_caps;
- 	int ret;
- 	int regular_irq, dma_irq;
+-	const struct of_device_id *match;
+ 	struct sdhci_omap_data *data;
+ 	const struct soc_device_attribute *soc;
+ 	struct resource *regs;
  
--	if (!of_id || !of_id->data) {
-+	wmt_caps = of_device_get_match_data(&pdev->dev);
-+	if (!wmt_caps) {
- 		dev_err(&pdev->dev, "Controller capabilities data missing\n");
- 		return -EFAULT;
- 	}
- 
--	wmt_caps = of_id->data;
+-	match = of_match_device(omap_sdhci_match, dev);
+-	if (!match)
+-		return -EINVAL;
 -
- 	if (!np) {
- 		dev_err(&pdev->dev, "Missing SDMMC description in devicetree\n");
- 		return -EFAULT;
+-	data = (struct sdhci_omap_data *)match->data;
++	data = of_device_get_match_data(&pdev->dev);
+ 	if (!data) {
+ 		dev_err(dev, "no sdhci omap data\n");
+ 		return -EINVAL;
 -- 
 2.25.1
 
