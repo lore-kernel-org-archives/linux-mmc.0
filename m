@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC438C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 02:40:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C5A1C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 04:21:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349096AbiBCCkz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Feb 2022 21:40:55 -0500
-Received: from mga06.intel.com ([134.134.136.31]:10743 "EHLO mga06.intel.com"
+        id S1344822AbiBCEVq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Feb 2022 23:21:46 -0500
+Received: from mga17.intel.com ([192.55.52.151]:29848 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1349104AbiBCCkw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Feb 2022 21:40:52 -0500
+        id S245287AbiBCEVp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Feb 2022 23:21:45 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1643856052; x=1675392052;
+  t=1643862105; x=1675398105;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=Fr4QYVGryPRCB9GK8wBYEAQ+/I6R6J7BVEbebjxhu/c=;
-  b=MehTSnhtmahSvHE13JSNFdRSkMNsupL1QSuQWfyrg0WcR2urKqbfSXXx
-   rSLXR5KBLS2YHNM/i2bJ4Nga8CtUQIapAXEcMx2S8GVEOXGRw0UQ0nhvp
-   FU2lff6Xz1EXpdQesqNWB02LIdgx26B4yGmUbWLSyB/1lALcg6MPfGi36
-   XfL7FlG8KaVpF81Sz/g/7O7oVvjmgMgkjupg0UWjNAXyl8Ecwk1ksU463
-   8AJbISsdhpwLGQpc3MSeTKYip6LePslEMyXK15DRcMcMdBDhmBP0WWwXC
-   h7w581hD9rF+/FSdmaRUIG/OKHX/EFlPTxkEVQ6gx4rpTpvn5TU91G4m0
-   Q==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10246"; a="308792905"
+  bh=lnRJAeoNlBOuReXM0IAo9uLQfX1piqeDJ1U14yaNvQM=;
+  b=XwGT/Ea1R5dniJj9tQZSl2A27oS42fXsQLXqXS0qPhKPMSVIPNlQgc84
+   o2jq4v7kcpvZt60mjNoO+NR+M3L5d2YxbAe09CotH1FanQo6El1Omblty
+   nTJvr+zUe7aUns7uJNmX/iTFHE5D0JeT+zOswzlFaxSTjUOmHmIMCBqI4
+   HNUU4JiRZoBsrnMtnKZV+rIz5l8CUU9pEcyDNmANxK4RnMKP+puSw2/1a
+   RB9c8MkHXtrG/fZhLyvcZ+VebPdM5RehguAkfR1dDJkZ8pxGrQ3yzWvwH
+   RHwiBwqNSFsuSYBC5uMo2uOFtfh1MReQHYs/OMFXaygTDSUwuyzbQ9RqM
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10246"; a="228726757"
 X-IronPort-AV: E=Sophos;i="5.88,338,1635231600"; 
-   d="scan'208";a="308792905"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2022 18:40:42 -0800
+   d="scan'208";a="228726757"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2022 20:21:45 -0800
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.88,338,1635231600"; 
-   d="scan'208";a="627290236"
+   d="scan'208";a="631217624"
 Received: from lkp-server01.sh.intel.com (HELO 276f1b88eecb) ([10.239.97.150])
-  by fmsmga002.fm.intel.com with ESMTP; 02 Feb 2022 18:40:39 -0800
+  by orsmga004.jf.intel.com with ESMTP; 02 Feb 2022 20:21:42 -0800
 Received: from kbuild by 276f1b88eecb with local (Exim 4.92)
         (envelope-from <lkp@intel.com>)
-        id 1nFS34-000VS9-E2; Thu, 03 Feb 2022 02:40:38 +0000
-Date:   Thu, 3 Feb 2022 10:39:43 +0800
+        id 1nFTcr-000VYy-Uu; Thu, 03 Feb 2022 04:21:41 +0000
+Date:   Thu, 3 Feb 2022 12:21:35 +0800
 From:   kernel test robot <lkp@intel.com>
 To:     Bean Huo <huobean@gmail.com>, ulf.hansson@linaro.org,
         eugen.hristev@microchip.com, adrian.hunter@intel.com,
@@ -46,7 +46,7 @@ To:     Bean Huo <huobean@gmail.com>, ulf.hansson@linaro.org,
 Cc:     kbuild-all@lists.01.org, beanhuo@micron.com
 Subject: Re: [PATCH 3/5] mmc: sdhci-omap: Use of_device_get_match_data()
  helper
-Message-ID: <202202030919.aWKiSg0Q-lkp@intel.com>
+Message-ID: <202202031221.asY8tGvu-lkp@intel.com>
 References: <20220202180648.1252154-4-huobean@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -69,31 +69,31 @@ https://git-scm.com/docs/git-format-patch]
 
 url:    https://github.com/0day-ci/linux/commits/Bean-Huo/Use-of_device_get_match_data-helper/20220203-020721
 base:   https://git.kernel.org/pub/scm/linux/kernel/git/tegra/linux.git for-next
-config: riscv-allyesconfig (https://download.01.org/0day-ci/archive/20220203/202202030919.aWKiSg0Q-lkp@intel.com/config)
-compiler: riscv64-linux-gcc (GCC) 11.2.0
-reproduce (this is a W=1 build):
+config: openrisc-randconfig-s031-20220131 (https://download.01.org/0day-ci/archive/20220203/202202031221.asY8tGvu-lkp@intel.com/config)
+compiler: or1k-linux-gcc (GCC) 11.2.0
+reproduce:
         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
         chmod +x ~/bin/make.cross
+        # apt-get install sparse
+        # sparse version: v0.6.4-dirty
         # https://github.com/0day-ci/linux/commit/33ccc62e7dd0ac8f965521ed7ff44ff52182f4b0
         git remote add linux-review https://github.com/0day-ci/linux
         git fetch --no-tags linux-review Bean-Huo/Use-of_device_get_match_data-helper/20220203-020721
         git checkout 33ccc62e7dd0ac8f965521ed7ff44ff52182f4b0
         # save the config file to linux build tree
         mkdir build_dir
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross O=build_dir ARCH=riscv SHELL=/bin/bash drivers/iio/multiplexer/ drivers/mmc/host/
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' O=build_dir ARCH=openrisc SHELL=/bin/bash drivers/mmc/host/
 
 If you fix the issue, kindly add following tag as appropriate
 Reported-by: kernel test robot <lkp@intel.com>
 
-All warnings (new ones prefixed by >>):
 
-   drivers/mmc/host/sdhci-omap.c: In function 'sdhci_omap_probe':
->> drivers/mmc/host/sdhci-omap.c:1226:14: warning: assignment discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
-    1226 |         data = of_device_get_match_data(&pdev->dev);
-         |              ^
+sparse warnings: (new ones prefixed by >>)
+>> drivers/mmc/host/sdhci-omap.c:1226:14: sparse: sparse: incorrect type in assignment (different modifiers) @@     expected struct sdhci_omap_data *data @@     got void const * @@
+   drivers/mmc/host/sdhci-omap.c:1226:14: sparse:     expected struct sdhci_omap_data *data
+   drivers/mmc/host/sdhci-omap.c:1226:14: sparse:     got void const *
 
-
-vim +/const +1226 drivers/mmc/host/sdhci-omap.c
+vim +1226 drivers/mmc/host/sdhci-omap.c
 
   1212	
   1213	static int sdhci_omap_probe(struct platform_device *pdev)
