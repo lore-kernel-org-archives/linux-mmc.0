@@ -2,128 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24EC1C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 09:16:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08577C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 10:09:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230504AbiBCJQI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Feb 2022 04:16:08 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:37856 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230259AbiBCJQH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Feb 2022 04:16:07 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1643879766;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=upgByqr3JPm/pcAvrDmZYGayUFSi5IEqwps1GZG/nc0=;
-        b=Qxm8VKikeG+QX0VkKNto9q14lv5+WZbJcZZAoVEaNjktiKsBQzKsg5FAUdTx0ff1BdH2uT
-        SdkfTdEAPkyxg8rOFd3FoQHEOjmPG6TATYMCIDAkTots7hqZSH9oWHjaj8snXJTByyvY9L
-        bSPLjj/356QAfsgv+kyU/8ET4DmByDI=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-568-EoxAI1sUPIO6LAQoAIe3XA-1; Thu, 03 Feb 2022 04:16:03 -0500
-X-MC-Unique: EoxAI1sUPIO6LAQoAIe3XA-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 306AA814245;
-        Thu,  3 Feb 2022 09:16:02 +0000 (UTC)
-Received: from localhost (unknown [10.39.192.146])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 09D181062227;
-        Thu,  3 Feb 2022 09:15:54 +0000 (UTC)
-Date:   Thu, 3 Feb 2022 09:15:53 +0000
-From:   Stefan Hajnoczi <stefanha@redhat.com>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-block@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 2/5] virtio_blk: simplify refcounting
-Message-ID: <YfudSXcT2rNh/Jhl@stefanha-x1.localdomain>
-References: <20220202155659.107895-1-hch@lst.de>
- <20220202155659.107895-3-hch@lst.de>
+        id S238482AbiBCKJW convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Feb 2022 05:09:22 -0500
+Received: from mail3.swissbit.com ([176.95.1.57]:59852 "EHLO
+        mail3.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234035AbiBCKJU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Feb 2022 05:09:20 -0500
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 06D24460A9F;
+        Thu,  3 Feb 2022 11:09:19 +0100 (CET)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id EC4F546322C;
+        Thu,  3 Feb 2022 11:09:18 +0100 (CET)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Thu,  3 Feb 2022 11:09:18 +0100 (CET)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.15; Thu, 3 Feb 2022
+ 11:09:18 +0100
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0986.015; Thu, 3 Feb 2022 11:09:18 +0100
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+CC:     Avri Altman <Avri.Altman@wdc.com>
+Subject: Re: [PATCH] mmc: block: fix read single on recovery logic
+Thread-Topic: [PATCH] mmc: block: fix read single on recovery logic
+Thread-Index: AQHYAlL02lgrcWpb+EOcEaPCcQdJl6yBx2Gn
+Date:   Thu, 3 Feb 2022 10:09:18 +0000
+Message-ID: <7c4757cc707740e580c61c39f963a04d@hyperstone.com>
+References: <5e5f2e45d0a14a55a8b7a9357846114b@hyperstone.com>
+In-Reply-To: <5e5f2e45d0a14a55a8b7a9357846114b@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.3.17]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="PeAgK0yhrSE0EZQO"
-Content-Disposition: inline
-In-Reply-To: <20220202155659.107895-3-hch@lst.de>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+X-TMASE-Version: DDEI-5.1-8.6.1018-26692.007
+X-TMASE-Result: 10--3.675200-10.000000
+X-TMASE-MatchedRID: 6E41RGmUyPrUL3YCMmnG4pkuHsgxfUFHAQ+35UHH2f36eRMM1gvcpCaC
+        jkFKp/+ebb+wP0Qo+N6TH1CW/Tkdqjfa6I248QZMLIrMljt3adu6dLKJpXxNs88DuAI4aSPIUWr
+        H6uLHVmtRmLjbyj6kWmX11xk42G8LTs5DMzlmM75wju9EALAXQlWiBZGwRpH+xuolijDY9YAEY2
+        eP08wZcuTlgVW5pemqPfRUVBjvSwsZHQl0dvECsZqvoi7RQmPSVCGp3g4/hjuxLSxkQHtzxtskx
+        tNP0r9NrdoLblq9S5ra/g/NGTW3MjmzjEr3tKb/xwBkXG2rycZ+tO36GYDlsj7y9gkl1CGUo8WM
+        kQWv6iUig6xaCvyzXY6HM5rqDwqtmm/tjUqU0sbdwni0+hA3TF+2Mt0DNJdsa+FJvRU2+c6BIUG
+        uEvaFzA==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 2b18a417-0f9d-4db4-a53b-f7e2230719dc-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+So could anyone take a long at this so far?
 
---PeAgK0yhrSE0EZQO
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Wed, Feb 02, 2022 at 04:56:56PM +0100, Christoph Hellwig wrote:
-> @@ -985,8 +947,6 @@ static void virtblk_remove(struct virtio_device *vdev)
->  	kfree(vblk->vqs);
-> =20
->  	mutex_unlock(&vblk->vdev_mutex);
-> -
-> -	virtblk_put(vblk);
->  }
 
-Thank you, this is a nice cleanup! One question:
+From: Christian Löhle
+Sent: Wednesday, January 5, 2022 5:43 PM
+To: ulf.hansson@linaro.org; Christian Löhle; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org
+Cc: Avri Altman
+Subject: [PATCH] mmc: block: fix read single on recovery logic
+    
+On reads with MMC_READ_MULTIPLE_BLOCK that fail,
+the recovery handler will use MMC_READ_SINGLE_BLOCK for
+each of the blocks, up to MMC_READ_SINGLE_RETRIES times each.
+The logic for this is fixed to never report unsuccessful reads
+as success to the block layer.
 
-File systems are unmounted and block devices are not open. PCI hot
-unplug calls virtblk_remove(). It looks vblk is used after being freed
-by virtblk_free_disk() halfway through virtblk_remove()?
+On command error with retries remaining, blk_update_request was
+called with whatever value error was set last to.
+In case it was last set to BLK_STS_OK (default), the read will be
+reported as success, even though there was no data read from the device.
+This could happen on a CRC mismatch for the response,
+a card rejecting the command (e.g. again due to a CRC mismatch).
+In case it was last set to BLK_STS_IOERR, the error is reported correctly,
+but no retries will be attempted.
 
-  static void virtblk_remove(struct virtio_device *vdev)
-  {
-          struct virtio_blk *vblk =3D vdev->priv;
- =20
-          /* Make sure no work handler is accessing the device. */
-          flush_work(&vblk->config_work);
- =20
-          del_gendisk(vblk->disk);
-          blk_cleanup_disk(vblk->disk);
-	          ^--- is virtblk_free_disk() called here?
-          blk_mq_free_tag_set(&vblk->tag_set);
-	                         ^--- use after free
- =20
-          mutex_lock(&vblk->vdev_mutex);
- =20
-          /* Stop all the virtqueues. */
-          virtio_reset_device(vdev);
- =20
-          /* Virtqueues are stopped, nothing can use vblk->vdev anymore. */
-          vblk->vdev =3D NULL;
- =20
-          vdev->config->del_vqs(vdev);
-          kfree(vblk->vqs);
- =20
-          mutex_unlock(&vblk->vdev_mutex);
-  }
+The patch now will count both command and data errors as retries and
+send BLK_STS_IOERR if there are no retries remaining,
+or BLK_STS_OK if the single read was successful in the meantime.
 
-Stefan
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ drivers/mmc/core/block.c | 28 ++++++++++++++--------------
+ 1 file changed, 14 insertions(+), 14 deletions(-)
 
---PeAgK0yhrSE0EZQO
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEyBAEBCAAdFiEEhpWov9P5fNqsNXdanKSrs4Grc8gFAmH7nUkACgkQnKSrs4Gr
-c8jN5Af4iefIKAa+WFTDInuj0dl0GqxL+bsDsqNBDCW3K7iOiQgIseKP/QpFl3n6
-4mtnQAzuafGzOc9g2LlaL1R3tTbz3hK5Vo2MeNSwI60VfMkOGmxh2G9ORRqVBfG6
-K884fdqqhR5QDBaJq9cysUjqUtCw6adOa2LR0jqbwX4SbwJhpab1W/zBy2jq7XWD
-WP+2D/1S5nmR8VwAYqpI5xFzoxtTmkN2mVR7niF2nQxutTzeorYHwMF9ZEPkoAcB
-nDUDhWU5rREG2a26dOemMRcitNHjT85xZxWYGB+SvdZCgT9kwJP69gJTkeJ+smC6
-2uOsaWdcWDALmkpFn1IdRd5uX5r3
-=0b+G
------END PGP SIGNATURE-----
-
---PeAgK0yhrSE0EZQO--
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 90e1bcd03b46..d7d880ce0f8a 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1682,31 +1682,31 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+         struct mmc_card *card = mq->card;
+         struct mmc_host *host = card->host;
+         blk_status_t error = BLK_STS_OK;
+-       int retries = 0;
+ 
+         do {
+                 u32 status;
+                 int err;
++               int retries = 0;
+ 
+-               mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
++               while (retries++ < MMC_READ_SINGLE_RETRIES) {
++                       mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
+ 
+-               mmc_wait_for_req(host, mrq);
++                       mmc_wait_for_req(host, mrq);
+ 
+-               err = mmc_send_status(card, &status);
+-               if (err)
+-                       goto error_exit;
+-
+-               if (!mmc_host_is_spi(host) &&
+-                   !mmc_ready_for_data(status)) {
+-                       err = mmc_blk_fix_state(card, req);
++                       err = mmc_send_status(card, &status);
+                         if (err)
+                                 goto error_exit;
+-               }
+ 
+-               if (mrq->cmd->error && retries++ < MMC_READ_SINGLE_RETRIES)
+-                       continue;
++                       if (!mmc_host_is_spi(host) &&
++                           !mmc_ready_for_data(status)) {
++                               err = mmc_blk_fix_state(card, req);
++                               if (err)
++                                       goto error_exit;
++                       }
+ 
+-               retries = 0;
++                       if (!mrq->cmd->error && !mrq->data->error)
++                               break;
++               }
+ 
+                 if (mrq->cmd->error ||
+                     mrq->data->error ||
+-- 
+2.34.1
+    =
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
