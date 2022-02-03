@@ -2,109 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3836C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 08:59:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24EC1C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 09:16:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347901AbiBCI7q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Feb 2022 03:59:46 -0500
-Received: from wnew2-smtp.messagingengine.com ([64.147.123.27]:47041 "EHLO
-        wnew2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231764AbiBCI7q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Feb 2022 03:59:46 -0500
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-        by mailnew.west.internal (Postfix) with ESMTP id D3D522B001B8;
-        Thu,  3 Feb 2022 03:59:44 -0500 (EST)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute5.internal (MEProxy); Thu, 03 Feb 2022 03:59:46 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; bh=EpiBukeZdut+hZos8noJKKPPM5H6pXyi49s4av
-        h90GE=; b=FGthVDX4E3XqAjsaiHeS6t0+CXoYuhpvNRcmAadJqU5whNjlZ4gmjW
-        HM/mSrCzy4awZEqbq9vObAMnPUor+v+sZcxTsO79/3CuUeH/XoCn4cop/1d8xo1X
-        6/Q1EMQmCU0ujPt0WEf1FQRY9uzxfVoldYXt7kejfLNDCb+dHRjvCaQ9QEKeX0SQ
-        x93bBKsAXlwTAHCoduvXzURUuNJkfFv+4pmx9iIhAjixcUIQXfpu3CBqj36QZtn+
-        cl2R3HC1L5ziOU7WAH1+UED44o8GAKJvJYnjzv+AEQpD2pTquHXR0vo0fLp6SB5p
-        cJEDoum7C0fmLqK1U2G/Hq0CNKGb2ddg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:from:from
-        :in-reply-to:in-reply-to:message-id:mime-version:references
-        :reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy
-        :x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=EpiBukeZdut+hZos8
-        noJKKPPM5H6pXyi49s4avh90GE=; b=BsVLeaW8ue9DnkT/ZI/Ny4lWr/YHYf7fP
-        qtc+yQXp7WdUt12lBCreKQ0B4fFUqpG7X5lihWO6sgeGoEBgyr3OThpTkWdOrop/
-        HOv2gsvYryCRzMXMt2Z7kVskpO0f587vwkrWHnrwkfMYuV8Z2vx2Q66EzwLnhPZL
-        Y3P/0q7/qXgLspm/29Fm1N27NjlIyMXnSTqjjeEpeaLfTTUpRueIz1g947eq90EG
-        +AE3rkHjwOc3aGl93LowNsK9uOIMuOY3kvEvkCaJ9ztl7iK9AKAlaWRZJtP6fnSb
-        mJEKegVRLeVukB9wHFdfN9P3lWTClj9SaDuSsQmSj3WtcQn9x/hYg==
-X-ME-Sender: <xms:f5n7Ya2bJ1nASG3TvNMhJ6CtwYsDo03NPkLRY3S8ncxJMEMqg5sXdQ>
-    <xme:f5n7YdHSLF2uXOJO8GN1UeSlqGvakVm5dX468kZSM0NN9CSwrBkybV-I6k-dGG2dy
-    GkKZRW1BTu9R_a7Q-A>
-X-ME-Received: <xmr:f5n7YS7hiX9YTd3N1VAKdpiy8iKKHw_cwiX-eAAACEN7jF5m3APHp6wy-QuEnaIcKlAi7sqeKtjKRpVl0s2PYMp32kmdBPttCjTWERs>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvvddrgeeigdduvdegucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepfffhvffukfhfgggtuggjsehgtderredttddvnecuhfhrohhmpeforgigihhm
-    vgcutfhiphgrrhguuceomhgrgihimhgvsegtvghrnhhordhtvggthheqnecuggftrfgrth
-    htvghrnhepleekgeehhfdutdeljefgleejffehfffgieejhffgueefhfdtveetgeehieeh
-    gedunecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepmh
-    grgihimhgvsegtvghrnhhordhtvggthh
-X-ME-Proxy: <xmx:f5n7Yb2gT-1Qo1Ep3v9yq36XLZFeTwCCK2HqkjSkQEXDngC6mk30Yw>
-    <xmx:f5n7YdEC0eV-G9DJxhnZD5a4uVffWrJgYxcTVWY1EZLCEcA2Uoss1g>
-    <xmx:f5n7YU-VGPqHOE76yfknmf87qol4lQoT8V2JSecD4zdjESRb3mc0Rw>
-    <xmx:gJn7Ycf6Ef3MfyHrNjbOo9SkEbQhDPIDEKWIuQ_foiglWPnACJz5eK2UKxI>
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Thu,
- 3 Feb 2022 03:59:42 -0500 (EST)
-Date:   Thu, 3 Feb 2022 09:59:40 +0100
-From:   Maxime Ripard <maxime@cerno.tech>
-To:     Samuel Holland <samuel@sholland.org>
-Cc:     Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org,
-        Takashi Iwai <tiwai@suse.com>,
-        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Jaroslav Kysela <perex@perex.cz>, Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        linux-sunxi@lists.linux.dev, alsa-devel@alsa-project.org,
+        id S230504AbiBCJQI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Feb 2022 04:16:08 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:37856 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230259AbiBCJQH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Feb 2022 04:16:07 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1643879766;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=upgByqr3JPm/pcAvrDmZYGayUFSi5IEqwps1GZG/nc0=;
+        b=Qxm8VKikeG+QX0VkKNto9q14lv5+WZbJcZZAoVEaNjktiKsBQzKsg5FAUdTx0ff1BdH2uT
+        SdkfTdEAPkyxg8rOFd3FoQHEOjmPG6TATYMCIDAkTots7hqZSH9oWHjaj8snXJTByyvY9L
+        bSPLjj/356QAfsgv+kyU/8ET4DmByDI=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-568-EoxAI1sUPIO6LAQoAIe3XA-1; Thu, 03 Feb 2022 04:16:03 -0500
+X-MC-Unique: EoxAI1sUPIO6LAQoAIe3XA-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 306AA814245;
+        Thu,  3 Feb 2022 09:16:02 +0000 (UTC)
+Received: from localhost (unknown [10.39.192.146])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 09D181062227;
+        Thu,  3 Feb 2022 09:15:54 +0000 (UTC)
+Date:   Thu, 3 Feb 2022 09:15:53 +0000
+From:   Stefan Hajnoczi <stefanha@redhat.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-block@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
         linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 0/3] ASoC: sun4i-i2s: Support for Allwinner R329 and D1
- SoCs
-Message-ID: <20220203085940.3mxixfnduerez5fd@houat>
-References: <20220203020116.12279-1-samuel@sholland.org>
+Subject: Re: [PATCH 2/5] virtio_blk: simplify refcounting
+Message-ID: <YfudSXcT2rNh/Jhl@stefanha-x1.localdomain>
+References: <20220202155659.107895-1-hch@lst.de>
+ <20220202155659.107895-3-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="rv5b6xkp6hnwyq66"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="PeAgK0yhrSE0EZQO"
 Content-Disposition: inline
-In-Reply-To: <20220203020116.12279-1-samuel@sholland.org>
+In-Reply-To: <20220202155659.107895-3-hch@lst.de>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---rv5b6xkp6hnwyq66
+--PeAgK0yhrSE0EZQO
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On Wed, Feb 02, 2022 at 08:01:12PM -0600, Samuel Holland wrote:
-> This series extends the sun4i-i2s binding and driver to support some
-> newer versions of the hardware. Each instance of the hardwar now has
-> multiple input/output pins, and channels can be muxed between them.
-> Since so far the driver only supports a "default" linear channel map,
-> the driver changes are minimal.
+On Wed, Feb 02, 2022 at 04:56:56PM +0100, Christoph Hellwig wrote:
+> @@ -985,8 +947,6 @@ static void virtblk_remove(struct virtio_device *vdev)
+>  	kfree(vblk->vqs);
+> =20
+>  	mutex_unlock(&vblk->vdev_mutex);
+> -
+> -	virtblk_put(vblk);
+>  }
 
-Acked-by: Maxime Ripard <maxime@cerno.tech>
+Thank you, this is a nice cleanup! One question:
 
-Maxime
+File systems are unmounted and block devices are not open. PCI hot
+unplug calls virtblk_remove(). It looks vblk is used after being freed
+by virtblk_free_disk() halfway through virtblk_remove()?
 
---rv5b6xkp6hnwyq66
+  static void virtblk_remove(struct virtio_device *vdev)
+  {
+          struct virtio_blk *vblk =3D vdev->priv;
+ =20
+          /* Make sure no work handler is accessing the device. */
+          flush_work(&vblk->config_work);
+ =20
+          del_gendisk(vblk->disk);
+          blk_cleanup_disk(vblk->disk);
+	          ^--- is virtblk_free_disk() called here?
+          blk_mq_free_tag_set(&vblk->tag_set);
+	                         ^--- use after free
+ =20
+          mutex_lock(&vblk->vdev_mutex);
+ =20
+          /* Stop all the virtqueues. */
+          virtio_reset_device(vdev);
+ =20
+          /* Virtqueues are stopped, nothing can use vblk->vdev anymore. */
+          vblk->vdev =3D NULL;
+ =20
+          vdev->config->del_vqs(vdev);
+          kfree(vblk->vqs);
+ =20
+          mutex_unlock(&vblk->vdev_mutex);
+  }
+
+Stefan
+
+--PeAgK0yhrSE0EZQO
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iHUEABYKAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCYfuZfAAKCRDj7w1vZxhR
-xTI+AP9ur9oPoumWyy6gsTnPceqJd66z4Nz316mJUbstvHP2OgEAqUNDn2LQognL
-CuzIrK19HzCMrHHLTynsRk75+ZrYvg4=
-=3wn8
+iQEyBAEBCAAdFiEEhpWov9P5fNqsNXdanKSrs4Grc8gFAmH7nUkACgkQnKSrs4Gr
+c8jN5Af4iefIKAa+WFTDInuj0dl0GqxL+bsDsqNBDCW3K7iOiQgIseKP/QpFl3n6
+4mtnQAzuafGzOc9g2LlaL1R3tTbz3hK5Vo2MeNSwI60VfMkOGmxh2G9ORRqVBfG6
+K884fdqqhR5QDBaJq9cysUjqUtCw6adOa2LR0jqbwX4SbwJhpab1W/zBy2jq7XWD
+WP+2D/1S5nmR8VwAYqpI5xFzoxtTmkN2mVR7niF2nQxutTzeorYHwMF9ZEPkoAcB
+nDUDhWU5rREG2a26dOemMRcitNHjT85xZxWYGB+SvdZCgT9kwJP69gJTkeJ+smC6
+2uOsaWdcWDALmkpFn1IdRd5uX5r3
+=0b+G
 -----END PGP SIGNATURE-----
 
---rv5b6xkp6hnwyq66--
+--PeAgK0yhrSE0EZQO--
+
