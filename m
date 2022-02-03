@@ -2,117 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9CD2C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 01:51:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C28F9C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Feb 2022 02:01:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348857AbiBCBvX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Feb 2022 20:51:23 -0500
-Received: from wnew4-smtp.messagingengine.com ([64.147.123.18]:44063 "EHLO
+        id S244336AbiBCCBU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Feb 2022 21:01:20 -0500
+Received: from wnew4-smtp.messagingengine.com ([64.147.123.18]:35211 "EHLO
         wnew4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1348861AbiBCBvT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 20:51:19 -0500
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-        by mailnew.west.internal (Postfix) with ESMTP id 861152B000B2;
-        Wed,  2 Feb 2022 20:51:18 -0500 (EST)
+        by vger.kernel.org with ESMTP id S229640AbiBCCBU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Feb 2022 21:01:20 -0500
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.west.internal (Postfix) with ESMTP id C44542B0009C;
+        Wed,  2 Feb 2022 21:01:18 -0500 (EST)
 Received: from mailfrontend1 ([10.202.2.162])
-  by compute5.internal (MEProxy); Wed, 02 Feb 2022 20:51:19 -0500
+  by compute3.internal (MEProxy); Wed, 02 Feb 2022 21:01:20 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sholland.org; h=
         cc:cc:content-transfer-encoding:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm1; bh=oqPS/m8KdcwSEqSZDEqPQcylkLS5Bx
-        Wh5VCZ7RIAJTQ=; b=OPfolPSeFqBN7+2WBft/PzG9Qf+vuXW7fGAtKcdwY7hBt9
-        p//R5NQFO8Kd8XKpS0AzBpPbmh6/857b0+XMTCV0QTKddL/hph82cg8tYOROKOtD
-        m60SGmJRDF1MAX1WvmZUIDJ/Q7keZNxKZmJD569fVCAVt85JLxWeQkqVnBqhpcko
-        qobYSRLY2lz7muP3qb8/cYeZ+Rysek0IdjjVull/WeSeUQTfVWCTEPzlHi4eKCd9
-        ujDvEsqndXQsLQ8Y0LQmT3MHtQBrIQeb15Mx+IlXQe28AcDzx5JNEE8TU14hBQ9X
-        jGuFd+ova53J/nSVYSANOwAxDlj4N8EcjpKNWghg==
+        :message-id:mime-version:reply-to:sender:subject:subject:to:to;
+         s=fm1; bh=9CK2u6ee+e0QjQkxatovO9y+1G1KA4Gn5dGKWr+mjC4=; b=ZnegH
+        ZQ60vHjqTX4D7uUYXe5eqphy9Hom3Q0OMy2nkIxlMA2DdDrxYZ3DqqefN+nQtUpT
+        yNXkOPQdeKyZP7jhIAJobfZ8FFSZxqNqWrVDqK6cst2uAyFZ3PkpfW8eyZxtejPL
+        FOJgZjEW2/+OiJyTAeMNteQPecTYN4uLWsQA6cVjr4t5oc6dTfzkgNNOiLByxQIz
+        vRWF+AuWVFMDrBvDos1EfIqxc/QQfTfqTUNtErkCPAH6mwpmc3PWWaJIPOjENi8V
+        u2WSTGgtrgaC3ycJRELZlLaEu00TLYU4KBvxr+nhR+XgCBXUz4M99HDTlJ75Ubb1
+        4yxd0S/CMOQRfEhXQ==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
         messagingengine.com; h=cc:cc:content-transfer-encoding:date:date
-        :from:from:in-reply-to:in-reply-to:message-id:mime-version
-        :references:reply-to:sender:subject:subject:to:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=oqPS/m
-        8KdcwSEqSZDEqPQcylkLS5BxWh5VCZ7RIAJTQ=; b=gtvImH1Up2Cm+sAJovBnj/
-        u1UwtFmOzaQSgDyS4VgyIE/odakeT1coAhPNQUoP2EbzWRt7I3ZkE4zL71ev9nhn
-        dUUJvB5W55Ze2HYat5SvQcaBJ36KSwWpkPAyvypxdAutC8LnOMc2VtQB3wPEqb0F
-        +b6VzOKqStlEKY4a7W4KMtTFNtPi2zgKCsyn59EkdQOwJviotbdC+SuE2T7VZtL7
-        5rTeMmaRLuHN45HPFJNyeyQmkb/OpBec1U6QcchXLHX/ErkNFu9JvPnDl2qaUVGc
-        On1nyiSF4cd6YpMWnk2aKphBYw053OCCz9HwWKB+1A5XB2ij+awvly5kKtSh5dPw
-        ==
-X-ME-Sender: <xms:FTX7YTo_SHU8P_deJ_Av1PzwDC5Wq4pfe4E5XKDOBqoj1G10VOOPTw>
-    <xme:FTX7Ydoj_7XrQx9ts1UfjuxHm_fjpO7i_MVV5reE3Oru-7FROk-MD6hF_TQkXU5TX
-    EnprktQlZ6Sbu6e4A>
-X-ME-Received: <xmr:FTX7YQN4MMgHIFHj_PlPiz2Z8VgKRunD3oLZspIcBW3NR3relvRUCEEf75ziYjPv2isJL_4ZagaxnHLeovetL2Z1tZpVzN_TKDZv5XFPlhTjQ_BNybX0o6nIbdQLS09Fp5WOfA>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvvddrgeeigdefkecutefuodetggdotefrodftvf
+        :from:from:in-reply-to:message-id:mime-version:reply-to:sender
+        :subject:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender
+        :x-me-sender:x-sasl-enc; s=fm2; bh=9CK2u6ee+e0QjQkxatovO9y+1G1KA
+        4Gn5dGKWr+mjC4=; b=k+D/h9SjwYCWKitapyjE4CFvr771k8gxw7Y8BIGXhXRSl
+        3BmwxtA+eIgUyRHgv75UY9/Jo0FqzFvrWRN4gkUorKLbDuYzrM3acKPJhmKH134S
+        5z/4aAGAmOfuFc2//n8aEdm/ZjcGElm1p9pd9Ih7/UMsNI/u5KBUmSWM1ZNRbrfw
+        P+WKUvNQsUvrE74X6NkwAnW8bMTI77EYBL3FtoYgk1ESHKTRxV+1WP4Q0P7gVdRx
+        xBaev1c60GKfmA2F93IENygqGpEmSBHdB2FCFgXKHcOeobdS49qDtUwR52THaFzH
+        lqomZuaRuJyFomiG3YKBGitWxLepYkIuGvuRph1eg==
+X-ME-Sender: <xms:bTf7YTWTuuKlb-2J7ORvbqYz83iYnI8dE9FX0V4QiNm_qJo6jtnjFg>
+    <xme:bTf7YblnhByH9vvLtIvCq01RWFgLFs8fnLxUbpQNH37z0LNjbNWItK04uFEnHw9Ns
+    WDCenOTGpa-GHRJoQ>
+X-ME-Received: <xmr:bTf7Yfa3fB2XRQf_x8SZC4o0PrgTEFbYewlgQcpalf5dKPrMETPMx61W2Sbo4NPpttux9Ff4s0XMzJ8HLyKgPTQCaHduwDAExUL4RT4GUaIommUvGy-u2zi7vsIM0ncVj4qmCw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvvddrgeeigdegudcutefuodetggdotefrodftvf
     curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
     uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefhvffufffkofgjfhgggfestdekredtredttdenucfhrhhomhepufgrmhhuvghl
-    ucfjohhllhgrnhguuceoshgrmhhuvghlsehshhholhhlrghnugdrohhrgheqnecuggftrf
-    grthhtvghrnhepudfhjeefvdfhgfefheetgffhieeigfefhefgvddvveefgeejheejvdfg
-    jeehueeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
-    epshgrmhhuvghlsehshhholhhlrghnugdrohhrgh
-X-ME-Proxy: <xmx:FTX7YW43HUqixIHZQXzO4FLl7O4CAqVsfUIIfVBl7emb7B_Dx8jiLw>
-    <xmx:FTX7YS4y6Ydi0gAEyVY61HSRB9Sqfzh8wfXQxflBP33xMV1ubrc5BQ>
-    <xmx:FTX7YehNrgg-wlAIjsmlnj4lFLylDepyDvjqWdI1TBTbxvJ_tYx4ww>
-    <xmx:FjX7YbEPx4Y5JR8sZbV4Jxva-xc7G7L5zCMNy3qcVVWcynLtN873KXzazJY>
+    fjughrpefhvffufffkofgggfestdekredtredttdenucfhrhhomhepufgrmhhuvghlucfj
+    ohhllhgrnhguuceoshgrmhhuvghlsehshhholhhlrghnugdrohhrgheqnecuggftrfgrth
+    htvghrnhepieetkefhheduudfgledtudefjeejfeegveehkeeufffhhfejkeehiefftdev
+    tdevnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepsh
+    grmhhuvghlsehshhholhhlrghnugdrohhrgh
+X-ME-Proxy: <xmx:bTf7YeXDDMu_6kHYY28fau6Oqk9As0BsFHH-IU1ijs457m3pHLqUGw>
+    <xmx:bTf7YdnqzlUBoXW4aEgGLSOY3k7B_lYhOtW-nqNAKbnT_X_e9XAKRg>
+    <xmx:bTf7YbeQC5-kdjTaVhdNw7qQnWtRB-ASPOqgoIzTa_DSCDoagXD-Tw>
+    <xmx:bjf7YfnzjWVR7i8J84FPAx566rYwrVhpQEMs4t9x_SYoc3USMjfIpoQvK2g>
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Wed,
- 2 Feb 2022 20:51:16 -0500 (EST)
+ 2 Feb 2022 21:01:16 -0500 (EST)
 From:   Samuel Holland <samuel@sholland.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Maxime Ripard <mripard@kernel.org>, Chen-Yu Tsai <wens@csie.org>,
+To:     Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>
+Cc:     linux-kernel@vger.kernel.org, Takashi Iwai <tiwai@suse.com>,
+        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        Jaroslav Kysela <perex@perex.cz>,
+        Maxime Ripard <mripard@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>,
         Jernej Skrabec <jernej.skrabec@gmail.com>,
-        linux-sunxi@lists.linux.dev, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Samuel Holland <samuel@sholland.org>
-Subject: [PATCH 2/2] mmc: sunxi-mmc: Add D1 MMC variant
-Date:   Wed,  2 Feb 2022 19:51:11 -0600
-Message-Id: <20220203015112.12008-2-samuel@sholland.org>
+        linux-sunxi@lists.linux.dev, alsa-devel@alsa-project.org,
+        linux-mmc@vger.kernel.org, Samuel Holland <samuel@sholland.org>
+Subject: [PATCH 0/3] ASoC: sun4i-i2s: Support for Allwinner R329 and D1 SoCs
+Date:   Wed,  2 Feb 2022 20:01:12 -0600
+Message-Id: <20220203020116.12279-1-samuel@sholland.org>
 X-Mailer: git-send-email 2.33.1
-In-Reply-To: <20220203015112.12008-1-samuel@sholland.org>
-References: <20220203015112.12008-1-samuel@sholland.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-D1's MMC controllers are unique in that they have the DMA address shift
-(like A100) with a 13-bit descriptor size field (like sun4i). Add the
-compatible and parameters for this new variant.
+This series extends the sun4i-i2s binding and driver to support some
+newer versions of the hardware. Each instance of the hardwar now has
+multiple input/output pins, and channels can be muxed between them.
+Since so far the driver only supports a "default" linear channel map,
+the driver changes are minimal.
 
-Signed-off-by: Samuel Holland <samuel@sholland.org>
----
 
- drivers/mmc/host/sunxi-mmc.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+Samuel Holland (3):
+  ASoC: dt-bindings: sun4i-i2s: Add compatibles for R329 and D1
+  ASoC: sun4i-i2s: Update registers for more channels
+  ASoC: sun4i-i2s: Add support for the R329/D1 variant
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 2702736a1c57..c62afd212692 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1167,6 +1167,14 @@ static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
- 	.can_calibrate = false,
- };
- 
-+static const struct sunxi_mmc_cfg sun20i_d1_cfg = {
-+	.idma_des_size_bits = 13,
-+	.idma_des_shift = 2,
-+	.can_calibrate = true,
-+	.mask_data0 = true,
-+	.needs_new_timings = true,
-+};
-+
- static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = NULL,
-@@ -1205,6 +1213,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
- 	{ .compatible = "allwinner,sun8i-a83t-emmc", .data = &sun8i_a83t_emmc_cfg },
- 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
-+	{ .compatible = "allwinner,sun20i-d1-mmc", .data = &sun20i_d1_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-emmc", .data = &sun50i_a64_emmc_cfg },
- 	{ .compatible = "allwinner,sun50i-a100-mmc", .data = &sun50i_a100_cfg },
+ .../sound/allwinner,sun4i-a10-i2s.yaml        |  5 ++
+ sound/soc/sunxi/sun4i-i2s.c                   | 68 +++++++++++++++----
+ 2 files changed, 59 insertions(+), 14 deletions(-)
+
 -- 
 2.33.1
 
