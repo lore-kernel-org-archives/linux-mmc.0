@@ -2,107 +2,195 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A57DAC433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Feb 2022 20:57:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1D07C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun,  6 Feb 2022 07:48:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235807AbiBEU5R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 5 Feb 2022 15:57:17 -0500
-Received: from mx2.freebsd.org ([96.47.72.81]:22371 "EHLO mx2.freebsd.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S241545AbiBEU5Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 5 Feb 2022 15:57:16 -0500
-Received: from mx1.freebsd.org (mx1.freebsd.org [96.47.72.80])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits)
-         client-signature RSA-PSS (4096 bits))
-        (Client CN "mx1.freebsd.org", Issuer "R3" (verified OK))
-        by mx2.freebsd.org (Postfix) with ESMTPS id 3D9B0765BE;
-        Sat,  5 Feb 2022 20:57:12 +0000 (UTC)
-        (envelope-from marius@freebsd.org)
-Received: from freefall.freebsd.org (freefall.freebsd.org [96.47.72.132])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256
-         client-signature RSA-PSS (4096 bits) client-digest SHA256)
-        (Client CN "freefall.freebsd.org", Issuer "R3" (verified OK))
-        by mx1.freebsd.org (Postfix) with ESMTPS id 4Jrl8S115cz4jv4;
-        Sat,  5 Feb 2022 20:57:12 +0000 (UTC)
-        (envelope-from marius@freebsd.org)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=freebsd.org; s=dkim;
-        t=1644094632;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=mOSRFVjhGeV3+LmN1bdkdkaeODnfJ0HC11OD5hljoUM=;
-        b=Go7kQzZ3FJp2QQD48i+4Bgt7lNVH0vy5nHSv5zqHti8DvWAVROgm+rY4bfDCP6rrivNX+E
-        Eme6L2WpYF4AysortUASSJCZrOBqqiCnm/Cgb3MJB5urBs9c5IWohjqhZFrJdHh3RT+ksX
-        r0+NMBtWKw4ySr86Ept68RbbumfDTFWUG20Wl6IZ7l0Ayw2FPG5cbpxOH1HLjqR7uAb2cX
-        Ojmp9UR/8LbTBuMMZTCJJZaPW9/nviE2zqkQiMtPQANVmv73CgS1G+CXKLlPmQPJ2Ax1YX
-        GxsKzMEge4WC7/FTp3nu8IBSFBZTfCOh4N4IbcNwdAknnxUn2M4nxewrTIuPHQ==
-Received: by freefall.freebsd.org (Postfix, from userid 1018)
-        id 086A03A47; Sat,  5 Feb 2022 20:57:12 +0000 (UTC)
-From:   Marius Strobl <marius@FreeBSD.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     Avri Altman <avri.altman@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Marius Strobl <marius@FreeBSD.org>
-Subject: [PATCH 3/3] mmc-utils: Display STROBE_SUPPORT when printing EXT_CSD
-Date:   Sat,  5 Feb 2022 20:56:47 +0000
-Message-Id: <20220205205647.7677-3-marius@FreeBSD.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20220205205647.7677-1-marius@FreeBSD.org>
+        id S229861AbiBFHsJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 6 Feb 2022 02:48:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34034 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229660AbiBFHsJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Feb 2022 02:48:09 -0500
+X-Greylist: delayed 61 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 05 Feb 2022 23:48:07 PST
+Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB16FC06173B
+        for <linux-mmc@vger.kernel.org>; Sat,  5 Feb 2022 23:48:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1644133687; x=1675669687;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=nndRWWT98/d7dlQvUYrr42zpr+0lmMKIctV9c14ov+c=;
+  b=ZjxsqQNci2gjP4Pl5zcw5dvMfZeCrpmmxgwMfsVcdHcLE9Lr/OnCTTD+
+   yxAqSwaE1kGKJNlC4JYK7FFuO2kJbuTojQFWciI/PUGeVk6i7duCK9JCs
+   TX8v/FgNUsSPKo9B0pdtcx/Qm3TE00zdRcvN4nwn9tmxwLFgw8fJBpVyX
+   sroPNPmOhafSJcJi7tjKCyGAVcsTpbS0c87WpAl67LGac8LykqtoMtQJK
+   YGNN7VHZVO5Tnnqi03Dim8HeaplC5tm6E5eeRAg8FUu5AuA0G3Ht/xyiZ
+   rTC65ZLrqDmKLinhBcTNIOwxuvZX4mUPVBnJvV7evowiMs8TbjNCIlRdE
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.88,347,1635177600"; 
+   d="scan'208";a="191194148"
+Received: from mail-dm6nam11lp2176.outbound.protection.outlook.com (HELO NAM11-DM6-obe.outbound.protection.outlook.com) ([104.47.57.176])
+  by ob1.hgst.iphmx.com with ESMTP; 06 Feb 2022 15:47:04 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=lsc+wdYra7v5NV1l+oHstOH99d9PLWSo1v0IzGOwHxoNX0Rqi8bU5urmA22WE60+y7TJpMyfqFJRnjM+a7uIzbQ5UmIpelslVGWqH4b+12dJQ0yFpoSBJL2aGOiI/wJwcMuHX9hULjaq9KJA3Wck2chT+6xg4pq7zpMphD/hV7R7/3bwC9ih51rI805R97ZEqZ8fWDB5hA5qKX0ii0OG6Okad6KFiJKKKwDSFtWRXd/j0lIWWbCEfpJ1c4RUxYNyAy2+XySGpqyXPmKYwuwr+SFvQtgY0JVC5n+/3MsQ5QiaFkQWc8PZTxuQGBwVPXFlrUEHNlLq/IIrWmogM15fuA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=J2XUFFVsVQnjbN0l9j2/P7xSCjoR58ZrmYqy35HvDt8=;
+ b=DoMyN112wrt9mVSDEYwAh0p29gFuFNAR5ZvypyGdfLPLYKdGrRPQTnCFmmSfp9y+DylPQqs4UTTJJxZt/r57yeJVxY50UKAo6eQVxuoPhlkU5eWf5Cw2jVvu4fvuZxW4RTlMuL24v3LrDQlJeH58N1mRF06UFSYyGxC6WqeaVlKY92JS/ESxXVanvgikmg4WV30db4ZAQXEl5nZo5e5ZzQJ176fw/dnekzUUFmldqukdR4P+A5Nkx/mhuppq1MjZIpCSSLKvdxCeKirOoVEqHrmVNJdY4uYed4h+EugHB/EhwZLdRj05Rz8oTtDOw2jcx+PDOHOUJDbLEHwMT3bUlQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=J2XUFFVsVQnjbN0l9j2/P7xSCjoR58ZrmYqy35HvDt8=;
+ b=DclF+L5nvEOFNatWBO6ufAfVetTr7hZhWQ5wCxpOrb1D3ZmVedwXNk1LifcDAV0gwG+bSHakkon1JrQPu3Vap03S0Mt7gZ4KHZXYGzVvIjlW9d1LdFOaX+qwE/+5j+ScfBRT3xSqKri4HTITyaANS4m7zm2wYNoBpgEeRnkr/PQ=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ MWHPR0401MB3529.namprd04.prod.outlook.com (2603:10b6:301:78::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4951.11; Sun, 6 Feb
+ 2022 07:47:01 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::14b1:1b88:427:df7]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::14b1:1b88:427:df7%6]) with mapi id 15.20.4951.018; Sun, 6 Feb 2022
+ 07:47:01 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     Marius Strobl <marius@FreeBSD.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: RE: [PATCH 1/3] mmc-utils: manpage: Document -c option for
+ partitioning commands
+Thread-Topic: [PATCH 1/3] mmc-utils: manpage: Document -c option for
+ partitioning commands
+Thread-Index: AQHYGtL68d1ig94h2E6AoqKCqON1u6yGJQlA
+Date:   Sun, 6 Feb 2022 07:47:01 +0000
+Message-ID: <DM6PR04MB6575C84BE1581A53D7D0D2A7FC2B9@DM6PR04MB6575.namprd04.prod.outlook.com>
 References: <20220205205647.7677-1-marius@FreeBSD.org>
+In-Reply-To: <20220205205647.7677-1-marius@FreeBSD.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: ced83459-f79b-4785-4dd7-08d9e944dc83
+x-ms-traffictypediagnostic: MWHPR0401MB3529:EE_
+x-microsoft-antispam-prvs: <MWHPR0401MB3529560A8C70F0A494E2ECF7FC2B9@MWHPR0401MB3529.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-oob-tlc-oobclassifiers: OLM:923;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: VaqW85deJ5JlpsD/Wltwup6BNmjQAsANO+ds/plG73JsZGx7V18z0C3As+vI+20duAYhTdZAEg9iwGSRAsEjfh54YEZS9UDocLtfPpD6Sv+g0YJmGqYHWeT2/eKpjzv8W+/HmREb9al8xxDfC643zxH8FXhSdlcfdITeHkMcrQLtnduZrjRZQPyhhzv5hXfMhq/hrgjPg9DO/wlWzR6dJ7WDXX3xoGLG59RFRNKX1eFV4+Pr5Fh4Sxztv30dlI21LwqTJIvn/9VZe7jOcv4cc6N0XhIRVitES+gTUh0cW2jfWeKhOi1vLZDFxu8naANdIyR6pykLRagfp+FQKgBxlGse4iYj5itrAXqwH2iuGhJ0PPHrniv/RCGbzzBjo1EWp1FCTOp5DWU+l6bx0oeStJkFKxWY+GSNb0ubd0KsSmX+cEMAeKJ6vusFHMKXFdttg3h5D1sT7UAUGIbHM7sYpanq8prbzMTmJbAHgVWj8xq6hvDouUWOp5HCEVa5K4wAiThpzFJEADps4zDEsRdBIzyzOe6mBIJf6fWY++slMQOuD3NhN9HDjQWvV63CmM6sp4uXkKWmSX+4A9gs9vXWw0eS8XoDPSFAKuWvt/YXy/tpiMEp6Za9qQPeTVD6reiXwsE+1dx34MGqAK0Ws2PqP02yy849XMCpdEd7P9LDjzxS0vuQL7Ro8+wX1ooiiAO3EYe6K6TX4bA+VqnULcWC3w==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(66446008)(9686003)(4326008)(82960400001)(76116006)(66946007)(508600001)(38100700002)(8676002)(8936002)(38070700005)(52536014)(71200400001)(64756008)(83380400001)(7696005)(6506007)(66556008)(316002)(66476007)(110136005)(2906002)(122000001)(55016003)(86362001)(33656002)(186003)(26005)(5660300002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?ITdcXvsbUIFh3jnHTQLPDuHitLgE9zf2SdB064vSeInoAXfbp067YHndprA2?=
+ =?us-ascii?Q?b7PP3OxTrYcuX/qEVw7H4IQdCbd4ctvMkLFOBLOsN3RkXO30+8RhJOHu0qoW?=
+ =?us-ascii?Q?n4WpRonnMQZo5F2KsdIkhC7lGaiRbxhHrl9WbUJAc1DRcu0LOn2fSCqklNz/?=
+ =?us-ascii?Q?9L5pinqjeP8zHHa45bNhb5qGg5e3CAPUMc6qZqk5U+IPC/nUnFD4xPtZB5rz?=
+ =?us-ascii?Q?M5peRMTVEq1k+VhbBmsr1fFFiR6AZJlcueSpIes7pz88QYDQl7LcfTneIaJF?=
+ =?us-ascii?Q?0uYsfj0L1pwHKx8q1z6CCFwKBSm3uj69yibpYOCTzUtyrPzJCABjqrSK7+O/?=
+ =?us-ascii?Q?/OgNwYWhaf2pZvCbPUyash55IMunmU01xJshuz4jb4EjTLD+5wlp7m1LFicZ?=
+ =?us-ascii?Q?ue95/mziYazlFr7048piyqKPOC2CMTMIrfN96npjIJA93xKa8E+jvO3ACPl5?=
+ =?us-ascii?Q?SeqfdSyrR3vNhin8xYTrDnYjMOqXo2Qme3TX6T6GU2dLdJCbFS0nol7TKG3x?=
+ =?us-ascii?Q?1N/Py5I6G9KoM/YPqoM1e8yxZo5ofVQCDWMzpPteOZjy4eVECx8lVbmEsNsZ?=
+ =?us-ascii?Q?DnNT9ef0lhU5D9bDGkIVQvL94Cw/Touqj09Jzy1y6dxrKM6TJVBp7cGPWew4?=
+ =?us-ascii?Q?qR/JO1lG/OFoY3OuAu2Oa7zv6yNzuu9OeORdCaJ7Xt4iYwx0dtoGoVZG0bne?=
+ =?us-ascii?Q?4Aq1t14du2CXjQABy8XkWzUEL3lZnpbyhhq1UNY1Zq+KZxNzfhCTZ/HT/0qo?=
+ =?us-ascii?Q?Kq61fy/EWI9HLBnRPRfHNq12OlcDCX9OyHAKrLNe+GFHQMcHX/I8xh7xBzkb?=
+ =?us-ascii?Q?5Rac4iYGu6GIuX2H6ssChs8B/UnPiZHeeAwEuOi3CZdekiMfQTz7b+todS9c?=
+ =?us-ascii?Q?UmeDk68N1J/0hbrmZDkihipwaDgLA/CkimdNuGBAamSVr7fNV/x5q7hPHv0w?=
+ =?us-ascii?Q?1hTzjlB1Pr/eWlQqDPXJz2c+1/6ARUxXd8FHsSa3+TG8Jwr0auIVRVHW38cQ?=
+ =?us-ascii?Q?gO4yZ/yrkP2qbkPGxmoqdiE60zpDa2hjTVk6Va89Bjr6kNEY9Jg3mS7RnPZW?=
+ =?us-ascii?Q?gdrXhrkQGd9L4pZbmwIox04IJPeVrJzzxuaAXGtRt8s4too9kFiRljH05zEe?=
+ =?us-ascii?Q?hyhaEpdgTavJtccEsfpSzkLSukYxDzt02AtkB2NZ+LuI2E3SKHuArWzsamLR?=
+ =?us-ascii?Q?We9I2y5Jlext3hPlbwki7W5Xwzc9YCFxdzK/7rBRBbl57z1qUtBtLfe6A/eA?=
+ =?us-ascii?Q?Tru4/iESpUqwyJ0mYNTetv7uE45uDMdHbvIWaNjDrVudZBFQL1ipvWmNIj8E?=
+ =?us-ascii?Q?i5cM8cjQnkCAC5PrgisU7WE5RB960+mDo8HGQfrHpXI0L2LfAjnONuP1tedu?=
+ =?us-ascii?Q?0pwJ9Wq+TsQ+Be4MmyqjaHGjkog8UMuuzStlkxy8LHaIFVH9S5E7GV4Tk9N+?=
+ =?us-ascii?Q?VRNG7KRzPSLa9N+HfXw31GqZCgunkgMBmvRIoOrsczcOeFu7fIFBafCPcxh6?=
+ =?us-ascii?Q?YoAOUabkuX7a5HDMrjr2wnJLv4KlNKiqp8V9JaKpJnH3eeHeuC3XVmL8VsRp?=
+ =?us-ascii?Q?akt81KCPmlPCByBhtcRFI9mlmmRz7tZt1NrQFshU3oyoWVyJQcwrfMWS2E+C?=
+ =?us-ascii?Q?wQ=3D=3D?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=freebsd.org;
-        s=dkim; t=1644094632;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=mOSRFVjhGeV3+LmN1bdkdkaeODnfJ0HC11OD5hljoUM=;
-        b=ZQRKpk15K16k5xZxEU/tzCVo6xSX5A3TYzbmtI+j7yVCNHLsYygs4V2li2hh1WCHZEoWr+
-        JdS1Tv4j/R7I9sFqiMqYQk2uybmbg7jGeBAr6ix/bb8ZxZyLlzzWdT8WvLe4JQmP0+6CaT
-        UCHSE0Qj1c0YeI+URrubmTZkThvz9L6Fye1ObjiVPvq0yFu42yWVDCM896Fxmn214p3pcw
-        T6tcTS85a9FnuiYOsvlEX3et5IT8jvN/zA4C5SZhwklHJArn4h4N/bRtTwMQwgThV5ryxg
-        XvjPm1lO0+Uh5Z3wFR5rN6gDStxG6eLSDWeo+wm2WeBC1A3n5fDdemp5YzJ5tQ==
-ARC-Seal: i=1; s=dkim; d=freebsd.org; t=1644094632; a=rsa-sha256; cv=none;
-        b=iAbys9EwdyJvkCHpoSnYh6n2ttOYMne3URkQy07dSb1BqrNB8S2CnKPqdSyRDZQSM9bkB3
-        8K8FIFUdpgDil9IH/UaOpiSY4sCJfnKn3NPeL5uVb/bgi2+HjvhAZ4I/dqc7/yHItCIIcr
-        rW+iUrG90IvEYRufrblyH/9X2n9KckK3zomjb1KYjwmbXJp5X8+IbCnAmuISUaXYbrL0NL
-        Iet4ICylwnocCqeXDMY9CmR4tAT36cEU+UEp86/nCUmhcOww0DTPmH56643Yu3kvQVrBkl
-        6N2zB28w90YKb7rwhsyd4laUZY40xOLCLdnMnB7pEK+pFsUbj7okv9NPx9ulBQ==
-ARC-Authentication-Results: i=1;
-        mx1.freebsd.org;
-        none
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ced83459-f79b-4785-4dd7-08d9e944dc83
+X-MS-Exchange-CrossTenant-originalarrivaltime: 06 Feb 2022 07:47:01.5339
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 5OlHeRms2a/+65UbxIHND5xRBBsaFqNpl9+f26UYQfNdKm3qoc5qrLitSNJQHkk6Vu5HpBqDQFayogVXf7w9ug==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR0401MB3529
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Support for Enhanced Strobe mode introduced in eMMC 5.1 JESD84-B51
-can be determined via EXT_CSD[184]. Along with the identification of
-HS400 data rates added in commit 3969aa4804ed ("mmc_cmds: add HS400
-data rates"), this allows to differentiate support for HS400/HS400ES.
+=20
+> The 'continue' option was added in commit 752072dafe9c ("Add -c option
+> for partitioning commands).
+>=20
+> Signed-off-by: Marius Strobl <marius@FreeBSD.org>
+Looks good to me.
 
-Signed-off-by: Marius Strobl <marius@FreeBSD.org>
----
- mmc_cmds.c | 3 +++
- 1 file changed, 3 insertions(+)
+A small editorial comment - if you are bundling your patches -
+a cover letter is usually attached with few words describing the series.
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index f024079..508ddad 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1628,6 +1628,9 @@ int do_read_extcsd(int nargs, char **argv)
- 	printf("Power class [POWER_CLASS: 0x%02x]\n", ext_csd[187]);
- 	printf("High-speed interface timing [HS_TIMING: 0x%02x]\n",
- 		ext_csd[185]);
-+	if (ext_csd_rev >= 8)
-+		printf("Enhanced Strobe mode [STROBE_SUPPORT: 0x%02x]\n",
-+			ext_csd[184]);
- 	/* bus_width: ext_csd[183] not readable */
- 	printf("Erased memory content [ERASED_MEM_CONT: 0x%02x]\n",
- 		ext_csd[181]);
--- 
-2.31.1
+Thanks,
+Avri
+
+> ---
+>  man/mmc.1 | 15 +++++++++------
+>  1 file changed, 9 insertions(+), 6 deletions(-)
+>=20
+> diff --git a/man/mmc.1 b/man/mmc.1
+> index bdb6f09..bccabf3 100644
+> --- a/man/mmc.1
+> +++ b/man/mmc.1
+> @@ -30,21 +30,24 @@ This sets the eMMC to be write-protected until next
+> boot.
+>  Set the eMMC data sector size to 4KB by disabling emulation on
+>  <device>.
+>  .TP
+> -.BR "gp create <-y|-n> <length KiB> <partition> <enh_attr> <ext_attr>
+> <device>"
+> +.BR "gp create <-y|-n|-c> <length KiB> <partition> <enh_attr> <ext_attr>
+> <device>"
+>  create general purpose partition for the <device>.
+> -Dry-run only unless -y is passed.
+> +Dry-run only unless -y or -c is passed.
+> +Use -c if more partitioning settings are still to come.
+>  To set enhanced attribute to general partition being created set <enh_at=
+tr> to 1
+> else set it to 0.
+>  To set extended attribute to general partition set <ext_attr> to 1,2 els=
+e set it to
+> 0.
+>  NOTE!  This is a one-time programmable (unreversible) change.
+>  .TP
+> -.BR "enh_area set <-y|-n> <start KiB> <length KiB> <device>"
+> +.BR "enh_area set <-y|-n|-c> <start KiB> <length KiB> <device>"
+>  Enable the enhanced user area for the <device>.
+> -Dry-run only unless -y is passed.
+> +Dry-run only unless -y or -c is passed.
+> +Use -c if more partitioning settings are still to come.
+>  NOTE!  This is a one-time programmable (unreversible) change.
+>  .TP
+> -.BR "write_reliability set <-y|-n> <partition> <device>"
+> +.BR "write_reliability set <-y|-n|-c> <partition> <device>"
+>  Enable write reliability per partition for the <device>.
+> -Dry-run only unless -y is passed.
+> +Dry-run only unless -y or -c is passed.
+> +Use -c if more partitioning settings are still to come.
+>  NOTE!  This is a one-time programmable (unreversible) change.
+>  .TP
+>  .BR "status get <device>"
+> --
+> 2.31.1
 
