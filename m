@@ -2,110 +2,204 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A811C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Feb 2022 11:59:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64472C43219
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Feb 2022 11:59:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243703AbiBGLqY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Feb 2022 06:46:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37326 "EHLO
+        id S1381649AbiBGLsn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Feb 2022 06:48:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1384387AbiBGL2C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Feb 2022 06:28:02 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBA44C03E946
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Feb 2022 03:26:09 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id o17so19088723ljp.1
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Feb 2022 03:26:09 -0800 (PST)
+        with ESMTP id S1353090AbiBGLMH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Feb 2022 06:12:07 -0500
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 606D0C043181
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Feb 2022 03:12:05 -0800 (PST)
+Received: by mail-lf1-x132.google.com with SMTP id u6so5063663lfc.3
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Feb 2022 03:12:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=77jDirKALASyuRe4H7SNos8+ceiZ5NwhVHAmzpu0zXA=;
-        b=YPG3HSxJDHKgSkLNtEZkTejuMRlS5t3d0YDL/GSegkBzscg/AzU0bbVAoAAIj2jYRj
-         aESr+4jgMaypMMIwM0Ho5vk5lfe7AUCINgESqbh1fjUuJHPGg3TszyV9MJG6Lsx9dlG3
-         lCaRevSAg68VQeJAGT8TYNZOWHv6gIYm98eYHsENIigae8mIHGqX3XT+TvMmFQm0D9fW
-         /EE7CB+EcTk3UXcfQR7OYRRuguM8pdwxYbFoHj/sP2ROwqrJ3r8MCdyqv+9f9NO1uHKL
-         /AqLLS18OjZzcg8UtTf+WhTvI7hSJ77JkNZ/92/dzIGYzYoMqlbKlUrJU0TXu15+UwRl
-         zg/w==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=XbKWNzwtzweE+tESV0+fzTxjkTTK/lxc2KgkbgEllU8=;
+        b=Bqu1THJMQ0yvHj3Dre8UYh6otX0QojMqhcpvqJsKcG99JBbHgGxFC4U8wrffpFI2MS
+         Sa0EOyFgLtUxjOivr0XSGw2keEcixLf6N1uIEOIQ8R5GoW7Nl07yxQSpMYNjIvVALMyC
+         siU5IVpmFAJMSnAAtII7eb83o7K77CjOHcIwkTBiMtWlGbaBTrZsihxccDWhs/J+7/Iu
+         6SkSTGMxOs1wan/pWtBBAh+6JPi9BO1tlnPQ3wX+d3wodY/V/LJP0GRsNeLyYGzotZQ4
+         Y1w3/+1yNRXQ8YcB1dCFh/y+5aBWQwvTZuVNIi+mj7v/sxwkED8usIoP93ICIRFmGb9D
+         PSaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=77jDirKALASyuRe4H7SNos8+ceiZ5NwhVHAmzpu0zXA=;
-        b=f9CQZdywbdnelx2uZ8/UkFPQ3iASeKeJ3FDOBWqFqmzlMvwPNxkCI7uwEVedvd42M1
-         wQoLfkDWWxQOYpXjLYD2kiYoMCZ60EavCqdS0n1mjE32GGC8/98B6twu/cUR+DFpF8W8
-         12Ee9F1XYfL+pxgoksK/s2VwMMaFkheDMKYDl6rYv1TgEUTQLDw7ReJeDNDGBRS1N9Pl
-         +OvEBxZ0cvZSVUr8AkYAOJ47sE5GZA+vf5GEmvWWEfmyLSZbfMEV4SpMFYvwTv4AnEeV
-         XQHOcRSnJvvF94LK1v+aWXIqKx/8NyL7h4MShhK2RQ0r9gNU673lAz5wNu4sinUMvRs3
-         Ya9Q==
-X-Gm-Message-State: AOAM532HVJrRtwzMESm6Vg3vh7diWdsKEcBf/gU5WicGRdh3Afhr9BUe
-        sHNbTPbad2LYpilKxfttLOVX5A==
-X-Google-Smtp-Source: ABdhPJx1YHEx8hiT2J0YS7cHvuzQ34b5CoCNxheFV1HDcYv0oDChcf6LpLrWcy+v2YVfAhzHSCjOWg==
-X-Received: by 2002:a05:651c:d4:: with SMTP id 20mr8530119ljr.132.1644233168232;
-        Mon, 07 Feb 2022 03:26:08 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-21.NA.cust.bahnhof.se. [155.4.129.21])
-        by smtp.gmail.com with ESMTPSA id z20sm1530066ljj.103.2022.02.07.03.26.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Feb 2022 03:26:07 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.17-rc4
-Date:   Mon,  7 Feb 2022 12:26:05 +0100
-Message-Id: <20220207112605.246647-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=XbKWNzwtzweE+tESV0+fzTxjkTTK/lxc2KgkbgEllU8=;
+        b=4LxMRpuswYxSCLu4dSI3Kl1jr2B9WiPmo/2kUohK6+rlv/Dj8ENKAjjyaEZx7qbDuG
+         6a/t/2RjU0Z0Gu4dVL4t2Fylfvg1MWodQyDGM0mxtxWcM2WnJXUt/Q+FEHf8AmdgvjMx
+         c2EvRtf5XDa+L3sfLHDfMqCAexZCUoT7+LEPOxpnFNA6LNt8AXv4COyJtlRsLD7P3FfE
+         l36bXk7OrX7WTg+vL1fKwTwZ8SsWce4LNOT5tAmWuoTwLjPDgjUovdDXniidIZCtV1AH
+         pmN28sPyr8Mbt1YyAXwOiBumHhhLT3XpIWLBm+9YlN5Mc16Fgs3ChcEdD5IF5sIYQ5Tj
+         4H8Q==
+X-Gm-Message-State: AOAM533Durh0dORM2kSMYutUNzTSCWkA1EmJci8oYiCE5DBt7U5kf7+Z
+        n/ua4K32c4CRRlfcNNqTE9syM06gFtZHZ/rm3HWyoQ==
+X-Google-Smtp-Source: ABdhPJwEVJnnNaxNKAnDxmE98KcsOO4AdVUEM4kKNPEV3/s9YO0k3TL/eLzyo53nzbo+dPK3K3FaKrFhuPiD0ba/vo0=
+X-Received: by 2002:a05:6512:3b9a:: with SMTP id g26mr8074861lfv.71.1644232323581;
+ Mon, 07 Feb 2022 03:12:03 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com> <CAPDyKFrLpim75nUB7ksDie2edkWsnFSq6TbFSFFpw5cY5d4y1w@mail.gmail.com>
+ <fabaed5751f04105a9719c1cb0390c98@realtek.com> <CAPDyKFr3NRUgfKtkb2DBrhziekFAB0jT_X3Fsfvjk_bGZLC9mA@mail.gmail.com>
+ <fa10aa1c644241808c2ad880088240ab@realtek.com> <CAPDyKFrtBKHHRgeF-JO27ANsbSmt8rdnhn-WNr5Je9okEgA29Q@mail.gmail.com>
+ <feb0c4e71e9c48a2a21f18b7d3baf135@realtek.com>
+In-Reply-To: <feb0c4e71e9c48a2a21f18b7d3baf135@realtek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 7 Feb 2022 12:11:27 +0100
+Message-ID: <CAPDyKFoq_PDk_JgW4D+o4eEPdcffUq2RLbBreRDqeK47m0UnJA@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi block rw
+To:     Ricky WU <ricky_wu@realtek.com>
+Cc:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+[...]
 
-Here's a PR with a couple of MMC fixes intended for v5.17-rc4. Details about the
-highlights are as usual found in the signed tag.
+> > > > >
+> > > > > Do you have any suggestion for testing random I/O But we think
+> > > > > random I/O will not change much
+> > > >
+> > > > I would probably look into using fio,
+> > > > https://fio.readthedocs.io/en/latest/
+> > > >
+> > >
+> > > Filled random I/O data
+> > > Before the patch:
+> > > CMD (Randread):
+> > > sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread
+> > > -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest
+> > > -bs=1M -rw=randread
+> >
+> > Thanks for running the tests! Overall, I would not expect an impact on the
+> > throughput when using a big blocksize like 1M. This is also pretty clear from
+> > the result you have provided.
+> >
+> > However, especially for random writes and reads, we want to try with smaller
+> > blocksizes. Like 8k or 16k, would you mind running another round of tests to
+> > see how that works out?
+> >
+>
+> Filled random I/O data(8k/16k)
 
-Please pull this in!
+Hi Ricky,
+
+Apologize for the delay! Thanks for running the tests. Let me comment
+on them below.
+
+>
+> Before(randread)
+> 8k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=8k -rw=randread
+> mytest: (g=0): rw=randread, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>    READ: bw=16.5MiB/s (17.3MB/s), 16.5MiB/s-16.5MiB/s (17.3MB/s-17.3MB/s), io=1024MiB (1074MB), run=62019-62019msec
+> Disk stats (read/write):
+>   mmcblk0: ios=130757/0, merge=0/0, ticks=57751/0, in_queue=57751, util=99.89%
+>
+> 16k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=16k -rw=randread
+> mytest: (g=0): rw=randread, bs=(R) 16.0KiB-16.0KiB, (W) 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>    READ: bw=23.3MiB/s (24.4MB/s), 23.3MiB/s-23.3MiB/s (24.4MB/s-24.4MB/s), io=1024MiB (1074MB), run=44034-44034msec
+> Disk stats (read/write):
+>   mmcblk0: ios=65333/0, merge=0/0, ticks=39420/0, in_queue=39420, util=99.84%
+>
+> Before(randrwrite)
+> 8k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=100M -name=mytest -bs=8k -rw=randwrite
+> mytest: (g=0): rw=randwrite, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>   WRITE: bw=4060KiB/s (4158kB/s), 4060KiB/s-4060KiB/s (4158kB/s-4158kB/s), io=100MiB (105MB), run=25220-25220msec
+> Disk stats (read/write):
+>   mmcblk0: ios=51/12759, merge=0/0, ticks=80/24154, in_queue=24234, util=99.90%
+>
+> 16k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=100M -name=mytest -bs=16k -rw=randwrite
+> mytest: (g=0): rw=randwrite, bs=(R) 16.0KiB-16.0KiB, (W) 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>   WRITE: bw=7201KiB/s (7373kB/s), 7201KiB/s-7201KiB/s (7373kB/s-7373kB/s), io=100MiB (105MB), run=14221-14221msec
+> Disk stats (read/write):
+>   mmcblk0: ios=51/6367, merge=0/0, ticks=82/13647, in_queue=13728, util=99.81%
+>
+>
+> After(randread)
+> 8k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=8k -rw=randread
+> mytest: (g=0): rw=randread, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>    READ: bw=12.4MiB/s (13.0MB/s), 12.4MiB/s-12.4MiB/s (13.0MB/s-13.0MB/s), io=1024MiB (1074MB), run=82397-82397msec
+> Disk stats (read/write):
+>   mmcblk0: ios=130640/0, merge=0/0, ticks=74125/0, in_queue=74125, util=99.94%
+>
+> 16k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=1G -name=mytest -bs=16k -rw=randread
+> mytest: (g=0): rw=randread, bs=(R) 16.0KiB-16.0KiB, (W) 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>    READ: bw=20.0MiB/s (21.0MB/s), 20.0MiB/s-20.0MiB/s (21.0MB/s-21.0MB/s), io=1024MiB (1074MB), run=51076-51076msec
+> Disk stats (read/write):
+>   mmcblk0: ios=65282/0, merge=0/0, ticks=46255/0, in_queue=46254, util=99.87%
+>
+> After(randwrite)
+> 8k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=100M -name=mytest -bs=8k -rw=randwrite
+> mytest: (g=0): rw=randwrite, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>   WRITE: bw=4215KiB/s (4317kB/s), 4215KiB/s-4215KiB/s (4317kB/s-4317kB/s), io=100MiB (105MB), run=24292-24292msec
+> Disk stats (read/write):
+>   mmcblk0: ios=52/12717, merge=0/0, ticks=86/23182, in_queue=23267, util=99.92%
+>
+> 16k:
+> Cmd: sudo fio -filename=/dev/mmcblk0 -direct=1 -numjobs=1 -thread -group_reporting -ioengine=psync -iodepth=1 -size=100M -name=mytest -bs=16k -rw=randwrite
+> mytest: (g=0): rw=randwrite, bs=(R) 16.0KiB-16.0KiB, (W) 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=psync, iodepth=1
+> result:
+> Run status group 0 (all jobs):
+>   WRITE: bw=6499KiB/s (6655kB/s), 6499KiB/s-6499KiB/s (6655kB/s-6655kB/s), io=100MiB (105MB), run=15756-15756msec
+> Disk stats (read/write):
+>   mmcblk0: ios=51/6347, merge=0/0, ticks=84/15120, in_queue=15204, util=99.80%
+
+It looks like the rand-read tests above are degrading with the new
+changes, while rand-writes are both improving and degrading.
+
+To summarize my view from all the tests you have done at this point
+(thanks a lot); it looks like the block I/O merging isn't really
+happening at common blocklayer, at least to that extent that would
+benefit us. Clearly you have shown that by the suggested change in the
+mmc host driver, by detecting whether the "next" request is sequential
+to the previous one, which allows us to skip a CMD12 and minimize some
+command overhead.
+
+However, according to the latest tests above, you have also proved
+that the changes in the mmc host driver doesn't come without a cost.
+In particular, small random-reads would degrade in performance from
+these changes.
+
+That said, it looks to me that rather than trying to improve things
+for one specific mmc host driver, it would be better to look at this
+from the generic block layer point of view - and investigate why
+sequential reads/writes aren't getting merged often enough for the
+MMC/SD case. If we can fix the problem there, all mmc host drivers
+would benefit I assume.
+
+BTW, have you tried with different I/O schedulers? If you haven't
+tried BFQ, I suggest you do as it's a good fit for MMC/SD.
+
+[...]
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit e783362eb54cd99b2cac8b3a9aeac942e6f6ac07:
-
-  Linux 5.17-rc1 (2022-01-23 10:12:53 +0200)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.17-rc1
-
-for you to fetch changes up to bd2db32e7c3e35bd4d9b8bbff689434a50893546:
-
-  moxart: fix potential use-after-free on remove path (2022-01-31 15:36:34 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix support for SD Power off notification
-
-MMC host:
- - moxart: Fix potential use-after-free on remove path
- - sdhci-of-esdhc: Fix error path when setting dma mask
- - sh_mmcif: Fix potential NULL pointer dereference
-
-----------------------------------------------------------------
-Andrey Skvortsov (1):
-      mmc: core: Wait for command setting 'Power Off Notification' bit to complete
-
-Greg Kroah-Hartman (1):
-      moxart: fix potential use-after-free on remove path
-
-Jiasheng Jiang (2):
-      mmc: sdhci-of-esdhc: Check for error num after setting mask
-      mmc: sh_mmcif: Check for null res pointer
-
- drivers/mmc/core/sd.c             | 8 +++++++-
- drivers/mmc/host/moxart-mmc.c     | 2 +-
- drivers/mmc/host/sdhci-of-esdhc.c | 8 ++++++--
- drivers/mmc/host/sh_mmcif.c       | 3 +++
- 4 files changed, 17 insertions(+), 4 deletions(-)
+Uffe
