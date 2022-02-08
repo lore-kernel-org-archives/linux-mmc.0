@@ -2,163 +2,295 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 970B3C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Feb 2022 15:13:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B70FC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Feb 2022 15:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358238AbiBHPNT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Feb 2022 10:13:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60496 "EHLO
+        id S1379715AbiBHPNV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Feb 2022 10:13:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60692 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1379733AbiBHPNN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2022 10:13:13 -0500
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97BB8C061577
-        for <linux-mmc@vger.kernel.org>; Tue,  8 Feb 2022 07:13:10 -0800 (PST)
-Received: by mail-lf1-x134.google.com with SMTP id m18so5490581lfq.4
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Feb 2022 07:13:10 -0800 (PST)
+        with ESMTP id S1379628AbiBHPNQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2022 10:13:16 -0500
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F81FC06157A
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Feb 2022 07:13:15 -0800 (PST)
+Received: by mail-lj1-x22a.google.com with SMTP id q22so24899434ljh.7
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Feb 2022 07:13:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=/9sKVsOnc0cVS/8zSZ6ugv07iRnjigV6S3zogn8KAC4=;
-        b=y91GP3EZwetiQxMDhlIjjv1c5AykdxJ9Y1SiEXTEOftWxlju22wr2p5GIX3gSBN7iX
-         tFN8XytqW4DUsP8zFMkTGIqM3c6Jw5VCyBqDZYVkicU8hynDjraLo+tHNiMnpr0cydL6
-         x1QHnY6wlwhPbyUo7ucsdSNimadY0DmegaLo6NOqVBLy7t6N3f2QLwHoo5VGoUUUF0zm
-         dPyCzyiPYgXzAbB1NORdIAnathOKKdqwx0iUSjSk/vDCRq0kmSWWDIeT+SD9WTJVOqSj
-         ezBdEl4YkT2ZSQFrKnldxcyJypYejHxI2V/XNuCVR5rIF59sb9TRJ3K5ZUJpCvoYAsmr
-         PTNQ==
+         :cc;
+        bh=HV19dnjJ9UTIU3iOBXasmwWcFMYMsiimWGZT7KraSz0=;
+        b=x6R5ld/maECbEJ+fdQVR5I8f9JDXJDqtYtfFHln7hZNTugzxeUgV5Hl8vHhHXQhVvL
+         drkoBa/0kZvB0u+4HNZ/yNr/5NnTpjoYQpeURgUmYfxUwJtwMMR+aLePc1sP4KBeNO4T
+         jjHkJsjDbPWRAZ6jyM2gPINqaMrvqyqOb0+Pgs7eyCWADbwDuadu4WzWoWqTXaSivAjE
+         QwgVEoiulLhCMLB5IIShEaeztIUNloBL+/2RVnz6SL/CAu7wl7isEVHNZ+oFHPwXA+Hr
+         KLF9pOZqoEBupK1YC5OhCVaLOiBHglFOpt1kgdpz0nG64hfJRWIbzfcass2URR7yuX98
+         4oMQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=/9sKVsOnc0cVS/8zSZ6ugv07iRnjigV6S3zogn8KAC4=;
-        b=kxKLkukQpPVpgbapy/CE1v0tWJAhOy3ZOc2Lgs9Kn8WmBpHREAmgu4RKRBm4TZekTv
-         PUUrsL2JWHko3GdX1NA6o5LF1zYk+44WxHDlpi8Py3mlobNK8f2uGjum8gdu9EFylIrE
-         XXG8iI70ieXaHroTKHvSSluqpiNhZuh9POirNmbHO/r+QeYR+8H3pOujrxxguKOdtTvo
-         p0EuDJbG3j6hyTXjkovbRe+UdzB6tnuqsERpkCwjeJPWDlcws+rvMt8yoXbcahuBOVeR
-         ZBxVdHKVXVOL5K2m+g/eeULLhPiUHTAZrWYpaUl20JBujRUjgTbjQFS7ASLgYAixeuxH
-         H/wA==
-X-Gm-Message-State: AOAM531FX2UBxyrS/ip7D/YqnZsqz+BM6+f/LSwT9ZYOWqHtklBV6G1K
-        CPjvTdd2/lCtb5hZX/CE1V26vW1PdqAxvdTxqB9o0jt28ds=
-X-Google-Smtp-Source: ABdhPJyNaIalMELpU7nV+Rc098C+S/9d3w1YEoJ5s6tRsR+iyYvZ0Ifdgwyu9N/cr3jjwp+NttkpZxdZ1gPMnzGz+8I=
-X-Received: by 2002:a05:6512:3da8:: with SMTP id k40mr981439lfv.358.1644333188959;
- Tue, 08 Feb 2022 07:13:08 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=HV19dnjJ9UTIU3iOBXasmwWcFMYMsiimWGZT7KraSz0=;
+        b=76KOwrIfaPrzJjxHqoK5n5l/IWxiz09Hzauhxhc2+I49BIeN5Dxy9iYGjP0u8k6aWo
+         0HIZSuHOkeQBIUOg6rwDBk3+65Q5Q8bDBnqPoSrL0Tz43gvED3b9RWKMUHeW0AdJAeY/
+         g8MVsnC7vYVZkS90AGfLhk7QbSXOEg09tZbbO8Wq4RSDQHcsFpsOKCia6yAcIRbDYSDV
+         Cw9cvcGwZvbd3h2si+hOYnrmAHOMci1avsf7+lAtQlqIg9bYu5vZkowFhSIoUOe5lKN1
+         LK7o3bNGYkDEtWtBCy5f50qRQRtHFGbrPJdPnKgdR4L/25BGvzS4kZ1YaJofBjPOFfXi
+         gMnw==
+X-Gm-Message-State: AOAM531sRgdPgnXvFg6R650koQvZ45HYiPxOEURvNqO3xG7cYCNUMTPz
+        p6bRGE3Lldl+TY7sSPrN9Z3qjFjSuRTsupax5cNIwe78Nss=
+X-Google-Smtp-Source: ABdhPJztoHh4hACrxaQ4X7aKsKYKEW9QtnflDetNxVLTfKj/xBFmLjuVVZoslsOiCUHxgkPnkpkdhPKK2oVQ7Fv3gFc=
+X-Received: by 2002:a2e:9c04:: with SMTP id s4mr3117010lji.229.1644333193470;
+ Tue, 08 Feb 2022 07:13:13 -0800 (PST)
 MIME-Version: 1.0
-References: <5e5f2e45d0a14a55a8b7a9357846114b@hyperstone.com>
- <7c4757cc707740e580c61c39f963a04d@hyperstone.com> <CAPDyKFr0YXCwL-8F9M7mkpNzSQpzw6gNUq2zaiJEXj1jNxUbrg@mail.gmail.com>
- <5c66833d-4b35-2c76-db54-0306e08843e5@intel.com> <79d44b0c54e048b0a9cc86319a24cc19@hyperstone.com>
- <bc706a6ab08c4fe2834ba0c05a804672@hyperstone.com> <b047d374-c282-8c63-32c1-2135eec11fb6@intel.com>
-In-Reply-To: <b047d374-c282-8c63-32c1-2135eec11fb6@intel.com>
+References: <717729b2-d65b-c72e-9fac-471d28d00b5a@omp.ru>
+In-Reply-To: <717729b2-d65b-c72e-9fac-471d28d00b5a@omp.ru>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 8 Feb 2022 16:12:32 +0100
-Message-ID: <CAPDyKFrhBdOO5O2Ef1Ny9BuvDCm6vt9TAL1rO=Qsx23xgb6LZA@mail.gmail.com>
-Subject: Re: [PATCHv2] mmc: block: fix read single on recovery logic
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        "stable@vger.kernel.org" <stable@vger.kernel.org>
+Date:   Tue, 8 Feb 2022 16:12:36 +0100
+Message-ID: <CAPDyKFoDQ3_=O5AAFsfcU3i7DurKVZ2G5pAN5xdi4UYFrvqKew@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: use sysfs_emit() instead of sprintf()
+To:     Sergey Shtylyov <s.shtylyov@omp.ru>
+Cc:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 8 Feb 2022 at 07:37, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Tue, 8 Feb 2022 at 13:02, Sergey Shtylyov <s.shtylyov@omp.ru> wrote:
 >
-> On 04/02/2022 17:11, Christian L=C3=B6hle wrote:
-> > On reads with MMC_READ_MULTIPLE_BLOCK that fail,
-> > the recovery handler will use MMC_READ_SINGLE_BLOCK for
-> > each of the blocks, up to MMC_READ_SINGLE_RETRIES times each.
-> > The logic for this is fixed to never report unsuccessful reads
-> > as success to the block layer.
-> >
-> > On command error with retries remaining, blk_update_request was
-> > called with whatever value error was set last to.
-> > In case it was last set to BLK_STS_OK (default), the read will be
-> > reported as success, even though there was no data read from the device=
-.
-> > This could happen on a CRC mismatch for the response,
-> > a card rejecting the command (e.g. again due to a CRC mismatch).
-> > In case it was last set to BLK_STS_IOERR, the error is reported correct=
-ly,
-> > but no retries will be attempted.
-> >
-> > Fixes: 81196976ed946c ("mmc: block: Add blk-mq support")
-> > Cc: stable@vger.kernel.org
-> > Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> sprintf() (still used in the MMC core for the sysfs output) is vulnerable
+> to the buffer overflow.  Use the new-fangled sysfs_emit() instead.
 >
-> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+> Found by Linux Verification Center (linuxtesting.org) with the SVACE static
+> analysis tool.
+>
+> Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 
-Applied for fixes, thanks to both of you!
+Applied for next and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 >
-> > ---
-> > v2:
-> >   - Do not allow data error retries
-> >   - Actually retry MMC_READ_SINGLE_RETRIES times instead of
-> >   MMC_READ_SINGLE_RETRIES-1
-> >
-> >
-> >  drivers/mmc/core/block.c | 28 ++++++++++++++--------------
-> >  1 file changed, 14 insertions(+), 14 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > index 4e61b28a002f..8d718aa56d33 100644
-> > --- a/drivers/mmc/core/block.c
-> > +++ b/drivers/mmc/core/block.c
-> > @@ -1682,31 +1682,31 @@ static void mmc_blk_read_single(struct mmc_queu=
-e *mq, struct request *req)
-> >       struct mmc_card *card =3D mq->card;
-> >       struct mmc_host *host =3D card->host;
-> >       blk_status_t error =3D BLK_STS_OK;
-> > -     int retries =3D 0;
-> >
-> >       do {
-> >               u32 status;
-> >               int err;
-> > +             int retries =3D 0;
-> >
-> > -             mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
-> > +             while (retries++ <=3D MMC_READ_SINGLE_RETRIES) {
-> > +                     mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
-> >
-> > -             mmc_wait_for_req(host, mrq);
-> > +                     mmc_wait_for_req(host, mrq);
-> >
-> > -             err =3D mmc_send_status(card, &status);
-> > -             if (err)
-> > -                     goto error_exit;
-> > -
-> > -             if (!mmc_host_is_spi(host) &&
-> > -                 !mmc_ready_for_data(status)) {
-> > -                     err =3D mmc_blk_fix_state(card, req);
-> > +                     err =3D mmc_send_status(card, &status);
-> >                       if (err)
-> >                               goto error_exit;
-> > -             }
-> >
-> > -             if (mrq->cmd->error && retries++ < MMC_READ_SINGLE_RETRIE=
-S)
-> > -                     continue;
-> > +                     if (!mmc_host_is_spi(host) &&
-> > +                         !mmc_ready_for_data(status)) {
-> > +                             err =3D mmc_blk_fix_state(card, req);
-> > +                             if (err)
-> > +                                     goto error_exit;
-> > +                     }
-> >
-> > -             retries =3D 0;
-> > +                     if (!mrq->cmd->error)
-> > +                             break;
-> > +             }
-> >
-> >               if (mrq->cmd->error ||
-> >                   mrq->data->error ||
-> >
+> ---
+> This patch is against the 'next' branch of Ulf Hansson's 'mmc.git' repo.
+>
+> Changes in version 2:
+> - added #include <linux/sysfs.h> where it was missing;
+> - moved  #include <linux/sysfs.h> where it was present (the #includes weren't
+>   sorted as it seemed at 1st).
+>
+>  drivers/mmc/core/bus.c      |    9 +++++----
+>  drivers/mmc/core/bus.h      |    3 ++-
+>  drivers/mmc/core/mmc.c      |   16 ++++++++--------
+>  drivers/mmc/core/sd.c       |   27 +++++++++++++--------------
+>  drivers/mmc/core/sdio.c     |    5 +++--
+>  drivers/mmc/core/sdio_bus.c |    7 ++++---
+>  6 files changed, 35 insertions(+), 32 deletions(-)
+>
+> Index: mmc/drivers/mmc/core/bus.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/bus.c
+> +++ mmc/drivers/mmc/core/bus.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/stat.h>
+>  #include <linux/of.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/sysfs.h>
+>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
+> @@ -34,13 +35,13 @@ static ssize_t type_show(struct device *
+>
+>         switch (card->type) {
+>         case MMC_TYPE_MMC:
+> -               return sprintf(buf, "MMC\n");
+> +               return sysfs_emit(buf, "MMC\n");
+>         case MMC_TYPE_SD:
+> -               return sprintf(buf, "SD\n");
+> +               return sysfs_emit(buf, "SD\n");
+>         case MMC_TYPE_SDIO:
+> -               return sprintf(buf, "SDIO\n");
+> +               return sysfs_emit(buf, "SDIO\n");
+>         case MMC_TYPE_SD_COMBO:
+> -               return sprintf(buf, "SDcombo\n");
+> +               return sysfs_emit(buf, "SDcombo\n");
+>         default:
+>                 return -EFAULT;
+>         }
+> Index: mmc/drivers/mmc/core/bus.h
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/bus.h
+> +++ mmc/drivers/mmc/core/bus.h
+> @@ -9,6 +9,7 @@
+>  #define _MMC_CORE_BUS_H
+>
+>  #include <linux/device.h>
+> +#include <linux/sysfs.h>
+>
+>  struct mmc_host;
+>  struct mmc_card;
+> @@ -17,7 +18,7 @@ struct mmc_card;
+>  static ssize_t mmc_##name##_show (struct device *dev, struct device_attribute *attr, char *buf)        \
+>  {                                                                              \
+>         struct mmc_card *card = mmc_dev_to_card(dev);                           \
+> -       return sprintf(buf, fmt, args);                                         \
+> +       return sysfs_emit(buf, fmt, args);                                      \
+>  }                                                                              \
+>  static DEVICE_ATTR(name, S_IRUGO, mmc_##name##_show, NULL)
+>
+> Index: mmc/drivers/mmc/core/mmc.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/mmc.c
+> +++ mmc/drivers/mmc/core/mmc.c
+> @@ -12,6 +12,7 @@
+>  #include <linux/slab.h>
+>  #include <linux/stat.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/sysfs.h>
+>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/card.h>
+> @@ -812,12 +813,11 @@ static ssize_t mmc_fwrev_show(struct dev
+>  {
+>         struct mmc_card *card = mmc_dev_to_card(dev);
+>
+> -       if (card->ext_csd.rev < 7) {
+> -               return sprintf(buf, "0x%x\n", card->cid.fwrev);
+> -       } else {
+> -               return sprintf(buf, "0x%*phN\n", MMC_FIRMWARE_LEN,
+> -                              card->ext_csd.fwrev);
+> -       }
+> +       if (card->ext_csd.rev < 7)
+> +               return sysfs_emit(buf, "0x%x\n", card->cid.fwrev);
+> +       else
+> +               return sysfs_emit(buf, "0x%*phN\n", MMC_FIRMWARE_LEN,
+> +                                 card->ext_csd.fwrev);
+>  }
+>
+>  static DEVICE_ATTR(fwrev, S_IRUGO, mmc_fwrev_show, NULL);
+> @@ -830,10 +830,10 @@ static ssize_t mmc_dsr_show(struct devic
+>         struct mmc_host *host = card->host;
+>
+>         if (card->csd.dsr_imp && host->dsr_req)
+> -               return sprintf(buf, "0x%x\n", host->dsr);
+> +               return sysfs_emit(buf, "0x%x\n", host->dsr);
+>         else
+>                 /* return default DSR value */
+> -               return sprintf(buf, "0x%x\n", 0x404);
+> +               return sysfs_emit(buf, "0x%x\n", 0x404);
+>  }
+>
+>  static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
+> Index: mmc/drivers/mmc/core/sd.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/sd.c
+> +++ mmc/drivers/mmc/core/sd.c
+> @@ -13,6 +13,7 @@
+>  #include <linux/stat.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/scatterlist.h>
+> +#include <linux/sysfs.h>
+>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/card.h>
+> @@ -708,18 +709,16 @@ MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr)
+>  MMC_DEV_ATTR(rca, "0x%04x\n", card->rca);
+>
+>
+> -static ssize_t mmc_dsr_show(struct device *dev,
+> -                           struct device_attribute *attr,
+> -                           char *buf)
+> -{
+> -       struct mmc_card *card = mmc_dev_to_card(dev);
+> -       struct mmc_host *host = card->host;
+> -
+> -       if (card->csd.dsr_imp && host->dsr_req)
+> -               return sprintf(buf, "0x%x\n", host->dsr);
+> -       else
+> -               /* return default DSR value */
+> -               return sprintf(buf, "0x%x\n", 0x404);
+> +static ssize_t mmc_dsr_show(struct device *dev, struct device_attribute *attr,
+> +                           char *buf)
+> +{
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +       struct mmc_host *host = card->host;
+> +
+> +       if (card->csd.dsr_imp && host->dsr_req)
+> +               return sysfs_emit(buf, "0x%x\n", host->dsr);
+> +       /* return default DSR value */
+> +       return sysfs_emit(buf, "0x%x\n", 0x404);
+>  }
+>
+>  static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
+> @@ -735,9 +734,9 @@ static ssize_t info##num##_show(struct d
+>                                                                                                 \
+>         if (num > card->num_info)                                                               \
+>                 return -ENODATA;                                                                \
+> -       if (!card->info[num-1][0])                                                              \
+> +       if (!card->info[num - 1][0])                                                            \
+>                 return 0;                                                                       \
+> -       return sprintf(buf, "%s\n", card->info[num-1]);                                         \
+> +       return sysfs_emit(buf, "%s\n", card->info[num - 1]);                                    \
+>  }                                                                                              \
+>  static DEVICE_ATTR_RO(info##num)
+>
+> Index: mmc/drivers/mmc/core/sdio.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/sdio.c
+> +++ mmc/drivers/mmc/core/sdio.c
+> @@ -7,6 +7,7 @@
+>
+>  #include <linux/err.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/sysfs.h>
+>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/card.h>
+> @@ -40,9 +41,9 @@ static ssize_t info##num##_show(struct d
+>                                                                                                 \
+>         if (num > card->num_info)                                                               \
+>                 return -ENODATA;                                                                \
+> -       if (!card->info[num-1][0])                                                              \
+> +       if (!card->info[num - 1][0])                                                            \
+>                 return 0;                                                                       \
+> -       return sprintf(buf, "%s\n", card->info[num-1]);                                         \
+> +       return sysfs_emit(buf, "%s\n", card->info[num - 1]);                                    \
+>  }                                                                                              \
+>  static DEVICE_ATTR_RO(info##num)
+>
+> Index: mmc/drivers/mmc/core/sdio_bus.c
+> ===================================================================
+> --- mmc.orig/drivers/mmc/core/sdio_bus.c
+> +++ mmc/drivers/mmc/core/sdio_bus.c
+> @@ -14,6 +14,7 @@
+>  #include <linux/pm_runtime.h>
+>  #include <linux/pm_domain.h>
+>  #include <linux/acpi.h>
+> +#include <linux/sysfs.h>
+>
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
+> @@ -35,7 +36,7 @@ field##_show(struct device *dev, struct
+>         struct sdio_func *func;                                         \
+>                                                                         \
+>         func = dev_to_sdio_func (dev);                                  \
+> -       return sprintf(buf, format_string, args);                       \
+> +       return sysfs_emit(buf, format_string, args);                    \
+>  }                                                                      \
+>  static DEVICE_ATTR_RO(field)
+>
+> @@ -52,9 +53,9 @@ static ssize_t info##num##_show(struct d
+>                                                                                                 \
+>         if (num > func->num_info)                                                               \
+>                 return -ENODATA;                                                                \
+> -       if (!func->info[num-1][0])                                                              \
+> +       if (!func->info[num - 1][0])                                                            \
+>                 return 0;                                                                       \
+> -       return sprintf(buf, "%s\n", func->info[num-1]);                                         \
+> +       return sysfs_emit(buf, "%s\n", func->info[num - 1]);                                    \
+>  }                                                                                              \
+>  static DEVICE_ATTR_RO(info##num)
 >
