@@ -2,67 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E869AC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Feb 2022 20:21:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63E42C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Feb 2022 06:37:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237098AbiBGUUk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Feb 2022 15:20:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45374 "EHLO
+        id S1347593AbiBHGhZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Feb 2022 01:37:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39406 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241810AbiBGUOp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Feb 2022 15:14:45 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91E29C0401E2;
-        Mon,  7 Feb 2022 12:14:45 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2A72361460;
-        Mon,  7 Feb 2022 20:14:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 86371C004E1;
-        Mon,  7 Feb 2022 20:14:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1644264884;
-        bh=vKsG/uWUXHsAh6WfbSKrv7geN+bm6kyGW2sX2wduaHk=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=ooAddBWVEWxEcID4bcrIu3Q2BB1KeBVccs5tkcBCwmfh3+bKNdT6VXsSvLzFjryE8
-         pPmSa3DvLZ0XuGKkMy1H4HnU5Yf6/F8z/N0MoIqyWY3GpicbSQ5p8gkTipuNeDK/ca
-         DhbaH65DSYy4Xo6f/us4XGcah52VQEBN9HXzjL8ZyQ2WJO+8q8+VlUgKzxUe9MgloA
-         HRpumgyC61snW9Blf2NI8wbPmA8j8/mKcw5t8CFhH7EE1APDURMNdC9RQWeY7lmfO9
-         XpaPP2IIrF+zn4X0yKQxfdr2CuowHlAOPiIiD1qXafoJhaozJydpA40uaPBNGT4kho
-         sIP7ZX7hNINlg==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 76596E5D09D;
-        Mon,  7 Feb 2022 20:14:44 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.17-rc4
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20220207112605.246647-1-ulf.hansson@linaro.org>
-References: <20220207112605.246647-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20220207112605.246647-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.17-rc1
-X-PR-Tracked-Commit-Id: bd2db32e7c3e35bd4d9b8bbff689434a50893546
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 51f7ea914d79aa44156dd63fe9e1cc75708d781d
-Message-Id: <164426488448.18191.15469163597693131085.pr-tracker-bot@kernel.org>
-Date:   Mon, 07 Feb 2022 20:14:44 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S1347556AbiBHGhZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Feb 2022 01:37:25 -0500
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82ED6C0401EF;
+        Mon,  7 Feb 2022 22:37:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1644302244; x=1675838244;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=DG+xa0PnRRQdvZ7t1yNYWlenZClK6CulMIOQACerRMg=;
+  b=hqFa+b3lBeT4PwvSRhkviQrlp6vx6HN11nluqrdFgG0A7W1DmoepThbw
+   KG9A0s5kBAFzdH+7+AFut8bj7ws0ENjjOwI95S/fcekUtnUCMzgM80f02
+   anGLpSAl+iZsih31vQsGVVNM+RQg2sU1uizCq8Hi5qpePDaQdpOkWxPkf
+   y+nzq946Lsa5gEbHetNPuDqwiasSs4YarOiDIHe9qvD88SA5e/JBWoXFk
+   os8gYi2jsEXLj0mnuPmZPbZG3+6OVvzTKvO/tKd/MsHzYyMxIPPfULRHf
+   5cedLJUGVge/ni+oJL2X5IwrXeaGGX/sOzY18DC05kl4tcLY/HZhbtR2A
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10251"; a="273412483"
+X-IronPort-AV: E=Sophos;i="5.88,351,1635231600"; 
+   d="scan'208";a="273412483"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Feb 2022 22:37:13 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.88,351,1635231600"; 
+   d="scan'208";a="632744902"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga004.jf.intel.com with ESMTP; 07 Feb 2022 22:37:11 -0800
+Subject: Re: [PATCHv2] mmc: block: fix read single on recovery logic
+To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Avri Altman <avri.altman@wdc.com>,
+        "stable@vger.kernel.org" <stable@vger.kernel.org>
+References: <5e5f2e45d0a14a55a8b7a9357846114b@hyperstone.com>
+ <7c4757cc707740e580c61c39f963a04d@hyperstone.com>
+ <CAPDyKFr0YXCwL-8F9M7mkpNzSQpzw6gNUq2zaiJEXj1jNxUbrg@mail.gmail.com>
+ <5c66833d-4b35-2c76-db54-0306e08843e5@intel.com>
+ <79d44b0c54e048b0a9cc86319a24cc19@hyperstone.com>
+ <bc706a6ab08c4fe2834ba0c05a804672@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <b047d374-c282-8c63-32c1-2135eec11fb6@intel.com>
+Date:   Tue, 8 Feb 2022 08:37:10 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.14.0
+MIME-Version: 1.0
+In-Reply-To: <bc706a6ab08c4fe2834ba0c05a804672@hyperstone.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Mon,  7 Feb 2022 12:26:05 +0100:
+On 04/02/2022 17:11, Christian Löhle wrote:
+> On reads with MMC_READ_MULTIPLE_BLOCK that fail,
+> the recovery handler will use MMC_READ_SINGLE_BLOCK for
+> each of the blocks, up to MMC_READ_SINGLE_RETRIES times each.
+> The logic for this is fixed to never report unsuccessful reads
+> as success to the block layer.
+> 
+> On command error with retries remaining, blk_update_request was
+> called with whatever value error was set last to.
+> In case it was last set to BLK_STS_OK (default), the read will be
+> reported as success, even though there was no data read from the device.
+> This could happen on a CRC mismatch for the response,
+> a card rejecting the command (e.g. again due to a CRC mismatch).
+> In case it was last set to BLK_STS_IOERR, the error is reported correctly,
+> but no retries will be attempted.
+> 
+> Fixes: 81196976ed946c ("mmc: block: Add blk-mq support")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.17-rc1
+Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/51f7ea914d79aa44156dd63fe9e1cc75708d781d
+> ---
+> v2:
+>   - Do not allow data error retries
+>   - Actually retry MMC_READ_SINGLE_RETRIES times instead of
+>   MMC_READ_SINGLE_RETRIES-1
+> 
+> 
+>  drivers/mmc/core/block.c | 28 ++++++++++++++--------------
+>  1 file changed, 14 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 4e61b28a002f..8d718aa56d33 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1682,31 +1682,31 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  	struct mmc_card *card = mq->card;
+>  	struct mmc_host *host = card->host;
+>  	blk_status_t error = BLK_STS_OK;
+> -	int retries = 0;
+>  
+>  	do {
+>  		u32 status;
+>  		int err;
+> +		int retries = 0;
+>  
+> -		mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
+> +		while (retries++ <= MMC_READ_SINGLE_RETRIES) {
+> +			mmc_blk_rw_rq_prep(mqrq, card, 1, mq);
+>  
+> -		mmc_wait_for_req(host, mrq);
+> +			mmc_wait_for_req(host, mrq);
+>  
+> -		err = mmc_send_status(card, &status);
+> -		if (err)
+> -			goto error_exit;
+> -
+> -		if (!mmc_host_is_spi(host) &&
+> -		    !mmc_ready_for_data(status)) {
+> -			err = mmc_blk_fix_state(card, req);
+> +			err = mmc_send_status(card, &status);
+>  			if (err)
+>  				goto error_exit;
+> -		}
+>  
+> -		if (mrq->cmd->error && retries++ < MMC_READ_SINGLE_RETRIES)
+> -			continue;
+> +			if (!mmc_host_is_spi(host) &&
+> +			    !mmc_ready_for_data(status)) {
+> +				err = mmc_blk_fix_state(card, req);
+> +				if (err)
+> +					goto error_exit;
+> +			}
+>  
+> -		retries = 0;
+> +			if (!mrq->cmd->error)
+> +				break;
+> +		}
+>  
+>  		if (mrq->cmd->error ||
+>  		    mrq->data->error ||
+> 
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
