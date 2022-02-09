@@ -2,32 +2,32 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1399C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Feb 2022 19:17:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08CCDC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Feb 2022 19:17:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229696AbiBITR3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Feb 2022 14:17:29 -0500
-Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:50102 "EHLO
+        id S233287AbiBITRg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Feb 2022 14:17:36 -0500
+Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:50484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233098AbiBITR0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Feb 2022 14:17:26 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40C26C0F8692;
-        Wed,  9 Feb 2022 11:17:21 -0800 (PST)
+        with ESMTP id S233231AbiBITRc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Feb 2022 14:17:32 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7AA79C0219F3;
+        Wed,  9 Feb 2022 11:17:28 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 0868AB82399;
-        Wed,  9 Feb 2022 19:15:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 382E9C340E7;
-        Wed,  9 Feb 2022 19:15:12 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 121596196B;
+        Wed,  9 Feb 2022 19:15:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D96FEC340E7;
+        Wed,  9 Feb 2022 19:15:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1644434112;
+        s=korg; t=1644434121;
         bh=dCxPR4JBeSv02HURTnL42udmBp2yb2pJ1Ew0FokUAEM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=kqbuinsX3+4H6y7jzBhRE5piA+qUZMz2QPFsSb9yF+yBp4s3jVive7d657Ww194af
-         Aw43WzAL4SebE7wit/Y/gnEWwzDsiGIhMO2d9dtYwgIuSwz7AUVt8v8Mjfy2po3f6A
-         +ga/dZDC+I+fKL8hmZuZ3hAcTdbcm+EP3EZQ1ySc=
+        b=FI4cXwTzKtElGJ8UepdxPg2dRklLDyRrQoPyI8gXPTn1mU+NuBt2W3YVP7udgCXYq
+         BwT22O3hnrPmGmMBwL+tc3fv7ptFFtfWs0bcYCPrPuxdIlxAXxXcyh1Sr9KzC0/g9K
+         zUufDklYj+Y+liYf9ix6aIHKwjtq2nxUlHKwdDuQ=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -38,13 +38,15 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Tony Lindgren <tony@atomide.com>,
         Yang Li <yang.lee@linux.alibaba.com>,
         linux-mmc@vger.kernel.org, whitehat002 <hackyzh002@gmail.com>
-Subject: [PATCH 4.19 2/2] moxart: fix potential use-after-free on remove path
-Date:   Wed,  9 Feb 2022 20:14:04 +0100
-Message-Id: <20220209191248.685713468@linuxfoundation.org>
+Subject: [PATCH 5.4 1/1] moxart: fix potential use-after-free on remove path
+Date:   Wed,  9 Feb 2022 20:14:10 +0100
+Message-Id: <20220209191248.735561392@linuxfoundation.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220209191248.596319706@linuxfoundation.org>
-References: <20220209191248.596319706@linuxfoundation.org>
+In-Reply-To: <20220209191248.688351316@linuxfoundation.org>
+References: <20220209191248.688351316@linuxfoundation.org>
 User-Agent: quilt/0.66
+X-stable: review
+X-Patchwork-Hint: ignore
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
