@@ -2,101 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DB7FC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Feb 2022 09:45:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 829F3C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Feb 2022 11:50:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229972AbiBIJpC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Feb 2022 04:45:02 -0500
-Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:36306 "EHLO
+        id S231146AbiBILuS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Feb 2022 06:50:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233592AbiBIJo7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Feb 2022 04:44:59 -0500
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 84D1AE0385F5
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Feb 2022 01:44:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1644399598;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=nrZaO1QLhXCKNSnMpSxxsA2uM/u3n5wse6OBdbYb6VM=;
-        b=DgniomjD2OxgEjiwn4oZqqe9AR7hoqKhDV7CbHtuaobMa6Vc7HAdniQHTibRvaExQ8Usp6
-        ThxwYjVNwmD8Gxm7TxevhE86mS0oZngGFb1hqXHq3nwhoO2jYlZa9sD0nTUZ6Db9cSK7QI
-        2pcsjHJUJ8ftyGfG01q32BGjiArNK/A=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-576-IBZ2QZvUPNi116_lJZriTA-1; Wed, 09 Feb 2022 04:39:53 -0500
-X-MC-Unique: IBZ2QZvUPNi116_lJZriTA-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6D82985B6C8;
-        Wed,  9 Feb 2022 09:39:50 +0000 (UTC)
-Received: from localhost (unknown [10.39.193.233])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 90BBE6C196;
-        Wed,  9 Feb 2022 09:39:34 +0000 (UTC)
-Date:   Wed, 9 Feb 2022 09:38:32 +0000
-From:   Stefan Hajnoczi <stefanha@redhat.com>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-block@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 5/5] virtio_blk: simplify refcounting
-Message-ID: <YgOLmLOCNZQS3EYG@stefanha-x1.localdomain>
-References: <20220209082121.2628452-1-hch@lst.de>
- <20220209082121.2628452-6-hch@lst.de>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="cXxZwQ9bZyPfG1Md"
-Content-Disposition: inline
-In-Reply-To: <20220209082121.2628452-6-hch@lst.de>
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+        with ESMTP id S229703AbiBILuR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Feb 2022 06:50:17 -0500
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A309E01C885;
+        Wed,  9 Feb 2022 02:40:53 -0800 (PST)
+Received: by mail-pj1-x1035.google.com with SMTP id r64-20020a17090a43c600b001b8854e682eso1873363pjg.0;
+        Wed, 09 Feb 2022 02:40:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id;
+        bh=F4dvlEAApq4sbNi12hDnWabgWkGNsJts8xnpPYqukvU=;
+        b=UXGDXsRlds35agIJYEneaEhMi0hvXSjblyL2c7Q0UBkC0yZVKHqdxrIVLozRIiOBJh
+         8xR1PvUU0j1jXV5ubvhkLpdkSKoiSsP1pjwv8nFnCzPB2z9ZqfVqAbnglkFrNhxMZuUC
+         ayHIyEBZNZP6s7WaW2T4Ksl9D5x4rLY6Zn3t8TWbWb6Ux97ATYmgEd9ydcTcukEdKUOW
+         KEwvl0x6bFw2X4d8Ls9es/JIwvzFQTnA1UDQHuRzwBZV4H/qrAPQYAi9JGo+aautVcr6
+         gGaC0qxdMTbeaOxGPO85HiwhfMaBHrQF8eOnt/hrNTvp+kVv/A5FWHQzPWtSDkvXtMvg
+         9OjA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=F4dvlEAApq4sbNi12hDnWabgWkGNsJts8xnpPYqukvU=;
+        b=ykURN8qmOzeiwll+ihIdn7QnOczkx2ctKP3nBtPXkLD1g+l/gW1LYxHROLRf9IQC7u
+         90w2ROQOJv9L7mvH79Yrly2xk1uKafiWv3QC3/X8gQu1MoxcXfn7AoaSjpY5CG4ZKX8V
+         HsJknqXBUgK4M30Ocw8GchFs/LIfAn7cQ0iC7coBPy2QoVnrPnNhVACnyBcXXK0NRBzC
+         lUGt11eovtlFjxTvp2CHFec3BVLXXM9BU65azOCnrgfjeHEyjyT+yiP4aT0yBqCkYgj4
+         MxkK3bIUMG23ijBml3ANqf0JSVlbG5uVPwQ4WSECcFwqInODC2ky5WFgJH/9nb9FlhCd
+         n7Wg==
+X-Gm-Message-State: AOAM530MrLPmyQQtj5pNjwPrzjFwzwohBKI6Fq3N2O9ULWO+l0sx9ZRb
+        BNiSgWEGs0ZIrOPhrc9VfE4=
+X-Google-Smtp-Source: ABdhPJwrmxUIij4bx8V1Fn58ivpmEEghm+3Hhi0wmRYMhN+PA/z942ewyGvb7a+r+hZcZI57RbZb7g==
+X-Received: by 2002:a17:90b:3cf:: with SMTP id go15mr1773859pjb.223.1644403252689;
+        Wed, 09 Feb 2022 02:40:52 -0800 (PST)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id m23sm18223272pff.201.2022.02.09.02.40.50
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 09 Feb 2022 02:40:52 -0800 (PST)
+From:   Tony Huang <tonyhuang.sunplus@gmail.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, lhjeff911@gmail.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        p.zabel@pengutronix.de, linux-kernel@vger.kernel.org,
+        tony.huang@sunplus.com, wells.lu@sunplus.com, lh.kuo@sunplus.com
+Cc:     Tony Huang <tonyhuang.sunplus@gmail.com>
+Subject: [PATCH v3 0/2] Add mmc driver for Sunplus SP7021 SOC
+Date:   Wed,  9 Feb 2022 18:41:05 +0800
+Message-Id: <cover.1644398657.git.tonyhuang.sunplus@gmail.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+This is a patch series for mmc driver for Sunplus SP7021 SOC.
 
---cXxZwQ9bZyPfG1Md
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
+many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
+etc.) into a single chip. It is designed for industrial control.
 
-On Wed, Feb 09, 2022 at 09:21:20AM +0100, Christoph Hellwig wrote:
-> Implement the ->free_disk method to free the virtio_blk structure only
-> once the last gendisk reference goes away instead of keeping a local
-> refcount.
->=20
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  drivers/block/virtio_blk.c | 74 +++++++++++---------------------------
->  1 file changed, 21 insertions(+), 53 deletions(-)
+Refer to:
+https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
+https://tibbo.com/store/plus1.html
 
-Thanks!
+Tony Huang (2):
+  dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+  mmc: Add mmc driver for Sunplus SP7021
 
-Reviewed-by: Stefan Hajnoczi <stefanha@redhat.com>
+ .../devicetree/bindings/mmc/sunplus-mmc.yaml       |   76 +
+ MAINTAINERS                                        |    7 +
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sunplus_mmc.c                     | 2168 ++++++++++++++++++++
+ 5 files changed, 2261 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus-mmc.yaml
+ create mode 100644 drivers/mmc/host/sunplus_mmc.c
 
---cXxZwQ9bZyPfG1Md
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEEhpWov9P5fNqsNXdanKSrs4Grc8gFAmIDi5cACgkQnKSrs4Gr
-c8g2sAgAp/NAAO/juuKgvBUzwYfw+VgLihgtcRdyhBUc5WnO+Aev/sb2TqEGOP5c
-UzY4CDswetq1vNZ9WitzwDaseUPVipRQtooSPmJwRFfLj2PQPeB/6MdLQljq4F67
-CIjaudo4PEP1jXUkX8dmaTpx8R0pfF7MGRHI759J5/6hWntvd0P7GQaiGU8EzHJh
-P5CA2pJvoXn5czUsigfT7DXqOEmRExrrNk2CnhATs/LQ49xLiDwEi5ysXMhNxKeR
-4VTbRo6WiONe1hpT71b0g199I0/4o2o9rLy1kCaqMjUKZetL2q7UeqCBFuBWpFgp
-X5DGkOtiZp8xt56ZheqqWQjrE8uuBA==
-=7zac
------END PGP SIGNATURE-----
-
---cXxZwQ9bZyPfG1Md--
+-- 
+2.7.4
 
