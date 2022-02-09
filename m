@@ -2,32 +2,32 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11B9BC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Feb 2022 19:26:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D68ADC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Feb 2022 19:27:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233074AbiBIT02 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Feb 2022 14:26:28 -0500
-Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:46152 "EHLO
+        id S233828AbiBIT1b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Feb 2022 14:27:31 -0500
+Received: from gmail-smtp-in.l.google.com ([23.128.96.19]:47006 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234385AbiBIT0I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Feb 2022 14:26:08 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 049D5C102FED;
-        Wed,  9 Feb 2022 11:19:55 -0800 (PST)
+        with ESMTP id S234327AbiBIT0r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Feb 2022 14:26:47 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72AB7E00E266;
+        Wed,  9 Feb 2022 11:19:16 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 5C3DEB8238C;
-        Wed,  9 Feb 2022 19:14:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8C001C340E7;
-        Wed,  9 Feb 2022 19:14:51 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 3A180B8238D;
+        Wed,  9 Feb 2022 19:15:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 55A48C340E7;
+        Wed,  9 Feb 2022 19:15:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1644434092;
-        bh=eoZDwWkV4rsrAJOY5F0LAs5kTxbQ7KPvapYjwLwSSJI=;
+        s=korg; t=1644434100;
+        bh=dCxPR4JBeSv02HURTnL42udmBp2yb2pJ1Ew0FokUAEM=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=kEi4yUF0j+4L2R7nkzZenYZutTMROVoJH+mMSQYop0n9IQFzvo6F2PAOTCsmbOrxf
-         d7Wj+PUuuR3EYo3YlCcJJALAnj10VbXMvVpvCVcW8zg5VelhDKsgpU/+tEQfEfox0f
-         nQO7lcjw4dXIuKbyKihcJegDtcw5kK2pKGMxnxvg=
+        b=zwE9JROxVTYQOo5PkARElkaSznCXNHyGVg3VjEtiNGl1HxJ4Fq8nsFP4xZerAvBN9
+         Ocn2OiF9JilSnRl05REjzCniWQPsxtdJYqUE2xj64fAyKPWn0m7f/1PmeOmB7FDMA9
+         plHbVrjJa7zaaAhnheXS5KIw3hbUWCkZEKZFHpto=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     linux-kernel@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -38,12 +38,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Tony Lindgren <tony@atomide.com>,
         Yang Li <yang.lee@linux.alibaba.com>,
         linux-mmc@vger.kernel.org, whitehat002 <hackyzh002@gmail.com>
-Subject: [PATCH 4.9 2/2] moxart: fix potential use-after-free on remove path
-Date:   Wed,  9 Feb 2022 20:13:33 +0100
-Message-Id: <20220209191247.913724368@linuxfoundation.org>
+Subject: [PATCH 4.14 2/3] moxart: fix potential use-after-free on remove path
+Date:   Wed,  9 Feb 2022 20:13:39 +0100
+Message-Id: <20220209191248.739254160@linuxfoundation.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220209191247.830371456@linuxfoundation.org>
-References: <20220209191247.830371456@linuxfoundation.org>
+In-Reply-To: <20220209191248.659458918@linuxfoundation.org>
+References: <20220209191248.659458918@linuxfoundation.org>
 User-Agent: quilt/0.66
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -79,7 +79,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/drivers/mmc/host/moxart-mmc.c
 +++ b/drivers/mmc/host/moxart-mmc.c
-@@ -698,12 +698,12 @@ static int moxart_remove(struct platform
+@@ -696,12 +696,12 @@ static int moxart_remove(struct platform
  		if (!IS_ERR(host->dma_chan_rx))
  			dma_release_channel(host->dma_chan_rx);
  		mmc_remove_host(mmc);
