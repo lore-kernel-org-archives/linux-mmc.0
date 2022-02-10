@@ -2,332 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9978EC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Feb 2022 14:57:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E382C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Feb 2022 15:13:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243299AbiBJO5i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Feb 2022 09:57:38 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:42716 "EHLO
+        id S243365AbiBJPN0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Feb 2022 10:13:26 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:52044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243295AbiBJO5h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2022 09:57:37 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33281C4C
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Feb 2022 06:57:37 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id z19so10906284lfq.13
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Feb 2022 06:57:37 -0800 (PST)
+        with ESMTP id S243267AbiBJPN0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2022 10:13:26 -0500
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2073.outbound.protection.outlook.com [40.107.93.73])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4083A137;
+        Thu, 10 Feb 2022 07:13:27 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=ZHP+KLSGV63rOf3m0XN+MX+YYSdpGM4U+zCj+7mlZmkmp22X395411cA0WYkxeLt02/P0+TSVGhzHg2wvwNFC+7bCDtj450BlJV0c3odhuOvY8s92sbF+QZXBm1IMBxZj6bLtfDWkW1edq0/2x1RPg3muDSesWyWXjd2+i1NlVX1pPJ50xnDpczKfk3QxeTIYSIIuwTu0/IHNAlU4Q2Gy/lIhvzspudN/197pXpnaQ+gSdIBYngSnOoe2g9Vm9gbBbxvtvKwuHqacop7e+kjgtL1+3AVfiPh1Z9mJ96Ha3ydivhtdsngy7FgQzzP72K6+3hDfZudskezFbAjm76brA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=4W1tDUBMGjvkLDBU5YF1ncnLJVd3Zu3+GdSGRVtEtrQ=;
+ b=QRa3tnxIMv5phI2Bd4ENO/MEOMJXb8gfOfXjL/HqRBlEhBdt3BubUAz4ySR1fHybrxJuU3xTaQVGV2+6kFm4m7uca65fFEY4U8G8TaXBTXP2zj5veb8VALYpIk/0EPZq5EsK+i3zBUCGe6S6yCpqGbq2RzpC68GTAJYVi4z+jl+LJOKJcRkP/j7gsDo1HKc8LvqbCCwJHK2i3z+I54Xna7OKSuFa98Qp2HDM3GNiVWDh9CyWAsnSl+t9vAoxW7EqgKgKluLMHHIwdUXulHi9qdzONJwhEINAWn5j/UYmJl1TWDeoLdfXQAgF3h5DG1G9wx7CF55Lg1Fltl5g0BT65A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=pg9FzP26LmpWryPvitUm/Fbht2mPNaCOpOrgJa4B7iA=;
-        b=MGIalNatTRUPqIdr82kA6Jju/JdwJreTzuJ4RNGJl1CckGXGKe8QnPM2OD3Qln/SyA
-         agBNetYMZJaxG23W1Wp8HxL/g59dFpXRybZ6ewZeYTlw77dep3Sj/DU/6OWdEKGoxQS/
-         GtpGSDxB6a+tmcLEffj+XUG6sxjZM/qp6jT0kyjMLuCCtswWHpZqkNcLmIehx5S3jKTe
-         /+0kVQA4OJfYapGNFhcoabSMJgczrP+bhujvpM4msu0mwNgxGicAvI7+5BUqanttMyI5
-         Ihf7kqznMLwuxNSTfAfXAI3+Sg4qCfuhycUbGPtlVQIsXcV7HcPE6i8wPWvVDWfC840W
-         K3cQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=pg9FzP26LmpWryPvitUm/Fbht2mPNaCOpOrgJa4B7iA=;
-        b=JNlauRx5/9RgJh/PxSousTUEFNd5KlHvWIHb1yD2PnBec2YAik9ygkHVrITIOdZaaH
-         NyluZLD5dteUW+MXalyonHxmQMqgTvU7iXOAGvPeV9gnas6UeZW5fASBsDN1gZ3cdcoe
-         XjbEhZuzyAoy2pOAL6ghR5ADfYV53ORsMRuELgjlb28S50agn3rWI3+LjcKH4Msre8CM
-         atM/8HSgMluHj+c1IxzNREB8hAQxnZb4MAxR9nlRxnOw+Jzx8AbTYir7amUfP0gkOtSL
-         eaK6DYpPlK69ze2ydLggVYK5kAwYqCuS2bS74WZQSgAX1uaT6KdK5D2iJx7q3MRg/y+A
-         4lVQ==
-X-Gm-Message-State: AOAM531A7dUgFxcBtxg5VgiiTDXfNT7cRY2wLwfdD4bIfcbb4JgxRwh/
-        BWaDrYptTv57nurl8+lAlNjrqcfBR6m5thQbKIuE8g==
-X-Google-Smtp-Source: ABdhPJwgTzQY+E0X4TE56VOW7BCxvAonO5DARQPbf6Gklh3B7hKtHsAaZZgDoLna4twwtute5zGtrCOkwiMaMiapo30=
-X-Received: by 2002:a05:6512:108e:: with SMTP id j14mr733232lfg.233.1644505055430;
- Thu, 10 Feb 2022 06:57:35 -0800 (PST)
-MIME-Version: 1.0
-References: <8e61aed5f64e434abc1d7b6f81859c8a@realtek.com> <CAPDyKFrLpim75nUB7ksDie2edkWsnFSq6TbFSFFpw5cY5d4y1w@mail.gmail.com>
- <fabaed5751f04105a9719c1cb0390c98@realtek.com> <CAPDyKFr3NRUgfKtkb2DBrhziekFAB0jT_X3Fsfvjk_bGZLC9mA@mail.gmail.com>
- <fa10aa1c644241808c2ad880088240ab@realtek.com> <CAPDyKFrtBKHHRgeF-JO27ANsbSmt8rdnhn-WNr5Je9okEgA29Q@mail.gmail.com>
- <feb0c4e71e9c48a2a21f18b7d3baf135@realtek.com> <CAPDyKFoq_PDk_JgW4D+o4eEPdcffUq2RLbBreRDqeK47m0UnJA@mail.gmail.com>
- <a82d7e877dc041d4be5e0ef38c2da406@realtek.com>
-In-Reply-To: <a82d7e877dc041d4be5e0ef38c2da406@realtek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 10 Feb 2022 15:56:58 +0100
-Message-ID: <CAPDyKFo59Q3dmUJU-hJ++=k0uwx2KxamW9KckDX=O_CA84O1_g@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi block rw
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+ d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=4W1tDUBMGjvkLDBU5YF1ncnLJVd3Zu3+GdSGRVtEtrQ=;
+ b=U5rCCDA4uaaZ1KLvb0mtXwBWH5Vq5XDvSEhw/iuFxqb/bqQkSYuGAXunk7stdmLcao5phlgjDxbLuy3pvM4sV/T3cs49RRq/K4JiCLQDgtZ8O6wS0jwbwLeuRIdelBQ8qbVstCKprwi53nBlxQFP1KZnhXhshmL08Pg/X8BZpwU=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=silabs.com;
+Received: from PH0PR11MB5657.namprd11.prod.outlook.com (2603:10b6:510:ee::19)
+ by BY5PR11MB3927.namprd11.prod.outlook.com (2603:10b6:a03:186::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4951.17; Thu, 10 Feb
+ 2022 15:13:24 +0000
+Received: from PH0PR11MB5657.namprd11.prod.outlook.com
+ ([fe80::1b3:e483:7396:1f98]) by PH0PR11MB5657.namprd11.prod.outlook.com
+ ([fe80::1b3:e483:7396:1f98%3]) with mapi id 15.20.4975.014; Thu, 10 Feb 2022
+ 15:13:24 +0000
+From:   =?ISO-8859-1?Q?J=E9r=F4me?= Pouiller <jerome.pouiller@silabs.com>
+To:     Kalle Valo <kvalo@kernel.org>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?ISO-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v9 05/24] wfx: add main.c/main.h
+Date:   Thu, 10 Feb 2022 16:13:16 +0100
+Message-ID: <39159625.OdyKsPGY69@pc-42>
+Organization: Silicon Labs
+In-Reply-To: <87ee4a3hd4.fsf@kernel.org>
+References: <20220111171424.862764-1-Jerome.Pouiller@silabs.com> <4055223.VTxhiZFAix@pc-42> <87ee4a3hd4.fsf@kernel.org>
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
+X-ClientProxiedBy: PR2P264CA0045.FRAP264.PROD.OUTLOOK.COM
+ (2603:10a6:101:1::33) To PH0PR11MB5657.namprd11.prod.outlook.com
+ (2603:10b6:510:ee::19)
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ce58b25f-569e-4e3d-1c35-08d9eca7e1b8
+X-MS-TrafficTypeDiagnostic: BY5PR11MB3927:EE_
+X-Microsoft-Antispam-PRVS: <BY5PR11MB3927831E42CBA7056DDB895F932F9@BY5PR11MB3927.namprd11.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:10000;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: tQ7bhfdYri6+g0QWum2DpNJiDg8S0CoTqLL7eTlkDtD2QGlZf3zy9qkz5gbIJC3PsNW4oZOYqoNDBDINTITbTM1VEMG14X3W3Aj3YL2Rx4xKYYqPON09P69xpXRl3XisfIA2PC6KSy8F+DTbM/7VMcTO49nM7E5R0e+gG+6hlaQ1/ulk9A8oqFCdgzqRj9rwlcRm6rileeP8EyJzpe8K/EkzZ93Tjy5vUm244GsVlFQSeIJeMXjmYuDdLWycUraCPVn2GrmNwrwcuix6nslxIscKGatGv9272erwiHT3QF1JdZhKr9G/suPVCLXpyj/9xAsjhdzyJWp5fiKi2gTYj+F+Eo6SXzVbBH8YfSTHs4KgwIGigd4N5Evn6NJB2Lp6NC9TPrRvBtxmaI/vj8sUtKhw0tPcAm27XV/YvEORLoQtsxYxn3mJ2FAzdD0f/gggmqLLQ5aq06BJwJx/Brviw0/c18dt+dvK/2TqetbTd610joq/ccK7mVzoZpbFOGpLSRuZLwxF7pYX+LwYsXnUCIWXy6Ou24wy+Q+P5f57LY0P6ZWlT5d3UhjcjoTdwJrXZmaVNip3C38eVHmkmzUtJ9t4YdA7nqzvf5rRwmva2tNWljFkfBD9moG7zGBos08AnSHg6kSND/K8AMb1Zar0fpRdapl+oC4utAotekDDg4mIM27B7byFHkEnL3lC+htmjg6fUZLYUpkeDf86Hw+GLevZ2iIPUFf4Slqei57pYYk=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR11MB5657.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(7916004)(366004)(6666004)(8936002)(66946007)(508600001)(86362001)(54906003)(52116002)(33716001)(6506007)(36916002)(316002)(38350700002)(8676002)(6916009)(9686003)(66476007)(66556008)(6512007)(5660300002)(186003)(83380400001)(66574015)(7416002)(38100700002)(26005)(6486002)(4326008)(2906002)(39026012);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?iso-8859-1?Q?I3+dqSU2Md0Dr7fS9oa+kB4Vqn6XROHqUN3ZXnaB6ApHYiWiB8Em3RhMe0?=
+ =?iso-8859-1?Q?tj0b9HzO4GRbMgum+t+N458YCVcVHFm47JesiI/EJuxbFCkReTpsUWSQwc?=
+ =?iso-8859-1?Q?YLvhmSfov3GiBF7leOZbRzTyMe0XTLryXX+v+sGLynvg6x7leOTellg+nz?=
+ =?iso-8859-1?Q?5YxR2kdxXhP0RaLtbhYqwC/wM1WeMNoPu+YbYbzxdFR0g4iM204H0J1Q2k?=
+ =?iso-8859-1?Q?EhreXqiAPUBeRBfSPb2WEkEWdB1CY7EKNh+QFY9ZkXYZzYX97b8tv9jCI8?=
+ =?iso-8859-1?Q?hp182Iq5xdcnNMQt1pDLExNxb7IzUNrttBu9Nkj9LmJKaD1tqt07XwpGNm?=
+ =?iso-8859-1?Q?oh2OVzCcY+US3Ln1tm7GiLApV0W13j7a1iHq/XQVWA+tXzb7sPZseO5iDX?=
+ =?iso-8859-1?Q?E/mVi5KwPtudh3w0f4CQ16tkUM0Z6EI5g2Ky+L7h9j8X9B4wfn7KwfPxOW?=
+ =?iso-8859-1?Q?hTE8GhVVNk5ajlUB4ZfMzqExaG+3mSr3yAZbypLTIe6dWtfoHmWOffZvLq?=
+ =?iso-8859-1?Q?GEUW0pAW84ABnk9Zi6ZAqgXIMyvL3QiVmSE/eV8mA2Ghag5ZRWL2uStDtR?=
+ =?iso-8859-1?Q?+wfGAb4PeQtwAw0AGjoWvl7XtFz+ZgWpRqQKDQxElRzdV7+0dgc9bmHEEn?=
+ =?iso-8859-1?Q?iL/baoP7khbjQ1uohoWYhSBh89Rrszu1WemRSZswY0keYnnkFfHMu5slp6?=
+ =?iso-8859-1?Q?bNSZRyf6WaIoPXBg0Dcph0tb7WX8i6Ykq68gRteQZKBNoEPefdzLFhWPcv?=
+ =?iso-8859-1?Q?68D7YxpolfoOMJcNYrSNHXdM67fOTKsxQo9rSeZAdtXz4EMnDU+u7xYZjD?=
+ =?iso-8859-1?Q?kfnBYHIzu7Ml85FbSaev89VSCNfRd1MrtYvObQs8Ld/EDTjyVF7Pf5Y+qs?=
+ =?iso-8859-1?Q?eiE7rBxp3sJxD7pjWhQ2Dblru6KZydQpCBXhz9vrrQuYVHJIz5b6QehYDX?=
+ =?iso-8859-1?Q?GkPH5wflpAO5kdYK49h3BTIDjrhT1UTqvJtfB4/Z7degvMq3wpqXv3+VYH?=
+ =?iso-8859-1?Q?iEzeROMNzsbe4cg0hOUmcd5xzvgT9H1uFvqabtOSA9dXl7nInw8NEmGexg?=
+ =?iso-8859-1?Q?aF25klocoDR+qzCt3IWN16KQK3+l5gr6lB5AjkNMAocU8yjn0YBnt7GZ2V?=
+ =?iso-8859-1?Q?UvW7v2vdj0oQlpZN1pHZ6CT5ryB0Bnw/zYkiehywuyvFXTqMj6xvBa+Wfy?=
+ =?iso-8859-1?Q?9YpWvLuO4yz/9pkmDLlW6iKWoYT56feMVsDcZuzZZAavm0wXBEZeAjnWeq?=
+ =?iso-8859-1?Q?Y46jKwc7DZTEwJttJ08aQGlOiTdln7XXAjVjrQz/vaG6+P5B6ovjlXHRSn?=
+ =?iso-8859-1?Q?0DRtsNUY9J/aYueMZcK9XU2F65FaiITocidCJ1NYzMxSO5Ch1DN94mO8RA?=
+ =?iso-8859-1?Q?OHxVYBVWQ7tqBUlNoBNbxV47OLcsvDekeT0hKmHttH+o3LKOvBIMazK9lw?=
+ =?iso-8859-1?Q?KrU/sh8u20Li+FCC+7CGbySS3yr0jDH1EFd8mWCirlIjB1n0w55yQfDA9E?=
+ =?iso-8859-1?Q?YuBx9DiGh/YRCHWPzVffsz15phEWy/Zio6KUKhVWLPyHTWpm52G2b9zJnw?=
+ =?iso-8859-1?Q?9l5zkRzmsUdRepPQdwrVCxOe8QHgn2Oa+XU26DWRVQe454d/RUVbie9Jw+?=
+ =?iso-8859-1?Q?Ag3r44yBD4LL6zDOxSYNYhMwkTqG2suEo6WfV94y787kiPya+v2bUwYk0d?=
+ =?iso-8859-1?Q?yx45COqNa4zxs5NWnbY=3D?=
+X-OriginatorOrg: silabs.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ce58b25f-569e-4e3d-1c35-08d9eca7e1b8
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR11MB5657.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Feb 2022 15:13:24.2769
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: OqpakgH/vVpWhT6fHz95FsBkkDefp6NmOEPHuxlnagA/nrFuUa5OInP+YMkq1yfU7x01h2zwhJMUopzqYG3cjA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR11MB3927
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 10 Feb 2022 at 07:43, Ricky WU <ricky_wu@realtek.com> wrote:
->
->
->
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Monday, February 7, 2022 7:11 PM
-> > To: Ricky WU <ricky_wu@realtek.com>
-> > Cc: tommyhebb@gmail.com; linux-mmc@vger.kernel.org;
-> > linux-kernel@vger.kernel.org
-> > Subject: Re: [PATCH v3] mmc: rtsx: improve performance for multi block =
-rw
+On Thursday 10 February 2022 15:51:03 CET Kalle Valo wrote:
+> J=E9r=F4me Pouiller <jerome.pouiller@silabs.com> writes:
+> > On Thursday 10 February 2022 15:20:56 CET Kalle Valo wrote:
+> >> J=E9r=F4me Pouiller <jerome.pouiller@silabs.com> writes:
+> >>
+> >> > Kalle, is this function what you expected? If it is right for you, I=
+ am
+> >> > going to send it to the staging tree.
+> >>
+> >> Looks better, but I don't get why '{' and '}' are still needed. Ah, do=
+es
+> >> the firmware require to have them?
 > >
-> > [...]
-> >
-> > > > > > >
-> > > > > > > Do you have any suggestion for testing random I/O But we thin=
-k
-> > > > > > > random I/O will not change much
-> > > > > >
-> > > > > > I would probably look into using fio,
-> > > > > > https://fio.readthedocs.io/en/latest/
-> > > > > >
-> > > > >
-> > > > > Filled random I/O data
-> > > > > Before the patch:
-> > > > > CMD (Randread):
-> > > > > sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -threa=
-d
-> > > > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D1G -name=
-=3Dmytest
-> > > > > -bs=3D1M -rw=3Drandread
-> > > >
-> > > > Thanks for running the tests! Overall, I would not expect an impact
-> > > > on the throughput when using a big blocksize like 1M. This is also
-> > > > pretty clear from the result you have provided.
-> > > >
-> > > > However, especially for random writes and reads, we want to try wit=
-h
-> > > > smaller blocksizes. Like 8k or 16k, would you mind running another
-> > > > round of tests to see how that works out?
-> > > >
-> > >
-> > > Filled random I/O data(8k/16k)
-> >
-> > Hi Ricky,
-> >
-> > Apologize for the delay! Thanks for running the tests. Let me comment o=
-n
-> > them below.
-> >
-> > >
-> > > Before(randread)
-> > > 8k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D1G -name=3Dmy=
-test
-> > > -bs=3D8k -rw=3Drandread
-> > > mytest: (g=3D0): rw=3Drandread, bs=3D(R) 8192B-8192B, (W) 8192B-8192B=
-, (T)
-> > > 8192B-8192B, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >    READ: bw=3D16.5MiB/s (17.3MB/s), 16.5MiB/s-16.5MiB/s
-> > > (17.3MB/s-17.3MB/s), io=3D1024MiB (1074MB), run=3D62019-62019msec Dis=
-k
-> > stats (read/write):
-> > >   mmcblk0: ios=3D130757/0, merge=3D0/0, ticks=3D57751/0, in_queue=3D5=
-7751,
-> > > util=3D99.89%
-> > >
-> > > 16k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D1G -name=3Dmy=
-test
-> > > -bs=3D16k -rw=3Drandread
-> > > mytest: (g=3D0): rw=3Drandread, bs=3D(R) 16.0KiB-16.0KiB, (W)
-> > > 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >    READ: bw=3D23.3MiB/s (24.4MB/s), 23.3MiB/s-23.3MiB/s
-> > > (24.4MB/s-24.4MB/s), io=3D1024MiB (1074MB), run=3D44034-44034msec Dis=
-k
-> > stats (read/write):
-> > >   mmcblk0: ios=3D65333/0, merge=3D0/0, ticks=3D39420/0, in_queue=3D39=
-420,
-> > > util=3D99.84%
-> > >
-> > > Before(randrwrite)
-> > > 8k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D100M -name=3D=
-mytest
-> > > -bs=3D8k -rw=3Drandwrite
-> > > mytest: (g=3D0): rw=3Drandwrite, bs=3D(R) 8192B-8192B, (W) 8192B-8192=
-B, (T)
-> > > 8192B-8192B, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >   WRITE: bw=3D4060KiB/s (4158kB/s), 4060KiB/s-4060KiB/s
-> > > (4158kB/s-4158kB/s), io=3D100MiB (105MB), run=3D25220-25220msec Disk =
-stats
-> > (read/write):
-> > >   mmcblk0: ios=3D51/12759, merge=3D0/0, ticks=3D80/24154, in_queue=3D=
-24234,
-> > > util=3D99.90%
-> > >
-> > > 16k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D100M -name=3D=
-mytest
-> > > -bs=3D16k -rw=3Drandwrite
-> > > mytest: (g=3D0): rw=3Drandwrite, bs=3D(R) 16.0KiB-16.0KiB, (W)
-> > > 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >   WRITE: bw=3D7201KiB/s (7373kB/s), 7201KiB/s-7201KiB/s
-> > > (7373kB/s-7373kB/s), io=3D100MiB (105MB), run=3D14221-14221msec Disk =
-stats
-> > (read/write):
-> > >   mmcblk0: ios=3D51/6367, merge=3D0/0, ticks=3D82/13647, in_queue=3D1=
-3728,
-> > > util=3D99.81%
-> > >
-> > >
-> > > After(randread)
-> > > 8k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D1G -name=3Dmy=
-test
-> > > -bs=3D8k -rw=3Drandread
-> > > mytest: (g=3D0): rw=3Drandread, bs=3D(R) 8192B-8192B, (W) 8192B-8192B=
-, (T)
-> > > 8192B-8192B, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >    READ: bw=3D12.4MiB/s (13.0MB/s), 12.4MiB/s-12.4MiB/s
-> > > (13.0MB/s-13.0MB/s), io=3D1024MiB (1074MB), run=3D82397-82397msec Dis=
-k
-> > stats (read/write):
-> > >   mmcblk0: ios=3D130640/0, merge=3D0/0, ticks=3D74125/0, in_queue=3D7=
-4125,
-> > > util=3D99.94%
-> > >
-> > > 16k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D1G -name=3Dmy=
-test
-> > > -bs=3D16k -rw=3Drandread
-> > > mytest: (g=3D0): rw=3Drandread, bs=3D(R) 16.0KiB-16.0KiB, (W)
-> > > 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >    READ: bw=3D20.0MiB/s (21.0MB/s), 20.0MiB/s-20.0MiB/s
-> > > (21.0MB/s-21.0MB/s), io=3D1024MiB (1074MB), run=3D51076-51076msec Dis=
-k
-> > stats (read/write):
-> > >   mmcblk0: ios=3D65282/0, merge=3D0/0, ticks=3D46255/0, in_queue=3D46=
-254,
-> > > util=3D99.87%
-> > >
-> > > After(randwrite)
-> > > 8k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D100M -name=3D=
-mytest
-> > > -bs=3D8k -rw=3Drandwrite
-> > > mytest: (g=3D0): rw=3Drandwrite, bs=3D(R) 8192B-8192B, (W) 8192B-8192=
-B, (T)
-> > > 8192B-8192B, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >   WRITE: bw=3D4215KiB/s (4317kB/s), 4215KiB/s-4215KiB/s
-> > > (4317kB/s-4317kB/s), io=3D100MiB (105MB), run=3D24292-24292msec Disk =
-stats
-> > (read/write):
-> > >   mmcblk0: ios=3D52/12717, merge=3D0/0, ticks=3D86/23182, in_queue=3D=
-23267,
-> > > util=3D99.92%
-> > >
-> > > 16k:
-> > > Cmd: sudo fio -filename=3D/dev/mmcblk0 -direct=3D1 -numjobs=3D1 -thre=
-ad
-> > > -group_reporting -ioengine=3Dpsync -iodepth=3D1 -size=3D100M -name=3D=
-mytest
-> > > -bs=3D16k -rw=3Drandwrite
-> > > mytest: (g=3D0): rw=3Drandwrite, bs=3D(R) 16.0KiB-16.0KiB, (W)
-> > > 16.0KiB-16.0KiB, (T) 16.0KiB-16.0KiB, ioengine=3Dpsync, iodepth=3D1
-> > > result:
-> > > Run status group 0 (all jobs):
-> > >   WRITE: bw=3D6499KiB/s (6655kB/s), 6499KiB/s-6499KiB/s
-> > > (6655kB/s-6655kB/s), io=3D100MiB (105MB), run=3D15756-15756msec Disk =
-stats
-> > (read/write):
-> > >   mmcblk0: ios=3D51/6347, merge=3D0/0, ticks=3D84/15120, in_queue=3D1=
-5204,
-> > > util=3D99.80%
-> >
-> > It looks like the rand-read tests above are degrading with the new chan=
-ges,
-> > while rand-writes are both improving and degrading.
-> >
-> > To summarize my view from all the tests you have done at this point (th=
-anks a
-> > lot); it looks like the block I/O merging isn't really happening at com=
-mon
-> > blocklayer, at least to that extent that would benefit us. Clearly you =
-have shown
-> > that by the suggested change in the mmc host driver, by detecting wheth=
-er the
-> > "next" request is sequential to the previous one, which allows us to sk=
-ip a
-> > CMD12 and minimize some command overhead.
-> >
-> > However, according to the latest tests above, you have also proved that=
- the
-> > changes in the mmc host driver doesn't come without a cost.
-> > In particular, small random-reads would degrade in performance from the=
-se
-> > changes.
-> >
-> > That said, it looks to me that rather than trying to improve things for=
- one
-> > specific mmc host driver, it would be better to look at this from the g=
-eneric
-> > block layer point of view - and investigate why sequential reads/writes=
- aren't
-> > getting merged often enough for the MMC/SD case. If we can fix the prob=
-lem
-> > there, all mmc host drivers would benefit I assume.
-> >
->
-> So you are thinking about how to patch this in MMC/SD?
-> I don't know if this method is compatible with other MMC Hosts? Or they n=
-eed to patch other code on their host driver
+> > Indeed. If '{' and '}' are not present, I guarantee the firmware will r=
+eturn
+> > an error (or assert). However, I am more confident in the driver than i=
+n the
+> > firmware to report errors to the user.
+>=20
+> Agreed.
+>=20
+> > If there is no other comment, I am going to:
+> >   - submit this change to the staging tree
+>=20
+> Good, it's important that you get all your changes to the staging tree
+> before the next merge window.
+>=20
+> >   - publish the tool that generate this new format
+> >   - submit the PDS files referenced in bus_{sdio,spi}.c to linux-firmwa=
+re
+> >   - send the v10 of this PR
+>=20
+> I'm not sure if there's a need to send a full patchset anymore? We are
+> so close now anyway and the full driver is available from the staging
+> tree, at least that's what I will use from now on when reviewing wfx.
+>=20
+> What about the Device Tree bindings? That needs to be acked by the DT
+> maintainers, so that's good to submit as a separate patch for review.
 
-I would not limit this to the core layer of MMC/SD. The point I was
-trying to make was that it doesn't look like the generic block layer
-is merging the sequential I/O requests in the most efficient way, at
-least for the eMMC/SD devices. Why this is the case, I can't tell. It
-looks like we need to do some more in-depth analysis to understand why
-merging isn't efficient for us.
+There is also the patch 01/24 about the SDIO IDs.
 
->
-> > BTW, have you tried with different I/O schedulers? If you haven't tried=
- BFQ, I
-> > suggest you do as it's a good fit for MMC/SD.
-> >
->
-> I don=E2=80=99t know what is different I/O schedulers means?
+I think the v10 could contain only 3 patches:
 
-What I/O scheduler did you use when running the test?
+    1. mmc: sdio: add SDIO IDs for Silabs WF200 chip
+    2. dt-bindings: introduce silabs,wfx.yaml
+    3. [all the patches 3 to 24 squashed]
 
-For MMC/SD the only one that makes sense to use is BFQ, however that
-needs to be configured via sysfs after boot. There is no way,
-currently, to make it the default, I think. You may look at
-Documentation/block/bfq-iosched.rst, if you are more interested.
+Would it be right for you?
 
-Kind regards
-Uffe
+--=20
+J=E9r=F4me Pouiller
+
+
