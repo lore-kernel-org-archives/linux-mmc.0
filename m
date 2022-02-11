@@ -2,115 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71479C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Feb 2022 23:55:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79C82C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Feb 2022 02:36:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345945AbiBJXzz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Feb 2022 18:55:55 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:55764 "EHLO
+        id S1343763AbiBKCgL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Feb 2022 21:36:11 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:58976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345909AbiBJXzz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2022 18:55:55 -0500
-Received: from mail-io1-xd31.google.com (mail-io1-xd31.google.com [IPv6:2607:f8b0:4864:20::d31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2ADE65F83;
-        Thu, 10 Feb 2022 15:55:55 -0800 (PST)
-Received: by mail-io1-xd31.google.com with SMTP id c188so9475771iof.6;
-        Thu, 10 Feb 2022 15:55:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=9Poe1QU0FyqYAnHH8Q+q/1vr6hVBL5HGB2D6185D4Dc=;
-        b=g31QJrIdHnrArxOcj+UtssUsmwnWEpH4lQAi2PZOos3OiL1YRpDRz8LhpX0UqO019M
-         VbAjG0CpxRcTaZ9F2Z5FfMfKvoymkuIxkojwKOyOspqzdoQuZuukn/CD6iH4hXlMql6a
-         y1emREWzbvfX8nKyVV+eNehAExdOMASWVGrEC5hJRbX6TlrY29oEs7aIlM/9mRm9xHgV
-         Rre3uyOgzPJZl799rdCZyxHLg7qjtxkKfJHCwnLgkd0TTvy57u4IHey9pRNlwJqKLpgN
-         dNTv5O/2hn7LRQQh2QoZ7blZYoTLIx3M6TjJwkeAUSxg/+K3RWUmOxa+YMxKXRQeSygm
-         6arQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=9Poe1QU0FyqYAnHH8Q+q/1vr6hVBL5HGB2D6185D4Dc=;
-        b=7QpP4semKo/wDBdvWxzR+iiha9Fp1mX2js8qSXiO9q8pqSXEI+wFFfpYV4clqmtvaj
-         D5wJksbwKiVkbF6fklMbBbm+TAWm4c0pUOwEKsd3lL8krXad5h7P6yvm72hPckWh6lsB
-         zrKqEfRAKG2ubY9kTAuxmU81gzSJg83l3rFy8gSD9V3OyWCJY2RfWI0pZfhxb1bkt/YV
-         1M4HBsl69teBu8oZr2oAJfMxy23Ta3PMUSik8AoImZen2rAI1kpNzebkLeo7CKd0xfFg
-         E//hyTANlhDr141vnD0GD4ULM9VfsbIjJq6upoz+LrqkdUciQLUYio5MpoyRhV6k2yW8
-         9A+w==
-X-Gm-Message-State: AOAM531l6+DnVytj+ykAv+cLciKRlvygdPhW2ylInC1ydFfLcpvUHF1j
-        OevOTrBeFD4YpgmmiTHK3bw=
-X-Google-Smtp-Source: ABdhPJxH+VGiGx9FUazjFDcnU7odGVOPzznh3sg75Vp+ADEFdLGkzCpLhCud0L3DRIIA/OcM2o86vA==
-X-Received: by 2002:a02:3f42:: with SMTP id c2mr5403680jaf.161.1644537354570;
-        Thu, 10 Feb 2022 15:55:54 -0800 (PST)
-Received: from localhost ([12.28.44.171])
-        by smtp.gmail.com with ESMTPSA id e20sm6388176ioc.35.2022.02.10.15.55.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Feb 2022 15:55:54 -0800 (PST)
-From:   Yury Norov <yury.norov@gmail.com>
-To:     Yury Norov <yury.norov@gmail.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        David Laight <David.Laight@aculab.com>,
-        Joe Perches <joe@perches.com>, Dennis Zhou <dennis@kernel.org>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Nicholas Piggin <npiggin@gmail.com>,
-        Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        linux-kernel@vger.kernel.org,
+        with ESMTP id S244563AbiBKCgL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Feb 2022 21:36:11 -0500
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D2DAABFD
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Feb 2022 18:36:10 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1644546969;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wUVqFARDBJNnBok2lT0WfqI736phrHJDPkbze9E0f/c=;
+        b=TyQmCgEEL+ScYvc9YS+/dNUvFexUKEZHNjP28eYiw61v6Sn7RDYDHId6MjWXAsJL4BdBfb
+        g/oKGlO1gOOQu4bM5bko6KSLQTp2jJJTog7GClX+S5XjOb0qbL+5yNyDllUQixm2Mbn9eT
+        qnuVxC1DS765KyArJkzmkKy9thq0C2Q=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-672-oQOwLwdgPe24Kq2cup0Gaw-1; Thu, 10 Feb 2022 21:36:06 -0500
+X-MC-Unique: oQOwLwdgPe24Kq2cup0Gaw-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 4DA80835B47;
+        Fri, 11 Feb 2022 02:36:05 +0000 (UTC)
+Received: from T590 (ovpn-8-26.pek2.redhat.com [10.72.8.26])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id EF608E2E8;
+        Fri, 11 Feb 2022 02:35:14 +0000 (UTC)
+Date:   Fri, 11 Feb 2022 10:35:09 +0800
+From:   Ming Lei <ming.lei@redhat.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Stefan Hajnoczi <stefanha@redhat.com>,
         Maxim Levitsky <maximlevitsky@gmail.com>,
         Alex Dubov <oakad@yahoo.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Colin Ian King <colin.king@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
+        linux-block@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
         linux-mmc@vger.kernel.org
-Cc:     Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
-Subject: [PATCH 29/49] memstick: replace bitmap_weight with bitmap_weight_eq where appropriate
-Date:   Thu, 10 Feb 2022 14:49:13 -0800
-Message-Id: <20220210224933.379149-30-yury.norov@gmail.com>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20220210224933.379149-1-yury.norov@gmail.com>
-References: <20220210224933.379149-1-yury.norov@gmail.com>
+Subject: Re: [PATCH 2/5] memstick/ms_block: simplify refcounting
+Message-ID: <YgXLXcwf8fLK3yti@T590>
+References: <20220209082121.2628452-1-hch@lst.de>
+ <20220209082121.2628452-3-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220209082121.2628452-3-hch@lst.de>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-msb_validate_used_block_bitmap() calls bitmap_weight() to compare the
-weight of bitmap with a given number. We can do it more efficiently with
-bitmap_weight_eq because conditional bitmap_weight may stop traversing the
-bitmap earlier, as soon as condition is (or can't be) met.
+On Wed, Feb 09, 2022 at 09:21:17AM +0100, Christoph Hellwig wrote:
+> Implement the ->free_disk method to free the msb_data structure only once
+> the last gendisk reference goes away instead of keeping a local refcount.
+> 
 
-Signed-off-by: Yury Norov <yury.norov@gmail.com>
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-Acked-by: Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
----
- drivers/memstick/core/ms_block.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+The approach looks good, just the error handling needs to be careful,
+such as, once driver data is bound to disk->private_data, the previous
+error handling code shouldn't touch/free the driver data any more. That
+said assigning disk->private_data implies driver data ownership transfer
+after this conversion.
 
-diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-index 0cda6c6baefc..5cdd987e78f7 100644
---- a/drivers/memstick/core/ms_block.c
-+++ b/drivers/memstick/core/ms_block.c
-@@ -155,8 +155,8 @@ static int msb_validate_used_block_bitmap(struct msb_data *msb)
- 	for (i = 0; i < msb->zone_count; i++)
- 		total_free_blocks += msb->free_block_count[i];
- 
--	if (msb->block_count - bitmap_weight(msb->used_blocks_bitmap,
--					msb->block_count) == total_free_blocks)
-+	if (bitmap_weight_eq(msb->used_blocks_bitmap, msb->block_count,
-+				msb->block_count - total_free_blocks))
- 		return 0;
- 
- 	pr_err("BUG: free block counts don't match the bitmap");
--- 
-2.32.0
+Such as, in msb_init_disk(), once blk_cleanup_disk() is done, the code
+branch of out_release_id shouldn't be run; msb_probe() has the similar
+issue too.
+
+Thanks,
+Ming
 
