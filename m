@@ -2,266 +2,660 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 948FBC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Feb 2022 14:00:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF5B7C4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 12 Feb 2022 20:16:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240100AbiBKOA1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Feb 2022 09:00:27 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:38254 "EHLO
+        id S231419AbiBLUQv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 12 Feb 2022 15:16:51 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:38524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240055AbiBKOA0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Feb 2022 09:00:26 -0500
-X-Greylist: delayed 390 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 11 Feb 2022 06:00:24 PST
-Received: from mailout1.samsung.com (mailout1.samsung.com [203.254.224.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F3DB383
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Feb 2022 06:00:24 -0800 (PST)
-Received: from epcas5p1.samsung.com (unknown [182.195.41.39])
-        by mailout1.samsung.com (KnoxPortal) with ESMTP id 20220211135351epoutp01cd5dad2d6a41caf2183a3d2fd495f7de~Sv7zdc_3_2941629416epoutp01I
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Feb 2022 13:53:51 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20220211135351epoutp01cd5dad2d6a41caf2183a3d2fd495f7de~Sv7zdc_3_2941629416epoutp01I
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1644587631;
-        bh=8cezIy141LnAGTrEqGD5hiu4yfKYG/XvPkNi2khhjNI=;
-        h=From:To:Cc:Subject:Date:References:From;
-        b=TeqGcYUpswZNmVmi8eGNLCp4pvg3hSa8UbUoQxP9Wp0aKyI3pqU2UIl8MEYchtWQQ
-         QDucs7l0KRHhYFVTIeOViVOon9hUJRriHvZLjIa2rgZZtdQlZohAHtPlqd2oagd9F9
-         RGvcU3nKOGi+hBlQ4Kd0f1spUQH8rz3cVYc/tCLs=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-        epcas5p1.samsung.com (KnoxPortal) with ESMTP id
-        20220211135350epcas5p1559205421221cbff47cf2d761d2e1234~Sv7yghy_H0404204042epcas5p1-;
-        Fri, 11 Feb 2022 13:53:50 +0000 (GMT)
-Received: from epsmges5p3new.samsung.com (unknown [182.195.38.180]) by
-        epsnrtp3.localdomain (Postfix) with ESMTP id 4JwFT56x2Jz4x9Pp; Fri, 11 Feb
-        2022 13:53:45 +0000 (GMT)
-Received: from epcas5p1.samsung.com ( [182.195.41.39]) by
-        epsmges5p3new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        A4.85.05590.C5A66026; Fri, 11 Feb 2022 22:53:32 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-        epcas5p3.samsung.com (KnoxPortal) with ESMTPA id
-        20220211120808epcas5p31f6a3bf93945f34d23840ed9e455f8ab~SuffrMyv81161911619epcas5p34;
-        Fri, 11 Feb 2022 12:08:08 +0000 (GMT)
-Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
-        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20220211120808epsmtrp1bd207e6797a7eb578a39b128302979ed~SuffqSB-T2966329663epsmtrp1d;
-        Fri, 11 Feb 2022 12:08:08 +0000 (GMT)
-X-AuditID: b6c32a4b-723ff700000015d6-0f-62066a5c76e3
-Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
-        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        44.26.29871.8A156026; Fri, 11 Feb 2022 21:08:08 +0900 (KST)
-Received: from test.sa.corp.samsungelectronics.net (unknown [107.99.43.140])
-        by epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-        20220211120806epsmtip18f6c412ac4af2453d6b4e1134ffc57ea~SufeU6Vph0541405414epsmtip1M;
-        Fri, 11 Feb 2022 12:08:06 +0000 (GMT)
-From:   Shankar Athanikar <shankar.ma@samsung.com>
-To:     linux-mmc@vger.kernel.org, avri.altman@wdc.com, chris@printf.net,
-        ulf.hansson@linaro.org
-Cc:     puneet.5@samsung.com, sumeet.paul@samsung.com,
-        akhilesh.j@samsung.com, Shankar Athanikar <shankar.ma@samsung.com>,
-        Mohan Raj Veerasamy <mohanraj.v@samsung.com>
-Subject: [PATCH v2] Enhancement to do_status_get() function for detailed
- Response info
-Date:   Fri, 11 Feb 2022 17:34:49 +0530
-Message-Id: <20220211120449.195052-1-shankar.ma@samsung.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S231411AbiBLUQt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Feb 2022 15:16:49 -0500
+Received: from mxout04.lancloud.ru (mxout04.lancloud.ru [45.84.86.114])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26C7CB48;
+        Sat, 12 Feb 2022 12:16:40 -0800 (PST)
+Received: from LanCloud
+DKIM-Filter: OpenDKIM Filter v2.11.0 mxout04.lancloud.ru 1A0F920A7A63
+Received: from LanCloud
+Received: from LanCloud
+Received: from LanCloud
+From:   Sergey Shtylyov <s.shtylyov@omp.ru>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        <linux-kernel@vger.kernel.org>
+CC:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Corey Minyard <minyard@acm.org>,
+        Oleksij Rempel <linux@rempel-privat.de>,
+        "Pengutronix Kernel Team" <kernel@pengutronix.de>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        "Linus Walleij" <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        "Lee Jones" <lee.jones@linaro.org>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        "Florian Fainelli" <f.fainelli@gmail.com>,
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        Andrew Lunn <andrew@lunn.ch>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        Brian Norris <computersforpeace@gmail.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Benson Leung <bleung@chromium.org>,
+        "Guenter Roeck" <groeck@chromium.org>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Mark Gross <markgross@kernel.org>,
+        John Garry <john.garry@huawei.com>,
+        Mark Brown <broonie@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Eric Auger <eric.auger@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        "Liam Girdwood" <lgirdwood@gmail.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        "Takashi Iwai" <tiwai@suse.com>,
+        <openipmi-developer@lists.sourceforge.net>,
+        <linux-iio@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
+        <linux-pwm@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mmc@vger.kernel.org>, <linux-mtd@lists.infradead.org>,
+        <netdev@vger.kernel.org>, <linux-renesas-soc@vger.kernel.org>,
+        <linux-phy@lists.infradead.org>,
+        <platform-driver-x86@vger.kernel.org>, <linux-spi@vger.kernel.org>,
+        <linux-mediatek@lists.infradead.org>, <linux-pm@vger.kernel.org>,
+        <linux-serial@vger.kernel.org>, <kvm@vger.kernel.org>,
+        <alsa-devel@alsa-project.org>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Subject: [PATCH v2 1/2] platform: make platform_get_irq_optional() optional
+Date:   Sat, 12 Feb 2022 23:16:30 +0300
+Message-ID: <20220212201631.12648-2-s.shtylyov@omp.ru>
+X-Mailer: git-send-email 2.26.3
+In-Reply-To: <20220212201631.12648-1-s.shtylyov@omp.ru>
+References: <20220212201631.12648-1-s.shtylyov@omp.ru>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFupmk+LIzCtJLcpLzFFi42LZdlhTXTcmiy3JoGW/qcXj5v3sFi9/XmWz
-        mHB5O6PFkf/9QOJwK6vFg0tvWCw29SpaHPm3lc3i+NpwB06PO9f2sHnceLWQyaNvyypGj8+b
-        5DzaD3QzBbBGZdtkpCampBYppOYl56dk5qXbKnkHxzvHm5oZGOoaWlqYKynkJeam2iq5+ATo
-        umXmAJ2jpFCWmFMKFApILC5W0rezKcovLUlVyMgvLrFVSi1IySkwKdArTswtLs1L18tLLbEy
-        NDAwMgUqTMjOuDz7BlNBg1rF/2mODYwXZLoYOTkkBEwkTh45xd7FyMUhJLCbUWLJ/n8sEM4n
-        RolJ11qhnG+MEl+737LDtDRfusIIYgsJ7AWqegLV3sgksfLYUWaQBJuAgcT9GSeBujk4RATi
-        JM69ygWpYRZYziixfUkHWI2wQITEna2PmUBsFgFVia27Z4DFeQVsJOZeOsUCsUxeYual7+wQ
-        cUGJkzOfgMWZgeLNW2czgwyVELjGLjF31TSo61wk7k1exAxhC0u8Or4FKi4l8bK/jR2ioZ1R
-        4uOkKWwQzgRGif4vS5ggquwl+mY+ZQI5m1lAU2L9Ln2IsKzE1FPrmCA280n0/n4CVc4rsWPe
-        E7ByCQEVibkTa2F2/fl1hQ3C9pDYd/kKCyS0YiX+HX3APIFRfhaSf2Yh+WcWwuIFjMyrGCVT
-        C4pz01OLTQuM81LL4RGbnJ+7iRGcKrW8dzA+evBB7xAjEwfjIUYJDmYlEd4VN1iThHhTEiur
-        Uovy44tKc1KLDzGaAgN5IrOUaHI+MFnnlcQbmlgamJiZmZlYGpsZKonznkrfkCgkkJ5Ykpqd
-        mlqQWgTTx8TBKdXA5Dwpo0zkqk3LtvPPoq6UXQqaW5Zgd5ptae/aycdmR/pcvSOboP675Bav
-        cir/DAudACHhkzPlOzjdj258KHKnfEmY45PIfKcNXg+OBbTWTI4PNzhxPCbjXcqjK1OWxb36
-        90nio9LB6Oo7fnYmx487MhbtkdM0+L5KYsmXHftf7+HY9/Z201Ld2B3i2sXrrrubxD7d+cNo
-        fY70tB9T+v6tuuL56bnOVO3PBrcNfkSlngncdufitJg/nNuPnP/50CjT+9ClJPtSucXq5kxR
-        ulc9i+/YyXGkHt41c0r69rOOje2Ba92r/R2XKs76oVHNJia3O33uyYCdYZfzZikHL7MLZoyb
-        lbFpvfRmiVud895cl1ZiKc5INNRiLipOBABAmwBKHgQAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrGLMWRmVeSWpSXmKPExsWy7bCSnO6KQLYkgy3buSweN+9nt3j58yqb
-        xYTL2xktjvzvBxKHW1ktHlx6w2KxqVfR4si/rWwWx9eGO3B63Lm2h83jxquFTB59W1Yxenze
-        JOfRfqCbKYA1issmJTUnsyy1SN8ugSvj8uwbTAUNahX/pzk2MF6Q6WLk5JAQMJFovnSFEcQW
-        EtjNKHH0VgREXEpiad9XJghbWGLlv+fsXYxcQDX/GSU2dbWzgCTYBAwk7s84CWaLCCRJTLje
-        xARSxCywmlGi+/F9NpCEsECYxM0z88AmsQioSmzdPYMZxOYVsJGYe+kUC8QGeYmZl76zQ8QF
-        JU7OfAIWZwaKN2+dzTyBkW8WktQsJKkFjEyrGCVTC4pz03OLDQsM81LL9YoTc4tL89L1kvNz
-        NzGCg1ZLcwfj9lUf9A4xMnEwHmKU4GBWEuFdcYM1SYg3JbGyKrUoP76oNCe1+BCjNAeLkjjv
-        ha6T8UIC6YklqdmpqQWpRTBZJg5OqQYmozv+wusLN4b1aV85eTjTc9dlw012fhvLl3h1f7Vf
-        y6IdE20YW934vCCvdc6ZyZo3b8/0TOn7sXH9z+88HMciWhZ5xG31bjhaNFHPZfvtvV3Zqr/n
-        NBXoyHje/mKVvX65xvY5U1MPWL7vPeE9byJz0zXf2UKCeo8aftdempqnUcTD6LE8/XXmz3PL
-        HJ6XWN1/uzK1+5PFupM8P2VDZEODVBRfe1/8lJ2TtX2RwuNDyR6mr1btKEt8m881+82VDz/3
-        c/Gn37+Zx1B9dH55ou+p30yBp/pjbj3+P8ltwfKFP/b9PnmF7e2fy4+Md+tkFT0M2L9Et4Lr
-        59aX6vnLZVRVpzrZFj1MC1jgae6asa4iUomlOCPRUIu5qDgRALgArqLJAgAA
-X-CMS-MailID: 20220211120808epcas5p31f6a3bf93945f34d23840ed9e455f8ab
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: REQ_APPROVE
-CMS-TYPE: 105P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20220211120808epcas5p31f6a3bf93945f34d23840ed9e455f8ab
-References: <CGME20220211120808epcas5p31f6a3bf93945f34d23840ed9e455f8ab@epcas5p3.samsung.com>
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [192.168.11.198]
+X-ClientProxiedBy: LFEXT02.lancloud.ru (fd00:f066::142) To
+ LFEX1907.lancloud.ru (fd00:f066::207)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This enhancement covers detailed status register decoding with 
-ERROR/STATUS information when host sends CMD13(with SQS=0)
+This patch is based on the former Andy Shevchenko's patch:
 
-Signed-off-by: Shankar Athanikar <shankar.ma@samsung.com>
-Reviewed-by: Mohan Raj Veerasamy <mohanraj.v@samsung.com>
+https://lore.kernel.org/lkml/20210331144526.19439-1-andriy.shevchenko@linux.intel.com/
+
+Currently platform_get_irq_optional() returns an error code even if IRQ
+resource simply has not been found.  It prevents the callers from being
+error code agnostic in their error handling:
+
+	ret = platform_get_irq_optional(...);
+	if (ret < 0 && ret != -ENXIO)
+		return ret; // respect deferred probe
+	if (ret > 0)
+		...we get an IRQ...
+
+All other *_optional() APIs seem to return 0 or NULL in case an optional
+resource is not available.  Let's follow this good example, so that the
+callers would look like:
+
+	ret = platform_get_irq_optional(...);
+	if (ret < 0)
+		return ret;
+	if (ret > 0)
+		...we get an IRQ...
+
+Reported-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
 ---
-change log V1 -> V2
+Changes in version 2:
+- added the error check using dev_err_probe() to platform_get_irq_optional();
+- fixed up the IRQ checks in 'drivers/char/ipmi/bt-bmc.c';
+- fixed up the IRQ check in 'drivers/thermal/rcar_gen3_thermal.c';
+- removed from the patch 'drivers/edac/xgene_edac.c and
+  'drivers/power/supply/mp2629_charger.c' as they were switched to calling
+  platform_get_irq();
+- shortened the IRQ checking code in 'drivers/vfio/platform/vfio_platform.c';
+- rebased atop of the recent platform_get_irq_byname() patch;
+- reformatted the patch description.
 
-1. Added #defines for R1 Response device status fields.
-2. Code cleanup and addressed Review comments from Ulf
-Hansson<ulf.hansson@linaro.org>.
----
- mmc.h      | 22 ++++++++++++++
- mmc_cmds.c | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++-
- 2 files changed, 108 insertions(+), 1 deletion(-)
+ drivers/base/platform.c                  | 60 +++++++++++++++---------
+ drivers/char/ipmi/bt-bmc.c               |  6 +--
+ drivers/counter/interrupt-cnt.c          |  4 +-
+ drivers/gpio/gpio-altera.c               |  3 +-
+ drivers/gpio/gpio-mvebu.c                |  2 +-
+ drivers/gpio/gpio-tqmx86.c               |  2 +-
+ drivers/i2c/busses/i2c-brcmstb.c         |  8 ++--
+ drivers/i2c/busses/i2c-ocores.c          |  4 +-
+ drivers/mmc/host/sh_mmcif.c              |  4 +-
+ drivers/mtd/nand/raw/brcmnand/brcmnand.c |  4 +-
+ drivers/net/ethernet/davicom/dm9000.c    |  2 +-
+ drivers/net/ethernet/freescale/fec_ptp.c |  2 +-
+ drivers/phy/renesas/phy-rcar-gen3-usb2.c |  4 +-
+ drivers/platform/chrome/cros_ec_lpc.c    |  2 +-
+ drivers/platform/x86/intel/punit_ipc.c   |  2 +-
+ drivers/spi/spi-hisi-sfc-v3xx.c          |  2 +-
+ drivers/spi/spi-mtk-nor.c                |  3 +-
+ drivers/thermal/rcar_gen3_thermal.c      |  2 +
+ drivers/tty/serial/8250/8250_mtk.c       |  4 +-
+ drivers/tty/serial/sh-sci.c              |  6 +--
+ drivers/uio/uio_pdrv_genirq.c            |  2 +-
+ drivers/vfio/platform/vfio_platform.c    |  3 +-
+ sound/soc/dwc/dwc-i2s.c                  |  4 +-
+ 23 files changed, 76 insertions(+), 59 deletions(-)
 
-diff --git a/mmc.h b/mmc.h
-index e9766d7..193dfee 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -44,6 +44,28 @@
- 					      [1] Discard Enable
- 					      [0] Identify Write Blocks for
- 					      Erase (or TRIM Enable)  R1b */
-+
-+#define R1_OUT_OF_RANGE         (1 << 31)       /* er, c */
-+#define R1_ADDRESS_ERROR        (1 << 30)       /* erx, c */
-+#define R1_BLOCK_LEN_ERROR      (1 << 29)       /* er, c */
-+#define R1_ERASE_SEQ_ERROR      (1 << 28)       /* er, c */
-+#define R1_ERASE_PARAM          (1 << 27)       /* ex, c */
-+#define R1_WP_VIOLATION         (1 << 26)       /* erx, c */
-+#define R1_CARD_IS_LOCKED       (1 << 25)       /* sx, a */
-+#define R1_LOCK_UNLOCK_FAILED   (1 << 24)       /* erx, c */
-+#define R1_COM_CRC_ERROR        (1 << 23)       /* er, b */
-+#define R1_ILLEGAL_COMMAND      (1 << 22)       /* er, b */
-+#define R1_CARD_ECC_FAILED      (1 << 21)       /* ex, c */
-+#define R1_CC_ERROR             (1 << 20)       /* erx, c */
-+#define R1_ERROR                (1 << 19)       /* erx, c */
-+#define R1_CID_CSD_OVERWRITE    (1 << 16)       /* erx, c, CID/CSD overwrite */
-+#define R1_WP_ERASE_SKIP        (1 << 15)       /* sx, c */
-+#define R1_CARD_ECC_DISABLED    (1 << 14)       /* sx, a */
-+#define R1_ERASE_RESET          (1 << 13)       /* sr, c */
-+#define R1_READY_FOR_DATA       (1 << 8)        /* sx, a */
-+#define R1_EXCEPTION_EVENT      (1 << 6)        /* sr, a */
-+#define R1_APP_CMD              (1 << 5)        /* sr, c */
-+
- /*
-  * EXT_CSD fields
-  */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index f024079..94916d2 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -848,6 +848,8 @@ int do_status_get(int nargs, char **argv)
- 	__u32 response;
- 	int fd, ret;
- 	char *device;
-+	const char *str;
-+	__u8 state;
+diff --git a/drivers/base/platform.c b/drivers/base/platform.c
+index 7d08cd8947be..52a8356f8261 100644
+--- a/drivers/base/platform.c
++++ b/drivers/base/platform.c
+@@ -148,25 +148,7 @@ devm_platform_ioremap_resource_byname(struct platform_device *pdev,
+ EXPORT_SYMBOL_GPL(devm_platform_ioremap_resource_byname);
+ #endif /* CONFIG_HAS_IOMEM */
  
- 	if (nargs != 2) {
- 		fprintf(stderr, "Usage: mmc status get </path/to/mmcblkX>\n");
-@@ -869,7 +871,90 @@ int do_status_get(int nargs, char **argv)
- 	}
- 
- 	printf("SEND_STATUS response: 0x%08x\n", response);
- 
-+	if (response & R1_OUT_OF_RANGE)
-+		printf("ERROR: ADDRESS_OUT_OF_RANGE\n");
-+	if (response & R1_ADDRESS_ERROR)
-+		printf("ERROR: ADDRESS_MISALIGN\n");
-+	if (response & R1_BLOCK_LEN_ERROR)
-+		printf("ERROR: BLOCK_LEN_ERROR\n");
-+	if (response & R1_ERASE_SEQ_ERROR)
-+		printf("ERROR: ERASE_SEQ_ERROR\n");
-+	if (response & R1_ERASE_PARAM)
-+		printf("ERROR: ERASE_PARAM_ERROR\n");
-+	if (response & R1_WP_VIOLATION)
-+		printf("ERROR: WP_VOILATION\n");
-+	if (response & R1_CARD_IS_LOCKED)
-+		printf("STATUS: DEVICE_IS_LOCKED\n");
-+	if (response & R1_LOCK_UNLOCK_FAILED)
-+		printf("ERROR: LOCK_UNLOCK_IS_FAILED\n");
-+	if (response & R1_COM_CRC_ERROR)
-+		printf("ERROR: COM_CRC_ERROR\n");
-+	if (response & R1_ILLEGAL_COMMAND)
-+		printf("ERROR: ILLEGAL_COMMAND\n");
-+	if (response & R1_CARD_ECC_FAILED)
-+		printf("ERROR: DEVICE_ECC_FAILED\n");
-+	if (response & R1_CC_ERROR)
-+		printf("ERROR: CC_ERROR\n");
-+	if (response & R1_ERROR)
-+		printf("ERROR: ERROR\n");
-+	if (response & R1_CID_CSD_OVERWRITE)
-+		printf("ERROR: CID/CSD OVERWRITE\n");
-+	if (response & R1_WP_ERASE_SKIP)
-+		printf("ERROR: WP_ERASE_SKIP\n");
-+	if (response & R1_ERASE_RESET)
-+		printf("ERROR: ERASE_RESET\n");
-+
-+	state = (response >> 9) & 0xF;
-+	switch (state) {
-+	case 0:
-+		str = "IDLE";
-+		break;
-+	case 1:
-+		str = "READY";
-+		break;
-+	case 2:
-+		str = "IDENT";
-+		break;
-+	case 3:
-+		str = "STDBY";
-+		break;
-+	case 4:
-+		str = "TRANS";
-+		break;
-+	case 5:
-+		str = "DATA";
-+		break;
-+	case 6:
-+		str = "RCV";
-+		break;
-+	case 7:
-+		str = "PRG";
-+		break;
-+	case 8:
-+		str = "DIS";
-+		break;
-+	case 9:
-+		str = "BTST";
-+		break;
-+	case 10:
-+		str = "SLP";
-+		break;
-+	default:
-+		printf("Attention : Device state is INVALID: Kindly check the Response\n");
-+		goto out_free;
-+	}
-+
-+	printf("DEVICE STATE: %s\n", str);
-+	if (response & R1_READY_FOR_DATA)
-+		printf("STATUS: READY_FOR_DATA\n");
-+	if (response & R1_SWITCH_ERROR)
-+		printf("ERROR: SWITCH_ERROR\n");
-+	if (response & R1_EXCEPTION_EVENT)
-+		printf("STATUS: EXCEPTION_EVENT\n");  /* Check EXCEPTION_EVENTS_STATUS fields for further actions */
-+	if (response & R1_APP_CMD)
-+		printf("STATUS: APP_CMD\n");
-+out_free:
- 	close(fd);
+-/**
+- * platform_get_irq_optional - get an optional IRQ for a device
+- * @dev: platform device
+- * @num: IRQ number index
+- *
+- * Gets an IRQ for a platform device. Device drivers should check the return
+- * value for errors so as to not pass a negative integer value to the
+- * request_irq() APIs. This is the same as platform_get_irq(), except that it
+- * does not print an error message if an IRQ can not be obtained.
+- *
+- * For example::
+- *
+- *		int irq = platform_get_irq_optional(pdev, 0);
+- *		if (irq < 0)
+- *			return irq;
+- *
+- * Return: non-zero IRQ number on success, negative error number on failure.
+- */
+-int platform_get_irq_optional(struct platform_device *dev, unsigned int num)
++static int __platform_get_irq(struct platform_device *dev, unsigned int num)
+ {
+ 	int ret;
+ #ifdef CONFIG_SPARC
+@@ -235,6 +217,42 @@ int platform_get_irq_optional(struct platform_device *dev, unsigned int num)
+ 		return -EINVAL;
  	return ret;
  }
-
++
++/**
++ * platform_get_irq_optional - get an optional IRQ for a device
++ * @dev: platform device
++ * @num: IRQ number index
++ *
++ * Gets an IRQ for a platform device. Device drivers should check the return
++ * value for errors so as to not pass a negative integer value to the
++ * request_irq() APIs. This is the same as platform_get_irq(), except that it
++ * does not print an error message if an IRQ can not be obtained and returns
++ * 0 when IRQ resource has not been found.
++ *
++ * For example::
++ *
++ *		int irq = platform_get_irq_optional(pdev, 0);
++ *		if (irq < 0)
++ *			return irq;
++ *		if (irq > 0)
++ *			...we have IRQ line defined...
++ *
++ * Return: non-zero IRQ number on success, 0 if IRQ wasn't found, negative error
++ * number on failure.
++ */
++int platform_get_irq_optional(struct platform_device *dev, unsigned int num)
++{
++	int ret;
++
++	ret = __platform_get_irq(dev, num);
++	if (ret == -ENXIO)
++		return 0;
++	if (ret < 0)
++		return dev_err_probe(&dev->dev, ret,
++				     "IRQ index %u not found\n", num);
++
++	return ret;
++}
+ EXPORT_SYMBOL_GPL(platform_get_irq_optional);
+ 
+ /**
+@@ -258,7 +276,7 @@ int platform_get_irq(struct platform_device *dev, unsigned int num)
+ {
+ 	int ret;
+ 
+-	ret = platform_get_irq_optional(dev, num);
++	ret = __platform_get_irq(dev, num);
+ 	if (ret < 0)
+ 		return dev_err_probe(&dev->dev, ret,
+ 				     "IRQ index %u not found\n", num);
+@@ -277,7 +295,7 @@ int platform_irq_count(struct platform_device *dev)
+ {
+ 	int ret, nr = 0;
+ 
+-	while ((ret = platform_get_irq_optional(dev, nr)) >= 0)
++	while ((ret = __platform_get_irq(dev, nr)) >= 0)
+ 		nr++;
+ 
+ 	if (ret == -EPROBE_DEFER)
+diff --git a/drivers/char/ipmi/bt-bmc.c b/drivers/char/ipmi/bt-bmc.c
+index 7450904e330a..289acaf4e720 100644
+--- a/drivers/char/ipmi/bt-bmc.c
++++ b/drivers/char/ipmi/bt-bmc.c
+@@ -380,7 +380,7 @@ static int bt_bmc_config_irq(struct bt_bmc *bt_bmc,
+ 	u32 reg;
+ 
+ 	bt_bmc->irq = platform_get_irq_optional(pdev, 0);
+-	if (bt_bmc->irq < 0)
++	if (bt_bmc->irq <= 0)
+ 		return bt_bmc->irq;
+ 
+ 	rc = devm_request_irq(dev, bt_bmc->irq, bt_bmc_irq, IRQF_SHARED,
+@@ -438,7 +438,7 @@ static int bt_bmc_probe(struct platform_device *pdev)
+ 
+ 	bt_bmc_config_irq(bt_bmc, pdev);
+ 
+-	if (bt_bmc->irq >= 0) {
++	if (bt_bmc->irq > 0) {
+ 		dev_info(dev, "Using IRQ %d\n", bt_bmc->irq);
+ 	} else {
+ 		dev_info(dev, "No IRQ; using timer\n");
+@@ -464,7 +464,7 @@ static int bt_bmc_remove(struct platform_device *pdev)
+ 	struct bt_bmc *bt_bmc = dev_get_drvdata(&pdev->dev);
+ 
+ 	misc_deregister(&bt_bmc->miscdev);
+-	if (bt_bmc->irq < 0)
++	if (bt_bmc->irq <= 0)
+ 		del_timer_sync(&bt_bmc->poll_timer);
+ 	return 0;
+ }
+diff --git a/drivers/counter/interrupt-cnt.c b/drivers/counter/interrupt-cnt.c
+index 9e99702470c2..a2443c66330b 100644
+--- a/drivers/counter/interrupt-cnt.c
++++ b/drivers/counter/interrupt-cnt.c
+@@ -157,9 +157,7 @@ static int interrupt_cnt_probe(struct platform_device *pdev)
+ 	priv = counter_priv(counter);
+ 
+ 	priv->irq = platform_get_irq_optional(pdev,  0);
+-	if (priv->irq == -ENXIO)
+-		priv->irq = 0;
+-	else if (priv->irq < 0)
++	if (priv->irq < 0)
+ 		return dev_err_probe(dev, priv->irq, "failed to get IRQ\n");
+ 
+ 	priv->gpio = devm_gpiod_get_optional(dev, NULL, GPIOD_IN);
+diff --git a/drivers/gpio/gpio-altera.c b/drivers/gpio/gpio-altera.c
+index b59fae993626..02a2995aa368 100644
+--- a/drivers/gpio/gpio-altera.c
++++ b/drivers/gpio/gpio-altera.c
+@@ -267,8 +267,7 @@ static int altera_gpio_probe(struct platform_device *pdev)
+ 	altera_gc->mmchip.gc.parent		= &pdev->dev;
+ 
+ 	altera_gc->mapped_irq = platform_get_irq_optional(pdev, 0);
+-
+-	if (altera_gc->mapped_irq < 0)
++	if (altera_gc->mapped_irq <= 0)
+ 		goto skip_irq;
+ 
+ 	if (of_property_read_u32(node, "altr,interrupt-type", &reg)) {
+diff --git a/drivers/gpio/gpio-mvebu.c b/drivers/gpio/gpio-mvebu.c
+index 4c1f9e1091b7..d94594807697 100644
+--- a/drivers/gpio/gpio-mvebu.c
++++ b/drivers/gpio/gpio-mvebu.c
+@@ -1293,7 +1293,7 @@ static int mvebu_gpio_probe(struct platform_device *pdev)
+ 	for (i = 0; i < 4; i++) {
+ 		int irq = platform_get_irq_optional(pdev, i);
+ 
+-		if (irq < 0)
++		if (irq <= 0)
+ 			continue;
+ 		irq_set_chained_handler_and_data(irq, mvebu_gpio_irq_handler,
+ 						 mvchip);
+diff --git a/drivers/gpio/gpio-tqmx86.c b/drivers/gpio/gpio-tqmx86.c
+index 5b103221b58d..dc0f83236ce8 100644
+--- a/drivers/gpio/gpio-tqmx86.c
++++ b/drivers/gpio/gpio-tqmx86.c
+@@ -237,7 +237,7 @@ static int tqmx86_gpio_probe(struct platform_device *pdev)
+ 	int ret, irq;
+ 
+ 	irq = platform_get_irq_optional(pdev, 0);
+-	if (irq < 0 && irq != -ENXIO)
++	if (irq < 0)
+ 		return irq;
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_IO, 0);
+diff --git a/drivers/i2c/busses/i2c-brcmstb.c b/drivers/i2c/busses/i2c-brcmstb.c
+index 490ee3962645..69395ae27a1a 100644
+--- a/drivers/i2c/busses/i2c-brcmstb.c
++++ b/drivers/i2c/busses/i2c-brcmstb.c
+@@ -250,7 +250,7 @@ static int brcmstb_i2c_wait_for_completion(struct brcmstb_i2c_dev *dev)
+ 	int ret = 0;
+ 	unsigned long timeout = msecs_to_jiffies(I2C_TIMEOUT);
+ 
+-	if (dev->irq >= 0) {
++	if (dev->irq > 0) {
+ 		if (!wait_for_completion_timeout(&dev->done, timeout))
+ 			ret = -ETIMEDOUT;
+ 	} else {
+@@ -297,7 +297,7 @@ static int brcmstb_send_i2c_cmd(struct brcmstb_i2c_dev *dev,
+ 		return rc;
+ 
+ 	/* only if we are in interrupt mode */
+-	if (dev->irq >= 0)
++	if (dev->irq > 0)
+ 		reinit_completion(&dev->done);
+ 
+ 	/* enable BSC CTL interrupt line */
+@@ -652,7 +652,7 @@ static int brcmstb_i2c_probe(struct platform_device *pdev)
+ 	brcmstb_i2c_enable_disable_irq(dev, INT_DISABLE);
+ 
+ 	/* register the ISR handler */
+-	if (dev->irq >= 0) {
++	if (dev->irq > 0) {
+ 		rc = devm_request_irq(&pdev->dev, dev->irq, brcmstb_i2c_isr,
+ 				      IRQF_SHARED,
+ 				      int_name ? int_name : pdev->name,
+@@ -696,7 +696,7 @@ static int brcmstb_i2c_probe(struct platform_device *pdev)
+ 
+ 	dev_info(dev->device, "%s@%dhz registered in %s mode\n",
+ 		 int_name ? int_name : " ", dev->clk_freq_hz,
+-		 (dev->irq >= 0) ? "interrupt" : "polling");
++		 (dev->irq > 0) ? "interrupt" : "polling");
+ 
+ 	return 0;
+ 
+diff --git a/drivers/i2c/busses/i2c-ocores.c b/drivers/i2c/busses/i2c-ocores.c
+index a0af027db04c..1f4d5e52ff42 100644
+--- a/drivers/i2c/busses/i2c-ocores.c
++++ b/drivers/i2c/busses/i2c-ocores.c
+@@ -691,10 +691,10 @@ static int ocores_i2c_probe(struct platform_device *pdev)
+ 	if (of_device_is_compatible(pdev->dev.of_node,
+ 				    "sifive,fu540-c000-i2c")) {
+ 		i2c->flags |= OCORES_FLAG_BROKEN_IRQ;
+-		irq = -ENXIO;
++		irq = 0;
+ 	}
+ 
+-	if (irq == -ENXIO) {
++	if (!irq) {
+ 		ocores_algorithm.master_xfer = ocores_xfer_polling;
+ 	} else {
+ 		if (irq < 0)
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index bcc595c70a9f..f558b9862032 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -1465,14 +1465,14 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+ 	sh_mmcif_sync_reset(host);
+ 	sh_mmcif_writel(host->addr, MMCIF_CE_INT_MASK, MASK_ALL);
+ 
+-	name = irq[1] < 0 ? dev_name(dev) : "sh_mmc:error";
++	name = irq[1] <= 0 ? dev_name(dev) : "sh_mmc:error";
+ 	ret = devm_request_threaded_irq(dev, irq[0], sh_mmcif_intr,
+ 					sh_mmcif_irqt, 0, name, host);
+ 	if (ret) {
+ 		dev_err(dev, "request_irq error (%s)\n", name);
+ 		goto err_clk;
+ 	}
+-	if (irq[1] >= 0) {
++	if (irq[1] > 0) {
+ 		ret = devm_request_threaded_irq(dev, irq[1],
+ 						sh_mmcif_intr, sh_mmcif_irqt,
+ 						0, "sh_mmc:int", host);
+diff --git a/drivers/mtd/nand/raw/brcmnand/brcmnand.c b/drivers/mtd/nand/raw/brcmnand/brcmnand.c
+index f75929783b94..ac222985efde 100644
+--- a/drivers/mtd/nand/raw/brcmnand/brcmnand.c
++++ b/drivers/mtd/nand/raw/brcmnand/brcmnand.c
+@@ -1521,7 +1521,7 @@ static irqreturn_t brcmnand_ctlrdy_irq(int irq, void *data)
+ 
+ 	/* check if you need to piggy back on the ctrlrdy irq */
+ 	if (ctrl->edu_pending) {
+-		if (irq == ctrl->irq && ((int)ctrl->edu_irq >= 0))
++		if (irq == ctrl->irq && ((int)ctrl->edu_irq > 0))
+ 	/* Discard interrupts while using dedicated edu irq */
+ 			return IRQ_HANDLED;
+ 
+@@ -2956,7 +2956,7 @@ static int brcmnand_edu_setup(struct platform_device *pdev)
+ 		brcmnand_edu_init(ctrl);
+ 
+ 		ctrl->edu_irq = platform_get_irq_optional(pdev, 1);
+-		if (ctrl->edu_irq < 0) {
++		if (ctrl->edu_irq <= 0) {
+ 			dev_warn(dev,
+ 				 "FLASH EDU enabled, using ctlrdy irq\n");
+ 		} else {
+diff --git a/drivers/net/ethernet/davicom/dm9000.c b/drivers/net/ethernet/davicom/dm9000.c
+index 0985ab216566..740c660a9411 100644
+--- a/drivers/net/ethernet/davicom/dm9000.c
++++ b/drivers/net/ethernet/davicom/dm9000.c
+@@ -1509,7 +1509,7 @@ dm9000_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	db->irq_wake = platform_get_irq_optional(pdev, 1);
+-	if (db->irq_wake >= 0) {
++	if (db->irq_wake > 0) {
+ 		dev_dbg(db->dev, "wakeup irq %d\n", db->irq_wake);
+ 
+ 		ret = request_irq(db->irq_wake, dm9000_wol_interrupt,
+diff --git a/drivers/net/ethernet/freescale/fec_ptp.c b/drivers/net/ethernet/freescale/fec_ptp.c
+index af99017a5453..de1d23808b6c 100644
+--- a/drivers/net/ethernet/freescale/fec_ptp.c
++++ b/drivers/net/ethernet/freescale/fec_ptp.c
+@@ -616,7 +616,7 @@ void fec_ptp_init(struct platform_device *pdev, int irq_idx)
+ 	/* Failure to get an irq is not fatal,
+ 	 * only the PTP_CLOCK_PPS clock events should stop
+ 	 */
+-	if (irq >= 0) {
++	if (irq > 0) {
+ 		ret = devm_request_irq(&pdev->dev, irq, fec_pps_interrupt,
+ 				       0, pdev->name, ndev);
+ 		if (ret < 0)
+diff --git a/drivers/phy/renesas/phy-rcar-gen3-usb2.c b/drivers/phy/renesas/phy-rcar-gen3-usb2.c
+index 9de617ca9daa..4914d6aca208 100644
+--- a/drivers/phy/renesas/phy-rcar-gen3-usb2.c
++++ b/drivers/phy/renesas/phy-rcar-gen3-usb2.c
+@@ -439,7 +439,7 @@ static int rcar_gen3_phy_usb2_init(struct phy *p)
+ 	u32 val;
+ 	int ret;
+ 
+-	if (!rcar_gen3_is_any_rphy_initialized(channel) && channel->irq >= 0) {
++	if (!rcar_gen3_is_any_rphy_initialized(channel) && channel->irq > 0) {
+ 		INIT_WORK(&channel->work, rcar_gen3_phy_usb2_work);
+ 		ret = request_irq(channel->irq, rcar_gen3_phy_usb2_irq,
+ 				  IRQF_SHARED, dev_name(channel->dev), channel);
+@@ -486,7 +486,7 @@ static int rcar_gen3_phy_usb2_exit(struct phy *p)
+ 		val &= ~USB2_INT_ENABLE_UCOM_INTEN;
+ 	writel(val, usb2_base + USB2_INT_ENABLE);
+ 
+-	if (channel->irq >= 0 && !rcar_gen3_is_any_rphy_initialized(channel))
++	if (channel->irq > 0 && !rcar_gen3_is_any_rphy_initialized(channel))
+ 		free_irq(channel->irq, channel);
+ 
+ 	return 0;
+diff --git a/drivers/platform/chrome/cros_ec_lpc.c b/drivers/platform/chrome/cros_ec_lpc.c
+index d6306d2a096f..91686d306534 100644
+--- a/drivers/platform/chrome/cros_ec_lpc.c
++++ b/drivers/platform/chrome/cros_ec_lpc.c
+@@ -400,7 +400,7 @@ static int cros_ec_lpc_probe(struct platform_device *pdev)
+ 	irq = platform_get_irq_optional(pdev, 0);
+ 	if (irq > 0)
+ 		ec_dev->irq = irq;
+-	else if (irq != -ENXIO) {
++	else if (irq < 0) {
+ 		dev_err(dev, "couldn't retrieve IRQ number (%d)\n", irq);
+ 		return irq;
+ 	}
+diff --git a/drivers/platform/x86/intel/punit_ipc.c b/drivers/platform/x86/intel/punit_ipc.c
+index 66bb39fd0ef9..f3cf5ee1466f 100644
+--- a/drivers/platform/x86/intel/punit_ipc.c
++++ b/drivers/platform/x86/intel/punit_ipc.c
+@@ -278,7 +278,7 @@ static int intel_punit_ipc_probe(struct platform_device *pdev)
+ 	platform_set_drvdata(pdev, punit_ipcdev);
+ 
+ 	irq = platform_get_irq_optional(pdev, 0);
+-	if (irq < 0) {
++	if (irq <= 0) {
+ 		dev_warn(&pdev->dev, "Invalid IRQ, using polling mode\n");
+ 	} else {
+ 		ret = devm_request_irq(&pdev->dev, irq, intel_punit_ioc,
+diff --git a/drivers/spi/spi-hisi-sfc-v3xx.c b/drivers/spi/spi-hisi-sfc-v3xx.c
+index d3a23b1c2a4c..476ddc081c60 100644
+--- a/drivers/spi/spi-hisi-sfc-v3xx.c
++++ b/drivers/spi/spi-hisi-sfc-v3xx.c
+@@ -467,7 +467,7 @@ static int hisi_sfc_v3xx_probe(struct platform_device *pdev)
+ 			dev_err(dev, "failed to request irq%d, ret = %d\n", host->irq, ret);
+ 			host->irq = 0;
+ 		}
+-	} else {
++	} else if (host->irq < 0) {
+ 		host->irq = 0;
+ 	}
+ 
+diff --git a/drivers/spi/spi-mtk-nor.c b/drivers/spi/spi-mtk-nor.c
+index 5c93730615f8..2422b0545936 100644
+--- a/drivers/spi/spi-mtk-nor.c
++++ b/drivers/spi/spi-mtk-nor.c
+@@ -829,8 +829,7 @@ static int mtk_nor_probe(struct platform_device *pdev)
+ 	mtk_nor_init(sp);
+ 
+ 	irq = platform_get_irq_optional(pdev, 0);
+-
+-	if (irq < 0) {
++	if (irq <= 0) {
+ 		dev_warn(sp->dev, "IRQ not available.");
+ 	} else {
+ 		ret = devm_request_irq(sp->dev, irq, mtk_nor_irq_handler, 0,
+diff --git a/drivers/thermal/rcar_gen3_thermal.c b/drivers/thermal/rcar_gen3_thermal.c
+index 43eb25b167bc..359b9941c42b 100644
+--- a/drivers/thermal/rcar_gen3_thermal.c
++++ b/drivers/thermal/rcar_gen3_thermal.c
+@@ -432,6 +432,8 @@ static int rcar_gen3_thermal_request_irqs(struct rcar_gen3_thermal_priv *priv,
+ 		irq = platform_get_irq_optional(pdev, i);
+ 		if (irq < 0)
+ 			return irq;
++		if (!irq)
++			return -ENXIO;
+ 
+ 		irqname = devm_kasprintf(dev, GFP_KERNEL, "%s:ch%d",
+ 					 dev_name(dev), i);
+diff --git a/drivers/tty/serial/8250/8250_mtk.c b/drivers/tty/serial/8250/8250_mtk.c
+index fb65dc601b23..328ab074fd89 100644
+--- a/drivers/tty/serial/8250/8250_mtk.c
++++ b/drivers/tty/serial/8250/8250_mtk.c
+@@ -621,7 +621,7 @@ static int __maybe_unused mtk8250_suspend(struct device *dev)
+ 	serial8250_suspend_port(data->line);
+ 
+ 	pinctrl_pm_select_sleep_state(dev);
+-	if (irq >= 0) {
++	if (irq > 0) {
+ 		err = enable_irq_wake(irq);
+ 		if (err) {
+ 			dev_err(dev,
+@@ -641,7 +641,7 @@ static int __maybe_unused mtk8250_resume(struct device *dev)
+ 	struct mtk8250_data *data = dev_get_drvdata(dev);
+ 	int irq = data->rx_wakeup_irq;
+ 
+-	if (irq >= 0)
++	if (irq > 0)
+ 		disable_irq_wake(irq);
+ 	pinctrl_pm_select_default_state(dev);
+ 
+diff --git a/drivers/tty/serial/sh-sci.c b/drivers/tty/serial/sh-sci.c
+index 968967d722d4..96c3146ff6a4 100644
+--- a/drivers/tty/serial/sh-sci.c
++++ b/drivers/tty/serial/sh-sci.c
+@@ -1915,7 +1915,7 @@ static int sci_request_irq(struct sci_port *port)
+ 			 * Certain port types won't support all of the
+ 			 * available interrupt sources.
+ 			 */
+-			if (unlikely(irq < 0))
++			if (unlikely(irq <= 0))
+ 				continue;
+ 		}
+ 
+@@ -1963,7 +1963,7 @@ static void sci_free_irq(struct sci_port *port)
+ 		 * Certain port types won't support all of the available
+ 		 * interrupt sources.
+ 		 */
+-		if (unlikely(irq < 0))
++		if (unlikely(irq <= 0))
+ 			continue;
+ 
+ 		/* Check if already freed (irq was muxed) */
+@@ -2875,7 +2875,7 @@ static int sci_init_single(struct platform_device *dev,
+ 	if (sci_port->irqs[0] < 0)
+ 		return -ENXIO;
+ 
+-	if (sci_port->irqs[1] < 0)
++	if (sci_port->irqs[1] <= 0)
+ 		for (i = 1; i < ARRAY_SIZE(sci_port->irqs); i++)
+ 			sci_port->irqs[i] = sci_port->irqs[0];
+ 
+diff --git a/drivers/uio/uio_pdrv_genirq.c b/drivers/uio/uio_pdrv_genirq.c
+index 63258b6accc4..7fd275fc6ceb 100644
+--- a/drivers/uio/uio_pdrv_genirq.c
++++ b/drivers/uio/uio_pdrv_genirq.c
+@@ -162,7 +162,7 @@ static int uio_pdrv_genirq_probe(struct platform_device *pdev)
+ 	if (!uioinfo->irq) {
+ 		ret = platform_get_irq_optional(pdev, 0);
+ 		uioinfo->irq = ret;
+-		if (ret == -ENXIO)
++		if (!ret)
+ 			uioinfo->irq = UIO_IRQ_NONE;
+ 		else if (ret == -EPROBE_DEFER)
+ 			return ret;
+diff --git a/drivers/vfio/platform/vfio_platform.c b/drivers/vfio/platform/vfio_platform.c
+index 68a1c87066d7..f7423d10cefd 100644
+--- a/drivers/vfio/platform/vfio_platform.c
++++ b/drivers/vfio/platform/vfio_platform.c
+@@ -32,8 +32,9 @@ static struct resource *get_platform_resource(struct vfio_platform_device *vdev,
+ static int get_platform_irq(struct vfio_platform_device *vdev, int i)
+ {
+ 	struct platform_device *pdev = (struct platform_device *) vdev->opaque;
++	int ret = platform_get_irq_optional(pdev, i);
+ 
+-	return platform_get_irq_optional(pdev, i);
++	return ret ? ret : -ENXIO;
+ }
+ 
+ static int vfio_platform_probe(struct platform_device *pdev)
+diff --git a/sound/soc/dwc/dwc-i2s.c b/sound/soc/dwc/dwc-i2s.c
+index 5cb58929090d..ff19c5130459 100644
+--- a/sound/soc/dwc/dwc-i2s.c
++++ b/sound/soc/dwc/dwc-i2s.c
+@@ -643,7 +643,7 @@ static int dw_i2s_probe(struct platform_device *pdev)
+ 	dev->dev = &pdev->dev;
+ 
+ 	irq = platform_get_irq_optional(pdev, 0);
+-	if (irq >= 0) {
++	if (irq > 0) {
+ 		ret = devm_request_irq(&pdev->dev, irq, i2s_irq_handler, 0,
+ 				pdev->name, dev);
+ 		if (ret < 0) {
+@@ -697,7 +697,7 @@ static int dw_i2s_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	if (!pdata) {
+-		if (irq >= 0) {
++		if (irq > 0) {
+ 			ret = dw_pcm_register(pdev);
+ 			dev->use_pio = true;
+ 		} else {
 -- 
-2.25.1
+2.26.3
+
