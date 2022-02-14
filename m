@@ -2,137 +2,185 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 124CEC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 12:43:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C800AC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 13:58:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353346AbiBNMnR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Feb 2022 07:43:17 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:37526 "EHLO
+        id S1354670AbiBNN6K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Feb 2022 08:58:10 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:37548 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245609AbiBNMnP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 07:43:15 -0500
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58867BCB2
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 04:43:07 -0800 (PST)
-Received: by mail-lj1-x230.google.com with SMTP id u16so853266ljk.2
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 04:43:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Lby/Xq3zeSdwLYFqFcNCZex0NU9UDxdlMx4IZhnNetU=;
-        b=aZpkT/KqmcamTV8KiwEHo1S9IiELeX4JE4aA8Fabn93WtY53TDmdSGwTcVDRQl0pOX
-         1nUHpgKKlDZZigBKDcpcuicotu0YpO2R0BxpUzW9VNF0xamZSENPvr3cP19Pmf3Gy1Sb
-         WTF9R2F4Hc9vtEr52wZkwgnb/FGeL9pT7r3MqGab3E64tenFs7P0yJpffSUq13aSjZJG
-         6ylQmJnvqkoBOTiszsJ3WlSOZO4Fyg8UZuSkANOhHE6Z4pBTZJKOYuY9Uj06Lkro3/OE
-         gV7uaYUJfhpVn0m2ESdfGXoma37/3weQlJTYFW5rqJ3Kw9a+lMqvexA8pt/QXhdf6ybJ
-         fzVA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Lby/Xq3zeSdwLYFqFcNCZex0NU9UDxdlMx4IZhnNetU=;
-        b=lxWvL4rVUghXmO+YcHWi9iNzi+RsaLZP97ww2vgHTikN1K47HfPyl9ciR/JQjnNJXY
-         buE2Bqbp4xlZGNXSMLTZWnut9yoDYJQFR1IdLHXewRMeo4oXx020H4/QyU00Gyk/zuek
-         mwrXLXzEZ36Q8bap6aHZvc5zdH7vQz17Lzn/mtf0Hg9X8xwKt/vpA2ScjkWsVw9n0G6J
-         YsL3wifpy9Al4qPg+GgTAmcCDMESiGjfLxR8hK+vhM4DnX1zO2k9U/rY9MYDeXkkkzSX
-         Bxd46Su0EQtp08xJKqa0azlr9TJMlTeEwCQ4UUsPhb1UBsz1tvypl1tjG2kIz8ZzAu+c
-         oZ/A==
-X-Gm-Message-State: AOAM532fDSpYkWZiF+sEeEuP07MHF8JhKU399CDcUYmYLrokavqHO4dg
-        zlQPlTWdDEUX9AbEAlWIx5hbDETB+RFDDJWFIfzWVg==
-X-Google-Smtp-Source: ABdhPJyDVBRyQt1+0dL+8+fMjWHZj37iJbjDmriFwn0ROM8UHoYxWAyxtm+qvJvXcTdIx8zl+BruZLuOQ2VQbLJLx3U=
-X-Received: by 2002:a2e:9656:: with SMTP id z22mr4908404ljh.273.1644842585462;
- Mon, 14 Feb 2022 04:43:05 -0800 (PST)
+        with ESMTP id S1354687AbiBNN6H (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 08:58:07 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFE7CB6B
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 05:57:59 -0800 (PST)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1nJbqA-0006T5-AI; Mon, 14 Feb 2022 14:56:30 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1nJbq0-00GYf6-Ms; Mon, 14 Feb 2022 14:56:19 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1nJbpy-0038Nh-VX; Mon, 14 Feb 2022 14:56:18 +0100
+Date:   Mon, 14 Feb 2022 14:56:18 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>, kvm@vger.kernel.org,
+        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Amit Kucheria <amitk@kernel.org>, alsa-devel@alsa-project.org,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Guenter Roeck <groeck@chromium.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        linux-phy@lists.infradead.org,
+        Oleksij Rempel <linux@rempel-privat.de>,
+        Lee Jones <lee.jones@linaro.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Joakim Zhang <qiangqing.zhang@nxp.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        linux-serial@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        platform-driver-x86@vger.kernel.org, linux-pwm@vger.kernel.org,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Corey Minyard <minyard@acm.org>, linux-pm@vger.kernel.org,
+        John Garry <john.garry@huawei.com>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Mark Gross <markgross@kernel.org>, linux-gpio@vger.kernel.org,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
+        linux-mediatek@lists.infradead.org,
+        Eric Auger <eric.auger@redhat.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        openipmi-developer@lists.sourceforge.net,
+        Jaroslav Kysela <perex@perex.cz>,
+        Benson Leung <bleung@chromium.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Sergey Shtylyov <s.shtylyov@omp.ru>,
+        Mun Yew Tham <mun.yew.tham@intel.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Cornelia Huck <cohuck@redhat.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
+        Zha Qipeng <qipeng.zha@intel.com>,
+        Richard Weinberger <richard@nod.at>,
+        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
+        Brian Norris <computersforpeace@gmail.com>,
+        netdev@vger.kernel.org
+Subject: Re: [PATCH v2 1/2] platform: make platform_get_irq_optional()
+ optional
+Message-ID: <20220214135618.kdiikxi3j4j4erks@pengutronix.de>
+References: <20220212201631.12648-1-s.shtylyov@omp.ru>
+ <20220212201631.12648-2-s.shtylyov@omp.ru>
+ <20220214071351.pcvstrzkwqyrg536@pengutronix.de>
+ <YgorLXUr8aT+1ttv@smile.fi.intel.com>
 MIME-Version: 1.0
-References: <20220118124355.167552-1-jasonlai.genesyslogic@gmail.com>
-In-Reply-To: <20220118124355.167552-1-jasonlai.genesyslogic@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 14 Feb 2022 13:42:29 +0100
-Message-ID: <CAPDyKFo-yGcnmwyHzzRBnR33=1HSxYeJ9rBnKXY8AkK148Lofw@mail.gmail.com>
-Subject: Re: [PATCH v2 0/7] Preparations to support SD UHS-II cards
-To:     Jason Lai <jasonlai.genesyslogic@gmail.com>
-Cc:     takahiro.akashi@linaro.org, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
-        greg.tu@genesyslogic.com.tw, Jason.Lai@genesyslogic.com.tw,
-        otis.wu@genesyslogic.com.tw
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="woc7fbustut2ntcm"
+Content-Disposition: inline
+In-Reply-To: <YgorLXUr8aT+1ttv@smile.fi.intel.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 18 Jan 2022 at 13:44, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
->
-> Series [1] that has been posted by Ulf Hansson which provided some guidance
-> and an overall structure.
->
-> Series [2] focused on UHS-II card control side to address Ulf's intention
-> regarding to "modularising" sd_uhs2.c.
->
-> Series [3] is based on series [2] and adopt most of Ulf's comments.
->
-> This series is the successor version of post [3], which adopts Ulf's
-> comments about series [3]:
-> 1. Remove unnecessary debug print.
-> 2. Rephrase description about uhs2_cmd_assemble() in sd_uhs2.c
-> 3. Place UHS-II variables in the appropriate structure.
-> 4. Integrate 5 callback functions in host->uhs2_host_operation().
->
-> Kind regards
-> Jason Lai
 
-Hi Jason,
+--woc7fbustut2ntcm
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I have looked through the series, but I again find it a bit difficult
-to review, sorry. I couldn't apply the patches to my next branch (so I
-fixed that manually), the patches don't build and I get a lot of
-checkpatch errors/warnings.
+Hello Andy,
 
-I tried to help out and worked on fixing these issues and to improve
-the series. However in the end it turned out to be more work than
-expected and time I don't have at the moment.
+On Mon, Feb 14, 2022 at 12:13:01PM +0200, Andy Shevchenko wrote:
+> On Mon, Feb 14, 2022 at 08:13:51AM +0100, Uwe Kleine-K=F6nig wrote:
+> > On Sat, Feb 12, 2022 at 11:16:30PM +0300, Sergey Shtylyov wrote:
+> > > This patch is based on the former Andy Shevchenko's patch:
+> > >=20
+> > > https://lore.kernel.org/lkml/20210331144526.19439-1-andriy.shevchenko=
+@linux.intel.com/
+> > >=20
+> > > Currently platform_get_irq_optional() returns an error code even if I=
+RQ
+> > > resource simply has not been found.  It prevents the callers from bei=
+ng
+> > > error code agnostic in their error handling:
+> > >=20
+> > > 	ret =3D platform_get_irq_optional(...);
+> > > 	if (ret < 0 && ret !=3D -ENXIO)
+> > > 		return ret; // respect deferred probe
+> > > 	if (ret > 0)
+> > > 		...we get an IRQ...
+> > >=20
+> > > All other *_optional() APIs seem to return 0 or NULL in case an optio=
+nal
+> > > resource is not available.  Let's follow this good example, so that t=
+he
+> > > callers would look like:
+> > >=20
+> > > 	ret =3D platform_get_irq_optional(...);
+> > > 	if (ret < 0)
+> > > 		return ret;
+> > > 	if (ret > 0)
+> > > 		...we get an IRQ...
+> > >=20
+> > > Reported-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+> > > Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
+> >=20
+> > While this patch is better than v1, I still don't like it for the
+> > reasons discussed for v1. (i.e. 0 isn't usable as a dummy value which I
+> > consider the real advantage for the other _get_optional() functions.)
+>=20
+> I think you haven't reacted anyhow to my point that you mixing apples and
+> bananas together when comparing this 0 to the others _optional APIs.
 
-To move forward, may I suggest rebasing the series on top of my latest
-next branch, run checkpatch and make sure it doesn't give
-errors/warnings, then of course you also need to make sure that each
-patch can be compiled. Then we can take it from there.
+Is this a question to me or Sergey?
 
-Kind regards
-Uffe
+I fully agree, when the 0 of platform_get_irq_optional is an apple and
+the NULL of gpio_get_optional is a banana, I doubt "All other
+*_optional() APIs seem to return 0 or NULL in case an optional resource
+is not available.  Let's follow this good example, [...]".
 
->
-> [1]
-> https://patchwork.kernel.org/project/linux-mmc/list/?series=438509
->
-> [2]
-> https://patchwork.kernel.org/project/linux-mmc/list/?series=539737
->
-> [3]
-> https://patchwork.kernel.org/project/linux-mmc/list/?series=589827
->
-> Jason Lai (3):
->   mmc: add UHS-II related definitions in headers
->   mmc: Implement content of UHS-II card initialization functions
->   mmc: core: Support UHS-II card access
->
-> Ulf Hansson (4):
->   mmc: core: Cleanup printing of speed mode at card insertion
->   mmc: core: Prepare to support SD UHS-II cards
->   mmc: core: Announce successful insertion of an SD UHS-II card
->   mmc: core: Extend support for mmc regulators with a vqmmc2
->
->  drivers/mmc/core/Makefile    |    2 +-
->  drivers/mmc/core/bus.c       |   38 +-
->  drivers/mmc/core/core.c      |   43 +-
->  drivers/mmc/core/core.h      |    1 +
->  drivers/mmc/core/host.h      |    4 +
->  drivers/mmc/core/regulator.c |   34 ++
->  drivers/mmc/core/sd_uhs2.c   | 1113 ++++++++++++++++++++++++++++++++++
->  include/linux/mmc/card.h     |   35 ++
->  include/linux/mmc/core.h     |    1 +
->  include/linux/mmc/host.h     |   68 +++
->  10 files changed, 1319 insertions(+), 20 deletions(-)
->  create mode 100644 drivers/mmc/core/sd_uhs2.c
->
-> --
-> 2.34.0
->
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--woc7fbustut2ntcm
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmIKX38ACgkQwfwUeK3K
+7AnLpgf9EdBYBZTRjJVoNGFFTEqmmhehKa4KFk5v/UfvgXZenr00B/u2K/MHO4lF
+HHazTdjZ6XfXR0zlckqQaisXEU2TXb/YxxUC3K7hBgh1k2dtS14XlUQHbh2zQXQI
+HKw3Yitn6vDghQH9WkSROTJNBOvMg3PcAg8i5h8g17e0D9BI5sdJERnMTFNeMzpz
+cY95lA6BqyVoJn2GW+QxAKYiYCMB5CSNw3yIxV8nd8CKPKMUQNt4aX4EFwglsJKP
+dB7ddBCRW0+mJcywV7mjkU7B7q6hTtPyAkNBQrWYtaAY4xcsIH7E2T64AaNc4Rah
+C/iCiRD7LGScn9QG72fV+C+upY3/gg==
+=VmOP
+-----END PGP SIGNATURE-----
+
+--woc7fbustut2ntcm--
