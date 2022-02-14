@@ -2,154 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB164C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 14:02:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2419C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 15:23:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354805AbiBNOCK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Feb 2022 09:02:10 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:41458 "EHLO
+        id S1355762AbiBNPX6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Feb 2022 10:23:58 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:50530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354841AbiBNOCG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 09:02:06 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE3A04A902
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 06:01:54 -0800 (PST)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1nJbu2-0007Aw-Jd; Mon, 14 Feb 2022 15:00:30 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1nJbu1-00GYgZ-R1; Mon, 14 Feb 2022 15:00:29 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1nJbu0-0038OM-4h; Mon, 14 Feb 2022 15:00:28 +0100
-Date:   Mon, 14 Feb 2022 15:00:27 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>, kvm@vger.kernel.org,
-        "Rafael J. Wysocki" <rafael@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>, alsa-devel@alsa-project.org,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Guenter Roeck <groeck@chromium.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        linux-phy@lists.infradead.org,
-        Oleksij Rempel <linux@rempel-privat.de>,
-        Lee Jones <lee.jones@linaro.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-serial@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        platform-driver-x86@vger.kernel.org, linux-pwm@vger.kernel.org,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Corey Minyard <minyard@acm.org>, linux-pm@vger.kernel.org,
-        John Garry <john.garry@huawei.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>, linux-gpio@vger.kernel.org,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        linux-mediatek@lists.infradead.org,
-        Eric Auger <eric.auger@redhat.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        openipmi-developer@lists.sourceforge.net,
-        Jaroslav Kysela <perex@perex.cz>,
-        Benson Leung <bleung@chromium.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Richard Weinberger <richard@nod.at>,
-        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        Brian Norris <computersforpeace@gmail.com>,
-        netdev@vger.kernel.org
-Subject: Re: [PATCH v2 1/2] platform: make platform_get_irq_optional()
- optional
-Message-ID: <20220214140027.npw6ddrxklarb6wp@pengutronix.de>
-References: <20220212201631.12648-1-s.shtylyov@omp.ru>
- <20220212201631.12648-2-s.shtylyov@omp.ru>
- <20220214071351.pcvstrzkwqyrg536@pengutronix.de>
- <CAMuHMdWi8gno_FBbc=AwsdRtDJik8_bANjQrrRtUOOBRjFN=KA@mail.gmail.com>
+        with ESMTP id S1348353AbiBNPX4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 10:23:56 -0500
+Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AC9E5FF3A
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:23:48 -0800 (PST)
+Received: by mail-lj1-x234.google.com with SMTP id t14so22709859ljh.8
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:23:48 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=h2Wzb73CCNJjymF4wVIRvovDIYwgk4oVDBjnM/KPNjs=;
+        b=elp+5cTpAjU+1/ip79o/mzc94QPWcQLdADxYuHtbbb35WzwfcPePrjIkqA6nuvK8xr
+         BlOV7/fKbg5q5P9bz1KGyaJV/tyQmgBVmkZV6IF4hLzxK/M/yGuI4KFp45wWoNuOU6i+
+         glNkY+TH9jAi2XDKFPtdZNEXktN0yfyVN6LxczV5G2xn4w0voWRmzdUNDm3gYWGNh/po
+         qp+PgBVIPqPEVbsxoB4OXVtFlH21t4pxQaCpVbsDuB++qcxTQ9nl8g8Fxy+AiSgYn63p
+         agFwAWRXcAeQNjE2W5r47S8l4JFw7/FhVRMzFrFto1pRWpdlWen+Rq8WTSI64k4A6UfU
+         MRUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=h2Wzb73CCNJjymF4wVIRvovDIYwgk4oVDBjnM/KPNjs=;
+        b=flLy+VjtMFSACSEhA/wbyYHt+iFke4tJSlIkR+R9q90E5TCmXvIlb+rGbs/eZd8X8P
+         PyEnqj6cwU1x0znKvwNaYnKddDXah4JBqoNWMjO54576yh87C94H79hsWZnKb1xCe0Jq
+         lS2DiWiYccbwoIXOs3FjHfDr+Lf4BQCJWudpYlaASpjN0dDliR3r1ZZO2Rwo/Pu/60Ue
+         L2NNG3LdYCz7PBXyis1AScXMtvCqhtrrsj54ANyoiBJ2MIqYyf9iDRlWcBJ3X7IkGeQs
+         fh4TJkHwh08MuVyuaPk7bvyiySjesLv24pO4MGQ1iYCmgL51epFW2BEkfn0529wD15G7
+         xizw==
+X-Gm-Message-State: AOAM530Pu2VeDpK+arqWSj0XqojpoeRl5EdSih6lOolrvZD0C+f3clPk
+        l13pP7wAQdaNEZxqfAmnNqQv/gZlEAHFhX3905/5eA==
+X-Google-Smtp-Source: ABdhPJzfciI7TngcTILpWVQuCNuuqqSMq2cqqqebQNnx9wghhN7LjSSWuFvn2nKCKlLwBdlHEDzZrWnTrQa46CaiDAA=
+X-Received: by 2002:a05:651c:179c:: with SMTP id bn28mr188158ljb.4.1644852226434;
+ Mon, 14 Feb 2022 07:23:46 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="mxy3a336cmbyaspi"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdWi8gno_FBbc=AwsdRtDJik8_bANjQrrRtUOOBRjFN=KA@mail.gmail.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20220119103212.13158-1-axe.yang@mediatek.com> <20220119103212.13158-2-axe.yang@mediatek.com>
+In-Reply-To: <20220119103212.13158-2-axe.yang@mediatek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 14 Feb 2022 16:23:10 +0100
+Message-ID: <CAPDyKFr8bV+1uTbuhMObvORLGJHsvZHUONJkdY54MXPPRWL5Qw@mail.gmail.com>
+Subject: Re: [PATCH v4 1/3] dt-bindings: mmc: add cap-sdio-async-irq flag
+To:     Axe Yang <axe.yang@mediatek.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed, 19 Jan 2022 at 11:32, Axe Yang <axe.yang@mediatek.com> wrote:
+>
+> Asynchronous interrupt is a mechanism that allow SDIO devices alarm
+> interrupt when host stop providing clock to card. Add a DT flag to
+> enable this feature if it is supported by SDIO card.
+>
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index 513f3c8758aa..16fb06f88471 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -165,6 +165,11 @@ properties:
+>      description:
+>        eMMC hardware reset is supported
+>
+> +  cap-sdio-async-irq:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      SDIO async interrupt is supported.
 
---mxy3a336cmbyaspi
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+We already have a DT property for this, I believe.
 
-Hello Geert,
+"wakeup-source" is probably what you want, but we have additional
+properties that are related to this too. See more below.
 
-On Mon, Feb 14, 2022 at 10:01:14AM +0100, Geert Uytterhoeven wrote:
-> Also IMHO, the dummy value handling is a red herring.  Contrary to
-> optional clocks and resets, a missing optional interrupt does not
-> always mean there is nothing to do: in case of polling, something
-> else must definitely be done.=20
+> +
+>    cap-sdio-irq:
+>      $ref: /schemas/types.yaml#/definitions/flag
+>      description:
 
-Note this is exactly why I don't like this change. I'd even go so far
-and claim that "a missing optional interrupt hardly ever means there is
-nothing to do".
+The above, "cap-sdio-irq", informs whether the SDIO IRQs can be
+supported at all, by the host controller.
 
-> So even if request_irq() would accept a dummy interrupt zero and just
-> do nothing, it would give the false impression that that is all there
-> is to do, while an actual check for zero with polling code handling
-> may still need to be present, thus leading to more not less bugs.
+The property "keep-power-in-suspend" informs whether we can preserve
+the power to the card during a suspend/resume cycle. This should be
+needed in your case too, I think.
 
-Yes, a dummy irq value will just not be possible.
+In other words, you may need to combine "cap-sdio-irq",
+"wakeup-source" and "keep-power-in-suspend" to describe your HW.
 
-Best regards
-Uwe
+However, what perhaps is missing, is a common MMC/SDIO binding that
+let us describe an optional irq-line, which sometimes is being used
+for the wakeup irq. In the sdhci-omap case, we look for an irq mapping
+towards "wakeup" if specified in the "interrupt-names" property.
 
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+In some case, when the SDIO card supports an out-of-band IRQ line, the
+similar should be specified in the child-node corresponding to the
+SDIO card.
 
---mxy3a336cmbyaspi
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmIKYHgACgkQwfwUeK3K
-7AkfUwf+PjHT71nPQKjE5hOrUJs08gV3dPyFE+Lky6h3jHjtzp+VwX3waHB3n4Iy
-r1fdR+06wiK9BWaTD2PdT8FdEYo9n0yQlTx+03PQXtLFnutK7QSb0fBMQs7sVAfa
-nxp4CK8a1wlf0mzj1zSaeiGm6BYTsoJxoblrZ8hWbpbiVfhF6Eo5zXr0toHMI0WF
-QOhqgWNpQjHlpU+2paIvbOnBpNxJaXj3cycd6036NHAFQvZN5xrDdqHa+By0jeU0
-bm8NmjRjwHCqvhBpRYUglt+KhyRYWWTC/83WFKviLwnPV7tnkh5ZhJE50aUUp1Lr
-hyNbZjQKG8NIOTLNKMgY4nM0uni8jg==
-=vr2/
------END PGP SIGNATURE-----
-
---mxy3a336cmbyaspi--
+Kind regards
+Uffe
