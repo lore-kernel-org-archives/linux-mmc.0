@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2419C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 15:23:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C355CC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 15:35:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355762AbiBNPX6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Feb 2022 10:23:58 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:50530 "EHLO
+        id S245036AbiBNPft (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Feb 2022 10:35:49 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:55440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348353AbiBNPX4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 10:23:56 -0500
-Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AC9E5FF3A
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:23:48 -0800 (PST)
-Received: by mail-lj1-x234.google.com with SMTP id t14so22709859ljh.8
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:23:48 -0800 (PST)
+        with ESMTP id S1355896AbiBNPfh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 10:35:37 -0500
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77EE6580D8
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:35:28 -0800 (PST)
+Received: by mail-lf1-x133.google.com with SMTP id u20so2826537lff.2
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:35:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=h2Wzb73CCNJjymF4wVIRvovDIYwgk4oVDBjnM/KPNjs=;
-        b=elp+5cTpAjU+1/ip79o/mzc94QPWcQLdADxYuHtbbb35WzwfcPePrjIkqA6nuvK8xr
-         BlOV7/fKbg5q5P9bz1KGyaJV/tyQmgBVmkZV6IF4hLzxK/M/yGuI4KFp45wWoNuOU6i+
-         glNkY+TH9jAi2XDKFPtdZNEXktN0yfyVN6LxczV5G2xn4w0voWRmzdUNDm3gYWGNh/po
-         qp+PgBVIPqPEVbsxoB4OXVtFlH21t4pxQaCpVbsDuB++qcxTQ9nl8g8Fxy+AiSgYn63p
-         agFwAWRXcAeQNjE2W5r47S8l4JFw7/FhVRMzFrFto1pRWpdlWen+Rq8WTSI64k4A6UfU
-         MRUQ==
+        bh=iRYhE5QfFh6N5neui9jc14hYBWThUe6VRAPVyILvtvI=;
+        b=hVYAEeUsZHwDztmlTeFxSWpRg3De/fjl/iZo3DZ2HN/sZNhxgJWdjODwGlfVs9GWuU
+         T3hUgy3RLKCaGk9U+pUc/FqmBoayO/BRpiaL6rXDMNEN2pfnVc5uDV/fY0Vq00k3eVFQ
+         WNoIuJIsnPKJ1ofvs7c4qiM3qaKtT9+qNSf+wOnunJUN7upd3HcRF4zlh/SS3q87GUua
+         zhsvo/z5wl3fUazBjwE1KzKcjTW/x/lWiRht9v8ZiDfJovHGYnsOL+Dr5+DgskHtYJ5S
+         eXitXaIvPefLnFP7E+OIOZya1VCZlRA+61zHOWQDq/Hp5It9wGjcz2t0Q0O22yF9Lpkq
+         YMUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=h2Wzb73CCNJjymF4wVIRvovDIYwgk4oVDBjnM/KPNjs=;
-        b=flLy+VjtMFSACSEhA/wbyYHt+iFke4tJSlIkR+R9q90E5TCmXvIlb+rGbs/eZd8X8P
-         PyEnqj6cwU1x0znKvwNaYnKddDXah4JBqoNWMjO54576yh87C94H79hsWZnKb1xCe0Jq
-         lS2DiWiYccbwoIXOs3FjHfDr+Lf4BQCJWudpYlaASpjN0dDliR3r1ZZO2Rwo/Pu/60Ue
-         L2NNG3LdYCz7PBXyis1AScXMtvCqhtrrsj54ANyoiBJ2MIqYyf9iDRlWcBJ3X7IkGeQs
-         fh4TJkHwh08MuVyuaPk7bvyiySjesLv24pO4MGQ1iYCmgL51epFW2BEkfn0529wD15G7
-         xizw==
-X-Gm-Message-State: AOAM530Pu2VeDpK+arqWSj0XqojpoeRl5EdSih6lOolrvZD0C+f3clPk
-        l13pP7wAQdaNEZxqfAmnNqQv/gZlEAHFhX3905/5eA==
-X-Google-Smtp-Source: ABdhPJzfciI7TngcTILpWVQuCNuuqqSMq2cqqqebQNnx9wghhN7LjSSWuFvn2nKCKlLwBdlHEDzZrWnTrQa46CaiDAA=
-X-Received: by 2002:a05:651c:179c:: with SMTP id bn28mr188158ljb.4.1644852226434;
- Mon, 14 Feb 2022 07:23:46 -0800 (PST)
+        bh=iRYhE5QfFh6N5neui9jc14hYBWThUe6VRAPVyILvtvI=;
+        b=c0DCb+iWTVx3ZfCnIMT15X46sp3bb99qOcmgnuV11zyxe7gZGq0NcL4LM/v5AhO4ae
+         1S8JD68P8jCJ2haN7nP5Ij7zlrLMezH3WJAVbmJns9KFfx4QrxrzSXobRe1jdTrF3Sb5
+         U5Fy52Cf6I+X2Jbo2lnbUJOfApkSCl6yr9RQlqYVmtGMSHdQxePhlmN1DmVg2uunwOaF
+         CAisuCQl/WlV5KODNV8806hqhQg0qxiKkTZNCvuI3ivFooKJLpG/E33kLLu9i/uJ6Gcy
+         d4/48B7mM1Hit2wCA7st5S9jtJHMsUJ4xzKHnkyUdg9I6pssggAlT5GO8VPso4SssI8h
+         Yn0g==
+X-Gm-Message-State: AOAM532QTuzH42dT7bq88dlvoA79T4H7GawPwk3bpUbjbZ4DaVcXzSGF
+        icoyqCmIGCRFjl22xj7sL7idQZD5MVrtC0q9gb4JGg==
+X-Google-Smtp-Source: ABdhPJx9g6QNumI+cxbYO4D4/KGsV3uSlDR9miwSvQwPmYjPvhAAf0dojPsqo48saytOTLx1auETX9CyWKvOARPGSgs=
+X-Received: by 2002:a05:6512:3e10:: with SMTP id i16mr160939lfv.184.1644852926808;
+ Mon, 14 Feb 2022 07:35:26 -0800 (PST)
 MIME-Version: 1.0
-References: <20220119103212.13158-1-axe.yang@mediatek.com> <20220119103212.13158-2-axe.yang@mediatek.com>
-In-Reply-To: <20220119103212.13158-2-axe.yang@mediatek.com>
+References: <20220121071942.11601-1-axe.yang@mediatek.com> <20220121071942.11601-3-axe.yang@mediatek.com>
+In-Reply-To: <20220121071942.11601-3-axe.yang@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 14 Feb 2022 16:23:10 +0100
-Message-ID: <CAPDyKFr8bV+1uTbuhMObvORLGJHsvZHUONJkdY54MXPPRWL5Qw@mail.gmail.com>
-Subject: Re: [PATCH v4 1/3] dt-bindings: mmc: add cap-sdio-async-irq flag
+Date:   Mon, 14 Feb 2022 16:34:50 +0100
+Message-ID: <CAPDyKFqd+H6F4+gBd4CEigaOTC5TtjtT75B3G0B6qexFi6XqKw@mail.gmail.com>
+Subject: Re: [PATCH v5 2/3] mmc: core: Add support for SDIO async interrupt
 To:     Axe Yang <axe.yang@mediatek.com>
 Cc:     Rob Herring <robh+dt@kernel.org>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
@@ -74,58 +74,119 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 19 Jan 2022 at 11:32, Axe Yang <axe.yang@mediatek.com> wrote:
+On Fri, 21 Jan 2022 at 08:19, Axe Yang <axe.yang@mediatek.com> wrote:
 >
-> Asynchronous interrupt is a mechanism that allow SDIO devices alarm
-> interrupt when host stop providing clock to card. Add a DT flag to
-> enable this feature if it is supported by SDIO card.
+> If cap-sdio-async-irq flag is set in host dts node, parse EAI
+> information from SDIO CCCR interrupt externsion segment. If async
+> interrupt is supported by SDIO card then send command to card to
+> enable it and set enable_async_irq flag in sdio_cccr structure to 1.
+> The parse flow is implemented in sdio_read_cccr().
 >
+> Acked-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 > ---
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 +++++
->  1 file changed, 5 insertions(+)
+>  drivers/mmc/core/host.c  |  2 ++
+>  drivers/mmc/core/sdio.c  | 17 +++++++++++++++++
+>  include/linux/mmc/card.h |  3 ++-
+>  include/linux/mmc/host.h |  1 +
+>  include/linux/mmc/sdio.h |  5 +++++
+>  5 files changed, 27 insertions(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index 513f3c8758aa..16fb06f88471 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -165,6 +165,11 @@ properties:
->      description:
->        eMMC hardware reset is supported
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index cf140f4ec864..a972241548b4 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -410,6 +410,8 @@ int mmc_of_parse(struct mmc_host *host)
+>         if (device_property_read_bool(dev, "no-mmc-hs400"))
+>                 host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
+>                                  MMC_CAP2_HS400_ES);
+> +       if (device_property_read_bool(dev, "cap-sdio-async-irq"))
+> +               host->caps2 |= MMC_CAP2_SDIO_ASYNC_IRQ;
 >
-> +  cap-sdio-async-irq:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      SDIO async interrupt is supported.
-
-We already have a DT property for this, I believe.
-
-"wakeup-source" is probably what you want, but we have additional
-properties that are related to this too. See more below.
-
+>         /* Must be after "non-removable" check */
+>         if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 41164748723d..771fb5d18585 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -225,6 +225,23 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
+>                                 card->sw_caps.sd3_drv_type |= SD_DRIVER_TYPE_C;
+>                         if (data & SDIO_DRIVE_SDTD)
+>                                 card->sw_caps.sd3_drv_type |= SD_DRIVER_TYPE_D;
 > +
->    cap-sdio-irq:
->      $ref: /schemas/types.yaml#/definitions/flag
->      description:
+> +                       if (card->host->caps2 & MMC_CAP2_SDIO_ASYNC_IRQ) {
 
-The above, "cap-sdio-irq", informs whether the SDIO IRQs can be
-supported at all, by the host controller.
+We can probably check host->pm_caps & MMC_PM_WAKE_SDIO_IRQ here,
+instead of MMC_CAP2_SDIO_ASYNC_IRQ.
 
-The property "keep-power-in-suspend" informs whether we can preserve
-the power to the card during a suspend/resume cycle. This should be
-needed in your case too, I think.
+> +                               ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTERRUPT_EXT, 0,
+> +                                                      &data);
+> +                               if (ret)
+> +                                       goto out;
+> +
+> +                               if (data & SDIO_INTERRUPT_EXT_SAI) {
+> +                                       data |= SDIO_INTERRUPT_EXT_EAI;
+> +                                       ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_INTERRUPT_EXT,
+> +                                                              data, NULL);
+> +                                       if (ret)
+> +                                               goto out;
+> +
+> +                                       card->cccr.enable_async_irq = 1;
 
-In other words, you may need to combine "cap-sdio-irq",
-"wakeup-source" and "keep-power-in-suspend" to describe your HW.
+As you show in the next patch(3), this flag is useful to read for the
+host driver.
 
-However, what perhaps is missing, is a common MMC/SDIO binding that
-let us describe an optional irq-line, which sometimes is being used
-for the wakeup irq. In the sdhci-omap case, we look for an irq mapping
-towards "wakeup" if specified in the "interrupt-names" property.
+However, rather than accessing this flag directly in the host driver,
+can you please add a helper function that takes a struct mmc_card* as
+in-parameter instead?
 
-In some case, when the SDIO card supports an out-of-band IRQ line, the
-similar should be specified in the child-node corresponding to the
-SDIO card.
+> +                               }
+> +                       }
+>                 }
+>
+>                 /* if no uhs mode ensure we check for high speed */
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 37f975875102..4df9182bc0e6 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -219,7 +219,8 @@ struct sdio_cccr {
+>                                 wide_bus:1,
+>                                 high_power:1,
+>                                 high_speed:1,
+> -                               disable_cd:1;
+> +                               disable_cd:1,
+> +                               enable_async_irq:1;
+>  };
+>
+>  struct sdio_cis {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 7afb57cab00b..502a5418264c 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -402,6 +402,7 @@ struct mmc_host {
+>  #define MMC_CAP2_CRYPTO                0
+>  #endif
+>  #define MMC_CAP2_ALT_GPT_TEGRA (1 << 28)       /* Host with eMMC that has GPT entry at a non-standard location */
+> +#define MMC_CAP2_SDIO_ASYNC_IRQ        (1 << 29)       /* SDIO host supports asynchronous interrupt */
+>
+>         int                     fixed_drv_type; /* fixed driver type for non-removable media */
+>
+> diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
+> index 2a05d1ac4f0e..1ef400f28642 100644
+> --- a/include/linux/mmc/sdio.h
+> +++ b/include/linux/mmc/sdio.h
+> @@ -159,6 +159,11 @@
+>  #define  SDIO_DTSx_SET_TYPE_A  (1 << SDIO_DRIVE_DTSx_SHIFT)
+>  #define  SDIO_DTSx_SET_TYPE_C  (2 << SDIO_DRIVE_DTSx_SHIFT)
+>  #define  SDIO_DTSx_SET_TYPE_D  (3 << SDIO_DRIVE_DTSx_SHIFT)
+> +
+> +#define SDIO_CCCR_INTERRUPT_EXT        0x16
+> +#define SDIO_INTERRUPT_EXT_SAI (1 << 0)
+> +#define SDIO_INTERRUPT_EXT_EAI (1 << 1)
+> +
+>  /*
+>   * Function Basic Registers (FBR)
+>   */
 
 Kind regards
 Uffe
