@@ -2,179 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D798EC43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 11:24:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 124CEC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 12:43:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351110AbiBNLYu convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Feb 2022 06:24:50 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:52632 "EHLO
+        id S1353346AbiBNMnR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Feb 2022 07:43:17 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:37526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351226AbiBNLX7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 06:23:59 -0500
-Received: from mail-qv1-f50.google.com (mail-qv1-f50.google.com [209.85.219.50])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6AAC7E0AA;
-        Mon, 14 Feb 2022 02:59:32 -0800 (PST)
-Received: by mail-qv1-f50.google.com with SMTP id a19so14432712qvm.4;
-        Mon, 14 Feb 2022 02:59:32 -0800 (PST)
+        with ESMTP id S245609AbiBNMnP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 07:43:15 -0500
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58867BCB2
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 04:43:07 -0800 (PST)
+Received: by mail-lj1-x230.google.com with SMTP id u16so853266ljk.2
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 04:43:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Lby/Xq3zeSdwLYFqFcNCZex0NU9UDxdlMx4IZhnNetU=;
+        b=aZpkT/KqmcamTV8KiwEHo1S9IiELeX4JE4aA8Fabn93WtY53TDmdSGwTcVDRQl0pOX
+         1nUHpgKKlDZZigBKDcpcuicotu0YpO2R0BxpUzW9VNF0xamZSENPvr3cP19Pmf3Gy1Sb
+         WTF9R2F4Hc9vtEr52wZkwgnb/FGeL9pT7r3MqGab3E64tenFs7P0yJpffSUq13aSjZJG
+         6ylQmJnvqkoBOTiszsJ3WlSOZO4Fyg8UZuSkANOhHE6Z4pBTZJKOYuY9Uj06Lkro3/OE
+         gV7uaYUJfhpVn0m2ESdfGXoma37/3weQlJTYFW5rqJ3Kw9a+lMqvexA8pt/QXhdf6ybJ
+         fzVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=3zUaM8opKL0LG20PPLjLO0sGhx6OMEFs8RjHjfjsiY4=;
-        b=tzYW5L5xOK2xjgIhwKD7wo4utCRQktTYnmyF5KtC7nyd4QwxINuVYG0oZDuj2UWxgT
-         v/aCYx8fYJ460CRM8cqFGhvZWVTV32Txdva7EilCtR5KuJUaUdqVVS7A7bSNU3h32VJ+
-         2pJ2Y3tGDfNi2ZOUy2aWpZT0nVb7NeQpDeHk76U1HFWgRfZgnwSl3z8nfQ4JYELBC7w+
-         anK5B90Xh4HPCL5PMFl7xyPXyFTTOvibl637EXBhEt2cmJo4/fZJ0Y71K7/l41QRDnHU
-         eA/djqj4anfQA78O8QEI0s/RYo5qs13hiZUR71hMLnibfSqINLjWfOOnZb42aq7YUf4q
-         CRrQ==
-X-Gm-Message-State: AOAM531hvoqH7tmhpaGYLCsoe+Zw1pr4CRNoNkqjMA02M0yksh9tEj9K
-        nnVGq0KJ/mQRARxLUWcaA+SwQIlmvrkhXw==
-X-Google-Smtp-Source: ABdhPJwrRq7LQh4v5o0CPVNGHtwumDUPKtYShp4qDGuprC6H2gTwWZ7lqh2fqI8sviBIFGzuhsrVZw==
-X-Received: by 2002:a1f:9092:: with SMTP id s140mr849683vkd.38.1644829287597;
-        Mon, 14 Feb 2022 01:01:27 -0800 (PST)
-Received: from mail-vk1-f171.google.com (mail-vk1-f171.google.com. [209.85.221.171])
-        by smtp.gmail.com with ESMTPSA id o2sm1719696vke.47.2022.02.14.01.01.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 14 Feb 2022 01:01:27 -0800 (PST)
-Received: by mail-vk1-f171.google.com with SMTP id bj24so2718190vkb.8;
-        Mon, 14 Feb 2022 01:01:26 -0800 (PST)
-X-Received: by 2002:a1f:7307:: with SMTP id o7mr818150vkc.0.1644829286141;
- Mon, 14 Feb 2022 01:01:26 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=Lby/Xq3zeSdwLYFqFcNCZex0NU9UDxdlMx4IZhnNetU=;
+        b=lxWvL4rVUghXmO+YcHWi9iNzi+RsaLZP97ww2vgHTikN1K47HfPyl9ciR/JQjnNJXY
+         buE2Bqbp4xlZGNXSMLTZWnut9yoDYJQFR1IdLHXewRMeo4oXx020H4/QyU00Gyk/zuek
+         mwrXLXzEZ36Q8bap6aHZvc5zdH7vQz17Lzn/mtf0Hg9X8xwKt/vpA2ScjkWsVw9n0G6J
+         YsL3wifpy9Al4qPg+GgTAmcCDMESiGjfLxR8hK+vhM4DnX1zO2k9U/rY9MYDeXkkkzSX
+         Bxd46Su0EQtp08xJKqa0azlr9TJMlTeEwCQ4UUsPhb1UBsz1tvypl1tjG2kIz8ZzAu+c
+         oZ/A==
+X-Gm-Message-State: AOAM532fDSpYkWZiF+sEeEuP07MHF8JhKU399CDcUYmYLrokavqHO4dg
+        zlQPlTWdDEUX9AbEAlWIx5hbDETB+RFDDJWFIfzWVg==
+X-Google-Smtp-Source: ABdhPJyDVBRyQt1+0dL+8+fMjWHZj37iJbjDmriFwn0ROM8UHoYxWAyxtm+qvJvXcTdIx8zl+BruZLuOQ2VQbLJLx3U=
+X-Received: by 2002:a2e:9656:: with SMTP id z22mr4908404ljh.273.1644842585462;
+ Mon, 14 Feb 2022 04:43:05 -0800 (PST)
 MIME-Version: 1.0
-References: <20220212201631.12648-1-s.shtylyov@omp.ru> <20220212201631.12648-2-s.shtylyov@omp.ru>
- <20220214071351.pcvstrzkwqyrg536@pengutronix.de>
-In-Reply-To: <20220214071351.pcvstrzkwqyrg536@pengutronix.de>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 14 Feb 2022 10:01:14 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdWi8gno_FBbc=AwsdRtDJik8_bANjQrrRtUOOBRjFN=KA@mail.gmail.com>
-Message-ID: <CAMuHMdWi8gno_FBbc=AwsdRtDJik8_bANjQrrRtUOOBRjFN=KA@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] platform: make platform_get_irq_optional() optional
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        linux-kernel@vger.kernel.org, Andrew Lunn <andrew@lunn.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Jiri Slaby <jirislaby@kernel.org>, linux-iio@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Amit Kucheria <amitk@kernel.org>, alsa-devel@alsa-project.org,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        linux-phy@lists.infradead.org,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-mtd@lists.infradead.org, linux-i2c@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Guenter Roeck <groeck@chromium.org>, linux-spi@vger.kernel.org,
-        Lee Jones <lee.jones@linaro.org>,
-        openipmi-developer@lists.sourceforge.net,
-        Peter Korsgaard <peter@korsgaard.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        kvm@vger.kernel.org, Kamal Dasu <kdasu.kdev@gmail.com>,
-        Richard Weinberger <richard@nod.at>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-serial@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        platform-driver-x86@vger.kernel.org, linux-pwm@vger.kernel.org,
-        Zha Qipeng <qipeng.zha@intel.com>,
-        Corey Minyard <minyard@acm.org>, linux-pm@vger.kernel.org,
-        John Garry <john.garry@huawei.com>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Mark Gross <markgross@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        linux-mediatek@lists.infradead.org,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Benson Leung <bleung@chromium.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Mun Yew Tham <mun.yew.tham@intel.com>,
-        Eric Auger <eric.auger@redhat.com>, netdev@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Cornelia Huck <cohuck@redhat.com>, linux-mmc@vger.kernel.org,
-        Joakim Zhang <qiangqing.zhang@nxp.com>,
-        Oleksij Rempel <linux@rempel-privat.de>,
-        linux-renesas-soc@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        Brian Norris <computersforpeace@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>
+References: <20220118124355.167552-1-jasonlai.genesyslogic@gmail.com>
+In-Reply-To: <20220118124355.167552-1-jasonlai.genesyslogic@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 14 Feb 2022 13:42:29 +0100
+Message-ID: <CAPDyKFo-yGcnmwyHzzRBnR33=1HSxYeJ9rBnKXY8AkK148Lofw@mail.gmail.com>
+Subject: Re: [PATCH v2 0/7] Preparations to support SD UHS-II cards
+To:     Jason Lai <jasonlai.genesyslogic@gmail.com>
+Cc:     takahiro.akashi@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
+        greg.tu@genesyslogic.com.tw, Jason.Lai@genesyslogic.com.tw,
+        otis.wu@genesyslogic.com.tw
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uwe,
-
-On Mon, Feb 14, 2022 at 8:29 AM Uwe Kleine-König
-<u.kleine-koenig@pengutronix.de> wrote:
-> On Sat, Feb 12, 2022 at 11:16:30PM +0300, Sergey Shtylyov wrote:
-> > This patch is based on the former Andy Shevchenko's patch:
-> >
-> > https://lore.kernel.org/lkml/20210331144526.19439-1-andriy.shevchenko@linux.intel.com/
-> >
-> > Currently platform_get_irq_optional() returns an error code even if IRQ
-> > resource simply has not been found.  It prevents the callers from being
-> > error code agnostic in their error handling:
-> >
-> >       ret = platform_get_irq_optional(...);
-> >       if (ret < 0 && ret != -ENXIO)
-> >               return ret; // respect deferred probe
-> >       if (ret > 0)
-> >               ...we get an IRQ...
-> >
-> > All other *_optional() APIs seem to return 0 or NULL in case an optional
-> > resource is not available.  Let's follow this good example, so that the
-> > callers would look like:
-> >
-> >       ret = platform_get_irq_optional(...);
-> >       if (ret < 0)
-> >               return ret;
-> >       if (ret > 0)
-> >               ...we get an IRQ...
-> >
-> > Reported-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
-> > Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
+On Tue, 18 Jan 2022 at 13:44, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
 >
-> While this patch is better than v1, I still don't like it for the
-> reasons discussed for v1. (i.e. 0 isn't usable as a dummy value which I
-> consider the real advantage for the other _get_optional() functions.)
+> Series [1] that has been posted by Ulf Hansson which provided some guidance
+> and an overall structure.
+>
+> Series [2] focused on UHS-II card control side to address Ulf's intention
+> regarding to "modularising" sd_uhs2.c.
+>
+> Series [3] is based on series [2] and adopt most of Ulf's comments.
+>
+> This series is the successor version of post [3], which adopts Ulf's
+> comments about series [3]:
+> 1. Remove unnecessary debug print.
+> 2. Rephrase description about uhs2_cmd_assemble() in sd_uhs2.c
+> 3. Place UHS-II variables in the appropriate structure.
+> 4. Integrate 5 callback functions in host->uhs2_host_operation().
+>
+> Kind regards
+> Jason Lai
 
-IMHO the real advantage is the simplified error handling, which is the
-area where most of the current bugs are. So I applaud the core change.
+Hi Jason,
 
-Also IMHO, the dummy value handling is a red herring.  Contrary to
-optional clocks and resets, a missing optional interrupt does not
-always mean there is nothing to do: in case of polling, something
-else must definitely be done.  So even if request_irq() would accept
-a dummy interrupt zero and just do nothing, it would give the false
-impression that that is all there is to do, while an actual check
-for zero with polling code handling may still need to be present,
-thus leading to more not less bugs.
+I have looked through the series, but I again find it a bit difficult
+to review, sorry. I couldn't apply the patches to my next branch (so I
+fixed that manually), the patches don't build and I get a lot of
+checkpatch errors/warnings.
 
-> Apart from that, I think the subject is badly chosen. With "Make
-> somefunc() optional" I would expect that you introduce a Kconfig symbol
-> that results in the function not being available when disabled.
+I tried to help out and worked on fixing these issues and to improve
+the series. However in the end it turned out to be more work than
+expected and time I don't have at the moment.
 
-Agreed.
+To move forward, may I suggest rebasing the series on top of my latest
+next branch, run checkpatch and make sure it doesn't give
+errors/warnings, then of course you also need to make sure that each
+patch can be compiled. Then we can take it from there.
 
-Gr{oetje,eeting}s,
+Kind regards
+Uffe
 
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+>
+> [1]
+> https://patchwork.kernel.org/project/linux-mmc/list/?series=438509
+>
+> [2]
+> https://patchwork.kernel.org/project/linux-mmc/list/?series=539737
+>
+> [3]
+> https://patchwork.kernel.org/project/linux-mmc/list/?series=589827
+>
+> Jason Lai (3):
+>   mmc: add UHS-II related definitions in headers
+>   mmc: Implement content of UHS-II card initialization functions
+>   mmc: core: Support UHS-II card access
+>
+> Ulf Hansson (4):
+>   mmc: core: Cleanup printing of speed mode at card insertion
+>   mmc: core: Prepare to support SD UHS-II cards
+>   mmc: core: Announce successful insertion of an SD UHS-II card
+>   mmc: core: Extend support for mmc regulators with a vqmmc2
+>
+>  drivers/mmc/core/Makefile    |    2 +-
+>  drivers/mmc/core/bus.c       |   38 +-
+>  drivers/mmc/core/core.c      |   43 +-
+>  drivers/mmc/core/core.h      |    1 +
+>  drivers/mmc/core/host.h      |    4 +
+>  drivers/mmc/core/regulator.c |   34 ++
+>  drivers/mmc/core/sd_uhs2.c   | 1113 ++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/card.h     |   35 ++
+>  include/linux/mmc/core.h     |    1 +
+>  include/linux/mmc/host.h     |   68 +++
+>  10 files changed, 1319 insertions(+), 20 deletions(-)
+>  create mode 100644 drivers/mmc/core/sd_uhs2.c
+>
+> --
+> 2.34.0
+>
