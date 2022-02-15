@@ -2,354 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72737C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Feb 2022 15:55:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F2CCC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Feb 2022 08:15:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355995AbiBNPzZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Feb 2022 10:55:25 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:45208 "EHLO
+        id S233959AbiBOIQH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Feb 2022 03:16:07 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:41546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241693AbiBNPzZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Feb 2022 10:55:25 -0500
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5EAB4927A
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:55:14 -0800 (PST)
-Received: by mail-lf1-x131.google.com with SMTP id u6so31512810lfc.3
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Feb 2022 07:55:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=JNRqOaFV7X2t6LXguaBdf+enzjwGv/oik8U+YHadlGI=;
-        b=e5zixySMmRTWDoy83vKhDTVdwMxmR4bPfpFs/rsgLzNkt305Iyqw12G6WObKeTXM+H
-         reZD2FGjZJaU4knBBUb38c0WzXT/orXdmGxK1u03KRNw5E2KT3Q3fu4sYrzSZZv6S1w5
-         lnGkTYWHtWGps5sUjX+fVQsekeGfM5vlrTgnmwKRjxFz5wFeXaTLd5aOnfEb+f0m/hZa
-         cBABjaVqB7Exti9JHrhcSSeloPupX8ev/sebtyz+zbEk/1lMnTh6TKkuBmrpLcb0dCt+
-         3dw8k4Jwd4V+vPgpNoX+uKnuxYR27vfZNzf3C+hHV9ARWNXYkZMOX2y6bvG2X4ePameb
-         3k7Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=JNRqOaFV7X2t6LXguaBdf+enzjwGv/oik8U+YHadlGI=;
-        b=HT6qQfrRuyHDC+M03pHWZGrpTTYjiki3egicfpjAQ6+6B+BwdCSGBiL1BhHZSIwohH
-         8QAxwywSDdwXoGnLqDMZpeT0a4NQ9CtjKiO9Ls0PBH9u/G2oOhtaS+3JZt6T/y8z7s3o
-         DBiSeCLq++KsoJlQqlwKiBKfN6pK/pvJEnVvfcUaY/j83CIIwmV2LaBtBsmhaE2CZGM5
-         X9TN3Lu+aQWzVsg8t2Fh0tvjuJDPbtAoua9HqooO+yPC5GoNVfeP/BDu3Z/6I369WEvB
-         aa9BD7240W5csB7tuG5Adq5MHGdwFW4eWI9CXi0GRQRhHTRdjGrO8YqbOy3SGzSFO825
-         1Fow==
-X-Gm-Message-State: AOAM533PAhyBvyo2D/TVCW1Yey/kd0NYJJMvVq4Y+wbzU2U4QtPZeoAE
-        1mJBHmYNtxSvjyWf3DmVy0gX2Oe6uGpsQsCKAVfL3g==
-X-Google-Smtp-Source: ABdhPJwl5SfUgEThhcOgbNZT+C3OdwOFkMIhUqrsDs8ZRVfAnHl2esIkiKhlTBxYvWs+np4NRIs6q1qn4xCGjwt9wKs=
-X-Received: by 2002:ac2:5a0b:: with SMTP id q11mr215506lfn.358.1644854113170;
- Mon, 14 Feb 2022 07:55:13 -0800 (PST)
+        with ESMTP id S231840AbiBOIQG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2022 03:16:06 -0500
+Received: from EUR02-AM5-obe.outbound.protection.outlook.com (mail-eopbgr00076.outbound.protection.outlook.com [40.107.0.76])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C1A76D84E;
+        Tue, 15 Feb 2022 00:15:57 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=jVvCkGguuCeDMYVvk3cq9oL7G5lHk/5oqWzLxgg6ICOP/k3ZYEWh6bjOVeHQfoJ2TBX9eN4H1cFdC8vkoY8SrAcfaiDwyoCQ3OH5JOoNEpqDm2qMZN4TaY6fMSdqe7pxb3XrPadfOM/9YoKozGhiZ+KxSJfdxOfik+opVb/NMZ7LRBSJQjvg7iyjZ44MFqwBymS2t6ACK+dgDAQ+tOJqZb8C2QnPksHLYU7jOMpDxvEfO665SS9u9+F8/w9onhUU4fBg9hyPj2LQYROVnl5FJcmMfV2AKxplJgf+Gy3n7C3aMiXAGmEQ8sFhoPkU7GtPkFSD0SMDtiQJo56oDZHZqg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=1eIDbczcjXk34wyXQhC1s4jlWwXlQCbex+bjIBplkGA=;
+ b=EzpfEuxHH6mlruk7cPiRCA+RjHnChjKghgimywabC+zZMyhpxgaPzpKVkWFj9LH6zKQvhhLNPysakLbZ8jOwihq/9Xhey7Q1vQHsDJlEj49v1BQSBUtrzKG4td3jP4RLbWH+m2LYKKQJHYTF3Tc2sawTRoVQUcPhSjrUUsH5u9fz4SUbY6iAhOBauLONa3foP9mg6FVV5u+b8gcCV1DAMrXj2JAlfEvsCxXKFY6yeABNWmSQknjXNJYa69yZ3obSZez8F8rhfXLvRTOCsopqDCeyrCTvnYRfCnW8cNpd85h1sb673athghtEBx8foIloLxvPHgrKKHeCSiyVVDEm6Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector2-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=1eIDbczcjXk34wyXQhC1s4jlWwXlQCbex+bjIBplkGA=;
+ b=YyYTCaCF6avgK25ImOKLzvptsv1XMc8uNph/z4BALCbUZE9Vzp7Ex13FHCi5NCwszMQOCFRBII9rpwaOobnOIGClzjqiBRrz4NeGGgHH6ED3JyEHwrGdOw9WwWvc1QeghgYCEp9JkYMZAGxV4ixD6c6cLSbHLjji3dZp7BiItew=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from DU0PR04MB9417.eurprd04.prod.outlook.com (2603:10a6:10:358::11)
+ by AM0PR04MB6740.eurprd04.prod.outlook.com (2603:10a6:208:16b::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4975.19; Tue, 15 Feb
+ 2022 08:15:54 +0000
+Received: from DU0PR04MB9417.eurprd04.prod.outlook.com
+ ([fe80::448c:19d:ca9a:123e]) by DU0PR04MB9417.eurprd04.prod.outlook.com
+ ([fe80::448c:19d:ca9a:123e%7]) with mapi id 15.20.4975.018; Tue, 15 Feb 2022
+ 08:15:54 +0000
+From:   "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
+        kernel@pengutronix.de
+Cc:     festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, Peng Fan <peng.fan@nxp.com>
+Subject: [PATCH] dt-bindings: mmc: imx-esdhc: Add imx93 compatible string
+Date:   Tue, 15 Feb 2022 16:15:02 +0800
+Message-Id: <20220215081502.789067-1-peng.fan@oss.nxp.com>
+X-Mailer: git-send-email 2.25.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SG2PR04CA0167.apcprd04.prod.outlook.com (2603:1096:4::29)
+ To DU0PR04MB9417.eurprd04.prod.outlook.com (2603:10a6:10:358::11)
 MIME-Version: 1.0
-References: <20220121071942.11601-1-axe.yang@mediatek.com> <20220121071942.11601-4-axe.yang@mediatek.com>
-In-Reply-To: <20220121071942.11601-4-axe.yang@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 14 Feb 2022 16:54:37 +0100
-Message-ID: <CAPDyKFqTcAd5kDAzrLDxFTismXDJdKOHLD1hEH369CyRLLo=mw@mail.gmail.com>
-Subject: Re: [PATCH v5 3/3] mmc: mediatek: add support for SDIO eint IRQ
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Yong Mao <yong.mao@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ca5d2be7-37ff-4189-69ce-08d9f05b62de
+X-MS-TrafficTypeDiagnostic: AM0PR04MB6740:EE_
+X-MS-Exchange-SharedMailbox-RoutingAgent-Processed: True
+X-Microsoft-Antispam-PRVS: <AM0PR04MB674046F92385613EE8A9A6D5C9349@AM0PR04MB6740.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:352;
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: FLskQhY+A9x5QSSatOgw1pki9QCi/6bydcOf4dvTxc9uftB14U0pOo2kv1Qv78fKV7iTu7v4uJbXKFmrLe45qQ0GYEQiVakM3kroEV5RqwR40K9OvaP6Q2layxlOEfdPDf8hKPc1iWSuKik6UkenuiXVEeFkyJqnpMDrKXqyYdpt6auAfUxAEjdn8gOanhQYd+WO7TNMgnQ0xbakffa34zxaHe1J8Pp2PgmR5HPb3OU7ei/01Q9F9oVl3uFFawafp6jxYnNhEKG92jogjBla3xsy2WJvO1kwKP4SLGQ4IBu2YZDZMVlO9zYpmkJn8/zC/fvCSbveZfZ6iRF+OgfhuWlHxbLdUvqO1K+gCgztpFz//dlvztGVO8aFzauHe4DND8Cs6ahyHk1KpWqHiYG9Hhx97llA1HSkPyHU13mTIYstXoiNNTpDBkOUTP1nbAuOJ7AqNL10+Y2Ky65us5IjqWAHIdFXfgWSGCLUBYTW5ogU1uhRs6ItExqPx0LPBpIvL4rsDt0rn0opp5P67BnpA75BdTlSGOYp6Z2wc+f75+s/wA1NAeE4MULcqi/Wc0LoLEyGFSFWqAFCoRFepLZ205sUwGMgyIacGj9l4uZA4JjqM6U+sA99i5bTI+dVONpAdTn1me6ICweASFbpWfBHHbcJQ2ZPgeveDo3KC3r5IS9DTMtpUXAY3esKTH7/cPiyHiXbH7hokcw32y2CywAGNA==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9417.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(316002)(186003)(508600001)(38100700002)(38350700002)(6486002)(26005)(66946007)(1076003)(8936002)(8676002)(4326008)(66476007)(66556008)(86362001)(2906002)(6512007)(6666004)(4744005)(5660300002)(2616005)(6506007)(52116002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?GMw1R7F83/tsKNCG7Nwe7QQiCXWBKM8Z0yMp9rDuobWUAdWDA+7zh6KhBPwq?=
+ =?us-ascii?Q?i2QE7sOxWsPuxdAb3b8TCJMUkHq6MhDeetlBUNDrl1Fo4g2LKFkdMq0/meGY?=
+ =?us-ascii?Q?cbcYqH8Fp0/0p6xKriEM0n8rMyLHh/KtF5vy0VBYmIDM0PaXUbrcwdI5rCip?=
+ =?us-ascii?Q?5z+pAhAaCZDM55wComLD9r//eTF13QJYaXZYDaclZKQ/qjxeEyYSxZOIlgfJ?=
+ =?us-ascii?Q?YQYfWC4sB6vZryZksPs4G6XHsDwARQoyv7arQvrJTWQuYsmFhQ39b1gFDONh?=
+ =?us-ascii?Q?KPP+8E/VckYprR6urQRZQ1ho64FX1zM/pz7fOCiVdt6tXtOW9qb7o384ozfw?=
+ =?us-ascii?Q?XJ4XeuQ+jvs/jsjUHzxfFRh2n8aj5mLUPTIFV/G0wOUcFUqPQ5QoJGTQd/e4?=
+ =?us-ascii?Q?x5qReBMWi797BUgbGCgezoeaFkUrxHFloU2UQPO7ONUUTxonVeYv35HkiT7Z?=
+ =?us-ascii?Q?NWOAQJF0aW4UCiMPjhT0vkjja3MF7t7H4dUqPzNzluQDwGoDBSNccVLOgYZl?=
+ =?us-ascii?Q?jS7wBSdDQrdrUTQ6GVjDYaggVNyOJitF1XwAq2sLzk3aldBYAYbo3JwjghSw?=
+ =?us-ascii?Q?bqtGiB+LSJOyGzttiD7J91NYWM9dbGvZhWe9J6LNCYDIRKTU2lxeUP5JKim6?=
+ =?us-ascii?Q?3ZMPW9PwLCUt9pPutBZFoIHc+LtZuIs0xouBYQAm/0aiF3pUu4jjw94JGR7S?=
+ =?us-ascii?Q?0yliduDMqOBeHjgyMfU+8QLo/cHI1tpeoyNfB6BWB5vGdXs630Q2b1TBfay1?=
+ =?us-ascii?Q?16TCszAsyhT/MrLwQeZvEOeO29Ru3JQTUqSWqlUS1GzREgakD0uyeb6D7beA?=
+ =?us-ascii?Q?nFiEw+q6G1nF5wD25SgukRCarm0KfYG0Tmvg6EBOnT42dk9XvSXw7eatkHv2?=
+ =?us-ascii?Q?kKH/qT8I1aMl89Nm2IGSUJqRDFjpLkDhk/t3d7DeuAELwulN3GwZ9M3nzAZB?=
+ =?us-ascii?Q?szNtd/pEs+eG/N/Co3FUw52txNdoldxRehWNezBJXmMdSmw+A7l2fNZQXmw6?=
+ =?us-ascii?Q?x+AKbYel7na4QX15gCVMJShQu4amFk4bG1dhIpBd7C5AK+dB/REW7WO6mcPO?=
+ =?us-ascii?Q?4RUks8KKvQa2MRmlBI5agSUl+whEjxaRgk5j2drER/rWoxuZr7gB/OYk7pmw?=
+ =?us-ascii?Q?D9vA8A3utpyXrGYeEVuTvOhjSn9c2SqgTk6w0Q4/mGdOAHy4vHS00WZZ8fbW?=
+ =?us-ascii?Q?AI7NkHzALu6/hQ/gkNEEjvIIuVTjmt9MPsuLv0VzByx+okffLeFqJMTEDNsx?=
+ =?us-ascii?Q?/roHJnM5w2dFoWwZbCtmuiDyK2H3khdrUH3/KXxf9OWIdtmLMslDbas4hZvn?=
+ =?us-ascii?Q?6xDfkgmmC4YiGvFRuiMs+wMgnBA9alIitmNdGKHjo0s6UtZ+LzBK9R0CgXK5?=
+ =?us-ascii?Q?r1KAbVKyKNC0VIX49dxLtsqvkVrYSLM0wqbrPszY0VlBt5QmrepfiKlHMyo6?=
+ =?us-ascii?Q?R7n/OFVfRpobXhstwszbfE/jA4U+R7JmJIHsZ+G/vE/vU4BAXCQBygRu8TyI?=
+ =?us-ascii?Q?cdnM1oboFRm8fJMEgZLkyTtGEoKz5T6fJ8ye8Z2WVZYszBhrav3H+Bo2wvZk?=
+ =?us-ascii?Q?4nlaPoO0t5HNP0KCHkD0V/FQefR4mzAWFNH5/K77KpVDYNU6oM3f/i7TZVlW?=
+ =?us-ascii?Q?hdW03qMbw4oxJSJ+esuqET8=3D?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ca5d2be7-37ff-4189-69ce-08d9f05b62de
+X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9417.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Feb 2022 08:15:54.4037
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: pXBH547ZAgJ4c+idI6wbBEybad+PrRbARrWKYGxeOlJCz/d+JFiSSsgEVjq0nxFy2aXEi49YfnO8lQTG+sJI+Q==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM0PR04MB6740
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 21 Jan 2022 at 08:19, Axe Yang <axe.yang@mediatek.com> wrote:
->
-> Add support for eint IRQ when MSDC is used as an SDIO host. This
-> feature requires SDIO device support async IRQ function. With this
-> feature, SDIO host can be awakened by SDIO card in suspend state,
-> without additional pin.
->
-> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> resume, switch GPIO function back to DAT1 mode then turn on clock.
->
-> Some device tree property should be added or modified in MSDC node
-> to support SDIO eint IRQ. Pinctrls named state_dat1 and state_eint
-> are mandatory. And cap-sdio-async-irq flag is necessary since this
-> feature depends on asynchronous interrupt:
->         &mmcX {
->                 ...
->                 pinctrl-names = "default", "state_uhs", "state_eint",
->                                 "state_dat1";
+From: Peng Fan <peng.fan@nxp.com>
 
-Looks like you need to update the DT docs too to describe these new
-things, right?
+Add i.MX93 compatible string, it uses two compatible strings.
 
->                 ...
->                 pinctrl-2 = <&mmc2_pins_eint>;
->                 pinctrl-3 = <&mmc2_pins_dat1>;
->                 ...
->                 cap-sdio-async-irq;
->                 ...
->         };
->
-> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 123 +++++++++++++++++++++++++++++++++++---
->  1 file changed, 115 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 65037e1d7723..f8e38228d810 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1,6 +1,6 @@
->  // SPDX-License-Identifier: GPL-2.0-only
->  /*
-> - * Copyright (c) 2014-2015 MediaTek Inc.
-> + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
->   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
->   */
->
-> @@ -9,6 +9,7 @@
->  #include <linux/clk.h>
->  #include <linux/delay.h>
->  #include <linux/dma-mapping.h>
-> +#include <linux/gpio/consumer.h>
->  #include <linux/iopoll.h>
->  #include <linux/ioport.h>
->  #include <linux/irq.h>
-> @@ -440,8 +441,12 @@ struct msdc_host {
->         struct pinctrl *pinctrl;
->         struct pinctrl_state *pins_default;
->         struct pinctrl_state *pins_uhs;
-> +       struct pinctrl_state *pins_eint;
-> +       struct pinctrl_state *pins_dat1;
->         struct delayed_work req_timeout;
->         int irq;                /* host interrupt */
-> +       int eint_irq;           /* device interrupt */
-> +       int sdio_irq_cnt;       /* irq enable cnt */
->         struct reset_control *reset;
->
->         struct clk *src_clk;    /* msdc source clock */
-> @@ -465,6 +470,7 @@ struct msdc_host {
->         bool hs400_tuning;      /* hs400 mode online tuning */
->         bool internal_cd;       /* Use internal card-detect logic */
->         bool cqhci;             /* support eMMC hw cmdq */
-> +       bool sdio_eint_ready;   /* Ready to support SDIO eint interrupt */
->         struct msdc_save_para save_para; /* used when gate HCLK */
->         struct msdc_tune_para def_tune_para; /* default tune setting */
->         struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-> @@ -1527,10 +1533,12 @@ static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
->         __msdc_enable_sdio_irq(host, enb);
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> -       if (enb)
-> -               pm_runtime_get_noresume(host->dev);
-> -       else
-> -               pm_runtime_put_noidle(host->dev);
-> +       if (mmc->card && !mmc->card->cccr.enable_async_irq) {
-> +               if (enb)
-> +                       pm_runtime_get_noresume(host->dev);
-> +               else
-> +                       pm_runtime_put_noidle(host->dev);
-> +       }
->  }
->
->  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-> @@ -2461,6 +2469,48 @@ static const struct mmc_host_ops mt_msdc_ops = {
->         .hw_reset = msdc_hw_reset,
->  };
->
-> +static irqreturn_t msdc_sdio_eint_irq(int irq, void *dev_id)
-> +{
-> +       struct msdc_host *host = dev_id;
-> +       struct mmc_host *mmc = mmc_from_priv(host);
-> +
-> +       spin_lock(&host->lock);
-> +       if (likely(host->sdio_irq_cnt > 0)) {
-> +               disable_irq_nosync(host->eint_irq);
-> +               disable_irq_wake(host->eint_irq);
-> +               host->sdio_irq_cnt--;
-> +       }
-> +       spin_unlock(&host->lock);
-> +
-> +       sdio_signal_irq(mmc);
-> +
-> +       return IRQ_HANDLED;
-> +}
-> +
-> +static int msdc_request_dat1_eint_irq(struct msdc_host *host)
-> +{
-> +       struct gpio_desc *desc;
-> +       int irq, ret;
-> +
-> +       desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
-> +       if (IS_ERR(desc))
-> +               return PTR_ERR(desc);
-> +
-> +       irq = gpiod_to_irq(desc);
-> +       if (irq < 0)
-> +               return irq;
-> +
-> +       ret = devm_request_threaded_irq(host->dev, irq, NULL, msdc_sdio_eint_irq,
-> +                                       IRQF_TRIGGER_LOW | IRQF_ONESHOT | IRQF_NO_AUTOEN,
-> +                                       "sdio-eint", host);
+Signed-off-by: Peng Fan <peng.fan@nxp.com>
+---
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-Again, I think you need to update the DT doc to describe these new
-IRQ/GPIO things.
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index 17acbc665f5a..7dbbcae9485c 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -47,6 +47,7 @@ properties:
+           - const: fsl,imx7d-usdhc
+       - items:
+           - enum:
++              - fsl,imx93-usdhc
+               - fsl,imx8ulp-usdhc
+           - const: fsl,imx8mm-usdhc
+ 
+-- 
+2.25.1
 
-> +       if (ret)
-> +               return ret;
-> +
-> +       host->eint_irq = irq;
-> +
-> +       return 0;
-> +}
-> +
->  static const struct cqhci_host_ops msdc_cmdq_ops = {
->         .enable         = msdc_cqe_enable,
->         .disable        = msdc_cqe_disable,
-> @@ -2631,6 +2681,23 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 goto host_free;
->         }
->
-> +       if (!(mmc->caps2 & MMC_CAP2_NO_SDIO) && (mmc->caps2 & MMC_CAP2_SDIO_ASYNC_IRQ)) {
-> +               /* Support for SDIO eint irq */
-> +               host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
-> +               if (IS_ERR(host->pins_eint)) {
-> +                       dev_dbg(&pdev->dev, "Cannot find pinctrl eint!\n");
-> +               } else {
-> +                       host->pins_dat1 = pinctrl_lookup_state(host->pinctrl, "state_dat1");
-> +                       if (IS_ERR(host->pins_dat1)) {
-> +                               ret = dev_err_probe(&pdev->dev, PTR_ERR(host->pins_dat1),
-> +                                                   "Cannot find pinctrl dat1!\n");
-> +                               goto host_free;
-> +                       }
-> +
-> +                       host->sdio_eint_ready = true;
-> +               }
-> +       }
-> +
->         msdc_of_property_parse(pdev, host);
->
->         host->dev = &pdev->dev;
-> @@ -2722,6 +2789,16 @@ static int msdc_drv_probe(struct platform_device *pdev)
->         if (ret)
->                 goto release;
->
-> +       if (host->sdio_eint_ready) {
-> +               ret = msdc_request_dat1_eint_irq(host);
-> +               if (ret) {
-> +                       dev_err(host->dev, "Failed to register data1 eint irq!\n");
-> +                       goto release;
-> +               }
-> +
-> +               pinctrl_select_state(host->pinctrl, host->pins_dat1);
-> +       }
-> +
->         pm_runtime_set_active(host->dev);
->         pm_runtime_set_autosuspend_delay(host->dev, MTK_MMC_AUTOSUSPEND_DELAY);
->         pm_runtime_use_autosuspend(host->dev);
-> @@ -2843,8 +2920,22 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         struct msdc_host *host = mmc_priv(mmc);
-> +       unsigned long flags;
->
->         msdc_save_reg(host);
-> +
-> +       if (host->sdio_eint_ready) {
-> +               disable_irq(host->irq);
-> +               pinctrl_select_state(host->pinctrl, host->pins_eint);
-> +               spin_lock_irqsave(&host->lock, flags);
-> +               if (host->sdio_irq_cnt == 0) {
-> +                       enable_irq(host->eint_irq);
-> +                       enable_irq_wake(host->eint_irq);
-> +                       host->sdio_irq_cnt++;
-> +               }
-> +               sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +               spin_unlock_irqrestore(&host->lock, flags);
-> +       }
->         msdc_gate_clock(host);
->         return 0;
->  }
-> @@ -2853,6 +2944,7 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         struct msdc_host *host = mmc_priv(mmc);
-> +       unsigned long flags;
->         int ret;
->
->         ret = msdc_ungate_clock(host);
-> @@ -2860,10 +2952,25 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
->                 return ret;
->
->         msdc_restore_reg(host);
-> +
-> +       if (host->sdio_eint_ready) {
-> +               spin_lock_irqsave(&host->lock, flags);
-> +               if (host->sdio_irq_cnt > 0) {
-> +                       disable_irq_nosync(host->eint_irq);
-> +                       disable_irq_wake(host->eint_irq);
-> +                       host->sdio_irq_cnt--;
-> +                       sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +               } else {
-> +                       sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-> +               }
-> +               spin_unlock_irqrestore(&host->lock, flags);
-> +               pinctrl_select_state(host->pinctrl, host->pins_uhs);
-> +               enable_irq(host->irq);
-> +       }
->         return 0;
->  }
->
-> -static int __maybe_unused msdc_suspend(struct device *dev)
-> +static int __maybe_unused msdc_suspend_noirq(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
->         int ret;
-> @@ -2877,13 +2984,13 @@ static int __maybe_unused msdc_suspend(struct device *dev)
->         return pm_runtime_force_suspend(dev);
->  }
->
-> -static int __maybe_unused msdc_resume(struct device *dev)
-> +static int __maybe_unused msdc_resume_noirq(struct device *dev)
->  {
->         return pm_runtime_force_resume(dev);
->  }
->
->  static const struct dev_pm_ops msdc_dev_pm_ops = {
-> -       SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
-> +       SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(msdc_suspend_noirq, msdc_resume_noirq)
->         SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
->  };
->
-
-Overall the approach makes perfect sense to me!
-
-However, I think the code can be simplified and made more robust by
-using the wakeirq interface instead. Please have a look at
-dev_pm_set_dedicated_wake_irq() and friends. Using them, will let the
-runtime PM core deal with disabling/enabling the IRQ, rather than
-having to do that manually by the driver, for example.
-
-If you want to get inspired by an existing implementation, please have
-a look at the sdhci-omap driver.
-
-Kind regards
-Uffe
