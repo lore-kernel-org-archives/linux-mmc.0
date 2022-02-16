@@ -2,196 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03932C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 10:30:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07882C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 10:36:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230378AbiBPKan (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Feb 2022 05:30:43 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:42728 "EHLO
+        id S229850AbiBPKgQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Feb 2022 05:36:16 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:34030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230355AbiBPKam (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 05:30:42 -0500
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9468222DCC
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:30:29 -0800 (PST)
-Received: by mail-lf1-x12b.google.com with SMTP id j15so2917418lfe.11
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:30:29 -0800 (PST)
+        with ESMTP id S229545AbiBPKgP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 05:36:15 -0500
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B15C22B9A33
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:36:03 -0800 (PST)
+Received: by mail-lf1-x132.google.com with SMTP id b9so2967626lfv.7
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:36:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Y+U2blIz2bHr/Hou20K+vB8EK8yt9Gm5o6A0v/q1Ufs=;
-        b=bmaY2mTyY9evN92fL8S15FP23bwOQg175/j/w9J0MQSQPxSnTXMxBZDaWXAKWYsZ+h
-         SHp12rfwrzGOlePdMZPIDVrnCGk3OAtITljLm+pXcSXXN1VH3CklKSnRika3NENyDtEC
-         zIlceVPicu6kGBc5349Bp7IZ2FjkyV40XJ0O/DBt08q/kZleBR0bX0ZF8WnrqrI4V9sQ
-         Ug5PMGQX62KF4aO/ZrT6rR8x1hz3YRMGDk+1CerrfW5q8hSv7BFDExJ+Z0tDYDbr4hPl
-         IUZK3qKeFFUHcijTy2F2TRpctIFFTN/lgHBnUOTPFd58uVqeYuiCUUm5z8InjmRScavs
-         xuLw==
+         :cc:content-transfer-encoding;
+        bh=DPYWkKQW0nFWmY1xKFD4WRaxOqq/BeFHyxszPN5EPVU=;
+        b=sUG7rjTRD6NrI48dGWwKOWJyGgjS5g2H1DjFZUQiMmRJj/ir9Wv7S+f3pcYhwB3G21
+         jgW2ghTrDeTyWExposS8pU9olgt0OSFSsKqTWvFBrZtYeR1hzrMRB/QHZbRFsmF8Z2S0
+         H/h0PiEEIFA7GmMAI2JMN3sa/fyLmEXYE57MT9xMELnMPIGAArOM53KTMVRbp5J3baMB
+         isLqyWoSSBY1G4sXiIcXWs7lxW91pyd5h21jcWCoFLVEL0Fbk7le1PLdPy5uxaXftMdu
+         5wLQBv6dJWYyW7H1/lavO2wyNL8O5n34jBSkfOXmCyy+T54Vr7Az+AHoRojt+05MRAOP
+         vMsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Y+U2blIz2bHr/Hou20K+vB8EK8yt9Gm5o6A0v/q1Ufs=;
-        b=JmNWPSpygh6wRsoUuzAoyjsio19yfNUjLfaZNiVB9U47KOHWEuWWcGMBUabdjHPoCB
-         qBiKXcWTNppzvS77a0UYynOkF1fzpMkTlahrqhRQDrbJW0BkTemjalXMVAdpEVrO/SNK
-         WdZUkoM9LwgAFQ8LdUWSR7a5umoTY2OvRuINuwRhz11JyiLz3aXgTVbf9O0l75mQXLdl
-         y3N70a0Z7IfzVZ7Ecj2I2MLqU1L4y/oUM78FukHVPfVLXA98QNqTyKUsWQAaI4KOPLBE
-         uETbZfn8xylLg0xShUYgOrPQZeXywNXW1BSH2wWbsJP7H3+70r8YqMiI5bADKcKdMPn3
-         jkOg==
-X-Gm-Message-State: AOAM5337+7b5R5H6oF+Rte0NCRePKw/yHJ6sQXoYUpiyGKuw7JAp7M0x
-        QYtioQaITlb205Fs0jkwsVKOheu0PKKLrUq3y1vod2MZKytHHQ==
-X-Google-Smtp-Source: ABdhPJxuTx34WgTkAaui/+oWNPCJhtdpRgb8InCtADP80jomO+tijlnanWqSIZvsT7xoMawzOxj4Y0yq7BoIcfsvHcA=
-X-Received: by 2002:ac2:5de4:0:b0:443:5b80:d4c4 with SMTP id
- z4-20020ac25de4000000b004435b80d4c4mr1505822lfq.373.1645007428152; Wed, 16
- Feb 2022 02:30:28 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=DPYWkKQW0nFWmY1xKFD4WRaxOqq/BeFHyxszPN5EPVU=;
+        b=n43WDIk/eqju10pD6/bsId8KxDxVsVVZdnqAH08VB/GYKIhmzYRvx7WRuRndlQ2xlT
+         XAON/VUWEq92hH5LzgE+vxnSDOV5ZqKPiEeGYX1VoOwu+a+UD7yz2UXijk6r3zZRF9ra
+         qSSPigehM6o8DkKAly3ftgqw7az36BGfdwJkcxyjdQ9Quwvy1wxpbUIf4pVVOt+2SZek
+         CDRkJdnai8X/4YnPxiyhM7gaK8FanYz/PSQ/xHU1m7AxcC7l5nfhmWzCqjGQOIZTzMrS
+         PUd0qJ/cXuChAtI1Eh7Sd0lLV931l282G7MMFcuxSal7IlZAc/HopvxypJGMSUBAELAZ
+         e3Jw==
+X-Gm-Message-State: AOAM530FQWwYMxMyBd52CE+QkTZfe+LPaYtfkmy5g9wZrUYtaE4YRfD0
+        9kNRQWke+RW/jnkqaGFBQ2DhHZx6kn/h238lpORi0A==
+X-Google-Smtp-Source: ABdhPJz9lTvKXYqNUYEUwJcowusuOCgV3hil3k2PW920Mo0Cq3dd/tLhknO2IA4VJElhIgGQWuFNWTFzEa2t3lXDQAk=
+X-Received: by 2002:a05:6512:388d:b0:443:6066:2c8d with SMTP id
+ n13-20020a056512388d00b0044360662c8dmr1552732lft.184.1645007762118; Wed, 16
+ Feb 2022 02:36:02 -0800 (PST)
 MIME-Version: 1.0
-References: <20220216055435.2335297-1-kai.heng.feng@canonical.com>
-In-Reply-To: <20220216055435.2335297-1-kai.heng.feng@canonical.com>
+References: <20220216093112.92469-1-Jerome.Pouiller@silabs.com>
+In-Reply-To: <20220216093112.92469-1-Jerome.Pouiller@silabs.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Feb 2022 11:29:52 +0100
-Message-ID: <CAPDyKFrAjT2PJBg+d00Tvekujk6Bh_dsK33121Fxr9hwHi9gLw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rtsx: Let MMC core handle runtime PM
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc:     Thomas Hebb <tommyhebb@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Wed, 16 Feb 2022 11:35:25 +0100
+Message-ID: <CAPDyKFreMJigpAgE95EgkStNrE+r+_k9iRuTXsFk6t9d66e0TQ@mail.gmail.com>
+Subject: Re: [PATCH 0/2] staging: wfx: apply SDIO suggestions
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        Kalle Valo <kvalo@codeaurora.org>, devel@driverdev.osuosl.org,
+        linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-mmc@vger.kernel.org,
+        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 16 Feb 2022 at 06:55, Kai-Heng Feng <kai.heng.feng@canonical.com> wrote:
+On Wed, 16 Feb 2022 at 10:31, Jerome Pouiller
+<Jerome.Pouiller@silabs.com> wrote:
 >
-> Since MMC core handles runtime PM reference counting, we can avoid doing
-> redundant runtime PM work in the driver. That means the only thing
-> commit 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM") misses is
-> to always enable runtime PM, to let its parent driver enable ASPM in the
-> runtime idle routine.
+> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
 >
-> Fixes: 7499b529d97f ("mmc: rtsx: Use pm_runtime_{get,put}() to handle runtime PM")
-> Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+> Hi Ulf, Greg,
+>
+> The second patch of this series touch to the staging tree and to the MMC
+> framework. I don't know what is the rule for these cases, but I think it
+> makes more sense to carry this patch with the staging tree.
 
-This looks good to me!
+I don't believe the changes to the mmc core will cause any merge
+conflict, so feel free to funnel this through whatever tree makes best
+sense.
 
+For the series:
 Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Greg, do you want to funnel this through your tree - or should I wait
-for an rc containing 7499b529d97f and take it through my mmc tree?
-Either way works for me.
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 18 ------------------
->  1 file changed, 18 deletions(-)
 >
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 2a3f14afe9f83..265b3889f9d72 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -823,7 +823,6 @@ static void sd_request(struct work_struct *work)
->         }
 >
->         mutex_lock(&pcr->pcr_mutex);
-> -       pm_runtime_get_sync(dev);
+> J=C3=A9r=C3=B4me Pouiller (2):
+>   staging: wfx: WF200 has no official SDIO IDs
+>   staging: wfx: apply the necessary SDIO quirks for the Silabs WF200
 >
->         rtsx_pci_start_run(pcr);
+>  drivers/mmc/core/quirks.h      | 5 +++++
+>  drivers/staging/wfx/bus_sdio.c | 8 ++------
+>  2 files changed, 7 insertions(+), 6 deletions(-)
 >
-> @@ -860,8 +859,6 @@ static void sd_request(struct work_struct *work)
->                         data->bytes_xfered = data->blocks * data->blksz;
->         }
->
-> -       pm_runtime_mark_last_busy(dev);
-> -       pm_runtime_put_autosuspend(dev);
->         mutex_unlock(&pcr->pcr_mutex);
->
->  finish:
-> @@ -1093,7 +1090,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 return;
->
->         mutex_lock(&pcr->pcr_mutex);
-> -       pm_runtime_get_sync(dev);
->
->         rtsx_pci_start_run(pcr);
->
-> @@ -1127,8 +1123,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         rtsx_pci_switch_clock(pcr, ios->clock, host->ssc_depth,
->                         host->initial_mode, host->double_clk, host->vpclk);
->
-> -       pm_runtime_mark_last_busy(dev);
-> -       pm_runtime_put_autosuspend(dev);
->         mutex_unlock(&pcr->pcr_mutex);
->  }
->
-> @@ -1144,7 +1138,6 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
->                 return -ENOMEDIUM;
->
->         mutex_lock(&pcr->pcr_mutex);
-> -       pm_runtime_get_sync(dev);
->
->         rtsx_pci_start_run(pcr);
->
-> @@ -1154,8 +1147,6 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
->         if (val & SD_WRITE_PROTECT)
->                 ro = 1;
->
-> -       pm_runtime_mark_last_busy(dev);
-> -       pm_runtime_put_autosuspend(dev);
->         mutex_unlock(&pcr->pcr_mutex);
->
->         return ro;
-> @@ -1173,7 +1164,6 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
->                 return cd;
->
->         mutex_lock(&pcr->pcr_mutex);
-> -       pm_runtime_get_sync(dev);
->
->         rtsx_pci_start_run(pcr);
->
-> @@ -1183,8 +1173,6 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
->         if (val & SD_EXIST)
->                 cd = 1;
->
-> -       pm_runtime_mark_last_busy(dev);
-> -       pm_runtime_put_autosuspend(dev);
->         mutex_unlock(&pcr->pcr_mutex);
->
->         return cd;
-> @@ -1282,7 +1270,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
->                 return err;
->
->         mutex_lock(&pcr->pcr_mutex);
-> -       pm_runtime_get_sync(dev);
->
->         rtsx_pci_start_run(pcr);
->
-> @@ -1312,8 +1299,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
->         err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
->                         SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
->
-> -       pm_runtime_mark_last_busy(dev);
-> -       pm_runtime_put_autosuspend(dev);
->         mutex_unlock(&pcr->pcr_mutex);
->
->         return err;
-> @@ -1334,7 +1319,6 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 return err;
->
->         mutex_lock(&pcr->pcr_mutex);
-> -       pm_runtime_get_sync(dev);
->
->         rtsx_pci_start_run(pcr);
->
-> @@ -1367,8 +1351,6 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 err = sd_change_phase(host, DDR50_RX_PHASE(pcr), true);
->
->  out:
-> -       pm_runtime_mark_last_busy(dev);
-> -       pm_runtime_put_autosuspend(dev);
->         mutex_unlock(&pcr->pcr_mutex);
->
->         return err;
 > --
 > 2.34.1
 >
