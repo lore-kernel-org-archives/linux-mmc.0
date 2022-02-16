@@ -2,103 +2,196 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6672FC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 10:23:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03932C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 10:30:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229674AbiBPKXo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Feb 2022 05:23:44 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:35208 "EHLO
+        id S230378AbiBPKan (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Feb 2022 05:30:43 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:42728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229695AbiBPKXn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 05:23:43 -0500
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 792F920699B
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:23:30 -0800 (PST)
-Received: by mail-lf1-x136.google.com with SMTP id p29so2021824lfa.3
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:23:30 -0800 (PST)
+        with ESMTP id S230355AbiBPKam (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 05:30:42 -0500
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9468222DCC
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:30:29 -0800 (PST)
+Received: by mail-lf1-x12b.google.com with SMTP id j15so2917418lfe.11
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:30:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=BgTdt/5Tmin+RrpPEv4f+OmO2PXeyvBfP6PGIN1pw00=;
-        b=ZgyZzKrmMhsvCg4VMfuF0GDqGdzdbOAx4uk46L+7NyKSrkuFJ6DR2tWzprIB09t90F
-         pdEfMTaqxgUhrDo328Woxo49aijQt/PH+5GrkfdtSWRvyq4re5bzLedlwmNSTfT3+kn8
-         Fh2guaKG2mWyijqIWhMdIhxXS1MGbaVDkGR1LWbDV24YlHrSA0CsW/PNLugG+ufy821z
-         QnY+PS1GQuurqd7ygmJgwJZvUwPTLfp5gfntzw00S2My1DCDpGjeRNJeADYNm/a4KfcS
-         zikp3p85IJaJaTZz6K1bUbQMmH7pNCsZYSCy6VpzOAirR9tSzCC+0jVLrKm95rP1yGl4
-         VhOA==
+        bh=Y+U2blIz2bHr/Hou20K+vB8EK8yt9Gm5o6A0v/q1Ufs=;
+        b=bmaY2mTyY9evN92fL8S15FP23bwOQg175/j/w9J0MQSQPxSnTXMxBZDaWXAKWYsZ+h
+         SHp12rfwrzGOlePdMZPIDVrnCGk3OAtITljLm+pXcSXXN1VH3CklKSnRika3NENyDtEC
+         zIlceVPicu6kGBc5349Bp7IZ2FjkyV40XJ0O/DBt08q/kZleBR0bX0ZF8WnrqrI4V9sQ
+         Ug5PMGQX62KF4aO/ZrT6rR8x1hz3YRMGDk+1CerrfW5q8hSv7BFDExJ+Z0tDYDbr4hPl
+         IUZK3qKeFFUHcijTy2F2TRpctIFFTN/lgHBnUOTPFd58uVqeYuiCUUm5z8InjmRScavs
+         xuLw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=BgTdt/5Tmin+RrpPEv4f+OmO2PXeyvBfP6PGIN1pw00=;
-        b=5fSPXFcit4fbJFhudJRXSLr+syyubBSTrfit6EnfvT9vfVHDSXPI8/YxKEOM48ejy0
-         tTkoo6ADmrA7FqU2yBMwpiKXYNw49KpNxed30jeHRFQ1BTSDdNt4+ENjtkZykxeTA3bl
-         Ga30amdYs6sak2w6GPsk3PklQcfyJg0E+LICkBkTTVKcgVRpwfShmk/HfxLfSyBDXFc5
-         VHhAYA3apxu60y5b8hB4mMUvacpaA8Mrrifzthy2neHvTTZDmWGXqNeGEeYjTW/KGVPt
-         1+0ie0JQc2/J7RZv+eLQg3uJ/bdciWJX89udK3dOpApUDkH/tpAGNFBDDoHPVmNIK5nc
-         dZNQ==
-X-Gm-Message-State: AOAM530HqOy2YgQ5iOq3WCBrUC/PCFBxI4Qo5cZO+rRsWVtNQrBsIvL5
-        V1IZYgC/Smq2odpzT9FQpEZS7wx8/tgSNDTm3ImP/ZkpWz8=
-X-Google-Smtp-Source: ABdhPJwgnpPtxD5K4HV7oO6sxOcMCiJwgU1TdTweqVp1m3xG6mpjoIJGR/sO87EROFqrpGyf758QznqJmtiqosajuuk=
-X-Received: by 2002:a05:6512:388d:b0:443:6066:2c8d with SMTP id
- n13-20020a056512388d00b0044360662c8dmr1521088lft.184.1645007008626; Wed, 16
- Feb 2022 02:23:28 -0800 (PST)
+        bh=Y+U2blIz2bHr/Hou20K+vB8EK8yt9Gm5o6A0v/q1Ufs=;
+        b=JmNWPSpygh6wRsoUuzAoyjsio19yfNUjLfaZNiVB9U47KOHWEuWWcGMBUabdjHPoCB
+         qBiKXcWTNppzvS77a0UYynOkF1fzpMkTlahrqhRQDrbJW0BkTemjalXMVAdpEVrO/SNK
+         WdZUkoM9LwgAFQ8LdUWSR7a5umoTY2OvRuINuwRhz11JyiLz3aXgTVbf9O0l75mQXLdl
+         y3N70a0Z7IfzVZ7Ecj2I2MLqU1L4y/oUM78FukHVPfVLXA98QNqTyKUsWQAaI4KOPLBE
+         uETbZfn8xylLg0xShUYgOrPQZeXywNXW1BSH2wWbsJP7H3+70r8YqMiI5bADKcKdMPn3
+         jkOg==
+X-Gm-Message-State: AOAM5337+7b5R5H6oF+Rte0NCRePKw/yHJ6sQXoYUpiyGKuw7JAp7M0x
+        QYtioQaITlb205Fs0jkwsVKOheu0PKKLrUq3y1vod2MZKytHHQ==
+X-Google-Smtp-Source: ABdhPJxuTx34WgTkAaui/+oWNPCJhtdpRgb8InCtADP80jomO+tijlnanWqSIZvsT7xoMawzOxj4Y0yq7BoIcfsvHcA=
+X-Received: by 2002:ac2:5de4:0:b0:443:5b80:d4c4 with SMTP id
+ z4-20020ac25de4000000b004435b80d4c4mr1505822lfq.373.1645007428152; Wed, 16
+ Feb 2022 02:30:28 -0800 (PST)
 MIME-Version: 1.0
-References: <20220121014039.1693208-1-kai.heng.feng@canonical.com>
- <20220125055010.1866563-1-kai.heng.feng@canonical.com> <CAPDyKFrtD28NKTyUAR-6Rt4PwYvkOuWcRhxZZWVAq4KcTNG7QQ@mail.gmail.com>
- <CAAd53p5LxZh6-jZj274g6+PeDpAPWSiwRWXL93dgOg3xpqvu8g@mail.gmail.com>
-In-Reply-To: <CAAd53p5LxZh6-jZj274g6+PeDpAPWSiwRWXL93dgOg3xpqvu8g@mail.gmail.com>
+References: <20220216055435.2335297-1-kai.heng.feng@canonical.com>
+In-Reply-To: <20220216055435.2335297-1-kai.heng.feng@canonical.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Feb 2022 11:22:52 +0100
-Message-ID: <CAPDyKFpx_H8b1KJ_yZ_3My_nxcC2e9k+wROH7hgfK3LbchQ8iQ@mail.gmail.com>
-Subject: Re: [PATCH v6 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle
- runtime PM
-To:     Kai-Heng Feng <kai.heng.feng@canonical.com>
-Cc:     arnd@arndb.de, gregkh@linuxfoundation.org,
-        linux-pm@vger.kernel.org, Ricky WU <ricky_wu@realtek.com>,
-        Thomas Hebb <tommyhebb@gmail.com>, linux-mmc@vger.kernel.org,
+Date:   Wed, 16 Feb 2022 11:29:52 +0100
+Message-ID: <CAPDyKFrAjT2PJBg+d00Tvekujk6Bh_dsK33121Fxr9hwHi9gLw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx: Let MMC core handle runtime PM
+To:     Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Thomas Hebb <tommyhebb@gmail.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 16 Feb 2022 at 05:21, Kai-Heng Feng <kai.heng.feng@canonical.com> wrote:
+On Wed, 16 Feb 2022 at 06:55, Kai-Heng Feng <kai.heng.feng@canonical.com> wrote:
 >
-> On Fri, Feb 4, 2022 at 8:28 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > On Tue, 25 Jan 2022 at 06:50, Kai-Heng Feng <kai.heng.feng@canonical.com> wrote:
-> > >
-> > > Commit 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM") doesn't
-> > > use pm_runtime_{get,put}() helpers when it should, so the RPM refcount
-> > > keeps at zero, hence its parent driver, rtsx_pci, has to do lots of
-> > > weird tricks to keep it from runtime suspending.
-> > >
-> > > So use those helpers at right places to properly manage runtime PM.
-> > >
-> > > Fixes: 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM")
-> > > Cc: Ricky WU <ricky_wu@realtek.com>
-> > > Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
-> >
-> > The runtime PM reference counting for the mmc host device is managed
-> > by the mmc core. Have a look at __mmc_claim_host() and
-> > mmc_release_host().
-> >
-> > In other words, the runtime PM reference counting should not be needed
-> > in the mmc host driver, unless there are some specific cases, like for
-> > example during ->probe|remove().
-> >
-> > So perhaps it's only the changes in the ->probe|remove() functions
-> > that you need to fix the problems? No?
+> Since MMC core handles runtime PM reference counting, we can avoid doing
+> redundant runtime PM work in the driver. That means the only thing
+> commit 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM") misses is
+> to always enable runtime PM, to let its parent driver enable ASPM in the
+> runtime idle routine.
 >
-> Yes you are right. Let me send a patch to remove redundant PM helpers
-> from this patch.
+> Fixes: 7499b529d97f ("mmc: rtsx: Use pm_runtime_{get,put}() to handle runtime PM")
+> Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
 
-Ohh, I didn't know that Greg already queued this up. Seems like I
-don't get more than one week to review. :-)
+This looks good to me!
 
-Alright, I will look at your new patch then.
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Greg, do you want to funnel this through your tree - or should I wait
+for an rc containing 7499b529d97f and take it through my mmc tree?
+Either way works for me.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 18 ------------------
+>  1 file changed, 18 deletions(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 2a3f14afe9f83..265b3889f9d72 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -823,7 +823,6 @@ static void sd_request(struct work_struct *work)
+>         }
+>
+>         mutex_lock(&pcr->pcr_mutex);
+> -       pm_runtime_get_sync(dev);
+>
+>         rtsx_pci_start_run(pcr);
+>
+> @@ -860,8 +859,6 @@ static void sd_request(struct work_struct *work)
+>                         data->bytes_xfered = data->blocks * data->blksz;
+>         }
+>
+> -       pm_runtime_mark_last_busy(dev);
+> -       pm_runtime_put_autosuspend(dev);
+>         mutex_unlock(&pcr->pcr_mutex);
+>
+>  finish:
+> @@ -1093,7 +1090,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 return;
+>
+>         mutex_lock(&pcr->pcr_mutex);
+> -       pm_runtime_get_sync(dev);
+>
+>         rtsx_pci_start_run(pcr);
+>
+> @@ -1127,8 +1123,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         rtsx_pci_switch_clock(pcr, ios->clock, host->ssc_depth,
+>                         host->initial_mode, host->double_clk, host->vpclk);
+>
+> -       pm_runtime_mark_last_busy(dev);
+> -       pm_runtime_put_autosuspend(dev);
+>         mutex_unlock(&pcr->pcr_mutex);
+>  }
+>
+> @@ -1144,7 +1138,6 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+>                 return -ENOMEDIUM;
+>
+>         mutex_lock(&pcr->pcr_mutex);
+> -       pm_runtime_get_sync(dev);
+>
+>         rtsx_pci_start_run(pcr);
+>
+> @@ -1154,8 +1147,6 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+>         if (val & SD_WRITE_PROTECT)
+>                 ro = 1;
+>
+> -       pm_runtime_mark_last_busy(dev);
+> -       pm_runtime_put_autosuspend(dev);
+>         mutex_unlock(&pcr->pcr_mutex);
+>
+>         return ro;
+> @@ -1173,7 +1164,6 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+>                 return cd;
+>
+>         mutex_lock(&pcr->pcr_mutex);
+> -       pm_runtime_get_sync(dev);
+>
+>         rtsx_pci_start_run(pcr);
+>
+> @@ -1183,8 +1173,6 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+>         if (val & SD_EXIST)
+>                 cd = 1;
+>
+> -       pm_runtime_mark_last_busy(dev);
+> -       pm_runtime_put_autosuspend(dev);
+>         mutex_unlock(&pcr->pcr_mutex);
+>
+>         return cd;
+> @@ -1282,7 +1270,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>                 return err;
+>
+>         mutex_lock(&pcr->pcr_mutex);
+> -       pm_runtime_get_sync(dev);
+>
+>         rtsx_pci_start_run(pcr);
+>
+> @@ -1312,8 +1299,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+>         err = rtsx_pci_write_register(pcr, SD_BUS_STAT,
+>                         SD_CLK_TOGGLE_EN | SD_CLK_FORCE_STOP, 0);
+>
+> -       pm_runtime_mark_last_busy(dev);
+> -       pm_runtime_put_autosuspend(dev);
+>         mutex_unlock(&pcr->pcr_mutex);
+>
+>         return err;
+> @@ -1334,7 +1319,6 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 return err;
+>
+>         mutex_lock(&pcr->pcr_mutex);
+> -       pm_runtime_get_sync(dev);
+>
+>         rtsx_pci_start_run(pcr);
+>
+> @@ -1367,8 +1351,6 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>                 err = sd_change_phase(host, DDR50_RX_PHASE(pcr), true);
+>
+>  out:
+> -       pm_runtime_mark_last_busy(dev);
+> -       pm_runtime_put_autosuspend(dev);
+>         mutex_unlock(&pcr->pcr_mutex);
+>
+>         return err;
+> --
+> 2.34.1
+>
