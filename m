@@ -2,335 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9304EC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Feb 2022 16:59:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16444C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 04:21:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239861AbiBOQ73 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Feb 2022 11:59:29 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:56338 "EHLO
+        id S243593AbiBPEV2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Feb 2022 23:21:28 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:34398 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240210AbiBOQ7Z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2022 11:59:25 -0500
-Received: from mail-oi1-x229.google.com (mail-oi1-x229.google.com [IPv6:2607:f8b0:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FEF1E6C33
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2022 08:59:15 -0800 (PST)
-Received: by mail-oi1-x229.google.com with SMTP id s24so21412753oic.6
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2022 08:59:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=YPExe43oiU2kbYuof8MAvM6DxTVmL+Y9rgGUD/NUjBo=;
-        b=ei/j2mpRiSvBEbwW4PhTHwo8MRfnAdUB8oK/mvFHvKeX4aX4ZXhdx4B63i6JZe/fwk
-         lZLOoxC3voXhGLJGx7Bs8sXCJ7C4158v70/mpaWRNO5u68o0L6EClrTuZCzau2MbJp7n
-         Cga9PMm/xZhvYAIn463oUDtXpTzQDzbeHxXlkVAsKMp3JiQyNmtaBvyjRu4Q2WXwxPpH
-         dRqhKVWETA5YDOHXnjKnh72/OiQ8PG3FapE6Nd64fBKN3zcx8H+IGiYFf7LL4CgJdXuB
-         foelGLCreR71CqB0vqQj5M/zQ62+5twqT6zCiqZNIcEPASIU/uw4oxUhcnuSMhkhbbwI
-         5i8A==
+        with ESMTP id S239765AbiBPEV1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Feb 2022 23:21:27 -0500
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59C2A931BC
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2022 20:21:16 -0800 (PST)
+Received: from mail-oo1-f69.google.com (mail-oo1-f69.google.com [209.85.161.69])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id CFBF3407F4
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 04:21:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1644985274;
+        bh=HsXK+os0Bu/iWLA0AHHw/feI5UAiYSJ6PqC8mSn7924=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=eXFDmBwprg5T7C0bA5bpvqRee9gHfyNdKh5K9TwrDfDoTNq5g943eeNvHsLhRSQn+
+         +v5kPOWtpuvJDFd1z2JXnafsc+HB7LvfoWS4dRX4975oOba2JaGylep+cy7SecZROt
+         MEq9RwTMvLVoZO5h2twSzkZrTgumVGStWdxw77xGPdTNZhijErn5w/TNzd/GwpdwDY
+         NnBbXU3ChFNZtFJAPeqGHRISG7q3zDn0nOKlkEwsIEWZQyLIjyFoPd+UsycLMcDDz0
+         5h1Xt0EvXOGpQSo7SYsg81lyFC2TghEEBv4xWZoFyFWEy9MyPDomEdSjZ3gQzrHWbo
+         +uYUpSGSuU01w==
+Received: by mail-oo1-f69.google.com with SMTP id t12-20020a4ab58c000000b002dcbee240efso665307ooo.10
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Feb 2022 20:21:14 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=YPExe43oiU2kbYuof8MAvM6DxTVmL+Y9rgGUD/NUjBo=;
-        b=Oe9UZZsPbcAMFUjWjN40Pd9QPkZnNq718FChN+qB4eyzTTHKT62O4sIlHn8dkKTrnG
-         BoBKSkUiPq47hBdRgDkEACVh2+VYnxc+yFvzdhRyNXjRmOWHhqJTLse3rz0gu8C962LQ
-         EcCqGkFuBKRfAKCcmQllustRTfYvPuMbt0BGffkJPnJMS526Cn3mpWm/anron3eCzZQk
-         sVivVxeQIw4Bt9Wg6BIlfuNP3BwPVBW0/Rb/oZx3A36/deGl+RFIeVjmfJ4EBLEmJ/vm
-         z997Xvomve6ng7Xmy7XThHtnoyC1AY0TCL3Se+VNZRxJnCwMxm0eIp2XzPkRY46JsbNQ
-         0exg==
-X-Gm-Message-State: AOAM531BfBcLsavkB+Hw4Ao71lgjhVabmEPOoiTBvBgFMZKiDXmaKh+p
-        ZVE0yTkqoFx0dAf25lTljGl4VA==
-X-Google-Smtp-Source: ABdhPJyLr97qtxQJpgNZ2Yr9x/XnvRC6XNfhjoLYiqk7mthC2wVrNYvVs5CTUGX5YwFPdjs+DFpPjg==
-X-Received: by 2002:a05:6808:1705:b0:2d4:d7a:9c25 with SMTP id bc5-20020a056808170500b002d40d7a9c25mr1618511oib.51.1644944354403;
-        Tue, 15 Feb 2022 08:59:14 -0800 (PST)
-Received: from yoga ([2600:1700:a0:3dc8:5c39:baff:fe03:898d])
-        by smtp.gmail.com with ESMTPSA id x1sm13993943oto.38.2022.02.15.08.59.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Feb 2022 08:59:13 -0800 (PST)
-Date:   Tue, 15 Feb 2022 10:59:11 -0600
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Cc:     adrian.hunter@intel.com, quic_asutoshd@quicinc.com,
-        ulf.hansson@linaro.org, agross@kernel.org,
-        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, sartgarg@codeaurora.org,
-        nitirawa@codeaurora.org, sayalil@codeaurora.org,
-        Liangliang Lu <luliang@codeaurora.org>,
-        "Bao D . Nguyen" <nguyenb@codeaurora.org>
-Subject: Re: [PATCH V3 1/4] mmc: sdhci: Capture eMMC and SD card errors
-Message-ID: <Ygvb38vVeafYS4O0@yoga>
-References: <1642699582-14785-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <1642699582-14785-2-git-send-email-quic_c_sbhanu@quicinc.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=HsXK+os0Bu/iWLA0AHHw/feI5UAiYSJ6PqC8mSn7924=;
+        b=h9f0Z0X9ZXVCCUzopDgeWnKX8e6ZiWRuy0eBi4sOaK4Ja48u2ZsRIMLuuUh2/exL3M
+         jo+tn4XpPSr/DdVJhezgFWi9bL8Ui3C0a+y6m3l1dv9Ni3WUguDqDR5Dl4dX51xsDygv
+         b1gJcQmDllIW0YUaALhlWrJiX4hJ3Zu7YU5+n29ZZQ7mt+u+IIi3vm7ZxPCESmGBTyXA
+         ABwQD6FXZOSnMPowDD5UG+eichBql3VmHL2+k5VeyabX4pBIzVg3yGnqKsRmrQhKe4Uc
+         HMT4b8E3NxIkaEGo1MRfgBAG2h6mX8DuH8OQnxs75sWsV78bdkKsJqvvoLKv4m/6ISbt
+         5l4w==
+X-Gm-Message-State: AOAM531ZZfx3h+ZZds9UqmNnvNjhSpU8vbyH/k6WU39m4+jLYl3djYas
+        M77cwsZHULOrB9aGRWHWSEhCYRC26mJBltFSr2dcuS1Wppo1lCYKT0JHXT2Tj4mn8LugoHQzAG4
+        bcQK0zNIuxkjI72dnUpSpOq654W/jZVjk8riwzKfF2mSi5C44w1ULKA==
+X-Received: by 2002:a05:6870:134e:b0:d3:7659:e8b5 with SMTP id 14-20020a056870134e00b000d37659e8b5mr1240413oac.131.1644985273568;
+        Tue, 15 Feb 2022 20:21:13 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJxqQr9WioccQW2rNW50BJPxIWDXzh/BNZrc3rusV/8zTVsrc7M7FzsEBHFXcP6ido7ZdOtWXBCXsG/e+zdx8wc=
+X-Received: by 2002:a05:6870:134e:b0:d3:7659:e8b5 with SMTP id
+ 14-20020a056870134e00b000d37659e8b5mr1240404oac.131.1644985273323; Tue, 15
+ Feb 2022 20:21:13 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1642699582-14785-2-git-send-email-quic_c_sbhanu@quicinc.com>
+References: <20220121014039.1693208-1-kai.heng.feng@canonical.com>
+ <20220125055010.1866563-1-kai.heng.feng@canonical.com> <CAPDyKFrtD28NKTyUAR-6Rt4PwYvkOuWcRhxZZWVAq4KcTNG7QQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFrtD28NKTyUAR-6Rt4PwYvkOuWcRhxZZWVAq4KcTNG7QQ@mail.gmail.com>
+From:   Kai-Heng Feng <kai.heng.feng@canonical.com>
+Date:   Wed, 16 Feb 2022 12:21:02 +0800
+Message-ID: <CAAd53p5LxZh6-jZj274g6+PeDpAPWSiwRWXL93dgOg3xpqvu8g@mail.gmail.com>
+Subject: Re: [PATCH v6 1/4] mmc: rtsx: Use pm_runtime_{get,put}() to handle
+ runtime PM
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     arnd@arndb.de, gregkh@linuxfoundation.org,
+        linux-pm@vger.kernel.org, Ricky WU <ricky_wu@realtek.com>,
+        Thomas Hebb <tommyhebb@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu 20 Jan 11:26 CST 2022, Shaik Sajida Bhanu wrote:
+On Fri, Feb 4, 2022 at 8:28 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Tue, 25 Jan 2022 at 06:50, Kai-Heng Feng <kai.heng.feng@canonical.com> wrote:
+> >
+> > Commit 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM") doesn't
+> > use pm_runtime_{get,put}() helpers when it should, so the RPM refcount
+> > keeps at zero, hence its parent driver, rtsx_pci, has to do lots of
+> > weird tricks to keep it from runtime suspending.
+> >
+> > So use those helpers at right places to properly manage runtime PM.
+> >
+> > Fixes: 5b4258f6721f ("misc: rtsx: rts5249 support runtime PM")
+> > Cc: Ricky WU <ricky_wu@realtek.com>
+> > Signed-off-by: Kai-Heng Feng <kai.heng.feng@canonical.com>
+>
+> The runtime PM reference counting for the mmc host device is managed
+> by the mmc core. Have a look at __mmc_claim_host() and
+> mmc_release_host().
+>
+> In other words, the runtime PM reference counting should not be needed
+> in the mmc host driver, unless there are some specific cases, like for
+> example during ->probe|remove().
+>
+> So perhaps it's only the changes in the ->probe|remove() functions
+> that you need to fix the problems? No?
 
-> Add changes to capture eMMC and SD card errors.
-> This is useful for debug and testing.
-> 
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> Signed-off-by: Liangliang Lu <luliang@codeaurora.org>
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-> Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
+Yes you are right. Let me send a patch to remove redundant PM helpers
+from this patch.
 
-Please read
-https://docs.kernel.org/process/submitting-patches.html#sign-your-work-the-developer-s-certificate-of-origin
-and the one section below on what your S-o-b actually means.
+Kai-Heng
 
-In particular this does not say "the four of us authored this patch", it
-documents the path the patch took to this point. In which case Bao is
-the last one stating that he _handled_ the patch - but then somehow it
-came out of your mailbox.
-
-You're probably looking for Co-developed-by, which is described just
-below that.
-
-Regards,
-Bjorn
-
-> ---
->  drivers/mmc/host/sdhci-msm.c |  3 ++
->  drivers/mmc/host/sdhci.c     | 72 ++++++++++++++++++++++++++++++++++++--------
->  include/linux/mmc/host.h     | 31 +++++++++++++++++++
->  3 files changed, 94 insertions(+), 12 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 50c71e0..309eb7b 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -128,6 +128,8 @@
->  
->  #define MSM_MMC_AUTOSUSPEND_DELAY_MS	50
->  
-> +#define MSM_MMC_ERR_STATS_ENABLE 1
-> +
->  /* Timeout value to avoid infinite waiting for pwr_irq */
->  #define MSM_PWR_IRQ_TIMEOUT_MS 5000
->  
-> @@ -2734,6 +2736,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto pm_runtime_disable;
->  
-> +	host->mmc->err_stats_enabled = MSM_MMC_ERR_STATS_ENABLE;
->  	pm_runtime_mark_last_busy(&pdev->dev);
->  	pm_runtime_put_autosuspend(&pdev->dev);
->  
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 07c6da1..74b356e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -113,6 +113,8 @@ void sdhci_dumpregs(struct sdhci_host *host)
->  	if (host->ops->dump_vendor_regs)
->  		host->ops->dump_vendor_regs(host);
->  
-> +	if (host->mmc->err_stats_enabled)
-> +		mmc_debugfs_err_stats_enable(host->mmc);
->  	SDHCI_DUMP("============================================\n");
->  }
->  EXPORT_SYMBOL_GPL(sdhci_dumpregs);
-> @@ -3159,6 +3161,8 @@ static void sdhci_timeout_timer(struct timer_list *t)
->  	spin_lock_irqsave(&host->lock, flags);
->  
->  	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_REQ_TIMEOUT);
->  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
->  		       mmc_hostname(host->mmc));
->  		sdhci_dumpregs(host);
-> @@ -3181,6 +3185,8 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
->  
->  	if (host->data || host->data_cmd ||
->  	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_REQ_TIMEOUT);
->  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
->  		       mmc_hostname(host->mmc));
->  		sdhci_dumpregs(host);
-> @@ -3240,11 +3246,18 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
->  
->  	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
->  		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
-> -		if (intmask & SDHCI_INT_TIMEOUT)
-> +		if (intmask & SDHCI_INT_TIMEOUT) {
->  			host->cmd->error = -ETIMEDOUT;
-> -		else
-> +			if (host->mmc && host->mmc->err_stats_enabled)
-> +				mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_TIMEOUT);
-> +		} else {
->  			host->cmd->error = -EILSEQ;
-> -
-> +			if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
-> +					host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) {
-> +				if (host->mmc && host->mmc->err_stats_enabled)
-> +					mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_CRC);
-> +			}
-> +		}
->  		/* Treat data command CRC error the same as data CRC error */
->  		if (host->cmd->data &&
->  		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
-> @@ -3265,6 +3278,8 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
->  		int err = (auto_cmd_status & SDHCI_AUTO_CMD_TIMEOUT) ?
->  			  -ETIMEDOUT :
->  			  -EILSEQ;
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_AUTO_CMD);
->  
->  		if (sdhci_auto_cmd23(host, mrq)) {
->  			mrq->sbc->error = err;
-> @@ -3342,6 +3357,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
->  				host->data_cmd = NULL;
->  				data_cmd->error = -ETIMEDOUT;
-> +				if (host->mmc && host->mmc->err_stats_enabled)
-> +					mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_TIMEOUT);
->  				__sdhci_finish_mrq(host, data_cmd->mrq);
->  				return;
->  			}
-> @@ -3375,18 +3392,29 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  		return;
->  	}
->  
-> -	if (intmask & SDHCI_INT_DATA_TIMEOUT)
-> +	if (intmask & SDHCI_INT_DATA_TIMEOUT) {
->  		host->data->error = -ETIMEDOUT;
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_TIMEOUT);
-> +	}
->  	else if (intmask & SDHCI_INT_DATA_END_BIT)
->  		host->data->error = -EILSEQ;
->  	else if ((intmask & SDHCI_INT_DATA_CRC) &&
->  		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
-> -			!= MMC_BUS_TEST_R)
-> +			!= MMC_BUS_TEST_R) {
->  		host->data->error = -EILSEQ;
-> +		if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
-> +				host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) {
-> +			if (host->mmc && host->mmc->err_stats_enabled)
-> +				mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_CRC);
-> +		}
-> +	}
->  	else if (intmask & SDHCI_INT_ADMA_ERROR) {
->  		pr_err("%s: ADMA error: 0x%08x\n", mmc_hostname(host->mmc),
->  		       intmask);
->  		sdhci_adma_show_error(host);
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_ADMA);
->  		host->data->error = -EIO;
->  		if (host->ops->adma_workaround)
->  			host->ops->adma_workaround(host, intmask);
-> @@ -3905,20 +3933,40 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
->  	if (!host->cqe_on)
->  		return false;
->  
-> -	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
-> +	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC)) {
->  		*cmd_error = -EILSEQ;
-> -	else if (intmask & SDHCI_INT_TIMEOUT)
-> +		if (intmask & SDHCI_INT_CRC) {
-> +			if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
-> +					host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) {
-> +				if (host->mmc && host->mmc->err_stats_enabled)
-> +					mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_CRC);
-> +			}
-> +		}
-> +	} else if (intmask & SDHCI_INT_TIMEOUT) {
->  		*cmd_error = -ETIMEDOUT;
-> -	else
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_CMD_TIMEOUT);
-> +	} else
->  		*cmd_error = 0;
->  
-> -	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
-> +	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
->  		*data_error = -EILSEQ;
-> -	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
-> +		if (intmask & SDHCI_INT_DATA_CRC) {
-> +			if (host->cmd->opcode != MMC_SEND_TUNING_BLOCK ||
-> +					host->cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) {
-> +				if (host->mmc && host->mmc->err_stats_enabled)
-> +					mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_CRC);
-> +			}
-> +		}
-> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
->  		*data_error = -ETIMEDOUT;
-> -	else if (intmask & SDHCI_INT_ADMA_ERROR)
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_DAT_TIMEOUT);
-> +	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
->  		*data_error = -EIO;
-> -	else
-> +		if (host->mmc && host->mmc->err_stats_enabled)
-> +			mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_ADMA);
-> +	} else
->  		*data_error = 0;
->  
->  	/* Clear selected interrupts. */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 7afb57c..883b50b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -93,6 +93,23 @@ struct mmc_clk_phase_map {
->  
->  struct mmc_host;
->  
-> +enum mmc_err_stat {
-> +	MMC_ERR_CMD_TIMEOUT,
-> +	MMC_ERR_CMD_CRC,
-> +	MMC_ERR_DAT_TIMEOUT,
-> +	MMC_ERR_DAT_CRC,
-> +	MMC_ERR_AUTO_CMD,
-> +	MMC_ERR_ADMA,
-> +	MMC_ERR_TUNING,
-> +	MMC_ERR_CMDQ_RED,
-> +	MMC_ERR_CMDQ_GCE,
-> +	MMC_ERR_CMDQ_ICCE,
-> +	MMC_ERR_REQ_TIMEOUT,
-> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
-> +	MMC_ERR_ICE_CFG,
-> +	MMC_ERR_MAX,
-> +};
-> +
->  struct mmc_host_ops {
->  	/*
->  	 * It is optional for the host to implement pre_req and post_req in
-> @@ -500,6 +517,9 @@ struct mmc_host {
->  
->  	/* Host Software Queue support */
->  	bool			hsq_enabled;
-> +	u32                     err_stats[MMC_ERR_MAX];
-> +	bool 			err_stats_enabled;
-> +	bool			err_state;
->  
->  	unsigned long		private[] ____cacheline_aligned;
->  };
-> @@ -635,6 +655,17 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
->  	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
->  }
->  
-> +static inline void mmc_debugfs_err_stats_enable(struct mmc_host *mmc)
-> +{
-> +	mmc->err_state = true;
-> +}
-> +
-> +static inline void mmc_debugfs_err_stats_inc(struct mmc_host *mmc,
-> +		enum mmc_err_stat stat) {
-> +
-> +	mmc->err_stats[stat] += 1;
-> +}
-> +
->  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
->  int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
->  int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-> -- 
-> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-> of Code Aurora Forum, hosted by The Linux Foundation
-> 
+>
+> [...]
+>
+> Kind regards
+> Uffe
