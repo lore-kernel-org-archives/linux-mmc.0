@@ -2,100 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07882C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 10:36:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41AE3C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Feb 2022 12:57:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229850AbiBPKgQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Feb 2022 05:36:16 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:34030 "EHLO
+        id S232333AbiBPM56 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Feb 2022 07:57:58 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:48498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229545AbiBPKgP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 05:36:15 -0500
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B15C22B9A33
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:36:03 -0800 (PST)
-Received: by mail-lf1-x132.google.com with SMTP id b9so2967626lfv.7
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 02:36:03 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=DPYWkKQW0nFWmY1xKFD4WRaxOqq/BeFHyxszPN5EPVU=;
-        b=sUG7rjTRD6NrI48dGWwKOWJyGgjS5g2H1DjFZUQiMmRJj/ir9Wv7S+f3pcYhwB3G21
-         jgW2ghTrDeTyWExposS8pU9olgt0OSFSsKqTWvFBrZtYeR1hzrMRB/QHZbRFsmF8Z2S0
-         H/h0PiEEIFA7GmMAI2JMN3sa/fyLmEXYE57MT9xMELnMPIGAArOM53KTMVRbp5J3baMB
-         isLqyWoSSBY1G4sXiIcXWs7lxW91pyd5h21jcWCoFLVEL0Fbk7le1PLdPy5uxaXftMdu
-         5wLQBv6dJWYyW7H1/lavO2wyNL8O5n34jBSkfOXmCyy+T54Vr7Az+AHoRojt+05MRAOP
-         vMsw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=DPYWkKQW0nFWmY1xKFD4WRaxOqq/BeFHyxszPN5EPVU=;
-        b=n43WDIk/eqju10pD6/bsId8KxDxVsVVZdnqAH08VB/GYKIhmzYRvx7WRuRndlQ2xlT
-         XAON/VUWEq92hH5LzgE+vxnSDOV5ZqKPiEeGYX1VoOwu+a+UD7yz2UXijk6r3zZRF9ra
-         qSSPigehM6o8DkKAly3ftgqw7az36BGfdwJkcxyjdQ9Quwvy1wxpbUIf4pVVOt+2SZek
-         CDRkJdnai8X/4YnPxiyhM7gaK8FanYz/PSQ/xHU1m7AxcC7l5nfhmWzCqjGQOIZTzMrS
-         PUd0qJ/cXuChAtI1Eh7Sd0lLV931l282G7MMFcuxSal7IlZAc/HopvxypJGMSUBAELAZ
-         e3Jw==
-X-Gm-Message-State: AOAM530FQWwYMxMyBd52CE+QkTZfe+LPaYtfkmy5g9wZrUYtaE4YRfD0
-        9kNRQWke+RW/jnkqaGFBQ2DhHZx6kn/h238lpORi0A==
-X-Google-Smtp-Source: ABdhPJz9lTvKXYqNUYEUwJcowusuOCgV3hil3k2PW920Mo0Cq3dd/tLhknO2IA4VJElhIgGQWuFNWTFzEa2t3lXDQAk=
-X-Received: by 2002:a05:6512:388d:b0:443:6066:2c8d with SMTP id
- n13-20020a056512388d00b0044360662c8dmr1552732lft.184.1645007762118; Wed, 16
- Feb 2022 02:36:02 -0800 (PST)
+        with ESMTP id S229379AbiBPM56 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 07:57:58 -0500
+X-Greylist: delayed 902 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 16 Feb 2022 04:57:46 PST
+Received: from mail-sz.amlogic.com (mail-sz.amlogic.com [211.162.65.117])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 391D6107822;
+        Wed, 16 Feb 2022 04:57:46 -0800 (PST)
+Received: from rd02-sz.amlogic.software (10.28.8.43) by mail-sz.amlogic.com
+ (10.28.11.5) with Microsoft SMTP Server id 15.1.2176.2; Wed, 16 Feb 2022
+ 20:42:41 +0800
+From:   Rong Chen <rong.chen@amlogic.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        <1131046452@qq.com>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-amlogic@lists.infradead.org>, <linux-kernel@vger.kernel.org>
+CC:     <45581586@qq.com>, Rong Chen <rong.chen@amlogic.com>
+Subject: [PATCH v2] mmc: meson: Fix usage of meson_mmc_post_req()
+Date:   Wed, 16 Feb 2022 20:42:39 +0800
+Message-ID: <20220216124239.4007667-1-rong.chen@amlogic.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20220216093112.92469-1-Jerome.Pouiller@silabs.com>
-In-Reply-To: <20220216093112.92469-1-Jerome.Pouiller@silabs.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Feb 2022 11:35:25 +0100
-Message-ID: <CAPDyKFreMJigpAgE95EgkStNrE+r+_k9iRuTXsFk6t9d66e0TQ@mail.gmail.com>
-Subject: Re: [PATCH 0/2] staging: wfx: apply SDIO suggestions
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        Kalle Valo <kvalo@codeaurora.org>, devel@driverdev.osuosl.org,
-        linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org,
-        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.28.8.43]
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 16 Feb 2022 at 10:31, Jerome Pouiller
-<Jerome.Pouiller@silabs.com> wrote:
->
-> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
->
-> Hi Ulf, Greg,
->
-> The second patch of this series touch to the staging tree and to the MMC
-> framework. I don't know what is the rule for these cases, but I think it
-> makes more sense to carry this patch with the staging tree.
+Currently meson_mmc_post_req() is called in meson_mmc_request() right
+after meson_mmc_start_cmd(). This could lead to DMA unmapping before the request
+is actually finished.
 
-I don't believe the changes to the mmc core will cause any merge
-conflict, so feel free to funnel this through whatever tree makes best
-sense.
+To fix, don't call meson_mmc_post_req() until meson_mmc_request_done().
 
-For the series:
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Rong Chen <rong.chen@amlogic.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 8f36536cb1b6..58ab9d90bc8b 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -173,6 +173,8 @@ struct meson_host {
+ 	int irq;
+ 
+ 	bool vqmmc_enabled;
++	bool needs_pre_post_req;
++
+ };
+ 
+ #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+@@ -663,6 +665,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+ 	struct meson_host *host = mmc_priv(mmc);
+ 
+ 	host->cmd = NULL;
++	if (host->needs_pre_post_req)
++		meson_mmc_post_req(mmc, mrq, 0);
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+@@ -880,7 +884,7 @@ static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data
+ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct meson_host *host = mmc_priv(mmc);
+-	bool needs_pre_post_req = mrq->data &&
++	host->needs_pre_post_req = mrq->data &&
+ 			!(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+ 
+ 	/*
+@@ -896,22 +900,19 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 		}
+ 	}
+ 
+-	if (needs_pre_post_req) {
++	if (host->needs_pre_post_req) {
+ 		meson_mmc_get_transfer_mode(mmc, mrq);
+ 		if (!meson_mmc_desc_chain_mode(mrq->data))
+-			needs_pre_post_req = false;
++			host->needs_pre_post_req = false;
+ 	}
+ 
+-	if (needs_pre_post_req)
++	if (host->needs_pre_post_req)
+ 		meson_mmc_pre_req(mmc, mrq);
+ 
+ 	/* Stop execution */
+ 	writel(0, host->regs + SD_EMMC_START);
+ 
+ 	meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+-
+-	if (needs_pre_post_req)
+-		meson_mmc_post_req(mmc, mrq, 0);
+ }
+ 
+ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+-- 
+2.25.1
 
->
->
-> J=C3=A9r=C3=B4me Pouiller (2):
->   staging: wfx: WF200 has no official SDIO IDs
->   staging: wfx: apply the necessary SDIO quirks for the Silabs WF200
->
->  drivers/mmc/core/quirks.h      | 5 +++++
->  drivers/staging/wfx/bus_sdio.c | 8 ++------
->  2 files changed, 7 insertions(+), 6 deletions(-)
->
-> --
-> 2.34.1
->
