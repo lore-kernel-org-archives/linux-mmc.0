@@ -2,72 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD1FEC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 15:40:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2025EC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 15:40:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242625AbiBQPkY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Feb 2022 10:40:24 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:32830 "EHLO
+        id S242639AbiBQPkl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Feb 2022 10:40:41 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33216 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242632AbiBQPkX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 10:40:23 -0500
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D44E72B2E3A
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:40:07 -0800 (PST)
-Received: by mail-lj1-x229.google.com with SMTP id o6so14282ljp.3
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:40:07 -0800 (PST)
+        with ESMTP id S242631AbiBQPkl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 10:40:41 -0500
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A7592B2E3A
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:40:26 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id bx31so89978ljb.0
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:40:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=0QQBoXxNzNE8ywxlHFFfAWGomixHy2u6zilUaFbuhmE=;
-        b=RrJjmHuXVzVPtammx2PWFkPzYxa0sp+CIs+a7p1reY0HA9oZgI6A2REIXw9b8X87aw
-         7pc9oqYfh2pWUeDGPUC+sYPFiWy5TmNtt0N8Yk45gdx5bEQCumDai+PpoJesoGcTvHkK
-         3DRBdvC49FrGQhrxOH/yH4nzcpoghoBj2cAkf/i7i2WMNp/JuYdHrXjA+/5A//mRpxy8
-         kkUCQyA6YybDATTmZeDwQT8wppphoA7p08DHO0KUt+BMuEQXgDCFQhQosH1H2P+Ws4dH
-         xyth298pl5lKvbRhwd5OOQ3S2/WTqa0/tqOiawymfYhfgUwa3YDahOFTXQbXp+jgr+f4
-         kkVQ==
+        bh=dtHuVZsN9dq8Ef87/aHczhTpVzC+pvWaYD+ZfU02gIo=;
+        b=DI03Q5WXZVS9ul6CojxIkkW4nz0ZO8uejIIb6VmNzipMI4NSLJuTUuNVVF8WnOFPAk
+         ETS6C8BnZIusFEeLd24/3GcTkvUN/KMupJrzeOYeA7tKvdIomQivWL/B3zy0zY/tPlWx
+         qZd8OE4OY3XIcUeT56fXQg7Hw3ayHOmVCKvDHuwxw4crgO4MVGVUQrERnwTHeExrETVI
+         5SmD7k91ENizvCB6TkQp/RzxY1OH9FxQ24PYKDpYCZa7+veM6B71vzU3wVeuJytFMcjb
+         NcYwsjepH5AqvNSOFhYwssoKWSW7LOjr9PgcAHHYaWL9iU46/fTADC/Xvtya3WEZDAsS
+         +HSg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=0QQBoXxNzNE8ywxlHFFfAWGomixHy2u6zilUaFbuhmE=;
-        b=p2T6/92M5FEQBchpOmBm3EhOk0hkTeyH3nzs4RIU5zPRqVZBUmPFEzSPZy6nXvXzya
-         oF88akmV/1Shys5rLBZIloSh0EFws5LBL4HpuPCpKdztsPapJ+U6KJ9kRcXMWd0eMaFJ
-         gnFzNaHdVWPWzM6Qk3JtgOfpe0zd+jQnkz9cfgP8mYXOMMTgqk0Z4idVWQp0MHBliOEW
-         5HmIY6yRhJ3NMlfAGvJ4iNNkLqQJ1WZHcUdNacXcDmQoLvuBAByKbnaCsJdeq43Vjunv
-         W4t+tDPM43Rxz0D+OGzSb3JUKECT8GSoErOhIyd0psOFbgbXD7R/oOXWxK6qH8Rg8HHe
-         vUEg==
-X-Gm-Message-State: AOAM533gQZ4KDgnGeEw2TR33Z7apLMyzfy+vmjYaKq/rH7qSk9C71vym
-        M116zc0ZAQIyoxQYkJXg77zcRcY4UdTa3LFdUEQOrQ==
-X-Google-Smtp-Source: ABdhPJz/2VHYH9XfV+9CZAADf8Qh3/CV94aravtyvXjpcx8p81PXfewRvi4Izfd3VQLRzuBPEmKSwtVVgXuWCGv7jDM=
-X-Received: by 2002:a2e:8603:0:b0:246:24c:b79c with SMTP id
- a3-20020a2e8603000000b00246024cb79cmr2624384lji.367.1645112406253; Thu, 17
- Feb 2022 07:40:06 -0800 (PST)
+        bh=dtHuVZsN9dq8Ef87/aHczhTpVzC+pvWaYD+ZfU02gIo=;
+        b=YWhHPtn3IMSKRNSaGc3SkScE9PPUkiA5IU4UId+VnnE/u0cGZ/PjBnEQoneYGi9EdE
+         6l873Ihk/SuWJpKcGsCxZHL/M7LLl9g2tgmYVoUJv9h0qSWr+oKsFyTFrd2AOs7219Si
+         7ILb3MS8ZraBUqSgkc0WFEiYmH332jf2dmhlNx1I7ZleZ9X/T5REmIQZP94eS8mFO7yH
+         8jBs9uK2kc0cZt5HM4mX7i8jAoBzP4vjT63pPBkfjNkpI/hfbfB548XZ8VLJhOg+s3kR
+         MTOh/tHJnygEtjZN1OZw7scKizsIMQBgdr4h+0eqK+VRpWXmtpA3KwH6W4T11JhrFwQg
+         oTRw==
+X-Gm-Message-State: AOAM532SUw8vskphZ1Eyp3ARINoQEbKFo8qrZaEHeOPz9N0lRXaecBYi
+        UGwFyQoggnY8kQw10vEaIWJ9hcMvdNFy4ec5Ilo5a64fUmk=
+X-Google-Smtp-Source: ABdhPJzS1HsQQFljNPEfdzoowpGZXeJXTbt7Iuq1OuK3MM2rhphn87bPRKA7/KY2OrtWgxD7W1s9ZurapEW2QYPSaeM=
+X-Received: by 2002:a05:651c:c7:b0:244:f9d7:7c48 with SMTP id
+ 7-20020a05651c00c700b00244f9d77c48mr2735695ljr.300.1645112424989; Thu, 17 Feb
+ 2022 07:40:24 -0800 (PST)
 MIME-Version: 1.0
-References: <20220215081502.789067-1-peng.fan@oss.nxp.com>
-In-Reply-To: <20220215081502.789067-1-peng.fan@oss.nxp.com>
+References: <1644395927-4138-1-git-send-email-wangqing@vivo.com>
+In-Reply-To: <1644395927-4138-1-git-send-email-wangqing@vivo.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 17 Feb 2022 16:39:30 +0100
-Message-ID: <CAPDyKFpkBGyxNxi3uYyYRrgh=itNf69-Xe9gwJktoE0p9yj74A@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: imx-esdhc: Add imx93 compatible string
-To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
-Cc:     robh+dt@kernel.org, shawnguo@kernel.org, Kernel@pengutronix.de,
-        festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, Peng Fan <peng.fan@nxp.com>
+Date:   Thu, 17 Feb 2022 16:39:48 +0100
+Message-ID: <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: use div64_u64() instead of do_div()
+To:     Qing Wang <wangqing@vivo.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 15 Feb 2022 at 09:15, Peng Fan (OSS) <peng.fan@oss.nxp.com> wrote:
+On Wed, 9 Feb 2022 at 09:39, Qing Wang <wangqing@vivo.com> wrote:
 >
-> From: Peng Fan <peng.fan@nxp.com>
+> From: Wang Qing <wangqing@vivo.com>
 >
-> Add i.MX93 compatible string, it uses two compatible strings.
+> do_div() does a 64-by-32 division.
+> When the divisor is u64, do_div() truncates it to 32 bits, this means it
+> can test non-zero and be truncated to zero for division.
 >
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> fix do_div.cocci warning:
+> do_div() does a 64-by-32 division, please consider using div64_u64 instead.
+>
+> Signed-off-by: Wang Qing <wangqing@vivo.com>
 
 Applied for next, thanks!
 
@@ -76,21 +81,22 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/mtk-sd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index 17acbc665f5a..7dbbcae9485c 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -47,6 +47,7 @@ properties:
->            - const: fsl,imx7d-usdhc
->        - items:
->            - enum:
-> +              - fsl,imx93-usdhc
->                - fsl,imx8ulp-usdhc
->            - const: fsl,imx8mm-usdhc
->
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 65037e1..777c9a8
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -766,7 +766,7 @@ static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
+>                 clk_ns  = 1000000000ULL;
+>                 do_div(clk_ns, mmc->actual_clock);
+>                 timeout = ns + clk_ns - 1;
+> -               do_div(timeout, clk_ns);
+> +               div64_u64(timeout, clk_ns);
+>                 timeout += clks;
+>                 /* in 1048576 sclk cycle unit */
+>                 timeout = DIV_ROUND_UP(timeout, BIT(20));
 > --
-> 2.25.1
+> 2.7.4
 >
