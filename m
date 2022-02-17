@@ -2,93 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E3B2C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 15:39:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B24CFC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 15:40:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242508AbiBQPkJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Feb 2022 10:40:09 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:60902 "EHLO
+        id S242615AbiBQPkP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Feb 2022 10:40:15 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:60968 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239577AbiBQPkI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 10:40:08 -0500
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC4932B2E14
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:39:53 -0800 (PST)
-Received: by mail-lf1-x12d.google.com with SMTP id m14so5282lfu.4
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:39:53 -0800 (PST)
+        with ESMTP id S242617AbiBQPkO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 10:40:14 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A03A22B2E28
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:39:59 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id i11so16983lfu.3
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 07:39:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=U2cIkQoSyV/uoYmrp2FFR+PMJsIjwxkMBhA2ESiWt/c=;
-        b=irgKRKkZ9T7jN+IYDnE3HbB0ZKFJSvwHktgqtGHXqrNvrXiBqXAtZ4fRvHLfPiTrJh
-         AqNdJVAnnp4ODJx58Fm4PjIeEbuBMT7hPJlDdT77elMGp/zpfNgcwWaJNa8PgqTOKNRW
-         7l7b5G3XD9p4n3lbnn1b4jLZ/KH0qtJX+Af8VpbJ+sCB6srjQqWp1P04vYYwpdU962xz
-         MGwmsQkClNOs6sqCeYuDT9kRQZQ3CxViKt1kQjH8JWbhxQCnl39gYbLLNkTUfp/zq6gq
-         GmY/jOpAJKMTDII4B1hnKosm7sn2jk1IAQeeOXkBcc3PwHm51epFQiu0AqjlgxOZAH4H
-         EtjQ==
+        bh=7RtYDADx4QQw3nzWuN70oIVG8nEMTl5DSCkcy5LhUkE=;
+        b=QII7ZKn99paThcY5nBrDoRQ4DFbIageeAVtKvpe+UeTY/hcPuVE2V69G3kYeVBcjqg
+         FpDph57yvjDFIAb4vvyvx/EB8NObDf6kK+pacX4hT5CuNKon/AG5ULZQHh8TY6XS9OOP
+         /X4inNHe1rI//4TM0/8VKSQ/asjArtn0ltdWIIeKP1hkgFwgZ1tRMKt4PMuj5mT7F0xE
+         XlDWC5MMm+kIW4DLDWm8Q9Ni9M0llxk2+dZR741HTB/51dYL2b3DHlptUyFuHrNziFUw
+         vVYLS5fAEQOoLR51gNiMgqywUifJveAQmIlw1jk04xSryDjEPJz1nkSApyiNcY1KK0jk
+         fQZA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=U2cIkQoSyV/uoYmrp2FFR+PMJsIjwxkMBhA2ESiWt/c=;
-        b=YOlOQRtvL8V8Y2qplYYwhQg/3a283jKOlfftib5Soe/kiOkZQP3iopyppLClYFEwiV
-         F8KW54TdVx2ReTGq7thQxW01OuBMWaOzS50rnzc8IUrIA40koCV72I1a6LS0cnSDirXp
-         yjshR75l1WWAT7xqvLUDzcnkI4H0Ra9C29TkAbtDbUEJq7nFkdyw8lI6SyB3aztf9ofH
-         /lrzYI+jkwvBFAtBX+2U27BwtU2WksiZ6f2hOmdwiewDqZMXcGSvZJt6+ZiAZK3l75vE
-         R8vFud/l99Vn0s+Zc/QMSDlsuJ0PshtLOsUGONA4A0wDbrNwXCPvi8lUoN75GmzgSNX6
-         HrTQ==
-X-Gm-Message-State: AOAM532jFm1WhmRDve8LP2ExzZzL9im0NEwppMQnfJDRfYMjjy1gczLW
-        70AX0yIV7HHhL6ELzT9pVkiT2qym6/KeKrD+WjP0hw==
-X-Google-Smtp-Source: ABdhPJxySvao13bawbL/6voEBW6OIbyLML55whQqeuxe5in4ddY/RXXRus+yOhL0IM7O4ZRy9PMY9ZEzeviBoYjSv4A=
-X-Received: by 2002:a19:9144:0:b0:43b:86a4:1497 with SMTP id
- y4-20020a199144000000b0043b86a41497mr2419922lfj.254.1645112392017; Thu, 17
- Feb 2022 07:39:52 -0800 (PST)
+        bh=7RtYDADx4QQw3nzWuN70oIVG8nEMTl5DSCkcy5LhUkE=;
+        b=vVKYb0rXvfFRXt1cFS0F9hGj7odcoBLsdv9fcI7KOwQWwuAxie/YQbmNqJvfPaGn5u
+         WvO5I8a4D6+dd6N9R5h6PZEPPl6HmV3zjRrbZmt9yUWjf9QJZcd7WXHdKXBe6UkumbLL
+         TtWT0zrf9Yo3COxRmc3pMycmbj8tLuhh2eqV/FsKYpQyE/rBh56Nv7GTESVRUXxqAIoM
+         J8eeID8Z15sGixi7s6PuYc3unWCS78Ehtrw8bPjEuBZXJZGRjzHxwRrJUjz2mkcVJRgG
+         DlDT5tiPYnOMQJVdUl1chApk6FpCBq8c2iGLwe5IhkJmG4avd4lT2Sfa5MHzEKdbqivZ
+         4TfA==
+X-Gm-Message-State: AOAM5304H7TYw3N/rM60lvhmQLXEWqkhkbXrfJ2PC4kEYbjcfXX7CDGj
+        fqFX4uLWIOF6XdTNZsgfehhdjabJWkS3qivqk1XsEr4P0Lc=
+X-Google-Smtp-Source: ABdhPJxx+WlNwrj3g8DmHHCXPTELFCPxQlK7IqCQ3NAlli3irDlMVGL1v6Gnap+Mi7IrIbGn91W64bziVKF4OQAMSk8=
+X-Received: by 2002:a05:6512:3d2a:b0:443:3198:cb95 with SMTP id
+ d42-20020a0565123d2a00b004433198cb95mr2461725lfv.233.1645112397989; Thu, 17
+ Feb 2022 07:39:57 -0800 (PST)
 MIME-Version: 1.0
-References: <20220210224933.379149-1-yury.norov@gmail.com> <20220210224933.379149-30-yury.norov@gmail.com>
-In-Reply-To: <20220210224933.379149-30-yury.norov@gmail.com>
+References: <20220211075056.26179-1-a-govindraju@ti.com>
+In-Reply-To: <20220211075056.26179-1-a-govindraju@ti.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 17 Feb 2022 16:39:15 +0100
-Message-ID: <CAPDyKFqvYhPTenGEH=LZyJXb5rJKbyeds4rH+aRN=u6JH_eJ5A@mail.gmail.com>
-Subject: Re: [PATCH 29/49] memstick: replace bitmap_weight with
- bitmap_weight_eq where appropriate
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        David Laight <david.laight@aculab.com>,
-        Joe Perches <joe@perches.com>, Dennis Zhou <dennis@kernel.org>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Nicholas Piggin <npiggin@gmail.com>,
-        Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        linux-kernel@vger.kernel.org,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, Jens Axboe <axboe@kernel.dk>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Colin Ian King <colin.king@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
-        linux-mmc@vger.kernel.org,
-        Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
+Date:   Thu, 17 Feb 2022 16:39:21 +0100
+Message-ID: <CAPDyKFpH4nnnzbFRfZ8p_vLSqh+m+fEd4yW2T2Z4rq6tRQS-Lw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci_am654: Fix the driver data of AM64 SoC
+To:     Aswath Govindraju <a-govindraju@ti.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 11 Feb 2022 at 00:55, Yury Norov <yury.norov@gmail.com> wrote:
+On Fri, 11 Feb 2022 at 08:51, Aswath Govindraju <a-govindraju@ti.com> wrote:
 >
-> msb_validate_used_block_bitmap() calls bitmap_weight() to compare the
-> weight of bitmap with a given number. We can do it more efficiently with
-> bitmap_weight_eq because conditional bitmap_weight may stop traversing the
-> bitmap earlier, as soon as condition is (or can't be) met.
+> The MMCSD IPs used in AM64 are the same as the ones used in J721E.
+> Therefore, fix this by using the driver data from J721E for AM64 too, for
+> both 8 and 4 bit instances.
 >
-> Signed-off-by: Yury Norov <yury.norov@gmail.com>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Acked-by: Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
+> Fixes: 754b7f2f7d2a ("mmc: sdhci_am654: Add Support for TI's AM64 SoC")
+> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
 
 Applied for next, thanks!
 
@@ -97,24 +78,54 @@ Uffe
 
 
 > ---
->  drivers/memstick/core/ms_block.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci_am654.c | 24 ++----------------------
+>  1 file changed, 2 insertions(+), 22 deletions(-)
 >
-> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-> index 0cda6c6baefc..5cdd987e78f7 100644
-> --- a/drivers/memstick/core/ms_block.c
-> +++ b/drivers/memstick/core/ms_block.c
-> @@ -155,8 +155,8 @@ static int msb_validate_used_block_bitmap(struct msb_data *msb)
->         for (i = 0; i < msb->zone_count; i++)
->                 total_free_blocks += msb->free_block_count[i];
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index f654afbe8e83..b4891bb26648 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -514,26 +514,6 @@ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
+>         .flags = IOMUX_PRESENT,
+>  };
 >
-> -       if (msb->block_count - bitmap_weight(msb->used_blocks_bitmap,
-> -                                       msb->block_count) == total_free_blocks)
-> +       if (bitmap_weight_eq(msb->used_blocks_bitmap, msb->block_count,
-> +                               msb->block_count - total_free_blocks))
->                 return 0;
->
->         pr_err("BUG: free block counts don't match the bitmap");
+> -static const struct sdhci_pltfm_data sdhci_am64_8bit_pdata = {
+> -       .ops = &sdhci_j721e_8bit_ops,
+> -       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> -};
+> -
+> -static const struct sdhci_am654_driver_data sdhci_am64_8bit_drvdata = {
+> -       .pdata = &sdhci_am64_8bit_pdata,
+> -       .flags = DLL_PRESENT | DLL_CALIB,
+> -};
+> -
+> -static const struct sdhci_pltfm_data sdhci_am64_4bit_pdata = {
+> -       .ops = &sdhci_j721e_4bit_ops,
+> -       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> -};
+> -
+> -static const struct sdhci_am654_driver_data sdhci_am64_4bit_drvdata = {
+> -       .pdata = &sdhci_am64_4bit_pdata,
+> -       .flags = IOMUX_PRESENT,
+> -};
+> -
+>  static const struct soc_device_attribute sdhci_am654_devices[] = {
+>         { .family = "AM65X",
+>           .revision = "SR1.0",
+> @@ -759,11 +739,11 @@ static const struct of_device_id sdhci_am654_of_match[] = {
+>         },
+>         {
+>                 .compatible = "ti,am64-sdhci-8bit",
+> -               .data = &sdhci_am64_8bit_drvdata,
+> +               .data = &sdhci_j721e_8bit_drvdata,
+>         },
+>         {
+>                 .compatible = "ti,am64-sdhci-4bit",
+> -               .data = &sdhci_am64_4bit_drvdata,
+> +               .data = &sdhci_j721e_4bit_drvdata,
+>         },
+>         { /* sentinel */ }
+>  };
 > --
-> 2.32.0
+> 2.17.1
 >
