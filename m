@@ -2,97 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A83C2C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 02:48:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05F0AC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 09:59:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231931AbiBQCs0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Feb 2022 21:48:26 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:56182 "EHLO
+        id S238947AbiBQJ7v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Feb 2022 04:59:51 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:50102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231937AbiBQCsZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Feb 2022 21:48:25 -0500
-Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33A921FFF65
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 18:48:12 -0800 (PST)
-Received: by mail-pf1-x432.google.com with SMTP id g1so3807416pfv.1
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Feb 2022 18:48:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:in-reply-to:references:subject:message-id:date
-         :mime-version:content-transfer-encoding;
-        bh=z4i3sOJXuX5pLimLJFSpC+ldhVIHQTJAyQCIIZg6vB0=;
-        b=MAKfpeBarFVBWwQcysBwZiWFmuKrF2I+yyKafwWHcLfuPTLpj5AhAFFMGSOS1ptpVW
-         BYaxp5/QaxDBE1pbWlzrWulYvblHF3P7HnUm40geVqEe/CWtocilVYmWtBMQzvgh7gBP
-         SbAi45TriQv1LDZ2FyoWNZKj3/g8YKlnllG9oTlhCX6attCGW/oTE70mpGrFw+Mm37eD
-         LqBsarqyBz7pJPWcP7lS0PVSDwRX7c2kZZjb0yAi580ERYzK4vlWMpLyB6+sBS9G1+2S
-         R+di0YkeuwdBoSGR3bQktJMmbNdIuykrRs4AADH7x+Gtr0RqPEq4USsFnolA7nsMWr9W
-         XLrw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject
-         :message-id:date:mime-version:content-transfer-encoding;
-        bh=z4i3sOJXuX5pLimLJFSpC+ldhVIHQTJAyQCIIZg6vB0=;
-        b=xSpuDZNKwnr68uFD4IgkXNDKIgh3hD+puKVL5xTdOrLfPzZBTBbaTk1DkipbWkNU+J
-         Tc5GWCRKqVyGlkEVN/8rqrcldb6wKozD6LYfBP0mZoHaAB1+hCSdgic+o/ziZMrWU/YR
-         hm9j48s/98E02UwfFUviauafxnBZmhI8m8+eOxuPq9tcCg5RBmmjLQ0bGciX7hSsDEXH
-         Zmoo1RvZL59mUdeS7sNHUNelwwOYeetxAgrh2bZ1MaCYFV8tp13kASRN7PD37z6fXDbo
-         vraDfSoC1bbNGa/xldDlEFhzh3QITGuE+UIsuoo/TJ6qnjil+1OXAbAv9Dg9sxVL84bX
-         4PKQ==
-X-Gm-Message-State: AOAM5322x832Iduh3tINd9Aogey61vZcNTOqem5hxm8MhSICx1bGl6lu
-        p0jiHP65wFh3EWAAVfo4raNt9Q==
-X-Google-Smtp-Source: ABdhPJzvExI+t8yuXaS1DEStOCB4GW78Viv/TkR5lL+Qjf2kAF0uOwLJYp8MNv5DGGmehSRGmJjLtw==
-X-Received: by 2002:a05:6a00:124a:b0:4e1:7cfb:634c with SMTP id u10-20020a056a00124a00b004e17cfb634cmr1100314pfi.12.1645066091528;
-        Wed, 16 Feb 2022 18:48:11 -0800 (PST)
-Received: from [192.168.1.100] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id lw3sm377109pjb.24.2022.02.16.18.48.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Feb 2022 18:48:11 -0800 (PST)
-From:   Jens Axboe <axboe@kernel.dk>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Stefan Hajnoczi <stefanha@redhat.com>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, Jason Wang <jasowang@redhat.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>, linux-block@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        virtualization@lists.linux-foundation.org,
-        linux-mmc@vger.kernel.org, Paolo Bonzini <pbonzini@redhat.com>
-In-Reply-To: <20220215094514.3828912-1-hch@lst.de>
-References: <20220215094514.3828912-1-hch@lst.de>
-Subject: Re: add a ->free_disk block_device_operation v3
-Message-Id: <164506608998.50072.6316036301772123687.b4-ty@kernel.dk>
-Date:   Wed, 16 Feb 2022 19:48:09 -0700
+        with ESMTP id S238357AbiBQJ7u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 04:59:50 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBD619F6C8;
+        Thu, 17 Feb 2022 01:59:35 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 80690CE2B06;
+        Thu, 17 Feb 2022 09:59:33 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 813D4C340E8;
+        Thu, 17 Feb 2022 09:59:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1645091971;
+        bh=kf4nnFyves4ytQtR0uAhDYL4Y82jWry/eJ/Oy/50d9g=;
+        h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
+        b=aoR51P4HeOo98AzfA1TapyB9YI7tT3P9ywfw+wXKzjpii0A8E2uzQ2MVDBynYaq4T
+         TUaIW3z7dtG/pn3asWhT2WgjRrzUN/imlwFmrGPoyLGX0PCueTQJ2Cu4W2bsS8JefE
+         bFPfsTeez2m/81fUye372Xx2vtFL1ZDGKt2p9h1UoJ1eO65zyvtq0UlnUQ82Fcm7xy
+         4c3F4yf8o20kLpgaPy/FlYlRY98+eUR9WrGOjLl4WlVYUibSm1GH0lkzJvnCemM2HR
+         DJRJYbXLUWKRW7fSl9OpPRk/7QqYZxU9zMFcs/gTEQ2G0Ea8M//whaCAyzJZn+Nvsa
+         vE0+yNEG4LIfg==
+From:   Kalle Valo <kvalo@kernel.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-mmc@vger.kernel.org,
+        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] staging: wfx: apply the necessary SDIO quirks for the Silabs WF200
+References: <20220216093112.92469-1-Jerome.Pouiller@silabs.com>
+        <20220216093112.92469-3-Jerome.Pouiller@silabs.com>
+Date:   Thu, 17 Feb 2022 11:59:24 +0200
+In-Reply-To: <20220216093112.92469-3-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Wed, 16 Feb 2022 10:31:12 +0100")
+Message-ID: <878ru924qr.fsf@kernel.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 15 Feb 2022 10:45:09 +0100, Christoph Hellwig wrote:
-> this series adds a ->free_disk method to struct block_device_operation so that
-> drivers can defer freeing their disk private data until the gendisk goes away
-> and don't need to play games with the validity of ->private_data.
-> 
-> This also converts three simple drivers over as example, but eventually I
-> imagine that all drivers with private data will use it.
-> 
-> [...]
+Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 
-Applied, thanks!
+> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+>
+> Until now, the SDIO quirks are applied directly from the driver.
+> However, it is better to apply the quirks before driver probing. So,
+> this patch relocate the quirks in the MMC framework.
 
-[1/5] block: add a ->free_disk method
-      commit: 76792055c4c8b2472ca1ae48e0ddaf8497529f08
-[2/5] memstick/ms_block: simplify refcounting
-      commit: e2efa0796607efe60c708271be483c3a2b0128de
-[3/5] memstick/mspro_block: fix handling of read-only devices
-      commit: 6dab421bfe06a59bf8f212a72e34673e8acf2018
-[4/5] memstick/mspro_block: simplify refcounting
-      commit: 185ed423d1898ead071c18f6161959cd3cab2dde
-[5/5] virtio_blk: simplify refcounting
-      commit: 24b45e6c25173abcf8d5e82285212b47f2b0f86b
+It would be good to know how this is better, what's the concrete
+advantage?
 
-Best regards,
--- 
-Jens Axboe
+--=20
+https://patchwork.kernel.org/project/linux-wireless/list/
 
-
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
