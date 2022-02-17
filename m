@@ -2,86 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 673DFC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 15:58:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4190C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 16:56:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242845AbiBQP7D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Feb 2022 10:59:03 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:41602 "EHLO
+        id S230436AbiBQQ4O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Feb 2022 11:56:14 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:57526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242851AbiBQP7C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 10:59:02 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ABC1166A7E;
-        Thu, 17 Feb 2022 07:58:48 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id B8189B821FC;
-        Thu, 17 Feb 2022 15:58:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB1FBC340E8;
-        Thu, 17 Feb 2022 15:58:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1645113525;
-        bh=7xZ83u8iDo18S5QTR71wMPT5q3d56ibzjE9KfTJtmwI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=EKdcSlgtu62AhJylD9QXGdp0i48vq0MMSevZuMBJG/jcEPbLP1JSeyZ9ufKr4reuq
-         pkzQUvZ7K2fqeZQXA358lJNja50Lp/hhvuk+RPUwKXtMYpIdXYfDNOHcxYjz/pqQPI
-         ULYM4K2ScoMQbZrCnp2cjwNEEI2/SO8p/a4Uq0Mw=
-Date:   Thu, 17 Feb 2022 16:58:42 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     =?iso-8859-1?B?Suly9G1l?= Pouiller <jerome.pouiller@silabs.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Kalle Valo <kvalo@kernel.org>, devel@driverdev.osuosl.org,
-        netdev@vger.kernel.org, linux-wireless@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
-        "David S . Miller" <davem@davemloft.net>
-Subject: Re: [PATCH 2/2] staging: wfx: apply the necessary SDIO quirks for
- the Silabs WF200
-Message-ID: <Yg5wsmsPQaFOANwv@kroah.com>
-References: <20220216093112.92469-1-Jerome.Pouiller@silabs.com>
- <CAPDyKFqm3tGa+dtAGPn803rLnfY=tdcoX5DySnG-spFFqM=CrA@mail.gmail.com>
- <87ley9zg8c.fsf@kernel.org>
- <2063576.g1lFC2ckuq@pc-42>
+        with ESMTP id S230028AbiBQQ4N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 11:56:13 -0500
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F244F2B3551;
+        Thu, 17 Feb 2022 08:55:58 -0800 (PST)
+Received: by mail-pl1-x62c.google.com with SMTP id j4so5046373plj.8;
+        Thu, 17 Feb 2022 08:55:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=J5FGTn5ILMijaIv0wSwcthiNL1OS6vJs5ba0cv9M5p0=;
+        b=Ybcw3sQgwaFlXLabS3GZovVUzkaWyxbsGVmBxa0VuMneh68dUAQKaQHuy51dlb0EYr
+         BRc/L2Nvr65Zu/zJLoBYHnoQXV+ZeOqxKEA13cB9E2KQJALJO0oVUzu3Howla4pHDwou
+         07B0y3PD0Ff9xqqLqSxpZBY6DswddqR5EmcnipwwcC0T95ITVODS82ThtT+smfknvRqC
+         7p5jgqsxt1yJqlwk0UkVCNXWjII0H2YxAmv7TuS+YUmBRcEj+t2C8n3QMg7VhgWZCReN
+         OteA/5v9Lnqfhr5eZAWA6DJxCyM/5ZzIu62SPRKhF6nkInWHPToO6rHjpL57FUJxoRl6
+         dmOQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=J5FGTn5ILMijaIv0wSwcthiNL1OS6vJs5ba0cv9M5p0=;
+        b=p2MHOyaHNJHPuqGp+984ISAgkaDkF+xH+U0HeATEUsnrabH43Xc2FJIrDqWvbTWCIy
+         /D4ELPoJZmf7l/4BI39Q5t0Mq7ZAcqKRCru4SpIqVya1E9V5HJl0r/QBNgk7iRarvy/h
+         X6FvzcbOFaPtgSbjuOaQ/ZNyY+d8wamiuJRi1rDyWXSePgayK+SdPVVpW6AHQrT9iPwD
+         HllNvF2mJuDYskgkNLRoW5Pvsrnqw+P4zhNh1J9QCt2cZRbiaImwLRI+1crq4sYtdzq2
+         OXjUmV3RRsAZH9SjKri0kMAaRL1soz1dSNQSAK7KtApexQzikBeYlM1RX/dizI8LdnyV
+         Fq3g==
+X-Gm-Message-State: AOAM532S2IkbklejKpT+Y2E3oAZXUgFco7SWHptxahL8AfF9XP1Ysr8r
+        J2WkPTb7IIkk/J+F3HiyuUHwzc5EzCtFKCPyrT0=
+X-Google-Smtp-Source: ABdhPJxphQ5kFT6Qc/Ioi+eXnWMbYvH9a5F8olBh+E/kNXYn7yD1lZj1szFMRdyE+lYkU9FGxip4qdxvX6MBM+6QYm4=
+X-Received: by 2002:a17:903:22c6:b0:14d:8a9b:a9ad with SMTP id
+ y6-20020a17090322c600b0014d8a9ba9admr3687557plg.141.1645116958446; Thu, 17
+ Feb 2022 08:55:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <2063576.g1lFC2ckuq@pc-42>
+References: <20220210224933.379149-1-yury.norov@gmail.com> <20220210224933.379149-30-yury.norov@gmail.com>
+ <CAPDyKFqvYhPTenGEH=LZyJXb5rJKbyeds4rH+aRN=u6JH_eJ5A@mail.gmail.com>
+In-Reply-To: <CAPDyKFqvYhPTenGEH=LZyJXb5rJKbyeds4rH+aRN=u6JH_eJ5A@mail.gmail.com>
+From:   Yury Norov <yury.norov@gmail.com>
+Date:   Thu, 17 Feb 2022 08:55:47 -0800
+Message-ID: <CAAH8bW9X4HGNDW9xY1zA8d0O0ty7kh_zcOKBDu88FL8uWEFAkA@mail.gmail.com>
+Subject: Re: [PATCH 29/49] memstick: replace bitmap_weight with
+ bitmap_weight_eq where appropriate
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        David Laight <David.Laight@aculab.com>,
+        Joe Perches <joe@perches.com>, Dennis Zhou <dennis@kernel.org>,
+        Emil Renner Berthing <kernel@esmil.dk>,
+        Nicholas Piggin <npiggin@gmail.com>,
+        Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        linux-kernel@vger.kernel.org,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, Jens Axboe <axboe@kernel.dk>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Colin Ian King <colin.king@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
+        linux-mmc@vger.kernel.org,
+        Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Feb 17, 2022 at 04:41:38PM +0100, Jérôme Pouiller wrote:
-> On Thursday 17 February 2022 16:04:51 CET Kalle Valo wrote:
-> > Ulf Hansson <ulf.hansson@linaro.org> writes:
-> > > On Thu, 17 Feb 2022 at 10:59, Kalle Valo <kvalo@kernel.org> wrote:
-> > >> Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
-> > >> > From: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> > >> >
-> > >> > Until now, the SDIO quirks are applied directly from the driver.
-> > >> > However, it is better to apply the quirks before driver probing. So,
-> > >> > this patch relocate the quirks in the MMC framework.
-> > >>
-> > >> It would be good to know how this is better, what's the concrete
-> > >> advantage?
-> > >
-> > > The mmc core has a quirk interface for all types of cards
-> > > (eMMC/SD/SDIO), which thus keeps these things from sprinkling to
-> > > drivers. In some cases, the quirk needs to be applied already during
-> > > card initialization, which is earlier than when probing an SDIO func
-> > > driver or the MMC block device driver.
-> > >
-> > > Perhaps it's a good idea to explain a bit about this in the commit message.
-> > 
-> > I would add the whole paragraph to the commit log :)
-> 
-> Arf, Greg has just pulled this patch into staging-testing. I assume it is
-> too late to change the commit message.
+On Thu, Feb 17, 2022 at 7:39 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Fri, 11 Feb 2022 at 00:55, Yury Norov <yury.norov@gmail.com> wrote:
+> >
+> > msb_validate_used_block_bitmap() calls bitmap_weight() to compare the
+> > weight of bitmap with a given number. We can do it more efficiently with
+> > bitmap_weight_eq because conditional bitmap_weight may stop traversing the
+> > bitmap earlier, as soon as condition is (or can't be) met.
+> >
+> > Signed-off-by: Yury Norov <yury.norov@gmail.com>
+> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > Acked-by: Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
+>
+> Applied for next, thanks!
 
-I can drop it, but really, it's fine as-is.
+Hi Ulf,
 
-thanks,
+This patch depends on patch 26/49 "bitmap: add bitmap_weight_{cmp, eq,
+gt, ge, lt, le} functions"
+from this series. Can you  make sure you applied them together? Or I can
+apply it later.
 
-greg k-h
+Thanks,
+Yury
