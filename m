@@ -2,105 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4190C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 16:56:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AF9BC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 20:01:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230436AbiBQQ4O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Feb 2022 11:56:14 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:57526 "EHLO
+        id S244100AbiBQUBQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Feb 2022 15:01:16 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:47948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230028AbiBQQ4N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 11:56:13 -0500
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F244F2B3551;
-        Thu, 17 Feb 2022 08:55:58 -0800 (PST)
-Received: by mail-pl1-x62c.google.com with SMTP id j4so5046373plj.8;
-        Thu, 17 Feb 2022 08:55:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=J5FGTn5ILMijaIv0wSwcthiNL1OS6vJs5ba0cv9M5p0=;
-        b=Ybcw3sQgwaFlXLabS3GZovVUzkaWyxbsGVmBxa0VuMneh68dUAQKaQHuy51dlb0EYr
-         BRc/L2Nvr65Zu/zJLoBYHnoQXV+ZeOqxKEA13cB9E2KQJALJO0oVUzu3Howla4pHDwou
-         07B0y3PD0Ff9xqqLqSxpZBY6DswddqR5EmcnipwwcC0T95ITVODS82ThtT+smfknvRqC
-         7p5jgqsxt1yJqlwk0UkVCNXWjII0H2YxAmv7TuS+YUmBRcEj+t2C8n3QMg7VhgWZCReN
-         OteA/5v9Lnqfhr5eZAWA6DJxCyM/5ZzIu62SPRKhF6nkInWHPToO6rHjpL57FUJxoRl6
-         dmOQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=J5FGTn5ILMijaIv0wSwcthiNL1OS6vJs5ba0cv9M5p0=;
-        b=p2MHOyaHNJHPuqGp+984ISAgkaDkF+xH+U0HeATEUsnrabH43Xc2FJIrDqWvbTWCIy
-         /D4ELPoJZmf7l/4BI39Q5t0Mq7ZAcqKRCru4SpIqVya1E9V5HJl0r/QBNgk7iRarvy/h
-         X6FvzcbOFaPtgSbjuOaQ/ZNyY+d8wamiuJRi1rDyWXSePgayK+SdPVVpW6AHQrT9iPwD
-         HllNvF2mJuDYskgkNLRoW5Pvsrnqw+P4zhNh1J9QCt2cZRbiaImwLRI+1crq4sYtdzq2
-         OXjUmV3RRsAZH9SjKri0kMAaRL1soz1dSNQSAK7KtApexQzikBeYlM1RX/dizI8LdnyV
-         Fq3g==
-X-Gm-Message-State: AOAM532S2IkbklejKpT+Y2E3oAZXUgFco7SWHptxahL8AfF9XP1Ysr8r
-        J2WkPTb7IIkk/J+F3HiyuUHwzc5EzCtFKCPyrT0=
-X-Google-Smtp-Source: ABdhPJxphQ5kFT6Qc/Ioi+eXnWMbYvH9a5F8olBh+E/kNXYn7yD1lZj1szFMRdyE+lYkU9FGxip4qdxvX6MBM+6QYm4=
-X-Received: by 2002:a17:903:22c6:b0:14d:8a9b:a9ad with SMTP id
- y6-20020a17090322c600b0014d8a9ba9admr3687557plg.141.1645116958446; Thu, 17
- Feb 2022 08:55:58 -0800 (PST)
+        with ESMTP id S242729AbiBQUBQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 15:01:16 -0500
+Received: from smtp.smtpout.orange.fr (smtp01.smtpout.orange.fr [80.12.242.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CB8A12E150
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 12:01:00 -0800 (PST)
+Received: from [192.168.1.18] ([90.126.236.122])
+        by smtp.orange.fr with ESMTPA
+        id KmxUnmRTpBzeEKmxUng2RW; Thu, 17 Feb 2022 21:00:59 +0100
+X-ME-Helo: [192.168.1.18]
+X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
+X-ME-Date: Thu, 17 Feb 2022 21:00:59 +0100
+X-ME-IP: 90.126.236.122
+Message-ID: <bcd6688f-6f42-ca8f-ab9c-978eeff4f4e3@wanadoo.fr>
+Date:   Thu, 17 Feb 2022 21:00:56 +0100
 MIME-Version: 1.0
-References: <20220210224933.379149-1-yury.norov@gmail.com> <20220210224933.379149-30-yury.norov@gmail.com>
- <CAPDyKFqvYhPTenGEH=LZyJXb5rJKbyeds4rH+aRN=u6JH_eJ5A@mail.gmail.com>
-In-Reply-To: <CAPDyKFqvYhPTenGEH=LZyJXb5rJKbyeds4rH+aRN=u6JH_eJ5A@mail.gmail.com>
-From:   Yury Norov <yury.norov@gmail.com>
-Date:   Thu, 17 Feb 2022 08:55:47 -0800
-Message-ID: <CAAH8bW9X4HGNDW9xY1zA8d0O0ty7kh_zcOKBDu88FL8uWEFAkA@mail.gmail.com>
-Subject: Re: [PATCH 29/49] memstick: replace bitmap_weight with
- bitmap_weight_eq where appropriate
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        David Laight <David.Laight@aculab.com>,
-        Joe Perches <joe@perches.com>, Dennis Zhou <dennis@kernel.org>,
-        Emil Renner Berthing <kernel@esmil.dk>,
-        Nicholas Piggin <npiggin@gmail.com>,
-        Matti Vaittinen <matti.vaittinen@fi.rohmeurope.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        linux-kernel@vger.kernel.org,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, Jens Axboe <axboe@kernel.dk>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Colin Ian King <colin.king@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
-        linux-mmc@vger.kernel.org,
-        Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH] mmc: mtk-sd: use div64_u64() instead of do_div()
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>, Qing Wang <wangqing@vivo.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <1644395927-4138-1-git-send-email-wangqing@vivo.com>
+ <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com>
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+In-Reply-To: <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Feb 17, 2022 at 7:39 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 11 Feb 2022 at 00:55, Yury Norov <yury.norov@gmail.com> wrote:
-> >
-> > msb_validate_used_block_bitmap() calls bitmap_weight() to compare the
-> > weight of bitmap with a given number. We can do it more efficiently with
-> > bitmap_weight_eq because conditional bitmap_weight may stop traversing the
-> > bitmap earlier, as soon as condition is (or can't be) met.
-> >
-> > Signed-off-by: Yury Norov <yury.norov@gmail.com>
-> > Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > Acked-by: Shubhankar Kuranagatti <shubhankar.vk@gmail.com>
->
+Le 17/02/2022 à 16:39, Ulf Hansson a écrit :
+> On Wed, 9 Feb 2022 at 09:39, Qing Wang <wangqing@vivo.com> wrote:
+>>
+>> From: Wang Qing <wangqing@vivo.com>
+>>
+>> do_div() does a 64-by-32 division.
+>> When the divisor is u64, do_div() truncates it to 32 bits, this means it
+>> can test non-zero and be truncated to zero for division.
+>>
+>> fix do_div.cocci warning:
+>> do_div() does a 64-by-32 division, please consider using div64_u64 instead.
+>>
+>> Signed-off-by: Wang Qing <wangqing@vivo.com>
+> 
 > Applied for next, thanks!
 
-Hi Ulf,
 
-This patch depends on patch 26/49 "bitmap: add bitmap_weight_{cmp, eq,
-gt, ge, lt, le} functions"
-from this series. Can you  make sure you applied them together? Or I can
-apply it later.
+This is wrong.
 
-Thanks,
-Yury
+See [1].
+
+
+Wang Qing, you should really warn all the people you have sent such patches.
+
+CJ
+
+[1]: 
+https://lore.kernel.org/linux-kernel/19b96972-cee7-937f-21ce-c78982ed2048@linaro.org/
+
+
+> 
+> Kind regards
+> Uffe
+> 
+> 
+>> ---
+>>   drivers/mmc/host/mtk-sd.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+>> index 65037e1..777c9a8
+>> --- a/drivers/mmc/host/mtk-sd.c
+>> +++ b/drivers/mmc/host/mtk-sd.c
+>> @@ -766,7 +766,7 @@ static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
+>>                  clk_ns  = 1000000000ULL;
+>>                  do_div(clk_ns, mmc->actual_clock);
+>>                  timeout = ns + clk_ns - 1;
+>> -               do_div(timeout, clk_ns);
+>> +               div64_u64(timeout, clk_ns);
+>>                  timeout += clks;
+>>                  /* in 1048576 sclk cycle unit */
+>>                  timeout = DIV_ROUND_UP(timeout, BIT(20));
+>> --
+>> 2.7.4
+>>
+> 
+
