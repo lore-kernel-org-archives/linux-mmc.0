@@ -2,101 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AF9BC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 20:01:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56F97C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 20:14:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244100AbiBQUBQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Feb 2022 15:01:16 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:47948 "EHLO
+        id S235236AbiBQUPD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Feb 2022 15:15:03 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:36984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242729AbiBQUBQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 15:01:16 -0500
-Received: from smtp.smtpout.orange.fr (smtp01.smtpout.orange.fr [80.12.242.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CB8A12E150
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 12:01:00 -0800 (PST)
-Received: from [192.168.1.18] ([90.126.236.122])
-        by smtp.orange.fr with ESMTPA
-        id KmxUnmRTpBzeEKmxUng2RW; Thu, 17 Feb 2022 21:00:59 +0100
-X-ME-Helo: [192.168.1.18]
-X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
-X-ME-Date: Thu, 17 Feb 2022 21:00:59 +0100
-X-ME-IP: 90.126.236.122
-Message-ID: <bcd6688f-6f42-ca8f-ab9c-978eeff4f4e3@wanadoo.fr>
-Date:   Thu, 17 Feb 2022 21:00:56 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH] mmc: mtk-sd: use div64_u64() instead of do_div()
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>, Qing Wang <wangqing@vivo.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <1644395927-4138-1-git-send-email-wangqing@vivo.com>
- <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com>
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-In-Reply-To: <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S231553AbiBQUPD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 15:15:03 -0500
+X-Greylist: delayed 164 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 17 Feb 2022 12:14:47 PST
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EAFF28093C
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 12:14:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1645128703;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=Message-Id:To:Cc:Subject:Date:From:Cc:Date:From:Subject:Sender;
+    bh=/ncdnXpbY4SFFS0er1tKwPrwjg499WQ61cmVGx8FfzE=;
+    b=i0oHJm1x9dwBejUmyWB+pi02WpJ2jLG6/kipDEZSa5Abus1VKAJGH5U3c7X03Dh1Cw
+    L37QWgHPMmr/Wl9HVFyd0pCaVADPqutNu3aTi7EuigNdOxy5Fb8WfS5sSn7/njlFTvPz
+    4hrh/M6r7e7o7EQ3LFl9CmI2BwsSZ6nBw5ArCbQ3cgd4HjFyrsAX732yWB8umwZNmngS
+    QWdKCTy9k3ZOeKEWRlNBit1D3mKAo3svSkkKC624E02zqUfiXGhdgmuopcTKMgI0ouTI
+    WxxHwZkjuakJD3bo2JKIwuPaTvbmFEkRBbFl2hK829cXuf297uxH3a5Qha+yaThnj1v3
+    RjVg==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw4SA"
+X-RZG-CLASS-ID: mo00
+Received: from imac.fritz.box
+    by smtp.strato.de (RZmta 47.39.2 DYNA|AUTH)
+    with ESMTPSA id Rb8524y1HKBh0LP
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Thu, 17 Feb 2022 21:11:43 +0100 (CET)
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
+Date:   Thu, 17 Feb 2022 21:11:40 +0100
+Subject: [BUG] mmc: core: adjust polling interval for CMD1
+Cc:     Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
+To:     Huijin Park <huijin.park@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Message-Id: <27DDB061-1235-4F4C-B6A8-F035D77AC9CF@goldelico.com>
+X-Mailer: Apple Mail (2.3445.104.21)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Le 17/02/2022 à 16:39, Ulf Hansson a écrit :
-> On Wed, 9 Feb 2022 at 09:39, Qing Wang <wangqing@vivo.com> wrote:
->>
->> From: Wang Qing <wangqing@vivo.com>
->>
->> do_div() does a 64-by-32 division.
->> When the divisor is u64, do_div() truncates it to 32 bits, this means it
->> can test non-zero and be truncated to zero for division.
->>
->> fix do_div.cocci warning:
->> do_div() does a 64-by-32 division, please consider using div64_u64 instead.
->>
->> Signed-off-by: Wang Qing <wangqing@vivo.com>
-> 
-> Applied for next, thanks!
+Hi,
+Jean Rene Dawin did report to me a problem on the Beagle Bone Black =
+starting
+with our disto kernel based on v5.17-rc1:
 
+>> since kernel 5.17-rc1 I noticed slower emmc performance on Beaglebone
+>> Black, but didn't check the logs.
+>> When I tried to run 5.17.0-rc3-letux+ it booted fine, but during IO
+>> traffic there were messages like
+>>=20
+>> [  662.529584] mmc1: error -110 doing runtime resume
+>> [  669.293590] mmc1: Card stuck being busy! __mmc_poll_for_busy
+>>=20
+>> [  739.076072] mmc1: Timeout waiting for hardware interrupt.
+>> [  739.145676] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D =
+SDHCI REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>> [  739.231053] mmc1: sdhci: Sys addr:  0x00000000 | Version:  =
+0x00003101
+>> [  739.316472] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  =
+0x00000400
+>> [  739.401937] mmc1: sdhci: Argument:  0x00342d30 | Trn mode: =
+0x00000023
+>> [  739.487439] mmc1: sdhci: Present:   0x01f70000 | Host ctl: =
+0x00000000
+>> [  739.573007] mmc1: sdhci: Power:     0x0000000f | Blk gap:  =
+0x00000000
+>> [  739.658609] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    =
+0x00003c07
+>> [  739.744224] mmc1: sdhci: Timeout:   0x00000007 | Int stat: =
+0x00000002
+>> [  739.829896] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: =
+0x027f000b
+>> [  739.915623] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: =
+0x00000001
+>> [  740.001394] mmc1: sdhci: Caps:      0x07e10080 | Caps_1:   =
+0x00000000
+>> [  740.087208] mmc1: sdhci: Cmd:       0x0000193a | Max curr: =
+0x00000000
+>> [  740.173051] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  =
+0x00000000
+>> [  740.258928] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  =
+0x00000000
+>> [  740.344854] mmc1: sdhci: Host ctl2: 0x00000000
+>> [  740.402796] mmc1: sdhci: =
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+>>=20
+>> and finally IO errors and a corrupted filesystem.
+>>=20
+>> 5.17.0-rc4-letux+ shows the same behaviour.
 
-This is wrong.
+I checked with my BeagleBoard Black (am3358) and can confirm this =
+observation.
+It happens only with the integrated eMMC but not with the =C2=B5SD =
+connected to
+the other mmc interface.
 
-See [1].
+A git bisect found:
 
+76bfc7ccc2fa9d382576f6013b57a0ef93d5a722 is the first bad commit
+commit 76bfc7ccc2fa9d382576f6013b57a0ef93d5a722
+Author: Huijin Park <huijin.park@samsung.com>
+Date:   Thu Nov 4 15:32:31 2021 +0900
 
-Wang Qing, you should really warn all the people you have sent such patches.
+  mmc: core: adjust polling interval for CMD1
 
-CJ
+  In mmc_send_op_cond(), loops are continuously performed at the same
+  interval of 10 ms.  However the behaviour is not good for some eMMC
+  which can be out from a busy state earlier than 10 ms if normal.
 
-[1]: 
-https://lore.kernel.org/linux-kernel/19b96972-cee7-937f-21ce-c78982ed2048@linaro.org/
+  Rather than fixing about the interval time in mmc_send_op_cond(),
+  let's instead convert into using the common __mmc_poll_for_busy().
 
+  The reason for adjusting the interval time is that it is important
+  to reduce the eMMC initialization time, especially in devices that
+  use eMMC as rootfs.
 
-> 
-> Kind regards
-> Uffe
-> 
-> 
->> ---
->>   drivers/mmc/host/mtk-sd.c | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->> index 65037e1..777c9a8
->> --- a/drivers/mmc/host/mtk-sd.c
->> +++ b/drivers/mmc/host/mtk-sd.c
->> @@ -766,7 +766,7 @@ static u64 msdc_timeout_cal(struct msdc_host *host, u64 ns, u64 clks)
->>                  clk_ns  = 1000000000ULL;
->>                  do_div(clk_ns, mmc->actual_clock);
->>                  timeout = ns + clk_ns - 1;
->> -               do_div(timeout, clk_ns);
->> +               div64_u64(timeout, clk_ns);
->>                  timeout += clks;
->>                  /* in 1048576 sclk cycle unit */
->>                  timeout = DIV_ROUND_UP(timeout, BIT(20));
->> --
->> 2.7.4
->>
-> 
+  Test log(eMMC:KLM8G1GETF-B041):
+
+  before: 12 ms (0.311016 - 0.298729)
+  [    0.295823] mmc0: starting CMD0 arg 00000000 flags 000000c0
+  [    0.298729] mmc0: starting CMD1 arg 40000080 flags 000000e1<-start
+  [    0.311016] mmc0: starting CMD1 arg 40000080 flags 000000e1<-finish
+  [    0.311336] mmc0: starting CMD2 arg 00000000 flags 00000007
+
+  after: 2 ms (0.301270 - 0.298762)
+  [    0.295862] mmc0: starting CMD0 arg 00000000 flags 000000c0
+  [    0.298762] mmc0: starting CMD1 arg 40000080 flags 000000e1<-start
+  [    0.299067] mmc0: starting CMD1 arg 40000080 flags 000000e1
+  [    0.299441] mmc0: starting CMD1 arg 40000080 flags 000000e1
+  [    0.299879] mmc0: starting CMD1 arg 40000080 flags 000000e1
+  [    0.300446] mmc0: starting CMD1 arg 40000080 flags 000000e1
+  [    0.301270] mmc0: starting CMD1 arg 40000080 flags 000000e1<-finish
+  [    0.301572] mmc0: starting CMD2 arg 00000000 flags 00000007
+
+  Signed-off-by: Huijin Park <huijin.park@samsung.com>
+  Link: =
+https://lore.kernel.org/r/20211104063231.2115-3-huijin.park@samsung.com
+  Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+Reverting this makes v5.17-rc[1-4] work.
+
+Any suggestions or fixes?
+
+BR and thanks,
+Nikolaus Schaller
+
+Reported-by: jdawin@math.uni-bielefeld.de
 
