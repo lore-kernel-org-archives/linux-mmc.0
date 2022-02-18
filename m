@@ -2,166 +2,118 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56F97C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Feb 2022 20:14:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0A79C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Feb 2022 07:00:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235236AbiBQUPD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Feb 2022 15:15:03 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:36984 "EHLO
+        id S229948AbiBRHBM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Feb 2022 02:01:12 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:47744 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231553AbiBQUPD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Feb 2022 15:15:03 -0500
-X-Greylist: delayed 164 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 17 Feb 2022 12:14:47 PST
-Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EAFF28093C
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 12:14:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1645128703;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=Message-Id:To:Cc:Subject:Date:From:Cc:Date:From:Subject:Sender;
-    bh=/ncdnXpbY4SFFS0er1tKwPrwjg499WQ61cmVGx8FfzE=;
-    b=i0oHJm1x9dwBejUmyWB+pi02WpJ2jLG6/kipDEZSa5Abus1VKAJGH5U3c7X03Dh1Cw
-    L37QWgHPMmr/Wl9HVFyd0pCaVADPqutNu3aTi7EuigNdOxy5Fb8WfS5sSn7/njlFTvPz
-    4hrh/M6r7e7o7EQ3LFl9CmI2BwsSZ6nBw5ArCbQ3cgd4HjFyrsAX732yWB8umwZNmngS
-    QWdKCTy9k3ZOeKEWRlNBit1D3mKAo3svSkkKC624E02zqUfiXGhdgmuopcTKMgI0ouTI
-    WxxHwZkjuakJD3bo2JKIwuPaTvbmFEkRBbFl2hK829cXuf297uxH3a5Qha+yaThnj1v3
-    RjVg==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw4SA"
-X-RZG-CLASS-ID: mo00
-Received: from imac.fritz.box
-    by smtp.strato.de (RZmta 47.39.2 DYNA|AUTH)
-    with ESMTPSA id Rb8524y1HKBh0LP
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Thu, 17 Feb 2022 21:11:43 +0100 (CET)
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Date:   Thu, 17 Feb 2022 21:11:40 +0100
-Subject: [BUG] mmc: core: adjust polling interval for CMD1
-Cc:     Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
-To:     Huijin Park <huijin.park@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Message-Id: <27DDB061-1235-4F4C-B6A8-F035D77AC9CF@goldelico.com>
-X-Mailer: Apple Mail (2.3445.104.21)
+        with ESMTP id S229850AbiBRHBL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2022 02:01:11 -0500
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 753FE60D4
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 23:00:55 -0800 (PST)
+Received: by mail-ej1-x62c.google.com with SMTP id d10so12748171eje.10
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 23:00:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:content-language:to:cc:from
+         :subject:content-transfer-encoding;
+        bh=c1WC1LBRmsTFGHrhhnaB9ccaJjMWkQMbdtbNl/QaxdA=;
+        b=i33n2QmH0Mel44H31uNtlfpIdmOAfeIpHc4ugLWJNbIJHRJCW2O1RoFSG1klyHuIU4
+         /iIJfw3O/i224aq6bScxzxkbw23A2gT9LCQvuDFkKVYOcYFW90FJ8r5pALsR2nbDPvTv
+         IbzvZ4HI1aODQB0zW4FLwAb/+BBSsrwgVvGPzbGaeEsTQwMPugr9wI0GQsH6gfd+6IGA
+         82LjkOIVHp0da6ouQcgg88JqT6KtoAYqfOE+mUSeqlhA5JU/5KcCe1ASTA9AOc49hW6d
+         E04cagiliZFytMTTBAegYrM1xSJZn8MG6IfSYzj1xOmRap80Gb0edJqLONIX39Fv/hXA
+         gWLg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent
+         :content-language:to:cc:from:subject:content-transfer-encoding;
+        bh=c1WC1LBRmsTFGHrhhnaB9ccaJjMWkQMbdtbNl/QaxdA=;
+        b=nie46oCfly8JZ5q9exgVSio+fPcH+nGZiic02bzwBSQsy8ChxUX+Hn3Zd7y3SGmMov
+         V5B0nIK3p658Hx8jU8S3+MlDxwX23cBe3cFnL/jo8RDtkImgYQQJAtal8mW1ZKG3CpN9
+         rebK/25ZIhKALq4xa6gsK8u+qMtnm1RMn7VPAIDf3tnPBWOeZa9lDCJCT1Z1a7Lx6gI2
+         ICplYnZhIBU6IkhTm2sXNHrHlCwr+LAFmsMcxCUuF9Wem7WVMC/IGzoyHV3PzUersJJL
+         BFFfyYMikZB3jnXkAU3ky5ptU9Yv/S8ByfgByPUNADELKVefz9sBycHROX8lXHBaOXFL
+         Oglw==
+X-Gm-Message-State: AOAM532LuWUneycrJXATKiI+9bV3yKws8CCDr1XnPOaF/F43az9iwwE4
+        KnAbCNAe9CiNTcOoLSwvKkJ2kI1Nr2U=
+X-Google-Smtp-Source: ABdhPJwSfR8cTktW9ZW8hrLtYSg5KMAtJ4d9Ncf+vbHv759ukS7PQ/0Wd7MDddcfZYYXlmsca9Yu6A==
+X-Received: by 2002:a17:906:f1cf:b0:6ae:9992:484 with SMTP id gx15-20020a170906f1cf00b006ae99920484mr5230915ejb.607.1645167653935;
+        Thu, 17 Feb 2022 23:00:53 -0800 (PST)
+Received: from ?IPV6:2003:ea:8f4d:2b00:dcd6:5131:2794:470e? (p200300ea8f4d2b00dcd651312794470e.dip0.t-ipconnect.de. [2003:ea:8f4d:2b00:dcd6:5131:2794:470e])
+        by smtp.googlemail.com with ESMTPSA id c6sm1893387ejs.130.2022.02.17.23.00.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 17 Feb 2022 23:00:52 -0800 (PST)
+Message-ID: <fae9ee4b-6b93-95ac-abf3-f97c62e07b9d@gmail.com>
+Date:   Fri, 18 Feb 2022 08:00:45 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+From:   Heiner Kallweit <hkallweit1@gmail.com>
+Subject: [PATCH] mmc: core: improve fallback in mmc_select_timing()
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-Jean Rene Dawin did report to me a problem on the Beagle Bone Black =
-starting
-with our disto kernel based on v5.17-rc1:
+I have a system (cheap Amlogic S905W based TV box) where the eMMC chip
+refuses to switch to HS200 timing. That's not nice, but my bigger
+problem is that the system then falls back to the very slow default
+mode, even though DDR52 is supported and works well.
 
->> since kernel 5.17-rc1 I noticed slower emmc performance on Beaglebone
->> Black, but didn't check the logs.
->> When I tried to run 5.17.0-rc3-letux+ it booted fine, but during IO
->> traffic there were messages like
->>=20
->> [  662.529584] mmc1: error -110 doing runtime resume
->> [  669.293590] mmc1: Card stuck being busy! __mmc_poll_for_busy
->>=20
->> [  739.076072] mmc1: Timeout waiting for hardware interrupt.
->> [  739.145676] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D =
-SDHCI REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->> [  739.231053] mmc1: sdhci: Sys addr:  0x00000000 | Version:  =
-0x00003101
->> [  739.316472] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  =
-0x00000400
->> [  739.401937] mmc1: sdhci: Argument:  0x00342d30 | Trn mode: =
-0x00000023
->> [  739.487439] mmc1: sdhci: Present:   0x01f70000 | Host ctl: =
-0x00000000
->> [  739.573007] mmc1: sdhci: Power:     0x0000000f | Blk gap:  =
-0x00000000
->> [  739.658609] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    =
-0x00003c07
->> [  739.744224] mmc1: sdhci: Timeout:   0x00000007 | Int stat: =
-0x00000002
->> [  739.829896] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: =
-0x027f000b
->> [  739.915623] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: =
-0x00000001
->> [  740.001394] mmc1: sdhci: Caps:      0x07e10080 | Caps_1:   =
-0x00000000
->> [  740.087208] mmc1: sdhci: Cmd:       0x0000193a | Max curr: =
-0x00000000
->> [  740.173051] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  =
-0x00000000
->> [  740.258928] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  =
-0x00000000
->> [  740.344854] mmc1: sdhci: Host ctl2: 0x00000000
->> [  740.402796] mmc1: sdhci: =
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
->>=20
->> and finally IO errors and a corrupted filesystem.
->>=20
->> 5.17.0-rc4-letux+ shows the same behaviour.
+Therefore, if setting a mode fails with EBADMSG (switch error), try the
+next (in descending performance order) mode instead of immediately
+falling back to the slowest mode.
 
-I checked with my BeagleBoard Black (am3358) and can confirm this =
-observation.
-It happens only with the integrated eMMC but not with the =C2=B5SD =
-connected to
-the other mmc interface.
+With the patch it looks like this on my system:
 
-A git bisect found:
+mmc1: mmc_select_hs200 failed, error -74
+mmc1: new DDR MMC card at address 0001
+mmcblk1: mmc1:0001 DG4008 7.28 GiB
 
-76bfc7ccc2fa9d382576f6013b57a0ef93d5a722 is the first bad commit
-commit 76bfc7ccc2fa9d382576f6013b57a0ef93d5a722
-Author: Huijin Park <huijin.park@samsung.com>
-Date:   Thu Nov 4 15:32:31 2021 +0900
+Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+---
+ drivers/mmc/core/mmc.c | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
 
-  mmc: core: adjust polling interval for CMD1
-
-  In mmc_send_op_cond(), loops are continuously performed at the same
-  interval of 10 ms.  However the behaviour is not good for some eMMC
-  which can be out from a busy state earlier than 10 ms if normal.
-
-  Rather than fixing about the interval time in mmc_send_op_cond(),
-  let's instead convert into using the common __mmc_poll_for_busy().
-
-  The reason for adjusting the interval time is that it is important
-  to reduce the eMMC initialization time, especially in devices that
-  use eMMC as rootfs.
-
-  Test log(eMMC:KLM8G1GETF-B041):
-
-  before: 12 ms (0.311016 - 0.298729)
-  [    0.295823] mmc0: starting CMD0 arg 00000000 flags 000000c0
-  [    0.298729] mmc0: starting CMD1 arg 40000080 flags 000000e1<-start
-  [    0.311016] mmc0: starting CMD1 arg 40000080 flags 000000e1<-finish
-  [    0.311336] mmc0: starting CMD2 arg 00000000 flags 00000007
-
-  after: 2 ms (0.301270 - 0.298762)
-  [    0.295862] mmc0: starting CMD0 arg 00000000 flags 000000c0
-  [    0.298762] mmc0: starting CMD1 arg 40000080 flags 000000e1<-start
-  [    0.299067] mmc0: starting CMD1 arg 40000080 flags 000000e1
-  [    0.299441] mmc0: starting CMD1 arg 40000080 flags 000000e1
-  [    0.299879] mmc0: starting CMD1 arg 40000080 flags 000000e1
-  [    0.300446] mmc0: starting CMD1 arg 40000080 flags 000000e1
-  [    0.301270] mmc0: starting CMD1 arg 40000080 flags 000000e1<-finish
-  [    0.301572] mmc0: starting CMD2 arg 00000000 flags 00000007
-
-  Signed-off-by: Huijin Park <huijin.park@samsung.com>
-  Link: =
-https://lore.kernel.org/r/20211104063231.2115-3-huijin.park@samsung.com
-  Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Reverting this makes v5.17-rc[1-4] work.
-
-Any suggestions or fixes?
-
-BR and thanks,
-Nikolaus Schaller
-
-Reported-by: jdawin@math.uni-bielefeld.de
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index bbbbcaf70..c0272192d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1523,11 +1523,23 @@ static int mmc_select_timing(struct mmc_card *card)
+ 	if (!mmc_can_ext_csd(card))
+ 		goto bus_speed;
+ 
+-	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES) {
+ 		err = mmc_select_hs400es(card);
+-	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
++		if (!err)
++			goto bus_speed;
++		if (err != -EBADMSG)
++			return err;
++	}
++
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200) {
+ 		err = mmc_select_hs200(card);
+-	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
++		if (!err)
++			goto bus_speed;
++		if (err != -EBADMSG)
++			return err;
++	}
++
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
+ 		err = mmc_select_hs(card);
+ 
+ 	if (err && err != -EBADMSG)
+-- 
+2.35.1
 
