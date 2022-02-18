@@ -2,118 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0A79C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Feb 2022 07:00:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69329C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Feb 2022 07:28:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229948AbiBRHBM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Feb 2022 02:01:12 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:47744 "EHLO
+        id S231573AbiBRH3K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Feb 2022 02:29:10 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:55464 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229850AbiBRHBL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2022 02:01:11 -0500
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 753FE60D4
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 23:00:55 -0800 (PST)
-Received: by mail-ej1-x62c.google.com with SMTP id d10so12748171eje.10
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Feb 2022 23:00:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:content-language:to:cc:from
-         :subject:content-transfer-encoding;
-        bh=c1WC1LBRmsTFGHrhhnaB9ccaJjMWkQMbdtbNl/QaxdA=;
-        b=i33n2QmH0Mel44H31uNtlfpIdmOAfeIpHc4ugLWJNbIJHRJCW2O1RoFSG1klyHuIU4
-         /iIJfw3O/i224aq6bScxzxkbw23A2gT9LCQvuDFkKVYOcYFW90FJ8r5pALsR2nbDPvTv
-         IbzvZ4HI1aODQB0zW4FLwAb/+BBSsrwgVvGPzbGaeEsTQwMPugr9wI0GQsH6gfd+6IGA
-         82LjkOIVHp0da6ouQcgg88JqT6KtoAYqfOE+mUSeqlhA5JU/5KcCe1ASTA9AOc49hW6d
-         E04cagiliZFytMTTBAegYrM1xSJZn8MG6IfSYzj1xOmRap80Gb0edJqLONIX39Fv/hXA
-         gWLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent
-         :content-language:to:cc:from:subject:content-transfer-encoding;
-        bh=c1WC1LBRmsTFGHrhhnaB9ccaJjMWkQMbdtbNl/QaxdA=;
-        b=nie46oCfly8JZ5q9exgVSio+fPcH+nGZiic02bzwBSQsy8ChxUX+Hn3Zd7y3SGmMov
-         V5B0nIK3p658Hx8jU8S3+MlDxwX23cBe3cFnL/jo8RDtkImgYQQJAtal8mW1ZKG3CpN9
-         rebK/25ZIhKALq4xa6gsK8u+qMtnm1RMn7VPAIDf3tnPBWOeZa9lDCJCT1Z1a7Lx6gI2
-         ICplYnZhIBU6IkhTm2sXNHrHlCwr+LAFmsMcxCUuF9Wem7WVMC/IGzoyHV3PzUersJJL
-         BFFfyYMikZB3jnXkAU3ky5ptU9Yv/S8ByfgByPUNADELKVefz9sBycHROX8lXHBaOXFL
-         Oglw==
-X-Gm-Message-State: AOAM532LuWUneycrJXATKiI+9bV3yKws8CCDr1XnPOaF/F43az9iwwE4
-        KnAbCNAe9CiNTcOoLSwvKkJ2kI1Nr2U=
-X-Google-Smtp-Source: ABdhPJwSfR8cTktW9ZW8hrLtYSg5KMAtJ4d9Ncf+vbHv759ukS7PQ/0Wd7MDddcfZYYXlmsca9Yu6A==
-X-Received: by 2002:a17:906:f1cf:b0:6ae:9992:484 with SMTP id gx15-20020a170906f1cf00b006ae99920484mr5230915ejb.607.1645167653935;
-        Thu, 17 Feb 2022 23:00:53 -0800 (PST)
-Received: from ?IPV6:2003:ea:8f4d:2b00:dcd6:5131:2794:470e? (p200300ea8f4d2b00dcd651312794470e.dip0.t-ipconnect.de. [2003:ea:8f4d:2b00:dcd6:5131:2794:470e])
-        by smtp.googlemail.com with ESMTPSA id c6sm1893387ejs.130.2022.02.17.23.00.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 17 Feb 2022 23:00:52 -0800 (PST)
-Message-ID: <fae9ee4b-6b93-95ac-abf3-f97c62e07b9d@gmail.com>
-Date:   Fri, 18 Feb 2022 08:00:45 +0100
+        with ESMTP id S230397AbiBRH3J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Feb 2022 02:29:09 -0500
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77ED825DA44;
+        Thu, 17 Feb 2022 23:28:53 -0800 (PST)
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 21I7Snr0041259;
+        Fri, 18 Feb 2022 01:28:49 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1645169329;
+        bh=ODXi2GRB6vVlNvxT0xvqYttksAAVTdslLMAf5LSA4S0=;
+        h=From:To:CC:Subject:Date;
+        b=LgocO4bXvHI/6NHM6rSH4fewkExxB87L+Z1J63C7GWNEMvUYVCHn65q3pyYa0OCTM
+         UJvM5RKl3gDFS26pxS4YTxWzgFy+MNGCJII+QqpoZJwzpIooisI1wrKiwSMjvcURTk
+         2UyoL3/nKg6jnEFZAjzWMkBIYGqxMo5l8wgE1Xds=
+Received: from DFLE111.ent.ti.com (dfle111.ent.ti.com [10.64.6.32])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 21I7SnEC056660
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 18 Feb 2022 01:28:49 -0600
+Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE111.ent.ti.com
+ (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Fri, 18
+ Feb 2022 01:28:48 -0600
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DFLE107.ent.ti.com
+ (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
+ Frontend Transport; Fri, 18 Feb 2022 01:28:48 -0600
+Received: from gsaswath-HP-ProBook-640-G5.dal.design.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 21I7SkjA022777;
+        Fri, 18 Feb 2022 01:28:46 -0600
+From:   Aswath Govindraju <a-govindraju@ti.com>
+CC:     Vignesh Raghavendra <vigneshr@ti.com>,
+        Aswath Govindraju <a-govindraju@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: sdhci_am654: Add Support for TI's AM62 SoC
+Date:   Fri, 18 Feb 2022 12:58:40 +0530
+Message-ID: <20220218072840.5629-1-a-govindraju@ti.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.6.1
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH] mmc: core: improve fallback in mmc_select_timing()
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-I have a system (cheap Amlogic S905W based TV box) where the eMMC chip
-refuses to switch to HS200 timing. That's not nice, but my bigger
-problem is that the system then falls back to the very slow default
-mode, even though DDR52 is supported and works well.
+Add support for the controller present on the AM62x SoC.
 
-Therefore, if setting a mode fails with EBADMSG (switch error), try the
-next (in descending performance order) mode instead of immediately
-falling back to the slowest mode.
+There are instances:
+sdhci0: 8bit bus width, max 200 MBps
+sdhci1: 4bit bus width, max 100 MBps
+sdhci2: 4bit bus width, max 100 MBps
 
-With the patch it looks like this on my system:
+The PHY used for 8 bit instance is same as the PHY for the 4 bit instance.
+Therefore, introduce a new bus width independent compatible for AM62 SoC
+that uses the driver data required for 4 bit instance.
 
-mmc1: mmc_select_hs200 failed, error -74
-mmc1: new DDR MMC card at address 0001
-mmcblk1: mmc1:0001 DG4008 7.28 GiB
-
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
 ---
- drivers/mmc/core/mmc.c | 18 +++++++++++++++---
- 1 file changed, 15 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci_am654.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index bbbbcaf70..c0272192d 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1523,11 +1523,23 @@ static int mmc_select_timing(struct mmc_card *card)
- 	if (!mmc_can_ext_csd(card))
- 		goto bus_speed;
- 
--	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
-+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES) {
- 		err = mmc_select_hs400es(card);
--	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
-+		if (!err)
-+			goto bus_speed;
-+		if (err != -EBADMSG)
-+			return err;
-+	}
-+
-+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200) {
- 		err = mmc_select_hs200(card);
--	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
-+		if (!err)
-+			goto bus_speed;
-+		if (err != -EBADMSG)
-+			return err;
-+	}
-+
-+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
- 		err = mmc_select_hs(card);
- 
- 	if (err && err != -EBADMSG)
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index b4891bb26648..e54fe24d47e7 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -745,6 +745,10 @@ static const struct of_device_id sdhci_am654_of_match[] = {
+ 		.compatible = "ti,am64-sdhci-4bit",
+ 		.data = &sdhci_j721e_4bit_drvdata,
+ 	},
++	{
++		.compatible = "ti,am62-sdhci",
++		.data = &sdhci_j721e_4bit_drvdata,
++	},
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_am654_of_match);
 -- 
-2.35.1
+2.17.1
 
