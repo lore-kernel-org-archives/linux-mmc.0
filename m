@@ -2,389 +2,312 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A139C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Feb 2022 07:37:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDFEAC43219
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Feb 2022 08:18:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346360AbiBUHhc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Feb 2022 02:37:32 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:33998 "EHLO
+        id S232684AbiBUISX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Feb 2022 03:18:23 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:58324 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346373AbiBUHha (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2022 02:37:30 -0500
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8367D13F0F;
-        Sun, 20 Feb 2022 23:37:06 -0800 (PST)
-X-UUID: d66b47d186954e4faea4ea25ca1bebc0-20220221
-X-UUID: d66b47d186954e4faea4ea25ca1bebc0-20220221
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw02.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 100218205; Mon, 21 Feb 2022 15:37:01 +0800
-Received: from mtkexhb02.mediatek.inc (172.21.101.103) by
- mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- 15.2.792.15; Mon, 21 Feb 2022 15:37:00 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by mtkexhb02.mediatek.inc
- (172.21.101.103) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Mon, 21 Feb
- 2022 15:37:00 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 21 Feb 2022 15:36:58 +0800
-Message-ID: <e25a07d2c365be84446aa492cddc313a5b0e2ca1.camel@mediatek.com>
-Subject: Re: [PATCH v5 3/3] mmc: mediatek: add support for SDIO eint IRQ
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
+        with ESMTP id S234041AbiBUISX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2022 03:18:23 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9471413DE2
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Feb 2022 00:18:00 -0800 (PST)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1nM3sw-00047o-3Z; Mon, 21 Feb 2022 09:17:30 +0100
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1nM3su-000Nwy-FU; Mon, 21 Feb 2022 09:17:27 +0100
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1nM3st-004YuB-4s; Mon, 21 Feb 2022 09:17:27 +0100
+Date:   Mon, 21 Feb 2022 09:17:27 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Lee Jones <lee.jones@linaro.org>, Nishanth Menon <nm@ti.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        "Eric Biggers" <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        "Stephen Boyd" <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <angelogioacchino.delregno@collabora.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        Yong Mao <yong.mao@mediatek.com>
-Date:   Mon, 21 Feb 2022 15:36:58 +0800
-In-Reply-To: <CAPDyKFqTcAd5kDAzrLDxFTismXDJdKOHLD1hEH369CyRLLo=mw@mail.gmail.com>
-References: <20220121071942.11601-1-axe.yang@mediatek.com>
-         <20220121071942.11601-4-axe.yang@mediatek.com>
-         <CAPDyKFqTcAd5kDAzrLDxFTismXDJdKOHLD1hEH369CyRLLo=mw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-clk@vger.kernel.org, David Heidelberg <david@ixit.cz>
+Subject: Re: [PATCH v16 21/40] pwm: tegra: Add runtime PM and OPP support
+Message-ID: <20220221081727.jeq2jff5ewjzubxv@pengutronix.de>
+References: <20211130232347.950-1-digetx@gmail.com>
+ <20211130232347.950-22-digetx@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="cwoouscqlz5ttj4a"
+Content-Disposition: inline
+In-Reply-To: <20211130232347.950-22-digetx@gmail.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 2022-02-14 at 16:54 +0100, Ulf Hansson wrote:
-> On Fri, 21 Jan 2022 at 08:19, Axe Yang <axe.yang@mediatek.com> wrote:
-> > 
-> > Add support for eint IRQ when MSDC is used as an SDIO host. This
-> > feature requires SDIO device support async IRQ function. With this
-> > feature, SDIO host can be awakened by SDIO card in suspend state,
-> > without additional pin.
-> > 
-> > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> > resume, switch GPIO function back to DAT1 mode then turn on clock.
-> > 
-> > Some device tree property should be added or modified in MSDC node
-> > to support SDIO eint IRQ. Pinctrls named state_dat1 and state_eint
-> > are mandatory. And cap-sdio-async-irq flag is necessary since this
-> > feature depends on asynchronous interrupt:
-> >         &mmcX {
-> >                 ...
-> >                 pinctrl-names = "default", "state_uhs",
-> > "state_eint",
-> >                                 "state_dat1";
-> 
-> Looks like you need to update the DT docs too to describe these new
-> things, right?
-Will update the docs in next patchset.
 
-> 
-> >                 ...
-> >                 pinctrl-2 = <&mmc2_pins_eint>;
-> >                 pinctrl-3 = <&mmc2_pins_dat1>;
-> >                 ...
-> >                 cap-sdio-async-irq;
-> >                 ...
-> >         };
-> > 
-> > Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> > ---
-> >  drivers/mmc/host/mtk-sd.c | 123
-> > +++++++++++++++++++++++++++++++++++---
-> >  1 file changed, 115 insertions(+), 8 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > index 65037e1d7723..f8e38228d810 100644
-> > --- a/drivers/mmc/host/mtk-sd.c
-> > +++ b/drivers/mmc/host/mtk-sd.c
-> > @@ -1,6 +1,6 @@
-> >  // SPDX-License-Identifier: GPL-2.0-only
-> >  /*
-> > - * Copyright (c) 2014-2015 MediaTek Inc.
-> > + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
-> >   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
-> >   */
-> > 
-> > @@ -9,6 +9,7 @@
-> >  #include <linux/clk.h>
-> >  #include <linux/delay.h>
-> >  #include <linux/dma-mapping.h>
-> > +#include <linux/gpio/consumer.h>
-> >  #include <linux/iopoll.h>
-> >  #include <linux/ioport.h>
-> >  #include <linux/irq.h>
-> > @@ -440,8 +441,12 @@ struct msdc_host {
-> >         struct pinctrl *pinctrl;
-> >         struct pinctrl_state *pins_default;
-> >         struct pinctrl_state *pins_uhs;
-> > +       struct pinctrl_state *pins_eint;
-> > +       struct pinctrl_state *pins_dat1;
-> >         struct delayed_work req_timeout;
-> >         int irq;                /* host interrupt */
-> > +       int eint_irq;           /* device interrupt */
-> > +       int sdio_irq_cnt;       /* irq enable cnt */
-> >         struct reset_control *reset;
-> > 
-> >         struct clk *src_clk;    /* msdc source clock */
-> > @@ -465,6 +470,7 @@ struct msdc_host {
-> >         bool hs400_tuning;      /* hs400 mode online tuning */
-> >         bool internal_cd;       /* Use internal card-detect logic
-> > */
-> >         bool cqhci;             /* support eMMC hw cmdq */
-> > +       bool sdio_eint_ready;   /* Ready to support SDIO eint
-> > interrupt */
-> >         struct msdc_save_para save_para; /* used when gate HCLK */
-> >         struct msdc_tune_para def_tune_para; /* default tune
-> > setting */
-> >         struct msdc_tune_para saved_tune_para; /* tune result of
-> > CMD21/CMD19 */
-> > @@ -1527,10 +1533,12 @@ static void msdc_enable_sdio_irq(struct
-> > mmc_host *mmc, int enb)
-> >         __msdc_enable_sdio_irq(host, enb);
-> >         spin_unlock_irqrestore(&host->lock, flags);
-> > 
-> > -       if (enb)
-> > -               pm_runtime_get_noresume(host->dev);
-> > -       else
-> > -               pm_runtime_put_noidle(host->dev);
-> > +       if (mmc->card && !mmc->card->cccr.enable_async_irq) {
-> > +               if (enb)
-> > +                       pm_runtime_get_noresume(host->dev);
-> > +               else
-> > +                       pm_runtime_put_noidle(host->dev);
-> > +       }
-> >  }
-> > 
-> >  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32
-> > intsts)
-> > @@ -2461,6 +2469,48 @@ static const struct mmc_host_ops mt_msdc_ops
-> > = {
-> >         .hw_reset = msdc_hw_reset,
-> >  };
-> > 
-> > +static irqreturn_t msdc_sdio_eint_irq(int irq, void *dev_id)
-> > +{
-> > +       struct msdc_host *host = dev_id;
-> > +       struct mmc_host *mmc = mmc_from_priv(host);
-> > +
-> > +       spin_lock(&host->lock);
-> > +       if (likely(host->sdio_irq_cnt > 0)) {
-> > +               disable_irq_nosync(host->eint_irq);
-> > +               disable_irq_wake(host->eint_irq);
-> > +               host->sdio_irq_cnt--;
-> > +       }
-> > +       spin_unlock(&host->lock);
-> > +
-> > +       sdio_signal_irq(mmc);
-> > +
-> > +       return IRQ_HANDLED;
-> > +}
-> > +
-> > +static int msdc_request_dat1_eint_irq(struct msdc_host *host)
-> > +{
-> > +       struct gpio_desc *desc;
-> > +       int irq, ret;
-> > +
-> > +       desc = devm_gpiod_get(host->dev, "eint", GPIOD_IN);
-> > +       if (IS_ERR(desc))
-> > +               return PTR_ERR(desc);
-> > +
-> > +       irq = gpiod_to_irq(desc);
-> > +       if (irq < 0)
-> > +               return irq;
-> > +
-> > +       ret = devm_request_threaded_irq(host->dev, irq, NULL,
-> > msdc_sdio_eint_irq,
-> > +                                       IRQF_TRIGGER_LOW |
-> > IRQF_ONESHOT | IRQF_NO_AUTOEN,
-> > +                                       "sdio-eint", host);
-> 
-> Again, I think you need to update the DT doc to describe these new
-> IRQ/GPIO things.
-Will update the docs in next patchset.
+--cwoouscqlz5ttj4a
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> 
-> > +       if (ret)
-> > +               return ret;
-> > +
-> > +       host->eint_irq = irq;
-> > +
-> > +       return 0;
-> > +}
-> > +
-> >  static const struct cqhci_host_ops msdc_cmdq_ops = {
-> >         .enable         = msdc_cqe_enable,
-> >         .disable        = msdc_cqe_disable,
-> > @@ -2631,6 +2681,23 @@ static int msdc_drv_probe(struct
-> > platform_device *pdev)
-> >                 goto host_free;
-> >         }
-> > 
-> > +       if (!(mmc->caps2 & MMC_CAP2_NO_SDIO) && (mmc->caps2 &
-> > MMC_CAP2_SDIO_ASYNC_IRQ)) {
-> > +               /* Support for SDIO eint irq */
-> > +               host->pins_eint = pinctrl_lookup_state(host-
-> > >pinctrl, "state_eint");
-> > +               if (IS_ERR(host->pins_eint)) {
-> > +                       dev_dbg(&pdev->dev, "Cannot find pinctrl
-> > eint!\n");
-> > +               } else {
-> > +                       host->pins_dat1 =
-> > pinctrl_lookup_state(host->pinctrl, "state_dat1");
-> > +                       if (IS_ERR(host->pins_dat1)) {
-> > +                               ret = dev_err_probe(&pdev->dev,
-> > PTR_ERR(host->pins_dat1),
-> > +                                                   "Cannot find
-> > pinctrl dat1!\n");
-> > +                               goto host_free;
-> > +                       }
-> > +
-> > +                       host->sdio_eint_ready = true;
-> > +               }
-> > +       }
-> > +
-> >         msdc_of_property_parse(pdev, host);
-> > 
-> >         host->dev = &pdev->dev;
-> > @@ -2722,6 +2789,16 @@ static int msdc_drv_probe(struct
-> > platform_device *pdev)
-> >         if (ret)
-> >                 goto release;
-> > 
-> > +       if (host->sdio_eint_ready) {
-> > +               ret = msdc_request_dat1_eint_irq(host);
-> > +               if (ret) {
-> > +                       dev_err(host->dev, "Failed to register
-> > data1 eint irq!\n");
-> > +                       goto release;
-> > +               }
-> > +
-> > +               pinctrl_select_state(host->pinctrl, host-
-> > >pins_dat1);
-> > +       }
-> > +
-> >         pm_runtime_set_active(host->dev);
-> >         pm_runtime_set_autosuspend_delay(host->dev,
-> > MTK_MMC_AUTOSUSPEND_DELAY);
-> >         pm_runtime_use_autosuspend(host->dev);
-> > @@ -2843,8 +2920,22 @@ static int __maybe_unused
-> > msdc_runtime_suspend(struct device *dev)
-> >  {
-> >         struct mmc_host *mmc = dev_get_drvdata(dev);
-> >         struct msdc_host *host = mmc_priv(mmc);
-> > +       unsigned long flags;
-> > 
-> >         msdc_save_reg(host);
-> > +
-> > +       if (host->sdio_eint_ready) {
-> > +               disable_irq(host->irq);
-> > +               pinctrl_select_state(host->pinctrl, host-
-> > >pins_eint);
-> > +               spin_lock_irqsave(&host->lock, flags);
-> > +               if (host->sdio_irq_cnt == 0) {
-> > +                       enable_irq(host->eint_irq);
-> > +                       enable_irq_wake(host->eint_irq);
-> > +                       host->sdio_irq_cnt++;
-> > +               }
-> > +               sdr_clr_bits(host->base + SDC_CFG,
-> > SDC_CFG_SDIOIDE);
-> > +               spin_unlock_irqrestore(&host->lock, flags);
-> > +       }
-> >         msdc_gate_clock(host);
-> >         return 0;
-> >  }
-> > @@ -2853,6 +2944,7 @@ static int __maybe_unused
-> > msdc_runtime_resume(struct device *dev)
-> >  {
-> >         struct mmc_host *mmc = dev_get_drvdata(dev);
-> >         struct msdc_host *host = mmc_priv(mmc);
-> > +       unsigned long flags;
-> >         int ret;
-> > 
-> >         ret = msdc_ungate_clock(host);
-> > @@ -2860,10 +2952,25 @@ static int __maybe_unused
-> > msdc_runtime_resume(struct device *dev)
-> >                 return ret;
-> > 
-> >         msdc_restore_reg(host);
-> > +
-> > +       if (host->sdio_eint_ready) {
-> > +               spin_lock_irqsave(&host->lock, flags);
-> > +               if (host->sdio_irq_cnt > 0) {
-> > +                       disable_irq_nosync(host->eint_irq);
-> > +                       disable_irq_wake(host->eint_irq);
-> > +                       host->sdio_irq_cnt--;
-> > +                       sdr_set_bits(host->base + SDC_CFG,
-> > SDC_CFG_SDIOIDE);
-> > +               } else {
-> > +                       sdr_clr_bits(host->base + MSDC_INTEN,
-> > MSDC_INTEN_SDIOIRQ);
-> > +               }
-> > +               spin_unlock_irqrestore(&host->lock, flags);
-> > +               pinctrl_select_state(host->pinctrl, host-
-> > >pins_uhs);
-> > +               enable_irq(host->irq);
-> > +       }
-> >         return 0;
-> >  }
-> > 
-> > -static int __maybe_unused msdc_suspend(struct device *dev)
-> > +static int __maybe_unused msdc_suspend_noirq(struct device *dev)
-> >  {
-> >         struct mmc_host *mmc = dev_get_drvdata(dev);
-> >         int ret;
-> > @@ -2877,13 +2984,13 @@ static int __maybe_unused
-> > msdc_suspend(struct device *dev)
-> >         return pm_runtime_force_suspend(dev);
-> >  }
-> > 
-> > -static int __maybe_unused msdc_resume(struct device *dev)
-> > +static int __maybe_unused msdc_resume_noirq(struct device *dev)
-> >  {
-> >         return pm_runtime_force_resume(dev);
-> >  }
-> > 
-> >  static const struct dev_pm_ops msdc_dev_pm_ops = {
-> > -       SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
-> > +       SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(msdc_suspend_noirq,
-> > msdc_resume_noirq)
-> >         SET_RUNTIME_PM_OPS(msdc_runtime_suspend,
-> > msdc_runtime_resume, NULL)
-> >  };
-> > 
-> 
-> Overall the approach makes perfect sense to me!
-> 
-> However, I think the code can be simplified and made more robust by
-> using the wakeirq interface instead. Please have a look at
-> dev_pm_set_dedicated_wake_irq() and friends. Using them, will let the
-> runtime PM core deal with disabling/enabling the IRQ, rather than
-> having to do that manually by the driver, for example.
-> 
-> If you want to get inspired by an existing implementation, please
-> have
-> a look at the sdhci-omap driver.
-Will read the wakeirq interfaces and use them in next version. Thanks
-for review.
+Hello,
 
-Regards,
-Axe Yang
+On Wed, Dec 01, 2021 at 02:23:28AM +0300, Dmitry Osipenko wrote:
+> The PWM on Tegra belongs to the core power domain and we're going to
+> enable GENPD support for the core domain. Now PWM must be resumed using
+> runtime PM API in order to initialize the PWM power state. The PWM clock
+> rate must be changed using OPP API that will reconfigure the power domain
+> performance state in accordance to the rate. Add runtime PM and OPP
+> support to the PWM driver.
+>=20
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  drivers/pwm/pwm-tegra.c | 82 ++++++++++++++++++++++++++++++++---------
+>  1 file changed, 64 insertions(+), 18 deletions(-)
+>=20
+> diff --git a/drivers/pwm/pwm-tegra.c b/drivers/pwm/pwm-tegra.c
+> index 11a10b575ace..18cf974ac776 100644
+> --- a/drivers/pwm/pwm-tegra.c
+> +++ b/drivers/pwm/pwm-tegra.c
+> @@ -42,12 +42,16 @@
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> +#include <linux/pm_opp.h>
+>  #include <linux/pwm.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/pinctrl/consumer.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/slab.h>
+>  #include <linux/reset.h>
+> =20
+> +#include <soc/tegra/common.h>
+> +
+>  #define PWM_ENABLE	(1 << 31)
+>  #define PWM_DUTY_WIDTH	8
+>  #define PWM_DUTY_SHIFT	16
+> @@ -145,7 +149,7 @@ static int tegra_pwm_config(struct pwm_chip *chip, st=
+ruct pwm_device *pwm,
+>  		required_clk_rate =3D
+>  			(NSEC_PER_SEC / period_ns) << PWM_DUTY_WIDTH;
+> =20
+> -		err =3D clk_set_rate(pc->clk, required_clk_rate);
+> +		err =3D dev_pm_opp_set_rate(pc->dev, required_clk_rate);
+>  		if (err < 0)
+>  			return -EINVAL;
+> =20
+> @@ -181,8 +185,8 @@ static int tegra_pwm_config(struct pwm_chip *chip, st=
+ruct pwm_device *pwm,
+>  	 * before writing the register. Otherwise, keep it enabled.
+>  	 */
+>  	if (!pwm_is_enabled(pwm)) {
+> -		err =3D clk_prepare_enable(pc->clk);
+> -		if (err < 0)
+> +		err =3D pm_runtime_resume_and_get(pc->dev);
+> +		if (err)
+>  			return err;
+>  	} else
+>  		val |=3D PWM_ENABLE;
+> @@ -193,7 +197,7 @@ static int tegra_pwm_config(struct pwm_chip *chip, st=
+ruct pwm_device *pwm,
+>  	 * If the PWM is not enabled, turn the clock off again to save power.
+>  	 */
+>  	if (!pwm_is_enabled(pwm))
+> -		clk_disable_unprepare(pc->clk);
+> +		pm_runtime_put(pc->dev);
+> =20
+>  	return 0;
+>  }
+> @@ -204,8 +208,8 @@ static int tegra_pwm_enable(struct pwm_chip *chip, st=
+ruct pwm_device *pwm)
+>  	int rc =3D 0;
+>  	u32 val;
+> =20
+> -	rc =3D clk_prepare_enable(pc->clk);
+> -	if (rc < 0)
+> +	rc =3D pm_runtime_resume_and_get(pc->dev);
+> +	if (rc)
+>  		return rc;
+> =20
+>  	val =3D pwm_readl(pc, pwm->hwpwm);
+> @@ -224,7 +228,7 @@ static void tegra_pwm_disable(struct pwm_chip *chip, =
+struct pwm_device *pwm)
+>  	val &=3D ~PWM_ENABLE;
+>  	pwm_writel(pc, pwm->hwpwm, val);
+> =20
+> -	clk_disable_unprepare(pc->clk);
+> +	pm_runtime_put_sync(pc->dev);
+>  }
+> =20
+>  static const struct pwm_ops tegra_pwm_ops =3D {
+> @@ -256,11 +260,20 @@ static int tegra_pwm_probe(struct platform_device *=
+pdev)
+>  	if (IS_ERR(pwm->clk))
+>  		return PTR_ERR(pwm->clk);
+> =20
+> +	ret =3D devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
+> +	if (ret)
+> +		return ret;
+> +
+> +	pm_runtime_enable(&pdev->dev);
+> +	ret =3D pm_runtime_resume_and_get(&pdev->dev);
+> +	if (ret)
+> +		return ret;
+> +
+>  	/* Set maximum frequency of the IP */
+> -	ret =3D clk_set_rate(pwm->clk, pwm->soc->max_frequency);
+> +	ret =3D dev_pm_opp_set_rate(pwm->dev, pwm->soc->max_frequency);
+>  	if (ret < 0) {
+>  		dev_err(&pdev->dev, "Failed to set max frequency: %d\n", ret);
+> -		return ret;
+> +		goto put_pm;
+>  	}
+> =20
+>  	/*
+> @@ -278,7 +291,7 @@ static int tegra_pwm_probe(struct platform_device *pd=
+ev)
+>  	if (IS_ERR(pwm->rst)) {
+>  		ret =3D PTR_ERR(pwm->rst);
+>  		dev_err(&pdev->dev, "Reset control is not found: %d\n", ret);
+> -		return ret;
+> +		goto put_pm;
+>  	}
+> =20
+>  	reset_control_deassert(pwm->rst);
+> @@ -291,10 +304,16 @@ static int tegra_pwm_probe(struct platform_device *=
+pdev)
+>  	if (ret < 0) {
+>  		dev_err(&pdev->dev, "pwmchip_add() failed: %d\n", ret);
+>  		reset_control_assert(pwm->rst);
+> -		return ret;
+> +		goto put_pm;
+>  	}
+> =20
+> +	pm_runtime_put(&pdev->dev);
+> +
+>  	return 0;
+> +put_pm:
+> +	pm_runtime_put_sync_suspend(&pdev->dev);
+> +	pm_runtime_force_suspend(&pdev->dev);
+> +	return ret;
+>  }
+> =20
+>  static int tegra_pwm_remove(struct platform_device *pdev)
+> @@ -305,20 +324,44 @@ static int tegra_pwm_remove(struct platform_device =
+*pdev)
+> =20
+>  	reset_control_assert(pc->rst);
+> =20
+> +	pm_runtime_force_suspend(&pdev->dev);
+> +
+>  	return 0;
+>  }
+> =20
+> -#ifdef CONFIG_PM_SLEEP
+> -static int tegra_pwm_suspend(struct device *dev)
+> +static int __maybe_unused tegra_pwm_runtime_suspend(struct device *dev)
+>  {
+> -	return pinctrl_pm_select_sleep_state(dev);
+> +	struct tegra_pwm_chip *pc =3D dev_get_drvdata(dev);
+> +	int err;
+> +
+> +	clk_disable_unprepare(pc->clk);
+> +
+> +	err =3D pinctrl_pm_select_sleep_state(dev);
+> +	if (err) {
+> +		clk_prepare_enable(pc->clk);
+> +		return err;
+> +	}
+> +
+> +	return 0;
+>  }
+> =20
+> -static int tegra_pwm_resume(struct device *dev)
+> +static int __maybe_unused tegra_pwm_runtime_resume(struct device *dev)
+>  {
+> -	return pinctrl_pm_select_default_state(dev);
+> +	struct tegra_pwm_chip *pc =3D dev_get_drvdata(dev);
+> +	int err;
+> +
+> +	err =3D pinctrl_pm_select_default_state(dev);
+> +	if (err)
+> +		return err;
+> +
+> +	err =3D clk_prepare_enable(pc->clk);
+> +	if (err) {
+> +		pinctrl_pm_select_sleep_state(dev);
+> +		return err;
+> +	}
+> +
+> +	return 0;
+>  }
+> -#endif
+> =20
+>  static const struct tegra_pwm_soc tegra20_pwm_soc =3D {
+>  	.num_channels =3D 4,
+> @@ -344,7 +387,10 @@ static const struct of_device_id tegra_pwm_of_match[=
+] =3D {
+>  MODULE_DEVICE_TABLE(of, tegra_pwm_of_match);
+> =20
+>  static const struct dev_pm_ops tegra_pwm_pm_ops =3D {
+> -	SET_SYSTEM_SLEEP_PM_OPS(tegra_pwm_suspend, tegra_pwm_resume)
+> +	SET_RUNTIME_PM_OPS(tegra_pwm_runtime_suspend, tegra_pwm_runtime_resume,
+> +			   NULL)
+> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> +				pm_runtime_force_resume)
+>  };
+> =20
+>  static struct platform_driver tegra_pwm_driver =3D {
 
+I admit to not completely understand the effects of this patch, but I
+don't see a problem either. So for me this patch is OK:
+
+Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+
+I spot a problem, it's not introduced by this patch however: If the
+consumer of the PWM didn't stop the hardware, the suspend should IMHO be
+prevented.
+
+I wonder if the patches in this series go in in one go via an ARM or
+Tegra tree, or each patch via its respective maintainer tree.
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--cwoouscqlz5ttj4a
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmITSpMACgkQwfwUeK3K
+7AmZaggAnjKWv6/JVY3Cp1bcb73ZjrS1hecjg6rS92mYnqvqYCbPCvW9u6Ku+IWI
+u/wIClnWJzYXF6ukB9OGBlJox1w6dS/j+LHiqAQw5h4DdWQv0cy27jDTF9lV4r1E
+DQWuKRNPSs/X7nMMIGkJ2UqgyeKw0sfX1cHpiJ8WatkPUwayInGaBfblE0seHIhw
+QUG2NbJtiROV3MgPRpoQWb0+7t9SSw9wxobBva3oaAIMNQLDmi/hcMzJXfXo3uH5
+Nu4PJjXQxnIxTap/ys4sqabTbmIopeHY2WDuuwIxgRqF9O4IRl+ygV05c79HE6mt
+tX1TItqO17EB1/sux6//dOpREBQgQA==
+=cZKl
+-----END PGP SIGNATURE-----
+
+--cwoouscqlz5ttj4a--
