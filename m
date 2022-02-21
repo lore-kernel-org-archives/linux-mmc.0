@@ -2,83 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78669C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Feb 2022 02:24:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07AD0C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Feb 2022 07:04:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343662AbiBUCYY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 20 Feb 2022 21:24:24 -0500
-Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:49598 "EHLO
+        id S1345794AbiBUHFH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Feb 2022 02:05:07 -0500
+Received: from mxb-00190b01.gslb.pphosted.com ([23.128.96.19]:49878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343681AbiBUCYG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Feb 2022 21:24:06 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13FB63C703;
-        Sun, 20 Feb 2022 18:23:33 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 6D39EB80E48;
-        Mon, 21 Feb 2022 02:23:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D4CE2C340F5;
-        Mon, 21 Feb 2022 02:23:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1645410211;
-        bh=+f42uaVoaynmzvwmeFuqeFek1G2q6WaVoSIttveoc8o=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=qLvxKXaKx0rMZKnbOvnm3aDrNWfwxuV/c8/wQLOuIU3L2P/7R8+zQdXY52FE614ZS
-         9L2Pb2ol73j8BsrUFxxUI+9L+4kUXAXgDhvpWKT0NNV2azcRVLinU1X3WTUdfphXn2
-         ugad5JGWoEL+ow43PZzZ5xPrat2Az80vP/ZZAaLXMkhZqzETW6e0glh/YVrKscYttp
-         5mrBx3z9iQVemas6NXu8JCUWjIP2rBWGj7dDa/b+gVIeSRRMAoxai0sAONIpamxajB
-         75QMoQZ0GIOmxECAI0cBQoOCrr3nBM89bg+k3zMkKLt02yoic+V3udmWcy4BOK9/Su
-         0bx4nPXNoDuaw==
-Date:   Sun, 20 Feb 2022 18:23:29 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-block@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, linux-api@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Bart Van Assche <bvanassche@acm.org>
-Subject: Re: [PATCH v4 0/3] block: show crypto capabilities in sysfs
-Message-ID: <YhL3obBiHO92EcEc@sol.localdomain>
-References: <20220124215938.2769-1-ebiggers@kernel.org>
+        with ESMTP id S1345790AbiBUHFF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Feb 2022 02:05:05 -0500
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49FAC5FAC;
+        Sun, 20 Feb 2022 23:04:38 -0800 (PST)
+X-UUID: 1b285ebb4d624eda838e4a2c5c83752d-20220221
+X-UUID: 1b285ebb4d624eda838e4a2c5c83752d-20220221
+Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 889575141; Mon, 21 Feb 2022 15:04:33 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Mon, 21 Feb 2022 15:04:32 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Mon, 21 Feb 2022 15:04:31 +0800
+Message-ID: <21fa48195101b91c09b266f1c4f40eda5d127fdb.camel@mediatek.com>
+Subject: Re: [PATCH v4 1/3] dt-bindings: mmc: add cap-sdio-async-irq flag
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        "Eric Biggers" <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        "Stephen Boyd" <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>
+Date:   Mon, 21 Feb 2022 15:04:31 +0800
+In-Reply-To: <CAPDyKFr8bV+1uTbuhMObvORLGJHsvZHUONJkdY54MXPPRWL5Qw@mail.gmail.com>
+References: <20220119103212.13158-1-axe.yang@mediatek.com>
+         <20220119103212.13158-2-axe.yang@mediatek.com>
+         <CAPDyKFr8bV+1uTbuhMObvORLGJHsvZHUONJkdY54MXPPRWL5Qw@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220124215938.2769-1-ebiggers@kernel.org>
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jan 24, 2022 at 01:59:35PM -0800, Eric Biggers wrote:
-> This series adds sysfs files that expose the inline encryption
-> capabilities of request queues.
+On Mon, 2022-02-14 at 16:23 +0100, Ulf Hansson wrote:
+> On Wed, 19 Jan 2022 at 11:32, Axe Yang <axe.yang@mediatek.com> wrote:
+> > 
+> > Asynchronous interrupt is a mechanism that allow SDIO devices alarm
+> > interrupt when host stop providing clock to card. Add a DT flag to
+> > enable this feature if it is supported by SDIO card.
+> > 
+> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5
+> > +++++
+> >  1 file changed, 5 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc-
+> > controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-
+> > controller.yaml
+> > index 513f3c8758aa..16fb06f88471 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> > @@ -165,6 +165,11 @@ properties:
+> >      description:
+> >        eMMC hardware reset is supported
+> > 
+> > +  cap-sdio-async-irq:
+> > +    $ref: /schemas/types.yaml#/definitions/flag
+> > +    description:
+> > +      SDIO async interrupt is supported.
 > 
-> Patches 1 and 2 are some related cleanups for existing blk-sysfs code.
-> Patch 3 is the real change; see there for more details.
+> We already have a DT property for this, I believe.
 > 
-> This series applies to v5.17-rc1.
+> "wakeup-source" is probably what you want, but we have additional
+> properties that are related to this too. See more below.
 > 
-> Changed v3 => v4:
->    - Reworded a comment in patch 2.
->    - Updated dates in sysfs documentation.
->    - Added more Reviewed-by tags.
+> > +
+> >    cap-sdio-irq:
+> >      $ref: /schemas/types.yaml#/definitions/flag
+> >      description:
 > 
-> Changed v2 => v3:
->    - Moved the documentation into Documentation/ABI/stable/sysfs-block,
->      and improved it a bit.
->    - Write "/sys/block/" instead of "/sys/class/block/".
->    - Added Reviewed-by tags.
+> The above, "cap-sdio-irq", informs whether the SDIO IRQs can be
+> supported at all, by the host controller.
 > 
-> Changed v1 => v2:
->    - Use sysfs_emit() instead of sprintf().
->    - Use __ATTR_RO().
+> The property "keep-power-in-suspend" informs whether we can preserve
+> the power to the card during a suspend/resume cycle. This should be
+> needed in your case too, I think.
 > 
-> Eric Biggers (3):
->   block: simplify calling convention of elv_unregister_queue()
->   block: don't delete queue kobject before its children
->   blk-crypto: show crypto capabilities in sysfs
+> In other words, you may need to combine "cap-sdio-irq",
+> "wakeup-source" and "keep-power-in-suspend" to describe your HW.
+> 
+> However, what perhaps is missing, is a common MMC/SDIO binding that
+> let us describe an optional irq-line, which sometimes is being used
+> for the wakeup irq. In the sdhci-omap case, we look for an irq
+> mapping
+> towards "wakeup" if specified in the "interrupt-names" property.
+> 
+> In some case, when the SDIO card supports an out-of-band IRQ line,
+> the
+> similar should be specified in the child-node corresponding to the
+> SDIO card.
+> 
 > 
 
-Any more feedback on this?
+Yes, the intention of the patchset is to wakeup SDIO host in
+runtime/system suspend state within SDIO DAT1(in-band wakeup).
 
-- Eric
+I will implement it with "wakeup-source", thanks for your review.
+
