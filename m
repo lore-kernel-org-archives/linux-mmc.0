@@ -2,61 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42E0FC4321E
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Feb 2022 09:15:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCD09C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Feb 2022 09:56:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232699AbiBXJPl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Feb 2022 04:15:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46426 "EHLO
+        id S233081AbiBXJ4c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Feb 2022 04:56:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49216 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232718AbiBXJPk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2022 04:15:40 -0500
-X-Greylist: delayed 460 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 24 Feb 2022 01:15:08 PST
-Received: from mail.onlinesuccesses.pl (mail.onlinesuccesses.pl [198.244.150.235])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C09D327991A
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2022 01:15:08 -0800 (PST)
-Received: by mail.onlinesuccesses.pl (Postfix, from userid 1002)
-        id A1509A478C; Thu, 24 Feb 2022 09:06:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=onlinesuccesses.pl;
-        s=mail; t=1645693601;
-        bh=nE8HqilgMh4dy7+Z8ksfg7Bc9rmPeQtYFq3/3YR2ODU=;
-        h=Date:From:To:Subject:From;
-        b=FMmgFlg4+cSGNKN0H0MlfPEgw4DBJ7e69HUExy4U3aczS/OhjvPbt408fGgHv3pH/
-         O3yELrJN1+HpWQFHWnpKGASOwsTNhRqZUyYrbIzigtHS0+7RQEV5jRBdR1pfrLNBnX
-         vrVptNUtd8eVR/6HrPK7kktnaVRVa/63X2cyl4bRqo3K/msYJD6167C30kkZUlAZ/J
-         OLds6BxtVZ226Ol0aWAIcju1wJzv21B/Uw0+NVuMNKksez7UEUFXrIVkNE1NmOBfEP
-         5hyJOluMsy8AM32hyTLULcGLOOQT4+wVVHVEK53nah9Zbo5TnelzLi7jiP7xr0IL3T
-         V9YbyuogKug3g==
-Received: by mail.onlinesuccesses.pl for <linux-mmc@vger.kernel.org>; Thu, 24 Feb 2022 09:05:53 GMT
-Message-ID: <20220224074501-0.1.2r.ho4i.0.j9fj9igofk@onlinesuccesses.pl>
-Date:   Thu, 24 Feb 2022 09:05:53 GMT
-From:   "Wiktor Zielonko" <wiktor.zielonko@onlinesuccesses.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Ruch z pierwszej pozycji w Google
-X-Mailer: mail.onlinesuccesses.pl
+        with ESMTP id S233072AbiBXJ4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Feb 2022 04:56:31 -0500
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6B0D285AA3;
+        Thu, 24 Feb 2022 01:56:01 -0800 (PST)
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 6325C212B8;
+        Thu, 24 Feb 2022 09:56:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1645696560; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Mi7kRn8+80MSMtlJoq/glAA6uvH6O77jShLeUaAMftM=;
+        b=Ld+6MGs1+cYUZ06k75aF5WtEQey1+qh3gW31FPPXM7XUJgc9JNtwVjG0XH5xWJV9LU5xLL
+        7AbU5tcOwSFSq8PddGs5NlH7S3YPH0gOaP0jKs1uNBY7YaQdY93jfJnCfPBpIhXi2eDzk3
+        Sgryb+HSyxyFxE7EJolJLUQpwo5B7Ak=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1645696560;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Mi7kRn8+80MSMtlJoq/glAA6uvH6O77jShLeUaAMftM=;
+        b=9geI1vQuvIGVF6Vd3C0FZJerDi6chs0XQZMG8JvJpNoRfeDxZSTa/AmydCrrhfNHjquwQY
+        qpO6DPXGhsC5m/AQ==
+Received: from localhost.localdomain (unknown [10.100.208.98])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by relay2.suse.de (Postfix) with ESMTPS id 2CD29A3B83;
+        Thu, 24 Feb 2022 09:56:00 +0000 (UTC)
+From:   Jiri Slaby <jslaby@suse.cz>
+To:     gregkh@linuxfoundation.org
+Cc:     linux-serial@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Jiri Slaby <jslaby@suse.cz>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH 4/5] sdio_uart: make use of UART_LCR_WLEN() + tty_get_char_size()
+Date:   Thu, 24 Feb 2022 10:55:57 +0100
+Message-Id: <20220224095558.30929-4-jslaby@suse.cz>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220224095558.30929-1-jslaby@suse.cz>
+References: <20220224095517.30872-1-jslaby@suse.cz>
+ <20220224095558.30929-1-jslaby@suse.cz>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,=20
+Having a generic UART_LCR_WLEN() macro and the tty_get_char_size()
+helper, we can remove all those repeated switch-cases in drivers.
 
-jaki=C5=9B czas temu zg=C5=82osi=C5=82a si=C4=99 do nas firma, kt=C3=B3re=
-j strona internetowa nie pozycjonowa=C5=82a si=C4=99 wysoko w wyszukiwarc=
-e Google.=20
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/core/sdio_uart.c | 16 +---------------
+ 1 file changed, 1 insertion(+), 15 deletions(-)
 
-Na podstawie wykonanego przez nas audytu SEO zoptymalizowali=C5=9Bmy tre=C5=
-=9Bci na stronie pod k=C4=85tem wcze=C5=9Bniej opracowanych s=C5=82=C3=B3=
-w kluczowych. Nasz wewn=C4=99trzny system codziennie analizuje prawid=C5=82=
-owe dzia=C5=82anie witryny.  Dzi=C4=99ki indywidualnej strategii, firma z=
-dobywa coraz wi=C4=99cej Klient=C3=B3w. =20
+diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
+index 04c0823e0359..e6eb5bd6e440 100644
+--- a/drivers/mmc/core/sdio_uart.c
++++ b/drivers/mmc/core/sdio_uart.c
+@@ -250,21 +250,7 @@ static void sdio_uart_change_speed(struct sdio_uart_port *port,
+ 	unsigned char cval, fcr = 0;
+ 	unsigned int baud, quot;
+ 
+-	switch (termios->c_cflag & CSIZE) {
+-	case CS5:
+-		cval = UART_LCR_WLEN5;
+-		break;
+-	case CS6:
+-		cval = UART_LCR_WLEN6;
+-		break;
+-	case CS7:
+-		cval = UART_LCR_WLEN7;
+-		break;
+-	default:
+-	case CS8:
+-		cval = UART_LCR_WLEN8;
+-		break;
+-	}
++	cval = UART_LCR_WLEN(tty_get_char_size(termios->c_cflag));
+ 
+ 	if (termios->c_cflag & CSTOPB)
+ 		cval |= UART_LCR_STOP;
+-- 
+2.35.1
 
-Czy chcieliby Pa=C5=84stwo zwi=C4=99kszy=C4=87 liczb=C4=99 os=C3=B3b odwi=
-edzaj=C4=85cych stron=C4=99 internetow=C4=85 firmy? M=C3=B3g=C5=82bym prz=
-edstawi=C4=87 ofert=C4=99?=20
-
-
-Pozdrawiam serdecznie,
-Wiktor Zielonko
