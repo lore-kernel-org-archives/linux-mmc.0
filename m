@@ -2,76 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDF80C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Feb 2022 16:55:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AE55C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Feb 2022 20:41:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243201AbiBYQzs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Feb 2022 11:55:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45962 "EHLO
+        id S236704AbiBYUlf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Feb 2022 15:41:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47468 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241873AbiBYQzn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2022 11:55:43 -0500
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 082D91E6953;
-        Fri, 25 Feb 2022 08:55:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1645808111; x=1677344111;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=a/2QHHN/ETWTPtmCEfGXBl9buOitSAcfb/bJHn2KyY0=;
-  b=aEtKsCDGlXMH+++MMqQOG1eb2JKVNPnIchpUA7Pn4EeVmtTFyOPlwRi/
-   Ilqpgpb28m9jcp/DlbzGPESomgkChUTuva5sA8Bd/CpwMwLIOCpEiCyXK
-   SY+EhDyV57W5AxuAssbPuPmd7WJpnYlf68+nnmSnHzAaBxYh35c5nYX5J
-   4G9npQ7GRcVRdefsQ7RUxdFmxBDwb3wcWifVa0ZiJrMjNwsZ2GkStFihi
-   KW0w9ND5ZznU7vRRj7J6waYsSw+lUmUJBJzoiY8IFPSXLP+3ke3HCu/oz
-   LBIg8XQXetQ5DHTX3pF/QpDYDvKIsrCjaAc+EamfV8irEO+LZGKjzS0YA
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10268"; a="250112543"
-X-IronPort-AV: E=Sophos;i="5.90,136,1643702400"; 
-   d="scan'208";a="250112543"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2022 08:55:10 -0800
-X-IronPort-AV: E=Sophos;i="5.90,136,1643702400"; 
-   d="scan'208";a="640169939"
-Received: from smile.fi.intel.com ([10.237.72.59])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Feb 2022 08:55:07 -0800
-Received: from andy by smile.fi.intel.com with local (Exim 4.95)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1nNdrG-008GpT-3G;
-        Fri, 25 Feb 2022 18:54:18 +0200
-Date:   Fri, 25 Feb 2022 18:54:17 +0200
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Jia-Ju Bai <baijiaju1990@gmail.com>
-Cc:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com,
-        yoshihiro.shimoda.uh@renesas.com, adrian.hunter@intel.com,
-        swboyd@chromium.org, dev@lynxeye.de, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: check the return value of
- wakeup_source_register()
-Message-ID: <YhkJuZb7PfGvmRTY@smile.fi.intel.com>
-References: <20220225121858.25638-1-baijiaju1990@gmail.com>
+        with ESMTP id S231500AbiBYUle (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2022 15:41:34 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42190214F99;
+        Fri, 25 Feb 2022 12:41:02 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 01AA7B83363;
+        Fri, 25 Feb 2022 20:41:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1FB20C340E7;
+        Fri, 25 Feb 2022 20:40:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1645821659;
+        bh=HE8061LF/iGlGPikfhtbvjKwTHd7MrtYrRbVauGucKk=;
+        h=From:To:Cc:Subject:Date:From;
+        b=p1fVqOO/4teZOpAH/ugmrKB7ZJeG0J4pG1tth3XNCRtbdkF7vXE5d3pUJi+DzPm8u
+         i0ISzk+WNMwe1woR2UxwcRzkEL8yxQBaoiXm09MvY096J7S5RE1hbEKYRww4IbkKwD
+         p3JPKcwFLQUXYhxfsY7AyyFFlxa2DgYB/lrVdgw1ng7Pbyxt58oaaHzjhWTcM7u/h8
+         Ys9LgtK9IHDOQJlSwG3oxIdxtRsG4s3NxoLy54nQsPDPIyMv2aDxLWG4Hbt/b7WOnt
+         /vlLjEUoheH8f6zw5GGpyR2jIh43nxliyJteIEbmrfWb288JpylDo3Aa1yeJ4/IpI1
+         yhRaXZbAXJGVg==
+From:   broonie@kernel.org
+To:     Greg KH <greg@kroah.com>, Arnd Bergmann <arnd@arndb.de>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux Next Mailing List <linux-next@vger.kernel.org>,
+        linux-mmc@vger.kernel.org
+Subject: linux-next: build failure after merge of the char-misc tree
+Date:   Fri, 25 Feb 2022 20:40:55 +0000
+Message-Id: <20220225204055.3899986-1-broonie@kernel.org>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220225121858.25638-1-baijiaju1990@gmail.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Feb 25, 2022 at 04:18:58AM -0800, Jia-Ju Bai wrote:
-> The function wakeup_source_register() in mmc_alloc_host() can fail, so
-> its return value should be checked.
+Hi all,
 
-NAK.
+After merging the char-misc tree, today's linux-next build (x86
+allmodconfig) failed like this:
 
-This doesn't explain why this resource must be non-optional.
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sd_request':
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:809:17: error: unused variable 'dev' [-Werror=unused-variable]
+  809 |  struct device *dev = &host->pdev->dev;
+      |                 ^~~
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_set_ios':
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1084:17: error: unused variable 'dev' [-Werror=unused-variable]
+ 1084 |  struct device *dev = &host->pdev->dev;
+      |                 ^~~
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_get_ro':
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1133:17: error: unused variable 'dev' [-Werror=unused-variable]
+ 1133 |  struct device *dev = &host->pdev->dev;
+      |                 ^~~
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_get_cd':
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1159:17: error: unused variable 'dev' [-Werror=unused-variable]
+ 1159 |  struct device *dev = &host->pdev->dev;
+      |                 ^~~
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_switch_voltage':
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1258:17: error: unused variable 'dev' [-Werror=unused-variable]
+ 1258 |  struct device *dev = &host->pdev->dev;
+      |                 ^~~
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_execute_tuning':
+/tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1311:17: error: unused variable 'dev' [-Werror=unused-variable]
+ 1311 |  struct device *dev = &host->pdev->dev;
+      |                 ^~~
+cc1: all warnings being treated as errors
 
-One should not dumbly use the robots.
+Caused by commit
 
--- 
-With Best Regards,
-Andy Shevchenko
+  7570fb41e450ba37 ("mmc: rtsx: Let MMC core handle runtime PM")
 
-
+I have used the char-misc tree from yesterday instead.
