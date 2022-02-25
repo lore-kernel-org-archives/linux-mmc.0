@@ -2,88 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F2B0C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Feb 2022 12:19:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C618AC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Feb 2022 12:56:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235824AbiBYMTp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Feb 2022 07:19:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57256 "EHLO
+        id S239628AbiBYM4l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Feb 2022 07:56:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240550AbiBYMTp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2022 07:19:45 -0500
-Received: from mail-wr1-x42c.google.com (mail-wr1-x42c.google.com [IPv6:2a00:1450:4864:20::42c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2363E2763E2;
-        Fri, 25 Feb 2022 04:19:13 -0800 (PST)
-Received: by mail-wr1-x42c.google.com with SMTP id n14so4204752wrq.7;
-        Fri, 25 Feb 2022 04:19:13 -0800 (PST)
+        with ESMTP id S235676AbiBYM4k (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Feb 2022 07:56:40 -0500
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2630518E3EC;
+        Fri, 25 Feb 2022 04:56:09 -0800 (PST)
+Received: by mail-pj1-x1036.google.com with SMTP id m22so4734871pja.0;
+        Fri, 25 Feb 2022 04:56:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id;
-        bh=o8+NAbtQaM8s0QBtxYtXps/G0x/Yv55F5vuRsn9wotI=;
-        b=KuLnE3sLDbqmkuOj7t76BVglUHe1X9tcTFgwLI/gQUjbB0qhd9+wjcppT3k7+zMh8p
-         3Qjkr+QPwhe6JrD2jkP1bmfCBkPfROR/b1d6FAYDErB4ybb3q49Uyi4fOSuJ3YgQ9gNR
-         4GC03kRpyjF6nw0z9l3P6f5oDCUf8LBDSVImNGakqt0b7Da9RvvXfebbqTQ7XqRyR7lD
-         EJ7bIsvl14f9qKX9xNJszbzbQN3riYjPJdjEWxbOn9hM6p+hAnJMQH3Z+ptG50jW9LiV
-         J5FaL0VVLjqsf6Gxj5FOsnlpCkd0b6iYCbGcjJUCbZB276rbn35mNp0k+hlTkc5Ao1pD
-         c1ng==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=b1LY+l/NhS0rChpc29wsrXNSMavIR38WPUl22nfsuvU=;
+        b=FBB5YaQVsr71kHT0ENiNVfU6OGDF9TnfU/WMi99/CQy2hlG2Dt3C5HYlCbJayyf8pN
+         31R0d+ffI7YqRmEuza3CVfzYWXXUviswU+cTgIOzoacn54iyWfrS9wPls3WgehdztAFD
+         lT8JTA27ZfsRluDBwHoeCWgbk4/3RVqmz6sQx0Ldzoap0XzaaqINL/h+mzM98O4TOp1U
+         7WcC1dj0PYaeY5kYQ8pDr3xv4emVha3Z7penypSX8o5QKnZw1YHtc4cIepLXDoG2kYs0
+         X4KA/PwvK3Gz/inZ9ewz8dH3zb1Pd6eCfywRXdJKlyw3dhPxRaHuKwHP74jtiQLtM+WW
+         NtgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=o8+NAbtQaM8s0QBtxYtXps/G0x/Yv55F5vuRsn9wotI=;
-        b=6bg25EkHMsMaqmUqrLDTs3dLgQSfedouGVY8EAwFYqF3xctKPRHu73owWAErT5ColP
-         O7fjpR7ow0rS8J9/YUaDoem/twUb/YiW7sJYjAlsE87wpkbA3QlSHcrGnbVl1Vd7g/gR
-         /QsnjpDFrqFKLP+vA1IX7yIUU1zCV9sgJMsb6nldd/5UC8aGJHplg21OBBbi9QviRDgG
-         2jeKG1dhtE34CgTmvyJ7c4LwxSx1ZiFfVTAgcP3YTZarMMSEbl63RJdr6wDwC4pXsI1i
-         XIr9nlQpzkFZqwYPD1UUBkrz4FU2fSG9XLyyRkhMySjVhNVy49Ftl0xf2WnN4/CFOeS0
-         my9A==
-X-Gm-Message-State: AOAM533xlKe0gNdZ0FGcdi/TIkveiFCibhCDDYafP7SoEHt6QN/JaSun
-        5NYeokjcdpPZvUeGsLY7lEI=
-X-Google-Smtp-Source: ABdhPJwxBXBS+ZQF6m1U2cdIolRn24v/xUbqgTXrq44N3GD4qPslMzYeXbDa1q+YqsmA6SmQo6F9bA==
-X-Received: by 2002:adf:fe0d:0:b0:1e3:3f5e:7469 with SMTP id n13-20020adffe0d000000b001e33f5e7469mr5996025wrr.61.1645791551527;
-        Fri, 25 Feb 2022 04:19:11 -0800 (PST)
-Received: from localhost.localdomain ([64.64.123.58])
-        by smtp.gmail.com with ESMTPSA id h9-20020adff189000000b001ea913352c9sm2048981wro.100.2022.02.25.04.19.07
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=b1LY+l/NhS0rChpc29wsrXNSMavIR38WPUl22nfsuvU=;
+        b=pjUwk7ELEMzfnYs0XxqezQFep+CyaO14DCw6/FpDIQNC/laWzz3dRIiYysR1uCcI+C
+         AX3kLGWdunF4xVzPW8BP/DVWejDzohPNSJr/3+JDhtE0jYYe4w5+pVP0viSL/KtvNZZZ
+         xqyFziyUkekn5J80riAPJXGxQe0lpkq+u7Dq/YbEVUtj6sXuXmjKrdtgkh9I3Pesb6+S
+         gzWw5omb5+C2cb5t5ZsBwJ3qi/QnW1Wvsmv/pI5EI36WHjeOx8cNkY+2bRrje1ArC8m7
+         CFNDqMfQ/wlx4wadaZptu+St7A3QbrfME7l5kQ0Uy+0wrHNPRdgSL95j9G4FlUwrhk+W
+         Ojng==
+X-Gm-Message-State: AOAM530hxhM+XpFjD3xD2jOF5YUmRTFPSLda50F7kFx85nc1/MZLNdaV
+        +nnOcFKmAB9mgK+Kcx3ePsDFvd3ZJV8=
+X-Google-Smtp-Source: ABdhPJyUW+a6X5XbT5h4hQJEf0D/i83NGP8nBDY3RWNGq06Z/4zWqK37bO5KcYC4lhf/oIbYMsKGjQ==
+X-Received: by 2002:a17:90a:6c8f:b0:1bc:f040:632c with SMTP id y15-20020a17090a6c8f00b001bcf040632cmr2791249pjj.215.1645793768428;
+        Fri, 25 Feb 2022 04:56:08 -0800 (PST)
+Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id t27-20020aa7939b000000b004ce11b956absm2994660pfe.186.2022.02.25.04.56.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Feb 2022 04:19:11 -0800 (PST)
-From:   Jia-Ju Bai <baijiaju1990@gmail.com>
-To:     ulf.hansson@linaro.org, andriy.shevchenko@linux.intel.com,
-        wsa+renesas@sang-engineering.com, yoshihiro.shimoda.uh@renesas.com,
-        adrian.hunter@intel.com, swboyd@chromium.org, dev@lynxeye.de
+        Fri, 25 Feb 2022 04:56:08 -0800 (PST)
+From:   Ben Chuang <benchuanggli@gmail.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Jia-Ju Bai <baijiaju1990@gmail.com>
-Subject: [PATCH] mmc: core: check the return value of wakeup_source_register()
-Date:   Fri, 25 Feb 2022 04:18:58 -0800
-Message-Id: <20220225121858.25638-1-baijiaju1990@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+        SeanHY.Chen@genesyslogic.com.tw,
+        Ben Chuang <benchuanggli@gmail.com>,
+        Kevin Chang <kevin.chang@lcfuturecenter.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
+Date:   Fri, 25 Feb 2022 20:55:52 +0800
+Message-Id: <20220225125553.1185108-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.35.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The function wakeup_source_register() in mmc_alloc_host() can fail, so
-its return value should be checked.
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-Fixes: b52fb259dff8 ("mmc: core: Always allow the card detect uevent to be consumed")
-Reported-by: TOTE Robot <oslab@tsinghua.edu.cn>
-Signed-off-by: Jia-Ju Bai <baijiaju1990@gmail.com>
+Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
+gated of upstream port can be enabled.
+
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
 ---
- drivers/mmc/core/host.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
+ 1 file changed, 54 insertions(+)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index cf140f4ec864..4f1a6db10ec5 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -550,6 +550,10 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 97035d77c18c..cf99b6af792d 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+ 	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+ }
  
- 	dev_set_name(&host->class_dev, "mmc%d", host->index);
- 	host->ws = wakeup_source_register(NULL, dev_name(&host->class_dev));
-+	if (!host->ws) {
-+		kfree(host);
-+		return NULL;
++#ifdef CONFIG_PM
++static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot = chip->slots[0];
++	struct sdhci_host *host = slot->host;
++	u16 clock;
++
++	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
++	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
++
++	return 0;
++}
++
++static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
++{
++	struct sdhci_pci_slot *slot = chip->slots[0];
++	struct sdhci_host *host = slot->host;
++	ktime_t timeout;
++	u16 clock;
++
++	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++
++	clock |= SDHCI_CLOCK_PLL_EN;
++	clock &= ~SDHCI_CLOCK_INT_STABLE;
++	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
++
++	timeout = ktime_add_ms(ktime_get(), 150);
++	while (1) {
++		bool timedout = ktime_after(ktime_get(), timeout);
++
++		clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++		if (clock & SDHCI_CLOCK_INT_STABLE)
++			break;
++		if (timedout) {
++			pr_err("%s: PLL clock never stabilised.\n",
++			       mmc_hostname(host->mmc));
++			sdhci_dumpregs(host);
++			break;
++		}
++		udelay(10);
 +	}
- 
- 	host->parent = dev;
- 	host->class_dev.parent = dev;
++	clock |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
++
++	return 0;
++}
++#endif
++
+ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+ {
+ 	struct pci_dev *pdev = slot->chip->pdev;
+@@ -982,6 +1031,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
+ #ifdef CONFIG_PM_SLEEP
+ 	.resume		= sdhci_cqhci_gli_resume,
+ 	.suspend	= sdhci_cqhci_gli_suspend,
++#endif
++#ifdef CONFIG_PM
++	.runtime_suspend = gl9763e_runtime_suspend,
++	.runtime_resume  = gl9763e_runtime_resume,
++	.allow_runtime_pm = true,
+ #endif
+ 	.add_host       = gl9763e_add_host,
+ };
 -- 
-2.17.1
+2.35.1
 
