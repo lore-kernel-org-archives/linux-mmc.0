@@ -2,119 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4D27C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 16:13:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C23E1C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 16:17:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237824AbiB1QON (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 11:14:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60772 "EHLO
+        id S231499AbiB1QRk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 11:17:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237819AbiB1QOM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 11:14:12 -0500
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE5BA3981F
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 08:13:33 -0800 (PST)
-Received: by mail-lf1-x12f.google.com with SMTP id b9so22250105lfv.7
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 08:13:33 -0800 (PST)
+        with ESMTP id S237551AbiB1QRj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 11:17:39 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 038F085677
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 08:16:59 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id m14so22249100lfu.4
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 08:16:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=aj7ohy06sMocjpRr7VZziDX9Znc+y574ZQOuLLO9Ujc=;
-        b=w8xFoxchmHuUDWSWIr1m6mGNR6QoP/Fkox6tNxODLRHvHOdqf9pAqIoK8/XrJ7sHc9
-         XM5W5YdyH4w05cP766eT945ueHGFLySs0dT2QHLWngzOsr/hbmx9tevQJyU+XTL57HdT
-         ajGIIzFSBnly4VtG8mQC7Z3poAmBiopPqJ6ULBOqT4Ik6srf4xCR5L1K+EtQM5QTjWVQ
-         L47zDYUutuH2hzqZ7NahI0n1+nRJpkDhW1NRYqV4TegLZtdeU+mfG96bvfWZ01lMEOk3
-         sQFHLwC/tMagzFhuDQiAfKao32H7O9/xPui6f+K4/ahLSDIiX8sv8BUDtZekvYNthp11
-         e3mg==
+        bh=IRc/v5RBhjywblCaCu+qbO7MMR+S4MDqe0h9NB7l5U4=;
+        b=qlvqPJLnwrw7v4sX5xzvIhieHQlASu2+KK8v/TE0ycWHA4g0hKZzF8AQIhmfPdWZ/X
+         Jzr3qYL9R8XGmXmWplbuJrwDXWVI39bTF4/Ce2BAMfG22MYlXnGFR/PrcgwIwPvcrN4k
+         nJ+HtLG6CeWccZEuOFd6WJ+ivGt0OKv4OUwjF2YB6CP2JpHE3nsVaJw9E01q3G39bD11
+         r3P0oixp2Bf7o+l6g7li6dfpheKa9NQMGZiiA3u1DC6S3V01K6hFVAgYO5YM7TXu8jnj
+         2Z/jwMgHEenqSLB5EzjYBm0EiVJrKCU4OgTSGnmmwqmPdNAOHT6Rk8ivhmSmkytAsIte
+         AsTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=aj7ohy06sMocjpRr7VZziDX9Znc+y574ZQOuLLO9Ujc=;
-        b=qW3gsdPMPU+1dZMS5GxHCje3VROWbFZqhssrymx60oYwktQwZ7mc3vO1QZ5pZ9hzUH
-         IuhrG07eCWTXOR3uUTMF2k4CUzuGJxaC18zQTbbLa9aTn/b42pM8fpP6JQV6HAA8+D/8
-         JqWEhVGcuDhK/t+h/3ak7D1CS+Y29aOu982fRf23N+gWBkXgiZ5rXRoEo2HQXzTbrCZE
-         mbY4nZocRzm8UyqnIaReWTVOyu97QbJ35RgsFsuXVkEH57RNNI0pGxF0n3ok133LP9ZP
-         SEhXtFOhsCau0u40PIeaAXQVqDQMS0jI5TfbJxcfGw7pMg/Pn7Wd0w8BgP34juDzDIZt
-         Kmyg==
-X-Gm-Message-State: AOAM5328iOm6qKnxcrtFD8l2Y5wRtNTPCeUvGo8LORKpqpm1dKMKHO4+
-        YI1nW/JjxVINHU5ADo2cHnx1ODVVP2OrgEEWksXYi9++xirqMQ==
-X-Google-Smtp-Source: ABdhPJwb8L4XXbmlNDwOvZjuKWEIzxBEm2q8c2oLQ6pda77hgpnw7LP1z8YK99bj5SrelYP+NZwELijfzodQzpA0P3Q=
-X-Received: by 2002:a05:6512:3604:b0:443:5d4b:3760 with SMTP id
- f4-20020a056512360400b004435d4b3760mr13142342lfs.358.1646064811622; Mon, 28
- Feb 2022 08:13:31 -0800 (PST)
+        bh=IRc/v5RBhjywblCaCu+qbO7MMR+S4MDqe0h9NB7l5U4=;
+        b=PcNai5xOTzA+47awHZhY+FhMZU/4Dh2doIYbamhUrAjfcN8EHneMLan6kvSolaQRL6
+         G8pwoQOBEB51IJJ8OzPSUy5m+QK+Se+dZM0bf6xwcNVODI/1K08KDXbbk7XNAC8syW6x
+         sYQCzBR+N0qLMwNIW+f5DZSqC7w+3XfyrtotSUaIUPGZml3HCKCNTo7NAV0ydSCPGPdg
+         Z0rJt8vawkyO4jxyxb+f3Kd7+QKWo6W8bwa33giN9h4i5nVKv/NtUpJGfS/N9wyrQzBS
+         KOOo7744AFzSNsgogih+9BQAWcdLSrsObCfOJG71HqOilXNqvCvQ9T4dzIdrWs5LP/Mx
+         fe5g==
+X-Gm-Message-State: AOAM531ELnAWCMcGdSmPXH6+5KOU+0Zec+g+Lw97IBRYzYnAltjfJY2k
+        0F5xZpmw+FgYpnsBEWYEHmo6tQJL8StTQC0X1D5zMw==
+X-Google-Smtp-Source: ABdhPJxSQGBBJL92fuhW6DLKJM3Nt6JMGwDv/3OLpLHw0RkJjKg+R2Fli+O5NmMNwoO2Z7eoGqDHcs7xf0MY7TG70Vc=
+X-Received: by 2002:ac2:5de4:0:b0:443:5b80:d4c4 with SMTP id
+ z4-20020ac25de4000000b004435b80d4c4mr13014007lfq.373.1646065016130; Mon, 28
+ Feb 2022 08:16:56 -0800 (PST)
 MIME-Version: 1.0
-References: <fb7cda69c5c244dfa579229ee2f0da83@realtek.com>
-In-Reply-To: <fb7cda69c5c244dfa579229ee2f0da83@realtek.com>
+References: <20220224095517.30872-1-jslaby@suse.cz> <20220224095558.30929-1-jslaby@suse.cz>
+ <20220224095558.30929-4-jslaby@suse.cz>
+In-Reply-To: <20220224095558.30929-4-jslaby@suse.cz>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Feb 2022 17:12:55 +0100
-Message-ID: <CAPDyKFrYWgCbwk6-hNZjtx4mdn7Sx1NJLie+f8wEjS==_HXR5Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: rtsx: add 74 Clocks in power on flow
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
-        "kai.heng.feng@canonical.com" <kai.heng.feng@canonical.com>,
-        "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Date:   Mon, 28 Feb 2022 17:16:20 +0100
+Message-ID: <CAPDyKFqHLQ8YTc3wzaFOdAA7Ay9RBEfdQC5uN574=oMavi6iCQ@mail.gmail.com>
+Subject: Re: [PATCH 4/5] sdio_uart: make use of UART_LCR_WLEN() + tty_get_char_size()
+To:     Jiri Slaby <jslaby@suse.cz>
+Cc:     gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 22 Feb 2022 at 08:28, Ricky WU <ricky_wu@realtek.com> wrote:
+On Thu, 24 Feb 2022 at 10:56, Jiri Slaby <jslaby@suse.cz> wrote:
 >
-> After 1ms stabilizing the voltage time
-> add "Host provides at least 74 Clocks
-> before issuing first command" that is
-> spec definition
+> Having a generic UART_LCR_WLEN() macro and the tty_get_char_size()
+> helper, we can remove all those repeated switch-cases in drivers.
 >
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 2a3f14afe9f8..e016d720e453 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -940,10 +940,17 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
->         if (err < 0)
->                 return err;
->
-> +       mdelay(1);
-> +
->         err = rtsx_pci_write_register(pcr, CARD_OE, SD_OUTPUT_EN, SD_OUTPUT_EN);
->         if (err < 0)
->                 return err;
->
-> +       /* send init 74 clocks */
-> +       rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
-> +       mdelay(5);
-> +       rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
-> +
->         if (PCI_PID(pcr) == PID_5261) {
->                 /*
->                  * If test mode is set switch to SD Express mandatorily,
+> Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
 
-As you probably are aware of, the mmc core uses three power states
-(MMC_POWER_ON, MMC_POWER_UP and MMC_POWER_OFF) to manage the
-initialization, while it invokes the ->set_ios() callback for the mmc
-host driver. During these steps the core also tries to manage the
-different delays that are needed according to the eMMC/SD specs. You
-may have a look at mmc_power_up() in drivers/mmc/core/core.c. In the
-rtsx case, MMC_POWER_ON and MMC_POWER_UP are treated as one single
-step.
-
-Moreover, it has turned out that some mmc HWs are actually controlling
-these delays during the initialization themselves, which makes the
-delays in the core superfluous. Therefore we have made the delays
-configurable for host drivers. For DT based platforms, we have the DT
-property "post-power-on-delay-ms" and for others, it's perfectly fine
-to update host->power_delay_ms before calling mmc_add_host().
-
-Would it be possible to take advantage of the above "features" from
-the core, to avoid hard coded and superfluous delays?
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/sdio_uart.c | 16 +---------------
+>  1 file changed, 1 insertion(+), 15 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
+> index 04c0823e0359..e6eb5bd6e440 100644
+> --- a/drivers/mmc/core/sdio_uart.c
+> +++ b/drivers/mmc/core/sdio_uart.c
+> @@ -250,21 +250,7 @@ static void sdio_uart_change_speed(struct sdio_uart_port *port,
+>         unsigned char cval, fcr = 0;
+>         unsigned int baud, quot;
+>
+> -       switch (termios->c_cflag & CSIZE) {
+> -       case CS5:
+> -               cval = UART_LCR_WLEN5;
+> -               break;
+> -       case CS6:
+> -               cval = UART_LCR_WLEN6;
+> -               break;
+> -       case CS7:
+> -               cval = UART_LCR_WLEN7;
+> -               break;
+> -       default:
+> -       case CS8:
+> -               cval = UART_LCR_WLEN8;
+> -               break;
+> -       }
+> +       cval = UART_LCR_WLEN(tty_get_char_size(termios->c_cflag));
+>
+>         if (termios->c_cflag & CSTOPB)
+>                 cval |= UART_LCR_STOP;
+> --
+> 2.35.1
+>
