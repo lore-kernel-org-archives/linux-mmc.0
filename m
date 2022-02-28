@@ -2,112 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E43BC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 11:26:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71231C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 12:04:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231409AbiB1L1N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 06:27:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53248 "EHLO
+        id S234902AbiB1MFE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 07:05:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229695AbiB1L1M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 06:27:12 -0500
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED5DA43ECF;
-        Mon, 28 Feb 2022 03:26:33 -0800 (PST)
-Received: by mail-wr1-x42f.google.com with SMTP id d17so14856118wrc.9;
-        Mon, 28 Feb 2022 03:26:33 -0800 (PST)
+        with ESMTP id S230322AbiB1MFD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 07:05:03 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BE2C13E98
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 04:04:25 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id t13so8942558lfd.9
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 04:04:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=0nOl9Gu2cS+40aKnl77MAdTBzkl+e2ajXLPqa1328c4=;
-        b=RF4z69yluICtYu1fuLZaU5ixtaQDPyAtJIV6s7TbYCPDKfko8sreM/MwfRn1VCiVB0
-         TSDCP5j9Bnpu2IOzh061GbVz6HMuZpuN1R0Vg3dYvBkElL2SqQ+XsqzJS/AaEkhVxfw8
-         wjb/fCMdjSlcZ3gLtLUiAjcGxqyIgkLiSdPfg+MVpcYvPygMabCcQirectYD9SNiQcC7
-         fB60JFiWqd2xEG7hLjg/wCYtRsDbH6QLwiQ9J5RvnUl6+lgM0nvbbnxwSaHUGPVp7fQK
-         56bQlW4K55lgpwfxgKyCGG7EdXEhk/UsWnq8TC5BCaqrtBDDWNQ6IyZV0/E/JCHjALLN
-         Qhig==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=8WnObInMC2ofWUsTKYtPij+k1Wh0DXe/u1zG3p1IPf4=;
+        b=JqfBkaGJmDTS5BLvufjhP/LEar/dzjQ6i7GPUZzQbUUApCYFA5AQYeQ/dfEM6n3HG6
+         CaZx9w0fjnDcQCHoNddRQS/A54mr7vTrErGBM5tIFsv7T/+VRPuNDLeW23vIDovdwSP7
+         1YlExP3x/CuK+MMWXD+8VX40ycwwMQg9kW/7AfxgyIM/5HUHjOIhV6o04w+Sz1TY6zGJ
+         yK5nlmPf9dv+VtE25IFeAdYzaQl0yQmQdb0DFN6YWjq3GJl8OCOtYnx1B1DzLqs0Htc5
+         BO28nMs1x1Ceqic4zFgJpRukkI19rYnBqN13EUOvPUo4O19aDegrb8WhpA5zTdnQRqGM
+         OE9Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=0nOl9Gu2cS+40aKnl77MAdTBzkl+e2ajXLPqa1328c4=;
-        b=OQ6nHNInaNeEhA1OeT+jT8rX6pJrkTWX1/yI/HOpUtZ6KnQYFHRTjDNzQo3OOmeV0A
-         GHIrA+8tNCfJgJoir/Aifoyag3BlIGnv0+5LOPItWbIljH5K2fMOAWaAA9JfZ89ZvWUR
-         SmjYaZ/5T3iunaO1ZIvCn5o0JKY0hBxtAB84X/YLo79EKzvU/pj9Ca33vprLUMsKFlEU
-         ovGsq1/xm4t9SIEv4AnhW0IQUhBxd1inGPaUmPRXfsJZOxXMfSK96iSpvchoS0Wu4oOh
-         oYf4duIMPMtfwLIOQ/pxRUDH7p89uNAg0y9fJcmlJflTbRbTqUm4NJfrWBaRA6q6H718
-         +EJg==
-X-Gm-Message-State: AOAM530QV0klwOa0eu3ahINz8/R7sMDJD2c6HJo4RyqQEkVsrBq320Sw
-        JwvUCeCQS4BdpInXYmHzLI8=
-X-Google-Smtp-Source: ABdhPJyEN3IVhZ9CqchTTNuRDYhwp5BAWHwjBXE4AYXcGoAFKxxj9OkPswk656aj1zqS3OkJFo7PcQ==
-X-Received: by 2002:a05:6000:1c0b:b0:1ef:f0cc:6e53 with SMTP id ba11-20020a0560001c0b00b001eff0cc6e53mr1225544wrb.715.1646047592597;
-        Mon, 28 Feb 2022 03:26:32 -0800 (PST)
-Received: from [192.168.0.14] (static-63-182-85-188.ipcom.comunitel.net. [188.85.182.63])
-        by smtp.gmail.com with ESMTPSA id z2-20020a056000110200b001e7140ddb44sm9847832wrw.49.2022.02.28.03.26.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 28 Feb 2022 03:26:31 -0800 (PST)
-Message-ID: <530f6169-afdb-8242-f4b4-54a54a73948b@gmail.com>
-Date:   Mon, 28 Feb 2022 12:26:30 +0100
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=8WnObInMC2ofWUsTKYtPij+k1Wh0DXe/u1zG3p1IPf4=;
+        b=IZ9k8ya0r6bDmoStsJ+O4mO2wXJO7Dh9VBqLpPaO1UGKoIjEK1PB+r0TFZGA5E68uU
+         z7t4GtvdqgFAYG0eFOQpSYZP1wINcdUVoNEGwdWYtCOYhmtXvxeEIktLnUwjVKCA6vqj
+         KwakwaWSyJpNBIczRzVp/Vh1D6C1UHKXMLKxxNVvqC60YbRmiyJHudhKUm475Dik9Sss
+         HvFU2o34ixuWV82ZKL2sq4uLTHoAOCUQ2gb2YNIwORMM8A0iUoHng05RyDa6ViU+Cx3O
+         nE+gSQFR/yanhpqCtxndzh8XDsRiRXv5MDxBBeZtLeqxqJ1+Oa/6JHfQNxJwvtCYlwqu
+         4lfw==
+X-Gm-Message-State: AOAM5305rC1FtHJitug305OkG6ZIy3eF7AmqXKTLqF1T5jOtYBCsMTzk
+        yO86Cc9vliwqjfSXGHR0eN3zkX4/P/gO54tx7PvXn4U3Pie0Zw==
+X-Google-Smtp-Source: ABdhPJxpZi2fIFjY4KRz6vVxIdDcBSJGElXWDH3T1Fddx90I97shcxEvbgmXGqeayZecnO4XROSRNKyZGUYTNmYasOI=
+X-Received: by 2002:ac2:5de4:0:b0:443:5b80:d4c4 with SMTP id
+ z4-20020ac25de4000000b004435b80d4c4mr12437782lfq.373.1646049863342; Mon, 28
+ Feb 2022 04:04:23 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH v3 1/7] dt-bindings: timer: Add compatible for Mediatek
- MT8186
-Content-Language: en-US
-To:     "allen-kh.cheng" <allen-kh.cheng@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>
-Cc:     hsinyi@chromium.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-mediatek@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-iio@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org
-References: <20220128062050.23978-1-allen-kh.cheng@mediatek.com>
- <20220128062050.23978-2-allen-kh.cheng@mediatek.com>
-From:   Matthias Brugger <matthias.bgg@gmail.com>
-In-Reply-To: <20220128062050.23978-2-allen-kh.cheng@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <1644395927-4138-1-git-send-email-wangqing@vivo.com>
+ <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com> <bcd6688f-6f42-ca8f-ab9c-978eeff4f4e3@wanadoo.fr>
+In-Reply-To: <bcd6688f-6f42-ca8f-ab9c-978eeff4f4e3@wanadoo.fr>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 28 Feb 2022 13:03:47 +0100
+Message-ID: <CAPDyKFo-4hkTo8F9q4+BmxUH_Y4nk_K0N20q53xrdJLAFRutcQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: use div64_u64() instead of do_div()
+To:     Qing Wang <wangqing@vivo.com>,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Thu, 17 Feb 2022 at 21:00, Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
+>
+> Le 17/02/2022 =C3=A0 16:39, Ulf Hansson a =C3=A9crit :
+> > On Wed, 9 Feb 2022 at 09:39, Qing Wang <wangqing@vivo.com> wrote:
+> >>
+> >> From: Wang Qing <wangqing@vivo.com>
+> >>
+> >> do_div() does a 64-by-32 division.
+> >> When the divisor is u64, do_div() truncates it to 32 bits, this means =
+it
+> >> can test non-zero and be truncated to zero for division.
+> >>
+> >> fix do_div.cocci warning:
+> >> do_div() does a 64-by-32 division, please consider using div64_u64 ins=
+tead.
+> >>
+> >> Signed-off-by: Wang Qing <wangqing@vivo.com>
+> >
+> > Applied for next, thanks!
+>
+>
+> This is wrong.
+>
+> See [1].
 
+Thanks for reporting this, I am dropping the patch from my next branch!
 
-On 28/01/2022 07:20, allen-kh.cheng wrote:
-> From: Allen-KH Cheng <Allen-KH.Cheng@mediatek.com>
-> 
-> This commit adds dt-binding documentation of timer for Mediatek MT8186 SoC
-> Platform.
-> 
-> Signed-off-by: Allen-KH Cheng <Allen-KH.Cheng@mediatek.com>
+See more comments below.
 
-Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
+>
+>
+> Wang Qing, you should really warn all the people you have sent such patch=
+es.
+>
+> CJ
+>
+> [1]:
+> https://lore.kernel.org/linux-kernel/19b96972-cee7-937f-21ce-c78982ed2048=
+@linaro.org/
+>
+>
+> >
+> > Kind regards
+> > Uffe
+> >
+> >
+> >> ---
+> >>   drivers/mmc/host/mtk-sd.c | 2 +-
+> >>   1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> >> index 65037e1..777c9a8
+> >> --- a/drivers/mmc/host/mtk-sd.c
+> >> +++ b/drivers/mmc/host/mtk-sd.c
+> >> @@ -766,7 +766,7 @@ static u64 msdc_timeout_cal(struct msdc_host *host=
+, u64 ns, u64 clks)
+> >>                  clk_ns  =3D 1000000000ULL;
+> >>                  do_div(clk_ns, mmc->actual_clock);
+> >>                  timeout =3D ns + clk_ns - 1;
+> >> -               do_div(timeout, clk_ns);
+> >> +               div64_u64(timeout, clk_ns);
 
-> ---
->   Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt | 1 +
->   1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
-> index e5c57d6e0186..e0d20d6adf81 100644
-> --- a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
-> +++ b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
-> @@ -22,6 +22,7 @@ Required properties:
->   
->   	For those SoCs that use SYST
->   	* "mediatek,mt8183-timer" for MT8183 compatible timers (SYST)
-> +	* "mediatek,mt8186-timer" for MT8186 compatible timers (SYST)
->   	* "mediatek,mt8192-timer" for MT8192 compatible timers (SYST)
->   	* "mediatek,mt8195-timer" for MT8195 compatible timers (SYST)
->   	* "mediatek,mt7629-timer" for MT7629 compatible timers (SYST)
+I guess a proper patch would be to convert clk_ns into an u32 instead!?
+
+> >>                  timeout +=3D clks;
+> >>                  /* in 1048576 sclk cycle unit */
+> >>                  timeout =3D DIV_ROUND_UP(timeout, BIT(20));
+> >> --
+
+Kind regards
+Uffe
