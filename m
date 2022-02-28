@@ -2,91 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 726F1C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 13:40:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4D27C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 16:13:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236077AbiB1NlZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 08:41:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35704 "EHLO
+        id S237824AbiB1QON (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 11:14:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60772 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232767AbiB1NlY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 08:41:24 -0500
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 174AE7C7BC
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 05:40:46 -0800 (PST)
-Received: by mail-pj1-x102e.google.com with SMTP id cp23-20020a17090afb9700b001bbfe0fbe94so11348692pjb.3
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 05:40:46 -0800 (PST)
+        with ESMTP id S237819AbiB1QOM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 11:14:12 -0500
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE5BA3981F
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 08:13:33 -0800 (PST)
+Received: by mail-lf1-x12f.google.com with SMTP id b9so22250105lfv.7
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 08:13:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:in-reply-to:references:subject:message-id:date
-         :mime-version:content-transfer-encoding;
-        bh=8AEAKRGq8N0ON2WXDBrR6DvzDs8wlyStSGQdnh6J7Bk=;
-        b=4CGakBFMfUd91qW2Zea8Ay3ZXjgwkHfjpcl9oYfHzNaGzNy9R9r4qRkFRFSMGvdimo
-         d9aOWeUry/nhwT9eUXWJ1Vq8+4yc3w7X6NAuRXJjoROQ7c/8yWVNI+d3DhywL3wrpXAx
-         32iNRwgY85RS27y4NP7pvSzs09tLKp4y2lWzVSVRMGR1ee9agNNEKlLQSLHgXAiD/KGa
-         ImzsQlTnd5LWZmoyQjG/sO6K1IwfA3qXlaxtn6GQvDtaMXf+X8T6a8lhnwP5cCVECV9u
-         v/M/BeiRS7oDi9lLiRXD0lptuZtCWieGIRQ+JHh9uUhcZelgoB1r6XH1l02MbpWdWG3Q
-         a02g==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=aj7ohy06sMocjpRr7VZziDX9Znc+y574ZQOuLLO9Ujc=;
+        b=w8xFoxchmHuUDWSWIr1m6mGNR6QoP/Fkox6tNxODLRHvHOdqf9pAqIoK8/XrJ7sHc9
+         XM5W5YdyH4w05cP766eT945ueHGFLySs0dT2QHLWngzOsr/hbmx9tevQJyU+XTL57HdT
+         ajGIIzFSBnly4VtG8mQC7Z3poAmBiopPqJ6ULBOqT4Ik6srf4xCR5L1K+EtQM5QTjWVQ
+         L47zDYUutuH2hzqZ7NahI0n1+nRJpkDhW1NRYqV4TegLZtdeU+mfG96bvfWZ01lMEOk3
+         sQFHLwC/tMagzFhuDQiAfKao32H7O9/xPui6f+K4/ahLSDIiX8sv8BUDtZekvYNthp11
+         e3mg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject
-         :message-id:date:mime-version:content-transfer-encoding;
-        bh=8AEAKRGq8N0ON2WXDBrR6DvzDs8wlyStSGQdnh6J7Bk=;
-        b=xcysktZ3IKo7xHfK03W4Ulm5G5wBMwQG5cirtZPKJ/WAGf6XwbwOsc3TlNY4iIvfmu
-         WI8l5gRZ6qLBxLjIjZ801G6UjZ2dCXUnv/C/wOXFbRLl9Vm32HWA/3n2hoXY8Ng9INaL
-         BYYadmJd/hhI4V0uIPrOBOZ/fnKUzpJ9BSe2SNm8zumTdc1TRCg22oZ9L8ohambl7Pik
-         OrArx9DXlfDEhZY4XPkuHsTN16HI8c0tGzw4VBg2k/L8CpgR453mv46DZ8lBWkRprIsl
-         YuzIDnCsL9gBCAzBSpoXR/CkIveu581u37Y4ASKh5woeDQ8FmqbfIBJZrto4iT8gfhTf
-         KZ3Q==
-X-Gm-Message-State: AOAM531To2EFz5WlTCqindgofx1JfYvanSFp62bDICj7k4CnBFP5Gn0z
-        EjDipbnR0YMvPe2f0TCli1YLwA==
-X-Google-Smtp-Source: ABdhPJzDDppjzyaiKiUKTzeLYFsp1i6YXo3jAy8eqnS0f2r8SktthNeZeMeNsqYu6qmmYNsunIPtJA==
-X-Received: by 2002:a17:90a:578f:b0:1b9:b03f:c33c with SMTP id g15-20020a17090a578f00b001b9b03fc33cmr16854315pji.114.1646055645500;
-        Mon, 28 Feb 2022 05:40:45 -0800 (PST)
-Received: from [127.0.1.1] ([198.8.77.157])
-        by smtp.gmail.com with ESMTPSA id s2-20020a056a001c4200b004f41e1196fasm1085316pfw.17.2022.02.28.05.40.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Feb 2022 05:40:45 -0800 (PST)
-From:   Jens Axboe <axboe@kernel.dk>
-To:     Eric Biggers <ebiggers@kernel.org>, linux-block@vger.kernel.org
-Cc:     linux-api@vger.kernel.org, linux-scsi@vger.kernel.org,
-        Bart Van Assche <bvanassche@acm.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-In-Reply-To: <20220124215938.2769-1-ebiggers@kernel.org>
-References: <20220124215938.2769-1-ebiggers@kernel.org>
-Subject: Re: [PATCH v4 0/3] block: show crypto capabilities in sysfs
-Message-Id: <164605564421.5266.4770347755442851079.b4-ty@kernel.dk>
-Date:   Mon, 28 Feb 2022 06:40:44 -0700
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=aj7ohy06sMocjpRr7VZziDX9Znc+y574ZQOuLLO9Ujc=;
+        b=qW3gsdPMPU+1dZMS5GxHCje3VROWbFZqhssrymx60oYwktQwZ7mc3vO1QZ5pZ9hzUH
+         IuhrG07eCWTXOR3uUTMF2k4CUzuGJxaC18zQTbbLa9aTn/b42pM8fpP6JQV6HAA8+D/8
+         JqWEhVGcuDhK/t+h/3ak7D1CS+Y29aOu982fRf23N+gWBkXgiZ5rXRoEo2HQXzTbrCZE
+         mbY4nZocRzm8UyqnIaReWTVOyu97QbJ35RgsFsuXVkEH57RNNI0pGxF0n3ok133LP9ZP
+         SEhXtFOhsCau0u40PIeaAXQVqDQMS0jI5TfbJxcfGw7pMg/Pn7Wd0w8BgP34juDzDIZt
+         Kmyg==
+X-Gm-Message-State: AOAM5328iOm6qKnxcrtFD8l2Y5wRtNTPCeUvGo8LORKpqpm1dKMKHO4+
+        YI1nW/JjxVINHU5ADo2cHnx1ODVVP2OrgEEWksXYi9++xirqMQ==
+X-Google-Smtp-Source: ABdhPJwb8L4XXbmlNDwOvZjuKWEIzxBEm2q8c2oLQ6pda77hgpnw7LP1z8YK99bj5SrelYP+NZwELijfzodQzpA0P3Q=
+X-Received: by 2002:a05:6512:3604:b0:443:5d4b:3760 with SMTP id
+ f4-20020a056512360400b004435d4b3760mr13142342lfs.358.1646064811622; Mon, 28
+ Feb 2022 08:13:31 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+References: <fb7cda69c5c244dfa579229ee2f0da83@realtek.com>
+In-Reply-To: <fb7cda69c5c244dfa579229ee2f0da83@realtek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 28 Feb 2022 17:12:55 +0100
+Message-ID: <CAPDyKFrYWgCbwk6-hNZjtx4mdn7Sx1NJLie+f8wEjS==_HXR5Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx: add 74 Clocks in power on flow
+To:     Ricky WU <ricky_wu@realtek.com>
+Cc:     "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
+        "kai.heng.feng@canonical.com" <kai.heng.feng@canonical.com>,
+        "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 24 Jan 2022 13:59:35 -0800, Eric Biggers wrote:
-> This series adds sysfs files that expose the inline encryption
-> capabilities of request queues.
-> 
-> Patches 1 and 2 are some related cleanups for existing blk-sysfs code.
-> Patch 3 is the real change; see there for more details.
-> 
-> This series applies to v5.17-rc1.
-> 
-> [...]
+On Tue, 22 Feb 2022 at 08:28, Ricky WU <ricky_wu@realtek.com> wrote:
+>
+> After 1ms stabilizing the voltage time
+> add "Host provides at least 74 Clocks
+> before issuing first command" that is
+> spec definition
+>
+> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 2a3f14afe9f8..e016d720e453 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -940,10 +940,17 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
+>         if (err < 0)
+>                 return err;
+>
+> +       mdelay(1);
+> +
+>         err = rtsx_pci_write_register(pcr, CARD_OE, SD_OUTPUT_EN, SD_OUTPUT_EN);
+>         if (err < 0)
+>                 return err;
+>
+> +       /* send init 74 clocks */
+> +       rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
+> +       mdelay(5);
+> +       rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
+> +
+>         if (PCI_PID(pcr) == PID_5261) {
+>                 /*
+>                  * If test mode is set switch to SD Express mandatorily,
 
-Applied, thanks!
+As you probably are aware of, the mmc core uses three power states
+(MMC_POWER_ON, MMC_POWER_UP and MMC_POWER_OFF) to manage the
+initialization, while it invokes the ->set_ios() callback for the mmc
+host driver. During these steps the core also tries to manage the
+different delays that are needed according to the eMMC/SD specs. You
+may have a look at mmc_power_up() in drivers/mmc/core/core.c. In the
+rtsx case, MMC_POWER_ON and MMC_POWER_UP are treated as one single
+step.
 
-[1/3] block: simplify calling convention of elv_unregister_queue()
-      commit: f5ec592dd3bcf7c91f7c262a7f5011e001d269cd
-[2/3] block: don't delete queue kobject before its children
-      commit: 0f69288253e9fc7c495047720e523b9f1aba5712
-[3/3] blk-crypto: show crypto capabilities in sysfs
-      commit: 20f01f163203666010ee1560852590a0c0572726
+Moreover, it has turned out that some mmc HWs are actually controlling
+these delays during the initialization themselves, which makes the
+delays in the core superfluous. Therefore we have made the delays
+configurable for host drivers. For DT based platforms, we have the DT
+property "post-power-on-delay-ms" and for others, it's perfectly fine
+to update host->power_delay_ms before calling mmc_add_host().
 
-Best regards,
--- 
-Jens Axboe
+Would it be possible to take advantage of the above "features" from
+the core, to avoid hard coded and superfluous delays?
 
-
+Kind regards
+Uffe
