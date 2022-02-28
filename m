@@ -2,82 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F925C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 27 Feb 2022 21:23:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2618DC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 08:11:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231176AbiB0VYZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 27 Feb 2022 16:24:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48018 "EHLO
+        id S233834AbiB1IL7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 03:11:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230260AbiB0VYY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Feb 2022 16:24:24 -0500
-Received: from relmlie5.idc.renesas.com (relmlor1.renesas.com [210.160.252.171])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id F1C3F434AB;
-        Sun, 27 Feb 2022 13:23:46 -0800 (PST)
-X-IronPort-AV: E=Sophos;i="5.90,142,1643641200"; 
-   d="scan'208";a="111721264"
-Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie5.idc.renesas.com with ESMTP; 28 Feb 2022 06:23:46 +0900
-Received: from localhost.localdomain (unknown [10.226.36.204])
-        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 20BA440E33A5;
-        Mon, 28 Feb 2022 06:23:43 +0900 (JST)
-From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To:     Geert Uytterhoeven <geert+renesas@glider.be>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
-Date:   Sun, 27 Feb 2022 21:23:30 +0000
-Message-Id: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S231684AbiB1IL6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 03:11:58 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBCB2692B9;
+        Mon, 28 Feb 2022 00:11:20 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 68594B80E47;
+        Mon, 28 Feb 2022 08:11:19 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D2506C340E7;
+        Mon, 28 Feb 2022 08:11:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1646035878;
+        bh=y1tdMpsiRpffhOx2vBGdYD8HZmjyMt0V4WvXxZ/HDI4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=V+KDVirnh3eOYCFV8FXguYwOhS1tTrAiJ9F0r9TEI1UpdiS6lrWv/9qsq+Z7R/F8c
+         bZdQLocTorrgNjW1WC7kweF/RNvrUKPNhmWTYwFwMOKrmMLK5+120uQ6abXSs3S2vR
+         +OWwJrC6zjIjrqS72GmHxVXQzFpQqOp5lU/D03q9Dkwg0o+jwIbS+dSeia5FvTnFQf
+         4V+bZGIfy/88ds4iki52ciHTi1GXFyz222Ssuh9RbjH0aL0vAJdlW1GE7eHRF2fY03
+         9iVW81iOYpG++HKlentvm3Vp/hOT9P12a3Ko93wjxX3eZy0PlpsU5BEU4SEtqrIk+/
+         sF/PnIeE17wwQ==
+Date:   Mon, 28 Feb 2022 00:11:16 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-api@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Bart Van Assche <bvanassche@acm.org>
+Subject: Re: [PATCH v4 0/3] block: show crypto capabilities in sysfs
+Message-ID: <YhyDpNN/Yoajneg/@sol.localdomain>
+References: <20220124215938.2769-1-ebiggers@kernel.org>
+ <YhL3obBiHO92EcEc@sol.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YhL3obBiHO92EcEc@sol.localdomain>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document RZ/V2L SDHI bindings. RZ/V2L SDHI is almost identical to one
-found on the R-Car Gen3. No driver changes are required as generic
-compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
+On Sun, Feb 20, 2022 at 06:23:29PM -0800, Eric Biggers wrote:
+> On Mon, Jan 24, 2022 at 01:59:35PM -0800, Eric Biggers wrote:
+> > This series adds sysfs files that expose the inline encryption
+> > capabilities of request queues.
+> > 
+> > Patches 1 and 2 are some related cleanups for existing blk-sysfs code.
+> > Patch 3 is the real change; see there for more details.
+> > 
+> > This series applies to v5.17-rc1.
+> > 
+> > Changed v3 => v4:
+> >    - Reworded a comment in patch 2.
+> >    - Updated dates in sysfs documentation.
+> >    - Added more Reviewed-by tags.
+> > 
+> > Changed v2 => v3:
+> >    - Moved the documentation into Documentation/ABI/stable/sysfs-block,
+> >      and improved it a bit.
+> >    - Write "/sys/block/" instead of "/sys/class/block/".
+> >    - Added Reviewed-by tags.
+> > 
+> > Changed v1 => v2:
+> >    - Use sysfs_emit() instead of sprintf().
+> >    - Use __ATTR_RO().
+> > 
+> > Eric Biggers (3):
+> >   block: simplify calling convention of elv_unregister_queue()
+> >   block: don't delete queue kobject before its children
+> >   blk-crypto: show crypto capabilities in sysfs
+> > 
+> 
+> Any more feedback on this?
+> 
 
-Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Reviewed-by: Biju Das <biju.das.jz@bp.renesas.com>
----
-DTSi changes have been posted [0].
+Jens, can you apply this for 5.18?  Is there anything else you're waiting for?
 
-[0] https://patchwork.kernel.org/project/linux-renesas-soc/patch/
-20220227203744.18355-2-prabhakar.mahadev-lad.rj@bp.renesas.com/
----
- Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 9ce6e06c19db..3b191fb89cf1 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -58,6 +58,7 @@ properties:
-               - renesas,sdhi-r8a77995  # R-Car D3
-               - renesas,sdhi-r8a779a0  # R-Car V3U
-               - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
-+              - renesas,sdhi-r9a07g054 # RZ/V2L
-           - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
- 
-   reg:
-@@ -107,7 +108,9 @@ allOf:
-       properties:
-         compatible:
-           contains:
--            const: renesas,sdhi-r9a07g044
-+            enum:
-+              - renesas,sdhi-r9a07g044
-+              - renesas,sdhi-r9a07g054
-     then:
-       properties:
-         clocks:
--- 
-2.17.1
-
+- Eric
