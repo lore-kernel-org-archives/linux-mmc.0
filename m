@@ -2,106 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B423C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 09:46:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E43BC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 11:26:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234356AbiB1Jq6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 04:46:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58030 "EHLO
+        id S231409AbiB1L1N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 06:27:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230046AbiB1Jq4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 04:46:56 -0500
-Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05A9169CF3
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 01:46:17 -0800 (PST)
-Received: from mail-wm1-f71.google.com (mail-wm1-f71.google.com [209.85.128.71])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id C2DBD3F170
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:46:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1646041575;
-        bh=kx3KwflhSQCgPfG7GHkNt9DIyHPaoaEcSwFWIFUDpTI=;
-        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-         In-Reply-To:Content-Type;
-        b=rwdvWQaKfYE0WPA7FVxo1nNoXW7QEg4HBaqb1eTa7MmPwRKXUKzmxQwNIPN/aGHIc
-         BVcy++fbcUq9yhspprHBgCK0ctQswXr4mSW9wFdUjU3ptplR+XRPcl5z4pbq61+Rj3
-         YrYcB89zF34A4BTALMogn/ZwpDwV2yhGGG/kClG2JMtIlMI7rI7/QLEDyTiNs3aFEp
-         0StR5hfsej+fNzTRv3O582QKi4JFhNojP4MFQQsTtjcRNr75IlGwetIR5XWJQNdoaY
-         /vavjPAGgc9l3I2DZX8P/nsFhuDoaH7lxzGDhHFhkedkx7XPoOnvqvwvX2BBDrPH/q
-         rrkAXOh0poosQ==
-Received: by mail-wm1-f71.google.com with SMTP id r206-20020a1c44d7000000b00380e36c6d34so6169236wma.4
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 01:46:15 -0800 (PST)
+        with ESMTP id S229695AbiB1L1M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 06:27:12 -0500
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED5DA43ECF;
+        Mon, 28 Feb 2022 03:26:33 -0800 (PST)
+Received: by mail-wr1-x42f.google.com with SMTP id d17so14856118wrc.9;
+        Mon, 28 Feb 2022 03:26:33 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=0nOl9Gu2cS+40aKnl77MAdTBzkl+e2ajXLPqa1328c4=;
+        b=RF4z69yluICtYu1fuLZaU5ixtaQDPyAtJIV6s7TbYCPDKfko8sreM/MwfRn1VCiVB0
+         TSDCP5j9Bnpu2IOzh061GbVz6HMuZpuN1R0Vg3dYvBkElL2SqQ+XsqzJS/AaEkhVxfw8
+         wjb/fCMdjSlcZ3gLtLUiAjcGxqyIgkLiSdPfg+MVpcYvPygMabCcQirectYD9SNiQcC7
+         fB60JFiWqd2xEG7hLjg/wCYtRsDbH6QLwiQ9J5RvnUl6+lgM0nvbbnxwSaHUGPVp7fQK
+         56bQlW4K55lgpwfxgKyCGG7EdXEhk/UsWnq8TC5BCaqrtBDDWNQ6IyZV0/E/JCHjALLN
+         Qhig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
          :content-language:to:cc:references:from:in-reply-to
          :content-transfer-encoding;
-        bh=kx3KwflhSQCgPfG7GHkNt9DIyHPaoaEcSwFWIFUDpTI=;
-        b=ljUi2iE0gJczwbKM6rHyXDlrhn5WHBmCaC7I2Gr5oXUkg89kJbpqs3JhxGSyUIzF90
-         14IlrDpv646/mR4kY1sz71lkmlnhbfdCytZj+XaRGi0Anbg1OUhlZb7Qytn/Lzc9zXyj
-         zvTOZHIv+6PTBqpg83GpvnbI6wHcrsIBLKqpI/+gDwvkWG7Rw8G4STRX9NZyV2yCRPZh
-         5TKGt1gF2f3eJPINRxv/geFuP2MFOCWpCCfLEraOtEMMkleaNpm1+h9yuPPhyFvYQFUv
-         xf535ZpdUE+7OCz62nxmabMltE/LhmBud7XS/lsqDOcmpd+IKp8NuZM5YhKUu3KCbdWu
-         bw1Q==
-X-Gm-Message-State: AOAM533x9cgCpXxNvboJCubqi4bUizBvu5s4OIb3BF582+JbF53q0+ub
-        U2ekX00/Bh4Zo1b5VsXBmXk/Vy7l14Lqurld4iEy5uRq5Psl62THXxkxEvOOp7BfuZ4XkS6WJ7h
-        5NYAxeVvcKkF+jcKfAl+iNjDgXGVurG1OlwsjfQ==
-X-Received: by 2002:adf:f00e:0:b0:1ed:e1d2:f10c with SMTP id j14-20020adff00e000000b001ede1d2f10cmr15225306wro.181.1646041575515;
-        Mon, 28 Feb 2022 01:46:15 -0800 (PST)
-X-Google-Smtp-Source: ABdhPJwL0JBj8yLIAMajpevQP4oIWnehXfhmFqdOAerH2yff2r6ZgTyrXSY7IhRRUp4jT3ezbYRq9w==
-X-Received: by 2002:adf:f00e:0:b0:1ed:e1d2:f10c with SMTP id j14-20020adff00e000000b001ede1d2f10cmr15225292wro.181.1646041575355;
-        Mon, 28 Feb 2022 01:46:15 -0800 (PST)
-Received: from [192.168.0.133] (xdsl-188-155-181-108.adslplus.ch. [188.155.181.108])
-        by smtp.gmail.com with ESMTPSA id n5-20020adffe05000000b001edf8fc0cc3sm9924559wrr.41.2022.02.28.01.46.13
+        bh=0nOl9Gu2cS+40aKnl77MAdTBzkl+e2ajXLPqa1328c4=;
+        b=OQ6nHNInaNeEhA1OeT+jT8rX6pJrkTWX1/yI/HOpUtZ6KnQYFHRTjDNzQo3OOmeV0A
+         GHIrA+8tNCfJgJoir/Aifoyag3BlIGnv0+5LOPItWbIljH5K2fMOAWaAA9JfZ89ZvWUR
+         SmjYaZ/5T3iunaO1ZIvCn5o0JKY0hBxtAB84X/YLo79EKzvU/pj9Ca33vprLUMsKFlEU
+         ovGsq1/xm4t9SIEv4AnhW0IQUhBxd1inGPaUmPRXfsJZOxXMfSK96iSpvchoS0Wu4oOh
+         oYf4duIMPMtfwLIOQ/pxRUDH7p89uNAg0y9fJcmlJflTbRbTqUm4NJfrWBaRA6q6H718
+         +EJg==
+X-Gm-Message-State: AOAM530QV0klwOa0eu3ahINz8/R7sMDJD2c6HJo4RyqQEkVsrBq320Sw
+        JwvUCeCQS4BdpInXYmHzLI8=
+X-Google-Smtp-Source: ABdhPJyEN3IVhZ9CqchTTNuRDYhwp5BAWHwjBXE4AYXcGoAFKxxj9OkPswk656aj1zqS3OkJFo7PcQ==
+X-Received: by 2002:a05:6000:1c0b:b0:1ef:f0cc:6e53 with SMTP id ba11-20020a0560001c0b00b001eff0cc6e53mr1225544wrb.715.1646047592597;
+        Mon, 28 Feb 2022 03:26:32 -0800 (PST)
+Received: from [192.168.0.14] (static-63-182-85-188.ipcom.comunitel.net. [188.85.182.63])
+        by smtp.gmail.com with ESMTPSA id z2-20020a056000110200b001e7140ddb44sm9847832wrw.49.2022.02.28.03.26.30
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 28 Feb 2022 01:46:14 -0800 (PST)
-Message-ID: <269c748f-e418-8fda-7c50-f15c3e6c604f@canonical.com>
-Date:   Mon, 28 Feb 2022 10:46:12 +0100
+        Mon, 28 Feb 2022 03:26:31 -0800 (PST)
+Message-ID: <530f6169-afdb-8242-f4b4-54a54a73948b@gmail.com>
+Date:   Mon, 28 Feb 2022 12:26:30 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.5.0
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
+Subject: Re: [PATCH v3 1/7] dt-bindings: timer: Add compatible for Mediatek
+ MT8186
 Content-Language: en-US
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
+To:     "allen-kh.cheng" <allen-kh.cheng@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-References: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset=UTF-8
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>
+Cc:     hsinyi@chromium.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-mediatek@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, linux-iio@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org
+References: <20220128062050.23978-1-allen-kh.cheng@mediatek.com>
+ <20220128062050.23978-2-allen-kh.cheng@mediatek.com>
+From:   Matthias Brugger <matthias.bgg@gmail.com>
+In-Reply-To: <20220128062050.23978-2-allen-kh.cheng@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/02/2022 22:23, Lad Prabhakar wrote:
-> Document RZ/V2L SDHI bindings. RZ/V2L SDHI is almost identical to one
-> found on the R-Car Gen3. No driver changes are required as generic
-> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
+
+
+On 28/01/2022 07:20, allen-kh.cheng wrote:
+> From: Allen-KH Cheng <Allen-KH.Cheng@mediatek.com>
 > 
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Biju Das <biju.das.jz@bp.renesas.com>
+> This commit adds dt-binding documentation of timer for Mediatek MT8186 SoC
+> Platform.
+> 
+> Signed-off-by: Allen-KH Cheng <Allen-KH.Cheng@mediatek.com>
+
+Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
+
 > ---
-> DTSi changes have been posted [0].
+>   Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt | 1 +
+>   1 file changed, 1 insertion(+)
 > 
-> [0] https://patchwork.kernel.org/project/linux-renesas-soc/patch/
-> 20220227203744.18355-2-prabhakar.mahadev-lad.rj@bp.renesas.com/
-> ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
-> 
-
-
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-
-
-Best regards,
-Krzysztof
+> diff --git a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+> index e5c57d6e0186..e0d20d6adf81 100644
+> --- a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+> +++ b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+> @@ -22,6 +22,7 @@ Required properties:
+>   
+>   	For those SoCs that use SYST
+>   	* "mediatek,mt8183-timer" for MT8183 compatible timers (SYST)
+> +	* "mediatek,mt8186-timer" for MT8186 compatible timers (SYST)
+>   	* "mediatek,mt8192-timer" for MT8192 compatible timers (SYST)
+>   	* "mediatek,mt8195-timer" for MT8195 compatible timers (SYST)
+>   	* "mediatek,mt7629-timer" for MT7629 compatible timers (SYST)
