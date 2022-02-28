@@ -2,137 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71231C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 12:04:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 726F1C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 13:40:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234902AbiB1MFE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 07:05:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51002 "EHLO
+        id S236077AbiB1NlZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 08:41:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230322AbiB1MFD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 07:05:03 -0500
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BE2C13E98
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 04:04:25 -0800 (PST)
-Received: by mail-lf1-x131.google.com with SMTP id t13so8942558lfd.9
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 04:04:25 -0800 (PST)
+        with ESMTP id S232767AbiB1NlY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 08:41:24 -0500
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 174AE7C7BC
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 05:40:46 -0800 (PST)
+Received: by mail-pj1-x102e.google.com with SMTP id cp23-20020a17090afb9700b001bbfe0fbe94so11348692pjb.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 05:40:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=8WnObInMC2ofWUsTKYtPij+k1Wh0DXe/u1zG3p1IPf4=;
-        b=JqfBkaGJmDTS5BLvufjhP/LEar/dzjQ6i7GPUZzQbUUApCYFA5AQYeQ/dfEM6n3HG6
-         CaZx9w0fjnDcQCHoNddRQS/A54mr7vTrErGBM5tIFsv7T/+VRPuNDLeW23vIDovdwSP7
-         1YlExP3x/CuK+MMWXD+8VX40ycwwMQg9kW/7AfxgyIM/5HUHjOIhV6o04w+Sz1TY6zGJ
-         yK5nlmPf9dv+VtE25IFeAdYzaQl0yQmQdb0DFN6YWjq3GJl8OCOtYnx1B1DzLqs0Htc5
-         BO28nMs1x1Ceqic4zFgJpRukkI19rYnBqN13EUOvPUo4O19aDegrb8WhpA5zTdnQRqGM
-         OE9Q==
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
+        h=from:to:cc:in-reply-to:references:subject:message-id:date
+         :mime-version:content-transfer-encoding;
+        bh=8AEAKRGq8N0ON2WXDBrR6DvzDs8wlyStSGQdnh6J7Bk=;
+        b=4CGakBFMfUd91qW2Zea8Ay3ZXjgwkHfjpcl9oYfHzNaGzNy9R9r4qRkFRFSMGvdimo
+         d9aOWeUry/nhwT9eUXWJ1Vq8+4yc3w7X6NAuRXJjoROQ7c/8yWVNI+d3DhywL3wrpXAx
+         32iNRwgY85RS27y4NP7pvSzs09tLKp4y2lWzVSVRMGR1ee9agNNEKlLQSLHgXAiD/KGa
+         ImzsQlTnd5LWZmoyQjG/sO6K1IwfA3qXlaxtn6GQvDtaMXf+X8T6a8lhnwP5cCVECV9u
+         v/M/BeiRS7oDi9lLiRXD0lptuZtCWieGIRQ+JHh9uUhcZelgoB1r6XH1l02MbpWdWG3Q
+         a02g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=8WnObInMC2ofWUsTKYtPij+k1Wh0DXe/u1zG3p1IPf4=;
-        b=IZ9k8ya0r6bDmoStsJ+O4mO2wXJO7Dh9VBqLpPaO1UGKoIjEK1PB+r0TFZGA5E68uU
-         z7t4GtvdqgFAYG0eFOQpSYZP1wINcdUVoNEGwdWYtCOYhmtXvxeEIktLnUwjVKCA6vqj
-         KwakwaWSyJpNBIczRzVp/Vh1D6C1UHKXMLKxxNVvqC60YbRmiyJHudhKUm475Dik9Sss
-         HvFU2o34ixuWV82ZKL2sq4uLTHoAOCUQ2gb2YNIwORMM8A0iUoHng05RyDa6ViU+Cx3O
-         nE+gSQFR/yanhpqCtxndzh8XDsRiRXv5MDxBBeZtLeqxqJ1+Oa/6JHfQNxJwvtCYlwqu
-         4lfw==
-X-Gm-Message-State: AOAM5305rC1FtHJitug305OkG6ZIy3eF7AmqXKTLqF1T5jOtYBCsMTzk
-        yO86Cc9vliwqjfSXGHR0eN3zkX4/P/gO54tx7PvXn4U3Pie0Zw==
-X-Google-Smtp-Source: ABdhPJxpZi2fIFjY4KRz6vVxIdDcBSJGElXWDH3T1Fddx90I97shcxEvbgmXGqeayZecnO4XROSRNKyZGUYTNmYasOI=
-X-Received: by 2002:ac2:5de4:0:b0:443:5b80:d4c4 with SMTP id
- z4-20020ac25de4000000b004435b80d4c4mr12437782lfq.373.1646049863342; Mon, 28
- Feb 2022 04:04:23 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject
+         :message-id:date:mime-version:content-transfer-encoding;
+        bh=8AEAKRGq8N0ON2WXDBrR6DvzDs8wlyStSGQdnh6J7Bk=;
+        b=xcysktZ3IKo7xHfK03W4Ulm5G5wBMwQG5cirtZPKJ/WAGf6XwbwOsc3TlNY4iIvfmu
+         WI8l5gRZ6qLBxLjIjZ801G6UjZ2dCXUnv/C/wOXFbRLl9Vm32HWA/3n2hoXY8Ng9INaL
+         BYYadmJd/hhI4V0uIPrOBOZ/fnKUzpJ9BSe2SNm8zumTdc1TRCg22oZ9L8ohambl7Pik
+         OrArx9DXlfDEhZY4XPkuHsTN16HI8c0tGzw4VBg2k/L8CpgR453mv46DZ8lBWkRprIsl
+         YuzIDnCsL9gBCAzBSpoXR/CkIveu581u37Y4ASKh5woeDQ8FmqbfIBJZrto4iT8gfhTf
+         KZ3Q==
+X-Gm-Message-State: AOAM531To2EFz5WlTCqindgofx1JfYvanSFp62bDICj7k4CnBFP5Gn0z
+        EjDipbnR0YMvPe2f0TCli1YLwA==
+X-Google-Smtp-Source: ABdhPJzDDppjzyaiKiUKTzeLYFsp1i6YXo3jAy8eqnS0f2r8SktthNeZeMeNsqYu6qmmYNsunIPtJA==
+X-Received: by 2002:a17:90a:578f:b0:1b9:b03f:c33c with SMTP id g15-20020a17090a578f00b001b9b03fc33cmr16854315pji.114.1646055645500;
+        Mon, 28 Feb 2022 05:40:45 -0800 (PST)
+Received: from [127.0.1.1] ([198.8.77.157])
+        by smtp.gmail.com with ESMTPSA id s2-20020a056a001c4200b004f41e1196fasm1085316pfw.17.2022.02.28.05.40.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Feb 2022 05:40:45 -0800 (PST)
+From:   Jens Axboe <axboe@kernel.dk>
+To:     Eric Biggers <ebiggers@kernel.org>, linux-block@vger.kernel.org
+Cc:     linux-api@vger.kernel.org, linux-scsi@vger.kernel.org,
+        Bart Van Assche <bvanassche@acm.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+In-Reply-To: <20220124215938.2769-1-ebiggers@kernel.org>
+References: <20220124215938.2769-1-ebiggers@kernel.org>
+Subject: Re: [PATCH v4 0/3] block: show crypto capabilities in sysfs
+Message-Id: <164605564421.5266.4770347755442851079.b4-ty@kernel.dk>
+Date:   Mon, 28 Feb 2022 06:40:44 -0700
 MIME-Version: 1.0
-References: <1644395927-4138-1-git-send-email-wangqing@vivo.com>
- <CAPDyKFqg5N1tCqQ2u2jt5qU0qLuDJRSJRtq_aMVDc7XNDbRvkw@mail.gmail.com> <bcd6688f-6f42-ca8f-ab9c-978eeff4f4e3@wanadoo.fr>
-In-Reply-To: <bcd6688f-6f42-ca8f-ab9c-978eeff4f4e3@wanadoo.fr>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Feb 2022 13:03:47 +0100
-Message-ID: <CAPDyKFo-4hkTo8F9q4+BmxUH_Y4nk_K0N20q53xrdJLAFRutcQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mtk-sd: use div64_u64() instead of do_div()
-To:     Qing Wang <wangqing@vivo.com>,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 17 Feb 2022 at 21:00, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
->
-> Le 17/02/2022 =C3=A0 16:39, Ulf Hansson a =C3=A9crit :
-> > On Wed, 9 Feb 2022 at 09:39, Qing Wang <wangqing@vivo.com> wrote:
-> >>
-> >> From: Wang Qing <wangqing@vivo.com>
-> >>
-> >> do_div() does a 64-by-32 division.
-> >> When the divisor is u64, do_div() truncates it to 32 bits, this means =
-it
-> >> can test non-zero and be truncated to zero for division.
-> >>
-> >> fix do_div.cocci warning:
-> >> do_div() does a 64-by-32 division, please consider using div64_u64 ins=
-tead.
-> >>
-> >> Signed-off-by: Wang Qing <wangqing@vivo.com>
-> >
-> > Applied for next, thanks!
->
->
-> This is wrong.
->
-> See [1].
+On Mon, 24 Jan 2022 13:59:35 -0800, Eric Biggers wrote:
+> This series adds sysfs files that expose the inline encryption
+> capabilities of request queues.
+> 
+> Patches 1 and 2 are some related cleanups for existing blk-sysfs code.
+> Patch 3 is the real change; see there for more details.
+> 
+> This series applies to v5.17-rc1.
+> 
+> [...]
 
-Thanks for reporting this, I am dropping the patch from my next branch!
+Applied, thanks!
 
-See more comments below.
+[1/3] block: simplify calling convention of elv_unregister_queue()
+      commit: f5ec592dd3bcf7c91f7c262a7f5011e001d269cd
+[2/3] block: don't delete queue kobject before its children
+      commit: 0f69288253e9fc7c495047720e523b9f1aba5712
+[3/3] blk-crypto: show crypto capabilities in sysfs
+      commit: 20f01f163203666010ee1560852590a0c0572726
 
->
->
-> Wang Qing, you should really warn all the people you have sent such patch=
-es.
->
-> CJ
->
-> [1]:
-> https://lore.kernel.org/linux-kernel/19b96972-cee7-937f-21ce-c78982ed2048=
-@linaro.org/
->
->
-> >
-> > Kind regards
-> > Uffe
-> >
-> >
-> >> ---
-> >>   drivers/mmc/host/mtk-sd.c | 2 +-
-> >>   1 file changed, 1 insertion(+), 1 deletion(-)
-> >>
-> >> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> >> index 65037e1..777c9a8
-> >> --- a/drivers/mmc/host/mtk-sd.c
-> >> +++ b/drivers/mmc/host/mtk-sd.c
-> >> @@ -766,7 +766,7 @@ static u64 msdc_timeout_cal(struct msdc_host *host=
-, u64 ns, u64 clks)
-> >>                  clk_ns  =3D 1000000000ULL;
-> >>                  do_div(clk_ns, mmc->actual_clock);
-> >>                  timeout =3D ns + clk_ns - 1;
-> >> -               do_div(timeout, clk_ns);
-> >> +               div64_u64(timeout, clk_ns);
+Best regards,
+-- 
+Jens Axboe
 
-I guess a proper patch would be to convert clk_ns into an u32 instead!?
 
-> >>                  timeout +=3D clks;
-> >>                  /* in 1048576 sclk cycle unit */
-> >>                  timeout =3D DIV_ROUND_UP(timeout, BIT(20));
-> >> --
-
-Kind regards
-Uffe
