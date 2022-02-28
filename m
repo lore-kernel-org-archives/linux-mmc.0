@@ -2,107 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E4CFC43219
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 17:06:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75374C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 22:36:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238104AbiB1RHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 12:07:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43670 "EHLO
+        id S229987AbiB1Wh2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 17:37:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34574 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238106AbiB1RHA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 12:07:00 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 729B886E3A
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:06:20 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id s25so18323582lji.5
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:06:20 -0800 (PST)
+        with ESMTP id S229594AbiB1WhZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 17:37:25 -0500
+Received: from mail-qk1-x732.google.com (mail-qk1-x732.google.com [IPv6:2607:f8b0:4864:20::732])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58B4D113AD6;
+        Mon, 28 Feb 2022 14:36:46 -0800 (PST)
+Received: by mail-qk1-x732.google.com with SMTP id 185so11623838qkh.1;
+        Mon, 28 Feb 2022 14:36:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Gc6ZFlJ3qZd+VgeRQ79wYKtmQCdPSDrZc3tlbcGpdsY=;
-        b=f0aN3H1DwqDC8Zwuq8vAg17jHyBd+u0MohL9kpPW9tjobajn1BpYtOmtVj+na6oNlj
-         BtahnqNCx1f1QQy6789N3wkofur/tYInlTdw8FvrLnaR9XAUWFJNPP6J+qzb7KJEDfdX
-         MppBbNXdSAeU7/kszSeUGI6jW6ljiiydLsSR8UaBvzCd6edo0LlXr+PaGnhHd8jigrVi
-         4ow9nVwFmCuHFqxpaxeyTmZqktRI9sElK62U9pd2MmsiqoHlTrgBQ2O3zoemO5254hao
-         c0je//1j4v4qFimsCHnSBF649Gme0sY4tiMKVxhnPBfoZ4cq31Rwb3sYcutMBPbKo51D
-         bbag==
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=NqNLCNZbfRzdZ6s+RPZUVSDu53vbe0qWHYGyNkt893E=;
+        b=XftIddrMAmhmuVKIlxOi7ezAmFRdps3UDkEEbl2ZeQMGo2H+ELXtV+4e9DhnZAMsyL
+         D/pDeeWj49sL9GZwHUnnj7n3RGyrUTegADjvReidPUORqC64NeyziR5G+yT6oAKr6A2d
+         Vdk+FWwex1AuVPvENWoJB6Ej44hGNZptg3xEBBphTsCS8U8UUkUxFpOUgebJdUc2qjrN
+         ox0phf1gLwEbJqPCbyajU3SIVtC/zaTN1s3koJIojHtROjDUYqV56hheoywgjYgCNSYz
+         vxCzJtshV5w34Hu9TntuiYVCrJxoLt0yfBW6VGutDNiE8lv73o7vOn34u0tiBsX6p2Gg
+         aRMw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Gc6ZFlJ3qZd+VgeRQ79wYKtmQCdPSDrZc3tlbcGpdsY=;
-        b=CkmewASvTwCvoXBsb7dK5DDLgK5rftylkiyLCCQGcw2OcNiDRz9qMGkODA8aZguZoA
-         /55qCk7LxevFwn5p5LaYMO5TuH4QLFI4V7zSOoZYvt1FEpfpaVSPr4YcrGnhQy+QlBvc
-         ORI7iacsBBWyvqX7PTIcS8Bgss+U3lIgICvQUiR/90w6KTeLIGm9YMY3XAuaRVBbWZqC
-         aWWynT/MIogGTlqrbK/nMNfG+GCZcAtVcIclLSwX0R01pbxiZ2IOxNMkEhbm+7JRH891
-         WIL9gwtZmZpyOeFg/ANudb49kjvHwHWqFpLSILVJVx+MZtjs4VJpocAVGhNIn4jgzXic
-         Mo3Q==
-X-Gm-Message-State: AOAM531x8Y3obC0I1/L+6PJzti+pmqUNDM0OaJmUcXpBgnvHwj6gr+Ko
-        +1MgOwDv/EuXR1b5qqATHJ4gNafQnX9YyRK4Ba8rtJu6/Y8=
-X-Google-Smtp-Source: ABdhPJyHm1HqQ04mXe/pep6vMfFi/IIxyvU1GTcRx+IxndP6xRlwjBmljKqD6gFOuOZlTVPyVims3SmL02o0zgRxUGo=
-X-Received: by 2002:a2e:9cc5:0:b0:239:da6e:290d with SMTP id
- g5-20020a2e9cc5000000b00239da6e290dmr14902326ljj.4.1646067978836; Mon, 28 Feb
- 2022 09:06:18 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=NqNLCNZbfRzdZ6s+RPZUVSDu53vbe0qWHYGyNkt893E=;
+        b=F0cm/T9jY9h4ZNZBw/vLoF6O2ymLSPe4K7qzX19jVgj9mQ8o5cBg8A5+BHpYsW8P/R
+         lXArAcZjE2/nvdb/ghcTH0iG/+KT2ph8scjy30BvWH88ALFCtm003NL5NQne2CcHyone
+         WbMpDy4DUOOXKbnbHBlzE9EDt4VpQuPLFmZ+JWtskfmgxl0NiC5nkefzJ3qi9ZpWjWhz
+         m6ss4qZxRL2uIML9t0DoxkwN5C6SGupTb76T+npVQ1enf0rB5DeuQeFKsHIHeMvmRcmG
+         +Lux2ccucJOUXKd/yDJmeK6TEIglD1wk4kurpToTzy/ih7BHEplI2M6wmucRNFoJR9Ff
+         himw==
+X-Gm-Message-State: AOAM531SIqqo/IC3Q4WL0cbI/oagBHe3nlo2Mw1yJQoPc/pBw464IbLH
+        28suTeHDbBaZuwEBje9VviQ=
+X-Google-Smtp-Source: ABdhPJxzocr7KcKfiyTO0gDJ53raBvOlFPXC+nmpx349DwcEXm+eD7Ij9yg7XQVuxFESGg/JvDVyWw==
+X-Received: by 2002:a05:620a:45:b0:508:176a:8892 with SMTP id t5-20020a05620a004500b00508176a8892mr12549250qkt.731.1646087805470;
+        Mon, 28 Feb 2022 14:36:45 -0800 (PST)
+Received: from master-x64.sparksnet ([2601:153:980:85b1::10])
+        by smtp.gmail.com with ESMTPSA id v9-20020a05622a144900b002dfedb4dccasm6632068qtx.66.2022.02.28.14.36.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 28 Feb 2022 14:36:45 -0800 (PST)
+From:   Peter Geis <pgwipeout@gmail.com>
+To:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Heiko Stuebner <heiko@sntech.de>
+Cc:     Peter Geis <pgwipeout@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
+Date:   Mon, 28 Feb 2022 17:36:42 -0500
+Message-Id: <20220228223642.1136229-1-pgwipeout@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <68d689c39c769d298b53ee8cb9de0e594a2999b2.1645460780.git.geert+renesas@glider.be>
-In-Reply-To: <68d689c39c769d298b53ee8cb9de0e594a2999b2.1645460780.git.geert+renesas@glider.be>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Feb 2022 18:05:42 +0100
-Message-ID: <CAPDyKFoYcCQqmUusJ_ZVw99d-zwF4o=qtFG0L=N5yM8S0Lg0dQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sh_mmcif: Simplify division/shift logic
-To:     Geert Uytterhoeven <geert+renesas@glider.be>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 21 Feb 2022 at 17:27, Geert Uytterhoeven
-<geert+renesas@glider.be> wrote:
->
-> "a / (1 << b)" == "a >> b".
->
-> No change in generated code.
->
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+The dw_mmc-rockchip driver drops a large amound of logspam constantly
+when the cd-broken flag is enabled.
+Set the warning to be debug ratelimited in this case.
 
-Applied for next, thanks!
+Signed-off-by: Peter Geis <pgwipeout@gmail.com>
+---
+ drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 95d0ec0f5f3a..d0ebf0afa42a 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -50,8 +50,13 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 		cclkin = ios->clock * RK3288_CLKGEN_DIV;
+ 
+ 	ret = clk_set_rate(host->ciu_clk, cclkin);
+-	if (ret)
+-		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
++	if (ret) {
++		/* this screams when card detection is broken */
++		if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
++			dev_dbg_ratelimited(host->dev, "failed to set rate %uHz\n", ios->clock);
++		else
++			dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
++	}
+ 
+ 	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+ 	if (bus_hz != host->bus_hz) {
+-- 
+2.25.1
 
-
-> ---
->  drivers/mmc/host/sh_mmcif.c | 7 +++----
->  1 file changed, 3 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 104dcd702870c423..5f9ebf045b1cb22b 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -521,8 +521,7 @@ static void sh_mmcif_clock_control(struct sh_mmcif_host *host, unsigned int clk)
->                 }
->
->                 dev_dbg(dev, "clk %u/%u (%u, 0x%x)\n",
-> -                       (best_freq / (1 << (clkdiv + 1))), clk,
-> -                       best_freq, clkdiv);
-> +                       (best_freq >> (clkdiv + 1)), clk, best_freq, clkdiv);
->
->                 clk_set_rate(host->clk, best_freq);
->                 clkdiv = clkdiv << 16;
-> @@ -1012,8 +1011,8 @@ static void sh_mmcif_clk_setup(struct sh_mmcif_host *host)
->                  */
->                 host->clkdiv_map = 0x3ff;
->
-> -               host->mmc->f_max = f_max / (1 << ffs(host->clkdiv_map));
-> -               host->mmc->f_min = f_min / (1 << fls(host->clkdiv_map));
-> +               host->mmc->f_max = f_max >> ffs(host->clkdiv_map);
-> +               host->mmc->f_min = f_min >> fls(host->clkdiv_map);
->         } else {
->                 unsigned int clk = clk_get_rate(host->clk);
->
-> --
-> 2.25.1
->
