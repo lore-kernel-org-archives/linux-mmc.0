@@ -2,162 +2,154 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB2E6C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 17:04:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60C47C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 17:06:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238098AbiB1RFT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 12:05:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37812 "EHLO
+        id S237499AbiB1RGw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Feb 2022 12:06:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43494 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237499AbiB1RFR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 12:05:17 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D68286E1D
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:04:38 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id j15so22448181lfe.11
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:04:38 -0800 (PST)
+        with ESMTP id S230393AbiB1RGw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 12:06:52 -0500
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F28D257B0D
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:06:12 -0800 (PST)
+Received: by mail-lf1-x12b.google.com with SMTP id bu29so22615369lfb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Feb 2022 09:06:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=lIdq0xDa5SoPSxzAGTemiHfQ1WhVcvzkPC8IThSINzA=;
-        b=DspDnAfRiAw2/8sOryQqZ05e2H7MMu1/Fzinh2vhH418uJZn+bTF9LC4dXcr8AzBC5
-         SN3Yv21IbqS+X+xBDEEAzEj78Ho/vuMmrN+Ed5HQz22qDK4UJ40TBf3whlVCwkYbGVHW
-         rkhvErM1Qfur9LKi1ZRSXNg3Xh9Caz/+F1d6jyhafsu5qmJdGPJs2Hl/BrY4PPQC3Llp
-         EAU1bDalFvvdutjL2iHCNdv4gzHtTZY9UF5e3G6W5vjJTXGGVGqVvUgSEuJiI3Q0sxlA
-         3ZFbWMmdXAA6GNlDXiqNCBqrZGIpQyr61kkowWx13aWKrXuMmYv/MewPouWWt+HVrmax
-         jNLA==
+        bh=iCqSJLVmzSiAQCZuGWx3jdcx0OAjD7prrRZYblRmLXk=;
+        b=biJj7wivuUwsykg3cCHNhf5pu9DOv2jbE6fUXHgxl5AXqJvtb2ehNXEpFdBsjf5qD4
+         vkHTAQcKYQZBp7geavn1aVx7d+zborulBdlwD7Z9JRROJb12Mj6rRHX0cdfRhdrBzE0T
+         /VohSnvjl3cAMBB76kxjvj0WUoNEYnotB2u9aY4x3HQ8MsPfk5guRYXgM9MGsq6586hO
+         P3k48kII6PkFhXlZjZdrwpfYsUaBAhs1H81yb5JvQCu2e5fNvNljwd6rz18hGoRAllT7
+         8vpUEGH8aPTJnoNzpFlbD5QQcpiY4id2uDJYhd0pnDZxqOyuc1WlmXodzzdBd3L88bUq
+         P45A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=lIdq0xDa5SoPSxzAGTemiHfQ1WhVcvzkPC8IThSINzA=;
-        b=vNyRO8IHs/N3rJtLtEDAB0pG+wjIOhl0OBKZa2SMSRlN5bzyTsM1dcjSBx7SuWz30p
-         YQFiTvATDdR9vFaGzizUBRYm3L8K3AljBPzNkDzqAZlOU7lRjGvTH8mWTeUT8yRBnRHf
-         8GiqoPP3woSD6qGNd6/RM1UDkY27ru5IwD2Bggf7Q7Va5Qk9zRTkjwvg5KA8Xwk5YNH6
-         FbNDvGfQWDyJwot6YQvY6z++LeLxFcTNegV35hpaP1qITQ2ZTzhaErUCQv3eCFt/UJUK
-         7xf69o4Jq7eRw+SxL8aPxCXkoeZek+skUPbUPcy7lEYN3qzNZmFVMBVfu1txOWJZyaZG
-         eTtQ==
-X-Gm-Message-State: AOAM531bnm+uF7UwegTnI7K91WG7BcDDSaer63rHFdq6u1YrpnRk83mB
-        bFp7kEODf/3gDp7/vEgjtWdhsRNe5fK58+lwc+e1uw==
-X-Google-Smtp-Source: ABdhPJz9RUZwJ8mORaL4cPamANxjVL0XmzpuvxgMDMuvfL0KaGeivTo02ZgSgXlFrroGwKFIiVaG5nG00YiDsTVuEOE=
-X-Received: by 2002:a05:6512:3d2a:b0:443:3198:cb95 with SMTP id
- d42-20020a0565123d2a00b004433198cb95mr14015061lfv.233.1646067876428; Mon, 28
- Feb 2022 09:04:36 -0800 (PST)
+        bh=iCqSJLVmzSiAQCZuGWx3jdcx0OAjD7prrRZYblRmLXk=;
+        b=BCdwZNp6naruCqiW4rjuFlnRyPjVKT+ncRnNseDaWfO96uox7Kzsjtyku3T5RILlqC
+         q65WI8nLznpODN21lcxsG0uI4zE/fhbv+gShf8Qa+mIBEIPEbgMcifjpWz/X1wrqvYBp
+         Y3G5In+/VIgYtKXIPAPxNqsyImuLVTQMeEsm72abL7Tw0/BjFy7hl/XW73q/UNDtsXG7
+         fIuueWpqLIB1VDNndvmrA5JUkW6WN0mgCSIxzkrYKvnWcgRXC45YU2cR9A7XvXYYfhJO
+         vHKmQJYDDkIcff1/rp6Y9p4XZ92OHxdrEgbUefRzOu1mXeP4D9driRSAvZmjV9SJuESl
+         G7cQ==
+X-Gm-Message-State: AOAM530ZgmEVS3kD+ZTsCtFKUU90tzZD/XIreYPyhgk6fqQHL/y3z9Ye
+        ncS26E2QE4y0t4M/Rdgagk2TVwiZ/Oiv2gQ+usdbDA==
+X-Google-Smtp-Source: ABdhPJyiqgn7SIzkaA0Z4EPVWwcwg577znE0wY62h7WlddpNO9W0l3Jz/eBXTKgDKMBrXh7YF6zOLSFPqFGqc/Yec0M=
+X-Received: by 2002:a19:9144:0:b0:43b:86a4:1497 with SMTP id
+ y4-20020a199144000000b0043b86a41497mr13291435lfj.254.1646067971343; Mon, 28
+ Feb 2022 09:06:11 -0800 (PST)
 MIME-Version: 1.0
-References: <20220225125553.1185108-1-benchuanggli@gmail.com> <20220225125553.1185108-2-benchuanggli@gmail.com>
-In-Reply-To: <20220225125553.1185108-2-benchuanggli@gmail.com>
+References: <20220216124239.4007667-1-rong.chen@amlogic.com>
+In-Reply-To: <20220216124239.4007667-1-rong.chen@amlogic.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Feb 2022 18:03:59 +0100
-Message-ID: <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
-To:     Ben Chuang <benchuanggli@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, greg.tu@genesyslogic.com.tw,
-        ben.chuang@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw,
-        Kevin Chang <kevin.chang@lcfuturecenter.com>
+Date:   Mon, 28 Feb 2022 18:05:35 +0100
+Message-ID: <CAPDyKFq797hihSwtX00V6tW2c035FLPnWonbBGcuh4L-zWqHTw@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: meson: Fix usage of meson_mmc_post_req()
+To:     Kevin Hilman <khilman@baylibre.com>,
+        Rong Chen <rong.chen@amlogic.com>
+Cc:     Neil Armstrong <narmstrong@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        1131046452@qq.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        45581586@qq.com, Heiner Kallweit <hkallweit1@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
->
-> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->
-> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
-> gated of upstream port can be enabled.
->
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
-> ---
->  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
->  1 file changed, 54 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index 97035d77c18c..cf99b6af792d 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
->         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->  }
->
-> +#ifdef CONFIG_PM
-> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
-> +{
-> +       struct sdhci_pci_slot *slot = chip->slots[0];
-> +       struct sdhci_host *host = slot->host;
-> +       u16 clock;
-> +
-> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
-> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> +
-> +       return 0;
-> +}
-> +
-> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
-> +{
-> +       struct sdhci_pci_slot *slot = chip->slots[0];
-> +       struct sdhci_host *host = slot->host;
-> +       ktime_t timeout;
-> +       u16 clock;
-> +
-> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +
-> +       clock |= SDHCI_CLOCK_PLL_EN;
-> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
-> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> +
-> +       timeout = ktime_add_ms(ktime_get(), 150);
-> +       while (1) {
-> +               bool timedout = ktime_after(ktime_get(), timeout);
-> +
-> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> +               if (clock & SDHCI_CLOCK_INT_STABLE)
-> +                       break;
-> +               if (timedout) {
-> +                       pr_err("%s: PLL clock never stabilised.\n",
-> +                              mmc_hostname(host->mmc));
-> +                       sdhci_dumpregs(host);
-> +                       break;
-> +               }
-> +               udelay(10);
-> +       }
-> +       clock |= SDHCI_CLOCK_CARD_EN;
-> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> +
-> +       return 0;
-> +}
++ Hainer
 
-Both functions above look very similar to what sdhci_set_clock() does.
-Can you use that, rather than open coding the above?
-
-Other than that, I would appreciate it if Adrian could have a look at
-this too. For example, I wonder if perhaps
-sdhci_runtime_suspend|resume_host() should be called in these paths
-too.
-
-> +#endif
-> +
->  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
->  {
->         struct pci_dev *pdev = slot->chip->pdev;
-> @@ -982,6 +1031,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
->  #ifdef CONFIG_PM_SLEEP
->         .resume         = sdhci_cqhci_gli_resume,
->         .suspend        = sdhci_cqhci_gli_suspend,
-> +#endif
-> +#ifdef CONFIG_PM
-> +       .runtime_suspend = gl9763e_runtime_suspend,
-> +       .runtime_resume  = gl9763e_runtime_resume,
-> +       .allow_runtime_pm = true,
->  #endif
->         .add_host       = gl9763e_add_host,
->  };
-> --
-> 2.35.1
+On Wed, 16 Feb 2022 at 13:42, Rong Chen <rong.chen@amlogic.com> wrote:
 >
+> Currently meson_mmc_post_req() is called in meson_mmc_request() right
+> after meson_mmc_start_cmd(). This could lead to DMA unmapping before the request
+> is actually finished.
+>
+> To fix, don't call meson_mmc_post_req() until meson_mmc_request_done().
+>
+> Signed-off-by: Rong Chen <rong.chen@amlogic.com>
+
+We should probably add a fixes tag to this, right?
+Fixes: 79ed05e329c3 ("mmc: meson-gx: add support for descriptor chain mode")
+
+Moreover, you want this tagged for stable kernels too, right?
+
+I have applied it for fixes and added the above tags, please tell if
+you want me to change it.
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/meson-gx-mmc.c | 15 ++++++++-------
+>  1 file changed, 8 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 8f36536cb1b6..58ab9d90bc8b 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -173,6 +173,8 @@ struct meson_host {
+>         int irq;
+>
+>         bool vqmmc_enabled;
+> +       bool needs_pre_post_req;
+> +
+>  };
+>
+>  #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
+> @@ -663,6 +665,8 @@ static void meson_mmc_request_done(struct mmc_host *mmc,
+>         struct meson_host *host = mmc_priv(mmc);
+>
+>         host->cmd = NULL;
+> +       if (host->needs_pre_post_req)
+> +               meson_mmc_post_req(mmc, mrq, 0);
+>         mmc_request_done(host->mmc, mrq);
+>  }
+>
+> @@ -880,7 +884,7 @@ static int meson_mmc_validate_dram_access(struct mmc_host *mmc, struct mmc_data
+>  static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct meson_host *host = mmc_priv(mmc);
+> -       bool needs_pre_post_req = mrq->data &&
+> +       host->needs_pre_post_req = mrq->data &&
+>                         !(mrq->data->host_cookie & SD_EMMC_PRE_REQ_DONE);
+>
+>         /*
+> @@ -896,22 +900,19 @@ static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 }
+>         }
+>
+> -       if (needs_pre_post_req) {
+> +       if (host->needs_pre_post_req) {
+>                 meson_mmc_get_transfer_mode(mmc, mrq);
+>                 if (!meson_mmc_desc_chain_mode(mrq->data))
+> -                       needs_pre_post_req = false;
+> +                       host->needs_pre_post_req = false;
+>         }
+>
+> -       if (needs_pre_post_req)
+> +       if (host->needs_pre_post_req)
+>                 meson_mmc_pre_req(mmc, mrq);
+>
+>         /* Stop execution */
+>         writel(0, host->regs + SD_EMMC_START);
+>
+>         meson_mmc_start_cmd(mmc, mrq->sbc ?: mrq->cmd);
+> -
+> -       if (needs_pre_post_req)
+> -               meson_mmc_post_req(mmc, mrq, 0);
+>  }
+>
+>  static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+> --
+> 2.25.1
+>
