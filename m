@@ -2,168 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38808C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 14:49:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AB04C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 14:54:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232245AbiCAOuM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 09:50:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38624 "EHLO
+        id S235463AbiCAOyl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 09:54:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48772 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231776AbiCAOuM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 09:50:12 -0500
-Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D76BF340D4;
-        Tue,  1 Mar 2022 06:49:30 -0800 (PST)
-Received: by mail-yb1-xb2f.google.com with SMTP id e186so3525114ybc.7;
-        Tue, 01 Mar 2022 06:49:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4U0iuFvcp7ujNscgy9HWinVgMJBUfxF78O2+/sgxqws=;
-        b=CMUPJpGKvr3VRoQQvPQyzEsAzLDTj34vgFV5ES1+5Nu15WcUM+u0NDaq/u5h2wT5EF
-         xA0SxExyPZ5A3+PfU5CznkcMfWJ34LGBbyWZjXf45jZF3BHFwDNznx9vGtJACZAoRCM+
-         gpEoI17azZ4V/VgCOnobUjySB62ZOhRALn1ftTxgp+8FCIitE2kf0vkpFOEnYdlSwN1m
-         P8JWKP0/aSxFVKqHEoxPEAalT+J13PmU4q1FPuCQ4gjpHePy8RJC/iYWJaOdj9UCbyXi
-         zVB4bQ0JVb+9o/ZTHu93yddixmVHx3ASVka+DdA2TsuRCOYIni0OacRqlqDxnnPC2M4Y
-         e0gQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4U0iuFvcp7ujNscgy9HWinVgMJBUfxF78O2+/sgxqws=;
-        b=WLrT3IRamRY4BuEa8IM+ete7nlINSXKmK9Ylo7Hm0zQA+Pp/P/SnAmo+IwSkRrkPTD
-         ftkhbOfhuNNeKTRkd8+tMJEKw2Kva7pSkDdECc0c+IfgXOkVyohigbxDWYgWEIZ4wHAh
-         cAGuTwMabHVJ6MXayfX27L7Y034x6vAcuflvbqcPf7DB/NZbJRMVfTcuMlXR3jvLSCcP
-         ugskGuXAGCyGebhAtxhlLt/rDwrtLqnN7vde606EY0W7gvKCshhsAxasrwD7F3deBlmC
-         2EbHHf/HIEGEZ3HFxnXCm4Kc0GMlc4w/l9HGVfy+5yjRhXmA4CYPgJ0sGInP5HwaraG8
-         bLiQ==
-X-Gm-Message-State: AOAM53236XwvzlKNfRs7qHI27ZWbnaBs9lDTE7yfg5BzhX88YniZmkk1
-        ISKIh2IW8qahLeu66nUKPNlLePXmJBYTDyn/U4A=
-X-Google-Smtp-Source: ABdhPJyWo86SQbAsOm+jG2RskwR28LgIWL5XKSlmF2OvZVF3QyQ1JM2DddFW07h88pUDilmGCDkPhF5MsIjLBwEte8s=
-X-Received: by 2002:a25:5145:0:b0:61d:ad99:6e5a with SMTP id
- f66-20020a255145000000b0061dad996e5amr23834211ybb.228.1646146169969; Tue, 01
- Mar 2022 06:49:29 -0800 (PST)
-MIME-Version: 1.0
-References: <20220228223642.1136229-1-pgwipeout@gmail.com> <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
- <CAMdYzYq0A4FitRGe49fxvjbwLUCi_KGwCtfz7pmayt_dK=r32w@mail.gmail.com>
- <54b24f3d-3762-abbd-5ac4-dc5728f2fe4e@arm.com> <CAMdYzYp=Po08pap9w5s8PV0mKfFZSPSOhM1U1AUdrRkYV-FRZQ@mail.gmail.com>
-In-Reply-To: <CAMdYzYp=Po08pap9w5s8PV0mKfFZSPSOhM1U1AUdrRkYV-FRZQ@mail.gmail.com>
-From:   Peter Geis <pgwipeout@gmail.com>
-Date:   Tue, 1 Mar 2022 09:49:19 -0500
-Message-ID: <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
-To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        with ESMTP id S234700AbiCAOyf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 09:54:35 -0500
+X-Greylist: delayed 225 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 01 Mar 2022 06:53:50 PST
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEE927EB3D
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 06:53:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=bHcc4GLjuPlwZ9IO4BDeSXmHBVnc
+        FhSDywmcS2SRGdA=; b=MGgWp5uuX9D3Q+AJpYpCzzHdrAso6Wq65Xij/C7BZ2ip
+        X12SMZOT+1S0c7n6yOBH2wei/3BADOzkKOC9Vrl3bl3xe0RP2bZBgdw5jMHH+pBw
+        WTKr4oKUsKOfixXY4IKRGlVwllNLVtV/2gowjlJlKjJZMQFQhsl0bl96ZCuKgJI=
+Received: (qmail 3900677 invoked from network); 1 Mar 2022 15:53:48 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Mar 2022 15:53:48 +0100
+X-UD-Smtp-Session: l3s3148p1@Q1YYVSnZ7NQgAQnoAGI9AP6D0HJXVmR3
+Date:   Tue, 1 Mar 2022 15:53:48 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
-        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
+Message-ID: <Yh4zfIliNC2EzF4R@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>
+References: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="1Oa0wvzClD7zRdyN"
+Content-Disposition: inline
+In-Reply-To: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 1, 2022 at 7:46 AM Peter Geis <pgwipeout@gmail.com> wrote:
->
-> On Tue, Mar 1, 2022 at 7:38 AM Robin Murphy <robin.murphy@arm.com> wrote:
-> >
-> > On 2022-03-01 11:49, Peter Geis wrote:
-> > > On Tue, Mar 1, 2022 at 6:23 AM Robin Murphy <robin.murphy@arm.com> wrote:
-> > >>
-> > >> On 2022-02-28 22:36, Peter Geis wrote:
-> > >>> The dw_mmc-rockchip driver drops a large amound of logspam constantly
-> > >>> when the cd-broken flag is enabled.
-> > >>> Set the warning to be debug ratelimited in this case.
-> > >>
-> > >> Isn't this just papering over some fundamental problem with the clock?
-> > >> If it's failing to set the expected rate for communicating with a card,
-> > >> then presumably that's an issue for correct operation in general? The
-> > >> fact that polling for a card makes a lot more of that communication
-> > >> happen seems unrelated :/
-> > >
-> > > Good Morning,
-> > >
-> > > This only happens when a card is not inserted, so communication cannot happen.
-> >
-> > Well, I suppose there's a philosophical question in there about whether
-> > shouting into the void counts as "communication", but AFAIR what the
-> > polling function does is power up the controller, send a command, and
-> > see if it gets a response.
-> >
-> > If the clock can't be set to the proper rate for low-speed discovery,
-> > some or all cards may not be detected properly. Conversely if it is
-> > already at a slow enough rate for discovery but can't be set higher once
-> > a proper communication mode has been established, data transfer
-> > performance will be terrible. Either way, it is not OK in general for
-> > clk_set_rate() to fail, hence the warning. You have a clock driver problem.
->
-> Alright, I'll look into this.
-> It seems only extremely low clock speeds fail and I know rockchip
-> chips have a hard time with extremely low clock rates.
-> I'll trace out where the failure is happening.
 
-Okay, I hope you can provide me a direction to go from here, because
-it looks like it's doing exactly what it should do in this situation.
-mmc core is requesting a rate (200k/100k).
-clk core tries to find a parent to provide a clock that low and fails,
-because the lowest possible parent is 750k.
-clk_sdmmc(x) is listed as no-div, so it can't go any lower.
+--1Oa0wvzClD7zRdyN
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-It seems to me that this error is sane, because other results of
-einval you want to catch.
-But einval in this case is fine, because
-The thing that strikes me weird is currently clk_core thinks the
-lowest possible freq here is 0, when in actuality it should be 750k,
-am I correct here?
-The mmc controller has an internal divider, so if my line of thinking
-is correct here we should be more flexible here and request a rate
-that's acceptable rather than just failing if it doesn't work.
-But that's based on my limited understanding of how mmc core is
-requesting this and what it expects in return.
+On Sun, Feb 27, 2022 at 09:23:30PM +0000, Lad Prabhakar wrote:
+> Document RZ/V2L SDHI bindings. RZ/V2L SDHI is almost identical to one
+> found on the R-Car Gen3. No driver changes are required as generic
+> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
+>=20
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Biju Das <biju.das.jz@bp.renesas.com>
 
->
-> Thanks!
->
-> >
-> > Cheers,
-> > Robin.
-> >
-> > > I found it while lighting off the SoQuartz module.
-> > > As it is pin compatible with the RPi CM4, and the CM4 does not have a
-> > > card detect line, sdmmc is non functional without cd-broken.
-> > > This led to the fun spew when there wasn't a card inserted as this
-> > > function is called every poll tick.
-> > >
-> > > Thanks,
-> > > Peter
-> > >
-> > >>
-> > >> Robin.
-> > >>
-> > >>> Signed-off-by: Peter Geis <pgwipeout@gmail.com>
-> > >>> ---
-> > >>>    drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++--
-> > >>>    1 file changed, 7 insertions(+), 2 deletions(-)
-> > >>>
-> > >>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> > >>> index 95d0ec0f5f3a..d0ebf0afa42a 100644
-> > >>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > >>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > >>> @@ -50,8 +50,13 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> > >>>                cclkin = ios->clock * RK3288_CLKGEN_DIV;
-> > >>>
-> > >>>        ret = clk_set_rate(host->ciu_clk, cclkin);
-> > >>> -     if (ret)
-> > >>> -             dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > >>> +     if (ret) {
-> > >>> +             /* this screams when card detection is broken */
-> > >>> +             if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-> > >>> +                     dev_dbg_ratelimited(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > >>> +             else
-> > >>> +                     dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > >>> +     }
-> > >>>
-> > >>>        bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-> > >>>        if (bus_hz != host->bus_hz) {
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--1Oa0wvzClD7zRdyN
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmIeM3sACgkQFA3kzBSg
+Kba/YBAAnssZXgvDGvV/aFRDKSkKps+gd9KCURFaUu26sXNfgUClvBWllhx70GQL
+7X+wwp5hPk1VzAvyuz4xK2CbrhZyMZvW5Pa1b76eGkOcDifC7zsMhU3KFMFg6p/P
+zoecKF+NqNgUViQ84TtUmnhsLy8UzoboV5NuFYFprAEp14+XateezTtLky7CS+Gg
+Dr2HwNN9cecrnfIyDC77wdKnCtTnH56bW7aQVERbt63dnByEYGGR2URuYnbZieY/
+Bo+funywtNneBXK9RCrpHcOWausGAuKOsE3Ub5BEfK37fi+WJKoWs8jlVxolYRD5
+b1FVFIu/wwOtst1nuLbli+s3Xr/fhE04aUVdnr1eem1XiX6LzoV1KviEblmBuHpo
+poDcUtin+HZKgFABIrKsrj/ZfYCt8gcmg5qFsehoiLyKKXw1ugQNGE67mmsZ5cyC
+02BKGh7myLA6fkeVRZ1CEGsQLx0TDeRVaL+E9XYfUK2sg6MR2FJEKPZJWs0TneQB
+OEKVeqAqOgOMI55j+McH99FF6RvKTa8sHW9fRD4DUnQgMeuPOmRdtg1qAtB9SEe9
+c8/2DZRhcZhuKuQBMAVaKDuBixsb0FurrR9rp8hf5yvBL7OqsEiOnEJoY5B3yYoU
+Zda5MEsid5RuycLDPnMnANWLQQasbqh9d8nwmTkNswiZr3NXkrw=
+=Mah6
+-----END PGP SIGNATURE-----
+
+--1Oa0wvzClD7zRdyN--
