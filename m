@@ -2,87 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02176C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 08:14:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8A20C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 10:05:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232469AbiCAIOi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 03:14:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35512 "EHLO
+        id S234150AbiCAKGg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 05:06:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229457AbiCAIOh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 03:14:37 -0500
-Received: from mail-ua1-f46.google.com (mail-ua1-f46.google.com [209.85.222.46])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B0A247AC0;
-        Tue,  1 Mar 2022 00:13:57 -0800 (PST)
-Received: by mail-ua1-f46.google.com with SMTP id 10so7086114uar.9;
-        Tue, 01 Mar 2022 00:13:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Hup4l0SCQpzYB1UP/0yN4hi6PPxy4Oe80sl6oWpNdRw=;
-        b=LKIZuCD5HBVGllMBty9EVsxmSAsANbjpqJ+Ydv8DOivMDR2/wgr+oAVWZ6fXGFUu4b
-         50r6rnlOAohqtdwtyGvg0MZQG3m2rRW3LVQ4ybIQ7OK5SiYRcsU2W7wuKkM+tdU8QPOO
-         vrZKMFNGhJwiAgjJcPaHKXgBGFMlHLlkpW4tdvA9myvsnQGLEtli2zvZxfE3VuXzZ79U
-         Lnjwf+EXSTRArfrCwu2snvg34vilh33ilXZ1ZSS+sol9nBNrV6Oycy1IqWxZdaqqRVXY
-         XnE5kIULiibc9kw35PmVoqDnsHkn3DBbsrlSV3t0nGK3bVZgqLRAVTBUcP5Ekp2b2R4S
-         SAqw==
-X-Gm-Message-State: AOAM532n+lj6EWU1R69imGuYdgFfWiDM1ttblotiXcIsAWdDybtQ21Pf
-        uTZEjlmGaaiyZphRhGqkS6PDe3gM9hXW6Q==
-X-Google-Smtp-Source: ABdhPJy7liRlf8SpUvscezMptczIa9SRDyzDD7vIqEt4LC1fLEJEbUBosbsC8206e07VoDXmtoavfA==
-X-Received: by 2002:ab0:70c7:0:b0:340:5421:a0c2 with SMTP id r7-20020ab070c7000000b003405421a0c2mr9360173ual.40.1646122436301;
-        Tue, 01 Mar 2022 00:13:56 -0800 (PST)
-Received: from mail-ua1-f48.google.com (mail-ua1-f48.google.com. [209.85.222.48])
-        by smtp.gmail.com with ESMTPSA id a6-20020a056102094600b0031b3c620df5sm1574261vsi.1.2022.03.01.00.13.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 01 Mar 2022 00:13:55 -0800 (PST)
-Received: by mail-ua1-f48.google.com with SMTP id b37so7072226uad.12;
-        Tue, 01 Mar 2022 00:13:51 -0800 (PST)
-X-Received: by 2002:ab0:3da4:0:b0:306:a7f8:f28b with SMTP id
- l36-20020ab03da4000000b00306a7f8f28bmr9979160uac.47.1646122430945; Tue, 01
- Mar 2022 00:13:50 -0800 (PST)
+        with ESMTP id S234240AbiCAKG2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 05:06:28 -0500
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D7978D6AA;
+        Tue,  1 Mar 2022 02:05:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1646129120; x=1677665120;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=OqRnVMfE9sumNiyhj1Qk7+SncksPrSyR31RaHEHrlOY=;
+  b=EupCCXi7Kx1VcAyY1BWANLcZfkh2IRY6XU0AWcrcfdIbfFZIenjVynvZ
+   9h+yvDLkb/cIe9zXgrc9yTyWayqJoIxA2bRck7zYiNd0k/t+v8kuVc3qH
+   fdZx5/5RoEtqnnt8OLerB3PltOOLi6SrDsvhEV3jlkRJn+yJ202HAZEK6
+   pDdnr8TNp720gMFTVCfB6Y1IuznOVl+QSq3H3IWdffUDGPcS3aTrYpcrS
+   o4Z8PD2D1TC84A/29PewXXnI1Ixn7ERgfBU+L3deDssYr8ohLTXDQF/ZP
+   aOa36dkt7cp/VcK0VZ9VFLgbi2pwdZONuuC1g+0gsAGok2tn9r8R5kcxR
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10272"; a="233073225"
+X-IronPort-AV: E=Sophos;i="5.90,145,1643702400"; 
+   d="scan'208";a="233073225"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Mar 2022 02:05:20 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.90,145,1643702400"; 
+   d="scan'208";a="685669736"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by fmsmga001.fm.intel.com with ESMTP; 01 Mar 2022 02:05:18 -0800
+Message-ID: <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com>
+Date:   Tue, 1 Mar 2022 12:05:17 +0200
 MIME-Version: 1.0
-References: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-In-Reply-To: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 1 Mar 2022 09:13:39 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdXNrRO2HaZ2pR6eH=6SH+j9fC-72Z3eUjNVwSQyTKQR9w@mail.gmail.com>
-Message-ID: <CAMuHMdXNrRO2HaZ2pR6eH=6SH+j9fC-72Z3eUjNVwSQyTKQR9w@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.5.0
+Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Ben Chuang <benchuanggli@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+        SeanHY.Chen@genesyslogic.com.tw,
+        Kevin Chang <kevin.chang@lcfuturecenter.com>
+References: <20220225125553.1185108-1-benchuanggli@gmail.com>
+ <20220225125553.1185108-2-benchuanggli@gmail.com>
+ <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Feb 27, 2022 at 10:23 PM Lad Prabhakar
-<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
-> Document RZ/V2L SDHI bindings. RZ/V2L SDHI is almost identical to one
-> found on the R-Car Gen3. No driver changes are required as generic
-> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
->
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Biju Das <biju.das.jz@bp.renesas.com>
+On 28/02/2022 19:03, Ulf Hansson wrote:
+> On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
+>>
+>> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>>
+>> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
+>> gated of upstream port can be enabled.
+>>
+>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
+>> ---
+>>  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
+>>  1 file changed, 54 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+>> index 97035d77c18c..cf99b6af792d 100644
+>> --- a/drivers/mmc/host/sdhci-pci-gli.c
+>> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+>> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+>>  }
+>>
+>> +#ifdef CONFIG_PM
+>> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+>> +{
+>> +       struct sdhci_pci_slot *slot = chip->slots[0];
+>> +       struct sdhci_host *host = slot->host;
+>> +       u16 clock;
+>> +
+>> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+>> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+>> +{
+>> +       struct sdhci_pci_slot *slot = chip->slots[0];
+>> +       struct sdhci_host *host = slot->host;
+>> +       ktime_t timeout;
+>> +       u16 clock;
+>> +
+>> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +
+>> +       clock |= SDHCI_CLOCK_PLL_EN;
+>> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
+>> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+>> +
+>> +       timeout = ktime_add_ms(ktime_get(), 150);
+>> +       while (1) {
+>> +               bool timedout = ktime_after(ktime_get(), timeout);
+>> +
+>> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>> +               if (clock & SDHCI_CLOCK_INT_STABLE)
+>> +                       break;
+>> +               if (timedout) {
+>> +                       pr_err("%s: PLL clock never stabilised.\n",
+>> +                              mmc_hostname(host->mmc));
+>> +                       sdhci_dumpregs(host);
+>> +                       break;
+>> +               }
+>> +               udelay(10);
+>> +       }
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Could use something like read_poll_timeout() here e.g.
 
-Gr{oetje,eeting}s,
+	if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
+			      1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
+		pr_err("%s: PLL clock never stabilised.\n",
+		       mmc_hostname(host->mmc));
+		sdhci_dumpregs(host);
+	}
 
-                        Geert
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+>> +       clock |= SDHCI_CLOCK_CARD_EN;
+>> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+>> +
+>> +       return 0;
+>> +}
+> 
+> Both functions above look very similar to what sdhci_set_clock() does.
+> Can you use that, rather than open coding the above?
+> 
+> Other than that, I would appreciate it if Adrian could have a look at
+> this too. For example, I wonder if perhaps
+> sdhci_runtime_suspend|resume_host() should be called in these paths
+> too.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Assuming the host controller does not lose state information, it should be fine.
+
+> 
+>> +#endif
+>> +
+>>  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+>>  {
+>>         struct pci_dev *pdev = slot->chip->pdev;
+>> @@ -982,6 +1031,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
+>>  #ifdef CONFIG_PM_SLEEP
+>>         .resume         = sdhci_cqhci_gli_resume,
+>>         .suspend        = sdhci_cqhci_gli_suspend,
+>> +#endif
+>> +#ifdef CONFIG_PM
+>> +       .runtime_suspend = gl9763e_runtime_suspend,
+>> +       .runtime_resume  = gl9763e_runtime_resume,
+>> +       .allow_runtime_pm = true,
+>>  #endif
+>>         .add_host       = gl9763e_add_host,
+>>  };
+>> --
+>> 2.35.1
+>>
+> 
+> Kind regards
+> Uffe
+
