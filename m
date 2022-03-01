@@ -2,117 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9CE2C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 11:49:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95E19C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 11:53:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230036AbiCALuO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 06:50:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40770 "EHLO
+        id S232359AbiCALxu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 06:53:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229508AbiCALuN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 06:50:13 -0500
-Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3DFF5BE50;
-        Tue,  1 Mar 2022 03:49:31 -0800 (PST)
-Received: by mail-yb1-xb29.google.com with SMTP id w16so755204ybi.12;
-        Tue, 01 Mar 2022 03:49:31 -0800 (PST)
+        with ESMTP id S229508AbiCALxs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 06:53:48 -0500
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3D9B8AE74
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 03:53:07 -0800 (PST)
+Received: by mail-lf1-x12d.google.com with SMTP id f37so26370997lfv.8
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Mar 2022 03:53:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=CJxq8hFGZ7YgUPO3gAshsHAMHYt7CVLZZRFS388ANNA=;
-        b=V6AVmqeZy1f/bTbL+s+DaCq0O/FOGV/CDQvTklr01/wY5ZrZUroJIa+XfUinfbjw4/
-         XeZO+f9uCJ7TMIspvtknhohs2+2HYoP5cvUcjWdxHLKI8smpO1DXKcgbASWzOsSDcZYg
-         PS0mGbWLvWNFIVaLBT0sSGSujHx365wu0Ar86+m1F6cvG5s6FZsnBHs6blRmb8GXdMaE
-         G0G3fvICzeMgST8T+ZNlFgRcsxJX2fljF7JMqQ2xRMiKDK/dgwDCprHzmh16Jh2pWurG
-         sGI2FXp/lDXpnqHxdzaVu+/01dxTAPMyTiRYx3Wuh3jbKcBFuwxppjo9KFGU6bwtLEXS
-         5MHA==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZXthyKuVSmjIK882wlyq5sshJFYrq5Qsz7nD78CwzhY=;
+        b=Two5H4sSOSzb5+mIBBKPmSRlk9b565laQsEBQyAJMnvbPKi/IpQ25SxGu34cvVoT/n
+         57KNMLxKLYv3Hgq5CcTY/WfV4KCWsqfCL4ww77BiMwgCdK3udAltpIyiJxeW0OoDbBC2
+         lwZHE+Vh6qCkbxPrAuz06jxqDFbqwwlrsSrDwjF5Pw4+ApU2hdH9b1FopdqXhX9bCGQZ
+         P03cjVOswbXF8mcgU2eFJsxBup6mBEWblLxxe6JOVS2qSQmKuDcy2KIDS1NePQkq07B5
+         e+Y2lvjc8QZxVlCSdgCH2N3zdvRJr+z/OLavgeUnQ0OVK2dsPhE3Z+KE9ok5+wHTIVhx
+         MKWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=CJxq8hFGZ7YgUPO3gAshsHAMHYt7CVLZZRFS388ANNA=;
-        b=3muaUX1PrStMqauH4yHNq1bZB6vMKB+MtaoH0IMRNm4Z97L4De/h8ofZCRtkcHGuTb
-         GAOsKMkr99S9znnTtHXegF9aiOJ4lX79SwuiK245FaqkUtEbzUvHG7Uj4oBixBWMw17i
-         eDOU7gpSAk26GRo05lCtpnx2mTr2OigYNURsHhWYZJNUa8MJnFawpRqq6widVc7nk0fb
-         00rGMPxeTPHLvtGWBr18klSvPh4h5rCklGXfoWE8M+bVirJbGbE8cOZwswzcrgTwZsLT
-         +D1Lss+UAeDThWVzO8iG8ezxIk18C36AgzWpn3SfDR98s2bFBk3y1AC7lWUGd4CFW+PK
-         S8LQ==
-X-Gm-Message-State: AOAM531xpSDvdI3XXVxflEUdO2z5z24VvlwgoZVWqnO2Krw+q88MpGG0
-        5jesCRuN8RJ+E+UyAIKfC2fNSlurDLtz/u9Q0vk=
-X-Google-Smtp-Source: ABdhPJw7T5LznYqNo8yoWuelEscL8WQZsOdXOT5tE/hEZodPnEUKYv2ihEe5yfueKVrP+yKitWhMA5wCI58gim5O+6w=
-X-Received: by 2002:a05:6902:143:b0:628:7cf1:f2a9 with SMTP id
- p3-20020a056902014300b006287cf1f2a9mr1723551ybh.51.1646135371065; Tue, 01 Mar
- 2022 03:49:31 -0800 (PST)
-MIME-Version: 1.0
-References: <20220228223642.1136229-1-pgwipeout@gmail.com> <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
-In-Reply-To: <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
-From:   Peter Geis <pgwipeout@gmail.com>
-Date:   Tue, 1 Mar 2022 06:49:20 -0500
-Message-ID: <CAMdYzYq0A4FitRGe49fxvjbwLUCi_KGwCtfz7pmayt_dK=r32w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
-To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZXthyKuVSmjIK882wlyq5sshJFYrq5Qsz7nD78CwzhY=;
+        b=gy5/7P3xFKaD86sZ968e3DMcTDnJarzE/XByJhVsCzdKP8srmN5PNeA2R078LaV9Jy
+         I2PsQU2+oAWYl0ouz2qdxfY7+DNCmwKYMKkU08CjMqHaHzmlp2nvMwKubWmjzmV+hE3x
+         1bWFimlfRMZ5Sas21nipiVltMac2Qu0NBt+mnXitJ+L+FaBMwCu3lCHhekFCRt3LuG3Z
+         is3Y3WyIMQfwxWb3tSBXdsx5vKWYCH0d+2PGxYpLi10m93l62tDmamf2C2QmrtW++t4k
+         VdM2M+8dZyhOSLb1Nv2YBaov1qa1jVq+uRzVILO70OMOv6rHRcC1Logf9WOECyp1r2wN
+         GW0w==
+X-Gm-Message-State: AOAM530nAm9coP4JUShCZ9imRgweldAX6kVQPffTZ4mpu89WqAhsAFy+
+        HNa08t0f9hrcoM+eN9XlSBdylg==
+X-Google-Smtp-Source: ABdhPJyYnEN5oHtzfZA2MsTk80UR1tU02WFkEOdkGpS9wKwJM5My3AVt9J7bxlgIV7L2JcOn+6CLKg==
+X-Received: by 2002:a05:6512:3296:b0:442:f695:ae75 with SMTP id p22-20020a056512329600b00442f695ae75mr15493028lfe.508.1646135586199;
+        Tue, 01 Mar 2022 03:53:06 -0800 (PST)
+Received: from localhost.localdomain (h-155-4-129-34.NA.cust.bahnhof.se. [155.4.129.34])
+        by smtp.gmail.com with ESMTPSA id x20-20020ac25dd4000000b004415ddbc97esm1457578lfq.212.2022.03.01.03.53.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 01 Mar 2022 03:53:05 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Arnd Bergmann <arnd@arndb.de>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
-        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Kai-Heng Feng <kai.heng.feng@canonical.com>
+Subject: [PATCH] mmc: rtsx: Fix build errors/warnings for unused variable
+Date:   Tue,  1 Mar 2022 12:53:00 +0100
+Message-Id: <20220301115300.64332-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 1, 2022 at 6:23 AM Robin Murphy <robin.murphy@arm.com> wrote:
->
-> On 2022-02-28 22:36, Peter Geis wrote:
-> > The dw_mmc-rockchip driver drops a large amound of logspam constantly
-> > when the cd-broken flag is enabled.
-> > Set the warning to be debug ratelimited in this case.
->
-> Isn't this just papering over some fundamental problem with the clock?
-> If it's failing to set the expected rate for communicating with a card,
-> then presumably that's an issue for correct operation in general? The
-> fact that polling for a card makes a lot more of that communication
-> happen seems unrelated :/
+The struct device *dev, is no longer needed at various functions, let's
+therefore drop it to fix the build errors/warnings.
 
-Good Morning,
+Cc: Kai-Heng Feng <kai.heng.feng@canonical.com>
+Fixes: 7570fb41e450 ("mmc: rtsx: Let MMC core handle runtime PM"
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 6 ------
+ 1 file changed, 6 deletions(-)
 
-This only happens when a card is not inserted, so communication cannot happen.
-I found it while lighting off the SoQuartz module.
-As it is pin compatible with the RPi CM4, and the CM4 does not have a
-card detect line, sdmmc is non functional without cd-broken.
-This led to the fun spew when there wasn't a card inserted as this
-function is called every poll tick.
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 265b3889f9d7..f7c384db89bf 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -806,7 +806,6 @@ static void sd_request(struct work_struct *work)
+ 	struct mmc_request *mrq = host->mrq;
+ 	struct mmc_command *cmd = mrq->cmd;
+ 	struct mmc_data *data = mrq->data;
+-	struct device *dev = &host->pdev->dev;
+ 
+ 	unsigned int data_size = 0;
+ 	int err;
+@@ -1081,7 +1080,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_pcr *pcr = host->pcr;
+-	struct device *dev = &host->pdev->dev;
+ 
+ 	if (host->eject)
+ 		return;
+@@ -1130,7 +1128,6 @@ static int sdmmc_get_ro(struct mmc_host *mmc)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_pcr *pcr = host->pcr;
+-	struct device *dev = &host->pdev->dev;
+ 	int ro = 0;
+ 	u32 val;
+ 
+@@ -1156,7 +1153,6 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_pcr *pcr = host->pcr;
+-	struct device *dev = &host->pdev->dev;
+ 	int cd = 0;
+ 	u32 val;
+ 
+@@ -1255,7 +1251,6 @@ static int sdmmc_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_pcr *pcr = host->pcr;
+-	struct device *dev = &host->pdev->dev;
+ 	int err = 0;
+ 	u8 voltage;
+ 
+@@ -1308,7 +1303,6 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
+ 	struct rtsx_pcr *pcr = host->pcr;
+-	struct device *dev = &host->pdev->dev;
+ 	int err = 0;
+ 
+ 	if (host->eject)
+-- 
+2.25.1
 
-Thanks,
-Peter
-
->
-> Robin.
->
-> > Signed-off-by: Peter Geis <pgwipeout@gmail.com>
-> > ---
-> >   drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++--
-> >   1 file changed, 7 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> > index 95d0ec0f5f3a..d0ebf0afa42a 100644
-> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > @@ -50,8 +50,13 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> >               cclkin = ios->clock * RK3288_CLKGEN_DIV;
-> >
-> >       ret = clk_set_rate(host->ciu_clk, cclkin);
-> > -     if (ret)
-> > -             dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > +     if (ret) {
-> > +             /* this screams when card detection is broken */
-> > +             if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-> > +                     dev_dbg_ratelimited(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > +             else
-> > +                     dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > +     }
-> >
-> >       bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-> >       if (bus_hz != host->bus_hz) {
