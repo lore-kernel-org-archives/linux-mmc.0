@@ -2,180 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8A20C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 10:05:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB09EC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 11:23:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234150AbiCAKGg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 05:06:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48756 "EHLO
+        id S231239AbiCALYc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 06:24:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51134 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234240AbiCAKG2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 05:06:28 -0500
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D7978D6AA;
-        Tue,  1 Mar 2022 02:05:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1646129120; x=1677665120;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=OqRnVMfE9sumNiyhj1Qk7+SncksPrSyR31RaHEHrlOY=;
-  b=EupCCXi7Kx1VcAyY1BWANLcZfkh2IRY6XU0AWcrcfdIbfFZIenjVynvZ
-   9h+yvDLkb/cIe9zXgrc9yTyWayqJoIxA2bRck7zYiNd0k/t+v8kuVc3qH
-   fdZx5/5RoEtqnnt8OLerB3PltOOLi6SrDsvhEV3jlkRJn+yJ202HAZEK6
-   pDdnr8TNp720gMFTVCfB6Y1IuznOVl+QSq3H3IWdffUDGPcS3aTrYpcrS
-   o4Z8PD2D1TC84A/29PewXXnI1Ixn7ERgfBU+L3deDssYr8ohLTXDQF/ZP
-   aOa36dkt7cp/VcK0VZ9VFLgbi2pwdZONuuC1g+0gsAGok2tn9r8R5kcxR
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10272"; a="233073225"
-X-IronPort-AV: E=Sophos;i="5.90,145,1643702400"; 
-   d="scan'208";a="233073225"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Mar 2022 02:05:20 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.90,145,1643702400"; 
-   d="scan'208";a="685669736"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
-  by fmsmga001.fm.intel.com with ESMTP; 01 Mar 2022 02:05:18 -0800
-Message-ID: <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com>
-Date:   Tue, 1 Mar 2022 12:05:17 +0200
+        with ESMTP id S233337AbiCALYa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 06:24:30 -0500
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E151D92842;
+        Tue,  1 Mar 2022 03:23:49 -0800 (PST)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id AB7B8ED1;
+        Tue,  1 Mar 2022 03:23:49 -0800 (PST)
+Received: from [10.57.39.47] (unknown [10.57.39.47])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 373963F73D;
+        Tue,  1 Mar 2022 03:23:48 -0800 (PST)
+Message-ID: <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
+Date:   Tue, 1 Mar 2022 11:23:44 +0000
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.5.0
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Ben Chuang <benchuanggli@gmail.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
-        SeanHY.Chen@genesyslogic.com.tw,
-        Kevin Chang <kevin.chang@lcfuturecenter.com>
-References: <20220225125553.1185108-1-benchuanggli@gmail.com>
- <20220225125553.1185108-2-benchuanggli@gmail.com>
- <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
+Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
+Content-Language: en-GB
+To:     Peter Geis <pgwipeout@gmail.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Heiko Stuebner <heiko@sntech.de>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20220228223642.1136229-1-pgwipeout@gmail.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <20220228223642.1136229-1-pgwipeout@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/02/2022 19:03, Ulf Hansson wrote:
-> On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
->>
->> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->>
->> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
->> gated of upstream port can be enabled.
->>
->> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
->> ---
->>  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
->>  1 file changed, 54 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
->> index 97035d77c18c..cf99b6af792d 100644
->> --- a/drivers/mmc/host/sdhci-pci-gli.c
->> +++ b/drivers/mmc/host/sdhci-pci-gli.c
->> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
->>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->>  }
->>
->> +#ifdef CONFIG_PM
->> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
->> +{
->> +       struct sdhci_pci_slot *slot = chip->slots[0];
->> +       struct sdhci_host *host = slot->host;
->> +       u16 clock;
->> +
->> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
->> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
->> +
->> +       return 0;
->> +}
->> +
->> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
->> +{
->> +       struct sdhci_pci_slot *slot = chip->slots[0];
->> +       struct sdhci_host *host = slot->host;
->> +       ktime_t timeout;
->> +       u16 clock;
->> +
->> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->> +
->> +       clock |= SDHCI_CLOCK_PLL_EN;
->> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
->> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
->> +
->> +       timeout = ktime_add_ms(ktime_get(), 150);
->> +       while (1) {
->> +               bool timedout = ktime_after(ktime_get(), timeout);
->> +
->> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->> +               if (clock & SDHCI_CLOCK_INT_STABLE)
->> +                       break;
->> +               if (timedout) {
->> +                       pr_err("%s: PLL clock never stabilised.\n",
->> +                              mmc_hostname(host->mmc));
->> +                       sdhci_dumpregs(host);
->> +                       break;
->> +               }
->> +               udelay(10);
->> +       }
+On 2022-02-28 22:36, Peter Geis wrote:
+> The dw_mmc-rockchip driver drops a large amound of logspam constantly
+> when the cd-broken flag is enabled.
+> Set the warning to be debug ratelimited in this case.
 
-Could use something like read_poll_timeout() here e.g.
+Isn't this just papering over some fundamental problem with the clock? 
+If it's failing to set the expected rate for communicating with a card, 
+then presumably that's an issue for correct operation in general? The 
+fact that polling for a card makes a lot more of that communication 
+happen seems unrelated :/
 
-	if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
-			      1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
-		pr_err("%s: PLL clock never stabilised.\n",
-		       mmc_hostname(host->mmc));
-		sdhci_dumpregs(host);
-	}
+Robin.
 
-
->> +       clock |= SDHCI_CLOCK_CARD_EN;
->> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
->> +
->> +       return 0;
->> +}
+> Signed-off-by: Peter Geis <pgwipeout@gmail.com>
+> ---
+>   drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++--
+>   1 file changed, 7 insertions(+), 2 deletions(-)
 > 
-> Both functions above look very similar to what sdhci_set_clock() does.
-> Can you use that, rather than open coding the above?
-> 
-> Other than that, I would appreciate it if Adrian could have a look at
-> this too. For example, I wonder if perhaps
-> sdhci_runtime_suspend|resume_host() should be called in these paths
-> too.
-
-Assuming the host controller does not lose state information, it should be fine.
-
-> 
->> +#endif
->> +
->>  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
->>  {
->>         struct pci_dev *pdev = slot->chip->pdev;
->> @@ -982,6 +1031,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
->>  #ifdef CONFIG_PM_SLEEP
->>         .resume         = sdhci_cqhci_gli_resume,
->>         .suspend        = sdhci_cqhci_gli_suspend,
->> +#endif
->> +#ifdef CONFIG_PM
->> +       .runtime_suspend = gl9763e_runtime_suspend,
->> +       .runtime_resume  = gl9763e_runtime_resume,
->> +       .allow_runtime_pm = true,
->>  #endif
->>         .add_host       = gl9763e_add_host,
->>  };
->> --
->> 2.35.1
->>
-> 
-> Kind regards
-> Uffe
-
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 95d0ec0f5f3a..d0ebf0afa42a 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -50,8 +50,13 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>   		cclkin = ios->clock * RK3288_CLKGEN_DIV;
+>   
+>   	ret = clk_set_rate(host->ciu_clk, cclkin);
+> -	if (ret)
+> -		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+> +	if (ret) {
+> +		/* this screams when card detection is broken */
+> +		if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
+> +			dev_dbg_ratelimited(host->dev, "failed to set rate %uHz\n", ios->clock);
+> +		else
+> +			dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+> +	}
+>   
+>   	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+>   	if (bus_hz != host->bus_hz) {
