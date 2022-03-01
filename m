@@ -2,97 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75374C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Feb 2022 22:36:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9347FC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 05:14:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229987AbiB1Wh2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Feb 2022 17:37:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34574 "EHLO
+        id S229763AbiCAFPQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 00:15:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229594AbiB1WhZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Feb 2022 17:37:25 -0500
-Received: from mail-qk1-x732.google.com (mail-qk1-x732.google.com [IPv6:2607:f8b0:4864:20::732])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58B4D113AD6;
-        Mon, 28 Feb 2022 14:36:46 -0800 (PST)
-Received: by mail-qk1-x732.google.com with SMTP id 185so11623838qkh.1;
-        Mon, 28 Feb 2022 14:36:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=NqNLCNZbfRzdZ6s+RPZUVSDu53vbe0qWHYGyNkt893E=;
-        b=XftIddrMAmhmuVKIlxOi7ezAmFRdps3UDkEEbl2ZeQMGo2H+ELXtV+4e9DhnZAMsyL
-         D/pDeeWj49sL9GZwHUnnj7n3RGyrUTegADjvReidPUORqC64NeyziR5G+yT6oAKr6A2d
-         Vdk+FWwex1AuVPvENWoJB6Ej44hGNZptg3xEBBphTsCS8U8UUkUxFpOUgebJdUc2qjrN
-         ox0phf1gLwEbJqPCbyajU3SIVtC/zaTN1s3koJIojHtROjDUYqV56hheoywgjYgCNSYz
-         vxCzJtshV5w34Hu9TntuiYVCrJxoLt0yfBW6VGutDNiE8lv73o7vOn34u0tiBsX6p2Gg
-         aRMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=NqNLCNZbfRzdZ6s+RPZUVSDu53vbe0qWHYGyNkt893E=;
-        b=F0cm/T9jY9h4ZNZBw/vLoF6O2ymLSPe4K7qzX19jVgj9mQ8o5cBg8A5+BHpYsW8P/R
-         lXArAcZjE2/nvdb/ghcTH0iG/+KT2ph8scjy30BvWH88ALFCtm003NL5NQne2CcHyone
-         WbMpDy4DUOOXKbnbHBlzE9EDt4VpQuPLFmZ+JWtskfmgxl0NiC5nkefzJ3qi9ZpWjWhz
-         m6ss4qZxRL2uIML9t0DoxkwN5C6SGupTb76T+npVQ1enf0rB5DeuQeFKsHIHeMvmRcmG
-         +Lux2ccucJOUXKd/yDJmeK6TEIglD1wk4kurpToTzy/ih7BHEplI2M6wmucRNFoJR9Ff
-         himw==
-X-Gm-Message-State: AOAM531SIqqo/IC3Q4WL0cbI/oagBHe3nlo2Mw1yJQoPc/pBw464IbLH
-        28suTeHDbBaZuwEBje9VviQ=
-X-Google-Smtp-Source: ABdhPJxzocr7KcKfiyTO0gDJ53raBvOlFPXC+nmpx349DwcEXm+eD7Ij9yg7XQVuxFESGg/JvDVyWw==
-X-Received: by 2002:a05:620a:45:b0:508:176a:8892 with SMTP id t5-20020a05620a004500b00508176a8892mr12549250qkt.731.1646087805470;
-        Mon, 28 Feb 2022 14:36:45 -0800 (PST)
-Received: from master-x64.sparksnet ([2601:153:980:85b1::10])
-        by smtp.gmail.com with ESMTPSA id v9-20020a05622a144900b002dfedb4dccasm6632068qtx.66.2022.02.28.14.36.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Feb 2022 14:36:45 -0800 (PST)
-From:   Peter Geis <pgwipeout@gmail.com>
-To:     Jaehoon Chung <jh80.chung@samsung.com>,
+        with ESMTP id S229508AbiCAFPP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 00:15:15 -0500
+Received: from gandalf.ozlabs.org (gandalf.ozlabs.org [150.107.74.76])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A81C4EF61;
+        Mon, 28 Feb 2022 21:14:33 -0800 (PST)
+Received: from authenticated.ozlabs.org (localhost [127.0.0.1])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        by mail.ozlabs.org (Postfix) with ESMTPSA id 4K755c0yDdz4xbw;
+        Tue,  1 Mar 2022 16:14:28 +1100 (AEDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canb.auug.org.au;
+        s=201702; t=1646111669;
+        bh=H8Fune5d6YVjvTlIxWcRKgVpwiDPXgX7uZrC0dJaG/A=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=Ffn92t4J2om/wR00NgH12ApgqsP9qCazoq1DpxlfWmr2zDNYTk2qmaMgJxlmqjgQS
+         S0s7BwKm9/L781aIzZpDZ1k70LNvXKXOzykADyhAqcm5j+b16L7kuF4bhnPnyJuDLL
+         sqw3zLvPx1GhNlYipgPjwqmbUGWQaorT7WCnFX2k4d9es5mZhCGUGieh44v+3rMYRK
+         fXVTKWhDqtKZyrsabWfQbZS72uCzwhCRaId6BanzAiEQPq80GRtzSwoApd4bWX+3F8
+         AFNRZWp8vTUcFuq2TiuHZIhvE86fQdZonBq3y0OFfYCAbY0cy2eCr0N2rLrrw9SRgf
+         jZ9AKMS+fzAAw==
+Date:   Tue, 1 Mar 2022 16:14:26 +1100
+From:   Stephen Rothwell <sfr@canb.auug.org.au>
+To:     Greg KH <gregkh@linuxfoundation.org>
+Cc:     broonie@kernel.org, Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Arnd Bergmann <arnd@arndb.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>
-Cc:     Peter Geis <pgwipeout@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
-Date:   Mon, 28 Feb 2022 17:36:42 -0500
-Message-Id: <20220228223642.1136229-1-pgwipeout@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux Next Mailing List <linux-next@vger.kernel.org>,
+        linux-mmc@vger.kernel.org
+Subject: Re: linux-next: build failure after merge of the char-misc tree
+Message-ID: <20220301161426.0218d519@canb.auug.org.au>
+In-Reply-To: <YhpCcE19y3sGqLQ3@kroah.com>
+References: <20220225204055.3899986-1-broonie@kernel.org>
+        <YhpCcE19y3sGqLQ3@kroah.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; boundary="Sig_/oH0An4cK9raxBdT22Ad.OEu";
+ protocol="application/pgp-signature"; micalg=pgp-sha256
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The dw_mmc-rockchip driver drops a large amound of logspam constantly
-when the cd-broken flag is enabled.
-Set the warning to be debug ratelimited in this case.
+--Sig_/oH0An4cK9raxBdT22Ad.OEu
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Peter Geis <pgwipeout@gmail.com>
----
- drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+Hi all,
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 95d0ec0f5f3a..d0ebf0afa42a 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -50,8 +50,13 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 		cclkin = ios->clock * RK3288_CLKGEN_DIV;
- 
- 	ret = clk_set_rate(host->ciu_clk, cclkin);
--	if (ret)
--		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-+	if (ret) {
-+		/* this screams when card detection is broken */
-+		if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-+			dev_dbg_ratelimited(host->dev, "failed to set rate %uHz\n", ios->clock);
-+		else
-+			dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-+	}
- 
- 	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
- 	if (bus_hz != host->bus_hz) {
--- 
-2.25.1
+On Sat, 26 Feb 2022 16:08:32 +0100 Greg KH <gregkh@linuxfoundation.org> wro=
+te:
+>
+> On Fri, Feb 25, 2022 at 08:40:55PM +0000, broonie@kernel.org wrote:
+> >=20
+> > After merging the char-misc tree, today's linux-next build (x86
+> > allmodconfig) failed like this:
+> >=20
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sd_requ=
+est':
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:809:17: error: unused=
+ variable 'dev' [-Werror=3Dunused-variable]
+> >   809 |  struct device *dev =3D &host->pdev->dev;
+> >       |                 ^~~
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_s=
+et_ios':
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1084:17: error: unuse=
+d variable 'dev' [-Werror=3Dunused-variable]
+> >  1084 |  struct device *dev =3D &host->pdev->dev;
+> >       |                 ^~~
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_g=
+et_ro':
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1133:17: error: unuse=
+d variable 'dev' [-Werror=3Dunused-variable]
+> >  1133 |  struct device *dev =3D &host->pdev->dev;
+> >       |                 ^~~
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_g=
+et_cd':
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1159:17: error: unuse=
+d variable 'dev' [-Werror=3Dunused-variable]
+> >  1159 |  struct device *dev =3D &host->pdev->dev;
+> >       |                 ^~~
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_s=
+witch_voltage':
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1258:17: error: unuse=
+d variable 'dev' [-Werror=3Dunused-variable]
+> >  1258 |  struct device *dev =3D &host->pdev->dev;
+> >       |                 ^~~
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c: In function 'sdmmc_e=
+xecute_tuning':
+> > /tmp/next/build/drivers/mmc/host/rtsx_pci_sdmmc.c:1311:17: error: unuse=
+d variable 'dev' [-Werror=3Dunused-variable]
+> >  1311 |  struct device *dev =3D &host->pdev->dev;
+> >       |                 ^~~
+> > cc1: all warnings being treated as errors
+> >=20
+> > Caused by commit
+> >=20
+> >   7570fb41e450ba37 ("mmc: rtsx: Let MMC core handle runtime PM")
+> >=20
+> > I have used the char-misc tree from yesterday instead. =20
+>=20
+> Kai-Heng, can you send an add-on patch to fix this?
+>=20
+> thanks,
 
+I am still getting these build errors.
+
+--=20
+Cheers,
+Stephen Rothwell
+
+--Sig_/oH0An4cK9raxBdT22Ad.OEu
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEENIC96giZ81tWdLgKAVBC80lX0GwFAmIdq7IACgkQAVBC80lX
+0GzmFwf9HJMF/qsEVM6oImsrYPgoAFirrQDKkyonF5GkBnR0QMkzQeCCsB74S+jI
+VxyAi+Uzba2fCEPSKPbziirlBatSLXU1LIg500T13ghzCOyJRDkwAb4znqgNhimp
+F39RAaXC+jLAwSRCnP0atI9UMBh2JrG9XXy7uYGL5UN5YO2Fgfom1H/sL5QR2krn
+yy/9unUblA/hr/RRFf+U0FRI3oGmgcPeP5ZMQ+BgpdGAuiNIymTAvskerl4dbGhO
+QbN2IZ5dTtXMYZkn69UpOjU9zybP+ZslHvLINHY6yQuFeHnXoQLHA0XSCsKobHPM
+8mbgQwPo37nw0w3LUuVZpSt7+29Ruw==
+=FZiu
+-----END PGP SIGNATURE-----
+
+--Sig_/oH0An4cK9raxBdT22Ad.OEu--
