@@ -2,145 +2,241 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0CFFC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 12:46:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BF2FC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 13:39:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234837AbiCAMrW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 07:47:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60284 "EHLO
+        id S235106AbiCANkA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 08:40:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54008 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232206AbiCAMrW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 07:47:22 -0500
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DBC898F75;
-        Tue,  1 Mar 2022 04:46:41 -0800 (PST)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-2d07ae0b1c4so143018507b3.11;
-        Tue, 01 Mar 2022 04:46:41 -0800 (PST)
+        with ESMTP id S229885AbiCANjz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 08:39:55 -0500
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E14C340EA
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 05:39:13 -0800 (PST)
+Received: by mail-lj1-x230.google.com with SMTP id u7so21875028ljk.13
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Mar 2022 05:39:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=fNYxb0caqFJflVe0lFiSRpMQbq4T7re3mr98tPyMuVo=;
-        b=DORDBK+OJopp5XZDr6HfOMo/j0vGvwW4iR9plo/nRoxkVlxirWPLuod9CUyzZQEfYF
-         QMp1jPOB0BiN9GnnNUvbfjIzr2UGb7gAt/OVaq3eeIIUPFMlqGmNXcHtmoPpz6YjqBhU
-         v1HKfQiLle1O4AS5KSpGMAP4rD5pFcdVW7aP0+1LB80mPoedNOXL78WsxvkXUFTsAgFG
-         kk5TqxfCnOq3wo9oxr3ZnNho3lyZtt/lIBRtgKCt7KkhoEZPxhQVYwrn9RYAyFsTOxfx
-         RMwJ27OFEewB1EF02ls7lRGfvPvOoG48KpJjL8dBgd/6gaBpqb2rzPGDiDrQw1YTwH2E
-         YGhw==
+         :cc:content-transfer-encoding;
+        bh=KI3DsPjaUSjE5QApswpGrywfpQ2UMrOI6XqmpMmLGFI=;
+        b=Srr7kH2rySUlVjGf2Twe6KAmgudo80X8BBHe8on+Jei/I9jMheFpheWEYFMZo+oSw3
+         8zJpx8gqK31Iv0j8VIncXwoNeTaKbokcEE64CL+5Kb3IrFagZbFr6WbE38DeY2QU4KMu
+         iyKxjQNtom2YhxKUGq1s67LE8WaSp8CMWZ7YxoqlCPz6MriXHKrd/RFIxE1Pf7ZwlDAH
+         5e/aBUoLvoTbzqNamdhbvmVcB7MRQu0gjvW1VdRwi3Nbh7rN+utvmE0W3kZMtAj6TKPL
+         BOXLQ2kfIqMO0DITTr3DeRVEBFBFpAty/NGX4/bH0ZzOZgAPmpBXUADKkUXg00mk5xjd
+         1RJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=fNYxb0caqFJflVe0lFiSRpMQbq4T7re3mr98tPyMuVo=;
-        b=u8IqJm/TuJU7QEcR/HN/Eq3k5Ci46kYyVHkb09iLWTJmCRf7srNYqn2Rxds8P5mmM0
-         rma5uuGoylu3v0H4Nd5SR8fmPOY+OEXaMzYjjCCzhCD2XTEjyMm61DvaxG2coDRxFpkS
-         OxcUrDdUYdt9aHrrGYcrvbON7dzsmBbtPbvgy6dhYeEQuee8okfdxKOoIX9U6btAqFKi
-         ttGO/rFswn1QzIbPkwk8L3sl3L852tudxKpLlSxy2RAQZXE/nrWun3/wSAoCBl034IpG
-         UDOCvVONRupLpuJFDWrXyZrrYcpD9g1p0q8NURwoAspfKcG1Y8f3igBgvBoOveHOpRRQ
-         34Gg==
-X-Gm-Message-State: AOAM531f+8BQAiXDgFuglR4SnDtLdcP1NjqW5GiE0OCJPT0yh7FGWUE3
-        il9sBkqnE0jghyxoVTxWryp2K6gogVsQZubnIKk=
-X-Google-Smtp-Source: ABdhPJxf5FpLziaFlmJ5Pr6hxG+fTN8jkthHfFVs81qUqpxpu+9OJnZ6uScFADTXcxf0WK0pd0r+PCOvNd9GvTdLEaI=
-X-Received: by 2002:a81:3807:0:b0:2d8:2ed:1d19 with SMTP id
- f7-20020a813807000000b002d802ed1d19mr24305957ywa.519.1646138800565; Tue, 01
- Mar 2022 04:46:40 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=KI3DsPjaUSjE5QApswpGrywfpQ2UMrOI6XqmpMmLGFI=;
+        b=dJ/54AKejGH0Wz7xgqh3hP8FFvpntwhbsnLGQnYtzBuhnDLu0jrtldaTEZ/85WPuS9
+         sTrdQT0pfhCr0FoRisgC0aOW1naottcwlIllM52uSJL4Oryjx4vDwyZ+rxZf/Gu7CVTh
+         +R3puJ3cHFQkCXt3JammUQ8UQ7X+Nsbh0gDS75gNUsRnOcV4oRMANwvSPg4GiXPpywGL
+         mIBEKdoYfMRwcF4pj1zpG7hz/FFIMSJWD3Hx1IwGRGli+D7ol4uSeQpTfbPQtC1mXDXA
+         ZiHvbL73PgSvx3azjv3g6UdDmS0O5WK9+KJNJHrd2+644tL88u4wl23mE+S/dH2Fed/c
+         TZBg==
+X-Gm-Message-State: AOAM530Jbb9npeqzUq+n34lijEIvr3AZsHxBDUZHIgPf0fI9RAZIUzcn
+        DZgKTn5tVR0ynHRYqI1DlSMgoYY5iWH3Xs6ZkaCypQ==
+X-Google-Smtp-Source: ABdhPJxQrLl9GCc68j2B90OgULF5lx68i1kJiu+LjbX/O8Fik8ofqbCkhLn235Er6Yd++YoQiUS/i3WcPpEaom2eHEs=
+X-Received: by 2002:a2e:8603:0:b0:246:24c:b79c with SMTP id
+ a3-20020a2e8603000000b00246024cb79cmr17227730lji.367.1646141951746; Tue, 01
+ Mar 2022 05:39:11 -0800 (PST)
 MIME-Version: 1.0
-References: <20220228223642.1136229-1-pgwipeout@gmail.com> <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
- <CAMdYzYq0A4FitRGe49fxvjbwLUCi_KGwCtfz7pmayt_dK=r32w@mail.gmail.com> <54b24f3d-3762-abbd-5ac4-dc5728f2fe4e@arm.com>
-In-Reply-To: <54b24f3d-3762-abbd-5ac4-dc5728f2fe4e@arm.com>
-From:   Peter Geis <pgwipeout@gmail.com>
-Date:   Tue, 1 Mar 2022 07:46:29 -0500
-Message-ID: <CAMdYzYp=Po08pap9w5s8PV0mKfFZSPSOhM1U1AUdrRkYV-FRZQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
-To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
-        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <27DDB061-1235-4F4C-B6A8-F035D77AC9CF@goldelico.com>
+In-Reply-To: <27DDB061-1235-4F4C-B6A8-F035D77AC9CF@goldelico.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 1 Mar 2022 14:38:35 +0100
+Message-ID: <CAPDyKFrz_2Vp64SUzB8CiHJLTjO8Hx8m3QEhY1VU2ksZhVEx7A@mail.gmail.com>
+Subject: Re: [BUG] mmc: core: adjust polling interval for CMD1
+To:     "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Huijin Park <huijin.park@samsung.com>,
+        Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 1, 2022 at 7:38 AM Robin Murphy <robin.murphy@arm.com> wrote:
+On Thu, 17 Feb 2022 at 21:12, H. Nikolaus Schaller <hns@goldelico.com> wrot=
+e:
 >
-> On 2022-03-01 11:49, Peter Geis wrote:
-> > On Tue, Mar 1, 2022 at 6:23 AM Robin Murphy <robin.murphy@arm.com> wrote:
+> Hi,
+> Jean Rene Dawin did report to me a problem on the Beagle Bone Black start=
+ing
+> with our disto kernel based on v5.17-rc1:
+>
+> >> since kernel 5.17-rc1 I noticed slower emmc performance on Beaglebone
+> >> Black, but didn't check the logs.
+> >> When I tried to run 5.17.0-rc3-letux+ it booted fine, but during IO
+> >> traffic there were messages like
 > >>
-> >> On 2022-02-28 22:36, Peter Geis wrote:
-> >>> The dw_mmc-rockchip driver drops a large amound of logspam constantly
-> >>> when the cd-broken flag is enabled.
-> >>> Set the warning to be debug ratelimited in this case.
+> >> [  662.529584] mmc1: error -110 doing runtime resume
+> >> [  669.293590] mmc1: Card stuck being busy! __mmc_poll_for_busy
 > >>
-> >> Isn't this just papering over some fundamental problem with the clock?
-> >> If it's failing to set the expected rate for communicating with a card,
-> >> then presumably that's an issue for correct operation in general? The
-> >> fact that polling for a card makes a lot more of that communication
-> >> happen seems unrelated :/
-> >
-> > Good Morning,
-> >
-> > This only happens when a card is not inserted, so communication cannot happen.
+> >> [  739.076072] mmc1: Timeout waiting for hardware interrupt.
+> >> [  739.145676] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D SDHCI=
+ REGISTER DUMP =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> >> [  739.231053] mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x000031=
+01
+> >> [  739.316472] mmc1: sdhci: Blk size:  0x00000200 | Blk cnt:  0x000004=
+00
+> >> [  739.401937] mmc1: sdhci: Argument:  0x00342d30 | Trn mode: 0x000000=
+23
+> >> [  739.487439] mmc1: sdhci: Present:   0x01f70000 | Host ctl: 0x000000=
+00
+> >> [  739.573007] mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x000000=
+00
+> >> [  739.658609] mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00003c=
+07
+> >> [  739.744224] mmc1: sdhci: Timeout:   0x00000007 | Int stat: 0x000000=
+02
+> >> [  739.829896] mmc1: sdhci: Int enab:  0x027f000b | Sig enab: 0x027f00=
+0b
+> >> [  739.915623] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x000000=
+01
+> >> [  740.001394] mmc1: sdhci: Caps:      0x07e10080 | Caps_1:   0x000000=
+00
+> >> [  740.087208] mmc1: sdhci: Cmd:       0x0000193a | Max curr: 0x000000=
+00
+> >> [  740.173051] mmc1: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x000000=
+00
+> >> [  740.258928] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x000000=
+00
+> >> [  740.344854] mmc1: sdhci: Host ctl2: 0x00000000
+> >> [  740.402796] mmc1: sdhci: =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D
+> >>
+> >> and finally IO errors and a corrupted filesystem.
+> >>
+> >> 5.17.0-rc4-letux+ shows the same behaviour.
 >
-> Well, I suppose there's a philosophical question in there about whether
-> shouting into the void counts as "communication", but AFAIR what the
-> polling function does is power up the controller, send a command, and
-> see if it gets a response.
+> I checked with my BeagleBoard Black (am3358) and can confirm this observa=
+tion.
+> It happens only with the integrated eMMC but not with the =C2=B5SD connec=
+ted to
+> the other mmc interface.
 >
-> If the clock can't be set to the proper rate for low-speed discovery,
-> some or all cards may not be detected properly. Conversely if it is
-> already at a slow enough rate for discovery but can't be set higher once
-> a proper communication mode has been established, data transfer
-> performance will be terrible. Either way, it is not OK in general for
-> clk_set_rate() to fail, hence the warning. You have a clock driver problem.
+> A git bisect found:
+>
+> 76bfc7ccc2fa9d382576f6013b57a0ef93d5a722 is the first bad commit
+> commit 76bfc7ccc2fa9d382576f6013b57a0ef93d5a722
+> Author: Huijin Park <huijin.park@samsung.com>
+> Date:   Thu Nov 4 15:32:31 2021 +0900
+>
+>   mmc: core: adjust polling interval for CMD1
+>
+>   In mmc_send_op_cond(), loops are continuously performed at the same
+>   interval of 10 ms.  However the behaviour is not good for some eMMC
+>   which can be out from a busy state earlier than 10 ms if normal.
+>
+>   Rather than fixing about the interval time in mmc_send_op_cond(),
+>   let's instead convert into using the common __mmc_poll_for_busy().
+>
+>   The reason for adjusting the interval time is that it is important
+>   to reduce the eMMC initialization time, especially in devices that
+>   use eMMC as rootfs.
+>
+>   Test log(eMMC:KLM8G1GETF-B041):
+>
+>   before: 12 ms (0.311016 - 0.298729)
+>   [    0.295823] mmc0: starting CMD0 arg 00000000 flags 000000c0
+>   [    0.298729] mmc0: starting CMD1 arg 40000080 flags 000000e1<-start
+>   [    0.311016] mmc0: starting CMD1 arg 40000080 flags 000000e1<-finish
+>   [    0.311336] mmc0: starting CMD2 arg 00000000 flags 00000007
+>
+>   after: 2 ms (0.301270 - 0.298762)
+>   [    0.295862] mmc0: starting CMD0 arg 00000000 flags 000000c0
+>   [    0.298762] mmc0: starting CMD1 arg 40000080 flags 000000e1<-start
+>   [    0.299067] mmc0: starting CMD1 arg 40000080 flags 000000e1
+>   [    0.299441] mmc0: starting CMD1 arg 40000080 flags 000000e1
+>   [    0.299879] mmc0: starting CMD1 arg 40000080 flags 000000e1
+>   [    0.300446] mmc0: starting CMD1 arg 40000080 flags 000000e1
+>   [    0.301270] mmc0: starting CMD1 arg 40000080 flags 000000e1<-finish
+>   [    0.301572] mmc0: starting CMD2 arg 00000000 flags 00000007
+>
+>   Signed-off-by: Huijin Park <huijin.park@samsung.com>
+>   Link: https://lore.kernel.org/r/20211104063231.2115-3-huijin.park@samsu=
+ng.com
+>   Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> Reverting this makes v5.17-rc[1-4] work.
+>
+> Any suggestions or fixes?
+>
+> BR and thanks,
+> Nikolaus Schaller
+>
+> Reported-by: jdawin@math.uni-bielefeld.de
+>
 
-Alright, I'll look into this.
-It seems only extremely low clock speeds fail and I know rockchip
-chips have a hard time with extremely low clock rates.
-I'll trace out where the failure is happening.
+Thanks for reporting and bisecting!
 
-Thanks!
+What changed with the offending commit is two things:
 
->
-> Cheers,
-> Robin.
->
-> > I found it while lighting off the SoQuartz module.
-> > As it is pin compatible with the RPi CM4, and the CM4 does not have a
-> > card detect line, sdmmc is non functional without cd-broken.
-> > This led to the fun spew when there wasn't a card inserted as this
-> > function is called every poll tick.
-> >
-> > Thanks,
-> > Peter
-> >
-> >>
-> >> Robin.
-> >>
-> >>> Signed-off-by: Peter Geis <pgwipeout@gmail.com>
-> >>> ---
-> >>>    drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++--
-> >>>    1 file changed, 7 insertions(+), 2 deletions(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> >>> index 95d0ec0f5f3a..d0ebf0afa42a 100644
-> >>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> >>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> >>> @@ -50,8 +50,13 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> >>>                cclkin = ios->clock * RK3288_CLKGEN_DIV;
-> >>>
-> >>>        ret = clk_set_rate(host->ciu_clk, cclkin);
-> >>> -     if (ret)
-> >>> -             dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> >>> +     if (ret) {
-> >>> +             /* this screams when card detection is broken */
-> >>> +             if (host->slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-> >>> +                     dev_dbg_ratelimited(host->dev, "failed to set rate %uHz\n", ios->clock);
-> >>> +             else
-> >>> +                     dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> >>> +     }
-> >>>
-> >>>        bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-> >>>        if (bus_hz != host->bus_hz) {
+1) We are sending the CMD1 more frequently, initially in the loop in
+the __mmc_poll_for_busy. Step by step, we increase the polling period.
+2) We may end up using a slightly shorter total timeout for polling
+time, compared to what we used before the offending commit.
+
+Hopefully the problem is related to 2), in which case I think the
+below patch should help. Can you please give it a try?
+
+Kind regards
+Uffe
+
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Tue, 1 Mar 2022 14:24:21 +0100
+Subject: [PATCH] mmc: core: Extend timeout to 2s for MMC_SEND_OP_COND
+
+It looks like the timeout for the MMC_SEND_OP_COND (CMD1) might have become
+a bit too small due to recent changes. Therefore, let's extend it to 2s,
+which is probably more inline with its previous value, to fix the reported
+timeout problems.
+
+While at it, let's add a define for the timeout value, rather than using
+a hard-coded value for it.
+
+Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+Cc: Huijin Park <huijin.park@samsung.com>
+Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/mmc_ops.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index d63d1c735335..1f57174b3cf3 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -21,6 +21,7 @@
+
+ #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
+ #define MMC_SANITIZE_TIMEOUT_MS                (240 * 1000) /* 240s */
++#define MMC_OP_COND_TIMEOUT_MS         2000 /* 2s */
+
+ static const u8 tuning_blk_pattern_4bit[] =3D {
+        0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+@@ -232,7 +233,8 @@ int mmc_send_op_cond(struct mmc_host *host, u32
+ocr, u32 *rocr)
+        cmd.arg =3D mmc_host_is_spi(host) ? 0 : ocr;
+        cmd.flags =3D MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+
+-       err =3D __mmc_poll_for_busy(host, 1000, &__mmc_send_op_cond_cb, &cb=
+_data);
++       err =3D __mmc_poll_for_busy(host, MMC_OP_COND_TIMEOUT_MS,
++                                 &__mmc_send_op_cond_cb, &cb_data);
+        if (err)
+                return err;
+
+--=20
+2.25.1
