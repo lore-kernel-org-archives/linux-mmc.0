@@ -2,236 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23598C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 15:56:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9329CC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 16:03:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233866AbiCAP5S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 10:57:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48810 "EHLO
+        id S234216AbiCAQDs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 11:03:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35636 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234686AbiCAP5P (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 10:57:15 -0500
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A280B56C2E;
-        Tue,  1 Mar 2022 07:56:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1646150194; x=1677686194;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=Dbno6f2IDbHjP13l+blnOurXonIAQbpx6n0jL1TaOYY=;
-  b=W6UUN38HCXC+hkRb8YQ1BnA35zx+Ggy2W7moz7rBu9Us3+6c5f2H5A7Q
-   i6XOYjexiu+ei3YfHxxH9tBsEh8PfXORAu50EvdWIVr121iBa6BGJ7GtE
-   ILEm2rV8fZh+YCxp22EnyiQPfr/OOhh6Qsvk8EhQ2QdltCIMoGFxyeADL
-   qeHlSIpH4dX6+jDH2+zixUgbxQh5XpZEfcTvEXg1tvtli2JBfX18ydQTC
-   MMZrV/XODJL4qLsf0osPl85Q8iiiQzE94Nb/Sm3xwzkv7kbkT64hHEIJh
-   LTH99tWcVUZ6SdsDPUhChySbOAlK2jkj2EVDmxWjhehqkMamiN0Hwfz4r
-   Q==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10272"; a="233129340"
-X-IronPort-AV: E=Sophos;i="5.90,146,1643702400"; 
-   d="scan'208";a="233129340"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Mar 2022 07:56:34 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.90,146,1643702400"; 
-   d="scan'208";a="575741547"
-Received: from lkp-server01.sh.intel.com (HELO 2146afe809fb) ([10.239.97.150])
-  by orsmga001.jf.intel.com with ESMTP; 01 Mar 2022 07:56:30 -0800
-Received: from kbuild by 2146afe809fb with local (Exim 4.92)
-        (envelope-from <lkp@intel.com>)
-        id 1nP4rW-0000ew-24; Tue, 01 Mar 2022 15:56:30 +0000
-Date:   Tue, 1 Mar 2022 23:55:39 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>
-Cc:     llvm@lists.linux.dev, kbuild-all@lists.01.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>
-Subject: Re: [PATCH] mmc: rtsx: Fix build errors/warnings for unused variable
-Message-ID: <202203012329.tsb96XPG-lkp@intel.com>
-References: <20220301115300.64332-1-ulf.hansson@linaro.org>
+        with ESMTP id S231601AbiCAQDs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 11:03:48 -0500
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A27F349917;
+        Tue,  1 Mar 2022 08:03:06 -0800 (PST)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 66BB31042;
+        Tue,  1 Mar 2022 08:03:06 -0800 (PST)
+Received: from [10.57.39.47] (unknown [10.57.39.47])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 26E0B3F70D;
+        Tue,  1 Mar 2022 08:03:05 -0800 (PST)
+Message-ID: <f9768ddd-26c4-9b23-8c48-9de4123a75e6@arm.com>
+Date:   Tue, 1 Mar 2022 16:03:00 +0000
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220301115300.64332-1-ulf.hansson@linaro.org>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
+Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
+Content-Language: en-GB
+To:     Peter Geis <pgwipeout@gmail.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
+        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20220228223642.1136229-1-pgwipeout@gmail.com>
+ <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
+ <CAMdYzYq0A4FitRGe49fxvjbwLUCi_KGwCtfz7pmayt_dK=r32w@mail.gmail.com>
+ <54b24f3d-3762-abbd-5ac4-dc5728f2fe4e@arm.com>
+ <CAMdYzYp=Po08pap9w5s8PV0mKfFZSPSOhM1U1AUdrRkYV-FRZQ@mail.gmail.com>
+ <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+On 2022-03-01 14:49, Peter Geis wrote:
+> On Tue, Mar 1, 2022 at 7:46 AM Peter Geis <pgwipeout@gmail.com> wrote:
+>>
+>> On Tue, Mar 1, 2022 at 7:38 AM Robin Murphy <robin.murphy@arm.com> wrote:
+>>>
+>>> On 2022-03-01 11:49, Peter Geis wrote:
+>>>> On Tue, Mar 1, 2022 at 6:23 AM Robin Murphy <robin.murphy@arm.com> wrote:
+>>>>>
+>>>>> On 2022-02-28 22:36, Peter Geis wrote:
+>>>>>> The dw_mmc-rockchip driver drops a large amound of logspam constantly
+>>>>>> when the cd-broken flag is enabled.
+>>>>>> Set the warning to be debug ratelimited in this case.
+>>>>>
+>>>>> Isn't this just papering over some fundamental problem with the clock?
+>>>>> If it's failing to set the expected rate for communicating with a card,
+>>>>> then presumably that's an issue for correct operation in general? The
+>>>>> fact that polling for a card makes a lot more of that communication
+>>>>> happen seems unrelated :/
+>>>>
+>>>> Good Morning,
+>>>>
+>>>> This only happens when a card is not inserted, so communication cannot happen.
+>>>
+>>> Well, I suppose there's a philosophical question in there about whether
+>>> shouting into the void counts as "communication", but AFAIR what the
+>>> polling function does is power up the controller, send a command, and
+>>> see if it gets a response.
+>>>
+>>> If the clock can't be set to the proper rate for low-speed discovery,
+>>> some or all cards may not be detected properly. Conversely if it is
+>>> already at a slow enough rate for discovery but can't be set higher once
+>>> a proper communication mode has been established, data transfer
+>>> performance will be terrible. Either way, it is not OK in general for
+>>> clk_set_rate() to fail, hence the warning. You have a clock driver problem.
+>>
+>> Alright, I'll look into this.
+>> It seems only extremely low clock speeds fail and I know rockchip
+>> chips have a hard time with extremely low clock rates.
+>> I'll trace out where the failure is happening.
+> 
+> Okay, I hope you can provide me a direction to go from here, because
+> it looks like it's doing exactly what it should do in this situation.
+> mmc core is requesting a rate (200k/100k).
+> clk core tries to find a parent to provide a clock that low and fails,
+> because the lowest possible parent is 750k.
+> clk_sdmmc(x) is listed as no-div, so it can't go any lower.
+> 
+> It seems to me that this error is sane, because other results of
+> einval you want to catch.
+> But einval in this case is fine, because
+> The thing that strikes me weird is currently clk_core thinks the
+> lowest possible freq here is 0, when in actuality it should be 750k,
+> am I correct here?
+> The mmc controller has an internal divider, so if my line of thinking
+> is correct here we should be more flexible here and request a rate
+> that's acceptable rather than just failing if it doesn't work.
+> But that's based on my limited understanding of how mmc core is
+> requesting this and what it expects in return.
 
-I love your patch! Yet something to improve:
+The downstream solution appears to be just to clamp the rate for 
+detection[1][2]. Not sure whether it's feasible to try to be cleverer 
+with the local divider to settle on a more in-spec rate for the final 
+output :/
 
-[auto build test ERROR on next-20220228]
-[cannot apply to soc/for-next linux/master linus/master v5.17-rc6 v5.17-rc5 v5.17-rc4 v5.17-rc6]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch]
+Robin.
 
-url:    https://github.com/0day-ci/linux/commits/Ulf-Hansson/mmc-rtsx-Fix-build-errors-warnings-for-unused-variable/20220301-195325
-base:    6705cd745adbbeac6b13002c7a30060f7b2568a5
-config: x86_64-randconfig-a005 (https://download.01.org/0day-ci/archive/20220301/202203012329.tsb96XPG-lkp@intel.com/config)
-compiler: clang version 15.0.0 (https://github.com/llvm/llvm-project d271fc04d5b97b12e6b797c6067d3c96a8d7470e)
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/0day-ci/linux/commit/392366d45e7f16e01727e7e82a08085301ca3de8
-        git remote add linux-review https://github.com/0day-ci/linux
-        git fetch --no-tags linux-review Ulf-Hansson/mmc-rtsx-Fix-build-errors-warnings-for-unused-variable/20220301-195325
-        git checkout 392366d45e7f16e01727e7e82a08085301ca3de8
-        # save the config file to linux build tree
-        mkdir build_dir
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=x86_64 SHELL=/bin/bash drivers/mmc/host/
-
-If you fix the issue, kindly add following tag as appropriate
-Reported-by: kernel test robot <lkp@intel.com>
-
-All errors (new ones prefixed by >>):
-
->> drivers/mmc/host/rtsx_pci_sdmmc.c:825:22: error: use of undeclared identifier 'dev'
-           pm_runtime_get_sync(dev);
-                               ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:862:28: error: use of undeclared identifier 'dev'
-           pm_runtime_mark_last_busy(dev);
-                                     ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:863:29: error: use of undeclared identifier 'dev'
-           pm_runtime_put_autosuspend(dev);
-                                      ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1094:22: error: use of undeclared identifier 'dev'
-           pm_runtime_get_sync(dev);
-                               ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1128:28: error: use of undeclared identifier 'dev'
-           pm_runtime_mark_last_busy(dev);
-                                     ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1129:29: error: use of undeclared identifier 'dev'
-           pm_runtime_put_autosuspend(dev);
-                                      ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1144:22: error: use of undeclared identifier 'dev'
-           pm_runtime_get_sync(dev);
-                               ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1154:28: error: use of undeclared identifier 'dev'
-           pm_runtime_mark_last_busy(dev);
-                                     ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1155:29: error: use of undeclared identifier 'dev'
-           pm_runtime_put_autosuspend(dev);
-                                      ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1172:22: error: use of undeclared identifier 'dev'
-           pm_runtime_get_sync(dev);
-                               ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1182:28: error: use of undeclared identifier 'dev'
-           pm_runtime_mark_last_busy(dev);
-                                     ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1183:29: error: use of undeclared identifier 'dev'
-           pm_runtime_put_autosuspend(dev);
-                                      ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1280:22: error: use of undeclared identifier 'dev'
-           pm_runtime_get_sync(dev);
-                               ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1310:28: error: use of undeclared identifier 'dev'
-           pm_runtime_mark_last_busy(dev);
-                                     ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1311:29: error: use of undeclared identifier 'dev'
-           pm_runtime_put_autosuspend(dev);
-                                      ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1331:22: error: use of undeclared identifier 'dev'
-           pm_runtime_get_sync(dev);
-                               ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1364:28: error: use of undeclared identifier 'dev'
-           pm_runtime_mark_last_busy(dev);
-                                     ^
-   drivers/mmc/host/rtsx_pci_sdmmc.c:1365:29: error: use of undeclared identifier 'dev'
-           pm_runtime_put_autosuspend(dev);
-                                      ^
-   18 errors generated.
-
-
-vim +/dev +825 drivers/mmc/host/rtsx_pci_sdmmc.c
-
-6291e7153a173f Micky Ching   2014-06-06  798  
-6291e7153a173f Micky Ching   2014-06-06  799  static void sd_request(struct work_struct *work)
-6291e7153a173f Micky Ching   2014-06-06  800  {
-6291e7153a173f Micky Ching   2014-06-06  801  	struct realtek_pci_sdmmc *host = container_of(work,
-6291e7153a173f Micky Ching   2014-06-06  802  			struct realtek_pci_sdmmc, work);
-ff984e57d36e8a Wei WANG      2012-10-29  803  	struct rtsx_pcr *pcr = host->pcr;
-6291e7153a173f Micky Ching   2014-06-06  804  
-6291e7153a173f Micky Ching   2014-06-06  805  	struct mmc_host *mmc = host->mmc;
-6291e7153a173f Micky Ching   2014-06-06  806  	struct mmc_request *mrq = host->mrq;
-ff984e57d36e8a Wei WANG      2012-10-29  807  	struct mmc_command *cmd = mrq->cmd;
-ff984e57d36e8a Wei WANG      2012-10-29  808  	struct mmc_data *data = mrq->data;
-6291e7153a173f Micky Ching   2014-06-06  809  
-ff984e57d36e8a Wei WANG      2012-10-29  810  	unsigned int data_size = 0;
-c3481955f6c78c Wei WANG      2013-02-08  811  	int err;
-ff984e57d36e8a Wei WANG      2012-10-29  812  
-b22217f966f585 Micky Ching   2015-01-14  813  	if (host->eject || !sd_get_cd_int(host)) {
-ff984e57d36e8a Wei WANG      2012-10-29  814  		cmd->error = -ENOMEDIUM;
-ff984e57d36e8a Wei WANG      2012-10-29  815  		goto finish;
-ff984e57d36e8a Wei WANG      2012-10-29  816  	}
-ff984e57d36e8a Wei WANG      2012-10-29  817  
-c3481955f6c78c Wei WANG      2013-02-08  818  	err = rtsx_pci_card_exclusive_check(host->pcr, RTSX_SD_CARD);
-c3481955f6c78c Wei WANG      2013-02-08  819  	if (err) {
-c3481955f6c78c Wei WANG      2013-02-08  820  		cmd->error = err;
-c3481955f6c78c Wei WANG      2013-02-08  821  		goto finish;
-c3481955f6c78c Wei WANG      2013-02-08  822  	}
-c3481955f6c78c Wei WANG      2013-02-08  823  
-98fcc5762dcecb Micky Ching   2014-04-29  824  	mutex_lock(&pcr->pcr_mutex);
-7499b529d97f75 Kai-Heng Feng 2022-01-25 @825  	pm_runtime_get_sync(dev);
-98fcc5762dcecb Micky Ching   2014-04-29  826  
-ff984e57d36e8a Wei WANG      2012-10-29  827  	rtsx_pci_start_run(pcr);
-ff984e57d36e8a Wei WANG      2012-10-29  828  
-ff984e57d36e8a Wei WANG      2012-10-29  829  	rtsx_pci_switch_clock(pcr, host->clock, host->ssc_depth,
-ff984e57d36e8a Wei WANG      2012-10-29  830  			host->initial_mode, host->double_clk, host->vpclk);
-ff984e57d36e8a Wei WANG      2012-10-29  831  	rtsx_pci_write_register(pcr, CARD_SELECT, 0x07, SD_MOD_SEL);
-ff984e57d36e8a Wei WANG      2012-10-29  832  	rtsx_pci_write_register(pcr, CARD_SHARE_MODE,
-ff984e57d36e8a Wei WANG      2012-10-29  833  			CARD_SHARE_MASK, CARD_SHARE_48_SD);
-ff984e57d36e8a Wei WANG      2012-10-29  834  
-98fcc5762dcecb Micky Ching   2014-04-29  835  	mutex_lock(&host->host_mutex);
-98fcc5762dcecb Micky Ching   2014-04-29  836  	host->mrq = mrq;
-98fcc5762dcecb Micky Ching   2014-04-29  837  	mutex_unlock(&host->host_mutex);
-98fcc5762dcecb Micky Ching   2014-04-29  838  
-ff984e57d36e8a Wei WANG      2012-10-29  839  	if (mrq->data)
-ff984e57d36e8a Wei WANG      2012-10-29  840  		data_size = data->blocks * data->blksz;
-ff984e57d36e8a Wei WANG      2012-10-29  841  
-1dcb35799e8fb5 Micky Ching   2014-12-23  842  	if (!data_size) {
-98fcc5762dcecb Micky Ching   2014-04-29  843  		sd_send_cmd_get_rsp(host, cmd);
-1dcb35799e8fb5 Micky Ching   2014-12-23  844  	} else if (sd_rw_cmd(cmd) || sdio_extblock_cmd(cmd, data)) {
-1dcb35799e8fb5 Micky Ching   2014-12-23  845  		cmd->error = sd_rw_multi(host, mrq);
-6291e7153a173f Micky Ching   2014-06-06  846  		if (!host->using_cookie)
-6291e7153a173f Micky Ching   2014-06-06  847  			sdmmc_post_req(host->mmc, host->mrq, 0);
-98fcc5762dcecb Micky Ching   2014-04-29  848  
-98fcc5762dcecb Micky Ching   2014-04-29  849  		if (mmc_op_multi(cmd->opcode) && mrq->stop)
-98fcc5762dcecb Micky Ching   2014-04-29  850  			sd_send_cmd_get_rsp(host, mrq->stop);
-ff984e57d36e8a Wei WANG      2012-10-29  851  	} else {
-ff984e57d36e8a Wei WANG      2012-10-29  852  		sd_normal_rw(host, mrq);
-ff984e57d36e8a Wei WANG      2012-10-29  853  	}
-98fcc5762dcecb Micky Ching   2014-04-29  854  
-98fcc5762dcecb Micky Ching   2014-04-29  855  	if (mrq->data) {
-98fcc5762dcecb Micky Ching   2014-04-29  856  		if (cmd->error || data->error)
-98fcc5762dcecb Micky Ching   2014-04-29  857  			data->bytes_xfered = 0;
-98fcc5762dcecb Micky Ching   2014-04-29  858  		else
-98fcc5762dcecb Micky Ching   2014-04-29  859  			data->bytes_xfered = data->blocks * data->blksz;
-98fcc5762dcecb Micky Ching   2014-04-29  860  	}
-98fcc5762dcecb Micky Ching   2014-04-29  861  
-7499b529d97f75 Kai-Heng Feng 2022-01-25  862  	pm_runtime_mark_last_busy(dev);
-7499b529d97f75 Kai-Heng Feng 2022-01-25  863  	pm_runtime_put_autosuspend(dev);
-98fcc5762dcecb Micky Ching   2014-04-29  864  	mutex_unlock(&pcr->pcr_mutex);
-ff984e57d36e8a Wei WANG      2012-10-29  865  
-ff984e57d36e8a Wei WANG      2012-10-29  866  finish:
-1dcb35799e8fb5 Micky Ching   2014-12-23  867  	if (cmd->error) {
-1dcb35799e8fb5 Micky Ching   2014-12-23  868  		dev_dbg(sdmmc_dev(host), "CMD %d 0x%08x error(%d)\n",
-1dcb35799e8fb5 Micky Ching   2014-12-23  869  			cmd->opcode, cmd->arg, cmd->error);
-1dcb35799e8fb5 Micky Ching   2014-12-23  870  	}
-98fcc5762dcecb Micky Ching   2014-04-29  871  
-98fcc5762dcecb Micky Ching   2014-04-29  872  	mutex_lock(&host->host_mutex);
-98fcc5762dcecb Micky Ching   2014-04-29  873  	host->mrq = NULL;
-98fcc5762dcecb Micky Ching   2014-04-29  874  	mutex_unlock(&host->host_mutex);
-98fcc5762dcecb Micky Ching   2014-04-29  875  
-98fcc5762dcecb Micky Ching   2014-04-29  876  	mmc_request_done(mmc, mrq);
-ff984e57d36e8a Wei WANG      2012-10-29  877  }
-ff984e57d36e8a Wei WANG      2012-10-29  878  
-
----
-0-DAY CI Kernel Test Service, Intel Corporation
-https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+[1] 
+https://github.com/JeffyCN/mirrors/commit/d80d5062b22f9c4a559401bdb7b2727c4ced36c0
+[2] 
+https://github.com/JeffyCN/mirrors/commit/3f26edfb2392df25efc361ad0a9f41d0917e40ee
