@@ -2,128 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E65B2C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 13:50:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FDBEC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 13:53:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231309AbiCANvj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 08:51:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53762 "EHLO
+        id S234993AbiCANyW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 08:54:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59926 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230081AbiCANvj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 08:51:39 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C534CDF7C
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 05:50:56 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id bu29so27076279lfb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Mar 2022 05:50:56 -0800 (PST)
+        with ESMTP id S233786AbiCANyW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 08:54:22 -0500
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31D1D457BE
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 05:53:41 -0800 (PST)
+Received: by mail-lf1-x12f.google.com with SMTP id f37so26923359lfv.8
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Mar 2022 05:53:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=vKbNB+QFCelUuFIWDTxEUSr2023K4PLkKkX5DLtqjDs=;
-        b=cLWP8XiR8+Ia5Sbi85algUG7M4V42UIOiGrjK4TssmFDsMhvv/orkMXJfBTTFFawxX
-         rCJmaYY+5jZIj40kvq+IJw6YH1VMal+eAWpqgK5qV6aeNZ8RZXzUC8YXhabUlPw0GTdA
-         xPQWlm4iRrozKX2txmm+aq97wE0f/1q68uvk2/4DSXleyEISpKzV8WpGKRUdiHxrL349
-         raYCaS/Ai7gfnqxCJOflv98/5Oif61xNCuVt7kGsBquUCxaC/rvTPp3BtQ3FZKSrGE2+
-         LUQNb1y4eBMPH/Bgc7L0gIsQkoD90qW8fC4AbwWXnyeK7Eo+qtQV2+9odTOC+213JazG
-         XzZg==
+        bh=QpS3f8EZoX7R2KAuz/UX0/xqwonI23q4hXHZBWApjxE=;
+        b=YFJelA+ENY4EZJiP/YLHJkzoR5u7rW4E0VfzaZ8Q0qZfr9TB0HgZJOE/d1MySMcgPx
+         Jf+/ZYCNvUoklZvkkIO9N8lnHCWaTxSd8Q/pfuSrwkZ31qj3uG/pBlU9hdB+FzzO1Bqa
+         lmSYkKdaVatqRi/v1os1vNgdcFtMMHkJrbetMD5nmxughc6Duj/ZLysburORm04pujaU
+         KZ1c7AyHGaDdC2fiLVz2VW+6SuRKZ3aGBHWXCdBU4CixGrA1OgBDOh/0wyOh9VhPVWZH
+         Alx8GWnHSK7hg1IbTKx8yzgr5et49ZSuE6bwTPoZU9wBDc7ko43DeEneBxLzc4NHCR6U
+         DfSA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=vKbNB+QFCelUuFIWDTxEUSr2023K4PLkKkX5DLtqjDs=;
-        b=69lLV2FfITjFubH8+f64D0YJ4Z6IZ5z1k+7BqdnePjuVgWVGKE977oSFVsIxZjTIZ4
-         ZZKSxTsFOXmDbLdX+kRy6HLX0mGYW4WUqKUDFCo0K0/TGh8Ub0WFUDn4TsMkhJ9FWIAj
-         hjot5CqoNJbL5J0M1SAI6WdkHJh8JzS5pYuPhdbYxxGG7bffvM/WgTqnnBkah2syZ5Ar
-         NgKojA282tX5n05CZ3k+J77KdlHKkMMljLNZe0Lzs8enKgdm8vZJ3ctYY1PPVN/uHY9a
-         VgK5mcakVV45pP5+G6GBk9K3/uoB3dHthBt7yyHvgSyE/t9itMntId195MQcvudyAMPV
-         tC/g==
-X-Gm-Message-State: AOAM53148nczlIKJsshblMZaowggPkhjsuCoeWLHJ3BSKKCSjP8HnLIj
-        SyBMSbtPAPKXwTuPyn7LJ1ddo8QOB38J2Iiy3T9lQtsStFc=
-X-Google-Smtp-Source: ABdhPJxkiRw9RFbwuO0NVCLlDukDZeTilTWmcjG5JurAuA0YrWueLlIvsvbS5OCyC+PEWV7AZaJKXvI4ii28yUfo/Uc=
-X-Received: by 2002:a05:6512:3604:b0:443:5d4b:3760 with SMTP id
- f4-20020a056512360400b004435d4b3760mr15701448lfs.358.1646142655067; Tue, 01
- Mar 2022 05:50:55 -0800 (PST)
+        bh=QpS3f8EZoX7R2KAuz/UX0/xqwonI23q4hXHZBWApjxE=;
+        b=H+NlJjvtyCLzbbV9WADFE2C4QblrDiMQOJpohYYRsWGjU0sw/oCR9pBdvNDq52saci
+         TS4KB2Wpe3TANewDtu4ZqlH97Xcil8AnIMpwT9jB2KtEBZuqeob7w4ebTBNQLYAp9HnO
+         8jTRHTtzlJ6tdiZRBG0iGBrY5Pltgt1YkGDo+NuREpN7gGfRPTmyGymgE+pSCFbCU7l1
+         +tm8iKnDNIlOWKh0VDLOuxg/W39eVNjbCfdmnDyupRtYwBp3GWcXjFtPrCZremZo0kuz
+         2QRzxFZUywKSM5ir21mbzVReMk8yGoxCT8ZURubqdJrzjb1tseQFB8ymvPJx/fU3wneM
+         F9dA==
+X-Gm-Message-State: AOAM532iHIAiD3UJRrmLmKcbNAhTXjzmqTbKGxGbCiqMRm/maH8hxRxX
+        3k4UT74Oc1rCilp9OcnIAwJr5lOQh1YlGPdc6wndLA==
+X-Google-Smtp-Source: ABdhPJx0SoaiuulrB+NSo+UFoD6svkfCdOGBHeUCADEpXekaO/ti4K9CDSati5FTR+FCN4cJpmdhK9sgH1YngXvfez4=
+X-Received: by 2002:ac2:44c1:0:b0:444:18fc:8389 with SMTP id
+ d1-20020ac244c1000000b0044418fc8389mr15500530lfm.167.1646142819499; Tue, 01
+ Mar 2022 05:53:39 -0800 (PST)
 MIME-Version: 1.0
-References: <fae9ee4b-6b93-95ac-abf3-f97c62e07b9d@gmail.com>
-In-Reply-To: <fae9ee4b-6b93-95ac-abf3-f97c62e07b9d@gmail.com>
+References: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 1 Mar 2022 14:50:18 +0100
-Message-ID: <CAPDyKFqeb=EM25vWThynoTt0A2Fbe6K-fp2s3yeqLpfdCfdkgg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: improve fallback in mmc_select_timing()
-To:     Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date:   Tue, 1 Mar 2022 14:53:03 +0100
+Message-ID: <CAPDyKFpgG-P8Gtb+ww3YeO8jyjuNhKtjk=bePz=3qcf-37fsvA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
+To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Prabhakar <prabhakar.csengg@gmail.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 18 Feb 2022 at 08:00, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+On Sun, 27 Feb 2022 at 22:23, Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
 >
-> I have a system (cheap Amlogic S905W based TV box) where the eMMC chip
-> refuses to switch to HS200 timing. That's not nice, but my bigger
-> problem is that the system then falls back to the very slow default
-> mode, even though DDR52 is supported and works well.
+> Document RZ/V2L SDHI bindings. RZ/V2L SDHI is almost identical to one
+> found on the R-Car Gen3. No driver changes are required as generic
+> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
 >
-> Therefore, if setting a mode fails with EBADMSG (switch error), try the
-> next (in descending performance order) mode instead of immediately
-> falling back to the slowest mode.
->
-> With the patch it looks like this on my system:
->
-> mmc1: mmc_select_hs200 failed, error -74
-> mmc1: new DDR MMC card at address 0001
-> mmcblk1: mmc1:0001 DG4008 7.28 GiB
->
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> Reviewed-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-Overall, I think the approach seems very much reasonable!
-
-Although, I want to have a closer look at the impact on the different
-scenarios, as mmc_select_timing() is being called during power
-management and reset too.
-
-Allow me a day or so, then I will get back to this, either with some
-more detailed suggestions or I may post a patch.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 > ---
->  drivers/mmc/core/mmc.c | 18 +++++++++++++++---
->  1 file changed, 15 insertions(+), 3 deletions(-)
+> DTSi changes have been posted [0].
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index bbbbcaf70..c0272192d 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1523,11 +1523,23 @@ static int mmc_select_timing(struct mmc_card *card)
->         if (!mmc_can_ext_csd(card))
->                 goto bus_speed;
+> [0] https://patchwork.kernel.org/project/linux-renesas-soc/patch/
+> 20220227203744.18355-2-prabhakar.mahadev-lad.rj@bp.renesas.com/
+> ---
+>  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
 >
-> -       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
-> +       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES) {
->                 err = mmc_select_hs400es(card);
-> -       else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
-> +               if (!err)
-> +                       goto bus_speed;
-> +               if (err != -EBADMSG)
-> +                       return err;
-> +       }
-> +
-> +       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200) {
->                 err = mmc_select_hs200(card);
-> -       else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
-> +               if (!err)
-> +                       goto bus_speed;
-> +               if (err != -EBADMSG)
-> +                       return err;
-> +       }
-> +
-> +       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
->                 err = mmc_select_hs(card);
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> index 9ce6e06c19db..3b191fb89cf1 100644
+> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> @@ -58,6 +58,7 @@ properties:
+>                - renesas,sdhi-r8a77995  # R-Car D3
+>                - renesas,sdhi-r8a779a0  # R-Car V3U
+>                - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
+> +              - renesas,sdhi-r9a07g054 # RZ/V2L
+>            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
 >
->         if (err && err != -EBADMSG)
+>    reg:
+> @@ -107,7 +108,9 @@ allOf:
+>        properties:
+>          compatible:
+>            contains:
+> -            const: renesas,sdhi-r9a07g044
+> +            enum:
+> +              - renesas,sdhi-r9a07g044
+> +              - renesas,sdhi-r9a07g054
+>      then:
+>        properties:
+>          clocks:
 > --
-> 2.35.1
+> 2.17.1
 >
