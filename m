@@ -2,96 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AB04C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 14:54:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F398BC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Mar 2022 14:56:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235463AbiCAOyl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 09:54:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48772 "EHLO
+        id S235494AbiCAO50 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Mar 2022 09:57:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57508 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234700AbiCAOyf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 09:54:35 -0500
-X-Greylist: delayed 225 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 01 Mar 2022 06:53:50 PST
+        with ESMTP id S235489AbiCAO5Z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 09:57:25 -0500
 Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEE927EB3D
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 06:53:50 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1159FA252C
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Mar 2022 06:56:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=bHcc4GLjuPlwZ9IO4BDeSXmHBVnc
-        FhSDywmcS2SRGdA=; b=MGgWp5uuX9D3Q+AJpYpCzzHdrAso6Wq65Xij/C7BZ2ip
-        X12SMZOT+1S0c7n6yOBH2wei/3BADOzkKOC9Vrl3bl3xe0RP2bZBgdw5jMHH+pBw
-        WTKr4oKUsKOfixXY4IKRGlVwllNLVtV/2gowjlJlKjJZMQFQhsl0bl96ZCuKgJI=
-Received: (qmail 3900677 invoked from network); 1 Mar 2022 15:53:48 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Mar 2022 15:53:48 +0100
-X-UD-Smtp-Session: l3s3148p1@Q1YYVSnZ7NQgAQnoAGI9AP6D0HJXVmR3
-Date:   Tue, 1 Mar 2022 15:53:48 +0100
+        :content-type:in-reply-to; s=k1; bh=yGGppxEG16RTXq0yehDXklpKmtJe
+        60Z2xNgIyioCZxI=; b=V19faUqNnzAweXP//tp+4nWvOTn0KxszJDI7FMqzE7ks
+        gy+nVJggCvL0j323mew0z/D7X9AOMlptaaqJIxWbXIDSaosOUbgNxDZ4P3G6e+93
+        FrG1sCGue5q9lUUGkL7U5sxFUm/MbJdUGEQbea/DEcnJY8+GIuClozAOxFwGloU=
+Received: (qmail 3899439 invoked from network); 1 Mar 2022 15:50:02 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Mar 2022 15:50:02 +0100
+X-UD-Smtp-Session: l3s3148p1@U9GdRynZ5tQgAQnoAGI9AP6D0HJXVmR3
+Date:   Tue, 1 Mar 2022 15:50:01 +0100
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
-Message-ID: <Yh4zfIliNC2EzF4R@ninjato>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH] mmc: sh_mmcif: Simplify division/shift logic
+Message-ID: <Yh4ymcHsCK9rU85Y@ninjato>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         Geert Uytterhoeven <geert+renesas@glider.be>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-References: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+References: <68d689c39c769d298b53ee8cb9de0e594a2999b2.1645460780.git.geert+renesas@glider.be>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="1Oa0wvzClD7zRdyN"
+        protocol="application/pgp-signature"; boundary="6xXqU3Svdn9icg6S"
 Content-Disposition: inline
-In-Reply-To: <20220227212330.22262-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <68d689c39c769d298b53ee8cb9de0e594a2999b2.1645460780.git.geert+renesas@glider.be>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---1Oa0wvzClD7zRdyN
+--6xXqU3Svdn9icg6S
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, Feb 27, 2022 at 09:23:30PM +0000, Lad Prabhakar wrote:
-> Document RZ/V2L SDHI bindings. RZ/V2L SDHI is almost identical to one
-> found on the R-Car Gen3. No driver changes are required as generic
-> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
+On Mon, Feb 21, 2022 at 05:27:20PM +0100, Geert Uytterhoeven wrote:
+> "a / (1 << b)" =3D=3D "a >> b".
 >=20
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Biju Das <biju.das.jz@bp.renesas.com>
+> No change in generated code.
+>=20
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Better late than never :/
 
 Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---1Oa0wvzClD7zRdyN
+--6xXqU3Svdn9icg6S
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmIeM3sACgkQFA3kzBSg
-Kba/YBAAnssZXgvDGvV/aFRDKSkKps+gd9KCURFaUu26sXNfgUClvBWllhx70GQL
-7X+wwp5hPk1VzAvyuz4xK2CbrhZyMZvW5Pa1b76eGkOcDifC7zsMhU3KFMFg6p/P
-zoecKF+NqNgUViQ84TtUmnhsLy8UzoboV5NuFYFprAEp14+XateezTtLky7CS+Gg
-Dr2HwNN9cecrnfIyDC77wdKnCtTnH56bW7aQVERbt63dnByEYGGR2URuYnbZieY/
-Bo+funywtNneBXK9RCrpHcOWausGAuKOsE3Ub5BEfK37fi+WJKoWs8jlVxolYRD5
-b1FVFIu/wwOtst1nuLbli+s3Xr/fhE04aUVdnr1eem1XiX6LzoV1KviEblmBuHpo
-poDcUtin+HZKgFABIrKsrj/ZfYCt8gcmg5qFsehoiLyKKXw1ugQNGE67mmsZ5cyC
-02BKGh7myLA6fkeVRZ1CEGsQLx0TDeRVaL+E9XYfUK2sg6MR2FJEKPZJWs0TneQB
-OEKVeqAqOgOMI55j+McH99FF6RvKTa8sHW9fRD4DUnQgMeuPOmRdtg1qAtB9SEe9
-c8/2DZRhcZhuKuQBMAVaKDuBixsb0FurrR9rp8hf5yvBL7OqsEiOnEJoY5B3yYoU
-Zda5MEsid5RuycLDPnMnANWLQQasbqh9d8nwmTkNswiZr3NXkrw=
-=Mah6
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmIeMpYACgkQFA3kzBSg
+KbaCvw//dw3Sz6fAoBaBH+L37exYw30woNnbdX0QkTAAPSo+CUVNe5O6pEGbxnjQ
+vpDBr9I/EXFw/X17YdSRZzJ88I/3vsFecPtJFp4f3L+IB5DcWMIgv2g84VGd21is
+rykGUnh7UMY4BegCYCjfkU9WD6ll3+wtefQ/2XsZZaRt1u+xq3yjI3o/TuJsrmdB
+DIoadDbBAMDTHXTlhb8/vpGIx9Vr29jVQiKeFoUGN97VehG+ZpHL7z7zaFksuaNN
+HM9GFw2AMZE0fgENo/Fxn+csv6wgUcRtBSpdhdYbrozpy63i6D1LFpeqYzlND/4u
+/OGGWGy3g3gec4C/UYSBoPWi7ILgjWPWbJNMOmrzA6uvf7+k6nWZJbMo+Og/FVLP
+eJ/26HUvv76C7zvGEo0Dl+vQucBjKI/+AK0PaziXxtj3q2WnwgyuRYf6hBKYb/j6
+0k2f2uXF6Ca/WAvxrujYI4saanVcPyjFMYA4HyYH9pS4VrDBA3XSlpA3YJPWV5SM
+NCobHX5eEzgBoOOQyShVSJg9UECUTiWw2ZmV56oCZABThpCMebxOPm/mZr1yr9Lr
+NFmYf5LSnhfELXS2YCePJoboSnQbv2vdxp0zpTkSewEwFGsd43Q+b+GNIRVo+3Bf
+6AOozgPcFJNMBafsdDNh/vSR+i05XW5DV1JefwLUjpu1YmV6mJk=
+=FCz0
 -----END PGP SIGNATURE-----
 
---1Oa0wvzClD7zRdyN--
+--6xXqU3Svdn9icg6S--
