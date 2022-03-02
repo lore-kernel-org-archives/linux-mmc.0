@@ -2,38 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A200C433FE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D448CC433EF
 	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 13:04:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242033AbiCBNE5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S242037AbiCBNE5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 2 Mar 2022 08:04:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38530 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242026AbiCBNEy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 08:04:54 -0500
+        with ESMTP id S242028AbiCBNEz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 08:04:55 -0500
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CC67C2483;
-        Wed,  2 Mar 2022 05:04:11 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3DD9C249E;
+        Wed,  2 Mar 2022 05:04:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1646226251; x=1677762251;
+  t=1646226253; x=1677762253;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references;
-  bh=GG6sGclM2fUujkTtTHHmQtLlaAG4I43rIWX2xU4YyQY=;
-  b=p+GF+lq/MEhDLKMm9dm10dgZO+gC+nCHrFN4y9/n0keoZCE2bPNn6k7v
-   9qAxCZCTL0wpOxcx004zfP21D2VHus//fkPWNaJVXydjQIf7BTVVAWu+S
-   6Oo4nDOh7E5wmV5ZGHj+sCRSDI6IMBbe3eX3BcQuj1BRyI9tnfTdVVliV
-   k=;
+  bh=SfwU9RRrwUbs8J2J4RuaSBSxyXtRxCmuowf1qerOqMc=;
+  b=UWwmBNn98/FPBH/6pTUvRJJPiX1MihnL7Xhmuhto87MexhlMHuZm5X+y
+   VDD1tpGkCnwvyeRcbjqRUFfLYVbmXiyqqV+C5TxJy08C0YlLMu1SNJzl7
+   QdGMK3Xy6roD8d9e27XaVA/TfDcLy4AlS5tIojNvrugWWBhn+NVORCrcx
+   I=;
 Received: from ironmsg-lv-alpha.qualcomm.com ([10.47.202.13])
-  by alexa-out.qualcomm.com with ESMTP; 02 Mar 2022 05:04:11 -0800
+  by alexa-out.qualcomm.com with ESMTP; 02 Mar 2022 05:04:13 -0800
 X-QCInternal: smtphost
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg-lv-alpha.qualcomm.com with ESMTP/TLS/AES256-SHA; 02 Mar 2022 05:04:09 -0800
+  by ironmsg-lv-alpha.qualcomm.com with ESMTP/TLS/AES256-SHA; 02 Mar 2022 05:04:11 -0800
 X-QCInternal: smtphost
 Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 02 Mar 2022 18:33:54 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 02 Mar 2022 18:34:00 +0530
 Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id E9ACA587B; Wed,  2 Mar 2022 18:33:53 +0530 (IST)
+        id 85F38587B; Wed,  2 Mar 2022 18:33:59 +0530 (IST)
 From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 To:     adrian.hunter@intel.com, quic_riteshh@quicinc.com,
         asutoshd@quicinc.com, ulf.hansson@linaro.org, agross@kernel.org,
@@ -45,9 +45,9 @@ Cc:     quic_vbadigan@quicinc.com, quic_rampraka@quicinc.com,
         Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
         Liangliang Lu <quic_luliang@quicinc.com>,
         "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V4 3/7] mmc: debugfs: Add debug fs entry for mmc driver
-Date:   Wed,  2 Mar 2022 18:33:43 +0530
-Message-Id: <1646226227-32429-4-git-send-email-quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V4 7/7] mmc: cqhci: Capture eMMC and SD card errors
+Date:   Wed,  2 Mar 2022 18:33:47 +0530
+Message-Id: <1646226227-32429-8-git-send-email-quic_c_sbhanu@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1646226227-32429-1-git-send-email-quic_c_sbhanu@quicinc.com>
 References: <1646226227-32429-1-git-send-email-quic_c_sbhanu@quicinc.com>
@@ -55,94 +55,39 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add debug fs entry to query eMMC and SD card errors statistics
+Add changes to capture eMMC and SD card errors.
+This is useful for debug and testing.
 
 Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
 Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
 Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
+Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
 Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 ---
- drivers/mmc/core/debugfs.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 60 insertions(+)
+ drivers/mmc/host/cqhci-core.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 3fdbc80..db0988c 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -223,6 +223,63 @@ static int mmc_clock_opt_set(void *data, u64 val)
- DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
- 	"%llu\n");
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index b0d30c3..b3d7d6d 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -822,8 +822,15 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
+ 	pr_debug("%s: cqhci: IRQ status: 0x%08x\n", mmc_hostname(mmc), status);
  
-+static int mmc_err_stats_show(struct seq_file *file, void *data)
-+{
-+	struct mmc_host *host = (struct mmc_host *)file->private;
-+	const char *desc[MMC_ERR_MAX] = {
-+		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
-+		[MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
-+		[MMC_ERR_DAT_TIMEOUT] = "Data Timeout Occurred",
-+		[MMC_ERR_DAT_CRC] = "Data CRC Errors Occurred",
-+		[MMC_ERR_AUTO_CMD] = "Auto-Cmd Error Occurred",
-+		[MMC_ERR_ADMA] = "ADMA Error Occurred",
-+		[MMC_ERR_TUNING] = "Tuning Error Occurred",
-+		[MMC_ERR_CMDQ_RED] = "CMDQ RED Errors",
-+		[MMC_ERR_CMDQ_GCE] = "CMDQ GCE Errors",
-+		[MMC_ERR_CMDQ_ICCE] = "CMDQ ICCE Errors",
-+		[MMC_ERR_REQ_TIMEOUT] = "Request Timedout",
-+		[MMC_ERR_CMDQ_REQ_TIMEOUT] = "CMDQ Request Timedout",
-+		[MMC_ERR_ICE_CFG] = "ICE Config Errors",
-+	};
-+	int i;
-+
-+	if (!host)
-+		return -EINVAL;
-+
-+	for (i = 0; i < MMC_ERR_MAX; i++) {
-+		if (desc[i])
-+			seq_printf(file, "# %s:\t %d\n",
-+					desc[i], host->err_stats[i]);
+ 	if ((status & (CQHCI_IS_RED | CQHCI_IS_GCE | CQHCI_IS_ICCE)) ||
+-	    cmd_error || data_error)
++	    cmd_error || data_error) {
++		if (status & CQHCI_IS_RED)
++			mmc_debugfs_err_stats_inc(mmc, MMC_ERR_CMDQ_RED);
++		if (status & CQHCI_IS_GCE)
++			mmc_debugfs_err_stats_inc(mmc, MMC_ERR_CMDQ_GCE);
++		if (status & CQHCI_IS_ICCE)
++			mmc_debugfs_err_stats_inc(mmc, MMC_ERR_CMDQ_ICCE);
+ 		cqhci_error_irq(mmc, status, cmd_error, data_error);
 +	}
-+
-+	return 0;
-+}
-+
-+static int mmc_err_stats_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, mmc_err_stats_show, inode->i_private);
-+}
-+
-+static ssize_t mmc_err_stats_write(struct file *filp, const char __user *ubuf,
-+				   size_t cnt, loff_t *ppos)
-+{
-+	struct mmc_host *host = filp->f_mapping->host->i_private;
-+
-+	if (!host)
-+		return -EINVAL;
-+
-+	pr_debug("%s: Resetting MMC error statistics\n", __func__);
-+	memset(host->err_stats, 0, sizeof(host->err_stats));
-+
-+	return cnt;
-+}
-+
-+static const struct file_operations mmc_err_stats_fops = {
-+	.open	= mmc_err_stats_open,
-+	.read	= seq_read,
-+	.write	= mmc_err_stats_write,
-+};
-+
- void mmc_add_host_debugfs(struct mmc_host *host)
- {
- 	struct dentry *root;
-@@ -236,6 +293,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
- 				   &mmc_clock_fops);
  
-+	debugfs_create_file("err_stats", 0600, root, host,
-+		&mmc_err_stats_fops);
-+
- #ifdef CONFIG_FAIL_MMC_REQUEST
- 	if (fail_request)
- 		setup_fault_attr(&fail_default_attr, fail_request);
+ 	if (status & CQHCI_IS_TCC) {
+ 		/* read TCN and complete the request */
 -- 
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
 of Code Aurora Forum, hosted by The Linux Foundation
