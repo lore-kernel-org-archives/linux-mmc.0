@@ -2,146 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB579C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 10:23:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D8CBC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 10:34:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236820AbiCBKYG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Mar 2022 05:24:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51768 "EHLO
+        id S241028AbiCBKfO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Mar 2022 05:35:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231748AbiCBKYF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 05:24:05 -0500
+        with ESMTP id S241025AbiCBKfK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 05:35:10 -0500
 Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 111A7AC918
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 02:23:22 -0800 (PST)
-Received: by mail-lj1-x229.google.com with SMTP id e8so1601170ljj.2
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 02:23:21 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04CA0BECC8
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 02:34:27 -0800 (PST)
+Received: by mail-lj1-x229.google.com with SMTP id s25so1631481lji.5
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 02:34:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=9tjY3EnNamNFx1y3oddYNE+8HtUaH9EZY+luGZxUhsM=;
-        b=mnACc6XQaE5xdOpPVbWeU0j4lqYfqsAhH0pnsiQ4s+1ZtVjntpL/OwJLMrmI7Sytrc
-         3tRtsEdE5mIug5N/dLj9wICfoEUbgNXaTnVTJzTbN/TkNBEuoYsBjmpPXQhSJ/Zw98oK
-         eakd9g9hwgta4vGWdNpsV6UQ/1ds7PYgJFpX8Ixx4BsbfdOrslso9neJdZOh8o+Zx0OP
-         hqtdM8INXeh0EMeBV7tNYMtDgmHyl8xBrjCR2OJqPBJaeUv9a76kEZQ5oae3z5q9mD8M
-         oPrJbl/dzH5LDyF/lhbY1pMfpYZ6RT1A7fixM7PSNAHPA76l8HsURnbmHIjlGSJGN6Tt
-         K8tg==
+        bh=nNE5Fuk1S7VXvQWbBVtfenLyBK3DknXKrcGn5hcrC6I=;
+        b=SRlP8dzJ0rC/EvoM4tj7g6i/4vbgCbZIyewg7h8zVcIb2lmEwGdvnZcP8pWUGiYDCp
+         Etcac9xOik3FU78hmVWyTqvbHSl9EwWfZrnE9irY3NYFYfjdESKx1h619SVLYlfwb/Kt
+         LNIc91aCRs6r2aI+4VCV4d0ooPE5dpzxe/f2cwQ0hVULcWdVehAeboiKH6elxoDi2iqi
+         OSon0gGaZBKrtdIHLGRmMyEmWRiMGjrrMUwIXZVMsRL1cqtnbb2/KpmFddMLGqhOLxuq
+         s127+/dG0TQ0mCDQ3UNtAhPKEEqkbv8QTT2FOf72w5/Pm/RPHyU1CLBqNem4Y8Z3oHFo
+         p6QQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=9tjY3EnNamNFx1y3oddYNE+8HtUaH9EZY+luGZxUhsM=;
-        b=vscbG7ri/JQTU5YKxnXd3w0zQS/2y8fODBy0sRyVVj/CiffbBSHNIqLUwnDD1hh7UZ
-         OHMtOm44a4HgN3LcBwRABaZ+miOxn5/0PJtaU3xlo1XzFzBPcig3x/OyYModmejdnDto
-         eybFnX/wNgXcv1IL/xUMZ2+gMP3Qx0YdK8yZ6L8TTGuI2VmAeeLhy8u7OtneFdcN0I47
-         BFuwmRJ++JuIoZqDhAhqah9Qcr78dQxhyWF89qeihyvAVD+uLfw9bCXP8Ke/XOaD7Y3d
-         Ozm0UjY3wUk/UQUGsliitXP74JQMnAnjVy6/j+ajAAql1hAAcc78pzqidvBSImkDE9ac
-         yQaA==
-X-Gm-Message-State: AOAM530wWa30TOxJwphaKjkxBmJaQ8+WFb3T6VUeM8/w4rasMdZgyLgO
-        rtV8oFWBjVkxIAQ0Ip4vYyVeXRv8MS0p+dMJ2tmhBg==
-X-Google-Smtp-Source: ABdhPJx6nuXDD4MZhP/3f28Fey4JB+n8W3ScZ0gwTpP8FwMhxThtjLQlKJCOe42eXVCgQa5QoPE3HwhN4Gy4WpG9dkU=
+        bh=nNE5Fuk1S7VXvQWbBVtfenLyBK3DknXKrcGn5hcrC6I=;
+        b=lBvlttre5i6AduywBHPq9Klc/BPm484Nz0CRe+JOGcoAq31OxL89caEFQZwmdiJb7D
+         NQI/jB2FgiZ7fBRKOsMFyXZUvRzciJWZ0OfZmUu+9yg56hQ7VW81jZoA2ONAPj5+Dzls
+         M0mig4opc+oyV3h0uQ1KAPyFgRqtnte/OtrwzxLqqSFL4n8FA6/gx8FNFzSwMnddwJJ9
+         XpkmQkH3XRhzwkVlISVayBNxwJU6u6gqs0nn8JjYzrV60UaaxCjCCQpn3e7szz84L1pL
+         0AO9L/U5yyexw8sNwRPK19filo6FtO4bU7B7pvs8QcMjQLUfdAPpb7ARdU7fIIwoC5JR
+         XqEw==
+X-Gm-Message-State: AOAM533beN40/u3c1xFL8qaWF+xwIenDfHa/AM0H0Hqc/hbadHTwEDIW
+        L3bg0gUvp0t67GpVNula3TC8MkDKgMIRkoVmSUZcng==
+X-Google-Smtp-Source: ABdhPJxy/8lfE+WWmK9cypiL6fx/Xc5LX8PSSehEJwhnWoXNJqHnm6TstUokNOEm6UeTIjZ2qTAxSuM7EQsHKF1Vq7I=
 X-Received: by 2002:a05:651c:201b:b0:246:34b5:155e with SMTP id
- s27-20020a05651c201b00b0024634b5155emr18803688ljo.273.1646216600403; Wed, 02
- Mar 2022 02:23:20 -0800 (PST)
+ s27-20020a05651c201b00b0024634b5155emr18829620ljo.273.1646217265345; Wed, 02
+ Mar 2022 02:34:25 -0800 (PST)
 MIME-Version: 1.0
-References: <20220228223642.1136229-1-pgwipeout@gmail.com> <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
- <CAMdYzYq0A4FitRGe49fxvjbwLUCi_KGwCtfz7pmayt_dK=r32w@mail.gmail.com>
- <54b24f3d-3762-abbd-5ac4-dc5728f2fe4e@arm.com> <CAMdYzYp=Po08pap9w5s8PV0mKfFZSPSOhM1U1AUdrRkYV-FRZQ@mail.gmail.com>
- <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
-In-Reply-To: <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
+References: <20220301115300.64332-1-ulf.hansson@linaro.org> <Yh6PjZ9/HAiyZ09M@kroah.com>
+In-Reply-To: <Yh6PjZ9/HAiyZ09M@kroah.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Mar 2022 11:22:44 +0100
-Message-ID: <CAPDyKFqYWK9WnzHsM1vwnUBRM1YofjMd9+9-MPZvvs=1K=51bg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
-To:     Peter Geis <pgwipeout@gmail.com>
-Cc:     Robin Murphy <robin.murphy@arm.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
-        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Wed, 2 Mar 2022 11:33:49 +0100
+Message-ID: <CAPDyKFrWHvK2+o8vg27v2NWRe0JZ3vTk111djpM2fJ8X3Oqgtg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: rtsx: Fix build errors/warnings for unused variable
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 1 Mar 2022 at 15:49, Peter Geis <pgwipeout@gmail.com> wrote:
+On Tue, 1 Mar 2022 at 22:26, Greg Kroah-Hartman
+<gregkh@linuxfoundation.org> wrote:
 >
-> On Tue, Mar 1, 2022 at 7:46 AM Peter Geis <pgwipeout@gmail.com> wrote:
+> On Tue, Mar 01, 2022 at 12:53:00PM +0100, Ulf Hansson wrote:
+> > The struct device *dev, is no longer needed at various functions, let's
+> > therefore drop it to fix the build errors/warnings.
 > >
-> > On Tue, Mar 1, 2022 at 7:38 AM Robin Murphy <robin.murphy@arm.com> wrote:
-> > >
-> > > On 2022-03-01 11:49, Peter Geis wrote:
-> > > > On Tue, Mar 1, 2022 at 6:23 AM Robin Murphy <robin.murphy@arm.com> wrote:
-> > > >>
-> > > >> On 2022-02-28 22:36, Peter Geis wrote:
-> > > >>> The dw_mmc-rockchip driver drops a large amound of logspam constantly
-> > > >>> when the cd-broken flag is enabled.
-> > > >>> Set the warning to be debug ratelimited in this case.
-> > > >>
-> > > >> Isn't this just papering over some fundamental problem with the clock?
-> > > >> If it's failing to set the expected rate for communicating with a card,
-> > > >> then presumably that's an issue for correct operation in general? The
-> > > >> fact that polling for a card makes a lot more of that communication
-> > > >> happen seems unrelated :/
-> > > >
-> > > > Good Morning,
-> > > >
-> > > > This only happens when a card is not inserted, so communication cannot happen.
-> > >
-> > > Well, I suppose there's a philosophical question in there about whether
-> > > shouting into the void counts as "communication", but AFAIR what the
-> > > polling function does is power up the controller, send a command, and
-> > > see if it gets a response.
-> > >
-> > > If the clock can't be set to the proper rate for low-speed discovery,
-> > > some or all cards may not be detected properly. Conversely if it is
-> > > already at a slow enough rate for discovery but can't be set higher once
-> > > a proper communication mode has been established, data transfer
-> > > performance will be terrible. Either way, it is not OK in general for
-> > > clk_set_rate() to fail, hence the warning. You have a clock driver problem.
-> >
-> > Alright, I'll look into this.
-> > It seems only extremely low clock speeds fail and I know rockchip
-> > chips have a hard time with extremely low clock rates.
-> > I'll trace out where the failure is happening.
+> > Cc: Kai-Heng Feng <kai.heng.feng@canonical.com>
+> > Fixes: 7570fb41e450 ("mmc: rtsx: Let MMC core handle runtime PM"
 >
-> Okay, I hope you can provide me a direction to go from here, because
-> it looks like it's doing exactly what it should do in this situation.
-> mmc core is requesting a rate (200k/100k).
-> clk core tries to find a parent to provide a clock that low and fails,
-> because the lowest possible parent is 750k.
-> clk_sdmmc(x) is listed as no-div, so it can't go any lower.
+> Forgot the trailing ')' character :(
+
+Ohh, checkpatch should have spotted that, I thought.
+
+Anyway, sorry and thanks for fixing!
+
 >
-> It seems to me that this error is sane, because other results of
-> einval you want to catch.
-> But einval in this case is fine, because
-> The thing that strikes me weird is currently clk_core thinks the
-> lowest possible freq here is 0, when in actuality it should be 750k,
-> am I correct here?
-> The mmc controller has an internal divider, so if my line of thinking
-> is correct here we should be more flexible here and request a rate
-> that's acceptable rather than just failing if it doesn't work.
-> But that's based on my limited understanding of how mmc core is
-> requesting this and what it expects in return.
-
-The important point from the eMMC/SD/SDIO spec point of view, is that
-the initialization of the cards starts at a maximum of 400KHz for the
-bus interface clock.
-
-In many cases, that requires a combination of the provided source
-clock for the mmc controller to be decreased with some kind of an
-internal divider managed by the controller itself.
-
-Moreover, the mmc host driver shall set mmc->f_min in its
-corresponding struct mmc_host during ->probe(), to inform the core
-about its lowest possible rate that can be set - and this must not be
-higher than 400KHz.
-
-Hope that clarifies how things should work.
-
-[...]
+> I've fixed this up and ignored the obviously incorrect kbuild
+> warnings...
+>
+> thanks,
+>
+> greg k-h
 
 Kind regards
 Uffe
