@@ -2,192 +2,211 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFE8EC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 11:34:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D3B2C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 11:46:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240717AbiCBLfe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Mar 2022 06:35:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45386 "EHLO
+        id S236041AbiCBLrM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Mar 2022 06:47:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39486 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239895AbiCBLfd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 06:35:33 -0500
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF52299694
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 03:34:50 -0800 (PST)
-Received: by mail-lj1-x22a.google.com with SMTP id l12so1801982ljh.12
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 03:34:50 -0800 (PST)
+        with ESMTP id S239032AbiCBLrK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 06:47:10 -0500
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B14A5AC915
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 03:46:25 -0800 (PST)
+Received: by mail-lf1-x133.google.com with SMTP id g39so2294510lfv.10
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 03:46:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Jk/kyV1GLxWOeF6Q9fh0NKxfKT7911e8jRHc7/h85W8=;
-        b=pyLW304YtYPCtMvRo2/e1WNmsRPQvhp2e1XDgqMPZlRnwdOc6UJufV599LDH1IXlKZ
-         BfE0B7r8teLF1tIoJshUoYVOOzKG/oK6uyOLRm/WZ4Z49/VVQK/G680A8ADN3P6vXS8V
-         0SMgE2WqihcpiU14qL/wFXteGveVRQ6U6EMXY0Sd7j4r90SLkEFtw3DtjDMvdvCcduVg
-         jEsrJX8p9iuemmRkcsZAEtTln9noZl3eLaX88r4RPyoof28AR1yxg7oCH+6m14Jfek12
-         2ldG2moeAgKrMhkGzLYmqSOrjbZMMKDUXjSM1cPjdid0x9sYUjqdte6e02gxvfsG7LxA
-         kFxw==
+        bh=Lc6+sFLH4xgHpUfpAkTWrsxSemAv/j1QkEWdwDqUEeo=;
+        b=rWAUr8KkXUHG5RY6SBczeSb9azLIJEyGi92k21TcCreY01VxIChitbz3qG4MU9dZr0
+         bGEcYijFMW5qjwMcoONcN3mJa3wy5bXNgo6+967xaSTewvJmGldP2BAieMxji3BSpI6k
+         ba4/q4AXnWwmw0l245cxJwVmc1ChwG1Ijb7r6R+IFXHatiHjz4r/RMCZsdtpjpb+KMsw
+         nIL7Hl4MnIxNW0mDBYOM8OWmRT+c09kgKLXHqtwj5LagPsFKs/Au6Vot4xhv5avljpub
+         Uv3JmyjEOmzie2DSyTZf90vQfwN+XN4Rt8zj1iQbm9PUP/6WWrqBsjInfxTUVJWmKkSw
+         z8vA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Jk/kyV1GLxWOeF6Q9fh0NKxfKT7911e8jRHc7/h85W8=;
-        b=bHoigZztQG+jsAXvqXSIAMeH9MrUL5SfYJvh3T0SQ8aeEK+TV09oJJ5ffu7iM5BUSd
-         myM5e7kSTWX+cVp7mdxLS3WzqayyHHTFlYfWj6e3uACc3sFyzkaYbrNcj9sEQpAOvH94
-         ePOHuRB35ndhwHkJgLxihJ7zq3tVRLw4bktdLyDfqpWL5b2q1JICFvoswQWXIV41LUq4
-         yLtEPn1KgBQw8DXIGOe8gr6T7XIM1BqYJHSBYVsOL/g0X1rxbU/e6vUOekF/80ZJCEyp
-         NaCEjZBvpePbK5AYlKBoSlLonRVNQHJnvsftHL36grSrQF1G6Yq3IH/J0jIV9jAayE6E
-         fiLQ==
-X-Gm-Message-State: AOAM530PJ43zTq4X1xXGIH3rCXZO2Q3fATFEi9qsd3Kb1gcLmI4jlbpU
-        m0M41PQ0/OLSVsM1jO9AzbhDYuY+cNfaXKhAJHJFCrEyCsU=
-X-Google-Smtp-Source: ABdhPJz6V1qwnDI6lZX9QgPe+WFHQPCPir7L0W08RpKrIxDAoCdDoWNUsQw7hLQyKs5Va9bM6ldL5n0zYBJ1B4A7LZs=
-X-Received: by 2002:a2e:9c94:0:b0:233:82df:a3b8 with SMTP id
- x20-20020a2e9c94000000b0023382dfa3b8mr20356385lji.229.1646220889153; Wed, 02
- Mar 2022 03:34:49 -0800 (PST)
+        bh=Lc6+sFLH4xgHpUfpAkTWrsxSemAv/j1QkEWdwDqUEeo=;
+        b=IXBLpyPkbPMAAg9XkPHqqvRfyKluP3QE2+iX0j45AkbODULQMaGWGyhBlW4hPgKpsw
+         O51WhjG+jtDnfRHNwuwAhNSg0gPi71rSyMD9r61klSs1e7fIpj6wQPZ3g0nWkYP4DwYw
+         hEuzO+JqbnQ0hf92AZvd5iB0MHEUDCX/Iq5xhpabQVq2e7LF4+4osiaKaQLbBrkH6ffJ
+         wlNRS89+beWOLkvbZ+coCXdaXAYGNZe2ttlk9Po2qWadIh/KpFMON059dMrNOebG+Nye
+         OQt/0/ROqc7QuYDk7oQFiVdOjW+7Rb+umovbBZtZmEKScVCQBm5wtUFOEPu8YsE3nDG1
+         LkYg==
+X-Gm-Message-State: AOAM532rW2A1hCI20smylLY0GJLv8R65MjW/BMJLubDmyBkQJm3ODVsK
+        ZZ3c4nNnQhxNS46hOCrHOmMxk86Q5lOOrIueCgwApQ==
+X-Google-Smtp-Source: ABdhPJw2DdnCG5o0Y7GjgeTud67zBTcDtQAwPjNtvYX1CcxMGtJbrcbmH7J7HcvSVfqcdfIJ8Ve49YJlO8jq7j6HCSU=
+X-Received: by 2002:a19:2d11:0:b0:445:65c7:5f1e with SMTP id
+ k17-20020a192d11000000b0044565c75f1emr18221775lfj.184.1646221584059; Wed, 02
+ Mar 2022 03:46:24 -0800 (PST)
 MIME-Version: 1.0
-References: <1badf10aba764191a1a752edcbf90389@realtek.com>
-In-Reply-To: <1badf10aba764191a1a752edcbf90389@realtek.com>
+References: <1646117728-28085-1-git-send-email-quic_c_sbhanu@quicinc.com>
+In-Reply-To: <1646117728-28085-1-git-send-email-quic_c_sbhanu@quicinc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Mar 2022 12:34:12 +0100
-Message-ID: <CAPDyKFoa6d8_8VXp1QcTguuq3d9kX=g8H3yJo-ZJmF9neE_JKQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: rtsx: add 74 Clocks in power on flow
-To:     Ricky WU <ricky_wu@realtek.com>
-Cc:     "tommyhebb@gmail.com" <tommyhebb@gmail.com>,
-        "kai.heng.feng@canonical.com" <kai.heng.feng@canonical.com>,
-        "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Date:   Wed, 2 Mar 2022 12:45:47 +0100
+Message-ID: <CAPDyKFpmR35dZj5VGPdKOp58VanUL7it3buN9yAvF+ObiSb32A@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Cc:     adrian.hunter@intel.com, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, sayalil@codeaurora.org,
+        cang@codeaurora.org, rampraka@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2 Mar 2022 at 10:43, Ricky WU <ricky_wu@realtek.com> wrote:
+On Tue, 1 Mar 2022 at 07:55, Shaik Sajida Bhanu
+<quic_c_sbhanu@quicinc.com> wrote:
 >
-> SD spec definition:
-> "Host provides at least 74 Clocks before issuing first command"
-> After 1ms for the voltage stable then start issuing the Clock signals
+> Reset GCC_SDCC_BCR register before every fresh initilazation. This will
+> reset whole SDHC-msm controller, clears the previous power control
+> states and avoids, software reset timeout issues as below.
 >
-> if POWER STATE is
-> MMC_POWER_OFF to MMC_POWER_UP to issue Clock signal to card
-> MMC_POWER_UP to MMC_POWER_ON to stop issuing signal to card
+> [ 5.458061][ T262] mmc1: Reset 0x1 never completed.
+> [ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP
+> ===========
+> [ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version:
+> 0x00007202
+> [ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt:
+> 0x00000000
+> [ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode:
+> 0x00000000
+> [ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl:
+> 0x00000000
+> [ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
+> [ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
+> [ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat:
+> 0x00000000
+> [ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab:
+> 0x00000000
+> [ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int:
+> 0x00000000
+> [ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
+> [ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+> [ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]:
+> 0x00000000
+> [ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]:
+> 0x00000000
+> [ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
+> [ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER
+> DUMP-----------
+> [ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+> 0x6000642c |
+> DLL cfg2: 0x0020a000
+> [ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+> 0x00010800 | DDR cfg: 0x80040873
+> [ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 :
+> 0xf88218a8 Vndr func3: 0x02626040
 >
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
+> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 
-Applied for next, thanks!
+If this is this a regression, then please try to add a fixes tag too.
 
-Greg, I verified that this shouldn't conflict with the changes you
-have picked up already for the rtsx mmc driver.
+I assume we should tag this for stable kernels?
+
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 48 ++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 48 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 50c71e0..f10b3c7 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/interconnect.h>
+>  #include <linux/pinctrl/consumer.h>
+> +#include <linux/reset.h>
+>
+>  #include "sdhci-pltfm.h"
+>  #include "cqhci.h"
+> @@ -284,6 +285,7 @@ struct sdhci_msm_host {
+>         bool uses_tassadar_dll;
+>         u32 dll_config;
+>         u32 ddr_config;
+> +       struct reset_control *core_reset;
+>         bool vqmmc_enabled;
+>  };
+>
+> @@ -2482,6 +2484,45 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
+>         of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
+>  }
+>
+> +static int sdhci_msm_gcc_reset(struct platform_device *pdev,
+> +              struct sdhci_host *host)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +       int ret = 0;
+> +
+> +       msm_host->core_reset = devm_reset_control_get(&pdev->dev, "core_reset");
+> +       if (IS_ERR(msm_host->core_reset)) {
+> +               ret = PTR_ERR(msm_host->core_reset);
+> +               dev_err(&pdev->dev, "core_reset unavailable (%d)\n", ret);
+> +               msm_host->core_reset = NULL;
+
+Looks like we should use devm_reset_control_get_optional_exclusive() instead.
+
+> +       }
+> +       if (msm_host->core_reset) {
+> +               ret = reset_control_assert(msm_host->core_reset);
+> +               if (ret) {
+> +                       dev_err(&pdev->dev, "core_reset assert failed (%d)\n",
+> +                                               ret);
+> +                       goto out;
+> +               }
+> +               /*
+> +                * The hardware requirement for delay between assert/deassert
+> +                * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
+> +                * ~125us (4/32768). To be on the safe side add 200us delay.
+> +                */
+> +               usleep_range(200, 210);
+
+Isn't this supposed to be taken care of by the reset driver?
+
+Or is this more an mmc controller specific thing? In that case, could
+this delay vary, depending on the variant of the controller?
+
+> +
+> +               ret = reset_control_deassert(msm_host->core_reset);
+> +               if (ret) {
+> +                       dev_err(&pdev->dev, "core_reset deassert failed (%d)\n",
+> +                                               ret);
+> +                       goto out;
+> +               }
+> +               usleep_range(200, 210);
+
+Ditto?
+
+> +       }
+> +
+> +out:
+> +       return ret;
+> +}
+>
+>  static int sdhci_msm_probe(struct platform_device *pdev)
+>  {
+> @@ -2529,6 +2570,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>
+>         msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+>
+> +       ret = sdhci_msm_gcc_reset(pdev, host);
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "core_reset assert/deassert failed (%d)\n",
+> +                                       ret);
+> +               goto pltfm_free;
+> +       }
+> +
+>         /* Setup SDCC bus voter clock. */
+>         msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+>         if (!IS_ERR(msm_host->bus_clk)) {
 
 Kind regards
 Uffe
-
-> ---
-> v2:
-> modify commit message
-> move mdelay(5) to host->power_delay_ms
-> replace host->power_state with host->prev_power_state
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 29 +++++++++++++++++++----------
->  1 file changed, 19 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 2a3f14afe9f8..d26803d3f4ca 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -38,10 +38,7 @@ struct realtek_pci_sdmmc {
->         bool                    double_clk;
->         bool                    eject;
->         bool                    initial_mode;
-> -       int                     power_state;
-> -#define SDMMC_POWER_ON         1
-> -#define SDMMC_POWER_OFF                0
-> -
-> +       int                     prev_power_state;
->         int                     sg_count;
->         s32                     cookie;
->         int                     cookie_sg_count;
-> @@ -909,7 +906,7 @@ static int sd_set_bus_width(struct realtek_pci_sdmmc *host,
->         return err;
->  }
->
-> -static int sd_power_on(struct realtek_pci_sdmmc *host)
-> +static int sd_power_on(struct realtek_pci_sdmmc *host, unsigned char power_mode)
->  {
->         struct rtsx_pcr *pcr = host->pcr;
->         struct mmc_host *mmc = host->mmc;
-> @@ -917,9 +914,14 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
->         u32 val;
->         u8 test_mode;
->
-> -       if (host->power_state == SDMMC_POWER_ON)
-> +       if (host->prev_power_state == MMC_POWER_ON)
->                 return 0;
->
-> +       if (host->prev_power_state == MMC_POWER_UP) {
-> +               rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, 0);
-> +               goto finish;
-> +       }
-> +
->         msleep(100);
->
->         rtsx_pci_init_cmd(pcr);
-> @@ -940,10 +942,15 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
->         if (err < 0)
->                 return err;
->
-> +       mdelay(1);
-> +
->         err = rtsx_pci_write_register(pcr, CARD_OE, SD_OUTPUT_EN, SD_OUTPUT_EN);
->         if (err < 0)
->                 return err;
->
-> +       /* send at least 74 clocks */
-> +       rtsx_pci_write_register(pcr, SD_BUS_STAT, SD_CLK_TOGGLE_EN, SD_CLK_TOGGLE_EN);
-> +
->         if (PCI_PID(pcr) == PID_5261) {
->                 /*
->                  * If test mode is set switch to SD Express mandatorily,
-> @@ -968,7 +975,8 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
->                 }
->         }
->
-> -       host->power_state = SDMMC_POWER_ON;
-> +finish:
-> +       host->prev_power_state = power_mode;
->         return 0;
->  }
->
-> @@ -977,7 +985,7 @@ static int sd_power_off(struct realtek_pci_sdmmc *host)
->         struct rtsx_pcr *pcr = host->pcr;
->         int err;
->
-> -       host->power_state = SDMMC_POWER_OFF;
-> +       host->prev_power_state = MMC_POWER_OFF;
->
->         rtsx_pci_init_cmd(pcr);
->
-> @@ -1003,7 +1011,7 @@ static int sd_set_power_mode(struct realtek_pci_sdmmc *host,
->         if (power_mode == MMC_POWER_OFF)
->                 err = sd_power_off(host);
->         else
-> -               err = sd_power_on(host);
-> +               err = sd_power_on(host, power_mode);
->
->         return err;
->  }
-> @@ -1506,10 +1514,11 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
->
->         host = mmc_priv(mmc);
->         host->pcr = pcr;
-> +       mmc->ios.power_delay_ms = 5;
->         host->mmc = mmc;
->         host->pdev = pdev;
->         host->cookie = -1;
-> -       host->power_state = SDMMC_POWER_OFF;
-> +       host->prev_power_state = MMC_POWER_OFF;
->         INIT_WORK(&host->work, sd_request);
->         platform_set_drvdata(pdev, host);
->         pcr->slots[RTSX_SD_CARD].p_dev = pdev;
-> --
-> 2.25.1
