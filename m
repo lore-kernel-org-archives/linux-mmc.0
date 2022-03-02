@@ -2,187 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 570C1C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 10:04:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB579C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 10:23:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240849AbiCBKFU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Mar 2022 05:05:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42986 "EHLO
+        id S236820AbiCBKYG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Mar 2022 05:24:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240836AbiCBKFS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 05:05:18 -0500
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E8A860ABF
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 02:04:31 -0800 (PST)
-Received: by mail-lf1-x12f.google.com with SMTP id i11so1881402lfu.3
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 02:04:30 -0800 (PST)
+        with ESMTP id S231748AbiCBKYF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 05:24:05 -0500
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 111A7AC918
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 02:23:22 -0800 (PST)
+Received: by mail-lj1-x229.google.com with SMTP id e8so1601170ljj.2
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 02:23:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=fGGCf1t6KZ4yLzYm6kfjSleskg8fXftKyp2MSN7X+GI=;
-        b=ot2WEYDUyrXvO7hA2eL1i2/jsYoH1NiwUJRmIqd7iM7OzIhxKOdDc3z+bUpeE6Mwvu
-         gDwaBBwuCAvsKGIO41fxyH2PYCuq8/mPJVORAXR0EcjOuy6yBdj7PxpxWhZTJ6gRWewt
-         +MkatMJ79g7HEwG5I5YlE86W+X1j7RlQ14ZIoz57AkS7IXEdK5TOy+JPp+uJOrsGSe5/
-         L3X2BeYfIu0auAfBa5WAS2tE9MdrRccrsdbViDpY9uBJDJqqTXlFEkGemPMnETKnXayH
-         wW+skD5ErSKl5XzbFJep1NAuKQlsOKOoE1pLJMj0VA4t5RKU/3XOKQFr1HUWDRhD/afQ
-         HkQg==
+        bh=9tjY3EnNamNFx1y3oddYNE+8HtUaH9EZY+luGZxUhsM=;
+        b=mnACc6XQaE5xdOpPVbWeU0j4lqYfqsAhH0pnsiQ4s+1ZtVjntpL/OwJLMrmI7Sytrc
+         3tRtsEdE5mIug5N/dLj9wICfoEUbgNXaTnVTJzTbN/TkNBEuoYsBjmpPXQhSJ/Zw98oK
+         eakd9g9hwgta4vGWdNpsV6UQ/1ds7PYgJFpX8Ixx4BsbfdOrslso9neJdZOh8o+Zx0OP
+         hqtdM8INXeh0EMeBV7tNYMtDgmHyl8xBrjCR2OJqPBJaeUv9a76kEZQ5oae3z5q9mD8M
+         oPrJbl/dzH5LDyF/lhbY1pMfpYZ6RT1A7fixM7PSNAHPA76l8HsURnbmHIjlGSJGN6Tt
+         K8tg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=fGGCf1t6KZ4yLzYm6kfjSleskg8fXftKyp2MSN7X+GI=;
-        b=dgjleX64P4dtEG7MyBZU0KMbEy+chlf22U/HEuraSiq0fLsA7HCYe8qnZsbL0bUGon
-         34C6/kkE0JMtW8FLAjRnGFAtjxKYcMH0Zu4va99u61QhGhX8ktG3Kv4NRDunhcgXqKkb
-         eEPbOira6IowJNygwet8E6u5EndUQz1qCd+E2LUtkpSkjxwo+LOga4Ny92DNHafTPd42
-         yZPPb7oiQ/uRfrzy8fCQ1o+BqEedCS11SpwoLA3gzYWZNz6th7TIS3JPmZ78oDp9V13u
-         mIyrX/AxAHVmLDsmU9mpwIBrcyGknBkKhCiWv8XUxTSjenbpbY9hTNLmK+bnbhAqG0SW
-         gczw==
-X-Gm-Message-State: AOAM533HkPDV96+QNPuqTQ5/WG03HGJg9pNzg6M3J2nFpEa023/l6U+S
-        FsZeWh5Br+LrpuW8cmjwB6oaItrwcvg3wYcFN6QoaQ==
-X-Google-Smtp-Source: ABdhPJyOa+dkkdCyPw8mxpIDiJcZ9NHeddBdPoHR2YLCv4wxRM0ahl8Avuguw3KZnyb306cdXQGjOYvuG6f5hnImFKE=
-X-Received: by 2002:a19:9144:0:b0:43b:86a4:1497 with SMTP id
- y4-20020a199144000000b0043b86a41497mr18201622lfj.254.1646215469277; Wed, 02
- Mar 2022 02:04:29 -0800 (PST)
+        bh=9tjY3EnNamNFx1y3oddYNE+8HtUaH9EZY+luGZxUhsM=;
+        b=vscbG7ri/JQTU5YKxnXd3w0zQS/2y8fODBy0sRyVVj/CiffbBSHNIqLUwnDD1hh7UZ
+         OHMtOm44a4HgN3LcBwRABaZ+miOxn5/0PJtaU3xlo1XzFzBPcig3x/OyYModmejdnDto
+         eybFnX/wNgXcv1IL/xUMZ2+gMP3Qx0YdK8yZ6L8TTGuI2VmAeeLhy8u7OtneFdcN0I47
+         BFuwmRJ++JuIoZqDhAhqah9Qcr78dQxhyWF89qeihyvAVD+uLfw9bCXP8Ke/XOaD7Y3d
+         Ozm0UjY3wUk/UQUGsliitXP74JQMnAnjVy6/j+ajAAql1hAAcc78pzqidvBSImkDE9ac
+         yQaA==
+X-Gm-Message-State: AOAM530wWa30TOxJwphaKjkxBmJaQ8+WFb3T6VUeM8/w4rasMdZgyLgO
+        rtV8oFWBjVkxIAQ0Ip4vYyVeXRv8MS0p+dMJ2tmhBg==
+X-Google-Smtp-Source: ABdhPJx6nuXDD4MZhP/3f28Fey4JB+n8W3ScZ0gwTpP8FwMhxThtjLQlKJCOe42eXVCgQa5QoPE3HwhN4Gy4WpG9dkU=
+X-Received: by 2002:a05:651c:201b:b0:246:34b5:155e with SMTP id
+ s27-20020a05651c201b00b0024634b5155emr18803688ljo.273.1646216600403; Wed, 02
+ Mar 2022 02:23:20 -0800 (PST)
 MIME-Version: 1.0
-References: <20220225125553.1185108-1-benchuanggli@gmail.com>
- <20220225125553.1185108-2-benchuanggli@gmail.com> <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
- <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com> <CACT4zj9AxpOuDn-1fFAgY7Y-X_w+OHisASpa6tUBHQZuSExjFQ@mail.gmail.com>
-In-Reply-To: <CACT4zj9AxpOuDn-1fFAgY7Y-X_w+OHisASpa6tUBHQZuSExjFQ@mail.gmail.com>
+References: <20220228223642.1136229-1-pgwipeout@gmail.com> <c12e74b7-0bef-ac7a-20c1-2a17ddd050dd@arm.com>
+ <CAMdYzYq0A4FitRGe49fxvjbwLUCi_KGwCtfz7pmayt_dK=r32w@mail.gmail.com>
+ <54b24f3d-3762-abbd-5ac4-dc5728f2fe4e@arm.com> <CAMdYzYp=Po08pap9w5s8PV0mKfFZSPSOhM1U1AUdrRkYV-FRZQ@mail.gmail.com>
+ <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
+In-Reply-To: <CAMdYzYoF6eO3mBZD=PtOPL3atdA3kH4UzV++6wB0pirW-7h_9A@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Mar 2022 11:03:52 +0100
-Message-ID: <CAPDyKFp-XrLOSUAbsW5JGNCs6aO8Gp1YgmkqiwVpN5byO1XXCQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
-To:     Ben Chuang <benchuanggli@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        greg.tu@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        SeanHY.Chen@genesyslogic.com.tw,
-        Kevin Chang <kevin.chang@lcfuturecenter.com>
+Date:   Wed, 2 Mar 2022 11:22:44 +0100
+Message-ID: <CAPDyKFqYWK9WnzHsM1vwnUBRM1YofjMd9+9-MPZvvs=1K=51bg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: avoid logspam when cd-broken
+To:     Peter Geis <pgwipeout@gmail.com>
+Cc:     Robin Murphy <robin.murphy@arm.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
+        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2 Mar 2022 at 03:10, Ben Chuang <benchuanggli@gmail.com> wrote:
+On Tue, 1 Mar 2022 at 15:49, Peter Geis <pgwipeout@gmail.com> wrote:
 >
-> Hi,
->
-> On Tue, Mar 1, 2022 at 6:05 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On Tue, Mar 1, 2022 at 7:46 AM Peter Geis <pgwipeout@gmail.com> wrote:
 > >
-> > On 28/02/2022 19:03, Ulf Hansson wrote:
-> > > On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
-> > >>
-> > >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > >>
-> > >> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
-> > >> gated of upstream port can be enabled.
-> > >>
-> > >> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > >> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
-> > >> ---
-> > >>  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
-> > >>  1 file changed, 54 insertions(+)
-> > >>
-> > >> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> > >> index 97035d77c18c..cf99b6af792d 100644
-> > >> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > >> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > >> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
-> > >>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> > >>  }
-> > >>
-> > >> +#ifdef CONFIG_PM
-> > >> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
-> > >> +{
-> > >> +       struct sdhci_pci_slot *slot = chip->slots[0];
-> > >> +       struct sdhci_host *host = slot->host;
-> > >> +       u16 clock;
-> > >> +
-> > >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > >> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
-> > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> > >> +
-> > >> +       return 0;
-> > >> +}
-> > >> +
-> > >> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
-> > >> +{
-> > >> +       struct sdhci_pci_slot *slot = chip->slots[0];
-> > >> +       struct sdhci_host *host = slot->host;
-> > >> +       ktime_t timeout;
-> > >> +       u16 clock;
-> > >> +
-> > >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > >> +
-> > >> +       clock |= SDHCI_CLOCK_PLL_EN;
-> > >> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
-> > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> > >> +
-> > >> +       timeout = ktime_add_ms(ktime_get(), 150);
-> > >> +       while (1) {
-> > >> +               bool timedout = ktime_after(ktime_get(), timeout);
-> > >> +
-> > >> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > >> +               if (clock & SDHCI_CLOCK_INT_STABLE)
-> > >> +                       break;
-> > >> +               if (timedout) {
-> > >> +                       pr_err("%s: PLL clock never stabilised.\n",
-> > >> +                              mmc_hostname(host->mmc));
-> > >> +                       sdhci_dumpregs(host);
-> > >> +                       break;
-> > >> +               }
-> > >> +               udelay(10);
-> > >> +       }
-> >
-> > Could use something like read_poll_timeout() here e.g.
-> >
-> >         if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
-> >                               1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
-> >                 pr_err("%s: PLL clock never stabilised.\n",
-> >                        mmc_hostname(host->mmc));
-> >                 sdhci_dumpregs(host);
-> >         }
-> >
-> >
->
-> Thanks for the tip. I will prepare the next patch.
->
-> > >> +       clock |= SDHCI_CLOCK_CARD_EN;
-> > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> > >> +
-> > >> +       return 0;
-> > >> +}
+> > On Tue, Mar 1, 2022 at 7:38 AM Robin Murphy <robin.murphy@arm.com> wrote:
 > > >
-> > > Both functions above look very similar to what sdhci_set_clock() does.
-> > > Can you use that, rather than open coding the above?
+> > > On 2022-03-01 11:49, Peter Geis wrote:
+> > > > On Tue, Mar 1, 2022 at 6:23 AM Robin Murphy <robin.murphy@arm.com> wrote:
+> > > >>
+> > > >> On 2022-02-28 22:36, Peter Geis wrote:
+> > > >>> The dw_mmc-rockchip driver drops a large amound of logspam constantly
+> > > >>> when the cd-broken flag is enabled.
+> > > >>> Set the warning to be debug ratelimited in this case.
+> > > >>
+> > > >> Isn't this just papering over some fundamental problem with the clock?
+> > > >> If it's failing to set the expected rate for communicating with a card,
+> > > >> then presumably that's an issue for correct operation in general? The
+> > > >> fact that polling for a card makes a lot more of that communication
+> > > >> happen seems unrelated :/
+> > > >
+> > > > Good Morning,
+> > > >
+> > > > This only happens when a card is not inserted, so communication cannot happen.
 > > >
->
-> The codes turn on/off the clock but it doesn't change the clock.
-> Using sdhci_set_clock()  needs to store the clock value because it
-> clears the clock.
-
-Well, in that case at least you can call sdhci_enable_clk() from
-gl9763e_runtime_resume(), rather than open coding it (the code looks
-like a direct copy of that code). All you need is to give the
-sdhci_enable_clk() the correct "clk" as in-parameter.
-
->
-> > > Other than that, I would appreciate it if Adrian could have a look at
-> > > this too. For example, I wonder if perhaps
-> > > sdhci_runtime_suspend|resume_host() should be called in these paths
-> > > too.
+> > > Well, I suppose there's a philosophical question in there about whether
+> > > shouting into the void counts as "communication", but AFAIR what the
+> > > polling function does is power up the controller, send a command, and
+> > > see if it gets a response.
+> > >
+> > > If the clock can't be set to the proper rate for low-speed discovery,
+> > > some or all cards may not be detected properly. Conversely if it is
+> > > already at a slow enough rate for discovery but can't be set higher once
+> > > a proper communication mode has been established, data transfer
+> > > performance will be terrible. Either way, it is not OK in general for
+> > > clk_set_rate() to fail, hence the warning. You have a clock driver problem.
 > >
-> > Assuming the host controller does not lose state information, it should be fine.
-> >
+> > Alright, I'll look into this.
+> > It seems only extremely low clock speeds fail and I know rockchip
+> > chips have a hard time with extremely low clock rates.
+> > I'll trace out where the failure is happening.
 >
-> Yes, the host always has aux. power and keep state.
+> Okay, I hope you can provide me a direction to go from here, because
+> it looks like it's doing exactly what it should do in this situation.
+> mmc core is requesting a rate (200k/100k).
+> clk core tries to find a parent to provide a clock that low and fails,
+> because the lowest possible parent is 750k.
+> clk_sdmmc(x) is listed as no-div, so it can't go any lower.
 >
-> Thank you both for your comments.
+> It seems to me that this error is sane, because other results of
+> einval you want to catch.
+> But einval in this case is fine, because
+> The thing that strikes me weird is currently clk_core thinks the
+> lowest possible freq here is 0, when in actuality it should be 750k,
+> am I correct here?
+> The mmc controller has an internal divider, so if my line of thinking
+> is correct here we should be more flexible here and request a rate
+> that's acceptable rather than just failing if it doesn't work.
+> But that's based on my limited understanding of how mmc core is
+> requesting this and what it expects in return.
 
-Okay, thanks for confirming!
+The important point from the eMMC/SD/SDIO spec point of view, is that
+the initialization of the cards starts at a maximum of 400KHz for the
+bus interface clock.
+
+In many cases, that requires a combination of the provided source
+clock for the mmc controller to be decreased with some kind of an
+internal divider managed by the controller itself.
+
+Moreover, the mmc host driver shall set mmc->f_min in its
+corresponding struct mmc_host during ->probe(), to inform the core
+about its lowest possible rate that can be set - and this must not be
+higher than 400KHz.
+
+Hope that clarifies how things should work.
 
 [...]
 
