@@ -2,138 +2,199 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F292C43217
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 13:04:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6CBFC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 16:32:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242056AbiCBNFB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Mar 2022 08:05:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38950 "EHLO
+        id S237188AbiCBQdI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Mar 2022 11:33:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38330 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242044AbiCBNE7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 08:04:59 -0500
-Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47020C2483;
-        Wed,  2 Mar 2022 05:04:16 -0800 (PST)
+        with ESMTP id S242225AbiCBQcz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 11:32:55 -0500
+Received: from mail-yw1-x1131.google.com (mail-yw1-x1131.google.com [IPv6:2607:f8b0:4864:20::1131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50107CD5C2
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 08:32:11 -0800 (PST)
+Received: by mail-yw1-x1131.google.com with SMTP id 00721157ae682-2dbd8777564so24550257b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 08:32:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1646226256; x=1677762256;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references;
-  bh=zRkmD/3/0Ciauk5yzlPVMvJbgpl1+ykhnwt0BbO+vNA=;
-  b=rsesroQ9HOmnLBiIjdqwcSobuBDd0OSvefEVU+IV7c4lh7jezOt1UI3a
-   fQtn+b8KCChIZMEN4WABEjpJ2iLpbGO6oXzbc6Fhv3IMxuqv4U6JqVbuF
-   y/xv8U9OhLpp0sd1KStxzA5Lg+OaV1K3QMOZa1EMzdZprIBNSydm0PM+t
-   Q=;
-Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
-  by alexa-out.qualcomm.com with ESMTP; 02 Mar 2022 05:04:16 -0800
-X-QCInternal: smtphost
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 02 Mar 2022 05:04:14 -0800
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 02 Mar 2022 18:33:52 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 39B36587B; Wed,  2 Mar 2022 18:33:51 +0530 (IST)
-From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-To:     adrian.hunter@intel.com, quic_riteshh@quicinc.com,
-        asutoshd@quicinc.com, ulf.hansson@linaro.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     quic_vbadigan@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Liangliang Lu <quic_luliang@quicinc.com>,
-        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V4 1/7] mmc: core: Capture eMMC and SD card errors
-Date:   Wed,  2 Mar 2022 18:33:41 +0530
-Message-Id: <1646226227-32429-2-git-send-email-quic_c_sbhanu@quicinc.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1646226227-32429-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1646226227-32429-1-git-send-email-quic_c_sbhanu@quicinc.com>
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=LO5WlNvmvZK+Oe3F8SgCWtBRKkuwTSqsf3nKZO8NpGw=;
+        b=rQ+xoLWBOrUuyyiRpsDclceteFY2IhtdY3S1QgAphXs7eZGBhLd7cqJOWgfohTuywI
+         6EtERWFWDRyGoCVOtYlaxp8MvdjrcUEp8Y2ETlw0L/o1L9kh644xH+DMZGJ4Fjv11kla
+         lmUdvoHa2QAxTShxhU76evBZUqKBsRHYgntNvBbF2xzbYqOp5/UtdcOAwHiRMpdwnZEH
+         HvpQdBSAWpBLOwKhr3NAU1H7eCTNvYh66GHVAyksh9YQmUIF/WJbCtMU32HNCezQFE2K
+         P60R4IKI3I8xGibc7EXp+012/DjlxAtFEjY0LOCaO2zB4uRM0d6bxrn2gLN69sZhJmnL
+         1qdw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=LO5WlNvmvZK+Oe3F8SgCWtBRKkuwTSqsf3nKZO8NpGw=;
+        b=KbN/FPwcwuU4xxqGxrW63dXfTfL5E1U4LdDXMrJ2aO6el3jqWxY+8K3oqurxFnpP5o
+         t5B4n0UsAz0XaJ5nqWX4aQRq+ZXPC9tP7sQGO/OxolZzUssfzEdnlmK3BDcQDz7WyyHg
+         6jhctuZtBMoQWVWj1Fmfzx1YFD/eEKPNFLuBy/hiNVh/E6eIHZrZGxK+UKYC4qSFRn+f
+         d/kAaNe8tt0Lo/eeKXpnK0VaiMSu/y/bV8wOGAlHHd0kq4ShDgcdiYZax+4jW1Yff+81
+         Dq2XTejIWQcs+6BKk2FHZkSGQ36fDGM/Bs/d6KpmbtDsjRWjdCv76wVTwr6OeNXsimmX
+         H48A==
+X-Gm-Message-State: AOAM5305xJ8BDpbNckVtmSLikbx22CONNYu8Kpk7NoXAqe8WZfRuo/Ul
+        nlzliNhe4XY1SHlROc+ysvPsJi2W3e/6xxPDq4WqV2lzkvCuHg==
+X-Google-Smtp-Source: ABdhPJy20CqTfg/b4Kwe/+MSKeEIl2hwemy2gJAakPTfyyyh1giylFzAN+jri1ofxNxyLIjhIrUI9y2yUAVa1c7Mua8=
+X-Received: by 2002:a81:188b:0:b0:2db:d9d0:d19 with SMTP id
+ 133-20020a81188b000000b002dbd9d00d19mr9728621ywy.309.1646238730504; Wed, 02
+ Mar 2022 08:32:10 -0800 (PST)
+MIME-Version: 1.0
+References: <20220225125553.1185108-1-benchuanggli@gmail.com>
+ <20220225125553.1185108-2-benchuanggli@gmail.com> <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
+ <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com> <CACT4zj9AxpOuDn-1fFAgY7Y-X_w+OHisASpa6tUBHQZuSExjFQ@mail.gmail.com>
+ <CAPDyKFp-XrLOSUAbsW5JGNCs6aO8Gp1YgmkqiwVpN5byO1XXCQ@mail.gmail.com> <CACT4zj_6k=0gNRw=EFHR=9-7fWJ=bT4Q1VsPMWrkVPftjLb=Hw@mail.gmail.com>
+In-Reply-To: <CACT4zj_6k=0gNRw=EFHR=9-7fWJ=bT4Q1VsPMWrkVPftjLb=Hw@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 2 Mar 2022 17:31:33 +0100
+Message-ID: <CAPDyKFoe1BmQBzmd0uXYTdOEZU21wFtUDyU0vAq8+yzqJhKpzA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
+To:     Ben Chuang <benchuanggli@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        greg.tu@genesyslogic.com.tw,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        SeanHY.Chen@genesyslogic.com.tw,
+        Kevin Chang <kevin.chang@lcfuturecenter.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add changes to capture eMMC and SD card errors.
-This is useful for debug and testing.
+On Wed, 2 Mar 2022 at 12:56, Ben Chuang <benchuanggli@gmail.com> wrote:
+>
+> Hi,
+>
+> On Wed, Mar 2, 2022 at 6:04 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Wed, 2 Mar 2022 at 03:10, Ben Chuang <benchuanggli@gmail.com> wrote:
+> > >
+> > > Hi,
+> > >
+> > > On Tue, Mar 1, 2022 at 6:05 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> > > >
+> > > > On 28/02/2022 19:03, Ulf Hansson wrote:
+> > > > > On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
+> > > > >>
+> > > > >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > > > >>
+> > > > >> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
+> > > > >> gated of upstream port can be enabled.
+> > > > >>
+> > > > >> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > > > >> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
+> > > > >> ---
+> > > > >>  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
+> > > > >>  1 file changed, 54 insertions(+)
+> > > > >>
+> > > > >> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > >> index 97035d77c18c..cf99b6af792d 100644
+> > > > >> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > > >> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > >> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+> > > > >>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> > > > >>  }
+> > > > >>
+> > > > >> +#ifdef CONFIG_PM
+> > > > >> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+> > > > >> +{
+> > > > >> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> > > > >> +       struct sdhci_host *host = slot->host;
+> > > > >> +       u16 clock;
+> > > > >> +
+> > > > >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > > > >> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+> > > > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> > > > >> +
+> > > > >> +       return 0;
+> > > > >> +}
+> > > > >> +
+> > > > >> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+> > > > >> +{
+> > > > >> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> > > > >> +       struct sdhci_host *host = slot->host;
+> > > > >> +       ktime_t timeout;
+> > > > >> +       u16 clock;
+> > > > >> +
+> > > > >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > > > >> +
+> > > > >> +       clock |= SDHCI_CLOCK_PLL_EN;
+> > > > >> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
+> > > > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> > > > >> +
+> > > > >> +       timeout = ktime_add_ms(ktime_get(), 150);
+> > > > >> +       while (1) {
+> > > > >> +               bool timedout = ktime_after(ktime_get(), timeout);
+> > > > >> +
+> > > > >> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > > > >> +               if (clock & SDHCI_CLOCK_INT_STABLE)
+> > > > >> +                       break;
+> > > > >> +               if (timedout) {
+> > > > >> +                       pr_err("%s: PLL clock never stabilised.\n",
+> > > > >> +                              mmc_hostname(host->mmc));
+> > > > >> +                       sdhci_dumpregs(host);
+> > > > >> +                       break;
+> > > > >> +               }
+> > > > >> +               udelay(10);
+> > > > >> +       }
+> > > >
+> > > > Could use something like read_poll_timeout() here e.g.
+> > > >
+> > > >         if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
+> > > >                               1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
+> > > >                 pr_err("%s: PLL clock never stabilised.\n",
+> > > >                        mmc_hostname(host->mmc));
+> > > >                 sdhci_dumpregs(host);
+> > > >         }
+> > > >
+> > > >
+> > >
+> > > Thanks for the tip. I will prepare the next patch.
+> > >
+> > > > >> +       clock |= SDHCI_CLOCK_CARD_EN;
+> > > > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> > > > >> +
+> > > > >> +       return 0;
+> > > > >> +}
+> > > > >
+> > > > > Both functions above look very similar to what sdhci_set_clock() does.
+> > > > > Can you use that, rather than open coding the above?
+> > > > >
+> > >
+> > > The codes turn on/off the clock but it doesn't change the clock.
+> > > Using sdhci_set_clock()  needs to store the clock value because it
+> > > clears the clock.
+> >
+> > Well, in that case at least you can call sdhci_enable_clk() from
+> > gl9763e_runtime_resume(), rather than open coding it (the code looks
+> > like a direct copy of that code). All you need is to give the
+> > sdhci_enable_clk() the correct "clk" as in-parameter.
+> >
+>
+> I want to explain a little more,
+> gl9763e is used as a boot disk controller.
+> In gl9763e_runtime_suspend(), gl9763e still needs the internal clock to keep states.
+> So gl9763e_runtime_suspend() only clears SDHCI_CLOCK_PLL_EN and SDHCI_CLOCK_CARD_EN.
+> The SDHCI_CLOCK_INT_EN is still one (1) In runtime suspend,
+>
+> If using sdhci_enable_clk()  in gl9763e_runtime_resume(), sdhci_enable_clk()
+> only fills one (1) to this bit (SDHCI_CLOCK_INT_EN) again, it cannot cause internal stable bit
+> (SDHCI_CLOCK_INT_STABLE) to one for gl9763e in the first while loop.
 
-Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
-Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
-Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
----
- drivers/mmc/core/core.c  |  6 ++++++
- include/linux/mmc/host.h | 23 +++++++++++++++++++++++
- 2 files changed, 29 insertions(+)
+Okay, I get it now, thanks for clarifying.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 368f104..f3679ed 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2242,6 +2242,12 @@ void mmc_rescan(struct work_struct *work)
- 		if (freqs[i] <= host->f_min)
- 			break;
- 	}
-+
-+	/*
-+	 * Ignore the command timeout errors observed during
-+	 * the card init as those are excepted.
-+	 */
-+	host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
- 	mmc_release_host(host);
- 
-  out:
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 7afb57c..3b7f1e5 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -93,6 +93,23 @@ struct mmc_clk_phase_map {
- 
- struct mmc_host;
- 
-+enum mmc_err_stat {
-+	MMC_ERR_CMD_TIMEOUT,
-+	MMC_ERR_CMD_CRC,
-+	MMC_ERR_DAT_TIMEOUT,
-+	MMC_ERR_DAT_CRC,
-+	MMC_ERR_AUTO_CMD,
-+	MMC_ERR_ADMA,
-+	MMC_ERR_TUNING,
-+	MMC_ERR_CMDQ_RED,
-+	MMC_ERR_CMDQ_GCE,
-+	MMC_ERR_CMDQ_ICCE,
-+	MMC_ERR_REQ_TIMEOUT,
-+	MMC_ERR_CMDQ_REQ_TIMEOUT,
-+	MMC_ERR_ICE_CFG,
-+	MMC_ERR_MAX,
-+};
-+
- struct mmc_host_ops {
- 	/*
- 	 * It is optional for the host to implement pre_req and post_req in
-@@ -500,6 +517,7 @@ struct mmc_host {
- 
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
-+	u32                     err_stats[MMC_ERR_MAX];
- 
- 	unsigned long		private[] ____cacheline_aligned;
- };
-@@ -635,6 +653,11 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
- 	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
- }
- 
-+static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
-+		enum mmc_err_stat stat) {
-+	host->err_stats[stat] += 1;
-+}
-+
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
+In any case, the loop in sdhci_enable_clk() that polls the
+SDHCI_CLOCK_CONTROL register to see if the SDHCI_CLOCK_INT_STABLE is
+set, could perhaps be split out to a function that you can use here as
+well.
 
+[...]
+
+Kind regards
+Uffe
