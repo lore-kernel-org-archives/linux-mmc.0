@@ -2,211 +2,211 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D3B2C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 11:46:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62F4DC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 12:03:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236041AbiCBLrM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Mar 2022 06:47:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39486 "EHLO
+        id S235505AbiCBMDu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Mar 2022 07:03:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239032AbiCBLrK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 06:47:10 -0500
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B14A5AC915
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Mar 2022 03:46:25 -0800 (PST)
-Received: by mail-lf1-x133.google.com with SMTP id g39so2294510lfv.10
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Mar 2022 03:46:25 -0800 (PST)
+        with ESMTP id S232405AbiCBMDu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 07:03:50 -0500
+Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7556543ECE;
+        Wed,  2 Mar 2022 04:03:06 -0800 (PST)
+Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-2d07ae0b1c4so14292447b3.11;
+        Wed, 02 Mar 2022 04:03:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Lc6+sFLH4xgHpUfpAkTWrsxSemAv/j1QkEWdwDqUEeo=;
-        b=rWAUr8KkXUHG5RY6SBczeSb9azLIJEyGi92k21TcCreY01VxIChitbz3qG4MU9dZr0
-         bGEcYijFMW5qjwMcoONcN3mJa3wy5bXNgo6+967xaSTewvJmGldP2BAieMxji3BSpI6k
-         ba4/q4AXnWwmw0l245cxJwVmc1ChwG1Ijb7r6R+IFXHatiHjz4r/RMCZsdtpjpb+KMsw
-         nIL7Hl4MnIxNW0mDBYOM8OWmRT+c09kgKLXHqtwj5LagPsFKs/Au6Vot4xhv5avljpub
-         Uv3JmyjEOmzie2DSyTZf90vQfwN+XN4Rt8zj1iQbm9PUP/6WWrqBsjInfxTUVJWmKkSw
-         z8vA==
+        bh=KEc+gL7G0rfMOn0cIRVoJHGoUVkINZBV6EdCwelWeLY=;
+        b=qkdK/+ATV/9wPMkziZWYAeiYZo+HGHDpmFAJ/X17ldr3JhIVJXm4Q0mlCj52+oGkmw
+         kXJolCgr3pk8tNp2rEzJvQ+Wu4HU8xRzXEXHMu03RYSuJ7JKFqPfbA4XXAQY5uFHgZbd
+         d18LgpA4n53BPQqUHocMtmY68PKoG+GIQuoKQf0qhFHMpcw48pOvDv//xl3WrwtvTIr9
+         hu3ZMJLO28NyS8E8lvzsI7WQK4UOzxlJdvpQ3fTA7AAkQ4VD0zpsRhccqnztAEpJXdiY
+         QEq63PDQ9UCr8Sra5zLEH/nYny0bxQkl3qqhPlilImHqS8o5p8P0QjtJgttb+p6Rygyi
+         sT7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Lc6+sFLH4xgHpUfpAkTWrsxSemAv/j1QkEWdwDqUEeo=;
-        b=IXBLpyPkbPMAAg9XkPHqqvRfyKluP3QE2+iX0j45AkbODULQMaGWGyhBlW4hPgKpsw
-         O51WhjG+jtDnfRHNwuwAhNSg0gPi71rSyMD9r61klSs1e7fIpj6wQPZ3g0nWkYP4DwYw
-         hEuzO+JqbnQ0hf92AZvd5iB0MHEUDCX/Iq5xhpabQVq2e7LF4+4osiaKaQLbBrkH6ffJ
-         wlNRS89+beWOLkvbZ+coCXdaXAYGNZe2ttlk9Po2qWadIh/KpFMON059dMrNOebG+Nye
-         OQt/0/ROqc7QuYDk7oQFiVdOjW+7Rb+umovbBZtZmEKScVCQBm5wtUFOEPu8YsE3nDG1
-         LkYg==
-X-Gm-Message-State: AOAM532rW2A1hCI20smylLY0GJLv8R65MjW/BMJLubDmyBkQJm3ODVsK
-        ZZ3c4nNnQhxNS46hOCrHOmMxk86Q5lOOrIueCgwApQ==
-X-Google-Smtp-Source: ABdhPJw2DdnCG5o0Y7GjgeTud67zBTcDtQAwPjNtvYX1CcxMGtJbrcbmH7J7HcvSVfqcdfIJ8Ve49YJlO8jq7j6HCSU=
-X-Received: by 2002:a19:2d11:0:b0:445:65c7:5f1e with SMTP id
- k17-20020a192d11000000b0044565c75f1emr18221775lfj.184.1646221584059; Wed, 02
- Mar 2022 03:46:24 -0800 (PST)
+        bh=KEc+gL7G0rfMOn0cIRVoJHGoUVkINZBV6EdCwelWeLY=;
+        b=kbIM4MRNbbO1ieIREtvT1cXbIaNcD1HYbAXFiTsC1cg1w0aWVwtzNFK4LG9y4bIytU
+         6020Y2efMGbZxJLdnFJMO3M+nrJxbklFCOZ3bZp38eUjTVqzR8eH8J3vgcsd2skJyY/n
+         wraeHsG+SVXAmAxxH1Z2DP2lwQtrRDyXlefPsIH2CO85t2GFkBGAlCqbWzFoaL3UvX1Q
+         o57Ncu9v8my5L9WR7xFKj6vX7DmH8zQnRoVpQ+DmXfaUvfJCkIE1JXQ8NM3HN9Ef41A3
+         DcmOVd+pHXeZK/zLl88TO2UjdoGTEDoShpFMya0U5JecI3A76k2GilMxoycQxJ5YYVkX
+         Cmaw==
+X-Gm-Message-State: AOAM5302Y+9BjjJoIxCZfTyqOh7/JSayhLIkzvpcHZ7edrcnRaDBZtSC
+        Fkedy/HJviTeDducUlWiTiNc5MYHBIcbjH75oL0=
+X-Google-Smtp-Source: ABdhPJxkmqg+OQb60NqbTgMXL7RTUX1yPYC6XnE92tIAaE7OlMIRWq2UCtYXS0J2bPJsBhsKBFZUqMFi3AZyf3EVGOg=
+X-Received: by 2002:a81:8044:0:b0:2db:2d8b:154f with SMTP id
+ q65-20020a818044000000b002db2d8b154fmr22960083ywf.191.1646222585705; Wed, 02
+ Mar 2022 04:03:05 -0800 (PST)
 MIME-Version: 1.0
-References: <1646117728-28085-1-git-send-email-quic_c_sbhanu@quicinc.com>
-In-Reply-To: <1646117728-28085-1-git-send-email-quic_c_sbhanu@quicinc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Mar 2022 12:45:47 +0100
-Message-ID: <CAPDyKFpmR35dZj5VGPdKOp58VanUL7it3buN9yAvF+ObiSb32A@mail.gmail.com>
-Subject: Re: [PATCH V1] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Cc:     adrian.hunter@intel.com, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, sayalil@codeaurora.org,
-        cang@codeaurora.org, rampraka@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org
+References: <20220225125553.1185108-1-benchuanggli@gmail.com>
+ <20220225125553.1185108-2-benchuanggli@gmail.com> <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
+ <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com> <CACT4zj9AxpOuDn-1fFAgY7Y-X_w+OHisASpa6tUBHQZuSExjFQ@mail.gmail.com>
+ <CAPDyKFp-XrLOSUAbsW5JGNCs6aO8Gp1YgmkqiwVpN5byO1XXCQ@mail.gmail.com> <CACT4zj_6k=0gNRw=EFHR=9-7fWJ=bT4Q1VsPMWrkVPftjLb=Hw@mail.gmail.com>
+In-Reply-To: <CACT4zj_6k=0gNRw=EFHR=9-7fWJ=bT4Q1VsPMWrkVPftjLb=Hw@mail.gmail.com>
+From:   Ben Chuang <benchuanggli@gmail.com>
+Date:   Wed, 2 Mar 2022 20:02:54 +0800
+Message-ID: <CACT4zj9Gkhpvtqfp19rBteZSdwcbArE8cOYmRYt7AgrsAabSxw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        greg.tu@genesyslogic.com.tw,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        SeanHY.Chen@genesyslogic.com.tw,
+        Kevin Chang <kevin.chang@lcfuturecenter.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 1 Mar 2022 at 07:55, Shaik Sajida Bhanu
-<quic_c_sbhanu@quicinc.com> wrote:
+Hi,
+
+On Wed, Mar 2, 2022 at 6:04 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> Reset GCC_SDCC_BCR register before every fresh initilazation. This will
-> reset whole SDHC-msm controller, clears the previous power control
-> states and avoids, software reset timeout issues as below.
+> On Wed, 2 Mar 2022 at 03:10, Ben Chuang <benchuanggli@gmail.com> wrote:
+> >
+> > Hi,
+> >
+> > On Tue, Mar 1, 2022 at 6:05 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> > >
+> > > On 28/02/2022 19:03, Ulf Hansson wrote:
+> > > > On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
+> > > >>
+> > > >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > > >>
+> > > >> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
+> > > >> gated of upstream port can be enabled.
+> > > >>
+> > > >> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > > >> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
+> > > >> ---
+> > > >>  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
+> > > >>  1 file changed, 54 insertions(+)
+> > > >>
+> > > >> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> > > >> index 97035d77c18c..cf99b6af792d 100644
+> > > >> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > >> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > >> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+> > > >>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> > > >>  }
+> > > >>
+> > > >> +#ifdef CONFIG_PM
+> > > >> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+> > > >> +{
+> > > >> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> > > >> +       struct sdhci_host *host = slot->host;
+> > > >> +       u16 clock;
+> > > >> +
+> > > >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > > >> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+> > > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> > > >> +
+> > > >> +       return 0;
+> > > >> +}
+> > > >> +
+> > > >> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+> > > >> +{
+> > > >> +       struct sdhci_pci_slot *slot = chip->slots[0];
+> > > >> +       struct sdhci_host *host = slot->host;
+> > > >> +       ktime_t timeout;
+> > > >> +       u16 clock;
+> > > >> +
+> > > >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > > >> +
+> > > >> +       clock |= SDHCI_CLOCK_PLL_EN;
+> > > >> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
+> > > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> > > >> +
+> > > >> +       timeout = ktime_add_ms(ktime_get(), 150);
+> > > >> +       while (1) {
+> > > >> +               bool timedout = ktime_after(ktime_get(), timeout);
+> > > >> +
+> > > >> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> > > >> +               if (clock & SDHCI_CLOCK_INT_STABLE)
+> > > >> +                       break;
+> > > >> +               if (timedout) {
+> > > >> +                       pr_err("%s: PLL clock never stabilised.\n",
+> > > >> +                              mmc_hostname(host->mmc));
+> > > >> +                       sdhci_dumpregs(host);
+> > > >> +                       break;
+> > > >> +               }
+> > > >> +               udelay(10);
+> > > >> +       }
+> > >
+> > > Could use something like read_poll_timeout() here e.g.
+> > >
+> > >         if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
+> > >                               1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
+> > >                 pr_err("%s: PLL clock never stabilised.\n",
+> > >                        mmc_hostname(host->mmc));
+> > >                 sdhci_dumpregs(host);
+> > >         }
+> > >
+> > >
+> >
+> > Thanks for the tip. I will prepare the next patch.
+> >
+> > > >> +       clock |= SDHCI_CLOCK_CARD_EN;
+> > > >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> > > >> +
+> > > >> +       return 0;
+> > > >> +}
+> > > >
+> > > > Both functions above look very similar to what sdhci_set_clock() does.
+> > > > Can you use that, rather than open coding the above?
+> > > >
+> >
+> > The codes turn on/off the clock but it doesn't change the clock.
+> > Using sdhci_set_clock()  needs to store the clock value because it
+> > clears the clock.
 >
-> [ 5.458061][ T262] mmc1: Reset 0x1 never completed.
-> [ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP
-> ===========
-> [ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version:
-> 0x00007202
-> [ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt:
-> 0x00000000
-> [ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode:
-> 0x00000000
-> [ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl:
-> 0x00000000
-> [ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
-> [ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
-> [ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat:
-> 0x00000000
-> [ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab:
-> 0x00000000
-> [ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int:
-> 0x00000000
-> [ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
-> [ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
-> [ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]:
-> 0x00000000
-> [ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]:
-> 0x00000000
-> [ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
-> [ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER
-> DUMP-----------
-> [ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
-> 0x6000642c |
-> DLL cfg2: 0x0020a000
-> [ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
-> 0x00010800 | DDR cfg: 0x80040873
-> [ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 :
-> 0xf88218a8 Vndr func3: 0x02626040
+> Well, in that case at least you can call sdhci_enable_clk() from
+> gl9763e_runtime_resume(), rather than open coding it (the code looks
+> like a direct copy of that code). All you need is to give the
+> sdhci_enable_clk() the correct "clk" as in-parameter.
 >
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 
-If this is this a regression, then please try to add a fixes tag too.
+I want to explain a little more,
+gl9763e is used as a boot disk controller.
+In gl9763e_runtime_suspend(), gl9763e still needs the internal clock
+to keep states.
+So gl9763e_runtime_suspend() only clears SDHCI_CLOCK_PLL_EN and
+SDHCI_CLOCK_CARD_EN.
+The SDHCI_CLOCK_INT_EN is still one (1) In runtime suspend,
 
-I assume we should tag this for stable kernels?
+If using sdhci_enable_clk()  in gl9763e_runtime_resume(), sdhci_enable_clk()
+only fills one (1) to this bit (SDHCI_CLOCK_INT_EN) again, it cannot
+cause internal stable bit
+(SDHCI_CLOCK_INT_STABLE) to one for gl9763e in the first while loop.
 
-> ---
->  drivers/mmc/host/sdhci-msm.c | 48 ++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 48 insertions(+)
+> >
+> > > > Other than that, I would appreciate it if Adrian could have a look at
+> > > > this too. For example, I wonder if perhaps
+> > > > sdhci_runtime_suspend|resume_host() should be called in these paths
+> > > > too.
+> > >
+> > > Assuming the host controller does not lose state information, it should be fine.
+> > >
+> >
+> > Yes, the host always has aux. power and keep state.
+> >
+> > Thank you both for your comments.
 >
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 50c71e0..f10b3c7 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -17,6 +17,7 @@
->  #include <linux/regulator/consumer.h>
->  #include <linux/interconnect.h>
->  #include <linux/pinctrl/consumer.h>
-> +#include <linux/reset.h>
+> Okay, thanks for confirming!
 >
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
-> @@ -284,6 +285,7 @@ struct sdhci_msm_host {
->         bool uses_tassadar_dll;
->         u32 dll_config;
->         u32 ddr_config;
-> +       struct reset_control *core_reset;
->         bool vqmmc_enabled;
->  };
+> [...]
 >
-> @@ -2482,6 +2484,45 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
->         of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
->  }
->
-> +static int sdhci_msm_gcc_reset(struct platform_device *pdev,
-> +              struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +       int ret = 0;
-> +
-> +       msm_host->core_reset = devm_reset_control_get(&pdev->dev, "core_reset");
-> +       if (IS_ERR(msm_host->core_reset)) {
-> +               ret = PTR_ERR(msm_host->core_reset);
-> +               dev_err(&pdev->dev, "core_reset unavailable (%d)\n", ret);
-> +               msm_host->core_reset = NULL;
+> Kind regards
+> Uffe
 
-Looks like we should use devm_reset_control_get_optional_exclusive() instead.
-
-> +       }
-> +       if (msm_host->core_reset) {
-> +               ret = reset_control_assert(msm_host->core_reset);
-> +               if (ret) {
-> +                       dev_err(&pdev->dev, "core_reset assert failed (%d)\n",
-> +                                               ret);
-> +                       goto out;
-> +               }
-> +               /*
-> +                * The hardware requirement for delay between assert/deassert
-> +                * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
-> +                * ~125us (4/32768). To be on the safe side add 200us delay.
-> +                */
-> +               usleep_range(200, 210);
-
-Isn't this supposed to be taken care of by the reset driver?
-
-Or is this more an mmc controller specific thing? In that case, could
-this delay vary, depending on the variant of the controller?
-
-> +
-> +               ret = reset_control_deassert(msm_host->core_reset);
-> +               if (ret) {
-> +                       dev_err(&pdev->dev, "core_reset deassert failed (%d)\n",
-> +                                               ret);
-> +                       goto out;
-> +               }
-> +               usleep_range(200, 210);
-
-Ditto?
-
-> +       }
-> +
-> +out:
-> +       return ret;
-> +}
->
->  static int sdhci_msm_probe(struct platform_device *pdev)
->  {
-> @@ -2529,6 +2570,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->
->         msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
->
-> +       ret = sdhci_msm_gcc_reset(pdev, host);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "core_reset assert/deassert failed (%d)\n",
-> +                                       ret);
-> +               goto pltfm_free;
-> +       }
-> +
->         /* Setup SDCC bus voter clock. */
->         msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
->         if (!IS_ERR(msm_host->bus_clk)) {
-
-Kind regards
-Uffe
+Best regards,
+Ben
