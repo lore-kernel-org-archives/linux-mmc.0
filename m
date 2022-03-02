@@ -2,203 +2,224 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67C18C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 02:10:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE7BDC4167E
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Mar 2022 07:30:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234710AbiCBCLb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Mar 2022 21:11:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35152 "EHLO
+        id S239886AbiCBHbG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Mar 2022 02:31:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231734AbiCBCLb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2022 21:11:31 -0500
-Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E0CA5B3DA;
-        Tue,  1 Mar 2022 18:10:49 -0800 (PST)
-Received: by mail-yb1-xb2d.google.com with SMTP id u61so413596ybi.11;
-        Tue, 01 Mar 2022 18:10:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=C60qY1W15wmEGzg0Fz5ufhX0jdSdAi/q3wBV4TnaYjQ=;
-        b=S+7owdLkkRm9npwuBQoYTXaNBSfly6aAAo0D34rlrWOfTgJxNLyjHujx32fG9LhDXV
-         QEGWN4bBqQR1lQNeerH1wR06cftfZ9OFV5J39/pHt5i+I9wGKuqXTaat1f+NwxRarcfw
-         aCI3XnTb7JNju2j0Z2YLw/9vD7xRBV0EiC7pL9VxunydQKJxfK/sgL401ybAww+m7cus
-         okfhJVHyHYiK5fHxdOodvS8JC3arL6X1YljlirOP34rEbncpCEyhXNDPtXlPAsFU7DN1
-         F+f6eyh4ecYbYRKcsAowISBXscOHsyZPgCow8wSsvaWNa3d1bspiF7bZZuAOCjn93J/V
-         6uvg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=C60qY1W15wmEGzg0Fz5ufhX0jdSdAi/q3wBV4TnaYjQ=;
-        b=TVVVk+1reo2v/BrgabyZefLPsyHfxnE29dgsuYUzDXFpEjuee9J2FIyfz1WhnyUQY5
-         EGcWxNrOOGM7AgpBjM3tgRctgTYEUaJ948MId3NY5ymnPzPblJLMsnFtjz5z/mZh1Noq
-         +S9SBqpjOSlOpS52bFWD6rWD6WPhtQhdYfByxksjjBiKHQ4JJeSAYTNWZ/MYzQw993za
-         QJ5ndmljMgIyRB2UhmkC48sQKV0eGmwOq10vh3R7ESEc7UzI82zw9MIGtrFjtYdQuRbK
-         /tHrZsm/tbSfyxO8X5BNBfRkCm9D+U2Y/7+SxSHDtR/IulbIIup2TbiF1q8gtOtP0IiK
-         ur7g==
-X-Gm-Message-State: AOAM530UopvYiWxvfpetkIlHtO1L2Vc8gS7ih1zfPE531FzqYhSd4Cd0
-        9UfrOIPQuC0QQiZ2TiPmb/SksO8Ina87t604deg=
-X-Google-Smtp-Source: ABdhPJysAYqmPDrRSXgywEUWgHLhQEhcXeq5Z4WOZrQs7C7dEnCx1oI9LnvuiBNmZH1e/E+3/0b1cpopto+MCsWzhG8=
-X-Received: by 2002:a05:6902:83:b0:61a:709b:d841 with SMTP id
- h3-20020a056902008300b0061a709bd841mr25970895ybs.140.1646187048420; Tue, 01
- Mar 2022 18:10:48 -0800 (PST)
+        with ESMTP id S231681AbiCBHbD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2022 02:31:03 -0500
+Received: from jabberwock.ucw.cz (jabberwock.ucw.cz [46.255.230.98])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C7EE51E51;
+        Tue,  1 Mar 2022 23:30:21 -0800 (PST)
+Received: by jabberwock.ucw.cz (Postfix, from userid 1017)
+        id B8E6F1C0B81; Wed,  2 Mar 2022 08:30:18 +0100 (CET)
+Date:   Wed, 2 Mar 2022 08:30:16 +0100
+From:   Pavel Machek <pavel@ucw.cz>
+To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>
+Cc:     Mark Brown <broonie@kernel.org>,
+        Marek =?iso-8859-1?Q?Beh=FAn?= <kabel@kernel.org>,
+        Peter Huewe <peterhuewe@gmx.de>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Jason Gunthorpe <jgg@ziepe.ca>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Sam Ravnborg <sam@ravnborg.org>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Markuss Broks <markuss.broks@gmail.com>,
+        Emma Anholt <emma@anholt.net>,
+        David Lechner <david@lechnology.com>,
+        Kamlesh Gurudasani <kamlesh.gurudasani@gmail.com>,
+        Noralf =?iso-8859-1?Q?Tr=F8nnes?= <noralf@tronnes.org>,
+        Jean Delvare <jdelvare@suse.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Dan Robertson <dan@dlrobertson.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Michael Hennerich <Michael.Hennerich@analog.com>,
+        Marcus Folkesson <marcus.folkesson@gmail.com>,
+        Kent Gustavsson <kent@minoris.se>,
+        Rui Miguel Silva <rmfrfs@gmail.com>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Yasunari Takiguchi <Yasunari.Takiguchi@sony.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Charles-Antoine Couret <charles-antoine.couret@nexvision.fr>,
+        Antti Palosaari <crope@iki.fi>,
+        Lee Jones <lee.jones@linaro.org>,
+        Support Opensource <support.opensource@diasemi.com>,
+        Charles Keepax <ckeepax@opensource.cirrus.com>,
+        Richard Fitzgerald <rf@opensource.cirrus.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Eric Piel <eric.piel@tremplin-utc.net>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Thomas Kopp <thomas.kopp@microchip.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Vivien Didelot <vivien.didelot@gmail.com>,
+        Vladimir Oltean <olteanv@gmail.com>,
+        Woojung Huh <woojung.huh@microchip.com>,
+        UNGLinuxDriver@microchip.com,
+        =?utf-8?Q?=C5=81ukasz?= Stelmach <l.stelmach@samsung.com>,
+        Alexander Aring <alex.aring@gmail.com>,
+        Stefan Schmidt <stefan@datenfreihafen.org>,
+        Harry Morris <h.morris@cascoda.com>,
+        Varka Bhadram <varkabhadram@gmail.com>,
+        Xue Liu <liuxuenetmail@gmail.com>, Alan Ott <alan@signal11.us>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Christian Lamparter <chunkeey@googlemail.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Ajay Singh <ajay.kathat@microchip.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        Solomon Peachy <pizza@shaftnet.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Mark Greer <mgreer@animalcreek.com>,
+        Benson Leung <bleung@chromium.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Mark Gross <markgross@kernel.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        =?iso-8859-1?B?Suly9G1l?= Pouiller <jerome.pouiller@silabs.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
+        James Schulman <james.schulman@cirrus.com>,
+        David Rhodes <david.rhodes@cirrus.com>,
+        Lucas Tanure <tanureal@opensource.cirrus.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        Nuno =?iso-8859-1?Q?S=E1?= <nuno.sa@analog.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Daniel Mack <daniel@zonque.org>,
+        Thomas Zimmermann <tzimmermann@suse.de>,
+        Maxime Ripard <mripard@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Stephan Gerhold <stephan@gerhold.net>,
+        Alexandru Ardelean <ardeleanalex@gmail.com>,
+        Mike Looijmans <mike.looijmans@topic.nl>,
+        Gwendal Grignou <gwendal@chromium.org>,
+        Cai Huoqing <caihuoqing@baidu.com>,
+        Minghao Chi <chi.minghao@zte.com.cn>,
+        Antoniu Miclaus <antoniu.miclaus@analog.com>,
+        Julia Lawall <Julia.Lawall@inria.fr>,
+        Ronald =?iso-8859-1?Q?Tschal=E4r?= <ronald@innovation.ch>,
+        Marco Felsch <m.felsch@pengutronix.de>,
+        Jonathan =?iso-8859-1?Q?Neusch=E4fer?= <j.neuschaefer@gmx.net>,
+        Emmanuel Gil Peyrot <linkmauve@linkmauve.fr>,
+        Jon Hunter <jonathanh@nvidia.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Heiko Schocher <hs@denx.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        Colin Ian King <colin.king@intel.com>,
+        Dan Carpenter <dan.carpenter@oracle.com>,
+        Tudor Ambarus <tudor.ambarus@microchip.com>,
+        Matt Kline <matt@bitbashing.io>,
+        Torin Cooper-Bennun <torin@maxiluxsystems.com>,
+        Vincent Mailhol <mailhol.vincent@wanadoo.fr>,
+        Stefan =?iso-8859-1?Q?M=E4tje?= <stefan.maetje@esd.eu>,
+        Frieder Schrempf <frieder.schrempf@kontron.de>,
+        Wei Yongjun <weiyongjun1@huawei.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Nanyong Sun <sunnanyong@huawei.com>,
+        Yang Shen <shenyang39@huawei.com>,
+        dingsenjie <dingsenjie@yulong.com>,
+        Aditya Srivastava <yashsri421@gmail.com>,
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Michael Walle <michael@walle.cc>,
+        Yang Li <yang.lee@linux.alibaba.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        wengjianfeng <wengjianfeng@yulong.com>,
+        Sidong Yang <realwakka@gmail.com>,
+        Paulo Miguel Almeida <paulo.miguel.almeida.rodenas@gmail.com>,
+        Zhang Qilong <zhangqilong3@huawei.com>,
+        Will Deacon <will@kernel.org>,
+        Mark Tomlinson <mark.tomlinson@alliedtelesis.co.nz>,
+        Davidlohr Bueso <dbueso@suse.de>, Claudius Heine <ch@denx.de>,
+        Jiri Prchal <jiri.prchal@aksignal.cz>,
+        linux-kernel@vger.kernel.org, linux-integrity@vger.kernel.org,
+        linux-clk@vger.kernel.org, linux-gpio@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-hwmon@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-leds@vger.kernel.org, linux-media@vger.kernel.org,
+        patches@opensource.cirrus.com, alsa-devel@alsa-project.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
+        netdev@vger.kernel.org, linux-wpan@vger.kernel.org,
+        linux-wireless@vger.kernel.org, libertas-dev@lists.infradead.org,
+        platform-driver-x86@vger.kernel.org, linux-rtc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-fbdev@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-serial@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-omap@vger.kernel.org,
+        kernel@pengutronix.de
+Subject: Re: [PATCH 5/5] spi: make remove callback a void function
+Message-ID: <20220302073016.GB32222@amd>
+References: <20220123175201.34839-1-u.kleine-koenig@pengutronix.de>
+ <20220123175201.34839-6-u.kleine-koenig@pengutronix.de>
 MIME-Version: 1.0
-References: <20220225125553.1185108-1-benchuanggli@gmail.com>
- <20220225125553.1185108-2-benchuanggli@gmail.com> <CAPDyKFq5MdGWefVW6Uwe74Ef5giW+68qRS2hmXNmHLqpfqav8A@mail.gmail.com>
- <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com>
-In-Reply-To: <4b35e465-626a-7218-ed9a-4e5cf28c1ccc@intel.com>
-From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Wed, 2 Mar 2022 10:10:37 +0800
-Message-ID: <CACT4zj9AxpOuDn-1fFAgY7Y-X_w+OHisASpa6tUBHQZuSExjFQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        greg.tu@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        SeanHY.Chen@genesyslogic.com.tw,
-        Kevin Chang <kevin.chang@lcfuturecenter.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="xXmbgvnjoT4axfJE"
+Content-Disposition: inline
+In-Reply-To: <20220123175201.34839-6-u.kleine-koenig@pengutronix.de>
+User-Agent: Mutt/1.5.23 (2014-03-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Tue, Mar 1, 2022 at 6:05 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 28/02/2022 19:03, Ulf Hansson wrote:
-> > On Fri, 25 Feb 2022 at 13:56, Ben Chuang <benchuanggli@gmail.com> wrote:
-> >>
-> >> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>
-> >> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
-> >> gated of upstream port can be enabled.
-> >>
-> >> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
-> >> ---
-> >>  drivers/mmc/host/sdhci-pci-gli.c | 54 ++++++++++++++++++++++++++++++++
-> >>  1 file changed, 54 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> >> index 97035d77c18c..cf99b6af792d 100644
-> >> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> >> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> >> @@ -873,6 +873,55 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
-> >>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> >>  }
-> >>
-> >> +#ifdef CONFIG_PM
-> >> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
-> >> +{
-> >> +       struct sdhci_pci_slot *slot = chip->slots[0];
-> >> +       struct sdhci_host *host = slot->host;
-> >> +       u16 clock;
-> >> +
-> >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> >> +       clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
-> >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> >> +
-> >> +       return 0;
-> >> +}
-> >> +
-> >> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
-> >> +{
-> >> +       struct sdhci_pci_slot *slot = chip->slots[0];
-> >> +       struct sdhci_host *host = slot->host;
-> >> +       ktime_t timeout;
-> >> +       u16 clock;
-> >> +
-> >> +       clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> >> +
-> >> +       clock |= SDHCI_CLOCK_PLL_EN;
-> >> +       clock &= ~SDHCI_CLOCK_INT_STABLE;
-> >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> >> +
-> >> +       timeout = ktime_add_ms(ktime_get(), 150);
-> >> +       while (1) {
-> >> +               bool timedout = ktime_after(ktime_get(), timeout);
-> >> +
-> >> +               clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> >> +               if (clock & SDHCI_CLOCK_INT_STABLE)
-> >> +                       break;
-> >> +               if (timedout) {
-> >> +                       pr_err("%s: PLL clock never stabilised.\n",
-> >> +                              mmc_hostname(host->mmc));
-> >> +                       sdhci_dumpregs(host);
-> >> +                       break;
-> >> +               }
-> >> +               udelay(10);
-> >> +       }
->
-> Could use something like read_poll_timeout() here e.g.
->
->         if (read_poll_timeout(sdhci_readw, clk, (clk & SDHCI_CLOCK_INT_STABLE),
->                               1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
->                 pr_err("%s: PLL clock never stabilised.\n",
->                        mmc_hostname(host->mmc));
->                 sdhci_dumpregs(host);
->         }
->
->
+--xXmbgvnjoT4axfJE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks for the tip. I will prepare the next patch.
+Hi!
 
-> >> +       clock |= SDHCI_CLOCK_CARD_EN;
-> >> +       sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-> >> +
-> >> +       return 0;
-> >> +}
-> >
-> > Both functions above look very similar to what sdhci_set_clock() does.
-> > Can you use that, rather than open coding the above?
-> >
+> The value returned by an spi driver's remove function is mostly ignored.
+> (Only an error message is printed if the value is non-zero that the
+> error is ignored.)
+>=20
+> So change the prototype of the remove function to return no value. This
+> way driver authors are not tempted to assume that passing an error to
+> the upper layer is a good idea. All drivers are adapted accordingly.
+> There is no intended change of behaviour, all callbacks were prepared to
+> return 0 before.
 
-The codes turn on/off the clock but it doesn't change the clock.
-Using sdhci_set_clock()  needs to store the clock value because it
-clears the clock.
+Acked-by: Pavel Machek <pavel@ucw.cz>
+									Pavel
+--=20
+http://www.livejournal.com/~pavelmachek
 
-> > Other than that, I would appreciate it if Adrian could have a look at
-> > this too. For example, I wonder if perhaps
-> > sdhci_runtime_suspend|resume_host() should be called in these paths
-> > too.
->
-> Assuming the host controller does not lose state information, it should be fine.
->
+--xXmbgvnjoT4axfJE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
-Yes, the host always has aux. power and keep state.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-Thank you both for your comments.
+iEYEARECAAYFAmIfHQgACgkQMOfwapXb+vLxcgCghFIMSLkgbmU4bCcL4+4sOBXY
+b1QAoKETSRxn6hbtUUF5RsaX43sun2ct
+=6C0C
+-----END PGP SIGNATURE-----
 
-> >
-> >> +#endif
-> >> +
-> >>  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
-> >>  {
-> >>         struct pci_dev *pdev = slot->chip->pdev;
-> >> @@ -982,6 +1031,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
-> >>  #ifdef CONFIG_PM_SLEEP
-> >>         .resume         = sdhci_cqhci_gli_resume,
-> >>         .suspend        = sdhci_cqhci_gli_suspend,
-> >> +#endif
-> >> +#ifdef CONFIG_PM
-> >> +       .runtime_suspend = gl9763e_runtime_suspend,
-> >> +       .runtime_resume  = gl9763e_runtime_resume,
-> >> +       .allow_runtime_pm = true,
-> >>  #endif
-> >>         .add_host       = gl9763e_add_host,
-> >>  };
-> >> --
-> >> 2.35.1
-> >>
-> >
-> > Kind regards
-> > Uffe
->
-
-Best regards,
-Ben
+--xXmbgvnjoT4axfJE--
