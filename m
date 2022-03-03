@@ -2,145 +2,215 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A32B7C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Mar 2022 10:21:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A841AC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Mar 2022 10:41:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232265AbiCCKWh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Mar 2022 05:22:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47090 "EHLO
+        id S232443AbiCCKmV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Mar 2022 05:42:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232260AbiCCKWg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2022 05:22:36 -0500
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84A2448E4E
-        for <linux-mmc@vger.kernel.org>; Thu,  3 Mar 2022 02:21:50 -0800 (PST)
-Received: by mail-lf1-x133.google.com with SMTP id m14so7579680lfu.4
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Mar 2022 02:21:50 -0800 (PST)
+        with ESMTP id S232449AbiCCKmU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2022 05:42:20 -0500
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73AD017B0FC
+        for <linux-mmc@vger.kernel.org>; Thu,  3 Mar 2022 02:41:33 -0800 (PST)
+Received: by mail-lf1-x12b.google.com with SMTP id bu29so7781158lfb.0
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Mar 2022 02:41:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=YzVwY3mEdfiRjeh2nt8836txEmK+uEtk2JZC3Nb2yhk=;
-        b=j9gu4Mu0aHrDPXhX9fLc18SmXl5WKdNcVj8zUgG/jHfez5HDyr9OyMW5K/I1w4bV0n
-         3FyDjFem2mdqFd/HELZ7FQCZ16utQ2I5Z0/CDl4ifmZceSJL85dgADz05D3Fm0waPatR
-         gWtWwWZhpWz/BJZM6C8Vk92O4ir6gZk10aNCluzkdRMPkgM9508C/R22kC3AoF585IN4
-         0HNHImtsgHLkeAiz/Zsq8AzGJolAUFXeP7BQNP8+SKWXE7fF1UQvzGu4To+hAIA/d6GJ
-         DAfx7RMicH8qS89PmQS+1ClQmTMREGz68SNsPB0y1tuMaruAeBQ6AZVQXaEc+KsoeFS0
-         ab/w==
+        bh=p/He5PBfzR9b46Np3sBPyvvvufWEvrJyXSblzv0l4h0=;
+        b=IfDTZ8mnsY+X/hCoFAZGPnck06QKboadm/ipoHjQMtZ0eJpqXXd/HWh7hgdK0K6qp7
+         w8Zg5X+eS58yqGYkplFo7h2FfwKcCmnZj2glx/KsuYh0U93v6JjpZPWch3GIW0ccZYod
+         ow2PYGroE6B75BwiPgbiIj4lYCiGZXZytYEfsvgp8QmULFohUizZY4XyAA/fmY5jbu99
+         XUP5WzWej4ITjnbLZwupR9BBVUhMsb54BGLVV2dr19xZ0JeeedfJwZxz5yztjRDDRCxz
+         1gbNNQtKF9aHbZhEdy6RTDuElWrcr1uDNurfk0GaVyghTEzxy/wog9wVlQMvqmA1uKwK
+         B1kw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=YzVwY3mEdfiRjeh2nt8836txEmK+uEtk2JZC3Nb2yhk=;
-        b=m9Ir2aQyKw9yij2k0OyhgiT67PwHTFnn1u6Pd8xp9YPy8b74hXouCyRVmiNsDyep2G
-         x3EFGLuDk1Obn4G0Gd5BCmZrQynKP8NRB3UgoWVgdc0KAVmKSFGNNKCjldCZ2urMEXNI
-         v0j9scI+cdSI2Zi4h7mgwvws09hpZrH9dTMQrz+lNlqiIbIce2mj581SvoLhclmnUDJ9
-         vCpFimXvvqYRj7Pbs+SQzUTbEegu2SxTpEZ9B2Yz/XrM7yDNus+WHJLTfZnbQINVkLUI
-         vQ07dLv65BYUwsdeoMSs047okrMQzYN4++E1lMlN7oe8VEAleuH+sy3KrFS30Kiz3g9X
-         TtVw==
-X-Gm-Message-State: AOAM532Ehbo83HMKhzJdxXz3mT/TGt4I4cQw6gNvZmk5s7cioqxGYsPx
-        AJULmBjnd98Ij91chAs5cC6RI1CSYXyR6E+LS9OxKA==
-X-Google-Smtp-Source: ABdhPJyRYePCBmySOF86+bHiB9xM/7SHonPiD0jMfoAj63fevUiSyjjk2EiJRi3fN0UWBQfOhYDVdoWgep3vWddYIPg=
+        bh=p/He5PBfzR9b46Np3sBPyvvvufWEvrJyXSblzv0l4h0=;
+        b=g0GO2gTSs6YcDwndFr6T0gWFZJnEA51+O1YW6Q1NuWUGklXxniov4goZ09oTF8psNW
+         tNa7bfjReAqieNy7gIvkTeODhBtIZ1cKeDQ1SqGM91aJt8O/LEcraxeN0whRIQJeG6aA
+         1OsPiIuYmeH32450HrftGfjJmZIJ/cQGPWA18qyHbinEYLefdh2tIDbN8bot1ivFuTxv
+         OA5EVr/NdjPPhBxs4uIVv3MlqwM2nUP4r2EzEssjtNSj6hgw3xriXIHgbUukSAcK2czD
+         B52jH6nAhjSo1CN8bBP+8N/wsDkxvRmTbW4E2zquuGHEPjZyYUj2uzK9rZ+foXUPYDla
+         tJ9Q==
+X-Gm-Message-State: AOAM530ACIIicjIJmwpR75mHKNaX+X6TviKiH3u7ri7PFXwVMbG7fI4+
+        91HXRKpour74aa7EMPYsJK0/mBfdxaF27XDFcyTWKw==
+X-Google-Smtp-Source: ABdhPJyj3Rk8sSBj5VBB1o9Ac4exoe3sztkfuVm5kHNefHJL6csmr+I21vP4c/Fc2zfkpfoBhdIJbTtTJ34rKaZIbig=
 X-Received: by 2002:a05:6512:260b:b0:445:c54c:4157 with SMTP id
- bt11-20020a056512260b00b00445c54c4157mr1496331lfb.254.1646302908794; Thu, 03
- Mar 2022 02:21:48 -0800 (PST)
+ bt11-20020a056512260b00b00445c54c4157mr1540165lfb.254.1646304091630; Thu, 03
+ Mar 2022 02:41:31 -0800 (PST)
 MIME-Version: 1.0
-References: <20220303015151.1711860-1-pgwipeout@gmail.com> <CAPDyKFrk+HCbSZtB7uv6u9tjTgzFDjpB9oP9FYJUqNxcCzQ9iw@mail.gmail.com>
- <CAMdYzYrndAwWJELRRL4kP-BCdWuF6bLVwS2PUMVx_UcJZE=nsQ@mail.gmail.com>
-In-Reply-To: <CAMdYzYrndAwWJELRRL4kP-BCdWuF6bLVwS2PUMVx_UcJZE=nsQ@mail.gmail.com>
+References: <27DDB061-1235-4F4C-B6A8-F035D77AC9CF@goldelico.com>
+ <CAPDyKFrz_2Vp64SUzB8CiHJLTjO8Hx8m3QEhY1VU2ksZhVEx7A@mail.gmail.com>
+ <20220302082034.GA5723@math.uni-bielefeld.de> <6715A5BE-CA64-4A3D-8EE5-5BEEB63F268A@goldelico.com>
+In-Reply-To: <6715A5BE-CA64-4A3D-8EE5-5BEEB63F268A@goldelico.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 3 Mar 2022 11:21:12 +0100
-Message-ID: <CAPDyKFp8tZ-Ty0Wo2jkTjr6Jun83QczQfQRQ1zvFBBCOCWjtng@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: fix handling invalid clock rates
-To:     Peter Geis <pgwipeout@gmail.com>
-Cc:     Robin Murphy <robin.murphy@arm.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Heiko Stuebner <heiko@sntech.de>,
-        Addy Ke <addy.ke@rock-chips.com>,
-        Doug Anderson <dianders@chromium.org>,
-        linux-mmc@vger.kernel.org,
-        arm-mail-list <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Thu, 3 Mar 2022 11:40:55 +0100
+Message-ID: <CAPDyKFqMs6FsJHVOoVmZxzBPgUdLoqa-xeLfvkQi1pn=8k1h6Q@mail.gmail.com>
+Subject: Re: [BUG] mmc: core: adjust polling interval for CMD1
+To:     Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Huijin Park <huijin.park@samsung.com>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 3 Mar 2022 at 10:49, Peter Geis <pgwipeout@gmail.com> wrote:
+On Wed, 2 Mar 2022 at 10:40, H. Nikolaus Schaller <hns@goldelico.com> wrote:
 >
-> On Thu, Mar 3, 2022 at 2:53 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > On Thu, 3 Mar 2022 at 02:52, Peter Geis <pgwipeout@gmail.com> wrote:
-> > >
-> > > The Rockchip ciu clock cannot be set as low as the dw-mmc hardware
-> > > supports. This leads to a situation during card initialization where the
-> > > ciu clock is set lower than the clock driver can support. The
-> > > dw-mmc-rockchip driver spews errors when this happens.
-> > > For normal operation this only happens a few times during boot, but when
-> > > cd-broken is enabled (in cases such as the SoQuartz module) this fires
-> > > multiple times each poll cycle.
-> > >
-> > > Fix this by testing the minimum frequency the clock driver can support
-> > > that is within the mmc specification, then divide that by the internal
-> > > clock divider. Set the f_min frequency to this value, or if it fails,
-> > > set f_min to the downstream driver's default.
-> > >
-> > > Fixes: f629ba2c04c9 ("mmc: dw_mmc: add support for RK3288")
-> > >
-> > > Signed-off-by: Peter Geis <pgwipeout@gmail.com>
-> > > ---
-> > >  drivers/mmc/host/dw_mmc-rockchip.c | 31 ++++++++++++++++++++++++++----
-> > >  1 file changed, 27 insertions(+), 4 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> > > index 95d0ec0f5f3a..c198590cd74a 100644
-> > > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > > @@ -15,7 +15,9 @@
-> > >  #include "dw_mmc.h"
-> > >  #include "dw_mmc-pltfm.h"
-> > >
-> > > -#define RK3288_CLKGEN_DIV       2
-> > > +#define RK3288_CLKGEN_DIV      2
-> > > +#define RK3288_MIN_INIT_FREQ   375000
-> > > +#define MMC_MAX_INIT_FREQ      400000
-> > >
-> > >  struct dw_mci_rockchip_priv_data {
-> > >         struct clk              *drv_clk;
-> > > @@ -27,6 +29,7 @@ struct dw_mci_rockchip_priv_data {
-> > >  static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> > >  {
-> > >         struct dw_mci_rockchip_priv_data *priv = host->priv;
-> > > +       struct mmc_host *mmc = mmc_from_priv(host);
-> > >         int ret;
-> > >         unsigned int cclkin;
-> > >         u32 bus_hz;
-> > > @@ -34,6 +37,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> > >         if (ios->clock == 0)
-> > >                 return;
-> > >
-> > > +       /* the clock will fail if below the f_min rate */
-> > > +       if (ios->clock < mmc->f_min)
-> > > +               ios->clock = mmc->f_min;
-> > > +
-> >
-> > You shouldn't need this. The mmc core should manage this already.
+> Hi,
 >
-> I thought so too, but while setting f_min did reduce the number of
-> errors, it didn't stop them completely.
-> Each tick I was getting three failures, it turns out mmc core tries
-> anyways with 300000, 200000, and 100000.
-> Clamping it here was necessary to stop these.
+> > Am 02.03.2022 um 09:20 schrieb Jean Rene Dawin <jdawin@math.uni-bielefeld.de>:
+> >
+> > Ulf Hansson wrote on Tue  1/03/22 14:38:
+> >> On Thu, 17 Feb 2022 at 21:12, H. Nikolaus Schaller <hns@goldelico.com> wrote:
+> >>>
+> >>
+> >> From: Ulf Hansson <ulf.hansson@linaro.org>
+> >> Date: Tue, 1 Mar 2022 14:24:21 +0100
+> >> Subject: [PATCH] mmc: core: Extend timeout to 2s for MMC_SEND_OP_COND
+> >>
+> >> It looks like the timeout for the MMC_SEND_OP_COND (CMD1) might have become
+> >> a bit too small due to recent changes. Therefore, let's extend it to 2s,
+> >> which is probably more inline with its previous value, to fix the reported
+> >> timeout problems.
+> >>
+> >> While at it, let's add a define for the timeout value, rather than using
+> >> a hard-coded value for it.
+> >>
+> >> Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+> >> Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+> >> Cc: Huijin Park <huijin.park@samsung.com>
+> >> Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
+> >> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >> ---
+> >> drivers/mmc/core/mmc_ops.c | 4 +++-
+> >> 1 file changed, 3 insertions(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> >> index d63d1c735335..1f57174b3cf3 100644
+> >> --- a/drivers/mmc/core/mmc_ops.c
+> >> +++ b/drivers/mmc/core/mmc_ops.c
+> >> @@ -21,6 +21,7 @@
+> >>
+> >> #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
+> >> #define MMC_SANITIZE_TIMEOUT_MS                (240 * 1000) /* 240s */
+> >> +#define MMC_OP_COND_TIMEOUT_MS         2000 /* 2s */
+> >>
+> >> static const u8 tuning_blk_pattern_4bit[] = {
+> >>        0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> >> @@ -232,7 +233,8 @@ int mmc_send_op_cond(struct mmc_host *host, u32
+> >> ocr, u32 *rocr)
+> >>        cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
+> >>        cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+> >>
+> >> -       err = __mmc_poll_for_busy(host, 1000, &__mmc_send_op_cond_cb, &cb_data);
+> >> +       err = __mmc_poll_for_busy(host, MMC_OP_COND_TIMEOUT_MS,
+> >> +                                 &__mmc_send_op_cond_cb, &cb_data);
+> >>        if (err)
+> >>                return err;
+> >>
+> >> --
+> >> 2.25.1
+> >
+> > Hi,
+> >
+> > thanks. But testing with this patch still gives the same errors:
+> >
+> > [   52.259940] mmc1: Card stuck being busy! __mmc_poll_for_busy
+> > [   52.273380] mmc1: error -110 doing runtime resume
+> >
+> > and the system gets stuck eventually.
+>
+> Same result from my tests.
+>
+> BR and thanks,
+> Nikolaus
 
-Ohh, that was certainly a surprise to me. Unless the dw_mmc driver
-invokes this path on it's own in some odd way, that means the mmc core
-has a bug that we need to fix.
+Alright, it starts to sound like we might need a revert (or at least a
+way to restore the previous behaviour) - even if that would just paper
+over the real problem. The real problem is more likely related to how
+the host driver manages restoring of the power to the card, which
+happens when runtime resuming it.
 
-Would you mind taking a stack trace or debug this so we understand in
-what case the mmc core doesn't respect f_min? It really should.
+In any case, just to make sure the loop timeout itself isn't the
+problem, can you run the below debug patch please? The intent is to
+figure out how long the worst case timeout is, when it's working with
+CMD1. As soon as the timeout exceeds the worst case, there is a
+message printed to the log.
 
-[...]
+The below patch is based upon that the offending commit has been reverted.
 
 Kind regards
 Uffe
+
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 3 Mar 2022 11:00:04 +0100
+Subject: [PATCH] mmc: core: DEBUG - Measure and log worst case CMD1 loop
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/mmc_ops.c | 11 +++++++++++
+ include/linux/mmc/host.h   |  1 +
+ 2 files changed, 12 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 9946733a34c6..3f03d9e8a3a4 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -177,11 +177,15 @@ int mmc_send_op_cond(struct mmc_host *host, u32
+ocr, u32 *rocr)
+ {
+        struct mmc_command cmd = {};
+        int i, err = 0;
++       s64 cmd1_ms;
++       ktime_t time_start;
+
+        cmd.opcode = MMC_SEND_OP_COND;
+        cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
+        cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+
++       time_start = ktime_get();
++
+        for (i = 100; i; i--) {
+                err = mmc_wait_for_cmd(host, &cmd, 0);
+                if (err)
+@@ -211,6 +215,13 @@ int mmc_send_op_cond(struct mmc_host *host, u32
+ocr, u32 *rocr)
+                        cmd.arg = cmd.resp[0] | BIT(30);
+        }
+
++       cmd1_ms = ktime_to_ms(ktime_sub(ktime_get(), time_start));
++       if (!err && cmd1_ms > host->cmd1_ms) {
++               pr_warn("%s: CMD1 timeout increased to %lld ms, loop=%d\n",
++                       mmc_hostname(host), cmd1_ms, i);
++               host->cmd1_ms = cmd1_ms;
++       }
++
+        if (rocr && !mmc_host_is_spi(host))
+                *rocr = cmd.resp[0];
+
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 7afb57cab00b..c2ca3bb05620 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -301,6 +301,7 @@ struct mmc_host {
+        unsigned int            f_min;
+        unsigned int            f_max;
+        unsigned int            f_init;
++       s64                     cmd1_ms;
+        u32                     ocr_avail;
+        u32                     ocr_avail_sdio; /* SDIO-specific OCR */
+        u32                     ocr_avail_sd;   /* SD-specific OCR */
+-- 
+2.25.1
