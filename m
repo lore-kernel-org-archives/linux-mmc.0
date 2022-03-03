@@ -2,118 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9348AC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Mar 2022 12:49:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DC2EC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Mar 2022 12:59:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231994AbiCCMuJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Mar 2022 07:50:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47200 "EHLO
+        id S232836AbiCCNAF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Mar 2022 08:00:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231899AbiCCMuI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2022 07:50:08 -0500
-Received: from albert.telenet-ops.be (albert.telenet-ops.be [IPv6:2a02:1800:110:4::f00:1a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FE9E15F35A
-        for <linux-mmc@vger.kernel.org>; Thu,  3 Mar 2022 04:49:22 -0800 (PST)
-Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed40:6495:14e6:1343:3ecb])
-        by albert.telenet-ops.be with bizsmtp
-        id 1opL2700S5ER6nL06opLui; Thu, 03 Mar 2022 13:49:21 +0100
-Received: from rox.of.borg ([192.168.97.57])
-        by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.93)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1nPktU-002Xsp-1f; Thu, 03 Mar 2022 13:49:20 +0100
-Received: from geert by rox.of.borg with local (Exim 4.93)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1nPktT-008DJh-H7; Thu, 03 Mar 2022 13:49:19 +0100
-From:   Geert Uytterhoeven <geert+renesas@glider.be>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        with ESMTP id S232216AbiCCNAE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2022 08:00:04 -0500
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 120F6186401
+        for <linux-mmc@vger.kernel.org>; Thu,  3 Mar 2022 04:59:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=+zuLWDvY47l2QhKFya80zi6klr5b
+        9SDt5QSVmt2GKEg=; b=GORGXtHgMRBcwQvtRe2TtSnt0AXuh5V5s1xikpmAXug/
+        F1sm5g5JXtnKBs18Y4vXtsDpxxsNiu42Yd6n8SL1gKp/O3ELqTwFToeug3ZTKeAe
+        0m7JplsLg2X8six+j0Tz2VWVljH2ts1ojKA6qR0X/rQF6jj9V4xoRz+neQXnimc=
+Received: (qmail 519150 invoked from network); 3 Mar 2022 13:59:15 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Mar 2022 13:59:15 +0100
+X-UD-Smtp-Session: l3s3148p1@yD8a90/ZKrggAQnoAG9rAEypTKKqokJH
+Date:   Thu, 3 Mar 2022 13:59:14 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Shawn Guo <shawnguo@kernel.org>, Li Yang <leoyang.li@nxp.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH] mmc: Drop commas after SoC match table sentinels
+Message-ID: <YiC7ohnjtmMUHUZI@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>, Li Yang <leoyang.li@nxp.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] mmc: Drop commas after SoC match table sentinels
-Date:   Thu,  3 Mar 2022 13:49:18 +0100
-Message-Id: <9050fa278eaaa9e6ec719a3b158a2fad285560d0.1646311673.git.geert+renesas@glider.be>
-X-Mailer: git-send-email 2.25.1
+        Shawn Guo <shawnguo@kernel.org>, Li Yang <leoyang.li@nxp.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+References: <9050fa278eaaa9e6ec719a3b158a2fad285560d0.1646311673.git.geert+renesas@glider.be>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="rRw9Qb0a4golC+UA"
+Content-Disposition: inline
+In-Reply-To: <9050fa278eaaa9e6ec719a3b158a2fad285560d0.1646311673.git.geert+renesas@glider.be>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It does not make sense to have a comma after a sentinel, as any new
-elements must be added before the sentinel.
 
-Add comments to clarify the purpose of the empty elements.
+--rRw9Qb0a4golC+UA
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  2 +-
- drivers/mmc/host/sdhci-of-esdhc.c             | 10 +++++-----
- 2 files changed, 6 insertions(+), 6 deletions(-)
+On Thu, Mar 03, 2022 at 01:49:18PM +0100, Geert Uytterhoeven wrote:
+> It does not make sense to have a comma after a sentinel, as any new
+> elements must be added before the sentinel.
+>=20
+> Add comments to clarify the purpose of the empty elements.
+>=20
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 9d2c600fd4ce2484..1685df00863b941a 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -212,7 +212,7 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
- 	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
- 	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
- 	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
--	{ /* Sentinel. */ },
-+	{ /* Sentinel. */ }
- };
- 
- static const struct renesas_sdhi_of_data_with_quirks of_r8a7795_compatible = {
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 0f3658b36513c681..d9dc41143bb35d49 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -934,7 +934,7 @@ static struct soc_device_attribute soc_tuning_erratum_type1[] = {
- 	{ .family = "QorIQ T1040", },
- 	{ .family = "QorIQ T2080", },
- 	{ .family = "QorIQ LS1021A", },
--	{ },
-+	{ /* sentinel */ }
- };
- 
- static struct soc_device_attribute soc_tuning_erratum_type2[] = {
-@@ -944,7 +944,7 @@ static struct soc_device_attribute soc_tuning_erratum_type2[] = {
- 	{ .family = "QorIQ LS1080A", },
- 	{ .family = "QorIQ LS2080A", },
- 	{ .family = "QorIQ LA1575A", },
--	{ },
-+	{ /* sentinel */ }
- };
- 
- static void esdhc_tuning_block_enable(struct sdhci_host *host, bool enable)
-@@ -1316,21 +1316,21 @@ static const struct sdhci_pltfm_data sdhci_esdhc_le_pdata = {
- static struct soc_device_attribute soc_incorrect_hostver[] = {
- 	{ .family = "QorIQ T4240", .revision = "1.0", },
- 	{ .family = "QorIQ T4240", .revision = "2.0", },
--	{ },
-+	{ /* sentinel */ }
- };
- 
- static struct soc_device_attribute soc_fixup_sdhc_clkdivs[] = {
- 	{ .family = "QorIQ LX2160A", .revision = "1.0", },
- 	{ .family = "QorIQ LX2160A", .revision = "2.0", },
- 	{ .family = "QorIQ LS1028A", .revision = "1.0", },
--	{ },
-+	{ /* sentinel */ }
- };
- 
- static struct soc_device_attribute soc_unreliable_pulse_detection[] = {
- 	{ .family = "QorIQ LX2160A", .revision = "1.0", },
- 	{ .family = "QorIQ LX2160A", .revision = "2.0", },
- 	{ .family = "QorIQ LS1028A", .revision = "1.0", },
--	{ },
-+	{ /* sentinel */ }
- };
- 
- static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
--- 
-2.25.1
+Obviously correct:
 
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--rRw9Qb0a4golC+UA
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmIgu58ACgkQFA3kzBSg
+KbaDFQ//UAx8sannbjkRsy8CdmIsVIiE+YMkiJQJiy/qqYRPkncxaYGDeTh3CG2d
+1NOcHGOWqvTheNjNZX20WZ0B+91xhr6ueFypcYEs1AZlw9O3oZ/17tybM/b4flMS
+BGA28CcmbUbkPaz7MuT/nR2qd5RBcc06C2i3jleAeYQTv9kRehA/7bVQK/A4oVuR
+02R6hlzu6AGSMAQVUvDyBTc8OsTYcRlxgr4ScCX76p5+iuxLz2bNqF5iMkoWTLkI
+F4DugiGFtLMmpgpXsrgIzwSMvEa/RGfVFwm8e6yBLKrdc+5+/NUJQT7V8A3PTf66
+YvDFn7JJMb8pVi3pVxoq6eCsdo8iTsruegyCaFhnNlDo7TRyErDUVsCljiqDgro5
+RNFEzPFwFb7/dbc/IErUtiKIQ+OUbeXGrFnEWtUnjeGliaFbr9X0d7SlOwO3t1LE
+oINvPE5SquOW+N025rLrtA6OqnEP7jYrDhUwkITjPEpt5lVbXRYc/4iOeVFGoYR2
+lSrrAX4eFqSGErnE1gIr2P36Jl548ur+8FkaOw/pA6JqugPor8HViooacNk/G5vX
+SCHbAU1pZoAD6Ri8byOZRRoolNCzUh3axAWwtGHV9050OnKgIDMrCh5sU84J+LoW
+U+OF0O4kUD7c+1cOwBBl8sgv+CUDu/TnaGeVvRi+RuNlsUImQ6E=
+=Uxad
+-----END PGP SIGNATURE-----
+
+--rRw9Qb0a4golC+UA--
