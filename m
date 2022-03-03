@@ -2,58 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9350EC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Mar 2022 21:30:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60ABCC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Mar 2022 21:31:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234403AbiCCVbL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Mar 2022 16:31:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55738 "EHLO
+        id S236397AbiCCVcG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Mar 2022 16:32:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57526 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233108AbiCCVbK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2022 16:31:10 -0500
-Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AC89166E31;
-        Thu,  3 Mar 2022 13:30:24 -0800 (PST)
-Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-2dbd8777564so71265067b3.0;
-        Thu, 03 Mar 2022 13:30:24 -0800 (PST)
+        with ESMTP id S231768AbiCCVcF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2022 16:32:05 -0500
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53B86166E31;
+        Thu,  3 Mar 2022 13:31:18 -0800 (PST)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-2dbfe58670cso71052327b3.3;
+        Thu, 03 Mar 2022 13:31:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=gSf4XqVZpmT23Xr2ZX9FwNJnPLIGiC4vINDwuY1D360=;
-        b=actHS3mVoDg2rVOMxvcJgIehT4d7j3IhXrEOgR0Pl2sY1NC17ai8XMF+gGROSKqqVG
-         y7Sd+Jefq9x0fRy2Qnmq8l2m2p3kVVndBGHZlsX3mnBFQnJL3xSXCG4X23+esMlNPL6/
-         9vsAnzuP5gePXHpPejDcTs8yBo3VitwvagZxLJd40WXIdd8NMMlxuZExOUAVk1nbnwCq
-         anANG9aUah+EcyVSl1rIRKo3ajo+B4YXgoMqbG4LqjlVIMJtvLbhLZ2T57R8egIaF3z2
-         OqO5UUumBzM988xwcs91SEgo3xGFSguQ0WLvoMQSipOI99h+mgn/a12CP0NoPTr8/JdV
-         Eo1g==
+        bh=QNfKZMMKziUoL1dbgKyTvgeSMX2xqKvBZZHesE5dGSE=;
+        b=ljCPXBT7kCLlCBtRr+GUEScUoSqwhmMm61CWTz4QuukXEximFyV+hlmC6jxR/xMquh
+         7GwHSDZxEMPpRYWlpYMPBj/pUX3uqkSLI22DaWjRNwMNcqh/VLo4ewSgfopRBsKUwKVL
+         ptPDGFR2dA3u5nGVRXyEhzKIYePQCkXZmpPfjbDomCMJO7SK5GEeTMTALoGGr3wdJt6a
+         aUg9zxwOpQniKud5eqc0RU4QuFtKrWKRKwoUTxkV6PU750t6hfqXURbiSIxfAcyr/FxD
+         7RXpjBPEh/eR7wNb6DO8Aj4sUObDEYNRPpAY503qMU2DpiMJJ0msBijlLh8YW4uKs9z+
+         Iv7g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=gSf4XqVZpmT23Xr2ZX9FwNJnPLIGiC4vINDwuY1D360=;
-        b=aVdmdqcCb6ElTF8O/0awWbk3hk/CAqk49W667gGZI3pMDIE+ZmcX4gLr9OpBiZzH93
-         trnOkNJw4JqRaqsyjrbWZYQcy8Ubp44E61GLqxOHH1O9LlerpuY8QJRHJXusWTrpkkBY
-         MD3W59Q+b8lBGr5h2K+bt3KO1eOL7FiC57lPaeXU9szvDSN0VIywmGRGQQmRDUVsphH7
-         37ykV9rFbM5qe8xZnEEi/MZEIkLnD16xZTOVndns9w+BfUQWQIVTjxBpfNU5hQnUY0uK
-         m02RN/ZZeLlLLxZfcwKDGH0/sRUuJsB/Mb5NEvhqpcr3DmRZnlqt3Jw/U1Ur6N6NiH1K
-         hAJg==
-X-Gm-Message-State: AOAM532ZKmnWlSRkm4+gTQe73K420tQS2djUp3+YhqXxcydAJ2jJGmDC
-        CMcRvr231nbTVoy0agZZkkyy72maHI91pPpMVic=
-X-Google-Smtp-Source: ABdhPJxbeN2ZVZQxcoylq4D0YplTVnFvbUdRvpY3EGQd96NETA96fQjAnlpJbzAFt+Fap0SxoBv1SOqGfHz9WzO9914=
-X-Received: by 2002:a0d:e082:0:b0:2dc:505b:dd20 with SMTP id
- j124-20020a0de082000000b002dc505bdd20mr2981033ywe.502.1646343023524; Thu, 03
- Mar 2022 13:30:23 -0800 (PST)
+        bh=QNfKZMMKziUoL1dbgKyTvgeSMX2xqKvBZZHesE5dGSE=;
+        b=30BxnrTFxzLNVtrfkr33iNEkI7xs6VRgKEYwoav4DjsB+tiY72CHj4Bdna94PCxbNP
+         wOikBhhmt9AXQQqSn7bYVmGMJHD6Gs+QTTzXLnjtzUNd4PBBAFa3lOKHsQDe+kQq0euO
+         ARSKU+AYWGngAEBA3qrC2OEB7lblYl4VaMM4fv5jIx/Xg5p+OAiGxkz/lC0ocJfeCMWg
+         lCGeVV/mH5Qu6Rekj5gykPEZ3djVLNjWELrnn1q5hDeiSr6soj3geJnSCG1tKvBtm413
+         oFXqlxfO75T/yMXoeap6TnxlNZGLwdXD/Th+2fQac2izNDkikpOz9sUGs5nUK0VWrrLz
+         xR/A==
+X-Gm-Message-State: AOAM533Sk6fFFS+xnOGaBuChOfFhfxN+yNftArceuCwNEQwvqRQAGENL
+        Sfbmd9fRr+Y/0scUBu3EE74groYXqysFbgLbZTs=
+X-Google-Smtp-Source: ABdhPJxH4H8OaBQDItbgQF521yYplb1Gjv67ZCeHiqcOfboIqpFvQONrxrQNM0ENsmVMT0wfWjHo5NYbiu8nHSakp6w=
+X-Received: by 2002:a81:b147:0:b0:2d7:68b8:de55 with SMTP id
+ p68-20020a81b147000000b002d768b8de55mr36338788ywh.281.1646343077491; Thu, 03
+ Mar 2022 13:31:17 -0800 (PST)
 MIME-Version: 1.0
-References: <20220303015151.1711860-1-pgwipeout@gmail.com> <07977a52-a492-4568-7259-7f213af0b0b0@arm.com>
-In-Reply-To: <07977a52-a492-4568-7259-7f213af0b0b0@arm.com>
+References: <20220303015151.1711860-1-pgwipeout@gmail.com> <CAPDyKFrk+HCbSZtB7uv6u9tjTgzFDjpB9oP9FYJUqNxcCzQ9iw@mail.gmail.com>
+ <CAMdYzYrndAwWJELRRL4kP-BCdWuF6bLVwS2PUMVx_UcJZE=nsQ@mail.gmail.com>
+ <CAPDyKFp8tZ-Ty0Wo2jkTjr6Jun83QczQfQRQ1zvFBBCOCWjtng@mail.gmail.com> <05ffc792-17cf-64f8-d3fd-4f7658aa6722@arm.com>
+In-Reply-To: <05ffc792-17cf-64f8-d3fd-4f7658aa6722@arm.com>
 From:   Peter Geis <pgwipeout@gmail.com>
-Date:   Thu, 3 Mar 2022 16:30:12 -0500
-Message-ID: <CAMdYzYp3p2pX2raHHWpmmgVnZU4zEohYWeCJ+0C_YeOg12V=NA@mail.gmail.com>
+Date:   Thu, 3 Mar 2022 16:31:06 -0500
+Message-ID: <CAMdYzYpEhoU+0RVkDgoo3c49Pa8q-oeqd=sp7y8SYsvwDPOP0g@mail.gmail.com>
 Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: fix handling invalid clock rates
 To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
         Heiko Stuebner <heiko@sntech.de>,
         Addy Ke <addy.ke@rock-chips.com>,
         Doug Anderson <dianders@chromium.org>,
@@ -66,128 +68,88 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 3, 2022 at 6:53 AM Robin Murphy <robin.murphy@arm.com> wrote:
+On Thu, Mar 3, 2022 at 10:19 AM Robin Murphy <robin.murphy@arm.com> wrote:
 >
-> On 2022-03-03 01:51, Peter Geis wrote:
-> > The Rockchip ciu clock cannot be set as low as the dw-mmc hardware
-> > supports.
+> On 2022-03-03 10:21, Ulf Hansson wrote:
+> > On Thu, 3 Mar 2022 at 10:49, Peter Geis <pgwipeout@gmail.com> wrote:
+> >>
+> >> On Thu, Mar 3, 2022 at 2:53 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >>>
+> >>> On Thu, 3 Mar 2022 at 02:52, Peter Geis <pgwipeout@gmail.com> wrote:
+> >>>>
+> >>>> The Rockchip ciu clock cannot be set as low as the dw-mmc hardware
+> >>>> supports. This leads to a situation during card initialization where the
+> >>>> ciu clock is set lower than the clock driver can support. The
+> >>>> dw-mmc-rockchip driver spews errors when this happens.
+> >>>> For normal operation this only happens a few times during boot, but when
+> >>>> cd-broken is enabled (in cases such as the SoQuartz module) this fires
+> >>>> multiple times each poll cycle.
+> >>>>
+> >>>> Fix this by testing the minimum frequency the clock driver can support
+> >>>> that is within the mmc specification, then divide that by the internal
+> >>>> clock divider. Set the f_min frequency to this value, or if it fails,
+> >>>> set f_min to the downstream driver's default.
+> >>>>
+> >>>> Fixes: f629ba2c04c9 ("mmc: dw_mmc: add support for RK3288")
+> >>>>
+> >>>> Signed-off-by: Peter Geis <pgwipeout@gmail.com>
+> >>>> ---
+> >>>>   drivers/mmc/host/dw_mmc-rockchip.c | 31 ++++++++++++++++++++++++++----
+> >>>>   1 file changed, 27 insertions(+), 4 deletions(-)
+> >>>>
+> >>>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> >>>> index 95d0ec0f5f3a..c198590cd74a 100644
+> >>>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> >>>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> >>>> @@ -15,7 +15,9 @@
+> >>>>   #include "dw_mmc.h"
+> >>>>   #include "dw_mmc-pltfm.h"
+> >>>>
+> >>>> -#define RK3288_CLKGEN_DIV       2
+> >>>> +#define RK3288_CLKGEN_DIV      2
+> >>>> +#define RK3288_MIN_INIT_FREQ   375000
+> >>>> +#define MMC_MAX_INIT_FREQ      400000
+> >>>>
+> >>>>   struct dw_mci_rockchip_priv_data {
+> >>>>          struct clk              *drv_clk;
+> >>>> @@ -27,6 +29,7 @@ struct dw_mci_rockchip_priv_data {
+> >>>>   static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> >>>>   {
+> >>>>          struct dw_mci_rockchip_priv_data *priv = host->priv;
+> >>>> +       struct mmc_host *mmc = mmc_from_priv(host);
+> >>>>          int ret;
+> >>>>          unsigned int cclkin;
+> >>>>          u32 bus_hz;
+> >>>> @@ -34,6 +37,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> >>>>          if (ios->clock == 0)
+> >>>>                  return;
+> >>>>
+> >>>> +       /* the clock will fail if below the f_min rate */
+> >>>> +       if (ios->clock < mmc->f_min)
+> >>>> +               ios->clock = mmc->f_min;
+> >>>> +
+> >>>
+> >>> You shouldn't need this. The mmc core should manage this already.
+> >>
+> >> I thought so too, but while setting f_min did reduce the number of
+> >> errors, it didn't stop them completely.
+> >> Each tick I was getting three failures, it turns out mmc core tries
+> >> anyways with 300000, 200000, and 100000.
+> >> Clamping it here was necessary to stop these.
+> >
+> > Ohh, that was certainly a surprise to me. Unless the dw_mmc driver
+> > invokes this path on it's own in some odd way, that means the mmc core
+> > has a bug that we need to fix.
+> >
+> > Would you mind taking a stack trace or debug this so we understand in
+> > what case the mmc core doesn't respect f_min? It really should.
 >
-> Isn't that specific to RK3568, per the downstream fix? Certainly my
-> RK3399 has no problem if I simulate polling by plugging in an empty adapter:
->
-> [499969.392530] mmc_host mmc1: Bus speed (slot 0) = 400000Hz (slot req
-> 400000Hz, actual 400000HZ div = 0)
-> [499969.467709] mmc_host mmc1: Bus speed (slot 0) = 300000Hz (slot req
-> 300000Hz, actual 300000HZ div = 0)
-> [499969.545975] mmc_host mmc1: Bus speed (slot 0) = 200000Hz (slot req
-> 200000Hz, actual 200000HZ div = 0)
-> [499969.629824] mmc_host mmc1: Bus speed (slot 0) = 100000Hz (slot req
-> 100000Hz, actual 100000HZ div = 0)
->
-> Even though every card within arm's reach of my desk does seem happy to
-> identify at 400KHz, there are apparently some that only work towards the
-> lower end of the range, so it's less than ideal to impose this
-> limitation where it isn't necessary.
+> I'm only armed with grep and a hunch, but is dw_mci_init_slot_caps()
+> stomping on the same f_min that we've set in the platform init hook?
 
-Thanks for the insight!
-In the V2 I'll change this to use the lowest supported frequency.
-I'm also going to explore what's different in the rk3399 clock tree
-from the rk356x clock tree.
+I suspected this originally, but no, f_min remains intact, so it's
+something else.
+Also, this clamp wouldn't work if f_min got clobbered.
 
 >
 > Robin.
->
-> > This leads to a situation during card initialization where the
-> > ciu clock is set lower than the clock driver can support. The
-> > dw-mmc-rockchip driver spews errors when this happens.
-> > For normal operation this only happens a few times during boot, but when
-> > cd-broken is enabled (in cases such as the SoQuartz module) this fires
-> > multiple times each poll cycle.
-> >
-> > Fix this by testing the minimum frequency the clock driver can support
-> > that is within the mmc specification, then divide that by the internal
-> > clock divider. Set the f_min frequency to this value, or if it fails,
-> > set f_min to the downstream driver's default.
-> >
-> > Fixes: f629ba2c04c9 ("mmc: dw_mmc: add support for RK3288")
-> >
-> > Signed-off-by: Peter Geis <pgwipeout@gmail.com>
-> > ---
-> >   drivers/mmc/host/dw_mmc-rockchip.c | 31 ++++++++++++++++++++++++++----
-> >   1 file changed, 27 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> > index 95d0ec0f5f3a..c198590cd74a 100644
-> > --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> > +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> > @@ -15,7 +15,9 @@
-> >   #include "dw_mmc.h"
-> >   #include "dw_mmc-pltfm.h"
-> >
-> > -#define RK3288_CLKGEN_DIV       2
-> > +#define RK3288_CLKGEN_DIV    2
-> > +#define RK3288_MIN_INIT_FREQ 375000
-> > +#define MMC_MAX_INIT_FREQ    400000
-> >
-> >   struct dw_mci_rockchip_priv_data {
-> >       struct clk              *drv_clk;
-> > @@ -27,6 +29,7 @@ struct dw_mci_rockchip_priv_data {
-> >   static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> >   {
-> >       struct dw_mci_rockchip_priv_data *priv = host->priv;
-> > +     struct mmc_host *mmc = mmc_from_priv(host);
-> >       int ret;
-> >       unsigned int cclkin;
-> >       u32 bus_hz;
-> > @@ -34,6 +37,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> >       if (ios->clock == 0)
-> >               return;
-> >
-> > +     /* the clock will fail if below the f_min rate */
-> > +     if (ios->clock < mmc->f_min)
-> > +             ios->clock = mmc->f_min;
-> > +
-> >       /*
-> >        * cclkin: source clock of mmc controller
-> >        * bus_hz: card interface clock generated by CLKGEN
-> > @@ -51,7 +58,7 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-> >
-> >       ret = clk_set_rate(host->ciu_clk, cclkin);
-> >       if (ret)
-> > -             dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> > +             dev_warn(host->dev, "failed to set rate %uHz err: %d\n", cclkin, ret);
-> >
-> >       bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
-> >       if (bus_hz != host->bus_hz) {
-> > @@ -290,13 +297,29 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
-> >
-> >   static int dw_mci_rockchip_init(struct dw_mci *host)
-> >   {
-> > +     struct mmc_host *mmc = mmc_from_priv(host);
-> > +     int ret;
-> > +
-> >       /* It is slot 8 on Rockchip SoCs */
-> >       host->sdio_id0 = 8;
-> >
-> > -     if (of_device_is_compatible(host->dev->of_node,
-> > -                                 "rockchip,rk3288-dw-mshc"))
-> > +     if (of_device_is_compatible(host->dev->of_node, "rockchip,rk3288-dw-mshc")) {
-> >               host->bus_hz /= RK3288_CLKGEN_DIV;
-> >
-> > +             /* clock driver will fail if the clock is less than the lowest source clock
-> > +              * divided by the internal clock divider. Test for the lowest available
-> > +              * clock and set the f_min freq to clock / clock divider. If we fail, set
-> > +              * it to the downstream hardcoded value.
-> > +              */
-> > +             ret = clk_round_rate(host->ciu_clk, MMC_MAX_INIT_FREQ * RK3288_CLKGEN_DIV);
-> > +             if (ret < 0) {
-> > +                     dev_warn(host->dev, "mmc safe rate failed: %d\n", ret);
-> > +                     mmc->f_min = RK3288_MIN_INIT_FREQ;
-> > +             } else {
-> > +                     mmc->f_min = ret / RK3288_CLKGEN_DIV;
-> > +             }
-> > +     }
-> > +
-> >       return 0;
-> >   }
-> >
