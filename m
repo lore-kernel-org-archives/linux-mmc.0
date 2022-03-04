@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0BA2C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 13:52:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED377C43217
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 13:52:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235713AbiCDNx2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Mar 2022 08:53:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38098 "EHLO
+        id S236609AbiCDNx3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Mar 2022 08:53:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231605AbiCDNx1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 08:53:27 -0500
+        with ESMTP id S234671AbiCDNx2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 08:53:28 -0500
 Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7765F33EB9;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 778453CA63;
         Fri,  4 Mar 2022 05:52:37 -0800 (PST)
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 224BrQTP011332;
-        Fri, 4 Mar 2022 14:51:49 +0100
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 224BsWNn027044;
+        Fri, 4 Mar 2022 14:51:47 +0100
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : mime-version :
  content-transfer-encoding : content-type; s=selector1;
- bh=tbU0qOc6Ayx6hnhXQ94zwIDGkMujBZbQs9NbPVdBY5A=;
- b=xTD9vKiQCmfnFprZmglcB5VgO+UPllnPsraMHR7AjH/CQpzG459UvGxKnuppKF7l3phZ
- O5DrbC4o7iq/H/OHufsZQu25IFcemolPNTOK+y3iprzO4ek4r7m0kqOFSGZX5XYIjjAb
- AX4jJbPI9lpjQs0I9JEGu1LeMT3IddwRABqkJiMVBVNhnUCaUsnMQigYTy17CP/Mlvcr
- 1Go75TThmKHtS8jbmBRCVHJhmQjNMkx2rsHpujwkyYwZFISvdr/Y9kOshHoV/T8Jpp+v
- bGKh0kpEr7M1rx8PZ/g7guIEhZNtXz8V0waxHONJL24IYvNfBmpwj3GIza4raQAvZgi/ zQ== 
+ bh=yG2HlQUVVcKdPHhJLDBcI8iIPMmmChs9y0unwzPfcW8=;
+ b=KZ4DoPUyPhrUbK8Ynakguzw0ymd9Ak+sX7T+7rL5n2Ikf976kGd5CtfAcST2e9tmTdj6
+ DkP912YQg4M18Dj6Kl7zt28ySFDolR+PkiLn8C9EGxmBJL9zOoaFcn7DZ8Ak3LIXN7P7
+ D8LamAgQ4Gh18If+mDqJsy6Nst8bF8VESFVPMf/RVxV1RotgMnVaxOfK/LlwvNEu7CLT
+ tkTogtL0uFq3N4V8mzKJdR2tcPNa0kpEW9yEegkV5oBFK5pNDmdO5j4HEYmAyBjgHnHZ
+ ynJDlodPs7N1y5WcLZjn9ADQo5Mh0Ka5ErelWHgcknfcbILnZ86AOkGRKfi1qmAZ92Xz 0Q== 
 Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ek4k5d52b-1
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ek4jxd557-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 04 Mar 2022 14:51:49 +0100
+        Fri, 04 Mar 2022 14:51:47 +0100
 Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 59220100038;
-        Fri,  4 Mar 2022 14:51:45 +0100 (CET)
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 7A038100034;
+        Fri,  4 Mar 2022 14:51:43 +0100 (CET)
 Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 2741C2291CC;
-        Fri,  4 Mar 2022 14:51:45 +0100 (CET)
-Received: from localhost (10.75.127.45) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Fri, 4 Mar 2022 14:51:44
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 7067E2278B6;
+        Fri,  4 Mar 2022 14:51:43 +0100 (CET)
+Received: from localhost (10.75.127.47) by SFHDAG2NODE2.st.com (10.75.127.5)
+ with Microsoft SMTP Server (TLS) id 15.0.1497.26; Fri, 4 Mar 2022 14:51:42
  +0100
 From:   Yann Gautier <yann.gautier@foss.st.com>
 To:     Rob Herring <robh+dt@kernel.org>,
@@ -57,16 +57,16 @@ CC:     <devicetree@vger.kernel.org>,
         Manivannan Sadhasivam <mani@kernel.org>,
         Grzegorz Szymaszek <gszymaszek@short.pl>,
         Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH 3/3] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
-Date:   Fri, 4 Mar 2022 14:51:34 +0100
-Message-ID: <20220304135134.47827-4-yann.gautier@foss.st.com>
+Subject: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA LLI
+Date:   Fri, 4 Mar 2022 14:51:32 +0100
+Message-ID: <20220304135134.47827-2-yann.gautier@foss.st.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220304135134.47827-1-yann.gautier@foss.st.com>
 References: <20220304135134.47827-1-yann.gautier@foss.st.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-Originating-IP: [10.75.127.45]
+X-Originating-IP: [10.75.127.47]
 X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
  (10.75.127.5)
 X-Proofpoint-Virus-Version: vendor=baseguard
@@ -76,65 +76,33 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a disable_keep_power field in variant_data struct. The
-MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
-It is only set to true for stm32_sdmmc variants.
-
-The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
-It doesn't correctly support low power, and we need to unbind the wifi
-driver before a suspend sequence. But the wifi chip firmware is then
-lost, and the communication with SDIO fails if MMC_PM_KEEP_POWER is
-enabled.
-The flag can still be enabled through DT property: keep-power-in-suspend.
+On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
+starting from revision v2 of the peripheral. But it has limitations,
+as all the buffers should be aligned on block size (except the last one).
+But this cannot be guaranteed with SDIO. We should then have a property
+to disable the support of LLI.
 
 Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 ---
- drivers/mmc/host/mmci.c | 5 ++++-
- drivers/mmc/host/mmci.h | 1 +
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 45b8608c935c..0e2f2f5d6a52 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -274,6 +274,7 @@ static struct variant_data variant_stm32_sdmmc = {
- 	.busy_detect		= true,
- 	.busy_detect_flag	= MCI_STM32_BUSYD0,
- 	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
-+	.disable_keep_power	= true,
- 	.init			= sdmmc_variant_init,
- };
+diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+index 1e69a5a42439..309a2c0426e5 100644
+--- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
++++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+@@ -145,6 +145,11 @@ properties:
+       driver to sample the receive data (for example with a voltage switch
+       transceiver).
  
-@@ -301,6 +302,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
- 	.busy_detect		= true,
- 	.busy_detect_flag	= MCI_STM32_BUSYD0,
- 	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
-+	.disable_keep_power	= true,
- 	.init			= sdmmc_variant_init,
- };
- 
-@@ -2172,7 +2174,8 @@ static int mmci_probe(struct amba_device *dev,
- 	host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
- 
- 	/* We support these PM capabilities. */
--	mmc->pm_caps |= MMC_PM_KEEP_POWER;
-+	if (!variant->disable_keep_power)
-+		mmc->pm_caps |= MMC_PM_KEEP_POWER;
- 
- 	/*
- 	 * We can do SGIO
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index e1a9b96a3396..2cad1ef9766a 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -361,6 +361,7 @@ struct variant_data {
- 	u32			opendrain;
- 	u8			dma_lli:1;
- 	u32			stm32_idmabsize_mask;
-+	u8			disable_keep_power:1;
- 	void (*init)(struct mmci_host *host);
- };
- 
++  st,disable-dma-lli:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, disable DMA linked lists.
++      It is used for SDIO.
++
+   st,cmd-gpios:
+     maxItems: 1
+     description:
 -- 
 2.25.1
 
