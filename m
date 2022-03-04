@@ -2,96 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21994C4167B
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 13:52:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B594FC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 14:39:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236496AbiCDNxb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Mar 2022 08:53:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38104 "EHLO
+        id S238338AbiCDOjr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Mar 2022 09:39:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235016AbiCDNx2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 08:53:28 -0500
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 778C73E0DA;
-        Fri,  4 Mar 2022 05:52:37 -0800 (PST)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 224C7LfC026984;
-        Fri, 4 Mar 2022 14:51:47 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=selector1;
- bh=9JE03u4sfdT0zvRoo95MCiqvaB33/YInHqU6AdtpVKc=;
- b=dk7XRLbqWXKacTDClup5Bgfmh3YJc5ZrIRf2U3JOp5LzHZ9H45c7s5M+YjJ4JqEyOBv+
- FVjYeOSsJ03uxz16/x/fzLRtIRldCRwsIoWSdBnIbfjIq+wqBrUYmMNgh6LYrgan8AVs
- rbX8MEZVM2cO+PC/R7GRSwJ3xZolrf+f8ST9oe3HkMHJbUbAnJYoQ7S8bgrtcUyQ+Pe+
- 2JNUIoofngkeb/orgBeAZ6O8CF97wUvKNWtfbmpCCAC7l6jei2mZv6d28R9+C4VwKb08
- 4kENr9i9/P/kjRIcO4WYCHOwH2D0Xus8KcnvsTzMSBPIEXelEe0s2DeXaou14tXjxTrf pA== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ek4jxd558-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 04 Mar 2022 14:51:47 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 01BF610002A;
-        Fri,  4 Mar 2022 14:51:42 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id D4A96222CBE;
-        Fri,  4 Mar 2022 14:51:42 +0100 (CET)
-Received: from localhost (10.75.127.46) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Fri, 4 Mar 2022 14:51:42
- +0100
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>,
-        Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH 0/3] mmc: mmci: stm32: updates for SDIO
-Date:   Fri, 4 Mar 2022 14:51:31 +0100
-Message-ID: <20220304135134.47827-1-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.25.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-04_06,2022-03-04_01,2022-02-23_01
+        with ESMTP id S232933AbiCDOjr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 09:39:47 -0500
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.21])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FC0F17FD0F;
+        Fri,  4 Mar 2022 06:38:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1646404726;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
+    From:Subject:Sender;
+    bh=5Qc8A3HzHhhVNwswhRRj+dDn3SjBwurLJjNxoV7R1h4=;
+    b=ZWw51Qyh1H8Owiia7uxcWPNiBl3gL10SUU9XRamoz15QEdxsxoeJRv5aSZTH4fuNuC
+    QwGkfOIEgNhztWx+I9k4b+7u+sZkiQrgpr/SoNSDN5u8DEq7sSncY6hDRAqE6/43zUQb
+    a7a5F+qZ2HZP9+0jSLHVE5qpzamOQtdMG39hdsewq6T/1ij05XpW4+gn6cY4Kn3s4CgR
+    zazAMdRWPZlHztPwJTMaLzMoWmjXql2WbLgYu30NlkSJJdEKImPoMuWWud4HXOyCvQLF
+    fp9IKN4W/lnAKc4ax3nzs9SdJL+n72Glh6I40Gw0osSd9JPTsXI/jHqodD/IgpEPSnwr
+    pXXA==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj7gpw91N5y2S3i8QUWw=="
+X-RZG-CLASS-ID: mo00
+Received: from imac.fritz.box
+    by smtp.strato.de (RZmta 47.40.1 DYNA|AUTH)
+    with ESMTPSA id n729cey24Eck6dY
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Fri, 4 Mar 2022 15:38:46 +0100 (CET)
+Content-Type: text/plain;
+        charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
+Subject: Re: [PATCH] mmc: core: Restore (almost) the busy polling for
+ MMC_SEND_OP_COND
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+In-Reply-To: <20220304105656.149281-1-ulf.hansson@linaro.org>
+Date:   Fri, 4 Mar 2022 15:38:45 +0100
+Cc:     linux-mmc@vger.kernel.org,
+        Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        Huijin Park <huijin.park@samsung.com>,
+        linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <EE1CAC2A-C06C-4E1F-A391-A063972A34A2@goldelico.com>
+References: <20220304105656.149281-1-ulf.hansson@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+X-Mailer: Apple Mail (2.3445.104.21)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To properly manage SDIO on STM32 variant of PL18x, we cannot have DMA
-Linked Lists enable. As it has to be disabled during probe sequence,
-we cannot wait until we have communicated with the SDIO chip. This
-should then be done through a DT property.
-The MMC_PM_KEEP_POWER should also be disabled on STM32MP157x-DK2 board
-as the clock used for wifi is not always-on.
+Hi Ulf,
 
-Yann Gautier (3):
-  dt-bindings: mmc: mmci: add a property to disable DMA LLI
-  mmc: mmci: stm32: manage st,disable-dma-lli property
-  mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
+> Am 04.03.2022 um 11:56 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+>=20
+> Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
+> significantly decreased the polling period from ~10-12ms into just a =
+couple
+> of us. The purpose was to decrease the total time spent in the busy =
+polling
+> loop, but unfortunate it has lead to problems, that causes eMMC cards =
+to
+> never gets out busy and thus fails to be initialized.
+>=20
+> To fix the problem, but also to try to keep some of the new improved
+> behaviour, let's start by using a polling period of 1-2ms, which then
+> increases for each loop, according to common polling loop in
+> __mmc_poll_for_busy().
+>=20
+> Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+> Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+> Cc: Huijin Park <huijin.park@samsung.com>
+> Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>=20
+> Jean Rene and H. Nikolaus, if this doesn't work, please try extending =
+the
+> the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that =
+always
+> works.
 
- Documentation/devicetree/bindings/mmc/arm,pl18x.yaml |  5 +++++
- drivers/mmc/host/mmci.c                              |  5 ++++-
- drivers/mmc/host/mmci.h                              |  1 +
- drivers/mmc/host/mmci_stm32_sdmmc.c                  | 10 ++++++++--
- 4 files changed, 18 insertions(+), 3 deletions(-)
+Works for me.
 
--- 
-2.25.1
+BR and thanks,
+Nikolaus
 
