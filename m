@@ -2,156 +2,139 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE02DC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 13:38:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0BA2C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 13:52:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232808AbiCDNiq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Mar 2022 08:38:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59422 "EHLO
+        id S235713AbiCDNx2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Mar 2022 08:53:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38098 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232196AbiCDNip (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 08:38:45 -0500
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 55CD663BEF;
-        Fri,  4 Mar 2022 05:37:56 -0800 (PST)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id ADEDD1396;
-        Fri,  4 Mar 2022 05:37:55 -0800 (PST)
-Received: from [10.57.39.47] (unknown [10.57.39.47])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id CA9903F70D;
-        Fri,  4 Mar 2022 05:37:52 -0800 (PST)
-Message-ID: <cd14d9f2-5bd5-ed45-8e49-42e6d5e69a38@arm.com>
-Date:   Fri, 4 Mar 2022 13:37:47 +0000
+        with ESMTP id S231605AbiCDNx1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 08:53:27 -0500
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7765F33EB9;
+        Fri,  4 Mar 2022 05:52:37 -0800 (PST)
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 224BrQTP011332;
+        Fri, 4 Mar 2022 14:51:49 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
+ subject : date : message-id : in-reply-to : references : mime-version :
+ content-transfer-encoding : content-type; s=selector1;
+ bh=tbU0qOc6Ayx6hnhXQ94zwIDGkMujBZbQs9NbPVdBY5A=;
+ b=xTD9vKiQCmfnFprZmglcB5VgO+UPllnPsraMHR7AjH/CQpzG459UvGxKnuppKF7l3phZ
+ O5DrbC4o7iq/H/OHufsZQu25IFcemolPNTOK+y3iprzO4ek4r7m0kqOFSGZX5XYIjjAb
+ AX4jJbPI9lpjQs0I9JEGu1LeMT3IddwRABqkJiMVBVNhnUCaUsnMQigYTy17CP/Mlvcr
+ 1Go75TThmKHtS8jbmBRCVHJhmQjNMkx2rsHpujwkyYwZFISvdr/Y9kOshHoV/T8Jpp+v
+ bGKh0kpEr7M1rx8PZ/g7guIEhZNtXz8V0waxHONJL24IYvNfBmpwj3GIza4raQAvZgi/ zQ== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ek4k5d52b-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 04 Mar 2022 14:51:49 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 59220100038;
+        Fri,  4 Mar 2022 14:51:45 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 2741C2291CC;
+        Fri,  4 Mar 2022 14:51:45 +0100 (CET)
+Received: from localhost (10.75.127.45) by SFHDAG2NODE2.st.com (10.75.127.5)
+ with Microsoft SMTP Server (TLS) id 15.0.1497.26; Fri, 4 Mar 2022 14:51:44
+ +0100
+From:   Yann Gautier <yann.gautier@foss.st.com>
+To:     Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Subject: [PATCH 3/3] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
+Date:   Fri, 4 Mar 2022 14:51:34 +0100
+Message-ID: <20220304135134.47827-4-yann.gautier@foss.st.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220304135134.47827-1-yann.gautier@foss.st.com>
+References: <20220304135134.47827-1-yann.gautier@foss.st.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
- Thunderbird/91.6.1
-Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: fix handling invalid clock
- rates
-Content-Language: en-GB
-To:     Peter Geis <pgwipeout@gmail.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>,
-        Addy Ke <addy.ke@rock-chips.com>,
-        Doug Anderson <dianders@chromium.org>
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20220303015151.1711860-1-pgwipeout@gmail.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-In-Reply-To: <20220303015151.1711860-1-pgwipeout@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.75.127.45]
+X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
+ (10.75.127.5)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-04_06,2022-03-04_01,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2022-03-03 01:51, Peter Geis wrote:
-> The Rockchip ciu clock cannot be set as low as the dw-mmc hardware
-> supports. This leads to a situation during card initialization where the
-> ciu clock is set lower than the clock driver can support. The
-> dw-mmc-rockchip driver spews errors when this happens.
-> For normal operation this only happens a few times during boot, but when
-> cd-broken is enabled (in cases such as the SoQuartz module) this fires
-> multiple times each poll cycle.
-> 
-> Fix this by testing the minimum frequency the clock driver can support
-> that is within the mmc specification, then divide that by the internal
-> clock divider. Set the f_min frequency to this value, or if it fails,
-> set f_min to the downstream driver's default.
-> 
-> Fixes: f629ba2c04c9 ("mmc: dw_mmc: add support for RK3288")
-> 
-> Signed-off-by: Peter Geis <pgwipeout@gmail.com>
-> ---
->   drivers/mmc/host/dw_mmc-rockchip.c | 31 ++++++++++++++++++++++++++----
->   1 file changed, 27 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 95d0ec0f5f3a..c198590cd74a 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -15,7 +15,9 @@
->   #include "dw_mmc.h"
->   #include "dw_mmc-pltfm.h"
->   
-> -#define RK3288_CLKGEN_DIV       2
-> +#define RK3288_CLKGEN_DIV	2
-> +#define RK3288_MIN_INIT_FREQ	375000
-> +#define MMC_MAX_INIT_FREQ	400000
->   
->   struct dw_mci_rockchip_priv_data {
->   	struct clk		*drv_clk;
-> @@ -27,6 +29,7 @@ struct dw_mci_rockchip_priv_data {
->   static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->   {
->   	struct dw_mci_rockchip_priv_data *priv = host->priv;
-> +	struct mmc_host *mmc = mmc_from_priv(host);
->   	int ret;
->   	unsigned int cclkin;
->   	u32 bus_hz;
-> @@ -34,6 +37,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->   	if (ios->clock == 0)
->   		return;
->   
-> +	/* the clock will fail if below the f_min rate */
-> +	if (ios->clock < mmc->f_min)
-> +		ios->clock = mmc->f_min;
-> +
->   	/*
->   	 * cclkin: source clock of mmc controller
->   	 * bus_hz: card interface clock generated by CLKGEN
-> @@ -51,7 +58,7 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->   
->   	ret = clk_set_rate(host->ciu_clk, cclkin);
->   	if (ret)
-> -		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
-> +		dev_warn(host->dev, "failed to set rate %uHz err: %d\n", cclkin, ret);
->   
->   	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
->   	if (bus_hz != host->bus_hz) {
-> @@ -290,13 +297,29 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
->   
->   static int dw_mci_rockchip_init(struct dw_mci *host)
->   {
-> +	struct mmc_host *mmc = mmc_from_priv(host);
+Add a disable_keep_power field in variant_data struct. The
+MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
+It is only set to true for stm32_sdmmc variants.
 
-Hang on, "host" here is a struct dw_mci allocated directly by 
-dw_mci_pltfm_register(), not as private data via mmc_alloc_host(), so 
-surely this is bogus?
+The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
+It doesn't correctly support low power, and we need to unbind the wifi
+driver before a suspend sequence. But the wifi chip firmware is then
+lost, and the communication with SDIO fails if MMC_PM_KEEP_POWER is
+enabled.
+The flag can still be enabled through DT property: keep-power-in-suspend.
 
-If I've followed things through correctly, I think it's host->slot->mmc 
-that we need to propagate a non-default f_min to, except that that 
-hasn't been allocated yet at this point.
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+ drivers/mmc/host/mmci.c | 5 ++++-
+ drivers/mmc/host/mmci.h | 1 +
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
-Having multiple different types of "host", "slot" and "mmc" variables 
-certainly does no favours to making sense of this stuff :(
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 45b8608c935c..0e2f2f5d6a52 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -274,6 +274,7 @@ static struct variant_data variant_stm32_sdmmc = {
+ 	.busy_detect		= true,
+ 	.busy_detect_flag	= MCI_STM32_BUSYD0,
+ 	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
++	.disable_keep_power	= true,
+ 	.init			= sdmmc_variant_init,
+ };
+ 
+@@ -301,6 +302,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+ 	.busy_detect		= true,
+ 	.busy_detect_flag	= MCI_STM32_BUSYD0,
+ 	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
++	.disable_keep_power	= true,
+ 	.init			= sdmmc_variant_init,
+ };
+ 
+@@ -2172,7 +2174,8 @@ static int mmci_probe(struct amba_device *dev,
+ 	host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
+ 
+ 	/* We support these PM capabilities. */
+-	mmc->pm_caps |= MMC_PM_KEEP_POWER;
++	if (!variant->disable_keep_power)
++		mmc->pm_caps |= MMC_PM_KEEP_POWER;
+ 
+ 	/*
+ 	 * We can do SGIO
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index e1a9b96a3396..2cad1ef9766a 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -361,6 +361,7 @@ struct variant_data {
+ 	u32			opendrain;
+ 	u8			dma_lli:1;
+ 	u32			stm32_idmabsize_mask;
++	u8			disable_keep_power:1;
+ 	void (*init)(struct mmci_host *host);
+ };
+ 
+-- 
+2.25.1
 
-Robin.
-
-> +	int ret;
-> +
->   	/* It is slot 8 on Rockchip SoCs */
->   	host->sdio_id0 = 8;
->   
-> -	if (of_device_is_compatible(host->dev->of_node,
-> -				    "rockchip,rk3288-dw-mshc"))
-> +	if (of_device_is_compatible(host->dev->of_node, "rockchip,rk3288-dw-mshc")) {
->   		host->bus_hz /= RK3288_CLKGEN_DIV;
->   
-> +		/* clock driver will fail if the clock is less than the lowest source clock
-> +		 * divided by the internal clock divider. Test for the lowest available
-> +		 * clock and set the f_min freq to clock / clock divider. If we fail, set
-> +		 * it to the downstream hardcoded value.
-> +		 */
-> +		ret = clk_round_rate(host->ciu_clk, MMC_MAX_INIT_FREQ * RK3288_CLKGEN_DIV);
-> +		if (ret < 0) {
-> +			dev_warn(host->dev, "mmc safe rate failed: %d\n", ret);
-> +			mmc->f_min = RK3288_MIN_INIT_FREQ;
-> +		} else {
-> +			mmc->f_min = ret / RK3288_CLKGEN_DIV;
-> +		}
-> +	}
-> +
->   	return 0;
->   }
->   
