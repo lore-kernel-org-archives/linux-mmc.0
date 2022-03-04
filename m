@@ -2,167 +2,204 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09A21C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 10:09:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52055C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 10:57:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239100AbiCDKKZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Mar 2022 05:10:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53286 "EHLO
+        id S231186AbiCDK6F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Mar 2022 05:58:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235816AbiCDKKY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 05:10:24 -0500
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5DCCDEA22
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Mar 2022 02:09:36 -0800 (PST)
-Received: by mail-lf1-x12c.google.com with SMTP id w27so13308315lfa.5
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Mar 2022 02:09:36 -0800 (PST)
+        with ESMTP id S238319AbiCDK57 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 05:57:59 -0500
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84C401AEED0
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Mar 2022 02:57:11 -0800 (PST)
+Received: by mail-lj1-x229.google.com with SMTP id y24so10418455ljh.11
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Mar 2022 02:57:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=TTlQzouujxjklNSmEgJUOKvgbuMUOxIuYP4op7FfZLA=;
-        b=pAFN1ddFQ/E0y4qv64XFp85SwQmgi+xcXmt8nmEAyVvhOOMI31LQPQCS/a1PE0+UOR
-         8B6J4criYegIzpwIp+e1b1HmTbtkzHcGAs5ZyQOdxacbmgFA/fpe5AbXnnDevZda50dS
-         EZJR3k9eSSXr5V4VvA87/xXJ4pfGx+caGTcevot0QzO1mSssbAJRojnBDufVSA/kOPGt
-         p+U3vDF/BtqLBkNqJh9DEoJj+OlPhIoYTWoDg4kPtO6vYLnILn1ITvcuu0ryU63AHrin
-         fImJq8o1zghEWqk4pDVH39DADSbHcquLL2wN2vSwi/XRXqfz88Yo81gjv72HZy9LuE10
-         IUFg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=jFhO7NN17N/Woor4pmTV0MTUo+f4zftXWLtspOge3Rg=;
+        b=XaBwEaRS4R2gx1K6Trkm/vnS71BZmpMru2l5kjPIcko+oCOQLmOAJvobGXvXAGNqJK
+         PwTQ80++wBOmQvhJVzrqV0b66VvSUVevLQbWwzXeGQkS460YI3CRvvCCJLEi7SFHouWG
+         1sZlKE3qKNc5Ghn3Kd8CQ4XGTGkW9F+gEwsqNI1zfnBu8smW0dTJVdPVPlH8i1Dhcw7i
+         Wb85+yMFp+T+0yR7PRUxEqb9Y7cR7Lo8rHmhgY7K7Y1PlvqT667V/goav4YH3iDUKfsj
+         0gaK/fEczu+FYaZec4PDRTQsFSQLWemsVXW9+b5NygltIUwt8CYwojvksHHtximhQ5vB
+         EzmA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=TTlQzouujxjklNSmEgJUOKvgbuMUOxIuYP4op7FfZLA=;
-        b=yYnfy4/4s5y+KwbnP0RgYHZbeGRh0c4TChOwDap1Q0PXL9ndX5IuHZLbWEZy3psng5
-         NeQtVCms1fUCDPxuKZlupohJIynFrsMCs0LYFiyffBCKKKOcfFFPUzJMT33DWG8j7lap
-         1XlcJuGBUo8DZsQf6ZPwwkGL8IOb4aab6yzacsjW/idJC3ib8iRvR9HFZ0W3HlqHzQOD
-         mTFw3z2XHwHVjXbiP8rPUpBYm/XT3hvd53Gcad8psE15ymFBwoK9eVG0jFhfjOY8Fn1J
-         9U1hzDRlDYX9atWX029KmIY4U9HImzG93QlRuMzUVWNXit5iYJW3cCu4g5UfQMMhd5NK
-         nY2g==
-X-Gm-Message-State: AOAM532/32pID3vuw0XrLdiTef63NPLwE6NMtMnero9jO9Fo2VF/eK9y
-        ZljHmOg/4yrlhIhUbInK/XFPoFL2Nq70z8BLGxhhaEUr2mg=
-X-Google-Smtp-Source: ABdhPJxioaW/kEbNRDMpwSwzMDNKpC0oQLgEd/3aJooMgZrQOKmA3ksjnvQNOly3P47CFSn8dG3kvRr5mCQf1ZAIY9Q=
-X-Received: by 2002:a05:6512:ea5:b0:43b:3603:69d9 with SMTP id
- bi37-20020a0565120ea500b0043b360369d9mr24172397lfb.71.1646388575210; Fri, 04
- Mar 2022 02:09:35 -0800 (PST)
-MIME-Version: 1.0
-References: <27DDB061-1235-4F4C-B6A8-F035D77AC9CF@goldelico.com>
- <CAPDyKFrz_2Vp64SUzB8CiHJLTjO8Hx8m3QEhY1VU2ksZhVEx7A@mail.gmail.com>
- <20220302082034.GA5723@math.uni-bielefeld.de> <6715A5BE-CA64-4A3D-8EE5-5BEEB63F268A@goldelico.com>
- <CAPDyKFqMs6FsJHVOoVmZxzBPgUdLoqa-xeLfvkQi1pn=8k1h6Q@mail.gmail.com> <20220304092811.GA20284@math.uni-bielefeld.de>
-In-Reply-To: <20220304092811.GA20284@math.uni-bielefeld.de>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=jFhO7NN17N/Woor4pmTV0MTUo+f4zftXWLtspOge3Rg=;
+        b=mYBetfICFrGOXdcvLZmLX4c2eOqvnhc7wkZzrUa3zPi+J5+jrSUPo+ysQf5BXjo7K3
+         5cuvVHuCKHJUsDyw3g1uBljMoQllGQzrmbk3GdiqxhSfGCW+o3EwoAqIbloTbAA62e5j
+         D7k/KbcWEtjGndZtrIrD6+IO+vpbipSKA2b1S/GtUjU1syHzfDrs7fYYTy8055po0gYg
+         EimK/cWOwWD7E03mn14utLhZ0Xg7JF1abFlh8YyXewPwswmn1M5uQDr9HjvhANfvEcaP
+         I5V4UWVoSUQGB0UzvRIOzD3bVS1nbGHCEToJ47MYnbkBbhPUno0aTHq13yhK5ONk6YIO
+         kXBg==
+X-Gm-Message-State: AOAM531RzzqfjVTn0XEMelshwJsosISuJAGdtDpK15HOFCBgXxcq7vRQ
+        Kw06DMmozwr9ePbibQqoUKqV+xow7z93zA==
+X-Google-Smtp-Source: ABdhPJzvWZ11ecPQZx1D0QUIbADDMd+0J/st6OtjE9c9d3gXXALzpYbxWxrkrWXQ/suL1boJKVz1lw==
+X-Received: by 2002:a2e:a4b4:0:b0:246:2930:53d7 with SMTP id g20-20020a2ea4b4000000b00246293053d7mr25182002ljm.74.1646391429310;
+        Fri, 04 Mar 2022 02:57:09 -0800 (PST)
+Received: from localhost.localdomain (h-155-4-129-34.NA.cust.bahnhof.se. [155.4.129.34])
+        by smtp.gmail.com with ESMTPSA id i12-20020a056512006c00b004481d8f1bf5sm92913lfo.153.2022.03.04.02.57.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 04 Mar 2022 02:57:08 -0800 (PST)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 4 Mar 2022 11:08:58 +0100
-Message-ID: <CAPDyKFq1G6uYz_3mMj3ZU54vDuzVDYw09rXCxx2rLAPeoXoFJA@mail.gmail.com>
-Subject: Re: [BUG] mmc: core: adjust polling interval for CMD1
-To:     Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
-Cc:     "H. Nikolaus Schaller" <hns@goldelico.com>,
+To:     linux-mmc@vger.kernel.org,
+        Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        "H . Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Huijin Park <huijin.park@samsung.com>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Tony Lindgren <tony@atomide.com>
-Content-Type: text/plain; charset="UTF-8"
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: core: Restore (almost) the busy polling for MMC_SEND_OP_COND
+Date:   Fri,  4 Mar 2022 11:56:56 +0100
+Message-Id: <20220304105656.149281-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 4 Mar 2022 at 10:28, Jean Rene Dawin
-<jdawin@math.uni-bielefeld.de> wrote:
->
-> Ulf Hansson wrote on Thu  3/03/22 11:40:
-> > On Wed, 2 Mar 2022 at 10:40, H. Nikolaus Schaller <hns@goldelico.com> wrote:
-> >
-> > Alright, it starts to sound like we might need a revert (or at least a
-> > way to restore the previous behaviour) - even if that would just paper
-> > over the real problem. The real problem is more likely related to how
-> > the host driver manages restoring of the power to the card, which
-> > happens when runtime resuming it.
-> >
-> > In any case, just to make sure the loop timeout itself isn't the
-> > problem, can you run the below debug patch please? The intent is to
-> > figure out how long the worst case timeout is, when it's working with
-> > CMD1. As soon as the timeout exceeds the worst case, there is a
-> > message printed to the log.
-> >
-> > The below patch is based upon that the offending commit has been reverted.
-> >
-> > Kind regards
-> > Uffe
-> >
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Date: Thu, 3 Mar 2022 11:00:04 +0100
-> > Subject: [PATCH] mmc: core: DEBUG - Measure and log worst case CMD1 loop
-> >
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > ---
-> >  drivers/mmc/core/mmc_ops.c | 11 +++++++++++
-> >  include/linux/mmc/host.h   |  1 +
-> >  2 files changed, 12 insertions(+)
-> >
-> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> > index 9946733a34c6..3f03d9e8a3a4 100644
-> > --- a/drivers/mmc/core/mmc_ops.c
-> > +++ b/drivers/mmc/core/mmc_ops.c
-> > @@ -177,11 +177,15 @@ int mmc_send_op_cond(struct mmc_host *host, u32
-> > ocr, u32 *rocr)
-> >  {
-> >         struct mmc_command cmd = {};
-> >         int i, err = 0;
-> > +       s64 cmd1_ms;
-> > +       ktime_t time_start;
-> >
-> >         cmd.opcode = MMC_SEND_OP_COND;
-> >         cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
-> >         cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
-> >
-> > +       time_start = ktime_get();
-> > +
-> >         for (i = 100; i; i--) {
-> >                 err = mmc_wait_for_cmd(host, &cmd, 0);
-> >                 if (err)
-> > @@ -211,6 +215,13 @@ int mmc_send_op_cond(struct mmc_host *host, u32
-> > ocr, u32 *rocr)
-> >                         cmd.arg = cmd.resp[0] | BIT(30);
-> >         }
-> >
-> > +       cmd1_ms = ktime_to_ms(ktime_sub(ktime_get(), time_start));
-> > +       if (!err && cmd1_ms > host->cmd1_ms) {
-> > +               pr_warn("%s: CMD1 timeout increased to %lld ms, loop=%d\n",
-> > +                       mmc_hostname(host), cmd1_ms, i);
-> > +               host->cmd1_ms = cmd1_ms;
-> > +       }
-> > +
-> >         if (rocr && !mmc_host_is_spi(host))
-> >                 *rocr = cmd.resp[0];
-> >
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 7afb57cab00b..c2ca3bb05620 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -301,6 +301,7 @@ struct mmc_host {
-> >         unsigned int            f_min;
-> >         unsigned int            f_max;
-> >         unsigned int            f_init;
-> > +       s64                     cmd1_ms;
-> >         u32                     ocr_avail;
-> >         u32                     ocr_avail_sdio; /* SDIO-specific OCR */
-> >         u32                     ocr_avail_sd;   /* SD-specific OCR */
-> > --
-> > 2.25.1
->
-> Hi,
->
-> thanks. With this patch applied with reverted 76bfc7ccc2fa9d382576f6013b57a0ef93d5a722
-> I don't get the "stuck" errors in __mmc_poll_for_busy and only one message of
->
-> [    1.095194] mmc1: CMD1 timeout increased to 64 ms, loop=98
+Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
+significantly decreased the polling period from ~10-12ms into just a couple
+of us. The purpose was to decrease the total time spent in the busy polling
+loop, but unfortunate it has lead to problems, that causes eMMC cards to
+never gets out busy and thus fails to be initialized.
 
-Okay, so for some reason polling doesn't work, if we poll too
-frequently. Clearly the 1s total timeout should be sufficient.
+To fix the problem, but also to try to keep some of the new improved
+behaviour, let's start by using a polling period of 1-2ms, which then
+increases for each loop, according to common polling loop in
+__mmc_poll_for_busy().
 
-I will prepare a patch that restores the old behaviour and post it
-within a few minutes.
+Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+Cc: Huijin Park <huijin.park@samsung.com>
+Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+
+Jean Rene and H. Nikolaus, if this doesn't work, please try extending the
+the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that always
+works.
 
 Kind regards
 Uffe
+
+---
+ drivers/mmc/core/block.c   |  2 +-
+ drivers/mmc/core/mmc.c     |  2 +-
+ drivers/mmc/core/mmc_ops.c | 13 +++++++++----
+ drivers/mmc/core/mmc_ops.h |  3 ++-
+ drivers/mmc/core/sd.c      |  2 +-
+ 5 files changed, 14 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 8d718aa56d33..4e67c1403cc9 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1908,7 +1908,7 @@ static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
+ 
+ 	cb_data.card = card;
+ 	cb_data.status = 0;
+-	err = __mmc_poll_for_busy(card->host, MMC_BLK_TIMEOUT_MS,
++	err = __mmc_poll_for_busy(card->host, 0, MMC_BLK_TIMEOUT_MS,
+ 				  &mmc_blk_busy_cb, &cb_data);
+ 
+ 	/*
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 13abfcd130a5..43d1b9b2fa49 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1962,7 +1962,7 @@ static int mmc_sleep(struct mmc_host *host)
+ 		goto out_release;
+ 	}
+ 
+-	err = __mmc_poll_for_busy(host, timeout_ms, &mmc_sleep_busy_cb, host);
++	err = __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_sleep_busy_cb, host);
+ 
+ out_release:
+ 	mmc_retune_release(host);
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index d63d1c735335..180d7e9d3400 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -21,6 +21,8 @@
+ 
+ #define MMC_BKOPS_TIMEOUT_MS		(120 * 1000) /* 120s */
+ #define MMC_SANITIZE_TIMEOUT_MS		(240 * 1000) /* 240s */
++#define MMC_OP_COND_PERIOD_US		(1 * 1000) /* 1ms */
++#define MMC_OP_COND_TIMEOUT_MS		1000 /* 1s */
+ 
+ static const u8 tuning_blk_pattern_4bit[] = {
+ 	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+@@ -232,7 +234,9 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
+ 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+ 
+-	err = __mmc_poll_for_busy(host, 1000, &__mmc_send_op_cond_cb, &cb_data);
++	err = __mmc_poll_for_busy(host, MMC_OP_COND_PERIOD_US,
++				  MMC_OP_COND_TIMEOUT_MS,
++				  &__mmc_send_op_cond_cb, &cb_data);
+ 	if (err)
+ 		return err;
+ 
+@@ -495,13 +499,14 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
+ 	return 0;
+ }
+ 
+-int __mmc_poll_for_busy(struct mmc_host *host, unsigned int timeout_ms,
++int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
++			unsigned int timeout_ms,
+ 			int (*busy_cb)(void *cb_data, bool *busy),
+ 			void *cb_data)
+ {
+ 	int err;
+ 	unsigned long timeout;
+-	unsigned int udelay = 32, udelay_max = 32768;
++	unsigned int udelay = period_us ? period_us : 32, udelay_max = 32768;
+ 	bool expired = false;
+ 	bool busy = false;
+ 
+@@ -546,7 +551,7 @@ int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 	cb_data.retry_crc_err = retry_crc_err;
+ 	cb_data.busy_cmd = busy_cmd;
+ 
+-	return __mmc_poll_for_busy(host, timeout_ms, &mmc_busy_cb, &cb_data);
++	return __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_busy_cb, &cb_data);
+ }
+ EXPORT_SYMBOL_GPL(mmc_poll_for_busy);
+ 
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 9c813b851d0b..09ffbc00908b 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -41,7 +41,8 @@ int mmc_can_ext_csd(struct mmc_card *card);
+ int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+ bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command *cmd,
+ 			  unsigned int timeout_ms);
+-int __mmc_poll_for_busy(struct mmc_host *host, unsigned int timeout_ms,
++int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
++			unsigned int timeout_ms,
+ 			int (*busy_cb)(void *cb_data, bool *busy),
+ 			void *cb_data);
+ int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 24b0418a24bb..68df6b2f49cc 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1671,7 +1671,7 @@ static int sd_poweroff_notify(struct mmc_card *card)
+ 
+ 	cb_data.card = card;
+ 	cb_data.reg_buf = reg_buf;
+-	err = __mmc_poll_for_busy(card->host, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
++	err = __mmc_poll_for_busy(card->host, 0, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
+ 				  &sd_busy_poweroff_notify_cb, &cb_data);
+ 
+ out:
+-- 
+2.25.1
+
