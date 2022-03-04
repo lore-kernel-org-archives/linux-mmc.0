@@ -2,204 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52055C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 10:57:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE02DC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 13:38:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231186AbiCDK6F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Mar 2022 05:58:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53568 "EHLO
+        id S232808AbiCDNiq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Mar 2022 08:38:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238319AbiCDK57 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 05:57:59 -0500
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84C401AEED0
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Mar 2022 02:57:11 -0800 (PST)
-Received: by mail-lj1-x229.google.com with SMTP id y24so10418455ljh.11
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Mar 2022 02:57:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=jFhO7NN17N/Woor4pmTV0MTUo+f4zftXWLtspOge3Rg=;
-        b=XaBwEaRS4R2gx1K6Trkm/vnS71BZmpMru2l5kjPIcko+oCOQLmOAJvobGXvXAGNqJK
-         PwTQ80++wBOmQvhJVzrqV0b66VvSUVevLQbWwzXeGQkS460YI3CRvvCCJLEi7SFHouWG
-         1sZlKE3qKNc5Ghn3Kd8CQ4XGTGkW9F+gEwsqNI1zfnBu8smW0dTJVdPVPlH8i1Dhcw7i
-         Wb85+yMFp+T+0yR7PRUxEqb9Y7cR7Lo8rHmhgY7K7Y1PlvqT667V/goav4YH3iDUKfsj
-         0gaK/fEczu+FYaZec4PDRTQsFSQLWemsVXW9+b5NygltIUwt8CYwojvksHHtximhQ5vB
-         EzmA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=jFhO7NN17N/Woor4pmTV0MTUo+f4zftXWLtspOge3Rg=;
-        b=mYBetfICFrGOXdcvLZmLX4c2eOqvnhc7wkZzrUa3zPi+J5+jrSUPo+ysQf5BXjo7K3
-         5cuvVHuCKHJUsDyw3g1uBljMoQllGQzrmbk3GdiqxhSfGCW+o3EwoAqIbloTbAA62e5j
-         D7k/KbcWEtjGndZtrIrD6+IO+vpbipSKA2b1S/GtUjU1syHzfDrs7fYYTy8055po0gYg
-         EimK/cWOwWD7E03mn14utLhZ0Xg7JF1abFlh8YyXewPwswmn1M5uQDr9HjvhANfvEcaP
-         I5V4UWVoSUQGB0UzvRIOzD3bVS1nbGHCEToJ47MYnbkBbhPUno0aTHq13yhK5ONk6YIO
-         kXBg==
-X-Gm-Message-State: AOAM531RzzqfjVTn0XEMelshwJsosISuJAGdtDpK15HOFCBgXxcq7vRQ
-        Kw06DMmozwr9ePbibQqoUKqV+xow7z93zA==
-X-Google-Smtp-Source: ABdhPJzvWZ11ecPQZx1D0QUIbADDMd+0J/st6OtjE9c9d3gXXALzpYbxWxrkrWXQ/suL1boJKVz1lw==
-X-Received: by 2002:a2e:a4b4:0:b0:246:2930:53d7 with SMTP id g20-20020a2ea4b4000000b00246293053d7mr25182002ljm.74.1646391429310;
-        Fri, 04 Mar 2022 02:57:09 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-34.NA.cust.bahnhof.se. [155.4.129.34])
-        by smtp.gmail.com with ESMTPSA id i12-20020a056512006c00b004481d8f1bf5sm92913lfo.153.2022.03.04.02.57.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Mar 2022 02:57:08 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org,
-        Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
-        "H . Nikolaus Schaller" <hns@goldelico.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Huijin Park <huijin.park@samsung.com>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: core: Restore (almost) the busy polling for MMC_SEND_OP_COND
-Date:   Fri,  4 Mar 2022 11:56:56 +0100
-Message-Id: <20220304105656.149281-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S232196AbiCDNip (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 08:38:45 -0500
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 55CD663BEF;
+        Fri,  4 Mar 2022 05:37:56 -0800 (PST)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id ADEDD1396;
+        Fri,  4 Mar 2022 05:37:55 -0800 (PST)
+Received: from [10.57.39.47] (unknown [10.57.39.47])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id CA9903F70D;
+        Fri,  4 Mar 2022 05:37:52 -0800 (PST)
+Message-ID: <cd14d9f2-5bd5-ed45-8e49-42e6d5e69a38@arm.com>
+Date:   Fri, 4 Mar 2022 13:37:47 +0000
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
+Subject: Re: [PATCH] mmc: host: dw-mmc-rockchip: fix handling invalid clock
+ rates
+Content-Language: en-GB
+To:     Peter Geis <pgwipeout@gmail.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Heiko Stuebner <heiko@sntech.de>,
+        Addy Ke <addy.ke@rock-chips.com>,
+        Doug Anderson <dianders@chromium.org>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20220303015151.1711860-1-pgwipeout@gmail.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <20220303015151.1711860-1-pgwipeout@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
-significantly decreased the polling period from ~10-12ms into just a couple
-of us. The purpose was to decrease the total time spent in the busy polling
-loop, but unfortunate it has lead to problems, that causes eMMC cards to
-never gets out busy and thus fails to be initialized.
+On 2022-03-03 01:51, Peter Geis wrote:
+> The Rockchip ciu clock cannot be set as low as the dw-mmc hardware
+> supports. This leads to a situation during card initialization where the
+> ciu clock is set lower than the clock driver can support. The
+> dw-mmc-rockchip driver spews errors when this happens.
+> For normal operation this only happens a few times during boot, but when
+> cd-broken is enabled (in cases such as the SoQuartz module) this fires
+> multiple times each poll cycle.
+> 
+> Fix this by testing the minimum frequency the clock driver can support
+> that is within the mmc specification, then divide that by the internal
+> clock divider. Set the f_min frequency to this value, or if it fails,
+> set f_min to the downstream driver's default.
+> 
+> Fixes: f629ba2c04c9 ("mmc: dw_mmc: add support for RK3288")
+> 
+> Signed-off-by: Peter Geis <pgwipeout@gmail.com>
+> ---
+>   drivers/mmc/host/dw_mmc-rockchip.c | 31 ++++++++++++++++++++++++++----
+>   1 file changed, 27 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 95d0ec0f5f3a..c198590cd74a 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -15,7 +15,9 @@
+>   #include "dw_mmc.h"
+>   #include "dw_mmc-pltfm.h"
+>   
+> -#define RK3288_CLKGEN_DIV       2
+> +#define RK3288_CLKGEN_DIV	2
+> +#define RK3288_MIN_INIT_FREQ	375000
+> +#define MMC_MAX_INIT_FREQ	400000
+>   
+>   struct dw_mci_rockchip_priv_data {
+>   	struct clk		*drv_clk;
+> @@ -27,6 +29,7 @@ struct dw_mci_rockchip_priv_data {
+>   static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>   {
+>   	struct dw_mci_rockchip_priv_data *priv = host->priv;
+> +	struct mmc_host *mmc = mmc_from_priv(host);
+>   	int ret;
+>   	unsigned int cclkin;
+>   	u32 bus_hz;
+> @@ -34,6 +37,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>   	if (ios->clock == 0)
+>   		return;
+>   
+> +	/* the clock will fail if below the f_min rate */
+> +	if (ios->clock < mmc->f_min)
+> +		ios->clock = mmc->f_min;
+> +
+>   	/*
+>   	 * cclkin: source clock of mmc controller
+>   	 * bus_hz: card interface clock generated by CLKGEN
+> @@ -51,7 +58,7 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>   
+>   	ret = clk_set_rate(host->ciu_clk, cclkin);
+>   	if (ret)
+> -		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
+> +		dev_warn(host->dev, "failed to set rate %uHz err: %d\n", cclkin, ret);
+>   
+>   	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+>   	if (bus_hz != host->bus_hz) {
+> @@ -290,13 +297,29 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+>   
+>   static int dw_mci_rockchip_init(struct dw_mci *host)
+>   {
+> +	struct mmc_host *mmc = mmc_from_priv(host);
 
-To fix the problem, but also to try to keep some of the new improved
-behaviour, let's start by using a polling period of 1-2ms, which then
-increases for each loop, according to common polling loop in
-__mmc_poll_for_busy().
+Hang on, "host" here is a struct dw_mci allocated directly by 
+dw_mci_pltfm_register(), not as private data via mmc_alloc_host(), so 
+surely this is bogus?
 
-Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
-Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
-Cc: Huijin Park <huijin.park@samsung.com>
-Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+If I've followed things through correctly, I think it's host->slot->mmc 
+that we need to propagate a non-default f_min to, except that that 
+hasn't been allocated yet at this point.
 
-Jean Rene and H. Nikolaus, if this doesn't work, please try extending the
-the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that always
-works.
+Having multiple different types of "host", "slot" and "mmc" variables 
+certainly does no favours to making sense of this stuff :(
 
-Kind regards
-Uffe
+Robin.
 
----
- drivers/mmc/core/block.c   |  2 +-
- drivers/mmc/core/mmc.c     |  2 +-
- drivers/mmc/core/mmc_ops.c | 13 +++++++++----
- drivers/mmc/core/mmc_ops.h |  3 ++-
- drivers/mmc/core/sd.c      |  2 +-
- 5 files changed, 14 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 8d718aa56d33..4e67c1403cc9 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1908,7 +1908,7 @@ static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
- 
- 	cb_data.card = card;
- 	cb_data.status = 0;
--	err = __mmc_poll_for_busy(card->host, MMC_BLK_TIMEOUT_MS,
-+	err = __mmc_poll_for_busy(card->host, 0, MMC_BLK_TIMEOUT_MS,
- 				  &mmc_blk_busy_cb, &cb_data);
- 
- 	/*
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 13abfcd130a5..43d1b9b2fa49 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1962,7 +1962,7 @@ static int mmc_sleep(struct mmc_host *host)
- 		goto out_release;
- 	}
- 
--	err = __mmc_poll_for_busy(host, timeout_ms, &mmc_sleep_busy_cb, host);
-+	err = __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_sleep_busy_cb, host);
- 
- out_release:
- 	mmc_retune_release(host);
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index d63d1c735335..180d7e9d3400 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -21,6 +21,8 @@
- 
- #define MMC_BKOPS_TIMEOUT_MS		(120 * 1000) /* 120s */
- #define MMC_SANITIZE_TIMEOUT_MS		(240 * 1000) /* 240s */
-+#define MMC_OP_COND_PERIOD_US		(1 * 1000) /* 1ms */
-+#define MMC_OP_COND_TIMEOUT_MS		1000 /* 1s */
- 
- static const u8 tuning_blk_pattern_4bit[] = {
- 	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
-@@ -232,7 +234,9 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 	cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
- 
--	err = __mmc_poll_for_busy(host, 1000, &__mmc_send_op_cond_cb, &cb_data);
-+	err = __mmc_poll_for_busy(host, MMC_OP_COND_PERIOD_US,
-+				  MMC_OP_COND_TIMEOUT_MS,
-+				  &__mmc_send_op_cond_cb, &cb_data);
- 	if (err)
- 		return err;
- 
-@@ -495,13 +499,14 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
- 	return 0;
- }
- 
--int __mmc_poll_for_busy(struct mmc_host *host, unsigned int timeout_ms,
-+int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
-+			unsigned int timeout_ms,
- 			int (*busy_cb)(void *cb_data, bool *busy),
- 			void *cb_data)
- {
- 	int err;
- 	unsigned long timeout;
--	unsigned int udelay = 32, udelay_max = 32768;
-+	unsigned int udelay = period_us ? period_us : 32, udelay_max = 32768;
- 	bool expired = false;
- 	bool busy = false;
- 
-@@ -546,7 +551,7 @@ int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
- 	cb_data.retry_crc_err = retry_crc_err;
- 	cb_data.busy_cmd = busy_cmd;
- 
--	return __mmc_poll_for_busy(host, timeout_ms, &mmc_busy_cb, &cb_data);
-+	return __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_busy_cb, &cb_data);
- }
- EXPORT_SYMBOL_GPL(mmc_poll_for_busy);
- 
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 9c813b851d0b..09ffbc00908b 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -41,7 +41,8 @@ int mmc_can_ext_csd(struct mmc_card *card);
- int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
- bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command *cmd,
- 			  unsigned int timeout_ms);
--int __mmc_poll_for_busy(struct mmc_host *host, unsigned int timeout_ms,
-+int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
-+			unsigned int timeout_ms,
- 			int (*busy_cb)(void *cb_data, bool *busy),
- 			void *cb_data);
- int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 24b0418a24bb..68df6b2f49cc 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1671,7 +1671,7 @@ static int sd_poweroff_notify(struct mmc_card *card)
- 
- 	cb_data.card = card;
- 	cb_data.reg_buf = reg_buf;
--	err = __mmc_poll_for_busy(card->host, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
-+	err = __mmc_poll_for_busy(card->host, 0, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
- 				  &sd_busy_poweroff_notify_cb, &cb_data);
- 
- out:
--- 
-2.25.1
-
+> +	int ret;
+> +
+>   	/* It is slot 8 on Rockchip SoCs */
+>   	host->sdio_id0 = 8;
+>   
+> -	if (of_device_is_compatible(host->dev->of_node,
+> -				    "rockchip,rk3288-dw-mshc"))
+> +	if (of_device_is_compatible(host->dev->of_node, "rockchip,rk3288-dw-mshc")) {
+>   		host->bus_hz /= RK3288_CLKGEN_DIV;
+>   
+> +		/* clock driver will fail if the clock is less than the lowest source clock
+> +		 * divided by the internal clock divider. Test for the lowest available
+> +		 * clock and set the f_min freq to clock / clock divider. If we fail, set
+> +		 * it to the downstream hardcoded value.
+> +		 */
+> +		ret = clk_round_rate(host->ciu_clk, MMC_MAX_INIT_FREQ * RK3288_CLKGEN_DIV);
+> +		if (ret < 0) {
+> +			dev_warn(host->dev, "mmc safe rate failed: %d\n", ret);
+> +			mmc->f_min = RK3288_MIN_INIT_FREQ;
+> +		} else {
+> +			mmc->f_min = ret / RK3288_CLKGEN_DIV;
+> +		}
+> +	}
+> +
+>   	return 0;
+>   }
+>   
