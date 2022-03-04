@@ -2,93 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B594FC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 14:39:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98FD8C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Mar 2022 16:05:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238338AbiCDOjr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Mar 2022 09:39:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37606 "EHLO
+        id S231488AbiCDQGG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Mar 2022 11:06:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54318 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232933AbiCDOjr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 09:39:47 -0500
-Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.21])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FC0F17FD0F;
-        Fri,  4 Mar 2022 06:38:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1646404726;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
-    From:Subject:Sender;
-    bh=5Qc8A3HzHhhVNwswhRRj+dDn3SjBwurLJjNxoV7R1h4=;
-    b=ZWw51Qyh1H8Owiia7uxcWPNiBl3gL10SUU9XRamoz15QEdxsxoeJRv5aSZTH4fuNuC
-    QwGkfOIEgNhztWx+I9k4b+7u+sZkiQrgpr/SoNSDN5u8DEq7sSncY6hDRAqE6/43zUQb
-    a7a5F+qZ2HZP9+0jSLHVE5qpzamOQtdMG39hdsewq6T/1ij05XpW4+gn6cY4Kn3s4CgR
-    zazAMdRWPZlHztPwJTMaLzMoWmjXql2WbLgYu30NlkSJJdEKImPoMuWWud4HXOyCvQLF
-    fp9IKN4W/lnAKc4ax3nzs9SdJL+n72Glh6I40Gw0osSd9JPTsXI/jHqodD/IgpEPSnwr
-    pXXA==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj7gpw91N5y2S3i8QUWw=="
-X-RZG-CLASS-ID: mo00
-Received: from imac.fritz.box
-    by smtp.strato.de (RZmta 47.40.1 DYNA|AUTH)
-    with ESMTPSA id n729cey24Eck6dY
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Fri, 4 Mar 2022 15:38:46 +0100 (CET)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Subject: Re: [PATCH] mmc: core: Restore (almost) the busy polling for
- MMC_SEND_OP_COND
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-In-Reply-To: <20220304105656.149281-1-ulf.hansson@linaro.org>
-Date:   Fri, 4 Mar 2022 15:38:45 +0100
+        with ESMTP id S231278AbiCDQGG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2022 11:06:06 -0500
+Received: from smtp2.math.uni-bielefeld.de (smtp2.math.uni-bielefeld.de [129.70.45.13])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BD8947387;
+        Fri,  4 Mar 2022 08:05:18 -0800 (PST)
+Received: from math.uni-bielefeld.de (kvm01.math.uni-bielefeld.de [129.70.45.15])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (Client did not present a certificate)
+        by smtp2.math.uni-bielefeld.de (Postfix) with ESMTPSA id 48F3D60179;
+        Fri,  4 Mar 2022 17:05:15 +0100 (CET)
+Date:   Fri, 4 Mar 2022 17:05:14 +0100
+From:   Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     linux-mmc@vger.kernel.org,
-        Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        "H . Nikolaus Schaller" <hns@goldelico.com>,
         Huijin Park <huijin.park@samsung.com>,
         linux-kernel@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <EE1CAC2A-C06C-4E1F-A391-A063972A34A2@goldelico.com>
+Subject: Re: [PATCH] mmc: core: Restore (almost) the busy polling for
+ MMC_SEND_OP_COND
+Message-ID: <20220304160513.GA1361@math.uni-bielefeld.de>
 References: <20220304105656.149281-1-ulf.hansson@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-X-Mailer: Apple Mail (2.3445.104.21)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220304105656.149281-1-ulf.hansson@linaro.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-> Am 04.03.2022 um 11:56 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
->=20
+Ulf Hansson wrote on Fri  4/03/22 11:56:
 > Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
-> significantly decreased the polling period from ~10-12ms into just a =
-couple
-> of us. The purpose was to decrease the total time spent in the busy =
-polling
-> loop, but unfortunate it has lead to problems, that causes eMMC cards =
-to
+> significantly decreased the polling period from ~10-12ms into just a couple
+> of us. The purpose was to decrease the total time spent in the busy polling
+> loop, but unfortunate it has lead to problems, that causes eMMC cards to
 > never gets out busy and thus fails to be initialized.
->=20
+> 
 > To fix the problem, but also to try to keep some of the new improved
 > behaviour, let's start by using a polling period of 1-2ms, which then
 > increases for each loop, according to common polling loop in
 > __mmc_poll_for_busy().
->=20
+> 
 > Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
 > Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
 > Cc: Huijin Park <huijin.park@samsung.com>
 > Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->=20
-> Jean Rene and H. Nikolaus, if this doesn't work, please try extending =
-the
-> the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that =
-always
+> 
+> Jean Rene and H. Nikolaus, if this doesn't work, please try extending the
+> the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that always
 > works.
+> 
+> Kind regards
+> Uffe
+> 
+> ---
+>  drivers/mmc/core/block.c   |  2 +-
+>  drivers/mmc/core/mmc.c     |  2 +-
+>  drivers/mmc/core/mmc_ops.c | 13 +++++++++----
+>  drivers/mmc/core/mmc_ops.h |  3 ++-
+>  drivers/mmc/core/sd.c      |  2 +-
+>  5 files changed, 14 insertions(+), 8 deletions(-)
 
-Works for me.
+Hi,
 
-BR and thanks,
-Nikolaus
+thanks, this works fine.
 
+Regads,
+Jean Rene Dawin
