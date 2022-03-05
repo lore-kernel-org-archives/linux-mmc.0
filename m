@@ -2,124 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93825C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Mar 2022 21:58:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98301C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Mar 2022 21:58:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232622AbiCEV7d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 5 Mar 2022 16:59:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49716 "EHLO
+        id S229716AbiCEV7f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 5 Mar 2022 16:59:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49798 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229716AbiCEV7d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Mar 2022 16:59:33 -0500
-Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD9E83D4A4;
-        Sat,  5 Mar 2022 13:58:41 -0800 (PST)
-Received: by mail-qt1-x82a.google.com with SMTP id bc10so10345048qtb.5;
-        Sat, 05 Mar 2022 13:58:41 -0800 (PST)
+        with ESMTP id S232691AbiCEV7e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Mar 2022 16:59:34 -0500
+Received: from mail-qk1-x736.google.com (mail-qk1-x736.google.com [IPv6:2607:f8b0:4864:20::736])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACCAD3D4A4;
+        Sat,  5 Mar 2022 13:58:43 -0800 (PST)
+Received: by mail-qk1-x736.google.com with SMTP id s16so904596qks.4;
+        Sat, 05 Mar 2022 13:58:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=DIx9K9RJDUrDmNZanDKXxxk7CV46iR0tswozjr8hy+s=;
-        b=bAc3BRu8jKiSyzaZi1EjxUBXXI7kqHegUWBiPskQcQMHtcltamHZULn+HD006kujJ8
-         G+4rLgv0tTepehZ2KHvQNyzOxGQLiOFWlL7fCcp9EWg01EAiqf/2Bv/qCU+WWVQ/ILd1
-         cf7eXFDQWBbjEXYXfdCryAAjuuNzV2a1gFscFdUrB0EGFtjONTUF3EDrbKUIuB1zn58s
-         JH2iZEDXBcIe0R3f14rMpgMHDcqjic7F29pw4oW2heIGTOJa4DC8C2k5vuNm3ADO/xqK
-         FRiQe5oTN8wWkdajt+fB1HdnUKULSSIJz1r1yrkBAjTmja8V2wuAPl/GeHIMGym284+a
-         UiIg==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=bA6COhkxqJULw1J6YY+ycVS3dSCISRuj2zyilCuPjTI=;
+        b=BXZW4KqpbIUC7e+zCk9eKL18jIJ0xZDUM3QtLst9hKoIqWVpoDyleq8wSY2l5TncMf
+         JQk2xtn64KZmU1Ia3GSEU6RIMKWAGnrVYFoHUoI2RhJSOit01nr0AibQupeN8cW08iHC
+         RDYBX6rgSbkNCwhalIT+DRyn1Gbr/XWUyswf8JXXuhL9gyPJ6zlQexrG+xA6/BSn0g0B
+         skCYIBmAmproF0AygsVLr6LeZBsjJkbCkYF7zkkea53wpfy42+0yUB6rY9VY4apC7SzL
+         xwf5LMUJyZKnmUL0YucmXeOny0+opvohkONeP7QKsY/f8na36oD8KkMEjI5GAXEhuUh5
+         1H4g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=DIx9K9RJDUrDmNZanDKXxxk7CV46iR0tswozjr8hy+s=;
-        b=4fo4Nw4LEZn1hdVCTIH4cc2tzakB/EpPEIrFrro1xbyBMyHqITLmWosjvenb4KQT4U
-         0VZbazX6SvwaXf6qameqd5oTCLt2KrFvrFQunv5y3SLuCpsMlLT6UrnXuv79Ib0bm7tg
-         oxI3RkIptMWHwp4CMjtpTd0rQ0lEdZ501ELz9u3Qr8oAoEq/o3cmevJJDwGU0XmRNXmO
-         Cz/jA/F7VGv7SsfUrkTNPILnlSLWderCzsp7m2jKtSsxZ9I6hgBvjxFspyAC4J1dfROj
-         LhogPJk4jCssonYGbw8+CYNuu7Z2lUa5kQB78n8POe97amTHnyoLz7mginTjR1FZN48c
-         xV9Q==
-X-Gm-Message-State: AOAM5317rmSaphiugGbLtgvGEuCwax59BW5EVRC/maGSV+jp9IcHu7Jz
-        fXcZveODPlBGuJi+RptnsM0=
-X-Google-Smtp-Source: ABdhPJzfTcXCrWx9v/ZGHY5w8QSH2c4kePkdPYZEMCN9VCXy6oIwNP/X43/ccSKgjTz3tul+cmEZQw==
-X-Received: by 2002:ac8:5bc2:0:b0:2de:adca:6624 with SMTP id b2-20020ac85bc2000000b002deadca6624mr4178178qtb.120.1646517520873;
-        Sat, 05 Mar 2022 13:58:40 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=bA6COhkxqJULw1J6YY+ycVS3dSCISRuj2zyilCuPjTI=;
+        b=rbJ4wQIJ+WGD6OY4epI3i1iOCYwNmR5oqor6PwDbrNo0kG/3Kv1pGYvz0xEcNJ5jtC
+         w5e0Ux/VJYdQ6JbNM68RNOZe4WpHG2b+EHlmrsv5s+K68c59CGzNDaqwj/dC4Ci/ww2S
+         tB54dQI63O1+J9rHwSp/Rmi7HON/AchJQnoGxCwpVoukNapWpGnyR7zV2HEpR9MpazBp
+         sWMlx9yjTei7T60UQuIM8LrzTGsThskCpmFlCfiajWr+rA2i20dGqj5KgXgYXgGKbkyG
+         L8B6+0fbcRnoPI3+uNjJtuwA1C4/JfbJeJMRitWQD89J3U2lIdESyMNF6pNGc/bSGXxd
+         aqdQ==
+X-Gm-Message-State: AOAM533kqOA3pj1XU5wHZQjd9QIwRRMe/Y/AlcTgFIR6rM1C8dx7ZU1e
+        /ai+pk6sBiVw1TSxPj+Q+EA=
+X-Google-Smtp-Source: ABdhPJw4vJOzmKSTMCO2ApCNqa91/MVS9ULXJohkxDqioQVkTER3QFf0T9/hF/IJnPH+tAoyzM+xew==
+X-Received: by 2002:a05:620a:4307:b0:507:d5b1:f65e with SMTP id u7-20020a05620a430700b00507d5b1f65emr2924851qko.363.1646517522746;
+        Sat, 05 Mar 2022 13:58:42 -0800 (PST)
 Received: from master-x64.sparksnet ([2601:153:980:85b1::10])
-        by smtp.gmail.com with ESMTPSA id h188-20020a376cc5000000b00648d7e2a36bsm4230067qkc.117.2022.03.05.13.58.40
+        by smtp.gmail.com with ESMTPSA id h188-20020a376cc5000000b00648d7e2a36bsm4230067qkc.117.2022.03.05.13.58.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Mar 2022 13:58:40 -0800 (PST)
+        Sat, 05 Mar 2022 13:58:42 -0800 (PST)
 From:   Peter Geis <pgwipeout@gmail.com>
-Cc:     robin.murphy@arm.com, linux-rockchip@lists.infradead.org,
-        Peter Geis <pgwipeout@gmail.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
+To:     Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
+        Heiko Stuebner <heiko@sntech.de>
+Cc:     robin.murphy@arm.com, linux-rockchip@lists.infradead.org,
+        Peter Geis <pgwipeout@gmail.com>, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v3 0/2] fix dw-mmc-rockchip rk356x clock rates
-Date:   Sat,  5 Mar 2022 16:58:33 -0500
-Message-Id: <20220305215835.2210388-1-pgwipeout@gmail.com>
+Subject: [PATCH v3 2/2] mmc: host: dw-mmc-rockchip: fix handling invalid clock rates
+Date:   Sat,  5 Mar 2022 16:58:35 -0500
+Message-Id: <20220305215835.2210388-3-pgwipeout@gmail.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220305215835.2210388-1-pgwipeout@gmail.com>
+References: <20220305215835.2210388-1-pgwipeout@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-cc: Jaehoon Chung <jh80.chung@samsung.com>
-cc: Ulf Hansson <ulf.hansson@linaro.org>
-cc: Heiko Stuebner <heiko@sntech.de>
-cc: linux-mmc@vger.kernel.org
-cc: linux-arm-kernel@lists.infradead.org
-cc: linux-rockchip@lists.infradead.org
-cc: linux-kernel@vger.kernel.org
+The Rockchip rk356x ciu clock cannot be set as low as the dw-mmc
+hardware supports. This leads to a situation during card initialization
+where the clock is set lower than the clock driver can support. The
+dw-mmc-rockchip driver spews errors when this happens.
+For normal operation this only happens a few times during boot, but when
+cd-broken is enabled (in cases such as the SoQuartz module) this fires
+multiple times each poll cycle.
 
-While lighting off support for the SoQuartz module, it was discoved the
-dw-mmc-rockchip driver has tremendous log spam when the cd-broken flag
-is enabled and no card is inserted.
-The SoQuart requires the cd-broken flag as the CM4 module pinout it
-follows has no card-detect pin.
-These errors occur during card initialization on all rk356x chips, but
-are amplified by cd-broken as the function is called multiple times each
-poll cycle.
+Fix this by testing the lowest possible frequency that the clock driver
+can support which is within the mmc specification. Divide that rate by
+the internal divider and set f_min to this.
 
-It was discovered the lowest possible clock rate the rk356x cru can
-provide for the ciu clock in the default configuration is 750khz. There 
-is an internal clock divider that makes the final minimum clock 375khz.
-We could hardcode this, but it is possible it could change if the
-default clock configuration changes.
-
-To fix this, we must make two changes:
-First, the dw-mmc core needs to be updated to allow a host driver to
-save its requested minimum frequency. This is necessary as the mmc_host
-struct isn't available when the host drivers initialization code is
-called. The dw-mmc core can then apply the f_min later when the struct
-is available.
-Second, the dw-mmc-rockchip driver is extended to test the frequencies
-mmc core will use during card initialization. It finds the lowest
-supported frequency from the cru and saves it for later use by dw-mmc
-core.
-
-
-Changelog:
-v3:
-- add support in dw_mmc core for saving the minimum frequency (fixes
-  setting f_min)
-- add test for the lowest supported frequency to avoid clamping configs
-  that don't have an error
-
-v2:
-- change from muting the error to attempting to fix the underlying issue
-  by setting f_min in driver initialization
-
-Peter Geis (2):
-  mmc: host: dw_mmc: support setting f_min from host drivers
-  mmc: host: dw-mmc-rockchip: fix handling invalid clock rates
-
+Signed-off-by: Peter Geis <pgwipeout@gmail.com>
+---
  drivers/mmc/host/dw_mmc-rockchip.c | 27 +++++++++++++++++++++++----
- drivers/mmc/host/dw_mmc.c          |  7 ++++++-
- drivers/mmc/host/dw_mmc.h          |  2 ++
- 3 files changed, 31 insertions(+), 5 deletions(-)
+ 1 file changed, 23 insertions(+), 4 deletions(-)
 
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 95d0ec0f5f3a..f825487aa739 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -15,7 +15,9 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+ 
+-#define RK3288_CLKGEN_DIV       2
++#define RK3288_CLKGEN_DIV	2
++
++static const unsigned int freqs[] = { 100000, 200000, 300000, 400000 };
+ 
+ struct dw_mci_rockchip_priv_data {
+ 	struct clk		*drv_clk;
+@@ -51,7 +53,7 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 
+ 	ret = clk_set_rate(host->ciu_clk, cclkin);
+ 	if (ret)
+-		dev_warn(host->dev, "failed to set rate %uHz\n", ios->clock);
++		dev_warn(host->dev, "failed to set rate %uHz err: %d\n", cclkin, ret);
+ 
+ 	bus_hz = clk_get_rate(host->ciu_clk) / RK3288_CLKGEN_DIV;
+ 	if (bus_hz != host->bus_hz) {
+@@ -290,13 +292,30 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+ 
+ static int dw_mci_rockchip_init(struct dw_mci *host)
+ {
++	int ret, i;
++
+ 	/* It is slot 8 on Rockchip SoCs */
+ 	host->sdio_id0 = 8;
+ 
+-	if (of_device_is_compatible(host->dev->of_node,
+-				    "rockchip,rk3288-dw-mshc"))
++	if (of_device_is_compatible(host->dev->of_node, "rockchip,rk3288-dw-mshc")) {
+ 		host->bus_hz /= RK3288_CLKGEN_DIV;
+ 
++		/* clock driver will fail if the clock is less than the lowest source clock
++		 * divided by the internal clock divider. Test for the lowest available
++		 * clock and set the minimum freq to clock / clock divider.
++		 */
++
++		for (i = 0; i < ARRAY_SIZE(freqs); i++) {
++			ret = clk_round_rate(host->ciu_clk, freqs[i] * RK3288_CLKGEN_DIV);
++			if (ret > 0) {
++				host->minimum_speed = ret / RK3288_CLKGEN_DIV;
++				break;
++			}
++		}
++		if (ret < 0)
++			dev_warn(host->dev, "no valid minimum freq: %d\n", ret);
++	}
++
+ 	return 0;
+ }
+ 
 -- 
 2.25.1
 
