@@ -2,157 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 277B8C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Mar 2022 09:00:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15EEFC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Mar 2022 12:17:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232849AbiCGJBH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Mar 2022 04:01:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58576 "EHLO
+        id S234122AbiCGMSu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Mar 2022 07:18:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40028 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231402AbiCGJBG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2022 04:01:06 -0500
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D81C60CFB;
-        Mon,  7 Mar 2022 01:00:13 -0800 (PST)
-Received: by mail-pj1-x1033.google.com with SMTP id p3-20020a17090a680300b001bbfb9d760eso15993946pjj.2;
-        Mon, 07 Mar 2022 01:00:13 -0800 (PST)
+        with ESMTP id S240252AbiCGMSt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2022 07:18:49 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67CB53150F
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Mar 2022 04:17:54 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id w27so25850630lfa.5
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Mar 2022 04:17:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=iuFL9uyQNAriGpCD2xLghLhBAOHEFGsgHrDh4RbTasA=;
-        b=ZzeHWjwIaLjKsIEZ4QMsy1kuD3HrAsBrDCnWrcwZ2oqTafI6oShTU9AKAUeJ/hK2sU
-         QoJLXuDw+6vzkSqqpzylNl1VHxlPCD0/bEezuEDgEpaRbPbm7q61jzB4g4VxmrjYAdVz
-         nIpNzrokm5D0iynm2xjip5CzSVQIQzCaCdvoe5ONDGKxbaFdmJarW4XOYihRZrYCyPlW
-         X2BVI+/sHj4IUgNLJsA65RpHLa9GCxJ9caxONNQ+VyuPZjngLuXzxHYrIeWtrfKt6KgK
-         rn+W2cZO87kQi/Mi1O4JPbxQVUomsfRfoAcd78XXNMJENI62WzyN6bZjJFSGYwIe1LYf
-         Co8A==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=HHRPAd2+BEPs+tfv+5iE/4Edpf3HwlV2J27uXAurHCw=;
+        b=Gt/pfhSt7vkmHIdUh0loB83y1KE8tsxVv80EiMuPqBAb8kZiJzJwzVR9nFhrpOHKIE
+         I5TAxDG01GvVFLXufXXY8sOnB/zJpP/TKWjcW9NWELJytqINrMzS+9TlUhEVgGiHDXQ6
+         dsMiS6eMZ5pWQGCT2TmRU0YiDwII5udvqczVM2yK0dndL5UMTdoh12kVG9SFBec71NE6
+         M7GE7ZhaEk/RRs3ttdqt3Q7eyqdEpEE5mnDaPpzi1+J7klFlyRnCNDl0lj0zvT0PEx/F
+         CMGaY7NQ9A537QBBJ/fS+jhZt6mp9i8L9mnFekZWiUKULz9Ne6ynND6+xJjudOUAyN83
+         wRGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=iuFL9uyQNAriGpCD2xLghLhBAOHEFGsgHrDh4RbTasA=;
-        b=v6bvcwELteOiQgoOiWC9ZCINJznoZP84dwtWaakqhhVQr9NMHTr5xAT3D0KhjgQiCY
-         wR02rWgKcVtjMiXiXTvbWFEBDI3uPFl5EzQmPO8PPQtpTr9yoY0e9W48a5U14OzSo7SW
-         duxPZnBostptxprErINiVfvFv+Fac3yik3EFl7gx7PKW6TX6N0HGU2wNabRc91LbmDWK
-         UwF8Fh14maGGwNWITjfxXc38b8YmcfuhwHPw41/xhsV0QEqCQqEx1JefaTsa20kDMLGO
-         Lvq5AeOkDV65o1kxiwGtfI6/yXUJ47PK4N3mmaKpsz+Zs4WqoI20z2NETLXz+ngIYfz/
-         f3iQ==
-X-Gm-Message-State: AOAM533XklZ8+4ZSWsSb6BKoCAGPTbOYmlJlap2xJwfaeqph1WrddEVY
-        cxDg5PuNVXupp9sFayTD9g+IYLd5u7E=
-X-Google-Smtp-Source: ABdhPJyPbv0WV5jxysEeKV5zDfDKHAqcALuZc09O/FfmMHAGIOFJcb8LidS157pEeKWugq6cvJgPYw==
-X-Received: by 2002:a17:902:8c8c:b0:150:739b:8ab1 with SMTP id t12-20020a1709028c8c00b00150739b8ab1mr10747897plo.3.1646643612702;
-        Mon, 07 Mar 2022 01:00:12 -0800 (PST)
-Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id c30-20020a63725e000000b0037c8bf5b630sm8981840pgn.12.2022.03.07.01.00.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Mar 2022 01:00:11 -0800 (PST)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
-        SeanHY.Chen@genesyslogic.com.tw, hl.liu@genesyslogic.com.tw,
-        Ben Chuang <benchuanggli@gmail.com>,
-        Kevin Chang <kevin.chang@lcfuturecenter.com>
-Subject: [PATCH V2] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
-Date:   Mon,  7 Mar 2022 17:00:09 +0800
-Message-Id: <20220307090009.1386876-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.35.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=HHRPAd2+BEPs+tfv+5iE/4Edpf3HwlV2J27uXAurHCw=;
+        b=dzEBTrLmSdwxJVHK/zz9Sd+nJqk1pPMH6FwPLfExIbnd8XLzIYH9Rw3SafWgVdYmjo
+         YsNm+Tw6t2YKa2xZWBuKSYnJhpJt2bcfb5iogC74XBzec0Vnj63aNmJn1GdRKDmdfeye
+         5N7J83iWdIFvTIURVMYs9WrbCUGmmtTQJ/JmMoHUWBWupILv1DWjVLiTOqbcU0qd9vEH
+         sXnLK7VcoitGfDi+GgX+vx0qzmti5jRbcs20WnkG4YwUOCdwgwJ2+ZVD4Z8ndxcRJKK3
+         1kkhfwtmU9WyggAbsgPN1rEc/7Ef2UGFfMRC6G9VvgN2nIoa6U/jNTzS44mlMa1gUI+m
+         XfCw==
+X-Gm-Message-State: AOAM531ENLPBi0kHd4YUtf7nPr+orMmu/lmvjaHlBVA5VC3rL1qJuMDW
+        JWuxmfz+vKU5WJLdu1gfOms2TCLnOteKqC+qQro8Eg==
+X-Google-Smtp-Source: ABdhPJwaySlpCWxsw4Grc4xbUmRYaRcssHhnetYj9sDCid79k0y0rdWn6ULciiywCayAdCRGWIFgFbKG24qH2Kvm/NM=
+X-Received: by 2002:a05:6512:308e:b0:448:3826:6d68 with SMTP id
+ z14-20020a056512308e00b0044838266d68mr580070lfd.184.1646655471512; Mon, 07
+ Mar 2022 04:17:51 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220304105656.149281-1-ulf.hansson@linaro.org>
+In-Reply-To: <20220304105656.149281-1-ulf.hansson@linaro.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 7 Mar 2022 13:17:15 +0100
+Message-ID: <CAPDyKFr1PzSaiKqB4ZoqTS_8bGsEH=aB3ARhxyGu+cYeRqeBew@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Restore (almost) the busy polling for MMC_SEND_OP_COND
+To:     Jean Rene Dawin <jdawin@math.uni-bielefeld.de>,
+        "H . Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Huijin Park <huijin.park@samsung.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+On Fri, 4 Mar 2022 at 11:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
+> significantly decreased the polling period from ~10-12ms into just a couple
+> of us. The purpose was to decrease the total time spent in the busy polling
+> loop, but unfortunate it has lead to problems, that causes eMMC cards to
+> never gets out busy and thus fails to be initialized.
+>
+> To fix the problem, but also to try to keep some of the new improved
+> behaviour, let's start by using a polling period of 1-2ms, which then
+> increases for each loop, according to common polling loop in
+> __mmc_poll_for_busy().
+>
+> Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+> Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+> Cc: Huijin Park <huijin.park@samsung.com>
+> Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
-gated of upstream port can be enabled. GL9763E has an auxiliary power
-so it keep states in runtime suspend. In runtime resume, PLL is enabled
-and waits for it to stabilize.
+Applied for fixes and by adding two tested-by tags from you, thanks!
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
----
-Changes in v2:
-* modify commit messages
-* Use read_poll_timeout() instead of while loop
----
- drivers/mmc/host/sdhci-pci-gli.c | 47 ++++++++++++++++++++++++++++++++
- 1 file changed, 47 insertions(+)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 97035d77c18c..c854c8db32e4 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -13,6 +13,7 @@
- #include <linux/mmc/mmc.h>
- #include <linux/delay.h>
- #include <linux/of.h>
-+#include <linux/iopoll.h>
- #include "sdhci.h"
- #include "sdhci-pci.h"
- #include "cqhci.h"
-@@ -873,6 +874,47 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
- }
- 
-+#ifdef CONFIG_PM
-+static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot = chip->slots[0];
-+	struct sdhci_host *host = slot->host;
-+	u16 clock;
-+
-+	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
-+	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-+
-+	return 0;
-+}
-+
-+static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
-+{
-+	struct sdhci_pci_slot *slot = chip->slots[0];
-+	struct sdhci_host *host = slot->host;
-+	u16 clock;
-+
-+	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+
-+	clock |= SDHCI_CLOCK_PLL_EN;
-+	clock &= ~SDHCI_CLOCK_INT_STABLE;
-+	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-+
-+	/* Wait max 150 ms */
-+	if (read_poll_timeout(sdhci_readw, clock, (clock & SDHCI_CLOCK_INT_STABLE),
-+			      1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
-+		pr_err("%s: PLL clock never stabilised.\n",
-+		       mmc_hostname(host->mmc));
-+		sdhci_dumpregs(host);
-+	}
-+
-+	clock |= SDHCI_CLOCK_CARD_EN;
-+	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
-+
-+	return 0;
-+}
-+#endif
-+
- static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
- {
- 	struct pci_dev *pdev = slot->chip->pdev;
-@@ -982,6 +1024,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
- #ifdef CONFIG_PM_SLEEP
- 	.resume		= sdhci_cqhci_gli_resume,
- 	.suspend	= sdhci_cqhci_gli_suspend,
-+#endif
-+#ifdef CONFIG_PM
-+	.runtime_suspend = gl9763e_runtime_suspend,
-+	.runtime_resume  = gl9763e_runtime_resume,
-+	.allow_runtime_pm = true,
- #endif
- 	.add_host       = gl9763e_add_host,
- };
--- 
-2.35.1
 
+> ---
+>
+> Jean Rene and H. Nikolaus, if this doesn't work, please try extending the
+> the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that always
+> works.
+>
+> Kind regards
+> Uffe
+>
+> ---
+>  drivers/mmc/core/block.c   |  2 +-
+>  drivers/mmc/core/mmc.c     |  2 +-
+>  drivers/mmc/core/mmc_ops.c | 13 +++++++++----
+>  drivers/mmc/core/mmc_ops.h |  3 ++-
+>  drivers/mmc/core/sd.c      |  2 +-
+>  5 files changed, 14 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 8d718aa56d33..4e67c1403cc9 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1908,7 +1908,7 @@ static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
+>
+>         cb_data.card = card;
+>         cb_data.status = 0;
+> -       err = __mmc_poll_for_busy(card->host, MMC_BLK_TIMEOUT_MS,
+> +       err = __mmc_poll_for_busy(card->host, 0, MMC_BLK_TIMEOUT_MS,
+>                                   &mmc_blk_busy_cb, &cb_data);
+>
+>         /*
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 13abfcd130a5..43d1b9b2fa49 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1962,7 +1962,7 @@ static int mmc_sleep(struct mmc_host *host)
+>                 goto out_release;
+>         }
+>
+> -       err = __mmc_poll_for_busy(host, timeout_ms, &mmc_sleep_busy_cb, host);
+> +       err = __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_sleep_busy_cb, host);
+>
+>  out_release:
+>         mmc_retune_release(host);
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index d63d1c735335..180d7e9d3400 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -21,6 +21,8 @@
+>
+>  #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
+>  #define MMC_SANITIZE_TIMEOUT_MS                (240 * 1000) /* 240s */
+> +#define MMC_OP_COND_PERIOD_US          (1 * 1000) /* 1ms */
+> +#define MMC_OP_COND_TIMEOUT_MS         1000 /* 1s */
+>
+>  static const u8 tuning_blk_pattern_4bit[] = {
+>         0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> @@ -232,7 +234,9 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+>         cmd.arg = mmc_host_is_spi(host) ? 0 : ocr;
+>         cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R3 | MMC_CMD_BCR;
+>
+> -       err = __mmc_poll_for_busy(host, 1000, &__mmc_send_op_cond_cb, &cb_data);
+> +       err = __mmc_poll_for_busy(host, MMC_OP_COND_PERIOD_US,
+> +                                 MMC_OP_COND_TIMEOUT_MS,
+> +                                 &__mmc_send_op_cond_cb, &cb_data);
+>         if (err)
+>                 return err;
+>
+> @@ -495,13 +499,14 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
+>         return 0;
+>  }
+>
+> -int __mmc_poll_for_busy(struct mmc_host *host, unsigned int timeout_ms,
+> +int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
+> +                       unsigned int timeout_ms,
+>                         int (*busy_cb)(void *cb_data, bool *busy),
+>                         void *cb_data)
+>  {
+>         int err;
+>         unsigned long timeout;
+> -       unsigned int udelay = 32, udelay_max = 32768;
+> +       unsigned int udelay = period_us ? period_us : 32, udelay_max = 32768;
+>         bool expired = false;
+>         bool busy = false;
+>
+> @@ -546,7 +551,7 @@ int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>         cb_data.retry_crc_err = retry_crc_err;
+>         cb_data.busy_cmd = busy_cmd;
+>
+> -       return __mmc_poll_for_busy(host, timeout_ms, &mmc_busy_cb, &cb_data);
+> +       return __mmc_poll_for_busy(host, 0, timeout_ms, &mmc_busy_cb, &cb_data);
+>  }
+>  EXPORT_SYMBOL_GPL(mmc_poll_for_busy);
+>
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index 9c813b851d0b..09ffbc00908b 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -41,7 +41,8 @@ int mmc_can_ext_csd(struct mmc_card *card);
+>  int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+>  bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command *cmd,
+>                           unsigned int timeout_ms);
+> -int __mmc_poll_for_busy(struct mmc_host *host, unsigned int timeout_ms,
+> +int __mmc_poll_for_busy(struct mmc_host *host, unsigned int period_us,
+> +                       unsigned int timeout_ms,
+>                         int (*busy_cb)(void *cb_data, bool *busy),
+>                         void *cb_data);
+>  int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 24b0418a24bb..68df6b2f49cc 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1671,7 +1671,7 @@ static int sd_poweroff_notify(struct mmc_card *card)
+>
+>         cb_data.card = card;
+>         cb_data.reg_buf = reg_buf;
+> -       err = __mmc_poll_for_busy(card->host, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
+> +       err = __mmc_poll_for_busy(card->host, 0, SD_POWEROFF_NOTIFY_TIMEOUT_MS,
+>                                   &sd_busy_poweroff_notify_cb, &cb_data);
+>
+>  out:
+> --
+> 2.25.1
+>
