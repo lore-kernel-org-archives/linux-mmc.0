@@ -2,102 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AB96C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Mar 2022 12:18:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55080C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Mar 2022 12:49:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240539AbiCGMTD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Mar 2022 07:19:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40444 "EHLO
+        id S241550AbiCGMt6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Mar 2022 07:49:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241639AbiCGMTC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2022 07:19:02 -0500
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCCC25BD23
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Mar 2022 04:18:07 -0800 (PST)
-Received: by mail-lf1-x12c.google.com with SMTP id l20so1196072lfg.12
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Mar 2022 04:18:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Ir/rPEzTgBLKB8JMU8C+SpZVAErsjWczEwy3W0PY9us=;
-        b=NAi9Hp76EZ0pg4WrnyReVA+F7lei8tkpibMWNH21fjc57P+SJgE3Xgk4S0GFafjgB+
-         gIFfuXwI7r38wU64qeUsHVsaUewPetwyvYik6XcX8z8DV2pJJ+6Y1GWmQFK495DZOqGl
-         1oLxIeyFAFXKC4+df6C/B0cQ4lzb7Qq9GxBwjP0mLP2FEOmuLRjWYwaMjCN1QVMlBIhV
-         uu9b27aKEI4bWIzlPaXUpLLl+aSoMHceenNXf8zitHEUsfdiNAtGo9opE5LhVYaEl/+p
-         zu4Mbpi2qkfWlN3nDlZDsujXHEQTtNqhRQ0FzAN2KyAys19ogoXR7lB4AiPXVCNvFBfv
-         /hbQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Ir/rPEzTgBLKB8JMU8C+SpZVAErsjWczEwy3W0PY9us=;
-        b=aPtwlBo7eJJes4POxJ14FG6A6USbi/pp1x1bVrWVfLSxpOZ2FxE2XpaV3n7xukqie3
-         dAsufX7E5niZQkf+7mhclFU7hhiWoRx7/Zpo1BRXstYfB2mLedxSkcQAkKRB4KmmAcPh
-         TItnoi24On0EeV5c4cnxT6h1yDAA6uJL2kxj3oni2kjDWQeu/p/t/AHGjvYPhBZskgeC
-         6lJ1PeM+XJjnkpMiO7q0KpSedShOOWUHrKLFbp/+gYTdzeivCUeBBq+qDLwT/d7x91Ia
-         VlIj8S2SSPizPtb4RbN8T2H3nmmMzLgRhq+gwH0Lwe0/baVBPQAkdDHn5u20r7lzD2V7
-         NIPw==
-X-Gm-Message-State: AOAM531JSuSWgMU4kYCIYcFLjrCUjTfaG/uLOGNGwn+1xwLP8x3exRGG
-        kzcs21vxnJueXpRumNVLCfBsQjgDYXsYFfNYIsdBlg==
-X-Google-Smtp-Source: ABdhPJz/PIFiiW6ET6enYPE2YnpMXMFruAGL0j5yT0Z210W/RQmAZibs1/nuAT2qmU93HoHUPgWF8feZ2nDStus7cEU=
-X-Received: by 2002:ac2:5f0b:0:b0:448:1e32:4531 with SMTP id
- 11-20020ac25f0b000000b004481e324531mr7445670lfq.167.1646655484705; Mon, 07
- Mar 2022 04:18:04 -0800 (PST)
+        with ESMTP id S239961AbiCGMt6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2022 07:49:58 -0500
+Received: from mga06.intel.com (mga06.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47B474C407
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Mar 2022 04:49:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1646657344; x=1678193344;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=ztz8XJhtQhJtPhab7sg4P02Jp7mStT+9/9U8GkIByPo=;
+  b=PjbN5W2sheMLzQqVIUgD21cpGB5TQNMll9axx+O9D606Qfvw+XahC8Z6
+   1UnO0OR4gEatV3IF4CN8aMK4sURgqLazSFiOS0SodeB8QIG7EmIQKPglx
+   aEA78nrR9pj3tKLnGQ4bzeVV0FSs+A1FZ0AvbGUrJX5KuWnDVzPDRvTLs
+   Ok5rrcHxNZdIL1NO18YTIlWisM/3afOQV60IhFU48iMXye8G74L3HXpxB
+   Z0VhJx/+pb7lIItJTCoQ05Uwd2MS2m8c1AM+Mca6xxUb/Gw/zl0pW7PoA
+   VrGdW9d3ODhDYmPt1Z0o1FcX4Gn4AZdpMfIisbehUJPfsqTKcQnO9Dof4
+   g==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10278"; a="315095562"
+X-IronPort-AV: E=Sophos;i="5.90,162,1643702400"; 
+   d="scan'208";a="315095562"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Mar 2022 04:49:03 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.90,162,1643702400"; 
+   d="scan'208";a="553140621"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga008.jf.intel.com with ESMTP; 07 Mar 2022 04:49:01 -0800
+Message-ID: <f98b62b1-d29f-9589-800d-ee829cfea251@intel.com>
+Date:   Mon, 7 Mar 2022 14:49:00 +0200
 MIME-Version: 1.0
-References: <bf2e2e69226b20d173cce66287f59488fd47474b.1646588375.git.christophe.jaillet@wanadoo.fr>
-In-Reply-To: <bf2e2e69226b20d173cce66287f59488fd47474b.1646588375.git.christophe.jaillet@wanadoo.fr>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 7 Mar 2022 13:17:28 +0100
-Message-ID: <CAPDyKFpyhS2poZj2E4oYfGOSoH6AuiUnL79_6-mozg5hxcT2gA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: wmt-sdmmc: Fix an error handling path in wmt_mci_probe()
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     cjb@laptop.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.5.0
+Subject: Re: [PATCH] mmc/host: Re-enable card en only after UHS mode changed
+ for spreadtrum chipset.
+Content-Language: en-US
+To:     Zhenxiong Lai <lzx.stg@gmail.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, zhixin.huang@unisoc.com,
+        yuelin.tang@unisoc.com, zhenxiong.lai@unisoc.com,
+        orsonzhai@gmail.com, baolin.wang7@gmail.com, zhang.lyra@gmail.com,
+        gengcixi@gmail.com
+References: <20220307023425.8687-1-lzx.stg@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220307023425.8687-1-lzx.stg@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 6 Mar 2022 at 18:44, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
->
-> A dma_free_coherent() call is missing in the error handling path of the
-> probe, as already done in the remove function.
->
-> Fixes: 3a96dff0f828 ("mmc: SD/MMC Host Controller for Wondermedia WM8505/WM8650")
-> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+On 07/03/2022 04:34, Zhenxiong Lai wrote:
+> From: Zhenxiong Lai <zhenxiong.lai@unisoc.com>
+> 
+> DLL locked status probably couldn't come out in a certain time on
+> Sharkl3 platform sometimes.
+> It can be workaround if re-anable card en bit only
+> rather than calling ->set_clock() after UHS timing changed.
+> 
+> Signed-off-by: Zhenxiong Lai <zhenxiong.lai@unisoc.com>
 > ---
-> I've not been able to find a Fixes tag because of the renaming of
-> function and files.
-> However, it looks old (before 2008)
+>  drivers/mmc/host/sdhci.c | 7 ++++++-
+>  drivers/mmc/host/sdhci.h | 2 ++
 
-Let's keep the above and monitor what the backport process reports.
+This is an SDHCI patch so it would be better if the subject
+begins with "mmc: sdhci: "
 
-Applied for next, thanks!
+>  2 files changed, 8 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 07c6da1f2f0f..c415d00304fe 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2396,7 +2396,12 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>  		}
+>  
+>  		/* Re-enable SD Clock */
+> -		host->ops->set_clock(host, host->clock);
+> +		if (host->quirks2 & SDHCI_QUIRK2_RE_ENABLE_CARD_EN) {
+> +			clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +			clk |= SDHCI_CLOCK_CARD_EN;
+> +			sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 
-Kind regards
-Uffe
+We like to try and avoid quirks whenever possible.
+Why can't this be done in the driver's ->set_clock() callback?
 
+> +		} else
+> +			host->ops->set_clock(host, host->clock);
+>  	} else
+>  		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index d7929d725730..3d4ab68f133f 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -477,6 +477,8 @@ struct sdhci_host {
+>   * block count.
+>   */
+>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
+> +/* controller only need to enable card en again after UHS timing was changed */
+> +#define SDHCI_QUIRK2_RE_ENABLE_CARD_EN			(1<<19)
 
-> ---
->  drivers/mmc/host/wmt-sdmmc.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-> index 163ac9df8cca..8e18f01c0938 100644
-> --- a/drivers/mmc/host/wmt-sdmmc.c
-> +++ b/drivers/mmc/host/wmt-sdmmc.c
-> @@ -863,6 +863,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
->         return 0;
->  fail6:
->         clk_put(priv->clk_sdmmc);
-> +       dma_free_coherent(&pdev->dev, mmc->max_blk_count * 16,
-> +                         priv->dma_desc_buffer, priv->dma_desc_device_addr);
->  fail5:
->         free_irq(dma_irq, priv);
->  fail4:
-> --
-> 2.32.0
->
+A quirk without any users is not useful.  Please also send the driver
+change that uses this quirk, although as I wrote above, the ->set_clock()
+callback should be used instead.
+
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+
