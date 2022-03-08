@@ -2,188 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 839D4C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Mar 2022 10:06:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 270A9C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Mar 2022 10:58:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343977AbiCHKHi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Mar 2022 05:07:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35408 "EHLO
+        id S1346050AbiCHK7W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Mar 2022 05:59:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345611AbiCHKHh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2022 05:07:37 -0500
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A5D640907;
-        Tue,  8 Mar 2022 02:06:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1646734001; x=1678270001;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=gQW1oAeon+57DU8wGcNd1CFDpjSEBBQeWTKSocyD9Ts=;
-  b=Sm6eyhpQJ4e0YrKm+FoPfTxdKWlI5cI4zIXP3d83QAWbN4lKOKs2wtoH
-   u1ALk4Pzk1wGTwGGb19nI3+UuZoSKkRktjZfraOx7WLYUwIIdgEf7yc0V
-   sZcbCDGUST4ur1g6Znln+R9JJcPigrOnvgCLHPMaRAgs/kothJD12SL4B
-   Ml0CW3F4nsUSh+3fFBjH99RxgPDEspPeF0BZ1/RCTE71tOdEh53fYkvgd
-   xz/VlzTgLLkSyw40mAF9VAxDqf129DOUJthMQEYNhZZPm1y59F9U9AwQa
-   h/PGnoAZv7AezD9cKfhVoY9BG/kGxogddutW5WutbliPW+dfkORjhVMf0
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10279"; a="254374481"
-X-IronPort-AV: E=Sophos;i="5.90,164,1643702400"; 
-   d="scan'208";a="254374481"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Mar 2022 02:06:34 -0800
-X-IronPort-AV: E=Sophos;i="5.90,164,1643702400"; 
-   d="scan'208";a="553558552"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.46.193])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Mar 2022 02:06:30 -0800
-Message-ID: <01515ee6-b312-7f81-43f0-e72a0d290046@intel.com>
-Date:   Tue, 8 Mar 2022 12:06:26 +0200
+        with ESMTP id S1345899AbiCHK7V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2022 05:59:21 -0500
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 977D421E0C
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Mar 2022 02:58:24 -0800 (PST)
+Received: by mail-lf1-x129.google.com with SMTP id g39so31449204lfv.10
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Mar 2022 02:58:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=4MO/RRuWikHJmBYuiJ+R2IrUU7oSQM4tuZv70kuUbRI=;
+        b=k3G503hqW26oHasEdtGWNmqrChEPSR064D0K46cqUj1wayPtOGD/xufqe5xAva/q2z
+         Ffqx6+329fNYW9gSOuqz2AAXgGMHll/goOEg9fZEiNOXJXN8f8TRAfB8+UO0rvWEEp4U
+         Rada8pn/BfE4qTuiNtbOiPIZ98UZ1PeaMGHmCpvaIGNVHsTrVX7eRs+r2Fdwhj1flLyK
+         PCNHcxe7N27lE1Ji7giCwvePKEoMIlX4Opu0W6g/YgQw1tx/OpyFKDMvY0b0lAhyiXHp
+         Qi2hTE7F3assUB0/w+hogn/mpzP4x+Wd4/vMzE+ib2IsK9gr64AAZp2LZS6s1kvowSL3
+         22sg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=4MO/RRuWikHJmBYuiJ+R2IrUU7oSQM4tuZv70kuUbRI=;
+        b=hkOoabk+gfl7CAOAd3ozRanKB4PxLb7m/rEMpNwYzcccOlLfJzhM9MJ6FkkUknwbGb
+         gqqjWQuAwKxMgFd/Q//oDAPIEa9fhqahVia/+ILXvgqOrzG8y3W5YeE6kCXxwgFJKNQc
+         exmyzHG/wI+VglPIB34qv30+EoHO4N6NfznuiN7nbaqtMCZUYkqUEffRv+8LoE94iRIO
+         u0/CnFunRp9RrbG60i+3/3wj0rMjA/GZ31In+2Cx9edQhGsBWVjd83JduQiMjmASwK2J
+         13nG7j7i6Si1Bda+jI6i+Pl6g+tYXwzEi+Tftd/ohoZSYMtBB5Q4fl8Fx5cKpGKFIt+o
+         lbfA==
+X-Gm-Message-State: AOAM532M/pZIXg4jSNhd5zqX6XuSj9I7XWmgHPI0TvJiiyCxZNFRti7O
+        B5KO4DxGppNVPRgNxb86czaVZPN0LxU8P18FUI4Acw==
+X-Google-Smtp-Source: ABdhPJw0ckIBbPI+QJkJYQsR/aHyPcFqI/Cbo2S1aK5o3fb6YXZSOQqQEvVnX9hlK1NxMKgitnE8GWNY+dSwqtFAvpc=
+X-Received: by 2002:a05:6512:3e0c:b0:448:3480:1fe5 with SMTP id
+ i12-20020a0565123e0c00b0044834801fe5mr4512406lfv.358.1646737102778; Tue, 08
+ Mar 2022 02:58:22 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.5.0
-Subject: Re: [PATCH V4 6/7] mmc: sdhci: Set error state for mmc driver
-Content-Language: en-US
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        asutoshd@quicinc.com, ulf.hansson@linaro.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     quic_vbadigan@quicinc.com, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        "Bao D . Nguyen" <nguyenb@codeaurora.org>
-References: <1646226227-32429-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <1646226227-32429-7-git-send-email-quic_c_sbhanu@quicinc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <1646226227-32429-7-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20220304135134.47827-1-yann.gautier@foss.st.com> <20220304135134.47827-2-yann.gautier@foss.st.com>
+In-Reply-To: <20220304135134.47827-2-yann.gautier@foss.st.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 8 Mar 2022 11:57:46 +0100
+Message-ID: <CAPDyKFq_TsBLjW2WxC-Fvu6qDs9MJ1=QPo9gOLRykJ5p2pJbGw@mail.gmail.com>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA LLI
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2.3.2022 15.03, Shaik Sajida Bhanu wrote:
-> Set error state if any errors observed in eMMC and SD card driver level.
-> 
-> Signed-off-by: Liangliang Lu <luliang@codeaurora.org>
-> Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-> Signed-off-by: Bao D. Nguyen <nguyenb@codeaurora.org>
-> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Hi Yann,
+
+On Fri, 4 Mar 2022 at 14:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>
+> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
+> starting from revision v2 of the peripheral. But it has limitations,
+> as all the buffers should be aligned on block size (except the last one).
+> But this cannot be guaranteed with SDIO. We should then have a property
+> to disable the support of LLI.
+
+Indeed, the buffer handling with SDIO is somewhat special, which also
+has been discussed several times on LKML before. In principle, we need
+the SDIO func drivers to respect buffer limitations that should be
+specified by the mmc host drivers. Quite similar to what we already
+have for block devices, like ->max_seg_size, ->max_seg, etc, that is
+set per mmc host.
+
+I realize that implementing something like the above requires bigger
+changes, which is why mmc host drivers instead validates the sglists
+and the elements. In some cases that means returning an error code and
+in others it could mean falling back to a non-DMA based I/O mode.
+
+For the stm32_sdmmc variant, it looks like the sglist validation is
+being managed in sdmmc_idma_validate_data() already. Can it be
+extended to cover this case too, rather than using a DT property?
+
+Kind regards
+Uffe
+
+>
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 > ---
->  drivers/mmc/host/sdhci.c | 22 ++++++++++++++++++++++
->  1 file changed, 22 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 741fb06..4ba3797 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -224,6 +224,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->  		if (timedout) {
->  			pr_err("%s: Reset 0x%x never completed.\n",
->  				mmc_hostname(host->mmc), (int)mask);
-> +			if (host->mmc && !host->mmc->err_state)
-> +				mmc_debugfs_err_stats_enable(host->mmc);
-
-I really do not understand why this cannot be another err_stats entry
-such as MMC_ERR_DRIVER and then as below?
-
-			sdhci_err_stats_inc(host, DRIVER);
-
-
->  			sdhci_dumpregs(host);
->  			return;
->  		}
-> @@ -1716,6 +1718,8 @@ static bool sdhci_send_command_retry(struct sdhci_host *host,
->  		if (!timeout--) {
->  			pr_err("%s: Controller never released inhibit bit(s).\n",
->  			       mmc_hostname(host->mmc));
-> +			if (host->mmc && !host->mmc->err_state)
-> +				mmc_debugfs_err_stats_enable(host->mmc);
->  			sdhci_dumpregs(host);
->  			cmd->error = -EIO;
->  			return false;
-> @@ -1965,6 +1969,8 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
->  		if (timedout) {
->  			pr_err("%s: Internal clock never stabilised.\n",
->  			       mmc_hostname(host->mmc));
-> +			if (host->mmc && !host->mmc->err_state)
-> +				mmc_debugfs_err_stats_enable(host->mmc);
->  			sdhci_dumpregs(host);
->  			return;
->  		}
-> @@ -1987,6 +1993,8 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
->  			if (timedout) {
->  				pr_err("%s: PLL clock never stabilised.\n",
->  				       mmc_hostname(host->mmc));
-> +				if (host->mmc && !host->mmc->err_state)
-> +					mmc_debugfs_err_stats_enable(host->mmc);
->  				sdhci_dumpregs(host);
->  				return;
->  			}
-> @@ -3162,6 +3170,8 @@ static void sdhci_timeout_timer(struct timer_list *t)
->  		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_REQ_TIMEOUT);
->  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
->  		       mmc_hostname(host->mmc));
-> +		if (host->mmc && !host->mmc->err_state)
-> +			mmc_debugfs_err_stats_enable(host->mmc);
->  		sdhci_dumpregs(host);
->  
->  		host->cmd->error = -ETIMEDOUT;
-> @@ -3185,6 +3195,8 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
->  		mmc_debugfs_err_stats_inc(host->mmc, MMC_ERR_REQ_TIMEOUT);
->  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
->  		       mmc_hostname(host->mmc));
-> +		if (host->mmc && !host->mmc->err_state)
-> +			mmc_debugfs_err_stats_enable(host->mmc);
->  		sdhci_dumpregs(host);
->  
->  		if (host->data) {
-> @@ -3236,6 +3248,8 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
->  			return;
->  		pr_err("%s: Got command interrupt 0x%08x even though no command operation was in progress.\n",
->  		       mmc_hostname(host->mmc), (unsigned)intmask);
-> +		if (host->mmc && !host->mmc->err_state)
-> +			mmc_debugfs_err_stats_enable(host->mmc);
->  		sdhci_dumpregs(host);
->  		return;
->  	}
-> @@ -3289,6 +3303,8 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
->  	void *desc = host->adma_table;
->  	dma_addr_t dma = host->adma_addr;
->  
-> +	if (host->mmc && !host->mmc->err_state)
-> +		mmc_debugfs_err_stats_enable(host->mmc);
->  	sdhci_dumpregs(host);
->  
->  	while (true) {
-> @@ -3378,6 +3394,8 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  
->  		pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
->  		       mmc_hostname(host->mmc), (unsigned)intmask);
-> +		if (host->mmc && !host->mmc->err_state)
-> +			mmc_debugfs_err_stats_enable(host->mmc);
->  		sdhci_dumpregs(host);
->  
->  		return;
-> @@ -3599,6 +3617,8 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
->  	if (unexpected) {
->  		pr_err("%s: Unexpected interrupt 0x%08x.\n",
->  			   mmc_hostname(host->mmc), unexpected);
-> +		if (host->mmc && !host->mmc->err_state)
-> +			mmc_debugfs_err_stats_enable(host->mmc);
->  		sdhci_dumpregs(host);
->  	}
->  
-> @@ -3962,6 +3982,8 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
->  		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
->  		pr_err("%s: CQE: Unexpected interrupt 0x%08x.\n",
->  		       mmc_hostname(host->mmc), intmask);
-> +		if (host->mmc && !host->mmc->err_state)
-> +			mmc_debugfs_err_stats_enable(host->mmc);
->  		sdhci_dumpregs(host);
->  	}
->  
-
+>  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> index 1e69a5a42439..309a2c0426e5 100644
+> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> @@ -145,6 +145,11 @@ properties:
+>        driver to sample the receive data (for example with a voltage switch
+>        transceiver).
+>
+> +  st,disable-dma-lli:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, disable DMA linked lists.
+> +      It is used for SDIO.
+> +
+>    st,cmd-gpios:
+>      maxItems: 1
+>      description:
+> --
+> 2.25.1
+>
