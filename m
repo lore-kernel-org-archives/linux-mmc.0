@@ -2,126 +2,185 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 270A9C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Mar 2022 10:58:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 413F9C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Mar 2022 12:55:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346050AbiCHK7W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Mar 2022 05:59:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48342 "EHLO
+        id S244900AbiCHM4I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Mar 2022 07:56:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59854 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345899AbiCHK7V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2022 05:59:21 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 977D421E0C
-        for <linux-mmc@vger.kernel.org>; Tue,  8 Mar 2022 02:58:24 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id g39so31449204lfv.10
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Mar 2022 02:58:24 -0800 (PST)
+        with ESMTP id S243471AbiCHM4G (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2022 07:56:06 -0500
+Received: from mx0b-00069f02.pphosted.com (mx0b-00069f02.pphosted.com [205.220.177.32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F78B473B5;
+        Tue,  8 Mar 2022 04:55:10 -0800 (PST)
+Received: from pps.filterd (m0246631.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 228Ci7FO002358;
+        Tue, 8 Mar 2022 12:55:04 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : content-type : in-reply-to :
+ mime-version; s=corp-2021-07-09;
+ bh=GWcdKpSxxrB1CRwivlJ5ol5C2EVnq7faRQzQtx0qh/o=;
+ b=Cnfbo9+dSzktERdNyc5zfv9e9VVUWlkCc++kcxKNXjZZcJanQASwkRFCf7P6EX+hv+gX
+ Bpl80S9oZrXGN5oS195mWA8AoxFPVHYEIpv4gHs2aw7kUVFcYVGo2yyNi3TAlamFO4RV
+ 28GCcyqojCbjfu7R0Qv6rsT0ZU40axaSxkmDWSBf8dWPFpFuJLmZxQX9HVtreq2mIi3x
+ 822bN8a8vuXSEhWrpjOuoeTczmmktXCAXEKgkbU0++xXyAMBkHBg7E+eR1d87C6ZJaz+
+ LVebJtv2b1kW26lLAE/k0HavRLB5thgDZeEI3xr+SSKvOJYPHCOxiqECPyp7/wWIjQBz 4w== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by mx0b-00069f02.pphosted.com with ESMTP id 3ekxn2extm-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 08 Mar 2022 12:55:04 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 228CjnmX047245;
+        Tue, 8 Mar 2022 12:55:03 GMT
+Received: from nam11-dm6-obe.outbound.protection.outlook.com (mail-dm6nam11lp2169.outbound.protection.outlook.com [104.47.57.169])
+        by userp3020.oracle.com with ESMTP id 3envvkdyj8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 08 Mar 2022 12:55:02 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=SNA0utoB59n0Q+8f4eeojLfwsKHnU494qgepE9xm7Th2IEinQssP6yy0Tog9CI2jlEibGkZs/4murKw8qN6ZyNrmOJR6xfI1tEqwI+ve9vv4dssTNUbVVdiJAtrcBPYjrK65I5sU9gCdcQik7catXDn2jEBfzEgNigQuGVvch7bTnvzomo1tK4Le/xKOsGt0YNGkqkGWfuOLTTUaZ98MAQFyDocCiRCCT2xlRbp5wRafbJmuf6qY6D2UHb5tragjvrkQsEE4KYCiYJR2NZiwT+nzfqYR8Ncc3DqsbzIGeth4J3E2thiCIMJ2bFgQAVDi2MmHW2Im4SZadERAhn4ypA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=GWcdKpSxxrB1CRwivlJ5ol5C2EVnq7faRQzQtx0qh/o=;
+ b=kABZ1W/acxCkaGv43pE4cHVAn/fPEks+HtvPxd2fTFaTSmmjRLStTe5qKbWLNc2bAu19OXZ2edgyT7VAksJK5kQ9TF/58eJDntlj+vZ4eEuh907CbbXs1QThmk1R4E5pKbN0GlKnoBh7A9hw5JMEn5rBDrvQ2lcFh7GF8iyQf/jvbfFRkLah0IKAZsMFo0jCVbZdyDoY8SDH+qUdVFdg3qh5Bu4OhBXOyDM0CUf6Zljyni+8Dot9BLCIDmlhH8dBXQThEBTjSwOTnEa2BdxNRmMUl3+bJq31HlKjbdcOPfxywYD+TVwXeov7ZAw9NoD1HigYSpxixZaubnehIZXJ6g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4MO/RRuWikHJmBYuiJ+R2IrUU7oSQM4tuZv70kuUbRI=;
-        b=k3G503hqW26oHasEdtGWNmqrChEPSR064D0K46cqUj1wayPtOGD/xufqe5xAva/q2z
-         Ffqx6+329fNYW9gSOuqz2AAXgGMHll/goOEg9fZEiNOXJXN8f8TRAfB8+UO0rvWEEp4U
-         Rada8pn/BfE4qTuiNtbOiPIZ98UZ1PeaMGHmCpvaIGNVHsTrVX7eRs+r2Fdwhj1flLyK
-         PCNHcxe7N27lE1Ji7giCwvePKEoMIlX4Opu0W6g/YgQw1tx/OpyFKDMvY0b0lAhyiXHp
-         Qi2hTE7F3assUB0/w+hogn/mpzP4x+Wd4/vMzE+ib2IsK9gr64AAZp2LZS6s1kvowSL3
-         22sg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4MO/RRuWikHJmBYuiJ+R2IrUU7oSQM4tuZv70kuUbRI=;
-        b=hkOoabk+gfl7CAOAd3ozRanKB4PxLb7m/rEMpNwYzcccOlLfJzhM9MJ6FkkUknwbGb
-         gqqjWQuAwKxMgFd/Q//oDAPIEa9fhqahVia/+ILXvgqOrzG8y3W5YeE6kCXxwgFJKNQc
-         exmyzHG/wI+VglPIB34qv30+EoHO4N6NfznuiN7nbaqtMCZUYkqUEffRv+8LoE94iRIO
-         u0/CnFunRp9RrbG60i+3/3wj0rMjA/GZ31In+2Cx9edQhGsBWVjd83JduQiMjmASwK2J
-         13nG7j7i6Si1Bda+jI6i+Pl6g+tYXwzEi+Tftd/ohoZSYMtBB5Q4fl8Fx5cKpGKFIt+o
-         lbfA==
-X-Gm-Message-State: AOAM532M/pZIXg4jSNhd5zqX6XuSj9I7XWmgHPI0TvJiiyCxZNFRti7O
-        B5KO4DxGppNVPRgNxb86czaVZPN0LxU8P18FUI4Acw==
-X-Google-Smtp-Source: ABdhPJw0ckIBbPI+QJkJYQsR/aHyPcFqI/Cbo2S1aK5o3fb6YXZSOQqQEvVnX9hlK1NxMKgitnE8GWNY+dSwqtFAvpc=
-X-Received: by 2002:a05:6512:3e0c:b0:448:3480:1fe5 with SMTP id
- i12-20020a0565123e0c00b0044834801fe5mr4512406lfv.358.1646737102778; Tue, 08
- Mar 2022 02:58:22 -0800 (PST)
-MIME-Version: 1.0
-References: <20220304135134.47827-1-yann.gautier@foss.st.com> <20220304135134.47827-2-yann.gautier@foss.st.com>
-In-Reply-To: <20220304135134.47827-2-yann.gautier@foss.st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 8 Mar 2022 11:57:46 +0100
-Message-ID: <CAPDyKFq_TsBLjW2WxC-Fvu6qDs9MJ1=QPo9gOLRykJ5p2pJbGw@mail.gmail.com>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA LLI
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=GWcdKpSxxrB1CRwivlJ5ol5C2EVnq7faRQzQtx0qh/o=;
+ b=jmjPFu8dg5TYu3FjKh7JXPR0/SRG3yiT07XLZgr1bXmY8+ddM5yRReu8DVULtrPsB01co0k03P/uzVaAfvItnoId1j2Cdz6NoToeSofA/mQZtX3x6YCXQYSYzQm0Myq9JZlIBbgdIs1B8kZbqKfeqWr05nbRnJEwUGpdl70J2M4=
+Received: from MWHPR1001MB2365.namprd10.prod.outlook.com
+ (2603:10b6:301:2d::28) by MN2PR10MB3359.namprd10.prod.outlook.com
+ (2603:10b6:208:122::15) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5038.14; Tue, 8 Mar
+ 2022 12:55:01 +0000
+Received: from MWHPR1001MB2365.namprd10.prod.outlook.com
+ ([fe80::2c3d:92b5:42b3:c1c5]) by MWHPR1001MB2365.namprd10.prod.outlook.com
+ ([fe80::2c3d:92b5:42b3:c1c5%4]) with mapi id 15.20.5038.026; Tue, 8 Mar 2022
+ 12:55:00 +0000
+Date:   Tue, 8 Mar 2022 15:54:45 +0300
+From:   Dan Carpenter <dan.carpenter@oracle.com>
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     ulf.hansson@linaro.org, cjb@laptop.org, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-Content-Type: text/plain; charset="UTF-8"
+        kernel-janitors@vger.kernel.org
+Subject: Re: [PATCH] mmc: wmt-sdmmc: Fix an error handling path in
+ wmt_mci_probe()
+Message-ID: <20220308125445.GE3293@kadam>
+References: <bf2e2e69226b20d173cce66287f59488fd47474b.1646588375.git.christophe.jaillet@wanadoo.fr>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <bf2e2e69226b20d173cce66287f59488fd47474b.1646588375.git.christophe.jaillet@wanadoo.fr>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-ClientProxiedBy: CTXP275CA0040.ZAFP275.PROD.OUTLOOK.COM
+ (2603:1086:100:1::28) To MWHPR1001MB2365.namprd10.prod.outlook.com
+ (2603:10b6:301:2d::28)
+MIME-Version: 1.0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 0ea9aaf8-4103-41dc-31ae-08da0102db1b
+X-MS-TrafficTypeDiagnostic: MN2PR10MB3359:EE_
+X-Microsoft-Antispam-PRVS: <MN2PR10MB3359E31907EF3796D3DBC28D8E099@MN2PR10MB3359.namprd10.prod.outlook.com>
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: e27ZK+xs29B3r+P9ac3XECCTMCzP2Ny5ASYn4vnpQXPhbtbgT9JI61UpsOTSh9RZbKmF8U8bnDA9/QJqYeV+LFf6KspuhfdvvSHXCm1FfqOC9CKqs+bztestdTbdayDVGKNmO2sfJWWpW/JifkWvhe2TbayoHd1FtTc2/t0JXoWmT0fBxXWgTvtI9lSja4fLumv47l8UbKVPzO7rBTQzaO+RQKy7+sYQP8+KFbEGSfWkuKFh2Wveq+437queTBkTyivJzyaNuRMA+Bmze+YDQiAnHjvtaVg1S2jKtoq1L55hF8HK83u2V85PcfzTk/ORQnest10Rn04mO4EuQVe6LDtpKDRZ4GU47HxTuh6SP4dpfZp/5w4v7zBfLrjVNues4m9mrS8ZtjdjZieJM/cLyrCmHA59rpKMnqqrK8h+tK4qoxGni546YdDJ967vAspMB0nurcveY8stbSf7JSwX+/L2lb5H2kCByQ2L/07kIh25U07/Fm6CVJftsvi0e7yVgGWl1MNkvi4r+XnYJ5pABGKFkMfsf5nCILinXao/eIJvKg44F7HVb6709uw9jAFdSsam7Bqpxx8CrHXPWwHHYPqJIBeqzY8lLDz3NkXsReaiPlS4gw6y6kUkHM++IZGobaPbLk/QyWKS9w8iJrOZJMAvkFWR98QH9wgQrp6UzXorqfj3hRv2HGPhyhC/zDhdOS/KLgI/P/exoRWfGUsJ3Zi1MVWW2708/dsSmaTBWBg=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MWHPR1001MB2365.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(7916004)(366004)(5660300002)(6916009)(9686003)(6512007)(6486002)(316002)(4326008)(8676002)(66556008)(6506007)(52116002)(86362001)(66946007)(66476007)(6666004)(38350700002)(8936002)(508600001)(38100700002)(26005)(186003)(33716001)(33656002)(1076003)(2906002)(44832011)(504134003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?53ACh44ZsNI1iat0f4JZhm+M2DjaRp3X7sN5aO03oL7rRpHY7zXALBaLTs8C?=
+ =?us-ascii?Q?P5fz1eFvhc5MbEVTropUz1hQYMfPOmPQnK1uKS3CQB7yXiU4a6xVsriCActI?=
+ =?us-ascii?Q?GjNbB+j2mDhYsc3ORt0Z2fP6AxYBPcflJTuuc+4WIwA1FCYVe5Gfhv75WcOb?=
+ =?us-ascii?Q?LQU41W2tQin1e14eZvEidK9bDGcHXYWRUD4FZmUYzB5MTkOBgf3/SV7C2lUZ?=
+ =?us-ascii?Q?VZlTR4BMhCzqM3bvH7DuN5CWTQvIRXScgvd7Ru8iKspMmFOAFD+3sbMwAKOB?=
+ =?us-ascii?Q?4/yT4Y9yQnYG0nPlGLCKVm+aH5hYcSGMAbtC/7JN31M+zJLh8K2vn69NHohI?=
+ =?us-ascii?Q?FWiEbx8UOqfZJRr+lec+hbvwqyqdavnzkwr+C3ugtZBDWNr3JHYXclW8bolu?=
+ =?us-ascii?Q?E6+5GWIw0RJeiRDFQc7fOoWG32mGb3QoHdD6un8ywFOkkZdyOjsjIM13FpZl?=
+ =?us-ascii?Q?hmQd6fBWT1PObqGkLi3E3KNn0UHiLiBP55vNGas/CqFFnRLbIrTX/E29eLIn?=
+ =?us-ascii?Q?ZDRP6yC9J1KKyzdlXZ42XzRxQAvMEOqHYfKFgAoafPW+kN5mJvT+9m8ANmpt?=
+ =?us-ascii?Q?ngimk8rlBlbKo7ThHNBvNxjUnTi2LxNPchqcwLXAwZUPWeoosMnoxXEcqY/W?=
+ =?us-ascii?Q?2CjyK4e2aKD6jg/HrH0vgAagrrGGM41T4QEKDfZUu2sn555YJgvra8omH9Z+?=
+ =?us-ascii?Q?weXvjtKk4xRp7ZYD/nkPNc/x3FfN9JfOP4CQFlCNvTFkEHDGBh9gduz5Py2g?=
+ =?us-ascii?Q?B6hBt9IZt1xz0Qvj3Q5Mwc+2AETIaqDQc93nejUTVokZ8cSVrM23pJp7OqO8?=
+ =?us-ascii?Q?oToS4m8iiZqV/wNMvasdCpqssLrt6FibrUOq7BCB1QamH5hW1vyXqg/F1rJ5?=
+ =?us-ascii?Q?gKbAb3R2qASIvaeO1Pbx2wgWoymlnq0VJM1eTUArpUvm3OTkWXejiWxjP6Fa?=
+ =?us-ascii?Q?VwQaM4mIPRFKQKZiVNrXniLWF+0A2EzBqZ+lJV/gFQicQj/wDpVHWt3G4jZq?=
+ =?us-ascii?Q?eqSWIcR9fISdJkW7gqcFAOBp4iI6GtpzhZpZ9CSbS+5ErFQuBzR478J5kKpT?=
+ =?us-ascii?Q?kqykDhW6xFnJmdSiQleENBoQM86n6ci5HU/ZelPfWfTa8vqwtFgioLfUg633?=
+ =?us-ascii?Q?cs7NQ3FltoPQSJvfdBJQsAmyidniVzANWPy6hvAy6tl9Dnr1o1LIw0IYQry5?=
+ =?us-ascii?Q?zP50hJ1whmZNg8SyY+bbqeFNLZ8yXi4jkGSMro6lPeWvpPo3H6vxaKFVk9b5?=
+ =?us-ascii?Q?xdfDbscqQ8jEuBnFTdV5H4APswuEC9ElBgMYW7we/SbRxNumjvWupBHLRlWK?=
+ =?us-ascii?Q?cJgHgtERQ+yBMtddtswF1AY25mz5yl05/Yq2qJOKksF4g7i3HIMxeRsN7M7k?=
+ =?us-ascii?Q?wUpS/LrV88LZ2rmMMevEpfp7w5w1NB+EOnkSeoUQ8YtI2jF1C/ZCuLlUBuSC?=
+ =?us-ascii?Q?XB0UZrTluI6XeoW27ebNShN57aOYnnU7ru5hGQMSTirVkDuuUkKDAMHJfFaN?=
+ =?us-ascii?Q?lcIJIf7CGRffP3ychKxY+TLV313Dn5Gpb9eUkWR4MntyNTWobA69IDVQSzqF?=
+ =?us-ascii?Q?Z0zp6DssAFKH2NK/11O8ict9YEK7r97X9/Tq3YFvVvUoWmbFuUXCZSMEM9h7?=
+ =?us-ascii?Q?OrD4DL1y65Q4qkscRs+ZqJOYOgrwCJD14hI5igOFyaw49LDSm5c2efM3ZJIt?=
+ =?us-ascii?Q?cu3bmA=3D=3D?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 0ea9aaf8-4103-41dc-31ae-08da0102db1b
+X-MS-Exchange-CrossTenant-AuthSource: MWHPR1001MB2365.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Mar 2022 12:55:00.8275
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: TA8+mFuTDLIzSZqWQvZwo9vRjEzMc4fcLrJfR1GCU+WBNvCgu0VNaUnguhKOFq91IF6FdMg6ARPVMSdBrRE2nKQHRPgnr2wvd5waT+IGCIQ=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR10MB3359
+X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10279 signatures=690470
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxlogscore=999 bulkscore=0
+ phishscore=0 malwarescore=0 suspectscore=0 mlxscore=0 adultscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2202240000
+ definitions=main-2203080067
+X-Proofpoint-ORIG-GUID: 2U-Z_O3q5raUHw6SjD-li9yrDSmGInqh
+X-Proofpoint-GUID: 2U-Z_O3q5raUHw6SjD-li9yrDSmGInqh
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Yann,
-
-On Fri, 4 Mar 2022 at 14:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
->
-> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
-> starting from revision v2 of the peripheral. But it has limitations,
-> as all the buffers should be aligned on block size (except the last one).
-> But this cannot be guaranteed with SDIO. We should then have a property
-> to disable the support of LLI.
-
-Indeed, the buffer handling with SDIO is somewhat special, which also
-has been discussed several times on LKML before. In principle, we need
-the SDIO func drivers to respect buffer limitations that should be
-specified by the mmc host drivers. Quite similar to what we already
-have for block devices, like ->max_seg_size, ->max_seg, etc, that is
-set per mmc host.
-
-I realize that implementing something like the above requires bigger
-changes, which is why mmc host drivers instead validates the sglists
-and the elements. In some cases that means returning an error code and
-in others it could mean falling back to a non-DMA based I/O mode.
-
-For the stm32_sdmmc variant, it looks like the sglist validation is
-being managed in sdmmc_idma_validate_data() already. Can it be
-extended to cover this case too, rather than using a DT property?
-
-Kind regards
-Uffe
-
->
-> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+On Sun, Mar 06, 2022 at 06:44:56PM +0100, Christophe JAILLET wrote:
+> A dma_free_coherent() call is missing in the error handling path of the
+> probe, as already done in the remove function.
+> 
+> Fixes: 3a96dff0f828 ("mmc: SD/MMC Host Controller for Wondermedia WM8505/WM8650")
+> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 > ---
->  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> index 1e69a5a42439..309a2c0426e5 100644
-> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> @@ -145,6 +145,11 @@ properties:
->        driver to sample the receive data (for example with a voltage switch
->        transceiver).
->
-> +  st,disable-dma-lli:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description: ST Micro-specific property, disable DMA linked lists.
-> +      It is used for SDIO.
-> +
->    st,cmd-gpios:
->      maxItems: 1
->      description:
-> --
-> 2.25.1
->
+> I've not been able to find a Fixes tag because of the renaming of
+> function and files.
+> However, it looks old (before 2008)
+
+You did add a fixes tag and it's from 2012.  :P
+
+> ---
+>  drivers/mmc/host/wmt-sdmmc.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 163ac9df8cca..8e18f01c0938 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -863,6 +863,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>  	return 0;
+>  fail6:
+>  	clk_put(priv->clk_sdmmc);
+> +	dma_free_coherent(&pdev->dev, mmc->max_blk_count * 16,
+> +			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
+>  fail5:
+>  	free_irq(dma_irq, priv);
+
+This isn't quite right.  If of_clk_get() fails it should call
+dma_free_coherent() but it does not.  You need to add:
+
+ fail6:
+ 	clk_put(priv->clk_sdmmc);
++fail5_and_a_half:
++	dma_free_coherent(&pdev->dev, mmc->max_blk_count * 16,
++			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
+ fail5:
+ 	free_irq(dma_irq, priv);
+
+regards,
+dan carpenter
+
