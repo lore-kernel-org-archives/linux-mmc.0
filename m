@@ -2,93 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFDC7C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Mar 2022 09:49:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05EB5C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Mar 2022 09:49:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237842AbiCHJu1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Mar 2022 04:50:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57640 "EHLO
+        id S1345481AbiCHJui (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Mar 2022 04:50:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58578 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345476AbiCHJu0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2022 04:50:26 -0500
-Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32EFE344C6
-        for <linux-mmc@vger.kernel.org>; Tue,  8 Mar 2022 01:49:29 -0800 (PST)
-Received: by mail-wm1-x333.google.com with SMTP id v2-20020a7bcb42000000b0037b9d960079so1057741wmj.0
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Mar 2022 01:49:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=4AMWeZkxp95RTDe+wPDPpAGms0iHGajzkgE4/KUX8bI=;
-        b=H8aMYJdR1rsOnt5DsE/e5rdF/g5CVV/ImrAKuw+9/cPZfWZFiO38RKfkOvUCOzHRn8
-         XqHP7+POHekXwKNA2LJVFDHwX+y+rUUhqpN+UDJJiOP9kpvWRKUzcDrjA7dZDZ6ZFcuG
-         lR77zCxBUR8/BaJhSXHGHagB54eapbQhSvnO7oaIsLzsZIo+g5XDnNZ/tR3IA39RQ3Ue
-         1mX0ri0O8X/Doruf5c5kTxOKzZiu3HcYBDifhFyTMf4rpLsMed0VvxDc2+rIjKVUehDs
-         /FB/JGFsa5DbFlN2zWnoxDd/1EIYwRbp1nGtO5+Xrc0XJn6TmBBRWsZIqqDuKUB9YT8l
-         SkPg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=4AMWeZkxp95RTDe+wPDPpAGms0iHGajzkgE4/KUX8bI=;
-        b=JCzeYOaipfcjau9mJDKS6Ey0rN+1jJxwRxgMx2Ghmzc5cqZ+QFoF2mWuT7Ce+D1xFx
-         SZ/e2YVCaL1ygvizTr3NMl1ePkBgYhmbho6K9voXbztSPKDZMwxODWkiW2bsC4sB5rXm
-         9JWrSXNy0GYX9fLGt1lcq4VgCI7HJvMZwk40ZaBJghob/MHSvMCYwWfuevi6TsFpGwa/
-         kB2Bu7aKbM9e5eY2CEzu7MaBhQ0EHMhEu9ZuQ3f0nMaTS63/JE7lOctThtYBJOsC6X0j
-         hghaoqYmPh1F1qUUrs7IEXg0gI/aNPtvKkkQ7Jwu71JpZqP2puwzZYhVYfUs2rP5gdCg
-         P75Q==
-X-Gm-Message-State: AOAM531M8OLcKv3gSEm9NMj26VmUFtyVBhu8yBjQOs3+yRpGAihm77lJ
-        F92RiTzNAo93FWgssqkyPseK4G0rrCiKN+9U
-X-Google-Smtp-Source: ABdhPJygU94zXAM1Uu54IBoLXA1LSudb52qrcnlJ03Lk9v6Rot2IWk4fYtPCBHBO4UAJEig/w3RXCg==
-X-Received: by 2002:a1c:f616:0:b0:37d:1e1c:f90a with SMTP id w22-20020a1cf616000000b0037d1e1cf90amr2688313wmc.148.1646732967642;
-        Tue, 08 Mar 2022 01:49:27 -0800 (PST)
-Received: from xps-9300.baylibre (laubervilliers-658-1-213-31.w90-63.abo.wanadoo.fr. [90.63.244.31])
-        by smtp.gmail.com with ESMTPSA id b1-20020a5d40c1000000b001f1dd6ea504sm8014205wrq.59.2022.03.08.01.49.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 08 Mar 2022 01:49:27 -0800 (PST)
-From:   Alexandre Bailon <abailon@baylibre.com>
-To:     chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
-        matthias.bgg@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>
-Subject: [PATCH] mmc: mtk-msdc: change a log level
-Date:   Tue,  8 Mar 2022 10:49:24 +0100
-Message-Id: <20220308094924.2868042-1-abailon@baylibre.com>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S1345484AbiCHJug (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Mar 2022 04:50:36 -0500
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E50B7344E5;
+        Tue,  8 Mar 2022 01:49:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1646732979; x=1678268979;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=qS7NRU3y0mPGTQHX2B4ljPRVEixQqYfSMWZPORyjxOw=;
+  b=QsSCtZBlutyNoJuZAGP1SOYlnOZmJZ8j3XYRMVTHq/5+NeVh+YaYsZDA
+   HMKnvZtkBepxZ/aAEfkuBRB9lXf3BpEa2Jq9Q5455LmwFcmRPoYsnMfjK
+   w6cy9yIOhKSOqMyRBxdNvwNMiosDsiAkCL4SbIqx27SGorq6VATUm6oY5
+   fqvqoBb1kZgz9CKxR2QxJOkiFLbl257Ux/uggTKQCtVFw9Q4C8iit1BTb
+   AgXBsH3u7xKefJjLXfy/DV+ptOHGxLRDoTK1IamVbpN+y0h6Dh1W27j2L
+   IpbVnLVSdgtH3biXJNHhgfqhrRfFhpidvkMhBmiHbuzjUitxwQ8Qp4Ptl
+   A==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10279"; a="234597253"
+X-IronPort-AV: E=Sophos;i="5.90,164,1643702400"; 
+   d="scan'208";a="234597253"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Mar 2022 01:49:39 -0800
+X-IronPort-AV: E=Sophos;i="5.90,164,1643702400"; 
+   d="scan'208";a="553553451"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.46.193])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Mar 2022 01:49:35 -0800
+Message-ID: <29a1a50c-bb65-25a4-b09e-7a869490231e@intel.com>
+Date:   Tue, 8 Mar 2022 11:49:30 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.5.0
+Subject: Re: [PATCH V4 3/7] mmc: debugfs: Add debug fs entry for mmc driver
+Content-Language: en-US
+To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        asutoshd@quicinc.com, ulf.hansson@linaro.org, agross@kernel.org,
+        bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     quic_vbadigan@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
+        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
+References: <1646226227-32429-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <1646226227-32429-4-git-send-email-quic_c_sbhanu@quicinc.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <1646226227-32429-4-git-send-email-quic_c_sbhanu@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-We write data to RPMB, we get many time the following log:
-mtk-msdc 11230000.mmc: phase: [map:ffffffff] [maxlen:32] [final:10]
+On 2.3.2022 15.03, Shaik Sajida Bhanu wrote:
+> Add debug fs entry to query eMMC and SD card errors statistics
+> 
+> Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
+> Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
+> Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
+> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+> ---
+>  drivers/mmc/core/debugfs.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 60 insertions(+)
+> 
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 3fdbc80..db0988c 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -223,6 +223,63 @@ static int mmc_clock_opt_set(void *data, u64 val)
+>  DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+>  	"%llu\n");
+>  
+> +static int mmc_err_stats_show(struct seq_file *file, void *data)
+> +{
+> +	struct mmc_host *host = (struct mmc_host *)file->private;
+> +	const char *desc[MMC_ERR_MAX] = {
+> +		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
+> +		[MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
+> +		[MMC_ERR_DAT_TIMEOUT] = "Data Timeout Occurred",
+> +		[MMC_ERR_DAT_CRC] = "Data CRC Errors Occurred",
+> +		[MMC_ERR_AUTO_CMD] = "Auto-Cmd Error Occurred",
+> +		[MMC_ERR_ADMA] = "ADMA Error Occurred",
+> +		[MMC_ERR_TUNING] = "Tuning Error Occurred",
+> +		[MMC_ERR_CMDQ_RED] = "CMDQ RED Errors",
+> +		[MMC_ERR_CMDQ_GCE] = "CMDQ GCE Errors",
+> +		[MMC_ERR_CMDQ_ICCE] = "CMDQ ICCE Errors",
+> +		[MMC_ERR_REQ_TIMEOUT] = "Request Timedout",
+> +		[MMC_ERR_CMDQ_REQ_TIMEOUT] = "CMDQ Request Timedout",
+> +		[MMC_ERR_ICE_CFG] = "ICE Config Errors",
+> +	};
+> +	int i;
+> +
+> +	if (!host)
+> +		return -EINVAL;
 
-dev_info is used to print that log but it seems that log is only
-useful for debbuging. Use dev_dbg instead of dev_info.
+Do not need to check host here
 
-Signed-off-by: Alexandre Bailon <abailon@baylibre.com>
----
- drivers/mmc/host/mtk-sd.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+> +
+> +	for (i = 0; i < MMC_ERR_MAX; i++) {
+> +		if (desc[i])
+> +			seq_printf(file, "# %s:\t %d\n",
+> +					desc[i], host->err_stats[i]);
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static int mmc_err_stats_open(struct inode *inode, struct file *file)
+> +{
+> +	return single_open(file, mmc_err_stats_show, inode->i_private);
+> +}
+> +
+> +static ssize_t mmc_err_stats_write(struct file *filp, const char __user *ubuf,
+> +				   size_t cnt, loff_t *ppos)
+> +{
+> +	struct mmc_host *host = filp->f_mapping->host->i_private;
+> +
+> +	if (!host)
+> +		return -EINVAL;
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index d5a9c269d492..05c8b4de46f3 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1914,8 +1914,8 @@ static struct msdc_delay_phase get_best_delay(struct msdc_host *host, u32 delay)
- 		final_phase = (start_final + len_final / 3) % PAD_DELAY_MAX;
- 	else
- 		final_phase = (start_final + len_final / 2) % PAD_DELAY_MAX;
--	dev_info(host->dev, "phase: [map:%x] [maxlen:%d] [final:%d]\n",
--		 delay, len_final, final_phase);
-+	dev_dbg(host->dev, "phase: [map:%x] [maxlen:%d] [final:%d]\n",
-+		delay, len_final, final_phase);
- 
- 	delay_phase.maxlen = len_final;
- 	delay_phase.start = start_final;
--- 
-2.34.1
+Do not need to check host here
+
+> +
+> +	pr_debug("%s: Resetting MMC error statistics\n", __func__);
+> +	memset(host->err_stats, 0, sizeof(host->err_stats));
+> +
+> +	return cnt;
+> +}
+> +
+> +static const struct file_operations mmc_err_stats_fops = {
+> +	.open	= mmc_err_stats_open,
+> +	.read	= seq_read,
+> +	.write	= mmc_err_stats_write,
+> +};
+> +
+>  void mmc_add_host_debugfs(struct mmc_host *host)
+>  {
+>  	struct dentry *root;
+> @@ -236,6 +293,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+>  	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
+>  				   &mmc_clock_fops);
+>  
+> +	debugfs_create_file("err_stats", 0600, root, host,
+> +		&mmc_err_stats_fops);
+> +
+>  #ifdef CONFIG_FAIL_MMC_REQUEST
+>  	if (fail_request)
+>  		setup_fault_attr(&fail_default_attr, fail_request);
 
