@@ -2,191 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B09DC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Mar 2022 15:40:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69887C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Mar 2022 16:00:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232740AbiCJPlx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Mar 2022 10:41:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43188 "EHLO
+        id S240613AbiCJQBw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Mar 2022 11:01:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39542 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229475AbiCJPlw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2022 10:41:52 -0500
-Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C69F1182DBA;
-        Thu, 10 Mar 2022 07:40:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1646926851; x=1678462851;
-  h=from:to:cc:subject:date:message-id;
-  bh=xQcu9yhqtW0WP5gvn5tmDGzwGOh80CRgaFIQ4EfxX0s=;
-  b=J1fK8NkdijFJlsL+FyRqgEo/ut12eXTThcu8MEb+QS9cTavm/hA+LVG7
-   aamaTQXrMYeuX31b48QO3ujhVfTpvcbpk6HzCtBiKBO850NaTfYSCX8gF
-   8dQ9qyLP0ol0U2EU4NAUZp9BoVh/9FFvdrex/3x8vmA8Rm9E73x4eU/S9
-   c=;
-Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
-  by alexa-out.qualcomm.com with ESMTP; 10 Mar 2022 07:40:50 -0800
-X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 10 Mar 2022 07:40:49 -0800
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 10 Mar 2022 21:10:27 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 3364A58A2; Thu, 10 Mar 2022 21:10:26 +0530 (IST)
-From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-To:     adrian.hunter@intel.com, agross@kernel.org,
-        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
-        p.zabel@pengutronix.de, chris@printf.net, gdjakov@mm-sol.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_asutoshd@quicinc.com,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sayalil@quicinc.com,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Subject: [PATCH V2] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-Date:   Thu, 10 Mar 2022 21:10:23 +0530
-Message-Id: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
-X-Mailer: git-send-email 2.7.4
+        with ESMTP id S240692AbiCJQBb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2022 11:01:31 -0500
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D277F186417;
+        Thu, 10 Mar 2022 08:00:22 -0800 (PST)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22AARWDr023835;
+        Thu, 10 Mar 2022 16:59:31 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=vKPTWN7CzmrHazpB+G2p0y7Va4U2SZ7wiP4CcFo27L4=;
+ b=mbLWETh9lhabuPovfTdTMzMya4arO2yMz1UXhe9GgnCEIWVwahrrAd6XpjR2upEjbrtO
+ IA9he0LvVvqQeB+rE3E3Uyjny8PUlHGSeEu8sxPcnBqSuHTG50r6b8xxNqw3cwyvrJFb
+ xcqGDkXXBvvtF2uZC9gFNOU7O6eoDAKgE0DENaNAHK3Lg0sQ8onyfXu32sikp3p56Gt5
+ aYo27q4ipsZDOWfkJHbkRn83HHaJpsqO/8iKF+kbPFkTssiADh6JF3PwHayjPwlXMML/
+ P+t/mK85RMlNYtYb3d78vlel950EFltAg0Qq2OHIE9WRERHJeFpVtqjWHuFbIdD9ZFyv 8Q== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3ekymmt5sg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 10 Mar 2022 16:59:31 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id C558210002A;
+        Thu, 10 Mar 2022 16:59:29 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id B135A2309E5;
+        Thu, 10 Mar 2022 16:59:29 +0100 (CET)
+Received: from [10.211.5.119] (10.75.127.51) by SFHDAG2NODE2.st.com
+ (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Thu, 10 Mar
+ 2022 16:59:28 +0100
+Message-ID: <b465353f-9291-f159-ba0b-4cd9577fc676@foss.st.com>
+Date:   Thu, 10 Mar 2022 16:59:28 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA
+ LLI
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>
+References: <20220304135134.47827-1-yann.gautier@foss.st.com>
+ <20220304135134.47827-2-yann.gautier@foss.st.com>
+ <CAPDyKFq_TsBLjW2WxC-Fvu6qDs9MJ1=QPo9gOLRykJ5p2pJbGw@mail.gmail.com>
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <CAPDyKFq_TsBLjW2WxC-Fvu6qDs9MJ1=QPo9gOLRykJ5p2pJbGw@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.51]
+X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE2.st.com
+ (10.75.127.5)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-10_06,2022-03-09_01,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Reset GCC_SDCC_BCR register before every fresh initilazation. This will
-reset whole SDHC-msm controller, clears the previous power control
-states and avoids, software reset timeout issues as below.
+On 3/8/22 11:57, Ulf Hansson wrote:
+> Hi Yann,
+> 
+> On Fri, 4 Mar 2022 at 14:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>>
+>> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
+>> starting from revision v2 of the peripheral. But it has limitations,
+>> as all the buffers should be aligned on block size (except the last one).
+>> But this cannot be guaranteed with SDIO. We should then have a property
+>> to disable the support of LLI.
+> 
+> Indeed, the buffer handling with SDIO is somewhat special, which also
+> has been discussed several times on LKML before. In principle, we need
+> the SDIO func drivers to respect buffer limitations that should be
+> specified by the mmc host drivers. Quite similar to what we already
+> have for block devices, like ->max_seg_size, ->max_seg, etc, that is
+> set per mmc host.
+> 
+> I realize that implementing something like the above requires bigger
+> changes, which is why mmc host drivers instead validates the sglists
+> and the elements. In some cases that means returning an error code and
+> in others it could mean falling back to a non-DMA based I/O mode.
+> 
+> For the stm32_sdmmc variant, it looks like the sglist validation is
+> being managed in sdmmc_idma_validate_data() already. Can it be
+> extended to cover this case too, rather than using a DT property?
+> 
+> Kind regards
+> Uffe
 
-[ 5.458061][ T262] mmc1: Reset 0x1 never completed.
-[ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP
-===========
-[ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version:
-0x00007202
-[ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt:
-0x00000000
-[ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode:
-0x00000000
-[ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl:
-0x00000000
-[ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
-[ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
-[ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat:
-0x00000000
-[ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab:
-0x00000000
-[ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int:
-0x00000000
-[ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
-[ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
-[ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]:
-0x00000000
-[ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]:
-0x00000000
-[ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
-[ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER
-DUMP-----------
-[ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
-0x6000642c |
-DLL cfg2: 0x0020a000
-[ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
-0x00010800 | DDR cfg: 0x80040873
-[ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 :
-0xf88218a8 Vndr func3: 0x02626040
+Hi Ulf,
 
-Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm
-chipsets")
+OK, I'll check what can be done for this. Patches 1 and 2 can be 
+dropped, they will be reworked.
+But patch 3 of this series could be taken, as not linked to LLI 
+management. Should I push it again alone, or could you review it directly?
 
-Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
----
+Best regards,
+Yann
 
-Changes since V1:
-	- Added fixes tag as suggested by Ulf Hansson.
-	- Replaced devm_reset_control_get() with
-	  devm_reset_control_get_optional_exclusive() as suggested by
-	  Ulf Hansson.
----
- drivers/mmc/host/sdhci-msm.c | 48 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 50c71e0..cb33c9a 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -17,6 +17,7 @@
- #include <linux/regulator/consumer.h>
- #include <linux/interconnect.h>
- #include <linux/pinctrl/consumer.h>
-+#include <linux/reset.h>
- 
- #include "sdhci-pltfm.h"
- #include "cqhci.h"
-@@ -284,6 +285,7 @@ struct sdhci_msm_host {
- 	bool uses_tassadar_dll;
- 	u32 dll_config;
- 	u32 ddr_config;
-+	struct reset_control *core_reset;
- 	bool vqmmc_enabled;
- };
- 
-@@ -2482,6 +2484,45 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
- 	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
- }
- 
-+static int sdhci_msm_gcc_reset(struct platform_device *pdev,
-+	       struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int ret = 0;
-+
-+	msm_host->core_reset = devm_reset_control_get_optional_exclusive(&pdev->dev, "core_reset");
-+	if (IS_ERR(msm_host->core_reset)) {
-+		ret = PTR_ERR(msm_host->core_reset);
-+		dev_err(&pdev->dev, "core_reset unavailable (%d)\n", ret);
-+		msm_host->core_reset = NULL;
-+	}
-+	if (msm_host->core_reset) {
-+		ret = reset_control_assert(msm_host->core_reset);
-+		if (ret) {
-+			dev_err(&pdev->dev, "core_reset assert failed (%d)\n",
-+						ret);
-+			goto out;
-+		}
-+		/*
-+		 * The hardware requirement for delay between assert/deassert
-+		 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
-+		 * ~125us (4/32768). To be on the safe side add 200us delay.
-+		 */
-+		usleep_range(200, 210);
-+
-+		ret = reset_control_deassert(msm_host->core_reset);
-+		if (ret) {
-+			dev_err(&pdev->dev, "core_reset deassert failed (%d)\n",
-+						ret);
-+			goto out;
-+		}
-+		usleep_range(200, 210);
-+	}
-+
-+out:
-+	return ret;
-+}
- 
- static int sdhci_msm_probe(struct platform_device *pdev)
- {
-@@ -2529,6 +2570,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
- 	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
- 
-+	ret = sdhci_msm_gcc_reset(pdev, host);
-+	if (ret) {
-+		dev_err(&pdev->dev, "core_reset assert/deassert failed (%d)\n",
-+					ret);
-+		goto pltfm_free;
-+	}
-+
- 	/* Setup SDCC bus voter clock. */
- 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
- 	if (!IS_ERR(msm_host->bus_clk)) {
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
+> 
+>>
+>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 5 +++++
+>>   1 file changed, 5 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+>> index 1e69a5a42439..309a2c0426e5 100644
+>> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+>> @@ -145,6 +145,11 @@ properties:
+>>         driver to sample the receive data (for example with a voltage switch
+>>         transceiver).
+>>
+>> +  st,disable-dma-lli:
+>> +    $ref: /schemas/types.yaml#/definitions/flag
+>> +    description: ST Micro-specific property, disable DMA linked lists.
+>> +      It is used for SDIO.
+>> +
+>>     st,cmd-gpios:
+>>       maxItems: 1
+>>       description:
+>> --
+>> 2.25.1
+>>
 
