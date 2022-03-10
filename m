@@ -2,144 +2,263 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DA9BC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Mar 2022 20:56:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 039A0C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Mar 2022 23:38:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245318AbiCJU55 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Mar 2022 15:57:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44246 "EHLO
+        id S244619AbiCJXjq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Mar 2022 18:39:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237222AbiCJU5v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2022 15:57:51 -0500
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 239D5190B41
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Mar 2022 12:56:49 -0800 (PST)
-Received: by mail-pj1-x1036.google.com with SMTP id c16-20020a17090aa61000b001befad2bfaaso6337890pjq.1
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Mar 2022 12:56:49 -0800 (PST)
+        with ESMTP id S241152AbiCJXjp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Mar 2022 18:39:45 -0500
+Received: from mail-oi1-x234.google.com (mail-oi1-x234.google.com [IPv6:2607:f8b0:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 871B333E2B
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Mar 2022 15:38:43 -0800 (PST)
+Received: by mail-oi1-x234.google.com with SMTP id h10so7668323oia.4
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Mar 2022 15:38:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=+k8ctLQCe8XJaC/j2fvvK4DGnmTULy8k6D3OKlVnPmQ=;
-        b=Dbn2SdA8XBEzKkhgr/DRBEKQOwwHc5fTtnmTYFq6onbcWgpIIxuwvaK/jH96ZFIgFP
-         j0J6CRhI2Fphg8sRtdKBb9CqFEmj/12ziO+DOD/GGeU8rFfXhj9MrQSkJDFxIDGTkVUB
-         Rqpw4AFrWgj/+xKNFzzeW2gaHo1CgS8G1x44w=
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=5YgWXh9EdVjh1W/rPJ6KNdL1nAingABW0Gom5HZqNug=;
+        b=nzuplA6UJr3OCptBVYac78FF2j0OKoFCo1m3M8XHawxP9y5CAnAkpZSl5R4BanCfpj
+         cVtxKKAkoyZpZ0ERLXpXG+awu/BNkt+SXsZwWqmeWVcoEh378F1IY2vJcrCoW39KbpCq
+         QbSFrjGl6ZvsLAvZWwCU9c/ul/bQ87UyPojUVqDpvy8R4ZX1FjeWPhbKCLA9w/eeY5DH
+         FX/MRVRygmrMyn4zzyf6IqTvQ/INPyRVDsfVTo0EaoN7wb07k09ozjFIuTTVlTNGF36J
+         TetMKkuHnBAlW58AzQgMWQFGOmVFjYEX/BWyasXE9DGnA5jnpUgPkTH/wD4w6L1N3jyV
+         A1bg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=+k8ctLQCe8XJaC/j2fvvK4DGnmTULy8k6D3OKlVnPmQ=;
-        b=OToetLzg9mfRCq8pQ7bKWikeH4ZSfHlBk8OagO4zSOQv7W3BQqToXoEuludJ24Gpfr
-         +4rE0xJKbRjFtBbW9AxKRAXOnm0j1NoTG3yC5nRFuEq63dr44l6qv9vFcFtfwG0LXGr9
-         lxhT/LxR4QdMW+nxUo5hKRyJuznO0DqA+Ja5LsbWGu4OOX0kY3FNEUslanKxnIp3Mcr/
-         ZEnJPiKzqTvScYJ3eM35bfJQOfUvKLnsv1GTyBW63xhw2c6Zqpp8BN2nDj8i+SHJYPWJ
-         qxT23Luzgrl+Y8OFh5TzNxPOYT76+sxgmOYOQagDbLRt+fwHSfZewUxC69yNUBqM6JWY
-         iyzA==
-X-Gm-Message-State: AOAM530yHs1ZTDpK2J+UYPWuMa9bju5SZ+1MKijOGYSnqjH8PU7QPIB7
-        4pgrdLtPbBqmVKxPENft+2kgAw==
-X-Google-Smtp-Source: ABdhPJzoY8GngJ2Y2OCQ6Aod62vcK4WUd1N9F4/6893poNA16PSF+larj4xu/DLXNzauKjq45MfJVA==
-X-Received: by 2002:a17:902:ec8f:b0:152:939:ac45 with SMTP id x15-20020a170902ec8f00b001520939ac45mr7038860plg.61.1646945808618;
-        Thu, 10 Mar 2022 12:56:48 -0800 (PST)
-Received: from localhost ([2620:15c:202:201:7181:d34e:52c2:be45])
-        by smtp.gmail.com with UTF8SMTPSA id s30-20020a056a001c5e00b004f75773f3fcsm7585302pfw.119.2022.03.10.12.56.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 10 Mar 2022 12:56:47 -0800 (PST)
-From:   Brian Norris <briannorris@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org,
-        Douglas Anderson <dianders@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, Brian Norris <briannorris@chromium.org>
-Subject: [PATCH] mmc: core: Set HS clock speed before sending HS CMD13
-Date:   Thu, 10 Mar 2022 12:56:39 -0800
-Message-Id: <20220310125636.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
-X-Mailer: git-send-email 2.35.1.723.g4982287a31-goog
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=5YgWXh9EdVjh1W/rPJ6KNdL1nAingABW0Gom5HZqNug=;
+        b=nFTqcwrbyUbWtp8xO/4iJqdQWV5NG7F53kmd6wwAhTdukjEYgswCjbMWu+kwLquSiD
+         ZOHiAuXIdJvbimPiKId7lqx1c2Q+0PIMu24diK+HVWxKHZKS6YBg6h9phEvUWKrN/fsF
+         r0Mfb0OgVFtAf/o+GMeZF/XeEJmMvTfFUwcpvvxdYx0Z6udGpnpOraZlJU1xfrQnDXnQ
+         /zIMDnMnhpgZbhFugIrW/aevLXydxrJUfyXvfd7KPY2j7V6AxrlEO/Zi0JT82sJyre2a
+         Zwqdg7d1a+hfN0ShfN5+hGQeu3fPsH96JRJZB1CJiUksN0duy9zGpkkovvim7C6ybaeU
+         r97Q==
+X-Gm-Message-State: AOAM5315Yj4aiQnagDtXOPLGzglnjMDxdhLyZ/2oJWnuTAqG2d2VjFTZ
+        BOUqKfm424i0tboc99qaurbIAQ==
+X-Google-Smtp-Source: ABdhPJxFCzc3m1UVAdP/mnxcDEWfhBzlFRkLIgemb8qHz2BIn0jGQVTGa4uoiqPy2lCgMtiHWPPACA==
+X-Received: by 2002:a05:6808:2227:b0:2da:5a4f:95db with SMTP id bd39-20020a056808222700b002da5a4f95dbmr3991134oib.129.1646955522821;
+        Thu, 10 Mar 2022 15:38:42 -0800 (PST)
+Received: from ripper ([2600:1700:a0:3dc8:205:1bff:fec0:b9b3])
+        by smtp.gmail.com with ESMTPSA id ay44-20020a056808302c00b002d9d2b564absm3047905oib.43.2022.03.10.15.38.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 10 Mar 2022 15:38:42 -0800 (PST)
+Date:   Thu, 10 Mar 2022 15:40:22 -0800
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Cc:     adrian.hunter@intel.com, agross@kernel.org, ulf.hansson@linaro.org,
+        p.zabel@pengutronix.de, chris@printf.net, gdjakov@mm-sol.com,
+        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, quic_asutoshd@quicinc.com,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sayalil@quicinc.com
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+Message-ID: <YiqMZouVVEtVNrlV@ripper>
+References: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
-hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
-some eMMC don't respond to SEND_STATUS commands very reliably if they're
-still running at a low initial frequency. As mentioned in that commit,
-JESD84-B51 P49 suggests a sequence in which the host:
-1. sets HS_TIMING
-2. bumps the clock ("<= 52 MHz")
-3. sends further commands
+On Thu 10 Mar 07:40 PST 2022, Shaik Sajida Bhanu wrote:
 
-It doesn't exactly require that we don't use a lower-than-52MHz
-frequency, but in practice, these eMMC don't like it.
+> Reset GCC_SDCC_BCR register before every fresh initilazation. This will
+> reset whole SDHC-msm controller, clears the previous power control
+> states and avoids, software reset timeout issues as below.
+> 
 
-Anyway, the aforementioned commit got that right for HS400ES, but the
-refactoring in 53e60650f74e ("mmc: core: Allow CMD13 polling when
-switching to HS mode for mmc") messed that back up again, by reordering
-step 2 after step 3.
+Nice, we've gotten reports about this from time to time.
 
-Let's fix that, and also apply the same logic to HS200/400, where this
-eMMC has problems too.
+> [ 5.458061][ T262] mmc1: Reset 0x1 never completed.
+> [ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP
+> ===========
+> [ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version:
+> 0x00007202
+> [ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt:
+> 0x00000000
+> [ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode:
+> 0x00000000
+> [ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl:
+> 0x00000000
+> [ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
+> [ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
+> [ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat:
+> 0x00000000
+> [ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab:
+> 0x00000000
+> [ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int:
+> 0x00000000
+> [ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
+> [ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+> [ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]:
+> 0x00000000
+> [ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]:
+> 0x00000000
+> [ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
+> [ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER
+> DUMP-----------
+> [ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+> 0x6000642c |
+> DLL cfg2: 0x0020a000
+> [ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+> 0x00010800 | DDR cfg: 0x80040873
+> [ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 :
+> 0xf88218a8 Vndr func3: 0x02626040
 
-This resolves errors like this seen when booting some RK3399 Gru/Scarlet
-systems:
+Please ignore the line length "limit" and leave these unwrapped.
 
-[    2.058881] mmc1: CQHCI version 5.10
-[    2.097545] mmc1: SDHCI controller on fe330000.mmc [fe330000.mmc] using ADMA
-[    2.209804] mmc1: mmc_select_hs400es failed, error -84
-[    2.215597] mmc1: error -84 whilst initialising MMC card
-[    2.417514] mmc1: mmc_select_hs400es failed, error -110
-[    2.423373] mmc1: error -110 whilst initialising MMC card
-[    2.605052] mmc1: mmc_select_hs400es failed, error -110
-[    2.617944] mmc1: error -110 whilst initialising MMC card
-[    2.835884] mmc1: mmc_select_hs400es failed, error -110
-[    2.841751] mmc1: error -110 whilst initialising MMC card
+> 
+> Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm
+> chipsets")
 
-Fixes: 53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode for mmc")
-Cc: Shawn Lin <shawn.lin@rock-chips.com>
-Signed-off-by: Brian Norris <briannorris@chromium.org>
----
+This as well, and please drop the empty line between Fixes: and
+Signed-off-by:.
 
- drivers/mmc/core/mmc.c | 15 +++++++++++++--
- 1 file changed, 13 insertions(+), 2 deletions(-)
+> 
+> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+> ---
+> 
+> Changes since V1:
+> 	- Added fixes tag as suggested by Ulf Hansson.
+> 	- Replaced devm_reset_control_get() with
+> 	  devm_reset_control_get_optional_exclusive() as suggested by
+> 	  Ulf Hansson.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 48 ++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 48 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 50c71e0..cb33c9a 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -17,6 +17,7 @@
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/interconnect.h>
+>  #include <linux/pinctrl/consumer.h>
+> +#include <linux/reset.h>
+>  
+>  #include "sdhci-pltfm.h"
+>  #include "cqhci.h"
+> @@ -284,6 +285,7 @@ struct sdhci_msm_host {
+>  	bool uses_tassadar_dll;
+>  	u32 dll_config;
+>  	u32 ddr_config;
+> +	struct reset_control *core_reset;
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 13abfcd130a5..821b90caba2f 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1390,12 +1390,17 @@ static int mmc_select_hs400es(struct mmc_card *card)
- 	}
- 
- 	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-+
-+	/*
-+	 * Bump to HS frequency. Some cards don't handle SEND_STATUS reliably
-+	 * at the initial frequency.
-+	 */
-+	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
-+
- 	err = mmc_switch_status(card, true);
- 	if (err)
- 		goto out_err;
- 
--	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
--
- 	/* Switch card to DDR with strobe bit */
- 	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
- 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-@@ -1487,6 +1492,12 @@ static int mmc_select_hs200(struct mmc_card *card)
- 		old_timing = host->ios.timing;
- 		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
- 
-+		/*
-+		 * Bump to HS frequency. Some cards don't handle SEND_STATUS
-+		 * reliably at the initial frequency.
-+		 */
-+		mmc_set_clock(host, card->ext_csd.hs_max_dtr);
-+
- 		/*
- 		 * For HS200, CRC errors are not a reliable way to know the
- 		 * switch failed. If there really is a problem, we would expect
--- 
-2.35.1.723.g4982287a31-goog
+As you only reset the controller once, during probe, this can be a local
+variable in sdhci_msm_gcc_reset().
 
+>  	bool vqmmc_enabled;
+>  };
+>  
+> @@ -2482,6 +2484,45 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
+>  	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
+>  }
+>  
+> +static int sdhci_msm_gcc_reset(struct platform_device *pdev,
+
+You don't need pdev here, take a struct deivce * in and pass &pdev->dev.
+
+> +	       struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	int ret = 0;
+> +
+> +	msm_host->core_reset = devm_reset_control_get_optional_exclusive(&pdev->dev, "core_reset");
+
+No need to hold onto that, so use the non-devm variant and free the
+reset at the end of the function.
+
+> +	if (IS_ERR(msm_host->core_reset)) {
+> +		ret = PTR_ERR(msm_host->core_reset);
+> +		dev_err(&pdev->dev, "core_reset unavailable (%d)\n", ret);
+> +		msm_host->core_reset = NULL;
+
+return dev_err_probe(&pdev->dev, PTR_ERR(msm_host->core_reset), "unable to acquire core_reset\n");
+
+> +	}
+> +	if (msm_host->core_reset) {
+
+If you flip this around as:
+
+	if (!msm_host->core_reset)
+		return 0;
+
+You don't need to zero-initialize ret, use goto and indent
+this block.
+
+> +		ret = reset_control_assert(msm_host->core_reset);
+> +		if (ret) {
+> +			dev_err(&pdev->dev, "core_reset assert failed (%d)\n",
+> +						ret);
+> +			goto out;
+
+return dev_err_probe();
+
+> +		}
+> +		/*
+> +		 * The hardware requirement for delay between assert/deassert
+> +		 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
+> +		 * ~125us (4/32768). To be on the safe side add 200us delay.
+> +		 */
+> +		usleep_range(200, 210);
+> +
+> +		ret = reset_control_deassert(msm_host->core_reset);
+> +		if (ret) {
+> +			dev_err(&pdev->dev, "core_reset deassert failed (%d)\n",
+> +						ret);
+> +			goto out;
+
+return dev_err_probe()
+
+> +		}
+> +		usleep_range(200, 210);
+
+The comment above says that we need to hold reset for 125us, is this
+delay in here in error or should the comment above mention that this
+needs to be done after deasserting the reset as well?
+
+> +	}
+> +
+> +out:
+> +	return ret;
+
+With above, you can return 0 here.
+
+> +}
+>  
+>  static int sdhci_msm_probe(struct platform_device *pdev)
+>  {
+> @@ -2529,6 +2570,13 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  
+>  	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+>  
+> +	ret = sdhci_msm_gcc_reset(pdev, host);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "core_reset assert/deassert failed (%d)\n",
+> +					ret);
+
+You just printed in sdhci_msm_gcc_reset(), no need to print again.
+
+Regards,
+Bjorn
+
+> +		goto pltfm_free;
+> +	}
+> +
+>  	/* Setup SDCC bus voter clock. */
+>  	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+>  	if (!IS_ERR(msm_host->bus_clk)) {
+> -- 
+> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+> of Code Aurora Forum, hosted by The Linux Foundation
+> 
