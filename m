@@ -2,124 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4172CC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Mar 2022 15:46:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B042AC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Mar 2022 20:44:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349404AbiCKPrI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Mar 2022 10:47:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47316 "EHLO
+        id S231563AbiCKUpw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Mar 2022 15:45:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348744AbiCKPrD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Mar 2022 10:47:03 -0500
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2161B1C6668
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Mar 2022 07:46:00 -0800 (PST)
-Received: by mail-lj1-x22f.google.com with SMTP id bn33so12544389ljb.6
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Mar 2022 07:46:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=10XF3Sb+t0GCaPOcQ9XoyXqUIC9CjyYdWscRYcObAxw=;
-        b=MqSyuOe34h+f5EWwR/oM3slrJ38qINF04yiqUGK9i44Eg7rBVyesJHW1EnFC5kq8Fz
-         lk+2YfR6+b43HpQckMotOid77fcXOQCYnCzxj1VBwif0v7RCPtuA/XLZTOUL3TGLQ5aP
-         rQQEfHcA3U6Ckvf/b/iG+3oXnpYqaTOumz8wAkXkJ28WbzSqpcBZIFq8ncUer5twWgks
-         FOJuSVG0lF2of7EiLc6kYvyyb0pg3ayR7my6BVOGNSBBms3Z+ikWZdLDJdqgvWdJqhJe
-         L4QlwgEkOq4Qz46/Q/RRjPefsiQTSwFPLy5q6vZRgKOnqEz3+Npwf2GWlZojgDZgRcgm
-         baow==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=10XF3Sb+t0GCaPOcQ9XoyXqUIC9CjyYdWscRYcObAxw=;
-        b=WpkCRmgPPkSXqfFZSWOA/P1+g2hkp2ldDxOhfIWcNvIm+jeJU6y0UHYIKXQ3dDBmxg
-         jNQOvC9/fUXePALN2yeY5WYV6r0Lf1xF1B9Rs68c49h/tuLZ33WkIBTmZBYr0a1K+m4F
-         BByNaxFtWM6786bEmkoRP2cUohjHNVGUasBGvVUwn+sWnqR61JXIuZGk0gV9xHAKf/0P
-         5G9Ve7e6HuLwTiVyaqVdSIkMVtRkBSSXOTgP/FVMIBKrC+OO6XjwY/Pnbx7NlYM1JL46
-         PeQa5t7bS1s7U2d1UVX9xpx04XT9RQx8+6WSsWUSfKnaUh2mJTI5KlqPjFikiOGemA9t
-         LtdA==
-X-Gm-Message-State: AOAM532KLT7o72a6dVwSgZ45ti4mfpsLHp45ImgsY6Zj4P9tfTdoXq+i
-        C1jux69V8mzdJraA1bFYBNvgR3a02BUxmtk+hIZgVA==
-X-Google-Smtp-Source: ABdhPJyKLXL/cjixS70H+wB5WRjtfcEBo2CKEa89VicVYZWBqrQ7uCDzqe5Ilvrer3zvBAGc4wkBHELro4zTjGulY/w=
-X-Received: by 2002:a2e:8603:0:b0:246:24c:b79c with SMTP id
- a3-20020a2e8603000000b00246024cb79cmr6543962lji.367.1647013557376; Fri, 11
- Mar 2022 07:45:57 -0800 (PST)
-MIME-Version: 1.0
-References: <20220304135134.47827-1-yann.gautier@foss.st.com>
- <20220304135134.47827-2-yann.gautier@foss.st.com> <CAPDyKFq_TsBLjW2WxC-Fvu6qDs9MJ1=QPo9gOLRykJ5p2pJbGw@mail.gmail.com>
- <b465353f-9291-f159-ba0b-4cd9577fc676@foss.st.com>
-In-Reply-To: <b465353f-9291-f159-ba0b-4cd9577fc676@foss.st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 11 Mar 2022 16:45:21 +0100
-Message-ID: <CAPDyKFqu_Y2ixbw380t5qA_rXTPLMWasqpBmaMqP0nHUOqzQhw@mail.gmail.com>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA LLI
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-Content-Type: text/plain; charset="UTF-8"
+        with ESMTP id S231485AbiCKUpv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Mar 2022 15:45:51 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 760A41EC987;
+        Fri, 11 Mar 2022 12:44:46 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 7350CCE2A41;
+        Fri, 11 Mar 2022 20:44:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id B56EDC340F3;
+        Fri, 11 Mar 2022 20:44:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647031482;
+        bh=PBjxc7AY//1jYO0ePlYxH9SVc1xDQ5rz80p7KeCHlUY=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=MSkNFAGOpWTgAku4C5dF9yjjPo6wHXUilUiNk4pGo98tUopFKbGtBrv0i/RXgOgM7
+         pG3cUwvEO5P97apMpEK7lxQET0dYAYgUoaboU38V5earJd5luoFO669/ysjsu0wDp4
+         oBBD5F3oocIhnqYTz6XGHAUhRT5lvQrOHaBWY7ykiRxNZg0rlw91E70naY0ET1o2DL
+         MAxJSEXtk95JNFnG08Ixefe7HRJ9xdxKChyRmaUaqYXpsbdz5Z8c4FRJ8kP3dEz7BF
+         5MXL2y5Nf2AXpY+RMkZlADuFI2MNHOq1YgwNJWajUj2WJuIkX9x+E05OVHK8WmXcuB
+         2r2I036JOPrPQ==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id A379FEAC095;
+        Fri, 11 Mar 2022 20:44:42 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v5.17-rc8
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20220311150945.84262-1-ulf.hansson@linaro.org>
+References: <20220311150945.84262-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20220311150945.84262-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.17-rc6
+X-PR-Tracked-Commit-Id: 1760fdb6fe9f796fbdb9b4106b3e0bbacc16b55c
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 3977a3fb67703273fb3d6f8647bbca43b3471d4e
+Message-Id: <164703148266.12993.7303672109443671368.pr-tracker-bot@kernel.org>
+Date:   Fri, 11 Mar 2022 20:44:42 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 10 Mar 2022 at 17:00, Yann Gautier <yann.gautier@foss.st.com> wrote:
->
-> On 3/8/22 11:57, Ulf Hansson wrote:
-> > Hi Yann,
-> >
-> > On Fri, 4 Mar 2022 at 14:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
-> >>
-> >> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
-> >> starting from revision v2 of the peripheral. But it has limitations,
-> >> as all the buffers should be aligned on block size (except the last one).
-> >> But this cannot be guaranteed with SDIO. We should then have a property
-> >> to disable the support of LLI.
-> >
-> > Indeed, the buffer handling with SDIO is somewhat special, which also
-> > has been discussed several times on LKML before. In principle, we need
-> > the SDIO func drivers to respect buffer limitations that should be
-> > specified by the mmc host drivers. Quite similar to what we already
-> > have for block devices, like ->max_seg_size, ->max_seg, etc, that is
-> > set per mmc host.
-> >
-> > I realize that implementing something like the above requires bigger
-> > changes, which is why mmc host drivers instead validates the sglists
-> > and the elements. In some cases that means returning an error code and
-> > in others it could mean falling back to a non-DMA based I/O mode.
-> >
-> > For the stm32_sdmmc variant, it looks like the sglist validation is
-> > being managed in sdmmc_idma_validate_data() already. Can it be
-> > extended to cover this case too, rather than using a DT property?
-> >
-> > Kind regards
-> > Uffe
->
-> Hi Ulf,
->
-> OK, I'll check what can be done for this. Patches 1 and 2 can be
-> dropped, they will be reworked.
+The pull request you sent on Fri, 11 Mar 2022 16:09:45 +0100:
 
-Okay.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.17-rc6
 
-> But patch 3 of this series could be taken, as not linked to LLI
-> management. Should I push it again alone, or could you review it directly?
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/3977a3fb67703273fb3d6f8647bbca43b3471d4e
 
-I have some comments/questions on it, but perhaps it makes it easier
-for people to follow the discussion if it is done separately. So
-please push it alone, then I will review it.
+Thank you!
 
-[...]
-
-Kind regards
-Uffe
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
