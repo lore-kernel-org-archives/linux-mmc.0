@@ -2,116 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20E55C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 13:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2F2FC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 13:13:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238169AbiCNNHM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Mar 2022 09:07:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51528 "EHLO
+        id S235136AbiCNNOe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Mar 2022 09:14:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35822 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233418AbiCNNHL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 09:07:11 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A06101AD8A
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Mar 2022 06:06:00 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nTkOc-00053S-TA; Mon, 14 Mar 2022 14:05:58 +0100
-Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nTkOa-000eWs-KI; Mon, 14 Mar 2022 14:05:55 +0100
-Received: from pza by lupine with local (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nTkOY-0007WY-D1; Mon, 14 Mar 2022 14:05:54 +0100
-Message-ID: <1e620fa18fa34ca1f65558e3a52f79f81ff20634.camel@pengutronix.de>
-Subject: Re: [PATCH v2] mmc: mmci: manage MMC_PM_KEEP_POWER per variant
- config
-From:   Philipp Zabel <p.zabel@pengutronix.de>
-To:     Yann Gautier <yann.gautier@foss.st.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-Date:   Mon, 14 Mar 2022 14:05:54 +0100
-In-Reply-To: <20220314125554.190574-1-yann.gautier@foss.st.com>
-References: <20220314095225.53563-1-yann.gautier@foss.st.com>
-         <20220314125554.190574-1-yann.gautier@foss.st.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
-User-Agent: Evolution 3.38.3-1 
+        with ESMTP id S237179AbiCNNOc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 09:14:32 -0400
+Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E25F1FD25;
+        Mon, 14 Mar 2022 06:13:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1647263602; x=1678799602;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=PZa4Z/AnozBB1/b7y4Pc4aEBj3nvFtO2eJ4umuQ0508=;
+  b=Z6Wz0W9vSK6xcKDbfyPFxJfb2HF1uNL4RaLCH8gODRJm2GYn2OyPDUuv
+   pHf6PEHjz6yI1fi1HjFthYDmQ8ZdArKj+DvqpRR75FJdmKsCaMYGRGzXF
+   cGg1WjLg1LoWDKgU6qtZkZVEazAXDpYzOMHaOHHXQSf0hYcQbD4BHpFvV
+   lgv6ns2sJLU6z/zEgAVDzXPOl79EtFJj2obHOi7k0Z1fKAZQtiWdySJyc
+   obuh89WqFoNwq0p5es1KP8zj67JruC5J4LK8v96wpjhdkRYXbv1XOZTnf
+   9NTigYueu3j5C88GzmE8J9NygpoHlCYcBspsAAeFBF91D+2tt9SFSm3mE
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10285"; a="256209204"
+X-IronPort-AV: E=Sophos;i="5.90,180,1643702400"; 
+   d="scan'208";a="256209204"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2022 06:11:48 -0700
+X-IronPort-AV: E=Sophos;i="5.90,180,1643702400"; 
+   d="scan'208";a="556413166"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.145])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2022 06:11:45 -0700
+Message-ID: <50d4b87c-003f-818a-c8ba-a3bac9c0f171@intel.com>
+Date:   Mon, 14 Mar 2022 15:11:40 +0200
 MIME-Version: 1.0
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: p.zabel@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.5.0
+Subject: Re: [PATCH] mmc: core: Set HS clock speed before sending HS CMD13
+Content-Language: en-US
+To:     Brian Norris <briannorris@chromium.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-kernel@vger.kernel.org,
+        Douglas Anderson <dianders@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
+References: <20220310125636.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220310125636.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgWWFubiwKCk9uIE1vLCAyMDIyLTAzLTE0IGF0IDEzOjU1ICswMTAwLCBZYW5uIEdhdXRpZXIg
-d3JvdGU6Cj4gQWRkIGEgZGlzYWJsZV9rZWVwX3Bvd2VyIGZpZWxkIGluIHZhcmlhbnRfZGF0YSBz
-dHJ1Y3QuIFRoZQo+IE1NQ19QTV9LRUVQX1BPV0VSIGZsYWcgd2lsbCBiZSBlbmFibGVkIGlmIGRp
-c2FibGVfa2VlcF9wb3dlciBpcyBub3QKPiBzZXQuCj4gSXQgaXMgb25seSBzZXQgdG8gdHJ1ZSBm
-b3Igc3RtMzJfc2RtbWMgdmFyaWFudHMuCj4gCj4gVGhlIGlzc3VlIHdhcyBzZWVuIG9uIFNUTTMy
-TVAxNTdDLURLMiBib2FyZCwgd2hpY2ggZW1iZWRzIGEgd2lmaQo+IGNoaXAuCj4gSXQgZG9lc24n
-dCBjb3JyZWN0bHkgc3VwcG9ydCBsb3cgcG93ZXIgb24gdGhpcyBib2FyZC4gVGhlIFdpZmkgY2hp
-cAo+IGF3YWl0cyBhbiBhbHdheXMtb24gcmVndWxhdG9yLCBidXQgaXQgd2FzIGNvbm5lY3RlZCB0
-byB2M3YzIHdoaWNoIGlzCj4gb2ZmCj4gaW4gbG93LXBvd2VyIHNlcXVlbmNlLiBNTUNfUE1fS0VF
-UF9QT1dFUiBzaG91bGQgdGhlbiBiZSBkaXNhYmxlZC4KPiAKPiBUaGUgZmxhZyBjYW4gc3RpbGwg
-YmUgZW5hYmxlZCB0aHJvdWdoIERUIHByb3BlcnR5Ogo+IGtlZXAtcG93ZXItaW4tc3VzcGVuZC4K
-PiAKPiBTaWduZWQtb2ZmLWJ5OiBZYW5uIEdhdXRpZXIgPHlhbm4uZ2F1dGllckBmb3NzLnN0LmNv
-bT4KPiAtLS0KPiBVcGRhdGUgaW4gdjI6Cj4gUmV3b3JkIGNvbW1pdCBtZXNzYWdlIHRvIGJldHRl
-ciBleHBsYWluIHRoZSBpc3N1ZS4KPiAKPiBSZXNlbmQgdGhlIHBhdGNoIGFsb25lLiBJdCB3YXMg
-cHJldmlvdWxzeSBpbiBhIHNlcmllcyBbMV0gZm9yIHdoaWNoCj4gdGhlCj4gb3RoZXIgcGF0Y2hl
-cyB3aWxsIGJlIHJld29ya2VkLgo+IAo+IFsxXSAKPiBodHRwczovL2xvcmUua2VybmVsLm9yZy9s
-a21sLzIwMjIwMzA0MTM1MTM0LjQ3ODI3LTEteWFubi5nYXV0aWVyQGZvc3Muc3QuY29tLwo+IAo+
-IMKgZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMgfCA1ICsrKystCj4gwqBkcml2ZXJzL21tYy9ob3N0
-L21tY2kuaCB8IDEgKwo+IMKgMiBmaWxlcyBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDEgZGVs
-ZXRpb24oLSkKPiAKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9tbWNpLmMgYi9kcml2
-ZXJzL21tYy9ob3N0L21tY2kuYwo+IGluZGV4IDQ1Yjg2MDhjOTM1Yy4uMGUyZjJmNWQ2YTUyIDEw
-MDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5jCj4gKysrIGIvZHJpdmVycy9tbWMv
-aG9zdC9tbWNpLmMKPiBAQCAtMjc0LDYgKzI3NCw3IEBAIHN0YXRpYyBzdHJ1Y3QgdmFyaWFudF9k
-YXRhIHZhcmlhbnRfc3RtMzJfc2RtbWMgPQo+IHsKPiDCoMKgwqDCoMKgwqDCoMKgLmJ1c3lfZGV0
-ZWN0wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgPSB0cnVlLAo+IMKgwqDCoMKgwqDCoMKgwqAuYnVz
-eV9kZXRlY3RfZmxhZ8KgwqDCoMKgwqDCoMKgPSBNQ0lfU1RNMzJfQlVTWUQwLAo+IMKgwqDCoMKg
-wqDCoMKgwqAuYnVzeV9kZXRlY3RfbWFza8KgwqDCoMKgwqDCoMKgPSBNQ0lfU1RNMzJfQlVTWUQw
-RU5ETUFTSywKPiArwqDCoMKgwqDCoMKgwqAuZGlzYWJsZV9rZWVwX3Bvd2VywqDCoMKgwqDCoD0g
-dHJ1ZSwKPiDCoMKgwqDCoMKgwqDCoMKgLmluaXTCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoD0gc2RtbWNfdmFyaWFudF9pbml0LAo+IMKgfTsKPiDCoAo+IEBAIC0zMDEsNiAr
-MzAyLDcgQEAgc3RhdGljIHN0cnVjdCB2YXJpYW50X2RhdGEgdmFyaWFudF9zdG0zMl9zZG1tY3Yy
-Cj4gPSB7Cj4gwqDCoMKgwqDCoMKgwqDCoC5idXN5X2RldGVjdMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoD0gdHJ1ZSwKPiDCoMKgwqDCoMKgwqDCoMKgLmJ1c3lfZGV0ZWN0X2ZsYWfCoMKgwqDCoMKg
-wqDCoD0gTUNJX1NUTTMyX0JVU1lEMCwKPiDCoMKgwqDCoMKgwqDCoMKgLmJ1c3lfZGV0ZWN0X21h
-c2vCoMKgwqDCoMKgwqDCoD0gTUNJX1NUTTMyX0JVU1lEMEVORE1BU0ssCj4gK8KgwqDCoMKgwqDC
-oMKgLmRpc2FibGVfa2VlcF9wb3dlcsKgwqDCoMKgwqA9IHRydWUsCj4gwqDCoMKgwqDCoMKgwqDC
-oC5pbml0wqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqA9IHNkbW1jX3Zhcmlh
-bnRfaW5pdCwKPiDCoH07Cj4gwqAKPiBAQCAtMjE3Miw3ICsyMTc0LDggQEAgc3RhdGljIGludCBt
-bWNpX3Byb2JlKHN0cnVjdCBhbWJhX2RldmljZSAqZGV2LAo+IMKgwqDCoMKgwqDCoMKgwqBob3N0
-LT5zdG9wX2Fib3J0LmZsYWdzID0gTU1DX1JTUF9SMUIgfCBNTUNfQ01EX0FDOwo+IMKgCj4gwqDC
-oMKgwqDCoMKgwqDCoC8qIFdlIHN1cHBvcnQgdGhlc2UgUE0gY2FwYWJpbGl0aWVzLiAqLwo+IC3C
-oMKgwqDCoMKgwqDCoG1tYy0+cG1fY2FwcyB8PSBNTUNfUE1fS0VFUF9QT1dFUjsKPiArwqDCoMKg
-wqDCoMKgwqBpZiAoIXZhcmlhbnQtPmRpc2FibGVfa2VlcF9wb3dlcikKPiArwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoMKgbW1jLT5wbV9jYXBzIHw9IE1NQ19QTV9LRUVQX1BPV0VSOwo+IMKg
-Cj4gwqDCoMKgwqDCoMKgwqDCoC8qCj4gwqDCoMKgwqDCoMKgwqDCoCAqIFdlIGNhbiBkbyBTR0lP
-Cj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5oIGIvZHJpdmVycy9tbWMvaG9z
-dC9tbWNpLmgKPiBpbmRleCBlMWE5Yjk2YTMzOTYuLjJjYWQxZWY5NzY2YSAxMDA2NDQKPiAtLS0g
-YS9kcml2ZXJzL21tYy9ob3N0L21tY2kuaAo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvbW1jaS5o
-Cj4gQEAgLTM2MSw2ICszNjEsNyBAQCBzdHJ1Y3QgdmFyaWFudF9kYXRhIHsKPiDCoMKgwqDCoMKg
-wqDCoMKgdTMywqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgb3BlbmRy
-YWluOwo+IMKgwqDCoMKgwqDCoMKgwqB1OMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgZG1hX2xsaToxOwo+IMKgwqDCoMKgwqDCoMKgwqB1MzLCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBzdG0zMl9pZG1hYnNpemVfbWFzazsKPiArwqDC
-oMKgwqDCoMKgwqB1OMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-ZGlzYWJsZV9rZWVwX3Bvd2VyOjE7CgpUaGVyZSBhcmUgYWxyZWFkeSBmb3VyIHNlcGFyYXRlIGJp
-dGZpZWxkcyBpbiBzdHJ1Y3QgdmFyaWFudF9kYXRhLCB3aHkKbm90IG1vdmUgdGhpcyB1cCBpbnRv
-IG9uZSBvZiB0aGVtPwoKcmVnYXJkcwpQaGlsaXBwCg==
+On 10.3.2022 22.56, Brian Norris wrote:
+> Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
+> hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
+> some eMMC don't respond to SEND_STATUS commands very reliably if they're
+> still running at a low initial frequency. As mentioned in that commit,
+> JESD84-B51 P49 suggests a sequence in which the host:
+> 1. sets HS_TIMING
+> 2. bumps the clock ("<= 52 MHz")
+> 3. sends further commands
+> 
+> It doesn't exactly require that we don't use a lower-than-52MHz
+> frequency, but in practice, these eMMC don't like it.
+> 
+> Anyway, the aforementioned commit got that right for HS400ES, but the
+> refactoring in 53e60650f74e ("mmc: core: Allow CMD13 polling when
+> switching to HS mode for mmc") messed that back up again, by reordering
+> step 2 after step 3.
+
+That description might not be accurate.
+
+It looks like 4f25580fb84d did not have the intended effect because
+CMD13 was already being sent by mmc_select_hs(), still before increasing
+the frequency.  53e60650f74e just kept that behaviour.
+
+> 
+> Let's fix that, and also apply the same logic to HS200/400, where this
+> eMMC has problems too.
+> 
+> This resolves errors like this seen when booting some RK3399 Gru/Scarlet
+> systems:
+> 
+> [    2.058881] mmc1: CQHCI version 5.10
+> [    2.097545] mmc1: SDHCI controller on fe330000.mmc [fe330000.mmc] using ADMA
+> [    2.209804] mmc1: mmc_select_hs400es failed, error -84
+> [    2.215597] mmc1: error -84 whilst initialising MMC card
+> [    2.417514] mmc1: mmc_select_hs400es failed, error -110
+> [    2.423373] mmc1: error -110 whilst initialising MMC card
+> [    2.605052] mmc1: mmc_select_hs400es failed, error -110
+> [    2.617944] mmc1: error -110 whilst initialising MMC card
+> [    2.835884] mmc1: mmc_select_hs400es failed, error -110
+> [    2.841751] mmc1: error -110 whilst initialising MMC card
+> 
+> Fixes: 53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode for mmc")
+> Cc: Shawn Lin <shawn.lin@rock-chips.com>
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
+> ---
+> 
+>  drivers/mmc/core/mmc.c | 15 +++++++++++++--
+>  1 file changed, 13 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 13abfcd130a5..821b90caba2f 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1390,12 +1390,17 @@ static int mmc_select_hs400es(struct mmc_card *card)
+>  	}
+>  
+>  	mmc_set_timing(host, MMC_TIMING_MMC_HS);
+> +
+> +	/*
+> +	 * Bump to HS frequency. Some cards don't handle SEND_STATUS reliably
+> +	 * at the initial frequency.
+> +	 */
+> +	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+> +
+>  	err = mmc_switch_status(card, true);
+>  	if (err)
+>  		goto out_err;
+>  
+> -	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+> -
+>  	/* Switch card to DDR with strobe bit */
+>  	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
+>  	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1487,6 +1492,12 @@ static int mmc_select_hs200(struct mmc_card *card)
+>  		old_timing = host->ios.timing;
+>  		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>  
+> +		/*
+> +		 * Bump to HS frequency. Some cards don't handle SEND_STATUS
+> +		 * reliably at the initial frequency.
+> +		 */
+> +		mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+
+Is card->ext_csd.hs_max_dtr better than card->ext_csd.hs200_max_dtr here?
+
+> +
+>  		/*
+>  		 * For HS200, CRC errors are not a reliable way to know the
+>  		 * switch failed. If there really is a problem, we would expect
 
