@@ -2,168 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1AA2C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 14:35:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96716C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 15:40:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234542AbiCNOgI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Mar 2022 10:36:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35202 "EHLO
+        id S242664AbiCNPlu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Mar 2022 11:41:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229925AbiCNOgI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 10:36:08 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B41F93BA69;
-        Mon, 14 Mar 2022 07:34:57 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22EEYU37010648;
-        Mon, 14 Mar 2022 15:34:31 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=kLY/rp9XFBnEGTA7AmSGnAI46HT15qqSZH0qqiHDQ8g=;
- b=Ic7xYf3r6l+v/jgFyCGeiHGfK1zwxEQ3yKLbO5UJoXWt1SRSUiBhYc48mv9lxeQz2iNY
- DRzNNoYmP9gYv+n01Ww9nBWFuesipS0x59ZssrsuXwxigqhtGPF3cWM5lauC7jM64UJk
- /SZSEYv7d8S+DMY4dq3uYfPIovLEab4QfJxb7P3bliS/HudISyUxxClUCBok4tqYiAJS
- r7unIxSb8zS8m9/OE6Tv8QO1IoseujmjZn/izJ4OgIaa4TCC77wIAI+bSyolw1pqD3b3
- 0+dLIycC1HFlaoNtTGm2uPvKTitW97yuXLkQhA1wxLXa+SfhanqE1N9WSDyZbuZb3XHn tw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3et7kd0007-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 14 Mar 2022 15:34:30 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 41DA410002A;
-        Mon, 14 Mar 2022 15:34:30 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 36755227895;
-        Mon, 14 Mar 2022 15:34:30 +0100 (CET)
-Received: from [10.201.21.172] (10.75.127.46) by SFHDAG2NODE2.st.com
- (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Mon, 14 Mar
- 2022 15:34:29 +0100
-Message-ID: <9e4fbf6a-1309-3aee-fcb0-be7c2c683892@foss.st.com>
-Date:   Mon, 14 Mar 2022 15:34:07 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH v2] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
-Content-Language: en-US
+        with ESMTP id S242670AbiCNPlt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 11:41:49 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5566443F7;
+        Mon, 14 Mar 2022 08:40:38 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id ABA2E61274;
+        Mon, 14 Mar 2022 15:40:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id ED6E9C340E9;
+        Mon, 14 Mar 2022 15:40:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647272437;
+        bh=N1ifLpIgpRyYM2X3kH35gK6SnVXZ+nbBy9A+jPeXgNc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=uD5H4O6+coUBFsCf4fK4LZgvjR2Cd3aTCyXWAd6DT5oWoApFckalq34tQJW0fctXG
+         IeCvu+s2eI00ZjmcPTHcNyJh386gwZH72RtkGRCqg/PwQ84CoZF3VGxIG2awuWkl/X
+         snPWL9Erf/iijlopvkbv3ImsSKDpeWGUYHQJOOiBbNMlSJFy+lMTMsT8OjMXHoTHsp
+         6YPKSfns04BKVKiNaBCx5vHoQ9Imbzjm0WX/5fyq7ORmbXnY7v1cinOnwpjWiKLtxt
+         su8Bcm0BZy9Og2Z3yWu6rumprqgU/wer2q2R7DvAjSRXZ7FnY3K01hj07h2scUdTmS
+         XKZ2PMSDiyWIg==
+Received: by pali.im (Postfix)
+        id E242E824; Mon, 14 Mar 2022 16:40:33 +0100 (CET)
+Date:   Mon, 14 Mar 2022 16:40:33 +0100
+From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-References: <20220314095225.53563-1-yann.gautier@foss.st.com>
- <20220314125554.190574-1-yann.gautier@foss.st.com>
- <CAPDyKFruN9Xwk4uqFumwBdcn4SjKQcSQVBbALa3kVxY4mVzOnQ@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CAPDyKFruN9Xwk4uqFumwBdcn4SjKQcSQVBbALa3kVxY4mVzOnQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-14_04,2022-03-14_01,2022-02-23_01
+Cc:     Marcin Wojtas <mw@semihalf.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ziji Hu <huziji@marvell.com>,
+        Adrian Hunter <adrian.hunter@intel.com>, jaz@semihalf.com,
+        tn@semihalf.com, Kostya Porotchkin <kostap@marvell.com>,
+        Alex Leibovich <alexl@marvell.com>,
+        "# 4.0+" <stable@vger.kernel.org>
+Subject: Re: [PATCH] mmc: sdhci-xenon: fix 1.8v regulator stabilization
+Message-ID: <20220314154033.4x74zscayee32rrj@pali>
+References: <20201211141656.24915-1-mw@semihalf.com>
+ <CAPDyKFqsSO+f9iG8vccwXZXDDNHgLEg7bfUe-KfHn2C-ZnOU4A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqsSO+f9iG8vccwXZXDDNHgLEg7bfUe-KfHn2C-ZnOU4A@mail.gmail.com>
+User-Agent: NeoMutt/20180716
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/14/22 14:03, Ulf Hansson wrote:
-> On Mon, 14 Mar 2022 at 13:56, Yann Gautier <yann.gautier@foss.st.com> wrote:
->>
->> Add a disable_keep_power field in variant_data struct. The
->> MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
->> It is only set to true for stm32_sdmmc variants.
->>
->> The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
->> It doesn't correctly support low power on this board. The Wifi chip
->> awaits an always-on regulator, but it was connected to v3v3 which is off
->> in low-power sequence. MMC_PM_KEEP_POWER should then be disabled.
+On Monday 11 January 2021 19:06:24 Ulf Hansson wrote:
+> On Fri, 11 Dec 2020 at 15:17, Marcin Wojtas <mw@semihalf.com> wrote:
+> >
+> > From: Alex Leibovich <alexl@marvell.com>
+> >
+> > Automatic Clock Gating is a feature used for the power
+> > consumption optimisation. It turned out that
+> > during early init phase it may prevent the stable voltage
+> > switch to 1.8V - due to that on some platfroms an endless
+> > printout in dmesg can be observed:
+> > "mmc1: 1.8V regulator output did not became stable"
+> > Fix the problem by disabling the ACG at very beginning
+> > of the sdhci_init and let that be enabled later.
+> >
+> > Fixes: 3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality")
+> > Signed-off-by: Alex Leibovich <alexl@marvell.com>
+> > Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+> > Cc: stable@vger.kernel.org
 > 
-> Just to make sure I get this correct.
-> 
-> Why can't the regulator stay on during system suspend? The point is,
-> we don't need an always on regulator to cope with this.
-> 
+> Applied for fixes (by fixing the typos), thanks!
+
+Hello!
+
+Is not this patch address same issue which was fixed by patch which was
+merged earlier?
+
+bb32e1987bc5 ("mmc: sdhci-xenon: fix annoying 1.8V regulator warning")
+https://lore.kernel.org/linux-mmc/CAPDyKFqAsvgAjfL-c9ukFNWeGJmufQosR2Eg9SKjXMVpNitdkA@mail.gmail.com/
+
 > Kind regards
 > Uffe
-
-Hi Ulf,
-
-This v3v3 regulator powers most of the devices on this board. So we need 
-to switch it off to gain power in suspend mode.
-
-
-Yann
-
 > 
->>
->> The flag can still be enabled through DT property:
->> keep-power-in-suspend.
->>
->> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
->> ---
->> Update in v2:
->> Reword commit message to better explain the issue.
->>
->> Resend the patch alone. It was previoulsy in a series [1] for which the
->> other patches will be reworked.
->>
->> [1] https://lore.kernel.org/lkml/20220304135134.47827-1-yann.gautier@foss.st.com/
->>
->>   drivers/mmc/host/mmci.c | 5 ++++-
->>   drivers/mmc/host/mmci.h | 1 +
->>   2 files changed, 5 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
->> index 45b8608c935c..0e2f2f5d6a52 100644
->> --- a/drivers/mmc/host/mmci.c
->> +++ b/drivers/mmc/host/mmci.c
->> @@ -274,6 +274,7 @@ static struct variant_data variant_stm32_sdmmc = {
->>          .busy_detect            = true,
->>          .busy_detect_flag       = MCI_STM32_BUSYD0,
->>          .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
->> +       .disable_keep_power     = true,
->>          .init                   = sdmmc_variant_init,
->>   };
->>
->> @@ -301,6 +302,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
->>          .busy_detect            = true,
->>          .busy_detect_flag       = MCI_STM32_BUSYD0,
->>          .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
->> +       .disable_keep_power     = true,
->>          .init                   = sdmmc_variant_init,
->>   };
->>
->> @@ -2172,7 +2174,8 @@ static int mmci_probe(struct amba_device *dev,
->>          host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
->>
->>          /* We support these PM capabilities. */
->> -       mmc->pm_caps |= MMC_PM_KEEP_POWER;
->> +       if (!variant->disable_keep_power)
->> +               mmc->pm_caps |= MMC_PM_KEEP_POWER;
->>
->>          /*
->>           * We can do SGIO
->> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
->> index e1a9b96a3396..2cad1ef9766a 100644
->> --- a/drivers/mmc/host/mmci.h
->> +++ b/drivers/mmc/host/mmci.h
->> @@ -361,6 +361,7 @@ struct variant_data {
->>          u32                     opendrain;
->>          u8                      dma_lli:1;
->>          u32                     stm32_idmabsize_mask;
->> +       u8                      disable_keep_power:1;
->>          void (*init)(struct mmci_host *host);
->>   };
->>
->> --
->> 2.25.1
->>
-
+> 
+> > ---
+> >  drivers/mmc/host/sdhci-xenon.c | 7 ++++++-
+> >  1 file changed, 6 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> > index c67611fdaa8a..4b05f6fdefb4 100644
+> > --- a/drivers/mmc/host/sdhci-xenon.c
+> > +++ b/drivers/mmc/host/sdhci-xenon.c
+> > @@ -168,7 +168,12 @@ static void xenon_reset_exit(struct sdhci_host *host,
+> >         /* Disable tuning request and auto-retuning again */
+> >         xenon_retune_setup(host);
+> >
+> > -       xenon_set_acg(host, true);
+> > +       /*
+> > +        * The ACG should be turned off at the early init time, in order
+> > +        * to solve a possile issues with the 1.8V regulator stabilization.
+> > +        * The feature is enabled in later stage.
+> > +        */
+> > +       xenon_set_acg(host, false);
+> >
+> >         xenon_set_sdclk_off_idle(host, sdhc_id, false);
+> >
+> > --
+> > 2.29.0
+> >
