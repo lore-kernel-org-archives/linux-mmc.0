@@ -2,151 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2F2FC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 13:13:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 537B2C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 13:38:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235136AbiCNNOe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Mar 2022 09:14:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35822 "EHLO
+        id S241986AbiCNNjd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Mar 2022 09:39:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34254 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237179AbiCNNOc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 09:14:32 -0400
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E25F1FD25;
-        Mon, 14 Mar 2022 06:13:22 -0700 (PDT)
+        with ESMTP id S241982AbiCNNj3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 09:39:29 -0400
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F059B193E1;
+        Mon, 14 Mar 2022 06:38:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1647263602; x=1678799602;
+  t=1647265095; x=1678801095;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=PZa4Z/AnozBB1/b7y4Pc4aEBj3nvFtO2eJ4umuQ0508=;
-  b=Z6Wz0W9vSK6xcKDbfyPFxJfb2HF1uNL4RaLCH8gODRJm2GYn2OyPDUuv
-   pHf6PEHjz6yI1fi1HjFthYDmQ8ZdArKj+DvqpRR75FJdmKsCaMYGRGzXF
-   cGg1WjLg1LoWDKgU6qtZkZVEazAXDpYzOMHaOHHXQSf0hYcQbD4BHpFvV
-   lgv6ns2sJLU6z/zEgAVDzXPOl79EtFJj2obHOi7k0Z1fKAZQtiWdySJyc
-   obuh89WqFoNwq0p5es1KP8zj67JruC5J4LK8v96wpjhdkRYXbv1XOZTnf
-   9NTigYueu3j5C88GzmE8J9NygpoHlCYcBspsAAeFBF91D+2tt9SFSm3mE
+  bh=AHI/JJbTZfROueDYE5RJAT/7Do58iIUYLmMbqYg/tQ8=;
+  b=CfpeUVkdInDWP5qerM1qYWEf1aC3bK/zmCJ+IN0efb+/6TYqptEvY5lu
+   kYIyPHk1rDQVo9399MccZz1F5xDE2KickKnOQ6QWcTV0KbYq6HVz+ufGi
+   Cu8U1zvjav3qbocW3YTyA3xRiloPThCOIskTTyuzP1J3D4AbqgaPAuokp
+   9B7R5YE0vIKS7uRgxGYfDtQic9e4jeZkdWoqqIlZoWR/znLRuJiweZUOw
+   5srauU9ZYBpmptR9HdjARK/MSAFSx12FpQgA1PfftCEqpIQGuDrBALvWU
+   SZB57B/XTUvhtGo4WxFXccpJ30I2/MxI5KpHGa7HJ1bIdk9DJBfvCTNL1
    Q==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10285"; a="256209204"
+X-IronPort-AV: E=McAfee;i="6200,9189,10285"; a="235975176"
 X-IronPort-AV: E=Sophos;i="5.90,180,1643702400"; 
-   d="scan'208";a="256209204"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2022 06:11:48 -0700
+   d="scan'208";a="235975176"
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2022 06:38:15 -0700
+X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.90,180,1643702400"; 
-   d="scan'208";a="556413166"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.145])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2022 06:11:45 -0700
-Message-ID: <50d4b87c-003f-818a-c8ba-a3bac9c0f171@intel.com>
-Date:   Mon, 14 Mar 2022 15:11:40 +0200
+   d="scan'208";a="515427504"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga006.jf.intel.com with ESMTP; 14 Mar 2022 06:38:12 -0700
+Message-ID: <f394b9fd-443b-953c-3c4b-596ae4348a58@intel.com>
+Date:   Mon, 14 Mar 2022 15:38:12 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Firefox/91.0 Thunderbird/91.5.0
-Subject: Re: [PATCH] mmc: core: Set HS clock speed before sending HS CMD13
+Subject: Re: [PATCH V2] mmc: sdhci-pci-gli: Add runtime PM for GL9763E
 Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org,
-        Douglas Anderson <dianders@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
-References: <20220310125636.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+To:     Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        greg.tu@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+        SeanHY.Chen@genesyslogic.com.tw, hl.liu@genesyslogic.com.tw,
+        Kevin Chang <kevin.chang@lcfuturecenter.com>
+References: <20220307090009.1386876-1-benchuanggli@gmail.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220310125636.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+In-Reply-To: <20220307090009.1386876-1-benchuanggli@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10.3.2022 22.56, Brian Norris wrote:
-> Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
-> hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
-> some eMMC don't respond to SEND_STATUS commands very reliably if they're
-> still running at a low initial frequency. As mentioned in that commit,
-> JESD84-B51 P49 suggests a sequence in which the host:
-> 1. sets HS_TIMING
-> 2. bumps the clock ("<= 52 MHz")
-> 3. sends further commands
+On 07/03/2022 11:00, Ben Chuang wrote:
+> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 > 
-> It doesn't exactly require that we don't use a lower-than-52MHz
-> frequency, but in practice, these eMMC don't like it.
+> Add runtime PM for GL9763E and disable PLL in runtime suspend. So power
+> gated of upstream port can be enabled. GL9763E has an auxiliary power
+> so it keep states in runtime suspend. In runtime resume, PLL is enabled
+> and waits for it to stabilize.
 > 
-> Anyway, the aforementioned commit got that right for HS400ES, but the
-> refactoring in 53e60650f74e ("mmc: core: Allow CMD13 polling when
-> switching to HS mode for mmc") messed that back up again, by reordering
-> step 2 after step 3.
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Tested-by: Kevin Chang <kevin.chang@lcfuturecenter.com>
 
-That description might not be accurate.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-It looks like 4f25580fb84d did not have the intended effect because
-CMD13 was already being sent by mmc_select_hs(), still before increasing
-the frequency.  53e60650f74e just kept that behaviour.
-
-> 
-> Let's fix that, and also apply the same logic to HS200/400, where this
-> eMMC has problems too.
-> 
-> This resolves errors like this seen when booting some RK3399 Gru/Scarlet
-> systems:
-> 
-> [    2.058881] mmc1: CQHCI version 5.10
-> [    2.097545] mmc1: SDHCI controller on fe330000.mmc [fe330000.mmc] using ADMA
-> [    2.209804] mmc1: mmc_select_hs400es failed, error -84
-> [    2.215597] mmc1: error -84 whilst initialising MMC card
-> [    2.417514] mmc1: mmc_select_hs400es failed, error -110
-> [    2.423373] mmc1: error -110 whilst initialising MMC card
-> [    2.605052] mmc1: mmc_select_hs400es failed, error -110
-> [    2.617944] mmc1: error -110 whilst initialising MMC card
-> [    2.835884] mmc1: mmc_select_hs400es failed, error -110
-> [    2.841751] mmc1: error -110 whilst initialising MMC card
-> 
-> Fixes: 53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode for mmc")
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
 > ---
+> Changes in v2:
+> * modify commit messages
+> * Use read_poll_timeout() instead of while loop
+> ---
+>  drivers/mmc/host/sdhci-pci-gli.c | 47 ++++++++++++++++++++++++++++++++
+>  1 file changed, 47 insertions(+)
 > 
->  drivers/mmc/core/mmc.c | 15 +++++++++++++--
->  1 file changed, 13 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 13abfcd130a5..821b90caba2f 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1390,12 +1390,17 @@ static int mmc_select_hs400es(struct mmc_card *card)
->  	}
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index 97035d77c18c..c854c8db32e4 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -13,6 +13,7 @@
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/delay.h>
+>  #include <linux/of.h>
+> +#include <linux/iopoll.h>
+>  #include "sdhci.h"
+>  #include "sdhci-pci.h"
+>  #include "cqhci.h"
+> @@ -873,6 +874,47 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>  	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+>  }
 >  
->  	mmc_set_timing(host, MMC_TIMING_MMC_HS);
+> +#ifdef CONFIG_PM
+> +static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+> +{
+> +	struct sdhci_pci_slot *slot = chip->slots[0];
+> +	struct sdhci_host *host = slot->host;
+> +	u16 clock;
 > +
-> +	/*
-> +	 * Bump to HS frequency. Some cards don't handle SEND_STATUS reliably
-> +	 * at the initial frequency.
-> +	 */
-> +	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+> +	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+> +	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
 > +
->  	err = mmc_switch_status(card, true);
->  	if (err)
->  		goto out_err;
->  
-> -	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
-> -
->  	/* Switch card to DDR with strobe bit */
->  	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
->  	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -1487,6 +1492,12 @@ static int mmc_select_hs200(struct mmc_card *card)
->  		old_timing = host->ios.timing;
->  		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
->  
-> +		/*
-> +		 * Bump to HS frequency. Some cards don't handle SEND_STATUS
-> +		 * reliably at the initial frequency.
-> +		 */
-> +		mmc_set_clock(host, card->ext_csd.hs_max_dtr);
-
-Is card->ext_csd.hs_max_dtr better than card->ext_csd.hs200_max_dtr here?
-
+> +	return 0;
+> +}
 > +
->  		/*
->  		 * For HS200, CRC errors are not a reliable way to know the
->  		 * switch failed. If there really is a problem, we would expect
+> +static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+> +{
+> +	struct sdhci_pci_slot *slot = chip->slots[0];
+> +	struct sdhci_host *host = slot->host;
+> +	u16 clock;
+> +
+> +	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +
+> +	clock |= SDHCI_CLOCK_PLL_EN;
+> +	clock &= ~SDHCI_CLOCK_INT_STABLE;
+> +	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> +
+> +	/* Wait max 150 ms */
+> +	if (read_poll_timeout(sdhci_readw, clock, (clock & SDHCI_CLOCK_INT_STABLE),
+> +			      1000, 150000, false, host, SDHCI_CLOCK_CONTROL)) {
+> +		pr_err("%s: PLL clock never stabilised.\n",
+> +		       mmc_hostname(host->mmc));
+> +		sdhci_dumpregs(host);
+> +	}
+> +
+> +	clock |= SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> +
+> +	return 0;
+> +}
+> +#endif
+> +
+>  static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+>  {
+>  	struct pci_dev *pdev = slot->chip->pdev;
+> @@ -982,6 +1024,11 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
+>  #ifdef CONFIG_PM_SLEEP
+>  	.resume		= sdhci_cqhci_gli_resume,
+>  	.suspend	= sdhci_cqhci_gli_suspend,
+> +#endif
+> +#ifdef CONFIG_PM
+> +	.runtime_suspend = gl9763e_runtime_suspend,
+> +	.runtime_resume  = gl9763e_runtime_resume,
+> +	.allow_runtime_pm = true,
+>  #endif
+>  	.add_host       = gl9763e_add_host,
+>  };
 
