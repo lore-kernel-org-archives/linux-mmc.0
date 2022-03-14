@@ -2,137 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ACE62C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 09:54:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1141EC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Mar 2022 10:32:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238301AbiCNJ4F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Mar 2022 05:56:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38444 "EHLO
+        id S238439AbiCNKeB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Mar 2022 06:34:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238304AbiCNJz1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 05:55:27 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 698893969B;
-        Mon, 14 Mar 2022 02:53:20 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22E8TvNB025967;
-        Mon, 14 Mar 2022 10:52:44 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-transfer-encoding :
- content-type; s=selector1;
- bh=pUSzcWf/L+OKxAki1hJsdcsg6/HMBg3ULewIOq5J2xo=;
- b=JKH3CvO+B2SYcNCqlYBQhTeGBVkao5q5TsquduHUhnsW7Dx/8DGjoZ7K/iUv0WdTy6lM
- +2vReM0o71dBjrbs4KqhA3LiHcP/5xvIslgj8ld4DA9J9FZbTh/OpGKJYtJ5HlW5oP1C
- L4wc45NvZ8I22ILrchuYWeGoZnWBO67+vYKfthgHeCKiGYt9I66RloRlvkoNzecGyUTm
- xokdH0AWxLzTg3b3m4A0QfvR/NSz0+w6JfomDdpHa2zlf/T4Ry0NQrs8pF+ueou+WBga
- cntR8esU4+W4ZEpfImFAqP0EGBwuRyK60IbNK7PU84F2IHoy3v/ORBnD1R3pcxM7fbK/ sg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3erk9k1agt-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 14 Mar 2022 10:52:44 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 050FE10002A;
-        Mon, 14 Mar 2022 10:52:42 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 22057216EE6;
-        Mon, 14 Mar 2022 10:52:42 +0100 (CET)
-Received: from localhost (10.75.127.48) by SFHDAG2NODE2.st.com (10.75.127.5)
- with Microsoft SMTP Server (TLS) id 15.0.1497.26; Mon, 14 Mar 2022 10:52:41
- +0100
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>,
-        Yann Gautier <yann.gautier@foss.st.com>
-Subject: [PATCH RESEND] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
-Date:   Mon, 14 Mar 2022 10:52:25 +0100
-Message-ID: <20220314095225.53563-1-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S236630AbiCNKeA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 06:34:00 -0400
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6751230F;
+        Mon, 14 Mar 2022 03:32:48 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1647253970; x=1678789970;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=tcH7GGg15JCUBMXBBEr4A+gzUlR4DzpJ44QMDaHKhXo=;
+  b=A9UqD0DW9K+S/CvEXXSZVh2smEJ6SObgjqDf2xwJiJ156wqXF6kdH8Dd
+   IsnXq0g+GAKC5bvUEuEHgnIaEHsHhnc4odPUXkIygMc7+h6oFuC3/MqaH
+   dwGpMF7LIVpWhn53OdS48+pVJK+2h1rTFaCQYyxz7mUM8sitteejWSZhK
+   /gXs8bf5MGq0evoU1A6+lEn25rPbXzsfgWOKTliNK5qwEnrWIHRr62vUB
+   OFHQJ7LViTcDJFwfS5c0RMNoQHEaiFg2xV+x+/msJ4W2N7RYwLeF23Zy3
+   +sfDKq6Cd+j0Y6swoOvrsCnWhcyWdfTLbF9BNQWrve+mOMV8M+G4Dle8d
+   Q==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10285"; a="255941815"
+X-IronPort-AV: E=Sophos;i="5.90,180,1643702400"; 
+   d="scan'208";a="255941815"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Mar 2022 03:32:48 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.90,180,1643702400"; 
+   d="scan'208";a="580067063"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.92]) ([10.237.72.92])
+  by orsmga001.jf.intel.com with ESMTP; 14 Mar 2022 03:32:45 -0700
+Message-ID: <4436fbb9-32fa-82f0-bf99-344b9bfddf78@intel.com>
+Date:   Mon, 14 Mar 2022 12:32:45 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.75.127.48]
-X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.816,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-14_04,2022-03-11_02,2022-02-23_01
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.5.0
+Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
+Content-Language: en-US
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        Michael Wu <michael@allwinnertech.com>, ulf.hansson@linaro.org,
+        beanhuo@micron.com, porzio@gmail.com
+Cc:     lixiang <lixiang@allwinnertech.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20220312044315.7994-1-michael@allwinnertech.com>
+ <DM6PR04MB6575D203B92955D9A913576CFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <DM6PR04MB6575D203B92955D9A913576CFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a disable_keep_power field in variant_data struct. The
-MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
-It is only set to true for stm32_sdmmc variants.
+On 14/03/2022 09:26, Avri Altman wrote:
+> Hi,
+>> The mmc core enable cache on default. But it only enables cache-flushing
+>> when host supports cmd23 and eMMC supports reliable write.
+>> For hosts which do not support cmd23 or eMMCs which do not support
+>> reliable write, the cache can not be flushed by `sync` command.
+>> This may leads to cache data lost.
+>> This patch enables cache-flushing as long as cache is enabled, no matter host
+>> supports cmd23 and/or eMMC supports reliable write or not.
+> I looked in the spec and indeed couldn't find why enabling cache is dependent of cmd23/reliable write.
+> Nor I was able to find the original commit log.
 
-The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
-It doesn't correctly support low power, and we need to unbind the wifi
-driver before a suspend sequence. But the wifi chip firmware is then
-lost, and the communication with SDIO fails if MMC_PM_KEEP_POWER is
-enabled.
-The flag can still be enabled through DT property: keep-power-in-suspend.
+Reliable write was added first, so it might have been an oversight:
 
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
----
-Resend the patch alone. It was previoulsy in a series [1] for which the
-other patches will be reworked.
+commit 881d1c25f765938a95def5afe39486ce39f9fc96
+Author: Seungwon Jeon <tgih.jun@samsung.com>
+Date:   Fri Oct 14 14:03:21 2011 +0900
 
-[1] https://lore.kernel.org/lkml/20220304135134.47827-1-yann.gautier@foss.st.com/
+    mmc: core: Add cache control for eMMC4.5 device
+    
+    This patch adds cache feature of eMMC4.5 Spec.
+    If device supports cache capability, host can utilize some specific
+    operations.
+    
+    Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+    Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+    Signed-off-by: Chris Ball <cjb@laptop.org>
 
- drivers/mmc/host/mmci.c | 5 ++++-
- drivers/mmc/host/mmci.h | 1 +
- 2 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 45b8608c935c..0e2f2f5d6a52 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -274,6 +274,7 @@ static struct variant_data variant_stm32_sdmmc = {
- 	.busy_detect		= true,
- 	.busy_detect_flag	= MCI_STM32_BUSYD0,
- 	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
-+	.disable_keep_power	= true,
- 	.init			= sdmmc_variant_init,
- };
- 
-@@ -301,6 +302,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
- 	.busy_detect		= true,
- 	.busy_detect_flag	= MCI_STM32_BUSYD0,
- 	.busy_detect_mask	= MCI_STM32_BUSYD0ENDMASK,
-+	.disable_keep_power	= true,
- 	.init			= sdmmc_variant_init,
- };
- 
-@@ -2172,7 +2174,8 @@ static int mmci_probe(struct amba_device *dev,
- 	host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
- 
- 	/* We support these PM capabilities. */
--	mmc->pm_caps |= MMC_PM_KEEP_POWER;
-+	if (!variant->disable_keep_power)
-+		mmc->pm_caps |= MMC_PM_KEEP_POWER;
- 
- 	/*
- 	 * We can do SGIO
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index e1a9b96a3396..2cad1ef9766a 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -361,6 +361,7 @@ struct variant_data {
- 	u32			opendrain;
- 	u8			dma_lli:1;
- 	u32			stm32_idmabsize_mask;
-+	u8			disable_keep_power:1;
- 	void (*init)(struct mmci_host *host);
- };
- 
--- 
-2.25.1
+
+> 
+> Please allow few days to ask internally.
+> 
+> Thanks,
+> Avri
 
