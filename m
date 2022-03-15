@@ -2,80 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCA39C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 00:29:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCF50C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 08:26:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343879AbiCOAaW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Mar 2022 20:30:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50300 "EHLO
+        id S1345879AbiCOI17 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 04:27:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44596 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343817AbiCOAaD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 20:30:03 -0400
-Received: from vps0.lunn.ch (vps0.lunn.ch [185.16.172.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34C7E43EF4;
-        Mon, 14 Mar 2022 17:28:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
-        s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
-        Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
-        Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
-        bh=qQtXTU8ksUIwdmpceTImoN53WCbF2ijK28WT1MKUOjc=; b=2dc2PnDBLqfcWIsEW9s1tE3T1N
-        1yhNfuCaUhKUpY86pcyE+imyZHmcArYP+LB+LdkGAQNPptXK5ZqP94qSR2x6zHqAlbd9PVn7dT1IP
-        clxo5iu8TagUJ6tGGZQmTf1NeI5fRN6rpFDeNct75Oqvg4wMKu9id9sDFXyu9KTen8SM=;
-Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
-        (envelope-from <andrew@lunn.ch>)
-        id 1nTv2S-00AqHd-9H; Tue, 15 Mar 2022 01:27:48 +0100
-Date:   Tue, 15 Mar 2022 01:27:48 +0100
-From:   Andrew Lunn <andrew@lunn.ch>
-To:     Chris Packham <Chris.Packham@alliedtelesis.co.nz>
-Cc:     "huziji@marvell.com" <huziji@marvell.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "davem@davemloft.net" <davem@davemloft.net>,
-        "kuba@kernel.org" <kuba@kernel.org>,
-        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "will@kernel.org" <will@kernel.org>,
-        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
-        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "thomas.petazzoni@bootlin.com" <thomas.petazzoni@bootlin.com>,
-        "kostap@marvell.com" <kostap@marvell.com>,
-        "robert.marko@sartura.hr" <robert.marko@sartura.hr>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>
-Subject: Re: [PATCH v2 1/8] dt-bindings: pinctrl: mvebu: Document bindings
- for AC5
-Message-ID: <Yi/dhK0NXg9g6J9T@lunn.ch>
-References: <20220314213143.2404162-1-chris.packham@alliedtelesis.co.nz>
- <20220314213143.2404162-2-chris.packham@alliedtelesis.co.nz>
- <Yi/Y0iynQbIOo8C0@lunn.ch>
- <16fa529e-b1ca-11d0-f068-628c7f25a7fa@alliedtelesis.co.nz>
+        with ESMTP id S239420AbiCOI17 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 04:27:59 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 267454BFD7;
+        Tue, 15 Mar 2022 01:26:45 -0700 (PDT)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22F4JVqv027247;
+        Tue, 15 Mar 2022 09:26:03 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=oDQ0bPSs1kEQPGA4aIXxaRySi/P2J26ASVpVIJPCOfw=;
+ b=eCCUCU3ckkjg9JZogaLrJW4bezRHw/mjZBIHhc9DDxaL78yvZ/BafbdZQPDnl81zrBbw
+ oD5Gnarfz/xDPmKyulwxiKLb/EbAgrir1PJgnqCHblXu6B7r2oIUym5/jte3hgVn0ZlC
+ niCX3zel4DKTke6eYb2627c/hzZxLkv83G93CX5zcfSvIRDqklqNW817kvikFPt1d401
+ A8FBfs3AEfWbl/SO0C4Wc1cnYBa2tTz6iiS+VhI2ezSrgY9NxOnn7GY6y0wCOmikD/Fr
+ 3SKmphfBhfhbn14vDgjV+W6Hy2LCFfF3DeHYksxjqaeecvvQu6c+4G918U/XsxG8+Z38 bw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3etj2ahghy-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 15 Mar 2022 09:26:03 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 8560B10002A;
+        Tue, 15 Mar 2022 09:26:02 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 7B789212FC5;
+        Tue, 15 Mar 2022 09:26:02 +0100 (CET)
+Received: from [10.201.21.172] (10.75.127.46) by SFHDAG2NODE2.st.com
+ (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Tue, 15 Mar
+ 2022 09:26:01 +0100
+Message-ID: <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
+Date:   Tue, 15 Mar 2022 09:26:01 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <16fa529e-b1ca-11d0-f068-628c7f25a7fa@alliedtelesis.co.nz>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA
+ LLI
+Content-Language: en-US
+To:     Linus Walleij <linus.walleij@linaro.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>
+References: <20220304135134.47827-1-yann.gautier@foss.st.com>
+ <20220304135134.47827-2-yann.gautier@foss.st.com>
+ <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.46]
+X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
+ (10.75.127.5)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-14_14,2022-03-14_02,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> I think it can. I vaguely remember seeing conditional clauses based on 
-> compatible strings in other yaml bindings.
+On 3/14/22 23:43, Linus Walleij wrote:
+> "On Fri, Mar 4, 2022 at 2:52 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
 > 
-> I started a new binding document because I expected adding significant 
-> additions to the existing .txt files would be rejected. If I get some 
-> cycles I could look at converting the existing docs from txt to yaml.
+>> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
+>> starting from revision v2 of the peripheral. But it has limitations,
+>> as all the buffers should be aligned on block size (except the last one).
+>> But this cannot be guaranteed with SDIO. We should then have a property
+>> to disable the support of LLI.
+>>
+>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 > 
-> I'm not sure that there will be much in the way of a common 
-> mvebu-pinctrl.yaml as you'd end up repeating most of the common stuff to 
-> make things conditional anyway.
+> Actually I think this is present also on the ux500 variants. See:
+> commit 2253ed4b36dc876d1598c4dab5587e537ec68c34
+> "mmc: mmci: Support any block sizes for ux500v2 and qcom variant"
+> 
+> Spot the variant data "dma_power_of_2".
+> 
+> So whatever property you add
+> to the variant data (not in the device tree please) should
+> be added to the ux500 variants as well, it will *VERY* likely
+> have a problem with LLI elements not being a power of 2
+> as it is the ancestor of later STMicro variants.
+> 
+> It might actually be the reason for some annoying WiFi error
+> messages I have seen :/
+> 
+> Yours,
+> Linus Walleij
 
-We should wait for Rob to comment. But is suspect you are right, there
-will not be much savings.
+Hi Linus,
 
-     Andrew
+The STM32 variant uses an internal DMA, and the DMA functions are in its 
+dedicated file. So I was planning to do the same as what is done in 
+meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA 
+constraints are not fulfilled. Not sure it can help for Ux500.
+
+Ulf, before I send my new series (although it is not ready yet), would 
+you be OK with the bounce buffer idea?
+
+
+Best regards,
+Yann
