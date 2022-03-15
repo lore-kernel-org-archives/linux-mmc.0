@@ -2,123 +2,211 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCF50C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 08:26:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CBA4C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 09:07:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345879AbiCOI17 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Mar 2022 04:27:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44596 "EHLO
+        id S240528AbiCOJIz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 05:08:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47994 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239420AbiCOI17 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 04:27:59 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 267454BFD7;
-        Tue, 15 Mar 2022 01:26:45 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22F4JVqv027247;
-        Tue, 15 Mar 2022 09:26:03 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=oDQ0bPSs1kEQPGA4aIXxaRySi/P2J26ASVpVIJPCOfw=;
- b=eCCUCU3ckkjg9JZogaLrJW4bezRHw/mjZBIHhc9DDxaL78yvZ/BafbdZQPDnl81zrBbw
- oD5Gnarfz/xDPmKyulwxiKLb/EbAgrir1PJgnqCHblXu6B7r2oIUym5/jte3hgVn0ZlC
- niCX3zel4DKTke6eYb2627c/hzZxLkv83G93CX5zcfSvIRDqklqNW817kvikFPt1d401
- A8FBfs3AEfWbl/SO0C4Wc1cnYBa2tTz6iiS+VhI2ezSrgY9NxOnn7GY6y0wCOmikD/Fr
- 3SKmphfBhfhbn14vDgjV+W6Hy2LCFfF3DeHYksxjqaeecvvQu6c+4G918U/XsxG8+Z38 bw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3etj2ahghy-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 15 Mar 2022 09:26:03 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 8560B10002A;
-        Tue, 15 Mar 2022 09:26:02 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 7B789212FC5;
-        Tue, 15 Mar 2022 09:26:02 +0100 (CET)
-Received: from [10.201.21.172] (10.75.127.46) by SFHDAG2NODE2.st.com
- (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Tue, 15 Mar
- 2022 09:26:01 +0100
-Message-ID: <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
-Date:   Tue, 15 Mar 2022 09:26:01 +0100
+        with ESMTP id S234309AbiCOJIy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 05:08:54 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 196CF4BB8B
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 02:07:42 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id e6so25158247lfc.1
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 02:07:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=zeeeJfWkS5svYpn4HoxGdh9ciDWv9LeSzory1b+B2SY=;
+        b=Lguir7+cdxtMoTZewkioJxEtHGNhM9VYzYPuNv0Zkv6l8LPQqhI1JbHWhTvJaZr7Iv
+         w5pKN21tWrKVA0imsDR+eix7wbRQ/1sdLV9jZZ9C3iODy0hm6yHTzGlMhZGI3+vOmSQq
+         uPRp9jsfu+1pCPwvydWSM1iqDCDyVkJvPsVCM7LoT7Bth5PrsYvvFwomMu7bsN8eqESa
+         Sksbb2zIowZaJ3A4aRZghSl5m4IdIAcJpyDuNPsL8KCMHTda0A8yNLcGosT/UGBEEOq7
+         DmMIRvbN3Ydzz5DohLHu9F7hIVkbOVf4MILPhvKFxLiWyQq2DopYrCN69vSk2r0x8Ucq
+         OFtg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=zeeeJfWkS5svYpn4HoxGdh9ciDWv9LeSzory1b+B2SY=;
+        b=1595TfTjmCf7lDPQXX7kM4e81XMbDAq/j3guyj2wP/hmofVk9G0j+iBWysLzgWGUlZ
+         qeSOrJoZk6DoTB07BGQKDgDA+T8xD6yCa2Qc3MHsrMrrEa+TPT9WFDIM+/sPP9pHpTiD
+         twhAVauO17bv2eksvULkXSzWsJd1pCjQN+9EkyU/NcaRE4P+pfYYOAyWb4K5/7UCSbpn
+         Idc1IH6SbVFA2xgBnyhK2p5xWxayFPXUv2b77E65ZS7yWEK/KLfaAMnJlmxuKvc8YIB2
+         jcXMdzByGW7gdv4QUJUSQ7KoYGYdR3dwhAEJo7V7bz0bj79phM05mfeuyUSF+QBKMmEb
+         uiNA==
+X-Gm-Message-State: AOAM530sS8J11x14ghJKNW0qpsFWlDwFUxcpe9TXkIg9wZ/ZVW1CEf3R
+        Lef2Db5+aaqyNxOx6lE5vYTu2N7qi3vCxyeMMTTRHg==
+X-Google-Smtp-Source: ABdhPJwMXDC4aNor5zLv9pw8OVQFFJXZ1VbOemFJnvj+EVSvjVIz4oxBW0h2HW79H2IdIi/HGrG+DumX2QL04EqSRW8=
+X-Received: by 2002:a05:6512:260b:b0:445:c54c:4157 with SMTP id
+ bt11-20020a056512260b00b00445c54c4157mr16046322lfb.254.1647335260309; Tue, 15
+ Mar 2022 02:07:40 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA
- LLI
-Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+References: <20220314095225.53563-1-yann.gautier@foss.st.com>
+ <20220314125554.190574-1-yann.gautier@foss.st.com> <CAPDyKFruN9Xwk4uqFumwBdcn4SjKQcSQVBbALa3kVxY4mVzOnQ@mail.gmail.com>
+ <9e4fbf6a-1309-3aee-fcb0-be7c2c683892@foss.st.com> <CAPDyKFq2Du1UWpvRFpVF_qL65SP0DfEV872U9Xe-9i7xKxXhqg@mail.gmail.com>
+ <ce29e53a-59ff-000a-6b88-0b7ae538c515@foss.st.com>
+In-Reply-To: <ce29e53a-59ff-000a-6b88-0b7ae538c515@foss.st.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 15 Mar 2022 10:07:03 +0100
+Message-ID: <CAPDyKFq29+nwxXkV-Fyn91WD62-6REk+5UryVAK6XC4xKhcsfg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
         Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
         Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
         Philipp Zabel <p.zabel@pengutronix.de>,
         Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
         Manivannan Sadhasivam <mani@kernel.org>,
         Grzegorz Szymaszek <gszymaszek@short.pl>
-References: <20220304135134.47827-1-yann.gautier@foss.st.com>
- <20220304135134.47827-2-yann.gautier@foss.st.com>
- <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-14_14,2022-03-14_02,2022-02-23_01
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/14/22 23:43, Linus Walleij wrote:
-> "On Fri, Mar 4, 2022 at 2:52 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
-> 
->> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
->> starting from revision v2 of the peripheral. But it has limitations,
->> as all the buffers should be aligned on block size (except the last one).
->> But this cannot be guaranteed with SDIO. We should then have a property
->> to disable the support of LLI.
->>
->> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-> 
-> Actually I think this is present also on the ux500 variants. See:
-> commit 2253ed4b36dc876d1598c4dab5587e537ec68c34
-> "mmc: mmci: Support any block sizes for ux500v2 and qcom variant"
-> 
-> Spot the variant data "dma_power_of_2".
-> 
-> So whatever property you add
-> to the variant data (not in the device tree please) should
-> be added to the ux500 variants as well, it will *VERY* likely
-> have a problem with LLI elements not being a power of 2
-> as it is the ancestor of later STMicro variants.
-> 
-> It might actually be the reason for some annoying WiFi error
-> messages I have seen :/
-> 
-> Yours,
-> Linus Walleij
+On Mon, 14 Mar 2022 at 17:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>
+> On 3/14/22 17:18, Ulf Hansson wrote:
+> > On Mon, 14 Mar 2022 at 15:34, Yann Gautier <yann.gautier@foss.st.com> wrote:
+> >>
+> >> On 3/14/22 14:03, Ulf Hansson wrote:
+> >>> On Mon, 14 Mar 2022 at 13:56, Yann Gautier <yann.gautier@foss.st.com> wrote:
+> >>>>
+> >>>> Add a disable_keep_power field in variant_data struct. The
+> >>>> MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
+> >>>> It is only set to true for stm32_sdmmc variants.
+> >>>>
+> >>>> The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
+> >>>> It doesn't correctly support low power on this board. The Wifi chip
+> >>>> awaits an always-on regulator, but it was connected to v3v3 which is off
+> >>>> in low-power sequence. MMC_PM_KEEP_POWER should then be disabled.
+> >>>
+> >>> Just to make sure I get this correct.
+> >>>
+> >>> Why can't the regulator stay on during system suspend? The point is,
+> >>> we don't need an always on regulator to cope with this.
+> >>>
+> >>> Kind regards
+> >>> Uffe
+> >>
+> >> Hi Ulf,
+> >>
+> >> This v3v3 regulator powers most of the devices on this board. So we need
+> >> to switch it off to gain power in suspend mode.
+> >
+> > I see. Thanks for sharing that information.
+> >
+> > The MMC_PM_KEEP_POWER flag is there to describe what is supported by
+> > the platform/host. It doesn't mean that the card *must* stay powered
+> > on during system suspend. Instead that depends on whether system
+> > wakeup for the SDIO/WiFi is supported too - and if that is enabled by
+> > userspace. If not, the regulator will be turned off for the SDIO card
+> > during system suspend.
+> >
+> > Assuming the regulator is implemented as a proper regulator and can
+> > remain on during system suspend, the right thing would be to keep the
+> > MMC_PM_KEEP_POWER flag around.
+> >
+> > Kind regards
+> > Uffe
+> >
+>
+> OK, but in the wifi driver we use on this platform (brcmfmac), the
+> suspend/resume functions (brcmf_ops_sdio_suspend/brcmf_ops_sdio_resume)
+> use the flag to check regu was off, and then call probe function during
+> resume, to re-init Wifi chip and reload its firmware.
 
-Hi Linus,
+I had a closer look at the brcmfmac driver, thanks for the pointers.
 
-The STM32 variant uses an internal DMA, and the DMA functions are in its 
-dedicated file. So I was planning to do the same as what is done in 
-meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA 
-constraints are not fulfilled. Not sure it can help for Ux500.
+In my opinion, I think we should change the brcmfmac driver, so it
+decides to power off the SDIO card, unless the WiFi chip is configured
+to serve us with system wakeups.
 
-Ulf, before I send my new series (although it is not ready yet), would 
-you be OK with the bounce buffer idea?
+I can send a patch for brcmfmac that we can try, unless you want to
+send it yourself?
 
+>
+>
+> Best regards,
+> Yann
 
-Best regards,
-Yann
+Kind regards
+Uffe
+
+>
+> >>
+> >>
+> >> Yann
+> >>
+> >>>
+> >>>>
+> >>>> The flag can still be enabled through DT property:
+> >>>> keep-power-in-suspend.
+> >>>>
+> >>>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> >>>> ---
+> >>>> Update in v2:
+> >>>> Reword commit message to better explain the issue.
+> >>>>
+> >>>> Resend the patch alone. It was previoulsy in a series [1] for which the
+> >>>> other patches will be reworked.
+> >>>>
+> >>>> [1] https://lore.kernel.org/lkml/20220304135134.47827-1-yann.gautier@foss.st.com/
+> >>>>
+> >>>>    drivers/mmc/host/mmci.c | 5 ++++-
+> >>>>    drivers/mmc/host/mmci.h | 1 +
+> >>>>    2 files changed, 5 insertions(+), 1 deletion(-)
+> >>>>
+> >>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> >>>> index 45b8608c935c..0e2f2f5d6a52 100644
+> >>>> --- a/drivers/mmc/host/mmci.c
+> >>>> +++ b/drivers/mmc/host/mmci.c
+> >>>> @@ -274,6 +274,7 @@ static struct variant_data variant_stm32_sdmmc = {
+> >>>>           .busy_detect            = true,
+> >>>>           .busy_detect_flag       = MCI_STM32_BUSYD0,
+> >>>>           .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
+> >>>> +       .disable_keep_power     = true,
+> >>>>           .init                   = sdmmc_variant_init,
+> >>>>    };
+> >>>>
+> >>>> @@ -301,6 +302,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+> >>>>           .busy_detect            = true,
+> >>>>           .busy_detect_flag       = MCI_STM32_BUSYD0,
+> >>>>           .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
+> >>>> +       .disable_keep_power     = true,
+> >>>>           .init                   = sdmmc_variant_init,
+> >>>>    };
+> >>>>
+> >>>> @@ -2172,7 +2174,8 @@ static int mmci_probe(struct amba_device *dev,
+> >>>>           host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> >>>>
+> >>>>           /* We support these PM capabilities. */
+> >>>> -       mmc->pm_caps |= MMC_PM_KEEP_POWER;
+> >>>> +       if (!variant->disable_keep_power)
+> >>>> +               mmc->pm_caps |= MMC_PM_KEEP_POWER;
+> >>>>
+> >>>>           /*
+> >>>>            * We can do SGIO
+> >>>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+> >>>> index e1a9b96a3396..2cad1ef9766a 100644
+> >>>> --- a/drivers/mmc/host/mmci.h
+> >>>> +++ b/drivers/mmc/host/mmci.h
+> >>>> @@ -361,6 +361,7 @@ struct variant_data {
+> >>>>           u32                     opendrain;
+> >>>>           u8                      dma_lli:1;
+> >>>>           u32                     stm32_idmabsize_mask;
+> >>>> +       u8                      disable_keep_power:1;
+> >>>>           void (*init)(struct mmci_host *host);
+> >>>>    };
+> >>>>
+> >>>> --
+> >>>> 2.25.1
+> >>>>
+> >>
+>
