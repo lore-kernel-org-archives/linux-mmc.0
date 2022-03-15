@@ -2,367 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E19ACC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 10:52:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32DFFC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 12:23:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347424AbiCOKwt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Mar 2022 06:52:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48346 "EHLO
+        id S245531AbiCOMYd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 08:24:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45086 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347414AbiCOKwl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 06:52:41 -0400
-Received: from smtp-relay-internal-1.canonical.com (smtp-relay-internal-1.canonical.com [185.125.188.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1E7A5419A
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 03:50:06 -0700 (PDT)
-Received: from mail-ed1-f72.google.com (mail-ed1-f72.google.com [209.85.208.72])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 4C9B93F5F4
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 10:50:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1647341402;
-        bh=Ey8drcAf2R1SHpM1HZTEkJQdDVCwzHfEqgUU/nFist8=;
-        h=Message-ID:Date:MIME-Version:Subject:To:Cc:References:From:
-         In-Reply-To:Content-Type;
-        b=wEgr95DVAQKqKspxmQCvvdS7ZucL8jSl4WmM+1juRdRGNkjjb5PXDm6Ds8LaRO2F8
-         FDSEVN+msHKdefpwa6DB/wEacjvuaPNuZIBikN+AKXFHz9s/J2KLvgX0X3r4GgRCIf
-         lsBgQ3qFAxAcpUnzxTiOvrbcv62wmEuqcmjr54HwYs0mSza13S2ZAQtd4kMMJnXag7
-         nD6laUbkwGCfGvbC4c2Z+H79Rt9qzX3zd3zvstwKawcOqRqtqMvxIMzCntuvHKmQqK
-         W/zOboJ44n5k/tUXPR2GsCUU5ir5Iel5iN6wWEErAWyGgQI+PwXm5WL2i7y1lHi8tP
-         Mxt2SATiHxN0Q==
-Received: by mail-ed1-f72.google.com with SMTP id da28-20020a056402177c00b00415ce4b20baso10358217edb.17
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 03:50:02 -0700 (PDT)
+        with ESMTP id S241910AbiCOMYc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 08:24:32 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71C93639F
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 05:23:20 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id w27so32690546lfa.5
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 05:23:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Sb104aj3tjLKyTTZ17U/Klg2aBSSJ2T/5c6D895wNBw=;
+        b=EKPJ4DTBgq1DS2BRevHWl8q2iA30+g+EpaPb32GmUpkfz6F9SIgFvoxLwtDVSmVnc9
+         o4QCgNSFdCUehk+XZ06HqikO+9nVCx2GZ0p5otm+Zz/Jn1JCrgp9c4Oj8pASpU4tszeq
+         U6bgOy/C/rTInOq21QMcQzfEkFSDw0PCOMXqmV1oNJEl2DNtoC9oVyIKO+mjsQBBcEbV
+         mroOVOpOGvmGmenjIO233FBscoMB8PD9OTym9PsGjI3oGy7JrzoaEK6U3+bCt59XbHiv
+         +QWeP8yTegN+YXO+E0WXIVXCXySLaiURu2jpPLeTmAAOXrHveXhYA1nYE9wDqcDypBRO
+         rhlg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=Ey8drcAf2R1SHpM1HZTEkJQdDVCwzHfEqgUU/nFist8=;
-        b=ok9Q+esIBRcOYXxCD1okU17EfmqZsKp2it1dM1tEycthw/EUoVzdQv9JKgLapngFZQ
-         N6j8dJfA3bhp5rvYVhjpoWge0t8UH286ZHGfCpkoulf2KBBRlC+HXUvKsbxpdCLrz+PT
-         lQzxDIxlG68RpkqqAyYL5fCdomu1OkKWe1TA2SnSYGqqrzIMD5B8ZNqM+5/DLduoNhW+
-         6PV1v5BFTR3HNR8R9zlMpvsmgW/fCoavxI2gXbi799Q0Oy0LYarLESmqYr1qhdMGLVyz
-         vi8PzhqkH6I7rZG8IFRcVKEXh2wZF2HBh6S9GxlAIuIz6NMSewxXhXJ9c/FMHxjuAKWD
-         plVA==
-X-Gm-Message-State: AOAM53261g39J3ncDKnutiZztYhw2+Q1F358FcMndsz+neI4JwJrwpXM
-        LOEvQBB2ADX3gYfghcBzUZsU2clZ0mK5R+AdD/VQPh4u3AM33PvDsdaZ0Db45zzbyPOV85mXny/
-        Gc0MNkGq0epJEvCuTs+GEH64WXNypoSI/aOsJbA==
-X-Received: by 2002:a17:906:154c:b0:6ce:21d7:2826 with SMTP id c12-20020a170906154c00b006ce21d72826mr22475605ejd.9.1647341401586;
-        Tue, 15 Mar 2022 03:50:01 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyF9UaD6/CVW3zUoCDdkgb4OFu0x67auCClmiRFX0zBBedOf/2/kXyNEMIzdX3QM2hJInyqOQ==
-X-Received: by 2002:a17:906:154c:b0:6ce:21d7:2826 with SMTP id c12-20020a170906154c00b006ce21d72826mr22475571ejd.9.1647341401319;
-        Tue, 15 Mar 2022 03:50:01 -0700 (PDT)
-Received: from [192.168.0.155] (xdsl-188-155-174-239.adslplus.ch. [188.155.174.239])
-        by smtp.googlemail.com with ESMTPSA id v6-20020a17090651c600b006d5c69301e4sm8012981ejk.202.2022.03.15.03.49.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 15 Mar 2022 03:50:00 -0700 (PDT)
-Message-ID: <04ed13f1-671f-7416-61d0-0bf452ae862e@canonical.com>
-Date:   Tue, 15 Mar 2022 11:49:59 +0100
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Sb104aj3tjLKyTTZ17U/Klg2aBSSJ2T/5c6D895wNBw=;
+        b=r58nmZyvN+7/0JUD8kR2IHjFr86xDlfftOcTmjAIVO3egM2Rswhlz+Iz4aq8B1PA7s
+         gEg8LnR+LvFXahdLq1jCI/+r6eJO7VLCn5dUfWcZwYTR1XFmRSuxsBgjTDQ6it7EiRhA
+         KwpNbTZof6SqK2oJ6kewuFZQ4NNfN945pQf1y+IiicSa9pYTVVkBY/E3TobyC2EUYgR1
+         M0MP5PzT2Zr4AQ4S1XZYrbpwZ2ngBhKVTRH/6+32L2YEgN5k8tAiu6PqBJtOnCYBTotH
+         SCvdY0ejThr3vXHTQ49iMQJ6LQLiRpHodfWfh3t6t9Nak7XSedIp1z7P/WlrcTpERytD
+         EObw==
+X-Gm-Message-State: AOAM532/D4lVg9vwbSlI4LaHVGuxezz0B0eDosL1zGiPtvPMi/b8qVgP
+        cz5U8V9c8qIIIBwnlyOy2zjkfnwrfO9L1YpLWRq2WQ==
+X-Google-Smtp-Source: ABdhPJwSjQ5oQZjfEtoR4Ve6sp8VlABql5PGdoO9Q/flDYRac285+1HDvAlszXmV6KA6EFPeME165019ThdE01YY4Ts=
+X-Received: by 2002:a05:6512:3b07:b0:448:27ab:4a0f with SMTP id
+ f7-20020a0565123b0700b0044827ab4a0fmr16658811lfv.373.1647346998734; Tue, 15
+ Mar 2022 05:23:18 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH v2 4/8] pinctrl: mvebu: pinctrl driver for 98DX2530 SoC
-Content-Language: en-US
-To:     Chris Packham <chris.packham@alliedtelesis.co.nz>,
-        huziji@marvell.com, ulf.hansson@linaro.org, robh+dt@kernel.org,
-        davem@davemloft.net, kuba@kernel.org, linus.walleij@linaro.org,
-        catalin.marinas@arm.com, will@kernel.org, andrew@lunn.ch,
-        gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com,
-        adrian.hunter@intel.com, thomas.petazzoni@bootlin.com,
-        kostap@marvell.com, robert.marko@sartura.hr
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-References: <20220314213143.2404162-1-chris.packham@alliedtelesis.co.nz>
- <20220314213143.2404162-5-chris.packham@alliedtelesis.co.nz>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20220314213143.2404162-5-chris.packham@alliedtelesis.co.nz>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20220303164522.129583-1-ulf.hansson@linaro.org>
+ <CAPDyKFod3LdfRRgVfdASqgSBAXqJnGkdKMM9qKnAYcfUQptF_g@mail.gmail.com> <ece53010-b7ed-6b12-1baa-08505537854d@gmail.com>
+In-Reply-To: <ece53010-b7ed-6b12-1baa-08505537854d@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 15 Mar 2022 13:22:42 +0100
+Message-ID: <CAPDyKFosSVMOXtin149h=YaLeMEUq3Q0-xwYcg0ZgcfWRbawvA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Improve fallback to speed modes if eMMC HS200 fails
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/03/2022 22:31, Chris Packham wrote:
-> This pinctrl driver supports the 98DX25xx and 98DX35xx family of chips
-> from Marvell. It is based on the Marvell SDK with additions for various
-> (non-gpio) pin configurations based on the datasheet.
-> 
-> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
-> ---
-> 
-> Notes:
->     Changes in v2:
->     - Make pinctrl a child of a syscon node like the armada-7k-pinctrl
-> 
->  drivers/pinctrl/mvebu/Kconfig       |   4 +
->  drivers/pinctrl/mvebu/Makefile      |   1 +
->  drivers/pinctrl/mvebu/pinctrl-ac5.c | 226 ++++++++++++++++++++++++++++
->  3 files changed, 231 insertions(+)
->  create mode 100644 drivers/pinctrl/mvebu/pinctrl-ac5.c
-> 
-> diff --git a/drivers/pinctrl/mvebu/Kconfig b/drivers/pinctrl/mvebu/Kconfig
-> index 0d12894d3ee1..aa5883f09d7b 100644
-> --- a/drivers/pinctrl/mvebu/Kconfig
-> +++ b/drivers/pinctrl/mvebu/Kconfig
-> @@ -45,6 +45,10 @@ config PINCTRL_ORION
->  	bool
->  	select PINCTRL_MVEBU
->  
-> +config PINCTRL_AC5
-> +	bool
-> +	select PINCTRL_MVEBU
-> +
->  config PINCTRL_ARMADA_37XX
->  	bool
->  	select GENERIC_PINCONF
-> diff --git a/drivers/pinctrl/mvebu/Makefile b/drivers/pinctrl/mvebu/Makefile
-> index cd082dca4482..23458ab17c53 100644
-> --- a/drivers/pinctrl/mvebu/Makefile
-> +++ b/drivers/pinctrl/mvebu/Makefile
-> @@ -11,3 +11,4 @@ obj-$(CONFIG_PINCTRL_ARMADA_CP110) += pinctrl-armada-cp110.o
->  obj-$(CONFIG_PINCTRL_ARMADA_XP)  += pinctrl-armada-xp.o
->  obj-$(CONFIG_PINCTRL_ARMADA_37XX)  += pinctrl-armada-37xx.o
->  obj-$(CONFIG_PINCTRL_ORION)  += pinctrl-orion.o
-> +obj-$(CONFIG_PINCTRL_AC5) += pinctrl-ac5.o
-> diff --git a/drivers/pinctrl/mvebu/pinctrl-ac5.c b/drivers/pinctrl/mvebu/pinctrl-ac5.c
-> new file mode 100644
-> index 000000000000..8bc0bbff7c1b
-> --- /dev/null
-> +++ b/drivers/pinctrl/mvebu/pinctrl-ac5.c
-> @@ -0,0 +1,226 @@
-> +// SPDX-License-Identifier: GPL-2.0-or-later
-> +/*
-> + * Marvell ac5 pinctrl driver based on mvebu pinctrl core
-> + *
-> + * Copyright (C) 2021 Marvell
-> + *
-> + * Noam Liron <lnoam@marvell.com>
-> + */
-> +
-> +#include <linux/err.h>
-> +#include <linux/init.h>
-> +#include <linux/io.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/of.h>
-> +#include <linux/of_device.h>
-> +#include <linux/pinctrl/pinctrl.h>
-> +
-> +#include "pinctrl-mvebu.h"
-> +
-> +static struct mvebu_mpp_mode ac5_mpp_modes[] = {
-> +	MPP_MODE(0,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d0"),
-> +		 MPP_FUNCTION(2, "nand",  "io4")),
-> +	MPP_MODE(1,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d1"),
-> +		 MPP_FUNCTION(2, "nand",  "io3")),
-> +	MPP_MODE(2,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d2"),
-> +		 MPP_FUNCTION(2, "nand",  "io2")),
-> +	MPP_MODE(3,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d3"),
-> +		 MPP_FUNCTION(2, "nand",  "io7")),
-> +	MPP_MODE(4,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d4"),
-> +		 MPP_FUNCTION(2, "nand",  "io6"),
-> +		 MPP_FUNCTION(3, "uart3", "txd"),
-> +		 MPP_FUNCTION(4, "uart2", "txd")),
-> +	MPP_MODE(5,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d5"),
-> +		 MPP_FUNCTION(2, "nand",  "io5"),
-> +		 MPP_FUNCTION(3, "uart3", "rxd"),
-> +		 MPP_FUNCTION(4, "uart2", "rxd")),
-> +	MPP_MODE(6,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d6"),
-> +		 MPP_FUNCTION(2, "nand",  "io0"),
-> +		 MPP_FUNCTION(3, "i2c1",  "sck")),
-> +	MPP_MODE(7,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "d7"),
-> +		 MPP_FUNCTION(2, "nand",  "io1"),
-> +		 MPP_FUNCTION(3, "i2c1",  "sda")),
-> +	MPP_MODE(8,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "clk"),
-> +		 MPP_FUNCTION(2, "nand",  "wen")),
-> +	MPP_MODE(9,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "cmd"),
-> +		 MPP_FUNCTION(2, "nand",  "ale")),
-> +	MPP_MODE(10,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "ds"),
-> +		 MPP_FUNCTION(2, "nand",  "cle")),
-> +	MPP_MODE(11,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "sdio",  "rst"),
-> +		 MPP_FUNCTION(2, "nand",  "cen")),
-> +	MPP_MODE(12,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "spi0",  "clk")),
-> +	MPP_MODE(13,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "spi0",  "csn")),
-> +	MPP_MODE(14,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "spi0",  "mosi")),
-> +	MPP_MODE(15,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "spi0",  "miso")),
-> +	MPP_MODE(16,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "spi0",  "wpn"),
-> +		 MPP_FUNCTION(2, "nand",  "ren"),
-> +		 MPP_FUNCTION(3, "uart1", "txd")),
-> +	MPP_MODE(17,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "spi0",  "hold"),
-> +		 MPP_FUNCTION(2, "nand",  "rb"),
-> +		 MPP_FUNCTION(3, "uart1", "rxd")),
-> +	MPP_MODE(18,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "uart2", "rxd")),
-> +	MPP_MODE(19,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "uart2", "txd")),
-> +	MPP_MODE(20,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "i2c1",  "sck"),
-> +		 MPP_FUNCTION(3, "spi1",  "clk"),
-> +		 MPP_FUNCTION(4, "uart3", "txd")),
-> +	MPP_MODE(21,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "i2c1",  "sda"),
-> +		 MPP_FUNCTION(3, "spi1",  "csn"),
-> +		 MPP_FUNCTION(4, "uart3", "rxd")),
-> +	MPP_MODE(22,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(3, "spi1",  "mosi")),
-> +	MPP_MODE(23,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(3, "spi1",  "miso")),
-> +	MPP_MODE(24,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "uart2", "txd")),
-> +	MPP_MODE(25,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "uart2", "rxd")),
-> +	MPP_MODE(26,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "i2c0",  "sck"),
-> +		 MPP_FUNCTION(3, "uart3", "txd")),
-> +	MPP_MODE(27,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "i2c0",  "sda"),
-> +		 MPP_FUNCTION(3, "uart3", "rxd")),
-> +	MPP_MODE(28,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(3, "uart3", "txd")),
-> +	MPP_MODE(29,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(3, "uart3", "rxd")),
-> +	MPP_MODE(30,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(31,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(32,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "uart0", "txd")),
-> +	MPP_MODE(33,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(1, "uart0", "rxd")),
-> +	MPP_MODE(34,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "uart3", "rxd")),
-> +	MPP_MODE(35,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(2, "uart3", "txd")),
-> +	MPP_MODE(36,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(37,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(38,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(39,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(40,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(41,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(4, "uart2", "txd"),
-> +		 MPP_FUNCTION(5, "i2c1",  "sck")),
-> +	MPP_MODE(42,
-> +		 MPP_FUNCTION(0, "gpio",  NULL),
-> +		 MPP_FUNCTION(4, "uart2", "rxd"),
-> +		 MPP_FUNCTION(5, "i2c1",  "sda")),
-> +	MPP_MODE(43,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(44,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +	MPP_MODE(45,
-> +		 MPP_FUNCTION(0, "gpio",  NULL)),
-> +};
-> +
-> +static struct mvebu_pinctrl_soc_info ac5_pinctrl_info;
+On Mon, 14 Mar 2022 at 23:02, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+>
+> On 14.03.2022 11:54, Ulf Hansson wrote:
+> > On Thu, 3 Mar 2022 at 17:45, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >>
+> >> In the error path of mmc_select_hs200() we are trying our best to restore
+> >> the card/host into a valid state. This makes sense, especially if we
+> >> encounter a simple switch error (-EBADMSG). However, rather than then
+> >> continue with using the legacy speed mode, let's try the other better speed
+> >> modes first. Additionally, let's update the card->mmc_avail_type to avoid
+> >> us from trying a broken HS200 mode again.
+> >>
+> >> In an Amlogic S905W based TV box where the switch to HS200 mode fails for
+> >> the eMMC, this allows us to use the eMMC in DDR mode in favor of the legacy
+> >> mode, which greatly improves the performance.
+> >>
+> >> Suggested-by: Heiner Kallweit <hkallweit1@gmail.com>
+> >> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> > Heiner, does this solve your problems? Can you perhaps run some tests
+> > at your side to see how it works for you?
+> >
+>
+> Tested-by: Heiner Kallweit <hkallweit1@gmail.com>
 
-You should not have static/file-scope variables, especially that it is
-not actually used in that way.
+Thanks! Patch applied for next.
 
-> +
-> +static const struct of_device_id ac5_pinctrl_of_match[] = {
-> +	{
-> +		.compatible = "marvell,ac5-pinctrl",
-> +	},
-> +	{ },
-> +};
-> +
-> +static const struct mvebu_mpp_ctrl ac5_mpp_controls[] = {
-> +	MPP_FUNC_CTRL(0, 45, NULL, mvebu_regmap_mpp_ctrl), };
-> +
-> +static struct pinctrl_gpio_range ac5_mpp_gpio_ranges[] = {
-> +	MPP_GPIO_RANGE(0,   0,  0, 46), };
-> +
-> +static int ac5_pinctrl_probe(struct platform_device *pdev)
-> +{
-> +	struct mvebu_pinctrl_soc_info *soc = &ac5_pinctrl_info;
-> +	const struct of_device_id *match =
-> +		of_match_device(ac5_pinctrl_of_match, &pdev->dev);
+[...]
 
-Why is this needed? Unusual, dead-code.
-
-> +
-> +	if (!match || !pdev->dev.parent)
-> +		return -ENODEV;
-> +
-> +	soc->variant = 0; /* no variants for ac5 */
-> +	soc->controls = ac5_mpp_controls;
-> +	soc->ncontrols = ARRAY_SIZE(ac5_mpp_controls);
-> +	soc->gpioranges = ac5_mpp_gpio_ranges;
-> +	soc->ngpioranges = ARRAY_SIZE(ac5_mpp_gpio_ranges);
-> +	soc->modes = ac5_mpp_modes;
-> +	soc->nmodes = ac5_mpp_controls[0].npins;
-> +
-> +	pdev->dev.platform_data = soc;
-> +
-> +	return mvebu_pinctrl_simple_regmap_probe(pdev, pdev->dev.parent, 0);
-> +}
-> +
-> +static struct platform_driver ac5_pinctrl_driver = {
-> +	.driver = {
-> +		.name = "ac5-pinctrl",
-> +		.of_match_table = of_match_ptr(ac5_pinctrl_of_match),
-
-of_match_ptr() does not look correct for OF-only platform. This should
-complain in W=1 compile tests on !OF config.
-
-Best regards,
-Krzysztof
+Kind regards
+Uffe
