@@ -2,166 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEA9DC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 12:27:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA6C1C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 12:31:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234044AbiCOM3C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Mar 2022 08:29:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55276 "EHLO
+        id S1344053AbiCOMcR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 08:32:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348270AbiCOM3B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 08:29:01 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D60ADE47
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 05:27:48 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id b28so20983478lfc.4
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 05:27:48 -0700 (PDT)
+        with ESMTP id S1348252AbiCOMcQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 08:32:16 -0400
+Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFD6553730
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 05:31:04 -0700 (PDT)
+Received: by mail-lj1-x234.google.com with SMTP id z26so26228258lji.8
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 05:31:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=AsA+Yh6Q1RmMXptMpCMPYPdPP7vKeigdTvuyokvMeVc=;
-        b=Em9Qk7CXYoY7kJ/x5MIbAzFv/MQ57GerniOmbIZANfrMlNCKWIregHTG8SP4ZgX7IG
-         uJZ99qnwkg0DMqtfbn0Sj/l54mHyq7so0cllYsVxIXuo/SrV4EMEsPqMM+kI1TnbGrv8
-         Si8P04B8WhgV8lHflb39DGw9dML5avysP83Ooata737y5di7fB5rz7l6mL3RKTDMxp3I
-         kpqtPotVV3spCSm2WtP9oOsp3adhFKSfWApKc9oYLuo09cKLXkUt1tAZ1SpSxN6Csjo/
-         CC4vpWL6pUQ/Pt0rAsZgEnBXb4oiwRNcJRj9tHjZ9XNmOxx5slEokIG32v45dIRcNJnu
-         PIww==
+        bh=0EP3v0YhMrRhXTUJ35foov+w4W51d6KLAhPxddwMa04=;
+        b=nq1DMVP6hE2O+kD8xCjGnyCTNXdYXUYAsNgHl2v9LGiGmpG46mIq7evyy1JPWLx6uo
+         B9KuiVuGwEKUc1/jIbEX7Iranm1sGADyKOz2e7fjkQFBifQD+Jnj1IyYybXnsVBXDDP1
+         2mxcb11F57ruvATZ79ItBouwpbbOT9zW+MadE86sZ7FJDXRVtF0RcWEutf/Qn9VdJPCL
+         akWXjAfNQ/LhzB60Zwr+y22psu6wRoFyF758ozY7teqwU2xR09Y9Jmb61GR+CLYG0tmq
+         6m9qDHnJwN293HAB4qapwlMuNR36bFykRE5fHVoffaU5lvCEBef6i/geA7g4Lpl9LRZ9
+         tSyA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=AsA+Yh6Q1RmMXptMpCMPYPdPP7vKeigdTvuyokvMeVc=;
-        b=xiCuVuZvgPeUjfX23WegpNFWkhV1S9zvpqH13hTaNmXbTo4WBAyiEBWG0RARjoVeCJ
-         4/rK7jaDqaxP+05dFCzsC/58XbUexclVruyvU1QAzaZJqhj7K1x4s2bMNffzdR1yUaFh
-         m5AlXGHtiPiUDqr49A2IiJlUYqIrQzOkuibJLyuWB+TcIOk6oZXbPO7RsZ3pljfWf45D
-         vFfkXxjKUPUIdkLfSkNV2bEGQLk64uy6kXpe76KeqFVGNTqaaxc/KNChaenOlmtfvprC
-         +K0anxYr/JWPslzIPrHDtl1ck/XT7EQcIYdR0whGZondgwMOCQGWewMlEfrz0rY101th
-         Az6Q==
-X-Gm-Message-State: AOAM532CxSLBx2/z71wC5jmo6C+EmSLBLqkXHArfkCRqzGB2a5dHLwhI
-        6mkKIsmZfaUj5hwM+IGCSomp2g2+HLbtj3rUPUj/iXrK7Lc=
-X-Google-Smtp-Source: ABdhPJwxVWuJkU2Vdp6g6fEM88LdXyiqS980jZq2aSertEju4rKA5wTfDZX/Ssb/jhYjtQ2num4y7Pzb1S633PkhjTk=
-X-Received: by 2002:a05:6512:308e:b0:448:3826:6d68 with SMTP id
- z14-20020a056512308e00b0044838266d68mr15642859lfd.184.1647347266932; Tue, 15
- Mar 2022 05:27:46 -0700 (PDT)
+        bh=0EP3v0YhMrRhXTUJ35foov+w4W51d6KLAhPxddwMa04=;
+        b=c0sIuRJFu9qC4t1eVUVAdf9osSIqPXP+ZXRYVa7T93Iss20aILJsQrpJhBQCAcRox1
+         x/JOAUFgw/Y8H7csyTDyVWRWOVrIJ507T/mlRwLLm53SXgYtJO0hJPvaWtZQZ6XrqiKp
+         zWOhgsf0iofVBarBejCshYAqhr1RAUHrpT/FqRjbSE/c7qG0QHm1FkFjRWYzo7gs/KrC
+         ETfS9n/Rx/p/5JxO47bUctLp6qmMMQwQJBy6dq7IuQiJdrLEPrpCTeCCa5y3iX1gz3O4
+         vGes0oNAUDxLKfTBLG8WYpwx9UnuUdpM3EPneWyHpWEku12YnhHY+yYMqUGGXcMrKkBJ
+         dC7g==
+X-Gm-Message-State: AOAM531kljYk942+86hx7Zs3W1wpRbsnC1iviVpjyT2kXRCVsJwyBSTX
+        BbfD+tPgynm9+OLjpmH178/nQWYu9++U1GA+cZ5D+g==
+X-Google-Smtp-Source: ABdhPJy8D5j/Opz5opxfQCblocWzZ3bktNGS5YOn5/kFVwoiaENtQx2jP9FVs/TZheAUyO+56uySEWgea+BikcXVQkY=
+X-Received: by 2002:a2e:5009:0:b0:247:d738:3e90 with SMTP id
+ e9-20020a2e5009000000b00247d7383e90mr17329760ljb.229.1647347463153; Tue, 15
+ Mar 2022 05:31:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220310125636.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
- <50d4b87c-003f-818a-c8ba-a3bac9c0f171@intel.com> <CA+ASDXO8-wmEDPxUrO6j9wBvCMzTZMpTyH7adSga8dYLNq5ehg@mail.gmail.com>
-In-Reply-To: <CA+ASDXO8-wmEDPxUrO6j9wBvCMzTZMpTyH7adSga8dYLNq5ehg@mail.gmail.com>
+References: <20220314095225.53563-1-yann.gautier@foss.st.com>
+ <20220314125554.190574-1-yann.gautier@foss.st.com> <CAPDyKFruN9Xwk4uqFumwBdcn4SjKQcSQVBbALa3kVxY4mVzOnQ@mail.gmail.com>
+ <9e4fbf6a-1309-3aee-fcb0-be7c2c683892@foss.st.com> <CAPDyKFq2Du1UWpvRFpVF_qL65SP0DfEV872U9Xe-9i7xKxXhqg@mail.gmail.com>
+ <ce29e53a-59ff-000a-6b88-0b7ae538c515@foss.st.com> <CAPDyKFq29+nwxXkV-Fyn91WD62-6REk+5UryVAK6XC4xKhcsfg@mail.gmail.com>
+ <c6972c78-a4eb-02ec-7b35-e473b66df821@foss.st.com>
+In-Reply-To: <c6972c78-a4eb-02ec-7b35-e473b66df821@foss.st.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 15 Mar 2022 13:27:10 +0100
-Message-ID: <CAPDyKFoQfr3W45vWY4SnTeBG7=z3J749=WBGNtEgujvXAqAn0Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Set HS clock speed before sending HS CMD13
-To:     Brian Norris <briannorris@chromium.org>,
-        Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Linux Kernel <linux-kernel@vger.kernel.org>,
-        Douglas Anderson <dianders@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
+Date:   Tue, 15 Mar 2022 13:30:26 +0100
+Message-ID: <CAPDyKFoJpxFOzJVRVF=R2UXuwBPfuegmaZ==-ohhw98dMgpk+Q@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>,
+        Christophe ROULLIER-SCND-02 <christophe.roullier@foss.st.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Heiner
-
-On Tue, 15 Mar 2022 at 00:11, Brian Norris <briannorris@chromium.org> wrote:
+On Tue, 15 Mar 2022 at 11:08, Yann Gautier <yann.gautier@foss.st.com> wrote:
 >
-> On Mon, Mar 14, 2022 at 6:13 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 3/15/22 10:07, Ulf Hansson wrote:
+> > On Mon, 14 Mar 2022 at 17:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
+> >>
+> >> On 3/14/22 17:18, Ulf Hansson wrote:
+> >>> On Mon, 14 Mar 2022 at 15:34, Yann Gautier <yann.gautier@foss.st.com> wrote:
+> >>>>
+> >>>> On 3/14/22 14:03, Ulf Hansson wrote:
+> >>>>> On Mon, 14 Mar 2022 at 13:56, Yann Gautier <yann.gautier@foss.st.com> wrote:
+> >>>>>>
+> >>>>>> Add a disable_keep_power field in variant_data struct. The
+> >>>>>> MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
+> >>>>>> It is only set to true for stm32_sdmmc variants.
+> >>>>>>
+> >>>>>> The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
+> >>>>>> It doesn't correctly support low power on this board. The Wifi chip
+> >>>>>> awaits an always-on regulator, but it was connected to v3v3 which is off
+> >>>>>> in low-power sequence. MMC_PM_KEEP_POWER should then be disabled.
+> >>>>>
+> >>>>> Just to make sure I get this correct.
+> >>>>>
+> >>>>> Why can't the regulator stay on during system suspend? The point is,
+> >>>>> we don't need an always on regulator to cope with this.
+> >>>>>
+> >>>>> Kind regards
+> >>>>> Uffe
+> >>>>
+> >>>> Hi Ulf,
+> >>>>
+> >>>> This v3v3 regulator powers most of the devices on this board. So we need
+> >>>> to switch it off to gain power in suspend mode.
+> >>>
+> >>> I see. Thanks for sharing that information.
+> >>>
+> >>> The MMC_PM_KEEP_POWER flag is there to describe what is supported by
+> >>> the platform/host. It doesn't mean that the card *must* stay powered
+> >>> on during system suspend. Instead that depends on whether system
+> >>> wakeup for the SDIO/WiFi is supported too - and if that is enabled by
+> >>> userspace. If not, the regulator will be turned off for the SDIO card
+> >>> during system suspend.
+> >>>
+> >>> Assuming the regulator is implemented as a proper regulator and can
+> >>> remain on during system suspend, the right thing would be to keep the
+> >>> MMC_PM_KEEP_POWER flag around.
+> >>>
+> >>> Kind regards
+> >>> Uffe
+> >>>
+> >>
+> >> OK, but in the wifi driver we use on this platform (brcmfmac), the
+> >> suspend/resume functions (brcmf_ops_sdio_suspend/brcmf_ops_sdio_resume)
+> >> use the flag to check regu was off, and then call probe function during
+> >> resume, to re-init Wifi chip and reload its firmware.
 > >
-> > On 10.3.2022 22.56, Brian Norris wrote:
-> > > Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
-> > > hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
-> > > some eMMC don't respond to SEND_STATUS commands very reliably if they're
-> > > still running at a low initial frequency. As mentioned in that commit,
-> > > JESD84-B51 P49 suggests a sequence in which the host:
-> > > 1. sets HS_TIMING
-> > > 2. bumps the clock ("<= 52 MHz")
-> > > 3. sends further commands
-> > >
-> > > It doesn't exactly require that we don't use a lower-than-52MHz
-> > > frequency, but in practice, these eMMC don't like it.
-> > >
-> > > Anyway, the aforementioned commit got that right for HS400ES, but the
-> > > refactoring in 53e60650f74e ("mmc: core: Allow CMD13 polling when
-> > > switching to HS mode for mmc") messed that back up again, by reordering
-> > > step 2 after step 3.
+> > I had a closer look at the brcmfmac driver, thanks for the pointers.
 > >
-> > That description might not be accurate.
->
-> I've been struggling to track where things were working, where things
-> were broken, and what/why Shawn's original fix was, precisely. So you
-> may be correct in many ways :) Thanks for looking.
->
-> > It looks like 4f25580fb84d did not have the intended effect because
-> > CMD13 was already being sent by mmc_select_hs(), still before increasing
-> > the frequency.  53e60650f74e just kept that behaviour.
->
-> You may be partially right, or fully right. But anyway, I think I have
-> some additional explanation, now that you've pointed that out: that
-> behavior changed a bit in this commit:
->
-> 08573eaf1a70 mmc: mmc: do not use CMD13 to get status after speed mode switch
->
-> While that patch was merged in July 2016 and Shawn submitted his v1
-> fix in September, there's a very good chance that a lot of his work
-> was actually done via backports, and even if not, he may not have been
-> testing precisely the latest -next kernel when submitting. So his fix
-> may have worked out for _some_ near-upstream kernel he was testing in
-> 2016, you may be correct that it didn't really work in the state it
-> was committed to git history.
->
-> This may also further explain why my attempts at bisection were rather
-> fruitless (notwithstanding the difficulties in getting RK3399 running
-> on that old of a kernel).
->
-> Anyway, I'll see if I can improve the messaging if/when a v2 comes around.
->
-> > > --- a/drivers/mmc/core/mmc.c
-> > > +++ b/drivers/mmc/core/mmc.c
-> ...
-> > > @@ -1487,6 +1492,12 @@ static int mmc_select_hs200(struct mmc_card *card)
-> > >               old_timing = host->ios.timing;
-> > >               mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-> > >
-> > > +             /*
-> > > +              * Bump to HS frequency. Some cards don't handle SEND_STATUS
-> > > +              * reliably at the initial frequency.
-> > > +              */
-> > > +             mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+> > In my opinion, I think we should change the brcmfmac driver, so it
+> > decides to power off the SDIO card, unless the WiFi chip is configured
+> > to serve us with system wakeups.
 > >
-> > Is card->ext_csd.hs_max_dtr better than card->ext_csd.hs200_max_dtr here?
+> > I can send a patch for brcmfmac that we can try, unless you want to
+> > send it yourself?
+> >
 >
-> I believe either worked in practice. I ended up choosing hs_max_dtr
-> because it's lower and presumably safer. But frankly, I don't know
-> what the Right thing to do is here, since the spec just talks about
-> "<=", and yet f_init (which is also "<=") does not work. I think it
-> might be like Ulf was guessing way back in the first place [1], and
-> the key is that there is *some* increase (i.e., not using f_init).
->
-> So assuming either works, would you prefer hs200_max_dtr here, since
-> that does seem like the appropriate final rate?
+> Hi Ulf,
+> If you already have an idea of the patch in the brcmfmac driver, can you
+> propose something?
 
-I think that makes most sense, as we are switching to that rate anyway
-just a few cycles later in mmc_select_timing(), when it calls
-mmc_set_bus_speed().
+Sure, I will post a patch as soon as I can.
 
-That said, I have recently queued a patch that improves the
-speed-mode-selection-fallback, when switching to HS200 mode fails [2].
-We need to make sure this part still works as expected. I have looped
-in Heiner who has been in the loop around this change, hopefully he
-can help with further testing or so. Maybe $subject patch (or a new
-version of it) can even make HS200 to work on Heiner's platform!?
+> We'll be able to test it at our side.
 
->
-> Brian
->
-> [1] https://lore.kernel.org/all/CAPDyKFrNp=Y3BhVE_kxtggv7Qc6m=2kef2U8Dn2Bb3ANHPYV-Q@mail.gmail.com/
-> Re: [PATCH 3/5] mmc: core: changes frequency to hs_max_dtr when
-> selecting hs400es
+Great, I will keep you posted!
+
+[...]
 
 Kind regards
 Uffe
-
-[2]
-https://patchwork.kernel.org/project/linux-mmc/patch/20220303164522.129583-1-ulf.hansson@linaro.org/
