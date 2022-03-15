@@ -2,189 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C181C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 09:40:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5431DC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 09:48:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346723AbiCOJlc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Mar 2022 05:41:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40206 "EHLO
+        id S1346796AbiCOJuI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 05:50:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55158 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346718AbiCOJlc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 05:41:32 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CF0F4EF62
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 02:40:18 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id g17so31923882lfh.2
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 02:40:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=pclaPODy93SP2IvMcnpEy/qRzqRnd4X+xxG6eJhSthY=;
-        b=v752Jg0r79km/A+aeykRzb13Wv15gCxUVyCnGjqRx5ZoJ1MVQNZf3EFJIwq2L99iM0
-         Dd1ajF4WL3XAnsTZuvnfYHpGbcm3kT3L4jFnoohfNvULXNDjsG3Li9aIR3q3be1qP6vv
-         FvoKk26Mev+l0JdfAGwrO6J2NtIzLxExBffXDSEI6q4UG+QwCi9/cyOes7ZXCfJ2QLTh
-         m7e2HUzXISwfFRSqeZyTdkODnPk2aIpLXCL/fwnM/qA2ieF80GFwdJBrZU99QOB5a1w8
-         iK0gH26yZXx3mgsbyDsVnI43/I8AUlbkI2nt7pM4+aZwbkVMbn8yL5pxXq7GDfgUDUb2
-         hMQg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=pclaPODy93SP2IvMcnpEy/qRzqRnd4X+xxG6eJhSthY=;
-        b=YmyEiIrC3YXESQifyJ0Pt11NuuBM3omuWr2xPwPbXQP8cbLaQn8SER2OW+kQgKJBh5
-         nznt+nbD1U/SKJtWa2wp/Wp07MK4gtRUFpkuRlqjc/a7CfR2bJK0X7McWWO0fnUtrVuY
-         0eE/E8g+mAa9+DWbqHgT3PeZl359rEr1y6oEKyfF+/opUhqEbM1i6pkzGfCCUstQHUfK
-         mng3CMqMsnHHYjRN5dy6yC98IALZEZWON0WUJW4tTixK2RqGvlLCw00kSnprtn3OC1Gm
-         H5rbY3Bi9/iheMfErN8ACRWFOMiLYOgjiDa/gEZWrwcKjJ/H2kzc2fogeigRCwbzFS/u
-         PzZw==
-X-Gm-Message-State: AOAM530UBTnJWc0Tg1Mv9u922XhtFMgDtoks9slRgvm3P6X9E/k5ortj
-        8+tBFB4mmr8fE+1Wi3YGq4XjNUSbjWc5yX7n0GK+s6RpwkNcSQ==
-X-Google-Smtp-Source: ABdhPJzTs17U46nZJ5m9l5tTMbfUia7Iivsjvd4wbCrie4iHkEBVe4aURP543kiy8TW9Sw8LW9gHFcUn3dJ+4MtxOME=
-X-Received: by 2002:ac2:4e98:0:b0:448:3039:d170 with SMTP id
- o24-20020ac24e98000000b004483039d170mr16879298lfr.233.1647337216430; Tue, 15
- Mar 2022 02:40:16 -0700 (PDT)
-MIME-Version: 1.0
-References: <cover.1646820083.git.marc.mattmueller@netmodule.com>
- <d68d8c8edda35a050a6e92b0ff1d57dd3e7c61d6.1646820083.git.marc.mattmueller@netmodule.com>
- <DM6PR04MB65751B0413F8A2FDC72F05B9FC0B9@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB65751B0413F8A2FDC72F05B9FC0B9@DM6PR04MB6575.namprd04.prod.outlook.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 15 Mar 2022 10:39:40 +0100
-Message-ID: <CAPDyKFov8OUvC8KkWm=-e=M5B3y1Lc0Ci4UXQPD1Y6zQnBVuNQ@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: core: add reliable write setting to sysfs and
- update on read
-To:     Avri Altman <avri.altman@wdc.com>,
-        Marc Mattmueller <marc.mattmueller@netmodule.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+        with ESMTP id S243306AbiCOJuH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 05:50:07 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3FA71AF24
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 02:48:55 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1nU3nJ-0004sX-UN; Tue, 15 Mar 2022 10:48:45 +0100
+Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1nU3nI-000oTA-SH; Tue, 15 Mar 2022 10:48:43 +0100
+Received: from pza by lupine with local (Exim 4.94.2)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1nU3nG-0002bJ-TX; Tue, 15 Mar 2022 10:48:42 +0100
+Message-ID: <daecd30e4798e7d1e4b74dfe37d67b74a6f3cde1.camel@pengutronix.de>
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+From:   Philipp Zabel <p.zabel@pengutronix.de>
+To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        adrian.hunter@intel.com, agross@kernel.org,
+        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
+        chris@printf.net, gdjakov@mm-sol.com
+Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, quic_asutoshd@quicinc.com,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sayalil@quicinc.com
+Date:   Tue, 15 Mar 2022 10:48:42 +0100
+In-Reply-To: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
+References: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
+User-Agent: Evolution 3.38.3-1 
+MIME-Version: 1.0
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: p.zabel@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 10 Mar 2022 at 15:08, Avri Altman <Avri.Altman@wdc.com> wrote:
->
->
-> > The mmc reliable write setting (from ext_csd) was not available on the sysfs.
-> > Thus, added rel_param and rel_write_set to sysfs and added the update of
-> > rel_write_set on sysfs read.
-> Here also - why adding ABI when its already available via mmc-utils?
->
-> Thanks,
-> Avri
+SGkgU2FqaWRhLAoKT24gRG8sIDIwMjItMDMtMTAgYXQgMjE6MTAgKzA1MzAsIFNoYWlrIFNhamlk
+YSBCaGFudSB3cm90ZToKWy4uLl0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhj
+aS1tc20uYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktCj4gbXNtLmMKPiBpbmRleCA1MGM3MWUw
+Li5jYjMzYzlhIDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktbXNtLmMKPiAr
+KysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW1zbS5jClsuLi5dCj4gQEAgLTI0ODIsNiArMjQ4
+NCw0NSBAQCBzdGF0aWMgaW5saW5lIHZvaWQgc2RoY2lfbXNtX2dldF9vZl9wcm9wZXJ0eShzdHJ1
+Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2LAo+IMKgwqDCoMKgwqDCoMKgwqBvZl9wcm9wZXJ0eV9y
+ZWFkX3UzMihub2RlLCAicWNvbSxkbGwtY29uZmlnIiwgJm1zbV9ob3N0LT5kbGxfY29uZmlnKTsK
+PiDCoH0KPiDCoAo+ICtzdGF0aWMgaW50IHNkaGNpX21zbV9nY2NfcmVzZXQoc3RydWN0IHBsYXRm
+b3JtX2RldmljZSAqcGRldiwKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgc3RydWN0IHNk
+aGNpX2hvc3QgKmhvc3QpCj4gK3sKPiArwqDCoMKgwqDCoMKgwqBzdHJ1Y3Qgc2RoY2lfcGx0Zm1f
+aG9zdCAqcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYoaG9zdCk7Cj4gK8KgwqDCoMKgwqDCoMKgc3Ry
+dWN0IHNkaGNpX21zbV9ob3N0ICptc21faG9zdCA9IHNkaGNpX3BsdGZtX3ByaXYocGx0Zm1faG9z
+dCk7Cj4gK8KgwqDCoMKgwqDCoMKgaW50IHJldCA9IDA7Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoG1z
+bV9ob3N0LT5jb3JlX3Jlc2V0ID0gZGV2bV9yZXNldF9jb250cm9sX2dldF9vcHRpb25hbF9leGNs
+dXNpdmUoJnBkZXYtPmRldiwgImNvcmVfcmVzZXQiKTsKCkkgdGhpbmsgdGhlICJfcmVzZXQiIHBh
+cnQgaW4gdGhlIG5hbWUgaXMgc3VwZXJmbHVvdXMgYW5kIHRoaXMgcmVzZXQKY29udHJvbCBzaG91
+bGQgYmUgY2FsbGVkICJjb3JlIi4gSXMgdGhpcyBkb2N1bWVudGVkIGluIHRoZSBzZGhjaS1tc20K
+ZGV2aWNlIHRyZWUgYmluZGluZyBkb2N1bWVudD8KCj4gK8KgwqDCoMKgwqDCoMKgaWYgKElTX0VS
+Uihtc21faG9zdC0+Y29yZV9yZXNldCkpIHsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgcmV0ID0gUFRSX0VSUihtc21faG9zdC0+Y29yZV9yZXNldCk7Cj4gK8KgwqDCoMKgwqDCoMKg
+wqDCoMKgwqDCoMKgwqDCoGRldl9lcnIoJnBkZXYtPmRldiwgImNvcmVfcmVzZXQgdW5hdmFpbGFi
+bGUgKCVkKVxuIiwgcmV0KTsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgbXNtX2hv
+c3QtPmNvcmVfcmVzZXQgPSBOVUxMOwoKQXMgQmpvcm4gcG9pbnRlZCBvdXQsIHRoaXMgZXJyb3Ig
+c2hvdWxkIGJlIHJldHVybmVkLgpyZXNldF9jb250cm9sX2dldF9vcHRpb25hbCByZXR1cm5zIE5V
+TEwgaWYgdGhlIG9wdGlvbmFsIHJlc2V0IGNvbnRyb2wKaXMgbm90IHNwZWNpZmllZCBpbiB0aGUg
+ZGV2aWNlIHRyZWUsIHNvIHdlIG9ubHkgbGFuZCBoZXJlIGlmIHRoZXJlJ3MgYQpyZWFsIGVycm9y
+LgoKWy4uLl0KPiBAQCAtMjUyOSw2ICsyNTcwLDEzIEBAIHN0YXRpYyBpbnQgc2RoY2lfbXNtX3By
+b2JlKHN0cnVjdAo+IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiDCoAo+IMKgwqDCoMKgwqDCoMKg
+wqBtc21faG9zdC0+c2F2ZWRfdHVuaW5nX3BoYXNlID0gSU5WQUxJRF9UVU5JTkdfUEhBU0U7Cj4g
+wqAKPiArwqDCoMKgwqDCoMKgwqByZXQgPSBzZGhjaV9tc21fZ2NjX3Jlc2V0KHBkZXYsIGhvc3Qp
+Owo+ICvCoMKgwqDCoMKgwqDCoGlmIChyZXQpIHsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
+wqDCoMKgZGV2X2VycigmcGRldi0+ZGV2LCAiY29yZV9yZXNldCBhc3NlcnQvZGVhc3NlcnQgZmFp
+bGVkICglZClcbiIsCj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHJldCk7Cj4gK8KgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoGdvdG8gcGx0Zm1fZnJlZTsKPiArwqDCoMKgwqDCoMKgwqB9Cj4g
+Kwo+IMKgwqDCoMKgwqDCoMKgwqAvKiBTZXR1cCBTRENDIGJ1cyB2b3RlciBjbG9jay4gKi8KPiDC
+oMKgwqDCoMKgwqDCoMKgbXNtX2hvc3QtPmJ1c19jbGsgPSBkZXZtX2Nsa19nZXQoJnBkZXYtPmRl
+diwgImJ1cyIpOwo+IMKgwqDCoMKgwqDCoMKgwqBpZiAoIUlTX0VSUihtc21faG9zdC0+YnVzX2Ns
+aykpIHsKCkkgbm90aWNlIHRoYXQgdGhpcyBkcml2ZXIgcmVxdWVzdHMgcmVzb3VyY2VzIHN1Y2gg
+YXMgY2xvY2tzIGFuZCByZXNldHMKYW5kIHRoZW4gaW1tZWRpYXRlbHkgdXNlcyB0aGVtLCBvbmUg
+Ynkgb25lLiBJdCB3b3VsZCBiZSBiZXR0ZXIgdG8KcmVxdWVzdCBhbGwgcmVzb3VyY2VzIGZpcnN0
+LCBhbmQgb25seSB0aGVuIHN0YXJ0IGludGVyYWN0aW5nIHdpdGggdGhlCmhhcmR3YXJlLiBUaGlz
+IGlzIG5vdCBhbiBpc3N1ZSB0aGF0IGNhbiBiZSBmaXhlZCBpbiB0aGlzIHBhdGNoLAphbHRob3Vn
+aCBtYXliZSBpdCBjb3VsZCBiZSBwcmVwYXJlZCBmb3IgaXQgYnkgc2VwYXJhdGluZyB0aGUKcmVz
+ZXRfY29udHJvbF9nZXQgZnJvbSB0aGUgX2Fzc2VydC9kZWFzc2VydC4KCnJlZ2FyZHMKUGhpbGlw
+cAo=
 
-FYI, I agree with Avri here. Please use mmc-utils.
-
-In case the values in sysfs become confusing as they may be outdated
-at some point, perhaps we should consider dropping them?
-
-Kind regards
-Uffe
-
->
-> >
-> > Signed-off-by: Marc Mattmueller <marc.mattmueller@netmodule.com>
-> > ---
-> >  drivers/mmc/core/mmc.c   | 29 +++++++++++++++++++++++++++++
-> >  include/linux/mmc/card.h |  1 +
-> >  include/linux/mmc/mmc.h  |  1 +
-> >  3 files changed, 31 insertions(+)
-> >
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
-> > d9537c894e33..a64d1ecb0de9 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -364,6 +364,10 @@ static int
-> > mmc_update_ext_csd_runtime_params(struct mmc_card *card, u8
-> > *ext_csd)  {
-> >         int err = 0;
-> >
-> > +       /* eMMC v4.41 or later */
-> > +       if (card->ext_csd.rev >= 5)
-> > +               card->ext_csd.rel_wr_set = ext_csd[EXT_CSD_WR_REL_SET];
-> > +
-> >         /* eMMC v5 or later */
-> >         if (card->ext_csd.rev >= 7) {
-> >                 card->ext_csd.pre_eol_info = ext_csd[EXT_CSD_PRE_EOL_INFO];
-> > @@ -587,6 +591,7 @@ static int mmc_decode_ext_csd(struct mmc_card
-> > *card, u8 *ext_csd)
-> >                 }
-> >
-> >                 card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
-> > +               card->ext_csd.rel_wr_set = ext_csd[EXT_CSD_WR_REL_SET];
-> >                 card->ext_csd.rst_n_function =
-> > ext_csd[EXT_CSD_RST_N_FUNCTION];
-> >
-> >                 /*
-> > @@ -820,6 +825,7 @@ MMC_DEV_ATTR(name, "%s\n", card-
-> > >cid.prod_name);  MMC_DEV_ATTR(oemid, "0x%04x\n", card->cid.oemid);
-> > MMC_DEV_ATTR(prv, "0x%x\n", card->cid.prv);  MMC_DEV_ATTR(rev,
-> > "0x%x\n", card->ext_csd.rev);
-> > +MMC_DEV_ATTR(rel_param, "0x%02x\n", card->ext_csd.rel_param);
-> >  MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
-> > MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
-> >                 card->ext_csd.enhanced_area_offset);
-> > @@ -886,6 +892,27 @@ static ssize_t pre_eol_info_show(struct device
-> > *dev,
-> >
-> >  static DEVICE_ATTR_RO(pre_eol_info);
-> >
-> > +static ssize_t rel_write_set_show(struct device *dev,
-> > +                                 struct device_attribute *attr,
-> > +                                 char *buf) {
-> > +       int err = 0;
-> > +       struct mmc_card *card = mmc_dev_to_card(dev);
-> > +
-> > +       /* before eMMC v4.41 */
-> > +       if (card->ext_csd.rev < 5)
-> > +               return sprintf(buf, "%s\n", "-");
-> > +
-> > +       /* eMMC v4.41 or later */
-> > +       err = mmc_update_csd(card);
-> > +       if (err)
-> > +               return (ssize_t)err;
-> > +
-> > +       return sprintf(buf, "0x%02x\n", card->ext_csd.rel_wr_set); }
-> > +
-> > +static DEVICE_ATTR_RO(rel_write_set);
-> > +
-> >  static ssize_t mmc_fwrev_show(struct device *dev,
-> >                               struct device_attribute *attr,
-> >                               char *buf) @@ -931,6 +958,8 @@ static struct attribute
-> > *mmc_std_attrs[] = {
-> >         &dev_attr_oemid.attr,
-> >         &dev_attr_prv.attr,
-> >         &dev_attr_rev.attr,
-> > +       &dev_attr_rel_param.attr,
-> > +       &dev_attr_rel_write_set.attr,
-> >         &dev_attr_pre_eol_info.attr,
-> >         &dev_attr_life_time.attr,
-> >         &dev_attr_serial.attr,
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
-> > 37f975875102..21c47893fcb4 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -48,6 +48,7 @@ struct mmc_ext_csd {
-> >         u8                      sec_feature_support;
-> >         u8                      rel_sectors;
-> >         u8                      rel_param;
-> > +       u8                      rel_wr_set;
-> >         bool                    enhanced_rpmb_supported;
-> >         u8                      part_config;
-> >         u8                      cache_ctrl;
-> > diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h index
-> > d9a65c6a8816..42afd442a70a 100644
-> > --- a/include/linux/mmc/mmc.h
-> > +++ b/include/linux/mmc/mmc.h
-> > @@ -266,6 +266,7 @@ static inline bool mmc_ready_for_data(u32 status)
-> >  #define EXT_CSD_BKOPS_START            164     /* W */
-> >  #define EXT_CSD_SANITIZE_START         165     /* W */
-> >  #define EXT_CSD_WR_REL_PARAM           166     /* RO */
-> > +#define EXT_CSD_WR_REL_SET             167     /* R/W */
-> >  #define EXT_CSD_RPMB_MULT              168     /* RO */
-> >  #define EXT_CSD_FW_CONFIG              169     /* R/W */
-> >  #define EXT_CSD_BOOT_WP                        173     /* R/W */
-> > --
-> > 2.20.1
->
