@@ -2,102 +2,230 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5431DC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 09:48:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 497CDC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 10:08:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346796AbiCOJuI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Mar 2022 05:50:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55158 "EHLO
+        id S238877AbiCOKKA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 06:10:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243306AbiCOJuH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 05:50:07 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3FA71AF24
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 02:48:55 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nU3nJ-0004sX-UN; Tue, 15 Mar 2022 10:48:45 +0100
-Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nU3nI-000oTA-SH; Tue, 15 Mar 2022 10:48:43 +0100
-Received: from pza by lupine with local (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nU3nG-0002bJ-TX; Tue, 15 Mar 2022 10:48:42 +0100
-Message-ID: <daecd30e4798e7d1e4b74dfe37d67b74a6f3cde1.camel@pengutronix.de>
-Subject: Re: [PATCH V2] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-From:   Philipp Zabel <p.zabel@pengutronix.de>
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        adrian.hunter@intel.com, agross@kernel.org,
-        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
-        chris@printf.net, gdjakov@mm-sol.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_asutoshd@quicinc.com,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sayalil@quicinc.com
-Date:   Tue, 15 Mar 2022 10:48:42 +0100
-In-Reply-To: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: base64
-User-Agent: Evolution 3.38.3-1 
+        with ESMTP id S1346950AbiCOKJ7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 06:09:59 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2AB03BF96;
+        Tue, 15 Mar 2022 03:08:46 -0700 (PDT)
+Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22F4JcYN013011;
+        Tue, 15 Mar 2022 11:08:06 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=wZLup1066BSl1Hsk/ZF1vSKE25M+uNQ85H+mRhWlPfw=;
+ b=OD5oGWIRM87iRwhfrsGXbAd2cYWCeLngme7W2/UIhqF7KKBQ3DPk/Kw8L3KNdW/QCcql
+ /NOyP7JB1BfjqX4fjS1mUVQu5mxmDWBoupuJsBPUZreIAkmToTLYKHjqWiiVcKElx15Y
+ 78Jug9xNwPIHY5krgWANZqQq44h6JHMoFtHKPvT7tVrjZY8QYYM05B46p+fstSh5jxa9
+ RTmmFy/JNFNC7X+cib1CuReB8CFCdziF3ASgRHu+FCQODmN/krqHs9xLA73ajl/9m7+9
+ vximtFti7RGxw5AQ5ieSkulQ6JYCOUDdlRBG9pmmiqjKmv7ZFYAQZQ3MXzKVvQb/Cqlk 6A== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3et63h5krf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 15 Mar 2022 11:08:05 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id EFC6010002A;
+        Tue, 15 Mar 2022 11:07:42 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id E07B72171CB;
+        Tue, 15 Mar 2022 11:07:42 +0100 (CET)
+Received: from [10.201.21.172] (10.75.127.47) by SFHDAG2NODE2.st.com
+ (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Tue, 15 Mar
+ 2022 11:07:42 +0100
+Message-ID: <c6972c78-a4eb-02ec-7b35-e473b66df821@foss.st.com>
+Date:   Tue, 15 Mar 2022 11:07:41 +0100
 MIME-Version: 1.0
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: p.zabel@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH v2] mmc: mmci: manage MMC_PM_KEEP_POWER per variant config
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>,
+        Christophe ROULLIER-SCND-02 <christophe.roullier@foss.st.com>
+References: <20220314095225.53563-1-yann.gautier@foss.st.com>
+ <20220314125554.190574-1-yann.gautier@foss.st.com>
+ <CAPDyKFruN9Xwk4uqFumwBdcn4SjKQcSQVBbALa3kVxY4mVzOnQ@mail.gmail.com>
+ <9e4fbf6a-1309-3aee-fcb0-be7c2c683892@foss.st.com>
+ <CAPDyKFq2Du1UWpvRFpVF_qL65SP0DfEV872U9Xe-9i7xKxXhqg@mail.gmail.com>
+ <ce29e53a-59ff-000a-6b88-0b7ae538c515@foss.st.com>
+ <CAPDyKFq29+nwxXkV-Fyn91WD62-6REk+5UryVAK6XC4xKhcsfg@mail.gmail.com>
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <CAPDyKFq29+nwxXkV-Fyn91WD62-6REk+5UryVAK6XC4xKhcsfg@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.47]
+X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
+ (10.75.127.5)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-14_14,2022-03-14_02,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgU2FqaWRhLAoKT24gRG8sIDIwMjItMDMtMTAgYXQgMjE6MTAgKzA1MzAsIFNoYWlrIFNhamlk
-YSBCaGFudSB3cm90ZToKWy4uLl0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhj
-aS1tc20uYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktCj4gbXNtLmMKPiBpbmRleCA1MGM3MWUw
-Li5jYjMzYzlhIDEwMDY0NAo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktbXNtLmMKPiAr
-KysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW1zbS5jClsuLi5dCj4gQEAgLTI0ODIsNiArMjQ4
-NCw0NSBAQCBzdGF0aWMgaW5saW5lIHZvaWQgc2RoY2lfbXNtX2dldF9vZl9wcm9wZXJ0eShzdHJ1
-Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2LAo+IMKgwqDCoMKgwqDCoMKgwqBvZl9wcm9wZXJ0eV9y
-ZWFkX3UzMihub2RlLCAicWNvbSxkbGwtY29uZmlnIiwgJm1zbV9ob3N0LT5kbGxfY29uZmlnKTsK
-PiDCoH0KPiDCoAo+ICtzdGF0aWMgaW50IHNkaGNpX21zbV9nY2NfcmVzZXQoc3RydWN0IHBsYXRm
-b3JtX2RldmljZSAqcGRldiwKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAgc3RydWN0IHNk
-aGNpX2hvc3QgKmhvc3QpCj4gK3sKPiArwqDCoMKgwqDCoMKgwqBzdHJ1Y3Qgc2RoY2lfcGx0Zm1f
-aG9zdCAqcGx0Zm1faG9zdCA9IHNkaGNpX3ByaXYoaG9zdCk7Cj4gK8KgwqDCoMKgwqDCoMKgc3Ry
-dWN0IHNkaGNpX21zbV9ob3N0ICptc21faG9zdCA9IHNkaGNpX3BsdGZtX3ByaXYocGx0Zm1faG9z
-dCk7Cj4gK8KgwqDCoMKgwqDCoMKgaW50IHJldCA9IDA7Cj4gKwo+ICvCoMKgwqDCoMKgwqDCoG1z
-bV9ob3N0LT5jb3JlX3Jlc2V0ID0gZGV2bV9yZXNldF9jb250cm9sX2dldF9vcHRpb25hbF9leGNs
-dXNpdmUoJnBkZXYtPmRldiwgImNvcmVfcmVzZXQiKTsKCkkgdGhpbmsgdGhlICJfcmVzZXQiIHBh
-cnQgaW4gdGhlIG5hbWUgaXMgc3VwZXJmbHVvdXMgYW5kIHRoaXMgcmVzZXQKY29udHJvbCBzaG91
-bGQgYmUgY2FsbGVkICJjb3JlIi4gSXMgdGhpcyBkb2N1bWVudGVkIGluIHRoZSBzZGhjaS1tc20K
-ZGV2aWNlIHRyZWUgYmluZGluZyBkb2N1bWVudD8KCj4gK8KgwqDCoMKgwqDCoMKgaWYgKElTX0VS
-Uihtc21faG9zdC0+Y29yZV9yZXNldCkpIHsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgcmV0ID0gUFRSX0VSUihtc21faG9zdC0+Y29yZV9yZXNldCk7Cj4gK8KgwqDCoMKgwqDCoMKg
-wqDCoMKgwqDCoMKgwqDCoGRldl9lcnIoJnBkZXYtPmRldiwgImNvcmVfcmVzZXQgdW5hdmFpbGFi
-bGUgKCVkKVxuIiwgcmV0KTsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgbXNtX2hv
-c3QtPmNvcmVfcmVzZXQgPSBOVUxMOwoKQXMgQmpvcm4gcG9pbnRlZCBvdXQsIHRoaXMgZXJyb3Ig
-c2hvdWxkIGJlIHJldHVybmVkLgpyZXNldF9jb250cm9sX2dldF9vcHRpb25hbCByZXR1cm5zIE5V
-TEwgaWYgdGhlIG9wdGlvbmFsIHJlc2V0IGNvbnRyb2wKaXMgbm90IHNwZWNpZmllZCBpbiB0aGUg
-ZGV2aWNlIHRyZWUsIHNvIHdlIG9ubHkgbGFuZCBoZXJlIGlmIHRoZXJlJ3MgYQpyZWFsIGVycm9y
-LgoKWy4uLl0KPiBAQCAtMjUyOSw2ICsyNTcwLDEzIEBAIHN0YXRpYyBpbnQgc2RoY2lfbXNtX3By
-b2JlKHN0cnVjdAo+IHBsYXRmb3JtX2RldmljZSAqcGRldikKPiDCoAo+IMKgwqDCoMKgwqDCoMKg
-wqBtc21faG9zdC0+c2F2ZWRfdHVuaW5nX3BoYXNlID0gSU5WQUxJRF9UVU5JTkdfUEhBU0U7Cj4g
-wqAKPiArwqDCoMKgwqDCoMKgwqByZXQgPSBzZGhjaV9tc21fZ2NjX3Jlc2V0KHBkZXYsIGhvc3Qp
-Owo+ICvCoMKgwqDCoMKgwqDCoGlmIChyZXQpIHsKPiArwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKg
-wqDCoMKgZGV2X2VycigmcGRldi0+ZGV2LCAiY29yZV9yZXNldCBhc3NlcnQvZGVhc3NlcnQgZmFp
-bGVkICglZClcbiIsCj4gK8KgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHJldCk7Cj4gK8KgwqDCoMKgwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoGdvdG8gcGx0Zm1fZnJlZTsKPiArwqDCoMKgwqDCoMKgwqB9Cj4g
-Kwo+IMKgwqDCoMKgwqDCoMKgwqAvKiBTZXR1cCBTRENDIGJ1cyB2b3RlciBjbG9jay4gKi8KPiDC
-oMKgwqDCoMKgwqDCoMKgbXNtX2hvc3QtPmJ1c19jbGsgPSBkZXZtX2Nsa19nZXQoJnBkZXYtPmRl
-diwgImJ1cyIpOwo+IMKgwqDCoMKgwqDCoMKgwqBpZiAoIUlTX0VSUihtc21faG9zdC0+YnVzX2Ns
-aykpIHsKCkkgbm90aWNlIHRoYXQgdGhpcyBkcml2ZXIgcmVxdWVzdHMgcmVzb3VyY2VzIHN1Y2gg
-YXMgY2xvY2tzIGFuZCByZXNldHMKYW5kIHRoZW4gaW1tZWRpYXRlbHkgdXNlcyB0aGVtLCBvbmUg
-Ynkgb25lLiBJdCB3b3VsZCBiZSBiZXR0ZXIgdG8KcmVxdWVzdCBhbGwgcmVzb3VyY2VzIGZpcnN0
-LCBhbmQgb25seSB0aGVuIHN0YXJ0IGludGVyYWN0aW5nIHdpdGggdGhlCmhhcmR3YXJlLiBUaGlz
-IGlzIG5vdCBhbiBpc3N1ZSB0aGF0IGNhbiBiZSBmaXhlZCBpbiB0aGlzIHBhdGNoLAphbHRob3Vn
-aCBtYXliZSBpdCBjb3VsZCBiZSBwcmVwYXJlZCBmb3IgaXQgYnkgc2VwYXJhdGluZyB0aGUKcmVz
-ZXRfY29udHJvbF9nZXQgZnJvbSB0aGUgX2Fzc2VydC9kZWFzc2VydC4KCnJlZ2FyZHMKUGhpbGlw
-cAo=
+On 3/15/22 10:07, Ulf Hansson wrote:
+> On Mon, 14 Mar 2022 at 17:52, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>>
+>> On 3/14/22 17:18, Ulf Hansson wrote:
+>>> On Mon, 14 Mar 2022 at 15:34, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>>>>
+>>>> On 3/14/22 14:03, Ulf Hansson wrote:
+>>>>> On Mon, 14 Mar 2022 at 13:56, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>>>>>>
+>>>>>> Add a disable_keep_power field in variant_data struct. The
+>>>>>> MMC_PM_KEEP_POWER flag will be enabled if disable_keep_power is not set.
+>>>>>> It is only set to true for stm32_sdmmc variants.
+>>>>>>
+>>>>>> The issue was seen on STM32MP157C-DK2 board, which embeds a wifi chip.
+>>>>>> It doesn't correctly support low power on this board. The Wifi chip
+>>>>>> awaits an always-on regulator, but it was connected to v3v3 which is off
+>>>>>> in low-power sequence. MMC_PM_KEEP_POWER should then be disabled.
+>>>>>
+>>>>> Just to make sure I get this correct.
+>>>>>
+>>>>> Why can't the regulator stay on during system suspend? The point is,
+>>>>> we don't need an always on regulator to cope with this.
+>>>>>
+>>>>> Kind regards
+>>>>> Uffe
+>>>>
+>>>> Hi Ulf,
+>>>>
+>>>> This v3v3 regulator powers most of the devices on this board. So we need
+>>>> to switch it off to gain power in suspend mode.
+>>>
+>>> I see. Thanks for sharing that information.
+>>>
+>>> The MMC_PM_KEEP_POWER flag is there to describe what is supported by
+>>> the platform/host. It doesn't mean that the card *must* stay powered
+>>> on during system suspend. Instead that depends on whether system
+>>> wakeup for the SDIO/WiFi is supported too - and if that is enabled by
+>>> userspace. If not, the regulator will be turned off for the SDIO card
+>>> during system suspend.
+>>>
+>>> Assuming the regulator is implemented as a proper regulator and can
+>>> remain on during system suspend, the right thing would be to keep the
+>>> MMC_PM_KEEP_POWER flag around.
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>
+>> OK, but in the wifi driver we use on this platform (brcmfmac), the
+>> suspend/resume functions (brcmf_ops_sdio_suspend/brcmf_ops_sdio_resume)
+>> use the flag to check regu was off, and then call probe function during
+>> resume, to re-init Wifi chip and reload its firmware.
+> 
+> I had a closer look at the brcmfmac driver, thanks for the pointers.
+> 
+> In my opinion, I think we should change the brcmfmac driver, so it
+> decides to power off the SDIO card, unless the WiFi chip is configured
+> to serve us with system wakeups.
+> 
+> I can send a patch for brcmfmac that we can try, unless you want to
+> send it yourself?
+> 
+
+Hi Ulf,
+If you already have an idea of the patch in the brcmfmac driver, can you 
+propose something?
+We'll be able to test it at our side.
+
+Thanks,
+Yann
+
+>>
+>>
+>> Best regards,
+>> Yann
+> 
+> Kind regards
+> Uffe
+> >>
+>>>>
+>>>>
+>>>> Yann
+>>>>
+>>>>>
+>>>>>>
+>>>>>> The flag can still be enabled through DT property:
+>>>>>> keep-power-in-suspend.
+>>>>>>
+>>>>>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+>>>>>> ---
+>>>>>> Update in v2:
+>>>>>> Reword commit message to better explain the issue.
+>>>>>>
+>>>>>> Resend the patch alone. It was previoulsy in a series [1] for which the
+>>>>>> other patches will be reworked.
+>>>>>>
+>>>>>> [1] https://lore.kernel.org/lkml/20220304135134.47827-1-yann.gautier@foss.st.com/
+>>>>>>
+>>>>>>     drivers/mmc/host/mmci.c | 5 ++++-
+>>>>>>     drivers/mmc/host/mmci.h | 1 +
+>>>>>>     2 files changed, 5 insertions(+), 1 deletion(-)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>>>>>> index 45b8608c935c..0e2f2f5d6a52 100644
+>>>>>> --- a/drivers/mmc/host/mmci.c
+>>>>>> +++ b/drivers/mmc/host/mmci.c
+>>>>>> @@ -274,6 +274,7 @@ static struct variant_data variant_stm32_sdmmc = {
+>>>>>>            .busy_detect            = true,
+>>>>>>            .busy_detect_flag       = MCI_STM32_BUSYD0,
+>>>>>>            .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
+>>>>>> +       .disable_keep_power     = true,
+>>>>>>            .init                   = sdmmc_variant_init,
+>>>>>>     };
+>>>>>>
+>>>>>> @@ -301,6 +302,7 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+>>>>>>            .busy_detect            = true,
+>>>>>>            .busy_detect_flag       = MCI_STM32_BUSYD0,
+>>>>>>            .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
+>>>>>> +       .disable_keep_power     = true,
+>>>>>>            .init                   = sdmmc_variant_init,
+>>>>>>     };
+>>>>>>
+>>>>>> @@ -2172,7 +2174,8 @@ static int mmci_probe(struct amba_device *dev,
+>>>>>>            host->stop_abort.flags = MMC_RSP_R1B | MMC_CMD_AC;
+>>>>>>
+>>>>>>            /* We support these PM capabilities. */
+>>>>>> -       mmc->pm_caps |= MMC_PM_KEEP_POWER;
+>>>>>> +       if (!variant->disable_keep_power)
+>>>>>> +               mmc->pm_caps |= MMC_PM_KEEP_POWER;
+>>>>>>
+>>>>>>            /*
+>>>>>>             * We can do SGIO
+>>>>>> diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+>>>>>> index e1a9b96a3396..2cad1ef9766a 100644
+>>>>>> --- a/drivers/mmc/host/mmci.h
+>>>>>> +++ b/drivers/mmc/host/mmci.h
+>>>>>> @@ -361,6 +361,7 @@ struct variant_data {
+>>>>>>            u32                     opendrain;
+>>>>>>            u8                      dma_lli:1;
+>>>>>>            u32                     stm32_idmabsize_mask;
+>>>>>> +       u8                      disable_keep_power:1;
+>>>>>>            void (*init)(struct mmci_host *host);
+>>>>>>     };
+>>>>>>
+>>>>>> --
+>>>>>> 2.25.1
+>>>>>>
+>>>>
+>>
 
