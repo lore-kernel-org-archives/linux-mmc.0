@@ -2,115 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 302B3C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 22:05:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B0ABC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 23:03:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352119AbiCOWHI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Mar 2022 18:07:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53956 "EHLO
+        id S1349790AbiCOXEy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Mar 2022 19:04:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352112AbiCOWHI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 18:07:08 -0400
-Received: from gate2.alliedtelesis.co.nz (gate2.alliedtelesis.co.nz [202.36.163.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 805F75A0BC
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Mar 2022 15:05:54 -0700 (PDT)
-Received: from svr-chch-seg1.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id A74172C0A8F;
-        Tue, 15 Mar 2022 22:05:52 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
-        s=mail181024; t=1647381952;
-        bh=shAvVAo4zZnFN8Y1h8zTgPxTI/jOM/JR1c6ANtqej8c=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=UBWQQe9L6SmpExPvcCXuHbeM73eij0pYLeWTuarC+eyQImOh7Od43h3s+ugVY+j9n
-         qdDub/ZoJYgGDAUc7JIzAwrmpF5aiLnJyOxzSrcafYpjx0o9J5zY6VTG/uoq1s1P2N
-         NZ8VXXOB96pUBdohPE+8A8mn2esQDzx1Zf+HVcbWV5mAjM8UZpteJ0xecx5hTmwyr5
-         Ez2NNLfBjFE5VL3DgtPEgxrPaX+fGweALYvRtY0Y1JUBHZ0QRwtg1j+ONa3tITeKAT
-         da04wEBxBZwCSTZsLuAHTut+O0GEgfl4qvVnAMNTNjgm6MWdDTnXTKCtZU7kc/JbxX
-         7LJ0IqCDCMgPA==
-Received: from pat.atlnz.lc (Not Verified[10.32.16.33]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
-        id <B62310dc00002>; Wed, 16 Mar 2022 11:05:52 +1300
-Received: from chrisp-dl.ws.atlnz.lc (chrisp-dl.ws.atlnz.lc [10.33.22.30])
-        by pat.atlnz.lc (Postfix) with ESMTP id 5BD2613EE3F;
-        Wed, 16 Mar 2022 11:05:52 +1300 (NZDT)
-Received: by chrisp-dl.ws.atlnz.lc (Postfix, from userid 1030)
-        id 4518D2A2677; Wed, 16 Mar 2022 11:05:51 +1300 (NZDT)
-From:   Chris Packham <chris.packham@alliedtelesis.co.nz>
-To:     huziji@marvell.com, ulf.hansson@linaro.org, robh+dt@kernel.org,
-        adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Chris Packham <chris.packham@alliedtelesis.co.nz>
-Subject: [PATCH v3 2/2] mmc: xenon: add AC5 compatible string
-Date:   Wed, 16 Mar 2022 11:05:49 +1300
-Message-Id: <20220315220549.2749328-3-chris.packham@alliedtelesis.co.nz>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220315220549.2749328-1-chris.packham@alliedtelesis.co.nz>
-References: <20220315220549.2749328-1-chris.packham@alliedtelesis.co.nz>
+        with ESMTP id S1344119AbiCOXEx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Mar 2022 19:04:53 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E793E2AC7;
+        Tue, 15 Mar 2022 16:03:39 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 93079B8190D;
+        Tue, 15 Mar 2022 23:03:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DD318C340E8;
+        Tue, 15 Mar 2022 23:03:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647385417;
+        bh=TzB71EHsQSxi9ycyQW305aKb38kU4PoZa65+ZUbL93c=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=gxcMWeCpBQjsYX9XnajV96+qEiT05QvvAx+rpLrcAIzeNueu3XWZgwe1bu+82MSBo
+         8QtaTDP9fJx5OgfCXARIFUexLMi0jPJs/vNLyeFZqi1jS8CkFc0ovgc57dSyCUNkOW
+         EaGMwjv3hwlNYVX/NmwlmTf7otRdnACrkJEFDFsl2nqjvl01R5QjRk3a5rO2gsXXPP
+         rAY9iKskfNSakrlT0SzC7D+j1L3AG8RJRn1nH9ENRUJ+KeoaiPR+qQyQt2K4Jcmx28
+         W7FavvnKY13dgKnurZpxAFG/STrJFbgl9ESVSWN0O3sFE1hLCsPzbip00dWz2/B2Z0
+         jKUsesoPwf9cQ==
+Received: by pali.im (Postfix)
+        id F1C44824; Wed, 16 Mar 2022 00:03:33 +0100 (CET)
+Date:   Wed, 16 Mar 2022 00:03:33 +0100
+From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
+To:     Marcin Wojtas <mw@semihalf.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ziji Hu <huziji@marvell.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Grzegorz Jaszczyk <jaz@semihalf.com>,
+        Tomasz Nowicki <tn@semihalf.com>,
+        Kostya Porotchkin <kostap@marvell.com>,
+        Alex Leibovich <alexl@marvell.com>,
+        "# 4.0+" <stable@vger.kernel.org>
+Subject: Re: [PATCH] mmc: sdhci-xenon: fix 1.8v regulator stabilization
+Message-ID: <20220315230333.eyznbu5tuxneizbs@pali>
+References: <20201211141656.24915-1-mw@semihalf.com>
+ <CAPDyKFqsSO+f9iG8vccwXZXDDNHgLEg7bfUe-KfHn2C-ZnOU4A@mail.gmail.com>
+ <20220314154033.4x74zscayee32rrj@pali>
+ <CAPv3WKc4MFeLgnJMWx=YNT5Ta5yi6fVhb4f-Rf211FTEmkvyog@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=KLBiSEs5mFS1a/PbTCJxuA==:117 a=o8Y5sQTvuykA:10 a=UvibhkeALEyMK9IFLgoA:9
-X-SEG-SpamProfiler-Score: 0
-x-atlnz-ls: pat
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPv3WKc4MFeLgnJMWx=YNT5Ta5yi6fVhb4f-Rf211FTEmkvyog@mail.gmail.com>
+User-Agent: NeoMutt/20180716
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add marvell,ac5-sdhci to the list of compatible strings for the Xenon
-SDHCI controller. Currently this is functionally no different to the
-ap806 but having the compatible string will allow handling any
-differences that arise from the controller being integrated in the
-98DX2530 switch chips.
+Hello!
 
-Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
-Reviewed-by: Andrew Lunn <andrew@lunn.ch>
----
+On Monday 14 March 2022 16:51:25 Marcin Wojtas wrote:
+> Hi Pali,
+> 
+> 
+> pon., 14 mar 2022 o 16:40 Pali Rohár <pali@kernel.org> napisał(a):
+> >
+> > On Monday 11 January 2021 19:06:24 Ulf Hansson wrote:
+> > > On Fri, 11 Dec 2020 at 15:17, Marcin Wojtas <mw@semihalf.com> wrote:
+> > > >
+> > > > From: Alex Leibovich <alexl@marvell.com>
+> > > >
+> > > > Automatic Clock Gating is a feature used for the power
+> > > > consumption optimisation. It turned out that
+> > > > during early init phase it may prevent the stable voltage
+> > > > switch to 1.8V - due to that on some platfroms an endless
+> > > > printout in dmesg can be observed:
+> > > > "mmc1: 1.8V regulator output did not became stable"
+> > > > Fix the problem by disabling the ACG at very beginning
+> > > > of the sdhci_init and let that be enabled later.
+> > > >
+> > > > Fixes: 3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality")
+> > > > Signed-off-by: Alex Leibovich <alexl@marvell.com>
+> > > > Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+> > > > Cc: stable@vger.kernel.org
+> > >
+> > > Applied for fixes (by fixing the typos), thanks!
+> >
+> > Hello!
+> >
+> > Is not this patch address same issue which was fixed by patch which was
+> > merged earlier?
+> >
+> > bb32e1987bc5 ("mmc: sdhci-xenon: fix annoying 1.8V regulator warning")
+> > https://lore.kernel.org/linux-mmc/CAPDyKFqAsvgAjfL-c9ukFNWeGJmufQosR2Eg9SKjXMVpNitdkA@mail.gmail.com/
+> >
+> 
+> This indeed look similar. This fix was originally developed for CN913x
+> platform without the mentioned patch (I'm wondering if it would also
+> suffice to fix A3k board's problem). Anyway, I don't think we have an
+> issue here, as everything seems to work fine on top of mainline Linux
+> with both changes.
 
-Notes:
-    Changes in v3:
-    - Split from larger series
-    - Add review from Andrew
-    Changes in v2:
-    - New
+Yea, there should be no issue. Just question is if we need _both_ fixes.
 
- drivers/mmc/host/sdhci-xenon.c | 1 +
- drivers/mmc/host/sdhci-xenon.h | 3 ++-
- 2 files changed, 3 insertions(+), 1 deletion(-)
+I could probably try to revert bb32e1987bc5 and check what happens on
+A3k board.
 
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xeno=
-n.c
-index 666cee4c7f7c..ac95d16809c5 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -692,6 +692,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[]=
- =3D {
- 	{ .compatible =3D "marvell,armada-ap807-sdhci", .data =3D (void *)XENON=
-_AP807},
- 	{ .compatible =3D "marvell,armada-cp110-sdhci", .data =3D  (void *)XENO=
-N_CP110},
- 	{ .compatible =3D "marvell,armada-3700-sdhci", .data =3D  (void *)XENON=
-_A3700},
-+	{ .compatible =3D "marvell,ac5-sdhci", .data =3D (void *)XENON_AC5},
- 	{}
- };
- MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
-diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xeno=
-n.h
-index 3e9c6c908a79..451b41dd3447 100644
---- a/drivers/mmc/host/sdhci-xenon.h
-+++ b/drivers/mmc/host/sdhci-xenon.h
-@@ -57,7 +57,8 @@ enum xenon_variant {
- 	XENON_A3700,
- 	XENON_AP806,
- 	XENON_AP807,
--	XENON_CP110
-+	XENON_CP110,
-+	XENON_AC5,
- };
-=20
- struct xenon_priv {
---=20
-2.35.1
-
+> Best regards,
+> Marcin
+> 
+> > > Kind regards
+> > > Uffe
+> > >
+> > >
+> > > > ---
+> > > >  drivers/mmc/host/sdhci-xenon.c | 7 ++++++-
+> > > >  1 file changed, 6 insertions(+), 1 deletion(-)
+> > > >
+> > > > diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> > > > index c67611fdaa8a..4b05f6fdefb4 100644
+> > > > --- a/drivers/mmc/host/sdhci-xenon.c
+> > > > +++ b/drivers/mmc/host/sdhci-xenon.c
+> > > > @@ -168,7 +168,12 @@ static void xenon_reset_exit(struct sdhci_host *host,
+> > > >         /* Disable tuning request and auto-retuning again */
+> > > >         xenon_retune_setup(host);
+> > > >
+> > > > -       xenon_set_acg(host, true);
+> > > > +       /*
+> > > > +        * The ACG should be turned off at the early init time, in order
+> > > > +        * to solve a possile issues with the 1.8V regulator stabilization.
+> > > > +        * The feature is enabled in later stage.
+> > > > +        */
+> > > > +       xenon_set_acg(host, false);
+> > > >
+> > > >         xenon_set_sdclk_off_idle(host, sdhc_id, false);
+> > > >
+> > > > --
+> > > > 2.29.0
+> > > >
