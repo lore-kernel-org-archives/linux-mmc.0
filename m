@@ -2,59 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7EE4C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 00:25:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B74BC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Mar 2022 00:29:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343748AbiCOA0b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Mar 2022 20:26:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47488 "EHLO
+        id S1343994AbiCOAaI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Mar 2022 20:30:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343707AbiCOA0a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 20:26:30 -0400
-Received: from vps0.lunn.ch (vps0.lunn.ch [185.16.172.187])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A0F73D1C1;
-        Mon, 14 Mar 2022 17:25:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
-        s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
-        Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
-        Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
-        bh=ozPHgUI6vT/O8/+umNUMMuK5fsDW+kbR6FhqQ3vZGCI=; b=FYajyiOnM7RvDVBT3TB+5Lpd20
-        ngDEcpSoDpE80VKEcYM/f56jLA/8sOLT8jZRtpb6ZY8w1SfhY3sZcJeZX5yAS60n0KIICEliHgY0J
-        uCEpdeC1o4R1XyWNfQt3upEyvifRR1CXW4uMGpyuPocryzKZxc57TsMab60+N0SJccTA=;
-Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
-        (envelope-from <andrew@lunn.ch>)
-        id 1nTuzu-00Aq8I-97; Tue, 15 Mar 2022 01:25:10 +0100
-Date:   Tue, 15 Mar 2022 01:25:10 +0100
-From:   Andrew Lunn <andrew@lunn.ch>
-To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
-Cc:     huziji@marvell.com, ulf.hansson@linaro.org, robh+dt@kernel.org,
-        davem@davemloft.net, kuba@kernel.org, linus.walleij@linaro.org,
-        catalin.marinas@arm.com, will@kernel.org,
-        gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com,
-        adrian.hunter@intel.com, thomas.petazzoni@bootlin.com,
-        kostap@marvell.com, robert.marko@sartura.hr,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH v2 8/8] arm64: marvell: enable the 98DX2530 pinctrl driver
-Message-ID: <Yi/c5nVYYR8r/fFc@lunn.ch>
+        with ESMTP id S1343992AbiCOAaC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Mar 2022 20:30:02 -0400
+Received: from gate2.alliedtelesis.co.nz (gate2.alliedtelesis.co.nz [IPv6:2001:df5:b000:5::4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85EB55F79
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Mar 2022 17:27:46 -0700 (PDT)
+Received: from svr-chch-seg1.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (Client did not present a certificate)
+        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id 027732C066E;
+        Tue, 15 Mar 2022 00:27:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
+        s=mail181024; t=1647304065;
+        bh=TOEaJLcAy9FaXsjjvCEs6i+ujFQu+Um52CZuhm6wy3A=;
+        h=From:To:CC:Subject:Date:References:In-Reply-To:From;
+        b=oeNxndQofXA+F8a+hxjbM7cS017ZjM0SCfMNqjb/wbU7Tx/x9rblCHHihXDXRIbeY
+         f2vA/JsPZFp+MWEeHoQo3ZwW/pvNKZXP0dq/FGMNirgqee+wH59WvS6PrxTTyHFXY1
+         zXy+bZPbjCd1XJR2L21C+IWdaDSQx3W6m7Y/7jzLphepMrShlddivLADFBuTB3uU4n
+         mM40NAKA9nfLR8E2XZ4x4JPPMt7Qmin3DeCcqJrgDbag3A+ulaOMNR75hvFBHXw+O4
+         S7+9elIRUPMMiZRgJJ8HAjHaM38/0BAi1yXHqv5bMjbGSlTjqSQjxOtgt4+NbVrBry
+         3DXLFfFrfcJXA==
+Received: from svr-chch-ex1.atlnz.lc (Not Verified[2001:df5:b000:bc8::77]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
+        id <B622fdd800001>; Tue, 15 Mar 2022 13:27:44 +1300
+Received: from svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8:409d:36f5:8899:92e8)
+ by svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8:409d:36f5:8899:92e8) with
+ Microsoft SMTP Server (TLS) id 15.0.1497.32; Tue, 15 Mar 2022 13:27:44 +1300
+Received: from svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8]) by
+ svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8%12]) with mapi id
+ 15.00.1497.033; Tue, 15 Mar 2022 13:27:44 +1300
+From:   Chris Packham <Chris.Packham@alliedtelesis.co.nz>
+To:     Andrew Lunn <andrew@lunn.ch>
+CC:     "huziji@marvell.com" <huziji@marvell.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "davem@davemloft.net" <davem@davemloft.net>,
+        "kuba@kernel.org" <kuba@kernel.org>,
+        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
+        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
+        "will@kernel.org" <will@kernel.org>,
+        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
+        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "thomas.petazzoni@bootlin.com" <thomas.petazzoni@bootlin.com>,
+        "kostap@marvell.com" <kostap@marvell.com>,
+        "robert.marko@sartura.hr" <robert.marko@sartura.hr>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
+        "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+Subject: Re: [PATCH v2 5/8] net: mvneta: Add support for 98DX2530 Ethernet
+ port
+Thread-Topic: [PATCH v2 5/8] net: mvneta: Add support for 98DX2530 Ethernet
+ port
+Thread-Index: AQHYN+r1Cm91Yq7jTEywLazWW4w1SKy+uQuAgAAEJ4A=
+Date:   Tue, 15 Mar 2022 00:27:44 +0000
+Message-ID: <4da378d9-d624-09a1-e261-8973c2670be4@alliedtelesis.co.nz>
 References: <20220314213143.2404162-1-chris.packham@alliedtelesis.co.nz>
- <20220314213143.2404162-9-chris.packham@alliedtelesis.co.nz>
+ <20220314213143.2404162-6-chris.packham@alliedtelesis.co.nz>
+ <Yi/aAemqY+NBRaov@lunn.ch>
+In-Reply-To: <Yi/aAemqY+NBRaov@lunn.ch>
+Accept-Language: en-NZ, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-messagesentrepresentingtype: 1
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [10.32.1.11]
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <F90FA6F3D790F94480647AFD5677ABDD@atlnz.lc>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220314213143.2404162-9-chris.packham@alliedtelesis.co.nz>
+X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=Xf/6aR1Nyvzi7BryhOrcLQ==:117 a=xqWC_Br6kY4A:10 a=oKJsc7D3gJEA:10 a=IkcTkHD0fZMA:10 a=o8Y5sQTvuykA:10 a=ihEotPDQY6E8XHjQGn4A:9 a=QEXdDO2ut3YA:10
+X-SEG-SpamProfiler-Score: 0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 15, 2022 at 10:31:43AM +1300, Chris Packham wrote:
-> This commit makes sure the drivers for the 98DX2530 pin controller is
-> enabled.
-> 
-> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
-
-Reviewed-by: Andrew Lunn <andrew@lunn.ch>
-
-    Andrew
+DQpPbiAxNS8wMy8yMiAxMzoxMiwgQW5kcmV3IEx1bm4gd3JvdGU6DQo+IE9uIFR1ZSwgTWFyIDE1
+LCAyMDIyIGF0IDEwOjMxOjQwQU0gKzEzMDAsIENocmlzIFBhY2toYW0gd3JvdGU6DQo+PiBUaGUg
+OThEWDI1MzAgU29DIGlzIHNpbWlsYXIgdG8gdGhlIEFybWFkYSAzNzAwIGV4Y2VwdCBpdCBuZWVk
+cyBhDQo+PiBkaWZmZXJlbnQgTUJVUyB3aW5kb3cgY29uZmlndXJhdGlvbi4gQWRkIGEgbmV3IGNv
+bXBhdGlibGUgc3RyaW5nIHRvDQo+PiBpZGVudGlmeSB0aGlzIGRldmljZSBhbmQgdGhlIHJlcXVp
+cmVkIE1CVVMgd2luZG93IGNvbmZpZ3VyYXRpb24uDQo+Pg0KPj4gU2lnbmVkLW9mZi1ieTogQ2hy
+aXMgUGFja2hhbSA8Y2hyaXMucGFja2hhbUBhbGxpZWR0ZWxlc2lzLmNvLm56Pg0KPiBJIHN1Z2dl
+c3QgeW91IHNlcGFyYXRlIHRoZSB0d28gbXZuZXRhIHBhdGNoZXMgYW5kIHNlbmQgdGhlbSB0byB0
+aGUNCj4gbmV0ZGV2IGxpc3QuIFRoZXkgYXJlIGxpa2VseSB0byBnZXQgbWVyZ2VkIGJlZm9yZSB0
+aGUgbWVyZ2Ugd2luZG93DQo+IG9wZW5zIG5leHQgd2Vla2VuZC4gVGhlIG90aGVyIHBhdGNoZXMg
+YXJlIGxlc3MgbGlrZWx5IHRvIGJlIG1lcmdlZCBzbw0KPiBmYXN0Lg0KDQpUaGFua3MgZm9yIHRo
+ZSBzdWdnZXN0aW9uLiBJIGRpZCB3b25kZXIgYWJvdXQgZG9pbmcgdGhhdCBmb3IgdGhpcyBwYXRj
+aCANCmFuZCB0aGUgc2RoY2kgb25lLiBJdCdkIGFsc28gY3V0IGRvd24gdGhlIENjIHNwYW0uDQoN
+Cj4gUmV2aWV3ZWQtYnk6IEFuZHJldyBMdW5uIDxhbmRyZXdAbHVubi5jaD4NCj4NCj4gICAgICBB
+bmRyZXc=
