@@ -2,301 +2,69 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEF44C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 06:00:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDC12C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 09:37:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353724AbiCPGBx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Mar 2022 02:01:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42528 "EHLO
+        id S1346339AbiCPJi6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Mar 2022 05:38:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56480 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353715AbiCPGBt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 02:01:49 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9F0060064;
-        Tue, 15 Mar 2022 23:00:34 -0700 (PDT)
-X-UUID: 1a4f80253f744e09b2b271ebdd8c3688-20220316
-X-UUID: 1a4f80253f744e09b2b271ebdd8c3688-20220316
-Received: from mtkexhb02.mediatek.inc [(172.21.101.103)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1694223216; Wed, 16 Mar 2022 14:00:25 +0800
-Received: from mtkexhb02.mediatek.inc (172.21.101.103) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 16 Mar 2022 14:00:25 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by mtkexhb02.mediatek.inc
- (172.21.101.103) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 16 Mar
- 2022 14:00:24 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 16 Mar 2022 14:00:22 +0800
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Axe Yang <axe.yang@mediatek.com>, Lucas Stach <dev@lynxeye.de>,
+        with ESMTP id S237334AbiCPJi5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 05:38:57 -0400
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CB0A2E0A4;
+        Wed, 16 Mar 2022 02:37:44 -0700 (PDT)
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 7C37D68AFE; Wed, 16 Mar 2022 10:37:40 +0100 (CET)
+Date:   Wed, 16 Mar 2022 10:37:40 +0100
+From:   Christoph Hellwig <hch@lst.de>
+To:     axboe@kernel.dk
+Cc:     jaegeuk@kernel.org, chao@kernel.org, ulf.hansson@linaro.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Daeho Jeong <daehojeong@google.com>,
         Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <angelogioacchino.delregno@collabora.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        Yong Mao <yong.mao@mediatek.com>
-Subject: [PATCH v6 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
-Date:   Wed, 16 Mar 2022 14:00:14 +0800
-Message-ID: <20220316060014.12732-4-axe.yang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220316060014.12732-1-axe.yang@mediatek.com>
-References: <20220316060014.12732-1-axe.yang@mediatek.com>
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: security issue: data exposure when using block layer secure erase
+Message-ID: <20220316093740.GA7714@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-MTK:  N
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for eint IRQ when MSDC is used as an SDIO host. This
-feature requires SDIO device support async IRQ function. With this
-feature, SDIO host can be awakened by SDIO card in suspend state,
-without additional pin.
+Hi all,
 
-MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-resume, switch GPIO function back to DAT1 mode then turn on clock.
+while staring at the block layer code I found what I think is a major
+security issue with the use of REQ_OP_SECURE_ERASE.
 
-Some device tree property should be added or modified in MSDC node
-to support SDIO eint IRQ. Pinctrls named "state_dat1" and "state_eint"
-are mandatory. Since this feature depends on asynchronous interrupts,
-"wakeup-source", "keep-power-in-suspend" and "cap-sdio-irq" flags are
-necessary, and the interrupts list should be extended:
-        &mmcX {
-		...
-		interrupts-extended = <...>,
-                              	      <&pio xxx IRQ_TYPE_LEVEL_LOW>;
-                ...
-                pinctrl-names = "default", "state_uhs", "state_eint",
-                                "state_dat1";
-                ...
-                pinctrl-2 = <&mmc2_pins_eint>;
-                pinctrl-3 = <&mmc2_pins_dat1>;
-                ...
-                cap-sdio-irq;
-		keep-power-in-suspend;
-		wakeup-source;
-                ...
-        };
+The issue is not about the actual protocol implementation, which only
+exists for eMMC [1], but about we handle issuing the operation in the
+block layer.  That is done through __blkdev_issue_discard, which
+takes various parameters into account to align the issue discard
+request to what the hardware prefers.  Which is perfectly fine for
+discard as an advisory operation, but deadly for an operation that
+wants to make data inaccessible.  The problem has existed ever since
+secure erase support was added to the kernel with commit
+8d57a98ccd0b ("block: add secure discard"), which added secure erase
+support as a REQ_SECURE flag to the discard operation.
 
-Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 99 +++++++++++++++++++++++++++++++++++----
- 1 file changed, 91 insertions(+), 8 deletions(-)
+The ioctl added there also as the only users for a long time, until f2fs
+added a second (really strange) user that uses secure erase if offered by 
+the device but otherwise plain old discard: 9af846486d78
+("f2fs: add F2FS_IOC_SEC_TRIM_FILE ioctl") which seems to treat the
+secure discard as nice to have but actually is fine with data leaks
+from the use of discard or an incorrect implementation of secure erase.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 65037e1d7723..5ff95f32bd45 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1,6 +1,6 @@
- // SPDX-License-Identifier: GPL-2.0-only
- /*
-- * Copyright (c) 2014-2015 MediaTek Inc.
-+ * Copyright (c) 2014-2015, 2022 MediaTek Inc.
-  * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
-  */
- 
-@@ -20,6 +20,7 @@
- #include <linux/platform_device.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-+#include <linux/pm_wakeirq.h>
- #include <linux/regulator/consumer.h>
- #include <linux/slab.h>
- #include <linux/spinlock.h>
-@@ -440,8 +441,12 @@ struct msdc_host {
- 	struct pinctrl *pinctrl;
- 	struct pinctrl_state *pins_default;
- 	struct pinctrl_state *pins_uhs;
-+	struct pinctrl_state *pins_eint;
-+	struct pinctrl_state *pins_dat1;
- 	struct delayed_work req_timeout;
- 	int irq;		/* host interrupt */
-+	int eint_irq;		/* interrupt from sdio device for waking up system */
-+	int sdio_wake_irq_depth;
- 	struct reset_control *reset;
- 
- 	struct clk *src_clk;	/* msdc source clock */
-@@ -465,6 +470,7 @@ struct msdc_host {
- 	bool hs400_tuning;	/* hs400 mode online tuning */
- 	bool internal_cd;	/* Use internal card-detect logic */
- 	bool cqhci;		/* support eMMC hw cmdq */
-+	bool sdio_eint_ready;	/* Ready to support SDIO eint interrupt */
- 	struct msdc_save_para save_para; /* used when gate HCLK */
- 	struct msdc_tune_para def_tune_para; /* default tune setting */
- 	struct msdc_tune_para saved_tune_para; /* tune result of CMD21/CMD19 */
-@@ -1527,10 +1533,12 @@ static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
- 	__msdc_enable_sdio_irq(host, enb);
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	if (enb)
--		pm_runtime_get_noresume(host->dev);
--	else
--		pm_runtime_put_noidle(host->dev);
-+	if (mmc->card && !mmc_card_enable_async_irq(mmc->card)) {
-+		if (enb)
-+			pm_runtime_get_noresume(host->dev);
-+		else
-+			pm_runtime_put_noidle(host->dev);
-+	}
- }
- 
- static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-@@ -2631,6 +2639,23 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		goto host_free;
- 	}
- 
-+	/* Support for SDIO eint irq ? */
-+	if (mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) {
-+		host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
-+		if (IS_ERR(host->pins_eint)) {
-+			dev_dbg(&pdev->dev, "Cannot find pinctrl eint!\n");
-+		} else {
-+			host->pins_dat1 = pinctrl_lookup_state(host->pinctrl, "state_dat1");
-+			if (IS_ERR(host->pins_dat1)) {
-+				ret = dev_err_probe(&pdev->dev, PTR_ERR(host->pins_dat1),
-+						    "Cannot find pinctrl dat1!\n");
-+				goto host_free;
-+			}
-+
-+			host->sdio_eint_ready = true;
-+		}
-+	}
-+
- 	msdc_of_property_parse(pdev, host);
- 
- 	host->dev = &pdev->dev;
-@@ -2722,6 +2747,20 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto release;
- 
-+	if (host->sdio_eint_ready) {
-+		host->eint_irq = irq_of_parse_and_map(host->dev->of_node, 1);
-+		ret = host->eint_irq ? dev_pm_set_dedicated_wake_irq(host->dev, host->eint_irq) :
-+		      -ENODEV;
-+
-+		if (ret) {
-+			dev_err(host->dev, "Failed to register data1 eint irq!\n");
-+			goto release;
-+		}
-+
-+		dev_pm_disable_wake_irq(host->dev);
-+		pinctrl_select_state(host->pinctrl, host->pins_dat1);
-+	}
-+
- 	pm_runtime_set_active(host->dev);
- 	pm_runtime_set_autosuspend_delay(host->dev, MTK_MMC_AUTOSUSPEND_DELAY);
- 	pm_runtime_use_autosuspend(host->dev);
-@@ -2734,6 +2773,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	return 0;
- end:
- 	pm_runtime_disable(host->dev);
-+	dev_pm_clear_wake_irq(host->dev);
- release:
- 	platform_set_drvdata(pdev, NULL);
- 	msdc_deinit_hw(host);
-@@ -2845,6 +2885,16 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
- 	struct msdc_host *host = mmc_priv(mmc);
- 
- 	msdc_save_reg(host);
-+
-+	if (host->sdio_eint_ready) {
-+		disable_irq(host->irq);
-+		pinctrl_select_state(host->pinctrl, host->pins_eint);
-+		if (host->sdio_wake_irq_depth == 0) {
-+			dev_pm_enable_wake_irq(dev);
-+			host->sdio_wake_irq_depth++;
-+		}
-+		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+	}
- 	msdc_gate_clock(host);
- 	return 0;
- }
-@@ -2860,12 +2910,25 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
- 		return ret;
- 
- 	msdc_restore_reg(host);
-+
-+	if (host->sdio_eint_ready) {
-+		if (host->sdio_wake_irq_depth > 0) {
-+			dev_pm_disable_wake_irq(dev);
-+			host->sdio_wake_irq_depth--;
-+			sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-+		} else {
-+			sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INTEN_SDIOIRQ);
-+		}
-+		pinctrl_select_state(host->pinctrl, host->pins_uhs);
-+		enable_irq(host->irq);
-+	}
- 	return 0;
- }
- 
--static int __maybe_unused msdc_suspend(struct device *dev)
-+static int __maybe_unused msdc_suspend_noirq(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
-+	struct msdc_host *host = mmc_priv(mmc);
- 	int ret;
- 
- 	if (mmc->caps2 & MMC_CAP2_CQE) {
-@@ -2874,16 +2937,36 @@ static int __maybe_unused msdc_suspend(struct device *dev)
- 			return ret;
- 	}
- 
-+	if (host->sdio_eint_ready)
-+		enable_irq_wake(host->eint_irq);
-+
- 	return pm_runtime_force_suspend(dev);
- }
- 
--static int __maybe_unused msdc_resume(struct device *dev)
-+static int __maybe_unused msdc_resume_noirq(struct device *dev)
- {
-+	struct mmc_host *mmc = dev_get_drvdata(dev);
-+	struct msdc_host *host = mmc_priv(mmc);
-+
-+	if (host->sdio_eint_ready) {
-+		disable_irq_wake(host->eint_irq);
-+
-+		/*
-+		 * In noirq resume stage, msdc_runtime_resume()
-+		 * won't be called, so disalbe wake irq here
-+		 * to block dedicated wake irq handler callback.
-+		 */
-+		if (likely(host->sdio_wake_irq_depth > 0)) {
-+			dev_pm_disable_wake_irq(dev);
-+			host->sdio_wake_irq_depth--;
-+		}
-+	}
-+
- 	return pm_runtime_force_resume(dev);
- }
- 
- static const struct dev_pm_ops msdc_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
-+	SET_NOIRQ_SYSTEM_SLEEP_PM_OPS(msdc_suspend_noirq, msdc_resume_noirq)
- 	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
- };
- 
--- 
-2.25.1
+My preference would be to just remove this ill designed feature entirely.
+The alternative 1 in this thead does just that.  Alternative 2 tries to
+fix it instead, but I haven't bee nable to get any interested party to
+actually test in more than three eeks, suggesting we're better off
+removing the code.
 
+[1] which is rather dubious as well, as sector based secure erase in
+flash based media can't really work due to the lack of in-place write
+support.  At best it is the equivalent for a Write Same or Write Zeroes
+command without deterministic data on the next read.
