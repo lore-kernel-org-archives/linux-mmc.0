@@ -2,147 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8323C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 16:08:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36D4DC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 18:05:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242154AbiCPQKH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Mar 2022 12:10:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39890 "EHLO
+        id S237961AbiCPSGs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Mar 2022 14:06:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349953AbiCPQKG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 12:10:06 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8FA965808;
-        Wed, 16 Mar 2022 09:08:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1647446932; x=1678982932;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=/8QegcIk90/shkE5eRxvinZRzrjv5RZeBgcX0bqDxMs=;
-  b=JPHctJxqcZaF9KzJG60IKf3UPapZqEPCo8HO4QK+8lBseg3f6NeSgWGo
-   dPlTqJSACY7xSWvdPvztVVzfomKiQZAY8pJdzkh20LR+Dn4vkSvgYXP24
-   v6MKadxNvzbiAOJ5gUqC8V/qnxLROhHkJVRSyr5xj2hV2y7ndUsPNVb49
-   P5oJAA+1rTk3HsfL0Q0KnwCVcihv1M3Ux+EsAVJozEWGC57pQ8b/xyGjv
-   uIogcp3kxnz4b+UgYWnKBzKsJiX7yjSgImqMfDfnFX9dvdJpLksy2rIkA
-   2dHOWLQ7pgbwVxyb6eePBg6X0Ahmrm8sxYvNIhjowFmDZvHm5J0jocUn/
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10288"; a="238809817"
-X-IronPort-AV: E=Sophos;i="5.90,187,1643702400"; 
-   d="scan'208";a="238809817"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2022 09:06:02 -0700
-X-IronPort-AV: E=Sophos;i="5.90,187,1643702400"; 
-   d="scan'208";a="540987379"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.28])
-  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2022 09:05:59 -0700
-Message-ID: <a1230f11-a2dd-1959-5444-28c57d3babf6@intel.com>
-Date:   Wed, 16 Mar 2022 18:05:52 +0200
+        with ESMTP id S236096AbiCPSGs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 14:06:48 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9947A4C436;
+        Wed, 16 Mar 2022 11:05:33 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 51DC9B81637;
+        Wed, 16 Mar 2022 18:05:32 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DED1DC340E9;
+        Wed, 16 Mar 2022 18:05:30 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647453931;
+        bh=EUwl1rJPMN38j2p42kZ+S3LhlRJpuLGqUxqQYMv+5QE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=qgCW7RY/0j2r7RQhPEWzTAdZHI91zrT43bm01uJMd9tulx3QwbBL8PBjcxHTe5Uor
+         B6gu/3FB37YqzAa2bnXyFSLn2ugdAAPHJWucZ2ynC4yonofmq1dErOcRo7CTLyVmBX
+         QscVjgfsN3QeWa9mjSPnS9HLWUnohQDReVoFkrpd5GcIyoa/VgtJbypGyH6CS0WbaM
+         5Erftk/ilvDwQyzctnRJrZ+h3oSecgWG5tVoAjk4FN+D8Kcnr5Px94xWmz9IUnzxeQ
+         gmiedvhyi1MJB1coBxncSbLAHo1HeV2tRDLTcbnCXAfroE0UEruDfV0azXZiaDsWPp
+         0h+qWumkY3SfQ==
+Date:   Wed, 16 Mar 2022 18:05:29 +0000
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     axboe@kernel.dk, jaegeuk@kernel.org, chao@kernel.org,
+        ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Daeho Jeong <daehojeong@google.com>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: security issue: data exposure when using block layer secure erase
+Message-ID: <YjIm6f6pSX1CKeqb@gmail.com>
+References: <20220316093740.GA7714@lst.de>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.5.0
-Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
-Content-Language: en-US
-To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <Avri.Altman@wdc.com>,
-        Michael Wu <michael@allwinnertech.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "beanhuo@micron.com" <beanhuo@micron.com>,
-        "porzio@gmail.com" <porzio@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        allwinner-opensource-support 
-        <allwinner-opensource-support@allwinnertech.com>
-References: <20220312044315.7994-1-michael@allwinnertech.com>
- <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com>
- <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
- <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com>
- <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
- <312d724c-e43f-d766-49fb-9c5b10fe8b07@intel.com>
- <7ec0cf3e316a4ed9987962b4cbf01604@hyperstone.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <7ec0cf3e316a4ed9987962b4cbf01604@hyperstone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220316093740.GA7714@lst.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16.3.2022 16.46, Christian Löhle wrote:
->> So we are not going to let the block layer know about SD cache?
->> Or is it a separate change?
+On Wed, Mar 16, 2022 at 10:37:40AM +0100, Christoph Hellwig wrote:
+> Hi all,
 > 
-> I have some code for this laying around, but as it requires reading, parsing and writing Function Registers,
-> in particular PEH, it's a lot of boilerplate code to get the functionality, but I'll clean it up and send a patch in the coming weeks.
+> while staring at the block layer code I found what I think is a major
+> security issue with the use of REQ_OP_SECURE_ERASE.
 > 
+> The issue is not about the actual protocol implementation, which only
+> exists for eMMC [1], but about we handle issuing the operation in the
+> block layer.  That is done through __blkdev_issue_discard, which
+> takes various parameters into account to align the issue discard
+> request to what the hardware prefers.  Which is perfectly fine for
+> discard as an advisory operation, but deadly for an operation that
+> wants to make data inaccessible.  The problem has existed ever since
+> secure erase support was added to the kernel with commit
+> 8d57a98ccd0b ("block: add secure discard"), which added secure erase
+> support as a REQ_SECURE flag to the discard operation.
 
-We have the sd cache flush.  We would presumably just need to call blk_queue_write_cache()
-for the !mmc_card_mmc(card) case e.g.
+__blkdev_issue_discard() can break up the region into multiple bios, but I don't
+see where it actually skips parts of the region.  Can you explain more
+specifically where the problem is?
 
-	if (mmc_has_reliable_write(card)) {
-		md->flags |= MMC_BLK_REL_WR;
-		enable_fua = true;
-	}
-
-	if (mmc_cache_enabled(card->host))
-		enable_cache = true;
-
-	blk_queue_write_cache(md->queue.queue, enable_cache, enable_fua);
-
-Avri, were you objecting to that?
-
-> 
-> 
-> 
-> 
-> From: Adrian Hunter <adrian.hunter@intel.com>
-> Sent: Wednesday, March 16, 2022 12:28 PM
-> To: Avri Altman; Michael Wu; ulf.hansson@linaro.org; beanhuo@micron.com; porzio@gmail.com
-> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; allwinner-opensource-support
-> Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
->     
-> On 16.3.2022 13.09, Avri Altman wrote:
->>> Hi Avril & Adrian,
->>> Thanks for your efforts. Could we have an agreement now --
->>>
->>> 1. enabling-cache and cmd23/reliable-write should be independent;
->>>
->>> Here's what I found in the spec JESD84-B51:
->>>   > 6.6.31 Cache
->>>   > Caching of data shall apply only for the single block
->>>   > read/write(CMD17/24), pre-defined multiple block
->>>   > read/write(CMD23+CMD18/25) and open ended multiple block
->>>   > read/write(CMD18/25+CMD12) commands and excludes any other access
->>>   > e.g., to the register space(e.g., CMD6).
->>> Which means with CMD18/25+CMD12 (without using CMD23), the cache can
->>> also be enabled. Maybe this could be an evidence of the independence
->>> between enabling-cache and cmd23/reliable-write?
->> Acked-by: Avri Altman <avri.altman@wdc.com>
->>
->> Thanks,
->> Avri
->>
->>>
->>> 2. We don't consider supporting SD in this change.
->>>
->>>   > On 14/03/2022 19:10, Avri Altman wrote:
->>>   >> Here is what our SD system guys wrote:
->>>   >> " In SD we don’t support reliable write and this eMMC driver may not
->>>   >>    be utilizing the cache feature we added in SD5.0.
->>>   >>   The method of cache flush is different between SD and eMMC."
->>>   >>
->>>   >> So adding SD seems to be out of scope of this change.
->>>
->>> Is there anything else I can do about this patch? Thanks again.
-> 
-> So we are not going to let the block layer know about SD cache?
-> Or is it a separate change?
->     =
-> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-> Managing Director: Dr. Jan Peter Berns.
-> Commercial register of local courts: Freiburg HRB381782
-> 
-
+- Eric
