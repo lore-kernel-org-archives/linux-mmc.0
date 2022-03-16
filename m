@@ -2,287 +2,201 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A96A9C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 09:39:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59418C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 09:54:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241723AbiCPJkN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Mar 2022 05:40:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33142 "EHLO
+        id S233065AbiCPJzu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Mar 2022 05:55:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38168 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237291AbiCPJkM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 05:40:12 -0400
-Received: from verein.lst.de (verein.lst.de [213.95.11.211])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B10CC2B1AB;
-        Wed, 16 Mar 2022 02:38:58 -0700 (PDT)
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 19B7D68AFE; Wed, 16 Mar 2022 10:38:56 +0100 (CET)
-Date:   Wed, 16 Mar 2022 10:38:55 +0100
-From:   Christoph Hellwig <hch@lst.de>
-To:     axboe@kernel.dk
-Cc:     jaegeuk@kernel.org, chao@kernel.org, ulf.hansson@linaro.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Daeho Jeong <daehojeong@google.com>,
-        Eric Biggers <ebiggers@google.com>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH alternative 2] block: fix the REQ_OP_SECURE_ERASE handling
- to not leak erased data
-Message-ID: <20220316093855.GC7714@lst.de>
-References: <20220316093740.GA7714@lst.de>
+        with ESMTP id S1355006AbiCPJzt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 05:55:49 -0400
+Received: from out28-73.mail.aliyun.com (out28-73.mail.aliyun.com [115.124.28.73])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DC5B33880;
+        Wed, 16 Mar 2022 02:54:34 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436528|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.0161911-0.00387286-0.979936;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=8;RT=8;SR=0;TI=SMTPD_---.N5pKMoy_1647424463;
+Received: from 172.30.10.142(mailfrom:michael@allwinnertech.com fp:SMTPD_---.N5pKMoy_1647424463)
+          by smtp.aliyun-inc.com(33.13.195.200);
+          Wed, 16 Mar 2022 17:54:31 +0800
+Message-ID: <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com>
+Date:   Wed, 16 Mar 2022 17:54:23 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220316093740.GA7714@lst.de>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
+Content-Language: en-GB
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "beanhuo@micron.com" <beanhuo@micron.com>,
+        "porzio@gmail.com" <porzio@gmail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        allwinner-opensource-support 
+        <allwinner-opensource-support@allwinnertech.com>
+References: <20220312044315.7994-1-michael@allwinnertech.com>
+ <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com>
+ <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
+ <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
+From:   Michael Wu <michael@allwinnertech.com>
+In-Reply-To: <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The support for this "secure erase" is completely broken, given that
-the blk-lib code aligns it to the discard granularity and alignment
-and thus skips parts of the two be discarded area, leaking plenty of
-securely erased data.  Fix this by adding a new blkdev_secure_erase
-helper instead.
+On 14/03/2022 17:37, Avri Altman wrote:
+>> On 14/03/2022 14:54, Adrian Hunter wrote:
+>>> On 12/03/2022 06:43, Michael Wu wrote:
+>>>> The mmc core enable cache on default. But it only enables
+>>>> cache-flushing when host supports cmd23 and eMMC supports reliable
+>> write.
+>>>> For hosts which do not support cmd23 or eMMCs which do not support
+>>>> reliable write, the cache can not be flushed by `sync` command.
+>>>> This may leads to cache data lost.
+>>>> This patch enables cache-flushing as long as cache is enabled, no
+>>>> matter host supports cmd23 and/or eMMC supports reliable write or not.
+>>>>
+>>>
+>>> Fixes tag?
+>>>
+>>
+>> Hi Adrian,
+>> My patch intend to fix the cache problem brought by the following two
+>> patches:
+>>
+>> Fixes: d0c97cfb81ebc ("mmc: core: Use CMD23 for multiblock transfers when
+>> we can.")
+>> Fixes: e9d5c746246c8 ("mmc/block: switch to using blk_queue_write_cache()")
+>>
+>> I'm not sure if this is what you referred to ("Fixes tag"). Please correct me if I
+>> misunderstood.
+>>
+>>>> Signed-off-by: Michael Wu <michael@allwinnertech.com>
+>>>> ---
+>>>>    drivers/mmc/core/block.c | 20 ++++++++++++++------
+>>>>    1 file changed, 14 insertions(+), 6 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>>>> index 689eb9afeeed..1e508c079c1e 100644
+>>>> --- a/drivers/mmc/core/block.c
+>>>> +++ b/drivers/mmc/core/block.c
+>>>> @@ -2279,6 +2279,8 @@ static struct mmc_blk_data
+>> *mmc_blk_alloc_req(struct mmc_card *card,
+>>>>       struct mmc_blk_data *md;
+>>>>       int devidx, ret;
+>>>>       char cap_str[10];
+>>>> +    bool enable_cache = false;
+>>>> +    bool enable_fua = false;
+>>>>
+>>>>       devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+>>>>       if (devidx < 0) {
+>>>> @@ -2375,12 +2377,18 @@ static struct mmc_blk_data
+>> *mmc_blk_alloc_req(struct mmc_card *card,
+>>>>                       md->flags |= MMC_BLK_CMD23;
+>>>>       }
+>>>>
+>>>> -    if (mmc_card_mmc(card) &&
+>>>> -        md->flags & MMC_BLK_CMD23 &&
+>>>> -        ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+>>>> -         card->ext_csd.rel_sectors)) {
+>>>> -            md->flags |= MMC_BLK_REL_WR;
+>>>> -            blk_queue_write_cache(md->queue.queue, true, true);
+>>>> +    if (mmc_card_mmc(card)) {
+>>>> +            if (md->flags & MMC_BLK_CMD23 &&
+>>>> +                    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN)
+>> ||
+>>>> +                    card->ext_csd.rel_sectors)) {
+>>>> +                    md->flags |= MMC_BLK_REL_WR;
+>>>> +                    enable_fua = true;
+>>>> +            }
+>>>> +
+>>>> +            if (mmc_cache_enabled(card->host))
+>>>> +                    enable_cache = true;
+>>>> +
+>>>> +            blk_queue_write_cache(md->queue.queue, enable_cache,
+>>>> + enable_fua);
+>>>>       }
+>>>
+>>> Seems like we should inform block layer about SD card cache also
+>>>
+>>
+>> I saw another mail by Avri Altman, which says few days will be needed to ask
+>> internally. Shall I wait or make another change here on 'inform block layer
+>> about SD card cache'?
+> Please don't wait.
+> 
+> Thanks,
+> Avri
+> 
+>>
+>>>>
+>>>>       string_get_size((u64)size, 512, STRING_UNITS_2,
+>>
+>> --
+>> Best Regards,
+>> Michael Wu
+Hi Avril & Adrian,
+Thanks for your efforts. Could we have an agreement now --
 
-Note that even if with these rounding errors fixed, a LBA based
-"secure erase" can't actually work on flash media.  As flash media
-requires erase cycles before writing instead of overwrites there
-usually will be copied of this data left somewhere on the media.
+1. enabling-cache and cmd23/reliable-write should be independent;
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- block/blk-lib.c                     | 55 +++++++++++++++++++++++------
- block/ioctl.c                       | 43 +++++++++++++++++-----
- drivers/block/xen-blkback/blkback.c | 15 ++++----
- fs/f2fs/file.c                      |  9 ++---
- include/linux/blkdev.h              |  4 +--
- 5 files changed, 95 insertions(+), 31 deletions(-)
+ > On 14/03/2022 18:32, Adrian Hunter wrote:
+ >> On 14/03/2022 09:26, Avri Altman wrote:
+ >>> Hi,
+ >>>> The mmc core enable cache on default. But it only enables 
+cache-flushing
+ >>>> when host supports cmd23 and eMMC supports reliable write.
+ >>>> For hosts which do not support cmd23 or eMMCs which do not support
+ >>>> reliable write, the cache can not be flushed by `sync` command.
+ >>>> This may leads to cache data lost.
+ >>>> This patch enables cache-flushing as long as cache is enabled, no
+ >>>> matter host supports cmd23 and/or eMMC supports reliable write or
+ >>>> not.
+ >>> I looked in the spec and indeed couldn't find why enabling cache is
+ >>> dependent of cmd23/reliable write.
+ >>> Nor I was able to find the original commit log.
+ >>
+ >> Reliable write was added first, so it might have been an oversight:
+ >>
+ >> commit 881d1c25f765938a95def5afe39486ce39f9fc96
+ >> Author: Seungwon Jeon <tgih.jun@samsung.com>
+ >> Date:   Fri Oct 14 14:03:21 2011 +0900
+ >>
+ >>      mmc: core: Add cache control for eMMC4.5 device
+ >>
+ >>      This patch adds cache feature of eMMC4.5 Spec.
+ >>      If device supports cache capability, host can utilize some
+ >>      specific operations.
+ >>
+ >>      Signed-off-by: Seungwon Jeon <tgih.jun@samsung.com>
+ >>      Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+ >>      Signed-off-by: Chris Ball <cjb@laptop.org>
 
-diff --git a/block/blk-lib.c b/block/blk-lib.c
-index 9f09beadcbe30..5fc2c0bf5c940 100644
---- a/block/blk-lib.c
-+++ b/block/blk-lib.c
-@@ -29,7 +29,7 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- {
- 	struct request_queue *q = bdev_get_queue(bdev);
- 	struct bio *bio = *biop;
--	unsigned int op;
-+	unsigned int op = REQ_OP_DISCARD;
- 	sector_t bs_mask, part_offset = 0;
- 
- 	if (!q)
-@@ -38,15 +38,8 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 	if (bdev_read_only(bdev))
- 		return -EPERM;
- 
--	if (flags & BLKDEV_DISCARD_SECURE) {
--		if (!blk_queue_secure_erase(q))
--			return -EOPNOTSUPP;
--		op = REQ_OP_SECURE_ERASE;
--	} else {
--		if (!blk_queue_discard(q))
--			return -EOPNOTSUPP;
--		op = REQ_OP_DISCARD;
--	}
-+	if (!blk_queue_discard(q))
-+		return -EOPNOTSUPP;
- 
- 	/* In case the discard granularity isn't set by buggy device driver */
- 	if (WARN_ON_ONCE(!q->limits.discard_granularity)) {
-@@ -440,3 +433,45 @@ int blkdev_issue_zeroout(struct block_device *bdev, sector_t sector,
- 	return ret;
- }
- EXPORT_SYMBOL(blkdev_issue_zeroout);
-+
-+int blkdev_issue_secure_erase(struct block_device *bdev, sector_t sector,
-+		sector_t nr_sects, gfp_t gfp)
-+{
-+	sector_t bs_mask = (bdev_logical_block_size(bdev) >> 9) - 1;
-+	unsigned int max_sectors =
-+		bdev_get_queue(bdev)->limits.max_discard_sectors;
-+	struct bio *bio = NULL;
-+	struct blk_plug plug;
-+	int ret = 0;
-+
-+	if (max_sectors == 0)
-+		return -EOPNOTSUPP;
-+	if ((sector | nr_sects) & bs_mask)
-+		return -EINVAL;
-+	if (bdev_read_only(bdev))
-+		return -EPERM;
-+
-+	blk_start_plug(&plug);
-+	for (;;) {
-+		unsigned int len = min_t(sector_t, nr_sects, max_sectors);
-+
-+		bio = blk_next_bio(bio, 0, gfp);
-+		bio_set_dev(bio, bdev);
-+		bio->bi_opf = REQ_OP_SECURE_ERASE;
-+		bio->bi_iter.bi_sector = sector;
-+		bio->bi_iter.bi_size = len;
-+
-+		sector += len << SECTOR_SHIFT;
-+		nr_sects -= len << SECTOR_SHIFT;
-+		if (!nr_sects) {
-+			ret = submit_bio_wait(bio);
-+			bio_put(bio);
-+			break;
-+		}
-+		cond_resched();
-+	}
-+	blk_finish_plug(&plug);
-+
-+	return ret;
-+}
-+EXPORT_SYMBOL(blkdev_issue_secure_erase);
-diff --git a/block/ioctl.c b/block/ioctl.c
-index 4a86340133e46..0821142f921d7 100644
---- a/block/ioctl.c
-+++ b/block/ioctl.c
-@@ -83,7 +83,7 @@ static int compat_blkpg_ioctl(struct block_device *bdev,
- #endif
- 
- static int blk_ioctl_discard(struct block_device *bdev, fmode_t mode,
--		unsigned long arg, unsigned long flags)
-+		unsigned long arg)
- {
- 	uint64_t range[2];
- 	uint64_t start, len;
-@@ -115,15 +115,43 @@ static int blk_ioctl_discard(struct block_device *bdev, fmode_t mode,
- 	err = truncate_bdev_range(bdev, mode, start, start + len - 1);
- 	if (err)
- 		goto fail;
--
--	err = blkdev_issue_discard(bdev, start >> 9, len >> 9,
--				   GFP_KERNEL, flags);
--
-+	err = blkdev_issue_discard(bdev, start >> 9, len >> 9, GFP_KERNEL, 0);
- fail:
- 	filemap_invalidate_unlock(inode->i_mapping);
- 	return err;
- }
- 
-+static int blk_ioctl_secure_erase(struct block_device *bdev, fmode_t mode,
-+		void __user *argp)
-+{
-+	uint64_t start, len;
-+	uint64_t range[2];
-+	int err;
-+
-+	if (!(mode & FMODE_WRITE))
-+		return -EBADF;
-+	if (!blk_queue_discard(bdev_get_queue(bdev)))
-+		return -EOPNOTSUPP;
-+	if (copy_from_user(range, argp, sizeof(range)))
-+		return -EFAULT;
-+
-+	start = range[0];
-+	len = range[1];
-+	if ((start & 511) || (len & 511))
-+		return -EINVAL;
-+	if (start + len > bdev_nr_bytes(bdev))
-+		return -EINVAL;
-+
-+	filemap_invalidate_lock(bdev->bd_inode->i_mapping);
-+	err = truncate_bdev_range(bdev, mode, start, start + len - 1);
-+	if (!err)
-+		err = blkdev_issue_secure_erase(bdev, start >> 9, len >> 9,
-+						GFP_KERNEL);
-+	filemap_invalidate_unlock(bdev->bd_inode->i_mapping);
-+	return err;
-+}
-+
-+
- static int blk_ioctl_zeroout(struct block_device *bdev, fmode_t mode,
- 		unsigned long arg)
- {
-@@ -451,10 +479,9 @@ static int blkdev_common_ioctl(struct block_device *bdev, fmode_t mode,
- 	case BLKROSET:
- 		return blkdev_roset(bdev, mode, cmd, arg);
- 	case BLKDISCARD:
--		return blk_ioctl_discard(bdev, mode, arg, 0);
-+		return blk_ioctl_discard(bdev, mode, arg);
- 	case BLKSECDISCARD:
--		return blk_ioctl_discard(bdev, mode, arg,
--				BLKDEV_DISCARD_SECURE);
-+		return blk_ioctl_secure_erase(bdev, mode, argp);
- 	case BLKZEROOUT:
- 		return blk_ioctl_zeroout(bdev, mode, arg);
- 	case BLKGETDISKSEQ:
-diff --git a/drivers/block/xen-blkback/blkback.c b/drivers/block/xen-blkback/blkback.c
-index 14e452896d04c..12f741068bcdf 100644
---- a/drivers/block/xen-blkback/blkback.c
-+++ b/drivers/block/xen-blkback/blkback.c
-@@ -970,7 +970,6 @@ static int dispatch_discard_io(struct xen_blkif_ring *ring,
- 	int status = BLKIF_RSP_OKAY;
- 	struct xen_blkif *blkif = ring->blkif;
- 	struct block_device *bdev = blkif->vbd.bdev;
--	unsigned long secure;
- 	struct phys_req preq;
- 
- 	xen_blkif_get(blkif);
-@@ -987,13 +986,15 @@ static int dispatch_discard_io(struct xen_blkif_ring *ring,
- 	}
- 	ring->st_ds_req++;
- 
--	secure = (blkif->vbd.discard_secure &&
--		 (req->u.discard.flag & BLKIF_DISCARD_SECURE)) ?
--		 BLKDEV_DISCARD_SECURE : 0;
-+	if (blkif->vbd.discard_secure &&
-+	    (req->u.discard.flag & BLKIF_DISCARD_SECURE))
-+		err = blkdev_issue_secure_erase(bdev,
-+				req->u.discard.sector_number,
-+				req->u.discard.nr_sectors, GFP_KERNEL);
-+	else
-+		err = blkdev_issue_discard(bdev, req->u.discard.sector_number,
-+				req->u.discard.nr_sectors, GFP_KERNEL, 0);
- 
--	err = blkdev_issue_discard(bdev, req->u.discard.sector_number,
--				   req->u.discard.nr_sectors,
--				   GFP_KERNEL, secure);
- fail_response:
- 	if (err == -EOPNOTSUPP) {
- 		pr_debug("discard op failed, not supported\n");
-diff --git a/fs/f2fs/file.c b/fs/f2fs/file.c
-index 3c98ef6af97d1..a83548ad7171f 100644
---- a/fs/f2fs/file.c
-+++ b/fs/f2fs/file.c
-@@ -3691,10 +3691,11 @@ static int f2fs_secure_erase(struct block_device *bdev, struct inode *inode,
- 	if (!q)
- 		return -ENXIO;
- 
--	if (flags & F2FS_TRIM_FILE_DISCARD)
--		ret = blkdev_issue_discard(bdev, sector, nr_sects, GFP_NOFS,
--						blk_queue_secure_erase(q) ?
--						BLKDEV_DISCARD_SECURE : 0);
-+	if ((flags & F2FS_TRIM_FILE_DISCARD) && blk_queue_secure_erase(q))
-+		ret = blkdev_issue_secure_erase(bdev, sector, nr_sects,
-+						GFP_NOFS);
-+	else if (flags & F2FS_TRIM_FILE_DISCARD)
-+		ret = blkdev_issue_discard(bdev, sector, nr_sects, GFP_NOFS, 0);
- 
- 	if (!ret && (flags & F2FS_TRIM_FILE_ZEROOUT)) {
- 		if (IS_ENCRYPTED(inode))
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 16b47035e4b06..6cfc60090b119 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -846,13 +846,13 @@ extern void blk_io_schedule(void);
- extern int blkdev_issue_write_same(struct block_device *bdev, sector_t sector,
- 		sector_t nr_sects, gfp_t gfp_mask, struct page *page);
- 
--#define BLKDEV_DISCARD_SECURE	(1 << 0)	/* issue a secure erase */
--
- extern int blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 		sector_t nr_sects, gfp_t gfp_mask, unsigned long flags);
- extern int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
- 		sector_t nr_sects, gfp_t gfp_mask, int flags,
- 		struct bio **biop);
-+int blkdev_issue_secure_erase(struct block_device *bdev, sector_t sector,
-+		sector_t nr_sects, gfp_t gfp);
- 
- #define BLKDEV_ZERO_NOUNMAP	(1 << 0)  /* do not free blocks */
- #define BLKDEV_ZERO_NOFALLBACK	(1 << 1)  /* don't write explicit zeroes */
+Here's what I found in the spec JESD84-B51:
+ > 6.6.31 Cache
+ > Caching of data shall apply only for the single block
+ > read/write(CMD17/24), pre-defined multiple block
+ > read/write(CMD23+CMD18/25) and open ended multiple block
+ > read/write(CMD18/25+CMD12) commands and excludes any other access
+ > e.g., to the register space(e.g., CMD6).
+Which means with CMD18/25+CMD12 (without using CMD23), the cache can 
+also be enabled. Maybe this could be an evidence of the independence 
+between enabling-cache and cmd23/reliable-write?
+
+2. We don't consider supporting SD in this change.
+
+ > On 14/03/2022 19:10, Avri Altman wrote:
+ >> Here is what our SD system guys wrote:
+ >> " In SD we don’t support reliable write and this eMMC driver may not 
+ >>    be utilizing the cache feature we added in SD5.0.
+ >>   The method of cache flush is different between SD and eMMC."
+ >>
+ >> So adding SD seems to be out of scope of this change.
+
+Is there anything else I can do about this patch? Thanks again.
+
 -- 
-2.30.2
-
+Best Regards,
+Michael Wu
