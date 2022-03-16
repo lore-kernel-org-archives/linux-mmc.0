@@ -2,105 +2,207 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 945FCC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 11:28:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3253C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Mar 2022 11:50:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355335AbiCPL3d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Mar 2022 07:29:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45070 "EHLO
+        id S242396AbiCPLvQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Mar 2022 07:51:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345749AbiCPL3a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 07:29:30 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40B141A82E;
-        Wed, 16 Mar 2022 04:28:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1647430096; x=1678966096;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=4jogdazBJV35LcyWiOHLVD3Ee6rHelFVxCPdz8kIHnk=;
-  b=G42YMc0ts/GjkO7owmhptiEQEDYJmj7wkD+wQoIRl5U371SXIackCN0r
-   C+tRMJdMyXdeBFDNhBYgu3GRa20cc/GBVUS37kvXJGQ3khJ5cPe4I/pm9
-   77Ea66fktW3KktaRT7fBylEqE1BouL5teaDLaXt2puIUvBryxBf2adJ1N
-   hNVtHXBrCjlmvGBbh9Y1uQWPcQtmZi5nB213FGie/QzUKynCpp2rtw9co
-   VGOGxDcjXzMmSo3qYMztlDhRryVK7euthufUGZ+2GHk80lJs3HDdSCQDX
-   GU3rRjtgQciMbyRkdE8CqjLe6iMuHO1oDGN9b2s2wiD2+4vu2wfX6KOHa
-   g==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10286"; a="238720659"
-X-IronPort-AV: E=Sophos;i="5.90,186,1643702400"; 
-   d="scan'208";a="238720659"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2022 04:28:15 -0700
-X-IronPort-AV: E=Sophos;i="5.90,186,1643702400"; 
-   d="scan'208";a="557395100"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.28])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2022 04:28:13 -0700
-Message-ID: <312d724c-e43f-d766-49fb-9c5b10fe8b07@intel.com>
-Date:   Wed, 16 Mar 2022 13:28:07 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.5.0
-Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
-Content-Language: en-US
-To:     Avri Altman <Avri.Altman@wdc.com>,
-        Michael Wu <michael@allwinnertech.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "beanhuo@micron.com" <beanhuo@micron.com>,
-        "porzio@gmail.com" <porzio@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        allwinner-opensource-support 
-        <allwinner-opensource-support@allwinnertech.com>
-References: <20220312044315.7994-1-michael@allwinnertech.com>
- <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com>
- <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
- <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com>
- <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S239920AbiCPLvP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2022 07:51:15 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BCC7C5C356;
+        Wed, 16 Mar 2022 04:50:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 685ADB81AB2;
+        Wed, 16 Mar 2022 11:49:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EF20EC340E9;
+        Wed, 16 Mar 2022 11:49:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647431398;
+        bh=Dy7fTBaxbV+Qx8X5DFZPL2kucR4BKaU/vcqCGalKej0=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=azas4dOY1rvH2almcoYuEGlAsHKA4/zY9MfE8nf7nU0u9IXM4FO3yXLzmc1e+Bbcv
+         KfwRucbt30KeYxPGJiNRJqdIPwxTpk2OzZbaY2rOkvvQmLl5/krxOwwetqr4BzGTVO
+         8rsr0/0mxQ32mP6WRjw/KUk+ga+wCFn+Xsty4DHss8a7obYkndg92aX4kgOV5N9Tmf
+         PmIzk7Rp7UBe9vtidTXeA/f6LqtB8AmgW4jaqZSNpaJzDfd3DtmAidMjA0GVsgue5m
+         hsoNcRn3PcD+mGAvEy4POCGXJ5+GtWpq4mMGasl21FePnxOTtwBawNJsS8WBpE7Os5
+         2WjlziMgt8fiA==
+Received: from sofa.misterjones.org ([185.219.108.64] helo=why.misterjones.org)
+        by disco-boy.misterjones.org with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <maz@kernel.org>)
+        id 1nUSA7-00Ety2-LA; Wed, 16 Mar 2022 11:49:55 +0000
+Date:   Wed, 16 Mar 2022 11:49:55 +0000
+Message-ID: <878rtayv4s.wl-maz@kernel.org>
+From:   Marc Zyngier <maz@kernel.org>
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
+Cc:     huziji@marvell.com, ulf.hansson@linaro.org, robh+dt@kernel.org,
+        davem@davemloft.net, kuba@kernel.org, linus.walleij@linaro.org,
+        catalin.marinas@arm.com, will@kernel.org, andrew@lunn.ch,
+        gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com,
+        adrian.hunter@intel.com, thomas.petazzoni@bootlin.com,
+        kostap@marvell.com, robert.marko@sartura.hr,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH v2 7/8] arm64: dts: marvell: Add Armada 98DX2530 SoC and RD-AC5X board
+In-Reply-To: <20220314213143.2404162-8-chris.packham@alliedtelesis.co.nz>
+References: <20220314213143.2404162-1-chris.packham@alliedtelesis.co.nz>
+        <20220314213143.2404162-8-chris.packham@alliedtelesis.co.nz>
+User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI-EPG/1.14.7 (Harue)
+ FLIM-LB/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL-LB/10.8 EasyPG/1.0.0 Emacs/27.1
+ (x86_64-pc-linux-gnu) MULE/6.0 (HANACHIRUSATO)
+MIME-Version: 1.0 (generated by SEMI-EPG 1.14.7 - "Harue")
+Content-Type: text/plain; charset=US-ASCII
+X-SA-Exim-Connect-IP: 185.219.108.64
+X-SA-Exim-Rcpt-To: chris.packham@alliedtelesis.co.nz, huziji@marvell.com, ulf.hansson@linaro.org, robh+dt@kernel.org, davem@davemloft.net, kuba@kernel.org, linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org, andrew@lunn.ch, gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com, adrian.hunter@intel.com, thomas.petazzoni@bootlin.com, kostap@marvell.com, robert.marko@sartura.hr, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, netdev@vger.kernel.org, linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+X-SA-Exim-Mail-From: maz@kernel.org
+X-SA-Exim-Scanned: No (on disco-boy.misterjones.org); SAEximRunCond expanded to false
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16.3.2022 13.09, Avri Altman wrote:
->> Hi Avril & Adrian,
->> Thanks for your efforts. Could we have an agreement now --
->>
->> 1. enabling-cache and cmd23/reliable-write should be independent;
->>
->> Here's what I found in the spec JESD84-B51:
->>  > 6.6.31 Cache
->>  > Caching of data shall apply only for the single block
->>  > read/write(CMD17/24), pre-defined multiple block
->>  > read/write(CMD23+CMD18/25) and open ended multiple block
->>  > read/write(CMD18/25+CMD12) commands and excludes any other access
->>  > e.g., to the register space(e.g., CMD6).
->> Which means with CMD18/25+CMD12 (without using CMD23), the cache can
->> also be enabled. Maybe this could be an evidence of the independence
->> between enabling-cache and cmd23/reliable-write?
-> Acked-by: Avri Altman <avri.altman@wdc.com>
+On Mon, 14 Mar 2022 21:31:42 +0000,
+Chris Packham <chris.packham@alliedtelesis.co.nz> wrote:
 > 
-> Thanks,
-> Avri
+> The 98DX2530 SoC is the Control and Management CPU integrated into
+> the Marvell 98DX25xx and 98DX35xx series of switch chip (internally
+> referred to as AlleyCat5 and AlleyCat5X).
 > 
->>
->> 2. We don't consider supporting SD in this change.
->>
->>  > On 14/03/2022 19:10, Avri Altman wrote:
->>  >> Here is what our SD system guys wrote:
->>  >> " In SD we don’t support reliable write and this eMMC driver may not
->>  >>    be utilizing the cache feature we added in SD5.0.
->>  >>   The method of cache flush is different between SD and eMMC."
->>  >>
->>  >> So adding SD seems to be out of scope of this change.
->>
->> Is there anything else I can do about this patch? Thanks again.
+> These files have been taken from the Marvell SDK and lightly cleaned
+> up with the License and copyright retained.
+> 
+> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> ---
+> 
+> Notes:
+>     The Marvell SDK has a number of new compatible strings. I've brought
+>     through some of the drivers or where possible used an in-tree
+>     alternative (e.g. there is SDK code for a ac5-gpio but the existing
+>     marvell,armada-8k-gpio seems to cover what is needed if you use an
+>     appropriate binding). I expect that there will a new series of patches
+>     when I get some different hardware (or additions to this series
+>     depending on if/when it lands).
+>     
+>     Changes in v2:
+>     - Make pinctrl a child node of a syscon node
+>     - Use marvell,armada-8k-gpio instead of orion-gpio
+>     - Remove nand peripheral. The Marvell SDK does have some changes for the
+>       ac5-nand-controller but I currently lack hardware with NAND fitted so
+>       I can't test it right now. I've therefore chosen to omit the node and
+>       not attempted to bring in the driver or binding.
+>     - Remove pcie peripheral. Again there are changes in the SDK and I have
+>       no way of testing them.
+>     - Remove prestera node.
+>     - Remove "marvell,ac5-ehci" compatible from USB node as
+>       "marvell,orion-ehci" is sufficient
+>     - Remove watchdog node. There is a buggy driver for the ac5 watchdog in
+>       the SDK but it needs some work so I've dropped the node for now.
+> 
+>  arch/arm64/boot/dts/marvell/Makefile          |   1 +
+>  .../boot/dts/marvell/armada-98dx2530.dtsi     | 343 ++++++++++++++++++
+>  arch/arm64/boot/dts/marvell/rd-ac5x.dts       |  62 ++++
+>  3 files changed, 406 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/marvell/armada-98dx2530.dtsi
+>  create mode 100644 arch/arm64/boot/dts/marvell/rd-ac5x.dts
+> 
+> diff --git a/arch/arm64/boot/dts/marvell/Makefile b/arch/arm64/boot/dts/marvell/Makefile
+> index 1c794cdcb8e6..3905dee558b4 100644
+> --- a/arch/arm64/boot/dts/marvell/Makefile
+> +++ b/arch/arm64/boot/dts/marvell/Makefile
+> @@ -24,3 +24,4 @@ dtb-$(CONFIG_ARCH_MVEBU) += cn9132-db.dtb
+>  dtb-$(CONFIG_ARCH_MVEBU) += cn9132-db-B.dtb
+>  dtb-$(CONFIG_ARCH_MVEBU) += cn9130-crb-A.dtb
+>  dtb-$(CONFIG_ARCH_MVEBU) += cn9130-crb-B.dtb
+> +dtb-$(CONFIG_ARCH_MVEBU) += rd-ac5x.dtb
+> diff --git a/arch/arm64/boot/dts/marvell/armada-98dx2530.dtsi b/arch/arm64/boot/dts/marvell/armada-98dx2530.dtsi
+> new file mode 100644
+> index 000000000000..ebe464b9ebd2
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/marvell/armada-98dx2530.dtsi
+> @@ -0,0 +1,343 @@
+> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+> +/*
+> + * Device Tree For AC5.
+> + *
+> + * Copyright (C) 2021 Marvell
+> + *
+> + */
+> +
+> +/dts-v1/;
+> +
+> +#include <dt-bindings/gpio/gpio.h>
+> +#include <dt-bindings/interrupt-controller/arm-gic.h>
+> +
+> +/ {
+> +	model = "Marvell AC5 SoC";
+> +	compatible = "marvell,ac5", "marvell,armada3700";
 
-So we are not going to let the block layer know about SD cache?
-Or is it a separate change?
+Are you sure about this compatibility with 3700? If so, why not reuse
+the existing file? But the rest of the file tends to show that the SoC
+is somehow different (the PPIs are all over the place -- someone got
+pointlessly creative here...). I'd really drop this string.
+
+> +	interrupt-parent = <&gic>;
+> +	#address-cells = <2>;
+> +	#size-cells = <2>;
+> +
+> +	aliases {
+> +		serial0 = &uart0;
+> +		spiflash0 = &spiflash0;
+> +		gpio0 = &gpio0;
+> +		gpio1 = &gpio1;
+> +		ethernet0 = &eth0;
+> +		ethernet1 = &eth1;
+> +	};
+> +
+> +	psci {
+> +		compatible = "arm,psci-0.2";
+> +		method = "smc";
+> +	};
+> +
+> +	timer {
+> +		compatible = "arm,armv8-timer";
+> +		interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>,
+> +				 <GIC_PPI 8 IRQ_TYPE_LEVEL_HIGH>,
+> +				 <GIC_PPI 10 IRQ_TYPE_LEVEL_HIGH>,
+> +				 <GIC_PPI 7 IRQ_TYPE_LEVEL_HIGH>;
+
+If you have an A55, you're missing an interrupt for the EL2 virtual
+timer.
+
+> +		clock-frequency = <25000000>;
+
+Please drop this. The firmware should do the right thing, and if not,
+that's an opportunity to fix it.
+
+> +	};
+> +
+
+[...]
+
+> +	gic: interrupt-controller@80600000 {
+> +		compatible = "arm,gic-v3";
+> +		#interrupt-cells = <3>;
+> +		interrupt-controller;
+> +		/*#redistributor-regions = <1>;*/
+> +		redistributor-stride = <0x0 0x20000>;	// 128kB stride
+
+Please drop these two lines. They are totally pointless as they are
+only expressing the default values.
+
+> +		reg = <0x0 0x80600000 0x0 0x10000>, /* GICD */
+> +			  <0x0 0x80660000 0x0 0x40000>; /* GICR */
+> +		interrupts = <GIC_PPI 6 IRQ_TYPE_LEVEL_HIGH>;
+> +	};
+
+Thanks,
+
+	M.
+
+-- 
+Without deviation from the norm, progress is not possible.
