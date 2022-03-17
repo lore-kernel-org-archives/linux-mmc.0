@@ -2,33 +2,30 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58D05C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 10:08:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83CCAC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 10:12:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232381AbiCQKJw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Mar 2022 06:09:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51340 "EHLO
+        id S232384AbiCQKNm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Mar 2022 06:13:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56862 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232374AbiCQKJv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 06:09:51 -0400
+        with ESMTP id S232367AbiCQKNm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 06:13:42 -0400
 Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB59CBF524;
-        Thu, 17 Mar 2022 03:08:34 -0700 (PDT)
-X-UUID: 82fc672ac7764aeeabc84181a6c9bdf2-20220317
-X-UUID: 82fc672ac7764aeeabc84181a6c9bdf2-20220317
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw02.mediatek.com
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4AD9BD7C1;
+        Thu, 17 Mar 2022 03:12:25 -0700 (PDT)
+X-UUID: 028b339904f64af2b9c7a619cdd5040e-20220317
+X-UUID: 028b339904f64af2b9c7a619cdd5040e-20220317
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw02.mediatek.com
         (envelope-from <axe.yang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1034840149; Thu, 17 Mar 2022 18:08:27 +0800
-Received: from mtkexhb02.mediatek.inc (172.21.101.103) by
- mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Thu, 17 Mar 2022 18:08:25 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by mtkexhb02.mediatek.inc
- (172.21.101.103) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 17 Mar
- 2022 18:08:25 +0800
+        with ESMTP id 430812365; Thu, 17 Mar 2022 18:12:19 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Thu, 17 Mar 2022 18:12:19 +0800
 Received: from localhost.localdomain (10.17.3.154) by mtkcas10.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Thu, 17 Mar 2022 18:08:24 +0800
+ Transport; Thu, 17 Mar 2022 18:12:17 +0800
 From:   Axe Yang <axe.yang@mediatek.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -50,12 +47,10 @@ CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>
-Subject: [PATCH 2/3] mmc: core: Add support for SDIO wakeup interrupt
-Date:   Thu, 17 Mar 2022 18:08:17 +0800
-Message-ID: <20220317100818.24908-3-axe.yang@mediatek.com>
+Subject: [RESEND v7 0/3] mmc: mediatek: add support for SDIO async IRQ
+Date:   Thu, 17 Mar 2022 18:12:12 +0800
+Message-ID: <20220317101215.24985-1-axe.yang@mediatek.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220317100818.24908-1-axe.yang@mediatek.com>
-References: <20220317100818.24908-1-axe.yang@mediatek.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
 Content-Type:   text/plain; charset=US-ASCII
@@ -64,90 +59,52 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If wakeup-source flag is set in host dts node, parse EAI information
-from SDIO CCCR interrupt externsion segment for in-band wakeup. If
-async interrupt is supported by SDIO card then enable it and set
-enable_async_irq flag in sdio_cccr structure to 1. The parse flow is
-implemented in sdio_read_cccr().
+Change in v7:
+- add device_init_wakeup() to register SDIO host as wakeup source
 
-Acked-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
----
- drivers/mmc/core/sdio.c  | 17 +++++++++++++++++
- include/linux/mmc/card.h |  8 +++++++-
- include/linux/mmc/sdio.h |  5 +++++
- 3 files changed, 29 insertions(+), 1 deletion(-)
+Change in v6:
+- abandon cap-sdio-async-irq flag, use wakeup-source flag instead
+- extend interrupts and pinctrls in mediatek mmc host controller DT documents
+- add mmc_card_enable_async_irq() to access enable_async_irq flag
+- simplify wakeup irq implementation with dedicate wake up irq related interface
 
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 25799accf8a0..4898c5e9a299 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -226,6 +226,23 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
- 				card->sw_caps.sd3_drv_type |= SD_DRIVER_TYPE_C;
- 			if (data & SDIO_DRIVE_SDTD)
- 				card->sw_caps.sd3_drv_type |= SD_DRIVER_TYPE_D;
-+
-+			if (card->host->pm_caps & MMC_PM_WAKE_SDIO_IRQ) {
-+				ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_INTERRUPT_EXT, 0,
-+						       &data);
-+				if (ret)
-+					goto out;
-+
-+				if (data & SDIO_INTERRUPT_EXT_SAI) {
-+					data |= SDIO_INTERRUPT_EXT_EAI;
-+					ret = mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_INTERRUPT_EXT,
-+							       data, NULL);
-+					if (ret)
-+						goto out;
-+
-+					card->cccr.enable_async_irq = 1;
-+				}
-+			}
- 		}
- 
- 		/* if no uhs mode ensure we check for high speed */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 37f975875102..968650c0b345 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -219,7 +219,8 @@ struct sdio_cccr {
- 				wide_bus:1,
- 				high_power:1,
- 				high_speed:1,
--				disable_cd:1;
-+				disable_cd:1,
-+				enable_async_irq:1;
- };
- 
- struct sdio_cis {
-@@ -343,6 +344,11 @@ static inline bool mmc_large_sector(struct mmc_card *card)
- 	return card->ext_csd.data_sector_size == 4096;
- }
- 
-+static inline int mmc_card_enable_async_irq(struct mmc_card *card)
-+{
-+	return card->cccr.enable_async_irq;
-+}
-+
- bool mmc_card_is_blockaddr(struct mmc_card *card);
- 
- #define mmc_card_mmc(c)		((c)->type == MMC_TYPE_MMC)
-diff --git a/include/linux/mmc/sdio.h b/include/linux/mmc/sdio.h
-index 2a05d1ac4f0e..1ef400f28642 100644
---- a/include/linux/mmc/sdio.h
-+++ b/include/linux/mmc/sdio.h
-@@ -159,6 +159,11 @@
- #define  SDIO_DTSx_SET_TYPE_A	(1 << SDIO_DRIVE_DTSx_SHIFT)
- #define  SDIO_DTSx_SET_TYPE_C	(2 << SDIO_DRIVE_DTSx_SHIFT)
- #define  SDIO_DTSx_SET_TYPE_D	(3 << SDIO_DRIVE_DTSx_SHIFT)
-+
-+#define SDIO_CCCR_INTERRUPT_EXT	0x16
-+#define SDIO_INTERRUPT_EXT_SAI	(1 << 0)
-+#define SDIO_INTERRUPT_EXT_EAI	(1 << 1)
-+
- /*
-  * Function Basic Registers (FBR)
-  */
+Change in v5:
+- resort variables to reversed xmas tree order
+- restore old copyright year range and add current year back
+
+Change in v4:
+- add MMC_CAP2_SDIO_ASYNC_IRQ judge before lookup eint pinctrl
+- replace spin_lock_irqsave() variant with spin_lock() in eint irq handler
+
+Changes in v3:
+- correct abbreviations with capital letters in commit message
+- replace copyright year with 2022 in mtk-sd.c
+- remove unnessary pointer casting
+- adjust variable order to reversed xmas tree
+- remove a redundant blank line
+- refine if statement, following standard pattern
+
+Change in v2:
+- change flag name from 'cap-sdio-async-int' to 'cap-sdio-async-irq'
+- change corresponding macro names from xxx_INT to xxx_IRQ
+- resort new member in msdc_host structure
+- refine function msdc_request_dat1_eint_irq()
+- rename msdc_{suspend,resume} function names, add suffix '_noirq'
+- add MMC_CAP2_NO_SDIO judgement before parse eint related pin setting
+
+Axe Yang (3):
+  dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
+  mmc: core: Add support for SDIO wakeup interrupt
+  mmc: mediatek: add support for SDIO eint wakup IRQ
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       |  24 ++++-
+ drivers/mmc/core/sdio.c                       |  17 +++
+ drivers/mmc/host/mtk-sd.c                     | 100 ++++++++++++++++--
+ include/linux/mmc/card.h                      |   8 +-
+ include/linux/mmc/sdio.h                      |   5 +
+ 5 files changed, 144 insertions(+), 10 deletions(-)
+
 -- 
 2.25.1
+
 
