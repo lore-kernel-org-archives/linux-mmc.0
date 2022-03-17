@@ -2,37 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CFE7C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 15:49:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21461C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 15:49:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236170AbiCQPvH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Mar 2022 11:51:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53364 "EHLO
+        id S236171AbiCQPvI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Mar 2022 11:51:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235062AbiCQPvG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 11:51:06 -0400
+        with ESMTP id S236162AbiCQPvH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 11:51:07 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C28849A990;
-        Thu, 17 Mar 2022 08:49:49 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D4F31546BF;
+        Thu, 17 Mar 2022 08:49:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1647532190; x=1679068190;
-  h=from:to:cc:subject:date:message-id;
-  bh=dQspgOQe8R6aBy50ayGKKroELAHAvWCjWGvNGhlXm0k=;
-  b=QESZiVK7Yl6GRoF4NVzcLffpYlPfLn0Rl2qlTpiWRQUjUeZ3sL6+atKM
-   sQS6gs5tMedWdBnxUhDeTgo6WtOgAIE7R129FCiLPkAc4wgowSskKhEsk
-   HlfUxkVAoeh4I8nx8pdWGC2yIMJ1W991lomgqTHHBAuQI9Dxoua3qTMYr
-   E=;
+  t=1647532191; x=1679068191;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references;
+  bh=WTkUf5wEGr7qXWKOKkj6HA5wCkdNTPnxIMRL1guvNfE=;
+  b=vWrT+7Rfa+65smh0C6TjwIUSVxX8vUuocSjqV+bKBv1/C6sWGT//RIO6
+   BMOdmrbJ2fi3gsp54rZ9Rmp/5ckn2EcfN5MUW+WDW9a9mFnGTbnvK6rGn
+   IiHTZ3hqFUmlFn97gif7OcBbVpMo7tSN3CgqjLN1TGCijOHouxYCzAErg
+   A=;
 Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
-  by alexa-out.qualcomm.com with ESMTP; 17 Mar 2022 08:49:49 -0700
+  by alexa-out.qualcomm.com with ESMTP; 17 Mar 2022 08:49:51 -0700
 X-QCInternal: smtphost
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 17 Mar 2022 08:49:47 -0700
+  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 17 Mar 2022 08:49:49 -0700
 X-QCInternal: smtphost
 Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 17 Mar 2022 21:19:28 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 17 Mar 2022 21:19:30 +0530
 Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 87B7B4CAF; Thu, 17 Mar 2022 21:19:27 +0530 (IST)
+        id 9157C5229; Thu, 17 Mar 2022 21:19:29 +0530 (IST)
 From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
@@ -42,30 +43,38 @@ Cc:     quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
         quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
         quic_sayalil@quicinc.com,
         Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Subject: [PATCH V3 0/2] Add reset entries for SDCC controllers
-Date:   Thu, 17 Mar 2022 21:19:23 +0530
-Message-Id: <1647532165-6302-1-git-send-email-quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V3 1/2] dt-bindings: mmc: sdhci-msm: Add gcc resets strings
+Date:   Thu, 17 Mar 2022 21:19:24 +0530
+Message-Id: <1647532165-6302-2-git-send-email-quic_c_sbhanu@quicinc.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1647532165-6302-1-git-send-email-quic_c_sbhanu@quicinc.com>
+References: <1647532165-6302-1-git-send-email-quic_c_sbhanu@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Changes since V2:
-	- Updated commit subject and comments in dtsi file.
-	- Added resets entry in sdhci-msm dt-bindings.
+Add gcc hardware reset supported strings for qcom-sdhci controller.
 
-Changes since V1:
-	- Updated commit message, subject and comments in dtsi file as
-	  suggested by Krzysztof Kozlowski.
-
-Shaik Sajida Bhanu (2):
-  dt-bindings: mmc: sdhci-msm: Add gcc resets strings
-  arm64: dts: qcom: sc7280: Add reset entries for SDCC controllers
-
+Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+---
  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
- arch/arm64/boot/dts/qcom/sc7280.dtsi                | 8 ++++++++
- 2 files changed, 12 insertions(+)
+ 1 file changed, 4 insertions(+)
 
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 6216ed7..f180111 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -62,6 +62,10 @@ Required properties:
+ - qcom,dll-config: Chipset and Platform specific value. Use this field to
+ 	specify the DLL_CONFIG register value as per Hardware Programming Guide.
+ 
++- resets: Phandle and reset specifier for the device's reset.
++- reset-names: List of reset signal name strings sorted in the same order as
++	       the resets property.
++
+ Optional Properties:
+ * Following bus parameters are required for interconnect bandwidth scaling:
+ - interconnects: Pairs of phandles and interconnect provider specifier
 -- 
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
 of Code Aurora Forum, hosted by The Linux Foundation
