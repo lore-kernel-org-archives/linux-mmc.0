@@ -2,87 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBFD6C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 08:38:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73B10C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 08:43:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230391AbiCQIjy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Mar 2022 04:39:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43444 "EHLO
+        id S231408AbiCQIo7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Mar 2022 04:44:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229565AbiCQIjx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 04:39:53 -0400
-Received: from mail-qv1-f41.google.com (mail-qv1-f41.google.com [209.85.219.41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 411339D4D9;
-        Thu, 17 Mar 2022 01:38:37 -0700 (PDT)
-Received: by mail-qv1-f41.google.com with SMTP id r1so3686174qvr.12;
-        Thu, 17 Mar 2022 01:38:37 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=kg3cLhfEIzxREyrRkZPbj7XQr5LmYlIgtgNtsk2nRuw=;
-        b=v0gMliPbHDDFngulsBdZyLouXmNvc1Mhe5bX0uTjPr83vOBd6mzrjNLRPTnfF31zKR
-         8v0DD3lWnwJonQYyB4vhK/b3LIi8sAp9JZswrW3oXHgzSc9W73jfzSdrGHA9pRD70IbO
-         XGST9EvFPzuTkto+ZQ1DzsY/C+JCwotzRyDAaACBaP1tom/IEcWG4vtGaBwvhZYy3DfK
-         rOboIQcT8GHoSMOZpgxquXedIGnF35+St0YzWebBszDf2FaukqarEX2pExu8KJTMzOOS
-         j+dq3jlFY7ksdrWix/svqeBujgfZ1OzUY5wCGbvlwY6V+JOO9TiG358U+zbGDDv9H4Vo
-         X+vg==
-X-Gm-Message-State: AOAM530cF2EqPD0NzHv3scTa7B8kyNf9bBh4z9krXlHFqdxxvsKRnsKJ
-        trxD6QDAO6HoamIG/JqyD1+ABMkpyPF9fw==
-X-Google-Smtp-Source: ABdhPJzvMdOoZ1VxOZniou8URpdKNq7YufV4lKy1jsDESwduvPEOnBbmwNj85nJ8NHTIC8m+Vb1WhQ==
-X-Received: by 2002:a05:6214:a8a:b0:430:8fbc:6be2 with SMTP id ev10-20020a0562140a8a00b004308fbc6be2mr2328389qvb.7.1647506315902;
-        Thu, 17 Mar 2022 01:38:35 -0700 (PDT)
-Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com. [209.85.128.171])
-        by smtp.gmail.com with ESMTPSA id n7-20020a05622a040700b002e1b8be0985sm3079067qtx.35.2022.03.17.01.38.34
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 17 Mar 2022 01:38:35 -0700 (PDT)
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-2e592e700acso49983767b3.5;
-        Thu, 17 Mar 2022 01:38:34 -0700 (PDT)
-X-Received: by 2002:a0d:f1c7:0:b0:2db:d2bc:be11 with SMTP id
- a190-20020a0df1c7000000b002dbd2bcbe11mr4541208ywf.62.1647506314522; Thu, 17
- Mar 2022 01:38:34 -0700 (PDT)
+        with ESMTP id S231444AbiCQIo4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 04:44:56 -0400
+Received: from mail.olerise.pl (mail.olerise.pl [46.183.184.59])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CCD2D370C
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 01:43:32 -0700 (PDT)
+Received: by mail.olerise.pl (Postfix, from userid 1001)
+        id 784D3467BF; Thu, 17 Mar 2022 09:41:01 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=olerise.pl; s=mail;
+        t=1647506505; bh=ZNYiuZLXlxCdAPtstEG/gwJieB5RBwA/cHj1SZ3Mpl0=;
+        h=Date:From:To:Subject:From;
+        b=eVD+1i6xX7j1XIwMPzUWGeRbH1r80kVHLodBA0Qpci2yHWTtsJZ196QFm0TFB9F5V
+         5yKpnCAZXA3ppEORgWlaBN8eC/D4bjSNzqOdio4t9iTX2f5iIO5QK41wAY7WjAF6il
+         rEdpWU04thSb6c/dX42+7cY9HcInZoTU15WOQv5HHKYRLpI0h44Jqy1TgowRyhaUmn
+         SsoP5DlLDzzR65R4Ho83gjyrhsulKTIfXsL+aLgBYE20AhJJQk1ELfw4Wfji0oKA5p
+         rCApcfd4VepkRH5jM+PEXONTVHHoy6YByqwE7yNDqFZn+WXoQ4jLKs08NSclmJJ573
+         IVhTPxu4lwZuQ==
+Received: by mail.olerise.pl for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 08:40:21 GMT
+Message-ID: <20220317084500-0.1.2d.ru8o.0.9ub0q2x43y@olerise.pl>
+Date:   Thu, 17 Mar 2022 08:40:21 GMT
+From:   =?UTF-8?Q? "Miko=C5=82aj_Rudzik" ?= <mikolaj.rudzik@olerise.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: =?UTF-8?Q?Nap=C5=82yw_Klient=C3=B3w_ze_strony?=
+X-Mailer: mail.olerise.pl
 MIME-Version: 1.0
-References: <20220315153258.21097-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20220315153258.21097-1-biju.das.jz@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Thu, 17 Mar 2022 09:38:23 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdVaS0PDYxmhkF2myBknRLoyPgy9DSMdKO_dSiVjvizkDg@mail.gmail.com>
-Message-ID: <CAMuHMdVaS0PDYxmhkF2myBknRLoyPgy9DSMdKO_dSiVjvizkDg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 15, 2022 at 4:33 PM Biju Das <biju.das.jz@bp.renesas.com> wrote:
-> Document RZ/G2UL SDHI bindings. RZ/G2UL SDHI is almost identical to one
-> found on the R-Car Gen3. No driver changes are required as generic
-> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
->
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Dzie=C5=84 dobry,
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+chcia=C5=82bym poinformowa=C4=87 Pa=C5=84stwa o mo=C5=BCliwo=C5=9Bci pozy=
+skania nowych zlece=C5=84 ze strony www.
 
-Gr{oetje,eeting}s,
+Widzimy zainteresowanie potencjalnych Klient=C3=B3w Pa=C5=84stwa firm=C4=85=
+, dlatego ch=C4=99tnie pomo=C5=BCemy Pa=C5=84stwu dotrze=C4=87 z ofert=C4=
+=85 do wi=C4=99kszego grona odbiorc=C3=B3w poprzez efektywne metody pozyc=
+jonowania strony w Google.
 
-                        Geert
+Czy m=C3=B3g=C5=82bym liczy=C4=87 na kontakt zwrotny?
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Pozdrawiam
+Miko=C5=82aj Rudzik
