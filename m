@@ -2,108 +2,157 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8FF4C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 10:15:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58260C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 10:18:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232509AbiCQKQ7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Mar 2022 06:16:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38730 "EHLO
+        id S232507AbiCQKUI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Mar 2022 06:20:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232419AbiCQKQ5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 06:16:57 -0400
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 913C8DFF83
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 03:15:41 -0700 (PDT)
-Received: by mail-lj1-x230.google.com with SMTP id u3so6639064ljd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 03:15:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=BBJNQVwMyLBs8lLLZ+phXdIS1BZRlnyigKaYZzIPGus=;
-        b=ZrFqjnS8CKuQDGyyWGOZxHY0dGaUnHUw9IrhHx+mGdrVp9Z/v5mQOg4A/OmMPxsD9+
-         gQbMkSOAZTYsrKOxBBcT1OFivH9Qu8cr/eScxhBZB6FsY0Nugc+3Fy0sPIZTWUHg9zGy
-         T2eFPO8ju7YBrDfOwhUZqPDQluCD5HcNRftCCYIBLKibbgSPObkpQtx61uZYb31vceUd
-         Tr8Ah6tvAhRcrzhAmYmqPbMlC3McRihY8SgCMMf97Sy0skRr9ZDLQIW6ycO7InxovhaY
-         yeFqHg2wY4brCSvwZPUbAEeKOF4bDZsmVInJVGhZzsp1lvINlMPckA0vyNxer+0N879q
-         vWrA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=BBJNQVwMyLBs8lLLZ+phXdIS1BZRlnyigKaYZzIPGus=;
-        b=TVJ4PmGLCBZAJrvO7a5fdE3GROpjNOyHVu9otNer0Jm5/hVekZ8cA4eD9q45K+kKzP
-         iQtpxZGgk0RZg5l2mWd/9hH2SFM7LdPs/wCWm2fn2vA5NpbEpM9UTLmwXIYMF7i/UKUb
-         m7HC2LG5uctB9Wx3Zv4bTt2fKoOA380H9EN0Sle34B3VzrffK/8F62ZQq2hqbJwW2mG5
-         9n/a2tWtLggu9896LwyI4fHMKcJg9Rkhe/wA2xtgLG9mGGv+1y4Jfqdn+Nq1Q+qfpdTF
-         nbnep+pdWjeZOPJ+GgqGnLkYbQkj24iT3FRcIJEy4UU5xKD8oFFGbsQM21DQWgRKJlHF
-         RbkQ==
-X-Gm-Message-State: AOAM531BIM4P+4L9pR563tc/tLsEO9W11Y5NTu99Cv9qf6l1AHeXuUBM
-        PJnMAXjB5TU0KDrFCqpakooZFfjGGdpLCHfzAIDvDQ==
-X-Google-Smtp-Source: ABdhPJzMAlFb6clniGiYBXS5RvYGVXflZX6StQiwUqd7rEWmCRagcg/bgKr+R6rvw17Siwuf39WjLbMxfMx2e9HTTg0=
-X-Received: by 2002:a2e:890e:0:b0:249:295a:eb40 with SMTP id
- d14-20020a2e890e000000b00249295aeb40mr2376622lji.463.1647512139862; Thu, 17
- Mar 2022 03:15:39 -0700 (PDT)
+        with ESMTP id S229763AbiCQKUH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 06:20:07 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78E5CCA0F5;
+        Thu, 17 Mar 2022 03:18:47 -0700 (PDT)
+Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22H8AOCs004861;
+        Thu, 17 Mar 2022 11:18:01 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=s0T2J+BUPfq3wtxoi9ptnx4PkAnuCrcogO563PL6A7E=;
+ b=tqrYTAk4hJkdazLPqvrldMktXaVm9S42CGuzyXUR+l5dwYSKzFJXJcmWvCl3n/6Zd4oj
+ nB68lSvlWf68oH7XFck5WhuVEOTLdPTjFNuJouxs2duli8lL5txwogER8/4avRbIF9gw
+ dLJladdVvNk4eePFSSjp7XfbapW34ADQgrnjIwmEW8lYSQtXdYl26zgh10fJGGgPtien
+ J3iHVDGmmZC6QAIer+Q+JtV2HW8DPlmS+6IqtxyQlSGOtmm7Kgwwzd7K8QymiRdJgZTb
+ 1U5eEf3EgbJEdQ9r6aWG0bJGyOcRT18cgI169NWPyrzeVCSjSDQQBM04laO0yP+kECcW oA== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3et63jbvmh-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 17 Mar 2022 11:18:00 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id AFA8910002A;
+        Thu, 17 Mar 2022 11:17:58 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 9B821215132;
+        Thu, 17 Mar 2022 11:17:58 +0100 (CET)
+Received: from [10.211.8.11] (10.75.127.47) by SFHDAG2NODE2.st.com
+ (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Thu, 17 Mar
+ 2022 11:17:57 +0100
+Message-ID: <6bfade04-36b4-98c3-2796-ebeaa230f52e@foss.st.com>
+Date:   Thu, 17 Mar 2022 11:17:57 +0100
 MIME-Version: 1.0
-References: <20220315153258.21097-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20220315153258.21097-1-biju.das.jz@bp.renesas.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 17 Mar 2022 11:15:03 +0100
-Message-ID: <CAPDyKFpLVsNjuWX-5sketEw-j4nbgVpUY8qvWKBjDSXPG4Sfwg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <chris.paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        linux-renesas-soc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA
+ LLI
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Linus Walleij <linus.walleij@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Grzegorz Szymaszek <gszymaszek@short.pl>
+References: <20220304135134.47827-1-yann.gautier@foss.st.com>
+ <20220304135134.47827-2-yann.gautier@foss.st.com>
+ <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
+ <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
+ <CAPDyKFqgQZFH3LT1Z+G9N0MVfhFwoiUr9N2sKFaejTWcH+dNXg@mail.gmail.com>
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <CAPDyKFqgQZFH3LT1Z+G9N0MVfhFwoiUr9N2sKFaejTWcH+dNXg@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.47]
+X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE2.st.com
+ (10.75.127.5)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-17_03,2022-03-15_01,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 15 Mar 2022 at 16:33, Biju Das <biju.das.jz@bp.renesas.com> wrote:
->
-> Document RZ/G2UL SDHI bindings. RZ/G2UL SDHI is almost identical to one
-> found on the R-Car Gen3. No driver changes are required as generic
-> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
->
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+On 3/17/22 11:00, Ulf Hansson wrote:
+> On Tue, 15 Mar 2022 at 09:26, Yann Gautier <yann.gautier@foss.st.com> wrote:
+>>
+>> On 3/14/22 23:43, Linus Walleij wrote:
+>>> "On Fri, Mar 4, 2022 at 2:52 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
+>>>
+>>>> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
+>>>> starting from revision v2 of the peripheral. But it has limitations,
+>>>> as all the buffers should be aligned on block size (except the last one).
+>>>> But this cannot be guaranteed with SDIO. We should then have a property
+>>>> to disable the support of LLI.
+>>>>
+>>>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+>>>
+>>> Actually I think this is present also on the ux500 variants. See:
+>>> commit 2253ed4b36dc876d1598c4dab5587e537ec68c34
+>>> "mmc: mmci: Support any block sizes for ux500v2 and qcom variant"
+>>>
+>>> Spot the variant data "dma_power_of_2".
+>>>
+>>> So whatever property you add
+>>> to the variant data (not in the device tree please) should
+>>> be added to the ux500 variants as well, it will *VERY* likely
+>>> have a problem with LLI elements not being a power of 2
+>>> as it is the ancestor of later STMicro variants.
+>>>
+>>> It might actually be the reason for some annoying WiFi error
+>>> messages I have seen :/
+>>>
+>>> Yours,
+>>> Linus Walleij
+>>
+>> Hi Linus,
+>>
+>> The STM32 variant uses an internal DMA, and the DMA functions are in its
+>> dedicated file. So I was planning to do the same as what is done in
+>> meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA
+>> constraints are not fulfilled. Not sure it can help for Ux500.
+> 
 
-Applied for next, thanks!
+Hi Ulf,
 
-Kind regards
-Uffe
+> We already have a bounce buffer in mmci_pio_read(), but we need one in
+> mmc_pio_write() too, which hasn't been implemented yet.
 
+The idea is to keep using our internal DMA, and not switch to pio mode.
 
-> ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index 3b191fb89cf1..9ac4986988c5 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -57,6 +57,7 @@ properties:
->                - renesas,sdhi-r8a77990  # R-Car E3
->                - renesas,sdhi-r8a77995  # R-Car D3
->                - renesas,sdhi-r8a779a0  # R-Car V3U
-> +              - renesas,sdhi-r9a07g043 # RZ/G2UL
->                - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
->                - renesas,sdhi-r9a07g054 # RZ/V2L
->            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
-> @@ -109,6 +110,7 @@ allOf:
->          compatible:
->            contains:
->              enum:
-> +              - renesas,sdhi-r9a07g043
->                - renesas,sdhi-r9a07g044
->                - renesas,sdhi-r9a07g054
->      then:
-> --
-> 2.17.1
->
+> 
+>>
+>> Ulf, before I send my new series (although it is not ready yet), would
+>> you be OK with the bounce buffer idea?
+> 
+> Yes, that works for me.
+I have patches almost ready, I'll send that soon.
+
+> 
+> On the other hand, it would be even better if we could specify the
+> buffer limitations per mmc host instance, so upper layers (SDIO func
+> drivers) could conform to these - and use better buffers, to achieve a
+> better performance.
+
+We've seen things that could be improved in the wifi driver. I'll check 
+what could be done.
+
+Best regards,
+Yann
+> 
+>>
+>>
+>> Best regards,
+>> Yann
+> 
+> Kind regards
+> Uffe
+
