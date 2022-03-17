@@ -2,55 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73B10C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 08:43:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53475C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 08:54:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231408AbiCQIo7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Mar 2022 04:44:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57810 "EHLO
+        id S231556AbiCQI4D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Mar 2022 04:56:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231444AbiCQIo4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 04:44:56 -0400
-Received: from mail.olerise.pl (mail.olerise.pl [46.183.184.59])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CCD2D370C
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 01:43:32 -0700 (PDT)
-Received: by mail.olerise.pl (Postfix, from userid 1001)
-        id 784D3467BF; Thu, 17 Mar 2022 09:41:01 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=olerise.pl; s=mail;
-        t=1647506505; bh=ZNYiuZLXlxCdAPtstEG/gwJieB5RBwA/cHj1SZ3Mpl0=;
-        h=Date:From:To:Subject:From;
-        b=eVD+1i6xX7j1XIwMPzUWGeRbH1r80kVHLodBA0Qpci2yHWTtsJZ196QFm0TFB9F5V
-         5yKpnCAZXA3ppEORgWlaBN8eC/D4bjSNzqOdio4t9iTX2f5iIO5QK41wAY7WjAF6il
-         rEdpWU04thSb6c/dX42+7cY9HcInZoTU15WOQv5HHKYRLpI0h44Jqy1TgowRyhaUmn
-         SsoP5DlLDzzR65R4Ho83gjyrhsulKTIfXsL+aLgBYE20AhJJQk1ELfw4Wfji0oKA5p
-         rCApcfd4VepkRH5jM+PEXONTVHHoy6YByqwE7yNDqFZn+WXoQ4jLKs08NSclmJJ573
-         IVhTPxu4lwZuQ==
-Received: by mail.olerise.pl for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 08:40:21 GMT
-Message-ID: <20220317084500-0.1.2d.ru8o.0.9ub0q2x43y@olerise.pl>
-Date:   Thu, 17 Mar 2022 08:40:21 GMT
-From:   =?UTF-8?Q? "Miko=C5=82aj_Rudzik" ?= <mikolaj.rudzik@olerise.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: =?UTF-8?Q?Nap=C5=82yw_Klient=C3=B3w_ze_strony?=
-X-Mailer: mail.olerise.pl
+        with ESMTP id S231293AbiCQI4D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 04:56:03 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA5551CAF23
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 01:54:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=HjPmz2Ga5G8Vj2cnXScLES8GLciR
+        Lx9DNNktST9XckY=; b=bNCIJqbn7GumthizLZCASHzto2yiEG4xv2a3gCwqktP2
+        /SRoRQEPAEoeRfgKQtzCQ9R8wdOhz97i/LaJC+nsa4DqALSd5L63vGkOU7PeiECi
+        E6LCHH2SFZ8xABGI4M0luUbSGtJDD7XEqJYEhjcjNfi9+Jrm5exNBx2Rc6zQGOA=
+Received: (qmail 3380571 invoked from network); 17 Mar 2022 09:54:44 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 17 Mar 2022 09:54:44 +0100
+X-UD-Smtp-Session: l3s3148p1@Q5Z0LmbaOs0gAQnoAEd5ADwsgXkBgqk7
+Date:   Thu, 17 Mar 2022 09:54:44 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Biju Das <biju.das.jz@bp.renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC
+Message-ID: <YjL3VAlsqzCtXPLM@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        linux-renesas-soc@vger.kernel.org
+References: <20220315153258.21097-1-biju.das.jz@bp.renesas.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="tG1BYTBMChgnHQNN"
+Content-Disposition: inline
+In-Reply-To: <20220315153258.21097-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,
 
-chcia=C5=82bym poinformowa=C4=87 Pa=C5=84stwa o mo=C5=BCliwo=C5=9Bci pozy=
-skania nowych zlece=C5=84 ze strony www.
+--tG1BYTBMChgnHQNN
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Widzimy zainteresowanie potencjalnych Klient=C3=B3w Pa=C5=84stwa firm=C4=85=
-, dlatego ch=C4=99tnie pomo=C5=BCemy Pa=C5=84stwu dotrze=C4=87 z ofert=C4=
-=85 do wi=C4=99kszego grona odbiorc=C3=B3w poprzez efektywne metody pozyc=
-jonowania strony w Google.
+On Tue, Mar 15, 2022 at 03:32:58PM +0000, Biju Das wrote:
+> Document RZ/G2UL SDHI bindings. RZ/G2UL SDHI is almost identical to one
+> found on the R-Car Gen3. No driver changes are required as generic
+> compatible string "renesas,rcar-gen3-sdhi" will be used as a fallback.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 
-Czy m=C3=B3g=C5=82bym liczy=C4=87 na kontakt zwrotny?
+Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
-Pozdrawiam
-Miko=C5=82aj Rudzik
+--tG1BYTBMChgnHQNN
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmIy91AACgkQFA3kzBSg
+Kbb22w//WlsMf1JqyhJFzYpfFuqxfdAZIjN3xP0sQo3x7YZ2wfsykLhgwcCXdABX
+otWfOaJxnsJrTBq5eJKJcWcNI9wkVNa7qdovuy1wZbL5OHBqMAJK0sXfR55dyJRv
+lqpximRNnsNz3poP7gBwfoIaCt1u2VjKLizsGFSxF8lMJHSU91KYS+AalzCyYE0N
+t+6Fpqno0ugAZ1zXcUmVhI+oZ8rgr2XsDdUPvK95rECODcxcXRukrsLHM3ZF0sht
+++DniY/AyOyyDrwFTwTcukpV/QHHdwMaP6RAYrALQeprCyx5Lj2CociUrmvGqUC5
+qARlYXq54p3dqaErHJ6EezkK0I8EikZO/R5ipy2VssFi6teux9hRXlVzjm7I/3fS
+LiBBgJqDR7HW7Jj2A0OOoAc3IEisSjaGQyih74HJD8LGCWGeFlDvp2pN8N4k4NCT
+pkIV2O8WjmnrGRlsdTVnUC0xmmEN900vMGGaLhfNpiXzUsfRamn52DEl3y9vG+q0
+6jvwmmF/w6GOYO9TPfPTET5o5YdxFF+fMghzWRWHdh8zqXcPHAPayJP+JUhasLI6
+Md9c+jcX1hJo9uAmw0xuIWOQiwN4QzPcZ567ekYow18sJQskjW6LWb0oOgldQLEf
+jNhTP3v8n+uacSKsQo/NvKmGBdivhbrRWJ5dkwZfXWWGD1UgLnQ=
+=gGDg
+-----END PGP SIGNATURE-----
+
+--tG1BYTBMChgnHQNN--
