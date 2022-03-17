@@ -2,133 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D76FBC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 10:00:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2520C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Mar 2022 10:08:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232239AbiCQKCG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Mar 2022 06:02:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38262 "EHLO
+        id S232304AbiCQKJr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Mar 2022 06:09:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50962 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232174AbiCQKCF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 06:02:05 -0400
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 323FCFD6C8
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 03:00:49 -0700 (PDT)
-Received: by mail-lj1-x22f.google.com with SMTP id h11so6538006ljb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Mar 2022 03:00:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=QhShUoe84DPn/qSDuJss4yxswaSum21NgfxRVJizeNM=;
-        b=JaGzOhhUBuH/BXOUzMz78R/tXpFW9PtxKjjthc7yAtoRV6cTPvWodM23mwl4m2cLfp
-         H1RGlDUWy2wa6JsIy60+qH5vCdemKBd2v0gUqAOPGoUbBDFr2pSFr3wgSR0o6N7mRYzO
-         wqRnXRK0iyG7WAANNYpOotSjtLLrnpazC+7XUP4/c+n+VArSv8HHCpDqk/CdTCIdtvlc
-         Whhnb9w3pm0GpqFL4VQLkt++CeRY50VzPSRwyn6+NfTW5Q3/YwGhr2VhWXGPecyL+sAY
-         hQ3BkMs88cXhYCv3eLILGmoc5xS9UP96DNEiRvnSgeBYP3ot7ItwtkAcBoYP5gTjlXVE
-         csCQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=QhShUoe84DPn/qSDuJss4yxswaSum21NgfxRVJizeNM=;
-        b=5DBof+GNnf8wAZKjpucslqNm+HagjcYxK3iYAk3TJZVcx28tkP8h2LbB33ZHQrJRjh
-         TIDJS1cUT8Tqz1ZHj/yAT5/rE1EnsmV+pUevi8ExJPUA/bTCpCsczaG2+iLijurE9trm
-         YOOW7OQNd50fwp+8pMzY/aVc5Rk5xtM/2yb5VM8NJh2A+w4GynokcOdKDP6aV2tKBoWf
-         ++eq/p73kFmM6qRlnXBu8f3PPkKvnBmnOYR+FznnfaOdCfdNar4IosG+TQjojx3KGtJF
-         w5+WlRlOdtpXC8Ai8uQpi5dfsWEElWNvPL2gJ1Pwg5wnOk+qyxdB1h16X4jEG+a2Osiq
-         S7xw==
-X-Gm-Message-State: AOAM532KQxHYHYM8FewdYRptZBe3poLU7oNgA5dpujRo8Cj8v5F5LeDV
-        O9JUMLOU+rgcluqguqSRQT8Cfl/HCXfs78hbib6Jqg==
-X-Google-Smtp-Source: ABdhPJzGP/6VJ+sfVftD7foeJ61GzofJGTWadnmk9/XhbBJ6gkiCtzjkDLFBkPAu3NbN9QU6HJH517gTjYEZt7di0FI=
-X-Received: by 2002:a2e:5009:0:b0:247:d738:3e90 with SMTP id
- e9-20020a2e5009000000b00247d7383e90mr2393121ljb.229.1647511247546; Thu, 17
- Mar 2022 03:00:47 -0700 (PDT)
+        with ESMTP id S230012AbiCQKJq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2022 06:09:46 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9792B82ED;
+        Thu, 17 Mar 2022 03:08:29 -0700 (PDT)
+X-UUID: 4182831d0f9847d58821cb8565e1458d-20220317
+X-UUID: 4182831d0f9847d58821cb8565e1458d-20220317
+Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw02.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 108028781; Thu, 17 Mar 2022 18:08:24 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Thu, 17 Mar 2022 18:08:22 +0800
+Received: from localhost.localdomain (10.17.3.154) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Thu, 17 Mar 2022 18:08:20 +0800
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Axe Yang <axe.yang@mediatek.com>, Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>
+Subject: [PATCH v7 0/3] mmc: mediatek: add support for SDIO async IRQ
+Date:   Thu, 17 Mar 2022 18:08:15 +0800
+Message-ID: <20220317100818.24908-1-axe.yang@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20220304135134.47827-1-yann.gautier@foss.st.com>
- <20220304135134.47827-2-yann.gautier@foss.st.com> <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
- <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
-In-Reply-To: <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 17 Mar 2022 11:00:10 +0100
-Message-ID: <CAPDyKFqgQZFH3LT1Z+G9N0MVfhFwoiUr9N2sKFaejTWcH+dNXg@mail.gmail.com>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA LLI
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 15 Mar 2022 at 09:26, Yann Gautier <yann.gautier@foss.st.com> wrote:
->
-> On 3/14/22 23:43, Linus Walleij wrote:
-> > "On Fri, Mar 4, 2022 at 2:52 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
-> >
-> >> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
-> >> starting from revision v2 of the peripheral. But it has limitations,
-> >> as all the buffers should be aligned on block size (except the last one).
-> >> But this cannot be guaranteed with SDIO. We should then have a property
-> >> to disable the support of LLI.
-> >>
-> >> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
-> >
-> > Actually I think this is present also on the ux500 variants. See:
-> > commit 2253ed4b36dc876d1598c4dab5587e537ec68c34
-> > "mmc: mmci: Support any block sizes for ux500v2 and qcom variant"
-> >
-> > Spot the variant data "dma_power_of_2".
-> >
-> > So whatever property you add
-> > to the variant data (not in the device tree please) should
-> > be added to the ux500 variants as well, it will *VERY* likely
-> > have a problem with LLI elements not being a power of 2
-> > as it is the ancestor of later STMicro variants.
-> >
-> > It might actually be the reason for some annoying WiFi error
-> > messages I have seen :/
-> >
-> > Yours,
-> > Linus Walleij
->
-> Hi Linus,
->
-> The STM32 variant uses an internal DMA, and the DMA functions are in its
-> dedicated file. So I was planning to do the same as what is done in
-> meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA
-> constraints are not fulfilled. Not sure it can help for Ux500.
+Change in v7:
+- add device_init_wakeup() to register SDIO host as wakeup source
 
-We already have a bounce buffer in mmci_pio_read(), but we need one in
-mmc_pio_write() too, which hasn't been implemented yet.
+Change in v6:
+- abandon cap-sdio-async-irq flag, use wakeup-source flag instead
+- extend interrupts and pinctrls in mediatek mmc host controller DT documents
+- add mmc_card_enable_async_irq() to access enable_async_irq flag
+- simplify wakeup irq implementation with dedicate wake up irq related interface
 
->
-> Ulf, before I send my new series (although it is not ready yet), would
-> you be OK with the bounce buffer idea?
+Change in v5:
+- resort variables to reversed xmas tree order
+- restore old copyright year range and add current year back
 
-Yes, that works for me.
+Change in v4:
+- add MMC_CAP2_SDIO_ASYNC_IRQ judge before lookup eint pinctrl
+- replace spin_lock_irqsave() variant with spin_lock() in eint irq handler
 
-On the other hand, it would be even better if we could specify the
-buffer limitations per mmc host instance, so upper layers (SDIO func
-drivers) could conform to these - and use better buffers, to achieve a
-better performance.
+Changes in v3:
+- correct abbreviations with capital letters in commit message
+- replace copyright year with 2022 in mtk-sd.c
+- remove unnessary pointer casting
+- adjust variable order to reversed xmas tree
+- remove a redundant blank line
+- refine if statement, following standard pattern
 
->
->
-> Best regards,
-> Yann
+Change in v2:
+- change flag name from 'cap-sdio-async-int' to 'cap-sdio-async-irq'
+- change corresponding macro names from xxx_INT to xxx_IRQ
+- resort new member in msdc_host structure
+- refine function msdc_request_dat1_eint_irq()
+- rename msdc_{suspend,resume} function names, add suffix '_noirq'
+- add MMC_CAP2_NO_SDIO judgement before parse eint related pin setting
 
-Kind regards
-Uffe
+Axe Yang (3):
+  dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
+  mmc: core: Add support for SDIO wakeup interrupt
+  mmc: mediatek: add support for SDIO eint wakup IRQ
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       |  24 ++++-
+ drivers/mmc/core/sdio.c                       |  17 +++
+ drivers/mmc/host/mtk-sd.c                     | 100 ++++++++++++++++--
+ include/linux/mmc/card.h                      |   8 +-
+ include/linux/mmc/sdio.h                      |   5 +
+ 5 files changed, 144 insertions(+), 10 deletions(-)
+
+-- 
+2.25.1
+
+
