@@ -2,89 +2,162 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 718AAC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Mar 2022 12:50:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26E59C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Mar 2022 13:01:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236412AbiCRMv4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Mar 2022 08:51:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37998 "EHLO
+        id S236476AbiCRNC3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Mar 2022 09:02:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49152 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230008AbiCRMvz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2022 08:51:55 -0400
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA5481ED063;
-        Fri, 18 Mar 2022 05:50:36 -0700 (PDT)
-Received: by mail-lf1-f47.google.com with SMTP id w27so13947724lfa.5;
-        Fri, 18 Mar 2022 05:50:36 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=OJu/+DhwQ4TG5+tIH51Zo9ItsMV5oal9aAoPrsbEoi8=;
-        b=ivXnSLtpOGaIMauHdRM7eGDHaDKj4RnX9Y5YODQ/G2BpToJJ/iSCriA4Z73IjGOUFW
-         CkaTD2E7qVV6Ws4S3b1s5UIoYQdp3D88wgpeUuoSQHSeby/wn3rX8mB5wnKlluOFL/Iy
-         vQOECIiWHAGdNJVmiWaFxXaURFd4Mkfu6Sg4RRCH1n/RUlh47A4Gc+M8z3gCsRIBBr2B
-         fPMEcMNv1504zycsJa/kRtGAIqU/9GSoVI2N9kILL8W+lQLkgh/3xe0LPCscU4QQCQNl
-         lxnCC0ohEio6ttxL4LpB+uC4b/K3EGaD66qQoSbiyZyB7UT+DJ4mARz2LQgymBrnrOE8
-         zelQ==
-X-Gm-Message-State: AOAM533etmiwV4+u5ehRl8XNCzQ05+3NpZGaIFAdZpFm2miXeLRwcNFy
-        CzzbQAZ7L2dyYuefQLXvl68=
-X-Google-Smtp-Source: ABdhPJyBkRrx7Z0uNMyc5zszBSpP9QRiZv8MKDpJewRS/0i0lodNGcX5PhVl8kjtJW8JfRMm+lnuWg==
-X-Received: by 2002:a05:6512:3981:b0:448:40e5:cf90 with SMTP id j1-20020a056512398100b0044840e5cf90mr5632455lfu.656.1647607834839;
-        Fri, 18 Mar 2022 05:50:34 -0700 (PDT)
-Received: from [192.168.0.17] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.googlemail.com with ESMTPSA id v21-20020a2e2f15000000b002456e6cdab2sm944860ljv.93.2022.03.18.05.50.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 18 Mar 2022 05:50:34 -0700 (PDT)
-Message-ID: <cd976ef0-767b-8cf0-8635-28aeaa6542a3@kernel.org>
-Date:   Fri, 18 Mar 2022 13:50:31 +0100
+        with ESMTP id S236427AbiCRNC1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Mar 2022 09:02:27 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 928672D8138;
+        Fri, 18 Mar 2022 06:01:05 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 19FF461944;
+        Fri, 18 Mar 2022 13:01:05 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2065AC340EC;
+        Fri, 18 Mar 2022 13:01:04 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647608464;
+        bh=EvKvDWMjPs8RviERmN4Qeb/n64LMap7LOYadKAjVVkE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=l+9xq6dRn9tlQYW+m4OOpWxHI7gEPhRgznCS5kNtOTBDzB33jtzQaWbJNW6OdJVce
+         oPUCf1KO5zzWHz+11/IbsI5USKTJoioW+dmYWVd2pV9yXpol++zuu5EN4UCc1Oq/q9
+         dEfqfRF2/NkkeuEyOx3elvJDBBbqIbmCl+F3hDIPSrhJuwK1fk1ChUD5GGncYr1LG4
+         2pmmcbJXnJHRQhThQEWvNN3LaOt4WVOiU8mVjQVhIERPEB5mPFbWQbukxE9lk5Hodw
+         Kbj9ZUQTrcfWqRsD/RVpSDc5MGBdDMYSIzgZCeMBh2F7k9TxxesknY87E9ors3quyA
+         Wrtp28M5fWYFw==
+Received: by pali.im (Postfix)
+        id 077999CF; Fri, 18 Mar 2022 14:01:00 +0100 (CET)
+Date:   Fri, 18 Mar 2022 14:01:00 +0100
+From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
+To:     Marcin Wojtas <mw@semihalf.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ziji Hu <huziji@marvell.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Grzegorz Jaszczyk <jaz@semihalf.com>,
+        Tomasz Nowicki <tn@semihalf.com>,
+        Kostya Porotchkin <kostap@marvell.com>,
+        Alex Leibovich <alexl@marvell.com>,
+        "# 4.0+" <stable@vger.kernel.org>
+Subject: Re: [PATCH] mmc: sdhci-xenon: fix 1.8v regulator stabilization
+Message-ID: <20220318130100.zkdaoviwzwhnixuh@pali>
+References: <20201211141656.24915-1-mw@semihalf.com>
+ <CAPDyKFqsSO+f9iG8vccwXZXDDNHgLEg7bfUe-KfHn2C-ZnOU4A@mail.gmail.com>
+ <20220314154033.4x74zscayee32rrj@pali>
+ <CAPv3WKc4MFeLgnJMWx=YNT5Ta5yi6fVhb4f-Rf211FTEmkvyog@mail.gmail.com>
+ <20220315230333.eyznbu5tuxneizbs@pali>
+ <CAPv3WKc96vDsW_duXYMYbr3X05=-p28N5_cf2PHo-tiwDLjaWg@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH V3 1/2] dt-bindings: mmc: sdhci-msm: Add gcc resets
- strings
-Content-Language: en-US
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, linux-arm-msm@vger.kernel.org
-Cc:     quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sayalil@quicinc.com
-References: <1647532165-6302-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <1647532165-6302-2-git-send-email-quic_c_sbhanu@quicinc.com>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-In-Reply-To: <1647532165-6302-2-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPv3WKc96vDsW_duXYMYbr3X05=-p28N5_cf2PHo-tiwDLjaWg@mail.gmail.com>
+User-Agent: NeoMutt/20180716
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/03/2022 16:49, Shaik Sajida Bhanu wrote:
-> Add gcc hardware reset supported strings for qcom-sdhci controller.
+On Wednesday 16 March 2022 02:03:35 Marcin Wojtas wrote:
+> Hi Pali,
 > 
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
->  1 file changed, 4 insertions(+)
+> śr., 16 mar 2022 o 00:03 Pali Rohár <pali@kernel.org> napisał(a):
+> >
+> > Hello!
+> >
+> > On Monday 14 March 2022 16:51:25 Marcin Wojtas wrote:
+> > > Hi Pali,
+> > >
+> > >
+> > > pon., 14 mar 2022 o 16:40 Pali Rohár <pali@kernel.org> napisał(a):
+> > > >
+> > > > On Monday 11 January 2021 19:06:24 Ulf Hansson wrote:
+> > > > > On Fri, 11 Dec 2020 at 15:17, Marcin Wojtas <mw@semihalf.com> wrote:
+> > > > > >
+> > > > > > From: Alex Leibovich <alexl@marvell.com>
+> > > > > >
+> > > > > > Automatic Clock Gating is a feature used for the power
+> > > > > > consumption optimisation. It turned out that
+> > > > > > during early init phase it may prevent the stable voltage
+> > > > > > switch to 1.8V - due to that on some platfroms an endless
+> > > > > > printout in dmesg can be observed:
+> > > > > > "mmc1: 1.8V regulator output did not became stable"
+> > > > > > Fix the problem by disabling the ACG at very beginning
+> > > > > > of the sdhci_init and let that be enabled later.
+> > > > > >
+> > > > > > Fixes: 3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality")
+> > > > > > Signed-off-by: Alex Leibovich <alexl@marvell.com>
+> > > > > > Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+> > > > > > Cc: stable@vger.kernel.org
+> > > > >
+> > > > > Applied for fixes (by fixing the typos), thanks!
+> > > >
+> > > > Hello!
+> > > >
+> > > > Is not this patch address same issue which was fixed by patch which was
+> > > > merged earlier?
+> > > >
+> > > > bb32e1987bc5 ("mmc: sdhci-xenon: fix annoying 1.8V regulator warning")
+> > > > https://lore.kernel.org/linux-mmc/CAPDyKFqAsvgAjfL-c9ukFNWeGJmufQosR2Eg9SKjXMVpNitdkA@mail.gmail.com/
+> > > >
+> > >
+> > > This indeed look similar. This fix was originally developed for CN913x
+> > > platform without the mentioned patch (I'm wondering if it would also
+> > > suffice to fix A3k board's problem). Anyway, I don't think we have an
+> > > issue here, as everything seems to work fine on top of mainline Linux
+> > > with both changes.
+> >
+> > Yea, there should be no issue. Just question is if we need _both_ fixes.
+> >
+> > I could probably try to revert bb32e1987bc5 and check what happens on
+> > A3k board.
+> >
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> index 6216ed7..f180111 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -62,6 +62,10 @@ Required properties:
->  - qcom,dll-config: Chipset and Platform specific value. Use this field to
->  	specify the DLL_CONFIG register value as per Hardware Programming Guide.
->  
-> +- resets: Phandle and reset specifier for the device's reset.
-> +- reset-names: List of reset signal name strings sorted in the same order as
-> +	       the resets property.
+> Yes, that would be interesting. Please let me know whenever you find
+> time to check.
 
-Please list the actual names used in reset-names.
+Hello! Now I tested kernel with reverted commit bb32e1987bc5 ("mmc:
+sdhci-xenon: fix annoying 1.8V regulator warning") and issue is still
+fixed. I reverted also bb32e1987bc5 ("mmc: sdhci-xenon: fix annoying
+1.8V regulator warning") commit and then issue appeared again.
 
+So any of this commit is fixing that issue on Armada 3720.
 
-Best regards,
-Krzysztof
+Should we revert one of them?
+
+> Best regards,
+> Marcin
+> 
+> > > > >
+> > > > >
+> > > > > > ---
+> > > > > >  drivers/mmc/host/sdhci-xenon.c | 7 ++++++-
+> > > > > >  1 file changed, 6 insertions(+), 1 deletion(-)
+> > > > > >
+> > > > > > diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> > > > > > index c67611fdaa8a..4b05f6fdefb4 100644
+> > > > > > --- a/drivers/mmc/host/sdhci-xenon.c
+> > > > > > +++ b/drivers/mmc/host/sdhci-xenon.c
+> > > > > > @@ -168,7 +168,12 @@ static void xenon_reset_exit(struct sdhci_host *host,
+> > > > > >         /* Disable tuning request and auto-retuning again */
+> > > > > >         xenon_retune_setup(host);
+> > > > > >
+> > > > > > -       xenon_set_acg(host, true);
+> > > > > > +       /*
+> > > > > > +        * The ACG should be turned off at the early init time, in order
+> > > > > > +        * to solve a possile issues with the 1.8V regulator stabilization.
+> > > > > > +        * The feature is enabled in later stage.
+> > > > > > +        */
+> > > > > > +       xenon_set_acg(host, false);
+> > > > > >
+> > > > > >         xenon_set_sdclk_off_idle(host, sdhc_id, false);
+> > > > > >
+> > > > > > --
+> > > > > > 2.29.0
+> > > > > >
