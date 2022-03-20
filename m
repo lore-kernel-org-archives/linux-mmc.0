@@ -2,101 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A6EDC433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 20 Mar 2022 02:13:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7576C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 20 Mar 2022 02:13:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244653AbiCTCPJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 19 Mar 2022 22:15:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57372 "EHLO
+        id S244661AbiCTCPM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 19 Mar 2022 22:15:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244640AbiCTCPG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2022 22:15:06 -0400
-Received: from mail-io1-f53.google.com (mail-io1-f53.google.com [209.85.166.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6849C13D68;
-        Sat, 19 Mar 2022 19:13:44 -0700 (PDT)
-Received: by mail-io1-f53.google.com with SMTP id e22so13342662ioe.11;
-        Sat, 19 Mar 2022 19:13:44 -0700 (PDT)
+        with ESMTP id S244659AbiCTCPK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2022 22:15:10 -0400
+Received: from mail-io1-f49.google.com (mail-io1-f49.google.com [209.85.166.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14E8F13FAE;
+        Sat, 19 Mar 2022 19:13:47 -0700 (PDT)
+Received: by mail-io1-f49.google.com with SMTP id z7so13422439iom.1;
+        Sat, 19 Mar 2022 19:13:47 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
          :message-id;
-        bh=EcBP75kXnzxIJCHk9xGycw2UXPhg1tlo3uKzCGAClzs=;
-        b=h9S7NYwzMq6MYDqJB8+IW8i0dVAns9F3vKQCdQgo6n6H+kJDcNGH+E1FQgRwfyA9Li
-         zO6JCTdfk+U4LsPqlNP2Eq6CBEQ732y2sz98z8CTQoGGb3JSGU+RIOSXGQQVi2aK8KyT
-         v1DjiT4CZv7N6fQFEswl5mHekdpPb2KbKq7oMIUfaGVO1ueneui+Zjrkpwdjicq2AqEj
-         odUmk1wzzco9pj89f/zAsLth1L4lESktVznpD5reNBRGAcw+oYdAjC1b5dle4M0WHSJV
-         QSlhfQq0vFVwchlTbiQlZK6KVNNrrkX/CfUOtZfJJTmuqnTmZ6lkJDLBHBwS/b+UJMKn
-         sKpQ==
-X-Gm-Message-State: AOAM533MJ/4+AS9HEpR7soP8PrhFXAx1YtRff+mdaslea1m/oBdizDgf
-        oU89IpIhQkXYIZo6BLLaeg==
-X-Google-Smtp-Source: ABdhPJxJDPbpWKi67EujRKBkRH8RtGb7+aW3ugz6xBNYrcq3XreB500+i0t7U2WL1fo2Plmn4BTXug==
-X-Received: by 2002:a05:6638:1402:b0:319:fe13:8eee with SMTP id k2-20020a056638140200b00319fe138eeemr8538086jad.130.1647742423702;
-        Sat, 19 Mar 2022 19:13:43 -0700 (PDT)
+        bh=p25aMwhGOhWBbd8mkmtLP5nuvXeH2abYeqFXOGvGry8=;
+        b=Rm61mx5RgWiKZrEgqhKg29pV2493fcET4AwxPFqDBQj3NaU78kfbrXRlzViaTW5Dr3
+         iPly6+HtXlyN8aZyU9p56TsFzagCx8h2k5pGXQuiEKhdkkqNoBLPLg/gVpKWSaVgWEas
+         2cZ/MHqpbCwnfjvtYyjHRcNs4gX8LxrcJ43KBlAi+QGEN2TzYxzcBK0gGEuNUBRhfI5p
+         w4re0w4Ep7BNXL+4Z7MUMaJYs8QLdj+BHSHM9jyPxBkyqxUth2BOr65XIoUuclHdGQkM
+         zKkDKsTHUcriL2jfNcf8fHgbVXGjF4egvsJdJKy5JzcVagNoqAFR1+lv7smV5MLXh40G
+         +ZoA==
+X-Gm-Message-State: AOAM530fA/MZW0iT+FGe17t0QsaEOyU5DPdAKXqGqI90y21tDQjqkuRX
+        yymZSaxDgoqYhsTldAnf1Krm9REdBw==
+X-Google-Smtp-Source: ABdhPJzpRREMVFbQIB8DGhakLsihdCAOKb7CdwEKr94yCa5Mz0je5jMM5kxUI1MCdjm137NZP75rUw==
+X-Received: by 2002:a6b:8bd7:0:b0:646:2804:5c73 with SMTP id n206-20020a6b8bd7000000b0064628045c73mr7270589iod.112.1647742426317;
+        Sat, 19 Mar 2022 19:13:46 -0700 (PDT)
 Received: from robh.at.kernel.org ([64.188.179.253])
-        by smtp.gmail.com with ESMTPSA id d16-20020a05660225d000b00645c8db7767sm6506688iop.35.2022.03.19.19.13.41
+        by smtp.gmail.com with ESMTPSA id v18-20020a6b5b12000000b00645bd8bd288sm6619523ioh.47.2022.03.19.19.13.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 19 Mar 2022 19:13:42 -0700 (PDT)
-Received: (nullmailer pid 2990519 invoked by uid 1000);
+        Sat, 19 Mar 2022 19:13:45 -0700 (PDT)
+Received: (nullmailer pid 2990521 invoked by uid 1000);
         Sun, 20 Mar 2022 02:13:33 -0000
 From:   Rob Herring <robh@kernel.org>
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Tian Tao <tiantao6@hisilicon.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Yue Hu <huyue2@yulong.com>,
-        linux-arm-kernel@lists.infradead.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        angelogioacchino.delregno@collabora.com,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Eric Biggers <ebiggers@google.com>,
-        Satya Tangirala <satyat@google.com>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mediatek@lists.infradead.org, Lucas Stach <dev@lynxeye.de>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Kiwoong Kim <kwmad.kim@samsung.com>
-In-Reply-To: <20220317101215.24985-2-axe.yang@mediatek.com>
-References: <20220317101215.24985-1-axe.yang@mediatek.com> <20220317101215.24985-2-axe.yang@mediatek.com>
-Subject: Re: [RESEND v7 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, huziji@marvell.com,
+        linux-kernel@vger.kernel.org, robh+dt@kernel.org
+In-Reply-To: <20220318033521.1432767-1-chris.packham@alliedtelesis.co.nz>
+References: <20220318033521.1432767-1-chris.packham@alliedtelesis.co.nz>
+Subject: Re: [PATCH] dt-bindings: mmc: xenon: Convert to JSON schema
 Date:   Sat, 19 Mar 2022 20:13:33 -0600
-Message-Id: <1647742413.962309.2990518.nullmailer@robh.at.kernel.org>
+Message-Id: <1647742413.974061.2990520.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 17 Mar 2022 18:12:13 +0800, Axe Yang wrote:
-> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
-> This feature allow SDIO devices alarm asynchronous interrupt to host
-> even when host stop providing clock to SDIO card. An extra wakeup
-> interrupt and pinctrl states for SDIO DAT1 pin state switching are
-> required in this scenario.
+On Fri, 18 Mar 2022 16:35:21 +1300, Chris Packham wrote:
+> Convert the marvell,xenon-sdhci binding to JSON schema. This is a fairly
+> direct conversion so there are some requirements that are documented in
+> prose but not currently enforced.
 > 
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
 > ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 24 ++++++++++++++++++-
->  1 file changed, 23 insertions(+), 1 deletion(-)
+>  .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 ------------
+>  .../bindings/mmc/marvell,xenon-sdhci.yaml     | 252 ++++++++++++++++++
+>  2 files changed, 252 insertions(+), 173 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
 > 
 
 My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
 on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
 yamllint warnings/errors:
+./Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml:38:13: [warning] wrong indentation: expected 14 but found 12 (indentation)
+./Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml:41:13: [warning] wrong indentation: expected 14 but found 12 (indentation)
 
 dtschema/dtc warnings/errors:
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/mtk-sd.yaml: properties:pinctrl-names: {'description': 'Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin will be switched between GPIO mode and SDIO DAT1 mode, state_eint and state_dat1 are mandatory in this scenarios.', 'minItems': 2, 'maxItems': 4, 'items': [{'const': 'default'}, {'const': 'state_uhs'}, {'const': 'state_eint'}, {'const': 'state_dat1'}]} should not be valid under {'required': ['maxItems']}
-	hint: "maxItems" is not needed with an "items" list
-	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/mtk-sd.yaml: ignoring, error in schema: properties: pinctrl-names
-Documentation/devicetree/bindings/mmc/mtk-sd.example.dt.yaml:0:0: /example-0/mmc@11230000: failed to match any schema with compatible: ['mediatek,mt8173-mmc']
 
 doc reference errors (make refcheckdocs):
+MAINTAINERS: Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
 
-See https://patchwork.ozlabs.org/patch/1606491
+See https://patchwork.ozlabs.org/patch/1606868
 
 This check can fail if there are any dependencies. The base for a patch
 series is generally the most recent rc1.
