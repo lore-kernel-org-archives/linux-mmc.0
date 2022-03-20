@@ -2,92 +2,203 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7576C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 20 Mar 2022 02:13:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E314C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun, 20 Mar 2022 11:41:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244661AbiCTCPM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 19 Mar 2022 22:15:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57684 "EHLO
+        id S244732AbiCTLnQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 20 Mar 2022 07:43:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244659AbiCTCPK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Mar 2022 22:15:10 -0400
-Received: from mail-io1-f49.google.com (mail-io1-f49.google.com [209.85.166.49])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14E8F13FAE;
-        Sat, 19 Mar 2022 19:13:47 -0700 (PDT)
-Received: by mail-io1-f49.google.com with SMTP id z7so13422439iom.1;
-        Sat, 19 Mar 2022 19:13:47 -0700 (PDT)
+        with ESMTP id S232223AbiCTLnQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Mar 2022 07:43:16 -0400
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 534F638BF1;
+        Sun, 20 Mar 2022 04:41:51 -0700 (PDT)
+Received: by mail-ed1-f43.google.com with SMTP id k10so1276814edj.2;
+        Sun, 20 Mar 2022 04:41:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
-         :message-id;
-        bh=p25aMwhGOhWBbd8mkmtLP5nuvXeH2abYeqFXOGvGry8=;
-        b=Rm61mx5RgWiKZrEgqhKg29pV2493fcET4AwxPFqDBQj3NaU78kfbrXRlzViaTW5Dr3
-         iPly6+HtXlyN8aZyU9p56TsFzagCx8h2k5pGXQuiEKhdkkqNoBLPLg/gVpKWSaVgWEas
-         2cZ/MHqpbCwnfjvtYyjHRcNs4gX8LxrcJ43KBlAi+QGEN2TzYxzcBK0gGEuNUBRhfI5p
-         w4re0w4Ep7BNXL+4Z7MUMaJYs8QLdj+BHSHM9jyPxBkyqxUth2BOr65XIoUuclHdGQkM
-         zKkDKsTHUcriL2jfNcf8fHgbVXGjF4egvsJdJKy5JzcVagNoqAFR1+lv7smV5MLXh40G
-         +ZoA==
-X-Gm-Message-State: AOAM530fA/MZW0iT+FGe17t0QsaEOyU5DPdAKXqGqI90y21tDQjqkuRX
-        yymZSaxDgoqYhsTldAnf1Krm9REdBw==
-X-Google-Smtp-Source: ABdhPJzpRREMVFbQIB8DGhakLsihdCAOKb7CdwEKr94yCa5Mz0je5jMM5kxUI1MCdjm137NZP75rUw==
-X-Received: by 2002:a6b:8bd7:0:b0:646:2804:5c73 with SMTP id n206-20020a6b8bd7000000b0064628045c73mr7270589iod.112.1647742426317;
-        Sat, 19 Mar 2022 19:13:46 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.253])
-        by smtp.gmail.com with ESMTPSA id v18-20020a6b5b12000000b00645bd8bd288sm6619523ioh.47.2022.03.19.19.13.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 19 Mar 2022 19:13:45 -0700 (PDT)
-Received: (nullmailer pid 2990521 invoked by uid 1000);
-        Sun, 20 Mar 2022 02:13:33 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, huziji@marvell.com,
-        linux-kernel@vger.kernel.org, robh+dt@kernel.org
-In-Reply-To: <20220318033521.1432767-1-chris.packham@alliedtelesis.co.nz>
-References: <20220318033521.1432767-1-chris.packham@alliedtelesis.co.nz>
-Subject: Re: [PATCH] dt-bindings: mmc: xenon: Convert to JSON schema
-Date:   Sat, 19 Mar 2022 20:13:33 -0600
-Message-Id: <1647742413.974061.2990520.nullmailer@robh.at.kernel.org>
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=pToxZLA9n09njUTlQ6yAnOP6dWA8izLb5aIRt0a25NY=;
+        b=npWhfOC/TXdzG1jDJ0Pf40rflD3T0zMp/XTjyaCgnTBgLf6xMFPqa0IrW6IqX1GrBr
+         jMLJa8EMzDFVGvDqb+dsdiHdVdYPJeddt5sHIszFQ4OHRQPwzAy1FqJC0sVpQYQNECBI
+         JpM8EZIe4JBkLege3+kVbNM4s9sYvEgcf+PkuiVxY0KBePO0ZXePNjy/w4iG42CI/k2H
+         k3L/P4kB/lgOQjxmDw0zvS19Akp0tOFBwCu7mZ6EIYuvw3YnlHwAQv1X7AoeeF79WhEt
+         sJQmWFXDX50G5tsOvNKBEqa7hOZrSfqxOOvUsBjJnu6IHINJpvkujSe5axs+CAJ8Fs7c
+         e36A==
+X-Gm-Message-State: AOAM533JNw13FDGYQ2AKKDkUD+8RGerFkZ8JJXipdfyx0iumTgBYZyMX
+        MJcghL6qVF7grnJa7JsTd/Y=
+X-Google-Smtp-Source: ABdhPJz3exzGbAupnzoyNEoKcd1UHRnHQh+ogzLgHco4Wng2wJCsmJzRLaC9s9Yvm++nuGkJfNxp2A==
+X-Received: by 2002:aa7:d904:0:b0:418:d53b:4662 with SMTP id a4-20020aa7d904000000b00418d53b4662mr18712676edr.217.1647776509787;
+        Sun, 20 Mar 2022 04:41:49 -0700 (PDT)
+Received: from [192.168.0.17] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
+        by smtp.googlemail.com with ESMTPSA id y14-20020a056402440e00b00416046b623csm7062643eda.2.2022.03.20.04.41.48
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 20 Mar 2022 04:41:49 -0700 (PDT)
+Message-ID: <c78aa9fa-8001-2c48-7a25-1f44f9952c9b@kernel.org>
+Date:   Sun, 20 Mar 2022 12:41:47 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH v4 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus
+ SP7021
+Content-Language: en-US
+To:     Tony Huang <tonyhuang.sunplus@gmail.com>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, lhjeff911@gmail.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        p.zabel@pengutronix.de
+Cc:     wells.lu@sunplus.com, tony.huang@sunplus.com
+References: <cover.1647652688.git.tonyhuang.sunplus@gmail.com>
+ <27dba330ec0c1cd7edbcec53083f78169713a42e.1647652688.git.tonyhuang.sunplus@gmail.com>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <27dba330ec0c1cd7edbcec53083f78169713a42e.1647652688.git.tonyhuang.sunplus@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 18 Mar 2022 16:35:21 +1300, Chris Packham wrote:
-> Convert the marvell,xenon-sdhci binding to JSON schema. This is a fairly
-> direct conversion so there are some requirements that are documented in
-> prose but not currently enforced.
+On 19/03/2022 02:50, Tony Huang wrote:
+> Add mmc yaml file for Sunplus SP7021
 > 
-> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
 > ---
->  .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 ------------
->  .../bindings/mmc/marvell,xenon-sdhci.yaml     | 252 ++++++++++++++++++
->  2 files changed, 252 insertions(+), 173 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> Changes in v4:
+>  - Addressed comments from Ulf Hansson.
 > 
+>  .../devicetree/bindings/mmc/sunplus,mmc.yaml       | 79 ++++++++++++++++++++++
+>  MAINTAINERS                                        |  6 ++
+>  2 files changed, 85 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml b/Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+> new file mode 100644
+> index 0000000..13ed07c
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+> @@ -0,0 +1,79 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (C) Sunplus Ltd. Co. 2021
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/sunplus,mmc.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: sunplus MMC controller
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+s/sunplus/Sunplus/
 
-yamllint warnings/errors:
-./Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml:38:13: [warning] wrong indentation: expected 14 but found 12 (indentation)
-./Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml:41:13: [warning] wrong indentation: expected 14 but found 12 (indentation)
+> +
+> +allOf:
+> +  - $ref: "mmc-controller.yaml"
 
-dtschema/dtc warnings/errors:
+allOf below maintainers,
 
-doc reference errors (make refcheckdocs):
-MAINTAINERS: Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+> +
+> +maintainers:
+> +  - Tony Huang <tonyhuang.sunplus@gmail.com>
+> +  - Li-hao Kuo <lhjeff911@gmail.com>
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - sunplus,mmc-v1
+> +      - sunplus,mmc-v2
 
-See https://patchwork.ozlabs.org/patch/1606868
+How did this happen? Versions of blocks are usually discouraged, unless
+you have clear specification,. The previous discussion did not end with
+"add v1 and v2".
 
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
+Do you have clear documentation/specification of these blocks? If no,
+please use SoC compatibles.
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    minItems: 1
 
-pip3 install dtschema --upgrade
+maxItems
 
-Please check and re-submit.
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  max-frequency: true
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - resets
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    mmc0: mmc@9c003b00 {
+> +        compatible = "sunplus,mmc-v2";
+> +        reg = <0x9c003b00 0x180>;
+> +        interrupts = <20 IRQ_TYPE_LEVEL_HIGH>;
+> +        clocks = <&clkc 0x4e>;
+> +        resets = <&rstc 0x3e>;
+> +        bus-width = <8>;
+> +        max-frequency = <52000000>;
+> +        non-removable;
+> +        disable-wp;
+> +        cap-mmc-highspeed;
+> +        mmc-ddr-3_3v;
+> +        no-sdio;
+> +        no-sd;
+> +    };
+> +
+> +    mmc1: mmc@9c003e80 {
+> +       compatible = "sunplus,mmc-v1";
+> +       reg = <0x9c003e80 0x280>;
+> +       interrupts = <21 IRQ_TYPE_LEVEL_HIGH>;
+> +       clocks = <&clkc 0x4f>;
+> +       resets = <&rstc 0x3f>;
+> +       pinctrl-names = "default";
+> +       pinctrl-0 = <&mmc1_mux &mmc1_mux_cd>;
+> +       max-frequency = <52000000>;
+> +       disable-wp;
+> +       cap-sd-highspeed;
+> +       no-sdio;
+> +       no-mmc;
+> +    };
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index fb18ce7..2d91431 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -18242,6 +18242,12 @@ L:	netdev@vger.kernel.org
+>  S:	Maintained
+>  F:	drivers/net/ethernet/dlink/sundance.c
+>  
+> +SUNPLUS MMC DRIVER
+> +M:	Tony Huang <tonyhuang.sunplus@gmail.com>
+> +M: Li-hao Kuo <lhjeff911@gmail.com>
 
+Wrong indentation.
+
+> +S:	Maintained
+> +F:	Documentation/devicetree/bindings/mmc/sunplu,mmc.yaml
+
+Wrong file name.
+
+> +
+>  SUPERH
+>  M:	Yoshinori Sato <ysato@users.sourceforge.jp>
+>  M:	Rich Felker <dalias@libc.org>
+
+
+Best regards,
+Krzysztof
