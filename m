@@ -2,97 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0EE1C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 04:17:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61BDFC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 04:55:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243922AbiCUESo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Mar 2022 00:18:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57068 "EHLO
+        id S241681AbiCUE4c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Mar 2022 00:56:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239857AbiCUESo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 00:18:44 -0400
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E988F11434B;
-        Sun, 20 Mar 2022 21:17:18 -0700 (PDT)
-X-UUID: cad40b1b56664c3eb99f8211ddf061ee-20220321
-X-UUID: cad40b1b56664c3eb99f8211ddf061ee-20220321
-Received: from mtkexhb02.mediatek.inc [(172.21.101.103)] by mailgw02.mediatek.com
-        (envelope-from <miles.chen@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 132751500; Mon, 21 Mar 2022 12:17:15 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Mon, 21 Mar 2022 12:17:15 +0800
-Received: from mtksdccf07.mediatek.inc (172.21.84.99) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 21 Mar 2022 12:17:15 +0800
-From:   Miles Chen <miles.chen@mediatek.com>
-To:     <robh@kernel.org>
-CC:     <adrian.hunter@intel.com>, <andrew@aj.id.au>,
-        <andriy.shevchenko@linux.intel.com>,
-        <angelogioacchino.delregno@collabora.com>, <axe.yang@mediatek.com>,
-        <chaotian.jing@mediatek.com>, <dev@lynxeye.de>,
-        <devicetree@vger.kernel.org>, <ebiggers@google.com>,
-        <huyue2@yulong.com>, <kwmad.kim@samsung.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
-        <matthias.bgg@gmail.com>, <robh+dt@kernel.org>,
-        <satyat@google.com>, <swboyd@chromium.org>,
-        <tiantao6@hisilicon.com>, <ulf.hansson@linaro.org>,
-        <wsa+renesas@sang-engineering.com>,
-        <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [RESEND v7 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
-Date:   Mon, 21 Mar 2022 12:17:15 +0800
-Message-ID: <20220321041715.8424-1-miles.chen@mediatek.com>
-X-Mailer: git-send-email 2.18.0
-In-Reply-To: <1647742413.962309.2990518.nullmailer@robh.at.kernel.org>
-References: <1647742413.962309.2990518.nullmailer@robh.at.kernel.org>
+        with ESMTP id S238723AbiCUE4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 00:56:31 -0400
+X-Greylist: delayed 8364 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sun, 20 Mar 2022 21:55:05 PDT
+Received: from mg.sunplus.com (unknown [113.196.136.162])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 61626193DC;
+        Sun, 20 Mar 2022 21:55:04 -0700 (PDT)
+X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
+        ,3)
+Received: from 172.17.9.202
+        by mg01.sunplus.com with MailGates ESMTP Server V5.0(10891:0:AUTH_RELAY)
+        (envelope-from <tony.huang@sunplus.com>); Mon, 21 Mar 2022 12:55:17 +0800 (CST)
+Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
+ sphcmbx01.sunplus.com.tw (172.17.9.202) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.26; Mon, 21 Mar 2022 12:55:12 +0800
+Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
+ sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
+ 15.00.1497.026; Mon, 21 Mar 2022 12:55:12 +0800
+From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
+To:     Krzysztof Kozlowski <krzk@kernel.org>,
+        Tony Huang <tonyhuang.sunplus@gmail.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>
+CC:     =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
+        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+Subject: RE: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Topic: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Index: AQHYOzO6cpYNd+UZBku5eHHWG55gaqzHpeaAgAGhbhA=
+Date:   Mon, 21 Mar 2022 04:55:11 +0000
+Message-ID: <c6ecbe40dc234454b41bcbc0bf073084@sphcmbx02.sunplus.com.tw>
+References: <cover.1647652688.git.tonyhuang.sunplus@gmail.com>
+ <f954fb1c0d1c4950b71a8fc360c78edcca9954de.1647652688.git.tonyhuang.sunplus@gmail.com>
+ <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org>
+In-Reply-To: <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [172.25.108.54]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
-
->My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
->on your patch (DT_CHECKER_FLAGS is new in v5.13):
->
->yamllint warnings/errors:
->
->dtschema/dtc warnings/errors:
->/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/mtk-sd.yaml: properties:pinctrl-names: {'description': 'Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin will be switched between GPIO mode and SDIO DAT1 mode, state_eint and state_dat1 are mandatory in this scenarios.', 'minItems': 2, 'maxItems': 4, 'items': [{'const': 'default'}, {'const': 'state_uhs'}, {'const': 'state_eint'}, {'const': 'state_dat1'}]} should not be valid under {'required': ['maxItems']}
->	hint: "maxItems" is not needed with an "items" list
->	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
->/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/mtk-sd.yaml: ignoring, error in schema: properties: pinctrl-names
->Documentation/devicetree/bindings/mmc/mtk-sd.example.dt.yaml:0:0: /example-0/mmc@11230000: failed to match any schema with compatible: ['mediatek,mt8173-mmc']
->
->doc reference errors (make refcheckdocs):
->
->See https://patchwork.ozlabs.org/patch/1606491
->
->This check can fail if there are any dependencies. The base for a patch
->series is generally the most recent rc1.
->
->If you already ran 'make dt_binding_check' and didn't see the above
->error(s), then make sure 'yamllint' is installed and dt-schema is up to
->date:
->
->pip3 install dtschema --upgrade
->
->Please check and re-submit.
-
-Thanks for this check.
-
-When I use 'make DT_CHECKER_FLAGS=-m dt_binding_check' on this patch,
-the warning message does show up but the 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-does not exit, so I am not able to tell if any error occurs by the exit value.
-
-Would you mind sharing the way your bot capture this error? (Do I have to grep 'error'
-from the log or is there any warning-as-error flags?)
-
-Thanks,
-Miles
+RGVhciBLcnp5c3p0b2Y6DQo+IA0KPiA+ICsJaW50IGRtYV9pbnRfdGhyZXNob2xkOw0KPiA+ICsJ
+c3RydWN0IHNnX21hcHBpbmdfaXRlciBzZ19taXRlcjsgLyogZm9yIHBpbyBtb2RlIHRvIGFjY2Vz
+cyBzZ2xpc3QgKi8NCj4gPiArCWludCBkbWFfdXNlX2ludDsgLyogc2hvdWxkIHJhaXNlIGlycSB3
+aGVuIGRtYSBkb25lICovDQo+ID4gKwlzdHJ1Y3Qgc3BtbWNfdHVuaW5nX2luZm8gZW1tY190dW5p
+bmdfaW5mbzsNCj4gPiArCXN0cnVjdCBzcHNkY190dW5pbmdfaW5mbyBzZF90dW5pbmdfaW5mbzsN
+Cj4gPiArCWludCByZXN0b3JlXzRiaXRfc2Rpb19idXM7DQo+ID4gKwljb25zdCBzdHJ1Y3Qgc3Bt
+bWNfY29tcGF0aWJsZSAqZGV2X2NvbXA7IH07DQo+ID4gKw0KPiA+ICtzdHJ1Y3Qgc3BzZGNfaG9z
+dCB7DQo+IA0KPiBXaGVyZSBpcyB0aGlzIHVzZWQ/DQo+IA0KDQpzdHJ1Y3Qgc3BtbWNfaG9zdHt9
+IGZvciBlbW1jLgkJCQ0Kc3RydWN0IHNwc2RjX2hvc3R7fSBmb3IgU0QgY2FyZC4JCQkNClRoZSBy
+ZWdpc3RlciBiYXNlIGFkZHJlc3MgYW5kIG9mZnNldCBhZGRyZXNzIG9mIGVtbWMgYW5kIHNkIGNh
+cmRzIGFyZSBkaWZmZXJlbnQuCQkJDQplTU1DIGFuZCBzZGNhcmQgYXJlIHRoZWlyIHJlc3BlY3Rp
+dmUgaGFyZHdhcmUgc2V0dGluZ3MuDQoNCg0K
