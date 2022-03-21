@@ -2,30 +2,29 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61BDFC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 04:55:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35A1BC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 07:40:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241681AbiCUE4c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Mar 2022 00:56:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35166 "EHLO
+        id S1344993AbiCUHl3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Mar 2022 03:41:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238723AbiCUE4b (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 00:56:31 -0400
-X-Greylist: delayed 8364 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sun, 20 Mar 2022 21:55:05 PDT
-Received: from mg.sunplus.com (unknown [113.196.136.162])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 61626193DC;
-        Sun, 20 Mar 2022 21:55:04 -0700 (PDT)
+        with ESMTP id S1344992AbiCUHl2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 03:41:28 -0400
+Received: from mg.sunplus.com (unknown [113.196.136.146])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EEF8425E89;
+        Mon, 21 Mar 2022 00:40:00 -0700 (PDT)
 X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
         ,3)
-Received: from 172.17.9.202
-        by mg01.sunplus.com with MailGates ESMTP Server V5.0(10891:0:AUTH_RELAY)
-        (envelope-from <tony.huang@sunplus.com>); Mon, 21 Mar 2022 12:55:17 +0800 (CST)
+Received: from 172.17.9.112
+        by mg02.sunplus.com with MailGates ESMTP Server V5.0(37794:0:AUTH_RELAY)
+        (envelope-from <tony.huang@sunplus.com>); Mon, 21 Mar 2022 15:40:15 +0800 (CST)
 Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
- sphcmbx01.sunplus.com.tw (172.17.9.202) with Microsoft SMTP Server (TLS) id
- 15.0.1497.26; Mon, 21 Mar 2022 12:55:12 +0800
+ sphcmbx02.sunplus.com.tw (172.17.9.112) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.26; Mon, 21 Mar 2022 15:40:09 +0800
 Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
  sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
- 15.00.1497.026; Mon, 21 Mar 2022 12:55:12 +0800
+ 15.00.1497.026; Mon, 21 Mar 2022 15:40:09 +0800
 From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
 To:     Krzysztof Kozlowski <krzk@kernel.org>,
         Tony Huang <tonyhuang.sunplus@gmail.com>,
@@ -40,13 +39,12 @@ CC:     =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
         =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
 Subject: RE: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
 Thread-Topic: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Index: AQHYOzO6cpYNd+UZBku5eHHWG55gaqzHpeaAgAGhbhA=
-Date:   Mon, 21 Mar 2022 04:55:11 +0000
-Message-ID: <c6ecbe40dc234454b41bcbc0bf073084@sphcmbx02.sunplus.com.tw>
+Thread-Index: AQHYOzO6cpYNd+UZBku5eHHWG55gaqzHpeaAgAGhbhCAAC9fIA==
+Date:   Mon, 21 Mar 2022 07:40:09 +0000
+Message-ID: <540322dcc7b246c5939e14abd3064cde@sphcmbx02.sunplus.com.tw>
 References: <cover.1647652688.git.tonyhuang.sunplus@gmail.com>
  <f954fb1c0d1c4950b71a8fc360c78edcca9954de.1647652688.git.tonyhuang.sunplus@gmail.com>
- <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org>
-In-Reply-To: <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org>
+ <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org> 
 Accept-Language: zh-TW, en-US
 Content-Language: zh-TW
 X-MS-Has-Attach: 
@@ -60,15 +58,16 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RGVhciBLcnp5c3p0b2Y6DQo+IA0KPiA+ICsJaW50IGRtYV9pbnRfdGhyZXNob2xkOw0KPiA+ICsJ
-c3RydWN0IHNnX21hcHBpbmdfaXRlciBzZ19taXRlcjsgLyogZm9yIHBpbyBtb2RlIHRvIGFjY2Vz
-cyBzZ2xpc3QgKi8NCj4gPiArCWludCBkbWFfdXNlX2ludDsgLyogc2hvdWxkIHJhaXNlIGlycSB3
-aGVuIGRtYSBkb25lICovDQo+ID4gKwlzdHJ1Y3Qgc3BtbWNfdHVuaW5nX2luZm8gZW1tY190dW5p
-bmdfaW5mbzsNCj4gPiArCXN0cnVjdCBzcHNkY190dW5pbmdfaW5mbyBzZF90dW5pbmdfaW5mbzsN
-Cj4gPiArCWludCByZXN0b3JlXzRiaXRfc2Rpb19idXM7DQo+ID4gKwljb25zdCBzdHJ1Y3Qgc3Bt
-bWNfY29tcGF0aWJsZSAqZGV2X2NvbXA7IH07DQo+ID4gKw0KPiA+ICtzdHJ1Y3Qgc3BzZGNfaG9z
-dCB7DQo+IA0KPiBXaGVyZSBpcyB0aGlzIHVzZWQ/DQo+IA0KDQpzdHJ1Y3Qgc3BtbWNfaG9zdHt9
-IGZvciBlbW1jLgkJCQ0Kc3RydWN0IHNwc2RjX2hvc3R7fSBmb3IgU0QgY2FyZC4JCQkNClRoZSBy
-ZWdpc3RlciBiYXNlIGFkZHJlc3MgYW5kIG9mZnNldCBhZGRyZXNzIG9mIGVtbWMgYW5kIHNkIGNh
-cmRzIGFyZSBkaWZmZXJlbnQuCQkJDQplTU1DIGFuZCBzZGNhcmQgYXJlIHRoZWlyIHJlc3BlY3Rp
-dmUgaGFyZHdhcmUgc2V0dGluZ3MuDQoNCg0K
+RGVhciBLcnp5c3p0b2Y6DQoNCj4gPg0KPiA+ID4gKwlpbnQgZG1hX2ludF90aHJlc2hvbGQ7DQo+
+ID4gPiArCXN0cnVjdCBzZ19tYXBwaW5nX2l0ZXIgc2dfbWl0ZXI7IC8qIGZvciBwaW8gbW9kZSB0
+byBhY2Nlc3Mgc2dsaXN0ICovDQo+ID4gPiArCWludCBkbWFfdXNlX2ludDsgLyogc2hvdWxkIHJh
+aXNlIGlycSB3aGVuIGRtYSBkb25lICovDQo+ID4gPiArCXN0cnVjdCBzcG1tY190dW5pbmdfaW5m
+byBlbW1jX3R1bmluZ19pbmZvOw0KPiA+ID4gKwlzdHJ1Y3Qgc3BzZGNfdHVuaW5nX2luZm8gc2Rf
+dHVuaW5nX2luZm87DQo+ID4gPiArCWludCByZXN0b3JlXzRiaXRfc2Rpb19idXM7DQo+ID4gPiAr
+CWNvbnN0IHN0cnVjdCBzcG1tY19jb21wYXRpYmxlICpkZXZfY29tcDsgfTsNCj4gPiA+ICsNCj4g
+PiA+ICtzdHJ1Y3Qgc3BzZGNfaG9zdCB7DQo+ID4NCj4gPiBXaGVyZSBpcyB0aGlzIHVzZWQ/DQo+
+ID4NCj4gDQo+IHN0cnVjdCBzcG1tY19ob3N0e30gZm9yIGVtbWMuDQo+IHN0cnVjdCBzcHNkY19o
+b3N0e30gZm9yIFNEIGNhcmQuDQo+IFRoZSByZWdpc3RlciBiYXNlIGFkZHJlc3MgYW5kIG9mZnNl
+dCBhZGRyZXNzIG9mIGVtbWMgYW5kIHNkIGNhcmRzIGFyZQ0KPiBkaWZmZXJlbnQuDQo+IGVNTUMg
+YW5kIHNkY2FyZCBhcmUgdGhlaXIgcmVzcGVjdGl2ZSBoYXJkd2FyZSBzZXR0aW5ncy4NCj4gDQoN
+Ckkgd2lsbCByZW1vdmUgc3RydWN0IHNwc2RjX2hvc3R7fS4NCg==
