@@ -2,50 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A82FC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 09:02:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBFA8C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 09:12:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345613AbiCUJDX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Mar 2022 05:03:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39758 "EHLO
+        id S1345659AbiCUJOE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Mar 2022 05:14:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345657AbiCUJDM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 05:03:12 -0400
-Received: from mail-ej1-f43.google.com (mail-ej1-f43.google.com [209.85.218.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 506E088799;
-        Mon, 21 Mar 2022 02:01:47 -0700 (PDT)
-Received: by mail-ej1-f43.google.com with SMTP id o10so9655025ejd.1;
-        Mon, 21 Mar 2022 02:01:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:from
-         :subject:content-language:to:cc:references:in-reply-to
-         :content-transfer-encoding;
-        bh=E8Qau+0wzq+mozrZXVdR8i7saP5ro63onX2XCKgGjPo=;
-        b=n7Rdh5KO4xeTQqS8Gj1dPqbv3rXvEDAjk44t8iGhGd4uBOIC2V2iQYqpuez23BHzh+
-         BVuajzaAy2WnshqVynMyOs/0mUogP2TCFmYVgpKcCfaYjstaUsQugqlSgPj9xAIoIeSt
-         gE9lkxAHTi/HF3QgzgUSxb9BN7kEknPkt23cEHN5xdYe8oAHf29+sRdxFOvVboYo6pCm
-         pOTVzUPTP1yStMdD3vgGKIdIFBxMsboQ5d/FGZStmcdZxKuiP5b7NDpTHuouo8IBrxtK
-         EDbsS2wGfdCImFagCxF+Ta/E6iZmBQ5cgekm6xSBUngkeQut8WQoNkgaWbYKC8HoNNK0
-         TzTg==
-X-Gm-Message-State: AOAM531sb8j5XxmZqvrr8XE9PsOPB6ZPEE9Vrbeoi00W40y5EmjspI64
-        qrXGwpkwEPjOvN2eNxWAiGI=
-X-Google-Smtp-Source: ABdhPJyJtCs/QTnBz7Ahos9m7nuLWKArBgZLNjJtOZ1N8f3LU6ZRxI7xIaWvq1/XpCIdIM3IOBEmiw==
-X-Received: by 2002:a17:907:d0f:b0:6df:d55c:a9a5 with SMTP id gn15-20020a1709070d0f00b006dfd55ca9a5mr8939068ejc.447.1647853305846;
-        Mon, 21 Mar 2022 02:01:45 -0700 (PDT)
-Received: from [192.168.0.17] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.googlemail.com with ESMTPSA id l20-20020a1709062a9400b006ce71a88bf5sm6540726eje.183.2022.03.21.02.01.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Mar 2022 02:01:45 -0700 (PDT)
-Message-ID: <ef173db6-4635-8a77-c3e3-d96b0c2fa7a3@kernel.org>
-Date:   Mon, 21 Mar 2022 10:01:43 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-Subject: Re: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
-Content-Language: en-US
-To:     =?UTF-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>,
+        with ESMTP id S235501AbiCUJOE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 05:14:04 -0400
+Received: from mg.sunplus.com (unknown [113.196.136.146])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 43A81DB4BE;
+        Mon, 21 Mar 2022 02:12:38 -0700 (PDT)
+X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
+        ,3)
+Received: from 172.17.9.202
+        by mg02.sunplus.com with MailGates ESMTP Server V5.0(37793:0:AUTH_RELAY)
+        (envelope-from <tony.huang@sunplus.com>); Mon, 21 Mar 2022 17:13:00 +0800 (CST)
+Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
+ sphcmbx01.sunplus.com.tw (172.17.9.202) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.26; Mon, 21 Mar 2022 17:12:54 +0800
+Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
+ sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
+ 15.00.1497.026; Mon, 21 Mar 2022 17:12:54 +0800
+From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
+To:     Krzysztof Kozlowski <krzk@kernel.org>,
         Tony Huang <tonyhuang.sunplus@gmail.com>,
         "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "robh+dt@kernel.org" <robh+dt@kernel.org>,
@@ -54,46 +35,48 @@ To:     =?UTF-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>,
         "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>
-Cc:     =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
-        =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+CC:     =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
+        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+Subject: RE: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Topic: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Index: AQHYOzO6cpYNd+UZBku5eHHWG55gaqzHpeaAgAGhbhD//8C6gIAAiLaA
+Date:   Mon, 21 Mar 2022 09:12:54 +0000
+Message-ID: <65f7b13e2c9d4bf484ecfd29b6ab4cc7@sphcmbx02.sunplus.com.tw>
 References: <cover.1647652688.git.tonyhuang.sunplus@gmail.com>
  <f954fb1c0d1c4950b71a8fc360c78edcca9954de.1647652688.git.tonyhuang.sunplus@gmail.com>
  <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org>
  <c6ecbe40dc234454b41bcbc0bf073084@sphcmbx02.sunplus.com.tw>
-In-Reply-To: <c6ecbe40dc234454b41bcbc0bf073084@sphcmbx02.sunplus.com.tw>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+ <ef173db6-4635-8a77-c3e3-d96b0c2fa7a3@kernel.org>
+In-Reply-To: <ef173db6-4635-8a77-c3e3-d96b0c2fa7a3@kernel.org>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [172.25.108.54]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/03/2022 05:55, Tony Huang 黃懷厚 wrote:
-> Dear Krzysztof:
->>
->>> +	int dma_int_threshold;
->>> +	struct sg_mapping_iter sg_miter; /* for pio mode to access sglist */
->>> +	int dma_use_int; /* should raise irq when dma done */
->>> +	struct spmmc_tuning_info emmc_tuning_info;
->>> +	struct spsdc_tuning_info sd_tuning_info;
->>> +	int restore_4bit_sdio_bus;
->>> +	const struct spmmc_compatible *dev_comp; };
->>> +
->>> +struct spsdc_host {
->>
->> Where is this used?
->>
-> 
-> struct spmmc_host{} for emmc.			
-> struct spsdc_host{} for SD card.			
-> The register base address and offset address of emmc and sd cards are different.			
-> eMMC and sdcard are their respective hardware settings.
-
-
-This is a weird answer. I asked where is this used (struct spsdc_host).
-There is no single reference of this type. Your answer does not cover it
-all. I know that eMMC and SD are different. That was not the question.
-The question is: point me to the code which uses this type.
-
-
-Best regards,
-Krzysztof
+RGVhciBrcnp5c3p0b2Y6DQoNCj4gPj4+ICsJaW50IGRtYV9pbnRfdGhyZXNob2xkOw0KPiA+Pj4g
+KwlzdHJ1Y3Qgc2dfbWFwcGluZ19pdGVyIHNnX21pdGVyOyAvKiBmb3IgcGlvIG1vZGUgdG8gYWNj
+ZXNzIHNnbGlzdCAqLw0KPiA+Pj4gKwlpbnQgZG1hX3VzZV9pbnQ7IC8qIHNob3VsZCByYWlzZSBp
+cnEgd2hlbiBkbWEgZG9uZSAqLw0KPiA+Pj4gKwlzdHJ1Y3Qgc3BtbWNfdHVuaW5nX2luZm8gZW1t
+Y190dW5pbmdfaW5mbzsNCj4gPj4+ICsJc3RydWN0IHNwc2RjX3R1bmluZ19pbmZvIHNkX3R1bmlu
+Z19pbmZvOw0KPiA+Pj4gKwlpbnQgcmVzdG9yZV80Yml0X3NkaW9fYnVzOw0KPiA+Pj4gKwljb25z
+dCBzdHJ1Y3Qgc3BtbWNfY29tcGF0aWJsZSAqZGV2X2NvbXA7IH07DQo+ID4+PiArDQo+ID4+PiAr
+c3RydWN0IHNwc2RjX2hvc3Qgew0KPiA+Pg0KPiA+PiBXaGVyZSBpcyB0aGlzIHVzZWQ/DQo+ID4+
+DQo+ID4NCj4gPiBzdHJ1Y3Qgc3BtbWNfaG9zdHt9IGZvciBlbW1jLg0KPiA+IHN0cnVjdCBzcHNk
+Y19ob3N0e30gZm9yIFNEIGNhcmQuDQo+ID4gVGhlIHJlZ2lzdGVyIGJhc2UgYWRkcmVzcyBhbmQg
+b2Zmc2V0IGFkZHJlc3Mgb2YgZW1tYyBhbmQgc2QgY2FyZHMgYXJlDQo+IGRpZmZlcmVudC4NCj4g
+PiBlTU1DIGFuZCBzZGNhcmQgYXJlIHRoZWlyIHJlc3BlY3RpdmUgaGFyZHdhcmUgc2V0dGluZ3Mu
+DQo+IA0KPiANCj4gVGhpcyBpcyBhIHdlaXJkIGFuc3dlci4gSSBhc2tlZCB3aGVyZSBpcyB0aGlz
+IHVzZWQgKHN0cnVjdCBzcHNkY19ob3N0KS4NCj4gVGhlcmUgaXMgbm8gc2luZ2xlIHJlZmVyZW5j
+ZSBvZiB0aGlzIHR5cGUuIFlvdXIgYW5zd2VyIGRvZXMgbm90IGNvdmVyIGl0IGFsbC4gSQ0KPiBr
+bm93IHRoYXQgZU1NQyBhbmQgU0QgYXJlIGRpZmZlcmVudC4gVGhhdCB3YXMgbm90IHRoZSBxdWVz
+dGlvbi4NCj4gVGhlIHF1ZXN0aW9uIGlzOiBwb2ludCBtZSB0byB0aGUgY29kZSB3aGljaCB1c2Vz
+IHRoaXMgdHlwZS4NCj4gDQoNClNvcnJ5LCBJIHdpbGwgcmVtb3ZlIHN0cnVjdCBzcHNkY19ob3N0
+IHt9Lg0KDQo=
