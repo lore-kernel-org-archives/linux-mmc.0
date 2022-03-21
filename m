@@ -2,81 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBFA8C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 09:12:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 270F9C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 11:51:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345659AbiCUJOE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Mar 2022 05:14:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49198 "EHLO
+        id S1346863AbiCULwm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Mar 2022 07:52:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47010 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235501AbiCUJOE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 05:14:04 -0400
-Received: from mg.sunplus.com (unknown [113.196.136.146])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 43A81DB4BE;
-        Mon, 21 Mar 2022 02:12:38 -0700 (PDT)
-X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
-        ,3)
-Received: from 172.17.9.202
-        by mg02.sunplus.com with MailGates ESMTP Server V5.0(37793:0:AUTH_RELAY)
-        (envelope-from <tony.huang@sunplus.com>); Mon, 21 Mar 2022 17:13:00 +0800 (CST)
-Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
- sphcmbx01.sunplus.com.tw (172.17.9.202) with Microsoft SMTP Server (TLS) id
- 15.0.1497.26; Mon, 21 Mar 2022 17:12:54 +0800
-Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
- sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
- 15.00.1497.026; Mon, 21 Mar 2022 17:12:54 +0800
-From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
-To:     Krzysztof Kozlowski <krzk@kernel.org>,
-        Tony Huang <tonyhuang.sunplus@gmail.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>
-CC:     =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
-        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
-Subject: RE: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Topic: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Index: AQHYOzO6cpYNd+UZBku5eHHWG55gaqzHpeaAgAGhbhD//8C6gIAAiLaA
-Date:   Mon, 21 Mar 2022 09:12:54 +0000
-Message-ID: <65f7b13e2c9d4bf484ecfd29b6ab4cc7@sphcmbx02.sunplus.com.tw>
-References: <cover.1647652688.git.tonyhuang.sunplus@gmail.com>
- <f954fb1c0d1c4950b71a8fc360c78edcca9954de.1647652688.git.tonyhuang.sunplus@gmail.com>
- <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org>
- <c6ecbe40dc234454b41bcbc0bf073084@sphcmbx02.sunplus.com.tw>
- <ef173db6-4635-8a77-c3e3-d96b0c2fa7a3@kernel.org>
-In-Reply-To: <ef173db6-4635-8a77-c3e3-d96b0c2fa7a3@kernel.org>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [172.25.108.54]
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S1346861AbiCULwg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 07:52:36 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EB9D55494
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Mar 2022 04:51:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=4S4Px63e2+0FVo0SEWjX4AYw/Zi
+        RThDbqzQpdXY0uk8=; b=oAESevOu8MJwUG4o1adMH4KtpWH/2eoSmcbwjO+TA6a
+        lGEZ8rUQjQZl1MfxvSzBiy3fAd0gwqzMWEeOtzhQbUH+mntJ6x+4KhSO6kL0y7/R
+        vDJOP8mgSH4whimqnpvNWnAMtcn0K6Zt+5CKKMjWEzEhQbvxiJEy/7Rgh8TG52l4
+        =
+Received: (qmail 860167 invoked from network); 21 Mar 2022 12:51:05 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Mar 2022 12:51:05 +0100
+X-UD-Smtp-Session: l3s3148p1@EjOBHLnaAKcgAQnoAFxnAN8BywfgXJ9V
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        ath10k@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com,
+        brcm80211-dev-list.pdl@broadcom.com,
+        linux-amlogic@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        linux-rpi-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        SHA-cyfmac-dev-list@infineon.com
+Subject: [RFC PATCH 00/10] mmc: improve API to make clear {h|s}w_reset is for cards
+Date:   Mon, 21 Mar 2022 12:50:46 +0100
+Message-Id: <20220321115059.21803-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RGVhciBrcnp5c3p0b2Y6DQoNCj4gPj4+ICsJaW50IGRtYV9pbnRfdGhyZXNob2xkOw0KPiA+Pj4g
-KwlzdHJ1Y3Qgc2dfbWFwcGluZ19pdGVyIHNnX21pdGVyOyAvKiBmb3IgcGlvIG1vZGUgdG8gYWNj
-ZXNzIHNnbGlzdCAqLw0KPiA+Pj4gKwlpbnQgZG1hX3VzZV9pbnQ7IC8qIHNob3VsZCByYWlzZSBp
-cnEgd2hlbiBkbWEgZG9uZSAqLw0KPiA+Pj4gKwlzdHJ1Y3Qgc3BtbWNfdHVuaW5nX2luZm8gZW1t
-Y190dW5pbmdfaW5mbzsNCj4gPj4+ICsJc3RydWN0IHNwc2RjX3R1bmluZ19pbmZvIHNkX3R1bmlu
-Z19pbmZvOw0KPiA+Pj4gKwlpbnQgcmVzdG9yZV80Yml0X3NkaW9fYnVzOw0KPiA+Pj4gKwljb25z
-dCBzdHJ1Y3Qgc3BtbWNfY29tcGF0aWJsZSAqZGV2X2NvbXA7IH07DQo+ID4+PiArDQo+ID4+PiAr
-c3RydWN0IHNwc2RjX2hvc3Qgew0KPiA+Pg0KPiA+PiBXaGVyZSBpcyB0aGlzIHVzZWQ/DQo+ID4+
-DQo+ID4NCj4gPiBzdHJ1Y3Qgc3BtbWNfaG9zdHt9IGZvciBlbW1jLg0KPiA+IHN0cnVjdCBzcHNk
-Y19ob3N0e30gZm9yIFNEIGNhcmQuDQo+ID4gVGhlIHJlZ2lzdGVyIGJhc2UgYWRkcmVzcyBhbmQg
-b2Zmc2V0IGFkZHJlc3Mgb2YgZW1tYyBhbmQgc2QgY2FyZHMgYXJlDQo+IGRpZmZlcmVudC4NCj4g
-PiBlTU1DIGFuZCBzZGNhcmQgYXJlIHRoZWlyIHJlc3BlY3RpdmUgaGFyZHdhcmUgc2V0dGluZ3Mu
-DQo+IA0KPiANCj4gVGhpcyBpcyBhIHdlaXJkIGFuc3dlci4gSSBhc2tlZCB3aGVyZSBpcyB0aGlz
-IHVzZWQgKHN0cnVjdCBzcHNkY19ob3N0KS4NCj4gVGhlcmUgaXMgbm8gc2luZ2xlIHJlZmVyZW5j
-ZSBvZiB0aGlzIHR5cGUuIFlvdXIgYW5zd2VyIGRvZXMgbm90IGNvdmVyIGl0IGFsbC4gSQ0KPiBr
-bm93IHRoYXQgZU1NQyBhbmQgU0QgYXJlIGRpZmZlcmVudC4gVGhhdCB3YXMgbm90IHRoZSBxdWVz
-dGlvbi4NCj4gVGhlIHF1ZXN0aW9uIGlzOiBwb2ludCBtZSB0byB0aGUgY29kZSB3aGljaCB1c2Vz
-IHRoaXMgdHlwZS4NCj4gDQoNClNvcnJ5LCBJIHdpbGwgcmVtb3ZlIHN0cnVjdCBzcHNkY19ob3N0
-IHt9Lg0KDQo=
+As discussed in 2020 [1], Ulf and I agreed that it would be easier to
+understand the {h|s}w_reset mechanisms if it was clear that they are for
+cards. This RFC series implements that by adding 'card' to the function
+names and changing the parameter to mmc_card where apropriate. Note that
+I only changed the MMC core. The SDHCI driver still uses hw_reset in its
+ops, I leave it to the SDHCI maintainers if they want to change that.
+Also, I didn't convert CAP_HW_RESET to CAP_CARD_HW_RESET yet although it
+should be done IMHO. However, we need an agreement on that first.
+Finally, I also did not check if all the host drivers are really doing a
+card reset or a controller reset. I tried but it was often not obvious
+what is actually happening in these functions without proper manuals.
+
+I tested it with my Renesas boards, so far no regressions. Buildbots are
+currently checking the series. For this RFC, I sent this as one series
+so people can get an overview and comment on that. For a proper release,
+I think patches 1-5 should be one series, and 7-10 probably. Patch 6
+could then be applied once patches 2-4 hit the net tree. That's my
+proposal.
+
+This series is based on mmc/next as of yesterday. A branch is here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/mmc/reset-api
+
+Looking forward to comments. Happy hacking,
+
+   Wolfram
+
+[1] https://lore.kernel.org/all/20200916090121.2350-1-wsa+renesas@sang-engineering.com/
+
+Wolfram Sang (10):
+  mmc: core: improve API to make clear mmc_hw_reset is for cards
+  ath10k: sdio: update to new MMC API for resetting cards
+  brcmfmac: sdio: update to new MMC API for resetting cards
+  mwifiex: sdio: update to new MMC API for resetting cards
+  wlcore: sdio: update to new MMC API for resetting cards
+  mmc: core: remove fallback for mmc_hw_reset()
+  mmc: core: improve API to make clear that mmc_sw_reset is for cards
+  mmc: core: improve API to make clear hw_reset from bus_ops is for
+    cards
+  mmc: core: improve API to make clear sw_reset from bus_ops is for
+    cards
+  mmc: improve API to make clear hw_reset callback is for cards
+
+ drivers/mmc/core/block.c                      |  2 +-
+ drivers/mmc/core/core.c                       | 31 ++++++++++---------
+ drivers/mmc/core/core.h                       |  4 +--
+ drivers/mmc/core/mmc.c                        | 10 +++---
+ drivers/mmc/core/mmc_test.c                   |  3 +-
+ drivers/mmc/core/sd.c                         |  8 ++---
+ drivers/mmc/core/sdio.c                       | 12 ++++---
+ drivers/mmc/host/bcm2835.c                    |  2 +-
+ drivers/mmc/host/dw_mmc.c                     |  2 +-
+ drivers/mmc/host/meson-mx-sdhc-mmc.c          |  2 +-
+ drivers/mmc/host/mtk-sd.c                     |  2 +-
+ drivers/mmc/host/sdhci.c                      |  2 +-
+ drivers/mmc/host/sunxi-mmc.c                  |  2 +-
+ drivers/mmc/host/uniphier-sd.c                |  2 +-
+ drivers/net/wireless/ath/ath10k/sdio.c        |  2 +-
+ .../broadcom/brcm80211/brcmfmac/sdio.c        |  2 +-
+ drivers/net/wireless/marvell/mwifiex/sdio.c   |  2 +-
+ drivers/net/wireless/ti/wlcore/sdio.c         |  2 +-
+ include/linux/mmc/core.h                      |  4 +--
+ include/linux/mmc/host.h                      |  2 +-
+ 20 files changed, 51 insertions(+), 47 deletions(-)
+
+-- 
+2.30.2
+
