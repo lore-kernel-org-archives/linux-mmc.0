@@ -2,39 +2,43 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A61DBC4167B
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 11:51:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD66CC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 11:51:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236268AbiCULwm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Mar 2022 07:52:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47284 "EHLO
+        id S1346866AbiCULwn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Mar 2022 07:52:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346866AbiCULwk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 07:52:40 -0400
+        with ESMTP id S1346894AbiCULwm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 07:52:42 -0400
 Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80F3E15679C
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Mar 2022 04:51:09 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDD8D141FED
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Mar 2022 04:51:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=YTuuwVU35z7nZX
-        Id+G+XxJLrCfLxFx7vvmpo3qJBvUM=; b=TWpQUKY0ISuVpQjnBadom1NUtIZhft
-        PduBXJWbTxsFmktScZMsyUbYBWq1TYpEUiAauquJGxRGNHFA8RPLUxRbDC/bFPbQ
-        BVpySXXgstR/iiuKRQ8tPNQ5Kr88FXzHfp6pjUfWXfEBTyFqGl2IOIEJNiQ8zqZC
-        CHepWQj2XIdK8=
-Received: (qmail 860252 invoked from network); 21 Mar 2022 12:51:07 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Mar 2022 12:51:07 +0100
-X-UD-Smtp-Session: l3s3148p1@zoKWHLnaBKcgAQnoAFxnAN8BywfgXJ9V
+        :mime-version:content-transfer-encoding; s=k1; bh=3/MweonOnAZzh0
+        9fhx+1gPXXRGWjBJLCioPiGXAo618=; b=nFKi4GC/C+rUCjAYG4bFTffa8e/2Ix
+        htMeS+n4hfsDkaQI4dtnpKID6i1jFjEAKBXG5a3MIZeiwb5TAwSvAzniHqXBlOqJ
+        Ck0vMIXpZmgSbZMz2bB9Kb9TXQT5uLka9BJOJvRl/4grj6U5xYMipTffCIkjaKZd
+        tpgZRSId7PGDY=
+Received: (qmail 860337 invoked from network); 21 Mar 2022 12:51:08 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Mar 2022 12:51:08 +0100
+X-UD-Smtp-Session: l3s3148p1@NoWpHLnaCKcgAQnoAFxnAN8BywfgXJ9V
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Amitkumar Karwar <amitkarwar@gmail.com>,
+        Ganapathi Bhat <ganapathi017@gmail.com>,
+        Sharvari Harisangam <sharvari.harisangam@nxp.com>,
+        Xinming Hu <huxinming820@gmail.com>,
         Kalle Valo <kvalo@kernel.org>,
         "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>, ath10k@lists.infradead.org,
+        Jakub Kicinski <kuba@kernel.org>,
         linux-wireless@vger.kernel.org, netdev@vger.kernel.org
-Subject: [RFC PATCH 02/10] ath10k: sdio: update to new MMC API for resetting cards
-Date:   Mon, 21 Mar 2022 12:50:48 +0100
-Message-Id: <20220321115059.21803-3-wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH 04/10] mwifiex: sdio: update to new MMC API for resetting cards
+Date:   Mon, 21 Mar 2022 12:50:50 +0100
+Message-Id: <20220321115059.21803-5-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220321115059.21803-1-wsa+renesas@sang-engineering.com>
 References: <20220321115059.21803-1-wsa+renesas@sang-engineering.com>
@@ -52,22 +56,22 @@ Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 RFC, please do not apply yet.
 
- drivers/net/wireless/ath/ath10k/sdio.c | 2 +-
+ drivers/net/wireless/marvell/mwifiex/sdio.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/net/wireless/ath/ath10k/sdio.c b/drivers/net/wireless/ath/ath10k/sdio.c
-index 63e1c2d783c5..b6c9eb0ab9c8 100644
---- a/drivers/net/wireless/ath/ath10k/sdio.c
-+++ b/drivers/net/wireless/ath/ath10k/sdio.c
-@@ -1633,7 +1633,7 @@ static void ath10k_sdio_hif_power_down(struct ath10k *ar)
- 		return;
- 	}
+diff --git a/drivers/net/wireless/marvell/mwifiex/sdio.c b/drivers/net/wireless/marvell/mwifiex/sdio.c
+index bde9e4bbfffe..8c3730c7d93e 100644
+--- a/drivers/net/wireless/marvell/mwifiex/sdio.c
++++ b/drivers/net/wireless/marvell/mwifiex/sdio.c
+@@ -2639,7 +2639,7 @@ static void mwifiex_sdio_card_reset_work(struct mwifiex_adapter *adapter)
  
--	ret = mmc_hw_reset(ar_sdio->func->card->host);
-+	ret = mmc_card_hw_reset(ar_sdio->func->card);
- 	if (ret)
- 		ath10k_warn(ar, "unable to reset sdio: %d\n", ret);
+ 	/* Run a HW reset of the SDIO interface. */
+ 	sdio_claim_host(func);
+-	ret = mmc_hw_reset(func->card->host);
++	ret = mmc_card_hw_reset(func->card);
+ 	sdio_release_host(func);
  
+ 	switch (ret) {
 -- 
 2.30.2
 
