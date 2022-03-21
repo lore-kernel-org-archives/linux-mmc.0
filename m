@@ -2,72 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35A1BC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 07:40:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9AB6C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Mar 2022 08:17:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344993AbiCUHl3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Mar 2022 03:41:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33658 "EHLO
+        id S231442AbiCUISs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Mar 2022 04:18:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344992AbiCUHl2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 03:41:28 -0400
-Received: from mg.sunplus.com (unknown [113.196.136.146])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EEF8425E89;
-        Mon, 21 Mar 2022 00:40:00 -0700 (PDT)
-X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
-        ,3)
-Received: from 172.17.9.112
-        by mg02.sunplus.com with MailGates ESMTP Server V5.0(37794:0:AUTH_RELAY)
-        (envelope-from <tony.huang@sunplus.com>); Mon, 21 Mar 2022 15:40:15 +0800 (CST)
-Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
- sphcmbx02.sunplus.com.tw (172.17.9.112) with Microsoft SMTP Server (TLS) id
- 15.0.1497.26; Mon, 21 Mar 2022 15:40:09 +0800
-Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
- sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
- 15.00.1497.026; Mon, 21 Mar 2022 15:40:09 +0800
-From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
-To:     Krzysztof Kozlowski <krzk@kernel.org>,
-        Tony Huang <tonyhuang.sunplus@gmail.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>
-CC:     =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
-        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
-Subject: RE: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Topic: [PATCH v4 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Index: AQHYOzO6cpYNd+UZBku5eHHWG55gaqzHpeaAgAGhbhCAAC9fIA==
-Date:   Mon, 21 Mar 2022 07:40:09 +0000
-Message-ID: <540322dcc7b246c5939e14abd3064cde@sphcmbx02.sunplus.com.tw>
-References: <cover.1647652688.git.tonyhuang.sunplus@gmail.com>
- <f954fb1c0d1c4950b71a8fc360c78edcca9954de.1647652688.git.tonyhuang.sunplus@gmail.com>
- <e5426768-1dd0-0bef-25e8-2ab494f7723d@kernel.org> 
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [172.25.108.54]
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S1345135AbiCUISn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2022 04:18:43 -0400
+Received: from mail-ed1-f43.google.com (mail-ed1-f43.google.com [209.85.208.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 601B711C7D9;
+        Mon, 21 Mar 2022 01:17:18 -0700 (PDT)
+Received: by mail-ed1-f43.google.com with SMTP id b24so16828240edu.10;
+        Mon, 21 Mar 2022 01:17:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:from
+         :subject:content-language:to:cc:references:in-reply-to
+         :content-transfer-encoding;
+        bh=UPXEd69sTaiK/uNEn1bkYPH2H2f2n1BGPqtAGLVGAlM=;
+        b=1vgb+KsYh+T5dcILb+vJEdQbg7Ty1oneWwHzd9AzA9StYZN01RHwKWiNaoqwcwndQo
+         lNUPXK8NoShLKLn5WyPDh+033LaPCaIsUwL5EbZV83CnvyPlVcUaV122otEOo3odqOp0
+         Q8L9UO79FfNYAvYpKr7Gf4Ag3mrD2sVn8Owi8/tEAFo4uchusGkxMp8Cto4uNSeTrE8C
+         DAr1JuknVN9OZKAJaaIgv17Jc3AYRUankeG1ElaTjPyAckVIpra3gKcFKKIQ9RqjhAWx
+         qDmEEYWfT39kqxMb6FAYPNjPhjNh8uNLym10A+YEOf3nbLf0ldhsJurJbGLW3l+8xbbK
+         4LSA==
+X-Gm-Message-State: AOAM533xAJq7GvMLQPeQ9Ab8REMnWwprm+oDskzoNjPqDuYTkB+HGWFC
+        llmsHRrwj+N9ozzZHbCaMdA=
+X-Google-Smtp-Source: ABdhPJyWMXLY7z5rSMdohaPlv2/J6RBymfAfq4g9TdxYDtEo9oJQIIYQ1+HwNjN0P3ynt7HJZKzPkQ==
+X-Received: by 2002:a05:6402:1148:b0:413:11e0:1f58 with SMTP id g8-20020a056402114800b0041311e01f58mr21227589edw.113.1647850636901;
+        Mon, 21 Mar 2022 01:17:16 -0700 (PDT)
+Received: from [192.168.0.17] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
+        by smtp.googlemail.com with ESMTPSA id nb6-20020a1709071c8600b006e02910f818sm323062ejc.157.2022.03.21.01.17.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 21 Mar 2022 01:17:16 -0700 (PDT)
+Message-ID: <8331991b-90e9-1649-8faa-4f42b4318488@kernel.org>
+Date:   Mon, 21 Mar 2022 09:17:15 +0100
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+Subject: Re: [PATCH] dt-bindings: mmc: xenon: Convert to JSON schema
+Content-Language: en-US
+To:     Chris Packham <Chris.Packham@alliedtelesis.co.nz>,
+        "huziji@marvell.com" <huziji@marvell.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <20220318033521.1432767-1-chris.packham@alliedtelesis.co.nz>
+ <91b6660d-c22b-0679-4cb9-6ebba9066545@kernel.org>
+ <b2ffd5d0-6cff-3ed1-cdca-e93ca1c6d5d0@alliedtelesis.co.nz>
+In-Reply-To: <b2ffd5d0-6cff-3ed1-cdca-e93ca1c6d5d0@alliedtelesis.co.nz>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RGVhciBLcnp5c3p0b2Y6DQoNCj4gPg0KPiA+ID4gKwlpbnQgZG1hX2ludF90aHJlc2hvbGQ7DQo+
-ID4gPiArCXN0cnVjdCBzZ19tYXBwaW5nX2l0ZXIgc2dfbWl0ZXI7IC8qIGZvciBwaW8gbW9kZSB0
-byBhY2Nlc3Mgc2dsaXN0ICovDQo+ID4gPiArCWludCBkbWFfdXNlX2ludDsgLyogc2hvdWxkIHJh
-aXNlIGlycSB3aGVuIGRtYSBkb25lICovDQo+ID4gPiArCXN0cnVjdCBzcG1tY190dW5pbmdfaW5m
-byBlbW1jX3R1bmluZ19pbmZvOw0KPiA+ID4gKwlzdHJ1Y3Qgc3BzZGNfdHVuaW5nX2luZm8gc2Rf
-dHVuaW5nX2luZm87DQo+ID4gPiArCWludCByZXN0b3JlXzRiaXRfc2Rpb19idXM7DQo+ID4gPiAr
-CWNvbnN0IHN0cnVjdCBzcG1tY19jb21wYXRpYmxlICpkZXZfY29tcDsgfTsNCj4gPiA+ICsNCj4g
-PiA+ICtzdHJ1Y3Qgc3BzZGNfaG9zdCB7DQo+ID4NCj4gPiBXaGVyZSBpcyB0aGlzIHVzZWQ/DQo+
-ID4NCj4gDQo+IHN0cnVjdCBzcG1tY19ob3N0e30gZm9yIGVtbWMuDQo+IHN0cnVjdCBzcHNkY19o
-b3N0e30gZm9yIFNEIGNhcmQuDQo+IFRoZSByZWdpc3RlciBiYXNlIGFkZHJlc3MgYW5kIG9mZnNl
-dCBhZGRyZXNzIG9mIGVtbWMgYW5kIHNkIGNhcmRzIGFyZQ0KPiBkaWZmZXJlbnQuDQo+IGVNTUMg
-YW5kIHNkY2FyZCBhcmUgdGhlaXIgcmVzcGVjdGl2ZSBoYXJkd2FyZSBzZXR0aW5ncy4NCj4gDQoN
-Ckkgd2lsbCByZW1vdmUgc3RydWN0IHNwc2RjX2hvc3R7fS4NCg==
+On 20/03/2022 20:51, Chris Packham wrote:
+> 
+
+(...)
+
+>>> +
+>>> +patternProperties:
+>>> +  "^sdhci@[0-9a-f]+$":
+>>> +    type: object
+>>> +    $ref: mmc-controller.yaml
+>> This is unusual schema... What are you matching here? Are these children
+>> of this device?
+> I was going for compatibility with existing uses. The 
+> mmc-controller.yaml schema expects these nodes to be mmc@... . But all 
+> of the existing usages of these bindings use sdhci@... as the primary 
+> node. I could make my example use mmc@ to squash the warning but I was 
+> hoping to be able to do something that didn't make the existing usages 
+> invalid.
+
+Please do not create inconsistent bindings because some DTS are
+inconsistent. Change the DTS and align them with generic MMC schema.
+Node name should not be considered an ABI, so it can be changed in DTS.
+Some systems unfortunately break (usually Android and Chrome like to
+encode node names), so then it would have to be individually discussed.
+
+>> Looks like you wanted allOf. See some existing examples, like:
+>> Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>>
+>>> +
+>>> +    properties:
+>>> +      compatible:
+>>> +        oneOf:
+>>> +          - const: marvell,armada-3700-sdhci
+>>> +            description: |
+>>> +              Must provide a second register area and marvell,pad-type
+>>> +          - const: marvell,armada-ap806-sdhci
+>>> +          - const: marvell,armada-ap807-sdhci
+>> This looks wrong. Either these can be standalone properties or in a list
+>> like in your last items below.
+> I was trying to allow 'compatible = "marvell,armada-ap806-sdhci";' or 
+> 'compatible = "marvell,armada-ap807-sdhci", "marvell,armada-ap806-sdhci";'
+
+But you have here 807! Both 806 and 807.  So is 807 compatible with 806
+or not?
+
+Best regards,
+Krzysztof
