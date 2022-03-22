@@ -2,173 +2,230 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3A7DC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 09:34:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CBA4C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 11:42:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232593AbiCVJff (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Mar 2022 05:35:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47482 "EHLO
+        id S234341AbiCVLnc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Mar 2022 07:43:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232590AbiCVJfb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 05:35:31 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B90DC2BD9;
-        Tue, 22 Mar 2022 02:34:02 -0700 (PDT)
-X-UUID: 46a6609a7c0344a881cf0174cf2a8715-20220322
-X-UUID: 46a6609a7c0344a881cf0174cf2a8715-20220322
-Received: from mtkexhb02.mediatek.inc [(172.21.101.103)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 845900133; Tue, 22 Mar 2022 17:33:58 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Tue, 22 Mar 2022 17:33:56 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Tue, 22 Mar 2022 17:33:55 +0800
-Message-ID: <4e7a532814510b03b74455f5a924b50a70699ca1.camel@mediatek.com>
-Subject: Re: [PATCH v8 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
- pinctrls properties
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        "Rob Herring" <robh@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        "Eric Biggers" <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        "Stephen Boyd" <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>
-Date:   Tue, 22 Mar 2022 17:33:55 +0800
-In-Reply-To: <5d9c7655-b05e-aa77-d405-c1ec971daa77@collabora.com>
-References: <20220321115133.32121-1-axe.yang@mediatek.com>
-         <20220321115133.32121-2-axe.yang@mediatek.com>
-         <YjkKURNzg8JPbXcg@robh.at.kernel.org>
-         <b03df175f871ee9a6561862f5bd7bceb9cafbde1.camel@mediatek.com>
-         <5d9c7655-b05e-aa77-d405-c1ec971daa77@collabora.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        with ESMTP id S234335AbiCVLnc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 07:43:32 -0400
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ECE67E590
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2022 04:42:03 -0700 (PDT)
+Received: by mail-lf1-x129.google.com with SMTP id bu29so29368886lfb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2022 04:42:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ohGkyUku2elxBgQMe+Wzk69ckX2qDwZ29y2rezztfrI=;
+        b=GWJjzP+T8LfzdkC/lgtEgqaH0Q96FYC/C0slY02APC0DRQyOX2KMXoU2kpdD70fSWC
+         e64lf0o5nRn5KYn/CTE3W2OhzxlaFHD/P21CFNNQ1A02Z4f8+Marqmgzt6V0gbJSai6/
+         57PiH9S4xvc0cMdn6MRwPpxYvZYQv6q6lKglYUnIg5uOIQw7f53jtK9E/jFxev+d13P+
+         Kv7lcLNP22kOn4TVFzU1rtWhOYSZfPk1TiCIixL9Zg+kuj7oVBxwvt778gdpWNUbZ/C1
+         qz3rmIJ+h2qU6ssPaSAAK2kgwyZjYvMfINyOdijHoCMhMiPkGZC5qaHD+ROlEBJ/ag02
+         2Jrw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ohGkyUku2elxBgQMe+Wzk69ckX2qDwZ29y2rezztfrI=;
+        b=R3n49bdA35KKlcxa16xiCgOEbAPH8C70tj4mX9HkCnXmUFVe3lWuDX/zDlTC2rFfsw
+         OHeM1CbZ1b8h1eWxHQ3bWOSorXNxmogNmAj4+OPTOHansk9FqcRgrZ18qcKG9LTau9RI
+         AyEKGCaz6/5SgsrY9+7fQuRNxUCSV9C7o4NPG5nIuNjE9PrzfHUfYwTICI/IIO2RN6+a
+         G1lJij39Nsfou6QzM3biM3lEK7qPA6OQUT9wqCf1c0YIGjQAObxgGQyPQBZcJlBmkUIw
+         MOS3VzFrgwCBqdnqqvp00d4T6nJgMtmiBiKeYKmP1j1+PzdZ4lXv4M1fQiyKo6JcECgB
+         4h7w==
+X-Gm-Message-State: AOAM532SFKV4bpXdvMlVHbYol8jLjw0LeBTXjwu/6flTvyqUHAw6aan/
+        D6def3aE0CbQDNdYqyi3bIroMw==
+X-Google-Smtp-Source: ABdhPJwqSAfEXqQbXnUK0X61C4Eer4DskAuzbJ6jm1N1F9586mdmsWY4vdW+TM2OinTfxpI1TDGBHg==
+X-Received: by 2002:ac2:58f0:0:b0:44a:206c:255d with SMTP id v16-20020ac258f0000000b0044a206c255dmr10010176lfo.124.1647949321742;
+        Tue, 22 Mar 2022 04:42:01 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-129-34.NA.cust.bahnhof.se. [155.4.129.34])
+        by smtp.gmail.com with ESMTPSA id a1-20020a056512390100b004483b717210sm2175684lfu.79.2022.03.22.04.42.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 22 Mar 2022 04:42:00 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC updates for v5.18
+Date:   Tue, 22 Mar 2022 12:41:59 +0100
+Message-Id: <20220322114159.358997-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello AngeloGioacchino,
+Hi Linus,
 
-On Tue, 2022-03-22 at 09:42 +0100, AngeloGioacchino Del Regno wrote:
-> Il 22/03/22 02:35, Axe Yang ha scritto:
-> > On Mon, 2022-03-21 at 18:29 -0500, Rob Herring wrote:
-> > > On Mon, Mar 21, 2022 at 07:51:32PM +0800, Axe Yang wrote:
-> > > > Extend interrupts and pinctrls for SDIO wakeup interrupt
-> > > > feature.
-> > > > This feature allow SDIO devices alarm asynchronous interrupt to
-> > > > host
-> > > > even when host stop providing clock to SDIO card. An extra
-> > > > wakeup
-> > > > interrupt and pinctrl states for SDIO DAT1 pin state switching
-> > > > are
-> > > > required in this scenario.
-> > > > 
-> > > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> > > > ---
-> > > >   .../devicetree/bindings/mmc/mtk-sd.yaml       | 23
-> > > > ++++++++++++++++++-
-> > > >   1 file changed, 22 insertions(+), 1 deletion(-)
-> > > > 
-> > > > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > index 297ada03e3de..f57774535a1d 100644
-> > > > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > @@ -69,12 +69,23 @@ properties:
-> > > >         - const: ahb_cg
-> > > >   
-> > > >     interrupts:
-> > > > -    maxItems: 1
-> > > > +    description:
-> > > > +      Should at least contain MSDC GIC interrupt. To support
-> > > > SDIO
-> > > > in-band wakeup, an extended
-> > > > +      interrupt is required and be configured as wakeup source
-> > > > irq.
-> > > > +    minItems: 1
-> > > > +    maxItems: 2
-> > > >   
-> > > >     pinctrl-names:
-> > > > +    description:
-> > > > +      Should at least contain default and state_uhs. To
-> > > > support
-> > > > SDIO in-band wakeup, dat1 pin
-> > > > +      will be switched between GPIO mode and SDIO DAT1 mode,
-> > > > state_eint and state_dat1 are
-> > > > +      mandatory in this scenarios.
-> > > > +    minItems: 2
-> > > >       items:
-> > > >         - const: default
-> > > >         - const: state_uhs
-> > > > +      - const: state_eint
-> > > > +      - const: state_dat1
-> > > >   
-> > > >     pinctrl-0:
-> > > >       description:
-> > > > @@ -86,6 +97,16 @@ properties:
-> > > >         should contain uhs mode pin ctrl.
-> > > >       maxItems: 1
-> > > >   
-> > > > +  pinctrl-2:
-> > > > +    description:
-> > > > +      should switch dat1 pin to GPIO mode.
-> > > > +    maxItems: 1
-> > > > +
-> > > > +  pinctrl-3:
-> > > > +    description:
-> > > > +      should switch SDIO dat1 pin from GPIO mode back to SDIO
-> > > > mode.
-> > > 
-> > > How is this different than pinctrl-0?
-> > 
-> > pinctrl-0 contains default settings for all IO pins(CLK/CMD/DAT).
-> > pinctrl-1 contains settings for all IO pins(CLK/CMD/DAT) in UHS
-> > mode.
-> > pinctrl-3 is lightweight pinctrl-1, only keep SDIO DAT1 pin
-> > function
-> > switch part.
-> > 
-> 
-> Is there any particular reason why we cannot simply select pinctrl-1
-> again
-> instead of pinctrl-3, apart from the virtually not existent overhead
-> of one more mmio write?
+Here's the PR with the MMC updates for v5.18. There are no updates for MEMSTICK
+this time. Details about the highlights are as usual found in the signed tag.
 
-No, there is no particular reason. 
-I just want to do the pin function switch quick and clean. 
+Please pull this in!
 
-The intention of pinctrl-1 is to set the most initial state of IO pins
-in UHS mode. If I don't need to adjust IO settings any longer, it is
-okay to select pinctrl-1 state instead of pinctrl-3. 
-But think about this scenarios: after initial SDIO IO pins to UHS mode,
-I want to adjust some IO related properties, such as driving strength.
-And I want to keep these settings because with new driving strength,
-the signal is better. I'd rather to choose pinctrl-3 but not pinctrl-1, 
-because I do not want the change be restored after next runtime resume.
-
-Regards,
-Axe
+Kind regards
+Ulf Hansson
 
 
+The following changes since commit 1760fdb6fe9f796fbdb9b4106b3e0bbacc16b55c:
 
+  mmc: core: Restore (almost) the busy polling for MMC_SEND_OP_COND (2022-03-07 11:47:39 +0100)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18
+
+for you to fetch changes up to dc3d879c6ffa25e90875237265898e49b2cabb7e:
+
+  dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC (2022-03-17 11:06:29 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Convert to sysfs_emit() in favor of sprintf()
+ - Improve fallback to speed modes if eMMC HS200 fails
+
+MMC host:
+ - dw_mmc: Allow variants to set minimal supported clock rate
+ - dw-mmc-rockchip: Fix problems with invalid clock rates
+ - litex_mmc: Add new DT based driver for the LiteX's LiteSDCard interface
+ - litex_mmc: Add Gabriel Somlo and Joel Stanley as co-maintainers for LiteX
+ - mtk-sd: Add support for the Mediatek MT8186 variant
+ - renesas_sdhi: Add support for RZ/G2UL variant
+ - renesas_sdhi: Add support for RZ/V2L variant
+ - rtsx_pci: Adjust power-on sequence to conform to the SD spec
+ - sdhci-am654: Add support for TI's AM62 variant
+ - sdhci_am654: Fixup support for TI's AM64 variant
+ - sdhci-esdhc-imx: Add support for the imx93 variant
+ - sdhci-msm: Add support for the msm8953 variant
+ - sdhci-pci-gli: Add support for runtime PM for the GL9763E variant
+ - sdhci-pci-gli: Adjustments of the SSC function for the GL975x variants
+ - sdhci-tegra: Add support for wake on SD card event
+ - sunxi-mmc: Add support for Allwinner's F1c100s variant
+ - sunxi-mmc: Add support for D1 MMC variant
+
+----------------------------------------------------------------
+Alexandre Bailon (1):
+      mmc: mtk-sd: Silence delay phase calculation debug log
+
+Allen-KH Cheng (1):
+      dt-bindings: mmc: Add compatible for Mediatek MT8186
+
+Andy Shevchenko (1):
+      mmc: dw_mmc: Use device_property_string_array_count()
+
+Aniruddha Rao (1):
+      mmc: sdhci-tegra: Enable wake on SD card event
+
+Aswath Govindraju (3):
+      mmc: sdhci_am654: Fix the driver data of AM64 SoC
+      dt-bindings: mmc: sdhci-am654: Add compatible string for AM62 SoC
+      mmc: sdhci_am654: Add Support for TI's AM62 SoC
+
+Bean Huo (4):
+      mmc: wmt-sdmmc: Use of_device_get_match_data() helper
+      mmc: sdhci-tegra: Use of_device_get_match_data() helper
+      mmc: sdhci-of-at91: Use of_device_get_match_data() helper
+      mmc: davinci: Use of_device_get_match_data() helper
+
+Ben Chuang (4):
+      mmc: sdhci-pci-gli: Reduce the SSC value at 205MHz for GL9750 and GL9755
+      mmc: sdhci-pci-gli: Enable SSC at 50MHz and 100MHz for GL9750 and GL9755
+      mmc: sdhci-pci-gli: Add a switch to enable/disable SSC for GL9750 and GL9755
+      mmc: sdhci-pci-gli: Add runtime PM for GL9763E
+
+Biju Das (1):
+      dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC
+
+Gabriel Somlo (3):
+      MAINTAINERS: co-maintain LiteX platform
+      dt-bindings: mmc: Add bindings for LiteSDCard
+      mmc: Add driver for LiteX's LiteSDCard interface
+
+Geert Uytterhoeven (2):
+      mmc: sh_mmcif: Simplify division/shift logic
+      mmc: host: Drop commas after SoC match table sentinels
+
+Jesse Taube (1):
+      dt-bindings: mmc: sunxi: add Allwinner F1c100s compatible
+
+Jiasheng Jiang (1):
+      mmc: davinci_mmc: Handle error for clk_enable
+
+Lad Prabhakar (1):
+      dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
+
+Luca Weiss (1):
+      dt-bindings: mmc: sdhci-msm: Add msm8953 compatible
+
+Peng Fan (1):
+      dt-bindings: mmc: imx-esdhc: Add imx93 compatible string
+
+Peter Geis (2):
+      mmc: dw_mmc: Support setting f_min from host drivers
+      mmc: dw-mmc-rockchip: Fix handling invalid clock rates
+
+Ricky WU (1):
+      mmc: rtsx: add 74 Clocks in power on flow
+
+Samuel Holland (2):
+      dt-bindings: mmc: sunxi: Add D1 MMC and eMMC compatibles
+      mmc: sunxi-mmc: Add D1 MMC variant
+
+Sergey Shtylyov (1):
+      mmc: core: use sysfs_emit() instead of sprintf()
+
+Ulf Hansson (5):
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      mmc: core: Improve fallback to speed modes if eMMC HS200 fails
+      mmc: host: Return an error when ->enable_sdio_irq() ops is missing
+      mmc: core: Drop HS400 caps unless 8-bit bus is supported too
+
+Wen Zhiwei (1):
+      mmc: dw_mmc: Fix potential null pointer risk
+
+Wolfram Sang (1):
+      mmc: tmio: remove outdated members from host struct
+
+ .../bindings/mmc/allwinner,sun4i-a10-mmc.yaml      |   7 +
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |   1 +
+ .../devicetree/bindings/mmc/litex,mmc.yaml         |  78 +++
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |   3 +
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   7 +-
+ .../devicetree/bindings/mmc/sdhci-am654.yaml       |   1 +
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
+ MAINTAINERS                                        |   9 +-
+ drivers/mmc/core/bus.c                             |   9 +-
+ drivers/mmc/core/bus.h                             |   3 +-
+ drivers/mmc/core/host.c                            |  24 +-
+ drivers/mmc/core/mmc.c                             |  37 +-
+ drivers/mmc/core/sd.c                              |  25 +-
+ drivers/mmc/core/sdio.c                            |   5 +-
+ drivers/mmc/core/sdio_bus.c                        |   7 +-
+ drivers/mmc/host/Kconfig                           |  13 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/davinci_mmc.c                     |  12 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 |  27 +-
+ drivers/mmc/host/dw_mmc.c                          |  12 +-
+ drivers/mmc/host/dw_mmc.h                          |   2 +
+ drivers/mmc/host/litex_mmc.c                       | 661 +++++++++++++++++++++
+ drivers/mmc/host/mtk-sd.c                          |   4 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   2 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |  29 +-
+ drivers/mmc/host/sdhci-of-at91.c                   |   6 +-
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  10 +-
+ drivers/mmc/host/sdhci-pci-gli.c                   | 133 ++++-
+ drivers/mmc/host/sdhci-tegra.c                     |  15 +-
+ drivers/mmc/host/sdhci_am654.c                     |  28 +-
+ drivers/mmc/host/sh_mmcif.c                        |   7 +-
+ drivers/mmc/host/sunxi-mmc.c                       |   9 +
+ drivers/mmc/host/tmio_mmc.h                        |   4 -
+ drivers/mmc/host/wmt-sdmmc.c                       |   7 +-
+ 34 files changed, 1076 insertions(+), 123 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
+ create mode 100644 drivers/mmc/host/litex_mmc.c
