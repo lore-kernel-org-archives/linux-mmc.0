@@ -2,230 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CBA4C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 11:42:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB980C43219
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 12:02:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234341AbiCVLnc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Mar 2022 07:43:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46760 "EHLO
+        id S233166AbiCVMEF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Mar 2022 08:04:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234335AbiCVLnc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 07:43:32 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ECE67E590
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2022 04:42:03 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id bu29so29368886lfb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Mar 2022 04:42:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ohGkyUku2elxBgQMe+Wzk69ckX2qDwZ29y2rezztfrI=;
-        b=GWJjzP+T8LfzdkC/lgtEgqaH0Q96FYC/C0slY02APC0DRQyOX2KMXoU2kpdD70fSWC
-         e64lf0o5nRn5KYn/CTE3W2OhzxlaFHD/P21CFNNQ1A02Z4f8+Marqmgzt6V0gbJSai6/
-         57PiH9S4xvc0cMdn6MRwPpxYvZYQv6q6lKglYUnIg5uOIQw7f53jtK9E/jFxev+d13P+
-         Kv7lcLNP22kOn4TVFzU1rtWhOYSZfPk1TiCIixL9Zg+kuj7oVBxwvt778gdpWNUbZ/C1
-         qz3rmIJ+h2qU6ssPaSAAK2kgwyZjYvMfINyOdijHoCMhMiPkGZC5qaHD+ROlEBJ/ag02
-         2Jrw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ohGkyUku2elxBgQMe+Wzk69ckX2qDwZ29y2rezztfrI=;
-        b=R3n49bdA35KKlcxa16xiCgOEbAPH8C70tj4mX9HkCnXmUFVe3lWuDX/zDlTC2rFfsw
-         OHeM1CbZ1b8h1eWxHQ3bWOSorXNxmogNmAj4+OPTOHansk9FqcRgrZ18qcKG9LTau9RI
-         AyEKGCaz6/5SgsrY9+7fQuRNxUCSV9C7o4NPG5nIuNjE9PrzfHUfYwTICI/IIO2RN6+a
-         G1lJij39Nsfou6QzM3biM3lEK7qPA6OQUT9wqCf1c0YIGjQAObxgGQyPQBZcJlBmkUIw
-         MOS3VzFrgwCBqdnqqvp00d4T6nJgMtmiBiKeYKmP1j1+PzdZ4lXv4M1fQiyKo6JcECgB
-         4h7w==
-X-Gm-Message-State: AOAM532SFKV4bpXdvMlVHbYol8jLjw0LeBTXjwu/6flTvyqUHAw6aan/
-        D6def3aE0CbQDNdYqyi3bIroMw==
-X-Google-Smtp-Source: ABdhPJwqSAfEXqQbXnUK0X61C4Eer4DskAuzbJ6jm1N1F9586mdmsWY4vdW+TM2OinTfxpI1TDGBHg==
-X-Received: by 2002:ac2:58f0:0:b0:44a:206c:255d with SMTP id v16-20020ac258f0000000b0044a206c255dmr10010176lfo.124.1647949321742;
-        Tue, 22 Mar 2022 04:42:01 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-129-34.NA.cust.bahnhof.se. [155.4.129.34])
-        by smtp.gmail.com with ESMTPSA id a1-20020a056512390100b004483b717210sm2175684lfu.79.2022.03.22.04.42.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Mar 2022 04:42:00 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC updates for v5.18
-Date:   Tue, 22 Mar 2022 12:41:59 +0100
-Message-Id: <20220322114159.358997-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S231799AbiCVMEE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 08:04:04 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A3A38301B;
+        Tue, 22 Mar 2022 05:02:37 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id BE5ED61382;
+        Tue, 22 Mar 2022 12:02:36 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 545B5C340EC;
+        Tue, 22 Mar 2022 12:02:32 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1647950556;
+        bh=oXomf+OroFKXPI727l4Y0841A5BkhUXzo5xCfhdMsC0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=TKE/1FWW/oIajs0VV3zmrI5NUmCEutISIFYySMXYpw+kvv0dJFWgyqzsVMXykcuoX
+         PyW7CTXlKifLMnywE5dTPyddnXvi+eurEpvnVBN1blVkHfFTNnAhPA7OE976g/tlqX
+         qbH1SznaPVG4E7H6Fq+qBcpe1PMXBezhJxT6ktcaIQRGDLiQWddT0rcKHLQi6S76bn
+         nuH0sA2NVhSCD0GcNMHL/GhCRYNfhBtAtnl4B1E4WmVWpqwLjXfwYlNfiQ+eIw1biZ
+         yxcoyoqSE0Vw3q7w4p3fNwK+Njl8UbLlQfh8LnObtcK56M/8fqDoxNl9qtaEAcMHc9
+         fzBoxgyDpyTYQ==
+Date:   Tue, 22 Mar 2022 12:02:28 +0000
+From:   Mark Brown <broonie@kernel.org>
+To:     Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
+        Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Felipe Balbi <balbi@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Liam Girdwood <lgirdwood@gmail.com>, linux-mmc@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to
+ CCF
+Message-ID: <Yjm61MFGuo0Yug/B@sirena.org.uk>
+References: <20220310233307.99220-3-jmkrzyszt@gmail.com>
+ <20220321215416.236250-1-jmkrzyszt@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="j44egohE1ZoQznmQ"
+Content-Disposition: inline
+In-Reply-To: <20220321215416.236250-1-jmkrzyszt@gmail.com>
+X-Cookie: Drop that pickle!
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
 
-Here's the PR with the MMC updates for v5.18. There are no updates for MEMSTICK
-this time. Details about the highlights are as usual found in the signed tag.
+--j44egohE1ZoQznmQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Please pull this in!
+On Mon, Mar 21, 2022 at 10:54:16PM +0100, Janusz Krzysztofik wrote:
+> In preparation for conversion of OMAP1 clocks to common clock framework,
+> identify users of those clocks which don't call clk_prepare/unprepare()
+> and update them to call clk_prepare_enable/clk_disable_unprepare() instead
+> of just clk_enable/disable(), as required by CCF implementation of clock
+> API.
 
-Kind regards
-Ulf Hansson
+Acked-by: Mark Brown <broonie@kernel.org>
 
+--j44egohE1ZoQznmQ
+Content-Type: application/pgp-signature; name="signature.asc"
 
-The following changes since commit 1760fdb6fe9f796fbdb9b4106b3e0bbacc16b55c:
+-----BEGIN PGP SIGNATURE-----
 
-  mmc: core: Restore (almost) the busy polling for MMC_SEND_OP_COND (2022-03-07 11:47:39 +0100)
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmI5utQACgkQJNaLcl1U
+h9COEQf9ELwbgSwwn1JVU6FAUZODISuwoWMyUuvHTGdNQEvrMH3GFIUbXQVQONw5
+wO62KwasXhYThVzc3rrC74tKTRzwY9/CvA4GNJfZqmHSuXg02O1XqYe6zUmlRbdt
+qxVjr4o/EKcY48qmrI9SV9k4GBDuOeU2fSZJP7EIvFqLC/tfDbQYYuRB+TY9Ig+j
+oTmg/0JXVooTcMULwexILHzRg4S4+mxOAjfsMojVzku0MepzEPzGo0xZDGYmD0RC
+QggKUpiyDnHPKgNk+pEG+1HmSf9sEd2Vb4k2eMfkacZ7Tz81/FON54F8K/213wKl
+hCsEajyZs2COxhX4Xfe+zoGXkLD3bg==
+=HhWj
+-----END PGP SIGNATURE-----
 
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18
-
-for you to fetch changes up to dc3d879c6ffa25e90875237265898e49b2cabb7e:
-
-  dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC (2022-03-17 11:06:29 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Convert to sysfs_emit() in favor of sprintf()
- - Improve fallback to speed modes if eMMC HS200 fails
-
-MMC host:
- - dw_mmc: Allow variants to set minimal supported clock rate
- - dw-mmc-rockchip: Fix problems with invalid clock rates
- - litex_mmc: Add new DT based driver for the LiteX's LiteSDCard interface
- - litex_mmc: Add Gabriel Somlo and Joel Stanley as co-maintainers for LiteX
- - mtk-sd: Add support for the Mediatek MT8186 variant
- - renesas_sdhi: Add support for RZ/G2UL variant
- - renesas_sdhi: Add support for RZ/V2L variant
- - rtsx_pci: Adjust power-on sequence to conform to the SD spec
- - sdhci-am654: Add support for TI's AM62 variant
- - sdhci_am654: Fixup support for TI's AM64 variant
- - sdhci-esdhc-imx: Add support for the imx93 variant
- - sdhci-msm: Add support for the msm8953 variant
- - sdhci-pci-gli: Add support for runtime PM for the GL9763E variant
- - sdhci-pci-gli: Adjustments of the SSC function for the GL975x variants
- - sdhci-tegra: Add support for wake on SD card event
- - sunxi-mmc: Add support for Allwinner's F1c100s variant
- - sunxi-mmc: Add support for D1 MMC variant
-
-----------------------------------------------------------------
-Alexandre Bailon (1):
-      mmc: mtk-sd: Silence delay phase calculation debug log
-
-Allen-KH Cheng (1):
-      dt-bindings: mmc: Add compatible for Mediatek MT8186
-
-Andy Shevchenko (1):
-      mmc: dw_mmc: Use device_property_string_array_count()
-
-Aniruddha Rao (1):
-      mmc: sdhci-tegra: Enable wake on SD card event
-
-Aswath Govindraju (3):
-      mmc: sdhci_am654: Fix the driver data of AM64 SoC
-      dt-bindings: mmc: sdhci-am654: Add compatible string for AM62 SoC
-      mmc: sdhci_am654: Add Support for TI's AM62 SoC
-
-Bean Huo (4):
-      mmc: wmt-sdmmc: Use of_device_get_match_data() helper
-      mmc: sdhci-tegra: Use of_device_get_match_data() helper
-      mmc: sdhci-of-at91: Use of_device_get_match_data() helper
-      mmc: davinci: Use of_device_get_match_data() helper
-
-Ben Chuang (4):
-      mmc: sdhci-pci-gli: Reduce the SSC value at 205MHz for GL9750 and GL9755
-      mmc: sdhci-pci-gli: Enable SSC at 50MHz and 100MHz for GL9750 and GL9755
-      mmc: sdhci-pci-gli: Add a switch to enable/disable SSC for GL9750 and GL9755
-      mmc: sdhci-pci-gli: Add runtime PM for GL9763E
-
-Biju Das (1):
-      dt-bindings: mmc: renesas,sdhi: Document RZ/G2UL SoC
-
-Gabriel Somlo (3):
-      MAINTAINERS: co-maintain LiteX platform
-      dt-bindings: mmc: Add bindings for LiteSDCard
-      mmc: Add driver for LiteX's LiteSDCard interface
-
-Geert Uytterhoeven (2):
-      mmc: sh_mmcif: Simplify division/shift logic
-      mmc: host: Drop commas after SoC match table sentinels
-
-Jesse Taube (1):
-      dt-bindings: mmc: sunxi: add Allwinner F1c100s compatible
-
-Jiasheng Jiang (1):
-      mmc: davinci_mmc: Handle error for clk_enable
-
-Lad Prabhakar (1):
-      dt-bindings: mmc: renesas,sdhi: Document RZ/V2L SoC
-
-Luca Weiss (1):
-      dt-bindings: mmc: sdhci-msm: Add msm8953 compatible
-
-Peng Fan (1):
-      dt-bindings: mmc: imx-esdhc: Add imx93 compatible string
-
-Peter Geis (2):
-      mmc: dw_mmc: Support setting f_min from host drivers
-      mmc: dw-mmc-rockchip: Fix handling invalid clock rates
-
-Ricky WU (1):
-      mmc: rtsx: add 74 Clocks in power on flow
-
-Samuel Holland (2):
-      dt-bindings: mmc: sunxi: Add D1 MMC and eMMC compatibles
-      mmc: sunxi-mmc: Add D1 MMC variant
-
-Sergey Shtylyov (1):
-      mmc: core: use sysfs_emit() instead of sprintf()
-
-Ulf Hansson (5):
-      Merge branch 'fixes' into next
-      Merge branch 'fixes' into next
-      mmc: core: Improve fallback to speed modes if eMMC HS200 fails
-      mmc: host: Return an error when ->enable_sdio_irq() ops is missing
-      mmc: core: Drop HS400 caps unless 8-bit bus is supported too
-
-Wen Zhiwei (1):
-      mmc: dw_mmc: Fix potential null pointer risk
-
-Wolfram Sang (1):
-      mmc: tmio: remove outdated members from host struct
-
- .../bindings/mmc/allwinner,sun4i-a10-mmc.yaml      |   7 +
- .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |   1 +
- .../devicetree/bindings/mmc/litex,mmc.yaml         |  78 +++
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |   3 +
- .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   7 +-
- .../devicetree/bindings/mmc/sdhci-am654.yaml       |   1 +
- .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
- MAINTAINERS                                        |   9 +-
- drivers/mmc/core/bus.c                             |   9 +-
- drivers/mmc/core/bus.h                             |   3 +-
- drivers/mmc/core/host.c                            |  24 +-
- drivers/mmc/core/mmc.c                             |  37 +-
- drivers/mmc/core/sd.c                              |  25 +-
- drivers/mmc/core/sdio.c                            |   5 +-
- drivers/mmc/core/sdio_bus.c                        |   7 +-
- drivers/mmc/host/Kconfig                           |  13 +
- drivers/mmc/host/Makefile                          |   1 +
- drivers/mmc/host/davinci_mmc.c                     |  12 +-
- drivers/mmc/host/dw_mmc-rockchip.c                 |  27 +-
- drivers/mmc/host/dw_mmc.c                          |  12 +-
- drivers/mmc/host/dw_mmc.h                          |   2 +
- drivers/mmc/host/litex_mmc.c                       | 661 +++++++++++++++++++++
- drivers/mmc/host/mtk-sd.c                          |   4 +-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   2 +-
- drivers/mmc/host/rtsx_pci_sdmmc.c                  |  29 +-
- drivers/mmc/host/sdhci-of-at91.c                   |   6 +-
- drivers/mmc/host/sdhci-of-esdhc.c                  |  10 +-
- drivers/mmc/host/sdhci-pci-gli.c                   | 133 ++++-
- drivers/mmc/host/sdhci-tegra.c                     |  15 +-
- drivers/mmc/host/sdhci_am654.c                     |  28 +-
- drivers/mmc/host/sh_mmcif.c                        |   7 +-
- drivers/mmc/host/sunxi-mmc.c                       |   9 +
- drivers/mmc/host/tmio_mmc.h                        |   4 -
- drivers/mmc/host/wmt-sdmmc.c                       |   7 +-
- 34 files changed, 1076 insertions(+), 123 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/litex,mmc.yaml
- create mode 100644 drivers/mmc/host/litex_mmc.c
+--j44egohE1ZoQznmQ--
