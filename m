@@ -2,92 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB980C43219
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 12:02:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21623C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 16:21:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233166AbiCVMEF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Mar 2022 08:04:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44232 "EHLO
+        id S239033AbiCVQXG convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Mar 2022 12:23:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231799AbiCVMEE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 08:04:04 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A3A38301B;
-        Tue, 22 Mar 2022 05:02:37 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id BE5ED61382;
-        Tue, 22 Mar 2022 12:02:36 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 545B5C340EC;
-        Tue, 22 Mar 2022 12:02:32 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1647950556;
-        bh=oXomf+OroFKXPI727l4Y0841A5BkhUXzo5xCfhdMsC0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=TKE/1FWW/oIajs0VV3zmrI5NUmCEutISIFYySMXYpw+kvv0dJFWgyqzsVMXykcuoX
-         PyW7CTXlKifLMnywE5dTPyddnXvi+eurEpvnVBN1blVkHfFTNnAhPA7OE976g/tlqX
-         qbH1SznaPVG4E7H6Fq+qBcpe1PMXBezhJxT6ktcaIQRGDLiQWddT0rcKHLQi6S76bn
-         nuH0sA2NVhSCD0GcNMHL/GhCRYNfhBtAtnl4B1E4WmVWpqwLjXfwYlNfiQ+eIw1biZ
-         yxcoyoqSE0Vw3q7w4p3fNwK+Njl8UbLlQfh8LnObtcK56M/8fqDoxNl9qtaEAcMHc9
-         fzBoxgyDpyTYQ==
-Date:   Tue, 22 Mar 2022 12:02:28 +0000
-From:   Mark Brown <broonie@kernel.org>
-To:     Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
-        Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org,
+        with ESMTP id S239032AbiCVQXG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 12:23:06 -0400
+Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA5B7245AD;
+        Tue, 22 Mar 2022 09:21:37 -0700 (PDT)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id B3EAA4638F2;
+        Tue, 22 Mar 2022 17:21:35 +0100 (CET)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id A2DC44638E4;
+        Tue, 22 Mar 2022 17:21:35 +0100 (CET)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Tue, 22 Mar 2022 17:21:35 +0100 (CET)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Tue, 22 Mar
+ 2022 17:21:35 +0100
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0986.022; Tue, 22 Mar 2022 17:21:35 +0100
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, Felipe Balbi <balbi@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Liam Girdwood <lgirdwood@gmail.com>, linux-mmc@vger.kernel.org,
-        alsa-devel@alsa-project.org
-Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to
- CCF
-Message-ID: <Yjm61MFGuo0Yug/B@sirena.org.uk>
-References: <20220310233307.99220-3-jmkrzyszt@gmail.com>
- <20220321215416.236250-1-jmkrzyszt@gmail.com>
+        Adrian Hunter <adrian.hunter@intel.com>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+CC:     Avri Altman <Avri.Altman@wdc.com>,
+        "david-b@pacbell.net" <david-b@pacbell.net>,
+        "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH] mmc: block: Check for errors after write on SPI
+Thread-Topic: [PATCH] mmc: block: Check for errors after write on SPI
+Thread-Index: AQHYPgh2IUgShFZhDU2/hO/RN7a7Qw==
+Date:   Tue, 22 Mar 2022 16:21:34 +0000
+Message-ID: <9d1ea819e4bb4222a227a02d5f6ad97c@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.154.1.4]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="j44egohE1ZoQznmQ"
-Content-Disposition: inline
-In-Reply-To: <20220321215416.236250-1-jmkrzyszt@gmail.com>
-X-Cookie: Drop that pickle!
+X-TMASE-Version: DDEI-5.1-8.6.1018-26788.001
+X-TMASE-Result: 10--2.793200-10.000000
+X-TMASE-MatchedRID: 0aps3uOmWi5rFdvBEmTnvLZ0InVwVLVTn5nfR7I2dFOxPXYIh1l6dlg7
+        cH4SOkOpdWqA+wY3gFZusJxXwmCOnpDH5Y6LoY7BRZfQN+FVqbA1kR+05VC1hsiCh8yBqE+tbiP
+        oclJOCy2GN/nQcKVf4OaffHI8kAmiHY/bzRmIaZH2TmdnNlUFIJki3iIBA3o/d3XtjqAaoMLBTP
+        qP0WxWQAGRC3bBIF8o0+pR+Ea5cIJI5l15C51feb+viKbH3Jj7+VJ6lZyB0s/3K1BQq7xa/qPFj
+        JEFr+olIoOsWgr8s12OhzOa6g8KrZJJPyubgmhlggtVtSto6r/F+XkGTl73rdhmSDF+y18n4CzB
+        jSy1DpI=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: d857b4c3-3f2c-4488-ad4d-658a55c19b80-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Introduce a SEND_STATUS check for writes through SPI to not mark
+an unsuccessful write as successful.
 
---j44egohE1ZoQznmQ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Since SPI SD/MMC does not have states, after a write, the card will
+just hold the line LOW until it is ready again. The driver marks the
+write therefore as completed as soon as it reads something other than
+all zeroes.
+The driver does not distinguish from a card no longer signalling busy
+and it being disconnected (and the line being pulled-up by the host).
+This lead to writes being marked as successful when disconnecting
+a busy card.
+Now the card is ensured to be still connected by an additional CMD13,
+just like non-SPI is ensured to go back to TRAN state.
 
-On Mon, Mar 21, 2022 at 10:54:16PM +0100, Janusz Krzysztofik wrote:
-> In preparation for conversion of OMAP1 clocks to common clock framework,
-> identify users of those clocks which don't call clk_prepare/unprepare()
-> and update them to call clk_prepare_enable/clk_disable_unprepare() instead
-> of just clk_enable/disable(), as required by CCF implementation of clock
-> API.
+While at it and since we already poll for the post-write status anyway,
+we might as well check for SPIs error bits (any of them).
 
-Acked-by: Mark Brown <broonie@kernel.org>
+The disconnecting card problem is reproducable for me after continuous
+write activity and randomly disconnecting, around every 20-50 tries
+on SPI DS for some card.
 
---j44egohE1ZoQznmQ
-Content-Type: application/pgp-signature; name="signature.asc"
+Fixes: 7213d175e3b6f ("MMC/SD card driver learns SPI")
+Cc: stable@vger.kernel.org
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ drivers/mmc/core/block.c | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
 
------BEGIN PGP SIGNATURE-----
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 4e67c1403cc9..fa34c4bbeebd 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1903,9 +1903,32 @@ static int mmc_blk_card_busy(struct mmc_card *card, struct request *req)
+ 	struct mmc_blk_busy_data cb_data;
+ 	int err;
+ 
+-	if (mmc_host_is_spi(card->host) || rq_data_dir(req) == READ)
++	if (rq_data_dir(req) == READ)
+ 		return 0;
+ 
++	/*
++	 * SPI does not have a TRAN state we have to wait on, instead the
++	 * card is ready again when it no longer holds the line LOW.
++	 * We still have to ensure two things here before we know the write
++	 * was successful:
++	 * 1. The card has not disconnected during busy and we actually read our
++	 * own pull-up, thinking it was still connected, so ensure it
++	 * still responds.
++	 * 2. Check for any error bits, in particular R1_SPI_IDLE to catch a
++	 * just reconnected card after being disconnected during busy.
++	 */
++	if (mmc_host_is_spi(card->host)) {
++		u32 status = 0;
++
++		err = __mmc_send_status(card, &status, 0);
++		/* All R1 and R2 bits of SPI are errors in our case */
++		if (status)
++			err = err ? err : -EIO;
++		if (err)
++			mqrq->brq.data.bytes_xfered = 0;
++		return err;
++	}
++
+ 	cb_data.card = card;
+ 	cb_data.status = 0;
+ 	err = __mmc_poll_for_busy(card->host, 0, MMC_BLK_TIMEOUT_MS,
+-- 
+2.34.1
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmI5utQACgkQJNaLcl1U
-h9COEQf9ELwbgSwwn1JVU6FAUZODISuwoWMyUuvHTGdNQEvrMH3GFIUbXQVQONw5
-wO62KwasXhYThVzc3rrC74tKTRzwY9/CvA4GNJfZqmHSuXg02O1XqYe6zUmlRbdt
-qxVjr4o/EKcY48qmrI9SV9k4GBDuOeU2fSZJP7EIvFqLC/tfDbQYYuRB+TY9Ig+j
-oTmg/0JXVooTcMULwexILHzRg4S4+mxOAjfsMojVzku0MepzEPzGo0xZDGYmD0RC
-QggKUpiyDnHPKgNk+pEG+1HmSf9sEd2Vb4k2eMfkacZ7Tz81/FON54F8K/213wKl
-hCsEajyZs2COxhX4Xfe+zoGXkLD3bg==
-=HhWj
------END PGP SIGNATURE-----
-
---j44egohE1ZoQznmQ--
