@@ -2,182 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 834F9C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 16:42:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F337C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Mar 2022 18:44:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239217AbiCVQnd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Mar 2022 12:43:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51166 "EHLO
+        id S234742AbiCVSqS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Mar 2022 14:46:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236602AbiCVQnc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 12:43:32 -0400
-Received: from mail-oi1-f176.google.com (mail-oi1-f176.google.com [209.85.167.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2F0C7463C;
-        Tue, 22 Mar 2022 09:42:04 -0700 (PDT)
-Received: by mail-oi1-f176.google.com with SMTP id e4so17008603oif.2;
-        Tue, 22 Mar 2022 09:42:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=f19PtgxgIFInjc+IlAHkQp6KzpsdEzJgw42yMBWHdQg=;
-        b=kQwgwdEcuemqrF7dnyGxmc0ir6Qoi1GS5OZ0cVJfR5Q7FkCZsYRlPThQoDUuKVBORT
-         XZmJPnpsWyK+MuD+LnqFoQ8emgOsH14FNlj7vtys5k10XsyZ7DXtssOUPeHK6KNyUMKg
-         xxo5EjrBuTyDnJl2hkTBzK5Qb1H7QuAON2DbZGQe0duGwlDYQi/jBt+CLevzIe82I7Gm
-         l9iP2lc0wWgr65BjT5GdEz+Z1yMh6IIXB16ni1TCe84WMk23SGf5F8e5oIoupPViV/8O
-         7ZxAUzn/TGKmjOiz3r/FqkSvbBWMZp+lylm4ETUagQ+ZsbKEIxd2lcWbou0OzbhLXF/c
-         WcYA==
-X-Gm-Message-State: AOAM530CV+bAmYyHZnrSoTiiNtCvA6l29EASPvGwbsDnTfUJ6UsiK7pg
-        Z/5OABcD2v0hs5/8qKaSbw==
-X-Google-Smtp-Source: ABdhPJy77nVIsmtyMrQZ89IidhxzPS7fqu8uM2zZDvVPEioBV9LTEyx/xmCMVJUZEAwG9u6Urw0D7Q==
-X-Received: by 2002:aca:eb58:0:b0:2d9:deea:2014 with SMTP id j85-20020acaeb58000000b002d9deea2014mr2513406oih.83.1647967324171;
-        Tue, 22 Mar 2022 09:42:04 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id s125-20020acaa983000000b002ecdbaf98fesm8932484oie.34.2022.03.22.09.42.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 22 Mar 2022 09:42:03 -0700 (PDT)
-Received: (nullmailer pid 2149693 invoked by uid 1000);
-        Tue, 22 Mar 2022 16:42:01 -0000
-Date:   Tue, 22 Mar 2022 11:42:01 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
+        with ESMTP id S234151AbiCVSqS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 14:46:18 -0400
+Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 027353B3C6;
+        Tue, 22 Mar 2022 11:44:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1647974689; x=1679510689;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=Z9ISvqYW+aTilxDXA9Qpu3ET59simZEgcBrqEX9APhA=;
+  b=WEqkixNrv8Yg6RumBPTxNK9NpMxqtqjq7waUgbBYUvBUP2kxVpv1m0yv
+   GY8EJn3a/FWMvjdMPhD/XeRuYhN1ltnSriIrH/NzPjD7mEYGmV7bJzPOI
+   +Xna8XHFADHkNmY6xgOswe5npn8o6Y4bv5wOaKcCDL8h7OfFrgc17h8Ma
+   6nspBNMdfFVrOMK+0lZN+ZWhfT6a8w1YwRb0za5/+ldqWOD06v0E03HQE
+   o5cl26cT4jCQ3Jmz3bLyikLjQBkEemJ/iHLJeRY3iG8OcGBdjjP8jAo1w
+   0POH1HS1UEFK7aihwI85Vj1eBlmV7ufWwreM9FOSEX56xnr57haAH3gLC
+   A==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10294"; a="344347989"
+X-IronPort-AV: E=Sophos;i="5.90,202,1643702400"; 
+   d="scan'208";a="344347989"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Mar 2022 11:44:49 -0700
+X-IronPort-AV: E=Sophos;i="5.90,202,1643702400"; 
+   d="scan'208";a="649120085"
+Received: from smile.fi.intel.com ([10.237.72.59])
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Mar 2022 11:44:47 -0700
+Received: from andy by smile.fi.intel.com with local (Exim 4.95)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1nWjUH-004jQF-U9;
+        Tue, 22 Mar 2022 20:44:09 +0200
+Date:   Tue, 22 Mar 2022 20:44:09 +0200
+From:   "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>
+To:     Christian =?iso-8859-1?Q?L=F6hle?= <CLoehle@hyperstone.com>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org
-Subject: Re: [PATCH v8 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
- pinctrls properties
-Message-ID: <Yjn8WVBdwiCrstx5@robh.at.kernel.org>
-References: <20220321115133.32121-1-axe.yang@mediatek.com>
- <20220321115133.32121-2-axe.yang@mediatek.com>
- <YjkKURNzg8JPbXcg@robh.at.kernel.org>
- <b03df175f871ee9a6561862f5bd7bceb9cafbde1.camel@mediatek.com>
- <5d9c7655-b05e-aa77-d405-c1ec971daa77@collabora.com>
- <4e7a532814510b03b74455f5a924b50a70699ca1.camel@mediatek.com>
+        Avri Altman <Avri.Altman@wdc.com>,
+        "david-b@pacbell.net" <david-b@pacbell.net>
+Subject: Re: [PATCH] mmc: block: Check for errors after write on SPI
+Message-ID: <YjoY+Z/iuIoNDhch@smile.fi.intel.com>
+References: <9d1ea819e4bb4222a227a02d5f6ad97c@hyperstone.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <4e7a532814510b03b74455f5a924b50a70699ca1.camel@mediatek.com>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <9d1ea819e4bb4222a227a02d5f6ad97c@hyperstone.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 22, 2022 at 05:33:55PM +0800, Axe Yang wrote:
-> Hello AngeloGioacchino,
+On Tue, Mar 22, 2022 at 04:21:34PM +0000, Christian Löhle wrote:
+> Introduce a SEND_STATUS check for writes through SPI to not mark
+> an unsuccessful write as successful.
 > 
-> On Tue, 2022-03-22 at 09:42 +0100, AngeloGioacchino Del Regno wrote:
-> > Il 22/03/22 02:35, Axe Yang ha scritto:
-> > > On Mon, 2022-03-21 at 18:29 -0500, Rob Herring wrote:
-> > > > On Mon, Mar 21, 2022 at 07:51:32PM +0800, Axe Yang wrote:
-> > > > > Extend interrupts and pinctrls for SDIO wakeup interrupt
-> > > > > feature.
-> > > > > This feature allow SDIO devices alarm asynchronous interrupt to
-> > > > > host
-> > > > > even when host stop providing clock to SDIO card. An extra
-> > > > > wakeup
-> > > > > interrupt and pinctrl states for SDIO DAT1 pin state switching
-> > > > > are
-> > > > > required in this scenario.
-> > > > > 
-> > > > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> > > > > ---
-> > > > >   .../devicetree/bindings/mmc/mtk-sd.yaml       | 23
-> > > > > ++++++++++++++++++-
-> > > > >   1 file changed, 22 insertions(+), 1 deletion(-)
-> > > > > 
-> > > > > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > index 297ada03e3de..f57774535a1d 100644
-> > > > > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > @@ -69,12 +69,23 @@ properties:
-> > > > >         - const: ahb_cg
-> > > > >   
-> > > > >     interrupts:
-> > > > > -    maxItems: 1
-> > > > > +    description:
-> > > > > +      Should at least contain MSDC GIC interrupt. To support
-> > > > > SDIO
-> > > > > in-band wakeup, an extended
-> > > > > +      interrupt is required and be configured as wakeup source
-> > > > > irq.
-> > > > > +    minItems: 1
-> > > > > +    maxItems: 2
-> > > > >   
-> > > > >     pinctrl-names:
-> > > > > +    description:
-> > > > > +      Should at least contain default and state_uhs. To
-> > > > > support
-> > > > > SDIO in-band wakeup, dat1 pin
-> > > > > +      will be switched between GPIO mode and SDIO DAT1 mode,
-> > > > > state_eint and state_dat1 are
-> > > > > +      mandatory in this scenarios.
-> > > > > +    minItems: 2
-> > > > >       items:
-> > > > >         - const: default
-> > > > >         - const: state_uhs
-> > > > > +      - const: state_eint
-> > > > > +      - const: state_dat1
-> > > > >   
-> > > > >     pinctrl-0:
-> > > > >       description:
-> > > > > @@ -86,6 +97,16 @@ properties:
-> > > > >         should contain uhs mode pin ctrl.
-> > > > >       maxItems: 1
-> > > > >   
-> > > > > +  pinctrl-2:
-> > > > > +    description:
-> > > > > +      should switch dat1 pin to GPIO mode.
-> > > > > +    maxItems: 1
-> > > > > +
-> > > > > +  pinctrl-3:
-> > > > > +    description:
-> > > > > +      should switch SDIO dat1 pin from GPIO mode back to SDIO
-> > > > > mode.
-> > > > 
-> > > > How is this different than pinctrl-0?
-> > > 
-> > > pinctrl-0 contains default settings for all IO pins(CLK/CMD/DAT).
-> > > pinctrl-1 contains settings for all IO pins(CLK/CMD/DAT) in UHS
-> > > mode.
-> > > pinctrl-3 is lightweight pinctrl-1, only keep SDIO DAT1 pin
-> > > function
-> > > switch part.
-> > > 
-> > 
-> > Is there any particular reason why we cannot simply select pinctrl-1
-> > again
-> > instead of pinctrl-3, apart from the virtually not existent overhead
-> > of one more mmio write?
+> Since SPI SD/MMC does not have states, after a write, the card will
+> just hold the line LOW until it is ready again. The driver marks the
+> write therefore as completed as soon as it reads something other than
+> all zeroes.
+> The driver does not distinguish from a card no longer signalling busy
+> and it being disconnected (and the line being pulled-up by the host).
+> This lead to writes being marked as successful when disconnecting
+> a busy card.
+> Now the card is ensured to be still connected by an additional CMD13,
+> just like non-SPI is ensured to go back to TRAN state.
 > 
-> No, there is no particular reason. 
-> I just want to do the pin function switch quick and clean. 
+> While at it and since we already poll for the post-write status anyway,
+> we might as well check for SPIs error bits (any of them).
 > 
-> The intention of pinctrl-1 is to set the most initial state of IO pins
-> in UHS mode. If I don't need to adjust IO settings any longer, it is
-> okay to select pinctrl-1 state instead of pinctrl-3. 
-> But think about this scenarios: after initial SDIO IO pins to UHS mode,
-> I want to adjust some IO related properties, such as driving strength.
-> And I want to keep these settings because with new driving strength,
-> the signal is better. I'd rather to choose pinctrl-3 but not pinctrl-1, 
-> because I do not want the change be restored after next runtime resume.
+> The disconnecting card problem is reproducable for me after continuous
+> write activity and randomly disconnecting, around every 20-50 tries
+> on SPI DS for some card.
 
-The pinctrl-X properties set modes, they aren't supposed to be a state 
-machine.
+...
 
-Rob
+> +	if (mmc_host_is_spi(card->host)) {
+> +		u32 status = 0;
+
+> +		err = __mmc_send_status(card, &status, 0);
+
+> +		/* All R1 and R2 bits of SPI are errors in our case */
+> +		if (status)
+> +			err = err ? err : -EIO;
+
+I would use either this:
+
+		if (err || status) {
+			mqrq->brq.data.bytes_xfered = 0;
+
+			if (err)
+				return err;
+			return -EIO;
+		}
+
+		return 0;
+
+or at least this:
+
+			err = err ?: -EIO;
+
+or even this:
+
+		if (!err && status)
+			err = -EIO;
+
+(Personally I would choose the first option)
+
+
+> +		if (err)
+> +			mqrq->brq.data.bytes_xfered = 0;
+> +		return err;
+> +	}
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
+
