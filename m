@@ -2,262 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 384D2C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Mar 2022 03:38:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B863C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Mar 2022 13:40:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241589AbiCWDkK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Mar 2022 23:40:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58006 "EHLO
+        id S244395AbiCWNmL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Mar 2022 09:42:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53252 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241596AbiCWDkJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Mar 2022 23:40:09 -0400
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C92F61CB00;
-        Tue, 22 Mar 2022 20:38:39 -0700 (PDT)
-X-UUID: 7823b751e6424cafa6dfa4eb38cc0079-20220323
-X-UUID: 7823b751e6424cafa6dfa4eb38cc0079-20220323
-Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1788832817; Wed, 23 Mar 2022 11:38:34 +0800
-Received: from mtkexhb01.mediatek.inc (172.21.101.102) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 23 Mar 2022 11:38:33 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by mtkexhb01.mediatek.inc
- (172.21.101.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 23 Mar
- 2022 11:38:33 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkcas11.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 23 Mar 2022 11:38:31 +0800
-Message-ID: <9415f00e4f2012adc14592c684fa5b670e382ee8.camel@mediatek.com>
-Subject: Re: [PATCH v8 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
- pinctrls properties
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        "Eric Biggers" <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        "Stephen Boyd" <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>
-Date:   Wed, 23 Mar 2022 11:38:31 +0800
-In-Reply-To: <Yjn8WVBdwiCrstx5@robh.at.kernel.org>
-References: <20220321115133.32121-1-axe.yang@mediatek.com>
-         <20220321115133.32121-2-axe.yang@mediatek.com>
-         <YjkKURNzg8JPbXcg@robh.at.kernel.org>
-         <b03df175f871ee9a6561862f5bd7bceb9cafbde1.camel@mediatek.com>
-         <5d9c7655-b05e-aa77-d405-c1ec971daa77@collabora.com>
-         <4e7a532814510b03b74455f5a924b50a70699ca1.camel@mediatek.com>
-         <Yjn8WVBdwiCrstx5@robh.at.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        with ESMTP id S244393AbiCWNmF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2022 09:42:05 -0400
+Received: from mail-il1-x135.google.com (mail-il1-x135.google.com [IPv6:2607:f8b0:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09B2E7D02A;
+        Wed, 23 Mar 2022 06:40:35 -0700 (PDT)
+Received: by mail-il1-x135.google.com with SMTP id e9so989203ilu.9;
+        Wed, 23 Mar 2022 06:40:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=S0yGfWVmwvBNXjV8YPBIOWgjw8QQzbCwNdOAxvwVYTE=;
+        b=U6wM5GzjHJQC3hlOYG2GxK4bQbvQp3hRDn+95gNbAfEFuk64fLKwY/tFSnVyK+NOj4
+         vZdXztglI5nT5OqVgR0LmqQ5/zLQNrcB9NcwH/1R8NuihQSH1k1uVW77r0Ph/WLqE/1u
+         3WZfIcLcgFQHFNonYfaUPVRIeWPEnR0wrr4wXtBarfp/4sMKCVkpxJ0FrnXP72vEPY8/
+         SxMiB6fvPl/UooyAOhFgBjcUFQlLjrd3xbGBHnpHjGtWD9TE9pBgLTBMVUTVlfYxQBeQ
+         kVDerAky8jen0gUdFCVIf0t4Fvck8cdKvgKzNb7XeZr6gopmbUli8TaQx6o01i2hM48M
+         XUMA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=S0yGfWVmwvBNXjV8YPBIOWgjw8QQzbCwNdOAxvwVYTE=;
+        b=ZSaJSQ0Yy4z4glXjGB7k+G5hJb/4fCU3U5uQPC41UAgGhbDuoEsUeLsQRGrYv5xPA4
+         gXNU0T0+RUkwDU8v5914ZFpJ2th7IOpZ6HhEuTrVUbiZTyjmOcKSUb7U0HuezmurSp4z
+         oS8Ag3QobU6nU9lFkVBR2z3B1VkCCg0teoxYouwVXspXwMQ5snJx1k8NGxPQiJ+hRBxc
+         Dw/qaWNxFETdy6+C/67fZ28yy4MwwRYbRLePIi7DdUjlFtkfp5TT+M8/MuMUpLM7KpxZ
+         TJRax6ms8vaAobTZIt56bG0a2UTmulJ7W8fRLYbO1o8DYIP4yDyW1Qo/rNh5oWi/5qRG
+         NZxQ==
+X-Gm-Message-State: AOAM532TO0dzbMyU5M7q7Crf3oj+GCjUhrgT8wGyHvDsfxQum5Cyl1yk
+        DxxBszLtb/o44osdr1I1dso=
+X-Google-Smtp-Source: ABdhPJzb6EZp+G+otRr+uRIAi5dKKi+NDQ5nUb8OUQKG4oZdIcQqV2tuKvBx5s3aRxvoMx2tKK+wvg==
+X-Received: by 2002:a05:6e02:1ba8:b0:2c8:218a:24bd with SMTP id n8-20020a056e021ba800b002c8218a24bdmr41690ili.198.1648042834178;
+        Wed, 23 Mar 2022 06:40:34 -0700 (PDT)
+Received: from aford-IdeaCentre-A730.lan ([2601:448:8400:9e8:3c99:2d92:f93d:dc94])
+        by smtp.gmail.com with ESMTPSA id y6-20020a056e02174600b002c7f247b3a7sm35253ill.54.2022.03.23.06.40.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 23 Mar 2022 06:40:33 -0700 (PDT)
+From:   Adam Ford <aford173@gmail.com>
+To:     linux-arm-kernel@lists.infradead.org
+Cc:     aford@beaconembedded.com, Adam Ford <aford173@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH 1/3] dt-bindings: mmc: imx-esdhc: Change imx8mn and imx8mp compatible fallback
+Date:   Wed, 23 Mar 2022 08:40:17 -0500
+Message-Id: <20220323134019.3796178-1-aford173@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
+The SDHC controller in the imx8mn and imx8mp have the same controller
+as the imx8mm which is slightly different than that of the imx7d.
+Using the fallback of the imx8mm enables the controllers to support
+HS400-ES which is not available on the imx7d.
 
-Sorry, my last mail may mislead your understanding. Let me explain more
-about this.
+Signed-off-by: Adam Ford <aford173@gmail.com>
 
-On Tue, 2022-03-22 at 11:42 -0500, Rob Herring wrote:
-> On Tue, Mar 22, 2022 at 05:33:55PM +0800, Axe Yang wrote:
-> > Hello AngeloGioacchino,
-> > 
-> > On Tue, 2022-03-22 at 09:42 +0100, AngeloGioacchino Del Regno
-> > wrote:
-> > > Il 22/03/22 02:35, Axe Yang ha scritto:
-> > > > On Mon, 2022-03-21 at 18:29 -0500, Rob Herring wrote:
-> > > > > On Mon, Mar 21, 2022 at 07:51:32PM +0800, Axe Yang wrote:
-> > > > > > Extend interrupts and pinctrls for SDIO wakeup interrupt
-> > > > > > feature.
-> > > > > > This feature allow SDIO devices alarm asynchronous
-> > > > > > interrupt to
-> > > > > > host
-> > > > > > even when host stop providing clock to SDIO card. An extra
-> > > > > > wakeup
-> > > > > > interrupt and pinctrl states for SDIO DAT1 pin state
-> > > > > > switching
-> > > > > > are
-> > > > > > required in this scenario.
-> > > > > > 
-> > > > > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> > > > > > ---
-> > > > > >   .../devicetree/bindings/mmc/mtk-sd.yaml       | 23
-> > > > > > ++++++++++++++++++-
-> > > > > >   1 file changed, 22 insertions(+), 1 deletion(-)
-> > > > > > 
-> > > > > > diff --git a/Documentation/devicetree/bindings/mmc/mtk-
-> > > > > > sd.yaml
-> > > > > > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > > index 297ada03e3de..f57774535a1d 100644
-> > > > > > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > > > > > @@ -69,12 +69,23 @@ properties:
-> > > > > >         - const: ahb_cg
-> > > > > >   
-> > > > > >     interrupts:
-> > > > > > -    maxItems: 1
-> > > > > > +    description:
-> > > > > > +      Should at least contain MSDC GIC interrupt. To
-> > > > > > support
-> > > > > > SDIO
-> > > > > > in-band wakeup, an extended
-> > > > > > +      interrupt is required and be configured as wakeup
-> > > > > > source
-> > > > > > irq.
-> > > > > > +    minItems: 1
-> > > > > > +    maxItems: 2
-> > > > > >   
-> > > > > >     pinctrl-names:
-> > > > > > +    description:
-> > > > > > +      Should at least contain default and state_uhs. To
-> > > > > > support
-> > > > > > SDIO in-band wakeup, dat1 pin
-> > > > > > +      will be switched between GPIO mode and SDIO DAT1
-> > > > > > mode,
-> > > > > > state_eint and state_dat1 are
-> > > > > > +      mandatory in this scenarios.
-> > > > > > +    minItems: 2
-> > > > > >       items:
-> > > > > >         - const: default
-> > > > > >         - const: state_uhs
-> > > > > > +      - const: state_eint
-> > > > > > +      - const: state_dat1
-> > > > > >   
-> > > > > >     pinctrl-0:
-> > > > > >       description:
-> > > > > > @@ -86,6 +97,16 @@ properties:
-> > > > > >         should contain uhs mode pin ctrl.
-> > > > > >       maxItems: 1
-> > > > > >   
-> > > > > > +  pinctrl-2:
-> > > > > > +    description:
-> > > > > > +      should switch dat1 pin to GPIO mode.
-> > > > > > +    maxItems: 1
-> > > > > > +
-> > > > > > +  pinctrl-3:
-> > > > > > +    description:
-> > > > > > +      should switch SDIO dat1 pin from GPIO mode back to
-> > > > > > SDIO
-> > > > > > mode.
-> > > > > 
-> > > > > How is this different than pinctrl-0?
-> > > > 
-> > > > pinctrl-0 contains default settings for all IO
-> > > > pins(CLK/CMD/DAT).
-> > > > pinctrl-1 contains settings for all IO pins(CLK/CMD/DAT) in UHS
-> > > > mode.
-> > > > pinctrl-3 is lightweight pinctrl-1, only keep SDIO DAT1 pin
-> > > > function
-> > > > switch part.
-> > > > 
-> > > 
-> > > Is there any particular reason why we cannot simply select
-> > > pinctrl-1
-> > > again
-> > > instead of pinctrl-3, apart from the virtually not existent
-> > > overhead
-> > > of one more mmio write?
-> > 
-> > No, there is no particular reason. 
-> > I just want to do the pin function switch quick and clean. 
-> > 
-> > The intention of pinctrl-1 is to set the most initial state of IO
-> > pins
-> > in UHS mode. If I don't need to adjust IO settings any longer, it
-> > is
-> > okay to select pinctrl-1 state instead of pinctrl-3. 
-> > But think about this scenarios: after initial SDIO IO pins to UHS
-> > mode,
-> > I want to adjust some IO related properties, such as driving
-> > strength.
-> > And I want to keep these settings because with new driving
-> > strength,
-> > the signal is better. I'd rather to choose pinctrl-3 but not
-> > pinctrl-1, 
-> > because I do not want the change be restored after next runtime
-> > resume.
-> 
-> The pinctrl-X properties set modes, they aren't supposed to be a
-> state 
-> machine
-
-I do use the pinctl-x properties to set modes, but not judge state from
-pin state.
-
-I need to time-multiplex SDIO DAT1 pin, shift it between GPIO mode and
-SDIO IO mode, for example:
-
-mmc2_pins_default {
-	...
-};
-
-mmc2_pins_uhs {
-        pins_clk {
-                pinmux = <PINMUX_GPIO170__FUNC_B1_MSDC2_CLK>;
-                drive-strength = <MTK_DRIVE_4mA>;
-                bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
-        };
-
-        pins_cmd_dat {
-                pinmux = <PINMUX_GPIO169__FUNC_B1_MSDC2_CMD>,
-                         <PINMUX_GPIO171__FUNC_B1_MSDC2_DAT0>,
-                         <PINMUX_GPIO172__FUNC_B1_MSDC2_DAT1>,
-                         <PINMUX_GPIO173__FUNC_B1_MSDC2_DAT2>,
-                         <PINMUX_GPIO174__FUNC_B1_MSDC2_DAT3>;
-                input-enable;
-                drive-strength = <MTK_DRIVE_6mA>;
-                bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-        };
-};
-
-mmc2_pins_eint {
-        pins_dat1 {
-                pinmux = <PINMUX_GPIO172__FUNC_B_GPIO172>;
-                input-enable;
-                bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-        };
-};
-
-mmc2_pins_dat1 {
-        pins_dat1 {
-                pinmux = <PINMUX_GPIO172__FUNC_B1_MSDC2_DAT1>;
-                input-enable;
-                bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-        };
-};
-
-The pinctrl-1(mmc2_pin_uhs) here contain all SDIO IO pins, for the most
-early initialize. I SELECT pinctrl-1 when I change SDIO to SDR104 mode,
-before calibration.
-And when SDIO bus is idle, I SELECT pinctrl-2(mmc2_pins_eint), use DAT1
-as a interrupt line when steping into runtime suspend.
-After resume, I SELECT pinctrl-3(mmc2_pins_dat1) to set DAT1 pin back
-to SDIO IO mode.
-
-I need all the pinctrl-x properties, and take the initiative to set pin
-mode according to needs.
-
-
-Best Regard,
-Axe
-
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index 7dbbcae9485c..d6ea73d76bdd 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -39,14 +39,14 @@ properties:
+       - items:
+           - enum:
+               - fsl,imx8mm-usdhc
+-              - fsl,imx8mn-usdhc
+-              - fsl,imx8mp-usdhc
+               - fsl,imx8mq-usdhc
+               - fsl,imx8qm-usdhc
+               - fsl,imx8qxp-usdhc
+           - const: fsl,imx7d-usdhc
+       - items:
+           - enum:
++              - fsl,imx8mn-usdhc
++              - fsl,imx8mp-usdhc
+               - fsl,imx93-usdhc
+               - fsl,imx8ulp-usdhc
+           - const: fsl,imx8mm-usdhc
+-- 
+2.34.1
 
