@@ -2,113 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC870C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 13:54:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 243A4C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 14:18:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350663AbiCXNzv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Mar 2022 09:55:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54888 "EHLO
+        id S1350822AbiCXOTq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Mar 2022 10:19:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350662AbiCXNzu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2022 09:55:50 -0400
-Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D87D39800;
-        Thu, 24 Mar 2022 06:54:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1648130059; x=1679666059;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:content-transfer-encoding:in-reply-to;
-  bh=e89Vv2Mvsm8AX/GVQLPEwSbd3UxDBlMkPanQzNoNiaU=;
-  b=ekfPARDp3tjpJ6m2XOYe0JHg3xEoLfBBM7IgjwHTxfK+7RQ7M0QBzndi
-   Rpyba/4knDAjL9OTs+35KoLv97jhCLmvdXx4ih1xmY4GCfACIDNU8bBvg
-   1pOJIYufWSIywZL3JYmAO/LjYRJPSgsumnLlgnh26WDgnMVFJBcskudmV
-   94irmyYui8NTMuEyshFyHdbdMijfBPBHmNJcILeJa5E4aWUtKtxvsrCVC
-   oVZsGY2zqU3LSCym0v5KGTAEz/Fo3rMmV1JXZyRI9OIC//kUIigSf071X
-   UzE+R/HpXMsWz4fSsyV/uFc3Gwvwffzdl6O4+UQ0IyQ72I03mRG8eB/pw
-   w==;
-X-IronPort-AV: E=McAfee;i="6200,9189,10295"; a="258334410"
-X-IronPort-AV: E=Sophos;i="5.90,207,1643702400"; 
-   d="scan'208";a="258334410"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Mar 2022 06:54:18 -0700
-X-IronPort-AV: E=Sophos;i="5.90,207,1643702400"; 
-   d="scan'208";a="519790170"
-Received: from smile.fi.intel.com ([10.237.72.59])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Mar 2022 06:54:15 -0700
-Received: from andy by smile.fi.intel.com with local (Exim 4.95)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1nXNuE-005qrz-Q4;
-        Thu, 24 Mar 2022 15:53:38 +0200
-Date:   Thu, 24 Mar 2022 15:53:38 +0200
-From:   "andriy.shevchenko@linux.intel.com" 
-        <andriy.shevchenko@linux.intel.com>
-To:     Christian =?iso-8859-1?Q?L=F6hle?= <CLoehle@hyperstone.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCHv4] mmc: block: Check for errors after write on SPI
-Message-ID: <Yjx34sDWl4bMSCg3@smile.fi.intel.com>
-References: <8052f30adc3747e2beab0e52db26837d@hyperstone.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <8052f30adc3747e2beab0e52db26837d@hyperstone.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+        with ESMTP id S1350818AbiCXOTp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2022 10:19:45 -0400
+Received: from mail-oo1-f53.google.com (mail-oo1-f53.google.com [209.85.161.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B53413DD5;
+        Thu, 24 Mar 2022 07:18:13 -0700 (PDT)
+Received: by mail-oo1-f53.google.com with SMTP id v19-20020a056820101300b0032488bb70f5so796303oor.5;
+        Thu, 24 Mar 2022 07:18:13 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
+         :message-id;
+        bh=GawCp05khlhl7cBgGdUQSxdDX5kHWZ23Unif+NFb2E8=;
+        b=uSU7SaPpc57OK5eRwSRa5AWGQ6OTGB2XSRXrlbH0NhzQsylA3ArsRpAzKzWJt/XNyv
+         FolpoHBgh8OcWtKznI4MMAYtaEO502U8lZddy6ikEhByDliA7Fd/e1KjApVYl40GMpIU
+         AeJLNxdqfjSIjOsknhZoIY1MNuKp2tgaAug5bxKMugbbWzU7pMgILj7ib/rnZ+GmGwIS
+         LrQYEpICG1xs+EcpuLQuhgyahYZe5JSGXv9szPGQtRtTRGKGkg7+H0MkNjbQdJs4O5l8
+         tau9pUMQeOWxrv30d1AxKxPbZvk9aUZXVOnOpu9mOOPjRhckKU0dM88QWmbGER1t++wo
+         0Nxg==
+X-Gm-Message-State: AOAM531FZN72GR0g/npjnQGfgoDMkSJvSyb5COkioCT/H6LQcapwP6wL
+        lRZBtEMeoyeE5IMRcd861w==
+X-Google-Smtp-Source: ABdhPJydWUBur9AjgFjFMbYu94DYLhx4H4z8qP983Tnwv9mK3HmPPALKdMbgHx4/yMucmO12mRUMMQ==
+X-Received: by 2002:a4a:dd15:0:b0:320:da3c:c342 with SMTP id m21-20020a4add15000000b00320da3cc342mr2033346oou.7.1648131492569;
+        Thu, 24 Mar 2022 07:18:12 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id r129-20020acac187000000b002ef358c6e0esm1407558oif.49.2022.03.24.07.18.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 24 Mar 2022 07:18:11 -0700 (PDT)
+Received: (nullmailer pid 1995387 invoked by uid 1000);
+        Thu, 24 Mar 2022 14:18:08 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+Cc:     pabeni@redhat.com, devicetree@vger.kernel.org,
+        qiangqing.zhang@nxp.com, wg@grandegger.com, krzk+dt@kernel.org,
+        festevam@gmail.com, davem@davemloft.net, kernel@pengutronix.de,
+        linux-arm-kernel@lists.infradead.org, linux-can@vger.kernel.org,
+        kuba@kernel.org, linux-kernel@vger.kernel.org,
+        ulf.hansson@linaro.org, mkl@pengutronix.de,
+        Peng Fan <peng.fan@nxp.com>, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, robh+dt@kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-imx@nxp.com
+In-Reply-To: <20220324042024.26813-5-peng.fan@oss.nxp.com>
+References: <20220324042024.26813-1-peng.fan@oss.nxp.com> <20220324042024.26813-5-peng.fan@oss.nxp.com>
+Subject: Re: [PATCH 4/4] dt-bindings: net: imx-dwmac: introduce nvmem property
+Date:   Thu, 24 Mar 2022 09:18:08 -0500
+Message-Id: <1648131488.621544.1995386.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 24, 2022 at 01:27:51PM +0000, Christian Löhle wrote:
+On Thu, 24 Mar 2022 12:20:24 +0800, Peng Fan (OSS) wrote:
+> From: Peng Fan <peng.fan@nxp.com>
+> 
+> To i.MX8M Family variants, dwmac maybe fused out. Bootloader could use
+> this property to read out the fuse value and mark the node status
+> at runtime.
+> 
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> ---
+>  Documentation/devicetree/bindings/net/nxp,dwmac-imx.yaml | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
 
-...
+Running 'make dtbs_check' with the schema in this patch gives the
+following warnings. Consider if they are expected or the schema is
+incorrect. These may not be new warnings.
 
-> v4:
->   - Move block layer handling out of the spi-specific function
+Note that it is not yet a requirement to have 0 warnings for dtbs_check.
+This will change in the future.
 
-In this case some optimizations are possible. See below.
+Full log is available here: https://patchwork.ozlabs.org/patch/1608879
 
-...
 
-> +static int mmc_spi_err_check(struct mmc_card *card)
-> +{
-> +	u32 status = 0;
-> +	int err;
-> +
-> +	/*
-> +	 * SPI does not have a TRAN state we have to wait on, instead the
-> +	 * card is ready again when it no longer holds the line LOW.
-> +	 * We still have to ensure two things here before we know the write
-> +	 * was successful:
-> +	 * 1. The card has not disconnected during busy and we actually read our
-> +	 * own pull-up, thinking it was still connected, so ensure it
-> +	 * still responds.
-> +	 * 2. Check for any error bits, in particular R1_SPI_IDLE to catch a
-> +	 * just reconnected card after being disconnected during busy.
-> +	 */
-> +	err = __mmc_send_status(card, &status, 0);
-
-> +	/* All R1 and R2 bits of SPI are errors in our case */
-> +	if (err || status) {
-> +		if (err)
-> +			return err;
-> +		return -EIO;
-> +	}
-
-	if (err)
-		return err;
-
-	/* All R1 and R2 bits of SPI are errors in our case */
-	if (status)
-		return -EIO;
-
-> +	return 0;
-> +}
-
--- 
-With Best Regards,
-Andy Shevchenko
-
+ethernet@30bf0000: nvmem-cell-names:0: 'fused' was expected
+	arch/arm64/boot/dts/freescale/imx8mp-evk.dt.yaml
+	arch/arm64/boot/dts/freescale/imx8mp-phyboard-pollux-rdk.dt.yaml
 
