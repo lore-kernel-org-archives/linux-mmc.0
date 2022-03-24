@@ -2,72 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DACBC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 06:09:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D86FC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 10:22:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232683AbiCXGKs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Mar 2022 02:10:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42292 "EHLO
+        id S1346336AbiCXKY2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Mar 2022 06:24:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232070AbiCXGKr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2022 02:10:47 -0400
-Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A28FB3F899
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Mar 2022 23:09:14 -0700 (PDT)
-Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-2e5757b57caso40417997b3.4
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Mar 2022 23:09:14 -0700 (PDT)
+        with ESMTP id S238441AbiCXKY2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2022 06:24:28 -0400
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E440F9399F
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2022 03:22:54 -0700 (PDT)
+Received: by mail-lj1-x236.google.com with SMTP id r22so5512791ljd.4
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2022 03:22:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=myP6PcWlkz+g7JLpxNShW2/qLFohQN6/LHBz4yYCtkc=;
-        b=X9cl4uBThrz/ReIezQEIcSIlBXUJMMLLR+Dv+WCSQgWOhbZDqKWh8al3lbBKxbZIBx
-         bJzpk7JRtQAD+0v7yQkPykPCyiLB/C9X18TOxoqD6u4EYK6pKwYtMW+QubbQSk4ybWjM
-         Fr2E469KE4q+6fR17F44iTJGWNhjAUvR+EoNm3gwedADQGx/p5WeYmDXVSvT0tv/2JIn
-         LCshZmb7cNzst7VvlPFEXngDnjehcsgQPB0KYOBvWzmgKbxiMyAAuWRcFHv3n33FMutn
-         vBDGwDQDj7SnYgsHwPcS43XcYQi+wSdjUr5AH8bvgl5JKl+44FstiC9SiBGL7+HMnRCM
-         yqIA==
+        bh=n6EmmiFsiNrlviUp3BObG46gOO/N3Ok+9jFD0Igta48=;
+        b=CzZ+AOHdIo2lmsGH+mA5T05TTALyjwg1BKpAMg8UAvdieRw8EyCZdlM1IEFie7NZHV
+         4cmq8rfL1TkuXKPyBf/Y6DpuOgOGuIeQ4OyBcMO0s/TU/toD1GwLUiExiZ/4mBPCj6FL
+         pxdl2NNk6q8NLv4gwhwXxAqmeu43Dg4bg0fFw/1O8L5IFi0wDIQqZA2HLqkMzyOAV3kV
+         GyxbwfLFRTRqCDQGhh9fM/uTQ32Xouy2F4e+WUkwLfKYfGllae3w5Jr39r9OWIMlQCdz
+         Q0KF8qxqY4TL0i3xhsck2bTMGmaeSczGK6g7DsnhtAEIAybUEINHLtsRzY56P3VI1gMX
+         QrVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to;
-        bh=myP6PcWlkz+g7JLpxNShW2/qLFohQN6/LHBz4yYCtkc=;
-        b=a6anPVwgiaLS2foAHfF+OFnZnMgB0fIonVjuS/9ITr9u9cCRDHXQSEYLVKbSEU3d8v
-         me6W3dLaDOnqUBGeE8UC1yqsBb0gHmOeF/8IxaD7Agin/uFO3dtkV5UJMUinshh5DDvS
-         /8/gHL2Gm2WJ+Xpqk4xoG9iwsvId6yr5PMxyr+squN5OxW7h9U3i/Hei/rcjYkwA+8cs
-         SlaftN+MgH8tMOiGM4clyvXC+WDynDWHU4d4OOm9zHOUGRkVAjEXfP6LfPptVIY4F740
-         fQ3TpSFHbQH/CY/gEE4h/YRyYCB+Z7QSrkzV9tVxT9+crP/Jsa9n76tPY/ETXW+6JjwW
-         asig==
-X-Gm-Message-State: AOAM531URQQuRpjyECNBoF1UejV8r+65XfZKOJoIkOPd3XFPxjjJRisy
-        MeltEFMm4bocvMnk7k5CFvAr8NAaGQKsfcXPvO004d5IodY=
-X-Google-Smtp-Source: ABdhPJyGRLrklIk5Ak0BchRqF0luDJ8VpdMICa1OFO3GUtmIC77g+XrS9BNGuhSThGa/L7l+sz06wTvKwBu6d3HT85w=
-X-Received: by 2002:a81:74e:0:b0:2e5:c468:367b with SMTP id
- 75-20020a81074e000000b002e5c468367bmr3220240ywh.509.1648102153582; Wed, 23
- Mar 2022 23:09:13 -0700 (PDT)
+        bh=n6EmmiFsiNrlviUp3BObG46gOO/N3Ok+9jFD0Igta48=;
+        b=NHoX7vFdebZ1hEDEl9UJh+4QK4g1MvEnoxdgwK3/OeGf5LrXPrWNk67n633HFT8F1C
+         H7NUJFlltVRLk7rk249s/ThMMPOlRjsvzzyuuswGWXhOLtbrGHyGQaka8Tx8NPOt8+0q
+         yhkKv9bqcjUGd1CxarCfsxxmGgwuv6OvygXlEEUfU7U4QTNU9KlMVDprxzMLNs897mKj
+         SmJserkc3q+didvnHnvREZNwnK84bB6y0/YCmuaUbHFrxWZe6Q4WRf208wfWJuhBSiC3
+         zJY+aKQXlctKu38cjr+IjZpS2geuYa4XP0yHZwho0sjXsqIfnx+I0bRbzZilRZICoy8d
+         c8GA==
+X-Gm-Message-State: AOAM533tuMGdNYdxlUx/Auw7Y5d6/ULAmiJ83hvH7FFLLbqL0jn8qE6G
+        n/6p8wzpwD5Pz2lYadffnr/4Qh0zd5vF5IfWc6OqoA==
+X-Google-Smtp-Source: ABdhPJyi3fTonV9/AHYs0MMrjQje6voZdqzRjV3W8qOdkUa6WlPpIbX8nc/0isyEPRxan+mDP9JMhVGVYYILfuOYGpk=
+X-Received: by 2002:a05:651c:90a:b0:249:5d82:fe9c with SMTP id
+ e10-20020a05651c090a00b002495d82fe9cmr3581084ljq.300.1648117372831; Thu, 24
+ Mar 2022 03:22:52 -0700 (PDT)
 MIME-Version: 1.0
 References: <20220222033931.237638-1-jasonlai.genesyslogic@gmail.com>
  <20220222033931.237638-7-jasonlai.genesyslogic@gmail.com> <CAPDyKFoDkxg1b0k4s_+F+eS8EUVM9ZabiwNc4VVQuCexLWNpsw@mail.gmail.com>
  <20220324012929.GA6955@laputa>
 In-Reply-To: <20220324012929.GA6955@laputa>
-From:   Lai Jason <jasonlai.genesyslogic@gmail.com>
-Date:   Thu, 24 Mar 2022 14:09:02 +0800
-Message-ID: <CAG0XXUFgfTH+=zJQrfxkXBEF1Ex+jZ-rnF8JZn-8CdvZ72Lj2Q@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 24 Mar 2022 11:22:16 +0100
+Message-ID: <CAPDyKFrJx2ZUR-_+6j0nL4U6P_NvH7b-21Tpz9xN1LPuhr+VSw@mail.gmail.com>
 Subject: Re: [PATCH V3 6/7] mmc: Implement content of UHS-II card
  initialization functions
 To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Jason Lai <jasonlai.genesyslogic@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>, dlunev@chromium.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>,
-        Jason Lai <Jason.Lai@genesyslogic.com.tw>,
+        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        dlunev@chromium.org, ben.chuang@genesyslogic.com.tw,
+        greg.tu@genesyslogic.com.tw, Jason.Lai@genesyslogic.com.tw,
         otis.wu@genesyslogic.com.tw
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 24, 2022 at 9:29 AM AKASHI Takahiro
+On Thu, 24 Mar 2022 at 02:29, AKASHI Takahiro
 <takahiro.akashi@linaro.org> wrote:
 >
 > On Wed, Mar 23, 2022 at 05:15:59PM +0100, Ulf Hansson wrote:
@@ -104,9 +102,22 @@ On Thu, Mar 24, 2022 at 9:29 AM AKASHI Takahiro
 >
 > To honor the original work, we should add Intel's copyright notice here
 > as I did before.
+
+I think Jason already did, at least for some of the files in this series.
+
+Note also that, the initial code that was posted, is very far from
+what code that is going to be merged. Simply because the quality was
+very poor and not acceptable for the upstream kernel. That said, I am
+not sure we need to keep the copyrights for this, but I leave that
+call to Jason to decide.
+
 >
 > -Takahiro Akashi
 >
+
+Kind regards
+Uffe
+
 >
 > > > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
 > > > ---
@@ -122,16 +133,6 @@ On Thu, Mar 24, 2022 at 9:29 AM AKASHI Takahiro
 > > >   *
 > > >   * Author: Ulf Hansson <ulf.hansson@linaro.org>
 > > > + * Author: Jason Lai <jason.lai@genesyslogic.com.tw>
-
-Do you mean to add copyright information listed below here?
-* Copyright (C) 2020 Linaro Limited
-* Author: Ulf Hansson <ulf.hansson@linaro.org>
-* Copyright (C) 2014 Intel Corp, All Rights Reserved.
-* Copyright (C) 2020 Genesys Logic, Inc.
-* Authors: Jason Lai <jason.lai@genesyslogic.com.tw>
-
--Jason Lai
-
 > > >   *
 > > >   * Support for SD UHS-II cards
 > > >   */
