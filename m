@@ -2,769 +2,471 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A666C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 01:29:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71DDEC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 02:54:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347173AbiCXBbH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Mar 2022 21:31:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45476 "EHLO
+        id S1346916AbiCXCz6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Mar 2022 22:55:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345146AbiCXBbG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2022 21:31:06 -0400
-Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5F7C44A16
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Mar 2022 18:29:34 -0700 (PDT)
-Received: by mail-pj1-x102b.google.com with SMTP id gb19so3415353pjb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Mar 2022 18:29:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:mail-followup-to:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=zeEXwPvZrMuQNZxcSKeqHLTgFMi9pr5blZKFhKkonZY=;
-        b=XO+v3lrwWj1I3hF76C9Qxb3dXusDFrtLul/ErAI1q29kyOTVKbkUV2TWaTbLShB/jY
-         b0HZ6z68SRzIeGT4sD62Z3QE9Fsq5mQIp0L9M2+immFqOfsLZDxcKrz+Ixz6xLjAyJqS
-         KVJ905HReg2Qfuts3pMn2QJCJOsV2ieAM1/9hUm2ittFmGrbZfrNwh/tcx/idDKkA+ON
-         SJtn/Q/QofJV3BysrRaIWPcH7IbRDLAF/yTmvOVOeXxKaGhjAf4zpkBlzd3bfcYcZmRd
-         71nUEglifHcks1OICwRrEe9OudROXpcagMympuNS/2mMXyMt43ZPsh3OsJDc6qUy7+WL
-         NrSA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=zeEXwPvZrMuQNZxcSKeqHLTgFMi9pr5blZKFhKkonZY=;
-        b=faQMo2dAW4i2nuYaB+TfYjRx5Ttflyt097ewfOwWhN3weu3XaIAEouqQ4f5os35TLz
-         EYaVdhk2qnQ2uwwLcwJbYb7LB1/X3lhXKzjA8y3u9/KeqAqjVQ2S6RwPirHCiOF/Ua12
-         uTLIAA2LMPJ7ZYo4350XtoAq5P6MZ1BRUXAipbjttgJ9Ge8hkts2Wh+tsX41dwHt5MjW
-         25/eYATHbyAJDXRa3ih+FDYya5onvQN302wngV36o+QW3mYRVo+tmrxkrypo0jH+b2BH
-         qjhXTDm/ZsylqRNVd93CP4mDz8LhU4QAIFbGsEKNfR9elV7RWtaOYWxEnqH9Wa8kvZuy
-         /kRQ==
-X-Gm-Message-State: AOAM532iMQGRK8jx/0WG7FcxSbAyBUaYmkRepECeGb9MTith5JTwumfP
-        5fQ9ZDUuxizVuXzkXfQMVOV8/Q==
-X-Google-Smtp-Source: ABdhPJyVYwc9xlsMJOQrZljDvdEKcBRLBJxjpdXc5xvX95H5J8Zfh0EnTNI6SHahtg9NoAs7Q9eamw==
-X-Received: by 2002:a17:903:2281:b0:154:50ab:72c6 with SMTP id b1-20020a170903228100b0015450ab72c6mr3229503plh.51.1648085373965;
-        Wed, 23 Mar 2022 18:29:33 -0700 (PDT)
-Received: from laputa ([2400:4050:c3e1:100:7d3a:4634:c891:518])
-        by smtp.gmail.com with ESMTPSA id o7-20020a056a00214700b004c169d45699sm1035491pfk.184.2022.03.23.18.29.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 23 Mar 2022 18:29:33 -0700 (PDT)
-Date:   Thu, 24 Mar 2022 10:29:29 +0900
-From:   AKASHI Takahiro <takahiro.akashi@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Jason Lai <jasonlai.genesyslogic@gmail.com>,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        dlunev@chromium.org, ben.chuang@genesyslogic.com.tw,
-        greg.tu@genesyslogic.com.tw, Jason.Lai@genesyslogic.com.tw,
-        otis.wu@genesyslogic.com.tw
-Subject: Re: [PATCH V3 6/7] mmc: Implement content of UHS-II card
- initialization functions
-Message-ID: <20220324012929.GA6955@laputa>
-Mail-Followup-To: AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        with ESMTP id S238778AbiCXCz5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Mar 2022 22:55:57 -0400
+Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-eopbgr80077.outbound.protection.outlook.com [40.107.8.77])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 800F264EA;
+        Wed, 23 Mar 2022 19:54:25 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=DiN7I2GkPkMfUkha8wyZOydfTHbMtyQhtgI/vUBo6ZsXrn1vbAeJW0hRfoS9Mz42XwHoBwb6EGlsf2khBp6VK7qfMkv8V6LP5xJ9c8WlAumuR4qsEsXwd6jxct9wsbRCfkz83M9Z0jiuPgBCYmyzA3dP1JWyGvh/EAgvls/HTGpouBLCqqVxl0dnwQb9zLNfZYJT99uMk7LYtZxhKmo1NhvzzSyOMNCG7IeqPICEddTC56l0Eamn+4vTS8lHAi/RgA7UGK7Ej/AlIWbQbgzIpiSLC6vkOQH9MFE16HCT+cE4o5hspHOcSn/SY25nPuyTyIp2mGWxc7YTxc+BgRkrXg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=AEiZsxKbUqnipiVa6zuS4UbUmJJOTVmlvaWrYmeTVs4=;
+ b=EYdtBfrY1cJasFgR0q72DTjTUIQ/6O3gFvqh7u+LQC1e+UUTFaOtJ502/N2teiuiMAZJ48qeZIATgd7qsiHtNy2Z+8+7USmgezO1DbTd3hi0XkZLdJa1BJHetTvmaJXACh+Ah/vjRobpLNK0BgVoYdevseK4YEBqa8m0GrwHt0+opA0pOov4ISvi+gR6zQwhT+mIahWILcDVOHGrO3Zu/GsNs570T5fnbvvuV3yCDLHSKGR5WTni2uW684VNgYoMroVkuxW/RFcXyXANfjDZx9UJkT+OpjLTwicb+KdL580XklUtiJeKu+Ad72LJAnNC4rQ6dHotkENPBZfXK5e83w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=AEiZsxKbUqnipiVa6zuS4UbUmJJOTVmlvaWrYmeTVs4=;
+ b=r2XY1wgSwPv46MyJVmVWne1m3THU3SSxcldTs0yAKUcjQx38Ro6uo14R+THnLlnJJdXwJiuxuDAB/VP1+G/O3WCAlJ4dQIwzpCLVz+d0yqFgNVV22IO9Xlxznq0XqlWqErE+4CEV6bKEc3V8LcyUizI6mSVMOA80iUw3UEZQvwc=
+Received: from AM0PR04MB4001.eurprd04.prod.outlook.com (2603:10a6:208:5d::20)
+ by DB8PR04MB6841.eurprd04.prod.outlook.com (2603:10a6:10:116::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5102.18; Thu, 24 Mar
+ 2022 02:54:20 +0000
+Received: from AM0PR04MB4001.eurprd04.prod.outlook.com
+ ([fe80::7d05:fb24:8147:8065]) by AM0PR04MB4001.eurprd04.prod.outlook.com
+ ([fe80::7d05:fb24:8147:8065%6]) with mapi id 15.20.5102.017; Thu, 24 Mar 2022
+ 02:54:20 +0000
+From:   Bough Chen <haibo.chen@nxp.com>
+To:     Adam Ford <aford173@gmail.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>
+CC:     arm-soc <linux-arm-kernel@lists.infradead.org>,
+        Adam Ford-BE <aford@beaconembedded.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Jason Lai <jasonlai.genesyslogic@gmail.com>,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        dlunev@chromium.org, ben.chuang@genesyslogic.com.tw,
-        greg.tu@genesyslogic.com.tw, Jason.Lai@genesyslogic.com.tw,
-        otis.wu@genesyslogic.com.tw
-References: <20220222033931.237638-1-jasonlai.genesyslogic@gmail.com>
- <20220222033931.237638-7-jasonlai.genesyslogic@gmail.com>
- <CAPDyKFoDkxg1b0k4s_+F+eS8EUVM9ZabiwNc4VVQuCexLWNpsw@mail.gmail.com>
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH 1/3] dt-bindings: mmc: imx-esdhc: Change imx8mn and imx8mp
+ compatible fallback
+Thread-Topic: [PATCH 1/3] dt-bindings: mmc: imx-esdhc: Change imx8mn and
+ imx8mp compatible fallback
+Thread-Index: AQHYPruVil8qRYU9SEieNBZcJMh8hKzM/geAgAABWICAAALggIAANaYAgACdT4A=
+Date:   Thu, 24 Mar 2022 02:54:20 +0000
+Message-ID: <AM0PR04MB4001A479B5C25EBABF1AE11890199@AM0PR04MB4001.eurprd04.prod.outlook.com>
+References: <20220323134019.3796178-1-aford173@gmail.com>
+ <35f58894-ed6d-0af0-e483-7a161ad6625a@kernel.org>
+ <CAHCN7x+RLAFnES8b3UMoc6n69ZVSFGOmAZyMeeY1g3aoiDNbZg@mail.gmail.com>
+ <354951e0-d2a8-bf4f-e0c5-081e836bb3c3@kernel.org>
+ <CAHCN7xLWoUGi-jfxR2a0gvEFkPT3USUEb+8U3CCqCb5wWEJ8xw@mail.gmail.com>
+In-Reply-To: <CAHCN7xLWoUGi-jfxR2a0gvEFkPT3USUEb+8U3CCqCb5wWEJ8xw@mail.gmail.com>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 5a7a254c-3745-44fd-f260-08da0d41987b
+x-ms-traffictypediagnostic: DB8PR04MB6841:EE_
+x-microsoft-antispam-prvs: <DB8PR04MB6841F034EE1CD49618FC584B90199@DB8PR04MB6841.eurprd04.prod.outlook.com>
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: Nk9gZKO9SB/U9yumMknaHpLI9gXxp9sa057Sso0Tt0hJWFhgQEoIv5SDHzABykUB4iW+Yl+0SaSId0FyA36dXKXm110Rn/ayqOJMzhajdZBrCiArGtMLQKbz66LlJLanlBFHljEi5Kcz4eoIYgZ0plHUWODS21nlprXFfpxTpC7CZ2KXLWlQBmOCtJeFcozMWS08vYo8PRzjdyHDQH5MJkx3qKgAuRf/+TqbgO72bW73WGmfZAHKwxMrU5KeECuqUjL+BwDZYnfRKphTpF81SQvOVcJiSNW5Ae+fxKKtR0stMaiX7QAdlB/vrrwLmojn8uuEKIYLYRW3u9BEFDGA80eenQYSrLM+wiabjixEOLCBC4FhHayePpmY6a07QqoBGMoNV8v5njsD3Wl7IHE8TmYmfnSts9fUlCoDbENBVXaqVtqEAv6xR56f41ICpSkPQgvDqUEqIKk0xAtaAb+trEN0H/fJq2pVCOeI0IFIq3y+/V4b2ZkPamVOLXW+30ozWn5HFAtvvSG7o6QpLZ4SfGX+uv5zTrtEXp2Olwr7RJGPuNl5zW7/9k5SC/KqDYaxhpAhHJ3X6wcxT794zpGIOX1kAvfAG3TAKyq96noAPN2SQusxQhTcOBF5QlcoFFyaRW2oQicNWP7EOTq4hXzRb4rEx1r9NRbTRGKPWE7HhMeMUL+rfnQ3StasMzUFu9OH4KyFcqIJlG638NiXncSjRVC04q+FVSkxAoNWJQn0wis=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM0PR04MB4001.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(9686003)(26005)(55016003)(508600001)(71200400001)(38070700005)(7696005)(53546011)(6506007)(33656002)(38100700002)(99936003)(83380400001)(122000001)(186003)(86362001)(54906003)(2906002)(76116006)(64756008)(66556008)(66476007)(66446008)(5660300002)(4326008)(66946007)(110136005)(8676002)(316002)(52536014)(7416002)(8936002)(32563001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?aFVtM1paVUxuSnE0MTRYR1JGTkNYT0RqeFIzRTRVRGxUZ1NQQ0l5QW5kMExx?=
+ =?utf-8?B?b1I3QzJlMXVLSXRVTUplUGxvNFBrcHpKOW1TU2NRZUlwNHJnc083Slp5cTdh?=
+ =?utf-8?B?S21lSHJtbkJZbDlPdGwzUFh2dlIvQzVHZG56TkQzdmhSUzd4VEhSSmxJMGhY?=
+ =?utf-8?B?OGQ0eDd6QjIxSEhLWXo5TG4zVU45M2w3NU9zVEVhVjZ0ZEdhSXVsMEh3K1Fs?=
+ =?utf-8?B?azNwdmw0M0w3a2lXeWtVQUl5UzdwdUhNUXdVUmduRTR0VTR3N3dvQjV1aUlh?=
+ =?utf-8?B?ZXZ1YkdNR3JmWTVvdFVmSTZpWXVNdSszQnFacXBvcXk2NVNKUUJ6T2xUeHJx?=
+ =?utf-8?B?SXhIQkc5bXlrbWc4TmdlK25KZUMvR2Z3OTh5REF0dktORWk4L0J6NUhjVnhw?=
+ =?utf-8?B?WnZ6R3VGM2FSZUtxVlBTSkl2c3JPaFZzQTNLeUUwYkhTQ3BOaEpkK2VFNjdr?=
+ =?utf-8?B?RUhjd0hBWC9oUGYzMGtUZ004WmZEWGdSeGxDV0xSR28vb1gvUjRvd0pqcURH?=
+ =?utf-8?B?aC8rTUVvcmozajhVMXYyVC90Y2FheVFoR3dSTDhydmhvbXNvcXg2K3RkS25I?=
+ =?utf-8?B?N2JQb3N2OHNHRDdXRmllVmxEcGJsOUpvMzNvM2VWNjU4N25qa01iTlhzNWJB?=
+ =?utf-8?B?TCtWN0crenFpTnhEYUFZdVJaZjlIZnNMUHZoMnIrQmNMRlNMVFRJN1h3UmNN?=
+ =?utf-8?B?b1B0aHV0cExFQWE5a0VWUFoyNHFxWWN4cE00dklhb0xBLzJIbWl2ZzdXcmtW?=
+ =?utf-8?B?enpYSnRSaTRLNFFEOFhud1orcHROTDR2VUZEamo5SzFPeE5pYnNIRDZXMnlC?=
+ =?utf-8?B?Z1ErNnZBL3ErenNYdFlhbE5POVQ1NDJoek1lU3R6NG9Nd05FYVR5T2tqY2VS?=
+ =?utf-8?B?OHFQbzdweEp0U2RjeTRQcmVpVWc1Z3N6T0NiRS9RSWtrbTlvdGs5YWxHaGY0?=
+ =?utf-8?B?LzUrdk5xdkF6RkxvRnNZeURNWTNETmZyVnRlUVhEWWszZStpc3NJQ255MC9t?=
+ =?utf-8?B?NUg3enFrSGxTVXRBeUllYjZ5aW5nWElhbHFQM3c3VGp4TXdXZStUc0lITnJk?=
+ =?utf-8?B?YmRtVVdVY1o5eStSV1dSd2JZR2FZdTI3WUpJTysvMld6cHdRR3IwNzBUVWtw?=
+ =?utf-8?B?TUUrcVBnZjhITTJ1MmQ0SXAxamhVd0dZUWhhWTNtWGlRQXhsM1BkeURVeE04?=
+ =?utf-8?B?dEFEaEkySWNKdTF2RU05Z2ZYNm0yek51aDI3MXgzUGhNR29SMUd5UW00QjJs?=
+ =?utf-8?B?d0pFQjJVYmpCMUtQSlpSOXZpaTYzaHo2bHVjVGRqOUNlMTFBczJNQlNQQ3VC?=
+ =?utf-8?B?ckNscUM0ejI2OEdGRzZvS0dub1E3ZVArS0VPV0dONzBueXFOSGF6MFdqdyt3?=
+ =?utf-8?B?djRjNlJlOHp3Q1daaDBPQkR3N3d5REVIb0I3Vm1EcEordVMraXZTclkyTXBo?=
+ =?utf-8?B?YitEL3lkNVhuekExejA5YU4wVFRmU3ZvLzRlSDVRYmxJU0NwRTVRU1kyVk04?=
+ =?utf-8?B?RVRLSGZDd2VHc0VzUlRDSE5rT0FiK0lGdWNYSXlTZUp2dG9FaXlkaGJvaFRv?=
+ =?utf-8?B?MDZGMU05enVIWHZSWUlKRFQxUTJMWExKdVUzSEpCa2RwcVFDS2N4UnlqbVBW?=
+ =?utf-8?B?SFpOOTZvN1ZCakhoRmRhc0tranduVHNhdjZCbElNVkNlR2M4b3JPSkJqSEZH?=
+ =?utf-8?B?WWh2bUIySURZVlVYVzQxNExJM1Rrc0cvdUtFazdoZWJ6MWxBTXZ0UFpqR0dv?=
+ =?utf-8?B?a2w2NVorKzQvUEFMeHdUUjdWODQ2eWFuTW9IQUF3b1lPWEMvNkZaWTU3ekpn?=
+ =?utf-8?B?RXdibDNmY05VZS8xM0NPWjJmbDAwMkFTN1dNOWVDL3NBUWdVMnQva1B6ZWdy?=
+ =?utf-8?B?WWREQ0h3OTdNbnR2amFrbzdKd1ZJbmI4RFdPNGxFSEQvQldZN1d4b09ML21i?=
+ =?utf-8?B?NFBUYmdUNzlSWHlaQnR1c1dzRlVCWGFJcmJIdTY3SlpUeGs3QURhYVBhMm54?=
+ =?utf-8?B?SGZnK3NOejZHZmJlajV6UkFFRndLZWQ2Z3Z1QVlJZys0NmhpV1d3UnZOK1Zj?=
+ =?utf-8?B?ckNlVjV0TW5RanQwaGlnMEJrUFp0ZnFMRnJRaXZOaStmTkRTZXFwZTJ4dXRU?=
+ =?utf-8?B?dG1vd1JmcmVtUTZ6Z3hsbUZ4dTc5bFZ5YWJlZVpDdGZPamVMN0tXcEFVd2xK?=
+ =?utf-8?B?ck9GQTBqVGFoS0kxazYvOE1nQUh6ZFJTcHp6bWNXSVljYzQ1Sk1rd0dFVnJW?=
+ =?utf-8?B?YkduOVo4UE5TNHRxTENqTkdiRnU1bzdXTFMxYXJKUHJrMUUxMFFIVHVGRFVw?=
+ =?utf-8?B?L2UvbWNjd1hQZXU0N0NncXJHWUtVS0RKZW5OVEE1cE9kZTdUcTd4UT09?=
+Content-Type: multipart/signed;
+        micalg=SHA1;
+        protocol="application/x-pkcs7-signature";
+        boundary="----=_NextPart_000_014C_01D83F6D.81FB39E0"
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoDkxg1b0k4s_+F+eS8EUVM9ZabiwNc4VVQuCexLWNpsw@mail.gmail.com>
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: AM0PR04MB4001.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5a7a254c-3745-44fd-f260-08da0d41987b
+X-MS-Exchange-CrossTenant-originalarrivaltime: 24 Mar 2022 02:54:20.8172
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: SY373p4LrbXBt8XnMbByahLeBl6FMhc5Y2XTI/CtTFqK2vh3EHDnYodAjkPT80QIaUWEuHWstpDrQ8riwYQ5wQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB8PR04MB6841
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 23, 2022 at 05:15:59PM +0100, Ulf Hansson wrote:
-> On Tue, 22 Feb 2022 at 04:40, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
-> >
-> > From: Jason Lai <jason.lai@genesyslogic.com.tw>
-> >
-> > UHS-II card initialization flow is divided into 2 categories: PHY & Card.
-> > Part 1 - PHY Initialization:
-> >          Every host controller may need their own avtivation operation to
-> >          establish LINK between controller and card. So we add a new member
-> >          function(uhs2_detect_init) in struct mmc_host_ops for host
-> >          controller use.
-> > Part 2 - Card Initialization:
-> >          This part can be divided into 6 substeps.
-> >          1. Send UHS-II CCMD DEVICE_INIT to card.
-> >          2. Send UHS-II CCMD ENUMERATE to card.
-> >          3. Send UHS-II Native Read CCMD to obtain capabilities in CFG_REG
-> >             of card.
-> >          4. Host compares capabilities of host controller and card, then
-> >             write the negotiated values to Setting field in CFG_REG of card
-> >             through UHS-II Native Write CCMD.
-> >          5. Switch host controller's clock to Range B if it is supported by
-> >             both host controller and card.
-> >          6. Execute legacy SD initialization flow.
-> > Part 3 - Provide a function to tranaform legacy SD command packet into
-> >          UHS-II SD-TRAN DCMD packet.
-> >
-> > Most of the code added above came from Intel's original patch[3].
-> >
-> > [3]
-> > https://patchwork.kernel.org/project/linux-mmc/patch/1419672479-30852-2-
-> > git-send-email-yi.y.sun@intel.com/
+------=_NextPart_000_014C_01D83F6D.81FB39E0
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 
-To honor the original work, we should add Intel's copyright notice here
-as I did before.
+> -----Original Message-----
+> From: Adam Ford [mailto:aford173@gmail.com]
+> Sent: 2022=E5=B9=B43=E6=9C=8824=E6=97=A5 1:23
+> To: Krzysztof Kozlowski <krzk@kernel.org>
+> Cc: arm-soc <linux-arm-kernel@lists.infradead.org>; Adam Ford-BE
+> <aford@beaconembedded.com>; Ulf Hansson <ulf.hansson@linaro.org>; Rob
+> Herring <robh+dt@kernel.org>; Krzysztof Kozlowski =
+<krzk+dt@kernel.org>;
+> Shawn Guo <shawnguo@kernel.org>; Sascha Hauer
+> <s.hauer@pengutronix.de>; Pengutronix Kernel Team
+> <kernel@pengutronix.de>; Fabio Estevam <festevam@gmail.com>;
+> dl-linux-imx <linux-imx@nxp.com>; linux-mmc =
+<linux-mmc@vger.kernel.org>;
+> devicetree <devicetree@vger.kernel.org>; Linux Kernel Mailing List
+> <linux-kernel@vger.kernel.org>
+> Subject: Re: [PATCH 1/3] dt-bindings: mmc: imx-esdhc: Change imx8mn =
+and
+> imx8mp compatible fallback
+>=20
+> On Wed, Mar 23, 2022 at 9:11 AM Krzysztof Kozlowski <krzk@kernel.org>
+> wrote:
+> >
+> > On 23/03/2022 15:00, Adam Ford wrote:
+> > > On Wed, Mar 23, 2022 at 8:56 AM Krzysztof Kozlowski =
+<krzk@kernel.org>
+> wrote:
+> > >>
+> > >> On 23/03/2022 14:40, Adam Ford wrote:
+> > >>> The SDHC controller in the imx8mn and imx8mp have the same
+> > >>> controller as the imx8mm which is slightly different than that =
+of the
+> imx7d.
+> > >>> Using the fallback of the imx8mm enables the controllers to
+> > >>> support HS400-ES which is not available on the imx7d.
+> > >>>
+> > >>> Signed-off-by: Adam Ford <aford173@gmail.com>
+> > >>>
+> > >>> diff --git
+> > >>> a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> > >>> b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> > >>> index 7dbbcae9485c..d6ea73d76bdd 100644
+> > >>> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> > >>> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> > >>> @@ -39,14 +39,14 @@ properties:
+> > >>>        - items:
+> > >>>            - enum:
+> > >>>                - fsl,imx8mm-usdhc
+> > >>
+> > >> Your change looks reasonable, but why imx8mm is compatible with =
+imx7d?
+> > >
+> > > I saw that, and I wasn't sure the best way to go about  fixing it.
+> > > If I move the 8mm out of the imx7d category, do I need to add it =
+to
+> > > the enum list associated with the imx8mm, or can I just delete it
+> > > from the enum leaving the const for imx8mm good enough?
+> > >
+> >
+> > The DTS is using:
+> >   compatible =3D "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc"
+> > which looks incorrect, based on what you wrote in commit =
+description.
+> > Since fsl,imx8mm-usdhc has its own compatibility-group and defines =
+the
+> > properties for entire family (imx8mm + imx8mn + imx8mp), then I =
+would
+> > assume that either fsl,imx8mm-usdhc is not be compatible with imx7d =
+or
+> > everything is compatible with imx7d. IOW, DTS and bindings should be
+> > changed to one of following:
+> > 1. Everything compatible with imx7d:
+> >   compatible =3D "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
+> >   compatible =3D "fsl,imx8mq-usdhc", "fsl,imx8mm-usdhc",
+> > "fsl,imx7d-usdhc";
+> >
+> > 2. A new group:
+> >   compatible =3D "fsl,imx8mm-usdhc";
+> >   compatible =3D "fsl,imx8mq-usdhc", "fsl,imx8mm-usdhc";
+> >
+> > Which one, I am not sure. My commit 80fd350b95 organized it in (1)
+> > approach, because also that time there was no new group for 8mm =
+(added
+> > in commit 431fae8). I assume NXP engineer knows better, so the =
+better
+> > solution would be (2). In such case, imx8mm has to be moved to the
+> > first enum and all DTS have to be adjusted.
+>=20
+> I pulled NXP's downtream kernel based on 5.15.y, and grepped the code =
+for
+> imx8mm-usdhc.  It looks like the imx8mm, imx8mn, imx8mp, and imx8ulp =
+use
+> the imx8mm compatible flag.
+> The imx8mq uses the older imx7d.  I'll do a second revision later =
+today or
+> tomorrow.  Looking inside the driver, it appears there are some other =
+quirks
+> that different between the imx7d and imx8mm beyond just support for
+> HS400-ES, so I think your option 2 is appropriate.
+> Hopefully someone from NXP can comment.
+>=20
 
--Takahiro Akashi
+I think better to change like this, and dts need change accordingly.
+
+  compatible:
+    oneOf:
+      - enum:
+          - fsl,imx25-esdhc
+          - fsl,imx35-esdhc
+          - fsl,imx51-esdhc
+          - fsl,imx53-esdhc
+          - fsl,imx6q-usdhc
+          - fsl,imx6sl-usdhc
+          - fsl,imx6sll-usdhc
+          - fsl,imx6sx-usdhc
+          - fsl,imx6ull-usdhc
+          - fsl,imx7d-usdhc
+          - fsl,imx7ulp-usdhc
+          - fsl,imxrt1050-usdhc
+          - fsl,imx8mm-usdhc
+          - fsl,imx8qxp-usdhc
+          - nxp,s32g2-usdhc
+      - items:
+          - enum:
+              - fsl,imx8mq-usdhc
+          - const: fsl,imx7d-usdhc
+      - items:
+          - enum:
+              - fsl,imx93-usdhc
+              - fsl,imx8ulp-usdhc
+              - fsl,imx8mn-usdhc
+              - fsl,imx8mp-usdhc
+          - const: fsl,imx8mm-usdhc
+      - items:
+          - enum:
+              - fsl,imx8qm-usdhc
+          - const: fsl,imx8qxp-usdhc
 
 
-> > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
-> > ---
-> >  drivers/mmc/core/sd_uhs2.c | 835 ++++++++++++++++++++++++++++++++++++-
-> >  1 file changed, 817 insertions(+), 18 deletions(-)
+Best Regards
+Haibo Chen
+
+> adam
 > >
-> > diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-> > index 800957f74632..f1e8e30301eb 100644
-> > --- a/drivers/mmc/core/sd_uhs2.c
-> > +++ b/drivers/mmc/core/sd_uhs2.c
-> > @@ -3,6 +3,7 @@
-> >   * Copyright (C) 2021 Linaro Ltd
-> >   *
-> >   * Author: Ulf Hansson <ulf.hansson@linaro.org>
-> > + * Author: Jason Lai <jason.lai@genesyslogic.com.tw>
-> >   *
-> >   * Support for SD UHS-II cards
-> >   */
-> > @@ -10,19 +11,31 @@
 > >
-> >  #include <linux/mmc/host.h>
-> >  #include <linux/mmc/card.h>
-> > +#include <linux/mmc/mmc.h>
-> > +#include <linux/mmc/sd_uhs2.h>
-> >
-> >  #include "core.h"
-> >  #include "bus.h"
-> > +#include "card.h"
-> >  #include "sd.h"
-> > +#include "sd_ops.h"
-> >  #include "mmc_ops.h"
-> > +#include "sd_uhs2.h"
-> >
-> >  static const unsigned int sd_uhs2_freqs[] = { 52000000, 26000000 };
-> >
-> >  static int sd_uhs2_set_ios(struct mmc_host *host)
-> >  {
-> >         struct mmc_ios *ios = &host->ios;
-> > +       int err = 0;
-> >
-> > -       return host->ops->uhs2_set_ios(host, ios);
-> > +       pr_debug("%s: clock %uHz powermode %u Vdd %u timing %u\n",
-> > +                mmc_hostname(host), ios->clock, ios->power_mode, ios->vdd,
-> > +                ios->timing);
-> > +
-> > +       host->ops->set_ios(host, ios);
-> 
-> We discussed using the ->set_ios() callback in a previous version. To
-> repeat myself, I don't think it's a good idea. UHS-II needs an
-> entirely different power sequence than the legacy interface(s), hence
-> I think it's simply cleaner to separate them.
-> 
-> To move forward, I see two options.
-> 1) Use only the ->uhs2_host_operation() ops.
-> 2) Use a combination of the ->uhs2_set_ios() ops and the
-> ->uhs2_host_operation() ops.
-> 
-> Both options work for me. However, perhaps if you could incorporate
-> the changes done on the host driver at next submission, it becomes
-> easier for me to understand what makes best sense.
-> 
-> > +
-> > +       return err;
-> >  }
-> >
-> >  static int sd_uhs2_power_up(struct mmc_host *host)
-> > @@ -45,6 +58,43 @@ static void sd_uhs2_power_off(struct mmc_host *host)
-> >         sd_uhs2_set_ios(host);
-> >  }
-> 
-> [...]
-> 
-> >
-> >  /*
-> > @@ -61,6 +119,77 @@ static int sd_uhs2_phy_init(struct mmc_host *host)
-> >   */
-> >  static int sd_uhs2_dev_init(struct mmc_host *host)
-> >  {
-> > +       struct mmc_command cmd = {0};
-> > +       struct uhs2_command uhs2_cmd = {};
-> > +       u32 cnt;
-> > +       u32 dap, gap, resp_gap;
-> > +       u16 header = 0, arg = 0;
-> 
-> No need to initiate these.
-> 
-> > +       u32 payload[1];
-> 
-> u32?
-> 
-> > +       u8 plen = 1;
-> > +       u8 gd = 0, cf = 1;
-> > +       u8 resp[6] = {0};
-> > +       u8 resp_len = 6;
-> 
-> Many of these variables are just constant numbers. If it makes sense
-> to add definitions for them, then please do that instead. If not, just
-> give the value directly in the code.
-> 
-> For example: plen = 1; (I assume that is payload length). This can
-> just be given as an in-parameter to sd_uhs2_cmd_assemble(), without
-> further explanation.
-> 
-> The point is, sd_uhs2_cmd_assemble() should have a well described
-> description of its in-parameters, so no need for further descriptions,
-> I think.
-> 
-> This comment applies to all the new code/functions that are added in
-> the $subject patch. Please go through all of the code and fix this.
-> 
-> 
-> > +       int err;
-> > +
-> > +       dap = host->uhs2_caps.dap;
-> > +       gap = host->uhs2_caps.gap;
-> > +
-> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD;
-> > +       arg = ((UHS2_DEV_CMD_DEVICE_INIT & 0xFF) << 8) |
-> > +              UHS2_NATIVE_CMD_WRITE |
-> > +              UHS2_NATIVE_CMD_PLEN_4B |
-> > +              (UHS2_DEV_CMD_DEVICE_INIT >> 8);
-> > +
-> > +       /*
-> > +        * Refer to UHS-II Addendum Version 1.02 section 6.3.1.
-> > +        * Max. time from DEVICE_INIT CCMD EOP reception on Device
-> > +        * Rx to its SOP transmission on Device Tx(Tfwd_init_cmd) is
-> > +        * 1 second.
-> > +        */
-> > +       cmd.busy_timeout = 1000;
-> > +
-> > +       /*
-> > +        * Refer to UHS-II Addendum Version 1.02 section 6.2.6.3.
-> > +        * When the number of the DEVICE_INIT commands is reach to
-> > +        * 30 tiems, Host shall stop issuing DEVICE_INIT command
-> > +        * and regard it as an error.
-> > +        */
-> > +       for (cnt = 0; cnt < 30; cnt++) {
-> > +               payload[0] = ((dap & 0xF) << 12) |
-> > +                             (cf << 11)         |
-> > +                             ((gd & 0xF) << 4)  |
-> > +                             (gap & 0xF);
-> 
-> To me, it looks like the payload data deserves to be explained a bit.
-> Perhaps you can add a comment explaining what pieces it consists of so
-> this becomes more clear?
-> 
-> > +
-> > +               sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg,  payload, plen, resp, resp_len);
-> > +
-> > +               err = mmc_wait_for_cmd(host, &cmd, 0);
-> > +
-> > +               if (err) {
-> > +                       pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
-> > +                              mmc_hostname(host), __func__, err);
-> > +                       return -EIO;
-> 
-> Why do you override the original error code that was returned from
-> mmc_wait_for_cmd()?
-> 
-> Normally it's preferred to keep the error code, unless there is good
-> reason not to.
-> 
-> Again, I won't add more comments like this in the code from the
-> $subject patch. But please go through it all to avoid this kind of
-> thing.
-> 
-> > +               }
-> > +
-> > +               if (resp[3] != (UHS2_DEV_CMD_DEVICE_INIT & 0xFF)) {
-> > +                       pr_err("%s: DEVICE_INIT response is wrong!\n",
-> > +                              mmc_hostname(host));
-> > +                       return -EIO;
-> > +               }
-> > +
-> > +               if (resp[5] & 0x8) {
-> > +                       host->uhs2_caps.group_desc = gd;
-> > +                       break;
-> 
-> I suggest you do a return 0 here. In this way you can skip the check
-> "if (cnt == 30)" below and just return an error code instead.
-> 
-> > +               }
-> > +               resp_gap = resp[4] & 0x0F;
-> > +               if (gap == resp_gap)
-> > +                       gd++;
-> > +       }
-> > +       if (cnt == 30) {
-> > +               pr_err("%s: DEVICE_INIT fail, already 30 times!\n",
-> > +                      mmc_hostname(host));
-> > +               return -EIO;
-> > +       }
-> > +
-> >         return 0;
-> >  }
-> >
-> 
-> >  static int sd_uhs2_config_read(struct mmc_host *host, struct mmc_card *card)
-> >  {
-> > +       struct mmc_command cmd = {0};
-> > +       struct uhs2_command uhs2_cmd = {};
-> > +       u16 header = 0, arg = 0;
-> > +       u32 cap;
-> > +       int err;
-> > +
-> > +       header = UHS2_NATIVE_PACKET |
-> > +                UHS2_PACKET_TYPE_CCMD |
-> > +                card->uhs2_config.node_id;
-> > +       arg = ((UHS2_DEV_CONFIG_GEN_CAPS & 0xFF) << 8) |
-> > +              UHS2_NATIVE_CMD_READ |
-> > +              UHS2_NATIVE_CMD_PLEN_4B |
-> > +              (UHS2_DEV_CONFIG_GEN_CAPS >> 8);
-> > +
-> > +       /* There is no payload because per spec, there should be
-> > +        * no payload field for read CCMD.
-> > +        * Plen is set in arg. Per spec, plen for read CCMD
-> > +        * represents the len of read data which is assigned in payload
-> > +        * of following RES (p136).
-> > +        */
-> > +       sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
-> 
-> We are reading the configuration data here and onwards, piece by
-> piece. Perhaps if you can add a small comment about each piece we are
-> reading, before each call to mmc_wait_for_cmd(), that can help to
-> easier understand what goes on.
-> 
-> [...]
-> 
-> >  static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
-> >  {
-> > +       struct mmc_command cmd = {0};
-> > +       struct uhs2_command uhs2_cmd = {};
-> > +       u16 header = 0, arg = 0;
-> > +       u32 payload[2];
-> > +       u8 nMinDataGap;
-> > +       u8 plen;
-> > +       int err;
-> > +       u8 resp[5] = {0};
-> > +       u8 resp_len = 5;
-> > +
-> > +       header = UHS2_NATIVE_PACKET |
-> > +                UHS2_PACKET_TYPE_CCMD | card->uhs2_config.node_id;
-> > +       arg = ((UHS2_DEV_CONFIG_GEN_SET & 0xFF) << 8) |
-> > +              UHS2_NATIVE_CMD_WRITE |
-> > +              UHS2_NATIVE_CMD_PLEN_8B |
-> > +              (UHS2_DEV_CONFIG_GEN_SET >> 8);
-> > +
-> > +       if (card->uhs2_config.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD &&
-> > +           host->uhs2_caps.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD) {
-> > +               /* Support HD */
-> > +               host->uhs2_caps.flags |= MMC_UHS2_2L_HD;
-> 
-> How is the uhs2_caps.flags field intended to be used? To me it looks
-> like a way for the mmc core to exchange status/configuration
-> information about the initialization process of the card, with the mmc
-> host driver. Perhaps there is more too. Is that correct?
-> 
-> If so, I think it looks quite similar for what we have in the struct
-> mmc_ios, for the legacy interface(s). I am not saying we should use
-> that, just trying to understand what would suit best here.
-> 
-> > +               nMinDataGap = 1;
-> > +       } else {
-> > +               /* Only support 2L-FD so far */
-> > +               host->uhs2_caps.flags &= ~MMC_UHS2_2L_HD;
-> > +               nMinDataGap = 3;
-> > +       }
-> > +
-> > +       /*
-> > +        * Most UHS-II cards only support FD and 2L-HD mode. Other lane numbers
-> > +        * defined in UHS-II addendem Ver1.01 are optional.
-> > +        */
-> > +       host->uhs2_caps.n_lanes_set = UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
-> > +       card->uhs2_config.n_lanes_set = UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
-> 
-> [...]
-> 
-> > +static int sd_uhs2_go_dormant(struct mmc_host *host, bool hibernate, u32 node_id)
-> > +{
-> 
-> Looks like the in-parameter "hibernate" is superfluous, as it's always
-> set to "false" by the caller.
-> 
-> > +       struct mmc_command cmd = {0};
-> > +       struct uhs2_command uhs2_cmd = {};
-> > +       u16 header = 0, arg = 0;
-> > +       u32 payload[1];
-> > +       u8 plen = 1;
-> > +       int err;
-> > +
-> > +       /* Disable Normal INT */
-> > +       if (!host->ops->uhs2_host_operation(host, UHS2_DISABLE_INT)) {
-> > +               pr_err("%s: %s: UHS2 DISABLE_INT fail!\n",
-> > +                      mmc_hostname(host), __func__);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD | node_id;
-> > +
-> > +       arg = ((UHS2_DEV_CMD_GO_DORMANT_STATE & 0xFF) << 8) |
-> > +               UHS2_NATIVE_CMD_WRITE |
-> > +               UHS2_NATIVE_CMD_PLEN_4B |
-> > +               (UHS2_DEV_CMD_GO_DORMANT_STATE >> 8);
-> > +
-> > +       if (hibernate)
-> > +               payload[0] = UHS2_DEV_CMD_DORMANT_HIBER;
-> > +
-> > +       sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen, NULL, 0);
-> > +
-> > +       err = mmc_wait_for_cmd(host, &cmd, 0);
-> > +       if (err) {
-> > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
-> > +                      mmc_hostname(host), __func__, err);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       /* Check Dormant State in Present */
-> > +       if (!host->ops->uhs2_host_operation(host, UHS2_CHECK_DORMANT)) {
-> > +               pr_err("%s: %s: UHS2 GO_DORMANT_STATE fail!\n",
-> > +                      mmc_hostname(host), __func__);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       host->ops->uhs2_host_operation(host, UHS2_DISABLE_CLK);
-> > +
-> >         return 0;
-> >  }
-> >
-> > +static int sd_uhs2_change_speed(struct mmc_host *host, u32 node_id)
-> > +{
-> > +       struct mmc_command cmd = {0};
-> > +       struct uhs2_command uhs2_cmd = {};
-> > +       u16 header = 0, arg = 0;
-> > +       int err;
-> > +       int timeout = 100;
-> > +
-> > +       /* Change Speed Range at controller side. */
-> > +       if (!host->ops->uhs2_host_operation(host, UHS2_SET_SPEED_B)) {
-> > +               pr_err("%s: %s: UHS2 SET_SPEED fail!\n",
-> > +                      mmc_hostname(host), __func__);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       err = sd_uhs2_go_dormant(host, false, node_id);
-> > +       if (err) {
-> > +               pr_err("%s: %s: UHS2 GO_DORMANT_STATE fail, err= 0x%x!\n",
-> > +                      mmc_hostname(host), __func__, err);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       /* restore sd clock */
-> > +       mmc_delay(5);
-> > +       host->ops->uhs2_host_operation(host, UHS2_ENABLE_CLK);
-> 
-> I think the code can be a bit better structured here. More precisely,
-> since sd_uhs2_go_dormant() is the one that calls
-> ->uhs2_host_operation(host, UHS2_DISABLE_INT) and
-> ->uhs2_host_operation(host, UHS2_DISABLE_CLK), it's then up to
-> sd_uhs2_change_speed() to restore these changes.
-> 
-> To me, it would be more clear if both enabling and disabling of the
-> clock /interrupt are managed in sd_uhs2_change_speed().
-> 
-> > +
-> > +       /* Enable Normal INT */
-> > +       if (!host->ops->uhs2_host_operation(host, UHS2_ENABLE_INT)) {
-> > +               pr_err("%s: %s: UHS2 ENABLE_INT fail!\n",
-> > +                      mmc_hostname(host), __func__);
-> > +               return -EIO;
-> > +       }
-> > +
-> > +       /*
-> > +        * According to UHS-II Addendum Version 1.01, chapter 6.2.3, wait card
-> > +        * switch to Active State
-> > +        */
-> > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD | node_id;
-> > +       arg = ((UHS2_DEV_CONFIG_GEN_SET & 0xFF) << 8) |
-> > +               UHS2_NATIVE_CMD_READ |
-> > +               UHS2_NATIVE_CMD_PLEN_8B |
-> > +               (UHS2_DEV_CONFIG_GEN_SET >> 8);
-> > +       do {
-> > +               sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, NULL, 0, NULL, 0);
-> > +               err = mmc_wait_for_cmd(host, &cmd, 0);
-> > +               if (err) {
-> > +                       pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
-> > +                              mmc_hostname(host), __func__, err);
-> > +                       return -EIO;
-> > +               }
-> > +
-> > +               if (cmd.resp[1] & UHS2_DEV_CONFIG_GEN_SET_CFG_COMPLETE)
-> > +                       break;
-> > +
-> > +               timeout--;
-> > +               if (timeout == 0) {
-> > +                       pr_err("%s: %s: Not switch to Active in 100 ms\n",
-> > +                              mmc_hostname(host), __func__);
-> > +                       return -EIO;
-> > +               }
-> > +
-> > +               mmc_delay(1);
-> > +       } while (1);
-> 
-> We really want to avoid these kinds of polling loops, for several
-> reasons. Please convert into using __mmc_poll_for_busy() instead.
-> 
-> > +
-> > +       return 0;
-> > +}
-> > +
-> > +static int sd_uhs2_get_ro(struct mmc_host *host)
-> > +{
-> > +       int ro;
-> > +
-> > +       /*
-> > +        * Some systems don't feature a write-protect pin and don't need one.
-> > +        * E.g. because they only have micro-SD card slot. For those systems
-> > +        * assume that the SD card is always read-write.
-> > +        */
-> > +       if (host->caps2 & MMC_CAP2_NO_WRITE_PROTECT)
-> > +               return 0;
-> > +
-> > +       if (!host->ops->get_ro)
-> > +               return -1;
-> > +
-> > +       ro = host->ops->get_ro(host);
-> > +
-> > +       return ro;
-> 
-> This can be replaced with mmc_sd_get_ro(). Let's avoid the open coding
-> and make that function being shared instead.
-> 
-> > +}
-> > +
-> >  /*
-> >   * Initialize the UHS-II card through the SD-TRAN transport layer. This enables
-> >   * commands/requests to be backwards compatible through the legacy SD protocol.
-> > @@ -107,9 +696,127 @@ static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
-> >   */
-> >  static int sd_uhs2_legacy_init(struct mmc_host *host, struct mmc_card *card)
-> >  {
-> > +       int err;
-> > +       u32 cid[4];
-> > +       u32 ocr;
-> > +       u32 rocr = 0;
-> > +       int ro;
-> > +
-> > +       WARN_ON(!host->claimed);
-> 
-> Drop this, it's an internal function, we should know that the host is
-> claimed before calling sd_uhs2_legacy_init().
-> 
-> > +
-> > +       /* Send CMD0 to reset SD card */
-> > +       mmc_go_idle(host);
-> > +
-> > +       /* Send CMD8 to communicate SD interface operation condition */
-> > +       err = mmc_send_if_cond(host, host->ocr_avail);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SEND_IF_COND fail!\n",
-> > +                      mmc_hostname(host), __func__);
-> 
-> Please drop these prints for every command/operation that fails. We
-> already have trace/debug options for commands/requests.
-> 
-> This applies to all the below code as well (perhaps there are few
-> cases not covered by the existing trace/debug support, those may be
-> converted to pr_debug().
-> 
-> > +               return err;
-> > +       }
-> > +
-> > +       /*
-> > +        * Probe SD card working voltage.
-> > +        */
-> > +       err = mmc_send_app_op_cond(host, 0, &ocr);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SD_SEND_OP_COND fail!\n",
-> > +                      mmc_hostname(host), __func__);
-> > +               return err;
-> > +       }
-> > +       card->ocr = ocr;
-> > +
-> > +       /*
-> > +        * Some SD cards claims an out of spec VDD voltage range. Let's treat
-> > +        * these bits as being in-valid and especially also bit7.
-> > +        */
-> > +       ocr &= ~0x7FFF;
-> > +       rocr = mmc_select_voltage(host, ocr);
-> 
-> If the host has MMC_CAP2_FULL_PWR_CYCLE set, mmc_select_voltage() may
-> end up calling mmc_power_cycle(). This is not going to work for
-> UHS-II.
-> 
-> Either we need to modify mmc_select_voltage() so it becomes aware that
-> it can be called for UHS-II initialization, allowing it to avoid the
-> path to mmc_power_cycle() - or simply open code the part from
-> mmc_select_voltage() for UHS-II here. I think I prefer the latter.
-> 
-> > +
-> > +       /*
-> > +        * Some cards have zero value of rocr in UHS-II mode. Assign host's
-> > +        * ocr value to rocr.
-> > +        */
-> > +       if (!rocr) {
-> > +               if (host->ocr_avail) {
-> > +                       rocr = host->ocr_avail;
-> 
-> host->ocr_avail should really be checked in when the host driver calls
-> mmc_add_host(). It must not be zero, then we should let mmc_add_host()
-> return an error code. I look into this and send a patch for this
-> separately.
-> 
-> In other words, you should not need to check it here, but just trust that's set.
-> 
-> > +               } else {
-> > +                       pr_err("%s: %s: there is no valid OCR.\n",
-> > +                              mmc_hostname(host), __func__);
-> > +                       return -EINVAL;
-> > +               }
-> > +       }
-> > +
-> > +       /* Wait SD power on ready */
-> > +       ocr = rocr;
-> > +       err = mmc_send_app_op_cond(host, ocr, &rocr);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SD_SEND_OP_COND fail!\n", mmc_hostname(host),
-> > +                      __func__);
-> > +               return err;
-> > +       }
-> > +
-> > +       err = mmc_send_cid(host, cid);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SD_SEND_CID fail!\n", mmc_hostname(host),
-> > +                      __func__);
-> > +               return err;
-> > +       }
-> > +       memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
-> > +
-> > +       /*
-> > +        * Call the optional HC's init_card function to handle quirks.
-> > +        */
-> > +       if (host->ops->init_card)
-> > +               host->ops->init_card(host, card);
-> 
-> This can be removed, as it's only for the legacy interface, I think.
-> 
-> > +
-> > +       /*
-> > +        * For native busses:  get card RCA and quit open drain mode.
-> > +        */
-> > +       err = mmc_send_relative_addr(host, &card->rca);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SD_SEND_RCA fail!\n", mmc_hostname(host),
-> > +                      __func__);
-> > +               return err;
-> > +       }
-> > +
-> > +       err = mmc_sd_get_csd(card);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SD_SEND_CSD fail!\n", mmc_hostname(host),
-> > +                      __func__);
-> > +               return err;
-> > +       }
-> > +
-> > +       /*
-> > +        * Select card, as all following commands rely on that.
-> > +        */
-> > +       err = mmc_select_card(card);
-> > +       if (err) {
-> > +               pr_err("%s: %s: SD_SEL_DSEL fail!\n", mmc_hostname(host),
-> > +                      __func__);
-> > +               return err;
-> > +       }
-> > +
-> > +       /*
-> > +        * Check if read-only switch is active.
-> > +        */
-> > +       ro = sd_uhs2_get_ro(host);
-> > +       if (ro < 0) {
-> > +               pr_warn("%s: host does not support read-only switch, assuming write-enable\n",
-> > +                       mmc_hostname(host));
-> > +       } else if (ro > 0) {
-> > +               mmc_card_set_readonly(card);
-> > +       }
-> > +
-> >         return 0;
-> >  }
-> >
-> > +static void sd_uhs2_remove(struct mmc_host *host)
-> > +{
-> > +       mmc_remove_card(host->card);
-> > +       host->card = NULL;
-> > +}
-> > +
-> >  /*
-> >   * Allocate the data structure for the mmc_card and run the UHS-II specific
-> >   * initialization sequence.
-> > @@ -121,16 +828,21 @@ static int sd_uhs2_init_card(struct mmc_host *host)
-> >         int err;
-> >
-> >         err = sd_uhs2_dev_init(host);
-> > -       if (err)
-> > +       if (err) {
-> > +               pr_err("%s: UHS2 DEVICE_INIT fail!\n", mmc_hostname(host));
-> >                 return err;
-> > +       }
-> >
-> >         err = sd_uhs2_enum(host, &node_id);
-> > -       if (err)
-> > +       if (err) {
-> > +               pr_err("%s: UHS2 ENUMERATE fail!\n", mmc_hostname(host));
-> >                 return err;
-> > +       }
-> >
-> >         card = mmc_alloc_card(host, &sd_type);
-> >         if (IS_ERR(card))
-> >                 return PTR_ERR(card);
-> > +       host->card = card;
-> >
-> >         card->uhs2_config.node_id = node_id;
-> >         card->type = MMC_TYPE_SD;
-> > @@ -139,6 +851,16 @@ static int sd_uhs2_init_card(struct mmc_host *host)
-> >         if (err)
-> >                 goto err;
-> >
-> > +       /* Change to Speed Range B if it is supported */
-> > +       if (host->uhs2_caps.flags & MMC_UHS2_SPEED_B) {
-> > +               err = sd_uhs2_change_speed(host, node_id);
-> > +               if (err) {
-> > +                       pr_err("%s: %s: UHS2 sd_uhs2_change_speed() fail!\n",
-> > +                              mmc_hostname(host), __func__);
-> > +                       return err;
-> > +               }
-> > +       }
-> > +
-> >         err = sd_uhs2_config_write(host, card);
-> >         if (err)
-> >                 goto err;
-> > @@ -147,20 +869,13 @@ static int sd_uhs2_init_card(struct mmc_host *host)
-> >         if (err)
-> >                 goto err;
-> >
-> > -       host->card = card;
-> >         return 0;
-> >
-> >  err:
-> > -       mmc_remove_card(card);
-> > +       sd_uhs2_remove(host);
-> >         return err;
-> >  }
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
+> > Best regards,
+> > Krzysztof
+
+------=_NextPart_000_014C_01D83F6D.81FB39E0
+Content-Type: application/pkcs7-signature;
+	name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename="smime.p7s"
+
+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
+MjBFbnRlcnByaXNlJTIwQ0ElMjA1LENOPU5MQU1TUEtJMDAwNSxDTj1DRFAsQ049UHVibGljJTIw
+S2V5JTIwU2VydmljZXMsQ049U2VydmljZXMsQ049Q29uZmlndXJhdGlvbixEQz13YmksREM9bnhw
+LERDPWNvbT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlz
+dHJpYnV0aW9uUG9pbnSGL2h0dHA6Ly9ud3cucGtpLm54cC5jb20vY3JsL05YUEVudGVycHJpc2VD
+QTUuY3Jshi9odHRwOi8vd3d3LnBraS5ueHAuY29tL2NybC9OWFBFbnRlcnByaXNlQ0E1LmNybDCC
+ARAGCCsGAQUFBwEBBIIBAjCB/zCBuwYIKwYBBQUHMAKGga5sZGFwOi8vL0NOPU5YUCUyMEVudGVy
+cHJpc2UlMjBDQSUyMDUsQ049QUlBLENOPVB1YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZp
+Y2VzLENOPUNvbmZpZ3VyYXRpb24sREM9d2JpLERDPW54cCxEQz1jb20/Y0FDZXJ0aWZpY2F0ZT9i
+YXNlP29iamVjdENsYXNzPWNlcnRpZmljYXRpb25BdXRob3JpdHkwPwYIKwYBBQUHMAKGM2h0dHA6
+Ly9ud3cucGtpLm54cC5jb20vY2VydHMvTlhQLUVudGVycHJpc2UtQ0E1LmNydDANBgkqhkiG9w0B
+AQsFAAOCAQEAJpGYHveFzmgLQ4J62fcmPkd4wJ8urL46itMWCgyLBPRARYB9oArCqPd4j0Yl0RmS
+F1oNZgVDYQTy2aLoe+YGm23TkdJsTx1ExTxtv+njRnvvlSXMMULlOIt25/Vj+vTZ/wjFDq6PJOSZ
+MSQHaVHSUrkLBT1H0pBmCA1Ecjuo7gUpG5T2NqD5KJP083pJZ+nogA9TVC9Ob+jNx0d/UR7UgRLf
+KOxBG05AakTa4luadPIRktiULtjzG20WDhvAIg4M9w1+9SV+LpvvqBtkovpCfj9Rf4pNRV1CjjTY
+AFIH0s3Q11HnFd1UNHKUvpp7/SrTyxaCXBO68U5aJz4zDjwIPzCCB+swggbToAMCAQICEy0ABsdV
+/0AV+3f0TucAAAAGx1UwDQYJKoZIhvcNAQELBQAwgbYxHDAaBgNVBAMME05YUCBFbnRlcnByaXNl
+IENBIDUxCzAJBgNVBAsMAklUMREwDwYDVQQKDAhOWFAgQi5WLjESMBAGA1UEBwwJRWluZGhvdmVu
+MRYwFAYDVQQIDA1Ob29yZC1CcmFiYW50MRMwEQYKCZImiZPyLGQBGRYDd2JpMRMwEQYKCZImiZPy
+LGQBGRYDbnhwMRMwEQYKCZImiZPyLGQBGRYDY29tMQswCQYDVQQGEwJOTDAeFw0yMTA5MjIwMTMw
+MTRaFw0yMzA5MjIwMTMwMTRaMIGaMRMwEQYKCZImiZPyLGQBGRYDY29tMRMwEQYKCZImiZPyLGQB
+GRYDbnhwMRMwEQYKCZImiZPyLGQBGRYDd2JpMQwwCgYDVQQLEwNOWFAxCzAJBgNVBAsTAkNOMRYw
+FAYDVQQLEw1NYW5hZ2VkIFVzZXJzMRMwEQYDVQQLEwpEZXZlbG9wZXJzMREwDwYDVQQDEwhueGEx
+MjkzNzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL6VTRRCbJgUEuoR2bppNZQc3ghr
+l0pDEZjK8uaayFYadelTc6iWe8EBLWrrOWd17yNeXc054yw+Yu8eI1IWMEE/mo5l93Kw+BkuCUda
+vpqZUMOvaPDKkHNPBNPJ6AP+vmZW8p/46dxo6Nx6xGzkpbUZ1Ju1a9LuxeFQBNNvV54wYbFmoKJF
+eQQ3RZdEafNucOw8ukTyWurcC8fPUQwqE1sFRdtjLeJWZBtrvNim4oikb5UFxcmoaQkJ/sqoJGZL
++bR3ZZx3101+Y7RJp56hfqT1eqkJkc7OTz+tsZx3p1a6r266NCB/RBIGVD2cFmhUs2Uitp/oB+9k
+BhycuX8wowECAwEAAaOCBAowggQGMDwGCSsGAQQBgjcVBwQvMC0GJSsGAQQBgjcVCIWCwH6BjvRV
+hu2FOILrmUuaklY/heaKboS14X4CAWQCATowEwYDVR0lBAwwCgYIKwYBBQUHAwQwDgYDVR0PAQH/
+BAQDAgUgMAwGA1UdEwEB/wQCMAAwGwYJKwYBBAGCNxUKBA4wDDAKBggrBgEFBQcDBDCBlAYJKoZI
+hvcNAQkPBIGGMIGDMAsGCWCGSAFlAwQBKjALBglghkgBZQMEAS0wCwYJYIZIAWUDBAEWMAsGCWCG
+SAFlAwQBGTALBglghkgBZQMEAQIwCwYJYIZIAWUDBAEFMAoGCCqGSIb3DQMHMAcGBSsOAwIHMA4G
+CCqGSIb3DQMCAgIAgDAOBggqhkiG9w0DBAICAgAwQQYDVR0RBDowOKAiBgorBgEEAYI3FAIDoBQM
+EmhhaWJvLmNoZW5AbnhwLmNvbYESaGFpYm8uY2hlbkBueHAuY29tMB0GA1UdDgQWBBQY587dMxoS
+HzI5SkUyoLrumaVa5jAfBgNVHSMEGDAWgBRYlWDuTnTvZSKqve0ZqSt6jhedBzCCAUYGA1UdHwSC
+AT0wggE5MIIBNaCCATGgggEthoHIbGRhcDovLy9DTj1OWFAlMjBFbnRlcnByaXNlJTIwQ0ElMjA1
+LENOPU5MQU1TUEtJMDAwNSxDTj1DRFAsQ049UHVibGljJTIwS2V5JTIwU2VydmljZXMsQ049U2Vy
+dmljZXMsQ049Q29uZmlndXJhdGlvbixEQz13YmksREM9bnhwLERDPWNvbT9jZXJ0aWZpY2F0ZVJl
+dm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0aW9uUG9pbnSGL2h0dHA6
+Ly9ud3cucGtpLm54cC5jb20vY3JsL05YUEVudGVycHJpc2VDQTUuY3Jshi9odHRwOi8vd3d3LnBr
+aS5ueHAuY29tL2NybC9OWFBFbnRlcnByaXNlQ0E1LmNybDCCARAGCCsGAQUFBwEBBIIBAjCB/zCB
+uwYIKwYBBQUHMAKGga5sZGFwOi8vL0NOPU5YUCUyMEVudGVycHJpc2UlMjBDQSUyMDUsQ049QUlB
+LENOPVB1YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENOPUNvbmZpZ3VyYXRpb24s
+REM9d2JpLERDPW54cCxEQz1jb20/Y0FDZXJ0aWZpY2F0ZT9iYXNlP29iamVjdENsYXNzPWNlcnRp
+ZmljYXRpb25BdXRob3JpdHkwPwYIKwYBBQUHMAKGM2h0dHA6Ly9ud3cucGtpLm54cC5jb20vY2Vy
+dHMvTlhQLUVudGVycHJpc2UtQ0E1LmNydDANBgkqhkiG9w0BAQsFAAOCAQEAsjJuJnMzvA59CAlY
+87eQCOafWbMF4HfC4oobtAqboB48BtCZ5dOeo+X4XQRaSmTwFJ2hZjX614KFnRGXLk/nDIY4pp8+
+fqfgHKUdY1ceVqs+Kjtabk3gY8zq7PtFUsAkwp4OW23kwphh7Awx1tf3XRZeOqwiVuk5V57GT8Tu
+dKNiOZqut3mrcdZINNUsqjt7ZA82r4ov5MbEBHeWVjo7CeWbgZFZhKhMKC9+2DKEUkdDJUcDYqxz
++Rh+6B+dgxeYkTGIqHELhkMjMCC5SwRNHfCxXCI+qRy4zIAo2K3V96zs3ungqiFZuFrpatfSBfAL
+d86AIrOgsHhvOB0UU1W//zGCBLMwggSvAgEBMIHOMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJwcmlz
+ZSBDQSA1MQswCQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3Zl
+bjEWMBQGA1UECAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT
+8ixkARkWA254cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwCEy0ABsdWyH4wxYEw
+yQ4AAAAGx1YwCQYFKw4DAhoFAKCCArkwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG
+9w0BCQUxDxcNMjIwMzI0MDI1NDE3WjAjBgkqhkiG9w0BCQQxFgQUYDKOcfgBQEXcyWpA9V0Sy0ws
+2q8wgZMGCSqGSIb3DQEJDzGBhTCBgjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAoGCCqGSIb3
+DQMHMAsGCWCGSAFlAwQBAjAOBggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAwBwYFKw4DAhow
+CwYJYIZIAWUDBAIDMAsGCWCGSAFlAwQCAjALBglghkgBZQMEAgEwgd8GCSsGAQQBgjcQBDGB0TCB
+zjCBtjEcMBoGA1UEAwwTTlhQIEVudGVycHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoM
+CE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5kaG92ZW4xFjAUBgNVBAgMDU5vb3JkLUJyYWJhbnQxEzAR
+BgoJkiaJk/IsZAEZFgN3YmkxEzARBgoJkiaJk/IsZAEZFgNueHAxEzARBgoJkiaJk/IsZAEZFgNj
+b20xCzAJBgNVBAYTAk5MAhMtAAbHVf9AFft39E7nAAAABsdVMIHhBgsqhkiG9w0BCRACCzGB0aCB
+zjCBtjEcMBoGA1UEAwwTTlhQIEVudGVycHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoM
+CE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5kaG92ZW4xFjAUBgNVBAgMDU5vb3JkLUJyYWJhbnQxEzAR
+BgoJkiaJk/IsZAEZFgN3YmkxEzARBgoJkiaJk/IsZAEZFgNueHAxEzARBgoJkiaJk/IsZAEZFgNj
+b20xCzAJBgNVBAYTAk5MAhMtAAbHVf9AFft39E7nAAAABsdVMA0GCSqGSIb3DQEBAQUABIIBABHB
+le7mLiELPcjpeforfgbYO2lwlTFTX4Tj61pFGlv4Rb4LZTxzt8byYe3zRI4uObPfm6bZ6VtMWjdR
+99SGA3mcSDux+MQd2E7IHyliPAQgHExL2RSUNLLcwEJjtApK4Tb3WTESF+SG1wkPXEqmE0hQ/JWp
+JDdxu4Wt0w+PVvOxQFH5ItuJiBMau7a0hRjw7QIBe3Ed3dtF/PSgl9urtXw5ygM/nz5mqayXW7MU
+KWRuEAt/3he4BMX5tC5CWOlMvwalHPo1HlfxFzKzKg9IIhalx0hE2ohERDVZs/BrY4ga/kBCydv6
+hb9zdTTwJv6XG4ZUv5aYIk4VqHTkYj6NxtQAAAAAAAA=
+
+------=_NextPart_000_014C_01D83F6D.81FB39E0--
