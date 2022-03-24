@@ -2,102 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B959C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 11:17:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72E5EC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Mar 2022 11:27:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349719AbiCXLSl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Mar 2022 07:18:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39680 "EHLO
+        id S242560AbiCXL3Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Mar 2022 07:29:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44918 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349720AbiCXLSl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2022 07:18:41 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5523CA66D0
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2022 04:17:09 -0700 (PDT)
-Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[127.0.0.1])
-        by metis.ext.pengutronix.de with esmtp (Exim 4.92)
-        (envelope-from <a.fatoum@pengutronix.de>)
-        id 1nXLSe-0005xo-30; Thu, 24 Mar 2022 12:17:00 +0100
-Message-ID: <ecc8cee6-e890-278e-2916-e7fd45276e6f@pengutronix.de>
-Date:   Thu, 24 Mar 2022 12:16:58 +0100
+        with ESMTP id S236176AbiCXL3P (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2022 07:29:15 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE9DFA66DA
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2022 04:27:43 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id t25so7499892lfg.7
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2022 04:27:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=fPfi4Xm9YbqP1IoK9ElG4DOlRT/KjgvgBNNdUk2X6ZQ=;
+        b=t/EfuE5B4xcxjUhY3ePpMuxc+uUjdNEyq5MDxPZP2WuJYR7sgQ4BiI89rM+KryafAK
+         UKfngnLjaX666ztqaPfZXEurD4HBxenspJu0puiPgk/GAQnHdppbsYHXmI7FTdq3IYTw
+         v/i7vTtQmAAdE3PO403saxQypwTvP55bnVYyj29Ro8qDQDyDQYvJ+1c15zRgsYbhrGex
+         kg2OiSvY6HCw8Jz6WPokAsW2Vdp4c8Ge8Bk0HDa9aQIIF44+J1qn6H7iFRwlj5qXpy1k
+         QJD3UcIvty1RXGS38NehZk1hd23cVf7oEcRFvWQKpBq8TLd8gnbtj1gp1X1O3vpWxewJ
+         uVhQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=fPfi4Xm9YbqP1IoK9ElG4DOlRT/KjgvgBNNdUk2X6ZQ=;
+        b=tFSJzyFs8J52Rkrex4AMwXwW+0oNY/xxgKSCCJghguEttluS4Qn8Hw+p2Bh4Lpc9oA
+         PssUoOWpZs6al6gJEnzBxLgtY0guhwcs6KvLev04sck6kRn5LhKQjgOS2DFmwoa4rzms
+         iwlEGGV33An0eF8PZc0cE3MT0C7l+VIhWfjCJW3HRz8RZsbo1Q6Aoe99y5it4THpuKbO
+         rhodGJ2n3qqxioOGR/7bpmpPGUpezgW6tCkBRTdjI5z4JMTuElE+vfkbRtzyaBJYyWqN
+         MQDuZCU8FKpnc99Glv/z8RkgAc+as0zvAPR/l9YleRQDJUdqTrdoQAE6oiKDiic9/ttR
+         l9rg==
+X-Gm-Message-State: AOAM530P9B7WMrXDmH8cHxrv+T/KIoagE/aKmMv7cUaVm5v4yP2YzEBD
+        +zyWBEP4T8695pyzMIWANJu/Rxg/5cUljiSgbXE2Ag==
+X-Google-Smtp-Source: ABdhPJxdvjqNo4uyHye12q7AtzjdCfzM0RY44K5wbnCJ2Tj14hNItGhGCR5vH6iOrKCB/ZBglN/ZRGwPtefkMIOPPKc=
+X-Received: by 2002:a05:6512:260b:b0:445:c54c:4157 with SMTP id
+ bt11-20020a056512260b00b00445c54c4157mr3543024lfb.254.1648121261963; Thu, 24
+ Mar 2022 04:27:41 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.6.1
-Subject: Re: [PATCH 0/4] dt-bindings: imx: add nvmem property
-Content-Language: en-US
-To:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
-Cc:     linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, Peng Fan <peng.fan@nxp.com>,
-        netdev@vger.kernel.org, s.hauer@pengutronix.de,
-        linux-mmc@vger.kernel.org, qiangqing.zhang@nxp.com,
-        linux-kernel@vger.kernel.org, linux-can@vger.kernel.org,
-        robh+dt@kernel.org, mkl@pengutronix.de, linux-imx@nxp.com,
-        kernel@pengutronix.de, kuba@kernel.org, krzk+dt@kernel.org,
-        pabeni@redhat.com, shawnguo@kernel.org, davem@davemloft.net,
-        wg@grandegger.com, festevam@gmail.com,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-References: <20220324042024.26813-1-peng.fan@oss.nxp.com>
- <20220324111104.cd7clpkzzedtcrja@pengutronix.de>
-From:   Ahmad Fatoum <a.fatoum@pengutronix.de>
-In-Reply-To: <20220324111104.cd7clpkzzedtcrja@pengutronix.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
-X-SA-Exim-Mail-From: a.fatoum@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20220312044315.7994-1-michael@allwinnertech.com>
+ <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com> <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
+ <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com> <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <312d724c-e43f-d766-49fb-9c5b10fe8b07@intel.com> <7ec0cf3e316a4ed9987962b4cbf01604@hyperstone.com>
+ <a1230f11-a2dd-1959-5444-28c57d3babf6@intel.com> <CAPDyKFpnR12+nrbiB-Ps-C4vn-WeHneRGJioQ_0b2ikk2CBChw@mail.gmail.com>
+In-Reply-To: <CAPDyKFpnR12+nrbiB-Ps-C4vn-WeHneRGJioQ_0b2ikk2CBChw@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 24 Mar 2022 12:27:05 +0100
+Message-ID: <CAPDyKFqnFVd=mvQMnydT569Y6YFg3zPkttQ=amdzmT_yqYQeTg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
+To:     Michael Wu <michael@allwinnertech.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        "beanhuo@micron.com" <beanhuo@micron.com>,
+        "porzio@gmail.com" <porzio@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        allwinner-opensource-support 
+        <allwinner-opensource-support@allwinnertech.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Thu, 17 Mar 2022 at 10:14, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Wed, 16 Mar 2022 at 17:08, Adrian Hunter <adrian.hunter@intel.com> wro=
+te:
+> >
+> > On 16.3.2022 16.46, Christian L=C3=B6hle wrote:
+> > >> So we are not going to let the block layer know about SD cache?
+> > >> Or is it a separate change?
+> > >
+> > > I have some code for this laying around, but as it requires reading, =
+parsing and writing Function Registers,
+> > > in particular PEH, it's a lot of boilerplate code to get the function=
+ality, but I'll clean it up and send a patch in the coming weeks.
+> > >
+> >
+> > We have the sd cache flush.  We would presumably just need to call blk_=
+queue_write_cache()
+> > for the !mmc_card_mmc(card) case e.g.
+> >
+> >         if (mmc_has_reliable_write(card)) {
+> >                 md->flags |=3D MMC_BLK_REL_WR;
+> >                 enable_fua =3D true;
+> >         }
+> >
+> >         if (mmc_cache_enabled(card->host))
+> >                 enable_cache =3D true;
+> >
+> >         blk_queue_write_cache(md->queue.queue, enable_cache, enable_fua=
+);
+>
+> To me, this seems like the most reasonable thing to do.
+>
+> However, I have to admit that it's not clear to me, if there was a
+> good reason to why commit f4c5522b0a88 ("mmc: Reliable write
+> support.") also added support for REQ_FLUSH (write back cache) and why
+> not only REQ_FUA. I assumed this was wrong too, right?
+>
+> When it comes to patches for stable kernels. mmc_cache_enabled() was
+> introduced quite recently in v5.13, so for older kernels that call
+> needs to be replaced with something else.
+>
+> In any case, the relevant commits that can be considered as needs to
+> be fixed seems like these:
+> commit f4c5522b0a88 ("mmc: Reliable write support.")
+> commit 881d1c25f765 ("mmc: core: Add cache control for eMMC4.5 device")
+> commit 130206a615a9 ("mmc: core: Add support for cache ctrl for SD cards"=
+)
+>
+> [...]
 
-On 24.03.22 12:11, Uwe Kleine-König wrote:
-> I'd rather not have that in an official binding as the syntax is
-> orthogonal to status = "..." but the semantic isn't. Also if we want
-> something like that, I'd rather not want to adapt all bindings, but
-> would like to see this being generic enough to be described in a single
-> catch-all binding.
+Michael, are you planning to send a v2 for this? Or are there any
+parts that are still unclear to you?
 
-Cc += Srini who maintains the NVMEM bindings.
-
-> I also wonder if it would be nicer to abstract that as something like:
-> 
-> 	/ {
-> 		fuse-info {
-> 			compatible = "otp-fuse-info";
-> 
-> 			flexcan {
-> 				devices = <&flexcan1>, <&flexcan2>;
-> 				nvmem-cells = <&flexcan_disabled>;
-> 				nvmem-cell-names = "disabled";
-> 			};
-> 
-> 			m7 {
-> 				....
-> 			};
-> 		};
-> 	};
-> 
-> as then the driver evaluating this wouldn't need to iterate over the
-> whole dtb but just over this node. But I'd still keep this private to
-> the bootloader and not describe it in the generic binding.
-
-I like this, but being for bootloader consumption only doesn't mean that
-this shouldn't be documented upstream. It's fine to have the binding,
-even if Linux isn't expected to implement it.
-
-Cheers,
-Ahmad
-
-> 
-> Just my 0.02€
-> Uwe
-
-
--- 
-Pengutronix e.K.                           |                             |
-Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Kind regards
+Uffe
