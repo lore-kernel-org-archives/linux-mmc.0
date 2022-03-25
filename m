@@ -2,128 +2,308 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C2B6C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Mar 2022 05:46:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4B1EC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Mar 2022 07:23:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237319AbiCYFrm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Mar 2022 01:47:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51374 "EHLO
+        id S1347667AbiCYHZE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Mar 2022 03:25:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229728AbiCYFrl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2022 01:47:41 -0400
-Received: from out28-5.mail.aliyun.com (out28-5.mail.aliyun.com [115.124.28.5])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56ED845AE1;
-        Thu, 24 Mar 2022 22:46:07 -0700 (PDT)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07537643|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_regular_dialog|0.10762-0.0120297-0.88035;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=9;RT=9;SR=0;TI=SMTPD_---.NC8pT5B_1648187152;
-Received: from 172.30.10.142(mailfrom:michael@allwinnertech.com fp:SMTPD_---.NC8pT5B_1648187152)
-          by smtp.aliyun-inc.com(33.38.168.42);
-          Fri, 25 Mar 2022 13:46:04 +0800
-Message-ID: <a39e9f71-7a9c-bf0e-50d0-d45de3c2e132@allwinnertech.com>
-Date:   Fri, 25 Mar 2022 13:45:52 +0800
+        with ESMTP id S1345627AbiCYHZC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2022 03:25:02 -0400
+Received: from alexa-out-sd-02.qualcomm.com (alexa-out-sd-02.qualcomm.com [199.106.114.39])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5492929821;
+        Fri, 25 Mar 2022 00:23:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1648193008; x=1679729008;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=t2cm6FUqVnb6HFIvoRE1nNyfNP+uxM9hF5kat0eAGC4=;
+  b=caD/Csp2ZtsLpSbyp0TMp5Lzunm7qDfkf6EWNLN2JmWoioaWhq3CB1/v
+   Cv2h7Q82KiFM4PATlIv33pq5iXUw/9JwhXuFMbzRwBoNQ42g/kkfJgsTF
+   VLdxM2SAJKO/bQA2kbsp34gTdAm3M40aPGJYSajxRm0Z35SqZYhd+9ZRy
+   Y=;
+Received: from unknown (HELO ironmsg05-sd.qualcomm.com) ([10.53.140.145])
+  by alexa-out-sd-02.qualcomm.com with ESMTP; 25 Mar 2022 00:23:23 -0700
+X-QCInternal: smtphost
+Received: from nasanex01c.na.qualcomm.com ([10.47.97.222])
+  by ironmsg05-sd.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Mar 2022 00:23:23 -0700
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nasanex01c.na.qualcomm.com (10.47.97.222) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.22; Fri, 25 Mar 2022 00:23:22 -0700
+Received: from [10.216.31.14] (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Fri, 25 Mar
+ 2022 00:22:42 -0700
+Message-ID: <f88d2318-38fa-1db2-37c8-39693b321306@quicinc.com>
+Date:   Fri, 25 Mar 2022 12:52:23 +0530
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
-Content-Language: en-GB
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        "beanhuo@micron.com" <beanhuo@micron.com>,
-        "porzio@gmail.com" <porzio@gmail.com>,
+ Thunderbird/91.6.1
+Subject: Re: [PATCH V2] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+Content-Language: en-US
+To:     "bjorn.andersson@linaro.org" <bjorn.andersson@linaro.org>
+CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "agross@kernel.org" <agross@kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "chris@printf.net" <chris@printf.net>,
+        "gdjakov@mm-sol.com" <gdjakov@mm-sol.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        allwinner-opensource-support 
-        <allwinner-opensource-support@allwinnertech.com>
-References: <20220312044315.7994-1-michael@allwinnertech.com>
- <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com>
- <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
- <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com>
- <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
- <312d724c-e43f-d766-49fb-9c5b10fe8b07@intel.com>
- <7ec0cf3e316a4ed9987962b4cbf01604@hyperstone.com>
- <a1230f11-a2dd-1959-5444-28c57d3babf6@intel.com>
- <CAPDyKFpnR12+nrbiB-Ps-C4vn-WeHneRGJioQ_0b2ikk2CBChw@mail.gmail.com>
- <CAPDyKFqnFVd=mvQMnydT569Y6YFg3zPkttQ=amdzmT_yqYQeTg@mail.gmail.com>
-From:   Michael Wu <michael@allwinnertech.com>
-In-Reply-To: <CAPDyKFqnFVd=mvQMnydT569Y6YFg3zPkttQ=amdzmT_yqYQeTg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+        "Asutosh Das (QUIC)" <quic_asutoshd@quicinc.com>,
+        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
+        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
+        "Sarthak Garg (QUIC)" <quic_sartgarg@quicinc.com>,
+        "Nitin Rawat (QUIC)" <quic_nitirawa@quicinc.com>,
+        "Sayali Lokhande (QUIC)" <quic_sayalil@quicinc.com>
+References: <1646926823-5362-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <YiqMZouVVEtVNrlV@ripper>
+ <SJ0PR02MB844961406A5030D86AAFC71ACD109@SJ0PR02MB8449.namprd02.prod.outlook.com>
+From:   "Sajida Bhanu (Temp)" <quic_c_sbhanu@quicinc.com>
+In-Reply-To: <SJ0PR02MB844961406A5030D86AAFC71ACD109@SJ0PR02MB8449.namprd02.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/03/2022 19:27, Ulf Hansson wrote:
-> On Thu, 17 Mar 2022 at 10:14, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+
+On 3/15/2022 2:47 PM, Sajida Bhanu (Temp) (QUIC) wrote:
+> Hi,
+>
+> Thanks for the review.
+>
+> Please find the inline comments.
+>
+> Thanks,
+> Sajida
+>> -----Original Message-----
+>> From: Bjorn Andersson <bjorn.andersson@linaro.org>
+>> Sent: Friday, March 11, 2022 5:10 AM
+>> To: Sajida Bhanu (Temp) (QUIC) <quic_c_sbhanu@quicinc.com>
+>> Cc: adrian.hunter@intel.com; agross@kernel.org; ulf.hansson@linaro.org;
+>> p.zabel@pengutronix.de; chris@printf.net; gdjakov@mm-sol.com; linux-
+>> mmc@vger.kernel.org; linux-arm-msm@vger.kernel.org; linux-
+>> kernel@vger.kernel.org; Asutosh Das (QUIC) <quic_asutoshd@quicinc.com>;
+>> Ram Prakash Gupta (QUIC) <quic_rampraka@quicinc.com>; Pradeep
+>> Pragallapati (QUIC) <quic_pragalla@quicinc.com>; Sarthak Garg (QUIC)
+>> <quic_sartgarg@quicinc.com>; Nitin Rawat (QUIC)
+>> <quic_nitirawa@quicinc.com>; Sayali Lokhande (QUIC)
+>> <quic_sayalil@quicinc.com>
+>> Subject: Re: [PATCH V2] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for
+>> SDHC
 >>
->> On Wed, 16 Mar 2022 at 17:08, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On Thu 10 Mar 07:40 PST 2022, Shaik Sajida Bhanu wrote:
+>>
+>>> Reset GCC_SDCC_BCR register before every fresh initilazation. This
+>>> will reset whole SDHC-msm controller, clears the previous power
+>>> control states and avoids, software reset timeout issues as below.
 >>>
->>> On 16.3.2022 16.46, Christian Löhle wrote:
->>>>> So we are not going to let the block layer know about SD cache?
->>>>> Or is it a separate change?
->>>>
->>>> I have some code for this laying around, but as it requires reading, parsing and writing Function Registers,
->>>> in particular PEH, it's a lot of boilerplate code to get the functionality, but I'll clean it up and send a patch in the coming weeks.
->>>>
+>> Nice, we've gotten reports about this from time to time.
+>>
+>>> [ 5.458061][ T262] mmc1: Reset 0x1 never completed.
+>>> [ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP
+>>> =========== [ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 |
+>>> Version:
+>>> 0x00007202
+>>> [ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt:
+>>> 0x00000000
+>>> [ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode:
+>>> 0x00000000
+>>> [ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl:
+>>> 0x00000000
+>>> [ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap:
+>>> 0x00000000 [ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 |
+>>> Clock: 0x00000003 [ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 |
+>> Int stat:
+>>> 0x00000000
+>>> [ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab:
+>>> 0x00000000
+>>> [ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int:
+>>> 0x00000000
+>>> [ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
+>>> [ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+>>> [ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]:
+>>> 0x00000000
+>>> [ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]:
+>>> 0x00000000
+>>> [ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000 [ 5.559651][
+>>> T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER
+>>> DUMP-----------
+>>> [ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+>>> 0x6000642c |
+>>> DLL cfg2: 0x0020a000
+>>> [ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+>>> 0x00010800 | DDR cfg: 0x80040873
+>>> [ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 :
+>>> 0xf88218a8 Vndr func3: 0x02626040
+>> Please ignore the line length "limit" and leave these unwrapped.
+>>
+> Sure
+>>> Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm
+>>> chipsets")
+>> This as well, and please drop the empty line between Fixes: and Signed-off-
+>> by:.
+>>
+> Sure
+>>> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+>>> ---
 >>>
->>> We have the sd cache flush.  We would presumably just need to call blk_queue_write_cache()
->>> for the !mmc_card_mmc(card) case e.g.
+>>> Changes since V1:
+>>>      - Added fixes tag as suggested by Ulf Hansson.
+>>>      - Replaced devm_reset_control_get() with
+>>>        devm_reset_control_get_optional_exclusive() as suggested by
+>>>        Ulf Hansson.
+>>> ---
+>>>   drivers/mmc/host/sdhci-msm.c | 48
+>>> ++++++++++++++++++++++++++++++++++++++++++++
+>>>   1 file changed, 48 insertions(+)
 >>>
->>>          if (mmc_has_reliable_write(card)) {
->>>                  md->flags |= MMC_BLK_REL_WR;
->>>                  enable_fua = true;
->>>          }
+>>> diff --git a/drivers/mmc/host/sdhci-msm.c
+>>> b/drivers/mmc/host/sdhci-msm.c index 50c71e0..cb33c9a 100644
+>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>> @@ -17,6 +17,7 @@
+>>>   #include <linux/regulator/consumer.h>  #include
+>>> <linux/interconnect.h>  #include <linux/pinctrl/consumer.h>
+>>> +#include <linux/reset.h>
 >>>
->>>          if (mmc_cache_enabled(card->host))
->>>                  enable_cache = true;
+>>>   #include "sdhci-pltfm.h"
+>>>   #include "cqhci.h"
+>>> @@ -284,6 +285,7 @@ struct sdhci_msm_host {
+>>>      bool uses_tassadar_dll;
+>>>      u32 dll_config;
+>>>      u32 ddr_config;
+>>> +   struct reset_control *core_reset;
+>> As you only reset the controller once, during probe, this can be a local
+>> variable in sdhci_msm_gcc_reset().
+> Hi,
+>
+> In future if any requirement to reset gcc , for example if we want to reset gcc as a part of hardware reset then we can use this core_reset right.
+>
+> Thanks,
+> Sajida
+>>>      bool vqmmc_enabled;
+>>>   };
 >>>
->>>          blk_queue_write_cache(md->queue.queue, enable_cache, enable_fua);
+>>> @@ -2482,6 +2484,45 @@ static inline void
+>> sdhci_msm_get_of_property(struct platform_device *pdev,
+>>>      of_property_read_u32(node, "qcom,dll-config",
+>>> &msm_host->dll_config);  }
+>>>
+>>> +static int sdhci_msm_gcc_reset(struct platform_device *pdev,
+>> You don't need pdev here, take a struct deivce * in and pass &pdev->dev.
+> Ok
+>>> +          struct sdhci_host *host)
+>>> +{
+>>> +   struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>> +   struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>> +   int ret = 0;
+>>> +
+>>> +   msm_host->core_reset =
+>>> +devm_reset_control_get_optional_exclusive(&pdev->dev,
+>> "core_reset");
 >>
->> To me, this seems like the most reasonable thing to do.
+>> No need to hold onto that, so use the non-devm variant and free the reset at
+>> the end of the function.
+> Sorry didn't get this.
+> Can you please point me any reference for this.
+
+Hi,
+
+Can you please help with comment on this.
+
+Thanks,
+
+Sajida
+
+>>> +   if (IS_ERR(msm_host->core_reset)) {
+>>> +           ret = PTR_ERR(msm_host->core_reset);
+>>> +           dev_err(&pdev->dev, "core_reset unavailable (%d)\n", ret);
+>>> +           msm_host->core_reset = NULL;
+>> return dev_err_probe(&pdev->dev, PTR_ERR(msm_host->core_reset),
+>> "unable to acquire core_reset\n");
 >>
->> However, I have to admit that it's not clear to me, if there was a
->> good reason to why commit f4c5522b0a88 ("mmc: Reliable write
->> support.") also added support for REQ_FLUSH (write back cache) and why
->> not only REQ_FUA. I assumed this was wrong too, right?
+>>> +   }
+>>> +   if (msm_host->core_reset) {
+>> If you flip this around as:
 >>
-
-Hi Ulf,
-
-1. I've found the reason. If we only enable REQ_FUA, there won't be any 
-effect -- The block layer won't send any request with FUA flag to the 
-driver.
-If we want REQ_FUA to take effect, we must enable REQ_FLUSH. But on the 
-contrary, REQ_FLUSH does not rely on REQ_FUA.
-In the previous patch(commit f4c5522b0a88 ("mmc: Reliable write 
-support.")), REQ_FLUSH was added to make REQ_FUA effective. I've done 
-experiments to prove this.
-
-2. Why block layer requires REQ_FLUSH to make REQ_FUA effective? I did 
-not find the reason. Does anyone know about this? Thank you.
-
->> When it comes to patches for stable kernels. mmc_cache_enabled() was
->> introduced quite recently in v5.13, so for older kernels that call
->> needs to be replaced with something else.
+>>        if (!msm_host->core_reset)
+>>                return 0;
 >>
->> In any case, the relevant commits that can be considered as needs to
->> be fixed seems like these:
->> commit f4c5522b0a88 ("mmc: Reliable write support.")
->> commit 881d1c25f765 ("mmc: core: Add cache control for eMMC4.5 device")
->> commit 130206a615a9 ("mmc: core: Add support for cache ctrl for SD cards")
+>> You don't need to zero-initialize ret, use goto and indent this block.
+> Sure
+>>> +           ret = reset_control_assert(msm_host->core_reset);
+>>> +           if (ret) {
+>>> +                   dev_err(&pdev->dev, "core_reset assert failed
+>> (%d)\n",
+>>> +                                           ret);
+>>> +                   goto out;
+>> return dev_err_probe();
 >>
->> [...]
-> 
-> Michael, are you planning to send a v2 for this? Or are there any
-> parts that are still unclear to you?
-
-Dear Ulf, Sorry for the delay. I was trying to figure out the SD cache 
-stuff, so a few day was taken...
-
-> 
-> Kind regards
-> Uffe
-
--- 
-Best Regards,
-Michael Wu
+> Sure
+>>> +           }
+>>> +           /*
+>>> +            * The hardware requirement for delay between
+>> assert/deassert
+>>> +            * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
+>>> +            * ~125us (4/32768). To be on the safe side add 200us delay.
+>>> +            */
+>>> +           usleep_range(200, 210);
+>>> +
+>>> +           ret = reset_control_deassert(msm_host->core_reset);
+>>> +           if (ret) {
+>>> +                   dev_err(&pdev->dev, "core_reset deassert failed
+>> (%d)\n",
+>>> +                                           ret);
+>>> +                   goto out;
+>> return dev_err_probe()
+> Sure
+>>> +           }
+>>> +           usleep_range(200, 210);
+>> The comment above says that we need to hold reset for 125us, is this delay
+>> in here in error or should the comment above mention that this needs to be
+>> done after deasserting the reset as well?
+> Yes we need delay after deasserting the reset as well.
+>>> +   }
+>>> +
+>>> +out:
+>>> +   return ret;
+>> With above, you can return 0 here.
+>>
+>>> +}
+>>>
+>>>   static int sdhci_msm_probe(struct platform_device *pdev)  { @@
+>>> -2529,6 +2570,13 @@ static int sdhci_msm_probe(struct platform_device
+>>> *pdev)
+>>>
+>>>      msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+>>>
+>>> +   ret = sdhci_msm_gcc_reset(pdev, host);
+>>> +   if (ret) {
+>>> +           dev_err(&pdev->dev, "core_reset assert/deassert failed
+>> (%d)\n",
+>>> +                                   ret);
+>> You just printed in sdhci_msm_gcc_reset(), no need to print again.
+>>
+>> Regards,
+>> Bjorn
+>>
+> Okay Sure
+>>> +           goto pltfm_free;
+>>> +   }
+>>> +
+>>>      /* Setup SDCC bus voter clock. */
+>>>      msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+>>>      if (!IS_ERR(msm_host->bus_clk)) {
+>>> --
+>>> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a
+>>> member of Code Aurora Forum, hosted by The Linux Foundation
+>>>
