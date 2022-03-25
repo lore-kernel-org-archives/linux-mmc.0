@@ -2,185 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6988DC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Mar 2022 10:14:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDA63C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Mar 2022 11:54:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346744AbiCYKPe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Mar 2022 06:15:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45274 "EHLO
+        id S1357532AbiCYL4b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Mar 2022 07:56:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346179AbiCYKPd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2022 06:15:33 -0400
-Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E402370921
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Mar 2022 03:13:59 -0700 (PDT)
-Received: by mail-yb1-xb2f.google.com with SMTP id m67so13206041ybm.4
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Mar 2022 03:13:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=Dy70LknDltaydRvM2j7tC/JvGxcBI/BpC2sBDwW5Whw=;
-        b=vfV/uWpmxibHreycGrmw/VMND9+KkaPPdtstXa9v0Lhs4/uFEuP6+60hce+nXKhVZQ
-         IkjbY1N4uwnA0lPGauk0BUD4jE1D92H+fJYU2kBPDXQKnKLXuTvl0rYaoWUs4X53YkhI
-         3jDH7/hdIpjzjsPXl68qO1535wFAqIcDszIyrPxZFMhwz7KvuByWeVo9YNAENrn2OS13
-         WVs3Aut+SlxtwfwfdZ3RNzZVK18mgvhyeS00LLBjsJ3nRBsw0yoP/GyVChkO0WfA9p7Z
-         OMJUzuhPlj+q9l/PFO+8dTuv35wpdxyVeGMOjp1sCU3kAe296BOI644tUnxvX3tuU+h5
-         SGgQ==
+        with ESMTP id S1357525AbiCYL4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2022 07:56:31 -0400
+Received: from mail-wr1-f45.google.com (mail-wr1-f45.google.com [209.85.221.45])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36260BCB6;
+        Fri, 25 Mar 2022 04:54:57 -0700 (PDT)
+Received: by mail-wr1-f45.google.com with SMTP id r13so10520843wrr.9;
+        Fri, 25 Mar 2022 04:54:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=Dy70LknDltaydRvM2j7tC/JvGxcBI/BpC2sBDwW5Whw=;
-        b=FWdGeDjQNKWR51hymbNJ0SStVgddvUtfewV5F1XWC72u23X0RHJAmKBZ0qZQvDfocd
-         olmj3/6ZqgnLTvywLIeZjvIRIrvxkWVKJkQHXljMcTOYmNn5/pfBecMAMorMnrp1gVOg
-         e5maXomRXY8xXIzxeYsR2StOVRQkD7tqzWr5FWrIyIKxdSZCjhCcBStJ7mAUBjHqDFQF
-         1n6kXHIWo2+6ZI9klj6rdZcabcR2o0yQGP03oom+8NHc9pwhT4dSxX7XKhYp26T9rLx7
-         ulx1zzIcvs0vHIr4PTXFKApwNfKnnX35rq0kxPuGz0O82xVnD7izUoLZXUmPnVZlchtL
-         T2ww==
-X-Gm-Message-State: AOAM531jikV8ieoO/tqj5hC+nffeON7oO+/euqcfABmseY8MUY5nl7Zd
-        D60qNKOsyAkqixcNTCEV5KuSj5G0A14S38ZuZowFGA==
-X-Google-Smtp-Source: ABdhPJygOttWqHBybnGqCkLkJtMfcXn5Ipj6ZXybayWFtfoPxakdfslCt6yTUQ2pQ95Ht6z3qOf8tH6YVyW77KzwvyE=
-X-Received: by 2002:a25:23c2:0:b0:633:b871:ce27 with SMTP id
- j185-20020a2523c2000000b00633b871ce27mr9312035ybj.644.1648203239081; Fri, 25
- Mar 2022 03:13:59 -0700 (PDT)
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=wfO/NgKZ7H/qKA+QCI+ODq0tIwjvgLb32lCfr243Wio=;
+        b=PjQ72ppjZJv71Q7Lsc1DCsD3OBT8iqTJclAni1GB8mJK9rjfbf+zXcupuTU554blja
+         FEKWJw7In4hw4MOVjiUKiWE7gBN3h/X36neZVFv2TZ4rBfePUTsCERymzVc4KajSs2tC
+         /sH5hRGAjQAHOyj4veDG0+0szQOCXKj5U4om4dlPbhs3aQfuZYdxHTIhI8fxXhZ+PM5l
+         us6BJoRoTm+qEXFLdNuQ+vh6zn72RDa7uiX9f3hkaKVVzRT1hlqO7oY6g/IG8SOi7z5J
+         X3dJ6BZfV4i2PFgbEpL1S3kfSOUwslQ9FnOEgCL7Es1x5EUvVdVS34wtZ0Xf7wUXqfTQ
+         0EZA==
+X-Gm-Message-State: AOAM531heWHSszkjgUnWbdohoompHROB41pnU9XaT4/ETFs5WicqncqB
+        TsdNhDvAORr9r4ipe/2NIAk=
+X-Google-Smtp-Source: ABdhPJyqx1hl6cEgGobyDAh7rmlx2h8IO+ILO7En01TltDi+G500EhEPBMZCB2sr6uU1h34LFuv1pw==
+X-Received: by 2002:adf:fc06:0:b0:204:975:acfb with SMTP id i6-20020adffc06000000b002040975acfbmr8958788wrr.486.1648209295383;
+        Fri, 25 Mar 2022 04:54:55 -0700 (PDT)
+Received: from [192.168.0.159] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
+        by smtp.googlemail.com with ESMTPSA id p2-20020a1c7402000000b0038159076d30sm8261916wmc.22.2022.03.25.04.54.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 25 Mar 2022 04:54:54 -0700 (PDT)
+Message-ID: <86f96cb1-aca4-2c55-fb34-ed35582af2f9@kernel.org>
+Date:   Fri, 25 Mar 2022 12:54:53 +0100
 MIME-Version: 1.0
-References: <20220312044315.7994-1-michael@allwinnertech.com>
- <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com> <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
- <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com> <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
- <312d724c-e43f-d766-49fb-9c5b10fe8b07@intel.com> <7ec0cf3e316a4ed9987962b4cbf01604@hyperstone.com>
- <a1230f11-a2dd-1959-5444-28c57d3babf6@intel.com> <CAPDyKFpnR12+nrbiB-Ps-C4vn-WeHneRGJioQ_0b2ikk2CBChw@mail.gmail.com>
- <CAPDyKFqnFVd=mvQMnydT569Y6YFg3zPkttQ=amdzmT_yqYQeTg@mail.gmail.com> <a39e9f71-7a9c-bf0e-50d0-d45de3c2e132@allwinnertech.com>
-In-Reply-To: <a39e9f71-7a9c-bf0e-50d0-d45de3c2e132@allwinnertech.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 25 Mar 2022 11:13:22 +0100
-Message-ID: <CAPDyKFoVVrCNqJUztKnOqyJHhFYnH0H3PR1z02qVN7pchD6W0g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
-To:     Michael Wu <michael@allwinnertech.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        "beanhuo@micron.com" <beanhuo@micron.com>,
-        "porzio@gmail.com" <porzio@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        allwinner-opensource-support 
-        <allwinner-opensource-support@allwinnertech.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: xenon: Convert to JSON schema
+Content-Language: en-US
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>,
+        ulf.hansson@linaro.org, robh+dt@kernel.org, huziji@marvell.com,
+        andrew@lunn.ch, gregory.clement@bootlin.com,
+        sebastian.hesselbarth@gmail.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+References: <20220325000745.1708610-1-chris.packham@alliedtelesis.co.nz>
+ <20220325000745.1708610-3-chris.packham@alliedtelesis.co.nz>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <20220325000745.1708610-3-chris.packham@alliedtelesis.co.nz>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 25 Mar 2022 at 06:46, Michael Wu <michael@allwinnertech.com> wrote:
->
-> On 24/03/2022 19:27, Ulf Hansson wrote:
-> > On Thu, 17 Mar 2022 at 10:14, Ulf Hansson <ulf.hansson@linaro.org> wrot=
-e:
-> >>
-> >> On Wed, 16 Mar 2022 at 17:08, Adrian Hunter <adrian.hunter@intel.com> =
-wrote:
-> >>>
-> >>> On 16.3.2022 16.46, Christian L=C3=B6hle wrote:
-> >>>>> So we are not going to let the block layer know about SD cache?
-> >>>>> Or is it a separate change?
-> >>>>
-> >>>> I have some code for this laying around, but as it requires reading,=
- parsing and writing Function Registers,
-> >>>> in particular PEH, it's a lot of boilerplate code to get the functio=
-nality, but I'll clean it up and send a patch in the coming weeks.
-> >>>>
-> >>>
-> >>> We have the sd cache flush.  We would presumably just need to call bl=
-k_queue_write_cache()
-> >>> for the !mmc_card_mmc(card) case e.g.
-> >>>
-> >>>          if (mmc_has_reliable_write(card)) {
-> >>>                  md->flags |=3D MMC_BLK_REL_WR;
-> >>>                  enable_fua =3D true;
-> >>>          }
-> >>>
-> >>>          if (mmc_cache_enabled(card->host))
-> >>>                  enable_cache =3D true;
-> >>>
-> >>>          blk_queue_write_cache(md->queue.queue, enable_cache, enable_=
-fua);
-> >>
-> >> To me, this seems like the most reasonable thing to do.
-> >>
-> >> However, I have to admit that it's not clear to me, if there was a
-> >> good reason to why commit f4c5522b0a88 ("mmc: Reliable write
-> >> support.") also added support for REQ_FLUSH (write back cache) and why
-> >> not only REQ_FUA. I assumed this was wrong too, right?
-> >>
->
-> Hi Ulf,
->
-> 1. I've found the reason. If we only enable REQ_FUA, there won't be any
-> effect -- The block layer won't send any request with FUA flag to the
-> driver.
-> If we want REQ_FUA to take effect, we must enable REQ_FLUSH. But on the
-> contrary, REQ_FLUSH does not rely on REQ_FUA.
-> In the previous patch(commit f4c5522b0a88 ("mmc: Reliable write
-> support.")), REQ_FLUSH was added to make REQ_FUA effective. I've done
-> experiments to prove this.
+On 25/03/2022 01:07, Chris Packham wrote:
+> Convert the marvell,xenon-sdhci binding to JSON schema. Currently the
+> in-tree dts files don't validate because they use sdhci@ instead of mmc@
+> as required by the generic mmc-controller schema.
+> 
+> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> ---
+> 
+> Notes:
+>     Changes in v3:
+>     - Don't accept ap807 without ap806
+>     - Add ref: string for pad-type
+>     Changes in v2:
+>     - Update MAINTAINERS entry
+>     - Incorporate feedback from Krzysztof
+> 
+>  .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 -----------
+>  .../bindings/mmc/marvell,xenon-sdhci.yaml     | 272 ++++++++++++++++++
+>  MAINTAINERS                                   |   2 +-
+>  3 files changed, 273 insertions(+), 174 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> 
 
-Thanks for doing the research and for confirming.
+Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
 
-Note that this is also pretty well documented in
-Documentation/block/writeback_cache_control.rst.
-
->
-> 2. Why block layer requires REQ_FLUSH to make REQ_FUA effective? I did
-> not find the reason. Does anyone know about this? Thank you.
-
-The REQ_FLUSH indicates that the storage device has a write back
-cache, which also can be flushed in some device specific way.
-
-The REQ_FUA (Force Unit Access), tells that the data can be written to
-the storage device, in a way that when the I/O request is completed,
-the data is fully written to the device (the data must not be left in
-the write back cache). In other words, REQ_FUA doesn't make sense
-unless REQ_FLUSH is supported too.
-
-$subject patch should also conform to this pattern.
-
-However, it's still questionable to me whether we want to support
-REQ_FUA through the eMMC reliable write command - in case we also have
-support for managing the eMMC cache separately. It looks to me that
-the reason why we currently support REQ_FUA, is because back in the
-days when there was only the eMMC reliable write command available, it
-was simply the best we could do. But it was never really a good fit.
-
-I am starting to think that we may consider dropping REQ_FUA, if we
-have the option to manage the eMMC cache separately - no matter
-whether the eMMC reliable write command is supported or not. In this
-case, REQ_FLUSH is sufficient and also a better match to what we
-really can support.
-
->
-> >> When it comes to patches for stable kernels. mmc_cache_enabled() was
-> >> introduced quite recently in v5.13, so for older kernels that call
-> >> needs to be replaced with something else.
-> >>
-> >> In any case, the relevant commits that can be considered as needs to
-> >> be fixed seems like these:
-> >> commit f4c5522b0a88 ("mmc: Reliable write support.")
-> >> commit 881d1c25f765 ("mmc: core: Add cache control for eMMC4.5 device"=
-)
-> >> commit 130206a615a9 ("mmc: core: Add support for cache ctrl for SD car=
-ds")
-> >>
-> >> [...]
-> >
-> > Michael, are you planning to send a v2 for this? Or are there any
-> > parts that are still unclear to you?
->
-> Dear Ulf, Sorry for the delay. I was trying to figure out the SD cache
-> stuff, so a few day was taken...
-
-No problem, I have been busy too. :-)
-
-Kind regards
-Uffe
+Best regards,
+Krzysztof
