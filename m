@@ -2,96 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C565C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Mar 2022 20:12:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08E18C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 26 Mar 2022 21:17:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231261AbiCYUN6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Mar 2022 16:13:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48478 "EHLO
+        id S235354AbiCZVTd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 26 Mar 2022 17:19:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39160 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231837AbiCYUN4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Mar 2022 16:13:56 -0400
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4AFE546641
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Mar 2022 13:12:21 -0700 (PDT)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-2d07ae0b1c4so93961587b3.11
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Mar 2022 13:12:21 -0700 (PDT)
+        with ESMTP id S229921AbiCZVTc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 26 Mar 2022 17:19:32 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68AC662FF;
+        Sat, 26 Mar 2022 14:17:55 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id m3so18776847lfj.11;
+        Sat, 26 Mar 2022 14:17:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=YT2o1xxdFf9OVHBJJGoL9aS2UVDgV96wgaPQnf59u3A=;
-        b=iUDT/G3LEcGf/5tagjP8eFjsGsyOBph1oCwiAU9SRpn47LJA8MWoC2ZnwxrjbSPjMm
-         NMgbwZLb++g0JJFq9rSNRDfuiuAAY8Rb8mEl15bFUi/1axDz0mqVDBjWIOF7rWkJktPB
-         GVLthy7ZRekp5ux4Y2DFI5hfRTVn6an7IoJvpEJSJ/9e6g+VV6/TIh6v+e0YKsPg/ANl
-         u9+Q/qattDvEkHp5i6SesaOU1SOYG0BE3BKYCSAklaOO+5ljSccec5A3gP/LLOHHRLHW
-         2IrIx4x8ygD2EPSpIa9BNu8dVIUcFM2jbwLpeByGektKecBFHNoOwvOwoDpGWDgslNFr
-         atGA==
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=dorKyWKnXy7IlU5rrn/oj/4eomYs0ghYVJYTP+RQhwU=;
+        b=YRqFWEWAZ28v076CK4im5SsXJvYcIfTGKam4+0bSK2o/aS6vIDYE9Y18URClNg/GqB
+         RCIrT5/7wf+CDsHlQvI4o8cs9ZDgVgyG09UsPOCxV7FV/be8bWIFNAdFHLt232AT/u/R
+         9tApWuES+tn6MKrH+Rd0XeuBjp3pfNrH9xiShEbuRChEEcxs22tXOEpjgP9sHh12IhF7
+         pyRZ7G5XJCDBc28A619jRNMmcBnapRF4g8eyBhjm8NHdarSvsB1s9EOVtGA7U+e2x7Z+
+         SqPOCtfjyDxdl+qszxJZ2uetnejw9VLLWyenYM/+BHW6jmXH/0j8qsRyJ0oRFmob/5Oz
+         E37g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=YT2o1xxdFf9OVHBJJGoL9aS2UVDgV96wgaPQnf59u3A=;
-        b=h5EeKTDGyXjL7ZwJkR3OCxg9M3CqdQmeFyCxod3DYrfvWn06S1rYxJZwTVCxNNTWWw
-         IcTzyhbF3Ef7qHvw7SpZeQrHvjGDP4tl4niZAzKIJfhZiIVKWP19sARJrr7nfh8+cdVq
-         upFiNod7hP/ZlMb4cZ8R9Xzurf0h94X4ey1GU2wH9EXfFqxNHSr7Qx6Y8WI7gh8mZJ6V
-         /o9cVH0wY/QajYjSQDzbyGlAWdKPEBfc51M0cjJ1l39rYnOSO2T9s+9595zb0uYOm981
-         wXNehDfq0bqaVAKz24dkApZUT0pFZk8qDzILGPOwap5v4myhElkAap+FoOvq/PZL+2yF
-         ol0w==
-X-Gm-Message-State: AOAM530tFhoKqcKbfsWKDu0c0GOIRwa/GOLY1nRw3/MEsZKYhVRm2iad
-        IyNwrQdPo8033WWtfuE5benMTMzh7Ur0HyPOBPdPrQ==
-X-Google-Smtp-Source: ABdhPJxUBffdaPMdxHWCaYq0Qr6rteF2S4TUamYdP1nuniOmrgv1lq5txO6UeJxGVYZr0OiLkvNRfbesOoqWq1bIo24=
-X-Received: by 2002:a81:164a:0:b0:2e6:8e4b:7487 with SMTP id
- 71-20020a81164a000000b002e68e4b7487mr12654258yww.437.1648239140546; Fri, 25
- Mar 2022 13:12:20 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220304135134.47827-1-yann.gautier@foss.st.com>
- <20220304135134.47827-2-yann.gautier@foss.st.com> <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
- <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
-In-Reply-To: <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 25 Mar 2022 21:12:09 +0100
-Message-ID: <CACRpkdYMWXEX6dpT0aUrCrFd-8-U35OG9Zmpkfty=zMH=mQqbA@mail.gmail.com>
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA LLI
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=dorKyWKnXy7IlU5rrn/oj/4eomYs0ghYVJYTP+RQhwU=;
+        b=OWtiosIj/h7OB969mbqPDwL32NnFGh+IdR5T+kFRrgdcDsCPaYcBF2jaw1TVndYTI1
+         gI6Zz/2j8a9NWwLkqi/riLMGSqwqbWH1VPnM5/KDzf+J0GUTkpKImYqNDB+gS2Erz2uS
+         Nc9ZP8ahIcEheGpLr8oIUivl2nw5pQEDU1b/S+WtwoKMy1krKIKr/GCDPhR2mcvUDa3N
+         KV1+N0UpLYZG6SL8LeMgfGtTPHDAlbG5+0b4djxAvVigIm4JaU+rwkWJhYD+p/xXL6IH
+         3FzxUyMmlChbgLE+uYPNG2K+5SfTbgkVue/bDu/XBwGC/+hg7VWXs8uOr1tnBK50RDBw
+         Dphg==
+X-Gm-Message-State: AOAM533wnbmlWFwTFFPbwpbCK8kPmcrR3BMNlkNZDboD+y/BlxtKDJoQ
+        FwqVkJWRKPgiYxAqTzoOlPS2rTYWiyvaEg==
+X-Google-Smtp-Source: ABdhPJwR/+ymjQZpTMAtiHGRcZti14dQruOjPpTxdcJTz7Y/Kj/+bGyN0Cae9N+tEUxHtv4Zv8OG9Q==
+X-Received: by 2002:ac2:434a:0:b0:443:e48d:50b7 with SMTP id o10-20020ac2434a000000b00443e48d50b7mr13484093lfl.45.1648329472824;
+        Sat, 26 Mar 2022 14:17:52 -0700 (PDT)
+Received: from dell.intranet (178235254230.gdansk.vectranet.pl. [178.235.254.230])
+        by smtp.gmail.com with ESMTPSA id h8-20020ac25d68000000b00447b5cad2a7sm1174015lft.228.2022.03.26.14.17.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 26 Mar 2022 14:17:52 -0700 (PDT)
+From:   Janusz Krzysztofik <jmkrzyszt@gmail.com>
+To:     Aaro Koskinen <aaro.koskinen@iki.fi>
+Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-Content-Type: text/plain; charset="UTF-8"
+        Arnd Bergmann <arnd@arndb.de>, Felipe Balbi <balbi@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to CCF
+Date:   Sat, 26 Mar 2022 22:17:49 +0100
+Message-ID: <1810824.tdWV9SEqCh@dell>
+In-Reply-To: <20220322190753.GF297526@darkstar.musicnaut.iki.fi>
+References: <20220310233307.99220-3-jmkrzyszt@gmail.com> <20220322163646.GD297526@darkstar.musicnaut.iki.fi> <20220322190753.GF297526@darkstar.musicnaut.iki.fi>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 15, 2022 at 9:26 AM Yann Gautier <yann.gautier@foss.st.com> wrote:
+Hi Aaro,
 
-> The STM32 variant uses an internal DMA, and the DMA functions are in its
-> dedicated file. So I was planning to do the same as what is done in
-> meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA
-> constraints are not fulfilled. Not sure it can help for Ux500.
->
-> Ulf, before I send my new series (although it is not ready yet), would
-> you be OK with the bounce buffer idea?
+Dnia wtorek, 22 marca 2022 20:07:53 CET Aaro Koskinen pisze:
+> Hi,
+> 
+> On Tue, Mar 22, 2022 at 06:36:48PM +0200, Aaro Koskinen wrote:
+> > On Mon, Mar 21, 2022 at 10:54:16PM +0100, Janusz Krzysztofik wrote:
+> > > In preparation for conversion of OMAP1 clocks to common clock framework,
+> > > identify users of those clocks which don't call clk_prepare/unprepare()
+> > > and update them to call clk_prepare_enable/clk_disable_unprepare() instead
+> > > of just clk_enable/disable(), as required by CCF implementation of clock
+> > > API.
+> > > 
+> > > v2: update still a few more OMAP specific drivers missed in v1,
+> > >   - call clk_prepare/unprepare() just after/before clk_get/put() where it
+> > >     can make more sense than merging prepare/unprepare with enable/disable.
+> > 
+> > Something is still broken. When doing kexec (using CCF kernel), the
+> > kexec'ed kernel now hangs early (on 770):
+> [...]
+> > [    0.928863] calling  omap1_init_devices+0x0/0x2c @ 1
+> 
+> It hangs in omap_sram_reprogram_clock() (<- omap1_select_table_rate()
+> <- omap1_clk_late_init()).
 
-Would it not be better if the bounce buffer is something available
-for all MMCI variants and not restricted to the STM32 DMA add-on?
+I've reviewed my changes but haven't found anything suspicious.  Could you 
+please provide:
+- dmesg from both cold start and kexec, both non-CCF and CCF version, 
+- contents of /sys/kernel/debug/clock/summary (non-CCF) after boot/kexec,
+- contents of /sys/kernel/debug/clk/clk_summary (CCF) after boot?
 
-What I'm thinking is that this is a problem with the MMCI hardware
-rather than with the DMA hardware, so the problem kind of gets
-fixed in the wrong place if the bounce buffer is in the DMA add-on
-code.
+Thanks,
+Janusz
 
-Maybe this is how you fixed it in later patches, I'll take a look.
+> 
+> A.
+> 
 
-Yours,
-Linus Walleij
+
+
+
