@@ -2,237 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3173C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 11:45:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 691BEC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 11:53:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241685AbiC1Lqg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 07:46:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40058 "EHLO
+        id S242039AbiC1Lyx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 07:54:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242728AbiC1Lns (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 07:43:48 -0400
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A6492B241
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 04:39:10 -0700 (PDT)
-Received: by mail-lf1-x130.google.com with SMTP id d5so24193628lfj.9
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 04:39:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=pzx8qqpSnwG1wLkI5RwMbGMXLwJB5p31g2jEsQjzdxU=;
-        b=IUznpuz3FW2immwzpFLIxX9Jt0ZuTSePyhtAzx/Nv1ONawtCJAmSQlNRCs3D+t0bu0
-         s39qYCm9M0pssq6Zkvpjwqh10zt3iVTzJgCNPNUbSbem1uSc01RE0Tr894UuzD6Biybv
-         yDYdY1mMj7RtwDHs5G1okANX6z0fOeWDAMED5bToz5UGFtM+EpJdNAcM29ktcyecOAm9
-         YLoD4xc8ls9PCr2QXilRKDYKB761wMsPheNOV8eUXBzYo8O1Du0pWG0snceut/xyvaQK
-         zNqHfpflc95nMZV7nehNtp5gDsKxBCT1udA30kh8i9Zb6OwbXkGsXDBgvU4oonDXMyrG
-         H1OQ==
+        with ESMTP id S241514AbiC1Lyq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 07:54:46 -0400
+Received: from mail-ed1-f52.google.com (mail-ed1-f52.google.com [209.85.208.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16712377D0;
+        Mon, 28 Mar 2022 04:49:22 -0700 (PDT)
+Received: by mail-ed1-f52.google.com with SMTP id a17so16574175edm.9;
+        Mon, 28 Mar 2022 04:49:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=pzx8qqpSnwG1wLkI5RwMbGMXLwJB5p31g2jEsQjzdxU=;
-        b=WizI9llPStHelNNnKdt3EWps85WEvaHPx8SoMAslyDd4nlJDwjZ8Ke2Z0mT3pFJNoN
-         mlePwta9iIaB/sJ8JykXqaqO+uftQlfquuhXLmqbl9TYprTPy9AHq8oinN8x4FWM+spF
-         /x7wbuw5neNsLjZkmDZh6CIV+TNtWRm6Kzypri1YRl98fIwnUMxlHGvRCDapmOS3SYKT
-         Pwvt9CJry4cbTqjijLqBsrp9IDjhv39myV5FANbZYikj4ZxbjmEhE7wo+b2t+Jo982Zf
-         YV2XSJzRmCdz3BQPqeZI6dN4PrK22frcL5h6M057rVherjY0W6D2bRdaQGaY3RvU3QQa
-         xgzg==
-X-Gm-Message-State: AOAM532dniTSjNXTpQI0Su0PmJlDtIRUZnxg1+qmT43q22XQLM1Msq0z
-        q7tmQvktkNPZTZPKG/tN3/LPgcpODQRooL3ge49Ynw==
-X-Google-Smtp-Source: ABdhPJzoAlBDgJqBsELPR82zmA7I24BxXbHO/3/xLeQkDQlBceC57LECo4BNbjP6XzyMlpfBeaHed/4AucKo2iIWhkE=
-X-Received: by 2002:a05:6512:ea8:b0:44a:81ad:c39a with SMTP id
- bi40-20020a0565120ea800b0044a81adc39amr9825142lfb.358.1648467541927; Mon, 28
- Mar 2022 04:39:01 -0700 (PDT)
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=wbmtuFgYk21OVybrhPNThf688k7OlnshZ2rECopA1sQ=;
+        b=DUus5YkXMkLwPHuMSYWpSbAzEXKGC7Ax8I4gLTBEAU+OOe7y2W8iqUcJvefaKdlUrI
+         cTo/YO6lFVWMCYHS8k3iPDCUO8bSrg1kjG5dIHkXlsRGeClBuJgjmN2agwAlK9XSljKm
+         2/2wRWSwgojkS5EjDMg6E4PPrQe4Z7chakGYt4qow8Ep4l+VJn7JyO+Ag0S2t+fjwCYL
+         c44IJDiWb9QMSWWamjJFA7ZgY96yZNmd/NQ1SKXSchyOPI1EwOa9CebK+IfF2CN/g4/q
+         SfrXLM41BhL8N1BkC10jatnFv3FTUOkRCOHldzmL50CbUg8QveVEI2Mnzl11ogKOVpeJ
+         x6gA==
+X-Gm-Message-State: AOAM533/LymGBHtkiU11xyP+BtzLsdrzWp2jVPVZnAr8hNECH7hRtK5h
+        /hoi9Zi9srLYcJmeQeKVLC4=
+X-Google-Smtp-Source: ABdhPJzWXsy4+GphF1QuoAkcYFlawyiEs4+1gNVRO87F9Ywpbhee44VZa+NoHAfXuvSNPc08MaGPTA==
+X-Received: by 2002:a05:6402:3488:b0:419:172c:e287 with SMTP id v8-20020a056402348800b00419172ce287mr15585663edc.87.1648468160467;
+        Mon, 28 Mar 2022 04:49:20 -0700 (PDT)
+Received: from [192.168.0.162] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
+        by smtp.googlemail.com with ESMTPSA id f3-20020a056402004300b004162aa024c0sm6850041edu.76.2022.03.28.04.49.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 28 Mar 2022 04:49:19 -0700 (PDT)
+Message-ID: <5c24c12b-3a12-1e18-9f03-2c54cad30bf9@kernel.org>
+Date:   Mon, 28 Mar 2022 13:49:18 +0200
 MIME-Version: 1.0
-References: <20220312044315.7994-1-michael@allwinnertech.com>
- <83edf9a1-1712-5388-a3fa-d685f1f581df@intel.com> <88e53cb9-791f-ee58-9be8-76ae9986e0e2@allwinnertech.com>
- <DM6PR04MB6575C3B87DFA920EDCD994CCFC0F9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <32b29790-eb5c-dac0-1f91-aede38220914@allwinnertech.com> <DM6PR04MB6575A4A2A687A876EA5C04B7FC119@DM6PR04MB6575.namprd04.prod.outlook.com>
- <312d724c-e43f-d766-49fb-9c5b10fe8b07@intel.com> <7ec0cf3e316a4ed9987962b4cbf01604@hyperstone.com>
- <a1230f11-a2dd-1959-5444-28c57d3babf6@intel.com> <CAPDyKFpnR12+nrbiB-Ps-C4vn-WeHneRGJioQ_0b2ikk2CBChw@mail.gmail.com>
- <CAPDyKFqnFVd=mvQMnydT569Y6YFg3zPkttQ=amdzmT_yqYQeTg@mail.gmail.com>
- <a39e9f71-7a9c-bf0e-50d0-d45de3c2e132@allwinnertech.com> <CAPDyKFoVVrCNqJUztKnOqyJHhFYnH0H3PR1z02qVN7pchD6W0g@mail.gmail.com>
- <580a9991-b117-86aa-a7b9-bf952d580a87@allwinnertech.com>
-In-Reply-To: <580a9991-b117-86aa-a7b9-bf952d580a87@allwinnertech.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Mar 2022 13:38:25 +0200
-Message-ID: <CAPDyKFrtVV35mg4dq5UZRnAzNRQRAbmbRXQfCB_gdpdyPETK3Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: enable cache-flushing when mmc cache is on
-To:     Michael Wu <michael@allwinnertech.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        "beanhuo@micron.com" <beanhuo@micron.com>,
-        "porzio@gmail.com" <porzio@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        allwinner-opensource-support 
-        <allwinner-opensource-support@allwinnertech.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH 3/5] arm64: dts: imx8mp: Enable HS400-ES
+Content-Language: en-US
+To:     Ahmad Fatoum <a.fatoum@pengutronix.de>,
+        Adam Ford <aford173@gmail.com>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Fabio Estevam <festevam@gmail.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Adam Ford-BE <aford@beaconembedded.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        arm-soc <linux-arm-kernel@lists.infradead.org>
+References: <20220327123835.28329-1-aford173@gmail.com>
+ <20220327123835.28329-3-aford173@gmail.com>
+ <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
+ <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
+ <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 28 Mar 2022 at 12:11, Michael Wu <michael@allwinnertech.com> wrote:
->
-> On 25/03/2022 18:13, Ulf Hansson wrote:
-> > On Fri, 25 Mar 2022 at 06:46, Michael Wu <michael@allwinnertech.com> wr=
-ote:
-> >>
-> >> On 24/03/2022 19:27, Ulf Hansson wrote:
-> >>> On Thu, 17 Mar 2022 at 10:14, Ulf Hansson <ulf.hansson@linaro.org> wr=
-ote:
-> >>>>
-> >>>> On Wed, 16 Mar 2022 at 17:08, Adrian Hunter <adrian.hunter@intel.com=
-> wrote:
-> >>>>>
-> >>>>> On 16.3.2022 16.46, Christian L=C3=B6hle wrote:
-> >>>>>>> So we are not going to let the block layer know about SD cache?
-> >>>>>>> Or is it a separate change?
-> >>>>>>
-> >>>>>> I have some code for this laying around, but as it requires readin=
-g, parsing and writing Function Registers,
-> >>>>>> in particular PEH, it's a lot of boilerplate code to get the funct=
-ionality, but I'll clean it up and send a patch in the coming weeks.
-> >>>>>>
-> >>>>>
-> >>>>> We have the sd cache flush.  We would presumably just need to call =
-blk_queue_write_cache()
-> >>>>> for the !mmc_card_mmc(card) case e.g.
-> >>>>>
-> >>>>>           if (mmc_has_reliable_write(card)) {
-> >>>>>                   md->flags |=3D MMC_BLK_REL_WR;
-> >>>>>                   enable_fua =3D true;
-> >>>>>           }
-> >>>>>
-> >>>>>           if (mmc_cache_enabled(card->host))
-> >>>>>                   enable_cache =3D true;
-> >>>>>
-> >>>>>           blk_queue_write_cache(md->queue.queue, enable_cache, enab=
-le_fua);
-> >>>>
-> >>>> To me, this seems like the most reasonable thing to do.
-> >>>>
-> >>>> However, I have to admit that it's not clear to me, if there was a
-> >>>> good reason to why commit f4c5522b0a88 ("mmc: Reliable write
-> >>>> support.") also added support for REQ_FLUSH (write back cache) and w=
-hy
-> >>>> not only REQ_FUA. I assumed this was wrong too, right?
-> >>>>
-> >>
-> >> Hi Ulf,
-> >>
-> >> 1. I've found the reason. If we only enable REQ_FUA, there won't be an=
-y
-> >> effect -- The block layer won't send any request with FUA flag to the
-> >> driver.
-> >> If we want REQ_FUA to take effect, we must enable REQ_FLUSH. But on th=
-e
-> >> contrary, REQ_FLUSH does not rely on REQ_FUA.
-> >> In the previous patch(commit f4c5522b0a88 ("mmc: Reliable write
-> >> support.")), REQ_FLUSH was added to make REQ_FUA effective. I've done
-> >> experiments to prove this.
-> >
-> > Thanks for doing the research and for confirming.
-> >
-> > Note that this is also pretty well documented in
-> > Documentation/block/writeback_cache_control.rst.
->
-> Thanks for reminding. I'm clear now.
->
-> >
-> >>
-> >> 2. Why block layer requires REQ_FLUSH to make REQ_FUA effective? I did
-> >> not find the reason. Does anyone know about this? Thank you.
-> >
-> > The REQ_FLUSH indicates that the storage device has a write back
-> > cache, which also can be flushed in some device specific way.
-> >
-> > The REQ_FUA (Force Unit Access), tells that the data can be written to
-> > the storage device, in a way that when the I/O request is completed,
-> > the data is fully written to the device (the data must not be left in
-> > the write back cache). In other words, REQ_FUA doesn't make sense
-> > unless REQ_FLUSH is supported too.
-> >
->
-> Thank you for your answer.
->
-> > $subject patch should also conform to this pattern.
->
-> I'm not sure if I understood this in a right way... Did you mean I
-> should modify the subject of this mail/patch?
+On 28/03/2022 13:09, Ahmad Fatoum wrote:
+> Hello Adam,
+> 
+> On 28.03.22 12:47, Adam Ford wrote:
+>> On Mon, Mar 28, 2022 at 2:20 AM Ahmad Fatoum <a.fatoum@pengutronix.de> wrote:
+>>>
+>>> Hello Adam,
+>>>
+>>> On 27.03.22 14:38, Adam Ford wrote:
+>>>> The SDHC controller in the imx8mp has the same controller
+>>>> as the imx8mm which supports HS400-ES. Change the compatible
+>>>> fallback to imx8mm to enable it.
+>>>
+>>> I believe that's a shortcoming of the Linux driver, which should explicitly list
+>>> fsl,imx8mp-usdhc in its compatibles and enable HS400-ES for it.
+>>>
+>>> I find dropping compatibles problematic, because like Linux matching
+>>> fsl,imx8mm-usdhc, but not fsl,imx8mp-usdhc, other software may match
+>>> fsl,imx7d-usdhc, but not fsl,imx8[mp]-usdhc.
+>>>
+>>> I'd prefer that either the kernel driver gains extra compatibles or that
+>>> the DTS lists extra compatibles and we refrain from dropping existing
+>>> (correct) ones.
+>>>
+>>
+>> I would argue that imx7d is not correct since the IP blocks between
+>> imx7d and imx8mm have different flags/quirks.  One of which includes
+>> HS400-ES, but there are other differences as well.
+> 
+> The DTS currently says that an fsl,imx7d-usdhc is a subset of an
+> fsl,imx8mm-usdhc. So a driver could treat both HW the exact same
+> by focusing on the i.MX7D parts. Linux apparently did exactly
+> that so far. Is this not accurate?
+> 
+> 
+>>> What do you think?
+>>
+>> From my understanding of the fallback compatibility strings is to
+>> avoid having to add more and more compatible strings to the drivers
+>> when they do not serve a functional purpose. Based On a conversation
+>> with Krzysztof [1], he suggested we update the YAML file based on the
+>> fallback, but he wanted NXP to give their feedback as to what the
+>> right fallback strings should be.  Haibo from NXP sent me a hierarchy
+>> [1] which is what I used to update the YAML file.  Based on the YAML
+>> file, the fallback in each DTSI file was updated to ensure the use of
+>> the proper IP block.
+> 
+> Myself I am in favor of moving to three compatibles instead of dropping one.
+> For some theoretical fsl,imx8mf-usdhc that's supposed to be exactly the same
+> as a fsl,imx8mm-usdhc, I don't mind omitting the fsl,imx7d-usdhc compatible,
+> but for existing device trees, this may introduce needless potential breakage
+> for other software that also uses Linux device trees.
+> 
 
-No, I just meant that the code in the patch should conform to this.
+Affecting existing users is indeed a concern with this approach, because
+in-kernel DTS might be used in other projects as well.
 
-If REQ_FUA is set, REQ_FLUSH must be set too.
-
->
-> >
-> > However, it's still questionable to me whether we want to support
-> > REQ_FUA through the eMMC reliable write command - in case we also have
-> > support for managing the eMMC cache separately. It looks to me that
-> > the reason why we currently support REQ_FUA, is because back in the
-> > days when there was only the eMMC reliable write command available, it
-> > was simply the best we could do. But it was never really a good fit.
-> >
-> > I am starting to think that we may consider dropping REQ_FUA, if we
-> > have the option to manage the eMMC cache separately - no matter
-> > whether the eMMC reliable write command is supported or not. In this
-> > case, REQ_FLUSH is sufficient and also a better match to what we
-> > really can support.
->
-> Hi Ulf,
-> As to dropping REQ_FUA, I don't know if it is a good idea, but generally
-> we are facing three possible situations:
->
-> 1. If both cache and reliable-write are available, both REQ_FUA and
-> REQ_FLUSH can be supported at the same time. In this case, with
-> available cache, the behavior of reliable-write is to write eMMC while
-> skipping cache, which is consistent with the current kernel's definition
-> of REQ_FUA. What's more, most eMMCs now support both cache and
-> reliable-write command.
-
-Yes, this seems reasonable.
+I still cannot find here the answer whether fsl,imx8mm-usdhc is actually
+compatible with fsl,imx7d-usdhc. It's not about driver, but about
+hardware and programming model. imx8mm can support additional features
+and still be compatible with imx7d. However if any flags of imx7d are
+actually not valid for imx8mm, then it's different case.
 
 
-> 2. If only reliable-write is available, REQ_FUA should not be supported,
-> which is consistent with the current standard in another way. But I
-> don't think eMMCs that only support reliable-write can be easily found
-> nowadays.
-
-If we drop REQ_FUA for this case, I am worried that we might break use
-cases for those older eMMC devices.
-
-So, no, let's keep REQ_FUA and REQ_FLUSH if reliable-write is supported.
-
-> 3. If only cache is available, we just use REQ_FLUSH. It is not in
-> conflict with keeping REQ_FUA.
-
-Right.
-
->
-> Maybe, is it more reasonable to reserve FUA and use if/else to pick it
-> up or down, considering the compatibility? I mean, in most cases, FUA
-> and FLUSH are complementary. So it seems more feasible with branch to
-> choose.
-
-Let's summarize what I think we should do then:
-
- if (reliable-write supported) {
-     enable_fua =3D true;
-     enable_cache =3D true;
-}
-
-if (mmc_cache_enabled)
-     enable_cache =3D true;
-
-blk_queue_write_cache(md->queue.queue, enable_cache, enable_fua);
-
-Does this seem reasonable to you?
-
-[...]
-
-Kind regards
-Uffe
+Best regards,
+Krzysztof
