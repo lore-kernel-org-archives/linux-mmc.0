@@ -2,177 +2,246 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B785CC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 14:05:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9988C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 14:51:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243641AbiC1OH0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 10:07:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48314 "EHLO
+        id S244085AbiC1OxX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 10:53:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243655AbiC1OHY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 10:07:24 -0400
-Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6823B21248
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 07:05:39 -0700 (PDT)
-Received: by mail-yb1-xb2a.google.com with SMTP id t11so26216064ybi.6
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 07:05:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=pwEzM3BVWnQ/EvlHm3wB1klIRYMyFKneOQkX+wIwdXs=;
-        b=ZL1OTesnf0OYajbRG1LFkJuSlcJdZq5bYH/y2PxxKLqX/bD99q5svcBYN2kwykhtiG
-         XYTsGzQ/1bDx1HziubSmMwNO9kuRPzV/ZIroyHDsvU0ScUYiD7N5+bR+A7rYrJcF1XIZ
-         mMTiw9rPLl8nJFHfTCnDidwDaQfHpGiIZ93o6cAHs+hjUyzR767iwgTt3EOH2yLfodiv
-         jMZvRE2ZfbDO5vNKe8qbnDVrSzLK2JsW8ucb5h5Nw2Ua7W3fo8rgK2veIArJhzEFDcPP
-         GQfo0EoxoaYGn7ihbXfCjJ+WWK3QyZeBn+bJyx4tnB+RGf0cNg5g49tgDkHHdeNOwPBS
-         uE0Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=pwEzM3BVWnQ/EvlHm3wB1klIRYMyFKneOQkX+wIwdXs=;
-        b=xeP8nwT5OXhtWGZeoMFIiETjLfI70VBKJAq/fSxNWZZTAUSwtyKKA1BXouGxx4kOdY
-         ZGafnQgiSnDIg5dD2Y0QnMLoiSYziR2upIu3hH7fMaQjFuIGg+CeQbW+4R2NCdYEmB6z
-         BTAjWYcRU/O1PyHFxAxSyFyjNrrresD/B+pUM9rtWihRwxxiQq3ArJkc3kXsF+o88XJb
-         ZZZ3nB/CBhK+Hv4Reij9pYupv/w6qb698Zn0XckUQQrJ9zhxGmFXdzVHLJhbbbeSPFiq
-         4LVz7RoSVaoocOnJpD4Ie2IhKyppT0KSMVqtd6iG4l7jzhI0RZcExiV1A+srY6ARBASA
-         UbEA==
-X-Gm-Message-State: AOAM532z1hfKlHrV7yprhinaEA/BkClm1lHiiTb3ur/ldG9hz6JPjh5g
-        +dco2Na+4EQeWgk+7uH0NFmteqPop/bys4+4qCVJ6Q==
-X-Google-Smtp-Source: ABdhPJzFR7pwH3A1bw0+6EQ+AMvuEO565hTLQyf4vqzc0e2Q/jFTzH9hLyoZLK2lmnYkH9coEqChxcg1uw5+fOackTw=
-X-Received: by 2002:a25:d002:0:b0:633:c5c5:bcb2 with SMTP id
- h2-20020a25d002000000b00633c5c5bcb2mr23827627ybg.123.1648476337704; Mon, 28
- Mar 2022 07:05:37 -0700 (PDT)
+        with ESMTP id S244083AbiC1OxV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 10:53:21 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F0455DE56;
+        Mon, 28 Mar 2022 07:51:39 -0700 (PDT)
+Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22SDaGbc023704;
+        Mon, 28 Mar 2022 16:51:25 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=selector1;
+ bh=0spQ+va0mupBxaDFYwsZDcGVtjhUmIgaGDAqHeg+qeI=;
+ b=rqTgfTo3U5WC7XloVhuPl6Z355ocyoda1qjCaIgQ0dmXUNrz3Yz5ewYvAYh9GM0vVo1h
+ yba4vH8fZ813j6OXkeMVdoIiUVdQILrO6c/z4iZR5SQtOdS6qUdyFce3VSOrqlmP/XHT
+ KbWGXKA0sEUFy9l+UZwjPg8WsZGMsrn2WNhW6EvDAPQaNCH9RMW3rvmUNxuaZXNIQN7z
+ +S0aeLrNWlKxepwUO5KgvAbG+HgXedB/CcmRd1VRoB2z8LgkjAIUKcBit43/6p3myyYX
+ w8cxBb+LXJOctJCJ3XDOf9G1vlp/3m7QigNgsKBeq8PQhAoh+TQ71qB0LDhi1T1gYHlz /A== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3f1u2422rs-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 28 Mar 2022 16:51:24 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 526FF100034;
+        Mon, 28 Mar 2022 16:51:24 +0200 (CEST)
+Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 484B9233C81;
+        Mon, 28 Mar 2022 16:51:24 +0200 (CEST)
+Received: from localhost (10.75.127.48) by SFHDAG2NODE2.st.com (10.75.127.5)
+ with Microsoft SMTP Server (TLS) id 15.0.1497.26; Mon, 28 Mar 2022 16:51:23
+ +0200
+From:   Yann Gautier <yann.gautier@foss.st.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Christophe Kerello <christophe.kerello@foss.st.com>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>,
+        Yann Gautier <yann.gautier@foss.st.com>
+Subject: [PATCH v2] mmc: mmci: stm32: use a buffer for unaligned DMA requests
+Date:   Mon, 28 Mar 2022 16:51:14 +0200
+Message-ID: <20220328145114.334577-1-yann.gautier@foss.st.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <76f6f5d2b35543bab3dfe438f268609c@hyperstone.com>
-In-Reply-To: <76f6f5d2b35543bab3dfe438f268609c@hyperstone.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Mar 2022 16:05:01 +0200
-Message-ID: <CAPDyKFq+YumWsLmYMZNxuN+LG7euStAyrmv7Eqs2cSR3fr-Kwg@mail.gmail.com>
-Subject: Re: [PATCHv5] mmc: block: Check for errors after write on SPI
-To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
-Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "andriy.shevchenko@linux.intel.com" 
-        <andriy.shevchenko@linux.intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.75.127.48]
+X-ClientProxiedBy: SFHDAG2NODE1.st.com (10.75.127.4) To SFHDAG2NODE2.st.com
+ (10.75.127.5)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
+ definitions=2022-03-28_06,2022-03-28_01,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 24 Mar 2022 at 15:18, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
- wrote:
->
-> Introduce a SEND_STATUS check for writes through SPI to not mark
-> an unsuccessful write as successful.
->
-> Since SPI SD/MMC does not have states, after a write, the card will
-> just hold the line LOW until it is ready again. The driver marks the
-> write therefore as completed as soon as it reads something other than
-> all zeroes.
-> The driver does not distinguish from a card no longer signalling busy
-> and it being disconnected (and the line being pulled-up by the host).
-> This lead to writes being marked as successful when disconnecting
-> a busy card.
-> Now the card is ensured to be still connected by an additional CMD13,
-> just like non-SPI is ensured to go back to TRAN state.
->
-> While at it and since we already poll for the post-write status anyway,
-> we might as well check for SPIs error bits (any of them).
->
-> The disconnecting card problem is reproducable for me after continuous
-> write activity and randomly disconnecting, around every 20-50 tries
-> on SPI DS for some card.
->
-> Fixes: 7213d175e3b6f ("MMC/SD card driver learns SPI")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+In SDIO mode, the sg list for requests can be unaligned with what the
+STM32 SDMMC internal DMA can support. In that case, instead of failing,
+use a temporary bounce buffer to copy from/to the sg list.
+This buffer is limited to 1MB. But for that we need to also limit
+max_req_size to 1MB. It has not shown any throughput penalties for
+SD-cards or eMMC.
 
-Applied for fixes, thanks!
+Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+---
+Changes since v1:
+- allocate bounce buffer in sdmmc_idma_validate_data()
+- realign on top of mmc/devel branch
+  (25e14a52d35928a1831ca98889a8a25ac3017990)
 
-Kind regards
-Uffe
+ drivers/mmc/host/mmci_stm32_sdmmc.c | 88 +++++++++++++++++++++++------
+ 1 file changed, 71 insertions(+), 17 deletions(-)
 
+diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
+index 4566d7fc9055..60bca78a72b1 100644
+--- a/drivers/mmc/host/mmci_stm32_sdmmc.c
++++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
+@@ -43,6 +43,9 @@ struct sdmmc_lli_desc {
+ struct sdmmc_idma {
+ 	dma_addr_t sg_dma;
+ 	void *sg_cpu;
++	dma_addr_t bounce_dma_addr;
++	void *bounce_buf;
++	bool use_bounce_buffer;
+ };
+ 
+ struct sdmmc_dlyb {
+@@ -54,6 +57,8 @@ struct sdmmc_dlyb {
+ static int sdmmc_idma_validate_data(struct mmci_host *host,
+ 				    struct mmc_data *data)
+ {
++	struct sdmmc_idma *idma = host->dma_priv;
++	struct device *dev = mmc_dev(host->mmc);
+ 	struct scatterlist *sg;
+ 	int i;
+ 
+@@ -61,41 +66,69 @@ static int sdmmc_idma_validate_data(struct mmci_host *host,
+ 	 * idma has constraints on idmabase & idmasize for each element
+ 	 * excepted the last element which has no constraint on idmasize
+ 	 */
++	idma->use_bounce_buffer = false;
+ 	for_each_sg(data->sg, sg, data->sg_len - 1, i) {
+ 		if (!IS_ALIGNED(sg->offset, sizeof(u32)) ||
+ 		    !IS_ALIGNED(sg->length, SDMMC_IDMA_BURST)) {
+-			dev_err(mmc_dev(host->mmc),
++			dev_dbg(mmc_dev(host->mmc),
+ 				"unaligned scatterlist: ofst:%x length:%d\n",
+ 				data->sg->offset, data->sg->length);
+-			return -EINVAL;
++			goto use_bounce_buffer;
+ 		}
+ 	}
+ 
+ 	if (!IS_ALIGNED(sg->offset, sizeof(u32))) {
+-		dev_err(mmc_dev(host->mmc),
++		dev_dbg(mmc_dev(host->mmc),
+ 			"unaligned last scatterlist: ofst:%x length:%d\n",
+ 			data->sg->offset, data->sg->length);
+-		return -EINVAL;
++		goto use_bounce_buffer;
+ 	}
+ 
++	return 0;
++
++use_bounce_buffer:
++	if (!idma->bounce_buf) {
++		idma->bounce_buf = dmam_alloc_coherent(dev,
++						       host->mmc->max_req_size,
++						       &idma->bounce_dma_addr,
++						       GFP_KERNEL);
++		if (!idma->bounce_buf) {
++			dev_err(dev, "Unable to map allocate DMA bounce buffer.\n");
++			return -ENOMEM;
++		}
++	}
++
++	idma->use_bounce_buffer = true;
++
+ 	return 0;
+ }
+ 
+ static int _sdmmc_idma_prep_data(struct mmci_host *host,
+ 				 struct mmc_data *data)
+ {
+-	int n_elem;
++	struct sdmmc_idma *idma = host->dma_priv;
+ 
+-	n_elem = dma_map_sg(mmc_dev(host->mmc),
+-			    data->sg,
+-			    data->sg_len,
+-			    mmc_get_dma_dir(data));
++	if (idma->use_bounce_buffer) {
++		if (data->flags & MMC_DATA_WRITE) {
++			unsigned int xfer_bytes = data->blksz * data->blocks;
+ 
+-	if (!n_elem) {
+-		dev_err(mmc_dev(host->mmc), "dma_map_sg failed\n");
+-		return -EINVAL;
+-	}
++			sg_copy_to_buffer(data->sg, data->sg_len,
++					  idma->bounce_buf, xfer_bytes);
++			dma_wmb();
++		}
++	} else {
++		int n_elem;
++
++		n_elem = dma_map_sg(mmc_dev(host->mmc),
++				    data->sg,
++				    data->sg_len,
++				    mmc_get_dma_dir(data));
+ 
++		if (!n_elem) {
++			dev_err(mmc_dev(host->mmc), "dma_map_sg failed\n");
++			return -EINVAL;
++		}
++	}
+ 	return 0;
+ }
+ 
+@@ -112,8 +145,19 @@ static int sdmmc_idma_prep_data(struct mmci_host *host,
+ static void sdmmc_idma_unprep_data(struct mmci_host *host,
+ 				   struct mmc_data *data, int err)
+ {
+-	dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+-		     mmc_get_dma_dir(data));
++	struct sdmmc_idma *idma = host->dma_priv;
++
++	if (idma->use_bounce_buffer) {
++		if (data->flags & MMC_DATA_READ) {
++			unsigned int xfer_bytes = data->blksz * data->blocks;
++
++			sg_copy_from_buffer(data->sg, data->sg_len,
++					    idma->bounce_buf, xfer_bytes);
++		}
++	} else {
++		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++			     mmc_get_dma_dir(data));
++	}
+ }
+ 
+ static int sdmmc_idma_setup(struct mmci_host *host)
+@@ -137,6 +181,8 @@ static int sdmmc_idma_setup(struct mmci_host *host)
+ 		host->mmc->max_segs = SDMMC_LLI_BUF_LEN /
+ 			sizeof(struct sdmmc_lli_desc);
+ 		host->mmc->max_seg_size = host->variant->stm32_idmabsize_mask;
++
++		host->mmc->max_req_size = SZ_1M;
+ 	} else {
+ 		host->mmc->max_segs = 1;
+ 		host->mmc->max_seg_size = host->mmc->max_req_size;
+@@ -154,8 +200,16 @@ static int sdmmc_idma_start(struct mmci_host *host, unsigned int *datactrl)
+ 	struct scatterlist *sg;
+ 	int i;
+ 
+-	if (!host->variant->dma_lli || data->sg_len == 1) {
+-		writel_relaxed(sg_dma_address(data->sg),
++	if (!host->variant->dma_lli || data->sg_len == 1 ||
++	    idma->use_bounce_buffer) {
++		u32 dma_addr;
++
++		if (idma->use_bounce_buffer)
++			dma_addr = idma->bounce_dma_addr;
++		else
++			dma_addr = sg_dma_address(data->sg);
++
++		writel_relaxed(dma_addr,
+ 			       host->base + MMCI_STM32_IDMABASE0R);
+ 		writel_relaxed(MMCI_STM32_IDMAEN,
+ 			       host->base + MMCI_STM32_IDMACTRLR);
+-- 
+2.25.1
 
-> ---
-> v2:
->   - Reorder err and status check for err to take precedence and look clea=
-ner
-> v3:
->   - Move the logic into its own function
-> v4:
->   - Move block layer handling out of the spi-specific function
-> v5:
->   - reorder err and status check
->
->  drivers/mmc/core/block.c | 34 +++++++++++++++++++++++++++++++++-
->  1 file changed, 33 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 4e67c1403cc9..be2078684417 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1880,6 +1880,31 @@ static inline bool mmc_blk_rq_error(struct mmc_blk=
-_request *brq)
->                brq->data.error || brq->cmd.resp[0] & CMD_ERRORS;
->  }
->
-> +static int mmc_spi_err_check(struct mmc_card *card)
-> +{
-> +       u32 status =3D 0;
-> +       int err;
-> +
-> +       /*
-> +        * SPI does not have a TRAN state we have to wait on, instead the
-> +        * card is ready again when it no longer holds the line LOW.
-> +        * We still have to ensure two things here before we know the wri=
-te
-> +        * was successful:
-> +        * 1. The card has not disconnected during busy and we actually r=
-ead our
-> +        * own pull-up, thinking it was still connected, so ensure it
-> +        * still responds.
-> +        * 2. Check for any error bits, in particular R1_SPI_IDLE to catc=
-h a
-> +        * just reconnected card after being disconnected during busy.
-> +        */
-> +       err =3D __mmc_send_status(card, &status, 0);
-> +       if (err)
-> +               return err;
-> +       /* All R1 and R2 bits of SPI are errors in our case */
-> +       if (status)
-> +               return -EIO;
-> +       return 0;
-> +}
-> +
->  static int mmc_blk_busy_cb(void *cb_data, bool *busy)
->  {
->         struct mmc_blk_busy_data *data =3D cb_data;
-> @@ -1903,9 +1928,16 @@ static int mmc_blk_card_busy(struct mmc_card *card=
-, struct request *req)
->         struct mmc_blk_busy_data cb_data;
->         int err;
->
-> -       if (mmc_host_is_spi(card->host) || rq_data_dir(req) =3D=3D READ)
-> +       if (rq_data_dir(req) =3D=3D READ)
->                 return 0;
->
-> +       if (mmc_host_is_spi(card->host)) {
-> +               err =3D mmc_spi_err_check(card);
-> +               if (err)
-> +                       mqrq->brq.data.bytes_xfered =3D 0;
-> +               return err;
-> +       }
-> +
->         cb_data.card =3D card;
->         cb_data.status =3D 0;
->         err =3D __mmc_poll_for_busy(card->host, 0, MMC_BLK_TIMEOUT_MS,
-> --
-> 2.34.1
-> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-> Managing Director: Dr. Jan Peter Berns.
-> Commercial register of local courts: Freiburg HRB381782
->
