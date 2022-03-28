@@ -2,115 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80E28C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 17:35:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B0AFC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 23:41:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236148AbiC1RhC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 13:37:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43316 "EHLO
+        id S231139AbiC1XnX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 19:43:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232336AbiC1RhA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 13:37:00 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6298713EBA;
-        Mon, 28 Mar 2022 10:35:19 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id F0A2C60F43;
-        Mon, 28 Mar 2022 17:35:18 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 192F3C340F0;
-        Mon, 28 Mar 2022 17:35:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648488918;
-        bh=8DK84zvqPVQ5dqS+l/hxkkjiMncObsS+szQGh2/hPXg=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=c2bDiePA9kHGkpvEstcte3dmY6J/ZwxEwE+Akse5+A/eLvrlrOHTah0fbvzTpRuh4
-         Pokc1eA4hRapiiyGDVv7277DFDB+HQ8hZe6l+gOshZAHIksKcpxXEB1ikexTibdkJP
-         f60RlTKUb7L0Djzxhr943hpHmv1HuG3Jr+P43jTJ30TkGk+Q+TQ6+iK6umVxiVqewQ
-         JQWzn1Ibvr7nDQw3iR4n33tSn5lWpGTtBkX6wHt+6NyvhH4ms3egZ3yvz9dVYJs5se
-         vZ26BRS4YGRcpdNJ1eiJa1uwFOWgXH/OU8iHr15SF/oruYYJiqRreOQD7ZMvr+Cy5i
-         2TOB7CldP3qPw==
-Message-ID: <6e1686d0-50f4-8681-1f15-2e4df957ebc8@kernel.org>
-Date:   Mon, 28 Mar 2022 19:35:10 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH 3/5] arm64: dts: imx8mp: Enable HS400-ES
+        with ESMTP id S231131AbiC1XnV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 19:43:21 -0400
+Received: from gate2.alliedtelesis.co.nz (gate2.alliedtelesis.co.nz [IPv6:2001:df5:b000:5::4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C7AB1276F
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 16:41:37 -0700 (PDT)
+Received: from svr-chch-seg1.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (Client did not present a certificate)
+        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id E7D732C03C7;
+        Mon, 28 Mar 2022 23:41:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
+        s=mail181024; t=1648510893;
+        bh=zd6sLGd9KzeKeuJg5bNahnkjJsMPW2on88ieV8eCP3g=;
+        h=From:To:CC:Subject:Date:References:In-Reply-To:From;
+        b=phFgwnWjfVZUR4k7YOUhpa9zra0HipDYgV0fd+utcg9yVT5ZY9rSIDkCqVH/7onDV
+         EixjbH/0wzVzxLckEGvz8e3ux2BNpc25anSZcUhGrAG4RKvK5mdlKnrDlHc2XIK5kH
+         p+T1bXcOrVOzue/CL4SlkSn7ArjGdUPbdIwMWamidoRqRv3gOF1kKb77y37DHQRqvi
+         PcONTn9/NxeZLRRRo9+vADv7ZYZO8ZMVs8HpFE1ZiL45hwn3phtICva0azBGDLxf+z
+         XFZXuTQQrBNcOc4Z+Dmws4oYeXwcy2WD8C5e9WLgMOjhcbQre7jPOitpfRUQrbrLS4
+         n8z3y3XS191kQ==
+Received: from svr-chch-ex1.atlnz.lc (Not Verified[2001:df5:b000:bc8::77]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
+        id <B624247ad0001>; Tue, 29 Mar 2022 12:41:33 +1300
+Received: from svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) by
+ svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Tue, 29 Mar 2022 12:41:34 +1300
+Received: from svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8]) by
+ svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8%12]) with mapi id
+ 15.00.1497.033; Tue, 29 Mar 2022 12:41:34 +1300
+From:   Chris Packham <Chris.Packham@alliedtelesis.co.nz>
+To:     Krzysztof Kozlowski <krzk@kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "huziji@marvell.com" <huziji@marvell.com>,
+        "andrew@lunn.ch" <andrew@lunn.ch>,
+        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
+        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+Subject: Re: [PATCH v3 3/3] dt-bindings: mmc: xenon: add marvell,sdhci-xenon
+ compatible
+Thread-Topic: [PATCH v3 3/3] dt-bindings: mmc: xenon: add marvell,sdhci-xenon
+ compatible
+Thread-Index: AQHYP9xfIKBsD25f3Ee8lzl+NV4iRazPJzmAgAV51QA=
+Date:   Mon, 28 Mar 2022 23:41:33 +0000
+Message-ID: <7224b8bb-2f59-3b06-b4c3-0b86a6e4703f@alliedtelesis.co.nz>
+References: <20220325000745.1708610-1-chris.packham@alliedtelesis.co.nz>
+ <20220325000745.1708610-4-chris.packham@alliedtelesis.co.nz>
+ <475d2af6-38cd-47a1-61b2-6b1298bf505d@kernel.org>
+In-Reply-To: <475d2af6-38cd-47a1-61b2-6b1298bf505d@kernel.org>
+Accept-Language: en-NZ, en-US
 Content-Language: en-US
-To:     Ahmad Fatoum <a.fatoum@pengutronix.de>,
-        Adam Ford <aford173@gmail.com>
-Cc:     Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Adam Ford-BE <aford@beaconembedded.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        arm-soc <linux-arm-kernel@lists.infradead.org>
-References: <20220327123835.28329-1-aford173@gmail.com>
- <20220327123835.28329-3-aford173@gmail.com>
- <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
- <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
- <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
- <5c24c12b-3a12-1e18-9f03-2c54cad30bf9@kernel.org>
- <CAHCN7xJ28t3igV8uHWfLxJx6wWkwzojg-d0QTTZM9jdfGCbTzw@mail.gmail.com>
- <5282b39b-85d5-81d6-10d5-a45c66d4d4e9@kernel.org>
- <010b3600-81dd-f5e3-2d57-8cab8efd58f0@pengutronix.de>
- <37da40fe-6e85-af40-756b-d022fe2559aa@kernel.org>
- <e2a3e6c0-d98c-7417-31bd-5f674c9c32b4@pengutronix.de>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-In-Reply-To: <e2a3e6c0-d98c-7417-31bd-5f674c9c32b4@pengutronix.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-messagesentrepresentingtype: 1
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [10.32.1.11]
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <4F92C887757CA0499E265D9D286857E2@atlnz.lc>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=Xf/6aR1Nyvzi7BryhOrcLQ==:117 a=xqWC_Br6kY4A:10 a=oKJsc7D3gJEA:10 a=IkcTkHD0fZMA:10 a=o8Y5sQTvuykA:10 a=jHPGDDJjT_i2t1f5GkIA:9 a=QEXdDO2ut3YA:10
+X-SEG-SpamProfiler-Score: 0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/03/2022 15:42, Ahmad Fatoum wrote:
-> On 28.03.22 15:14, Krzysztof Kozlowski wrote:
->> On 28/03/2022 15:07, Ahmad Fatoum wrote:
->>> On 28.03.22 14:56, Krzysztof Kozlowski wrote:
->>>> You could also add two cases:
->>>> 1. three compatibles, deprecated: True,
->>>> 2. two compatibles, without imx7d.
->>>>
->>>> Existing DTS stays with three compatibles for two years and later gets
->>>> converted to two compatibles. New DTS should use two compatibles.
->>>>
->>>> It's quite a lot of churn, but would make in the long term bindings
->>>> correct and also not break other users/projects.
->>>
->>> I don't see why we need to deprecate the old binding. New SoCs
->>> can be imx8mm-usdhc compatible from the beginning and need not
->>> care about the old binding. Existing SoCs can just remain imx7d-usdhc
->>> compatible as they are now.
->>>
->>> I don't see what the deprecation accomplishes.
->>
->> It avoids to have too many entries of imx8mm (imx8mm alone,
->> imx8mm+imx7d, imx8xx+imx8mm+imx7d).
-> 
-> I see. I assume use of deprecated binding will be reported on a dtbs_check?
-
-Unfortunately no, at least not yet. :-(
-
-> If so, the expectation is that downstream projects run dtbs_check on their
-> imported Linux DT repository, see the deprecation warning and extend
-> their drivers to comply with it.
-> 
-> Some time later upstream will remove the deprecated binding and adjust
-> the device trees. This works for me.
->
-
-Yes. Plus this gives the notice to downstream projects, to comply with
-the change of DTS.
-
-Best regards,
-Krzysztof
+DQpPbiAyNi8wMy8yMiAwMTowNCwgS3J6eXN6dG9mIEtvemxvd3NraSB3cm90ZToNCj4gT24gMjUv
+MDMvMjAyMiAwMTowNywgQ2hyaXMgUGFja2hhbSB3cm90ZToNCj4+IFRoZSBhcm1hZGEtMzd4eCBT
+b0MgZHRzaSBpbmNsdWRlcyB0aGlzIGFzIGEgY29tcGF0aWJsZSBzdHJpbmcuIEFkZCBpdCB0bw0K
+Pj4gdGhlIGR0LWJpbmRpbmcuDQo+Pg0KPj4gU2lnbmVkLW9mZi1ieTogQ2hyaXMgUGFja2hhbSA8
+Y2hyaXMucGFja2hhbUBhbGxpZWR0ZWxlc2lzLmNvLm56Pg0KPj4gLS0tDQo+Pg0KPj4gTm90ZXM6
+DQo+PiAgICAgIENoYW5nZXMgaW4gdjM6DQo+PiAgICAgIC0gbmV3DQo+Pg0KPj4gICAuLi4vZGV2
+aWNldHJlZS9iaW5kaW5ncy9tbWMvbWFydmVsbCx4ZW5vbi1zZGhjaS55YW1sICAgICAgICAgIHwg
+NCArKysrDQo+PiAgIDEgZmlsZSBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykNCj4+DQo+PiBkaWZm
+IC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhl
+bm9uLXNkaGNpLnlhbWwgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL21h
+cnZlbGwseGVub24tc2RoY2kueWFtbA0KPj4gaW5kZXggMzI2YWMzZmEzNmI1Li43NzZiZWQ1MDQ2
+ZmEgMTAwNjQ0DQo+PiAtLS0gYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1j
+L21hcnZlbGwseGVub24tc2RoY2kueWFtbA0KPj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
+cmVlL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNpLnlhbWwNCj4+IEBAIC0zMSw2ICsz
+MSwxMCBAQCBwcm9wZXJ0aWVzOg0KPj4gICAgICAgICAgICAgLSBjb25zdDogbWFydmVsbCxhcm1h
+ZGEtYXA4MDctc2RoY2kNCj4+ICAgICAgICAgICAgIC0gY29uc3Q6IG1hcnZlbGwsYXJtYWRhLWFw
+ODA2LXNkaGNpDQo+PiAgIA0KPj4gKyAgICAgIC0gaXRlbXM6DQo+PiArICAgICAgICAgIC0gY29u
+c3Q6IG1hcnZlbGwsYXJtYWRhLTM3MDAtc2RoY2kNCj4+ICsgICAgICAgICAgLSBjb25zdDogbWFy
+dmVsbCxzZGhjaS14ZW5vbg0KPiBEbyB5b3Uga25vdyBvZiBhbnkgdXNhZ2VzIG9mIG1hcnZlbGws
+YXJtYWRhLTM3MDAtc2RoY2kgYWxvbmUgKHdpdGhvdXQNCj4gc2RoY2kteGVub24pPyBJZiBub3Qs
+IGl0IHNob3VsZCBiZSByZW1vdmVkIGZyb20gdGhlIGVudW0gYmVmb3JlICh0aGUgb25lDQo+IGFk
+ZGVkIGluIHlvdXIgcGF0Y2ggIzIpLiBJdCBkb2VzIG5vdCBsb29rIGNvcnJlY3QgdG8gaGF2ZSBp
+dCBib3RoIGFzDQo+IHN0YW5kYWxvbmUgY29tcGF0aWJsZSBhbmQgb25lIGNvbXBhdGlibGUgd2l0
+aCBzZGhjaS14ZW5vbi4gRWl0aGVyIGl0IGlzDQo+IGNvbXBhdGlibGUgd2l0aCBzZGhjaS14ZW5v
+biBvciBub3QuIDopDQoNClRoZSBpbi10cmVlIHVzZXMgYWxsIGhhdmUgYm90aC4gSSdsbCByZW1v
+dmUgaXQgZnJvbSB0aGUgZW51bS4NCg0KPg0KPiBJIHN1Z2dlc3RlZCBiZWZvcmUgdG8gbWFrZSB0
+aGlzIGNoYW5nZSBoZXJlIGFzIHNlcGFyYXRlIHBhdGNoLCBidXQgSQ0KPiB0aGluayBJIG1pc3Nl
+ZCB0aGUgZmFjdCB0aGF0IGl0IGlzIHNpbXBsZSBjb3JyZWN0aW9uIG9mDQo+IGFybWFkYS0zNzAw
+LXNkaGNpIGNvbXBhdGlibGUuIFN1Y2ggc2ltcGxlIGNvcnJlY3Rpb25zIGNhbiBiZSBkb25lIHdp
+dGhpbg0KPiBzYW1lIHBhdGNoIGFzIGNvbnZlcnNpb24sIHdpdGggZXhwbGFuYXRpb24gaW4gY29t
+bWl0IG1zZyAod2hpY2ggd2FzDQo+IG1pc3NpbmcgaW4geW91ciB2MSkuDQo+DQo+IFRvIGF2b2lk
+IHVubmVjZXNzYXJ5IHBhdGNoIGNoYW5nZXMgeW91IGNvdWxkIHNxdWFzaCBpdCB3aXRoIHYxIGFu
+ZA0KPiBpbmNsdWRlIHRoaXMgaW4gdGhlIGNvbW1pdCBtc2cgKGFjdHVhbGx5IGV4dGVuZCBpdCB0
+byBzYXkgdGhhdCB5b3UgYXJlDQo+IGNvcnJlY3RpbmcgdGhlIDM3MDAtc2RoY2kgY29tcGF0aWJs
+ZSksIG9yIGNyZWF0ZSBwYXRjaCAjMiB0aGF0IHdheToNCj4NCj4gKyAgICBvbmVPZjoNCj4gKyAg
+ICAgIC0gZW51bToNCj4gKyAgICAgICAgICAtIG1hcnZlbGwsYXJtYWRhLWNwMTEwLXNkaGNpDQo+
+ICsgICAgICAgICAgLSBtYXJ2ZWxsLGFybWFkYS1hcDgwNi1zZGhjaQ0KPiArICAgICAgLSBpdGVt
+czoNCj4gKyAgICAgICAgICAtIGNvbnN0OiBtYXJ2ZWxsLGFybWFkYS1hcDgwNy1zZGhjaQ0KPiAr
+ICAgICAgICAgIC0gY29uc3Q6IG1hcnZlbGwsYXJtYWRhLWFwODA2LXNkaGNpDQo+ICsgICAgICAt
+IGl0ZW1zOg0KPiArICAgICAgICAgIC0gbWFydmVsbCxhcm1hZGEtMzcwMC1zZGhjaQ0KPg0KPiBz
+byBub3cgeW91IHdpbGwgb25seSBhZGQgeGVub24gaGVyZS4gQnV0IHRoZW4gaXQgaXMgc28gc21h
+bGwgcGF0Y2ggdGhhdA0KPiB3aXRoIGV4cGxhbmF0aW9uIHdlIHVzdWFsbHkgaW5jbHVkZSBpdCBp
+biBjb252ZXJzaW9uLg0KT0sgd2lsbCBzcXVhc2ggYW5kIGFkZCBhbiBleHBsYW5hdGlvbiBmb3Ig
+djQuDQo+DQo+IEJlc3QgcmVnYXJkcywNCj4gS3J6eXN6dG9m
