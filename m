@@ -2,57 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE660C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 10:47:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 984EEC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 11:09:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240337AbiC1KtZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 06:49:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32882 "EHLO
+        id S235561AbiC1LLL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 07:11:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33330 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236221AbiC1KtZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 06:49:25 -0400
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 382BE41315;
-        Mon, 28 Mar 2022 03:47:44 -0700 (PDT)
-Received: by mail-ej1-x62c.google.com with SMTP id p15so27747275ejc.7;
-        Mon, 28 Mar 2022 03:47:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=5MH++TcPuKhQzVkvXPAXpE2uJ7KTI2BReKPG/BP69Jc=;
-        b=Ut8jMp9By1vnZGclTipmL/IpUc6eXLtRJsjiRQEg2X7rDFgJtwsqfDSoiCjdT4iq8q
-         fo222b8zAHEaRvvvEU4Jo1TrX4zBQo7dV6vDfqPaff8EXeHBOUVZLA61XYxNjqfxIRPt
-         JTkQl6OvVv9sb/nxNeV6chP5HXU2+4m8fCJx7iDiiYFGdQ+QfmRWvMDG8qknEqe2vxdP
-         YTfl/NXZ2Y9Aiq2zeP6jN/w09SCmRODfl/B7NrrUsviGb6Tuw70tRDOQZ25NvuCbYM99
-         NtsvY2KnBGXGdhGi1ZJbqv3dUe0XyBMK7V8umb6163ujfOWUWyqPwAWVGPps0x/2WJzF
-         yj3Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=5MH++TcPuKhQzVkvXPAXpE2uJ7KTI2BReKPG/BP69Jc=;
-        b=K4yJhyLNaITG9EpLZMYiQ/W6t9JHwlp7L6ppPEGQVyvgvmAByBd5Dm92W8JdQaXbH+
-         OAQK4/OnsfZEssC0NzTErHeRDghCSJ/gVu6WJsQJQqGH5OEBCB8CowO7VuqkIh9HdzkF
-         F26k+RDNQuN1eujmtrpEbBv9T2o74vm+fjLxKc97lEJaX+eCQETiS525rCf4voB/I3zt
-         sS7ECkjgjkixxh/kijnnGMJ7azaf7S7Wj2V9319Wkx0nRUOInuQJ1nRQo3cUMOx3yQec
-         Qi1faJdomRRnvW8iXUFzVnBiZClPwtj+lSXvVCUUSetd+y9l7xANkuh900P5vYOSq16G
-         3X9Q==
-X-Gm-Message-State: AOAM530XlSG5xaQoVF3TpUWKhDSStVMGD1/y9Yl8QZBm9CPxiUhGBlbp
-        p6g2nT5/1i4cbNF3PDv4F9q9zdaC40sWur85KT8=
-X-Google-Smtp-Source: ABdhPJxg5fZXVMm1vCwl69+nB/6+LYAEtihlcCjnFTe7x9eRff6762Eb2TzI9/F/xVzn/m5PSCL/D++eiHpaH/STg6A=
-X-Received: by 2002:a17:907:7ba3:b0:6df:b07c:ee35 with SMTP id
- ne35-20020a1709077ba300b006dfb07cee35mr26754289ejc.588.1648464462488; Mon, 28
- Mar 2022 03:47:42 -0700 (PDT)
+        with ESMTP id S233183AbiC1LLK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 07:11:10 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 332CA22532
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 04:09:29 -0700 (PDT)
+Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[127.0.0.1])
+        by metis.ext.pengutronix.de with esmtp (Exim 4.92)
+        (envelope-from <a.fatoum@pengutronix.de>)
+        id 1nYnFX-0000jR-1o; Mon, 28 Mar 2022 13:09:27 +0200
+Message-ID: <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
+Date:   Mon, 28 Mar 2022 13:09:25 +0200
 MIME-Version: 1.0
-References: <20220327123835.28329-1-aford173@gmail.com> <20220327123835.28329-3-aford173@gmail.com>
- <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
-In-Reply-To: <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Mon, 28 Mar 2022 05:47:31 -0500
-Message-ID: <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
 Subject: Re: [PATCH 3/5] arm64: dts: imx8mp: Enable HS400-ES
-To:     Ahmad Fatoum <a.fatoum@pengutronix.de>
+Content-Language: en-US
+To:     Adam Ford <aford173@gmail.com>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -65,98 +39,135 @@ Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         NXP Linux Team <linux-imx@nxp.com>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
         arm-soc <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+References: <20220327123835.28329-1-aford173@gmail.com>
+ <20220327123835.28329-3-aford173@gmail.com>
+ <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
+ <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
+From:   Ahmad Fatoum <a.fatoum@pengutronix.de>
+In-Reply-To: <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
+X-SA-Exim-Mail-From: a.fatoum@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Mar 28, 2022 at 2:20 AM Ahmad Fatoum <a.fatoum@pengutronix.de> wrote:
->
-> Hello Adam,
->
-> On 27.03.22 14:38, Adam Ford wrote:
-> > The SDHC controller in the imx8mp has the same controller
-> > as the imx8mm which supports HS400-ES. Change the compatible
-> > fallback to imx8mm to enable it.
->
-> I believe that's a shortcoming of the Linux driver, which should explicitly list
-> fsl,imx8mp-usdhc in its compatibles and enable HS400-ES for it.
->
-> I find dropping compatibles problematic, because like Linux matching
-> fsl,imx8mm-usdhc, but not fsl,imx8mp-usdhc, other software may match
-> fsl,imx7d-usdhc, but not fsl,imx8[mp]-usdhc.
->
-> I'd prefer that either the kernel driver gains extra compatibles or that
-> the DTS lists extra compatibles and we refrain from dropping existing
-> (correct) ones.
->
+Hello Adam,
 
-I would argue that imx7d is not correct since the IP blocks between
-imx7d and imx8mm have different flags/quirks.  One of which includes
-HS400-ES, but there are other differences as well.
+On 28.03.22 12:47, Adam Ford wrote:
+> On Mon, Mar 28, 2022 at 2:20 AM Ahmad Fatoum <a.fatoum@pengutronix.de> wrote:
+>>
+>> Hello Adam,
+>>
+>> On 27.03.22 14:38, Adam Ford wrote:
+>>> The SDHC controller in the imx8mp has the same controller
+>>> as the imx8mm which supports HS400-ES. Change the compatible
+>>> fallback to imx8mm to enable it.
+>>
+>> I believe that's a shortcoming of the Linux driver, which should explicitly list
+>> fsl,imx8mp-usdhc in its compatibles and enable HS400-ES for it.
+>>
+>> I find dropping compatibles problematic, because like Linux matching
+>> fsl,imx8mm-usdhc, but not fsl,imx8mp-usdhc, other software may match
+>> fsl,imx7d-usdhc, but not fsl,imx8[mp]-usdhc.
+>>
+>> I'd prefer that either the kernel driver gains extra compatibles or that
+>> the DTS lists extra compatibles and we refrain from dropping existing
+>> (correct) ones.
+>>
+> 
+> I would argue that imx7d is not correct since the IP blocks between
+> imx7d and imx8mm have different flags/quirks.  One of which includes
+> HS400-ES, but there are other differences as well.
 
-> What do you think?
+The DTS currently says that an fsl,imx7d-usdhc is a subset of an
+fsl,imx8mm-usdhc. So a driver could treat both HW the exact same
+by focusing on the i.MX7D parts. Linux apparently did exactly
+that so far. Is this not accurate?
 
-From my understanding of the fallback compatibility strings is to
-avoid having to add more and more compatible strings to the drivers
-when they do not serve a functional purpose. Based On a conversation
-with Krzysztof [1], he suggested we update the YAML file based on the
-fallback, but he wanted NXP to give their feedback as to what the
-right fallback strings should be.  Haibo from NXP sent me a hierarchy
-[1] which is what I used to update the YAML file.  Based on the YAML
-file, the fallback in each DTSI file was updated to ensure the use of
-the proper IP block.
 
-adam
+>> What do you think?
+> 
+> From my understanding of the fallback compatibility strings is to
+> avoid having to add more and more compatible strings to the drivers
+> when they do not serve a functional purpose. Based On a conversation
+> with Krzysztof [1], he suggested we update the YAML file based on the
+> fallback, but he wanted NXP to give their feedback as to what the
+> right fallback strings should be.  Haibo from NXP sent me a hierarchy
+> [1] which is what I used to update the YAML file.  Based on the YAML
+> file, the fallback in each DTSI file was updated to ensure the use of
+> the proper IP block.
 
-[1] - https://lore.kernel.org/linux-arm-kernel/CAHCN7xLWoUGi-jfxR2a0gvEFkPT3USUEb+8U3CCqCb5wWEJ8xw@mail.gmail.com/T/
+Myself I am in favor of moving to three compatibles instead of dropping one.
+For some theoretical fsl,imx8mf-usdhc that's supposed to be exactly the same
+as a fsl,imx8mm-usdhc, I don't mind omitting the fsl,imx7d-usdhc compatible,
+but for existing device trees, this may introduce needless potential breakage
+for other software that also uses Linux device trees.
 
->
-> Cheers,
-> Ahmad
->
-> > Signed-off-by: Adam Ford <aford173@gmail.com>
-> > ---
-> >  arch/arm64/boot/dts/freescale/imx8mp.dtsi | 6 +++---
-> >  1 file changed, 3 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-> > index 794d75173cf5..d5ee1520f1fe 100644
-> > --- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-> > +++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-> > @@ -769,7 +769,7 @@ i2c6: i2c@30ae0000 {
-> >                       };
-> >
-> >                       usdhc1: mmc@30b40000 {
-> > -                             compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-> > +                             compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
-> >                               reg = <0x30b40000 0x10000>;
-> >                               interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
-> >                               clocks = <&clk IMX8MP_CLK_DUMMY>,
-> > @@ -783,7 +783,7 @@ usdhc1: mmc@30b40000 {
-> >                       };
-> >
-> >                       usdhc2: mmc@30b50000 {
-> > -                             compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-> > +                             compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
-> >                               reg = <0x30b50000 0x10000>;
-> >                               interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
-> >                               clocks = <&clk IMX8MP_CLK_DUMMY>,
-> > @@ -797,7 +797,7 @@ usdhc2: mmc@30b50000 {
-> >                       };
-> >
-> >                       usdhc3: mmc@30b60000 {
-> > -                             compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-> > +                             compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
-> >                               reg = <0x30b60000 0x10000>;
-> >                               interrupts = <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
-> >                               clocks = <&clk IMX8MP_CLK_DUMMY>,
->
->
-> --
-> Pengutronix e.K.                           |                             |
-> Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-> 31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-> Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Cheers,
+Ahmad
+
+> 
+> adam
+> 
+> [1] - https://lore.kernel.org/linux-arm-kernel/CAHCN7xLWoUGi-jfxR2a0gvEFkPT3USUEb+8U3CCqCb5wWEJ8xw@mail.gmail.com/T/
+> 
+>>
+>> Cheers,
+>> Ahmad
+>>
+>>> Signed-off-by: Adam Ford <aford173@gmail.com>
+>>> ---
+>>>  arch/arm64/boot/dts/freescale/imx8mp.dtsi | 6 +++---
+>>>  1 file changed, 3 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+>>> index 794d75173cf5..d5ee1520f1fe 100644
+>>> --- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+>>> +++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+>>> @@ -769,7 +769,7 @@ i2c6: i2c@30ae0000 {
+>>>                       };
+>>>
+>>>                       usdhc1: mmc@30b40000 {
+>>> -                             compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
+>>> +                             compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
+>>>                               reg = <0x30b40000 0x10000>;
+>>>                               interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
+>>>                               clocks = <&clk IMX8MP_CLK_DUMMY>,
+>>> @@ -783,7 +783,7 @@ usdhc1: mmc@30b40000 {
+>>>                       };
+>>>
+>>>                       usdhc2: mmc@30b50000 {
+>>> -                             compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
+>>> +                             compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
+>>>                               reg = <0x30b50000 0x10000>;
+>>>                               interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
+>>>                               clocks = <&clk IMX8MP_CLK_DUMMY>,
+>>> @@ -797,7 +797,7 @@ usdhc2: mmc@30b50000 {
+>>>                       };
+>>>
+>>>                       usdhc3: mmc@30b60000 {
+>>> -                             compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
+>>> +                             compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
+>>>                               reg = <0x30b60000 0x10000>;
+>>>                               interrupts = <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
+>>>                               clocks = <&clk IMX8MP_CLK_DUMMY>,
+>>
+>>
+>> --
+>> Pengutronix e.K.                           |                             |
+>> Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+>> 31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+>> Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+> 
+
+
+-- 
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
