@@ -2,52 +2,61 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 691BEC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 11:53:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB315C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 12:45:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242039AbiC1Lyx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 07:54:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40684 "EHLO
+        id S242607AbiC1Mre (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 08:47:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241514AbiC1Lyq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 07:54:46 -0400
-Received: from mail-ed1-f52.google.com (mail-ed1-f52.google.com [209.85.208.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16712377D0;
-        Mon, 28 Mar 2022 04:49:22 -0700 (PDT)
-Received: by mail-ed1-f52.google.com with SMTP id a17so16574175edm.9;
-        Mon, 28 Mar 2022 04:49:22 -0700 (PDT)
+        with ESMTP id S237500AbiC1Mre (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 08:47:34 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5273E4D638;
+        Mon, 28 Mar 2022 05:45:53 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id u26so16736479eda.12;
+        Mon, 28 Mar 2022 05:45:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=5GzAXCiHKn740WB88VYaXEioW9TMP9IG2kbGPT2sCHE=;
+        b=FM8dC5tQYBxg/a9sOblYTVnlbCPwqFdeyQ5ziyOF1PY3H389hZlkzBLbqqy8MwXXAf
+         A+dJ+5NOCrBZejlUxbBgQKMOG76kY43DIhH7GNulNDyEM2BWJCrTyjf/fCrvdVV4zNUA
+         0xUtrt5k4+5+zra4dHdxU7U0iCMWR13OIruhPGOnrjXswbQFT97Fqp5PP3oZUw7el4Mg
+         Sajnpa+xlRqcHYjW/IFTWvlC0Y1LNc38/xUHs6XEG17/JhozHq+3IF3NrsdcdOvrF8mj
+         mU/J6sIX1KmyXwzXQrdyPTsx+QbZuik7yZiPsB4vGQeO4Wd/DsLQJ/Xp1Aj4bp1m3KYj
+         4+4g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=wbmtuFgYk21OVybrhPNThf688k7OlnshZ2rECopA1sQ=;
-        b=DUus5YkXMkLwPHuMSYWpSbAzEXKGC7Ax8I4gLTBEAU+OOe7y2W8iqUcJvefaKdlUrI
-         cTo/YO6lFVWMCYHS8k3iPDCUO8bSrg1kjG5dIHkXlsRGeClBuJgjmN2agwAlK9XSljKm
-         2/2wRWSwgojkS5EjDMg6E4PPrQe4Z7chakGYt4qow8Ep4l+VJn7JyO+Ag0S2t+fjwCYL
-         c44IJDiWb9QMSWWamjJFA7ZgY96yZNmd/NQ1SKXSchyOPI1EwOa9CebK+IfF2CN/g4/q
-         SfrXLM41BhL8N1BkC10jatnFv3FTUOkRCOHldzmL50CbUg8QveVEI2Mnzl11ogKOVpeJ
-         x6gA==
-X-Gm-Message-State: AOAM533/LymGBHtkiU11xyP+BtzLsdrzWp2jVPVZnAr8hNECH7hRtK5h
-        /hoi9Zi9srLYcJmeQeKVLC4=
-X-Google-Smtp-Source: ABdhPJzWXsy4+GphF1QuoAkcYFlawyiEs4+1gNVRO87F9Ywpbhee44VZa+NoHAfXuvSNPc08MaGPTA==
-X-Received: by 2002:a05:6402:3488:b0:419:172c:e287 with SMTP id v8-20020a056402348800b00419172ce287mr15585663edc.87.1648468160467;
-        Mon, 28 Mar 2022 04:49:20 -0700 (PDT)
-Received: from [192.168.0.162] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
-        by smtp.googlemail.com with ESMTPSA id f3-20020a056402004300b004162aa024c0sm6850041edu.76.2022.03.28.04.49.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 28 Mar 2022 04:49:19 -0700 (PDT)
-Message-ID: <5c24c12b-3a12-1e18-9f03-2c54cad30bf9@kernel.org>
-Date:   Mon, 28 Mar 2022 13:49:18 +0200
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=5GzAXCiHKn740WB88VYaXEioW9TMP9IG2kbGPT2sCHE=;
+        b=Rws3CDUSt6cqfSqau94G/bKM2rCWbapsoLdf2yBrhIL4gVPXhat6RUjaOBQBC8uJMf
+         SgBNFJ5FMThUPhFFXo3II/Zf/phGfJ3m8XuPV2DjwSRk/Yrly/2Sa1fM9x480muRl9xQ
+         4IWWog/r5M+JQLp+LrV7ZCzBHUPzUhNA0x4tg8B7FeIMdWfIrTfjN3As3NCyiwiCBv/x
+         1Q1fPbMzxCO6e2mVUJn0k+eVXZ6NEgVMXbKr3adjN4g3hMqZbIdOsLoza4Leij7WVxV3
+         cpDcZYmDFED6BtYwozVkJs+SFrbgGXlSYGgYg6/+jnLGwJqD2t85pQuxKiCvgRgyAznx
+         9o5g==
+X-Gm-Message-State: AOAM532NtK8rFw8Cr+ikqrrTO3AzklaYUODPurlc/5oI94qdbfZFUjtu
+        UPB3xg6HY2jdh+vjs8OlfvxMdPOHTnWBPyvVpfs=
+X-Google-Smtp-Source: ABdhPJz90iB17mVjeopA5CGT2QyLyR4w0yF6S9hmFgwrdk/BNJza7oZqY0QP8HkpjT6efjW64Ha/d+eWXtCw8wKKMHY=
+X-Received: by 2002:aa7:c64c:0:b0:418:ecf7:afaa with SMTP id
+ z12-20020aa7c64c000000b00418ecf7afaamr16277961edr.38.1648471551479; Mon, 28
+ Mar 2022 05:45:51 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
+References: <20220327123835.28329-1-aford173@gmail.com> <20220327123835.28329-3-aford173@gmail.com>
+ <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de> <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
+ <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de> <5c24c12b-3a12-1e18-9f03-2c54cad30bf9@kernel.org>
+In-Reply-To: <5c24c12b-3a12-1e18-9f03-2c54cad30bf9@kernel.org>
+From:   Adam Ford <aford173@gmail.com>
+Date:   Mon, 28 Mar 2022 07:45:40 -0500
+Message-ID: <CAHCN7xJ28t3igV8uHWfLxJx6wWkwzojg-d0QTTZM9jdfGCbTzw@mail.gmail.com>
 Subject: Re: [PATCH 3/5] arm64: dts: imx8mp: Enable HS400-ES
-Content-Language: en-US
-To:     Ahmad Fatoum <a.fatoum@pengutronix.de>,
-        Adam Ford <aford173@gmail.com>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+To:     Krzysztof Kozlowski <krzk@kernel.org>
+Cc:     Ahmad Fatoum <a.fatoum@pengutronix.de>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
         devicetree <devicetree@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Fabio Estevam <festevam@gmail.com>,
@@ -60,82 +69,107 @@ Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         NXP Linux Team <linux-imx@nxp.com>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
         arm-soc <linux-arm-kernel@lists.infradead.org>
-References: <20220327123835.28329-1-aford173@gmail.com>
- <20220327123835.28329-3-aford173@gmail.com>
- <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
- <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
- <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-In-Reply-To: <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/03/2022 13:09, Ahmad Fatoum wrote:
-> Hello Adam,
-> 
-> On 28.03.22 12:47, Adam Ford wrote:
->> On Mon, Mar 28, 2022 at 2:20 AM Ahmad Fatoum <a.fatoum@pengutronix.de> wrote:
->>>
->>> Hello Adam,
->>>
->>> On 27.03.22 14:38, Adam Ford wrote:
->>>> The SDHC controller in the imx8mp has the same controller
->>>> as the imx8mm which supports HS400-ES. Change the compatible
->>>> fallback to imx8mm to enable it.
->>>
->>> I believe that's a shortcoming of the Linux driver, which should explicitly list
->>> fsl,imx8mp-usdhc in its compatibles and enable HS400-ES for it.
->>>
->>> I find dropping compatibles problematic, because like Linux matching
->>> fsl,imx8mm-usdhc, but not fsl,imx8mp-usdhc, other software may match
->>> fsl,imx7d-usdhc, but not fsl,imx8[mp]-usdhc.
->>>
->>> I'd prefer that either the kernel driver gains extra compatibles or that
->>> the DTS lists extra compatibles and we refrain from dropping existing
->>> (correct) ones.
->>>
->>
->> I would argue that imx7d is not correct since the IP blocks between
->> imx7d and imx8mm have different flags/quirks.  One of which includes
->> HS400-ES, but there are other differences as well.
-> 
-> The DTS currently says that an fsl,imx7d-usdhc is a subset of an
-> fsl,imx8mm-usdhc. So a driver could treat both HW the exact same
-> by focusing on the i.MX7D parts. Linux apparently did exactly
-> that so far. Is this not accurate?
-> 
-> 
->>> What do you think?
->>
->> From my understanding of the fallback compatibility strings is to
->> avoid having to add more and more compatible strings to the drivers
->> when they do not serve a functional purpose. Based On a conversation
->> with Krzysztof [1], he suggested we update the YAML file based on the
->> fallback, but he wanted NXP to give their feedback as to what the
->> right fallback strings should be.  Haibo from NXP sent me a hierarchy
->> [1] which is what I used to update the YAML file.  Based on the YAML
->> file, the fallback in each DTSI file was updated to ensure the use of
->> the proper IP block.
-> 
-> Myself I am in favor of moving to three compatibles instead of dropping one.
-> For some theoretical fsl,imx8mf-usdhc that's supposed to be exactly the same
-> as a fsl,imx8mm-usdhc, I don't mind omitting the fsl,imx7d-usdhc compatible,
-> but for existing device trees, this may introduce needless potential breakage
-> for other software that also uses Linux device trees.
-> 
+On Mon, Mar 28, 2022 at 6:49 AM Krzysztof Kozlowski <krzk@kernel.org> wrote:
+>
+> On 28/03/2022 13:09, Ahmad Fatoum wrote:
+> > Hello Adam,
+> >
+> > On 28.03.22 12:47, Adam Ford wrote:
+> >> On Mon, Mar 28, 2022 at 2:20 AM Ahmad Fatoum <a.fatoum@pengutronix.de> wrote:
+> >>>
+> >>> Hello Adam,
+> >>>
+> >>> On 27.03.22 14:38, Adam Ford wrote:
+> >>>> The SDHC controller in the imx8mp has the same controller
+> >>>> as the imx8mm which supports HS400-ES. Change the compatible
+> >>>> fallback to imx8mm to enable it.
+> >>>
+> >>> I believe that's a shortcoming of the Linux driver, which should explicitly list
+> >>> fsl,imx8mp-usdhc in its compatibles and enable HS400-ES for it.
+> >>>
+> >>> I find dropping compatibles problematic, because like Linux matching
+> >>> fsl,imx8mm-usdhc, but not fsl,imx8mp-usdhc, other software may match
+> >>> fsl,imx7d-usdhc, but not fsl,imx8[mp]-usdhc.
+> >>>
+> >>> I'd prefer that either the kernel driver gains extra compatibles or that
+> >>> the DTS lists extra compatibles and we refrain from dropping existing
+> >>> (correct) ones.
+> >>>
+> >>
+> >> I would argue that imx7d is not correct since the IP blocks between
+> >> imx7d and imx8mm have different flags/quirks.  One of which includes
+> >> HS400-ES, but there are other differences as well.
+> >
+> > The DTS currently says that an fsl,imx7d-usdhc is a subset of an
+> > fsl,imx8mm-usdhc. So a driver could treat both HW the exact same
+> > by focusing on the i.MX7D parts. Linux apparently did exactly
+> > that so far. Is this not accurate?
+> >
+> >
+> >>> What do you think?
+> >>
+> >> From my understanding of the fallback compatibility strings is to
+> >> avoid having to add more and more compatible strings to the drivers
+> >> when they do not serve a functional purpose. Based On a conversation
+> >> with Krzysztof [1], he suggested we update the YAML file based on the
+> >> fallback, but he wanted NXP to give their feedback as to what the
+> >> right fallback strings should be.  Haibo from NXP sent me a hierarchy
+> >> [1] which is what I used to update the YAML file.  Based on the YAML
+> >> file, the fallback in each DTSI file was updated to ensure the use of
+> >> the proper IP block.
+> >
+> > Myself I am in favor of moving to three compatibles instead of dropping one.
+> > For some theoretical fsl,imx8mf-usdhc that's supposed to be exactly the same
+> > as a fsl,imx8mm-usdhc, I don't mind omitting the fsl,imx7d-usdhc compatible,
+> > but for existing device trees, this may introduce needless potential breakage
+> > for other software that also uses Linux device trees.
+> >
+>
+> Affecting existing users is indeed a concern with this approach, because
+> in-kernel DTS might be used in other projects as well.
+>
+> I still cannot find here the answer whether fsl,imx8mm-usdhc is actually
+> compatible with fsl,imx7d-usdhc. It's not about driver, but about
+> hardware and programming model. imx8mm can support additional features
+> and still be compatible with imx7d. However if any flags of imx7d are
+> actually not valid for imx8mm, then it's different case.
 
-Affecting existing users is indeed a concern with this approach, because
-in-kernel DTS might be used in other projects as well.
+The imx7d flags are:
+ ESDHC_FLAG_USDHC
+ESDHC_FLAG_STD_TUNING
+ ESDHC_FLAG_HAVE_CAP1
+ESDHC_FLAG_HS200
+ ESDHC_FLAG_HS400
+ ESDHC_FLAG_STATE_LOST_IN_LPMODE
+ ESDHC_FLAG_BROKEN_AUTO_CMD23,
 
-I still cannot find here the answer whether fsl,imx8mm-usdhc is actually
-compatible with fsl,imx7d-usdhc. It's not about driver, but about
-hardware and programming model. imx8mm can support additional features
-and still be compatible with imx7d. However if any flags of imx7d are
-actually not valid for imx8mm, then it's different case.
+The imx8mm flags are:
+ ESDHC_FLAG_USDHC
+ ESDHC_FLAG_STD_TUNING
+ ESDHC_FLAG_HAVE_CAP1
+ESDHC_FLAG_HS200
+ ESDHC_FLAG_HS400
+ ESDHC_FLAG_HS400_ES
+ ESDHC_FLAG_STATE_LOST_IN_LPMODE
 
+It does not have the ESDHC_FLAG_BROKEN_AUTO_CMD23 that is present in the imx7d.
 
-Best regards,
-Krzysztof
+Maybe Haibo can comment on whether or not that would be an issue for the 8m[mnp]
+
+I will defer to Krzysztof and Haibo as to the proper method that we
+should add HS400-ES.  I don't have an issue adding the imx8mn or
+imx8mp compatible flags to the esdhc driver if that's the decision.
+If that is the decision, my follow-up question would be how the YAML
+should look, and if it needs to change at all.
+
+adam
+
+>
+>
+> Best regards,
+> Krzysztof
