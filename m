@@ -2,117 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4CB3C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 07:20:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 572F7C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 07:55:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238786AbiC1HWd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 03:22:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37052 "EHLO
+        id S238987AbiC1H5L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 03:57:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238781AbiC1HWd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 03:22:33 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BA831706A
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 00:20:52 -0700 (PDT)
-Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[127.0.0.1])
-        by metis.ext.pengutronix.de with esmtp (Exim 4.92)
-        (envelope-from <a.fatoum@pengutronix.de>)
-        id 1nYjgH-0005fL-Dg; Mon, 28 Mar 2022 09:20:49 +0200
-Message-ID: <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
-Date:   Mon, 28 Mar 2022 09:20:46 +0200
+        with ESMTP id S238986AbiC1H5H (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 03:57:07 -0400
+X-Greylist: delayed 481 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 28 Mar 2022 00:55:26 PDT
+Received: from mail.ourpartnership.pl (mail.ourpartnership.pl [80.211.82.238])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98E1EE026
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 00:55:25 -0700 (PDT)
+Received: by mail.ourpartnership.pl (Postfix, from userid 1001)
+        id 42E9261F9D; Mon, 28 Mar 2022 08:46:28 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=ourpartnership.pl;
+        s=mail; t=1648453642;
+        bh=M1ZVeu3q6Upppe+FUx/3rgI7MKJXh389NZDbgCK1SX4=;
+        h=Date:From:To:Subject:From;
+        b=GzNGbMAGZ8R08pORUSszg4aeA3nHX2Kb5jpNFg1uKuJeRp17xdfUb4MQ/Kcf4l6dJ
+         +FQ6xZBDJYMRuCeThZmA8CZNWAiVqlDSVF7nd41cFcDqqTm4JJ0J42QEUCNpVbKuid
+         VpxF1QbZzQ0rgcQXz5xEhUzXvc7opUvt46k8yPCPpmrtHvkamLVo6NnnVVVDFPbXXp
+         gMFCUU0lk3Op8NY9JMlZsZ9YMvxdnhnQ5OmKsQc8KtUceU0nk1Pb8vcpsQuoZtfQyG
+         WPILyZQYJ6BCZ2Z48CpmzcoLsWIn7SciwRP3sbQLzxvBOmOKXo4FVG+ovQbZHeBltF
+         NwkTYGLcjYJYQ==
+Received: by mail.ourpartnership.pl for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 07:46:04 GMT
+Message-ID: <20220328074501-0.1.9.2aby.0.b43arp6b6j@ourpartnership.pl>
+Date:   Mon, 28 Mar 2022 07:46:04 GMT
+From:   =?UTF-8?Q? "Arkadiusz_Soko=C5=82owski" ?= 
+        <arkadiusz.sokolowski@ourpartnership.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: Koszty instalacji fotowoltaicznej
+X-Mailer: mail.ourpartnership.pl
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.6.1
-From:   Ahmad Fatoum <a.fatoum@pengutronix.de>
-Subject: Re: [PATCH 3/5] arm64: dts: imx8mp: Enable HS400-ES
-To:     Adam Ford <aford173@gmail.com>, linux-mmc@vger.kernel.org
-Cc:     devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        aford@beaconembedded.com, haibo.chen@nxp.com,
-        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-References: <20220327123835.28329-1-aford173@gmail.com>
- <20220327123835.28329-3-aford173@gmail.com>
-Content-Language: en-US
-In-Reply-To: <20220327123835.28329-3-aford173@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
-X-SA-Exim-Mail-From: a.fatoum@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Adam,
+Dzie=C5=84 dobry,
 
-On 27.03.22 14:38, Adam Ford wrote:
-> The SDHC controller in the imx8mp has the same controller
-> as the imx8mm which supports HS400-ES. Change the compatible
-> fallback to imx8mm to enable it.
+stworzyli=C5=9Bmy specjaln=C4=85 ofert=C4=99 dla firm, na kompleksow=C4=85=
+ obs=C5=82ug=C4=99 inwestycji w fotowoltaik=C4=99. =20
 
-I believe that's a shortcoming of the Linux driver, which should explicitly list
-fsl,imx8mp-usdhc in its compatibles and enable HS400-ES for it.
+Specjalizujemy si=C4=99 w zakresie doboru, monta=C5=BCu i serwisie instal=
+acji fotowoltaicznych, dysponujemy najnowocze=C5=9Bniejszymi rozwi=C4=85z=
+ania, kt=C3=B3re zapewni=C4=85 Pa=C5=84stwu oczekiwane rezultaty.
 
-I find dropping compatibles problematic, because like Linux matching
-fsl,imx8mm-usdhc, but not fsl,imx8mp-usdhc, other software may match
-fsl,imx7d-usdhc, but not fsl,imx8[mp]-usdhc.
+Mo=C5=BCemy przygotowa=C4=87 dla Pa=C5=84stwa wst=C4=99pn=C4=85 kalkulacj=
+=C4=99 i przeanalizowa=C4=87 efekty mo=C5=BCliwe do osi=C4=85gni=C4=99cia=
+=2E
 
-I'd prefer that either the kernel driver gains extra compatibles or that
-the DTS lists extra compatibles and we refrain from dropping existing
-(correct) ones.
-
-What do you think?
-
-Cheers,
-Ahmad
-
-> Signed-off-by: Adam Ford <aford173@gmail.com>
-> ---
->  arch/arm64/boot/dts/freescale/imx8mp.dtsi | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-> index 794d75173cf5..d5ee1520f1fe 100644
-> --- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-> +++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-> @@ -769,7 +769,7 @@ i2c6: i2c@30ae0000 {
->  			};
->  
->  			usdhc1: mmc@30b40000 {
-> -				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-> +				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
->  				reg = <0x30b40000 0x10000>;
->  				interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
->  				clocks = <&clk IMX8MP_CLK_DUMMY>,
-> @@ -783,7 +783,7 @@ usdhc1: mmc@30b40000 {
->  			};
->  
->  			usdhc2: mmc@30b50000 {
-> -				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-> +				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
->  				reg = <0x30b50000 0x10000>;
->  				interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
->  				clocks = <&clk IMX8MP_CLK_DUMMY>,
-> @@ -797,7 +797,7 @@ usdhc2: mmc@30b50000 {
->  			};
->  
->  			usdhc3: mmc@30b60000 {
-> -				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-> +				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc";
->  				reg = <0x30b60000 0x10000>;
->  				interrupts = <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
->  				clocks = <&clk IMX8MP_CLK_DUMMY>,
+Czy s=C4=85 Pa=C5=84stwo otwarci na wst=C4=99pn=C4=85 rozmow=C4=99 w tym =
+temacie?
 
 
--- 
-Pengutronix e.K.                           |                             |
-Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
-31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
-Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
+Pozdrawiam
+Arkadiusz Soko=C5=82owski
