@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8AD8C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 11:19:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB4B8C41535
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 11:23:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240762AbiC1LVc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 07:21:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57358 "EHLO
+        id S241007AbiC1LYo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 07:24:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240677AbiC1LU4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 07:20:56 -0400
+        with ESMTP id S241247AbiC1LXZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 07:23:25 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6183C55BE8;
-        Mon, 28 Mar 2022 04:18:52 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACF8F58E46;
+        Mon, 28 Mar 2022 04:20:30 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 92C1361042;
-        Mon, 28 Mar 2022 11:18:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BF914C340EC;
-        Mon, 28 Mar 2022 11:18:49 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8A4BB61120;
+        Mon, 28 Mar 2022 11:20:29 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B977BC340EC;
+        Mon, 28 Mar 2022 11:20:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648466331;
+        s=k20201202; t=1648466429;
         bh=P/lxEK3xXgM2nxhjaAHZNVVhYk11eH/eKFXBmOkQsxo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=r8phhbyy6yhLyNx5MW3ncieo3R98LXiLFr25I+wz5Ycy3nm+zNtomkvk2SOsV7r/T
-         SSQduWJZ4ymnLwYDr96WkB6JMYloKzXhfZ//D6NOMMcfgroTthLeLzBtyq1Kft3zUp
-         Wn0pxNS//lnhEXXCX6shjDxOh0bN590+9PVBDBtP7z4YJqPcYqK/WQZIls8tSGYp1c
-         aiYXf1ehnIF1EVVeYlodaQcEWAoVUuC3lyeUbzd5qlA+1NK7wTUA5ZURAFSJusfKUQ
-         XOx3RSjWqG1/B/XrVyWQ9mB+nx006sLdU0zIOd18FLIM3TgAz6JSSEsTXrooawaEue
-         Wd8BnGVN/0G4Q==
+        b=p+TJnOEkMSJJRonGfovAEVXGT4lME0gygkIzOhs7fuUThdMdefIWeGDXlAEQBopWw
+         VOqFXzokqwsYN041K3K7JpoGXFhQ9aItHKsHdOSOyCee+Sq3X7s0/1kmpzCwrcC1cn
+         BXT+80hOcyW0qPPKslmKJIRMVSH5XbhVH0cIU9pZgeSv+uZaKPgvAoyVJZum7xFmYJ
+         fhVzPT9qIF8uZmqd4JcBKHNpu3Z+YWl9j1inywp2i3s00qbsiScUnp9VvOZtyJm141
+         LJnGIJSeCxfhs04kQ9s2LgggQhMNK+UjnHP8WHEaJ7dLil3OWAMfL7N/y07EWRO4rt
+         9pLsuALGLdMcw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
         Sasha Levin <sashal@kernel.org>, maximlevitsky@gmail.com,
-        oakad@yahoo.com, ulf.hansson@linaro.org, baijiaju1990@gmail.com,
-        chaitanya.kulkarni@wdc.com, mcgrof@kernel.org,
+        oakad@yahoo.com, ulf.hansson@linaro.org, mcgrof@kernel.org,
+        baijiaju1990@gmail.com, chaitanya.kulkarni@wdc.com,
         linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.17 10/43] memstick/mspro_block: fix handling of read-only devices
-Date:   Mon, 28 Mar 2022 07:17:54 -0400
-Message-Id: <20220328111828.1554086-10-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.16 09/35] memstick/mspro_block: fix handling of read-only devices
+Date:   Mon, 28 Mar 2022 07:19:45 -0400
+Message-Id: <20220328112011.1555169-9-sashal@kernel.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220328111828.1554086-1-sashal@kernel.org>
-References: <20220328111828.1554086-1-sashal@kernel.org>
+In-Reply-To: <20220328112011.1555169-1-sashal@kernel.org>
+References: <20220328112011.1555169-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
