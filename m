@@ -2,120 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28CFBC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 14:59:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80E28C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 17:35:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244201AbiC1PBX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 11:01:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57080 "EHLO
+        id S236148AbiC1RhC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 13:37:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229673AbiC1PBX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 11:01:23 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E5C92D1C9;
-        Mon, 28 Mar 2022 07:59:42 -0700 (PDT)
-Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22SDsu15025436;
-        Mon, 28 Mar 2022 16:59:07 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=kltjsirzntSwfHTV/4WKoQM0uiln7XLsDRSP3qmSBh4=;
- b=NecfBsKyQWBqiXma1Zhw2cVJtVl4UDOKML7BTAe3e+LFAcTdfXlyw7wklCzcffFl/EDp
- rSyYsr6Irm3guATATSJnlScoZDze8MKQAUzD73gV/CVt5XOl91XVuLu5E8KRLC1iZXyN
- ctiHoAjA4oy5Tc2npoOG5dLc1f9k9JoCbc8sa066ciP2XwmPPnwd6ASka2hD0tBrNcpj
- M5gOYnzVCzR06iV7BjkQdTNhnrX6LWS3LEZGhMXkxiWXt6Ypck4UgYtve25lGkEGmx58
- kY9D7nQU2JTpeA/AKR/eRLS0OcDWs0X3Lc0SGhgLk3QCqqgkroGdaxnEKSRsGWVIVZX2 ug== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3f1tkm3ec9-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 28 Mar 2022 16:59:07 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id EE38110002A;
-        Mon, 28 Mar 2022 16:59:05 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id D9521235F0D;
-        Mon, 28 Mar 2022 16:59:05 +0200 (CEST)
-Received: from [10.201.21.172] (10.75.127.49) by SFHDAG2NODE2.st.com
- (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Mon, 28 Mar
- 2022 16:59:04 +0200
-Message-ID: <0d0653d4-8272-7052-e0c5-447506a13a64@foss.st.com>
-Date:   Mon, 28 Mar 2022 16:58:52 +0200
+        with ESMTP id S232336AbiC1RhA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 13:37:00 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6298713EBA;
+        Mon, 28 Mar 2022 10:35:19 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id F0A2C60F43;
+        Mon, 28 Mar 2022 17:35:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 192F3C340F0;
+        Mon, 28 Mar 2022 17:35:13 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1648488918;
+        bh=8DK84zvqPVQ5dqS+l/hxkkjiMncObsS+szQGh2/hPXg=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=c2bDiePA9kHGkpvEstcte3dmY6J/ZwxEwE+Akse5+A/eLvrlrOHTah0fbvzTpRuh4
+         Pokc1eA4hRapiiyGDVv7277DFDB+HQ8hZe6l+gOshZAHIksKcpxXEB1ikexTibdkJP
+         f60RlTKUb7L0Djzxhr943hpHmv1HuG3Jr+P43jTJ30TkGk+Q+TQ6+iK6umVxiVqewQ
+         JQWzn1Ibvr7nDQw3iR4n33tSn5lWpGTtBkX6wHt+6NyvhH4ms3egZ3yvz9dVYJs5se
+         vZ26BRS4YGRcpdNJ1eiJa1uwFOWgXH/OU8iHr15SF/oruYYJiqRreOQD7ZMvr+Cy5i
+         2TOB7CldP3qPw==
+Message-ID: <6e1686d0-50f4-8681-1f15-2e4df957ebc8@kernel.org>
+Date:   Mon, 28 Mar 2022 19:35:10 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.5.0
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA
- LLI
+Subject: Re: [PATCH 3/5] arm64: dts: imx8mp: Enable HS400-ES
 Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
+To:     Ahmad Fatoum <a.fatoum@pengutronix.de>,
+        Adam Ford <aford173@gmail.com>
+Cc:     Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-References: <20220304135134.47827-1-yann.gautier@foss.st.com>
- <20220304135134.47827-2-yann.gautier@foss.st.com>
- <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
- <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
- <CACRpkdYMWXEX6dpT0aUrCrFd-8-U35OG9Zmpkfty=zMH=mQqbA@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CACRpkdYMWXEX6dpT0aUrCrFd-8-U35OG9Zmpkfty=zMH=mQqbA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+        Fabio Estevam <festevam@gmail.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Adam Ford-BE <aford@beaconembedded.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        arm-soc <linux-arm-kernel@lists.infradead.org>
+References: <20220327123835.28329-1-aford173@gmail.com>
+ <20220327123835.28329-3-aford173@gmail.com>
+ <c964bf2c-f7bf-451c-1691-02903f20c634@pengutronix.de>
+ <CAHCN7xL05pBK0uK7zuE7Uq4P9Rzo6bHbJdbOt5XnQRB7Sh3msw@mail.gmail.com>
+ <74e74ea8-1554-bf08-b0ea-36e77259cb18@pengutronix.de>
+ <5c24c12b-3a12-1e18-9f03-2c54cad30bf9@kernel.org>
+ <CAHCN7xJ28t3igV8uHWfLxJx6wWkwzojg-d0QTTZM9jdfGCbTzw@mail.gmail.com>
+ <5282b39b-85d5-81d6-10d5-a45c66d4d4e9@kernel.org>
+ <010b3600-81dd-f5e3-2d57-8cab8efd58f0@pengutronix.de>
+ <37da40fe-6e85-af40-756b-d022fe2559aa@kernel.org>
+ <e2a3e6c0-d98c-7417-31bd-5f674c9c32b4@pengutronix.de>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <e2a3e6c0-d98c-7417-31bd-5f674c9c32b4@pengutronix.de>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.49]
-X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-28_06,2022-03-28_01,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/25/22 21:12, Linus Walleij wrote:
-> On Tue, Mar 15, 2022 at 9:26 AM Yann Gautier <yann.gautier@foss.st.com> wrote:
-> 
->> The STM32 variant uses an internal DMA, and the DMA functions are in its
->> dedicated file. So I was planning to do the same as what is done in
->> meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA
->> constraints are not fulfilled. Not sure it can help for Ux500.
+On 28/03/2022 15:42, Ahmad Fatoum wrote:
+> On 28.03.22 15:14, Krzysztof Kozlowski wrote:
+>> On 28/03/2022 15:07, Ahmad Fatoum wrote:
+>>> On 28.03.22 14:56, Krzysztof Kozlowski wrote:
+>>>> You could also add two cases:
+>>>> 1. three compatibles, deprecated: True,
+>>>> 2. two compatibles, without imx7d.
+>>>>
+>>>> Existing DTS stays with three compatibles for two years and later gets
+>>>> converted to two compatibles. New DTS should use two compatibles.
+>>>>
+>>>> It's quite a lot of churn, but would make in the long term bindings
+>>>> correct and also not break other users/projects.
+>>>
+>>> I don't see why we need to deprecate the old binding. New SoCs
+>>> can be imx8mm-usdhc compatible from the beginning and need not
+>>> care about the old binding. Existing SoCs can just remain imx7d-usdhc
+>>> compatible as they are now.
+>>>
+>>> I don't see what the deprecation accomplishes.
 >>
->> Ulf, before I send my new series (although it is not ready yet), would
->> you be OK with the bounce buffer idea?
+>> It avoids to have too many entries of imx8mm (imx8mm alone,
+>> imx8mm+imx7d, imx8xx+imx8mm+imx7d).
 > 
-Hi Linus,
+> I see. I assume use of deprecated binding will be reported on a dtbs_check?
 
-> Would it not be better if the bounce buffer is something available
-> for all MMCI variants and not restricted to the STM32 DMA add-on?
+Unfortunately no, at least not yet. :-(
 
-The issue was seen with the internal DMA of the STM32 variant of PL180.
-
+> If so, the expectation is that downstream projects run dtbs_check on their
+> imported Linux DT repository, see the deprecation warning and extend
+> their drivers to comply with it.
 > 
-> What I'm thinking is that this is a problem with the MMCI hardware
-> rather than with the DMA hardware, so the problem kind of gets
-> fixed in the wrong place if the bounce buffer is in the DMA add-on
-> code.
-> 
-> Maybe this is how you fixed it in later patches, I'll take a look.
+> Some time later upstream will remove the deprecated binding and adjust
+> the device trees. This works for me.
+>
 
-I've pushed a new version there to correct latest remarks from Ulf:
-https://lore.kernel.org/all/20220328145114.334577-1-yann.gautier@foss.st.com/
-
-
-> 
-> Yours,
-> Linus Walleij
+Yes. Plus this gives the notice to downstream projects, to comply with
+the change of DTS.
 
 Best regards,
-Yann
-
+Krzysztof
