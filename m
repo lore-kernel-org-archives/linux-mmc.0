@@ -2,115 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15549C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 14:27:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6D0BC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 14:42:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235564AbiC2O3d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 10:29:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47642 "EHLO
+        id S237998AbiC2OoH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 10:44:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50242 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235011AbiC2O3d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 10:29:33 -0400
-Received: from mail-wm1-x32c.google.com (mail-wm1-x32c.google.com [IPv6:2a00:1450:4864:20::32c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53C2222F3E8;
-        Tue, 29 Mar 2022 07:27:47 -0700 (PDT)
-Received: by mail-wm1-x32c.google.com with SMTP id k124-20020a1ca182000000b0038c9cf6e2a6so1624595wme.0;
-        Tue, 29 Mar 2022 07:27:47 -0700 (PDT)
+        with ESMTP id S231377AbiC2OoE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 10:44:04 -0400
+Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D49633E0B;
+        Tue, 29 Mar 2022 07:42:22 -0700 (PDT)
+Received: by mail-pf1-x429.google.com with SMTP id h19so15105065pfv.1;
+        Tue, 29 Mar 2022 07:42:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=UkJOWRMCUbYGorBI9uSjtZM4DcqQkhNQvraKREd6DJc=;
-        b=V1fRhBIzg9+s+zRnUxg0fUPZxucXslx9ozftXP1RpkHrH4Ef/J8W7paMsNPEPzNxWp
-         /+Ns57oOWvMkb+7cVyvajnyIZ2+yq4WYSY+FWPo89ChQev2ybZaNvp7Hn/qmjA5CdEKM
-         73JvpoORSJ1tAfT4h1Yt1/pEtUUwyPm3yFV2bqjzBPkbPARl4U0g1qwDrdxAMHlfF1sJ
-         SGrTJ1HowfJ8kmHppGztqy+CtZcl7iQKEd/VgkKew8vlAAVgS5hVKn1w1TmYwmiWcor5
-         S42MkiEXSmEGlOXujsai4H4vmK3sMM1+Yx+59rNiHmIwoNyQtdcVWaG4DvPSBIZ6sflS
-         5lkQ==
+        h=from:to:cc:subject:date:message-id;
+        bh=qQMU1UOC6msMA3QkNjDMmv91MNuawzJ089EgdBRJGvA=;
+        b=EQ7JkrvxubOLSNofl3ON/g00u7rH3PWvEGSSAUuOpWtSCDlXofcS8lqvZGsn13dUe/
+         Z0LCpWK7t4N3WZIZaE4WoLXqWCDK+UTQAEouqqBOhPsCR0GxKMA6MLcIQDlMNyLaXNwj
+         N0UsSmpgrubLLW5G5BleOQ1PH0riIBAUp2miCBeOJA4AFCRZ2e9RYAWnIylkQ0fPxmwb
+         zPVh/msbI5wZ0P/8P0nwQpXJg5EJpdKujGOEnqOi4kArQHk1XA0Yttn2FosTIYoWbCyx
+         D/RuoQxcnRWsYVdaN3ooPixr5+vGKtaTfKNeV1G0WkSOsBEApy77cd1SvwFvjtHHyr1z
+         dIzQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=UkJOWRMCUbYGorBI9uSjtZM4DcqQkhNQvraKREd6DJc=;
-        b=hqIpWqkv+IKYg2hKwke9RsbTTjsdtOavd0F270TM4Mt2ehQVcUm+5RhD7Yx8H/LCg+
-         qWtK4/Z6THdKQGlEdd69eHTlXn1bU7DSjMoaHxktUHBQk1pbBG/PPt2INxLx88ds+U6n
-         bqMJeavrAWSJFkxPNMya0+0HJzZbtKTuqyAyyi59uGE9BhRFS6FCwsI6Yy2uh6x59y+s
-         TC9RCTEKvkOC3rKLvrsRFSo1xvy0sA23jtx8xSIwJQlcJRSkihrWuphAhOj9fmKjuGd+
-         GFB8ca2lVcthsSu+gSqEPDai5Z8PjDNplG80sH45svnnkgS4zy0tyjR4wlzhO+mMejRZ
-         H4yA==
-X-Gm-Message-State: AOAM532w739N/oYE2HnWv3wloRGJpL00LkyNyZ8BD59Ex3UjHNC7uf6j
-        Wmta6+xAHGBtMyohBKsVvpY=
-X-Google-Smtp-Source: ABdhPJwX2KEy3tkZ1IjhynPidjlbcvxK0tdLnJQsJX0bhkANmcG0wKDngAHg7t+Pw1CwomTxSCE3nA==
-X-Received: by 2002:a05:600c:19cf:b0:38c:b1fd:1fc9 with SMTP id u15-20020a05600c19cf00b0038cb1fd1fc9mr7334595wmq.103.1648564065633;
-        Tue, 29 Mar 2022 07:27:45 -0700 (PDT)
-Received: from [192.168.1.145] ([207.188.167.132])
-        by smtp.gmail.com with ESMTPSA id u8-20020a5d4348000000b00203dbfa4ff2sm14956641wrr.34.2022.03.29.07.27.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 29 Mar 2022 07:27:45 -0700 (PDT)
-Message-ID: <32931f81-5615-8156-4c67-bb4260488185@gmail.com>
-Date:   Tue, 29 Mar 2022 16:27:43 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCH v12 2/3] dt-bindings: mmc: mtk-sd: increase reg maxItems
-Content-Language: en-US
-To:     Tinghan Shen <tinghan.shen@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        ryder.lee@kernel.org, wenst@chromium.org, chunfeng.yun@mediatek.com
-References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
- <20220329114540.17140-3-tinghan.shen@mediatek.com>
-From:   Matthias Brugger <matthias.bgg@gmail.com>
-In-Reply-To: <20220329114540.17140-3-tinghan.shen@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=qQMU1UOC6msMA3QkNjDMmv91MNuawzJ089EgdBRJGvA=;
+        b=upJD4pCH8OWv3dbRJBISYdJ5BpE/eY7W6F0e7BpxnUyrden6IKZ5qHkro5PTgjvmE+
+         DXomIVhio8U6wYSC7L7uhUL+1DEP+44+LI+L9+puwRvtJ1h47qN7jlBlFQknyHX4dVRS
+         RseORn5xV3gu6eToV7j2IbpuIBF4jIdbdldwIrnD2Xx2JIJnkwko3Tg0eu/mqfovTENq
+         ylXKq95iwx7XlwaA0fkq2OuepYMbCyyb0z/CDCFih1EhQxQ9eZx+EBXJZ0jiceTk6W0q
+         45pwwVC4DeXCCxii/NbHtwXVDPJ0LWJ4vA/1ATPNJpAG9Hm5Q/VPpfDK5hzY1kjmDLsJ
+         W3Og==
+X-Gm-Message-State: AOAM530WS0qakmKJQ3qiCoYFrap2wogW+LL02zn5hbz2JCjMBHcavqqf
+        hhDgSP9aeQQ0kRojC6pcpJY=
+X-Google-Smtp-Source: ABdhPJxPqwp6ekKWfuJMbn8EADeIw4d5Ch/FS1LyZlVrhohnAp4b5HYT3kVeHCnS4btwqEEsuk7ADg==
+X-Received: by 2002:a05:6a00:130e:b0:4f3:9654:266d with SMTP id j14-20020a056a00130e00b004f39654266dmr27980051pfu.59.1648564941642;
+        Tue, 29 Mar 2022 07:42:21 -0700 (PDT)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id ij17-20020a17090af81100b001c67c964d93sm4349569pjb.2.2022.03.29.07.42.19
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Tue, 29 Mar 2022 07:42:21 -0700 (PDT)
+From:   Tony Huang <tonyhuang.sunplus@gmail.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, lhjeff911@gmail.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, p.zabel@pengutronix.de
+Cc:     wells.lu@sunplus.com, tony.huang@sunplus.com, lh.kuo@sunplus.com,
+        Tony Huang <tonyhuang.sunplus@gmail.com>
+Subject: [PATCH v5 0/2] Add mmc driver for Sunplus SP7021 SOC
+Date:   Tue, 29 Mar 2022 22:42:02 +0800
+Message-Id: <cover.1648551070.git.tonyhuang.sunplus@gmail.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+This is a patch series for mmc driver for Sunplus SP7021 SOC.
 
+Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
+many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
+etc.) into a single chip. It is designed for industrial control.
 
-On 29/03/2022 13:45, Tinghan Shen wrote:
-> Add optional host top register base for the reg binding description.
-> 
+Refer to:
+https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
+https://tibbo.com/store/plus1.html
 
-Is this based a on a new version of the IP? Shall we make the second reg 
-mandatory for the new HW? If I remember correctly the reg needs to be restored 
-after power save event. So I suppose mmc won't work if that's not done. So 
-optional wouldn't be the right approach.
+Tony Huang (2):
+  dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+  mmc: Add mmc driver for Sunplus SP7021
 
-Can you please clarify if that's the case.
+ .../devicetree/bindings/mmc/sunplus,mmc.yaml       |   64 ++
+ MAINTAINERS                                        |    7 +
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sunplus-mmc.c                     | 1212 ++++++++++++++++++++
+ 5 files changed, 1293 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+ create mode 100644 drivers/mmc/host/sunplus-mmc.c
 
-Thanks,
-Matthias
+-- 
+2.7.4
 
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
-> ---
->   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index 7032f7adf3ca..6d41bcec900f 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -40,7 +40,8 @@ properties:
->             - const: mediatek,mt8183-mmc
->   
->     reg:
-> -    maxItems: 1
-> +    minItems: 1
-> +    maxItems: 2
->   
->     clocks:
->       description:
