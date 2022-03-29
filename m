@@ -2,80 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F94BC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 12:48:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66187C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 13:14:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236582AbiC2MuB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 08:50:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33196 "EHLO
+        id S232738AbiC2NQN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 09:16:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234837AbiC2Mti (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 08:49:38 -0400
-Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e3e3])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF4B41B2;
-        Tue, 29 Mar 2022 05:47:54 -0700 (PDT)
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (Authenticated sender: kholk11)
-        with ESMTPSA id BCB281F43E07
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1648558073;
-        bh=tJzMYOhX+6l/q9zZjN+QPrd8ljoj0rb7a1tgDfRrPbE=;
+        with ESMTP id S230181AbiC2NQM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 09:16:12 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09CAC639B;
+        Tue, 29 Mar 2022 06:14:29 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 20FE86154F;
+        Tue, 29 Mar 2022 13:14:29 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 04873C2BBE4;
+        Tue, 29 Mar 2022 13:14:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1648559668;
+        bh=BUiGfVpPE2VIxewXuuuW8TDfj0IZzmLt4jyDJzc1e4U=;
         h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=O8GNe3VfKg3pYdZ1I8sCYquUFd3JTXG47fVyk4/DELPOhaEyYXPaqqCMaQRum5ABL
-         nLTj/0NFPa6rsIOqyIbVU0WBvKCO/ed/kSqGLCT5Dw33SMxA+BReycYTJqX4wEY7t/
-         EZwqjhi2wfNLtxbPYZCew6QiDqDOIsfO/5vhk9ZQ6lGYiTKZ4pVNKuj9Y2ciqIJhuz
-         t4FXcLiZ1QQmo9J0TC/B9hsLFIszOpTvq9ezpMZNaHUnoqeMiZCYw5EXZrF/IcchM9
-         NCVD/dDFRANMa3ojLk4nDut1LDYowr0eIuTU+zLw3hNpbqvQCUChfDSTbU+7cWteW1
-         7gmzR+I7KPV6w==
-Message-ID: <97f2b11d-15c7-d28e-f7b5-e65f2f333580@collabora.com>
-Date:   Tue, 29 Mar 2022 14:47:50 +0200
+        b=PFKK2Ka2bFipYV22HyUJrbCDmogkwW+lH79Dg+PzXreiSriWdCq93ecnnzo89S/dj
+         zrr/xhohQhOTYaTGNu5Nx8Wpk2kt1d+jnvUn1MvV2Zi2XYSEqmaRWjCBrCpdMstBXV
+         PvwwDvXA3xOk+a7K8ardNiyCNM9VHkz7UPuERDZ26bCknQk38AKdO9B8DNYDHqgTDR
+         Z6Oah3FflPvUgl0WdZm4yfaUOkWyS+wiMQxbz9camg5juIzOmjLcBlpDiTUvEohMm0
+         sQsvTPlMTX2B4tIBJckvDK536G8BEDXT7wbXtc916DKWj6YsA0L3pWBaRiEpQEl2sE
+         MqwS7XwTcSm4A==
+Message-ID: <d4c477b3-0cf2-e495-6a54-5fcd0301cc14@kernel.org>
+Date:   Tue, 29 Mar 2022 15:14:21 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH v12 1/3] dt-bindings: mmc: mtk-sd: fix yamllint error
+ Thunderbird/91.5.0
+Subject: Re: [PATCH v4 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
 Content-Language: en-US
-To:     Tinghan Shen <tinghan.shen@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        ryder.lee@kernel.org, wenst@chromium.org, chunfeng.yun@mediatek.com
-References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
- <20220329114540.17140-2-tinghan.shen@mediatek.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20220329114540.17140-2-tinghan.shen@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To:     Rob Herring <robh@kernel.org>,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>
+Cc:     andrew@lunn.ch, ulf.hansson@linaro.org,
+        linux-arm-kernel@lists.infradead.org,
+        sebastian.hesselbarth@gmail.com, gregory.clement@bootlin.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        krzk+dt@kernel.org, huziji@marvell.com, robh+dt@kernel.org,
+        devicetree@vger.kernel.org
+References: <20220329000231.3544810-1-chris.packham@alliedtelesis.co.nz>
+ <20220329000231.3544810-3-chris.packham@alliedtelesis.co.nz>
+ <1648554629.870840.350362.nullmailer@robh.at.kernel.org>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <1648554629.870840.350362.nullmailer@robh.at.kernel.org>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 29/03/22 13:45, Tinghan Shen ha scritto:
-> Documentation/devicetree/bindings/mmc/mtk-sd.yaml
->    54:81     error    line too long (95 > 80 characters)  (line-length)
+On 29/03/2022 13:50, Rob Herring wrote:
+> On Tue, 29 Mar 2022 13:02:31 +1300, Chris Packham wrote:
+>> Convert the marvell,xenon-sdhci binding to JSON schema. Currently the
+>> in-tree dts files don't validate because they use sdhci@ instead of mmc@
+>> as required by the generic mmc-controller schema.
+>>
+>> The compatible "marvell,sdhci-xenon" was not documented in the old
+>> binding but it accompanies the of "marvell,armada-3700-sdhci" in the
+>> armada-37xx SoC dtsi so this combination is added to the new binding
+>> document.
+>>
+>> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+>> Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
+>> ---
+>>
+>> Notes:
+>>     Changes in v4:
+>>     - Add review from Krzysztof
+>>     - Squash in addition of marvell,sdhci-xenon with an explanation in the
+>>       commit message
+>>     Changes in v3:
+>>     - Don't accept ap807 without ap806
+>>     - Add ref: string for pad-type
+>>     Changes in v2:
+>>     - Update MAINTAINERS entry
+>>     - Incorporate feedback from Krzysztof
+>>
+>>  .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 -----------
+>>  .../bindings/mmc/marvell,xenon-sdhci.yaml     | 275 ++++++++++++++++++
+>>  MAINTAINERS                                   |   2 +-
+>>  3 files changed, 276 insertions(+), 174 deletions(-)
+>>  delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+>>
 > 
+> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> 
+> yamllint warnings/errors:
+> 
+> dtschema/dtc warnings/errors:
+> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.example.dt.yaml: mmc@aa0000: compatible: 'oneOf' conditional failed, one must be fixed:
+> 	['marvell,armada-3700-sdhci'] is too short
+> 	'marvell,armada-3700-sdhci' is not one of ['marvell,armada-cp110-sdhci', 'marvell,armada-ap806-sdhci']
+> 	'marvell,armada-ap807-sdhci' was expected
+> 	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.example.dt.yaml: mmc@ab0000: compatible: 'oneOf' conditional failed, one must be fixed:
+> 	['marvell,armada-3700-sdhci'] is too short
+> 	'marvell,armada-3700-sdhci' is not one of ['marvell,armada-cp110-sdhci', 'marvell,armada-ap806-sdhci']
+> 	'marvell,armada-ap807-sdhci' was expected
+> 	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> 
+> doc reference errors (make refcheckdocs):
 
-I can't reproduce this error that you're getting... this commit is not
-necessary, as the .yamllint file in the kernel allows a maximum line-length
-of 110 characters.
+Chris, your own dt binding does not pass it's check (example)...
 
-rules:
-   line-length:
-     # 80 chars should be enough, but don't fail if a line is longer
-     max: 110
+After updating the compatibles, you need to check the example. The
+examples are anyway duplicating common stuff, so half of them could be
+removed.
 
-https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/tree/Documentation/devicetree/bindings/.yamllint?h=next-20220329
 
-Please drop this commit.
-
-> Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
-> ---
->   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
+Best regards,
+Krzysztof
