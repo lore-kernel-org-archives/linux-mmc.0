@@ -2,103 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5158C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 19:11:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 094B7C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 19:51:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240851AbiC2TMy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 15:12:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34280 "EHLO
+        id S241054AbiC2Tw5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 15:52:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237082AbiC2TMx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 15:12:53 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B46916D969;
-        Tue, 29 Mar 2022 12:11:05 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 40D8861659;
-        Tue, 29 Mar 2022 19:11:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9FFC1C34112;
-        Tue, 29 Mar 2022 19:11:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648581064;
-        bh=Z9f2r56vngMSRkwrHGORVdFRCd3Ja+qoUjCgMo0+fMY=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=AOqfCUf7yLFwIfnj5brTUWDumtDXd+nH9QlX4rQ0iGE9+11qaGnEBp5dfHRHfjO32
-         aBcnWaGdSBdUaIJbBTN+NVlcs29bfVJx9bZH/qD1VHGmFP37vRLWLy5sH9LyCgTrTC
-         HVBcc1/XBxBl/En/IFGZxjAo/jvof8AQcq7muiF49yBOPh4ACv+UoTSYtAcvsrYLsv
-         xw/IjhZznRIY/cA1ecbc9P7eyS4w+NLmU97gmiBuxSvJfmPOXLHi5r+zKoQPY9CQXl
-         kAiQc+kfmQQyHFY3DHfYToyr/8CLrbSkEZwdHaRxioM8S+oVpOQIJ5NxD4qyimkzXm
-         ocTtn0FJky02Q==
-Received: by mail-ed1-f47.google.com with SMTP id b24so21786722edu.10;
-        Tue, 29 Mar 2022 12:11:04 -0700 (PDT)
-X-Gm-Message-State: AOAM533ypBUei2Sib0mS6x9NJNklSRuELPGCZs+4MmTrZfPhSCpwd+NB
-        +s2iydj8UiJ3ppWamzfYj7FV3AgAIXW9cCQHqQ==
-X-Google-Smtp-Source: ABdhPJz2EcwfbpLLNfbPV4lpc6oRX1DfGgrw/zODvGbU5XGzz47/sV8C7BZQxzV2+8hYQITbC12p1Ms7BrmdH7NXLW4=
-X-Received: by 2002:a05:6402:2711:b0:419:5a50:75ef with SMTP id
- y17-20020a056402271100b004195a5075efmr6622477edd.280.1648581062773; Tue, 29
- Mar 2022 12:11:02 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
- <20220329114540.17140-3-tinghan.shen@mediatek.com> <d720a5e9-d078-6c60-f55b-0506c4b4e1fa@collabora.com>
-In-Reply-To: <d720a5e9-d078-6c60-f55b-0506c4b4e1fa@collabora.com>
-From:   Rob Herring <robh+dt@kernel.org>
-Date:   Tue, 29 Mar 2022 14:10:50 -0500
-X-Gmail-Original-Message-ID: <CAL_JsqLrgW4GwSZ20x5Gsu-umjtw4x8k=uHeZk9T2+A3K6UT0Q@mail.gmail.com>
-Message-ID: <CAL_JsqLrgW4GwSZ20x5Gsu-umjtw4x8k=uHeZk9T2+A3K6UT0Q@mail.gmail.com>
-Subject: Re: [PATCH v12 2/3] dt-bindings: mmc: mtk-sd: increase reg maxItems
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-Cc:     Tinghan Shen <tinghan.shen@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree@vger.kernel.org,
+        with ESMTP id S241087AbiC2Twu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 15:52:50 -0400
+Received: from gate2.alliedtelesis.co.nz (gate2.alliedtelesis.co.nz [202.36.163.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09AD918B25D
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2022 12:51:03 -0700 (PDT)
+Received: from svr-chch-seg1.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (Client did not present a certificate)
+        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id CB0A82C028E;
+        Tue, 29 Mar 2022 19:51:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
+        s=mail181024; t=1648583460;
+        bh=BNF2UMylQFUCmmIZXcvoQ329GJFVKaMW/CAJjK9WuQ0=;
+        h=From:To:CC:Subject:Date:References:In-Reply-To:From;
+        b=Y0hVUzewhYM8L8Vui/dU1oY5bKeGvAXvvgXLPbax8R32hPu5tM+Nno5ZEPF7ZXQ/R
+         3QGrBjAOyUxwV9Bko5MiB0stn0ouyzzWMgC7zJXtesD31y3bH0fpEJoOPg12f0lwMX
+         Q/Gtryq6kYBwxmrA1wbVvJNINvoZ76bt7wfdSsLeHUUbHHuTFalmuEprw2xFfBG2ke
+         y79H8C6Ve4YgvbUJiWh3X9eGYEueKYgNLE1GmLvJ/xyoN+GXBo73q5SdSIAa6eIh3K
+         ElrOyeI0W+SHJvDN5boy5UhtGRFVSoMjop6MQln7gP28NBfUQspwrkahKCxt6AgmjK
+         4413MexXmo09Q==
+Received: from svr-chch-ex1.atlnz.lc (Not Verified[2001:df5:b000:bc8::77]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
+        id <B624363240001>; Wed, 30 Mar 2022 08:51:00 +1300
+Received: from svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) by
+ svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) with Microsoft SMTP Server
+ (TLS) id 15.0.1497.32; Wed, 30 Mar 2022 08:51:00 +1300
+Received: from svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8]) by
+ svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8%12]) with mapi id
+ 15.00.1497.033; Wed, 30 Mar 2022 08:51:00 +1300
+From:   Chris Packham <Chris.Packham@alliedtelesis.co.nz>
+To:     Krzysztof Kozlowski <krzk@kernel.org>,
+        Rob Herring <robh@kernel.org>
+CC:     "andrew@lunn.ch" <andrew@lunn.ch>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>,
+        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
-        Project_Global_Chrome_Upstream_Group 
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        Ryder Lee <ryder.lee@kernel.org>,
-        Chen-Yu Tsai <wenst@chromium.org>,
-        Chunfeng Yun <chunfeng.yun@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
+        "krzk+dt@kernel.org" <krzk+dt@kernel.org>,
+        "huziji@marvell.com" <huziji@marvell.com>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Subject: Re: [PATCH v4 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
+Thread-Topic: [PATCH v4 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
+Thread-Index: AQHYQwBQxHzoaq5k202Ou7T2PLN3cqzVZnGAgAAXboCAAG7SgA==
+Date:   Tue, 29 Mar 2022 19:50:59 +0000
+Message-ID: <6e118704-3c63-929e-ebf0-9a78fbed5daa@alliedtelesis.co.nz>
+References: <20220329000231.3544810-1-chris.packham@alliedtelesis.co.nz>
+ <20220329000231.3544810-3-chris.packham@alliedtelesis.co.nz>
+ <1648554629.870840.350362.nullmailer@robh.at.kernel.org>
+ <d4c477b3-0cf2-e495-6a54-5fcd0301cc14@kernel.org>
+In-Reply-To: <d4c477b3-0cf2-e495-6a54-5fcd0301cc14@kernel.org>
+Accept-Language: en-NZ, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-messagesentrepresentingtype: 1
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [10.32.1.11]
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <F2F2FAA0294065438213375A3B0291C0@atlnz.lc>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=Xf/6aR1Nyvzi7BryhOrcLQ==:117 a=xqWC_Br6kY4A:10 a=oKJsc7D3gJEA:10 a=IkcTkHD0fZMA:10 a=o8Y5sQTvuykA:10 a=VwQbUJbxAAAA:8 a=q3wFjaZLP3K7T2WVW-8A:9 a=QEXdDO2ut3YA:10 a=AjGcO6oz07-iQ99wixmX:22
+X-SEG-SpamProfiler-Score: 0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 29, 2022 at 7:43 AM AngeloGioacchino Del Regno
-<angelogioacchino.delregno@collabora.com> wrote:
->
-> Il 29/03/22 13:45, Tinghan Shen ha scritto:
-> > Add optional host top register base for the reg binding description.
-> >
-> > Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> > Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
-> > ---
-> >   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
-> >   1 file changed, 2 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > index 7032f7adf3ca..6d41bcec900f 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > @@ -40,7 +40,8 @@ properties:
-> >             - const: mediatek,mt8183-mmc
-> >
-> >     reg:
-> > -    maxItems: 1
-> > +    minItems: 1
-> > +    maxItems: 2
->
-> it's just maxItems... adding minItems: 1 is not required.
-
-If 1 entry is still valid, then minItems is required. If not, then
-it's an ABI break.
-
-Rob
+DQpPbiAzMC8wMy8yMiAwMjoxNCwgS3J6eXN6dG9mIEtvemxvd3NraSB3cm90ZToNCj4gT24gMjkv
+MDMvMjAyMiAxMzo1MCwgUm9iIEhlcnJpbmcgd3JvdGU6DQo+PiBPbiBUdWUsIDI5IE1hciAyMDIy
+IDEzOjAyOjMxICsxMzAwLCBDaHJpcyBQYWNraGFtIHdyb3RlOg0KPj4+IENvbnZlcnQgdGhlIG1h
+cnZlbGwseGVub24tc2RoY2kgYmluZGluZyB0byBKU09OIHNjaGVtYS4gQ3VycmVudGx5IHRoZQ0K
+Pj4+IGluLXRyZWUgZHRzIGZpbGVzIGRvbid0IHZhbGlkYXRlIGJlY2F1c2UgdGhleSB1c2Ugc2Ro
+Y2lAIGluc3RlYWQgb2YgbW1jQA0KPj4+IGFzIHJlcXVpcmVkIGJ5IHRoZSBnZW5lcmljIG1tYy1j
+b250cm9sbGVyIHNjaGVtYS4NCj4+Pg0KPj4+IFRoZSBjb21wYXRpYmxlICJtYXJ2ZWxsLHNkaGNp
+LXhlbm9uIiB3YXMgbm90IGRvY3VtZW50ZWQgaW4gdGhlIG9sZA0KPj4+IGJpbmRpbmcgYnV0IGl0
+IGFjY29tcGFuaWVzIHRoZSBvZiAibWFydmVsbCxhcm1hZGEtMzcwMC1zZGhjaSIgaW4gdGhlDQo+
+Pj4gYXJtYWRhLTM3eHggU29DIGR0c2kgc28gdGhpcyBjb21iaW5hdGlvbiBpcyBhZGRlZCB0byB0
+aGUgbmV3IGJpbmRpbmcNCj4+PiBkb2N1bWVudC4NCj4+Pg0KPj4+IFNpZ25lZC1vZmYtYnk6IENo
+cmlzIFBhY2toYW0gPGNocmlzLnBhY2toYW1AYWxsaWVkdGVsZXNpcy5jby5uej4NCj4+PiBSZXZp
+ZXdlZC1ieTogS3J6eXN6dG9mIEtvemxvd3NraSA8a3J6a0BrZXJuZWwub3JnPg0KPj4+IC0tLQ0K
+Pj4+DQo+Pj4gTm90ZXM6DQo+Pj4gICAgICBDaGFuZ2VzIGluIHY0Og0KPj4+ICAgICAgLSBBZGQg
+cmV2aWV3IGZyb20gS3J6eXN6dG9mDQo+Pj4gICAgICAtIFNxdWFzaCBpbiBhZGRpdGlvbiBvZiBt
+YXJ2ZWxsLHNkaGNpLXhlbm9uIHdpdGggYW4gZXhwbGFuYXRpb24gaW4gdGhlDQo+Pj4gICAgICAg
+IGNvbW1pdCBtZXNzYWdlDQo+Pj4gICAgICBDaGFuZ2VzIGluIHYzOg0KPj4+ICAgICAgLSBEb24n
+dCBhY2NlcHQgYXA4MDcgd2l0aG91dCBhcDgwNg0KPj4+ICAgICAgLSBBZGQgcmVmOiBzdHJpbmcg
+Zm9yIHBhZC10eXBlDQo+Pj4gICAgICBDaGFuZ2VzIGluIHYyOg0KPj4+ICAgICAgLSBVcGRhdGUg
+TUFJTlRBSU5FUlMgZW50cnkNCj4+PiAgICAgIC0gSW5jb3Jwb3JhdGUgZmVlZGJhY2sgZnJvbSBL
+cnp5c3p0b2YNCj4+Pg0KPj4+ICAgLi4uL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNp
+LnR4dCAgICAgIHwgMTczIC0tLS0tLS0tLS0tDQo+Pj4gICAuLi4vYmluZGluZ3MvbW1jL21hcnZl
+bGwseGVub24tc2RoY2kueWFtbCAgICAgfCAyNzUgKysrKysrKysrKysrKysrKysrDQo+Pj4gICBN
+QUlOVEFJTkVSUyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDIgKy0NCj4+
+PiAgIDMgZmlsZXMgY2hhbmdlZCwgMjc2IGluc2VydGlvbnMoKyksIDE3NCBkZWxldGlvbnMoLSkN
+Cj4+PiAgIGRlbGV0ZSBtb2RlIDEwMDY0NCBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGlu
+Z3MvbW1jL21hcnZlbGwseGVub24tc2RoY2kudHh0DQo+Pj4gICBjcmVhdGUgbW9kZSAxMDA2NDQg
+RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNp
+LnlhbWwNCj4+Pg0KPj4gTXkgYm90IGZvdW5kIGVycm9ycyBydW5uaW5nICdtYWtlIERUX0NIRUNL
+RVJfRkxBR1M9LW0gZHRfYmluZGluZ19jaGVjaycNCj4+IG9uIHlvdXIgcGF0Y2ggKERUX0NIRUNL
+RVJfRkxBR1MgaXMgbmV3IGluIHY1LjEzKToNCj4+DQo+PiB5YW1sbGludCB3YXJuaW5ncy9lcnJv
+cnM6DQo+Pg0KPj4gZHRzY2hlbWEvZHRjIHdhcm5pbmdzL2Vycm9yczoNCj4+IC9idWlsZHMvcm9i
+aGVycmluZy9saW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdz
+L21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNpLmV4YW1wbGUuZHQueWFtbDogbW1jQGFhMDAwMDogY29t
+cGF0aWJsZTogJ29uZU9mJyBjb25kaXRpb25hbCBmYWlsZWQsIG9uZSBtdXN0IGJlIGZpeGVkOg0K
+Pj4gCVsnbWFydmVsbCxhcm1hZGEtMzcwMC1zZGhjaSddIGlzIHRvbyBzaG9ydA0KPj4gCSdtYXJ2
+ZWxsLGFybWFkYS0zNzAwLXNkaGNpJyBpcyBub3Qgb25lIG9mIFsnbWFydmVsbCxhcm1hZGEtY3Ax
+MTAtc2RoY2knLCAnbWFydmVsbCxhcm1hZGEtYXA4MDYtc2RoY2knXQ0KPj4gCSdtYXJ2ZWxsLGFy
+bWFkYS1hcDgwNy1zZGhjaScgd2FzIGV4cGVjdGVkDQo+PiAJRnJvbSBzY2hlbWE6IC9idWlsZHMv
+cm9iaGVycmluZy9saW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRp
+bmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNpLnlhbWwNCj4+IC9idWlsZHMvcm9iaGVycmluZy9s
+aW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tYXJ2
+ZWxsLHhlbm9uLXNkaGNpLmV4YW1wbGUuZHQueWFtbDogbW1jQGFiMDAwMDogY29tcGF0aWJsZTog
+J29uZU9mJyBjb25kaXRpb25hbCBmYWlsZWQsIG9uZSBtdXN0IGJlIGZpeGVkOg0KPj4gCVsnbWFy
+dmVsbCxhcm1hZGEtMzcwMC1zZGhjaSddIGlzIHRvbyBzaG9ydA0KPj4gCSdtYXJ2ZWxsLGFybWFk
+YS0zNzAwLXNkaGNpJyBpcyBub3Qgb25lIG9mIFsnbWFydmVsbCxhcm1hZGEtY3AxMTAtc2RoY2kn
+LCAnbWFydmVsbCxhcm1hZGEtYXA4MDYtc2RoY2knXQ0KPj4gCSdtYXJ2ZWxsLGFybWFkYS1hcDgw
+Ny1zZGhjaScgd2FzIGV4cGVjdGVkDQo+PiAJRnJvbSBzY2hlbWE6IC9idWlsZHMvcm9iaGVycmlu
+Zy9saW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9t
+YXJ2ZWxsLHhlbm9uLXNkaGNpLnlhbWwNCj4+DQo+PiBkb2MgcmVmZXJlbmNlIGVycm9ycyAobWFr
+ZSByZWZjaGVja2RvY3MpOg0KPiBDaHJpcywgeW91ciBvd24gZHQgYmluZGluZyBkb2VzIG5vdCBw
+YXNzIGl0J3MgY2hlY2sgKGV4YW1wbGUpLi4uDQo+DQo+IEFmdGVyIHVwZGF0aW5nIHRoZSBjb21w
+YXRpYmxlcywgeW91IG5lZWQgdG8gY2hlY2sgdGhlIGV4YW1wbGUuIFRoZQ0KPiBleGFtcGxlcyBh
+cmUgYW55d2F5IGR1cGxpY2F0aW5nIGNvbW1vbiBzdHVmZiwgc28gaGFsZiBvZiB0aGVtIGNvdWxk
+IGJlDQo+IHJlbW92ZWQuDQoNClllYWggc2lsbHkgbWUuIEkgc3RhcnRlZCB0YWtpbmcgc2hvcnQg
+Y3V0cyB0byBydW4gZHRfYmluZGluZ19jaGVjayANCmR0YnNfY2hlY2sgYXMgb25lIGNvbW1hbmQg
+YnV0IHRoZW4gdGhlIGR0X2JpbmRpbmdzX2NoZWNrIG91dHB1dCBzY3JvbGxlZCANCm9mZiB0aGUg
+dG9wIG9mIG15IHRlcm1pbmFsLg0KDQpBcyBmb3IgdGhlIGV4YW1wbGVzIHRoZW1zZWx2ZXMgSSB3
+YW50IHRvIGxlYXZlIHdoYXQncyB0aGVyZSBhcyBhIGZhaXJseSANCmRpcmVjdCB0cmFuc2xhdGlv
+biBvZiB0aGUgb2xkIGJpbmRpbmcuIElmIHdlIGNvbnNpZGVyIHRoZW0gdW5uZWNlc3NhcnkgDQpy
+ZW1vdmluZyB0aGVtIGNhbiBiZSBkb25lIGFzIGEgZm9sbG93LXVwLg0KDQo+DQo+IEJlc3QgcmVn
+YXJkcywNCj4gS3J6eXN6dG9m
