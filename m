@@ -2,124 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B0AFC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Mar 2022 23:41:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C5BBC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 00:02:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231139AbiC1XnX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Mar 2022 19:43:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58212 "EHLO
+        id S231251AbiC2AE0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Mar 2022 20:04:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44456 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231131AbiC1XnV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 19:43:21 -0400
+        with ESMTP id S231264AbiC2AEZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2022 20:04:25 -0400
 Received: from gate2.alliedtelesis.co.nz (gate2.alliedtelesis.co.nz [IPv6:2001:df5:b000:5::4])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C7AB1276F
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 16:41:37 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2C2813F01
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2022 17:02:41 -0700 (PDT)
 Received: from svr-chch-seg1.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (Client did not present a certificate)
-        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id E7D732C03C7;
-        Mon, 28 Mar 2022 23:41:33 +0000 (UTC)
+        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id C1D402C0A4C;
+        Tue, 29 Mar 2022 00:02:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
-        s=mail181024; t=1648510893;
-        bh=zd6sLGd9KzeKeuJg5bNahnkjJsMPW2on88ieV8eCP3g=;
-        h=From:To:CC:Subject:Date:References:In-Reply-To:From;
-        b=phFgwnWjfVZUR4k7YOUhpa9zra0HipDYgV0fd+utcg9yVT5ZY9rSIDkCqVH/7onDV
-         EixjbH/0wzVzxLckEGvz8e3ux2BNpc25anSZcUhGrAG4RKvK5mdlKnrDlHc2XIK5kH
-         p+T1bXcOrVOzue/CL4SlkSn7ArjGdUPbdIwMWamidoRqRv3gOF1kKb77y37DHQRqvi
-         PcONTn9/NxeZLRRRo9+vADv7ZYZO8ZMVs8HpFE1ZiL45hwn3phtICva0azBGDLxf+z
-         XFZXuTQQrBNcOc4Z+Dmws4oYeXwcy2WD8C5e9WLgMOjhcbQre7jPOitpfRUQrbrLS4
-         n8z3y3XS191kQ==
-Received: from svr-chch-ex1.atlnz.lc (Not Verified[2001:df5:b000:bc8::77]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
-        id <B624247ad0001>; Tue, 29 Mar 2022 12:41:33 +1300
-Received: from svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) by
- svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Tue, 29 Mar 2022 12:41:34 +1300
-Received: from svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8]) by
- svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8%12]) with mapi id
- 15.00.1497.033; Tue, 29 Mar 2022 12:41:34 +1300
-From:   Chris Packham <Chris.Packham@alliedtelesis.co.nz>
-To:     Krzysztof Kozlowski <krzk@kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "huziji@marvell.com" <huziji@marvell.com>,
-        "andrew@lunn.ch" <andrew@lunn.ch>,
-        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
-        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>
-Subject: Re: [PATCH v3 3/3] dt-bindings: mmc: xenon: add marvell,sdhci-xenon
- compatible
-Thread-Topic: [PATCH v3 3/3] dt-bindings: mmc: xenon: add marvell,sdhci-xenon
- compatible
-Thread-Index: AQHYP9xfIKBsD25f3Ee8lzl+NV4iRazPJzmAgAV51QA=
-Date:   Mon, 28 Mar 2022 23:41:33 +0000
-Message-ID: <7224b8bb-2f59-3b06-b4c3-0b86a6e4703f@alliedtelesis.co.nz>
-References: <20220325000745.1708610-1-chris.packham@alliedtelesis.co.nz>
- <20220325000745.1708610-4-chris.packham@alliedtelesis.co.nz>
- <475d2af6-38cd-47a1-61b2-6b1298bf505d@kernel.org>
-In-Reply-To: <475d2af6-38cd-47a1-61b2-6b1298bf505d@kernel.org>
-Accept-Language: en-NZ, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-messagesentrepresentingtype: 1
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [10.32.1.11]
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <4F92C887757CA0499E265D9D286857E2@atlnz.lc>
-Content-Transfer-Encoding: base64
+        s=mail181024; t=1648512159;
+        bh=Wm7ZrsbohwxyPXzOAcMh/4fpLkArv/rUjr/HHU89ikw=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=bZf+fuBINh8I9vi4RpSVoaBRFH7agRn7JpmMYLM6pxL54S5toDCPUg8+cnx5LxnIG
+         ZaJP5dDCLMq6rPxP6iWmdHCIWuPO1ZW/TEc4MdgWHylEkBSIIloi42qOTgn/vr8+1N
+         gWoR+KvfBhLo0Qzr1eqdijx45b23WmF7+gLhy0QMf+/rG4EPBTH6wxmEh/nlvaSiDl
+         eJ2fgOlyIVkTPZMutWxQtRh1YeGF97XtgKvAiSSmL6mDlIHKqNBjRovSCBJVlwfQkb
+         88GGMHV1JwDono8xmwXMSlbI9M9H90eb9vZiluTf/ypeGqrM4N7H+Zn37mDEFn2ZiP
+         bKOoadtSxmWVw==
+Received: from pat.atlnz.lc (Not Verified[10.32.16.33]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
+        id <B62424c9f0001>; Tue, 29 Mar 2022 13:02:39 +1300
+Received: from chrisp-dl.ws.atlnz.lc (chrisp-dl.ws.atlnz.lc [10.33.22.30])
+        by pat.atlnz.lc (Postfix) with ESMTP id 7103F13EE82;
+        Tue, 29 Mar 2022 13:02:39 +1300 (NZDT)
+Received: by chrisp-dl.ws.atlnz.lc (Postfix, from userid 1030)
+        id CAD142A2678; Tue, 29 Mar 2022 13:02:35 +1300 (NZDT)
+From:   Chris Packham <chris.packham@alliedtelesis.co.nz>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
+        huziji@marvell.com, andrew@lunn.ch, gregory.clement@bootlin.com,
+        sebastian.hesselbarth@gmail.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>
+Subject: [PATCH v4 1/2] arm64: dts: marvell: Update sdhci node names to match schema
+Date:   Tue, 29 Mar 2022 13:02:30 +1300
+Message-Id: <20220329000231.3544810-2-chris.packham@alliedtelesis.co.nz>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220329000231.3544810-1-chris.packham@alliedtelesis.co.nz>
+References: <20220329000231.3544810-1-chris.packham@alliedtelesis.co.nz>
 MIME-Version: 1.0
-X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=Xf/6aR1Nyvzi7BryhOrcLQ==:117 a=xqWC_Br6kY4A:10 a=oKJsc7D3gJEA:10 a=IkcTkHD0fZMA:10 a=o8Y5sQTvuykA:10 a=jHPGDDJjT_i2t1f5GkIA:9 a=QEXdDO2ut3YA:10
+Content-Transfer-Encoding: quoted-printable
+X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=KLBiSEs5mFS1a/PbTCJxuA==:117 a=o8Y5sQTvuykA:10 a=VwQbUJbxAAAA:8 a=AgHtZ1O-xYyxAwoHFCcA:9 a=AjGcO6oz07-iQ99wixmX:22
 X-SEG-SpamProfiler-Score: 0
+x-atlnz-ls: pat
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DQpPbiAyNi8wMy8yMiAwMTowNCwgS3J6eXN6dG9mIEtvemxvd3NraSB3cm90ZToNCj4gT24gMjUv
-MDMvMjAyMiAwMTowNywgQ2hyaXMgUGFja2hhbSB3cm90ZToNCj4+IFRoZSBhcm1hZGEtMzd4eCBT
-b0MgZHRzaSBpbmNsdWRlcyB0aGlzIGFzIGEgY29tcGF0aWJsZSBzdHJpbmcuIEFkZCBpdCB0bw0K
-Pj4gdGhlIGR0LWJpbmRpbmcuDQo+Pg0KPj4gU2lnbmVkLW9mZi1ieTogQ2hyaXMgUGFja2hhbSA8
-Y2hyaXMucGFja2hhbUBhbGxpZWR0ZWxlc2lzLmNvLm56Pg0KPj4gLS0tDQo+Pg0KPj4gTm90ZXM6
-DQo+PiAgICAgIENoYW5nZXMgaW4gdjM6DQo+PiAgICAgIC0gbmV3DQo+Pg0KPj4gICAuLi4vZGV2
-aWNldHJlZS9iaW5kaW5ncy9tbWMvbWFydmVsbCx4ZW5vbi1zZGhjaS55YW1sICAgICAgICAgIHwg
-NCArKysrDQo+PiAgIDEgZmlsZSBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKykNCj4+DQo+PiBkaWZm
-IC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhl
-bm9uLXNkaGNpLnlhbWwgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL21h
-cnZlbGwseGVub24tc2RoY2kueWFtbA0KPj4gaW5kZXggMzI2YWMzZmEzNmI1Li43NzZiZWQ1MDQ2
-ZmEgMTAwNjQ0DQo+PiAtLS0gYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1j
-L21hcnZlbGwseGVub24tc2RoY2kueWFtbA0KPj4gKysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
-cmVlL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNpLnlhbWwNCj4+IEBAIC0zMSw2ICsz
-MSwxMCBAQCBwcm9wZXJ0aWVzOg0KPj4gICAgICAgICAgICAgLSBjb25zdDogbWFydmVsbCxhcm1h
-ZGEtYXA4MDctc2RoY2kNCj4+ICAgICAgICAgICAgIC0gY29uc3Q6IG1hcnZlbGwsYXJtYWRhLWFw
-ODA2LXNkaGNpDQo+PiAgIA0KPj4gKyAgICAgIC0gaXRlbXM6DQo+PiArICAgICAgICAgIC0gY29u
-c3Q6IG1hcnZlbGwsYXJtYWRhLTM3MDAtc2RoY2kNCj4+ICsgICAgICAgICAgLSBjb25zdDogbWFy
-dmVsbCxzZGhjaS14ZW5vbg0KPiBEbyB5b3Uga25vdyBvZiBhbnkgdXNhZ2VzIG9mIG1hcnZlbGws
-YXJtYWRhLTM3MDAtc2RoY2kgYWxvbmUgKHdpdGhvdXQNCj4gc2RoY2kteGVub24pPyBJZiBub3Qs
-IGl0IHNob3VsZCBiZSByZW1vdmVkIGZyb20gdGhlIGVudW0gYmVmb3JlICh0aGUgb25lDQo+IGFk
-ZGVkIGluIHlvdXIgcGF0Y2ggIzIpLiBJdCBkb2VzIG5vdCBsb29rIGNvcnJlY3QgdG8gaGF2ZSBp
-dCBib3RoIGFzDQo+IHN0YW5kYWxvbmUgY29tcGF0aWJsZSBhbmQgb25lIGNvbXBhdGlibGUgd2l0
-aCBzZGhjaS14ZW5vbi4gRWl0aGVyIGl0IGlzDQo+IGNvbXBhdGlibGUgd2l0aCBzZGhjaS14ZW5v
-biBvciBub3QuIDopDQoNClRoZSBpbi10cmVlIHVzZXMgYWxsIGhhdmUgYm90aC4gSSdsbCByZW1v
-dmUgaXQgZnJvbSB0aGUgZW51bS4NCg0KPg0KPiBJIHN1Z2dlc3RlZCBiZWZvcmUgdG8gbWFrZSB0
-aGlzIGNoYW5nZSBoZXJlIGFzIHNlcGFyYXRlIHBhdGNoLCBidXQgSQ0KPiB0aGluayBJIG1pc3Nl
-ZCB0aGUgZmFjdCB0aGF0IGl0IGlzIHNpbXBsZSBjb3JyZWN0aW9uIG9mDQo+IGFybWFkYS0zNzAw
-LXNkaGNpIGNvbXBhdGlibGUuIFN1Y2ggc2ltcGxlIGNvcnJlY3Rpb25zIGNhbiBiZSBkb25lIHdp
-dGhpbg0KPiBzYW1lIHBhdGNoIGFzIGNvbnZlcnNpb24sIHdpdGggZXhwbGFuYXRpb24gaW4gY29t
-bWl0IG1zZyAod2hpY2ggd2FzDQo+IG1pc3NpbmcgaW4geW91ciB2MSkuDQo+DQo+IFRvIGF2b2lk
-IHVubmVjZXNzYXJ5IHBhdGNoIGNoYW5nZXMgeW91IGNvdWxkIHNxdWFzaCBpdCB3aXRoIHYxIGFu
-ZA0KPiBpbmNsdWRlIHRoaXMgaW4gdGhlIGNvbW1pdCBtc2cgKGFjdHVhbGx5IGV4dGVuZCBpdCB0
-byBzYXkgdGhhdCB5b3UgYXJlDQo+IGNvcnJlY3RpbmcgdGhlIDM3MDAtc2RoY2kgY29tcGF0aWJs
-ZSksIG9yIGNyZWF0ZSBwYXRjaCAjMiB0aGF0IHdheToNCj4NCj4gKyAgICBvbmVPZjoNCj4gKyAg
-ICAgIC0gZW51bToNCj4gKyAgICAgICAgICAtIG1hcnZlbGwsYXJtYWRhLWNwMTEwLXNkaGNpDQo+
-ICsgICAgICAgICAgLSBtYXJ2ZWxsLGFybWFkYS1hcDgwNi1zZGhjaQ0KPiArICAgICAgLSBpdGVt
-czoNCj4gKyAgICAgICAgICAtIGNvbnN0OiBtYXJ2ZWxsLGFybWFkYS1hcDgwNy1zZGhjaQ0KPiAr
-ICAgICAgICAgIC0gY29uc3Q6IG1hcnZlbGwsYXJtYWRhLWFwODA2LXNkaGNpDQo+ICsgICAgICAt
-IGl0ZW1zOg0KPiArICAgICAgICAgIC0gbWFydmVsbCxhcm1hZGEtMzcwMC1zZGhjaQ0KPg0KPiBz
-byBub3cgeW91IHdpbGwgb25seSBhZGQgeGVub24gaGVyZS4gQnV0IHRoZW4gaXQgaXMgc28gc21h
-bGwgcGF0Y2ggdGhhdA0KPiB3aXRoIGV4cGxhbmF0aW9uIHdlIHVzdWFsbHkgaW5jbHVkZSBpdCBp
-biBjb252ZXJzaW9uLg0KT0sgd2lsbCBzcXVhc2ggYW5kIGFkZCBhbiBleHBsYW5hdGlvbiBmb3Ig
-djQuDQo+DQo+IEJlc3QgcmVnYXJkcywNCj4gS3J6eXN6dG9m
+Update the node names of the sdhci@ interfaces to be mmc@ to match the
+node name enforced by the mmc-controller.yaml schema.
+
+Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+Acked-by: Krzysztof Kozlowski <krzk@kernel.org>
+---
+
+Notes:
+    This has been sent separately [1] but on Krzysztof's advice I've
+    included it in v3 of this series.
+   =20
+    [1] -  https://lore.kernel.org/linux-arm-kernel/20220321212007.296158=
+1-1-chris.packham@alliedtelesis.co.nz/
+    Changes in v4:
+    - None
+    Changes in v3:
+    - New
+
+ arch/arm64/boot/dts/marvell/armada-37xx.dtsi  | 4 ++--
+ arch/arm64/boot/dts/marvell/armada-ap80x.dtsi | 2 +-
+ arch/arm64/boot/dts/marvell/armada-cp11x.dtsi | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/marvell/armada-37xx.dtsi b/arch/arm64/bo=
+ot/dts/marvell/armada-37xx.dtsi
+index 30233de58bb3..78adb803df26 100644
+--- a/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
++++ b/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
+@@ -434,7 +434,7 @@ rwtm: mailbox@b0000 {
+ 				#mbox-cells =3D <1>;
+ 			};
+=20
+-			sdhci1: sdhci@d0000 {
++			sdhci1: mmc@d0000 {
+ 				compatible =3D "marvell,armada-3700-sdhci",
+ 					     "marvell,sdhci-xenon";
+ 				reg =3D <0xd0000 0x300>,
+@@ -445,7 +445,7 @@ sdhci1: sdhci@d0000 {
+ 				status =3D "disabled";
+ 			};
+=20
+-			sdhci0: sdhci@d8000 {
++			sdhci0: mmc@d8000 {
+ 				compatible =3D "marvell,armada-3700-sdhci",
+ 					     "marvell,sdhci-xenon";
+ 				reg =3D <0xd8000 0x300>,
+diff --git a/arch/arm64/boot/dts/marvell/armada-ap80x.dtsi b/arch/arm64/b=
+oot/dts/marvell/armada-ap80x.dtsi
+index 6614472100c2..a06a0a889c43 100644
+--- a/arch/arm64/boot/dts/marvell/armada-ap80x.dtsi
++++ b/arch/arm64/boot/dts/marvell/armada-ap80x.dtsi
+@@ -250,7 +250,7 @@ watchdog: watchdog@610000 {
+ 				interrupts =3D <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
+ 			};
+=20
+-			ap_sdhci0: sdhci@6e0000 {
++			ap_sdhci0: mmc@6e0000 {
+ 				compatible =3D "marvell,armada-ap806-sdhci";
+ 				reg =3D <0x6e0000 0x300>;
+ 				interrupts =3D <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
+diff --git a/arch/arm64/boot/dts/marvell/armada-cp11x.dtsi b/arch/arm64/b=
+oot/dts/marvell/armada-cp11x.dtsi
+index 3bd2182817fb..d6c0990a267d 100644
+--- a/arch/arm64/boot/dts/marvell/armada-cp11x.dtsi
++++ b/arch/arm64/boot/dts/marvell/armada-cp11x.dtsi
+@@ -493,7 +493,7 @@ CP11X_LABEL(trng): trng@760000 {
+ 			status =3D "okay";
+ 		};
+=20
+-		CP11X_LABEL(sdhci0): sdhci@780000 {
++		CP11X_LABEL(sdhci0): mmc@780000 {
+ 			compatible =3D "marvell,armada-cp110-sdhci";
+ 			reg =3D <0x780000 0x300>;
+ 			interrupts =3D <27 IRQ_TYPE_LEVEL_HIGH>;
+--=20
+2.35.1
+
