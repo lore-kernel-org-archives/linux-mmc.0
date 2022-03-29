@@ -2,150 +2,190 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48E1DC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 16:01:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 529C9C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 16:50:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239092AbiC2QDR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 12:03:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46700 "EHLO
+        id S239920AbiC2Qvv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 12:51:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238372AbiC2QDR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 12:03:17 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B7665132F;
-        Tue, 29 Mar 2022 09:01:33 -0700 (PDT)
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.1.2) with ESMTP id 22TAHJ9G029059;
-        Tue, 29 Mar 2022 18:00:31 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=3Yxk1/MIRHxufTH1ZAuAKAEKJlCKfQFMRe3OV5pXA3I=;
- b=M/o4rnHgOdL7/4U054PT4yWWxcHnF+pjF5huaoZOGUf9nzk+ASp8GzUnnId8qszD/+MC
- 840HgkW4QN+OtrCW6zLDmGflJ077XWaIshkoc4TjjIqT1TCVVte5x6UxgnKIncNhKnpr
- L22r0/o6kNmm2EFC14mBnotbGVq9gRxGWhcxZfNRKwXyTX/o+OuzQww7t8z8E81nJ6x5
- 61IlQ5C706XsFspHaNu/mNVI/M0YzYy7Q5wqkkQT1S3dT5Hu3R1yxl4Rx/cTcwt8lfb2
- yOKfXy/eWy4mxBPlPygVHbn53Jf9NINgkWGQJCdMnWjpASGdkdImos9+yimU5n8Tw1jT Rg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3f1rudbcjk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 29 Mar 2022 18:00:31 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id B2FB110002A;
-        Tue, 29 Mar 2022 18:00:28 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag2node2.st.com [10.75.127.5])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id A356322FA30;
-        Tue, 29 Mar 2022 18:00:28 +0200 (CEST)
-Received: from [10.201.21.172] (10.75.127.50) by SFHDAG2NODE2.st.com
- (10.75.127.5) with Microsoft SMTP Server (TLS) id 15.0.1497.26; Tue, 29 Mar
- 2022 18:00:26 +0200
-Message-ID: <71b10ce2-7b87-14d5-c8e4-3a4598c889e0@foss.st.com>
-Date:   Tue, 29 Mar 2022 18:00:26 +0200
+        with ESMTP id S239915AbiC2Qvu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 12:51:50 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C35311A9A6
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2022 09:50:06 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id pv16so36393691ejb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2022 09:50:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=3W39tC2e+e4XlENh3geReI/CxfG4scvOcsFNszfM2k4=;
+        b=ySG+mixvItTpHny21aTnBnKz+TP6aGDVpHG5nZS5Rd0Tb52jAYKdBGgZaJDE0/8bXr
+         FkmjdkptNzOvdefZvgAiIdDYcCPwMYf0P0BP0klpKVeoZ/zZoyVfbtIeq+3Cp7kgRKSE
+         Pads40KqXEJvZ1Hx5Ul05VMlYoDrtSoRRWKhAcbP1qpGnKpZXO/HrsXV//iT6zsmogoE
+         sARUk5j21HdviVg9F+ARHjnDqn5JBLx0/Ry/Mn0QGJnnBUToAQyri++1kLyz9x7ZGjEJ
+         XmVJMXt234cCaIHxx0EHLEcC8TTMZmyiiiljhTLMewQQBEw1kVdyCyfXBaLZzam+cr18
+         BsKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=3W39tC2e+e4XlENh3geReI/CxfG4scvOcsFNszfM2k4=;
+        b=ol82F6e0OXVVtohNa2sDsh5gIQy1xt/SYbiS6h5o636EPsRHucU3X9571NuCpKWTRK
+         84Bk8xjq9YW0YqS5WfUcC3QMp2a8+bNIpZ14cRfUiLzkMDxMDclUYeYfCGpsmdz3Ohhj
+         YOZVe6yXPZjsi1qt05I+ibPGy3UZ+2R0j2KTz+60LPEL0FJw8GAmYt5mPdlX+k2RBl9W
+         +Z6x5NAPG5vzRVVNVJyI//xA0PIX78vQrJWwCteeZjLdFbAZmU9N3n9q3Xwu3yyjILwy
+         tuPI3535c0mgcW99jp785OgxNEfGanOgraEr63W6l3sMbVedjtimWC5HZaWvWI2gsrSC
+         44TQ==
+X-Gm-Message-State: AOAM530JaMVWh3XA+0sQrgbgCeHr83/KAbhMlcb9t3QRfb5Z0F3GIZhA
+        1fdLsteUFqn+s8rD2MNKnTrJ7Q==
+X-Google-Smtp-Source: ABdhPJyv5/j1KLCPW2EGMkODOgQaFZJ8INemE/1yDu/Q4K7LSfV1gStbxYZglireUgGSfjH+MeW7Pg==
+X-Received: by 2002:a17:907:7f8b:b0:6e0:612b:38fd with SMTP id qk11-20020a1709077f8b00b006e0612b38fdmr35710600ejc.552.1648572604849;
+        Tue, 29 Mar 2022 09:50:04 -0700 (PDT)
+Received: from [192.168.0.162] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
+        by smtp.gmail.com with ESMTPSA id n13-20020a170906724d00b006cedd6d7e24sm7237928ejk.119.2022.03.29.09.50.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 29 Mar 2022 09:50:04 -0700 (PDT)
+Message-ID: <85ed0e5b-0c6f-aea0-ea89-522591d85420@linaro.org>
+Date:   Tue, 29 Mar 2022 18:50:03 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.5.0
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable DMA
- LLI
+Subject: Re: [PATCH v5 1/2] dt-binding: mmc: Add mmc yaml file for Sunplus
+ SP7021
 Content-Language: en-US
-To:     Manivannan Sadhasivam <mani@kernel.org>
-CC:     Linus Walleij <linus.walleij@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        Ludovic Barre <ludovic.barre@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
-        Grzegorz Szymaszek <gszymaszek@short.pl>
-References: <20220304135134.47827-1-yann.gautier@foss.st.com>
- <20220304135134.47827-2-yann.gautier@foss.st.com>
- <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
- <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
- <20220329153114.GA58120@thinkpad>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <20220329153114.GA58120@thinkpad>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+To:     Tony Huang <tonyhuang.sunplus@gmail.com>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, lhjeff911@gmail.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        p.zabel@pengutronix.de
+Cc:     wells.lu@sunplus.com, tony.huang@sunplus.com, lh.kuo@sunplus.com
+References: <cover.1648551070.git.tonyhuang.sunplus@gmail.com>
+ <abd34a74bf56e04050868c63d030552a9af210f4.1648551070.git.tonyhuang.sunplus@gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <abd34a74bf56e04050868c63d030552a9af210f4.1648551070.git.tonyhuang.sunplus@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.50]
-X-ClientProxiedBy: SFHDAG2NODE1.st.com (10.75.127.4) To SFHDAG2NODE2.st.com
- (10.75.127.5)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.850,Hydra:6.0.425,FMLib:17.11.64.514
- definitions=2022-03-29_06,2022-03-29_01,2022-02-23_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/29/22 17:31, Manivannan Sadhasivam wrote:
-> On Tue, Mar 15, 2022 at 09:26:01AM +0100, Yann Gautier wrote:
->> On 3/14/22 23:43, Linus Walleij wrote:
->>> "On Fri, Mar 4, 2022 at 2:52 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
->>>
->>>> On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
->>>> starting from revision v2 of the peripheral. But it has limitations,
->>>> as all the buffers should be aligned on block size (except the last one).
->>>> But this cannot be guaranteed with SDIO. We should then have a property
->>>> to disable the support of LLI.
->>>>
->>>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
->>>
->>> Actually I think this is present also on the ux500 variants. See:
->>> commit 2253ed4b36dc876d1598c4dab5587e537ec68c34
->>> "mmc: mmci: Support any block sizes for ux500v2 and qcom variant"
->>>
->>> Spot the variant data "dma_power_of_2".
->>>
->>> So whatever property you add
->>> to the variant data (not in the device tree please) should
->>> be added to the ux500 variants as well, it will *VERY* likely
->>> have a problem with LLI elements not being a power of 2
->>> as it is the ancestor of later STMicro variants.
->>>
->>> It might actually be the reason for some annoying WiFi error
->>> messages I have seen :/
->>>
->>> Yours,
->>> Linus Walleij
->>
->> Hi Linus,
->>
->> The STM32 variant uses an internal DMA, and the DMA functions are in its
->> dedicated file. So I was planning to do the same as what is done in
->> meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA
->> constraints are not fulfilled. Not sure it can help for Ux500.
->>
+On 29/03/2022 16:42, Tony Huang wrote:
+> Add mmc yaml file for Sunplus SP7021
 
-Hi Mani,
+s/mmc/MMC/
+s/yaml/YAML/
+And a full stop.
+
+Please rebase your changes on recent Linux kernel, because you skip
+Cc-ing me all the time, so I assume you have some old Maintainers file.
 
 > 
-> Irrelevant to this patch: May I know why the internal DMA cannot be represented
-> as a dmaengine driver? We started seeing these internal DMA implementations in
-> the other subsystems as well with pointers towards MMC core [1].
-
-As for Prabhakar's answer, the IDMA here is inside our IP, and not used 
-in any other IP. So I'm not sure it is really relevant to move that to 
-another dmaengine driver.
-
+> Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
+> ---
+> Changes in v5:
+>  - Addressed comments from Krzysztof.
 > 
-> Thanks,
-> Mani
+>  .../devicetree/bindings/mmc/sunplus,mmc.yaml       | 64 ++++++++++++++++++++++
+>  MAINTAINERS                                        |  6 ++
+>  2 files changed, 70 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml b/Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+> new file mode 100644
+> index 0000000..92537d0
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+> @@ -0,0 +1,64 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +# Copyright (C) Sunplus Ltd. Co. 2021
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/sunplus,mmc.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Sunplus MMC Controller
+> +
+> +maintainers:
+> +  - Tony Huang <tonyhuang.sunplus@gmail.com>
+> +  - Li-hao Kuo <lhjeff911@gmail.com>
+> +
+> +allOf:
+> +  - $ref: "mmc-controller.yaml"
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - sunplus,sp7021-mmc
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 1
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  max-frequency: true
+
+I think you do not need this.
+
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - resets
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    mmc0: mmc@9c003b00 {
+> +        compatible = "sunplus,mmc-v2";
+> +        reg = <0x9c003b00 0x180>;
+> +        interrupts = <20 IRQ_TYPE_LEVEL_HIGH>;
+> +        clocks = <&clkc 0x4e>;
+> +        resets = <&rstc 0x3e>;
+> +        bus-width = <8>;
+> +        max-frequency = <52000000>;
+> +        non-removable;
+> +        disable-wp;
+> +        cap-mmc-highspeed;
+> +        mmc-ddr-3_3v;
+> +        no-sdio;
+> +        no-sd;
+> +    };
+> +
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index fb18ce7..42498b2 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -18242,6 +18242,12 @@ L:	netdev@vger.kernel.org
+>  S:	Maintained
+>  F:	drivers/net/ethernet/dlink/sundance.c
+>  
+> +SUNPLUS MMC DRIVER
+> +M:	Tony Huang <tonyhuang.sunplus@gmail.com>
+> +M:	Li-hao Kuo <lhjeff911@gmail.com>
+> +S:	Maintained
+> +F:	Documentation/devicetree/bindings/mmc/sunplu,mmc.yaml
+
+I pointed this already for your v4.
+
+> +
+>  SUPERH
+>  M:	Yoshinori Sato <ysato@users.sourceforge.jp>
+>  M:	Rich Felker <dalias@libc.org>
+
 
 Best regards,
-Yann
-
-> 
-> [1] https://lore.kernel.org/all/CA+V-a8tfUgvzPyMe_FHuz=8mmC6dPHP7E=e+nCzOey04vCcAkg@mail.gmail.com/
-> 
->> Ulf, before I send my new series (although it is not ready yet), would you
->> be OK with the bounce buffer idea?
->>
->>
->> Best regards,
->> Yann
-
+Krzysztof
