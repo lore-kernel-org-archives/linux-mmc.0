@@ -2,107 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A8BEC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 15:10:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B677C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 15:32:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238318AbiC2PMG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 11:12:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41550 "EHLO
+        id S237142AbiC2Pdt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 11:33:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234378AbiC2PMG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 11:12:06 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18B17522CC;
-        Tue, 29 Mar 2022 08:10:21 -0700 (PDT)
-Received: from mail-wm1-f54.google.com ([209.85.128.54]) by
- mrelayeu.kundenserver.de (mreue012 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1MYtoe-1nUrt61Sro-00UrdT; Tue, 29 Mar 2022 17:10:20 +0200
-Received: by mail-wm1-f54.google.com with SMTP id r204-20020a1c44d5000000b0038ccb70e239so1406116wma.3;
-        Tue, 29 Mar 2022 08:10:20 -0700 (PDT)
-X-Gm-Message-State: AOAM531uCDccBNB8TxD4GKHG3zBHalbonhtDBgEVZqpf1zLHjY56dGFm
-        8K4aoSgYFJKYwVsOvig2G3pJkljG/E5xBFoGkbw=
-X-Google-Smtp-Source: ABdhPJy1J5xaryus8X4nFV6ubkK8diotbwfxO4GiSu5zF+wuBLiP5QA+mjqckcwLSa9RHUv88mORXl0v0ubH+5QCE64=
-X-Received: by 2002:a05:600c:1e0b:b0:38c:9ac5:b486 with SMTP id
- ay11-20020a05600c1e0b00b0038c9ac5b486mr100357wmb.71.1648566619950; Tue, 29
- Mar 2022 08:10:19 -0700 (PDT)
-MIME-Version: 1.0
-References: <cover.1648551070.git.tonyhuang.sunplus@gmail.com> <46aad49867912fc57b669fc54fdb28638cccfcd9.1648551070.git.tonyhuang.sunplus@gmail.com>
-In-Reply-To: <46aad49867912fc57b669fc54fdb28638cccfcd9.1648551070.git.tonyhuang.sunplus@gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Tue, 29 Mar 2022 17:10:03 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a0CLA33CTerXJ=bK+myhyHp_utoLnTX-NzMgjeb7icAGg@mail.gmail.com>
-Message-ID: <CAK8P3a0CLA33CTerXJ=bK+myhyHp_utoLnTX-NzMgjeb7icAGg@mail.gmail.com>
-Subject: Re: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
-To:     Tony Huang <tonyhuang.sunplus@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, lhjeff911@gmail.com,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        with ESMTP id S238781AbiC2PdK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 11:33:10 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D05F1207EC;
+        Tue, 29 Mar 2022 08:31:26 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2C19B60EDF;
+        Tue, 29 Mar 2022 15:31:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 49EFEC2BBE4;
+        Tue, 29 Mar 2022 15:31:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1648567885;
+        bh=YEzE/YcpvqqkcMmxUt5/89JnyfIyasWtNCTkrpB/nTQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nGliDUx1XpLBTY+M1+jN/YhNuNDMIM4RV751BM/0ANbsgCKbza8Gehf6xf8u613Rq
+         7fpofgTcZUopDwAS6kDSwxkKv2OFfqz+0lawL/vcw7Ap0vjmK0a53DEf1xO+LwVF/j
+         6DNqkFAis10JEUtSzt+QjaSTSzYM64fD3EEKkgvjFPLnoCZfRCRS8JR9k6zLFzE66k
+         uqznO/ah1xpYmcjNm1mBm695rxfYXDKptHbdr6faQBaXCy8+Rk0vZK8qDx+/SjHNug
+         LKob2/v5EEGNS7KVGP5bPFwM7MIxNj8apHaIm+IFh8N3UtE2tNtNfUmwSEpY8cbLv/
+         yDEnIbazRlQNA==
+Date:   Tue, 29 Mar 2022 21:01:14 +0530
+From:   Manivannan Sadhasivam <mani@kernel.org>
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Christophe Kerello <christophe.kerello@foss.st.com>,
+        Ludovic Barre <ludovic.barre@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
         Philipp Zabel <p.zabel@pengutronix.de>,
-        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
-        Tony Huang <tony.huang@sunplus.com>, lh.kuo@sunplus.com
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:OW6ybkuzuYCfxijmsioYK+OSNW7E2KgMfVayWbofgwQomK+oPCP
- wXw4bApq9HvOJPG2tWxRbIV9+afCXeH4UfQlSS7kTVqazSIj48S+9O+vfEU3JCdnruU0HZI
- ooneO1/e8kk3rOmeHPdkvhJnyjDhDgFvbh7wG+aWXVYFyKgSlC204Oypz4t7J8ZD9YsanZU
- AK2l31XA2xkNNCoxmBxuA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:+9itSpFYgyk=:13dbzQkzEwFSyL+fpVeNvL
- 8wSlv9F1PvRAw3PVGCZ3H4ukXgWvdJvJCiwwJCXyeLQTvW8PNQpoNOnGRII26kc2T+Vkao7+G
- iXxh0kTZmFOnFsKHjCZS0eMw7FiQJsz62F7PpSehd7hrCZuV9R66HARFGtbLoFIM4+sJnS2Rk
- ZByHWMIV4ScG/6SLPXOaCLvrGUHfVcq8KxQ4cVNxb8KvauecPXHAk6vj3M00rSyrUKHbmz8I+
- qFMOLz47sC12u1gaof3lLWwEjgmWtwUfji7Jy65HSGcfKF7yWf32DBKAQCEd1mRI8WDpKV1Hj
- F1H87KcezNy75KX2i4Ek8zCuR8Xt0/9nEaQUMyeOmbq0/MliBMBrBuQDEtcQ6EV93L93hloOp
- oMlvDi6g/R5mGr33260HgB7y85EhAGLttVLFs4N0BV3ayDS8vL7p9yx2LeUTpSz85pTv192JW
- k0NsXBFUa74SgEALxWIAnOZvNbpH6XNnCEBcCC0U1+6iE4OLzJYOjVmgJRU+fwJ+OX2M0ihFc
- VQHpg9s63MRwQ+Z2uyBEeOxOfHGVo7X1HZm1BfHBtxySKmpGnDJOYCWGCmRwpSwG3AFEL4H4J
- FUGTs4xQdYaLqyneUJNCxQ4YY5QBKwH5QOeBadNmpAnmD++oTpMrhr1GKZtTwZvNkce/nyInR
- tWFNUF1xiQacWQN9sPCHad9rVIylSrP4xfqMz7FkwKAnEghezegjYCrMV/vbCJ0se8Es=
+        Russell King <linux@armlinux.org.uk>,
+        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
+        Grzegorz Szymaszek <gszymaszek@short.pl>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: mmci: add a property to disable
+ DMA LLI
+Message-ID: <20220329153114.GA58120@thinkpad>
+References: <20220304135134.47827-1-yann.gautier@foss.st.com>
+ <20220304135134.47827-2-yann.gautier@foss.st.com>
+ <CACRpkdYQz+-im3n-r0_8RKL7so2bHS=aZobty4BbzixmPzms-Q@mail.gmail.com>
+ <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0bc53018-fce4-4104-fa47-6e60d2367d69@foss.st.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 29, 2022 at 4:42 PM Tony Huang <tonyhuang.sunplus@gmail.com> wrote:
->
-> Add mmc driver for Sunplus SP7021
->
-> Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
+On Tue, Mar 15, 2022 at 09:26:01AM +0100, Yann Gautier wrote:
+> On 3/14/22 23:43, Linus Walleij wrote:
+> > "On Fri, Mar 4, 2022 at 2:52 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
+> > 
+> > > On STMicroelectronics variant of PL18x, the DMA Linked Lists are supported
+> > > starting from revision v2 of the peripheral. But it has limitations,
+> > > as all the buffers should be aligned on block size (except the last one).
+> > > But this cannot be guaranteed with SDIO. We should then have a property
+> > > to disable the support of LLI.
+> > > 
+> > > Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> > 
+> > Actually I think this is present also on the ux500 variants. See:
+> > commit 2253ed4b36dc876d1598c4dab5587e537ec68c34
+> > "mmc: mmci: Support any block sizes for ux500v2 and qcom variant"
+> > 
+> > Spot the variant data "dma_power_of_2".
+> > 
+> > So whatever property you add
+> > to the variant data (not in the device tree please) should
+> > be added to the ux500 variants as well, it will *VERY* likely
+> > have a problem with LLI elements not being a power of 2
+> > as it is the ancestor of later STMicro variants.
+> > 
+> > It might actually be the reason for some annoying WiFi error
+> > messages I have seen :/
+> > 
+> > Yours,
+> > Linus Walleij
+> 
+> Hi Linus,
+> 
+> The STM32 variant uses an internal DMA, and the DMA functions are in its
+> dedicated file. So I was planning to do the same as what is done in
+> meson-gx-mmc.c: using a bounce buffer to copy from/to in case DMA
+> constraints are not fulfilled. Not sure it can help for Ux500.
+> 
 
-There should be a description of the device in the changelog, not just the same
-text as the subject.
+Irrelevant to this patch: May I know why the internal DMA cannot be represented
+as a dmaengine driver? We started seeing these internal DMA implementations in
+the other subsystems as well with pointers towards MMC core [1].
 
-> +static void spmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +       struct spmmc_host *host = mmc_priv(mmc);
-> +       struct mmc_data *data;
-> +       struct mmc_command *cmd;
-> +       int ret;
-> +
-> +       ret = mutex_lock_interruptible(&host->mrq_lock);
-> +       if (ret)
-> +               return;
+Thanks,
+Mani
 
-I don't think it's valid to just return here when you get a signal. If
-nothing can
-handle the signal, doesn't it just hang?
+[1] https://lore.kernel.org/all/CA+V-a8tfUgvzPyMe_FHuz=8mmC6dPHP7E=e+nCzOey04vCcAkg@mail.gmail.com/
 
-It also appears that you don't release the mutex until the tasklet runs,
-but it is not valid to release a mutex from a different context.
-
-You should get a warning about this when running a kernel with lockdep
-enabled at compile time. Please rework the locking to make this work.
-
-> +#endif /* ifdef CONFIG_PM_RUNTIME */
-> +
-> +static const struct dev_pm_ops spmmc_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(spmmc_pm_suspend, spmmc_pm_resume)
-> +#ifdef CONFIG_PM_RUNTIME
-> +       SET_RUNTIME_PM_OPS(spmmc_pm_runtime_suspend, spmmc_pm_runtime_resume, NULL)
-> +#endif
-> +};
-> +#endif /* ifdef CONFIG_PM */
-
-It's better to use SYSTEM_SLEEP_PM_OPS/RUNTIME_PM_OPS instead
-of the SET_ version, then you can remove all the #ifdef checks.
-
-       Arnd
+> Ulf, before I send my new series (although it is not ready yet), would you
+> be OK with the bounce buffer idea?
+> 
+> 
+> Best regards,
+> Yann
