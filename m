@@ -2,143 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 094B7C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 19:51:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D47DC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 20:38:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241054AbiC2Tw5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 15:52:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39222 "EHLO
+        id S230156AbiC2Ukf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 16:40:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51178 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241087AbiC2Twu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 15:52:50 -0400
-Received: from gate2.alliedtelesis.co.nz (gate2.alliedtelesis.co.nz [202.36.163.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09AD918B25D
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2022 12:51:03 -0700 (PDT)
-Received: from svr-chch-seg1.atlnz.lc (mmarshal3.atlnz.lc [10.32.18.43])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        by gate2.alliedtelesis.co.nz (Postfix) with ESMTPS id CB0A82C028E;
-        Tue, 29 Mar 2022 19:51:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alliedtelesis.co.nz;
-        s=mail181024; t=1648583460;
-        bh=BNF2UMylQFUCmmIZXcvoQ329GJFVKaMW/CAJjK9WuQ0=;
-        h=From:To:CC:Subject:Date:References:In-Reply-To:From;
-        b=Y0hVUzewhYM8L8Vui/dU1oY5bKeGvAXvvgXLPbax8R32hPu5tM+Nno5ZEPF7ZXQ/R
-         3QGrBjAOyUxwV9Bko5MiB0stn0ouyzzWMgC7zJXtesD31y3bH0fpEJoOPg12f0lwMX
-         Q/Gtryq6kYBwxmrA1wbVvJNINvoZ76bt7wfdSsLeHUUbHHuTFalmuEprw2xFfBG2ke
-         y79H8C6Ve4YgvbUJiWh3X9eGYEueKYgNLE1GmLvJ/xyoN+GXBo73q5SdSIAa6eIh3K
-         ElrOyeI0W+SHJvDN5boy5UhtGRFVSoMjop6MQln7gP28NBfUQspwrkahKCxt6AgmjK
-         4413MexXmo09Q==
-Received: from svr-chch-ex1.atlnz.lc (Not Verified[2001:df5:b000:bc8::77]) by svr-chch-seg1.atlnz.lc with Trustwave SEG (v8,2,6,11305)
-        id <B624363240001>; Wed, 30 Mar 2022 08:51:00 +1300
-Received: from svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) by
- svr-chch-ex1.atlnz.lc (2001:df5:b000:bc8::77) with Microsoft SMTP Server
- (TLS) id 15.0.1497.32; Wed, 30 Mar 2022 08:51:00 +1300
-Received: from svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8]) by
- svr-chch-ex1.atlnz.lc ([fe80::409d:36f5:8899:92e8%12]) with mapi id
- 15.00.1497.033; Wed, 30 Mar 2022 08:51:00 +1300
-From:   Chris Packham <Chris.Packham@alliedtelesis.co.nz>
-To:     Krzysztof Kozlowski <krzk@kernel.org>,
-        Rob Herring <robh@kernel.org>
-CC:     "andrew@lunn.ch" <andrew@lunn.ch>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>,
-        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "krzk+dt@kernel.org" <krzk+dt@kernel.org>,
-        "huziji@marvell.com" <huziji@marvell.com>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-Subject: Re: [PATCH v4 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
-Thread-Topic: [PATCH v4 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
-Thread-Index: AQHYQwBQxHzoaq5k202Ou7T2PLN3cqzVZnGAgAAXboCAAG7SgA==
-Date:   Tue, 29 Mar 2022 19:50:59 +0000
-Message-ID: <6e118704-3c63-929e-ebf0-9a78fbed5daa@alliedtelesis.co.nz>
-References: <20220329000231.3544810-1-chris.packham@alliedtelesis.co.nz>
- <20220329000231.3544810-3-chris.packham@alliedtelesis.co.nz>
- <1648554629.870840.350362.nullmailer@robh.at.kernel.org>
- <d4c477b3-0cf2-e495-6a54-5fcd0301cc14@kernel.org>
-In-Reply-To: <d4c477b3-0cf2-e495-6a54-5fcd0301cc14@kernel.org>
-Accept-Language: en-NZ, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-messagesentrepresentingtype: 1
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [10.32.1.11]
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <F2F2FAA0294065438213375A3B0291C0@atlnz.lc>
-Content-Transfer-Encoding: base64
+        with ESMTP id S229612AbiC2Uke (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 16:40:34 -0400
+Received: from mail-oi1-f172.google.com (mail-oi1-f172.google.com [209.85.167.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B20F949F00;
+        Tue, 29 Mar 2022 13:38:48 -0700 (PDT)
+Received: by mail-oi1-f172.google.com with SMTP id j83so20213876oih.6;
+        Tue, 29 Mar 2022 13:38:48 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=4TtgqB+qx7XVjHzfNHtzxULilxnRMCv4wkN1Lk/S1ms=;
+        b=mIVt5XRF+JiSH2GOfs26FcIig2Vz8WO88Yje9GQC67Bms+O6apqFPrubFQtSFD5Uru
+         +/tOy3TAuUPTz3h8te9GVQCt40Ep4OnlwDtSRgDLKYheUaqRgyZc8RhDrVyfjPaGQuGd
+         1FqFRp/1TyjMn77Kw+tFV6wVO7+ZaiixZBMhVm2nhgmp9A0Zl6VhPpqazdg1Fa+F1NGP
+         z2hSlUWd/orn3ejJ0EWBpBh4V0heXe2LO8W6QK+9VmtvTai2uku/qwXr0xLJ5LZfum4N
+         4Xtof7F4gNp1zdmc6Ru1BxMJrSrQvKbx4wU59tGqVf25cQvl9QiSheTJTngQei+QdV76
+         pcig==
+X-Gm-Message-State: AOAM532VhZlHr4ufV+X64KU5vpEx8y8xiq1q5NtYbWa0E64eQ7XU2YbY
+        NmZ28n8KFmDIACKCrca+rg==
+X-Google-Smtp-Source: ABdhPJwQ4FlupI7A/BX1ZpZC7myqHedGwWuamCYndsUFew8tbRsRgZX1033348l40PCDg2B778mnZg==
+X-Received: by 2002:aca:2418:0:b0:2ee:f7da:795f with SMTP id n24-20020aca2418000000b002eef7da795fmr499152oic.276.1648586327975;
+        Tue, 29 Mar 2022 13:38:47 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id ep36-20020a056870a9a400b000de98fe4869sm8295009oab.35.2022.03.29.13.38.46
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 29 Mar 2022 13:38:47 -0700 (PDT)
+Received: (nullmailer pid 1228499 invoked by uid 1000);
+        Tue, 29 Mar 2022 20:38:45 -0000
+Date:   Tue, 29 Mar 2022 15:38:45 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Tinghan Shen <tinghan.shen@mediatek.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        ryder.lee@kernel.org, wenst@chromium.org, chunfeng.yun@mediatek.com
+Subject: Re: [PATCH v12 2/3] dt-bindings: mmc: mtk-sd: increase reg maxItems
+Message-ID: <YkNuVTkTCfVJBFz+@robh.at.kernel.org>
+References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
+ <20220329114540.17140-3-tinghan.shen@mediatek.com>
 MIME-Version: 1.0
-X-SEG-SpamProfiler-Analysis: v=2.3 cv=Cfh2G4jl c=1 sm=1 tr=0 a=Xf/6aR1Nyvzi7BryhOrcLQ==:117 a=xqWC_Br6kY4A:10 a=oKJsc7D3gJEA:10 a=IkcTkHD0fZMA:10 a=o8Y5sQTvuykA:10 a=VwQbUJbxAAAA:8 a=q3wFjaZLP3K7T2WVW-8A:9 a=QEXdDO2ut3YA:10 a=AjGcO6oz07-iQ99wixmX:22
-X-SEG-SpamProfiler-Score: 0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220329114540.17140-3-tinghan.shen@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DQpPbiAzMC8wMy8yMiAwMjoxNCwgS3J6eXN6dG9mIEtvemxvd3NraSB3cm90ZToNCj4gT24gMjkv
-MDMvMjAyMiAxMzo1MCwgUm9iIEhlcnJpbmcgd3JvdGU6DQo+PiBPbiBUdWUsIDI5IE1hciAyMDIy
-IDEzOjAyOjMxICsxMzAwLCBDaHJpcyBQYWNraGFtIHdyb3RlOg0KPj4+IENvbnZlcnQgdGhlIG1h
-cnZlbGwseGVub24tc2RoY2kgYmluZGluZyB0byBKU09OIHNjaGVtYS4gQ3VycmVudGx5IHRoZQ0K
-Pj4+IGluLXRyZWUgZHRzIGZpbGVzIGRvbid0IHZhbGlkYXRlIGJlY2F1c2UgdGhleSB1c2Ugc2Ro
-Y2lAIGluc3RlYWQgb2YgbW1jQA0KPj4+IGFzIHJlcXVpcmVkIGJ5IHRoZSBnZW5lcmljIG1tYy1j
-b250cm9sbGVyIHNjaGVtYS4NCj4+Pg0KPj4+IFRoZSBjb21wYXRpYmxlICJtYXJ2ZWxsLHNkaGNp
-LXhlbm9uIiB3YXMgbm90IGRvY3VtZW50ZWQgaW4gdGhlIG9sZA0KPj4+IGJpbmRpbmcgYnV0IGl0
-IGFjY29tcGFuaWVzIHRoZSBvZiAibWFydmVsbCxhcm1hZGEtMzcwMC1zZGhjaSIgaW4gdGhlDQo+
-Pj4gYXJtYWRhLTM3eHggU29DIGR0c2kgc28gdGhpcyBjb21iaW5hdGlvbiBpcyBhZGRlZCB0byB0
-aGUgbmV3IGJpbmRpbmcNCj4+PiBkb2N1bWVudC4NCj4+Pg0KPj4+IFNpZ25lZC1vZmYtYnk6IENo
-cmlzIFBhY2toYW0gPGNocmlzLnBhY2toYW1AYWxsaWVkdGVsZXNpcy5jby5uej4NCj4+PiBSZXZp
-ZXdlZC1ieTogS3J6eXN6dG9mIEtvemxvd3NraSA8a3J6a0BrZXJuZWwub3JnPg0KPj4+IC0tLQ0K
-Pj4+DQo+Pj4gTm90ZXM6DQo+Pj4gICAgICBDaGFuZ2VzIGluIHY0Og0KPj4+ICAgICAgLSBBZGQg
-cmV2aWV3IGZyb20gS3J6eXN6dG9mDQo+Pj4gICAgICAtIFNxdWFzaCBpbiBhZGRpdGlvbiBvZiBt
-YXJ2ZWxsLHNkaGNpLXhlbm9uIHdpdGggYW4gZXhwbGFuYXRpb24gaW4gdGhlDQo+Pj4gICAgICAg
-IGNvbW1pdCBtZXNzYWdlDQo+Pj4gICAgICBDaGFuZ2VzIGluIHYzOg0KPj4+ICAgICAgLSBEb24n
-dCBhY2NlcHQgYXA4MDcgd2l0aG91dCBhcDgwNg0KPj4+ICAgICAgLSBBZGQgcmVmOiBzdHJpbmcg
-Zm9yIHBhZC10eXBlDQo+Pj4gICAgICBDaGFuZ2VzIGluIHYyOg0KPj4+ICAgICAgLSBVcGRhdGUg
-TUFJTlRBSU5FUlMgZW50cnkNCj4+PiAgICAgIC0gSW5jb3Jwb3JhdGUgZmVlZGJhY2sgZnJvbSBL
-cnp5c3p0b2YNCj4+Pg0KPj4+ICAgLi4uL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNp
-LnR4dCAgICAgIHwgMTczIC0tLS0tLS0tLS0tDQo+Pj4gICAuLi4vYmluZGluZ3MvbW1jL21hcnZl
-bGwseGVub24tc2RoY2kueWFtbCAgICAgfCAyNzUgKysrKysrKysrKysrKysrKysrDQo+Pj4gICBN
-QUlOVEFJTkVSUyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDIgKy0NCj4+
-PiAgIDMgZmlsZXMgY2hhbmdlZCwgMjc2IGluc2VydGlvbnMoKyksIDE3NCBkZWxldGlvbnMoLSkN
-Cj4+PiAgIGRlbGV0ZSBtb2RlIDEwMDY0NCBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGlu
-Z3MvbW1jL21hcnZlbGwseGVub24tc2RoY2kudHh0DQo+Pj4gICBjcmVhdGUgbW9kZSAxMDA2NDQg
-RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNp
-LnlhbWwNCj4+Pg0KPj4gTXkgYm90IGZvdW5kIGVycm9ycyBydW5uaW5nICdtYWtlIERUX0NIRUNL
-RVJfRkxBR1M9LW0gZHRfYmluZGluZ19jaGVjaycNCj4+IG9uIHlvdXIgcGF0Y2ggKERUX0NIRUNL
-RVJfRkxBR1MgaXMgbmV3IGluIHY1LjEzKToNCj4+DQo+PiB5YW1sbGludCB3YXJuaW5ncy9lcnJv
-cnM6DQo+Pg0KPj4gZHRzY2hlbWEvZHRjIHdhcm5pbmdzL2Vycm9yczoNCj4+IC9idWlsZHMvcm9i
-aGVycmluZy9saW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdz
-L21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNpLmV4YW1wbGUuZHQueWFtbDogbW1jQGFhMDAwMDogY29t
-cGF0aWJsZTogJ29uZU9mJyBjb25kaXRpb25hbCBmYWlsZWQsIG9uZSBtdXN0IGJlIGZpeGVkOg0K
-Pj4gCVsnbWFydmVsbCxhcm1hZGEtMzcwMC1zZGhjaSddIGlzIHRvbyBzaG9ydA0KPj4gCSdtYXJ2
-ZWxsLGFybWFkYS0zNzAwLXNkaGNpJyBpcyBub3Qgb25lIG9mIFsnbWFydmVsbCxhcm1hZGEtY3Ax
-MTAtc2RoY2knLCAnbWFydmVsbCxhcm1hZGEtYXA4MDYtc2RoY2knXQ0KPj4gCSdtYXJ2ZWxsLGFy
-bWFkYS1hcDgwNy1zZGhjaScgd2FzIGV4cGVjdGVkDQo+PiAJRnJvbSBzY2hlbWE6IC9idWlsZHMv
-cm9iaGVycmluZy9saW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRp
-bmdzL21tYy9tYXJ2ZWxsLHhlbm9uLXNkaGNpLnlhbWwNCj4+IC9idWlsZHMvcm9iaGVycmluZy9s
-aW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tYXJ2
-ZWxsLHhlbm9uLXNkaGNpLmV4YW1wbGUuZHQueWFtbDogbW1jQGFiMDAwMDogY29tcGF0aWJsZTog
-J29uZU9mJyBjb25kaXRpb25hbCBmYWlsZWQsIG9uZSBtdXN0IGJlIGZpeGVkOg0KPj4gCVsnbWFy
-dmVsbCxhcm1hZGEtMzcwMC1zZGhjaSddIGlzIHRvbyBzaG9ydA0KPj4gCSdtYXJ2ZWxsLGFybWFk
-YS0zNzAwLXNkaGNpJyBpcyBub3Qgb25lIG9mIFsnbWFydmVsbCxhcm1hZGEtY3AxMTAtc2RoY2kn
-LCAnbWFydmVsbCxhcm1hZGEtYXA4MDYtc2RoY2knXQ0KPj4gCSdtYXJ2ZWxsLGFybWFkYS1hcDgw
-Ny1zZGhjaScgd2FzIGV4cGVjdGVkDQo+PiAJRnJvbSBzY2hlbWE6IC9idWlsZHMvcm9iaGVycmlu
-Zy9saW51eC1kdC1yZXZpZXcvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9t
-YXJ2ZWxsLHhlbm9uLXNkaGNpLnlhbWwNCj4+DQo+PiBkb2MgcmVmZXJlbmNlIGVycm9ycyAobWFr
-ZSByZWZjaGVja2RvY3MpOg0KPiBDaHJpcywgeW91ciBvd24gZHQgYmluZGluZyBkb2VzIG5vdCBw
-YXNzIGl0J3MgY2hlY2sgKGV4YW1wbGUpLi4uDQo+DQo+IEFmdGVyIHVwZGF0aW5nIHRoZSBjb21w
-YXRpYmxlcywgeW91IG5lZWQgdG8gY2hlY2sgdGhlIGV4YW1wbGUuIFRoZQ0KPiBleGFtcGxlcyBh
-cmUgYW55d2F5IGR1cGxpY2F0aW5nIGNvbW1vbiBzdHVmZiwgc28gaGFsZiBvZiB0aGVtIGNvdWxk
-IGJlDQo+IHJlbW92ZWQuDQoNClllYWggc2lsbHkgbWUuIEkgc3RhcnRlZCB0YWtpbmcgc2hvcnQg
-Y3V0cyB0byBydW4gZHRfYmluZGluZ19jaGVjayANCmR0YnNfY2hlY2sgYXMgb25lIGNvbW1hbmQg
-YnV0IHRoZW4gdGhlIGR0X2JpbmRpbmdzX2NoZWNrIG91dHB1dCBzY3JvbGxlZCANCm9mZiB0aGUg
-dG9wIG9mIG15IHRlcm1pbmFsLg0KDQpBcyBmb3IgdGhlIGV4YW1wbGVzIHRoZW1zZWx2ZXMgSSB3
-YW50IHRvIGxlYXZlIHdoYXQncyB0aGVyZSBhcyBhIGZhaXJseSANCmRpcmVjdCB0cmFuc2xhdGlv
-biBvZiB0aGUgb2xkIGJpbmRpbmcuIElmIHdlIGNvbnNpZGVyIHRoZW0gdW5uZWNlc3NhcnkgDQpy
-ZW1vdmluZyB0aGVtIGNhbiBiZSBkb25lIGFzIGEgZm9sbG93LXVwLg0KDQo+DQo+IEJlc3QgcmVn
-YXJkcywNCj4gS3J6eXN6dG9m
+On Tue, Mar 29, 2022 at 07:45:39PM +0800, Tinghan Shen wrote:
+> Add optional host top register base for the reg binding description.
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index 7032f7adf3ca..6d41bcec900f 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -40,7 +40,8 @@ properties:
+>            - const: mediatek,mt8183-mmc
+>  
+>    reg:
+> -    maxItems: 1
+> +    minItems: 1
+> +    maxItems: 2
+
+If more than 1 entry, then you need to define what each one is.
+
+>  
+>    clocks:
+>      description:
+> -- 
+> 2.18.0
+> 
+> 
