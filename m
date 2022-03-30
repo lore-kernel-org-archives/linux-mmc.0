@@ -2,98 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7ECC1C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 02:56:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D199C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 07:20:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242146AbiC3C5u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 22:57:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55824 "EHLO
+        id S241108AbiC3HWc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Mar 2022 03:22:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237760AbiC3C5t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 22:57:49 -0400
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35F8EB6C;
-        Tue, 29 Mar 2022 19:56:03 -0700 (PDT)
-X-UUID: efa09f0674934a8abba41ee778363274-20220330
-X-UUID: efa09f0674934a8abba41ee778363274-20220330
-Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw02.mediatek.com
-        (envelope-from <tinghan.shen@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 525386966; Wed, 30 Mar 2022 10:55:57 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 30 Mar 2022 10:55:56 +0800
-Received: from mtksdccf07 (172.21.84.99) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 30 Mar 2022 10:55:56 +0800
-Message-ID: <ed60e1a69b4b61008b2bc76cfed93f46ac5efa2b.camel@mediatek.com>
-Subject: Re: [PATCH v12 1/3] dt-bindings: mmc: mtk-sd: fix yamllint error
-From:   Tinghan Shen <tinghan.shen@mediatek.com>
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "Krzysztof Kozlowski" <krzysztof.kozlowski@canonical.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        <ryder.lee@kernel.org>, <wenst@chromium.org>,
-        <chunfeng.yun@mediatek.com>
-Date:   Wed, 30 Mar 2022 10:55:56 +0800
-In-Reply-To: <97f2b11d-15c7-d28e-f7b5-e65f2f333580@collabora.com>
-References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
-         <20220329114540.17140-2-tinghan.shen@mediatek.com>
-         <97f2b11d-15c7-d28e-f7b5-e65f2f333580@collabora.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        with ESMTP id S240445AbiC3HWb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2022 03:22:31 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35891C74A4
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2022 00:20:46 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id o10so39678806ejd.1
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2022 00:20:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=nKyHhk1aCz3J+2WnVPDV/+yanuQHnJSxGVVBQGJ8Rs0=;
+        b=NCO6etGLHHH6X38b34SknmLRrdfqnVMnkOiwd6ElkxYMj0ZtzGitFZAWeAEUC+RiKL
+         Y5VUnHoGBWI499BseoXn4wlzJ+AG2OFx0p4ToGNPiz3mBOQK/oasn2YUB/XI1PtGU265
+         qO35Ck89razjDnmf0jUqCDsEP4/G+KzYN8cbC2eI4q0GiL+CIb9kniGAetaS0FiOB/TY
+         uiRhVN7zE7sEtBMYF5v1q3JEEhCadWwAqzbjNP/O+yjiOL5AH+6R3me/+7my60Gee0kr
+         5Lzq9RafruSougdsQXGFaDGiZ9sunNDowIDXiMaZH7t5kCw3JhG0z7AeH5bo1M2rE3wh
+         SbdA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=nKyHhk1aCz3J+2WnVPDV/+yanuQHnJSxGVVBQGJ8Rs0=;
+        b=mjFxv/nUDhyNBgdu78Jz2Prf6C8sudzQYl6dCuwYEfVyqRFir+b6ofSUBcv461R8ek
+         1zc/UDmfXm/L27HWE+7Sjqpge053VCPK8wgJWaWR0yj8RlW/Kpe+QFux8uH4PfWRsBj6
+         LRBtKLCvshcu7Kp6bpisJ9FNAoGX/SctTSBAEvvl4A1xbGDJQDzAOcZFqmqtIHqDiGH7
+         mDVZNmkPBhsSVUh6FzznISCZax0lVDwADOD6Fpn43p4NbAewd/YOKpo/obSjj8lIlxIy
+         L6Zb5Xq4jlTH4bvvdHQec/6flJpDopgrWwPmAdaLwMCS0ewDoSbLmZC/BA5aGtPARN0E
+         B3PA==
+X-Gm-Message-State: AOAM532rmXTdMpONfEz/OYlk/XI9MkDOxaQLrxqFfcywWBheXtuBkcqi
+        IvWp77DEsEI2M0NXeiWVom0ggA==
+X-Google-Smtp-Source: ABdhPJwFtTZFPPpNR5frMHkyY3jbV3DBMwyHz0XMeIyP61bIXNX5XnuJ+DaCpjWN14Z9IW8C3GcYJw==
+X-Received: by 2002:a17:907:da6:b0:6e0:c59:f3ad with SMTP id go38-20020a1709070da600b006e00c59f3admr38699777ejc.85.1648624844736;
+        Wed, 30 Mar 2022 00:20:44 -0700 (PDT)
+Received: from [192.168.0.162] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
+        by smtp.gmail.com with ESMTPSA id bm5-20020a170906c04500b006ce6f8892a5sm7862579ejb.7.2022.03.30.00.20.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 30 Mar 2022 00:20:44 -0700 (PDT)
+Message-ID: <ad213f38-f0a2-6420-cfa0-a9ba7cb362d5@linaro.org>
+Date:   Wed, 30 Mar 2022 09:20:43 +0200
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH v5 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
+Content-Language: en-US
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>,
+        ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
+        huziji@marvell.com, andrew@lunn.ch, gregory.clement@bootlin.com,
+        sebastian.hesselbarth@gmail.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+References: <20220329220544.2132135-1-chris.packham@alliedtelesis.co.nz>
+ <20220329220544.2132135-3-chris.packham@alliedtelesis.co.nz>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220329220544.2132135-3-chris.packham@alliedtelesis.co.nz>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Angelo,
+On 30/03/2022 00:05, Chris Packham wrote:
+> Convert the marvell,xenon-sdhci binding to JSON schema. Currently the
+> in-tree dts files don't validate because they use sdhci@ instead of mmc@
+> as required by the generic mmc-controller schema.
+> 
+> The compatible "marvell,sdhci-xenon" was not documented in the old
+> binding but it accompanies the of "marvell,armada-3700-sdhci" in the
+> armada-37xx SoC dtsi so this combination is added to the new binding
+> document.
+> 
+> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
+> ---
+> 
+> Notes:
+>     Changes in v5:
+>     - Fix silly error in examples
+>     Changes in v4:
+>     - Add review from Krzysztof
+>     - Squash in addition of marvell,sdhci-xenon with an explanation in the
+>       commit message
+>     Changes in v3:
+>     - Don't accept ap807 without ap806
+>     - Add ref: string for pad-type
+>     Changes in v2:
+>     - Update MAINTAINERS entry
+>     - Incorporate feedback from Krzysztof
+> 
+>  .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 -----------
+>  .../bindings/mmc/marvell,xenon-sdhci.yaml     | 275 ++++++++++++++++++
+>  MAINTAINERS                                   |   2 +-
+>  3 files changed, 276 insertions(+), 174 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> 
 
-On Tue, 2022-03-29 at 14:47 +0200, AngeloGioacchino Del Regno wrote:
-> Il 29/03/22 13:45, Tinghan Shen ha scritto:
-> > Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> >    54:81     error    line too long (95 > 80 characters)  (line-length)
-> > 
-> 
-> I can't reproduce this error that you're getting... this commit is not
-> necessary, as the .yamllint file in the kernel allows a maximum line-length
-> of 110 characters.
-> 
-> rules:
->    line-length:
->      # 80 chars should be enough, but don't fail if a line is longer
->      max: 110
-> 
-> 
-https://urldefense.com/v3/__https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/tree/Documentation/devicetree/bindings/.yamllint?h=next-20220329__;!!CTRNKA9wMg0ARbw!1L9icT80FdI9EYV81qRGpzbEvV1NFP_pwk8YABV0eIiRf2ppttnPlRfu5aXEUsxODiE$
->  
-> 
-> Please drop this commit.
-
-Thank you for your feedback.
-
-I figured out why I have this error...
-It's because I do the yamllint outside of the bindings folder and not specify the yamllint config
-file.
-
-I'll drop this at next version.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
 Best regards,
-Tinghan
-> 
-> > Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
-> > ---
-> >   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
-> >   1 file changed, 2 insertions(+), 1 deletion(-)
-
+Krzysztof
