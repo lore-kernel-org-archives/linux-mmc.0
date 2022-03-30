@@ -2,105 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5932C4167E
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 11:57:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8ED2FC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 14:40:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242950AbiC3L6x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Mar 2022 07:58:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37182 "EHLO
+        id S237914AbiC3OmQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Mar 2022 10:42:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344453AbiC3L4D (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2022 07:56:03 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4CE6626F;
-        Wed, 30 Mar 2022 04:54:06 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id A62CE615E7;
-        Wed, 30 Mar 2022 11:54:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 82D04C340EE;
-        Wed, 30 Mar 2022 11:54:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1648641245;
-        bh=TjnvLi83cOFFJf6NtahCnNbN2EUZK9664M/61JhVXLI=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=A8dkv29HAscXL091jZOtUt0iIxvnXD7qgVJ+WD6UTl54T0FmLMD9Xy3ulrZabE6N+
-         d5SzaIVMPeeTV5HosUylbIZ2FnTsBaJpvPjDjTqchg6W7agVO1Q4YxM3qYipv/uOrt
-         A7WE7d5ckzoa0yRmw60QIapkCsmDpAG2SMl6zEgdJ/XS09uWvDcwO8FTf2wGJQ0qLk
-         8hBwhcYW6Rl+lKs2+coXXADPi4ijU9/NseccOfDgjWelmV2g0NNCq1m8fHxAuKmFqK
-         XRlSpsyjX6RiMn7pQgaTMVFQPphKPcDTe9G9Js9QsaKjYTWd5TwyHOTwPLHodbQY1C
-         84/No33KKEcFw==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 19/20] mmc: host: Return an error when ->enable_sdio_irq() ops is missing
-Date:   Wed, 30 Mar 2022 07:53:35 -0400
-Message-Id: <20220330115336.1672930-19-sashal@kernel.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220330115336.1672930-1-sashal@kernel.org>
-References: <20220330115336.1672930-1-sashal@kernel.org>
+        with ESMTP id S244124AbiC3OmP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2022 10:42:15 -0400
+Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C6A453B7C;
+        Wed, 30 Mar 2022 07:40:30 -0700 (PDT)
+Received: by mail-ot1-f54.google.com with SMTP id i23-20020a9d6117000000b005cb58c354e6so15035492otj.10;
+        Wed, 30 Mar 2022 07:40:30 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=WluG5A3Su9h6kButSakciwh97/HOUIf+fbIX970BGps=;
+        b=5UTR25fk0eCnYZHCswINXb8g2foHBrXOVsMdSRzVUaORw2clQLqpLUgBG2LoeaCCzo
+         EevNGFJJoBSjQB2pAuFldOplvxp4xr/gkkC7/kzaS548SLyJx6O0NHKXxswIkjFtLFyZ
+         I+9SswivJELTcXkF1utwG/TuiAB+bwR1movajntxM8CJNemuoP8DBumnRbyB1WBpOGRE
+         +fiaP54AnHFXJxyHOyfcOB93YTq0IJUh9lIJRuVaWAB28PHJWO8lRdsZyoQMzaRxevLZ
+         QT4ncJVmBFglKkAV18ERMwPwG7KdYOQDoQ4JiJWiRfWyKGu9vDg6jYNUjOdaqTeqn1Qe
+         JPeA==
+X-Gm-Message-State: AOAM533aGvwqtlAnTrNU74BwhSrg6RtzwjzMRqRN5WR2cAFuusVDCGI+
+        14o9Nj0mLz807tVeq1XNTw==
+X-Google-Smtp-Source: ABdhPJwBBRjRl69m95mUWUdtBlAPdWiXCOSKHrQW8piO6H7rRiDBWu53Pcr1z0ZJDoY2oW17y4smCA==
+X-Received: by 2002:a9d:74da:0:b0:5cd:b164:6daf with SMTP id a26-20020a9d74da000000b005cdb1646dafmr3414136otl.231.1648651229564;
+        Wed, 30 Mar 2022 07:40:29 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id c3-20020a056808138300b002f76b9a9ef6sm2137595oiw.10.2022.03.30.07.40.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 30 Mar 2022 07:40:27 -0700 (PDT)
+Received: (nullmailer pid 3015921 invoked by uid 1000);
+        Wed, 30 Mar 2022 14:40:27 -0000
+Date:   Wed, 30 Mar 2022 09:40:27 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Chris Packham <Chris.Packham@alliedtelesis.co.nz>
+Cc:     Krzysztof Kozlowski <krzk@kernel.org>,
+        "andrew@lunn.ch" <andrew@lunn.ch>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "sebastian.hesselbarth@gmail.com" <sebastian.hesselbarth@gmail.com>,
+        "gregory.clement@bootlin.com" <gregory.clement@bootlin.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "krzk+dt@kernel.org" <krzk+dt@kernel.org>,
+        "huziji@marvell.com" <huziji@marvell.com>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Subject: Re: [PATCH v4 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
+Message-ID: <YkRr22lQHKCZa5A2@robh.at.kernel.org>
+References: <20220329000231.3544810-1-chris.packham@alliedtelesis.co.nz>
+ <20220329000231.3544810-3-chris.packham@alliedtelesis.co.nz>
+ <1648554629.870840.350362.nullmailer@robh.at.kernel.org>
+ <d4c477b3-0cf2-e495-6a54-5fcd0301cc14@kernel.org>
+ <6e118704-3c63-929e-ebf0-9a78fbed5daa@alliedtelesis.co.nz>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6e118704-3c63-929e-ebf0-9a78fbed5daa@alliedtelesis.co.nz>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+On Tue, Mar 29, 2022 at 07:50:59PM +0000, Chris Packham wrote:
+> 
+> On 30/03/22 02:14, Krzysztof Kozlowski wrote:
+> > On 29/03/2022 13:50, Rob Herring wrote:
+> >> On Tue, 29 Mar 2022 13:02:31 +1300, Chris Packham wrote:
+> >>> Convert the marvell,xenon-sdhci binding to JSON schema. Currently the
+> >>> in-tree dts files don't validate because they use sdhci@ instead of mmc@
+> >>> as required by the generic mmc-controller schema.
+> >>>
+> >>> The compatible "marvell,sdhci-xenon" was not documented in the old
+> >>> binding but it accompanies the of "marvell,armada-3700-sdhci" in the
+> >>> armada-37xx SoC dtsi so this combination is added to the new binding
+> >>> document.
+> >>>
+> >>> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> >>> Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
+> >>> ---
+> >>>
+> >>> Notes:
+> >>>      Changes in v4:
+> >>>      - Add review from Krzysztof
+> >>>      - Squash in addition of marvell,sdhci-xenon with an explanation in the
+> >>>        commit message
+> >>>      Changes in v3:
+> >>>      - Don't accept ap807 without ap806
+> >>>      - Add ref: string for pad-type
+> >>>      Changes in v2:
+> >>>      - Update MAINTAINERS entry
+> >>>      - Incorporate feedback from Krzysztof
+> >>>
+> >>>   .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 -----------
+> >>>   .../bindings/mmc/marvell,xenon-sdhci.yaml     | 275 ++++++++++++++++++
+> >>>   MAINTAINERS                                   |   2 +-
+> >>>   3 files changed, 276 insertions(+), 174 deletions(-)
+> >>>   delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
+> >>>   create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> >>>
+> >> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+> >> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> >>
+> >> yamllint warnings/errors:
+> >>
+> >> dtschema/dtc warnings/errors:
+> >> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.example.dt.yaml: mmc@aa0000: compatible: 'oneOf' conditional failed, one must be fixed:
+> >> 	['marvell,armada-3700-sdhci'] is too short
+> >> 	'marvell,armada-3700-sdhci' is not one of ['marvell,armada-cp110-sdhci', 'marvell,armada-ap806-sdhci']
+> >> 	'marvell,armada-ap807-sdhci' was expected
+> >> 	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> >> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.example.dt.yaml: mmc@ab0000: compatible: 'oneOf' conditional failed, one must be fixed:
+> >> 	['marvell,armada-3700-sdhci'] is too short
+> >> 	'marvell,armada-3700-sdhci' is not one of ['marvell,armada-cp110-sdhci', 'marvell,armada-ap806-sdhci']
+> >> 	'marvell,armada-ap807-sdhci' was expected
+> >> 	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> >>
+> >> doc reference errors (make refcheckdocs):
+> > Chris, your own dt binding does not pass it's check (example)...
+> >
+> > After updating the compatibles, you need to check the example. The
+> > examples are anyway duplicating common stuff, so half of them could be
+> > removed.
+> 
+> Yeah silly me. I started taking short cuts to run dt_binding_check 
+> dtbs_check as one command but then the dt_bindings_check output scrolled 
+> off the top of my terminal.
+> 
+> As for the examples themselves I want to leave what's there as a fairly 
+> direct translation of the old binding. If we consider them unnecessary 
+> removing them can be done as a follow-up.
 
-[ Upstream commit d6c9219ca1139b74541b2a98cee47a3426d754a9 ]
+The examples cannot have warnings/errors.
 
-Even if the current WARN() notifies the user that something is severely
-wrong, we can still end up in a PANIC() when trying to invoke the missing
-->enable_sdio_irq() ops. Therefore, let's also return an error code and
-prevent the host from being added.
-
-While at it, move the code into a separate function to prepare for
-subsequent changes and for further host caps validations.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Link: https://lore.kernel.org/r/20220303165142.129745-1-ulf.hansson@linaro.org
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/core/host.c | 15 +++++++++++++--
- 1 file changed, 13 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 3740fb0052a4..4da2bcfd0649 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -401,6 +401,16 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
- 
- EXPORT_SYMBOL(mmc_alloc_host);
- 
-+static int mmc_validate_host_caps(struct mmc_host *host)
-+{
-+	if (host->caps & MMC_CAP_SDIO_IRQ && !host->ops->enable_sdio_irq) {
-+		dev_warn(host->parent, "missing ->enable_sdio_irq() ops\n");
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
- /**
-  *	mmc_add_host - initialise host hardware
-  *	@host: mmc host
-@@ -413,8 +423,9 @@ int mmc_add_host(struct mmc_host *host)
- {
- 	int err;
- 
--	WARN_ON((host->caps & MMC_CAP_SDIO_IRQ) &&
--		!host->ops->enable_sdio_irq);
-+	err = mmc_validate_host_caps(host);
-+	if (err)
-+		return err;
- 
- 	err = device_add(&host->class_dev);
- 	if (err)
--- 
-2.34.1
-
+Rob
