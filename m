@@ -2,88 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3269C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Mar 2022 23:00:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7ECC1C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 02:56:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239216AbiC2XCh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Mar 2022 19:02:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48768 "EHLO
+        id S242146AbiC3C5u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Mar 2022 22:57:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239217AbiC2XCf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 19:02:35 -0400
-Received: from mail-oo1-f46.google.com (mail-oo1-f46.google.com [209.85.161.46])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E019A4E3A8;
-        Tue, 29 Mar 2022 16:00:49 -0700 (PDT)
-Received: by mail-oo1-f46.google.com with SMTP id p10-20020a056820044a00b00320d7d4af22so3330774oou.4;
-        Tue, 29 Mar 2022 16:00:49 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=0ufsH4kPmkwYwUY4XrUsn1zP4xDV7A/GblHEkZpfic4=;
-        b=wY9q5p2BWT09dM4HY7NO7JepkpuzMT6AjkaCbJp959bQNLoL3gGhe192v7LV+I2nRM
-         veiO9umvfkAuPkSuxvFwZY2TqJp58UrJC/mf2Z/SDqukoni6nFGqAbYcM8Dv88EK9ECx
-         2MswD06F7wQyQnhyplFRXbJvmAc2gMI4qDLm//kdGF+lcqzXWAzC53R9LLNfu5DXpeRX
-         MJTDc395F0hPpPA25dby3gQqDyDfdBA8o0m7ZN1bGm9yMCIPk2Ee1j7ONyZFUo1L7wES
-         EbC1WMqWDvCHpYEvXpl+ZoH93IL6lwFxyM6hHT3RjeU/YAj6/J/Cmd/rG0y2xJxEBvRl
-         j1cw==
-X-Gm-Message-State: AOAM531clsUXr3DbCF88FrjM/GNdg4X+5Sjy6VsvXEZOfjYt1EzQFPnm
-        bxJ1bsP4I+DO8CmSaGVMIQ==
-X-Google-Smtp-Source: ABdhPJy7C1m1dEvCRktWVO5I/Fo2UO/XKIY/6vOY1H7aF/ef2qykqq61ZyIH386G0Fd71hfq7+6S8w==
-X-Received: by 2002:a4a:2f0f:0:b0:320:f7cd:58d2 with SMTP id p15-20020a4a2f0f000000b00320f7cd58d2mr1912170oop.85.1648594849162;
-        Tue, 29 Mar 2022 16:00:49 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id m17-20020a0568301e7100b005b256697d7csm9487340otr.72.2022.03.29.16.00.47
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 29 Mar 2022 16:00:48 -0700 (PDT)
-Received: (nullmailer pid 1509915 invoked by uid 1000);
-        Tue, 29 Mar 2022 23:00:46 -0000
-Date:   Tue, 29 Mar 2022 18:00:46 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Tian Tao <tiantao6@hisilicon.com>,
-        Satya Tangirala <satyat@google.com>, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mediatek@lists.infradead.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        angelogioacchino.delregno@collabora.com,
+        with ESMTP id S237760AbiC3C5t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2022 22:57:49 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35F8EB6C;
+        Tue, 29 Mar 2022 19:56:03 -0700 (PDT)
+X-UUID: efa09f0674934a8abba41ee778363274-20220330
+X-UUID: efa09f0674934a8abba41ee778363274-20220330
+Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw02.mediatek.com
+        (envelope-from <tinghan.shen@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 525386966; Wed, 30 Mar 2022 10:55:57 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Wed, 30 Mar 2022 10:55:56 +0800
+Received: from mtksdccf07 (172.21.84.99) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Wed, 30 Mar 2022 10:55:56 +0800
+Message-ID: <ed60e1a69b4b61008b2bc76cfed93f46ac5efa2b.camel@mediatek.com>
+Subject: Re: [PATCH v12 1/3] dt-bindings: mmc: mtk-sd: fix yamllint error
+From:   Tinghan Shen <tinghan.shen@mediatek.com>
+To:     AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
-        devicetree@vger.kernel.org, Yue Hu <huyue2@yulong.com>,
-        linux-kernel@vger.kernel.org,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-arm-kernel@lists.infradead.org,
+        Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski@canonical.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>, Lucas Stach <dev@lynxeye.de>
-Subject: Re: [PATCH v9 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
- pinctrls properties
-Message-ID: <YkOPnkFz2DDx7Qr0@robh.at.kernel.org>
-References: <20220329032913.8750-1-axe.yang@mediatek.com>
- <20220329032913.8750-2-axe.yang@mediatek.com>
+        Wenbin Mei <wenbin.mei@mediatek.com>
+CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
+        <ryder.lee@kernel.org>, <wenst@chromium.org>,
+        <chunfeng.yun@mediatek.com>
+Date:   Wed, 30 Mar 2022 10:55:56 +0800
+In-Reply-To: <97f2b11d-15c7-d28e-f7b5-e65f2f333580@collabora.com>
+References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
+         <20220329114540.17140-2-tinghan.shen@mediatek.com>
+         <97f2b11d-15c7-d28e-f7b5-e65f2f333580@collabora.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220329032913.8750-2-axe.yang@mediatek.com>
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 29 Mar 2022 11:29:11 +0800, Axe Yang wrote:
-> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
-> This feature allow SDIO devices alarm asynchronous interrupt to host
-> even when host stop providing clock to SDIO card. An extra wakeup
-> interrupt and pinctrl states for SDIO DAT1 pin state switching are
-> required in this scenario.
-> 
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml         | 17 ++++++++++++++++-
->  1 file changed, 16 insertions(+), 1 deletion(-)
-> 
+Hi Angelo,
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+On Tue, 2022-03-29 at 14:47 +0200, AngeloGioacchino Del Regno wrote:
+> Il 29/03/22 13:45, Tinghan Shen ha scritto:
+> > Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> >    54:81     error    line too long (95 > 80 characters)  (line-length)
+> > 
+> 
+> I can't reproduce this error that you're getting... this commit is not
+> necessary, as the .yamllint file in the kernel allows a maximum line-length
+> of 110 characters.
+> 
+> rules:
+>    line-length:
+>      # 80 chars should be enough, but don't fail if a line is longer
+>      max: 110
+> 
+> 
+https://urldefense.com/v3/__https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/tree/Documentation/devicetree/bindings/.yamllint?h=next-20220329__;!!CTRNKA9wMg0ARbw!1L9icT80FdI9EYV81qRGpzbEvV1NFP_pwk8YABV0eIiRf2ppttnPlRfu5aXEUsxODiE$
+>  
+> 
+> Please drop this commit.
+
+Thank you for your feedback.
+
+I figured out why I have this error...
+It's because I do the yamllint outside of the bindings folder and not specify the yamllint config
+file.
+
+I'll drop this at next version.
+
+Best regards,
+Tinghan
+> 
+> > Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
+> > ---
+> >   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
+> >   1 file changed, 2 insertions(+), 1 deletion(-)
+
