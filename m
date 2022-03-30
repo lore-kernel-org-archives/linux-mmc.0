@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 768A0C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 07:25:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA86AC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 07:33:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239419AbiC3H1F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Mar 2022 03:27:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38130 "EHLO
+        id S243708AbiC3HfT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Mar 2022 03:35:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237275AbiC3H1B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2022 03:27:01 -0400
+        with ESMTP id S243827AbiC3HfR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2022 03:35:17 -0400
 Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E10CF1C3902;
-        Wed, 30 Mar 2022 00:25:12 -0700 (PDT)
-X-UUID: b732f1914e434f5385098bd5edc4b91b-20220330
-X-UUID: b732f1914e434f5385098bd5edc4b91b-20220330
-Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw01.mediatek.com
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A5BA2128CD;
+        Wed, 30 Mar 2022 00:33:24 -0700 (PDT)
+X-UUID: 8c46d7339c6a4ab3a740c16bdc33d4e3-20220330
+X-UUID: 8c46d7339c6a4ab3a740c16bdc33d4e3-20220330
+Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw01.mediatek.com
         (envelope-from <tinghan.shen@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 420345708; Wed, 30 Mar 2022 15:25:06 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 1717705257; Wed, 30 Mar 2022 15:33:17 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by
  mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 30 Mar 2022 15:25:05 +0800
-Received: from mtksdccf07 (172.21.84.99) by mtkcas10.mediatek.inc
+ 15.0.1497.2; Wed, 30 Mar 2022 15:33:16 +0800
+Received: from mtksdccf07 (172.21.84.99) by mtkcas11.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 30 Mar 2022 15:25:05 +0800
-Message-ID: <18f7e845660b94d5ab477de228838749385753a9.camel@mediatek.com>
+ Transport; Wed, 30 Mar 2022 15:33:16 +0800
+Message-ID: <094d261cf7621b2e68e53a0aaef8e7eaa9965a7e.camel@mediatek.com>
 Subject: Re: [PATCH v12 2/3] dt-bindings: mmc: mtk-sd: increase reg maxItems
 From:   Tinghan Shen <tinghan.shen@mediatek.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
+To:     Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
         AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>
+CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>,
         <Project_Global_Chrome_Upstream_Group@mediatek.com>,
         <ryder.lee@kernel.org>, <wenst@chromium.org>,
         <chunfeng.yun@mediatek.com>
-Date:   Wed, 30 Mar 2022 15:25:05 +0800
-In-Reply-To: <YkNuVTkTCfVJBFz+@robh.at.kernel.org>
+Date:   Wed, 30 Mar 2022 15:33:16 +0800
+In-Reply-To: <32931f81-5615-8156-4c67-bb4260488185@gmail.com>
 References: <20220329114540.17140-1-tinghan.shen@mediatek.com>
          <20220329114540.17140-3-tinghan.shen@mediatek.com>
-         <YkNuVTkTCfVJBFz+@robh.at.kernel.org>
+         <32931f81-5615-8156-4c67-bb4260488185@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
@@ -58,17 +58,39 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
+Hi Matthias,
 
-On Tue, 2022-03-29 at 15:38 -0500, Rob Herring wrote:
-> On Tue, Mar 29, 2022 at 07:45:39PM +0800, Tinghan Shen wrote:
+On Tue, 2022-03-29 at 16:27 +0200, Matthias Brugger wrote:
+> 
+> On 29/03/2022 13:45, Tinghan Shen wrote:
 > > Add optional host top register base for the reg binding description.
 > > 
+> 
+> Is this based a on a new version of the IP? Shall we make the second reg 
+> mandatory for the new HW? If I remember correctly the reg needs to be restored 
+> after power save event. So I suppose mmc won't work if that's not done. So 
+> optional wouldn't be the right approach.
+> 
+> Can you please clarify if that's the case.
+
+Yes. This change is introduced since mt8183, and the host top register 
+is required for mt8183. 
+
+We'll try to describe this change clearly in bindings in next version.
+
+
+Best regards,
+Tinghan
+
+> 
+> Thanks,
+> Matthias
+> 
 > > Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
 > > Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
 > > ---
-> >  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 ++-
+> >   1 file changed, 2 insertions(+), 1 deletion(-)
 > > 
 > > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
 > > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
@@ -76,28 +98,13 @@ On Tue, 2022-03-29 at 15:38 -0500, Rob Herring wrote:
 > > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
 > > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
 > > @@ -40,7 +40,8 @@ properties:
-> >            - const: mediatek,mt8183-mmc
-> >  
-> >    reg:
+> >             - const: mediatek,mt8183-mmc
+> >   
+> >     reg:
 > > -    maxItems: 1
 > > +    minItems: 1
 > > +    maxItems: 2
-> 
-> If more than 1 entry, then you need to define what each one is.
-
-Ok. I'll add definitions at next version.
-Thank you.
-
-
-Best regards,
-Tinghan
-
-> 
-> >  
-> >    clocks:
-> >      description:
-> > -- 
-> > 2.18.0
-> > 
-> > 
+> >   
+> >     clocks:
+> >       description:
 
