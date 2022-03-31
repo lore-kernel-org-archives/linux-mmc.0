@@ -2,118 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B677FC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Mar 2022 21:17:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0A22C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 07:28:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239988AbiC3VTk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Mar 2022 17:19:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44348 "EHLO
+        id S232065AbiCaHak convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Mar 2022 03:30:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232349AbiC3VTj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2022 17:19:39 -0400
-X-Greylist: delayed 520 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Mar 2022 14:17:51 PDT
-Received: from mxout02.lancloud.ru (mxout02.lancloud.ru [45.84.86.82])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1CDA05939D
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2022 14:17:51 -0700 (PDT)
-Received: from LanCloud
-DKIM-Filter: OpenDKIM Filter v2.11.0 mxout02.lancloud.ru 7120722C8A7E
-Received: from LanCloud
-Received: from LanCloud
-Received: from LanCloud
-From:   Sergey Shtylyov <s.shtylyov@omp.ru>
-Subject: [PATCH] mmc: core: block: fix sloppy typing in
- mmc_blk_ioctl_multi_cmd()
-To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>
-Organization: Open Mobile Platform
-Message-ID: <eea3b0bd-6091-f005-7189-b5b7868abdb6@omp.ru>
-Date:   Thu, 31 Mar 2022 00:09:07 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+        with ESMTP id S230010AbiCaHai (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 03:30:38 -0400
+Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53D4E377D6;
+        Thu, 31 Mar 2022 00:28:50 -0700 (PDT)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 02F36462580;
+        Thu, 31 Mar 2022 09:28:48 +0200 (CEST)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id E8153462537;
+        Thu, 31 Mar 2022 09:28:47 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Thu, 31 Mar 2022 09:28:47 +0200 (CEST)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Thu, 31 Mar
+ 2022 09:28:47 +0200
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0986.022; Thu, 31 Mar 2022 09:28:47 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "digetx@gmail.com" <digetx@gmail.com>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>
+Subject: [PATCH 1/2] mmc: mmc_spi: parse speed mode options
+Thread-Topic: [PATCH 1/2] mmc: mmc_spi: parse speed mode options
+Thread-Index: AQHYRNACkgNu3ZFsJkmPWUm4Hk64og==
+Date:   Thu, 31 Mar 2022 07:28:47 +0000
+Message-ID: <20c6efa9a4c7423bbfb9352705c4a53a@hyperstone.com>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [192.168.11.198]
-X-ClientProxiedBy: LFEXT01.lancloud.ru (fd00:f066::141) To
- LFEX1907.lancloud.ru (fd00:f066::207)
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.154.1.4]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1000-26804.006
+X-TMASE-Result: 10--0.036500-10.000000
+X-TMASE-MatchedRID: Pcf9tAO75fCjw14NC3gXsBF4zyLyne+ATJDl9FKHbrkFDK6GZYQJfeWs
+        WsO3yC+R3QLokIDIx5AEE2WBGwi7GEkjllSXrjtQEzQnFLEeMUljFT88f69nG/oLR4+zsDTtjoc
+        zmuoPCq3Cm3CnLLVUv6sY7DmQqcN3sXAiAjufsEOba5xi6u49NCGz5f1YHY3o
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 0ba8af54-7a4e-45e3-ad95-daac4f8d37d4-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Despite mmc_ioc_multi_cmd::num_of_cmds is a 64-bit field, its maximum
-value is limited to MMC_IOC_MAX_CMDS (only 255); using a 64-bit local
-variable to hold a copy of that field leads to gcc generating ineffective
-loop code: despite the source code using an *int* variable for the loop
-counters,  the 32-bit object code uses 64-bit unsigned counters.  Also,
-gcc has to drop the most significant word of that 64-bit variable when
-calling kcalloc() and assigning to mmc_queue_req::ioc_count anyway.
-Using the *unsigned int* variable instead results in a better code.
+Since SD and MMC Highspeed modes are also valid for SPI let's parse
+them too.
 
-Found by Linux Verification Center (linuxtesting.org) with the SVACE static
-analysis tool.
-
-Signed-off-by: Sergey Shtylyov <s.shtylyov@omp.ru>
-
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 ---
-This patch is against the 'next' branch of Ulf Hansson's 'mmc.git' repo.
+ drivers/mmc/host/of_mmc_spi.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
- drivers/mmc/core/block.c |   16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
-
-Index: mmc/drivers/mmc/core/block.c
-===================================================================
---- mmc.orig/drivers/mmc/core/block.c
-+++ mmc/drivers/mmc/core/block.c
-@@ -676,8 +676,9 @@ static int mmc_blk_ioctl_multi_cmd(struc
- 	struct mmc_ioc_cmd __user *cmds = user->cmds;
- 	struct mmc_card *card;
- 	struct mmc_queue *mq;
--	int i, err = 0, ioc_err = 0;
-+	int err = 0, ioc_err = 0;
- 	__u64 num_of_cmds;
-+	unsigned int i, n;
- 	struct request *req;
- 
- 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
-@@ -690,15 +691,16 @@ static int mmc_blk_ioctl_multi_cmd(struc
- 	if (num_of_cmds > MMC_IOC_MAX_CMDS)
- 		return -EINVAL;
- 
--	idata = kcalloc(num_of_cmds, sizeof(*idata), GFP_KERNEL);
-+	n = num_of_cmds;
-+	idata = kcalloc(n, sizeof(*idata), GFP_KERNEL);
- 	if (!idata)
- 		return -ENOMEM;
- 
--	for (i = 0; i < num_of_cmds; i++) {
-+	for (i = 0; i < n; i++) {
- 		idata[i] = mmc_blk_ioctl_copy_from_user(&cmds[i]);
- 		if (IS_ERR(idata[i])) {
- 			err = PTR_ERR(idata[i]);
--			num_of_cmds = i;
-+			n = i;
- 			goto cmd_err;
- 		}
- 		/* This will be NULL on non-RPMB ioctl():s */
-@@ -725,18 +727,18 @@ static int mmc_blk_ioctl_multi_cmd(struc
- 	req_to_mmc_queue_req(req)->drv_op =
- 		rpmb ? MMC_DRV_OP_IOCTL_RPMB : MMC_DRV_OP_IOCTL;
- 	req_to_mmc_queue_req(req)->drv_op_data = idata;
--	req_to_mmc_queue_req(req)->ioc_count = num_of_cmds;
-+	req_to_mmc_queue_req(req)->ioc_count = n;
- 	blk_execute_rq(req, false);
- 	ioc_err = req_to_mmc_queue_req(req)->drv_op_result;
- 
- 	/* copy to user if data and response */
--	for (i = 0; i < num_of_cmds && !err; i++)
-+	for (i = 0; i < n && !err; i++)
- 		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
- 
- 	blk_mq_free_request(req);
- 
- cmd_err:
--	for (i = 0; i < num_of_cmds; i++) {
-+	for (i = 0; i < n; i++) {
- 		kfree(idata[i]->buf);
- 		kfree(idata[i]);
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index 3629550528b6..bf54776fb26c 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -70,6 +70,10 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+ 	} else {
+ 		oms->pdata.caps |= MMC_CAP_NEEDS_POLL;
  	}
++	if (device_property_read_bool(dev, "cap-sd-highspeed"))
++		oms->pdata.caps |= MMC_CAP_SD_HIGHSPEED;
++	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
++		oms->pdata.caps |= MMC_CAP_MMC_HIGHSPEED;
+ 
+ 	dev->platform_data = &oms->pdata;
+ 	return dev->platform_data;
+-- 
+2.34.1
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
