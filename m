@@ -2,118 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CB6EC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 09:38:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A47BFC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 10:44:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234198AbiCaJkM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 05:40:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53716 "EHLO
+        id S234685AbiCaKp4 convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Mar 2022 06:45:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234196AbiCaJkH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 05:40:07 -0400
-Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CABB2182D
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2022 02:38:19 -0700 (PDT)
-Received: by mail-ed1-x534.google.com with SMTP id a17so27480166edm.9
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Mar 2022 02:38:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language
-         :from:to:cc:references:in-reply-to:content-transfer-encoding;
-        bh=UCC75knalYGf1Q05cm9FuhkiW0Xs+WxJ5xH2vJmJaW0=;
-        b=DFNRt3TXZmQA3QwVuMf3QzdsrbODG7CPRt2CDkUf6ZaIn3+avsosj9vJY0ePDiwmzI
-         2VjGFevuXHFaCGP2sWEyPhs4Dax9F6noubihKjTFYfRQrr0uOYr9RdhyXSCtiYz2n/zg
-         vMsTu5fwIeFA39mXgnGgn1xLjEuJqBb7Rzo+DNR8WVqbJO+TrtprG4a1wtKrgYJtVamp
-         ylnGjTDA7b5Mqdn9sncEGDMhHyzSVHGGJQUkb6tUg0r1Fq8BzeF7lslGFveaD/rKSXQk
-         TvkOqIXiCnW17ub/GS+4yGGhSrHrizEk7Q47Epth/3Z5rtnQRy/yCHbaMaTGn04I+U5P
-         mEeg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:from:to:cc:references:in-reply-to
-         :content-transfer-encoding;
-        bh=UCC75knalYGf1Q05cm9FuhkiW0Xs+WxJ5xH2vJmJaW0=;
-        b=Yb01UGIs2WNP3YJv0S7LzSaqf3gf3C6mk7qL9kNbWjAzKrxXuFTbOq6A6KzfyDqcVx
-         cTBv0H9+GQ2jJF4KTsVDaQVi7i54sg3Fte7gEur+xOfuyVP9nIdVveEZm6bMZyl0fHI6
-         qj/aIfQ714T2q9lPAD5UitQl/XCibTUdB1iTk06xRjgeevdB4L7++nFA7JPW3EvjFYLa
-         tgRdn2ii4aHDLGGk6lvFVqIpqyPE1CWPVPFpKUST1rxlcREdcHIMQxB8Ruo9xXIVRTqZ
-         HjTYl7IHj5jmgOAXR51kmjubrM82Sjl5TQZbpGn31+zQIaAUb900vE4oEPXAW3D+Sl/8
-         HN2w==
-X-Gm-Message-State: AOAM533k4rmF1dHswDbXwNGv0VdL4uEcf4BJvYA9BbaBtZuGEz6eJBed
-        lwHezy581wjkEGbxQwD9Et9r2w==
-X-Google-Smtp-Source: ABdhPJy6mFYew0T0h5pUb+fhZ0Oecmvx8z0GwMXb+IYI5LGeFXXy5EqTpEJ9+txFsFhrL5oZO94rGQ==
-X-Received: by 2002:a05:6402:5215:b0:419:4c82:8f06 with SMTP id s21-20020a056402521500b004194c828f06mr15725638edd.275.1648719498039;
-        Thu, 31 Mar 2022 02:38:18 -0700 (PDT)
-Received: from [192.168.0.166] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
-        by smtp.gmail.com with ESMTPSA id by4-20020a0564021b0400b00418fc410299sm10791232edb.62.2022.03.31.02.38.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 31 Mar 2022 02:38:17 -0700 (PDT)
-Message-ID: <5dea78a0-83ed-c016-35c6-637c8a445005@linaro.org>
-Date:   Thu, 31 Mar 2022 11:38:16 +0200
+        with ESMTP id S234703AbiCaKpy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 06:45:54 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.10])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E0A03DDD3;
+        Thu, 31 Mar 2022 03:44:04 -0700 (PDT)
+Received: from mail-lj1-f173.google.com ([209.85.208.173]) by
+ mrelayeu.kundenserver.de (mreue109 [213.165.67.113]) with ESMTPSA (Nemesis)
+ id 1M9WqY-1ndBfK2fES-005WBS; Thu, 31 Mar 2022 12:44:02 +0200
+Received: by mail-lj1-f173.google.com with SMTP id q5so31416863ljb.11;
+        Thu, 31 Mar 2022 03:44:02 -0700 (PDT)
+X-Gm-Message-State: AOAM5323KREuaVHS2c7IL/So/5JqmC4FfoC8xn5v6/9DcCl67dMXy9r/
+        5xMJCBbMTxxtWaCmRkAbJafU6oj1vRoiYNGUiOw=
+X-Google-Smtp-Source: ABdhPJxSLzSPG469rbBjqUgenc7GqtDg1G59o6eI2kBV31nJzx0w1XbePWgcX9pqw/Nc6/av9pIeO+axzqEg7/x2jpQ=
+X-Received: by 2002:a5d:66ca:0:b0:203:fb72:a223 with SMTP id
+ k10-20020a5d66ca000000b00203fb72a223mr3507386wrw.12.1648721862625; Thu, 31
+ Mar 2022 03:17:42 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH v5 2/2] dt-bindings: mmc: xenon: Convert to JSON schema
-Content-Language: en-US
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Chris Packham <chris.packham@alliedtelesis.co.nz>,
-        ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
-        huziji@marvell.com, andrew@lunn.ch, gregory.clement@bootlin.com,
-        sebastian.hesselbarth@gmail.com
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-References: <20220329220544.2132135-1-chris.packham@alliedtelesis.co.nz>
- <20220329220544.2132135-3-chris.packham@alliedtelesis.co.nz>
- <ad213f38-f0a2-6420-cfa0-a9ba7cb362d5@linaro.org>
-In-Reply-To: <ad213f38-f0a2-6420-cfa0-a9ba7cb362d5@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <cover.1648551070.git.tonyhuang.sunplus@gmail.com>
+ <46aad49867912fc57b669fc54fdb28638cccfcd9.1648551070.git.tonyhuang.sunplus@gmail.com>
+ <CAK8P3a0CLA33CTerXJ=bK+myhyHp_utoLnTX-NzMgjeb7icAGg@mail.gmail.com> <7c4b66f7fe4940cba1b0158803767f6e@sphcmbx02.sunplus.com.tw>
+In-Reply-To: <7c4b66f7fe4940cba1b0158803767f6e@sphcmbx02.sunplus.com.tw>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Thu, 31 Mar 2022 12:17:26 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
+Message-ID: <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
+Subject: Re: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
+To:     =?UTF-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        Tony Huang <tonyhuang.sunplus@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
+        =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+X-Provags-ID: V03:K1:xpTDZlbZOwasZwLrLnRYa79iGksGPPPYKzdPgLjVKaYMjt/vsPC
+ oyEIPYjVRFcQyA4PNZJX/xnG+oJDhVU702bzgqxl3euj/jeXIfmG35z5+RqQjAUD1N6BA14
+ RLirJQdaGCss6LkjeGsHKBdoFFnUUwdd5MD3AQ1YSn+QY4wqIDYO4X8KAFUpU1WVZYzQVrs
+ 37JuybXcKR6lNq6ADMJVQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:b5BZ0dW7EXs=:8DuCFhVrpT8d+PbDr/wvOp
+ PZWDHl1XQCObIZ6FlNwQua/oX9HSOrI6HZhcmyYxgsvx8w0KBV6atFGff9Np2qfM2QJfaLLWj
+ h9lOC8FgrugUr9IaA9GuelIdkRlY4RvElr59c33Yc0dSrKx5/MggDSjFXEqxW4L2uAorw+y/y
+ KGebJt1F5nYspINknuufq9pRqX6DE7M1Lo7GLTLJPgTgasZphjgL0sNpkQ9uSZTbdYrZ1wafZ
+ 33fqm/6UFfRMRspdWshZ629nHXAWSJSW5M5mwYVWGpWj5rQuNLk0vhcqCnJcMztsI+TlKaf/3
+ /3749RSKzSFYYMLfQa7Cmha4HEdMSMH9FUzOOvxowTECv+VbGNMEqmsZyLbaYL57efMUtNKpY
+ AwzN0UyMtEwXyoE4CcAVU/Je02d4EZRRTHqY+mC97k6geEPbwidGyCHm4M/CU6UHGWWZxSeYE
+ i4vZtd1kSb2gyVjws216tl+5ibZLyb6aKq2swCPgLm2ebDPXR8193TCz3Bck7kOwlXBZOkBy6
+ FBU7c+JRvxFeoR9HpQHfr/IcY8LwtkQf6ymGvQLEbHcdWh3flmu9YtjiV8xc/aGZbkgVQCpld
+ mt0rzgY6o40rKeklPFCoNwVZIy3+gpdZBmlBXn5G9MzN1Y41ztahzpgyXZFDPxSlhFvF52wMm
+ jfPZNGXAyIYgMWsp5NLUdz3JmliK5g2dT0kcfykJ9Xbiq4KFhIom3Y0Xw4zFFFuWXIXKzFy5h
+ PErpGfMG8DgyjscU9WQpdrq+tpm7X/Hi0UhWLcFa6zC9OvFTDT1y7iZNnH29xDQ7L1qoyP8cS
+ /ureQvGAcdTPhlNMVuI8AOS7YnivdZDj5h9Nym4r1Tqqu94Ve0=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/03/2022 09:20, Krzysztof Kozlowski wrote:
-> On 30/03/2022 00:05, Chris Packham wrote:
->> Convert the marvell,xenon-sdhci binding to JSON schema. Currently the
->> in-tree dts files don't validate because they use sdhci@ instead of mmc@
->> as required by the generic mmc-controller schema.
->>
->> The compatible "marvell,sdhci-xenon" was not documented in the old
->> binding but it accompanies the of "marvell,armada-3700-sdhci" in the
->> armada-37xx SoC dtsi so this combination is added to the new binding
->> document.
->>
->> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
->> Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
->> ---
->>
->> Notes:
->>     Changes in v5:
->>     - Fix silly error in examples
->>     Changes in v4:
->>     - Add review from Krzysztof
->>     - Squash in addition of marvell,sdhci-xenon with an explanation in the
->>       commit message
->>     Changes in v3:
->>     - Don't accept ap807 without ap806
->>     - Add ref: string for pad-type
->>     Changes in v2:
->>     - Update MAINTAINERS entry
->>     - Incorporate feedback from Krzysztof
->>
->>  .../bindings/mmc/marvell,xenon-sdhci.txt      | 173 -----------
->>  .../bindings/mmc/marvell,xenon-sdhci.yaml     | 275 ++++++++++++++++++
->>  MAINTAINERS                                   |   2 +-
->>  3 files changed, 276 insertions(+), 174 deletions(-)
->>  delete mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
->>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
->>
-> 
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> 
+On Thu, Mar 31, 2022 at 11:27 AM Tony Huang 黃懷厚 <tony.huang@sunplus.com> wrote:
+> > > +static void spmmc_request(struct mmc_host *mmc, struct mmc_request
+> > > +*mrq) {
+> > > +       struct spmmc_host *host = mmc_priv(mmc);
+> > > +       struct mmc_data *data;
+> > > +       struct mmc_command *cmd;
+> > > +       int ret;
+> > > +
+> > > +       ret = mutex_lock_interruptible(&host->mrq_lock);
+> > > +       if (ret)
+> > > +               return;
+> >
+> > I don't think it's valid to just return here when you get a signal. If nothing can
+> > handle the signal, doesn't it just hang?
+> >
+> > It also appears that you don't release the mutex until the tasklet runs, but it is
+> > not valid to release a mutex from a different context.
+> >
+> > You should get a warning about this when running a kernel with lockdep
+> > enabled at compile time. Please rework the locking to make this work.
+> >
+>         Reomve code:
+>     ret = mutex_lock_interruptible(&host->mrq_lock);
+>     if (ret)
+>          return;
+>
+>         Below is my modification:
+> .    mutex_lock(&host->mrq_lock);
 
-Oh, this should be only one review tag. Preferably @linaro.org. Sorry
-for the noise.
+That addresses the problem with the signal handling, but not the lock
+imbalance. Please fix that as well.
+> >
+> > It's better to use SYSTEM_SLEEP_PM_OPS/RUNTIME_PM_OPS instead of the
+> > SET_ version, then you can remove all the #ifdef checks.
+> >
+>
+>         I use SYSTEM_SLEEP_PM_OPS/RUNTIME_PM_OPS.
+>         Compile shows error. Error: implicit declaration of function ? ? SYSTEM_SLEEP_PM_OPS? ? Did you mean ? ? SET_SYSTEM_SLEEP_PM_OPS? ?             [-Werror=implicit-function-declaration]
 
-Best regards,
-Krzysztof
+Maybe you are on an old kernel release?
+
+>         I reference other mmc driver.
+>         Below is my modification:
+>     Compiler is pass.
+>
+>         #ifdef CONFIG_PM_SLEEP
+>         static int spmmc_pm_suspend(struct device *dev)
+>         {
+>                 pm_runtime_force_suspend(dev);
+>
+>                 return 0;
+>         }
+
+We should fix the other drivers as well. For the moment, just do it
+the right way now
+instead of copying the #ifdefs.
+
+        Arnd
