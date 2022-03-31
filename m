@@ -2,38 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0A22C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 07:28:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8ED5BC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 07:29:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232065AbiCaHak convert rfc822-to-8bit (ORCPT
+        id S230126AbiCaHb3 convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 03:30:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47796 "EHLO
+        Thu, 31 Mar 2022 03:31:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230010AbiCaHai (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 03:30:38 -0400
+        with ESMTP id S229731AbiCaHb1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 03:31:27 -0400
 Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53D4E377D6;
-        Thu, 31 Mar 2022 00:28:50 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 598BF433A0;
+        Thu, 31 Mar 2022 00:29:39 -0700 (PDT)
 Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 02F36462580;
-        Thu, 31 Mar 2022 09:28:48 +0200 (CEST)
+        by DDEI (Postfix) with ESMTP id 706F8462580;
+        Thu, 31 Mar 2022 09:29:38 +0200 (CEST)
 Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id E8153462537;
-        Thu, 31 Mar 2022 09:28:47 +0200 (CEST)
+        by DDEI (Postfix) with ESMTP id 5A213462537;
+        Thu, 31 Mar 2022 09:29:38 +0200 (CEST)
 X-TM-AS-ERS: 10.149.2.84-127.5.254.253
 X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
 X-DDEI-TLS-USAGE: Used
 Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
         by mail3.swissbit.com (Postfix) with ESMTPS;
-        Thu, 31 Mar 2022 09:28:47 +0200 (CEST)
+        Thu, 31 Mar 2022 09:29:38 +0200 (CEST)
 Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
  (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Thu, 31 Mar
- 2022 09:28:47 +0200
+ 2022 09:29:37 +0200
 Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
  sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
- 15.02.0986.022; Thu, 31 Mar 2022 09:28:47 +0200
+ 15.02.0986.022; Thu, 31 Mar 2022 09:29:37 +0200
 From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
@@ -44,11 +44,13 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
         "digetx@gmail.com" <digetx@gmail.com>,
         "avri.altman@wdc.com" <avri.altman@wdc.com>
-Subject: [PATCH 1/2] mmc: mmc_spi: parse speed mode options
-Thread-Topic: [PATCH 1/2] mmc: mmc_spi: parse speed mode options
-Thread-Index: AQHYRNACkgNu3ZFsJkmPWUm4Hk64og==
-Date:   Thu, 31 Mar 2022 07:28:47 +0000
-Message-ID: <20c6efa9a4c7423bbfb9352705c4a53a@hyperstone.com>
+Subject: [PATCH 2/2] mmc: mmc_spi: enable Highspeed for above 25MHz
+Thread-Topic: [PATCH 2/2] mmc: mmc_spi: enable Highspeed for above 25MHz
+Thread-Index: AQHYRNET6fGEHIFWCkie/s3TyF86+Q==
+Date:   Thu, 31 Mar 2022 07:29:37 +0000
+Message-ID: <5eaae8e215d84dd3a4f7e09782478a29@hyperstone.com>
+References: <20c6efa9a4c7423bbfb9352705c4a53a@hyperstone.com>
+In-Reply-To: <20c6efa9a4c7423bbfb9352705c4a53a@hyperstone.com>
 Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
@@ -59,40 +61,39 @@ Content-Type: text/plain;
 Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
 X-TMASE-Version: DDEI-5.1-9.0.1000-26804.006
-X-TMASE-Result: 10--0.036500-10.000000
-X-TMASE-MatchedRID: Pcf9tAO75fCjw14NC3gXsBF4zyLyne+ATJDl9FKHbrkFDK6GZYQJfeWs
-        WsO3yC+R3QLokIDIx5AEE2WBGwi7GEkjllSXrjtQEzQnFLEeMUljFT88f69nG/oLR4+zsDTtjoc
-        zmuoPCq3Cm3CnLLVUv6sY7DmQqcN3sXAiAjufsEOba5xi6u49NCGz5f1YHY3o
+X-TMASE-Result: 10--1.650500-10.000000
+X-TMASE-MatchedRID: oCMH03eFz6A8g1fEYZ38207nLUqYrlslFIuBIWrdOePfUZT83lbkEEJn
+        SqMrU6ESduRFO7j4H00XIQarK0WBEFxxDx5qbkR9EzQnFLEeMUljtslS0wA5rWbAhi1JhpZ+5MI
+        x11wv+CM7AFczfjr/7IdkpRw99KlXsEX7PGskxPf2BcRn1XxtLxK9slNBhdAQVBqhwt6IXBw=
 X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 0ba8af54-7a4e-45e3-ad95-daac4f8d37d4-0-0-200-0
+X-TMASE-XGENCLOUD: 2605bab8-5430-4ccb-8379-ed77654b1a55-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Since SD and MMC Highspeed modes are also valid for SPI let's parse
-them too.
+Any setup supporting more than 25MHz is able to utilize
+highspeed, so enable it even when not explicitly specified.
 
 Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 ---
- drivers/mmc/host/of_mmc_spi.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/mmc_spi.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 3629550528b6..bf54776fb26c 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -70,6 +70,10 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	} else {
- 		oms->pdata.caps |= MMC_CAP_NEEDS_POLL;
- 	}
-+	if (device_property_read_bool(dev, "cap-sd-highspeed"))
-+		oms->pdata.caps |= MMC_CAP_SD_HIGHSPEED;
-+	if (device_property_read_bool(dev, "cap-mmc-highspeed"))
-+		oms->pdata.caps |= MMC_CAP_MMC_HIGHSPEED;
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 106dd204b1a7..0a74c2f55542 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -1378,6 +1378,9 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 	mmc->f_min = 400000;
+ 	mmc->f_max = spi->max_speed_hz;
  
- 	dev->platform_data = &oms->pdata;
- 	return dev->platform_data;
++	if (mmc->f_max > 25000000)
++		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
++
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+ 	host->spi = spi;
 -- 
 2.34.1
 Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
