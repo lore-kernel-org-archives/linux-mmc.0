@@ -2,130 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A47BFC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 10:44:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9EC7C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 10:54:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234685AbiCaKp4 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 06:45:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57498 "EHLO
+        id S232437AbiCaK4M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Mar 2022 06:56:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234703AbiCaKpy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 06:45:54 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E0A03DDD3;
-        Thu, 31 Mar 2022 03:44:04 -0700 (PDT)
-Received: from mail-lj1-f173.google.com ([209.85.208.173]) by
- mrelayeu.kundenserver.de (mreue109 [213.165.67.113]) with ESMTPSA (Nemesis)
- id 1M9WqY-1ndBfK2fES-005WBS; Thu, 31 Mar 2022 12:44:02 +0200
-Received: by mail-lj1-f173.google.com with SMTP id q5so31416863ljb.11;
-        Thu, 31 Mar 2022 03:44:02 -0700 (PDT)
-X-Gm-Message-State: AOAM5323KREuaVHS2c7IL/So/5JqmC4FfoC8xn5v6/9DcCl67dMXy9r/
-        5xMJCBbMTxxtWaCmRkAbJafU6oj1vRoiYNGUiOw=
-X-Google-Smtp-Source: ABdhPJxSLzSPG469rbBjqUgenc7GqtDg1G59o6eI2kBV31nJzx0w1XbePWgcX9pqw/Nc6/av9pIeO+axzqEg7/x2jpQ=
-X-Received: by 2002:a5d:66ca:0:b0:203:fb72:a223 with SMTP id
- k10-20020a5d66ca000000b00203fb72a223mr3507386wrw.12.1648721862625; Thu, 31
- Mar 2022 03:17:42 -0700 (PDT)
+        with ESMTP id S232452AbiCaK4L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 06:56:11 -0400
+Received: from mail-oa1-x33.google.com (mail-oa1-x33.google.com [IPv6:2001:4860:4864:20::33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8388340909;
+        Thu, 31 Mar 2022 03:54:24 -0700 (PDT)
+Received: by mail-oa1-x33.google.com with SMTP id 586e51a60fabf-df22f50e0cso7664843fac.3;
+        Thu, 31 Mar 2022 03:54:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=r9MO9CjxH2HfDd+vRxfevxhMbQ63nHf2fy/t+/G6Jc0=;
+        b=h937QY9LPyg4HH13nvZYx0qmQ5VKURkH9NHhO0hnEC+biUZ+nzMTp/8e3pQinIJXwv
+         EvZ9QNhsFAkQAmmvtrAS0O2/qHbG52mf6mXI8r8j+Ohj03nodEL2WOp15IgT01muDFZg
+         C3GHkS+2anejUbnNYOlZCIJIwShD9B7RbJ8gc2MdIPMY1eNbEZldItXyrzWZr76yZZ2U
+         cBUtZwRL81QmxRuMdkT86/YTIhvs4lyPM+xMFx0ZCiejG9OD7ofSg3Wfrk+gdW+l1c3R
+         wXOB/XEzjBb5LPo8OslS452WzlI6ZjmNyBoTAb+AI1NhBNXlpSND8K+WT4l5jCrbdZ9z
+         Etgg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=r9MO9CjxH2HfDd+vRxfevxhMbQ63nHf2fy/t+/G6Jc0=;
+        b=GR1zWbNzv24uyPN3UvfysUso3I6ZDyD2u7JNS0TXyTsXhxwnSCSwI+SG8xq+6H4P1q
+         qXixo+hDlfa55S4oZjfBR4ycHKyD3kFsi4UbtyFjiGxLgBQaPOutCwV5FXakXqriPd0L
+         JXK9Yui4tT3rAo7hbfFCAZChEpO3/2n63u7hBl+0MyNl8ydxNH+jz29wyGR2Yg7IVLxe
+         qofzmZR3u1/TbMjko8aVYwKwlYqBQJLjNhiLnkmmT+wu42fuBtNWACTJfNIATcNe9jbs
+         FY7BWcWYVDsrkZZJj4ZO96HGd01DCLcKYI8Xjvi5ZF3WYVfBRzvhjmE1wJs2A1Ewc8Sq
+         ab1Q==
+X-Gm-Message-State: AOAM533rRLetMv+dV9j3YVKYw85x3eOvnfQXgyWD+EJM7xjevCaf5XrE
+        EsHYBcIMJdZ8TXqrkktA7DN/pNJG/R8=
+X-Google-Smtp-Source: ABdhPJzeYp620vLruglmRKCzBWwVvuiTG66YWc4vci+zzvBDZ356PQ8IORZSh2k5wvNENuSDBoGD4w==
+X-Received: by 2002:a05:6870:c154:b0:dd:986c:afa9 with SMTP id g20-20020a056870c15400b000dd986cafa9mr2318919oad.160.1648724063688;
+        Thu, 31 Mar 2022 03:54:23 -0700 (PDT)
+Received: from [192.168.1.145] ([207.188.167.132])
+        by smtp.gmail.com with ESMTPSA id v24-20020a9d5a18000000b005ad458facbdsm12352123oth.27.2022.03.31.03.54.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 31 Mar 2022 03:54:21 -0700 (PDT)
+Message-ID: <aebbb5c8-1d27-5e66-e18a-e2b647bc8cb4@gmail.com>
+Date:   Thu, 31 Mar 2022 12:54:16 +0200
 MIME-Version: 1.0
-References: <cover.1648551070.git.tonyhuang.sunplus@gmail.com>
- <46aad49867912fc57b669fc54fdb28638cccfcd9.1648551070.git.tonyhuang.sunplus@gmail.com>
- <CAK8P3a0CLA33CTerXJ=bK+myhyHp_utoLnTX-NzMgjeb7icAGg@mail.gmail.com> <7c4b66f7fe4940cba1b0158803767f6e@sphcmbx02.sunplus.com.tw>
-In-Reply-To: <7c4b66f7fe4940cba1b0158803767f6e@sphcmbx02.sunplus.com.tw>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Thu, 31 Mar 2022 12:17:26 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
-Message-ID: <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
-Subject: Re: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
-To:     =?UTF-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
-Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Tony Huang <tonyhuang.sunplus@gmail.com>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.5.0
+Subject: Re: [PATCH v13 1/2] dt-bindings: mmc: mtk-sd: increase reg items
+Content-Language: en-US
+To:     Tinghan Shen <tinghan.shen@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        =?UTF-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
-        =?UTF-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-X-Provags-ID: V03:K1:xpTDZlbZOwasZwLrLnRYa79iGksGPPPYKzdPgLjVKaYMjt/vsPC
- oyEIPYjVRFcQyA4PNZJX/xnG+oJDhVU702bzgqxl3euj/jeXIfmG35z5+RqQjAUD1N6BA14
- RLirJQdaGCss6LkjeGsHKBdoFFnUUwdd5MD3AQ1YSn+QY4wqIDYO4X8KAFUpU1WVZYzQVrs
- 37JuybXcKR6lNq6ADMJVQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:b5BZ0dW7EXs=:8DuCFhVrpT8d+PbDr/wvOp
- PZWDHl1XQCObIZ6FlNwQua/oX9HSOrI6HZhcmyYxgsvx8w0KBV6atFGff9Np2qfM2QJfaLLWj
- h9lOC8FgrugUr9IaA9GuelIdkRlY4RvElr59c33Yc0dSrKx5/MggDSjFXEqxW4L2uAorw+y/y
- KGebJt1F5nYspINknuufq9pRqX6DE7M1Lo7GLTLJPgTgasZphjgL0sNpkQ9uSZTbdYrZ1wafZ
- 33fqm/6UFfRMRspdWshZ629nHXAWSJSW5M5mwYVWGpWj5rQuNLk0vhcqCnJcMztsI+TlKaf/3
- /3749RSKzSFYYMLfQa7Cmha4HEdMSMH9FUzOOvxowTECv+VbGNMEqmsZyLbaYL57efMUtNKpY
- AwzN0UyMtEwXyoE4CcAVU/Je02d4EZRRTHqY+mC97k6geEPbwidGyCHm4M/CU6UHGWWZxSeYE
- i4vZtd1kSb2gyVjws216tl+5ibZLyb6aKq2swCPgLm2ebDPXR8193TCz3Bck7kOwlXBZOkBy6
- FBU7c+JRvxFeoR9HpQHfr/IcY8LwtkQf6ymGvQLEbHcdWh3flmu9YtjiV8xc/aGZbkgVQCpld
- mt0rzgY6o40rKeklPFCoNwVZIy3+gpdZBmlBXn5G9MzN1Y41ztahzpgyXZFDPxSlhFvF52wMm
- jfPZNGXAyIYgMWsp5NLUdz3JmliK5g2dT0kcfykJ9Xbiq4KFhIom3Y0Xw4zFFFuWXIXKzFy5h
- PErpGfMG8DgyjscU9WQpdrq+tpm7X/Hi0UhWLcFa6zC9OvFTDT1y7iZNnH29xDQ7L1qoyP8cS
- /ureQvGAcdTPhlNMVuI8AOS7YnivdZDj5h9Nym4r1Tqqu94Ve0=
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        ryder.lee@kernel.org, wenst@chromium.org, chunfeng.yun@mediatek.com
+References: <20220330094532.21721-1-tinghan.shen@mediatek.com>
+ <20220330094532.21721-2-tinghan.shen@mediatek.com>
+From:   Matthias Brugger <matthias.bgg@gmail.com>
+In-Reply-To: <20220330094532.21721-2-tinghan.shen@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 31, 2022 at 11:27 AM Tony Huang 黃懷厚 <tony.huang@sunplus.com> wrote:
-> > > +static void spmmc_request(struct mmc_host *mmc, struct mmc_request
-> > > +*mrq) {
-> > > +       struct spmmc_host *host = mmc_priv(mmc);
-> > > +       struct mmc_data *data;
-> > > +       struct mmc_command *cmd;
-> > > +       int ret;
-> > > +
-> > > +       ret = mutex_lock_interruptible(&host->mrq_lock);
-> > > +       if (ret)
-> > > +               return;
-> >
-> > I don't think it's valid to just return here when you get a signal. If nothing can
-> > handle the signal, doesn't it just hang?
-> >
-> > It also appears that you don't release the mutex until the tasklet runs, but it is
-> > not valid to release a mutex from a different context.
-> >
-> > You should get a warning about this when running a kernel with lockdep
-> > enabled at compile time. Please rework the locking to make this work.
-> >
->         Reomve code:
->     ret = mutex_lock_interruptible(&host->mrq_lock);
->     if (ret)
->          return;
->
->         Below is my modification:
-> .    mutex_lock(&host->mrq_lock);
 
-That addresses the problem with the signal handling, but not the lock
-imbalance. Please fix that as well.
-> >
-> > It's better to use SYSTEM_SLEEP_PM_OPS/RUNTIME_PM_OPS instead of the
-> > SET_ version, then you can remove all the #ifdef checks.
-> >
->
->         I use SYSTEM_SLEEP_PM_OPS/RUNTIME_PM_OPS.
->         Compile shows error. Error: implicit declaration of function ? ? SYSTEM_SLEEP_PM_OPS? ? Did you mean ? ? SET_SYSTEM_SLEEP_PM_OPS? ?             [-Werror=implicit-function-declaration]
 
-Maybe you are on an old kernel release?
+On 30/03/2022 11:45, Tinghan Shen wrote:
+> MediaTek has a new version of mmc IP since mt8183. Some IO registers
+> are moved to top to improve hardware design and named as "host top
+> registers".
+> 
+> Add host top register in the reg binding description for mt8183 and
+> successors.
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
+> ---
+>   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 15 ++++++++++++++-
+>   1 file changed, 14 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index 297ada03e3de..2a2e9fa8c188 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -40,7 +40,10 @@ properties:
+>             - const: mediatek,mt8183-mmc
+>   
+>     reg:
+> -    maxItems: 1
+> +    minItems: 1
 
->         I reference other mmc driver.
->         Below is my modification:
->     Compiler is pass.
->
->         #ifdef CONFIG_PM_SLEEP
->         static int spmmc_pm_suspend(struct device *dev)
->         {
->                 pm_runtime_force_suspend(dev);
->
->                 return 0;
->         }
+ From my understanding adding minItems is correct, but you need to add also 
+maxItems: 2 as there can't be more then two register entries.
 
-We should fix the other drivers as well. For the moment, just do it
-the right way now
-instead of copying the #ifdefs.
+Regards,
+Matthias
 
-        Arnd
+> +    items:
+> +      - description: base register (required).
+> +      - description: top base register (required for MT8183).
+>   
+>     clocks:
+>       description:
+> @@ -168,6 +171,16 @@ required:
+>     - vmmc-supply
+>     - vqmmc-supply
+>   
+> +if:
+> +  properties:
+> +    compatible:
+> +      contains:
+> +        const: mediatek,mt8183-mmc
+> +then:
+> +  properties:
+> +    reg:
+> +      minItems: 2
+> +
+>   unevaluatedProperties: false
+>   
+>   examples:
