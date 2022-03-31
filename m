@@ -2,103 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A958C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 07:32:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 858B7C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Mar 2022 08:07:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230328AbiCaHeQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 03:34:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54146 "EHLO
+        id S231947AbiCaIIt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Mar 2022 04:08:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43676 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230313AbiCaHeP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 03:34:15 -0400
-Received: from out28-145.mail.aliyun.com (out28-145.mail.aliyun.com [115.124.28.145])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9E041F2DCC;
-        Thu, 31 Mar 2022 00:32:27 -0700 (PDT)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.2316432|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.00797514-0.00208816-0.989937;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=19;RT=19;SR=0;TI=SMTPD_---.NGpUuXy_1648711941;
-Received: from SunxiBot.allwinnertech.com(mailfrom:michael@allwinnertech.com fp:SMTPD_---.NGpUuXy_1648711941)
-          by smtp.aliyun-inc.com(33.38.168.42);
-          Thu, 31 Mar 2022 15:32:23 +0800
-From:   Michael Wu <michael@allwinnertech.com>
-To:     ulf.hansson@linaro.org, axboe@kernel.dk, adrian.hunter@intel.com,
-        avri.altman@wdc.com, kch@nvidia.com, beanhuo@micron.com,
-        swboyd@chromium.org, digetx@gmail.com, bigeasy@linutronix.de,
-        CLoehle@hyperstone.com, cjb@laptop.org, arnd@arndb.de,
-        andreiw@motorola.com, tgih.jun@samsung.com, jh80.chung@samsung.com,
-        linus.walleij@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        allwinner-opensource-support@allwinnertech.com
-Subject: [PATCH v2] mmc: block: enable cache-flushing when mmc cache is on
-Date:   Thu, 31 Mar 2022 15:32:23 +0800
-Message-Id: <20220331073223.106415-1-michael@allwinnertech.com>
-X-Mailer: git-send-email 2.29.0
+        with ESMTP id S231243AbiCaIIq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 04:08:46 -0400
+Received: from alexa-out-sd-02.qualcomm.com (alexa-out-sd-02.qualcomm.com [199.106.114.39])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55E3911C1B;
+        Thu, 31 Mar 2022 01:07:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1648714020; x=1680250020;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=hmbdlfSAVy3MtxW9X7UN4auw220H+YI+Yt/QeUjJsRo=;
+  b=LvbCsotkIZxIYE5jG8YqbvX9RW9rVyQ0sk/YZ9cL6vwsF5AwQVHsyNyP
+   5B8bEdtWAzM/Erx6RmXoAIBaDQLw2H9zq9KMYG2/FFB4GQmhJt1kFBm1Y
+   tFlMb5ZK608njJZzADfMmg4OIvThpr1r9YDOGHu+u6fZVkcs1keDyk8jZ
+   s=;
+Received: from unknown (HELO ironmsg02-sd.qualcomm.com) ([10.53.140.142])
+  by alexa-out-sd-02.qualcomm.com with ESMTP; 31 Mar 2022 01:06:59 -0700
+X-QCInternal: smtphost
+Received: from nasanex01c.na.qualcomm.com ([10.47.97.222])
+  by ironmsg02-sd.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 Mar 2022 01:06:59 -0700
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nasanex01c.na.qualcomm.com (10.47.97.222) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.22; Thu, 31 Mar 2022 01:06:59 -0700
+Received: from [10.216.48.115] (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Thu, 31 Mar
+ 2022 01:06:44 -0700
+Message-ID: <4eaa8fed-56be-4f36-82be-a016e7e6ca2c@quicinc.com>
+Date:   Thu, 31 Mar 2022 13:36:34 +0530
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
+Subject: Re: [PATCH V3 1/2] dt-bindings: mmc: sdhci-msm: Add gcc resets
+ strings
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzk@kernel.org>, <ulf.hansson@linaro.org>,
+        <robh+dt@kernel.org>, <krzk+dt@kernel.org>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <agross@kernel.org>,
+        <bjorn.andersson@linaro.org>, <linux-arm-msm@vger.kernel.org>
+CC:     <quic_rampraka@quicinc.com>, <quic_pragalla@quicinc.com>,
+        <quic_sartgarg@quicinc.com>, <quic_nitirawa@quicinc.com>,
+        <quic_sayalil@quicinc.com>
+References: <1647532165-6302-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <1647532165-6302-2-git-send-email-quic_c_sbhanu@quicinc.com>
+ <cd976ef0-767b-8cf0-8635-28aeaa6542a3@kernel.org>
+From:   "Sajida Bhanu (Temp)" <quic_c_sbhanu@quicinc.com>
+In-Reply-To: <cd976ef0-767b-8cf0-8635-28aeaa6542a3@kernel.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The mmc core enables cache by default. But it only enables
-cache-flushing when host supports cmd23 and eMMC supports
-reliable-write.
-For hosts which do not support cmd23 or eMMCs which do not support
-reliable-write, the cache can not be flushed by `sync` command.
-This may leads to cache data lost.
-This patch enables cache-flushing as long as cache is enabled,
-no matter host supports cmd23 and/or eMMC supports reliable write
-or not.
-For SD cards, backwards compatibility is guaranteed. Newer components
-like SD5.0 which have cache are also supported in advance, which means
-this patch will also be applicable if SD5.0 cache is added to the mmc
-core in the future.
 
-Fixes: f4c5522b0a88 ("mmc: Reliable write support.")
-Fixes: 881d1c25f765 ("mmc: core: Add cache control for eMMC4.5 device")
-Fixes: 130206a615a9 ("mmc: core: Add support for cache ctrl for SD cards")
-Fixes: d0c97cfb81eb ("mmc: core: Use CMD23 for multiblock transfers when we can.")
-Fixes: e9d5c746246c ("mmc/block: switch to using blk_queue_write_cache()")
-
-Reviewed-by: Avri Altman <Avri.Altman@wdc.com>
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-Signed-off-by: Michael Wu <michael@allwinnertech.com>
----
- drivers/mmc/core/block.c | 12 +++++++++---
- 1 file changed, 9 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 4e67c1403cc9..ec76ed82abb9 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2350,6 +2350,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
- 	char cap_str[10];
-+	bool cache_enabled = false;
-+	bool fua_enabled = false;
- 
- 	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
- 	if (devidx < 0) {
-@@ -2429,13 +2431,17 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 			md->flags |= MMC_BLK_CMD23;
- 	}
- 
--	if (mmc_card_mmc(card) &&
--	    md->flags & MMC_BLK_CMD23 &&
-+	if (md->flags & MMC_BLK_CMD23 &&
- 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
- 	     card->ext_csd.rel_sectors)) {
- 		md->flags |= MMC_BLK_REL_WR;
--		blk_queue_write_cache(md->queue.queue, true, true);
-+		fua_enabled = true;
-+		cache_enabled = true;
- 	}
-+	if (mmc_cache_enabled(card->host))
-+		cache_enabled  = true;
-+
-+	blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
- 
- 	string_get_size((u64)size, 512, STRING_UNITS_2,
- 			cap_str, sizeof(cap_str));
--- 
-2.29.0
-
+On 3/18/2022 6:20 PM, Krzysztof Kozlowski wrote:
+> On 17/03/2022 16:49, Shaik Sajida Bhanu wrote:
+>> Add gcc hardware reset supported strings for qcom-sdhci controller.
+>>
+>> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 4 ++++
+>>   1 file changed, 4 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> index 6216ed7..f180111 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> @@ -62,6 +62,10 @@ Required properties:
+>>   - qcom,dll-config: Chipset and Platform specific value. Use this field to
+>>   	specify the DLL_CONFIG register value as per Hardware Programming Guide.
+>>   
+>> +- resets: Phandle and reset specifier for the device's reset.
+>> +- reset-names: List of reset signal name strings sorted in the same order as
+>> +	       the resets property.
+> Please list the actual names used in reset-names.
+Sure Thanks for the review.
+>
+> Best regards,
+> Krzysztof
