@@ -2,128 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 102F2C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 00:15:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E523C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 00:53:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243313AbiDAARV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 20:17:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47500 "EHLO
+        id S231624AbiDAAzY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Mar 2022 20:55:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243312AbiDAARU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 20:17:20 -0400
-Received: from mail-oa1-f53.google.com (mail-oa1-f53.google.com [209.85.160.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D1893C72B;
-        Thu, 31 Mar 2022 17:15:32 -0700 (PDT)
-Received: by mail-oa1-f53.google.com with SMTP id 586e51a60fabf-dacc470e03so1062975fac.5;
-        Thu, 31 Mar 2022 17:15:32 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=kgDedcBJcc+tv/OOgxKjgk/SoshOh6AR9hwsk4pYsLw=;
-        b=1xsJ2ZfiQ5wEvzuC8CYkkWA4D4dVF0QRHSFazuz+YXFKE5EzIyjEAw6b1fL6qza+Qt
-         fw2yGZq0WPJb2gWYQ3fqEaXXXc0y0anUChlWOorELWDjKiK+MjQ61b9sEcJFAzO/jM6w
-         aJcw6qgbYLExQjGR3rPTvnuOMfHFHNwsYlMKzxr0I2QfIdcvIPblwCq0mXw+/5HoLTQP
-         Q31fc2BeGpKxknfxoF93kbH6AIRM7ms7UGDj4/NlmaO48b13p7bORa5zv/Oo8kH2YR47
-         UcAW4OhGkAy0L+ncUSt1pQgVyejNLLzsu+8sUDIygz+AEUvEfa2dTFaXbVcp/mHgPdTa
-         kSxQ==
-X-Gm-Message-State: AOAM532umhlA9LeJ2JStM71lg8gE6MJuCmDi2iDbprDLPjjRtiUuIY7Y
-        aCvRcz6PtJCvz+cFSS9qnw==
-X-Google-Smtp-Source: ABdhPJxOduw+Z9X08dI1UdH+GcjThmH7U3p+ZG1PL2p1hT2KQYDpoCnYsTC2oy0JMhvgskl1k1Dz6g==
-X-Received: by 2002:a05:6870:f71f:b0:d7:5f1b:534f with SMTP id ej31-20020a056870f71f00b000d75f1b534fmr3922617oab.109.1648772131730;
-        Thu, 31 Mar 2022 17:15:31 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g8-20020a9d2d88000000b005b238f7551csm462301otb.53.2022.03.31.17.15.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Mar 2022 17:15:30 -0700 (PDT)
-Received: (nullmailer pid 1762367 invoked by uid 1000);
-        Fri, 01 Apr 2022 00:15:29 -0000
-Date:   Thu, 31 Mar 2022 19:15:29 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>, ulf.hansson@linaro.org,
-        krzk+dt@kernel.org, shawnguo@kernel.org, s.hauer@pengutronix.de,
-        wg@grandegger.com, mkl@pengutronix.de, davem@davemloft.net,
-        kuba@kernel.org, pabeni@redhat.com, qiangqing.zhang@nxp.com,
-        devicetree@vger.kernel.org, Peng Fan <peng.fan@nxp.com>,
-        netdev@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-imx@nxp.com, kernel@pengutronix.de, festevam@gmail.com,
-        linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH 0/4] dt-bindings: imx: add nvmem property
-Message-ID: <YkZEIR1XqJ6sseto@robh.at.kernel.org>
-References: <20220324042024.26813-1-peng.fan@oss.nxp.com>
- <20220324111104.cd7clpkzzedtcrja@pengutronix.de>
+        with ESMTP id S230257AbiDAAzX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 20:55:23 -0400
+Received: from mg.sunplus.com (mswedge1.sunplus.com [60.248.182.113])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 12DF15131A;
+        Thu, 31 Mar 2022 17:53:29 -0700 (PDT)
+X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
+        ,3)
+Received: from 172.17.9.112
+        by mg01.sunplus.com with MailGates ESMTP Server V5.0(8686:0:AUTH_RELAY)
+        (envelope-from <tony.huang@sunplus.com>); Fri, 01 Apr 2022 08:53:05 +0800 (CST)
+Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
+ sphcmbx02.sunplus.com.tw (172.17.9.112) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.26; Fri, 1 Apr 2022 08:53:01 +0800
+Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
+ sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
+ 15.00.1497.026; Fri, 1 Apr 2022 08:53:01 +0800
+From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
+To:     Arnd Bergmann <arnd@arndb.de>
+CC:     Tony Huang <tonyhuang.sunplus@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
+        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+Subject: RE: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Topic: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Index: AQHYQ3s7ORyaR4vCu0uQF2nts2U94azV8Q6AgAM9naD//5VMAIABeSpQ
+Date:   Fri, 1 Apr 2022 00:53:01 +0000
+Message-ID: <b93772c707074f14ae3f2eeaf5e348ab@sphcmbx02.sunplus.com.tw>
+References: <cover.1648551070.git.tonyhuang.sunplus@gmail.com>
+ <46aad49867912fc57b669fc54fdb28638cccfcd9.1648551070.git.tonyhuang.sunplus@gmail.com>
+ <CAK8P3a0CLA33CTerXJ=bK+myhyHp_utoLnTX-NzMgjeb7icAGg@mail.gmail.com>
+ <7c4b66f7fe4940cba1b0158803767f6e@sphcmbx02.sunplus.com.tw>
+ <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
+In-Reply-To: <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [172.25.108.54]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220324111104.cd7clpkzzedtcrja@pengutronix.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 24, 2022 at 12:11:04PM +0100, Uwe Kleine-König wrote:
-> Hello,
-> 
-> On Thu, Mar 24, 2022 at 12:20:20PM +0800, Peng Fan (OSS) wrote:
-> > From: Peng Fan <peng.fan@nxp.com>
-> > 
-> > To i.MX SoC, there are many variants, such as i.MX8M Plus which
-> > feature 4 A53, GPU, VPU, SDHC, FLEXCAN, FEC, eQOS and etc.
-> > But i.MX8M Plus has many parts, one part may not have FLEXCAN,
-> > the other part may not have eQOS or GPU.
-> > But we use one device tree to support i.MX8MP including its parts,
-> > then we need update device tree to mark the disabled IP status "disabled".
-> > 
-> > In NXP U-Boot, we hardcoded node path and runtime update device tree
-> > status in U-Boot according to fuse value. But this method is not
-> > scalable and need encoding all the node paths that needs check.
-> > 
-> > By introducing nvmem property for each node that needs runtime update
-> > status property accoridng fuse value, we could use one Bootloader
-> > code piece to support all i.MX SoCs.
-> > 
-> > The drawback is we need nvmem property for all the nodes which maybe
-> > fused out.
-> 
-> I'd rather not have that in an official binding as the syntax is
-> orthogonal to status = "..." but the semantic isn't. Also if we want
-> something like that, I'd rather not want to adapt all bindings, but
-> would like to see this being generic enough to be described in a single
-> catch-all binding.
-> 
-> I also wonder if it would be nicer to abstract that as something like:
-> 
-> 	/ {
-> 		fuse-info {
-> 			compatible = "otp-fuse-info";
-> 
-> 			flexcan {
-> 				devices = <&flexcan1>, <&flexcan2>;
-> 				nvmem-cells = <&flexcan_disabled>;
-> 				nvmem-cell-names = "disabled";
-> 			};
-> 
-> 			m7 {
-> 				....
-> 			};
-> 		};
-> 	};
-> 
-> as then the driver evaluating this wouldn't need to iterate over the
-> whole dtb but just over this node. But I'd still keep this private to
-> the bootloader and not describe it in the generic binding.
-
-There's been discussions (under the system DT umbrella mostly) about 
-bindings for peripheral enable/disable control/status. Most of the time 
-it is in context of device assignment to secure/non-secure world or 
-partitions in a system (via a partitioning hypervisor).
-
-This feels like the same thing and could use the same binding. But 
-someone has to take into account all the uses and come up with 
-something. One off solutions are a NAK.
-
-Rob
+RGVhciBBcm5kOg0KDQo+IDx0b255Lmh1YW5nQHN1bnBsdXMuY29tPiB3cm90ZToNCj4gPiA+ID4g
+K3N0YXRpYyB2b2lkIHNwbW1jX3JlcXVlc3Qoc3RydWN0IG1tY19ob3N0ICptbWMsIHN0cnVjdA0K
+PiA+ID4gPiArbW1jX3JlcXVlc3QNCj4gPiA+ID4gKyptcnEpIHsNCj4gPiA+ID4gKyAgICAgICBz
+dHJ1Y3Qgc3BtbWNfaG9zdCAqaG9zdCA9IG1tY19wcml2KG1tYyk7DQo+ID4gPiA+ICsgICAgICAg
+c3RydWN0IG1tY19kYXRhICpkYXRhOw0KPiA+ID4gPiArICAgICAgIHN0cnVjdCBtbWNfY29tbWFu
+ZCAqY21kOw0KPiA+ID4gPiArICAgICAgIGludCByZXQ7DQo+ID4gPiA+ICsNCj4gPiA+ID4gKyAg
+ICAgICByZXQgPSBtdXRleF9sb2NrX2ludGVycnVwdGlibGUoJmhvc3QtPm1ycV9sb2NrKTsNCj4g
+PiA+ID4gKyAgICAgICBpZiAocmV0KQ0KPiA+ID4gPiArICAgICAgICAgICAgICAgcmV0dXJuOw0K
+PiA+ID4NCj4gPiA+IEkgZG9uJ3QgdGhpbmsgaXQncyB2YWxpZCB0byBqdXN0IHJldHVybiBoZXJl
+IHdoZW4geW91IGdldCBhIHNpZ25hbC4NCj4gPiA+IElmIG5vdGhpbmcgY2FuIGhhbmRsZSB0aGUg
+c2lnbmFsLCBkb2Vzbid0IGl0IGp1c3QgaGFuZz8NCj4gPiA+DQo+ID4gPiBJdCBhbHNvIGFwcGVh
+cnMgdGhhdCB5b3UgZG9uJ3QgcmVsZWFzZSB0aGUgbXV0ZXggdW50aWwgdGhlIHRhc2tsZXQNCj4g
+PiA+IHJ1bnMsIGJ1dCBpdCBpcyBub3QgdmFsaWQgdG8gcmVsZWFzZSBhIG11dGV4IGZyb20gYSBk
+aWZmZXJlbnQgY29udGV4dC4NCj4gPiA+DQo+ID4gPiBZb3Ugc2hvdWxkIGdldCBhIHdhcm5pbmcg
+YWJvdXQgdGhpcyB3aGVuIHJ1bm5pbmcgYSBrZXJuZWwgd2l0aA0KPiA+ID4gbG9ja2RlcCBlbmFi
+bGVkIGF0IGNvbXBpbGUgdGltZS4gUGxlYXNlIHJld29yayB0aGUgbG9ja2luZyB0byBtYWtlIHRo
+aXMNCj4gd29yay4NCj4gPiA+DQo+ID4gICAgICAgICBSZW9tdmUgY29kZToNCj4gPiAgICAgcmV0
+ID0gbXV0ZXhfbG9ja19pbnRlcnJ1cHRpYmxlKCZob3N0LT5tcnFfbG9jayk7DQo+ID4gICAgIGlm
+IChyZXQpDQo+ID4gICAgICAgICAgcmV0dXJuOw0KPiA+DQo+ID4gICAgICAgICBCZWxvdyBpcyBt
+eSBtb2RpZmljYXRpb246DQo+ID4gLiAgICBtdXRleF9sb2NrKCZob3N0LT5tcnFfbG9jayk7DQo+
+IA0KPiBUaGF0IGFkZHJlc3NlcyB0aGUgcHJvYmxlbSB3aXRoIHRoZSBzaWduYWwgaGFuZGxpbmcs
+IGJ1dCBub3QgdGhlIGxvY2sNCj4gaW1iYWxhbmNlLiBQbGVhc2UgZml4IHRoYXQgYXMgd2VsbC4N
+Cg0KT2ssIEkgd2lsbCBtb2RpZnkgbG9jayBpbWJhbGFuY2UgaXNzdWUuDQoNCj4gPiA+DQo+ID4g
+PiBJdCdzIGJldHRlciB0byB1c2UgU1lTVEVNX1NMRUVQX1BNX09QUy9SVU5USU1FX1BNX09QUyBp
+bnN0ZWFkIG9mDQo+IHRoZQ0KPiA+ID4gU0VUXyB2ZXJzaW9uLCB0aGVuIHlvdSBjYW4gcmVtb3Zl
+IGFsbCB0aGUgI2lmZGVmIGNoZWNrcy4NCj4gPiA+DQo+ID4NCj4gPiAgICAgICAgIEkgdXNlIFNZ
+U1RFTV9TTEVFUF9QTV9PUFMvUlVOVElNRV9QTV9PUFMuDQo+ID4gICAgICAgICBDb21waWxlIHNo
+b3dzIGVycm9yLiBFcnJvcjogaW1wbGljaXQgZGVjbGFyYXRpb24gb2YgZnVuY3Rpb24gPyA/DQo+
+IFNZU1RFTV9TTEVFUF9QTV9PUFM/ID8gRGlkIHlvdSBtZWFuID8gPyBTRVRfU1lTVEVNX1NMRUVQ
+X1BNX09QUz8gPw0KPiBbLVdlcnJvcj1pbXBsaWNpdC1mdW5jdGlvbi1kZWNsYXJhdGlvbl0NCj4g
+DQo+IE1heWJlIHlvdSBhcmUgb24gYW4gb2xkIGtlcm5lbCByZWxlYXNlPw0KPiANCg0KT0ssSSB3
+aWxsIHVzZSBuZXcga2VybmVsIHJlbGVhc2UgdG8gY29tcGlsZXIuDQoNCj4gPiAgICAgICAgIEkg
+cmVmZXJlbmNlIG90aGVyIG1tYyBkcml2ZXIuDQo+ID4gICAgICAgICBCZWxvdyBpcyBteSBtb2Rp
+ZmljYXRpb246DQo+ID4gICAgIENvbXBpbGVyIGlzIHBhc3MuDQo+ID4NCj4gPiAgICAgICAgICNp
+ZmRlZiBDT05GSUdfUE1fU0xFRVANCj4gPiAgICAgICAgIHN0YXRpYyBpbnQgc3BtbWNfcG1fc3Vz
+cGVuZChzdHJ1Y3QgZGV2aWNlICpkZXYpDQo+ID4gICAgICAgICB7DQo+ID4gICAgICAgICAgICAg
+ICAgIHBtX3J1bnRpbWVfZm9yY2Vfc3VzcGVuZChkZXYpOw0KPiA+DQo+ID4gICAgICAgICAgICAg
+ICAgIHJldHVybiAwOw0KPiA+ICAgICAgICAgfQ0KPiANCj4gV2Ugc2hvdWxkIGZpeCB0aGUgb3Ro
+ZXIgZHJpdmVycyBhcyB3ZWxsLiBGb3IgdGhlIG1vbWVudCwganVzdCBkbyBpdCB0aGUgcmlnaHQN
+Cj4gd2F5IG5vdyBpbnN0ZWFkIG9mIGNvcHlpbmcgdGhlICNpZmRlZnMuDQo+IA0KT0ssIEkgd2ls
+bCBmb2xsb3cgcmlnaHQgd2F5IHRvIHJlbW92ZSAjaWZkZWYuDQoNCg0KDQo=
