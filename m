@@ -2,103 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E523C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 00:53:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D69EC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 02:18:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231624AbiDAAzY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 20:55:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49376 "EHLO
+        id S238832AbiDACUJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Mar 2022 22:20:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58220 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230257AbiDAAzX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 20:55:23 -0400
-Received: from mg.sunplus.com (mswedge1.sunplus.com [60.248.182.113])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 12DF15131A;
-        Thu, 31 Mar 2022 17:53:29 -0700 (PDT)
-X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
-        ,3)
-Received: from 172.17.9.112
-        by mg01.sunplus.com with MailGates ESMTP Server V5.0(8686:0:AUTH_RELAY)
-        (envelope-from <tony.huang@sunplus.com>); Fri, 01 Apr 2022 08:53:05 +0800 (CST)
-Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
- sphcmbx02.sunplus.com.tw (172.17.9.112) with Microsoft SMTP Server (TLS) id
- 15.0.1497.26; Fri, 1 Apr 2022 08:53:01 +0800
-Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
- sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
- 15.00.1497.026; Fri, 1 Apr 2022 08:53:01 +0800
-From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
-To:     Arnd Bergmann <arnd@arndb.de>
-CC:     Tony Huang <tonyhuang.sunplus@gmail.com>,
+        with ESMTP id S238038AbiDACUJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 22:20:09 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DE5F192BA;
+        Thu, 31 Mar 2022 19:18:19 -0700 (PDT)
+X-UUID: b491eb1115b14c9188e725920ef79dbd-20220401
+X-UUID: b491eb1115b14c9188e725920ef79dbd-20220401
+Received: from mtkexhb02.mediatek.inc [(172.21.101.103)] by mailgw02.mediatek.com
+        (envelope-from <tinghan.shen@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 1063335137; Fri, 01 Apr 2022 10:18:10 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Fri, 1 Apr 2022 10:18:08 +0800
+Received: from mtksdccf07 (172.21.84.99) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Fri, 1 Apr 2022 10:18:08 +0800
+Message-ID: <53cb53b8614aa39e0785b99f46b708ad201c3dd8.camel@mediatek.com>
+Subject: Re: [PATCH v13 1/2] dt-bindings: mmc: mtk-sd: increase reg items
+From:   Tinghan Shen <tinghan.shen@mediatek.com>
+To:     Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "lhjeff911@gmail.com" <lhjeff911@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
-        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
-Subject: RE: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Topic: [PATCH v5 2/2] mmc: Add mmc driver for Sunplus SP7021
-Thread-Index: AQHYQ3s7ORyaR4vCu0uQF2nts2U94azV8Q6AgAM9naD//5VMAIABeSpQ
-Date:   Fri, 1 Apr 2022 00:53:01 +0000
-Message-ID: <b93772c707074f14ae3f2eeaf5e348ab@sphcmbx02.sunplus.com.tw>
-References: <cover.1648551070.git.tonyhuang.sunplus@gmail.com>
- <46aad49867912fc57b669fc54fdb28638cccfcd9.1648551070.git.tonyhuang.sunplus@gmail.com>
- <CAK8P3a0CLA33CTerXJ=bK+myhyHp_utoLnTX-NzMgjeb7icAGg@mail.gmail.com>
- <7c4b66f7fe4940cba1b0158803767f6e@sphcmbx02.sunplus.com.tw>
- <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
-In-Reply-To: <CAK8P3a3edkGMyypwchiJjHDvO4ro6RsOvrhUbEDmP1Obs94mXw@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [172.25.108.54]
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        "Rob Herring" <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>
+CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
+        <ryder.lee@kernel.org>, <wenst@chromium.org>,
+        <chunfeng.yun@mediatek.com>
+Date:   Fri, 1 Apr 2022 10:18:08 +0800
+In-Reply-To: <aebbb5c8-1d27-5e66-e18a-e2b647bc8cb4@gmail.com>
+References: <20220330094532.21721-1-tinghan.shen@mediatek.com>
+         <20220330094532.21721-2-tinghan.shen@mediatek.com>
+         <aebbb5c8-1d27-5e66-e18a-e2b647bc8cb4@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RGVhciBBcm5kOg0KDQo+IDx0b255Lmh1YW5nQHN1bnBsdXMuY29tPiB3cm90ZToNCj4gPiA+ID4g
-K3N0YXRpYyB2b2lkIHNwbW1jX3JlcXVlc3Qoc3RydWN0IG1tY19ob3N0ICptbWMsIHN0cnVjdA0K
-PiA+ID4gPiArbW1jX3JlcXVlc3QNCj4gPiA+ID4gKyptcnEpIHsNCj4gPiA+ID4gKyAgICAgICBz
-dHJ1Y3Qgc3BtbWNfaG9zdCAqaG9zdCA9IG1tY19wcml2KG1tYyk7DQo+ID4gPiA+ICsgICAgICAg
-c3RydWN0IG1tY19kYXRhICpkYXRhOw0KPiA+ID4gPiArICAgICAgIHN0cnVjdCBtbWNfY29tbWFu
-ZCAqY21kOw0KPiA+ID4gPiArICAgICAgIGludCByZXQ7DQo+ID4gPiA+ICsNCj4gPiA+ID4gKyAg
-ICAgICByZXQgPSBtdXRleF9sb2NrX2ludGVycnVwdGlibGUoJmhvc3QtPm1ycV9sb2NrKTsNCj4g
-PiA+ID4gKyAgICAgICBpZiAocmV0KQ0KPiA+ID4gPiArICAgICAgICAgICAgICAgcmV0dXJuOw0K
-PiA+ID4NCj4gPiA+IEkgZG9uJ3QgdGhpbmsgaXQncyB2YWxpZCB0byBqdXN0IHJldHVybiBoZXJl
-IHdoZW4geW91IGdldCBhIHNpZ25hbC4NCj4gPiA+IElmIG5vdGhpbmcgY2FuIGhhbmRsZSB0aGUg
-c2lnbmFsLCBkb2Vzbid0IGl0IGp1c3QgaGFuZz8NCj4gPiA+DQo+ID4gPiBJdCBhbHNvIGFwcGVh
-cnMgdGhhdCB5b3UgZG9uJ3QgcmVsZWFzZSB0aGUgbXV0ZXggdW50aWwgdGhlIHRhc2tsZXQNCj4g
-PiA+IHJ1bnMsIGJ1dCBpdCBpcyBub3QgdmFsaWQgdG8gcmVsZWFzZSBhIG11dGV4IGZyb20gYSBk
-aWZmZXJlbnQgY29udGV4dC4NCj4gPiA+DQo+ID4gPiBZb3Ugc2hvdWxkIGdldCBhIHdhcm5pbmcg
-YWJvdXQgdGhpcyB3aGVuIHJ1bm5pbmcgYSBrZXJuZWwgd2l0aA0KPiA+ID4gbG9ja2RlcCBlbmFi
-bGVkIGF0IGNvbXBpbGUgdGltZS4gUGxlYXNlIHJld29yayB0aGUgbG9ja2luZyB0byBtYWtlIHRo
-aXMNCj4gd29yay4NCj4gPiA+DQo+ID4gICAgICAgICBSZW9tdmUgY29kZToNCj4gPiAgICAgcmV0
-ID0gbXV0ZXhfbG9ja19pbnRlcnJ1cHRpYmxlKCZob3N0LT5tcnFfbG9jayk7DQo+ID4gICAgIGlm
-IChyZXQpDQo+ID4gICAgICAgICAgcmV0dXJuOw0KPiA+DQo+ID4gICAgICAgICBCZWxvdyBpcyBt
-eSBtb2RpZmljYXRpb246DQo+ID4gLiAgICBtdXRleF9sb2NrKCZob3N0LT5tcnFfbG9jayk7DQo+
-IA0KPiBUaGF0IGFkZHJlc3NlcyB0aGUgcHJvYmxlbSB3aXRoIHRoZSBzaWduYWwgaGFuZGxpbmcs
-IGJ1dCBub3QgdGhlIGxvY2sNCj4gaW1iYWxhbmNlLiBQbGVhc2UgZml4IHRoYXQgYXMgd2VsbC4N
-Cg0KT2ssIEkgd2lsbCBtb2RpZnkgbG9jayBpbWJhbGFuY2UgaXNzdWUuDQoNCj4gPiA+DQo+ID4g
-PiBJdCdzIGJldHRlciB0byB1c2UgU1lTVEVNX1NMRUVQX1BNX09QUy9SVU5USU1FX1BNX09QUyBp
-bnN0ZWFkIG9mDQo+IHRoZQ0KPiA+ID4gU0VUXyB2ZXJzaW9uLCB0aGVuIHlvdSBjYW4gcmVtb3Zl
-IGFsbCB0aGUgI2lmZGVmIGNoZWNrcy4NCj4gPiA+DQo+ID4NCj4gPiAgICAgICAgIEkgdXNlIFNZ
-U1RFTV9TTEVFUF9QTV9PUFMvUlVOVElNRV9QTV9PUFMuDQo+ID4gICAgICAgICBDb21waWxlIHNo
-b3dzIGVycm9yLiBFcnJvcjogaW1wbGljaXQgZGVjbGFyYXRpb24gb2YgZnVuY3Rpb24gPyA/DQo+
-IFNZU1RFTV9TTEVFUF9QTV9PUFM/ID8gRGlkIHlvdSBtZWFuID8gPyBTRVRfU1lTVEVNX1NMRUVQ
-X1BNX09QUz8gPw0KPiBbLVdlcnJvcj1pbXBsaWNpdC1mdW5jdGlvbi1kZWNsYXJhdGlvbl0NCj4g
-DQo+IE1heWJlIHlvdSBhcmUgb24gYW4gb2xkIGtlcm5lbCByZWxlYXNlPw0KPiANCg0KT0ssSSB3
-aWxsIHVzZSBuZXcga2VybmVsIHJlbGVhc2UgdG8gY29tcGlsZXIuDQoNCj4gPiAgICAgICAgIEkg
-cmVmZXJlbmNlIG90aGVyIG1tYyBkcml2ZXIuDQo+ID4gICAgICAgICBCZWxvdyBpcyBteSBtb2Rp
-ZmljYXRpb246DQo+ID4gICAgIENvbXBpbGVyIGlzIHBhc3MuDQo+ID4NCj4gPiAgICAgICAgICNp
-ZmRlZiBDT05GSUdfUE1fU0xFRVANCj4gPiAgICAgICAgIHN0YXRpYyBpbnQgc3BtbWNfcG1fc3Vz
-cGVuZChzdHJ1Y3QgZGV2aWNlICpkZXYpDQo+ID4gICAgICAgICB7DQo+ID4gICAgICAgICAgICAg
-ICAgIHBtX3J1bnRpbWVfZm9yY2Vfc3VzcGVuZChkZXYpOw0KPiA+DQo+ID4gICAgICAgICAgICAg
-ICAgIHJldHVybiAwOw0KPiA+ICAgICAgICAgfQ0KPiANCj4gV2Ugc2hvdWxkIGZpeCB0aGUgb3Ro
-ZXIgZHJpdmVycyBhcyB3ZWxsLiBGb3IgdGhlIG1vbWVudCwganVzdCBkbyBpdCB0aGUgcmlnaHQN
-Cj4gd2F5IG5vdyBpbnN0ZWFkIG9mIGNvcHlpbmcgdGhlICNpZmRlZnMuDQo+IA0KT0ssIEkgd2ls
-bCBmb2xsb3cgcmlnaHQgd2F5IHRvIHJlbW92ZSAjaWZkZWYuDQoNCg0KDQo=
+Hi Matthias,
+
+On Thu, 2022-03-31 at 12:54 +0200, Matthias Brugger wrote:
+> 
+> On 30/03/2022 11:45, Tinghan Shen wrote:
+> > MediaTek has a new version of mmc IP since mt8183. Some IO registers
+> > are moved to top to improve hardware design and named as "host top
+> > registers".
+> > 
+> > Add host top register in the reg binding description for mt8183 and
+> > successors.
+> > 
+> > Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> > Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
+> > ---
+> >   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 15 ++++++++++++++-
+> >   1 file changed, 14 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > index 297ada03e3de..2a2e9fa8c188 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > @@ -40,7 +40,10 @@ properties:
+> >             - const: mediatek,mt8183-mmc
+> >   
+> >     reg:
+> > -    maxItems: 1
+> > +    minItems: 1
+> 
+>  From my understanding adding minItems is correct, but you need to add also 
+> maxItems: 2 as there can't be more then two register entries.
+> 
+> Regards,
+> Matthias
+> 
+
+After add "maxItems: 2", I get following message when doing dt_binding_check.
+from this message, it looks like that maxItems is not necessary.
+
+/proj/mtk15399/2cros/src/third_party/kernel/v5.10/Documentation/devicetree/bindings/mmc/mtk-sd.yaml: 
+properties:reg: {'minItems': 1, 'maxItems': 2, 'items': [{'description': 'base register
+(required).'}, {'description': 'top base register (required for MT8183).'}]} should not be valid
+under {'required': ['maxItems']}
+        hint: "maxItems" is not needed with an "items" list
+        from schema $id: http://devicetree.org/meta-schemas/items.yaml#
+  SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+
+Best regards,
+Tinghan
+
+> > +    items:
+> > +      - description: base register (required).
+> > +      - description: top base register (required for MT8183).
+> >   
+> >     clocks:
+> >       description:
+> > @@ -168,6 +171,16 @@ required:
+> >     - vmmc-supply
+> >     - vqmmc-supply
+> >   
+> > +if:
+> > +  properties:
+> > +    compatible:
+> > +      contains:
+> > +        const: mediatek,mt8183-mmc
+> > +then:
+> > +  properties:
+> > +    reg:
+> > +      minItems: 2
+> > +
+> >   unevaluatedProperties: false
+> >   
+> >   examples:
+
