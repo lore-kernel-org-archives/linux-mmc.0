@@ -2,285 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D58E0C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 02:19:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8D29C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 09:22:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244018AbiDACVa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Mar 2022 22:21:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34504 "EHLO
+        id S238725AbiDAJYp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Apr 2022 05:24:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242265AbiDACVa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2022 22:21:30 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30D5055482;
-        Thu, 31 Mar 2022 19:19:40 -0700 (PDT)
-X-UUID: e4ab3b337fd44b24b6578b50061434db-20220401
-X-UUID: e4ab3b337fd44b24b6578b50061434db-20220401
-Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw01.mediatek.com
-        (envelope-from <tinghan.shen@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 1335888238; Fri, 01 Apr 2022 10:19:23 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Fri, 1 Apr 2022 10:19:22 +0800
-Received: from mtksdccf07 (172.21.84.99) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Fri, 1 Apr 2022 10:19:22 +0800
-Message-ID: <dbfe7ce524747ed3c3a7ccb8f370ca67cbb12361.camel@mediatek.com>
-Subject: Re: [PATCH v13 2/2] arm64: dts: Add mediatek SoC mt8195 and
- evaluation board
-From:   Tinghan Shen <tinghan.shen@mediatek.com>
-To:     Chunfeng Yun <chunfeng.yun@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "Rob Herring" <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        <ryder.lee@kernel.org>, <wenst@chromium.org>,
-        Seiya Wang <seiya.wang@mediatek.com>
-Date:   Fri, 1 Apr 2022 10:19:22 +0800
-In-Reply-To: <58f498a19f6c7be85823b2e2d5955272e78f0176.camel@mediatek.com>
-References: <20220330094532.21721-1-tinghan.shen@mediatek.com>
-         <20220330094532.21721-3-tinghan.shen@mediatek.com>
-         <58f498a19f6c7be85823b2e2d5955272e78f0176.camel@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        with ESMTP id S1344484AbiDAJYm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2022 05:24:42 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75230269374
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Apr 2022 02:22:51 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id k21so3781256lfe.4
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2022 02:22:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=kqDhQ6uz5tP7E/u76ETFJKOp+CrWLSoKcxKKyX0RqW4=;
+        b=VvgYSKL81nZLAs4hoT9cuIsMhmP8h+p1g8wsI7YmSZnBeQWKpXBsjn0tFPK6mWo+U2
+         38yZO++R3yRrPbTkM8dEjkga/lPr9tEW/5pUICD57kN2HDO3BhHC5axSG09Ik5EDogUC
+         odEYy8MIWeo6kBwh2h5eip/pRRkKQhCifIcNTOZB3KSe2PCRUY+eZnDarzCNA6n2gYST
+         SOkZAmrZ5l3VSV9pwY4R233uVdLQNubqwwsEHybGBF3sXnxmo5DLZK7DHk/Hj+e+73GQ
+         p8Fz+9RGcb5+Sjw4wE9P5FkohTTgEP7sHGYookmt7H+nWkL+ROTUng18DaKcREcp96yR
+         6G4w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=kqDhQ6uz5tP7E/u76ETFJKOp+CrWLSoKcxKKyX0RqW4=;
+        b=gX0l3fKG93k5c0j6R5k5nkBLXs9UZ/IvYJIsb3plfUJ7ZFEgm23mEnJLRE8wMUqZv1
+         tMuYpTTAjLpBTjsHrUOAjv4GhR0EUjJsy0D+OVDrkLSsuiUyZpW0yk4xDz7H7U4Blx57
+         rVeedI+nPk40alxrun/3Z7w+dgqvlD+PlaA1kcXXXYiTgN8+IlVZhCN9n4TJsDCkPhYk
+         WHQb0dS3cpF3ltZ2mwIvWFGNKwWxy3arw2ma5jTszJ8B2kVdfGxJFoDrhAyzkkbgvMGU
+         u660EdKHt58JLpMyS8FFUV8dNeeKZ8zOhDW1HZsyl37V5drNtZAagUhpYRGSmotOWxDq
+         lY4w==
+X-Gm-Message-State: AOAM533kwdsQmWMCND0UEaKZIz+MRKB82N/nmSGPd+IpW5ptDKp8J5CP
+        DhsHkP8ieyTVJNDIWp8csw6xAkcybjcRQEmuAZCRDw==
+X-Google-Smtp-Source: ABdhPJwJrDnSzRPA1QW45MFiPs0C/KCemCmZtTlay3kzIbYxlsxllBZdkUFbUM0hK5gl/cOTN43YhXEhrJYg4D4w6LI=
+X-Received: by 2002:a05:6512:3b0e:b0:44a:547d:c8b8 with SMTP id
+ f14-20020a0565123b0e00b0044a547dc8b8mr13429451lfv.373.1648804969656; Fri, 01
+ Apr 2022 02:22:49 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+References: <20220329032913.8750-1-axe.yang@mediatek.com> <20220329032913.8750-2-axe.yang@mediatek.com>
+In-Reply-To: <20220329032913.8750-2-axe.yang@mediatek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 1 Apr 2022 11:22:13 +0200
+Message-ID: <CAPDyKFqoTN1pF-L6qCHxpdMCmPtHP0aHHaDURN2QJsN3v+wZBw@mail.gmail.com>
+Subject: Re: [PATCH v9 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
+ pinctrls properties
+To:     Axe Yang <axe.yang@mediatek.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2022-03-31 at 15:29 +0800, Chunfeng Yun wrote:
-> On Wed, 2022-03-30 at 17:45 +0800, Tinghan Shen wrote:
-> > Add basic chip support for mediatek mt8195.
-> > 
-> > Signed-off-by: Seiya Wang <seiya.wang@mediatek.com>
-> > Signed-off-by: Tinghan Shen <tinghan.shen@mediatek.com>
-> > Reviewed-by: AngeloGioacchino Del Regno <
-> > angelogioacchino.delregno@collabora.com>
-> > ---
-> >  arch/arm64/boot/dts/mediatek/Makefile       |    1 +
-> >  arch/arm64/boot/dts/mediatek/mt8195-evb.dts |  173 +++
-> >  arch/arm64/boot/dts/mediatek/mt8195.dtsi    | 1045
-> > +++++++++++++++++++
-> >  3 files changed, 1219 insertions(+)
-> >  create mode 100644 arch/arm64/boot/dts/mediatek/mt8195-evb.dts
-> >  create mode 100644 arch/arm64/boot/dts/mediatek/mt8195.dtsi
-> > 
-> > diff --git a/arch/arm64/boot/dts/mediatek/Makefile
-> > b/arch/arm64/boot/dts/mediatek/Makefile
-> > index 8c1e18032f9f..5da29e7223e4 100644
-> > --- a/arch/arm64/boot/dts/mediatek/Makefile
-> > +++ b/arch/arm64/boot/dts/mediatek/Makefile
-> > @@ -38,4 +38,5 @@ dtb-$(CONFIG_ARCH_MEDIATEK) += mt8183-kukui-krane-
-> > sku0.dtb
-> >  dtb-$(CONFIG_ARCH_MEDIATEK) += mt8183-kukui-krane-sku176.dtb
-> >  dtb-$(CONFIG_ARCH_MEDIATEK) += mt8183-pumpkin.dtb
-> >  dtb-$(CONFIG_ARCH_MEDIATEK) += mt8192-evb.dtb
-> > +dtb-$(CONFIG_ARCH_MEDIATEK) += mt8195-evb.dtb
-> >  dtb-$(CONFIG_ARCH_MEDIATEK) += mt8516-pumpkin.dtb
-> > diff --git a/arch/arm64/boot/dts/mediatek/mt8195-evb.dts
-> > b/arch/arm64/boot/dts/mediatek/mt8195-evb.dts
-> > new file mode 100644
-> > index 000000000000..76b5aaad7263
-> > --- /dev/null
-> > +++ b/arch/arm64/boot/dts/mediatek/mt8195-evb.dts
-> > @@ -0,0 +1,173 @@
-> > +// SPDX-License-Identifier: (GPL-2.0 OR MIT)
-> > +/*
-> > + * Copyright (C) 2021 MediaTek Inc.
-> > + * Author: Seiya Wang <seiya.wang@mediatek.com>
-> > + */
-> > +/dts-v1/;
-> > +#include "mt8195.dtsi"
-> > +
-> > +/ {
-> > +	model = "MediaTek MT8195 evaluation board";
-> > +	compatible = "mediatek,mt8195-evb", "mediatek,mt8195";
-> > +
-> > +	aliases {
-> > +		serial0 = &uart0;
-> > +	};
-> > +
-> > +	chosen {
-> > +		stdout-path = "serial0:921600n8";
-> > +	};
-> > +
-> > +	memory@40000000 {
-> > +		device_type = "memory";
-> > +		reg = <0 0x40000000 0 0x80000000>;
-> > +	};
-> > +};
-> > +
-> > +&auxadc {
-> > +	status = "okay";
-> > +};
-> > +
-> > +&i2c0 {
-> > +	pinctrl-names = "default";
-> > +	pinctrl-0 = <&i2c0_pin>;
-> > +	clock-frequency = <100000>;
-> > +	status = "okay";
-> > +};
-> > +
-> > +&i2c1 {
-> > +	pinctrl-names = "default";
-> > +	pinctrl-0 = <&i2c1_pin>;
-> > +	clock-frequency = <400000>;
-> > +	status = "okay";
-> > +};
-> > +
-> > +&i2c4 {
-> > +	pinctrl-names = "default";
-> > +	pinctrl-0 = <&i2c4_pin>;
-> > +	clock-frequency = <400000>;
-> > +	status = "okay";
-> > +};
-> > +
-> > +&i2c6 {
-> > +	pinctrl-names = "default";
-> > +	pinctrl-0 = <&i2c6_pin>;
-> > +	clock-frequency = <400000>;
-> > +	status = "okay";
-> > +};
-> > +
-> > +&nor_flash {
-> > +	status = "okay";
-> > +	pinctrl-names = "default";
-> > +	pinctrl-0 = <&nor_pins_default>;
-> > +
-> > +	flash@0 {
-> > +		compatible = "jedec,spi-nor";
-> > +		reg = <0>;
-> > +		spi-max-frequency = <50000000>;
-> > +	};
-> > +};
-> > +
-> > +&pio {
-> > +	i2c0_pin: i2c0-pins {
-> > +		pins {
-> > +			pinmux = <PINMUX_GPIO8__FUNC_SDA0>,
-> > +				 <PINMUX_GPIO9__FUNC_SCL0>;
-> > +			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-> > +			mediatek,drive-strength-adv = <0>;
-> > +			drive-strength = <6>;
-> > +		};
-> > +	};
-> > +
-> > +	i2c1_pin: i2c1-pins {
-> > +		pins {
-> > +			pinmux = <PINMUX_GPIO10__FUNC_SDA1>,
-> > +				 <PINMUX_GPIO11__FUNC_SCL1>;
-> > +			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-> > +			mediatek,drive-strength-adv = <0>;
-> > +			drive-strength = <6>;
-> > +		};
-> > +	};
-> > +
-> > +	i2c4_pin: i2c4-pins {
-> > +		pins {
-> > +			pinmux = <PINMUX_GPIO16__FUNC_SDA4>,
-> > +				 <PINMUX_GPIO17__FUNC_SCL4>;
-> > +			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-> > +			mediatek,drive-strength-adv = <7>;
-> > +		};
-> > +	};
-> > +
-> > +	i2c6_pin: i2c6-pins {
-> > +		pins {
-> > +			pinmux = <PINMUX_GPIO25__FUNC_SDA6>,
-> > +				 <PINMUX_GPIO26__FUNC_SCL6>;
-> > +			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-> > +		};
-> > +	};
-> > +
-> > +	i2c7_pin: i2c7-pins {
-> > +		pins {
-> > +			pinmux = <PINMUX_GPIO27__FUNC_SCL7>,
-> > +				 <PINMUX_GPIO28__FUNC_SDA7>;
-> > +			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-> > +		};
-> > +	};
-> > +
-> > +	nor_pins_default: nor-pins {
-> > +		pins0 {
-> > +			pinmux = <PINMUX_GPIO142__FUNC_SPINOR_IO0>,
-> > +				 <PINMUX_GPIO141__FUNC_SPINOR_CK>,
-> > +				 <PINMUX_GPIO143__FUNC_SPINOR_IO1>;
-> > +			bias-pull-down;
-> > +		};
-> > +
-> > +		pins1 {
-> > +			pinmux = <PINMUX_GPIO140__FUNC_SPINOR_CS>,
-> > +				 <PINMUX_GPIO130__FUNC_SPINOR_IO2>,
-> > +				 <PINMUX_GPIO131__FUNC_SPINOR_IO3>;
-> > +			bias-pull-up;
-> > +		};
-> > +	};
-> > +
-> > +	uart0_pin: uart0-pins {
-> > +		pins {
-> > +			pinmux = <PINMUX_GPIO98__FUNC_UTXD0>,
-> > +				 <PINMUX_GPIO99__FUNC_URXD0>;
-> > +		};
-> > +	};
-> > +};
-> > +
-> > +&u3phy0 {
-> > +	status="okay";
-> > +};
-> > +
-> > +&u3phy1 {
-> > +	status="okay";
-> > +};
-> 
-> Seems forget to enable &phy2/3? due to xhci2/3 are enabled below
+On Tue, 29 Mar 2022 at 05:29, Axe Yang <axe.yang@mediatek.com> wrote:
+>
+> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
+> This feature allow SDIO devices alarm asynchronous interrupt to host
+> even when host stop providing clock to SDIO card. An extra wakeup
+> interrupt and pinctrl states for SDIO DAT1 pin state switching are
+> required in this scenario.
+>
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> ---
+>  .../devicetree/bindings/mmc/mtk-sd.yaml         | 17 ++++++++++++++++-
+>  1 file changed, 16 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index 297ada03e3de..3872a6ce2867 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -69,12 +69,22 @@ properties:
+>        - const: ahb_cg
+>
+>    interrupts:
+> -    maxItems: 1
+> +    description:
+> +      Should at least contain MSDC GIC interrupt. To support SDIO in-band wakeup, an extended
+> +      interrupt is required and be configured as wakeup source irq.
 
-Ok, I'll add them at next version.
-Thank you.
+If I understand correctly, the extended interrupt (a GPIO irq) may not
+necessarily share the same interrupt parent as the primary device
+interrupt.
 
-Best regards,
-Tinghan
+Perhaps it's then better to extend this with "interrupts-extended"
+instead. See Documentation/devicetree/bindings/interrupt-controller/interrupts.txt.
 
-> 
-> > +
-> > +&uart0 {
-> > +	pinctrl-names = "default";
-> > +	pinctrl-0 = <&uart0_pin>;
-> > +	status = "okay";
-> > +};
-> > +
-> > +&xhci0 {
-> > +	status = "okay";
-> > +};
-> > +
-> > +&xhci1 {
-> > +	status = "okay";
-> > +};
-> > +
-> > +&xhci2 {
-> > +	status = "okay";
-> > +};
-> > +
-> > +&xhci3 {
-> > +	/* This controller is connected with a BT device.
-> > +	 * Disable usb2 lpm to prevent known issues.
-> > +	 */
-> > +	usb2-lpm-disable;
-> > +	status = "okay";
-> > +};
-> > 
-> 
-> [skip]
-> 
+> +    minItems: 1
+> +    maxItems: 2
+>
+>    pinctrl-names:
+> +    description:
+> +      Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin
+> +      will be switched between GPIO mode and SDIO DAT1 mode, state_eint and state_dat1 are
+> +      mandatory in this scenarios.
+> +    minItems: 2
+>      items:
+>        - const: default
+>        - const: state_uhs
+> +      - const: state_eint
+>
+>    pinctrl-0:
+>      description:
+> @@ -86,6 +96,11 @@ properties:
+>        should contain uhs mode pin ctrl.
+>      maxItems: 1
+>
+> +  pinctrl-2:
+> +    description:
+> +      should switch dat1 pin to GPIO mode.
+> +    maxItems: 1
+> +
+>    assigned-clocks:
+>      description:
+>        PLL of the source clock.
+> --
+> 2.25.1
+>
 
+Kind regards
+Uffe
