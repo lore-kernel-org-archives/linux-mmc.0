@@ -2,79 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6924C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 15:55:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0224DC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 15:55:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346381AbiDAP46 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Apr 2022 11:56:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37570 "EHLO
+        id S1348126AbiDAP5C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Apr 2022 11:57:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350018AbiDAPRY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2022 11:17:24 -0400
+        with ESMTP id S1354642AbiDAPpd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2022 11:45:33 -0400
 Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E93211C35
-        for <linux-mmc@vger.kernel.org>; Fri,  1 Apr 2022 08:00:22 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B91E86A029
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Apr 2022 08:20:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=7Ug2uL5ohGsqoMIYzk2mt/x/mM6K
-        Qi9tWaXz2iDwO6Q=; b=WKZ8pk0NdTyAcN2y9e+qYKZDZikbNAo022jzITMe7GxX
-        j3hrh8Tz3zmUXpujn3RhSHgkyIeOfPQvLyoH6osRaGNbGA5UU2X8X01u9saM6JJa
-        4nFmzshWildwpbG5b0k07vM6p/Jegw49yb4HDOJtNBcs/yEi+m2T5SYpAamDqyI=
-Received: (qmail 777783 invoked from network); 1 Apr 2022 17:00:20 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2022 17:00:20 +0200
-X-UD-Smtp-Session: l3s3148p1@if6JCZnbLKYgAQnoAGGbAFirbAEmXd1u
-Date:   Fri, 1 Apr 2022 17:00:19 +0200
+        :content-type:in-reply-to; s=k1; bh=FEFxfssSSTU22YXch7aVrtelpaE7
+        WagHES7sL502rZY=; b=Ziz9m6B1gzVQe1cPSM8+XVqJcbrztrHyNP2UDvUnVShN
+        YuGTd2peo4vynJTtteFDOswuel+Y7bM4mTdxJaYN/LI2Pasebj+8s2WNjdk6fpuh
+        wUcgUUtgi7xxCveP53JS9iMpewnH6/wni9mHNKzxmVB1fvnRI4siVf6YTqbdUiw=
+Received: (qmail 784814 invoked from network); 1 Apr 2022 17:20:50 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2022 17:20:50 +0200
+X-UD-Smtp-Session: l3s3148p1@s/7hUpnbNKYgAQnoAGGbAFirbAEmXd1u
+Date:   Fri, 1 Apr 2022 17:20:49 +0200
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     Geert Uytterhoeven <geert@linux-m68k.org>
 Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH 6/6] mmc: renesas_sdhi: make 'dmac_only_one_rx' a quirk
-Message-ID: <YkcTg8j9KCDXKvM9@ninjato>
+Subject: Re: [PATCH 2/6] mmc: renesas_sdhi: R-Car D3 also has no HS400
+Message-ID: <YkcYUatquGqQHynX@ninjato>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 References: <20220320123016.57991-1-wsa+renesas@sang-engineering.com>
- <20220320123016.57991-7-wsa+renesas@sang-engineering.com>
- <CAMuHMdWdtCsfVHYi4zqAMgN9wzDmwFpXs5VkJG4G0iXvuhSVKA@mail.gmail.com>
+ <20220320123016.57991-3-wsa+renesas@sang-engineering.com>
+ <CAMuHMdUso+a2UqMTZByGQryj+GvT4go4GB9EOM60D1Ue9oMi_A@mail.gmail.com>
+ <YkcTQCZceQcRQo5A@ninjato>
+ <CAMuHMdWDPncJ7Rny6ZOxbgUMnTJPzyu6kmmYUUPkHVfuqi=7NA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="fX0erNqFCYR3EWlb"
+        protocol="application/pgp-signature"; boundary="zRyTQKlt48aTGFvG"
 Content-Disposition: inline
-In-Reply-To: <CAMuHMdWdtCsfVHYi4zqAMgN9wzDmwFpXs5VkJG4G0iXvuhSVKA@mail.gmail.com>
+In-Reply-To: <CAMuHMdWDPncJ7Rny6ZOxbgUMnTJPzyu6kmmYUUPkHVfuqi=7NA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---fX0erNqFCYR3EWlb
+--zRyTQKlt48aTGFvG
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
 
-> If there are no quirks (yes, we do have such systems ;-), this will
+> BTW, SDHI0 and SDHI1 don't have the DS signal neither.
+> Does that mean we never support HS400 on these?
 
-Wow, seems that slipped my reality :D Thanks for catching!
+Yes, those don't even support eMMC.
+
+> We do have SD0H and SD1H clocks.
+> Upstream DTS uses at most sd-uhs-sdr104 on SDHI[01].
+
+Yes, SDnH (and SCC) is also needed for SDR104.
 
 
---fX0erNqFCYR3EWlb
+--zRyTQKlt48aTGFvG
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJHE4MACgkQFA3kzBSg
-KbbEehAAtf+TYw+cBp78KrL2z+3m0sLeO6m2QzfA1d0d3l2OZmL5zq35qvAzVoWn
-xidZdglIHro+XtcwOg1nDmjVIn2eeybbeSBkIllMwxtNoOirZQvmbBg3nbuKwh68
-XnAl8C0P7+4J3miSvoN6ms+1RYWQkZ/q/YQ8byOjUk3rEN3BLywGOO/V1O/0mn8p
-mFaxrQqkNV/PHNd3+Gw6mQweqS7YcmIVoCFxFRcjZ6DrKpSl6bAM05kEbwQS3HeJ
-FjUiAbff5f5Lv+3NDP5mY3F+ywtx8aSpfAjkiCYCalriCvzqfqOrlCbMs2mUJDEV
-ABlcgsSEfyBIx+cb6pO7BAvIn9GWQv5tMXA0cT6Dt3rWGATp9C4mn+gS6GV+qf/M
-kEk+4BcjfPrz0Vz59aPZx6smLLJ4SYyx6YUINv5rP608IdNRzUaAAfgibDq6jfuq
-Yj0S47SgGoT01hphpvhJNTgIXNoeUowCDkirUVn97/wh+6EKHTP8Sm78i/0JcFIj
-Ojo0MGkvxPz3IovrtwoCiaSsZk4lKPRTL6WaCtJAUGOjCazPar9ziNwrzvyBU31k
-y7CWbIywZJyb+WdJGkRhfjnRSIo2aCepNUBH6foBPJFMkwlF1nxkAjBhichatSxv
-7pj+vglfhktTgIoK14qDnypgqyAZpbyG0k9sId3fKxmRACUBVIY=
-=iA70
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJHGFEACgkQFA3kzBSg
+KbaiMhAAlPO2o/VoeXigCGmDrnKFz+QOl8rQa0+s/+yjT7mvLmEs4G5EmaYweRcv
+tiVcMjYqGvj3PPK2/B/k50akz1SxDick2KrOOShwQuUb0amAcX8VwWAWIsaQG6Eo
+cDMKsYGZqSDtRSVTzu/8A00zMzLuL3vi+4QK28XLnScJj385veRq/EP9k4qaYpmF
+sh8EJ/C2J5Weq3REDSxiBD3CYMRurxlsPtyqjOj1Ld0mFlOza/+jN0Befrafg4rS
+yoD5TmKVm/bOgxMZBUx6g9eTyyYqw94nHnePXt6iDYSp5wEDCGeVMyGQ8SBdA8bG
+MveI96dExvS6Gt8RTBbhAVyA6Qi8qtkKPP7vPzRV2X8+71TpqmyO2Q6gt8cx25km
+3ED5w9JTwqrInqteaYYO8FIA1reiWwYmr4SL7cL9WthLmcWstdLhwDjfXbk6DsCV
+Ts7+PO73oqVuGaaStmVlezDyW9N71Xy9h92qtn/qXrZOxOcoZE+dyrHXPis/Eu41
+YRUBbgJnpvFxbQ1xkAZrNrDyExbJSf1WYI7IkDsYpQnNgGyE2DEMXNOD/vmy+iUJ
+zPw90FMCKs9sL3AX9ReeHfI3zXfVUHoIYeZOtuIMxrp1LgJ7tp81d2xfkOXSrSEv
+0dz9c7aw6cYjMD+jZDD+zewIGsasYSrWY7S6EYvrOzfJIsZwN58=
+=UH/u
 -----END PGP SIGNATURE-----
 
---fX0erNqFCYR3EWlb--
+--zRyTQKlt48aTGFvG--
