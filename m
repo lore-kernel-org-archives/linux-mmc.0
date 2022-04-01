@@ -2,89 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D58B0C43219
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 15:55:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F70CC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Apr 2022 16:28:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348279AbiDAP5G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Apr 2022 11:57:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37904 "EHLO
+        id S235171AbiDAQaM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Apr 2022 12:30:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354867AbiDAPh3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2022 11:37:29 -0400
-Received: from mail-qt1-f180.google.com (mail-qt1-f180.google.com [209.85.160.180])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2CE13CA69;
-        Fri,  1 Apr 2022 08:09:03 -0700 (PDT)
-Received: by mail-qt1-f180.google.com with SMTP id 10so2358557qtz.11;
-        Fri, 01 Apr 2022 08:09:03 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=sQqTiC9OGfhuNjDOSSejZuPTIGOiIJFccJxlppJ7s/s=;
-        b=ibYFc3mOIi2u+VOlRXr0El71X4KKqRYTQ2Ms2ukPPHqaTIuU82bqjQiKYiRQzPspsH
-         fve4X8HzhySp4rJ8nfSOQMUXZVqXLNykruWQ20bnJIMze5JrmwLo9+EJ8nXQ0UwIRDuv
-         clcc2xaRXKMPscJ9QA4bsEMh3IocDCdGpzpgYatp4nAWuoEpHAoLaj4lpSRA6YOXBuYL
-         Nv23l3llq6k7zDRUr2BddHAxm2kAoL8SKdlHH/nes1lLXb6tyl8pcDD+iBpVDDjHKHj3
-         RtxrhjnhNs+XBYYGbkjDQ59JSXxlrkeClm1OIsu22BtnOsAOYqPAzS1XVxfaoQ2yEGXO
-         vr+Q==
-X-Gm-Message-State: AOAM533qXYZqqtdAV9GTMyh4YxJ351x43+ixcTN4kHLpWJDFt6UBsWFO
-        ehai3k9fhC5PXaLMN/KvcVjhSNiXkc4vOA==
-X-Google-Smtp-Source: ABdhPJy5xnXv9zYGi+TNf+Z5I9x8j5JUbhB4m+sg0m3U2TxcIBX5Uzjp6GfvahPSKAevOVSV0PMlBQ==
-X-Received: by 2002:ac8:5e4f:0:b0:2e2:2bad:4252 with SMTP id i15-20020ac85e4f000000b002e22bad4252mr8818055qtx.231.1648825742489;
-        Fri, 01 Apr 2022 08:09:02 -0700 (PDT)
-Received: from mail-yw1-f180.google.com (mail-yw1-f180.google.com. [209.85.128.180])
-        by smtp.gmail.com with ESMTPSA id i18-20020ac85c12000000b002e1ce74f1a8sm2012889qti.27.2022.04.01.08.09.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 01 Apr 2022 08:09:02 -0700 (PDT)
-Received: by mail-yw1-f180.google.com with SMTP id 00721157ae682-2e592e700acso36356047b3.5;
-        Fri, 01 Apr 2022 08:09:02 -0700 (PDT)
-X-Received: by 2002:a81:5c2:0:b0:2e5:e4eb:c3e7 with SMTP id
- 185-20020a8105c2000000b002e5e4ebc3e7mr10694826ywf.62.1648825740763; Fri, 01
- Apr 2022 08:09:00 -0700 (PDT)
+        with ESMTP id S1348969AbiDAQ2E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2022 12:28:04 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 853E924BD0
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Apr 2022 09:01:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=U9mglw3sp1c6pqKAgLM4I/FuCr3Z
+        1BAfVXkgJrKDtg8=; b=Q9/8ssP2OOXjaMTB8JYfM8BWRTrG9VQldVanfMLAHCyj
+        2EvQZ7CSyZGmLOS7LoLqN8xnAOyxjJI6Bc/Ac/qZNH1EWHtbLxvC/IL9KCju+NVV
+        pqFfqDSt6BrAE43ZY5vOdQVJ6pcudDDrdD9amX+OB1B0Q5wJIHzeCBBBEJBrNw8=
+Received: (qmail 794846 invoked from network); 1 Apr 2022 18:01:03 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Apr 2022 18:01:03 +0200
+X-UD-Smtp-Session: l3s3148p1@xqGv4pnbbKYgAQnoAGGbAFirbAEmXd1u
+Date:   Fri, 1 Apr 2022 18:01:03 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: Add missing checks for the presence
+ of quirks
+Message-ID: <Ykchv+A4jijyOtbT@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+References: <cc3178c2ff60f640f4d5a071d51f6b0b1db37656.1648822020.git.geert+renesas@glider.be>
 MIME-Version: 1.0
-References: <20220320123016.57991-1-wsa+renesas@sang-engineering.com>
- <20220320123016.57991-3-wsa+renesas@sang-engineering.com> <CAMuHMdUso+a2UqMTZByGQryj+GvT4go4GB9EOM60D1Ue9oMi_A@mail.gmail.com>
- <YkcTQCZceQcRQo5A@ninjato>
-In-Reply-To: <YkcTQCZceQcRQo5A@ninjato>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 1 Apr 2022 17:08:49 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWDPncJ7Rny6ZOxbgUMnTJPzyu6kmmYUUPkHVfuqi=7NA@mail.gmail.com>
-Message-ID: <CAMuHMdWDPncJ7Rny6ZOxbgUMnTJPzyu6kmmYUUPkHVfuqi=7NA@mail.gmail.com>
-Subject: Re: [PATCH 2/6] mmc: renesas_sdhi: R-Car D3 also has no HS400
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="XPcqMus7IWjHyVZr"
+Content-Disposition: inline
+In-Reply-To: <cc3178c2ff60f640f4d5a071d51f6b0b1db37656.1648822020.git.geert+renesas@glider.be>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
 
-On Fri, Apr 1, 2022 at 4:59 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> > You mean the DS signal?  That also doesn't exist on R-Car V3M, so
-> > shouldn't of_r8a77970_compatible.quirks be set to &sdhi_quirks_nohs400,
-> > too?
->
-> Probably. The BSP contains the DTS of a function board addon for the
-> Eagle board which also enables HS200 only. But I think we should try to
-> ask the Renesas HW team for confirmation. D'accord?
+--XPcqMus7IWjHyVZr
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Sure.
+On Fri, Apr 01, 2022 at 04:09:28PM +0200, Geert Uytterhoeven wrote:
+> When running on an system without any quirks (e.g. R-Car V3U), the
+> kernel crashes with a NULL pointer dereference:
+>=20
+>     Unable to handle kernel NULL pointer dereference at virtual address 0=
+000000000000002
+>     ...
+>     Hardware name: Renesas Falcon CPU and Breakout boards based on r8a779=
+a0 (DT)
+>     Workqueue: events_freezable mmc_rescan
+>     ...
+>     Call trace:
+>      renesas_sdhi_internal_dmac_start_dma+0x54/0x12c
+>      tmio_process_mrq+0x124/0x274
+>=20
+> Fix this by adding the missing checks for the validatity of the
+> priv->quirks pointer.
+>=20
+> Fixes: dce2ba8b2ee8cef6 ("mmc: renesas_sdhi: make 'dmac_only_one_rx' a qu=
+irk")
+> Fixes: d4bfa17a655c6de2 ("mmc: renesas_sdhi: make 'fixed_addr_mode' a qui=
+rk")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-BTW, SDHI0 and SDHI1 don't have the DS signal neither.
-Does that mean we never support HS400 on these?
-We do have SD0H and SD1H clocks.
-Upstream DTS uses at most sd-uhs-sdr104 on SDHI[01].
+Thanks for catching this!
 
-Gr{oetje,eeting}s,
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-                        Geert
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+--XPcqMus7IWjHyVZr
+Content-Type: application/pgp-signature; name="signature.asc"
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJHIb4ACgkQFA3kzBSg
+KbYUig//YrC0ADFQuB6sipgrC3SEYoflvJs4zX/0TwFG6mAtfHRkqD5oG6FCheDy
+Nb3irOdej8JrogtQDWDeiwILKln0JllBm5idrupDczO23ur6wFKvAAwjaBS1vcd5
+9nzbJgCpspsLkPwJKJgA65NCqZ5Q6wy2DsAeYm1SfTp29rZNd5KHh/3iBpBHboK0
+HC00gP+Ce8Y4dZZRFXO58HD0zW1hZOnSzJCYI1pS2VHD8/SOapyzdSwNkgouSt/H
+UnlrO/ILRfRo3Vhd6/O3VA+inuLbG5pjegS8HjhE7q/6wTvP7vJx+D7445PasQeU
+DGyEiJsT/bS43eLW/ARNT3o8i7bRIFQssD2MrA7ANFAYCN0m4PkC6wItnHy98EfV
+gElmyPRTRkRCnBC7cfCgDWw4e5OfDPFwk90ghc8Ts8Qu5WpxLJlHbvQvi+1pVfnc
+N4ssEfzJ3j8VYHQIWK7k7B9QpQWu0WYlRBgl9N10/9TbqIDmStM9OSCFyfp7IDIf
+D0VSNas1xaRMZ+BdayK6bvmHsIKxVwFHe6zgiTpILQj2C64YmTCh4P5DzCCgzK1t
+J3BKKcF5HrK8X9O+m9CF9alqExxMc59UcBMacnvRZucUKs+5vf64bGSxzcFcsBg6
+QoNsmqktT6a5Mtg6vFDr6QhVispFBsPctEVQ0DdD3ebK15mkjS8=
+=STW6
+-----END PGP SIGNATURE-----
+
+--XPcqMus7IWjHyVZr--
