@@ -2,67 +2,75 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC7A7C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Apr 2022 08:16:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52BD4C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Apr 2022 10:05:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238209AbiDDISe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Apr 2022 04:18:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42700 "EHLO
+        id S245061AbiDDKHL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Apr 2022 06:07:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239755AbiDDISd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2022 04:18:33 -0400
-X-Greylist: delayed 334 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 04 Apr 2022 01:16:38 PDT
-Received: from mail.coredeal.pl (mail.coredeal.pl [51.75.73.133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36C9E3B3EF
-        for <linux-mmc@vger.kernel.org>; Mon,  4 Apr 2022 01:16:37 -0700 (PDT)
-Received: by mail.coredeal.pl (Postfix, from userid 1002)
-        id 9D7B7A32EE; Mon,  4 Apr 2022 08:10:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=coredeal.pl; s=mail;
-        t=1649059862; bh=9KGuIG62LgzC9aYmjKxzocuYLRCVghXg6v9Q1q2LHec=;
-        h=Date:From:To:Subject:From;
-        b=sYfub4XTzODduyJcoJnLI6x7KrhySNprvmy4Tyn3gCbZ166Du5GOWNchfHRNGQkEc
-         /8YIQ4vSMl0KkabQPN4xPWhmZ6AK86BSGwwnQGle/TmVVlN7fdpzmGuGwrWd6LbC3n
-         ulu8PWJsRDFHQbQeIMTOvNMD/glM+vjSyTXIG8ANzJssJdpApb2ELb48fUvwq/zcAp
-         NBGY7iWkqgjSGDb7VH+GjHh9LSXJKG2rW+n5/Bn6HM0lfdmLJUveVPLvED3008ysg9
-         gSCXrXeCP9pQ7FXchyBPhPKfKDnlAith8mHOPOG8iKS2WMJGhLaOl9sBUBHtMnIXlx
-         i2pFJ11nSQU7Q==
-Received: by mail.coredeal.pl for <linux-mmc@vger.kernel.org>; Mon,  4 Apr 2022 08:10:30 GMT
-Message-ID: <20220404064500-0.1.2c.c94l.0.d9kk8nmmi7@coredeal.pl>
-Date:   Mon,  4 Apr 2022 08:10:30 GMT
-From:   "Krzysztof Maj" <krzysztof.maj@coredeal.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Biznesowy angielski
-X-Mailer: mail.coredeal.pl
+        with ESMTP id S238223AbiDDKHL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2022 06:07:11 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA3433C49F
+        for <linux-mmc@vger.kernel.org>; Mon,  4 Apr 2022 03:05:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=HkTDaLDxwM8BJY8EUzc+HapY/fj
+        lXBfai++nFeMBJaw=; b=m1VjyYzdsgjG3PiMU/chEIEjO7bfoUiwBOxf76DhJEl
+        Wgfh/fnNDIXoQP4mvAILU2cCyxukZxRM/ocTC7048A+vio5EIGVnoMJMQwL8xBIZ
+        OMAoJy06/ZPQoUZTGEZ72YPECQ/K7rHZebP5QRU6zGGI9OZmPxlQnF/Sy9UQBtlQ
+        =
+Received: (qmail 1811774 invoked from network); 4 Apr 2022 12:05:10 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Apr 2022 12:05:10 +0200
+X-UD-Smtp-Session: l3s3148p1@+V96Q9HbpqQgAQnoAHNmALK3JllQBOZM
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH v2] mmc: renesas_sdhi: special 4tap settings only apply to HS400
+Date:   Mon,  4 Apr 2022 12:05:08 +0200
+Message-Id: <20220404100508.3209-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,=20
+Previous documentation was vague, so we included SDR104 for slow SDnH
+clock settings. It turns out now, that it is only needed for HS400.
 
-czy rozwa=C5=BCali Pa=C5=84stwo rozw=C3=B3j kwalifikacji j=C4=99zykowych =
-swoich pracownik=C3=B3w?
+Fixes: bb6d3fa98a41 ("clk: renesas: rcar-gen3: Switch to new SD clock handling")
+Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+---
 
-Opracowali=C5=9Bmy kursy j=C4=99zykowe dla r=C3=B3=C5=BCnych bran=C5=BC, =
-w kt=C3=B3rych koncentrujemy si=C4=99 na podniesieniu poziomu s=C5=82owni=
-ctwa i jako=C5=9Bci komunikacji wykorzystuj=C4=85c autorsk=C4=85 metod=C4=
-=99, stworzon=C4=85 specjalnie dla wymagaj=C4=85cego biznesu.=20
+Chages since v1:
+* fixed typo in the commit message (Shimoda-san)
+* added review tag
 
-Niestandardowy kurs on-line, dopasowany do profilu firmy i obszar=C3=B3w =
-=C5=9Bwiadczonych us=C5=82ug, w szybkim czasie przyniesie efekty, kt=C3=B3=
-re zwi=C4=99ksz=C4=85 komfort i jako=C5=9B=C4=87 pracy, rozwijaj=C4=85c m=
-o=C5=BCliwo=C5=9Bci biznesowe.=20
+ drivers/mmc/host/renesas_sdhi_core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Zdalne szkolenie j=C4=99zykowe to m.in. zaj=C4=99cia z native speakerami,=
- kt=C3=B3re w szybkim czasie naucz=C4=85 pracownik=C3=B3w rozmawia=C4=87 =
-za pomoc=C4=85 jasnego i zwi=C4=99z=C5=82ego j=C4=99zyka Business English=
-=2E
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index fe63548d816d..89d21231ec5f 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -142,9 +142,9 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 		return clk_get_rate(priv->clk);
+ 
+ 	if (priv->clkh) {
++		/* HS400 with 4TAP needs different clock settings */
+ 		bool use_4tap = priv->quirks && priv->quirks->hs400_4taps;
+-		bool need_slow_clkh = (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104) ||
+-				      (host->mmc->ios.timing == MMC_TIMING_MMC_HS400);
++		bool need_slow_clkh = host->mmc->ios.timing == MMC_TIMING_MMC_HS400;
+ 		clkh_shift = use_4tap && need_slow_clkh ? 1 : 2;
+ 		ref_clk = priv->clkh;
+ 	}
+-- 
+2.30.2
 
-Czy m=C3=B3g=C5=82bym przedstawi=C4=87 wi=C4=99cej szczeg=C3=B3=C5=82=C3=B3=
-w i opowiedzie=C4=87 jak dzia=C5=82amy?=20
-
-
-Pozdrawiam
-Krzysztof Maj
