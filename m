@@ -2,116 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9B83C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Apr 2022 11:53:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5429C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Apr 2022 11:53:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230519AbiDDLzN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Apr 2022 07:55:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60454 "EHLO
+        id S232547AbiDDLzP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Apr 2022 07:55:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233136AbiDDLzL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2022 07:55:11 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDF123DA53
-        for <linux-mmc@vger.kernel.org>; Mon,  4 Apr 2022 04:53:14 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id y32so1498251lfa.6
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Apr 2022 04:53:14 -0700 (PDT)
+        with ESMTP id S232796AbiDDLzO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2022 07:55:14 -0400
+Received: from mail-lj1-x235.google.com (mail-lj1-x235.google.com [IPv6:2a00:1450:4864:20::235])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC8053DA4D
+        for <linux-mmc@vger.kernel.org>; Mon,  4 Apr 2022 04:53:18 -0700 (PDT)
+Received: by mail-lj1-x235.google.com with SMTP id by7so12616285ljb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Apr 2022 04:53:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=lqg0JG2bYMOlD6F3+AHo1Qsj61f1ApR+ao40cjbbIVI=;
-        b=lzYDOAj3hgO3n6rtww73HeOYSeHxdj0u+oYgtLKMWGTstT9aPEtIPRsPSFvtYMEm0Q
-         eg2sheiYil9u1Zt3GtsePYCFPstXmCjQrgqbOx+mBZAbC5ewfPssr8Ii6ph3PhGHmD71
-         1Fsg05cEqzqnNE/WKKBlx8D4z9JRiK0HwU4JWJi8ZZ4oj82MMkJed2m7x9wm1LHVbDZZ
-         nmi8vLnGBqAK2a3KFID6Qpmdk/q1kL6Hjtv8FLVck0AZDbdgJgy2IzwFrIlSYk4rIdPb
-         fSLb+mccXXUbdsC/OZGbqbKAmyVaq/SjlJlWj415mxGzl3YcyKk1gC/6ae0YlQKAGLgi
-         VysA==
+        bh=cH63uFF/Ds1PEA6ozfC7BG7nBZMAO+T4zLJM201iPAU=;
+        b=Vb3JWaftR14TP7vFCrUeuNLqUrkQRhDhOR2ONnrnawUZnlzWIbVeLhdZAkmM3yHOTY
+         HwXu4+n04GaRsEH5JmTZxOz2GS0ROvch3cWLcMzMEeI4IQJ5+vLjoY9fbXEFjZ9imkde
+         kTxuqLAKOKZVExMc5yjQTx0GDPfj7Ieo4KFRQ/+rjDrI8UZbqnhYkn8e1nFJP/FPLOb4
+         mAjd5DexAimAj9LjuntcuWC5gohPM2PrKMoedYOpEteXlpmNSlVHbfzphSwpK09RbaJ6
+         QIHV1HhbHQAIL/AGpzi7yj/Teh7p/s8czzi1KFOmQYI/cI2qiwzwQCEUKy5BhobkaVam
+         aOcw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=lqg0JG2bYMOlD6F3+AHo1Qsj61f1ApR+ao40cjbbIVI=;
-        b=SjDBIS1QGKLLoqilhlLFmyf5LGIYWXbC1UJMgTO4yVnrKu2LK6fj5GRb+zElJtXP7A
-         V3ccg2S9V1e2CB6P10n+OtyLuwkHDea/UyEwIeK54eJI1cy8/APbJNDNAO0PNpRvE+hm
-         rpeGEuwDYDlqr/z1xfl6y4Msrm6Ivzrxlcf5c/Y1bkCAn3HgJR3hQb/Xbov6VThLslXa
-         G+2jJebKaSArIMz1VBF11guDvJ9k5+nVWq/4ooWXmP0fFbqhgDYK4yqNKZdw8Eo5KRAv
-         O5ZDuavmpec81QvqtDgxjEJ9pYDjZPnyJW2kLSm39EGPJ/07t3NvppceCHwNLRh+Nl7M
-         XBMQ==
-X-Gm-Message-State: AOAM530p5+JX3ckcst4nnXi4oNfEHrldhvB06QxUxrV43OdpfjU3g/MW
-        Dl3fTWNqNDOsLjRrhy3vJf5tjD1JrP0Ojo1WE9DvSg==
-X-Google-Smtp-Source: ABdhPJwoUF8BRiRIT5vjDQ5OByUaXROoJfEbVkEjoIjq+z5nOG2IHwFJWAdY05shxB+DEwdorbi5llik2IIbz51LdHg=
-X-Received: by 2002:a05:6512:108b:b0:44a:6dc2:ffeb with SMTP id
- j11-20020a056512108b00b0044a6dc2ffebmr22844986lfg.184.1649073193182; Mon, 04
- Apr 2022 04:53:13 -0700 (PDT)
+        bh=cH63uFF/Ds1PEA6ozfC7BG7nBZMAO+T4zLJM201iPAU=;
+        b=FTjOosrY0m+jAoclXCKjRhteRPhnvi2g34OFcw4uOJsBU3LC+CXSg2kBXG2aAnakb6
+         ouI2CDToQnYIf822n6Z2gxleE03SHL9EG9qNotu9gLhS0ZqxdP+JmZS+MUMI2giQ6aCx
+         tTGhbyq4vuHMKoOgc/eyvKtvsEKkyeJbO+LmfzDhbyEXR6OG5UASajq7Od4/lqZguqUa
+         ukzuqgD+sasOWriS2VGFV6TJXtcRdH0g/zCNXjT+NQ6NuNN5oHrW7qgIOy0N8D+13hjN
+         y5sOmGgtvlD7E9mS55MMf5NUMbzFKqj1N9JXN4VRZpOpgqdLFmN2UPHlzh3/gMaxOapJ
+         75zQ==
+X-Gm-Message-State: AOAM530dCdGGkBHfZot4/X8FrSW/nDFxJrnfMGYAnVNuYIQhOPZTvjk7
+        4hXQ7LkxgdNeUQGNh1Vy/VWMtkN9kXRA185Vg7MUrg==
+X-Google-Smtp-Source: ABdhPJwgYOaICwLby8+H+Or0dATz+UGCTrspiEEt5enDgmadKYp7daAzZ5RbOoamWWpXqD7G3NhOHPCnOa6uDmSPcmM=
+X-Received: by 2002:a2e:b012:0:b0:249:8061:8486 with SMTP id
+ y18-20020a2eb012000000b0024980618486mr20852079ljk.463.1649073197201; Mon, 04
+ Apr 2022 04:53:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <cc3178c2ff60f640f4d5a071d51f6b0b1db37656.1648822020.git.geert+renesas@glider.be>
-In-Reply-To: <cc3178c2ff60f640f4d5a071d51f6b0b1db37656.1648822020.git.geert+renesas@glider.be>
+References: <20220404100508.3209-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220404100508.3209-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 4 Apr 2022 13:52:37 +0200
-Message-ID: <CAPDyKFp9gq8-4V26Ujz82CRwZ=T1T9L13atmSjnGTspRLsSLyw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: Add missing checks for the presence of quirks
-To:     Geert Uytterhoeven <geert+renesas@glider.be>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Date:   Mon, 4 Apr 2022 13:52:41 +0200
+Message-ID: <CAPDyKFpTbaA4e0r+vAM_H3dQSjee1GKPrrwmrM-Sp3eDJUBaOg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: renesas_sdhi: special 4tap settings only apply to HS400
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 1 Apr 2022 at 16:09, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
+On Mon, 4 Apr 2022 at 12:05, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> When running on an system without any quirks (e.g. R-Car V3U), the
-> kernel crashes with a NULL pointer dereference:
+> Previous documentation was vague, so we included SDR104 for slow SDnH
+> clock settings. It turns out now, that it is only needed for HS400.
 >
->     Unable to handle kernel NULL pointer dereference at virtual address 0000000000000002
->     ...
->     Hardware name: Renesas Falcon CPU and Breakout boards based on r8a779a0 (DT)
->     Workqueue: events_freezable mmc_rescan
->     ...
->     Call trace:
->      renesas_sdhi_internal_dmac_start_dma+0x54/0x12c
->      tmio_process_mrq+0x124/0x274
->
-> Fix this by adding the missing checks for the validatity of the
-> priv->quirks pointer.
->
-> Fixes: dce2ba8b2ee8cef6 ("mmc: renesas_sdhi: make 'dmac_only_one_rx' a quirk")
-> Fixes: d4bfa17a655c6de2 ("mmc: renesas_sdhi: make 'fixed_addr_mode' a quirk")
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Fixes: bb6d3fa98a41 ("clk: renesas: rcar-gen3: Switch to new SD clock handling")
+> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 4 ++--
+>
+> Chages since v1:
+> * fixed typo in the commit message (Shimoda-san)
+> * added review tag
+>
+>  drivers/mmc/host/renesas_sdhi_core.c | 4 ++--
 >  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> index 6dd5ade3851b2ba8..90048f74e6221add 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -374,7 +374,7 @@ renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
->         struct scatterlist *sg = host->sg_ptr;
->         u32 dtran_mode = DTRAN_MODE_BUS_WIDTH;
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index fe63548d816d..89d21231ec5f 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -142,9 +142,9 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+>                 return clk_get_rate(priv->clk);
 >
-> -       if (!priv->quirks->fixed_addr_mode)
-> +       if (!(priv->quirks && priv->quirks->fixed_addr_mode))
->                 dtran_mode |= DTRAN_MODE_ADDR_MODE;
->
->         if (!renesas_sdhi_internal_dmac_map(host, data, COOKIE_MAPPED))
-> @@ -382,7 +382,7 @@ renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
->
->         if (data->flags & MMC_DATA_READ) {
->                 dtran_mode |= DTRAN_MODE_CH_NUM_CH1;
-> -               if (priv->quirks->dma_one_rx_only &&
-> +               if (priv->quirks && priv->quirks->dma_one_rx_only &&
->                     test_and_set_bit(SDHI_INTERNAL_DMAC_RX_IN_USE, &global_flags))
->                         goto force_pio_with_unmap;
->         } else {
+>         if (priv->clkh) {
+> +               /* HS400 with 4TAP needs different clock settings */
+>                 bool use_4tap = priv->quirks && priv->quirks->hs400_4taps;
+> -               bool need_slow_clkh = (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104) ||
+> -                                     (host->mmc->ios.timing == MMC_TIMING_MMC_HS400);
+> +               bool need_slow_clkh = host->mmc->ios.timing == MMC_TIMING_MMC_HS400;
+>                 clkh_shift = use_4tap && need_slow_clkh ? 1 : 2;
+>                 ref_clk = priv->clkh;
+>         }
 > --
-> 2.25.1
+> 2.30.2
 >
