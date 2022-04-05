@@ -2,146 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32B3BC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Apr 2022 03:53:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C75A0C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Apr 2022 04:47:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230374AbiDEDzF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Apr 2022 23:55:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46878 "EHLO
+        id S229458AbiDEEti (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Apr 2022 00:49:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230320AbiDEDyt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2022 23:54:49 -0400
-Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 970F65C36C;
-        Mon,  4 Apr 2022 20:52:08 -0700 (PDT)
-Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-2eb46d33db9so69146137b3.12;
-        Mon, 04 Apr 2022 20:52:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=JawIlW32rh9zjc4U68o5uxVUC0MZ6MDx0kaSrO8k3MM=;
-        b=HhA+4iHnu8iKgFhO4qSBoqmbVuEe60odV3/yG7URgqR8EzL/mBS+G6zi6ZL/ascG+O
-         rxA6jjxZF5w0JmC3JtK6lmEhDF67laOTmZITuaunjgqJktWe6VoMzFEt8IlNrBsD+jMh
-         mof8YKia5bTMMT30eiBvSUjMjDqxD7hTG4NoZncz2edKVD2/1OpTc67KlFCTRfR3VyIA
-         gM8ISYor3jlO412SPovMCVMGFAK4SJggLpyEhTwS9wXhwUtmPRfduZrMMToGxsbdTteO
-         kqhidbt4kaUnzc9AEAbnGnt74GCopJzc/tKPUSpasVh82cl1CBjizAjlnzAyumZePWBL
-         F9fQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=JawIlW32rh9zjc4U68o5uxVUC0MZ6MDx0kaSrO8k3MM=;
-        b=1nFlhy/AP3gibrADl+r7d0DvTsbth1wfqHyCvrWhAmgd+OnhAZ6hV5kUQCplU0+2Hl
-         mLLXvLMzpJ1e21d0ZvLGL11JAX7gRthkPY9A8zL0Bwvhve8WjRDCOVHSN/unZgL7xcUN
-         Gw7fyBulCTaTxvfHZeLHsGt8xloT94vh4DkQFzMB9peOb5J/f3cKU0ffCBNdItH73453
-         MBbyANABhgHNeT/UeTh9Tk7W/sTMunzMzd4/pcOioA3Ty85O2xDrbg0b7fzKr3r7IcvH
-         HhAL9cOYFr11M6keBgf2kPP55EIVr5MYze8aNrFrAr13uaacyMGEIV0HMzxU7glzu0Z0
-         x4Fg==
-X-Gm-Message-State: AOAM531mnUNw9qzvLdfn+N6xZKXzkGaJcomgwdP9n3XWMDqSciMqdCRI
-        C8mHmRHOOSNhCtwjGYEIxXSR09+D5lVK2wYBkSQ=
-X-Google-Smtp-Source: ABdhPJzfFh7ax1o5PJKAXPSkU8hUJJUw1kINiCd80hWsnubpOVfjgU5q952TYRI5Qk04Mokjs1az2Hd++l9V3MmLtJ8=
-X-Received: by 2002:a81:345:0:b0:2ea:a8fa:f323 with SMTP id
- 66-20020a810345000000b002eaa8faf323mr1139433ywd.292.1649130727820; Mon, 04
- Apr 2022 20:52:07 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220404172322.32578-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20220404172322.32578-2-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <OS0PR01MB5922182F6302386EFF2ED66B86E59@OS0PR01MB5922.jpnprd01.prod.outlook.com>
- <CA+V-a8tdkw8-dUfrFG9kZizok8OQdcGHitAdb4E2tsBW3Xrh-g@mail.gmail.com> <OS0PR01MB5922C35E8C5259C3DA2A951A86E59@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-In-Reply-To: <OS0PR01MB5922C35E8C5259C3DA2A951A86E59@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
-Date:   Tue, 5 Apr 2022 04:51:41 +0100
-Message-ID: <CA+V-a8uX9=+94xvRSO3c2PQLvxzabYc912_h00Qs6kPTxxVXhg@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: renesas_sdhi: Jump to error path instead of
- returning directly
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        with ESMTP id S229646AbiDEEtL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2022 00:49:11 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29AACBC36
+        for <linux-mmc@vger.kernel.org>; Mon,  4 Apr 2022 21:45:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=Cbu5imkSxmYw8BD7MxQU3rR2N6h6
+        Y4uRLJS6hFCxJB0=; b=uroHnEP3KHV/eYhuNvbJOVEou/nJHePNgdHzii+CfUnW
+        DrOF4BRUlcjVXePd9soij7tZg5gwyUoyiFcVicC4pcmU4uLK7CTT4VtezkmHUB/c
+        /grlmS+lCSMPyZ1Z/K4xpVkHdRYvRCmlTGqGck35EsxI2Vv1yLMWyUJajG0+raY=
+Received: (qmail 2125024 invoked from network); 5 Apr 2022 06:45:22 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 5 Apr 2022 06:45:22 +0200
+X-UD-Smtp-Session: l3s3148p1@Diph6eDbFNwgAQnoAHlrAKkk7l/QScWc
+Date:   Tue, 5 Apr 2022 06:45:18 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Cc:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Philipp Zabel <p.zabel@pengutronix.de>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
         Pavel Machek <pavel@denx.de>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        LKML <linux-kernel@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Biju Das <biju.das.jz@bp.renesas.com>
+Subject: Re: [PATCH 2/2] mmc: renesas_internal_dmac: Fix typo's
+Message-ID: <YkvJXu7Y6Tc68U9e@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "Lad, Prabhakar" <prabhakar.csengg@gmail.com>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Pavel Machek <pavel@denx.de>, LKML <linux-kernel@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Biju Das <biju.das.jz@bp.renesas.com>
+References: <20220404172322.32578-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <20220404172322.32578-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <Yks3Q75ZrUkXSjwz@ninjato>
+ <CA+V-a8skF4h6yhjSFw5PXQEbgKEQt6kMs9bEsO3OCNfE1hu46A@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="XGw+3cSwhZWV2vXx"
+Content-Disposition: inline
+In-Reply-To: <CA+V-a8skF4h6yhjSFw5PXQEbgKEQt6kMs9bEsO3OCNfE1hu46A@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Biju,
 
-On Mon, Apr 4, 2022 at 7:12 PM Biju Das <biju.das.jz@bp.renesas.com> wrote:
->
-> Hi Prabhkar,
->
-> > Subject: Re: [PATCH 1/2] mmc: renesas_sdhi: Jump to error path instead of
-> > returning directly
-> >
-> > Hi Biju,
-> >
-> > Thank you for the review.
-> >
-> > On Mon, Apr 4, 2022 at 7:02 PM Biju Das <biju.das.jz@bp.renesas.com>
-> > wrote:
-> > >
-> > > Hi Prabhakar and Pavel,
-> > >
-> > > Thanks for the patch.
-> > >
-> > > > Subject: [PATCH 1/2] mmc: renesas_sdhi: Jump to error path instead
-> > > > of returning directly
-> > > >
-> > > > Jump to error path "edisclk" instead of returning directly in case
-> > > > of
-> > > > devm_reset_control_get_optional_exclusive() failure.
-> > > >
-> > > > Fixes: b4d86f37eacb7 ("mmc: renesas_sdhi: do hard reset if
-> > > > possible")
-> > > > Reported-by: Pavel Machek <pavel@denx.de>
-> > > > Signed-off-by: Lad Prabhakar
-> > > > <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > > > ---
-> > > >  drivers/mmc/host/renesas_sdhi_core.c | 6 ++++--
-> > > >  1 file changed, 4 insertions(+), 2 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/host/renesas_sdhi_core.c
-> > > > b/drivers/mmc/host/renesas_sdhi_core.c
-> > > > index 2797a9c0f17d..cddb0185f5fb 100644
-> > > > --- a/drivers/mmc/host/renesas_sdhi_core.c
-> > > > +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> > > > @@ -1033,8 +1033,10 @@ int renesas_sdhi_probe(struct platform_device
-> > > > *pdev,
-> > > >               goto efree;
-> > > >
-> > > >       priv->rstc =
-> > > > devm_reset_control_get_optional_exclusive(&pdev->dev,
-> > > > NULL);
-> > > > -     if (IS_ERR(priv->rstc))
-> > > > -             return PTR_ERR(priv->rstc);
-> > > > +     if (IS_ERR(priv->rstc)) {
-> > > > +             ret = PTR_ERR(priv->rstc);
-> > > > +             goto edisclk;
-> > > > +     }
-> > >
-> > > Why can't devm_reset_control_get_optional_exclusive to be moved up
-> > before devm_clk_get?
-> > >
-> > In that case we will have to jump to the "efree" label Or if you don't
-> > want goto at all this can be moved to the very beginning of the probe.
->
-> I guess it has to move up, first get reset handle and clock handle and return error
-> directly in case of error, Then do clk/reset ops.
->
-Fine by me.
+--XGw+3cSwhZWV2vXx
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Cheers,
-Prabhakar
 
+> > > -     /* This DMAC cannot handle if buffer is not 128-bytes alignment */
+> > > +     /* This DMAC cannot handle if buffer is not 128-bytes aligned */
 > >
-> > Wolfram, what is your preference on the above?
+> > Well, as we are here now, I think this can be further improved.
 > >
-> > Cheers,
-> > Prabhakar
+> "The internal DMAC supports 128-bytes aligned buffers only", does this
+> sound good?
+
+I'd think it should be "128 byte aligned"? But I can't explain why, just
+a gut feeling.
+
+Otherwise good!
+
+
+--XGw+3cSwhZWV2vXx
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJLyVoACgkQFA3kzBSg
+KbbStw/9FM9rKMQ30IKzCdiUkW37SCGDxC3zsb4B8ekiSgarbLM4gTKacYLVB0SE
+N8CAHx/Zc33WxgmVXx0UOWmrzN24zEBq1NtH20I0+Bvspl94UZ7XbLq3eJ53fbx+
+1d5vnZFyo0Je5lFGlUy9aKAsMfKG+Jk1lI6uAFsJR8t/D7e0s1b3i9ZUB4U5bFAl
+fHAXT/ZvTl3cnX9vLcoeH+DWZjBYqU42JI4qqof5aVdN+pbDialUOuZvqUyvKHUM
+t9FHV/mKnnGsMOycEX6Cb4hGEB9xNOJjuxXu3gw93WZHH52UQAKG80OFbtdggT/e
+78rIpPlzwDNmYd5QXc1aGECHRfH2jCu5pDitk/8uRjSxs3gKyHe6noaQ4DnYNi8c
+JKG9X6KsQlf+5M3OBgOdRM2Q9sMTv00l07av9dxfTiS52fPEBxIbRlhnoJ7XKEn8
+4NgcNN32sQ5hu2pKQyKpT+o1LQ94K/1m3UHSl26/ggtrWvr3P+ybCKG6lUpElsnm
+q6QV1lBjY+8Iq4Dgx9OSh4a5ZxfTaSjeq/SrDgzkTRiD2nyEs7NCnNrcdZwIbYWA
+q0rSBHDedP0Oqe6JpgcJfOJxTPYPF9T1PItSpp8fYIgVBFmOnzScmp7nRG/E7aPg
+DOSmkYW1svjwtJsWXLvfV7gFs+q847A3STZexo+A8BHc0JJVTVE=
+=lfpM
+-----END PGP SIGNATURE-----
+
+--XGw+3cSwhZWV2vXx--
