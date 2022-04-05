@@ -2,73 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E2D6C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Apr 2022 07:01:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D6E4C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Apr 2022 07:12:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230267AbiDEHDG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Apr 2022 03:03:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35708 "EHLO
+        id S230363AbiDEHOP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Apr 2022 03:14:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50510 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230085AbiDEHDF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2022 03:03:05 -0400
-Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7A5411161;
-        Tue,  5 Apr 2022 00:01:07 -0700 (PDT)
-Received: by mail-qk1-f178.google.com with SMTP id d65so9604382qke.5;
-        Tue, 05 Apr 2022 00:01:07 -0700 (PDT)
+        with ESMTP id S229963AbiDEHOP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2022 03:14:15 -0400
+Received: from mail-qt1-f175.google.com (mail-qt1-f175.google.com [209.85.160.175])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 227556344;
+        Tue,  5 Apr 2022 00:12:17 -0700 (PDT)
+Received: by mail-qt1-f175.google.com with SMTP id s11so9759041qtc.3;
+        Tue, 05 Apr 2022 00:12:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=OzWpni0hfB4U8rh5IakRHfzMsXXrFTYsZJsWONlkI+g=;
-        b=nMGDi/nKfR8c8AuDDFih/q1pYmLkFOE3KhVW6i1OqBXDvKDvqXZts1kaJncQ6fL8c3
-         NNNtJAQ7LBeFGShUBMJffZpezhjzLn9DKE2hzF/urN2MryhwLwPNtAVo/aE5q3FiEBYN
-         mLqLQdTZG8F2EVQcKVKprjNlJbBCcZ/ot+swbDbrAqaqNZM9ydV+KBkCfTVJsFRZh9z9
-         Icg3Vzn9eusAlxOknqwc1JKTMKPVoQXgBS3Fyr+CyFi3Jupo565E5JWsvwzTxGl+HE7q
-         5256H2uyTaqH6qXmg+bjA6GDB9zysevBYC7xBYE7ny7w2T/pCtOQ7+32IEDAdnqfqxHW
-         bwSA==
-X-Gm-Message-State: AOAM532CVaENaBYdeFsJ8Efh3TEphA9g7PUZyX7oISRLys+IpOihM2tk
-        JziSNk02yHVEQ22LPIWKvaqbwRrqdPlC/g==
-X-Google-Smtp-Source: ABdhPJxZ9XHilEAzBKdGN91scVnqrNSbsJW11pL8Oj5104r6ualuQ3WkPsmVGi3P9qsRgPka57VJCg==
-X-Received: by 2002:a37:ef13:0:b0:680:fc96:f63a with SMTP id j19-20020a37ef13000000b00680fc96f63amr1288373qkk.248.1649142066650;
-        Tue, 05 Apr 2022 00:01:06 -0700 (PDT)
+        bh=xoGXHDKWjTvAsayLti/sFDJp9QEB6cbn2vaRjDyKRIs=;
+        b=e07Xlmwr27N5icXd8wdJKBEVp0cxJHTnPoM7WYJ7AjU9V3TTrcBNckAj4yHDKbUQuR
+         z1Pd8BWczCaqFjx3APKYZF3VHjdTeoSkVbQqGZLRKvedM5t+xiSrvOBdwsoRv98OELZ5
+         Ts9qH0j9b27ZIl4TTSeVBeWf8KRgSC5uhe137zIwYPiI/IzWSnDFpeap+pBOXs/62Im/
+         1f0ZipFE4A9rckcIRtjz1ey4lCg8ZO9GqVPVqHiCmeyE1xvlzXOacelKHhuA2OwKRxUb
+         lmtwBWPfIdjCBkMsXJbzX2IWg/CAiwh+W62x6TpYnGcg/FwSNsliu0qM7WRhzr0JVQqz
+         +DVA==
+X-Gm-Message-State: AOAM532PEgjzVARZ4R8NWXJTE6iFqPAWlnOPb45/lXmOygvD9LTDsoJL
+        Ws+tXSOL6PIZAzGiADknm7+FpJGmhlRbiA==
+X-Google-Smtp-Source: ABdhPJzVI7IaLaIK9TGsfZxpvt0Kwffyc4HD+SqG4d30uo1/vEfE0ClaD46Y0RGBMmhCwjJo3GohIQ==
+X-Received: by 2002:ac8:570e:0:b0:2e2:2963:e2de with SMTP id 14-20020ac8570e000000b002e22963e2demr1717814qtw.123.1649142736091;
+        Tue, 05 Apr 2022 00:12:16 -0700 (PDT)
 Received: from mail-yw1-f171.google.com (mail-yw1-f171.google.com. [209.85.128.171])
-        by smtp.gmail.com with ESMTPSA id 21-20020ac85715000000b002e1ce9605ffsm10793638qtw.65.2022.04.05.00.01.06
+        by smtp.gmail.com with ESMTPSA id t7-20020a05622a148700b002eba7850c57sm8520104qtx.21.2022.04.05.00.12.15
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 05 Apr 2022 00:01:06 -0700 (PDT)
-Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-2eb888cf7e7so37293077b3.13;
-        Tue, 05 Apr 2022 00:01:06 -0700 (PDT)
-X-Received: by 2002:a81:3d81:0:b0:2eb:8069:5132 with SMTP id
- k123-20020a813d81000000b002eb80695132mr1471199ywa.438.1649142066072; Tue, 05
- Apr 2022 00:01:06 -0700 (PDT)
+        Tue, 05 Apr 2022 00:12:16 -0700 (PDT)
+Received: by mail-yw1-f171.google.com with SMTP id 00721157ae682-2eb9412f11dso29680407b3.4;
+        Tue, 05 Apr 2022 00:12:15 -0700 (PDT)
+X-Received: by 2002:a81:c703:0:b0:2d0:cc6b:3092 with SMTP id
+ m3-20020a81c703000000b002d0cc6b3092mr1467836ywi.449.1649142735431; Tue, 05
+ Apr 2022 00:12:15 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220404100508.3209-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20220404100508.3209-1-wsa+renesas@sang-engineering.com>
+References: <20220404123404.16289-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220404123404.16289-1-wsa+renesas@sang-engineering.com>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 5 Apr 2022 09:00:54 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdW9CjzEN5jbrgjHY+HaPN9EJDD8cPGTOxgBf+fHrMX8Uw@mail.gmail.com>
-Message-ID: <CAMuHMdW9CjzEN5jbrgjHY+HaPN9EJDD8cPGTOxgBf+fHrMX8Uw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: renesas_sdhi: special 4tap settings only apply to HS400
+Date:   Tue, 5 Apr 2022 09:12:04 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdXovC8OzfPwdPQZuC1wPX8UU=EoYOek3inq7i59Jd56Fw@mail.gmail.com>
+Message-ID: <CAMuHMdXovC8OzfPwdPQZuC1wPX8UU=EoYOek3inq7i59Jd56Fw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: R-Car V3H ES2.0 gained HS400 support
 To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 5, 2022 at 2:26 AM Wolfram Sang
+Hi Wolfram,
+
+On Tue, Apr 5, 2022 at 2:33 AM Wolfram Sang
 <wsa+renesas@sang-engineering.com> wrote:
-> Previous documentation was vague, so we included SDR104 for slow SDnH
-> clock settings. It turns out now, that it is only needed for HS400.
+> The hardware evolved, so we only need to disable HS400 support on ES1.*
+> revisions. Update the code.
 >
-> Fixes: bb6d3fa98a41 ("clk: renesas: rcar-gen3: Switch to new SD clock handling")
-> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
+> [wsa: refactored to top-of-tree]
 > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+> Another HS400 update for a specific SoC. Builds fine. But I can't test
+> because of no HW. Reviews from Geert and/or Shimoda-san would be much
+> appreciated.
+
+> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> @@ -215,6 +215,7 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
+>         { .soc_id = "r8a7796", .revision = "ES1.0", .data = &sdhi_quirks_4tap_nohs400_one_rx },
+>         { .soc_id = "r8a7796", .revision = "ES1.[12]", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
+> +       { .soc_id = "r8a77980", .revision = "ES1.*", .data = &sdhi_quirks_nohs400 },
+
+LGTM.
+
+>         { /* Sentinel. */ }
+>  };
+>
+> @@ -265,7 +266,6 @@ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
+>         { .compatible = "renesas,sdhi-r8a77961", .data = &of_r8a77961_compatible, },
+>         { .compatible = "renesas,sdhi-r8a77965", .data = &of_r8a77965_compatible, },
+>         { .compatible = "renesas,sdhi-r8a77970", .data = &of_r8a77970_compatible, },
+> -       { .compatible = "renesas,sdhi-r8a77980", .data = &of_rcar_gen3_nohs400_compatible, },
+
+arch/arm64/boot/dts/renesas/r8a77980.dtsi always had the
+family-specific compatible value, so this is OK.
+
+>         { .compatible = "renesas,sdhi-r8a77990", .data = &of_r8a77990_compatible, },
+>         { .compatible = "renesas,sdhi-r8a77995", .data = &of_rcar_gen3_nohs400_compatible, },
+>         { .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
 
 Gr{oetje,eeting}s,
 
