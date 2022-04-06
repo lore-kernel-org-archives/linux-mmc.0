@@ -2,73 +2,76 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91A13C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 16:52:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8830FC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 16:52:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238014AbiDFQys (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 12:54:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50550 "EHLO
+        id S238268AbiDFQyu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 12:54:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238236AbiDFQy2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 12:54:28 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 129081F7618
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 07:56:32 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id y32so4545727lfa.6
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2022 07:56:31 -0700 (PDT)
+        with ESMTP id S238257AbiDFQya (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 12:54:30 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31D922A3D8F
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 07:56:27 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id b21so4555198lfb.5
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2022 07:56:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gFpgrsnLnc4iDOPupsDr/hfYxK6Z0h6eWyrz3p261dM=;
-        b=lkZwtdvoeffsynG0Cm8wN/TWC2xr9vAgsTqIgZchJO+Xnqv4FT0qZU1mb2+ikd5GgZ
-         ugQsTJEUnRZJcA0NT3P/EHMztqQAMW23LkZaFaH/s5QTkPT+8Mpdb57rGttNOJZQoLEy
-         3E5PLMFWoENkWYrP7/LbcR4EBAb3IJfIxlytRozBrMfUtExLuE8magxgvkP20/wNSoy2
-         CGD1EeggTVMfBnZZ9i9pYp4lcjREdh9ZVcFxihGLfL+R2OWiuyGwSRNhTacDyQPD1w6J
-         XK3x/aR/iAPJMtxkMIWEtGF88Xj656MjKKMyVvwNC9b1mBrOBKyBM86gTgYqcMT2NosD
-         7XNg==
+         :cc:content-transfer-encoding;
+        bh=nNVtA40oQHM0eOGId5yNo8xiVPzOWuJpNkMLS3feFc0=;
+        b=muU3faxErilQjUnsrCmgyj60U8GEHYstiuZuK2DRn5NgDG38ZnUH2qyP1UUrECX3MF
+         WmBZi7gaaPPLqwNdDPrVdXTcSmplJbHbgh7dAwcBtWX/0PB/R1FtVVWyWeWGBEqa2Dt5
+         qG4ww8t31zd7uK0muC6tgclP5/Yb4MErHKHGy57IcxecvvLTVwjgGdDoiLVwREVFUg9y
+         qj1fZR5zwQOmSapyD6wZHha26vwyKIvj3KzYUIgFb7ngPFmjjjKsN5wjhp8rBli8wxn+
+         jMiEj/l4Z+MHIARTLbk5ZzOTCR0hyNkQdkDS6V8wfPzPaiK3cfJ0Y6mz+zyOLTdp3QSo
+         2ovA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gFpgrsnLnc4iDOPupsDr/hfYxK6Z0h6eWyrz3p261dM=;
-        b=gE8SY4+GbJxx/4memLNLj3iZtJhT/D7FvdlxeyqQr0NLY1nYMeiQncehFyCELEMGeA
-         MkToyKmhfGxsCM0ZtQcxgfYyBFlPDYVtnZ8kbj0RQU3UMliBKHB1mlexarAmtepJ6eON
-         b4EbSdbahYsPmZskq8iJ4Ifw2UQgO7SQyZ4DFFZMmPM1qjYVm1qhkxsmk1NFiOLeHahV
-         2uycmZK5DEnrfB0QPdGF0UBwXKvF3q7anhkCoyXzdLZdEtqs2ArO2zClEEa/iijk5t1T
-         fog80NlSb16TpEVB/XjXRihLYEO2eBSvKZpuvU6uD7j9ZZ4U1zsD1TsfqG/+CwRrzKPW
-         ruOA==
-X-Gm-Message-State: AOAM533rYJb+vxCUCtKB0/xLliwrmMkNMl+CKmLzBkSXwyONKPP8/NXF
-        ZL+TfhoZFTonYVw5IUqFl/lhVZ7oMOGkVIKy9Z5OMA==
-X-Google-Smtp-Source: ABdhPJy+0Vn/oa5vvN/2kOPrZDZXG5mFUd14JNKQ/X2A2nnXBgXrA0jAleJzbKDmd+rPEJod8YDmRWQRljZOFnLmaW4=
-X-Received: by 2002:a05:6512:b19:b0:44a:b7c4:3d94 with SMTP id
- w25-20020a0565120b1900b0044ab7c43d94mr6109325lfu.358.1649256990277; Wed, 06
- Apr 2022 07:56:30 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=nNVtA40oQHM0eOGId5yNo8xiVPzOWuJpNkMLS3feFc0=;
+        b=SIOkaUSFN8LmCv2nLm+xvQvF8oQ+XXrargf8UTzA2HCLipPK5vrcC9EuPY2rswpBAo
+         nKmKMED/BF2C1zYp6TmlAZkKNBaIWCVNgVU/CaIp/z3QJthQIMHLvOUivsjJgpG20Q+J
+         hXy2rzuDtkpFEDnn75J09UQB1jEn+E5vhd4wG5jb6NFEqLLnjijmO6VrkFONlVBPlc8j
+         VBlVBezOimihDWpzsdlPYqbmqQtDRMeiI1N1L544Vrp3miNEQz0d3w/XtUZM9BvhsxHG
+         dYL+LJ13ebhAwGETHanl4zsERhSMDEoTv2eKebRA9tfNOQKWozeWTnpvpxrVggp29a33
+         n06Q==
+X-Gm-Message-State: AOAM531f39Q34hmQO00dZvqjRG76yCtZjv9jvbK22YS9bGEwWvHHTkUw
+        JqKtuRZ0iHUhpzOGfUW9rdb6g/TapZPNjiDhOvg1gA==
+X-Google-Smtp-Source: ABdhPJzKPggqZccGIT2HfZeUDHW9yOnVHP5ILJl0MafomwBwwOiE+fVEx0WmfbRtpslMc/dD7zdERcTgRqXSNkmI4QM=
+X-Received: by 2002:a05:6512:c0c:b0:44a:6865:860a with SMTP id
+ z12-20020a0565120c0c00b0044a6865860amr5978705lfu.71.1649256985512; Wed, 06
+ Apr 2022 07:56:25 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220402112004.129886-1-jmkrzyszt@gmail.com>
-In-Reply-To: <20220402112004.129886-1-jmkrzyszt@gmail.com>
+References: <20c6efa9a4c7423bbfb9352705c4a53a@hyperstone.com>
+In-Reply-To: <20c6efa9a4c7423bbfb9352705c4a53a@hyperstone.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 6 Apr 2022 16:55:54 +0200
-Message-ID: <CAPDyKFrci4owyLo48FKe-_kcyaYU+C2k42Wwco_52wo_X=Z2Kw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: omap: Make it CCF clk API compatible
-To:     Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>, linux-mmc@vger.kernel.org,
-        linux-omap@vger.kernel.org
+Date:   Wed, 6 Apr 2022 16:55:49 +0200
+Message-ID: <CAPDyKFod9iFyOAByt3C1G4qxvDYGOk7xsSqi0+Yh+W43eDZKxw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: mmc_spi: parse speed mode options
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "digetx@gmail.com" <digetx@gmail.com>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 2 Apr 2022 at 13:20, Janusz Krzysztofik <jmkrzyszt@gmail.com> wrote:
+On Thu, 31 Mar 2022 at 09:28, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
+ wrote:
 >
-> The driver, OMAP specific, now omits clk_prepare/unprepare() steps, not
-> supported by OMAP custom implementation of clock API.  However, non-CCF
-> stubs of those functions exist for use on such platforms until converted
-> to CCF.
+> Since SD and MMC Highspeed modes are also valid for SPI let's parse
+> them too.
 >
-> Update the driver to be compatible with CCF implementation of clock API.
->
-> Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
 Applied for next, thanks!
 
@@ -77,80 +80,29 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/omap.c | 23 ++++++++++++++---------
->  1 file changed, 14 insertions(+), 9 deletions(-)
+>  drivers/mmc/host/of_mmc_spi.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index 5e5af34090f1..57d39283924d 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1374,7 +1374,7 @@ static int mmc_omap_probe(struct platform_device *pdev)
->         host->iclk = clk_get(&pdev->dev, "ick");
->         if (IS_ERR(host->iclk))
->                 return PTR_ERR(host->iclk);
-> -       clk_enable(host->iclk);
-> +       clk_prepare_enable(host->iclk);
->
->         host->fclk = clk_get(&pdev->dev, "fck");
->         if (IS_ERR(host->fclk)) {
-> @@ -1382,16 +1382,18 @@ static int mmc_omap_probe(struct platform_device *pdev)
->                 goto err_free_iclk;
+> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.=
+c
+> index 3629550528b6..bf54776fb26c 100644
+> --- a/drivers/mmc/host/of_mmc_spi.c
+> +++ b/drivers/mmc/host/of_mmc_spi.c
+> @@ -70,6 +70,10 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct=
+ spi_device *spi)
+>         } else {
+>                 oms->pdata.caps |=3D MMC_CAP_NEEDS_POLL;
 >         }
+> +       if (device_property_read_bool(dev, "cap-sd-highspeed"))
+> +               oms->pdata.caps |=3D MMC_CAP_SD_HIGHSPEED;
+> +       if (device_property_read_bool(dev, "cap-mmc-highspeed"))
+> +               oms->pdata.caps |=3D MMC_CAP_MMC_HIGHSPEED;
 >
-> +       ret = clk_prepare(host->fclk);
-> +       if (ret)
-> +               goto err_put_fclk;
-> +
->         host->dma_tx_burst = -1;
->         host->dma_rx_burst = -1;
->
->         host->dma_tx = dma_request_chan(&pdev->dev, "tx");
->         if (IS_ERR(host->dma_tx)) {
->                 ret = PTR_ERR(host->dma_tx);
-> -               if (ret == -EPROBE_DEFER) {
-> -                       clk_put(host->fclk);
-> -                       goto err_free_iclk;
-> -               }
-> +               if (ret == -EPROBE_DEFER)
-> +                       goto err_free_fclk;
->
->                 host->dma_tx = NULL;
->                 dev_warn(host->dev, "TX DMA channel request failed\n");
-> @@ -1403,8 +1405,7 @@ static int mmc_omap_probe(struct platform_device *pdev)
->                 if (ret == -EPROBE_DEFER) {
->                         if (host->dma_tx)
->                                 dma_release_channel(host->dma_tx);
-> -                       clk_put(host->fclk);
-> -                       goto err_free_iclk;
-> +                       goto err_free_fclk;
->                 }
->
->                 host->dma_rx = NULL;
-> @@ -1454,9 +1455,12 @@ static int mmc_omap_probe(struct platform_device *pdev)
->                 dma_release_channel(host->dma_tx);
->         if (host->dma_rx)
->                 dma_release_channel(host->dma_rx);
-> +err_free_fclk:
-> +       clk_unprepare(host->fclk);
-> +err_put_fclk:
->         clk_put(host->fclk);
->  err_free_iclk:
-> -       clk_disable(host->iclk);
-> +       clk_disable_unprepare(host->iclk);
->         clk_put(host->iclk);
->         return ret;
->  }
-> @@ -1476,8 +1480,9 @@ static int mmc_omap_remove(struct platform_device *pdev)
->
->         mmc_omap_fclk_enable(host, 0);
->         free_irq(host->irq, host);
-> +       clk_unprepare(host->fclk);
->         clk_put(host->fclk);
-> -       clk_disable(host->iclk);
-> +       clk_disable_unprepare(host->iclk);
->         clk_put(host->iclk);
->
->         if (host->dma_tx)
+>         dev->platform_data =3D &oms->pdata;
+>         return dev->platform_data;
 > --
-> 2.35.1
+> 2.34.1
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
 >
