@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 854C3C433F5
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAB0DC433EF
 	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 09:21:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353255AbiDFJRU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:17:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52348 "EHLO
+        id S1357494AbiDFJRe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:17:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352018AbiDFJCs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:02:48 -0400
+        with ESMTP id S1349398AbiDFJCq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:02:46 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 253A848F713;
-        Tue,  5 Apr 2022 23:05:42 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EDFB48EC7E;
+        Tue,  5 Apr 2022 23:05:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=cTLTfYr7duFMbl13zCRXcRUBgEmH7Snqn+WlWdpEWNo=; b=ZV/CVrUb4qbpXBUImFAvqmY7OC
-        YR/KmNB2+lAjq+EqA8oBYfyehyx3Nq+YwtV4TxCIA5A8L2WVXtNlev4guWoUuadGmFOwtgMiNwq9i
-        yqX5G6E2+zNceTQVJtjM3l08MHhteYnLHXffM4/jtc5yfz/GeuE8HPUJ4reOje5U615tM7p768ryF
-        Y/h9+5h+K+8NlHUqGExK7MtGefB5aNgyMmSmLlNaZTgeiyQAt5+xaIpSgQ/+zSSJmDjA+IoRmYh1L
-        IwncIh14NoCZ6DbOmIaikx8OL30Ru/YZRUBoYvofpcHUxFXkbbQXdd7v+XeVl55WVE6NwYrNNaEln
-        SKW/g4CA==;
+        bh=sINtR+pRAAWqBCMZRslKVJyakyubEJXVW4tI3wGLsb0=; b=gBrZsvegbTHoIEG5qdijcHzNWW
+        PfzclL3zzl2tB5xhm8Sj7w6skVV8SvvJytC4EH0RoMlbB62c3vMVvjooDHTIWQ3smYKaAuMQ4cOli
+        spZhkrdfcyNNrOGeIUuTpGtX63bYCgqfiIr52xJMA9AGK42nQUGH/2eHVQ3foGEH/zFa8lWfGs7Pp
+        Ay5KyAHLP9DhsOCOpCtbHRVbRjzyQdYUTq4TkVLaYR9+Sga+ljLLLtQo5Hukpu2Q5UAw6RMQTfLQg
+        vt8zwwfekDfQOHpKLK7/INfKF40CQ8temfgKOOdrhB506dWycfStoRSbi1wi6owABwmVkNNzYqcsL
+        kVwVOMFA==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbynT-003usA-Kd; Wed, 06 Apr 2022 06:05:40 +0000
+        id 1nbynD-003ul3-Rn; Wed, 06 Apr 2022 06:05:24 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,9 +43,9 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 05/27] drbd: use bdev based limit helpers in drbd_send_sizes
-Date:   Wed,  6 Apr 2022 08:04:54 +0200
-Message-Id: <20220406060516.409838-6-hch@lst.de>
+Subject: [PATCH 01/27] target: remove an incorrect unmap zeroes data deduction
+Date:   Wed,  6 Apr 2022 08:04:50 +0200
+Message-Id: <20220406060516.409838-2-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220406060516.409838-1-hch@lst.de>
 References: <20220406060516.409838-1-hch@lst.de>
@@ -56,50 +56,31 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the bdev based limits helpers where they exist.
+For block devices the target code implements UNMAP as calls to
+blkdev_issue_discard, which does not guarantee zeroing just because
+Write Zeroes is supported.
 
+Note that this does not affect the file backed path which uses
+fallocate to punch holes.
+
+Fixes: 2237498f0b5c ("target/iblock: Convert WRITE_SAME to blkdev_issue_zeroout")
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/block/drbd/drbd_main.c | 15 ++++++++-------
- 1 file changed, 8 insertions(+), 7 deletions(-)
+ drivers/target/target_core_device.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/block/drbd/drbd_main.c b/drivers/block/drbd/drbd_main.c
-index 74b1b2424efff..d20d84ee7a88e 100644
---- a/drivers/block/drbd/drbd_main.c
-+++ b/drivers/block/drbd/drbd_main.c
-@@ -924,7 +924,9 @@ int drbd_send_sizes(struct drbd_peer_device *peer_device, int trigger_reply, enu
- 
- 	memset(p, 0, packet_size);
- 	if (get_ldev_if_state(device, D_NEGOTIATING)) {
--		struct request_queue *q = bdev_get_queue(device->ldev->backing_bdev);
-+		struct block_device *bdev = device->ldev->backing_bdev;
-+		struct request_queue *q = bdev_get_queue(bdev);
-+
- 		d_size = drbd_get_max_capacity(device->ldev);
- 		rcu_read_lock();
- 		u_size = rcu_dereference(device->ldev->disk_conf)->disk_size;
-@@ -933,16 +935,15 @@ int drbd_send_sizes(struct drbd_peer_device *peer_device, int trigger_reply, enu
- 		max_bio_size = queue_max_hw_sectors(q) << 9;
- 		max_bio_size = min(max_bio_size, DRBD_MAX_BIO_SIZE);
- 		p->qlim->physical_block_size =
--			cpu_to_be32(queue_physical_block_size(q));
-+			cpu_to_be32(bdev_physical_block_size(bdev));
- 		p->qlim->logical_block_size =
--			cpu_to_be32(queue_logical_block_size(q));
-+			cpu_to_be32(bdev_logical_block_size(bdev));
- 		p->qlim->alignment_offset =
- 			cpu_to_be32(queue_alignment_offset(q));
--		p->qlim->io_min = cpu_to_be32(queue_io_min(q));
--		p->qlim->io_opt = cpu_to_be32(queue_io_opt(q));
-+		p->qlim->io_min = cpu_to_be32(bdev_io_min(bdev));
-+		p->qlim->io_opt = cpu_to_be32(bdev_io_opt(bdev));
- 		p->qlim->discard_enabled = blk_queue_discard(q);
--		p->qlim->write_same_capable =
--			!!q->limits.max_write_same_sectors;
-+		p->qlim->write_same_capable = 0;
- 		put_ldev(device);
- 	} else {
- 		struct request_queue *q = device->rq_queue;
+diff --git a/drivers/target/target_core_device.c b/drivers/target/target_core_device.c
+index 44bb380e7390c..fa866acef5bb2 100644
+--- a/drivers/target/target_core_device.c
++++ b/drivers/target/target_core_device.c
+@@ -850,7 +850,6 @@ bool target_configure_unmap_from_queue(struct se_dev_attrib *attrib,
+ 	attrib->unmap_granularity = q->limits.discard_granularity / block_size;
+ 	attrib->unmap_granularity_alignment = q->limits.discard_alignment /
+ 								block_size;
+-	attrib->unmap_zeroes_data = !!(q->limits.max_write_zeroes_sectors);
+ 	return true;
+ }
+ EXPORT_SYMBOL(target_configure_unmap_from_queue);
 -- 
 2.30.2
 
