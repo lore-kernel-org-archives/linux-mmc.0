@@ -2,90 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3383C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 21:20:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07015C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 21:24:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235727AbiDFVWS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 17:22:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42680 "EHLO
+        id S234504AbiDFVZz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 17:25:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235659AbiDFVV6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 17:21:58 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A9F9DF96
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 13:15:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=I+79RCC5wLvFgPdEG/X+30z3ozXN
-        htsMgw7+VDQgq/M=; b=1XQ+8XnJSym3Pz+8JhjqZWTD9FkGYE9NSl8GPVjmH5NU
-        9B+IxJpH3Z+3EG/b/rK85hKY5d5okBDIlyjAERZ0RR/819KD5FVGwjfJ4YQqyuN/
-        wRWrS5yGRe1dQSTZak4xFYXGgSNt9gQ6jwALI8JymzHG75zBZ+2VuKTeCaV+goE=
-Received: (qmail 2883505 invoked from network); 6 Apr 2022 22:15:43 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 6 Apr 2022 22:15:43 +0200
-X-UD-Smtp-Session: l3s3148p1@x9isBgLc4scgAQnoAH8rAHnYTrcYCkZJ
-Date:   Wed, 6 Apr 2022 22:15:43 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-Subject: Re: [PATCH] MAINTAINERS: Add linux-renesas-soc@vger.kernel.org list
- for Renesas TMIO/SDHI driver
-Message-ID: <Yk307+KxWoh6sYtP@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-References: <20220404174159.571-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+        with ESMTP id S235209AbiDFVZn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 17:25:43 -0400
+Received: from mail-pl1-f176.google.com (mail-pl1-f176.google.com [209.85.214.176])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFD35B6;
+        Wed,  6 Apr 2022 13:21:01 -0700 (PDT)
+Received: by mail-pl1-f176.google.com with SMTP id j8so2951085pll.11;
+        Wed, 06 Apr 2022 13:21:01 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=3mCDtib46azYhoHX+oJIxgCRBmS2BXiXfAVoUab2E94=;
+        b=G/IakRoTiAI0cvScoaTKDrEAtYKZlUYKKy1nKDsjiU+2JCkytRwqvIhWSlYkzzu2UP
+         /pC8bSSOL9fXe1mntksjHBwt4/qDkr49OyaQdYurlfKhU3iB2T/LWCxGviFSxYqzktns
+         ditxD6t8mR2QT/2g+Fo8NsvnUD09JKot3+3tJduNVRminyvWw0sJOk1f9rVLyXdRp+MV
+         1/15Ra1zkLd3GyrzmeT6KWROsuFtBZHjRg9lxjDh8oCfzNz3Cu0YPBb5VJreliZquwsc
+         W6RMZtepyu6DRTxXOL3LTjjtSUCu6iQpJ+SHUQwm9vsnnG2NJyT2+EYtYR7xsj+dOfNn
+         zjIA==
+X-Gm-Message-State: AOAM530LnSArg00wUxm7sZxts/G5W1SBNK0/D9KLfDwYH8QwHnDDOYjV
+        EDW5zrt6ihIYJiiNOpEBRps=
+X-Google-Smtp-Source: ABdhPJxMJ3dzw7N9XtYfZUeTBt4fqiJFyiCzT9SQ10HzjeqEzZaDG86sXBMGiVqyHmM+u0AmHyV3iQ==
+X-Received: by 2002:a17:90b:3a81:b0:1c6:834e:cd61 with SMTP id om1-20020a17090b3a8100b001c6834ecd61mr11840281pjb.149.1649276461210;
+        Wed, 06 Apr 2022 13:21:01 -0700 (PDT)
+Received: from ?IPV6:2601:647:4000:d7:feaa:14ff:fe9d:6dbd? ([2601:647:4000:d7:feaa:14ff:fe9d:6dbd])
+        by smtp.gmail.com with ESMTPSA id y12-20020a17090a784c00b001c6bdafc995sm5468971pjl.3.2022.04.06.13.20.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 06 Apr 2022 13:21:00 -0700 (PDT)
+Message-ID: <b95bdfa9-4373-8f54-677e-4a764061c61c@acm.org>
+Date:   Wed, 6 Apr 2022 13:20:58 -0700
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="BWAkag8zG++8jsre"
-Content-Disposition: inline
-In-Reply-To: <20220404174159.571-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+Content-Language: en-US
+To:     Bean Huo <huobean@gmail.com>,
+        =?UTF-8?Q?Alex_Benn=c3=a9e?= <alex.bennee@linaro.org>
+Cc:     linux-kernel@vger.kernel.org, maxim.uvarov@linaro.org,
+        joakim.bech@linaro.org, ulf.hansson@linaro.org,
+        ilias.apalodimas@linaro.org, arnd@linaro.org,
+        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
+        yang.huang@intel.com, bing.zhu@intel.com,
+        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+References: <20220405093759.1126835-1-alex.bennee@linaro.org>
+ <8b3ce88f65fd11523a4d2daab3c617f7089eb1ce.camel@gmail.com>
+ <87r16bk013.fsf@linaro.org>
+ <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
+ <87ee2ajuky.fsf@linaro.org>
+ <c18a2b359046a14250cafa5a619dbe53f2872b5a.camel@gmail.com>
+ <e72812a9-1e5b-a826-d490-62ed23d94116@acm.org>
+ <310d20a04bdaf40672592d9ffa950606d2ceaff7.camel@gmail.com>
+From:   Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <310d20a04bdaf40672592d9ffa950606d2ceaff7.camel@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 4/6/22 11:12, Bean Huo wrote:
+> It is from the ufs-utils.
+> 
+> So, do you vote to add the UFS RPMB driver based on this new framework
+> to resolve this conflict?
 
---BWAkag8zG++8jsre
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Are any applications using the RPMB code from ufs-utils? It seems to me 
+that the ufs-utils code doe not handle SCSI unit attentions correctly. 
+If a POWER ON unit attention is received as reply to a SECURITY PROTOCOL 
+OUT transaction, the write counter should be reread instead of retrying 
+the SECURITY PROTOCOL OUT command with the same write counter.
 
-On Mon, Apr 04, 2022 at 06:41:59PM +0100, Lad Prabhakar wrote:
-> Add linux-renesas-soc@vger.kernel.org list entry for Renesas TMIO/SDHI
-> driver.
->=20
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Regarding adding a UFS RPMB driver: that seems useful to me since 
+multiple applications make use of the UFS RPMB functionality. My 
+understanding is that currently storageproxyd multiplexes UFS RPMB 
+accesses in Android.
 
-Yes, can be argued.
+Thanks,
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-
---BWAkag8zG++8jsre
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJN9O8ACgkQFA3kzBSg
-KbbJ9g//azq48qKcFXX6BzAgo9gl0HwWlS8h9hEz4jq1oeiTbFrk7DB3ldVZXkTD
-YAR03cs6qTN5JXr0xLifgerJsp05kG1ZFHJGIxqIr3u1wYP3xBZvYNrHr0y8tRrE
-lxcIHKCQnA7JyuImDYKwp1TMtsK88zEb4ObAejWp1xyWIkUH4A2Q8oXUHGoA/5bO
-IE7HKkYv7GGnon95hcQCqPsacqY5WUnQjU6aWFjVdX7MMaDvdXlz5XKlCMomJA1M
-H3l8OaEWBLQ0H48DvpakURlsgPY7IEBLDh2URtadZri0XGoAYK4/HbG1eXKLOE/K
-6TG5z6EnxNOh8rKHCN5bw1oImZudahBlvgANn1ybBkv4wd5JtjGD/Fhq+81f6xu4
-VW8WC0WOKbFwX5kWF9oo+5pll6JWIo5NIFMpqh/DytuFt2UJpt14ilxKUjvKpQX9
-bkEY8pHe+9zW840Ncdycp+pNF6wcGtMOuAge+6X0eTe0gQ0qTthiLJkYXyw9/3bJ
-1cZdrVz4ywS4lavGmSfelHuKQnXHxrwKRt/oIXbDcvL/FfjXH2lb6+ZcISX1/vin
-RKMPj6MFZNSwpjL46jW0Yz/mAhYjsDZ5JVv8A4jwYq3fhMt6IHaVui5eSioLIxSU
-xU69GdBTM/LeaIyi2XzyGejtZS3Smnnf9pP6aQWWY4MstL1bsyw=
-=aqhj
------END PGP SIGNATURE-----
-
---BWAkag8zG++8jsre--
+Bart.
