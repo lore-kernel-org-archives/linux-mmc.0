@@ -2,122 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3925C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 15:01:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F296C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 15:55:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235305AbiDFPDs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 11:03:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50504 "EHLO
+        id S236639AbiDFP5G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 11:57:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236150AbiDFPD2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 11:03:28 -0400
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE1E843A67F
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 05:35:50 -0700 (PDT)
-Received: by mail-wr1-x430.google.com with SMTP id j12so3003979wrb.5
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2022 05:35:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=references:user-agent:from:to:cc:subject:date:in-reply-to
-         :message-id:mime-version:content-transfer-encoding;
-        bh=whOdS+ZcH7sIpEntYe8CJFTcnKkZdKG28Xb/p70XMvo=;
-        b=JsHKfdW83fLPaATYi8d9V3sljgvsb0oN7RRpWT6JB80/10uDk+SQamUjz4rob4ZZS0
-         gpka4IkmpVK6jnRr8X2aNLtGHqzOjKiM0WQE3+Uy9zMVEejPzHP+aTUse0FLHKtxo317
-         Rh4ephi89YgTP7m13Ladzc1N+VqpWWIaw76MYLR5gPZqVY4jnvJ55WcIK2D4KbzCEtNU
-         +JV6+V1KVZ/izMtnIZqPqWqhJmXK7Qeo7Vc1i7RSdjLG9qqq6Uo0xHbhojxwh6mP4S2f
-         8oeJHaXtzLyGDYh4waFsXrD37rwYqLPmR5fdTDK7kVDH/zVBJxSQsRx6DatNT+8FnZsU
-         IozQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject:date
-         :in-reply-to:message-id:mime-version:content-transfer-encoding;
-        bh=whOdS+ZcH7sIpEntYe8CJFTcnKkZdKG28Xb/p70XMvo=;
-        b=gFr5CPUuQpGN+EKHNrfKiF3eUbGZ9ildbbbMkUEZNMXq7PvnNjqiG406/LpvnT6ORP
-         f6Vf7Z8fnlzJo7V+N3NcJJ0uP9jgcnOnWmWlN07MoiPSZbwgtdJxAISl1aeqKwLCCIfk
-         3BwRTRwiFnkeeDfXHqDUalEFBltEhNsxmyyLNrZGmlTc2Ja8nuSB++ZkGFl44XeHaAMx
-         z7pe7tu1ifgOqb3FJaSRMnE8FPqRtZmiTuE8ZtrhspUu9DDDqxi+rZEGXKvduzuJNItu
-         00DTrGMfZbTIcJgMyLlZuJfUsl4vCX94prI2dJLgSw+OLWFw6MLbJOBYIMtshVEmIb+l
-         NO+A==
-X-Gm-Message-State: AOAM532zFMFMYaoeJTk4OZjUhrGyS70jRtgerkwz9gCbb2cvWgxe/1iI
-        O6V+D4+o0PWcIsMGw2ilZRD4Y1Z5WzGkqA==
-X-Google-Smtp-Source: ABdhPJxWPoa96Rp6WyUCbZqG8Rc+VbSNKHl6bbF4sy2t/iT60ay3eCLeVu4In006GQNqNwkQToMQvA==
-X-Received: by 2002:a05:6402:51d4:b0:410:a328:3c86 with SMTP id r20-20020a05640251d400b00410a3283c86mr8318099edd.55.1649246062857;
-        Wed, 06 Apr 2022 04:54:22 -0700 (PDT)
-Received: from zen.linaroharston ([51.148.130.216])
-        by smtp.gmail.com with ESMTPSA id j8-20020aa7c0c8000000b0041934547989sm7922351edp.55.2022.04.06.04.54.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Apr 2022 04:54:21 -0700 (PDT)
-Received: from zen (localhost [127.0.0.1])
-        by zen.linaroharston (Postfix) with ESMTP id 179711FFB7;
-        Wed,  6 Apr 2022 12:54:21 +0100 (BST)
-References: <20220405093759.1126835-1-alex.bennee@linaro.org>
- <8b3ce88f65fd11523a4d2daab3c617f7089eb1ce.camel@gmail.com>
- <87r16bk013.fsf@linaro.org>
- <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
-User-agent: mu4e 1.7.12; emacs 28.1.50
-From:   Alex =?utf-8?Q?Benn=C3=A9e?= <alex.bennee@linaro.org>
-To:     Bean Huo <huobean@gmail.com>
-Cc:     linux-kernel@vger.kernel.org, maxim.uvarov@linaro.org,
-        joakim.bech@linaro.org, ulf.hansson@linaro.org,
-        ilias.apalodimas@linaro.org, arnd@linaro.org,
-        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
-        yang.huang@intel.com, bing.zhu@intel.com,
-        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
-Subject: Re: [PATCH  v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
-Date:   Wed, 06 Apr 2022 12:22:00 +0100
-In-reply-to: <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
-Message-ID: <87ee2ajuky.fsf@linaro.org>
+        with ESMTP id S236759AbiDFP4z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 11:56:55 -0400
+Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8CD156ED5D;
+        Wed,  6 Apr 2022 06:21:56 -0700 (PDT)
+Received: from darkstar.musicnaut.iki.fi (85-76-76-218-nat.elisa-mobile.fi [85.76.76.218])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: aaro.koskinen)
+        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id 67FC71B000E0;
+        Wed,  6 Apr 2022 16:21:51 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
+        t=1649251312;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wwR7bU/LqezBbEgTJDf+iEsMymzvGIHgAIteyu5Psh0=;
+        b=eQ8xzLBJMgXjtwB7Yzjx/LojJlTidJ/nTLI5pX0s3cY3Zpsn8b7BqqyMs3XT0RDiE5x3gs
+        VxYcG9eYTL2ti5Y7V7hFYM+rqV7NikHD3H+p5eERqlQfhhkziGxt5EzkIqEux9pVT/63ct
+        9RZefQzE5i14yPjKv+zCKIJs/eTPZg90LntJxUwFkLpuxJfeJHGC27x/eapHvMw+3QBCfO
+        gmU++itRdwNwFQooc8+77js9RrGrUrR+mkDgelpwUoV/wq1kCEziaeZMKg/gpUDKVDqGmb
+        sdmlvWnhCTYcYS7NFr9PDY7i6KlEk5IH1VV/If5zeEdFsCEIB7hDvyObaWz3Xw==
+Date:   Wed, 6 Apr 2022 16:21:49 +0300
+From:   Aaro Koskinen <aaro.koskinen@iki.fi>
+To:     Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Felipe Balbi <balbi@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to
+ CCF
+Message-ID: <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
+References: <20220310233307.99220-3-jmkrzyszt@gmail.com>
+ <20220322163646.GD297526@darkstar.musicnaut.iki.fi>
+ <20220322190753.GF297526@darkstar.musicnaut.iki.fi>
+ <1810824.tdWV9SEqCh@dell>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1810824.tdWV9SEqCh@dell>
+ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1649251312; a=rsa-sha256;
+        cv=none;
+        b=G3rkvREcvYSgPILWjB5NXkPEwDB12zuDb/aFmiEvpjUFHoIPAJkYCg4gSvydBuXsCOrASV
+        qwVzzbSSEMx9mt98MsnoQGVKzIanrO0nr1oceqozsnLldbYtfYofM5nMCz1ygfNCoiqH+K
+        IgUw/j2ZP7FR0vbtq7AE6gODdl7vMQ3Vfs+C4Xr8gfhiKcLrcewjnyFbLJ8VzM6wBTdU7t
+        gGydIzbI/MdPmrFnVpcq2dLpYJlLq8V5O5cFhpaQPPezxVpgC6QZLcN3upxt341r2aPWzQ
+        DGmnbA4hUe8LZaRUfUkOTNHA0z69SzxLRjRbScNwYpTyKIoK+T6Q5ps5tgqjKw==
+ARC-Authentication-Results: i=1;
+        ORIGINATING;
+        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
+        s=lahtoruutu; t=1649251312;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=wwR7bU/LqezBbEgTJDf+iEsMymzvGIHgAIteyu5Psh0=;
+        b=vWn818AHWtvsq5cDnlrJUnWE79qMNnj8xFj19jFSqwBPLeAtdZ43oHVi70bcMK+nMmLrSK
+        egs3u5wrj9LuerZbuMRnIpytvyvxIRPPV7q5I7a2AsQUHhbykzAHVVpq/9fp7ydLJC4BkE
+        /j7PyMCSQ8gsrfNhsiwPPt7loNA6QMRRlDk5Z6QZ2s9NdMXLpTvDXdFyETUiIH9yQ6N8ZV
+        UA7Ohf8mDgm8uV/Dx1bNcCT7oIamV8mar/PlKoL+fP1XJy/PNu3ZxCz87uc5NkMQwotWIp
+        I92ppcKhR83XiGqTSWPAjd1EkDpGjMI2CtDXW+kr0FIUmivOhk5Ny7zCGfDavA==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi,
 
-Bean Huo <huobean@gmail.com> writes:
+On Sat, Mar 26, 2022 at 10:17:49PM +0100, Janusz Krzysztofik wrote:
+> Dnia wtorek, 22 marca 2022 20:07:53 CET Aaro Koskinen pisze:
+> > On Tue, Mar 22, 2022 at 06:36:48PM +0200, Aaro Koskinen wrote:
+> > > Something is still broken. When doing kexec (using CCF kernel), the
+> > > kexec'ed kernel now hangs early (on 770):
+> > [...]
+> > > [    0.928863] calling  omap1_init_devices+0x0/0x2c @ 1
+> > 
+> > It hangs in omap_sram_reprogram_clock() (<- omap1_select_table_rate()
+> > <- omap1_clk_late_init()).
+> 
+> I've reviewed my changes but haven't found anything suspicious.
 
-> On Tue, 2022-04-05 at 16:43 +0100, Alex Benn=C3=A9e wrote:
->>=20
->> Bean Huo <huobean@gmail.com> writes:
->>=20
->> > Hi Alex,
->> >=20
->> > Thanks for this unified RPMB interface, I wanted to verify this on
->> > our
->> > UFS, it seems you didn't add the UFS access interface in this
->> > version=20
->> > from your userspace tools, right?
->>=20
->> No I didn't but it should be easy enough to add some function pointer
->> redirection everywhere one of the op_* functions calls a vrpmb_*
->> function. Do you already have a UFS RPMB device driver?
->>=20
->
-> Hi Alex,
-> Thanks for your feedback.
->
-> We now access UFS RPMB through the RPMB LUN BSG device, RPMB is a well-
-> known LU and we have a userspace tool to access it.
->
-> I see that if we're going to use your interface, "static struct
-> rpmb_ops" should be registered from a lower-level driver, for example
-> in a UFS driver, yes there should be no problem with this registration,
-> but I don't know with the current way Compared, what are the advantages
-> to add a driver. maybe the main advantage is that we will have an
-> unified user space tool for RPMB. right?
+The below change is fixing the kexec boot. Based on the comment in the
+code, it seems this clock is needed for the SRAM to work.
 
-Pretty much. The main issue for virtio-rpmb is it doesn't really fit
-neatly into the block stack because all it does is the RPMB part so a
-non-block orientate API makes sense.
+diff --git a/arch/arm/mach-omap1/clock_data.c b/arch/arm/mach-omap1/clock_data.c
+index e33e11f826af..b8b4876ff935 100644
+--- a/arch/arm/mach-omap1/clock_data.c
++++ b/arch/arm/mach-omap1/clock_data.c
+@@ -285,7 +285,7 @@ static struct omap1_clk tc1_ck = {
+  */
+ 
+ static struct omap1_clk tc2_ck = {
+-	.hw.init	= CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, 0),
++	.hw.init	= CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, CLK_IS_CRITICAL),
+ 	.ops		= &clkops_generic,
+ 	.enable_reg	= OMAP1_IO_ADDRESS(ARM_IDLECT3),
+ 	.enable_bit	= EN_TC2_CK,
 
-Can you point be to where the UFS driver does it's current RPMB stuff?
-
->
-> Kind regards,
-> Bean
-
-
---=20
-Alex Benn=C3=A9e
+A.
