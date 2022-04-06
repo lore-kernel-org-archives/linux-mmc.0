@@ -2,46 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56C05C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 13:06:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C002C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 13:11:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232655AbiDFNIj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 09:08:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57562 "EHLO
+        id S232209AbiDFNNw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 09:13:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232977AbiDFNHu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 09:07:50 -0400
+        with ESMTP id S233595AbiDFNMt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 09:12:49 -0400
 Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90CCD4DF8AA;
-        Wed,  6 Apr 2022 02:42:07 -0700 (PDT)
-X-UUID: f38cdd16a5934c02bb76974fe8781fa9-20220406
-X-UUID: f38cdd16a5934c02bb76974fe8781fa9-20220406
-Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 085B14E1D1E;
+        Wed,  6 Apr 2022 02:49:44 -0700 (PDT)
+X-UUID: 61da098c1a8f4141b6812e69d4ab8532-20220406
+X-UUID: 61da098c1a8f4141b6812e69d4ab8532-20220406
+Received: from mtkexhb01.mediatek.inc [(172.21.101.102)] by mailgw01.mediatek.com
         (envelope-from <axe.yang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 475865710; Wed, 06 Apr 2022 17:41:37 +0800
+        with ESMTP id 1250012946; Wed, 06 Apr 2022 17:38:39 +0800
 Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 6 Apr 2022 17:41:36 +0800
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Wed, 6 Apr 2022 17:38:38 +0800
 Received: from mhfsdcap04 (10.17.3.154) by mtkcas10.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 6 Apr 2022 17:41:34 +0800
-Message-ID: <174a42437212ed26ecc08d1a35d20717d0346158.camel@mediatek.com>
-Subject: Re: [PATCH v9 2/3] mmc: core: Add support for SDIO wakeup interrupt
+ Transport; Wed, 6 Apr 2022 17:38:37 +0800
+Message-ID: <d7c0b9573e32d68c25444e48e6df1bba0eb64262.camel@mediatek.com>
+Subject: Re: [PATCH v9 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
+ pinctrls properties
 From:   Axe Yang <axe.yang@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
+To:     Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        "Yoshihiro Shimoda" <yoshihiro.shimoda.uh@renesas.com>,
         Satya Tangirala <satyat@google.com>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Lucas Stach <dev@lynxeye.de>,
-        "Eric Biggers" <ebiggers@google.com>,
+        Eric Biggers <ebiggers@google.com>,
         Andrew Jeffery <andrew@aj.id.au>,
-        "Stephen Boyd" <swboyd@chromium.org>,
+        Stephen Boyd <swboyd@chromium.org>,
         Kiwoong Kim <kwmad.kim@samsung.com>,
         Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
         <angelogioacchino.delregno@collabora.com>,
@@ -49,11 +50,12 @@ CC:     Rob Herring <robh+dt@kernel.org>,
         <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>
-Date:   Wed, 6 Apr 2022 17:41:34 +0800
-In-Reply-To: <CAPDyKFqzNJxt8RhQ5ABLqqkVaJmRPDFu=QuSUvAr-eW9SK4fSw@mail.gmail.com>
+Date:   Wed, 6 Apr 2022 17:38:37 +0800
+In-Reply-To: <Ykc53EmCaA7TadRK@robh.at.kernel.org>
 References: <20220329032913.8750-1-axe.yang@mediatek.com>
-         <20220329032913.8750-3-axe.yang@mediatek.com>
-         <CAPDyKFqzNJxt8RhQ5ABLqqkVaJmRPDFu=QuSUvAr-eW9SK4fSw@mail.gmail.com>
+         <20220329032913.8750-2-axe.yang@mediatek.com>
+         <CAPDyKFqoTN1pF-L6qCHxpdMCmPtHP0aHHaDURN2QJsN3v+wZBw@mail.gmail.com>
+         <Ykc53EmCaA7TadRK@robh.at.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
@@ -63,74 +65,84 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2022-04-01 at 14:42 +0200, Ulf Hansson wrote:
-> On Tue, 29 Mar 2022 at 05:29, Axe Yang <axe.yang@mediatek.com> wrote:
+On Fri, 2022-04-01 at 12:43 -0500, Rob Herring wrote:
+> On Fri, Apr 01, 2022 at 11:22:13AM +0200, Ulf Hansson wrote:
+> > On Tue, 29 Mar 2022 at 05:29, Axe Yang <axe.yang@mediatek.com>
+> > wrote:
+> > > 
+> > > Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
+> > > This feature allow SDIO devices alarm asynchronous interrupt to
+> > > host
+> > > even when host stop providing clock to SDIO card. An extra wakeup
+> > > interrupt and pinctrl states for SDIO DAT1 pin state switching
+> > > are
+> > > required in this scenario.
+> > > 
+> > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> > > ---
+> > >  .../devicetree/bindings/mmc/mtk-sd.yaml         | 17
+> > > ++++++++++++++++-
+> > >  1 file changed, 16 insertions(+), 1 deletion(-)
+> > > 
+> > > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > index 297ada03e3de..3872a6ce2867 100644
+> > > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > > @@ -69,12 +69,22 @@ properties:
+> > >        - const: ahb_cg
+> > > 
+> > >    interrupts:
+> > > -    maxItems: 1
+> > > +    description:
+> > > +      Should at least contain MSDC GIC interrupt. To support
+> > > SDIO in-band wakeup, an extended
+> > > +      interrupt is required and be configured as wakeup source
+> > > irq.
 > > 
-> > If wakeup-source flag is set in host dts node, parse EAI
-> > information
-> > from SDIO CCCR interrupt externsion segment for in-band wakeup. If
-> > async interrupt is supported by SDIO card then enable it and set
-> > enable_async_irq flag in sdio_cccr structure to 1. The parse flow
-> > is
-> > implemented in sdio_read_cccr().
+> > If I understand correctly, the extended interrupt (a GPIO irq) may
+> > not
+> > necessarily share the same interrupt parent as the primary device
+> > interrupt.
 > > 
-> > Acked-by: AngeloGioacchino Del Regno <
-> > angelogioacchino.delregno@collabora.com>
-> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> > ---
-> >  drivers/mmc/core/sdio.c  | 17 +++++++++++++++++
-> >  include/linux/mmc/card.h |  8 +++++++-
-> >  include/linux/mmc/sdio.h |  5 +++++
-> >  3 files changed, 29 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> > index 25799accf8a0..4898c5e9a299 100644
-> > --- a/drivers/mmc/core/sdio.c
-> > +++ b/drivers/mmc/core/sdio.c
-> > @@ -226,6 +226,23 @@ static int sdio_read_cccr(struct mmc_card
-> > *card, u32 ocr)
-> >                                 card->sw_caps.sd3_drv_type |=
-> > SD_DRIVER_TYPE_C;
-> >                         if (data & SDIO_DRIVE_SDTD)
-> >                                 card->sw_caps.sd3_drv_type |=
-> > SD_DRIVER_TYPE_D;
-> > +
-> > +                       if (card->host->pm_caps &
-> > MMC_PM_WAKE_SDIO_IRQ) {
+> > Perhaps it's then better to extend this with "interrupts-extended"
+> > instead. See Documentation/devicetree/bindings/interrupt-
+> > controller/interrupts.txt.
 > 
-> After a second thought, I think we can just skip this check. The
-> MMC_PM_WAKE_SDIO_IRQ indicates that the host supports SDIO IRQs as
-> *system wakeups*.
+> 'interrupts-extended' is interchangeable with 'interrupts'. For
+> schemas, 
+> use 'interrupts' and the tools take care of supporting both forms.
 > 
-> But, in fact, I think we want this feature to be enabled to allow
-> waking up for runtime_suspend (RPM_SUSPENDED) too.
-> 
-> > +                               ret = mmc_io_rw_direct(card, 0, 0,
-> > SDIO_CCCR_INTERRUPT_EXT, 0,
-> > +                                                      &data);
-> > +                               if (ret)
-> > +                                       goto out;
-> > +
-> > +                               if (data & SDIO_INTERRUPT_EXT_SAI)
-> > {
-> > +                                       data |=
-> > SDIO_INTERRUPT_EXT_EAI;
-> > +                                       ret =
-> > mmc_io_rw_direct(card, 1, 0, SDIO_CCCR_INTERRUPT_EXT,
-> > +                                                              data
-> > , NULL);
-> > +                                       if (ret)
-> > +                                               goto out;
-> > +
-> > +                                       card->cccr.enable_async_irq 
-> > = 1;
-> > +                               }
-> > +                       }
-> >                 }
-> 
-> 
-Will skip this check in next version. Thanks.
+
+hello Ulf, you are right, the wakeup interrupt(parent is &pio) do not
+share same parent as primary interrupt(parent is &gic). And as you
+said, I am using "interrupts-extended" to declare the wakeup irq, see
+commit message in patch 3/3:
+         &mmcX {
+                 ...
+                 interrupts-extended = <...>,
+                                       <&pio xxx IRQ_TYPE_LEVEL_LOW>;
+                 ...
+                 pinctrl-names = "default", "state_uhs", "state_eint";
+                 ...
+                 pinctrl-2 = <&mmc2_pins_eint>;
+                 ...
+                 cap-sdio-irq;
+                 keep-power-in-suspend;
+                 wakeup-source;
+                 ...
+         };
+
+But the wakup interrupt is for SDIO only, in most instances, MSDC is
+been used as eMMC/SD card host, they do not need this interrupt. So as
+Rob suggested, I think we'd better keep using 'interrupts'. And I will
+update the description for 'interrupts', suggest to use 'interrupts-
+extended' to declare SDIO wakeup interrupt.
+
+And 'interrupt-names' is a good idea, I will add this property to
+document too. Thank you for the advice.
 
 Regards,
 Axe
+
 
