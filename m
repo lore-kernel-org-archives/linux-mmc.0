@@ -2,146 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34AAFC43219
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 20:12:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 820ACC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 20:26:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234100AbiDFUOg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 16:14:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40640 "EHLO
+        id S234430AbiDFU2a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 16:28:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236447AbiDFUNm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 16:13:42 -0400
-Received: from mail-pj1-f51.google.com (mail-pj1-f51.google.com [209.85.216.51])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C560B14144F;
-        Wed,  6 Apr 2022 10:32:48 -0700 (PDT)
-Received: by mail-pj1-f51.google.com with SMTP id kw18so3187563pjb.5;
-        Wed, 06 Apr 2022 10:32:48 -0700 (PDT)
+        with ESMTP id S234330AbiDFU2K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 16:28:10 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4838413D09;
+        Wed,  6 Apr 2022 11:48:19 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id k21so5687961lfe.4;
+        Wed, 06 Apr 2022 11:48:19 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=j9395K+P3ckPAEpp0VngX/lMlS/mSO7/OiLA6T9rii8=;
+        b=AdiupK0f5tH3mzh81yMw74TNiqYSKhpRq5BV6vNWimIJM65sCmwtO0VGTLEIQSkjg/
+         xHomBGdi80pYAOjj2DuUq1oWwtOlgDYUspbmgS50UQ2XpWmFvFb64rmVAjIspPHu8v/N
+         raKCDBS81RRn+l35CiP8V9s15SZMqyc+I6CC6eNFaX7SY9jCEODu+ODqKQrEXvDnNfW9
+         06BmSYAMjoFA6bYLj+hs4lTp1VvofM5xzi/2yOrMuJgyl5vhhS2Qt0VQ3ZrZxNRi+m2Y
+         ZVJqXmFHD7We6zWDIH1c5jJ/5vx6iC0vE5/vmSAzew0dRX0CYnl+53PUQ+FMuZ066+V3
+         5MlQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=1p8gUuneckKY8YLiEV5xhyLd1rkixdksic7T++BXSFo=;
-        b=1FEsfjRlo0QfDUzwuwuNA5IhH0olWwSJftyKFQxGAImpRJ3r6cpGWZLRa9O84JAyLJ
-         F279G0VKZzSYPUbjgtAEYgNamizRSDvdSMMbekzyeB3IK+7Zumi2dVlEesVMKenyNJYC
-         x8xdh4E4/FZ4oSNz3u65wy0Yqtaotehlwnz9/Vq0phY2SRaAeTyG7kmqJny8Hlen8d+/
-         7O9fLt5Ky+t3GSeOnve6KI08zUlmaeLxJtQUwCIv8ppni5MMxOn62deov3UTe7MiWAFD
-         o35CCokAbRft1iVnKM26AmIPAX6wEkMiWs2PX2D0i8X42/0twcjQw2pi1mGpAk7U90ev
-         zK6g==
-X-Gm-Message-State: AOAM530pgtT//yc4DkmUe9milgOVAxzti/BdqtIrla5PZU3a3nJINO6G
-        sNJid8+gBveFgnMB3trnkI4=
-X-Google-Smtp-Source: ABdhPJxyL8mCwgcllhty9biVKtUpTHo4mXsfQpbuIBga5V0A8ZuzeKzBXeJfVylupuW8iUwBo0uotw==
-X-Received: by 2002:a17:902:834a:b0:14f:3337:35de with SMTP id z10-20020a170902834a00b0014f333735demr9895533pln.8.1649266367475;
-        Wed, 06 Apr 2022 10:32:47 -0700 (PDT)
-Received: from ?IPV6:2601:647:4000:d7:feaa:14ff:fe9d:6dbd? ([2601:647:4000:d7:feaa:14ff:fe9d:6dbd])
-        by smtp.gmail.com with ESMTPSA id mu1-20020a17090b388100b001c77e79531bsm6454716pjb.50.2022.04.06.10.32.45
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 06 Apr 2022 10:32:46 -0700 (PDT)
-Message-ID: <e72812a9-1e5b-a826-d490-62ed23d94116@acm.org>
-Date:   Wed, 6 Apr 2022 10:32:44 -0700
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=j9395K+P3ckPAEpp0VngX/lMlS/mSO7/OiLA6T9rii8=;
+        b=C9xni2Se3KsxJ/qA93W+xT20Lw3+mTceU3wgH16Dve2CQ7nmCmvrtOUmZD0avnYS2S
+         YmqpjEb78NypbSAU+0QDfalhlbm7FtQnPIlFdG/05lAYnVqgSslrUyVzNxG5yHzUXbtT
+         5TUZYkFpCdtJwRYIvdGa4Mx+fmCErSMshhNppBLX2HnXOMvylHXA5DgldxXFZ8Mw32/b
+         RZ9UKjpvY8iAEM3wSAylA1/cwa3L6vBrcRLV5ILiJq4shdrvxaFjGIoU9E/buKc4gkVP
+         kFZOU3CpMbZF+yCcvcX4+GLM8S+4Kp5lBqTmCd8noPP9LVf2QoKGRzIAFN6HnTxNcc44
+         6Hzw==
+X-Gm-Message-State: AOAM532pgeNnve5fE9O4raZl5zCCcOeWUnFsS38sUmEVI1sjGjGMNMMv
+        J99BOXbnijdY3dBwS55rfaP1ZIb57nLf9boT
+X-Google-Smtp-Source: ABdhPJzNADicM+sXa4roBFQ7B2f4eH3VnwkH5xkwOrMbesUL+8GJo8yXhHvLj4BO2Bo5WHfPEDGStA==
+X-Received: by 2002:a05:6512:39c1:b0:44a:e25d:47fd with SMTP id k1-20020a05651239c100b0044ae25d47fdmr6907751lfu.580.1649270897430;
+        Wed, 06 Apr 2022 11:48:17 -0700 (PDT)
+Received: from dell.intranet (93-181-165-181.internetia.net.pl. [93.181.165.181])
+        by smtp.gmail.com with ESMTPSA id e14-20020a19500e000000b0044a16931c7csm1912219lfb.97.2022.04.06.11.48.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Apr 2022 11:48:16 -0700 (PDT)
+From:   Janusz Krzysztofik <jmkrzyszt@gmail.com>
+To:     Aaro Koskinen <aaro.koskinen@iki.fi>
+Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Felipe Balbi <balbi@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to CCF
+Date:   Wed, 06 Apr 2022 20:48:14 +0200
+Message-ID: <1888452.PYKUYFuaPT@dell>
+In-Reply-To: <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
+References: <20220310233307.99220-3-jmkrzyszt@gmail.com> <1810824.tdWV9SEqCh@dell> <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
-Content-Language: en-US
-To:     Bean Huo <huobean@gmail.com>,
-        =?UTF-8?Q?Alex_Benn=c3=a9e?= <alex.bennee@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, maxim.uvarov@linaro.org,
-        joakim.bech@linaro.org, ulf.hansson@linaro.org,
-        ilias.apalodimas@linaro.org, arnd@linaro.org,
-        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
-        yang.huang@intel.com, bing.zhu@intel.com,
-        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
-References: <20220405093759.1126835-1-alex.bennee@linaro.org>
- <8b3ce88f65fd11523a4d2daab3c617f7089eb1ce.camel@gmail.com>
- <87r16bk013.fsf@linaro.org>
- <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
- <87ee2ajuky.fsf@linaro.org>
- <c18a2b359046a14250cafa5a619dbe53f2872b5a.camel@gmail.com>
-From:   Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <c18a2b359046a14250cafa5a619dbe53f2872b5a.camel@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/6/22 10:19, Bean Huo wrote:
-> On Wed, 2022-04-06 at 12:22 +0100, Alex Bennée wrote:
->>
->> Bean Huo <huobean@gmail.com> writes:
->>
->>> On Tue, 2022-04-05 at 16:43 +0100, Alex Bennée wrote:
->>>>
->>>> Bean Huo <huobean@gmail.com> writes:
->>>>
->>>>> Hi Alex,
->>>>>
->>>>> Thanks for this unified RPMB interface, I wanted to verify this
->>>>> on
->>>>> our
->>>>> UFS, it seems you didn't add the UFS access interface in this
->>>>> version
->>>>> from your userspace tools, right?
->>>>
->>>> No I didn't but it should be easy enough to add some function
->>>> pointer
->>>> redirection everywhere one of the op_* functions calls a vrpmb_*
->>>> function. Do you already have a UFS RPMB device driver?
->>>>
->>>
->>> Hi Alex,
->>> Thanks for your feedback.
->>>
->>> We now access UFS RPMB through the RPMB LUN BSG device, RPMB is a
->>> well-
->>> known LU and we have a userspace tool to access it.
->>>
->>> I see that if we're going to use your interface, "static struct
->>> rpmb_ops" should be registered from a lower-level driver, for
->>> example
->>> in a UFS driver, yes there should be no problem with this
->>> registration,
->>> but I don't know with the current way Compared, what are the
->>> advantages
->>> to add a driver. maybe the main advantage is that we will have an
->>> unified user space tool for RPMB. right?
->>
->> Pretty much. The main issue for virtio-rpmb is it doesn't really fit
->> neatly into the block stack because all it does is the RPMB part so a
->> non-block orientate API makes sense.
->>
->> Can you point be to where the UFS driver does it's current RPMB
->> stuff?
->>
-> 
-> It's the SCSI BSG driver, in fact, we don't have a dedicated UFS RPMB
-> driver in the kernel. RPMB is a well known LU, we are using userspace
-> tools to issue SCSI commands directly to the UFS RPMB LU via ioctl()
-> from the BSG device node in the /dev/sg/ folder.
-> 
-> Here is the BSG part of the code in the userspace tools:
-> 
->          io_hdr_v4.guard = 'Q';
->          io_hdr_v4.protocol = BSG_PROTOCOL_SCSI;
->          io_hdr_v4.subprotocol = BSG_SUB_PROTOCOL_SCSI_CMD;
->          io_hdr_v4.response = (__u64)sense_buffer;
->          io_hdr_v4.max_response_len = SENSE_BUFF_LEN;
->          io_hdr_v4.request_len = cmd_len;
->          io_hdr_v4.request = (__u64)cdb;
->                                                                                                                            
->                                                                                   
->          ioctl(fd, SG_IO, &io_hdr_v4))
+Dnia =C5=9Broda, 6 kwietnia 2022 15:21:49 CEST Aaro Koskinen pisze:
+> Hi,
+>=20
+> On Sat, Mar 26, 2022 at 10:17:49PM +0100, Janusz Krzysztofik wrote:
+> > Dnia wtorek, 22 marca 2022 20:07:53 CET Aaro Koskinen pisze:
+> > > On Tue, Mar 22, 2022 at 06:36:48PM +0200, Aaro Koskinen wrote:
+> > > > Something is still broken. When doing kexec (using CCF kernel), the
+> > > > kexec'ed kernel now hangs early (on 770):
+> > > [...]
+> > > > [    0.928863] calling  omap1_init_devices+0x0/0x2c @ 1
+> > >=20
+> > > It hangs in omap_sram_reprogram_clock() (<- omap1_select_table_rate()
+> > > <- omap1_clk_late_init()).
+> >=20
+> > I've reviewed my changes but haven't found anything suspicious.
+>=20
+> The below change is fixing the kexec boot. Based on the comment in the
+> code, it seems this clock is needed for the SRAM to work.
+>=20
+> diff --git a/arch/arm/mach-omap1/clock_data.c b/arch/arm/mach-omap1/clock=
+_data.c
+> index e33e11f826af..b8b4876ff935 100644
+> --- a/arch/arm/mach-omap1/clock_data.c
+> +++ b/arch/arm/mach-omap1/clock_data.c
+> @@ -285,7 +285,7 @@ static struct omap1_clk tc1_ck =3D {
+>   */
+> =20
+>  static struct omap1_clk tc2_ck =3D {
+> -	.hw.init	=3D CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, 0),
+> +	.hw.init	=3D CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, CLK_IS=
+_CRITICAL),
+>  	.ops		=3D &clkops_generic,
+>  	.enable_reg	=3D OMAP1_IO_ADDRESS(ARM_IDLECT3),
+>  	.enable_bit	=3D EN_TC2_CK,
+>=20
+> A.
+>=20
 
-Hi Bean,
-
-I'm not sure where the above comes from? The Android RPMB client uses 
-slightly different code. Additionally, the retry loop around the 
-submission of SG/IO commands is very important. See also the 
-check_sg_io_hdr() call in send_ufs_rpmb_req(). See also 
-https://cs.android.com/android/platform/superproject/+/master:system/core/trusty/storage/proxy/rpmb.c
+Thank you Aaro.  Will you submit this as a separate fix, or should I submit=
+=20
+v2 of my patch 4/4 with your fix included?
 
 Thanks,
+Janusz
 
-Bart.
+
+
