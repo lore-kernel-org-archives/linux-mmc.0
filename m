@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FF73C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 09:15:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A8FCC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 09:15:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235576AbiDFJQ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:16:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39700 "EHLO
+        id S240425AbiDFJRC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:17:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349404AbiDFJCq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:02:46 -0400
+        with ESMTP id S1359501AbiDFJDX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:03:23 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64CAF48F70C;
-        Tue,  5 Apr 2022 23:05:30 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA943478A54;
+        Tue,  5 Apr 2022 23:06:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=qk698qFB+7DuJ4AJ2sY5VQ7AD5pdtTim73QQqZ92loQ=; b=vV1BbnA55cPPAZB3254BK506im
-        Old6T+yuUYVQppmY4OvzxURFILotMc/oCVviEkRv2abUE0J0i0GHlFCQmQE6zN4zzMN0LyyGdxCxm
-        a3zAC2ibzPxxmh2esPJ31vQhU4t1hgSd4oolbLVJ30XUyZxO92DdwG6hQFMXNMNhWN7rcep7w4tlS
-        VBiExL3j/1rs3vSKxNFaeesN2dWuawOYgyTbMBu//+gVZzz/ekohyJi6Ui5YQzYrI1BTFh69BMJ40
-        8U0V0qb3pKlFpPgDI+reF/WlPNRxgS+0CgrkGxB17h8Jk2cVEx0UzjeLM8HRoV8yqMFF4OEOqQS3q
-        gljNqowQ==;
+        bh=65vdZDv/Oyhj9d7BIFQpxpieHFePRtIOo5rSsdbnvJY=; b=fnclFxf748Yk+HJEP8iaRVW3WB
+        aWWIhphvzxhVY6FZKXEjV9bmsgZxn1Kj0ojlUoEizIay0h/EV1KlYq6LYsLwUZoiL+Fz08VFbrmWJ
+        BYNbJJT671L+8hPCaASzQ9hicWQta9jTVuyI55rgNvXk3KOf4lbIG1gDSvXVJwm3aMnDnl4JurT3R
+        S8cYXnLnqA9S0vlUcqmBeds07qoRbn35ezQfJ8pyS1RE387ITcgzq6PHUXXwRZqcO/Sk1L5arJMLy
+        E+9ofKyWiYPnidQ8zD5I0ZyEozinv4MmGtOr/LudVUr7xp27guzf7u4zI6ERWqMoK3aOeUdBrl0mu
+        xcCu0PRw==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbynH-003umG-Rn; Wed, 06 Apr 2022 06:05:28 +0000
+        id 1nbyoD-003vVW-6V; Wed, 06 Apr 2022 06:06:25 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,9 +43,9 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 02/27] target: pass a block_device to target_configure_unmap_from_queue
-Date:   Wed,  6 Apr 2022 08:04:51 +0200
-Message-Id: <20220406060516.409838-3-hch@lst.de>
+Subject: [PATCH 17/27] block: use bdev_alignment_offset in disk_alignment_offset_show
+Date:   Wed,  6 Apr 2022 08:05:06 +0200
+Message-Id: <20220406060516.409838-18-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220406060516.409838-1-hch@lst.de>
 References: <20220406060516.409838-1-hch@lst.de>
@@ -56,96 +56,47 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The target code is a consumer of the block layer and should generally
-work on struct block_device.
+This does the same as the open coded variant except for an extra branch,
+and allows to remove queue_alignment_offset entirely.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/target/target_core_device.c  | 5 +++--
- drivers/target/target_core_file.c    | 7 ++++---
- drivers/target/target_core_iblock.c  | 2 +-
- include/target/target_core_backend.h | 4 ++--
- 4 files changed, 10 insertions(+), 8 deletions(-)
+ block/genhd.c          | 2 +-
+ include/linux/blkdev.h | 8 --------
+ 2 files changed, 1 insertion(+), 9 deletions(-)
 
-diff --git a/drivers/target/target_core_device.c b/drivers/target/target_core_device.c
-index fa866acef5bb2..3a1ec705cd80b 100644
---- a/drivers/target/target_core_device.c
-+++ b/drivers/target/target_core_device.c
-@@ -834,9 +834,10 @@ struct se_device *target_alloc_device(struct se_hba *hba, const char *name)
-  * in ATA and we need to set TPE=1
-  */
- bool target_configure_unmap_from_queue(struct se_dev_attrib *attrib,
--				       struct request_queue *q)
-+				       struct block_device *bdev)
+diff --git a/block/genhd.c b/block/genhd.c
+index b8b6759d670f0..712031ce19070 100644
+--- a/block/genhd.c
++++ b/block/genhd.c
+@@ -1010,7 +1010,7 @@ static ssize_t disk_alignment_offset_show(struct device *dev,
  {
--	int block_size = queue_logical_block_size(q);
-+	struct request_queue *q = bdev_get_queue(bdev);
-+	int block_size = bdev_logical_block_size(bdev);
+ 	struct gendisk *disk = dev_to_disk(dev);
  
- 	if (!blk_queue_discard(q))
- 		return false;
-diff --git a/drivers/target/target_core_file.c b/drivers/target/target_core_file.c
-index 8190b840065f3..8d191fdc33217 100644
---- a/drivers/target/target_core_file.c
-+++ b/drivers/target/target_core_file.c
-@@ -134,10 +134,11 @@ static int fd_configure_device(struct se_device *dev)
- 	 */
- 	inode = file->f_mapping->host;
- 	if (S_ISBLK(inode->i_mode)) {
--		struct request_queue *q = bdev_get_queue(I_BDEV(inode));
-+		struct block_device *bdev = I_BDEV(inode);
-+		struct request_queue *q = bdev_get_queue(bdev);
- 		unsigned long long dev_size;
+-	return sprintf(buf, "%d\n", queue_alignment_offset(disk->queue));
++	return sprintf(buf, "%d\n", bdev_alignment_offset(disk->part0));
+ }
  
--		fd_dev->fd_block_size = bdev_logical_block_size(I_BDEV(inode));
-+		fd_dev->fd_block_size = bdev_logical_block_size(bdev);
- 		/*
- 		 * Determine the number of bytes from i_size_read() minus
- 		 * one (1) logical sector from underlying struct block_device
-@@ -150,7 +151,7 @@ static int fd_configure_device(struct se_device *dev)
- 			dev_size, div_u64(dev_size, fd_dev->fd_block_size),
- 			fd_dev->fd_block_size);
+ static ssize_t disk_discard_alignment_show(struct device *dev,
+diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
+index f8c50b77543eb..d5346e72e3645 100644
+--- a/include/linux/blkdev.h
++++ b/include/linux/blkdev.h
+@@ -1251,14 +1251,6 @@ bdev_zone_write_granularity(struct block_device *bdev)
+ 	return queue_zone_write_granularity(bdev_get_queue(bdev));
+ }
  
--		if (target_configure_unmap_from_queue(&dev->dev_attrib, q))
-+		if (target_configure_unmap_from_queue(&dev->dev_attrib, bdev))
- 			pr_debug("IFILE: BLOCK Discard support available,"
- 				 " disabled by default\n");
- 		/*
-diff --git a/drivers/target/target_core_iblock.c b/drivers/target/target_core_iblock.c
-index 87ede165ddba4..b886ce1770bfd 100644
---- a/drivers/target/target_core_iblock.c
-+++ b/drivers/target/target_core_iblock.c
-@@ -119,7 +119,7 @@ static int iblock_configure_device(struct se_device *dev)
- 	dev->dev_attrib.hw_max_sectors = queue_max_hw_sectors(q);
- 	dev->dev_attrib.hw_queue_depth = q->nr_requests;
- 
--	if (target_configure_unmap_from_queue(&dev->dev_attrib, q))
-+	if (target_configure_unmap_from_queue(&dev->dev_attrib, bd))
- 		pr_debug("IBLOCK: BLOCK Discard support available,"
- 			 " disabled by default\n");
- 
-diff --git a/include/target/target_core_backend.h b/include/target/target_core_backend.h
-index 675f3a1fe6139..773963a1e0b53 100644
---- a/include/target/target_core_backend.h
-+++ b/include/target/target_core_backend.h
-@@ -14,7 +14,7 @@
- #define TRANSPORT_FLAG_PASSTHROUGH_ALUA		0x2
- #define TRANSPORT_FLAG_PASSTHROUGH_PGR          0x4
- 
--struct request_queue;
-+struct block_device;
- struct scatterlist;
- 
- struct target_backend_ops {
-@@ -117,7 +117,7 @@ sense_reason_t passthrough_parse_cdb(struct se_cmd *cmd,
- bool target_sense_desc_format(struct se_device *dev);
- sector_t target_to_linux_sector(struct se_device *dev, sector_t lb);
- bool target_configure_unmap_from_queue(struct se_dev_attrib *attrib,
--				       struct request_queue *q);
-+				       struct block_device *bdev);
- 
- static inline bool target_dev_configured(struct se_device *se_dev)
+-static inline int queue_alignment_offset(const struct request_queue *q)
+-{
+-	if (q->limits.misaligned)
+-		return -1;
+-
+-	return q->limits.alignment_offset;
+-}
+-
+ static inline int queue_limit_alignment_offset(struct queue_limits *lim, sector_t sector)
  {
+ 	unsigned int granularity = max(lim->physical_block_size, lim->io_min);
 -- 
 2.30.2
 
