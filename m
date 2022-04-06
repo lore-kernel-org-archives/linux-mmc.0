@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B6BDC433FE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 854C3C433F5
 	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 09:21:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1356792AbiDFJRX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:17:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53136 "EHLO
+        id S1353255AbiDFJRU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:17:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376837AbiDFJD3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:03:29 -0400
+        with ESMTP id S1352018AbiDFJCs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:02:48 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCFE5478A46;
-        Tue,  5 Apr 2022 23:06:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 253A848F713;
+        Tue,  5 Apr 2022 23:05:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=rlsVeHMg1hHe1r1+YuPgwXRF4/8zJamKMsqI05vg2XQ=; b=dEa4kNFmwX0SYcUFcc8Xi9cZiL
-        0YHBnhtVe3qzqowCIKMRB3fv14qh0IEapvyOiw9f3P2TSmik6xnIn650HHnwvUXy84tiN3zbnssTg
-        bDH/a8s5U5AtH87Q46R+MdZn/5zNmDyW2XAGsRKbf666enqb4maEJBeBUKRiT5IBnUoONGC/RElhk
-        R2OL8L7AkB7Ubnk5lUhjB16LEYlI2jSitkdlJ7GTrHY/8Pee2MpDAWz1qn3WxE7V0lFGXbe3hSOHh
-        45Avy2PKid7ei173qk3MzQTEY8YnmjD/8olfy3eNuGejl5sdeK7uQvol+EUTRrVgtV4C0kFycxISR
-        GBDMxuEg==;
+        bh=cTLTfYr7duFMbl13zCRXcRUBgEmH7Snqn+WlWdpEWNo=; b=ZV/CVrUb4qbpXBUImFAvqmY7OC
+        YR/KmNB2+lAjq+EqA8oBYfyehyx3Nq+YwtV4TxCIA5A8L2WVXtNlev4guWoUuadGmFOwtgMiNwq9i
+        yqX5G6E2+zNceTQVJtjM3l08MHhteYnLHXffM4/jtc5yfz/GeuE8HPUJ4reOje5U615tM7p768ryF
+        Y/h9+5h+K+8NlHUqGExK7MtGefB5aNgyMmSmLlNaZTgeiyQAt5+xaIpSgQ/+zSSJmDjA+IoRmYh1L
+        IwncIh14NoCZ6DbOmIaikx8OL30Ru/YZRUBoYvofpcHUxFXkbbQXdd7v+XeVl55WVE6NwYrNNaEln
+        SKW/g4CA==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbyoG-003vYE-MZ; Wed, 06 Apr 2022 06:06:29 +0000
+        id 1nbynT-003usA-Kd; Wed, 06 Apr 2022 06:05:40 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,9 +43,9 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 18/27] block: move bdev_alignment_offset and queue_limit_alignment_offset out of line
-Date:   Wed,  6 Apr 2022 08:05:07 +0200
-Message-Id: <20220406060516.409838-19-hch@lst.de>
+Subject: [PATCH 05/27] drbd: use bdev based limit helpers in drbd_send_sizes
+Date:   Wed,  6 Apr 2022 08:04:54 +0200
+Message-Id: <20220406060516.409838-6-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220406060516.409838-1-hch@lst.de>
 References: <20220406060516.409838-1-hch@lst.de>
@@ -56,84 +56,50 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-No need to inline these fairly larger helpers.
+Use the bdev based limits helpers where they exist.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- block/blk-settings.c   | 23 +++++++++++++++++++++++
- include/linux/blkdev.h | 21 +--------------------
- 2 files changed, 24 insertions(+), 20 deletions(-)
+ drivers/block/drbd/drbd_main.c | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
 
-diff --git a/block/blk-settings.c b/block/blk-settings.c
-index b83df3d2eebca..94410a13c0dee 100644
---- a/block/blk-settings.c
-+++ b/block/blk-settings.c
-@@ -468,6 +468,16 @@ void blk_queue_io_opt(struct request_queue *q, unsigned int opt)
- }
- EXPORT_SYMBOL(blk_queue_io_opt);
+diff --git a/drivers/block/drbd/drbd_main.c b/drivers/block/drbd/drbd_main.c
+index 74b1b2424efff..d20d84ee7a88e 100644
+--- a/drivers/block/drbd/drbd_main.c
++++ b/drivers/block/drbd/drbd_main.c
+@@ -924,7 +924,9 @@ int drbd_send_sizes(struct drbd_peer_device *peer_device, int trigger_reply, enu
  
-+static int queue_limit_alignment_offset(struct queue_limits *lim,
-+		sector_t sector)
-+{
-+	unsigned int granularity = max(lim->physical_block_size, lim->io_min);
-+	unsigned int alignment = sector_div(sector, granularity >> SECTOR_SHIFT)
-+		<< SECTOR_SHIFT;
+ 	memset(p, 0, packet_size);
+ 	if (get_ldev_if_state(device, D_NEGOTIATING)) {
+-		struct request_queue *q = bdev_get_queue(device->ldev->backing_bdev);
++		struct block_device *bdev = device->ldev->backing_bdev;
++		struct request_queue *q = bdev_get_queue(bdev);
 +
-+	return (granularity + lim->alignment_offset - alignment) % granularity;
-+}
-+
- static unsigned int blk_round_down_sectors(unsigned int sectors, unsigned int lbs)
- {
- 	sectors = round_down(sectors, lbs >> SECTOR_SHIFT);
-@@ -901,3 +911,16 @@ void blk_queue_set_zoned(struct gendisk *disk, enum blk_zoned_model model)
- 	}
- }
- EXPORT_SYMBOL_GPL(blk_queue_set_zoned);
-+
-+int bdev_alignment_offset(struct block_device *bdev)
-+{
-+	struct request_queue *q = bdev_get_queue(bdev);
-+
-+	if (q->limits.misaligned)
-+		return -1;
-+	if (bdev_is_partition(bdev))
-+		return queue_limit_alignment_offset(&q->limits,
-+				bdev->bd_start_sect);
-+	return q->limits.alignment_offset;
-+}
-+EXPORT_SYMBOL_GPL(bdev_alignment_offset);
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index d5346e72e3645..0a1795ac26275 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -1251,26 +1251,7 @@ bdev_zone_write_granularity(struct block_device *bdev)
- 	return queue_zone_write_granularity(bdev_get_queue(bdev));
- }
- 
--static inline int queue_limit_alignment_offset(struct queue_limits *lim, sector_t sector)
--{
--	unsigned int granularity = max(lim->physical_block_size, lim->io_min);
--	unsigned int alignment = sector_div(sector, granularity >> SECTOR_SHIFT)
--		<< SECTOR_SHIFT;
--
--	return (granularity + lim->alignment_offset - alignment) % granularity;
--}
--
--static inline int bdev_alignment_offset(struct block_device *bdev)
--{
--	struct request_queue *q = bdev_get_queue(bdev);
--
--	if (q->limits.misaligned)
--		return -1;
--	if (bdev_is_partition(bdev))
--		return queue_limit_alignment_offset(&q->limits,
--				bdev->bd_start_sect);
--	return q->limits.alignment_offset;
--}
-+int bdev_alignment_offset(struct block_device *bdev);
- 
- static inline int queue_discard_alignment(const struct request_queue *q)
- {
+ 		d_size = drbd_get_max_capacity(device->ldev);
+ 		rcu_read_lock();
+ 		u_size = rcu_dereference(device->ldev->disk_conf)->disk_size;
+@@ -933,16 +935,15 @@ int drbd_send_sizes(struct drbd_peer_device *peer_device, int trigger_reply, enu
+ 		max_bio_size = queue_max_hw_sectors(q) << 9;
+ 		max_bio_size = min(max_bio_size, DRBD_MAX_BIO_SIZE);
+ 		p->qlim->physical_block_size =
+-			cpu_to_be32(queue_physical_block_size(q));
++			cpu_to_be32(bdev_physical_block_size(bdev));
+ 		p->qlim->logical_block_size =
+-			cpu_to_be32(queue_logical_block_size(q));
++			cpu_to_be32(bdev_logical_block_size(bdev));
+ 		p->qlim->alignment_offset =
+ 			cpu_to_be32(queue_alignment_offset(q));
+-		p->qlim->io_min = cpu_to_be32(queue_io_min(q));
+-		p->qlim->io_opt = cpu_to_be32(queue_io_opt(q));
++		p->qlim->io_min = cpu_to_be32(bdev_io_min(bdev));
++		p->qlim->io_opt = cpu_to_be32(bdev_io_opt(bdev));
+ 		p->qlim->discard_enabled = blk_queue_discard(q);
+-		p->qlim->write_same_capable =
+-			!!q->limits.max_write_same_sectors;
++		p->qlim->write_same_capable = 0;
+ 		put_ldev(device);
+ 	} else {
+ 		struct request_queue *q = device->rq_queue;
 -- 
 2.30.2
 
