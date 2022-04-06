@@ -2,112 +2,203 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59D6FC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 16:33:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D961C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 16:38:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237864AbiDFQfx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 12:35:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59250 "EHLO
+        id S237921AbiDFQkW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 12:40:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49820 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237951AbiDFQfj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 12:35:39 -0400
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D8B924F515
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 06:53:58 -0700 (PDT)
-Received: by mail-lj1-x231.google.com with SMTP id q68so3324049ljb.3
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2022 06:53:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=EqQfJZ4mc7OO4cUc0d4RFE7EZvMiOuWXacxJvIJtpOI=;
-        b=Qx74LWKwYs4HkeHYGg+haqaFK4GUAG0f8pvAnEKZ+KrpaGG0Cepxod2JrpypOJRV+F
-         r+qx+DKhtDKhXCVkrara3sNhM22dx1zXlE+nwnzj2Lt04V030fhU+0njpe1bq0eNNDLB
-         zT7tqR1z0QGLmotX6pU8WRtnodUV0hgdG2v2VpRRcAEmfRrTQMw0ncRZFQZlo+qbi+/m
-         OArcxVGks6iTqj5yCilMlw02NJNLesHxTytvLdrTM11MmNTldE8zKjzqaExl+dUIFelJ
-         rtQ/st3eB/23lzNVD0OfjhRfjNdonGZvsYj3WgGa5BUQWtqOn1hdJH6vFijDutu9G/Sh
-         iOtw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=EqQfJZ4mc7OO4cUc0d4RFE7EZvMiOuWXacxJvIJtpOI=;
-        b=mIO6Yo1mHuSe+nm6V5r65ruptw9JW5EcowgBPQ8BfBzMgdzorJqHxU1Rmai1pBMW8Q
-         to7/ld0inp5gGKgczaLSWed8HnLrm4jduGzZq427ZPIiqP6mmT6GilE3x9dE1Y/aOIcC
-         yU6eIheaBxPkcZWaaEAndOjRsgl7NvK5niNKLsL50DaCyQvDak96MBpdzEsz7t9ksVSF
-         OHZ3qgd2FW1hkqmHPcoZPeUmLUhqbxhrEOMlv/5Jjc5RsRHYCw2C0ojhc95BhzuB4+Tk
-         BFfzL0n+Wk3mM+/j3cf/64LCt2+d74peJ1XBopxZS5HkpcRkQTE5O/qnBdBLa4t3xrU0
-         SAZA==
-X-Gm-Message-State: AOAM531mUCTK/pQsrR3T+Ob+U+uWPB4njuVOSzG8OT18c+sH+X/QdAZr
-        y6L+jQr0136r6Nia6Spg8dTgluSgaEkoDvFHwwSn6h1bbiNJWA==
-X-Google-Smtp-Source: ABdhPJw+oz8MjSOzN5SYIp1viKlgFytSd6eCLPyNN3Hmxh5mccBpwesQl71g1I06gJ5yKXAsx6jkHNtUd4c/v3RqRas=
-X-Received: by 2002:a05:651c:1783:b0:249:43a8:b6f9 with SMTP id
- bn3-20020a05651c178300b0024943a8b6f9mr5247979ljb.273.1649253235784; Wed, 06
- Apr 2022 06:53:55 -0700 (PDT)
+        with ESMTP id S238059AbiDFQkN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 12:40:13 -0400
+Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AE5836D099;
+        Wed,  6 Apr 2022 06:59:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1649253549; x=1680789549;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=4sO0YOVEXn9YOIeEYa0+2adTXILjyuEQFtBZ73zwYmY=;
+  b=f4RzOkK3vgt4J3VgllCMUOoXLDtliTqh/NkufQzX+esWjYFBwvrV+pAH
+   GhsdIDARS/Z2ce2ar0E6fjFmYVA4ErdWhusW4AkIrEku4Nj08icx79aLY
+   6S4rN7JPGITyzqQ9me4MRto50U2Jx9sCtNnCg+k9+sPF2mTo0rs3MWYuM
+   MtEHYSe1T8uw+v5uhis/6f1oVkdrxsBZPJbgXCUcLwVs6KxtRgcwsu08V
+   4RZ27muYivI/QjWs7AJFuO3PXOUZuY6XU3KUiG9GjlhqCqCUfXlQRShKH
+   1HEpwn3tygIeFCtlsXe7U6Wllm5G5fRJDoyT4MlvKAvbG54hs4RnkGOrz
+   A==;
+X-IronPort-AV: E=McAfee;i="6200,9189,10309"; a="347492204"
+X-IronPort-AV: E=Sophos;i="5.90,239,1643702400"; 
+   d="scan'208";a="347492204"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Apr 2022 06:59:07 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.90,239,1643702400"; 
+   d="scan'208";a="505737292"
+Received: from lkp-server02.sh.intel.com (HELO a44fdfb70b94) ([10.239.97.151])
+  by orsmga003.jf.intel.com with ESMTP; 06 Apr 2022 06:59:04 -0700
+Received: from kbuild by a44fdfb70b94 with local (Exim 4.95)
+        (envelope-from <lkp@intel.com>)
+        id 1nc6Bb-0004Sn-A4;
+        Wed, 06 Apr 2022 13:59:03 +0000
+Date:   Wed, 6 Apr 2022 21:58:14 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Tony Huang <tonyhuang.sunplus@gmail.com>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        p.zabel@penguronix.de, krzysztof.kozlowski@linaro.org
+Cc:     kbuild-all@lists.01.org, wells.lu@sunplus.com, lh.Kuo@sunplus.com,
+        Tony Huang <tonyhuang.sunplus@gmail.com>
+Subject: Re: [PATCH v6 2/2] mmc: Add mmc driver for Sunplus SP7021
+Message-ID: <202204062111.QhaaiQEq-lkp@intel.com>
+References: <e99f3027590b5ab3938c2e2d8713bf6284a810b2.1649229258.git.tonyhuang.sunplus@gmail.com>
 MIME-Version: 1.0
-References: <20220321115059.21803-1-wsa+renesas@sang-engineering.com>
- <20220321115059.21803-2-wsa+renesas@sang-engineering.com> <CAPDyKFqt8UUfGVHvpSX5ciP7qJReTYed=sffCGWPP9psS3vC_w@mail.gmail.com>
- <Yk1INkxW/i5p8yxf@ninjato>
-In-Reply-To: <Yk1INkxW/i5p8yxf@ninjato>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 6 Apr 2022 15:53:19 +0200
-Message-ID: <CAPDyKFo5aO-s13sP4MyjZgP-w+1Bmd59a-o+t3pVA+NgKoCHGg@mail.gmail.com>
-Subject: Re: [RFC PATCH 01/10] mmc: core: improve API to make clear
- mmc_hw_reset is for cards
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e99f3027590b5ab3938c2e2d8713bf6284a810b2.1649229258.git.tonyhuang.sunplus@gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 6 Apr 2022 at 09:58, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> Hi Ulf,
->
-> > > To make it unambiguous that mmc_hw_reset() is for cards and not for
-> > > controllers, we a) add 'card' to the function name and b) make the
-> > > function argument mmc_card instead of mmc_host. A fallback is provided
-> > > until all users are converted.
-> >
-> > In my opinion, I think b) is sufficient and would be a nice improvement.
->
-> If you say so... but I do wonder why we can't be super clear with the
-> function name alone without the function argument as an additional
-> source of information? Kernel hacking is complicated enough.
->
-> > In this regard, I suggest we make one big cross-subsystem patch (the
-> > smallest change as possible) then I can pick it up and send it for the
-> > v5.18-rc2.
->
-> Ok, I can prepare this.
+Hi Tony,
 
-Great!
+I love your patch! Perhaps something to improve:
 
->
-> > > -static void mmc_hw_reset_for_init(struct mmc_host *host)
-> > > +/* we can't use mmc_card as a parameter, it is not populated yet */
-> >
-> > Please drop this. The function is internal/static and at least to me,
-> > rather self-explanatory.
->
-> All other ?w_reset() functions have a card as a parameter. For people
-> trying to get into the MMC core, this comment might be helpful to
-> understand the anomaly? I know that you as the maintainer do know this
-> by heart, this comment is meant for people learning the stuff.
+[auto build test WARNING on ulf-hansson-mmc-mirror/next]
+[cannot apply to robh/for-next linus/master v5.18-rc1 next-20220406]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch]
 
-I understand your point, however I don't think it makes much sense to
-try to clarify the names on mmc_hw|sw_reset() alone. There are simply
-lots of other functions that then would need to be changed too.
-Otherwise we would just end up with having even more in-consistency in
-function namings. To me, that's even worse.
+url:    https://github.com/intel-lab-lkp/linux/commits/Tony-Huang/Add-mmc-driver-for-Sunplus-SP7021-SOC/20220406-194106
+base:   https://git.linaro.org/people/ulf.hansson/mmc-mirror.git next
+config: arc-allyesconfig (https://download.01.org/0day-ci/archive/20220406/202204062111.QhaaiQEq-lkp@intel.com/config)
+compiler: arceb-elf-gcc (GCC) 11.2.0
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # https://github.com/intel-lab-lkp/linux/commit/325a0d9ca9d65f5616f794e0dbb04256312f739d
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Tony-Huang/Add-mmc-driver-for-Sunplus-SP7021-SOC/20220406-194106
+        git checkout 325a0d9ca9d65f5616f794e0dbb04256312f739d
+        # save the config file to linux build tree
+        mkdir build_dir
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross O=build_dir ARCH=arc SHELL=/bin/bash drivers/mmc/host/
 
->
-> All the best,
->
->    Wolfram
+If you fix the issue, kindly add following tag as appropriate
+Reported-by: kernel test robot <lkp@intel.com>
 
-Kind regards
-Uffe
+All warnings (new ones prefixed by >>):
+
+   drivers/mmc/host/sunplus-mmc.c: In function 'spmmc_set_bus_timing':
+>> drivers/mmc/host/sunplus-mmc.c:311:15: warning: variable 'timing_name' set but not used [-Wunused-but-set-variable]
+     311 |         char *timing_name;
+         |               ^~~~~~~~~~~
+   drivers/mmc/host/sunplus-mmc.c: At top level:
+>> drivers/mmc/host/sunplus-mmc.c:798:13: warning: no previous prototype for 'spmmc_irq' [-Wmissing-prototypes]
+     798 | irqreturn_t spmmc_irq(int irq, void *dev_id)
+         |             ^~~~~~~~~
+>> drivers/mmc/host/sunplus-mmc.c:894:5: warning: no previous prototype for 'spmmc_get_cd' [-Wmissing-prototypes]
+     894 | int spmmc_get_cd(struct mmc_host *mmc)
+         |     ^~~~~~~~~~~~
+   drivers/mmc/host/sunplus-mmc.c: In function 'spmmc_drv_probe':
+>> drivers/mmc/host/sunplus-mmc.c:1021:22: warning: variable 'mode' set but not used [-Wunused-but-set-variable]
+    1021 |         unsigned int mode;
+         |                      ^~~~
+   drivers/mmc/host/sunplus-mmc.c: At top level:
+   drivers/mmc/host/sunplus-mmc.c:1170:9: error: implicit declaration of function 'SYSTEM_SLEEP_PM_OPS'; did you mean 'SET_SYSTEM_SLEEP_PM_OPS'? [-Werror=implicit-function-declaration]
+    1170 |         SYSTEM_SLEEP_PM_OPS(spmmc_pm_suspend, spmmc_pm_resume)
+         |         ^~~~~~~~~~~~~~~~~~~
+         |         SET_SYSTEM_SLEEP_PM_OPS
+>> drivers/mmc/host/sunplus-mmc.c:1170:9: warning: initialization of 'int (*)(struct device *)' from 'int' makes pointer from integer without a cast [-Wint-conversion]
+   drivers/mmc/host/sunplus-mmc.c:1170:9: note: (near initialization for 'spmmc_pm_ops.prepare')
+   drivers/mmc/host/sunplus-mmc.c:1170:9: error: initializer element is not constant
+   drivers/mmc/host/sunplus-mmc.c:1170:9: note: (near initialization for 'spmmc_pm_ops.prepare')
+   drivers/mmc/host/sunplus-mmc.c:1171:9: error: expected '}' before 'RUNTIME_PM_OPS'
+    1171 |         RUNTIME_PM_OPS(spmmc_pm_runtime_suspend, spmmc_pm_runtime_resume, NULL)
+         |         ^~~~~~~~~~~~~~
+   drivers/mmc/host/sunplus-mmc.c:1169:47: note: to match this '{'
+    1169 | static const struct dev_pm_ops spmmc_pm_ops = {
+         |                                               ^
+   drivers/mmc/host/sunplus-mmc.c:1160:12: warning: 'spmmc_pm_runtime_resume' defined but not used [-Wunused-function]
+    1160 | static int spmmc_pm_runtime_resume(struct device *dev)
+         |            ^~~~~~~~~~~~~~~~~~~~~~~
+   drivers/mmc/host/sunplus-mmc.c:1150:12: warning: 'spmmc_pm_runtime_suspend' defined but not used [-Wunused-function]
+    1150 | static int spmmc_pm_runtime_suspend(struct device *dev)
+         |            ^~~~~~~~~~~~~~~~~~~~~~~~
+   cc1: some warnings being treated as errors
+
+
+vim +/timing_name +311 drivers/mmc/host/sunplus-mmc.c
+
+   304	
+   305	static void spmmc_set_bus_timing(struct spmmc_host *host, unsigned int timing)
+   306	{
+   307		u32 value = readl(host->base + SPMMC_SD_CONFIG1_REG);
+   308		int clkdiv = FIELD_GET(SPMMC_CLOCK_DIVISION, readl(host->base + SPMMC_SD_CONFIG0_REG));
+   309		int delay = clkdiv / 2 < 7 ? clkdiv / 2 : 7;
+   310		int hs_en = 1;
+ > 311		char *timing_name;
+   312	
+   313		host->ddr_enabled = 0;
+   314		switch (timing) {
+   315		case MMC_TIMING_LEGACY:
+   316			hs_en = 0;
+   317			timing_name = "legacy";
+   318			break;
+   319		case MMC_TIMING_MMC_HS:
+   320			timing_name = "mmc high-speed";
+   321			break;
+   322		case MMC_TIMING_SD_HS:
+   323			timing_name = "sd high-speed";
+   324			break;
+   325		case MMC_TIMING_UHS_SDR50:
+   326			timing_name = "sd uhs SDR50";
+   327			break;
+   328		case MMC_TIMING_UHS_SDR104:
+   329			timing_name = "sd uhs SDR104";
+   330			break;
+   331		case MMC_TIMING_UHS_DDR50:
+   332			host->ddr_enabled = 1;
+   333			timing_name = "sd uhs DDR50";
+   334			break;
+   335		case MMC_TIMING_MMC_DDR52:
+   336			host->ddr_enabled = 1;
+   337			timing_name = "mmc DDR52";
+   338			break;
+   339		case MMC_TIMING_MMC_HS200:
+   340			timing_name = "mmc HS200";
+   341			break;
+   342		default:
+   343			timing_name = "invalid";
+   344			hs_en = 0;
+   345			break;
+   346		}
+   347	
+   348		if (hs_en) {
+   349			value |= SPMMC_SD_HIGH_SPEED_EN; /* sd_high_speed_en */
+   350			writel(value, host->base + SPMMC_SD_CONFIG1_REG);
+   351			value = readl(host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+   352			value |= FIELD_PREP(SPMMC_SD_WRITE_DATA_DELAY, delay); /* sd_wr_dat_dly_sel */
+   353			value |= FIELD_PREP(SPMMC_SD_WRITE_COMMAND_DELAY, delay); /* sd_wr_cmd_dly_sel */
+   354			writel(value, host->base + SPMMC_SD_TIMING_CONFIG0_REG);
+   355		} else {
+   356			value &= ~SPMMC_SD_HIGH_SPEED_EN;
+   357			writel(value, host->base + SPMMC_SD_CONFIG1_REG);
+   358		}
+   359		if (host->ddr_enabled) {
+   360			value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+   361			value |= SPMMC_SD_DDR_MODE; /* sdddrmode */
+   362			writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+   363		} else {
+   364			value = readl(host->base + SPMMC_SD_CONFIG0_REG);
+   365			value &= ~SPMMC_SD_DDR_MODE;
+   366			writel(value, host->base + SPMMC_SD_CONFIG0_REG);
+   367		}
+   368	}
+   369	
+
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
