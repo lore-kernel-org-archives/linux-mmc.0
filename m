@@ -2,88 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF223C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 11:42:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61AA9C43219
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 12:16:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229891AbiDFLoI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 07:44:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39396 "EHLO
+        id S232755AbiDFMSk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 08:18:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35264 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232071AbiDFLnb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 07:43:31 -0400
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C2E83EF036;
-        Wed,  6 Apr 2022 01:30:02 -0700 (PDT)
-Received: by mail-pj1-x1031.google.com with SMTP id g15-20020a17090adb0f00b001caa9a230c7so5093973pjv.5;
-        Wed, 06 Apr 2022 01:30:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id;
-        bh=IG1tkBL/llWliJGxLdIJUi+tn1T0VL64oyH/UZUw89c=;
-        b=SuqWhpwWFVJORPBYictUdK1YVpb62bflKnyxPmSDylk4t4mpsacQXP0e0bg/5JTKEC
-         n/6nEYPEhb2+pvcdD6DgkxeqBPq1SdPAKkwd1xphOBd30FQvRZDm2RbCGYJf3db8BXSf
-         UBMyMBB++GIO9kKUpNxoHV/EqC3AocBa/CmtomvOL6DLydOBTgYprp8bpA0iILXom5qY
-         n1BQOAhvx5LqLHhtC7FOgdda3kzHsG672YGhjXKNxdORJms8ac4dxf/2e4LGsSua+MTU
-         bWEGtOBIqhN86wohnIFNLwy7wYEpYDQFQF860pwQkezrTTYsjPuxUthP5Oe5mldDiR20
-         BcJA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=IG1tkBL/llWliJGxLdIJUi+tn1T0VL64oyH/UZUw89c=;
-        b=m+bWw1lMPyDbM8iMH/K5Snp3VEjypF9vSYrhY/mEbKPgienyHdriAOa6Gb4XBsawbU
-         SDF77tQlfOgEXIQSMKET9Ail53jJhobkxbBKWi9QxZhCt9QwZyex885PfmAoNY17SAvD
-         Kt0uP7hGxXD+Qbm9Pu2aSWUukiH8MkYd+ApIYHRN/seJO4e8xE83lsCngf+yQNZUADZN
-         YwvVIvJKt79ngQ1WzF6EsScSfQD/lXus743LAWin+SD+ijGBcuFuiHJ7me9DV2Bui+Ac
-         nuBnOv8sgpiyqD1myztEchNNPgnmHDsNHKT4JKyQd9QHXrhlD9e2RtRYYPcTMzyQpl1d
-         waaw==
-X-Gm-Message-State: AOAM530TvNc/CNWOWPa0DEL/JFfIPJNbmfkvttEQKT/v2WTct1R6GHsh
-        p/TshBiU+7cNCboU8esWOSU=
-X-Google-Smtp-Source: ABdhPJzwpB0jmLPHgl0m4pBgOkxvpvOMrOed5iwoQGGrTg/E7fJwZG3bBoGNUAptXhObL+JcKmqcJQ==
-X-Received: by 2002:a17:903:40c7:b0:156:8b56:5fa1 with SMTP id t7-20020a17090340c700b001568b565fa1mr7484133pld.108.1649233802239;
-        Wed, 06 Apr 2022 01:30:02 -0700 (PDT)
-Received: from scdiu3.sunplus.com ([113.196.136.192])
-        by smtp.googlemail.com with ESMTPSA id r8-20020a17090a0ac800b001c9e35d3a3asm4904977pje.24.2022.04.06.01.29.59
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 06 Apr 2022 01:30:01 -0700 (PDT)
-From:   Tony Huang <tonyhuang.sunplus@gmail.com>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, p.zabel@pengutronix.de,
-        krzysztof.kozlowski@linaro.org
-Cc:     wells.lu@sunplus.com, lh.Kuo@sunplus.com, tony.huang@sunplus.com,
-        Tony Huang <tonyhuang.sunplus@gmail.com>
-Subject: [PATCH v6 0/2] Add mmc driver for Sunplus SP7021 SOC
-Date:   Wed,  6 Apr 2022 16:29:47 +0800
-Message-ID: <cover.1649229258.git.tonyhuang.sunplus@gmail.com>
-X-Mailer: git-send-email 2.7.4
+        with ESMTP id S233348AbiDFMSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 08:18:14 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4651750E458
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 01:02:14 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=BAvepl+m4lr4VUIlMDK9326Co7aN
+        ArbKAWcyhN4afso=; b=nL7rIFi0g1Gsg5GL+LUrgVEpQYDnJCkVlcHQNOeVYX+y
+        T+TW2ZWIodS/ULoqjVQRsNm/3BrKi+qAOE5zFOlaJltd7WQNruNAcKQE6HLWE/hw
+        ZqoZgWuHY9DtGPmMENxWFhxUqkFsXlps1Uol3wIL0uIR9V5MWWcwwtDcy52oYX4=
+Received: (qmail 2628494 invoked from network); 6 Apr 2022 10:02:12 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 6 Apr 2022 10:02:12 +0200
+X-UD-Smtp-Session: l3s3148p1@PEhhx/fbSpQgAQnoAH8rAO83AtqmbDBd
+Date:   Wed, 6 Apr 2022 10:02:11 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [RFC PATCH 08/10] mmc: core: improve API to make clear hw_reset
+ from bus_ops is for cards
+Message-ID: <Yk1JA4TWO9bTt0kb@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220321115059.21803-1-wsa+renesas@sang-engineering.com>
+ <20220321115059.21803-9-wsa+renesas@sang-engineering.com>
+ <CAPDyKFqwgxhRPBabxfUTC+8UVegWrTg3F0nRn3PoToiO2DWtvQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="WmgP1hItt5WDz7hZ"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqwgxhRPBabxfUTC+8UVegWrTg3F0nRn3PoToiO2DWtvQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
-Message-ID: <20220406082947.qYSiv2wsNg7yNxLwiZ0hfQmwYY4hcw8MdHNKBJUazkc@z>
 
-This is a patch series for mmc driver for Sunplus SP7021 SOC.
 
-Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
-many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
-etc.) into a single chip. It is designed for industrial control.
+--WmgP1hItt5WDz7hZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Refer to:
-https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
-https://tibbo.com/store/plus1.html
 
-Tony Huang (2):
-  dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
-  mmc: Add mmc driver for Sunplus SP7021
+> > To make it unambiguous that bus_ops->hw_reset() is for cards and not for
+> > controllers, we a) add 'card' to the function name and b) make the
+> > function argument mmc_card instead of mmc_host. All users are converted,
+> > too.
+>=20
+> Again b) is sufficient in my opinion. All bus_ops are for cards, while
+> host_ops are for hosts.
 
- .../devicetree/bindings/mmc/sunplus,mmc.yaml       |   62 +
- MAINTAINERS                                        |    7 +
- drivers/mmc/host/Kconfig                           |    9 +
- drivers/mmc/host/Makefile                          |    1 +
- drivers/mmc/host/sunplus-mmc.c                     | 1200 ++++++++++++++++++++
- 5 files changed, 1279 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
- create mode 100644 drivers/mmc/host/sunplus-mmc.c
+Okay, this argument I buy right away.
 
--- 
-2.7.4
+> Also, there may be some corner cases where b) can't be done, like the
+> ->remove() bus_ops for example. In that case, we either have to make
+> more re-structuring of the code of simply live with that there may be
+> some special cases.
 
+With the above argument, I could even imaging to simply drop this patch?
+That keeps 'host' consistently as the default argument? All given that
+'bus_ops' are for cards anyway.
+
+
+--WmgP1hItt5WDz7hZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJNSQMACgkQFA3kzBSg
+KbZerRAApvClAIJvXDjBVi5cIAt85vX1GGEV2WMs29A02GLYHBpBp+U3Et/rsA6o
+DWg+xLV8zJTZw+D2RJOAvM8lq6nMmTiGn67byy79huhwUr6DtYlvKKIIizR7Ae4M
+niV0TXz1vv97qd4RdfJ8SjRyNoFAJOsJIt7zGkuuXviaBIc+5GwJyWYdM48Klgqc
+9B8JUutPyHmxbwIeH+lUZfaY87WTTypBWQehJJIZN5+vcFyVz/l93OL8wf727VDX
+LujbAf2WlvFTLjrHs6QPSuq2IUlbILazWBcILMOKlYMFLy8+ETvX99x1rj5pV4Bv
+l6p5Q+KOW428FyjMBoYOMYzlI+BNL2Ym9f1oM6vAuOfoZbtMENq6RDy67w5oovgm
+DH8QMzyszLrASjzu4y/drWm3/d9Pge8FkhTF1RRi7jL0NnAMFtu51AzIiSN1OKlv
+O87LZVSQTRcNo4/KhazHyMv6TxM1Ev7zRKvMkm/+/5OcoVZynBTDv46A/CNGA1oU
+q2kggc5f69xTaQKAxOGwFJrdYvucqf3s11XiIdLdYU3jjcQmbKMLBruahi4x/WUr
+zMh25xweGmwm2lvAGzs1fm3sZmw2lHwa0G0EeawGW6ctCK8l6iUD6xwGrXV09LcQ
+9u7aJsJGkzYoMu+DSR/YJj+peBAIjA0fdwfYet37fjXcBr+vcFY=
+=Fe4Y
+-----END PGP SIGNATURE-----
+
+--WmgP1hItt5WDz7hZ--
