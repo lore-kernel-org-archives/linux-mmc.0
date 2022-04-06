@@ -2,75 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE38CC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 14:47:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3925C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 15:01:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235184AbiDFOtK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 10:49:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55960 "EHLO
+        id S235305AbiDFPDs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 11:03:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235237AbiDFOtD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 10:49:03 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60BAE5E866A
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 04:21:50 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id d7so2177707edn.11
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2022 04:21:50 -0700 (PDT)
+        with ESMTP id S236150AbiDFPD2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 11:03:28 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE1E843A67F
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 05:35:50 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id j12so3003979wrb.5
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2022 05:35:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=references:user-agent:from:to:cc:subject:date:in-reply-to
          :message-id:mime-version:content-transfer-encoding;
-        bh=qoco3RRZczrBsbcgQAlfSk5MIz7VjrCwvzbtrToaDgc=;
-        b=lYViyLKuxnmWvVOxSiIAvZo7ThzWayhTEithFwUkjoinkLc5FCaTrrYpbT4lWoKBwf
-         SHgPUoZKJ7UV2IPYqxkuXYeeTYGRB83bdEMwIdBmZQKFxyDvfCEnlmoTCLT2OUjBdixY
-         +G+SZiFdv3qepH4rdbFuW+L7cxBLBF32dysdgWgzwToIpOZTyeNLqWrZ4wQUZazH7P+G
-         7hlLeTWPdexl+2Jz1SfDUOV3df8qLraggMceTQvB2595SmmUUQCz69mNwcRT30DswAW8
-         p2g82mMXlYeye2LNaq72Bx0B1+oaVmBEYPJJneZtBT5wcJXOArVR1HP8KLHXNn2Q7dhs
-         SQDw==
+        bh=whOdS+ZcH7sIpEntYe8CJFTcnKkZdKG28Xb/p70XMvo=;
+        b=JsHKfdW83fLPaATYi8d9V3sljgvsb0oN7RRpWT6JB80/10uDk+SQamUjz4rob4ZZS0
+         gpka4IkmpVK6jnRr8X2aNLtGHqzOjKiM0WQE3+Uy9zMVEejPzHP+aTUse0FLHKtxo317
+         Rh4ephi89YgTP7m13Ladzc1N+VqpWWIaw76MYLR5gPZqVY4jnvJ55WcIK2D4KbzCEtNU
+         +JV6+V1KVZ/izMtnIZqPqWqhJmXK7Qeo7Vc1i7RSdjLG9qqq6Uo0xHbhojxwh6mP4S2f
+         8oeJHaXtzLyGDYh4waFsXrD37rwYqLPmR5fdTDK7kVDH/zVBJxSQsRx6DatNT+8FnZsU
+         IozQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:references:user-agent:from:to:cc:subject:date
          :in-reply-to:message-id:mime-version:content-transfer-encoding;
-        bh=qoco3RRZczrBsbcgQAlfSk5MIz7VjrCwvzbtrToaDgc=;
-        b=OF4UQu52TfsVgxnL1JEtC4mcA2+z4mUhAbR7E7XxqIoLWDdl8aIpvfkneG0IxcMYA1
-         79luNFxcVwlCYmbYmkuKYnTnM7jkMYFjMvG4DmGZYoEAsjsehIPqBa/3Tz+K2Gm3apBs
-         /sQdkuMAWs+KtIYmTusONsNnRRO+Pcg2VSdjFs/HRk3IhVA/NtAKvWxJi8/v24s4T6Uu
-         I6HngFikq+GumbCuxTrhG78uCZ1M82biRxdGRYVz09YZipC6nnBwRrNbsgDraIdHC3rn
-         fvPZ+MT4biyXSZsEjM3fqyCE3YEH6CMMUQtB38CX4XnMRUPhSIdS17G9PmeOVep2ISkC
-         6X9Q==
-X-Gm-Message-State: AOAM531uX6/x2/S/yEnbiKk+vSOMRDRoU8KEykoqHx81gBvg4GsdtAD7
-        qukylLOo5911dOlfqgcGoonsuA==
-X-Google-Smtp-Source: ABdhPJy6h64v3sKAn1fbVCaa1Z2Ysb9wdK3PGtCZ11UEJzUeLhJwFDk9MTZbEjA8xxN3l5Pyt59TpA==
-X-Received: by 2002:a05:6402:430d:b0:419:45cd:7ab1 with SMTP id m13-20020a056402430d00b0041945cd7ab1mr8041132edc.367.1649244108812;
-        Wed, 06 Apr 2022 04:21:48 -0700 (PDT)
+        bh=whOdS+ZcH7sIpEntYe8CJFTcnKkZdKG28Xb/p70XMvo=;
+        b=gFr5CPUuQpGN+EKHNrfKiF3eUbGZ9ildbbbMkUEZNMXq7PvnNjqiG406/LpvnT6ORP
+         f6Vf7Z8fnlzJo7V+N3NcJJ0uP9jgcnOnWmWlN07MoiPSZbwgtdJxAISl1aeqKwLCCIfk
+         3BwRTRwiFnkeeDfXHqDUalEFBltEhNsxmyyLNrZGmlTc2Ja8nuSB++ZkGFl44XeHaAMx
+         z7pe7tu1ifgOqb3FJaSRMnE8FPqRtZmiTuE8ZtrhspUu9DDDqxi+rZEGXKvduzuJNItu
+         00DTrGMfZbTIcJgMyLlZuJfUsl4vCX94prI2dJLgSw+OLWFw6MLbJOBYIMtshVEmIb+l
+         NO+A==
+X-Gm-Message-State: AOAM532zFMFMYaoeJTk4OZjUhrGyS70jRtgerkwz9gCbb2cvWgxe/1iI
+        O6V+D4+o0PWcIsMGw2ilZRD4Y1Z5WzGkqA==
+X-Google-Smtp-Source: ABdhPJxWPoa96Rp6WyUCbZqG8Rc+VbSNKHl6bbF4sy2t/iT60ay3eCLeVu4In006GQNqNwkQToMQvA==
+X-Received: by 2002:a05:6402:51d4:b0:410:a328:3c86 with SMTP id r20-20020a05640251d400b00410a3283c86mr8318099edd.55.1649246062857;
+        Wed, 06 Apr 2022 04:54:22 -0700 (PDT)
 Received: from zen.linaroharston ([51.148.130.216])
-        by smtp.gmail.com with ESMTPSA id og49-20020a1709071df100b006db0dcf673esm6505430ejc.27.2022.04.06.04.21.47
+        by smtp.gmail.com with ESMTPSA id j8-20020aa7c0c8000000b0041934547989sm7922351edp.55.2022.04.06.04.54.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Apr 2022 04:21:47 -0700 (PDT)
+        Wed, 06 Apr 2022 04:54:21 -0700 (PDT)
 Received: from zen (localhost [127.0.0.1])
-        by zen.linaroharston (Postfix) with ESMTP id 22DB51FFB7;
-        Wed,  6 Apr 2022 12:21:47 +0100 (BST)
+        by zen.linaroharston (Postfix) with ESMTP id 179711FFB7;
+        Wed,  6 Apr 2022 12:54:21 +0100 (BST)
 References: <20220405093759.1126835-1-alex.bennee@linaro.org>
- <20220405093759.1126835-2-alex.bennee@linaro.org>
- <d01942c2-e600-b789-e613-9ead8c11d94a@acm.org>
+ <8b3ce88f65fd11523a4d2daab3c617f7089eb1ce.camel@gmail.com>
+ <87r16bk013.fsf@linaro.org>
+ <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
 User-agent: mu4e 1.7.12; emacs 28.1.50
 From:   Alex =?utf-8?Q?Benn=C3=A9e?= <alex.bennee@linaro.org>
-To:     Bart Van Assche <bvanassche@acm.org>
+To:     Bean Huo <huobean@gmail.com>
 Cc:     linux-kernel@vger.kernel.org, maxim.uvarov@linaro.org,
         joakim.bech@linaro.org, ulf.hansson@linaro.org,
         ilias.apalodimas@linaro.org, arnd@linaro.org,
         ruchika.gupta@linaro.org, tomas.winkler@intel.com,
         yang.huang@intel.com, bing.zhu@intel.com,
         Matti.Moell@opensynergy.com, hmo@opensynergy.com,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Eric Biggers <ebiggers@kernel.org>
-Subject: Re: [PATCH v2 1/4] rpmb: add Replay Protected Memory Block (RPMB)
- subsystem
-Date:   Wed, 06 Apr 2022 12:21:15 +0100
-In-reply-to: <d01942c2-e600-b789-e613-9ead8c11d94a@acm.org>
-Message-ID: <87ilrmjw38.fsf@linaro.org>
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: Re: [PATCH  v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+Date:   Wed, 06 Apr 2022 12:22:00 +0100
+In-reply-to: <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
+Message-ID: <87ee2ajuky.fsf@linaro.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
@@ -79,36 +76,48 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-Bart Van Assche <bvanassche@acm.org> writes:
+Bean Huo <huobean@gmail.com> writes:
 
-> On 4/5/22 02:37, Alex Benn=C3=A9e wrote:
->> +int rpmb_get_write_count(struct rpmb_dev *rdev, int len, u8 *request, i=
-nt rlen, u8 *resp)
->> +{
->> +	int err;
->> +
->> +	if (!rdev)
->> +		return -EINVAL;
->> +
->> +	mutex_lock(&rdev->lock);
->> +	err =3D -EOPNOTSUPP;
->> +	if (rdev->ops && rdev->ops->get_write_count)
->> +		err =3D rdev->ops->get_write_count(rdev->dev.parent, rdev->target,
->> +						 len, request, rlen, resp);
->> +	mutex_unlock(&rdev->lock);
->> +
->> +	return err;
->> +}
+> On Tue, 2022-04-05 at 16:43 +0100, Alex Benn=C3=A9e wrote:
+>>=20
+>> Bean Huo <huobean@gmail.com> writes:
+>>=20
+>> > Hi Alex,
+>> >=20
+>> > Thanks for this unified RPMB interface, I wanted to verify this on
+>> > our
+>> > UFS, it seems you didn't add the UFS access interface in this
+>> > version=20
+>> > from your userspace tools, right?
+>>=20
+>> No I didn't but it should be easy enough to add some function pointer
+>> redirection everywhere one of the op_* functions calls a vrpmb_*
+>> function. Do you already have a UFS RPMB device driver?
+>>=20
 >
-> The names rpmb_get_write_count() and get_write_count() look confusing
-> to me since these functions query the write counter. How about adding
-> "er" at the end of both function names?
+> Hi Alex,
+> Thanks for your feedback.
 >
-> Are there any plans to add an implementation of struct rpmb_ops for
-> UFS devices?
+> We now access UFS RPMB through the RPMB LUN BSG device, RPMB is a well-
+> known LU and we have a userspace tool to access it.
+>
+> I see that if we're going to use your interface, "static struct
+> rpmb_ops" should be registered from a lower-level driver, for example
+> in a UFS driver, yes there should be no problem with this registration,
+> but I don't know with the current way Compared, what are the advantages
+> to add a driver. maybe the main advantage is that we will have an
+> unified user space tool for RPMB. right?
 
-Not by me but I agree it would be a useful exercise to see if a unified
-API makes sense.
+Pretty much. The main issue for virtio-rpmb is it doesn't really fit
+neatly into the block stack because all it does is the RPMB part so a
+non-block orientate API makes sense.
+
+Can you point be to where the UFS driver does it's current RPMB stuff?
+
+>
+> Kind regards,
+> Bean
+
 
 --=20
 Alex Benn=C3=A9e
