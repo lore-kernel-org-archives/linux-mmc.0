@@ -2,130 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5B35C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 21:14:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FB38C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 21:19:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235112AbiDFVQ0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 17:16:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53732 "EHLO
+        id S233845AbiDFVVs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 17:21:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232759AbiDFVP4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 17:15:56 -0400
-Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B4EC2487A0;
-        Wed,  6 Apr 2022 13:00:19 -0700 (PDT)
-Received: from darkstar.musicnaut.iki.fi (85-76-76-218-nat.elisa-mobile.fi [85.76.76.218])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        (Authenticated sender: aaro.koskinen)
-        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id C3DA61B000E0;
-        Wed,  6 Apr 2022 23:00:11 +0300 (EEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
-        t=1649275212;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=HF/OS3JAtoNKv3AksoUVmxtqiwmaGXqNkeVyB7AYT2k=;
-        b=Nn4RAbFbzK4bwfg86ykyMmwZil9SKibzGCF6IqPtA9woskWkPm0Qpo8xHB6DmiuFZCDabl
-        hKhYB7cTF1pnQmfdEueduNI+Bie9rxrrlv4+Ae9YdogxoZPaT+AnKd36njOcJfii/ZG9el
-        NXeQ9cJa9eyyADZvMify5l3g3e6/9P6d54WrG6RxGfxgsqDX4gklm2g60np78Z2iAK4H5W
-        MYGDa3g/ettQmzEK/GGe/dgnxSa0+JfQVzn6IDHYnDPuqAhZ29ChrVGrIXEk6e+gIQp/ZO
-        YsKxpOTuJMbZKTk6UgFqwopmBrXCz1Q8WLvlxfzJ2EFoML4ykS+CJaqZAs9ITA==
-Date:   Wed, 6 Apr 2022 23:00:10 +0300
-From:   Aaro Koskinen <aaro.koskinen@iki.fi>
-To:     Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, Felipe Balbi <balbi@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org,
-        alsa-devel@alsa-project.org
-Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to
- CCF
-Message-ID: <20220406200010.GE594699@darkstar.musicnaut.iki.fi>
-References: <20220310233307.99220-3-jmkrzyszt@gmail.com>
- <1810824.tdWV9SEqCh@dell>
- <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
- <1888452.PYKUYFuaPT@dell>
+        with ESMTP id S232277AbiDFVVk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 17:21:40 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21E4925A499
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 13:14:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=PQr3wD2bv7Ugjk3EFJrghrQ2xkAG
+        j0Dbn0dT+6caGCs=; b=o9qLOszRMg995eXzG9hTtbsZ4979l9Hz6qK1CT6X/IbJ
+        TrElaKYLhJ4Rpatd10vjQKs1OSCwy5t6LQTbhV8/8vh8n//4QcWvza75Ca2Puxup
+        hETaloI3X4JN0fUrGwQug9/DFS6eC5M81p26mth5Kj7i5ChoKAxmFiGzkmNotnc=
+Received: (qmail 2883230 invoked from network); 6 Apr 2022 22:14:42 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 6 Apr 2022 22:14:42 +0200
+X-UD-Smtp-Session: l3s3148p1@MwIAAwLc4McgAQnoAH8rAHnYTrcYCkZJ
+Date:   Wed, 6 Apr 2022 22:14:41 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: special 4tap settings only apply to
+ HS400
+Message-ID: <Yk30sViNEfQm3Ef8@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20220401124523.42892-1-wsa+renesas@sang-engineering.com>
+ <CAMuHMdVJ7r1RXgoHAP1+RLtm11XMFzs1zht7+KQnUss=Rx4sBg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="gH+JPDsZwgUQg7pE"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <1888452.PYKUYFuaPT@dell>
-ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1649275212; a=rsa-sha256;
-        cv=none;
-        b=Ol1GS9eE8NlyDUV0WcHY2VWATp+nj58s0051qvEeumo7NtBnjXas42R78yzG70ifyC61w1
-        uNejgjj5y2u/lipXR8kWDr6uohk/Qlt2RTi7GBtSFq/B72+3ebibY0TmKGFTacwnLE/Q0Q
-        tPyBaa+IGUVAVry4W3pdajUy4YfXuZPAbe7qOV2W6PWhvFy5/u1KlaqNZJsnjYrRO5D9dj
-        xoCq4TSeoGt+wWudWLGQwD7h83OmvjLmmnHe1ciL+J2iNX7wi6z6XTcYeQ2dMUgmsEzE7h
-        UOG82BaXJw2nJuLhTmns2woVednPtANIIzueIdMPzqje3Y1nqQ/oFewmJr60ng==
-ARC-Authentication-Results: i=1;
-        ORIGINATING;
-        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
-        s=lahtoruutu; t=1649275212;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=HF/OS3JAtoNKv3AksoUVmxtqiwmaGXqNkeVyB7AYT2k=;
-        b=amTI0JvrXmyzyX8Uf2XnSz1hRH/n+rrTw1Nz41uGo9Db4A+x3UljqHgdkWZ+xZMSMFXmqF
-        NpqoT7DqPS10usMauUwiurnKUVrlRou9YOW5adeY4I5ejE8YptoMDaRUt5BlI5ya6Tsir4
-        ZQ9EwOXwkara1rof7KYZYYBUaJHXP873LqWCguWgum+N5SNiM6cE8BjG6+lCLdr+Og6l7/
-        02uNTNywsqyZ7r97elJ/MoCN+w2VWTRKFSv18b2pTuPihEhiQNuhWhqeAlpXg+nqf5Nq92
-        42iC+aDWXKVc7nuF531otS5HSwey0rL0Z+4eYJWSaqI9TJ0RCC9yORLMK37McA==
+In-Reply-To: <CAMuHMdVJ7r1RXgoHAP1+RLtm11XMFzs1zht7+KQnUss=Rx4sBg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Wed, Apr 06, 2022 at 08:48:14PM +0200, Janusz Krzysztofik wrote:
-> Dnia środa, 6 kwietnia 2022 15:21:49 CEST Aaro Koskinen pisze:
-> > On Sat, Mar 26, 2022 at 10:17:49PM +0100, Janusz Krzysztofik wrote:
-> > > Dnia wtorek, 22 marca 2022 20:07:53 CET Aaro Koskinen pisze:
-> > > > On Tue, Mar 22, 2022 at 06:36:48PM +0200, Aaro Koskinen wrote:
-> > > > > Something is still broken. When doing kexec (using CCF kernel), the
-> > > > > kexec'ed kernel now hangs early (on 770):
-> > > > [...]
-> > > > > [    0.928863] calling  omap1_init_devices+0x0/0x2c @ 1
-> > > > 
-> > > > It hangs in omap_sram_reprogram_clock() (<- omap1_select_table_rate()
-> > > > <- omap1_clk_late_init()).
-> > > 
-> > > I've reviewed my changes but haven't found anything suspicious.
-> > 
-> > The below change is fixing the kexec boot. Based on the comment in the
-> > code, it seems this clock is needed for the SRAM to work.
-> > 
-> > diff --git a/arch/arm/mach-omap1/clock_data.c b/arch/arm/mach-omap1/clock_data.c
-> > index e33e11f826af..b8b4876ff935 100644
-> > --- a/arch/arm/mach-omap1/clock_data.c
-> > +++ b/arch/arm/mach-omap1/clock_data.c
-> > @@ -285,7 +285,7 @@ static struct omap1_clk tc1_ck = {
-> >   */
-> >  
-> >  static struct omap1_clk tc2_ck = {
-> > -	.hw.init	= CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, 0),
-> > +	.hw.init	= CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, CLK_IS_CRITICAL),
-> >  	.ops		= &clkops_generic,
-> >  	.enable_reg	= OMAP1_IO_ADDRESS(ARM_IDLECT3),
-> >  	.enable_bit	= EN_TC2_CK,
-> > 
-> > A.
-> > 
-> 
-> Thank you Aaro.  Will you submit this as a separate fix, or should I submit 
-> v2 of my patch 4/4 with your fix included?
+--gH+JPDsZwgUQg7pE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Please send a new version with the fix included.
 
-A.
+> I'm wondering if we've lost the critical mass for keeping the bools?
+
+So, I had a look at this and think that the current version is still way
+better in terms of readability. I think the compilers will optimize
+enough. It is not a hot path anyway. So, I'd like to keep the code.
+
+
+--gH+JPDsZwgUQg7pE
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJN9K4ACgkQFA3kzBSg
+KbaCQw//fZsqZhj9tp6ozsKRL43FyMZwITbg9seMQR+3XqmChr4CJLIyrpVzT/fw
+ZiCVOG/nk90JHBZrAInzMUc/p2v/yXgDZzYSxhm5QeKzxGpuMOst9KajH9eAp08z
+3Hmxe/TmNj474mqNZL+ococrcI+/O9qHbvCVcK8c4Z/30Fq3TCSJJb8Ea72YRNgt
+iZis1exUwWonZEScAd3cYJQ/RusC8iKpUUr5RPgKCzarsVE4SN4+c2BhRsjjtnzr
+gSnNQGUAbR1ARz+PkALgd/QZM5Qi53ysAAGDzqKz4CakWgvxETUSRnwcQt2qEysR
+9jdEH1kCYyDWdoSTw6YGAlxEgPmhtn5lcHexxjmeWqDih8ADyEIe0DryXWjPjFvR
+IM4JVQ5aVBSRC4t4ualqP2cfzbmFc2q1PLbX8eSsfdRZp24OP1SyZed6Ms37DhKg
+JY3EQ1WxVBLym0HRwXpBe478IaVf5pviwK3Q6ndit7WV7N9eJNqv8FT12an1pnBw
+YSvuI5A2tMBzhwMPiWZ8y2XcAySe+3H2DwIJqoLa3dombKPTxOvaTUWPONI5FvpS
+Ls3xvfspWHZCjI2zxggwz2Mi4xK3T7tNYF+kCvTEablujcGDfy8/Rgo5iu0KTFDw
+4K1J/McRyXU3OpLjTmDFpyqYR5iZ1vhT0W7yKVqrbHSxvL9tXzo=
+=04K3
+-----END PGP SIGNATURE-----
+
+--gH+JPDsZwgUQg7pE--
