@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A8FCC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 09:15:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 224FEC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 09:15:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240425AbiDFJRC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 05:17:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53082 "EHLO
+        id S243213AbiDFJRE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 05:17:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1359501AbiDFJDX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:03:23 -0400
+        with ESMTP id S1353845AbiDFJCt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 05:02:49 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA943478A54;
-        Tue,  5 Apr 2022 23:06:28 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D1E645C21B;
+        Tue,  5 Apr 2022 23:05:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=65vdZDv/Oyhj9d7BIFQpxpieHFePRtIOo5rSsdbnvJY=; b=fnclFxf748Yk+HJEP8iaRVW3WB
-        aWWIhphvzxhVY6FZKXEjV9bmsgZxn1Kj0ojlUoEizIay0h/EV1KlYq6LYsLwUZoiL+Fz08VFbrmWJ
-        BYNbJJT671L+8hPCaASzQ9hicWQta9jTVuyI55rgNvXk3KOf4lbIG1gDSvXVJwm3aMnDnl4JurT3R
-        S8cYXnLnqA9S0vlUcqmBeds07qoRbn35ezQfJ8pyS1RE387ITcgzq6PHUXXwRZqcO/Sk1L5arJMLy
-        E+9ofKyWiYPnidQ8zD5I0ZyEozinv4MmGtOr/LudVUr7xp27guzf7u4zI6ERWqMoK3aOeUdBrl0mu
-        xcCu0PRw==;
+        bh=tRabeefOvFWuX0UGmN5W80/SEitu80or+ujXPxbBifU=; b=AOm4sjiAlP6tD5BDPG+nlvSOnr
+        a+eqmQqJ44Gu3hNVff0rp/i9EstWS6YUe61HZmqK+NgAP9RCVrUroq8zVL8cKV3zpQ5XL0vyJlmRK
+        NzewYB+71v3WGLpgxvDoCFkqDQNPtIyV060z8fdSvtAa8bXvOhTJAGc1uVeds1Z8SanWEw05KGQ3W
+        UFB/Fg7NmKib5Uv9tykTUx2ZTObJAhnLIWQguQ08ldvRIaVpq8BqAf/QlCjLYPeugVNgGqcQ31x4x
+        JN/Z3K777fE2OazN7ZPpQSN18xdxSBZinMwtnPgc6nyTQwlijNE+ESpNHGBXjEkXAjangL33mjfc5
+        dZArx7ow==;
 Received: from 213-225-3-188.nat.highway.a1.net ([213.225.3.188] helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nbyoD-003vVW-6V; Wed, 06 Apr 2022 06:06:25 +0000
+        id 1nbyne-003v04-Nu; Wed, 06 Apr 2022 06:05:51 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,9 +43,9 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: [PATCH 17/27] block: use bdev_alignment_offset in disk_alignment_offset_show
-Date:   Wed,  6 Apr 2022 08:05:06 +0200
-Message-Id: <20220406060516.409838-18-hch@lst.de>
+Subject: [PATCH 08/27] ntfs3: use bdev_logical_block_size instead of open coding it
+Date:   Wed,  6 Apr 2022 08:04:57 +0200
+Message-Id: <20220406060516.409838-9-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220406060516.409838-1-hch@lst.de>
 References: <20220406060516.409838-1-hch@lst.de>
@@ -56,47 +56,24 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This does the same as the open coded variant except for an extra branch,
-and allows to remove queue_alignment_offset entirely.
-
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- block/genhd.c          | 2 +-
- include/linux/blkdev.h | 8 --------
- 2 files changed, 1 insertion(+), 9 deletions(-)
+ fs/ntfs3/super.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/block/genhd.c b/block/genhd.c
-index b8b6759d670f0..712031ce19070 100644
---- a/block/genhd.c
-+++ b/block/genhd.c
-@@ -1010,7 +1010,7 @@ static ssize_t disk_alignment_offset_show(struct device *dev,
- {
- 	struct gendisk *disk = dev_to_disk(dev);
+diff --git a/fs/ntfs3/super.c b/fs/ntfs3/super.c
+index 278dcf5024102..cd30e81abbce0 100644
+--- a/fs/ntfs3/super.c
++++ b/fs/ntfs3/super.c
+@@ -920,7 +920,7 @@ static int ntfs_fill_super(struct super_block *sb, struct fs_context *fc)
+ 	}
  
--	return sprintf(buf, "%d\n", queue_alignment_offset(disk->queue));
-+	return sprintf(buf, "%d\n", bdev_alignment_offset(disk->part0));
- }
- 
- static ssize_t disk_discard_alignment_show(struct device *dev,
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index f8c50b77543eb..d5346e72e3645 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -1251,14 +1251,6 @@ bdev_zone_write_granularity(struct block_device *bdev)
- 	return queue_zone_write_granularity(bdev_get_queue(bdev));
- }
- 
--static inline int queue_alignment_offset(const struct request_queue *q)
--{
--	if (q->limits.misaligned)
--		return -1;
--
--	return q->limits.alignment_offset;
--}
--
- static inline int queue_limit_alignment_offset(struct queue_limits *lim, sector_t sector)
- {
- 	unsigned int granularity = max(lim->physical_block_size, lim->io_min);
+ 	/* Parse boot. */
+-	err = ntfs_init_from_boot(sb, rq ? queue_logical_block_size(rq) : 512,
++	err = ntfs_init_from_boot(sb, bdev_logical_block_size(bdev),
+ 				  bdev_nr_bytes(bdev));
+ 	if (err)
+ 		goto out;
 -- 
 2.30.2
 
