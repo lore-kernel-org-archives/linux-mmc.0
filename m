@@ -2,53 +2,40 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 820ACC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 20:26:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5B35C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Apr 2022 21:14:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234430AbiDFU2a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Apr 2022 16:28:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42856 "EHLO
+        id S235112AbiDFVQ0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Apr 2022 17:16:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234330AbiDFU2K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 16:28:10 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4838413D09;
-        Wed,  6 Apr 2022 11:48:19 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id k21so5687961lfe.4;
-        Wed, 06 Apr 2022 11:48:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=j9395K+P3ckPAEpp0VngX/lMlS/mSO7/OiLA6T9rii8=;
-        b=AdiupK0f5tH3mzh81yMw74TNiqYSKhpRq5BV6vNWimIJM65sCmwtO0VGTLEIQSkjg/
-         xHomBGdi80pYAOjj2DuUq1oWwtOlgDYUspbmgS50UQ2XpWmFvFb64rmVAjIspPHu8v/N
-         raKCDBS81RRn+l35CiP8V9s15SZMqyc+I6CC6eNFaX7SY9jCEODu+ODqKQrEXvDnNfW9
-         06BmSYAMjoFA6bYLj+hs4lTp1VvofM5xzi/2yOrMuJgyl5vhhS2Qt0VQ3ZrZxNRi+m2Y
-         ZVJqXmFHD7We6zWDIH1c5jJ/5vx6iC0vE5/vmSAzew0dRX0CYnl+53PUQ+FMuZ066+V3
-         5MlQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=j9395K+P3ckPAEpp0VngX/lMlS/mSO7/OiLA6T9rii8=;
-        b=C9xni2Se3KsxJ/qA93W+xT20Lw3+mTceU3wgH16Dve2CQ7nmCmvrtOUmZD0avnYS2S
-         YmqpjEb78NypbSAU+0QDfalhlbm7FtQnPIlFdG/05lAYnVqgSslrUyVzNxG5yHzUXbtT
-         5TUZYkFpCdtJwRYIvdGa4Mx+fmCErSMshhNppBLX2HnXOMvylHXA5DgldxXFZ8Mw32/b
-         RZ9UKjpvY8iAEM3wSAylA1/cwa3L6vBrcRLV5ILiJq4shdrvxaFjGIoU9E/buKc4gkVP
-         kFZOU3CpMbZF+yCcvcX4+GLM8S+4Kp5lBqTmCd8noPP9LVf2QoKGRzIAFN6HnTxNcc44
-         6Hzw==
-X-Gm-Message-State: AOAM532pgeNnve5fE9O4raZl5zCCcOeWUnFsS38sUmEVI1sjGjGMNMMv
-        J99BOXbnijdY3dBwS55rfaP1ZIb57nLf9boT
-X-Google-Smtp-Source: ABdhPJzNADicM+sXa4roBFQ7B2f4eH3VnwkH5xkwOrMbesUL+8GJo8yXhHvLj4BO2Bo5WHfPEDGStA==
-X-Received: by 2002:a05:6512:39c1:b0:44a:e25d:47fd with SMTP id k1-20020a05651239c100b0044ae25d47fdmr6907751lfu.580.1649270897430;
-        Wed, 06 Apr 2022 11:48:17 -0700 (PDT)
-Received: from dell.intranet (93-181-165-181.internetia.net.pl. [93.181.165.181])
-        by smtp.gmail.com with ESMTPSA id e14-20020a19500e000000b0044a16931c7csm1912219lfb.97.2022.04.06.11.48.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Apr 2022 11:48:16 -0700 (PDT)
-From:   Janusz Krzysztofik <jmkrzyszt@gmail.com>
-To:     Aaro Koskinen <aaro.koskinen@iki.fi>
+        with ESMTP id S232759AbiDFVP4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2022 17:15:56 -0400
+Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B4EC2487A0;
+        Wed,  6 Apr 2022 13:00:19 -0700 (PDT)
+Received: from darkstar.musicnaut.iki.fi (85-76-76-218-nat.elisa-mobile.fi [85.76.76.218])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: aaro.koskinen)
+        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id C3DA61B000E0;
+        Wed,  6 Apr 2022 23:00:11 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
+        t=1649275212;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=HF/OS3JAtoNKv3AksoUVmxtqiwmaGXqNkeVyB7AYT2k=;
+        b=Nn4RAbFbzK4bwfg86ykyMmwZil9SKibzGCF6IqPtA9woskWkPm0Qpo8xHB6DmiuFZCDabl
+        hKhYB7cTF1pnQmfdEueduNI+Bie9rxrrlv4+Ae9YdogxoZPaT+AnKd36njOcJfii/ZG9el
+        NXeQ9cJa9eyyADZvMify5l3g3e6/9P6d54WrG6RxGfxgsqDX4gklm2g60np78Z2iAK4H5W
+        MYGDa3g/ettQmzEK/GGe/dgnxSa0+JfQVzn6IDHYnDPuqAhZ29ChrVGrIXEk6e+gIQp/ZO
+        YsKxpOTuJMbZKTk6UgFqwopmBrXCz1Q8WLvlxfzJ2EFoML4ykS+CJaqZAs9ITA==
+Date:   Wed, 6 Apr 2022 23:00:10 +0300
+From:   Aaro Koskinen <aaro.koskinen@iki.fi>
+To:     Janusz Krzysztofik <jmkrzyszt@gmail.com>
 Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
         Alan Stern <stern@rowland.harvard.edu>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -61,62 +48,84 @@ Cc:     Tony Lindgren <tony@atomide.com>, Paul Walmsley <paul@pwsan.com>,
         Liam Girdwood <lgirdwood@gmail.com>,
         Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org,
         alsa-devel@alsa-project.org
-Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to CCF
-Date:   Wed, 06 Apr 2022 20:48:14 +0200
-Message-ID: <1888452.PYKUYFuaPT@dell>
-In-Reply-To: <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
-References: <20220310233307.99220-3-jmkrzyszt@gmail.com> <1810824.tdWV9SEqCh@dell> <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
+Subject: Re: [PATCH v2] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to
+ CCF
+Message-ID: <20220406200010.GE594699@darkstar.musicnaut.iki.fi>
+References: <20220310233307.99220-3-jmkrzyszt@gmail.com>
+ <1810824.tdWV9SEqCh@dell>
+ <20220406132149.GC594699@darkstar.musicnaut.iki.fi>
+ <1888452.PYKUYFuaPT@dell>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <1888452.PYKUYFuaPT@dell>
+ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1649275212; a=rsa-sha256;
+        cv=none;
+        b=Ol1GS9eE8NlyDUV0WcHY2VWATp+nj58s0051qvEeumo7NtBnjXas42R78yzG70ifyC61w1
+        uNejgjj5y2u/lipXR8kWDr6uohk/Qlt2RTi7GBtSFq/B72+3ebibY0TmKGFTacwnLE/Q0Q
+        tPyBaa+IGUVAVry4W3pdajUy4YfXuZPAbe7qOV2W6PWhvFy5/u1KlaqNZJsnjYrRO5D9dj
+        xoCq4TSeoGt+wWudWLGQwD7h83OmvjLmmnHe1ciL+J2iNX7wi6z6XTcYeQ2dMUgmsEzE7h
+        UOG82BaXJw2nJuLhTmns2woVednPtANIIzueIdMPzqje3Y1nqQ/oFewmJr60ng==
+ARC-Authentication-Results: i=1;
+        ORIGINATING;
+        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
+        s=lahtoruutu; t=1649275212;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=HF/OS3JAtoNKv3AksoUVmxtqiwmaGXqNkeVyB7AYT2k=;
+        b=amTI0JvrXmyzyX8Uf2XnSz1hRH/n+rrTw1Nz41uGo9Db4A+x3UljqHgdkWZ+xZMSMFXmqF
+        NpqoT7DqPS10usMauUwiurnKUVrlRou9YOW5adeY4I5ejE8YptoMDaRUt5BlI5ya6Tsir4
+        ZQ9EwOXwkara1rof7KYZYYBUaJHXP873LqWCguWgum+N5SNiM6cE8BjG6+lCLdr+Og6l7/
+        02uNTNywsqyZ7r97elJ/MoCN+w2VWTRKFSv18b2pTuPihEhiQNuhWhqeAlpXg+nqf5Nq92
+        42iC+aDWXKVc7nuF531otS5HSwey0rL0Z+4eYJWSaqI9TJ0RCC9yORLMK37McA==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dnia =C5=9Broda, 6 kwietnia 2022 15:21:49 CEST Aaro Koskinen pisze:
-> Hi,
->=20
-> On Sat, Mar 26, 2022 at 10:17:49PM +0100, Janusz Krzysztofik wrote:
-> > Dnia wtorek, 22 marca 2022 20:07:53 CET Aaro Koskinen pisze:
-> > > On Tue, Mar 22, 2022 at 06:36:48PM +0200, Aaro Koskinen wrote:
-> > > > Something is still broken. When doing kexec (using CCF kernel), the
-> > > > kexec'ed kernel now hangs early (on 770):
-> > > [...]
-> > > > [    0.928863] calling  omap1_init_devices+0x0/0x2c @ 1
-> > >=20
-> > > It hangs in omap_sram_reprogram_clock() (<- omap1_select_table_rate()
-> > > <- omap1_clk_late_init()).
-> >=20
-> > I've reviewed my changes but haven't found anything suspicious.
->=20
-> The below change is fixing the kexec boot. Based on the comment in the
-> code, it seems this clock is needed for the SRAM to work.
->=20
-> diff --git a/arch/arm/mach-omap1/clock_data.c b/arch/arm/mach-omap1/clock=
-_data.c
-> index e33e11f826af..b8b4876ff935 100644
-> --- a/arch/arm/mach-omap1/clock_data.c
-> +++ b/arch/arm/mach-omap1/clock_data.c
-> @@ -285,7 +285,7 @@ static struct omap1_clk tc1_ck =3D {
->   */
-> =20
->  static struct omap1_clk tc2_ck =3D {
-> -	.hw.init	=3D CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, 0),
-> +	.hw.init	=3D CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, CLK_IS=
-_CRITICAL),
->  	.ops		=3D &clkops_generic,
->  	.enable_reg	=3D OMAP1_IO_ADDRESS(ARM_IDLECT3),
->  	.enable_bit	=3D EN_TC2_CK,
->=20
-> A.
->=20
+Hi,
 
-Thank you Aaro.  Will you submit this as a separate fix, or should I submit=
-=20
-v2 of my patch 4/4 with your fix included?
+On Wed, Apr 06, 2022 at 08:48:14PM +0200, Janusz Krzysztofik wrote:
+> Dnia środa, 6 kwietnia 2022 15:21:49 CEST Aaro Koskinen pisze:
+> > On Sat, Mar 26, 2022 at 10:17:49PM +0100, Janusz Krzysztofik wrote:
+> > > Dnia wtorek, 22 marca 2022 20:07:53 CET Aaro Koskinen pisze:
+> > > > On Tue, Mar 22, 2022 at 06:36:48PM +0200, Aaro Koskinen wrote:
+> > > > > Something is still broken. When doing kexec (using CCF kernel), the
+> > > > > kexec'ed kernel now hangs early (on 770):
+> > > > [...]
+> > > > > [    0.928863] calling  omap1_init_devices+0x0/0x2c @ 1
+> > > > 
+> > > > It hangs in omap_sram_reprogram_clock() (<- omap1_select_table_rate()
+> > > > <- omap1_clk_late_init()).
+> > > 
+> > > I've reviewed my changes but haven't found anything suspicious.
+> > 
+> > The below change is fixing the kexec boot. Based on the comment in the
+> > code, it seems this clock is needed for the SRAM to work.
+> > 
+> > diff --git a/arch/arm/mach-omap1/clock_data.c b/arch/arm/mach-omap1/clock_data.c
+> > index e33e11f826af..b8b4876ff935 100644
+> > --- a/arch/arm/mach-omap1/clock_data.c
+> > +++ b/arch/arm/mach-omap1/clock_data.c
+> > @@ -285,7 +285,7 @@ static struct omap1_clk tc1_ck = {
+> >   */
+> >  
+> >  static struct omap1_clk tc2_ck = {
+> > -	.hw.init	= CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, 0),
+> > +	.hw.init	= CLK_HW_INIT("tc2_ck", "tc_ck", &omap1_clk_gate_ops, CLK_IS_CRITICAL),
+> >  	.ops		= &clkops_generic,
+> >  	.enable_reg	= OMAP1_IO_ADDRESS(ARM_IDLECT3),
+> >  	.enable_bit	= EN_TC2_CK,
+> > 
+> > A.
+> > 
+> 
+> Thank you Aaro.  Will you submit this as a separate fix, or should I submit 
+> v2 of my patch 4/4 with your fix included?
 
-Thanks,
-Janusz
+Please send a new version with the fix included.
 
-
-
+A.
