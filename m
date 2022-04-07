@@ -2,110 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69C3DC43217
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 06:31:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8983CC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 06:31:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241160AbiDGGdT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Apr 2022 02:33:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54628 "EHLO
+        id S241168AbiDGGdg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Apr 2022 02:33:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55942 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241237AbiDGGdD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 02:33:03 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [217.72.192.74])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41C41B57;
-        Wed,  6 Apr 2022 23:31:01 -0700 (PDT)
-Received: from mail-wr1-f42.google.com ([209.85.221.42]) by
- mrelayeu.kundenserver.de (mreue109 [213.165.67.113]) with ESMTPSA (Nemesis)
- id 1M7JvO-1ndTCa0PRk-007inq; Thu, 07 Apr 2022 08:31:00 +0200
-Received: by mail-wr1-f42.google.com with SMTP id d3so6293631wrb.7;
-        Wed, 06 Apr 2022 23:30:59 -0700 (PDT)
-X-Gm-Message-State: AOAM531mvRP+YU0Ma1WSLPxsQoAwx+cMBs5z+r9nbD38NqjP8feQ/rj5
-        e5qQLgdq3mc4ISiC77+AmUFK9RnkQLtEiRaiSE8=
-X-Google-Smtp-Source: ABdhPJyKRyRW3k/cQmPVF80spQCMRGb5SVS98DqNmPx2g8IW88njX3uUl4iA4i0AVSL8t67eZnNZkGCEOKSOf5l4kho=
-X-Received: by 2002:a5d:6505:0:b0:205:9a98:e184 with SMTP id
- x5-20020a5d6505000000b002059a98e184mr8803769wru.317.1649313059590; Wed, 06
- Apr 2022 23:30:59 -0700 (PDT)
+        with ESMTP id S241184AbiDGGde (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 02:33:34 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33CB1972DA
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Apr 2022 23:31:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=aVDaLiyWtJkPwABSnm8EkuVv+SO
+        WJa+DTa5kVd46J4A=; b=SIKl6PO9UqxiqauxNPuFyxAYkQgRi0j9JEJoFal4nox
+        trXLyfG0gGATB5iBWA7cvCsTRTPeygPBov+GrAfxjImY0Un7oAloiTW59n3tDlko
+        arzVbHBKUE71qEatdSJWx4aws3n7Hl3/O9MvqxD4pfuQhiaKrRaODpT97bgCx77o
+        =
+Received: (qmail 3038714 invoked from network); 7 Apr 2022 08:31:20 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 7 Apr 2022 08:31:20 +0200
+X-UD-Smtp-Session: l3s3148p1@PiYfoArcLqIgAQnoAEUrAEwALhsXf+iu
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH] mmc: sh_mmcif: move platform_data header to proper location
+Date:   Thu,  7 Apr 2022 08:31:14 +0200
+Message-Id: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-References: <20220406233648.21644-1-brad@pensando.io> <20220406233648.21644-4-brad@pensando.io>
-In-Reply-To: <20220406233648.21644-4-brad@pensando.io>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Thu, 7 Apr 2022 08:30:43 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a2wZwza=tUzxpHTHTnahf-bUS2-e80rW-wzN3aWodD1vQ@mail.gmail.com>
-Message-ID: <CAK8P3a2wZwza=tUzxpHTHTnahf-bUS2-e80rW-wzN3aWodD1vQ@mail.gmail.com>
-Subject: Re: [PATCH 03/11] dt-bindings: mmc: Add Pensando Elba SoC binding
-To:     Brad Larson <brad@pensando.io>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>, dac2@pensando.io,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:L1k9lwuF84IUYFFiRBIy1y9YRO/zDLweXc/0M4LdGijxfIFw9tc
- uhWCJ5iCNpeSZY5AKy4xxUeM4Wong5Tg7ALVzPdKQPCUMJJAcJtcpStGanwP1SUr0Bt4OUF
- zuTEsc/MN1WkvfT9lVoeshnnoUV7pC6yTjLkFyLC2SYctOWFZ/CZh6Y9d1ihtZIDHUtVTXH
- YqTqVULdun1tWZ8WAFiRQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:L92u0FhEV/M=:4ckcr4vHSN8nZ/BuLXu0U0
- VgEajCa4He4/5g6iP1UDFWjIyNYOlCij2e1hvTyaJ32aE3Lg93MVMnDn1bJmiSHU3xBaQbHsf
- pkHg5HoLJ1iIwKS0SRrDx67MgqM67aB0dm8Oshuupr4ZMqZFG14FHqkU0yOkcV3RlM1HxIdpk
- mEXOJVh5ZDH06xbV1wBI6D14w1i4eppXJnGlUsHkwIltJ0F+hOe6sJD6y5HsjKuU5wvH5u0/K
- kYMY9cF8c/41FarVV1i/ffZgGqa+OW2m7q3GOWs4pl10iH8P8FkQlu8QqPOzF9YKgfhMOvzM9
- mxYvq09vFBrk0I/j6suvN2B4Z4jJ7l1hdHpr4cT8mFKINst5cVR+bDb9KipMGWaVP8kg+Jupp
- XnVEFeeWXhxj4LuJcVZv7t2TgiVgbKsdRrjOzjjj+G3VO0RgxT3Msbd8KAOJUA0jq3bWquFZC
- HdSZpb07ltwRlOyguEzGLRePMPFaSaO8u+YwLnag9UZ0wnnfCR9ldag4YtJ8gauu3d0oNfhSF
- Z6Vg3CNFY9P5E+s5Z6ONiD04y21Vz4fh2cggNCZmF1iCONu6X9HxoLN6vFT9bRd0KiNWVG7K9
- K/qrStWZqBhhe8h8k0Lv95GMQqCIp1UYq0KvO0+fU+YHhwpAH1y56TMZ3r6VrQQ5P55UW3Buu
- v/YGKwXlMQGXoWxjBdq7TYtcB27df5zlbdh0U7ZtIRbus8A3PFVgTJ3oKtEFXjTxdL8lyBbk2
- 1uIxG0ra8by+fDj+0zORF8eU/aLGQENdGpZV8FxzSBQw41ESfHRh7oHGtTyts/Z4LN7bIwfxE
- 4SP5DBUZ4qs5lVeA5qZBcJa9Et54IG3LTbDgbC230KzJIndKL8=
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Apr 7, 2022 at 1:36 AM Brad Larson <brad@pensando.io> wrote:
->
-> Pensando Elba ARM 64-bit SoC is integrated with this IP and
-> explicitly controls byte-lane enables resulting in an additional
-> reg property resource.
->
-> Signed-off-by: Brad Larson <brad@pensando.io>
-> ---
-> Change from V3:
-> - Change from elba-emmc to elba-sd4hc to match file convention
-> - Use minItems: 1 and maxItems: 2 to pass schema check
->
->  Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index 4207fed62dfe..278a71b27488 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -19,10 +19,12 @@ properties:
->        - enum:
->            - microchip,mpfs-sd4hc
->            - socionext,uniphier-sd4hc
-> +          - pensando,elba-sd4hc
->        - const: cdns,sd4hc
->
->    reg:
-> -    maxItems: 1
-> +    minItems: 1
-> +    maxItems: 2
->
+We have a dedicated directory for platform_data meanwhile, don't spoil
+the MMC directory with it.
 
-Shouldn't the binding describe what the register areas are? If there
-is only one of them, it is fairly clear, but when you have the choice
-between one and two, it gets ambiguous, and there is a risk that
-another SoC might have a different register area in the second entry,
-making it incompatible.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-        Arnd
+I don't have the HW to test this but the buildbots are happy with this
+change. I checked that they actually tested the SH builds. To make the
+patch more readable, I used the -M (rename) feature of git-format-patch.
+
+ arch/sh/boards/board-sh7757lcr.c                | 2 +-
+ arch/sh/boards/mach-ecovec24/setup.c            | 2 +-
+ arch/sh/boot/romimage/mmcif-sh7724.c            | 2 +-
+ drivers/mmc/host/sh_mmcif.c                     | 2 +-
+ include/linux/{mmc => platform_data}/sh_mmcif.h | 2 --
+ 5 files changed, 4 insertions(+), 6 deletions(-)
+ rename include/linux/{mmc => platform_data}/sh_mmcif.h (99%)
+
+diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
+index c32b4c6229d3..f39c8196efdf 100644
+--- a/arch/sh/boards/board-sh7757lcr.c
++++ b/arch/sh/boards/board-sh7757lcr.c
+@@ -16,7 +16,7 @@
+ #include <linux/io.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+-#include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <linux/sh_eth.h>
+ #include <linux/sh_intc.h>
+ #include <linux/usb/renesas_usbhs.h>
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index 4c9522dd351f..674da7ebd8b7 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -19,7 +19,7 @@
+ #include <linux/memblock.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+-#include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/gpio.h>
+ #include <linux/gpio/machine.h>
+diff --git a/arch/sh/boot/romimage/mmcif-sh7724.c b/arch/sh/boot/romimage/mmcif-sh7724.c
+index 6595b6b45bf1..d30123d859e0 100644
+--- a/arch/sh/boot/romimage/mmcif-sh7724.c
++++ b/arch/sh/boot/romimage/mmcif-sh7724.c
+@@ -8,7 +8,7 @@
+  * for more details.
+  */
+ 
+-#include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <mach/romimage.h>
+ 
+ #define MMCIF_BASE      (void __iomem *)0xa4ca0000
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5f9ebf045b1c..dc17bf5bc3b4 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -43,13 +43,13 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sdio.h>
+-#include <linux/mmc/sh_mmcif.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/mutex.h>
+ #include <linux/of_device.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <linux/pm_qos.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/sh_dma.h>
+diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/platform_data/sh_mmcif.h
+similarity index 99%
+rename from include/linux/mmc/sh_mmcif.h
+rename to include/linux/platform_data/sh_mmcif.h
+index e25533b95d9f..6eb914f958f9 100644
+--- a/include/linux/mmc/sh_mmcif.h
++++ b/include/linux/platform_data/sh_mmcif.h
+@@ -1,7 +1,5 @@
+ /* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+- * include/linux/mmc/sh_mmcif.h
+- *
+  * platform data for eMMC driver
+  *
+  * Copyright (C) 2010 Renesas Solutions Corp.
+-- 
+2.30.2
+
