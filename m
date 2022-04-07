@@ -2,324 +2,256 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59D28C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 15:01:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F115C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 15:11:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241366AbiDGPDN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Apr 2022 11:03:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36412 "EHLO
+        id S1344562AbiDGPM7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Apr 2022 11:12:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60346 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232775AbiDGPDN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 11:03:13 -0400
-Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB3521EFE11
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 08:01:11 -0700 (PDT)
-Received: by mail-lj1-x236.google.com with SMTP id s13so7817653ljd.5
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 08:01:11 -0700 (PDT)
+        with ESMTP id S1344557AbiDGPM5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 11:12:57 -0400
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3EB952898E
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 08:10:33 -0700 (PDT)
+Received: by mail-lj1-x230.google.com with SMTP id q14so7808051ljc.12
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 08:10:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=PizPajUaroVwTg9UYKL6VQyPpIngOO6602sR9aCeoXY=;
-        b=ga/0Z2X7oiyTOGGAexiVxYpQtgfbLjoW2y6Q3QRoBYGZj9KgOoUC3xY6BIcEwHYCRY
-         TMz+lplufPLsmCw4ph9bxlOSUwPP9i6002ciu06GvXKyBBHQxSKncDvRin/0YYpK5gmW
-         ToQpmVM7QSieC3x3BCDFQf1G9/2hUoPIOJ8SXjV/3+kx8WxGzV+BErYWJxqEEVYtaMb5
-         r9PDIkYL9eEel3gb8+4LZP4Y1uB+c7TwjmJmnxo1PcY9XL72GW1SP6LBOHimBJ0QVDL8
-         PtieOgLumuH2ott/qp8jMnMzzoRPH//F2ABkO3Kn/VmvD78ISq3GBcDC3eufL8lTCXZR
-         lduA==
+         :cc:content-transfer-encoding;
+        bh=LGWw2kVCEuEDYp9L995BHNM/E/68VFcptn8+/BGALX8=;
+        b=DOyRv2vuSsupa+/xHf8iYQRe24gS3+gIvUETnkOdOAE3PkfA9jryAYGFIOA0VvNGtG
+         pcibbWNh5jvnPZaQlYGirkgdEj0aTQaq2ceiMSBLR6O9RIDz4tjazTFa+TcIsmsEu5Yn
+         +UDx24wv6ek367JuaiDuc5MPZN/X+qBGXsDqQKnAEXUuNAtaipvhsOwLOhNc2BAf//81
+         B77iioOOq0/22QrxsG/Y3hunlrfdsCWnU9MkKr5XAkGB1Jg49HDCNj7cx3I78c88rVvM
+         R73oMMcs9jsmS6XrHn6PF6pel1rFqQYi6GRVLDl/Ju6Km9M0KPQbhVv2ij2x59Bdo8uQ
+         WLoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=PizPajUaroVwTg9UYKL6VQyPpIngOO6602sR9aCeoXY=;
-        b=SNxi1IFNQER3Y2CFfyFAy+uQ8GBnGOWc424iELUitlwEqffXjU27dtt6Uegg5Zgn6u
-         mkwAavZL5seNRghL4ivwbBBR1QJrMLunuCdtjapA26YuN2Ang+U9mCov8BR7bEJWo8ne
-         PGNTJLDyxnmEHTtSWshS435gNDz5cmkPbVRcYTMMrdLCrxev+LX/L6FUH3U1TjnwOHde
-         oPxWWfyWY/ANm1M5TJWhnbOdKb9zr/jqtP57dc3NRKy6T+1mHNxaXsQZJLfnG/7Vi+GE
-         9KvpOi0lwQqNfTB8MqFGjyxzzkPVw/23e1DkhoLsVqTHIIz5IuosQNuNi97pa+pnARk0
-         qc6A==
-X-Gm-Message-State: AOAM533p25BZvyMrn9gEzCDHVSFLl0hCiuOC7Krwr2nqiUAzzno8krn/
-        kFU7QMlKxd19T2v2T4LckEIQlSL6dpLrKFmObJh7Ig==
-X-Google-Smtp-Source: ABdhPJyGQcA+JxVBY5N6TVzsWJsjTKDr1ZJyXCrLKR9HKZ+YR7muH6BCBK5XHxkmZzempcsSbP9i/8VGOL499ll6Xv8=
-X-Received: by 2002:a2e:b012:0:b0:249:8061:8486 with SMTP id
- y18-20020a2eb012000000b0024980618486mr8853345ljk.463.1649343669901; Thu, 07
- Apr 2022 08:01:09 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=LGWw2kVCEuEDYp9L995BHNM/E/68VFcptn8+/BGALX8=;
+        b=3tXdsvJsR6ZkzZ0K3hwP6v3vaA7jo2vo5sXBg3nTMUVRJyblIIU2m6y4a0zkExuRpY
+         7+r/PZAqyEPr51iOT+hL2rQyhyk8JLGGwsP8tROdNsPUn7WTZKouaIYgbmfTYfmbPfeN
+         YsxkoSk86wFx3POMrYF2axpEFWoTqs+dhuPpzcSFDTH/wCF8hpuIt/EU9lZYjwA6HTZr
+         PYw468HAO/qrwD7nNgyS1vPxBbwedG63EUROlwAo7/SYwPWJCzM/wj65yYJ2uL9VDJ19
+         FAppVzvBn6WVf13z5T2mhy446Y/BEdbDNtL0sJp9U5lpKI71VmKykuXAKFoLbjpOmxwv
+         IX9Q==
+X-Gm-Message-State: AOAM531yx4IqCNwUNKpONW16/F01FAFX0t1NqQg93lSttM8AMSvJK/Fa
+        unymC3lMAGFkAHBjVdcv8mpXcCHgQJ1WAz17yMdYIw==
+X-Google-Smtp-Source: ABdhPJyLJQXEdkfvIvdV/o+bGlQivaCdVYI5YDT2swQd0R7Wbvq8imZUtER4C/PQOpsmm82Uki4NG0Kpg4leTI1n6AA=
+X-Received: by 2002:a2e:8189:0:b0:249:7d3a:ceb0 with SMTP id
+ e9-20020a2e8189000000b002497d3aceb0mr8652350ljg.367.1649344223490; Thu, 07
+ Apr 2022 08:10:23 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220222033931.237638-1-jasonlai.genesyslogic@gmail.com>
- <20220222033931.237638-7-jasonlai.genesyslogic@gmail.com> <CAPDyKFoDkxg1b0k4s_+F+eS8EUVM9ZabiwNc4VVQuCexLWNpsw@mail.gmail.com>
- <CAG0XXUGc4+8vF5paKZi9x=i_8pPpYcdCdh=Yr9zkLFe5MqNG0g@mail.gmail.com>
-In-Reply-To: <CAG0XXUGc4+8vF5paKZi9x=i_8pPpYcdCdh=Yr9zkLFe5MqNG0g@mail.gmail.com>
+References: <20220330075255.12127-1-a-govindraju@ti.com> <CAPDyKFoEZPaPG1bGq+nHtyO=FNzSfmwDPtVh5tobSJcctmQD4A@mail.gmail.com>
+ <4cc5cc8f-3249-4caf-0c09-995860bd379d@ti.com>
+In-Reply-To: <4cc5cc8f-3249-4caf-0c09-995860bd379d@ti.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 7 Apr 2022 17:00:32 +0200
-Message-ID: <CAPDyKFrj8DZ0Adn7+7gND0VGFj4J2TDPdQf2Vuf7mOTJD4BY+g@mail.gmail.com>
-Subject: Re: [PATCH V3 6/7] mmc: Implement content of UHS-II card
- initialization functions
-To:     Lai Jason <jasonlai.genesyslogic@gmail.com>
-Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+Date:   Thu, 7 Apr 2022 17:09:46 +0200
+Message-ID: <CAPDyKFo5V8WfcJaZfRAVg6RteTTRDP=uv7SnO4xmE3bdV3rHLg@mail.gmail.com>
+Subject: Re: [PATCH RFC] mmc: sdhci_am654: Add support for PM suspend/resume
+To:     Aswath Govindraju <a-govindraju@ti.com>
+Cc:     Kishon Vijay Abraham I <kishon@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>, dlunev@chromium.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>,
-        Jason Lai <Jason.Lai@genesyslogic.com.tw>,
-        otis.wu@genesyslogic.com.tw
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Faiz Abbas <faiz_abbas@ti.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 7 Apr 2022 at 12:45, Lai Jason <jasonlai.genesyslogic@gmail.com> wrote:
+On Thu, 7 Apr 2022 at 14:24, Aswath Govindraju <a-govindraju@ti.com> wrote:
 >
 > Hi Uffe,
 >
-> On Thu, Mar 24, 2022 at 12:16 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 07/04/22 16:12, Ulf Hansson wrote:
+> > + Faiz
 > >
-> > On Tue, 22 Feb 2022 at 04:40, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
-> > >
-> > > From: Jason Lai <jason.lai@genesyslogic.com.tw>
-> > >
-> > > UHS-II card initialization flow is divided into 2 categories: PHY & Card.
-> > > Part 1 - PHY Initialization:
-> > >          Every host controller may need their own avtivation operation to
-> > >          establish LINK between controller and card. So we add a new member
-> > >          function(uhs2_detect_init) in struct mmc_host_ops for host
-> > >          controller use.
-> > > Part 2 - Card Initialization:
-> > >          This part can be divided into 6 substeps.
-> > >          1. Send UHS-II CCMD DEVICE_INIT to card.
-> > >          2. Send UHS-II CCMD ENUMERATE to card.
-> > >          3. Send UHS-II Native Read CCMD to obtain capabilities in CFG_REG
-> > >             of card.
-> > >          4. Host compares capabilities of host controller and card, then
-> > >             write the negotiated values to Setting field in CFG_REG of card
-> > >             through UHS-II Native Write CCMD.
-> > >          5. Switch host controller's clock to Range B if it is supported by
-> > >             both host controller and card.
-> > >          6. Execute legacy SD initialization flow.
-> > > Part 3 - Provide a function to tranaform legacy SD command packet into
-> > >          UHS-II SD-TRAN DCMD packet.
-> > >
-> > > Most of the code added above came from Intel's original patch[3].
-> > >
-> > > [3]
-> > > https://patchwork.kernel.org/project/linux-mmc/patch/1419672479-30852-2-
-> > > git-send-email-yi.y.sun@intel.com/
-> > >
-> > > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
-> > > ---
-> > >  drivers/mmc/core/sd_uhs2.c | 835 ++++++++++++++++++++++++++++++++++++-
-> > >  1 file changed, 817 insertions(+), 18 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-> > > index 800957f74632..f1e8e30301eb 100644
-> > > --- a/drivers/mmc/core/sd_uhs2.c
-> > > +++ b/drivers/mmc/core/sd_uhs2.c
-> > > @@ -3,6 +3,7 @@
-> > >   * Copyright (C) 2021 Linaro Ltd
-> > >   *
-> > >   * Author: Ulf Hansson <ulf.hansson@linaro.org>
-> > > + * Author: Jason Lai <jason.lai@genesyslogic.com.tw>
-> > >   *
-> > >   * Support for SD UHS-II cards
-> > >   */
-> > > @@ -10,19 +11,31 @@
-> > >
-> > >  #include <linux/mmc/host.h>
-> > >  #include <linux/mmc/card.h>
-> > > +#include <linux/mmc/mmc.h>
-> > > +#include <linux/mmc/sd_uhs2.h>
-> > >
-> > >  #include "core.h"
-> > >  #include "bus.h"
-> > > +#include "card.h"
-> > >  #include "sd.h"
-> > > +#include "sd_ops.h"
-> > >  #include "mmc_ops.h"
-> > > +#include "sd_uhs2.h"
-> > >
-> > >  static const unsigned int sd_uhs2_freqs[] = { 52000000, 26000000 };
-> > >
-> > >  static int sd_uhs2_set_ios(struct mmc_host *host)
-> > >  {
-> > >         struct mmc_ios *ios = &host->ios;
-> > > +       int err = 0;
-> > >
-> > > -       return host->ops->uhs2_set_ios(host, ios);
-> > > +       pr_debug("%s: clock %uHz powermode %u Vdd %u timing %u\n",
-> > > +                mmc_hostname(host), ios->clock, ios->power_mode, ios->vdd,
-> > > +                ios->timing);
-> > > +
-> > > +       host->ops->set_ios(host, ios);
+> > On Wed, 30 Mar 2022 at 09:53, Aswath Govindraju <a-govindraju@ti.com> w=
+rote:
+> >>
+> >> Add support for suspend/resume and pm_runtime resume/suspend.
+> >>
+> >> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci_am654.c | 204 ++++++++++++++++++++++++++++++--=
+-
+> >>  1 file changed, 191 insertions(+), 13 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_a=
+m654.c
+> >> index e54fe24d47e7..e86df72dfd78 100644
+> >> --- a/drivers/mmc/host/sdhci_am654.c
+> >> +++ b/drivers/mmc/host/sdhci_am654.c
+> >> @@ -84,6 +84,7 @@
+> >>  #define DRIVER_STRENGTH_40_OHM 0x4
+> >>
+> >>  #define CLOCK_TOO_SLOW_HZ      50000000
+> >> +#define SDHCI_AM654_AUTOSUSPEND_DELAY  100
+> >>
+> >>  /* Command Queue Host Controller Interface Base address */
+> >>  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+> >> @@ -791,16 +792,10 @@ static int sdhci_am654_probe(struct platform_dev=
+ice *pdev)
+> >>
+> >>         pltfm_host->clk =3D clk_xin;
+> >>
+> >> -       /* Clocks are enabled using pm_runtime */
+> >> -       pm_runtime_enable(dev);
+> >> -       ret =3D pm_runtime_resume_and_get(dev);
+> >> -       if (ret)
+> >> -               goto pm_runtime_disable;
+> >> -
+> >>         base =3D devm_platform_ioremap_resource(pdev, 1);
+> >>         if (IS_ERR(base)) {
+> >>                 ret =3D PTR_ERR(base);
+> >> -               goto pm_runtime_put;
+> >> +               goto err_pltfm_free;
+> >>         }
+> >>
+> >>         sdhci_am654->base =3D devm_regmap_init_mmio(dev, base,
+> >> @@ -808,30 +803,42 @@ static int sdhci_am654_probe(struct platform_dev=
+ice *pdev)
+> >>         if (IS_ERR(sdhci_am654->base)) {
+> >>                 dev_err(dev, "Failed to initialize regmap\n");
+> >>                 ret =3D PTR_ERR(sdhci_am654->base);
+> >> -               goto pm_runtime_put;
+> >> +               goto err_pltfm_free;
+> >>         }
+> >>
+> >>         ret =3D sdhci_am654_get_of_property(pdev, sdhci_am654);
+> >>         if (ret)
+> >> -               goto pm_runtime_put;
+> >> +               goto err_pltfm_free;
+> >>
+> >>         ret =3D mmc_of_parse(host->mmc);
+> >>         if (ret) {
+> >>                 dev_err(dev, "parsing dt failed (%d)\n", ret);
+> >> -               goto pm_runtime_put;
+> >> +               goto err_pltfm_free;
+> >>         }
+> >>
+> >>         host->mmc_host_ops.execute_tuning =3D sdhci_am654_execute_tuni=
+ng;
+> >>
+> >> +       pm_runtime_set_active(dev);
+> >> +       pm_runtime_enable(dev);
+> >> +       clk_prepare_enable(pltfm_host->clk);
 > >
-> > We discussed using the ->set_ios() callback in a previous version. To
-> > repeat myself, I don't think it's a good idea. UHS-II needs an
-> > entirely different power sequence than the legacy interface(s), hence
-> > I think it's simply cleaner to separate them.
+> > I think some error handling is missing, at least for clk_prepare_enable=
+().
 > >
-> > To move forward, I see two options.
-> > 1) Use only the ->uhs2_host_operation() ops.
-> > 2) Use a combination of the ->uhs2_set_ios() ops and the
-> > ->uhs2_host_operation() ops.
+> >> +       ret =3D pm_runtime_resume_and_get(dev);
+> >
+> > This can be replaced with a pm_runtime_get_noresume() - and I think it
+> > would improve the readability of the code, to put the call above
+> > pm_runtime_set_active().
 > >
 >
-> I referred to the usage of "host->ops->set_ios" in core.c, it is called in
-> mmc_set_ios() and ".set_ios" is directed to sdhci_set_ios(), which is
-> located in mmc/host/sdhci.c. So I created sd_uhs2_set_ios() and call
-> host->ops->uhs2_set_ios() inside it. The ".uhs2_set_ios" is left to host
-> part to implement it.
+> Shouldn't pm_runtime_get_* be only done after we execute
+> pm_runtime_enable and pm_runtime_set_active should be called before
+> pm_runtime_enable()
 
-I see. In that case, what you are looking for is an sdhci specific
-callback, this wouldn't belong as part of the generic mmc host ops.
+pm_runtime_get_noresume() is somewhat special in this regard. It only
+bumps the usage count, which is to prevent any following attempts from
+runtime suspending the device.
 
-That said, I still think we need to choose between the two options I
-suggested above. Otherwise, I fear that it will turn into a nightmare
-for the mmc host drivers to support both UHS-II and the legacy
-interface.
-
-In other words, I strongly suggest that we must not call ->set_ios()
-to manage the UHS-II interface.
+It's perfectly okay to call it, both before and after runtime PM has
+been enabled.
 
 >
-> > Both options work for me. However, perhaps if you could incorporate
-> > the changes done on the host driver at next submission, it becomes
-> > easier for me to understand what makes best sense.
-> >
-> > > +
-> > > +       return err;
-> > >  }
-> > >
-
-[...]
-
-> > >  static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
-> > >  {
-> > > +       struct mmc_command cmd = {0};
-> > > +       struct uhs2_command uhs2_cmd = {};
-> > > +       u16 header = 0, arg = 0;
-> > > +       u32 payload[2];
-> > > +       u8 nMinDataGap;
-> > > +       u8 plen;
-> > > +       int err;
-> > > +       u8 resp[5] = {0};
-> > > +       u8 resp_len = 5;
-> > > +
-> > > +       header = UHS2_NATIVE_PACKET |
-> > > +                UHS2_PACKET_TYPE_CCMD | card->uhs2_config.node_id;
-> > > +       arg = ((UHS2_DEV_CONFIG_GEN_SET & 0xFF) << 8) |
-> > > +              UHS2_NATIVE_CMD_WRITE |
-> > > +              UHS2_NATIVE_CMD_PLEN_8B |
-> > > +              (UHS2_DEV_CONFIG_GEN_SET >> 8);
-> > > +
-> > > +       if (card->uhs2_config.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD &&
-> > > +           host->uhs2_caps.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD) {
-> > > +               /* Support HD */
-> > > +               host->uhs2_caps.flags |= MMC_UHS2_2L_HD;
-> >
-> > How is the uhs2_caps.flags field intended to be used? To me it looks
-> > like a way for the mmc core to exchange status/configuration
-> > information about the initialization process of the card, with the mmc
-> > host driver. Perhaps there is more too. Is that correct?
-> >
-> > If so, I think it looks quite similar for what we have in the struct
-> > mmc_ios, for the legacy interface(s). I am not saying we should use
-> > that, just trying to understand what would suit best here.
-> >
+> "In addition to that, the initial runtime PM status of all devices is
+> =E2=80=98suspended=E2=80=99, but it need not reflect the actual physical =
+state of the
+> device. Thus, if the device is initially active (i.e. it is able to
+> process I/O), its runtime PM status must be changed to =E2=80=98active=E2=
+=80=99, with
+> the help of pm_runtime_set_active(), before pm_runtime_enable() is
+> called for the device." [1]
 >
-> The usage of uhs2_caps.flags is spread out through core and host.
-> All operations related to it cannot be integrated into uhs2_set_ios()
-> simply. I recommend maintaining the status quo.
+>
+> Yeah, and I agree that pm_runtime_get_noresume would be better to use
+> over here.
 
-What is puzzling to me, is that the data is stored below uhs2_caps.*
-and that it's called "flags". It's not self-explanatory and it's not
-consistent with the way we use the ->set_ios() callback, for the
-legacy interface.
-
-It looks to me that we should rather add a new variable to the struct
-mmc_host and perhaps name it "uhs2_ios", to keep this data. Whether we
-need to create a new struct for "uhs2_ios" or if it's better to extend
-struct mmc_ios, I am not sure. I guess exploring this by writing the
-code would tell us what is best suited.
+Great!
 
 >
-> > > +               nMinDataGap = 1;
-> > > +       } else {
-> > > +               /* Only support 2L-FD so far */
-> > > +               host->uhs2_caps.flags &= ~MMC_UHS2_2L_HD;
-> > > +               nMinDataGap = 3;
-> > > +       }
-> > > +
-> > > +       /*
-> > > +        * Most UHS-II cards only support FD and 2L-HD mode. Other lane numbers
-> > > +        * defined in UHS-II addendem Ver1.01 are optional.
-> > > +        */
-> > > +       host->uhs2_caps.n_lanes_set = UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
-> > > +       card->uhs2_config.n_lanes_set = UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD;
+> [1] - https://www.infradead.org/~mchehab/kernel_docs/power/runtime_pm.htm=
+l
+>
+>
+> >> +       if (ret)
+> >> +               goto clk_disable;
+> >> +
+> >>         ret =3D sdhci_am654_init(host);
+> >>         if (ret)
+> >> -               goto pm_runtime_put;
+> >> +               goto clk_disable;
+> >>
+> >> +       /* Setting up autosuspend */
+> >> +       pm_runtime_set_autosuspend_delay(dev, SDHCI_AM654_AUTOSUSPEND_=
+DELAY);
+> >> +       pm_runtime_use_autosuspend(dev);
+> >> +       pm_runtime_mark_last_busy(dev);
+> >> +       pm_runtime_put_autosuspend(dev);
+> >>         return 0;
+> >>
+> >> -pm_runtime_put:
+> >> +clk_disable:
+> >> +       clk_disable_unprepare(pltfm_host->clk);
+> >>         pm_runtime_put_sync(dev);
+> >> -pm_runtime_disable:
+> >>         pm_runtime_disable(dev);
+> >>  err_pltfm_free:
+> >>         sdhci_pltfm_free(pdev);
+> >> @@ -841,6 +848,7 @@ static int sdhci_am654_probe(struct platform_devic=
+e *pdev)
+> >>  static int sdhci_am654_remove(struct platform_device *pdev)
+> >>  {
+> >>         struct sdhci_host *host =3D platform_get_drvdata(pdev);
+> >> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> >>         int ret;
+> >>
+> >>         sdhci_remove_host(host, true);
+> >> @@ -848,16 +856,186 @@ static int sdhci_am654_remove(struct platform_d=
+evice *pdev)
+> >>         if (ret < 0)
+> >>                 return ret;
+> >>
+> >> +       clk_disable_unprepare(pltfm_host->clk);
 > >
-> > [...]
-> >
-> > > +static int sd_uhs2_go_dormant(struct mmc_host *host, bool hibernate, u32 node_id)
-> > > +{
-> >
-> > Looks like the in-parameter "hibernate" is superfluous, as it's always
-> > set to "false" by the caller.
+> > To gate the clock, you need to make sure it has been ungated first. As
+> > you anyway need to add a call pm_runtime_get_sync() prior to calling
+> > sdhci_remove_host() a few lines above, this would fix it.
 > >
 >
-> The in-parameter "hibernate" is designed according to UHS-II
-> specification. We did not use
-> it for now. But we are not sure if it will be set to true in future
-> use. So I suggest keeping it.
+> This call was the counter part for the clk_enable_prepare called in
+> probe(). Yes, and I should have done a pm_runtime_get_sync before
+> calling sdhci_remove_host() in sdhci_am654_remove()
+>
+> > Moreover, the existing call to pm_runtime_put_sync() a few lines above
+> > in sdhci_am654_remove(), should be replaced with a call to
+> > pm_runtime_put_noidle() - and that call should be made below the call
+> > pm_runtime_disable() to become correct.
+>
+> Again shouldn't we disable pm_runtime after putting the device?
 
-I understand your point, but I don't agree, sorry. We don't want dead
-code around in the kernel, so please remove it.
+pm_runtime_put_noidle() is special in this regard, it only decreases
+the usage count and doesn't try to runtime suspend the device.
 
-Perhaps what we can do, is to add a comment in sd_uhs2_go_dormant(),
-somewhere we default to not use hibernate, we could simply explain
-that hibernation is currently not supported.
+It's perfectly okay to call it, both before and after runtime PM has
+been enabled.
 
 >
-> > > +       struct mmc_command cmd = {0};
-> > > +       struct uhs2_command uhs2_cmd = {};
-> > > +       u16 header = 0, arg = 0;
-> > > +       u32 payload[1];
-> > > +       u8 plen = 1;
-> > > +       int err;
-> > > +
-> > > +       /* Disable Normal INT */
-> > > +       if (!host->ops->uhs2_host_operation(host, UHS2_DISABLE_INT)) {
-> > > +               pr_err("%s: %s: UHS2 DISABLE_INT fail!\n",
-> > > +                      mmc_hostname(host), __func__);
-> > > +               return -EIO;
-> > > +       }
-> > > +
-> > > +       header = UHS2_NATIVE_PACKET | UHS2_PACKET_TYPE_CCMD | node_id;
-> > > +
-> > > +       arg = ((UHS2_DEV_CMD_GO_DORMANT_STATE & 0xFF) << 8) |
-> > > +               UHS2_NATIVE_CMD_WRITE |
-> > > +               UHS2_NATIVE_CMD_PLEN_4B |
-> > > +               (UHS2_DEV_CMD_GO_DORMANT_STATE >> 8);
-> > > +
-> > > +       if (hibernate)
-> > > +               payload[0] = UHS2_DEV_CMD_DORMANT_HIBER;
-> > > +
-> > > +       sd_uhs2_cmd_assemble(&cmd, &uhs2_cmd, header, arg, payload, plen, NULL, 0);
-> > > +
-> > > +       err = mmc_wait_for_cmd(host, &cmd, 0);
-> > > +       if (err) {
-> > > +               pr_err("%s: %s: UHS2 CMD send fail, err= 0x%x!\n",
-> > > +                      mmc_hostname(host), __func__, err);
-> > > +               return -EIO;
-> > > +       }
-> > > +
-> > > +       /* Check Dormant State in Present */
-> > > +       if (!host->ops->uhs2_host_operation(host, UHS2_CHECK_DORMANT)) {
-> > > +               pr_err("%s: %s: UHS2 GO_DORMANT_STATE fail!\n",
-> > > +                      mmc_hostname(host), __func__);
-> > > +               return -EIO;
-> > > +       }
-> > > +
-> > > +       host->ops->uhs2_host_operation(host, UHS2_DISABLE_CLK);
-> > > +
-> > >         return 0;
-> > >  }
+> >
+> >>         pm_runtime_disable(&pdev->dev);
+> >>         sdhci_pltfm_free(pdev);
+> >> +       return 0;
+> >> +}
 
 [...]
 
