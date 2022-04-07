@@ -2,102 +2,379 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F7A5C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 09:52:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AC17C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 10:43:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239507AbiDGJyk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Apr 2022 05:54:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42494 "EHLO
+        id S237815AbiDGKpg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Apr 2022 06:45:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234771AbiDGJyj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 05:54:39 -0400
-Received: from mail-oi1-x236.google.com (mail-oi1-x236.google.com [IPv6:2607:f8b0:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 845DBE085
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 02:52:37 -0700 (PDT)
-Received: by mail-oi1-x236.google.com with SMTP id 12so5068913oix.12
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 02:52:37 -0700 (PDT)
+        with ESMTP id S244515AbiDGKpf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 06:45:35 -0400
+Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AE92FCE
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 03:43:35 -0700 (PDT)
+Received: by mail-yb1-xb29.google.com with SMTP id g9so8830586ybf.1
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 03:43:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=yf8JQc9Qjute3HaS4oAxuuK/UMyLcmwrFL+oSYp9c4s=;
-        b=f9c6/YdmZ59ENBQIZ3oOlALAZgCDQ1xxl11RbHfKBiRt+gLbsH0LwKSLJyPYqufHuB
-         vlCFCpPxeBg1ggL1bM9XQr1luz2yaZuN2XqHd+UF/PR7ZHAhKaKn0qJKHnikzH7Pb0jo
-         FD/7hBKLKjvcTQzHkkVVr4ciXIKtKT5VEz97wlVn89LXNi+wtyVxlET7a+QiptsiLEKx
-         lK1mQEK9vCfrMPxXMyR7m4YUKBufkmsNiy1WrrWycfc8/6lgEX2LgbBvlSI+SwhV/J1B
-         taxE9//5InT8IPDWuYLG+AiPmbaL1vZzsypzuqeeuj3FuaY7Y2nHEoLUl3WvLXPkU7av
-         XMSg==
+        bh=l3YvTpcfPiEWxk1I10kLowl40sYIag3etxavugZ3bDE=;
+        b=VMQRrVFaw8JSNCEpTT0/kIYne5tNVC1X8D/N4o+b91ux5jouknGm0PfZ5MDVSS9K05
+         taoEillRBbVLBqODbKzZdcX7OKulSncJi8LuGg9FwMxcCCj06gA6F74uBzyvaK+NpcE4
+         fjbRRWZdXtZUT6Q7SZYvxINM9EwwcX/MNyABZIeSPWrUei19mx1kv1fvOXEJdv7ZCaWH
+         4BJf4Ggf3BIS0Efw0x1qGR6tXHqbe+rMuucbWvYpWxKc2zNEsKTdWpTFgL+HbzJuJB0U
+         fvVvEjPpgyIebVogVu5soGl8ixNvbnHl+NOAbCppG4fidxrEYpIl+5BZIxMt26/XYgkD
+         Mhlw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=yf8JQc9Qjute3HaS4oAxuuK/UMyLcmwrFL+oSYp9c4s=;
-        b=5kUhaDGl5fBn1XI5Tp2k6bA9UVHHUpjLoRuJkomK13S5LctL3duKLoFr+6y74LPpWN
-         RrMsOnD8VPvx6G/d2HgF8QVEBvvpiTXCJfGK2I/FcYbF4xREqzWNYk0P30lhcnfgfPXJ
-         AkAsRb4JHp/bIiDu16fUgdOX+OoZYNwF9E6wof4q2k0fleb82Magyz53lWN8u9EihtzH
-         lGbMPczTgT0qnmzxSBoKgqt4zpX7nNKa/DYrJKsJSuhk6Nx05y9YgBgQRUZKi5V5HVSW
-         W3J2SKiYqAIgZGhH5glAzgVfwlLKGl0Uja/yIt+sRiu6Ws7RQ8nHyvlk7oo0F+QHXssi
-         m/Kw==
-X-Gm-Message-State: AOAM5320RSUY4pfSfVPdJC3Z7mX6/TzMkUpfmPEjsqDrfzcEvUtPFsvQ
-        Q7DxLKaeYRFJCx/WWdWLbRr5KRNgXbPTPNx9YMPYcw==
-X-Google-Smtp-Source: ABdhPJxfIYs3oP15TQZ95ML7kXxJZYCzuv9OJyRs5uLFdpahVDzSN+WqzWCtw7pcD5uY2IWTV+DukmbBJrTKg18Gs2s=
-X-Received: by 2002:a05:6808:dc3:b0:2ef:86e7:a0b with SMTP id
- g3-20020a0568080dc300b002ef86e70a0bmr5327574oic.48.1649325156785; Thu, 07 Apr
- 2022 02:52:36 -0700 (PDT)
+        bh=l3YvTpcfPiEWxk1I10kLowl40sYIag3etxavugZ3bDE=;
+        b=8O69XXOwDROyM5jjb8LoCh3/ZaTVUj+2SYAffjrjwiQKCoiC9irCDplldjdNZYVBbp
+         evVRuiGnaaA9Emxf3ULBhk3YPjKzcAcFLLElE0cbEPpxakdN0ll3Q01uCdUAVjBL9ieF
+         G78fBur5OPMy8tx0nvYr56sa60Ooo671lLXO5iA3cXMMm59KxaXJAxp/yoBI/cYVZcDq
+         MsTzq2QjiL0ci6Ie8ktYcDzeYTs0mouJOKgJoljh/Ovb4EVeg+yF3COVrn3i5TANNepp
+         o9zx7ul8f0q2a3KhSoSnU75zfuKcRelpYl/pxe8u5JpD71tByZYYx0968HXGKHuSyzGD
+         1h3Q==
+X-Gm-Message-State: AOAM530hx7Al6Gt7obolfsI91gyhUqlM3+zwpJd0/1VJOUczwwIcNaTf
+        nc4keB35kuXiUI8pVqBg613m2qL3ONmouVvfCwULDA==
+X-Google-Smtp-Source: ABdhPJzCEyCg8U/nuMk8nM9A9hrDhfhiHoJKjftMPeOsXCWfcKOP62tJgzMX4li+G1IPMcVV3E39T+BNRsIcjGoZH8c=
+X-Received: by 2002:a25:344e:0:b0:63d:b9af:4dce with SMTP id
+ b75-20020a25344e000000b0063db9af4dcemr10255861yba.123.1649328214535; Thu, 07
+ Apr 2022 03:43:34 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220403145133.93583-1-bhupesh.sharma@linaro.org> <CAPDyKFp2U0MgrJYeV9T=fJ+82+2OP-VT1rSqgbyrAQM2E9ssfw@mail.gmail.com>
-In-Reply-To: <CAPDyKFp2U0MgrJYeV9T=fJ+82+2OP-VT1rSqgbyrAQM2E9ssfw@mail.gmail.com>
-From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Date:   Thu, 7 Apr 2022 15:22:25 +0530
-Message-ID: <CAH=2NtwROCoJ5AKskpa2hc5HU8HXGNo7JJ4b9DVuQuD0RKvJGQ@mail.gmail.com>
-Subject: Re: [PATCH 1/1] dt-bindings: mmc: sdhci-msm: Add compatible string
- for sm8150
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, bhupesh.linux@gmail.com,
-        agross@kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        robh+dt@kernel.org, bjorn.andersson@linaro.org,
-        Rob Herring <robh@kernel.org>
+References: <20220330075255.12127-1-a-govindraju@ti.com>
+In-Reply-To: <20220330075255.12127-1-a-govindraju@ti.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 7 Apr 2022 12:42:57 +0200
+Message-ID: <CAPDyKFoEZPaPG1bGq+nHtyO=FNzSfmwDPtVh5tobSJcctmQD4A@mail.gmail.com>
+Subject: Re: [PATCH RFC] mmc: sdhci_am654: Add support for PM suspend/resume
+To:     Aswath Govindraju <a-govindraju@ti.com>
+Cc:     Kishon Vijay Abraham I <kishon@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Faiz Abbas <faiz_abbas@ti.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
++ Faiz
 
-On Wed, 6 Apr 2022 at 20:20, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Wed, 30 Mar 2022 at 09:53, Aswath Govindraju <a-govindraju@ti.com> wrote:
 >
-> On Sun, 3 Apr 2022 at 16:51, Bhupesh Sharma <bhupesh.sharma@linaro.org> wrote:
-> >
-> > Add sm8150 SoC specific compatible strings for qcom-sdhci controller.
-> >
-> > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> > Cc: Rob Herring <robh@kernel.org>
-> > Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> > index 6216ed777343..35a7d78da213 100644
-> > --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> > @@ -25,6 +25,7 @@ Required properties:
-> >                 "qcom,sc7280-sdhci", "qcom,sdhci-msm-v5";
-> >                 "qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
-> >                 "qcom,sdx55-sdhci", "qcom,sdhci-msm-v5";
-> > +               "qcom,sm8150-sdhci", "qcom,sdhci-msm-v5"
-> >                 "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
-> >         NOTE that some old device tree files may be floating around that only
-> >         have the string "qcom,sdhci-msm-v4" without the SoC compatible string
+> Add support for suspend/resume and pm_runtime resume/suspend.
 >
-> Even if this is a trivial change to the existing DT bindings, I would
-> really like to see all mmc bindings getting converted to the new (not
-> so new any more) yaml format.
+> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 204 ++++++++++++++++++++++++++++++---
+>  1 file changed, 191 insertions(+), 13 deletions(-)
 >
-> Would you mind having a look and doing this conversion?
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index e54fe24d47e7..e86df72dfd78 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -84,6 +84,7 @@
+>  #define DRIVER_STRENGTH_40_OHM 0x4
+>
+>  #define CLOCK_TOO_SLOW_HZ      50000000
+> +#define SDHCI_AM654_AUTOSUSPEND_DELAY  100
+>
+>  /* Command Queue Host Controller Interface Base address */
+>  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+> @@ -791,16 +792,10 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>
+>         pltfm_host->clk = clk_xin;
+>
+> -       /* Clocks are enabled using pm_runtime */
+> -       pm_runtime_enable(dev);
+> -       ret = pm_runtime_resume_and_get(dev);
+> -       if (ret)
+> -               goto pm_runtime_disable;
+> -
+>         base = devm_platform_ioremap_resource(pdev, 1);
+>         if (IS_ERR(base)) {
+>                 ret = PTR_ERR(base);
+> -               goto pm_runtime_put;
+> +               goto err_pltfm_free;
+>         }
+>
+>         sdhci_am654->base = devm_regmap_init_mmio(dev, base,
+> @@ -808,30 +803,42 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>         if (IS_ERR(sdhci_am654->base)) {
+>                 dev_err(dev, "Failed to initialize regmap\n");
+>                 ret = PTR_ERR(sdhci_am654->base);
+> -               goto pm_runtime_put;
+> +               goto err_pltfm_free;
+>         }
+>
+>         ret = sdhci_am654_get_of_property(pdev, sdhci_am654);
+>         if (ret)
+> -               goto pm_runtime_put;
+> +               goto err_pltfm_free;
+>
+>         ret = mmc_of_parse(host->mmc);
+>         if (ret) {
+>                 dev_err(dev, "parsing dt failed (%d)\n", ret);
+> -               goto pm_runtime_put;
+> +               goto err_pltfm_free;
+>         }
+>
+>         host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+>
+> +       pm_runtime_set_active(dev);
+> +       pm_runtime_enable(dev);
+> +       clk_prepare_enable(pltfm_host->clk);
 
-Ok, will send the yaml binding conversion with v2.
+I think some error handling is missing, at least for clk_prepare_enable().
 
-Thanks,
-Bhupesh
+> +       ret = pm_runtime_resume_and_get(dev);
+
+This can be replaced with a pm_runtime_get_noresume() - and I think it
+would improve the readability of the code, to put the call above
+pm_runtime_set_active().
+
+> +       if (ret)
+> +               goto clk_disable;
+> +
+>         ret = sdhci_am654_init(host);
+>         if (ret)
+> -               goto pm_runtime_put;
+> +               goto clk_disable;
+>
+> +       /* Setting up autosuspend */
+> +       pm_runtime_set_autosuspend_delay(dev, SDHCI_AM654_AUTOSUSPEND_DELAY);
+> +       pm_runtime_use_autosuspend(dev);
+> +       pm_runtime_mark_last_busy(dev);
+> +       pm_runtime_put_autosuspend(dev);
+>         return 0;
+>
+> -pm_runtime_put:
+> +clk_disable:
+> +       clk_disable_unprepare(pltfm_host->clk);
+>         pm_runtime_put_sync(dev);
+> -pm_runtime_disable:
+>         pm_runtime_disable(dev);
+>  err_pltfm_free:
+>         sdhci_pltfm_free(pdev);
+> @@ -841,6 +848,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>  static int sdhci_am654_remove(struct platform_device *pdev)
+>  {
+>         struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         int ret;
+>
+>         sdhci_remove_host(host, true);
+> @@ -848,16 +856,186 @@ static int sdhci_am654_remove(struct platform_device *pdev)
+>         if (ret < 0)
+>                 return ret;
+>
+> +       clk_disable_unprepare(pltfm_host->clk);
+
+To gate the clock, you need to make sure it has been ungated first. As
+you anyway need to add a call pm_runtime_get_sync() prior to calling
+sdhci_remove_host() a few lines above, this would fix it.
+
+Moreover, the existing call to pm_runtime_put_sync() a few lines above
+in sdhci_am654_remove(), should be replaced with a call to
+pm_runtime_put_noidle() - and that call should be made below the call
+pm_runtime_disable() to become correct.
+
+>         pm_runtime_disable(&pdev->dev);
+>         sdhci_pltfm_free(pdev);
+> +       return 0;
+> +}
+> +
+> +#ifdef CONFIG_PM
+> +static int sdhci_am654_restore(struct sdhci_host *host)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> +       u32 ctl_cfg_2 = 0;
+> +       u32 val;
+> +       int ret;
+> +
+> +       if (sdhci_am654->flags & DLL_CALIB) {
+> +               regmap_read(sdhci_am654->base, PHY_STAT1, &val);
+> +               if (~val & CALDONE_MASK) {
+> +                       /* Calibrate IO lines */
+> +                       regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+> +                                          PDB_MASK, PDB_MASK);
+> +                       ret = regmap_read_poll_timeout(sdhci_am654->base,
+> +                                                      PHY_STAT1, val,
+> +                                                      val & CALDONE_MASK,
+> +                                                      1, 20);
+> +                       if (ret)
+> +                               return ret;
+> +               }
+> +       }
+> +
+> +       /* Enable pins by setting IO mux to 0 */
+> +       if (sdhci_am654->flags & IOMUX_PRESENT)
+> +               regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+> +                                  IOMUX_ENABLE_MASK, 0);
+> +
+> +       /* Set slot type based on SD or eMMC */
+> +       if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +               ctl_cfg_2 = SLOTTYPE_EMBEDDED;
+> +
+> +       regmap_update_bits(sdhci_am654->base, CTL_CFG_2, SLOTTYPE_MASK,
+> +                          ctl_cfg_2);
+> +
+> +       regmap_read(sdhci_am654->base, CTL_CFG_3, &val);
+> +       if (~val & TUNINGFORSDR50_MASK)
+> +               /* Enable tuning for SDR50 */
+> +               regmap_update_bits(sdhci_am654->base, CTL_CFG_3, TUNINGFORSDR50_MASK,
+> +                                  TUNINGFORSDR50_MASK);
+>
+>         return 0;
+>  }
+>
+> +static int sdhci_am654_runtime_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       int ret;
+> +
+> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> +               mmc_retune_needed(host->mmc);
+> +
+> +       ret = cqhci_suspend(host->mmc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = sdhci_runtime_suspend_host(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       /* disable the clock */
+> +       clk_disable_unprepare(pltfm_host->clk);
+> +       return 0;
+> +}
+> +
+> +static int sdhci_am654_runtime_resume(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       int ret;
+> +
+> +       /* Enable the clock */
+> +       clk_prepare_enable(pltfm_host->clk);
+> +       ret = sdhci_am654_restore(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = sdhci_runtime_resume_host(host, 0);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = cqhci_resume(host->mmc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       return 0;
+> +}
+> +#endif
+> +
+> +#ifdef CONFIG_PM_SLEEP
+> +static int sdhci_am654_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       int ret;
+> +
+> +       if (!host)
+> +               return 0;
+> +
+> +       ret = pm_runtime_get_sync(dev);
+> +       if (ret < 0)
+> +               return ret;
+> +
+> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+> +               mmc_retune_needed(host->mmc);
+> +
+> +       ret = cqhci_suspend(host->mmc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = sdhci_suspend_host(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = pm_runtime_put_sync(dev);
+> +
+> +       /* disable the clock */
+> +       clk_disable_unprepare(pltfm_host->clk);
+> +
+> +       return 0;
+> +}
+> +
+> +static int sdhci_am654_resume(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       int ret;
+> +
+> +       if (!host)
+> +               return 0;
+> +
+> +       /* Enable the clock */
+> +       clk_prepare_enable(pltfm_host->clk);
+> +       ret = pm_runtime_get_sync(dev);
+> +       if (ret < 0)
+> +               goto clk_unprepare;
+> +
+> +       ret = sdhci_am654_restore(host);
+> +       if (ret)
+> +               goto put;
+> +
+> +       ret = sdhci_resume_host(host);
+> +       if (ret)
+> +               goto put;
+> +
+> +       ret = cqhci_resume(host->mmc);
+> +       if (ret)
+> +               goto put;
+> +
+> +       pm_runtime_mark_last_busy(dev);
+> +       pm_runtime_put_autosuspend(dev);
+> +       return 0;
+> +
+> +put:
+> +       pm_runtime_put_sync(dev);
+> +clk_unprepare:
+> +       clk_disable_unprepare(pltfm_host->clk);
+> +       return ret;
+> +}
+
+By looking at the code in sdhci_am654_suspend|resume(), I wonder if
+those is better replaced with assigning system PM callbacks to
+pm_runtime_force_suspend|resume() instead. Other sdhci variants do
+this already, you may have a look at those to better get the idea.
+
+> +#endif
+> +
+> +static const struct dev_pm_ops sdhci_am654_dev_pm_ops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_am654_suspend, sdhci_am654_resume)
+> +       .runtime_suspend = sdhci_am654_runtime_suspend,
+> +       .runtime_resume = sdhci_am654_runtime_resume,
+
+For runtime PM callbacks, you can use SET_RUNTIME_PM_OPS(). Otherwise
+I think this will cause a build error when built with CONFIG_PM unset.
+
+> +};
+> +
+>  static struct platform_driver sdhci_am654_driver = {
+>         .driver = {
+>                 .name = "sdhci-am654",
+>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> +               .pm = &sdhci_am654_dev_pm_ops,
+>                 .of_match_table = sdhci_am654_of_match,
+>         },
+>         .probe = sdhci_am654_probe,
+
+Kind regards
+Uffe
