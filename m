@@ -2,213 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CEC7C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 08:04:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94929C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 09:42:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242891AbiDGIGc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Apr 2022 04:06:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48996 "EHLO
+        id S230094AbiDGJoY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Apr 2022 05:44:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242826AbiDGIGW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 04:06:22 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54C34160468;
-        Thu,  7 Apr 2022 01:03:18 -0700 (PDT)
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id BA7481F859;
-        Thu,  7 Apr 2022 08:03:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1649318596; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=7k0z5t+RkWgzil40AtKwhJmpL0iBjAFtHXia6nIwjc8=;
-        b=BFj1weRWNO0gJwf1a0jytpVaNV2SIOQyml/DNHaVaAYv+GWtC9RRp3Nkr1QhUY/V7QdLG9
-        baoJsXmF2FufEolsvsTPwbwZ3Or5/MyPwA8jPnqPoYDtXH5U9TjRT7F8cNWLR3Nqx6fvJv
-        Ws2fOIHqbo98FqfWwnQjig+YJFloGxM=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1649318596;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=7k0z5t+RkWgzil40AtKwhJmpL0iBjAFtHXia6nIwjc8=;
-        b=DjSOFiN41nmAx2XAVq/tnPaDKbkIhCw6FaIeWu9KyiZMi8ecy7DPyjacZPoBAIl6E7Jspy
-        2pyi9oy0n8T7WCDA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 4CF8613485;
-        Thu,  7 Apr 2022 08:03:11 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id F2mtCL+aTmKlAgAAMHmgww
-        (envelope-from <colyli@suse.de>); Thu, 07 Apr 2022 08:03:11 +0000
-Message-ID: <9f91936a-7dd7-2ee6-3293-f199ada85210@suse.de>
-Date:   Thu, 7 Apr 2022 16:03:09 +0800
+        with ESMTP id S234870AbiDGJoX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 05:44:23 -0400
+Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C28F15EDDB
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 02:42:23 -0700 (PDT)
+Received: by mail-lj1-x22b.google.com with SMTP id bn33so6702067ljb.6
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 02:42:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=vBIFCqrRmqJXlZXuO4tI37xf4KvAArxDsIUEJCsxt3w=;
+        b=ExtlPPrTavaYpUApNQWB9ohbQnmwEiM1l50L4c0QKIZX7k45kIJ1hETfMpkwVub9L2
+         7l3jZrqkh/iuxZe5y13mVqqSuDYpaEpuR7sqpqR9Dtq0o5VxabSuuA6V5ODh9HLq+VHO
+         QjEYkmNKlIBbZ5bISLetorU81WPZgi/EvnsnmtcFJ7hZRl5v233DugL+V2hA5+E50hv9
+         F4uhxf5WWtEj2uUmV/7cjE/gHcLrm4KgewlpM7lhSrI4nFora3TfQ/Nm/Hq4fHQxUdX5
+         v7JEfXhxICvdCpm1ZAdtE7WUdALXYn1BHbY/oLK6fwM+llccjHBV3lUiU8byoGBGillc
+         hbFQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=vBIFCqrRmqJXlZXuO4tI37xf4KvAArxDsIUEJCsxt3w=;
+        b=xThAlpesIzfoQkgWbpd+gP8h3D4ot2KvAGhwldcPf/jFVXPQqRHXggF3XJGg2xqox0
+         15swUPI78bvWZ7J5qZ7/fiPYcnOmXZ/haAu7FSl+6wJZnGIbruEvnK8NoNY7jJ1iiSkm
+         Aoqlk+S/ktC5keKFls1CxIkIMvbAaqdOGkSOGXu3Xnz0VGefzGiP2XD3Ndg38xmYHy6g
+         V/y4klcYPly4Pwil4eDrKomv6RiovNZXn66beKzAzIE6wqEsSysTLF9ICTmOMzLw+wYJ
+         zo3GXP8dgba65BPQDUIuX4y7zcRsHS8tmCLv0lrjrVp3oV4CIjmZGCz/yReWa1BR1EAq
+         i6rw==
+X-Gm-Message-State: AOAM531V66zrI6UdY6XDfbyn7oxcksXP5/eOOFfV8wFxdbfOH0loVlPP
+        sIgFviZfUhNGvhBkwmAWoGNPuJ7GrsV7raZN2xIl1Q==
+X-Google-Smtp-Source: ABdhPJy7GXnQH6nJZ2YovLffW5rT5Ub1jGpiDgNYAJJP1lSnd7a/G8rzzFbSEsx46su97PKCEWJ2Lh1Lkjgp9SNF5Cc=
+X-Received: by 2002:a05:651c:90a:b0:249:5d82:fe9c with SMTP id
+ e10-20020a05651c090a00b002495d82fe9cmr8189270ljq.300.1649324541547; Thu, 07
+ Apr 2022 02:42:21 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:91.0)
- Gecko/20100101 Thunderbird/91.7.0
-Subject: Re: [PATCH 22/27] block: refactor discard bio size limiting
-Content-Language: en-US
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-um@lists.infradead.org,
-        linux-block@vger.kernel.org, drbd-dev@lists.linbit.com,
-        nbd@other.debian.org, ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
-        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
-        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org,
-        Jens Axboe <axboe@kernel.dk>
-References: <20220406060516.409838-1-hch@lst.de>
- <20220406060516.409838-23-hch@lst.de>
-From:   Coly Li <colyli@suse.de>
-In-Reply-To: <20220406060516.409838-23-hch@lst.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 7 Apr 2022 11:41:45 +0200
+Message-ID: <CAPDyKFp6_3_pQTtNpOA56QM6s2tvUKa_gZn=JCYY0kKTAoe49w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: move platform_data header to proper location
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/6/22 2:05 PM, Christoph Hellwig wrote:
-> Move all the logic to limit the discard bio size into a common helper
-> so that it is better documented.
+On Thu, 7 Apr 2022 at 08:31, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> We have a dedicated directory for platform_data meanwhile, don't spoil
+> the MMC directory with it.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Acked-by: Coly Li <colyli@suse.de>
+I can pick this up through my mmc tree, but I need an ack from the
+sh-maintainers to do it.
 
-
-Thanks for the change.
-
-Coly Li
-
+Kind regards
+Uffe
 
 > ---
->   block/blk-lib.c | 59 ++++++++++++++++++++++++-------------------------
->   block/blk.h     | 14 ------------
->   2 files changed, 29 insertions(+), 44 deletions(-)
 >
-> diff --git a/block/blk-lib.c b/block/blk-lib.c
-> index 237d60d8b5857..2ae32a722851c 100644
-> --- a/block/blk-lib.c
-> +++ b/block/blk-lib.c
-> @@ -10,6 +10,32 @@
->   
->   #include "blk.h"
->   
-> +static sector_t bio_discard_limit(struct block_device *bdev, sector_t sector)
-> +{
-> +	unsigned int discard_granularity =
-> +		bdev_get_queue(bdev)->limits.discard_granularity;
-> +	sector_t granularity_aligned_sector;
-> +
-> +	if (bdev_is_partition(bdev))
-> +		sector += bdev->bd_start_sect;
-> +
-> +	granularity_aligned_sector =
-> +		round_up(sector, discard_granularity >> SECTOR_SHIFT);
-> +
-> +	/*
-> +	 * Make sure subsequent bios start aligned to the discard granularity if
-> +	 * it needs to be split.
-> +	 */
-> +	if (granularity_aligned_sector != sector)
-> +		return granularity_aligned_sector - sector;
-> +
-> +	/*
-> +	 * Align the bio size to the discard granularity to make splitting the bio
-> +	 * at discard granularity boundaries easier in the driver if needed.
-> +	 */
-> +	return round_down(UINT_MAX, discard_granularity) >> SECTOR_SHIFT;
-> +}
-> +
->   int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
->   		sector_t nr_sects, gfp_t gfp_mask, int flags,
->   		struct bio **biop)
-> @@ -17,7 +43,7 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
->   	struct request_queue *q = bdev_get_queue(bdev);
->   	struct bio *bio = *biop;
->   	unsigned int op;
-> -	sector_t bs_mask, part_offset = 0;
-> +	sector_t bs_mask;
->   
->   	if (bdev_read_only(bdev))
->   		return -EPERM;
-> @@ -48,36 +74,9 @@ int __blkdev_issue_discard(struct block_device *bdev, sector_t sector,
->   	if (!nr_sects)
->   		return -EINVAL;
->   
-> -	/* In case the discard request is in a partition */
-> -	if (bdev_is_partition(bdev))
-> -		part_offset = bdev->bd_start_sect;
-> -
->   	while (nr_sects) {
-> -		sector_t granularity_aligned_lba, req_sects;
-> -		sector_t sector_mapped = sector + part_offset;
-> -
-> -		granularity_aligned_lba = round_up(sector_mapped,
-> -				q->limits.discard_granularity >> SECTOR_SHIFT);
-> -
-> -		/*
-> -		 * Check whether the discard bio starts at a discard_granularity
-> -		 * aligned LBA,
-> -		 * - If no: set (granularity_aligned_lba - sector_mapped) to
-> -		 *   bi_size of the first split bio, then the second bio will
-> -		 *   start at a discard_granularity aligned LBA on the device.
-> -		 * - If yes: use bio_aligned_discard_max_sectors() as the max
-> -		 *   possible bi_size of the first split bio. Then when this bio
-> -		 *   is split in device drive, the split ones are very probably
-> -		 *   to be aligned to discard_granularity of the device's queue.
-> -		 */
-> -		if (granularity_aligned_lba == sector_mapped)
-> -			req_sects = min_t(sector_t, nr_sects,
-> -					  bio_aligned_discard_max_sectors(q));
-> -		else
-> -			req_sects = min_t(sector_t, nr_sects,
-> -					  granularity_aligned_lba - sector_mapped);
-> -
-> -		WARN_ON_ONCE((req_sects << 9) > UINT_MAX);
-> +		sector_t req_sects =
-> +			min(nr_sects, bio_discard_limit(bdev, sector));
->   
->   		bio = blk_next_bio(bio, bdev, 0, op, gfp_mask);
->   		bio->bi_iter.bi_sector = sector;
-> diff --git a/block/blk.h b/block/blk.h
-> index 8ccbc6e076369..1fdc1d28e6d60 100644
-> --- a/block/blk.h
-> +++ b/block/blk.h
-> @@ -346,20 +346,6 @@ static inline unsigned int bio_allowed_max_sectors(struct request_queue *q)
->   	return round_down(UINT_MAX, queue_logical_block_size(q)) >> 9;
->   }
->   
-> -/*
-> - * The max bio size which is aligned to q->limits.discard_granularity. This
-> - * is a hint to split large discard bio in generic block layer, then if device
-> - * driver needs to split the discard bio into smaller ones, their bi_size can
-> - * be very probably and easily aligned to discard_granularity of the device's
-> - * queue.
-> - */
-> -static inline unsigned int bio_aligned_discard_max_sectors(
-> -					struct request_queue *q)
-> -{
-> -	return round_down(UINT_MAX, q->limits.discard_granularity) >>
-> -			SECTOR_SHIFT;
-> -}
-> -
->   /*
->    * Internal io_context interface
->    */
-
-
+> I don't have the HW to test this but the buildbots are happy with this
+> change. I checked that they actually tested the SH builds. To make the
+> patch more readable, I used the -M (rename) feature of git-format-patch.
+>
+>  arch/sh/boards/board-sh7757lcr.c                | 2 +-
+>  arch/sh/boards/mach-ecovec24/setup.c            | 2 +-
+>  arch/sh/boot/romimage/mmcif-sh7724.c            | 2 +-
+>  drivers/mmc/host/sh_mmcif.c                     | 2 +-
+>  include/linux/{mmc => platform_data}/sh_mmcif.h | 2 --
+>  5 files changed, 4 insertions(+), 6 deletions(-)
+>  rename include/linux/{mmc => platform_data}/sh_mmcif.h (99%)
+>
+> diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
+> index c32b4c6229d3..f39c8196efdf 100644
+> --- a/arch/sh/boards/board-sh7757lcr.c
+> +++ b/arch/sh/boards/board-sh7757lcr.c
+> @@ -16,7 +16,7 @@
+>  #include <linux/io.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mmcif.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <linux/sh_eth.h>
+>  #include <linux/sh_intc.h>
+>  #include <linux/usb/renesas_usbhs.h>
+> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+> index 4c9522dd351f..674da7ebd8b7 100644
+> --- a/arch/sh/boards/mach-ecovec24/setup.c
+> +++ b/arch/sh/boards/mach-ecovec24/setup.c
+> @@ -19,7 +19,7 @@
+>  #include <linux/memblock.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mmcif.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/gpio.h>
+>  #include <linux/gpio/machine.h>
+> diff --git a/arch/sh/boot/romimage/mmcif-sh7724.c b/arch/sh/boot/romimage/mmcif-sh7724.c
+> index 6595b6b45bf1..d30123d859e0 100644
+> --- a/arch/sh/boot/romimage/mmcif-sh7724.c
+> +++ b/arch/sh/boot/romimage/mmcif-sh7724.c
+> @@ -8,7 +8,7 @@
+>   * for more details.
+>   */
+>
+> -#include <linux/mmc/sh_mmcif.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <mach/romimage.h>
+>
+>  #define MMCIF_BASE      (void __iomem *)0xa4ca0000
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 5f9ebf045b1c..dc17bf5bc3b4 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -43,13 +43,13 @@
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/sdio.h>
+> -#include <linux/mmc/sh_mmcif.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mod_devicetable.h>
+>  #include <linux/mutex.h>
+>  #include <linux/of_device.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <linux/pm_qos.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/sh_dma.h>
+> diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/platform_data/sh_mmcif.h
+> similarity index 99%
+> rename from include/linux/mmc/sh_mmcif.h
+> rename to include/linux/platform_data/sh_mmcif.h
+> index e25533b95d9f..6eb914f958f9 100644
+> --- a/include/linux/mmc/sh_mmcif.h
+> +++ b/include/linux/platform_data/sh_mmcif.h
+> @@ -1,7 +1,5 @@
+>  /* SPDX-License-Identifier: GPL-2.0-only */
+>  /*
+> - * include/linux/mmc/sh_mmcif.h
+> - *
+>   * platform data for eMMC driver
+>   *
+>   * Copyright (C) 2010 Renesas Solutions Corp.
+> --
+> 2.30.2
+>
