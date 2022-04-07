@@ -2,105 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BC5AC4321E
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 15:32:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8351BC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 16:29:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344925AbiDGPdu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Apr 2022 11:33:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47606 "EHLO
+        id S1345721AbiDGQbT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Apr 2022 12:31:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345006AbiDGPci (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 11:32:38 -0400
-Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34D78C36;
-        Thu,  7 Apr 2022 08:30:38 -0700 (PDT)
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id E56341F85A;
-        Thu,  7 Apr 2022 15:30:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
-        t=1649345436;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=zPq01JLA6dLoXnFchjjFxJhIcKHBhEdkrZLnR4TbLUY=;
-        b=arXCGHubFNDMJivA50IVAh5E18SENgaJ+8psB29O+dYSp9GznJDHN9eBNpNqVEEypC+xPt
-        YsOhdRjVTg1mFsMpWqZ4oNaVAGZnjLyClojrRdjsUuitokjLJy7oqe8RxGnlNpP0HUVyi6
-        8uSBZYdSoqUowgEJK8P6YGm7aUVWSbo=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
-        s=susede2_ed25519; t=1649345436;
-        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
-         cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=zPq01JLA6dLoXnFchjjFxJhIcKHBhEdkrZLnR4TbLUY=;
-        b=+RoHDuxhi8eXdx1m79jW3LC9fhbmevwd72sFBk44Osas+gmEsPN5qSbgbwIpqCBgrNluyA
-        EXeawVVGeX85rgBw==
-Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
-        by relay2.suse.de (Postfix) with ESMTP id AE7A3A3B94;
-        Thu,  7 Apr 2022 15:30:36 +0000 (UTC)
-Received: by ds.suse.cz (Postfix, from userid 10065)
-        id 5C928DA80E; Thu,  7 Apr 2022 17:26:34 +0200 (CEST)
-Date:   Thu, 7 Apr 2022 17:26:34 +0200
-From:   David Sterba <dsterba@suse.cz>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-um@lists.infradead.org, linux-block@vger.kernel.org,
-        drbd-dev@lists.linbit.com, nbd@other.debian.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
-        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
-        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-Subject: Re: [PATCH 24/27] block: add a bdev_discard_granularity helper
-Message-ID: <20220407152634.GL15609@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-Mail-Followup-To: dsterba@suse.cz, Christoph Hellwig <hch@lst.de>,
-        Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
-        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
-        linux-um@lists.infradead.org, linux-block@vger.kernel.org,
-        drbd-dev@lists.linbit.com, nbd@other.debian.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
-        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
-        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
-        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
-References: <20220406060516.409838-1-hch@lst.de>
- <20220406060516.409838-25-hch@lst.de>
+        with ESMTP id S1345705AbiDGQbS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 12:31:18 -0400
+Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 591912654B;
+        Thu,  7 Apr 2022 09:29:18 -0700 (PDT)
+Received: by mail-ej1-x633.google.com with SMTP id r13so12003866ejd.5;
+        Thu, 07 Apr 2022 09:29:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :content-transfer-encoding:user-agent:mime-version;
+        bh=HLM2327HfIQSb5AwGCuDE4o35NVw/WE2roNt9nbAMpw=;
+        b=Uu0jDkO/ISBZICB6UeYcaaVPdLs6mjY2zO5CvUzLhZJCfpu8rA64Wq5eNmFnobcm6O
+         Li+yxDMAOMAzGY/9DGEIN7ndNquDMY+cyx7B40iPEivyszYbPYsjc3PQAxfH4dG5lFAh
+         2SjWXNwE6LmV9D7kDuA+nI1eS4+eQsvPWeq1gpMm8BJAS1AN+pGthkLIAgAwHVTo2Dih
+         2DeOu2Yqelv0pqLjAKhy5rOxOaQgDQ8EU57P1iPvPUGl0EXkfCUJFXQek8blf5AR3Voe
+         m985dF7kqK5lPRCsaEmKFw6R+nRKJlLeEg9eNrl7fAUgQF2ZRmiG1RKlHwoAkjJjVgb1
+         hBNg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:content-transfer-encoding:user-agent:mime-version;
+        bh=HLM2327HfIQSb5AwGCuDE4o35NVw/WE2roNt9nbAMpw=;
+        b=AP9DTDci4U1JsZJHxqyh8oSIPAhrlMjMmzDfNBBBAXbAdyZqxyTipPVvAyhm4xH0NA
+         5z7kwLcAM8EsnoTqN18Ukf45K3Z/1TegpdxiWk9XvdBRhoR6sfiBzSMg2HLJMXkRBN8G
+         Lr3z+EMHCons7I6IKsjeTnfldgpNepg4ACVncpdTvBbUTjvV6fyPl5Pl1PukSXx9bn+N
+         eRbcOJm9vvuxJG8FdyE23aQT84YgbWpW4eEMIlTtCH5QawHVq/AiI+v6osyXD5umuL0D
+         7TIpcHiP7VYt+vwcSUnjcn4HLWbXAgLpeuG1+4VtmMKE+tnLiqwHQpVc1BWHzURoRHLs
+         bF7A==
+X-Gm-Message-State: AOAM533m9n9WjDF9tHupbN0PY/Q3f1r+psBNZRrMjS8UsJWjdxNVJOnn
+        yJsyAfGukomcFr+4De0oqHo=
+X-Google-Smtp-Source: ABdhPJx3W0Ld7YJ4+BlxNMXYyMAgifPw92xX89sWU5GQE09AdVcaHdKm224Kx8RPSjAAtHflEgUOTQ==
+X-Received: by 2002:a17:907:c309:b0:6e8:4e5:6504 with SMTP id tl9-20020a170907c30900b006e804e56504mr13829576ejc.706.1649348941346;
+        Thu, 07 Apr 2022 09:29:01 -0700 (PDT)
+Received: from [192.168.3.2] (p5dd1ed70.dip0.t-ipconnect.de. [93.209.237.112])
+        by smtp.googlemail.com with ESMTPSA id d2-20020a1709067a0200b006df8c996b36sm7790329ejo.26.2022.04.07.09.29.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 07 Apr 2022 09:29:00 -0700 (PDT)
+Message-ID: <df19cba8bfa3adf67e32e36f6c9163008a278c68.camel@gmail.com>
+Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+From:   Bean Huo <huobean@gmail.com>
+To:     Bart Van Assche <bvanassche@acm.org>,
+        Alex =?ISO-8859-1?Q?Benn=E9e?= <alex.bennee@linaro.org>
+Cc:     linux-kernel@vger.kernel.org, maxim.uvarov@linaro.org,
+        joakim.bech@linaro.org, ulf.hansson@linaro.org,
+        ilias.apalodimas@linaro.org, arnd@linaro.org,
+        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
+        yang.huang@intel.com, bing.zhu@intel.com,
+        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Date:   Thu, 07 Apr 2022 18:28:59 +0200
+In-Reply-To: <b95bdfa9-4373-8f54-677e-4a764061c61c@acm.org>
+References: <20220405093759.1126835-1-alex.bennee@linaro.org>
+         <8b3ce88f65fd11523a4d2daab3c617f7089eb1ce.camel@gmail.com>
+         <87r16bk013.fsf@linaro.org>
+         <aeb64d1c4bbddfd8463c07a40ab1fc78be0d158d.camel@gmail.com>
+         <87ee2ajuky.fsf@linaro.org>
+         <c18a2b359046a14250cafa5a619dbe53f2872b5a.camel@gmail.com>
+         <e72812a9-1e5b-a826-d490-62ed23d94116@acm.org>
+         <310d20a04bdaf40672592d9ffa950606d2ceaff7.camel@gmail.com>
+         <b95bdfa9-4373-8f54-677e-4a764061c61c@acm.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.0-1 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220406060516.409838-25-hch@lst.de>
-User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Apr 06, 2022 at 08:05:13AM +0200, Christoph Hellwig wrote:
-> Abstract away implementation details from file systems by providing a
-> block_device based helper to retreive the discard granularity.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  block/blk-lib.c                     |  5 ++---
->  drivers/block/drbd/drbd_nl.c        |  9 +++++----
->  drivers/block/drbd/drbd_receiver.c  |  3 +--
->  drivers/block/loop.c                |  2 +-
->  drivers/target/target_core_device.c |  3 +--
+On Wed, 2022-04-06 at 13:20 -0700, Bart Van Assche wrote:
+> On 4/6/22 11:12, Bean Huo wrote:
+> > It is from the ufs-utils.
+> >=20
+> > So, do you vote to add the UFS RPMB driver based on this new
+> > framework
+> > to resolve this conflict?
+>=20
+> Are any applications using the RPMB code from ufs-utils? It seems to
+> me=20
+> that the ufs-utils code doe not handle SCSI unit attentions
+> correctly.=20
+> If a POWER ON unit attention is received as reply to a SECURITY
+> PROTOCOL=20
+> OUT transaction, the write counter should be reread instead of
+> retrying=20
+> the SECURITY PROTOCOL OUT command with the same write counter.
+>=20
 
-For
+Not much sure how customers use this tool, based on my little
+information from the field, the customer developed their own RPMB code
+in the application. Here utils code is good example for them to study
+and verify RPMB functinalities.
 
->  fs/btrfs/ioctl.c                    | 12 ++++--------
+> Regarding adding a UFS RPMB driver: that seems useful to me since=20
+> multiple applications make use of the UFS RPMB functionality. My=20
+> understanding is that currently storageproxyd multiplexes UFS RPMB=20
+> accesses in Android.
+>=20
 
-Acked-by: David Sterba <dsterba@suse.com>
+I have the same opinion with you, if we have an unified RPMB access
+interface, and adding RPMB driver in the kernel, thus is better to
+manage RPMB.
+
+Kind regards,
+Bean
+
+> Thanks,
+>=20
+> Bart.
+
