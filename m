@@ -2,107 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7020C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 10:50:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E63AEC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Apr 2022 11:00:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235831AbiDGKwn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Apr 2022 06:52:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41768 "EHLO
+        id S229947AbiDGLCW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Apr 2022 07:02:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50132 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238158AbiDGKwc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 06:52:32 -0400
-Received: from mail-yb1-xb2c.google.com (mail-yb1-xb2c.google.com [IPv6:2607:f8b0:4864:20::b2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A18EC054B
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 03:50:29 -0700 (PDT)
-Received: by mail-yb1-xb2c.google.com with SMTP id g9so8856966ybf.1
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 03:50:29 -0700 (PDT)
+        with ESMTP id S231506AbiDGLCW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2022 07:02:22 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FD3A15A2F
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Apr 2022 04:00:19 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-2eafabbc80aso56767947b3.11
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2022 04:00:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20210112;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=TySKIjPSj/26zImOFZFRX5P+kH16cuqo+d2bY9GL/jE=;
-        b=sDi6+LYW3GQ815U4o+QsBKbPRStQ55Jp+2afvDxBuD8uHNobxa/rMbKWiHJN5jKJpK
-         de9RYkpleTJGc01iClyP4kXpQ9Dausi/kVmz8b+TANzv3y+JASYLdgNnMv/oKD8GoBgf
-         pVtVxhwa3UH/CXzfWqbQbxfORSYHT7VVwyklQuJnN1R3eiPuc0vvMR0XpmCruSDte8Q+
-         U2BuWgdQQmwEdmG4sf4iKUAgvYZ9WyGRlaGLeC812jxPr5+VAPYvPDMkmjJ1t6AAmo3B
-         k7VGjls6tVh40KE1bEivj6SbA77LVFeVhymUcf9bnfr0cnsUoaqbz/Tfd+n1uOU/O0Ck
-         cJ4Q==
+        bh=lKR+g1RRHl4Cc7327VO2HHV+dqts0j7ZDDb38Ygj+ek=;
+        b=qQnvrxDOTWn7LoVIxziLWVxI70A/nG5JV5WAMcZySADnDD/nGCGP3ss6qkg1Rgywu1
+         KzqT06/i6w8SH/ih6v34ev78TCMmn861x3CRNN5BulfMHzhCByapMZbqoMVnyrTk/DnX
+         +DshHV1juDEsojztDVsQIScge/cuh+iFDRYNaEem2G36BAxqt2MmbenWZSKkvBdkREO9
+         L5VcueN53sMaCP9pAMqRmjFiqcW6qSNEgWMWrGQfWQnvLuoowqFWBxk862AmCb2kUIPQ
+         VvG3lIkogn9nvdzvzyM0DwEjN8i+DYOEcpLHazzggtkdjx1yFLxNLipgQTRI1mTeyjN8
+         pQpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=TySKIjPSj/26zImOFZFRX5P+kH16cuqo+d2bY9GL/jE=;
-        b=wWVxJ2ksOYyJdZ9QS5N/fmKAbNKuI177VocvhIakhxbnTZZ9G8VMtn7qmCuWywB/PP
-         /4ro5HHu/FT0adNc7YeD+dQ9SF29QworBtPhlqC7ckoCThMwIQVSU8/2F1gNw3kspIwB
-         0N4ialAbxCpSG3K9J9Mc/hqgU0E/AQP6H/R331L0GVTzegOaQ4Uyz4onbjPYw1CDhwrJ
-         kcQBrY+7SMLkYxyG/0/jrlCm1DlqrcdOwpZaTNvdk9+e1KwI+vX0QcI7Gb7XIdLfSwtQ
-         f7fOvNLquLSJmws7k/a1TsKjwa187Gh3vI/1Qur5WmKldtOg9lvema/TlLTsJmKzDJoi
-         dXQQ==
-X-Gm-Message-State: AOAM530I8HXRW043kzrovBPTvzoX9lTv0BARLkR8JFrB5h4BmElI/2WQ
-        U3wEDjVn4raplDLGkVfX0PmwOBNUMEyHD6j3LicWW/PSyI0=
-X-Google-Smtp-Source: ABdhPJzuBD862kdaPvyksHZYhwRWe3mGONoTotSTBfyiEfUFjfH124D9rzHq4d+IcMj5sSUSUsPZz0zanwoh8HnWjBE=
-X-Received: by 2002:a25:8244:0:b0:63d:a262:c1f3 with SMTP id
- d4-20020a258244000000b0063da262c1f3mr9323520ybn.397.1649328628742; Thu, 07
- Apr 2022 03:50:28 -0700 (PDT)
+        bh=lKR+g1RRHl4Cc7327VO2HHV+dqts0j7ZDDb38Ygj+ek=;
+        b=NRf9CSJB3R30fHqU0M3HZYKQFAxsZc6stHhaMSsg2PZZIJYj7cG514jMKgt6wjIoEz
+         267NOLha67Yplco1VDzquYuukEt0B/e56D1ftxFznFEuQW82K8IjLZUK+VFAkGFU8Yw/
+         zNxTvrQKUpOvZ8SnGXFDisdVvU3vJXsVYbgztohmS9/mVyeD0hM9w0tqiCMZogrIZCV0
+         oj+szY6ibKyjxk1Bic7mhqMeA8kNQRL7BH2mfDjkSo+bHV78lm8upCw1ZSxGFWj+NMua
+         Mpm8s7fAvFakLStywhaQsZ+GpSmwHmKecUAGYZipk5gqWjmONc8SsTBavwgKnoDz4kv0
+         OqMQ==
+X-Gm-Message-State: AOAM530JwqqmWpTVKtO34WxJqFmEqZ0y+hVXcMR/S9Pq1t7Mbi1cn0ka
+        lc54Qh6SwOEIJK5OqvT2d/IunPJEqBSiUURSKXg=
+X-Google-Smtp-Source: ABdhPJzDGvwBAG7qF/QBNYIQS6k3+wMNWh33gciKTSTyySfnrNpbOHx4qew5AGfWlcpbLtCY1y1+2g/65r6FVKPfTc0=
+X-Received: by 2002:a81:9201:0:b0:2eb:c207:288a with SMTP id
+ j1-20020a819201000000b002ebc207288amr3121530ywg.19.1649329218543; Thu, 07 Apr
+ 2022 04:00:18 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220404114902.12175-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20220404114902.12175-1-wsa+renesas@sang-engineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 7 Apr 2022 12:49:52 +0200
-Message-ID: <CAPDyKFoL1ew7wNXu_XjCMxQ4kTR05fdHqvwKVtfnDSFrpL4qOA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: don't overwrite TAP settings when
- HS400 tuning is complete
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20220222033931.237638-1-jasonlai.genesyslogic@gmail.com>
+ <20220222033931.237638-8-jasonlai.genesyslogic@gmail.com> <CAPDyKFoOxZqf7YB5nFSuGCYs1+pjYC4eVZkYQ_um9j8PCm3YFg@mail.gmail.com>
+In-Reply-To: <CAPDyKFoOxZqf7YB5nFSuGCYs1+pjYC4eVZkYQ_um9j8PCm3YFg@mail.gmail.com>
+From:   Lai Jason <jasonlai.genesyslogic@gmail.com>
+Date:   Thu, 7 Apr 2022 19:00:07 +0800
+Message-ID: <CAG0XXUHnEcrjXOqE1rH=pYLK9AzqtMryfdCT0P5T9fTVDKjv2Q@mail.gmail.com>
+Subject: Re: [PATCH V3 7/7] mmc: core: Support UHS-II card access
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>, dlunev@chromium.org,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>,
+        Jason Lai <Jason.Lai@genesyslogic.com.tw>,
+        otis.wu@genesyslogic.com.tw
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 4 Apr 2022 at 13:49, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> When HS400 tuning is complete and HS400 is going to be activated, we
-> have to keep the current number of TAPs and should not overwrite them
-> with a hardcoded value. This was probably a copy&paste mistake when
-> upporting HS400 support from the BSP.
->
-> Fixes: 26eb2607fa28 ("mmc: renesas_sdhi: add eMMC HS400 mode support")
-> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Hi Uffe,
 
-Applied for fixes, thanks!
+On Thu, Mar 24, 2022 at 12:23 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Tue, 22 Feb 2022 at 04:40, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
+> >
+> > From: Jason Lai <jason.lai@genesyslogic.com.tw>
+> >
+> > Embed UHS-II access functionality into the MMC request processing flow.
+> >
+> > Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/core/core.c | 26 ++++++++++++++++++++++++--
+> >  1 file changed, 24 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index fc3d8d61a97c..d2dcaa64bf27 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -31,6 +31,7 @@
+> >  #include <linux/mmc/mmc.h>
+> >  #include <linux/mmc/sd.h>
+> >  #include <linux/mmc/slot-gpio.h>
+> > +#include <linux/mmc/sd_uhs2.h>
+> >
+> >  #define CREATE_TRACE_POINTS
+> >  #include <trace/events/mmc.h>
+> > @@ -42,6 +43,7 @@
+> >  #include "host.h"
+> >  #include "sdio_bus.h"
+> >  #include "pwrseq.h"
+> > +#include "sd_uhs2.h"
+> >
+> >  #include "mmc_ops.h"
+> >  #include "sd_ops.h"
+> > @@ -335,6 +337,8 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
+> >
+> >  int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+> >  {
+> > +       struct uhs2_command uhs2_cmd;
+> > +       u32 payload[4]; /* for maximum size */
+> >         int err;
+> >
+> >         init_completion(&mrq->cmd_completion);
+> > @@ -352,6 +356,13 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+> >         if (err)
+> >                 return err;
+> >
+> > +       if (host->uhs2_caps.flags & MMC_UHS2_SUPPORT &&
+> > +           host->uhs2_caps.flags & MMC_UHS2_INITIALIZED) {
+> > +               uhs2_cmd.payload = payload;
+> > +               mrq->cmd->uhs2_cmd = &uhs2_cmd;
+> > +               sd_uhs2_prepare_cmd(host, mrq);
+> > +       }
+> > +
+> >         led_trigger_event(host->led, LED_FULL);
+> >         __mmc_start_request(host, mrq);
+> >
+> > @@ -431,6 +442,8 @@ EXPORT_SYMBOL(mmc_wait_for_req_done);
+> >   */
+> >  int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+> >  {
+> > +       struct uhs2_command uhs2_cmd;
+> > +       u32 payload[4]; /* for maximum size */
+> >         int err;
+> >
+> >         /*
+> > @@ -451,6 +464,13 @@ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+> >         if (err)
+> >                 goto out_err;
+> >
+> > +       if (host->uhs2_caps.flags & MMC_UHS2_SUPPORT &&
+> > +           host->uhs2_caps.flags & MMC_UHS2_INITIALIZED) {
+> > +               uhs2_cmd.payload = payload;
+> > +               mrq->cmd->uhs2_cmd = &uhs2_cmd;
+> > +               sd_uhs2_prepare_cmd(host, mrq);
+> > +       }
+> > +
+> >         err = host->cqe_ops->cqe_request(host, mrq);
+> >         if (err)
+> >                 goto out_err;
+> > @@ -899,8 +919,10 @@ static inline void mmc_set_ios(struct mmc_host *host)
+> >   */
+> >  void mmc_set_chip_select(struct mmc_host *host, int mode)
+> >  {
+> > -       host->ios.chip_select = mode;
+> > -       mmc_set_ios(host);
+> > +       if (!(host->uhs2_caps.flags & MMC_UHS2_INITIALIZED)) {
+> > +               host->ios.chip_select = mode;
+> > +               mmc_set_ios(host);
+> > +       }
+>
+> As I stated for patch6, rather than having these hacks spread out into
+> the legacy code, we must not allow the ->set_ios() ops to be invoked
+> when UHS-II is being used/initialized.
+>
 
-Kind regards
-Uffe
+After checking sd_uhs2.c, mmc_set_chip_select() is called in mmc_go_idle()
+and mmc_go_idle() is called in sd_uhs2_legacy_init(). Hence, I issue CMD0
+directly in sd_uhs2_legacy_init().
 
-> ---
+> >  }
+> >
 >
-> Lightly tested with a Renesas R-Car M3N SoC. I think I can't really test
-> it because my TAPs are usually stable in my environment. The fix should
-> be obvious, though. Shimoda-san, are you happy with it?
+> Moreover, I think $subject patch should be squashed into patch6. There
+> is really no reason to have them split up like this. Or is there?
 >
->  drivers/mmc/host/renesas_sdhi_core.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+
+OK.
+
+Kind regards,
+Jason
+
+
+> I have now walked through the series - and it seems like there are a
+> few more pieces that we need to sort out, but it's certainly getting
+> better and better.
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 89d21231ec5f..4404ca1f98d8 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -394,10 +394,10 @@ static void renesas_sdhi_hs400_complete(struct mmc_host *mmc)
->                         SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) |
->                         sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
->
-> -       /* Set the sampling clock selection range of HS400 mode */
->         sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
->                        SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN |
-> -                      0x4 << SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT);
-> +                      sd_scc_read32(host, priv,
-> +                                    SH_MOBILE_SDHI_SCC_DTCNTL));
->
->         /* Avoid bad TAP */
->         if (bad_taps & BIT(priv->tap_set)) {
-> --
-> 2.30.2
->
+> Kind regards
+> Uffe
