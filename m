@@ -2,67 +2,188 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D45CFC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Apr 2022 16:49:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF614C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Apr 2022 17:48:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234108AbiDHQvT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Apr 2022 12:51:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55304 "EHLO
+        id S233488AbiDHRur (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Apr 2022 13:50:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234136AbiDHQvT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Apr 2022 12:51:19 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2531D35275;
-        Fri,  8 Apr 2022 09:49:15 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B5D516211A;
-        Fri,  8 Apr 2022 16:49:14 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 2626DC385A3;
-        Fri,  8 Apr 2022 16:49:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1649436554;
-        bh=asfFPVE4GWVSvyU3lTGK4Jym4ERe1Og4JwpM9nhJNYw=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=KCIoz4n4lbpwuQyeDN5EJijjJtmO5qjkpK2sxosLjApIBraw8w/YB8E6i+WYgtncE
-         JPfkEBHq79Gqn0dtVu9785wZ9VVHE5A/z2CRCRRLGUyENxuOGnqYZVGN5WDGoLUgMy
-         keFsxhjdXz4fyOAxp9G5JyIGqkqSvSA0ZjKT/kX37Rl591Nodzp6AwsW4UvBfhztIt
-         g0/N48DbpfShExSC8N5Tgl6/anU/g1qJHVKrbAzEQf6ru1rwJRFFfsIHubV9Dhrivq
-         3PQtSDArcTatnS+IYiwXiTJsmjN+I4pbzcV9hmZ+R1JJasMCyBDC/HJjL7DPy1YCiO
-         y7PtmBJLIngKg==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 07212E8DBDA;
-        Fri,  8 Apr 2022 16:49:14 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.18-rc2
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20220408140654.119255-1-ulf.hansson@linaro.org>
-References: <20220408140654.119255-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20220408140654.119255-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18-rc1
-X-PR-Tracked-Commit-Id: b71597edfaade119157ded98991bac7160be80c2
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 0ccab01401c89cc846913fcba6130f76034624c0
-Message-Id: <164943655402.24432.9494439471398652257.pr-tracker-bot@kernel.org>
-Date:   Fri, 08 Apr 2022 16:49:14 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S230482AbiDHRur (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Apr 2022 13:50:47 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9940BF947;
+        Fri,  8 Apr 2022 10:48:42 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id k23so18770915ejd.3;
+        Fri, 08 Apr 2022 10:48:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1dYMooINZBesZgE+qatHQg2DcF3xb71Lnrv9t8f9hFE=;
+        b=mJSARCmDj7mvEdVm4LUW8tlKV5ZElMGZfO2fPLhyqzHIzl3y20W7IVKyfZmJPOjD0A
+         xbMhzT6SkWuSQ33KIdYEXcm3uX/eQpod49u6ikQV0lXivg+Mfbk+hRDiUw77vUZ1/+NQ
+         YE+G0D8zjG5Uh1YHzHlNfAkY7yNF8adKNthr9F0DpQhD+ckMxfW0Lqdvd2Ictu/X21kO
+         AqRM8UxZfst7TxtSzZR8kevNOYLuEBuH0i+ESYBAorzi9A1JEmlKheUs3rez2ndS0csB
+         PEgjDsgvlXYKMwXuS8xNfMuE8ZgKMQayFGmMoNClN8XW8O+vMmqxV+nIGjxdgMjDDBWm
+         IAFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1dYMooINZBesZgE+qatHQg2DcF3xb71Lnrv9t8f9hFE=;
+        b=OCW3kXDhORV7AmkkJpgusyNFpHBwMXMkciCEFPAd5wI1goanA2zqp54rCMKvYAzgnH
+         j0QSdjI5+VWTr6Naubqw9szr+WmO8AwFzFvcJs176t037JIY20U5rzND6JJudiOW+6zT
+         Q07R4GVWWB22b1qKDypxjNxdABHPTBSAiY7Rz2eZNyRTqmCdR+hAPoQQ6VVgX29SWra7
+         uj1PRsvgAPodjjGY5WK05Yim2Gb/SQtfErrD/wWTCcPvXkBtMoMtROC3wk06ILLHbsnM
+         zjXck8kSkRVHu2lYLv6OHDiSEnFaMbgwJZ6xnWFx1c8kAQB5eohiVeyBMt5oDIU8tAU+
+         oOOw==
+X-Gm-Message-State: AOAM533ZQJDKnJYYZxLLRzfwOpMT1yEfAkj40bfrOvab2YH9xebQ62Ha
+        RePMNNufDGtfVxe8RK7N5TMD+wWOHZY8tA==
+X-Google-Smtp-Source: ABdhPJygv+AX+HiGiURYc2MGuFx9svBO5zEHUCxAXyqMDd394Zipfk1quOQo/017eoEzkg4iDbFp2g==
+X-Received: by 2002:a17:907:2d93:b0:6db:ab5e:7e0b with SMTP id gt19-20020a1709072d9300b006dbab5e7e0bmr19341556ejc.262.1649440121391;
+        Fri, 08 Apr 2022 10:48:41 -0700 (PDT)
+Received: from linux.. (p5dd1ed70.dip0.t-ipconnect.de. [93.209.237.112])
+        by smtp.gmail.com with ESMTPSA id gh9-20020a1709073c0900b006e803954409sm4487654ejc.5.2022.04.08.10.48.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 08 Apr 2022 10:48:41 -0700 (PDT)
+From:   Bean Huo <huobean@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        jakob.rossler@nokia.com, sperson@micron.com,
+        Bean Huo <beanhuo@micron.com>
+Subject: [PATCH v1] mmc-utils: Add General command CMD56 read support
+Date:   Fri,  8 Apr 2022 19:48:32 +0200
+Message-Id: <20220408174832.303915-1-huobean@gmail.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri,  8 Apr 2022 16:06:54 +0200:
+From: Bean Huo <beanhuo@micron.com>
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18-rc1
+Micron eMMC offers an additional set of commands that go beyond the JEDEC Device
+Health Report. These additional DEVICE HEALTH commands are implemented using the
+generic CMD56 command and they return a significant amount of useful information
+about the status of the NAND device. Such as bad block counters, block erase
+counters ,etc. For more information, refer to TN-FC-32: e·MMC Device Health Report.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/0ccab01401c89cc846913fcba6130f76034624c0
+Since the CMD56 is specified in JEDEC, to make CMD56 universal used and let more
+users of mmc-utils get the benefit for this. I add CMD56 read, and let the user
+to input the CMD56 argument, also, here I didn't add data parsing, just print raw
+data, since it is vendor-specific.
 
-Thank you!
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+---
+ mmc.c      |  7 +++++++
+ mmc.h      |  2 ++
+ mmc_cmds.c | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |  1 +
+ 4 files changed, 62 insertions(+)
 
+diff --git a/mmc.c b/mmc.c
+index eb2638b12271..ea465e59fdf3 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -237,6 +237,13 @@ static struct Command commands[] = {
+ 		"secure-trim1 | secure-trim2 | trim \n",
+ 	NULL
+ 	},
++	{ do_general_cmd_read, -2,
++	"gen_cmd read", "<arg> <device>\n"
++		"Send GEN_CMD (CMD56) with specific <arg> to  <device> to read vendor\n"
++		"specific data. <arg> must be 32 bits length hex number prefixed with 0x/0X.\n\n"
++		"NOTE!: Because this option is only used to read, the bit0 in <arg> must be 1",
++	NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
+ 
+diff --git a/mmc.h b/mmc.h
+index 25d6864ac76f..b621374a1ed1 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -41,6 +41,8 @@
+ 					      [1] Discard Enable
+ 					      [0] Identify Write Blocks for
+ 					      Erase (or TRIM Enable)  R1b */
++#define MMC_GEN_CMD		56   /* adtc  [31:1] stuff bits.
++					      [0]: RD/WR1 R1 */
+ 
+ #define R1_OUT_OF_RANGE         (1 << 31)       /* er, c */
+ #define R1_ADDRESS_ERROR        (1 << 30)       /* erx, c */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 49d3e324d266..6e006b10d4fd 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2981,3 +2981,55 @@ out:
+ 	return ret;
+ #endif
+ }
++
++int do_general_cmd_read(int nargs, char **argv)
++{
++	int dev_fd;
++	__u8 buf[512];
++	__u32 arg;
++	char *device;
++	char *endptr;
++	int ret = -EINVAL, i;
++	struct mmc_ioc_cmd idata;
++
++	if (nargs != 3) {
++		fprintf(stderr, "Usage: gen_cmd read <arg> </path/to/mmcblkX>\n");
++		exit(1);
++	}
++
++	device = argv[2];
++	dev_fd = open(device, O_RDWR);
++	if (dev_fd < 0) {
++		perror("device open failed");
++		exit(1);
++	}
++	arg = strtol(argv[1], &endptr, 16);
++	if (errno != 0 || *endptr != '\0' || !arg&0x1) {
++		fprintf(stderr, "Wrong ARG, it should be Hex number and bit0 must be 1\n");
++		goto out;
++	}
++	memset(&idata, 0, sizeof(idata));
++	idata.write_flag = 0;
++	idata.opcode = MMC_GEN_CMD;
++	idata.arg = arg;
++	idata.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++	idata.blksz = 512;
++	idata.blocks = 1;
++	mmc_ioc_cmd_set_data(idata, buf);
++
++	ret = ioctl(dev_fd, MMC_IOC_CMD, &idata);
++	if (ret) {
++		perror("ioctl");
++		goto out;
++	}
++
++	printf("Data:\n");
++	for (i = 0; i < 512; i++) {
++		printf("%2x ", buf[i]);
++		if ((i + 1) % 16 == 0)
++			printf("\n");
++	}
++out:
++	close(dev_fd);
++	return ret;
++}
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 8331ab2373fd..0f7c0041f753 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -46,3 +46,4 @@ int do_read_scr(int argc, char **argv);
+ int do_read_cid(int argc, char **argv);
+ int do_read_csd(int argc, char **argv);
+ int do_erase(int nargs, char **argv);
++int do_general_cmd_read(int nargs, char **argv);
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.34.1
+
