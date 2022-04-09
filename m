@@ -2,105 +2,118 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABCCCC433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 Apr 2022 10:40:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE193C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  9 Apr 2022 11:12:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238221AbiDIKmL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 9 Apr 2022 06:42:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46434 "EHLO
+        id S237497AbiDILOO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 9 Apr 2022 07:14:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229946AbiDIKmL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Apr 2022 06:42:11 -0400
-Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48EE6140EA
-        for <linux-mmc@vger.kernel.org>; Sat,  9 Apr 2022 03:40:03 -0700 (PDT)
-Received: by mail-ed1-x52d.google.com with SMTP id z99so4046567ede.5
-        for <linux-mmc@vger.kernel.org>; Sat, 09 Apr 2022 03:40:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=IH+smdr6HwLu60QJ4rEGM3k3Dwd3Lj1hSShNkYwWADk=;
-        b=rty0p7mqU35z9SiXjeEgTFu8FRbCxhvexcOsUrlIt2BwWJXSFqETpUfh2SurdgIZHw
-         Cxf0QKOMKHkPNrhcH+CV/QQI0ne3PxKaMbZa9I+apWEeb3EmZRb9Xm9DsSqN3fd/y5YS
-         pujlC6id7v5BvTbGc3HuJ3meNyErqCDv1e1p9GFTGXZe48ilLPuKzwrjFVesKoG0u3Rd
-         WRhs2UyS+RLKF8stOLNdwGkLc1oThzFAxJLrYbxYz1oBgY5hIwVZIBQVuyp2DfS8r7Kt
-         NJXmg74A/HlxVPmM6HPI+ZNCN1XkvSzC8vGEn11aQYEYh6aNEXbVNeickzbYxvhJcYfz
-         SGAA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=IH+smdr6HwLu60QJ4rEGM3k3Dwd3Lj1hSShNkYwWADk=;
-        b=L9LphVinSVliz1zIvEaGLJ2hoQjifHXx7bNVLrx/PXCKaKQB5Q9aot1tF80IMxjOwo
-         ioxi0VTcvosLHrYt/Zkhh7sFZL5JQn7pLS1U0wy09w82vAUVRmD+S+D1lDjsPf76x3/p
-         Fs+cYnaMcdC7u5Qx5cUcXXto7MYKqmQTo0QAKCHiaMnmhd8OB9f4PkbYbnSJ4EI22f3X
-         JQKrLBMKC5q/rG3CCEvDqu8+YaeS8T0HGm0XIso0IWJHHn+JUH1GUylqF3klCDI4bPoT
-         uWa3HNmToUhOX0jbn73TIEsTTZYL5sKPo8ZP3p9eHG409GUtK4pV680QB6K4tPGw6sju
-         r9pQ==
-X-Gm-Message-State: AOAM530OaN0MeRvzL5OMSx6SVCxwUbUm3FjvjegTy7dsayVcW5suo3kZ
-        2fOJnSch4nycue7URHZQDW2H7w==
-X-Google-Smtp-Source: ABdhPJyKA/1xZ2gv355sS2o5W8tQkWswcamJ0HPKtJp41RHmX4J+r9pD8t6bnrZaAwz6XaMcPo2fow==
-X-Received: by 2002:aa7:c58d:0:b0:41d:6d1:6f43 with SMTP id g13-20020aa7c58d000000b0041d06d16f43mr12679263edq.125.1649500801722;
-        Sat, 09 Apr 2022 03:40:01 -0700 (PDT)
-Received: from [192.168.0.188] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
-        by smtp.gmail.com with ESMTPSA id e12-20020a170906c00c00b006e66eff7584sm8204774ejz.102.2022.04.09.03.40.00
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 09 Apr 2022 03:40:01 -0700 (PDT)
-Message-ID: <49c1d200-8c07-b306-a400-86ee6a637bb4@linaro.org>
-Date:   Sat, 9 Apr 2022 12:39:59 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH 01/11] dt-bindings: arm: add Pensando boards
-Content-Language: en-US
-To:     Brad Larson <brad@pensando.io>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        David Clear <dac2@pensando.io>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
+        with ESMTP id S241507AbiDILON (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Apr 2022 07:14:13 -0400
+Received: from mg.sunplus.com (unknown [113.196.136.162])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 5DC6B3BA7D;
+        Sat,  9 Apr 2022 04:11:59 -0700 (PDT)
+X-MailGates: (flag:3,DYNAMIC,RELAY,NOHOST:PASS)(compute_score:DELIVER,40
+        ,3)
+Received: from 172.17.9.112
+        by mg01.sunplus.com with MailGates ESMTP Server V5.0(8696:0:AUTH_RELAY)
+        (envelope-from <tony.huang@sunplus.com>); Sat, 09 Apr 2022 19:11:46 +0800 (CST)
+Received: from sphcmbx02.sunplus.com.tw (172.17.9.112) by
+ sphcmbx02.sunplus.com.tw (172.17.9.112) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.26; Sat, 9 Apr 2022 19:11:41 +0800
+Received: from sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd]) by
+ sphcmbx02.sunplus.com.tw ([fe80::fd3d:ad1a:de2a:18bd%14]) with mapi id
+ 15.00.1497.026; Sat, 9 Apr 2022 19:11:41 +0800
+From:   =?utf-8?B?VG9ueSBIdWFuZyDpu4Pmh7fljpo=?= <tony.huang@sunplus.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <20220406233648.21644-1-brad@pensando.io>
- <20220406233648.21644-2-brad@pensando.io>
- <05febd3f-bfdb-13c2-8cce-b9dc422c5eae@linaro.org>
- <CAK9rFnyRrS_LvoZ_j66cKDHgecqcqzJN5krSxdCquBanViKyHg@mail.gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <CAK9rFnyRrS_LvoZ_j66cKDHgecqcqzJN5krSxdCquBanViKyHg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        DTML <devicetree@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+CC:     =?utf-8?B?V2VsbHMgTHUg5ZGC6Iqz6aiw?= <wells.lu@sunplus.com>,
+        =?utf-8?B?TGggS3VvIOmDreWKm+ixqg==?= <lh.Kuo@sunplus.com>
+Subject: RE: [PATCH v6 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Topic: [PATCH v6 2/2] mmc: Add mmc driver for Sunplus SP7021
+Thread-Index: AQHYSZCPbSy48/804Uq8neyvz9tcSKznbUOWgAACnWA=
+Date:   Sat, 9 Apr 2022 11:11:41 +0000
+Message-ID: <607c96516048441db549f716656ea62f@sphcmbx02.sunplus.com.tw>
+References: <e99f3027590b5ab3938c2e2d8713bf6284a810b2.1649229258.git.tonyhuang.sunplus@gmail.com>
+ <202204070029.JvyEor8F-lkp@intel.com>
+ <CAHpW4oQc0=SinXTVW=ph8BgKQ4bN1mXOtWDv46MCNgXED+9TGQ@mail.gmail.com>
+In-Reply-To: <CAHpW4oQc0=SinXTVW=ph8BgKQ4bN1mXOtWDv46MCNgXED+9TGQ@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [172.25.108.54]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/04/2022 04:19, Brad Larson wrote:
-> On Thu, Apr 7, 2022 at 11:45 AM Krzysztof Kozlowski
-> <krzysztof.kozlowski@linaro.org> wrote:
->>> Change from V3:
->>> - Add description and board compatible
->>
->> That's a bit confusing... the subject is for v1.
-> 
-> Goal was to identify in the cover letter patch the key changes from
-> the V3 patchset to this V4 patchset.  Then in each patch that had a
-> material change highlight that in the patch itself.  Will try and make
-> it more clear.
-
-This is fine, I am talking about the subject - it is marked as a v1, so
-it's confusing to see a changelog.
-
-One way to achieve this is: "git format-patch -v4 -11 ..."
-
-Best regards,
-Krzysztof
+RGVhciBBcm5kOg0KDQo+IA0KPiBIaSBUb255LA0KPiANCj4gSSBsb3ZlIHlvdXIgcGF0Y2ghIFll
+dCBzb21ldGhpbmcgdG8gaW1wcm92ZToNCj4gDQo+IFthdXRvIGJ1aWxkIHRlc3QgRVJST1Igb24g
+dWxmLWhhbnNzb24tbW1jLW1pcnJvci9uZXh0XSBbY2Fubm90IGFwcGx5IHRvDQo+IHJvYmgvZm9y
+LW5leHQgbGludXMvbWFzdGVyIHY1LjE4LXJjMSBuZXh0LTIwMjIwNDA2XSBbSWYgeW91ciBwYXRj
+aCBpcyBhcHBsaWVkDQo+IHRvIHRoZSB3cm9uZyBnaXQgdHJlZSwga2luZGx5IGRyb3AgdXMgYSBu
+b3RlLg0KPiBBbmQgd2hlbiBzdWJtaXR0aW5nIHBhdGNoLCB3ZSBzdWdnZXN0IHRvIHVzZSAnLS1i
+YXNlJyBhcyBkb2N1bWVudGVkIGluDQo+IGh0dHBzOi8vZ2l0LXNjbS5jb20vZG9jcy9naXQtZm9y
+bWF0LXBhdGNoXQ0KPiANCj4gdXJsOg0KPiBodHRwczovL2dpdGh1Yi5jb20vaW50ZWwtbGFiLWxr
+cC9saW51eC9jb21taXRzL1RvbnktSHVhbmcvQWRkLW1tYy1kcml2ZXItZg0KPiBvci1TdW5wbHVz
+LVNQNzAyMS1TT0MvMjAyMjA0MDYtMTk0MTA2DQo+IGJhc2U6ICAgaHR0cHM6Ly9naXQubGluYXJv
+Lm9yZy9wZW9wbGUvdWxmLmhhbnNzb24vbW1jLW1pcnJvci5naXQgbmV4dA0KPiBjb25maWc6IG5k
+czMyLWJ1aWxkb25seS1yYW5kY29uZmlnLXIwMDMtMjAyMjA0MDYNCj4gKGh0dHBzOi8vZG93bmxv
+YWQuMDEub3JnLzBkYXktY2kvYXJjaGl2ZS8yMDIyMDQwNy8yMDIyMDQwNzAwMjkuSnZ5RW9yOEYt
+bA0KPiBrcEBpbnRlbC5jb20vY29uZmlnKQ0KPiBjb21waWxlcjogbmRzMzJsZS1saW51eC1nY2Mg
+KEdDQykgMTEuMi4wIHJlcHJvZHVjZSAodGhpcyBpcyBhIFc9MSBidWlsZCk6DQo+ICAgICAgICAg
+d2dldA0KPiBodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vaW50ZWwvbGtwLXRlc3Rz
+L21hc3Rlci9zYmluL21ha2UuY3Jvc3MNCj4gLU8gfi9iaW4vbWFrZS5jcm9zcw0KPiAgICAgICAg
+IGNobW9kICt4IH4vYmluL21ha2UuY3Jvc3MNCj4gICAgICAgICAjDQo+IGh0dHBzOi8vZ2l0aHVi
+LmNvbS9pbnRlbC1sYWItbGtwL2xpbnV4L2NvbW1pdC8zMjVhMGQ5Y2E5ZDY1ZjU2MTZmNzk0ZTBk
+YmINCj4gMDQyNTYzMTJmNzM5ZA0KPiAgICAgICAgIGdpdCByZW1vdGUgYWRkIGxpbnV4LXJldmll
+dyBodHRwczovL2dpdGh1Yi5jb20vaW50ZWwtbGFiLWxrcC9saW51eA0KPiAgICAgICAgIGdpdCBm
+ZXRjaCAtLW5vLXRhZ3MgbGludXgtcmV2aWV3DQo+IFRvbnktSHVhbmcvQWRkLW1tYy1kcml2ZXIt
+Zm9yLVN1bnBsdXMtU1A3MDIxLVNPQy8yMDIyMDQwNi0xOTQxMDYNCj4gICAgICAgICBnaXQgY2hl
+Y2tvdXQgMzI1YTBkOWNhOWQ2NWY1NjE2Zjc5NGUwZGJiMDQyNTYzMTJmNzM5ZA0KPiAgICAgICAg
+ICMgc2F2ZSB0aGUgY29uZmlnIGZpbGUgdG8gbGludXggYnVpbGQgdHJlZQ0KPiAgICAgICAgIG1r
+ZGlyIGJ1aWxkX2Rpcg0KPiAgICAgICAgIENPTVBJTEVSX0lOU1RBTExfUEFUSD0kSE9NRS8wZGF5
+IENPTVBJTEVSPWdjYy0xMS4yLjANCj4gbWFrZS5jcm9zcyBPPWJ1aWxkX2RpciBBUkNIPW5kczMy
+IFNIRUxMPS9iaW4vYmFzaCBkcml2ZXJzL21tYy9ob3N0Lw0KPiANCj4gSWYgeW91IGZpeCB0aGUg
+aXNzdWUsIGtpbmRseSBhZGQgZm9sbG93aW5nIHRhZyBhcyBhcHByb3ByaWF0ZQ0KPiBSZXBvcnRl
+ZC1ieToga2VybmVsIHRlc3Qgcm9ib3QgPGxrcEBpbnRlbC5jb20+DQo+IA0KPiBBbGwgZXJyb3Iv
+d2FybmluZ3MgKG5ldyBvbmVzIHByZWZpeGVkIGJ5ID4+KToNCj4gDQo+ICAgIGRyaXZlcnMvbW1j
+L2hvc3Qvc3VucGx1cy1tbWMuYzogSW4gZnVuY3Rpb24gJ3NwbW1jX3NldF9idXNfdGltaW5nJzoN
+Cj4gPj4gZHJpdmVycy9tbWMvaG9zdC9zdW5wbHVzLW1tYy5jOjMxMToxNTogd2FybmluZzogdmFy
+aWFibGUNCj4gPj4gJ3RpbWluZ19uYW1lJyBzZXQgYnV0IG5vdCB1c2VkIFstV3VudXNlZC1idXQt
+c2V0LXZhcmlhYmxlXQ0KPiAgICAgIDMxMSB8ICAgICAgICAgY2hhciAqdGltaW5nX25hbWU7DQo+
+ICAgICAgICAgIHwgICAgICAgICAgICAgICBefn5+fn5+fn5+fg0KPiAgICBkcml2ZXJzL21tYy9o
+b3N0L3N1bnBsdXMtbW1jLmM6IEF0IHRvcCBsZXZlbDoNCj4gPj4gZHJpdmVycy9tbWMvaG9zdC9z
+dW5wbHVzLW1tYy5jOjc5ODoxMzogd2FybmluZzogbm8gcHJldmlvdXMgcHJvdG90eXBlDQo+ID4+
+IGZvciAnc3BtbWNfaXJxJyBbLVdtaXNzaW5nLXByb3RvdHlwZXNdDQo+ICAgICAgNzk4IHwgaXJx
+cmV0dXJuX3Qgc3BtbWNfaXJxKGludCBpcnEsIHZvaWQgKmRldl9pZCkNCj4gICAgICAgICAgfCAg
+ICAgICAgICAgICBefn5+fn5+fn4NCj4gPj4gZHJpdmVycy9tbWMvaG9zdC9zdW5wbHVzLW1tYy5j
+Ojg5NDo1OiB3YXJuaW5nOiBubyBwcmV2aW91cyBwcm90b3R5cGUNCj4gPj4gZm9yICdzcG1tY19n
+ZXRfY2QnIFstV21pc3NpbmctcHJvdG90eXBlc10NCj4gICAgICA4OTQgfCBpbnQgc3BtbWNfZ2V0
+X2NkKHN0cnVjdCBtbWNfaG9zdCAqbW1jKQ0KPiAgICAgICAgICB8ICAgICBefn5+fn5+fn5+fn4N
+Cj4gICAgZHJpdmVycy9tbWMvaG9zdC9zdW5wbHVzLW1tYy5jOiBJbiBmdW5jdGlvbiAnc3BtbWNf
+ZHJ2X3Byb2JlJzoNCj4gPj4gZHJpdmVycy9tbWMvaG9zdC9zdW5wbHVzLW1tYy5jOjEwMjE6MjI6
+IHdhcm5pbmc6IHZhcmlhYmxlICdtb2RlJyBzZXQNCj4gPj4gYnV0IG5vdCB1c2VkIFstV3VudXNl
+ZC1idXQtc2V0LXZhcmlhYmxlXQ0KPiAgICAgMTAyMSB8ICAgICAgICAgdW5zaWduZWQgaW50IG1v
+ZGU7DQo+ICAgICAgICAgIHwgICAgICAgICAgICAgICAgICAgICAgXn5+fg0KPiAgICBkcml2ZXJz
+L21tYy9ob3N0L3N1bnBsdXMtbW1jLmM6IEF0IHRvcCBsZXZlbDoNCj4gPj4gZHJpdmVycy9tbWMv
+aG9zdC9zdW5wbHVzLW1tYy5jOjExNzA6OTogZXJyb3I6IGltcGxpY2l0IGRlY2xhcmF0aW9uIG9m
+DQo+ID4+IGZ1bmN0aW9uICdTWVNURU1fU0xFRVBfUE1fT1BTJzsgZGlkIHlvdSBtZWFuDQo+ID4+
+ICdTRVRfU1lTVEVNX1NMRUVQX1BNX09QUyc/IFstV2Vycm9yPWltcGxpY2l0LWZ1bmN0aW9uLWRl
+Y2xhcmF0aW9uXQ0KPiAgICAgMTE3MCB8ICAgICAgICAgU1lTVEVNX1NMRUVQX1BNX09QUyhzcG1t
+Y19wbV9zdXNwZW5kLA0KPiBzcG1tY19wbV9yZXN1bWUpDQo+ICAgICAgICAgIHwgICAgICAgICBe
+fn5+fn5+fn5+fn5+fn5+fn5+DQo+ICAgICAgICAgIHwgICAgICAgICBTRVRfU1lTVEVNX1NMRUVQ
+X1BNX09QUw0KDQpJIGZvbGxvdyB5b3VyIHN1Z2d1ZXN0IGluIHY1LiAJCQkJCQkNCiJJdCdzIGJl
+dHRlciB0byB1c2UgU1lTVEVNX1NMRUVQX1BNX09QUy9SVU5USU1FX1BNX09QUyBpbnN0ZWFkIG9m
+IHRoZSBTRVRfIHZlcnNpb24iCQkJCQkJDQpCdXQga2VybmVsIHRlc3Qgcm9ib3Qgc2hvd3MgZXJy
+b3IuCQkJCQkJDQo=
