@@ -2,54 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAC8AC4332F
-	for <linux-mmc@archiver.kernel.org>; Sun, 10 Apr 2022 19:36:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95451C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 06:42:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241683AbiDJTiP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 10 Apr 2022 15:38:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50916 "EHLO
+        id S245031AbiDKGpC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Apr 2022 02:45:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59766 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241651AbiDJTiM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 10 Apr 2022 15:38:12 -0400
-Received: from mail-il1-x131.google.com (mail-il1-x131.google.com [IPv6:2607:f8b0:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE94056C3C;
-        Sun, 10 Apr 2022 12:36:00 -0700 (PDT)
-Received: by mail-il1-x131.google.com with SMTP id e1so10051336ile.2;
-        Sun, 10 Apr 2022 12:36:00 -0700 (PDT)
+        with ESMTP id S245028AbiDKGpA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 02:45:00 -0400
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C19D8289A0
+        for <linux-mmc@vger.kernel.org>; Sun, 10 Apr 2022 23:42:45 -0700 (PDT)
+Received: by mail-ej1-x62e.google.com with SMTP id bv19so5738047ejb.6
+        for <linux-mmc@vger.kernel.org>; Sun, 10 Apr 2022 23:42:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Kq2mDXpJVUKHZ8kDUCVzEF7Ewrkfj8MwGMVmAZjj5HM=;
-        b=G0GGQ471rxAxJoI+vflM67vRTsrP8uihcV5wkB9k4TaGvypdTKT++LF0rprADglri2
-         brzUGCQfJDrVkfTd//0Vuy4tRp7SXeRaYzURHhGtwSnqFsa61aFVWZCnH3/NcJbyj27Z
-         oNSstFwLreTMuQtJSJhbT8AAN5lPD0uyA8jUceBJVjZc+kkpV9PvGpyNZ8KCZy6aRlo/
-         pXWRDNpNLaZfjg+LXmih3fp7zzOfuccZ/38lkPnn4W8fxAlqT33vu8nE81HWhqnI4wmR
-         vMqM6ASyb+Y3K+9tdyzumxpNnxrNe4WL42waSJsqOhuz8hEEvxKPC/JYmovk1hbl4jBM
-         +Izw==
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=oeGY+i1594VzqaZYPeCwfNtowmuuBm84SvUo17g7pww=;
+        b=UxJIcbi+k0bsNmAhFdx5LRRsGrLtn1cxDTlmkQ6rEecQxLd3ZlQzxbbXpBXlqGMqW2
+         mcunz3PDYykTTMlJMvdGv4Pf0VZ+tO4dhzuj3cMkad/CJAfyQhY44MenyyiMs4zO9B4i
+         GgLx+x1mfFRfOJwLXHFGacQUj38rWDNNamcoR+5tizxZXj1+kbnd3Qmg0bDStwp2AELF
+         QqXJYc0ZMuaOkHcF+9nCkY+rzYgeOnqB7VcYdHcQu8MS2yal6THrzsFfHG3elJfIqqwH
+         8iYXRWblSPgVH+ym5mLkJORVDKtpdrp6EtblUZ8AZZJcoxXKvneyiS38Xhy4kI7VZY80
+         ABHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Kq2mDXpJVUKHZ8kDUCVzEF7Ewrkfj8MwGMVmAZjj5HM=;
-        b=Xwhhb8fCTFcbZg4DKrjuTzM+VzuVmdMapRuCvGSjlxlouGdeYmZzjBvb6SJusbWWMv
-         4EI9RBI8Vh+rJshke1mcbruFe4njrieZZE+CJc5X7Mbm+bDnxOSQ4RzmUdFd5w0Lhd8b
-         ukrZM0la19sD41vFtyBgI4W7Dw7QhkbE5eKvTs/TlxeSsvMoaEYQhCRWOdlruENJS4Sb
-         uSM6hbTtYv4Y5gabNSkKQoZK8Exub8YTIh1W51WBKkKnw9ysfVgzlDX22w3G6ow7OcNg
-         93dpVVg3MHjB+boot+HHVHLur+Fa3g2/n56jOw/yBUQgn/uYMfxoTGTeTUkHEdoFYWqo
-         f08w==
-X-Gm-Message-State: AOAM532d6cF/gxLSS4GXsJI2b3r3tx0XsWLRMJbtwbuw8TY/pbhLMTo0
-        /tqQmW1Lisr31JLj0VydN8Kptdbqvzc=
-X-Google-Smtp-Source: ABdhPJzaEb7zRVi/v1e9VtJQAKwimsKumnvluM8yYX+DQjfXWYPJkI4iu0AYZKgzS9EOghpQgBRi4A==
-X-Received: by 2002:a05:6e02:18cb:b0:2ca:a7d5:d392 with SMTP id s11-20020a056e0218cb00b002caa7d5d392mr1717924ilu.8.1649619359818;
-        Sun, 10 Apr 2022 12:35:59 -0700 (PDT)
-Received: from aford-IdeaCentre-A730.lan ([2601:448:8400:9e8:1e67:6f3b:4d7f:4f90])
-        by smtp.gmail.com with ESMTPSA id m6-20020a923f06000000b002ca74f4fab2sm7218409ila.14.2022.04.10.12.35.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 10 Apr 2022 12:35:59 -0700 (PDT)
-From:   Adam Ford <aford173@gmail.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     aford@beaconembedded.com, Adam Ford <aford173@gmail.com>,
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=oeGY+i1594VzqaZYPeCwfNtowmuuBm84SvUo17g7pww=;
+        b=whqYAm8zAGVBfm8+NM94tjenjAO7QCc4h9tgxu/3lnVFylpB7GZAL9Xpqt/vAwb3q+
+         //ae5e7cydMbKERw6tNdREvmdW1I7SSv0OrCV1ctAstjpSGsFPI8dCxzOs7z3dJcjkru
+         qchpr9dn9xWkvJXLz1mJU9VeHJ368wlWTkDPLVJUJcGHhy5yRSgyL93m2MK4cov0l9we
+         SFv4cT0gfvQOpld/bGXqf59RkKRk1oNBla2OzOhZyo+sNiw1Dkp62YSkjVmJAm8kboy0
+         FuLk8DKeaUuf/G8BlA6V/Y5ROeZ4cG0Wp0w2jHb6yco5iBbZA1hKJyL9/L98yCjOLk9w
+         Kryg==
+X-Gm-Message-State: AOAM532O/fKE6nH8V3aJtVH2Klp02adM1IiMkM9z1eAhjgnnMOslV9fF
+        8zmQi/HzpiHN7zq32FBJCeJsyg==
+X-Google-Smtp-Source: ABdhPJxWQegr0c/5XL0ZzwCad1TzFMKBUFGyQOBP0ER/rivBmSCr6Xyxq34fdHrUvtNT/lD5OtP94w==
+X-Received: by 2002:a17:907:9705:b0:6e4:b769:286f with SMTP id jg5-20020a170907970500b006e4b769286fmr27845750ejc.728.1649659364246;
+        Sun, 10 Apr 2022 23:42:44 -0700 (PDT)
+Received: from [192.168.0.191] (xdsl-188-155-201-27.adslplus.ch. [188.155.201.27])
+        by smtp.gmail.com with ESMTPSA id r29-20020a50c01d000000b00415fb0dc793sm14810681edb.47.2022.04.10.23.42.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 10 Apr 2022 23:42:43 -0700 (PDT)
+Message-ID: <6c4b6eac-86d8-eb93-37a5-d0fa9bf2a7d2@linaro.org>
+Date:   Mon, 11 Apr 2022 08:42:42 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH V4 1/3] dt-bindings: mmc: imx-esdhc: Update compatible
+ fallbacks
+Content-Language: en-US
+To:     Adam Ford <aford173@gmail.com>, linux-mmc@vger.kernel.org
+Cc:     aford@beaconembedded.com, haibo.chen@nxp.com,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -60,60 +68,34 @@ Cc:     aford@beaconembedded.com, Adam Ford <aford173@gmail.com>,
         NXP Linux Team <linux-imx@nxp.com>,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH V4 3/3] arm64: dts: imx8mp: Enable HS400-ES
-Date:   Sun, 10 Apr 2022 14:35:43 -0500
-Message-Id: <20220410193544.1745684-3-aford173@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220410193544.1745684-1-aford173@gmail.com>
 References: <20220410193544.1745684-1-aford173@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220410193544.1745684-1-aford173@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The SDHC controller in the imx8mp has the same controller
-as the imx8mm which supports HS400-ES. Change the compatible
-fallback to imx8mm to enable it, but keep the imx7d-usdhc
-to prevent breaking backwards compatibility.
+On 10/04/2022 21:35, Adam Ford wrote:
+> The SDHC controller in the imx8mn and imx8mp have the same controller
+> as the imx8mm which is slightly different than that of the imx7d.
+> 
+> Using the fallback of the imx8mm enables the controllers to support
+> HS400-ES which is not available on the imx7d. After discussion with NXP,
+> it turns out that the imx8qm should fall back to the imx8qxp, because
+> those have some additional flags not present in the imx8mm.
+> 
+> Mark the current state of the fallbacks as deprecated, and add the
+> proper fallbacks so in the future, the deprecated combination can be
+> removed and prevent any future devices from using the wrong fallback.
+> 
+> Suggested-by: haibo.chen@nxp.com
+> Signed-off-by: Adam Ford <aford173@gmail.com>
 
-Signed-off-by: Adam Ford <aford173@gmail.com>
----
-V4: No Change
-V3: No change
-V2: Keep fallback to fsl,imx7d-usdhc to prevent breakage
 
-diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-index 794d75173cf5..8578ff1062e6 100644
---- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
-@@ -769,7 +769,7 @@ i2c6: i2c@30ae0000 {
- 			};
- 
- 			usdhc1: mmc@30b40000 {
--				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-+				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
- 				reg = <0x30b40000 0x10000>;
- 				interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
- 				clocks = <&clk IMX8MP_CLK_DUMMY>,
-@@ -783,7 +783,7 @@ usdhc1: mmc@30b40000 {
- 			};
- 
- 			usdhc2: mmc@30b50000 {
--				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-+				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
- 				reg = <0x30b50000 0x10000>;
- 				interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
- 				clocks = <&clk IMX8MP_CLK_DUMMY>,
-@@ -797,7 +797,7 @@ usdhc2: mmc@30b50000 {
- 			};
- 
- 			usdhc3: mmc@30b60000 {
--				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
-+				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
- 				reg = <0x30b60000 0x10000>;
- 				interrupts = <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
- 				clocks = <&clk IMX8MP_CLK_DUMMY>,
--- 
-2.34.1
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
+
+Best regards,
+Krzysztof
