@@ -2,109 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 402B5C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 19:38:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA075C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 21:17:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348116AbiDKTks (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Apr 2022 15:40:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45572 "EHLO
+        id S1348265AbiDKVUI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Apr 2022 17:20:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53572 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244590AbiDKTkr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 15:40:47 -0400
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 050471D302
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2022 12:38:30 -0700 (PDT)
-Received: by mail-ej1-x62c.google.com with SMTP id g18so8052871ejc.10
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2022 12:38:30 -0700 (PDT)
+        with ESMTP id S236174AbiDKVUH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 17:20:07 -0400
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 181AF1B7B8;
+        Mon, 11 Apr 2022 14:17:52 -0700 (PDT)
+Received: by mail-lj1-x230.google.com with SMTP id s13so21739332ljd.5;
+        Mon, 11 Apr 2022 14:17:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=e+KBmFjS1K+rC980qWl91puxJ4gewnilNoHGcgMKQoc=;
-        b=lfsemvgekvvOaB+81RkHbnUqWRCh1Fix0wKsqEadDuhbzquWlOfbqU6typxIk/pW4q
-         3PwQ2zxu06N67mNi5DBOrdRetTniXXXOUSbF+h5N65EAfmEFySOl+yJ5iDXSR5hrrE0j
-         QX1Y6kJORz1NcYdksBs2/y8hX4q1muJeJbcJj4alk+VmW4lVQjFYwHed9IxFtKBnDc0Y
-         mDj3duKA475k90W5SVHuSh5Hud1XSBjCZ3F34wQ2jd7pzbUaEcHi/Pe2WTHJRsYaZf1R
-         Q05205GHAYJDC+XuODV0X6Kx6J+BNhsPGMgoYt4JTb7VPPbeyY0C+6DVi7Eg5knQ4Di5
-         eGVw==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=i0zDKPAt/qufZ/2jxiglBqBb3LU9NVf66CHpPtR+y0U=;
+        b=SL7bvtN5kIiGOoqp4g1eJjN4b+D1XnkBCJjrGWEx3fqmVWNV2vI3QsrsCAwL+/TUhH
+         TaofrnTJq7QNBNJw1e8Hxs7NXBWGMmBaGE5L5QP/YOlU5zTKHE3AyTO8ScvY9hOLqPXg
+         165zanGQoZQO7gSM5qDrimAma3Iv27KTx/Pl65umQPJepvY146IlZQs7xww2soJstFqy
+         jzbT/zaC85v9AuzePoFQYXQ6AFN+O+PWwH12KBX0P6uUpD9aTCjoAKo7qN04bIF0BZrp
+         dro1Q37yiqwcHLriURQwEa9/0YW/kq4nMfn90QVZe4ndX/h3wwYh7W/8Tz0mitK5uDp4
+         Q2pA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=e+KBmFjS1K+rC980qWl91puxJ4gewnilNoHGcgMKQoc=;
-        b=jCVI0lODkh7o75Nq+khp5Xy4U+3K5GhWeb3515SGq39JN1rNB5LQr/Cjm7OL3tva6k
-         7ikrQ65V/d8ngEwU4IHKjdEe+uTHJhm1p1+GqFd12LqTnX60vZ4nm9h90vbOdyXBemqG
-         fC0CNrqC8gpQ5CJha3iP4wwYSaU/+dFaHYVlcc0Ccu9P5eVS474AXnfwMAmMGUDTl2FA
-         vqmUGAi0xNbP6fLMiphECZS94hnrzzdxKzWtzncRxKAbHjcIxY7Lnbhx32Wn+fNL0K8h
-         7kEWTBtWzi5yWBnGy+vP8Bv4QX/xEp9Baa19wxEckmVJN26vGd3iYuuj668Y2x6JcFD4
-         OWCA==
-X-Gm-Message-State: AOAM530EQTgLD9AL6srG1T3Zyo7B/PtHZsCSeKImAR3Yh4MozQbdrckQ
-        GXNRo5uEyd+10Rtgvtbb3ufta48s4Nc0lchH8FpPbLtj
-X-Google-Smtp-Source: ABdhPJw/qdRpbj1QxwIfJKTJt/0X7De1GVaHVeBRY2EHwSJPm7eKhdjIoc22WwlraV0x/hE+QfxDP5rWmB0PJWyN5tw=
-X-Received: by 2002:a17:906:dc93:b0:6e8:8d81:b4bb with SMTP id
- cs19-20020a170906dc9300b006e88d81b4bbmr6677593ejc.32.1649705908809; Mon, 11
- Apr 2022 12:38:28 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=i0zDKPAt/qufZ/2jxiglBqBb3LU9NVf66CHpPtR+y0U=;
+        b=tzPiGZqss6WQhn1ekJH8zsjz79gexMYbLunOtbIiCXRlBKc5CLSdEqf6WBoSMH/ikX
+         lu1dzOi1m+Mr7M9KYVSAhByV6jvVCsz0shw9KK4zhbC5ZFPFfM0ewme9BmcKJPlezQvT
+         TzZ8BA5pqEXvEiwqhYI+ZS7V50vp+Wo93rL45qVLH1u6JxHrUMyvRMSOovZ8d8scVNe/
+         qgi9Luofgx+PTXPw/twEmdYWN/spD9mMhzx/PwOuas8PsBGFPiOjJMzo8OFhjN8TEKg4
+         1UM/ToPeVkXPllp+jS54tEgyZotDB9uWSegNQKJ38lF2XwtVf6O4Ukcgg2HrGIzvvhcg
+         0loQ==
+X-Gm-Message-State: AOAM533su2IXI52fivpMrkim5GvkBWpk46zp8H2ftg5croFOW2/rQiwC
+        taE4CVKjJ9YCC3b5eoOBOnA=
+X-Google-Smtp-Source: ABdhPJxeTr2tnLXOWLID+EcB1R5yGfZdzHA5Pr5lRRx+5q2f6Pvr7LZvKQK3f8TLdcv5bY3x5nnvXg==
+X-Received: by 2002:a2e:9a8b:0:b0:24b:4ffa:638f with SMTP id p11-20020a2e9a8b000000b0024b4ffa638fmr11338355lji.192.1649711870402;
+        Mon, 11 Apr 2022 14:17:50 -0700 (PDT)
+Received: from mobilestation ([95.79.134.149])
+        by smtp.gmail.com with ESMTPSA id i4-20020a056512318400b0044a31d60589sm3428966lfe.86.2022.04.11.14.17.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Apr 2022 14:17:49 -0700 (PDT)
+Date:   Tue, 12 Apr 2022 00:17:47 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
+        Brad Larson <brad@pensando.io>,
+        linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, olof@lixom.net, dac2@pensando.io,
+        linux-gpio@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 05/11] dt-bindings: spi: dw: Add Pensando Elba SoC SPI
+ Controller bindings
+Message-ID: <20220411211747.ttpqk7s37j3gpzxp@mobilestation>
+References: <20220406233648.21644-1-brad@pensando.io>
+ <20220406233648.21644-6-brad@pensando.io>
+ <6769ea2d-9e6a-03b1-0e05-cb5b7379cb5e@linaro.org>
 MIME-Version: 1.0
-References: <CAHCN7xK_fr_gREVsOzN=atcS08mwufr-=7q1JAN=CCyVk_k-dA@mail.gmail.com>
- <YlR9TCeV8FJVu38U@ninjato>
-In-Reply-To: <YlR9TCeV8FJVu38U@ninjato>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Mon, 11 Apr 2022 14:38:17 -0500
-Message-ID: <CAHCN7xLso6kwWxeT3VuRQBcs9oKZMctGbsWmd1T=mwgHx0T+SA@mail.gmail.com>
-Subject: Re: RZ/G2M Hangs when booting some SD cards
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adam Ford <aford173@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <6769ea2d-9e6a-03b1-0e05-cb5b7379cb5e@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 11, 2022 at 2:11 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> Hi,
->
-> > I was thinking about taking the math from the U-Boot and porting it to
-> > Linux to see if the issue goes away, but before I did that, I was
-> > hoping someone might have some insights to see if that's the right
-> > direction to go.
->
-> Thank you very much for your detailed report!
->
-> I have one SanDisk card which sometimes fails to probe on one specific
-> board, so for me it was really hard to debug the issue because it was
-> hardly reproducible. Can you tell me which cards fail and if they do
-> that realiably? Also which Renesas HW do you use?
->
+On Thu, Apr 07, 2022 at 08:52:34PM +0200, Krzysztof Kozlowski wrote:
+> On 07/04/2022 01:36, Brad Larson wrote:
+> > The Pensando Elba SoC has integrated the DW APB SPI Controller
+> > and requires the property pensando,syscon-spics for access
+> > to the spics control register.
+> > 
+> > Signed-off-by: Brad Larson <brad@pensando.io>
+> > ---
+> > Change from V3:
+> > - Add required property pensando,syscon-spics to go with
+> >   pensando,elba-spi
+> 
+> Thank you for your patch. There is something to discuss/improve.
+> 
+> 
+> >  .../bindings/spi/snps,dw-apb-ssi.yaml           | 17 +++++++++++++++++
+> >  1 file changed, 17 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> > index d7e08b03e204..41c3bbf5a55c 100644
+> > --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> > +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> > @@ -37,6 +37,21 @@ allOf:
+> >      else:
+> >        required:
+> >          - interrupts
+> > +  - if:
+> > +      properties:
+> > +        compatible:
+> > +          contains:
+> > +            enum:
+> > +              - pensando,elba-spi
+> > +    then:
+> > +      properties:
+> > +        pensando,syscon-spics:
+> > +          $ref: /schemas/types.yaml#/definitions/phandle
+> > +          description:
+> > +            Phandle to the system control device node which provides access to
+> > +            the spics control register
+> 
 
-I have cards that fail 100% on my RZ//G2M.  I have an N and H as well,
-but I haven't tested them yet.
+> It looks you only need to poke one register from spics, so it could be
+> something like:
+> 
+>     items:
+>       - items:
+>           - description: Phandle to the system control device node
+>           - description: spics control register offset
 
-Unfortunately, a colleague of mine tested positive for covid-19, which
-prompted several of us to get tests, and I received a positive test,
-so I cannot go back to the office for at least 5 days.  (I am feeling
-fine today)
-Because I cannot go into the office I can't get the exact part number,
-but the card I have is a Patriot card, but a colleague of mine
-reported another brand was failing the same way.
+Right, especially seeing that's the way the elba-specific part of the
+DW APB SSI driver expects the property being initialized.
 
-I was given permission to ship one out if you're interested but I have
-to wait until next week to test anything or ship anything. Please
-don't feel obligated to accept the card,but I know it can be easier to
-have actual hardware.
+-Sergey
 
-> So much for a first response. I will have a closer look at your findings
-
-Thanks for responding.  I'll try to get card info / part number from
-my colleague.
-
-adam
-
-> tomorrow.
->
-> Thanks again,
->
->    Wolfram
->
+> 
+> 
+> Best regards,
+> Krzysztof
