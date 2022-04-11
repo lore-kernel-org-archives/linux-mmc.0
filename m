@@ -2,138 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D71BC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 15:37:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60A8BC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 17:26:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343824AbiDKPjx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Apr 2022 11:39:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58528 "EHLO
+        id S1348849AbiDKR2l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Apr 2022 13:28:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240237AbiDKPjw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 11:39:52 -0400
-Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F3A33A5E7;
-        Mon, 11 Apr 2022 08:37:38 -0700 (PDT)
-Received: by mail-wr1-x434.google.com with SMTP id t1so5918923wra.4;
-        Mon, 11 Apr 2022 08:37:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=XynkJF5/tDNj210GbAEuyHTgO4xrEQFboF9g0CngvhM=;
-        b=TcdFyn/pxbgxLWoLfzplhGxofZcbi77a7AxnJibbvUBt1UEVyiq8LXH9CG3JwId/LX
-         WThRwMHCCAyhOOe13ysUxfQ7HQ9frbJ+Iw+dJ34dg5y/DeG9uvvs/DV0KKPr+onQolJB
-         0CZ6rW+r/cU/0t6fZQT/qpvLqMgW27hGGQiTMHwvj32zdDfHfxM7jymPfxR1saawoydy
-         d+hsB+UNcLjpTdJhUVLlhcwpdNvCgV8SbPwPcfwSjoBq+299/UaTsqKitZKw/3AB4qZ+
-         dC0h8RfPGBjUavNzXr0rjqw9yYZaw32O5P95plikhJACrw4m6Xm1NNTUnEiO13tWSzGl
-         e1tw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=XynkJF5/tDNj210GbAEuyHTgO4xrEQFboF9g0CngvhM=;
-        b=1oW0JhuJFby0cyn4I64SDcZl/ZTL2tUOL+iHaHJPcG838Vb0VorhO+k6kBANEsRlyq
-         4WDTk+mQijqWHL9Uujsc3MghXannWqB7u1oCYUljH5ibGvUq8TohgO9bonPqhNj8dEV2
-         QQimfM2Q0KPX/SSifQHxtCOHr/Oqr+tU1UDmac4/BJExEG1INycNOynoVeRdWXdcFRN5
-         jlCJqmrvBN4nfxOkUeEtXj3SUlbKl2P7byFfvUcTyT8b1i6g0Wvfoc/m7HG1qjcun9LT
-         0M8QmlVvCvN1dKqcuK4t/X3Kj6DVzF/FkWj4ZwDZlzLFs2nX8mf153/4MGjlysnImlML
-         ayqg==
-X-Gm-Message-State: AOAM531HGHNfiiD1/youGYWaWbMkHoVH7uuHMPwrRzl4wEmTnKYi3NuW
-        Te9YKFbdLQaRECOsaZqfVq2n4vssyn/taw==
-X-Google-Smtp-Source: ABdhPJxwzNG+yEG+/rRMEfyd4DjC9tcEcRWRocqOeFgwph6rD5rmPMhBWfDXRqvYq61H6lCjVh4nCw==
-X-Received: by 2002:a5d:4306:0:b0:207:9e49:a1d3 with SMTP id h6-20020a5d4306000000b002079e49a1d3mr9748738wrq.188.1649691456762;
-        Mon, 11 Apr 2022 08:37:36 -0700 (PDT)
-Received: from localhost (92.40.202.92.threembb.co.uk. [92.40.202.92])
-        by smtp.gmail.com with ESMTPSA id bs12-20020a056000070c00b00207a2c698b1sm4831432wrb.40.2022.04.11.08.37.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Apr 2022 08:37:36 -0700 (PDT)
-From:   Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
-To:     paul@crapouillou.net, ulf.hansson@linaro.org
-Cc:     linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: jz4740: Apply DMA engine limits to maximum segment size
-Date:   Mon, 11 Apr 2022 16:37:53 +0100
-Message-Id: <20220411153753.50443-1-aidanmacdonald.0x0@gmail.com>
+        with ESMTP id S1348817AbiDKR2j (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 13:28:39 -0400
+Received: from smtp-out1.suse.de (smtp-out1.suse.de [195.135.220.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB7692982C;
+        Mon, 11 Apr 2022 10:26:24 -0700 (PDT)
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 80BF421606;
+        Mon, 11 Apr 2022 17:26:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1649697983;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=ojOMmoWG3Vi82iwkKmDthce/DTUxrqsrVMcEPPdM3So=;
+        b=QZwWZVQwC0bnchneRkqJ/+jzsU6T9BsE/QwjE1iflJ8e+QPH7qzL+AxcI+atiGlV8qm9Lo
+        u8oIaWSdY7hbFlYvzT8ENcrgX9LIGNQj4Ik1HCmhtpjbfJ75vgExpzBPpp974aNYAtu6v8
+        bf5VKoGfQqIUb3Ou/OOGio4KxiUFZwg=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1649697983;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=ojOMmoWG3Vi82iwkKmDthce/DTUxrqsrVMcEPPdM3So=;
+        b=98et+OqtZl3DiPU61ep6rcrI2VbwKFWZL1iuQ8dNt7YkOb55uCdVju/GMJmDyvRi7cAHwR
+        HPLi3jycKdDWeJCw==
+Received: from ds.suse.cz (ds.suse.cz [10.100.12.205])
+        by relay2.suse.de (Postfix) with ESMTP id 1C7B9A3B83;
+        Mon, 11 Apr 2022 17:26:23 +0000 (UTC)
+Received: by ds.suse.cz (Postfix, from userid 10065)
+        id 7FF53DA7F7; Mon, 11 Apr 2022 19:22:18 +0200 (CEST)
+Date:   Mon, 11 Apr 2022 19:22:18 +0200
+From:   David Sterba <dsterba@suse.cz>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-block@vger.kernel.org,
+        drbd-dev@lists.linbit.com, nbd@other.debian.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
+        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
+        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
+        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+Subject: Re: [PATCH 08/27] btrfs: use bdev_max_active_zones instead of open
+ coding it
+Message-ID: <20220411172218.GT15609@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+Mail-Followup-To: dsterba@suse.cz, Christoph Hellwig <hch@lst.de>,
+        Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-block@vger.kernel.org,
+        drbd-dev@lists.linbit.com, nbd@other.debian.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
+        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
+        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
+        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org,
+        Johannes Thumshirn <johannes.thumshirn@wdc.com>
+References: <20220409045043.23593-1-hch@lst.de>
+ <20220409045043.23593-9-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220409045043.23593-9-hch@lst.de>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Do what is done in other DMA-enabled MMC host drivers (cf. host/mmci.c) and
-limit the maximum segment size based on the DMA engine's capabilities. This
-is needed to avoid warnings like the following with CONFIG_DMA_API_DEBUG=y.
+On Sat, Apr 09, 2022 at 06:50:24AM +0200, Christoph Hellwig wrote:
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> Reviewed-by: Johannes Thumshirn <johannes.thumshirn@wdc.com>
 
-------------[ cut here ]------------
-WARNING: CPU: 0 PID: 21 at kernel/dma/debug.c:1162 debug_dma_map_sg+0x2f4/0x39c
-DMA-API: jz4780-dma 13420000.dma-controller: mapping sg segment longer than device claims to support [len=98304] [max=65536]
-CPU: 0 PID: 21 Comm: kworker/0:1H Not tainted 5.18.0-rc1 #19
-Workqueue: kblockd blk_mq_run_work_fn
-Stack : 81575aec 00000004 80620000 80620000 80620000 805e7358 00000009 801537ac
-        814c832c 806276e3 806e34b4 80620000 81575aec 00000001 81575ab8 09291444
-        00000000 00000000 805e7358 81575958 ffffffea 8157596c 00000000 636f6c62
-        6220646b 80387a70 0000000f 6d5f6b6c 80620000 00000000 81575ba4 00000009
-        805e170c 80896640 00000001 00010000 00000000 00000000 00006098 806e0000
-        ...
-Call Trace:
-[<80107670>] show_stack+0x84/0x120
-[<80528cd8>] __warn+0xb8/0xec
-[<80528d78>] warn_slowpath_fmt+0x6c/0xb8
-[<8016f1d4>] debug_dma_map_sg+0x2f4/0x39c
-[<80169d4c>] __dma_map_sg_attrs+0xf0/0x118
-[<8016a27c>] dma_map_sg_attrs+0x14/0x28
-[<804f66b4>] jz4740_mmc_prepare_dma_data+0x74/0xa4
-[<804f6714>] jz4740_mmc_pre_request+0x30/0x54
-[<804f4ff4>] mmc_blk_mq_issue_rq+0x6e0/0x7bc
-[<804f5590>] mmc_mq_queue_rq+0x220/0x2d4
-[<8038b2c0>] blk_mq_dispatch_rq_list+0x480/0x664
-[<80391040>] blk_mq_do_dispatch_sched+0x2dc/0x370
-[<80391468>] __blk_mq_sched_dispatch_requests+0xec/0x164
-[<80391540>] blk_mq_sched_dispatch_requests+0x44/0x94
-[<80387900>] __blk_mq_run_hw_queue+0xb0/0xcc
-[<80134c14>] process_one_work+0x1b8/0x264
-[<80134ff8>] worker_thread+0x2ec/0x3b8
-[<8013b13c>] kthread+0x104/0x10c
-[<80101dcc>] ret_from_kernel_thread+0x14/0x1c
-
----[ end trace 0000000000000000 ]---
-
-Signed-off-by: Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
----
- drivers/mmc/host/jz4740_mmc.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
-
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 7ab1b38a7be5..b1d563b2ed1b 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -247,6 +247,26 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
- 		return PTR_ERR(host->dma_rx);
- 	}
- 
-+	/*
-+	 * Limit the maximum segment size in any SG entry according to
-+	 * the parameters of the DMA engine device.
-+	 */
-+	if (host->dma_tx) {
-+		struct device *dev = host->dma_tx->device->dev;
-+		unsigned int max_seg_size = dma_get_max_seg_size(dev);
-+
-+		if (max_seg_size < host->mmc->max_seg_size)
-+			host->mmc->max_seg_size = max_seg_size;
-+	}
-+
-+	if (host->dma_rx) {
-+		struct device *dev = host->dma_rx->device->dev;
-+		unsigned int max_seg_size = dma_get_max_seg_size(dev);
-+
-+		if (max_seg_size < host->mmc->max_seg_size)
-+			host->mmc->max_seg_size = max_seg_size;
-+	}
-+
- 	return 0;
- }
- 
--- 
-2.35.1
-
+Acked-by: David Sterba <dsterba@suse.com>
