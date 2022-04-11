@@ -2,100 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A56C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 15:19:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D71BC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 15:37:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229797AbiDKPVU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Apr 2022 11:21:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34582 "EHLO
+        id S1343824AbiDKPjx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Apr 2022 11:39:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244274AbiDKPVT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 11:21:19 -0400
-Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0F8F136;
-        Mon, 11 Apr 2022 08:19:02 -0700 (PDT)
-Received: by mail-ej1-x62f.google.com with SMTP id r13so31628537ejd.5;
-        Mon, 11 Apr 2022 08:19:02 -0700 (PDT)
+        with ESMTP id S240237AbiDKPjw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 11:39:52 -0400
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F3A33A5E7;
+        Mon, 11 Apr 2022 08:37:38 -0700 (PDT)
+Received: by mail-wr1-x434.google.com with SMTP id t1so5918923wra.4;
+        Mon, 11 Apr 2022 08:37:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=fej47CfixVgPG/8tAe3B68WAc9QzMj+LhfE1bf6mdHc=;
-        b=jD9MaBAIHx7E4aQHXu/BECkBObNtPbqFVEY9DF0mITyo+lkTI/fnGWkGJ/1BL+Gd4V
-         +tf/gFyTMBVLefBt+Jiy87iLc/GFyKWbPCvUUfr3YQuY3VHUzoWygchl5F4A2MQh2rZQ
-         iEjb7Ud1HMoayECdcHLn/eYbJ/qsaxEvc2kAujKqz2r4aFGF8ubWwUq/JS6QhU08MMmd
-         q4tLWyE9vtitTttFJXG6ZjAx9zAt/J4jU9iU0kuSD03+fdPx0AQOI5lTiFzZWwVxwy+E
-         xW3YlUSvtXo6zDtTJ0Sf6qNebJgGea2i+8p17GhGb3j2UhmcuVN0nOG7QudVBFIr5pm9
-         4AoQ==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=XynkJF5/tDNj210GbAEuyHTgO4xrEQFboF9g0CngvhM=;
+        b=TcdFyn/pxbgxLWoLfzplhGxofZcbi77a7AxnJibbvUBt1UEVyiq8LXH9CG3JwId/LX
+         WThRwMHCCAyhOOe13ysUxfQ7HQ9frbJ+Iw+dJ34dg5y/DeG9uvvs/DV0KKPr+onQolJB
+         0CZ6rW+r/cU/0t6fZQT/qpvLqMgW27hGGQiTMHwvj32zdDfHfxM7jymPfxR1saawoydy
+         d+hsB+UNcLjpTdJhUVLlhcwpdNvCgV8SbPwPcfwSjoBq+299/UaTsqKitZKw/3AB4qZ+
+         dC0h8RfPGBjUavNzXr0rjqw9yYZaw32O5P95plikhJACrw4m6Xm1NNTUnEiO13tWSzGl
+         e1tw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=fej47CfixVgPG/8tAe3B68WAc9QzMj+LhfE1bf6mdHc=;
-        b=aeBxXe9XWC0zwvPc+W3g5uJbMmAp6kF87XjpfoKRGE7SElKrNzv0NVKOso3XHJ+/vX
-         KIRA6nvx20hAwus+F16+oZxB2t9YWg7qVTSCgl2dAFcBf9vqDnIReKJ12lm+SOXcLy3U
-         /OdHSQXPgcTod/Ey+rXt5u8ZvZubBKrfjDL7fTOez8JEhuo5HQqEmvzW9byKAdCQD3nf
-         onUfzxotYwL5/0Q23tWXCz/b68uG9u5hluTdx1O6GytIAda7GcYrZgwMhKEopRGdpKu0
-         fwmkMtwU45fgqw6YAX8L3UJolNZZ/nTTnVEL6X51dlg4z0GGwy9FslmFBvGVaBygyt1S
-         xtDA==
-X-Gm-Message-State: AOAM533wy8Zc4VZ83WFHe/fAPTfWXkNcrjyH5vieN27zD1fdYafCjNpd
-        Ah7kwkuKBr7zeJfoAowAFYzCi26wOu9FVDN+dNk6V+xgqXw=
-X-Google-Smtp-Source: ABdhPJy+ii2nkk759zthtMe3RU2DqWHDHIqPX16lClgCQ18ZzQ5HFYN8xZzKc4Xaq3XAWkbK9F4qIhNPm6K1PIT6Gs8=
-X-Received: by 2002:a17:907:724a:b0:6e8:4f12:b6fd with SMTP id
- ds10-20020a170907724a00b006e84f12b6fdmr14444674ejc.198.1649690340917; Mon, 11
- Apr 2022 08:19:00 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=XynkJF5/tDNj210GbAEuyHTgO4xrEQFboF9g0CngvhM=;
+        b=1oW0JhuJFby0cyn4I64SDcZl/ZTL2tUOL+iHaHJPcG838Vb0VorhO+k6kBANEsRlyq
+         4WDTk+mQijqWHL9Uujsc3MghXannWqB7u1oCYUljH5ibGvUq8TohgO9bonPqhNj8dEV2
+         QQimfM2Q0KPX/SSifQHxtCOHr/Oqr+tU1UDmac4/BJExEG1INycNOynoVeRdWXdcFRN5
+         jlCJqmrvBN4nfxOkUeEtXj3SUlbKl2P7byFfvUcTyT8b1i6g0Wvfoc/m7HG1qjcun9LT
+         0M8QmlVvCvN1dKqcuK4t/X3Kj6DVzF/FkWj4ZwDZlzLFs2nX8mf153/4MGjlysnImlML
+         ayqg==
+X-Gm-Message-State: AOAM531HGHNfiiD1/youGYWaWbMkHoVH7uuHMPwrRzl4wEmTnKYi3NuW
+        Te9YKFbdLQaRECOsaZqfVq2n4vssyn/taw==
+X-Google-Smtp-Source: ABdhPJxwzNG+yEG+/rRMEfyd4DjC9tcEcRWRocqOeFgwph6rD5rmPMhBWfDXRqvYq61H6lCjVh4nCw==
+X-Received: by 2002:a5d:4306:0:b0:207:9e49:a1d3 with SMTP id h6-20020a5d4306000000b002079e49a1d3mr9748738wrq.188.1649691456762;
+        Mon, 11 Apr 2022 08:37:36 -0700 (PDT)
+Received: from localhost (92.40.202.92.threembb.co.uk. [92.40.202.92])
+        by smtp.gmail.com with ESMTPSA id bs12-20020a056000070c00b00207a2c698b1sm4831432wrb.40.2022.04.11.08.37.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 11 Apr 2022 08:37:36 -0700 (PDT)
+From:   Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
+To:     paul@crapouillou.net, ulf.hansson@linaro.org
+Cc:     linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: jz4740: Apply DMA engine limits to maximum segment size
+Date:   Mon, 11 Apr 2022 16:37:53 +0100
+Message-Id: <20220411153753.50443-1-aidanmacdonald.0x0@gmail.com>
 MIME-Version: 1.0
-References: <20220410193544.1745684-1-aford173@gmail.com> <6c4b6eac-86d8-eb93-37a5-d0fa9bf2a7d2@linaro.org>
-In-Reply-To: <6c4b6eac-86d8-eb93-37a5-d0fa9bf2a7d2@linaro.org>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Mon, 11 Apr 2022 10:18:49 -0500
-Message-ID: <CAHCN7xKpoCrLgFfM30ZgYCgTan7FymhopcMQE0=VkzNuYryu9w@mail.gmail.com>
-Subject: Re: [PATCH V4 1/3] dt-bindings: mmc: imx-esdhc: Update compatible fallbacks
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Adam Ford-BE <aford@beaconembedded.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        devicetree <devicetree@vger.kernel.org>,
-        arm-soc <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 11, 2022 at 1:42 AM Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
->
-> On 10/04/2022 21:35, Adam Ford wrote:
-> > The SDHC controller in the imx8mn and imx8mp have the same controller
-> > as the imx8mm which is slightly different than that of the imx7d.
-> >
-> > Using the fallback of the imx8mm enables the controllers to support
-> > HS400-ES which is not available on the imx7d. After discussion with NXP,
-> > it turns out that the imx8qm should fall back to the imx8qxp, because
-> > those have some additional flags not present in the imx8mm.
-> >
-> > Mark the current state of the fallbacks as deprecated, and add the
-> > proper fallbacks so in the future, the deprecated combination can be
-> > removed and prevent any future devices from using the wrong fallback.
-> >
-> > Suggested-by: haibo.chen@nxp.com
-> > Signed-off-by: Adam Ford <aford173@gmail.com>
->
->
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->
-Thanks for the help and guidance.  I always seem to struggle with the
-YAML syntax.
+Do what is done in other DMA-enabled MMC host drivers (cf. host/mmci.c) and
+limit the maximum segment size based on the DMA engine's capabilities. This
+is needed to avoid warnings like the following with CONFIG_DMA_API_DEBUG=y.
 
->
-> Best regards,
-> Krzysztof
+------------[ cut here ]------------
+WARNING: CPU: 0 PID: 21 at kernel/dma/debug.c:1162 debug_dma_map_sg+0x2f4/0x39c
+DMA-API: jz4780-dma 13420000.dma-controller: mapping sg segment longer than device claims to support [len=98304] [max=65536]
+CPU: 0 PID: 21 Comm: kworker/0:1H Not tainted 5.18.0-rc1 #19
+Workqueue: kblockd blk_mq_run_work_fn
+Stack : 81575aec 00000004 80620000 80620000 80620000 805e7358 00000009 801537ac
+        814c832c 806276e3 806e34b4 80620000 81575aec 00000001 81575ab8 09291444
+        00000000 00000000 805e7358 81575958 ffffffea 8157596c 00000000 636f6c62
+        6220646b 80387a70 0000000f 6d5f6b6c 80620000 00000000 81575ba4 00000009
+        805e170c 80896640 00000001 00010000 00000000 00000000 00006098 806e0000
+        ...
+Call Trace:
+[<80107670>] show_stack+0x84/0x120
+[<80528cd8>] __warn+0xb8/0xec
+[<80528d78>] warn_slowpath_fmt+0x6c/0xb8
+[<8016f1d4>] debug_dma_map_sg+0x2f4/0x39c
+[<80169d4c>] __dma_map_sg_attrs+0xf0/0x118
+[<8016a27c>] dma_map_sg_attrs+0x14/0x28
+[<804f66b4>] jz4740_mmc_prepare_dma_data+0x74/0xa4
+[<804f6714>] jz4740_mmc_pre_request+0x30/0x54
+[<804f4ff4>] mmc_blk_mq_issue_rq+0x6e0/0x7bc
+[<804f5590>] mmc_mq_queue_rq+0x220/0x2d4
+[<8038b2c0>] blk_mq_dispatch_rq_list+0x480/0x664
+[<80391040>] blk_mq_do_dispatch_sched+0x2dc/0x370
+[<80391468>] __blk_mq_sched_dispatch_requests+0xec/0x164
+[<80391540>] blk_mq_sched_dispatch_requests+0x44/0x94
+[<80387900>] __blk_mq_run_hw_queue+0xb0/0xcc
+[<80134c14>] process_one_work+0x1b8/0x264
+[<80134ff8>] worker_thread+0x2ec/0x3b8
+[<8013b13c>] kthread+0x104/0x10c
+[<80101dcc>] ret_from_kernel_thread+0x14/0x1c
+
+---[ end trace 0000000000000000 ]---
+
+Signed-off-by: Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
+---
+ drivers/mmc/host/jz4740_mmc.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index 7ab1b38a7be5..b1d563b2ed1b 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -247,6 +247,26 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
+ 		return PTR_ERR(host->dma_rx);
+ 	}
+ 
++	/*
++	 * Limit the maximum segment size in any SG entry according to
++	 * the parameters of the DMA engine device.
++	 */
++	if (host->dma_tx) {
++		struct device *dev = host->dma_tx->device->dev;
++		unsigned int max_seg_size = dma_get_max_seg_size(dev);
++
++		if (max_seg_size < host->mmc->max_seg_size)
++			host->mmc->max_seg_size = max_seg_size;
++	}
++
++	if (host->dma_rx) {
++		struct device *dev = host->dma_rx->device->dev;
++		unsigned int max_seg_size = dma_get_max_seg_size(dev);
++
++		if (max_seg_size < host->mmc->max_seg_size)
++			host->mmc->max_seg_size = max_seg_size;
++	}
++
+ 	return 0;
+ }
+ 
+-- 
+2.35.1
+
