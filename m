@@ -2,105 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2332C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 07:34:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2D75C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Apr 2022 08:52:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245513AbiDKHgY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Apr 2022 03:36:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53834 "EHLO
+        id S244233AbiDKIyo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Apr 2022 04:54:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55358 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245516AbiDKHgU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 03:36:20 -0400
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3502726D
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2022 00:34:05 -0700 (PDT)
-Received: by mail-pj1-x1036.google.com with SMTP id ll10so6015673pjb.5
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2022 00:34:05 -0700 (PDT)
+        with ESMTP id S234411AbiDKIyn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2022 04:54:43 -0400
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A5EF3886;
+        Mon, 11 Apr 2022 01:52:30 -0700 (PDT)
+Received: by mail-ej1-x635.google.com with SMTP id u15so10739779ejf.11;
+        Mon, 11 Apr 2022 01:52:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=iZkMojDEiOG897WMlFg+Va0QtRJHeg2erchkTICMc24=;
-        b=hRdTZbnlrYWoBM0S8X6kLUXTF8SNJO5PrmDCFE/DJnzjqJS8PZQGxNejp8OMNXx5Ra
-         VB4qMrcyMMDskerI3ElBg/Pfz9IYBoHMSQJCPYscb1SwHNfFoH4xY4I3GQEW5ZPWrChB
-         xuV8kHfY6s5Ut/ApM6lYD93p+BCJCX/Dlgez37VfSwOJhk6cLpU9Lt0gcBNR7hjElywR
-         WRlAW3OewEjN7PS+Wqh2MW9xLOukNDMbcZ7O68ihL7U3j1puvlYv1wYHKuKlIfsvgFnK
-         4xffWmjv/3yXginjUG6tzLvjnvg5Kpx55SmqqMixCVCYYyYg6hu1ZlwQwX9NlunzpMC1
-         375w==
+        d=gmail.com; s=20210112;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :content-transfer-encoding:user-agent:mime-version;
+        bh=/SgmTjMqwtpk9caKkdwZC1qgaJ93uCKltxtYXdsY3Zk=;
+        b=hy2lG+uIpqMnLHr5GnQAr3ZpIZ07xlSJn20AQ8Fyj2ofzgW/4jYO+I7vyAy1klX6AE
+         8jn26V3p3UyhHi9/fApNZ+l+OoZUfnBTbO7+17bFKkQvlbwSjncB9R4+5DzkdGoejDas
+         QkW7Kb+d67Je+tfroWqlRZERA2hLJa0YuOXQjB0KplUqqjEJXqb+4OMNo4eDx2JX0GNs
+         +/MRwPXyqMkynn5J0g2KAmHWqHqrh2tc3NGXL6xL3am/M3QsNcjyqAcoTgrydvgakwO+
+         uxc4e9tQ7CljBytSt4t4JpcZD9Atj1DcmDAfW8dpVEEDMA86MCkaz+yq2Y3d7ozpvVlS
+         NzhA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=iZkMojDEiOG897WMlFg+Va0QtRJHeg2erchkTICMc24=;
-        b=ooOLmFB4kVJ285NlKFNzKUj9IZXiPsgIXba8BYCiTlk8FMWzMpuLvmrWuzyo+W5nzD
-         /eNOojD2OfzsFYKEw/FmdT2MAm6+pXCpKIfVQ7fXseP80GFJWV6tk2h/011yBj4xnjwE
-         ESlO0+lr1/CZ6vAQ6UdN+t/XpK9/5Lea++KWAYh0+ncCHs9KvX51fVZQEf8pnZINLVCI
-         jh/L5hin1EDarkJpYQ8eqs2FP2qzvs6VL/0gGbJzPY5xHQ7kbPIYV3lBD3LPj4qhvlWK
-         Hry5WmeFEDo5YxypMTeZOlse/jpg/UbkKaPo64OJNwJYZnT26VpopokZDG3VY8SySAqK
-         GuVw==
-X-Gm-Message-State: AOAM533sPj5wA1vIPTQ4/o93eZXALgqz+B0QIuEOvtGAIGIwgrkjIH6R
-        Ew+igGxD14UQewQuj7OR9Pn/
-X-Google-Smtp-Source: ABdhPJzAQ1sW5dAp4LbQendoFyZcshYJiDlJIWfSZjsLfFvcCcxYZj5kvAk6DUP9/icLNdM7fDr6bQ==
-X-Received: by 2002:a17:902:ccc4:b0:156:5d37:b42f with SMTP id z4-20020a170902ccc400b001565d37b42fmr30864306ple.157.1649662444701;
-        Mon, 11 Apr 2022 00:34:04 -0700 (PDT)
-Received: from thinkpad ([117.217.182.106])
-        by smtp.gmail.com with ESMTPSA id a21-20020a62bd15000000b00505b8bad895sm3477896pff.106.2022.04.11.00.33.59
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:content-transfer-encoding:user-agent:mime-version;
+        bh=/SgmTjMqwtpk9caKkdwZC1qgaJ93uCKltxtYXdsY3Zk=;
+        b=B1jOCNEOd/KT9i7vxN/E5zuEVu4OLunFmM3EaM9zXxc1+5U+fktI7FIG5KhDv8Nc/N
+         aQtqwzTzJcLiZOKLVneCscmvaRayk01b+iHzgnqC92iaFVVYNZW7LIjt2besCXrRYb71
+         eThdOpNeeI+9xIzD3FpHIPU2bWMGHfERwTfnfDOkkAUcWYdd6+M8+cB9eE85H4xMkFv/
+         QWUQlMNh1D5PuSaXtncOOuzPNeSZObHArvSrVz6JZFBd1cj3OTQeolCLwlAAGdySsba0
+         kTT3MmtmQ0W02awLDAJ5C/TYkFWBHZMJ2G1SxyJVLSN8nwe1SMqOFh9ELKdtesXFRF9/
+         1TdA==
+X-Gm-Message-State: AOAM530nk5vIiqzBsjIrO5q78CWIcUIEtrFQcfQrUeeoGGA9X2fWhGMX
+        q10lixsqSx66kAnK2kmNM84hgQwlC/cv1Q==
+X-Google-Smtp-Source: ABdhPJxtEH7X77p4Qu0gHE8RrBYJRq3oWHQTGANgRa6aJ3uym9t9+HWTRWe/qHBwPHLki6yw/nYYgg==
+X-Received: by 2002:a17:907:6095:b0:6e7:cc3f:c33d with SMTP id ht21-20020a170907609500b006e7cc3fc33dmr22587785ejc.570.1649667148711;
+        Mon, 11 Apr 2022 01:52:28 -0700 (PDT)
+Received: from [192.168.3.2] (p5dd1ed70.dip0.t-ipconnect.de. [93.209.237.112])
+        by smtp.googlemail.com with ESMTPSA id x4-20020a170906b08400b006e493cb583esm11598540ejy.47.2022.04.11.01.52.28
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Apr 2022 00:34:04 -0700 (PDT)
-Date:   Mon, 11 Apr 2022 13:03:55 +0530
-From:   Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-To:     Rohit Agarwal <quic_rohiagar@quicinc.com>
-Cc:     will@kernel.org, robin.murphy@arm.com, joro@8bytes.org,
-        robh+dt@kernel.org, krzk+dt@kernel.org, ulf.hansson@linaro.org,
-        agross@kernel.org, bjorn.andersson@linaro.org,
-        linux-arm-kernel@lists.infradead.org,
-        iommu@lists.linux-foundation.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH 6/7] ARM: dts: qcom: sdx65: Add support for TCSR Mutex
-Message-ID: <20220411073355.GE24975@thinkpad>
-References: <1649660143-22400-1-git-send-email-quic_rohiagar@quicinc.com>
- <1649660143-22400-7-git-send-email-quic_rohiagar@quicinc.com>
+        Mon, 11 Apr 2022 01:52:28 -0700 (PDT)
+Message-ID: <9ac83fe9bc33cce4b8691d49bdd155587196a62a.camel@gmail.com>
+Subject: Re: [PATCH v1] mmc-utils: Add General command CMD56 read support
+From:   Bean Huo <huobean@gmail.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "jakob.rossler@nokia.com" <jakob.rossler@nokia.com>,
+        "sperson@micron.com" <sperson@micron.com>,
+        Bean Huo <beanhuo@micron.com>
+Date:   Mon, 11 Apr 2022 10:52:27 +0200
+In-Reply-To: <DM6PR04MB6575816F943FB2F0D4099CDFFCE89@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20220408174832.303915-1-huobean@gmail.com>
+         <DM6PR04MB6575816F943FB2F0D4099CDFFCE89@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.0-1 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1649660143-22400-7-git-send-email-quic_rohiagar@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 11, 2022 at 12:25:42PM +0530, Rohit Agarwal wrote:
-> Add TCSR Mutex node to support Qualcomm Hardware Mutex block
-> on SDX65 platform.
-> 
-> Signed-off-by: Rohit Agarwal <quic_rohiagar@quicinc.com>
+On Sat, 2022-04-09 at 09:03 +0000, Avri Altman wrote:
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 memset(&idata, 0, sizeof(idata));
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 idata.write_flag =3D 0;
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 idata.opcode =3D MMC_GEN_CMD;
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 idata.arg =3D arg;
+> Practically arg is not needed, because bits[1..31] are meaningless.
+> Maybe just set: idata.arg =3D 1;
+>=20
+> Thanks,
+> Avri
+Thanks for your review.
 
-Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+you are right arg is not needed according to eMMC spec.  But as I
+mentioned in the commit message, for the universal use. we need it for
+the vendor-specific arg. I will change it that its arg will be 1 by
+default if the user doesn't specific arg.
 
-Thanks,
-Mani
+Kind regards,
+Bean
 
-> ---
->  arch/arm/boot/dts/qcom-sdx65.dtsi | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/arch/arm/boot/dts/qcom-sdx65.dtsi b/arch/arm/boot/dts/qcom-sdx65.dtsi
-> index 2481769..5c28c94 100644
-> --- a/arch/arm/boot/dts/qcom-sdx65.dtsi
-> +++ b/arch/arm/boot/dts/qcom-sdx65.dtsi
-> @@ -168,6 +168,12 @@
->  			#interrupt-cells = <2>;
->  		};
->  
-> +		tcsr_mutex: hwlock@1f40000 {
-> +			compatible = "qcom,tcsr-mutex";
-> +			reg = <0x01f40000 0x40000>;
-> +			#hwlock-cells = <1>;
-> +		};
-> +
->  		sdhc_1: sdhci@8804000 {
->  			compatible = "qcom,sdx65-sdhci", "qcom,sdhci-msm-v5";
->  			reg = <0x08804000 0x1000>;
-> -- 
-> 2.7.4
-> 
+
+ =20
