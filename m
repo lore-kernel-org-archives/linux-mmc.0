@@ -2,101 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25A32C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 10:29:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 086EEC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 10:29:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231992AbiDLKbR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Apr 2022 06:31:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48424 "EHLO
+        id S241804AbiDLKb1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Apr 2022 06:31:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1358429AbiDLKS7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 06:18:59 -0400
-Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com [209.85.160.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DDA07C78C;
-        Tue, 12 Apr 2022 02:16:20 -0700 (PDT)
-Received: by mail-qt1-f176.google.com with SMTP id ay4so2781349qtb.11;
-        Tue, 12 Apr 2022 02:16:20 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=vb/exwohC5cqMpKn9cySsv+5hXcFSt6tITGqK0qhvEs=;
-        b=teg71CknfoVJRSLoZ+OLA2CnR8d2kDBCsLiuEuSD5WI2f9Sij2B+zNefGwrJJ51LtO
-         aTjvsx/MUHqDXVmG/IcLe8YqmN5PdQ+3Cr0HxWtze0mjOhLcLdK7o//FieZmuKZm801D
-         LxlhgrOg42lWO3C6liJ9a/4/7zV/GFwdhZMgYv7sp1/KTzAYdGXjy5sXjNRnVSOLAmD/
-         LkxpFBUfPY2u6Ww2uYI9VKV44BxWom5+sPjsrxkxnLZ9EZffBfUHNVrQ48x8/bg8NqeG
-         ciRxk/CTYN0YRx9gJONrqNYW1+LQfyCQJLVqVYfBdaXUzBRH/eB/a2WmJSDZH30FyzNo
-         qZ0w==
-X-Gm-Message-State: AOAM533Hpz60iaFbGhiUh0UFsB7mhomSICGAEYDg8cg0ypqEF9U9Ere4
-        6iHN+BDaFtcjJVItHL9rGt6PYItp0aaEpuTL
-X-Google-Smtp-Source: ABdhPJx8B//x2UQUJInXTyWdFEbdHOMBR9uc4R6GGe9r8sPxOdCCrFn30GbsNTqe6U/j3D7InGDX+Q==
-X-Received: by 2002:ac8:43cc:0:b0:2eb:dc8a:d5c5 with SMTP id w12-20020ac843cc000000b002ebdc8ad5c5mr2456949qtn.663.1649754979220;
-        Tue, 12 Apr 2022 02:16:19 -0700 (PDT)
-Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com. [209.85.219.182])
-        by smtp.gmail.com with ESMTPSA id p16-20020a05622a13d000b002e227782e9asm26730974qtk.14.2022.04.12.02.16.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 12 Apr 2022 02:16:19 -0700 (PDT)
-Received: by mail-yb1-f182.google.com with SMTP id j2so32113520ybu.0;
-        Tue, 12 Apr 2022 02:16:18 -0700 (PDT)
-X-Received: by 2002:a25:c049:0:b0:634:6751:e8d2 with SMTP id
- c70-20020a25c049000000b006346751e8d2mr26209411ybf.6.1649754978717; Tue, 12
- Apr 2022 02:16:18 -0700 (PDT)
+        with ESMTP id S1381421AbiDLK3T (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 06:29:19 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D99C580CD
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2022 02:31:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=pXpt/O0wt40ELy2VjiVcNMr4U+X
+        Bfk5SDzhV9fM2Egk=; b=JonB2GfC1bYb3hU/Pm+B/VVayEli2jf5gVR+JuHgVI9
+        0QU1Z1rg+w/ylhmfkssV9mzymBRYToStQ9jqBqjrgUPM2KkGAqoTwbnK1plACiO9
+        nVMgRySQ10W7FikM2QDbyLs5FNnesUrNhNVnvAK8KOyXHkF1EnZXwkwM0UAObKtc
+        =
+Received: (qmail 981999 invoked from network); 12 Apr 2022 11:31:30 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 12 Apr 2022 11:31:30 +0200
+X-UD-Smtp-Session: l3s3148p1@jLPGuXHcAucgAQnoAGZ4AFi7qjeMIP6q
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-sh@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: sh_mmcif: move platform_data header to proper location
+Date:   Tue, 12 Apr 2022 11:31:02 +0200
+Message-Id: <20220412093102.3428-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-References: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 12 Apr 2022 11:16:07 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdV=_QBTzd=yzD0kwvi2gNOp+oj3VjRursynto-Nbt4cLA@mail.gmail.com>
-Message-ID: <CAMuHMdV=_QBTzd=yzD0kwvi2gNOp+oj3VjRursynto-Nbt4cLA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sh_mmcif: move platform_data header to proper location
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
-
-On Thu, Apr 7, 2022 at 4:33 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> We have a dedicated directory for platform_data meanwhile, don't spoil
-> the MMC directory with it.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+We have a dedicated directory for platform_data meanwhile, don't spoil
+the MMC directory with it.
 
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-One minor nit below.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -43,13 +43,13 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/mmc/sdio.h>
-> -#include <linux/mmc/sh_mmcif.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/mod_devicetable.h>
->  #include <linux/mutex.h>
->  #include <linux/of_device.h>
->  #include <linux/pagemap.h>
->  #include <linux/platform_device.h>
-> +#include <linux/platform_data/sh_mmcif.h>
+Change since v1: fixed sorting of includes in the MMCIF driver
+		 (Thanks Geert!)
 
-Is this intended to be sorted? a < e.
+I don't have the HW to test this but the buildbots are happy with this
+change. I checked that they actually tested the SH builds. To make the
+patch more readable, I used the -M (rename) feature of git-format-patch.
 
->  #include <linux/pm_qos.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/sh_dma.h>
+ arch/sh/boards/board-sh7757lcr.c                | 2 +-
+ arch/sh/boards/mach-ecovec24/setup.c            | 2 +-
+ arch/sh/boot/romimage/mmcif-sh7724.c            | 2 +-
+ drivers/mmc/host/sh_mmcif.c                     | 2 +-
+ include/linux/{mmc => platform_data}/sh_mmcif.h | 2 --
+ 5 files changed, 4 insertions(+), 6 deletions(-)
+ rename include/linux/{mmc => platform_data}/sh_mmcif.h (99%)
 
-Gr{oetje,eeting}s,
+diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
+index c32b4c6229d3..f39c8196efdf 100644
+--- a/arch/sh/boards/board-sh7757lcr.c
++++ b/arch/sh/boards/board-sh7757lcr.c
+@@ -16,7 +16,7 @@
+ #include <linux/io.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+-#include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <linux/sh_eth.h>
+ #include <linux/sh_intc.h>
+ #include <linux/usb/renesas_usbhs.h>
+diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+index 4c9522dd351f..674da7ebd8b7 100644
+--- a/arch/sh/boards/mach-ecovec24/setup.c
++++ b/arch/sh/boards/mach-ecovec24/setup.c
+@@ -19,7 +19,7 @@
+ #include <linux/memblock.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+-#include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <linux/mtd/physmap.h>
+ #include <linux/gpio.h>
+ #include <linux/gpio/machine.h>
+diff --git a/arch/sh/boot/romimage/mmcif-sh7724.c b/arch/sh/boot/romimage/mmcif-sh7724.c
+index 6595b6b45bf1..d30123d859e0 100644
+--- a/arch/sh/boot/romimage/mmcif-sh7724.c
++++ b/arch/sh/boot/romimage/mmcif-sh7724.c
+@@ -8,7 +8,7 @@
+  * for more details.
+  */
+ 
+-#include <linux/mmc/sh_mmcif.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <mach/romimage.h>
+ 
+ #define MMCIF_BASE      (void __iomem *)0xa4ca0000
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index 5f9ebf045b1c..0fd4c9d644dd 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -43,12 +43,12 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sdio.h>
+-#include <linux/mmc/sh_mmcif.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/mod_devicetable.h>
+ #include <linux/mutex.h>
+ #include <linux/of_device.h>
+ #include <linux/pagemap.h>
++#include <linux/platform_data/sh_mmcif.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_qos.h>
+ #include <linux/pm_runtime.h>
+diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/platform_data/sh_mmcif.h
+similarity index 99%
+rename from include/linux/mmc/sh_mmcif.h
+rename to include/linux/platform_data/sh_mmcif.h
+index e25533b95d9f..6eb914f958f9 100644
+--- a/include/linux/mmc/sh_mmcif.h
++++ b/include/linux/platform_data/sh_mmcif.h
+@@ -1,7 +1,5 @@
+ /* SPDX-License-Identifier: GPL-2.0-only */
+ /*
+- * include/linux/mmc/sh_mmcif.h
+- *
+  * platform data for eMMC driver
+  *
+  * Copyright (C) 2010 Renesas Solutions Corp.
+-- 
+2.30.2
 
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
