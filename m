@@ -2,84 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65256C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 10:29:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25A32C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 10:29:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235335AbiDLKbJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Apr 2022 06:31:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59666 "EHLO
+        id S231992AbiDLKbR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Apr 2022 06:31:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1379643AbiDLKTq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 06:19:46 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7047BBB
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2022 02:23:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=hGN3hbcr46V0pF/9JiBvXu2YhE7A
-        2TWOogM7BL0HuyA=; b=zZhbEnUZq6eIR3HqnMZyFZLZhYZe/KzlIqyOxf6aQCdk
-        Hs11Sb8YvbBxwvvYplrrM/RDYhINVCVBRe/bQ6iqFhoypJz6Ckhu7iV5MNdykHHU
-        bl2pM46A0lShTtT54ipYBsddC88qRPZHoV8RRSYZQKgkgkhYT4ZF6OmR/Hw5J4c=
-Received: (qmail 979298 invoked from network); 12 Apr 2022 11:23:00 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 12 Apr 2022 11:23:00 +0200
-X-UD-Smtp-Session: l3s3148p1@YeVem3HcAOcgAQnoAGZ4AFi7qjeMIP6q
-Date:   Tue, 12 Apr 2022 11:22:59 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
+        with ESMTP id S1358429AbiDLKS7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 06:18:59 -0400
+Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com [209.85.160.176])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DDA07C78C;
+        Tue, 12 Apr 2022 02:16:20 -0700 (PDT)
+Received: by mail-qt1-f176.google.com with SMTP id ay4so2781349qtb.11;
+        Tue, 12 Apr 2022 02:16:20 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=vb/exwohC5cqMpKn9cySsv+5hXcFSt6tITGqK0qhvEs=;
+        b=teg71CknfoVJRSLoZ+OLA2CnR8d2kDBCsLiuEuSD5WI2f9Sij2B+zNefGwrJJ51LtO
+         aTjvsx/MUHqDXVmG/IcLe8YqmN5PdQ+3Cr0HxWtze0mjOhLcLdK7o//FieZmuKZm801D
+         LxlhgrOg42lWO3C6liJ9a/4/7zV/GFwdhZMgYv7sp1/KTzAYdGXjy5sXjNRnVSOLAmD/
+         LkxpFBUfPY2u6Ww2uYI9VKV44BxWom5+sPjsrxkxnLZ9EZffBfUHNVrQ48x8/bg8NqeG
+         ciRxk/CTYN0YRx9gJONrqNYW1+LQfyCQJLVqVYfBdaXUzBRH/eB/a2WmJSDZH30FyzNo
+         qZ0w==
+X-Gm-Message-State: AOAM533Hpz60iaFbGhiUh0UFsB7mhomSICGAEYDg8cg0ypqEF9U9Ere4
+        6iHN+BDaFtcjJVItHL9rGt6PYItp0aaEpuTL
+X-Google-Smtp-Source: ABdhPJx8B//x2UQUJInXTyWdFEbdHOMBR9uc4R6GGe9r8sPxOdCCrFn30GbsNTqe6U/j3D7InGDX+Q==
+X-Received: by 2002:ac8:43cc:0:b0:2eb:dc8a:d5c5 with SMTP id w12-20020ac843cc000000b002ebdc8ad5c5mr2456949qtn.663.1649754979220;
+        Tue, 12 Apr 2022 02:16:19 -0700 (PDT)
+Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com. [209.85.219.182])
+        by smtp.gmail.com with ESMTPSA id p16-20020a05622a13d000b002e227782e9asm26730974qtk.14.2022.04.12.02.16.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 12 Apr 2022 02:16:19 -0700 (PDT)
+Received: by mail-yb1-f182.google.com with SMTP id j2so32113520ybu.0;
+        Tue, 12 Apr 2022 02:16:18 -0700 (PDT)
+X-Received: by 2002:a25:c049:0:b0:634:6751:e8d2 with SMTP id
+ c70-20020a25c049000000b006346751e8d2mr26209411ybf.6.1649754978717; Tue, 12
+ Apr 2022 02:16:18 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 12 Apr 2022 11:16:07 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdV=_QBTzd=yzD0kwvi2gNOp+oj3VjRursynto-Nbt4cLA@mail.gmail.com>
+Message-ID: <CAMuHMdV=_QBTzd=yzD0kwvi2gNOp+oj3VjRursynto-Nbt4cLA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sh_mmcif: move platform_data header to proper location
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH] mmc: sh_mmcif: move platform_data header to proper
- location
-Message-ID: <YlVE8785QA4JjyTs@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-References: <20220407063114.1433-1-wsa+renesas@sang-engineering.com>
- <CAMuHMdV=_QBTzd=yzD0kwvi2gNOp+oj3VjRursynto-Nbt4cLA@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="uCf1cxL/q58P0jnc"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdV=_QBTzd=yzD0kwvi2gNOp+oj3VjRursynto-Nbt4cLA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram,
 
---uCf1cxL/q58P0jnc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Thu, Apr 7, 2022 at 4:33 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> We have a dedicated directory for platform_data meanwhile, don't spoil
+> the MMC directory with it.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+One minor nit below.
 
-> >  #include <linux/platform_device.h>
-> > +#include <linux/platform_data/sh_mmcif.h>
->=20
-> Is this intended to be sorted? a < e.
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -43,13 +43,13 @@
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/sdio.h>
+> -#include <linux/mmc/sh_mmcif.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mod_devicetable.h>
+>  #include <linux/mutex.h>
+>  #include <linux/of_device.h>
+>  #include <linux/pagemap.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/platform_data/sh_mmcif.h>
 
-Yes, can be argued. I was giving the subdirectory a priority, but
-probably keeping the lexical sorting is better.
+Is this intended to be sorted? a < e.
 
+>  #include <linux/pm_qos.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/sh_dma.h>
 
---uCf1cxL/q58P0jnc
-Content-Type: application/pgp-signature; name="signature.asc"
+Gr{oetje,eeting}s,
 
------BEGIN PGP SIGNATURE-----
+                        Geert
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmJVRPMACgkQFA3kzBSg
-KbZw8Q//dc+SlqRHHEF3pRSFUsf9USM+Hbn2FtioP4KZeC2W2F9vxGfbnVdH1SUF
-4jBHHR7EG62EDi0Dleb3cxP7FkOT2QFiVqUriqwy5blGKeuXIlmQ/mBVTaeibpGJ
-D6eYP4YS0dJe6Uj/Zh5qBkH+fHYOoCn19LyTGpVAtQIjzotEouZXMWCyTgiyee2H
-O6F8yOLKANx7HL2qmu9G02EcCSRW9/jLHm0NzCsa9s0CDPtduEA36EiH96+ZiHlY
-gXVi2oB/DkLPi9AJ6yz9iUS6446DCI3Ypw/T+S1ky3qdeJ2nyC9/V4aSK2SGnbuX
-BwUw2aDU84ENH6R7G76oJuTm/1njR0FXfgKiL6G7Z7+FNdlGyLUU0aTbqslMcVkw
-+n4FEiRt3VXjGmNEPaoUSOBG5GyaO3LpP6Ox59wL1GNX3d/QlxByd+fw7XJcnxRp
-mF4Awboumc5phDd4/hX90Jjc0U/lP4vTtMpeNVJ7soroBbF8wiJGT01yH+74lXQE
-ExAl3upxJelMTzB24d47G++7Tzj7S2qKYCbBKV7D3IJGsD4qxW2I6WeUrsuW4VSZ
-Il1HU0Eke1PpunOUCbOe33EJJ1xZbuqaVVjzy9w3HIErLHeqZA2EMvsrGhck7kQ5
-owpgzGYbYjDxW5BWIFGJpw8DRzlJUPntEc1ztwHWD0hgnHQ7W7k=
-=+juU
------END PGP SIGNATURE-----
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
---uCf1cxL/q58P0jnc--
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
