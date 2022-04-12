@@ -2,76 +2,149 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64C6AC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 11:48:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 364E8C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 11:55:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350872AbiDLLvB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Apr 2022 07:51:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46126 "EHLO
+        id S243836AbiDLL5R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Apr 2022 07:57:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355021AbiDLLtJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 07:49:09 -0400
+        with ESMTP id S1345375AbiDLL4r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 07:56:47 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B62FFF67;
-        Tue, 12 Apr 2022 03:32:32 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E02160A8B;
+        Tue, 12 Apr 2022 03:40:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1649759553; x=1681295553;
+  t=1649760010; x=1681296010;
   h=from:to:cc:subject:date:message-id;
-  bh=MMIUO1AN7gN05AzZCun/kXzznO7BJ9UyKv14hpLUruU=;
-  b=p0d/Zx108iEl4D63i2ebDkuQp/QO9gO9orIW5Pay78JrPzuLZoLZxbRB
-   KRWBthGIdWJjyTyPohCbej2NNxtIgSlVtr85yt/hdcLWbNNuiwCDOAAYW
-   s6SCqstHOge8Em5Mg3BRsoemHX79ctnmokY6qKLtCWwPEMv6g6gaJYvAT
-   E=;
-Received: from ironmsg-lv-alpha.qualcomm.com ([10.47.202.13])
-  by alexa-out.qualcomm.com with ESMTP; 12 Apr 2022 03:32:33 -0700
+  bh=374d2KEtS0jWsYeS7dQ6Ghuf7T7NoRUNsq5r7DmUasA=;
+  b=JPj7baWdlM9khb9S0P9mDFtxUU+xzqcHZgvvJcnrS42Y1kTzwGttG/LP
+   BSAB/PC8VrEbqB2dIj5unKZn/7h99bb7JwhpbZiA3hc2CwauEI8dqY80d
+   90XndUlcV9d10quzD3FIf5Q/1e/sZxG0oZfgq/WZMJW0fP1835/RnK/BL
+   M=;
+Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
+  by alexa-out.qualcomm.com with ESMTP; 12 Apr 2022 03:40:10 -0700
 X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg-lv-alpha.qualcomm.com with ESMTP/TLS/AES256-SHA; 12 Apr 2022 03:32:30 -0700
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 12 Apr 2022 03:40:08 -0700
 X-QCInternal: smtphost
 Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 12 Apr 2022 16:02:11 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 12 Apr 2022 16:09:46 +0530
 Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 934595963; Tue, 12 Apr 2022 16:02:10 +0530 (IST)
+        id 395D45A26; Tue, 12 Apr 2022 16:09:45 +0530 (IST)
 From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, linux-arm-msm@vger.kernel.org
-Cc:     quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sayalil@quicinc.com,
+To:     adrian.hunter@intel.com, agross@kernel.org,
+        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
+        p.zabel@pengutronix.de, chris@printf.net, venkatg@codeaurora.org,
+        gdjakov@mm-sol.com, quic_asutoshd@quicinc.com
+Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
         Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Subject: [PATCH V4 0/2] Add reset entries for SDCC controllers
-Date:   Tue, 12 Apr 2022 16:02:06 +0530
-Message-Id: <1649759528-15125-1-git-send-email-quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V4] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+Date:   Tue, 12 Apr 2022 16:09:43 +0530
+Message-Id: <1649759983-22035-1-git-send-email-quic_c_sbhanu@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Reset GCC_SDCC_BCR register before every fresh initilazation. This will
+reset whole SDHC-msm controller, clears the previous power control
+states and avoids, software reset timeout issues as below.
 
-Changes since V3:
-	- Removed reset-names from bindings and DT file as suggested by
-	  Stephen Boyd.
-	- Removed comments for resets as suggested by Stephen Boyd.
+[ 5.458061][ T262] mmc1: Reset 0x1 never completed.
+[ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version: 0x00007202
+[ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt: 0x00000000
+[ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+[ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl: 0x00000000
+[ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
+[ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
+[ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
+[ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+[ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
+[ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+[ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]: 0x00000000
+[ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]: 0x00000000
+[ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
+[ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER DUMP-----------
+[ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg: 0x6000642c | DLL cfg2: 0x0020a000
+[ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl: 0x00010800 | DDR cfg: 0x80040873
+[ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 : 0xf88218a8 Vndr func3: 0x02626040
 
-Changes since V2:
-	- Updated commit subject and comments in dtsi file.
-	- Added resets entry in sdhci-msm dt-bindings.
+Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm chipsets")
+Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+---
+ drivers/mmc/host/sdhci-msm.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
 
-Changes since V1:
-	- Updated commit message, subject and comments in dtsi file as
-	  suggested by Krzysztof Kozlowski.
-
-Shaik Sajida Bhanu (2):
-  dt-bindings: mmc: sdhci-msm: Add gcc resets strings
-  arm64: dts: qcom: sc7280: Add reset entries for SDCC controllers
-
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 5 +++++
- arch/arm64/boot/dts/qcom/sc7280.dtsi                | 4 ++++
- 2 files changed, 9 insertions(+)
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 50c71e0..0e5fb62 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -17,6 +17,7 @@
+ #include <linux/regulator/consumer.h>
+ #include <linux/interconnect.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/reset.h>
+ 
+ #include "sdhci-pltfm.h"
+ #include "cqhci.h"
+@@ -2482,6 +2483,39 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
+ 	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
+ }
+ 
++static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
++{
++	struct reset_control *reset;
++	int ret = 0;
++
++	reset = reset_control_get_optional_exclusive(dev, NULL);
++	if (IS_ERR(reset))
++		return dev_err_probe(dev, PTR_ERR(reset),
++				"unable to acquire core_reset\n");
++
++	if (!reset)
++		return ret;
++
++	ret = reset_control_assert(reset);
++	if (ret)
++		return dev_err_probe(dev, ret, "core_reset assert failed\n");
++
++	/*
++	 * The hardware requirement for delay between assert/deassert
++	 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
++	 * ~125us (4/32768). To be on the safe side add 200us delay.
++	 */
++	usleep_range(200, 210);
++
++	ret = reset_control_deassert(reset);
++	if (ret)
++		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
++
++	usleep_range(200, 210);
++	reset_control_put(reset);
++
++	return ret;
++}
+ 
+ static int sdhci_msm_probe(struct platform_device *pdev)
+ {
+@@ -2529,6 +2563,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 
+ 	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+ 
++	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
++	if (ret)
++		goto pltfm_free;
++
+ 	/* Setup SDCC bus voter clock. */
+ 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+ 	if (!IS_ERR(msm_host->bus_clk)) {
 -- 
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
 of Code Aurora Forum, hosted by The Linux Foundation
