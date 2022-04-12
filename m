@@ -2,125 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A7C5C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 14:03:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 572F4C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Apr 2022 14:12:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351209AbiDLOFv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Apr 2022 10:05:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44006 "EHLO
+        id S242092AbiDLOOh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Apr 2022 10:14:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349415AbiDLOFn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 10:05:43 -0400
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEB795DA54
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2022 07:03:25 -0700 (PDT)
-Received: by mail-lj1-x22b.google.com with SMTP id c15so24173283ljr.9
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2022 07:03:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=FI3i4DL+p93iGd73hc2Cm0m5a7s8/TNa00wTXMOU0ks=;
-        b=OQPw9yReNLf2lc7yzrrKpiDe9z2AVUlCam5txQ55MrKIk5wszCeEXLAG1I2neQnt9E
-         q6XnFpmEqgpj3wOuUT5uGeQ08UUqsth91qUH21CG+GL+v49D8mW7crB+WpLPwAJ+nFn7
-         FK6cEVLX7wzs7V3TR3CuZ4HpiceFtGouak4rgaAQa0F6KqBgBYPsaMeFq++RulFl7Bm5
-         PH0BkLvu2lTtD47RPL2+5IPIoHrW+WlWVcCiCb1UmlTKSh7X4h6lLE/OecbQR1KY+a/7
-         g+gjdbZo7fa0EqyY4x/Ni9rxjQGcCVpjsUGJaq0uWqIGhqN1LbLWE4tC2yJdiG2Fw9Si
-         /KFg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=FI3i4DL+p93iGd73hc2Cm0m5a7s8/TNa00wTXMOU0ks=;
-        b=NGy9Aq7SAQlL/T1Y9AcASPSXgMxCexfb7JNm5tnoo2wDgRZuSllMvhxcYaNqRHHS9/
-         tWY+PrC/QySlX8LzHZc5tr9yx2BJSQuzHpl7fgiTkKW8clExSVGGT1OVTankZLbcOaZx
-         Zh9GWCciiZ4ZWjAcJR59cGm3S6VT0Ivlh/uPYjFnw5CpNYwuAJpVHOfECTGF6a9ugkMh
-         4T9xbKl7MQPSOzBfZAvsAXqlS4bchvcCNMOTsx/DAQhD/xwLmdz19f+Y4/GAgqfgEPuI
-         elAI6EWzibrLVtDJjxMWDuhLGeq0P238QYQB+h69+h1EcdhdIXEuTt6kP9a6+aPAPX41
-         g1LQ==
-X-Gm-Message-State: AOAM530SRVn8RjNQV399gNr90otlxRxQ02y/QqSuCxmDWNCnBvCOur4S
-        KD84XvAff9rDuaPetiPuHHjnmzHSfL711g==
-X-Google-Smtp-Source: ABdhPJyubUVJUrOhIw8kv51qEIkiAvuz1zIpTdA+msFn254owgYvu7zFCTI486BMZBt75DgVGgmxqQ==
-X-Received: by 2002:a2e:9241:0:b0:24b:63e8:1cd with SMTP id v1-20020a2e9241000000b0024b63e801cdmr6090530ljg.390.1649772202576;
-        Tue, 12 Apr 2022 07:03:22 -0700 (PDT)
-Received: from localhost.localdomain ([2a00:801:73a:37d6:817b:98fe:fa3c:58f3])
-        by smtp.gmail.com with ESMTPSA id q10-20020a2eb4aa000000b0024b51c3467asm1316062ljm.53.2022.04.12.07.03.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Apr 2022 07:03:20 -0700 (PDT)
-From:   liu.ming50@gmail.com
-To:     linux-mmc@vger.kernel.org
-Cc:     avri.altman@wdc.com, ulf.hansson@linaro.org,
-        Ming Liu <liu.ming50@gmail.com>
-Subject: [mmc-utils] [PATCH] Revert "mmc-utils: Remove unused MMC_BLOCK_MAJOR"
-Date:   Tue, 12 Apr 2022 16:03:31 +0200
-Message-Id: <20220412140331.1146516-1-liu.ming50@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S240441AbiDLOOf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2022 10:14:35 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F9D21CFE4
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2022 07:12:17 -0700 (PDT)
+Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[127.0.0.1])
+        by metis.ext.pengutronix.de with esmtp (Exim 4.92)
+        (envelope-from <a.fatoum@pengutronix.de>)
+        id 1neHFg-0003eH-7Y; Tue, 12 Apr 2022 16:12:16 +0200
+Message-ID: <b7990c48-1bfe-210f-a24f-6e1c70235d76@pengutronix.de>
+Date:   Tue, 12 Apr 2022 16:12:15 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH V4 3/3] arm64: dts: imx8mp: Enable HS400-ES
+Content-Language: en-US
+To:     Adam Ford <aford173@gmail.com>, linux-mmc@vger.kernel.org
+Cc:     devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Fabio Estevam <festevam@gmail.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        aford@beaconembedded.com, linux-kernel@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        linux-arm-kernel@lists.infradead.org
+References: <20220410193544.1745684-1-aford173@gmail.com>
+ <20220410193544.1745684-3-aford173@gmail.com>
+From:   Ahmad Fatoum <a.fatoum@pengutronix.de>
+In-Reply-To: <20220410193544.1745684-3-aford173@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
+X-SA-Exim-Mail-From: a.fatoum@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ming Liu <liu.ming50@gmail.com>
+On 10.04.22 21:35, Adam Ford wrote:
+> The SDHC controller in the imx8mp has the same controller
+> as the imx8mm which supports HS400-ES. Change the compatible
+> fallback to imx8mm to enable it, but keep the imx7d-usdhc
+> to prevent breaking backwards compatibility.
+> 
+> Signed-off-by: Adam Ford <aford173@gmail.com>
 
-This reverts commit 118dc4a0909f3413b6f8bd086cef43262e89dc2a.
+Reviewed-by: Ahmad Fatoum <a.fatoum@pengutronix.de>
 
-A compiling error was observed without this reverting, as follows:
-| mmc_cmds.c: In function 'read_extcsd':
-| mmc_cmds.c:72:25: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|    72 |         ret = ioctl(fd, MMC_IOC_CMD, &idata);
-|       |                         ^~~~~~~~~~~
-| mmc_cmds.c:72:25: note: each undeclared identifier is reported only once for each function it appears in
-| mmc_cmds.c: In function 'write_extcsd_value':
-| mmc_cmds.c:93:25: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|    93 |         ret = ioctl(fd, MMC_IOC_CMD, &idata);
-|       |                         ^~~~~~~~~~~
-| mmc_cmds.c: In function 'send_status':
-| mmc_cmds.c:110:25: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|   110 |         ret = ioctl(fd, MMC_IOC_CMD, &idata);
-|       |                         ^~~~~~~~~~~
-| mmc_cmds.c: In function 'set_write_protect':
-| mmc_cmds.c:148:25: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|   148 |         ret = ioctl(fd, MMC_IOC_CMD, &idata);
-|       |                         ^~~~~~~~~~~
-| mmc_cmds.c: In function 'send_write_protect_type':
-| mmc_cmds.c:172:25: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|   172 |         ret = ioctl(fd, MMC_IOC_CMD, &idata);
-|       |                         ^~~~~~~~~~~
-| mmc_cmds.c: In function 'do_rpmb_op':
-| mmc_cmds.c:2157:25: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|  2157 |         err = ioctl(fd, MMC_IOC_MULTI_CMD, mioc);
-|       |                         ^~~~~~~~~~~~~~~~~
-| mmc_cmds.c: In function 'erase':
-| mmc_cmds.c:2659:29: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|  2659 |         ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-|       |                             ^~~~~~~~~~~~~~~~~
-| mmc_cmds.c: In function 'do_ffu':
-| mmc_cmds.c:2888:37: error: 'MMC_BLOCK_MAJOR' undeclared (first use in this function)
-|  2888 |                 ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-|       |                                     ^~~~~~~~~~~~~~~~~
-| make: *** [Makefile:36: mmc_cmds.o] Error 1
-| make: *** Waiting for unfinished jobs....
+Thanks,
+Ahmad
 
-Signed-off-by: Ming Liu <liu.ming50@gmail.com>
----
- mmc.h | 3 +++
- 1 file changed, 3 insertions(+)
+> ---
+> V4: No Change
+> V3: No change
+> V2: Keep fallback to fsl,imx7d-usdhc to prevent breakage
+> 
+> diff --git a/arch/arm64/boot/dts/freescale/imx8mp.dtsi b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+> index 794d75173cf5..8578ff1062e6 100644
+> --- a/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+> +++ b/arch/arm64/boot/dts/freescale/imx8mp.dtsi
+> @@ -769,7 +769,7 @@ i2c6: i2c@30ae0000 {
+>  			};
+>  
+>  			usdhc1: mmc@30b40000 {
+> -				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
+> +				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
+>  				reg = <0x30b40000 0x10000>;
+>  				interrupts = <GIC_SPI 22 IRQ_TYPE_LEVEL_HIGH>;
+>  				clocks = <&clk IMX8MP_CLK_DUMMY>,
+> @@ -783,7 +783,7 @@ usdhc1: mmc@30b40000 {
+>  			};
+>  
+>  			usdhc2: mmc@30b50000 {
+> -				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
+> +				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
+>  				reg = <0x30b50000 0x10000>;
+>  				interrupts = <GIC_SPI 23 IRQ_TYPE_LEVEL_HIGH>;
+>  				clocks = <&clk IMX8MP_CLK_DUMMY>,
+> @@ -797,7 +797,7 @@ usdhc2: mmc@30b50000 {
+>  			};
+>  
+>  			usdhc3: mmc@30b60000 {
+> -				compatible = "fsl,imx8mp-usdhc", "fsl,imx7d-usdhc";
+> +				compatible = "fsl,imx8mp-usdhc", "fsl,imx8mm-usdhc", "fsl,imx7d-usdhc";
+>  				reg = <0x30b60000 0x10000>;
+>  				interrupts = <GIC_SPI 24 IRQ_TYPE_LEVEL_HIGH>;
+>  				clocks = <&clk IMX8MP_CLK_DUMMY>,
 
-diff --git a/mmc.h b/mmc.h
-index 25d6864..193dfee 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -19,6 +19,9 @@
- 
- #include <linux/mmc/ioctl.h>
- 
-+/* From kernel linux/major.h */
-+#define MMC_BLOCK_MAJOR			179
-+
- /* From kernel linux/mmc/mmc.h */
- #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
- #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
+
 -- 
-2.25.1
-
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
