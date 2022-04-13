@@ -2,160 +2,319 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19253C43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Apr 2022 10:35:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57FE8C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Apr 2022 11:04:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234992AbiDMKh7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Apr 2022 06:37:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57838 "EHLO
+        id S231742AbiDMLHD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Apr 2022 07:07:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56494 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234942AbiDMKhS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2022 06:37:18 -0400
-Received: from EUR04-DB3-obe.outbound.protection.outlook.com (mail-eopbgr60087.outbound.protection.outlook.com [40.107.6.87])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15BA3255AA;
-        Wed, 13 Apr 2022 03:34:54 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=N1vgakoqOOZOJchXfWJHlIczGBRE38Bz2+TfMeTNT5M4G8BsJPssYqmOaemv13ceDbUG4ut4kU0E829y13pDuGif4L/G86olawVQOi44sHL8LjA0y9ReOkEO073Y5EVUwoNt9N9NmwbHJjbZ0Q8SG7pOwt+orTO2+ZN98c+uLQMWWnyP54rWTfB6BtgAOOrBGZJxxnGkyhdjtLwxyzkMnjqpJkodd+32iCSYKJDWE08HI9yKk2Muou7OCvrV5kqGGE8PPnlke0wfV8QkfwTIPLc5txoFZDYQDJQkxsqqN4qA40Brhi55tMKLAsGzJ7V2UqSSORZuxbQaomh8E7MoTA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=85UFeRB/zGVi6eE47DWbgwvrQqugErgznrE2LXvLdKw=;
- b=NlX3Zso+X0uIN3Ylg80RWIYWLaVtDteVYNZQ0KZ+TVDGVbKgCExnIhZJ2/EQfYtPts9qRWSY5d2JuQpnk47+S7QJ2nj9KyFKzQNQwRPeVcx1pgOhVAckg/1/vvTIASOV7pir6a3ah1CbTr/CI2iYEIIBCail7U0P68nM109lZQOX6aaX9NyxlV5MyBMmoOg2UWhHHVOq8eHV043//096yyeC9GjvvCpxyEsU1FhTACbJLGchRTI3CcbevuTNUnqXJ9PNmOEPozky4lEo2FXxipfNAqzd1JUL4bcMbWhZdTyWiFI7SyRFZD+Huqi+IcX9wiCDe8aKf99ioyfYpnI8fw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=85UFeRB/zGVi6eE47DWbgwvrQqugErgznrE2LXvLdKw=;
- b=RSKfyVn3K8JLVboMgcmflb5JAYCSWdtYviI9YbozEXlf0Ar/nRkUXC7joEy/KDGbIFTTpGke9H/Fp74lT0cwB1ma2eD7yQGSZVLKWbhxUp1+pL/hF3ZcXjdTcfVpPzB+97MFKSJO2W2mpxk6EMzoPgROduEO4WVAsc2MqgZtNgk=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from VI1PR04MB4688.eurprd04.prod.outlook.com (2603:10a6:803:6a::30)
- by AS8PR04MB8691.eurprd04.prod.outlook.com (2603:10a6:20b:42a::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5164.20; Wed, 13 Apr
- 2022 10:34:46 +0000
-Received: from VI1PR04MB4688.eurprd04.prod.outlook.com
- ([fe80::a9d1:199:574b:502f]) by VI1PR04MB4688.eurprd04.prod.outlook.com
- ([fe80::a9d1:199:574b:502f%6]) with mapi id 15.20.5144.029; Wed, 13 Apr 2022
- 10:34:46 +0000
-From:   Abel Vesa <abel.vesa@nxp.com>
-To:     Rob Herring <robh@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>
-Cc:     Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <fabio.estevam@nxp.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, <netdev@vger.kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-Subject: [PATCH v6 07/13] dt-bindings: fsl: scu: Add i.MX8DXL ocotp and scu-pd binding
-Date:   Wed, 13 Apr 2022 13:33:50 +0300
-Message-Id: <20220413103356.3433637-8-abel.vesa@nxp.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220413103356.3433637-1-abel.vesa@nxp.com>
-References: <20220413103356.3433637-1-abel.vesa@nxp.com>
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: AM6PR04CA0047.eurprd04.prod.outlook.com
- (2603:10a6:20b:f0::24) To VI1PR04MB4688.eurprd04.prod.outlook.com
- (2603:10a6:803:6a::30)
+        with ESMTP id S232158AbiDMLHB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2022 07:07:01 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C490850077
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2022 04:04:37 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id 17so1739826lji.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2022 04:04:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PolVCYZH+S+5d7+8nRmDwlwTMq3+M1AEfuUjAP3FCeI=;
+        b=dXtdVu9LsqgOgy35KfstKtm0hztrsHt7h+h0lTqbJswGY+gOtbimR7QPafOCF+FUeb
+         7ptokpz6RxGlhrl1Y3iIeXYQlY935ArYO991NRiz7ubvhwbB2yFVyGVlvgmpBzWlXAtR
+         QJzfhIxHkUwYVQZMh0D0pOyBPrAvgfwPNxwyJ4ODXIKNN88trxeBYIjgRGGsxw7yjl2p
+         10l10+10hXIqcLU6pUnD+tD5rWIGRsNdmwWKGPcmV0PkaFNYfjwGC2zcRjs/nr7/u2YQ
+         gM09g+XK5WbeEoEMfIu7U+CD65iEGJMMGbRq0pcXgLDTYteSoDPVi+22n5J8pFhjIJBd
+         jN6w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PolVCYZH+S+5d7+8nRmDwlwTMq3+M1AEfuUjAP3FCeI=;
+        b=7pagudFNt5q2cJxRMtKl2u+2hScQywFNIe/6xFGe7BY1hnFoEJKICS6KBY9RwirzqR
+         9sn0R12Bm5jbLV8lIZG70yqIcrluf37WUcY5npXGtDs9Z8nKh7/WcLvLLV8XEXswdHm6
+         IaMkRqf7An06MCd9IcCtADugKzKhoSr8hUkmp5VGdsc+j+Wt6HaAyhtWo3QEhnmTnQJS
+         Goz+TR420l9CSSC8LoHmCJkc6vUvhCtEEfhwQ4qfrs5xnv+uoxM71LFo5JMFOM4MAaa0
+         0YjSamTAWaBhNxwD4peFv5y8uKZ5Gx9JtWtN+nWVwxWK3hZOKIieFgeYelS2cY4TE7iM
+         7b5A==
+X-Gm-Message-State: AOAM531w5RQlHCPDLIG+kbZzdvPSZ/mvJGcIrLaNOuDOg6cRC5nNGA/Z
+        fxercbP/1qhewihYjMXre+pcNClZnwUjSyQmnJi7Gw==
+X-Google-Smtp-Source: ABdhPJyYFC3sXsuhLaP4aOMKHr0gs8sm6F4Vhit9IaxSTfQxfGV/vl1g5fswRKo8yS6D6hDxOoDijKuuDa/spqi2MgE=
+X-Received: by 2002:a2e:3e05:0:b0:24b:5df0:6388 with SMTP id
+ l5-20020a2e3e05000000b0024b5df06388mr10609582lja.367.1649847875891; Wed, 13
+ Apr 2022 04:04:35 -0700 (PDT)
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: c70fbd65-d29c-47fe-7e0e-08da1d393ad8
-X-MS-TrafficTypeDiagnostic: AS8PR04MB8691:EE_
-X-Microsoft-Antispam-PRVS: <AS8PR04MB8691480D84E2520C623799FEF6EC9@AS8PR04MB8691.eurprd04.prod.outlook.com>
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 6zXj3891UQY64SFO97tmDLgANv6N2PvkvBWlxd7fuV4z9WQuoRrO/97CM95b/jcc34d3bBqfQFvsmn5xGr19OUrZC1nGbI4W8oX7IrUkN6qQNSK5dwp2YtKLy5ITzZ0KV5UsDDGgWBiuRGu4Rkjl1Y5oNAbUapbPCXkOGyhez4E4Yy/eCvuD0hIZ9P5OcVmaHlPtkg2Xb8alWmLceaybnqe5QNFu571htZ71aKsxTm4hFny2YheTr8hfXZeZBg86aD5HxwK4S7Sr6EweTupgGeJ+U0L5LaHwp7Oy41xe2aN+7huAsZdKKA8Gi6tmB6pj79Z4kGOmYm0RwO2Q0RFJfibJazp4WzG6h5gIqw7cAbPHoTJZy3BvSdzI01iJvrhPxDorX3FZtYX2XVK8lu8DqWC+dsquACwy9ejzc2PNIyYbgjr44o5EFvI1byMgPYCVLOc3pcNDUK0xErRANylxOJqST+WRQq6VUsu2VmfIzpimot9apqg+bbQO99EJwZy/4la7BjpuQGfQuqmn3hwwZeoehMwYyAde6VXgrpzwFx46DGRguk6/b2NQvG0Szq8K3cKMmWhlnpXQ9eLd5+mIx6P6/pPCxv8IX2n/F8PRAeWD7e/UG4zitrvyHY3/BtCNM2/BydN6A0FUJb9sfUebLg6hxy17XUu1Zr9zA39+f7eq5McJbQCoShH0Yf1ynmKp7kzuxdQ3wG/tBEG0rHYZyw==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR04MB4688.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(6486002)(38350700002)(38100700002)(4326008)(66476007)(66946007)(66556008)(316002)(54906003)(110136005)(508600001)(1076003)(8676002)(26005)(186003)(2616005)(52116002)(6512007)(6506007)(6666004)(86362001)(2906002)(44832011)(7416002)(5660300002)(36756003)(8936002)(83380400001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?3JMfTEKdSNsnVyoFhYka60nr84wKexH+2vDw7rCJsdQ8XSOYYqffs06bSgmd?=
- =?us-ascii?Q?gv02FL/LDw+26shBXMVgi+yZ+N2ErP5M42XKAf7NYoUN9xBN/8CNJ16EIZlX?=
- =?us-ascii?Q?i3SoRtO/UWT+NKHlDEfZ9EX8B8DZ5TwNhJ1YNQKvn90nyYEdQrhGTEVbURga?=
- =?us-ascii?Q?AKvqtJ8a+fCXXPGYFaaJc+GxY0Nzaf/Ru0ytuER8yWYqX6ufLZ16E46FA3y+?=
- =?us-ascii?Q?w4gDZwKuH82Ui9L2Bw8gjCgS7g0SqTRNXQGxIgOJXldemL8XmS1lqOjkGR52?=
- =?us-ascii?Q?xvzqj32Ru7jAS229ORYXopnHZyEAVjzn2NHFLtLaALk/clAXgNYBBBiJqwsw?=
- =?us-ascii?Q?HQ23Qe9+jlOaQvqftrKRdeiRwAhFErihT84IB2jax7GAHEv3TS2SuowSZLMR?=
- =?us-ascii?Q?4xFhW4Vvojr7bSw94FzZVYZuRzTXqR2ZSbF4i4S34q2EmWHyOVQcdI1nAxfA?=
- =?us-ascii?Q?WvW/dSuZeqWBOcsTKrzNyj8UwrvndYn/smDbTA6sq90iOgTnNyA+uKdl+XC6?=
- =?us-ascii?Q?CszWBi16HGQGMEpA2MLorQHnnhn2k7ErahfMOvce5LWANyI42r0UPOYlPnew?=
- =?us-ascii?Q?0p2QPGYFBE/lFgBFPanfpgNtOxReELfreL7OryXTlr5S2zt9Jpg6eXZDIW6P?=
- =?us-ascii?Q?T6/FK84FOxGd48vvXNTFJxuu69WH4/yL0ZPqcR16E/MCPzyL1xopKxpfKVUR?=
- =?us-ascii?Q?YjHHVrF4TmDi/PPopg0U7H2kTyJpxF8Ng0iA3scw9S8stFeZPjyWGElq8rWp?=
- =?us-ascii?Q?A8SYFkQibEi96yH7hhfbS5cdMmcivABDQXndpFlWpK5n6dWhMvmJiJWNvww9?=
- =?us-ascii?Q?gPYKOyzLtcqAqy/HLrrfpGUsupg2NzQdjD/Rzx8BxieKrpEtUA9tsdrpl4H3?=
- =?us-ascii?Q?I7PlLXvg9axu1T+JFDRVPeZbwxUPoN01iP438mKLe25IUj75Dennc1ZaEaSv?=
- =?us-ascii?Q?WtMu0kJ8rpRaauqI3NW7+8Kh5w5uP003uuqL9U+khL9AMgX6XGezgSEItHm2?=
- =?us-ascii?Q?eDCKYmrfKGd5pRA3fz1LGmSKOK98foWqts/hxCPsChK7y4kKNkonu+aT8SVO?=
- =?us-ascii?Q?mDJuTaZ7Qrh6jh2mFa2b4I+2SizLaZWQECwzd8F/VGU6qLOB3z2N/8q6fS5R?=
- =?us-ascii?Q?Ul3wK5JqCdY9fLtZpFzTAxi4FsGQnpGMTL4Zysg1snF3td/huMboGg1V0kjR?=
- =?us-ascii?Q?hEAIbfNowyc2h9GY9z0q69yn8EI08PfE3LxXSgjBpYQI70SdQvObUUjZb5xa?=
- =?us-ascii?Q?oSkyq83z0TGAwUlKt1g3gjR/ebttIT/cTMmZQ4vocGUkRxpjCX8pW6qOGKt3?=
- =?us-ascii?Q?13BdZZcBJWJwuSRXz/UsAvJVoD7nL/TeVquVucEueHxwrOu+UjX5AvQ0hcxK?=
- =?us-ascii?Q?KB0Len/eFrZHidxyqQ2Amn/moIp/Gp7o+h4+arn8G7eMXst8Pi5HTzL/ugG3?=
- =?us-ascii?Q?pJEcXQTXjJ5vVLH05jGfqQM2uRaH2fQDi9m4h026+uIhRKwMQ0rHX5naTVW6?=
- =?us-ascii?Q?GXBcvmdjRkEhM33uMqmoecRb1PaZKHpW2oMRUr0jGfLEXuJuavilfSGyDLEP?=
- =?us-ascii?Q?jTew6jTzpg7GBkqiUqm7xPnpobRMVkRXlIDfbiKpR4wSjD7D6CCOR4+Ma88F?=
- =?us-ascii?Q?dGlgECVTtXPhL63rYwm8OkVlaiNfQDC6v5wLRrW/dniPKtol6egEZkhmzES5?=
- =?us-ascii?Q?DOZLbuVgTAEa65PPaPZF6Ua9KCMtdbC9KdhZQRK92m7UexTCRkHu1ELkvNRl?=
- =?us-ascii?Q?UVnJ0T6idA=3D=3D?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c70fbd65-d29c-47fe-7e0e-08da1d393ad8
-X-MS-Exchange-CrossTenant-AuthSource: VI1PR04MB4688.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Apr 2022 10:34:46.6766
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: v2gTs/4YGvuuote4JkOQy74LREcdPcLQ6cQWQg83vC8RrkBtXJPhXk3eLh+0t83saPZfgEl+Rp2zC4YIqI351Q==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8691
+References: <20220222033931.237638-1-jasonlai.genesyslogic@gmail.com>
+ <20220222033931.237638-7-jasonlai.genesyslogic@gmail.com> <CAPDyKFoDkxg1b0k4s_+F+eS8EUVM9ZabiwNc4VVQuCexLWNpsw@mail.gmail.com>
+ <CAG0XXUGc4+8vF5paKZi9x=i_8pPpYcdCdh=Yr9zkLFe5MqNG0g@mail.gmail.com>
+ <CAPDyKFrj8DZ0Adn7+7gND0VGFj4J2TDPdQf2Vuf7mOTJD4BY+g@mail.gmail.com>
+ <CAG0XXUE_mH-=oxBZhvYphk+Pyg4QoHogFk2ifQu8eniq2vzeCQ@mail.gmail.com>
+ <CAPDyKFpeXKBu_+0Ws10-EGTr6iR3VirTdg_M2CVAeqzwx6DwxA@mail.gmail.com> <CAG0XXUFYVjU8aMCCL_Caewdh8KZYfmxy0cSBD62jj6N7_pE2GA@mail.gmail.com>
+In-Reply-To: <CAG0XXUFYVjU8aMCCL_Caewdh8KZYfmxy0cSBD62jj6N7_pE2GA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 13 Apr 2022 13:03:59 +0200
+Message-ID: <CAPDyKFqnPhV3078w7NttmG2SQVETp2kZwjHXwshYCVgcb41cQw@mail.gmail.com>
+Subject: Re: [PATCH V3 6/7] mmc: Implement content of UHS-II card
+ initialization functions
+To:     Lai Jason <jasonlai.genesyslogic@gmail.com>
+Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>, dlunev@chromium.org,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>,
+        Jason Lai <Jason.Lai@genesyslogic.com.tw>,
+        otis.wu@genesyslogic.com.tw
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add i.MX8DXL ocotp and scu-pd compatibles to the SCU bindings
-documentation.
+[...]
 
-Signed-off-by: Abel Vesa <abel.vesa@nxp.com>
-Acked-by: Rob Herring <robh@kernel.org>
+> > > > > > >  static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
+> > > > > > >  {
+> > > > > > > +       struct mmc_command cmd = {0};
+> > > > > > > +       struct uhs2_command uhs2_cmd = {};
+> > > > > > > +       u16 header = 0, arg = 0;
+> > > > > > > +       u32 payload[2];
+> > > > > > > +       u8 nMinDataGap;
+> > > > > > > +       u8 plen;
+> > > > > > > +       int err;
+> > > > > > > +       u8 resp[5] = {0};
+> > > > > > > +       u8 resp_len = 5;
+> > > > > > > +
+> > > > > > > +       header = UHS2_NATIVE_PACKET |
+> > > > > > > +                UHS2_PACKET_TYPE_CCMD | card->uhs2_config.node_id;
+> > > > > > > +       arg = ((UHS2_DEV_CONFIG_GEN_SET & 0xFF) << 8) |
+> > > > > > > +              UHS2_NATIVE_CMD_WRITE |
+> > > > > > > +              UHS2_NATIVE_CMD_PLEN_8B |
+> > > > > > > +              (UHS2_DEV_CONFIG_GEN_SET >> 8);
+> > > > > > > +
+> > > > > > > +       if (card->uhs2_config.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD &&
+> > > > > > > +           host->uhs2_caps.n_lanes == UHS2_DEV_CONFIG_2L_HD_FD) {
+> > > > > > > +               /* Support HD */
+> > > > > > > +               host->uhs2_caps.flags |= MMC_UHS2_2L_HD;
+> > > > > >
+> > > > > > How is the uhs2_caps.flags field intended to be used? To me it looks
+> > > > > > like a way for the mmc core to exchange status/configuration
+> > > > > > information about the initialization process of the card, with the mmc
+> > > > > > host driver. Perhaps there is more too. Is that correct?
+> > > > > >
+> > > > > > If so, I think it looks quite similar for what we have in the struct
+> > > > > > mmc_ios, for the legacy interface(s). I am not saying we should use
+> > > > > > that, just trying to understand what would suit best here.
+> > > > > >
+> > > > >
+> > > > > The usage of uhs2_caps.flags is spread out through core and host.
+> > > > > All operations related to it cannot be integrated into uhs2_set_ios()
+> > > > > simply. I recommend maintaining the status quo.
+> > > >
+> > > > What is puzzling to me, is that the data is stored below uhs2_caps.*
+> > > > and that it's called "flags". It's not self-explanatory and it's not
+> > > > consistent with the way we use the ->set_ios() callback, for the
+> > > > legacy interface.
+> > > >
+> > >
+> > > Sorry,  I did not understand why uhs2_caps.flag is related to set_ios().
+> > > The bit flags are used to indicate current status of UHS2 card:
+> > >   - bit 0: MMC_UHS2_SUPPORT
+> > >              This flag indicates if current sd card  supports UHS2 mode.
+> >
+> > By looking at the code, it seems like MMC_UHS2_SUPPORT is redundant,
+> > at least from the mmc core point of view. Everywhere it's used, we use
+> > MMC_UHS2_INITIALIZED too.
+> >
+>
+> Yes. MMC_UHS2_SUPPORT is only useful in patch set: "Add support UHS-II
+> for GL9755"
+> (https://patchwork.kernel.org/project/linux-mmc/list/?series=378627&archive=both).
+>
+> I will remove it in V4.
+>
+> > Moreover, in patch 2 (mmc: core: Prepare to support SD UHS-II cards) I
+> > added MMC_CAP2_SD_UHS2 as a generic host cap, which is being used in
+> > mmc_attach_sd_uhs2(). This should be sufficient as a generic cap for
+> > UHS2, I think.
+> >
+> > >   - bit 1: MMC_UHS2_INITIALIZED
+> > >              This flag indicates if current uhs2 sd card  had been initialized.
+> >
+> > In patch 2 (mmc: core: Prepare to support SD UHS-II cards), I added
+> > MMC_TIMING_SD_UHS2. It looks like it tries to serve a similar purpose.
+> >
+>
+> MMC_TIMING_SD_UHS2 is used to indicate that host controller is using UHS2
+> timing now. But MMC_UHS2_INITIALIZED=1 means that UHS2 interface
+> initialization is complete. The meaning of these two flags are different.
+>
+> > Moreover, I don't see where MMC_UHS2_INITIALIZED is getting set, but I
+> > assume it must be before we try to initialize the card by sending UHS2
+> > specific commands to it, right?
+> >
+>
+> It is set in sd_uhs2_init_card():
+> static int sd_uhs2_init_card(struct mmc_host *host, struct mmc_card *oldcard)
+> {
+>         struct mmc_card *card;
+>         u32 node_id;
+>         int err;
+>         [...]
+>         if (card->uhs2_state & MMC_UHS2_SPEED_B) {
+>                 err = sd_uhs2_change_speed(host, node_id);
+>                 if (err)
+>                        return err;
+>         }
+>
+>         card->uhs2_state |= MMC_UHS2_INITIALIZED;
 
-dt-bindings: fsl: scu: Add i.MX8DXL scu-pd binding
+This is probably a local change present only in your own tree, because
+I don't see this anywhere in the v3 series.
 
-Add i.MX8DXL scu-pd compatible to the SCU bindings documentation.
+In any case, it's not obvious to me why you need to set it exactly at
+this point. Can you clarify why?
 
-Signed-off-by: Abel Vesa <abel.vesa@nxp.com>
----
- Documentation/devicetree/bindings/arm/freescale/fsl,scu.txt | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+Perhaps, as I stated before, it's time to post the entire series,
+including the host driver changes. In this way, I should be able to
+get the complete picture.
 
-diff --git a/Documentation/devicetree/bindings/arm/freescale/fsl,scu.txt b/Documentation/devicetree/bindings/arm/freescale/fsl,scu.txt
-index a87ec15e28d2..27a2d9c45b0b 100644
---- a/Documentation/devicetree/bindings/arm/freescale/fsl,scu.txt
-+++ b/Documentation/devicetree/bindings/arm/freescale/fsl,scu.txt
-@@ -70,6 +70,7 @@ domain binding[2].
- 
- Required properties:
- - compatible:		Should be one of:
-+			  "fsl,imx8dxl-scu-pd",
- 			  "fsl,imx8qm-scu-pd",
- 			  "fsl,imx8qxp-scu-pd"
- 			followed by "fsl,scu-pd"
-@@ -142,7 +143,8 @@ OCOTP bindings based on SCU Message Protocol
- Required properties:
- - compatible:		Should be one of:
- 			"fsl,imx8qm-scu-ocotp",
--			"fsl,imx8qxp-scu-ocotp".
-+			"fsl,imx8qxp-scu-ocotp",
-+			"fsl,imx8dxl-scu-ocotp".
- - #address-cells:	Must be 1. Contains byte index
- - #size-cells:		Must be 1. Contains byte length
- 
--- 
-2.34.1
+>
+>         err = sd_uhs2_legacy_init(host, card);
+>         if (err)
+>                 goto err;
+>         [...]
+>
+> }
+>
+> > >   - bit 2: MMC_UHS2_2L_HD
+> > >              This flag indicates the speed mode of current uhs2 sd card is
+> > >              2L-HD mode. The host sets DCMD argument[0] bit 6
+> > >              according to this flag. That means this flag was checked in
+> > >              every MMC request.
+> >
+> > If we compare how we managed things like this for the legacy
+> > interface, this information is kept in the "ios->timing" variable.
+> >
+> > >   - bit 3: MMC_UHS2_APP_CMD
+> > >              This flag indicates if the current SD_TRAN command is an APP
+> > >              command. The host sets DCMD argument[0] bit 14  according to
+> > >              this flag.  That means this flag was checked in every MMC
+> > >              request.
+> >
+> > Alright, so it's a specific flag for UHS2 commands.
+> >
+> > >   - bit 4: MMC_UHS2_SPEED_B
+> > >              This flag indicates the speed range of current UHS2 sd card. This
+> > >              flag is used only during uhs2 sd card initialization.
+> > >
+> > > > It looks to me that we should rather add a new variable to the struct
+> > > > mmc_host and perhaps name it "uhs2_ios", to keep this data. Whether we
+> > > > need to create a new struct for "uhs2_ios" or if it's better to extend
+> > > > struct mmc_ios, I am not sure. I guess exploring this by writing the
+> > > > code would tell us what is best suited.
+> > > >
+> > >
+> > > I will add a new variable to the struct mmc_host and name it "uhs2_ios".
+> > > In UHS2 CCMD/DCMD command packet, DM in TMODE(bit 6 in Argument)
+> > > and bit APP(bit 15 in Argument) are set according to MMC_UHS2_2L_HD
+> > > and MMC_UHS2_APP_CMD. Hence, I plan to define struct uhs2_ios as:
+> > > struct sd_uhs2_ios {
+> > >         bool                  is_2L_HD_mode;    /* DM bit in TMODE in UHS2 DCDM
+> > >                                                                   *
+> > > argument will be set to 1 when
+> >
+> > Seems reasonable.
+> >
+> > >                                                                   *
+> > > this field is true. */
+> > >         bool                  is_APP_CMD;         /* APP bit in UHS2 CCMD/DCDM
+> > >                                                                   *
+> > > argument will be set to 1 when
+> > >                                                                   *
+> > > this field is true. */
+> >
+> > Sounds like this better belongs in the struct uhs2_command.
+> >
+>
+> Indeed, it is more reasonable to put is_APP_CMD in uhs2_cmd. But uhs2_cmd
+> is allocated in mmc_start_request() and is_APP_CMD is set in mmc_app_cmd(),
+> which is called prior to mmc_start_request(). So I use this flag as a mark and
+> check it when filling uhs2_cmd in uhs2_prepare_sd_cmd().
 
+I couldn't find where MMC_UHS2_APP_CMD was getting set, but I assume
+you have some local changes that make it set in mmc_app_cmd() then.
+
+I decided to have a closer look at this. Instead of using a flag
+(MMC_UHS2_APP_CMD) for this, let's re-work the code so it becomes
+possible to prepare the "uhs2_cmd" in mmc_app_cmd() too. That means,
+from mmc_start_request() we need to check if the mmc_cmd->uhs2_cmd has
+already been assigned and then just leave it as is.
+
+>
+> > >         unsigned int     power_delay_ms;    /* waiting for stable power */
+> > > };
+> > >
+> > > As for MMC_UHS2_INITIALIZED and MMC_UHS2_SPEED_B, I plan to add a variable
+> > > in struct mmc_card and name it "uhs2_state", to keep current UHS2 card states.
+> > > struct mmc_card {
+> > >         struct mmc_host *host; /* the host this device belongs to */
+> > >         [...]
+> > >         struct  sd_uhs2_config  uhs2_config;   /* SD UHS-II config */
+> > >         u8                                  uhs2_state;     /* SD
+> > > UHS-II states */
+> > > #define MMC_UHS2_INITIALIZED    BIT(1)
+> > > #define MMC_UHS2_SPEED_B        BIT(2)
+> > >         [...]
+> >
+> > Please don't.
+> >
+> > If it's configurations of the card, the data belongs under struct
+> > sd_uhs2_config. If it's configuration of the host, the data typically
+> > belongs in the struct sd_uhs2_ios.
+> >
+> > MMC_UHS2_SPEED_B is typically a speed mode for UHS2. For the legacy
+> > interface in the struct mmc_ios, we have an "unsigned char timing"
+> > variable to keep things like these. We need something similar in the
+> > struct sd_uhs2_ios for this, I think. Maybe we should even turn the
+> > bool for "2L_HD_mode" into being part of this "timing" variable.
+> >
+>
+> Actually, MMC_UHS2_INITIALIZED and MMC_UHS2_SPEED_B are more
+> like "is UHS2 interface initialization complete?" and "is current UHS2 sd card
+> support Range B clock?". They are not configurations but a kind of flags which
+> are used to tell driver:
+>     - MMC_UHS2_SPEED_B:     Current UHS2 sd card supports Range B clock
+>                                                    frequency. Driver
+> can execute sd_uhs2_change_speed()
+>                                                    after sd_uhs2_config_write().
+
+I assume you mean that if both the card and the host supports Range B
+speed mode for UHS-II, we should try to switch to it.
+
+Then I have two follow up questions related to this.
+1) Is there some specific need to inform the host driver, in the
+progress of switching to the new speed mode, to make this work? I
+would believe so, but I don't have the complete picture.
+2) After a successful switch to the new speed mode, we should keep
+track of that we are running in this mode. In this way we can report
+this in logs/debugfs. How do you intend to do this?
+
+>     - MMC_UHS2_INITIALIZED: UHS2 interface handshake done. Driver can access
+>                                                    current UHS2 sd
+> card with UHS2 interface.
+
+What does "driver can access UHS2 interface" really mean? Is it that
+the card is ready to accept SD-TRAN commands, for example? Can you try
+to be a bit more precise, please?
+
+>
+> That's why I named it 'uhs2_state'. What do you think?
+
+Let's see where the discussion brings us. Although, "state" is rather
+confusing - and it's inconsistent with the ways things are implemented
+for the legacy interface.
+
+[...]
+
+Kind regards
+Uffe
