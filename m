@@ -2,59 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E71D7C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Apr 2022 09:26:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76AA9C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Apr 2022 09:49:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241722AbiDNJ2m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Apr 2022 05:28:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55148 "EHLO
+        id S236051AbiDNJwP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Apr 2022 05:52:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48112 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241715AbiDNJ2k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Apr 2022 05:28:40 -0400
-Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D959148302;
-        Thu, 14 Apr 2022 02:26:16 -0700 (PDT)
-Received: by mail-pf1-x432.google.com with SMTP id u29so648379pfg.7;
-        Thu, 14 Apr 2022 02:26:16 -0700 (PDT)
+        with ESMTP id S229803AbiDNJwO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Apr 2022 05:52:14 -0400
+Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59A0A633E;
+        Thu, 14 Apr 2022 02:49:48 -0700 (PDT)
+Received: by mail-pl1-x629.google.com with SMTP id n18so4221568plg.5;
+        Thu, 14 Apr 2022 02:49:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
         bh=zv2u67VUTHgcQVHVUxKlQUfo3twOkOyQTpWpLFs+HfU=;
-        b=mntMiy3fQByvKw7rwF6+IdJXrfqFIr7hYdeBVWaVVkmYC7pJrqx7jAv891elodFmoc
-         5fk4ZTDvSJ5thBiGtT1Ksm8SKuNjqS3NC9WWUZCgpvpcMUzu27WS+cEkJRvHsZAFZYBk
-         xZf3sPc5nU9AcaXZq35+2cMRgKJO2hZBn+/T8vidZf4TjjBKL0pjaIMYEBzyaxAODGh0
-         onnLxYO6efQRyZd1Xz9arcJXGd2RqIslpXc6ydqAZnY2l8IZJHWs9Kzk1lNBrzYSWUGZ
-         Aq6raXAY8qSKGc97cmKQx/kcPJcGJqnHKWdfPCUd7tGL+NawkjlKu3yVbQktP00OIprd
-         9fRg==
+        b=DWsmfMcZlwH7OSGkV7auWZsBJ/al3HnlfUVbLDkx+CAbb8C2lgpDoYfb1hqkMKJ8e1
+         xddujm1TdFy7l3hTsAtteOEJLma1hOthjc9OMUcSFsGT1rcivIIP5ozAb8kWm7/eMwHo
+         /0B2bIGulLpcwlsmcjas/pkYXrsYt4wrgqoWGOeqF35Cf8xgBa/dLhwxd2f2vg2jo8a0
+         DvoftHC/zaOLAWn5ugjI07A61v8QK7Vl7+h8ranhPiFr8Nh+ft6D4NQ55GhI/SIq9w7N
+         62BZrB0vxBB+eJlhRtCqUH1a45xHhmAZa1vMVkze+PU3jga1Z6px7pmGwgJWj7uOjNKB
+         4ssA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
         bh=zv2u67VUTHgcQVHVUxKlQUfo3twOkOyQTpWpLFs+HfU=;
-        b=Fu6KG5D/Eu3GuNAOLEVBfsYgVSTo9YWDmZUvgC8y6r7EzakmFV3Lbs2cf6U0azIW0U
-         8anNmTZy3lC2utjzqIZJEAcJQUs2hwXOa9wIEzHP9btmogRCPea0657APMsGVvO9+dPd
-         q2V7VbQzUYnTteqaNrR1AwpEUfuZ1bC0NOrEt9m+jbViQ4iwv3wFBcPJVYh2H9aO4uA9
-         qjy6hJI5EHWW6uAI9qYv1XFFoRH89OMNziY2Gha4ynkE0F74EbKdUa7sJqOIMtdU1EyR
-         YXSjhXU9Odg593cRbDi9dgzfPVvtxREWIeWZ2O62e0Eeh136Tejy6HVXd2WTWcvDRTI8
-         8Iwg==
-X-Gm-Message-State: AOAM5310g/pzKEER4FOg7C0a4L0X+MXivrbpMNMPJtTVkcjHq4X6EbPt
-        MZWb93coMhw54z2z41QT11Y=
-X-Google-Smtp-Source: ABdhPJzYM4dvLOcTka6nYDCt2/mSB/TJn7kMvQYOy4aBuEn8m2V96zC1Bc5VE7dM6sZrauLYfffC1g==
-X-Received: by 2002:a63:6e49:0:b0:385:fb1c:f432 with SMTP id j70-20020a636e49000000b00385fb1cf432mr1515386pgc.207.1649928376049;
-        Thu, 14 Apr 2022 02:26:16 -0700 (PDT)
+        b=Tupe6kxS9VvFy4xee6Q9/leS7QWXhofYZ8kJmafWg17pEY2Jl7gy1Y96VaoUXtPWHT
+         ZmtIqKD4UK8DLgx1bQwvkhFa3Cw/tmIc3vDZosbPzMhpbgWMNv/+p2qyXPTmZsvZGXXn
+         9v7mlQbbCzEDSCNZ/OkWeQ5NdIZdQQyV9jb4AinRp9WDdLJnG4e551ZCBiYb8yjvQ6Kn
+         UTMeNKilIw/9tQxYjFYk6WquFDJ5r0g26wnOXXeU37NRbssvDnMpvrE40T6KWZBAnBMJ
+         1zvdxgEzr+d7iWiosW+Z1qDLFkcX5rV8DWrmfENZ8VtwmafMj1SPVM0KnKSEkrMe/Tkx
+         Qb9g==
+X-Gm-Message-State: AOAM5306uVaAv5GYdkVgLi3iJu1F78JSfkUzfSigFAFf5uERmzTsiYuA
+        sAVegZfPaHG8Uyi66j+ci5M=
+X-Google-Smtp-Source: ABdhPJwJy2f/l6+cNztO4ckNzXYQUX//84LV4uu5q5oD91OvxnTFIalckRWTVTcqhgMLoicLdeIqWQ==
+X-Received: by 2002:a17:90a:e7cf:b0:1cd:3eb9:ce79 with SMTP id kb15-20020a17090ae7cf00b001cd3eb9ce79mr3371550pjb.88.1649929787809;
+        Thu, 14 Apr 2022 02:49:47 -0700 (PDT)
 Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id t184-20020a625fc1000000b004fa3bd9bef0sm1586765pfb.110.2022.04.14.02.26.14
+        by smtp.gmail.com with ESMTPSA id d16-20020a056a00245000b004f7728a4346sm1799753pfj.79.2022.04.14.02.49.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Apr 2022 02:26:15 -0700 (PDT)
+        Thu, 14 Apr 2022 02:49:47 -0700 (PDT)
 From:   Ben Chuang <benchuanggli@gmail.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        SeanHY.Chen@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
-        ben.chuang@genesyslogic.com.tw, Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH] mmc: sdhci-pci-gli: A workaround to allow GL9755 enter ASPM L1.2
-Date:   Thu, 14 Apr 2022 17:26:12 +0800
-Message-Id: <20220414092612.456730-1-benchuanggli@gmail.com>
+Cc:     SeanHY.Chen@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+        greg.tu@genesyslogic.com.tw, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Ben Chuang <benchuanggli@gmail.com>
+Subject: [RESEND, PATCH] mmc: sdhci-pci-gli: A workaround to allow GL9755 to enter ASPM L1.2
+Date:   Thu, 14 Apr 2022 17:49:45 +0800
+Message-Id: <20220414094945.457500-1-benchuanggli@gmail.com>
 X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
