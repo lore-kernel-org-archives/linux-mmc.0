@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7379FC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Apr 2022 04:57:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D4C9C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Apr 2022 04:57:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350076AbiDOE7V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Apr 2022 00:59:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47846 "EHLO
+        id S1350137AbiDOE7y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Apr 2022 00:59:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47712 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350045AbiDOE6S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2022 00:58:18 -0400
+        with ESMTP id S1349703AbiDOE6c (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2022 00:58:32 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE2BDAFADA;
-        Thu, 14 Apr 2022 21:54:09 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17857B0A51;
+        Thu, 14 Apr 2022 21:54:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
-        :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=J+DlKJplDF1Q+uvJsRC9/x84m39e7OAPqS6lbIf59go=; b=SEeH/79eKPqdW8SzrNl3V2nOHl
-        ZWhXxUOKMmxbomD4h47qxDHhmZR1AcrilsdsHynv3whZecHSbjPQD1q9d/FU6+E8K/5xf+VTFPZEC
-        yjptUXDEOozEKnhNef4pA/iH+U6X5UT2a4kDQV1dcB4OMBiR7EqjwvZGUpUqzaw/ctS1BK7jfj0ET
-        6bEbZ634DG1jUBSD4gMSefXlbHX9s1oVYHaM3eb8uWhP4KXYOa4yPkTPaEVS3k17D/+asg++w51Tw
-        tL9Bw3UnRO/ROF9NNLI3S4GrxiqTSBVA9Nyw52Y9tkIfGW9lfoR4Uoz9tWbp7jnXJX8faoVQRTg4x
-        Z/Iw+o9w==;
+        Content-Type:MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:
+        To:From:Sender:Reply-To:Content-ID:Content-Description;
+        bh=CzPLS+Gjxb/zoXdxVG3wb1X+zPEYuY3a71fFFzUQsIo=; b=PxTC6KnciQw0TSk9vI+K+AMZhB
+        u9e+Rsg6/gEELi9/+U/v63dpyvw0hUtfHyPU16IZS1Eodmr5X+cu2FRmZWSzJpe+KZhaB8WPX73iy
+        c6TK87vBkvMsokVjnVkLP6p7ua2/nu4iRHseV7k8Otwf/q7lwy6z7apWU+n+IP1iUvyEzbauM7lCp
+        dkSj+aQUOppSdadfxst8W0LcrS+Mm/D+yrRNvKalP/J5Dfogq3zfiOEumpJYUHKnW8QvLxDGWbnNa
+        GemfPfulsMzUnykcCOMbb7hTYIQIE4W/va/oe9dQyCoWo0AOAT691zcccidiP4Ae970vBl8VgjIPB
+        +dTJ1dFw==;
 Received: from [2a02:1205:504b:4280:f5dd:42a4:896c:d877] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nfDy6-008PUJ-Fn; Fri, 15 Apr 2022 04:54:02 +0000
+        id 1nfDyG-008PgP-Ki; Fri, 15 Apr 2022 04:54:13 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -43,63 +43,184 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
         ocfs2-devel@oss.oracle.com, linux-mm@kvack.org,
-        "Martin K . Petersen" <martin.petersen@oracle.com>
-Subject: [PATCH 19/27] block: remove queue_discard_alignment
-Date:   Fri, 15 Apr 2022 06:52:50 +0200
-Message-Id: <20220415045258.199825-20-hch@lst.de>
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        =?UTF-8?q?Christoph=20B=C3=B6hmwalder?= 
+        <christoph.boehmwalder@linbit.com>, Coly Li <colyli@suse.de>,
+        David Sterba <dsterba@suse.com>
+Subject: [PATCH 23/27] block: add a bdev_max_discard_sectors helper
+Date:   Fri, 15 Apr 2022 06:52:54 +0200
+Message-Id: <20220415045258.199825-24-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220415045258.199825-1-hch@lst.de>
 References: <20220415045258.199825-1-hch@lst.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Just use bdev_alignment_offset in disk_discard_alignment_show instead.
-That helpers is the same except for an always false branch that doesn't
-matter in this slow path.
+Add a helper to query the number of sectors support per each discard bio
+based on the block device and use this helper to stop various places from
+poking into the request_queue to see if discard is supported and if so how
+much.  This mirrors what is done e.g. for write zeroes as well.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+Acked-by: Christoph Böhmwalder <christoph.boehmwalder@linbit.com> [drbd]
+Acked-by: Coly Li <colyli@suse.de> [bcache]
+Acked-by: David Sterba <dsterba@suse.com> [btrfs]
 ---
- block/genhd.c          | 2 +-
- include/linux/blkdev.h | 8 --------
- 2 files changed, 1 insertion(+), 9 deletions(-)
+ drivers/block/drbd/drbd_nl.c        | 8 +++++---
+ drivers/block/drbd/drbd_receiver.c  | 2 +-
+ drivers/block/rnbd/rnbd-srv-dev.h   | 3 +--
+ drivers/md/dm-io.c                  | 2 +-
+ drivers/target/target_core_device.c | 7 +++----
+ fs/f2fs/segment.c                   | 6 ++----
+ include/linux/blkdev.h              | 5 +++++
+ 7 files changed, 18 insertions(+), 15 deletions(-)
 
-diff --git a/block/genhd.c b/block/genhd.c
-index 712031ce19070..36532b9318419 100644
---- a/block/genhd.c
-+++ b/block/genhd.c
-@@ -1019,7 +1019,7 @@ static ssize_t disk_discard_alignment_show(struct device *dev,
+diff --git a/drivers/block/drbd/drbd_nl.c b/drivers/block/drbd/drbd_nl.c
+index 4d00986d6f588..a0a06e238e917 100644
+--- a/drivers/block/drbd/drbd_nl.c
++++ b/drivers/block/drbd/drbd_nl.c
+@@ -1439,7 +1439,8 @@ static bool write_ordering_changed(struct disk_conf *a, struct disk_conf *b)
+ static void sanitize_disk_conf(struct drbd_device *device, struct disk_conf *disk_conf,
+ 			       struct drbd_backing_dev *nbc)
  {
- 	struct gendisk *disk = dev_to_disk(dev);
+-	struct request_queue * const q = nbc->backing_bdev->bd_disk->queue;
++	struct block_device *bdev = nbc->backing_bdev;
++	struct request_queue *q = bdev->bd_disk->queue;
  
--	return sprintf(buf, "%d\n", queue_discard_alignment(disk->queue));
-+	return sprintf(buf, "%d\n", bdev_alignment_offset(disk->part0));
+ 	if (disk_conf->al_extents < DRBD_AL_EXTENTS_MIN)
+ 		disk_conf->al_extents = DRBD_AL_EXTENTS_MIN;
+@@ -1455,6 +1456,7 @@ static void sanitize_disk_conf(struct drbd_device *device, struct disk_conf *dis
+ 
+ 	if (disk_conf->rs_discard_granularity) {
+ 		int orig_value = disk_conf->rs_discard_granularity;
++		sector_t discard_size = bdev_max_discard_sectors(bdev) << 9;
+ 		int remainder;
+ 
+ 		if (q->limits.discard_granularity > disk_conf->rs_discard_granularity)
+@@ -1463,8 +1465,8 @@ static void sanitize_disk_conf(struct drbd_device *device, struct disk_conf *dis
+ 		remainder = disk_conf->rs_discard_granularity % q->limits.discard_granularity;
+ 		disk_conf->rs_discard_granularity += remainder;
+ 
+-		if (disk_conf->rs_discard_granularity > q->limits.max_discard_sectors << 9)
+-			disk_conf->rs_discard_granularity = q->limits.max_discard_sectors << 9;
++		if (disk_conf->rs_discard_granularity > discard_size)
++			disk_conf->rs_discard_granularity = discard_size;
+ 
+ 		if (disk_conf->rs_discard_granularity != orig_value)
+ 			drbd_info(device, "rs_discard_granularity changed to %d\n",
+diff --git a/drivers/block/drbd/drbd_receiver.c b/drivers/block/drbd/drbd_receiver.c
+index 08da922f81d1d..0b4c7de463989 100644
+--- a/drivers/block/drbd/drbd_receiver.c
++++ b/drivers/block/drbd/drbd_receiver.c
+@@ -1524,7 +1524,7 @@ int drbd_issue_discard_or_zero_out(struct drbd_device *device, sector_t start, u
+ 	granularity = max(q->limits.discard_granularity >> 9, 1U);
+ 	alignment = (bdev_discard_alignment(bdev) >> 9) % granularity;
+ 
+-	max_discard_sectors = min(q->limits.max_discard_sectors, (1U << 22));
++	max_discard_sectors = min(bdev_max_discard_sectors(bdev), (1U << 22));
+ 	max_discard_sectors -= max_discard_sectors % granularity;
+ 	if (unlikely(!max_discard_sectors))
+ 		goto zero_out;
+diff --git a/drivers/block/rnbd/rnbd-srv-dev.h b/drivers/block/rnbd/rnbd-srv-dev.h
+index 2c3df02b5e8ec..f82fbb4bbda8e 100644
+--- a/drivers/block/rnbd/rnbd-srv-dev.h
++++ b/drivers/block/rnbd/rnbd-srv-dev.h
+@@ -52,8 +52,7 @@ static inline int rnbd_dev_get_max_discard_sects(const struct rnbd_dev *dev)
+ 	if (!blk_queue_discard(bdev_get_queue(dev->bdev)))
+ 		return 0;
+ 
+-	return blk_queue_get_max_sectors(bdev_get_queue(dev->bdev),
+-					 REQ_OP_DISCARD);
++	return bdev_max_discard_sectors(dev->bdev);
  }
  
- static ssize_t diskseq_show(struct device *dev,
+ static inline int rnbd_dev_get_discard_granularity(const struct rnbd_dev *dev)
+diff --git a/drivers/md/dm-io.c b/drivers/md/dm-io.c
+index 5762366333a27..e4b95eaeec8c7 100644
+--- a/drivers/md/dm-io.c
++++ b/drivers/md/dm-io.c
+@@ -311,7 +311,7 @@ static void do_region(int op, int op_flags, unsigned region,
+ 	 * Reject unsupported discard and write same requests.
+ 	 */
+ 	if (op == REQ_OP_DISCARD)
+-		special_cmd_max_sectors = q->limits.max_discard_sectors;
++		special_cmd_max_sectors = bdev_max_discard_sectors(where->bdev);
+ 	else if (op == REQ_OP_WRITE_ZEROES)
+ 		special_cmd_max_sectors = q->limits.max_write_zeroes_sectors;
+ 	if ((op == REQ_OP_DISCARD || op == REQ_OP_WRITE_ZEROES) &&
+diff --git a/drivers/target/target_core_device.c b/drivers/target/target_core_device.c
+index 16e775bcf4a7c..c3e25bac90d59 100644
+--- a/drivers/target/target_core_device.c
++++ b/drivers/target/target_core_device.c
+@@ -829,9 +829,8 @@ struct se_device *target_alloc_device(struct se_hba *hba, const char *name)
+ }
+ 
+ /*
+- * Check if the underlying struct block_device request_queue supports
+- * the QUEUE_FLAG_DISCARD bit for UNMAP/WRITE_SAME in SCSI + TRIM
+- * in ATA and we need to set TPE=1
++ * Check if the underlying struct block_device supports discard and if yes
++ * configure the UNMAP parameters.
+  */
+ bool target_configure_unmap_from_queue(struct se_dev_attrib *attrib,
+ 				       struct block_device *bdev)
+@@ -843,7 +842,7 @@ bool target_configure_unmap_from_queue(struct se_dev_attrib *attrib,
+ 		return false;
+ 
+ 	attrib->max_unmap_lba_count =
+-		q->limits.max_discard_sectors >> (ilog2(block_size) - 9);
++		bdev_max_discard_sectors(bdev) >> (ilog2(block_size) - 9);
+ 	/*
+ 	 * Currently hardcoded to 1 in Linux/SCSI code..
+ 	 */
+diff --git a/fs/f2fs/segment.c b/fs/f2fs/segment.c
+index 22dfeb9915290..71f09adbcba86 100644
+--- a/fs/f2fs/segment.c
++++ b/fs/f2fs/segment.c
+@@ -1196,9 +1196,8 @@ static int __submit_discard_cmd(struct f2fs_sb_info *sbi,
+ 						unsigned int *issued)
+ {
+ 	struct block_device *bdev = dc->bdev;
+-	struct request_queue *q = bdev_get_queue(bdev);
+ 	unsigned int max_discard_blocks =
+-			SECTOR_TO_BLOCK(q->limits.max_discard_sectors);
++			SECTOR_TO_BLOCK(bdev_max_discard_sectors(bdev));
+ 	struct discard_cmd_control *dcc = SM_I(sbi)->dcc_info;
+ 	struct list_head *wait_list = (dpolicy->type == DPOLICY_FSTRIM) ?
+ 					&(dcc->fstrim_list) : &(dcc->wait_list);
+@@ -1375,9 +1374,8 @@ static void __update_discard_tree_range(struct f2fs_sb_info *sbi,
+ 	struct discard_cmd *dc;
+ 	struct discard_info di = {0};
+ 	struct rb_node **insert_p = NULL, *insert_parent = NULL;
+-	struct request_queue *q = bdev_get_queue(bdev);
+ 	unsigned int max_discard_blocks =
+-			SECTOR_TO_BLOCK(q->limits.max_discard_sectors);
++			SECTOR_TO_BLOCK(bdev_max_discard_sectors(bdev));
+ 	block_t end = lstart + len;
+ 
+ 	dc = (struct discard_cmd *)f2fs_lookup_rb_tree_ret(&dcc->root,
 diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 0a1795ac26275..5a9b7aeda010b 100644
+index 34b1cfd067421..ce16247d3afab 100644
 --- a/include/linux/blkdev.h
 +++ b/include/linux/blkdev.h
-@@ -1253,14 +1253,6 @@ bdev_zone_write_granularity(struct block_device *bdev)
- 
+@@ -1254,6 +1254,11 @@ bdev_zone_write_granularity(struct block_device *bdev)
  int bdev_alignment_offset(struct block_device *bdev);
+ unsigned int bdev_discard_alignment(struct block_device *bdev);
  
--static inline int queue_discard_alignment(const struct request_queue *q)
--{
--	if (q->limits.discard_misaligned)
--		return -1;
--
--	return q->limits.discard_alignment;
--}
--
- static inline int queue_limit_discard_alignment(struct queue_limits *lim, sector_t sector)
++static inline unsigned int bdev_max_discard_sectors(struct block_device *bdev)
++{
++	return bdev_get_queue(bdev)->limits.max_discard_sectors;
++}
++
+ static inline unsigned int bdev_write_zeroes_sectors(struct block_device *bdev)
  {
- 	unsigned int alignment, granularity, offset;
+ 	struct request_queue *q = bdev_get_queue(bdev);
 -- 
 2.30.2
 
