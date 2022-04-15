@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35FA1C38A02
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Apr 2022 04:53:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAC7EC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Apr 2022 04:54:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349671AbiDOE4Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Apr 2022 00:56:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47428 "EHLO
+        id S1349823AbiDOE4g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Apr 2022 00:56:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349526AbiDOEzz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2022 00:55:55 -0400
+        with ESMTP id S1349726AbiDOE4M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2022 00:56:12 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 371986A406;
-        Thu, 14 Apr 2022 21:53:29 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77B5A716E1;
+        Thu, 14 Apr 2022 21:53:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        Content-Type:MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:
-        To:From:Sender:Reply-To:Content-ID:Content-Description;
-        bh=XZGhvwW8WnEXnqFpyMAZS4hEeSHoeSYBiqC69zbelFo=; b=Gxz7Y5uJ+XKe3DFB5F+glNf4Qd
-        +ilmHliKeg1fmYV7/5LLANJc72+LNxw8j97CHk5ziFCgc1uz7kS3J7fxsGIO6cnBRc/aEIND8YKio
-        0SkKbU86rwF6U+vXBBwyr3GFqwWasgE9TCw8n+hO0zPxSPP5I4ZPpiX7PrV0Nkluz9OYVJwj4Hmwy
-        oKidnHT0/AqxHbe4vf+J+1VyQBy8myzVvzFwGzWB5MOWnMsTyORGtxjAzgY+jPvDzJzijUERBo3GF
-        IuBPqJCO6mtg8vZGmw86bOvzf7HW3Tdf+1Wt8evubUZivpuvFh33FBjqoHj3OCwfnGHVCD1k5Crl7
-        crl4uuXw==;
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=OGJvHxXgCvw9/l2/0Y6T0ivupEa5/VICLVgDi4pj6zk=; b=V1O5NFc1OlhQKBAtPUESXrscbH
+        +gcfK8CWzUYJRweVfHt/gmcJRbnnyENCL0uxhp1nElH2rQXnBLZskSDze6nM9j3gF5JGx31h7pu9N
+        vPub4AczDFXqMD/nyRBLgGmvIyYUqZBGTv5Cc6JJINS7BJNf0/btoIeeLCOjZ4a5fxHer4O2Wp+wl
+        3U3FDeLPVBAqUisUOlzqQt8zs+kHINf2usFr1NigldxLvR21wl2YG3uLr/6AwNNFGfA7YCs2iW8C/
+        bPJ75RbYfKAHSDs+/fiusGnx0gVrEkfUrP1ZPu0GLZCLsq5AzPGOB49mYYVnrdML7RbrD/GaYtdc7
+        GVJ2xQ0g==;
 Received: from [2a02:1205:504b:4280:f5dd:42a4:896c:d877] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1nfDxW-008OrQ-LX; Fri, 15 Apr 2022 04:53:27 +0000
+        id 1nfDxj-008P34-1w; Fri, 15 Apr 2022 04:53:39 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>
 Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
@@ -42,64 +42,40 @@ Cc:     dm-devel@redhat.com, linux-xfs@vger.kernel.org,
         linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
         cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
         linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
-        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org,
-        =?UTF-8?q?Christoph=20B=C3=B6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>
-Subject: [PATCH 05/27] drbd: use bdev based limit helpers in drbd_send_sizes
-Date:   Fri, 15 Apr 2022 06:52:36 +0200
-Message-Id: <20220415045258.199825-6-hch@lst.de>
+        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
+Subject: [PATCH 10/27] mm: use bdev_is_zoned in claim_swapfile
+Date:   Fri, 15 Apr 2022 06:52:41 +0200
+Message-Id: <20220415045258.199825-11-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20220415045258.199825-1-hch@lst.de>
 References: <20220415045258.199825-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the bdev based limits helpers where they exist.
+Use the bdev based helper instead of poking into the queue.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
-Acked-by: Christoph Böhmwalder <christoph.boehmwalder@linbit.com>
 ---
- drivers/block/drbd/drbd_main.c | 12 +++++++-----
- 1 file changed, 7 insertions(+), 5 deletions(-)
+ mm/swapfile.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/block/drbd/drbd_main.c b/drivers/block/drbd/drbd_main.c
-index 367715205c860..c39b04bda261f 100644
---- a/drivers/block/drbd/drbd_main.c
-+++ b/drivers/block/drbd/drbd_main.c
-@@ -924,7 +924,9 @@ int drbd_send_sizes(struct drbd_peer_device *peer_device, int trigger_reply, enu
- 
- 	memset(p, 0, packet_size);
- 	if (get_ldev_if_state(device, D_NEGOTIATING)) {
--		struct request_queue *q = bdev_get_queue(device->ldev->backing_bdev);
-+		struct block_device *bdev = device->ldev->backing_bdev;
-+		struct request_queue *q = bdev_get_queue(bdev);
-+
- 		d_size = drbd_get_max_capacity(device->ldev);
- 		rcu_read_lock();
- 		u_size = rcu_dereference(device->ldev->disk_conf)->disk_size;
-@@ -933,13 +935,13 @@ int drbd_send_sizes(struct drbd_peer_device *peer_device, int trigger_reply, enu
- 		max_bio_size = queue_max_hw_sectors(q) << 9;
- 		max_bio_size = min(max_bio_size, DRBD_MAX_BIO_SIZE);
- 		p->qlim->physical_block_size =
--			cpu_to_be32(queue_physical_block_size(q));
-+			cpu_to_be32(bdev_physical_block_size(bdev));
- 		p->qlim->logical_block_size =
--			cpu_to_be32(queue_logical_block_size(q));
-+			cpu_to_be32(bdev_logical_block_size(bdev));
- 		p->qlim->alignment_offset =
- 			cpu_to_be32(queue_alignment_offset(q));
--		p->qlim->io_min = cpu_to_be32(queue_io_min(q));
--		p->qlim->io_opt = cpu_to_be32(queue_io_opt(q));
-+		p->qlim->io_min = cpu_to_be32(bdev_io_min(bdev));
-+		p->qlim->io_opt = cpu_to_be32(bdev_io_opt(bdev));
- 		p->qlim->discard_enabled = blk_queue_discard(q);
- 		put_ldev(device);
- 	} else {
+diff --git a/mm/swapfile.c b/mm/swapfile.c
+index 63c61f8b26118..4c7537162af5e 100644
+--- a/mm/swapfile.c
++++ b/mm/swapfile.c
+@@ -2761,7 +2761,7 @@ static int claim_swapfile(struct swap_info_struct *p, struct inode *inode)
+ 		 * write only restriction.  Hence zoned block devices are not
+ 		 * suitable for swapping.  Disallow them here.
+ 		 */
+-		if (blk_queue_is_zoned(p->bdev->bd_disk->queue))
++		if (bdev_is_zoned(p->bdev))
+ 			return -EINVAL;
+ 		p->flags |= SWP_BLKDEV;
+ 	} else if (S_ISREG(inode->i_mode)) {
 -- 
 2.30.2
 
