@@ -2,313 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C066C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Apr 2022 14:32:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44113C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Apr 2022 22:31:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354534AbiDOOfP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Apr 2022 10:35:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55440 "EHLO
+        id S231873AbiDOWeK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Apr 2022 18:34:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354530AbiDOOfO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2022 10:35:14 -0400
-Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com [209.85.167.170])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FD528BE1F;
-        Fri, 15 Apr 2022 07:32:45 -0700 (PDT)
-Received: by mail-oi1-f170.google.com with SMTP id r85so3353124oie.7;
-        Fri, 15 Apr 2022 07:32:45 -0700 (PDT)
+        with ESMTP id S229853AbiDOWeJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2022 18:34:09 -0400
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22448A66D2
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2022 15:31:39 -0700 (PDT)
+Received: by mail-lj1-x22c.google.com with SMTP id q14so10760819ljc.12
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2022 15:31:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6BMwgeUc0Xlg6VZQXkagjAPImol7moZt3g1QrQ8J3cE=;
+        b=o0YbJ3KmGMaP4t9lgo4TanbSifySGtdvSclzWyUfZtXCJBgKvSenvn7tJtj/cF4A5R
+         keGFWC3/saB9m/cozTVwEMIc6KHgcL+Rll8p8uvekk/1dyN3s38go7jgKBCZHQj1QK1G
+         UZiO96IfLGE2QJLWT2N/q4iNeRSVO77BOtOFu9hHreQbFBINwWwfs+uBpobhI9KHt8hh
+         BdwQCLgtz9/Eokw+uehxUeCWH9vljX/NyH1TQePNk1IaTjPe2kNcqRyuNVa5X3DmJjoO
+         dDA29xBv9Nehbb0fuIjFpOW7j0lzGda3zi+c9tmwvQdioPUyI6LmYdRux/a4fLwn7SrE
+         ehYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
-         :message-id;
-        bh=WRvWFCZM+CSlWmbu28ZW3agDB/Ioh2AgkDnpKocjFBE=;
-        b=jbcLuV3Q33imNNoipA7PL6D0OzXNktu2DR7dSHO9IkecfyJcPHJt/9+dDFvoobsr7H
-         Nq7G6NU+jDIi11X4bqKkJiRVyMB/53DdL8vRDRED3JwkCcyC5WM/JRwW7n9LywWC1XOC
-         dtPT/rEYmu9Sz3ZlvlsnEmpcjegaq/82SgS+/C0670WXdmBfWQvG2b71Iih6GVBtX3n6
-         TlXZt/rI1UvHvqLyZxfTzL39oYxBz264i5CckM0QBycBXeZ+NmGKjRDq+ulou9D5uL9C
-         U72SJl3Teq9T5HtltRv+LuXefcC+LS9dOyCqLVxqhvUUsukevZxDudvc78wQEmL2LwoF
-         3hiA==
-X-Gm-Message-State: AOAM531604cjovVKnXK1w14lBwXqkvuSNDeaty/OSf26DvTlmsZsKcnV
-        sXDrN8VhcOcEHyan+46E5g==
-X-Google-Smtp-Source: ABdhPJy+M+qLnqcZGHZA2zAZsZUD29gfwCAun1jdghPH9Ok1etH7dNXYHty41fGiEXQm7/IucVah8g==
-X-Received: by 2002:a05:6808:211f:b0:2da:84f6:9eed with SMTP id r31-20020a056808211f00b002da84f69eedmr1597872oiw.239.1650033164763;
-        Fri, 15 Apr 2022 07:32:44 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id bf35-20020a056808192300b002fa282123b7sm1178973oib.2.2022.04.15.07.32.44
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6BMwgeUc0Xlg6VZQXkagjAPImol7moZt3g1QrQ8J3cE=;
+        b=JdzQXWKMVbTVLGDwX1JT7ho84P1ynuV4b7sqlyXtEkFbmaUjImLsj+jSwnMNvNR5EZ
+         O0vmurkjpvrMV5jf6gs7eOUFrlLDj/TNCh605/bRjFNJW1iuYWIkmZZYG82U7Pfj5ijy
+         ZhMBhzxKarj+7p+bPkCdbVYFSjrV07RlVfqvlZy+QnZX7WZI8QDvt78wCWUxrKTLL8xC
+         5BQ/wRxS/NiaUWMNpLcsFzrAUKHEuv6d8QdlxgypkShxWEcVfCUfPJZ+IaTZ6eqMopoU
+         5Rmrw0DGG40dJXM5h3W962pInWTaWM2p0FOrccQK2Rdxt6gvpkZ9AoHZ0S3v9OsS3KST
+         EYCw==
+X-Gm-Message-State: AOAM530onX/n5Jg+gmuo24vJzI6U01CoBidvNkNHPe4Lo3s1Ze6/y7vl
+        sFsu2irusAYQZPOfobqw2lyYFqJ+Y+hVUQ==
+X-Google-Smtp-Source: ABdhPJwTBKKSqMUCZYq6H0Hz1ILRZbH+J4JKo/I0GoWh6MVfGDXGSEIvXDwFQzJL6RqJ3r8Gj/nX4Q==
+X-Received: by 2002:a05:651c:545:b0:24d:b084:a673 with SMTP id q5-20020a05651c054500b0024db084a673mr88748ljp.461.1650061897097;
+        Fri, 15 Apr 2022 15:31:37 -0700 (PDT)
+Received: from localhost.localdomain (c-fdcc225c.014-348-6c756e10.bbcust.telenor.se. [92.34.204.253])
+        by smtp.gmail.com with ESMTPSA id n23-20020a056512311700b0046b926fd343sm469679lfb.142.2022.04.15.15.31.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 15 Apr 2022 07:32:44 -0700 (PDT)
-Received: (nullmailer pid 251789 invoked by uid 1000);
-        Fri, 15 Apr 2022 14:32:41 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
-Cc:     robh+dt@kernel.org, sebastian.hesselbarth@gmail.com,
-        ulf.hansson@linaro.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
-        andrew@lunn.ch, linux-mmc@vger.kernel.org,
-        gregory.clement@bootlin.com, krzk+dt@kernel.org
-In-Reply-To: <20220414230603.567049-4-chris.packham@alliedtelesis.co.nz>
-References: <20220414230603.567049-1-chris.packham@alliedtelesis.co.nz> <20220414230603.567049-4-chris.packham@alliedtelesis.co.nz>
-Subject: Re: [PATCH 3/4] dt-bindings: mmc: convert orion-sdio to JSON schema
-Date:   Fri, 15 Apr 2022 09:32:41 -0500
-Message-Id: <1650033161.788328.251788.nullmailer@robh.at.kernel.org>
+        Fri, 15 Apr 2022 15:31:35 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Theodore Ts'o <tytso@mit.edu>,
+        "Jason A . Donenfeld" <Jason@zx2c4.com>
+Subject: [PATCH] mmc: core: Add CIDs for cards to the entropy pool
+Date:   Sat, 16 Apr 2022 00:29:31 +0200
+Message-Id: <20220415222931.481352-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.35.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 15 Apr 2022 11:06:02 +1200, Chris Packham wrote:
-> Convert the orion-sdio binding to JSON schema.
-> 
-> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
-> ---
->  .../bindings/mmc/marvell,orion-sdio.yaml      | 43 +++++++++++++++++++
->  .../devicetree/bindings/mmc/orion-sdio.txt    | 16 -------
->  2 files changed, 43 insertions(+), 16 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,orion-sdio.yaml
->  delete mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
-> 
+To make the entropy pool a bit better we can toss in the
+CID for eMMC and SD cards into it, usually the serial
+number portion is at least unique.
 
-Running 'make dtbs_check' with the schema in this patch gives the
-following warnings. Consider if they are expected or the schema is
-incorrect. These may not be new warnings.
+This does not count as improvement of the entropy but
+in practice it makes it a bit more random to mix in these
+numbers.
 
-Note that it is not yet a requirement to have 0 warnings for dtbs_check.
-This will change in the future.
+Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: Jason A. Donenfeld <Jason@zx2c4.com>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/core/mmc.c | 7 +++++++
+ drivers/mmc/core/sd.c  | 7 +++++++
+ 2 files changed, 14 insertions(+)
 
-Full log is available here: https://patchwork.ozlabs.org/patch/
-
-
-mvsdio@90000: $nodename:0: 'mvsdio@90000' does not match '^mmc(@.*)?$'
-	arch/arm/boot/dts/kirkwood-b3.dtb
-	arch/arm/boot/dts/kirkwood-blackarmor-nas220.dtb
-	arch/arm/boot/dts/kirkwood-c200-v1.dtb
-	arch/arm/boot/dts/kirkwood-cloudbox.dtb
-	arch/arm/boot/dts/kirkwood-d2net.dtb
-	arch/arm/boot/dts/kirkwood-db-88f6281.dtb
-	arch/arm/boot/dts/kirkwood-db-88f6282.dtb
-	arch/arm/boot/dts/kirkwood-dir665.dtb
-	arch/arm/boot/dts/kirkwood-dns320.dtb
-	arch/arm/boot/dts/kirkwood-dns325.dtb
-	arch/arm/boot/dts/kirkwood-dockstar.dtb
-	arch/arm/boot/dts/kirkwood-dreamplug.dtb
-	arch/arm/boot/dts/kirkwood-ds109.dtb
-	arch/arm/boot/dts/kirkwood-ds110jv10.dtb
-	arch/arm/boot/dts/kirkwood-ds111.dtb
-	arch/arm/boot/dts/kirkwood-ds112.dtb
-	arch/arm/boot/dts/kirkwood-ds209.dtb
-	arch/arm/boot/dts/kirkwood-ds210.dtb
-	arch/arm/boot/dts/kirkwood-ds212.dtb
-	arch/arm/boot/dts/kirkwood-ds212j.dtb
-	arch/arm/boot/dts/kirkwood-ds409.dtb
-	arch/arm/boot/dts/kirkwood-ds409slim.dtb
-	arch/arm/boot/dts/kirkwood-ds411.dtb
-	arch/arm/boot/dts/kirkwood-ds411j.dtb
-	arch/arm/boot/dts/kirkwood-ds411slim.dtb
-	arch/arm/boot/dts/kirkwood-goflexnet.dtb
-	arch/arm/boot/dts/kirkwood-guruplug-server-plus.dtb
-	arch/arm/boot/dts/kirkwood-ib62x0.dtb
-	arch/arm/boot/dts/kirkwood-iconnect.dtb
-	arch/arm/boot/dts/kirkwood-iomega_ix2_200.dtb
-	arch/arm/boot/dts/kirkwood-is2.dtb
-	arch/arm/boot/dts/kirkwood-l-50.dtb
-	arch/arm/boot/dts/kirkwood-laplug.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lsqvl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lsvl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lswsxl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lswvl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lswxl.dtb
-	arch/arm/boot/dts/kirkwood-linksys-viper.dtb
-	arch/arm/boot/dts/kirkwood-lschlv2.dtb
-	arch/arm/boot/dts/kirkwood-lsxhl.dtb
-	arch/arm/boot/dts/kirkwood-mplcec4.dtb
-	arch/arm/boot/dts/kirkwood-mv88f6281gtw-ge.dtb
-	arch/arm/boot/dts/kirkwood-nas2big.dtb
-	arch/arm/boot/dts/kirkwood-net2big.dtb
-	arch/arm/boot/dts/kirkwood-net5big.dtb
-	arch/arm/boot/dts/kirkwood-netgear_readynas_duo_v2.dtb
-	arch/arm/boot/dts/kirkwood-netgear_readynas_nv+_v2.dtb
-	arch/arm/boot/dts/kirkwood-ns2.dtb
-	arch/arm/boot/dts/kirkwood-ns2lite.dtb
-	arch/arm/boot/dts/kirkwood-ns2max.dtb
-	arch/arm/boot/dts/kirkwood-ns2mini.dtb
-	arch/arm/boot/dts/kirkwood-nsa310a.dtb
-	arch/arm/boot/dts/kirkwood-nsa310.dtb
-	arch/arm/boot/dts/kirkwood-nsa320.dtb
-	arch/arm/boot/dts/kirkwood-nsa325.dtb
-	arch/arm/boot/dts/kirkwood-openblocks_a6.dtb
-	arch/arm/boot/dts/kirkwood-openblocks_a7.dtb
-	arch/arm/boot/dts/kirkwood-openrd-base.dtb
-	arch/arm/boot/dts/kirkwood-openrd-client.dtb
-	arch/arm/boot/dts/kirkwood-openrd-ultimate.dtb
-	arch/arm/boot/dts/kirkwood-pogo_e02.dtb
-	arch/arm/boot/dts/kirkwood-pogoplug-series-4.dtb
-	arch/arm/boot/dts/kirkwood-rd88f6192.dtb
-	arch/arm/boot/dts/kirkwood-rd88f6281-a.dtb
-	arch/arm/boot/dts/kirkwood-rd88f6281-z0.dtb
-	arch/arm/boot/dts/kirkwood-rs212.dtb
-	arch/arm/boot/dts/kirkwood-rs409.dtb
-	arch/arm/boot/dts/kirkwood-rs411.dtb
-	arch/arm/boot/dts/kirkwood-sheevaplug.dtb
-	arch/arm/boot/dts/kirkwood-sheevaplug-esata.dtb
-	arch/arm/boot/dts/kirkwood-t5325.dtb
-	arch/arm/boot/dts/kirkwood-topkick.dtb
-	arch/arm/boot/dts/kirkwood-ts219-6281.dtb
-	arch/arm/boot/dts/kirkwood-ts219-6282.dtb
-	arch/arm/boot/dts/kirkwood-ts419-6281.dtb
-	arch/arm/boot/dts/kirkwood-ts419-6282.dtb
-
-mvsdio@90000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed', 'broken-cd' were unexpected)
-	arch/arm/boot/dts/kirkwood-dreamplug.dtb
-	arch/arm/boot/dts/kirkwood-sheevaplug.dtb
-	arch/arm/boot/dts/kirkwood-topkick.dtb
-
-mvsdio@90000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed', 'cd-gpios' were unexpected)
-	arch/arm/boot/dts/kirkwood-l-50.dtb
-	arch/arm/boot/dts/kirkwood-mplcec4.dtb
-	arch/arm/boot/dts/kirkwood-openrd-base.dtb
-	arch/arm/boot/dts/kirkwood-openrd-client.dtb
-	arch/arm/boot/dts/kirkwood-openrd-ultimate.dtb
-	arch/arm/boot/dts/kirkwood-rd88f6281-a.dtb
-	arch/arm/boot/dts/kirkwood-rd88f6281-z0.dtb
-
-mvsdio@90000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed', 'cd-gpios', 'wp-gpios' were unexpected)
-	arch/arm/boot/dts/kirkwood-pogoplug-series-4.dtb
-	arch/arm/boot/dts/kirkwood-sheevaplug-esata.dtb
-
-mvsdio@90000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed', 'non-removable' were unexpected)
-	arch/arm/boot/dts/kirkwood-guruplug-server-plus.dtb
-
-mvsdio@90000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed' were unexpected)
-	arch/arm/boot/dts/kirkwood-b3.dtb
-	arch/arm/boot/dts/kirkwood-blackarmor-nas220.dtb
-	arch/arm/boot/dts/kirkwood-c200-v1.dtb
-	arch/arm/boot/dts/kirkwood-cloudbox.dtb
-	arch/arm/boot/dts/kirkwood-d2net.dtb
-	arch/arm/boot/dts/kirkwood-dir665.dtb
-	arch/arm/boot/dts/kirkwood-dns320.dtb
-	arch/arm/boot/dts/kirkwood-dns325.dtb
-	arch/arm/boot/dts/kirkwood-dockstar.dtb
-	arch/arm/boot/dts/kirkwood-ds109.dtb
-	arch/arm/boot/dts/kirkwood-ds110jv10.dtb
-	arch/arm/boot/dts/kirkwood-ds111.dtb
-	arch/arm/boot/dts/kirkwood-ds112.dtb
-	arch/arm/boot/dts/kirkwood-ds209.dtb
-	arch/arm/boot/dts/kirkwood-ds210.dtb
-	arch/arm/boot/dts/kirkwood-ds212.dtb
-	arch/arm/boot/dts/kirkwood-ds212j.dtb
-	arch/arm/boot/dts/kirkwood-ds409.dtb
-	arch/arm/boot/dts/kirkwood-ds409slim.dtb
-	arch/arm/boot/dts/kirkwood-ds411.dtb
-	arch/arm/boot/dts/kirkwood-ds411j.dtb
-	arch/arm/boot/dts/kirkwood-ds411slim.dtb
-	arch/arm/boot/dts/kirkwood-goflexnet.dtb
-	arch/arm/boot/dts/kirkwood-ib62x0.dtb
-	arch/arm/boot/dts/kirkwood-iconnect.dtb
-	arch/arm/boot/dts/kirkwood-iomega_ix2_200.dtb
-	arch/arm/boot/dts/kirkwood-is2.dtb
-	arch/arm/boot/dts/kirkwood-laplug.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lsqvl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lsvl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lswsxl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lswvl.dtb
-	arch/arm/boot/dts/kirkwood-linkstation-lswxl.dtb
-	arch/arm/boot/dts/kirkwood-linksys-viper.dtb
-	arch/arm/boot/dts/kirkwood-lschlv2.dtb
-	arch/arm/boot/dts/kirkwood-lsxhl.dtb
-	arch/arm/boot/dts/kirkwood-mv88f6281gtw-ge.dtb
-	arch/arm/boot/dts/kirkwood-nas2big.dtb
-	arch/arm/boot/dts/kirkwood-net2big.dtb
-	arch/arm/boot/dts/kirkwood-net5big.dtb
-	arch/arm/boot/dts/kirkwood-netgear_readynas_duo_v2.dtb
-	arch/arm/boot/dts/kirkwood-netgear_readynas_nv+_v2.dtb
-	arch/arm/boot/dts/kirkwood-ns2.dtb
-	arch/arm/boot/dts/kirkwood-ns2lite.dtb
-	arch/arm/boot/dts/kirkwood-ns2max.dtb
-	arch/arm/boot/dts/kirkwood-ns2mini.dtb
-	arch/arm/boot/dts/kirkwood-nsa310a.dtb
-	arch/arm/boot/dts/kirkwood-nsa310.dtb
-	arch/arm/boot/dts/kirkwood-nsa320.dtb
-	arch/arm/boot/dts/kirkwood-nsa325.dtb
-	arch/arm/boot/dts/kirkwood-openblocks_a6.dtb
-	arch/arm/boot/dts/kirkwood-openblocks_a7.dtb
-	arch/arm/boot/dts/kirkwood-pogo_e02.dtb
-	arch/arm/boot/dts/kirkwood-rd88f6192.dtb
-	arch/arm/boot/dts/kirkwood-rs212.dtb
-	arch/arm/boot/dts/kirkwood-rs409.dtb
-	arch/arm/boot/dts/kirkwood-rs411.dtb
-	arch/arm/boot/dts/kirkwood-t5325.dtb
-	arch/arm/boot/dts/kirkwood-ts219-6281.dtb
-	arch/arm/boot/dts/kirkwood-ts219-6282.dtb
-	arch/arm/boot/dts/kirkwood-ts419-6281.dtb
-	arch/arm/boot/dts/kirkwood-ts419-6282.dtb
-
-mvsdio@90000: Unevaluated properties are not allowed ('wp-gpios', 'cd-gpios', 'bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed' were unexpected)
-	arch/arm/boot/dts/kirkwood-db-88f6281.dtb
-	arch/arm/boot/dts/kirkwood-db-88f6282.dtb
-
-mvsdio@d4000: $nodename:0: 'mvsdio@d4000' does not match '^mmc(@.*)?$'
-	arch/arm/boot/dts/armada-370-c200-v2.dtb
-	arch/arm/boot/dts/armada-370-db.dtb
-	arch/arm/boot/dts/armada-370-dlink-dns327l.dtb
-	arch/arm/boot/dts/armada-370-mirabox.dtb
-	arch/arm/boot/dts/armada-370-netgear-rn102.dtb
-	arch/arm/boot/dts/armada-370-netgear-rn104.dtb
-	arch/arm/boot/dts/armada-370-rd.dtb
-	arch/arm/boot/dts/armada-370-seagate-nas-2bay.dtb
-	arch/arm/boot/dts/armada-370-seagate-nas-4bay.dtb
-	arch/arm/boot/dts/armada-370-seagate-personal-cloud-2bay.dtb
-	arch/arm/boot/dts/armada-370-seagate-personal-cloud.dtb
-	arch/arm/boot/dts/armada-370-synology-ds213j.dtb
-	arch/arm/boot/dts/armada-375-db.dtb
-	arch/arm/boot/dts/armada-xp-axpwifiap.dtb
-	arch/arm/boot/dts/armada-xp-crs305-1g-4s-bit.dtb
-	arch/arm/boot/dts/armada-xp-crs305-1g-4s.dtb
-	arch/arm/boot/dts/armada-xp-crs326-24g-2s-bit.dtb
-	arch/arm/boot/dts/armada-xp-crs326-24g-2s.dtb
-	arch/arm/boot/dts/armada-xp-crs328-4c-20s-4s-bit.dtb
-	arch/arm/boot/dts/armada-xp-crs328-4c-20s-4s.dtb
-	arch/arm/boot/dts/armada-xp-db.dtb
-	arch/arm/boot/dts/armada-xp-db-dxbc2.dtb
-	arch/arm/boot/dts/armada-xp-db-xc3-24g4xg.dtb
-	arch/arm/boot/dts/armada-xp-gp.dtb
-	arch/arm/boot/dts/armada-xp-lenovo-ix4-300d.dtb
-	arch/arm/boot/dts/armada-xp-linksys-mamba.dtb
-	arch/arm/boot/dts/armada-xp-matrix.dtb
-	arch/arm/boot/dts/armada-xp-netgear-rn2120.dtb
-	arch/arm/boot/dts/armada-xp-openblocks-ax3-4.dtb
-	arch/arm/boot/dts/armada-xp-synology-ds414.dtb
-
-mvsdio@d4000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed', 'broken-cd' were unexpected)
-	arch/arm/boot/dts/armada-370-db.dtb
-	arch/arm/boot/dts/armada-370-mirabox.dtb
-	arch/arm/boot/dts/armada-370-rd.dtb
-	arch/arm/boot/dts/armada-xp-db.dtb
-	arch/arm/boot/dts/armada-xp-db-dxbc2.dtb
-
-mvsdio@d4000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed', 'cd-gpios', 'wp-gpios' were unexpected)
-	arch/arm/boot/dts/armada-375-db.dtb
-
-mvsdio@d4000: Unevaluated properties are not allowed ('bus-width', 'cap-sdio-irq', 'cap-sd-highspeed', 'cap-mmc-highspeed' were unexpected)
-	arch/arm/boot/dts/armada-370-c200-v2.dtb
-	arch/arm/boot/dts/armada-370-dlink-dns327l.dtb
-	arch/arm/boot/dts/armada-370-netgear-rn102.dtb
-	arch/arm/boot/dts/armada-370-netgear-rn104.dtb
-	arch/arm/boot/dts/armada-370-seagate-nas-2bay.dtb
-	arch/arm/boot/dts/armada-370-seagate-nas-4bay.dtb
-	arch/arm/boot/dts/armada-370-seagate-personal-cloud-2bay.dtb
-	arch/arm/boot/dts/armada-370-seagate-personal-cloud.dtb
-	arch/arm/boot/dts/armada-370-synology-ds213j.dtb
-	arch/arm/boot/dts/armada-xp-axpwifiap.dtb
-	arch/arm/boot/dts/armada-xp-crs305-1g-4s-bit.dtb
-	arch/arm/boot/dts/armada-xp-crs305-1g-4s.dtb
-	arch/arm/boot/dts/armada-xp-crs326-24g-2s-bit.dtb
-	arch/arm/boot/dts/armada-xp-crs326-24g-2s.dtb
-	arch/arm/boot/dts/armada-xp-crs328-4c-20s-4s-bit.dtb
-	arch/arm/boot/dts/armada-xp-crs328-4c-20s-4s.dtb
-	arch/arm/boot/dts/armada-xp-db-xc3-24g4xg.dtb
-	arch/arm/boot/dts/armada-xp-gp.dtb
-	arch/arm/boot/dts/armada-xp-lenovo-ix4-300d.dtb
-	arch/arm/boot/dts/armada-xp-linksys-mamba.dtb
-	arch/arm/boot/dts/armada-xp-matrix.dtb
-	arch/arm/boot/dts/armada-xp-netgear-rn2120.dtb
-	arch/arm/boot/dts/armada-xp-openblocks-ax3-4.dtb
-	arch/arm/boot/dts/armada-xp-synology-ds414.dtb
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index e7ea45386c22..974d8a02b966 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -12,6 +12,7 @@
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+ #include <linux/pm_runtime.h>
++#include <linux/random.h>
+ #include <linux/sysfs.h>
+ 
+ #include <linux/mmc/host.h>
+@@ -1673,6 +1674,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		err = mmc_decode_cid(card);
+ 		if (err)
+ 			goto free_card;
++		/*
++		 * Add card ID (cid) data to the entropy pool.
++		 * It doesn't matter that not all of it is unique,
++		 * it's just bonus entropy.
++		 */
++		add_device_randomness(&card->cid, sizeof(card->cid));
+ 	}
+ 
+ 	/*
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 68df6b2f49cc..65e0ac031e2a 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -12,6 +12,7 @@
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+ #include <linux/pm_runtime.h>
++#include <linux/random.h>
+ #include <linux/scatterlist.h>
+ #include <linux/sysfs.h>
+ 
+@@ -1443,6 +1444,12 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 			goto free_card;
+ 
+ 		mmc_decode_cid(card);
++		/*
++		 * Add card ID (cid) data to the entropy pool.
++		 * It doesn't matter that not all of it is unique,
++		 * it's just bonus entropy.
++		 */
++		add_device_randomness(&card->cid, sizeof(card->cid));
+ 	}
+ 
+ 	/*
+-- 
+2.35.1
 
