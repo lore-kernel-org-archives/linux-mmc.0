@@ -2,73 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25765C433F5
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 Apr 2022 10:52:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71245C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat, 16 Apr 2022 22:47:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229845AbiDPKzT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 16 Apr 2022 06:55:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47058 "EHLO
+        id S232020AbiDPWu3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 16 Apr 2022 18:50:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55848 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229575AbiDPKzS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2022 06:55:18 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A8063A5CF
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2022 03:52:47 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id B116DB802BD
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2022 10:52:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F1549C385A1
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2022 10:52:43 +0000 (UTC)
-Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="Cw88ybCX"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1650106362;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=G/cMntdOv78MLKetYV5P/cihm6SFTsJS7OHfJXItwl8=;
-        b=Cw88ybCXqpeRxWbfH4By3HM4W4TBo0PfJKsFi8Td1FdI0Guvu23j2/ufxFmyWYDQzjomkn
-        bIZmE7K1nmMo5y6ToRNvFDGssyfI1GcuxtF2UPKfUyyp9MMBflHQclqfR9Qk33Tupj6RZY
-        9UuKqElFViSbLj+/wkmdZvIXFmQGHUo=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 34bd8808 (TLSv1.3:AEAD-AES256-GCM-SHA384:256:NO)
-        for <linux-mmc@vger.kernel.org>;
-        Sat, 16 Apr 2022 10:52:41 +0000 (UTC)
-Received: by mail-yb1-f177.google.com with SMTP id t67so18173229ybi.2
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2022 03:52:41 -0700 (PDT)
-X-Gm-Message-State: AOAM532i0Y+F/fzADfk6T3ynl1jwpS+2F9QnqNYs/s1lxtdjzDAERkmD
-        zEZDHPk9aKFJDDvTStuFV0CtTXqQOUygn/33A00=
-X-Google-Smtp-Source: ABdhPJzUqjXFiOH8LyjnEqZXNXvQxQXpom9gc2nRMRXlrr8HkpZum1/sT/ec4V4nxB346eN1LJKry0zdmnGT+895zHM=
-X-Received: by 2002:a05:6902:10c2:b0:63e:986:494e with SMTP id
- w2-20020a05690210c200b0063e0986494emr2545939ybu.267.1650106360798; Sat, 16
- Apr 2022 03:52:40 -0700 (PDT)
+        with ESMTP id S230377AbiDPWu3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Apr 2022 18:50:29 -0400
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F86F3CFCB
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2022 15:47:55 -0700 (PDT)
+Received: by mail-lj1-x22e.google.com with SMTP id bn33so13071805ljb.6
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Apr 2022 15:47:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hdMN3k0Sjf7cBpT9HSc70WSDqmmm9h4hh0kYHkQwaQc=;
+        b=P2fw/flztEvlMJydzoAnU1R8oowS35EJUEOjItpuFquRKHOuxLdVzNgcwYsbryg/xy
+         n50ZCNN+9JAB86MuQShX24+xi5q51olGRL8x82dGImjZxxvQtNfCYoeBXqO+NHYPqnOX
+         N2WE9rFajc5ALo+4WUmLA6adtMEGX++toyTM9uZgJ98UnznarMex256UZyaCbcGyyT2P
+         1E1+RrWXGxEI9S4HtyRZO1REydaaiAit9oUFIxYVzxDi5Md83ZAjIeii1H6v4fTDa9j6
+         HsaAFzMP2RbtFxm4KJJyDwKg7CRwnctYENdsXbmkbmZgPMHMmhVytfOWct/W5fU2V2Dh
+         mbmg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hdMN3k0Sjf7cBpT9HSc70WSDqmmm9h4hh0kYHkQwaQc=;
+        b=OHuXxr2E6hwnfahP2rOb7w7UBYOIq9yKiA/pIAdG7A+1AgYwlb3Ns6tUjAmmF5n4f3
+         RHIdqt4pmlEtq4V8S7GxHvlJ+TLWUiRDjGEwutEhOinj7KcDQoudbURCN9/Eammg93BU
+         NOdVEn29KeFIQo/j1lEvly/V+vzlko5vqgE73gUIQrZLeoocbyu1/2VyLwOBPuzHotjs
+         Y/pf5JRdjwR6TARSSPVKN3pTI0cH0dnOOfouDmPe5S95q3/jQ7VZBUqruNF4vEojKKPj
+         xva6Usd9/EDxLzMAbF0U4VQQRQ1xmbt+1Omfvty0S54VRpaO0axTebT5e0tmSsXWReHK
+         oRag==
+X-Gm-Message-State: AOAM532e26WSfMN/4+hGPMI/jZTUcyPcCm6z0IPcte38/NkljsyJ1MyK
+        JmwjYH9rw6zsUyoxr76vaTg7UVrREnwnhw==
+X-Google-Smtp-Source: ABdhPJxk8n3TREbst8mNkEvgl03nwTeVsrpCNrNUUPzZgVNi6EjHWioWeK/C5L62H8xw3/B2SnDa4g==
+X-Received: by 2002:a2e:9c9:0:b0:24d:ab7d:808f with SMTP id 192-20020a2e09c9000000b0024dab7d808fmr3031088ljj.330.1650149273063;
+        Sat, 16 Apr 2022 15:47:53 -0700 (PDT)
+Received: from localhost.localdomain (c-fdcc225c.014-348-6c756e10.bbcust.telenor.se. [92.34.204.253])
+        by smtp.gmail.com with ESMTPSA id d5-20020a056512320500b0046ed7bf92b7sm707015lfe.177.2022.04.16.15.47.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 16 Apr 2022 15:47:52 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: mmci: Break IRQ status loop when all zero
+Date:   Sun, 17 Apr 2022 00:45:49 +0200
+Message-Id: <20220416224549.627623-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-References: <20220415222931.481352-1-linus.walleij@linaro.org>
-In-Reply-To: <20220415222931.481352-1-linus.walleij@linaro.org>
-From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
-Date:   Sat, 16 Apr 2022 12:52:29 +0200
-X-Gmail-Original-Message-ID: <CAHmME9pL3wySZVp+-HA7O_BVyu=a1aEeVAvFaKYRXg=8vp96VQ@mail.gmail.com>
-Message-ID: <CAHmME9pL3wySZVp+-HA7O_BVyu=a1aEeVAvFaKYRXg=8vp96VQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Add CIDs for cards to the entropy pool
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        "Theodore Ts'o" <tytso@mit.edu>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+We iterate an extra time through the IRQ status handling
+loop despite nothing had fired. Enabling the debug prints:
 
-This seems like a pretty nice idea. It seems like a lot of small
-embedded boards are fairly deterministic and have lots of identical
-board information, with possibly the only thing differing
-board-to-board on firstboot being whatever serial number is baked into
-the SD card. And the input pool only ever accumulates with
-add_device_randomness(), so in the worst case, this won't hurt
-anything. So:
+mmci-pl18x 80005000.mmc: op 01 arg 00000000 flags 000000e1
+mmci-pl18x 80005000.mmc: irq0 (data+cmd) 00000001
+mmci-pl18x 80005000.mmc: irq0 (data+cmd) 00000000
+mmci-pl18x 80005000.mmc: op 01 arg 40ff8080 flags 000000e1
+mmci-pl18x 80005000.mmc: irq0 (data+cmd) 00000001
+mmci-pl18x 80005000.mmc: irq0 (data+cmd) 00000000
 
-Acked-by: Jason A. Donenfeld <Jason@zx2c4.com>
+It is pointless to loop through the function when status
+is zero. Just break the loop if the status is zero.
 
-Jason
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/host/mmci.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 45b8608c935c..f3cf3152a397 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1619,6 +1619,8 @@ static irqreturn_t mmci_irq(int irq, void *dev_id)
+ 
+ 	do {
+ 		status = readl(host->base + MMCISTATUS);
++		if (!status)
++			break;
+ 
+ 		if (host->singleirq) {
+ 			if (status & host->mask1_reg)
+-- 
+2.35.1
+
