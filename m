@@ -2,139 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38670C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 10:21:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 837E9C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 11:41:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237659AbiDRKXn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Apr 2022 06:23:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36714 "EHLO
+        id S232287AbiDRLo0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Apr 2022 07:44:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237660AbiDRKXm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 06:23:42 -0400
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F161913E2A;
-        Mon, 18 Apr 2022 03:21:03 -0700 (PDT)
-Received: from fllv0035.itg.ti.com ([10.64.41.0])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 23IAL01b036713;
-        Mon, 18 Apr 2022 05:21:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1650277260;
-        bh=5vlzWnykhMTqczae+yu/fb/SoPEuuYZhc9mFRVH1Lro=;
-        h=From:To:CC:Subject:Date:In-Reply-To:References;
-        b=u9tmqR2ke8Q9Od47uSx9YIuT8wGMdf7a2yIr6Z5TEIN+n/8V/TUEwAyAwmCyuBk+t
-         xOVkUu0V5H4JpFXxfPdoDPUbzucvOl9Wc+CE17smusDEYK7V7H4oVTgk3UlC8/R+6e
-         BqGvTAfCs9tLlL54/bOEtbQ+eSeIL4Wh4S/t4ZCI=
-Received: from DLEE108.ent.ti.com (dlee108.ent.ti.com [157.170.170.38])
-        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 23IAL0Ol070574
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 18 Apr 2022 05:21:00 -0500
-Received: from DLEE112.ent.ti.com (157.170.170.23) by DLEE108.ent.ti.com
- (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Mon, 18
- Apr 2022 05:21:00 -0500
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE112.ent.ti.com
- (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
- Frontend Transport; Mon, 18 Apr 2022 05:21:00 -0500
-Received: from gsaswath-HP-ProBook-640-G5.dal.design.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 23IAKgTa021324;
-        Mon, 18 Apr 2022 05:20:57 -0500
-From:   Aswath Govindraju <a-govindraju@ti.com>
-CC:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Aswath Govindraju <a-govindraju@ti.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH 2/2] drivers: mmc: sdhci_am654: Add the quirk to set TESTCD bit
-Date:   Mon, 18 Apr 2022 15:50:40 +0530
-Message-ID: <20220418102040.4993-3-a-govindraju@ti.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20220418102040.4993-1-a-govindraju@ti.com>
-References: <20220418102040.4993-1-a-govindraju@ti.com>
+        with ESMTP id S236380AbiDRLoZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 07:44:25 -0400
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FFF2120AF
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:41:45 -0700 (PDT)
+Received: by mail-ed1-x52e.google.com with SMTP id v4so17147861edl.7
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:41:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=fmqrWEaMLzdzM6tlfO27gc/5ZjxaVbLantgCWtrzxek=;
+        b=euLeyub8VKd1us4OwhWIZzr3XV+POZ9D4tQLxC59vh85fmzN0/EVt8PiyZEOcOThP2
+         SGipuK3/fFUQh4OIEj/tUPjKfgC4U1Vs1JR44X8fEktdAUef0FmXFVAl9yS7wlBCamz4
+         1FNGh7HdJJdtqnUyE/EwU5nAlurUZzRIx+/YyEtGXFLtc7RrKS8kr6hBSnkxpVmQLGTB
+         quVtKz+eAR+F22D8M88AXByTb73Ytb3RUid038sU3fozUZAFcsUs0QcL+n4RZla9hT+7
+         br9Rd0/8aWonrhkRGsDF/ng25tJ4WSiZn7AJbj6hxM4rzWzfFznwcs1jpby8AxAizWLl
+         9K8w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=fmqrWEaMLzdzM6tlfO27gc/5ZjxaVbLantgCWtrzxek=;
+        b=6FbSlSUsJujsLZM9JNbyFamn+Scs7xFcAQqp3z+6z+tLMvhumvKu09tZJu0IV5PQ2v
+         Ldz92HnQy0bwO2Pk+UUkS5UIXeoF3QQ8XGOUvmWHcMX/I4pzdqGyfUxnu6tEk6J1M0pr
+         QDBY3Nj40jXgaKWT6j29/72/YN/Sx1UAcRV3AOEt8G88KHsjP70Ul0AgDwXsib6vyAMq
+         sfn9vSbczxE6ChoId90LUu8eNBwPrAJv2p/OYJoyp8feKMvgf4f/KGD5KJTjYNhiVsa2
+         N8d1z3JpKM86mEZCaIluKMrTdMsweOfQ1KDIPNGQrpzxNpKxtdrvcVjyltbaGCaY2Gmx
+         E5QA==
+X-Gm-Message-State: AOAM531pKlCjnfNP91mo2DAN5fTzB/vnw0UZi7KRKeGfmybp2ErOexFB
+        msBgL2/tA/qMR9AjXPZwgHiDmw==
+X-Google-Smtp-Source: ABdhPJy5kGTGP7Apl58/+o1/q/TVZVuRIYgAiCuDaaJBGKYub7vpPI4igucgaDqIEtBRy96pV5HUgQ==
+X-Received: by 2002:aa7:c68d:0:b0:41d:7b1c:7da0 with SMTP id n13-20020aa7c68d000000b0041d7b1c7da0mr11742036edq.175.1650282104090;
+        Mon, 18 Apr 2022 04:41:44 -0700 (PDT)
+Received: from [192.168.0.217] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id u25-20020a170906b11900b006e08588afedsm4506051ejy.132.2022.04.18.04.41.42
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 Apr 2022 04:41:43 -0700 (PDT)
+Message-ID: <09df1d1f-71cf-a24f-2908-8e1630d9c536@linaro.org>
+Date:   Mon, 18 Apr 2022 13:41:42 +0200
 MIME-Version: 1.0
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
-To:     unlisted-recipients:; (no To-header on input)
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH 3/4] dt-bindings: mmc: convert orion-sdio to JSON schema
+Content-Language: en-US
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>,
+        ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
+        andrew@lunn.ch, gregory.clement@bootlin.com,
+        sebastian.hesselbarth@gmail.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+References: <20220414230603.567049-1-chris.packham@alliedtelesis.co.nz>
+ <20220414230603.567049-4-chris.packham@alliedtelesis.co.nz>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220414230603.567049-4-chris.packham@alliedtelesis.co.nz>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Vignesh Raghavendra <vigneshr@ti.com>
+On 15/04/2022 01:06, Chris Packham wrote:
+> Convert the orion-sdio binding to JSON schema.
+> 
+> Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> ---
+>  .../bindings/mmc/marvell,orion-sdio.yaml      | 43 +++++++++++++++++++
+>  .../devicetree/bindings/mmc/orion-sdio.txt    | 16 -------
+>  2 files changed, 43 insertions(+), 16 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,orion-sdio.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/marvell,orion-sdio.yaml b/Documentation/devicetree/bindings/mmc/marvell,orion-sdio.yaml
+> new file mode 100644
+> index 000000000000..4fef53fc78ed
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/marvell,orion-sdio.yaml
+> @@ -0,0 +1,43 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/marvell,orion-sdio.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Marvell orion-sdio controller
+> +
+> +maintainers:
+> +  - Ulf Hansson <ulf.hansson@linaro.org>
 
-The ARASAN MMC controller on Keystone 3 class of devices need the SDCD
-line to be connected for proper functioning. Similar to the issue pointed
-out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
-sdhci-of-arasan: Set controller to test mode when no CD bit").
+This should be someone having taking care about this hardware, not
+subsystem maintainer. If there is no dedicated person for Marvell MMC,
+then maybe SoC maintainers?
 
-In cases where this can't be connected, add a quirk to force the
-controller into test mode and set the TESTCD bit. Use the flag
-"ti,fails-without-test-cd", to implement this above quirk when required.
 
-Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
-Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
----
- drivers/mmc/host/sdhci_am654.c | 23 ++++++++++++++++++++++-
- 1 file changed, 22 insertions(+), 1 deletion(-)
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index e54fe24d47e7..c36b969ed1b6 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -147,6 +147,9 @@ struct sdhci_am654_data {
- 	int drv_strength;
- 	int strb_sel;
- 	u32 flags;
-+	u32 quirks;
-+
-+#define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
- };
- 
- struct sdhci_am654_driver_data {
-@@ -369,6 +372,21 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
- 	}
- }
- 
-+void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u8 ctrl;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_reset(host, mask);
-+
-+	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
-+}
-+
- static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -500,7 +518,7 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
- 	.set_clock = sdhci_j721e_4bit_set_clock,
- 	.write_b = sdhci_am654_write_b,
- 	.irq = sdhci_am654_cqhci_irq,
--	.reset = sdhci_reset,
-+	.reset = sdhci_am654_reset,
- };
- 
- static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
-@@ -719,6 +737,9 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
- 	device_property_read_u32(dev, "ti,clkbuf-sel",
- 				 &sdhci_am654->clkbuf_sel);
- 
-+	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
-+		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
-+
- 	sdhci_get_of_property(pdev);
- 
- 	return 0;
--- 
-2.17.1
 
+Best regards,
+Krzysztof
