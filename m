@@ -2,91 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BB2AC433F5
-	for <linux-mmc@archiver.kernel.org>; Sun, 17 Apr 2022 14:44:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F790C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 08:08:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234249AbiDQOrE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 17 Apr 2022 10:47:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50082 "EHLO
+        id S233625AbiDRIL3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Apr 2022 04:11:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40552 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234247AbiDQOrD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Apr 2022 10:47:03 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CE4BDF5E
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Apr 2022 07:44:28 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id x17so20866853lfa.10
-        for <linux-mmc@vger.kernel.org>; Sun, 17 Apr 2022 07:44:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=RnWct7vKYCF5Uv27r8WcT39f+hEMz2AIjexA1wHqeFc=;
-        b=LHOJ6g/M4VpeXoLOayEmmb0o6z38hkflkA+ktwrpdh8zeBDjoT6EkxwwB+I84QuU2J
-         FPIkXEegL4IGZim/0RkFUIf3JHlMkh+Qh8+6TxyvF0mz74O28eTP8AnNR0Q9CmHNvNwp
-         5bPIQJZQrImHIjiV/qfsuIulBBkLDtwT+ai9rKWIPy7qX2xASAc1ztop69LHsJE7MKBF
-         PXTlIGeCaztVwyA7/RozsFA2YQruyahmlsxbBWp6yDuRu5Ox4HWTGjjetvQIJnfcQLED
-         qvZ1qVqaHud6cEC6oLX4VBk0m8lssakItPIXe0N3U65pR2J6id2OLglFf2s/GeRu9uYx
-         18TQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=RnWct7vKYCF5Uv27r8WcT39f+hEMz2AIjexA1wHqeFc=;
-        b=KeStTeQOrMRjNJW+xg95q7motYLK1hOFMwccdBYr4GbDYQlsg9abYdtSd4JnJHHmod
-         Usspio+Xas9Tg3PMef3GR/XO2KdlTZdys/8K7d0aoTai3AaN3eCToG57OZXNm3GPTkva
-         oEqd8wsEaITWbvQ1t7kyIqTYFpPyNOHD4T0OSv9c3+OgcHY8Myr3TpNbVwko+Xr36VTt
-         0fpiuMuaow5ZwPGmi5mTxkswtXgEReova98gJmE+gEzKdJR7KRqdTYEPNwljJLN7Ba0N
-         siPsskrOZx+hNp/eO3cGBMKgDXFO1pPf5IYoDf0c+DkfNcaheEAdZvPWyURCOAkLkjvm
-         E/gA==
-X-Gm-Message-State: AOAM531LOaR2HedbkjbF9mJZg9b5ZgpWZMy61K8p9Wt2Vsfywdn+P+8V
-        dlttyjyh4rd9dRLDV5UM+wxjBb1Nphy7aQ==
-X-Google-Smtp-Source: ABdhPJwrV4qFcvi/BOh02dpNGBtnc1ORhfIQcNDibvJ5ZlDBtmOMbKmxmTcHyrYgUckPVSLtFL54oA==
-X-Received: by 2002:a05:6512:cf:b0:46c:cb02:336d with SMTP id c15-20020a05651200cf00b0046ccb02336dmr5329688lfp.548.1650206666066;
-        Sun, 17 Apr 2022 07:44:26 -0700 (PDT)
-Received: from localhost.localdomain (c-fdcc225c.014-348-6c756e10.bbcust.telenor.se. [92.34.204.253])
-        by smtp.gmail.com with ESMTPSA id b17-20020a196451000000b0046d86056d22sm961012lfj.179.2022.04.17.07.44.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 17 Apr 2022 07:44:25 -0700 (PDT)
-From:   Linus Walleij <linus.walleij@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        devicetree@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: Add small binding node on level shifters
-Date:   Sun, 17 Apr 2022 16:42:23 +0200
-Message-Id: <20220417144223.649201-1-linus.walleij@linaro.org>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S231859AbiDRIL2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 04:11:28 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A529A11C32;
+        Mon, 18 Apr 2022 01:08:50 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3FD346104C;
+        Mon, 18 Apr 2022 08:08:50 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4D834C385A8;
+        Mon, 18 Apr 2022 08:08:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1650269329;
+        bh=NvQzA8r3CpfN3EEOE+dzR+OC5JOdLMsVh5Lvn23crhA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=YHHaw/xnv0FhFCoI7OBu5iGoO8G/dtyKx6A4psBQjjaufFL4ylKUsTcZB29bKhcbs
+         PlbQwXbKp15iJk4zI1b00CKnMocs8aFpEZlRbcc+kbPoZWrriYjURPtgotnorrHob1
+         fCkz5HYZv0OUUw221TDerNviDZOHfWtM74q3PlMSmsr6F49dG+Wg21BYsvvKo0v2RK
+         KdDj/XmhvDgGc4sGjzDLTrT+YJjTbiIR6LgfLeBcPATwenYN1lDncs0ylKZGvs+6uu
+         GHlJD4KLuxYZY5YN64YvtrLtiDsoV2YS90mDxC6oBnsa+43HKEkV6amWxbTBlIhTTe
+         K5CxM6WS5mmxw==
+Date:   Mon, 18 Apr 2022 16:08:42 +0800
+From:   Shawn Guo <shawnguo@kernel.org>
+To:     Adam Ford <aford173@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, aford@beaconembedded.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH V4 2/3] arm64: dts: imx8mn: Enable HS400-ES
+Message-ID: <20220418080842.GC391514@dragon>
+References: <20220410193544.1745684-1-aford173@gmail.com>
+ <20220410193544.1745684-2-aford173@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220410193544.1745684-2-aford173@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The VQMMC is often provided by a level shifter, so drop a small note
-in the bindings that this can be the case and how that is done.
-It is helpful information since this is pretty common.
+On Sun, Apr 10, 2022 at 02:35:42PM -0500, Adam Ford wrote:
+> The SDHC controller in the imx8mn has the same controller
+> as the imx8mm which supports HS400-ES. Change the compatible
+> fallback to imx8mm to enable it, but keep the imx7d-usdhc
+> to prevent breaking backwards compatibility.
+> 
+> Signed-off-by: Adam Ford <aford173@gmail.com>
 
-Cc: devicetree@vger.kernel.org
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-index 513f3c8758aa..ff5ce89e5111 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-@@ -298,7 +298,10 @@ properties:
- 
-   vqmmc-supply:
-     description:
--      Supply for the bus IO line power
-+      Supply for the bus IO line power, such as a level shifter.
-+      If the level shifter is controlled by a GPIO line, this shall
-+      be modeled as a "regulator-fixed" with a GPIO line for
-+      switching the level shifter on/off.
- 
-   mmc-pwrseq:
-     $ref: /schemas/types.yaml#/definitions/phandle
--- 
-2.35.1
-
+Applied #2 and #3, thanks!
