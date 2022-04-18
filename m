@@ -2,124 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8430FC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 11:56:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8B50C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 11:58:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237943AbiDRL7K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Apr 2022 07:59:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58456 "EHLO
+        id S235337AbiDRMBT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Apr 2022 08:01:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237941AbiDRL7J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 07:59:09 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6114619283;
-        Mon, 18 Apr 2022 04:56:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1650282990; x=1681818990;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=/HxZz6S5PJGAsiWfCIX8Ebb5KnPrpBo25d6b8Hx0WyA=;
-  b=W4MM89jgBF8/vffe8TFZJr5JyVsGHMjXe0a8HF2amvj541uRZbXdRfHS
-   jD70a9fUUFfj04uzp7VZLH19VIC8DEe1aVKM7t0gvRZOpKxv6tTeXmq/P
-   TV1fWVlhRRR3/01do+h88X/TSBY7dC0W36u8w5E7Cl+1/xcmPVzf//Xsc
-   t9HQKkLKeujmsLWCupQXN/jUqN+hWYjAZdJdX8nFhQjqG/F7fJ4UyWewj
-   uxT5cG7DtHFNWyLAFzXrmWpwpdMX+qyIlB1xb1uv+0G4Q4MfszXNxTlsX
-   V53UPaDPyVoHaG8pmXyIzYbzR3e/rV4FUwyFCk8dnoXDQshQTvOCpvHyh
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10320"; a="262361511"
-X-IronPort-AV: E=Sophos;i="5.90,269,1643702400"; 
-   d="scan'208";a="262361511"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Apr 2022 04:56:29 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.90,269,1643702400"; 
-   d="scan'208";a="665155557"
-Received: from lkp-server01.sh.intel.com (HELO 3abc53900bec) ([10.239.97.150])
-  by orsmga004.jf.intel.com with ESMTP; 18 Apr 2022 04:56:24 -0700
-Received: from kbuild by 3abc53900bec with local (Exim 4.95)
-        (envelope-from <lkp@intel.com>)
-        id 1ngPzU-0004bH-1G;
-        Mon, 18 Apr 2022 11:56:24 +0000
-Date:   Mon, 18 Apr 2022 19:55:42 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Aswath Govindraju <a-govindraju@ti.com>
-Cc:     kbuild-all@lists.01.org, Vignesh Raghavendra <vigneshr@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Aswath Govindraju <a-govindraju@ti.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] drivers: mmc: sdhci_am654: Add the quirk to set
- TESTCD bit
-Message-ID: <202204181920.iopT8zQA-lkp@intel.com>
-References: <20220418102040.4993-3-a-govindraju@ti.com>
+        with ESMTP id S235342AbiDRMBS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 08:01:18 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 878BC1A800
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:58:39 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id z5-20020a17090a468500b001d2bc2743c4so351699pjf.0
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:58:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ijizZXHckJyY8byLZcyK/JgZoQnnrWvDKOblHUIK4F4=;
+        b=M+yxBY4DCGA7bx9IJIM/oe+ZVEcjgYl6eFoO4izdUklnqi/Td//mMA2EN24H8dYoVe
+         /eaFiuB2H5oMoRQrk1j5sVxm0wj5ErTf+EHG3XKmvknVA50xg/UQTxoGhvvFJxskUh/P
+         kDwfFeA43bqiaIhtrze26B+N5iFVq5j0Wn3emvo57+Nbj0Y1pkhfl6mKGw7myI+WkBhS
+         5EVhethoy+urLcHMXgOUpGV4keCPW/njyzWcXm+xyZoE9ZY+jL1WsRdtdVwfrf8EUNLA
+         w6TQk8zxyimi9m0l8zV2a1e+5IWShpTByOLPT4R9IQHgdTBej/RjviBlAoTNrgu0HaEp
+         QNMA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ijizZXHckJyY8byLZcyK/JgZoQnnrWvDKOblHUIK4F4=;
+        b=MorLtG8JYU5XsI1oaxVo44lvQq1nScMIFSWg381nlt7YVTofapYAkrmQwcFs7yTpYc
+         YxhKZY68HYUOhgkXH8S8FunOnKT2AJAY3X+roPhIwsFKJSI3ffc8D8GdTCMqFLXmm/Fr
+         Yy8sbANNvKA/hTlPRf1chjRbtMINK1Rs+gkgAyHZnU99SmneEoVYuPUTpX/RPRQirw9D
+         +i8O69c8z1x+tEjuNZPsgj9NMciBsD/k8vhf6uF30t18iOUt/giTv0DQJEgyUSNnl+nj
+         C+7hh3iLKUZp/ed6RI8GwgJ+r8R+SZlIV4M9CL3N7dPd0UiK2rom84FsanssWK2zwxE6
+         y69Q==
+X-Gm-Message-State: AOAM532eIg992l/FGq6i50bds1KwhfhRWggvdT/SdY1vkRPLb7lZN9BU
+        ey9H7vcNSreLewv321SHrIo=
+X-Google-Smtp-Source: ABdhPJwArX4BSCfGnm0WS0ub5j6SMgKqb9COKWqDcpKTkaxj18hL4XNpIlRIP01GByn5NUaLjGfFQw==
+X-Received: by 2002:a17:90b:3ecd:b0:1d1:7733:a125 with SMTP id rm13-20020a17090b3ecd00b001d17733a125mr14589817pjb.184.1650283119041;
+        Mon, 18 Apr 2022 04:58:39 -0700 (PDT)
+Received: from jason-z170xgaming7.genesyslogic.com.tw ([122.146.30.3])
+        by smtp.gmail.com with ESMTPSA id u206-20020a6279d7000000b00505fdc42bf9sm12409749pfc.101.2022.04.18.04.58.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 18 Apr 2022 04:58:38 -0700 (PDT)
+From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
+To:     ulf.hansson@linaro.org, takahiro.akashi@linaro.org,
+        adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, dlunev@chromium.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        jason.lai@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com,
+        Tim.Hsieh@genesyslogic.com.tw
+Subject: [PATCH V4 0/6] Preparations to support SD UHS-II cards
+Date:   Mon, 18 Apr 2022 19:58:27 +0800
+Message-Id: <20220418115833.10738-1-jasonlai.genesyslogic@gmail.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220418102040.4993-3-a-govindraju@ti.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Aswath,
+Series [1] that has been posted by Ulf Hansson which provided some
+ guidance and an overall structure.
 
-I love your patch! Perhaps something to improve:
+Series [2] focused on UHS-II card control side to address Ulf's intention
+ regarding to "modularising" sd_uhs2.c.
 
-[auto build test WARNING on robh/for-next]
-[also build test WARNING on linus/master ulf-hansson-mmc-mirror/next v5.18-rc3 next-20220414]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch]
+Series [3] is based on series [2] and adopt most of Ulf's comments.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Aswath-Govindraju/MMC-Add-quirk-to-set-the-TESTCD-bit/20220418-182325
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-config: arc-allyesconfig (https://download.01.org/0day-ci/archive/20220418/202204181920.iopT8zQA-lkp@intel.com/config)
-compiler: arceb-elf-gcc (GCC) 11.2.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/a7d917691f55e240b1ab0abf36b0b39d1194a323
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Aswath-Govindraju/MMC-Add-quirk-to-set-the-TESTCD-bit/20220418-182325
-        git checkout a7d917691f55e240b1ab0abf36b0b39d1194a323
-        # save the config file to linux build tree
-        mkdir build_dir
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.2.0 make.cross O=build_dir ARCH=arc SHELL=/bin/bash drivers/mmc/host/
+Series [4] is based on series [3] and refined by Ulf Hanssion.
 
-If you fix the issue, kindly add following tag as appropriate
-Reported-by: kernel test robot <lkp@intel.com>
+This series is the successor version of post [4], which is base on Ulf's
+ "wip_uhs_v3" branch:
+  1. Implement call back functions in sd_uhs2_ops.
+  2. Adopt Ulf's comments for V3.
 
-All warnings (new ones prefixed by >>):
+[1]
+https://patchwork.kernel.org/project/linux-mmc/list/?series=438509
 
->> drivers/mmc/host/sdhci_am654.c:375:6: warning: no previous prototype for 'sdhci_am654_reset' [-Wmissing-prototypes]
-     375 | void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
-         |      ^~~~~~~~~~~~~~~~~
+[2]
+https://patchwork.kernel.org/project/linux-mmc/list/?series=589827
 
+[3]
+https://patchwork.kernel.org/project/linux-mmc/list/?series=606241
 
-vim +/sdhci_am654_reset +375 drivers/mmc/host/sdhci_am654.c
+[4]
+https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/log/?h=
+wip_uhs_v3
 
-   374	
- > 375	void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
-   376	{
-   377		u8 ctrl;
-   378		struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-   379		struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-   380	
-   381		sdhci_reset(host, mask);
-   382	
-   383		if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
-   384			ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-   385			ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-   386			sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-   387		}
-   388	}
-   389	
+Jason Lai (2):
+  mmc: core: Add definitions for SD UHS-II cards
+  mmc:core: Support UHS-II card control and access
+
+Ulf Hansson (4):
+  mmc: core: Cleanup printing of speed mode at card insertion
+  mmc: core: Prepare to support SD UHS-II cards
+  mmc: core: Announce successful insertion of an SD UHS-II card
+  mmc: core: Extend support for mmc regulators with a vqmmc2
+
+ drivers/mmc/core/Makefile    |    2 +-
+ drivers/mmc/core/block.c     |    5 +-
+ drivers/mmc/core/bus.c       |   38 +-
+ drivers/mmc/core/core.c      |   33 +-
+ drivers/mmc/core/core.h      |    1 +
+ drivers/mmc/core/host.h      |    4 +
+ drivers/mmc/core/mmc_ops.c   |   24 +-
+ drivers/mmc/core/mmc_ops.h   |    1 +
+ drivers/mmc/core/regulator.c |   34 +
+ drivers/mmc/core/sd.c        |   11 +-
+ drivers/mmc/core/sd.h        |    3 +
+ drivers/mmc/core/sd_ops.c    |    9 +
+ drivers/mmc/core/sd_ops.h    |    3 +
+ drivers/mmc/core/sd_uhs2.c   | 1377 ++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h     |   47 ++
+ include/linux/mmc/core.h     |   13 +
+ include/linux/mmc/host.h     |   83 ++
+ include/linux/mmc/sd_uhs2.h  |  263 +++++++
+ 18 files changed, 1916 insertions(+), 35 deletions(-)
+ create mode 100644 drivers/mmc/core/sd_uhs2.c
+ create mode 100644 include/linux/mmc/sd_uhs2.h
 
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.35.1
+
