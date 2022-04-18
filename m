@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8B50C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 11:58:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E56CAC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Apr 2022 11:58:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235337AbiDRMBT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Apr 2022 08:01:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59384 "EHLO
+        id S231689AbiDRMBW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Apr 2022 08:01:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235342AbiDRMBS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 08:01:18 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 878BC1A800
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:58:39 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id z5-20020a17090a468500b001d2bc2743c4so351699pjf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:58:39 -0700 (PDT)
+        with ESMTP id S235342AbiDRMBV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2022 08:01:21 -0400
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB6501A805
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:58:41 -0700 (PDT)
+Received: by mail-pj1-x102f.google.com with SMTP id n33-20020a17090a5aa400b001d28f5ee3f9so2367657pji.4
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2022 04:58:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ijizZXHckJyY8byLZcyK/JgZoQnnrWvDKOblHUIK4F4=;
-        b=M+yxBY4DCGA7bx9IJIM/oe+ZVEcjgYl6eFoO4izdUklnqi/Td//mMA2EN24H8dYoVe
-         /eaFiuB2H5oMoRQrk1j5sVxm0wj5ErTf+EHG3XKmvknVA50xg/UQTxoGhvvFJxskUh/P
-         kDwfFeA43bqiaIhtrze26B+N5iFVq5j0Wn3emvo57+Nbj0Y1pkhfl6mKGw7myI+WkBhS
-         5EVhethoy+urLcHMXgOUpGV4keCPW/njyzWcXm+xyZoE9ZY+jL1WsRdtdVwfrf8EUNLA
-         w6TQk8zxyimi9m0l8zV2a1e+5IWShpTByOLPT4R9IQHgdTBej/RjviBlAoTNrgu0HaEp
-         QNMA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=RSUTOvHR9x81DktuWwrA5BNOEcj+VMAMwFa5FNnQGgo=;
+        b=mkN7QSFSqj05HaDj6DWIWnlZapqYjRs9xHPkXzK58OqcoQwifjcsxAGGVBflS3sqEq
+         Qmzlt98zVaVYhhGFEaUAOOtgy+HZSHFSTk7eiV9qfVJIHt6MuKzkzKi/gYfig0e/pEWS
+         wiH+2FWo3ItPSfJw6Bbxg7JHmqp9g33cGk+IGgI8+J6VypGacdLfXtU2r+gm0oSZ/I1o
+         bA9zF8vvEvf5dNIlhsef08JDTgu1DXJMBG2iv9yQL6RA3i/0493N6Mcsb7wFLzSQJba5
+         qE3nAJxV1AJj35A8N/uf8fvib1EcMU1mO7hYH4XmlKJKnx0ReRHJ6yzl5n3gmpHld11U
+         WXHw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ijizZXHckJyY8byLZcyK/JgZoQnnrWvDKOblHUIK4F4=;
-        b=MorLtG8JYU5XsI1oaxVo44lvQq1nScMIFSWg381nlt7YVTofapYAkrmQwcFs7yTpYc
-         YxhKZY68HYUOhgkXH8S8FunOnKT2AJAY3X+roPhIwsFKJSI3ffc8D8GdTCMqFLXmm/Fr
-         Yy8sbANNvKA/hTlPRf1chjRbtMINK1Rs+gkgAyHZnU99SmneEoVYuPUTpX/RPRQirw9D
-         +i8O69c8z1x+tEjuNZPsgj9NMciBsD/k8vhf6uF30t18iOUt/giTv0DQJEgyUSNnl+nj
-         C+7hh3iLKUZp/ed6RI8GwgJ+r8R+SZlIV4M9CL3N7dPd0UiK2rom84FsanssWK2zwxE6
-         y69Q==
-X-Gm-Message-State: AOAM532eIg992l/FGq6i50bds1KwhfhRWggvdT/SdY1vkRPLb7lZN9BU
-        ey9H7vcNSreLewv321SHrIo=
-X-Google-Smtp-Source: ABdhPJwArX4BSCfGnm0WS0ub5j6SMgKqb9COKWqDcpKTkaxj18hL4XNpIlRIP01GByn5NUaLjGfFQw==
-X-Received: by 2002:a17:90b:3ecd:b0:1d1:7733:a125 with SMTP id rm13-20020a17090b3ecd00b001d17733a125mr14589817pjb.184.1650283119041;
-        Mon, 18 Apr 2022 04:58:39 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=RSUTOvHR9x81DktuWwrA5BNOEcj+VMAMwFa5FNnQGgo=;
+        b=3/0pw+vPAV5HWrPVNmMAfML10veW+RZwKXrdn0pt4DjjFqJEA58QNJRDHhBMzmAhWG
+         BPLXwRjxm9Eb8cHajQ2E9XWppzyt/aSvG3mZNzdLk+SyKsiHZiVMZfcUdQxGFQDojlmW
+         vMAiut7+OrOKbUt2m9dw0R9cOZoke8cHx2KcVqTVPVJemCusQrQl33nsxfbGdlsTNZqe
+         BQes0GvembeOeHLp4o5MBaUq1683vGxDILwkhZ49594fZ27es9pRsiVaLdHDbqB63hbB
+         yGxVB1T7EZMD9kNpE2pcR15W/KMBLl5XcK6/oTt17lPlBtJfzLjluvp/O2kXlGEmvpi+
+         R6zA==
+X-Gm-Message-State: AOAM5304fLz2/vTXdNsktYFK7dI+rMVPUhs5QRMep8Waj8ZuHPbygXqt
+        yY2Na2cOms/t6gMqgm7VoDw7d7xQIhU=
+X-Google-Smtp-Source: ABdhPJxJjTP9sIla8K38dELxACG1yiJlUcrCFtup9j8SpBI2r9gOonapnfffZXjKuzpIqDYLexpM6Q==
+X-Received: by 2002:a17:903:284:b0:158:8e21:2108 with SMTP id j4-20020a170903028400b001588e212108mr10153361plr.37.1650283121093;
+        Mon, 18 Apr 2022 04:58:41 -0700 (PDT)
 Received: from jason-z170xgaming7.genesyslogic.com.tw ([122.146.30.3])
-        by smtp.gmail.com with ESMTPSA id u206-20020a6279d7000000b00505fdc42bf9sm12409749pfc.101.2022.04.18.04.58.36
+        by smtp.gmail.com with ESMTPSA id u206-20020a6279d7000000b00505fdc42bf9sm12409749pfc.101.2022.04.18.04.58.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Apr 2022 04:58:38 -0700 (PDT)
+        Mon, 18 Apr 2022 04:58:40 -0700 (PDT)
 From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
 To:     ulf.hansson@linaro.org, takahiro.akashi@linaro.org,
         adrian.hunter@intel.com
@@ -54,76 +54,89 @@ Cc:     linux-mmc@vger.kernel.org, dlunev@chromium.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         jason.lai@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com,
         Tim.Hsieh@genesyslogic.com.tw
-Subject: [PATCH V4 0/6] Preparations to support SD UHS-II cards
-Date:   Mon, 18 Apr 2022 19:58:27 +0800
-Message-Id: <20220418115833.10738-1-jasonlai.genesyslogic@gmail.com>
+Subject: [PATCH V4 1/6] mmc: core: Cleanup printing of speed mode at card insertion
+Date:   Mon, 18 Apr 2022 19:58:28 +0800
+Message-Id: <20220418115833.10738-2-jasonlai.genesyslogic@gmail.com>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220418115833.10738-1-jasonlai.genesyslogic@gmail.com>
+References: <20220418115833.10738-1-jasonlai.genesyslogic@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Series [1] that has been posted by Ulf Hansson which provided some
- guidance and an overall structure.
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Series [2] focused on UHS-II card control side to address Ulf's intention
- regarding to "modularising" sd_uhs2.c.
+The current print of the bus speed mode in mmc_add_card() has grown over
+the years and is now difficult to parse. Let's clean up the code and also
+take the opportunity to properly announce "DDR" for eMMCs as
+"high speed DDR", which is according to the eMMC spec.
 
-Series [3] is based on series [2] and adopt most of Ulf's comments.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/bus.c | 36 ++++++++++++++++++++----------------
+ 1 file changed, 20 insertions(+), 16 deletions(-)
 
-Series [4] is based on series [3] and refined by Ulf Hanssion.
-
-This series is the successor version of post [4], which is base on Ulf's
- "wip_uhs_v3" branch:
-  1. Implement call back functions in sd_uhs2_ops.
-  2. Adopt Ulf's comments for V3.
-
-[1]
-https://patchwork.kernel.org/project/linux-mmc/list/?series=438509
-
-[2]
-https://patchwork.kernel.org/project/linux-mmc/list/?series=589827
-
-[3]
-https://patchwork.kernel.org/project/linux-mmc/list/?series=606241
-
-[4]
-https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/log/?h=
-wip_uhs_v3
-
-Jason Lai (2):
-  mmc: core: Add definitions for SD UHS-II cards
-  mmc:core: Support UHS-II card control and access
-
-Ulf Hansson (4):
-  mmc: core: Cleanup printing of speed mode at card insertion
-  mmc: core: Prepare to support SD UHS-II cards
-  mmc: core: Announce successful insertion of an SD UHS-II card
-  mmc: core: Extend support for mmc regulators with a vqmmc2
-
- drivers/mmc/core/Makefile    |    2 +-
- drivers/mmc/core/block.c     |    5 +-
- drivers/mmc/core/bus.c       |   38 +-
- drivers/mmc/core/core.c      |   33 +-
- drivers/mmc/core/core.h      |    1 +
- drivers/mmc/core/host.h      |    4 +
- drivers/mmc/core/mmc_ops.c   |   24 +-
- drivers/mmc/core/mmc_ops.h   |    1 +
- drivers/mmc/core/regulator.c |   34 +
- drivers/mmc/core/sd.c        |   11 +-
- drivers/mmc/core/sd.h        |    3 +
- drivers/mmc/core/sd_ops.c    |    9 +
- drivers/mmc/core/sd_ops.h    |    3 +
- drivers/mmc/core/sd_uhs2.c   | 1377 ++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h     |   47 ++
- include/linux/mmc/core.h     |   13 +
- include/linux/mmc/host.h     |   83 ++
- include/linux/mmc/sd_uhs2.h  |  263 +++++++
- 18 files changed, 1916 insertions(+), 35 deletions(-)
- create mode 100644 drivers/mmc/core/sd_uhs2.c
- create mode 100644 include/linux/mmc/sd_uhs2.h
-
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 58a60afa650b..eefe74bf1356 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
+ {
+ 	int ret;
+ 	const char *type;
++	const char *speed_mode = "";
+ 	const char *uhs_bus_speed_mode = "";
+ 	static const char *const uhs_speeds[] = {
+ 		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
+@@ -337,27 +338,30 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
++	if (mmc_card_hs(card))
++		speed_mode = "high speed ";
++	else if (mmc_card_uhs(card))
++		speed_mode = "ultra high speed ";
++	else if	(mmc_card_ddr52(card))
++		speed_mode = "high speed DDR ";
++	else if (mmc_card_hs200(card))
++		speed_mode = "HS200 ";
++	else if (mmc_card_hs400es(card))
++		speed_mode = "HS400 Enhanced strobe ";
++	else if (mmc_card_hs400(card))
++		speed_mode = "HS400 ";
++
+ 	if (mmc_card_uhs(card) &&
+ 		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+ 		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+ 
+-	if (mmc_host_is_spi(card->host)) {
+-		pr_info("%s: new %s%s%s card on SPI\n",
+-			mmc_hostname(card->host),
+-			mmc_card_hs(card) ? "high speed " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
+-			type);
+-	} else {
+-		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+-			mmc_hostname(card->host),
+-			mmc_card_uhs(card) ? "ultra high speed " :
+-			(mmc_card_hs(card) ? "high speed " : ""),
+-			mmc_card_hs400(card) ? "HS400 " :
+-			(mmc_card_hs200(card) ? "HS200 " : ""),
+-			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
++	if (mmc_host_is_spi(card->host))
++		pr_info("%s: new %s%s card on SPI\n",
++			mmc_hostname(card->host), speed_mode, type);
++	else
++		pr_info("%s: new %s%s%s card at address %04x\n",
++			mmc_hostname(card->host), speed_mode,
+ 			uhs_bus_speed_mode, type, card->rca);
+-	}
+ 
+ #ifdef CONFIG_DEBUG_FS
+ 	mmc_add_card_debugfs(card);
 -- 
 2.35.1
 
