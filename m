@@ -2,110 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A23A7C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 12:51:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3354C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 12:59:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241774AbiDSMxx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 08:53:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48594 "EHLO
+        id S1350475AbiDSNCH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:02:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237698AbiDSMxv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 08:53:51 -0400
-Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C492A36B7B
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2022 05:51:08 -0700 (PDT)
-Received: by mail-ed1-x52a.google.com with SMTP id 21so21167215edv.1
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2022 05:51:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=frK4ELbA3jfI5PJwRqa6vMvLk5oMvD1W9mfa1RZXlWU=;
-        b=iSaPxjgEQzTUtSGUwhPyGHNLCcobELAXeGfD7Q95TlAkiCffIpiQ4yVfYMJcRRxkje
-         GpUOPDTt6sL1KQs+FapySmJnjOIlxHXohMlHMZc43QgnAfzRklFEmVTo1TIHY9n2GPxH
-         9JvU6mNGHM1bgOkZaItOByOkPKZ3Cowai7PxDYGI6WjYRGIZ/EwZs0XB5YRRArarZr9U
-         y1wrjw3kth/7gGeARdBk1xI5nMlW5IHoCfZD6z+CIvodql1ZwSSr/KWna//jkglnpL2Q
-         2/1wnimzNLmcUQASrFKOgjQPMapdk15tkfy9623vwPZlA8ct9pFfMqjA6QNs7w/Epstk
-         OL+A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=frK4ELbA3jfI5PJwRqa6vMvLk5oMvD1W9mfa1RZXlWU=;
-        b=3zlfo7NJ6B9uKQokN4PKIE+gh9J6lXqn3lkgi3q6axfwU9wWlQ3KDYC3n7fwRj2m8p
-         fbAmrKZ2ZKUJys17LXT5VS7v2G3DSu8epoaxrfE+IIkb7xEV/9OrNJ6k0HQt6rOPGxMF
-         s3H7HlZzl+G/qWWNmb4j+KxnsLIVoPqceDTyMThLOKtKTlQa/9oZ4CR+/82d5UaXDb3F
-         CgC0NbKXWjW1VTgzxUAL4Ul4PYoby0OXXWSmD2//eHMSlcV//CFT/6jglGwDctVm0pod
-         74nSoM01qVMBC5VL8/pAXrNYgzUmD4u9Y8ET6m9bQPTa7X+HVk4bVP1e9Vcs4jMCWzo3
-         zQzw==
-X-Gm-Message-State: AOAM533b+ZIdap6fhSoglNZLsBJu0byuEddmzn+Fm7LNVm4STC/n2hNd
-        on6DlCdzgB5qGCZ6s4TTejpaFhr8e+oP8UHV9B8Jl9Z+hn8=
-X-Google-Smtp-Source: ABdhPJzWtNi3kq/d3Ti0EmgTW4/gcmCMWBUuMN3+tckamA2qyotYFDwmbZP2BBgJlrK2IuccnzKKITSeGxvTMHmJn7w=
-X-Received: by 2002:a50:d4d9:0:b0:41d:6ee0:80d with SMTP id
- e25-20020a50d4d9000000b0041d6ee0080dmr16948642edj.254.1650372667043; Tue, 19
- Apr 2022 05:51:07 -0700 (PDT)
+        with ESMTP id S236243AbiDSNCE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:02:04 -0400
+Received: from smtp-out2.suse.de (smtp-out2.suse.de [195.135.220.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19622377CB;
+        Tue, 19 Apr 2022 05:59:22 -0700 (PDT)
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id C99F51F38D;
+        Tue, 19 Apr 2022 12:59:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.cz; s=susede2_rsa;
+        t=1650373160;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=VfBYsPW8LdFmKxr65w1hdhdV60yv3YMcCbpJWSrqKvk=;
+        b=NvUNYJ0aijygZaycEKANEzrLj5OpFXGbpMkv75nQ6FnXKgRf9EXcV4+9POedJBZkOwU5S7
+        5pILnN4Shqgf3JhLxLgoR5OWcJL0pDDsuxwB46NB53CVYSYKQtDfU6ZcMenkfu3sqHVTkW
+        IM2WCbvx+MAK2WLHjSdOm9gfT/yomU4=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.cz;
+        s=susede2_ed25519; t=1650373160;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=VfBYsPW8LdFmKxr65w1hdhdV60yv3YMcCbpJWSrqKvk=;
+        b=R3XLspmIJ8AmIyyP6ZGhyQkfkNAvIfydJiDrLZbCwnLmc9AnAFEIt/H4vRE7D3uxeV/uH+
+        hd0WY76/Imja80AA==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 550DC139BE;
+        Tue, 19 Apr 2022 12:59:20 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id BH7rEyiyXmLxeQAAMHmgww
+        (envelope-from <dsterba@suse.cz>); Tue, 19 Apr 2022 12:59:20 +0000
+Date:   Tue, 19 Apr 2022 14:55:17 +0200
+From:   David Sterba <dsterba@suse.cz>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-block@vger.kernel.org,
+        drbd-dev@lists.linbit.com, nbd@other.debian.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
+        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
+        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
+        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
+Subject: Re: [PATCH 27/27] direct-io: remove random prefetches
+Message-ID: <20220419125517.GB2348@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+Mail-Followup-To: dsterba@suse.cz, Christoph Hellwig <hch@lst.de>,
+        Jens Axboe <axboe@kernel.dk>, dm-devel@redhat.com,
+        linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-block@vger.kernel.org,
+        drbd-dev@lists.linbit.com, nbd@other.debian.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-bcache@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
+        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-btrfs@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        cluster-devel@redhat.com, jfs-discussion@lists.sourceforge.net,
+        linux-nilfs@vger.kernel.org, ntfs3@lists.linux.dev,
+        ocfs2-devel@oss.oracle.com, linux-mm@kvack.org
+References: <20220415045258.199825-1-hch@lst.de>
+ <20220415045258.199825-28-hch@lst.de>
 MIME-Version: 1.0
-References: <CAHCN7xK_fr_gREVsOzN=atcS08mwufr-=7q1JAN=CCyVk_k-dA@mail.gmail.com>
- <YlR9TCeV8FJVu38U@ninjato> <CAHCN7xLso6kwWxeT3VuRQBcs9oKZMctGbsWmd1T=mwgHx0T+SA@mail.gmail.com>
- <YlVApjtNOBLgA0hy@ninjato> <YlWUV1SW4lVLjIZi@shikoro>
-In-Reply-To: <YlWUV1SW4lVLjIZi@shikoro>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Tue, 19 Apr 2022 07:50:56 -0500
-Message-ID: <CAHCN7xLLsXikG=8zSM=udqnqwvbkqkSLH8iYcuLiLVvHa=LPPQ@mail.gmail.com>
-Subject: Re: RZ/G2M Hangs when booting some SD cards
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adam Ford <aford173@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220415045258.199825-28-hch@lst.de>
+User-Agent: Mutt/1.5.23.1-rc1 (2014-03-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 12, 2022 at 10:01 AM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
->
-> > Anyhow, I'll report back with results from today.
->
-> So, no news here. When the board is "cold" (hasn't been used for some
-> days), probing the SD card occasionally fails, but after some reboots it
-> just works. I don't see a pattern.
+On Fri, Apr 15, 2022 at 06:52:58AM +0200, Christoph Hellwig wrote:
+> Randomly poking into block device internals for manual prefetches isn't
+> exactly a very maintainable thing to do.  And none of the performance
+> criticil direct I/O implementations still use this library function
+> anyway, so just drop it.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-From what I have been able to determine, the U-Boot code explicitly
-disables DMA during the tuning phase:
+That the direct io function needed a valid bdev just for the prefetch
+but nothing else was one of the reasons we had to keep the latest_bdev
+in btrfs, so good riddance.
 
-<snip>
-/* Force PIO for the tuning */
-caps = priv->caps;
-priv->caps &= ~TMIO_SD_CAP_DMA_INTERNAL;
+You may want to add the reference to the patch that added the prefetch,
+65dd2aa90aa1 ("dio: optimize cache misses in the submission path") and
+also remove #include <linux/prefetch.h> as there are no more uses of
+prefetch in the file.
 
-ret = mmc_send_tuning(mmc, opcode, NULL);
+With that
 
-priv->caps = caps;
-
-if (ret == 0)
-taps |= BIT(i);
-<snip>
-
-When doing this, the value of taps is non-zero.  For this card, it is fefe
-In U-Boot smpcmp is also the save value.
-
-However, Linux does not disable the DMA, and the value of taps is zero
-and the tuning ultimately fails.
-
-I did some experiments to attempt to disable it, but when I do, it
-usually ends up hanging or a kernel panic.
-
-Does anyone have a suggestion on how I can properly attempt to disable
-the DMA and use PIO during the tuning phase to see if this fixes the
-micro SD card initialization issue I'm seeing.
-
-If I manually set taps  to match priv->smpcmp when taps=0, the microSD
-card enumerates correctly.
-
-thanks
-
-adam
-
->
+Reviewed-by: David Sterba <dsterba@suse.com>
