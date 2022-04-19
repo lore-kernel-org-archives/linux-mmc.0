@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE3B2C4321E
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:39:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC5EBC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:40:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354792AbiDSQl5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:41:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50936 "EHLO
+        id S245155AbiDSQm6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:42:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241799AbiDSQlu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:41:50 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D30815A2B;
-        Tue, 19 Apr 2022 09:39:07 -0700 (PDT)
+        with ESMTP id S1354835AbiDSQmH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:42:07 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 755FC140B0;
+        Tue, 19 Apr 2022 09:39:24 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D34EF61826;
-        Tue, 19 Apr 2022 16:39:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F23EEC385AB;
-        Tue, 19 Apr 2022 16:38:58 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 28DC8B81BEF;
+        Tue, 19 Apr 2022 16:39:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7FBC5C385A7;
+        Tue, 19 Apr 2022 16:39:14 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386346;
-        bh=/w2/TuJUuh8aAeAb2m2RYQ0ha5XDa7wX5MqtonXBziw=;
+        s=k20201202; t=1650386361;
+        bh=8eNcQvPL/qwAHe1cyIDldIcvo4EcdfaIYnGqLI1GMk8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=JSa8soCOWoHbvEvEMCJM5/utpcask8B1DWr5x2vp91tbyaynmX0rTSsEKOTeoQHXR
-         xSRS3Xno7rnCUQ3pMwm4mb0C5Nn4Un3kthir4lze9lCf7arGoOqvJyX6s9isYF1BTg
-         81xrpPmbsNyOwda4gry9Su9QAWOc6aLDIvSCivZ6D7ALqa5hnnFk8qqp6WGo4H0jz/
-         n3cmV2yg+Hsqp/2KBOQWv4OG8fsDhuMeF3RquJVsVmQ3r03jGQ5Jb/kE9Eg+MfTnPV
-         0fhh0N+QRSE/UK4kqmfvj+oYMYiI2cyul44m5sN6XHaZpuap2KcE/Ox9+lUvfY7liW
-         OcEgijUbKxbQQ==
+        b=LVWCBec3TOUY0aiyOISATFg6pS9jumUzky+Ehfz7G3cgxF1rj0HVil0+pa2jkeAex
+         +I/kMAz7NPdj5SvpkunSAFKIAEk8QSgdWx+SIEumBcrPnXonnU4eEXHczTJyAamIGW
+         Fqx5TRqKxYXqZIi3auuy03GYtQb1udlODQ45EdRJtZzlua4YntfSSfjlKnwxqVPTK7
+         Sam1zQZYtyCqFeU+De7N+gO0nzM6BEX233RRdS5AuCXB25Nncz35spe45uNkA9vaey
+         log5jNFTz3afoWInaxRTj1U0qhJDCMqiOZM7huV6OxJSkNIfGwYjRhB8fCNmUgag4C
+         qK0Gc9ZA81juQ==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -59,9 +59,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
         alsa-devel@alsa-project.org
-Subject: [PATCH 02/48] ARM: pxa: make mainstone.h private
-Date:   Tue, 19 Apr 2022 18:37:24 +0200
-Message-Id: <20220419163810.2118169-3-arnd@kernel.org>
+Subject: [PATCH 04/48] ARM: pxa: remove mach/dma.h
+Date:   Tue, 19 Apr 2022 18:37:26 +0200
+Message-Id: <20220419163810.2118169-5-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,44 +73,77 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-No driver includes this any more, so don't expose it globally.
+The file no longer contains anything useful, so remove it.
 
 Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-pxa/mainstone.c                    | 2 +-
- arch/arm/mach-pxa/{include/mach => }/mainstone.h | 2 --
- 2 files changed, 1 insertion(+), 3 deletions(-)
- rename arch/arm/mach-pxa/{include/mach => }/mainstone.h (99%)
+ arch/arm/mach-pxa/include/mach/dma.h | 17 -----------------
+ arch/arm/mach-pxa/pxa25x.c           |  1 -
+ arch/arm/mach-pxa/pxa27x.c           |  1 -
+ arch/arm/mach-pxa/pxa3xx.c           |  1 -
+ 4 files changed, 20 deletions(-)
+ delete mode 100644 arch/arm/mach-pxa/include/mach/dma.h
 
-diff --git a/arch/arm/mach-pxa/mainstone.c b/arch/arm/mach-pxa/mainstone.c
-index d237bd030238..997f6e502201 100644
---- a/arch/arm/mach-pxa/mainstone.c
-+++ b/arch/arm/mach-pxa/mainstone.c
-@@ -45,7 +45,7 @@
- #include <asm/mach/flash.h>
- 
- #include "pxa27x.h"
--#include <mach/mainstone.h>
-+#include "mainstone.h"
- #include <mach/audio.h>
- #include <linux/platform_data/video-pxafb.h>
- #include <linux/platform_data/mmc-pxamci.h>
-diff --git a/arch/arm/mach-pxa/include/mach/mainstone.h b/arch/arm/mach-pxa/mainstone.h
-similarity index 99%
-rename from arch/arm/mach-pxa/include/mach/mainstone.h
-rename to arch/arm/mach-pxa/mainstone.h
-index 1698f2ffd7c7..ba003742e003 100644
---- a/arch/arm/mach-pxa/include/mach/mainstone.h
-+++ b/arch/arm/mach-pxa/mainstone.h
-@@ -1,7 +1,5 @@
- /* SPDX-License-Identifier: GPL-2.0-only */
- /*
-- *  arch/arm/mach-pxa/include/mach/mainstone.h
+diff --git a/arch/arm/mach-pxa/include/mach/dma.h b/arch/arm/mach-pxa/include/mach/dma.h
+deleted file mode 100644
+index 79f9842a7e1c..000000000000
+--- a/arch/arm/mach-pxa/include/mach/dma.h
++++ /dev/null
+@@ -1,17 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0-only */
+-/*
+- *  arch/arm/mach-pxa/include/mach/dma.h
 - *
-  *  Author:	Nicolas Pitre
-  *  Created:	Nov 14, 2002
-  *  Copyright:	MontaVista Software Inc.
+- *  Author:	Nicolas Pitre
+- *  Created:	Jun 15, 2001
+- *  Copyright:	MontaVista Software, Inc.
+- */
+-#ifndef __ASM_ARCH_DMA_H
+-#define __ASM_ARCH_DMA_H
+-
+-#include <mach/hardware.h>
+-
+-/* DMA Controller Registers Definitions */
+-#define DMAC_REGS_VIRT	io_p2v(0x40000000)
+-
+-#endif /* _ASM_ARCH_DMA_H */
+diff --git a/arch/arm/mach-pxa/pxa25x.c b/arch/arm/mach-pxa/pxa25x.c
+index 678641ab46e5..0d25cc45f825 100644
+--- a/arch/arm/mach-pxa/pxa25x.c
++++ b/arch/arm/mach-pxa/pxa25x.c
+@@ -34,7 +34,6 @@
+ #include "pxa25x.h"
+ #include <mach/reset.h>
+ #include "pm.h"
+-#include <mach/dma.h>
+ #include <mach/smemc.h>
+ 
+ #include "generic.h"
+diff --git a/arch/arm/mach-pxa/pxa27x.c b/arch/arm/mach-pxa/pxa27x.c
+index f0ba7ed24cb6..f7e89831e85b 100644
+--- a/arch/arm/mach-pxa/pxa27x.c
++++ b/arch/arm/mach-pxa/pxa27x.c
+@@ -33,7 +33,6 @@
+ #include <mach/reset.h>
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include "pm.h"
+-#include <mach/dma.h>
+ #include <mach/smemc.h>
+ 
+ #include "generic.h"
+diff --git a/arch/arm/mach-pxa/pxa3xx.c b/arch/arm/mach-pxa/pxa3xx.c
+index 560160682df6..6eb1c24d7395 100644
+--- a/arch/arm/mach-pxa/pxa3xx.c
++++ b/arch/arm/mach-pxa/pxa3xx.c
+@@ -32,7 +32,6 @@
+ #include <mach/reset.h>
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include "pm.h"
+-#include <mach/dma.h>
+ #include <mach/smemc.h>
+ #include <mach/irqs.h>
+ 
 -- 
 2.29.2
 
