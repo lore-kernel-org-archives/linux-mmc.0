@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 913CEC38A2E
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:44:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EAA7C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:44:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355008AbiDSQqV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:46:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54166 "EHLO
+        id S1355035AbiDSQq1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:46:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355091AbiDSQoa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:44:30 -0400
+        with ESMTP id S1354823AbiDSQnf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:43:35 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D1C323BF4;
-        Tue, 19 Apr 2022 09:41:47 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BECA8286FB;
+        Tue, 19 Apr 2022 09:40:52 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 0DEB5B819DE;
-        Tue, 19 Apr 2022 16:41:46 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7B048C385A5;
-        Tue, 19 Apr 2022 16:41:37 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 646A7B81BB5;
+        Tue, 19 Apr 2022 16:40:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8675C385AD;
+        Tue, 19 Apr 2022 16:40:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386504;
-        bh=F7MBpdNOWf67bimqHOji31bTXpJ1ZCUAsldDqvgUu28=;
+        s=k20201202; t=1650386450;
+        bh=jhDfr1ZWF3PO87dsTFnhjEgY7CrgFIhStoxQAjgbO8c=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=M9+kiqJIfUhfsFE1H4YAU921VV0VonfY9j1NKObGUwzCjRXR46YiY5Nj5Dl5rsV5L
-         iADk6/ddM85QG95gOh8OUVYyoEgAxa4D3s0bKJkfzDri4GMhVZSzQQuTx0F/9H+wsJ
-         MVlTyeihlRVWFJ5B3aJxEUdAG2tMIaPk7ers3/ONTltRkZsg/z88XIF9SNvMLClZls
-         I6TvEKcDx5DRBX76OZrUNtcSo4m6dLcfqZX2lAkhvSfR9zZVl354Yk7Zy6TbAGL6Ya
-         K7sfhczH1+GW+wFu7/eCNYeSzMXgdYelcxwq9ivucHJV+x+FdLYDsJhrGZDEpOBDtI
-         Wp06/+3vmFtwg==
+        b=IQZbCphc2aVG/7nQPc8i6SmaXQBHDLcd8lu8VCmzfuxTE9zQ1fttSmG7EuqkoEKfV
+         +AijdqGUGVaVV7Gc6JQtpvmfbM8oJLiqSVhH1EBaliC1N03xEc1T1smfyTfNlPQ+ci
+         g7D2ubLO4DZSZbQ1S7mLLZAjhkr/Lf9nzpyNW7rUgW2JoDBYVacKhRiIFK/VFk/Xdk
+         UDw/LuEvBj9xe6IYc/bXh3fl9uuuA9b3Lcl7FHH7ZpoOjUIFEYceuWcUa/cIuAsEha
+         DxLdKbU1RVdss4xqHuQUN0IBiEAqCfNSmrZdnpLyeTBHr4KtQrWshWX4LLED0dDmoN
+         GxgomaIMHhKEQ==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -59,9 +59,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
         alsa-devel@alsa-project.org
-Subject: [PATCH 22/48] ARM: pxa: z2: use gpio lookup for audio device
-Date:   Tue, 19 Apr 2022 18:37:44 +0200
-Message-Id: <20220419163810.2118169-23-arnd@kernel.org>
+Subject: [PATCH 15/48] ARM: pxa: tosa: use gpio descriptor for audio
+Date:   Tue, 19 Apr 2022 18:37:37 +0200
+Message-Id: <20220419163810.2118169-16-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,87 +73,114 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The audio device is allocated by the audio driver, and it uses a gpio
-number from the mach/z2.h header file.
-
-Change it to use a gpio lookup table for the device allocated by the
-driver to keep the header file local to the machine.
+The audio driver should not use a hardwired gpio number
+from the header. Change it to use a lookup table.
 
 Acked-by: Mark Brown <broonie@kernel.org>
-Cc: alsa-devel@alsa-project.org
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: alsa-devel@alsa-project.org
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-pxa/z2.c | 11 +++++++++++
- sound/soc/pxa/z2.c     |  5 ++---
- 2 files changed, 13 insertions(+), 3 deletions(-)
+ arch/arm/mach-pxa/tosa.c | 12 ++++++++++++
+ sound/soc/pxa/tosa.c     | 16 +++++++---------
+ 2 files changed, 19 insertions(+), 9 deletions(-)
 
-diff --git a/arch/arm/mach-pxa/z2.c b/arch/arm/mach-pxa/z2.c
-index 7eaeda269927..bb854e903c8f 100644
---- a/arch/arm/mach-pxa/z2.c
-+++ b/arch/arm/mach-pxa/z2.c
-@@ -651,6 +651,15 @@ static void __init z2_spi_init(void)
- static inline void z2_spi_init(void) {}
- #endif
+diff --git a/arch/arm/mach-pxa/tosa.c b/arch/arm/mach-pxa/tosa.c
+index 9476ed0f55e9..5a16a025192c 100644
+--- a/arch/arm/mach-pxa/tosa.c
++++ b/arch/arm/mach-pxa/tosa.c
+@@ -887,6 +887,17 @@ static struct platform_device wm9712_device = {
+ 	.id	= -1,
+ };
  
-+static struct gpiod_lookup_table z2_audio_gpio_table = {
-+	.dev_id = "soc-audio",
++static struct gpiod_lookup_table tosa_audio_gpio_table = {
++	.dev_id = "tosa-audio",
 +	.table = {
-+		GPIO_LOOKUP("gpio-pxa", GPIO37_ZIPITZ2_HEADSET_DETECT,
-+			    "hsdet-gpio", GPIO_ACTIVE_HIGH),
++		GPIO_LOOKUP("tc6393xb",
++			    TOSA_GPIO_L_MUTE - TOSA_TC6393XB_GPIO_BASE,
++			    "l-mute", GPIO_ACTIVE_HIGH),
 +		{ },
 +	},
 +};
 +
- /******************************************************************************
-  * Core power regulator
-  ******************************************************************************/
-@@ -755,6 +764,8 @@ static void __init z2_init(void)
- 	z2_keys_init();
- 	z2_pmic_init();
- 
-+	gpiod_add_lookup_table(&z2_audio_gpio_table);
 +
- 	pm_power_off = z2_power_off;
- }
+ static struct platform_device tosa_audio_device = {
+ 	.name	= "tosa-audio",
+ 	.id	= -1,
+@@ -944,6 +955,7 @@ static void __init tosa_init(void)
+ 	PMCR = 0x01;
  
-diff --git a/sound/soc/pxa/z2.c b/sound/soc/pxa/z2.c
-index dc6c48e4738b..7f1c6bc69510 100644
---- a/sound/soc/pxa/z2.c
-+++ b/sound/soc/pxa/z2.c
-@@ -13,7 +13,7 @@
- #include <linux/timer.h>
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
+ 	gpiod_add_lookup_table(&tosa_mci_gpio_table);
++	gpiod_add_lookup_table(&tosa_audio_gpio_table);
+ 	pxa_set_mci_info(&tosa_mci_platform_data);
+ 	pxa_set_ficp_info(&tosa_ficp_platform_data);
+ 	pxa_set_i2c_info(NULL);
+diff --git a/sound/soc/pxa/tosa.c b/sound/soc/pxa/tosa.c
+index 06226f9b863e..157e6bcacffd 100644
+--- a/sound/soc/pxa/tosa.c
++++ b/sound/soc/pxa/tosa.c
+@@ -16,14 +16,13 @@
+ #include <linux/module.h>
+ #include <linux/moduleparam.h>
+ #include <linux/device.h>
 -#include <linux/gpio.h>
 +#include <linux/gpio/consumer.h>
  
  #include <sound/core.h>
  #include <sound/pcm.h>
-@@ -22,7 +22,6 @@
+ #include <sound/soc.h>
  
  #include <asm/mach-types.h>
+-#include <mach/tosa.h>
  #include <linux/platform_data/asoc-pxa.h>
--#include <mach/z2.h>
  
- #include "../codecs/wm8750.h"
- #include "pxa2xx-i2s.h"
-@@ -89,7 +88,6 @@ static struct snd_soc_jack_pin hs_jack_pins[] = {
- /* Headset jack detection gpios */
- static struct snd_soc_jack_gpio hs_jack_gpios[] = {
- 	{
--		.gpio		= GPIO37_ZIPITZ2_HEADSET_DETECT,
- 		.name		= "hsdet-gpio",
- 		.report		= SND_JACK_HEADSET,
- 		.debounce_time	= 200,
-@@ -195,6 +193,7 @@ static int __init z2_init(void)
- 	if (!z2_snd_device)
- 		return -ENOMEM;
+ #define TOSA_HP        0
+@@ -35,6 +34,7 @@
  
-+	hs_jack_gpios[0].gpiod_dev = &z2_snd_device->dev;
- 	platform_set_drvdata(z2_snd_device, &snd_soc_z2);
- 	ret = platform_device_add(z2_snd_device);
+ static int tosa_jack_func;
+ static int tosa_spk_func;
++static struct gpio_desc *l_mute_gpio;
+ 
+ static void tosa_ext_control(struct snd_soc_dapm_context *dapm)
+ {
+@@ -128,7 +128,7 @@ static int tosa_set_spk(struct snd_kcontrol *kcontrol,
+ static int tosa_hp_event(struct snd_soc_dapm_widget *w,
+ 	struct snd_kcontrol *k, int event)
+ {
+-	gpio_set_value(TOSA_GPIO_L_MUTE, SND_SOC_DAPM_EVENT_ON(event) ? 1 : 0);
++	gpiod_set_value(l_mute_gpio, SND_SOC_DAPM_EVENT_ON(event) ? 1 : 0);
+ 	return 0;
+ }
+ 
+@@ -222,25 +222,23 @@ static int tosa_probe(struct platform_device *pdev)
+ 	struct snd_soc_card *card = &tosa;
+ 	int ret;
+ 
+-	ret = gpio_request_one(TOSA_GPIO_L_MUTE, GPIOF_OUT_INIT_LOW,
+-			       "Headphone Jack");
++	l_mute_gpio = devm_gpiod_get(&pdev->dev, "l-mute", GPIOD_OUT_LOW);
++	ret = PTR_ERR_OR_ZERO(l_mute_gpio);
+ 	if (ret)
+ 		return ret;
+ 
+ 	card->dev = &pdev->dev;
+ 
+ 	ret = devm_snd_soc_register_card(&pdev->dev, card);
+-	if (ret) {
++	if (ret)
+ 		dev_err(&pdev->dev, "snd_soc_register_card() failed: %d\n",
+ 			ret);
+-		gpio_free(TOSA_GPIO_L_MUTE);
+-	}
++
+ 	return ret;
+ }
+ 
+ static int tosa_remove(struct platform_device *pdev)
+ {
+-	gpio_free(TOSA_GPIO_L_MUTE);
+ 	return 0;
+ }
  
 -- 
 2.29.2
