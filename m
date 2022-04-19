@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 796A0C4167B
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:47:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D14A4C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:47:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355455AbiDSQuH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:50:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56658 "EHLO
+        id S233776AbiDSQuI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:50:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355187AbiDSQrn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:47:43 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2614B2617;
-        Tue, 19 Apr 2022 09:45:00 -0700 (PDT)
+        with ESMTP id S1354759AbiDSQra (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:47:30 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A8C69D;
+        Tue, 19 Apr 2022 09:44:46 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B729F6187A;
-        Tue, 19 Apr 2022 16:44:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id DEE24C385A5;
-        Tue, 19 Apr 2022 16:44:51 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 02B1BB81BB6;
+        Tue, 19 Apr 2022 16:44:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6062FC385A5;
+        Tue, 19 Apr 2022 16:44:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386699;
-        bh=TQPO8Eb4DXbuBVjH4snBze/CPXLx8hYfj8F7j3GxU9A=;
+        s=k20201202; t=1650386683;
+        bh=XdueS6o3x8Genbrjo7SphR5bJ8o+YLBkmS/22/Y/tzI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=PkE+S9qLLt/uVvjmX7SVYzOD8H0A2jnCwpUediQL9CiEFuo2XQ7+fzVe5orFR/j+B
-         1Kn0644vK/CRT07rVNiayly/tbCE5RPqmVa3sV7YLFN50VR4KOu5kwLyvCKy7UdWrd
-         PpC3+mfHHUpdHO2H25Am/SucJvYtHlNwTKkTuKmcMj5yZ3LlaeFsGLmcsHCxsrNU/J
-         cXPXnNTaI9aPH1OycStlSzavEF+2HEuf5KBubApJxMqmt5vWDdLpCukXObZY00wvyD
-         QUu8InZhgmCtgAChwTU5DZn/0HRUIttBKkcHuZWOka//Ki7ysvaMnLhCuX+trrjXmv
-         KfputJ5rHCapw==
+        b=YXQtUJB7B4bM52daStJxTBrA8/zErvRHpHn2okco8xXiPRjGGTcMxZ34F9ihe2zZF
+         1BoMvocNKdvX/A7Mn4lmcao9QbvEfofhr0515a2QLJ4e/1ti5g/eDZCmDNi5sdZR/I
+         9XNG+Otrayi6yRijGpRrnLzixoTgFiEZlFFL/2ise5K7ONOzh9kv641LscK+chNQJ7
+         Q9EFuzcxnFtDUtDisGrueMKhbPDgR4AstoPr4QwJ7WiTnp9E3XeIFc84uL5FnW7uoT
+         5DjaGzrz2kHiXzQHJSz/k+R25fFOoMSH+WeElYMHF7zCHXx8w3wvu8Yx03jMnZvboF
+         gxYGbk6+OLuAg==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -59,9 +59,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
         alsa-devel@alsa-project.org
-Subject: [PATCH 47/48] ARM: pxa: remove support for MTD_XIP
-Date:   Tue, 19 Apr 2022 18:38:09 +0200
-Message-Id: <20220419163810.2118169-48-arnd@kernel.org>
+Subject: [PATCH 45/48] ARM: PXA: fix multi-cpu build of xsc3
+Date:   Tue, 19 Apr 2022 18:38:07 +0200
+Message-Id: <20220419163810.2118169-46-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,76 +73,38 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-Using MTD-XIP does not work on multiplatform kernels because
-it requires SoC specific register accesses to be done from
-low-level flash handling functions in RAM while the rest of the
-kernel sits in flash.
+On a kernel that includes both ARMv4 and XScale support,
+the copypage function fails to build with invalid
+instructions.
 
-I found no evidence of anyone still actually using this feature,
-so remove it from PXA to avoid spending a lot of time on
-actually making it work.
+Since these are only called on an actual XScale processor,
+annotate the assembly with the correct .arch directive.
 
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/Kconfig                         |  1 -
- arch/arm/mach-pxa/include/mach/mtd-xip.h | 36 ------------------------
- 2 files changed, 37 deletions(-)
- delete mode 100644 arch/arm/mach-pxa/include/mach/mtd-xip.h
+ arch/arm/mm/copypage-xsc3.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index eef8cbf20045..ace6c08c8ae2 100644
---- a/arch/arm/Kconfig
-+++ b/arch/arm/Kconfig
-@@ -413,7 +413,6 @@ config ARCH_DOVE
+diff --git a/arch/arm/mm/copypage-xsc3.c b/arch/arm/mm/copypage-xsc3.c
+index 6f0909dda2f9..c86e79677ff9 100644
+--- a/arch/arm/mm/copypage-xsc3.c
++++ b/arch/arm/mm/copypage-xsc3.c
+@@ -29,6 +29,7 @@ static void xsc3_mc_copy_user_page(void *kto, const void *kfrom)
+ 	int tmp;
  
- config ARCH_PXA
- 	bool "PXA2xx/PXA3xx-based"
--	select ARCH_MTD_XIP
- 	select ARM_CPU_SUSPEND if PM
- 	select AUTO_ZRELADDR
- 	select COMMON_CLK
-diff --git a/arch/arm/mach-pxa/include/mach/mtd-xip.h b/arch/arm/mach-pxa/include/mach/mtd-xip.h
-deleted file mode 100644
-index 4b31bef9e50a..000000000000
---- a/arch/arm/mach-pxa/include/mach/mtd-xip.h
-+++ /dev/null
-@@ -1,36 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0-only */
--/*
-- * MTD primitives for XIP support. Architecture specific functions
-- *
-- * Do not include this file directly. It's included from linux/mtd/xip.h
-- * 
-- * Author:	Nicolas Pitre
-- * Created:	Nov 2, 2004
-- * Copyright:	(C) 2004 MontaVista Software, Inc.
-- */
--
--#ifndef __ARCH_PXA_MTD_XIP_H__
--#define __ARCH_PXA_MTD_XIP_H__
--
--#include <mach/regs-ost.h>
--
--/* restored July 2017, this did not build since 2011! */
--
--#define ICIP			io_p2v(0x40d00000)
--#define ICMR			io_p2v(0x40d00004)
--#define xip_irqpending()	(readl(ICIP) & readl(ICMR))
--
--/* we sample OSCR and convert desired delta to usec (1/4 ~= 1000000/3686400) */
--#define xip_currtime()		readl(OSCR)
--#define xip_elapsed_since(x)	(signed)((readl(OSCR) - (x)) / 4)
--
--/*
-- * xip_cpu_idle() is used when waiting for a delay equal or larger than
-- * the system timer tick period.  This should put the CPU into idle mode
-- * to save power and to be woken up only when some interrupts are pending.
-- * As above, this should not rely upon standard kernel code.
-- */
--
--#define xip_cpu_idle()  asm volatile ("mcr p14, 0, %0, c7, c0, 0" :: "r" (1))
--
--#endif /* __ARCH_PXA_MTD_XIP_H__ */
+ 	asm volatile ("\
++.arch xscale					\n\
+ 	pld	[%1, #0]			\n\
+ 	pld	[%1, #32]			\n\
+ 1:	pld	[%1, #64]			\n\
+@@ -80,6 +81,7 @@ void xsc3_mc_clear_user_highpage(struct page *page, unsigned long vaddr)
+ {
+ 	void *ptr, *kaddr = kmap_atomic(page);
+ 	asm volatile ("\
++.arch xscale					\n\
+ 	mov	r1, %2				\n\
+ 	mov	r2, #0				\n\
+ 	mov	r3, #0				\n\
 -- 
 2.29.2
 
