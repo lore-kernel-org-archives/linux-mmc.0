@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9107C47080
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D74F4C433F5
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352705AbiDSNno (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:43:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36844 "EHLO
+        id S1352735AbiDSNnq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:43:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352765AbiDSNmo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:44 -0400
+        with ESMTP id S1352696AbiDSNmi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:38 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42E8B2DF3;
-        Tue, 19 Apr 2022 06:39:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D53038DA8;
+        Tue, 19 Apr 2022 06:39:40 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C9235B81982;
-        Tue, 19 Apr 2022 13:39:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 356D1C385B0;
-        Tue, 19 Apr 2022 13:39:45 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id CDCF6B8197F;
+        Tue, 19 Apr 2022 13:39:38 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E95D2C385B7;
+        Tue, 19 Apr 2022 13:39:30 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375592;
-        bh=8q6Kcm45o4hfMaS4KO2xUUwlzHF/dRLSCx2ycbmM2jM=;
+        s=k20201202; t=1650375577;
+        bh=/1rRcvDuoUNuJnmYPxOkUtRPrNjTWfgWCQQLuGK0bF0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=OgmmYGrmtBNTwP0hCIY2RRe2mYaIftLuJ9OAVdYZvDleZcdZ/6LPlvQThD8t4drPE
-         e4GTt4uIWh8cT6kZaI5XpPeUyLnOtfrJOYRguM9hj4PAws3Nw6EJsErSkHU1o96SDp
-         CJK1ClRy1PNIBDwJEdrTaAupJfBbsWzoUyxDI/TgIMrsKD8viQ8fdfp8EJGbT+yU0/
-         8XgF5eboJCt8z5/M3YL3N4OJjP2al4MR7iSjKD4PDfsLgdyuBVPNvGv/0iJ/g176J+
-         GpCXmp/q9iOjw7VrGYG72DN9pQVr66GHwhD+MR1FtySUnjMsgDitc2xmLrwnqX0sN8
-         yniK00Bea96aQ==
+        b=HzTn7rZS28K28plwPgCJQ1ghRASliQgI+2FNpVIvzNFzUi1UMK5PsDjZfQF3E1zqt
+         mnS9gOUBto2VoRVRCx4Yuj8lbyW2OmCu+xl6Yg/lQSI7z3yCggGhd8SZLzhUTKkV0G
+         4ogMF4OyTC9vLOk3qkrtZxw01Hx1kngOU7CkWOkrZ7irrMS32QrmiusUzBa73hEit/
+         zPGdRbq5Q5uW64+CqYtjA3PCCVDipYSV0x3AONDo7ffgU5sraeCgGnABr+zWsns3bI
+         fd00kWQV003loXXb9YePqTFuhXdVkfreFhqu2YPTGCtBIjFiNHdyrGAFpEfaT8V4vz
+         PhMvBlCy/tvnA==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -56,10 +56,11 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 18/41] ARM: omap: remove debug-leds driver
-Date:   Tue, 19 Apr 2022 15:37:00 +0200
-Message-Id: <20220419133723.1394715-19-arnd@kernel.org>
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        Felipe Balbi <felipe.balbi@linux.intel.com>
+Subject: [PATCH 16/41] ARM: omap1: innovator: move ohci phy power handling to board file
+Date:   Tue, 19 Apr 2022 15:36:58 +0200
+Message-Id: <20220419133723.1394715-17-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -71,228 +72,118 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-It has been impossible to select this driver for six years
-without anyone noticing, so just kill it completely.
+The innovator board needs a special case for its phy control.
 
-Fixes: 54ea18e8866a ("ARM: OMAP2+: Remove board file for H4")
+Move the corresponding code into the board file and out of the
+common code by adding another callback.
+
+Acked-by: Felipe Balbi <felipe.balbi@linux.intel.com>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/plat-omap/Kconfig      |  10 --
- arch/arm/plat-omap/Makefile     |   4 -
- arch/arm/plat-omap/debug-leds.c | 171 --------------------------------
- 3 files changed, 185 deletions(-)
- delete mode 100644 arch/arm/plat-omap/debug-leds.c
+ arch/arm/mach-omap1/board-innovator.c   | 19 +++++++++++++++
+ drivers/usb/host/ohci-omap.c            | 31 ++++---------------------
+ include/linux/platform_data/usb-omap1.h |  2 ++
+ 3 files changed, 26 insertions(+), 26 deletions(-)
 
-diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
-index dfa19d5030e3..dc53ea8e5bbb 100644
---- a/arch/arm/plat-omap/Kconfig
-+++ b/arch/arm/plat-omap/Kconfig
-@@ -11,16 +11,6 @@ config ARCH_OMAP_OTG
+diff --git a/arch/arm/mach-omap1/board-innovator.c b/arch/arm/mach-omap1/board-innovator.c
+index e7d6735d4701..f169e172421d 100644
+--- a/arch/arm/mach-omap1/board-innovator.c
++++ b/arch/arm/mach-omap1/board-innovator.c
+@@ -290,6 +290,23 @@ static void __init innovator_init_smc91x(void)
+ }
  
- comment "OMAP Feature Selections"
+ #ifdef CONFIG_ARCH_OMAP15XX
++/*
++ * Board specific gang-switched transceiver power on/off.
++ */
++static int innovator_omap_ohci_transceiver_power(int on)
++{
++	if (on)
++		__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
++				| ((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
++			       INNOVATOR_FPGA_CAM_USB_CONTROL);
++	else
++		__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
++				& ~((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
++			       INNOVATOR_FPGA_CAM_USB_CONTROL);
++
++	return 0;
++}
++
+ static struct omap_usb_config innovator1510_usb_config __initdata = {
+ 	/* for bundled non-standard host and peripheral cables */
+ 	.hmc_mode	= 4,
+@@ -300,6 +317,8 @@ static struct omap_usb_config innovator1510_usb_config __initdata = {
  
--config OMAP_DEBUG_DEVICES
--	bool
--	help
--	  For debug cards on TI reference boards.
--
--config OMAP_DEBUG_LEDS
--	def_bool y if NEW_LEDS
--	depends on OMAP_DEBUG_DEVICES
--	select LEDS_CLASS
--
- config POWER_AVS_OMAP
- 	bool "AVS(Adaptive Voltage Scaling) support for OMAP IP versions 1&2"
- 	depends on (ARCH_OMAP3 || ARCH_OMAP4) && PM
-diff --git a/arch/arm/plat-omap/Makefile b/arch/arm/plat-omap/Makefile
-index 98a7b607873a..68ccec9de106 100644
---- a/arch/arm/plat-omap/Makefile
-+++ b/arch/arm/plat-omap/Makefile
-@@ -7,7 +7,3 @@ ccflags-$(CONFIG_ARCH_MULTIPLATFORM) := -I$(srctree)/arch/arm/plat-omap/include
+ 	.register_dev	= 1,
+ 	.pins[0]	= 2,
++
++	.transceiver_power = innovator_omap_ohci_transceiver_power,
+ };
  
- # Common support
- obj-y := sram.o dma.o
--
--# omap_device support (OMAP2+ only at the moment)
--
--obj-$(CONFIG_OMAP_DEBUG_LEDS) += debug-leds.o
-diff --git a/arch/arm/plat-omap/debug-leds.c b/arch/arm/plat-omap/debug-leds.c
-deleted file mode 100644
-index 2b698d074874..000000000000
---- a/arch/arm/plat-omap/debug-leds.c
-+++ /dev/null
-@@ -1,171 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0-only
+ static const struct omap_lcd_config innovator1510_lcd_config __initconst = {
+diff --git a/drivers/usb/host/ohci-omap.c b/drivers/usb/host/ohci-omap.c
+index 750a90c41a0a..069791d25abb 100644
+--- a/drivers/usb/host/ohci-omap.c
++++ b/drivers/usb/host/ohci-omap.c
+@@ -67,31 +67,6 @@ static void omap_ohci_clock_power(struct ohci_omap_priv *priv, int on)
+ 	}
+ }
+ 
 -/*
-- * linux/arch/arm/plat-omap/debug-leds.c
-- *
-- * Copyright 2011 by Bryan Wu <bryan.wu@canonical.com>
-- * Copyright 2003 by Texas Instruments Incorporated
+- * Board specific gang-switched transceiver power on/off.
+- * NOTE:  OSK supplies power from DC, not battery.
 - */
--
--#include <linux/kernel.h>
--#include <linux/init.h>
--#include <linux/platform_device.h>
--#include <linux/leds.h>
--#include <linux/io.h>
--#include <linux/platform_data/gpio-omap.h>
--#include <linux/slab.h>
--
--#include <asm/mach-types.h>
--
--/* Many OMAP development platforms reuse the same "debug board"; these
-- * platforms include H2, H3, H4, and Perseus2.  There are 16 LEDs on the
-- * debug board (all green), accessed through FPGA registers.
-- */
--
--/* NOTE:  most boards don't have a static mapping for the FPGA ... */
--struct h2p2_dbg_fpga {
--	/* offset 0x00 */
--	u16		smc91x[8];
--	/* offset 0x10 */
--	u16		fpga_rev;
--	u16		board_rev;
--	u16		gpio_outputs;
--	u16		leds;
--	/* offset 0x18 */
--	u16		misc_inputs;
--	u16		lan_status;
--	u16		lan_reset;
--	u16		reserved0;
--	/* offset 0x20 */
--	u16		ps2_data;
--	u16		ps2_ctrl;
--	/* plus also 4 rs232 ports ... */
--};
--
--static struct h2p2_dbg_fpga __iomem *fpga;
--
--static u16 fpga_led_state;
--
--struct dbg_led {
--	struct led_classdev	cdev;
--	u16			mask;
--};
--
--static const struct {
--	const char *name;
--	const char *trigger;
--} dbg_leds[] = {
--	{ "dbg:d4", "heartbeat", },
--	{ "dbg:d5", "cpu0", },
--	{ "dbg:d6", "default-on", },
--	{ "dbg:d7", },
--	{ "dbg:d8", },
--	{ "dbg:d9", },
--	{ "dbg:d10", },
--	{ "dbg:d11", },
--	{ "dbg:d12", },
--	{ "dbg:d13", },
--	{ "dbg:d14", },
--	{ "dbg:d15", },
--	{ "dbg:d16", },
--	{ "dbg:d17", },
--	{ "dbg:d18", },
--	{ "dbg:d19", },
--};
--
--/*
-- * The triggers lines up below will only be used if the
-- * LED triggers are compiled in.
-- */
--static void dbg_led_set(struct led_classdev *cdev,
--			      enum led_brightness b)
+-static int omap_ohci_transceiver_power(struct ohci_omap_priv *priv, int on)
 -{
--	struct dbg_led *led = container_of(cdev, struct dbg_led, cdev);
--	u16 reg;
--
--	reg = readw_relaxed(&fpga->leds);
--	if (b != LED_OFF)
--		reg |= led->mask;
--	else
--		reg &= ~led->mask;
--	writew_relaxed(reg, &fpga->leds);
--}
--
--static enum led_brightness dbg_led_get(struct led_classdev *cdev)
--{
--	struct dbg_led *led = container_of(cdev, struct dbg_led, cdev);
--	u16 reg;
--
--	reg = readw_relaxed(&fpga->leds);
--	return (reg & led->mask) ? LED_FULL : LED_OFF;
--}
--
--static int fpga_probe(struct platform_device *pdev)
--{
--	struct resource	*iomem;
--	int i;
--
--	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!iomem)
--		return -ENODEV;
--
--	fpga = ioremap(iomem->start, resource_size(iomem));
--	writew_relaxed(0xff, &fpga->leds);
--
--	for (i = 0; i < ARRAY_SIZE(dbg_leds); i++) {
--		struct dbg_led *led;
--
--		led = kzalloc(sizeof(*led), GFP_KERNEL);
--		if (!led)
--			break;
--
--		led->cdev.name = dbg_leds[i].name;
--		led->cdev.brightness_set = dbg_led_set;
--		led->cdev.brightness_get = dbg_led_get;
--		led->cdev.default_trigger = dbg_leds[i].trigger;
--		led->mask = BIT(i);
--
--		if (led_classdev_register(NULL, &led->cdev) < 0) {
--			kfree(led);
--			break;
--		}
+-	if (on) {
+-		if (machine_is_omap_innovator() && cpu_is_omap1510())
+-			__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
+-				| ((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
+-			       INNOVATOR_FPGA_CAM_USB_CONTROL);
+-		else if (priv->power)
+-			gpiod_set_value_cansleep(priv->power, 0);
+-	} else {
+-		if (machine_is_omap_innovator() && cpu_is_omap1510())
+-			__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
+-				& ~((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
+-			       INNOVATOR_FPGA_CAM_USB_CONTROL);
+-		else if (priv->power)
+-			gpiod_set_value_cansleep(priv->power, 1);
 -	}
 -
 -	return 0;
 -}
 -
--static int fpga_suspend_noirq(struct device *dev)
--{
--	fpga_led_state = readw_relaxed(&fpga->leds);
--	writew_relaxed(0xff, &fpga->leds);
--
--	return 0;
--}
--
--static int fpga_resume_noirq(struct device *dev)
--{
--	writew_relaxed(~fpga_led_state, &fpga->leds);
--	return 0;
--}
--
--static const struct dev_pm_ops fpga_dev_pm_ops = {
--	.suspend_noirq = fpga_suspend_noirq,
--	.resume_noirq = fpga_resume_noirq,
--};
--
--static struct platform_driver led_driver = {
--	.driver.name	= "omap_dbg_led",
--	.driver.pm	= &fpga_dev_pm_ops,
--	.probe		= fpga_probe,
--};
--
--static int __init fpga_init(void)
--{
--	if (machine_is_omap_h4()
--			|| machine_is_omap_h3()
--			|| machine_is_omap_h2()
--			|| machine_is_omap_perseus2()
--			)
--		return platform_driver_register(&led_driver);
--	return 0;
--}
--fs_initcall(fpga_init);
+ #ifdef	CONFIG_USB_OTG
+ 
+ static void start_hnp(struct ohci_hcd *ohci)
+@@ -202,7 +177,11 @@ static int ohci_omap_reset(struct usb_hcd *hcd)
+ 	}
+ 
+ 	/* FIXME hub_wq hub requests should manage power switching */
+-	omap_ohci_transceiver_power(priv, 1);
++	if (config->transceiver_power)
++		return config->transceiver_power(1);
++
++	if (priv->power)
++		gpiod_set_value_cansleep(priv->power, 0);
+ 
+ 	/* board init will have already handled HMC and mux setup.
+ 	 * any external transceiver should already be initialized
+diff --git a/include/linux/platform_data/usb-omap1.h b/include/linux/platform_data/usb-omap1.h
+index 878e572a78bf..e7b8dc92a269 100644
+--- a/include/linux/platform_data/usb-omap1.h
++++ b/include/linux/platform_data/usb-omap1.h
+@@ -50,6 +50,8 @@ struct omap_usb_config {
+ 	int (*ocpi_enable)(void);
+ 
+ 	void (*lb_reset)(void);
++
++	int (*transceiver_power)(int on);
+ };
+ 
+ #endif /* __LINUX_USB_OMAP1_H */
 -- 
 2.29.2
 
