@@ -2,106 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C996EC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 11:43:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FBDCC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 11:45:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351743AbiDSLqM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 07:46:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33340 "EHLO
+        id S1351815AbiDSLsY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 07:48:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349627AbiDSLqI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 07:46:08 -0400
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F35AA237E9
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2022 04:43:24 -0700 (PDT)
-Received: by mail-ej1-x629.google.com with SMTP id u15so32262847ejf.11
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2022 04:43:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=JapUrTCwkt8ScGCQP7sItH2b923a92w4iMI5OHDmEVs=;
-        b=pzL2a6YcGrGnhVVsETujFs4fghRBnunJi4U2HdjN3UQFvzhsFmBAn6I16l7j/otzCB
-         JWQk42d3wUb/kMwGjhKI1bKskWm+2fy+Ztl9X3PlJ/57oIPTqYzu7+iX6kD9g5N3rWNd
-         2px7JzPy7Rnc+uowgtXC31vPo4XHQOzxdQTh7hfB3Ry2vxRLmA+BY2+HRWAFLIWqJYoD
-         oZbMz3EGi8d1JpyM7ZZXiuHGcvtsmZRyxOVDCslCy7jnKioWKiB/hXrIl4Nvtcoc+XZK
-         q0OSAbjpbNKAYSUIOWYelmbQmY4sJKnUGhfgGw4iac1Y8MbKtSndbN8jvbPmYTbyqkTQ
-         rRuw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=JapUrTCwkt8ScGCQP7sItH2b923a92w4iMI5OHDmEVs=;
-        b=YSnSbJMjsYjXUmcRLWweOgwkK1fqgcTj7Kh47BQOIyWniy0ewjmRCg2aycIGQ4GGhA
-         157unV020u+rsPlXoQpXgEJ9RRl+KYSCh7A6LdUSgRGTWXsVEGYAG0WH6xug2o6uI5ow
-         Fn1h6AMM5RNLFneC7UvsQvUpjh1eOhQjk2ZHUr7hdC/cUMi0ZSG3WlVuFIwkCNdwG2Y/
-         WEe/jWwZND6hlro6c1RsvXoTN8hQ1XlfbA/eG2g7NrfhDbDXb07eTvwrnENohRPb1LwO
-         aV/ENkSoS1iDHq0yj1NKmn+g9k+B9QLyY8L/r5tij1JAulT5kQmcOQIyht1Kynsb3q7K
-         pE8g==
-X-Gm-Message-State: AOAM530wH/J80G55TD/I4wEWA5DYigWvy+zNCNxLJgKmfHpnbqQ540E9
-        bXa8PIv0pIp+MWdNr5/hIl5L8LMu64T+cg==
-X-Google-Smtp-Source: ABdhPJxY+PqgjEuxgzNVYn8xSZxNDSHFLznx5K4VhYMjyn5azFTvIlaKaWndwcEiHada9QIkuvxMkg==
-X-Received: by 2002:a17:906:66c8:b0:6e8:8b06:1b32 with SMTP id k8-20020a17090666c800b006e88b061b32mr13044739ejp.236.1650368603530;
-        Tue, 19 Apr 2022 04:43:23 -0700 (PDT)
-Received: from [192.168.0.217] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id m1-20020a170906234100b006ef83025804sm3363851eja.87.2022.04.19.04.43.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 19 Apr 2022 04:43:23 -0700 (PDT)
-Message-ID: <24618256-2814-7b54-3705-58c093ca2727@linaro.org>
-Date:   Tue, 19 Apr 2022 13:43:22 +0200
+        with ESMTP id S1351945AbiDSLsU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 07:48:20 -0400
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45DA833A02;
+        Tue, 19 Apr 2022 04:45:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1650368737; x=1681904737;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=nXvv6I9Mx8UNUdA9ZNMVZJ7CfWBPlua0s960ddgVcJg=;
+  b=FAOAPsts2aKfr5nszOcU/5R42dPnM4r+jQLPGKo7+xVD6Nvt31H8nEsa
+   pgD9fV3NTo46QChiYabNl7oxDX+EaZX/U62iIxOdrekKrWRBsFxE+z3Cn
+   MNBt/XMp8ODd4CPH3SDA/Klxmo6eRCbYMAnI2uLUxAG11KuBj0xYC7LXJ
+   hy+3hdcACRS/epfIH+xDpRyN3x3lRcXPXYoHuCWTZ3ziiXAwHY2t+tdui
+   BXMj+lOt34PlS8srJ7RpU1Wjme9pxSYke6EgoA2gBoZwXDG72hjXYzy9X
+   id64xZbX3pLadRmiAJZNd25Z9G1GtPBxBpI00ZsOxBgRh6enFsAE6sFsB
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10321"; a="326642928"
+X-IronPort-AV: E=Sophos;i="5.90,272,1643702400"; 
+   d="scan'208";a="326642928"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2022 04:45:35 -0700
+X-IronPort-AV: E=Sophos;i="5.90,272,1643702400"; 
+   d="scan'208";a="576062896"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.44.237])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2022 04:45:32 -0700
+Message-ID: <19948f89-80fe-a726-2a03-db16bf5d66ef@intel.com>
+Date:   Tue, 19 Apr 2022 14:45:30 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH v8 03/13] arm64: dts: freescale: Add the imx8dxl
- connectivity subsys dtsi
+ Firefox/91.0 Thunderbird/91.7.0
+Subject: Re: [RESEND, PATCH] mmc: sdhci-pci-gli: A workaround to allow GL9755
+ to enter ASPM L1.2
 Content-Language: en-US
-To:     Abel Vesa <abel.vesa@nxp.com>, Rob Herring <robh@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>
-Cc:     Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, Jacky Bai <ping.bai@nxp.com>
-References: <20220419113516.1827863-1-abel.vesa@nxp.com>
- <20220419113516.1827863-4-abel.vesa@nxp.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220419113516.1827863-4-abel.vesa@nxp.com>
+To:     Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org
+Cc:     SeanHY.Chen@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
+        greg.tu@genesyslogic.com.tw, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20220414094945.457500-1-benchuanggli@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220414094945.457500-1-benchuanggli@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/04/2022 13:35, Abel Vesa wrote:
+On 14/04/22 12:49, Ben Chuang wrote:
+> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> 
+> When GL9755 enters ASPM L1 sub-states, it will stay at L1.1 and will not
+> enter L1.2. The workaround is to toggle PM state to allow GL9755 to enter
+> ASPM L1.2.
+> 
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-(...)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
+> ---
+>  drivers/mmc/host/sdhci-pci-gli.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index 97035d77c18c..52230857388f 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -137,6 +137,9 @@
+>  #define PCI_GLI_9755_SerDes  0x70
+>  #define PCI_GLI_9755_SCP_DIS   BIT(19)
+>  
+> +#define PCI_GLI_9755_PM_CTRL     0xFC
+> +#define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
 > +
-> +	usbmisc2: usbmisc@5b0e0200 {
-
-Generic node names, so maybe "usb"?
-
-> +		#index-cells = <1>;
-> +		compatible = "fsl,imx8dxl-usbmisc", "fsl,imx7ulp-usbmisc";
-> +		reg = <0x5b0e0200 0x200>;
-> +	};
+>  #define GLI_MAX_TUNING_LOOP 40
+>  
+>  /* Genesys Logic chipset */
+> @@ -597,6 +600,13 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+>  			    GLI_9755_CFG2_L1DLY_VALUE);
+>  	pci_write_config_dword(pdev, PCI_GLI_9755_CFG2, value);
+>  
+> +	/* toggle PM state to allow GL9755 to enter ASPM L1.2 */
+> +	pci_read_config_dword(pdev, PCI_GLI_9755_PM_CTRL, &value);
+> +	value |= PCI_GLI_9755_PM_STATE;
+> +	pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> +	value &= ~PCI_GLI_9755_PM_STATE;
+> +	pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
 > +
-> +	usbphy2: usbphy@5b110000 {
+>  	gl9755_wt_off(pdev);
+>  }
+>  
 
-Generic node names, so "phy".
-
-> +		compatible = "fsl,imx8dxl-usbphy", "fsl,imx7ulp-usbphy";
-> +		reg = <0x5b110000 0x1000>;
-> +		clocks = <&usb2_2_lpcg IMX_LPCG_CLK_7>;
-> +		status = "disabled";
-> +	};
-> +
-
-
-Best regards,
-Krzysztof
