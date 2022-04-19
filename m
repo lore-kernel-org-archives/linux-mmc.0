@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D5F7C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36E5EC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239639AbiDSNn3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:43:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36878 "EHLO
+        id S239030AbiDSNnl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:43:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36932 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352670AbiDSNmh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:37 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBAF038BDA;
-        Tue, 19 Apr 2022 06:39:32 -0700 (PDT)
+        with ESMTP id S1352514AbiDSNmE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:04 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F0DE37BF2;
+        Tue, 19 Apr 2022 06:39:17 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id A6A30B81980;
-        Tue, 19 Apr 2022 13:39:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E6057C385A7;
-        Tue, 19 Apr 2022 13:39:23 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E7101616A8;
+        Tue, 19 Apr 2022 13:39:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A81EFC385AC;
+        Tue, 19 Apr 2022 13:39:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375570;
-        bh=B7GGzQK0KIjiwCxoEg1dXjX6/oLgtetrXN0VV1GNBGs=;
+        s=k20201202; t=1650375556;
+        bh=f9Y/96hrDNAN/+YDT6y/IETuuHURcMDkd3mR04iG5MY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=TOpp36+rC0pDLis7adjFpLtRxKwHifzqT8ATqBoHM3otXvUperBtVcs1FifHc5yyB
-         rqLPC7rYbjq0Cf9Ys1ZbJ2P/GGpYZjaZv29gcfAMIMSQP3xSrwfLAML/qNNhmU/GVd
-         gH/ywtlMj8E5lIgxWXQ0d1WKgZnNBdasQLQRmukrsvNWTS1WfVWbNuYArE2MVzLjOQ
-         7HngWtMC/2cYvIPEoUHdURPi61wEmycHnijfRFxP36EiMPOyusZ0YufgRWJ+JHp9ci
-         tnu1W78uOh80vxB8EvHIbeFZxxM2wIE9VFANNL583gMp6zk/BtWTAHQhAPI0pKoXd2
-         RNXWpAmIMsrlg==
+        b=ebr5utca6XgjB3tSpUqlgAxa1J/VO+5Up3W225Ck2Y1KV0kHl25WxqiLaxQnTrrDP
+         o4ZMRT5uiqJlbasFReJEEjIucMAj0DIkjrh7yNwei7KTqUAxhrCrbIU9vS1MWfztjT
+         pnZZDXwYX8Bp58oIwWuMxVkm3t1lAwr40PquGM25WMYWoQU4zuhNhfylYnCyYIm7KS
+         AxbhGnhgw8s8/7Sp0BNcsDkI0IMc9J8IbULGpS4rd/U42TIh6dRRUrDsawrsOWc7ZZ
+         Lnc4CsAY2Xr00xDadJHWFy5+sqJIjPU+QvQwa5Q0tAKRS7Lo54LfD5qNiWFtBeJuUY
+         ATdlp/KQHWVdA==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -56,10 +56,11 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 15/41] input: omap: void using mach/*.h headers
-Date:   Tue, 19 Apr 2022 15:36:57 +0200
-Message-Id: <20220419133723.1394715-16-arnd@kernel.org>
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        Daniel Lezcano <daniel.lezcano@linaro.org>
+Subject: [PATCH 13/41] clocksource: ti-dmtimer: avoid using mach/hardware.h
+Date:   Tue, 19 Apr 2022 15:36:55 +0200
+Message-Id: <20220419133723.1394715-14-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -71,28 +72,29 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The omap-keypad driver currently relies on including mach/memory.h
-implicitly, but that won't happen once omap1 is converted to
-CONFIG_ARCH_MULTIPLATFORM. Include the required header
-explicitly.
+As a preparation for future omap1 multiplatform support, stop
+using mach/hardware.h and instead include the omap1-io.h
+for low-level register access to MOD_CONF_CTRL_1.
 
+Acked-by: Daniel Lezcano <daniel.lezcano@linaro.org>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/input/keyboard/omap-keypad.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/clocksource/timer-ti-dm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/input/keyboard/omap-keypad.c b/drivers/input/keyboard/omap-keypad.c
-index eb3a687796e7..57447d6c9007 100644
---- a/drivers/input/keyboard/omap-keypad.c
-+++ b/drivers/input/keyboard/omap-keypad.c
-@@ -24,6 +24,7 @@
- #include <linux/gpio.h>
- #include <linux/platform_data/gpio-omap.h>
- #include <linux/platform_data/keypad-omap.h>
+diff --git a/drivers/clocksource/timer-ti-dm.c b/drivers/clocksource/timer-ti-dm.c
+index 3e52c5226c4d..df4a73ea6651 100644
+--- a/drivers/clocksource/timer-ti-dm.c
++++ b/drivers/clocksource/timer-ti-dm.c
+@@ -433,7 +433,7 @@ int omap_dm_timer_get_irq(struct omap_dm_timer *timer)
+ }
+ 
+ #if defined(CONFIG_ARCH_OMAP1)
+-#include <mach/hardware.h>
 +#include <linux/soc/ti/omap1-io.h>
  
- #undef NEW_BOARD_LEARNING_MODE
- 
+ static struct clk *omap_dm_timer_get_fclk(struct omap_dm_timer *timer)
+ {
 -- 
 2.29.2
 
