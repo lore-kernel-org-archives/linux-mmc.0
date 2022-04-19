@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0F0BC35295
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:45:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3911BC35296
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:46:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355139AbiDSQqp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:46:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55058 "EHLO
+        id S1355146AbiDSQqr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:46:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350141AbiDSQpj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:45:39 -0400
+        with ESMTP id S1348967AbiDSQqC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:46:02 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C924F36E26;
-        Tue, 19 Apr 2022 09:42:55 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 113A5396A3;
+        Tue, 19 Apr 2022 09:43:19 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 63FC761874;
-        Tue, 19 Apr 2022 16:42:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 80884C385AC;
-        Tue, 19 Apr 2022 16:42:47 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A15E56145C;
+        Tue, 19 Apr 2022 16:43:18 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BED67C385A9;
+        Tue, 19 Apr 2022 16:43:10 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386574;
-        bh=RVE6EmI/XNsvZr+sz6SY+1PqohGEsq3I0n4zlwh58+w=;
+        s=k20201202; t=1650386598;
+        bh=v2JXUsT+aPSiyV8AWZ0OLtn99RZRKtVDeuty5M4eG68=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=dHkbZ59jO4tpFys0DP7olW8IY7ZH5CGyEM3n2P2fl7D3JvK9hQ7BKYiNMCkVX0QMO
-         DzwIJv2XuHva+L/KHbieQhFRPKov89shvDnwcRIqSGqfBDAYykBmRV+5xMRQwCndOp
-         sHEX5civiLh3GC6mOa9LkgRIlBFjYRIyGRh7lIfTZoJ/GNwulWi9NOLR6NJJ2N2jTC
-         fWVoQDYVTClTgFIbtWF4Aw1YdDz3Dn9HqY5Kktz5XtwGO57L+cplp1HmwGjhzgiXge
-         HL9aNnhck3V9UwzUA23nrnbbVePDqvxauzNlGoRmQeEK/cTZnnxkove2t2MWjx50A7
-         aeTu+UERvoByg==
+        b=tt/fiI6JfMKScsjC4gupDTlXwIFAYWcsYENflWn5n3kMrbCN+Y2cCr3glEwE1sItJ
+         cONsIQQLt01Y/qCAeHUUbJd9TpD27gE/DUc3zMZ7c0U2VwpCWQ+qBf7uwrq/GZGzTX
+         3FGOj+knk17r2GSyltkagM0yCF+n9LJkDIwNmtctqNly1C9p720AIevLts/VbLM17G
+         O+4nFGEcvsfnWMk8Au/5OQB6coNhg3LP2cgERB8iHAG0NNlBzSNRpU2laCxc90/bD8
+         8gZIgUWRqfgnaIv2WyLz/01oqgCe1ixn6EBO/7GUMc0aVvmzyH6K1PsZ1Shk5OoOYF
+         /MoVumyBheReg==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -59,9 +59,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
         alsa-devel@alsa-project.org
-Subject: [PATCH 31/48] ASoC: pxa: use pdev resource for FIFO regs
-Date:   Tue, 19 Apr 2022 18:37:53 +0200
-Message-Id: <20220419163810.2118169-32-arnd@kernel.org>
+Subject: [PATCH 34/48] ARM: pxa: pcmcia: move smemc configuration back to arch
+Date:   Tue, 19 Apr 2022 18:37:56 +0200
+Message-Id: <20220419163810.2118169-35-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,98 +73,193 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The driver currently takes the hardwired FIFO address from
-a header file that we want to eliminate. Change it to use
-the mmio resource instead and stop including the here.
+Rather than poking at the smemc registers directly from the
+pcmcia/pxa2xx_base driver, move those bits into machine file
+to have a cleaner interface.
 
-Acked-by: Mark Brown <broonie@kernel.org>
-Cc: alsa-devel@alsa-project.org
-Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+Cc: Dominik Brodowski <linux@dominikbrodowski.net>
+Link: https://lore.kernel.org/lkml/87d0egjzxk.fsf@belgarion.home/
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- sound/soc/pxa/pxa2xx-ac97.c | 22 +++++++++++++++-------
- 1 file changed, 15 insertions(+), 7 deletions(-)
+ arch/arm/mach-pxa/generic.c   | 29 ++++++++++++++++++++++
+ drivers/pcmcia/pxa2xx_base.c  | 46 ++++++++++++-----------------------
+ include/linux/soc/pxa/smemc.h | 10 ++++++++
+ 3 files changed, 55 insertions(+), 30 deletions(-)
+ create mode 100644 include/linux/soc/pxa/smemc.h
 
-diff --git a/sound/soc/pxa/pxa2xx-ac97.c b/sound/soc/pxa/pxa2xx-ac97.c
-index 9443c1390d2f..809ea34736ed 100644
---- a/sound/soc/pxa/pxa2xx-ac97.c
-+++ b/sound/soc/pxa/pxa2xx-ac97.c
-@@ -21,10 +21,12 @@
- #include <sound/pxa2xx-lib.h>
- #include <sound/dmaengine_pcm.h>
+diff --git a/arch/arm/mach-pxa/generic.c b/arch/arm/mach-pxa/generic.c
+index f9083c4f0aea..fe1d55d328e5 100644
+--- a/arch/arm/mach-pxa/generic.c
++++ b/arch/arm/mach-pxa/generic.c
+@@ -70,6 +70,35 @@ unsigned int get_clk_frequency_khz(int info)
+ }
+ EXPORT_SYMBOL(get_clk_frequency_khz);
  
--#include <mach/pxa-regs.h>
--#include <mach/regs-ac97.h>
- #include <linux/platform_data/asoc-pxa.h>
- 
-+#define PCDR	0x0040  /* PCM FIFO Data Register */
-+#define MODR	0x0140  /* Modem FIFO Data Register */
-+#define MCDR	0x0060  /* Mic-in FIFO Data Register */
++void pxa_smemc_set_pcmcia_timing(int sock, u32 mcmem, u32 mcatt, u32 mcio)
++{
++	__raw_writel(mcmem, MCMEM(sock));
++	__raw_writel(mcatt, MCATT(sock));
++	__raw_writel(mcio, MCIO(sock));
++}
++EXPORT_SYMBOL_GPL(pxa_smemc_set_pcmcia_timing);
 +
- static void pxa2xx_ac97_warm_reset(struct ac97_controller *adrv)
++void pxa_smemc_set_pcmcia_socket(int nr)
++{
++	switch (nr) {
++	case 0:
++		__raw_writel(0, MECR);
++		break;
++	case 1:
++		/*
++		 * We have at least one socket, so set MECR:CIT
++		 * (Card Is There)
++		 */
++		__raw_writel(MECR_CIT, MECR);
++		break;
++	case 2:
++		/* Set CIT and MECR:NOS (Number Of Sockets) */
++		__raw_writel(MECR_CIT | MECR_NOS, MECR);
++		break;
++	}
++}
++EXPORT_SYMBOL_GPL(pxa_smemc_set_pcmcia_socket);
++
+ /*
+  * Intel PXA2xx internal register mapping.
+  *
+diff --git a/drivers/pcmcia/pxa2xx_base.c b/drivers/pcmcia/pxa2xx_base.c
+index 7cd1375d6087..0ea41f1411e5 100644
+--- a/drivers/pcmcia/pxa2xx_base.c
++++ b/drivers/pcmcia/pxa2xx_base.c
+@@ -24,11 +24,10 @@
+ #include <linux/spinlock.h>
+ #include <linux/platform_device.h>
+ #include <linux/soc/pxa/cpu.h>
++#include <linux/soc/pxa/smemc.h>
+ 
+-#include <mach/smemc.h>
+ #include <asm/io.h>
+ #include <asm/irq.h>
+-#include <mach/pxa2xx-regs.h>
+ #include <asm/mach-types.h>
+ 
+ #include <pcmcia/ss.h>
+@@ -113,7 +112,7 @@ static inline u_int pxa2xx_pcmcia_cmd_time(u_int mem_clk_10khz,
+ 	return (300000 * (pcmcia_mcxx_asst + 1) / mem_clk_10khz);
+ }
+ 
+-static int pxa2xx_pcmcia_set_mcmem( int sock, int speed, int clock )
++static uint32_t pxa2xx_pcmcia_mcmem(int sock, int speed, int clock)
  {
- 	pxa2xx_ac97_try_warm_reset();
-@@ -59,35 +61,30 @@ static struct ac97_controller_ops pxa2xx_ac97_ops = {
- };
+ 	uint32_t val;
  
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_in = {
--	.addr		= __PREG(PCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
- 	.chan_name	= "pcm_pcm_stereo_in",
- 	.maxburst	= 32,
- };
+@@ -124,12 +123,10 @@ static int pxa2xx_pcmcia_set_mcmem( int sock, int speed, int clock )
+ 		| ((pxa2xx_mcxx_hold(speed, clock)
+ 		& MCXX_HOLD_MASK) << MCXX_HOLD_SHIFT);
  
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_stereo_out = {
--	.addr		= __PREG(PCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_4_BYTES,
- 	.chan_name	= "pcm_pcm_stereo_out",
- 	.maxburst	= 32,
- };
+-	__raw_writel(val, MCMEM(sock));
+-
+-	return 0;
++	return val;
+ }
  
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_out = {
--	.addr		= __PREG(MODR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
- 	.chan_name	= "pcm_aux_mono_out",
- 	.maxburst	= 16,
- };
+-static int pxa2xx_pcmcia_set_mcio( int sock, int speed, int clock )
++static int pxa2xx_pcmcia_mcio(int sock, int speed, int clock)
+ {
+ 	uint32_t val;
  
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_aux_mono_in = {
--	.addr		= __PREG(MODR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
- 	.chan_name	= "pcm_aux_mono_in",
- 	.maxburst	= 16,
- };
+@@ -140,12 +137,11 @@ static int pxa2xx_pcmcia_set_mcio( int sock, int speed, int clock )
+ 		| ((pxa2xx_mcxx_hold(speed, clock)
+ 		& MCXX_HOLD_MASK) << MCXX_HOLD_SHIFT);
  
- static struct snd_dmaengine_dai_dma_data pxa2xx_ac97_pcm_mic_mono_in = {
--	.addr		= __PREG(MCDR),
- 	.addr_width	= DMA_SLAVE_BUSWIDTH_2_BYTES,
- 	.chan_name	= "pcm_aux_mic_mono",
- 	.maxburst	= 16,
-@@ -226,6 +223,7 @@ static int pxa2xx_ac97_dev_probe(struct platform_device *pdev)
- 	int ret;
- 	struct ac97_controller *ctrl;
- 	pxa2xx_audio_ops_t *pdata = pdev->dev.platform_data;
-+	struct resource *regs;
- 	void **codecs_pdata;
+-	__raw_writel(val, MCIO(sock));
  
- 	if (pdev->id != -1) {
-@@ -233,6 +231,16 @@ static int pxa2xx_ac97_dev_probe(struct platform_device *pdev)
- 		return -ENXIO;
- 	}
+-	return 0;
++	return val;
+ }
  
-+	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	if (!regs)
-+		return -ENXIO;
+-static int pxa2xx_pcmcia_set_mcatt( int sock, int speed, int clock )
++static int pxa2xx_pcmcia_mcatt(int sock, int speed, int clock)
+ {
+ 	uint32_t val;
+ 
+@@ -156,31 +152,26 @@ static int pxa2xx_pcmcia_set_mcatt( int sock, int speed, int clock )
+ 		| ((pxa2xx_mcxx_hold(speed, clock)
+ 		& MCXX_HOLD_MASK) << MCXX_HOLD_SHIFT);
+ 
+-	__raw_writel(val, MCATT(sock));
+ 
+-	return 0;
++	return val;
+ }
+ 
+-static int pxa2xx_pcmcia_set_mcxx(struct soc_pcmcia_socket *skt, unsigned int clk)
++static int pxa2xx_pcmcia_set_timing(struct soc_pcmcia_socket *skt)
+ {
++	unsigned long clk = clk_get_rate(skt->clk) / 10000;
+ 	struct soc_pcmcia_timing timing;
+ 	int sock = skt->nr;
+ 
+ 	soc_common_pcmcia_get_timing(skt, &timing);
+ 
+-	pxa2xx_pcmcia_set_mcmem(sock, timing.mem, clk);
+-	pxa2xx_pcmcia_set_mcatt(sock, timing.attr, clk);
+-	pxa2xx_pcmcia_set_mcio(sock, timing.io, clk);
++	pxa_smemc_set_pcmcia_timing(sock,
++		pxa2xx_pcmcia_mcmem(sock, timing.mem, clk),
++		pxa2xx_pcmcia_mcatt(sock, timing.attr, clk),
++		pxa2xx_pcmcia_mcio(sock, timing.io, clk));
+ 
+ 	return 0;
+ }
+ 
+-static int pxa2xx_pcmcia_set_timing(struct soc_pcmcia_socket *skt)
+-{
+-	unsigned long clk = clk_get_rate(skt->clk);
+-	return pxa2xx_pcmcia_set_mcxx(skt, clk / 10000);
+-}
+-
+ #ifdef CONFIG_CPU_FREQ
+ 
+ static int
+@@ -215,18 +206,13 @@ pxa2xx_pcmcia_frequency_change(struct soc_pcmcia_socket *skt,
+ 
+ void pxa2xx_configure_sockets(struct device *dev, struct pcmcia_low_level *ops)
+ {
+-	/*
+-	 * We have at least one socket, so set MECR:CIT
+-	 * (Card Is There)
+-	 */
+-	uint32_t mecr = MECR_CIT;
++	int nr = 1;
+ 
+-	/* Set MECR:NOS (Number Of Sockets) */
+ 	if ((ops->first + ops->nr) > 1 ||
+ 	    machine_is_viper() || machine_is_arcom_zeus())
+-		mecr |= MECR_NOS;
++		nr = 2;
+ 
+-	__raw_writel(mecr, MECR);
++	pxa_smemc_set_pcmcia_socket(nr);
+ }
+ EXPORT_SYMBOL(pxa2xx_configure_sockets);
+ 
+diff --git a/include/linux/soc/pxa/smemc.h b/include/linux/soc/pxa/smemc.h
+new file mode 100644
+index 000000000000..cbf1a2d8af29
+--- /dev/null
++++ b/include/linux/soc/pxa/smemc.h
+@@ -0,0 +1,10 @@
++/* SPDX-License-Identifier: GPL-2.0-only */
++#ifndef __PXA_REGS_H
++#define __PXA_REGS_H
 +
-+	pxa2xx_ac97_pcm_stereo_in.addr = regs->start + PCDR;
-+	pxa2xx_ac97_pcm_stereo_out.addr = regs->start + PCDR;
-+	pxa2xx_ac97_pcm_aux_mono_out.addr = regs->start + MODR;
-+	pxa2xx_ac97_pcm_aux_mono_in.addr = regs->start + MODR;
-+	pxa2xx_ac97_pcm_mic_mono_in.addr = regs->start + MCDR;
++#include <linux/types.h>
 +
- 	ret = pxa2xx_ac97_hw_probe(pdev);
- 	if (ret) {
- 		dev_err(&pdev->dev, "PXA2xx AC97 hw probe error (%d)\n", ret);
++void pxa_smemc_set_pcmcia_timing(int sock, u32 mcmem, u32 mcatt, u32 mcio);
++void pxa_smemc_set_pcmcia_socket(int nr);
++
++#endif
 -- 
 2.29.2
 
