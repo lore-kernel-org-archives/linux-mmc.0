@@ -2,184 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1657FC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 152B7C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352870AbiDSNp0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:45:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40688 "EHLO
+        id S1352675AbiDSNp2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:45:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352663AbiDSNpI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:45:08 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D63C387A5;
+        with ESMTP id S1352698AbiDSNpJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:45:09 -0400
+Received: from mail-qv1-f47.google.com (mail-qv1-f47.google.com [209.85.219.47])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B3C338BC3;
+        Tue, 19 Apr 2022 06:41:27 -0700 (PDT)
+Received: by mail-qv1-f47.google.com with SMTP id b17so13114966qvp.6;
+        Tue, 19 Apr 2022 06:41:27 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jGm6guTALRSU5+PRnvbVJaHFz19D6EpgjjGAnT9VVE4=;
+        b=4JEdMvpbiMgx28XR8Fg5kRuOMFgA9V7b+ZKqAkqsa7OEJ6xaPAfwXNr+2nfUddWQ81
+         0JX78BD+/tj7SmI3szrVygKlS4aLCEzix1GzpQpfXtcK5qJwrZfJc5VrPJKs8GK0/qM0
+         FojlNz4PM21owIFDaY7VTImXCvwTzcLvAKz9C6V2xdQ4mONsm6Qznc4kKeuaVA+yNbDl
+         K3rePScJRjo5C5a3g07g6oqgPGfkdA7x89QL2+toLxu+TI3d5sNs55366iYQ8HJFYsIG
+         +2dMXVoR6nP67uUK35gKLw01j4PVEVNfkRcLoNMTkpYZ5vDyU4zBBdzxaMxP6/q5I274
+         MuNQ==
+X-Gm-Message-State: AOAM531Om/8lcbjdS1arIqFg0EyMZC5IOr7EUjoxdgCe2z7fUi1LPXp1
+        h4fKJeuUudwRxMh7WmtQaGMK7e96Ih/7SA==
+X-Google-Smtp-Source: ABdhPJyJ1A6FiVgoio+yHvhRxV4zyEMQE1hZTjjz04uYHzDT/C4103SoGyxgz50tdbvVg2oLGHnFjw==
+X-Received: by 2002:a0c:e8ca:0:b0:446:e7a:61af with SMTP id m10-20020a0ce8ca000000b004460e7a61afmr11308174qvo.37.1650375686852;
         Tue, 19 Apr 2022 06:41:26 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 40DD4B81980;
-        Tue, 19 Apr 2022 13:41:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EDD10C385A5;
-        Tue, 19 Apr 2022 13:41:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375683;
-        bh=Lqql5jJ2TjMR0BVNQRp5+3ddwljyuhELVCm/kXj+7ik=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=JIoRCZ5P7nywKXcKjFEeDGGEvckH/ddxelOi4sgLLOtXOcDjoGje3+bE947Tyfmia
-         404OQdFoYPFkbzMHBsltzemOp8kG1cXvkIXl73jYoerRI3ggoObRe7dclw+jMSy9H8
-         F+o3O5viIo54fVXJj2D8nfZNTbQ86aaDw5H9fg3Kd6DLTGBA7lJG4+V5LTJULF9e+r
-         tvfzzSP4zoEJRSSCciMSDW0M3yqyLWUuAL26tBfmvTvd3LCp7oXzclqlFOfsHHkqez
-         QdbmAWEIjwpUIeKE0k/ZBNkPe/Zdvsshi18aHuPRwsuSu3oIE5fxAI7S7/ls1bYkDQ
-         VWwgVS/Bp5Amw==
-From:   Arnd Bergmann <arnd@kernel.org>
-To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
-        jmkrzyszt@gmail.com
-Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Paul Walmsley <paul@pwsan.com>,
-        Kevin Hilman <khilman@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Mark Brown <broonie@kernel.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Lee Jones <lee.jones@linaro.org>,
-        Daniel Thompson <daniel.thompson@linaro.org>,
-        Jingoo Han <jingoohan1@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 30/41] ARM: OMAP1: Prepare for conversion of OMAP1 clocks to CCF
-Date:   Tue, 19 Apr 2022 15:37:12 +0200
-Message-Id: <20220419133723.1394715-31-arnd@kernel.org>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
-References: <20220419133723.1394715-1-arnd@kernel.org>
+Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com. [209.85.219.181])
+        by smtp.gmail.com with ESMTPSA id s4-20020ae9de04000000b0069c3a577b0asm24755qkf.51.2022.04.19.06.41.26
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 19 Apr 2022 06:41:26 -0700 (PDT)
+Received: by mail-yb1-f181.google.com with SMTP id s33so3657508ybi.12;
+        Tue, 19 Apr 2022 06:41:26 -0700 (PDT)
+X-Received: by 2002:a05:6902:724:b0:644:c37b:4e21 with SMTP id
+ l4-20020a056902072400b00644c37b4e21mr14534539ybt.6.1650375686021; Tue, 19 Apr
+ 2022 06:41:26 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220419132716.1392407-1-arnd@kernel.org>
+In-Reply-To: <20220419132716.1392407-1-arnd@kernel.org>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 19 Apr 2022 15:41:14 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdUW+jPUJzdJ-xWQYxDy4SMJ1PDFbFDsBk9Km-+EObgsvA@mail.gmail.com>
+Message-ID: <CAMuHMdUW+jPUJzdJ-xWQYxDy4SMJ1PDFbFDsBk9Km-+EObgsvA@mail.gmail.com>
+Subject: Re: [PATCH] [v2] m68k: coldfire: drop ISA_DMA_API support
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Greg Ungerer <gerg@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        Finn Thain <fthain@linux-m68k.org>,
+        linux-m68k <linux-m68k@lists.linux-m68k.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+On Tue, Apr 19, 2022 at 3:27 PM Arnd Bergmann <arnd@kernel.org> wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
+>
+> After a build regression report, I took a look at possible users of
+> CONFIG_ISA_DMA_API on m68k and found none, which Greg confirmed. The
+> CONFIG_GENERIC_ISA_DMA option in turn is only needed to implement
+> ISA_DMA_API, and is clearly not used on the platforms with ISA support.
+>
+> The CONFIG_ISA support for AMIGA_PCMCIA is probably also unneeded,
+> but this is less clear. Unlike other PCMCIA implementations, this one
+> does not use the drivers/pcmcia subsystem at all and just supports
+> the "apne" network driver. When it was first added, one could use
+> ISA drivers on it as well, but this probably broke at some point.
+>
+> With no reason to keep this, let's just drop the corresponding files
+> and prevent the remaining ISA drivers that use this from getting built.
+>
+> The remaining definitions in asm/dma.h are used for PCI support.
+>
+> Link: https://lore.kernel.org/lkml/9e5ee1c3-ca80-f343-a1f5-66f3dd1c0727@linux-m68k.org/
+> Cc: Greg Ungerer <gerg@linux-m68k.org>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+> v2: drop GENERIC_ISA_DMA as well, add some background on CONFIG_ISA.
 
-In preparation for conversion of OMAP1 clocks to common clock framework,
-identify arch/arm/mach-omap1 local users of those clocks and update them
-to call clk_prepare_enable/clk_disable_unprepare() instead of just
-clk_enable/disable(), as required by CCF implementation of clock API.
+Acked-by: Geert Uytterhoeven <geert@linux-m68k.org>
 
-Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- arch/arm/mach-omap1/mcbsp.c    | 8 ++++----
- arch/arm/mach-omap1/ocpi.c     | 4 ++--
- arch/arm/mach-omap1/serial.c   | 6 +++---
- arch/arm/mach-omap1/timer32k.c | 2 +-
- 4 files changed, 10 insertions(+), 10 deletions(-)
+Gr{oetje,eeting}s,
 
-diff --git a/arch/arm/mach-omap1/mcbsp.c b/arch/arm/mach-omap1/mcbsp.c
-index b7bc7e4b426c..05c25c432449 100644
---- a/arch/arm/mach-omap1/mcbsp.c
-+++ b/arch/arm/mach-omap1/mcbsp.c
-@@ -43,8 +43,8 @@ static void omap1_mcbsp_request(unsigned int id)
- 			api_clk = clk_get(NULL, "api_ck");
- 			dsp_clk = clk_get(NULL, "dsp_ck");
- 			if (!IS_ERR(api_clk) && !IS_ERR(dsp_clk)) {
--				clk_enable(api_clk);
--				clk_enable(dsp_clk);
-+				clk_prepare_enable(api_clk);
-+				clk_prepare_enable(dsp_clk);
- 
- 				/*
- 				 * DSP external peripheral reset
-@@ -62,11 +62,11 @@ static void omap1_mcbsp_free(unsigned int id)
- 	if (id == 0 || id == 2) {
- 		if (--dsp_use == 0) {
- 			if (!IS_ERR(api_clk)) {
--				clk_disable(api_clk);
-+				clk_disable_unprepare(api_clk);
- 				clk_put(api_clk);
- 			}
- 			if (!IS_ERR(dsp_clk)) {
--				clk_disable(dsp_clk);
-+				clk_disable_unprepare(dsp_clk);
- 				clk_put(dsp_clk);
- 			}
- 		}
-diff --git a/arch/arm/mach-omap1/ocpi.c b/arch/arm/mach-omap1/ocpi.c
-index c4a33ace4a8b..d48f726571a4 100644
---- a/arch/arm/mach-omap1/ocpi.c
-+++ b/arch/arm/mach-omap1/ocpi.c
-@@ -73,7 +73,7 @@ static int __init omap_ocpi_init(void)
- 	if (IS_ERR(ocpi_ck))
- 		return PTR_ERR(ocpi_ck);
- 
--	clk_enable(ocpi_ck);
-+	clk_prepare_enable(ocpi_ck);
- 	ocpi_enable();
- 	pr_info("OMAP OCPI interconnect driver loaded\n");
- 
-@@ -87,7 +87,7 @@ static void __exit omap_ocpi_exit(void)
- 	if (!cpu_is_omap16xx())
- 		return;
- 
--	clk_disable(ocpi_ck);
-+	clk_disable_unprepare(ocpi_ck);
- 	clk_put(ocpi_ck);
- }
- 
-diff --git a/arch/arm/mach-omap1/serial.c b/arch/arm/mach-omap1/serial.c
-index d6d1843337a5..299ae1106187 100644
---- a/arch/arm/mach-omap1/serial.c
-+++ b/arch/arm/mach-omap1/serial.c
-@@ -142,7 +142,7 @@ void __init omap_serial_init(void)
- 			if (IS_ERR(uart1_ck))
- 				printk("Could not get uart1_ck\n");
- 			else {
--				clk_enable(uart1_ck);
-+				clk_prepare_enable(uart1_ck);
- 				if (cpu_is_omap15xx())
- 					clk_set_rate(uart1_ck, 12000000);
- 			}
-@@ -152,7 +152,7 @@ void __init omap_serial_init(void)
- 			if (IS_ERR(uart2_ck))
- 				printk("Could not get uart2_ck\n");
- 			else {
--				clk_enable(uart2_ck);
-+				clk_prepare_enable(uart2_ck);
- 				if (cpu_is_omap15xx())
- 					clk_set_rate(uart2_ck, 12000000);
- 				else
-@@ -164,7 +164,7 @@ void __init omap_serial_init(void)
- 			if (IS_ERR(uart3_ck))
- 				printk("Could not get uart3_ck\n");
- 			else {
--				clk_enable(uart3_ck);
-+				clk_prepare_enable(uart3_ck);
- 				if (cpu_is_omap15xx())
- 					clk_set_rate(uart3_ck, 12000000);
- 			}
-diff --git a/arch/arm/mach-omap1/timer32k.c b/arch/arm/mach-omap1/timer32k.c
-index 23952a85ac79..560cd16568a7 100644
---- a/arch/arm/mach-omap1/timer32k.c
-+++ b/arch/arm/mach-omap1/timer32k.c
-@@ -270,7 +270,7 @@ int __init omap_32k_timer_init(void)
- 
- 		sync32k_ick = clk_get(NULL, "omap_32ksync_ick");
- 		if (!IS_ERR(sync32k_ick))
--			clk_enable(sync32k_ick);
-+			clk_prepare_enable(sync32k_ick);
- 
- 		ret = omap_init_clocksource_32k(base);
- 	}
--- 
-2.29.2
+                        Geert
 
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
