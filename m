@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 137E4C352A7
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BED4EC35296
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244640AbiDSNnq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:43:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39934 "EHLO
+        id S245739AbiDSNnp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:43:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234762AbiDSNnI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:43:08 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C35AE182;
-        Tue, 19 Apr 2022 06:40:25 -0700 (PDT)
+        with ESMTP id S1352797AbiDSNmt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:49 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6A6737BF6;
+        Tue, 19 Apr 2022 06:40:02 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 7A754B81983;
-        Tue, 19 Apr 2022 13:40:24 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B32FFC385A5;
-        Tue, 19 Apr 2022 13:40:15 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 7289CB81984;
+        Tue, 19 Apr 2022 13:40:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EC917C385AE;
+        Tue, 19 Apr 2022 13:39:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375623;
-        bh=R5zRvKa0SoyT3N6cs+9ATf3vspiQLolbMLlEiLA/7fA=;
+        s=k20201202; t=1650375600;
+        bh=zW9EXgIwrT6e9se5HepqxV0X/iuSevgZPTTCehW8dB0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=h4qvsRlCqc1+D/Un3T++kg9XOlylFj9tu57mNt8nm00hUNQ6OKBJwfaNIy8CUc5b/
-         qlJ5Qll9E9CFFYZxtIhDJzmK+qDlqq4+ArAd2BBXudLqHYrCpKgbUoCnwsfLaR2pgk
-         Q7EkW4bPFi3bk0l1eRnod+7F8TcxdVYbp1x3X1kd6GHmuGnsuLz3ITS24UVsnNzXdg
-         x/K6BdB+SIi+C9NttQpeR53oMsrljIEQWrLP8CdiwfvAVwJt/CIv2ZT1IB0hwp9ZMU
-         YhjJTR86Ah4hamcr5wDfPSVrUyclrlzsHDyDQ4lgL5SrWli+rzKao8UrzltowcxyNH
-         vWiGzLOvfg/Eg==
+        b=vHI0qQByX+c/7bvvFxsJDZg8Rk3Tmicri/PsugtdLSnLPggMHo6v2ctc+djyVus3N
+         ui0ORHPtKfuy3WL0CumRMeBMzGHFm0UT+AP+rOrkATXgVT5fIgx6GErLIT2RrsL1Ec
+         IZnzmJ8Dnh78euRrjLA7zfaPZJirZjn2+Ns06Fju3HP4p2eONLIleIC49bfNsZO5hd
+         z5fjeKu5u4euWVq8Y01KsxQPT+uo12m/zcR2VMTIGaMdkSl1elVAK6Ja0/bpG1+umE
+         1lBMBmTCxncgj2s+VWFf/59RsmLfL2r5TKijMH37jw/Ys1Zb+TJYoC5rYrhTKbwaRm
+         wVS3j8bExN97Q==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -57,9 +57,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 22/41] ARM: omap1: move plat/dma.c to mach/omap-dma.c
-Date:   Tue, 19 Apr 2022 15:37:04 +0200
-Message-Id: <20220419133723.1394715-23-arnd@kernel.org>
+Subject: [PATCH 19/41] ARM: omap: dma: make usb support optional
+Date:   Tue, 19 Apr 2022 15:37:01 +0200
+Message-Id: <20220419133723.1394715-20-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -71,48 +71,154 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-Most of the interface functions in plat/dma.c are only used from the
-USB driver, which is practically OMAP1 specific, except for compile
-testing.
-
-The omap_get_plat_info(), omap_request_dma() and omap_free_dma()
-functions are never called on omap2 because of runtime checks.
+Most of the plat-omap/dma.c code is specific to the USB
+driver. Hide that code when it is not in use, to make it
+clearer which parts are actually still required.
 
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-omap1/Makefile                        | 2 +-
- arch/arm/{plat-omap/dma.c => mach-omap1/omap-dma.c} | 0
- arch/arm/plat-omap/Makefile                         | 2 +-
- 3 files changed, 2 insertions(+), 2 deletions(-)
- rename arch/arm/{plat-omap/dma.c => mach-omap1/omap-dma.c} (100%)
+ arch/arm/plat-omap/dma.c       | 45 +++++++++++++++++-----------------
+ drivers/usb/gadget/udc/Kconfig |  2 +-
+ include/linux/omap-dma.h       |  5 +++-
+ 3 files changed, 27 insertions(+), 25 deletions(-)
 
-diff --git a/arch/arm/mach-omap1/Makefile b/arch/arm/mach-omap1/Makefile
-index 450bbf552b57..0615cb0ba580 100644
---- a/arch/arm/mach-omap1/Makefile
-+++ b/arch/arm/mach-omap1/Makefile
-@@ -5,7 +5,7 @@
+diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/plat-omap/dma.c
+index 700ba9b600e7..b7757864d0aa 100644
+--- a/arch/arm/plat-omap/dma.c
++++ b/arch/arm/plat-omap/dma.c
+@@ -66,7 +66,6 @@ enum { DMA_CHAIN_STARTED, DMA_CHAIN_NOTSTARTED };
  
- # Common support
- obj-y := io.o id.o sram-init.o sram.o time.o irq.o mux.o flash.o \
--	 serial.o devices.o dma.o fb.o
-+	 serial.o devices.o dma.o omap-dma.o fb.o
- obj-y += clock.o clock_data.o opp_data.o reset.o pm_bus.o timer.o
+ static struct omap_system_dma_plat_info *p;
+ static struct omap_dma_dev_attr *d;
+-static void omap_clear_dma(int lch);
+ static int enable_1510_mode;
+ static u32 errata;
  
- ifneq ($(CONFIG_SND_SOC_OMAP_MCBSP),)
-diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/mach-omap1/omap-dma.c
-similarity index 100%
-rename from arch/arm/plat-omap/dma.c
-rename to arch/arm/mach-omap1/omap-dma.c
-diff --git a/arch/arm/plat-omap/Makefile b/arch/arm/plat-omap/Makefile
-index 68ccec9de106..5d55295a14ee 100644
---- a/arch/arm/plat-omap/Makefile
-+++ b/arch/arm/plat-omap/Makefile
-@@ -6,4 +6,4 @@
- ccflags-$(CONFIG_ARCH_MULTIPLATFORM) := -I$(srctree)/arch/arm/plat-omap/include
+@@ -90,19 +89,16 @@ static int omap_dma_reserve_channels;
+ static DEFINE_SPINLOCK(dma_chan_lock);
+ static struct omap_dma_lch *dma_chan;
  
- # Common support
--obj-y := sram.o dma.o
-+obj-y := sram.o
+-static inline void disable_lnk(int lch);
+-static void omap_disable_channel_irq(int lch);
+-static inline void omap_enable_channel_irq(int lch);
+-
+-#ifdef CONFIG_ARCH_OMAP15XX
+-/* Returns 1 if the DMA module is in OMAP1510-compatible mode, 0 otherwise */
+-static int omap_dma_in_1510_mode(void)
++static inline void omap_disable_channel_irq(int lch)
+ {
+-	return enable_1510_mode;
++	/* disable channel interrupts */
++	p->dma_write(0, CICR, lch);
++	/* Clear CSR */
++	if (dma_omap1())
++		p->dma_read(CSR, lch);
++	else
++		p->dma_write(OMAP2_DMA_CSR_CLEAR_MASK, CSR, lch);
+ }
+-#else
+-#define omap_dma_in_1510_mode()		0
+-#endif
+ 
+ #ifdef CONFIG_ARCH_OMAP1
+ static inline void set_gdma_dev(int req, int dev)
+@@ -169,6 +165,17 @@ void omap_set_dma_priority(int lch, int dst_port, int priority)
+ #endif
+ EXPORT_SYMBOL(omap_set_dma_priority);
+ 
++#if IS_ENABLED(CONFIG_USB_OMAP)
++#ifdef CONFIG_ARCH_OMAP15XX
++/* Returns 1 if the DMA module is in OMAP1510-compatible mode, 0 otherwise */
++static int omap_dma_in_1510_mode(void)
++{
++	return enable_1510_mode;
++}
++#else
++#define omap_dma_in_1510_mode()		0
++#endif
++
+ void omap_set_dma_transfer_params(int lch, int data_type, int elem_count,
+ 				  int frame_count, int sync_mode,
+ 				  int dma_trigger, int src_or_dst_synch)
+@@ -418,17 +425,6 @@ static inline void omap_enable_channel_irq(int lch)
+ 	p->dma_write(dma_chan[lch].enabled_irqs, CICR, lch);
+ }
+ 
+-static inline void omap_disable_channel_irq(int lch)
+-{
+-	/* disable channel interrupts */
+-	p->dma_write(0, CICR, lch);
+-	/* Clear CSR */
+-	if (dma_omap1())
+-		p->dma_read(CSR, lch);
+-	else
+-		p->dma_write(OMAP2_DMA_CSR_CLEAR_MASK, CSR, lch);
+-}
+-
+ void omap_disable_dma_irq(int lch, u16 bits)
+ {
+ 	dma_chan[lch].enabled_irqs &= ~bits;
+@@ -473,6 +469,7 @@ static inline void disable_lnk(int lch)
+ 	p->dma_write(l, CLNK_CTRL, lch);
+ 	dma_chan[lch].flags &= ~OMAP_DMA_ACTIVE;
+ }
++#endif
+ 
+ int omap_request_dma(int dev_id, const char *dev_name,
+ 		     void (*callback)(int lch, u16 ch_status, void *data),
+@@ -572,6 +569,7 @@ static void omap_clear_dma(int lch)
+ 	local_irq_restore(flags);
+ }
+ 
++#if IS_ENABLED(CONFIG_USB_OMAP)
+ void omap_start_dma(int lch)
+ {
+ 	u32 l;
+@@ -792,6 +790,7 @@ int omap_get_dma_active_status(int lch)
+ 	return (p->dma_read(CCR, lch) & OMAP_DMA_CCR_EN) != 0;
+ }
+ EXPORT_SYMBOL(omap_get_dma_active_status);
++#endif
+ 
+ int omap_dma_running(void)
+ {
+diff --git a/drivers/usb/gadget/udc/Kconfig b/drivers/usb/gadget/udc/Kconfig
+index cee934dce4f0..69394dc1cdfb 100644
+--- a/drivers/usb/gadget/udc/Kconfig
++++ b/drivers/usb/gadget/udc/Kconfig
+@@ -128,7 +128,7 @@ config USB_GR_UDC
+ 
+ config USB_OMAP
+ 	tristate "OMAP USB Device Controller"
+-	depends on ARCH_OMAP1 || (ARCH_OMAP && COMPILE_TEST)
++	depends on ARCH_OMAP1
+ 	depends on ISP1301_OMAP || !(MACH_OMAP_H2 || MACH_OMAP_H3)
+ 	help
+ 	   Many Texas Instruments OMAP processors have flexible full
+diff --git a/include/linux/omap-dma.h b/include/linux/omap-dma.h
+index 5e228428fda1..07fa58ae9902 100644
+--- a/include/linux/omap-dma.h
++++ b/include/linux/omap-dma.h
+@@ -299,8 +299,9 @@ extern void omap_set_dma_priority(int lch, int dst_port, int priority);
+ extern int omap_request_dma(int dev_id, const char *dev_name,
+ 			void (*callback)(int lch, u16 ch_status, void *data),
+ 			void *data, int *dma_ch);
+-extern void omap_disable_dma_irq(int ch, u16 irq_bits);
+ extern void omap_free_dma(int ch);
++#if IS_ENABLED(CONFIG_USB_OMAP)
++extern void omap_disable_dma_irq(int ch, u16 irq_bits);
+ extern void omap_start_dma(int lch);
+ extern void omap_stop_dma(int lch);
+ extern void omap_set_dma_transfer_params(int lch, int data_type,
+@@ -326,6 +327,8 @@ extern void omap_set_dma_dest_burst_mode(int lch,
+ extern dma_addr_t omap_get_dma_src_pos(int lch);
+ extern dma_addr_t omap_get_dma_dst_pos(int lch);
+ extern int omap_get_dma_active_status(int lch);
++#endif
++
+ extern int omap_dma_running(void);
+ 
+ #if IS_ENABLED(CONFIG_FB_OMAP)
 -- 
 2.29.2
 
