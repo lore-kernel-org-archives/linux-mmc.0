@@ -2,102 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 152B7C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51FDAC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:44:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352675AbiDSNp2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:45:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40422 "EHLO
+        id S1348990AbiDSNqs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:46:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41292 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352698AbiDSNpJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:45:09 -0400
-Received: from mail-qv1-f47.google.com (mail-qv1-f47.google.com [209.85.219.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B3C338BC3;
-        Tue, 19 Apr 2022 06:41:27 -0700 (PDT)
-Received: by mail-qv1-f47.google.com with SMTP id b17so13114966qvp.6;
-        Tue, 19 Apr 2022 06:41:27 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=jGm6guTALRSU5+PRnvbVJaHFz19D6EpgjjGAnT9VVE4=;
-        b=4JEdMvpbiMgx28XR8Fg5kRuOMFgA9V7b+ZKqAkqsa7OEJ6xaPAfwXNr+2nfUddWQ81
-         0JX78BD+/tj7SmI3szrVygKlS4aLCEzix1GzpQpfXtcK5qJwrZfJc5VrPJKs8GK0/qM0
-         FojlNz4PM21owIFDaY7VTImXCvwTzcLvAKz9C6V2xdQ4mONsm6Qznc4kKeuaVA+yNbDl
-         K3rePScJRjo5C5a3g07g6oqgPGfkdA7x89QL2+toLxu+TI3d5sNs55366iYQ8HJFYsIG
-         +2dMXVoR6nP67uUK35gKLw01j4PVEVNfkRcLoNMTkpYZ5vDyU4zBBdzxaMxP6/q5I274
-         MuNQ==
-X-Gm-Message-State: AOAM531Om/8lcbjdS1arIqFg0EyMZC5IOr7EUjoxdgCe2z7fUi1LPXp1
-        h4fKJeuUudwRxMh7WmtQaGMK7e96Ih/7SA==
-X-Google-Smtp-Source: ABdhPJyJ1A6FiVgoio+yHvhRxV4zyEMQE1hZTjjz04uYHzDT/C4103SoGyxgz50tdbvVg2oLGHnFjw==
-X-Received: by 2002:a0c:e8ca:0:b0:446:e7a:61af with SMTP id m10-20020a0ce8ca000000b004460e7a61afmr11308174qvo.37.1650375686852;
-        Tue, 19 Apr 2022 06:41:26 -0700 (PDT)
-Received: from mail-yb1-f181.google.com (mail-yb1-f181.google.com. [209.85.219.181])
-        by smtp.gmail.com with ESMTPSA id s4-20020ae9de04000000b0069c3a577b0asm24755qkf.51.2022.04.19.06.41.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 19 Apr 2022 06:41:26 -0700 (PDT)
-Received: by mail-yb1-f181.google.com with SMTP id s33so3657508ybi.12;
-        Tue, 19 Apr 2022 06:41:26 -0700 (PDT)
-X-Received: by 2002:a05:6902:724:b0:644:c37b:4e21 with SMTP id
- l4-20020a056902072400b00644c37b4e21mr14534539ybt.6.1650375686021; Tue, 19 Apr
- 2022 06:41:26 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220419132716.1392407-1-arnd@kernel.org>
-In-Reply-To: <20220419132716.1392407-1-arnd@kernel.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 19 Apr 2022 15:41:14 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdUW+jPUJzdJ-xWQYxDy4SMJ1PDFbFDsBk9Km-+EObgsvA@mail.gmail.com>
-Message-ID: <CAMuHMdUW+jPUJzdJ-xWQYxDy4SMJ1PDFbFDsBk9Km-+EObgsvA@mail.gmail.com>
-Subject: Re: [PATCH] [v2] m68k: coldfire: drop ISA_DMA_API support
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Greg Ungerer <gerg@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>,
+        with ESMTP id S243252AbiDSNpW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:45:22 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4E1938DA8;
+        Tue, 19 Apr 2022 06:41:34 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 57A0AB81987;
+        Tue, 19 Apr 2022 13:41:33 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7BB39C385A8;
+        Tue, 19 Apr 2022 13:41:24 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1650375692;
+        bh=tnWw7oBH8X/XBSc06dB4T/Xrxth9FWCIgmXAbL0gUiI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=l353b3xn7RP12XuOF9Cs9zO9tge/orX72WpKCH58E7muL7FyXckbWebpZVTgREpYO
+         94nj83AEJ8G4ma3/hGOjwiDA7u44mm32sOWTOmedTY1j9E754Khi/eBhNw7sZcR/fP
+         sEELa4g6tqqCHlME51Brhwnr6YLWLyI8Af7wRGM8o8xD8amnnB09engI4zVkiclXXu
+         mCNS0Sb+wp3+DZySStUMonTFolm2Ob9v/CLQNN4JWPX7Aweoh7N2XbyQM1ddcyBgBz
+         1g2qalhGNLlbW40TdlyWoLmDXnGz4w+LLuOQpSk9G4QwyJjZxE6HKbSgWD1lwNbvb3
+         UwCXSJ2vUo86g==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
+        jmkrzyszt@gmail.com
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Paul Walmsley <paul@pwsan.com>,
+        Kevin Hilman <khilman@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>,
-        Finn Thain <fthain@linux-m68k.org>,
-        linux-m68k <linux-m68k@lists.linux-m68k.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Mark Brown <broonie@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Lee Jones <lee.jones@linaro.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: [PATCH 31/41] ARM: OMAP1: clock: Fix early UART rate issues
+Date:   Tue, 19 Apr 2022 15:37:13 +0200
+Message-Id: <20220419133723.1394715-32-arnd@kernel.org>
+X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
+References: <20220419133723.1394715-1-arnd@kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 19, 2022 at 3:27 PM Arnd Bergmann <arnd@kernel.org> wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
->
-> After a build regression report, I took a look at possible users of
-> CONFIG_ISA_DMA_API on m68k and found none, which Greg confirmed. The
-> CONFIG_GENERIC_ISA_DMA option in turn is only needed to implement
-> ISA_DMA_API, and is clearly not used on the platforms with ISA support.
->
-> The CONFIG_ISA support for AMIGA_PCMCIA is probably also unneeded,
-> but this is less clear. Unlike other PCMCIA implementations, this one
-> does not use the drivers/pcmcia subsystem at all and just supports
-> the "apne" network driver. When it was first added, one could use
-> ISA drivers on it as well, but this probably broke at some point.
->
-> With no reason to keep this, let's just drop the corresponding files
-> and prevent the remaining ISA drivers that use this from getting built.
->
-> The remaining definitions in asm/dma.h are used for PCI support.
->
-> Link: https://lore.kernel.org/lkml/9e5ee1c3-ca80-f343-a1f5-66f3dd1c0727@linux-m68k.org/
-> Cc: Greg Ungerer <gerg@linux-m68k.org>
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
-> v2: drop GENERIC_ISA_DMA as well, add some background on CONFIG_ISA.
+From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
 
-Acked-by: Geert Uytterhoeven <geert@linux-m68k.org>
+Commit ef772f2ee31e ("ARM: OMAP: Fix CONFIG_DEBUG_LL") was supposed to fix
+low level debugging, most possibly by early enabling UART clocks.  The fix
+actually introduced early reset of most bits of MOD_CONF_CTRL_0 register,
+with the exception of UART1 and UART2 clock related bits which were set
+high.  However, UART1 clock bit can play different roles on different
+OMAP1 variants.  On OMAP1610 it enables the clock as intended, but on
+OMAP1510 it switches the clock rate from 12 to 48 MHz.  Even worth, for
+UART2 the bit changes its clock rate also on OMAP1610.  As a result, UART
+rates set by a bootloader can be unintentionally changed early on kernel
+boot and low level debugging broken, not fixed.  Besides, reset of all
+other bits was not justified.
 
-Gr{oetje,eeting}s,
+Don't touch register bits not related to UART clocks.  Also, don't touch
+the bit of UART2 clock.  Make sure UART1 and UART3 are enabled early on
+relevant OMAP1610 machine types while preserving bootloader UART clock
+rates on others.
 
-                        Geert
+Signed-off-by: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ arch/arm/mach-omap1/clock_data.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+diff --git a/arch/arm/mach-omap1/clock_data.c b/arch/arm/mach-omap1/clock_data.c
+index 36f04da4b939..57d3752babf8 100644
+--- a/arch/arm/mach-omap1/clock_data.c
++++ b/arch/arm/mach-omap1/clock_data.c
+@@ -766,11 +766,11 @@ int __init omap1_clk_init(void)
+ 	u32 reg;
+ 
+ #ifdef CONFIG_DEBUG_LL
+-	/*
+-	 * Resets some clocks that may be left on from bootloader,
+-	 * but leaves serial clocks on.
+-	 */
+-	omap_writel(0x3 << 29, MOD_CONF_CTRL_0);
++	/* Make sure UART clocks are enabled early */
++	if (cpu_is_omap16xx())
++		omap_writel(omap_readl(MOD_CONF_CTRL_0) |
++			    CONF_MOD_UART1_CLK_MODE_R |
++			    CONF_MOD_UART3_CLK_MODE_R, MOD_CONF_CTRL_0);
+ #endif
+ 
+ 	/* USB_REQ_EN will be disabled later if necessary (usb_dc_ck) */
+-- 
+2.29.2
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
