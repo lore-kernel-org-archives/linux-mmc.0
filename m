@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D74F4C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 137E4C352A7
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:41:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352735AbiDSNnq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S244640AbiDSNnq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 19 Apr 2022 09:43:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36912 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352696AbiDSNmi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:38 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D53038DA8;
-        Tue, 19 Apr 2022 06:39:40 -0700 (PDT)
+        with ESMTP id S234762AbiDSNnI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:43:08 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C35AE182;
+        Tue, 19 Apr 2022 06:40:25 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id CDCF6B8197F;
-        Tue, 19 Apr 2022 13:39:38 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E95D2C385B7;
-        Tue, 19 Apr 2022 13:39:30 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 7A754B81983;
+        Tue, 19 Apr 2022 13:40:24 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B32FFC385A5;
+        Tue, 19 Apr 2022 13:40:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375577;
-        bh=/1rRcvDuoUNuJnmYPxOkUtRPrNjTWfgWCQQLuGK0bF0=;
+        s=k20201202; t=1650375623;
+        bh=R5zRvKa0SoyT3N6cs+9ATf3vspiQLolbMLlEiLA/7fA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=HzTn7rZS28K28plwPgCJQ1ghRASliQgI+2FNpVIvzNFzUi1UMK5PsDjZfQF3E1zqt
-         mnS9gOUBto2VoRVRCx4Yuj8lbyW2OmCu+xl6Yg/lQSI7z3yCggGhd8SZLzhUTKkV0G
-         4ogMF4OyTC9vLOk3qkrtZxw01Hx1kngOU7CkWOkrZ7irrMS32QrmiusUzBa73hEit/
-         zPGdRbq5Q5uW64+CqYtjA3PCCVDipYSV0x3AONDo7ffgU5sraeCgGnABr+zWsns3bI
-         fd00kWQV003loXXb9YePqTFuhXdVkfreFhqu2YPTGCtBIjFiNHdyrGAFpEfaT8V4vz
-         PhMvBlCy/tvnA==
+        b=h4qvsRlCqc1+D/Un3T++kg9XOlylFj9tu57mNt8nm00hUNQ6OKBJwfaNIy8CUc5b/
+         qlJ5Qll9E9CFFYZxtIhDJzmK+qDlqq4+ArAd2BBXudLqHYrCpKgbUoCnwsfLaR2pgk
+         Q7EkW4bPFi3bk0l1eRnod+7F8TcxdVYbp1x3X1kd6GHmuGnsuLz3ITS24UVsnNzXdg
+         x/K6BdB+SIi+C9NttQpeR53oMsrljIEQWrLP8CdiwfvAVwJt/CIv2ZT1IB0hwp9ZMU
+         YhjJTR86Ah4hamcr5wDfPSVrUyclrlzsHDyDQ4lgL5SrWli+rzKao8UrzltowcxyNH
+         vWiGzLOvfg/Eg==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -56,11 +56,10 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        Felipe Balbi <felipe.balbi@linux.intel.com>
-Subject: [PATCH 16/41] ARM: omap1: innovator: move ohci phy power handling to board file
-Date:   Tue, 19 Apr 2022 15:36:58 +0200
-Message-Id: <20220419133723.1394715-17-arnd@kernel.org>
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: [PATCH 22/41] ARM: omap1: move plat/dma.c to mach/omap-dma.c
+Date:   Tue, 19 Apr 2022 15:37:04 +0200
+Message-Id: <20220419133723.1394715-23-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -72,118 +71,48 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The innovator board needs a special case for its phy control.
+Most of the interface functions in plat/dma.c are only used from the
+USB driver, which is practically OMAP1 specific, except for compile
+testing.
 
-Move the corresponding code into the board file and out of the
-common code by adding another callback.
+The omap_get_plat_info(), omap_request_dma() and omap_free_dma()
+functions are never called on omap2 because of runtime checks.
 
-Acked-by: Felipe Balbi <felipe.balbi@linux.intel.com>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-omap1/board-innovator.c   | 19 +++++++++++++++
- drivers/usb/host/ohci-omap.c            | 31 ++++---------------------
- include/linux/platform_data/usb-omap1.h |  2 ++
- 3 files changed, 26 insertions(+), 26 deletions(-)
+ arch/arm/mach-omap1/Makefile                        | 2 +-
+ arch/arm/{plat-omap/dma.c => mach-omap1/omap-dma.c} | 0
+ arch/arm/plat-omap/Makefile                         | 2 +-
+ 3 files changed, 2 insertions(+), 2 deletions(-)
+ rename arch/arm/{plat-omap/dma.c => mach-omap1/omap-dma.c} (100%)
 
-diff --git a/arch/arm/mach-omap1/board-innovator.c b/arch/arm/mach-omap1/board-innovator.c
-index e7d6735d4701..f169e172421d 100644
---- a/arch/arm/mach-omap1/board-innovator.c
-+++ b/arch/arm/mach-omap1/board-innovator.c
-@@ -290,6 +290,23 @@ static void __init innovator_init_smc91x(void)
- }
+diff --git a/arch/arm/mach-omap1/Makefile b/arch/arm/mach-omap1/Makefile
+index 450bbf552b57..0615cb0ba580 100644
+--- a/arch/arm/mach-omap1/Makefile
++++ b/arch/arm/mach-omap1/Makefile
+@@ -5,7 +5,7 @@
  
- #ifdef CONFIG_ARCH_OMAP15XX
-+/*
-+ * Board specific gang-switched transceiver power on/off.
-+ */
-+static int innovator_omap_ohci_transceiver_power(int on)
-+{
-+	if (on)
-+		__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
-+				| ((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
-+			       INNOVATOR_FPGA_CAM_USB_CONTROL);
-+	else
-+		__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
-+				& ~((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
-+			       INNOVATOR_FPGA_CAM_USB_CONTROL);
-+
-+	return 0;
-+}
-+
- static struct omap_usb_config innovator1510_usb_config __initdata = {
- 	/* for bundled non-standard host and peripheral cables */
- 	.hmc_mode	= 4,
-@@ -300,6 +317,8 @@ static struct omap_usb_config innovator1510_usb_config __initdata = {
+ # Common support
+ obj-y := io.o id.o sram-init.o sram.o time.o irq.o mux.o flash.o \
+-	 serial.o devices.o dma.o fb.o
++	 serial.o devices.o dma.o omap-dma.o fb.o
+ obj-y += clock.o clock_data.o opp_data.o reset.o pm_bus.o timer.o
  
- 	.register_dev	= 1,
- 	.pins[0]	= 2,
-+
-+	.transceiver_power = innovator_omap_ohci_transceiver_power,
- };
+ ifneq ($(CONFIG_SND_SOC_OMAP_MCBSP),)
+diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/mach-omap1/omap-dma.c
+similarity index 100%
+rename from arch/arm/plat-omap/dma.c
+rename to arch/arm/mach-omap1/omap-dma.c
+diff --git a/arch/arm/plat-omap/Makefile b/arch/arm/plat-omap/Makefile
+index 68ccec9de106..5d55295a14ee 100644
+--- a/arch/arm/plat-omap/Makefile
++++ b/arch/arm/plat-omap/Makefile
+@@ -6,4 +6,4 @@
+ ccflags-$(CONFIG_ARCH_MULTIPLATFORM) := -I$(srctree)/arch/arm/plat-omap/include
  
- static const struct omap_lcd_config innovator1510_lcd_config __initconst = {
-diff --git a/drivers/usb/host/ohci-omap.c b/drivers/usb/host/ohci-omap.c
-index 750a90c41a0a..069791d25abb 100644
---- a/drivers/usb/host/ohci-omap.c
-+++ b/drivers/usb/host/ohci-omap.c
-@@ -67,31 +67,6 @@ static void omap_ohci_clock_power(struct ohci_omap_priv *priv, int on)
- 	}
- }
- 
--/*
-- * Board specific gang-switched transceiver power on/off.
-- * NOTE:  OSK supplies power from DC, not battery.
-- */
--static int omap_ohci_transceiver_power(struct ohci_omap_priv *priv, int on)
--{
--	if (on) {
--		if (machine_is_omap_innovator() && cpu_is_omap1510())
--			__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
--				| ((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
--			       INNOVATOR_FPGA_CAM_USB_CONTROL);
--		else if (priv->power)
--			gpiod_set_value_cansleep(priv->power, 0);
--	} else {
--		if (machine_is_omap_innovator() && cpu_is_omap1510())
--			__raw_writeb(__raw_readb(INNOVATOR_FPGA_CAM_USB_CONTROL)
--				& ~((1 << 5/*usb1*/) | (1 << 3/*usb2*/)),
--			       INNOVATOR_FPGA_CAM_USB_CONTROL);
--		else if (priv->power)
--			gpiod_set_value_cansleep(priv->power, 1);
--	}
--
--	return 0;
--}
--
- #ifdef	CONFIG_USB_OTG
- 
- static void start_hnp(struct ohci_hcd *ohci)
-@@ -202,7 +177,11 @@ static int ohci_omap_reset(struct usb_hcd *hcd)
- 	}
- 
- 	/* FIXME hub_wq hub requests should manage power switching */
--	omap_ohci_transceiver_power(priv, 1);
-+	if (config->transceiver_power)
-+		return config->transceiver_power(1);
-+
-+	if (priv->power)
-+		gpiod_set_value_cansleep(priv->power, 0);
- 
- 	/* board init will have already handled HMC and mux setup.
- 	 * any external transceiver should already be initialized
-diff --git a/include/linux/platform_data/usb-omap1.h b/include/linux/platform_data/usb-omap1.h
-index 878e572a78bf..e7b8dc92a269 100644
---- a/include/linux/platform_data/usb-omap1.h
-+++ b/include/linux/platform_data/usb-omap1.h
-@@ -50,6 +50,8 @@ struct omap_usb_config {
- 	int (*ocpi_enable)(void);
- 
- 	void (*lb_reset)(void);
-+
-+	int (*transceiver_power)(int on);
- };
- 
- #endif /* __LINUX_USB_OMAP1_H */
+ # Common support
+-obj-y := sram.o dma.o
++obj-y := sram.o
 -- 
 2.29.2
 
