@@ -2,109 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C02BC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 14:15:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04DAEC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 15:00:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347992AbiDSOSb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 10:18:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34242 "EHLO
+        id S237037AbiDSPCv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 11:02:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54692 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347930AbiDSOSW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 10:18:22 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 604906141
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2022 07:15:38 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id bq30so29663320lfb.3
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2022 07:15:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=qxyAAJCwk86YjxNZvzK22H+Q1D0EYzqfXkSlEcQ3oGI=;
-        b=U8TznkIEfkbn6wBOe66bedzDevL3UCKOj2LIyC+yTGFJGe6H3CAWKuIFxq5wvflo2M
-         YPqSiNhdSo2UNK5R9O5lCdht+dpY1uQXmpjL/Z2JFciY07hF8cmoQIVlKVZcMQkrMdzh
-         xQm2rYQ0y3EHpvQGdBCAJQhmqrJzsgMGbbKb5iv69GK1zwsTBUeeLrPf+fWbm8h+OHA8
-         vn0GNOWufxa2UwVQxTLp7VsjdfB/OMoUd3kiZk3aI2ynnkLj6hV4IE9GaixWqYMB2hOy
-         2zvKaEDzVunsnL9lz2/5ZLP2otiiwePv+BwjP1+txAY9RzGc80diIVCJYeA3N5BV6gHd
-         SN9g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qxyAAJCwk86YjxNZvzK22H+Q1D0EYzqfXkSlEcQ3oGI=;
-        b=zPugBalneOzrB0nzpL4HgDA9rACYkkoiGR13XWWhz2D5f2eMmxWFRB1aVFTptHICOB
-         VO76T28CBTnWgYNLRZILbEcKTG/DpcnwSiE2geiDv9J0GVpa2t02rPo5zAr5ABUP4uHl
-         002CYRECcP4SGuVePTMqtR1NDku8WOl8xqzD0tORUBvB33BpKhpEbgOGGQ5HjLNtqoCn
-         UyyLsvJXDAM9gulavpU3UVs6Gs81TDz3KVaX31uiFJB2k8+CKpwTCfj6kQy6/P6AWpX1
-         fmCm6IN2MY/bfqMkCT2KoX6Khf/R+QfCSt2qJ5GI7mlpWAlRjxmb/EiLOHX3U5f+QyRR
-         FxnQ==
-X-Gm-Message-State: AOAM5336WGiJY6AbHfTeLDTcF9Z+xEwbnj9YRFxXhk3WQLHHkdU1NjDP
-        2Fp7bBwdgRMaSRunN1jj/yW64VsrfKkvZCgl403Flg==
-X-Google-Smtp-Source: ABdhPJxIT9MKS48QeVlFyb2PryH3hNOoBA+EcM/qYaYW4YqWA7WkuSzrRWCJdkdrX1W/EdQ0V2GdotZdJALOaahglbM=
-X-Received: by 2002:a05:6512:2627:b0:44a:f55c:ded9 with SMTP id
- bt39-20020a056512262700b0044af55cded9mr11491748lfb.373.1650377736569; Tue, 19
- Apr 2022 07:15:36 -0700 (PDT)
+        with ESMTP id S1353571AbiDSPCo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 11:02:44 -0400
+Received: from out28-49.mail.aliyun.com (out28-49.mail.aliyun.com [115.124.28.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 591F9193E0;
+        Tue, 19 Apr 2022 08:00:00 -0700 (PDT)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.0822624|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.0337172-0.000537099-0.965746;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047199;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=19;RT=19;SR=0;TI=SMTPD_---.NTqoddF_1650380382;
+Received: from 192.168.10.102(mailfrom:michael@allwinnertech.com fp:SMTPD_---.NTqoddF_1650380382)
+          by smtp.aliyun-inc.com(11.95.168.178);
+          Tue, 19 Apr 2022 22:59:55 +0800
+Message-ID: <5cfbdc20-fafa-18b5-71ef-0ce8b91566a7@allwinnertech.com>
+Date:   Tue, 19 Apr 2022 22:59:48 +0800
 MIME-Version: 1.0
-References: <20220419133723.1394715-1-arnd@kernel.org>
-In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Apr 2022 16:15:00 +0200
-Message-ID: <CAPDyKFpNx9xt1xwO-EKAx_qYtfcM5RUC6=Kh9NZ5o+A=H5ut6A@mail.gmail.com>
-Subject: Re: [PATCH 00/41] OMAP1 full multiplatform conversion
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
-        jmkrzyszt@gmail.com, Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Paul Walmsley <paul@pwsan.com>,
-        Kevin Hilman <khilman@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Mark Brown <broonie@kernel.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Lee Jones <lee.jones@linaro.org>,
-        Daniel Thompson <daniel.thompson@linaro.org>,
-        Jingoo Han <jingoohan1@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH v2] mmc: block: enable cache-flushing when mmc cache is on
+Content-Language: en-GB
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     axboe@kernel.dk, adrian.hunter@intel.com, avri.altman@wdc.com,
+        kch@nvidia.com, beanhuo@micron.com, swboyd@chromium.org,
+        digetx@gmail.com, bigeasy@linutronix.de, CLoehle@hyperstone.com,
+        cjb@laptop.org, arnd@arndb.de, andreiw@motorola.com,
+        tgih.jun@samsung.com, jh80.chung@samsung.com,
+        linus.walleij@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        allwinner-opensource-support@allwinnertech.com
+References: <20220331073223.106415-1-michael@allwinnertech.com>
+ <CAPDyKFq4yowT_t_y_fg9vqgyr=qVykWeOux8H6CGZDyn0M5JhQ@mail.gmail.com>
+From:   Michael Wu <michael@allwinnertech.com>
+In-Reply-To: <CAPDyKFq4yowT_t_y_fg9vqgyr=qVykWeOux8H6CGZDyn0M5JhQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 Apr 2022 at 15:37, Arnd Bergmann <arnd@kernel.org> wrote:
->
-> From: Arnd Bergmann <arnd@arndb.de>
->
-> This is the full series for converting OMAP1 to multiplatform, rebased
-> from my 2019 attempt to do the same thing. The soc tree contains simpler
-> patches to do the same for iop32x, ixp4xx, ep93xx and s3c24xx, which
-> means we are getting closer to completing this for all ARMv5 platforms
-> (I have patches for PXA, which is the last one remaining).
->
-> Janusz already tested the branch separately and did the missing work
-> for the common-clk conversion after my previous approach was broken.
->
-> The fbdev, mmc and ASoC portion of Janusz' work already went into the
-> corresponding maintainer tree, but I include them here for reference.
-> Unless there are any objections, I would add the entire series to the
-> for-next branch of the soc tree, but only send the first 36 patches early
-> in the merge window. After everything else has made it in, I would rebase
-> the last two patches and send them separately, which may or may not make
-> it in the merge window.
+On 04/04/2022 19:52, Ulf Hansson wrote:
+> On Thu, 31 Mar 2022 at 09:32, Michael Wu <michael@allwinnertech.com> wrote:
+>>
+>> The mmc core enables cache by default. But it only enables
+>> cache-flushing when host supports cmd23 and eMMC supports
+>> reliable-write.
+>> For hosts which do not support cmd23 or eMMCs which do not support
+>> reliable-write, the cache can not be flushed by `sync` command.
+>> This may leads to cache data lost.
+>> This patch enables cache-flushing as long as cache is enabled,
+>> no matter host supports cmd23 and/or eMMC supports reliable write
+>> or not.
+>> For SD cards, backwards compatibility is guaranteed. Newer components
+>> like SD5.0 which have cache are also supported in advance, which means
+>> this patch will also be applicable if SD5.0 cache is added to the mmc
+>> core in the future.
+> 
+> SD 5.0 cache support was added in the commit 130206a615a9 below. No
+> need to resend, I will take care of updating the commit message.
+> >>
+>> Fixes: f4c5522b0a88 ("mmc: Reliable write support.")
+>> Fixes: 881d1c25f765 ("mmc: core: Add cache control for eMMC4.5 device")
+>> Fixes: 130206a615a9 ("mmc: core: Add support for cache ctrl for SD cards")
+>> Fixes: d0c97cfb81eb ("mmc: core: Use CMD23 for multiblock transfers when we can.")
+>> Fixes: e9d5c746246c ("mmc/block: switch to using blk_queue_write_cache()")
+> 
+> I will have a look at the above to see what makes sense to add - and
+> then I will add a stable tag too.
+> 
+Dear Ulf,
+Thank you for your effort. I saw this patch which was taken care by you 
+on the mainline [commit 08ebf903af57], and also the commits in 
+stable-queque by Greg-KH. I guess this means this patch is accepted/closed.
+I'm so happy and want to say thank you for all the help. Next time I'm 
+sure I'll do it better :)
 
-Sounds like a good plan to me. I usually send the MMC pull-request on
-Mondays, the first day of the merge window.
+-- 
+Best Regards,
+Michael Wu
 
-[...]
-
-Kind regards
-Uffe
+>>
+>> Reviewed-by: Avri Altman <Avri.Altman@wdc.com>
+>> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> Signed-off-by: Michael Wu <michael@allwinnertech.com>
+> 
+> Thanks, applied for fixes!
+> 
+> Kind regards
+> Uffe
+> 
+> 
+>> ---
+>>   drivers/mmc/core/block.c | 12 +++++++++---
+>>   1 file changed, 9 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>> index 4e67c1403cc9..ec76ed82abb9 100644
+>> --- a/drivers/mmc/core/block.c
+>> +++ b/drivers/mmc/core/block.c
+>> @@ -2350,6 +2350,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>>          struct mmc_blk_data *md;
+>>          int devidx, ret;
+>>          char cap_str[10];
+>> +       bool cache_enabled = false;
+>> +       bool fua_enabled = false;
+>>
+>>          devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+>>          if (devidx < 0) {
+>> @@ -2429,13 +2431,17 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>>                          md->flags |= MMC_BLK_CMD23;
+>>          }
+>>
+>> -       if (mmc_card_mmc(card) &&
+>> -           md->flags & MMC_BLK_CMD23 &&
+>> +       if (md->flags & MMC_BLK_CMD23 &&
+>>              ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+>>               card->ext_csd.rel_sectors)) {
+>>                  md->flags |= MMC_BLK_REL_WR;
+>> -               blk_queue_write_cache(md->queue.queue, true, true);
+>> +               fua_enabled = true;
+>> +               cache_enabled = true;
+>>          }
+>> +       if (mmc_cache_enabled(card->host))
+>> +               cache_enabled  = true;
+>> +
+>> +       blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
+>>
+>>          string_get_size((u64)size, 512, STRING_UNITS_2,
+>>                          cap_str, sizeof(cap_str));
+>> --
+>> 2.29.0
+>>
