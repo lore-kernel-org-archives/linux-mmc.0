@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7A7CC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95888C35280
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344084AbiDSNor (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:44:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36906 "EHLO
+        id S1344260AbiDSNou (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:44:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352613AbiDSNl4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:41:56 -0400
+        with ESMTP id S244866AbiDSNnp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:43:45 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C45BD37BF3;
-        Tue, 19 Apr 2022 06:39:11 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F8E8182;
+        Tue, 19 Apr 2022 06:41:02 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 8176FB81982;
-        Tue, 19 Apr 2022 13:39:10 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2380AC385A8;
-        Tue, 19 Apr 2022 13:39:01 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id DF144B8197F;
+        Tue, 19 Apr 2022 13:41:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1808EC385A5;
+        Tue, 19 Apr 2022 13:40:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375549;
-        bh=vO/bPd1PQ9hX0L2CV68DjG3d21RjoFDCbeNW9JFFn4s=;
+        s=k20201202; t=1650375659;
+        bh=0G3cWV48CpbBHTE2pnfpd8IteUQx33zVzk5I5jOHq28=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=i/7k/0F4r+E1Ur3z329l1Cj5g6ftB8oHQwHSKR1c5qv5Sg7DTH6Yfai9kN/3xqIG2
-         6IN+CC95Vy2J9Ecwiqu9jWLiRWHVIRsEYbraSEFksjcs4ejGoj4CLQt1bPvfSrevg1
-         Yq0O4PA1y1h2ip/jGL8GEaPuT5rLYGT2eKrRRFBMDLn3T+XmQZzgJHZaYZjmp5Ifqh
-         zPEF1FobgULdceNOjlrrAVUkcHB8AklSGR/iVkkqLtnOeADz098ACszzEAEOTLv0jD
-         wNQhDFHsfHDookQXljdeMUAjhviMzHxOZBk30q/fEeERal0vp7CC5caie0j1VqHLTj
-         MLWQvzBYRx05A==
+        b=tcaHuW+qziDrvzUpHuEMFKwFU24gmYLLaVW/lH4YSmvt7xGUnfF0sNVHp802pMZbG
+         K6J/uNMNn5vL9mXzi8X3zRI/z8lzVEB3EuRwjjxKiFdSM+arUaoowF1MoiFyyH8XVV
+         /v4R5gyMXGZMU1ta0p9hOmph2xXY8RLU5gpqA4zETCrSrM5Xh09D1z+ACK4EbozYv5
+         9Sive/zvlpYwCeQ4lV4Bn/MYQu9361EX6fnn4oEfAgmr8UYhW5oVkAM1jX9gnVVYhJ
+         ZhuIwaJaHXeGR4SyNhWN+K44rhkpWMXYC38ShwJwl87he4xwz0XOvHfjHqz/624Ycs
+         325kt1woDgtcA==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -56,12 +56,10 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Felipe Balbi <felipe.balbi@linux.intel.com>
-Subject: [PATCH 12/41] usb: omap: avoid mach/*.h headers
-Date:   Tue, 19 Apr 2022 15:36:54 +0200
-Message-Id: <20220419133723.1394715-13-arnd@kernel.org>
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: [PATCH 27/41] ARM: omap1: use pci_remap_iospace() for omap_cf
+Date:   Tue, 19 Apr 2022 15:37:09 +0200
+Message-Id: <20220419133723.1394715-28-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -73,117 +71,134 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The omap usb drivers still rely on mach/*.h headers that
-are explicitly or implicitly included, but all the required
-definitions are now in include/linux/soc/ti/, so use those
-instead and allow compile-testing on other architectures.
+The ISA I/O space handling in omap_cf is incompatible with
+PCI drivers in a multiplatform kernel, and requires a custom
+mach/io.h.
 
-Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Acked-by: Felipe Balbi <felipe.balbi@linux.intel.com>
+Change the driver to use pci_remap_iospace() like PCI drivers do,
+so the generic ioport access can work across platforms.
+
+To actually use that code, we have to select CONFIG_PCI
+here.
+
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/usb/gadget/udc/Kconfig     | 2 +-
- drivers/usb/gadget/udc/omap_udc.c  | 2 ++
- drivers/usb/host/Kconfig           | 2 +-
- drivers/usb/host/ohci-omap.c       | 7 +++----
- drivers/usb/phy/Kconfig            | 3 ++-
- drivers/usb/phy/phy-isp1301-omap.c | 4 ++--
- 6 files changed, 11 insertions(+), 9 deletions(-)
+ arch/arm/Kconfig                      |  2 +-
+ arch/arm/mach-omap1/include/mach/io.h | 45 ---------------------------
+ drivers/pcmcia/omap_cf.c              | 10 +++---
+ 3 files changed, 5 insertions(+), 52 deletions(-)
+ delete mode 100644 arch/arm/mach-omap1/include/mach/io.h
 
-diff --git a/drivers/usb/gadget/udc/Kconfig b/drivers/usb/gadget/udc/Kconfig
-index 69394dc1cdfb..cee934dce4f0 100644
---- a/drivers/usb/gadget/udc/Kconfig
-+++ b/drivers/usb/gadget/udc/Kconfig
-@@ -128,7 +128,7 @@ config USB_GR_UDC
- 
- config USB_OMAP
- 	tristate "OMAP USB Device Controller"
--	depends on ARCH_OMAP1
-+	depends on ARCH_OMAP1 || (ARCH_OMAP && COMPILE_TEST)
- 	depends on ISP1301_OMAP || !(MACH_OMAP_H2 || MACH_OMAP_H3)
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 700655e31b04..a57ad0928edc 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -487,11 +487,11 @@ config ARCH_OMAP1
+ 	bool "TI OMAP1"
+ 	select ARCH_OMAP
+ 	select CLKSRC_MMIO
++	select FORCE_PCI if PCCARD
+ 	select GENERIC_IRQ_CHIP
+ 	select GPIOLIB
+ 	select HAVE_LEGACY_CLK
+ 	select IRQ_DOMAIN
+-	select NEED_MACH_IO_H if PCCARD
+ 	select NEED_MACH_MEMORY_H
+ 	select SPARSE_IRQ
  	help
- 	   Many Texas Instruments OMAP processors have flexible full
-diff --git a/drivers/usb/gadget/udc/omap_udc.c b/drivers/usb/gadget/udc/omap_udc.c
-index b1da584585cf..5096d24915ce 100644
---- a/drivers/usb/gadget/udc/omap_udc.c
-+++ b/drivers/usb/gadget/udc/omap_udc.c
-@@ -43,6 +43,8 @@
- #include <linux/platform_data/usb-omap1.h>
- 
- #include <linux/soc/ti/omap1-usb.h>
-+#include <linux/soc/ti/omap1-soc.h>
-+#include <linux/soc/ti/omap1-io.h>
- 
- #include "omap_udc.h"
- 
-diff --git a/drivers/usb/host/Kconfig b/drivers/usb/host/Kconfig
-index 57ca5f97a3dc..682b3d2da623 100644
---- a/drivers/usb/host/Kconfig
-+++ b/drivers/usb/host/Kconfig
-@@ -214,7 +214,7 @@ config USB_EHCI_HCD_NPCM7XX
- 
- config USB_EHCI_HCD_OMAP
- 	tristate "EHCI support for OMAP3 and later chips"
--	depends on ARCH_OMAP
-+	depends on ARCH_OMAP || COMPILE_TEST
- 	depends on NOP_USB_XCEIV
- 	default y
- 	help
-diff --git a/drivers/usb/host/ohci-omap.c b/drivers/usb/host/ohci-omap.c
-index 7be1ffefc40e..750a90c41a0a 100644
---- a/drivers/usb/host/ohci-omap.c
-+++ b/drivers/usb/host/ohci-omap.c
-@@ -27,6 +27,9 @@
- #include <linux/platform_device.h>
- #include <linux/platform_data/usb-omap1.h>
- #include <linux/soc/ti/omap1-usb.h>
-+#include <linux/soc/ti/omap1-mux.h>
-+#include <linux/soc/ti/omap1-soc.h>
-+#include <linux/soc/ti/omap1-io.h>
- #include <linux/signal.h>
- #include <linux/usb.h>
- #include <linux/usb/hcd.h>
-@@ -36,10 +39,6 @@
- #include <asm/io.h>
- #include <asm/mach-types.h>
- 
--#include <mach/mux.h>
+diff --git a/arch/arm/mach-omap1/include/mach/io.h b/arch/arm/mach-omap1/include/mach/io.h
+deleted file mode 100644
+index ce4f8005b26f..000000000000
+--- a/arch/arm/mach-omap1/include/mach/io.h
++++ /dev/null
+@@ -1,45 +0,0 @@
+-/*
+- * arch/arm/mach-omap1/include/mach/io.h
+- *
+- * IO definitions for TI OMAP processors and boards
+- *
+- * Copied from arch/arm/mach-sa1100/include/mach/io.h
+- * Copyright (C) 1997-1999 Russell King
+- *
+- * This program is free software; you can redistribute it and/or modify it
+- * under the terms of the GNU General Public License as published by the
+- * Free Software Foundation; either version 2 of the License, or (at your
+- * option) any later version.
+- *
+- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
+- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+- * NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+- *
+- * You should have received a copy of the GNU General Public License along
+- * with this program; if not, write to the Free Software Foundation, Inc.,
+- * 675 Mass Ave, Cambridge, MA 02139, USA.
+- *
+- * Modifications:
+- *  06-12-1997	RMK	Created.
+- *  07-04-1999	RMK	Major cleanup
+- */
 -
--#include <mach/hardware.h>
+-#ifndef __ASM_ARM_ARCH_IO_H
+-#define __ASM_ARM_ARCH_IO_H
 -
- #define DRIVER_DESC "OHCI OMAP driver"
- 
- struct ohci_omap_priv {
-diff --git a/drivers/usb/phy/Kconfig b/drivers/usb/phy/Kconfig
-index 52eebcb88c1f..2acbe41fbf7e 100644
---- a/drivers/usb/phy/Kconfig
-+++ b/drivers/usb/phy/Kconfig
-@@ -30,7 +30,8 @@ config FSL_USB2_OTG
- 
- config ISP1301_OMAP
- 	tristate "Philips ISP1301 with OMAP OTG"
--	depends on I2C && ARCH_OMAP_OTG
-+	depends on I2C
-+	depends on ARCH_OMAP_OTG || (ARM && COMPILE_TEST)
- 	depends on USB
- 	depends on USB_GADGET || !USB_GADGET # if USB_GADGET=m, this can't be 'y'
- 	select USB_PHY
-diff --git a/drivers/usb/phy/phy-isp1301-omap.c b/drivers/usb/phy/phy-isp1301-omap.c
-index 88aade82b82b..f8bd93fe69cd 100644
---- a/drivers/usb/phy/phy-isp1301-omap.c
-+++ b/drivers/usb/phy/phy-isp1301-omap.c
-@@ -23,9 +23,9 @@
- #include <asm/irq.h>
- #include <asm/mach-types.h>
- 
--#include <mach/mux.h>
+-#define IO_SPACE_LIMIT 0xffffffff
 -
-+#include <linux/soc/ti/omap1-mux.h>
- #include <linux/soc/ti/omap1-usb.h>
-+#include <linux/soc/ti/omap1-io.h>
+-/*
+- * We don't actually have real ISA nor PCI buses, but there is so many
+- * drivers out there that might just work if we fake them...
+- */
+-#define __io(a)		__typesafe_io(a)
+-
+-#endif
+diff --git a/drivers/pcmcia/omap_cf.c b/drivers/pcmcia/omap_cf.c
+index 093022ce7d91..1972a8f6fa8e 100644
+--- a/drivers/pcmcia/omap_cf.c
++++ b/drivers/pcmcia/omap_cf.c
+@@ -205,6 +205,7 @@ static int __init omap_cf_probe(struct platform_device *pdev)
+ 	int			irq;
+ 	int			status;
+ 	struct resource		*res;
++	struct resource		iospace = DEFINE_RES_IO(SZ_64, SZ_4K);
  
- #undef VERBOSE
+ 	seg = (int) pdev->dev.platform_data;
+ 	if (seg == 0 || seg > 3)
+@@ -235,9 +236,9 @@ static int __init omap_cf_probe(struct platform_device *pdev)
+ 	cf->phys_cf = res->start;
  
+ 	/* pcmcia layer only remaps "real" memory */
+-	cf->socket.io_offset = (unsigned long)
+-			ioremap(cf->phys_cf + SZ_4K, SZ_2K);
+-	if (!cf->socket.io_offset) {
++	cf->socket.io_offset = iospace.start;
++	status = pci_remap_iospace(&iospace, cf->phys_cf + SZ_4K);
++	if (status) {
+ 		status = -ENOMEM;
+ 		goto fail1;
+ 	}
+@@ -285,8 +286,6 @@ static int __init omap_cf_probe(struct platform_device *pdev)
+ fail2:
+ 	release_mem_region(cf->phys_cf, SZ_8K);
+ fail1:
+-	if (cf->socket.io_offset)
+-		iounmap((void __iomem *) cf->socket.io_offset);
+ 	free_irq(irq, cf);
+ fail0:
+ 	kfree(cf);
+@@ -300,7 +299,6 @@ static int __exit omap_cf_remove(struct platform_device *pdev)
+ 	cf->active = 0;
+ 	pcmcia_unregister_socket(&cf->socket);
+ 	del_timer_sync(&cf->timer);
+-	iounmap((void __iomem *) cf->socket.io_offset);
+ 	release_mem_region(cf->phys_cf, SZ_8K);
+ 	free_irq(cf->irq, cf);
+ 	kfree(cf);
 -- 
 2.29.2
 
