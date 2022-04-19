@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B21A2C4167D
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:46:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E29A4C352A8
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:47:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355148AbiDSQqs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:46:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55402 "EHLO
+        id S1345683AbiDSQtz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:49:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354977AbiDSQqR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:46:17 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9682039692;
-        Tue, 19 Apr 2022 09:43:34 -0700 (PDT)
+        with ESMTP id S1355163AbiDSQqw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:46:52 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2A0E39692;
+        Tue, 19 Apr 2022 09:44:07 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 277516145C;
-        Tue, 19 Apr 2022 16:43:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C435C385A5;
-        Tue, 19 Apr 2022 16:43:26 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 483B2B81BF9;
+        Tue, 19 Apr 2022 16:44:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73DF2C385AB;
+        Tue, 19 Apr 2022 16:43:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386613;
-        bh=1CznP/IcfkJndLnXKlEqV7YtwAE/0IZ23NVP7Os5Lbk=;
+        s=k20201202; t=1650386644;
+        bh=dqIJ/cXf0VPjwidEepmxEeZMiI7iN357W1VgCgckmDE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=gkyeNvpegI/KQIRWnjwkEYCied4Du61ntShcs66DzkQFnJHkJWp70dBzOiTP/ZG6j
-         n96w9hkpW3grm9KvPbPA2R8JMHGs0B28jY9iQ2TtUgdW5V+XoN0ZLiqkWwVdMXxfJ1
-         g4lG/kC3swRcBOnkw50SSbGy5I/KjmkMOKQ/SlEhuKtrq2jtmRtW2c5FwToKh8BGwy
-         tQTv4ia+QOAVOVszdbwIbLvRCF+TpW81A0z+kf9LYr2Zgm++jGTXkxtLEd4wDmJIYw
-         XmyDe5w2feEiHmwvkFrvwJr16KElh9yxIpw5HNExil/VCLxaA6PWzlCybRgA8G+uZe
-         V5QDp19UieVxQ==
+        b=SgAVx6hkZdaHv3CD8CN9Q7eFkd1WUAxX4YYUeFf05mJNMCnPu3lsKbjbIJb+nrCSH
+         MbRo2uS1vlrWa6T8ShtJWreZbTLJrb3dXDPHBc25PMNa0XNB4hScmCRsBeQkEkqSCv
+         +D1EK+XAc5braLuQb46aOEU3+7YIhdjNAW0N5PZNZrplKGnsuxTJ6x799OQOgfgMbW
+         sbEfJMfJtKirlg5dW3FA+g0LbZALwv1CD2pNQ8XdFMVqsxpox+u5NY6tYIKKBroYh4
+         rdb9urn3q2CZRyIE88jk1iLQ4cIwwCb8rIZ4FbWkBX8VTcNRrzaU+7vSzuv+G4IMMQ
+         4B9UEXBmi+xuw==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -58,10 +58,10 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        alsa-devel@alsa-project.org
-Subject: [PATCH 36/48] cpufreq: pxa3: move clk register access to clk driver
-Date:   Tue, 19 Apr 2022 18:37:58 +0200
-Message-Id: <20220419163810.2118169-37-arnd@kernel.org>
+        alsa-devel@alsa-project.org, Sebastian Reichel <sre@kernel.org>
+Subject: [PATCH 40/48] ARM: pxa: tosa: use gpio lookup for battery
+Date:   Tue, 19 Apr 2022 18:38:02 +0200
+Message-Id: <20220419163810.2118169-41-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,230 +73,423 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The driver needs some low-level register access for setting
-the core and bus frequencies. These registers are owned
-by the clk driver, so move the low-level access into that
-driver with a slightly higher-level interface and avoid
-any machine header file dependencies.
+The battery driver uses a lot of GPIO lines, hardcoded from a
+machine header file.
 
-Cc: Michael Turquette <mturquette@baylibre.com>
-Cc: Stephen Boyd <sboyd@kernel.org>
-Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
-Cc: linux-clk@vger.kernel.org
+Change it to use a gpiod lookup table instead.
+
+Reviewed-by: Sebastian Reichel <sre@kernel.org>
+Acked-by: Sebastian Reichel <sre@kernel.org>
 Cc: linux-pm@vger.kernel.org
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-pxa/generic.h              |  1 -
- arch/arm/mach-pxa/include/mach/generic.h |  5 --
- arch/arm/mach-pxa/pxa3xx.c               |  1 +
- drivers/clk/pxa/clk-pxa3xx.c             | 16 ++++++
- drivers/cpufreq/pxa2xx-cpufreq.c         |  3 --
- drivers/cpufreq/pxa3xx-cpufreq.c         | 64 +++++++++++++-----------
- include/linux/clk/pxa.h                  |  9 ++++
- 7 files changed, 62 insertions(+), 37 deletions(-)
- delete mode 100644 arch/arm/mach-pxa/include/mach/generic.h
- create mode 100644 include/linux/clk/pxa.h
+ arch/arm/mach-pxa/tosa.c            |  23 +++++
+ drivers/power/supply/tosa_battery.c | 147 ++++++++++++++++------------
+ 2 files changed, 109 insertions(+), 61 deletions(-)
 
-diff --git a/arch/arm/mach-pxa/generic.h b/arch/arm/mach-pxa/generic.h
-index 2f706ef97357..487eadb0fc2a 100644
---- a/arch/arm/mach-pxa/generic.h
-+++ b/arch/arm/mach-pxa/generic.h
-@@ -7,7 +7,6 @@
+diff --git a/arch/arm/mach-pxa/tosa.c b/arch/arm/mach-pxa/tosa.c
+index 5a16a025192c..19fe79518aaf 100644
+--- a/arch/arm/mach-pxa/tosa.c
++++ b/arch/arm/mach-pxa/tosa.c
+@@ -366,6 +366,28 @@ static struct pxaficp_platform_data tosa_ficp_platform_data = {
+ 	.shutdown		= tosa_irda_shutdown,
+ };
+ 
++static struct gpiod_lookup_table tosa_battery_gpio_table = {
++	.dev_id = "wm97xx-battery",
++	.table = {
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_CHARGE_OFF - TOSA_TC6393XB_GPIO_BASE,    "main charge off", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_CHARGE_OFF_JC - TOSA_TC6393XB_GPIO_BASE, "jacket charge off", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_BAT_SW_ON - TOSA_TC6393XB_GPIO_BASE,     "battery switch", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_BAT0_V_ON - TOSA_TC6393XB_GPIO_BASE,     "main battery", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_BAT1_V_ON - TOSA_TC6393XB_GPIO_BASE,     "jacket battery", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_BAT1_TH_ON - TOSA_TC6393XB_GPIO_BASE,    "main battery temp", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_BAT0_TH_ON - TOSA_TC6393XB_GPIO_BASE,    "jacket battery temp", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("tc6393xb", TOSA_GPIO_BU_CHRG_ON - TOSA_TC6393XB_GPIO_BASE,    "backup battery", GPIO_ACTIVE_HIGH ),
++
++		GPIO_LOOKUP("gpio-pxa", TOSA_GPIO_BAT0_CRG,      "main battery full", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("gpio-pxa", TOSA_GPIO_BAT1_CRG,      "jacket battery full", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("gpio-pxa", TOSA_GPIO_BAT0_LOW,      "main battery low", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("gpio-pxa", TOSA_GPIO_BAT1_LOW,      "jacket battery low", GPIO_ACTIVE_HIGH ),
++		GPIO_LOOKUP("gpio-pxa", TOSA_GPIO_JACKET_DETECT, "jacket detect", GPIO_ACTIVE_HIGH ),
++		{ },
++	},
++};
++
++
+ /*
+  * Tosa AC IN
   */
+@@ -954,6 +976,7 @@ static void __init tosa_init(void)
+ 	/* enable batt_fault */
+ 	PMCR = 0x01;
  
- #include <linux/reboot.h>
--#include <mach/generic.h>
++	gpiod_add_lookup_table(&tosa_battery_gpio_table);
+ 	gpiod_add_lookup_table(&tosa_mci_gpio_table);
+ 	gpiod_add_lookup_table(&tosa_audio_gpio_table);
+ 	pxa_set_mci_info(&tosa_mci_platform_data);
+diff --git a/drivers/power/supply/tosa_battery.c b/drivers/power/supply/tosa_battery.c
+index b26b0eca33e1..d10320f348d0 100644
+--- a/drivers/power/supply/tosa_battery.c
++++ b/drivers/power/supply/tosa_battery.c
+@@ -15,11 +15,16 @@
+ #include <linux/gpio.h>
  
- struct irq_data;
+ #include <asm/mach-types.h>
+-#include <mach/tosa.h>
  
-diff --git a/arch/arm/mach-pxa/include/mach/generic.h b/arch/arm/mach-pxa/include/mach/generic.h
-deleted file mode 100644
-index 613f6a299d0d..000000000000
---- a/arch/arm/mach-pxa/include/mach/generic.h
-+++ /dev/null
-@@ -1,5 +0,0 @@
--#ifdef CONFIG_PXA3xx
--extern unsigned	pxa3xx_get_clk_frequency_khz(int);
--#else
--#define pxa3xx_get_clk_frequency_khz(x)		(0)
--#endif
-diff --git a/arch/arm/mach-pxa/pxa3xx.c b/arch/arm/mach-pxa/pxa3xx.c
-index 7881888107c7..f4657f4edb3b 100644
---- a/arch/arm/mach-pxa/pxa3xx.c
-+++ b/arch/arm/mach-pxa/pxa3xx.c
-@@ -25,6 +25,7 @@
- #include <linux/platform_data/i2c-pxa.h>
- #include <linux/platform_data/mmp_dma.h>
- #include <linux/soc/pxa/cpu.h>
-+#include <linux/clk/pxa.h>
+ static DEFINE_MUTEX(bat_lock); /* protects gpio pins */
+ static struct work_struct bat_work;
  
- #include <asm/mach/map.h>
- #include <asm/suspend.h>
-diff --git a/drivers/clk/pxa/clk-pxa3xx.c b/drivers/clk/pxa/clk-pxa3xx.c
-index 027b78183565..60a0db4f3790 100644
---- a/drivers/clk/pxa/clk-pxa3xx.c
-+++ b/drivers/clk/pxa/clk-pxa3xx.c
-@@ -16,6 +16,7 @@
- #include <linux/of.h>
- #include <linux/soc/pxa/cpu.h>
- #include <mach/smemc.h>
-+#include <linux/clk/pxa.h>
- #include <mach/pxa3xx-regs.h>
++struct tosa_gpio {
++	const char *con;
++	enum gpiod_flags flags;
++	struct gpio_desc *desc;
++};
++
+ struct tosa_bat {
+ 	int status;
+ 	struct power_supply *psy;
+@@ -28,38 +33,42 @@ struct tosa_bat {
+ 	struct mutex work_lock; /* protects data */
  
- #include <dt-bindings/clock/pxa-clock.h>
-@@ -79,6 +80,21 @@ unsigned int pxa3xx_get_clk_frequency_khz(int info)
- 	return (unsigned int)clks[0] / KHz;
+ 	bool (*is_present)(struct tosa_bat *bat);
+-	int gpio_full;
+-	int gpio_charge_off;
++	struct tosa_gpio gpio_full;
++	struct tosa_gpio gpio_charge_off;
+ 
+ 	int technology;
+ 
+-	int gpio_bat;
++	struct tosa_gpio gpio_bat;
+ 	int adc_bat;
+ 	int adc_bat_divider;
+ 	int bat_max;
+ 	int bat_min;
+ 
+-	int gpio_temp;
++	struct tosa_gpio gpio_temp;
+ 	int adc_temp;
+ 	int adc_temp_divider;
+ };
+ 
+ static struct tosa_bat tosa_bat_main;
+ static struct tosa_bat tosa_bat_jacket;
++static struct tosa_gpio gpiod_jacket_det = { "jacket detect", GPIOD_IN };
++static struct tosa_gpio gpiod_battery_switch = { "battery switch", GPIOD_OUT_LOW };
++static struct tosa_gpio gpiod_main_battery_low = { "main battery low", GPIOD_IN };
++static struct tosa_gpio gpiod_jacket_battery_low = { "jacket battery low", GPIOD_IN };
+ 
+ static unsigned long tosa_read_bat(struct tosa_bat *bat)
+ {
+ 	unsigned long value = 0;
+ 
+-	if (bat->gpio_bat < 0 || bat->adc_bat < 0)
++	if (!bat->gpio_bat.desc || bat->adc_bat < 0)
+ 		return 0;
+ 
+ 	mutex_lock(&bat_lock);
+-	gpio_set_value(bat->gpio_bat, 1);
++	gpiod_set_value(bat->gpio_bat.desc, 1);
+ 	msleep(5);
+ 	value = wm97xx_read_aux_adc(dev_get_drvdata(bat->psy->dev.parent),
+ 			bat->adc_bat);
+-	gpio_set_value(bat->gpio_bat, 0);
++	gpiod_set_value(bat->gpio_bat.desc, 0);
+ 	mutex_unlock(&bat_lock);
+ 
+ 	value = value * 1000000 / bat->adc_bat_divider;
+@@ -71,15 +80,15 @@ static unsigned long tosa_read_temp(struct tosa_bat *bat)
+ {
+ 	unsigned long value = 0;
+ 
+-	if (bat->gpio_temp < 0 || bat->adc_temp < 0)
++	if (!bat->gpio_temp.desc || bat->adc_temp < 0)
+ 		return 0;
+ 
+ 	mutex_lock(&bat_lock);
+-	gpio_set_value(bat->gpio_temp, 1);
++	gpiod_set_value(bat->gpio_temp.desc, 1);
+ 	msleep(5);
+ 	value = wm97xx_read_aux_adc(dev_get_drvdata(bat->psy->dev.parent),
+ 			bat->adc_temp);
+-	gpio_set_value(bat->gpio_temp, 0);
++	gpiod_set_value(bat->gpio_temp.desc, 0);
+ 	mutex_unlock(&bat_lock);
+ 
+ 	value = value * 10000 / bat->adc_temp_divider;
+@@ -136,7 +145,7 @@ static int tosa_bat_get_property(struct power_supply *psy,
+ 
+ static bool tosa_jacket_bat_is_present(struct tosa_bat *bat)
+ {
+-	return gpio_get_value(TOSA_GPIO_JACKET_DETECT) == 0;
++	return gpiod_get_value(gpiod_jacket_det.desc) == 0;
  }
  
-+void pxa3xx_clk_update_accr(u32 disable, u32 enable, u32 xclkcfg, u32 mask)
+ static void tosa_bat_external_power_changed(struct power_supply *psy)
+@@ -166,23 +175,23 @@ static void tosa_bat_update(struct tosa_bat *bat)
+ 		bat->full_chrg = -1;
+ 	} else if (power_supply_am_i_supplied(psy)) {
+ 		if (bat->status == POWER_SUPPLY_STATUS_DISCHARGING) {
+-			gpio_set_value(bat->gpio_charge_off, 0);
++			gpiod_set_value(bat->gpio_charge_off.desc, 0);
+ 			mdelay(15);
+ 		}
+ 
+-		if (gpio_get_value(bat->gpio_full)) {
++		if (gpiod_get_value(bat->gpio_full.desc)) {
+ 			if (old == POWER_SUPPLY_STATUS_CHARGING ||
+ 					bat->full_chrg == -1)
+ 				bat->full_chrg = tosa_read_bat(bat);
+ 
+-			gpio_set_value(bat->gpio_charge_off, 1);
++			gpiod_set_value(bat->gpio_charge_off.desc, 1);
+ 			bat->status = POWER_SUPPLY_STATUS_FULL;
+ 		} else {
+-			gpio_set_value(bat->gpio_charge_off, 0);
++			gpiod_set_value(bat->gpio_charge_off.desc, 0);
+ 			bat->status = POWER_SUPPLY_STATUS_CHARGING;
+ 		}
+ 	} else {
+-		gpio_set_value(bat->gpio_charge_off, 1);
++		gpiod_set_value(bat->gpio_charge_off.desc, 1);
+ 		bat->status = POWER_SUPPLY_STATUS_DISCHARGING;
+ 	}
+ 
+@@ -251,18 +260,18 @@ static struct tosa_bat tosa_bat_main = {
+ 	.full_chrg = -1,
+ 	.psy = NULL,
+ 
+-	.gpio_full = TOSA_GPIO_BAT0_CRG,
+-	.gpio_charge_off = TOSA_GPIO_CHARGE_OFF,
++	.gpio_full = { "main battery full", GPIOD_IN },
++	.gpio_charge_off = { "main charge off" , GPIOD_OUT_HIGH },
+ 
+ 	.technology = POWER_SUPPLY_TECHNOLOGY_LIPO,
+ 
+-	.gpio_bat = TOSA_GPIO_BAT0_V_ON,
++	.gpio_bat = { "main battery", GPIOD_OUT_LOW },
+ 	.adc_bat = WM97XX_AUX_ID3,
+ 	.adc_bat_divider = 414,
+ 	.bat_max = 4310000,
+ 	.bat_min = 1551 * 1000000 / 414,
+ 
+-	.gpio_temp = TOSA_GPIO_BAT1_TH_ON,
++	.gpio_temp = { "main battery temp", GPIOD_OUT_LOW },
+ 	.adc_temp = WM97XX_AUX_ID2,
+ 	.adc_temp_divider = 10000,
+ };
+@@ -273,18 +282,18 @@ static struct tosa_bat tosa_bat_jacket = {
+ 	.psy = NULL,
+ 
+ 	.is_present = tosa_jacket_bat_is_present,
+-	.gpio_full = TOSA_GPIO_BAT1_CRG,
+-	.gpio_charge_off = TOSA_GPIO_CHARGE_OFF_JC,
++	.gpio_full = { "jacket battery full", GPIOD_IN },
++	.gpio_charge_off = { "jacket charge off", GPIOD_OUT_HIGH },
+ 
+ 	.technology = POWER_SUPPLY_TECHNOLOGY_LIPO,
+ 
+-	.gpio_bat = TOSA_GPIO_BAT1_V_ON,
++	.gpio_bat = { "jacket battery", GPIOD_OUT_LOW },
+ 	.adc_bat = WM97XX_AUX_ID3,
+ 	.adc_bat_divider = 414,
+ 	.bat_max = 4310000,
+ 	.bat_min = 1551 * 1000000 / 414,
+ 
+-	.gpio_temp = TOSA_GPIO_BAT0_TH_ON,
++	.gpio_temp = { "jacket battery temp", GPIOD_OUT_LOW },
+ 	.adc_temp = WM97XX_AUX_ID2,
+ 	.adc_temp_divider = 10000,
+ };
+@@ -294,36 +303,16 @@ static struct tosa_bat tosa_bat_bu = {
+ 	.full_chrg = -1,
+ 	.psy = NULL,
+ 
+-	.gpio_full = -1,
+-	.gpio_charge_off = -1,
+-
+ 	.technology = POWER_SUPPLY_TECHNOLOGY_LiMn,
+ 
+-	.gpio_bat = TOSA_GPIO_BU_CHRG_ON,
++	.gpio_bat = { "backup battery", GPIOD_OUT_LOW },
+ 	.adc_bat = WM97XX_AUX_ID4,
+ 	.adc_bat_divider = 1266,
+ 
+-	.gpio_temp = -1,
+ 	.adc_temp = -1,
+ 	.adc_temp_divider = -1,
+ };
+ 
+-static struct gpio tosa_bat_gpios[] = {
+-	{ TOSA_GPIO_CHARGE_OFF,	   GPIOF_OUT_INIT_HIGH, "main charge off" },
+-	{ TOSA_GPIO_CHARGE_OFF_JC, GPIOF_OUT_INIT_HIGH, "jacket charge off" },
+-	{ TOSA_GPIO_BAT_SW_ON,	   GPIOF_OUT_INIT_LOW,	"battery switch" },
+-	{ TOSA_GPIO_BAT0_V_ON,	   GPIOF_OUT_INIT_LOW,	"main battery" },
+-	{ TOSA_GPIO_BAT1_V_ON,	   GPIOF_OUT_INIT_LOW,	"jacket battery" },
+-	{ TOSA_GPIO_BAT1_TH_ON,	   GPIOF_OUT_INIT_LOW,	"main battery temp" },
+-	{ TOSA_GPIO_BAT0_TH_ON,	   GPIOF_OUT_INIT_LOW,	"jacket battery temp" },
+-	{ TOSA_GPIO_BU_CHRG_ON,	   GPIOF_OUT_INIT_LOW,	"backup battery" },
+-	{ TOSA_GPIO_BAT0_CRG,	   GPIOF_IN,		"main battery full" },
+-	{ TOSA_GPIO_BAT1_CRG,	   GPIOF_IN,		"jacket battery full" },
+-	{ TOSA_GPIO_BAT0_LOW,	   GPIOF_IN,		"main battery low" },
+-	{ TOSA_GPIO_BAT1_LOW,	   GPIOF_IN,		"jacket battery low" },
+-	{ TOSA_GPIO_JACKET_DETECT, GPIOF_IN,		"jacket detect" },
+-};
+-
+ #ifdef CONFIG_PM
+ static int tosa_bat_suspend(struct platform_device *dev, pm_message_t state)
+ {
+@@ -343,6 +332,21 @@ static int tosa_bat_resume(struct platform_device *dev)
+ #define tosa_bat_resume NULL
+ #endif
+ 
++static int tosa_bat_gpio_get(struct device *dev, struct tosa_gpio *gpio)
 +{
-+	u32 accr = ACCR;
++	int ret;
 +
-+	accr &= ~disable;
-+	accr |= enable;
++	if (!gpio->con)
++		return 0;
 +
-+	ACCR = accr;
-+	if (xclkcfg)
-+		__asm__("mcr p14, 0, %0, c6, c0, 0\n" : : "r"(xclkcfg));
++	gpio->desc = devm_gpiod_get(dev, gpio->con, gpio->flags);
++	ret = PTR_ERR_OR_ZERO(gpio->desc);
++	if (ret)
++		dev_warn(dev, "failed to get gpio \"%s\"\n", gpio->con);
 +
-+	while ((ACSR & mask) != (accr & mask))
-+		cpu_relax();
++	return ret;
 +}
 +
- static unsigned long clk_pxa3xx_ac97_get_rate(struct clk_hw *hw,
- 					     unsigned long parent_rate)
- {
-diff --git a/drivers/cpufreq/pxa2xx-cpufreq.c b/drivers/cpufreq/pxa2xx-cpufreq.c
-index e74d36d6f78d..ed1ae061a687 100644
---- a/drivers/cpufreq/pxa2xx-cpufreq.c
-+++ b/drivers/cpufreq/pxa2xx-cpufreq.c
-@@ -27,9 +27,6 @@
- #include <linux/soc/pxa/cpu.h>
- #include <linux/io.h>
- 
--#include <mach/pxa2xx-regs.h>
--#include <mach/smemc.h>
--
- #ifdef DEBUG
- static unsigned int freq_debug;
- module_param(freq_debug, uint, 0);
-diff --git a/drivers/cpufreq/pxa3xx-cpufreq.c b/drivers/cpufreq/pxa3xx-cpufreq.c
-index d3b398b4aa6a..4afa48d172db 100644
---- a/drivers/cpufreq/pxa3xx-cpufreq.c
-+++ b/drivers/cpufreq/pxa3xx-cpufreq.c
-@@ -9,12 +9,10 @@
- #include <linux/init.h>
- #include <linux/cpufreq.h>
- #include <linux/soc/pxa/cpu.h>
-+#include <linux/clk/pxa.h>
- #include <linux/slab.h>
- #include <linux/io.h>
- 
--#include <mach/generic.h>
--#include <mach/pxa3xx-regs.h>
--
- #define HSS_104M	(0)
- #define HSS_156M	(1)
- #define HSS_208M	(2)
-@@ -35,6 +33,28 @@
- #define DMCFS_26M	(0)
- #define DMCFS_260M	(3)
- 
-+#define ACCR_XPDIS		(1 << 31)	/* Core PLL Output Disable */
-+#define ACCR_SPDIS		(1 << 30)	/* System PLL Output Disable */
-+#define ACCR_D0CS		(1 << 26)	/* D0 Mode Clock Select */
-+#define ACCR_PCCE		(1 << 11)	/* Power Mode Change Clock Enable */
-+#define ACCR_DDR_D0CS		(1 << 7)	/* DDR SDRAM clock frequency in D0CS (PXA31x only) */
+ static int tosa_power_supply_register(struct device *dev,
+ 			struct tosa_bat *bat,
+ 			const struct power_supply_desc *desc)
+@@ -350,6 +354,23 @@ static int tosa_power_supply_register(struct device *dev,
+ 	struct power_supply_config cfg = {
+ 		.drv_data = bat,
+ 	};
++	int ret;
 +
-+#define ACCR_SMCFS_MASK		(0x7 << 23)	/* Static Memory Controller Frequency Select */
-+#define ACCR_SFLFS_MASK		(0x3 << 18)	/* Frequency Select for Internal Memory Controller */
-+#define ACCR_XSPCLK_MASK	(0x3 << 16)	/* Core Frequency during Frequency Change */
-+#define ACCR_HSS_MASK		(0x3 << 14)	/* System Bus-Clock Frequency Select */
-+#define ACCR_DMCFS_MASK		(0x3 << 12)	/* Dynamic Memory Controller Clock Frequency Select */
-+#define ACCR_XN_MASK		(0x7 << 8)	/* Core PLL Turbo-Mode-to-Run-Mode Ratio */
-+#define ACCR_XL_MASK		(0x1f)		/* Core PLL Run-Mode-to-Oscillator Ratio */
++	ret = tosa_bat_gpio_get(dev, &bat->gpio_full);
++	if (ret)
++		return ret;
 +
-+#define ACCR_SMCFS(x)		(((x) & 0x7) << 23)
-+#define ACCR_SFLFS(x)		(((x) & 0x3) << 18)
-+#define ACCR_XSPCLK(x)		(((x) & 0x3) << 16)
-+#define ACCR_HSS(x)		(((x) & 0x3) << 14)
-+#define ACCR_DMCFS(x)		(((x) & 0x3) << 12)
-+#define ACCR_XN(x)		(((x) & 0x7) << 8)
-+#define ACCR_XL(x)		((x) & 0x1f)
++	ret = tosa_bat_gpio_get(dev, &bat->gpio_charge_off);
++	if (ret)
++		return ret;
 +
- struct pxa3xx_freq_info {
- 	unsigned int cpufreq_mhz;
- 	unsigned int core_xl : 5;
-@@ -112,41 +132,29 @@ static int setup_freqs_table(struct cpufreq_policy *policy,
++	ret = tosa_bat_gpio_get(dev, &bat->gpio_bat);
++	if (ret)
++		return ret;
++
++	ret = tosa_bat_gpio_get(dev, &bat->gpio_temp);
++	if (ret)
++		return ret;
  
- static void __update_core_freq(struct pxa3xx_freq_info *info)
- {
--	uint32_t mask = ACCR_XN_MASK | ACCR_XL_MASK;
--	uint32_t accr = ACCR;
--	uint32_t xclkcfg;
--
--	accr &= ~(ACCR_XN_MASK | ACCR_XL_MASK | ACCR_XSPCLK_MASK);
--	accr |= ACCR_XN(info->core_xn) | ACCR_XL(info->core_xl);
-+	u32 mask, disable, enable, xclkcfg;
- 
-+	mask	= ACCR_XN_MASK | ACCR_XL_MASK;
-+	disable = mask | ACCR_XSPCLK_MASK;
-+	enable  = ACCR_XN(info->core_xn) | ACCR_XL(info->core_xl);
- 	/* No clock until core PLL is re-locked */
--	accr |= ACCR_XSPCLK(XSPCLK_NONE);
--
-+	enable |= ACCR_XSPCLK(XSPCLK_NONE);
- 	xclkcfg = (info->core_xn == 2) ? 0x3 : 0x2;	/* turbo bit */
- 
--	ACCR = accr;
--	__asm__("mcr p14, 0, %0, c6, c0, 0\n" : : "r"(xclkcfg));
--
--	while ((ACSR & mask) != (accr & mask))
--		cpu_relax();
-+	pxa3xx_clk_update_accr(disable, enable, xclkcfg, mask);
+ 	mutex_init(&bat->work_lock);
+ 	bat->psy = power_supply_register(dev, desc, &cfg);
+@@ -358,49 +379,55 @@ static int tosa_power_supply_register(struct device *dev,
  }
  
- static void __update_bus_freq(struct pxa3xx_freq_info *info)
+ 
+-static int tosa_bat_probe(struct platform_device *dev)
++static int tosa_bat_probe(struct platform_device *pdev)
  {
--	uint32_t mask;
--	uint32_t accr = ACCR;
--
--	mask = ACCR_SMCFS_MASK | ACCR_SFLFS_MASK | ACCR_HSS_MASK |
--		ACCR_DMCFS_MASK;
--
--	accr &= ~mask;
--	accr |= ACCR_SMCFS(info->smcfs) | ACCR_SFLFS(info->sflfs) |
--		ACCR_HSS(info->hss) | ACCR_DMCFS(info->dmcfs);
-+	u32 mask, disable, enable;
++	struct device *dev = &pdev->dev;
+ 	int ret;
  
--	ACCR = accr;
-+	mask	= ACCR_SMCFS_MASK | ACCR_SFLFS_MASK | ACCR_HSS_MASK |
-+		  ACCR_DMCFS_MASK;
-+	disable = mask;
-+	enable	= ACCR_SMCFS(info->smcfs) | ACCR_SFLFS(info->sflfs) |
-+		  ACCR_HSS(info->hss) | ACCR_DMCFS(info->dmcfs);
+ 	if (!machine_is_tosa())
+ 		return -ENODEV;
  
--	while ((ACSR & mask) != (accr & mask))
--		cpu_relax();
-+	pxa3xx_clk_update_accr(disable, enable, 0, mask);
+-	ret = gpio_request_array(tosa_bat_gpios, ARRAY_SIZE(tosa_bat_gpios));
++	ret = tosa_bat_gpio_get(dev, &gpiod_jacket_det);
+ 	if (ret)
+ 		return ret;
+ 
++	/* these are not used anywhere, continue on failure */
++	tosa_bat_gpio_get(dev, &gpiod_battery_switch);
++	tosa_bat_gpio_get(dev, &gpiod_main_battery_low);
++	tosa_bat_gpio_get(dev, &gpiod_jacket_battery_low);
++
+ 	INIT_WORK(&bat_work, tosa_bat_work);
+ 
+-	ret = tosa_power_supply_register(&dev->dev, &tosa_bat_main,
++	ret = tosa_power_supply_register(dev, &tosa_bat_main,
+ 					 &tosa_bat_main_desc);
+ 	if (ret)
+ 		goto err_psy_reg_main;
+ 
+-	ret = tosa_power_supply_register(&dev->dev, &tosa_bat_jacket,
++	ret = tosa_power_supply_register(dev, &tosa_bat_jacket,
+ 					 &tosa_bat_jacket_desc);
+ 	if (ret)
+ 		goto err_psy_reg_jacket;
+ 
+-	ret = tosa_power_supply_register(&dev->dev, &tosa_bat_bu,
++	ret = tosa_power_supply_register(dev, &tosa_bat_bu,
+ 					 &tosa_bat_bu_desc);
+ 	if (ret)
+ 		goto err_psy_reg_bu;
+ 
+-	ret = request_irq(gpio_to_irq(TOSA_GPIO_BAT0_CRG),
++	ret = request_irq(gpiod_to_irq(tosa_bat_main.gpio_full.desc),
+ 				tosa_bat_gpio_isr,
+ 				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+ 				"main full", &tosa_bat_main);
+ 	if (ret)
+ 		goto err_req_main;
+ 
+-	ret = request_irq(gpio_to_irq(TOSA_GPIO_BAT1_CRG),
++	ret = request_irq(gpiod_to_irq(tosa_bat_jacket.gpio_full.desc),
+ 				tosa_bat_gpio_isr,
+ 				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+ 				"jacket full", &tosa_bat_jacket);
+ 	if (ret)
+ 		goto err_req_jacket;
+ 
+-	ret = request_irq(gpio_to_irq(TOSA_GPIO_JACKET_DETECT),
++	ret = request_irq(gpiod_to_irq(gpiod_jacket_det.desc),
+ 				tosa_bat_gpio_isr,
+ 				IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
+ 				"jacket detect", &tosa_bat_jacket);
+@@ -409,9 +436,9 @@ static int tosa_bat_probe(struct platform_device *dev)
+ 		return 0;
+ 	}
+ 
+-	free_irq(gpio_to_irq(TOSA_GPIO_BAT1_CRG), &tosa_bat_jacket);
++	free_irq(gpiod_to_irq(tosa_bat_jacket.gpio_full.desc), &tosa_bat_jacket);
+ err_req_jacket:
+-	free_irq(gpio_to_irq(TOSA_GPIO_BAT0_CRG), &tosa_bat_main);
++	free_irq(gpiod_to_irq(tosa_bat_main.gpio_full.desc), &tosa_bat_main);
+ err_req_main:
+ 	power_supply_unregister(tosa_bat_bu.psy);
+ err_psy_reg_bu:
+@@ -423,15 +450,14 @@ static int tosa_bat_probe(struct platform_device *dev)
+ 	/* see comment in tosa_bat_remove */
+ 	cancel_work_sync(&bat_work);
+ 
+-	gpio_free_array(tosa_bat_gpios, ARRAY_SIZE(tosa_bat_gpios));
+ 	return ret;
  }
  
- static unsigned int pxa3xx_cpufreq_get(unsigned int cpu)
-diff --git a/include/linux/clk/pxa.h b/include/linux/clk/pxa.h
-new file mode 100644
-index 000000000000..e5516c608c99
---- /dev/null
-+++ b/include/linux/clk/pxa.h
-@@ -0,0 +1,9 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+
-+#ifdef CONFIG_PXA3xx
-+extern unsigned	pxa3xx_get_clk_frequency_khz(int);
-+extern void pxa3xx_clk_update_accr(u32 disable, u32 enable, u32 xclkcfg, u32 mask);
-+#else
-+#define pxa3xx_get_clk_frequency_khz(x)		(0)
-+#define pxa3xx_clk_update_accr(disable, enable, xclkcfg, mask) do { } while (0)
-+#endif
+ static int tosa_bat_remove(struct platform_device *dev)
+ {
+-	free_irq(gpio_to_irq(TOSA_GPIO_JACKET_DETECT), &tosa_bat_jacket);
+-	free_irq(gpio_to_irq(TOSA_GPIO_BAT1_CRG), &tosa_bat_jacket);
+-	free_irq(gpio_to_irq(TOSA_GPIO_BAT0_CRG), &tosa_bat_main);
++	free_irq(gpiod_to_irq(gpiod_jacket_det.desc), &tosa_bat_jacket);
++	free_irq(gpiod_to_irq(tosa_bat_jacket.gpio_full.desc), &tosa_bat_jacket);
++	free_irq(gpiod_to_irq(tosa_bat_main.gpio_full.desc), &tosa_bat_main);
+ 
+ 	power_supply_unregister(tosa_bat_bu.psy);
+ 	power_supply_unregister(tosa_bat_jacket.psy);
+@@ -443,7 +469,6 @@ static int tosa_bat_remove(struct platform_device *dev)
+ 	 * unregistered now.
+ 	 */
+ 	cancel_work_sync(&bat_work);
+-	gpio_free_array(tosa_bat_gpios, ARRAY_SIZE(tosa_bat_gpios));
+ 	return 0;
+ }
+ 
 -- 
 2.29.2
 
