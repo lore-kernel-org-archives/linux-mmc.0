@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73A2FC3527E
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14483C4167E
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352572AbiDSNoy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:44:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40140 "EHLO
+        id S244893AbiDSNoz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:44:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352699AbiDSNnh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:43:37 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 102ED24F;
-        Tue, 19 Apr 2022 06:40:55 -0700 (PDT)
+        with ESMTP id S1352642AbiDSNmf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:42:35 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2698A3818F;
+        Tue, 19 Apr 2022 06:39:26 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C68D6B8197F;
-        Tue, 19 Apr 2022 13:40:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CD49CC385AA;
-        Tue, 19 Apr 2022 13:40:45 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id BD100B81980;
+        Tue, 19 Apr 2022 13:39:24 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB547C385A5;
+        Tue, 19 Apr 2022 13:39:16 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375652;
-        bh=++wgzzP18IgZjv9gq3IHjeFk3mw3AxMESGKM1bss8GE=;
+        s=k20201202; t=1650375563;
+        bh=e/6LwBQRyYsqoQ1/3hfke8Tr/1qpFFXXNWHXWvPRr1U=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=t77plAsS6dzi52zALntxTrIsGvlZ7TVWnBbbBL6BHh9HDB22Vsg+GSU1TUGr/L7yo
-         4VED/jnUp/m/iprQbhEzkF/oCLBhn5mjye8/COB4ccOhKBk+sJixyUn/j4z5hhYvAS
-         fOMPXYC1p6lswgiO83CT8qRkpbcih1isQSb5qwxzvrTQT+MaBaR+iH3FJlzRpZeFL+
-         xLv4MH8XhKivg2WwM9SJ6+BOtF2fIbLSMuGDS0PC2ZNc4r0d6HSPSj40prxX3RgJXN
-         wDqi6ESmFTYAF/uvoZWrHFUtV7uChc7cszyCFCMHFQ8dub8SswJUKqRzrKaa1+D2F9
-         cs9GhVWEGvR5A==
+        b=iV3cqgxsdj2upxQIoK91L/txRXqfjq76PvDRmkXJrWp/FZGP3UwajNZc3LzYUXwep
+         Wpjx5B2mgf8pPs8V3T9NF38UepMlWko7fW3ElDUkn1L39NbypTyjb4e3cTF2YtXtQM
+         rZZBrb0moVxeTXaoNCmPZjxeZFc2BxdRbHQTb85h/EtHpKNmkXtvFfU3G1YcCDbWMG
+         CVWPbZyeLymL8KTq6UQjFFxy8H40arcYLX9BtcjX8Nx5GCgnb/7f2+XzLLpVS0D1gI
+         fGuz9dkWZKrYHjDKwJ8ucl3hOEywWE023+f3G2C7nEhMm4yp70/BMqYBIQ5am0gbGx
+         IBMrD0Q8dumig==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -57,9 +57,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 26/41] ARM: omap1: relocate static I/O mapping
-Date:   Tue, 19 Apr 2022 15:37:08 +0200
-Message-Id: <20220419133723.1394715-27-arnd@kernel.org>
+Subject: [PATCH 14/41] serial: 8250/omap1: include linux/soc/ti/omap1-soc.h
+Date:   Tue, 19 Apr 2022 15:36:56 +0200
+Message-Id: <20220419133723.1394715-15-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -71,49 +71,27 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The address range 0xfee00000-0xfeffffff is used for PCI and
-PCMCIA I/O port mappings, but OMAP1 has its static mappings
-there as well.
-
-Move the OMAP1 addresses a little higher to avoid crashing
-at boot.
+As a preparation for cleaning up the omap1 headers, start
+including linux/soc/ti/omap1-soc.h directly so we can
+keep calling cpu_is_omap1510().
 
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/Kconfig.debug                      | 6 +++---
- arch/arm/mach-omap1/include/mach/hardware.h | 2 +-
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ drivers/tty/serial/8250/8250.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm/Kconfig.debug b/arch/arm/Kconfig.debug
-index 0c9497d549e3..f57b449000f7 100644
---- a/arch/arm/Kconfig.debug
-+++ b/arch/arm/Kconfig.debug
-@@ -1837,9 +1837,9 @@ config DEBUG_UART_VIRT
- 	default 0xfec00000 if ARCH_IXP4XX && !CPU_BIG_ENDIAN
- 	default 0xfec00003 if ARCH_IXP4XX && CPU_BIG_ENDIAN
- 	default 0xfef36000 if DEBUG_HIGHBANK_UART
--	default 0xfefb0000 if DEBUG_OMAP1UART1 || DEBUG_OMAP7XXUART1
--	default 0xfefb0800 if DEBUG_OMAP1UART2 || DEBUG_OMAP7XXUART2
--	default 0xfefb9800 if DEBUG_OMAP1UART3 || DEBUG_OMAP7XXUART3
-+	default 0xff000000 if DEBUG_OMAP1UART1 || DEBUG_OMAP7XXUART1
-+	default 0xff000800 if DEBUG_OMAP1UART2 || DEBUG_OMAP7XXUART2
-+	default 0xff009800 if DEBUG_OMAP1UART3 || DEBUG_OMAP7XXUART3
- 	default 0xffd01000 if DEBUG_HIP01_UART
- 	default DEBUG_UART_PHYS if !MMU
- 	depends on DEBUG_LL_UART_8250 || DEBUG_LL_UART_PL01X || \
-diff --git a/arch/arm/mach-omap1/include/mach/hardware.h b/arch/arm/mach-omap1/include/mach/hardware.h
-index 05c5cd3e95f4..e3522e601ccd 100644
---- a/arch/arm/mach-omap1/include/mach/hardware.h
-+++ b/arch/arm/mach-omap1/include/mach/hardware.h
-@@ -63,7 +63,7 @@ static inline u32 omap_cs3_phys(void)
+diff --git a/drivers/tty/serial/8250/8250.h b/drivers/tty/serial/8250/8250.h
+index db784ace25d8..a8830e15a22c 100644
+--- a/drivers/tty/serial/8250/8250.h
++++ b/drivers/tty/serial/8250/8250.h
+@@ -259,6 +259,7 @@ static inline int fintek_8250_probe(struct uart_8250_port *uart) { return 0; }
+ #endif
  
- #endif	/* ifndef __ASSEMBLER__ */
- 
--#define OMAP1_IO_OFFSET		0x01000000	/* Virtual IO = 0xfefb0000 */
-+#define OMAP1_IO_OFFSET		0x00fb0000	/* Virtual IO = 0xff000000 */
- #define OMAP1_IO_ADDRESS(pa)	IOMEM((pa) - OMAP1_IO_OFFSET)
- 
- #include <mach/serial.h>
+ #ifdef CONFIG_ARCH_OMAP1
++#include <linux/soc/ti/omap1-soc.h>
+ static inline int is_omap1_8250(struct uart_8250_port *pt)
+ {
+ 	int res;
 -- 
 2.29.2
 
