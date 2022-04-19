@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F36EC4332F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64178C43217
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:47:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350238AbiDSQuA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:50:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55712 "EHLO
+        id S1355211AbiDSQuE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:50:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57106 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346769AbiDSQrO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:47:14 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D446039692;
-        Tue, 19 Apr 2022 09:44:30 -0700 (PDT)
+        with ESMTP id S1349580AbiDSQry (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:47:54 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93E967658;
+        Tue, 19 Apr 2022 09:45:09 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 635EAB81BEF;
-        Tue, 19 Apr 2022 16:44:29 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D40C0C385A5;
-        Tue, 19 Apr 2022 16:44:20 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 28068B81BFE;
+        Tue, 19 Apr 2022 16:45:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9DAF6C385AD;
+        Tue, 19 Apr 2022 16:44:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386668;
-        bh=hFaUfBHHZyua9/0SIUVCF7GfRjXY8twBhb6ozCWe2ig=;
+        s=k20201202; t=1650386706;
+        bh=oNd2jzd1ZgiC1U71slXEuF0Jw0poX3XVV+5BeDbbYa8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Fo/tKcUroKIiRisEELy+Quhv3E8Useos/6dFZnWrT0uevB2S46HiM7GoogmEpRySA
-         bDcDcRDtP9O6a9u5D33IHltlhiammHzC7GF2SDnzFHXvXnuXIUSzwDhpuo1jO5Gz0P
-         ClrMmdWLuCqC1z0YjcwVHVnX5Z9gzl+nUlu0FeQj08vu9jzopfFFz4FL5eECm7RAuY
-         ZZnyMXTBeUQSFy8p9Mptsd2e6ZImS2jV5cNayGF6QWNDOzx1yetY2gGClWhEb/tHjZ
-         HIvMbgIPWC5wXvKwPJXPhpoTLr0+ZUb12OFRhVWafG0AiuetotoT6K/V2ymNZOPWy4
-         luzaLbrzw3CFQ==
+        b=eVv/JxXnBMI8H1rNYcDgRe1YKiI3MroWqCXwupYAZyfp6Y8ukHiHF/5kn5Mx/+I5y
+         j/799pOJ+F/pj3wyOtKsICgAU+YeAfXm1ukGhaRazluTHJ4IcIEdlRxQPgmpSCuPm1
+         ogEIbzAt5lZDtm97mHkQdDrFBzdy9VafLDkJLSKgUTURMmhufcftKDQ+baPjnPexl2
+         8jHrEZ02A8VZOBE9lEopc2ie/OYNHyzj/pLzbIv452shuanbP3xk00G5QWu60CjSRY
+         NBgn+0C1lnZL16WegiUAVIjrVxIf8VVvn8wl8O1aHfsK4yRsJmWPebcAU9BlGYxb27
+         ad7YKwZ1K48JQ==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -59,9 +59,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
         alsa-devel@alsa-project.org
-Subject: [PATCH 43/48] ARM: mmp: rename pxa_register_device
-Date:   Tue, 19 Apr 2022 18:38:05 +0200
-Message-Id: <20220419163810.2118169-44-arnd@kernel.org>
+Subject: [PATCH 48/48] ARM: pxa: convert to multiplatform
+Date:   Tue, 19 Apr 2022 18:38:10 +0200
+Message-Id: <20220419163810.2118169-49-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,435 +73,456 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-In a multiplatform kernel that includes both pxa and mmp, we get a link
-failure from the clash of two pxa_register_device functions.
+PXA is now ready to be built into a single kernel with all the
+other ARMv5 platforms, so change the Kconfig bit to finish it
+off. The mach/uncompress.h support is the last bit that goes away,
+getting replaced with the normal DEBUG_LL based approach.
 
-Rename the one in mach-mmp to mmp_register_device, along with with the
-rename of pxa_device_desc.
-
-Acked-by: Lubomir Rintel <lkundrak@v3.sk>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-mmp/devices.c |  2 +-
- arch/arm/mach-mmp/devices.h | 10 +++----
- arch/arm/mach-mmp/mmp2.h    | 48 ++++++++++++++---------------
- arch/arm/mach-mmp/pxa168.h  | 60 ++++++++++++++++++-------------------
- arch/arm/mach-mmp/pxa910.h  | 38 +++++++++++------------
- arch/arm/mach-mmp/ttc_dkb.c |  6 ++--
- 6 files changed, 82 insertions(+), 82 deletions(-)
+ arch/arm/Kconfig                            | 17 -----
+ arch/arm/configs/am200epdkit_defconfig      |  1 +
+ arch/arm/configs/cm_x300_defconfig          |  1 +
+ arch/arm/configs/colibri_pxa270_defconfig   |  1 +
+ arch/arm/configs/colibri_pxa300_defconfig   |  1 +
+ arch/arm/configs/corgi_defconfig            |  1 +
+ arch/arm/configs/eseries_pxa_defconfig      |  1 +
+ arch/arm/configs/ezx_defconfig              |  1 +
+ arch/arm/configs/h5000_defconfig            |  1 +
+ arch/arm/configs/imote2_defconfig           |  1 +
+ arch/arm/configs/lpd270_defconfig           |  1 +
+ arch/arm/configs/lubbock_defconfig          |  1 +
+ arch/arm/configs/magician_defconfig         |  1 +
+ arch/arm/configs/mainstone_defconfig        |  1 +
+ arch/arm/configs/palmz72_defconfig          |  1 +
+ arch/arm/configs/pcm027_defconfig           |  1 +
+ arch/arm/configs/pxa255-idp_defconfig       |  1 +
+ arch/arm/configs/pxa3xx_defconfig           |  1 +
+ arch/arm/configs/pxa_defconfig              |  1 +
+ arch/arm/configs/spitz_defconfig            |  1 +
+ arch/arm/configs/trizeps4_defconfig         |  1 +
+ arch/arm/configs/viper_defconfig            |  1 +
+ arch/arm/configs/xcep_defconfig             |  1 +
+ arch/arm/configs/zeus_defconfig             |  1 +
+ arch/arm/mach-pxa/Kconfig                   | 14 +++++
+ arch/arm/mach-pxa/Makefile.boot             |  3 -
+ arch/arm/mach-pxa/include/mach/uncompress.h | 70 ---------------------
+ 27 files changed, 37 insertions(+), 90 deletions(-)
+ delete mode 100644 arch/arm/mach-pxa/Makefile.boot
+ delete mode 100644 arch/arm/mach-pxa/include/mach/uncompress.h
 
-diff --git a/arch/arm/mach-mmp/devices.c b/arch/arm/mach-mmp/devices.c
-index 18bee66a671f..79f4a2aa5475 100644
---- a/arch/arm/mach-mmp/devices.c
-+++ b/arch/arm/mach-mmp/devices.c
-@@ -14,7 +14,7 @@
- #include <linux/soc/mmp/cputype.h>
- #include "regs-usb.h"
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index ace6c08c8ae2..001f77e0058c 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -411,23 +411,6 @@ config ARCH_DOVE
+ 	help
+ 	  Support for the Marvell Dove SoC 88AP510
  
--int __init pxa_register_device(struct pxa_device_desc *desc,
-+int __init mmp_register_device(struct mmp_device_desc *desc,
- 				void *data, size_t size)
- {
- 	struct platform_device *pdev;
-diff --git a/arch/arm/mach-mmp/devices.h b/arch/arm/mach-mmp/devices.h
-index 4df596c5c201..d4920ebfebc5 100644
---- a/arch/arm/mach-mmp/devices.h
-+++ b/arch/arm/mach-mmp/devices.h
-@@ -7,7 +7,7 @@
- #define MAX_RESOURCE_DMA	2
+-config ARCH_PXA
+-	bool "PXA2xx/PXA3xx-based"
+-	select ARM_CPU_SUSPEND if PM
+-	select AUTO_ZRELADDR
+-	select COMMON_CLK
+-	select CLKSRC_PXA
+-	select CLKSRC_MMIO
+-	select TIMER_OF
+-	select CPU_XSCALE if !CPU_XSC3
+-	select GPIO_PXA
+-	select GPIOLIB
+-	select IRQ_DOMAIN
+-	select PLAT_PXA
+-	select SPARSE_IRQ
+-	help
+-	  Support for Intel/Marvell's PXA2xx/PXA3xx processor line.
+-
+ config ARCH_RPC
+ 	bool "RiscPC"
+ 	depends on !CC_IS_CLANG && GCC_VERSION < 90100 && GCC_VERSION >= 60000
+diff --git a/arch/arm/configs/am200epdkit_defconfig b/arch/arm/configs/am200epdkit_defconfig
+index 4e49d6cb2f62..9252ce0e722b 100644
+--- a/arch/arm/configs/am200epdkit_defconfig
++++ b/arch/arm/configs/am200epdkit_defconfig
+@@ -10,6 +10,7 @@ CONFIG_SLAB=y
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_GUMSTIX=y
+ CONFIG_PCCARD=y
+diff --git a/arch/arm/configs/cm_x300_defconfig b/arch/arm/configs/cm_x300_defconfig
+index 45769d0ddd4e..bb0fcd82d2a7 100644
+--- a/arch/arm/configs/cm_x300_defconfig
++++ b/arch/arm/configs/cm_x300_defconfig
+@@ -10,6 +10,7 @@ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_GPIO_PCA953X=y
+ CONFIG_MACH_CM_X300=y
+diff --git a/arch/arm/configs/colibri_pxa270_defconfig b/arch/arm/configs/colibri_pxa270_defconfig
+index 52bad9a544a0..b29898fd6a12 100644
+--- a/arch/arm/configs/colibri_pxa270_defconfig
++++ b/arch/arm/configs/colibri_pxa270_defconfig
+@@ -16,6 +16,7 @@ CONFIG_MODULE_FORCE_UNLOAD=y
+ CONFIG_MODVERSIONS=y
+ CONFIG_MODULE_SRCVERSION_ALL=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_COLIBRI=y
+ CONFIG_PREEMPT=y
+diff --git a/arch/arm/configs/colibri_pxa300_defconfig b/arch/arm/configs/colibri_pxa300_defconfig
+index 26e5a67f8e2d..f9d110294644 100644
+--- a/arch/arm/configs/colibri_pxa300_defconfig
++++ b/arch/arm/configs/colibri_pxa300_defconfig
+@@ -1,6 +1,7 @@
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_COLIBRI300=y
+ CONFIG_AEABI=y
+diff --git a/arch/arm/configs/corgi_defconfig b/arch/arm/configs/corgi_defconfig
+index 15b749f6996d..96c677c98bc7 100644
+--- a/arch/arm/configs/corgi_defconfig
++++ b/arch/arm/configs/corgi_defconfig
+@@ -9,6 +9,7 @@ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_PXA_SHARPSL=y
+ CONFIG_MACH_POODLE=y
+diff --git a/arch/arm/configs/eseries_pxa_defconfig b/arch/arm/configs/eseries_pxa_defconfig
+index 046f4dc2e18e..2146adc1825e 100644
+--- a/arch/arm/configs/eseries_pxa_defconfig
++++ b/arch/arm/configs/eseries_pxa_defconfig
+@@ -9,6 +9,7 @@ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_PXA_ESERIES=y
+ # CONFIG_ARM_THUMB is not set
+diff --git a/arch/arm/configs/ezx_defconfig b/arch/arm/configs/ezx_defconfig
+index 0788a892e160..5d000c8be44e 100644
+--- a/arch/arm/configs/ezx_defconfig
++++ b/arch/arm/configs/ezx_defconfig
+@@ -14,6 +14,7 @@ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ CONFIG_MODVERSIONS=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_PXA_EZX=y
+ CONFIG_NO_HZ=y
+diff --git a/arch/arm/configs/h5000_defconfig b/arch/arm/configs/h5000_defconfig
+index f5a338fefda8..a67d6020aee5 100644
+--- a/arch/arm/configs/h5000_defconfig
++++ b/arch/arm/configs/h5000_defconfig
+@@ -10,6 +10,7 @@ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_H5000=y
+ CONFIG_AEABI=y
+diff --git a/arch/arm/configs/imote2_defconfig b/arch/arm/configs/imote2_defconfig
+index 015b7ef237de..c056fe29d300 100644
+--- a/arch/arm/configs/imote2_defconfig
++++ b/arch/arm/configs/imote2_defconfig
+@@ -13,6 +13,7 @@ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ CONFIG_MODVERSIONS=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_INTELMOTE2=y
+ CONFIG_NO_HZ=y
+diff --git a/arch/arm/configs/lpd270_defconfig b/arch/arm/configs/lpd270_defconfig
+index 3a4d0e64cd6e..5c0a671ed294 100644
+--- a/arch/arm/configs/lpd270_defconfig
++++ b/arch/arm/configs/lpd270_defconfig
+@@ -2,6 +2,7 @@ CONFIG_SYSVIPC=y
+ CONFIG_LOG_BUF_SHIFT=14
+ CONFIG_SLAB=y
+ CONFIG_MODULES=y
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_LOGICPD_PXA270=y
+ # CONFIG_ARM_THUMB is not set
+diff --git a/arch/arm/configs/lubbock_defconfig b/arch/arm/configs/lubbock_defconfig
+index 4ce2da2e76fa..cf49dc1629a7 100644
+--- a/arch/arm/configs/lubbock_defconfig
++++ b/arch/arm/configs/lubbock_defconfig
+@@ -1,6 +1,7 @@
+ CONFIG_SYSVIPC=y
+ CONFIG_LOG_BUF_SHIFT=14
+ CONFIG_MODULES=y
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_LUBBOCK=y
+ # CONFIG_ARM_THUMB is not set
+diff --git a/arch/arm/configs/magician_defconfig b/arch/arm/configs/magician_defconfig
+index abde1fb23b20..13da808ffa13 100644
+--- a/arch/arm/configs/magician_defconfig
++++ b/arch/arm/configs/magician_defconfig
+@@ -9,6 +9,7 @@ CONFIG_SLAB=y
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_H4700=y
+ CONFIG_MACH_MAGICIAN=y
+diff --git a/arch/arm/configs/mainstone_defconfig b/arch/arm/configs/mainstone_defconfig
+index 26499b697f9f..03b4c61bdadd 100644
+--- a/arch/arm/configs/mainstone_defconfig
++++ b/arch/arm/configs/mainstone_defconfig
+@@ -1,6 +1,7 @@
+ CONFIG_SYSVIPC=y
+ CONFIG_LOG_BUF_SHIFT=14
+ CONFIG_MODULES=y
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_MAINSTONE=y
+ # CONFIG_ARM_THUMB is not set
+diff --git a/arch/arm/configs/palmz72_defconfig b/arch/arm/configs/palmz72_defconfig
+index b47c8abe85bc..e6acb1d588e2 100644
+--- a/arch/arm/configs/palmz72_defconfig
++++ b/arch/arm/configs/palmz72_defconfig
+@@ -7,6 +7,7 @@ CONFIG_SLAB=y
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_PXA_PALM=y
+ # CONFIG_MACH_PALMTX is not set
+diff --git a/arch/arm/configs/pcm027_defconfig b/arch/arm/configs/pcm027_defconfig
+index e97a158081fc..106d5bef48e2 100644
+--- a/arch/arm/configs/pcm027_defconfig
++++ b/arch/arm/configs/pcm027_defconfig
+@@ -13,6 +13,7 @@ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_PCM027=y
+ CONFIG_MACH_PCM990_BASEBOARD=y
+diff --git a/arch/arm/configs/pxa255-idp_defconfig b/arch/arm/configs/pxa255-idp_defconfig
+index 4a383afa5e87..5663245e9534 100644
+--- a/arch/arm/configs/pxa255-idp_defconfig
++++ b/arch/arm/configs/pxa255-idp_defconfig
+@@ -1,6 +1,7 @@
+ CONFIG_SYSVIPC=y
+ CONFIG_LOG_BUF_SHIFT=14
+ CONFIG_MODULES=y
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_PXA_IDP=y
+ # CONFIG_ARM_THUMB is not set
+diff --git a/arch/arm/configs/pxa3xx_defconfig b/arch/arm/configs/pxa3xx_defconfig
+index f0c34017f2aa..228d4271748b 100644
+--- a/arch/arm/configs/pxa3xx_defconfig
++++ b/arch/arm/configs/pxa3xx_defconfig
+@@ -6,6 +6,7 @@ CONFIG_KALLSYMS_ALL=y
+ CONFIG_SLAB=y
+ CONFIG_MODULES=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_LITTLETON=y
+ CONFIG_MACH_TAVOREVB=y
+diff --git a/arch/arm/configs/pxa_defconfig b/arch/arm/configs/pxa_defconfig
+index 29b1f192afbb..1db70dfd32d2 100644
+--- a/arch/arm/configs/pxa_defconfig
++++ b/arch/arm/configs/pxa_defconfig
+@@ -23,6 +23,7 @@ CONFIG_MODULE_SRCVERSION_ALL=y
+ CONFIG_PARTITION_ADVANCED=y
+ CONFIG_LDM_PARTITION=y
+ CONFIG_CMDLINE_PARTITION=y
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_LUBBOCK=y
+ CONFIG_MACH_MAINSTONE=y
+diff --git a/arch/arm/configs/spitz_defconfig b/arch/arm/configs/spitz_defconfig
+index f42c7a502b6e..43d079ee342a 100644
+--- a/arch/arm/configs/spitz_defconfig
++++ b/arch/arm/configs/spitz_defconfig
+@@ -9,6 +9,7 @@ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_PXA_SHARPSL=y
+ CONFIG_MACH_AKITA=y
+diff --git a/arch/arm/configs/trizeps4_defconfig b/arch/arm/configs/trizeps4_defconfig
+index d66f0c287d41..baeba4667e9b 100644
+--- a/arch/arm/configs/trizeps4_defconfig
++++ b/arch/arm/configs/trizeps4_defconfig
+@@ -14,6 +14,7 @@ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODULE_FORCE_UNLOAD=y
+ CONFIG_MODVERSIONS=y
+ CONFIG_MODULE_SRCVERSION_ALL=y
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_TRIZEPS_PXA=y
+ CONFIG_MACH_TRIZEPS4=y
+diff --git a/arch/arm/configs/viper_defconfig b/arch/arm/configs/viper_defconfig
+index c28539bfd128..7c1029716ea5 100644
+--- a/arch/arm/configs/viper_defconfig
++++ b/arch/arm/configs/viper_defconfig
+@@ -9,6 +9,7 @@ CONFIG_SLAB=y
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_ARCH_VIPER=y
+ CONFIG_IWMMXT=y
+diff --git a/arch/arm/configs/xcep_defconfig b/arch/arm/configs/xcep_defconfig
+index 4d8e7f2eaef7..3752672f980e 100644
+--- a/arch/arm/configs/xcep_defconfig
++++ b/arch/arm/configs/xcep_defconfig
+@@ -19,6 +19,7 @@ CONFIG_MODULE_UNLOAD=y
+ CONFIG_MODVERSIONS=y
+ CONFIG_MODULE_SRCVERSION_ALL=y
+ # CONFIG_BLOCK is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_XCEP=y
+ CONFIG_IWMMXT=y
+diff --git a/arch/arm/configs/zeus_defconfig b/arch/arm/configs/zeus_defconfig
+index 25bb6995f105..03a12fb51259 100644
+--- a/arch/arm/configs/zeus_defconfig
++++ b/arch/arm/configs/zeus_defconfig
+@@ -4,6 +4,7 @@ CONFIG_LOG_BUF_SHIFT=13
+ CONFIG_MODULES=y
+ CONFIG_MODULE_UNLOAD=y
+ # CONFIG_BLK_DEV_BSG is not set
++# CONFIG_ARCH_MULTI_V7 is not set
+ CONFIG_ARCH_PXA=y
+ CONFIG_MACH_ARCOM_ZEUS=y
+ CONFIG_PCCARD=m
+diff --git a/arch/arm/mach-pxa/Kconfig b/arch/arm/mach-pxa/Kconfig
+index 57f0be4065c1..d2cea239fe13 100644
+--- a/arch/arm/mach-pxa/Kconfig
++++ b/arch/arm/mach-pxa/Kconfig
+@@ -1,4 +1,18 @@
+ # SPDX-License-Identifier: GPL-2.0-only
++menuconfig ARCH_PXA
++	bool "PXA2xx/PXA3xx-based"
++	depends on ARCH_MULTI_V5
++	select ARM_CPU_SUSPEND if PM
++	select CLKSRC_PXA
++	select CLKSRC_MMIO
++	select TIMER_OF
++	select CPU_XSCALE if !CPU_XSC3
++	select GPIO_PXA
++	select GPIOLIB
++	select PLAT_PXA
++	help
++	  Support for Intel/Marvell's PXA2xx/PXA3xx processor line.
++
+ if ARCH_PXA
  
- /* structure for describing the on-chip devices */
--struct pxa_device_desc {
-+struct mmp_device_desc {
- 	const char	*dev_name;
- 	const char	*drv_name;
- 	int		id;
-@@ -18,7 +18,7 @@ struct pxa_device_desc {
- };
- 
- #define PXA168_DEVICE(_name, _drv, _id, _irq, _start, _size, _dma...)	\
--struct pxa_device_desc pxa168_device_##_name __initdata = {		\
-+struct mmp_device_desc pxa168_device_##_name __initdata = {		\
- 	.dev_name	= "pxa168-" #_name,				\
- 	.drv_name	= _drv,						\
- 	.id		= _id,						\
-@@ -29,7 +29,7 @@ struct pxa_device_desc pxa168_device_##_name __initdata = {		\
- };
- 
- #define PXA910_DEVICE(_name, _drv, _id, _irq, _start, _size, _dma...)	\
--struct pxa_device_desc pxa910_device_##_name __initdata = {		\
-+struct mmp_device_desc pxa910_device_##_name __initdata = {		\
- 	.dev_name	= "pxa910-" #_name,				\
- 	.drv_name	= _drv,						\
- 	.id		= _id,						\
-@@ -40,7 +40,7 @@ struct pxa_device_desc pxa910_device_##_name __initdata = {		\
- };
- 
- #define MMP2_DEVICE(_name, _drv, _id, _irq, _start, _size, _dma...)	\
--struct pxa_device_desc mmp2_device_##_name __initdata = {		\
-+struct mmp_device_desc mmp2_device_##_name __initdata = {		\
- 	.dev_name	= "mmp2-" #_name,				\
- 	.drv_name	= _drv,						\
- 	.id		= _id,						\
-@@ -50,7 +50,7 @@ struct pxa_device_desc mmp2_device_##_name __initdata = {		\
- 	.dma		= { _dma },					\
- }
- 
--extern int pxa_register_device(struct pxa_device_desc *, void *, size_t);
-+extern int mmp_register_device(struct mmp_device_desc *, void *, size_t);
- extern int pxa_usb_phy_init(void __iomem *phy_reg);
- extern void pxa_usb_phy_deinit(void __iomem *phy_reg);
- 
-diff --git a/arch/arm/mach-mmp/mmp2.h b/arch/arm/mach-mmp/mmp2.h
-index adafc4fba8f4..3ebc1bb13f71 100644
---- a/arch/arm/mach-mmp/mmp2.h
-+++ b/arch/arm/mach-mmp/mmp2.h
-@@ -15,28 +15,28 @@ extern void mmp2_clear_pmic_int(void);
- 
- #include "devices.h"
- 
--extern struct pxa_device_desc mmp2_device_uart1;
--extern struct pxa_device_desc mmp2_device_uart2;
--extern struct pxa_device_desc mmp2_device_uart3;
--extern struct pxa_device_desc mmp2_device_uart4;
--extern struct pxa_device_desc mmp2_device_twsi1;
--extern struct pxa_device_desc mmp2_device_twsi2;
--extern struct pxa_device_desc mmp2_device_twsi3;
--extern struct pxa_device_desc mmp2_device_twsi4;
--extern struct pxa_device_desc mmp2_device_twsi5;
--extern struct pxa_device_desc mmp2_device_twsi6;
--extern struct pxa_device_desc mmp2_device_sdh0;
--extern struct pxa_device_desc mmp2_device_sdh1;
--extern struct pxa_device_desc mmp2_device_sdh2;
--extern struct pxa_device_desc mmp2_device_sdh3;
--extern struct pxa_device_desc mmp2_device_asram;
--extern struct pxa_device_desc mmp2_device_isram;
-+extern struct mmp_device_desc mmp2_device_uart1;
-+extern struct mmp_device_desc mmp2_device_uart2;
-+extern struct mmp_device_desc mmp2_device_uart3;
-+extern struct mmp_device_desc mmp2_device_uart4;
-+extern struct mmp_device_desc mmp2_device_twsi1;
-+extern struct mmp_device_desc mmp2_device_twsi2;
-+extern struct mmp_device_desc mmp2_device_twsi3;
-+extern struct mmp_device_desc mmp2_device_twsi4;
-+extern struct mmp_device_desc mmp2_device_twsi5;
-+extern struct mmp_device_desc mmp2_device_twsi6;
-+extern struct mmp_device_desc mmp2_device_sdh0;
-+extern struct mmp_device_desc mmp2_device_sdh1;
-+extern struct mmp_device_desc mmp2_device_sdh2;
-+extern struct mmp_device_desc mmp2_device_sdh3;
-+extern struct mmp_device_desc mmp2_device_asram;
-+extern struct mmp_device_desc mmp2_device_isram;
- 
- extern struct platform_device mmp2_device_gpio;
- 
- static inline int mmp2_add_uart(int id)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 1: d = &mmp2_device_uart1; break;
-@@ -47,13 +47,13 @@ static inline int mmp2_add_uart(int id)
- 		return -EINVAL;
- 	}
- 
--	return pxa_register_device(d, NULL, 0);
-+	return mmp_register_device(d, NULL, 0);
- }
- 
- static inline int mmp2_add_twsi(int id, struct i2c_pxa_platform_data *data,
- 				  struct i2c_board_info *info, unsigned size)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 	int ret;
- 
- 	switch (id) {
-@@ -71,12 +71,12 @@ static inline int mmp2_add_twsi(int id, struct i2c_pxa_platform_data *data,
- 	if (ret)
- 		return ret;
- 
--	return pxa_register_device(d, data, sizeof(*data));
-+	return mmp_register_device(d, data, sizeof(*data));
- }
- 
- static inline int mmp2_add_sdhost(int id, struct sdhci_pxa_platdata *data)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 0: d = &mmp2_device_sdh0; break;
-@@ -87,17 +87,17 @@ static inline int mmp2_add_sdhost(int id, struct sdhci_pxa_platdata *data)
- 		return -EINVAL;
- 	}
- 
--	return pxa_register_device(d, data, sizeof(*data));
-+	return mmp_register_device(d, data, sizeof(*data));
- }
- 
- static inline int mmp2_add_asram(struct sram_platdata *data)
- {
--	return pxa_register_device(&mmp2_device_asram, data, sizeof(*data));
-+	return mmp_register_device(&mmp2_device_asram, data, sizeof(*data));
- }
- 
- static inline int mmp2_add_isram(struct sram_platdata *data)
- {
--	return pxa_register_device(&mmp2_device_isram, data, sizeof(*data));
-+	return mmp_register_device(&mmp2_device_isram, data, sizeof(*data));
- }
- 
- #endif /* __ASM_MACH_MMP2_H */
-diff --git a/arch/arm/mach-mmp/pxa168.h b/arch/arm/mach-mmp/pxa168.h
-index dff651b9f252..34f907cd165a 100644
---- a/arch/arm/mach-mmp/pxa168.h
-+++ b/arch/arm/mach-mmp/pxa168.h
-@@ -21,24 +21,24 @@ extern void pxa168_clear_keypad_wakeup(void);
- 
- #include "devices.h"
- 
--extern struct pxa_device_desc pxa168_device_uart1;
--extern struct pxa_device_desc pxa168_device_uart2;
--extern struct pxa_device_desc pxa168_device_uart3;
--extern struct pxa_device_desc pxa168_device_twsi0;
--extern struct pxa_device_desc pxa168_device_twsi1;
--extern struct pxa_device_desc pxa168_device_pwm1;
--extern struct pxa_device_desc pxa168_device_pwm2;
--extern struct pxa_device_desc pxa168_device_pwm3;
--extern struct pxa_device_desc pxa168_device_pwm4;
--extern struct pxa_device_desc pxa168_device_ssp1;
--extern struct pxa_device_desc pxa168_device_ssp2;
--extern struct pxa_device_desc pxa168_device_ssp3;
--extern struct pxa_device_desc pxa168_device_ssp4;
--extern struct pxa_device_desc pxa168_device_ssp5;
--extern struct pxa_device_desc pxa168_device_nand;
--extern struct pxa_device_desc pxa168_device_fb;
--extern struct pxa_device_desc pxa168_device_keypad;
--extern struct pxa_device_desc pxa168_device_eth;
-+extern struct mmp_device_desc pxa168_device_uart1;
-+extern struct mmp_device_desc pxa168_device_uart2;
-+extern struct mmp_device_desc pxa168_device_uart3;
-+extern struct mmp_device_desc pxa168_device_twsi0;
-+extern struct mmp_device_desc pxa168_device_twsi1;
-+extern struct mmp_device_desc pxa168_device_pwm1;
-+extern struct mmp_device_desc pxa168_device_pwm2;
-+extern struct mmp_device_desc pxa168_device_pwm3;
-+extern struct mmp_device_desc pxa168_device_pwm4;
-+extern struct mmp_device_desc pxa168_device_ssp1;
-+extern struct mmp_device_desc pxa168_device_ssp2;
-+extern struct mmp_device_desc pxa168_device_ssp3;
-+extern struct mmp_device_desc pxa168_device_ssp4;
-+extern struct mmp_device_desc pxa168_device_ssp5;
-+extern struct mmp_device_desc pxa168_device_nand;
-+extern struct mmp_device_desc pxa168_device_fb;
-+extern struct mmp_device_desc pxa168_device_keypad;
-+extern struct mmp_device_desc pxa168_device_eth;
- 
- /* pdata can be NULL */
- extern int __init pxa168_add_usb_host(struct mv_usb_platform_data *pdata);
-@@ -48,7 +48,7 @@ extern struct platform_device pxa168_device_gpio;
- 
- static inline int pxa168_add_uart(int id)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 1: d = &pxa168_device_uart1; break;
-@@ -59,13 +59,13 @@ static inline int pxa168_add_uart(int id)
- 	if (d == NULL)
- 		return -EINVAL;
- 
--	return pxa_register_device(d, NULL, 0);
-+	return mmp_register_device(d, NULL, 0);
- }
- 
- static inline int pxa168_add_twsi(int id, struct i2c_pxa_platform_data *data,
- 				  struct i2c_board_info *info, unsigned size)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 	int ret;
- 
- 	switch (id) {
-@@ -79,12 +79,12 @@ static inline int pxa168_add_twsi(int id, struct i2c_pxa_platform_data *data,
- 	if (ret)
- 		return ret;
- 
--	return pxa_register_device(d, data, sizeof(*data));
-+	return mmp_register_device(d, data, sizeof(*data));
- }
- 
- static inline int pxa168_add_pwm(int id)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 1: d = &pxa168_device_pwm1; break;
-@@ -95,12 +95,12 @@ static inline int pxa168_add_pwm(int id)
- 		return -EINVAL;
- 	}
- 
--	return pxa_register_device(d, NULL, 0);
-+	return mmp_register_device(d, NULL, 0);
- }
- 
- static inline int pxa168_add_ssp(int id)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 1: d = &pxa168_device_ssp1; break;
-@@ -111,17 +111,17 @@ static inline int pxa168_add_ssp(int id)
- 	default:
- 		return -EINVAL;
- 	}
--	return pxa_register_device(d, NULL, 0);
-+	return mmp_register_device(d, NULL, 0);
- }
- 
- static inline int pxa168_add_nand(struct pxa3xx_nand_platform_data *info)
- {
--	return pxa_register_device(&pxa168_device_nand, info, sizeof(*info));
-+	return mmp_register_device(&pxa168_device_nand, info, sizeof(*info));
- }
- 
- static inline int pxa168_add_fb(struct pxa168fb_mach_info *mi)
- {
--	return pxa_register_device(&pxa168_device_fb, mi, sizeof(*mi));
-+	return mmp_register_device(&pxa168_device_fb, mi, sizeof(*mi));
- }
- 
- static inline int pxa168_add_keypad(struct pxa27x_keypad_platform_data *data)
-@@ -129,11 +129,11 @@ static inline int pxa168_add_keypad(struct pxa27x_keypad_platform_data *data)
- 	if (cpu_is_pxa168())
- 		data->clear_wakeup_event = pxa168_clear_keypad_wakeup;
- 
--	return pxa_register_device(&pxa168_device_keypad, data, sizeof(*data));
-+	return mmp_register_device(&pxa168_device_keypad, data, sizeof(*data));
- }
- 
- static inline int pxa168_add_eth(struct pxa168_eth_platform_data *data)
- {
--	return pxa_register_device(&pxa168_device_eth, data, sizeof(*data));
-+	return mmp_register_device(&pxa168_device_eth, data, sizeof(*data));
- }
- #endif /* __ASM_MACH_PXA168_H */
-diff --git a/arch/arm/mach-mmp/pxa910.h b/arch/arm/mach-mmp/pxa910.h
-index 2dfe38e4acc1..6ace5a8aa15b 100644
---- a/arch/arm/mach-mmp/pxa910.h
-+++ b/arch/arm/mach-mmp/pxa910.h
-@@ -13,28 +13,28 @@ extern void __init pxa910_init_irq(void);
- 
- #include "devices.h"
- 
--extern struct pxa_device_desc pxa910_device_uart1;
--extern struct pxa_device_desc pxa910_device_uart2;
--extern struct pxa_device_desc pxa910_device_twsi0;
--extern struct pxa_device_desc pxa910_device_twsi1;
--extern struct pxa_device_desc pxa910_device_pwm1;
--extern struct pxa_device_desc pxa910_device_pwm2;
--extern struct pxa_device_desc pxa910_device_pwm3;
--extern struct pxa_device_desc pxa910_device_pwm4;
--extern struct pxa_device_desc pxa910_device_nand;
-+extern struct mmp_device_desc pxa910_device_uart1;
-+extern struct mmp_device_desc pxa910_device_uart2;
-+extern struct mmp_device_desc pxa910_device_twsi0;
-+extern struct mmp_device_desc pxa910_device_twsi1;
-+extern struct mmp_device_desc pxa910_device_pwm1;
-+extern struct mmp_device_desc pxa910_device_pwm2;
-+extern struct mmp_device_desc pxa910_device_pwm3;
-+extern struct mmp_device_desc pxa910_device_pwm4;
-+extern struct mmp_device_desc pxa910_device_nand;
- extern struct platform_device pxa168_device_usb_phy;
- extern struct platform_device pxa168_device_u2o;
- extern struct platform_device pxa168_device_u2ootg;
- extern struct platform_device pxa168_device_u2oehci;
--extern struct pxa_device_desc pxa910_device_disp;
--extern struct pxa_device_desc pxa910_device_fb;
--extern struct pxa_device_desc pxa910_device_panel;
-+extern struct mmp_device_desc pxa910_device_disp;
-+extern struct mmp_device_desc pxa910_device_fb;
-+extern struct mmp_device_desc pxa910_device_panel;
- extern struct platform_device pxa910_device_gpio;
- extern struct platform_device pxa910_device_rtc;
- 
- static inline int pxa910_add_uart(int id)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 1: d = &pxa910_device_uart1; break;
-@@ -44,13 +44,13 @@ static inline int pxa910_add_uart(int id)
- 	if (d == NULL)
- 		return -EINVAL;
- 
--	return pxa_register_device(d, NULL, 0);
-+	return mmp_register_device(d, NULL, 0);
- }
- 
- static inline int pxa910_add_twsi(int id, struct i2c_pxa_platform_data *data,
- 				  struct i2c_board_info *info, unsigned size)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 	int ret;
- 
- 	switch (id) {
-@@ -64,12 +64,12 @@ static inline int pxa910_add_twsi(int id, struct i2c_pxa_platform_data *data,
- 	if (ret)
- 		return ret;
- 
--	return pxa_register_device(d, data, sizeof(*data));
-+	return mmp_register_device(d, data, sizeof(*data));
- }
- 
- static inline int pxa910_add_pwm(int id)
- {
--	struct pxa_device_desc *d = NULL;
-+	struct mmp_device_desc *d = NULL;
- 
- 	switch (id) {
- 	case 1: d = &pxa910_device_pwm1; break;
-@@ -80,11 +80,11 @@ static inline int pxa910_add_pwm(int id)
- 		return -EINVAL;
- 	}
- 
--	return pxa_register_device(d, NULL, 0);
-+	return mmp_register_device(d, NULL, 0);
- }
- 
- static inline int pxa910_add_nand(struct pxa3xx_nand_platform_data *info)
- {
--	return pxa_register_device(&pxa910_device_nand, info, sizeof(*info));
-+	return mmp_register_device(&pxa910_device_nand, info, sizeof(*info));
- }
- #endif /* __ASM_MACH_PXA910_H */
-diff --git a/arch/arm/mach-mmp/ttc_dkb.c b/arch/arm/mach-mmp/ttc_dkb.c
-index 4f240760d4aa..345b2e6d5c7e 100644
---- a/arch/arm/mach-mmp/ttc_dkb.c
-+++ b/arch/arm/mach-mmp/ttc_dkb.c
-@@ -253,12 +253,12 @@ static struct spi_board_info spi_board_info[] __initdata = {
- 
- static void __init add_disp(void)
- {
--	pxa_register_device(&pxa910_device_disp,
-+	mmp_register_device(&pxa910_device_disp,
- 		&dkb_disp_info, sizeof(dkb_disp_info));
- 	spi_register_board_info(spi_board_info, ARRAY_SIZE(spi_board_info));
--	pxa_register_device(&pxa910_device_fb,
-+	mmp_register_device(&pxa910_device_fb,
- 		&dkb_fb_info, sizeof(dkb_fb_info));
--	pxa_register_device(&pxa910_device_panel,
-+	mmp_register_device(&pxa910_device_panel,
- 		&dkb_tpo_panel_info, sizeof(dkb_tpo_panel_info));
- }
- #endif
+ menu "Intel PXA2xx/PXA3xx Implementations"
+diff --git a/arch/arm/mach-pxa/Makefile.boot b/arch/arm/mach-pxa/Makefile.boot
+deleted file mode 100644
+index bb6e353ecf06..000000000000
+--- a/arch/arm/mach-pxa/Makefile.boot
++++ /dev/null
+@@ -1,3 +0,0 @@
+-# SPDX-License-Identifier: GPL-2.0-only
+-   zreladdr-y	+= 0xa0008000
+-
+diff --git a/arch/arm/mach-pxa/include/mach/uncompress.h b/arch/arm/mach-pxa/include/mach/uncompress.h
+deleted file mode 100644
+index 1ed629e38ce6..000000000000
+--- a/arch/arm/mach-pxa/include/mach/uncompress.h
++++ /dev/null
+@@ -1,70 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0-only */
+-/*
+- * arch/arm/mach-pxa/include/mach/uncompress.h
+- *
+- * Author:	Nicolas Pitre
+- * Copyright:	(C) 2001 MontaVista Software Inc.
+- */
+-
+-#include <linux/serial_reg.h>
+-#include <asm/mach-types.h>
+-
+-#define FFUART_BASE	(0x40100000)
+-#define BTUART_BASE	(0x40200000)
+-#define STUART_BASE	(0x40700000)
+-
+-unsigned long uart_base;
+-unsigned int uart_shift;
+-unsigned int uart_is_pxa;
+-
+-static inline unsigned char uart_read(int offset)
+-{
+-	return *(volatile unsigned char *)(uart_base + (offset << uart_shift));
+-}
+-
+-static inline void uart_write(unsigned char val, int offset)
+-{
+-	*(volatile unsigned char *)(uart_base + (offset << uart_shift)) = val;
+-}
+-
+-static inline int uart_is_enabled(void)
+-{
+-	/* assume enabled by default for non-PXA uarts */
+-	return uart_is_pxa ? uart_read(UART_IER) & UART_IER_UUE : 1;
+-}
+-
+-static inline void putc(char c)
+-{
+-	if (!uart_is_enabled())
+-		return;
+-
+-	while (!(uart_read(UART_LSR) & UART_LSR_THRE))
+-		barrier();
+-
+-	uart_write(c, UART_TX);
+-}
+-
+-/*
+- * This does not append a newline
+- */
+-static inline void flush(void)
+-{
+-}
+-
+-static inline void arch_decomp_setup(void)
+-{
+-	/* initialize to default */
+-	uart_base = FFUART_BASE;
+-	uart_shift = 2;
+-	uart_is_pxa = 1;
+-
+-	if (machine_is_littleton() ||  machine_is_csb726() ||
+-	    machine_is_cm_x300() || machine_is_balloon3())
+-		uart_base = STUART_BASE;
+-
+-	if (machine_is_arcom_zeus()) {
+-		uart_base = 0x10000000;	/* nCS4 */
+-		uart_shift = 1;
+-		uart_is_pxa = 0;
+-	}
+-}
 -- 
 2.29.2
 
