@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EAA7C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:44:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B32B9C38A2B
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 16:44:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355035AbiDSQq1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 12:46:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53524 "EHLO
+        id S1354211AbiDSQqW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 12:46:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354823AbiDSQnf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:43:35 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BECA8286FB;
-        Tue, 19 Apr 2022 09:40:52 -0700 (PDT)
+        with ESMTP id S1355104AbiDSQow (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 12:44:52 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61E11326ED;
+        Tue, 19 Apr 2022 09:42:09 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 646A7B81BB5;
-        Tue, 19 Apr 2022 16:40:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B8675C385AD;
-        Tue, 19 Apr 2022 16:40:42 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id AAB6461866;
+        Tue, 19 Apr 2022 16:42:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C61CCC385AC;
+        Tue, 19 Apr 2022 16:42:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650386450;
-        bh=jhDfr1ZWF3PO87dsTFnhjEgY7CrgFIhStoxQAjgbO8c=;
+        s=k20201202; t=1650386528;
+        bh=pMXP3tiz+pXmptnDBsvlTEJvLY7a6WjIQlAUDseVC7c=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IQZbCphc2aVG/7nQPc8i6SmaXQBHDLcd8lu8VCmzfuxTE9zQ1fttSmG7EuqkoEKfV
-         +AijdqGUGVaVV7Gc6JQtpvmfbM8oJLiqSVhH1EBaliC1N03xEc1T1smfyTfNlPQ+ci
-         g7D2ubLO4DZSZbQ1S7mLLZAjhkr/Lf9nzpyNW7rUgW2JoDBYVacKhRiIFK/VFk/Xdk
-         UDw/LuEvBj9xe6IYc/bXh3fl9uuuA9b3Lcl7FHH7ZpoOjUIFEYceuWcUa/cIuAsEha
-         DxLdKbU1RVdss4xqHuQUN0IBiEAqCfNSmrZdnpLyeTBHr4KtQrWshWX4LLED0dDmoN
-         GxgomaIMHhKEQ==
+        b=WNtq6L7kYzLqPo1CgDnRfCSkhbU40rWot44wiH0w7KY5q5PTaeX6yBsSjejpCMIO5
+         7YyF6BGgXkj9KCnK6hk1vKyGqJQqYGi0k986h/js2Dhzln1p0JAC3zoc9J0QoVPOEL
+         TweRk/7T+kSDIDXkf8Ls1dRyo2LMdJPLhNkThXg9d52y29Ru+lYVKiNP2G3UFkn5vQ
+         cGC7cmPNtQJ2U0GFsNug3uLKlp06uWSZX6uTKLJ1lTu+kvNpDykOw9NqOoWZtYj2UY
+         ruEFGMjX0RkqbWcX1HOwB0ciYaSwKKyyeA+rysBsucYttmfP/kQc1miV4a16y8Cds+
+         GVXQTXNlRlmpA==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org
 Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -59,9 +59,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
         alsa-devel@alsa-project.org
-Subject: [PATCH 15/48] ARM: pxa: tosa: use gpio descriptor for audio
-Date:   Tue, 19 Apr 2022 18:37:37 +0200
-Message-Id: <20220419163810.2118169-16-arnd@kernel.org>
+Subject: [PATCH 25/48] ARM: pxa: zylonite: use gpio lookup instead mfp header
+Date:   Tue, 19 Apr 2022 18:37:47 +0200
+Message-Id: <20220419163810.2118169-26-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419163810.2118169-1-arnd@kernel.org>
 References: <20220419163810.2118169-1-arnd@kernel.org>
@@ -73,115 +73,121 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-The audio driver should not use a hardwired gpio number
-from the header. Change it to use a lookup table.
+The mach/mfp.h header is only used by this one driver
+for hardcoded gpio numbers. Change that to use a lookup
+table instead.
 
-Acked-by: Mark Brown <broonie@kernel.org>
+Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Cc: linux-input@vger.kernel.org
 Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: alsa-devel@alsa-project.org
+Acked-by: Linus Walleij <linus.walleij@linaro.org>
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/mach-pxa/tosa.c | 12 ++++++++++++
- sound/soc/pxa/tosa.c     | 16 +++++++---------
- 2 files changed, 19 insertions(+), 9 deletions(-)
+ arch/arm/mach-pxa/zylonite.c                | 31 +++++++++++++++++++++
+ drivers/input/touchscreen/zylonite-wm97xx.c | 20 +++++++------
+ 2 files changed, 42 insertions(+), 9 deletions(-)
 
-diff --git a/arch/arm/mach-pxa/tosa.c b/arch/arm/mach-pxa/tosa.c
-index 9476ed0f55e9..5a16a025192c 100644
---- a/arch/arm/mach-pxa/tosa.c
-+++ b/arch/arm/mach-pxa/tosa.c
-@@ -887,6 +887,17 @@ static struct platform_device wm9712_device = {
- 	.id	= -1,
- };
+diff --git a/arch/arm/mach-pxa/zylonite.c b/arch/arm/mach-pxa/zylonite.c
+index c48dd6d03df9..ba6dc86da855 100644
+--- a/arch/arm/mach-pxa/zylonite.c
++++ b/arch/arm/mach-pxa/zylonite.c
+@@ -32,6 +32,7 @@
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include <linux/platform_data/keypad-pxa27x.h>
+ #include <linux/platform_data/mtd-nand-pxa3xx.h>
++#include <mach/mfp.h>
  
-+static struct gpiod_lookup_table tosa_audio_gpio_table = {
-+	.dev_id = "tosa-audio",
+ #include "devices.h"
+ #include "generic.h"
+@@ -425,6 +426,35 @@ static void __init zylonite_init_ohci(void)
+ static inline void zylonite_init_ohci(void) {}
+ #endif /* CONFIG_USB_OHCI_HCD || CONFIG_USB_OHCI_HCD_MODULE */
+ 
++static struct gpiod_lookup_table zylonite_wm97xx_touch_gpio15_table = {
++	.dev_id = "wm97xx-touch.0",
 +	.table = {
-+		GPIO_LOOKUP("tc6393xb",
-+			    TOSA_GPIO_L_MUTE - TOSA_TC6393XB_GPIO_BASE,
-+			    "l-mute", GPIO_ACTIVE_HIGH),
++		GPIO_LOOKUP("gpio-pxa", mfp_to_gpio(MFP_PIN_GPIO15),
++			    "touch", GPIO_ACTIVE_LOW),
 +		{ },
 +	},
 +};
 +
++static struct gpiod_lookup_table zylonite_wm97xx_touch_gpio26_table = {
++	.dev_id = "wm97xx-touch.0",
++	.table = {
++		GPIO_LOOKUP("gpio-pxa", mfp_to_gpio(MFP_PIN_GPIO26),
++			    "touch", GPIO_ACTIVE_LOW),
++		{ },
++	},
++};
 +
- static struct platform_device tosa_audio_device = {
- 	.name	= "tosa-audio",
- 	.id	= -1,
-@@ -944,6 +955,7 @@ static void __init tosa_init(void)
- 	PMCR = 0x01;
++static void __init zylonite_init_wm97xx_touch(void)
++{
++	if (!IS_ENABLED(CONFIG_TOUCHSCREEN_WM97XX_ZYLONITE))
++		return;
++
++	if (cpu_is_pxa320())
++		gpiod_add_lookup_table(&zylonite_wm97xx_touch_gpio15_table);
++	else
++		gpiod_add_lookup_table(&zylonite_wm97xx_touch_gpio26_table);
++}
++
+ static void __init zylonite_init(void)
+ {
+ 	pxa_set_ffuart_info(NULL);
+@@ -450,6 +480,7 @@ static void __init zylonite_init(void)
+ 	zylonite_init_nand();
+ 	zylonite_init_leds();
+ 	zylonite_init_ohci();
++	zylonite_init_wm97xx_touch();
+ }
  
- 	gpiod_add_lookup_table(&tosa_mci_gpio_table);
-+	gpiod_add_lookup_table(&tosa_audio_gpio_table);
- 	pxa_set_mci_info(&tosa_mci_platform_data);
- 	pxa_set_ficp_info(&tosa_ficp_platform_data);
- 	pxa_set_i2c_info(NULL);
-diff --git a/sound/soc/pxa/tosa.c b/sound/soc/pxa/tosa.c
-index 06226f9b863e..157e6bcacffd 100644
---- a/sound/soc/pxa/tosa.c
-+++ b/sound/soc/pxa/tosa.c
-@@ -16,14 +16,13 @@
- #include <linux/module.h>
+ MACHINE_START(ZYLONITE, "PXA3xx Platform Development Kit (aka Zylonite)")
+diff --git a/drivers/input/touchscreen/zylonite-wm97xx.c b/drivers/input/touchscreen/zylonite-wm97xx.c
+index f57bdf083188..cabdd6e3c6f8 100644
+--- a/drivers/input/touchscreen/zylonite-wm97xx.c
++++ b/drivers/input/touchscreen/zylonite-wm97xx.c
+@@ -17,14 +17,13 @@
  #include <linux/moduleparam.h>
- #include <linux/device.h>
+ #include <linux/kernel.h>
+ #include <linux/delay.h>
 -#include <linux/gpio.h>
 +#include <linux/gpio/consumer.h>
+ #include <linux/irq.h>
+ #include <linux/interrupt.h>
+ #include <linux/io.h>
+ #include <linux/soc/pxa/cpu.h>
+ #include <linux/wm97xx.h>
  
- #include <sound/core.h>
- #include <sound/pcm.h>
- #include <sound/soc.h>
+-#include <mach/mfp.h>
+ #include <mach/regs-ac97.h>
  
- #include <asm/mach-types.h>
--#include <mach/tosa.h>
- #include <linux/platform_data/asoc-pxa.h>
- 
- #define TOSA_HP        0
-@@ -35,6 +34,7 @@
- 
- static int tosa_jack_func;
- static int tosa_spk_func;
-+static struct gpio_desc *l_mute_gpio;
- 
- static void tosa_ext_control(struct snd_soc_dapm_context *dapm)
+ struct continuous {
+@@ -181,14 +180,17 @@ static struct wm97xx_mach_ops zylonite_mach_ops = {
+ static int zylonite_wm97xx_probe(struct platform_device *pdev)
  {
-@@ -128,7 +128,7 @@ static int tosa_set_spk(struct snd_kcontrol *kcontrol,
- static int tosa_hp_event(struct snd_soc_dapm_widget *w,
- 	struct snd_kcontrol *k, int event)
- {
--	gpio_set_value(TOSA_GPIO_L_MUTE, SND_SOC_DAPM_EVENT_ON(event) ? 1 : 0);
-+	gpiod_set_value(l_mute_gpio, SND_SOC_DAPM_EVENT_ON(event) ? 1 : 0);
- 	return 0;
- }
- 
-@@ -222,25 +222,23 @@ static int tosa_probe(struct platform_device *pdev)
- 	struct snd_soc_card *card = &tosa;
- 	int ret;
- 
--	ret = gpio_request_one(TOSA_GPIO_L_MUTE, GPIOF_OUT_INIT_LOW,
--			       "Headphone Jack");
-+	l_mute_gpio = devm_gpiod_get(&pdev->dev, "l-mute", GPIOD_OUT_LOW);
-+	ret = PTR_ERR_OR_ZERO(l_mute_gpio);
- 	if (ret)
- 		return ret;
- 
- 	card->dev = &pdev->dev;
- 
- 	ret = devm_snd_soc_register_card(&pdev->dev, card);
--	if (ret) {
-+	if (ret)
- 		dev_err(&pdev->dev, "snd_soc_register_card() failed: %d\n",
- 			ret);
--		gpio_free(TOSA_GPIO_L_MUTE);
--	}
+ 	struct wm97xx *wm = platform_get_drvdata(pdev);
+-	int gpio_touch_irq;
+-
+-	if (cpu_is_pxa320())
+-		gpio_touch_irq = mfp_to_gpio(MFP_PIN_GPIO15);
+-	else
+-		gpio_touch_irq = mfp_to_gpio(MFP_PIN_GPIO26);
++	struct gpio_desc *gpio_touch_irq;
++	int err;
 +
- 	return ret;
- }
++	gpio_touch_irq = devm_gpiod_get(&pdev->dev, "touch", GPIOD_IN);
++	err = PTR_ERR_OR_ZERO(gpio_touch_irq);
++	if (err) {
++		dev_err(&pdev->dev, "Cannot get irq gpio: %d\n", err);
++		return err;
++	}
  
- static int tosa_remove(struct platform_device *pdev)
- {
--	gpio_free(TOSA_GPIO_L_MUTE);
- 	return 0;
- }
+-	wm->pen_irq = gpio_to_irq(gpio_touch_irq);
++	wm->pen_irq = gpiod_to_irq(gpio_touch_irq);
+ 	irq_set_irq_type(wm->pen_irq, IRQ_TYPE_EDGE_BOTH);
  
+ 	wm97xx_config_gpio(wm, WM97XX_GPIO_13, WM97XX_GPIO_IN,
 -- 
 2.29.2
 
