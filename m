@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2465C43217
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9438C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Apr 2022 13:42:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344200AbiDSNo5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Apr 2022 09:44:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39972 "EHLO
+        id S1346182AbiDSNo6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Apr 2022 09:44:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244173AbiDSNnQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:43:16 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A4DD182;
-        Tue, 19 Apr 2022 06:40:33 -0700 (PDT)
+        with ESMTP id S1352812AbiDSNoC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2022 09:44:02 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6752AB876;
+        Tue, 19 Apr 2022 06:41:16 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 91168B81981;
-        Tue, 19 Apr 2022 13:40:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9BA25C385AF;
-        Tue, 19 Apr 2022 13:40:23 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EA6E2616BF;
+        Tue, 19 Apr 2022 13:41:15 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9BA99C385AC;
+        Tue, 19 Apr 2022 13:41:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650375630;
-        bh=Y28p7Ny9YomGZamqZAIMduIfzMd9ilwbgGj96GOTejs=;
+        s=k20201202; t=1650375675;
+        bh=Zu+s/Y6CPoLWnIUPjVgATnzi0v1z3Jhkw2fBKn8V10M=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=eUHAFjoiHuXtqZ4ZQCCCjrNWBObk3OpvdAoRndhAbYTT/dWpoD2ncZTLJ89QVYpaG
-         E3ATSEWOwtxhMgdoVM3aoUvIYenIeLY8VecZ74Q1zfAO0JlMqhoBixhEDM2LhMCyTM
-         Bg8EvhbdgtMjbcznvJxbbq6hNISkYGTTR4Tv2UoKdlOSU7hMkR/ruvdJ/iC72Zem7f
-         i9ZFFfE2l05LHOqtf8V/dIsD5stadiF0iLdtFAAfv026f+K1DHAgxo/HxMLDoMG0LJ
-         KlL7TLBkRPDFumi0yT4sk8TbBxJfJ8Zsfkwpvwn7UIjjyX9tWqdiDl36pA3xGyphWy
-         6yb1hp9ibLpEg==
+        b=U5cHM84vrLY3O3eyj59RLMY2m4fa/fIXcrDCJ9kjqXW9XoISe3lQxXTO6L1dAaoQk
+         oQoOecRjFl/5jFqnm0E7okbJ6ifMuDNAdWBOnlrkhp25WpgKIJYVTtI7PuyR0j44Wt
+         7VsEFwWnvRKUEPainDkDn9AuVbG7J1W7AlpltYmSzKoWeF58QXmvv/f82nxuMT/W8N
+         aPUFb2G2ez74e0BV9D2X9qJaN5aJ9wiK14osJsk3UfjTmuRqz6tm7WcpnIOvwfOH1f
+         Xlf8Y8XE35dK5tWzEayPKnnm9LQnhR2Mue+H9vmhX/9J78LZeH0skpwslSkMEsZyAj
+         DLN5B2SpMEUCQ==
 From:   Arnd Bergmann <arnd@kernel.org>
 To:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
         jmkrzyszt@gmail.com
@@ -57,9 +57,9 @@ Cc:     Arnd Bergmann <arnd@arndb.de>,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: [PATCH 23/41] ARM: omap: split up arch/arm/plat-omap/Kconfig
-Date:   Tue, 19 Apr 2022 15:37:05 +0200
-Message-Id: <20220419133723.1394715-24-arnd@kernel.org>
+Subject: [PATCH 29/41] ARM: omap1: fix build with no SoC selected
+Date:   Tue, 19 Apr 2022 15:37:11 +0200
+Message-Id: <20220419133723.1394715-30-arnd@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
 References: <20220419133723.1394715-1-arnd@kernel.org>
@@ -71,252 +71,97 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Arnd Bergmann <arnd@arndb.de>
 
-All the remaining features in here are either omap1
-or omap2plus specific, so move them into the respective
-Kconfig files.
+In a multiplatform randconfig kernel, one can have
+CONFIG_ARCH_OMAP1 enabled, but none of the specific SoCs.
+This leads to some build issues as the code is not
+meant to deal with this configuration at the moment:
+
+arch/arm/mach-omap1/io.c:86:20: error: unused function 'omap1_map_common_io' [-Werror,-Wunused-function]
+arch/arm/mach-omap1/pm.h:113:2: error: "Power management for this processor not implemented yet" [-Werror,-W#warnings]
+
+Use the same trick as on OMAP2 and guard the actual compilation
+of platform code with another Makefile ifdef check based
+on an option that depends on having at least one SoC enabled.
+
+The io.c file still needs to get compiled to allow building
+device drivers with a dependency on CONFIG_ARCH_OMAP1.
 
 Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- arch/arm/Kconfig            |  2 -
- arch/arm/mach-omap1/Kconfig | 37 +++++++++++++++
- arch/arm/mach-omap2/Kconfig | 49 ++++++++++++++++++++
- arch/arm/plat-omap/Kconfig  | 92 -------------------------------------
- 4 files changed, 86 insertions(+), 94 deletions(-)
- delete mode 100644 arch/arm/plat-omap/Kconfig
+ arch/arm/Kconfig                | 1 -
+ arch/arm/mach-omap1/Kconfig     | 4 ++++
+ arch/arm/mach-omap1/Makefile    | 4 ++++
+ include/linux/soc/ti/omap1-io.h | 4 ++--
+ 4 files changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index 2e8091e2d8a8..700655e31b04 100644
+index fb6afa6bbc8f..a65f2c05f01c 100644
 --- a/arch/arm/Kconfig
 +++ b/arch/arm/Kconfig
-@@ -656,8 +656,6 @@ source "arch/arm/mach-npcm/Kconfig"
+@@ -485,7 +485,6 @@ config ARCH_S3C24XX
  
- source "arch/arm/mach-nspire/Kconfig"
- 
--source "arch/arm/plat-omap/Kconfig"
--
- source "arch/arm/mach-omap1/Kconfig"
- 
- source "arch/arm/mach-omap2/Kconfig"
+ config ARCH_OMAP1
+ 	bool "TI OMAP1"
+-	select ARCH_OMAP
+ 	select CLKSRC_MMIO
+ 	select FORCE_PCI if PCCARD
+ 	select GENERIC_IRQ_CHIP
 diff --git a/arch/arm/mach-omap1/Kconfig b/arch/arm/mach-omap1/Kconfig
-index 04155b5ce978..93ea86954a84 100644
+index 93ea86954a84..d4b0cd91a4f9 100644
 --- a/arch/arm/mach-omap1/Kconfig
 +++ b/arch/arm/mach-omap1/Kconfig
-@@ -28,6 +28,11 @@ config ARCH_OMAP16XX
+@@ -28,6 +28,10 @@ config ARCH_OMAP16XX
  	select CPU_ARM926T
  	select OMAP_DM_TIMER
  
-+config ARCH_OMAP
-+	bool
++config ARCH_OMAP1_ANY
++	select ARCH_OMAP
++	def_bool ARCH_OMAP730 || ARCH_OMAP850 || ARCH_OMAP15XX || ARCH_OMAP16XX
 +
-+comment "OMAP Feature Selections"
-+
- config OMAP_MUX
- 	bool "OMAP multiplexing support"
- 	default y
-@@ -69,6 +74,38 @@ config OMAP_32K_TIMER
- 	  The actual timer selection is done in the board file
- 	  through the (DT_)MACHINE_START structure.
- 
-+config OMAP_MPU_TIMER
-+	bool "Use mpu timer"
-+	depends on ARCH_OMAP1
-+	help
-+	  Select this option if you want to use the OMAP mpu timer. This
-+	  timer provides more intra-tick resolution than the 32KHz timer,
-+	  but consumes more power.
-+
-+config OMAP_SERIAL_WAKE
-+	bool "Enable wake-up events for serial ports"
-+	depends on ARCH_OMAP1 && OMAP_MUX
-+	default y
-+	help
-+	  Select this option if you want to have your system wake up
-+	  to data on the serial RX line. This allows you to wake the
-+	  system from serial console.
-+
-+config OMAP_RESET_CLOCKS
-+	bool "Reset unused clocks during boot"
-+	depends on ARCH_OMAP
-+	help
-+	  Say Y if you want to reset unused clocks during boot.
-+	  This option saves power, but assumes all drivers are
-+	  using the clock framework. Broken drivers that do not
-+	  yet use clock framework may not work with this option.
-+	  If you are booting from another operating system, you
-+	  probably do not want this option enabled until your
-+	  device drivers work properly.
-+
-+config ARCH_OMAP_OTG
-+	bool
-+
- comment "OMAP Board Type"
- 
- config MACH_OMAP_INNOVATOR
-diff --git a/arch/arm/mach-omap2/Kconfig b/arch/arm/mach-omap2/Kconfig
-index 02c253de9b6e..a8adbb4d478a 100644
---- a/arch/arm/mach-omap2/Kconfig
-+++ b/arch/arm/mach-omap2/Kconfig
-@@ -123,6 +123,8 @@ config OMAP_INTERCONNECT_BARRIER
+ config ARCH_OMAP
  	bool
- 	select ARM_HEAVY_MB
- 	
-+config ARCH_OMAP
-+	bool
  
- if ARCH_OMAP2PLUS
+diff --git a/arch/arm/mach-omap1/Makefile b/arch/arm/mach-omap1/Makefile
+index 0615cb0ba580..506074b86333 100644
+--- a/arch/arm/mach-omap1/Makefile
++++ b/arch/arm/mach-omap1/Makefile
+@@ -3,6 +3,8 @@
+ # Makefile for the linux kernel.
+ #
  
-@@ -153,6 +155,53 @@ config SOC_HAS_REALTIME_COUNTER
- 	depends on SOC_OMAP5 || SOC_DRA7XX
- 	default y
++ifdef CONFIG_ARCH_OMAP1_ANY
++
+ # Common support
+ obj-y := io.o id.o sram-init.o sram.o time.o irq.o mux.o flash.o \
+ 	 serial.o devices.o dma.o omap-dma.o fb.o
+@@ -57,3 +59,5 @@ obj-$(CONFIG_ARCH_OMAP730)		+= gpio7xx.o
+ obj-$(CONFIG_ARCH_OMAP850)		+= gpio7xx.o
+ obj-$(CONFIG_ARCH_OMAP15XX)		+= gpio15xx.o
+ obj-$(CONFIG_ARCH_OMAP16XX)		+= gpio16xx.o
++
++endif
+diff --git a/include/linux/soc/ti/omap1-io.h b/include/linux/soc/ti/omap1-io.h
+index 9332c92690f4..f7f12728d4a6 100644
+--- a/include/linux/soc/ti/omap1-io.h
++++ b/include/linux/soc/ti/omap1-io.h
+@@ -5,7 +5,7 @@
+ #ifndef __ASSEMBLER__
+ #include <linux/types.h>
  
-+config POWER_AVS_OMAP
-+	bool "AVS(Adaptive Voltage Scaling) support for OMAP IP versions 1&2"
-+	depends on (ARCH_OMAP3 || ARCH_OMAP4) && PM
-+	select POWER_SUPPLY
-+	help
-+	  Say Y to enable AVS(Adaptive Voltage Scaling)
-+	  support on OMAP containing the version 1 or
-+	  version 2 of the SmartReflex IP.
-+	  V1 is the 65nm version used in OMAP3430.
-+	  V2 is the update for the 45nm version of the IP used in OMAP3630
-+	  and OMAP4430
-+
-+	  Please note, that by default SmartReflex is only
-+	  initialized and not enabled. To enable the automatic voltage
-+	  compensation for vdd mpu and vdd core from user space,
-+	  user must write 1 to
-+		/debug/smartreflex/sr_<X>/autocomp,
-+	  where X is mpu_iva or core for OMAP3.
-+	  Optionally autocompensation can be enabled in the kernel
-+	  by default during system init via the enable_on_init flag
-+	  which an be passed as platform data to the smartreflex driver.
-+
-+config POWER_AVS_OMAP_CLASS3
-+	bool "Class 3 mode of Smartreflex Implementation"
-+	depends on POWER_AVS_OMAP && TWL4030_CORE
-+	help
-+	  Say Y to enable Class 3 implementation of Smartreflex
-+
-+	  Class 3 implementation of Smartreflex employs continuous hardware
-+	  voltage calibration.
-+
-+config OMAP3_L2_AUX_SECURE_SAVE_RESTORE
-+	bool "OMAP3 HS/EMU save and restore for L2 AUX control register"
-+	depends on ARCH_OMAP3 && PM
-+	help
-+	  Without this option, L2 Auxiliary control register contents are
-+	  lost during off-mode entry on HS/EMU devices. This feature
-+	  requires support from PPA / boot-loader in HS/EMU devices, which
-+	  currently does not exist by default.
-+
-+config OMAP3_L2_AUX_SECURE_SERVICE_SET_ID
-+	int "Service ID for the support routine to set L2 AUX control"
-+	depends on OMAP3_L2_AUX_SECURE_SAVE_RESTORE
-+	default 43
-+	help
-+	  PPA routine service ID for setting L2 auxiliary control register.
-+
- comment "OMAP Core Type"
- 	depends on ARCH_OMAP2
- 
-diff --git a/arch/arm/plat-omap/Kconfig b/arch/arm/plat-omap/Kconfig
-deleted file mode 100644
-index dc53ea8e5bbb..000000000000
---- a/arch/arm/plat-omap/Kconfig
-+++ /dev/null
-@@ -1,92 +0,0 @@
--# SPDX-License-Identifier: GPL-2.0
--config ARCH_OMAP
--	bool
--
--if ARCH_OMAP
--
--menu "TI OMAP Common Features"
--
--config ARCH_OMAP_OTG
--	bool
--
--comment "OMAP Feature Selections"
--
--config POWER_AVS_OMAP
--	bool "AVS(Adaptive Voltage Scaling) support for OMAP IP versions 1&2"
--	depends on (ARCH_OMAP3 || ARCH_OMAP4) && PM
--	select POWER_SUPPLY
--	help
--	  Say Y to enable AVS(Adaptive Voltage Scaling)
--	  support on OMAP containing the version 1 or
--	  version 2 of the SmartReflex IP.
--	  V1 is the 65nm version used in OMAP3430.
--	  V2 is the update for the 45nm version of the IP used in OMAP3630
--	  and OMAP4430
--
--	  Please note, that by default SmartReflex is only
--	  initialized and not enabled. To enable the automatic voltage
--	  compensation for vdd mpu and vdd core from user space,
--	  user must write 1 to
--		/debug/smartreflex/sr_<X>/autocomp,
--	  where X is mpu_iva or core for OMAP3.
--	  Optionally autocompensation can be enabled in the kernel
--	  by default during system init via the enable_on_init flag
--	  which an be passed as platform data to the smartreflex driver.
--
--config POWER_AVS_OMAP_CLASS3
--	bool "Class 3 mode of Smartreflex Implementation"
--	depends on POWER_AVS_OMAP && TWL4030_CORE
--	help
--	  Say Y to enable Class 3 implementation of Smartreflex
--
--	  Class 3 implementation of Smartreflex employs continuous hardware
--	  voltage calibration.
--
--config OMAP_RESET_CLOCKS
--	bool "Reset unused clocks during boot"
--	depends on ARCH_OMAP
--	help
--	  Say Y if you want to reset unused clocks during boot.
--	  This option saves power, but assumes all drivers are
--	  using the clock framework. Broken drivers that do not
--	  yet use clock framework may not work with this option.
--	  If you are booting from another operating system, you
--	  probably do not want this option enabled until your
--	  device drivers work properly.
--
--config OMAP_MPU_TIMER
--	bool "Use mpu timer"
--	depends on ARCH_OMAP1
--	help
--	  Select this option if you want to use the OMAP mpu timer. This
--	  timer provides more intra-tick resolution than the 32KHz timer,
--	  but consumes more power.
--
--config OMAP3_L2_AUX_SECURE_SAVE_RESTORE
--	bool "OMAP3 HS/EMU save and restore for L2 AUX control register"
--	depends on ARCH_OMAP3 && PM
--	help
--	  Without this option, L2 Auxiliary control register contents are
--	  lost during off-mode entry on HS/EMU devices. This feature
--	  requires support from PPA / boot-loader in HS/EMU devices, which
--	  currently does not exist by default.
--
--config OMAP3_L2_AUX_SECURE_SERVICE_SET_ID
--	int "Service ID for the support routine to set L2 AUX control"
--	depends on OMAP3_L2_AUX_SECURE_SAVE_RESTORE
--	default 43
--	help
--	  PPA routine service ID for setting L2 auxiliary control register.
--
--config OMAP_SERIAL_WAKE
--	bool "Enable wake-up events for serial ports"
--	depends on ARCH_OMAP1 && OMAP_MUX
--	default y
--	help
--	  Select this option if you want to have your system wake up
--	  to data on the serial RX line. This allows you to wake the
--	  system from serial console.
--
--endmenu
--
--endif
+-#if defined(CONFIG_ARCH_OMAP) && defined(CONFIG_ARCH_OMAP1)
++#ifdef CONFIG_ARCH_OMAP1_ANY
+ /*
+  * NOTE: Please use ioremap + __raw_read/write where possible instead of these
+  */
+@@ -15,7 +15,7 @@ extern u32 omap_readl(u32 pa);
+ extern void omap_writeb(u8 v, u32 pa);
+ extern void omap_writew(u16 v, u32 pa);
+ extern void omap_writel(u32 v, u32 pa);
+-#elif defined(CONFIG_COMPILE_TEST)
++#else
+ static inline u8 omap_readb(u32 pa)  { return 0; }
+ static inline u16 omap_readw(u32 pa) { return 0; }
+ static inline u32 omap_readl(u32 pa) { return 0; }
 -- 
 2.29.2
 
