@@ -2,120 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39CBAC43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 20:45:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86D7CC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 21:16:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1382233AbiDTUrr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Apr 2022 16:47:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59180 "EHLO
+        id S1382449AbiDTVT3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Apr 2022 17:19:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59034 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1382203AbiDTUrc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 16:47:32 -0400
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA4CD42ED0;
-        Wed, 20 Apr 2022 13:44:45 -0700 (PDT)
-Received: by mail-pl1-x62a.google.com with SMTP id b7so2892694plh.2;
-        Wed, 20 Apr 2022 13:44:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=xImE356a59BZUnW4Cic4JbWC5DVqpMAKjv6nwKPx9DI=;
-        b=OL+QXVJEpjV7Z4HuC//q37HqEuUht5h1CcpKGCCRPAuSYfx2YaqLCPrvEiiO6kkGQk
-         ggnMOq4NmaIE9B/cPhZqsf2wZexOSYOkZPiDlrJdAHQqubU8MJXkS448ovjQVaRnX2e5
-         LgEycZiGsVjUMCg/zKHNyTA3QJf2e1fWo5sPcrVoK5ceeKR5+XlHe/v27vaSfj2kNKZm
-         Lme5O2auyyEXGSeMUH5F9xazkNNEa6Oq/msiVIUxgriDElUFLOTt3BxB9fFZuOIoJPDR
-         AGZh/1BBFqOc7WG1aCYUXuhGLOOD5R0CwNE7wt0mGMLXgsVtmHrbHmdtHto+xpq+O7Qx
-         +r5g==
+        with ESMTP id S1382459AbiDTVT3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 17:19:29 -0400
+Received: from mail-oa1-f44.google.com (mail-oa1-f44.google.com [209.85.160.44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58FD843AFF;
+        Wed, 20 Apr 2022 14:16:41 -0700 (PDT)
+Received: by mail-oa1-f44.google.com with SMTP id 586e51a60fabf-e2442907a1so3352596fac.8;
+        Wed, 20 Apr 2022 14:16:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=xImE356a59BZUnW4Cic4JbWC5DVqpMAKjv6nwKPx9DI=;
-        b=7oTS/NFWLqgwlxt+NIUgSjYOxGC1+Iu641FBCkRZGj6s8U7/NFFW5Usz++cDxCl/nm
-         nWHn1CfAnUx9YXTcLXUaL/197bdUasS/JWDSNtyiDvmR/213RtApqGAMBYDIbgdynOfy
-         O1mNmga4nX28c75x4rsQfcKC9T68gpkGxje51+gJwPMD7+ZBJPfzhYS66bUl9E0P3938
-         lS0bUw8XqOc8aQkxob/28PEcoTfEKQhu4sXYj4nRLPK9tJKRpl1Gvm0v65bOO/HoVlat
-         qUvvVQvQbvjCS9/Gj2Qcr2sobe2XQxwMPB/ZoLqwitA7iv9Pr+NQFrO6AgVvVpA0S7Ug
-         rCQg==
-X-Gm-Message-State: AOAM533tiOVRRfHxHStVccgU9/sW6sa9awwCaDegtXontXcQOm4hmT6T
-        JEYmEDytcwiSMBAKVdLTa5o=
-X-Google-Smtp-Source: ABdhPJyBl+Q5YR9vFVRt1kP8/H8gZas/M80UgmaibWxL0BJyPvZZ1qF4/ahkBpyves1PD3Tl2tbTiQ==
-X-Received: by 2002:a17:902:b48a:b0:158:e38d:ca23 with SMTP id y10-20020a170902b48a00b00158e38dca23mr21918715plr.115.1650487484960;
-        Wed, 20 Apr 2022 13:44:44 -0700 (PDT)
-Received: from google.com ([2620:15c:202:201:fe4b:9301:599b:d734])
-        by smtp.gmail.com with ESMTPSA id l25-20020a635719000000b0039da6cdf82dsm20914985pgb.83.2022.04.20.13.44.42
+        bh=Th0dX12lMZvuR5tp3w0qZKCRz9BSomG0+8iVjF7Mv6I=;
+        b=eX0QqQW88hx8G7QCneDX3tSDfbba4bDnHm4r3NuLshiBISt+QJJFmME46HogJOayMN
+         /DjW98J2IQkQJj8CLV08BwA6Z7iof/Su33m4kmx2Mc0C+MQnHah/lomP8vb5O67XMEBw
+         HwYLz9hL8X2g9/zSEIVh5egWAXGdxXmGPpwHXJgr8Q21xjqGC6v9I6msBWW/dhnW3JqE
+         QGHS2gw6DB8GvxGBTeUhutnbY9/hTCyBHSVFkLywWA/x97qRR4ylta1/+Lf9OZpszkVd
+         QYlMRPc7ObP82HSYyWO8BnK6qQegaGKRAlPKxizYDEQJX3EjAJAndiKj+CCjDIptzuCY
+         XgaQ==
+X-Gm-Message-State: AOAM5333TUuLb4HJdKJA4v2NC5/Cxdngz1xU0I2WWuR5gIMCQqQOV/UD
+        1pXPi75WnK0svWI/Bt1mJA==
+X-Google-Smtp-Source: ABdhPJyZQZnIeSTcR5QuXFH20WVVwckci/cxd1Nup7ns0hvWRZjAm9QuV170gcMZwvBniomX13r5Jw==
+X-Received: by 2002:a05:6870:b39c:b0:d1:4a9f:35f9 with SMTP id w28-20020a056870b39c00b000d14a9f35f9mr2310887oap.119.1650489400567;
+        Wed, 20 Apr 2022 14:16:40 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id y23-20020a056808061700b00322e73cd18bsm953770oih.16.2022.04.20.14.16.39
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Apr 2022 13:44:43 -0700 (PDT)
-Date:   Wed, 20 Apr 2022 13:44:40 -0700
-From:   Dmitry Torokhov <dmitry.torokhov@gmail.com>
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
-        jmkrzyszt@gmail.com, Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Paul Walmsley <paul@pwsan.com>,
-        Kevin Hilman <khilman@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Mark Brown <broonie@kernel.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Lee Jones <lee.jones@linaro.org>,
-        Daniel Thompson <daniel.thompson@linaro.org>,
-        Jingoo Han <jingoohan1@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: Re: [PATCH 15/41] input: omap: void using mach/*.h headers
-Message-ID: <YmBwuBc9UVH6MK+M@google.com>
-References: <20220419133723.1394715-1-arnd@kernel.org>
- <20220419133723.1394715-16-arnd@kernel.org>
+        Wed, 20 Apr 2022 14:16:40 -0700 (PDT)
+Received: (nullmailer pid 1863106 invoked by uid 1000);
+        Wed, 20 Apr 2022 21:16:39 -0000
+Date:   Wed, 20 Apr 2022 16:16:39 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Chris Packham <chris.packham@alliedtelesis.co.nz>
+Cc:     sebastian.hesselbarth@gmail.com, ulf.hansson@linaro.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        devicetree@vger.kernel.org, andrew@lunn.ch,
+        linux-mmc@vger.kernel.org, gregory.clement@bootlin.com,
+        krzk+dt@kernel.org
+Subject: Re: [PATCH 3/4] dt-bindings: mmc: convert orion-sdio to JSON schema
+Message-ID: <YmB4N1w/dgioauMA@robh.at.kernel.org>
+References: <20220414230603.567049-1-chris.packham@alliedtelesis.co.nz>
+ <20220414230603.567049-4-chris.packham@alliedtelesis.co.nz>
+ <1650033161.788328.251788.nullmailer@robh.at.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220419133723.1394715-16-arnd@kernel.org>
+In-Reply-To: <1650033161.788328.251788.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 19, 2022 at 03:36:57PM +0200, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
+On Fri, Apr 15, 2022 at 09:32:41AM -0500, Rob Herring wrote:
+> On Fri, 15 Apr 2022 11:06:02 +1200, Chris Packham wrote:
+> > Convert the orion-sdio binding to JSON schema.
+> > 
+> > Signed-off-by: Chris Packham <chris.packham@alliedtelesis.co.nz>
+> > ---
+> >  .../bindings/mmc/marvell,orion-sdio.yaml      | 43 +++++++++++++++++++
+> >  .../devicetree/bindings/mmc/orion-sdio.txt    | 16 -------
+> >  2 files changed, 43 insertions(+), 16 deletions(-)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/marvell,orion-sdio.yaml
+> >  delete mode 100644 Documentation/devicetree/bindings/mmc/orion-sdio.txt
+> > 
 > 
-> The omap-keypad driver currently relies on including mach/memory.h
-> implicitly, but that won't happen once omap1 is converted to
-> CONFIG_ARCH_MULTIPLATFORM. Include the required header
-> explicitly.
+> Running 'make dtbs_check' with the schema in this patch gives the
+> following warnings. Consider if they are expected or the schema is
+> incorrect. These may not be new warnings.
 > 
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Note that it is not yet a requirement to have 0 warnings for dtbs_check.
+> This will change in the future.
+> 
+> Full log is available here: https://patchwork.ozlabs.org/patch/
+> 
+> 
+> mvsdio@90000: $nodename:0: 'mvsdio@90000' does not match '^mmc(@.*)?$'
 
-Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+Looks like all these will be fixed with patch 1, so nothing to do here.
 
-> ---
->  drivers/input/keyboard/omap-keypad.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/input/keyboard/omap-keypad.c b/drivers/input/keyboard/omap-keypad.c
-> index eb3a687796e7..57447d6c9007 100644
-> --- a/drivers/input/keyboard/omap-keypad.c
-> +++ b/drivers/input/keyboard/omap-keypad.c
-> @@ -24,6 +24,7 @@
->  #include <linux/gpio.h>
->  #include <linux/platform_data/gpio-omap.h>
->  #include <linux/platform_data/keypad-omap.h>
-> +#include <linux/soc/ti/omap1-io.h>
->  
->  #undef NEW_BOARD_LEARNING_MODE
->  
-> -- 
-> 2.29.2
-> 
-
--- 
-Dmitry
+Rob
