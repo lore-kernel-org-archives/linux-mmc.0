@@ -2,72 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4743AC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 14:47:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49268C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 16:24:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231221AbiDTOts (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Apr 2022 10:49:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49358 "EHLO
+        id S1380535AbiDTQ0v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Apr 2022 12:26:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242167AbiDTOts (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 10:49:48 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D94AA6391;
-        Wed, 20 Apr 2022 07:46:59 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6BD2961755;
-        Wed, 20 Apr 2022 14:46:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 60FF4C385A0;
-        Wed, 20 Apr 2022 14:46:58 +0000 (UTC)
-Date:   Wed, 20 Apr 2022 16:46:56 +0200
-From:   Greg KH <greg@kroah.com>
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
-        jmkrzyszt@gmail.com, Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Paul Walmsley <paul@pwsan.com>,
-        Kevin Hilman <khilman@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Mark Brown <broonie@kernel.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Lee Jones <lee.jones@linaro.org>,
-        Daniel Thompson <daniel.thompson@linaro.org>,
-        Jingoo Han <jingoohan1@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: Re: [PATCH 14/41] serial: 8250/omap1: include
- linux/soc/ti/omap1-soc.h
-Message-ID: <YmAc4KTQbgJVT2GY@kroah.com>
-References: <20220419133723.1394715-1-arnd@kernel.org>
- <20220419133723.1394715-15-arnd@kernel.org>
+        with ESMTP id S1376497AbiDTQ0v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 12:26:51 -0400
+Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DE6D3DDFB;
+        Wed, 20 Apr 2022 09:24:04 -0700 (PDT)
+Received: by mail-oi1-f182.google.com with SMTP id w194so2580727oiw.11;
+        Wed, 20 Apr 2022 09:24:04 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=eqRuR80cwcGhb1bZpUFPS9H8sCLdtwMaN4leB1jQaUo=;
+        b=ugxoj5NFkVAZbXODfuSHPRZ91dkseGSrlIiD/x81FDFlvXBFgVNwBOK26go969rzj2
+         JJmlvGvuHjPuq9g6M/PAXrycI2O65BAQ+Kccx+HAZGczUfh/mKtwiJe1zoM00guVhqUM
+         mL6uriX3/bIXyxsr5XQXrmBiu4v7BbiV0/Q47gjBAwsC9TCrcqcDd47JpL5VN1nvgabO
+         OiBUBNeL4JvippwoidxPMnUS9XL8kzjTflp1vhHJYRezouYZNPdskilidoxMCLNzxezo
+         qiFODhVQ3XoPx26FU2Cbkrg6rZ2her7MdfvIkyk0wkNHduAwly+pd/rKnKuz9zHFvNsN
+         IRhw==
+X-Gm-Message-State: AOAM530ulcNGFsw7Ls/zmLPU0KEa6LnvxEvYvIdxXSIoPeWWfAhTqS13
+        a4NU4B09L8c3uvTbVuWf6w==
+X-Google-Smtp-Source: ABdhPJy5sRyqbV6H1nky7jUgsc4SvVnBgGMkW66trSKOz92/NZSbbjjYt53XFfCWY+uBTYHwI2PVeQ==
+X-Received: by 2002:a05:6808:e8c:b0:322:4b82:d33d with SMTP id k12-20020a0568080e8c00b003224b82d33dmr2128366oil.21.1650471843684;
+        Wed, 20 Apr 2022 09:24:03 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id j9-20020a056808056900b0032252797ea4sm5551746oig.6.2022.04.20.09.24.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Apr 2022 09:24:03 -0700 (PDT)
+Received: (nullmailer pid 1423242 invoked by uid 1000);
+        Wed, 20 Apr 2022 16:24:02 -0000
+Date:   Wed, 20 Apr 2022 11:24:02 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Abel Vesa <abel.vesa@nxp.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Shawn Guo <shawnguo@kernel.org>, netdev@vger.kernel.org,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        linux-arm-kernel@lists.infradead.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        devicetree@vger.kernel.org, Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH v8 08/13] dt-bindings: arm: Document i.MX8DXL EVK board
+ binding
+Message-ID: <YmAzos7VBz2vgJd6@robh.at.kernel.org>
+References: <20220419113516.1827863-1-abel.vesa@nxp.com>
+ <20220419113516.1827863-9-abel.vesa@nxp.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220419133723.1394715-15-arnd@kernel.org>
+In-Reply-To: <20220419113516.1827863-9-abel.vesa@nxp.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 19, 2022 at 03:36:56PM +0200, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> As a preparation for cleaning up the omap1 headers, start
-> including linux/soc/ti/omap1-soc.h directly so we can
-> keep calling cpu_is_omap1510().
-> 
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+On Tue, 19 Apr 2022 14:35:11 +0300, Abel Vesa wrote:
+> Document devicetree binding of i.XM8DXL EVK board.
 
-Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+i.XM?
+
+> 
+> Signed-off-by: Abel Vesa <abel.vesa@nxp.com>
+> ---
+>  Documentation/devicetree/bindings/arm/fsl.yaml | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+
+Acked-by: Rob Herring <robh@kernel.org>
