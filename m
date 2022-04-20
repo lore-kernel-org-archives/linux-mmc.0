@@ -2,92 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27534C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 09:10:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4381FC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 09:24:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377039AbiDTJNN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Apr 2022 05:13:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43176 "EHLO
+        id S1377182AbiDTJ1F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Apr 2022 05:27:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377048AbiDTJNN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 05:13:13 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46A7D28E18;
-        Wed, 20 Apr 2022 02:10:25 -0700 (PDT)
-Received: from mail-wr1-f46.google.com ([209.85.221.46]) by
- mrelayeu.kundenserver.de (mreue010 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1N0Fl9-1nsBMN0ERL-00xJW1; Wed, 20 Apr 2022 11:10:24 +0200
-Received: by mail-wr1-f46.google.com with SMTP id c10so1351772wrb.1;
-        Wed, 20 Apr 2022 02:10:23 -0700 (PDT)
-X-Gm-Message-State: AOAM533ri6+6sbSQsHwjA230VB/UYGyMv6gZKZgIoz6S93RTpHirDkdV
-        vMzaF/OOofaBvUrnM67Tu6p2G2MtdhjSwDKO8vE=
-X-Google-Smtp-Source: ABdhPJwtLOp969nuzl2HcHrjTrE/8+7taAszNCD7/wMyEv6mWoZB/KbZc5q+V3PBrcZaYVxcH5WclGOcWViagO5a7ww=
-X-Received: by 2002:a5d:6389:0:b0:207:a7d8:2b64 with SMTP id
- p9-20020a5d6389000000b00207a7d82b64mr14665624wru.12.1650445823721; Wed, 20
- Apr 2022 02:10:23 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220420084249.2186634-1-arnd@kernel.org>
-In-Reply-To: <20220420084249.2186634-1-arnd@kernel.org>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Wed, 20 Apr 2022 11:10:07 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a1mBdcGxV1nP15nY7sVfjya_VEeS78M5KQHjw66Kg+=Kg@mail.gmail.com>
-Message-ID: <CAK8P3a1mBdcGxV1nP15nY7sVfjya_VEeS78M5KQHjw66Kg+=Kg@mail.gmail.com>
-Subject: Re: [PATCH] [v3] m68k: coldfire: drop ISA_DMA_API support
-To:     Greg Ungerer <gerg@linux-m68k.org>
+        with ESMTP id S1377174AbiDTJ06 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 05:26:58 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFD283B039;
+        Wed, 20 Apr 2022 02:24:12 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id w1so1749960lfa.4;
+        Wed, 20 Apr 2022 02:24:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=u55Ek4ovTu93jGC6owGr6QZtrHl98TBOqnvlwoTCUt0=;
+        b=VCx/HeNdAIrVvK22LWtPVkq9Bv1IKELkDsHc9ZDCJpEzPZXiUk1L12Dy+mMZouB4Kb
+         Sm5gqeWiHiAo7O1rqL4fR/FRWrLwV1sxcNCEE/ser/ng6KnPEXuXeI6mJT4hEuhbpkyR
+         CnEwq7dF8XjnevURjfPXlQSPsthUbrMgXmTx0ftPiqNOdHSrKFkOiwbXMIgL4L8pif1x
+         S2OC7crPo4slcyULVJrhskiIc37n3wR0KWOXQ2sj5i0hsb8hGWYGa7c9kFuF9uQx1Lrd
+         PnwrnrwZvh2dBVEvqkQHhB/xuL6v+vJ4eVgGVRgIh8ublrifvFa02qV7bdCp+CMifVZv
+         cETg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=u55Ek4ovTu93jGC6owGr6QZtrHl98TBOqnvlwoTCUt0=;
+        b=55Zz5VXfyuyO9tEV2yEjN8Ldm9TK+io3F/MI5EJqGc/HQ3mH8rXju020y4VXUolXIW
+         bwOoTjeDuH2JlairDwziZgu+vYQvmRPH/kEwoqdiZnNazOyuxEOfph2YCBCvU6+6nzP8
+         3Eq4c6ZMMe7x1040quAHf2M7bz++V5VU+YO8ZycDlz0NIQJfidDzQiWYmxlmQMu7JFhH
+         LISM9zxiezlh5A/wYrjslqwk/J94zCB9qSYkeKsIAAus+7Z80wdpk71wbd6ZviFTUbd3
+         QtVf2T9AYjbwz2QNTW29xs+RR72sBgXZxr5xrEnD/zDw3AyTe0scJ4ODCLTSypD3wFoe
+         ZMXQ==
+X-Gm-Message-State: AOAM533CBkLY+YR3ZKlRpB/NBnnDAvN9wpGQyeRXL0Kuyo1BrncCldyr
+        B24iMJH+xrswkBbCL9WgEF8=
+X-Google-Smtp-Source: ABdhPJwBIjGhPQR/MG3suNBpw+sG1uqlbM+4wIOJy5ZknDOvMCYopGuZbVrLmdXv8OTjIhB4lEs0Kw==
+X-Received: by 2002:a05:6512:168d:b0:471:6cb9:c20f with SMTP id bu13-20020a056512168d00b004716cb9c20fmr11611107lfb.229.1650446651069;
+        Wed, 20 Apr 2022 02:24:11 -0700 (PDT)
+Received: from [192.168.1.103] ([178.176.74.70])
+        by smtp.gmail.com with ESMTPSA id d11-20020a19384b000000b0046bbd144dfesm1760268lfj.125.2022.04.20.02.24.09
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 Apr 2022 02:24:10 -0700 (PDT)
+Subject: Re: [PATCH 01/41] video: fbdev: omapfb: lcd_ams_delta: fix unused
+ variable warning
+To:     Arnd Bergmann <arnd@kernel.org>, linux-omap@vger.kernel.org,
+        tony@atomide.com, aaro.koskinen@iki.fi, jmkrzyszt@gmail.com
 Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Paul Walmsley <paul@pwsan.com>,
+        Kevin Hilman <khilman@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-m68k <linux-m68k@lists.linux-m68k.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:qF8uUzsZN4LBwJDSKSRH/nzVuSsVw7fvjZm56gLdoXhtyFIOiA/
- vWqfrkUIsfiRwqfZgQVrc89fNjZdCn9Nidl3eh/Deop3xw05hp/JMIGtBHnsBmVxrwhMqVN
- PRj+JNjY6kEEGEDk5LOw6R+4YXw9Vzn28CkjvOtBzBoJBrI5VyuUaeBifBw47kHkqo+iNfO
- HffoTegv9OaoUKoMxlbNA==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:kWQqunrDJgc=:A0Ijx97e6NH2mW7PukdQrm
- KanLPf8FjiMVs24OaVWRawRGtbfUQIMbzlX+zjfu6FZBqgE0r4yMoXf1dvD6eVIlK/0+XxtR8
- PO4mvC5DS+/pgiz2o4gv3/uyUB/x46V0IbY2hMYHWjriwP2I3FFQ56CqOXicN8PZTf2LMRlmn
- 2J0XbBjNuMxUz3QfRREWOxlxd/ioemkX1nx5gfCmyRDQjeNbt5kThrTcdb1/0UA939lPxFVbD
- AyeUEmvF+QQfovy+BsgXt6FLD5CRnpwlp+aAzUD9L/owr7isyUospGX+nEuZZUykRE70CfXCA
- DdYY5U60MH70LMOuhziLfyq3gaYKlzJkzRj7SdrvkzERzyBz+bpgpAQkx/ktyoQMkEU0XbsQi
- uV3AyWXNFobcHiVrZPUWEwZYY6XjJR3UDQX6qaCqWhyWwyT9ZT/1KYjhnOc5BXj3IRFayHXqF
- ZQVspluhg9Pn+Js9VB2CsYL60bKYXwvKvCJ9gM2u4HUfh5ONLAY864JxEjY7qt+AOxYAoD91D
- fOCfJZzKuOjV7PwTQzNwls1EQ9x0RywFwTuNocS7nzxgm7DK+bmGQel26jEI9uIq7Qzm8qY9g
- kz81wMW5B4B6ncVSLYobW3BJEzXvpaJLEaxu7s0sQdiW148CJfjWBzEsVVXYpNuvuHHexoypQ
- XvbZGYApHJYRDjhEqha63zQzVEZMSaRvVGGdlSYuXT69DB8BDvJkAw3Ir2ZH+swoRpuo=
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Mark Brown <broonie@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Lee Jones <lee.jones@linaro.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+References: <20220419133723.1394715-1-arnd@kernel.org>
+ <20220419133723.1394715-2-arnd@kernel.org>
+From:   Sergei Shtylyov <sergei.shtylyov@gmail.com>
+Message-ID: <ddaf112d-f997-84b7-2c57-bab3d0cca382@gmail.com>
+Date:   Wed, 20 Apr 2022 12:24:08 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
+MIME-Version: 1.0
+In-Reply-To: <20220419133723.1394715-2-arnd@kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Apr 20, 2022 at 10:42 AM Arnd Bergmann <arnd@kernel.org> wrote:
->
+Hello!
+
+On 4/19/22 4:36 PM, Arnd Bergmann wrote:
+
 > From: Arnd Bergmann <arnd@arndb.de>
->
-> After a build regression report, I took a look at possible users of
-> CONFIG_ISA_DMA_API on m68k and found none, which Greg confirmed. The
-> CONFIG_GENERIC_ISA_DMA option in turn is only needed to implement
-> ISA_DMA_API, and is clearly not used on the platforms with ISA support.
->
-> The CONFIG_ISA support for AMIGA_PCMCIA is probably also unneeded,
-> but this is less clear. Unlike other PCMCIA implementations, this one
-> does not use the drivers/pcmcia subsystem at all and just supports
-> the "apne" network driver. When it was first added, one could use
-> ISA drivers on it as well, but this probably broke at some point.
->
-> With no reason to keep this, let's just drop the corresponding files
-> and prevent the remaining ISA drivers that use this from getting built.
->
-> The remaining definitions in asm/dma.h are used for PCI support.
->
-> Link: https://lore.kernel.org/lkml/9e5ee1c3-ca80-f343-a1f5-66f3dd1c0727@linux-m68k.org/
-> Acked-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
-> Acked-by: Greg Ungerer <gerg@linux-m68k.org>
+> 
+> A recent cleanup patch removed the only reference to a local variable
+> in some configurations.
+> 
+> Move the variable into the one block it is still used in, inside
+> of an #ifdef, to avoid this warning.
+> 
+> Fixes: 9d773f103b89 ("video: fbdev: omapfb: lcd_ams_delta: Make use of the helper function dev_err_probe()")
 > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  drivers/video/fbdev/omap/lcd_ams_delta.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/drivers/video/fbdev/omap/lcd_ams_delta.c b/drivers/video/fbdev/omap/lcd_ams_delta.c
+> index bbf871f9d862..01944ce46aa1 100644
+> --- a/drivers/video/fbdev/omap/lcd_ams_delta.c
+> +++ b/drivers/video/fbdev/omap/lcd_ams_delta.c
+[...]
+> @@ -145,7 +144,7 @@ static int ams_delta_panel_probe(struct platform_device *pdev)
+>  						&ams_delta_lcd_ops);
+>  
+>  	if (IS_ERR(lcd_device)) {
+> -		ret = PTR_ERR(lcd_device);
+> +		int ret = PTR_ERR(lcd_device);
 
-Nevermind, this is the same as before, I forgot the 'git add' for the trivial
-Makefile change.
+   How about inserting an empty line after declaration?
 
-       Arnd
+>  		dev_err(&pdev->dev, "failed to register device\n");
+>  		return ret;
+>  	}
+
+MBR, Sergey
