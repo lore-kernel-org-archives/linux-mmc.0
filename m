@@ -2,77 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49268C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 16:24:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C97D6C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 17:08:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1380535AbiDTQ0v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Apr 2022 12:26:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60920 "EHLO
+        id S1380904AbiDTRLb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Apr 2022 13:11:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1376497AbiDTQ0v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 12:26:51 -0400
-Received: from mail-oi1-f182.google.com (mail-oi1-f182.google.com [209.85.167.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DE6D3DDFB;
-        Wed, 20 Apr 2022 09:24:04 -0700 (PDT)
-Received: by mail-oi1-f182.google.com with SMTP id w194so2580727oiw.11;
-        Wed, 20 Apr 2022 09:24:04 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=eqRuR80cwcGhb1bZpUFPS9H8sCLdtwMaN4leB1jQaUo=;
-        b=ugxoj5NFkVAZbXODfuSHPRZ91dkseGSrlIiD/x81FDFlvXBFgVNwBOK26go969rzj2
-         JJmlvGvuHjPuq9g6M/PAXrycI2O65BAQ+Kccx+HAZGczUfh/mKtwiJe1zoM00guVhqUM
-         mL6uriX3/bIXyxsr5XQXrmBiu4v7BbiV0/Q47gjBAwsC9TCrcqcDd47JpL5VN1nvgabO
-         OiBUBNeL4JvippwoidxPMnUS9XL8kzjTflp1vhHJYRezouYZNPdskilidoxMCLNzxezo
-         qiFODhVQ3XoPx26FU2Cbkrg6rZ2her7MdfvIkyk0wkNHduAwly+pd/rKnKuz9zHFvNsN
-         IRhw==
-X-Gm-Message-State: AOAM530ulcNGFsw7Ls/zmLPU0KEa6LnvxEvYvIdxXSIoPeWWfAhTqS13
-        a4NU4B09L8c3uvTbVuWf6w==
-X-Google-Smtp-Source: ABdhPJy5sRyqbV6H1nky7jUgsc4SvVnBgGMkW66trSKOz92/NZSbbjjYt53XFfCWY+uBTYHwI2PVeQ==
-X-Received: by 2002:a05:6808:e8c:b0:322:4b82:d33d with SMTP id k12-20020a0568080e8c00b003224b82d33dmr2128366oil.21.1650471843684;
-        Wed, 20 Apr 2022 09:24:03 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id j9-20020a056808056900b0032252797ea4sm5551746oig.6.2022.04.20.09.24.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Apr 2022 09:24:03 -0700 (PDT)
-Received: (nullmailer pid 1423242 invoked by uid 1000);
-        Wed, 20 Apr 2022 16:24:02 -0000
-Date:   Wed, 20 Apr 2022 11:24:02 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Abel Vesa <abel.vesa@nxp.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>, netdev@vger.kernel.org,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-arm-kernel@lists.infradead.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        devicetree@vger.kernel.org, Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH v8 08/13] dt-bindings: arm: Document i.MX8DXL EVK board
- binding
-Message-ID: <YmAzos7VBz2vgJd6@robh.at.kernel.org>
-References: <20220419113516.1827863-1-abel.vesa@nxp.com>
- <20220419113516.1827863-9-abel.vesa@nxp.com>
+        with ESMTP id S236999AbiDTRLa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 13:11:30 -0400
+Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3478D140E8;
+        Wed, 20 Apr 2022 10:08:43 -0700 (PDT)
+Received: from darkstar.musicnaut.iki.fi (85-76-69-216-nat.elisa-mobile.fi [85.76.69.216])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: aaro.koskinen)
+        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id 75C061B00220;
+        Wed, 20 Apr 2022 20:08:38 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
+        t=1650474519;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=B5msNSogp8zw4YAcAsDj6Qc4zdyDGRTVYmRgqRI/0Bk=;
+        b=kTa4PeKcYbiz8v0d1bG/DaDfDPW+JW/Y5caY8AdpKOUIvDM5o36RCvYnTBodU8x4tUxuiF
+        ktxA1VDWnp4JhwdnVZN87iQgFWmYig18OVXRM8AVMhj39aWpQH20CPI4avqgLCd+YIg1Qy
+        idcTWI4UYPweIAjRUudXT1Zf+FbV1KFQ6CsP671o0mcoZYtmGXBa6OtYrK6P6K3jtGr5MZ
+        EHOyrIqm3R/nP1YaqVIW53HsDJDowGirtgtowbqAHter8eYPWisaRosyEAvgWd8N5xDazf
+        MEVSDjkPCt3ICTrqoO34GRh7hV71rJoxKjbq4SJKV8lZ4881URlm0+K8k78LMA==
+Date:   Wed, 20 Apr 2022 20:08:36 +0300
+From:   Aaro Koskinen <aaro.koskinen@iki.fi>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     linux-omap@vger.kernel.org, tony@atomide.com, jmkrzyszt@gmail.com,
+        Arnd Bergmann <arnd@arndb.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Paul Walmsley <paul@pwsan.com>,
+        Kevin Hilman <khilman@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Mark Brown <broonie@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Lee Jones <lee.jones@linaro.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: Re: [PATCH 00/41] OMAP1 full multiplatform conversion
+Message-ID: <20220420170836.GB1947@darkstar.musicnaut.iki.fi>
+References: <20220419133723.1394715-1-arnd@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220419113516.1827863-9-abel.vesa@nxp.com>
+In-Reply-To: <20220419133723.1394715-1-arnd@kernel.org>
+ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1650474519; a=rsa-sha256;
+        cv=none;
+        b=fUP5y+/XQ6zNbth6dMfmG2kN9cICXfnwRNYbkGoVeRNsnY+v6znhO5ch2i5vR5slzPAUec
+        Sztc4GVEZyZOwSwkjLWA4eNpQZV5fEBKgPV4PA0N+8DX6z5GrX6hFbFsM5SltaEfdOE+4X
+        UDuk5UOcv8jYUvEeGfo5RBPyqhwpuA6b4fVpMKqPEFiwGDCvSZdERPOuJX+KlmiYWEjjRQ
+        bzFS2MgkL1ik8EAGHbfrB4YVK4K3DZYBDGcMAmDesHi8ybCiB4PqONwfrj/O7/GLX4DLwE
+        F7s5Eze8miwVNtjGjumlbsWMr0sA8n2Asp4QdugmIsfg6AnQuJaXDQ3ZfwifVA==
+ARC-Authentication-Results: i=1;
+        ORIGINATING;
+        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
+        s=lahtoruutu; t=1650474519;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=B5msNSogp8zw4YAcAsDj6Qc4zdyDGRTVYmRgqRI/0Bk=;
+        b=uAZuJDKZ7bj4MVqgI3bbcZAOIBMgL+TVcCp9+D4Bx6tcZMUwn0Yukw4zw8doMpCzXb5WaN
+        pJVbadhIweA9yGpQNueUVV9vr1H4bIPdTLnUt9sq85H8sbrTY3WHbuj7hKBBvCPd9hNdLm
+        1ukZgRh1UpuRnt4Qyg6muAqbGwQyb+0ufFu2ZZFIwmdViYeENLfMfCKbIoMvRNyQt/3O2K
+        fLMvlRgaN2w7kyqhajE30yj5vD3Ir8o/PY21vwX9mxyhgmVGkpxJMIAtFXlT8CRNLmGomp
+        hDjQyLXElaOcP4BTszvgdBbpo30Bae+K5TvQUlGAai/EzsAchzF8OdhdOWxG2A==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 Apr 2022 14:35:11 +0300, Abel Vesa wrote:
-> Document devicetree binding of i.XM8DXL EVK board.
+Hi,
 
-i.XM?
-
+On Tue, Apr 19, 2022 at 03:36:42PM +0200, Arnd Bergmann wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
 > 
-> Signed-off-by: Abel Vesa <abel.vesa@nxp.com>
-> ---
->  Documentation/devicetree/bindings/arm/fsl.yaml | 6 ++++++
->  1 file changed, 6 insertions(+)
+> This is the full series for converting OMAP1 to multiplatform, rebased
+> from my 2019 attempt to do the same thing. The soc tree contains simpler
+> patches to do the same for iop32x, ixp4xx, ep93xx and s3c24xx, which
+> means we are getting closer to completing this for all ARMv5 platforms
+> (I have patches for PXA, which is the last one remaining).
 > 
+> Janusz already tested the branch separately and did the missing work
+> for the common-clk conversion after my previous approach was broken.
 
-Acked-by: Rob Herring <robh@kernel.org>
+I tested the full series on the following OMAP1 boards: ams-delta,
+nokia770, osk, palmte and sx1 (QEMU only).
+
+Apart from the earlyprintk breakage, everything seemed to work OK.
+
+A minor note, zImage grows about 50 KB with a minimal kernel config. This
+is not yet critical, there's still about 7% headroom on 770 to the 2 MB
+bootloader limit on my setup. Also the decompression time is approaching
+the hardcoded watchdog timeout...
+
+A.
