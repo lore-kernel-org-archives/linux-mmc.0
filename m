@@ -2,97 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31F5BC4167E
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 13:48:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4743AC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 14:47:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1379189AbiDTNv1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Apr 2022 09:51:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40622 "EHLO
+        id S231221AbiDTOts (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Apr 2022 10:49:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49358 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234412AbiDTNv0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 09:51:26 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A58543493;
-        Wed, 20 Apr 2022 06:48:40 -0700 (PDT)
+        with ESMTP id S242167AbiDTOts (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 10:49:48 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D94AA6391;
+        Wed, 20 Apr 2022 07:46:59 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 03ECBB81F18;
-        Wed, 20 Apr 2022 13:48:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C3157C385B0;
-        Wed, 20 Apr 2022 13:48:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650462517;
-        bh=r5gIACVwFwXfu+L0SjHY63rmQTmlBYIcuCScaOsuAjk=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=E8Em2MQWztm+C2EmlV1FQe3I0FTSV2DiJcyK2iihaFQo51NM0DFE/rYOIE+wyx1wp
-         /VWN0/71ZwssYkNVh129T8UpZm6AUkLIGuMiY6fzJStQ7ZZZzsLu+YfHMjswZ9W7YM
-         mjdK3DJxHlIkGZPSUsh/8dFkbBcT5Jm8E77pDoGNiEZG4/4EPstw+51gVak16za2ga
-         dhu7kZkcOynk9SMtnhYtXUgL6zQdymwzczZfSDpnrDpvJEhYxBXYfvKUUxyNISj4vp
-         /lSN3yrqnyEcDKHRIhkxeNkjouxpUUs1/5w5lM+l5Iw8Csip1eFb3F0IQ3ctyogPeM
-         5m+eazxPFDoqg==
-Received: by mail-wr1-f44.google.com with SMTP id p18so2362232wru.5;
-        Wed, 20 Apr 2022 06:48:37 -0700 (PDT)
-X-Gm-Message-State: AOAM5314VcoKSUO2df9/UV2WWtZ74zAVJ6/84WF1Vw3vWjbKXqaEVb8b
-        SEDqrsFliZOFpFCpdAgMviERW/E84s9t8n1stW8=
-X-Google-Smtp-Source: ABdhPJwSpIclw+ZwqVR57edT/aQRpFn5BaY64Phs17aAgIE6n54XF3PED3yv14Fv9AL2uDPz7qCh2GbTzsHglUZV1DA=
-X-Received: by 2002:a5d:6389:0:b0:207:a7d8:2b64 with SMTP id
- p9-20020a5d6389000000b00207a7d82b64mr15595597wru.12.1650462515957; Wed, 20
- Apr 2022 06:48:35 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-41-arnd@kernel.org>
- <20220420134305.fq7pc3fsz5fxkryj@mercury.elektranox.org>
-In-Reply-To: <20220420134305.fq7pc3fsz5fxkryj@mercury.elektranox.org>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Wed, 20 Apr 2022 15:48:19 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a2Mv-gUoc3hpqvCa1tzvEEwHN6wXDxmy8K5rN8sULQnMw@mail.gmail.com>
-Message-ID: <CAK8P3a2Mv-gUoc3hpqvCa1tzvEEwHN6wXDxmy8K5rN8sULQnMw@mail.gmail.com>
-Subject: Re: [PATCH 40/48] ARM: pxa: tosa: use gpio lookup for battery
-To:     Sebastian Reichel <sre@kernel.org>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6BD2961755;
+        Wed, 20 Apr 2022 14:46:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 60FF4C385A0;
+        Wed, 20 Apr 2022 14:46:58 +0000 (UTC)
+Date:   Wed, 20 Apr 2022 16:46:56 +0200
+From:   Greg KH <greg@kroah.com>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     linux-omap@vger.kernel.org, tony@atomide.com, aaro.koskinen@iki.fi,
+        jmkrzyszt@gmail.com, Arnd Bergmann <arnd@arndb.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Paul Walmsley <paul@pwsan.com>,
+        Kevin Hilman <khilman@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
         Dmitry Torokhov <dmitry.torokhov@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Lee Jones <lee.jones@linaro.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
         Linus Walleij <linus.walleij@linaro.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: Re: [PATCH 14/41] serial: 8250/omap1: include
+ linux/soc/ti/omap1-soc.h
+Message-ID: <YmAc4KTQbgJVT2GY@kroah.com>
+References: <20220419133723.1394715-1-arnd@kernel.org>
+ <20220419133723.1394715-15-arnd@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220419133723.1394715-15-arnd@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Apr 20, 2022 at 3:43 PM Sebastian Reichel <sre@kernel.org> wrote:
-> > @@ -15,11 +15,16 @@
-> >  #include <linux/gpio.h>
->
-> This should be <linux/gpio/consumer.h> now.
->
-Fixed now, thanks!
+On Tue, Apr 19, 2022 at 03:36:56PM +0200, Arnd Bergmann wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
+> 
+> As a preparation for cleaning up the omap1 headers, start
+> including linux/soc/ti/omap1-soc.h directly so we can
+> keep calling cpu_is_omap1510().
+> 
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-     Arnd
+Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
