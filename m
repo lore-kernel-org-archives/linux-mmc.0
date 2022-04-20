@@ -2,117 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CCBBC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 19:21:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5C2DC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Apr 2022 19:42:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1381722AbiDTTXx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Apr 2022 15:23:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44820 "EHLO
+        id S1355529AbiDTTo4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Apr 2022 15:44:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60426 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230233AbiDTTXw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 15:23:52 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA1ED13FBB;
-        Wed, 20 Apr 2022 12:21:05 -0700 (PDT)
+        with ESMTP id S1347556AbiDTTo4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2022 15:44:56 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 084D813FB1;
+        Wed, 20 Apr 2022 12:42:08 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 64F6161647;
-        Wed, 20 Apr 2022 19:21:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C350EC385A8;
-        Wed, 20 Apr 2022 19:21:04 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 8A1E861617;
+        Wed, 20 Apr 2022 19:42:08 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C871C385A0;
+        Wed, 20 Apr 2022 19:42:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650482464;
-        bh=+PgOfT87QXZRKpM2v9ZNowWskAsreLZEe6RAZERVuxs=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=LWkg8+P3Xly8sjIxoqjEgUnQ8BqoLngtqGiQEPZggl4dkK1DiOpgHHwSwn56ifoYf
-         0jYMBC2y9oudEQNk98zILpE9CQilgE7tkJqFfirwGiPaSzGz60rXyG7LagSrWPhQem
-         gbXXIArHrbaEUbVwFKFsMGfZw+kiVhQTkNWJBmFatyWcBtF+i4qgINtXXuldo7Vx0G
-         RpToCuYAP6mrwt+aiH/IjOOBsTv71f5Oi3+i5AJ3tiOTaMEh/815Em+H9EnYveGtMX
-         wgIyjIS3nQS3pxspnrQ1f27FpB7+Y6rOGSmBE7zDDiBd809M2ZhAxpsXP8A+8SQw2R
-         w9+fnlrAhUS+g==
-Received: by mail-wr1-f47.google.com with SMTP id m14so3602817wrb.6;
-        Wed, 20 Apr 2022 12:21:04 -0700 (PDT)
-X-Gm-Message-State: AOAM531HBf5PvIpNJOJDMxIoRo2xda1qDyp1WenSvo6XtyrM6cHHhQeu
-        u4iC9XS8SJYNsKkRkMm7dhmZ0zBzHXaHtBvuABs=
-X-Google-Smtp-Source: ABdhPJznf39uJYDI3N62QzlkS6buptTPqwk86KhjNzbLbHyB/jaRCmYyra2UZ9f1wUtI0joZyTmyxGE4xOIYt2PeYqA=
-X-Received: by 2002:a5d:64a3:0:b0:20a:7931:5b84 with SMTP id
- m3-20020a5d64a3000000b0020a79315b84mr17397786wrp.407.1650482462896; Wed, 20
- Apr 2022 12:21:02 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220419133723.1394715-1-arnd@kernel.org> <20220419133723.1394715-27-arnd@kernel.org>
- <20220420134615.GA1947@darkstar.musicnaut.iki.fi>
-In-Reply-To: <20220420134615.GA1947@darkstar.musicnaut.iki.fi>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Wed, 20 Apr 2022 21:20:46 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a00DgKYdzTZFiBfKDF_zwaJjL6Duw8aOOJ-gVkz4L1ZwQ@mail.gmail.com>
-Message-ID: <CAK8P3a00DgKYdzTZFiBfKDF_zwaJjL6Duw8aOOJ-gVkz4L1ZwQ@mail.gmail.com>
-Subject: Re: [PATCH 26/41] ARM: omap1: relocate static I/O mapping
-To:     Aaro Koskinen <aaro.koskinen@iki.fi>
-Cc:     linux-omap <linux-omap@vger.kernel.org>,
-        Tony Lindgren <tony@atomide.com>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Paul Walmsley <paul@pwsan.com>,
-        Kevin Hilman <khilman@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        s=k20201202; t=1650483727;
+        bh=VkstLNUnX452bwgxVbRIkkIiLOBzV/cxnUGwTZse+38=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Pz9skgakdcihR9csrUcjZT44NnjtWbJ8iPQVCsk8Bt4o9WuCBhLXYSzur/HQUFBJD
+         ManinBuSF5ltDZDb/nyBtQIuyjkh+fRifJgvhSXi5SgqQj4AImO46y4MvzC4E59WuI
+         FAFMZo673HxfxypD1JRbsuV1EBBa2ua1OJPwzH/LTk2kc5qg1xbCvFNkfINkCoiL1B
+         xrUoAT7Qw2jqPxpewcc2bSSWpGQhZuuN5WkZwt672JiuEIoucKhHrV1XR2MQ6CTyFE
+         L+RQ+mnNwLHOW14E9sUwSIxu9EDBMbiaOVdMng5v882yuCetMkbHOpSYe1RZVYYuX8
+         FYf1lk3HXT1ag==
+Date:   Wed, 20 Apr 2022 12:41:53 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Jens Axboe <axboe@kernel.dk>, Mike Snitzer <snitzer@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Mark Brown <broonie@kernel.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Lee Jones <lee.jones@linaro.org>,
-        Daniel Thompson <daniel.thompson@linaro.org>,
-        Jingoo Han <jingoohan1@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        USB list <linux-usb@vger.kernel.org>,
-        dmaengine@vger.kernel.org,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>, dm-devel@redhat.com,
+        linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [PATCH 2/2] blk-crypto: fix the blk_crypto_profile liftime
+Message-ID: <YmBiAQ/IZbFhRc6o@sol.localdomain>
+References: <20220420064745.1119823-1-hch@lst.de>
+ <20220420064745.1119823-3-hch@lst.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220420064745.1119823-3-hch@lst.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Apr 20, 2022 at 3:46 PM Aaro Koskinen <aaro.koskinen@iki.fi> wrote:
->
-> Hi,
->
-> On Tue, Apr 19, 2022 at 03:37:08PM +0200, Arnd Bergmann wrote:
-> > From: Arnd Bergmann <arnd@arndb.de>
-> >
-> > The address range 0xfee00000-0xfeffffff is used for PCI and
-> > PCMCIA I/O port mappings, but OMAP1 has its static mappings
-> > there as well.
-> >
-> > Move the OMAP1 addresses a little higher to avoid crashing
-> > at boot.
->
-> This has the same problem I reported in 2019, with earlyprintk the
-> system no longer boots:
->
->         https://marc.info/?t=156530014200005&r=1&w=2
->
-> Tested on OSK and SX1/qemu.
+On Wed, Apr 20, 2022 at 08:47:45AM +0200, Christoph Hellwig wrote:
+> Once the blk_crypto_profile is exposed in sysfs it needs to stay alive
+> as long as sysfs accesses are possibly pending.  Ensure that by removing
+> the blk_crypto_kobj wrapper and just embedding the kobject into the
+> actual blk_crypto_profile.  This requires the blk_crypto_profile
+> structure to be dynamically allocated, which in turn requires a private
+> data pointer for driver use.
+> 
+> Fixes: 20f01f163203 ("blk-crypto: show crypto capabilities in sysfs")
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Thanks a lot for testing!
+Can you elaborate on what you think the actual problem is here?  The lifetime of
+the blk_crypto_profile matches that of the host controller kobject, and I
+thought that it is not destroyed until after higher-level objects such as
+gendisks and request_queues are destroyed.  Similar assumptions are made by the
+queue kobject, which assumes it is safe to access the gendisk, and by the
+independent_access_ranges kobject which assumes it is safe to access the queue.
 
-I managed to get to the bottom of this after just a few hours, and
-it turned out to be a simple math error on my end, as I got
-the alignment wrong, the offset has to be 0x00f00000
-instead of 0x00fb0000 be section aligned. I made sure the
-kernel boots up (to the point of missing a rootfs) and uploaded
-the fixed branch.
+I suppose this wouldn't have worked with the original sysfs design where opening
+a file in sysfs actually got a refcount to the kobject.  But that's long gone,
+having been changed in Linux v2.6.23 (https://lwn.net/Articles/229774).
 
-      Arnd
+Note that commit 20f01f163203 which added this code got an "all looks good" from
+Greg KH (https://lore.kernel.org/r/YaH1CmHClx5WvDWD@kroah.com).  I'd have hoped
+that he would've noticed if there was a major problem with how kobjects are used
+here!  Greg, would you mind taking a look at this part again?
+
+>  int blk_crypto_sysfs_register(struct request_queue *q)
+>  {
+> -	struct blk_crypto_kobj *obj;
+>  	int err;
+>  
+>  	if (!q->crypto_profile)
+>  		return 0;
+>  
+> -	obj = kzalloc(sizeof(*obj), GFP_KERNEL);
+> -	if (!obj)
+> -		return -ENOMEM;
+> -	obj->profile = q->crypto_profile;
+> -
+> -	err = kobject_init_and_add(&obj->kobj, &blk_crypto_ktype, &q->kobj,
+> -				   "crypto");
+> -	if (err) {
+> -		kobject_put(&obj->kobj);
+> -		return err;
+> -	}
+> -	q->crypto_kobject = &obj->kobj;
+> -	return 0;
+> +	err = kobject_add(&q->crypto_profile->kobj, &q->kobj, "crypto");
+> +	if (err)
+> +		kobject_put(&q->crypto_profile->kobj);
+> +	return err;
+>  }
+
+In any case, this proposal is not correct since it is assuming that each
+blk_crypto_profile is referenced by only one request_queue, which is not
+necessarily the case since a host controller can have multiple disks.
+The same kobject can't be added to multiple places in the hierarchy.
+
+If we did need to do something differently here, I think we'd either need to put
+the blk_crypto_profile kobject under the host controller one and link to it from
+the queue directories (which I mentioned in commit 20f01f163203 as an
+alternative considered), or duplicate the crypto capabilities in each
+request_queue and only share the actual keyslot management data structures.
+
+- Eric
