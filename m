@@ -2,147 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54C07C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 13:54:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1242C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 13:55:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1388041AbiDUN5q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Apr 2022 09:57:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34380 "EHLO
+        id S1388076AbiDUN5z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Apr 2022 09:57:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1387966AbiDUN5p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 09:57:45 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 323721165
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 06:54:55 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id p10so8822590lfa.12
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 06:54:55 -0700 (PDT)
+        with ESMTP id S1388117AbiDUN5y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 09:57:54 -0400
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36D8A2BB1B
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 06:55:03 -0700 (PDT)
+Received: by mail-lj1-x22a.google.com with SMTP id bf11so5854679ljb.7
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 06:55:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=kWBtjZ/u41ciVQ8eqRCZfXpmvt0679NfHMhFgpCEUzs=;
-        b=DrQFE5Ue2oD2fxauVOiZjO38io8f/v9u+jZfZKC3DiT6Yio76/QDFFy1r54tpiCKLU
-         Bae9C0+AEwzoqhKVPBCK+f1FurOag5SZMFfXfdcnyGTdIQgetZtHZvWsnhuArW/lQzj8
-         iLe5SO5aZU7Mbbt7NvcFhtSITQq3ccbZRcuClitErSEXhvL9K0JsDbHWtil4IqmO2Jxz
-         2TGrTY6+AQBZW000oXexntBGLo6jFLA0c5ElqwS5gen/ZnoVNmu1kP9WJfq4tDq1SnS3
-         b2vZJrqq0U+ZUEhU4kWzTMd7AxkNDG4MME6dh3vdC6kt2hdaBMoqHlr2pUJ5inzKKfar
-         ZSCw==
+        bh=9I2sv/w+bVoJVhgEON4k5i7vtxgov/Cr9H4jEyKQU44=;
+        b=uPd35zp+t9AoSNs4r+Vp3gerI9BRNYp+bGV9SmMC4t1Di8G5JwPLrsrJ8vas36Vmu9
+         J+PZO8qisz7ZoEOxYN8xOzv5ys4koF/bY+LyCGQ9LrE23WgtogSIRfeP1Oh2D09cEbt6
+         OO2k80qci6e56m43qzH2mW7Z/XDz9GmXTZXpOQn+Gv9DcYFMV+sqqPY19Osf2oRYWAMz
+         3zakafPxoqFkyEH8aNpwbBHlveLn+8xSW736SnqrjQ6wKh3E/6qIQRQM7WVV5PzpG8FY
+         to1aEdA0c91W/Lvb+xUcGDufj8GB7wkM6T9QrwzVDVAOrWGjLz0rkWCc5V7Lqpn4npMj
+         u1CA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=kWBtjZ/u41ciVQ8eqRCZfXpmvt0679NfHMhFgpCEUzs=;
-        b=I4wSs6/qQUVhN7YZ5aqsoJBjfVbnclVxyx+Q91vcV+/BOiESuL6fE6w3berbsVb5DJ
-         Clapv0/n6uvG8sOPUjBi6aXyBu85sFag2UtZiNLRtKHPbOLLTp81J6FwMpiqOCfCjZkM
-         nH8VO+yESK1zCiPR7WPW52L75J2f1JOg7+iW1IOnxKLfH9L0UbfCqbwW2dCTxOexijwT
-         7KDq6kkh2P6rnMs0YJLTUTeqxNqiIL8rj6r7MxHvjb83Cnf+M5iaaJsPppYX1UJ222jM
-         7E8aPI0FMny1aelOHM0MzCmLOrbmGqrP+S77aIBIIHxQZAQ+9zqgzmgZHtxIEmJyonJa
-         9zog==
-X-Gm-Message-State: AOAM5338MJyoUHNMoh2QsVEKCffb/JW7fNELeBN10FuNXmlEfHTZouK9
-        jV0yqcyBJ6FhIQNMnT6I0B+jf1PGyt3bbyBI74njqg==
-X-Google-Smtp-Source: ABdhPJyPHSxcjMeoCqMPg/92niGB+5z9ocJsA4qd+sVPE7MSHNmj+16//1nBcKkS1oBD5MwwcxOtT5be7Js74qB5Lc0=
-X-Received: by 2002:a19:505d:0:b0:46d:167e:b9df with SMTP id
- z29-20020a19505d000000b0046d167eb9dfmr18737298lfj.184.1650549293450; Thu, 21
- Apr 2022 06:54:53 -0700 (PDT)
+        bh=9I2sv/w+bVoJVhgEON4k5i7vtxgov/Cr9H4jEyKQU44=;
+        b=Fmfl6vIl5vCZdyXXv6tjouaA7dfEdxI25sj1FMh+5M20xkaD0AHw/nxwh6GMYhgyOE
+         +m0fF9dqtM7/loVvPvuiXsy+Lz9I2gS6+RwMPb43XQqa0kS/2rg0fS3wlnKDONMf8nhH
+         rcDFlad/uj/QN1LMeKscYRP4havltpPYLzTRKLToFH2cOQ/W6IXkb/CPa3Og1N/H+T0l
+         FoGU1r0833hNcrlzTgFRVQFW0qzdQxZZ3y+3yhIJOy23I4yqGd0VeMJvjjdYlnKSVr2u
+         o5rjoNyadfXi84TPVaNGZfJMw1tzt2l3RrcNPwly2EQa+T0ZASAgUle8dPnTJs8fPccm
+         Df8A==
+X-Gm-Message-State: AOAM530T5IFIvsLIysKcy5qj/QZgf+nk+5sFV2OYWAmgjW01bJ9UaVPA
+        EunLqNfA0hCDqPPg/JG0zpEhJUp3fXKO7Qy442XykQ==
+X-Google-Smtp-Source: ABdhPJxQ8zojrK8xdolxDcQ8zrSMsAOsNwi85QHOAAX4QMpz2jZNq6/IIYky8NRkIbD1nX8JR7qkOxUpHzF/JMNvZPU=
+X-Received: by 2002:a05:651c:1783:b0:249:43a8:b6f9 with SMTP id
+ bn3-20020a05651c178300b0024943a8b6f9mr16093756ljb.273.1650549301441; Thu, 21
+ Apr 2022 06:55:01 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220411153753.50443-1-aidanmacdonald.0x0@gmail.com>
-In-Reply-To: <20220411153753.50443-1-aidanmacdonald.0x0@gmail.com>
+References: <20220412093102.3428-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220412093102.3428-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 21 Apr 2022 15:54:16 +0200
-Message-ID: <CAPDyKFpuD1m68SRuCYj0q+KU2Ua1Jt+f3upbLavs8x4HS0-szA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: jz4740: Apply DMA engine limits to maximum segment size
-To:     Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
-Cc:     paul@crapouillou.net, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 21 Apr 2022 15:54:25 +0200
+Message-ID: <CAPDyKFofCmWC4PDQBzw-wJweOy5brD5dJ1RM2n2vM1gOTQ8peQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sh_mmcif: move platform_data header to proper location
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>, linux-sh@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 11 Apr 2022 at 17:37, Aidan MacDonald
-<aidanmacdonald.0x0@gmail.com> wrote:
+On Tue, 12 Apr 2022 at 11:31, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> Do what is done in other DMA-enabled MMC host drivers (cf. host/mmci.c) and
-> limit the maximum segment size based on the DMA engine's capabilities. This
-> is needed to avoid warnings like the following with CONFIG_DMA_API_DEBUG=y.
+> We have a dedicated directory for platform_data meanwhile, don't spoil
+> the MMC directory with it.
 >
-> ------------[ cut here ]------------
-> WARNING: CPU: 0 PID: 21 at kernel/dma/debug.c:1162 debug_dma_map_sg+0x2f4/0x39c
-> DMA-API: jz4780-dma 13420000.dma-controller: mapping sg segment longer than device claims to support [len=98304] [max=65536]
-> CPU: 0 PID: 21 Comm: kworker/0:1H Not tainted 5.18.0-rc1 #19
-> Workqueue: kblockd blk_mq_run_work_fn
-> Stack : 81575aec 00000004 80620000 80620000 80620000 805e7358 00000009 801537ac
->         814c832c 806276e3 806e34b4 80620000 81575aec 00000001 81575ab8 09291444
->         00000000 00000000 805e7358 81575958 ffffffea 8157596c 00000000 636f6c62
->         6220646b 80387a70 0000000f 6d5f6b6c 80620000 00000000 81575ba4 00000009
->         805e170c 80896640 00000001 00010000 00000000 00000000 00006098 806e0000
->         ...
-> Call Trace:
-> [<80107670>] show_stack+0x84/0x120
-> [<80528cd8>] __warn+0xb8/0xec
-> [<80528d78>] warn_slowpath_fmt+0x6c/0xb8
-> [<8016f1d4>] debug_dma_map_sg+0x2f4/0x39c
-> [<80169d4c>] __dma_map_sg_attrs+0xf0/0x118
-> [<8016a27c>] dma_map_sg_attrs+0x14/0x28
-> [<804f66b4>] jz4740_mmc_prepare_dma_data+0x74/0xa4
-> [<804f6714>] jz4740_mmc_pre_request+0x30/0x54
-> [<804f4ff4>] mmc_blk_mq_issue_rq+0x6e0/0x7bc
-> [<804f5590>] mmc_mq_queue_rq+0x220/0x2d4
-> [<8038b2c0>] blk_mq_dispatch_rq_list+0x480/0x664
-> [<80391040>] blk_mq_do_dispatch_sched+0x2dc/0x370
-> [<80391468>] __blk_mq_sched_dispatch_requests+0xec/0x164
-> [<80391540>] blk_mq_sched_dispatch_requests+0x44/0x94
-> [<80387900>] __blk_mq_run_hw_queue+0xb0/0xcc
-> [<80134c14>] process_one_work+0x1b8/0x264
-> [<80134ff8>] worker_thread+0x2ec/0x3b8
-> [<8013b13c>] kthread+0x104/0x10c
-> [<80101dcc>] ret_from_kernel_thread+0x14/0x1c
->
-> ---[ end trace 0000000000000000 ]---
->
-> Signed-off-by: Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Applied for next, thanks!
+As this is a trivial change, I have applied it for next, thanks!
+
+Sato-san, Rich, please tell me if you see any problems with this - or
+if you want me to add your acks.
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/jz4740_mmc.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
 >
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index 7ab1b38a7be5..b1d563b2ed1b 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -247,6 +247,26 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
->                 return PTR_ERR(host->dma_rx);
->         }
+> Change since v1: fixed sorting of includes in the MMCIF driver
+>                  (Thanks Geert!)
 >
-> +       /*
-> +        * Limit the maximum segment size in any SG entry according to
-> +        * the parameters of the DMA engine device.
-> +        */
-> +       if (host->dma_tx) {
-> +               struct device *dev = host->dma_tx->device->dev;
-> +               unsigned int max_seg_size = dma_get_max_seg_size(dev);
-> +
-> +               if (max_seg_size < host->mmc->max_seg_size)
-> +                       host->mmc->max_seg_size = max_seg_size;
-> +       }
-> +
-> +       if (host->dma_rx) {
-> +               struct device *dev = host->dma_rx->device->dev;
-> +               unsigned int max_seg_size = dma_get_max_seg_size(dev);
-> +
-> +               if (max_seg_size < host->mmc->max_seg_size)
-> +                       host->mmc->max_seg_size = max_seg_size;
-> +       }
-> +
->         return 0;
->  }
+> I don't have the HW to test this but the buildbots are happy with this
+> change. I checked that they actually tested the SH builds. To make the
+> patch more readable, I used the -M (rename) feature of git-format-patch.
 >
+>  arch/sh/boards/board-sh7757lcr.c                | 2 +-
+>  arch/sh/boards/mach-ecovec24/setup.c            | 2 +-
+>  arch/sh/boot/romimage/mmcif-sh7724.c            | 2 +-
+>  drivers/mmc/host/sh_mmcif.c                     | 2 +-
+>  include/linux/{mmc => platform_data}/sh_mmcif.h | 2 --
+>  5 files changed, 4 insertions(+), 6 deletions(-)
+>  rename include/linux/{mmc => platform_data}/sh_mmcif.h (99%)
+>
+> diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
+> index c32b4c6229d3..f39c8196efdf 100644
+> --- a/arch/sh/boards/board-sh7757lcr.c
+> +++ b/arch/sh/boards/board-sh7757lcr.c
+> @@ -16,7 +16,7 @@
+>  #include <linux/io.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mmcif.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <linux/sh_eth.h>
+>  #include <linux/sh_intc.h>
+>  #include <linux/usb/renesas_usbhs.h>
+> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+> index 4c9522dd351f..674da7ebd8b7 100644
+> --- a/arch/sh/boards/mach-ecovec24/setup.c
+> +++ b/arch/sh/boards/mach-ecovec24/setup.c
+> @@ -19,7 +19,7 @@
+>  #include <linux/memblock.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mmcif.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/gpio.h>
+>  #include <linux/gpio/machine.h>
+> diff --git a/arch/sh/boot/romimage/mmcif-sh7724.c b/arch/sh/boot/romimage/mmcif-sh7724.c
+> index 6595b6b45bf1..d30123d859e0 100644
+> --- a/arch/sh/boot/romimage/mmcif-sh7724.c
+> +++ b/arch/sh/boot/romimage/mmcif-sh7724.c
+> @@ -8,7 +8,7 @@
+>   * for more details.
+>   */
+>
+> -#include <linux/mmc/sh_mmcif.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <mach/romimage.h>
+>
+>  #define MMCIF_BASE      (void __iomem *)0xa4ca0000
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 5f9ebf045b1c..0fd4c9d644dd 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -43,12 +43,12 @@
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/sdio.h>
+> -#include <linux/mmc/sh_mmcif.h>
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/mod_devicetable.h>
+>  #include <linux/mutex.h>
+>  #include <linux/of_device.h>
+>  #include <linux/pagemap.h>
+> +#include <linux/platform_data/sh_mmcif.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/pm_qos.h>
+>  #include <linux/pm_runtime.h>
+> diff --git a/include/linux/mmc/sh_mmcif.h b/include/linux/platform_data/sh_mmcif.h
+> similarity index 99%
+> rename from include/linux/mmc/sh_mmcif.h
+> rename to include/linux/platform_data/sh_mmcif.h
+> index e25533b95d9f..6eb914f958f9 100644
+> --- a/include/linux/mmc/sh_mmcif.h
+> +++ b/include/linux/platform_data/sh_mmcif.h
+> @@ -1,7 +1,5 @@
+>  /* SPDX-License-Identifier: GPL-2.0-only */
+>  /*
+> - * include/linux/mmc/sh_mmcif.h
+> - *
+>   * platform data for eMMC driver
+>   *
+>   * Copyright (C) 2010 Renesas Solutions Corp.
 > --
-> 2.35.1
+> 2.30.2
 >
