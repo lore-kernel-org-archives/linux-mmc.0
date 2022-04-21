@@ -2,22 +2,22 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53C27C43217
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 06:17:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE4FBC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 06:25:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1384740AbiDUGU2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Apr 2022 02:20:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57246 "EHLO
+        id S1384817AbiDUG16 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Apr 2022 02:27:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1381512AbiDUGU1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 02:20:27 -0400
+        with ESMTP id S1384803AbiDUG13 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 02:27:29 -0400
 Received: from muru.com (muru.com [72.249.23.125])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6C117BC2B;
-        Wed, 20 Apr 2022 23:17:39 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0BBBC13EBD;
+        Wed, 20 Apr 2022 23:24:40 -0700 (PDT)
 Received: from localhost (localhost [127.0.0.1])
-        by muru.com (Postfix) with ESMTPS id D7D83811B;
-        Thu, 21 Apr 2022 06:14:47 +0000 (UTC)
-Date:   Thu, 21 Apr 2022 09:17:37 +0300
+        by muru.com (Postfix) with ESMTPS id 53E33811B;
+        Thu, 21 Apr 2022 06:21:49 +0000 (UTC)
+Date:   Thu, 21 Apr 2022 09:24:39 +0300
 From:   Tony Lindgren <tony@atomide.com>
 To:     Arnd Bergmann <arnd@kernel.org>
 Cc:     linux-omap@vger.kernel.org, aaro.koskinen@iki.fi,
@@ -44,29 +44,37 @@ Cc:     linux-omap@vger.kernel.org, aaro.koskinen@iki.fi,
         linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-Subject: Re: [PATCH 17/41] ARM: omap1: move 32k counter from plat-omap to
- mach-omap1
-Message-ID: <YmD3ATc4CBESln6j@atomide.com>
+Subject: Re: [PATCH 40/41] [TO BE REBASED] ARM: OMAP1: clock: Convert to CCF
+Message-ID: <YmD4p+09B/dq54XL@atomide.com>
 References: <20220419133723.1394715-1-arnd@kernel.org>
- <20220419133723.1394715-18-arnd@kernel.org>
+ <20220419133723.1394715-41-arnd@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220419133723.1394715-18-arnd@kernel.org>
+In-Reply-To: <20220419133723.1394715-41-arnd@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-* Arnd Bergmann <arnd@kernel.org> [220419 13:36]:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> omap2 stopped using this code with commit 8d39ff3d1696 ("ARM: OMAP2+:
-> Remove unused legacy code for timer"), so just move it to mach-omap1 now,
-> along with the other half of that driver.
+* Arnd Bergmann <arnd@kernel.org> [220419 13:39]:
+> From: Janusz Krzysztofik <jmkrzyszt@gmail.com>
+> +	/* protect clk->enable_reg from concurrent access via clk_set_rate() */
+> +	if (clk->enable_reg == OMAP1_IO_ADDRESS(ARM_CKCTL))
+> +		spin_lock_irqsave(&arm_ckctl_lock, flags);
+> +	else if (clk->enable_reg == OMAP1_IO_ADDRESS(ARM_IDLECT2))
+> +		spin_lock_irqsave(&arm_idlect2_lock, flags);
+> +	else if (clk->enable_reg == OMAP1_IO_ADDRESS(MOD_CONF_CTRL_0))
+> +		spin_lock_irqsave(&mod_conf_ctrl_0_lock, flags);
+> +	else if (clk->enable_reg == OMAP1_IO_ADDRESS(MOD_CONF_CTRL_1))
+> +		spin_lock_irqsave(&mod_conf_ctrl_1_lock, flags);
+> +	else if (clk->enable_reg == OMAP1_IO_ADDRESS(SWD_CLK_DIV_CTRL_SEL))
+> +		spin_lock_irqsave(&swd_clk_div_ctrl_sel_lock, flags);
+> +
 
-BTW, if omap1 gains devicetree support, chances are that the
-drivers/clocksource/timer-ti-32k.c will be usable with minor
-modifications.
+Eventually there should be just separate clock controller instances for
+the clock registers banks, and then this should all disappear as the
+lock is instance specific. Anyways, that's probably best done as a separate
+changes later on.
 
 Regards,
 
