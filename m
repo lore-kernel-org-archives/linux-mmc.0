@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 281F1C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 18:28:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA9F8C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 18:28:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1391345AbiDUSbX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Apr 2022 14:31:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52744 "EHLO
+        id S1391350AbiDUSbZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Apr 2022 14:31:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1391321AbiDUSbV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 14:31:21 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15B422BCC;
-        Thu, 21 Apr 2022 11:28:31 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id ga4-20020a17090b038400b001d4b33c74ccso4587858pjb.1;
-        Thu, 21 Apr 2022 11:28:31 -0700 (PDT)
+        with ESMTP id S1391346AbiDUSbY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 14:31:24 -0400
+Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44CFA2BCC;
+        Thu, 21 Apr 2022 11:28:34 -0700 (PDT)
+Received: by mail-pg1-x529.google.com with SMTP id t13so5329944pgn.8;
+        Thu, 21 Apr 2022 11:28:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=mxxHlhYNIG4dd3FIR1DSmPfxfi0MyzRVrwtk2D5SO70=;
-        b=RxdLGeE8XYHgxJljVAm+AWBFmD6aB+WctKzs5SaWM9HH6YMPD57YSpgi2WhuGj0DyV
-         rYTmYoSpypPiAgLZAhv2X+engz8F0b8tJgc/ENDdxvCb1rM2oITYT/YdtirU2z4EN0Wk
-         BTaGwTlzC1KkH3g36aJxOztz57jTwJyR67WCCuMNLuGnZ1OQJLjWbHo5bymacR+hSXL2
-         o+gFDfdoUetYeQVQev3rhKrOvqJAih9s79BiHHIrxnd/tRL6RPRJimpkbwxgmYhZUpx2
-         BYHmwy+iYPGDbF6L/cO7XpzBFO7NJzo1fEDAVWi8a8bEFmrRI9V4k3VWcfgUFc6KJtO2
-         NIgA==
+        bh=DL6DI5feuJoMlU44P61YM6Wgo//JlAhCvPdBp3CmZdI=;
+        b=qzaGT9qBstujuIErvgj5N/ijlSkXXKv1dd4yHvyPK5vMRZDLH0sQ4QgkfVIJHZqDSh
+         ulxtbFjtU3b6rQVgtH7v6XRVBICdlTWzpSXYoUfDYLo69d1BzrIptOjfsx0aH8NANPbI
+         UnBBTN/1kY+lmSccneUBAaxPSeeXV7QnvEggxiOiGWl4YMblpvIhhRkpGe0TKQ5/e+fA
+         zLHDC2YOI9nK8AQZuBZndvGpt1hq29+wfpJWQ0oRkGCJ4cbjqU7U6Q82y0FkjBT4IZgX
+         XKieTOg/lz4RPntmdRdEZrMs8VMvTMJgML4B4nCNhwpL1BY+nVx8eZqMaR/AWe72y0y6
+         8v5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=mxxHlhYNIG4dd3FIR1DSmPfxfi0MyzRVrwtk2D5SO70=;
-        b=XUCV9c+lSOapFQDosRtL+n9K6YwWGigKudhq+MYZ6HAxgCeI/1dMsE8/ciL+RZmXIt
-         Eg0hXg++RjgNulnQ69wCcdK1XQVCaHxwdWRSGWuYA5rlTSkSNlkocGtA27/NqO5ToLxU
-         6gT8wSSINPHmi4f/bzAW9alx6jXw3UbN7/WrRa6Wfn89s0ORTyX80Xqp/r73qdyK2log
-         /OTgd8bxIWwm6h0wWBrIJv5cTQdqftTWjpGG6raXxJ4m0geSosL2e3Qu/JZDwM7+PAob
-         wpRBK5D0XmxCVYMPeKqKxDPOOxonHWoPoeYcmStP43WKM4Q+ReuMAVsIZBHkxeILAc2m
-         9ZKQ==
-X-Gm-Message-State: AOAM533gthB5FwcCDwjI2hS+o1U+KfqCrjq/Q2QEfN18s2xfNYvVmFVV
-        jG6CGWWNhBI7tL/RM+wytzY=
-X-Google-Smtp-Source: ABdhPJzW3IkNZoDdc/BOxTkma8VNnnhslQRkNi+B8JWEvOJx88gT6NPVZcuQ6DRdIkxKs0aAQEhUvg==
-X-Received: by 2002:a17:902:7088:b0:156:1aa9:79eb with SMTP id z8-20020a170902708800b001561aa979ebmr677193plk.71.1650565710635;
-        Thu, 21 Apr 2022 11:28:30 -0700 (PDT)
+        bh=DL6DI5feuJoMlU44P61YM6Wgo//JlAhCvPdBp3CmZdI=;
+        b=dUNANhcHeAfwyL2SDDzpbCrZEYlY0uUt2dybFiFVwPiPTtcC/EylauI+tN9w3KnuA9
+         AlZQD0lV+FNVYBJBsGuSRpb09TdTl9I4WWQv6reDuuTfS4O/OwV4ok+0WPtnxmeSSm+X
+         F+x/AknTbEtIUULWfJ7Cf+eKYR1GCkBighEXLgnzIlDp9JUKIoAsMbMP3Mni5W4p6KXO
+         JPCbLQFOO+152kr0ym3WFC9m8NLzugHe5XYzo7m11eRn6knrz9pSglT+vV1sktyI5xKr
+         iGlcyGGJflFsvU83y5giOuDBCEkdMHiW1WtiC/hz1AONng2hBbqjzWF+mNnT3tn/1tiJ
+         fWcw==
+X-Gm-Message-State: AOAM530odaaL8AaFwGJVBWHoqARf6tr5bfka7OelAkKuTAit1bVJBgAG
+        BslZDQO1v0pRaUz6AX7PQPY=
+X-Google-Smtp-Source: ABdhPJyoK0byw8pr/pHJ1F1wx9N4DUcklZjDJIgldLfZhneMCmESqNGOx0SWSjlONpCtT3CGqKFTag==
+X-Received: by 2002:a05:6a00:198c:b0:505:c18b:3184 with SMTP id d12-20020a056a00198c00b00505c18b3184mr795725pfl.82.1650565713816;
+        Thu, 21 Apr 2022 11:28:33 -0700 (PDT)
 Received: from mail.broadcom.net ([192.19.11.250])
-        by smtp.gmail.com with ESMTPSA id s62-20020a635e41000000b003a9eb7f65absm6509333pgb.85.2022.04.21.11.28.28
+        by smtp.gmail.com with ESMTPSA id s62-20020a635e41000000b003a9eb7f65absm6509333pgb.85.2022.04.21.11.28.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 21 Apr 2022 11:28:30 -0700 (PDT)
+        Thu, 21 Apr 2022 11:28:33 -0700 (PDT)
 From:   Kamal Dasu <kdasu.kdev@gmail.com>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
         alcooperx@gmail.com
@@ -53,9 +53,9 @@ Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
         adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Kamal Dasu <kdasu.kdev@gmail.com>
-Subject: [PATCH 3/5] mmc: sdhci-brcmstb: Enable Clock Gating to save power
-Date:   Thu, 21 Apr 2022 14:28:01 -0400
-Message-Id: <20220421182803.6495-4-kdasu.kdev@gmail.com>
+Subject: [PATCH 4/5] dt-bindings: mmc: Add Broadcom optional sdio_freq clock
+Date:   Thu, 21 Apr 2022 14:28:02 -0400
+Message-Id: <20220421182803.6495-5-kdasu.kdev@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220421182803.6495-1-kdasu.kdev@gmail.com>
 References: <20220421182803.6495-1-kdasu.kdev@gmail.com>
@@ -63,100 +63,78 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Al Cooper <alcooperx@gmail.com>
+The 72116B0 has improved SDIO controllers that allow the max clock
+rate to be increased from a max of 100MHz to a max of 150MHz.
+Optional "sdio_freq" clock is used to drive the bus clock if present
+optional property "clock-frequency" specifies a base clock frequency
+in Hz that overrides the base clock frequency in the CAPS registers.
 
-Enabling this feature will allow the controller to stop the bus
-clock when the bus is idle. The feature is not part of the standard
-and is unique to newer Arasan cores and is enabled with a bit in a
-vendor specific register. This feature will only be enabled for
-non-removable devices because they don't switch the voltage and
-clock gating breaks SD Card volatge switching.
-
-Signed-off-by: Al Cooper <alcooperx@gmail.com>
 Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
 ---
- drivers/mmc/host/sdhci-brcmstb.c | 35 +++++++++++++++++++++++++++++++-
- 1 file changed, 34 insertions(+), 1 deletion(-)
+ .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 29 +++++++++++++++----
+ 1 file changed, 24 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-index f32aa045c26d..d5cb3e8978b2 100644
---- a/drivers/mmc/host/sdhci-brcmstb.c
-+++ b/drivers/mmc/host/sdhci-brcmstb.c
-@@ -17,11 +17,14 @@
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+index dccd5ad96981..1b45a918400a 100644
+--- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
++++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
+@@ -10,8 +10,6 @@ maintainers:
+   - Al Cooper <alcooperx@gmail.com>
+   - Florian Fainelli <f.fainelli@gmail.com>
  
- #define SDHCI_VENDOR 0x78
- #define  SDHCI_VENDOR_ENHANCED_STRB 0x1
-+#define  SDHCI_VENDOR_GATE_SDCLK_EN 0x2
+-allOf:
+-  - $ref: mmc-controller.yaml#
  
- #define BRCMSTB_MATCH_FLAGS_NO_64BIT		BIT(0)
- #define BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT	BIT(1)
-+#define BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE	BIT(2)
+ properties:
+   compatible:
+@@ -42,23 +40,44 @@ properties:
+     maxItems: 1
  
- #define BRCMSTB_PRIV_FLAGS_HAS_CQE		BIT(0)
-+#define BRCMSTB_PRIV_FLAGS_GATE_CLOCK		BIT(1)
+   clocks:
+-    maxItems: 1
+-    description:
+-      handle to core clock for the sdhci controller.
++    minItems: 1
++    items:
++      - description: handle to core clock for the sdhci controller
++      - description: improved 150Mhz clock for sdhci controller (Optional clock)
  
- #define SDHCI_ARASAN_CQE_BASE_ADDR		0x200
- 
-@@ -36,6 +39,27 @@ struct brcmstb_match_priv {
- 	const unsigned int flags;
- };
- 
-+static inline void enable_clock_gating(struct sdhci_host *host)
-+{
-+	u32 reg;
+   clock-names:
++    minItems: 1
+     items:
+       - const: sw_sdio
++      - const: sdio_freq # Optional clock
 +
-+	reg = sdhci_readl(host, SDHCI_VENDOR);
-+	reg |= SDHCI_VENDOR_GATE_SDCLK_EN;
-+	sdhci_writel(host, reg, SDHCI_VENDOR);
-+}
-+
-+void brcmstb_reset(struct sdhci_host *host, u8 mask)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_reset(host, mask);
-+
-+	/* Reset will clear this, so re-enable it */
-+	if (priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK)
-+		enable_clock_gating(host);
-+}
-+
- static void sdhci_brcmstb_hs400es(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -131,7 +155,7 @@ static struct sdhci_ops sdhci_brcmstb_ops = {
- static struct sdhci_ops sdhci_brcmstb_ops_7216 = {
- 	.set_clock = sdhci_brcmstb_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.reset = sdhci_reset,
-+	.reset = brcmstb_reset,
- 	.set_uhs_signaling = sdhci_brcmstb_set_uhs_signaling,
- };
++  clock-frequency:
++    description: Should be the frequency (in Hz) of the base controller clock
++    minimum: 400000
++    maximum: 150000000
  
-@@ -147,6 +171,7 @@ static struct brcmstb_match_priv match_priv_7445 = {
- };
+   sdhci,auto-cmd12:
+     type: boolean
+     description: Specifies that controller should use auto CMD12
  
- static const struct brcmstb_match_priv match_priv_7216 = {
-+	.flags = BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE,
- 	.hs400es = sdhci_brcmstb_hs400es,
- 	.ops = &sdhci_brcmstb_ops_7216,
- };
-@@ -273,6 +298,14 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
- 	if (res)
- 		goto err;
- 
-+	/*
-+	 * Automatic clock gating does not work for SD cards that may
-+	 * voltage switch so only enable it for non-removable devices.
-+	 */
-+	if ((match_priv->flags & BRCMSTB_MATCH_FLAGS_HAS_CLOCK_GATE) &&
-+	    (host->mmc->caps & MMC_CAP_NONREMOVABLE))
-+		priv->flags |= BRCMSTB_PRIV_FLAGS_GATE_CLOCK;
++allOf:
++  - $ref: mmc-controller.yaml#
++  - if:
++      properties:
++        clock-names:
++          contains:
++            const: sdio_freq
 +
- 	/*
- 	 * If the chip has enhanced strobe and it's enabled, add
- 	 * callback
++  - then:
++      required:
++        - clock-frequency
++
+ required:
+   - compatible
+   - reg
+   - interrupts
+   - clocks
++  - clock-names
+ 
+ unevaluatedProperties: false
+ 
 -- 
 2.17.1
 
