@@ -2,151 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51A1DC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 12:12:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68591C43217
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 13:34:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1383347AbiDUMP2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Apr 2022 08:15:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57306 "EHLO
+        id S1386857AbiDUNhn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Apr 2022 09:37:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1378145AbiDUMP1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 08:15:27 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78B5A2F004
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 05:12:37 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id h27so8081513lfj.13
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 05:12:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gASVhU/crs6sXEphNU/hZV9BV2Qz02aD86zFkSz7dK0=;
-        b=AL/cU7XSsTVHVXBOy9gNNsGbwO4XtEb7qDxziknT+GhSzSOKw/nGhJ8bkG0b4pBEC8
-         RqagWYyY1PfSUlcsMEUQx9vbiqwQmJz3vOw6tv5J+IaMRvALQbqTRetz9AU0Fx5a2RwT
-         RgGUeKNArgHrzrgo/H4ztslTetgHDX5j4mmGliQzF7mu3Q5tkKFo9NW2joKRrcGKq466
-         YUIlPloRjds1l+4UbO5eS3DKvZ7IbBLDJjL7ExyfWkejPkerLoYyocgS1kg38sY8qkDI
-         Db/AHnTSn7lwLSq4zH4gxqSIWpr/FCAAEvzHH0btOALKV204L6qTr2Jk+Bkvl+6raUFf
-         /T6w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gASVhU/crs6sXEphNU/hZV9BV2Qz02aD86zFkSz7dK0=;
-        b=uT6fItNtYnexWt38rxIxwThdgGqGav0ZjlCNQy9SEYdofKV1m1OAAGgsd7FkcxDrBf
-         53gwjKHQHqUuGNRgTrkW57IdIU9PT21r7q1wAwk8PqPgeh3QxMYD2HHCVQPa4hsCLDhq
-         de7ryOtlvFwlZw+2BALBzKoB3GppbOfYRcmdiPn7Tvmq2En9KjBxjUKLyjPG4jye53jl
-         wqIZTXtF9bWUZGNOZENHhrsVruLseuOWBnPUX83d21PWNumU049vjGbbQWg/LSGBlh8i
-         Fg2/lSxcP3VZqQvjadYUlaWGMR247ik9i8IFntseAF1RAJyKjzO9yZSm8uH3eTcht5f5
-         mQLg==
-X-Gm-Message-State: AOAM531f6G+i8iyNo6M+uAHR422j8JPMs5jzEiGFEbpzgvpojWG5/EZM
-        lmtThTKNawGYGG5Hew11ehafy6gQHT3ECkVWg8uQmA503Uw=
-X-Google-Smtp-Source: ABdhPJzzmEIowJToWOzSJDQuwgmSD6gBEbeEuLfo7t2ZABJXLNCi5A40sLZ5f4IPRbUM1f5J+33uzMoTexb64mmtoVs=
-X-Received: by 2002:a19:505d:0:b0:46d:167e:b9df with SMTP id
- z29-20020a19505d000000b0046d167eb9dfmr18438699lfj.184.1650543155741; Thu, 21
- Apr 2022 05:12:35 -0700 (PDT)
+        with ESMTP id S230271AbiDUNhb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 09:37:31 -0400
+Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7AFD12ED69;
+        Thu, 21 Apr 2022 06:34:41 -0700 (PDT)
+Received: from darkstar.musicnaut.iki.fi (85-76-47-192-nat.elisa-mobile.fi [85.76.47.192])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: aaro.koskinen)
+        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id 047811B00252;
+        Thu, 21 Apr 2022 16:34:32 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
+        t=1650548074;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=oVFIWam2OH5Kq5QzsfblzUEMIMiatzAi7D5irCcCglk=;
+        b=Xk3qyrppSMBB4y+4boXcQF3oQ0tJICSyEousvelDBkd8/PVx55tQbJieAi/Q0KQa0aNG+G
+        Gh88Z+pM8E36JmzxlWSVvjXm3PFhBwLXYL2LZOWOsctt2/ybfngzEzXevKqVRqqsk+dHOX
+        5L1WRR3RN0Tc57TLDGaoxQzs/vTRLS73kqV8NQ7Pr+rYaKPhEVw6YpbHAi1CUcgHmT/iJb
+        sSsFTNRKlLJoxWjnYPJUSCoDtMuNfYAqp6Y4933cAcgTAbeGBst/0aU+ZHi8x118KnYG/L
+        TTEMpWSI21eBdlKccjScwxNSRB5ywON2ldVT1bI/+m9vyrFPnxxWxtiiOfNC6w==
+Date:   Thu, 21 Apr 2022 16:34:31 +0300
+From:   Aaro Koskinen <aaro.koskinen@iki.fi>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     linux-omap <linux-omap@vger.kernel.org>,
+        Tony Lindgren <tony@atomide.com>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Paul Walmsley <paul@pwsan.com>,
+        Kevin Hilman <khilman@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Mark Brown <broonie@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Lee Jones <lee.jones@linaro.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        dmaengine@vger.kernel.org,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Subject: Re: [PATCH 00/41] OMAP1 full multiplatform conversion
+Message-ID: <20220421133431.GE1947@darkstar.musicnaut.iki.fi>
+References: <20220419133723.1394715-1-arnd@kernel.org>
+ <20220420170836.GB1947@darkstar.musicnaut.iki.fi>
+ <CAK8P3a1+sOrn8BWPVc7f+QFZ5=7fE6=MLsMYV9t+HJcG2aRCXA@mail.gmail.com>
 MIME-Version: 1.0
-References: <20220418102040.4993-1-a-govindraju@ti.com> <20220418102040.4993-3-a-govindraju@ti.com>
-In-Reply-To: <20220418102040.4993-3-a-govindraju@ti.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 21 Apr 2022 14:11:59 +0200
-Message-ID: <CAPDyKFreftOExcZ9hgxpDGtdHhniB847vGAGpoO-McTy5_ao1w@mail.gmail.com>
-Subject: Re: [PATCH 2/2] drivers: mmc: sdhci_am654: Add the quirk to set
- TESTCD bit
-To:     Aswath Govindraju <a-govindraju@ti.com>
-Cc:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a1+sOrn8BWPVc7f+QFZ5=7fE6=MLsMYV9t+HJcG2aRCXA@mail.gmail.com>
+ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1650548074; a=rsa-sha256;
+        cv=none;
+        b=ENXGTtwbaVogGy0K8rD23cjHmjO1KDBpZYPSWyAXiJ0/g3DluUJMMqXizYyXV1sh/1O56S
+        hChw4SwQwbKFg4HYlY2SOiU8koj4G0UA6uGgTWSMxSwgySv+tbXfSR2Tt70pNgc6FN/vqj
+        fDExRVdSPenGd/ZTQhfjmyvSX3P7pooRbwh0WQDjEhItMOJyG5yZgN9teFQT3NBHXEEZkO
+        lTJHNaVgxdVFvqiak5FfjdiYOvwW5qr/IFspdks2sOUviaT7JpvKaacUapRAwuXFYtOguN
+        JXEZ3bM5xviSbbt9Tw3xErBDkB9cnwUXXzqGZHNp79d0+eb+sY0cVMOQI8ss7A==
+ARC-Authentication-Results: i=1;
+        ORIGINATING;
+        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
+        s=lahtoruutu; t=1650548074;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=oVFIWam2OH5Kq5QzsfblzUEMIMiatzAi7D5irCcCglk=;
+        b=Eu1uUO0EKvbhrdQZfCpIhRELzJA5jQZA+tye8R+aaTvgG9DkVEsXKYWX2Sby3kmhYmBCFx
+        570Cbs63dCqUFZqQdnWOK5t2vzZfwXPpwZynEikAKA3hi3QfuIi/BoBmae0xNSLey+fMmB
+        6AN1xF39YRJln008whjTgBohIBALbd/JXyh+rxwe1mx9rmT55Z+64rbOepQpAj7WZ0ttFr
+        jnTgxti7i7/9Pg4jNgskYWOOvKpXwrgTWzEQwA6H3TD1Jh0kJTMK2AunGS+FmvtC90A9Rp
+        r/9gYERVC+5BvSqEpSaGtYy+3htyiKaREqUWXaB7dxpxJqJYBA33p4txWzgVSw==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 18 Apr 2022 at 12:21, Aswath Govindraju <a-govindraju@ti.com> wrote:
->
-> From: Vignesh Raghavendra <vigneshr@ti.com>
->
-> The ARASAN MMC controller on Keystone 3 class of devices need the SDCD
-> line to be connected for proper functioning. Similar to the issue pointed
-> out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
-> sdhci-of-arasan: Set controller to test mode when no CD bit").
->
-> In cases where this can't be connected, add a quirk to force the
-> controller into test mode and set the TESTCD bit. Use the flag
-> "ti,fails-without-test-cd", to implement this above quirk when required.
->
-> Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
-> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
-> ---
->  drivers/mmc/host/sdhci_am654.c | 23 ++++++++++++++++++++++-
->  1 file changed, 22 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index e54fe24d47e7..c36b969ed1b6 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -147,6 +147,9 @@ struct sdhci_am654_data {
->         int drv_strength;
->         int strb_sel;
->         u32 flags;
-> +       u32 quirks;
-> +
-> +#define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->  };
->
->  struct sdhci_am654_driver_data {
-> @@ -369,6 +372,21 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
->         }
->  }
->
-> +void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
+Hi,
 
-This should be a static function.
+On Wed, Apr 20, 2022 at 10:00:13PM +0200, Arnd Bergmann wrote:
+> On Wed, Apr 20, 2022 at 7:08 PM Aaro Koskinen <aaro.koskinen@iki.fi> wrote:
+> > On Tue, Apr 19, 2022 at 03:36:42PM +0200, Arnd Bergmann wrote:
+> > > From: Arnd Bergmann <arnd@arndb.de>
+> > >
+> > > This is the full series for converting OMAP1 to multiplatform, rebased
+> > > from my 2019 attempt to do the same thing. The soc tree contains simpler
+> > > patches to do the same for iop32x, ixp4xx, ep93xx and s3c24xx, which
+> > > means we are getting closer to completing this for all ARMv5 platforms
+> > > (I have patches for PXA, which is the last one remaining).
+> > >
+> > > Janusz already tested the branch separately and did the missing work
+> > > for the common-clk conversion after my previous approach was broken.
+> >
+> > I tested the full series on the following OMAP1 boards: ams-delta,
+> > nokia770, osk, palmte and sx1 (QEMU only).
+> >
+> > Apart from the earlyprintk breakage, everything seemed to work OK.
+> 
+> Nice, thanks a lot for testing!
 
-> +{
-> +       u8 ctrl;
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-> +
-> +       sdhci_reset(host, mask);
-> +
-> +       if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
-> +               ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +               ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-> +               sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +       }
-> +}
-> +
->  static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  {
->         struct sdhci_host *host = mmc_priv(mmc);
-> @@ -500,7 +518,7 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
->         .set_clock = sdhci_j721e_4bit_set_clock,
->         .write_b = sdhci_am654_write_b,
->         .irq = sdhci_am654_cqhci_irq,
-> -       .reset = sdhci_reset,
-> +       .reset = sdhci_am654_reset,
->  };
->
->  static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
-> @@ -719,6 +737,9 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->         device_property_read_u32(dev, "ti,clkbuf-sel",
->                                  &sdhci_am654->clkbuf_sel);
->
-> +       if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
-> +               sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
-> +
->         sdhci_get_of_property(pdev);
->
->         return 0;
-> --
-> 2.17.1
->
+With the updated patch 26 also earlyprintk now works, so if you still
+update the patches, feel free to add for the whole series:
 
-Other than the minor thing above, this looks good to me.
+Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi>
 
-Kind regards
-Uffe
+Thanks,
+
+A.
