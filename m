@@ -2,168 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 614E3C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 09:56:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78050C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 12:11:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240733AbiDUJ7L convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Apr 2022 05:59:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58288 "EHLO
+        id S231919AbiDUMN7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Apr 2022 08:13:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229758AbiDUJ7F (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 05:59:05 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F44C237D1
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 02:56:16 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nhTXh-0003ZT-V5; Thu, 21 Apr 2022 11:56:06 +0200
-Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nhTXf-004KoC-Qh; Thu, 21 Apr 2022 11:56:02 +0200
-Received: from pza by lupine with local (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nhTXd-0006Qn-Nd; Thu, 21 Apr 2022 11:56:01 +0200
-Message-ID: <9b2b9460e46d8544867589ce61d380265f42cd04.camel@pengutronix.de>
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-From:   Philipp Zabel <p.zabel@pengutronix.de>
-To:     "Sajida Bhanu (Temp)" <quic_c_sbhanu@quicinc.com>,
-        adrian.hunter@intel.com, agross@kernel.org,
-        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
-        chris@printf.net, venkatg@codeaurora.org, gdjakov@mm-sol.com,
-        quic_asutoshd@quicinc.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com
-Date:   Thu, 21 Apr 2022 11:56:01 +0200
-In-Reply-To: <fb6480f6-f004-c02d-09fe-92a64785a0c5@quicinc.com>
-References: <1649759983-22035-1-git-send-email-quic_c_sbhanu@quicinc.com>
-         <1ee3b0619ee976eaf88e7207318770d441418c94.camel@pengutronix.de>
-         <1943a5fb-cf6c-f358-9e27-408792a458ce@quicinc.com>
-         <dc2252f03db5881dbb17006c910dfca54c7d2fee.camel@pengutronix.de>
-         <fb6480f6-f004-c02d-09fe-92a64785a0c5@quicinc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-User-Agent: Evolution 3.38.3-1 
+        with ESMTP id S1376597AbiDUMN6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 08:13:58 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ABC62ED73
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 05:11:05 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id y32so8337404lfa.6
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Apr 2022 05:11:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=2qh1sP8uzQryeVgDtsc75uouxg8rbCQSDajPwRRmCQo=;
+        b=Z0INWc9lxyV6HU2uh2mPeBqK0yli23uZv/u24ByX5vg6Pu4bhQ7AzrEPCeUdwAodwC
+         pC+3TIzpU57+5m5qC3ebKzY93Rycc2+gHYqhtruCTqoWutODQzVzIEOhd2YfqeK6yqIF
+         Xu6b4XHkcJ32Hm1srnlpzDf1g2t+aZDF2WSNHDuPjSJZbdfU1LuzRzn0LYl8gaxoraZ/
+         gVFgo5J3mpWveMo2GKV02uNZfN3GI7ia3OBZjgXqrR8oRDkqaHkPNZ/XW+zCLqPWsFg9
+         Wz/2JXeM+6hz5hvpyqD6hZJqcc7QVRa76tne8gXABci2GCSjRBFoRffN6oTU6BDV/wBP
+         dmIQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=2qh1sP8uzQryeVgDtsc75uouxg8rbCQSDajPwRRmCQo=;
+        b=duzW8xWEgFFVfIJhwG+/7mnYOTm62Ya+mx9Et+YkeyCqCSHzVqxKkBMXZqPHXs+9+a
+         WLKWIRauRb9qk7Cw4MG0t7m15Bqy4Uv5bilKHCrSMmfU3RO4BAscxdBSNOhmTCrfJVWO
+         2FbGhsGJTOsXR05bYL/eITAXOMK6KnFaA+h1fyky4dalt0Lb9XUuKRJo743ywEDD2cTI
+         hIYvS49a5ZeU0GMsjYcZbfhsJ3r9pRVkiQ3wzHJ+N30PFzqg9nm+0JnHmfaze5PTwHGh
+         etKkBoC+J6VdSPcgKfzj6Dn1iAyWbLslw8VbYpzpMEvUbeFUhNzz98wWimRMdivk7lEo
+         luWA==
+X-Gm-Message-State: AOAM530qBNDtcaBHbu/sKbwZlbDai9WHoz9MUu2QfYre6X93dFB9vM33
+        N8rceuvIU53P9UCmsgvcqQaA6w/8oAeykBkaa9EoPw==
+X-Google-Smtp-Source: ABdhPJxiF6HE3qtyySBVgBeLZFZb4229Fdfv3WYeASID+W6jtiE1O7ThlV69sO3NVsaNvqCnkYIoYFyNgU7zcMkUyh0=
+X-Received: by 2002:ac2:4e98:0:b0:448:3039:d170 with SMTP id
+ o24-20020ac24e98000000b004483039d170mr19385452lfr.233.1650543063540; Thu, 21
+ Apr 2022 05:11:03 -0700 (PDT)
 MIME-Version: 1.0
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: p.zabel@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20220418102040.4993-1-a-govindraju@ti.com> <20220418102040.4993-2-a-govindraju@ti.com>
+In-Reply-To: <20220418102040.4993-2-a-govindraju@ti.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 21 Apr 2022 14:10:27 +0200
+Message-ID: <CAPDyKFrHi3-7FMfwRP5rtjSbTOnw73FvU5ZAz=eC8-XqQZYpsg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-am654: Add flag to force
+ setting to TESTCD bit
+To:     Aswath Govindraju <a-govindraju@ti.com>
+Cc:     Vignesh Raghavendra <vigneshr@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Do, 2022-04-21 at 10:32 +0530, Sajida Bhanu (Temp) wrote:
-> Hi,
-> 
-> Thanks for the review.
-> 
-> Please find the inline comments.
-> 
-> Thanks,
-> 
-> Sajida
-> 
-> On 4/19/2022 12:52 PM, Philipp Zabel wrote:
-> > Hi Sajida,
-> > 
-> > On Di, 2022-04-19 at 11:46 +0530, Sajida Bhanu (Temp) wrote:
-> > [...]
-> > > > > +static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
-> > > > > +{
-> > > > > +	struct reset_control *reset;
-> > > > > +	int ret = 0;
-> > > > No need to initialize ret.
-> > > > 
-> > > > > +
-> > > > > +	reset = reset_control_get_optional_exclusive(dev, NULL);
-> > > > > +	if (IS_ERR(reset))
-> > > > > +		return dev_err_probe(dev, PTR_ERR(reset),
-> > > > > +				"unable to acquire core_reset\n");
-> > > > > +
-> > > > > +	if (!reset)
-> > > > > +		return ret;
-> > > Here we are returning ret directly if reset is NULL , so ret
-> > > initialization is required.
-> > You are right. I would just "return 0;" here, but this is correct as
-> > is.
-> Ok
-> > > > > +
-> > > > > +	ret = reset_control_assert(reset);
-> > > > > +	if (ret)
-> > > > > +		return dev_err_probe(dev, ret, "core_reset assert failed\n");
-> > > > Missing reset_control_put(reset) in the error path.
-> > > Sure will add
-> > > > > +
-> > > > > +	/*
-> > > > > +	 * The hardware requirement for delay between assert/deassert
-> > > > > +	 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
-> > > > > +	 * ~125us (4/32768). To be on the safe side add 200us delay.
-> > > > > +	 */
-> > > > > +	usleep_range(200, 210);
-> > > > > +
-> > > > > +	ret = reset_control_deassert(reset);
-> > > > > +	if (ret)
-> > > > > +		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
-> > > > Same as above. Maybe make both ret = dev_err_probe() and goto ...
-> > > In both cases error message is different so I think goto not good idea here.
-> > You could goto after the error message. Either way is fine.
-> 
-> Sorry didn't get this ..can  you please help
+On Mon, 18 Apr 2022 at 12:21, Aswath Govindraju <a-govindraju@ti.com> wrote:
+>
+> The ARASAN MMC controller on Keystone 3 class of devices needs the SDCD
+> line to be connected for proper functioning. Similar to the issue pointed
+> out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
+> sdhci-of-arasan: Set controller to test mode when no CD bit").
+>
+> In cases where SDCD line is not connected, driver support has been added to
+> force the controller into test mode and set the TESTCD bit. In order to
+> implement this quirk the driver uses "ti,fails-without-test-cd" flag from
+> the device tree node. Therefore, update the bindings to document the above.
 
-I meant you could either use goto after the error messages:
+Would you mind rephrasing this a bit. DT bindings is about describing
+the HW, not about what the software should do.
 
-+static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
-+{
-[...]
-+	ret = reset_control_assert(reset);
-+	if (ret) {
-+		dev_err_probe(dev, ret, "core_reset assert failed\n");
-+		goto out_reset_put;
-+	}
-[...]
-+	ret = reset_control_deassert(reset);
-+	if (ret) {
-+		dev_err_probe(dev, ret, "core_reset deassert failed\n");
-+		goto out_reset_put;
-+	}
-+
-+	usleep_range(200, 210);
-+
-+out_reset_put:
-+	reset_control_put(reset);
-+
-+	return ret;
-+}
+Otherwise, this looks good to me.
 
-Or not use goto and copy the reset_control_put() into each error path:
+Kind regards
+Uffe
 
-+static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
-+{
-[...]
-+	ret = reset_control_assert(reset);
-+	if (ret) {
-+		reset_control_put(reset);
-+		return dev_err_probe(dev, ret, "core_reset assert failed\n");
-+	}
-[...]
-+	ret = reset_control_deassert(reset);
-+	if (ret) {
-+		reset_control_put(reset);
-+		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
-+	}
-+
-+	usleep_range(200, 210);
-+	reset_control_put(reset);
-+
-+	return 0;
-+}
-
-regards
-Philipp
-> 
+>
+> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> index 0566493c4def..0ab07759b472 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> @@ -186,6 +186,13 @@ properties:
+>      description: Clock Delay Buffer Select
+>      $ref: "/schemas/types.yaml#/definitions/uint32"
+>
+> +  ti,fails-without-test-cd:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      When present, indicates that the CD line is not connected
+> +      and the controller is required to be forced into Test mode
+> +      to set the TESTCD bit.
+> +
+>  required:
+>    - compatible
+>    - reg
+> --
+> 2.17.1
+>
