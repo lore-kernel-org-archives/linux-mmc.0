@@ -2,129 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25D63C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 05:03:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99286C43217
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Apr 2022 05:20:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238664AbiDUFGd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Apr 2022 01:06:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44712 "EHLO
+        id S1384337AbiDUFWq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Apr 2022 01:22:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237190AbiDUFGc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 01:06:32 -0400
-Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34A6DE08F;
-        Wed, 20 Apr 2022 22:03:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1650517424; x=1682053424;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=eU7QDjI4vyI81/XW/z3kwNXUIF5FPDflWs0YKsUKWWk=;
-  b=VeId9NL4Hs68D7a2KqGLLh9LhkiOJx+XLJz+GEOiC7CfTfdkt7PXSVOr
-   zHyKtP5hl8k+ZcuCoidG3W+FDCLLuGztuVI6lWOWCjbNTLY6aZNt97tnn
-   KDDaDPgYMbuNAyyxsVqDfXRmRfAX53ruFxzPl4t4oVs+vofV/qIXq0kAu
-   8=;
-Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
-  by alexa-out.qualcomm.com with ESMTP; 20 Apr 2022 22:03:44 -0700
-X-QCInternal: smtphost
-Received: from nasanex01c.na.qualcomm.com ([10.47.97.222])
-  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Apr 2022 22:03:43 -0700
-Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
- nasanex01c.na.qualcomm.com (10.47.97.222) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.22; Wed, 20 Apr 2022 22:03:08 -0700
-Received: from [10.216.45.250] (10.80.80.8) by nalasex01a.na.qualcomm.com
- (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Wed, 20 Apr
- 2022 22:03:03 -0700
-Message-ID: <fb6480f6-f004-c02d-09fe-92a64785a0c5@quicinc.com>
-Date:   Thu, 21 Apr 2022 10:32:57 +0530
+        with ESMTP id S1384344AbiDUFWg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2022 01:22:36 -0400
+Received: from muru.com (muru.com [72.249.23.125])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B83CBC7C;
+        Wed, 20 Apr 2022 22:19:47 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTPS id 2EAAD811B;
+        Thu, 21 Apr 2022 05:16:56 +0000 (UTC)
+Date:   Thu, 21 Apr 2022 08:19:45 +0300
+From:   Tony Lindgren <tony@atomide.com>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Paul Walmsley <paul@pwsan.com>,
+        Kevin Hilman <khilman@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Mark Brown <broonie@kernel.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Lee Jones <lee.jones@linaro.org>,
+        Daniel Thompson <daniel.thompson@linaro.org>,
+        Jingoo Han <jingoohan1@gmail.com>,
+        Helge Deller <deller@gmx.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        dmaengine@vger.kernel.org,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Subject: Re: [PATCH 26/41] ARM: omap1: relocate static I/O mapping
+Message-ID: <YmDpcXoafouaDL7s@atomide.com>
+References: <20220419133723.1394715-1-arnd@kernel.org>
+ <20220419133723.1394715-27-arnd@kernel.org>
+ <20220420134615.GA1947@darkstar.musicnaut.iki.fi>
+ <CAK8P3a00DgKYdzTZFiBfKDF_zwaJjL6Duw8aOOJ-gVkz4L1ZwQ@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.6.1
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-Content-Language: en-US
-To:     Philipp Zabel <p.zabel@pengutronix.de>, <adrian.hunter@intel.com>,
-        <agross@kernel.org>, <bjorn.andersson@linaro.org>,
-        <ulf.hansson@linaro.org>, <chris@printf.net>,
-        <venkatg@codeaurora.org>, <gdjakov@mm-sol.com>,
-        <quic_asutoshd@quicinc.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <quic_rampraka@quicinc.com>,
-        <quic_pragalla@quicinc.com>, <quic_sartgarg@quicinc.com>,
-        <quic_nitirawa@quicinc.com>, <quic_sayalil@quicinc.com>
-References: <1649759983-22035-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <1ee3b0619ee976eaf88e7207318770d441418c94.camel@pengutronix.de>
- <1943a5fb-cf6c-f358-9e27-408792a458ce@quicinc.com>
- <dc2252f03db5881dbb17006c910dfca54c7d2fee.camel@pengutronix.de>
-From:   "Sajida Bhanu (Temp)" <quic_c_sbhanu@quicinc.com>
-In-Reply-To: <dc2252f03db5881dbb17006c910dfca54c7d2fee.camel@pengutronix.de>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAK8P3a00DgKYdzTZFiBfKDF_zwaJjL6Duw8aOOJ-gVkz4L1ZwQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+* Arnd Bergmann <arnd@kernel.org> [220420 19:18]:
+> On Wed, Apr 20, 2022 at 3:46 PM Aaro Koskinen <aaro.koskinen@iki.fi> wrote:
+> >
+> > Hi,
+> >
+> > On Tue, Apr 19, 2022 at 03:37:08PM +0200, Arnd Bergmann wrote:
+> > > From: Arnd Bergmann <arnd@arndb.de>
+> > >
+> > > The address range 0xfee00000-0xfeffffff is used for PCI and
+> > > PCMCIA I/O port mappings, but OMAP1 has its static mappings
+> > > there as well.
+> > >
+> > > Move the OMAP1 addresses a little higher to avoid crashing
+> > > at boot.
+> >
+> > This has the same problem I reported in 2019, with earlyprintk the
+> > system no longer boots:
+> >
+> >         https://marc.info/?t=156530014200005&r=1&w=2
+> >
+> > Tested on OSK and SX1/qemu.
+> 
+> Thanks a lot for testing!
+> 
+> I managed to get to the bottom of this after just a few hours, and
+> it turned out to be a simple math error on my end, as I got
+> the alignment wrong, the offset has to be 0x00f00000
+> instead of 0x00fb0000 be section aligned. I made sure the
+> kernel boots up (to the point of missing a rootfs) and uploaded
+> the fixed branch.
 
-Thanks for the review.
+Good to hear this got sorted out :)
 
-Please find the inline comments.
+Regards,
 
-Thanks,
-
-Sajida
-
-On 4/19/2022 12:52 PM, Philipp Zabel wrote:
-> Hi Sajida,
->
-> On Di, 2022-04-19 at 11:46 +0530, Sajida Bhanu (Temp) wrote:
-> [...]
->>>> +static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
->>>> +{
->>>> +	struct reset_control *reset;
->>>> +	int ret = 0;
->>> No need to initialize ret.
->>>
->>>> +
->>>> +	reset = reset_control_get_optional_exclusive(dev, NULL);
->>>> +	if (IS_ERR(reset))
->>>> +		return dev_err_probe(dev, PTR_ERR(reset),
->>>> +				"unable to acquire core_reset\n");
->>>> +
->>>> +	if (!reset)
->>>> +		return ret;
->> Here we are returning ret directly if reset is NULL , so ret
->> initialization is required.
-> You are right. I would just "return 0;" here, but this is correct as
-> is.
-Ok
->>>> +
->>>> +	ret = reset_control_assert(reset);
->>>> +	if (ret)
->>>> +		return dev_err_probe(dev, ret, "core_reset assert failed\n");
->>> Missing reset_control_put(reset) in the error path.
->> Sure will add
->>>> +
->>>> +	/*
->>>> +	 * The hardware requirement for delay between assert/deassert
->>>> +	 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
->>>> +	 * ~125us (4/32768). To be on the safe side add 200us delay.
->>>> +	 */
->>>> +	usleep_range(200, 210);
->>>> +
->>>> +	ret = reset_control_deassert(reset);
->>>> +	if (ret)
->>>> +		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
->>> Same as above. Maybe make both ret = dev_err_probe() and goto ...
->> In both cases error message is different so I think goto not good idea here.
-> You could goto after the error message. Either way is fine.
-
-Sorry didn't get this ..can  you please help
-
->
-> regards
-> Philipp
+Tony
