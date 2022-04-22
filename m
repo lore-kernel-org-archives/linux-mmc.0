@@ -2,126 +2,205 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D737C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 17:07:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C2ADC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 17:09:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235917AbiDVRKQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Apr 2022 13:10:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44002 "EHLO
+        id S234496AbiDVRMC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Apr 2022 13:12:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231415AbiDVRKM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 13:10:12 -0400
-Received: from mail-ej1-x634.google.com (mail-ej1-x634.google.com [IPv6:2a00:1450:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83B1E888E7
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 10:07:13 -0700 (PDT)
-Received: by mail-ej1-x634.google.com with SMTP id l7so17653482ejn.2
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 10:07:13 -0700 (PDT)
+        with ESMTP id S229722AbiDVRMB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 13:12:01 -0400
+Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4B9A8CDB6
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 10:09:05 -0700 (PDT)
+Received: by mail-pf1-x42d.google.com with SMTP id x80so8588505pfc.1
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 10:09:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=HuaHFmqvQqnIyK40h6V5f/iowB3mu3oIEkcjqTultSk=;
-        b=WkxCwPEM5BKiLQpoW8yI3vRR/7oRMqP6IemLSS9GzlcAwzMQ5Uc47r38D3xAzU0Wh2
-         cJJVFNI/OXUH+3o7c85aTCx37AUKEytfJL1t+DgF2z+yUy4fsGGt5rz+g6lDCEBpge9m
-         7p4IGdGY41KivyiNIje7WbmTToHThzLh7gB153B2jGnJT4jXX3XCt2nRxz0KmQ4bWbMn
-         FDtL0HU8jkpAxollLUl0zDQTk3RbFZdJ/SR59QS3YiIEgTu8mnkV25AWU8CEMihxInTC
-         O/m2MkmIdW6c4C+FWZ6cWwndBei/t8CNN/+G1ECuEjZsXQUYBf4UWTi6yi+xkwfPc1eI
-         u+Ww==
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=LkPfqDmkY8KImet371CZtiMwqL3xYv7MY5i6YutDB18=;
+        b=ncN4W2vOsDVnoc4oVw2ea+O0cnzBA5VAH5VyP1AwfaAk/0a+naaEIZglGAd6BLAQ1t
+         3qqSPad0w/EsbLBXcE+ECn5NkxfffSq79EKErg+z0BDss3Y06cSBGG2996bjzDmhULGC
+         5PTjFL1z3g5ZEdSIRUkfXH3lM86FZ3+ymoiZQ=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=HuaHFmqvQqnIyK40h6V5f/iowB3mu3oIEkcjqTultSk=;
-        b=qx9V70piuz7UaIBSq4uYJ9yxh4fZ2EavYui0ktZRWbTpi14HfTOR2lzazSrx/ouNpo
-         umlviRpjP4tzvrNeSy/6xSBp/ePjr97hth5ohV+PgH/l49duI03NtaX4SqsXj5SEGXkt
-         yhAENlQ4J5sEqyg8/FP+BlgFhihMlcRZt7o6HAGvGjkoPwcKOiy7sfC8e6zKhAbmcR7I
-         wd5ACH1iTP3LeNjySi8gbEHMxq3oG6TIYdAX2L66gNjwgsmtqSzFlga656P+odbYYDKU
-         qadYvCkaA5x/BUR0Id/9ouRO2m5o6Ok6fFZyC1JAT9SV7HyewL9BAHMIuzLbYsQZPFcU
-         /3NQ==
-X-Gm-Message-State: AOAM532534y2TKvKTJo3Lr7TmFIMZtT6BIm16LTwdg1J4p7UQ3bNYlKq
-        WOshWqcQbrU6nngPiGUIY4dXcQ==
-X-Google-Smtp-Source: ABdhPJw33mJXV5pnWAH2xVmAmR/b8XhX+8WpfcVcwaTudi+ZVFG9u+HRSB4xvm24l55uj1mv9DkVNg==
-X-Received: by 2002:a17:907:9482:b0:6da:a24e:e767 with SMTP id dm2-20020a170907948200b006daa24ee767mr5000350ejc.479.1650647232087;
-        Fri, 22 Apr 2022 10:07:12 -0700 (PDT)
-Received: from [192.168.0.233] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id tk20-20020a170907c29400b006efc91707d8sm820399ejc.107.2022.04.22.10.07.11
+        bh=LkPfqDmkY8KImet371CZtiMwqL3xYv7MY5i6YutDB18=;
+        b=k7DVAS61RHyO60Q5G0AHKlRImJLpycav3pbm6ty9wi+xgNVb0lnrp6YC9TmTYJS//d
+         Y17LzoiygUabUo/q2fQw5lnHRrR5HYUUZHyP3vgd+k3Tv4shK51D2QWtBJhU5iZAFEZo
+         z2GuxGnI05moM9NqotdgSoZjXTvdqr4RxblHrY1J+Jrg93QIQvooviI3S7ZPWfu5B5Gc
+         CA8rfluY4SO+bnSkfIZRV0QGyEnp5QpG6QQFroqgRiskK7xBq996yci5xZeDpUmGhByn
+         8auzd5RXWy0vcXhW/qbPMbMx6fwZVab+pcd2tBzcTJ1HWdvIAvJPY+QaTqab2dn6OWF0
+         Nljg==
+X-Gm-Message-State: AOAM532gfdh85d/wKSgcpgvwaDtOVNh/8PYdLz0MtFdbm5g+Efs8yV1P
+        VQ9hnk88BIyxLg9flROvP8+6sw==
+X-Google-Smtp-Source: ABdhPJwxploMckz9Ou9GObHKrr8g2ZfpK6OuIjmriImWrIGfGFFzqCuOY0nLaezjKdWv75Y18HAiWg==
+X-Received: by 2002:a05:6a00:1749:b0:50a:8eed:b824 with SMTP id j9-20020a056a00174900b0050a8eedb824mr6002522pfc.50.1650647345159;
+        Fri, 22 Apr 2022 10:09:05 -0700 (PDT)
+Received: from localhost ([2620:15c:202:201:e283:652b:fb2e:829f])
+        by smtp.gmail.com with UTF8SMTPSA id gi21-20020a17090b111500b001d903861194sm496915pjb.30.2022.04.22.10.09.03
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 22 Apr 2022 10:07:11 -0700 (PDT)
-Message-ID: <857e78dd-b8e8-d55e-3b3c-cbbfb7c98505@linaro.org>
-Date:   Fri, 22 Apr 2022 19:07:10 +0200
+        Fri, 22 Apr 2022 10:09:04 -0700 (PDT)
+From:   Brian Norris <briannorris@chromium.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-kernel@vger.kernel.org,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org,
+        Douglas Anderson <dianders@chromium.org>,
+        Luca Weiss <luca@z3ntu.xyz>,
+        Brian Norris <briannorris@chromium.org>
+Subject: [PATCH v4] mmc: core: Set HS clock speed before sending HS CMD13
+Date:   Fri, 22 Apr 2022 10:08:53 -0700
+Message-Id: <20220422100824.v4.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+X-Mailer: git-send-email 2.36.0.rc2.479.g8af0fa9b8e-goog
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH 4/5] dt-bindings: mmc: Add Broadcom optional sdio_freq
- clock
-Content-Language: en-US
-To:     Kamal Dasu <kdasu.kdev@gmail.com>, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzk+dt@kernel.org, alcooperx@gmail.com
-Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-References: <20220421182803.6495-1-kdasu.kdev@gmail.com>
- <20220421182803.6495-5-kdasu.kdev@gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220421182803.6495-5-kdasu.kdev@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/04/2022 20:28, Kamal Dasu wrote:
-> The 72116B0 has improved SDIO controllers that allow the max clock
-> rate to be increased from a max of 100MHz to a max of 150MHz.
-> Optional "sdio_freq" clock is used to drive the bus clock if present
-> optional property "clock-frequency" specifies a base clock frequency
-> in Hz that overrides the base clock frequency in the CAPS registers.
-> 
-> Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
-> ---
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 29 +++++++++++++++----
->  1 file changed, 24 insertions(+), 5 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> index dccd5ad96981..1b45a918400a 100644
-> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-> @@ -10,8 +10,6 @@ maintainers:
->    - Al Cooper <alcooperx@gmail.com>
->    - Florian Fainelli <f.fainelli@gmail.com>
->  
-> -allOf:
-> -  - $ref: mmc-controller.yaml#
->  
->  properties:
->    compatible:
-> @@ -42,23 +40,44 @@ properties:
->      maxItems: 1
->  
->    clocks:
-> -    maxItems: 1
-> -    description:
-> -      handle to core clock for the sdhci controller.
-> +    minItems: 1
-> +    items:
-> +      - description: handle to core clock for the sdhci controller
-> +      - description: improved 150Mhz clock for sdhci controller (Optional clock)
->  
->    clock-names:
-> +    minItems: 1
->      items:
->        - const: sw_sdio
-> +      - const: sdio_freq # Optional clock
-> +
-> +  clock-frequency:
-> +    description: Should be the frequency (in Hz) of the base controller clock
-> +    minimum: 400000
-> +    maximum: 150000000
+Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
+hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
+some eMMC don't respond to SEND_STATUS commands very reliably if they're
+still running at a low initial frequency. As mentioned in that commit,
+JESD84-B51 P49 suggests a sequence in which the host:
+1. sets HS_TIMING
+2. bumps the clock ("<= 52 MHz")
+3. sends further commands
 
-Why do you need this property? The mmc-controller.yaml already has
-max-frequency, so maybe that suits your needs?
+It doesn't exactly require that we don't use a lower-than-52MHz
+frequency, but in practice, these eMMC don't like it.
 
+The aforementioned commit tried to get that right for HS400ES, although
+it's unclear whether this ever truly worked as committed into mainline,
+as other changes/refactoring adjusted the sequence in conflicting ways:
 
-Best regards,
-Krzysztof
+08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed mode
+switch")
+
+53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode
+for mmc")
+
+In any case, today we do step 3 before step 2. Let's fix that, and also
+apply the same logic to HS200/400, where this eMMC has problems too.
+
+Resolves errors like this seen when booting some RK3399 Gru/Scarlet
+systems:
+
+[    2.058881] mmc1: CQHCI version 5.10
+[    2.097545] mmc1: SDHCI controller on fe330000.mmc [fe330000.mmc] using ADMA
+[    2.209804] mmc1: mmc_select_hs400es failed, error -84
+[    2.215597] mmc1: error -84 whilst initialising MMC card
+[    2.417514] mmc1: mmc_select_hs400es failed, error -110
+[    2.423373] mmc1: error -110 whilst initialising MMC card
+[    2.605052] mmc1: mmc_select_hs400es failed, error -110
+[    2.617944] mmc1: error -110 whilst initialising MMC card
+[    2.835884] mmc1: mmc_select_hs400es failed, error -110
+[    2.841751] mmc1: error -110 whilst initialising MMC card
+
+Ealier versions of this patch bumped to 200MHz/HS200 speeds too early,
+which caused issues on, e.g., qcom-msm8974-fairphone-fp2. (Thanks for
+the report Luca!) After a second look, it appears that aligns with
+JESD84 / page 45 / table 28, so we need to keep to lower (HS / 52 MHz)
+rates first.
+
+Fixes: 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed mode switch")
+Fixes: 53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode for mmc")
+Fixes: 4f25580fb84d ("mmc: core: changes frequency to hs_max_dtr when selecting hs400es")
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Link: https://lore.kernel.org/linux-mmc/11962455.O9o76ZdvQC@g550jk/
+Reported-by: Luca Weiss <luca@z3ntu.xyz>
+Signed-off-by: Brian Norris <briannorris@chromium.org>
+---
+
+Changes in v4:
+ * Revert to hs_max_dtr for HS200, due to issues reported by Luca Weiss
+   <luca@z3ntu.xyz>; Luca, feel free to provide a "Tested-by: ..." reply
+   if you'd like that included
+ * Drop the "redundant clock rate" changes, as they aren't needed any
+   more
+
+Changes in v3:
+ * Use mmc_set_bus_speed() to help choose the right clock rate
+ * Avoid redundant clock rate changes
+ * Restore clock rate on failed HS200 switch
+
+Changes in v2:
+ * Use ext_csd.hs200_max_dtr for HS200
+ * Retest on top of 3b6c472822f8 ("mmc: core: Improve fallback to speed
+   modes if eMMC HS200 fails")
+
+ drivers/mmc/core/mmc.c | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5d8d9f72476f..82ca62c8669c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1384,13 +1384,17 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ 		goto out_err;
+ 	}
+ 
++	/*
++	 * Bump to HS timing and frequency. Some cards don't handle
++	 * SEND_STATUS reliably at the initial frequency.
++	 */
+ 	mmc_set_timing(host, MMC_TIMING_MMC_HS);
++	mmc_set_bus_speed(card);
++
+ 	err = mmc_switch_status(card, true);
+ 	if (err)
+ 		goto out_err;
+ 
+-	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+-
+ 	/* Switch card to DDR with strobe bit */
+ 	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
+ 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+@@ -1448,7 +1452,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ static int mmc_select_hs200(struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+-	unsigned int old_timing, old_signal_voltage;
++	unsigned int old_timing, old_signal_voltage, old_clock;
+ 	int err = -EINVAL;
+ 	u8 val;
+ 
+@@ -1479,8 +1483,17 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 				   false, true, MMC_CMD_RETRIES);
+ 		if (err)
+ 			goto err;
++
++		/*
++		 * Bump to HS timing and frequency. Some cards don't handle
++		 * SEND_STATUS reliably at the initial frequency.
++		 * NB: We can't move to full (HS200) speeds until after we've
++		 * successfully switched over.
++		 */
+ 		old_timing = host->ios.timing;
++		old_clock = host->ios.clock;
+ 		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
++		mmc_set_clock(card->host, card->ext_csd.hs_max_dtr);
+ 
+ 		/*
+ 		 * For HS200, CRC errors are not a reliable way to know the
+@@ -1493,8 +1506,10 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 		 * mmc_select_timing() assumes timing has not changed if
+ 		 * it is a switch error.
+ 		 */
+-		if (err == -EBADMSG)
++		if (err == -EBADMSG) {
++			mmc_set_clock(host, old_clock);
+ 			mmc_set_timing(host, old_timing);
++		}
+ 	}
+ err:
+ 	if (err) {
+-- 
+2.36.0.rc2.479.g8af0fa9b8e-goog
+
