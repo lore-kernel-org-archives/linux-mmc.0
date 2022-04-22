@@ -2,105 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE875C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 09:01:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FF27C4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 09:14:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1445819AbiDVJEm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Apr 2022 05:04:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55764 "EHLO
+        id S233635AbiDVJQy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Apr 2022 05:16:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1445919AbiDVJEU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 05:04:20 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF52D53739;
-        Fri, 22 Apr 2022 02:01:23 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 8A1C3B82B2F;
-        Fri, 22 Apr 2022 09:01:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 24EC6C385AF;
-        Fri, 22 Apr 2022 09:01:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650618081;
-        bh=/m9HtiXeSolu5qrg2Hq80k+3cr1LM6XYLdAbp3oTHTc=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=jBBBgfxNw8Qg5UPzBjmDTjT+E3APsjuWTMVt+hprqOwS6DIxRVDImGrZN7wMEx+rx
-         86vdIpshLw/2xvYq9EXVD6U2UdmQg2jRX0+t8216G1sy5tFLNYTW6io3yJaCI0QPDi
-         +fH/z8A5Z81qWD80aniD3CFr9+DcQ5t/+T4FsFJZDyW+Lf8LBXr2ZWf8iswYK9yKfa
-         i6FRRqnzC3GECksp/PEHUWBaSiEgEAKgocxi6UKsOOgJj2oKl2WyGacfZfbT6muE++
-         R+suLf2CeI5uMPJbWVzOPVsVKgB0U5HrVu/hHPwlJEySlo+e+tm5dGIoX+20rq6n6I
-         1LbvJa+916YEg==
-Received: by mail-wm1-f46.google.com with SMTP id q20so4708636wmq.1;
-        Fri, 22 Apr 2022 02:01:21 -0700 (PDT)
-X-Gm-Message-State: AOAM531iQPKC7tDafbQgrxM8A5fPYLPvNc07bzy+GpC5CUwexNDkFsVc
-        NpS/ULGgNtZkFbWmGBwEzly5Zc6w1iLAge5OLC4=
-X-Google-Smtp-Source: ABdhPJyXx4ILSyW4olBWclzAEyhWJERXMp826335O4ZspD2rq64GVKddYaqSWtWZief/QyASpmBJtJchA9yTbG1sWmU=
-X-Received: by 2002:a7b:ce15:0:b0:38e:b7b0:79be with SMTP id
- m21-20020a7bce15000000b0038eb7b079bemr3134739wmc.71.1650618079284; Fri, 22
- Apr 2022 02:01:19 -0700 (PDT)
+        with ESMTP id S1445890AbiDVJOD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 05:14:03 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4FFB51E74
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 02:11:10 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id h3so8472705lfu.8
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 02:11:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=rfgkrfURJKwhnI2/O7vdqPyYaGN5+mF6L9gQd890Ir0=;
+        b=kdqGeyrRYGT3n4ywR9Tojfe9wJIKYW3OZQoxPqApj85B56My8aN7tsB5C87A/kD2xO
+         o8oxqlkGI0Jl5s35e1uvwGpbUnBS0QF4iVgqe2E58vRGe7nNGdBTf6oKrqa6HuBD/z5z
+         80UB3Lr0/v2kbHxykgw4rph62BrOWDrG2jivAOXdyKrUI357N2kYPhPA4vzHsOJXnTHa
+         tZYsj+QEcfK6apJTGlL0gJ0MNTCtmKO1wwsGby+HpW71FlyG3HrWjdIj3O20GSAtkoWX
+         9dvokVBex3F4Q7TVkBhcOCeKSJ+n9glUBDi0LINhpkDXs9T6E3N0S87B1gc6SNBBznMS
+         niDw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=rfgkrfURJKwhnI2/O7vdqPyYaGN5+mF6L9gQd890Ir0=;
+        b=UkcmdwTrZ1VrYA2+yf+Uk5z8sCt7Nk2VMJa4cNmxChztYUG8Gbbj49VBUfnmDWrBbi
+         PUOeYi8z9xfl4e1w4Qj9Zp8dRJz2rGxxwvcMSEFKr0PR7jHi3RawxXV7aLc4lWZS86Av
+         6CpY35uEZHK7v84YCXuYtojMSb2RE7pdUQ6AlNJtUMHZdYUQM2qDO7BtldYIFH62PB7l
+         kExKSVZW5WvSNofixXrb+nF8kyk4SGyZ/kz7wicHLURvY/lcLxjdkbdeSObhQYVd5eQ0
+         8CU9NleQFWmn6u7D42Wp5P+pEukKUmJuiMYN1NSd+cYGH3MAAjrNoqa/MSP+kvDArtUZ
+         me2A==
+X-Gm-Message-State: AOAM531j308tm/aJacwoltDZy2I7X0FgSgbxqARubbLTYkXav7pmG7Y2
+        mIPzUW7N0EXaBMRLMy9Kl4NHhl5eYlInal3hutO8bg==
+X-Google-Smtp-Source: ABdhPJyRJGWde6pW3x5AhbWnlvDZuG+mM35K5paxOFe+8Xdj01CyYDkCOg6E/xYU08VmG2hIu2QHAFIgIpZGVV+S4C8=
+X-Received: by 2002:a05:6512:c12:b0:471:a932:cfe1 with SMTP id
+ z18-20020a0565120c1200b00471a932cfe1mr2449495lfu.358.1650618668972; Fri, 22
+ Apr 2022 02:11:08 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220421082040.2866638-1-arnd@kernel.org> <2d2c0c14-461b-985b-ebf1-3c03fe97f332@gmail.com>
-In-Reply-To: <2d2c0c14-461b-985b-ebf1-3c03fe97f332@gmail.com>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Fri, 22 Apr 2022 11:01:03 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a1PvZUV9MDNqLWUZGT6Bb18SoPEv-j1V6RTEziKV74Z0A@mail.gmail.com>
-Message-ID: <CAK8P3a1PvZUV9MDNqLWUZGT6Bb18SoPEv-j1V6RTEziKV74Z0A@mail.gmail.com>
-Subject: Re: [PATCH] [v4] m68k: coldfire: drop ISA_DMA_API support
-To:     Michael Schmitz <schmitzmic@gmail.com>
-Cc:     Greg Ungerer <gerg@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-m68k <linux-m68k@lists.linux-m68k.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+References: <20220422002318.3587413-1-briannorris@chromium.org>
+In-Reply-To: <20220422002318.3587413-1-briannorris@chromium.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 22 Apr 2022 11:10:32 +0200
+Message-ID: <CAPDyKFqhqNn1ZDQxshRidN=Odv6sTEcRz54=radQhknfx60Ovw@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: Don't set HS200 clock rate prematurely
+To:     Brian Norris <briannorris@chromium.org>
+Cc:     Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org,
+        Douglas Anderson <dianders@chromium.org>,
+        Luca Weiss <luca@z3ntu.xyz>, linux-kernel@vger.kernel.org,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Apr 22, 2022 at 9:48 AM Michael Schmitz <schmitzmic@gmail.com> wrote:
-> Am 21.04.2022 um 20:20 schrieb Arnd Bergmann:
-> > From: Arnd Bergmann <arnd@arndb.de>
-> >
-> > After a build regression report, I took a look at possible users of
-> > CONFIG_ISA_DMA_API on m68k and found none, which Greg confirmed. The
-> > CONFIG_GENERIC_ISA_DMA option in turn is only needed to implement
-> > ISA_DMA_API, and is clearly not used on the platforms with ISA support.
-> >
-> > The CONFIG_ISA support for AMIGA_PCMCIA is probably also unneeded,
-> > but this is less clear. Unlike other PCMCIA implementations, this one
-> > does not use the drivers/pcmcia subsystem at all and just supports
-> > the "apne" network driver. When it was first added, one could use
-> > ISA drivers on it as well, but this probably broke at some point.
+On Fri, 22 Apr 2022 at 02:23, Brian Norris <briannorris@chromium.org> wrote:
 >
-> Hoping to clarify some of this:
+> Commit 1c7ec586fe55 ("mmc: core: Set HS clock speed before sending HS
+> CMD13") fixes problems with certain eMMC, but introduced new ones with
+> others:
 >
-> For the Amiga PCMCIA "apne" driver, both the definitions of
-> isa_type/isa_sex and the definitions of the low-level accessor and
-> address translation functions are protected by CONFIG_ISA (see
-> arch/m68k/kernel/setup_mm.c and arch/m68k/include/asm/io_mm.h for details).
+>   qcom-msm8974-fairphone-fp2:
 >
-> This could conceivably be changed (only AMIGA_PCMCIA and Q40 do use
-> these definitions, aside from ATARI_ROM_ISA), but as things are right
-> now, neither Q40 ISA nor Amiga PCMCIA will work without CONFIG_ISA defined.
+>   [    1.868608] mmc0: SDHCI controller on f9824900.sdhci [f9824900.sdhci] using ADMA 64-bit
+>   [    1.925220] mmc0: mmc_select_hs200 failed, error -110
+>   [    1.925285] mmc0: error -110 whilst initialising MMC card
+>
+> It appears we've overshot the acceptable clock rate here; while JESD84
+> suggests that we can bump to 52 MHz before switching (CMD6) to HS400, it
+> does *not* say we can switch to 200 MHz before switching to HS200 (see
+> page 45 / table 28). Use the HS bounds (typically 52 MHz) instead of the
+> HS200 bounds (which are only applicable after we successfully switch).
+>
+> Link: https://lore.kernel.org/lkml/11962455.O9o76ZdvQC@g550jk/
+> Fixes: 1c7ec586fe55 ("mmc: core: Set HS clock speed before sending HS CMD13")
+> Reported-by: Luca Weiss <luca@z3ntu.xyz>
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
 
-Ok, thanks for clarifying that, this makes a lot more sense now. I was wondering
-what ISA devices one can actually use without DMA, but it turns out that a
-lot of the older storage (pata_legacy, pata_isapnp, aha152x) and network
-(3c509, 8390, cs89x0, smc9194) devices work in PIO mode, aside from
-a couple of oddball special-purpose stuff (speech, busmouse, comedi,
-appletalk, wan, ...).
+Rather than applying this incremental patch, I decided to drop the
+offending commit from my branch. Please submit a new version of that
+patch and make sure to incorporate credits and information provided by
+Luca, as a part of the new commit message.
 
-> Regarding the Amiga PCMCIA driver's use of the drivers/pcmcia subsystem,
-> I have a patch in limbo at netdev that makes use of the cftable parser
-> code from drivers/pcmcia, but as far as I can recall, none of this
-> depends on CONFIG_ISA.
+The main reason for this step is that I think we want a clean patch
+that we can use for stable kernels too.
 
-Yes, Geert mentioned that on IRC already. Note that Dominik Brodowski
-has said in the past that he would plan to eventually drop PCMCIA
-support from the kernel, but I think if that happens, the cftable
-parser can just be moved into the amiga_pcmcia code.
+Moreover, this also means you can drop the changes in mmc_set_clock()
+that was introduced in 1c7ec586fe55().
 
-       Arnd
+Kind regards
+Uffe
+
+> ---
+> Apologies for the quick resend; I fumbled the commit/send, even though I
+> had already updated the comments...
+>
+> Changes in v2:
+>  * Updated comments
+>
+>  drivers/mmc/core/mmc.c | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 9ab915b5737a..82ca62c8669c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1485,13 +1485,15 @@ static int mmc_select_hs200(struct mmc_card *card)
+>                         goto err;
+>
+>                 /*
+> -                * Bump to HS200 timing and frequency. Some cards don't
+> -                * handle SEND_STATUS reliably at the initial frequency.
+> +                * Bump to HS timing and frequency. Some cards don't handle
+> +                * SEND_STATUS reliably at the initial frequency.
+> +                * NB: We can't move to full (HS200) speeds until after we've
+> +                * successfully switched over.
+>                  */
+>                 old_timing = host->ios.timing;
+>                 old_clock = host->ios.clock;
+>                 mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+> -               mmc_set_bus_speed(card);
+> +               mmc_set_clock(card->host, card->ext_csd.hs_max_dtr);
+>
+>                 /*
+>                  * For HS200, CRC errors are not a reliable way to know the
+> --
+> 2.36.0.rc2.479.g8af0fa9b8e-goog
+>
