@@ -2,136 +2,181 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FF27C4167B
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 09:14:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2E3BC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 14:22:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233635AbiDVJQy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Apr 2022 05:16:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60498 "EHLO
+        id S1448333AbiDVOZd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Apr 2022 10:25:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1445890AbiDVJOD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 05:14:03 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4FFB51E74
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 02:11:10 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id h3so8472705lfu.8
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 02:11:10 -0700 (PDT)
+        with ESMTP id S1448592AbiDVOZb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 10:25:31 -0400
+Received: from mail-oi1-x236.google.com (mail-oi1-x236.google.com [IPv6:2607:f8b0:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CFB44F9F0
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 07:22:36 -0700 (PDT)
+Received: by mail-oi1-x236.google.com with SMTP id z8so9205726oix.3
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2022 07:22:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=rfgkrfURJKwhnI2/O7vdqPyYaGN5+mF6L9gQd890Ir0=;
-        b=kdqGeyrRYGT3n4ywR9Tojfe9wJIKYW3OZQoxPqApj85B56My8aN7tsB5C87A/kD2xO
-         o8oxqlkGI0Jl5s35e1uvwGpbUnBS0QF4iVgqe2E58vRGe7nNGdBTf6oKrqa6HuBD/z5z
-         80UB3Lr0/v2kbHxykgw4rph62BrOWDrG2jivAOXdyKrUI357N2kYPhPA4vzHsOJXnTHa
-         tZYsj+QEcfK6apJTGlL0gJ0MNTCtmKO1wwsGby+HpW71FlyG3HrWjdIj3O20GSAtkoWX
-         9dvokVBex3F4Q7TVkBhcOCeKSJ+n9glUBDi0LINhpkDXs9T6E3N0S87B1gc6SNBBznMS
-         niDw==
+        h=references:user-agent:from:to:cc:subject:date:in-reply-to
+         :message-id:mime-version:content-transfer-encoding;
+        bh=Dm1Q3RuZS/84y7al/vWL+CiE8BS1ax90BXjLHlS5WHg=;
+        b=tc5skVD9Ooc0/MV4kUSZ6U6QULZlxjw5oYMH+oPpJQay3KTBdL6Xy91ms4LgRhOCVq
+         ZL948bjr1EozQ2OHYug9UDfA1eyV+ZkcLsHJq54pVHR//PzGmgBe9nnsrow4js5QoTRC
+         rQ+98GrAIu9uUZQzt1sUAetrdBFnl/mnyN+aFdW1bqsxhcbL1IW/aWHNEDdf0S30KWHc
+         aAeKJBHyfPwlt2ozzcD02HNqqo95HCWo/uRyXkQdPOyDGrnQ8iMgKoNKrAbAm5AbThFn
+         8HedfImyBSnGfATVz2g+xECKUJirpmU1Jy9iPgDtk7Tijoy+MN9VlH8paVZrDQxE5LqC
+         vKPw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=rfgkrfURJKwhnI2/O7vdqPyYaGN5+mF6L9gQd890Ir0=;
-        b=UkcmdwTrZ1VrYA2+yf+Uk5z8sCt7Nk2VMJa4cNmxChztYUG8Gbbj49VBUfnmDWrBbi
-         PUOeYi8z9xfl4e1w4Qj9Zp8dRJz2rGxxwvcMSEFKr0PR7jHi3RawxXV7aLc4lWZS86Av
-         6CpY35uEZHK7v84YCXuYtojMSb2RE7pdUQ6AlNJtUMHZdYUQM2qDO7BtldYIFH62PB7l
-         kExKSVZW5WvSNofixXrb+nF8kyk4SGyZ/kz7wicHLURvY/lcLxjdkbdeSObhQYVd5eQ0
-         8CU9NleQFWmn6u7D42Wp5P+pEukKUmJuiMYN1NSd+cYGH3MAAjrNoqa/MSP+kvDArtUZ
-         me2A==
-X-Gm-Message-State: AOAM531j308tm/aJacwoltDZy2I7X0FgSgbxqARubbLTYkXav7pmG7Y2
-        mIPzUW7N0EXaBMRLMy9Kl4NHhl5eYlInal3hutO8bg==
-X-Google-Smtp-Source: ABdhPJyRJGWde6pW3x5AhbWnlvDZuG+mM35K5paxOFe+8Xdj01CyYDkCOg6E/xYU08VmG2hIu2QHAFIgIpZGVV+S4C8=
-X-Received: by 2002:a05:6512:c12:b0:471:a932:cfe1 with SMTP id
- z18-20020a0565120c1200b00471a932cfe1mr2449495lfu.358.1650618668972; Fri, 22
- Apr 2022 02:11:08 -0700 (PDT)
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject:date
+         :in-reply-to:message-id:mime-version:content-transfer-encoding;
+        bh=Dm1Q3RuZS/84y7al/vWL+CiE8BS1ax90BXjLHlS5WHg=;
+        b=aKfkYlV9wU6SY+hR3FnhGeg7d+bLcnF8qIDMcbZr7aEtypv9LW+ppKlT3XUmwYvSIL
+         2ocreRhdKvwKzVFTsgmjd7i/yCA8lVSQ6YbFIBQkYVC1IuArspLe2QnS+iFCrsVHdQ5G
+         eNhr1AUALo7i2Ls2mYJDiGBpjFh3pQ8YcsW/MTFFZpVkpmQT9+K42bRs+1+cgnBPWxf+
+         NR/zIvggPjxe4iKdjuxuIogqLMmyiNDfQL0QISdhupdYMEDIdXfnvTRnqhDctJb7HzXr
+         +vO3/IwQpZWDM4Q7xeBRIjjtZGZWeDKDKFGuJ1kkgM5/8PM+HZIJoUkEdxTMCJqnboZK
+         zONw==
+X-Gm-Message-State: AOAM533v2GzRYVisHXQDnUfRqVCGVcahOO2Lh7zplC30eqs36lD9LJTV
+        8NzOnILSuwYws5kSag100cVV3A==
+X-Google-Smtp-Source: ABdhPJyWXPHobhLmtwoHxIUDVM8nl4YALwg9uoBKl2RI+Bw26vjUChcDENNVqy8VRrFcuG1GXFA5bQ==
+X-Received: by 2002:a05:6808:124f:b0:321:855d:5b19 with SMTP id o15-20020a056808124f00b00321855d5b19mr2465775oiv.30.1650637355858;
+        Fri, 22 Apr 2022 07:22:35 -0700 (PDT)
+Received: from zen.linaroharston ([51.148.130.216])
+        by smtp.gmail.com with ESMTPSA id q12-20020a4ad54c000000b003245ac0a745sm822098oos.22.2022.04.22.07.22.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 22 Apr 2022 07:22:34 -0700 (PDT)
+Received: from zen (localhost [127.0.0.1])
+        by zen.linaroharston (Postfix) with ESMTP id AEDAD1FFB7;
+        Fri, 22 Apr 2022 15:22:32 +0100 (BST)
+References: <20220405093759.1126835-1-alex.bennee@linaro.org>
+User-agent: mu4e 1.7.13; emacs 28.1.50
+From:   Alex =?utf-8?Q?Benn=C3=A9e?= <alex.bennee@linaro.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     maxim.uvarov@linaro.org, joakim.bech@linaro.org,
+        ulf.hansson@linaro.org, ilias.apalodimas@linaro.org,
+        arnd@linaro.org, ruchika.gupta@linaro.org, tomas.winkler@intel.com,
+        yang.huang@intel.com, bing.zhu@intel.com,
+        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+        Alex =?utf-8?Q?Ben?= =?utf-8?Q?n=C3=A9e?= 
+        <alex.bennee@linaro.org>
+Subject: Re: [PATCH  v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+Date:   Fri, 22 Apr 2022 15:21:10 +0100
+In-reply-to: <20220405093759.1126835-1-alex.bennee@linaro.org>
+Message-ID: <87wnfhtcyf.fsf@linaro.org>
 MIME-Version: 1.0
-References: <20220422002318.3587413-1-briannorris@chromium.org>
-In-Reply-To: <20220422002318.3587413-1-briannorris@chromium.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 22 Apr 2022 11:10:32 +0200
-Message-ID: <CAPDyKFqhqNn1ZDQxshRidN=Odv6sTEcRz54=radQhknfx60Ovw@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: core: Don't set HS200 clock rate prematurely
-To:     Brian Norris <briannorris@chromium.org>
-Cc:     Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org,
-        Douglas Anderson <dianders@chromium.org>,
-        Luca Weiss <luca@z3ntu.xyz>, linux-kernel@vger.kernel.org,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 22 Apr 2022 at 02:23, Brian Norris <briannorris@chromium.org> wrote:
->
-> Commit 1c7ec586fe55 ("mmc: core: Set HS clock speed before sending HS
-> CMD13") fixes problems with certain eMMC, but introduced new ones with
-> others:
->
->   qcom-msm8974-fairphone-fp2:
->
->   [    1.868608] mmc0: SDHCI controller on f9824900.sdhci [f9824900.sdhci] using ADMA 64-bit
->   [    1.925220] mmc0: mmc_select_hs200 failed, error -110
->   [    1.925285] mmc0: error -110 whilst initialising MMC card
->
-> It appears we've overshot the acceptable clock rate here; while JESD84
-> suggests that we can bump to 52 MHz before switching (CMD6) to HS400, it
-> does *not* say we can switch to 200 MHz before switching to HS200 (see
-> page 45 / table 28). Use the HS bounds (typically 52 MHz) instead of the
-> HS200 bounds (which are only applicable after we successfully switch).
->
-> Link: https://lore.kernel.org/lkml/11962455.O9o76ZdvQC@g550jk/
-> Fixes: 1c7ec586fe55 ("mmc: core: Set HS clock speed before sending HS CMD13")
-> Reported-by: Luca Weiss <luca@z3ntu.xyz>
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
 
-Rather than applying this incremental patch, I decided to drop the
-offending commit from my branch. Please submit a new version of that
-patch and make sure to incorporate credits and information provided by
-Luca, as a part of the new commit message.
+Alex Benn=C3=A9e <alex.bennee@linaro.org> writes:
 
-The main reason for this step is that I think we want a clean patch
-that we can use for stable kernels too.
+> Hi,
+>
+> This is another attempt to come up with an RPMB API for the kernel.
+> The last discussion of this was in the thread:
 
-Moreover, this also means you can drop the changes in mmc_set_clock()
-that was introduced in 1c7ec586fe55().
+Ping?
 
-Kind regards
-Uffe
+Any other comments or reviews? Is there a desire to make other devices
+that provide RPMB functionality visible via a common API?
 
-> ---
-> Apologies for the quick resend; I fumbled the commit/send, even though I
-> had already updated the comments...
 >
-> Changes in v2:
->  * Updated comments
+>   Subject: [RFC PATCH  0/5] RPMB internal and user-space API + WIP virtio=
+-rpmb frontend
+>   Date: Wed,  3 Mar 2021 13:54:55 +0000
+>   Message-Id: <20210303135500.24673-1-alex.bennee@linaro.org>
 >
->  drivers/mmc/core/mmc.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
+> The series provides for the RPMB sub-system, a new chardev API driven
+> by ioctls and a full multi-block capable virtio-rpmb driver. You can
+> find a working vhost-user backend in my QEMU branch here:
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 9ab915b5737a..82ca62c8669c 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1485,13 +1485,15 @@ static int mmc_select_hs200(struct mmc_card *card)
->                         goto err;
+>   https://github.com/stsquad/qemu/commits/virtio/vhost-user-rpmb-v2
 >
->                 /*
-> -                * Bump to HS200 timing and frequency. Some cards don't
-> -                * handle SEND_STATUS reliably at the initial frequency.
-> +                * Bump to HS timing and frequency. Some cards don't handle
-> +                * SEND_STATUS reliably at the initial frequency.
-> +                * NB: We can't move to full (HS200) speeds until after we've
-> +                * successfully switched over.
->                  */
->                 old_timing = host->ios.timing;
->                 old_clock = host->ios.clock;
->                 mmc_set_timing(host, MMC_TIMING_MMC_HS200);
-> -               mmc_set_bus_speed(card);
-> +               mmc_set_clock(card->host, card->ext_csd.hs_max_dtr);
+> The branch is a little messy but I'll be posting a cleaned up version
+> in the following weeks. The only real changes to the backend is the
+> multi-block awareness and some tweaks to deal with QEMU internals
+> handling VirtIO config space messages which weren't previously
+> exercised. The test.sh script in tools/rpmb works through the various
+> transactions but isn't comprehensive.
 >
->                 /*
->                  * For HS200, CRC errors are not a reliable way to know the
-> --
-> 2.36.0.rc2.479.g8af0fa9b8e-goog
+> Changes since the last posting:
 >
+>   - frame construction is mostly back in userspace
+>
+>   The previous discussion showed there wasn't any appetite for using
+>   the kernels keyctl() interface so userspace yet again takes
+>   responsibility for constructing most* frames. Currently these are
+>   all pure virtio-rpmb frames but the code is written so we can plug
+>   in additional frame types. The virtio-rpmb driver does some
+>   validation and in some cases (* read-blocks) constructs the request
+>   frame in the driver. It would take someone implementing a driver for
+>   another RPMB device type to see if this makes sense.
+>
+>   - user-space interface is still split across several ioctls
+>
+>   Although 3 of the ioctls share the common rpmb_ioc_reqresp_cmd
+>   structure it does mean things like capacity, write_count and
+>   read_blocks can have their own structure associated with the
+>   command.
+>
+> As before I shall follow up with the QEMU based vhost-user backend and
+> hopefully a rust-vmm re-implementation. However I've no direct
+> interest in implementing the interfaces to real hardware. I leave that
+> to people who have access to such things and are willing to take up
+> the maintainer burden if this is merged.
+>
+> Regards,
+>
+> Alex
+>=20=20=20=20=20
+>
+> Alex Benn=C3=A9e (4):
+>   rpmb: add Replay Protected Memory Block (RPMB) subsystem
+>   char: rpmb: provide a user space interface
+>   rpmb: create virtio rpmb frontend driver
+>   tools rpmb: add RPBM access tool
+>
+>  .../userspace-api/ioctl/ioctl-number.rst      |    1 +
+>  MAINTAINERS                                   |    9 +
+>  drivers/Kconfig                               |    2 +
+>  drivers/Makefile                              |    1 +
+>  drivers/rpmb/Kconfig                          |   28 +
+>  drivers/rpmb/Makefile                         |    9 +
+>  drivers/rpmb/cdev.c                           |  309 +++++
+>  drivers/rpmb/core.c                           |  439 +++++++
+>  drivers/rpmb/rpmb-cdev.h                      |   17 +
+>  drivers/rpmb/virtio_rpmb.c                    |  518 ++++++++
+>  include/linux/rpmb.h                          |  182 +++
+>  include/uapi/linux/rpmb.h                     |   99 ++
+>  include/uapi/linux/virtio_rpmb.h              |   54 +
+>  tools/Makefile                                |   16 +-
+>  tools/rpmb/.gitignore                         |    2 +
+>  tools/rpmb/Makefile                           |   41 +
+>  tools/rpmb/key                                |    1 +
+>  tools/rpmb/rpmb.c                             | 1083 +++++++++++++++++
+>  tools/rpmb/test.sh                            |   22 +
+>  19 files changed, 2828 insertions(+), 5 deletions(-)
+>  create mode 100644 drivers/rpmb/Kconfig
+>  create mode 100644 drivers/rpmb/Makefile
+>  create mode 100644 drivers/rpmb/cdev.c
+>  create mode 100644 drivers/rpmb/core.c
+>  create mode 100644 drivers/rpmb/rpmb-cdev.h
+>  create mode 100644 drivers/rpmb/virtio_rpmb.c
+>  create mode 100644 include/linux/rpmb.h
+>  create mode 100644 include/uapi/linux/rpmb.h
+>  create mode 100644 include/uapi/linux/virtio_rpmb.h
+>  create mode 100644 tools/rpmb/.gitignore
+>  create mode 100644 tools/rpmb/Makefile
+>  create mode 100644 tools/rpmb/key
+>  create mode 100644 tools/rpmb/rpmb.c
+>  create mode 100755 tools/rpmb/test.sh
+
+
+--=20
+Alex Benn=C3=A9e
