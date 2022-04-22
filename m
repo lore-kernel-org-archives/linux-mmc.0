@@ -2,33 +2,33 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE700C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 17:11:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EC9CC4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 17:11:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241969AbiDVRO0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Apr 2022 13:14:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53186 "EHLO
+        id S243056AbiDVRO3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Apr 2022 13:14:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241747AbiDVRMd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 13:12:33 -0400
+        with ESMTP id S242615AbiDVRMe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 13:12:34 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 337989157A;
-        Fri, 22 Apr 2022 10:09:36 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4CBB92304;
+        Fri, 22 Apr 2022 10:09:37 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: sre)
-        with ESMTPSA id 063301F4684B
+        with ESMTPSA id 1764D1F468DD
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
         s=mail; t=1650647375;
-        bh=TnIdNrpuxC9G+/dcTYgeKYN/nQW+pYpEjAihkygqdxs=;
+        bh=JyODDbAkozctO2YF4+4+8QrF0xaiP+MYadCgEeOgwr0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cGw0GubNhgROE6TLDJPojVfCfb0ArWNA9nHL6ZyLFzE2GJqHKPjgRpUPiMWQQr6Ct
-         dM9d3QjX7pT3XN+Jm57+qX+S1JlBBelOoySvtemfwRaQJiodFGMH17U7YOsmMKgAfN
-         USRATS6jKb2BEBXSRHwJJwE6oxjzZYfG6mGvuHtD8GaB3CPAOveSAAnBNzCRae7Wx1
-         z+6w6j1rk18S0c+M5ehTTakHa5ekMGxOg9W52lpKFMH7k6E7H+eeWVbHPkbztUmcWq
-         l6TKcjUv6UoI9S8Ed03f+EutQxDxHfZ/zPmaf704yIiSFDLx0ijZkVBDCXm5Xr03zn
-         Xj2jzh7C68zBg==
+        b=PiwXSCIeNFXJDbDuRsS0Znqr5Lz7z/o749sD4Fkr/ZuG3r3SBBZRwyTW6Ln/Ysw3h
+         Jl26DLa6JJGIe7bzvRQkAozr9btvB5YUh6w3LYgjp3defiGILiMxU6ahTzrtmaqoDN
+         u0HlzBCi25TFJckd/Kc5Pt0WoLuSThdD5i1W5PSyfKe1q+dXheyE/fpkmX9cqMVTRM
+         cbZWyZcz/dG5JK9AhpC6bLChAF4GRFmhmLeAZWKEgzJ/BQ6cQrceUhjDCEqNIKc+o4
+         4aP8LY1JNbUWGeUeewL30L0ziciOsHuL4eQ8CWbzZDIKJuU6leDuB6cD68ryibhyUX
+         l1dEYWDgfrtbA==
 Received: by jupiter.universe (Postfix, from userid 1000)
-        id C18D24807E0; Fri, 22 Apr 2022 19:09:32 +0200 (CEST)
+        id C902F4807F0; Fri, 22 Apr 2022 19:09:32 +0200 (CEST)
 From:   Sebastian Reichel <sebastian.reichel@collabora.com>
 To:     Heiko Stuebner <heiko@sntech.de>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -46,13 +46,14 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
         Elaine Zhang <zhangqing@rock-chips.com>, kernel@collabora.com,
         Sebastian Reichel <sebastian.reichel@collabora.com>
-Subject: [PATCHv1 01/19] dt-binding: clock: Document rockchip,rk3588-cru bindings
-Date:   Fri, 22 Apr 2022 19:09:02 +0200
-Message-Id: <20220422170920.401914-2-sebastian.reichel@collabora.com>
+Subject: [PATCHv1 04/19] clk: rockchip: clk-cpu: add mux setting for cpu change frequency
+Date:   Fri, 22 Apr 2022 19:09:05 +0200
+Message-Id: <20220422170920.401914-5-sebastian.reichel@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220422170920.401914-1-sebastian.reichel@collabora.com>
 References: <20220422170920.401914-1-sebastian.reichel@collabora.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -60,85 +61,121 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Elaine Zhang <zhangqing@rock-chips.com>
 
-Document the device tree bindings of the rockchip Rk3588 SoC
-clock driver.
+In order to improve the main frequency of CPU, the clock path of CPU is
+simplified as follows:
+                         |--\
+                         |   \            |--\
+ --apll--|\              |    \           |   \
+         | |--apll_core--|     \          |    \
+ --24M---|/              |mux1 |--[gate]--|mux2|---clk_core
+                         |     /          |    /
+ --gpll--|\              |    /    |------|   /
+         | |--gpll_core--|   /     |      |--/
+ --24M---|/              |--/      |
+                                   |
+ -------apll_directly--------------|
+
+When the CPU requests high frequency, we want to use MUX2 select the
+"apll_directly".
+At low frequencies use MUX1 to select “apll_core" and then MUX2 to
+select "apll_core_gate".
+
+However, in this way, the CPU frequency conversion needs to be
+in the following order:
+1. MUX2 select to "apll_core_gate", MUX1 select "gpll_core"
+2. Apll sets slow_mode, sets APLL parameters, locks APLL, and then APLL
+sets normal_mode
+3. MUX1 select "apll_core", MUX2 select "apll_directly"
+
+So add pre_muxs and post_muxs to cover this special requirements.
 
 Signed-off-by: Elaine Zhang <zhangqing@rock-chips.com>
+[rebase]
 Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 ---
- .../bindings/clock/rockchip,rk3588-cru.yaml   | 63 +++++++++++++++++++
- 1 file changed, 63 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
+ drivers/clk/rockchip/clk-cpu.c | 41 ++++++++++++++++++++++++++++++++++
+ drivers/clk/rockchip/clk.h     |  2 ++
+ 2 files changed, 43 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml b/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
-new file mode 100644
-index 000000000000..dec2ae8c7970
---- /dev/null
-+++ b/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
-@@ -0,0 +1,63 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/clock/rockchip,rk3588-cru.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/drivers/clk/rockchip/clk-cpu.c b/drivers/clk/rockchip/clk-cpu.c
+index 11aa2259b532..6ea7fba9f9e5 100644
+--- a/drivers/clk/rockchip/clk-cpu.c
++++ b/drivers/clk/rockchip/clk-cpu.c
+@@ -113,6 +113,42 @@ static void rockchip_cpuclk_set_dividers(struct rockchip_cpuclk *cpuclk,
+ 	}
+ }
+ 
++static void rockchip_cpuclk_set_pre_muxs(struct rockchip_cpuclk *cpuclk,
++					 const struct rockchip_cpuclk_rate_table *rate)
++{
++	int i;
 +
-+title: ROCKCHIP rk3588 Family Clock Control Module Binding
++	/* alternate parent is active now. set the pre_muxs */
++	for (i = 0; i < ARRAY_SIZE(rate->pre_muxs); i++) {
++		const struct rockchip_cpuclk_clksel *clksel = &rate->pre_muxs[i];
 +
-+maintainers:
-+  - Elaine Zhang <zhangqing@rock-chips.com>
-+  - Heiko Stuebner <heiko@sntech.de>
++		if (!clksel->reg)
++			break;
 +
-+description: |
-+  The RK3588 clock controller generates the clock and also implements a
-+  reset controller for SoC peripherals.
-+  (examples: provide SCLK_UART2\PCLK_UART2 and SRST_P_UART2\SRST_S_UART2 for UART module)
-+  Each clock is assigned an identifier and client nodes can use this identifier
-+  to specify the clock which they consume. All available clocks are defined as
-+  preprocessor macros in the dt-bindings/clock/rk3588-cru.h headers and can be
-+  used in device tree sources.
++		pr_debug("%s: setting reg 0x%x to 0x%x\n",
++			 __func__, clksel->reg, clksel->val);
++		writel(clksel->val, cpuclk->reg_base + clksel->reg);
++	}
++}
 +
-+properties:
-+  compatible:
-+    enum:
-+      - rockchip,rk3588-cru
++static void rockchip_cpuclk_set_post_muxs(struct rockchip_cpuclk *cpuclk,
++					  const struct rockchip_cpuclk_rate_table *rate)
++{
++	int i;
 +
-+  reg:
-+    maxItems: 1
++	/* alternate parent is active now. set the muxs */
++	for (i = 0; i < ARRAY_SIZE(rate->post_muxs); i++) {
++		const struct rockchip_cpuclk_clksel *clksel = &rate->post_muxs[i];
 +
-+  "#clock-cells":
-+    const: 1
++		if (!clksel->reg)
++			break;
 +
-+  "#reset-cells":
-+    const: 1
++		pr_debug("%s: setting reg 0x%x to 0x%x\n",
++			 __func__, clksel->reg, clksel->val);
++		writel(clksel->val, cpuclk->reg_base + clksel->reg);
++	}
++}
 +
-+  clocks: true
+ static int rockchip_cpuclk_pre_rate_change(struct rockchip_cpuclk *cpuclk,
+ 					   struct clk_notifier_data *ndata)
+ {
+@@ -165,6 +201,9 @@ static int rockchip_cpuclk_pre_rate_change(struct rockchip_cpuclk *cpuclk,
+ 			       cpuclk->reg_base + reg_data->core_reg[i]);
+ 		}
+ 	}
 +
-+  assigned-clocks:
-+    minItems: 1
++	rockchip_cpuclk_set_pre_muxs(cpuclk, rate);
 +
-+  assigned-clock-parents:
-+    minItems: 1
+ 	/* select alternate parent */
+ 	if (reg_data->mux_core_reg)
+ 		writel(HIWORD_UPDATE(reg_data->mux_core_alt,
+@@ -219,6 +258,8 @@ static int rockchip_cpuclk_post_rate_change(struct rockchip_cpuclk *cpuclk,
+ 				     reg_data->mux_core_shift),
+ 		       cpuclk->reg_base + reg_data->core_reg[0]);
+ 
++	rockchip_cpuclk_set_post_muxs(cpuclk, rate);
 +
-+  assigned-clock-rates:
-+    minItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - "#clock-cells"
-+  - "#reset-cells"
-+
-+additionalProperties: false
-+
-+examples:
-+  # Clock Control Module node:
-+  - |
-+    cru: clock-controller@fd7c0000 {
-+      compatible = "rockchip,rk3588-cru";
-+      reg = <0xfd7c0000 0x5c000>;
-+      #clock-cells = <1>;
-+      #reset-cells = <1>;
-+    };
+ 	/* remove dividers */
+ 	for (i = 0; i < reg_data->num_cores; i++) {
+ 		writel(HIWORD_UPDATE(0, reg_data->div_core_mask[i],
+diff --git a/drivers/clk/rockchip/clk.h b/drivers/clk/rockchip/clk.h
+index bf7c8d082fde..2bd1863a7418 100644
+--- a/drivers/clk/rockchip/clk.h
++++ b/drivers/clk/rockchip/clk.h
+@@ -380,6 +380,8 @@ struct rockchip_cpuclk_clksel {
+ struct rockchip_cpuclk_rate_table {
+ 	unsigned long prate;
+ 	struct rockchip_cpuclk_clksel divs[ROCKCHIP_CPUCLK_NUM_DIVIDERS];
++	struct rockchip_cpuclk_clksel pre_muxs[ROCKCHIP_CPUCLK_NUM_DIVIDERS];
++	struct rockchip_cpuclk_clksel post_muxs[ROCKCHIP_CPUCLK_NUM_DIVIDERS];
+ };
+ 
+ /**
 -- 
 2.35.1
 
