@@ -2,381 +2,171 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA938C3527C
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 18:26:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88739C43219
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Apr 2022 19:23:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230314AbiDVS2y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Apr 2022 14:28:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44532 "EHLO
+        id S229702AbiDVT0W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Apr 2022 15:26:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230054AbiDVS2l (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 14:28:41 -0400
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2FAEA8167D;
-        Fri, 22 Apr 2022 11:25:46 -0700 (PDT)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 0CE041FB;
-        Fri, 22 Apr 2022 11:16:23 -0700 (PDT)
-Received: from [10.57.80.98] (unknown [10.57.80.98])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 362863F73B;
-        Fri, 22 Apr 2022 11:16:19 -0700 (PDT)
-Message-ID: <36551341-60f5-8b61-59d1-176ece8204d6@arm.com>
-Date:   Fri, 22 Apr 2022 19:16:13 +0100
+        with ESMTP id S229566AbiDVT0Q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2022 15:26:16 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19E5B291D43;
+        Fri, 22 Apr 2022 12:20:13 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 96CF961CEB;
+        Fri, 22 Apr 2022 19:16:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F2A8DC385BC;
+        Fri, 22 Apr 2022 19:16:36 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1650654997;
+        bh=usqLrTa+RhNIXODsvc1TquBT71WxqcNK2RxgDri8djo=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=BcbAj7n7cyrdsYQDBhKMzC/YUP1oi3n0WJLV/Vawg0ETGgRxV3laogMOtLoZsS2S6
+         deAr85yKEmeImhiHAgSHPYRkW4keZh105LIDrm0LR/EY+7ylYYi5+Ag9M9tf4obaqu
+         6qys2kdldoqnru7mzQfJXQU9V+CnbiPr9Tktzh6HF1FiaQ3cdZifzPK+IzTLrZupY3
+         nj76lUfw/prvPD39owSDZAYYqmaY/o4jd1l0MOSMfMfXqhh6ksSgKZQso7EdYWgT82
+         sS83lues1q+E9qW5a3gPFPNwTUorxb9c9MGc25aNl98SvSiYw+tUUBKBn/94bqxJ36
+         XhAvozQCefNHg==
+Received: by mail-wr1-f47.google.com with SMTP id q7so4751997wrm.5;
+        Fri, 22 Apr 2022 12:16:36 -0700 (PDT)
+X-Gm-Message-State: AOAM531y3Mhhr0MFAokHPZ9evsmIFRZ5vjPGpIPLwUldh7tqQdpP0bLv
+        T2dgMunT5PXj2CquFVe+0ENKqNdJTU5JzhwERSI=
+X-Google-Smtp-Source: ABdhPJw6+Yao9x3BaLiJGzKRj3K3UIg0JnN9aGyxH7bzbX5jCygm3ZIZ1bsSqfcHE9peInK43hwx2CakFvcKMsS3Rps=
+X-Received: by 2002:a5d:6983:0:b0:207:a226:df4b with SMTP id
+ g3-20020a5d6983000000b00207a226df4bmr5002354wru.192.1650654994816; Fri, 22
+ Apr 2022 12:16:34 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
- Thunderbird/91.8.1
-Subject: Re: [PATCHv1 18/19] arm64: dts: rockchip: Add base DT for rk3588 SoC
-Content-Language: en-GB
-To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
-        Heiko Stuebner <heiko@sntech.de>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
+References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
+In-Reply-To: <20220422170530.GA2338209@roeck-us.net>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Fri, 22 Apr 2022 21:16:18 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
+Message-ID: <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
+Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
+To:     Guenter Roeck <linux@roeck-us.net>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Tomas Cech <sleep_walker@suse.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Kever Yang <kever.yang@rock-chips.com>, kernel@collabora.com,
-        Yifeng Zhao <yifeng.zhao@rock-chips.com>,
-        Elaine Zhang <zhangqing@rock-chips.com>,
-        Sugar Zhang <sugar.zhang@rock-chips.com>
-References: <20220422170920.401914-1-sebastian.reichel@collabora.com>
- <20220422170920.401914-19-sebastian.reichel@collabora.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-In-Reply-To: <20220422170920.401914-19-sebastian.reichel@collabora.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2022-04-22 18:09, Sebastian Reichel wrote:
-> From: Kever Yang <kever.yang@rock-chips.com>
-> 
-> This initial version supports (single core) CPU, dma, interrupts, timers,
-> UART and SDHCI. In short - everything necessary to boot Linux on this
-> system on chip.
-> 
-> The DT is split into rk3588 and rk3588s, which is a reduced version
-> (i.e. with less peripherals) of the former.
-> 
-> Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> Signed-off-by: Elaine Zhang <zhangqing@rock-chips.com>
-> Signed-off-by: Sugar Zhang <sugar.zhang@rock-chips.com>
-> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
-> [rebase, squash and reword commit message]
-> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+On Fri, Apr 22, 2022 at 7:05 PM Guenter Roeck <linux@roeck-us.net> wrote:
+>
+> On Tue, Apr 19, 2022 at 06:37:22PM +0200, Arnd Bergmann wrote:
+> > From: Arnd Bergmann <arnd@arndb.de>
+> >
+> > This revisits a series I sent a few years ago:
+> >
+> > https://lore.kernel.org/lkml/20191018154052.1276506-1-arnd@arndb.de/
+> >
+> > All the other ARMv5 conversions are under way now, with
+> > OMAP1 being the only one still not in linux-next yet,
+> > and PXA completing the set.
+> >
+> > Most of the patches are unchanged from before, furtunately
+> > the PXA code is fairly stable. I addressed Robert's comments,
+> > pulled in two patches from Dmitry, and added the last a the
+> > final four patches to finish off the multiplatform conversion.
+> >
+> > I hope someone is left to test these on PXA: if this works,
+> > I'd like to merge it for 5.19. A git tree with these is avaialable
+> > for testing at
+> >
+> > https://git.kernel.org/pub/scm/linux/kernel/git/soc/soc.git/log/?h=pxa-multiplatform-5.18
+> >
+>
+> Unfortunately that crashes for me when trying to boot from ide.
+> Bisect points to the last patch of the series.
+
+Thanks a lot for testing and the perfect bug report!
+
+> [    1.403715] 8<--- cut here ---
+> [    1.403848] Unable to handle kernel paging request at virtual address feeb000e
+> [    1.404097] [feeb000e] *pgd=00000000
+
+Ok, this is the PCI I/O space area, which starts at 0xfee00000,
+clearly the way I/O space
+gets mapped changed here. I don't yet see what happened, but it should
+be straightforward
+to find from here.
+
+> [    1.416643]  pcmcia_init_one from pcmcia_device_probe+0xe4/0x2a0
+> [    1.416882]  pcmcia_device_probe from really_probe+0xc8/0x3b4
+> [    1.417070]  really_probe from __driver_probe_device+0x9c/0x214
+> [    1.417255]  __driver_probe_device from driver_probe_device+0x38/0xe0
+> [    1.417454]  driver_probe_device from __device_attach_driver+0xa4/0x11c
+> [    1.417657]  __device_attach_driver from bus_for_each_drv+0x88/0xd8
+> [    1.417864]  bus_for_each_drv from __device_attach+0xf4/0x194
+> [    1.418047]  __device_attach from bus_probe_device+0x8c/0x94
+> [    1.418224]  bus_probe_device from device_add+0x3d0/0x894
+> [    1.418395]  device_add from pcmcia_device_add+0x2ec/0x3e0
+> [    1.418568]  pcmcia_device_add from pcmcia_card_add+0xd4/0x1a0
+> [    1.418756]  pcmcia_card_add from pcmcia_bus_add+0x44/0x4c
+> [    1.418930]  pcmcia_bus_add from socket_insert+0x12c/0x150
+> [    1.419103]  socket_insert from pccardd+0x398/0x44c
+> [    1.419257]  pccardd from kthread+0xdc/0x114
+> [    1.419400]  kthread from ret_from_fork+0x14/0x2c
+> [    1.419569] Exception stack(0xc48a5fb0 to 0xc48a5ff8)
+> [    1.419735] 5fa0:                                     00000000 00000000 00000000 00000000
+> [    1.419979] 5fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+> [    1.420222] 5fe0: 00000000 00000000 00000000 00000000 00000013 00000000
+> [    1.420501] Code: 13570000 e1a06000 0a000043 e3a03002 (e5c03000)
+> [    1.420874] ---[ end trace 0000000000000000 ]---
+>
 > ---
->   arch/arm64/boot/dts/rockchip/rk3588.dtsi  |   6 +
->   arch/arm64/boot/dts/rockchip/rk3588s.dtsi | 501 ++++++++++++++++++++++
->   include/dt-bindings/clock/rk3588-cru.h    |   1 +
->   3 files changed, 508 insertions(+)
->   create mode 100644 arch/arm64/boot/dts/rockchip/rk3588.dtsi
->   create mode 100644 arch/arm64/boot/dts/rockchip/rk3588s.dtsi
-> 
-> diff --git a/arch/arm64/boot/dts/rockchip/rk3588.dtsi b/arch/arm64/boot/dts/rockchip/rk3588.dtsi
-> new file mode 100644
-> index 000000000000..ddb3ccff1299
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/rockchip/rk3588.dtsi
-> @@ -0,0 +1,6 @@
-> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-> +/*
-> + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
-> + */
-> +
-> +#include "rk3588s.dtsi"
-> diff --git a/arch/arm64/boot/dts/rockchip/rk3588s.dtsi b/arch/arm64/boot/dts/rockchip/rk3588s.dtsi
-> new file mode 100644
-> index 000000000000..f7d3ad4384b3
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/rockchip/rk3588s.dtsi
-> @@ -0,0 +1,501 @@
-> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-> +/*
-> + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
-> + */
-> +
-> +#include <dt-bindings/clock/rk3588-cru.h>
-> +#include <dt-bindings/interrupt-controller/arm-gic.h>
-> +#include <dt-bindings/interrupt-controller/irq.h>
-> +
-> +/ {
-> +	compatible = "rockchip,rk3588";
-> +
-> +	interrupt-parent = <&gic>;
-> +	#address-cells = <2>;
-> +	#size-cells = <2>;
-> +
-> +	aliases {
-> +		serial0 = &uart0;
-> +		serial1 = &uart1;
-> +		serial2 = &uart2;
-> +		serial3 = &uart3;
-> +		serial4 = &uart4;
-> +		serial5 = &uart5;
-> +		serial6 = &uart6;
-> +		serial7 = &uart7;
-> +		serial8 = &uart8;
-> +		serial9 = &uart9;
-> +	};
-> +
-> +	clocks {
-> +		compatible = "simple-bus";
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges;
+> # bad: [7643a9ca9f8e08f71e15f89dd74863635e981e03] ARM: pxa: convert to multiplatform
+> # good: [3123109284176b1532874591f7c81f3837bbdc17] Linux 5.18-rc1
+> git bisect start 'HEAD' 'v5.18-rc1'
+> # good: [9b03d7f95bd4d97101ecb8ea1e822103b81fdb2d] ARM: pxa: mainstone-wm97xx: use gpio lookup table
+> git bisect good 9b03d7f95bd4d97101ecb8ea1e822103b81fdb2d
+> # good: [764063eee7620ea9abb940068a7ad0e7f9efa1b6] cpufreq: pxa3: move clk register access to clk driver
+> git bisect good 764063eee7620ea9abb940068a7ad0e7f9efa1b6
+> # good: [5153474f0a4388b7ddb59add4be73bfb42b2007f] ARM: mmp: remove tavorevb board support
+> git bisect good 5153474f0a4388b7ddb59add4be73bfb42b2007f
+> # good: [2746f7c78b428c8b01b691a29a972c08101ae343] ARM: PXA: fix multi-cpu build of xsc3
+> git bisect good 2746f7c78b428c8b01b691a29a972c08101ae343
+> # good: [73d5106e9489464eac84362705e93bcf3b376123] ARM: pxa: remove support for MTD_XIP
+> git bisect good 73d5106e9489464eac84362705e93bcf3b376123
+> # first bad commit: [7643a9ca9f8e08f71e15f89dd74863635e981e03] ARM: pxa: convert to multiplatform
 
-I'm pretty sure that doing clocks as fake buses fell out of favour long ago.
+I'll back out this patch for now while investigating further.
 
-> +
-> +		spll: spll {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +			clock-frequency = <702000000>;
-> +			clock-output-names = "spll";
-> +		};
-> +
-> +		xin24m: xin24m {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +			clock-frequency = <24000000>;
-> +			clock-output-names = "xin24m";
-> +		};
-> +
-> +		xin32k: xin32k {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +			clock-frequency = <32768>;
-> +			clock-output-names = "xin32k";
-> +		};
+Which machine did you hit this on? Is this on hardware or in qemu?
 
-Do those two really belong in the SoC DTSI? On previous SoCs they're 
-typically external inputs, and while the 24MHz is usually a crystal 
-which can be largely taken for granted, the 32KHz is often provided by 
-an RTC chip or similar which might need proper modelling.
-
-> +	};
-> +
-> +	cpus {
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
-> +
-> +		cpu-map {
-> +			cluster0 {
-> +				core0 {
-> +					cpu = <&cpu_l0>;
-> +				};
-> +			};
-> +		};
-> +
-> +		cpu_l0: cpu@0 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a55";
-> +			reg = <0x0>;
-> +			enable-method = "psci";
-> +			capacity-dmips-mhz = <530>;
-> +			clocks = <&scmi_clk SCMI_CLK_CPUL>;
-> +			i-cache-size = <32768>;
-> +			i-cache-line-size = <64>;
-> +			i-cache-sets = <128>;
-> +			d-cache-size = <32768>;
-> +			d-cache-line-size = <64>;
-> +			d-cache-sets = <128>;
-> +			next-level-cache = <&l2_cache_l0>;
-> +			#cooling-cells = <2>;
-> +			dynamic-power-coefficient = <228>;
-> +		};
-
-Is there any particular reason for not including more of the CPUs?
-
-> +
-> +		l2_cache_l0: l2-cache-l0 {
-> +			compatible = "cache";
-> +			cache-size = <131072>;
-> +			cache-line-size = <64>;
-> +			cache-sets = <512>;
-> +			next-level-cache = <&l3_cache>;
-> +		};
-> +
-> +		l3_cache: l3-cache {
-> +			compatible = "cache";
-> +			cache-size = <3145728>;
-> +			cache-line-size = <64>;
-> +			cache-sets = <4096>;
-> +		};
-> +	};
-> +
-> +	arm-pmu {
-> +		compatible = "arm,armv8-pmuv3";
-
-Please use the correct Cortex-A55 compatible.
-
-> +		interrupts = <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
-> +		interrupt-affinity = <&cpu_l0>;
-
-Is affinity meaningful for a single CPU? If this is going to need to be 
-a partitioned PPI once the Cortex-A76 PMU shows up as well, start as you 
-mean to go on.
-
-> +	};
-> +
-> +	firmware {
-> +		optee: optee {
-> +			compatible = "linaro,optee-tz";
-> +			method = "smc";
-> +		};
-> +
-> +		scmi: scmi {
-> +			compatible = "arm,scmi-smc";
-> +			shmem = <&scmi_shmem>;
-> +			arm,smc-id = <0x82000010>;
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +
-> +			scmi_clk: protocol@14 {
-> +				reg = <0x14>;
-> +				#clock-cells = <1>;
-> +
-> +				assigned-clocks = <&scmi_clk SCMI_SPLL>;
-> +				assigned-clock-rates = <700000000>;
-> +			};
-> +
-> +			scmi_reset: protocol@16 {
-> +				reg = <0x16>;
-> +				#reset-cells = <1>;
-> +			};
-> +		};
-> +
-> +		sdei: sdei {
-> +			compatible = "arm,sdei-1.0";
-> +			method = "smc";
-> +		};
-> +	};
-> +
-> +	psci {
-> +		compatible = "arm,psci-1.0";
-> +		method = "smc";
-> +	};
-> +
-> +	timer {
-> +		compatible = "arm,armv8-timer";
-> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
-> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
-> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
-> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
-
-A mask representing all 4 of one (of 8) CPUs, for a GICv2 which we don't 
-have? I doubt it ;)
-
-> +	};
-> +
-> +	sram@10f000 {
-> +		compatible = "mmio-sram";
-> +		reg = <0x0 0x0010f000 0x0 0x100>;
-> +		#address-cells = <1>;
-> +		#size-cells = <1>;
-> +		ranges = <0 0x0 0x0010f000 0x100>;
-> +
-> +		scmi_shmem: sram@0 {
-> +			compatible = "arm,scmi-shmem";
-> +			reg = <0x0 0x100>;
-> +		};
-> +	};
-> +
-> +	php_grf: syscon@fd5b0000 {
-> +		compatible = "rockchip,rk3588-php-grf", "syscon";
-> +		reg = <0x0 0xfd5b0000 0x0 0x1000>;
-> +	};
-> +
-> +	ioc: syscon@fd5f0000 {
-> +		compatible = "rockchip,rk3588-ioc", "syscon";
-> +		reg = <0x0 0xfd5f0000 0x0 0x10000>;
-> +	};
-> +
-> +	syssram: sram@fd600000 {
-> +		compatible = "mmio-sram";
-> +		reg = <0x0 0xfd600000 0x0 0x100000>;
-> +
-> +		#address-cells = <1>;
-> +		#size-cells = <1>;
-> +		ranges = <0x0 0x0 0xfd600000 0x100000>;
-> +	};
-> +
-> +	cru: clock-controller@fd7c0000 {
-> +		compatible = "rockchip,rk3588-cru";
-> +		rockchip,grf = <&php_grf>;
-> +		reg = <0x0 0xfd7c0000 0x0 0x5c000>;
-> +		#clock-cells = <1>;
-> +		#reset-cells = <1>;
-> +
-> +		assigned-clocks =
-> +			<&cru PLL_PPLL>, <&cru PLL_AUPLL>,
-> +			<&cru PLL_NPLL>, <&cru PLL_GPLL>,
-> +			<&cru ACLK_CENTER_ROOT>,
-> +			<&cru HCLK_CENTER_ROOT>, <&cru ACLK_CENTER_LOW_ROOT>,
-> +			<&cru ACLK_TOP_ROOT>, <&cru PCLK_TOP_ROOT>,
-> +			<&cru ACLK_LOW_TOP_ROOT>, <&cru PCLK_PMU0_ROOT>,
-> +			<&cru HCLK_PMU_CM0_ROOT>, <&cru ACLK_VOP>,
-> +			<&cru ACLK_BUS_ROOT>, <&cru CLK_150M_SRC>,
-> +			<&cru CLK_GPU>;
-> +		assigned-clock-rates =
-> +			<100000000>, <786432000>,
-> +			<850000000>, <1188000000>,
-> +			<702000000>,
-> +			<400000000>, <500000000>,
-> +			<800000000>, <100000000>,
-> +			<400000000>, <100000000>,
-> +			<200000000>, <500000000>,
-> +			<375000000>, <150000000>,
-> +			<200000000>;
-> +	};
-> +
-> +	sdhci: mmc@fe2e0000 {
-> +		compatible = "rockchip,rk3588-dwcmshc", "snps,dwcmshc-sdhci";
-> +		reg = <0x0 0xfe2e0000 0x0 0x10000>;
-> +		interrupts = <GIC_SPI 205 IRQ_TYPE_LEVEL_HIGH>;
-> +		assigned-clocks = <&cru BCLK_EMMC>, <&cru TMCLK_EMMC>, <&cru CCLK_EMMC>;
-> +		assigned-clock-rates = <200000000>, <24000000>, <200000000>;
-> +		clocks = <&cru CCLK_EMMC>, <&cru HCLK_EMMC>,
-> +			 <&cru ACLK_EMMC>, <&cru BCLK_EMMC>,
-> +			 <&cru TMCLK_EMMC>;
-> +		clock-names = "core", "bus", "axi", "block", "timer";
-> +		resets = <&cru SRST_C_EMMC>, <&cru SRST_H_EMMC>,
-> +			 <&cru SRST_A_EMMC>, <&cru SRST_B_EMMC>,
-> +			 <&cru SRST_T_EMMC>;
-> +		reset-names = "core", "bus", "axi", "block", "timer";
-> +		max-frequency = <200000000>;
-> +		status = "disabled";
-> +	};
-> +
-> +	gic: interrupt-controller@fe600000 {
-> +		compatible = "arm,gic-v3";
-> +		reg = <0x0 0xfe600000 0 0x10000>, /* GICD */
-> +		      <0x0 0xfe680000 0 0x100000>; /* GICR */
-> +		interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
-> +		interrupt-controller;
-> +		#interrupt-cells = <3>;
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges;
-> +
-> +		its: interrupt-controller@fe640000 {
-> +			compatible = "arm,gic-v3-its";
-> +			msi-controller;
-> +			#msi-cells = <1>;
-> +			reg = <0x0 0xfe640000 0x0 0x20000>;
-> +		};
-> +	};
-
-Does the ITS (and other bits related to GIC memory accesses) actually 
-work, or will we have more of the same issues as RK356x?
-
-Thanks,
-Robin.
+       Arnd
