@@ -2,58 +2,58 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E358C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 10:07:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4853EC4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 10:11:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234102AbiDWKKh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 23 Apr 2022 06:10:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39822 "EHLO
+        id S234703AbiDWKOa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 23 Apr 2022 06:14:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47334 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233405AbiDWKKg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 06:10:36 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0427F1B2B05
-        for <linux-mmc@vger.kernel.org>; Sat, 23 Apr 2022 03:07:39 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id d6so8062919ede.8
-        for <linux-mmc@vger.kernel.org>; Sat, 23 Apr 2022 03:07:38 -0700 (PDT)
+        with ESMTP id S234883AbiDWKMb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 06:12:31 -0400
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1FA51CF703
+        for <linux-mmc@vger.kernel.org>; Sat, 23 Apr 2022 03:09:24 -0700 (PDT)
+Received: by mail-ej1-x635.google.com with SMTP id ks6so20768222ejb.1
+        for <linux-mmc@vger.kernel.org>; Sat, 23 Apr 2022 03:09:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=message-id:date:mime-version:user-agent:subject:content-language:to
          :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=fg4f1I3ghx0/KVyE5VZCYPv9D9SX7g8jd1zZokiQ29A=;
-        b=uSBMpS/AKQcMFs2W4M1dofXhfEhs3MYXdjs3RAb+3mi/UsnNu/k3utDpyE38B2euWP
-         1uIFkxNvv0Iu6dkaoCw0vAEVT1haxPoLhjrOb8p6HV6NEEpSmSRnMfe95NecMS+kR5Ig
-         eKVZ6Y8eubZt5o95ybwH442YWPy/fD5WyzeGlBeR76ivgM7LJaUomaJ2CKpShDHz+iB4
-         2ZLDefsrnklOZS1BqwhIzunq8dQ99Fm8iAqW7wyPd3QbJ/0bqbw1LMorZsy4HigGEXW8
-         TMSlRS/D7EnXd55cIJxJKc6I009HsW9iK4zTh/PvkelqtoVQhf+YhI0CYKKpxXD1+lWC
-         8fow==
+        bh=DCeonWjVpVvFaDIUwzVDrsiqJjzTalP0OPLls+NZnWc=;
+        b=Ti6mIMHpl+KN1/VH2J/2Cm2mTkZux/aaoLWdUgSJvMYK24cdjcpn/xrC3BuGDo4kU5
+         zVPpBVbSqxfJsJOqUtG0AvsE5eno6MEaDIdYS5A5JMJ6H7ahribCTyyba0KYpA2nqLPJ
+         BI8saKICCz7P89BZceexn4b0+G5zn3YM2hhIsdizMzQ0GYAcp2NhaS7unERZLNvZRkhV
+         jyPbeGU5IJWhC21moe7MTkHHFwGGiJ9PXB0TzaGiZCsw3s83TzXTJOobl7nE8d5lHyzz
+         nYMOCOeD9ctRMRRf9Rw8MYeHrcD2stIQr6yYnMX9fqRJQO1Oh7KtVK5a4d3dwe0wQOB1
+         BhQA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
          :content-language:to:cc:references:from:in-reply-to
          :content-transfer-encoding;
-        bh=fg4f1I3ghx0/KVyE5VZCYPv9D9SX7g8jd1zZokiQ29A=;
-        b=CvV9F5PrQx6c9zDBpOzpBeSjDhq/LZ9p2EjYdw0BElPrw0A3HPOC1itRkjF7lEV9sD
-         odhwzpzKyzChNtmLu0OW3LdYqPwvolYil0s6Zd5pS+Bj8mK0ggs5F2UIq29PlfXJ4bNh
-         hQa8z70vywMvMw6tux4GiaLDy89ZiYu3OVr2iFUU0Yr7I+pAEtNcbXuRwRgrJ0vCyES2
-         hdA4AGGzCONSbwYlIWAV6NnDH/PhK23O2SEVR5jFRuFL/uLAjpCLWSBjPUXEZFe1MxWM
-         4RIM92+KF9DDdJdxZoocU0hKpKiWWeRmivOCUIdn5f5rhpROOK6hF+7WNem3XNt4IERx
-         7qPw==
-X-Gm-Message-State: AOAM531ZggwJuOs1EHDBhOF37TQaqPdfsJwniZIm4vWa8FCYGdvjufsJ
-        14zAhg93Xb64uK2pIIc2q5zdAg==
-X-Google-Smtp-Source: ABdhPJyKnnAzcHVAg01zAFGOji92P8ff6zdAF/h+x/p/Sln8gc+Fxos95ajNoWv34ODIv1qu01zEwg==
-X-Received: by 2002:a05:6402:2318:b0:413:7645:fa51 with SMTP id l24-20020a056402231800b004137645fa51mr9539154eda.201.1650708457556;
-        Sat, 23 Apr 2022 03:07:37 -0700 (PDT)
+        bh=DCeonWjVpVvFaDIUwzVDrsiqJjzTalP0OPLls+NZnWc=;
+        b=CWPP2nXWZnuOL1M5ppbtv+RL9zAXgjOZH4MpWKxwajbgOIM+nGcSsu8edEywS0mlJU
+         Nz1lCyqbaZil+lGfdH/kWV5+TkZbmsTEJh70Q35naH83wnfDp5E77oBgMmcPUh3Q8j0u
+         HWEXtjyqqENEcqjXJifoJDTqHFxEgP7I0fSOdxBveoZudeCF3YSsoDKwzFtS2i2zVL+o
+         ZiEBI16VWvHvlN6tDiix/yHoGbA3L5jseGQH+2libQkj/SQ4Qlvx9lJmGfskpGsr2/wj
+         8DZ6s6Y4neYSRyMgh+wwBe5F/8QeWOzopUWl35tuaxpegc0Pp0YKKrW/ThqO6c0EnIXZ
+         oWOA==
+X-Gm-Message-State: AOAM532WvQJTcA/GWxhYIH6Xq7S7+2CYEKSqNW1Pc+zchaRq5wdKdOu4
+        5cqdsLAhTjBm3hP3eI69iCdGWg==
+X-Google-Smtp-Source: ABdhPJxH7lyOrG5mIRwnK45I7YIT1NaYQjc31HVx1K3KqPyODzSMcETNAdiuJaWQhGMZt5D/Z2kNzQ==
+X-Received: by 2002:a17:906:8301:b0:6e4:896d:59b1 with SMTP id j1-20020a170906830100b006e4896d59b1mr7624358ejx.396.1650708563296;
+        Sat, 23 Apr 2022 03:09:23 -0700 (PDT)
 Received: from [192.168.0.234] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id kw5-20020a170907770500b006db075e5358sm1549268ejc.66.2022.04.23.03.07.36
+        by smtp.gmail.com with ESMTPSA id p12-20020a50c94c000000b00425c48132bfsm1362892edh.55.2022.04.23.03.09.22
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 23 Apr 2022 03:07:37 -0700 (PDT)
-Message-ID: <bb988637-ecdd-008b-8a28-80d5c94cfd8d@linaro.org>
-Date:   Sat, 23 Apr 2022 12:07:35 +0200
+        Sat, 23 Apr 2022 03:09:22 -0700 (PDT)
+Message-ID: <46e72600-b96a-03a9-134d-28a0cb4bc078@linaro.org>
+Date:   Sat, 23 Apr 2022 12:09:21 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.7.0
-Subject: Re: [PATCHv1 18/19] arm64: dts: rockchip: Add base DT for rk3588 SoC
+Subject: Re: [PATCHv1 19/19] arm64: dts: rockchip: Add rk3588-evb1 board
 Content-Language: en-US
 To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
         Heiko Stuebner <heiko@sntech.de>
@@ -70,14 +70,11 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-arm-kernel@lists.infradead.org,
         linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Kever Yang <kever.yang@rock-chips.com>, kernel@collabora.com,
-        Yifeng Zhao <yifeng.zhao@rock-chips.com>,
-        Elaine Zhang <zhangqing@rock-chips.com>,
-        Sugar Zhang <sugar.zhang@rock-chips.com>
+        Kever Yang <kever.yang@rock-chips.com>, kernel@collabora.com
 References: <20220422170920.401914-1-sebastian.reichel@collabora.com>
- <20220422170920.401914-19-sebastian.reichel@collabora.com>
+ <20220422170920.401914-20-sebastian.reichel@collabora.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220422170920.401914-19-sebastian.reichel@collabora.com>
+In-Reply-To: <20220422170920.401914-20-sebastian.reichel@collabora.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -85,182 +82,94 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 22/04/2022 19:09, Sebastian Reichel wrote:
-
-Thank you for your patch. There is something to discuss/improve.
-
+> From: Kever Yang <kever.yang@rock-chips.com>
+> 
+> Add board file for the RK3588 evaluation board. While the hardware
+> offers plenty of peripherals and connectivity this basic implementation
+> just handles things required to successfully boot Linux from eMMC
+> and connect via UART.
+> 
+> Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
+> [rebase, update commit message, use EVB1 for SoC bringup]
+> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+> ---
+>  .../devicetree/bindings/arm/rockchip.yaml     |  5 +++
+>  arch/arm64/boot/dts/rockchip/Makefile         |  1 +
+>  .../boot/dts/rockchip/rk3588-evb1-v10.dts     | 34 +++++++++++++++++++
+>  3 files changed, 40 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts
+> 
+> diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
+> index eece92f83a2d..b14d0c84c69b 100644
+> --- a/Documentation/devicetree/bindings/arm/rockchip.yaml
+> +++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
+> @@ -664,6 +664,11 @@ properties:
+>            - const: rockchip,rk3568-bpi-r2pro
+>            - const: rockchip,rk3568
+>  
+> +      - description: Rockchip RK3588 Evaluation board
+> +        items:
+> +          - const: rockchip,rk3588-evb1-v10
+> +          - const: rockchip,rk3588
 > +
-> +	clocks {
-> +		compatible = "simple-bus";
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges;
-
-There are no children with unit addresses... this should not be a simple
-bus.
-
+>  additionalProperties: true
+>  
+>  ...
+> diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
+> index 4ae9f35434b8..8a53ab6d37a1 100644
+> --- a/arch/arm64/boot/dts/rockchip/Makefile
+> +++ b/arch/arm64/boot/dts/rockchip/Makefile
+> @@ -61,3 +61,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3566-pinenote-v1.2.dtb
+>  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3566-quartz64-a.dtb
+>  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
+>  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-bpi-r2-pro.dtb
+> +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-evb1-v10.dtb
+> diff --git a/arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts
+> new file mode 100644
+> index 000000000000..68b19acb1550
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts
+> @@ -0,0 +1,34 @@
+> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+> +/*
+> + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+> + *
+> + */
 > +
-> +		spll: spll {
-
-Generic node names please, so either "clock-0" or "spll-clock" etc.
-
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +			clock-frequency = <702000000>;
-> +			clock-output-names = "spll";
-> +		};
+> +/dts-v1/;
 > +
-> +		xin24m: xin24m {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +			clock-frequency = <24000000>;
-> +			clock-output-names = "xin24m";
-> +		};
+> +#include "rk3588.dtsi"
 > +
-> +		xin32k: xin32k {
-> +			compatible = "fixed-clock";
-> +			#clock-cells = <0>;
-> +			clock-frequency = <32768>;
-> +			clock-output-names = "xin32k";
-> +		};
+> +/ {
+> +	model = "Rockchip RK3588 EVB1 V10 Board";
+> +	compatible = "rockchip,rk3588-evb1-v10", "rockchip,rk3588";
+> +
+> +	chosen {
+> +		stdout-path = "serial2:1500000n8";
 > +	};
+> +};
 > +
-> +	cpus {
-> +		#address-cells = <1>;
-> +		#size-cells = <0>;
+> +&sdhci {
+> +	bus-width = <8>;
+> +	no-sdio;
+> +	no-sd;
+> +	non-removable;
+> +	max-frequency = <200000000>;
+> +	mmc-hs400-1_8v;
+> +	mmc-hs400-enhanced-strobe;
+> +	status = "ok";
+> +};
 > +
-> +		cpu-map {
-> +			cluster0 {
-> +				core0 {
-> +					cpu = <&cpu_l0>;
-> +				};
-> +			};
-> +		};
-> +
-> +		cpu_l0: cpu@0 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a55";
-> +			reg = <0x0>;
-> +			enable-method = "psci";
-> +			capacity-dmips-mhz = <530>;
-> +			clocks = <&scmi_clk SCMI_CLK_CPUL>;
-> +			i-cache-size = <32768>;
-> +			i-cache-line-size = <64>;
-> +			i-cache-sets = <128>;
-> +			d-cache-size = <32768>;
-> +			d-cache-line-size = <64>;
-> +			d-cache-sets = <128>;
-> +			next-level-cache = <&l2_cache_l0>;
-> +			#cooling-cells = <2>;
-> +			dynamic-power-coefficient = <228>;
-> +		};
-> +
-> +		l2_cache_l0: l2-cache-l0 {
-> +			compatible = "cache";
-> +			cache-size = <131072>;
-> +			cache-line-size = <64>;
-> +			cache-sets = <512>;
-> +			next-level-cache = <&l3_cache>;
-> +		};
-> +
-> +		l3_cache: l3-cache {
-> +			compatible = "cache";
-> +			cache-size = <3145728>;
-> +			cache-line-size = <64>;
-> +			cache-sets = <4096>;
-> +		};
-> +	};
-> +
-> +	arm-pmu {
+> +&uart2 {
+> +	status = "ok";
 
-Generic node name, so just "pmu" unless there is goign to be a another
-PMU node?
+Usually status goes at the end of properties and rockchip sources use
+"okay" instead of "ok".
 
-> +		compatible = "arm,armv8-pmuv3";
-> +		interrupts = <GIC_PPI 7 IRQ_TYPE_LEVEL_LOW>;
-> +		interrupt-affinity = <&cpu_l0>;
-> +	};
-> +
-> +	firmware {
-> +		optee: optee {
-> +			compatible = "linaro,optee-tz";
-> +			method = "smc";
-> +		};
-> +
-> +		scmi: scmi {
-> +			compatible = "arm,scmi-smc";
-> +			shmem = <&scmi_shmem>;
-> +			arm,smc-id = <0x82000010>;
-> +			#address-cells = <1>;
-> +			#size-cells = <0>;
-> +
-> +			scmi_clk: protocol@14 {
-> +				reg = <0x14>;
-> +				#clock-cells = <1>;
-> +
-> +				assigned-clocks = <&scmi_clk SCMI_SPLL>;
-> +				assigned-clock-rates = <700000000>;
-> +			};
-> +
-> +			scmi_reset: protocol@16 {
-> +				reg = <0x16>;
-> +				#reset-cells = <1>;
-> +			};
-> +		};
-> +
-> +		sdei: sdei {
-> +			compatible = "arm,sdei-1.0";
-> +			method = "smc";
-> +		};
-> +	};
-> +
-> +	psci {
-> +		compatible = "arm,psci-1.0";
-> +		method = "smc";
-> +	};
-> +
-> +	timer {
-> +		compatible = "arm,armv8-timer";
-> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
-> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
-> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
-> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
-> +	};
-> +
-> +	sram@10f000 {
-> +		compatible = "mmio-sram";
-> +		reg = <0x0 0x0010f000 0x0 0x100>;
-> +		#address-cells = <1>;
-> +		#size-cells = <1>;
-> +		ranges = <0 0x0 0x0010f000 0x100>;
-> +
-> +		scmi_shmem: sram@0 {
-> +			compatible = "arm,scmi-shmem";
-> +			reg = <0x0 0x100>;
-> +		};
-> +	};
-> +
-> +	php_grf: syscon@fd5b0000 {
-> +		compatible = "rockchip,rk3588-php-grf", "syscon";
-> +		reg = <0x0 0xfd5b0000 0x0 0x1000>;
-> +	};
-> +
-> +	ioc: syscon@fd5f0000 {
-> +		compatible = "rockchip,rk3588-ioc", "syscon";
-> +		reg = <0x0 0xfd5f0000 0x0 0x10000>;
-> +	};
-> +
-> +	syssram: sram@fd600000 {
-> +		compatible = "mmio-sram";
-> +		reg = <0x0 0xfd600000 0x0 0x100000>;
-> +
-> +		#address-cells = <1>;
-> +		#size-cells = <1>;
-> +		ranges = <0x0 0x0 0xfd600000 0x100000>;
+It's a nit, so in any case:
 
-No children here, so why do you need it?
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-> +	};
-> +
 
 Best regards,
 Krzysztof
