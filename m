@@ -2,174 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AD1FC4332F
-	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 10:32:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E839FC433EF
+	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 14:41:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235041AbiDWKfh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 23 Apr 2022 06:35:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38598 "EHLO
+        id S229543AbiDWOo2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 23 Apr 2022 10:44:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234903AbiDWKfg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 06:35:36 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5793F22BF6;
-        Sat, 23 Apr 2022 03:32:39 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id bf11so12378996ljb.7;
-        Sat, 23 Apr 2022 03:32:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=FjHVIpwQVF2j9Z1J3pzN5aGfezd4ZG1gp/yXo52Doyk=;
-        b=XFmDGucF/OcegOVH0xx/d8n/IGwkExBInzgnH2Lm7dLvoea6vEpiarJprM8axfZYn6
-         xdqdozexD2dH6IbHU5LMU7IS9U+oioxj5yy6DIUWl2cXiOWkfXf0jBRUlbUac9HTVnqB
-         RiOklvCNDaZGnqGSqOn6qqrJh+pq6gQJAqGVe8G1NMAPMjHTihC998Aaq06Jmcc+fcT+
-         iz/U5Gi7FQk1R1FbfVjnYWzi8EXNYk8F+GlASybLnp/xB8AV28jXILYawb2+8Cn5XGAL
-         kLLkAgfNwnWBTuxawnfafuToG52yusZv5V839takuTzRzaFeEZiTEDGv/G0oXano+ONU
-         j+Lg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=FjHVIpwQVF2j9Z1J3pzN5aGfezd4ZG1gp/yXo52Doyk=;
-        b=KCTlJkNynU29CGY0k2iS81iCNCEOGuOpqK1owtrkqjYtW9EO5paYyQlyV3HRpxptj3
-         ZVyoXEIQommDlftZ+YPgYDLeFY0CpLlTvzcYcGPWOXHOK75L2YOsC83huyF0KS/JNBwZ
-         S+0Nxbtj+ALrihwndKCtJtqjkuhI8ldU6JPeQNUeKoBGNmKLizoGzs7fd0tRVzVkLMms
-         vprBWwpDFtuWjHRdVNBdjb7vkB1Fo1GczA8POVV0ejg3DxnTBXI4h4t61A2YsJFmQFnN
-         XIvV+sTjewtA9H3Gw87gS8B4WHyVdw7Tr3ZeuAMcjMM2Ddt685/0G4L2+/5oJd664yOu
-         Djpg==
-X-Gm-Message-State: AOAM531xjJ8tckkekqujWsIJ+QxIpoaJncC2WDbCNDQRoPNiV75YtuHu
-        xvnF+LzMYql2RVymtFwA/rQ=
-X-Google-Smtp-Source: ABdhPJypw+C0OHw2I6BBqFjoROXfn7uqBt7/o3BKuV0y5z0fzD6WCOzfmSwCSW856LNxwR99k8GuRg==
-X-Received: by 2002:a05:651c:1781:b0:247:daa7:4358 with SMTP id bn1-20020a05651c178100b00247daa74358mr5186355ljb.477.1650709957430;
-        Sat, 23 Apr 2022 03:32:37 -0700 (PDT)
-Received: from [192.168.2.145] (109-252-138-167.dynamic.spd-mgts.ru. [109.252.138.167])
-        by smtp.googlemail.com with ESMTPSA id m1-20020a2e7101000000b0024f081cb0absm73107ljc.83.2022.04.23.03.32.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 23 Apr 2022 03:32:36 -0700 (PDT)
-Message-ID: <0ac35b47-720e-ae99-45d2-3f8d63868a1e@gmail.com>
-Date:   Sat, 23 Apr 2022 13:32:35 +0300
+        with ESMTP id S230380AbiDWOoZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 10:44:25 -0400
+Received: from mail.z3ntu.xyz (mail.z3ntu.xyz [128.199.32.197])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12E95D080A;
+        Sat, 23 Apr 2022 07:41:25 -0700 (PDT)
+Received: from g550jk.localnet (a246182.upc-a.chello.nl [62.163.246.182])
+        by mail.z3ntu.xyz (Postfix) with ESMTPSA id BC581CAE5B;
+        Sat, 23 Apr 2022 14:41:23 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=z3ntu.xyz; s=z3ntu;
+        t=1650724883; bh=BIfSWu7v2lgpz9edEm/FgQbjWjN5ZtnItWkbbsxl6Qo=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References;
+        b=SeYpb55do4rv9Mt2RniftzH6LcLYOEsFVSIj/Te9mJ7TxUh1WDYZ98L/U37j7tUGF
+         SX4kP4mGbUyB+DTeQs96SG8j0tOE5X40pHKeIEHKuorX9dFDuO1++wPyX9oFmzxq6x
+         FuB7EIZ287XRIt80w+dvKNJAEXwBKKgb2hzWAyOI=
+From:   Luca Weiss <luca@z3ntu.xyz>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Brian Norris <briannorris@chromium.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-kernel@vger.kernel.org,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org,
+        Douglas Anderson <dianders@chromium.org>,
+        Brian Norris <briannorris@chromium.org>
+Subject: Re: [PATCH v4] mmc: core: Set HS clock speed before sending HS CMD13
+Date:   Sat, 23 Apr 2022 16:41:23 +0200
+Message-ID: <2235553.ElGaqSPkdT@g550jk>
+In-Reply-To: <20220422100824.v4.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+References: <20220422100824.v4.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.5.0
-Subject: Re: [PATCHv1 08/19] mmc: sdhci-of-dwcmshc: add reset call back for
- rockchip Socs
-Content-Language: en-US
-To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
-        Heiko Stuebner <heiko@sntech.de>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Yifeng Zhao <yifeng.zhao@rock-chips.com>, kernel@collabora.com
-References: <20220422170920.401914-1-sebastian.reichel@collabora.com>
- <20220422170920.401914-9-sebastian.reichel@collabora.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-In-Reply-To: <20220422170920.401914-9-sebastian.reichel@collabora.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-22.04.2022 20:09, Sebastian Reichel пишет:
-> From: Yifeng Zhao <yifeng.zhao@rock-chips.com>
+Hi Brian,
+
+On Freitag, 22. April 2022 19:08:53 CEST Brian Norris wrote:
+> Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
+> hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
+> some eMMC don't respond to SEND_STATUS commands very reliably if they're
+> still running at a low initial frequency. As mentioned in that commit,
+> JESD84-B51 P49 suggests a sequence in which the host:
+> 1. sets HS_TIMING
+> 2. bumps the clock ("<= 52 MHz")
+> 3. sends further commands
 > 
-> The reset function build in the SDHCI will not reset the logic
-> circuit related to the tuning function, which may cause data
-> reading errors. Resetting the complete SDHCI controller through
-> the reset controller fixes the issue.
+> It doesn't exactly require that we don't use a lower-than-52MHz
+> frequency, but in practice, these eMMC don't like it.
 > 
-> Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> [rebase]
-> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+> The aforementioned commit tried to get that right for HS400ES, although
+> it's unclear whether this ever truly worked as committed into mainline,
+> as other changes/refactoring adjusted the sequence in conflicting ways:
+> 
+> 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed mode
+> switch")
+> 
+> 53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode
+> for mmc")
+> 
+> In any case, today we do step 3 before step 2. Let's fix that, and also
+> apply the same logic to HS200/400, where this eMMC has problems too.
+> 
+> Resolves errors like this seen when booting some RK3399 Gru/Scarlet
+> systems:
+> 
+> [    2.058881] mmc1: CQHCI version 5.10
+> [    2.097545] mmc1: SDHCI controller on fe330000.mmc [fe330000.mmc] using
+> ADMA [    2.209804] mmc1: mmc_select_hs400es failed, error -84
+> [    2.215597] mmc1: error -84 whilst initialising MMC card
+> [    2.417514] mmc1: mmc_select_hs400es failed, error -110
+> [    2.423373] mmc1: error -110 whilst initialising MMC card
+> [    2.605052] mmc1: mmc_select_hs400es failed, error -110
+> [    2.617944] mmc1: error -110 whilst initialising MMC card
+> [    2.835884] mmc1: mmc_select_hs400es failed, error -110
+> [    2.841751] mmc1: error -110 whilst initialising MMC card
+> 
+> Ealier versions of this patch bumped to 200MHz/HS200 speeds too early,
+> which caused issues on, e.g., qcom-msm8974-fairphone-fp2. (Thanks for
+> the report Luca!) After a second look, it appears that aligns with
+> JESD84 / page 45 / table 28, so we need to keep to lower (HS / 52 MHz)
+> rates first.
+> 
+> Fixes: 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed
+> mode switch") Fixes: 53e60650f74e ("mmc: core: Allow CMD13 polling when
+> switching to HS mode for mmc") Fixes: 4f25580fb84d ("mmc: core: changes
+> frequency to hs_max_dtr when selecting hs400es") Cc: Shawn Lin
+> <shawn.lin@rock-chips.com>
+> Link: https://lore.kernel.org/linux-mmc/11962455.O9o76ZdvQC@g550jk/
+> Reported-by: Luca Weiss <luca@z3ntu.xyz>
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
+
+Verified on qcom-apq8026-lg-lenok which also showed the same error with the 
+last revision of this patch.
+
+Tested-by: Luca Weiss <luca@z3ntu.xyz>
+
+Regards
+Luca
+
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 28 +++++++++++++++++++++++++++-
->  1 file changed, 27 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index bac874ab0b33..d95ae6ca1256 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -15,6 +15,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/reset.h>
->  #include <linux/sizes.h>
->  
->  #include "sdhci-pltfm.h"
-> @@ -63,6 +64,7 @@
->  struct rk3568_priv {
->  	/* Rockchip specified optional clocks */
->  	struct clk_bulk_data rockchip_clks[RK3568_MAX_CLKS];
-> +	struct reset_control *reset;
->  	u8 txclk_tapnum;
->  };
->  
-> @@ -255,6 +257,23 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->  	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
->  }
->  
-> +static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-> +	struct rk35xx_priv *priv = dwc_priv->priv;
-> +
-> +	if (mask & SDHCI_RESET_ALL) {
-> +		if (!IS_ERR_OR_NULL(priv->reset)) {
+> Changes in v4:
+>  * Revert to hs_max_dtr for HS200, due to issues reported by Luca Weiss
+>    <luca@z3ntu.xyz>; Luca, feel free to provide a "Tested-by: ..." reply
+>    if you'd like that included
+>  * Drop the "redundant clock rate" changes, as they aren't needed any
+>    more
+> 
+> Changes in v3:
+>  * Use mmc_set_bus_speed() to help choose the right clock rate
+>  * Avoid redundant clock rate changes
+>  * Restore clock rate on failed HS200 switch
+> 
+> Changes in v2:
+>  * Use ext_csd.hs200_max_dtr for HS200
+>  * Retest on top of 3b6c472822f8 ("mmc: core: Improve fallback to speed
+>    modes if eMMC HS200 fails")
+> 
+>  drivers/mmc/core/mmc.c | 23 +++++++++++++++++++----
+>  1 file changed, 19 insertions(+), 4 deletions(-)
+> 
 
-priv->reset can't be a error ptr since probe fails on error.
 
-> +			reset_control_assert(priv->reset);
-> +			udelay(1);
-> +			reset_control_deassert(priv->reset);
-> +		}
-> +	}
-> +
-> +	sdhci_reset(host, mask);
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.set_bus_width		= sdhci_set_bus_width,
-> @@ -269,7 +288,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk3568_ops = {
->  	.set_bus_width		= sdhci_set_bus_width,
->  	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
->  	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-> -	.reset			= sdhci_reset,
-> +	.reset			= rk35xx_sdhci_reset,
->  	.adma_write_desc	= dwcmshc_adma_write_desc,
->  };
->  
-> @@ -292,6 +311,13 @@ static int dwcmshc_rk3568_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
->  	int err;
->  	struct rk3568_priv *priv = dwc_priv->priv;
->  
-> +	priv->reset = devm_reset_control_array_get_exclusive(mmc_dev(host->mmc));
-
-The devm_reset_control_array_get_exclusive() never returns NULL.
-
-The devm_reset_control_array_get_optional_exclusive(() may return NULL
-if reset is missing in DT, perhaps that's what you actually want?
-
-> +	if (IS_ERR_OR_NULL(priv->reset)) {
-> +		err = PTR_ERR(priv->reset);
-
-NULL isn't a error
-
-> +		dev_err(mmc_dev(host->mmc), "failed to get reset control %d\n", err);
-
-dev_err_probe()?
 
