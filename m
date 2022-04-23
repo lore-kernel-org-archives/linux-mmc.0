@@ -2,150 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C98A2C4332F
-	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 19:55:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 023F6C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 22:16:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236958AbiDWT6c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 23 Apr 2022 15:58:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44584 "EHLO
+        id S230159AbiDWWTd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 23 Apr 2022 18:19:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33378 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236914AbiDWT60 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 15:58:26 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2115F183FBD;
-        Sat, 23 Apr 2022 12:55:24 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C5E94B80D1C;
-        Sat, 23 Apr 2022 19:55:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6CA3CC385B5;
-        Sat, 23 Apr 2022 19:55:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650743721;
-        bh=f+gN5VFSk9TvNUY6oLSGkqRdwS9xhEyKvVqBzBXLs0k=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=PzAHzR20lzvPfCTqt/UUzx12IPhOfz+TRjqNJ8NxEoRI/bWqgErqlZjk7cfTM259a
-         ES9ZLzK7AQ5x5SMPoX4fGuEBvk10IF/bYoYOZNrIybBirPtSW18FdAPqWZza8MudXV
-         vG23F9GYtnFHpHrf84m9ZBvRrLCT6HR3YBoZ5rIdgNbcdWJ4WulW+Ag5txr/fArK/K
-         8hzENh6M4DW/B6aRii4K02sQiyHAgWdV6wTeninHDFb9FTGsk1kC60BC8Ty7Z9oRiu
-         uezNy/Q8OZSv9U2rlimKsK6lo1l+EW6dZRWZhxxZjuCiGNgZmaJtyoN+hSdEOEgF8G
-         ZbIfS2Abjyb2Q==
-Received: by mail-wm1-f48.google.com with SMTP id v64-20020a1cac43000000b0038cfd1b3a6dso10070118wme.5;
-        Sat, 23 Apr 2022 12:55:21 -0700 (PDT)
-X-Gm-Message-State: AOAM533lGh9EPqhUPg/nNViJ/yIL6iwq+/2Z9XUGtlSB1o1YIthHmVZa
-        ZwNhKnBa6uPnYoSswxFiRZFxxDjgek5kduGVgxM=
-X-Google-Smtp-Source: ABdhPJwI9oPHj0hjS6Y5T/XpNunPLjXzfhDb/y4TSIxWhFvis5ICGMzIa2Kp6ZajGKm/dLFayXeKiCmoNnJ4Fu7pVP8=
-X-Received: by 2002:a1c:f219:0:b0:38c:782c:3bb with SMTP id
- s25-20020a1cf219000000b0038c782c03bbmr18417513wmc.94.1650743719480; Sat, 23
- Apr 2022 12:55:19 -0700 (PDT)
+        with ESMTP id S229863AbiDWWTc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 18:19:32 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C68B14DEA4;
+        Sat, 23 Apr 2022 15:16:34 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id y3so2392567ejo.12;
+        Sat, 23 Apr 2022 15:16:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=8lFjJJJlYM4H1S+bgrWGGgV2Wqrk7g+17B8HEDjArx4=;
+        b=NUZQI1WhFEVKOCJDqtpRIuautN5VsgNc+CyCC2+2EATEdY/qZx63tx4kpBGaLIuDGF
+         P/hTU/tn7D3yrLbEUcNwGZ/G+VhEM54t9mKxNxvxN02HMLCIUHAB05RIdMt/vtSYdgL/
+         Aj12h+tPsAn2PqYAytgYl3DUsZOgzCUax6uv7CyN0i3KrBYe+g7+yv21L5n5O38YPWaX
+         e90mGZDPQvt7rMTqRmkO/fVnA4r2ftcrlCm4gtbzzx+5DvLcrFMdczOXBweu1XaWXrpY
+         eN+mCNGiJ5eNtHgW+2Y9CCgzhxGlzj4Eqz8C0usIyBE8jduG5FuPWgKDbPR4zaLbsyTC
+         0NEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=8lFjJJJlYM4H1S+bgrWGGgV2Wqrk7g+17B8HEDjArx4=;
+        b=WZPcr4qW8MX5mvdd/8zB4UYI6Y6lzCa5O9IZ1bCoCMDPvJ+Lz3AahIzloh2CcrjjeD
+         ISUIH1lrlZnPEeeVrdrOW4TQktYyx/sgkQDh1RKz5bQgrc/FltAAn6BgtW1/0gZaDMCk
+         Ma1HvLPKrTeWpQ6sD0Loc94nTYqCkq360J1k5WrjAifyjKL30+fmHht9i3wbdtxUnIAR
+         Y0g5XzyWNnxopGy1fi0b5vyssDcVZZEJ6HkVbYbqcalOodfV8/SFCnNNwfiI8/cvFcI8
+         AOOjBAlelxyCz3zsHbJO1mLziLUNVG+dqtcOjrsF9b6bAZOykWVb6R2fhijaFkVkSEw1
+         iUeg==
+X-Gm-Message-State: AOAM533YsWFz+ATsxbjM9bs4Lz74jPp9ojDYexVbQ23iV3urupRA4ptS
+        7FBJvSxzijSBASPrrv0gaMQ=
+X-Google-Smtp-Source: ABdhPJwdtPCiIyMg6RvG8hPrGGPDvN1FyrrPBzSDQwui6YeEsm82lAiqhpzcIBtKMwFSGQO+7EOWVw==
+X-Received: by 2002:a17:907:7e93:b0:6f0:2bde:a1ec with SMTP id qb19-20020a1709077e9300b006f02bdea1ecmr9613235ejc.225.1650752193052;
+        Sat, 23 Apr 2022 15:16:33 -0700 (PDT)
+Received: from linux.. (p5dd1ed70.dip0.t-ipconnect.de. [93.209.237.112])
+        by smtp.gmail.com with ESMTPSA id s1-20020a056402036100b004240a3fc6b4sm2669484edw.82.2022.04.23.15.16.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 23 Apr 2022 15:16:32 -0700 (PDT)
+From:   Bean Huo <huobean@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linus.walleij@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     beanhuo@micron.com
+Subject: [PATCH v1 0/2] Two changes for eMMC
+Date:   Sun, 24 Apr 2022 00:16:21 +0200
+Message-Id: <20220423221623.1074556-1-huobean@gmail.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
- <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
- <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net> <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
- <20220422234150.GA3442771@roeck-us.net>
-In-Reply-To: <20220422234150.GA3442771@roeck-us.net>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Sat, 23 Apr 2022 21:55:03 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
-Message-ID: <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
-Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
-To:     Guenter Roeck <linux@roeck-us.net>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Apr 23, 2022 at 1:41 AM Guenter Roeck <linux@roeck-us.net> wrote:
->
-> On Sat, Apr 23, 2022 at 12:04:31AM +0200, Arnd Bergmann wrote:
-> > On Fri, Apr 22, 2022 at 10:55 PM Guenter Roeck <linux@roeck-us.net> wrote:
-> > > On 4/22/22 12:16, Arnd Bergmann wrote:
-> > > > On Fri, Apr 22, 2022 at 7:05 PM Guenter Roeck <linux@roeck-us.net> wrote:
-> > > >
-> > > > Which machine did you hit this on? Is this on hardware or in qemu?
-> > > >
-> > > qemu, as always. borzoi, spitz, terrier, tosa, z2, and sx1 fail.
-> > > Also, I just noticed that the failure is not always the same.
-> > > z2 fails to boot from initrd, and sx1 fails to boot completely.
-> >
-> > That's a lot of machines failing, I hope at least we got the same bugs more
-> > than once here.
-> >
-> > For the I/O space, I found now that PXA was not using the standard
-> > virtual I/O address yet, but instead used a NULL-based offset.
-> >
-> > I'm not entirely happy with this patch, but this is an outline of what
-> > I think we need to fix that: https://pastebin.com/3nVgQsEw
-> > This one is probably incomplete, at least it breaks sa1100 for now,
-> > and it adds a bogus CONFIG_PCI dependency. I'm also not sure
-> > in what way the last patch in the series triggers it, rather than the
-> > one that removed mach/io.h.
-> >
-> > I had sx1 booting in qemu at least, with the omap1 multiplatform series only.
-> > If you have a custom config for this one, make sure you get the right
-> > DEBUG_LL address.
-> >
-> > > I'll do another round of bisects.
-> >
->
-> Here is the bisect for the sx1 boot failure.
+From: Bean Huo <beanhuo@micron.com>
 
-Odd, I can't reproduce this at all. Do you get any console output at
-all for this?
+Hi Ullf,
 
-Is this the plain omap1_defconfig, or something else?
+Patch 1/2 here is a missing patch since the last commit, I've fixed the
+warning: "Assign discards 'const' qualifier from pointer target type".
 
-One thing I keep having to apply myself is this snippet:
+Patch 2/2 is new, please take a look.
 
-diff --git a/arch/arm/mm/proc-arm925.S b/arch/arm/mm/proc-arm925.S
-index 0bfad62ea858..87c695703580 100644
---- a/arch/arm/mm/proc-arm925.S
-+++ b/arch/arm/mm/proc-arm925.S
-@@ -441,7 +441,6 @@ __arm925_setup:
+thanks,
+Bean Huo
 
- #ifdef CONFIG_CPU_DCACHE_WRITETHROUGH
-        mov     r0, #4                          @ disable write-back
-on caches explicitly
--       mcr     p15, 7, r0, c15, c0, 0
- #endif
+Bean Huo (2):
+  mmc: sdhci-omap: Use of_device_get_match_data() helper
+  mmc: core: Allows to override the timeout value for ioctl() path
 
-        adr     r5, arm925_crval
+ drivers/mmc/core/block.c      | 8 ++++----
+ drivers/mmc/host/sdhci-omap.c | 9 ++-------
+ 2 files changed, 6 insertions(+), 11 deletions(-)
 
-I don't remember what the story is behind this, but I can't actually manage
-to boot omap1_defconfig on qemu with the instruction intact.
+-- 
+2.34.1
 
-       Arnd
