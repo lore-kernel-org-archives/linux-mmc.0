@@ -2,136 +2,150 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E839FC433EF
-	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 14:41:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C98A2C4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 23 Apr 2022 19:55:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229543AbiDWOo2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 23 Apr 2022 10:44:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35934 "EHLO
+        id S236958AbiDWT6c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 23 Apr 2022 15:58:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44584 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230380AbiDWOoZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 10:44:25 -0400
-Received: from mail.z3ntu.xyz (mail.z3ntu.xyz [128.199.32.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12E95D080A;
-        Sat, 23 Apr 2022 07:41:25 -0700 (PDT)
-Received: from g550jk.localnet (a246182.upc-a.chello.nl [62.163.246.182])
-        by mail.z3ntu.xyz (Postfix) with ESMTPSA id BC581CAE5B;
-        Sat, 23 Apr 2022 14:41:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=z3ntu.xyz; s=z3ntu;
-        t=1650724883; bh=BIfSWu7v2lgpz9edEm/FgQbjWjN5ZtnItWkbbsxl6Qo=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=SeYpb55do4rv9Mt2RniftzH6LcLYOEsFVSIj/Te9mJ7TxUh1WDYZ98L/U37j7tUGF
-         SX4kP4mGbUyB+DTeQs96SG8j0tOE5X40pHKeIEHKuorX9dFDuO1++wPyX9oFmzxq6x
-         FuB7EIZ287XRIt80w+dvKNJAEXwBKKgb2hzWAyOI=
-From:   Luca Weiss <luca@z3ntu.xyz>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Brian Norris <briannorris@chromium.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org,
-        Douglas Anderson <dianders@chromium.org>,
-        Brian Norris <briannorris@chromium.org>
-Subject: Re: [PATCH v4] mmc: core: Set HS clock speed before sending HS CMD13
-Date:   Sat, 23 Apr 2022 16:41:23 +0200
-Message-ID: <2235553.ElGaqSPkdT@g550jk>
-In-Reply-To: <20220422100824.v4.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
-References: <20220422100824.v4.1.I484f4ee35609f78b932bd50feed639c29e64997e@changeid>
+        with ESMTP id S236914AbiDWT60 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Apr 2022 15:58:26 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2115F183FBD;
+        Sat, 23 Apr 2022 12:55:24 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id C5E94B80D1C;
+        Sat, 23 Apr 2022 19:55:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6CA3CC385B5;
+        Sat, 23 Apr 2022 19:55:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1650743721;
+        bh=f+gN5VFSk9TvNUY6oLSGkqRdwS9xhEyKvVqBzBXLs0k=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=PzAHzR20lzvPfCTqt/UUzx12IPhOfz+TRjqNJ8NxEoRI/bWqgErqlZjk7cfTM259a
+         ES9ZLzK7AQ5x5SMPoX4fGuEBvk10IF/bYoYOZNrIybBirPtSW18FdAPqWZza8MudXV
+         vG23F9GYtnFHpHrf84m9ZBvRrLCT6HR3YBoZ5rIdgNbcdWJ4WulW+Ag5txr/fArK/K
+         8hzENh6M4DW/B6aRii4K02sQiyHAgWdV6wTeninHDFb9FTGsk1kC60BC8Ty7Z9oRiu
+         uezNy/Q8OZSv9U2rlimKsK6lo1l+EW6dZRWZhxxZjuCiGNgZmaJtyoN+hSdEOEgF8G
+         ZbIfS2Abjyb2Q==
+Received: by mail-wm1-f48.google.com with SMTP id v64-20020a1cac43000000b0038cfd1b3a6dso10070118wme.5;
+        Sat, 23 Apr 2022 12:55:21 -0700 (PDT)
+X-Gm-Message-State: AOAM533lGh9EPqhUPg/nNViJ/yIL6iwq+/2Z9XUGtlSB1o1YIthHmVZa
+        ZwNhKnBa6uPnYoSswxFiRZFxxDjgek5kduGVgxM=
+X-Google-Smtp-Source: ABdhPJwI9oPHj0hjS6Y5T/XpNunPLjXzfhDb/y4TSIxWhFvis5ICGMzIa2Kp6ZajGKm/dLFayXeKiCmoNnJ4Fu7pVP8=
+X-Received: by 2002:a1c:f219:0:b0:38c:782c:3bb with SMTP id
+ s25-20020a1cf219000000b0038c782c03bbmr18417513wmc.94.1650743719480; Sat, 23
+ Apr 2022 12:55:19 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
+ <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
+ <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net> <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
+ <20220422234150.GA3442771@roeck-us.net>
+In-Reply-To: <20220422234150.GA3442771@roeck-us.net>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Sat, 23 Apr 2022 21:55:03 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
+Message-ID: <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
+Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
+To:     Guenter Roeck <linux@roeck-us.net>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Tomas Cech <sleep_walker@suse.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brian,
+On Sat, Apr 23, 2022 at 1:41 AM Guenter Roeck <linux@roeck-us.net> wrote:
+>
+> On Sat, Apr 23, 2022 at 12:04:31AM +0200, Arnd Bergmann wrote:
+> > On Fri, Apr 22, 2022 at 10:55 PM Guenter Roeck <linux@roeck-us.net> wrote:
+> > > On 4/22/22 12:16, Arnd Bergmann wrote:
+> > > > On Fri, Apr 22, 2022 at 7:05 PM Guenter Roeck <linux@roeck-us.net> wrote:
+> > > >
+> > > > Which machine did you hit this on? Is this on hardware or in qemu?
+> > > >
+> > > qemu, as always. borzoi, spitz, terrier, tosa, z2, and sx1 fail.
+> > > Also, I just noticed that the failure is not always the same.
+> > > z2 fails to boot from initrd, and sx1 fails to boot completely.
+> >
+> > That's a lot of machines failing, I hope at least we got the same bugs more
+> > than once here.
+> >
+> > For the I/O space, I found now that PXA was not using the standard
+> > virtual I/O address yet, but instead used a NULL-based offset.
+> >
+> > I'm not entirely happy with this patch, but this is an outline of what
+> > I think we need to fix that: https://pastebin.com/3nVgQsEw
+> > This one is probably incomplete, at least it breaks sa1100 for now,
+> > and it adds a bogus CONFIG_PCI dependency. I'm also not sure
+> > in what way the last patch in the series triggers it, rather than the
+> > one that removed mach/io.h.
+> >
+> > I had sx1 booting in qemu at least, with the omap1 multiplatform series only.
+> > If you have a custom config for this one, make sure you get the right
+> > DEBUG_LL address.
+> >
+> > > I'll do another round of bisects.
+> >
+>
+> Here is the bisect for the sx1 boot failure.
 
-On Freitag, 22. April 2022 19:08:53 CEST Brian Norris wrote:
-> Way back in commit 4f25580fb84d ("mmc: core: changes frequency to
-> hs_max_dtr when selecting hs400es"), Rockchip engineers noticed that
-> some eMMC don't respond to SEND_STATUS commands very reliably if they're
-> still running at a low initial frequency. As mentioned in that commit,
-> JESD84-B51 P49 suggests a sequence in which the host:
-> 1. sets HS_TIMING
-> 2. bumps the clock ("<= 52 MHz")
-> 3. sends further commands
-> 
-> It doesn't exactly require that we don't use a lower-than-52MHz
-> frequency, but in practice, these eMMC don't like it.
-> 
-> The aforementioned commit tried to get that right for HS400ES, although
-> it's unclear whether this ever truly worked as committed into mainline,
-> as other changes/refactoring adjusted the sequence in conflicting ways:
-> 
-> 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed mode
-> switch")
-> 
-> 53e60650f74e ("mmc: core: Allow CMD13 polling when switching to HS mode
-> for mmc")
-> 
-> In any case, today we do step 3 before step 2. Let's fix that, and also
-> apply the same logic to HS200/400, where this eMMC has problems too.
-> 
-> Resolves errors like this seen when booting some RK3399 Gru/Scarlet
-> systems:
-> 
-> [    2.058881] mmc1: CQHCI version 5.10
-> [    2.097545] mmc1: SDHCI controller on fe330000.mmc [fe330000.mmc] using
-> ADMA [    2.209804] mmc1: mmc_select_hs400es failed, error -84
-> [    2.215597] mmc1: error -84 whilst initialising MMC card
-> [    2.417514] mmc1: mmc_select_hs400es failed, error -110
-> [    2.423373] mmc1: error -110 whilst initialising MMC card
-> [    2.605052] mmc1: mmc_select_hs400es failed, error -110
-> [    2.617944] mmc1: error -110 whilst initialising MMC card
-> [    2.835884] mmc1: mmc_select_hs400es failed, error -110
-> [    2.841751] mmc1: error -110 whilst initialising MMC card
-> 
-> Ealier versions of this patch bumped to 200MHz/HS200 speeds too early,
-> which caused issues on, e.g., qcom-msm8974-fairphone-fp2. (Thanks for
-> the report Luca!) After a second look, it appears that aligns with
-> JESD84 / page 45 / table 28, so we need to keep to lower (HS / 52 MHz)
-> rates first.
-> 
-> Fixes: 08573eaf1a70 ("mmc: mmc: do not use CMD13 to get status after speed
-> mode switch") Fixes: 53e60650f74e ("mmc: core: Allow CMD13 polling when
-> switching to HS mode for mmc") Fixes: 4f25580fb84d ("mmc: core: changes
-> frequency to hs_max_dtr when selecting hs400es") Cc: Shawn Lin
-> <shawn.lin@rock-chips.com>
-> Link: https://lore.kernel.org/linux-mmc/11962455.O9o76ZdvQC@g550jk/
-> Reported-by: Luca Weiss <luca@z3ntu.xyz>
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
+Odd, I can't reproduce this at all. Do you get any console output at
+all for this?
 
-Verified on qcom-apq8026-lg-lenok which also showed the same error with the 
-last revision of this patch.
+Is this the plain omap1_defconfig, or something else?
 
-Tested-by: Luca Weiss <luca@z3ntu.xyz>
+One thing I keep having to apply myself is this snippet:
 
-Regards
-Luca
+diff --git a/arch/arm/mm/proc-arm925.S b/arch/arm/mm/proc-arm925.S
+index 0bfad62ea858..87c695703580 100644
+--- a/arch/arm/mm/proc-arm925.S
++++ b/arch/arm/mm/proc-arm925.S
+@@ -441,7 +441,6 @@ __arm925_setup:
 
-> ---
-> 
-> Changes in v4:
->  * Revert to hs_max_dtr for HS200, due to issues reported by Luca Weiss
->    <luca@z3ntu.xyz>; Luca, feel free to provide a "Tested-by: ..." reply
->    if you'd like that included
->  * Drop the "redundant clock rate" changes, as they aren't needed any
->    more
-> 
-> Changes in v3:
->  * Use mmc_set_bus_speed() to help choose the right clock rate
->  * Avoid redundant clock rate changes
->  * Restore clock rate on failed HS200 switch
-> 
-> Changes in v2:
->  * Use ext_csd.hs200_max_dtr for HS200
->  * Retest on top of 3b6c472822f8 ("mmc: core: Improve fallback to speed
->    modes if eMMC HS200 fails")
-> 
->  drivers/mmc/core/mmc.c | 23 +++++++++++++++++++----
->  1 file changed, 19 insertions(+), 4 deletions(-)
-> 
+ #ifdef CONFIG_CPU_DCACHE_WRITETHROUGH
+        mov     r0, #4                          @ disable write-back
+on caches explicitly
+-       mcr     p15, 7, r0, c15, c0, 0
+ #endif
 
+        adr     r5, arm925_crval
 
+I don't remember what the story is behind this, but I can't actually manage
+to boot omap1_defconfig on qemu with the instruction intact.
 
+       Arnd
