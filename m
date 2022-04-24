@@ -2,170 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF645C433F5
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 15:35:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5083BC433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 16:03:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234531AbiDXPiQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Apr 2022 11:38:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37174 "EHLO
+        id S233068AbiDXQGA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Apr 2022 12:06:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240462AbiDXPb1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 11:31:27 -0400
-Received: from mail-oi1-x22a.google.com (mail-oi1-x22a.google.com [IPv6:2607:f8b0:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98985171C04;
-        Sun, 24 Apr 2022 08:28:25 -0700 (PDT)
-Received: by mail-oi1-x22a.google.com with SMTP id e4so14578216oif.2;
-        Sun, 24 Apr 2022 08:28:25 -0700 (PDT)
+        with ESMTP id S231513AbiDXQF7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 12:05:59 -0400
+Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9044A74DE8;
+        Sun, 24 Apr 2022 09:02:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=sender:message-id:date:mime-version:user-agent:content-language:to
-         :cc:references:from:subject:in-reply-to:content-transfer-encoding;
-        bh=yr0/AkbMMu8pn1dkU35YlQmF7na7yjrNnK/horRQvq8=;
-        b=YTsJBncPwlsdJoy0clMDPkRYsap010NbelrrDwP4gT2p8VkAeOwyCadOMVg4EkLC3g
-         BU6v4rcHRP7TcChruJdux/6WqtJmUToOWUlOimc0ldD0p/STL+v6YSxQqTz/SiEj3JGk
-         6SfYzDXOC60C+Zk6YtFsjMz2c7gYsvaefbEF/eKAM03STJHCFm25OuC/Z0YH/2cfNqkA
-         U538FM4O480tv4oZ6rwPTTcYDvIV4RyyrEvA6n7gY5KKJPB4B+s22HrjImpN8j9osv2G
-         SEdJ9k63zxNOgRDgM+KmfcxMquHhbq8CJJjUKerT4sEDujG7ogRPrwOnyNIjdLCE9lFh
-         BU0Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:sender:message-id:date:mime-version:user-agent
-         :content-language:to:cc:references:from:subject:in-reply-to
-         :content-transfer-encoding;
-        bh=yr0/AkbMMu8pn1dkU35YlQmF7na7yjrNnK/horRQvq8=;
-        b=6vnD+8dQFmxyCIkjIp2rzinoLopet/bOToKxMnl2YtHOByGo/3uzEEWghB5ivZYWCi
-         +rlylgSvpddSCP7L/jowhR+EY8PKx8gmUpaAklTLvOnGzBu+KsO0K5sZma/VxYfD+8O7
-         cY1obNpFAKSpXcqX/vynqo70JQqRpH2fX6OJ/az/sdloBzVT1Hlbsy0t+ISTk9eja4i2
-         NPP0370RoYz/QRrb9fuISYcH3nGQX0swBEPrmTAqQY3CW47NEd9aiH8cBNciV3kMxAg/
-         0HhL+B10ELgesmaEYtrPaSpDfQrPLH0USQ0+qkRh8SEWZ8FsnZoU4Bz5k5H7i2AYbXQ+
-         GfoA==
-X-Gm-Message-State: AOAM533aS0heWnGx1qtXYFFuC/rH9r8ilEPuKVhXK6t5ZIQox5cSnKAm
-        JAmIERVQLb6nkLj0Rfc7TIQ=
-X-Google-Smtp-Source: ABdhPJy+gDyQI+jYYZai2x5URiEV01l+fMZDWT8YjU8/GgIriEk0FB5ZVdkvpb6NfVQx+IMk0aUfQA==
-X-Received: by 2002:aca:f286:0:b0:2da:58ba:c578 with SMTP id q128-20020acaf286000000b002da58bac578mr6576017oih.127.1650814104777;
-        Sun, 24 Apr 2022 08:28:24 -0700 (PDT)
-Received: from ?IPV6:2600:1700:e321:62f0:329c:23ff:fee3:9d7c? ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id w8-20020a056830410800b00605b48122eesm53063ott.14.2022.04.24.08.28.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 24 Apr 2022 08:28:23 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Message-ID: <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net>
-Date:   Sun, 24 Apr 2022 08:28:19 -0700
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Content-Language: en-US
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-References: <20220419163810.2118169-1-arnd@kernel.org>
- <20220422170530.GA2338209@roeck-us.net>
- <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
- <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net>
- <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
- <20220422234150.GA3442771@roeck-us.net>
- <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
- <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net>
- <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
-From:   Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
-In-Reply-To: <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1650816179; x=1682352179;
+  h=from:to:cc:subject:date:message-id;
+  bh=hgmWv2J10YMgm1PnZWc/9wRep8El2UqAWfmRn8325s4=;
+  b=jEt7LQkoynYBAPloafnl0suI/aTOA9YzWNOkiVz0lSTgSjKpjLbSswaD
+   2c2c0LnuOvcjz8gUWaf21W1QudwrIPLnV2BUBKuUNkto3TBGmxXLlBgEQ
+   gYtGE32aDWyRLivpy+WwpZ2VHAwPkBv+AdPystonVEj7jNOZweZ9gnwCp
+   4=;
+Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
+  by alexa-out.qualcomm.com with ESMTP; 24 Apr 2022 09:02:58 -0700
+X-QCInternal: smtphost
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 24 Apr 2022 09:02:56 -0700
+X-QCInternal: smtphost
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg02-blr.qualcomm.com with ESMTP; 24 Apr 2022 21:32:34 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id 5C3C45B82; Sun, 24 Apr 2022 21:32:33 +0530 (IST)
+From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+To:     agross@kernel.org, bjorn.andersson@linaro.org,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        p.zabel@pengutronix.de, chris@printf.net, venkatg@codeaurora.org,
+        gdjakov@mm-sol.com, quic_asutoshd@quicinc.com
+Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V5] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+Date:   Sun, 24 Apr 2022 21:32:33 +0530
+Message-Id: <1650816153-23797-1-git-send-email-quic_c_sbhanu@quicinc.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/24/22 01:52, Arnd Bergmann wrote:
-> On Sun, Apr 24, 2022 at 4:09 AM Guenter Roeck <linux@roeck-us.net> wrote:
->> On 4/23/22 12:55, Arnd Bergmann wrote:
->>> On Sat, Apr 23, 2022 at 1:41 AM Guenter Roeck <linux@roeck-us.net> wrote:
->>>> On Sat, Apr 23, 2022 at 12:04:31AM +0200, Arnd Bergmann wrote:
->>>
->>> Odd, I can't reproduce this at all. Do you get any console output at
->>> all for this?
->>>
->>> Is this the plain omap1_defconfig, or something else?
->>>
->>
->> No, it is my own sx1 specific configuration.
->>
->> https://github.com/groeck/linux-build-test/blob/master/rootfs/arm/qemu_sx1_defconfig
->>
->> I don't recall where I got it from but ...
-> 
-> Ok, that explains it, thanks!
-> 
-> I fixed all the defconfig files that come with the kernel, but for your own
-> ones you have to add
-> 
-> # CONFIG_ARCH_MULTI_V7 is not set
-> 
-> into the defconfig file, otherwise the multiplatform target defaults to
-> an ARMv7 instead of ARMv5 build. For an OMAP15xx as in the SX1,
-> you also need to enable CONFIG_ARCH_MULTI_V4T.
-> 
-> This is slightly unfortunate, but I don't see any way to avoid it, and the
-> modified defconfig will still work fine with older kernel trees.
-> 
+Reset GCC_SDCC_BCR register before every fresh initilazation. This will
+reset whole SDHC-msm controller, clears the previous power control
+states and avoids, software reset timeout issues as below.
 
-Yes, that works. I changed it in my configuration.
+[ 5.458061][ T262] mmc1: Reset 0x1 never completed.
+[ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version: 0x00007202
+[ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt: 0x00000000
+[ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+[ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl: 0x00000000
+[ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
+[ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
+[ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
+[ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+[ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
+[ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+[ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]: 0x00000000
+[ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]: 0x00000000
+[ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
+[ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER DUMP-----------
+[ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg: 0x6000642c | DLL cfg2: 0x0020a000
+[ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl: 0x00010800 | DDR cfg: 0x80040873
+[ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 : 0xf88218a8 Vndr func3: 0x02626040
 
->>> One thing I keep having to apply myself is this snippet:
->>>
->>> diff --git a/arch/arm/mm/proc-arm925.S b/arch/arm/mm/proc-arm925.S
->>> index 0bfad62ea858..87c695703580 100644
->>> --- a/arch/arm/mm/proc-arm925.S
->>> +++ b/arch/arm/mm/proc-arm925.S
->>> @@ -441,7 +441,6 @@ __arm925_setup:
->>>
->>>    #ifdef CONFIG_CPU_DCACHE_WRITETHROUGH
->>>           mov     r0, #4                          @ disable write-back
->>> on caches explicitly
->>> -       mcr     p15, 7, r0, c15, c0, 0
->>>    #endif
->>
->> it does not have CONFIG_CPU_DCACHE_WRITETHROUGH enabled.
-> 
-> Maybe it was disabled explicitly for the sx1_defconfig because of this
-> bug. I would think that this is required for actual sx1 hardware because the
-> option is default-enabled for ARM925T, and that CPU core is exclusively
-> used in OMAP15xx.
-> 
+Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm chipsets")
+Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+---
 
-That looks like a bug in qemu. ARM925T instruction support is limited to V4T
-instructions. qemu doesn't have explicit 5T support. It is either V4T
-or V5.
+Changes since V4:
+	- Called reset_control_put() in error path.
 
-Guenter
+Changes since V3:
+	- Used reset controller local variable as suggested by
+	  Bjorn Andersson.
+	- Passed NULL as a parameter to
+	  devm_reset_control_get_optional_exclusive() as suggested by
+	  Bjorn Andersson.
+	- Replaced devm_reset_control_get_optional_exclusive() with
+	  reset_control_get_optional_exclusive() and called
+	  reset_control_put() before returning to clear the reset
+	  controller as suggested by Bjorn Andersson.
+
+Changes since V2:
+	- Dropped new line after fixes tag as suggested by Bjorn
+	  Andersson.
+	- Passed device structure instead of passing platform_device
+	  structure as a argument for sdhci_msm_gcc_reset() as suggested
+	  by Bjorn Andersson.
+	- Replaced dev_err() with dev_err_probe() as suggested by Bjorn
+	  Andersson.
+
+Changes since V1:
+	- Added fixes tag as suggested by Ulf Hansson.
+	- Replaced devm_reset_control_get() with
+	  devm_reset_control_get_optional_exclusive() as suggested by
+	  Ulf Hansson.
+---
+ drivers/mmc/host/sdhci-msm.c | 42 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 50c71e0..ff9f5b6 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -17,6 +17,7 @@
+ #include <linux/regulator/consumer.h>
+ #include <linux/interconnect.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/reset.h>
+ 
+ #include "sdhci-pltfm.h"
+ #include "cqhci.h"
+@@ -2482,6 +2483,43 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
+ 	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
+ }
+ 
++static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
++{
++	struct reset_control *reset;
++	int ret = 0;
++
++	reset = reset_control_get_optional_exclusive(dev, NULL);
++	if (IS_ERR(reset))
++		return dev_err_probe(dev, PTR_ERR(reset),
++				"unable to acquire core_reset\n");
++
++	if (!reset)
++		return ret;
++
++	ret = reset_control_assert(reset);
++	if (ret) {
++		reset_control_put(reset);
++		return dev_err_probe(dev, ret, "core_reset assert failed\n");
++	}
++
++	/*
++	 * The hardware requirement for delay between assert/deassert
++	 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
++	 * ~125us (4/32768). To be on the safe side add 200us delay.
++	 */
++	usleep_range(200, 210);
++
++	ret = reset_control_deassert(reset);
++	if (ret) {
++		reset_control_put(reset);
++		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
++	}
++
++	usleep_range(200, 210);
++	reset_control_put(reset);
++
++	return ret;
++}
+ 
+ static int sdhci_msm_probe(struct platform_device *pdev)
+ {
+@@ -2529,6 +2567,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 
+ 	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
+ 
++	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
++	if (ret)
++		goto pltfm_free;
++
+ 	/* Setup SDCC bus voter clock. */
+ 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+ 	if (!IS_ERR(msm_host->bus_clk)) {
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+of Code Aurora Forum, hosted by The Linux Foundation
+
