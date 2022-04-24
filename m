@@ -2,138 +2,189 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F490C433F5
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 09:04:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26BD3C433FE
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 10:25:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238756AbiDXJHs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Apr 2022 05:07:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39428 "EHLO
+        id S239189AbiDXK2E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Apr 2022 06:28:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238691AbiDXJHh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 05:07:37 -0400
-Received: from APC01-TYZ-obe.outbound.protection.outlook.com (mail-tyzapc01on2098.outbound.protection.outlook.com [40.107.117.98])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE2D117770B;
-        Sun, 24 Apr 2022 02:04:37 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=hLJD7ziHL5iVqo69s9ou5u/T+VBHuwR80L+iLONwjRVo1xKIfVmfKb9f4lJbtUCris1ps3i+fMZRIP1PJ7Vntnt8znceW5Z7jxde2rR1PuKvJCaJYK5ohh/VfibaawzTEpDyurfU851i4NkCw3ShnOVk8sukVqlIds7rRWqCkxecWIAlYzY4+fig6FmtOgirpFco8s244cHOGtV0PjzCBZCAoTPpMWAOqB3eNbW0QPlkeEBcoXwOERMxprhugLL7Wml143F+Bydh4FIB7TWbTKk1EnqdYVHbUyAVOYUvgXXQ4HSY8JnKvY86uhkYzrxOpchvlN8czS7SxSQbWupGZQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=4gnEAXdpXP71byyrT9gvPlXxJXXKjacWqFJ5AHNv7jQ=;
- b=DxrdCKz3b1uXJ+wfdk8ZLUjbTiAanDaboRK5D9YyxrJ+A89Or/23SwAa45Vlw+AqL/uMhFBT8NZGEjxKuuHrpbrVom6aR35uNN2RIWnaVG8+IVYdlRjkXrBzX6Jo6zQayXMvpA59ezlAcrwnrkKJB/6sNzbz3vP9NIF0NZowCLNRvoagNFG9i17sXQsEtH8Gh9+lv7rlkWyb2sAHfkkqrG/fCMzW+1z6h+cLt0PTNvBSNJxQNz4GR2KbO4kQ3M3m7DjUz90QsIIs7akrsfLIS3UgpLWrVsDgCEFdAiXKkvVpjhspZFkugnyReUCAJddCm0C0O4Jmh28N7u8Yyus9EA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
- dkim=pass header.d=vivo.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo0.onmicrosoft.com;
- s=selector2-vivo0-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=4gnEAXdpXP71byyrT9gvPlXxJXXKjacWqFJ5AHNv7jQ=;
- b=hR4PTEmWEIFZvsHPKjiXkRaR/cxCXSYXUxwWWGxBipXdSYS8ejUXFjh3sUKh1CrUYpA7FpmQjAgINo/5idC5jwrp9vqxAQCTgLKPdRMp1NGb6lrW1q/Ly3RwJjQrZ+QX9AsoJbv1MzCqXGyLH+ei/fcRzMeu4k6b84R6xChzIdc=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=vivo.com;
-Received: from SG2PR06MB3367.apcprd06.prod.outlook.com (2603:1096:4:78::19) by
- HK0PR06MB2468.apcprd06.prod.outlook.com (2603:1096:203:6b::19) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5186.14; Sun, 24 Apr 2022 09:04:35 +0000
-Received: from SG2PR06MB3367.apcprd06.prod.outlook.com
- ([fe80::4591:4f3e:f951:6c8c]) by SG2PR06MB3367.apcprd06.prod.outlook.com
- ([fe80::4591:4f3e:f951:6c8c%7]) with mapi id 15.20.5186.019; Sun, 24 Apr 2022
- 09:04:35 +0000
-From:   Wan Jiabing <wanjiabing@vivo.com>
-To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Claudiu Beznea <claudiu.beznea@microchip.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Cc:     kael_w@yeah.net, Wan Jiabing <wanjiabing@vivo.com>
-Subject: [PATCH] mmc: atmel-mci: simplify if-if to if-else
-Date:   Sun, 24 Apr 2022 17:04:22 +0800
-Message-Id: <20220424090422.97070-1-wanjiabing@vivo.com>
-X-Mailer: git-send-email 2.35.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: HK2PR06CA0018.apcprd06.prod.outlook.com
- (2603:1096:202:2e::30) To SG2PR06MB3367.apcprd06.prod.outlook.com
- (2603:1096:4:78::19)
+        with ESMTP id S239071AbiDXK1b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 06:27:31 -0400
+Received: from alexa-out-sd-02.qualcomm.com (alexa-out-sd-02.qualcomm.com [199.106.114.39])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E69E5E74B;
+        Sun, 24 Apr 2022 03:24:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1650795871; x=1682331871;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=5EWdBAYXxR4LyG1mkoRqIGtYHft5pGIkFSUzkEcRgjI=;
+  b=NIkwg+Vt4edA3vv3TewtYNzZyr8Pq5wb6ufwhVQBAhzHQUZb4aFFEZGd
+   6569ud5PShF+7eMsjek2tgMEPwVeqUKaOORdLP/Kf195maq4dm031an8v
+   HXH+AjFq96+D8zyVNQbdiguoGMXh/6Z9xoooRzmU5K/ZqVnXB1UOTUda4
+   Q=;
+Received: from unknown (HELO ironmsg05-sd.qualcomm.com) ([10.53.140.145])
+  by alexa-out-sd-02.qualcomm.com with ESMTP; 24 Apr 2022 03:23:29 -0700
+X-QCInternal: smtphost
+Received: from nasanex01c.na.qualcomm.com ([10.47.97.222])
+  by ironmsg05-sd.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Apr 2022 03:23:29 -0700
+Received: from nalasex01a.na.qualcomm.com (10.47.209.196) by
+ nasanex01c.na.qualcomm.com (10.47.97.222) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.22; Sun, 24 Apr 2022 03:23:28 -0700
+Received: from [10.216.46.93] (10.80.80.8) by nalasex01a.na.qualcomm.com
+ (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Sun, 24 Apr
+ 2022 03:23:07 -0700
+Message-ID: <e85dace0-66f5-6ef1-425a-d5cff4278c19@quicinc.com>
+Date:   Sun, 24 Apr 2022 15:52:50 +0530
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 0921e593-08df-4aec-72db-08da25d173f3
-X-MS-TrafficTypeDiagnostic: HK0PR06MB2468:EE_
-X-Microsoft-Antispam-PRVS: <HK0PR06MB246805C2B864C00DB72AF443ABF99@HK0PR06MB2468.apcprd06.prod.outlook.com>
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: cYYlNi6SMuyYdZZ4uENYKIg9U51CABZ6Ta2W8VWxKNGbavo9s/dsvgm1ndXRasLpTVbBK5f1OrdDU5YhIhJKzYXwPYbgEU06xwyVFCAzM7XAc9ljFespiOXqjVhe7FbJb9R9eXxj4UuthYxk7Ivx0VNV2UT2xVafbGmtL3qoCV6kncwF6DvXwOW/Sjygp0Sjh+lF5jOxCuOQZA7ER41bsR9c1nuLlGjSZpivatuvAohMGSljVnQdPidWpBvvr/a1wmCtACxHy7P+MXK13ULLmqPApXV0QHqaRKybB+N+toPdjvMEuAuCa7CfbKvxb1+Adtsw90ab0YqAF6AN1c4KG9tCrMoE6q5Mdc1R/StVhsnvxzJkEm/4s89fWBsgfMxGd/eD91I6+jaFvIGyZ8AeoyXH12FT4cFyZYg65IIdjOQWxOAqXzoOVTwYWCObDaT1nt1aVUjagwF8q2RBetXjN0rIv4f5pBS2zev9Q3SSVQ3LmCQ08DAgu1IP8KOGSPQfx9aHckMb1KO1kyT9rqycoonYgX3kbC5rFlBZk2OjKea8DQ+pIdSAdFskSS6g9op5R3dedj5HkpegtLjsWJrh5PxEFYnLKRtNBPOwKJNTs3CwkKtPSmrPCgveXY9+DVcgO7pIlKufmeoUBIq7UJpp/6xrdA6eOsAyJf2sWG8AQ9OUmHicCAFz0XWD6hBsUDadqmlg2w5csLbrOa6X9YhtkA==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SG2PR06MB3367.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(26005)(6512007)(107886003)(2616005)(36756003)(38350700002)(38100700002)(1076003)(66556008)(316002)(6666004)(52116002)(66946007)(66476007)(8676002)(4326008)(8936002)(5660300002)(186003)(110136005)(86362001)(83380400001)(6486002)(508600001)(6506007)(2906002)(4744005);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?9zwCudj6vu1jP2lkMTcTjl2vnNW9kvXJs4CJYewBXTq6uHxdVgk4If3qotKb?=
- =?us-ascii?Q?CnpQ69bOZvBKtGiHXCfNH5CAgQhaRN58wIO0G3ro84DebOGWeeT0dotriOap?=
- =?us-ascii?Q?uqhMi0UY9fMHRr0ALViaiQxFZ28+oCl4diskFR54SySm5r9woAHDxuYxvqmn?=
- =?us-ascii?Q?20F93Nl7hZVTX/JG/gaij/vrOOVSEWGNi0hNYi4wsbH4DsJcuXekEz1cXgSs?=
- =?us-ascii?Q?E01xnsNS6kld8Gvd9Td0md1e64Zbk4wV51Ec3Cp2rUZcbADRHAcSDETOAYR9?=
- =?us-ascii?Q?btSDSkWui5wCY0+ohM//v6qu2IyBeK07eM4TEFfZ2pl+lQs5Oclu9biYFSrL?=
- =?us-ascii?Q?dWVvtB+6QpWdvzSb94NUplIU8yhum2yKAsnsY4r0euOZZvuMGH7Bmrkk8mxA?=
- =?us-ascii?Q?Ha7gByh2uqtXrXhgu8S2FK8gtAxRw0O6ctnLt7fAjHqvC1ZItAJdGtBgQoTq?=
- =?us-ascii?Q?J0XZyRaasoTp+3J5TDTl/AYckF+W/5kQpZpLeHnUo5W3xhgVPFhvzfQZLIMf?=
- =?us-ascii?Q?RLwSe8BgUIIDxVbVt3r7Bm3xdD6DYLQR6dn7WXo/Em6YuPYkTPpeiQlSDFoU?=
- =?us-ascii?Q?riDmR9kY1ADSmh/AN67R7oR2P8sWBvTjdLSGHuqyg1hE7VPtuqQvmJBDw5Mi?=
- =?us-ascii?Q?+0kkluop19BJ/0gQ/mxQFn6sIFqIN57cspnG9SB/kaDPbzntkXJSIBrRXWpO?=
- =?us-ascii?Q?84pQuCJ48YOWLy1msqrNBHIh5F/rLtyyH34ynlraa9k0jDXBYY19oDvQ5Mau?=
- =?us-ascii?Q?t5k8OHP8SICx2Z8LaJiSaRgo+3XzKxRh5mc4TSUyx/0MK2Tv9AFGYeoGadYb?=
- =?us-ascii?Q?hGJ92Gf13JXLdyRdpA2M77CHtOt8H0O2J7U7zaqkj7JnvHH3pBUbUS9WsRD1?=
- =?us-ascii?Q?OmBtt3D/BbYihoZMACH2nP96UVEgIAE7EjwcHz3nDsrc56Zti9rv2isVFeZf?=
- =?us-ascii?Q?msapxQYTF9Zm1E4vZy/8ogpssAkytVGxepw/oSoLEzRAS1AeLWfk5NtpcxZv?=
- =?us-ascii?Q?BaAVKb1YTwlQzdPA7a91pwbpcllZ5Yz01jm0BCsDfITeEDjnfWN4nanIWm2V?=
- =?us-ascii?Q?W5kqItqaUsEJx+jUZBHjzKw5QMTHGIEX6GLmiz/Du9vAanSZOCV9tQAJRh7j?=
- =?us-ascii?Q?uWV372U2g8QNzqoNrYpszHn3ZRQoe+xOP+6jF9gRPHqNiKKljllEIKBoQNGJ?=
- =?us-ascii?Q?3Rgq3W/6YOJd+zpAFEepoPRg/iskI/g2m/UA6+M+sfbSFPlqwJBCU9LNxTDC?=
- =?us-ascii?Q?jcQl/HYP8xOvYag87YH8LvJFLh1Gqodri/kjW4KJ6IG91BDUdARnWw7BQGKe?=
- =?us-ascii?Q?FTVPAuTah5EfmlpUmXjpcpLiqP774HrV4ysA2j5U1n0lD6yHLtgRWwe9mwc4?=
- =?us-ascii?Q?gK6OHsLYhtTT9UjlE37OLo7KDO5+LxlF8y//8OTr/zi9lmF92uiGIFEjpSDS?=
- =?us-ascii?Q?pTqtytoBIzMqVnIND1mY7lykkDKSgpOJBx+DeVqTME5zDgXerKReRfMqzBqH?=
- =?us-ascii?Q?+SZ+jZR/Ua3ueqLIzHmDbfqWO9DiuGzEa4xKuwr3lZcVziEbgjJ8wbBUFFoh?=
- =?us-ascii?Q?YuGWkNEi4xasprrPG0J44+1qwXEmqbEb13NvXgF9iG/rOLo81zf0TwFOVTNx?=
- =?us-ascii?Q?XFwI1yuYzt7Vq57vJ3b45AsDJrXuA96QwxJu91yhuR6j0W2wyVuK47pOmqvZ?=
- =?us-ascii?Q?w2tb4XiHCCk+mmA1nmj1Qvi8AvueX+hbhlnrNMtFP/l4est7DpczJ9etTHX/?=
- =?us-ascii?Q?zK1T8bcXpw=3D=3D?=
-X-OriginatorOrg: vivo.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0921e593-08df-4aec-72db-08da25d173f3
-X-MS-Exchange-CrossTenant-AuthSource: SG2PR06MB3367.apcprd06.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Apr 2022 09:04:35.2573
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: sqS3QDLxrp3k3WWte1xK66W3K/+T/fYJdiHiAMZjAYApGo45Mti9mF8798D9UxLCicHXgVFoaihDxTvdinFmcw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: HK0PR06MB2468
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.6.1
+Subject: Re: [PATCH V4] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
+Content-Language: en-US
+To:     Philipp Zabel <p.zabel@pengutronix.de>, <adrian.hunter@intel.com>,
+        <agross@kernel.org>, <bjorn.andersson@linaro.org>,
+        <ulf.hansson@linaro.org>, <chris@printf.net>,
+        <venkatg@codeaurora.org>, <gdjakov@mm-sol.com>,
+        <quic_asutoshd@quicinc.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <quic_rampraka@quicinc.com>,
+        <quic_pragalla@quicinc.com>, <quic_sartgarg@quicinc.com>,
+        <quic_nitirawa@quicinc.com>, <quic_sayalil@quicinc.com>
+References: <1649759983-22035-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <1ee3b0619ee976eaf88e7207318770d441418c94.camel@pengutronix.de>
+ <1943a5fb-cf6c-f358-9e27-408792a458ce@quicinc.com>
+ <dc2252f03db5881dbb17006c910dfca54c7d2fee.camel@pengutronix.de>
+ <fb6480f6-f004-c02d-09fe-92a64785a0c5@quicinc.com>
+ <9b2b9460e46d8544867589ce61d380265f42cd04.camel@pengutronix.de>
+From:   "Sajida Bhanu (Temp)" <quic_c_sbhanu@quicinc.com>
+In-Reply-To: <9b2b9460e46d8544867589ce61d380265f42cd04.camel@pengutronix.de>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01a.na.qualcomm.com (10.47.209.196)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use if and else instead of if(A) and if (!A).
+Hi,
 
-Signed-off-by: Wan Jiabing <wanjiabing@vivo.com>
----
- drivers/mmc/host/atmel-mci.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+Thanks for the review.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 807177c953f3..98893ccad4bd 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -1125,8 +1125,7 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
- 	chan = host->dma.chan;
- 	if (chan)
- 		host->data_chan = chan;
--
--	if (!chan)
-+	else
- 		return -ENODEV;
- 
- 	if (data->flags & MMC_DATA_READ) {
--- 
-2.35.1
+Please find the inline comments.
 
+Thanks,
+
+Sajida
+
+On 4/21/2022 3:26 PM, Philipp Zabel wrote:
+> On Do, 2022-04-21 at 10:32 +0530, Sajida Bhanu (Temp) wrote:
+>> Hi,
+>>
+>> Thanks for the review.
+>>
+>> Please find the inline comments.
+>>
+>> Thanks,
+>>
+>> Sajida
+>>
+>> On 4/19/2022 12:52 PM, Philipp Zabel wrote:
+>>> Hi Sajida,
+>>>
+>>> On Di, 2022-04-19 at 11:46 +0530, Sajida Bhanu (Temp) wrote:
+>>> [...]
+>>>>>> +static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
+>>>>>> +{
+>>>>>> +	struct reset_control *reset;
+>>>>>> +	int ret = 0;
+>>>>> No need to initialize ret.
+>>>>>
+>>>>>> +
+>>>>>> +	reset = reset_control_get_optional_exclusive(dev, NULL);
+>>>>>> +	if (IS_ERR(reset))
+>>>>>> +		return dev_err_probe(dev, PTR_ERR(reset),
+>>>>>> +				"unable to acquire core_reset\n");
+>>>>>> +
+>>>>>> +	if (!reset)
+>>>>>> +		return ret;
+>>>> Here we are returning ret directly if reset is NULL , so ret
+>>>> initialization is required.
+>>> You are right. I would just "return 0;" here, but this is correct as
+>>> is.
+>> Ok
+>>>>>> +
+>>>>>> +	ret = reset_control_assert(reset);
+>>>>>> +	if (ret)
+>>>>>> +		return dev_err_probe(dev, ret, "core_reset assert failed\n");
+>>>>> Missing reset_control_put(reset) in the error path.
+>>>> Sure will add
+>>>>>> +
+>>>>>> +	/*
+>>>>>> +	 * The hardware requirement for delay between assert/deassert
+>>>>>> +	 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
+>>>>>> +	 * ~125us (4/32768). To be on the safe side add 200us delay.
+>>>>>> +	 */
+>>>>>> +	usleep_range(200, 210);
+>>>>>> +
+>>>>>> +	ret = reset_control_deassert(reset);
+>>>>>> +	if (ret)
+>>>>>> +		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
+>>>>> Same as above. Maybe make both ret = dev_err_probe() and goto ...
+>>>> In both cases error message is different so I think goto not good idea here.
+>>> You could goto after the error message. Either way is fine.
+>> Sorry didn't get this ..can  you please help
+> I meant you could either use goto after the error messages:
+>
+> +static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
+> +{
+> [...]
+> +	ret = reset_control_assert(reset);
+> +	if (ret) {
+> +		dev_err_probe(dev, ret, "core_reset assert failed\n");
+> +		goto out_reset_put;
+> +	}
+> [...]
+> +	ret = reset_control_deassert(reset);
+> +	if (ret) {
+> +		dev_err_probe(dev, ret, "core_reset deassert failed\n");
+> +		goto out_reset_put;
+> +	}
+> +
+> +	usleep_range(200, 210);
+> +
+> +out_reset_put:
+> +	reset_control_put(reset);
+> +
+> +	return ret;
+> +}
+>
+> Or not use goto and copy the reset_control_put() into each error path:
+>
+> +static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
+> +{
+> [...]
+> +	ret = reset_control_assert(reset);
+> +	if (ret) {
+> +		reset_control_put(reset);
+> +		return dev_err_probe(dev, ret, "core_reset assert failed\n");
+> +	}
+> [...]
+> +	ret = reset_control_deassert(reset);
+> +	if (ret) {
+> +		reset_control_put(reset);
+> +		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
+> +	}
+> +
+> +	usleep_range(200, 210);
+> +	reset_control_put(reset);
+> +
+> +	return 0;
+> +}
+>
+> regards
+> Philipp
+Sure I will call reset_control_put() in each error path
