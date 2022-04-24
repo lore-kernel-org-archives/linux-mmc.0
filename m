@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F06EEC433F5
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 23:06:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AB5AC433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 23:17:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237969AbiDXXJs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Apr 2022 19:09:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51372 "EHLO
+        id S239882AbiDXXU6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Apr 2022 19:20:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233081AbiDXXJr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 19:09:47 -0400
+        with ESMTP id S233081AbiDXXU5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 19:20:57 -0400
 Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B342337AAA;
-        Sun, 24 Apr 2022 16:06:45 -0700 (PDT)
-Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
-        by mailout.nyi.internal (Postfix) with ESMTP id 2398C5C00ED;
-        Sun, 24 Apr 2022 19:06:43 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute5.internal (MEProxy); Sun, 24 Apr 2022 19:06:43 -0400
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68CB55DA14;
+        Sun, 24 Apr 2022 16:17:54 -0700 (PDT)
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailout.nyi.internal (Postfix) with ESMTP id BC0865C010E;
+        Sun, 24 Apr 2022 19:17:53 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute4.internal (MEProxy); Sun, 24 Apr 2022 19:17:53 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sholland.org; h=
         cc:cc:content-transfer-encoding:date:date:from:from:in-reply-to
         :message-id:mime-version:reply-to:sender:subject:subject:to:to;
-         s=fm2; t=1650841603; x=1650928003; bh=3OBKHVbbE8+WTVho7BOdi/9Bu
-        3xsWKZkElXAOTZAnrM=; b=kKwWgTyOPXVEgGX1P6Gl/7kmudauDIGT5B+8ZOWOh
-        ELSRGWF0YCFV9tw9G9BKsAos/Zk0ODicyx2o2wYCfEavKcyeivMzFhwG0WJvnwBN
-        uM/IRWJODjrgu6JH4qVoSbe7bUIQH7nP7Ey5Ig5jht9/2fp0yUymH0jMhxUx+jAS
-        r/HNtHExs6o70MnwCFoT5kgTrWmQRhPietIrfP9at6jnU7+Qd0ghXObQVnjGchwQ
-        U5udDeYBL4CN/Kv/pziu2N6eaekplTU6aBcYohmRQYDUbHMkHNQtgWeHSCCybua5
-        0V/gr7buuBGtt+Wyrd26RT14ZbRQrsjl1DI4o3/A01PPw==
+         s=fm2; t=1650842273; x=1650928673; bh=ukhK/3p5rv4p+ixQouMflt4+T
+        +mWNkdHDOYzih3p7Uc=; b=ZgtYGMJLu+mac01+DAYTZ0b8xT+Og/Lx7gii1iuci
+        G33s0ZfpaZXpNjjAfsh1j2zUBsTpsq2QYROM8IWxtePYhZYmwyNzBemRGpZhVQNf
+        u4PdbRnehe99W8WnDhtOqwWmk0e8QJB88z5Xh9riqiU8cD4kc3Z5wQUHvoc0t2ZX
+        k/+U3J6316QBjh3LJKti3VFS5YZQsD8QLTmlLkIsmtIBjXkW3/XmeYOIClNBJgrn
+        sbixv5kLO08IuRgMoJbkZYmJ/WZ5nukR07Ps01LJX4+ScCvL4fw8n5jC5dwu5jz8
+        UV+wA7pVeYUAA3ajkKm1rlfQmSZqe4GU7VqppPExZH71A==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
         messagingengine.com; h=cc:cc:content-transfer-encoding:date:date
         :from:from:in-reply-to:message-id:mime-version:reply-to:sender
         :subject:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender
-        :x-me-sender:x-sasl-enc; s=fm1; t=1650841603; x=1650928003; bh=3
-        OBKHVbbE8+WTVho7BOdi/9Bu3xsWKZkElXAOTZAnrM=; b=JRXOmA2beSZzcjNrF
-        p6Pcn0x8ajbq3XBdIC4LJ5uPE2CdKmZJheKuqF4Rhi21KdgBGoEOF86dtWsXKANN
-        kU7Xyi+XyyrF0Dov4jPlhXnJm9NRzCVx0JtV5KKX+LMTMVM8C2UQCQbucGPIWk/5
-        mIeWl3yuxJcQYCwoFOtT7PL9drTiQOI2t4tl2kiEW7fZkZIPNWelU39Udq2qCmS6
-        Y0MW+LWzjtKt2XD2J6iVzLbm0S7ona3JFyf7fM3oVlGzkkJDX1zz3IIu5WagGMAO
-        v6KeKdnV/nWsYhtvUewPsZvPD2fVrxk5KfkslfyC7miV7U0KG9FO+kdueDhWo2m9
-        bC86Q==
-X-ME-Sender: <xms:AthlYutu5bcxXywKZaOouBuWyn85DftTLy7AbC0kSYoCLEcZmDRKgw>
-    <xme:AthlYjd48cAO5mP00x9b-cGQli6vL8cTzR5Aclm3UndvFC-49-XN2ptdScRMc2qtp
-    pW2bYA9JMJ7CIEeEQ>
-X-ME-Received: <xmr:AthlYpzx5ZQRrBxQiif5HmZHsooFFW5fQAaXX2ZjSWI5l-oD7GKNZ4DzmfyZ-cR10iVmNwO3GwM3PQY66nBeW9yAI0szy4aT_p6YM2bwn4kEgYIqYzyU4U8RCO08dBNICQaewg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedruddtgddukecutefuodetggdotefrodftvf
+        :x-me-sender:x-sasl-enc; s=fm1; t=1650842273; x=1650928673; bh=u
+        khK/3p5rv4p+ixQouMflt4+T+mWNkdHDOYzih3p7Uc=; b=mbIQwFTIE94auivFE
+        sTfdUfxiDwtXw4VsO9TSzerZLQr5ueV758NYVCYWyiw8j7UTrlGGnKdQWECilEhH
+        LIxwJf+6bx8E+BhqUS7e1b8BfelX/mKC3BU3D8imbHzw5Lsf8CPRSTS4NzO2wBiL
+        FW+ry/lwD1sVthP/YBMUHeCZ3kqOiIEPfBx/epGKIWF7XdKzqWtqQ0bwQBWvenjR
+        8gd9XMmTRXSKXorpDNj/IYol5x6pLkCJrdb76GCfGrqX85nmthySApPrOZS0QXZZ
+        W3mmupJapOLKUXhrMGBtPcdCvL+gu9vY44tcOrHmu4eR00lj1oIE4VYsjBRh8gHL
+        JN5ZQ==
+X-ME-Sender: <xms:oNplYpnvePGjpFLxXcrnjHVAIJsEBAJRYLSxiuG2giy2yfJ-hfsdGQ>
+    <xme:oNplYk2Ww07sfEoa53DKMrctWwlcl0-FOrC3xN2yZn513SyZ4CpcWY9RXcIiCEg_s
+    Yu7vAN9vuMfm1XU9w>
+X-ME-Received: <xmr:oNplYvqErI6S5L0hQM2qr7UxIQQuNCbNzwpd_e7p5lKB3FkZH1wkh_mxnSvmnYPy2l_42zjm7f909zKtMDJXHnnXNKE-rumYl4UEhl123J7YjBOc5lL10BSQ7k9c27mFRlWfFg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedruddtgddvudcutefuodetggdotefrodftvf
     curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
     uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
     fjughrpefhvfevufffkffoggfgsedtkeertdertddtnecuhfhrohhmpefurghmuhgvlhcu
@@ -53,26 +53,25 @@ X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedruddtgddukecutefuodetggdote
     htthgvrhhnpeekveelhfejueelleetvdejvdeffeetgeelheeujeffhefgffefkeehhffh
     keekgeenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
     hsrghmuhgvlhesshhhohhllhgrnhgurdhorhhg
-X-ME-Proxy: <xmx:AthlYpNzrUU2wIU7LDd9B0_KN19l4j30JliBUYgahCqRGvPQQW8m1g>
-    <xmx:AthlYu8LeMIy6xeVywPSyy518ZlBmXfCmUXGwEkNZS4On_svFwKZng>
-    <xmx:AthlYhVrEGs-7bLVbikf6Cr_gFDf871W2JIaX0W7BSPJT_2efb3TkQ>
-    <xmx:A9hlYhVtG_SH9yTsl092Igdr69M2pBebl2i5mD-6t74FP805I-dNbA>
+X-ME-Proxy: <xmx:oNplYpmmSGYTGcRQGAregerKYU7hQm6ghAUjC0XSIEzeHlRxik1JjQ>
+    <xmx:oNplYn0p7FERwylDQ8gC4LgvpsRrg5BAbgPOPnLAIZ_26P1WpiRiwQ>
+    <xmx:oNplYouU9jQWPtKuiy6FZkAcgOtQ42myTjFe2emAGufgpElNvOOGbw>
+    <xmx:odplYpyfKITICRD3YusCIUuNnw3A4JhonMGzT_YB46czZ62H8tRp3w>
 Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sun,
- 24 Apr 2022 19:06:41 -0400 (EDT)
+ 24 Apr 2022 19:17:52 -0400 (EDT)
 From:   Samuel Holland <samuel@sholland.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc:     Samuel Holland <samuel@sholland.org>,
-        Arnd Bergmann <arnd@arndb.de>, Chen-Yu Tsai <wens@csie.org>,
-        Chris Ball <chris@printf.net>,
-        Hans de Goede <hdegoede@redhat.com>,
+        Andre Przywara <andre.przywara@arm.com>,
+        Chen-Yu Tsai <wens@csie.org>,
         Jernej Skrabec <jernej.skrabec@gmail.com>,
         Maxime Ripard <maxime@cerno.tech>,
-        Mike Turquette <mturquette@linaro.org>,
+        Yangtao Li <frank@allwinnertech.com>,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-sunxi@lists.linux.dev
-Subject: [PATCH] mmc: sunxi-mmc: Correct the maximum segment size
-Date:   Sun, 24 Apr 2022 18:06:39 -0500
-Message-Id: <20220424230640.31735-1-samuel@sholland.org>
+Subject: [PATCH] mmc: sunxi-mmc: Fix DMA descriptors allocated above 32 bits
+Date:   Sun, 24 Apr 2022 18:17:50 -0500
+Message-Id: <20220424231751.32053-1-samuel@sholland.org>
 X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -80,66 +79,34 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-According to the DMA descriptor documentation, the lowest two bits of
-the size field are ignored, so the size must be rounded up to a multiple
-of 4 bytes. Furthermore, 0 is not a valid buffer size; setting the size
-to 0 will cause that DMA descriptor to be ignored.
+Newer variants of the MMC controller support a 34-bit physical address
+space by using word addresses instead of byte addresses. However, the
+code truncates the DMA descriptor address to 32 bits before applying the
+shift. This breaks DMA for descriptors allocated above the 32-bit limit.
 
-Together, these restrictions limit the maximum DMA segment size to 4
-less than the power-of-two width of the size field.
-
-Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
+Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
 Signed-off-by: Samuel Holland <samuel@sholland.org>
 ---
 
- drivers/mmc/host/sunxi-mmc.c | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index c62afd212692..4bd5f37b1036 100644
+index c62afd212692..46f9e2923d86 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -214,6 +214,9 @@
- #define SDXC_IDMAC_DES0_CES	BIT(30) /* card error summary */
- #define SDXC_IDMAC_DES0_OWN	BIT(31) /* 1-idma owns it, 0-host owns it */
- 
-+/* Buffer size must be a multiple of 4 bytes. */
-+#define SDXC_IDMAC_SIZE_ALIGN	4
-+
- #define SDXC_CLK_400K		0
- #define SDXC_CLK_25M		1
- #define SDXC_CLK_50M		2
-@@ -361,17 +364,15 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
- {
- 	struct sunxi_idma_des *pdes = (struct sunxi_idma_des *)host->sg_cpu;
- 	dma_addr_t next_desc = host->sg_dma;
--	int i, max_len = (1 << host->cfg->idma_des_size_bits);
-+	int i;
- 
- 	for (i = 0; i < data->sg_len; i++) {
- 		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
- 					     SDXC_IDMAC_DES0_OWN |
- 					     SDXC_IDMAC_DES0_DIC);
- 
--		if (data->sg[i].length == max_len)
--			pdes[i].buf_size = 0; /* 0 == max_len */
--		else
--			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
-+		pdes[i].buf_size = cpu_to_le32(ALIGN(data->sg[i].length,
-+						     SDXC_IDMAC_SIZE_ALIGN));
- 
- 		next_desc += sizeof(struct sunxi_idma_des);
+@@ -377,8 +377,9 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
  		pdes[i].buf_addr_ptr1 =
-@@ -1420,7 +1421,8 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	mmc->max_blk_count	= 8192;
- 	mmc->max_blk_size	= 4096;
- 	mmc->max_segs		= PAGE_SIZE / sizeof(struct sunxi_idma_des);
--	mmc->max_seg_size	= (1 << host->cfg->idma_des_size_bits);
-+	mmc->max_seg_size	= (1 << host->cfg->idma_des_size_bits) -
-+				  SDXC_IDMAC_SIZE_ALIGN;
- 	mmc->max_req_size	= mmc->max_seg_size * mmc->max_segs;
- 	/* 400kHz ~ 52MHz */
- 	mmc->f_min		=   400000;
+ 			cpu_to_le32(sg_dma_address(&data->sg[i]) >>
+ 				    host->cfg->idma_des_shift);
+-		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc >>
+-						    host->cfg->idma_des_shift);
++		pdes[i].buf_addr_ptr2 =
++			cpu_to_le32(next_desc >>
++				    host->cfg->idma_des_shift);
+ 	}
+ 
+ 	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
 -- 
 2.35.1
 
