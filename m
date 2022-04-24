@@ -2,141 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C6C5C433FE
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 18:49:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F06EEC433F5
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 23:06:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237181AbiDXSwC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Apr 2022 14:52:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44386 "EHLO
+        id S237969AbiDXXJs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Apr 2022 19:09:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229929AbiDXSwA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 14:52:00 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 848D813F51;
-        Sun, 24 Apr 2022 11:48:58 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B01276124F;
-        Sun, 24 Apr 2022 18:48:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 12B0CC385B1;
-        Sun, 24 Apr 2022 18:48:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1650826137;
-        bh=ipl3oSa3DODJXFqNROBx1CoqGwslciyjMuC+i+Saf6s=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=BOkM82fII90m6hiFZrsM+S6NoOx/9JSXO645uDox3wouyvV5cDVRWJxz7xq/cB9au
-         LYrBwqxSBkhIKBzBNs0hwtCBHRO1gixAqGnRtxVTd+01UzyFfxHSDne9WN6ttlm+rb
-         jcQBniXrkaKqn2jBmZOb15DeGZFcd9PAC8aU0sErmt9X3VJ12+DgM2/0JBOHnN/nNw
-         G4IIFddQ3lsrPoLfBPfhYi7wy7+MEYhHtnQkavlIidm5fb5N3XrXiQ6swPnyQws0/W
-         CtU43okgiFy2OpjRFiWX3gSYz6BOM2afEEdzeBOnonvAaXEfnmyinRGY3cRVziG/FD
-         TihvS5WssHAGA==
-Received: by mail-wm1-f49.google.com with SMTP id n126-20020a1c2784000000b0038e8af3e788so8339736wmn.1;
-        Sun, 24 Apr 2022 11:48:56 -0700 (PDT)
-X-Gm-Message-State: AOAM532dCbbuPtNLiFWY0oLFZs8XVfrMBbWkSdIYLtsNfBb72iV3o7bU
-        it6YCv5pHi/kxy42HhEx37g9WQ8uhZLw+EPMKaw=
-X-Google-Smtp-Source: ABdhPJy0bXzhrJhOMZ1X8kbnkslFxEyAGa0Ih/9fgvnO3mTuzgN7/0kU+dSPN2u/9dZRAXnrV+Nc5ftINsUw3V0d/rc=
-X-Received: by 2002:a05:600c:4e4a:b0:392:88e1:74a7 with SMTP id
- e10-20020a05600c4e4a00b0039288e174a7mr22771106wmq.174.1650826135238; Sun, 24
- Apr 2022 11:48:55 -0700 (PDT)
+        with ESMTP id S233081AbiDXXJr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 19:09:47 -0400
+Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B342337AAA;
+        Sun, 24 Apr 2022 16:06:45 -0700 (PDT)
+Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
+        by mailout.nyi.internal (Postfix) with ESMTP id 2398C5C00ED;
+        Sun, 24 Apr 2022 19:06:43 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute5.internal (MEProxy); Sun, 24 Apr 2022 19:06:43 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sholland.org; h=
+        cc:cc:content-transfer-encoding:date:date:from:from:in-reply-to
+        :message-id:mime-version:reply-to:sender:subject:subject:to:to;
+         s=fm2; t=1650841603; x=1650928003; bh=3OBKHVbbE8+WTVho7BOdi/9Bu
+        3xsWKZkElXAOTZAnrM=; b=kKwWgTyOPXVEgGX1P6Gl/7kmudauDIGT5B+8ZOWOh
+        ELSRGWF0YCFV9tw9G9BKsAos/Zk0ODicyx2o2wYCfEavKcyeivMzFhwG0WJvnwBN
+        uM/IRWJODjrgu6JH4qVoSbe7bUIQH7nP7Ey5Ig5jht9/2fp0yUymH0jMhxUx+jAS
+        r/HNtHExs6o70MnwCFoT5kgTrWmQRhPietIrfP9at6jnU7+Qd0ghXObQVnjGchwQ
+        U5udDeYBL4CN/Kv/pziu2N6eaekplTU6aBcYohmRQYDUbHMkHNQtgWeHSCCybua5
+        0V/gr7buuBGtt+Wyrd26RT14ZbRQrsjl1DI4o3/A01PPw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-transfer-encoding:date:date
+        :from:from:in-reply-to:message-id:mime-version:reply-to:sender
+        :subject:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender
+        :x-me-sender:x-sasl-enc; s=fm1; t=1650841603; x=1650928003; bh=3
+        OBKHVbbE8+WTVho7BOdi/9Bu3xsWKZkElXAOTZAnrM=; b=JRXOmA2beSZzcjNrF
+        p6Pcn0x8ajbq3XBdIC4LJ5uPE2CdKmZJheKuqF4Rhi21KdgBGoEOF86dtWsXKANN
+        kU7Xyi+XyyrF0Dov4jPlhXnJm9NRzCVx0JtV5KKX+LMTMVM8C2UQCQbucGPIWk/5
+        mIeWl3yuxJcQYCwoFOtT7PL9drTiQOI2t4tl2kiEW7fZkZIPNWelU39Udq2qCmS6
+        Y0MW+LWzjtKt2XD2J6iVzLbm0S7ona3JFyf7fM3oVlGzkkJDX1zz3IIu5WagGMAO
+        v6KeKdnV/nWsYhtvUewPsZvPD2fVrxk5KfkslfyC7miV7U0KG9FO+kdueDhWo2m9
+        bC86Q==
+X-ME-Sender: <xms:AthlYutu5bcxXywKZaOouBuWyn85DftTLy7AbC0kSYoCLEcZmDRKgw>
+    <xme:AthlYjd48cAO5mP00x9b-cGQli6vL8cTzR5Aclm3UndvFC-49-XN2ptdScRMc2qtp
+    pW2bYA9JMJ7CIEeEQ>
+X-ME-Received: <xmr:AthlYpzx5ZQRrBxQiif5HmZHsooFFW5fQAaXX2ZjSWI5l-oD7GKNZ4DzmfyZ-cR10iVmNwO3GwM3PQY66nBeW9yAI0szy4aT_p6YM2bwn4kEgYIqYzyU4U8RCO08dBNICQaewg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedruddtgddukecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefhvfevufffkffoggfgsedtkeertdertddtnecuhfhrohhmpefurghmuhgvlhcu
+    jfholhhlrghnugcuoehsrghmuhgvlhesshhhohhllhgrnhgurdhorhhgqeenucggtffrrg
+    htthgvrhhnpeekveelhfejueelleetvdejvdeffeetgeelheeujeffhefgffefkeehhffh
+    keekgeenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    hsrghmuhgvlhesshhhohhllhgrnhgurdhorhhg
+X-ME-Proxy: <xmx:AthlYpNzrUU2wIU7LDd9B0_KN19l4j30JliBUYgahCqRGvPQQW8m1g>
+    <xmx:AthlYu8LeMIy6xeVywPSyy518ZlBmXfCmUXGwEkNZS4On_svFwKZng>
+    <xmx:AthlYhVrEGs-7bLVbikf6Cr_gFDf871W2JIaX0W7BSPJT_2efb3TkQ>
+    <xmx:A9hlYhVtG_SH9yTsl092Igdr69M2pBebl2i5mD-6t74FP805I-dNbA>
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sun,
+ 24 Apr 2022 19:06:41 -0400 (EDT)
+From:   Samuel Holland <samuel@sholland.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Samuel Holland <samuel@sholland.org>,
+        Arnd Bergmann <arnd@arndb.de>, Chen-Yu Tsai <wens@csie.org>,
+        Chris Ball <chris@printf.net>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Maxime Ripard <maxime@cerno.tech>,
+        Mike Turquette <mturquette@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-sunxi@lists.linux.dev
+Subject: [PATCH] mmc: sunxi-mmc: Correct the maximum segment size
+Date:   Sun, 24 Apr 2022 18:06:39 -0500
+Message-Id: <20220424230640.31735-1-samuel@sholland.org>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
- <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
- <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net> <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
- <20220422234150.GA3442771@roeck-us.net> <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
- <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net> <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
- <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net>
-In-Reply-To: <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Sun, 24 Apr 2022 20:48:39 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
-Message-ID: <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
-Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
-To:     Guenter Roeck <linux@roeck-us.net>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Apr 24, 2022 at 5:28 PM Guenter Roeck <linux@roeck-us.net> wrote:
-> On 4/24/22 01:52, Arnd Bergmann wrote:
-> > On Sun, Apr 24, 2022 at 4:09 AM Guenter Roeck <linux@roeck-us.net> wrote:
-> > into the defconfig file, otherwise the multiplatform target defaults to
-> > an ARMv7 instead of ARMv5 build. For an OMAP15xx as in the SX1,
-> > you also need to enable CONFIG_ARCH_MULTI_V4T.
-> >
-> > This is slightly unfortunate, but I don't see any way to avoid it, and the
-> > modified defconfig will still work fine with older kernel trees.
-> >
->
-> Yes, that works. I changed it in my configuration.
+According to the DMA descriptor documentation, the lowest two bits of
+the size field are ignored, so the size must be rounded up to a multiple
+of 4 bytes. Furthermore, 0 is not a valid buffer size; setting the size
+to 0 will cause that DMA descriptor to be ignored.
 
-Ok, great!. I managed to boot the z2 machine with PCMCIA support
-and it gets around the issue with my patch, correctly detecting the
-CF card.
+Together, these restrictions limit the maximum DMA segment size to 4
+less than the power-of-two width of the size field.
 
-> >>> One thing I keep having to apply myself is this snippet:
-> >>>
-> >>> diff --git a/arch/arm/mm/proc-arm925.S b/arch/arm/mm/proc-arm925.S
-> >>> index 0bfad62ea858..87c695703580 100644
-> >>> --- a/arch/arm/mm/proc-arm925.S
-> >>> +++ b/arch/arm/mm/proc-arm925.S
-> >>> @@ -441,7 +441,6 @@ __arm925_setup:
-> >>>
-> >>>    #ifdef CONFIG_CPU_DCACHE_WRITETHROUGH
-> >>>           mov     r0, #4                          @ disable write-back
-> >>> on caches explicitly
-> >>> -       mcr     p15, 7, r0, c15, c0, 0
-> >>>    #endif
-> >>
-> >> it does not have CONFIG_CPU_DCACHE_WRITETHROUGH enabled.
-> >
-> > Maybe it was disabled explicitly for the sx1_defconfig because of this
-> > bug. I would think that this is required for actual sx1 hardware because the
-> > option is default-enabled for ARM925T, and that CPU core is exclusively
-> > used in OMAP15xx.
-> >
->
-> That looks like a bug in qemu. ARM925T instruction support is limited to V4T
-> instructions. qemu doesn't have explicit 5T support. It is either V4T
-> or V5.
+Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
+Signed-off-by: Samuel Holland <samuel@sholland.org>
+---
 
-I'm not entirely sure what instructions the CPU supports, but Linux
-treats it as ARMv4T as well, and qemu supports some of the 925t
-specific instructions as "ti925t" in target/arm/cpu_tcg.c, it just seems
-it's missing some others.
+ drivers/mmc/host/sunxi-mmc.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
-      Arnd
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index c62afd212692..4bd5f37b1036 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -214,6 +214,9 @@
+ #define SDXC_IDMAC_DES0_CES	BIT(30) /* card error summary */
+ #define SDXC_IDMAC_DES0_OWN	BIT(31) /* 1-idma owns it, 0-host owns it */
+ 
++/* Buffer size must be a multiple of 4 bytes. */
++#define SDXC_IDMAC_SIZE_ALIGN	4
++
+ #define SDXC_CLK_400K		0
+ #define SDXC_CLK_25M		1
+ #define SDXC_CLK_50M		2
+@@ -361,17 +364,15 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+ {
+ 	struct sunxi_idma_des *pdes = (struct sunxi_idma_des *)host->sg_cpu;
+ 	dma_addr_t next_desc = host->sg_dma;
+-	int i, max_len = (1 << host->cfg->idma_des_size_bits);
++	int i;
+ 
+ 	for (i = 0; i < data->sg_len; i++) {
+ 		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
+ 					     SDXC_IDMAC_DES0_OWN |
+ 					     SDXC_IDMAC_DES0_DIC);
+ 
+-		if (data->sg[i].length == max_len)
+-			pdes[i].buf_size = 0; /* 0 == max_len */
+-		else
+-			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
++		pdes[i].buf_size = cpu_to_le32(ALIGN(data->sg[i].length,
++						     SDXC_IDMAC_SIZE_ALIGN));
+ 
+ 		next_desc += sizeof(struct sunxi_idma_des);
+ 		pdes[i].buf_addr_ptr1 =
+@@ -1420,7 +1421,8 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	mmc->max_blk_count	= 8192;
+ 	mmc->max_blk_size	= 4096;
+ 	mmc->max_segs		= PAGE_SIZE / sizeof(struct sunxi_idma_des);
+-	mmc->max_seg_size	= (1 << host->cfg->idma_des_size_bits);
++	mmc->max_seg_size	= (1 << host->cfg->idma_des_size_bits) -
++				  SDXC_IDMAC_SIZE_ALIGN;
+ 	mmc->max_req_size	= mmc->max_seg_size * mmc->max_segs;
+ 	/* 400kHz ~ 52MHz */
+ 	mmc->f_min		=   400000;
+-- 
+2.35.1
+
