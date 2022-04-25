@@ -2,113 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EFBFC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 15:38:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 062BDC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 16:01:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242926AbiDYPlp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 11:41:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55102 "EHLO
+        id S237163AbiDYQEV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 12:04:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239227AbiDYPlp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 11:41:45 -0400
-Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F21A444A17;
-        Mon, 25 Apr 2022 08:38:40 -0700 (PDT)
-Received: by mail-ed1-x52a.google.com with SMTP id z99so18897591ede.5;
-        Mon, 25 Apr 2022 08:38:40 -0700 (PDT)
+        with ESMTP id S243149AbiDYQEU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 12:04:20 -0400
+Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4B01E012;
+        Mon, 25 Apr 2022 09:01:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=lyKb4FdguiCq+rrS9QTQp8nb4hp+SYmLFGLR3Wa4zP0=;
-        b=oR0hgVe+fDdxZD9+CK6avbwwxst9IxTbsMtLq6aW8nl049044HLXTgVi9nHCY+Qc5n
-         GMmxTLe9j6AsomYiIspYq9X9YCBjYb3QrCgO8e75oi5Ip2iR02r/0xDDKIkN8H1V6398
-         DH6oUE+7acEJ3s3LcKhnf8heFGPMFI6NahiyzttiY/ZuPZH/iQpUsjjgiZ72ISHVHT2z
-         2KB4ViwjkhWkcWf4b6u6ZOACe4oj+ACgcDAqUtvRFigC8GlOAdb8EKLWIFqsR7uj3FgR
-         CfhJl9XUC0NooRA5BFTahfsDuLxzdbTtqP56TE5L6rOke5C+YgB+2Mi4TOTlVYB2TmN7
-         BiMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=lyKb4FdguiCq+rrS9QTQp8nb4hp+SYmLFGLR3Wa4zP0=;
-        b=GBTYKmbqkeGLzq3wFKY/CMyvV7QxKtKR5bD+arH4cYqF4BeE/dFaaf5aEGIR4TwtZN
-         rm+tbsdfctJ5SA43z7fIcfIsNBABGv8jtH457FcvrZvC2t5X+VGcy7PSt0LRrVXydX4w
-         QBrunsuARKjiDk926aYpEYpIJ0sMi3iAARPO+Mjn9dXSw1iULXAhZxHhb+giNmsgvx0h
-         I3lDkJrgXk5DAs+Fdi9juTHAkWlo4Oz0ureTAlgi/N0u99V0oCcGWQVev8U7h5vyFUsV
-         oferHz6cwmJUyns6yKIzsoMhm3/OhZ4u9VbU4GDc7G3r6B0vzhf4OOvGfw2LSm4z5JFJ
-         MGqA==
-X-Gm-Message-State: AOAM531+TUjW1FgYyskCTcm4Eklbdmlxz7nKJ2MfjHTX+6CXAtgZWLo8
-        d+qkOfpi6y04aUge2eXDCIA=
-X-Google-Smtp-Source: ABdhPJy7/i2EjP7Cft8S7OWZdF41cMgkZwTrPEfilPCAN8PeG/6lORkVjz6ueYqKFCMOyADTntHYyA==
-X-Received: by 2002:a05:6402:1e93:b0:424:1b50:688d with SMTP id f19-20020a0564021e9300b004241b50688dmr19810193edf.405.1650901119465;
-        Mon, 25 Apr 2022 08:38:39 -0700 (PDT)
-Received: from kista.localnet (cpe-86-58-32-107.static.triera.net. [86.58.32.107])
-        by smtp.gmail.com with ESMTPSA id e22-20020a170906505600b006da7d71f25csm3747575ejk.41.2022.04.25.08.38.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Apr 2022 08:38:39 -0700 (PDT)
-From:   Jernej =?utf-8?B?xaBrcmFiZWM=?= <jernej.skrabec@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Samuel Holland <samuel@sholland.org>
-Cc:     Samuel Holland <samuel@sholland.org>,
-        Andre Przywara <andre.przywara@arm.com>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Maxime Ripard <maxime@cerno.tech>,
-        Yangtao Li <frank@allwinnertech.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-sunxi@lists.linux.dev
-Subject: Re: [PATCH] mmc: sunxi-mmc: Fix DMA descriptors allocated above 32 bits
-Date:   Mon, 25 Apr 2022 17:38:37 +0200
-Message-ID: <7372337.EvYhyI6sBW@kista>
-In-Reply-To: <20220424231751.32053-1-samuel@sholland.org>
-References: <20220424231751.32053-1-samuel@sholland.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1650902476; x=1682438476;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references;
+  bh=hwdEvu1QeW6CN8XD9JWW4BQQtJcBisHi9+un6ZV5BI0=;
+  b=P1bPH9Q7wn7EKlVdBDuf7zQjrSOPddQw84XVtbFwlctSVAVuOnHfE9M5
+   uSgXTHibesRWr9wELP627x5V9b617ipqZOJv/gFrlmcVSiQZmY7h7o2FT
+   NF3naBCKL4AYkhIDFderb1UjerQREruKBQ2vMwgw/wEIyA79w04TDulv8
+   A=;
+Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
+  by alexa-out.qualcomm.com with ESMTP; 25 Apr 2022 09:01:14 -0700
+X-QCInternal: smtphost
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 25 Apr 2022 09:01:12 -0700
+X-QCInternal: smtphost
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg02-blr.qualcomm.com with ESMTP; 25 Apr 2022 21:30:52 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id 05F6BB8E; Mon, 25 Apr 2022 21:30:50 +0530 (IST)
+From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        wsa+renesas@sang-engineering.com, yoshihiro.shimoda.uh@renesas.com,
+        linus.walleij@linaro.org, digetx@gmail.com,
+        briannorris@chromium.org, quic_riteshh@quicinc.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        quic_asutoshd@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        Liangliang Lu <quic_luliang@quicinc.com>,
+        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
+Subject: [PATCH V5 4/5] mmc: debugfs: Add debug fs error state entry for mmc driver
+Date:   Mon, 25 Apr 2022 21:30:42 +0530
+Message-Id: <1650902443-26357-5-git-send-email-quic_c_sbhanu@quicinc.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com>
+References: <1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dne ponedeljek, 25. april 2022 ob 01:17:50 CEST je Samuel Holland napisal(a):
-> Newer variants of the MMC controller support a 34-bit physical address
-> space by using word addresses instead of byte addresses. However, the
-> code truncates the DMA descriptor address to 32 bits before applying the
-> shift. This breaks DMA for descriptors allocated above the 32-bit limit.
-> 
-> Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
-> Signed-off-by: Samuel Holland <samuel@sholland.org>
+Add debug fs entry error state to query eMMC and SD card errors statistics.
+If any errors occurred in eMMC and SD card driver level then
+err_state value will be set to 1.
 
-Reviewed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
+Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
+Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
+Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+---
+ drivers/mmc/core/debugfs.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
-Best regards,
-Jernej
-
-> ---
-> 
->  drivers/mmc/host/sunxi-mmc.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index c62afd212692..46f9e2923d86 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -377,8 +377,9 @@ static void sunxi_mmc_init_idma_des(struct 
-sunxi_mmc_host *host,
->  		pdes[i].buf_addr_ptr1 =
->  			cpu_to_le32(sg_dma_address(&data->sg[i]) >>
->  				    host->cfg->idma_des_shift);
-> -		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc >>
-> -						    host-
->cfg->idma_des_shift);
-> +		pdes[i].buf_addr_ptr2 =
-> +			cpu_to_le32(next_desc >>
-> +				    host->cfg->idma_des_shift);
->  	}
->  
->  	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
-> -- 
-> 2.35.1
-> 
-> 
-
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 6aa5a60..2f5b63f 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -222,6 +222,29 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ 
+ DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+ 	"%llu\n");
++static int mmc_err_state_get(void *data, u64 *val)
++{
++	struct mmc_host *host = data;
++
++	if (!host)
++		return -EINVAL;
++
++	*val = host->err_stats[MMC_ERR_REQ_TIMEOUT] ||
++	       host->err_stats[MMC_ERR_ADMA] ||
++	       host->err_stats[MMC_ERR_CTRL_TIMEOUT] ||
++	       host->err_stats[MMC_ERR_UNEXPECTED_IRQ] ||
++	       host->err_stats[MMC_ERR_CMDQ_RED] ||
++	       host->err_stats[MMC_ERR_CMDQ_GCE] ||
++	       host->err_stats[MMC_ERR_CMDQ_ICCE] ||
++	       host->err_stats[MMC_ERR_DAT_TIMEOUT] ||
++	       host->err_stats[MMC_ERR_DAT_CRC] ||
++	       host->err_stats[MMC_ERR_CMD_CRC] ||
++	       host->err_stats[MMC_ERR_CMD_TIMEOUT];
++
++	return 0;
++}
++
++DEFINE_SIMPLE_ATTRIBUTE(mmc_err_state, mmc_err_state_get, NULL, "%llu\n");
+ 
+ static int mmc_err_stats_show(struct seq_file *file, void *data)
+ {
+@@ -289,6 +312,8 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
+ 				   &mmc_clock_fops);
+ 
++	debugfs_create_file("err_state", 0600, root, host,
++			    &mmc_err_state);
+ 	debugfs_create_file("err_stats", 0600, root, host,
+ 			    &mmc_err_stats_fops);
+ 
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+of Code Aurora Forum, hosted by The Linux Foundation
 
