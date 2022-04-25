@@ -2,125 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 900B9C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 00:53:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57DBBC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 06:19:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240051AbiDYA4g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Apr 2022 20:56:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55826 "EHLO
+        id S240672AbiDYGWd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 02:22:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40852 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240049AbiDYA4g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 20:56:36 -0400
-Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 444492AE33;
-        Sun, 24 Apr 2022 17:53:34 -0700 (PDT)
-Received: by mail-yb1-xb2a.google.com with SMTP id m128so6450814ybm.5;
-        Sun, 24 Apr 2022 17:53:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=KZQ3FMYUd+p/inKfEtNk7azbI0rl4BBbugTy82Pulbk=;
-        b=mbKKUDoML1MgFijTXSdszOCRfm204iehbQFamK9YL4OyLefmNETkuWOTg/55yhQZlz
-         MOXMOrlZT7yx0AgHeBMIlQbduznxpKMqwxqmgvRzZetaFQHTAPPoo/pZWUrGabIepYbj
-         JR0lGeXqIslccK99hoTJR3G5DVavQ6KkAd46lsjJInfLmzO6+Nb/pl41I07ixAnWMjtu
-         z0J32fG2tMN9h7rP7mvXPAqxLf4+BRcgSvBqmeK/zxynEiOt8QzAriq5EP5+CZn22PxS
-         hhgnDqpPdVJC2bmeKKk2qJc/QoY/LXU7f8cOzZrS8/CdnBPn+hKPUnt0a4xDS9gIaJCg
-         TG3g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=KZQ3FMYUd+p/inKfEtNk7azbI0rl4BBbugTy82Pulbk=;
-        b=APEwmD9HKRw4UJqRb4yNKqRynHVTOWEPy324MdnGVQGv7ldJFSpCMTrr7XExOz3Eke
-         U3GdVecbjrwob6WE7Saw03NlLKmoK5aTaydMTaDsee+NG1wVyPHL7Qm4G0ZWJ3geXl07
-         7tzSc/65EkNQUdv1UA5ePVfU2OWLPjJmzXQZg6xUVF9ahmaQSRrH4uJ0mj154KN1Tg+t
-         Iq4ECC4sAtc5ZCOEOnUAaifF0YcN96CWA0VAWsnpNROGJaVuUIs8k8tKAjkGLWMk3Lqq
-         6KhLqcu40RzJlcibqCzxefC615ZHWKT1aLPbuwrD26FztIdUR4GgpAK8n922PAVwSlyw
-         D2eA==
-X-Gm-Message-State: AOAM530AHadXLUU4TbPedatbV1sbUhtfMXIgcTYoX9Lh6u1E7R4XpP8u
-        Ng2eNGtEWL1LNERExviwJZuawOy8JdVLOOmOzyE=
-X-Google-Smtp-Source: ABdhPJw9e1BG4zkQJcj7cJbfdiKChlhybqzcCD3J0heWIWKkippV6yvT97DgC67kxkdfxYrYsFP+8++rsK102W9Yy3k=
-X-Received: by 2002:a25:3a06:0:b0:641:cbcd:73b2 with SMTP id
- h6-20020a253a06000000b00641cbcd73b2mr14691974yba.64.1650848013511; Sun, 24
- Apr 2022 17:53:33 -0700 (PDT)
+        with ESMTP id S236974AbiDYGWY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 02:22:24 -0400
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2DB8B2DCA;
+        Sun, 24 Apr 2022 23:19:15 -0700 (PDT)
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 23P6J6iU111789;
+        Mon, 25 Apr 2022 01:19:06 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1650867546;
+        bh=F7ADQn60kfgRVAW03faSTjsksmw9WV/uDuMtxixSUJ4=;
+        h=Date:Subject:To:CC:References:From:In-Reply-To;
+        b=dIEQFQ8lJ3L0w3zKvk6cVqq/wF20GbK8Z3T8/TL1z3ZFjjxGszl2mWGCMBQZrCewb
+         xdgaeMoOV6BpI+CaR534CkyEcCNtB34Ne8I0LRQ1bkCm+qokHSq7uAG3OFjLEfHNS0
+         KpncBRyNnxeu/JFgZb8Q8H7ZrsnMk6u9DM7AT1X0=
+Received: from DLEE102.ent.ti.com (dlee102.ent.ti.com [157.170.170.32])
+        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 23P6J6AF088268
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 25 Apr 2022 01:19:06 -0500
+Received: from DLEE111.ent.ti.com (157.170.170.22) by DLEE102.ent.ti.com
+ (157.170.170.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Mon, 25
+ Apr 2022 01:19:06 -0500
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE111.ent.ti.com
+ (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
+ Frontend Transport; Mon, 25 Apr 2022 01:19:06 -0500
+Received: from [10.24.69.236] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 23P6J2Uu069099;
+        Mon, 25 Apr 2022 01:19:03 -0500
+Message-ID: <9da52dd4-9162-3a23-05e6-b2b524ef4d4d@ti.com>
+Date:   Mon, 25 Apr 2022 11:49:02 +0530
 MIME-Version: 1.0
-References: <20220414094945.457500-1-benchuanggli@gmail.com> <CAPDyKFo2YhqgEStGcQb0ZWcuhrUcGeamgHk1Hov6_DzS=TNe3A@mail.gmail.com>
-In-Reply-To: <CAPDyKFo2YhqgEStGcQb0ZWcuhrUcGeamgHk1Hov6_DzS=TNe3A@mail.gmail.com>
-From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Mon, 25 Apr 2022 08:53:22 +0800
-Message-ID: <CACT4zj9rRmwPBTg6GE1qd_F_sUuaJeQbB4U3K0h24jWKe8oRWQ@mail.gmail.com>
-Subject: Re: [RESEND, PATCH] mmc: sdhci-pci-gli: A workaround to allow GL9755
- to enter ASPM L1.2
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-am654: Add flag to force
+ setting to TESTCD bit
+Content-Language: en-US
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        SeanHY.Chen@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        greg.tu@genesyslogic.com.tw,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
+CC:     Vignesh Raghavendra <vigneshr@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20220418102040.4993-1-a-govindraju@ti.com>
+ <20220418102040.4993-2-a-govindraju@ti.com>
+ <CAPDyKFrHi3-7FMfwRP5rtjSbTOnw73FvU5ZAz=eC8-XqQZYpsg@mail.gmail.com>
+From:   Aswath Govindraju <a-govindraju@ti.com>
+In-Reply-To: <CAPDyKFrHi3-7FMfwRP5rtjSbTOnw73FvU5ZAz=eC8-XqQZYpsg@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Apr 21, 2022 at 9:55 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Thu, 14 Apr 2022 at 11:49, Ben Chuang <benchuanggli@gmail.com> wrote:
-> >
-> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >
-> > When GL9755 enters ASPM L1 sub-states, it will stay at L1.1 and will not
-> > enter L1.2. The workaround is to toggle PM state to allow GL9755 to enter
-> > ASPM L1.2.
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->
-> This didn't apply cleanly, I fixed it up this time. So, applied for
-> next, thanks!
->
+Hi Uffe,
+
+On 21/04/22 17:40, Ulf Hansson wrote:
+> On Mon, 18 Apr 2022 at 12:21, Aswath Govindraju <a-govindraju@ti.com> wrote:
+>>
+>> The ARASAN MMC controller on Keystone 3 class of devices needs the SDCD
+>> line to be connected for proper functioning. Similar to the issue pointed
+>> out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
+>> sdhci-of-arasan: Set controller to test mode when no CD bit").
+>>
+>> In cases where SDCD line is not connected, driver support has been added to
+>> force the controller into test mode and set the TESTCD bit. In order to
+>> implement this quirk the driver uses "ti,fails-without-test-cd" flag from
+>> the device tree node. Therefore, update the bindings to document the above.
+> 
+> Would you mind rephrasing this a bit. DT bindings is about describing
+> the HW, not about what the software should do.
+> 
+
+Sure, will rephrase it in the respin to remove the aspects that indicate
+the sw support added.
+
+> Otherwise, this looks good to me.
+> 
+
+Thank you for the review.
+
+Regards,
+Aswath
+
 > Kind regards
 > Uffe
-
-I forgot to rebase to v5.18rc. I will pay more attention next time. Thank you.
-
-Best regards,
-Ben
-
->
->
-> > ---
-> >  drivers/mmc/host/sdhci-pci-gli.c | 10 ++++++++++
-> >  1 file changed, 10 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> > index 97035d77c18c..52230857388f 100644
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -137,6 +137,9 @@
-> >  #define PCI_GLI_9755_SerDes  0x70
-> >  #define PCI_GLI_9755_SCP_DIS   BIT(19)
-> >
-> > +#define PCI_GLI_9755_PM_CTRL     0xFC
-> > +#define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
-> > +
-> >  #define GLI_MAX_TUNING_LOOP 40
-> >
-> >  /* Genesys Logic chipset */
-> > @@ -597,6 +600,13 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
-> >                             GLI_9755_CFG2_L1DLY_VALUE);
-> >         pci_write_config_dword(pdev, PCI_GLI_9755_CFG2, value);
-> >
-> > +       /* toggle PM state to allow GL9755 to enter ASPM L1.2 */
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_PM_CTRL, &value);
-> > +       value |= PCI_GLI_9755_PM_STATE;
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
-> > +       value &= ~PCI_GLI_9755_PM_STATE;
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
-> > +
-> >         gl9755_wt_off(pdev);
-> >  }
-> >
-> > --
-> > 2.35.1
-> >
+> 
+>>
+>> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+>> ---
+>>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 7 +++++++
+>>  1 file changed, 7 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+>> index 0566493c4def..0ab07759b472 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+>> @@ -186,6 +186,13 @@ properties:
+>>      description: Clock Delay Buffer Select
+>>      $ref: "/schemas/types.yaml#/definitions/uint32"
+>>
+>> +  ti,fails-without-test-cd:
+>> +    $ref: /schemas/types.yaml#/definitions/flag
+>> +    description:
+>> +      When present, indicates that the CD line is not connected
+>> +      and the controller is required to be forced into Test mode
+>> +      to set the TESTCD bit.
+>> +
+>>  required:
+>>    - compatible
+>>    - reg
+>> --
+>> 2.17.1
+>>
