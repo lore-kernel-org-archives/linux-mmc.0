@@ -2,128 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57DBBC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 06:19:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F740C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 06:31:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240672AbiDYGWd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 02:22:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40852 "EHLO
+        id S234961AbiDYGeo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 02:34:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236974AbiDYGWY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 02:22:24 -0400
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2DB8B2DCA;
-        Sun, 24 Apr 2022 23:19:15 -0700 (PDT)
-Received: from fllv0035.itg.ti.com ([10.64.41.0])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 23P6J6iU111789;
-        Mon, 25 Apr 2022 01:19:06 -0500
+        with ESMTP id S234073AbiDYGej (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 02:34:39 -0400
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 857E7636C;
+        Sun, 24 Apr 2022 23:31:36 -0700 (PDT)
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 23P6VRiH115027;
+        Mon, 25 Apr 2022 01:31:27 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1650867546;
-        bh=F7ADQn60kfgRVAW03faSTjsksmw9WV/uDuMtxixSUJ4=;
-        h=Date:Subject:To:CC:References:From:In-Reply-To;
-        b=dIEQFQ8lJ3L0w3zKvk6cVqq/wF20GbK8Z3T8/TL1z3ZFjjxGszl2mWGCMBQZrCewb
-         xdgaeMoOV6BpI+CaR534CkyEcCNtB34Ne8I0LRQ1bkCm+qokHSq7uAG3OFjLEfHNS0
-         KpncBRyNnxeu/JFgZb8Q8H7ZrsnMk6u9DM7AT1X0=
-Received: from DLEE102.ent.ti.com (dlee102.ent.ti.com [157.170.170.32])
-        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 23P6J6AF088268
+        s=ti-com-17Q1; t=1650868287;
+        bh=4QBJHNetsb9nr0Gngo4I1V9MZEueDFepjXgelnO7xyo=;
+        h=From:To:CC:Subject:Date;
+        b=u210ydZQmbE25kWcIUlWzhuZwvHsp7BTLOdn01GIVOQndwi7SWD6Ri+uwMe3/ka6G
+         A9sldnJAV5Z5m5F9ELSzAjRr/jWzIisQvE6L9TLsRc5Y7p58cqnvsu8bQPGvL6u58H
+         xhlHY9zvLW1CtVSrJGnsSsnsSlbjGYPePKAKZVak=
+Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 23P6VRJY125619
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 25 Apr 2022 01:19:06 -0500
-Received: from DLEE111.ent.ti.com (157.170.170.22) by DLEE102.ent.ti.com
- (157.170.170.32) with Microsoft SMTP Server (version=TLS1_2,
+        Mon, 25 Apr 2022 01:31:27 -0500
+Received: from DLEE115.ent.ti.com (157.170.170.26) by DLEE112.ent.ti.com
+ (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Mon, 25
- Apr 2022 01:19:06 -0500
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE111.ent.ti.com
- (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
+ Apr 2022 01:31:26 -0500
+Received: from lelv0327.itg.ti.com (10.180.67.183) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
- Frontend Transport; Mon, 25 Apr 2022 01:19:06 -0500
-Received: from [10.24.69.236] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 23P6J2Uu069099;
-        Mon, 25 Apr 2022 01:19:03 -0500
-Message-ID: <9da52dd4-9162-3a23-05e6-b2b524ef4d4d@ti.com>
-Date:   Mon, 25 Apr 2022 11:49:02 +0530
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-am654: Add flag to force
- setting to TESTCD bit
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
+ Frontend Transport; Mon, 25 Apr 2022 01:31:26 -0500
+Received: from gsaswath-HP-ProBook-640-G5.dal.design.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id 23P6VNNN079479;
+        Mon, 25 Apr 2022 01:31:24 -0500
+From:   Aswath Govindraju <a-govindraju@ti.com>
 CC:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
+        Aswath Govindraju <a-govindraju@ti.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>
-References: <20220418102040.4993-1-a-govindraju@ti.com>
- <20220418102040.4993-2-a-govindraju@ti.com>
- <CAPDyKFrHi3-7FMfwRP5rtjSbTOnw73FvU5ZAz=eC8-XqQZYpsg@mail.gmail.com>
-From:   Aswath Govindraju <a-govindraju@ti.com>
-In-Reply-To: <CAPDyKFrHi3-7FMfwRP5rtjSbTOnw73FvU5ZAz=eC8-XqQZYpsg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v2 0/2] MMC: Add quirk to set the TESTCD bit
+Date:   Mon, 25 Apr 2022 12:01:18 +0530
+Message-ID: <20220425063120.10135-1-a-govindraju@ti.com>
+X-Mailer: git-send-email 2.17.1
+MIME-Version: 1.0
+Content-Type: text/plain
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uffe,
+The following series of patches add support for setting TESTCD bit
+when SDCD line is connected to the controller, in the sdhci_am654.c
+driver.
 
-On 21/04/22 17:40, Ulf Hansson wrote:
-> On Mon, 18 Apr 2022 at 12:21, Aswath Govindraju <a-govindraju@ti.com> wrote:
->>
->> The ARASAN MMC controller on Keystone 3 class of devices needs the SDCD
->> line to be connected for proper functioning. Similar to the issue pointed
->> out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
->> sdhci-of-arasan: Set controller to test mode when no CD bit").
->>
->> In cases where SDCD line is not connected, driver support has been added to
->> force the controller into test mode and set the TESTCD bit. In order to
->> implement this quirk the driver uses "ti,fails-without-test-cd" flag from
->> the device tree node. Therefore, update the bindings to document the above.
-> 
-> Would you mind rephrasing this a bit. DT bindings is about describing
-> the HW, not about what the software should do.
-> 
+Changes since v1:
+- Rephrased the commit message in patch 1 to decribe the hardware
+  and not the sw support
+- Made the reset function static in patch 2
 
-Sure, will rephrase it in the respin to remove the aspects that indicate
-the sw support added.
+Aswath Govindraju (1):
+  dt-bindings: mmc: sdhci-am654: Add flag to force setting of TESTCD bit
 
-> Otherwise, this looks good to me.
-> 
+Vignesh Raghavendra (1):
+  drivers: mmc: sdhci_am654: Add the quirk to set TESTCD bit
 
-Thank you for the review.
+ .../devicetree/bindings/mmc/sdhci-am654.yaml  |  7 ++++++
+ drivers/mmc/host/sdhci_am654.c                | 23 ++++++++++++++++++-
+ 2 files changed, 29 insertions(+), 1 deletion(-)
 
-Regards,
-Aswath
+-- 
+2.17.1
 
-> Kind regards
-> Uffe
-> 
->>
->> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 7 +++++++
->>  1 file changed, 7 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
->> index 0566493c4def..0ab07759b472 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
->> @@ -186,6 +186,13 @@ properties:
->>      description: Clock Delay Buffer Select
->>      $ref: "/schemas/types.yaml#/definitions/uint32"
->>
->> +  ti,fails-without-test-cd:
->> +    $ref: /schemas/types.yaml#/definitions/flag
->> +    description:
->> +      When present, indicates that the CD line is not connected
->> +      and the controller is required to be forced into Test mode
->> +      to set the TESTCD bit.
->> +
->>  required:
->>    - compatible
->>    - reg
->> --
->> 2.17.1
->>
