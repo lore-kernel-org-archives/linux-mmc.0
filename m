@@ -2,163 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C06DC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 19:44:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43043C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 20:02:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245044AbiDYTrK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 15:47:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44992 "EHLO
+        id S245084AbiDYUFI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 16:05:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51882 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245038AbiDYTrJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 15:47:09 -0400
-Received: from mail-oo1-f48.google.com (mail-oo1-f48.google.com [209.85.161.48])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40FB62A71A;
-        Mon, 25 Apr 2022 12:44:04 -0700 (PDT)
-Received: by mail-oo1-f48.google.com with SMTP id g30-20020a4a251e000000b0033a39d8340aso2983475ooa.5;
-        Mon, 25 Apr 2022 12:44:04 -0700 (PDT)
+        with ESMTP id S245074AbiDYUFH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 16:05:07 -0400
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77AD6B0A52;
+        Mon, 25 Apr 2022 13:02:02 -0700 (PDT)
+Received: by mail-ej1-x630.google.com with SMTP id g6so8938530ejw.1;
+        Mon, 25 Apr 2022 13:02:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :content-transfer-encoding:user-agent:mime-version;
+        bh=Fmjs2qdPk3eUOBZHdhQG4JdB4/lCcC7aZeX3SYv+IQM=;
+        b=iSuKs2xrmd8iz5XESYCu2x1iYM3Rw3bmLCrVrR87JboXSJwZMsBDYmnrbC55MqXllw
+         LzlQP/jE//VPBJ8y3DG3wd7LUWZAoyad8tnokzf4/ehHqzqr5WRalsOH003OTr5nbkdZ
+         NWul1h1DZxEs+nkpe7yIKVMAXCBiFIJk5dVQLERACRWRpSmIHebRc6psouBc5QTUin6a
+         g4rulWV34hhDjvnQxmIH1mAfDkaEVKbLV+xRWAjtodbtdkeaucXKkneh/edxHLdShaQD
+         rx9ArWveSZ3aNJQhLePuJg5Yoy/TKqkwVkz9JjGWoH8HyWcjc/nPp1QclkSSlzk99xit
+         cfkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=3MgO8upGLQIT7MA1c1wZtenkS69Cr8OOjspSzkPpmss=;
-        b=VdK/ikbGzF8vyJbzdErm17h3UVQcKhQ4ouDT0f/q4y73e1YKtOE4LoE0LTsM3N5BuK
-         0tRsUDymTkqEdFAJWAEPtgxgPwXbhoCaVJSTLQFSVCQ5Cv+U0tFaCg08zHYu8Hwi25Xh
-         xXq8WLRl+Xb7MMB3L8OJmCdM9X0mDIj6dO/JrQT0wEvU7N9xH69EcnyFb0xZ4kO8rkYQ
-         +AVPP20N4h831POP1s+hPFDZ4MT22B0ofLuqVF33TKkC3D6syPen+vfDxpPxPJ1tEb16
-         JuR+oMd/u+R8LCdv8J/0+pwhX9OHoOfVBPJIr+UhWntZddkm4E5qhpaMOTQBVYJrjT47
-         ELtQ==
-X-Gm-Message-State: AOAM531K/0LdO5/HmQ/4M/bRWx7oFg4ZmBYfCtn55LIvCA1JYt+B19B2
-        1WshILB86MNfNhdrJGWceQ==
-X-Google-Smtp-Source: ABdhPJwf4Xyx+/VQ5kGcMOPdAcQfh7fvYOnVekrEwwDVyJaLDX2aks6e0Ho5r/lUEmXwJDUSbQPsMg==
-X-Received: by 2002:a4a:dfd7:0:b0:35e:499c:7bb5 with SMTP id p23-20020a4adfd7000000b0035e499c7bb5mr4695942ood.36.1650915843421;
-        Mon, 25 Apr 2022 12:44:03 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id f63-20020a9d2c45000000b005e973e22081sm4115852otb.37.2022.04.25.12.44.02
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:content-transfer-encoding:user-agent:mime-version;
+        bh=Fmjs2qdPk3eUOBZHdhQG4JdB4/lCcC7aZeX3SYv+IQM=;
+        b=E+WlqTkPXg/d8yvOeaofkSxmB2ufzRcW0IfJ/LKNYQNwEq9AfM5POVEoLv4FVMT/0U
+         6Yfze/gi4jlg3IEIKMXCQOXx/Hpb+AqqO9cfLNjnbMmqqR3+xqz2GNA4Ub46kRJCp9b3
+         XFIPKoOsGZQbKoynz9gn3kIFljqw7UyFJxO0Md+lj1RyDj67xbyjsdSvTkr8Oct0iNNP
+         3y/i2J6RoMQuQpR7LXvDBT59k+T3qhNHkeeEWA55HiOQwxLSmDWm+yql9J2OntXHeLMa
+         YUEl5BE1h7WFtrSRqpqKjp+gSDXWIlaQfX4O/LxxDgWIHDsgJLtqVnAwZ3TmwxETkHSB
+         flag==
+X-Gm-Message-State: AOAM530GoAgZBEnGXLkau+T2B7g75h0yPSvA7cBV6rrDxZRWit/cp3E0
+        i9d10wFeOHDAA00TBafx2lcRRRIoC8tYHA==
+X-Google-Smtp-Source: ABdhPJzosQC/YjZvx2sjBZa0vexS/EYotPB9tax638U/Wlv4HVYKILUzHyIDDoAi0uroTYvvAK0btQ==
+X-Received: by 2002:a17:906:c1c1:b0:6ef:7bd7:a508 with SMTP id bw1-20020a170906c1c100b006ef7bd7a508mr17806427ejb.614.1650916920876;
+        Mon, 25 Apr 2022 13:02:00 -0700 (PDT)
+Received: from [192.168.3.2] (p5dd1ed70.dip0.t-ipconnect.de. [93.209.237.112])
+        by smtp.googlemail.com with ESMTPSA id 27-20020a17090600db00b006df6b34d9b8sm3899371eji.211.2022.04.25.13.01.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Apr 2022 12:44:02 -0700 (PDT)
-Received: (nullmailer pid 141172 invoked by uid 1000);
-        Mon, 25 Apr 2022 19:44:01 -0000
-Date:   Mon, 25 Apr 2022 14:44:01 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Sebastian Reichel <sebastian.reichel@collabora.com>
-Cc:     Heiko Stuebner <heiko@sntech.de>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Kever Yang <kever.yang@rock-chips.com>, kernel@collabora.com
-Subject: Re: [PATCHv1 19/19] arm64: dts: rockchip: Add rk3588-evb1 board
-Message-ID: <Ymb6AWcLkUnqsslp@robh.at.kernel.org>
-References: <20220422170920.401914-1-sebastian.reichel@collabora.com>
- <20220422170920.401914-20-sebastian.reichel@collabora.com>
- <46e72600-b96a-03a9-134d-28a0cb4bc078@linaro.org>
+        Mon, 25 Apr 2022 13:01:59 -0700 (PDT)
+Message-ID: <89845bec6c827d7012cda916ee50b16c8eb08755.camel@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: core: Allows to override the timeout value
+ for ioctl() path
+From:   Bean Huo <huobean@gmail.com>
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        beanhuo@micron.com, stable <stable@vger.kernel.org>
+Date:   Mon, 25 Apr 2022 22:01:59 +0200
+In-Reply-To: <CACRpkdahf5QhUJ-vG6Qs7i0VYbSS02zBrQOtN8EVFu9SyHZA1Q@mail.gmail.com>
+References: <20220423221623.1074556-1-huobean@gmail.com>
+         <20220423221623.1074556-3-huobean@gmail.com>
+         <CACRpkdahf5QhUJ-vG6Qs7i0VYbSS02zBrQOtN8EVFu9SyHZA1Q@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+User-Agent: Evolution 3.44.0-1 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <46e72600-b96a-03a9-134d-28a0cb4bc078@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Apr 23, 2022 at 12:09:21PM +0200, Krzysztof Kozlowski wrote:
-> On 22/04/2022 19:09, Sebastian Reichel wrote:
-> > From: Kever Yang <kever.yang@rock-chips.com>
-> > 
-> > Add board file for the RK3588 evaluation board. While the hardware
-> > offers plenty of peripherals and connectivity this basic implementation
-> > just handles things required to successfully boot Linux from eMMC
-> > and connect via UART.
-> > 
-> > Signed-off-by: Kever Yang <kever.yang@rock-chips.com>
-> > [rebase, update commit message, use EVB1 for SoC bringup]
-> > Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
-> > ---
-> >  .../devicetree/bindings/arm/rockchip.yaml     |  5 +++
-> >  arch/arm64/boot/dts/rockchip/Makefile         |  1 +
-> >  .../boot/dts/rockchip/rk3588-evb1-v10.dts     | 34 +++++++++++++++++++
-> >  3 files changed, 40 insertions(+)
-> >  create mode 100644 arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts
-> > 
-> > diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
-> > index eece92f83a2d..b14d0c84c69b 100644
-> > --- a/Documentation/devicetree/bindings/arm/rockchip.yaml
-> > +++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
-> > @@ -664,6 +664,11 @@ properties:
-> >            - const: rockchip,rk3568-bpi-r2pro
-> >            - const: rockchip,rk3568
-> >  
-> > +      - description: Rockchip RK3588 Evaluation board
-> > +        items:
-> > +          - const: rockchip,rk3588-evb1-v10
-> > +          - const: rockchip,rk3588
-> > +
-> >  additionalProperties: true
-> >  
-> >  ...
-> > diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
-> > index 4ae9f35434b8..8a53ab6d37a1 100644
-> > --- a/arch/arm64/boot/dts/rockchip/Makefile
-> > +++ b/arch/arm64/boot/dts/rockchip/Makefile
-> > @@ -61,3 +61,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3566-pinenote-v1.2.dtb
-> >  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3566-quartz64-a.dtb
-> >  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
-> >  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-bpi-r2-pro.dtb
-> > +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3588-evb1-v10.dtb
-> > diff --git a/arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts
-> > new file mode 100644
-> > index 000000000000..68b19acb1550
-> > --- /dev/null
-> > +++ b/arch/arm64/boot/dts/rockchip/rk3588-evb1-v10.dts
-> > @@ -0,0 +1,34 @@
-> > +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-> > +/*
-> > + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
-> > + *
-> > + */
-> > +
-> > +/dts-v1/;
-> > +
-> > +#include "rk3588.dtsi"
-> > +
-> > +/ {
-> > +	model = "Rockchip RK3588 EVB1 V10 Board";
-> > +	compatible = "rockchip,rk3588-evb1-v10", "rockchip,rk3588";
-> > +
-> > +	chosen {
-> > +		stdout-path = "serial2:1500000n8";
-> > +	};
-> > +};
-> > +
-> > +&sdhci {
-> > +	bus-width = <8>;
-> > +	no-sdio;
-> > +	no-sd;
-> > +	non-removable;
-> > +	max-frequency = <200000000>;
-> > +	mmc-hs400-1_8v;
-> > +	mmc-hs400-enhanced-strobe;
-> > +	status = "ok";
-> > +};
-> > +
-> > +&uart2 {
-> > +	status = "ok";
-> 
-> Usually status goes at the end of properties and rockchip sources use
-> "okay" instead of "ok".
+On Sun, 2022-04-24 at 15:29 +0200, Linus Walleij wrote:
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (idata->rpmb || (cm=
+d.flags & MMC_RSP_R1B) =3D=3D
+> > MMC_RSP_R1B) {
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0 /*
+> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 * Ensure RPMB/R1B command has completed by polling
+> > CMD13
+> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 * "Send Status".
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 * Ensure RPMB/R1B command has completed by polling
+> > CMD13 "Send Status". Here we
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0 * allow to override the default timeout value if a
+> > custom timeout is specified.
+> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 */
+> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 err =3D mmc_poll_for_busy(card, MMC_BLK_TIMEOUT_MS,
+> > false,
+> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0 MMC_BUSY_IO);
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0 err =3D mmc_poll_for_busy(card, idata-
+> > >ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS,
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
+=A0=C2=A0 false, MMC_BUSY_IO);
+>=20
+> I suppose it's OK (albeit dubious) that we have a userspace interface
+> setting
+> a hardware-specific thing such as a timeout.
+>=20
+> However: is MMC_BLK_TIMEOUT_MS even reasonable here? If you guys
+> know a better timeout for RPMB operations (from your experience)
+> what about defining MMC_RPMB_TIMEOUT_MS to something more
+> reasonable (and I suppose longer) and use that as fallback instead
+> of MMC_BLK_TIMEOUT_MS?
+>=20
+> This knowledge (that RPMB commands can have long timeouts) is not
+> something that should be hidden in userspace.
+>=20
 
-"okay" is what's documented in the spec and in the schemas, so please 
-fix. 
+Hi Linus,
 
-No need for reviewers to tell you this though, please run 'make 
-dtbs_checks' on the dts file and don't add new warnings.
 
-Rob
+understand what you mean. I must say, it's hard to come up with a
+uniform timeout value that works for all commands but also for all
+vendors. Meanwhile, the MMC_BLK_TIMEOUT_MS here is not only for RPMB
+commands but also for all commands (with R1B responses) issued by the
+ioctl() system call. The current 10s timeout can cover almost 99% of
+the scenarios. There are very few special cases that take more than
+10s.
+
+I think the current solution is the most flexible way, if the customer
+wants to override the kernel default timeout, they know how to initiate
+the correct timeout value in ioctl() based on their specific
+hardware/software system. I don't know how to convince every maintainer
+and reviewer if we don't want to give this permission or want to
+maintain a unified timeout value in the kernel driver. Given that we
+already have eMMC ioctl() support, and we've opened the door to allow
+users to specify specific cmd_timeout_ms in struct mmc_ioc_cmd{},
+please consider my change.
+
+struct mmc_ioc_cmd {
+      ...
+        /*
+         *Override driver-computed timeouts.  Note the difference in
+units!
+         */
+        unsigned int data_timeout_ns;
+        unsigned int cmd_timeout_ms;
+...}
+
+
+
+Kind regards,
+Bean
