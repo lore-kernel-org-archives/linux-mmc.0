@@ -2,38 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 749BCC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 16:01:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E2F2C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 16:01:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243138AbiDYQEV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 12:04:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59760 "EHLO
+        id S243165AbiDYQEX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 12:04:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243147AbiDYQEU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 12:04:20 -0400
+        with ESMTP id S243152AbiDYQEW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 12:04:22 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4EAB101FB;
-        Mon, 25 Apr 2022 09:01:15 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92BADBC94;
+        Mon, 25 Apr 2022 09:01:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1650902476; x=1682438476;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references;
-  bh=BN5wLRGjtLKhwO/YI3QqYiT0K0JR0D0zC9Y19zaVu+w=;
-  b=qFYqaMsPXXNP9Cr44nM7HF05zNr5lMWPp+cWSGN0wbZqUhRV49+KBC2t
-   7h4clUUyZPtJVh5k43U7ezM4pXRuvWx1NekU03LW59skrpOvNwaVUcOrl
-   n0UrbNnY/d8s34wc2A+vKQ/3hMA5bMC/ckLlbdOEt9RuiKYxOGPsEg31n
+  t=1650902478; x=1682438478;
+  h=from:to:cc:subject:date:message-id;
+  bh=x8+BsrF0nyGjYvButLrl2VvdspR3FlxWvFjFP8NJGHA=;
+  b=r9LrlhkBqYCfspSUTRNlAB0WywO3yeic4Q+HZjXlmYAA+q8WrqdNZbHL
+   18JinRbuVr6ZD8lq3rAgmfJD1gHjOiF7pGbz9K0D5sVt18nH4N7GSMYUy
+   vOEyAMpM1XkR3S/bY1fgTf+fw2k42S0S3VT6CT4ZuYjx2utFF3kZUoL+X
    Y=;
 Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
-  by alexa-out.qualcomm.com with ESMTP; 25 Apr 2022 09:01:15 -0700
+  by alexa-out.qualcomm.com with ESMTP; 25 Apr 2022 09:01:18 -0700
 X-QCInternal: smtphost
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 25 Apr 2022 09:01:14 -0700
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 25 Apr 2022 09:01:16 -0700
 X-QCInternal: smtphost
 Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 25 Apr 2022 21:30:51 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 25 Apr 2022 21:30:46 +0530
 Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id A34A0C07; Mon, 25 Apr 2022 21:30:49 +0530 (IST)
+        id 98883B77; Mon, 25 Apr 2022 21:30:45 +0530 (IST)
 From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         wsa+renesas@sang-engineering.com, yoshihiro.shimoda.uh@renesas.com,
@@ -43,103 +42,76 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         quic_asutoshd@quicinc.com, quic_rampraka@quicinc.com,
         quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
         quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Liangliang Lu <quic_luliang@quicinc.com>,
-        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V5 3/5] mmc: debugfs: Add debug fs entry for mmc driver
-Date:   Mon, 25 Apr 2022 21:30:41 +0530
-Message-Id: <1650902443-26357-4-git-send-email-quic_c_sbhanu@quicinc.com>
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V5 0/5] mmc: add error statistics for eMMC and SD card
+Date:   Mon, 25 Apr 2022 21:30:38 +0530
+Message-Id: <1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com>
 X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add debug fs entry to query eMMC and SD card errors statistics
+Changes since V4:
+	- Defined new macro to increment err_stats members when error occured
+	  as suggested by Adrain Hunter.
+	- Called err_stats members increment function after printing the error
+	  as suggested by Adrain Hunter.
+	- Considered INDEX and END_BIT errors same as CRC errors as suggested
+	  by Adrain Hunter.
+	- Removed Null check for host in debug fs functions and Reordered
+	  err_stats declarationas suggested by Adrain Hunter.
+	- Removed err_state variable stuff and updated err_state debug fs entry
+	  based on the err_stats members state as suggested by Adrain Hunter.
 
-Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
-Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
-Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
----
- drivers/mmc/core/debugfs.c | 56 ++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 56 insertions(+)
+Changes since V3:
+	- Dropped error stats feature flag as suggested by Adrain Hunter.
+	- Separated error state related changes in separate patches as
+	  suggested by Adrain Hunter.
+	  [PATCH V4 4/7] : error state debug fs
+	  [PATCH V4 5/7] : error state enable function
+	  [PATCH V4 6/7] : error state enable in error case
+	- Note: we are enabling error state before calling sdhci_dumpregs
+	  we couldn't add the err state in error stats array as err state
+	  is not error type.
+	- Corrected Signed-off-by order as suggested by Bjron Andersson.
+	- Moved error state enable code from sdhci_dumpregs to error
+	  conditions as suggested by Adrain Hunter
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 3fdbc80..6aa5a60 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -223,6 +223,59 @@ static int mmc_clock_opt_set(void *data, u64 val)
- DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
- 	"%llu\n");
- 
-+static int mmc_err_stats_show(struct seq_file *file, void *data)
-+{
-+	struct mmc_host *host = (struct mmc_host *)file->private;
-+	const char *desc[MMC_ERR_MAX] = {
-+		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
-+		[MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
-+		[MMC_ERR_DAT_TIMEOUT] = "Data Timeout Occurred",
-+		[MMC_ERR_DAT_CRC] = "Data CRC Errors Occurred",
-+		[MMC_ERR_AUTO_CMD] = "Auto-Cmd Error Occurred",
-+		[MMC_ERR_ADMA] = "ADMA Error Occurred",
-+		[MMC_ERR_TUNING] = "Tuning Error Occurred",
-+		[MMC_ERR_CMDQ_RED] = "CMDQ RED Errors",
-+		[MMC_ERR_CMDQ_GCE] = "CMDQ GCE Errors",
-+		[MMC_ERR_CMDQ_ICCE] = "CMDQ ICCE Errors",
-+		[MMC_ERR_REQ_TIMEOUT] = "Request Timedout",
-+		[MMC_ERR_CMDQ_REQ_TIMEOUT] = "CMDQ Request Timedout",
-+		[MMC_ERR_ICE_CFG] = "ICE Config Errors",
-+		[MMC_ERR_CTRL_TIMEOUT] = "Controller Timedout errors",
-+		[MMC_ERR_UNEXPECTED_IRQ] = "Unexpected IRQ errors",
-+	};
-+	int i;
-+
-+	for (i = 0; i < MMC_ERR_MAX; i++) {
-+		if (desc[i])
-+			seq_printf(file, "# %s:\t %d\n",
-+					desc[i], host->err_stats[i]);
-+	}
-+
-+	return 0;
-+}
-+
-+static int mmc_err_stats_open(struct inode *inode, struct file *file)
-+{
-+	return single_open(file, mmc_err_stats_show, inode->i_private);
-+}
-+
-+static ssize_t mmc_err_stats_write(struct file *filp, const char __user *ubuf,
-+				   size_t cnt, loff_t *ppos)
-+{
-+	struct mmc_host *host = filp->f_mapping->host->i_private;
-+
-+	pr_debug("%s: Resetting MMC error statistics\n", __func__);
-+	memset(host->err_stats, 0, sizeof(host->err_stats));
-+
-+	return cnt;
-+}
-+
-+static const struct file_operations mmc_err_stats_fops = {
-+	.open	= mmc_err_stats_open,
-+	.read	= seq_read,
-+	.write	= mmc_err_stats_write,
-+};
-+
- void mmc_add_host_debugfs(struct mmc_host *host)
- {
- 	struct dentry *root;
-@@ -236,6 +289,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
- 				   &mmc_clock_fops);
- 
-+	debugfs_create_file("err_stats", 0600, root, host,
-+			    &mmc_err_stats_fops);
-+
- #ifdef CONFIG_FAIL_MMC_REQUEST
- 	if (fail_request)
- 		setup_fault_attr(&fail_default_attr, fail_request);
+Changes since V2:
+	- Removed userspace error stats clear debug fs entry as suggested
+	  by Adrain Hunter.
+	- Split patch into 4 patches
+	  [PATCH V3 1/4] : sdhci driver
+	  [PATCH V3 2/4] : debug fs entries
+	  [PATCH V3 3/4] : core driver
+	  [PATCH V3 4/4] : cqhci driver
+	- Used for loop to print error messages instead of using printf
+	  statements for all error messages as suggested by Adrain Hunter.
+	- Introduced one flag to enable error stats feature, if any other
+	  client wants to use this feature, they need to enable that flag.
+	- Moved reset command timeout error statement to card init flow
+	  as suggested by Adrain Hunter.
+
+Changes since V1:
+	- Removed sysfs entry for eMMC and SD card error statistics and added
+	  debugfs entry as suggested by Adrian Hunter and Ulf Hansson.
+
+Shaik Sajida Bhanu (5):
+  mmc: core: Capture eMMC and SD card errors
+  mmc: sdhci: Capture eMMC and SD card errors
+  mmc: debugfs: Add debug fs entry for mmc driver
+  mmc: debugfs: Add debug fs error state entry for mmc driver
+  mmc: cqhci: Capture eMMC and SD card errors
+
+ drivers/mmc/core/core.c       |  6 ++++
+ drivers/mmc/core/debugfs.c    | 81 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cqhci-core.c |  9 ++++-
+ drivers/mmc/host/sdhci.c      | 54 ++++++++++++++++++++++-------
+ drivers/mmc/host/sdhci.h      |  3 ++
+ include/linux/mmc/host.h      | 26 ++++++++++++++
+ include/linux/mmc/mmc.h       |  6 ++++
+ 7 files changed, 171 insertions(+), 14 deletions(-)
+
 -- 
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
 of Code Aurora Forum, hosted by The Linux Foundation
