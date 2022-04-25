@@ -2,173 +2,175 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C864C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 06:45:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 643CDC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 10:40:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233689AbiDYGsU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 02:48:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50532 "EHLO
+        id S239170AbiDYKnn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 06:43:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48952 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240395AbiDYGsG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 02:48:06 -0400
-Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4711C39828;
-        Sun, 24 Apr 2022 23:44:25 -0700 (PDT)
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 23P6iLUM127426;
-        Mon, 25 Apr 2022 01:44:21 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1650869061;
-        bh=4EJh5D6LdGjk7iMaA1TW14jBbGPHosvUf2mdjD2XwvE=;
-        h=Date:Subject:To:CC:References:From:In-Reply-To;
-        b=ddnDZy9d7LiemyjmU0s/0I+cXgHEFZIVOy0vu+GV+Y6awCLU160SIaoJ6CyZMGUk8
-         fBymruE75vWXCmF0lDUwgVAcIhGcy2k0d3ywjDe4J4N9DCyw1RmH3Dks3AyUSQ7Ib3
-         FXUQFBF2qBSxHpzYf2jA7uGAgPojPU5/ZucDwObk=
-Received: from DLEE113.ent.ti.com (dlee113.ent.ti.com [157.170.170.24])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 23P6iLR5008358
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 25 Apr 2022 01:44:21 -0500
-Received: from DLEE101.ent.ti.com (157.170.170.31) by DLEE113.ent.ti.com
- (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Mon, 25
- Apr 2022 01:44:21 -0500
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE101.ent.ti.com
- (157.170.170.31) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
- Frontend Transport; Mon, 25 Apr 2022 01:44:21 -0500
-Received: from [10.24.69.236] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 23P6iGjR095438;
-        Mon, 25 Apr 2022 01:44:17 -0500
-Message-ID: <7c1cfb06-e759-dcf7-7022-5e15b159b508@ti.com>
-Date:   Mon, 25 Apr 2022 12:14:16 +0530
+        with ESMTP id S240540AbiDYKn1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 06:43:27 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4AE4E1BEA6
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Apr 2022 03:40:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1650883220;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=3Y91YY01N7UrHQaQhke//8ISQGGOkcgPe3+Pz+wp220=;
+        b=a91AdZ5R3mmFPVXYfDS8+B482x8zf7thMir50II1Qvws0HLCro1GD58zN0ChrxI+a31eQM
+        SOP6AzNudTsAWndmii5UT+tSx45fVmFKJLfvhrb+UqiNeMnxZ4Lid2O3cyiR3cvwOWkFAe
+        xnGwbmqIm8XVMhWO7vWCd1nNXmkGwVs=
+Received: from mail-ed1-f69.google.com (mail-ed1-f69.google.com
+ [209.85.208.69]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-50-09KQFt0LPymNdtLTtYpLfA-1; Mon, 25 Apr 2022 06:40:19 -0400
+X-MC-Unique: 09KQFt0LPymNdtLTtYpLfA-1
+Received: by mail-ed1-f69.google.com with SMTP id cz24-20020a0564021cb800b00425dfdd7768so1457825edb.2
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Apr 2022 03:40:18 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=3Y91YY01N7UrHQaQhke//8ISQGGOkcgPe3+Pz+wp220=;
+        b=3nFHNwqvQ5QQS59vrzZ/kJa+ZWf3uo4s6tyaa6OLqe68ikTXhOGlPc03Ugo2xX5Ht2
+         gKnwtoiWNFyFI+7fxeuRRaqR3v/wGYUxaQyDeIBd18DytcDCv8NzMf+N8go0zfgqCQj4
+         oqNID4B6s/euAT79BoYaqRcRZzfAOhTTglZbSD5MWnvLFFOyt9yqpAPrcNUOW6x8DmMV
+         EXKhN3VAJKeVUDoo2iPuUDGy6f4805orfsYDTb8dNNdbXoC0eMm9GDuIdRCjZfkGAUWj
+         mQaOFe3MQileNjttXEyX58NmEGQJ1na3FK97/hr5H3VDcP7wC6dh9v91uCCWbtKOrNKi
+         QT0A==
+X-Gm-Message-State: AOAM530T/ZxO+qGHDhFabq1fn1YFow2gfvy6yra+fhHG/092qynS4+Kz
+        Jikx02xVOQtBDPckd1diNgFfWmsNtIxqAVhsCkfEsjpZKwWx0x1BsUenjO6BxcKgkRi2FF5Qw7k
+        lP7aZf5DtTsLun9MAKrDs
+X-Received: by 2002:a17:907:c243:b0:6f3:953d:6e2 with SMTP id tj3-20020a170907c24300b006f3953d06e2mr4143258ejc.506.1650883217950;
+        Mon, 25 Apr 2022 03:40:17 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyUrVv8ZCepa/U3q4uft3AB87DDPX1VjjBR7uWVrYkmmUi98hEXzpSCu5QtPh8Y6mSgOFXzlg==
+X-Received: by 2002:a17:907:c243:b0:6f3:953d:6e2 with SMTP id tj3-20020a170907c24300b006f3953d06e2mr4143246ejc.506.1650883217736;
+        Mon, 25 Apr 2022 03:40:17 -0700 (PDT)
+Received: from ?IPV6:2001:1c00:c1e:bf00:d69d:5353:dba5:ee81? (2001-1c00-0c1e-bf00-d69d-5353-dba5-ee81.cable.dynamic.v6.ziggo.nl. [2001:1c00:c1e:bf00:d69d:5353:dba5:ee81])
+        by smtp.gmail.com with ESMTPSA id q11-20020a170906144b00b006cf61dfb03esm3481489ejc.62.2022.04.25.03.40.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 25 Apr 2022 03:40:16 -0700 (PDT)
+Message-ID: <dcc1b028-7e53-cb94-9a66-41890393f2ed@redhat.com>
+Date:   Mon, 25 Apr 2022 12:40:15 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH 2/2] drivers: mmc: sdhci_am654: Add the quirk to set
- TESTCD bit
+ Thunderbird/91.8.0
+Subject: Re: [PATCH] mmc: sunxi-mmc: Correct the maximum segment size
 Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20220418102040.4993-1-a-govindraju@ti.com>
- <20220418102040.4993-3-a-govindraju@ti.com>
- <CAPDyKFreftOExcZ9hgxpDGtdHhniB847vGAGpoO-McTy5_ao1w@mail.gmail.com>
-From:   Aswath Govindraju <a-govindraju@ti.com>
-In-Reply-To: <CAPDyKFreftOExcZ9hgxpDGtdHhniB847vGAGpoO-McTy5_ao1w@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+To:     Samuel Holland <samuel@sholland.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Arnd Bergmann <arnd@arndb.de>, Chen-Yu Tsai <wens@csie.org>,
+        Chris Ball <chris@printf.net>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Maxime Ripard <maxime@cerno.tech>,
+        Mike Turquette <mturquette@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-sunxi@lists.linux.dev
+References: <20220424230640.31735-1-samuel@sholland.org>
+From:   Hans de Goede <hdegoede@redhat.com>
+In-Reply-To: <20220424230640.31735-1-samuel@sholland.org>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uffe,
+Hi Samuel,
 
-On 21/04/22 17:41, Ulf Hansson wrote:
-> On Mon, 18 Apr 2022 at 12:21, Aswath Govindraju <a-govindraju@ti.com> wrote:
->>
->> From: Vignesh Raghavendra <vigneshr@ti.com>
->>
->> The ARASAN MMC controller on Keystone 3 class of devices need the SDCD
->> line to be connected for proper functioning. Similar to the issue pointed
->> out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
->> sdhci-of-arasan: Set controller to test mode when no CD bit").
->>
->> In cases where this can't be connected, add a quirk to force the
->> controller into test mode and set the TESTCD bit. Use the flag
->> "ti,fails-without-test-cd", to implement this above quirk when required.
->>
->> Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
->> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
->> ---
->>  drivers/mmc/host/sdhci_am654.c | 23 ++++++++++++++++++++++-
->>  1 file changed, 22 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->> index e54fe24d47e7..c36b969ed1b6 100644
->> --- a/drivers/mmc/host/sdhci_am654.c
->> +++ b/drivers/mmc/host/sdhci_am654.c
->> @@ -147,6 +147,9 @@ struct sdhci_am654_data {
->>         int drv_strength;
->>         int strb_sel;
->>         u32 flags;
->> +       u32 quirks;
->> +
->> +#define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
->>  };
->>
->>  struct sdhci_am654_driver_data {
->> @@ -369,6 +372,21 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
->>         }
->>  }
->>
->> +void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
+On 4/25/22 01:06, Samuel Holland wrote:
+> According to the DMA descriptor documentation, the lowest two bits of
+> the size field are ignored, so the size must be rounded up to a multiple
+> of 4 bytes. Furthermore, 0 is not a valid buffer size; setting the size
+> to 0 will cause that DMA descriptor to be ignored.
 > 
-> This should be a static function.
+> Together, these restrictions limit the maximum DMA segment size to 4
+> less than the power-of-two width of the size field.
+
+I assume that you were seeing some problems where things where not working
+which caused you to investigate this; and that this patch fixes those
+problems?   If yes then it would be good to also mention the problems +
+investigative process in the commit message.
+
+I'm no longer involved in sunxi development, but still I wonder if the
+substraction of 4 from the max_seg_size is really necessary? This seems
+to be based on the notion that as you say "0 is not a valid buffer size"
+where as the code so far has been operating under the assumption that
+putting 0 in sunxi_idma_des.buf_size means maximum buf-size.
+
+I'm pretty sure that 0 meaning maximum buf-size is correct for at least
+the older chips where idma_des_size_bits equals 13, which means that
+only 2 4K pages fit in a single desc, so we almost certainly have been
+hitting this code path ?
+
+Although: drivers/mmc/host/dw_mmc.c which seems to be for similar
+hw suggests that on designs where idma_des_size_bits == 13 only
+4k can be used, which sorta matches what you are doing here except
+that you limit things to 8k - 4 instead of to just 4k.
+
+Anyways I was just wondering about all this...
+
+Regards,
+
+Hans
+
+
+
 > 
-
-Fixed this in the respin.
-
->> +{
->> +       u8 ctrl;
->> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->> +
->> +       sdhci_reset(host, mask);
->> +
->> +       if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
->> +               ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->> +               ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
->> +               sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->> +       }
->> +}
->> +
->>  static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>  {
->>         struct sdhci_host *host = mmc_priv(mmc);
->> @@ -500,7 +518,7 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
->>         .set_clock = sdhci_j721e_4bit_set_clock,
->>         .write_b = sdhci_am654_write_b,
->>         .irq = sdhci_am654_cqhci_irq,
->> -       .reset = sdhci_reset,
->> +       .reset = sdhci_am654_reset,
->>  };
->>
->>  static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
->> @@ -719,6 +737,9 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
->>         device_property_read_u32(dev, "ti,clkbuf-sel",
->>                                  &sdhci_am654->clkbuf_sel);
->>
->> +       if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
->> +               sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
->> +
->>         sdhci_get_of_property(pdev);
->>
->>         return 0;
->> --
->> 2.17.1
->>
+> Fixes: 3cbcb16095f9 ("mmc: sunxi: Add driver for SD/MMC hosts found on Allwinner sunxi SoCs")
+> Signed-off-by: Samuel Holland <samuel@sholland.org>
+> ---
 > 
-> Other than the minor thing above, this looks good to me.
+>  drivers/mmc/host/sunxi-mmc.c | 14 ++++++++------
+>  1 file changed, 8 insertions(+), 6 deletions(-)
 > 
-
-Thank you for the review.
-
-Link to the v2 of this patch series,
-
-https://patchwork.kernel.org/project/linux-mmc/list/?series=635179
-
--- 
-Thanks,
-Aswath
-
-> Kind regards
-> Uffe
-
-
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index c62afd212692..4bd5f37b1036 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -214,6 +214,9 @@
+>  #define SDXC_IDMAC_DES0_CES	BIT(30) /* card error summary */
+>  #define SDXC_IDMAC_DES0_OWN	BIT(31) /* 1-idma owns it, 0-host owns it */
+>  
+> +/* Buffer size must be a multiple of 4 bytes. */
+> +#define SDXC_IDMAC_SIZE_ALIGN	4
+> +
+>  #define SDXC_CLK_400K		0
+>  #define SDXC_CLK_25M		1
+>  #define SDXC_CLK_50M		2
+> @@ -361,17 +364,15 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+>  {
+>  	struct sunxi_idma_des *pdes = (struct sunxi_idma_des *)host->sg_cpu;
+>  	dma_addr_t next_desc = host->sg_dma;
+> -	int i, max_len = (1 << host->cfg->idma_des_size_bits);
+> +	int i;
+>  
+>  	for (i = 0; i < data->sg_len; i++) {
+>  		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
+>  					     SDXC_IDMAC_DES0_OWN |
+>  					     SDXC_IDMAC_DES0_DIC);
+>  
+> -		if (data->sg[i].length == max_len)
+> -			pdes[i].buf_size = 0; /* 0 == max_len */
+> -		else
+> -			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
+> +		pdes[i].buf_size = cpu_to_le32(ALIGN(data->sg[i].length,
+> +						     SDXC_IDMAC_SIZE_ALIGN));
+>  
+>  		next_desc += sizeof(struct sunxi_idma_des);
+>  		pdes[i].buf_addr_ptr1 =
+> @@ -1420,7 +1421,8 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+>  	mmc->max_blk_count	= 8192;
+>  	mmc->max_blk_size	= 4096;
+>  	mmc->max_segs		= PAGE_SIZE / sizeof(struct sunxi_idma_des);
+> -	mmc->max_seg_size	= (1 << host->cfg->idma_des_size_bits);
+> +	mmc->max_seg_size	= (1 << host->cfg->idma_des_size_bits) -
+> +				  SDXC_IDMAC_SIZE_ALIGN;
+>  	mmc->max_req_size	= mmc->max_seg_size * mmc->max_segs;
+>  	/* 400kHz ~ 52MHz */
+>  	mmc->f_min		=   400000;
 
