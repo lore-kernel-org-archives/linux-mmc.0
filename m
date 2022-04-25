@@ -2,111 +2,125 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AB5AC433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Apr 2022 23:17:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 900B9C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 00:53:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239882AbiDXXU6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Apr 2022 19:20:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36784 "EHLO
+        id S240051AbiDYA4g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Apr 2022 20:56:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233081AbiDXXU5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 19:20:57 -0400
-Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68CB55DA14;
-        Sun, 24 Apr 2022 16:17:54 -0700 (PDT)
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.nyi.internal (Postfix) with ESMTP id BC0865C010E;
-        Sun, 24 Apr 2022 19:17:53 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute4.internal (MEProxy); Sun, 24 Apr 2022 19:17:53 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sholland.org; h=
-        cc:cc:content-transfer-encoding:date:date:from:from:in-reply-to
-        :message-id:mime-version:reply-to:sender:subject:subject:to:to;
-         s=fm2; t=1650842273; x=1650928673; bh=ukhK/3p5rv4p+ixQouMflt4+T
-        +mWNkdHDOYzih3p7Uc=; b=ZgtYGMJLu+mac01+DAYTZ0b8xT+Og/Lx7gii1iuci
-        G33s0ZfpaZXpNjjAfsh1j2zUBsTpsq2QYROM8IWxtePYhZYmwyNzBemRGpZhVQNf
-        u4PdbRnehe99W8WnDhtOqwWmk0e8QJB88z5Xh9riqiU8cD4kc3Z5wQUHvoc0t2ZX
-        k/+U3J6316QBjh3LJKti3VFS5YZQsD8QLTmlLkIsmtIBjXkW3/XmeYOIClNBJgrn
-        sbixv5kLO08IuRgMoJbkZYmJ/WZ5nukR07Ps01LJX4+ScCvL4fw8n5jC5dwu5jz8
-        UV+wA7pVeYUAA3ajkKm1rlfQmSZqe4GU7VqppPExZH71A==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-transfer-encoding:date:date
-        :from:from:in-reply-to:message-id:mime-version:reply-to:sender
-        :subject:subject:to:to:x-me-proxy:x-me-proxy:x-me-sender
-        :x-me-sender:x-sasl-enc; s=fm1; t=1650842273; x=1650928673; bh=u
-        khK/3p5rv4p+ixQouMflt4+T+mWNkdHDOYzih3p7Uc=; b=mbIQwFTIE94auivFE
-        sTfdUfxiDwtXw4VsO9TSzerZLQr5ueV758NYVCYWyiw8j7UTrlGGnKdQWECilEhH
-        LIxwJf+6bx8E+BhqUS7e1b8BfelX/mKC3BU3D8imbHzw5Lsf8CPRSTS4NzO2wBiL
-        FW+ry/lwD1sVthP/YBMUHeCZ3kqOiIEPfBx/epGKIWF7XdKzqWtqQ0bwQBWvenjR
-        8gd9XMmTRXSKXorpDNj/IYol5x6pLkCJrdb76GCfGrqX85nmthySApPrOZS0QXZZ
-        W3mmupJapOLKUXhrMGBtPcdCvL+gu9vY44tcOrHmu4eR00lj1oIE4VYsjBRh8gHL
-        JN5ZQ==
-X-ME-Sender: <xms:oNplYpnvePGjpFLxXcrnjHVAIJsEBAJRYLSxiuG2giy2yfJ-hfsdGQ>
-    <xme:oNplYk2Ww07sfEoa53DKMrctWwlcl0-FOrC3xN2yZn513SyZ4CpcWY9RXcIiCEg_s
-    Yu7vAN9vuMfm1XU9w>
-X-ME-Received: <xmr:oNplYvqErI6S5L0hQM2qr7UxIQQuNCbNzwpd_e7p5lKB3FkZH1wkh_mxnSvmnYPy2l_42zjm7f909zKtMDJXHnnXNKE-rumYl4UEhl123J7YjBOc5lL10BSQ7k9c27mFRlWfFg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedruddtgddvudcutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefhvfevufffkffoggfgsedtkeertdertddtnecuhfhrohhmpefurghmuhgvlhcu
-    jfholhhlrghnugcuoehsrghmuhgvlhesshhhohhllhgrnhgurdhorhhgqeenucggtffrrg
-    htthgvrhhnpeekveelhfejueelleetvdejvdeffeetgeelheeujeffhefgffefkeehhffh
-    keekgeenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
-    hsrghmuhgvlhesshhhohhllhgrnhgurdhorhhg
-X-ME-Proxy: <xmx:oNplYpmmSGYTGcRQGAregerKYU7hQm6ghAUjC0XSIEzeHlRxik1JjQ>
-    <xmx:oNplYn0p7FERwylDQ8gC4LgvpsRrg5BAbgPOPnLAIZ_26P1WpiRiwQ>
-    <xmx:oNplYouU9jQWPtKuiy6FZkAcgOtQ42myTjFe2emAGufgpElNvOOGbw>
-    <xmx:odplYpyfKITICRD3YusCIUuNnw3A4JhonMGzT_YB46czZ62H8tRp3w>
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sun,
- 24 Apr 2022 19:17:52 -0400 (EDT)
-From:   Samuel Holland <samuel@sholland.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Samuel Holland <samuel@sholland.org>,
-        Andre Przywara <andre.przywara@arm.com>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Maxime Ripard <maxime@cerno.tech>,
-        Yangtao Li <frank@allwinnertech.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-sunxi@lists.linux.dev
-Subject: [PATCH] mmc: sunxi-mmc: Fix DMA descriptors allocated above 32 bits
-Date:   Sun, 24 Apr 2022 18:17:50 -0500
-Message-Id: <20220424231751.32053-1-samuel@sholland.org>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S240049AbiDYA4g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2022 20:56:36 -0400
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 444492AE33;
+        Sun, 24 Apr 2022 17:53:34 -0700 (PDT)
+Received: by mail-yb1-xb2a.google.com with SMTP id m128so6450814ybm.5;
+        Sun, 24 Apr 2022 17:53:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=KZQ3FMYUd+p/inKfEtNk7azbI0rl4BBbugTy82Pulbk=;
+        b=mbKKUDoML1MgFijTXSdszOCRfm204iehbQFamK9YL4OyLefmNETkuWOTg/55yhQZlz
+         MOXMOrlZT7yx0AgHeBMIlQbduznxpKMqwxqmgvRzZetaFQHTAPPoo/pZWUrGabIepYbj
+         JR0lGeXqIslccK99hoTJR3G5DVavQ6KkAd46lsjJInfLmzO6+Nb/pl41I07ixAnWMjtu
+         z0J32fG2tMN9h7rP7mvXPAqxLf4+BRcgSvBqmeK/zxynEiOt8QzAriq5EP5+CZn22PxS
+         hhgnDqpPdVJC2bmeKKk2qJc/QoY/LXU7f8cOzZrS8/CdnBPn+hKPUnt0a4xDS9gIaJCg
+         TG3g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=KZQ3FMYUd+p/inKfEtNk7azbI0rl4BBbugTy82Pulbk=;
+        b=APEwmD9HKRw4UJqRb4yNKqRynHVTOWEPy324MdnGVQGv7ldJFSpCMTrr7XExOz3Eke
+         U3GdVecbjrwob6WE7Saw03NlLKmoK5aTaydMTaDsee+NG1wVyPHL7Qm4G0ZWJ3geXl07
+         7tzSc/65EkNQUdv1UA5ePVfU2OWLPjJmzXQZg6xUVF9ahmaQSRrH4uJ0mj154KN1Tg+t
+         Iq4ECC4sAtc5ZCOEOnUAaifF0YcN96CWA0VAWsnpNROGJaVuUIs8k8tKAjkGLWMk3Lqq
+         6KhLqcu40RzJlcibqCzxefC615ZHWKT1aLPbuwrD26FztIdUR4GgpAK8n922PAVwSlyw
+         D2eA==
+X-Gm-Message-State: AOAM530AHadXLUU4TbPedatbV1sbUhtfMXIgcTYoX9Lh6u1E7R4XpP8u
+        Ng2eNGtEWL1LNERExviwJZuawOy8JdVLOOmOzyE=
+X-Google-Smtp-Source: ABdhPJw9e1BG4zkQJcj7cJbfdiKChlhybqzcCD3J0heWIWKkippV6yvT97DgC67kxkdfxYrYsFP+8++rsK102W9Yy3k=
+X-Received: by 2002:a25:3a06:0:b0:641:cbcd:73b2 with SMTP id
+ h6-20020a253a06000000b00641cbcd73b2mr14691974yba.64.1650848013511; Sun, 24
+ Apr 2022 17:53:33 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220414094945.457500-1-benchuanggli@gmail.com> <CAPDyKFo2YhqgEStGcQb0ZWcuhrUcGeamgHk1Hov6_DzS=TNe3A@mail.gmail.com>
+In-Reply-To: <CAPDyKFo2YhqgEStGcQb0ZWcuhrUcGeamgHk1Hov6_DzS=TNe3A@mail.gmail.com>
+From:   Ben Chuang <benchuanggli@gmail.com>
+Date:   Mon, 25 Apr 2022 08:53:22 +0800
+Message-ID: <CACT4zj9rRmwPBTg6GE1qd_F_sUuaJeQbB4U3K0h24jWKe8oRWQ@mail.gmail.com>
+Subject: Re: [RESEND, PATCH] mmc: sdhci-pci-gli: A workaround to allow GL9755
+ to enter ASPM L1.2
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        SeanHY.Chen@genesyslogic.com.tw,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        greg.tu@genesyslogic.com.tw,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Newer variants of the MMC controller support a 34-bit physical address
-space by using word addresses instead of byte addresses. However, the
-code truncates the DMA descriptor address to 32 bits before applying the
-shift. This breaks DMA for descriptors allocated above the 32-bit limit.
+On Thu, Apr 21, 2022 at 9:55 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Thu, 14 Apr 2022 at 11:49, Ben Chuang <benchuanggli@gmail.com> wrote:
+> >
+> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> >
+> > When GL9755 enters ASPM L1 sub-states, it will stay at L1.1 and will not
+> > enter L1.2. The workaround is to toggle PM state to allow GL9755 to enter
+> > ASPM L1.2.
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>
+> This didn't apply cleanly, I fixed it up this time. So, applied for
+> next, thanks!
+>
+> Kind regards
+> Uffe
 
-Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
-Signed-off-by: Samuel Holland <samuel@sholland.org>
----
+I forgot to rebase to v5.18rc. I will pay more attention next time. Thank you.
 
- drivers/mmc/host/sunxi-mmc.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+Best regards,
+Ben
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index c62afd212692..46f9e2923d86 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -377,8 +377,9 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
- 		pdes[i].buf_addr_ptr1 =
- 			cpu_to_le32(sg_dma_address(&data->sg[i]) >>
- 				    host->cfg->idma_des_shift);
--		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc >>
--						    host->cfg->idma_des_shift);
-+		pdes[i].buf_addr_ptr2 =
-+			cpu_to_le32(next_desc >>
-+				    host->cfg->idma_des_shift);
- 	}
- 
- 	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
--- 
-2.35.1
-
+>
+>
+> > ---
+> >  drivers/mmc/host/sdhci-pci-gli.c | 10 ++++++++++
+> >  1 file changed, 10 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> > index 97035d77c18c..52230857388f 100644
+> > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > @@ -137,6 +137,9 @@
+> >  #define PCI_GLI_9755_SerDes  0x70
+> >  #define PCI_GLI_9755_SCP_DIS   BIT(19)
+> >
+> > +#define PCI_GLI_9755_PM_CTRL     0xFC
+> > +#define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> > +
+> >  #define GLI_MAX_TUNING_LOOP 40
+> >
+> >  /* Genesys Logic chipset */
+> > @@ -597,6 +600,13 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+> >                             GLI_9755_CFG2_L1DLY_VALUE);
+> >         pci_write_config_dword(pdev, PCI_GLI_9755_CFG2, value);
+> >
+> > +       /* toggle PM state to allow GL9755 to enter ASPM L1.2 */
+> > +       pci_read_config_dword(pdev, PCI_GLI_9755_PM_CTRL, &value);
+> > +       value |= PCI_GLI_9755_PM_STATE;
+> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> > +       value &= ~PCI_GLI_9755_PM_STATE;
+> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PM_CTRL, value);
+> > +
+> >         gl9755_wt_off(pdev);
+> >  }
+> >
+> > --
+> > 2.35.1
+> >
