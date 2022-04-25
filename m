@@ -2,91 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34562C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 10:53:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FE6AC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Apr 2022 11:03:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234606AbiDYK4t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 06:56:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49618 "EHLO
+        id S235145AbiDYLGr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Apr 2022 07:06:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231502AbiDYK4t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 06:56:49 -0400
-Received: from mail-qk1-x72b.google.com (mail-qk1-x72b.google.com [IPv6:2607:f8b0:4864:20::72b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A33C18233C;
-        Mon, 25 Apr 2022 03:53:45 -0700 (PDT)
-Received: by mail-qk1-x72b.google.com with SMTP id s4so10482793qkh.0;
-        Mon, 25 Apr 2022 03:53:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=peu4gv2FGZBgMzK4VqAafb6JLZ20qiywVqW5LgkX7HA=;
-        b=k3cm/jAoa4Rlwh8j9n1yh0OEi1U//6+xYMOoKmLhpBOQXCge5e7odetNJ6G26YeaD0
-         E+PgVeXL//+axDEh/GawTgprgOBXnWaG4zRccGVHSzR6mPNyodu5lvNGobuT28+xPG1o
-         di+aJkuY6Vk+h4R3FNWarZjAwTviontQqYwe+/U/Kmvir1tBzyWVTQT2kQWgnEZMGfWu
-         77HudJFfuWjytUg+Syeh8hGyJ6If8XrBf8aaTA6oOeCJQgS9CyS/nKUH9ajn79ueqnxc
-         TjWWTS1pOhosUyLkDTm0pmUhY+g1z+rM2ffRbvHflVUgsjM6dxwPF23xvq3T3qLzyCZL
-         KzXw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=peu4gv2FGZBgMzK4VqAafb6JLZ20qiywVqW5LgkX7HA=;
-        b=0hMtsd8FjkwTGG54bJiI4KTuvo20bmS8ePlg753lNIsZ13WRW7MflyOj1NzXQ1lXk0
-         26zascdi9h0kgvYvBbyQ7REGur+fv30a4vCs6n+IVRO5axRdDjxE5ySZYd4t/RxqesKE
-         cFV1Abz7jFl7jndnD+CxNlkOIn7aqUMDrOOhlxRDUoYPi1xFqoH9/obH/PSRlk6osxDD
-         Nc6altJPayMmV//YY0Ts9jVZzWbq4n7SaGdyBBhhgCo0Db020sTunTgyUN7x2ynsNBta
-         CwvcvArEph4ftHhYJiay3DQ1yWMErYjKMP2bZHM6IIHQwTEZaOGguXD7AVtl0VskLtTI
-         95Ow==
-X-Gm-Message-State: AOAM532ZCsXeuPVARYtRYVaKrDz0VACFO+Yfnf65fFDKxYa8Ro/l9IDh
-        /4Gs1xEnfGKnvurdYPxs2LQ=
-X-Google-Smtp-Source: ABdhPJxr2rj5ClM4IGDuDoTOolpultTM0NaIh3DYqTMoh/mzT8/nPsv39h4IK1Mr3axvwbxCToC9Mw==
-X-Received: by 2002:a05:620a:6cc:b0:69b:dd1b:3235 with SMTP id 12-20020a05620a06cc00b0069bdd1b3235mr9522389qky.374.1650884024797;
-        Mon, 25 Apr 2022 03:53:44 -0700 (PDT)
-Received: from localhost.localdomain ([193.203.214.57])
-        by smtp.gmail.com with ESMTPSA id y9-20020ac87c89000000b002f364b84040sm2591273qtv.34.2022.04.25.03.53.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 25 Apr 2022 03:53:44 -0700 (PDT)
-From:   cgel.zte@gmail.com
-X-Google-Original-From: chi.minghao@zte.com.cn
-To:     ulf.hansson@linaro.org
-Cc:     axboe@kernel.dk, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Minghao Chi <chi.minghao@zte.com.cn>,
-        Zeal Robot <zealci@zte.com.cn>
-Subject: [PATCH] mmc: block: use kobj_to_dev()
-Date:   Mon, 25 Apr 2022 10:53:39 +0000
-Message-Id: <20220425105339.3515368-1-chi.minghao@zte.com.cn>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S241651AbiDYLGo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 07:06:44 -0400
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A39092A737;
+        Mon, 25 Apr 2022 04:03:38 -0700 (PDT)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 4D0371FB;
+        Mon, 25 Apr 2022 04:03:38 -0700 (PDT)
+Received: from donnerap.cambridge.arm.com (usa-sjc-imap-foss1.foss.arm.com [10.121.207.14])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id ECFB83F73B;
+        Mon, 25 Apr 2022 04:03:36 -0700 (PDT)
+Date:   Mon, 25 Apr 2022 12:03:34 +0100
+From:   Andre Przywara <andre.przywara@arm.com>
+To:     Samuel Holland <samuel@sholland.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Maxime Ripard <maxime@cerno.tech>,
+        Yangtao Li <frank@allwinnertech.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-sunxi@lists.linux.dev
+Subject: Re: [PATCH] mmc: sunxi-mmc: Fix DMA descriptors allocated above 32
+ bits
+Message-ID: <20220425120334.62f60978@donnerap.cambridge.arm.com>
+In-Reply-To: <20220424231751.32053-1-samuel@sholland.org>
+References: <20220424231751.32053-1-samuel@sholland.org>
+Organization: ARM
+X-Mailer: Claws Mail 3.18.0 (GTK+ 2.24.32; aarch64-unknown-linux-gnu)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Minghao Chi <chi.minghao@zte.com.cn>
+On Sun, 24 Apr 2022 18:17:50 -0500
+Samuel Holland <samuel@sholland.org> wrote:
 
-Use kobj_to_dev() instead of open-coding it.
+Hi Samuel,
 
-Reported-by: Zeal Robot <zealci@zte.com.cn>
-Signed-off-by: Minghao Chi <chi.minghao@zte.com.cn>
----
- drivers/mmc/core/block.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+thanks for sending this.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index b35e7a95798b..983151b7296d 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -330,7 +330,7 @@ static struct attribute *mmc_disk_attrs[] = {
- static umode_t mmc_disk_attrs_is_visible(struct kobject *kobj,
- 		struct attribute *a, int n)
- {
--	struct device *dev = container_of(kobj, struct device, kobj);
-+	struct device *dev = kobj_to_dev(kobj);
- 	struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
- 	umode_t mode = a->mode;
- 
--- 
-2.25.1
+> Newer variants of the MMC controller support a 34-bit physical address
+> space by using word addresses instead of byte addresses. However, the
+> code truncates the DMA descriptor address to 32 bits before applying the
+> shift. This breaks DMA for descriptors allocated above the 32-bit limit.
+> 
+> Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
+> Signed-off-by: Samuel Holland <samuel@sholland.org>
+> ---
+> 
+>  drivers/mmc/host/sunxi-mmc.c | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index c62afd212692..46f9e2923d86 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -377,8 +377,9 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+>  		pdes[i].buf_addr_ptr1 =
+>  			cpu_to_le32(sg_dma_address(&data->sg[i]) >>
+>  				    host->cfg->idma_des_shift);
+> -		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc >>
+> -						    host->cfg->idma_des_shift);
+> +		pdes[i].buf_addr_ptr2 =
+> +			cpu_to_le32(next_desc >>
+> +				    host->cfg->idma_des_shift);
 
+I had mentioned this problem on the original patch before[1] and had
+this fixed in my re-submission[2], so it looks good to me:
+
+Reviewed-by: Andre Przywara <andre.przywara@arm.com>
+
+Cheers,
+Andre
+
+[1]https://lore.kernel.org/linux-arm-kernel/65401815-cb2e-58ec-7653-f09d6a25804c@arm.com/
+[2]https://lore.kernel.org/linux-arm-kernel/20210118020848.11721-3-andre.przywara@arm.com/
+
+>  	}
+>  
+>  	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
 
