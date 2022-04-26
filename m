@@ -2,105 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8F59C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 09:51:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D8AC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 09:54:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236183AbiDZJyY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Apr 2022 05:54:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36218 "EHLO
+        id S1347850AbiDZJ6D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 05:58:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45370 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347569AbiDZJxi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 05:53:38 -0400
+        with ESMTP id S1347774AbiDZJ5o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 05:57:44 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B72672981A;
-        Tue, 26 Apr 2022 02:10:41 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E924387B2;
+        Tue, 26 Apr 2022 02:15:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1650964242; x=1682500242;
+  t=1650964554; x=1682500554;
   h=from:to:cc:subject:date:message-id;
-  bh=+p40Cvh2hhSxVfAPCJZpYYJuBDaizdr/QFl0LujIiyQ=;
-  b=y1OMGka4EBLJIHT6oDWaoQuh1qamXXwi234qTk3eLdV9AldtHw5OuLsV
-   yL7Pni4OYSLMgsUsFkFVWZCR8e/dAKv0H57S8bcHgFEWzaPvxU1fv4N1c
-   R/ihdMUEgf/B1XGyORS6x720HNeFoXNVm9DgPg7y6t6K1TFjtnYYGKn28
-   Q=;
+  bh=IbCZhL5dtMpAnfh6d6qY6fF2LqJySHYeU8LCRLMN9ng=;
+  b=W1vnJkRM+ce2cT1BOG3+ujXevnBsywjEHYInTHuOj7RaOKZI60xmG4NW
+   wTpx1H3KUlcrc5NXtLWuYgMmCP2zq0TXVjsWQhG1+9gJEgo/CcOgsn/Nv
+   rLFhg43tVabC2JI1DqJW+kd6O33T6/1goh2cGAKL+3U7Ijy64IiwisXaW
+   U=;
 Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
-  by alexa-out.qualcomm.com with ESMTP; 26 Apr 2022 02:10:42 -0700
+  by alexa-out.qualcomm.com with ESMTP; 26 Apr 2022 02:15:54 -0700
 X-QCInternal: smtphost
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 26 Apr 2022 02:10:40 -0700
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 26 Apr 2022 02:15:53 -0700
 X-QCInternal: smtphost
 Received: from hu-c-spathi-hyd.qualcomm.com (HELO hu-sgudaval-hyd.qualcomm.com) ([10.213.108.59])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 26 Apr 2022 14:40:28 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 26 Apr 2022 14:45:35 +0530
 Received: by hu-sgudaval-hyd.qualcomm.com (Postfix, from userid 212714)
-        id B262D3AE1; Tue, 26 Apr 2022 14:40:27 +0530 (+0530)
+        id 98D8A3AEA; Tue, 26 Apr 2022 14:45:34 +0530 (+0530)
 From:   Srinivasarao Pathipati <quic_spathi@quicinc.com>
-To:     ulf.hansson@linaro.org, u.kleine-koenig@pengutronix.de,
-        YehezkelShB@gmail.com, rmk+kernel@armlinux.org.uk,
-        t.scherer@eckelmann.de, s.shtylyov@omp.ru, sensor1010@163.com,
-        sartgarg@codeaurora.org, hns@goldelico.com,
-        uic_kamasali@quicinc.com, quic_spathi@quicinc.com,
-        tiantao6@hisilicon.com, linux-mmc@vger.kernel.org,
+To:     ulf.hansson@linaro.org, avri.altman@wdc.com,
+        linus.walleij@linaro.org, vbadigan@codeaurora.org,
+        shawn.lin@rock-chips.com, s.shtylyov@omp.ru, merez@codeaurora.org,
+        wsa+renesas@sang-engineering.com, briannorris@chromium.org,
+        sayalil@codeaurora.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Cc:     kamasali <quic_kamasali@quicinc.com>
-Subject: [PATCH V1] mmc: sdhci-msm: Add wakeup functionality support for sdio cards
-Date:   Tue, 26 Apr 2022 14:40:25 +0530
-Message-Id: <1650964225-6705-1-git-send-email-quic_spathi@quicinc.com>
+Cc:     Kishor Krishna Bhat <quic_kishkris@quicinc.com>,
+        kamasali <quic_kamasali@quicinc.com>,
+        Srinivasarao Pathipati <quic_spathi@quicinc.com>
+Subject: [PATCH V1] mmc: core: Select HS mode in device first and then in the host
+Date:   Tue, 26 Apr 2022 14:45:32 +0530
+Message-Id: <1650964532-9379-1-git-send-email-quic_spathi@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sarthak Garg <sartgarg@codeaurora.org>
+From: Sayali Lokhande <sayalil@codeaurora.org>
 
-This adds external GPIO wakeup support to sdhci-msm driver
-for sdio cards.
+While switching from hs400 to hs200 mode, high speed mode
+timing should be selected in the device before changing the
+clock frequency in the host. But current implementation,
+(mmc_hs400_to_hs200) first updates the frequency in the host
+and then updates mode in the device. This is a spec violation.
+Hence update the sequence to comply with the spec.
 
-Also enables clk gating only in system Suspend/Resume for SDIO card.
-
-Also add the below fixes from 4.9 kernel :
-
-c363224b: Fix wakeup functionality for SDIO
-61fc5bf6: Remove flag MMC_PM_WAKE_SDIO_IRQ in mmc_resume_host
-a7a2a82e: Set sdio_pending_processing default state to false.
-
-Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
+Signed-off-by: Kishor Krishna Bhat <quic_kishkris@quicinc.com>
 Signed-off-by: kamasali <quic_kamasali@quicinc.com>
 Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
 ---
- drivers/mmc/core/bus.c  | 7 +++++++
- drivers/mmc/core/sdio.c | 1 +
- 2 files changed, 8 insertions(+)
+ drivers/mmc/core/mmc.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 58a60af..a475fe1 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -364,6 +364,13 @@ int mmc_add_card(struct mmc_card *card)
- #endif
- 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 8691c00..b4bcebc 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1259,10 +1259,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 	int err;
+ 	u8 val;
  
-+	if (mmc_card_sdio(card)) {
-+		ret = device_init_wakeup(&card->dev, true);
-+		if (ret)
-+			pr_err("%s: %s: failed to init wakeup: %d\n",
-+				mmc_hostname(card->host), __func__, ret);
-+	}
+-	/* Reduce frequency to HS */
+-	max_dtr = card->ext_csd.hs_max_dtr;
+-	mmc_set_clock(host, max_dtr);
+-
+ 	/* Switch HS400 to HS DDR */
+ 	val = EXT_CSD_TIMING_HS;
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
+@@ -1276,6 +1272,10 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+ 
+ 	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
+ 
++	/* Reduce frequency to HS */
++	max_dtr = card->ext_csd.hs_max_dtr;
++	mmc_set_clock(host, max_dtr);
 +
- 	device_enable_async_suspend(&card->dev);
- 
- 	ret = device_add(&card->dev);
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 25799ac..9502318 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -1096,6 +1096,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
- 	mmc_release_host(host);
- 
- 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
-+	host->pm_flags &= ~MMC_PM_WAKE_SDIO_IRQ;
- 	return err;
- }
- 
+ 	err = mmc_switch_status(card, true);
+ 	if (err)
+ 		goto out_err;
 -- 
 2.7.4
 
