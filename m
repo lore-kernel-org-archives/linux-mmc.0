@@ -2,726 +2,307 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EC92C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 01:38:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDE49C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 07:51:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241046AbiDZBl3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Apr 2022 21:41:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55104 "EHLO
+        id S237844AbiDZHys (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 03:54:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240718AbiDZBl2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2022 21:41:28 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B433745AE6;
-        Mon, 25 Apr 2022 18:38:20 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 210B261724;
-        Tue, 26 Apr 2022 01:38:20 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5E6DAC385A7;
-        Tue, 26 Apr 2022 01:38:17 +0000 (UTC)
-Message-ID: <b7216d50-7f30-a988-7756-c00f98de0b65@linux-m68k.org>
-Date:   Tue, 26 Apr 2022 11:38:14 +1000
+        with ESMTP id S242699AbiDZHyr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 03:54:47 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AECC0A1AC;
+        Tue, 26 Apr 2022 00:51:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1650959500; x=1682495500;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=AF4hNHwrM38viZOG6GKR5ftamlJBG8twUEdWLdAN5HQ=;
+  b=FaiI3cR+eDnrL67PAVSBE7wjzTKxb0FQgwOqhvDId8WmFXXifMTxOBuG
+   dSDYLK/Dre8yeLeQ/xUBL3WQN3vYZqNkCH5VIpZI0+/4fmm62W4p+Y4QI
+   uTXkiry+mkhnZstGrkMATOmh6FDhqQyTs4UYOPGqJEBctrWDnqQ3JQRTa
+   WFHnmGtblJmeH9B3mwIW5WPUIPNMwi1rQfSD+3vD0fZEJb73trk7qqas8
+   IOB2GWBvGtuU60ctlWs1VP92kre1jmRYPL5ZKXqjicF7fCniL3P78cY/0
+   YmRGUpYt+/yDUPyqK3QQ8s94PEcoRtnapGu0h+7/k7SzYQwZaHF32cRFS
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10328"; a="325977114"
+X-IronPort-AV: E=Sophos;i="5.90,290,1643702400"; 
+   d="scan'208";a="325977114"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Apr 2022 00:51:40 -0700
+X-IronPort-AV: E=Sophos;i="5.90,290,1643702400"; 
+   d="scan'208";a="558170957"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.58.98])
+  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Apr 2022 00:51:35 -0700
+Message-ID: <d643e80e-a7a7-818f-5d75-09d198e1a5b3@intel.com>
+Date:   Tue, 26 Apr 2022 10:51:31 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH] [v4] m68k: coldfire: drop ISA_DMA_API support
+ Firefox/91.0 Thunderbird/91.7.0
+Subject: Re: [PATCH V5 2/5] mmc: sdhci: Capture eMMC and SD card errors
 Content-Language: en-US
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-m68k@lists.linux-m68k.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, alsa-devel@alsa-project.org
-References: <20220421082040.2866638-1-arnd@kernel.org>
-From:   Greg Ungerer <gerg@linux-m68k.org>
-In-Reply-To: <20220421082040.2866638-1-arnd@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com,
+        yoshihiro.shimoda.uh@renesas.com, linus.walleij@linaro.org,
+        digetx@gmail.com, briannorris@chromium.org,
+        quic_riteshh@quicinc.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        quic_asutoshd@quicinc.com, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
+        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
+        Liangliang Lu <quic_luliang@quicinc.com>,
+        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
+References: <1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com>
+ <1650902443-26357-3-git-send-email-quic_c_sbhanu@quicinc.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <1650902443-26357-3-git-send-email-quic_c_sbhanu@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Arnd,
+On 25/04/22 19:00, Shaik Sajida Bhanu wrote:
+> Add changes to capture eMMC and SD card errors.
+> This is useful for debug and testing.
+> 
+> Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
+> Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
+> Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
+> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 
-On 21/4/22 18:20, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> After a build regression report, I took a look at possible users of
-> CONFIG_ISA_DMA_API on m68k and found none, which Greg confirmed. The
-> CONFIG_GENERIC_ISA_DMA option in turn is only needed to implement
-> ISA_DMA_API, and is clearly not used on the platforms with ISA support.
-> 
-> The CONFIG_ISA support for AMIGA_PCMCIA is probably also unneeded,
-> but this is less clear. Unlike other PCMCIA implementations, this one
-> does not use the drivers/pcmcia subsystem at all and just supports
-> the "apne" network driver. When it was first added, one could use
-> ISA drivers on it as well, but this probably broke at some point.
-> 
-> With no reason to keep this, let's just drop the corresponding files
-> and prevent the remaining ISA drivers that use this from getting built.
-> 
-> The remaining definitions in asm/dma.h are used for PCI support.
-> 
-> Link: https://lore.kernel.org/lkml/9e5ee1c3-ca80-f343-a1f5-66f3dd1c0727@linux-m68k.org/
-> Acked-by: Geert Uytterhoeven <geert@linux-m68k.org>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
-> Acked-by: Greg Ungerer <gerg@linux-m68k.org>
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-
-I have added this to the m68knommu git tree, for-next branch.
-
-Thanks
-Greg
-
+Looks good.  A couple of minor comments.
 
 > ---
-> v4: actually fix the build regression
-> v3: fix build regression
-> v2: drop GENERIC_ISA_DMA as well, add some background on CONFIG_ISA.
-> ---
->   arch/m68k/Kconfig.bus       |  10 -
->   arch/m68k/coldfire/Makefile |   2 +-
->   arch/m68k/coldfire/dma.c    |  43 ----
->   arch/m68k/include/asm/dma.h | 483 ------------------------------------
->   arch/m68k/mm/motorola.c     |   1 -
->   drivers/mmc/host/Kconfig    |   2 +-
->   sound/core/Makefile         |   2 -
->   sound/isa/Kconfig           |   2 +-
->   8 files changed, 3 insertions(+), 542 deletions(-)
->   delete mode 100644 arch/m68k/coldfire/dma.c
+>  drivers/mmc/host/sdhci.c | 54 ++++++++++++++++++++++++++++++++++++------------
+>  drivers/mmc/host/sdhci.h |  3 +++
+>  include/linux/mmc/mmc.h  |  6 ++++++
+>  3 files changed, 50 insertions(+), 13 deletions(-)
 > 
-> diff --git a/arch/m68k/Kconfig.bus b/arch/m68k/Kconfig.bus
-> index d1e93a39cd3b..d5c0b2990ee1 100644
-> --- a/arch/m68k/Kconfig.bus
-> +++ b/arch/m68k/Kconfig.bus
-> @@ -56,16 +56,6 @@ config ATARI_ROM_ISA
->   	  The only driver currently using this adapter is the EtherNEC
->   	  driver for RTL8019AS based NE2000 compatible network cards.
->   
-> -config GENERIC_ISA_DMA
-> -	def_bool ISA
-> -
->   source "drivers/zorro/Kconfig"
->   
->   endif
-> -
-> -if COLDFIRE
-> -
-> -config ISA_DMA_API
-> -	def_bool !M5272
-> -
-> -endif
-> diff --git a/arch/m68k/coldfire/Makefile b/arch/m68k/coldfire/Makefile
-> index a3e18d73d8b8..9419a6c1f036 100644
-> --- a/arch/m68k/coldfire/Makefile
-> +++ b/arch/m68k/coldfire/Makefile
-> @@ -15,7 +15,7 @@
->   
->   asflags-$(CONFIG_FULLDEBUG) := -DDEBUGGER_COMPATIBLE_CACHE=1
->   
-> -obj-$(CONFIG_COLDFIRE)	+= cache.o clk.o device.o dma.o entry.o vectors.o
-> +obj-$(CONFIG_COLDFIRE)	+= cache.o clk.o device.o entry.o vectors.o
->   obj-$(CONFIG_M5206)	+= m5206.o intc.o reset.o
->   obj-$(CONFIG_M5206e)	+= m5206.o intc.o reset.o
->   obj-$(CONFIG_M520x)	+= m520x.o intc-simr.o reset.o
-> diff --git a/arch/m68k/coldfire/dma.c b/arch/m68k/coldfire/dma.c
-> deleted file mode 100644
-> index c3279f7467d7..000000000000
-> --- a/arch/m68k/coldfire/dma.c
-> +++ /dev/null
-> @@ -1,43 +0,0 @@
-> -// SPDX-License-Identifier: GPL-2.0
-> -/***************************************************************************/
-> -
-> -/*
-> - *	dma.c -- Freescale ColdFire DMA support
-> - *
-> - *	Copyright (C) 2007, Greg Ungerer (gerg@snapgear.com)
-> - */
-> -
-> -/***************************************************************************/
-> -
-> -#include <linux/kernel.h>
-> -#include <linux/module.h>
-> -#include <asm/dma.h>
-> -#include <asm/coldfire.h>
-> -#include <asm/mcfsim.h>
-> -#include <asm/mcfdma.h>
-> -
-> -/***************************************************************************/
-> -
-> -/*
-> - *      DMA channel base address table.
-> - */
-> -unsigned int dma_base_addr[MAX_M68K_DMA_CHANNELS] = {
-> -#ifdef MCFDMA_BASE0
-> -	MCFDMA_BASE0,
-> -#endif
-> -#ifdef MCFDMA_BASE1
-> -	MCFDMA_BASE1,
-> -#endif
-> -#ifdef MCFDMA_BASE2
-> -	MCFDMA_BASE2,
-> -#endif
-> -#ifdef MCFDMA_BASE3
-> -	MCFDMA_BASE3,
-> -#endif
-> -};
-> -EXPORT_SYMBOL(dma_base_addr);
-> -
-> -unsigned int dma_device_address[MAX_M68K_DMA_CHANNELS];
-> -EXPORT_SYMBOL(dma_device_address);
-> -
-> -/***************************************************************************/
-> diff --git a/arch/m68k/include/asm/dma.h b/arch/m68k/include/asm/dma.h
-> index ae2021964e32..f6c5e0dfb4e5 100644
-> --- a/arch/m68k/include/asm/dma.h
-> +++ b/arch/m68k/include/asm/dma.h
-> @@ -2,493 +2,10 @@
->   #ifndef _M68K_DMA_H
->   #define _M68K_DMA_H 1
->   
-> -#ifdef CONFIG_COLDFIRE
-> -/*
-> - * ColdFire DMA Model:
-> - *   ColdFire DMA supports two forms of DMA: Single and Dual address. Single
-> - * address mode emits a source address, and expects that the device will either
-> - * pick up the data (DMA READ) or source data (DMA WRITE). This implies that
-> - * the device will place data on the correct byte(s) of the data bus, as the
-> - * memory transactions are always 32 bits. This implies that only 32 bit
-> - * devices will find single mode transfers useful. Dual address DMA mode
-> - * performs two cycles: source read and destination write. ColdFire will
-> - * align the data so that the device will always get the correct bytes, thus
-> - * is useful for 8 and 16 bit devices. This is the mode that is supported
-> - * below.
-> - *
-> - * AUG/22/2000 : added support for 32-bit Dual-Address-Mode (K) 2000
-> - *               Oliver Kamphenkel (O.Kamphenkel@tu-bs.de)
-> - *
-> - * AUG/25/2000 : added support for 8, 16 and 32-bit Single-Address-Mode (K)2000
-> - *               Oliver Kamphenkel (O.Kamphenkel@tu-bs.de)
-> - *
-> - * APR/18/2002 : added proper support for MCF5272 DMA controller.
-> - *               Arthur Shipkowski (art@videon-central.com)
-> - */
-> -
-> -#include <asm/coldfire.h>
-> -#include <asm/mcfsim.h>
-> -#include <asm/mcfdma.h>
-> -
-> -/*
-> - * Set number of channels of DMA on ColdFire for different implementations.
-> - */
-> -#if defined(CONFIG_M5249) || defined(CONFIG_M5307) || defined(CONFIG_M5407) || \
-> -	defined(CONFIG_M523x) || defined(CONFIG_M527x) || \
-> -	defined(CONFIG_M528x) || defined(CONFIG_M525x)
-> -
-> -#define MAX_M68K_DMA_CHANNELS 4
-> -#elif defined(CONFIG_M5272)
-> -#define MAX_M68K_DMA_CHANNELS 1
-> -#elif defined(CONFIG_M53xx)
-> -#define MAX_M68K_DMA_CHANNELS 0
-> -#else
-> -#define MAX_M68K_DMA_CHANNELS 2
-> -#endif
-> -
-> -extern unsigned int dma_base_addr[MAX_M68K_DMA_CHANNELS];
-> -extern unsigned int dma_device_address[MAX_M68K_DMA_CHANNELS];
-> -
-> -#if !defined(CONFIG_M5272)
-> -#define DMA_MODE_WRITE_BIT  0x01  /* Memory/IO to IO/Memory select */
-> -#define DMA_MODE_WORD_BIT   0x02  /* 8 or 16 bit transfers */
-> -#define DMA_MODE_LONG_BIT   0x04  /* or 32 bit transfers */
-> -#define DMA_MODE_SINGLE_BIT 0x08  /* single-address-mode */
-> -
-> -/* I/O to memory, 8 bits, mode */
-> -#define DMA_MODE_READ	            0
-> -/* memory to I/O, 8 bits, mode */
-> -#define DMA_MODE_WRITE	            1
-> -/* I/O to memory, 16 bits, mode */
-> -#define DMA_MODE_READ_WORD          2
-> -/* memory to I/O, 16 bits, mode */
-> -#define DMA_MODE_WRITE_WORD         3
-> -/* I/O to memory, 32 bits, mode */
-> -#define DMA_MODE_READ_LONG          4
-> -/* memory to I/O, 32 bits, mode */
-> -#define DMA_MODE_WRITE_LONG         5
-> -/* I/O to memory, 8 bits, single-address-mode */
-> -#define DMA_MODE_READ_SINGLE        8
-> -/* memory to I/O, 8 bits, single-address-mode */
-> -#define DMA_MODE_WRITE_SINGLE       9
-> -/* I/O to memory, 16 bits, single-address-mode */
-> -#define DMA_MODE_READ_WORD_SINGLE  10
-> -/* memory to I/O, 16 bits, single-address-mode */
-> -#define DMA_MODE_WRITE_WORD_SINGLE 11
-> -/* I/O to memory, 32 bits, single-address-mode */
-> -#define DMA_MODE_READ_LONG_SINGLE  12
-> -/* memory to I/O, 32 bits, single-address-mode */
-> -#define DMA_MODE_WRITE_LONG_SINGLE 13
-> -
-> -#else /* CONFIG_M5272 is defined */
-> -
-> -/* Source static-address mode */
-> -#define DMA_MODE_SRC_SA_BIT 0x01
-> -/* Two bits to select between all four modes */
-> -#define DMA_MODE_SSIZE_MASK 0x06
-> -/* Offset to shift bits in */
-> -#define DMA_MODE_SSIZE_OFF  0x01
-> -/* Destination static-address mode */
-> -#define DMA_MODE_DES_SA_BIT 0x10
-> -/* Two bits to select between all four modes */
-> -#define DMA_MODE_DSIZE_MASK 0x60
-> -/* Offset to shift bits in */
-> -#define DMA_MODE_DSIZE_OFF  0x05
-> -/* Size modifiers */
-> -#define DMA_MODE_SIZE_LONG  0x00
-> -#define DMA_MODE_SIZE_BYTE  0x01
-> -#define DMA_MODE_SIZE_WORD  0x02
-> -#define DMA_MODE_SIZE_LINE  0x03
-> -
-> -/*
-> - * Aliases to help speed quick ports; these may be suboptimal, however. They
-> - * do not include the SINGLE mode modifiers since the MCF5272 does not have a
-> - * mode where the device is in control of its addressing.
-> - */
-> -
-> -/* I/O to memory, 8 bits, mode */
-> -#define DMA_MODE_READ	              ((DMA_MODE_SIZE_BYTE << DMA_MODE_DSIZE_OFF) | (DMA_MODE_SIZE_BYTE << DMA_MODE_SSIZE_OFF) | DMA_SRC_SA_BIT)
-> -/* memory to I/O, 8 bits, mode */
-> -#define DMA_MODE_WRITE	            ((DMA_MODE_SIZE_BYTE << DMA_MODE_DSIZE_OFF) | (DMA_MODE_SIZE_BYTE << DMA_MODE_SSIZE_OFF) | DMA_DES_SA_BIT)
-> -/* I/O to memory, 16 bits, mode */
-> -#define DMA_MODE_READ_WORD	        ((DMA_MODE_SIZE_WORD << DMA_MODE_DSIZE_OFF) | (DMA_MODE_SIZE_WORD << DMA_MODE_SSIZE_OFF) | DMA_SRC_SA_BIT)
-> -/* memory to I/O, 16 bits, mode */
-> -#define DMA_MODE_WRITE_WORD         ((DMA_MODE_SIZE_WORD << DMA_MODE_DSIZE_OFF) | (DMA_MODE_SIZE_WORD << DMA_MODE_SSIZE_OFF) | DMA_DES_SA_BIT)
-> -/* I/O to memory, 32 bits, mode */
-> -#define DMA_MODE_READ_LONG	        ((DMA_MODE_SIZE_LONG << DMA_MODE_DSIZE_OFF) | (DMA_MODE_SIZE_LONG << DMA_MODE_SSIZE_OFF) | DMA_SRC_SA_BIT)
-> -/* memory to I/O, 32 bits, mode */
-> -#define DMA_MODE_WRITE_LONG         ((DMA_MODE_SIZE_LONG << DMA_MODE_DSIZE_OFF) | (DMA_MODE_SIZE_LONG << DMA_MODE_SSIZE_OFF) | DMA_DES_SA_BIT)
-> -
-> -#endif /* !defined(CONFIG_M5272) */
-> -
-> -#if !defined(CONFIG_M5272)
-> -/* enable/disable a specific DMA channel */
-> -static __inline__ void enable_dma(unsigned int dmanr)
-> -{
-> -  volatile unsigned short *dmawp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("enable_dma(dmanr=%d)\n", dmanr);
-> -#endif
-> -
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -  dmawp[MCFDMA_DCR] |= MCFDMA_DCR_EEXT;
-> -}
-> -
-> -static __inline__ void disable_dma(unsigned int dmanr)
-> -{
-> -  volatile unsigned short *dmawp;
-> -  volatile unsigned char  *dmapb;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("disable_dma(dmanr=%d)\n", dmanr);
-> -#endif
-> -
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -  dmapb = (unsigned char *) dma_base_addr[dmanr];
-> -
-> -  /* Turn off external requests, and stop any DMA in progress */
-> -  dmawp[MCFDMA_DCR] &= ~MCFDMA_DCR_EEXT;
-> -  dmapb[MCFDMA_DSR] = MCFDMA_DSR_DONE;
-> -}
-> -
-> -/*
-> - * Clear the 'DMA Pointer Flip Flop'.
-> - * Write 0 for LSB/MSB, 1 for MSB/LSB access.
-> - * Use this once to initialize the FF to a known state.
-> - * After that, keep track of it. :-)
-> - * --- In order to do that, the DMA routines below should ---
-> - * --- only be used while interrupts are disabled! ---
-> - *
-> - * This is a NOP for ColdFire. Provide a stub for compatibility.
-> - */
-> -static __inline__ void clear_dma_ff(unsigned int dmanr)
-> -{
-> -}
-> -
-> -/* set mode (above) for a specific DMA channel */
-> -static __inline__ void set_dma_mode(unsigned int dmanr, char mode)
-> -{
-> -
-> -  volatile unsigned char  *dmabp;
-> -  volatile unsigned short *dmawp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_mode(dmanr=%d,mode=%d)\n", dmanr, mode);
-> -#endif
-> -
-> -  dmabp = (unsigned char *) dma_base_addr[dmanr];
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -
-> -  /* Clear config errors */
-> -  dmabp[MCFDMA_DSR] = MCFDMA_DSR_DONE;
-> -
-> -  /* Set command register */
-> -  dmawp[MCFDMA_DCR] =
-> -    MCFDMA_DCR_INT |         /* Enable completion irq */
-> -    MCFDMA_DCR_CS |          /* Force one xfer per request */
-> -    MCFDMA_DCR_AA |          /* Enable auto alignment */
-> -    /* single-address-mode */
-> -    ((mode & DMA_MODE_SINGLE_BIT) ? MCFDMA_DCR_SAA : 0) |
-> -    /* sets s_rw (-> r/w) high if Memory to I/0 */
-> -    ((mode & DMA_MODE_WRITE_BIT) ? MCFDMA_DCR_S_RW : 0) |
-> -    /* Memory to I/O or I/O to Memory */
-> -    ((mode & DMA_MODE_WRITE_BIT) ? MCFDMA_DCR_SINC : MCFDMA_DCR_DINC) |
-> -    /* 32 bit, 16 bit or 8 bit transfers */
-> -    ((mode & DMA_MODE_WORD_BIT)  ? MCFDMA_DCR_SSIZE_WORD :
-> -     ((mode & DMA_MODE_LONG_BIT) ? MCFDMA_DCR_SSIZE_LONG :
-> -                                   MCFDMA_DCR_SSIZE_BYTE)) |
-> -    ((mode & DMA_MODE_WORD_BIT)  ? MCFDMA_DCR_DSIZE_WORD :
-> -     ((mode & DMA_MODE_LONG_BIT) ? MCFDMA_DCR_DSIZE_LONG :
-> -                                   MCFDMA_DCR_DSIZE_BYTE));
-> -
-> -#ifdef DEBUG_DMA
-> -  printk("%s(%d): dmanr=%d DSR[%x]=%x DCR[%x]=%x\n", __FILE__, __LINE__,
-> -         dmanr, (int) &dmabp[MCFDMA_DSR], dmabp[MCFDMA_DSR],
-> -	 (int) &dmawp[MCFDMA_DCR], dmawp[MCFDMA_DCR]);
-> -#endif
-> -}
-> -
-> -/* Set transfer address for specific DMA channel */
-> -static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int a)
-> -{
-> -  volatile unsigned short *dmawp;
-> -  volatile unsigned int   *dmalp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_addr(dmanr=%d,a=%x)\n", dmanr, a);
-> -#endif
-> -
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -
-> -  /* Determine which address registers are used for memory/device accesses */
-> -  if (dmawp[MCFDMA_DCR] & MCFDMA_DCR_SINC) {
-> -    /* Source incrementing, must be memory */
-> -    dmalp[MCFDMA_SAR] = a;
-> -    /* Set dest address, must be device */
-> -    dmalp[MCFDMA_DAR] = dma_device_address[dmanr];
-> -  } else {
-> -    /* Destination incrementing, must be memory */
-> -    dmalp[MCFDMA_DAR] = a;
-> -    /* Set source address, must be device */
-> -    dmalp[MCFDMA_SAR] = dma_device_address[dmanr];
-> -  }
-> -
-> -#ifdef DEBUG_DMA
-> -  printk("%s(%d): dmanr=%d DCR[%x]=%x SAR[%x]=%08x DAR[%x]=%08x\n",
-> -	__FILE__, __LINE__, dmanr, (int) &dmawp[MCFDMA_DCR], dmawp[MCFDMA_DCR],
-> -	(int) &dmalp[MCFDMA_SAR], dmalp[MCFDMA_SAR],
-> -	(int) &dmalp[MCFDMA_DAR], dmalp[MCFDMA_DAR]);
-> -#endif
-> -}
-> -
-> -/*
-> - * Specific for Coldfire - sets device address.
-> - * Should be called after the mode set call, and before set DMA address.
-> - */
-> -static __inline__ void set_dma_device_addr(unsigned int dmanr, unsigned int a)
-> -{
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_device_addr(dmanr=%d,a=%x)\n", dmanr, a);
-> -#endif
-> -
-> -  dma_device_address[dmanr] = a;
-> -}
-> -
-> -/*
-> - * NOTE 2: "count" represents _bytes_.
-> - */
-> -static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
-> -{
-> -  volatile unsigned short *dmawp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_count(dmanr=%d,count=%d)\n", dmanr, count);
-> -#endif
-> -
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -  dmawp[MCFDMA_BCR] = (unsigned short)count;
-> -}
-> -
-> -/*
-> - * Get DMA residue count. After a DMA transfer, this
-> - * should return zero. Reading this while a DMA transfer is
-> - * still in progress will return unpredictable results.
-> - * Otherwise, it returns the number of _bytes_ left to transfer.
-> - */
-> -static __inline__ int get_dma_residue(unsigned int dmanr)
-> -{
-> -  volatile unsigned short *dmawp;
-> -  unsigned short count;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("get_dma_residue(dmanr=%d)\n", dmanr);
-> -#endif
-> -
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -  count = dmawp[MCFDMA_BCR];
-> -  return((int) count);
-> -}
-> -#else /* CONFIG_M5272 is defined */
-> -
-> -/*
-> - * The MCF5272 DMA controller is very different than the controller defined above
-> - * in terms of register mapping.  For instance, with the exception of the 16-bit
-> - * interrupt register (IRQ#85, for reference), all of the registers are 32-bit.
-> - *
-> - * The big difference, however, is the lack of device-requested DMA.  All modes
-> - * are dual address transfer, and there is no 'device' setup or direction bit.
-> - * You can DMA between a device and memory, between memory and memory, or even between
-> - * two devices directly, with any combination of incrementing and non-incrementing
-> - * addresses you choose.  This puts a crimp in distinguishing between the 'device
-> - * address' set up by set_dma_device_addr.
-> - *
-> - * Therefore, there are two options.  One is to use set_dma_addr and set_dma_device_addr,
-> - * which will act exactly as above in -- it will look to see if the source is set to
-> - * autoincrement, and if so it will make the source use the set_dma_addr value and the
-> - * destination the set_dma_device_addr value.  Otherwise the source will be set to the
-> - * set_dma_device_addr value and the destination will get the set_dma_addr value.
-> - *
-> - * The other is to use the provided set_dma_src_addr and set_dma_dest_addr functions
-> - * and make it explicit.  Depending on what you're doing, one of these two should work
-> - * for you, but don't mix them in the same transfer setup.
-> - */
-> -
-> -/* enable/disable a specific DMA channel */
-> -static __inline__ void enable_dma(unsigned int dmanr)
-> -{
-> -  volatile unsigned int  *dmalp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("enable_dma(dmanr=%d)\n", dmanr);
-> -#endif
-> -
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -  dmalp[MCFDMA_DMR] |= MCFDMA_DMR_EN;
-> -}
-> -
-> -static __inline__ void disable_dma(unsigned int dmanr)
-> -{
-> -  volatile unsigned int   *dmalp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("disable_dma(dmanr=%d)\n", dmanr);
-> -#endif
-> -
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -
-> -  /* Turn off external requests, and stop any DMA in progress */
-> -  dmalp[MCFDMA_DMR] &= ~MCFDMA_DMR_EN;
-> -  dmalp[MCFDMA_DMR] |= MCFDMA_DMR_RESET;
-> -}
-> -
-> -/*
-> - * Clear the 'DMA Pointer Flip Flop'.
-> - * Write 0 for LSB/MSB, 1 for MSB/LSB access.
-> - * Use this once to initialize the FF to a known state.
-> - * After that, keep track of it. :-)
-> - * --- In order to do that, the DMA routines below should ---
-> - * --- only be used while interrupts are disabled! ---
-> - *
-> - * This is a NOP for ColdFire. Provide a stub for compatibility.
-> - */
-> -static __inline__ void clear_dma_ff(unsigned int dmanr)
-> -{
-> -}
-> -
-> -/* set mode (above) for a specific DMA channel */
-> -static __inline__ void set_dma_mode(unsigned int dmanr, char mode)
-> -{
-> -
-> -  volatile unsigned int   *dmalp;
-> -  volatile unsigned short *dmawp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_mode(dmanr=%d,mode=%d)\n", dmanr, mode);
-> -#endif
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -  dmawp = (unsigned short *) dma_base_addr[dmanr];
-> -
-> -  /* Clear config errors */
-> -  dmalp[MCFDMA_DMR] |= MCFDMA_DMR_RESET;
-> -
-> -  /* Set command register */
-> -  dmalp[MCFDMA_DMR] =
-> -    MCFDMA_DMR_RQM_DUAL |         /* Mandatory Request Mode setting */
-> -    MCFDMA_DMR_DSTT_SD  |         /* Set up addressing types; set to supervisor-data. */
-> -    MCFDMA_DMR_SRCT_SD  |         /* Set up addressing types; set to supervisor-data. */
-> -    /* source static-address-mode */
-> -    ((mode & DMA_MODE_SRC_SA_BIT) ? MCFDMA_DMR_SRCM_SA : MCFDMA_DMR_SRCM_IA) |
-> -    /* dest static-address-mode */
-> -    ((mode & DMA_MODE_DES_SA_BIT) ? MCFDMA_DMR_DSTM_SA : MCFDMA_DMR_DSTM_IA) |
-> -    /* burst, 32 bit, 16 bit or 8 bit transfers are separately configurable on the MCF5272 */
-> -    (((mode & DMA_MODE_SSIZE_MASK) >> DMA_MODE_SSIZE_OFF) << MCFDMA_DMR_DSTS_OFF) |
-> -    (((mode & DMA_MODE_SSIZE_MASK) >> DMA_MODE_SSIZE_OFF) << MCFDMA_DMR_SRCS_OFF);
-> -
-> -  dmawp[MCFDMA_DIR] |= MCFDMA_DIR_ASCEN;   /* Enable completion interrupts */
-> -
-> -#ifdef DEBUG_DMA
-> -  printk("%s(%d): dmanr=%d DMR[%x]=%x DIR[%x]=%x\n", __FILE__, __LINE__,
-> -	 dmanr, (int) &dmalp[MCFDMA_DMR], dmalp[MCFDMA_DMR],
-> -	 (int) &dmawp[MCFDMA_DIR], dmawp[MCFDMA_DIR]);
-> -#endif
-> -}
-> -
-> -/* Set transfer address for specific DMA channel */
-> -static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int a)
-> -{
-> -  volatile unsigned int   *dmalp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_addr(dmanr=%d,a=%x)\n", dmanr, a);
-> -#endif
-> -
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -
-> -  /* Determine which address registers are used for memory/device accesses */
-> -  if (dmalp[MCFDMA_DMR] & MCFDMA_DMR_SRCM) {
-> -    /* Source incrementing, must be memory */
-> -    dmalp[MCFDMA_DSAR] = a;
-> -    /* Set dest address, must be device */
-> -    dmalp[MCFDMA_DDAR] = dma_device_address[dmanr];
-> -  } else {
-> -    /* Destination incrementing, must be memory */
-> -    dmalp[MCFDMA_DDAR] = a;
-> -    /* Set source address, must be device */
-> -    dmalp[MCFDMA_DSAR] = dma_device_address[dmanr];
-> -  }
-> -
-> -#ifdef DEBUG_DMA
-> -  printk("%s(%d): dmanr=%d DMR[%x]=%x SAR[%x]=%08x DAR[%x]=%08x\n",
-> -	__FILE__, __LINE__, dmanr, (int) &dmalp[MCFDMA_DMR], dmalp[MCFDMA_DMR],
-> -	(int) &dmalp[MCFDMA_DSAR], dmalp[MCFDMA_DSAR],
-> -	(int) &dmalp[MCFDMA_DDAR], dmalp[MCFDMA_DDAR]);
-> -#endif
-> -}
-> -
-> -/*
-> - * Specific for Coldfire - sets device address.
-> - * Should be called after the mode set call, and before set DMA address.
-> - */
-> -static __inline__ void set_dma_device_addr(unsigned int dmanr, unsigned int a)
-> -{
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_device_addr(dmanr=%d,a=%x)\n", dmanr, a);
-> -#endif
-> -
-> -  dma_device_address[dmanr] = a;
-> -}
-> -
-> -/*
-> - * NOTE 2: "count" represents _bytes_.
-> - *
-> - * NOTE 3: While a 32-bit register, "count" is only a maximum 24-bit value.
-> - */
-> -static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
-> -{
-> -  volatile unsigned int *dmalp;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("set_dma_count(dmanr=%d,count=%d)\n", dmanr, count);
-> -#endif
-> -
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -  dmalp[MCFDMA_DBCR] = count;
-> -}
-> -
-> -/*
-> - * Get DMA residue count. After a DMA transfer, this
-> - * should return zero. Reading this while a DMA transfer is
-> - * still in progress will return unpredictable results.
-> - * Otherwise, it returns the number of _bytes_ left to transfer.
-> - */
-> -static __inline__ int get_dma_residue(unsigned int dmanr)
-> -{
-> -  volatile unsigned int *dmalp;
-> -  unsigned int count;
-> -
-> -#ifdef DMA_DEBUG
-> -  printk("get_dma_residue(dmanr=%d)\n", dmanr);
-> -#endif
-> -
-> -  dmalp = (unsigned int *) dma_base_addr[dmanr];
-> -  count = dmalp[MCFDMA_DBCR];
-> -  return(count);
-> -}
-> -
-> -#endif /* !defined(CONFIG_M5272) */
-> -#endif /* CONFIG_COLDFIRE */
-> -
->   /* it's useless on the m68k, but unfortunately needed by the new
->      bootmem allocator (but this should do it for this) */
->   #define MAX_DMA_ADDRESS PAGE_OFFSET
->   
-> -#define MAX_DMA_CHANNELS 8
-> -
-> -extern int request_dma(unsigned int dmanr, const char * device_id);	/* reserve a DMA channel */
-> -extern void free_dma(unsigned int dmanr);	/* release it again */
-> -
->   #ifdef CONFIG_PCI
->   extern int isa_dma_bridge_buggy;
->   #else
-> diff --git a/arch/m68k/mm/motorola.c b/arch/m68k/mm/motorola.c
-> index ecbe948f4c1a..df7f797c908a 100644
-> --- a/arch/m68k/mm/motorola.c
-> +++ b/arch/m68k/mm/motorola.c
-> @@ -27,7 +27,6 @@
->   #include <asm/pgalloc.h>
->   #include <asm/machdep.h>
->   #include <asm/io.h>
-> -#include <asm/dma.h>
->   #ifdef CONFIG_ATARI
->   #include <asm/atari_stram.h>
->   #endif
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index af6c3c329076..d6144978e32d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -508,7 +508,7 @@ config MMC_OMAP_HS
->   
->   config MMC_WBSD
->   	tristate "Winbond W83L51xD SD/MMC Card Interface support"
-> -	depends on ISA_DMA_API && !M68K
-> +	depends on ISA_DMA_API
->   	help
->   	  This selects the Winbond(R) W83L51xD Secure digital and
->   	  Multimedia card Interface.
-> diff --git a/sound/core/Makefile b/sound/core/Makefile
-> index 350d704ced98..2762f03d9b7b 100644
-> --- a/sound/core/Makefile
-> +++ b/sound/core/Makefile
-> @@ -9,9 +9,7 @@ ifneq ($(CONFIG_SND_PROC_FS),)
->   snd-y += info.o
->   snd-$(CONFIG_SND_OSSEMUL) += info_oss.o
->   endif
-> -ifneq ($(CONFIG_M68K),y)
->   snd-$(CONFIG_ISA_DMA_API) += isadma.o
-> -endif
->   snd-$(CONFIG_SND_OSSEMUL) += sound_oss.o
->   snd-$(CONFIG_SND_VMASTER) += vmaster.o
->   snd-$(CONFIG_SND_JACK)	  += ctljack.o jack.o
-> diff --git a/sound/isa/Kconfig b/sound/isa/Kconfig
-> index 570b88e0b201..6ffa48dd5983 100644
-> --- a/sound/isa/Kconfig
-> +++ b/sound/isa/Kconfig
-> @@ -22,7 +22,7 @@ config SND_SB16_DSP
->   menuconfig SND_ISA
->   	bool "ISA sound devices"
->   	depends on ISA || COMPILE_TEST
-> -	depends on ISA_DMA_API && !M68K
-> +	depends on ISA_DMA_API
->   	default y
->   	help
->   	  Support for sound devices connected via the ISA bus.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2215202..1cda28ba 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -224,6 +224,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+>  		if (timedout) {
+>  			pr_err("%s: Reset 0x%x never completed.\n",
+>  				mmc_hostname(host->mmc), (int)mask);
+> +			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
+>  			sdhci_dumpregs(host);
+>  			return;
+>  		}
+> @@ -1716,6 +1717,7 @@ static bool sdhci_send_command_retry(struct sdhci_host *host,
+>  		if (!timeout--) {
+>  			pr_err("%s: Controller never released inhibit bit(s).\n",
+>  			       mmc_hostname(host->mmc));
+> +			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
+>  			sdhci_dumpregs(host);
+>  			cmd->error = -EIO;
+>  			return false;
+> @@ -1965,6 +1967,7 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+>  		if (timedout) {
+>  			pr_err("%s: Internal clock never stabilised.\n",
+>  			       mmc_hostname(host->mmc));
+> +			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
+>  			sdhci_dumpregs(host);
+>  			return;
+>  		}
+> @@ -1987,6 +1990,7 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
+>  			if (timedout) {
+>  				pr_err("%s: PLL clock never stabilised.\n",
+>  				       mmc_hostname(host->mmc));
+> +				sdhci_err_stats_inc(host, CTRL_TIMEOUT);
+>  				sdhci_dumpregs(host);
+>  				return;
+>  			}
+> @@ -3161,6 +3165,7 @@ static void sdhci_timeout_timer(struct timer_list *t)
+>  	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
+>  		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
+>  		       mmc_hostname(host->mmc));
+> +		sdhci_err_stats_inc(host, REQ_TIMEOUT);
+>  		sdhci_dumpregs(host);
+>  
+>  		host->cmd->error = -ETIMEDOUT;
+> @@ -3183,6 +3188,7 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
+>  	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
+>  		pr_err("%s: Timeout waiting for hardware interrupt.\n",
+>  		       mmc_hostname(host->mmc));
+> +		sdhci_err_stats_inc(host, REQ_TIMEOUT);
+>  		sdhci_dumpregs(host);
+>  
+>  		if (host->data) {
+> @@ -3234,17 +3240,21 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+>  			return;
+>  		pr_err("%s: Got command interrupt 0x%08x even though no command operation was in progress.\n",
+>  		       mmc_hostname(host->mmc), (unsigned)intmask);
+> +		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+>  		sdhci_dumpregs(host);
+>  		return;
+>  	}
+>  
+>  	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
+>  		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
+> -		if (intmask & SDHCI_INT_TIMEOUT)
+> +		if (intmask & SDHCI_INT_TIMEOUT) {
+>  			host->cmd->error = -ETIMEDOUT;
+> -		else
+> +			sdhci_err_stats_inc(host, CMD_TIMEOUT);
+> +		} else {
+>  			host->cmd->error = -EILSEQ;
+> -
+> +			if (!mmc_op_tuning(host->cmd->opcode))
+> +				sdhci_err_stats_inc(host, CMD_CRC);
+> +		}
+>  		/* Treat data command CRC error the same as data CRC error */
+>  		if (host->cmd->data &&
+>  		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
+> @@ -3266,6 +3276,8 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+>  			  -ETIMEDOUT :
+>  			  -EILSEQ;
+>  
+> +		sdhci_err_stats_inc(host, AUTO_CMD);
+> +
+>  		if (sdhci_auto_cmd23(host, mrq)) {
+>  			mrq->sbc->error = err;
+>  			__sdhci_finish_mrq(host, mrq);
+> @@ -3342,6 +3354,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>  			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+>  				host->data_cmd = NULL;
+>  				data_cmd->error = -ETIMEDOUT;
+> +				sdhci_err_stats_inc(host, CMD_TIMEOUT);
+>  				__sdhci_finish_mrq(host, data_cmd->mrq);
+>  				return;
+>  			}
+> @@ -3370,23 +3383,29 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>  
+>  		pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
+>  		       mmc_hostname(host->mmc), (unsigned)intmask);
+> +		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+>  		sdhci_dumpregs(host);
+>  
+>  		return;
+>  	}
+>  
+> -	if (intmask & SDHCI_INT_DATA_TIMEOUT)
+> +	if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+>  		host->data->error = -ETIMEDOUT;
+> -	else if (intmask & SDHCI_INT_DATA_END_BIT)
+> +		sdhci_err_stats_inc(host, DAT_TIMEOUT);
+> +	} else if (intmask & SDHCI_INT_DATA_END_BIT)
+>  		host->data->error = -EILSEQ;
+
+Seems to be missing here:
+
+		sdhci_err_stats_inc(host, DAT_CRC);
+
+Also it would be nice to have braces {} on all arms of if-else-if
+Can use checkpatch.pl --strict to see where
+
+>  	else if ((intmask & SDHCI_INT_DATA_CRC) &&
+>  		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
+> -			!= MMC_BUS_TEST_R)
+> +			!= MMC_BUS_TEST_R) {
+>  		host->data->error = -EILSEQ;
+> +		if (!mmc_op_tuning(host->cmd->opcode))
+> +			sdhci_err_stats_inc(host, DAT_CRC);
+> +	}
+>  	else if (intmask & SDHCI_INT_ADMA_ERROR) {
+>  		pr_err("%s: ADMA error: 0x%08x\n", mmc_hostname(host->mmc),
+>  		       intmask);
+>  		sdhci_adma_show_error(host);
+> +		sdhci_err_stats_inc(host, ADMA);
+>  		host->data->error = -EIO;
+>  		if (host->ops->adma_workaround)
+>  			host->ops->adma_workaround(host, intmask);
+> @@ -3584,6 +3603,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>  	if (unexpected) {
+>  		pr_err("%s: Unexpected interrupt 0x%08x.\n",
+>  			   mmc_hostname(host->mmc), unexpected);
+> +		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+>  		sdhci_dumpregs(host);
+>  	}
+>  
+> @@ -3905,20 +3925,27 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>  	if (!host->cqe_on)
+>  		return false;
+>  
+> -	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
+> +	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC)) {
+>  		*cmd_error = -EILSEQ;
+> -	else if (intmask & SDHCI_INT_TIMEOUT)
+> +		if (!mmc_op_tuning(host->cmd->opcode))
+> +			sdhci_err_stats_inc(host, CMD_CRC);
+> +	} else if (intmask & SDHCI_INT_TIMEOUT) {
+>  		*cmd_error = -ETIMEDOUT;
+> -	else
+> +		sdhci_err_stats_inc(host, CMD_TIMEOUT);
+> +	} else
+>  		*cmd_error = 0;
+>  
+> -	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
+> +	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
+>  		*data_error = -EILSEQ;
+> -	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
+> +		if (!mmc_op_tuning(host->cmd->opcode))
+> +			sdhci_err_stats_inc(host, DAT_CRC);
+> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+>  		*data_error = -ETIMEDOUT;
+> -	else if (intmask & SDHCI_INT_ADMA_ERROR)
+> +		sdhci_err_stats_inc(host, DAT_TIMEOUT);
+> +	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
+>  		*data_error = -EIO;
+> -	else
+> +		sdhci_err_stats_inc(host, ADMA);
+> +	} else
+>  		*data_error = 0;
+>  
+>  	/* Clear selected interrupts. */
+> @@ -3934,6 +3961,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>  		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
+>  		pr_err("%s: CQE: Unexpected interrupt 0x%08x.\n",
+>  		       mmc_hostname(host->mmc), intmask);
+> +		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+>  		sdhci_dumpregs(host);
+>  	}
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index d7929d7..95a08f0 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -356,6 +356,9 @@ struct sdhci_adma2_64_desc {
+>   */
+>  #define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
+>  
+> +#define sdhci_err_stats_inc(host, err_name) \
+> +	mmc_debugfs_err_stats_inc((host)->mmc, MMC_ERR_##err_name)
+> +
+>  enum sdhci_cookie {
+>  	COOKIE_UNMAPPED,
+>  	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index d9a65c6..9c50bc4 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -99,6 +99,12 @@ static inline bool mmc_op_multi(u32 opcode)
+>  	       opcode == MMC_READ_MULTIPLE_BLOCK;
+>  }
+>  
+> +static inline bool mmc_op_tuning(u32 opcode)
+> +{
+> +	return opcode == MMC_SEND_TUNING_BLOCK ||
+> +			opcode == MMC_SEND_TUNING_BLOCK_HS200;
+> +}
+> +
+>  /*
+>   * MMC_SWITCH argument format:
+>   *
+
+There does not seem to be any:
+
+	sdhci_err_stats_inc(host, TUNING);
+
+MMC_ERR_TUNING does not seem to get used.
