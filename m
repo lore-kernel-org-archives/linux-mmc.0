@@ -2,49 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEF28C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 08:37:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 351F9C35280
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 09:32:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345406AbiDZIkT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Apr 2022 04:40:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58646 "EHLO
+        id S242720AbiDZJfO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 05:35:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345801AbiDZIjc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 04:39:32 -0400
+        with ESMTP id S1347753AbiDZJeD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 05:34:03 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72AF8996A1;
-        Tue, 26 Apr 2022 01:31:20 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E492C3F326;
+        Tue, 26 Apr 2022 01:58:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1650961881; x=1682497881;
+  t=1650963508; x=1682499508;
   h=from:to:cc:subject:date:message-id;
-  bh=ey2DEjx+AwyO6kemYE9A9R1iln2K570othjBxqTPYqY=;
-  b=YMmPAOq6g3ITUqKsSgvvDdhuQfYVjeyHV9yzYYsnrQjMX2MbZaOZmsCV
-   7fVJhUr+CK4cR0fppYGMSyQS4vks+438FIodfukQxCbE1wtoW8CHXS+P8
-   U6GZUFgDnchYP7ERpEpG0rGwhpe5O69FBkhQW6KqDei6tk6LguPYSDYIj
-   g=;
-Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
-  by alexa-out.qualcomm.com with ESMTP; 26 Apr 2022 01:31:20 -0700
+  bh=Q251io/kJJuj8uHbuLecwGWxnXivBjY2LaiYPZX3vSQ=;
+  b=Dm+ISPdfrvz4+wBcHt8bX5lwUSop6MKOM4Tc0P72GlAdu1KEf1sulqsc
+   FM1KqSqROIgf2fueCxGkCPtGqlW8NAgM4xbPCzmAKx28juvQINUGDakUm
+   1xHJnUOCciHSaFvohjiCLv9wvunZeG+m/xoW8zTGJgKM7/C2rlbyL9dbB
+   Y=;
+Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
+  by alexa-out.qualcomm.com with ESMTP; 26 Apr 2022 01:58:28 -0700
 X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 26 Apr 2022 01:31:18 -0700
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 26 Apr 2022 01:58:26 -0700
 X-QCInternal: smtphost
 Received: from hu-c-spathi-hyd.qualcomm.com (HELO hu-sgudaval-hyd.qualcomm.com) ([10.213.108.59])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 26 Apr 2022 14:00:59 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 26 Apr 2022 14:28:09 +0530
 Received: by hu-sgudaval-hyd.qualcomm.com (Postfix, from userid 212714)
-        id 3A599DD9; Tue, 26 Apr 2022 14:00:58 +0530 (+0530)
+        id 621D63085; Tue, 26 Apr 2022 14:28:08 +0530 (+0530)
 From:   Srinivasarao Pathipati <quic_spathi@quicinc.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
-        riteshh@codeaurora.org, asutoshd@codeaurora.org, axboe@kernel.dk,
-        avri.altman@wdc.com, kch@nvidia.com, CLoehle@hyperstone.com,
-        swboyd@chromium.org, digetx@gmail.com, bigeasy@linutronix.de,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        kamasali <quic_kamasali@quicinc.com>,
+        riteshh@codeaurora.org, asutoshd@codeaurora.org, colyli@suse.de,
+        axboe@kernel.dk, kch@nvidia.com, cw9316.lee@samsung.com,
+        sbhanu@codeaurora.org, joel@jms.id.au, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     kamasali <quic_kamasali@quicinc.com>,
         Srinivasarao Pathipati <quic_spathi@quicinc.com>
-Subject: [PATCH V1] mmc: core: Enable force hw reset
-Date:   Tue, 26 Apr 2022 14:00:18 +0530
-Message-Id: <1650961818-13452-1-git-send-email-quic_spathi@quicinc.com>
+Subject: [PATCH V1] sdhci-msm: Add err_stat's in CQE path
+Date:   Tue, 26 Apr 2022 14:28:01 +0530
+Message-Id: <1650963481-11139-1-git-send-email-quic_spathi@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -52,78 +51,137 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
 
-During error recovery set need hw reset to handle
-ICE error where cqe reset is must.
+Add err_stat's in CQE path for eMMC.
 
 Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
 Signed-off-by: kamasali <quic_kamasali@quicinc.com>
 Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
 ---
- drivers/mmc/core/block.c      | 8 +++++---
- drivers/mmc/host/cqhci-core.c | 7 +++++--
- include/linux/mmc/host.h      | 1 +
- 3 files changed, 11 insertions(+), 5 deletions(-)
+ drivers/mmc/core/queue.c      |  4 ++++
+ drivers/mmc/host/cqhci-core.c |  7 +++++++
+ drivers/mmc/host/sdhci.c      | 21 ++++++++++++++-------
+ include/linux/mmc/host.h      | 22 ++++++++++++++++++++++
+ 4 files changed, 47 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index b35e7a9..f63bf33 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1482,10 +1482,12 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
- 	pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index a3d4460..7b07520 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -100,6 +100,10 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct request *req)
+ 	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
+ 	bool recovery_needed = false;
  
- 	err = mmc_cqe_recovery(host);
--	if (err)
-+	if (err || host->need_hw_reset) {
- 		mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
--	else
--		mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
-+		if (host->need_hw_reset)
-+			host->need_hw_reset = false;
-+	}
-+	mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
- 
- 	pr_debug("%s: CQE recovery done\n", mmc_hostname(host));
- }
++	host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]++;
++	mmc_log_string(host,
++	"Request timed out! Active reqs: %d Req: %p Tag: %d\n",
++	mmc_cqe_qcnt(mq), req, req->tag);
+ 	switch (issue_type) {
+ 	case MMC_ISSUE_ASYNC:
+ 	case MMC_ISSUE_DCMD:
 diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index b0d30c3..311b510 100644
+index 311b510..03d4064 100644
 --- a/drivers/mmc/host/cqhci-core.c
 +++ b/drivers/mmc/host/cqhci-core.c
-@@ -812,18 +812,21 @@ static void cqhci_finish_mrq(struct mmc_host *mmc, unsigned int tag)
- irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
- 		      int data_error)
- {
--	u32 status;
-+	u32 status, ice_err;
- 	unsigned long tag = 0, comp_status;
- 	struct cqhci_host *cq_host = mmc->cqe_private;
- 
- 	status = cqhci_readl(cq_host, CQHCI_IS);
- 	cqhci_writel(cq_host, status, CQHCI_IS);
-+	ice_err = status & (CQHCI_IS_GCE | CQHCI_IS_ICCE);
- 
- 	pr_debug("%s: cqhci: IRQ status: 0x%08x\n", mmc_hostname(mmc), status);
- 
+@@ -825,6 +825,13 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
  	if ((status & (CQHCI_IS_RED | CQHCI_IS_GCE | CQHCI_IS_ICCE)) ||
--	    cmd_error || data_error)
-+	    cmd_error || data_error || ice_err){
-+		mmc->need_hw_reset = true;
+ 	    cmd_error || data_error || ice_err){
+ 		mmc->need_hw_reset = true;
++		if (status & CQHCI_IS_RED)
++			mmc->err_stats[MMC_ERR_CMDQ_RED]++;
++		if (status & CQHCI_IS_GCE)
++			mmc->err_stats[MMC_ERR_CMDQ_GCE]++;
++		if (status & CQHCI_IS_ICCE)
++			mmc->err_stats[MMC_ERR_CMDQ_ICCE]++;
++
  		cqhci_error_irq(mmc, status, cmd_error, data_error);
-+	}
+ 	}
  
- 	if (status & CQHCI_IS_TCC) {
- 		/* read TCN and complete the request */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2215202..a76c514 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3905,20 +3905,27 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+ 	if (!host->cqe_on)
+ 		return false;
+ 
+-	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
++	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC)) {
+ 		*cmd_error = -EILSEQ;
+-	else if (intmask & SDHCI_INT_TIMEOUT)
++		if (intmask & SDHCI_INT_CRC)
++			host->mmc->err_stats[MMC_ERR_CMD_CRC]++;
++	} else if (intmask & SDHCI_INT_TIMEOUT) {
+ 		*cmd_error = -ETIMEDOUT;
+-	else
++		host->mmc->err_stats[MMC_ERR_CMD_TIMEOUT]++;
++	} else
+ 		*cmd_error = 0;
+ 
+-	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
++	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
+ 		*data_error = -EILSEQ;
+-	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
++		if (intmask & SDHCI_INT_DATA_CRC)
++			host->mmc->err_stats[MMC_ERR_DAT_CRC]++;
++	} else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
+ 		*data_error = -ETIMEDOUT;
+-	else if (intmask & SDHCI_INT_ADMA_ERROR)
++		host->mmc->err_stats[MMC_ERR_DAT_TIMEOUT]++;
++	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
+ 		*data_error = -EIO;
+-	else
++		host->mmc->err_stats[MMC_ERR_ADMA]++;
++	} else
+ 		*data_error = 0;
+ 
+ 	/* Clear selected interrupts. */
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c193c50..3d00bcf 100644
+index 3d00bcf..c38072e 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -492,6 +492,7 @@ struct mmc_host {
- 	int			cqe_qdepth;
- 	bool			cqe_enabled;
- 	bool			cqe_on;
-+	bool                    need_hw_reset;
+@@ -80,6 +80,9 @@ struct mmc_ios {
+ 	bool enhanced_strobe;			/* hs400es selection */
+ };
  
- 	/* Inline encryption support */
- #ifdef CONFIG_MMC_CRYPTO
++#define NUM_LOG_PAGES           10
++#define mmc_log_string(mmc_host, fmt, ...)      do { } while (0)
++
+ struct mmc_clk_phase {
+ 	bool valid;
+ 	u16 in_deg;
+@@ -93,6 +96,24 @@ struct mmc_clk_phase_map {
+ 
+ struct mmc_host;
+ 
++enum {
++	MMC_ERR_CMD_TIMEOUT,
++	MMC_ERR_CMD_CRC,
++	MMC_ERR_DAT_TIMEOUT,
++	MMC_ERR_DAT_CRC,
++	MMC_ERR_AUTO_CMD,
++	MMC_ERR_ADMA,
++	MMC_ERR_TUNING,
++	MMC_ERR_CMDQ_RED,
++	MMC_ERR_CMDQ_GCE,
++	MMC_ERR_CMDQ_ICCE,
++	MMC_ERR_REQ_TIMEOUT,
++	MMC_ERR_CMDQ_REQ_TIMEOUT,
++	MMC_ERR_ICE_CFG,
++	MMC_ERR_MAX,
++};
++
++
+ struct mmc_host_ops {
+ 	/*
+ 	 * It is optional for the host to implement pre_req and post_req in
+@@ -471,6 +492,7 @@ struct mmc_host {
+ 	struct mmc_supply	supply;
+ 
+ 	struct dentry		*debugfs_root;
++	u32                     err_stats[MMC_ERR_MAX];
+ 
+ 	/* Ongoing data transfer that allows commands during transfer */
+ 	struct mmc_request	*ongoing_mrq;
 -- 
 2.7.4
 
