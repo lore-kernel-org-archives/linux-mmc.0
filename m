@@ -2,203 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCD3AC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 09:47:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8F59C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 09:51:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345140AbiDZJuX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Apr 2022 05:50:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48472 "EHLO
+        id S236183AbiDZJyY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 05:54:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36218 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348996AbiDZJt4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 05:49:56 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8CB11AD3F5;
-        Tue, 26 Apr 2022 02:05:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1650963935; x=1682499935;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=7rLDl2p4/VTZazRPC6IkxodREfnunclbnMNaItgAgxA=;
-  b=jPSxzXaL+vnJqsyjQo7m5JyNxqrIxD8y/7xL9TNXLNZ1LpIVOfIO8BKp
-   YiVuPxTPQg/kb8su/jmyzUBEW68KDhxhR+gOdJeRVdoi+7cLB4CgsAEIQ
-   eaCv/6dRf/nv74R7MGaSc0H5guU51O9r++VNq03JW1sDDnd7lQq0r2TQY
-   c2gMWRvM6mMJ+ZKvIS3bi6u/RLGs9Gt55YIrwXjv9lkX4gVtHbRI53tzq
-   LELXQvhtoHiKA8a3M6KBWuGW8VizlMZlXSB29dRpnKXcj+Uj77xpN81MV
-   19fWLtxoK5iT1kkEyeYDtrEMHXQSYuaXlPChOlOrePefpbS8jrJXqmoeu
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10328"; a="247440661"
-X-IronPort-AV: E=Sophos;i="5.90,290,1643702400"; 
-   d="scan'208";a="247440661"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Apr 2022 02:05:08 -0700
-X-IronPort-AV: E=Sophos;i="5.90,290,1643702400"; 
-   d="scan'208";a="558203556"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.58.98])
-  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Apr 2022 02:05:04 -0700
-Message-ID: <ddedd476-eb78-229a-e028-eabb046bf22a@intel.com>
-Date:   Tue, 26 Apr 2022 12:05:00 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.7.0
-Subject: Re: [PATCH V1] sdhci-msm: Add err_stat's in CQE path
-Content-Language: en-US
-To:     Srinivasarao Pathipati <quic_spathi@quicinc.com>,
-        ulf.hansson@linaro.org, riteshh@codeaurora.org,
-        asutoshd@codeaurora.org, colyli@suse.de, axboe@kernel.dk,
-        kch@nvidia.com, cw9316.lee@samsung.com, sbhanu@codeaurora.org,
-        joel@jms.id.au, linux-mmc@vger.kernel.org,
+        with ESMTP id S1347569AbiDZJxi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 05:53:38 -0400
+Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B72672981A;
+        Tue, 26 Apr 2022 02:10:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1650964242; x=1682500242;
+  h=from:to:cc:subject:date:message-id;
+  bh=+p40Cvh2hhSxVfAPCJZpYYJuBDaizdr/QFl0LujIiyQ=;
+  b=y1OMGka4EBLJIHT6oDWaoQuh1qamXXwi234qTk3eLdV9AldtHw5OuLsV
+   yL7Pni4OYSLMgsUsFkFVWZCR8e/dAKv0H57S8bcHgFEWzaPvxU1fv4N1c
+   R/ihdMUEgf/B1XGyORS6x720HNeFoXNVm9DgPg7y6t6K1TFjtnYYGKn28
+   Q=;
+Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
+  by alexa-out.qualcomm.com with ESMTP; 26 Apr 2022 02:10:42 -0700
+X-QCInternal: smtphost
+Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 26 Apr 2022 02:10:40 -0700
+X-QCInternal: smtphost
+Received: from hu-c-spathi-hyd.qualcomm.com (HELO hu-sgudaval-hyd.qualcomm.com) ([10.213.108.59])
+  by ironmsg02-blr.qualcomm.com with ESMTP; 26 Apr 2022 14:40:28 +0530
+Received: by hu-sgudaval-hyd.qualcomm.com (Postfix, from userid 212714)
+        id B262D3AE1; Tue, 26 Apr 2022 14:40:27 +0530 (+0530)
+From:   Srinivasarao Pathipati <quic_spathi@quicinc.com>
+To:     ulf.hansson@linaro.org, u.kleine-koenig@pengutronix.de,
+        YehezkelShB@gmail.com, rmk+kernel@armlinux.org.uk,
+        t.scherer@eckelmann.de, s.shtylyov@omp.ru, sensor1010@163.com,
+        sartgarg@codeaurora.org, hns@goldelico.com,
+        uic_kamasali@quicinc.com, quic_spathi@quicinc.com,
+        tiantao6@hisilicon.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
 Cc:     kamasali <quic_kamasali@quicinc.com>
-References: <1650963481-11139-1-git-send-email-quic_spathi@quicinc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <1650963481-11139-1-git-send-email-quic_spathi@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH V1] mmc: sdhci-msm: Add wakeup functionality support for sdio cards
+Date:   Tue, 26 Apr 2022 14:40:25 +0530
+Message-Id: <1650964225-6705-1-git-send-email-quic_spathi@quicinc.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/04/22 11:58, Srinivasarao Pathipati wrote:
-> From: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> 
-> Add err_stat's in CQE path for eMMC.
-> 
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> Signed-off-by: kamasali <quic_kamasali@quicinc.com>
-> Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
+From: Sarthak Garg <sartgarg@codeaurora.org>
 
-How does this relate to the V5 patches:
+This adds external GPIO wakeup support to sdhci-msm driver
+for sdio cards.
 
-	https://lore.kernel.org/linux-mmc/1650902443-26357-1-git-send-email-quic_c_sbhanu@quicinc.com/T/#u
+Also enables clk gating only in system Suspend/Resume for SDIO card.
 
+Also add the below fixes from 4.9 kernel :
 
-> ---
->  drivers/mmc/core/queue.c      |  4 ++++
->  drivers/mmc/host/cqhci-core.c |  7 +++++++
->  drivers/mmc/host/sdhci.c      | 21 ++++++++++++++-------
->  include/linux/mmc/host.h      | 22 ++++++++++++++++++++++
->  4 files changed, 47 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index a3d4460..7b07520 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -100,6 +100,10 @@ static enum blk_eh_timer_return mmc_cqe_timed_out(struct request *req)
->  	enum mmc_issue_type issue_type = mmc_issue_type(mq, req);
->  	bool recovery_needed = false;
->  
-> +	host->err_stats[MMC_ERR_CMDQ_REQ_TIMEOUT]++;
-> +	mmc_log_string(host,
-> +	"Request timed out! Active reqs: %d Req: %p Tag: %d\n",
-> +	mmc_cqe_qcnt(mq), req, req->tag);
->  	switch (issue_type) {
->  	case MMC_ISSUE_ASYNC:
->  	case MMC_ISSUE_DCMD:
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index 311b510..03d4064 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -825,6 +825,13 @@ irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
->  	if ((status & (CQHCI_IS_RED | CQHCI_IS_GCE | CQHCI_IS_ICCE)) ||
->  	    cmd_error || data_error || ice_err){
->  		mmc->need_hw_reset = true;
-> +		if (status & CQHCI_IS_RED)
-> +			mmc->err_stats[MMC_ERR_CMDQ_RED]++;
-> +		if (status & CQHCI_IS_GCE)
-> +			mmc->err_stats[MMC_ERR_CMDQ_GCE]++;
-> +		if (status & CQHCI_IS_ICCE)
-> +			mmc->err_stats[MMC_ERR_CMDQ_ICCE]++;
-> +
->  		cqhci_error_irq(mmc, status, cmd_error, data_error);
->  	}
->  
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 2215202..a76c514 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3905,20 +3905,27 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
->  	if (!host->cqe_on)
->  		return false;
->  
-> -	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
-> +	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC)) {
->  		*cmd_error = -EILSEQ;
-> -	else if (intmask & SDHCI_INT_TIMEOUT)
-> +		if (intmask & SDHCI_INT_CRC)
-> +			host->mmc->err_stats[MMC_ERR_CMD_CRC]++;
-> +	} else if (intmask & SDHCI_INT_TIMEOUT) {
->  		*cmd_error = -ETIMEDOUT;
-> -	else
-> +		host->mmc->err_stats[MMC_ERR_CMD_TIMEOUT]++;
-> +	} else
->  		*cmd_error = 0;
->  
-> -	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
-> +	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
->  		*data_error = -EILSEQ;
-> -	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
-> +		if (intmask & SDHCI_INT_DATA_CRC)
-> +			host->mmc->err_stats[MMC_ERR_DAT_CRC]++;
-> +	} else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
->  		*data_error = -ETIMEDOUT;
-> -	else if (intmask & SDHCI_INT_ADMA_ERROR)
-> +		host->mmc->err_stats[MMC_ERR_DAT_TIMEOUT]++;
-> +	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
->  		*data_error = -EIO;
-> -	else
-> +		host->mmc->err_stats[MMC_ERR_ADMA]++;
-> +	} else
->  		*data_error = 0;
->  
->  	/* Clear selected interrupts. */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 3d00bcf..c38072e 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -80,6 +80,9 @@ struct mmc_ios {
->  	bool enhanced_strobe;			/* hs400es selection */
->  };
->  
-> +#define NUM_LOG_PAGES           10
-> +#define mmc_log_string(mmc_host, fmt, ...)      do { } while (0)
-> +
->  struct mmc_clk_phase {
->  	bool valid;
->  	u16 in_deg;
-> @@ -93,6 +96,24 @@ struct mmc_clk_phase_map {
->  
->  struct mmc_host;
->  
-> +enum {
-> +	MMC_ERR_CMD_TIMEOUT,
-> +	MMC_ERR_CMD_CRC,
-> +	MMC_ERR_DAT_TIMEOUT,
-> +	MMC_ERR_DAT_CRC,
-> +	MMC_ERR_AUTO_CMD,
-> +	MMC_ERR_ADMA,
-> +	MMC_ERR_TUNING,
-> +	MMC_ERR_CMDQ_RED,
-> +	MMC_ERR_CMDQ_GCE,
-> +	MMC_ERR_CMDQ_ICCE,
-> +	MMC_ERR_REQ_TIMEOUT,
-> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
-> +	MMC_ERR_ICE_CFG,
-> +	MMC_ERR_MAX,
-> +};
-> +
-> +
->  struct mmc_host_ops {
->  	/*
->  	 * It is optional for the host to implement pre_req and post_req in
-> @@ -471,6 +492,7 @@ struct mmc_host {
->  	struct mmc_supply	supply;
->  
->  	struct dentry		*debugfs_root;
-> +	u32                     err_stats[MMC_ERR_MAX];
->  
->  	/* Ongoing data transfer that allows commands during transfer */
->  	struct mmc_request	*ongoing_mrq;
+c363224b: Fix wakeup functionality for SDIO
+61fc5bf6: Remove flag MMC_PM_WAKE_SDIO_IRQ in mmc_resume_host
+a7a2a82e: Set sdio_pending_processing default state to false.
+
+Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+Signed-off-by: kamasali <quic_kamasali@quicinc.com>
+Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
+---
+ drivers/mmc/core/bus.c  | 7 +++++++
+ drivers/mmc/core/sdio.c | 1 +
+ 2 files changed, 8 insertions(+)
+
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 58a60af..a475fe1 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -364,6 +364,13 @@ int mmc_add_card(struct mmc_card *card)
+ #endif
+ 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
+ 
++	if (mmc_card_sdio(card)) {
++		ret = device_init_wakeup(&card->dev, true);
++		if (ret)
++			pr_err("%s: %s: failed to init wakeup: %d\n",
++				mmc_hostname(card->host), __func__, ret);
++	}
++
+ 	device_enable_async_suspend(&card->dev);
+ 
+ 	ret = device_add(&card->dev);
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index 25799ac..9502318 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1096,6 +1096,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 	mmc_release_host(host);
+ 
+ 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
++	host->pm_flags &= ~MMC_PM_WAKE_SDIO_IRQ;
+ 	return err;
+ }
+ 
+-- 
+2.7.4
 
