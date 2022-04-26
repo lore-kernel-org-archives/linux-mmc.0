@@ -2,99 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D8AC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 09:54:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1704FC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 10:27:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347850AbiDZJ6D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Apr 2022 05:58:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45370 "EHLO
+        id S1348845AbiDZKah (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 06:30:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347774AbiDZJ5o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 05:57:44 -0400
-Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E924387B2;
-        Tue, 26 Apr 2022 02:15:54 -0700 (PDT)
+        with ESMTP id S1348787AbiDZKa2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 06:30:28 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB597CA0C7
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 03:06:21 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id p10so31015589lfa.12
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 03:06:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1650964554; x=1682500554;
-  h=from:to:cc:subject:date:message-id;
-  bh=IbCZhL5dtMpAnfh6d6qY6fF2LqJySHYeU8LCRLMN9ng=;
-  b=W1vnJkRM+ce2cT1BOG3+ujXevnBsywjEHYInTHuOj7RaOKZI60xmG4NW
-   wTpx1H3KUlcrc5NXtLWuYgMmCP2zq0TXVjsWQhG1+9gJEgo/CcOgsn/Nv
-   rLFhg43tVabC2JI1DqJW+kd6O33T6/1goh2cGAKL+3U7Ijy64IiwisXaW
-   U=;
-Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
-  by alexa-out.qualcomm.com with ESMTP; 26 Apr 2022 02:15:54 -0700
-X-QCInternal: smtphost
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 26 Apr 2022 02:15:53 -0700
-X-QCInternal: smtphost
-Received: from hu-c-spathi-hyd.qualcomm.com (HELO hu-sgudaval-hyd.qualcomm.com) ([10.213.108.59])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 26 Apr 2022 14:45:35 +0530
-Received: by hu-sgudaval-hyd.qualcomm.com (Postfix, from userid 212714)
-        id 98D8A3AEA; Tue, 26 Apr 2022 14:45:34 +0530 (+0530)
-From:   Srinivasarao Pathipati <quic_spathi@quicinc.com>
-To:     ulf.hansson@linaro.org, avri.altman@wdc.com,
-        linus.walleij@linaro.org, vbadigan@codeaurora.org,
-        shawn.lin@rock-chips.com, s.shtylyov@omp.ru, merez@codeaurora.org,
-        wsa+renesas@sang-engineering.com, briannorris@chromium.org,
-        sayalil@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Kishor Krishna Bhat <quic_kishkris@quicinc.com>,
-        kamasali <quic_kamasali@quicinc.com>,
-        Srinivasarao Pathipati <quic_spathi@quicinc.com>
-Subject: [PATCH V1] mmc: core: Select HS mode in device first and then in the host
-Date:   Tue, 26 Apr 2022 14:45:32 +0530
-Message-Id: <1650964532-9379-1-git-send-email-quic_spathi@quicinc.com>
-X-Mailer: git-send-email 2.7.4
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=buYIEkZGtPXCru56pipwVvOC7qPXwxIaSSF1o4dnOTw=;
+        b=Yq0f64tMeyHseF6dm+UJXJq7hpkxPmjktLmOek1YIupiKJeErQepBUX5G2Th2LxHOO
+         uzoiDvKGVTwqxKrvoGQb6lwm7OW+rjw6C94CSyf46+wHIYqDCV55bOQVW8E3+PFLW+1h
+         QdJwvzMCnQ64IHvntEx8HcmKWGnJk7phL3NKeTJfyBwbIupTy3cXmYZLIl7qFBn61lvD
+         2W9EzmxLW7DptpCPA873KhdiIMx7Yq05LAt7hqDHTtYGmVNiZHxjULL/mhN50NCd8RJV
+         sQwYfLVF10VNFh7UetbqXOdd5dTw9oaYgkupn8w/gWcC4l4ZRkxRaqx/zJZAyo7Q1Unv
+         InAA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=buYIEkZGtPXCru56pipwVvOC7qPXwxIaSSF1o4dnOTw=;
+        b=mYUEScueehkzsMQBK8tUiV9+feSVPCv8UIdpHzw0zUFmwF3/hUzuvZXmU3WQ0Kj+FL
+         d6mAlhRpfpADpfwYEydce+kxw/rxOvjP4DblmoZGdnU+BTS6Trneyo9B8v0/hnBqVUdT
+         WtawmBhMu2/xb0/xHu7veshKSpy94z84sJAltKvrSb/28MA+7fLSE3NK1gf/atBRScnK
+         pgqnhKSjAMN5+dM4m2rnRjOy3m/SFPcEIsHSyPaJq5K67L4i4VqI69wBoxoH5+ohxia0
+         YHVSVT4ok2f9UmUKUrPgxnB3ivXidXcGwZTcPNoRmapd4jpYi4AwSlf1QXpRPAvsieJf
+         mfIQ==
+X-Gm-Message-State: AOAM530iJaT9zttiq0dUYn3vi0OQUfaumldd5twFIUc825WHvrJvZndp
+        GLTFyw0ZugvAPspmF6v2BMxshpwygg1wQA==
+X-Google-Smtp-Source: ABdhPJwc93M8oY2GAQslCyI361jrj0wG8f2KN+c4FnPjlqlo9hGxazLLBFk6gScweoS9hxa8fAEN4g==
+X-Received: by 2002:a19:8c4b:0:b0:44a:b6a4:4873 with SMTP id i11-20020a198c4b000000b0044ab6a44873mr15960995lfj.549.1650967579535;
+        Tue, 26 Apr 2022 03:06:19 -0700 (PDT)
+Received: from localhost.localdomain (h-98-128-181-154.NA.cust.bahnhof.se. [98.128.181.154])
+        by smtp.gmail.com with ESMTPSA id j5-20020a2eb705000000b0024ee0f8ef8asm1486284ljo.79.2022.04.26.03.06.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Apr 2022 03:06:18 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
+Cc:     Ming Liu <liu.ming50@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc-utils: Fix build error MMC_BLOCK_MAJOR undeclared
+Date:   Tue, 26 Apr 2022 12:06:05 +0200
+Message-Id: <20220426100605.36019-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sayali Lokhande <sayalil@codeaurora.org>
+The reported build error:
+In function read_extcsd: mmc_cmds.c:72:18: error: MMC_BLOCK_MAJOR
+undeclared (first use in this function)
 
-While switching from hs400 to hs200 mode, high speed mode
-timing should be selected in the device before changing the
-clock frequency in the host. But current implementation,
-(mmc_hs400_to_hs200) first updates the frequency in the host
-and then updates mode in the device. This is a spec violation.
-Hence update the sequence to comply with the spec.
+In commit 118dc4a0909f ("mmc-utils: Remove unused MMC_BLOCK_MAJOR") the
+define for MMC_BLOCK_MAJOR was dropped. In a way this commit is still
+correct, but unfortunately it also introduced a dependency to a commit for
+the Linux kernel (83fc5dd57f86 mmc: fix compilation of user API), which
+fixes the mmc uapi header file (mmc: fix compilation of user API).
 
-Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Signed-off-by: Sayali Lokhande <sayalil@codeaurora.org>
-Signed-off-by: Kishor Krishna Bhat <quic_kishkris@quicinc.com>
-Signed-off-by: kamasali <quic_kamasali@quicinc.com>
-Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
+Rather than relying on the commit in the kernel, let's include the missing
+header for MMC_BLOCK_MAJOR.
+
+Reported-by: Ming Liu <liu.ming50@gmail.com>
+Fixes: 118dc4a0909f ("mmc-utils: Remove unused MMC_BLOCK_MAJOR")
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/mmc.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ mmc.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 8691c00..b4bcebc 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1259,10 +1259,6 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 	int err;
- 	u8 val;
+diff --git a/mmc.h b/mmc.h
+index 25d6864..0796532 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -17,6 +17,7 @@
+  * those modifications are Copyright (c) 2016 SanDisk Corp.
+  */
  
--	/* Reduce frequency to HS */
--	max_dtr = card->ext_csd.hs_max_dtr;
--	mmc_set_clock(host, max_dtr);
--
- 	/* Switch HS400 to HS DDR */
- 	val = EXT_CSD_TIMING_HS;
- 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
-@@ -1276,6 +1272,10 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
++#include <linux/major.h>
+ #include <linux/mmc/ioctl.h>
  
- 	mmc_set_timing(host, MMC_TIMING_MMC_DDR52);
- 
-+	/* Reduce frequency to HS */
-+	max_dtr = card->ext_csd.hs_max_dtr;
-+	mmc_set_clock(host, max_dtr);
-+
- 	err = mmc_switch_status(card, true);
- 	if (err)
- 		goto out_err;
+ /* From kernel linux/mmc/mmc.h */
 -- 
-2.7.4
+2.25.1
 
