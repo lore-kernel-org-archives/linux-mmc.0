@@ -2,102 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 740C2C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 11:50:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBF4FC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 13:33:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232381AbiDZLxe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Apr 2022 07:53:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55700 "EHLO
+        id S1350823AbiDZNg1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 09:36:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345743AbiDZLxc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 07:53:32 -0400
+        with ESMTP id S1346629AbiDZNg0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 09:36:26 -0400
 Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C8BE9FC6
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 04:50:25 -0700 (PDT)
-Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-2ec42eae76bso178926007b3.10
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 04:50:25 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 550F03614D
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 06:33:17 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-2eba37104a2so182649027b3.0
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 06:33:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=ryH7A1gT8kJXzD+UMJN/QoxvCXn7WegHnO3tnqAZB5Y=;
-        b=tg2Iuq6q3rhNw/DfT5pRxfRIlwx3xHyFGX8ujHI3NZVh5Kl6U3ufsvud3xW0+L/2jW
-         42DZA0INTlCQkxIH3aiF+rt7svWYbOw3A0+ANdgUtexhpKaWIA48bS8ZOz8dSQQvvOEF
-         yHp5koE2nwg9EhJ+35mF6kaots72Cs0VQyOEuxjt4ebpmliTq4busP3tokMDOL4OlCNi
-         knRdUizzAq/W9EYRA4lTxd0PtaujH+5aZRDvtYI1Y1lIAuZwTsIMl7HTHn8P7iyB2Hxq
-         upx/aKJHDGS8w1RuSqrzTHhL9OC8OulaUbtD1GAq9puPlZlCFSPj8nEKWW9ze7l9myb1
-         vS4Q==
+         :cc;
+        bh=xQJxtHgYo45TypCgF91EJUJX/kpEtMGt2+M/xOBJnMI=;
+        b=SwIK1PdkH4n+khwbHWsA069VnDXEen+KnTWOPpaksm1zszI77d6fkxok+B1KfpsMIU
+         Z8DGXH867i4dqJ+RjIAoUudDdGyaJv5rfW/bxSMufgtl+hF5p6E648Sogatr0G3L9wKd
+         hQdoH1h8hg0jgYD4x90Fy9w1yXLMEk/DWd6RqrPz+tPkKQPrSyO5CXGGltSPkcCQl1gx
+         F+gDmRZBk0Qh/TEUul/7QIJ23O9qnHpbaPw2t2m1mRFzELl3pRHnWyaCTwXUAYi5yVQi
+         k51NW7rxmelAmQ5+PNoVD5SniZRWllE92VyWyfYXNAXpIHcL/L/8URDqvSK3xEjiKykR
+         HMHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=ryH7A1gT8kJXzD+UMJN/QoxvCXn7WegHnO3tnqAZB5Y=;
-        b=7Lj7Y0zy1Za3+TVlvP6Mv5gXC2iIoxKp+BxffT3ypeKFzz122F4kUUXDlQvfA06i1t
-         4j8X61RTmWvGwggYEpEr4ZPfu8cg1qVRmW4l0o9uOXNypdUOmlZioGf48p+QdHFeRqDb
-         ij3Ta1ZOGJ/1wA6UKMk+P71/ykhGCea8SYbWu5ng52pgthfwyTLftq4ZStthjZHnIp5G
-         FDloKxKcpGcs9l0odEOKnvFcsNDXLWG0VtbsdfVmCTQhT5GzIZIRzfAUfuj48W8UsA25
-         geftFjWtmE3t7VBDmlpLTQRXEh6pmYFr36pj/WLjqJq7rmZJ3Y4TJdAD57BUXRVIOXPv
-         X/AQ==
-X-Gm-Message-State: AOAM531NbfN0ulRs3lGmFeb5FjuuBcUd/U82DJn9YupgpQbhwKOcQPs3
-        OkfpuKwZDyPSCU/G8sg88OHDOMkq4q7JoP+YWZ5mvw==
-X-Google-Smtp-Source: ABdhPJyvU8Hr0BFrDFzYtwgegXf9sk3T6WGuoCfdgQkM6Sz7KGKi+hiNLdv5iJo5uvrFT/1hO9oXBiSayhwwbPyMfnk=
-X-Received: by 2002:a81:50c:0:b0:2ef:4c3d:af5a with SMTP id
- 12-20020a81050c000000b002ef4c3daf5amr21637045ywf.85.1650973824562; Tue, 26
- Apr 2022 04:50:24 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=xQJxtHgYo45TypCgF91EJUJX/kpEtMGt2+M/xOBJnMI=;
+        b=FJzUDFMmPRfVkjSPejYL2t+vc+qS3Z6iFqlvFmUVwQmGwzCQCnG4tPw0j/qrdVqfLq
+         J0DpkJHwNUM496nu2BsyoDRgBgOOEk1X8gvy2oDoeup7/PLIkyLkyhMJUbFsRpZkagXc
+         ydX5v17AI7Xs/grcbJjBvM90h3JZT0JEo29h8ZZObLlBl46B2UrohGSZkvQqq9WNEAQs
+         iH0+xl9sCmDRtXJqzaQuvyMnloUTOfcr1MnOzchlSQWbj8dhGleQJjjSbOicnY6uhePq
+         CuwzJgkUk39/kPKjsa42wwdAOCMFMsPtsalOowsS3N++vrSGd9nSohm4OahtKzovODHb
+         ifxw==
+X-Gm-Message-State: AOAM533Yjkj4IBLlZrUNgUq/U9y5TR/D6FXqBOOz/2qa9ZAplxweiLPC
+        nlbkufGi2hlbP/5ICsShKZwiWsQl7ucvDQgt9KcqsQ==
+X-Google-Smtp-Source: ABdhPJyNT/CX/SXRXOQuOox6/jWyVG5uSS7VPA9wWYPVI6WZSfJ7419v0oaLcxGDmhwykXFIqSwFNqC/4GfbI9f/pa8=
+X-Received: by 2002:a81:998e:0:b0:2f4:e2a0:f30f with SMTP id
+ q136-20020a81998e000000b002f4e2a0f30fmr21317098ywg.376.1650979997177; Tue, 26
+ Apr 2022 06:33:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220417111622.621650-1-huobean@gmail.com> <c5f33892dbce61b267cc74dca50e0fae5d1270e9.camel@gmail.com>
-In-Reply-To: <c5f33892dbce61b267cc74dca50e0fae5d1270e9.camel@gmail.com>
+References: <20220423221623.1074556-1-huobean@gmail.com> <20220423221623.1074556-3-huobean@gmail.com>
+ <CACRpkdahf5QhUJ-vG6Qs7i0VYbSS02zBrQOtN8EVFu9SyHZA1Q@mail.gmail.com>
+ <89845bec6c827d7012cda916ee50b16c8eb08755.camel@gmail.com> <CACRpkdbM_qhwmFhwJNx0J_r2jUHoSsE6B=bKhGwKG=dXtX7uEg@mail.gmail.com>
+In-Reply-To: <CACRpkdbM_qhwmFhwJNx0J_r2jUHoSsE6B=bKhGwKG=dXtX7uEg@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Apr 2022 13:49:47 +0200
-Message-ID: <CAPDyKFpKsRyYosF4p+eEzPRi709-NZG9R5YJ=nDt5mTTnqWd6w@mail.gmail.com>
-Subject: Re: [PATCH v2 RESENT] mmc-utils: Add General command CMD56 read support
-To:     Bean Huo <huobean@gmail.com>
-Cc:     adrian.hunter@intel.com, jakob.rossler@nokia.com,
-        Avri.Altman@wdc.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Bean Huo <beanhuo@micron.com>
+Date:   Tue, 26 Apr 2022 15:32:40 +0200
+Message-ID: <CAPDyKFpavPhxzvohj8nOLujVyqTekgQO_G71eVpcCtxB+rhCMQ@mail.gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: core: Allows to override the timeout value
+ for ioctl() path
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        Bean Huo <huobean@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, beanhuo@micron.com,
+        stable <stable@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 22 Apr 2022 at 21:41, Bean Huo <huobean@gmail.com> wrote:
+On Mon, 25 Apr 2022 at 22:15, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> On Sun, 2022-04-17 at 13:16 +0200, Bean Huo wrote:
-> > From: Bean Huo <beanhuo@micron.com>
-> >
-> > We can use GEN_CMD (CMD56) to read a  data block with vendor-specific
-> > format and meaning, which is very helpful and useful for customers to
-> > analyze device health. This patch is to add support for this command.
-> >
-> > At the same time, in order to make CMD56 universal, let more users of
-> > mmc-utils can benefit from this. We will allow the user to enter
-> > [arg]
-> > for special commands. Because some eMMC vendors provide an additional
-> > set of commands beyond the GEN_CMD (CMD56) definition in the JEDEC
-> > specification. These additional commands are implemented using
-> > generic
-> > CMD56 commands, and they return a wealth of useful information about
-> > the
-> > state of the NAND device. For these special purposes, the [31:1]stuff
-> > bits in the CMD56 argument are used. You can refer to  Micron eMMC
-> > "TN-FC-32: e=C2=B7MMC Device Health Report" as an example.
-> >
-> > I didn't add data parsing, just print the raw data as it is vendor-
-> > specific.
-> >
-> > Signed-off-by: Bean Huo <beanhuo@micron.com>
-> > Acked-by: Avri Altman <Avri.Altman@wdc.com>
-> > Tested-by: Rossler Jakob (Nokia - DE/Ulm) <jakob.rossler@nokia.com>
-> > ---
+> On Mon, Apr 25, 2022 at 10:02 PM Bean Huo <huobean@gmail.com> wrote:
 >
-> Hi Ullf,
+> > I think the current solution is the most flexible way, if the customer
+> > wants to override the kernel default timeout, they know how to initiate
+> > the correct timeout value in ioctl() based on their specific
+> > hardware/software system. I don't know how to convince every maintainer
+> > and reviewer if we don't want to give this permission or want to
+> > maintain a unified timeout value in the kernel driver. Given that we
+> > already have eMMC ioctl() support, and we've opened the door to allow
+> > users to specify specific cmd_timeout_ms in struct mmc_ioc_cmd{},
+> > please consider my change.
 >
-> Would you be willing to merge this patch into your mmc-utils git repo?
+> The patch is fine, I'm just saying we should put another patch on
+> top that defines a RPMB default timeout and set it to something
+> high, such as a minute.
 
-Certainly! My apologies for the delay!
-
-Applied to mmc-utils.git master, thanks!
+I am also okay with $subject patch - and I agree with you Linus, that
+it sounds reasonable to pick something specific for RPMB. I guess the
+question is rather what value to pick, but I guess Bean can have some
+ideas for that, at least for Micron eMMCs. BTW, we do something very
+similar for mmc_sanitize() already.
 
 Kind regards
 Uffe
