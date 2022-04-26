@@ -2,144 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4C6DC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 13:56:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C43E1C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Apr 2022 13:56:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351293AbiDZN7R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Apr 2022 09:59:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52122 "EHLO
+        id S1351309AbiDZN7S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Apr 2022 09:59:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51894 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351313AbiDZN65 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 09:58:57 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D30E215F58C
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 06:55:49 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id e12so4243180ybc.11
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 06:55:49 -0700 (PDT)
+        with ESMTP id S1351301AbiDZN6y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2022 09:58:54 -0400
+Received: from mail-yb1-xb32.google.com (mail-yb1-xb32.google.com [IPv6:2607:f8b0:4864:20::b32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AC3915F58B
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 06:55:45 -0700 (PDT)
+Received: by mail-yb1-xb32.google.com with SMTP id y2so14176873ybi.7
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Apr 2022 06:55:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=bPX6SvIVsdPnKcky53/GZaWz62scba5UabXhwraMtuM=;
-        b=XEnrBtWa5HaGUJxa66ENrsJIM/eQE3SIv/G70LSsYT79QH0u9+1kgku0wHZMM39ypg
-         rQDOk1U3thbNoo/MhkX1711FUwhmRK3x4K7LxzA/g/PWU6h/cAdk8QTZk/akDYiCz49t
-         VI0L4ARJcVK+wQO75cTnotgq2TolInRBt5JSxKMieCggGk4xCvoTmk/rtehH5OqQwcd2
-         1TPp7sMar15fLoFeRFB/He3UIUvvuYwP/V7GVD9a53NbSzgTVCX/YtDq0Hielh8ZXZD1
-         vUSaB6dLOnC8G27xIsUyTu8KuJ/pjGWZRYxopwty2gGNhxAUGHGNdDGUSoi74EIvB4JA
-         0dxA==
+        bh=uBWTMy19BCU8GJLOpBmlkiJHgnhETyOqG4xsK78wLxQ=;
+        b=y0qlk5Wop1rWL3gXkgBl5O9PjeYqAiQ1ig5/DeQlJRMziLwwYQx+LkfhDm+OGi+g9j
+         7oliRUhScsahDl34Eu1Fa2j59Y8ajc/Vhlir2Y7/aPAFoB67qyf+oqHDK1XZ2UVaQNlw
+         sr0RkEERg55+T9vK0IZlgRpc6eSXLnVnM291eRkpVjMG3Z0VLQR9eTKNxCaKdALs5NFO
+         hBhWH+3ZRcXKKK1sultcqu8lbZ7aCzaRdi1IzAjb3TqCebP5VSiWhG6+vmvI6J4przib
+         ASXHvVFfO5rMIdh1GlBR0Q1uYleb+NKjAVVfkERYhkI039Egka5l45WNe6gJpXbgkXQt
+         rCuA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=bPX6SvIVsdPnKcky53/GZaWz62scba5UabXhwraMtuM=;
-        b=JPid2YcD+sltPxIEVlnjAHlDi5xA8t0VosT/kC7M148RYa6td47K09WYJnetX621IN
-         oLy1to5XHFXdc7HbmbsTK71/he4maG4Rfq8iROgmmQkQ72yc0NPUcTgbNbry5QE8ybRh
-         3OzgJ/amow+x/mlPltJEC2aBHttDmAkycG/kuxmeWCbR9L0zL2huZH/PbHY+A+1yf/NX
-         rI0C4LnZ5XVbES4Db7YM+18jvvMhrDlP6Y5JKg2nVlSTF6vXn5+CaF7hwiLUXnsJoDbS
-         +0noqwh0gUcnU+RlsggK+zUxjQP96TA6suPEpZZ4RdDwDyIrxomYl74Ptuf5xqIHkwv2
-         zNIw==
-X-Gm-Message-State: AOAM531dU/3iLNk5Bo0pve1lDD4LQO1Hlywh37opb2Vd8j9bGAuss31I
-        NRfb2ePhwcFhi1Tc8h4RMWX2oKXr0lnvGip/14CM/zcW+60=
-X-Google-Smtp-Source: ABdhPJwXhTbd5GPMKzrNimOCcoB8RuBTleCY6fd68g0McV0xcPOumYJnrnbSw9UjGE6dryOfU4VD2sre4bZBSrC/AuI=
-X-Received: by 2002:a25:8250:0:b0:645:8834:b91f with SMTP id
- d16-20020a258250000000b006458834b91fmr19931258ybn.553.1650981349101; Tue, 26
- Apr 2022 06:55:49 -0700 (PDT)
+        bh=uBWTMy19BCU8GJLOpBmlkiJHgnhETyOqG4xsK78wLxQ=;
+        b=M0z13QhOyAn5HMXocdb2XFQoID+h5K02tibY6w07JnoDyPBCOTcgto2abirN7mwPWf
+         5SJdu82sGklOpnNT5oX/OyfzW9wwnSHWZmJRsqeYrI50sQuxgSBPOXgnsT6FC6ZQrAeR
+         /AxAHjqd1HTelNSRd+rkJr6jAWy0vwyBH2EhTcRIS9p4SKfROz/KASB66Z4vn8JKgKpG
+         oOHnf9oXSem0NNUzSDRbzNggUy7rJwpdAhkwOjqR2uE1rANR4Tahs95IqcKbs3hsJ2+N
+         2Hkw2M0DIiguC0rq5giOqsJryYBq0LZeJ0JIHRi1NaFeJqpgyVRMOXkyR+bZhCmA4BSl
+         2Ibg==
+X-Gm-Message-State: AOAM533BXAAqariRH4k3dTU2QBBRtwKp1XWgfWTPR+kF4huAOVBhZlAT
+        0OdStRKMAFpKFzvoVXDQETjLR+CkW6l3CNlYVCAz0A==
+X-Google-Smtp-Source: ABdhPJw92iLZ8A8h//KsmSd7zk7HfXV1sN9OJS8uxSz8+RRspq25GOq/lPymHBG1FtpLpzP8LuhhvxTuI+IgUuTf+0M=
+X-Received: by 2002:a05:6902:8c:b0:631:ef56:6694 with SMTP id
+ h12-20020a056902008c00b00631ef566694mr20679552ybs.194.1650981344539; Tue, 26
+ Apr 2022 06:55:44 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220425205442.1347837-1-linus.walleij@linaro.org>
-In-Reply-To: <20220425205442.1347837-1-linus.walleij@linaro.org>
+References: <20220423221623.1074556-1-huobean@gmail.com> <20220423221623.1074556-3-huobean@gmail.com>
+In-Reply-To: <20220423221623.1074556-3-huobean@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Apr 2022 15:55:12 +0200
-Message-ID: <CAPDyKFo8CxOG6Fz8mEDJ-NWgeMN56Ta=dV5AiM6TX8gdHTPb8A@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: core: Add CIDs for cards to the entropy pool
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, "Theodore Ts'o" <tytso@mit.edu>,
-        "Jason A . Donenfeld" <Jason@zx2c4.com>
+Date:   Tue, 26 Apr 2022 15:55:08 +0200
+Message-ID: <CAPDyKFrksB_kgrnmcay+ub0nDfmPVZfw-zJihop5N8_6qUqrug@mail.gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: core: Allows to override the timeout value
+ for ioctl() path
+To:     Bean Huo <huobean@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, beanhuo@micron.com,
+        stable <stable@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 25 Apr 2022 at 22:56, Linus Walleij <linus.walleij@linaro.org> wrote:
+On Sun, 24 Apr 2022 at 00:16, Bean Huo <huobean@gmail.com> wrote:
 >
-> To make the entropy pool a bit better we can toss in the
-> CID for eMMC and SD cards into it, usually the serial
-> number portion is at least unique.
+> From: Bean Huo <beanhuo@micron.com>
 >
-> This does not count as improvement of the entropy but
-> in practice it makes it a bit more random to mix in these
-> numbers.
+> Occasionally, user-land applications initiate longer timeout values for certain commands
+> through ioctl() system call. But so far we are still using a fixed timeout of 10 seconds
+> in mmc_poll_for_busy() on the ioctl() path, even if a custom timeout is specified in the
+> userspace application. This patch allows custom timeout values to override this default
+> timeout values on the ioctl path.
 >
-> Cc: Theodore Ts'o <tytso@mit.edu>
-> Acked-by: Jason A. Donenfeld <Jason@zx2c4.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> Cc: stable <stable@vger.kernel.org>
+> Signed-off-by: Bean Huo <beanhuo@micron.com>
 
 Applied for next, thanks!
+
+Linus, I interpreted your earlier reply as a reviewed-by tag, so I
+have added that. Please tell me, if you want me to drop it.
 
 Kind regards
 Uffe
 
 
 > ---
-> ChangeLog v1->v2:
-> - Move the device_add_randomness() into each mmc_decode_cid()
->   function for MMC and SD card.
-> - Use the raw cid, no reason to unpack the data before using
->   it for this purpose.
-> ---
->  drivers/mmc/core/mmc.c | 7 +++++++
->  drivers/mmc/core/sd.c  | 7 +++++++
->  2 files changed, 14 insertions(+)
+>  drivers/mmc/core/block.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 6b78ae45c4c9..9804a06ffadd 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -12,6 +12,7 @@
->  #include <linux/slab.h>
->  #include <linux/stat.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/random.h>
->  #include <linux/sysfs.h>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index b35e7a95798b..6cb701aa1abc 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -609,11 +609,11 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
 >
->  #include <linux/mmc/host.h>
-> @@ -71,6 +72,12 @@ static int mmc_decode_cid(struct mmc_card *card)
->  {
->         u32 *resp = card->raw_cid;
+>         if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
+>                 /*
+> -                * Ensure RPMB/R1B command has completed by polling CMD13
+> -                * "Send Status".
+> +                * Ensure RPMB/R1B command has completed by polling CMD13 "Send Status". Here we
+> +                * allow to override the default timeout value if a custom timeout is specified.
+>                  */
+> -               err = mmc_poll_for_busy(card, MMC_BLK_TIMEOUT_MS, false,
+> -                                       MMC_BUSY_IO);
+> +               err = mmc_poll_for_busy(card, idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS,
+> +                                       false, MMC_BUSY_IO);
+>         }
 >
-> +       /*
-> +        * Add the raw card ID (cid) data to the entropy pool. It doesn't
-> +        * matter that not all of it is unique, it's just bonus entropy.
-> +        */
-> +       add_device_randomness(&card->raw_cid, sizeof(card->raw_cid));
-> +
->         /*
->          * The selection of the format here is based upon published
->          * specs from sandisk and from what people have reported.
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 68df6b2f49cc..c5f1df6ce4c0 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -12,6 +12,7 @@
->  #include <linux/slab.h>
->  #include <linux/stat.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/random.h>
->  #include <linux/scatterlist.h>
->  #include <linux/sysfs.h>
->
-> @@ -83,6 +84,12 @@ void mmc_decode_cid(struct mmc_card *card)
->  {
->         u32 *resp = card->raw_cid;
->
-> +       /*
-> +        * Add the raw card ID (cid) data to the entropy pool. It doesn't
-> +        * matter that not all of it is unique, it's just bonus entropy.
-> +        */
-> +       add_device_randomness(&card->raw_cid, sizeof(card->raw_cid));
-> +
->         /*
->          * SD doesn't currently have a version field so we will
->          * have to assume we can parse this.
+>         return err;
 > --
-> 2.35.1
+> 2.34.1
 >
