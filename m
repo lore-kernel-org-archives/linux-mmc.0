@@ -2,143 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 364CAC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 12:33:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F53AC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 12:58:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234201AbiD0Mgw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Apr 2022 08:36:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60662 "EHLO
+        id S235101AbiD0NBN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Apr 2022 09:01:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51742 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234177AbiD0Mgv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 08:36:51 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F8B24D26F;
-        Wed, 27 Apr 2022 05:33:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1651062819; x=1682598819;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ryq+7hnciz42oDnnoJDat6cjPpO2/tvSMzKzL6pYH1I=;
-  b=QSlfyvG9LwCfQBOgsYMDLpT6r5yFO8opt0V+XrL1+e9KbnFPYhOv/reB
-   tXRj2AFG2oadqErfyjZXX2Lx+fxvvoDTif6zqADdRLsbjXF++On/WIOW+
-   wFPiXIIPy+Sn/mv/IbIuzv03iix6G9z5UkrTOPflwmXFFyCnjynr4N3Tc
-   bzDsUSzmwxSIJvYpF3yeskjCnYJJRG2Y1Q6fltbnbYM9hRjhcXUcMmbh9
-   GIPbnzIifK5WxQhL+n5zI5OmxVpw8aLwbzwaSDEd5oRRm+Maym8B9G94+
-   28tMbSyVuFv8rywok697cxn6vRlf/GPayQK1mURumKfcBpM7Ykt3MtrJy
-   A==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10329"; a="264757648"
-X-IronPort-AV: E=Sophos;i="5.90,293,1643702400"; 
-   d="scan'208";a="264757648"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2022 05:33:39 -0700
-X-IronPort-AV: E=Sophos;i="5.90,293,1643702400"; 
-   d="scan'208";a="580570529"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.60.122])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2022 05:33:35 -0700
-Message-ID: <7db46c19-a92a-a13a-eb63-38e5ed31580f@intel.com>
-Date:   Wed, 27 Apr 2022 15:33:30 +0300
+        with ESMTP id S234956AbiD0NBN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 09:01:13 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 053912C4A6D
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2022 05:58:02 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id p12so2994737lfs.5
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2022 05:58:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=X80gnM4oc5KK6p9tJPUWOtoPo8Q+cREOs7ydgjCCrlg=;
+        b=vcVCj1F3AYmY4zRPzvewZRkxjbHII34wH69ltcp0rxebFsPr40kqCSfQIvzOCOnquj
+         3rKtdYHv34EAogMkVBvRxiYDzUXwnXKkEI/Yenhd+s1KP66WPtCo6ls2ld1V4BzHM0nb
+         1tcMaBn9h87kVzEeEkypgYPww5GBVfQZ8+noUo7szvJtFyxfI7sA2gXI55LKFFz1xM/h
+         zzfVhDq+W9FJbL92fl6DxrLd51uF8i/e6uF/sXhr4E4dvsuqGDc37hacoCpo7hi1Y4gC
+         wSnU/pQxtb6iUZnTjbRtMWL7Fmqhu2Z6GWpdIt1c0Lq3z0gyPTl3WVwkg7hrLaePv6Cf
+         9i4g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=X80gnM4oc5KK6p9tJPUWOtoPo8Q+cREOs7ydgjCCrlg=;
+        b=NsFJMeHsvjHr7UHnIHDn3n5khicdnvZEixZGj6UzHVPwn760IS3uUJqOJvDjlGUkGy
+         N5dCfuV4Dcq3WHV2g84dIRsEGJQHbnS+HVTjcoi5W4z38aBNm9kdvb8rB6B77YuZJU1J
+         pMjfP4albvu0rlTQcoqcgKsdmP5LpqFmRjLXncv3QPX1g5dl5AA1skcmiD9sosn+C1c7
+         s2Ad4oWrhmEa160PHDdCfe4SIIFE/xAxut/9PNMr3ok8BBVAhWEO57OwcXKMpEqhZU/x
+         N7G7Ey07CVPW/pUTLlGKSoK+EzFXur3JJstklRAbcFz7Ub1XTPcfgupOq4s7fnQ00HZp
+         +y1g==
+X-Gm-Message-State: AOAM531u2cBkZAPmf8BN1Gn0Njc9gjfVv7RMrpTMfFQ8NG/iSP01IY55
+        BQuFG4M7d2TIjfLdoPy6g4xKL62Hmu5GJQ==
+X-Google-Smtp-Source: ABdhPJyeXv6CZSm1tuf6L/iDUEpGVNI7lWVPhM7LwreXrFqlSPTcAyfLvfUqUHcFmhTlQcaAijL5HQ==
+X-Received: by 2002:a05:6512:332d:b0:472:9a2:6e27 with SMTP id l13-20020a056512332d00b0047209a26e27mr10310417lfe.611.1651064279955;
+        Wed, 27 Apr 2022 05:57:59 -0700 (PDT)
+Received: from localhost.localdomain (c-fdcc225c.014-348-6c756e10.bbcust.telenor.se. [92.34.204.253])
+        by smtp.gmail.com with ESMTPSA id x7-20020a056512046700b0047201f1343asm1225659lfd.258.2022.04.27.05.57.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 27 Apr 2022 05:57:59 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: mmci: Remove custom ios handler
+Date:   Wed, 27 Apr 2022 14:55:57 +0200
+Message-Id: <20220427125557.1608825-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.7.0
-Subject: Re: [PATCH V1] mmc: core: Enable force hw reset
-Content-Language: en-US
-To:     Srinivasarao Pathipati <quic_spathi@quicinc.com>,
-        ulf.hansson@linaro.org, riteshh@codeaurora.org,
-        asutoshd@codeaurora.org, axboe@kernel.dk, avri.altman@wdc.com,
-        kch@nvidia.com, CLoehle@hyperstone.com, swboyd@chromium.org,
-        digetx@gmail.com, bigeasy@linutronix.de, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        kamasali <quic_kamasali@quicinc.com>
-References: <1650961818-13452-1-git-send-email-quic_spathi@quicinc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <1650961818-13452-1-git-send-email-quic_spathi@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/04/22 11:30, Srinivasarao Pathipati wrote:
-> From: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> 
-> During error recovery set need hw reset to handle
-> ICE error where cqe reset is must.
+The custom boardfile ios handler isn't used anywhere in the
+kernel. Delete it.
 
-How do you get ICE errors?  Doesn't it mean either the hardware
-is broken or the configuration is broken?
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/host/mmci.c   | 4 ----
+ include/linux/amba/mmci.h | 6 ------
+ 2 files changed, 10 deletions(-)
 
-> 
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> Signed-off-by: kamasali <quic_kamasali@quicinc.com>
-> Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
-> ---
->  drivers/mmc/core/block.c      | 8 +++++---
->  drivers/mmc/host/cqhci-core.c | 7 +++++--
->  include/linux/mmc/host.h      | 1 +
->  3 files changed, 11 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index b35e7a9..f63bf33 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1482,10 +1482,12 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
->  	pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
->  
->  	err = mmc_cqe_recovery(host);
-> -	if (err)
-> +	if (err || host->need_hw_reset) {
->  		mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
-> -	else
-> -		mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
-> +		if (host->need_hw_reset)
-> +			host->need_hw_reset = false;
-> +	}
-> +	mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
->  
->  	pr_debug("%s: CQE recovery done\n", mmc_hostname(host));
->  }
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index b0d30c3..311b510 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -812,18 +812,21 @@ static void cqhci_finish_mrq(struct mmc_host *mmc, unsigned int tag)
->  irqreturn_t cqhci_irq(struct mmc_host *mmc, u32 intmask, int cmd_error,
->  		      int data_error)
->  {
-> -	u32 status;
-> +	u32 status, ice_err;
->  	unsigned long tag = 0, comp_status;
->  	struct cqhci_host *cq_host = mmc->cqe_private;
->  
->  	status = cqhci_readl(cq_host, CQHCI_IS);
->  	cqhci_writel(cq_host, status, CQHCI_IS);
-> +	ice_err = status & (CQHCI_IS_GCE | CQHCI_IS_ICCE);
->  
->  	pr_debug("%s: cqhci: IRQ status: 0x%08x\n", mmc_hostname(mmc), status);
->  
->  	if ((status & (CQHCI_IS_RED | CQHCI_IS_GCE | CQHCI_IS_ICCE)) ||
-> -	    cmd_error || data_error)
-> +	    cmd_error || data_error || ice_err){
-> +		mmc->need_hw_reset = true;
->  		cqhci_error_irq(mmc, status, cmd_error, data_error);
-> +	}
->  
->  	if (status & CQHCI_IS_TCC) {
->  		/* read TCN and complete the request */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index c193c50..3d00bcf 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -492,6 +492,7 @@ struct mmc_host {
->  	int			cqe_qdepth;
->  	bool			cqe_enabled;
->  	bool			cqe_on;
-> +	bool                    need_hw_reset;
->  
->  	/* Inline encryption support */
->  #ifdef CONFIG_MMC_CRYPTO
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index f3cf3152a397..01159eaf8694 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1748,10 +1748,6 @@ static void mmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	unsigned long flags;
+ 	int ret;
+ 
+-	if (host->plat->ios_handler &&
+-		host->plat->ios_handler(mmc_dev(mmc), ios))
+-			dev_err(mmc_dev(mmc), "platform ios_handler failed\n");
+-
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+ 		if (!IS_ERR(mmc->supply.vmmc))
+diff --git a/include/linux/amba/mmci.h b/include/linux/amba/mmci.h
+index c92ebc39fc1f..6f96dc2209c0 100644
+--- a/include/linux/amba/mmci.h
++++ b/include/linux/amba/mmci.h
+@@ -13,17 +13,11 @@
+  * @ocr_mask: available voltages on the 4 pins from the block, this
+  * is ignored if a regulator is used, see the MMC_VDD_* masks in
+  * mmc/host.h
+- * @ios_handler: a callback function to act on specfic ios changes,
+- * used for example to control a levelshifter
+- * mask into a value to be binary (or set some other custom bits
+- * in MMCIPWR) or:ed and written into the MMCIPWR register of the
+- * block.  May also control external power based on the power_mode.
+  * @status: if no GPIO line was given to the block in this function will
+  * be called to determine whether a card is present in the MMC slot or not
+  */
+ struct mmci_platform_data {
+ 	unsigned int ocr_mask;
+-	int (*ios_handler)(struct device *, struct mmc_ios *);
+ 	unsigned int (*status)(struct device *);
+ };
+ 
+-- 
+2.35.1
 
