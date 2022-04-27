@@ -2,196 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A39CC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 11:32:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96172C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 12:03:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232749AbiD0LgC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Apr 2022 07:36:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44456 "EHLO
+        id S233404AbiD0MGs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Apr 2022 08:06:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232694AbiD0LgB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 07:36:01 -0400
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B54743A721;
-        Wed, 27 Apr 2022 04:32:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1651059169; x=1682595169;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=/A3B6d6OPF/q0b6dnctlrtCp51yNGiV6UyDdy28MVuE=;
-  b=iNFNVLwfGCZNsFZ3eoeZ2Ts5f4XJLFn5otE+t4J4916LU4ZlwJEcrmgg
-   bzQmSi7kggUt16B9OVAeUzlq+niB0SZT+pj9eERGhC8mE/TUp5VsfpUHh
-   hfv91GujNi5x2RF+6SeguVuE+IjxoL2tSt91Pw7kdAZuFZ7MG4ZELuO2Y
-   G3nbofBS5hfNjqtqaFxgBaQWcKKUh726Z8Y4eddWAgZ97+8penETfHFoy
-   En4QHOSjbyDdMOUvUq2BvbQpoLE/c9SXCyFhGtJ0dR7pyouaB1HqMVoNX
-   K3nb+VKweohXkUa1pAl8FOoF11XpJkOj4ucMdq3myAYrVok0SS7oikYlj
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10329"; a="326391272"
-X-IronPort-AV: E=Sophos;i="5.90,292,1643702400"; 
-   d="scan'208";a="326391272"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2022 04:32:49 -0700
-X-IronPort-AV: E=Sophos;i="5.90,292,1643702400"; 
-   d="scan'208";a="580543933"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.60.122])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2022 04:32:42 -0700
-Message-ID: <c592d7b6-b317-2f14-e4a2-62529129b0e5@intel.com>
-Date:   Wed, 27 Apr 2022 14:32:38 +0300
+        with ESMTP id S233513AbiD0MGp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 08:06:45 -0400
+Received: from APC01-TYZ-obe.outbound.protection.outlook.com (mail-tyzapc01on2093.outbound.protection.outlook.com [40.107.117.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67F44541AD;
+        Wed, 27 Apr 2022 05:03:32 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=mi65aNKxLngKzcMxl4Q8SwbrTeO+UWGWsn58JSG7pDOTlWL6Nd0j6rTRbtuE2FGVUj91VsE0seoHqHACgpNeEcbcmvOftO2dCB52a1fJVpMzY3KuXqfNRvpGEi6l5Z0BsOjl3I+Qk8Y7FEMW3Mb63u3GfuEKIvagmoysdKDGBXK4YMct7QyT7UxUoYnoV4s2yryFrxRe9lJpwBNwQfvBkwHV0+t8adXcq8AshmbxZGC3RxjWDi163sgO3r43os2lZlqcqIcv2Sn7Pq7EVL2rPPoGHmFILbvWHoHb4qpjYLa06/GggdCcZNQkuqhwEAELwlHykR+nY7NyEb0lVLGA5w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=eT4GvEkcJukxhYJSxCmjRuqSGasYCwRX7p3QE6jQWAg=;
+ b=YLCDDJROUZwaCoorHQmDoHyFuwJ5/SEhIDjrRyfCWjR33zzvYEgyyZipJGDSk86qLap+B78Z/2zz9mGMvHZSpI73xfmLRoYOI9yybfb1D17qXNlsLVspEt9tiFvv16qyGU3/U/925d4C7IU3eRR3zEwEYPwW06hLWh05owm4TqfuvYX45QZXMD3VSn9EC5iJm/WOzbd0lNQ25OO0CQmQEWECA7WZtPVqsuH2VoNGExdr9vN4CjBH2qMTIfpUN1Mc8dEKQXvgs61JhpVbXOA/I152vDQlcsVU8l/d9uHbajYbQtOs86v5LzkmS+DlG+4yl1TJc2WDOyvO2F6afwxYXg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=vivo.com; dmarc=pass action=none header.from=vivo.com;
+ dkim=pass header.d=vivo.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=vivo0.onmicrosoft.com;
+ s=selector2-vivo0-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=eT4GvEkcJukxhYJSxCmjRuqSGasYCwRX7p3QE6jQWAg=;
+ b=cAA6Fsac7tKzsYDh0Ze0yh8x+OzYu5HfFvOR8ip6DiVyXc02c/o6V30OrYAvP8U7SQ7JSfiKSAvlDkjUFJpKbaPp/J0nvbePk700Aw8KCCD2IERF/73aESHl8aO3F3aVMtjPmf3Qlekyu57fXJGn1n6pf3C3AuoAq/vIGYTbHLs=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=vivo.com;
+Received: from SG2PR06MB3367.apcprd06.prod.outlook.com (2603:1096:4:78::19) by
+ TYZPR06MB4980.apcprd06.prod.outlook.com (2603:1096:400:1cc::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5186.14; Wed, 27 Apr
+ 2022 12:03:30 +0000
+Received: from SG2PR06MB3367.apcprd06.prod.outlook.com
+ ([fe80::4591:4f3e:f951:6c8c]) by SG2PR06MB3367.apcprd06.prod.outlook.com
+ ([fe80::4591:4f3e:f951:6c8c%7]) with mapi id 15.20.5186.021; Wed, 27 Apr 2022
+ 12:03:30 +0000
+From:   Wan Jiabing <wanjiabing@vivo.com>
+To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Cc:     Wan Jiabing <wanjiabing@vivo.com>
+Subject: [PATCH] mmc: atmel-mci: Simplify if(chan) and if(!chan)
+Date:   Wed, 27 Apr 2022 20:03:09 +0800
+Message-Id: <20220427120310.838843-1-wanjiabing@vivo.com>
+X-Mailer: git-send-email 2.35.3
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: HK2PR02CA0137.apcprd02.prod.outlook.com
+ (2603:1096:202:16::21) To SG2PR06MB3367.apcprd06.prod.outlook.com
+ (2603:1096:4:78::19)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.7.0
-Subject: Re: [PATCH V5] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-Content-Language: en-US
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>, agross@kernel.org,
-        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
-        p.zabel@pengutronix.de, chris@printf.net, venkatg@codeaurora.org,
-        gdjakov@mm-sol.com, quic_asutoshd@quicinc.com
-Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com
-References: <1650816153-23797-1-git-send-email-quic_c_sbhanu@quicinc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <1650816153-23797-1-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 5fb98a8c-365e-4f0e-e71d-08da2845f1c5
+X-MS-TrafficTypeDiagnostic: TYZPR06MB4980:EE_
+X-Microsoft-Antispam-PRVS: <TYZPR06MB498036278ADD5CF3B0D41877ABFA9@TYZPR06MB4980.apcprd06.prod.outlook.com>
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: JHHk1Ifo2UQsmt/jWokaYZQWWPMKeVHlYYe4Wu5pvjWHF2PeJgMTU1RgcAVjy2oqEGxfPoFQGMhyptQCCX5i1y7yWgml8HiT4KrqY8CYyS5aYAysQYLVuHSLMMedXd91+RKtYEnLwjqQpJ3xWV+KgWote2SuYcbQQRlfIkaZ4lPQFqJryS+7wxhUzcvQJ7J2bavxzOk5mqjcVHyI8udfspU62XgvDop/WFat3ktUQp0B9CoOaBcum8ryon0B0g7XUQynofRcfnU1gJ1k+wa/XCLqh1QOqIAyzjqh3rSMT/hyh7xW4Ocm6J2mJUHKQt3U+ccUsRJvKO21S67pMAPeEiyWAAcPatWPO6Q6KgfYNSligJk4NfSTf/4bBLdZV4zHARFdYwJhEUO0Hg7XPq71McM2S3NhXw49lbWlXRFoht8uVf9xbwS4NJryrqQn4gSZk2taR7NZvu4EeHvvMuQaWCBycowP5aM7fm7ZfvUc+S+ovJOt72+STFibYs9cjpIS+tTXuuNnmJz6uOjDNVNG7dwX2uW+TD1kCXu5UJNntSZ/2b5v8+4KKEQ+7GPnom1QgqT4hA7VbbkVRlCKntTdRwWL0fJmFdzz9/B9ZlJz37PDjAIA9wSGCcTeHFE7SK7LeZsqTkoQ0p3TCxYPEWd5ojuxYZd9tWPdTXmSCOUKqhvRA5o6wTfzBufJy3hT9qzYC99YDLL5yoqQchuYkoenqg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SG2PR06MB3367.apcprd06.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(4744005)(4326008)(2616005)(86362001)(66476007)(66556008)(6512007)(38350700002)(38100700002)(26005)(6666004)(8676002)(6506007)(52116002)(6486002)(2906002)(83380400001)(1076003)(8936002)(508600001)(66946007)(316002)(36756003)(5660300002)(186003)(107886003)(110136005);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?NFqP8QktZ9KFuzSvic6kiDznrnS3bPFqFM96V65Jb9trBfqK+M8InoOcD/Y0?=
+ =?us-ascii?Q?ykrwq9gzOi4Pah9as8RyCpr+k53ESAmt8QR9HOcdxls3KGIWYxpyJGdGVIdE?=
+ =?us-ascii?Q?rl31V9tMUiDnEKtW/Llhn0jPJXc9Re7psjGuOgT70IdHSIXeZTd72UqVEFRw?=
+ =?us-ascii?Q?NSqvCnVXk9vBtDrgM6TAZxFF4gdVDs6iEooRBa2kZ0uF1xFikX8svQ20u7hS?=
+ =?us-ascii?Q?Tbdt3N/r51XSh0CHqsIPEsfyhE6KueBgm+jZ2q3ewVDfpYXRBv8VqrHstiUR?=
+ =?us-ascii?Q?CJfEGXreRQOe4BvqP+erYJ13dJdPedmqdVXHGsPRxVIXQBtIs7t52P30GQgC?=
+ =?us-ascii?Q?4noGzmocq4wuidQFjb3e9NEDLecDkbzK96h03VpYepjA2MohBOuDQJYh2Szz?=
+ =?us-ascii?Q?iL/Dxn1JckcIwRvwMEclrUNEuTiIcrnSnHHM9C0M6QpTu1dvU76uEHfyXu20?=
+ =?us-ascii?Q?8H+fyoZ+wdYMKU3JcFkwbh6ArqpHDdSRRWX/6GOMKPSvEg2sTmfLKIcq/bOM?=
+ =?us-ascii?Q?0kwzs8yU88TrCHCiE3AVDSQ0EcrWVHY8am+KAFjrvfeD1G4LFLkEoC50jR4d?=
+ =?us-ascii?Q?xCSz+PXENu1lCiKOMiV2M8q9x2+1wM0qMkFv5+WsErnFMr90/KnABOqzt3ht?=
+ =?us-ascii?Q?jIMzQhi9y+8S0UmdxOQIPHic/AYSG/ZrYj5ojfPr5EY0Wqk1hmjZDbo12Cyu?=
+ =?us-ascii?Q?aTZGEeGgPD0ZjaRebkl+fateGW82oCyFrudDvJyeF7xCS0dFoM58srWANaHE?=
+ =?us-ascii?Q?F0QLk8CbACRAirUwpmDhlBGuBQr0d+9jPPvMyx9cWLSa73BtkKzuHksKnOAw?=
+ =?us-ascii?Q?GFprk0kh8xGklptimYjlB4WJNCT76IP4fnL18zqwtnlZMLatdwhr3P1qg7gE?=
+ =?us-ascii?Q?IovaQs65nU2SZrG4y6sX4qBvZQMMop4t5GUjg+KHTokLxAuD2yaJ5zPWiBCa?=
+ =?us-ascii?Q?AzgmACPqivkqMdWIw3VXfZn5zdjTyx5bRfwPW11VUWN6unWQUqd9asTX7s8I?=
+ =?us-ascii?Q?/vKjCjHPaRaSRZ/chH90FNM8NG6lELxw+b0ehA4YcHaehokF3zkpbm61eipQ?=
+ =?us-ascii?Q?O55KkXzRJbA3XCi86rgfyOeWa4GJN2LdppFLK8vNCFC0sfMMu5ZBhxoZ5TqN?=
+ =?us-ascii?Q?tsx0HY83YkLTeFAFd5yNNlCNAU+7CUHVE5b/j/OoamE8V2YXWo+66gLEQj6S?=
+ =?us-ascii?Q?fQGv70DVnwB5W5a0JFWiD6N7BWXlsyaUEPjQBrUS3TKbqIEP1jnXr51DKjca?=
+ =?us-ascii?Q?/3wRt0dYYdj9Rr2nsmLOMBZzzkLinYMadcnwNdk3FWOoqUWRHoWz+Wu0++ih?=
+ =?us-ascii?Q?oYn7NOhHZ3uNlU2iY9U0s68fu45AHZKfmKJtuqfnNaa6gljF+cJyBHfoFcRb?=
+ =?us-ascii?Q?iTpgT0pvHlvLQv1cIGO8H+UkVXEWhtaD5e66r9CBUWkyv6nPCdnT8O2Onit4?=
+ =?us-ascii?Q?DtzeezT4J0Oyeoi6gLzucYtZGA4wTBex7yVfXCwVOGj8whUvmTAsRyOOt1YP?=
+ =?us-ascii?Q?C77L3PIpBWCZUHnTsnEunS/eTK5kcVoeex3hJSPGt+ajHUY5s+/S0w4i0Hi1?=
+ =?us-ascii?Q?Bz8eouOsviT2jjRTa7/+WrrulIHTETFH/41woFjjI8VSZOt0LSHgeQu5QjYg?=
+ =?us-ascii?Q?7mS5ltNPKSQQFl1VMiwWEpz8XH0Toh3Mt++ueIHvcbIkVcqKlI5ut5n8ymfE?=
+ =?us-ascii?Q?7T7uTJEMnXWEia2ZET8x4Y0wDr/OEju05BZoiQeKTveNinCwb+Mz29bKeDif?=
+ =?us-ascii?Q?xVfw33JlCQ=3D=3D?=
+X-OriginatorOrg: vivo.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5fb98a8c-365e-4f0e-e71d-08da2845f1c5
+X-MS-Exchange-CrossTenant-AuthSource: SG2PR06MB3367.apcprd06.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Apr 2022 12:03:30.2667
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 923e42dc-48d5-4cbe-b582-1a797a6412ed
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: YE7UHX6FggvKmwCj+5a1O/KIvMTmd8UcUqKtWwweNTJh8XsNf9zTFyJKvk9hn8ILItkIbZ2h8LU8nbIcCV9ZHg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYZPR06MB4980
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/04/22 19:02, Shaik Sajida Bhanu wrote:
-> Reset GCC_SDCC_BCR register before every fresh initilazation. This will
-> reset whole SDHC-msm controller, clears the previous power control
-> states and avoids, software reset timeout issues as below.
-> 
-> [ 5.458061][ T262] mmc1: Reset 0x1 never completed.
-> [ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version: 0x00007202
-> [ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt: 0x00000000
-> [ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-> [ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl: 0x00000000
-> [ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
-> [ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
-> [ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
-> [ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
-> [ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> [ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
-> [ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
-> [ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]: 0x00000000
-> [ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]: 0x00000000
-> [ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
-> [ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER DUMP-----------
-> [ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg: 0x6000642c | DLL cfg2: 0x0020a000
-> [ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl: 0x00010800 | DDR cfg: 0x80040873
-> [ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 : 0xf88218a8 Vndr func3: 0x02626040
-> 
-> Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm chipsets")
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Use if(!host->dma.chan) instead of if(chan) and if(!chan) to make
+code better.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Wan Jiabing <wanjiabing@vivo.com>
+---
+ drivers/mmc/host/atmel-mci.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
-> ---
-> 
-> Changes since V4:
-> 	- Called reset_control_put() in error path.
-> 
-> Changes since V3:
-> 	- Used reset controller local variable as suggested by
-> 	  Bjorn Andersson.
-> 	- Passed NULL as a parameter to
-> 	  devm_reset_control_get_optional_exclusive() as suggested by
-> 	  Bjorn Andersson.
-> 	- Replaced devm_reset_control_get_optional_exclusive() with
-> 	  reset_control_get_optional_exclusive() and called
-> 	  reset_control_put() before returning to clear the reset
-> 	  controller as suggested by Bjorn Andersson.
-> 
-> Changes since V2:
-> 	- Dropped new line after fixes tag as suggested by Bjorn
-> 	  Andersson.
-> 	- Passed device structure instead of passing platform_device
-> 	  structure as a argument for sdhci_msm_gcc_reset() as suggested
-> 	  by Bjorn Andersson.
-> 	- Replaced dev_err() with dev_err_probe() as suggested by Bjorn
-> 	  Andersson.
-> 
-> Changes since V1:
-> 	- Added fixes tag as suggested by Ulf Hansson.
-> 	- Replaced devm_reset_control_get() with
-> 	  devm_reset_control_get_optional_exclusive() as suggested by
-> 	  Ulf Hansson.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 42 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 42 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 50c71e0..ff9f5b6 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -17,6 +17,7 @@
->  #include <linux/regulator/consumer.h>
->  #include <linux/interconnect.h>
->  #include <linux/pinctrl/consumer.h>
-> +#include <linux/reset.h>
->  
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
-> @@ -2482,6 +2483,43 @@ static inline void sdhci_msm_get_of_property(struct platform_device *pdev,
->  	of_property_read_u32(node, "qcom,dll-config", &msm_host->dll_config);
->  }
->  
-> +static int sdhci_msm_gcc_reset(struct device *dev, struct sdhci_host *host)
-> +{
-> +	struct reset_control *reset;
-> +	int ret = 0;
-> +
-> +	reset = reset_control_get_optional_exclusive(dev, NULL);
-> +	if (IS_ERR(reset))
-> +		return dev_err_probe(dev, PTR_ERR(reset),
-> +				"unable to acquire core_reset\n");
-> +
-> +	if (!reset)
-> +		return ret;
-> +
-> +	ret = reset_control_assert(reset);
-> +	if (ret) {
-> +		reset_control_put(reset);
-> +		return dev_err_probe(dev, ret, "core_reset assert failed\n");
-> +	}
-> +
-> +	/*
-> +	 * The hardware requirement for delay between assert/deassert
-> +	 * is at least 3-4 sleep clock (32.7KHz) cycles, which comes to
-> +	 * ~125us (4/32768). To be on the safe side add 200us delay.
-> +	 */
-> +	usleep_range(200, 210);
-> +
-> +	ret = reset_control_deassert(reset);
-> +	if (ret) {
-> +		reset_control_put(reset);
-> +		return dev_err_probe(dev, ret, "core_reset deassert failed\n");
-> +	}
-> +
-> +	usleep_range(200, 210);
-> +	reset_control_put(reset);
-> +
-> +	return ret;
-> +}
->  
->  static int sdhci_msm_probe(struct platform_device *pdev)
->  {
-> @@ -2529,6 +2567,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  
->  	msm_host->saved_tuning_phase = INVALID_TUNING_PHASE;
->  
-> +	ret = sdhci_msm_gcc_reset(&pdev->dev, host);
-> +	if (ret)
-> +		goto pltfm_free;
-> +
->  	/* Setup SDCC bus voter clock. */
->  	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
->  	if (!IS_ERR(msm_host->bus_clk)) {
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 807177c953f3..91d52ba7a39f 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -1122,13 +1122,12 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+ 	}
+ 
+ 	/* If we don't have a channel, we can't do DMA */
+-	chan = host->dma.chan;
+-	if (chan)
+-		host->data_chan = chan;
+-
+-	if (!chan)
++	if (!host->dma.chan)
+ 		return -ENODEV;
+ 
++	chan = host->dma.chan;
++	host->data_chan = chan;
++
+ 	if (data->flags & MMC_DATA_READ) {
+ 		host->dma_conf.direction = slave_dirn = DMA_DEV_TO_MEM;
+ 		maxburst = atmci_convert_chksize(host,
+-- 
+2.35.3
 
