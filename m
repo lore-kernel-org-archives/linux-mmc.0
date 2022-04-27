@@ -2,318 +2,185 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4846C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 07:51:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7C71C43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 08:04:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359104AbiD0Hy6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Apr 2022 03:54:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52784 "EHLO
+        id S1359245AbiD0IHm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Apr 2022 04:07:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244093AbiD0Hy5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 03:54:57 -0400
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A0CBFF5;
-        Wed, 27 Apr 2022 00:51:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1651045907; x=1682581907;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=kHEYCuupGjrrRD+V/W1xr234pxONkXoJXwGYNFi1AnY=;
-  b=c/ag03qwg6YUwGCbifFKxR7uflUW0yNVtBCqJLbNOi/FY/DmV2hnboO6
-   TwuumgneO/uRscmKELluW0r9PSuRGCvF0wJlw39k/HTxQJdw3NQt5fYs+
-   qBWvzNAZJGd0Vd2lZXXUXlLq4OYld2d+Yx8ptgB5sUM+4CMbg9RRmd+2n
-   vDDWWlRx7DvOh7e504QgrSJAYYr0bcKKa/rHCeCJWm9Zm5jBtuECIX/60
-   wNZOWHgEMBT7hpk0Y3xiJQ7C+ffpoGPUvRLuH7P322bZFenq/0h8MINvv
-   bG7WgZL8qmT43NsKnFwMCJVR0oStskyzkrD3Oux93dRsJdYEHdnwliPnt
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10329"; a="291001023"
-X-IronPort-AV: E=Sophos;i="5.90,292,1643702400"; 
-   d="scan'208";a="291001023"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2022 00:51:47 -0700
-X-IronPort-AV: E=Sophos;i="5.90,292,1643702400"; 
-   d="scan'208";a="580450929"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.60.122])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Apr 2022 00:51:41 -0700
-Message-ID: <cf0b7980-e58d-e5f8-682c-c5defdffb872@intel.com>
-Date:   Wed, 27 Apr 2022 10:51:38 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.7.0
-Subject: Re: [PATCHv1 10/19] mmc: sdhci-of-dwcmshc: add support for rk3588
-Content-Language: en-US
-To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
-        Heiko Stuebner <heiko@sntech.de>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        with ESMTP id S1359269AbiD0IHk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 04:07:40 -0400
+Received: from esa1.hgst.iphmx.com (esa1.hgst.iphmx.com [68.232.141.245])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48A9C522D1;
+        Wed, 27 Apr 2022 01:04:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1651046670; x=1682582670;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-transfer-encoding:mime-version;
+  bh=PN87uTB5N57PmDywIXWDdta/w0XolTqBHw6pCaqP4qI=;
+  b=U1L9qC1h5xH5lJFb8ynvbSY6uq8nV5lmuNDyDjU06T2Z64QZ9Cb5CjYv
+   VERvdglxe1zdBrbFp71QNCSRFChRv7cyfrgfRbRRoZtKqqDvyvSP0pO3x
+   ePSP7L5Hg1ww6L85udvwka7JfiFTQv9qca/G6HDlBY/FtE4Hjw9JvrZns
+   X3R82mRg2iGAQB/GjLovbBIsSGIui2MsXgy+ezi3vdARuaLx5PjAT5h5D
+   95mR4i6ya1bF+iZOKT2C4wj+BdoJxGcc4FgSUoTt5/gsMdDUyyjcJwO8A
+   aSEcbFnIBT42N7yQh/mzIqj5rr+/nV7EIftx1Q4I4M+vQQKNPLcm9bqzr
+   g==;
+X-IronPort-AV: E=Sophos;i="5.90,292,1643644800"; 
+   d="scan'208";a="310906214"
+Received: from mail-bn8nam11lp2171.outbound.protection.outlook.com (HELO NAM11-BN8-obe.outbound.protection.outlook.com) ([104.47.58.171])
+  by ob1.hgst.iphmx.com with ESMTP; 27 Apr 2022 16:04:26 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=ABaNSvt/8y4lpWQdOD3XN9ctcUSiTn2n7bLKBHTSzV+GWv+o2iBC0T/It/XrFjRyKfwC06+t0ug1N55DuSPbMKcjPxn0WT5HSuPOxvnnV4Q41M+nxfm38I/DyylhavRNDEEA3sFKNwlYoYP7pj85n07eYhfdVdNTc+9608SsBYbOsr3ssVXRmo0+uU6M8uOdo1kURbmkCtI0GFF5liwSl/IZcu5FRhAz+g9/m94rBX0tkicPobiDcSp/o4+MPUhUKz2jfSwq0TmGBuMZ45Ao8EKXS6nXWSsGZ+ViCCoIWbEoEBwIFCfhxafGWHl3E4Wu0oCP0L3f+O+ncNK313hiCQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=PN87uTB5N57PmDywIXWDdta/w0XolTqBHw6pCaqP4qI=;
+ b=Mlqux7Qk7AczwJ4B2jFBENNduxfRC3psc5ZBu7WAByv7oTTQoFKmE03FqbN2bYMuNv4IskM73jtl4UN34LKSgAcZ5jV0MOBZJN+BSd5kJfsbzbE09S57j8culseXs7OyMCQgMUWn8229+UJJ8KyC5diJ46THmLpxW35nQxp1xfK8BCyVrUsnumvC103jWQZJjHbxMQj5ZWIkDz9NUja3aQf79DKuTearGbU2zEwGKiWkw5PiInzcmEnURX2sV2fjk/LlAiMQiQQ98I0E5S38nMcq5qG4AkYVS9GyR8VJxuP28a5R/DvFYPDOIpBKI//LfSDltvtFpCq9DCOYRZC4SA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=PN87uTB5N57PmDywIXWDdta/w0XolTqBHw6pCaqP4qI=;
+ b=VBEOjBhpLhfJ8sH7BPC/5wym1btE4jG3lbKZeCAr/cciqbpvslaRoyW9YWChhyiBjePoBiwLVfP9RBZq4mPQ/wt71fYhypFNKDdVLhZK6BzufpZ5B5xSkMrs+PN9YYDj7zLIrn5ccJOBIJpC0kk3yEmmH5cMh94py9XP9r+AOhY=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ MWHPR04MB0511.namprd04.prod.outlook.com (2603:10b6:300:72::12) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5186.17; Wed, 27 Apr 2022 08:04:20 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::b049:a979:f614:a5a3]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::b049:a979:f614:a5a3%3]) with mapi id 15.20.5206.012; Wed, 27 Apr 2022
+ 08:04:20 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     Brian Norris <briannorris@chromium.org>,
+        Srinivasarao Pathipati <quic_spathi@quicinc.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
         Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Yifeng Zhao <yifeng.zhao@rock-chips.com>, kernel@collabora.com
-References: <20220422170920.401914-1-sebastian.reichel@collabora.com>
- <20220422170920.401914-11-sebastian.reichel@collabora.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220422170920.401914-11-sebastian.reichel@collabora.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        "vbadigan@codeaurora.org" <vbadigan@codeaurora.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "merez@codeaurora.org" <merez@codeaurora.org>,
+        "wsa+renesas@sang-engineering.com" <wsa+renesas@sang-engineering.com>,
+        "sayalil@codeaurora.org" <sayalil@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel <linux-kernel@vger.kernel.org>,
+        Kishor Krishna Bhat <quic_kishkris@quicinc.com>,
+        kamasali <quic_kamasali@quicinc.com>
+Subject: RE: [PATCH V1] mmc: core: Select HS mode in device first and then in
+ the host
+Thread-Topic: [PATCH V1] mmc: core: Select HS mode in device first and then in
+ the host
+Thread-Index: AQHYWU49cQ9dmnwn9064beDvvBcOZa0CfRUAgADp/CA=
+Date:   Wed, 27 Apr 2022 08:04:20 +0000
+Message-ID: <DM6PR04MB657515154B27EB6B9E57A3D7FCFA9@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <1650964532-9379-1-git-send-email-quic_spathi@quicinc.com>
+ <CA+ASDXMkzrqkDdb=y4DpK5Ot=XFtj6aAv7-mSBoGP5rDJZanpA@mail.gmail.com>
+In-Reply-To: <CA+ASDXMkzrqkDdb=y4DpK5Ot=XFtj6aAv7-mSBoGP5rDJZanpA@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 3629af4e-18ca-4b50-7216-08da282488f8
+x-ms-traffictypediagnostic: MWHPR04MB0511:EE_
+x-microsoft-antispam-prvs: <MWHPR04MB051133F8EF9A729D811C5DE7FCFA9@MWHPR04MB0511.namprd04.prod.outlook.com>
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: rIVyxfrWq03FQMQN+bF6Gpnqwn+4eRrUEZlwmu4vOJxCoLYEQWVDzd1er5Q/u+57cUb7SXgiSR2TXnhhHNEvcHsdBToSWwL295/nbPgvVGE0UHi2M6p9seSVVySv9Q5B7ZhITvTeO8XE3wz7YE+a3hCBTY2Rud5l0b4AqFtunoZr1Qof6Clf7mzRCu+n/WdP0sOjazz3cbUevDXFWPXgZkg7cLuvyMIzQ2jwkSbGBlyiP4j+fuECO4G4t44V/zWxmrXsD1k3Xph+o3JaQQS1POGflzx0Njq16DzEGchftoo7+3uTdMoGl9342vRsZWekR948B0r7S1MflSWWyvLgaWZQH1fR51S44VDPo5dLXBtO/hcd7Z3ZP8MBgudB+QQrwsfCJz3gzeIeDVokPJAi4ZZCv6aw54nRXTz4o18PQs7icDYu1S1Id1J/qZVlDH7vhp0UCLGu19rX/+3kFP2MkdJejsN7K5gVumjtVlG7kTU1UDwtXX4v3xaLuWRBYNnZAev8Jv4PgBq8e9lcjOirVPmcnpHFoNnVgJx4+k5YUMYERAi/XX1hnbDseGRATwFCOM9KbCHPMfc8l8s3hce+UCK3o6sTyXaWYScG5CCafnUG7oRDz8gLGb/5UhR923N92j7hz7903ul9dkX4eeZs7/QdOkIId/iehz8ggXsdibBG18Io/eLzR0k/MGM2q3j/Lb+9y3qGKziTvH1StXtExg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230001)(4636009)(366004)(110136005)(33656002)(54906003)(122000001)(86362001)(76116006)(71200400001)(8936002)(52536014)(508600001)(2906002)(7416002)(55016003)(82960400001)(83380400001)(66946007)(4326008)(5660300002)(8676002)(186003)(66476007)(64756008)(66556008)(66446008)(6506007)(26005)(7696005)(316002)(53546011)(9686003)(38100700002)(38070700005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?emVqQWpsVWJOYTIvbWR6Zk9wUFN1QU0zVHk2NHExUmJPYmFrajZmcHpnYmdp?=
+ =?utf-8?B?cGRBMkVmT3ZOSUNmTVM1dFZzSWswRUF4enhoNGJZdTFjaS9sV21ZWVFEaE9V?=
+ =?utf-8?B?ejBBZGpvZlh0RUVMY1Foc2VEaG00YjJZWHpYbnVqN2wrTzNYUldqZWwrU05u?=
+ =?utf-8?B?MnNqbm45SXI5MkJ4UWZHcFdSaVgrc1V1WGlYdWFGTHJtMS9qQ3RGUG1aVk5M?=
+ =?utf-8?B?SnM4akx1bmZnZEZkQ0pzMFVEcC9RTmQzbmJBZ1N2MjFJbzBpRldzdngwRUFq?=
+ =?utf-8?B?blV2RElMdCtyaFFEYXlGcGpzdlBvMVIvbnpGbElGM0pybEF0TUtyc0taZDJn?=
+ =?utf-8?B?Sk5nWGl2MFVrcncxaFhpZnNQNEJIeit5ZVhqQVg2V20xMWw2VzRWemlXTVhN?=
+ =?utf-8?B?N1g2dUdTczlwYThXRit3dFVvZmV4UDc1czBZNHNzNHR3NVpjd3dtSmc1dlMv?=
+ =?utf-8?B?aUVtaXE0ZDhWM0szdk5uOExiMCtvVlIxcURKaEVaOG00WWgxTjg5eUtKc1V1?=
+ =?utf-8?B?SGZ4YnQwekxVV2ltZE9HdnI4bDhicTNKTC9qTjlTUVcvYVR1N1BiRW5XMGRB?=
+ =?utf-8?B?WVEzQy9DaUY3MkZoeUVCMUVBNUVLRmRsbERtQ2xhNXk4WDMxWTNOOWJrKzA2?=
+ =?utf-8?B?Njg5ck9LU1dmRnpDR084cDRPL2tYUVBhTmZXSXg0Y1pQZnNWa3FxZi95dGF1?=
+ =?utf-8?B?aG1wUzFraXVtcGx1N1RDUHRpL1U3RlUrY0l1Z2JzV1UwclRvTC9wVWdSaGVz?=
+ =?utf-8?B?SG5PdUFDdUR3Vjd2RWwrYXQzZkMrYU03WlBNT2UyczhqT1JNTW1iMVk5V2Jo?=
+ =?utf-8?B?YXlZdUpGZTZXTVNFUDVCVDVHT0U2Q2hOUVdEZzlScG51RmlYOEdRT3J0eWhx?=
+ =?utf-8?B?OUcrczMwRWluRzFMV0JqTG5kL3pIZmVTWEFPMjlhbnBzSkhUMHpRdUJncngv?=
+ =?utf-8?B?TkFIdlI1b055WjJmTUhsZlplbENqR1pRMGNWc1dkQ0toNXR4alRMYVVqRDNF?=
+ =?utf-8?B?dWRuMlBjWHlxanVDYTRHZDhheE9vRTN3NGxQcUo2QlUrQ1V0Z1JRZzBZRzJM?=
+ =?utf-8?B?MW5MSUwvcnJzdTVwUEYxTXhEVDU4dXFQZytxMzgyVUx5cU5YUDk2QytTS2Z3?=
+ =?utf-8?B?YXl2TUtUR3NHMnpJcTFleWZGYjd3OWpvdTQvcEV5TU8xVmp1R1VLZWszZWRy?=
+ =?utf-8?B?SmdMVnJNRFV5cFFEMmpMdGlER3pnQTdJdzNwQ1pWK0RkTXFkZkJLUUc1cDFV?=
+ =?utf-8?B?OFhyRCtCSjlNOUk3UXNBMmNIZkNLb3NNSGdRVVlENGIxTkpHMHZVYVJYb0FJ?=
+ =?utf-8?B?UVNKalFxSkVJcmFNNkNaby83b3A1RWhIV0JLNUc4RzZ1R1NpaktEc2pUWm82?=
+ =?utf-8?B?ZmNma0hXRmxsRGlma3IrakRwTjZLR0J2ckdmcUx3WndVZU5OSWgvRUJEem83?=
+ =?utf-8?B?cDBqckl2YmJZV3k4ODBud3BTUEtNZGN6OWl1LzFrZUhOTGM4dlpEYVJONU9Q?=
+ =?utf-8?B?WU54Tm5MbUVreW5naUZDZDVTSEhjMk1aMlE4eG5YWlozN3RiYmt1aU9pM1JQ?=
+ =?utf-8?B?anV4aWIzSXZzQ0doQzM3clNud3hidE5QRXlIdGI2UlE2ZnlLbGo1Qy9IdWkv?=
+ =?utf-8?B?Q0JadFdkU290bXkwZDhnK0JybXN2SUZmYzU5ZEpweGNoMnI2czEyZ1JSYjlV?=
+ =?utf-8?B?UXU1eU5HREN3aTJNRHhLaEtkajU1QmtJbmhFdWNWWTJmS2RUWjFMVlpscFJY?=
+ =?utf-8?B?TkZlQm1OR2RkODhlSzNrQ2x6QmFNVU5kUGJQUThGMVd4QmloY1A1anZOQjNl?=
+ =?utf-8?B?aU14SGZMQXhTTUpGTzZ4ZG50ZnFWc0w0MnIzbjN2ckMxY0ZWZGRxb2YxTlo2?=
+ =?utf-8?B?c1BsVkxkTVExa2RXNjJZM0VYaTFUUHhWdTkxdHQxQXBQWjlGOVcxNDNUV2RE?=
+ =?utf-8?B?YmFTK2lPZUVxZUx5cC9HazMrUWE0QzVZalBkU1Q0eXpEZm5JYW1LU0dEWTlp?=
+ =?utf-8?B?aVhwcm1NN2tlbEZuSHcwV3NaZk9yYmdxeHJjNVRoUGc3ck00b1J2SzFIcVEr?=
+ =?utf-8?B?djVEdUxrNGtEcGpBUlp3clQrcG53Z2tQVDc5WjlRUkMvdG5nOEVhdVorc0NM?=
+ =?utf-8?B?SFBPL0tySHQ2a0dmOGNxS2dJSHQ1cndmUzMvbmUvdVgyMExXc0R1MXZvU3hY?=
+ =?utf-8?B?RWgya0IyaE9VaDRFZW50SnlwenpWcEZEc2NDQTdJTGpiRi9aL09LanNPQ25Z?=
+ =?utf-8?B?bWFEUGFreVo0UmZZblkzbTVkeVRoTVY0bWt4WVB5akNBV2tyZmV0WENWbjll?=
+ =?utf-8?B?N09QTE9yZHl0SjFYK2p5a2NQUmZMSTczMGo4eTNlQ2lFTG1qV25YZz09?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3629af4e-18ca-4b50-7216-08da282488f8
+X-MS-Exchange-CrossTenant-originalarrivaltime: 27 Apr 2022 08:04:20.8107
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: A5SggXYw0qniIlrM23pXGsU88o8yFdF+qozMkjbbjHP+lBRCw5RN7jXPdLJhLQgrl1TNzKCpYKmXsJhL5En8og==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR04MB0511
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 22/04/22 20:09, Sebastian Reichel wrote:
-> From: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> 
-> Add support for RK3588's DWCMSHC controller, which is used for
-> providing the rootfs on the RK3588 evaluation board.
-> 
-> Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> [port from vendor BSP]
-> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
-
-One comment otherwise:
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 113 +++++++++++++++++++++++-----
->  1 file changed, 96 insertions(+), 17 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 54ae0268e002..bc365767e66c 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -31,6 +31,7 @@
->  /* Offset inside the  vendor area 1 */
->  #define DWCMSHC_HOST_CTRL3		0x8
->  #define DWCMSHC_EMMC_CONTROL		0x2c
-> +#define DWCMSHC_CARD_IS_EMMC		BIT(0)
->  #define DWCMSHC_ENHANCED_STROBE		BIT(8)
->  #define DWCMSHC_EMMC_ATCTRL		0x40
->  
-> @@ -39,7 +40,7 @@
->  #define DWCMSHC_EMMC_DLL_RXCLK		0x804
->  #define DWCMSHC_EMMC_DLL_TXCLK		0x808
->  #define DWCMSHC_EMMC_DLL_STRBIN		0x80c
-> -#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
-> +#define DECMSHC_EMMC_DLL_CMDOUT		0x810
->  #define DWCMSHC_EMMC_DLL_STATUS0	0x840
->  #define DWCMSHC_EMMC_DLL_START		BIT(0)
->  #define DWCMSHC_EMMC_DLL_LOCKED		BIT(8)
-> @@ -48,11 +49,21 @@
->  #define DWCMSHC_EMMC_DLL_START_POINT	16
->  #define DWCMSHC_EMMC_DLL_INC		8
->  #define DWCMSHC_EMMC_DLL_DLYENA		BIT(27)
-> -#define DLL_TXCLK_TAPNUM_DEFAULT	0x8
-> -#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
-> +#define DLL_TXCLK_TAPNUM_DEFAULT	0x10
-> +#define DLL_TXCLK_TAPNUM_90_DEGREES	0xA
->  #define DLL_TXCLK_TAPNUM_FROM_SW	BIT(24)
-> +#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
-> +#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
-> +#define DLL_STRBIN_DELAY_NUM_SEL	BIT(26)
-> +#define DLL_STRBIN_DELAY_NUM_OFFSET	16
-> +#define DLL_STRBIN_DELAY_NUM_DEFAULT	0x16
->  #define DLL_RXCLK_NO_INVERTER		1
->  #define DLL_RXCLK_INVERTER		0
-> +#define DLL_CMDOUT_TAPNUM_90_DEGREES	0x8
-> +#define DLL_CMDOUT_TAPNUM_FROM_SW	BIT(24)
-> +#define DLL_CMDOUT_SRC_CLK_NEG		BIT(28)
-> +#define DLL_CMDOUT_EN_SRC_CLK_NEG	BIT(29)
-> +
->  #define DLL_LOCK_WO_TMOUT(x) \
->  	((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
->  	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
-> @@ -61,10 +72,16 @@
->  #define BOUNDARY_OK(addr, len) \
->  	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
->  
-> +enum dwcmshc_rk_type {
-> +	DWCMSHC_RK3568,
-> +	DWCMSHC_RK3588,
-> +};
-> +
->  struct rk35xx_priv {
->  	/* Rockchip specified optional clocks */
->  	struct clk_bulk_data rockchip_clks[RK35xx_MAX_CLKS];
->  	struct reset_control *reset;
-> +	enum dwcmshc_rk_type devtype;
->  	u8 txclk_tapnum;
->  };
->  
-> @@ -133,7 +150,9 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
->  				      unsigned int timing)
->  {
-> -	u16 ctrl_2;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-> +	u16 ctrl, ctrl_2;
->  
->  	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->  	/* Select Bus Speed Mode for host */
-> @@ -151,8 +170,15 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
->  	else if ((timing == MMC_TIMING_UHS_DDR50) ||
->  		 (timing == MMC_TIMING_MMC_DDR52))
->  		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-> -	else if (timing == MMC_TIMING_MMC_HS400)
-> +	else if (timing == MMC_TIMING_MMC_HS400) {
-> +		/* set CARD_IS_EMMC bit to enable Data Strobe for HS400 */
-> +		ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> +		ctrl |= DWCMSHC_CARD_IS_EMMC;
-> +		sdhci_writew(host, ctrl, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
-> +
->  		ctrl_2 |= DWCMSHC_CTRL_HS400;
-> +	}
-> +
->  	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
->  }
->  
-> @@ -185,17 +211,11 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->  
->  	host->mmc->actual_clock = 0;
->  
-> -	/*
-> -	 * DO NOT TOUCH THIS SETTING. RX clk inverter unit is enabled
-> -	 * by default, but it shouldn't be enabled. We should anyway
-> -	 * disable it before issuing any cmds.
-> -	 */
-> -	extra = DWCMSHC_EMMC_DLL_DLYENA |
-> -		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
-> -	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
-> -
-> -	if (clock == 0)
-> +	if (clock == 0) {
-> +		/* Disable interface clock at initial state. */
-> +		sdhci_set_clock(host, clock);
->  		return;
-> +	}
->  
->  	/* Rockchip platform only support 375KHz for identify mode */
->  	if (clock <= 400000)
-> @@ -213,9 +233,21 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->  	extra &= ~BIT(0);
->  	sdhci_writel(host, extra, reg);
->  
-> -	if (clock <= 400000) {
-> -		/* Disable DLL to reset sample clock */
-> +	if (clock <= 52000000) {
-> +		/* Disable DLL and reset both of sample and drive clock */
->  		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_CTRL);
-> +		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_RXCLK);
-> +		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
-> +		sdhci_writel(host, 0, DECMSHC_EMMC_DLL_CMDOUT);
-> +		/*
-> +		 * Before switching to hs400es mode, the driver will enable
-> +		 * enhanced strobe first. PHY needs to configure the parameters
-> +		 * of enhanced strobe first.
-> +		 */
-> +		extra = DWCMSHC_EMMC_DLL_DLYENA |
-> +			DLL_STRBIN_DELAY_NUM_SEL |
-> +			DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
-> +		sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
->  		return;
->  	}
->  
-> @@ -224,6 +256,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->  	udelay(1);
->  	sdhci_writel(host, 0x0, DWCMSHC_EMMC_DLL_CTRL);
->  
-> +	/*
-> +	 * We shouldn't set DLL_RXCLK_NO_INVERTER for identify mode but
-> +	 * we must set it in higher speed mode.
-> +	 */
-> +	extra = DWCMSHC_EMMC_DLL_DLYENA;
-> +	if (priv->devtype == DWCMSHC_RK3568)
-> +		extra |= DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
-> +	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
-> +
->  	/* Init DLL settings */
->  	extra = 0x5 << DWCMSHC_EMMC_DLL_START_POINT |
->  		0x2 << DWCMSHC_EMMC_DLL_INC |
-> @@ -246,8 +287,20 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->  	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
->  		txclk_tapnum = priv->txclk_tapnum;
->  
-> +	if ((priv->devtype == DWCMSHC_RK3588) && host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
-> +		txclk_tapnum = DLL_TXCLK_TAPNUM_90_DEGREES;
-> +
-> +		extra = DLL_CMDOUT_SRC_CLK_NEG |
-> +			DLL_CMDOUT_EN_SRC_CLK_NEG |
-> +			DWCMSHC_EMMC_DLL_DLYENA |
-> +			DLL_CMDOUT_TAPNUM_90_DEGREES |
-> +			DLL_CMDOUT_TAPNUM_FROM_SW;
-> +		sdhci_writel(host, extra, DECMSHC_EMMC_DLL_CMDOUT);
-> +	}
-> +
->  	extra = DWCMSHC_EMMC_DLL_DLYENA |
->  		DLL_TXCLK_TAPNUM_FROM_SW |
-> +		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL |
->  		txclk_tapnum;
->  	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_TXCLK);
->  
-> @@ -347,7 +400,25 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
->  	return 0;
->  }
->  
-> +static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-> +{
-> +	/*
-> +	 * Don't support highspeed bus mode with low clk speed as we
-> +	 * cannot use DLL for this condition.
-> +	 */
-> +	if (host->mmc->f_max <= 52000000) {
-> +		dev_info(mmc_dev(host->mmc), "Disabling HS200/HS400, frequency too low (%d)\n",
-> +			 host->mmc->f_max);
-> +		host->mmc->caps2 &= ~(MMC_CAP2_HS200 | MMC_CAP2_HS400);
-> +		host->mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR);
-
-Ideally, this should be done before mmc_add_host(), for example by using
-sdhci_setup_host() + __sdhci_add_host() instead of sdhci_add_host(), and
-putting dwcmshc_rk35xx_postinit() between sdhci_setup_host() and
-__sdhci_add_host().
-
-> +	}
-> +}
-> +
->  static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-> +	{
-> +		.compatible = "rockchip,rk3588-dwcmshc",
-> +		.data = &sdhci_dwcmshc_rk35xx_pdata,
-> +	},
->  	{
->  		.compatible = "rockchip,rk3568-dwcmshc",
->  		.data = &sdhci_dwcmshc_rk35xx_pdata,
-> @@ -435,6 +506,11 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  			goto err_clk;
->  		}
->  
-> +		if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
-> +			rk_priv->devtype = DWCMSHC_RK3588;
-> +		else
-> +			rk_priv->devtype = DWCMSHC_RK3568;
-> +
->  		priv->priv = rk_priv;
->  
->  		err = dwcmshc_rk35xx_init(host, priv);
-> @@ -448,6 +524,9 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	if (err)
->  		goto err_clk;
->  
-> +	if (rk_priv)
-> +		dwcmshc_rk35xx_postinit(host, priv);
-> +
->  	return 0;
->  
->  err_clk:
-
+PiBIaSwNCj4gDQo+IE9uIFR1ZSwgQXByIDI2LCAyMDIyIGF0IDI6MTYgQU0gU3Jpbml2YXNhcmFv
+IFBhdGhpcGF0aQ0KPiA8cXVpY19zcGF0aGlAcXVpY2luYy5jb20+IHdyb3RlOg0KPiA+DQo+ID4g
+RnJvbTogU2F5YWxpIExva2hhbmRlIDxzYXlhbGlsQGNvZGVhdXJvcmEub3JnPg0KPiA+DQo+ID4g
+V2hpbGUgc3dpdGNoaW5nIGZyb20gaHM0MDAgdG8gaHMyMDAgbW9kZSwgaGlnaCBzcGVlZCBtb2Rl
+DQo+ID4gdGltaW5nIHNob3VsZCBiZSBzZWxlY3RlZCBpbiB0aGUgZGV2aWNlIGJlZm9yZSBjaGFu
+Z2luZyB0aGUNCj4gPiBjbG9jayBmcmVxdWVuY3kgaW4gdGhlIGhvc3QuIEJ1dCBjdXJyZW50IGlt
+cGxlbWVudGF0aW9uLA0KPiA+IChtbWNfaHM0MDBfdG9faHMyMDApIGZpcnN0IHVwZGF0ZXMgdGhl
+IGZyZXF1ZW5jeSBpbiB0aGUgaG9zdA0KPiA+IGFuZCB0aGVuIHVwZGF0ZXMgbW9kZSBpbiB0aGUg
+ZGV2aWNlLiBUaGlzIGlzIGEgc3BlYyB2aW9sYXRpb24uDQo+ID4gSGVuY2UgdXBkYXRlIHRoZSBz
+ZXF1ZW5jZSB0byBjb21wbHkgd2l0aCB0aGUgc3BlYy4NCj4gDQo+IEknbSBhIGJpdCBuZXcgdG8g
+aW50ZXJwcmV0aW5nIGVNTUMgc3BlY3MsIGJ1dCBhcmUgeW91IHN1cmUgdGhpcyBpcyBhDQo+IHZp
+b2xhdGlvbj8gSW4gSkVTRDg0LUI1MSwgSSBzZWU6DQo+IA0KPiAiVGhlIGJ1cyBmcmVxdWVuY3kg
+Y2FuIGJlIGNoYW5nZWQgYXQgYW55IHRpbWUgKHVuZGVyIHRoZSByZXN0cmljdGlvbnMNCj4gb2Yg
+bWF4aW11bSBkYXRhIHRyYW5zZmVyIGZyZXF1ZW5jeSwgZGVmaW5lZCBieSB0aGUgRGV2aWNlLCBh
+bmQgdGhlDQo+IGlkZW50aWZpY2F0aW9uIGZyZXF1ZW5jeSBkZWZpbmVkIGJ5IHRoZSBzdGFuZGFy
+ZCBkb2N1bWVudCkuIg0KPiANCj4gSSB0aGluayB0aGF0IHN1Z2dlc3RzIHdlIGNhbiBsb3dlciB0
+aGUgaG9zdCBjbG9jayBmaXJzdCwgYW5kIHRoZW4NCj4gbG93ZXIgdGhlIGRldmljZSB0aW1pbmcu
+IEFuZCAoYWNjb3JkaW5nIHRvIG15IGxpbWl0ZWQga25vd2xlZGdlKSB0aGF0DQo+IG1ha2VzIHNl
+bnNlIHRvbzogdGhlIGRldmljZSB0aW1pbmcgaXMgYSAibWF4aW11bSIgKHRvIHNvbWUgZXh0ZW50
+KSBhbmQNCj4gd2UncmUgZnJlZSB0byBydW4gdGhlIGhvc3QgYnVzIHNvbWV3aGF0IHNsb3dlci4N
+Cj4gDQo+IEFuZCBvbiB0aGUgZmxpcCBzaWRlOiBpdCBzb3VuZHMgbGlrZSB5b3UgbWF5IGJlIF9p
+bnRyb2R1Y2luZ18gYSBzcGVjDQo+IHZpb2xhdGlvbiAodGhhdCB3ZSdsbCBiZSBydW5uaW5nIHRo
+ZSBob3N0IGZhc3RlciB0aGFuIHRoZSBkZXZpY2UNCj4gdGltaW5nLCBicmllZmx5KT8NCkFjayBv
+biB0aGF0Lg0KDQpBbHNvLCBzcGVjaWZpY2FsbHksIHBsZWFzZSByZWZlciB0byBGaWd1cmUgMjgg
+4oCUIEhTMjAwIFNlbGVjdGlvbiBmbG93IGRpYWdyYW0uDQpZb3UgY2FuIHNlZSB0aGF0IHRoZSBm
+bG93IGdvZXMgdGhvdWdoOg0KQlVTX1dJRFRIIFsxODNdIC0+IGZyb20gMHgwNiAoRERSIDhiaXQp
+IHRvIDB4MDIgKFNEUiA4Yml0KQ0KSFNfVElNSU5HIFsxODVdIC0+ICBmcm9tIDB4MDMoSFM0MDAp
+IHRvIDB4MDIgKEhTMjAwKQ0KSG9zdCBtYXkgY2hhbmdlcyB0aGUgZnJlcXVlbmN5ICwgYnV0IGl0
+4oCZcyBubyBuZWVkZWQgYXMgSFM0MDAgYW5kIEhTMjAwIHVzZSBzYW1lIENMSw0KDQpUaGFua3Ms
+DQpBdnJpDQo+IA0KPiBBcG9sb2dpZXMgaWYgSSdtIG9mZiBiYXNlLiBCdXQgeW91IGRpZCBDQyBt
+ZSA7KQ0KPiANCj4gUmVnYXJkcywNCj4gQnJpYW4NCg==
