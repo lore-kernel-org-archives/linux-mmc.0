@@ -2,91 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4B75C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 10:19:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ED01C4167D
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 13:45:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229572AbiD1KXE convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Apr 2022 06:23:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49752 "EHLO
+        id S1347607AbiD1NsZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Apr 2022 09:48:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37380 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229473AbiD1KXD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 06:23:03 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 027BE2EB
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 03:19:49 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nk1FJ-0007p7-Ru; Thu, 28 Apr 2022 12:19:37 +0200
-Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nk1FI-005jdQ-Kb; Thu, 28 Apr 2022 12:19:35 +0200
-Received: from pza by lupine with local (Exim 4.94.2)
-        (envelope-from <p.zabel@pengutronix.de>)
-        id 1nk1FG-0006Kp-GQ; Thu, 28 Apr 2022 12:19:34 +0200
-Message-ID: <3f40330f76e27dbe3162c31c3e33837e2d0433e0.camel@pengutronix.de>
-Subject: Re: [PATCH V5] mmc: sdhci-msm: Reset GCC_SDCC_BCR register for SDHC
-From:   Philipp Zabel <p.zabel@pengutronix.de>
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>, agross@kernel.org,
-        bjorn.andersson@linaro.org, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, chris@printf.net, venkatg@codeaurora.org,
-        gdjakov@mm-sol.com, quic_asutoshd@quicinc.com
-Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com
-Date:   Thu, 28 Apr 2022 12:19:34 +0200
-In-Reply-To: <1650816153-23797-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1650816153-23797-1-git-send-email-quic_c_sbhanu@quicinc.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-User-Agent: Evolution 3.38.3-1 
+        with ESMTP id S1347594AbiD1NsX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 09:48:23 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.10])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 613661009;
+        Thu, 28 Apr 2022 06:45:07 -0700 (PDT)
+Received: from mail-yw1-f172.google.com ([209.85.128.172]) by
+ mrelayeu.kundenserver.de (mreue106 [213.165.67.113]) with ESMTPSA (Nemesis)
+ id 1Mbj7g-1oHTX51Pwc-00dBzt; Thu, 28 Apr 2022 15:45:05 +0200
+Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-2f16645872fso53520157b3.4;
+        Thu, 28 Apr 2022 06:45:04 -0700 (PDT)
+X-Gm-Message-State: AOAM531rqS3TMANA9dj5PbXHgYaYSabwGuCiqYz/vsc+5F15FvO6r45T
+        WzYb45HYkZmr2LEKIEQie8lnR4wtPfawCBHHv8E=
+X-Google-Smtp-Source: ABdhPJzhKdbLezBOw+onlWys2HjSNrb5hSb6f6j0ogYNPd9ax1npbHyo1Y6CrpuYIOWED3Pgr1SGQ4YvAKDaJmP/tmM=
+X-Received: by 2002:a0d:fc83:0:b0:2e5:b0f4:c125 with SMTP id
+ m125-20020a0dfc83000000b002e5b0f4c125mr33063062ywf.347.1651153503029; Thu, 28
+ Apr 2022 06:45:03 -0700 (PDT)
 MIME-Version: 1.0
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: p.zabel@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
+ <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
+ <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net> <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
+ <20220422234150.GA3442771@roeck-us.net> <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
+ <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net> <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
+ <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net> <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
+In-Reply-To: <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Thu, 28 Apr 2022 15:44:47 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
+Message-ID: <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
+Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
+To:     Guenter Roeck <linux@roeck-us.net>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:FlIDVPKXj9nzRwbk/wtccBdWDayg3PeTGiQuZ0/K42Bc7lGmPdy
+ zssQcyDZ/DvWHSLnMLZ2c9c0/R8//Ct6Le7VOKueD5Qrh1XSkN/immCrCQM54OpPKR7UGyt
+ rQR8FQFtM5HLTQupvDTlwrysBtqfjlwTZD25pEF/Z42s6fyHy6hxD7eWpHSPUujdYwhn8pQ
+ hp2z24g1g13nAlk8lrHHQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:bRWqGE+N+ZY=:1iRjrIl6V157UK5O78TAoc
+ 5W5zmo/RxHt6piZZQJR7bHPk8veJW7G/eD5jO6ABZaX8NSxlHXJ4TP5x5uFoaOWveTMuY2YNB
+ E/S7IJzqQcjMpAVq0rBO649N779tX8wy6iezjQHdAX7O/6l7dHbxrLeGuJGtVvy5SPmFPsnuF
+ 7hnbUhs94zbUsLMYQRcLlnGNptZ7bFxfi+PlNYB3jQQh0+wXdJS+P/EHPJK8UZHs5BjQBv+Qa
+ EX048TdTH+63xTL5zzrwgKZLFucF2PiHs68Y/WDhFOvULFD5XwxnpC8QYME42zx9V0NjnR5nN
+ Zars/a9a2hpnBBVlPLxle2k0Ttww//0frPo+wnR8G+aU3Z16D9IvAlHwSrOB4KMSHfQcLKCXw
+ tPZA1Y7PpVtBkQv7lmHrlSCe1xcRYAXOza/mWm2Xjc8xgk76wXvHvzBr1oDGBEonkVw+bOSVk
+ vREnB57Ovs/1UlfpUFpyy1eB8Q7JaktAGlKXASPtn19bnV5rt2G4I4ntfhaJQgAmDnlzlZpC5
+ Evd5+7v4S1X/iOOX+m+Ahkho8f4fM1ugsUVvQaHKOghqQBb6nN0eAvrdXIURg56QmTfn7UwPn
+ N0bxJ5G7FH8Br9CiO+tOZBKs/TdaV+aEaEj9KMO4yP5VYEF6IpBEitkf9ifUTwFwihqSEjEM8
+ bFcGWSSCC9/0KLlTg8Gh5+db6LA5cg7itMKXDE5C7XsBAI9Hm3mx1p5yWo7HLHsbXHmzeASA2
+ rpwe5iV2gi/30EyX8gsnnoe4xEtOTZhUuWGdwxWCA0Vb4Q0oLDG+gyWlREBg6vyV7SR9Ag7iE
+ yckvS97oNG9rtf98GBy9xysVb2+4/y8JObMv6+5+lQPd284ay4=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On So, 2022-04-24 at 21:32 +0530, Shaik Sajida Bhanu wrote:
-> Reset GCC_SDCC_BCR register before every fresh initilazation. This will
-> reset whole SDHC-msm controller, clears the previous power control
-> states and avoids, software reset timeout issues as below.
-> 
-> [ 5.458061][ T262] mmc1: Reset 0x1 never completed.
-> [ 5.462454][ T262] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [ 5.469065][ T262] mmc1: sdhci: Sys addr: 0x00000000 | Version: 0x00007202
-> [ 5.475688][ T262] mmc1: sdhci: Blk size: 0x00000000 | Blk cnt: 0x00000000
-> [ 5.482315][ T262] mmc1: sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-> [ 5.488927][ T262] mmc1: sdhci: Present: 0x01f800f0 | Host ctl: 0x00000000
-> [ 5.495539][ T262] mmc1: sdhci: Power: 0x00000000 | Blk gap: 0x00000000
-> [ 5.502162][ T262] mmc1: sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
-> [ 5.508768][ T262] mmc1: sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
-> [ 5.515381][ T262] mmc1: sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
-> [ 5.521996][ T262] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> [ 5.528607][ T262] mmc1: sdhci: Caps: 0x362dc8b2 | Caps_1: 0x0000808f
-> [ 5.535227][ T262] mmc1: sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
-> [ 5.541841][ T262] mmc1: sdhci: Resp[0]: 0x00000000 | Resp[1]: 0x00000000
-> [ 5.548454][ T262] mmc1: sdhci: Resp[2]: 0x00000000 | Resp[3]: 0x00000000
-> [ 5.555079][ T262] mmc1: sdhci: Host ctl2: 0x00000000
-> [ 5.559651][ T262] mmc1: sdhci_msm: ----------- VENDOR REGISTER DUMP-----------
-> [ 5.566621][ T262] mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg: 0x6000642c | DLL cfg2: 0x0020a000
-> [ 5.575465][ T262] mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl: 0x00010800 | DDR cfg: 0x80040873
-> [ 5.584658][ T262] mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 : 0xf88218a8 Vndr func3: 0x02626040
-> 
-> Fixes: 0eb0d9f4de34 ("mmc: sdhci-msm: Initial support for Qualcomm chipsets")
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> ---
-> 
-> Changes since V4:
-> 	- Called reset_control_put() in error path.
+On Sun, Apr 24, 2022 at 8:48 PM Arnd Bergmann <arnd@kernel.org> wrote:
+> On Sun, Apr 24, 2022 at 5:28 PM Guenter Roeck <linux@roeck-us.net> wrote:
+> > On 4/24/22 01:52, Arnd Bergmann wrote:
+> > > On Sun, Apr 24, 2022 at 4:09 AM Guenter Roeck <linux@roeck-us.net> wrote:
+> > > into the defconfig file, otherwise the multiplatform target defaults to
+> > > an ARMv7 instead of ARMv5 build. For an OMAP15xx as in the SX1,
+> > > you also need to enable CONFIG_ARCH_MULTI_V4T.
+> > >
+> > > This is slightly unfortunate, but I don't see any way to avoid it, and the
+> > > modified defconfig will still work fine with older kernel trees.
+> > >
+> >
+> > Yes, that works. I changed it in my configuration.
+>
+> Ok, great!. I managed to boot the z2 machine with PCMCIA support
+> and it gets around the issue with my patch, correctly detecting the
+> CF card.
 
-Reviewed-by: Philipp Zabel <p.zabel@pengutronix.de>
+Hi Guenter,
 
-regards
-Philipp
+I have now sent out a fix that I'm happy with, and applied it to the
+pxa-multiplatform-5.18 branch of the soc tree as well as the
+combined arm/multiplatform tree.
+
+I have not merged this new version into the for-next branch
+since I would like to see if there are any other regressions first.
+
+Can you run your boot tests on the arm/multiplatform branch
+and let me know if that fixes everything you found? If that
+takes a lot of manual steps on your side, I'd just wait for the
+build bots and merge it after all there are no new compile-time
+issues.
+
+       Arnd
