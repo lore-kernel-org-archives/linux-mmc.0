@@ -2,56 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82914C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 22:55:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4399EC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 22:56:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353073AbiD1W6S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Apr 2022 18:58:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47090 "EHLO
+        id S1353090AbiD1W7V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Apr 2022 18:59:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50744 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353070AbiD1W6S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 18:58:18 -0400
-Received: from mail-yb1-xb30.google.com (mail-yb1-xb30.google.com [IPv6:2607:f8b0:4864:20::b30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED311C1CAA
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 15:55:00 -0700 (PDT)
-Received: by mail-yb1-xb30.google.com with SMTP id s30so11609299ybi.8
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 15:55:00 -0700 (PDT)
+        with ESMTP id S1348693AbiD1W7V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 18:59:21 -0400
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E1D82AE3F
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 15:56:04 -0700 (PDT)
+Received: by mail-yb1-xb2a.google.com with SMTP id m128so11637037ybm.5
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 15:56:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=cgTFMUsq9gVZz59+3kDOySK+OVbeH8W2pPDccjzuXKE=;
-        b=ov2q5f2yE12o/uS00CPcFLtntiChTcYemtbGaDmhDAusLUIMEjB4VaNqGcC3WNcCPd
-         L7yYE9xuB/7zZyKq9VQCxp2jIFB8CR7OFU5ZyhIOoVX3kFdYNID85+1a7J1f7sxAjjtG
-         W7h8rWHl0hDVgXzxH0vvYzqteazALEC74JXOYii/DLzplO/NYZ0Lc0/ot+q4NvVAqt/I
-         YIiJgCRu8Bb3hGo76YEBHfVL64mDFlBZKDBoB33icT3OC/SkBRmpCz6Nglkboa6ia0jE
-         dDwfvH+RJVmQAqLIK8xM+VJl3XthUy4h6wSYEuLNngxFj+VdGOtvJcl1oBXwOwCsjeKl
-         KreQ==
+        bh=AZ8/ZHQt0GRQpJww4lct7d21fcaHvDESbeLqhd2I1bI=;
+        b=ucuXnzehNcoNaIFz9y++2PCcsmNoxYh67Y2KFZNW1unHKW3FnmC4jzYOewXM8Y7g4i
+         RCw2dTbN99FjrpiObL5fMg0NrgNqjjIxJ5Po0XBvbzx6JzwvnJ8DVM1zIs5zlD74E1q0
+         m1O/Hbi6ojuQ+0olAjqTdPvqAkMZ9yZUPWgFNvaDvkofZjKTwao9BpU8U58p7Ha3ctLs
+         Myce8HelYJRSbfctgbvNmZpVc9HR27CkzBi+prypXnuk44E85VVpxCQxnGUTA5Ry6iWf
+         5XGDUTo34p7wqyxHe6NPQzmfgS+/lpiLoDsVYKk0dhjZWwIDojmNRq91DoVwj1LdSjIR
+         axBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=cgTFMUsq9gVZz59+3kDOySK+OVbeH8W2pPDccjzuXKE=;
-        b=WhWjl880EgMsLKNG2FuTbrZTc0e3cHoyWsTtlA1HyfTh7GLibx/KmHAvEuTiyh2QXF
-         /h82fXkhDMyPBVmfwK2UG3SCvjRk4yYzxDCywjasmpLC6LhIGxj6foS46LZiP/z2Gkbp
-         1tgfQvAS8SP7tTLwRI0hq2Y09MpZkfaIQ6XMxOGQMFYw9wJhi2hkiRn8w0ellAhlyC/R
-         EnjpaOePNEA8AE/ZdvhKJjHLUf2H8PFsqOdLxAbfo3AW07M9RWZXzFBDqS8PIkDR5BpZ
-         bfpZRG3Lg1jwSkajPpAvOu+55sp89E4wfz0ZAXAmXiObf2VYq/CLpr7zu4aG/1/5Iy4d
-         YKaw==
-X-Gm-Message-State: AOAM530J3FOXtnAf9bynyW7EM53/Tr19X4YRK++Wzod3+ALKV8TJFSHY
-        UAQ4JYCe+KRLgUfEXwFM34MnqganquRzVug1Mi0UBw==
-X-Google-Smtp-Source: ABdhPJzzpmlI/Pkjo7HQbAq5Q2zszomNzPfs/JPPXY6KHrXgc/mt8oB2lus+Oi/UtX2SN9COoG/Tm2fMjSmMEsomV1M=
-X-Received: by 2002:a25:bcc3:0:b0:648:7360:8e75 with SMTP id
- l3-20020a25bcc3000000b0064873608e75mr20334083ybm.533.1651186500208; Thu, 28
- Apr 2022 15:55:00 -0700 (PDT)
+        bh=AZ8/ZHQt0GRQpJww4lct7d21fcaHvDESbeLqhd2I1bI=;
+        b=Uz7lPQ/yE8Eup74Ch5Ovo14zu03vIBgjFICuOfYGeUUsU7g+irk11XS4pxfz83kzM/
+         Vcd0In7KYQlkMXipg+mO0FGGIUEbSvGsUwJBEb3pE8ga/UnLxuz1TPCQj/pVHJrSyE/w
+         E7+7SFVz1wUlan3N1xQqwxsopzo8ZTsDxYbs/h9qVfTYaX++IzD0w5ESF5dZfUM6KY3q
+         HJec7YCERjXoVgmrjePuh3qsqM4P17o5iVipo23mD0LuQWnB6ARMlq9AAmL5op0X6a3S
+         bZ1F35Upd70dNkkBlm1XQi+I4R8vLJJFA4jXPZ1GFGh4BXHyR5dkhXRG4C24hvew7coU
+         TnoA==
+X-Gm-Message-State: AOAM53096SOAGm3uzYghLRvvOL6XSqqoUWVaS/hcx0QwduFkKYuMjBEY
+        X43Qd7rgRoFRv+DUtxmT7I7dT7+eIB6hAeLTSJpYEQ==
+X-Google-Smtp-Source: ABdhPJyhJ2SNA8+s8ZqNAY+1RfMSxJ4alux7Fu+Nxl0Epn8PePLV4XNSQZmCWxbE/uh/DAjUC1b9me8wZwZ/ybZMEvw=
+X-Received: by 2002:a25:aa94:0:b0:648:62f2:ef4e with SMTP id
+ t20-20020a25aa94000000b0064862f2ef4emr21465149ybi.626.1651186563960; Thu, 28
+ Apr 2022 15:56:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220422170920.401914-1-sebastian.reichel@collabora.com> <20220422170920.401914-13-sebastian.reichel@collabora.com>
-In-Reply-To: <20220422170920.401914-13-sebastian.reichel@collabora.com>
+References: <20220422170920.401914-1-sebastian.reichel@collabora.com> <20220422170920.401914-14-sebastian.reichel@collabora.com>
+In-Reply-To: <20220422170920.401914-14-sebastian.reichel@collabora.com>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 29 Apr 2022 00:54:49 +0200
-Message-ID: <CACRpkdZZGXMV5cnZpdat1Z_22CZE-gGfCqRHpOqnd_asw_KMwQ@mail.gmail.com>
-Subject: Re: [PATCHv1 12/19] pinctrl/rockchip: add error handling for
- pull/drive register getters
+Date:   Fri, 29 Apr 2022 00:55:52 +0200
+Message-ID: <CACRpkdZXuLPpgKcM_OU+Xewuuq6zGJek0QXAT1Xxn5fcZofJvA@mail.gmail.com>
+Subject: Re: [PATCHv1 13/19] pinctrl/rockchip: add rk3588 support
 To:     Sebastian Reichel <sebastian.reichel@collabora.com>
 Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzk+dt@kernel.org>,
@@ -65,7 +64,7 @@ Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
         linux-arm-kernel@lists.infradead.org,
         linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        kernel@collabora.com
+        Jianqun Xu <jay.xu@rock-chips.com>, kernel@collabora.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -74,12 +73,18 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On Fri, Apr 22, 2022 at 7:09 PM Sebastian Reichel
 <sebastian.reichel@collabora.com> wrote:
 
-> Add error handling for the pull and driver register getters in preparation
-> for RK3588 support.
+> From: Jianqun Xu <jay.xu@rock-chips.com>
 >
+> Add pinctrl support for RK3588.
+>
+> Signed-off-by: Jianqun Xu <jay.xu@rock-chips.com>
+> [merged in downstream fixes, simplified register lookup logic for better
+> maintanence at the cost of a bit more static const memory and fixed some
+> incorrect registers]
 > Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 
-Patch applied.
+Patch applied, unless Heiko does some loud protesting it stays
+in the tree.
 
 Yours,
 Linus Walleij
