@@ -2,87 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2822C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 15:00:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F586C4321E
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 16:49:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348703AbiD1PEL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Apr 2022 11:04:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56996 "EHLO
+        id S1350361AbiD1Qw5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Apr 2022 12:52:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348730AbiD1PD6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 11:03:58 -0400
-Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73E01B3C4C;
-        Thu, 28 Apr 2022 08:00:44 -0700 (PDT)
-Received: by mail-pl1-x632.google.com with SMTP id h12so4571782plf.12;
-        Thu, 28 Apr 2022 08:00:44 -0700 (PDT)
+        with ESMTP id S1344849AbiD1Qw4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 12:52:56 -0400
+Received: from mail-oa1-x2b.google.com (mail-oa1-x2b.google.com [IPv6:2001:4860:4864:20::2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82B05B53E6;
+        Thu, 28 Apr 2022 09:49:41 -0700 (PDT)
+Received: by mail-oa1-x2b.google.com with SMTP id 586e51a60fabf-e5e433d66dso5707062fac.5;
+        Thu, 28 Apr 2022 09:49:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :references:from:in-reply-to:content-transfer-encoding;
-        bh=Xzh71VOPVUr+FTLGg1rFRJRlpUUfpPpuTtbbxsOPXfI=;
-        b=O5bMQXXZowjnASkvRhCWoT+QMe8mgP+/12AIDAsuiTgxY4Nj4M71kFjRRl4/HvuX7n
-         iKd+G/OfoI31xR44jdpgxb+UxGmOPvjBbjJbg6IQh+CfSC1ahh/7SRr4jYt+kooa1S/k
-         ntgHw7A88EWdbHp0rib6grcjCLLI2lWNvbXSIvRo3eWXiTtQOvkU98+mKCqTmarQ5a6j
-         89tilDCVOHA10IV7O+ZQNiLHy6uev/Wl6S6ArorU06Ka6erpU5y+4grLqvOy2CimHT3s
-         m8ZnO+VLvQeQPdpsVUixFFcV70NnnAV2O0jWWDLxQLRMfVG97HWK/oTaX6dhBIpy7UoF
-         3RlA==
+        h=sender:message-id:date:mime-version:user-agent:content-language:to
+         :cc:references:from:subject:in-reply-to:content-transfer-encoding;
+        bh=XISky4EfFFruGvnkmI6B4SFkxFQ52ohN9Fu2cRfYJfw=;
+        b=OkCy3r1S0ZpJd0xw0VfvdODlVptYGtGD/s68vjFfu+cv5VfksDwVTELspFMjzyqn2l
+         o3HoJm03XsZQdwbEbRWjI+Lb63jSRMQLNDN7FFeOkhyetGmz/gAbkEhkV3TcaKgGRG82
+         vuwvRZEQI4XV6kVyb9AK1+aJWoE9PIAQbe2raaE3M+WY6coymTsE71a+p721Tp/oJ1tu
+         En+rQbHzGa1KawncckJtHDkTWA14zP+YTiLHoNAAclpt3pPZZQzCVaSg0pgbdjB43usw
+         AxIfxdOHjkKVb6pAsbdhR1cE59eZyAmq6cI4Gd58mfC+2jQzc1Zta0D378ut2yf8lfbd
+         NqrQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:references:from:in-reply-to
+        h=x-gm-message-state:sender:message-id:date:mime-version:user-agent
+         :content-language:to:cc:references:from:subject:in-reply-to
          :content-transfer-encoding;
-        bh=Xzh71VOPVUr+FTLGg1rFRJRlpUUfpPpuTtbbxsOPXfI=;
-        b=C2Vt0t9t+ZxPG45rGdFB9+coGXrGsYnEuthb3ygBiWHULQX5ZwjCYv1RznqE+Vvsy5
-         YzysSQyULS5iS4CAnNKin8e30KDNMi+QlLypdgR0nbMkLDD7e2rFNys1Xs4a6ZEsPVkr
-         +sjNuULNcYaorjstGNhQ0wkC1OyipmI9oakUuzwUyRuVfYu4//lQcyXzSYNxYOqoLudt
-         QwtH3pCF0hex0y5ckP1/7cBero9NFtNHLupBU9BpEIknTdfeRhInEbLyLxHalL5EfXVL
-         1hmT2HlDHOSMRiyH0/GhnU5YYMtj45a84E8gsTE6nfZhIavSsf2GxVGDj5p7ltrH0VLN
-         51tw==
-X-Gm-Message-State: AOAM5323kMcZW9k/CyicxVwWCHn01vez8ugOsa2/eGdeZVm+upjOYbM7
-        gXnsvNBa+eHJ3QoAp5URpaMam2z3PNU=
-X-Google-Smtp-Source: ABdhPJz8BQrt5G2ELPiXuQARmcj6SXgWvxmGYSF4ceGToAt3z56e7gcOGZXW/o5OYHsXQeAzQ/LZew==
-X-Received: by 2002:a17:902:f612:b0:14c:e978:f99e with SMTP id n18-20020a170902f61200b0014ce978f99emr34096174plg.23.1651158043945;
-        Thu, 28 Apr 2022 08:00:43 -0700 (PDT)
-Received: from ?IPV6:2600:8802:b00:4a48:e9ac:ce6:5da2:8724? ([2600:8802:b00:4a48:e9ac:ce6:5da2:8724])
-        by smtp.gmail.com with ESMTPSA id t63-20020a625f42000000b0050a7eaff8c9sm127923pfb.189.2022.04.28.08.00.42
+        bh=XISky4EfFFruGvnkmI6B4SFkxFQ52ohN9Fu2cRfYJfw=;
+        b=dOwkGtw9dzdMd240ouokfJ4dl8tjhaloPKw1nqE++5hoRiCFTpENqlsfi1mg3Ls4wI
+         xNnEZM1iKXU53rnxp3MocydBbnoFRWtpSI0zT45CGCsgJhQwFQQtfIADkMfUemDBG8DU
+         pscUPvNhybZQ2ZqjUTFqi201/nbeOLGbjKP0IFH6JwbBmX+LOCb31UFAgn9JPHJ9bDRp
+         7bbHsthT0/ioa6oB7tDeBKTR6U/rZaMZjpk803fdXhybT2D5ZmpkmPQdqjAzPAKLvhkO
+         tOeIpK7DHaG5QmPgvwEAFlBAKlEHsd0+SxqzEwZBitZ8AUMcFZi0DgmkVooUr8TdPkpE
+         ZPZA==
+X-Gm-Message-State: AOAM533GaflZGPmbY4D3fPd7Q2nhlECfkZgiV8DzhzGR90HRc0jbmLDc
+        5K+CiJ64HwZsPVWUYcNN5OQ=
+X-Google-Smtp-Source: ABdhPJzrsKYpUtqCt/iZ06NVVnsLxq83abuM+0rz/PmqCRR+0Jas/OQpo6w5mfl9KOVI8b7KjTk3bw==
+X-Received: by 2002:a05:6870:3289:b0:e9:1a82:c010 with SMTP id q9-20020a056870328900b000e91a82c010mr11417956oac.25.1651164580861;
+        Thu, 28 Apr 2022 09:49:40 -0700 (PDT)
+Received: from ?IPV6:2600:1700:e321:62f0:329c:23ff:fee3:9d7c? ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id p17-20020a4a3651000000b0035d9b838f21sm205539ooe.10.2022.04.28.09.49.37
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 28 Apr 2022 08:00:43 -0700 (PDT)
-Message-ID: <0650ab91-4102-77a4-c27a-f48e74c6bd8d@gmail.com>
-Date:   Thu, 28 Apr 2022 08:00:42 -0700
+        Thu, 28 Apr 2022 09:49:40 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Message-ID: <dd3ac1fa-67c2-8bdf-f275-9210a9e23054@roeck-us.net>
+Date:   Thu, 28 Apr 2022 09:49:36 -0700
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.1
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,sdhci-brcmstb: cleanup example
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.7.0
 Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Broadcom Kernel Team <bcm-kernel-feedback-list@broadcom.com>,
-        Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-References: <20220428081817.35382-1-krzysztof.kozlowski@linaro.org>
- <20220428081817.35382-2-krzysztof.kozlowski@linaro.org>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <20220428081817.35382-2-krzysztof.kozlowski@linaro.org>
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+References: <20220419163810.2118169-1-arnd@kernel.org>
+ <20220422170530.GA2338209@roeck-us.net>
+ <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
+ <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net>
+ <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
+ <20220422234150.GA3442771@roeck-us.net>
+ <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
+ <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net>
+ <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
+ <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net>
+ <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
+ <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
+From:   Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
+In-Reply-To: <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-On 4/28/2022 1:18 AM, Krzysztof Kozlowski wrote:
-> Cleanup indentation and order of entries in example DTS.  The most
-> important when reading the DTS are compatible and reg.  By convention
-> they are usually to first entries.  No functional change.
+On 4/28/22 06:44, Arnd Bergmann wrote:
+> On Sun, Apr 24, 2022 at 8:48 PM Arnd Bergmann <arnd@kernel.org> wrote:
+>> On Sun, Apr 24, 2022 at 5:28 PM Guenter Roeck <linux@roeck-us.net> wrote:
+>>> On 4/24/22 01:52, Arnd Bergmann wrote:
+>>>> On Sun, Apr 24, 2022 at 4:09 AM Guenter Roeck <linux@roeck-us.net> wrote:
+>>>> into the defconfig file, otherwise the multiplatform target defaults to
+>>>> an ARMv7 instead of ARMv5 build. For an OMAP15xx as in the SX1,
+>>>> you also need to enable CONFIG_ARCH_MULTI_V4T.
+>>>>
+>>>> This is slightly unfortunate, but I don't see any way to avoid it, and the
+>>>> modified defconfig will still work fine with older kernel trees.
+>>>>
+>>>
+>>> Yes, that works. I changed it in my configuration.
+>>
+>> Ok, great!. I managed to boot the z2 machine with PCMCIA support
+>> and it gets around the issue with my patch, correctly detecting the
+>> CF card.
 > 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Hi Guenter,
+> 
+> I have now sent out a fix that I'm happy with, and applied it to the
+> pxa-multiplatform-5.18 branch of the soc tree as well as the
+> combined arm/multiplatform tree.
+> 
+> I have not merged this new version into the for-next branch
+> since I would like to see if there are any other regressions first.
+> 
+> Can you run your boot tests on the arm/multiplatform branch
+> and let me know if that fixes everything you found? If that
+> takes a lot of manual steps on your side, I'd just wait for the
+> build bots and merge it after all there are no new compile-time
+> issues.
+> 
 
-Acked-by: Florian Fainelli <f.fainelli@gmail.com>
--- 
-Florian
+-next is pretty badly broken right now due to a series of less than
+perfect mm patches, so testing there won't do any good.
+
+I'll see if I can dig up the multiplatform branch and push it into
+my 'testing' branch.
+
+Guenter
