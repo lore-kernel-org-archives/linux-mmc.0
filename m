@@ -2,128 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ED01C4167D
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 13:45:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69100C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 15:00:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347607AbiD1NsZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Apr 2022 09:48:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37380 "EHLO
+        id S239278AbiD1PDn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Apr 2022 11:03:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55902 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347594AbiD1NsX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 09:48:23 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.10])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 613661009;
-        Thu, 28 Apr 2022 06:45:07 -0700 (PDT)
-Received: from mail-yw1-f172.google.com ([209.85.128.172]) by
- mrelayeu.kundenserver.de (mreue106 [213.165.67.113]) with ESMTPSA (Nemesis)
- id 1Mbj7g-1oHTX51Pwc-00dBzt; Thu, 28 Apr 2022 15:45:05 +0200
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-2f16645872fso53520157b3.4;
-        Thu, 28 Apr 2022 06:45:04 -0700 (PDT)
-X-Gm-Message-State: AOAM531rqS3TMANA9dj5PbXHgYaYSabwGuCiqYz/vsc+5F15FvO6r45T
-        WzYb45HYkZmr2LEKIEQie8lnR4wtPfawCBHHv8E=
-X-Google-Smtp-Source: ABdhPJzhKdbLezBOw+onlWys2HjSNrb5hSb6f6j0ogYNPd9ax1npbHyo1Y6CrpuYIOWED3Pgr1SGQ4YvAKDaJmP/tmM=
-X-Received: by 2002:a0d:fc83:0:b0:2e5:b0f4:c125 with SMTP id
- m125-20020a0dfc83000000b002e5b0f4c125mr33063062ywf.347.1651153503029; Thu, 28
- Apr 2022 06:45:03 -0700 (PDT)
+        with ESMTP id S230396AbiD1PDm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 11:03:42 -0400
+Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 427A512A9A;
+        Thu, 28 Apr 2022 08:00:23 -0700 (PDT)
+Received: by mail-pl1-x636.google.com with SMTP id q8so4597310plx.3;
+        Thu, 28 Apr 2022 08:00:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :references:from:in-reply-to:content-transfer-encoding;
+        bh=FYUWi4vkuGypzkaoW/GrEwcwOVXevYtnTdO9X9e1buU=;
+        b=iLbZNiSk+pMv0mMhNDMobKgLlw5630f+/sUl3Lam0GQG0pgIk/yXL0ofgK0TBslC9H
+         q93kE+LYs8WflCxBaf3jLWNlBbes1MkU+ZUqgAHXV+9bAuSsT9I5lMweqEdZyVE/AjVV
+         1H50PTpLhuMZRu1WqaYiciexF3gHJ3ok3ERQC0kDd5f2ikPlpEBpBgByKkN2M7DXfxDl
+         HhPaOLHjdz1OwGEAgmccAkzvrjUtucBK3mUH7SDZpukCLx/tp3TunvVby6nvfVfQ+yiL
+         SvXnpI/Q4AkJQ+3F1HnbfDbEvr6MIcIMjqYySQc+mrJwzpUvHwTuhOZRsLOwYBLA3U/U
+         ElQA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=FYUWi4vkuGypzkaoW/GrEwcwOVXevYtnTdO9X9e1buU=;
+        b=cAIgzg3rSct4Y9OPPYJ3kiIO0bDg6QqOfdoZ+YbC1mV4v5oSefUnpSfqz0kVhU18+q
+         96TpsdVPKc8T05M9FDDtigelkd3aXpbBsPqv+lHlqTEgM6FbEkw4wD3QnGYRGdlNnfnQ
+         B6wdtAYvldvcKf8KqgXYrL0EDGlyydUAPRS/tRYwrxydXQwV388EOJ9a5puXnEXo9E16
+         5VdKH08Qqfadbp/IDbvRZ+nx1Y0+yvOR0PRpB1mpZyHFjZenUdOT/vx2eJKd2GYyV/xF
+         RtOPx6oZQbcydGXz7hixLCFPsoSQWMOzMzns0Vkm/Ug4PSLI18JeK/+5MZq2NmfJHLq1
+         FUcw==
+X-Gm-Message-State: AOAM533EeP8eAem6eIHwgW7Cz42d8Cx/YJmDf8nOCp8kQ4Lt2cumKEq9
+        lL+p3bN5iq/f/8yNLRawIrUHapzgSeI=
+X-Google-Smtp-Source: ABdhPJyg+1m3ua5MWgkCAUcgXZ0Dtwt+jstW9vVHiB6nSOMYMh+3mbDaT/pv0lRwmNriyngKnrhSww==
+X-Received: by 2002:a17:90b:4b41:b0:1d9:b562:5bbe with SMTP id mi1-20020a17090b4b4100b001d9b5625bbemr15012080pjb.61.1651158022765;
+        Thu, 28 Apr 2022 08:00:22 -0700 (PDT)
+Received: from ?IPV6:2600:8802:b00:4a48:e9ac:ce6:5da2:8724? ([2600:8802:b00:4a48:e9ac:ce6:5da2:8724])
+        by smtp.gmail.com with ESMTPSA id w9-20020a056a0014c900b004fb2ca5f6d7sm133968pfu.136.2022.04.28.08.00.21
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 28 Apr 2022 08:00:22 -0700 (PDT)
+Message-ID: <e25544bd-6fc1-e5c0-79b2-71e5d51bcde2@gmail.com>
+Date:   Thu, 28 Apr 2022 08:00:21 -0700
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
- <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
- <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net> <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
- <20220422234150.GA3442771@roeck-us.net> <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
- <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net> <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
- <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net> <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
-In-Reply-To: <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Thu, 28 Apr 2022 15:44:47 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
-Message-ID: <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
-Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
-To:     Guenter Roeck <linux@roeck-us.net>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.1
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: brcm,sdhci-brcmstb: correct number
+ of reg entries
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:FlIDVPKXj9nzRwbk/wtccBdWDayg3PeTGiQuZ0/K42Bc7lGmPdy
- zssQcyDZ/DvWHSLnMLZ2c9c0/R8//Ct6Le7VOKueD5Qrh1XSkN/immCrCQM54OpPKR7UGyt
- rQR8FQFtM5HLTQupvDTlwrysBtqfjlwTZD25pEF/Z42s6fyHy6hxD7eWpHSPUujdYwhn8pQ
- hp2z24g1g13nAlk8lrHHQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:bRWqGE+N+ZY=:1iRjrIl6V157UK5O78TAoc
- 5W5zmo/RxHt6piZZQJR7bHPk8veJW7G/eD5jO6ABZaX8NSxlHXJ4TP5x5uFoaOWveTMuY2YNB
- E/S7IJzqQcjMpAVq0rBO649N779tX8wy6iezjQHdAX7O/6l7dHbxrLeGuJGtVvy5SPmFPsnuF
- 7hnbUhs94zbUsLMYQRcLlnGNptZ7bFxfi+PlNYB3jQQh0+wXdJS+P/EHPJK8UZHs5BjQBv+Qa
- EX048TdTH+63xTL5zzrwgKZLFucF2PiHs68Y/WDhFOvULFD5XwxnpC8QYME42zx9V0NjnR5nN
- Zars/a9a2hpnBBVlPLxle2k0Ttww//0frPo+wnR8G+aU3Z16D9IvAlHwSrOB4KMSHfQcLKCXw
- tPZA1Y7PpVtBkQv7lmHrlSCe1xcRYAXOza/mWm2Xjc8xgk76wXvHvzBr1oDGBEonkVw+bOSVk
- vREnB57Ovs/1UlfpUFpyy1eB8Q7JaktAGlKXASPtn19bnV5rt2G4I4ntfhaJQgAmDnlzlZpC5
- Evd5+7v4S1X/iOOX+m+Ahkho8f4fM1ugsUVvQaHKOghqQBb6nN0eAvrdXIURg56QmTfn7UwPn
- N0bxJ5G7FH8Br9CiO+tOZBKs/TdaV+aEaEj9KMO4yP5VYEF6IpBEitkf9ifUTwFwihqSEjEM8
- bFcGWSSCC9/0KLlTg8Gh5+db6LA5cg7itMKXDE5C7XsBAI9Hm3mx1p5yWo7HLHsbXHmzeASA2
- rpwe5iV2gi/30EyX8gsnnoe4xEtOTZhUuWGdwxWCA0Vb4Q0oLDG+gyWlREBg6vyV7SR9Ag7iE
- yckvS97oNG9rtf98GBy9xysVb2+4/y8JObMv6+5+lQPd284ay4=
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Broadcom Kernel Team <bcm-kernel-feedback-list@broadcom.com>,
+        Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+References: <20220428081817.35382-1-krzysztof.kozlowski@linaro.org>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+In-Reply-To: <20220428081817.35382-1-krzysztof.kozlowski@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Apr 24, 2022 at 8:48 PM Arnd Bergmann <arnd@kernel.org> wrote:
-> On Sun, Apr 24, 2022 at 5:28 PM Guenter Roeck <linux@roeck-us.net> wrote:
-> > On 4/24/22 01:52, Arnd Bergmann wrote:
-> > > On Sun, Apr 24, 2022 at 4:09 AM Guenter Roeck <linux@roeck-us.net> wrote:
-> > > into the defconfig file, otherwise the multiplatform target defaults to
-> > > an ARMv7 instead of ARMv5 build. For an OMAP15xx as in the SX1,
-> > > you also need to enable CONFIG_ARCH_MULTI_V4T.
-> > >
-> > > This is slightly unfortunate, but I don't see any way to avoid it, and the
-> > > modified defconfig will still work fine with older kernel trees.
-> > >
-> >
-> > Yes, that works. I changed it in my configuration.
->
-> Ok, great!. I managed to boot the z2 machine with PCMCIA support
-> and it gets around the issue with my patch, correctly detecting the
-> CF card.
 
-Hi Guenter,
 
-I have now sent out a fix that I'm happy with, and applied it to the
-pxa-multiplatform-5.18 branch of the soc tree as well as the
-combined arm/multiplatform tree.
+On 4/28/2022 1:18 AM, Krzysztof Kozlowski wrote:
+> The binding should not allow infinite number of 'reg' entries, so add
+> strict limit.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-I have not merged this new version into the for-next branch
-since I would like to see if there are any other regressions first.
+Acked-by: Florian Fainelli <f.fainelli@gmail.com>
 
-Can you run your boot tests on the arm/multiplatform branch
-and let me know if that fixes everything you found? If that
-takes a lot of manual steps on your side, I'd just wait for the
-build bots and merge it after all there are no new compile-time
-issues.
+Given Kamal's patch series:
 
-       Arnd
+https://lore.kernel.org/linux-devicetree/20220427180853.35970-1-kdasu.kdev@gmail.com/
+
+we should probably merge those via Ulf's mmc tree to avoid conflicts.
+-- 
+Florian
