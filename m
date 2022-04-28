@@ -2,124 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B586C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Apr 2022 21:49:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AB5AC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Apr 2022 08:13:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232599AbiD0Vww (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Apr 2022 17:52:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53028 "EHLO
+        id S1343926AbiD1IQk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Apr 2022 04:16:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229452AbiD0Vwv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2022 17:52:51 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8180EA27DC;
-        Wed, 27 Apr 2022 14:49:39 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id z5-20020a17090a468500b001d2bc2743c4so2793718pjf.0;
-        Wed, 27 Apr 2022 14:49:39 -0700 (PDT)
+        with ESMTP id S233461AbiD1IQO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 04:16:14 -0400
+Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BFD07C16F
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 01:13:00 -0700 (PDT)
+Received: by mail-ej1-x636.google.com with SMTP id y3so7925934ejo.12
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2022 01:13:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=message-id:date:mime-version:user-agent:subject:content-language:to
          :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=Bb29L+lWQnjBZGrDCL4rnMfyCvERMlWX1G9CDanEUqA=;
-        b=i5fBa9T5GBWPMk2Y/a1x3hgBzs1eC5u3QxXb4/yVA8ndf+pBw6Re3MCdocm5UhqqED
-         sSWv7Gjnm7KVLBhU9IVtG2EfvJiGHCKC7G9uTW5F6aqjNvMl/qQhIgalEnkI9YElwJLX
-         UCTtPqRE/vC+GK2yc54AkUADlYsn8lZLv9ZLVOKyBaMIQNv3U0M+DzNoEu1Vd8L9HUJz
-         m5KnrXGF7iEMy5rTw3la0fFq+r9q3z/4/RuBhB08jBAtowTjLpcE/ObRs8L5e9CqDUaq
-         elCm3HIEAfnZL6W53FY//qXHZJgdl83gPK1ibLbwH0ilW0ySUrUO/GPzB9DjCAm2Psfu
-         5Hmg==
+        bh=D4oCxzRFXlzFb4EquDzVhE4rkJditmYiFd7ltTpGoyY=;
+        b=tvfiaHMagceqKr7/DpjX41Hyv5lTrjlzfCaggv3jsnwxdIr8mK7xT48mgDGVBkLdeb
+         OzZK3YaJmwX+uLSgALT+ZMsOwJmlHpDOmAPPgnqPCQYuHjmTG93dQhWYt/N6RpqoaF1p
+         4gkTgrCrcnmLtt278WwioqUYPZ0ZgVmM/TkHAnNu+T+ubnghjkniIOxgBEWPV6O4rlPw
+         pWqfBA3lUgMwonr8KvgfAucsMiDGQ0mlOZnnCY5S18ItmEU/aWJV8JWd89i0V9TfTo+L
+         7/SdKNZnBE1p5Aciy155bg+ETEUJzvNSSveubimeqjShgxPjKAgM8GRRXJt76K+ZO8Tc
+         KBDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
          :content-language:to:cc:references:from:in-reply-to
          :content-transfer-encoding;
-        bh=Bb29L+lWQnjBZGrDCL4rnMfyCvERMlWX1G9CDanEUqA=;
-        b=mgHZazG4hs7xBqwZYP6NuqXacM8QL2nUXzQ3C74HFpMmBYEpeVm+fa3Hzpthc+rYin
-         752ypDgFCUJpFwcESKeoc0WbDPGdslgW6EqiLuG+ego0/0WUQuOBNJRCfrw1vvBC5mnY
-         O2AKAaZ/Fzrrhva+AtdaSaG0xYiDhd8EwhJY/leBOD3lPU48QpGhWMlBJhgFWGn94WDd
-         ouIjP6PNL1ST6JysLwHtoCRcNr8+iyNGVVSFwv80zAiS5SFumZNM4cZo08zWdnhF0QZp
-         mD2RjrPgbnrZd3NB6XGbwzggvQJqUVUlHFpn4sl8w5vix4eOJrgFvWfZbTm6N3GUwWgI
-         25FA==
-X-Gm-Message-State: AOAM531HwdUNNT7or4TGFr4ZnoToQoY/uP4RRK4QciZCg3gTdTM4RDox
-        A0b/Hqv9/xwpPSwX+6/1Xh4=
-X-Google-Smtp-Source: ABdhPJzsHMf7KlYf06Jxw73myWqsPrl/MI9vOoMGa8sHuK7wENnhdAxv7+9iN3iiicCHBBv3+6xajA==
-X-Received: by 2002:a17:902:d5c3:b0:154:c472:de80 with SMTP id g3-20020a170902d5c300b00154c472de80mr30302580plh.87.1651096179009;
-        Wed, 27 Apr 2022 14:49:39 -0700 (PDT)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.googlemail.com with ESMTPSA id s5-20020a17090a6e4500b001d899a28d1esm3874136pjm.4.2022.04.27.14.49.37
+        bh=D4oCxzRFXlzFb4EquDzVhE4rkJditmYiFd7ltTpGoyY=;
+        b=s61CNl3qfwq/aR0vZN00++pkVQghQZNgUco5Y9xvDbyx0xNyN4rTNHYGJGPUX23Yo5
+         8jaaQz1nN+B0vWsPQrZh0sd4uywfd32ZPI4H94Q2EgLwfppgMI8xuRyx/HaA21Ws80ow
+         UcFNkHwJOIm0/S9nBX04DPhEeuUSvhrgKaQ4yKfK6TFJmkiCVrIPXLaMlZpdQRn0G357
+         i7oyFxskfQKB6iYTzSZkbCCrKx6tOAcQunBhgefZ0fZAF92siL6v065486KWulJbY38O
+         tNXi4uTR866MluJ9TWxDq39re9yr+MUurYioYCqS1peNMOgKeVkm2MnxI/VHqC8hNUuT
+         H1vg==
+X-Gm-Message-State: AOAM531FUWssWm9MATaL61qDXSGsYwt2YCBa6qbMGWCXouRSY42uuRDP
+        W3xTq+S26xf8aKay9kJEqN50AQ==
+X-Google-Smtp-Source: ABdhPJzK06wInFNLQk053v3hrpwhhJMdYOSTWClNddC6Y9MOu/hDlBgc4sOn+tCpnBrLUecCVkbeuw==
+X-Received: by 2002:a17:906:9c82:b0:6e1:1d6c:914c with SMTP id fj2-20020a1709069c8200b006e11d6c914cmr29611725ejc.769.1651133578760;
+        Thu, 28 Apr 2022 01:12:58 -0700 (PDT)
+Received: from [192.168.0.161] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id dm11-20020a170907948b00b006cf488e72e3sm8052832ejc.25.2022.04.28.01.12.57
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 27 Apr 2022 14:49:38 -0700 (PDT)
-Message-ID: <a4638e5c-bc2a-8250-c6ca-a9727ee43daf@gmail.com>
-Date:   Wed, 27 Apr 2022 14:49:36 -0700
+        Thu, 28 Apr 2022 01:12:58 -0700 (PDT)
+Message-ID: <e945cc6f-fd1b-5ba5-fab9-33672994d54b@linaro.org>
+Date:   Thu, 28 Apr 2022 10:12:57 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.1
-Subject: Re: [PATCH v2 4/4] mmc: sdhci-brcmstb: Add ability to increase max
- clock rate for 72116b0
+ Thunderbird/91.7.0
+Subject: Re: [PATCH v2 3/4] dt-bindings: mmc: Add Broadcom optional sdio_freq
+ clock
 Content-Language: en-US
 To:     Kamal Dasu <kdasu.kdev@gmail.com>, ulf.hansson@linaro.org,
         robh+dt@kernel.org, krzk+dt@kernel.org, alcooperx@gmail.com
-Cc:     bcm-kernel-feedback-list@broadcom.com, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
+Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
+        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 References: <20220427180853.35970-1-kdasu.kdev@gmail.com>
- <20220427180853.35970-5-kdasu.kdev@gmail.com>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <20220427180853.35970-5-kdasu.kdev@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+ <20220427180853.35970-4-kdasu.kdev@gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220427180853.35970-4-kdasu.kdev@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/27/22 11:08, Kamal Dasu wrote:
-> From: Al Cooper <alcooperx@gmail.com>
-> 
-> The 72116B0 has improved SDIO controllers that allow the max clock
-> rate to be increased from a max of 100MHz to a max of 150MHz. The
-> driver will need to get the clock and increase it's default rate
-> and override the caps register, that still indicates a max of 100MHz.
-> The new clock will be named "sdio_freq" in the DT node's "clock-names"
-> list. The driver will use a DT property, "clock-frequency", to
-> enable this functionality and will get the actual rate in MHz
-> from the property to allow various speeds to be requested.
-> 
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
-> Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
-> ---
->   drivers/mmc/host/sdhci-brcmstb.c | 25 +++++++++++++++++++++++++
->   1 file changed, 25 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index 683d0c685748..51a23e9f4535 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -250,6 +250,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
->   	struct sdhci_pltfm_host *pltfm_host;
->   	const struct of_device_id *match;
->   	struct sdhci_brcmstb_priv *priv;
-> +	u32 base_clock_hz = 0;
->   	struct sdhci_host *host;
->   	struct resource *iomem;
->   	struct clk *clk;
-> @@ -330,6 +331,30 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
->   	if (match_priv->flags & BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT)
->   		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->   
-> +	/* Change the base clock frequency if the DT property exists */
-> +	if (device_property_read_u32(&pdev->dev, "max-frequency",
-> +				     &base_clock_hz) == 0) {
-> +		struct clk *master_clk;
-> +		u32 actual_clock_mhz;
-> +
-> +		master_clk = devm_clk_get(&pdev->dev, "sdio_freq");
-> +		if (IS_ERR(master_clk)) {
-> +			dev_warn(&pdev->dev,
-> +				 "Clock for \"sdio_freq\" was not found\n");
-> +		} else {
-> +			clk_set_rate(master_clk, base_clock_hz);
+On 27/04/2022 20:08, Kamal Dasu wrote:
 
-It seems to me that you should enable the clock before getting its rate, 
-otherwise this may not return a valid rate. You might also consider 
-reducing the indentation a little bit by using a label.
--- 
-Florian
+Thank you for your patch. There is something to discuss/improve.
+
+>  
+>    clocks:
+> -    maxItems: 1
+> -    description:
+> -      handle to core clock for the sdhci controller.
+> +    minItems: 1
+> +    items:
+> +      - description: handle to core clock for the sdhci controller
+> +      - description: improved 150Mhz clock for sdhci controller (Optional clock)
+>  
+>    clock-names:
+> +    minItems: 1
+>      items:
+>        - const: sw_sdio
+> +      - const: sdio_freq # Optional clock
+>  
+>    sdhci,auto-cmd12:
+>      type: boolean
+>      description: Specifies that controller should use auto CMD12
+>  
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +  - if:
+> +      properties:
+> +        clock-names:
+> +          contains:
+> +            const: sdio_freq
+> +
+> +  - then:
+
+This won't work. Please test your bindings.
+
+
+Best regards,
+Krzysztof
