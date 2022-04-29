@@ -2,142 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59647C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Apr 2022 19:30:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A9AFC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Apr 2022 19:32:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1380104AbiD2Tdf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Apr 2022 15:33:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42524 "EHLO
+        id S1378513AbiD2Tfz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Apr 2022 15:35:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357195AbiD2Tde (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2022 15:33:34 -0400
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 529B613D03;
-        Fri, 29 Apr 2022 12:30:14 -0700 (PDT)
-Received: by mail-lj1-x22d.google.com with SMTP id c15so11650350ljr.9;
-        Fri, 29 Apr 2022 12:30:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=EpAcbnx+U/L1NwXa16pvqhPXcqBubVwUeHlDIja2sKs=;
-        b=fVBaXJcaF9JmA9kT3gJGJ1d182xVAxExs/K2C2cpg9fOUq9K4LgvkN5/2cWKEV8XX1
-         vdk0G98yxS2sLJ8zWaB7rhdyyJXKLgvzNqBV6A8afXlXuOH91elyLLmUDaTqdKe4V69x
-         AAvZ50gl//UGXVXDm7KrqMLY7C8sZcSZWv2FS0leIXeR83qD9QrBN8p2fl+Pq8HASr1G
-         TKXvllgu1hI2pYC43JwELnhiq4v7YL5/ugckF8nanpl/WTJIHkmE7zH4QJz9h7FqOUVT
-         0Jz3z+e4DkBb7K3Koshx7MxQKB7Q04DFmhKx0W84Bksadz0n4fPxx9SVm6StU8NgbLlo
-         18pg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=EpAcbnx+U/L1NwXa16pvqhPXcqBubVwUeHlDIja2sKs=;
-        b=YWQMMlhm+0W5xptY+8dn4YRDAhByKq9NNVHmlyPkCq+u7EXiYpMOKFYEXe5TZDPfDU
-         eUMwTSyOtHmO/b0CYvKRiqtB2fA8c3L8R3D9HOosOBQMyI4HDF/QsTZ5s8JZfyHF1vTx
-         9/CTZUlsPs/zCsSw2vTPlsiZElWEl+awl3H/A+zmbE4vrtP+flpwoL5b2YMyiG1Co7JV
-         yEG8HlDI4N0pc4Em/PMfBvQT8x2+6+VsVxnZP9DcLqyv2Lvcnxu1o+ox+XsPLUmpjpeu
-         vGJdkXdUL/tQ7KDSAO2NIEAwU1RvSmeltOAenwdMYkAYCUJGxy4Bs4qoZ+1yBXsfwRRN
-         JXJg==
-X-Gm-Message-State: AOAM533USA4eG1AgtFaw+rBqJuEFEXmjN+teG8FKBlqJ9+lm+EQjKIr8
-        tpGBLjIeP6fR2ybgroJzqm4=
-X-Google-Smtp-Source: ABdhPJyG5g1UMJHbAE7oQdPUIBwsTGD8b2GZt4x0YMEODqQnagM+tQa4NgqWxwqwNFjLTVjBd5ZQlA==
-X-Received: by 2002:a2e:8502:0:b0:24f:1036:b405 with SMTP id j2-20020a2e8502000000b0024f1036b405mr465514lji.220.1651260612572;
-        Fri, 29 Apr 2022 12:30:12 -0700 (PDT)
-Received: from [10.0.0.42] (91-159-150-230.elisa-laajakaista.fi. [91.159.150.230])
-        by smtp.gmail.com with ESMTPSA id d3-20020ac24c83000000b0047255d2115dsm5721lfl.140.2022.04.29.12.30.11
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 29 Apr 2022 12:30:12 -0700 (PDT)
-Message-ID: <7e47c5fa-4cff-b12f-20ce-2e62b62ec538@gmail.com>
-Date:   Fri, 29 Apr 2022 22:36:53 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH 22/41] ARM: omap1: move plat/dma.c to mach/omap-dma.c
-Content-Language: en-US
-To:     Arnd Bergmann <arnd@kernel.org>, linux-omap@vger.kernel.org,
-        tony@atomide.com, aaro.koskinen@iki.fi, jmkrzyszt@gmail.com
-Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Russell King <linux@armlinux.org.uk>,
-        Paul Walmsley <paul@pwsan.com>,
-        Kevin Hilman <khilman@kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Mark Brown <broonie@kernel.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Lee Jones <lee.jones@linaro.org>,
-        Daniel Thompson <daniel.thompson@linaro.org>,
-        Jingoo Han <jingoohan1@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
+        with ESMTP id S238144AbiD2Tfz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2022 15:35:55 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DED99692AA;
+        Fri, 29 Apr 2022 12:32:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1651260756; x=1682796756;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=JndYmvyDHGDJ5FLMtua0mbKv4qhsfh22QdXtZJJmVlQ=;
+  b=m91AYf/kuCNbT9zbjpYqz6+1uEpWL3ieA4Eggo+cmEzG/UeTJPhsZMwa
+   KaAWOqyUXtJTOXa4Z5iCasuON5GPlH+wP+psoOD8upQRpumCMQjmM42oO
+   iub29LBpzKDTK2jeibTFevSen7MYkBRYPU3UTpgNfoiMzL6FwsHvUqE5m
+   1EQQ7mAgUtZXHT2R3rhPPELaBlYI5L8f73dQIpevofLYF8R1lUVTfE5sh
+   Oh5uDZKc8a98VSl2PsF2gAoMFx7zMcp4BnfDGOALl0yWsi5KTLI08MbmU
+   5VgQrLYZhtNL7fBUOq4MrrH50WPATWmckmTnbhswS4PYvytSkidBTWm25
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10332"; a="266294483"
+X-IronPort-AV: E=Sophos;i="5.91,186,1647327600"; 
+   d="scan'208";a="266294483"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Apr 2022 12:32:26 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.91,186,1647327600"; 
+   d="scan'208";a="566287859"
+Received: from lkp-server01.sh.intel.com (HELO 5056e131ad90) ([10.239.97.150])
+  by fmsmga007.fm.intel.com with ESMTP; 29 Apr 2022 12:32:21 -0700
+Received: from kbuild by 5056e131ad90 with local (Exim 4.95)
+        (envelope-from <lkp@intel.com>)
+        id 1nkWLk-0006a3-Gm;
+        Fri, 29 Apr 2022 19:32:20 +0000
+Date:   Sat, 30 Apr 2022 03:31:43 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
+        Heiko Stuebner <heiko@sntech.de>
+Cc:     kbuild-all@lists.01.org, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-usb@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-serial@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
-References: <20220419133723.1394715-1-arnd@kernel.org>
- <20220419133723.1394715-23-arnd@kernel.org>
-From:   =?UTF-8?Q?P=c3=a9ter_Ujfalusi?= <peter.ujfalusi@gmail.com>
-In-Reply-To: <20220419133723.1394715-23-arnd@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
+        Elaine Zhang <zhangqing@rock-chips.com>, kernel@collabora.com,
+        Sebastian Reichel <sebastian.reichel@collabora.com>
+Subject: Re: [PATCHv1 06/19] clk: rockchip: Add clock controller for the
+ RK3588
+Message-ID: <202204300329.BL2rwfwr-lkp@intel.com>
+References: <20220422170920.401914-7-sebastian.reichel@collabora.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220422170920.401914-7-sebastian.reichel@collabora.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Sebastian,
+
+Thank you for the patch! Perhaps something to improve:
+
+[auto build test WARNING on robh/for-next]
+[also build test WARNING on linusw-pinctrl/devel linus/master v5.18-rc4 next-20220429]
+[cannot apply to rockchip/for-next]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Sebastian-Reichel/Basic-RK3588-Support/20220423-013425
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
+config: arm64-defconfig (https://download.01.org/0day-ci/archive/20220430/202204300329.BL2rwfwr-lkp@intel.com/config)
+compiler: aarch64-linux-gcc (GCC) 11.3.0
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # https://github.com/intel-lab-lkp/linux/commit/6736e6f1e32bb98780b77b5aa64fe5ac5dfaae26
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Sebastian-Reichel/Basic-RK3588-Support/20220423-013425
+        git checkout 6736e6f1e32bb98780b77b5aa64fe5ac5dfaae26
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.3.0 make.cross W=1 O=build_dir ARCH=arm64 SHELL=/bin/bash drivers/clk/rockchip/ drivers/media/platform/qcom/venus/
+
+If you fix the issue, kindly add following tag as appropriate
+Reported-by: kernel test robot <lkp@intel.com>
+
+All warnings (new ones prefixed by >>):
+
+   drivers/clk/rockchip/clk-rk3588.c: In function 'rk3588_clk_init':
+>> drivers/clk/rockchip/clk-rk3588.c:2408:22: warning: variable 'clks' set but not used [-Wunused-but-set-variable]
+    2408 |         struct clk **clks;
+         |                      ^~~~
 
 
-On 4/19/22 16:37, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> Most of the interface functions in plat/dma.c are only used from the
-> USB driver, which is practically OMAP1 specific, except for compile
-> testing.
-> 
-> The omap_get_plat_info(), omap_request_dma() and omap_free_dma()
-> functions are never called on omap2 because of runtime checks.
+vim +/clks +2408 drivers/clk/rockchip/clk-rk3588.c
 
-Reviewed-by: Peter Ujfalusi <peter.ujfalusi@gmail.com>
-
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
->  arch/arm/mach-omap1/Makefile                        | 2 +-
->  arch/arm/{plat-omap/dma.c => mach-omap1/omap-dma.c} | 0
->  arch/arm/plat-omap/Makefile                         | 2 +-
->  3 files changed, 2 insertions(+), 2 deletions(-)
->  rename arch/arm/{plat-omap/dma.c => mach-omap1/omap-dma.c} (100%)
-> 
-> diff --git a/arch/arm/mach-omap1/Makefile b/arch/arm/mach-omap1/Makefile
-> index 450bbf552b57..0615cb0ba580 100644
-> --- a/arch/arm/mach-omap1/Makefile
-> +++ b/arch/arm/mach-omap1/Makefile
-> @@ -5,7 +5,7 @@
->  
->  # Common support
->  obj-y := io.o id.o sram-init.o sram.o time.o irq.o mux.o flash.o \
-> -	 serial.o devices.o dma.o fb.o
-> +	 serial.o devices.o dma.o omap-dma.o fb.o
->  obj-y += clock.o clock_data.o opp_data.o reset.o pm_bus.o timer.o
->  
->  ifneq ($(CONFIG_SND_SOC_OMAP_MCBSP),)
-> diff --git a/arch/arm/plat-omap/dma.c b/arch/arm/mach-omap1/omap-dma.c
-> similarity index 100%
-> rename from arch/arm/plat-omap/dma.c
-> rename to arch/arm/mach-omap1/omap-dma.c
-> diff --git a/arch/arm/plat-omap/Makefile b/arch/arm/plat-omap/Makefile
-> index 68ccec9de106..5d55295a14ee 100644
-> --- a/arch/arm/plat-omap/Makefile
-> +++ b/arch/arm/plat-omap/Makefile
-> @@ -6,4 +6,4 @@
->  ccflags-$(CONFIG_ARCH_MULTIPLATFORM) := -I$(srctree)/arch/arm/plat-omap/include
->  
->  # Common support
-> -obj-y := sram.o dma.o
-> +obj-y := sram.o
+  2403	
+  2404	static void __init rk3588_clk_init(struct device_node *np)
+  2405	{
+  2406		struct rockchip_clk_provider *ctx;
+  2407		void __iomem *reg_base;
+> 2408		struct clk **clks;
+  2409	
+  2410		reg_base = of_iomap(np, 0);
+  2411		if (!reg_base) {
+  2412			pr_err("%s: could not map cru region\n", __func__);
+  2413			return;
+  2414		}
+  2415	
+  2416		ctx = rockchip_clk_init(np, reg_base, CLK_NR_CLKS);
+  2417		if (IS_ERR(ctx)) {
+  2418			pr_err("%s: rockchip clk init failed\n", __func__);
+  2419			iounmap(reg_base);
+  2420			return;
+  2421		}
+  2422		clks = ctx->clk_data.clks;
+  2423	
+  2424		rockchip_clk_register_plls(ctx, rk3588_pll_clks,
+  2425					   ARRAY_SIZE(rk3588_pll_clks),
+  2426					   RK3588_GRF_SOC_STATUS0);
+  2427	
+  2428		rockchip_clk_register_armclk(ctx, ARMCLK_L, "armclk_l",
+  2429				mux_armclkl_p, ARRAY_SIZE(mux_armclkl_p),
+  2430				&rk3588_cpulclk_data, rk3588_cpulclk_rates,
+  2431				ARRAY_SIZE(rk3588_cpulclk_rates));
+  2432		rockchip_clk_register_armclk(ctx, ARMCLK_B01, "armclk_b01",
+  2433				mux_armclkb01_p, ARRAY_SIZE(mux_armclkb01_p),
+  2434				&rk3588_cpub0clk_data, rk3588_cpub0clk_rates,
+  2435				ARRAY_SIZE(rk3588_cpub0clk_rates));
+  2436		rockchip_clk_register_armclk(ctx, ARMCLK_B23, "armclk_b23",
+  2437				mux_armclkb23_p, ARRAY_SIZE(mux_armclkb23_p),
+  2438				&rk3588_cpub1clk_data, rk3588_cpub1clk_rates,
+  2439				ARRAY_SIZE(rk3588_cpub1clk_rates));
+  2440	
+  2441		rockchip_clk_register_branches(ctx, rk3588_clk_branches,
+  2442					       ARRAY_SIZE(rk3588_clk_branches));
+  2443	
+  2444		rockchip_register_softrst(np, 49158, reg_base + RK3588_SOFTRST_CON(0),
+  2445					  ROCKCHIP_SOFTRST_HIWORD_MASK);
+  2446	
+  2447		rockchip_register_restart_notifier(ctx, RK3588_GLB_SRST_FST, NULL);
+  2448	
+  2449		rockchip_clk_of_add_provider(np, ctx);
+  2450	}
+  2451	
 
 -- 
-Péter
+0-DAY CI Kernel Test Service
+https://01.org/lkp
