@@ -2,156 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47C61C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Apr 2022 15:22:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14423C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Apr 2022 17:48:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1377898AbiD2PZ3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Apr 2022 11:25:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59388 "EHLO
+        id S1379828AbiD2RwA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Apr 2022 13:52:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241558AbiD2PZ2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2022 11:25:28 -0400
-Received: from smtp2.axis.com (smtp2.axis.com [195.60.68.18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ABB5689A4;
-        Fri, 29 Apr 2022 08:22:06 -0700 (PDT)
+        with ESMTP id S1379808AbiD2Rv6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2022 13:51:58 -0400
+Received: from mail-oi1-x230.google.com (mail-oi1-x230.google.com [IPv6:2607:f8b0:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E046AD3D90;
+        Fri, 29 Apr 2022 10:48:38 -0700 (PDT)
+Received: by mail-oi1-x230.google.com with SMTP id m11so9239827oib.11;
+        Fri, 29 Apr 2022 10:48:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1651245727;
-  x=1682781727;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=xenmPUOXW+RZJN9qBuvo/3MkIoPU8IrRSy9rcS8hUiY=;
-  b=UeM6p+50yGpDPgGq8Xz9wtdT2t35h45DaXetIDo5DRLpncv3FHq3tOuC
-   CKrcDvKDOJztYFB4LgvmE7cqwmxEwsLXzR6Jc/ogGiElGounW7+BPPjX/
-   Ehz3EZiveGlf+R31BRHnaXwWtWVfJTFEpKJ2fV0ykUqDrkrpM2BiF6Cli
-   VTnsHMHzPYUccOOr075dPHfxLywFL1vSU2wVbtqrkiYoSRNwT1Hk1Xog0
-   V5XPBFqbWXBXs3xijrDaeKX9E6KyRwqK5AJE/87AOa3/LrXUHB1jqXJVf
-   BjYVGK+V5QtvN519jgUR0iGFxPV8Pk86e2WW24Ocrrwc5d5Bg7cHy54bP
-   w==;
-From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@axis.com>, <linux-block@vger.kernel.org>, <tytso@mit.edu>,
-        Vincent Whitchurch <vincent.whitchurch@axis.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-Subject: [PATCH] mmc: core: support zeroout using TRIM
-Date:   Fri, 29 Apr 2022 17:21:18 +0200
-Message-ID: <20220429152118.3617303-1-vincent.whitchurch@axis.com>
-X-Mailer: git-send-email 2.34.1
+        d=gmail.com; s=20210112;
+        h=sender:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=m5t7cdt/CWgC/r7ZaFwRZ/Pe0JhVgK8SGggmxnAqq8E=;
+        b=OnQlHi3ErSMC6qSiLPAQK9tsaNNmGUsK/yx8P84vl8ZH25FjCToTTPCP6xYzUtp823
+         nQu8zFOChn7TRclx0bhUluxvWGG31ISy3vYfQGsDQqCS3EjmUrqIVRNyq2psGtG3IDpi
+         1W6Ytq3a5RYAKQBAidu7fUxQYTQpt+5vW3SEkCPANbWWQlmsLBqc9x1cEkbQPaLnW01H
+         /gSIWuD7kQ5j7LODOU/HAxL6B5EQxZzhqJDbdqVUp7cmUle2rokPIwVHwnAzyzTxiKGl
+         riWnsbp5SbzhiGJgU3qP8CBvVkoxV+4fTE0nup4rFZ2hllcAmSpZXHHWttMly/Jd1ESk
+         NA5w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:sender:message-id:date:mime-version:user-agent
+         :subject:content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=m5t7cdt/CWgC/r7ZaFwRZ/Pe0JhVgK8SGggmxnAqq8E=;
+        b=udmPLQBOZ0l0YxVOjotvF9nbHe5bj0fFvHlEfo190PuI0Y0u0HSbhBqy8Y3WAFVMmc
+         zU5QqximbdIUopnrej6PQSFEKvupe3fZIgRz1pEjegLnyrqguPoTaoLy0aHChaBFTAcG
+         fWmDV93KiodLGEeM8Ysk7+FcvAI1YRUMlNR6wGFUYT9Kq+4tkLd1TR2eA6gaxXW/XBNN
+         MV3d0//EYER7AzemZWUeWestg/pOil66ViLoX5lrp8b4pyUHswsIGssCQ//TJtPre7mV
+         GR/ELhsXBJAKuWXCY5QELuHRDRmdrbvg4yZCS0uFjZt7XkIq1AuE6pmqkT0SxcDdiu87
+         aVEg==
+X-Gm-Message-State: AOAM533rAFbWNzed8JHj2loMEujnerVvJuj9A2OvVCDkgNcIXgwhoCAZ
+        pzqfnobXL0AntLf1UXJXTXk=
+X-Google-Smtp-Source: ABdhPJxkF8A90UBe5FIUXgDpVBp8codcF4hzbNyKrz59fIRSWDCgfC0jKHUvcyNxHQ5kW9qHkRB58A==
+X-Received: by 2002:a05:6808:11ca:b0:2d4:6861:2a9e with SMTP id p10-20020a05680811ca00b002d468612a9emr282421oiv.114.1651254518245;
+        Fri, 29 Apr 2022 10:48:38 -0700 (PDT)
+Received: from ?IPV6:2600:1700:e321:62f0:329c:23ff:fee3:9d7c? ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id b7-20020a9d5d07000000b00605e7b6b19dsm1261051oti.39.2022.04.29.10.48.34
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 29 Apr 2022 10:48:37 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Message-ID: <6f1b27fa-96d1-4be7-ac6a-762610314f2a@roeck-us.net>
+Date:   Fri, 29 Apr 2022 10:48:33 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.1
+Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
+Content-Language: en-US
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+References: <20220419163810.2118169-1-arnd@kernel.org>
+ <20220422170530.GA2338209@roeck-us.net>
+ <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
+ <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net>
+ <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
+ <20220422234150.GA3442771@roeck-us.net>
+ <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
+ <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net>
+ <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
+ <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net>
+ <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
+ <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
+From:   Guenter Roeck <linux@roeck-us.net>
+In-Reply-To: <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If the device supports TRIM and indicates that it erases to zeros, we
-can use it to support hardware offloading of REQ_OP_WRITE_ZEROES.
+On 4/28/22 06:44, Arnd Bergmann wrote:
+> On Sun, Apr 24, 2022 at 8:48 PM Arnd Bergmann <arnd@kernel.org> wrote:
+>> On Sun, Apr 24, 2022 at 5:28 PM Guenter Roeck <linux@roeck-us.net> wrote:
+>>> On 4/24/22 01:52, Arnd Bergmann wrote:
+>>>> On Sun, Apr 24, 2022 at 4:09 AM Guenter Roeck <linux@roeck-us.net> wrote:
+>>>> into the defconfig file, otherwise the multiplatform target defaults to
+>>>> an ARMv7 instead of ARMv5 build. For an OMAP15xx as in the SX1,
+>>>> you also need to enable CONFIG_ARCH_MULTI_V4T.
+>>>>
+>>>> This is slightly unfortunate, but I don't see any way to avoid it, and the
+>>>> modified defconfig will still work fine with older kernel trees.
+>>>>
+>>>
+>>> Yes, that works. I changed it in my configuration.
+>>
+>> Ok, great!. I managed to boot the z2 machine with PCMCIA support
+>> and it gets around the issue with my patch, correctly detecting the
+>> CF card.
+> 
+> Hi Guenter,
+> 
+> I have now sent out a fix that I'm happy with, and applied it to the
+> pxa-multiplatform-5.18 branch of the soc tree as well as the
+> combined arm/multiplatform tree.
+> 
+> I have not merged this new version into the for-next branch
+> since I would like to see if there are any other regressions first.
+> 
+> Can you run your boot tests on the arm/multiplatform branch
+> and let me know if that fixes everything you found? If that
+> takes a lot of manual steps on your side, I'd just wait for the
+> build bots and merge it after all there are no new compile-time
+> issues.
+> 
 
-Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
----
+I tried the pxa-multiplatform-5.18 branch. Its failures match
+those in v5.18-rc1.
 
-Notes:
-    https://lore.kernel.org/lkml/20160303182146.GG9772@thunk.org/ seems to agree
-    that BLKZEROOUT can use TRIM on eMMC.
-    
-    BLKDISCARD uses DISCARD when available so it can't be used to send TRIM.
-    
-    If TRIM should not be used for BLKZEROOUT for some reason I guess the only way
-    is to use MMC_IOC_MULTI_CMD like in this commit in mmc-utils but that's a
-    rather low-level interface:
-    
-     https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git/commit/?id=43282e80e174cc73b09b81a4d17cb3a7b4dc5cfc
+Should I try soc/arm/multiplatform as well ?
 
- drivers/mmc/core/block.c | 26 ++++++++++++++++++++++----
- drivers/mmc/core/queue.c |  2 ++
- 2 files changed, 24 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 506dc900f5c7..0398b205a285 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -126,6 +126,7 @@ struct mmc_blk_data {
- #define MMC_BLK_DISCARD		BIT(2)
- #define MMC_BLK_SECDISCARD	BIT(3)
- #define MMC_BLK_CQE_RECOVERY	BIT(4)
-+#define MMC_BLK_TRIM		BIT(5)
- 
- 	/*
- 	 * Only set in main mmc_blk_data associated
-@@ -1090,12 +1091,13 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
- 	blk_mq_end_request(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
- }
- 
--static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-+static void mmc_blk_issue_erase_rq(struct mmc_queue *mq, struct request *req,
-+				   int type, unsigned int erase_arg)
- {
- 	struct mmc_blk_data *md = mq->blkdata;
- 	struct mmc_card *card = md->queue.card;
- 	unsigned int from, nr;
--	int err = 0, type = MMC_BLK_DISCARD;
-+	int err = 0;
- 	blk_status_t status = BLK_STS_OK;
- 
- 	if (!mmc_can_erase(card)) {
-@@ -1111,13 +1113,13 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- 		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 INAND_CMD38_ARG_EXT_CSD,
--					 card->erase_arg == MMC_TRIM_ARG ?
-+					 erase_arg == MMC_TRIM_ARG ?
- 					 INAND_CMD38_ARG_TRIM :
- 					 INAND_CMD38_ARG_ERASE,
- 					 card->ext_csd.generic_cmd6_time);
- 		}
- 		if (!err)
--			err = mmc_erase(card, from, nr, card->erase_arg);
-+			err = mmc_erase(card, from, nr, erase_arg);
- 	} while (err == -EIO && !mmc_blk_reset(md, card->host, type));
- 	if (err)
- 		status = BLK_STS_IOERR;
-@@ -1127,6 +1129,19 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- 	blk_mq_end_request(req, status);
- }
- 
-+static void mmc_blk_issue_trim_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_TRIM, MMC_TRIM_ARG);
-+}
-+
-+static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	struct mmc_blk_data *md = mq->blkdata;
-+	struct mmc_card *card = md->queue.card;
-+
-+	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card->erase_arg);
-+}
-+
- static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 				       struct request *req)
- {
-@@ -2327,6 +2342,9 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
- 		case REQ_OP_SECURE_ERASE:
- 			mmc_blk_issue_secdiscard_rq(mq, req);
- 			break;
-+		case REQ_OP_WRITE_ZEROES:
-+			mmc_blk_issue_trim_rq(mq, req);
-+			break;
- 		case REQ_OP_FLUSH:
- 			mmc_blk_issue_flush(mq, req);
- 			break;
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index c69b2d9df6f1..bbe2ea829ea7 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -191,6 +191,8 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 		q->limits.discard_granularity = SECTOR_SIZE;
- 	if (mmc_can_secure_erase_trim(card))
- 		blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
-+	if (mmc_can_trim(card) && card->erased_byte == 0)
-+		blk_queue_max_write_zeroes_sectors(q, max_discard);
- }
- 
- static unsigned short mmc_get_max_segments(struct mmc_host *host)
--- 
-2.34.1
-
+Guenter
