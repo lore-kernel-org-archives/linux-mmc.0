@@ -2,118 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10341C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Apr 2022 01:56:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47C61C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Apr 2022 15:22:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354080AbiD2CAJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Apr 2022 22:00:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60406 "EHLO
+        id S1377898AbiD2PZ3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Apr 2022 11:25:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231824AbiD2CAI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2022 22:00:08 -0400
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54BE08723F;
-        Thu, 28 Apr 2022 18:56:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1651197411; x=1682733411;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=CPEvDJ3ytBpYATJRkPLi382z+ezVo1awVW8z44TiQNE=;
-  b=SlqPVfjXvnihFrxSnATIn6wus84NmFGNq3FDJRtBjZI1GD60kSfY/sWE
-   ju5iuj2wvFQssqh8mG8y2NQU958Gq2gOkfPDooz4jusXe4cVNPLWdT29m
-   qcz7N78qJv6dxrO3H2LK9CBfTYPNVO7o2nAOVPDqjdlJgU6dwl9gCX7zb
-   h7h7MF0iDtsmfkowlMXSgJCHfrvr6mtVnb0yVnszcBW8aNmO45M/towgj
-   CeHU8SpkMPWFpccZ7SpWsGem1ETVVTgUi7hzPwZ48MsXxYQkVC22Dr3yv
-   brFANqYtbmFuDflmFuCNoqk5+40KW23IaF/z56o9zZO0d4fC6wZHBYwgU
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10331"; a="266652286"
-X-IronPort-AV: E=Sophos;i="5.91,296,1647327600"; 
-   d="scan'208";a="266652286"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Apr 2022 18:56:51 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.91,296,1647327600"; 
-   d="scan'208";a="565900073"
-Received: from lkp-server01.sh.intel.com (HELO 5056e131ad90) ([10.239.97.150])
-  by fmsmga007.fm.intel.com with ESMTP; 28 Apr 2022 18:56:46 -0700
-Received: from kbuild by 5056e131ad90 with local (Exim 4.95)
-        (envelope-from <lkp@intel.com>)
-        id 1nkFsD-0005rp-RA;
-        Fri, 29 Apr 2022 01:56:45 +0000
-Date:   Fri, 29 Apr 2022 09:56:36 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
-        Heiko Stuebner <heiko@sntech.de>
-Cc:     kbuild-all@lists.01.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <brgl@bgdev.pl>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Elaine Zhang <zhangqing@rock-chips.com>, kernel@collabora.com,
-        Sebastian Reichel <sebastian.reichel@collabora.com>
-Subject: Re: [PATCHv1 03/19] clk: rockchip: add pll type for RK3588
-Message-ID: <202204290947.GtdwE4Zq-lkp@intel.com>
-References: <20220422170920.401914-4-sebastian.reichel@collabora.com>
+        with ESMTP id S241558AbiD2PZ2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2022 11:25:28 -0400
+Received: from smtp2.axis.com (smtp2.axis.com [195.60.68.18])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ABB5689A4;
+        Fri, 29 Apr 2022 08:22:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=axis.com; q=dns/txt; s=axis-central1; t=1651245727;
+  x=1682781727;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=xenmPUOXW+RZJN9qBuvo/3MkIoPU8IrRSy9rcS8hUiY=;
+  b=UeM6p+50yGpDPgGq8Xz9wtdT2t35h45DaXetIDo5DRLpncv3FHq3tOuC
+   CKrcDvKDOJztYFB4LgvmE7cqwmxEwsLXzR6Jc/ogGiElGounW7+BPPjX/
+   Ehz3EZiveGlf+R31BRHnaXwWtWVfJTFEpKJ2fV0ykUqDrkrpM2BiF6Cli
+   VTnsHMHzPYUccOOr075dPHfxLywFL1vSU2wVbtqrkiYoSRNwT1Hk1Xog0
+   V5XPBFqbWXBXs3xijrDaeKX9E6KyRwqK5AJE/87AOa3/LrXUHB1jqXJVf
+   BjYVGK+V5QtvN519jgUR0iGFxPV8Pk86e2WW24Ocrrwc5d5Bg7cHy54bP
+   w==;
+From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <kernel@axis.com>, <linux-block@vger.kernel.org>, <tytso@mit.edu>,
+        Vincent Whitchurch <vincent.whitchurch@axis.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: core: support zeroout using TRIM
+Date:   Fri, 29 Apr 2022 17:21:18 +0200
+Message-ID: <20220429152118.3617303-1-vincent.whitchurch@axis.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220422170920.401914-4-sebastian.reichel@collabora.com>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Sebastian,
+If the device supports TRIM and indicates that it erases to zeros, we
+can use it to support hardware offloading of REQ_OP_WRITE_ZEROES.
 
-Thank you for the patch! Perhaps something to improve:
+Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+---
 
-[auto build test WARNING on robh/for-next]
-[also build test WARNING on linusw-pinctrl/devel linus/master v5.18-rc4 next-20220428]
-[cannot apply to rockchip/for-next]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch]
+Notes:
+    https://lore.kernel.org/lkml/20160303182146.GG9772@thunk.org/ seems to agree
+    that BLKZEROOUT can use TRIM on eMMC.
+    
+    BLKDISCARD uses DISCARD when available so it can't be used to send TRIM.
+    
+    If TRIM should not be used for BLKZEROOUT for some reason I guess the only way
+    is to use MMC_IOC_MULTI_CMD like in this commit in mmc-utils but that's a
+    rather low-level interface:
+    
+     https://git.kernel.org/pub/scm/utils/mmc/mmc-utils.git/commit/?id=43282e80e174cc73b09b81a4d17cb3a7b4dc5cfc
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Sebastian-Reichel/Basic-RK3588-Support/20220423-013425
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
-config: arm64-defconfig (https://download.01.org/0day-ci/archive/20220429/202204290947.GtdwE4Zq-lkp@intel.com/config)
-compiler: aarch64-linux-gcc (GCC) 11.3.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/28c7fd4a10867094894809b60b86688817f70744
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Sebastian-Reichel/Basic-RK3588-Support/20220423-013425
-        git checkout 28c7fd4a10867094894809b60b86688817f70744
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-11.3.0 make.cross W=1 O=build_dir ARCH=arm64 SHELL=/bin/bash drivers/clk/rockchip/ drivers/media/platform/qcom/venus/
+ drivers/mmc/core/block.c | 26 ++++++++++++++++++++++----
+ drivers/mmc/core/queue.c |  2 ++
+ 2 files changed, 24 insertions(+), 4 deletions(-)
 
-If you fix the issue, kindly add following tag as appropriate
-Reported-by: kernel test robot <lkp@intel.com>
-
-All warnings (new ones prefixed by >>):
-
->> drivers/clk/rockchip/clk-pll.c:916: warning: This comment starts with '/**', but isn't a kernel-doc comment. Refer Documentation/doc-guide/kernel-doc.rst
-    * PLL used in RK3588
-
-
-vim +916 drivers/clk/rockchip/clk-pll.c
-
-   914	
-   915	/**
- > 916	 * PLL used in RK3588
-   917	 */
-   918	
-
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 506dc900f5c7..0398b205a285 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -126,6 +126,7 @@ struct mmc_blk_data {
+ #define MMC_BLK_DISCARD		BIT(2)
+ #define MMC_BLK_SECDISCARD	BIT(3)
+ #define MMC_BLK_CQE_RECOVERY	BIT(4)
++#define MMC_BLK_TRIM		BIT(5)
+ 
+ 	/*
+ 	 * Only set in main mmc_blk_data associated
+@@ -1090,12 +1091,13 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *mq, struct request *req)
+ 	blk_mq_end_request(req, ret ? BLK_STS_IOERR : BLK_STS_OK);
+ }
+ 
+-static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
++static void mmc_blk_issue_erase_rq(struct mmc_queue *mq, struct request *req,
++				   int type, unsigned int erase_arg)
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
+ 	unsigned int from, nr;
+-	int err = 0, type = MMC_BLK_DISCARD;
++	int err = 0;
+ 	blk_status_t status = BLK_STS_OK;
+ 
+ 	if (!mmc_can_erase(card)) {
+@@ -1111,13 +1113,13 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 		if (card->quirks & MMC_QUIRK_INAND_CMD38) {
+ 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 					 INAND_CMD38_ARG_EXT_CSD,
+-					 card->erase_arg == MMC_TRIM_ARG ?
++					 erase_arg == MMC_TRIM_ARG ?
+ 					 INAND_CMD38_ARG_TRIM :
+ 					 INAND_CMD38_ARG_ERASE,
+ 					 card->ext_csd.generic_cmd6_time);
+ 		}
+ 		if (!err)
+-			err = mmc_erase(card, from, nr, card->erase_arg);
++			err = mmc_erase(card, from, nr, erase_arg);
+ 	} while (err == -EIO && !mmc_blk_reset(md, card->host, type));
+ 	if (err)
+ 		status = BLK_STS_IOERR;
+@@ -1127,6 +1129,19 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ 	blk_mq_end_request(req, status);
+ }
+ 
++static void mmc_blk_issue_trim_rq(struct mmc_queue *mq, struct request *req)
++{
++	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_TRIM, MMC_TRIM_ARG);
++}
++
++static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
++{
++	struct mmc_blk_data *md = mq->blkdata;
++	struct mmc_card *card = md->queue.card;
++
++	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card->erase_arg);
++}
++
+ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+ 				       struct request *req)
+ {
+@@ -2327,6 +2342,9 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		case REQ_OP_SECURE_ERASE:
+ 			mmc_blk_issue_secdiscard_rq(mq, req);
+ 			break;
++		case REQ_OP_WRITE_ZEROES:
++			mmc_blk_issue_trim_rq(mq, req);
++			break;
+ 		case REQ_OP_FLUSH:
+ 			mmc_blk_issue_flush(mq, req);
+ 			break;
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index c69b2d9df6f1..bbe2ea829ea7 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -191,6 +191,8 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 		q->limits.discard_granularity = SECTOR_SIZE;
+ 	if (mmc_can_secure_erase_trim(card))
+ 		blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
++	if (mmc_can_trim(card) && card->erased_byte == 0)
++		blk_queue_max_write_zeroes_sectors(q, max_discard);
+ }
+ 
+ static unsigned short mmc_get_max_segments(struct mmc_host *host)
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.34.1
+
