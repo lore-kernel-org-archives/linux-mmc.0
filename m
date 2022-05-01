@@ -2,57 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D9BFC4321E
-	for <linux-mmc@archiver.kernel.org>; Sat, 30 Apr 2022 14:43:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A8C2C4332F
+	for <linux-mmc@archiver.kernel.org>; Sun,  1 May 2022 21:34:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242422AbiD3Oql (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 30 Apr 2022 10:46:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54220 "EHLO
+        id S1355128AbiEAVhx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 1 May 2022 17:37:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231355AbiD3Oqj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Apr 2022 10:46:39 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D85B161295;
-        Sat, 30 Apr 2022 07:43:16 -0700 (PDT)
-Received: from mail-ot1-f42.google.com ([209.85.210.42]) by
- mrelayeu.kundenserver.de (mreue009 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1Mn2eN-1oAYcv3eXX-00kApA; Sat, 30 Apr 2022 16:43:15 +0200
-Received: by mail-ot1-f42.google.com with SMTP id w8-20020a9d5388000000b006060c4a9ee3so483894otg.10;
-        Sat, 30 Apr 2022 07:43:13 -0700 (PDT)
-X-Gm-Message-State: AOAM530lJLjGIGkDDyrzz26RBeTaJulD941ict7DOulu0ByeoygDj/K8
-        6EElQtNwsRwKvdAYHK7cp/6ch1znfnysExWofiY=
-X-Google-Smtp-Source: ABdhPJyu1oLM1IRKTqR+eQdQ1rsYTJoLMnuBV/FFpB8y5vKEh5sII8e/hMlA25PDcp1w4A+thLzVKyWiU6hDO089+bw=
-X-Received: by 2002:a0d:d804:0:b0:2f4:e47d:1c2c with SMTP id
- a4-20020a0dd804000000b002f4e47d1c2cmr4143200ywe.320.1651328616903; Sat, 30
- Apr 2022 07:23:36 -0700 (PDT)
+        with ESMTP id S1355104AbiEAVhx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 1 May 2022 17:37:53 -0400
+Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A78DF3C716
+        for <linux-mmc@vger.kernel.org>; Sun,  1 May 2022 14:34:26 -0700 (PDT)
+Received: by mail-yb1-xb2e.google.com with SMTP id e12so23242769ybc.11
+        for <linux-mmc@vger.kernel.org>; Sun, 01 May 2022 14:34:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=XHDe8NwwI9SjN9yPCfdFZVh4P/kcPQDXEmbvi28Ry+g=;
+        b=UhniDGJRP7jnhKBKyFEU7Wm1oj19NfJgHgLTwiUZocIMzFuZcy6/C6VzBVOL++cBvj
+         LrIdaNUAfF6A3gJNASrFvHnAKvQMpgaI3a+ALVbDTJ8eikxSpYzLlQUmI4nPbtXjDg4D
+         61l+wu6AHbkliq+H0f8Ajl6wMDIrIDWbHXSKpPcelWQXQMMNGkpdczkhdkUi7iNKqqom
+         f4kY22N5GzwsoRBTgxLB4z0sMMH1XkpdSeUqQXDWgVrNldazzOzczD605y1f7K81V1C4
+         4ugAXmyrIfWO1yaViycscWtZgLZGrFY+/HbQHeYpwIpBVHoKMccEQ7oDjW2RE/A2D6ol
+         0zew==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=XHDe8NwwI9SjN9yPCfdFZVh4P/kcPQDXEmbvi28Ry+g=;
+        b=ZHhJ6f7SqOVLigwfplsbHxmHQ5F6TIUvyUEq4YWJMpZA9Vs0tGEtTXyDJhCGv6XSWX
+         TmWq/CKYpOpeXdqy3Q3DCCfNNq63ewvOXbp5W5dU64/uV5QTn5ts4/SfZRzISiCfmiil
+         Qzmk+6DTnnhBvaNgKvCwkeDaN7voxLSseAj9K/yOuMLUNQV18zNtl+W6nhvt/lbeOldy
+         iYQcXDnpLQzxJv+eJqyRcCot4V50FSxwYmc7/7NU9It2+4FctUkcm9DmkgTMLjYnn6L/
+         a2lWN8/xepTbNr/l54JOIptAAYXemqvKTd/h2+kgXmYn/tJzl71gynKE8lh/mlICtE7G
+         IJVA==
+X-Gm-Message-State: AOAM5325fNgauyY6U9EBQ4roA/tcA5YhNiIBY3enO9imVKuZUgTKF/qG
+        k1R1l4hp01tHCcY1cMhxBOb4gzsGDyapI2QsEAai1A==
+X-Google-Smtp-Source: ABdhPJwyu4GO9ZTopFM1Qtp9g0AYWW/G2gCL2Rkf2k0emOIuL58PKSUnjfCPuXZtMMqa2spe4DyjerPL+kd11/8NfmU=
+X-Received: by 2002:a25:aa94:0:b0:648:62f2:ef4e with SMTP id
+ t20-20020a25aa94000000b0064862f2ef4emr8160978ybi.626.1651440865094; Sun, 01
+ May 2022 14:34:25 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220422170530.GA2338209@roeck-us.net>
- <CAK8P3a3V=qxUqYT3Yt=dpXVv58-Y+HVi952wO6D4LPN5NNphGA@mail.gmail.com>
- <8b36d3a4-ec85-2f9f-e4b7-734d8ddd3d8f@roeck-us.net> <CAK8P3a0R9cpEb1d2=e9KnGSbi_uRv48RWfCu_J4DDak_cGZSuw@mail.gmail.com>
- <20220422234150.GA3442771@roeck-us.net> <CAK8P3a3qZdEqnJ2nTOKwDMossngOgCpEvZq4cQMPQjSsUoU=6g@mail.gmail.com>
- <3b4046ed-fd75-13ea-fac3-06469172806c@roeck-us.net> <CAK8P3a1LzEG1vo+5nMrnL3TOMcbSKJ3u=StcfY8dajV2raUBjA@mail.gmail.com>
- <3df135a2-17f5-d6c6-b4a8-e1a60e254297@roeck-us.net> <CAK8P3a2EHMQPN4ny9sXXuReFG0jN0hyRV7h9v_AR_0pqpOU41w@mail.gmail.com>
- <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
- <6f1b27fa-96d1-4be7-ac6a-762610314f2a@roeck-us.net> <8d6d453a-e6fc-439b-2f34-e60c22fc9e98@roeck-us.net>
- <CAK8P3a2Ekvis1YcrJZtuga+XQdbeTC98PkOszCpS2DiZri7VMQ@mail.gmail.com>
- <149509dd-f43d-1b27-4395-81eab4ff3455@roeck-us.net> <CAK8P3a05vFdBnXXAMPVS82xX29+uinvWPcWxAgvj0TfoOk+1kg@mail.gmail.com>
- <b13783aa-9225-d52a-3800-c97ad772688b@roeck-us.net> <CAK8P3a3S5OjkKq_u5FpnwzYv+0+typya6Z4MzTez5ZH+do00xQ@mail.gmail.com>
-In-Reply-To: <CAK8P3a3S5OjkKq_u5FpnwzYv+0+typya6Z4MzTez5ZH+do00xQ@mail.gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Sat, 30 Apr 2022 16:23:20 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a3jiqf_zpBsZyvAb5ZtkwDa7KkqExqDAdpY_pYqkr_NgQ@mail.gmail.com>
-Message-ID: <CAK8P3a3jiqf_zpBsZyvAb5ZtkwDa7KkqExqDAdpY_pYqkr_NgQ@mail.gmail.com>
-Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
-To:     Arnd Bergmann <arnd@arndb.de>
-Cc:     Guenter Roeck <linux@roeck-us.net>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Daniel Mack <daniel@zonque.org>,
+References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-16-arnd@kernel.org>
+In-Reply-To: <20220419163810.2118169-16-arnd@kernel.org>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Sun, 1 May 2022 23:34:13 +0200
+Message-ID: <CACRpkdbdCzeWgLOhQfEPVz6fYMqDeTYtqQ3uunj1MK+RGcZZKA@mail.gmail.com>
+Subject: Re: [PATCH 15/48] ARM: pxa: tosa: use gpio descriptor for audio
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org,
+        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
         Haojian Zhuang <haojian.zhuang@gmail.com>,
         Marek Vasut <marek.vasut@gmail.com>,
         Philipp Zabel <philipp.zabel@gmail.com>,
         Lubomir Rintel <lkundrak@v3.sk>,
         Paul Parsons <lost.distance@yahoo.com>,
+        Tomas Cech <sleep_walker@suse.com>,
         Sergey Lapin <slapin@ossfans.org>,
         Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         Michael Turquette <mturquette@baylibre.com>,
@@ -63,80 +70,33 @@ Cc:     Guenter Roeck <linux@roeck-us.net>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Dominik Brodowski <linux@dominikbrodowski.net>,
         Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-input@vger.kernel.org,
         patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-rtc@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        alsa-devel@alsa-project.org
 Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:H6IJBEz+ZpomKcFiPidyhkUxEF5w0DLXHe/vMZwISX/BHUEDMJn
- 8j/HagrzkYpHjm2t/x9VBIXKuZQV3AqFInnFiSwWiMPGzFWgqdFaN5rcXKOnBegblTTz6EE
- uMjlCJwhQjwp4SwKefBkyCGNKMB/lV4MYEcHOR/J4MeULTPINTxBzZPO8P1uDY4R9JHxRtP
- 0MMFl3XheI0bnuRT/Sk3Q==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:VPedLqT9np0=:7zewjiKp3tbI7dQZ8xe6nI
- U8UyWjOB5sNHgwM5+P1UxSMkme5dnGMow4JYAXQQ+TyLo6IlRzottshuhG0lTTHDzwK9hQrlY
- WYvK6HHh957URL/wUs3GqBxThWlKzULBdPhuatwg4rNa6ER5kWaDoomIGdUoaPtFyRGQlv/TI
- 1THH6UeYG//B659nk9K8vn932sLO3QESSnVOErCi1lAtUnazuP71bmCtdQ9NFdeps5CgcKWd3
- 1snKB2ECaTsCBZ4myNVW/ycvuSPkDjdAS+0HiSyY6BsCWQcWR3KQXJkVI53uYv8iZvCeYHYWk
- LAoLR8GYSoqGu0Ogm6H3riBYXyT6TWPbLw3n8s9bF0eA1UeKPSMhmcNhAeP5cHaYDPebkOuMF
- iAoQ4UQqc5wSQRxeOEbTatJd+YoZzPf1eRftohhpaGfZswgOUEkty3hzYs7Dy2YzMErRkARB0
- 2t/42VQiWjkml54rDgbucXTDT2nqxnASsJfyCVnBC4r8MYeqQACR8cJpHNXkPEa9rj8iYwsP8
- azvt6us6rZIC6gpX2nXLnNRBi4FqMELPeKL0pY7lskwIZKw6UnbHe5uOUOeKuUkwNsuxJNodk
- m+0P6Io3MXrOI3z/mHHUgs52ZL/DSK+5dnEj0ajN29iX2nYVMlV5rsNwhO+YEDK0xm0hl451K
- QG2G8hAuzwVzXeUY4LHg5uUFifmMYEhKR49z3K60I6J0brkvufGKlMgjl3pfD3/H65u1slhxb
- xkRJqjsZLimrMAQQM5VL0URHZgEoVMI6lTiza95jjdhehR2zvCmXW7h88TViDEodkWXvCu2PE
- mtOr5S65VuWBVzrJV26tfgq81fvr+wRRe+GnTvbKD3PrbnwkmQ=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Apr 30, 2022 at 3:32 PM Arnd Bergmann <arnd@arndb.de> wrote:
+On Tue, Apr 19, 2022 at 6:40 PM Arnd Bergmann <arnd@kernel.org> wrote:
+
+> From: Arnd Bergmann <arnd@arndb.de>
 >
-> On Sat, Apr 30, 2022 at 2:41 PM Guenter Roeck <linux@roeck-us.net> wrote:
-> > On 4/30/22 01:04, Arnd Bergmann wrote:
-> > > and concluded that it must have done this for a long time. In my own qemu
-> > > instance, I see a crash from iWMMXt, but that works fine on your machine.
-> > > OTOH, your failed instances all look like they either time out or
-> > > failed to find a
-> > > rootfs. I tried passing an MMC device as root, and that works here.
-> > >
-> >
-> > Booting from mmc works for me as well. Booting from pcmcia worked before,
-> > so I assume that there must be some regression.
+> The audio driver should not use a hardwired gpio number
+> from the header. Change it to use a lookup table.
 >
-> Ok, got it, and managed to reproduce the hang now. My "ARM: pxa/sa1100: move
-> I/O space to PCI_IOBASE" patch managed to get it to the point of detecting
-> the pcmcia device instead of crashing, so I assumed it was enough when it
-> clearly was not. Before that patch, it still works, afterwards it hangs with
-> "pata_pcmcia: probe of 0.0 failed with error -12" as mentioned above. I'll
-> have another look.
+> Acked-by: Mark Brown <broonie@kernel.org>
+> Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> Cc: alsa-devel@alsa-project.org
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-Got it: as the PCMCIA bus on this machine is the only thing with an I/O space,
-I assigned it port number range 0-0x1000, with an io_offset of 0, but this
-was apparently unexpected and triggered this sanity check:
+Looks good to me!
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-static int static_find_io(struct pcmcia_socket *s, unsigned int attr,
-                        unsigned int *base, unsigned int num,
-                        unsigned int align, struct resource **parent)
-{
-      if (!s->io_offset)
-              return -EINVAL;
-      ...
-      return 0;
-}
-
-I moved the devices around now, giving zeus/viper I/O space an offset of
-zero, and moving PCMCIA to offset 0x10000 and 0x11000 for the two slots,
-which now works because the io_offset is nonzero. I've regenerated the
-branches again, and confirmed the for-next branch still boots from pcmcia.
-
-        Arnd
+Yours,
+Linus Walleij
