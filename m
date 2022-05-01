@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55D4EC433EF
-	for <linux-mmc@archiver.kernel.org>; Sun,  1 May 2022 21:48:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3F01C4167B
+	for <linux-mmc@archiver.kernel.org>; Sun,  1 May 2022 21:50:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1359689AbiEAVwD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 1 May 2022 17:52:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53544 "EHLO
+        id S244572AbiEAVxz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 1 May 2022 17:53:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54882 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237224AbiEAVwC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 1 May 2022 17:52:02 -0400
-Received: from mail-yw1-x1130.google.com (mail-yw1-x1130.google.com [IPv6:2607:f8b0:4864:20::1130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62B7F48E73
-        for <linux-mmc@vger.kernel.org>; Sun,  1 May 2022 14:48:35 -0700 (PDT)
-Received: by mail-yw1-x1130.google.com with SMTP id 00721157ae682-2f863469afbso107651577b3.0
-        for <linux-mmc@vger.kernel.org>; Sun, 01 May 2022 14:48:35 -0700 (PDT)
+        with ESMTP id S1359490AbiEAVxv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 1 May 2022 17:53:51 -0400
+Received: from mail-yw1-x112a.google.com (mail-yw1-x112a.google.com [IPv6:2607:f8b0:4864:20::112a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E99FBC8A
+        for <linux-mmc@vger.kernel.org>; Sun,  1 May 2022 14:50:23 -0700 (PDT)
+Received: by mail-yw1-x112a.google.com with SMTP id 00721157ae682-2ec42eae76bso131559907b3.10
+        for <linux-mmc@vger.kernel.org>; Sun, 01 May 2022 14:50:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=IF3vEg3+jPF9cVJcI8jPci4JS9DP0GVP7RD7934mEjE=;
-        b=zwY5ZnqN7kNhGK99pE/WVaiRJMMJk1J46UwT4pwImXGX6UOmFH90vIl3pqBFOiefpf
-         XGDauOFPVnr0N+wehwWqxGedJrPEnCfA7QYfI1Ud6pUqjR0VJCUMCPCgmokVJfJlO5J3
-         9fgUKiXoKaLiNlZ2lnMOc8odLW1cWM39J6DifJp1VzhPP3yFCswh3y7kpJGPLRycUKkx
-         MOm6n0oCCKvOF9FQQTqGTr1+Nj0qDNWhyJnFD6sUHzDc8vvEHbsUWHtvJVGJUVLO7jGU
-         zEl/kVv1ENb3aFDPeJIshWrcYr3gbS2Bho2vG2ESmIY+jYGxLU0tAEUviHdRTMa60iKl
-         bN4g==
+        bh=DrYFNF6XiUDLRQ8BG/sFtx3Ph/Zfoke+tXA+P2uLssI=;
+        b=d2nReteaB3Jz4i06NpIM6gnz5B8hQwBBjiPEVsw+epXirApSHuit8G+1KpGNH0E41i
+         zxQnSRyQRoC4LRDvTTpNQXXWsgzjSg9lPXQ+2R5TERxPbgFoJ0rO3XT8c3m0Yq0HNGg1
+         xoDglp5RLj9nKgfEQ74i2SHqKwgwMdRpEEtiYG/Om0Qpux5sR/mLSHSOL9gM6Vj1gMWz
+         VoIYgx1rBx+zz3z7FpvoE8zQGdfABxOi+Ob8Z9KwW9nuJHZuBF/shpRDF0nV/UEdNxMy
+         YZNy+kAfKoMJQflpdXIk7n78QiZxl/VYBhTpXLO/UC9d4n5NKuo5I3ZCPC4z1lrBlf8C
+         mZEA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=IF3vEg3+jPF9cVJcI8jPci4JS9DP0GVP7RD7934mEjE=;
-        b=niEHhrLIy9RY4ey2914aBCC8FMjEbPNQ4+yoUULExcGczjg60Ha9rJ9gG2woa5lo/R
-         pNu78EWIzKk1nof3+T1DhtPuS9oDP0eyXwjnbzajhzMXCD9N5ce9YhY2NG/MPfZnQfF8
-         xV7Z1APCaqN4bHviaUzNQhpFZ9DuKQdzcfZz4FOHp+oZ3bW01jKnUPPVrra/RZPJuTHQ
-         qGvNGr0Vk5d8viG7g3r2oewFtAuHh9W/2Q5zWtr5YOEUnLfh3vp9sPpBCEHeCpvjPiY0
-         3gbGwGrBSZLP+N0NacvSQAVPdbwRaEO0tHBXFzDXubOg/krCTIpVrE4LEwGCSIN9Az1o
-         XwVg==
-X-Gm-Message-State: AOAM531jWD7JNqaOnRVL9RemZzSx3G9s8tx4uZW+omQVi83ykNDF46Mt
-        XG9hzcgT4IVrYpVsgFWH7bzicVoycz6a7t98uLAp9Q==
-X-Google-Smtp-Source: ABdhPJyC4yrP3wkFWKCa3+OUAbpp0OAp6QL2ydyOZCULhsvaONngjc+9/s4GocTjYt3qkP0LOVwZrKfaB6+LtqaJLgI=
-X-Received: by 2002:a0d:f0c3:0:b0:2f4:d291:9dde with SMTP id
- z186-20020a0df0c3000000b002f4d2919ddemr9084184ywe.437.1651441714674; Sun, 01
- May 2022 14:48:34 -0700 (PDT)
+        bh=DrYFNF6XiUDLRQ8BG/sFtx3Ph/Zfoke+tXA+P2uLssI=;
+        b=BaC215ogzhSCsM06DHMvkszJ+whZ3Sou9nAMF4Yj03Jjt4fZDlO/LBu/Af7t3BEIgE
+         zJLSAQmMchavDBWPCEdkLZD/adDn+OKVJ6aC8H+A4P86GCkhINXi7/+hwowYpYwtPCVf
+         a3xPjt5pgSU04OmfUdLBMUpToTZlAQAwWtVpdssfZZq3z5cGGXOXI+bCOLSzfjEfGbnI
+         dT/ke7Ncj3rPU2Ig08fUaMp+XL1oaQtHItvAux1Jc2O5oT4PbOp/xpO7scJzMrrEpY0V
+         JCxpJgDEQ3MozlKgAVODB8ieqH3fekwBr/3Bpo+v7fFv/jn5Zs/JKC1U19YITiA4JOQ8
+         Q5mg==
+X-Gm-Message-State: AOAM5337ZfEI5ZQki1DDSm2S/N1a6PTPxry3unAw3oKN/tZ0B54eoZ0w
+        JiVl9fm1lytaFUA8yKqJ/mEEh1vU4+Xc/JeIBQop3Q==
+X-Google-Smtp-Source: ABdhPJy78P6hUpCS1kUYg8tICBMpcOG7ZelV2yx+uOWLM+IsGmklihAlHCtdjke+EOaf0s2Ys/opvH6nxxiY8Y3Ggaw=
+X-Received: by 2002:a0d:e5c6:0:b0:2f8:c866:7af9 with SMTP id
+ o189-20020a0de5c6000000b002f8c8667af9mr9181281ywe.268.1651441822394; Sun, 01
+ May 2022 14:50:22 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-25-arnd@kernel.org>
-In-Reply-To: <20220419163810.2118169-25-arnd@kernel.org>
+References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-26-arnd@kernel.org>
+In-Reply-To: <20220419163810.2118169-26-arnd@kernel.org>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sun, 1 May 2022 23:48:23 +0200
-Message-ID: <CACRpkdb8kDuia5udsUSF0f2rvPeyYGoxeUVV_ppAvEaA7cRxiQ@mail.gmail.com>
-Subject: Re: [PATCH 24/48] ARM: pxa: mainstone-wm97xx: use gpio lookup table
+Date:   Sun, 1 May 2022 23:50:10 +0200
+Message-ID: <CACRpkdYs+0OdHfXGXwX3hdwV+BLi=V6FUkJEkm_ckbuR6QHToQ@mail.gmail.com>
+Subject: Re: [PATCH 25/48] ARM: pxa: zylonite: use gpio lookup instead mfp header
 To:     Arnd Bergmann <arnd@kernel.org>
 Cc:     robert.jarzmik@free.fr, linux-arm-kernel@lists.infradead.org,
         Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
@@ -87,14 +87,14 @@ On Tue, Apr 19, 2022 at 6:42 PM Arnd Bergmann <arnd@kernel.org> wrote:
 
 > From: Arnd Bergmann <arnd@arndb.de>
 >
-> This driver hardcodes gpio numbers without a header file.
-> Use lookup tables instead.
+> The mach/mfp.h header is only used by this one driver
+> for hardcoded gpio numbers. Change that to use a lookup
+> table instead.
 >
-> Cc: Marek Vasut <marek.vasut@gmail.com>
-> Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-> Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
 > Cc: linux-input@vger.kernel.org
+> Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
 > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
 Looks good to me!
