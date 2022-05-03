@@ -2,86 +2,149 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24D96C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 May 2022 12:26:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC502C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 May 2022 14:05:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235225AbiECM3b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 May 2022 08:29:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40726 "EHLO
+        id S236672AbiECOIi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 May 2022 10:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51894 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234461AbiECM3a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2022 08:29:30 -0400
-Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 060C537A9B
-        for <linux-mmc@vger.kernel.org>; Tue,  3 May 2022 05:25:57 -0700 (PDT)
-Received: by mail-ed1-x52d.google.com with SMTP id a1so19667288edt.3
-        for <linux-mmc@vger.kernel.org>; Tue, 03 May 2022 05:25:57 -0700 (PDT)
+        with ESMTP id S236230AbiECOIg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2022 10:08:36 -0400
+Received: from mail-oi1-x22b.google.com (mail-oi1-x22b.google.com [IPv6:2607:f8b0:4864:20::22b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E36161EADD;
+        Tue,  3 May 2022 07:05:03 -0700 (PDT)
+Received: by mail-oi1-x22b.google.com with SMTP id z8so18283201oix.3;
+        Tue, 03 May 2022 07:05:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=GCGJOVaFvPi2cdZAa6UPkRWwapZJfoD9FjLKsOzvOl8=;
-        b=zZpYb09NzsULIdZvqjDWB34wsfCyTIW5qhy/Esiwqa0TJfdQ0n7LVmNrsNmV9pyYX/
-         DOXjArMo3aj+3DszDWbmUxffbbzRcO+PfFNXvLHttb9IL3AsZ4t55iSPu5Kep3RbgDEI
-         On09x1duQp/RjmK699DnwteUsXUHhTlQEUoRxhk2VrDxk3RpN38pfzvawTR0tWOjYm9M
-         NsQGospBzheK8/z/zqufHgKDQv1LNN2yESPk6B4p4fhOF/kUPU3RIFmN0X0DTOwxxVbx
-         J7mFj0hO6o6JoWysUrtCd3xUCy3izDNsJTqNfb6Cw4OqLBR3Y44FMnkLGAYLH4Gox31N
-         zHyw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+        d=gmail.com; s=20210112;
+        h=sender:message-id:date:mime-version:user-agent:subject
          :content-language:to:cc:references:from:in-reply-to
          :content-transfer-encoding;
-        bh=GCGJOVaFvPi2cdZAa6UPkRWwapZJfoD9FjLKsOzvOl8=;
-        b=kgBgseAlKeqwJ8vk+LbK3Nr0B9esTnPdGzlhhpHVQldbJHN4gRElHpn9bZNJbMQ584
-         k2ZZ1sP+NsRjvqL6QZqEtC5Amv6vQAdSDnGP6MMD07NDb4g6w77afv5OgNJpQm6y5JI7
-         d1iu3BA5VjKknt9/cuKCYL+9yEnIyEDlBfsaR6sWkpY40oE6BC1PQniObu8eOURF3Wwp
-         cPXo+/LRumy4xha1KgaBuEeg4h3n7Xab1Yb+ABb+IU66pCefsbZZv+m+t3bvpEJhHzP8
-         YJHHz03A8CJPOAX+fr+WTuoJVJoXoU8LDXDTvKujRiQF8yvuqypH876z+dHFsb1d8mr7
-         PY5Q==
-X-Gm-Message-State: AOAM530gA3nsTHqfeR7QzP+/xOcHS6oCRmDzVcutI34xmiDNV6UCXnOK
-        aZpohCxqlwhfBduoRxr9TQOO9Q==
-X-Google-Smtp-Source: ABdhPJxaIEfqBaZo/WyNo6ukWwIiffhWb+nMnmw0GMvJWG2DxptvaFbjV2ed02Ff/JuclfPWdiESsQ==
-X-Received: by 2002:a05:6402:2554:b0:423:f3e3:81da with SMTP id l20-20020a056402255400b00423f3e381damr17651983edb.87.1651580756428;
-        Tue, 03 May 2022 05:25:56 -0700 (PDT)
-Received: from [192.168.0.203] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id ia15-20020a170907a06f00b006f3ef214e78sm4554780ejc.222.2022.05.03.05.25.55
+        bh=b5zcWYUFPO27QgFEnMVs+54HuZPkQ0FL3sPCUBagWEs=;
+        b=nmtAO8elN+lD21aNW4PeFwV5qviuq6Y4sVLZWcQC9zZn6UqsLXYF5ciWRgl0+lA1Wo
+         Q3rLe4Fskzg95B7RE9bBDzCWYoXQcNXwViucb5QcW8FGpQqDvUf5YZDsdBhza6rYepvt
+         JfGvKjbu2S1tIWfgmVuDBkIJnidthNgLCkvix0KKZ/uKOs1c5s5gsxh2uVagQLRY6nw/
+         ziKH7/MVdkOxup3VPlggEPris50qLUCDUg9E33r7OhDbS5bq0RNLc5yT2Ouqb/LH4LOT
+         N/oRmt4dIHZssgokdRevfTbu/juuu2xeyRBaFEeQbqQW6cVYD7R5t3xz7Vo6hhn100CX
+         OKdg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:sender:message-id:date:mime-version:user-agent
+         :subject:content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=b5zcWYUFPO27QgFEnMVs+54HuZPkQ0FL3sPCUBagWEs=;
+        b=yDASM6rLJbKX9+ZVLg892YHe+za9Eudw4dVMdkqwtGrE/Fsso8IYnAC6pDNj3glBci
+         h5qmg4AzpgUPm+NZIIzKePXcxlKrKcojE25DvCs+EkMUd/g03kbK2c4e5vLQ+YBxX5Sq
+         tedkXejWxzGvqYo8xhGeAEMyqqpHNBR+/mI4hYUCjGdroTGIY531YrdI1PBIY4Oc/RR9
+         FsGW8BwSprfejNnrqZ7ffZJMU4PQ75dv11xNKpn4uzx+yrsS7dZrdc2Xta1cuvblikHR
+         u/ZB6O5zrAx5E0snvd2ULn5sdIC/gnTHCUOwHXivFgG7KcOURKqzWt+zCuOJ3JQQGRPd
+         kX5A==
+X-Gm-Message-State: AOAM5334v8GF7VvLDFyoThb5yWDY715wrSL36U1B4eQNUHMlIAT44ltn
+        /AIqRT/yMjljZjdbP3069QE=
+X-Google-Smtp-Source: ABdhPJzzGJEdAdih1u7jF2kiLOrOxmCv3lvE9XNEtKe9LYoSPKte95Aq4ECL/l2Oq3F4Q7XGCpzu3g==
+X-Received: by 2002:a05:6808:2007:b0:325:7c10:475e with SMTP id q7-20020a056808200700b003257c10475emr1861677oiw.250.1651586703247;
+        Tue, 03 May 2022 07:05:03 -0700 (PDT)
+Received: from ?IPV6:2600:1700:e321:62f0:329c:23ff:fee3:9d7c? ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id k6-20020a056830168600b0060603221249sm4013581otr.25.2022.05.03.07.04.57
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 03 May 2022 05:25:55 -0700 (PDT)
-Message-ID: <9868ae89-57fc-0f1a-89a5-5ee0cd9207aa@linaro.org>
-Date:   Tue, 3 May 2022 14:25:54 +0200
+        Tue, 03 May 2022 07:05:00 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Message-ID: <d4eb4752-d8c0-715a-1d69-829f39c88d2e@roeck-us.net>
+Date:   Tue, 3 May 2022 07:04:56 -0700
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.7.0
-Subject: Re: [PATCH 3/4] dt-bindings: arm-smmu: Add binding for SDX65 SMMU
+ Thunderbird/91.8.1
+Subject: Re: [PATCH v2 00/48] ARM: PXA multiplatform support
 Content-Language: en-US
-To:     Rohit Agarwal <quic_rohiagar@quicinc.com>, will@kernel.org,
-        robin.murphy@arm.com, joro@8bytes.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, ulf.hansson@linaro.org,
-        agross@kernel.org, bjorn.andersson@linaro.org,
-        adrian.hunter@intel.com, bhupesh.sharma@linaro.org
-Cc:     linux-arm-kernel@lists.infradead.org,
-        iommu@lists.linux-foundation.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org
-References: <1651480665-14978-1-git-send-email-quic_rohiagar@quicinc.com>
- <1651480665-14978-4-git-send-email-quic_rohiagar@quicinc.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <1651480665-14978-4-git-send-email-quic_rohiagar@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+References: <20220419163810.2118169-1-arnd@kernel.org>
+ <CAK8P3a09+nFS3g1rgvTW9da3tMiAhHjkjZVs1QOJOj8TJ-9MDg@mail.gmail.com>
+ <6f1b27fa-96d1-4be7-ac6a-762610314f2a@roeck-us.net>
+ <8d6d453a-e6fc-439b-2f34-e60c22fc9e98@roeck-us.net>
+ <CAK8P3a2Ekvis1YcrJZtuga+XQdbeTC98PkOszCpS2DiZri7VMQ@mail.gmail.com>
+ <149509dd-f43d-1b27-4395-81eab4ff3455@roeck-us.net>
+ <CAK8P3a05vFdBnXXAMPVS82xX29+uinvWPcWxAgvj0TfoOk+1kg@mail.gmail.com>
+ <b13783aa-9225-d52a-3800-c97ad772688b@roeck-us.net>
+ <CAK8P3a3S5OjkKq_u5FpnwzYv+0+typya6Z4MzTez5ZH+do00xQ@mail.gmail.com>
+ <CAK8P3a3jiqf_zpBsZyvAb5ZtkwDa7KkqExqDAdpY_pYqkr_NgQ@mail.gmail.com>
+ <4dcdbfe2-9edf-320b-d123-3b62c8b5e28e@roeck-us.net>
+ <CAK8P3a0ogn1wgPBDHkT=Fb8ufA+y8Ax1Qov2-vRXfC08QqnrQA@mail.gmail.com>
+ <c001d58e-9a78-6338-a533-d0f215b3dfd1@roeck-us.net>
+ <CAK8P3a1X3YH0RqqmqgqFAaY94yreD-PfY-pvyMf+xU3nGeqvsg@mail.gmail.com>
+ <04840b4f-5b9d-b29a-62f7-e5148d415313@roeck-us.net>
+ <CAK8P3a39oiWyDwp=BHuCsBVwfzyZ802-NwL9G9r-t6X8KSr6nA@mail.gmail.com>
+From:   Guenter Roeck <linux@roeck-us.net>
+In-Reply-To: <CAK8P3a39oiWyDwp=BHuCsBVwfzyZ802-NwL9G9r-t6X8KSr6nA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 02/05/2022 10:37, Rohit Agarwal wrote:
-> Add devicetree binding for Qualcomm SDX65 SMMU.
+On 5/3/22 00:17, Arnd Bergmann wrote:
+> On Tue, May 3, 2022 at 4:55 AM Guenter Roeck <linux@roeck-us.net> wrote:
+>> On 5/2/22 14:03, Arnd Bergmann wrote:
+>>> On Mon, May 2, 2022 at 10:35 PM Guenter Roeck <linux@roeck-us.net> wrote:
+>>>> On 5/2/22 12:21, Arnd Bergmann wrote:
+>>
+>> qemu puts initrd in the middle of available memory. With the image size
+>> being ~1MB larger than with v5.18-rc, this is too much, and the kernel
+>> overwrites part of initrd. This causes it to be corrupted.
+>>
+>> It looks like that would have happened eventually, your patch series just
+>> made it happen now. The kernel is just getting too large to run on such small
+>> systems. I worked around the problem in my version of qemu by loading initrd
+>> at the end of the (small) RAM. With that, I no longer see the boot failure.
 > 
-> Signed-off-by: Rohit Agarwal <quic_rohiagar@quicinc.com>
+> Ok, thanks for confirming. If it's just the image size that changed,
+> then I think
+> we can live with it. Having the kernel image grow by 1MB seems excessive
+> though, I'd like to understand better where that increase comes from.
+> 
+> Starting out from pxa_defconfig, I see a 40KB increase from the final patch
+> that moves to multiplatform support, which I think is fine.
+> 
+> If you have a z2 specific config, that would probably not enable CONFIG_OF,
+> which is always turned on for multiplatform, but again that only adds around
+> 250KB in my builds (using gcc-11). This is more than I'd like it to be, but
+> still much less than 1MB.
+> 
 
+Maybe it is a bit less; I only compared the size of "Image". Either case,
+it is enough to cause the problem. I am not sure if it is worth the time
+trying to track this down further.
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-
-Best regards,
-Krzysztof
+Guenter
