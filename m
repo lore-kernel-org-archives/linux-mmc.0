@@ -2,109 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EAD9CC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 05:56:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07973C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 06:41:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344751AbiEDGAF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 02:00:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33192 "EHLO
+        id S1345001AbiEDGog (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 May 2022 02:44:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230149AbiEDGAE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 02:00:04 -0400
-X-Greylist: delayed 572 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 03 May 2022 22:56:28 PDT
-Received: from smtp2.math.uni-bielefeld.de (smtp2.math.uni-bielefeld.de [129.70.45.13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DE69201BC;
-        Tue,  3 May 2022 22:56:28 -0700 (PDT)
-Received: from math.uni-bielefeld.de (kvm01.math.uni-bielefeld.de [129.70.45.15])
+        with ESMTP id S240187AbiEDGof (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 02:44:35 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9409818B13;
+        Tue,  3 May 2022 23:41:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (Client did not present a certificate)
-        by smtp2.math.uni-bielefeld.de (Postfix) with ESMTPSA id 72BA360213;
-        Wed,  4 May 2022 07:46:53 +0200 (CEST)
-Date:   Wed, 4 May 2022 07:46:52 +0200
-From:   Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "H . Nikolaus Schaller" <hns@goldelico.com>,
-        Huijin Park <huijin.park@samsung.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: core: Restore (almost) the busy polling for
- MMC_SEND_OP_COND
-Message-ID: <20220504054652.GA7851@math.uni-bielefeld.de>
-References: <20220304105656.149281-1-ulf.hansson@linaro.org>
- <CAPDyKFr1PzSaiKqB4ZoqTS_8bGsEH=aB3ARhxyGu+cYeRqeBew@mail.gmail.com>
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 38CF46153E;
+        Wed,  4 May 2022 06:41:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 929DBC385A4;
+        Wed,  4 May 2022 06:40:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651646459;
+        bh=ZGMwwfSt9WgGcP9EzHW/QosFc70Yb/XaCBfaIMon8lM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=hCMa156AuRtjnImdRRFb6sjNT7gi2K+aKH0x8uKbL7AEODCLcmpA+AldqhNahLoMc
+         Jjbn4PU2sZC0QO3tUog7PiYYrqIfJDpXhjQPR0ah9UBAo6hM2LqRyEviiRxk8BR/Z/
+         PswEhJLlhaaJETbJ+cDB+HgHVFfdIRtcQWjx3W6kmEYtvsvtdX1D61teQWllRNYd4Y
+         4rq0yVjTAy3gemypN42SU8Wvxydjxbsf9n9Yu7PohyC0omGj3kKtLN8XGs6TxWmKd5
+         RbuiHnFactE1ob6Dd26hg53PXFe++MOjqEkVBKu+OdQv2rpx3HjFyo1wUYQL3DAF3f
+         4Lj9rl6MCVe6w==
+Date:   Wed, 4 May 2022 12:10:55 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     devicetree@vger.kernel.org,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Abel Vesa <abel.vesa@nxp.com>, Stephen Boyd <sboyd@kernel.org>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>, Anson Huang <Anson.Huang@nxp.com>,
+        Fabrice Gasnier <fabrice.gasnier@foss.st.com>,
+        Han Xu <han.xu@nxp.com>, Dario Binacchi <dariobin@libero.it>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@ti.com>,
+        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
+        netdev@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-pm@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Drop redundant 'maxItems/minItems' in
+ if/then schemas
+Message-ID: <YnIf95FnuC01qxIp@matsya>
+References: <20220503162738.3827041-1-robh@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFr1PzSaiKqB4ZoqTS_8bGsEH=aB3ARhxyGu+cYeRqeBew@mail.gmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+In-Reply-To: <20220503162738.3827041-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ulf Hansson wrote on Mon  7/03/22 13:17:
-> On Fri, 4 Mar 2022 at 11:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
-> > significantly decreased the polling period from ~10-12ms into just a couple
-> > of us. The purpose was to decrease the total time spent in the busy polling
-> > loop, but unfortunate it has lead to problems, that causes eMMC cards to
-> > never gets out busy and thus fails to be initialized.
-> >
-> > To fix the problem, but also to try to keep some of the new improved
-> > behaviour, let's start by using a polling period of 1-2ms, which then
-> > increases for each loop, according to common polling loop in
-> > __mmc_poll_for_busy().
-> >
-> > Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
-> > Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
-> > Cc: Huijin Park <huijin.park@samsung.com>
-> > Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > ---
-> > 
-> > Jean Rene and H. Nikolaus, if this doesn't work, please try extending the
-> > the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that always
-> > works.
-> > 
-> > Kind regards
-> > Uffe
-
+On 03-05-22, 11:27, Rob Herring wrote:
+> Another round of removing redundant minItems/maxItems when 'items' list is
+> specified. This time it is in if/then schemas as the meta-schema was
+> failing to check this case.
 > 
-> Applied for fixes and by adding two tested-by tags from you, thanks!
-> 
-> Kind regards
-> Uffe
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooling
+> will fixup the final schema adding any unspecified minItems/maxItems.
 
-Hi,
+For phy:
 
-with the current value of MMC_OP_COND_PERIOD_US = 1ms I still see
+Acked-By: Vinod Koul <vkoul@kernel.org>
 
-mmc1: Card stuck being busy! __mmc_poll_for_busy
-mmc1: error -110 doing runtime resume
-
-regularly. The same with 2ms. Setting it to 4ms makes the messages go
-away. Would it be ok to increase MMC_OP_COND_PERIOD_US to 4ms?
-
-
----
- drivers/mmc/core/mmc_ops.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 180d7e9d3400..1fd57f342842 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -21,7 +21,7 @@
-
- #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
- #define MMC_SANITIZE_TIMEOUT_MS                (240 * 1000) /* 240s */
--#define MMC_OP_COND_PERIOD_US          (1 * 1000) /* 1ms */
-+#define MMC_OP_COND_PERIOD_US          (4 * 1000) /* 1ms */
- #define MMC_OP_COND_TIMEOUT_MS         1000 /* 1s */
-
- static const u8 tuning_blk_pattern_4bit[] = {
---
-2.35.1
-
-
-Regards,
-Jean Rene
+-- 
+~Vinod
