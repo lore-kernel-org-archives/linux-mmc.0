@@ -2,105 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A22DFC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 10:37:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 456CEC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 10:38:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348209AbiEDKld (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 06:41:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48366 "EHLO
+        id S1348218AbiEDKle (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 May 2022 06:41:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48464 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231820AbiEDKl2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 06:41:28 -0400
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67595286F2
-        for <linux-mmc@vger.kernel.org>; Wed,  4 May 2022 03:37:52 -0700 (PDT)
-Received: by mail-lf1-x130.google.com with SMTP id x17so1572972lfa.10
-        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2022 03:37:52 -0700 (PDT)
+        with ESMTP id S1348211AbiEDKld (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 06:41:33 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7F5428E00
+        for <linux-mmc@vger.kernel.org>; Wed,  4 May 2022 03:37:56 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id p12so1591975lfs.5
+        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2022 03:37:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=R+UK7a5jf0KZOl/DUtb1w9sbFadlObhTOJmpHWQdrpc=;
-        b=hm2ua1HVcCJqnnAGwF5xo/rNEYAQhftBcLO3n4wSKHPKVExz4/ps2iF279WPGoLBOi
-         U2RMBXyKqSHTq/iMqYJuaihXJyHGxfXMUoI6gK1wxi8kI9vXEbnR8PGYbZzf2WhO09kp
-         k1h6Mz1WWZ6WZMtwi1Pf49wB1iKajJLIfzVcFWl5oc7BQN0JtmTELvuFDiiGwWtTnfeO
-         lMp1bNf08nelacSsBTyAup8ZqotOBF7uKfj/MXiOACYrrxKJdGm3Hq2qfYRWBVX1uCmJ
-         hiq3henLKfsJ9oxmGhuJ1Ld7u/gIFo3aBnCDxUuS7EQ66IUB+PXHY3Bylibvxsm03sZF
-         tCAA==
+        bh=hXrHNwJC3BAV97iHU4og2HGxITVvzbeFV0KAKwYw/nI=;
+        b=QTTdNNHxLgnl1v1dobnNNIk2xfsStVyPHrDEqovPV2KjeX8NQrpD0xCiZDb/x3oQFO
+         LwKab/3vcamG1Nv6zhbuJiDlW4+pPxM3ynh8drc2LqBHXvAv6MztHHfeE/ns5yaBcZ0m
+         ulSKV5CPTLVaKIjvaQVWxxIlfzvJRF/Uh2rF3/Bix5DaZoaJmUrMOtxjQHotAWoS9C0C
+         yMc45JdckmSKuo9Qs4Xc/Y8Snz1ODJbFq2UBiN04hBiv9SeOHOW79fhgHqQIlsLUpy76
+         6YLE3CxLBLsbYrToQL/1cLrNt7caLUc0XrHTiBAF90VQDXWsOGw5Vphlk7rIPgDPcGVl
+         Jseg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=R+UK7a5jf0KZOl/DUtb1w9sbFadlObhTOJmpHWQdrpc=;
-        b=eGWusnj+tpB0WGBvjsgC6cTgUSsrka3esYeyGabWTqvGEdk6Mkn1cLjFILrwxEtq1n
-         VWqG7jFbBhyIsyg5RjJT7oYFETEi1UCFvP8jAQ1rvgosdWd3QaZNid7Q4prQGK0BqHn4
-         +Tojnr270OCD5UyelUT5DCWZTUCyxxEIxmHry/zIqQVnEOyY5UhSExjnReUW18HRQ2RH
-         QLVArgs3YMspfYiMTQjPKY8VT/b3v20RVhtEBo4udW76OfpqEc4E0pt5hUoHmr0zXjdL
-         /DFdEvDHFwUtjTyOUFnZK5bAzkrFx2ejmGal5Spu0kIV/qXTvOCQ0cQQJSV6A3vOy+ur
-         Pn4g==
-X-Gm-Message-State: AOAM533PMDkpcrWXTM9Iyt4H5em6BuxdacfZpY8kpeq6qfgurBKxKy+K
-        YD/K8xykMd3adFFZySDc6UKRpU4GWzBZDicPvPSH5g==
-X-Google-Smtp-Source: ABdhPJwkwNV4rISj+UH7j2rCs0ZZC2RzQF+RxkG2Q4oc4buD17InzEKJpaRYTpbP38qZFRwCTAMNg/Ni/18erN3K+dw=
-X-Received: by 2002:a05:6512:301:b0:471:ecd0:ea24 with SMTP id
- t1-20020a056512030100b00471ecd0ea24mr13515183lfp.71.1651660670573; Wed, 04
- May 2022 03:37:50 -0700 (PDT)
+        bh=hXrHNwJC3BAV97iHU4og2HGxITVvzbeFV0KAKwYw/nI=;
+        b=l5ch++MO4KqK9wBs8Lv7HTeHNuki4oO2Gh9GWtsRqc/PD7EjJjwtXk8EV8UvOZUKSe
+         UeDj8koRtnP67YaCpZcr3j0Q+RixWb/HE4xDRItrTWPOVrwilUIxNXfFEtc0NETPyzFS
+         2X77+3J1IphXm9Rcp0KXS9/d9E9LmBcMyQqo+c2d0BFZLBWJ0sPjZL/g6AaoUSun33D4
+         yuoAs0M34MuTsglonM36oXzmp64cV7Q86B9z/DJ8jLJsdX5KhdNE6/nY5c0dGdO0sqPV
+         Cgl8M2O1FqXWwS5kbBkoEIzhbivs/5Pq4hsl+pF6rsRyThsKGhdx5caFA3IABHx0nZeV
+         tS/A==
+X-Gm-Message-State: AOAM531fq1CXD8GSRfrctV1cITtefBJn7KCHVQVCiI9miOzKD+dZ6pLp
+        HYkKAatR/wnC7mIyq+ljapLXMFipAQS7hsvm9jY69fVSqns=
+X-Google-Smtp-Source: ABdhPJyvrZpc1dvJUHpgzPqhSF7EzFjSFbIrL2BjM/E8E9i49RX6cCpueU1FHEwqnwkLycU6waf9TfwywbIR9IY7q7k=
+X-Received: by 2002:a05:6512:5cb:b0:472:f7e:a5f5 with SMTP id
+ o11-20020a05651205cb00b004720f7ea5f5mr13185193lfo.358.1651660675327; Wed, 04
+ May 2022 03:37:55 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220424231751.32053-1-samuel@sholland.org>
-In-Reply-To: <20220424231751.32053-1-samuel@sholland.org>
+References: <20220425105339.3515368-1-chi.minghao@zte.com.cn>
+In-Reply-To: <20220425105339.3515368-1-chi.minghao@zte.com.cn>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 May 2022 12:37:14 +0200
-Message-ID: <CAPDyKFp8JRkMJxPP8g_83o4hqxu8FUARaT8fU0zPR7Yn26cYsQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sunxi-mmc: Fix DMA descriptors allocated above 32 bits
-To:     Samuel Holland <samuel@sholland.org>
-Cc:     linux-mmc@vger.kernel.org, Andre Przywara <andre.przywara@arm.com>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Maxime Ripard <maxime@cerno.tech>,
-        Yangtao Li <frank@allwinnertech.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-sunxi@lists.linux.dev
+Date:   Wed, 4 May 2022 12:37:18 +0200
+Message-ID: <CAPDyKFporsmucBfHWN4vuBTmGNFKM028K6AWZu9k2rAb2cfZRw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: use kobj_to_dev()
+To:     cgel.zte@gmail.com
+Cc:     axboe@kernel.dk, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Minghao Chi <chi.minghao@zte.com.cn>,
+        Zeal Robot <zealci@zte.com.cn>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 25 Apr 2022 at 01:17, Samuel Holland <samuel@sholland.org> wrote:
+On Mon, 25 Apr 2022 at 12:53, <cgel.zte@gmail.com> wrote:
 >
-> Newer variants of the MMC controller support a 34-bit physical address
-> space by using word addresses instead of byte addresses. However, the
-> code truncates the DMA descriptor address to 32 bits before applying the
-> shift. This breaks DMA for descriptors allocated above the 32-bit limit.
+> From: Minghao Chi <chi.minghao@zte.com.cn>
 >
-> Fixes: 3536b82e5853 ("mmc: sunxi: add support for A100 mmc controller")
-> Signed-off-by: Samuel Holland <samuel@sholland.org>
+> Use kobj_to_dev() instead of open-coding it.
+>
+> Reported-by: Zeal Robot <zealci@zte.com.cn>
+> Signed-off-by: Minghao Chi <chi.minghao@zte.com.cn>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
+>  drivers/mmc/core/block.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
->  drivers/mmc/host/sunxi-mmc.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index b35e7a95798b..983151b7296d 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -330,7 +330,7 @@ static struct attribute *mmc_disk_attrs[] = {
+>  static umode_t mmc_disk_attrs_is_visible(struct kobject *kobj,
+>                 struct attribute *a, int n)
+>  {
+> -       struct device *dev = container_of(kobj, struct device, kobj);
+> +       struct device *dev = kobj_to_dev(kobj);
+>         struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
+>         umode_t mode = a->mode;
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index c62afd212692..46f9e2923d86 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -377,8 +377,9 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
->                 pdes[i].buf_addr_ptr1 =
->                         cpu_to_le32(sg_dma_address(&data->sg[i]) >>
->                                     host->cfg->idma_des_shift);
-> -               pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc >>
-> -                                                   host->cfg->idma_des_shift);
-> +               pdes[i].buf_addr_ptr2 =
-> +                       cpu_to_le32(next_desc >>
-> +                                   host->cfg->idma_des_shift);
->         }
->
->         pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
 > --
-> 2.35.1
+> 2.25.1
+>
 >
