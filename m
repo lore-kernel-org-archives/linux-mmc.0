@@ -2,33 +2,33 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F808C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3651C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:38:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230287AbiEDVhX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 17:37:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48622 "EHLO
+        id S1344190AbiEDVmZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 May 2022 17:42:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58594 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1378751AbiEDVhL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:37:11 -0400
+        with ESMTP id S234995AbiEDVmX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:42:23 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB936522CD;
-        Wed,  4 May 2022 14:33:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ABEEA1FCC7;
+        Wed,  4 May 2022 14:38:46 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: sre)
-        with ESMTPSA id 897471F44C69
+        with ESMTPSA id 5EB351F44BA3
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1651699979;
-        bh=IcImFggGEzn5gbEr7rqP/4HgGwGmbwDRuyiWG6oyZ1A=;
+        s=mail; t=1651700325;
+        bh=uyAo5zR8dw2G1PXvLBzX4kEvbmbHh0MqtTGpkAws0D4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=W7NO66XvbVt2GJXUFRRPYNA9x/3kZtc9zykxrYfghsSmvbAgFRZAe4hYixJZmnnih
-         gLDwRb7mqrrfxPljdhNHueO4C04LDGuFwTtuOxssScIxcy5UUoUMZMms1oH5Yi+zYo
-         TI2Q/rwBb0RNiopfrqlo82gDwlfHUtN1KA3NSdPzkI0athEIxBgLDHn3Qjf7POdUMW
-         NmbeJYtYX8e8Wu24lVPdg98cO5JavyubB0O3fPoLs7j5m/XaW153L8VSKF3D87V6bI
-         T5hDXJIufbCLKl4Hhzf4V9I4zYzETKwr/5E56NEkWhciySE2Qi+R5/KAOlUmLabHK+
-         FBuNce4z/WrGg==
+        b=inO3cIE1rPZA0GCZu1aeQjV6iYnIhJF7h5w1UFxljkHcfOzGjt/6e5AdBubBBgtIM
+         ajmxEAcAv39U4TWCq65xRt6fgS3edehSQWe4qaRsOdFO9zh1ashxBv8zRK6Pxuzgfv
+         SHFhC5xjcldM/blagI01VYnA/89Kb0LqmEcwP0UVYbWDN4egDfBHNJJlxle7E+B1lB
+         9sgE5lUg0g+9o+0F1H4raLBx+AptayB4wW/evyWF101Ccxlh6bEqEaSoMey2HTE++k
+         pQsYojZ7YVTxhxQEdIOpTsXGFuvbDOoeTcq93eoRIilIvm0AdFzUhDe9TAjknHu4pj
+         x65BHNCyOY8wQ==
 Received: by jupiter.universe (Postfix, from userid 1000)
-        id 461074819CF; Wed,  4 May 2022 23:32:53 +0200 (CEST)
+        id 598FE4819D7; Wed,  4 May 2022 23:32:53 +0200 (CEST)
 From:   Sebastian Reichel <sebastian.reichel@collabora.com>
 To:     Heiko Stuebner <heiko@sntech.de>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -46,9 +46,9 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
         Sebastian Reichel <sebastian.reichel@collabora.com>,
         kernel@collabora.com
-Subject: [PATCHv2 10/21] mmc: sdhci-of-dwcmshc: rename rk3568 to rk35xx
-Date:   Wed,  4 May 2022 23:32:40 +0200
-Message-Id: <20220504213251.264819-11-sebastian.reichel@collabora.com>
+Subject: [PATCHv2 18/21] dt-bindings: pinctrl: rockchip: increase max amount of device functions
+Date:   Wed,  4 May 2022 23:32:48 +0200
+Message-Id: <20220504213251.264819-19-sebastian.reichel@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220504213251.264819-1-sebastian.reichel@collabora.com>
 References: <20220504213251.264819-1-sebastian.reichel@collabora.com>
@@ -58,195 +58,29 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Prepare driver for rk3588 support by renaming the internal data
-structures.
+RK3588 can have 10 different device functions, so increase the maximum
+amount appropriately. Considering rockchip uses auto-generated pinmux
+files, adding a quite complex if construct to increase the limit just
+for rk3588 does not seem to be worth the effort.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 ---
- drivers/mmc/host/sdhci-of-dwcmshc.c | 46 ++++++++++++++---------------
- 1 file changed, 23 insertions(+), 23 deletions(-)
+ Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 3a1b5ba36405..f5fd88c7adef 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -56,14 +56,14 @@
- #define DLL_LOCK_WO_TMOUT(x) \
- 	((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
- 	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
--#define RK3568_MAX_CLKS 3
-+#define RK35xx_MAX_CLKS 3
- 
- #define BOUNDARY_OK(addr, len) \
- 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
- 
--struct rk3568_priv {
-+struct rk35xx_priv {
- 	/* Rockchip specified optional clocks */
--	struct clk_bulk_data rockchip_clks[RK3568_MAX_CLKS];
-+	struct clk_bulk_data rockchip_clks[RK35xx_MAX_CLKS];
- 	struct reset_control *reset;
- 	u8 txclk_tapnum;
- };
-@@ -178,7 +178,7 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
--	struct rk3568_priv *priv = dwc_priv->priv;
-+	struct rk35xx_priv *priv = dwc_priv->priv;
- 	u8 txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT;
- 	u32 extra, reg;
- 	int err;
-@@ -281,7 +281,7 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
- };
- 
--static const struct sdhci_ops sdhci_dwcmshc_rk3568_ops = {
-+static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
- 	.set_clock		= dwcmshc_rk3568_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
-@@ -296,18 +296,18 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- };
- 
--static const struct sdhci_pltfm_data sdhci_dwcmshc_rk3568_pdata = {
--	.ops = &sdhci_dwcmshc_rk3568_ops,
-+static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
-+	.ops = &sdhci_dwcmshc_rk35xx_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
- 		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
- 		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
--static int dwcmshc_rk3568_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
-+static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
- {
- 	int err;
--	struct rk3568_priv *priv = dwc_priv->priv;
-+	struct rk35xx_priv *priv = dwc_priv->priv;
- 
- 	priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
- 	if (IS_ERR(priv->reset)) {
-@@ -319,14 +319,14 @@ static int dwcmshc_rk3568_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
- 	priv->rockchip_clks[0].id = "axi";
- 	priv->rockchip_clks[1].id = "block";
- 	priv->rockchip_clks[2].id = "timer";
--	err = devm_clk_bulk_get_optional(mmc_dev(host->mmc), RK3568_MAX_CLKS,
-+	err = devm_clk_bulk_get_optional(mmc_dev(host->mmc), RK35xx_MAX_CLKS,
- 					 priv->rockchip_clks);
- 	if (err) {
- 		dev_err(mmc_dev(host->mmc), "failed to get clocks %d\n", err);
- 		return err;
- 	}
- 
--	err = clk_bulk_prepare_enable(RK3568_MAX_CLKS, priv->rockchip_clks);
-+	err = clk_bulk_prepare_enable(RK35xx_MAX_CLKS, priv->rockchip_clks);
- 	if (err) {
- 		dev_err(mmc_dev(host->mmc), "failed to enable clocks %d\n", err);
- 		return err;
-@@ -348,7 +348,7 @@ static int dwcmshc_rk3568_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
- static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
- 	{
- 		.compatible = "rockchip,rk3568-dwcmshc",
--		.data = &sdhci_dwcmshc_rk3568_pdata,
-+		.data = &sdhci_dwcmshc_rk35xx_pdata,
- 	},
- 	{
- 		.compatible = "snps,dwcmshc-sdhci",
-@@ -371,7 +371,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_host *host;
- 	struct dwcmshc_priv *priv;
--	struct rk3568_priv *rk_priv = NULL;
-+	struct rk35xx_priv *rk_priv = NULL;
- 	const struct sdhci_pltfm_data *pltfm_data;
- 	int err;
- 	u32 extra;
-@@ -426,8 +426,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 	host->mmc_host_ops.request = dwcmshc_request;
- 	host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
- 
--	if (pltfm_data == &sdhci_dwcmshc_rk3568_pdata) {
--		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk3568_priv), GFP_KERNEL);
-+	if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
-+		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
- 		if (!rk_priv) {
- 			err = -ENOMEM;
- 			goto err_clk;
-@@ -435,7 +435,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 
- 		priv->priv = rk_priv;
- 
--		err = dwcmshc_rk3568_init(host, priv);
-+		err = dwcmshc_rk35xx_init(host, priv);
- 		if (err)
- 			goto err_clk;
- 	}
-@@ -452,7 +452,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_disable_unprepare(priv->bus_clk);
- 	if (rk_priv)
--		clk_bulk_disable_unprepare(RK3568_MAX_CLKS,
-+		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
- 					   rk_priv->rockchip_clks);
- free_pltfm:
- 	sdhci_pltfm_free(pdev);
-@@ -464,14 +464,14 @@ static int dwcmshc_remove(struct platform_device *pdev)
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
--	struct rk3568_priv *rk_priv = priv->priv;
-+	struct rk35xx_priv *rk_priv = priv->priv;
- 
- 	sdhci_remove_host(host, 0);
- 
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_disable_unprepare(priv->bus_clk);
- 	if (rk_priv)
--		clk_bulk_disable_unprepare(RK3568_MAX_CLKS,
-+		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
- 					   rk_priv->rockchip_clks);
- 	sdhci_pltfm_free(pdev);
- 
-@@ -484,7 +484,7 @@ static int dwcmshc_suspend(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
--	struct rk3568_priv *rk_priv = priv->priv;
-+	struct rk35xx_priv *rk_priv = priv->priv;
- 	int ret;
- 
- 	ret = sdhci_suspend_host(host);
-@@ -496,7 +496,7 @@ static int dwcmshc_suspend(struct device *dev)
- 		clk_disable_unprepare(priv->bus_clk);
- 
- 	if (rk_priv)
--		clk_bulk_disable_unprepare(RK3568_MAX_CLKS,
-+		clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
- 					   rk_priv->rockchip_clks);
- 
- 	return ret;
-@@ -507,7 +507,7 @@ static int dwcmshc_resume(struct device *dev)
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
--	struct rk3568_priv *rk_priv = priv->priv;
-+	struct rk35xx_priv *rk_priv = priv->priv;
- 	int ret;
- 
- 	ret = clk_prepare_enable(pltfm_host->clk);
-@@ -521,7 +521,7 @@ static int dwcmshc_resume(struct device *dev)
- 	}
- 
- 	if (rk_priv) {
--		ret = clk_bulk_prepare_enable(RK3568_MAX_CLKS,
-+		ret = clk_bulk_prepare_enable(RK35xx_MAX_CLKS,
- 					      rk_priv->rockchip_clks);
- 		if (ret)
- 			return ret;
+diff --git a/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
+index e62fb5e9db76..68339082571f 100644
+--- a/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
++++ b/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
+@@ -130,7 +130,7 @@ additionalProperties:
+               description:
+                 Pin bank index.
+             - minimum: 0
+-              maximum: 6
++              maximum: 10
+               description:
+                 Mux 0 means GPIO and mux 1 to N means
+                 the specific device function.
 -- 
 2.35.1
 
