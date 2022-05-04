@@ -2,33 +2,33 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4526C43219
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F27CBC43217
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378741AbiEDVhK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S234641AbiEDVhK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 4 May 2022 17:37:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48160 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1378698AbiEDVgu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:36:50 -0400
+        with ESMTP id S1378650AbiEDVgm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:36:42 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8264051E59;
-        Wed,  4 May 2022 14:33:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1ED55131A;
+        Wed,  4 May 2022 14:33:02 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: sre)
-        with ESMTPSA id 3F2D81F44C76
+        with ESMTPSA id 695F81F44BE4
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
         s=mail; t=1651699980;
-        bh=n8ptnSaD35IA9Jtv6GAjdKZa0Tsgpb0PU5vYPYENXdI=;
+        bh=jvWlCqU5BM5uSfYkfGx9KIBVQnJo5rwQWZiOEIDmon8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=RvvlpIDKiTkna03c2xPjjRQyNQJvEqgMl2nkN0TNATt1GPeP7vRt9pXh4j19WDx8M
-         smQfRzl/FUINOQ+B8ceNMCu7EW/SqTVft59daQrzIy6fXEKM4i0mUzILU08K1bDvBc
-         BwtpDq8STBogEHpd91vyFCSfrxgIAk5TCQYaznm04GpjHBNuyGUACPNZ0tyvg5nIBv
-         QO4GQBmMpA/WYK7wRgPXT8zR6UBzD4ZPgl/uQ4Afi4Xo+ryZDCvnNGUZqCKWTmTDqW
-         hWsn8NedRUkqWFuDmDqHEwY6UMLIL2YXmWpNkk37fNc5oeCCwerZO6fgPsls3hh4Kc
-         PHgLm5qrhxCqQ==
+        b=MdPuIIeZWYeMSIgJd1Opz7ab7G2fZdI/z0515K9zE6Cxp51bWVmcTBn4XUY7wYzWb
+         Fa7/oLxckC7J1pW7p/Syb5ZEJPPel+FGbXjrLC9egcj1s862t/+EtItN/CYPo0IbQ9
+         ytXOM1Pa8fxrrb73gSTR26UGTPrQHUCjsf4m/q8/UPgWNZM+sZTZaGfi+NlBw7vIby
+         odk8yJ+RM1E/uOB/pJgYqtBPw32Se4gkONQ+Lhtp4BZVoVSLWVqo57oI+rFCOzM/CX
+         O8lHJp84UZX+LhJ7lW7PLKbQz7YhM/SbXHboqEfI8qH3Tz+POotft66+BgoxCgveAr
+         hocrE8MtVAMug==
 Received: by jupiter.universe (Postfix, from userid 1000)
-        id 52A6C4819D4; Wed,  4 May 2022 23:32:53 +0200 (CEST)
+        id 573344819D6; Wed,  4 May 2022 23:32:53 +0200 (CEST)
 From:   Sebastian Reichel <sebastian.reichel@collabora.com>
 To:     Heiko Stuebner <heiko@sntech.de>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -45,11 +45,10 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
         Sebastian Reichel <sebastian.reichel@collabora.com>,
-        kernel@collabora.com,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCHv2 15/21] dt-bindings: serial: snps-dw-apb-uart: Add Rockchip RK3588
-Date:   Wed,  4 May 2022 23:32:45 +0200
-Message-Id: <20220504213251.264819-16-sebastian.reichel@collabora.com>
+        kernel@collabora.com
+Subject: [PATCHv2 17/21] dt-bindings: gpio: rockchip: add gpio-ranges
+Date:   Wed,  4 May 2022 23:32:47 +0200
+Message-Id: <20220504213251.264819-18-sebastian.reichel@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220504213251.264819-1-sebastian.reichel@collabora.com>
 References: <20220504213251.264819-1-sebastian.reichel@collabora.com>
@@ -59,26 +58,28 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a Rockchip RK3588 compatible.
+Allow usage of gpio-ranges with the rockchip gpio controller. The driver
+already had support for this since it has been added to the mainline kernel
+in the first place.
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 ---
- Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml b/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml
-index 12137fe80acf..b5c819c5fa2c 100644
---- a/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml
-+++ b/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml
-@@ -33,6 +33,7 @@ properties:
-               - rockchip,rk3368-uart
-               - rockchip,rk3399-uart
-               - rockchip,rk3568-uart
-+              - rockchip,rk3588-uart
-               - rockchip,rv1108-uart
-           - const: snps,dw-apb-uart
-       - items:
+diff --git a/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml b/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
+index d4e42c2b995b..affd823c881d 100644
+--- a/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
++++ b/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
+@@ -27,6 +27,8 @@ properties:
+       - description: APB interface clock source
+       - description: GPIO debounce reference clock source
+ 
++  gpio-ranges: true
++
+   gpio-controller: true
+ 
+   gpio-line-names: true
 -- 
 2.35.1
 
