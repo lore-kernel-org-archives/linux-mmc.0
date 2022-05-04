@@ -2,33 +2,33 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8EBE2C4707E
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5794C3527D
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378775AbiEDVgx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 17:36:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48178 "EHLO
+        id S1378745AbiEDVgw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 May 2022 17:36:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1378633AbiEDVgl (ORCPT
+        with ESMTP id S1378683AbiEDVgl (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:36:41 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B58C522CB;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50A30522C4;
         Wed,  4 May 2022 14:33:01 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: sre)
-        with ESMTPSA id AFD3B1F44C7A
+        with ESMTPSA id 993091F44C6A
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
         s=mail; t=1651699979;
-        bh=xKsayHojt26SxtKzfAYPIuwAwQh6HxgpvHEntOE+k3g=;
+        bh=V89BHx68Wd/tHtnRBykO9dL/JFdCxXb+1blceCN4sMk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=nwdHthJZtsKS3w/gjC5n9qPe3S3gu/k4YwHYIMrSehkmiR0NDRmi0EK3T8srnMLD6
-         yKBcDMtoRzgdMRXaOdvVyz9p6J0EpCCqB6YgZ+lMH8PS+Uwno8KDtDvoBG5kZoovmF
-         2ibL/b92EsPu7Z8+N8e159D/pSzzGb5UA808vOYTZZHHw+waz3mXsgJcnDqxln+y4t
-         07DmCvGBPnsC18PxcEGsXKKYJxhQPnQdXp6iDPtTuNOtzVdkgRbQTT+ipW5vHqhJ29
-         bHPMOzci15N1a+dj8LfbU2S/EQHP2w14O4uYGvwv1lqSHYNHRdGZvNm3zgyAJ3me+V
-         HevB79HfQTynA==
+        b=dKWxtYQ1qIqqDNWo9GJ/pVID3HmKjW4piO2zBsdHa413AcNhEcsCKhVLLgQfA5UCV
+         YT0jTVOZ1hN4pUGEWO8CZXd/ysuzUh30/56I7QfTXY9Q8mfPuP1oPzII5gpr+z9AIN
+         AZWIpaGps4eyznoKUSWi/G0I6sGLipnL8lSBN4//+G5kfOWVCjfeDtu7qRjDjpxnL/
+         Gz9/on9whZiR/72+TSFaGwBede9i+n4g0xCu3FZyl3dWB2/G6ykOwX+JU9a43xJMXK
+         YLda58w70BB6K4OvPNXY7pNN0/k8kxdq+kCWXri/1WxLeA1AubcCT8vGMDVhkGGReN
+         YUy6IG3f9oNbA==
 Received: by jupiter.universe (Postfix, from userid 1000)
-        id 4DF6E4819D2; Wed,  4 May 2022 23:32:53 +0200 (CEST)
+        id 488164819D0; Wed,  4 May 2022 23:32:53 +0200 (CEST)
 From:   Sebastian Reichel <sebastian.reichel@collabora.com>
 To:     Heiko Stuebner <heiko@sntech.de>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -44,11 +44,11 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-arm-kernel@lists.infradead.org,
         linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Jianqun Xu <jay.xu@rock-chips.com>, kernel@collabora.com,
+        Yifeng Zhao <yifeng.zhao@rock-chips.com>, kernel@collabora.com,
         Sebastian Reichel <sebastian.reichel@collabora.com>
-Subject: [PATCHv2 13/21] pinctrl/rockchip: add rk3588 support
-Date:   Wed,  4 May 2022 23:32:43 +0200
-Message-Id: <20220504213251.264819-14-sebastian.reichel@collabora.com>
+Subject: [PATCHv2 11/21] mmc: sdhci-of-dwcmshc: add support for rk3588
+Date:   Wed,  4 May 2022 23:32:41 +0200
+Message-Id: <20220504213251.264819-12-sebastian.reichel@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220504213251.264819-1-sebastian.reichel@collabora.com>
 References: <20220504213251.264819-1-sebastian.reichel@collabora.com>
@@ -58,599 +58,253 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Jianqun Xu <jay.xu@rock-chips.com>
+From: Yifeng Zhao <yifeng.zhao@rock-chips.com>
 
-Add pinctrl support for RK3588.
+Add support for RK3588's DWCMSHC controller, which is used for
+providing the rootfs on the RK3588 evaluation board.
 
-Signed-off-by: Jianqun Xu <jay.xu@rock-chips.com>
-[merged in downstream fixes, simplified register lookup logic for better
-maintanence at the cost of a bit more static const memory and fixed some
-incorrect registers]
+Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
+[port from vendor BSP]
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 ---
- drivers/pinctrl/pinctrl-rockchip.c | 300 ++++++++++++++++++++++++++++-
- drivers/pinctrl/pinctrl-rockchip.h | 166 ++++++++++++++++
- 2 files changed, 465 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 121 +++++++++++++++++++++++-----
+ 1 file changed, 103 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/pinctrl/pinctrl-rockchip.c b/drivers/pinctrl/pinctrl-rockchip.c
-index 012cd2f0d85b..db2489a785d4 100644
---- a/drivers/pinctrl/pinctrl-rockchip.c
-+++ b/drivers/pinctrl/pinctrl-rockchip.c
-@@ -103,6 +103,25 @@
- 		},							\
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index f5fd88c7adef..4e904850973c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -31,6 +31,7 @@
+ /* Offset inside the  vendor area 1 */
+ #define DWCMSHC_HOST_CTRL3		0x8
+ #define DWCMSHC_EMMC_CONTROL		0x2c
++#define DWCMSHC_CARD_IS_EMMC		BIT(0)
+ #define DWCMSHC_ENHANCED_STROBE		BIT(8)
+ #define DWCMSHC_EMMC_ATCTRL		0x40
+ 
+@@ -39,7 +40,7 @@
+ #define DWCMSHC_EMMC_DLL_RXCLK		0x804
+ #define DWCMSHC_EMMC_DLL_TXCLK		0x808
+ #define DWCMSHC_EMMC_DLL_STRBIN		0x80c
+-#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
++#define DECMSHC_EMMC_DLL_CMDOUT		0x810
+ #define DWCMSHC_EMMC_DLL_STATUS0	0x840
+ #define DWCMSHC_EMMC_DLL_START		BIT(0)
+ #define DWCMSHC_EMMC_DLL_LOCKED		BIT(8)
+@@ -48,11 +49,21 @@
+ #define DWCMSHC_EMMC_DLL_START_POINT	16
+ #define DWCMSHC_EMMC_DLL_INC		8
+ #define DWCMSHC_EMMC_DLL_DLYENA		BIT(27)
+-#define DLL_TXCLK_TAPNUM_DEFAULT	0x8
+-#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
++#define DLL_TXCLK_TAPNUM_DEFAULT	0x10
++#define DLL_TXCLK_TAPNUM_90_DEGREES	0xA
+ #define DLL_TXCLK_TAPNUM_FROM_SW	BIT(24)
++#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
++#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
++#define DLL_STRBIN_DELAY_NUM_SEL	BIT(26)
++#define DLL_STRBIN_DELAY_NUM_OFFSET	16
++#define DLL_STRBIN_DELAY_NUM_DEFAULT	0x16
+ #define DLL_RXCLK_NO_INVERTER		1
+ #define DLL_RXCLK_INVERTER		0
++#define DLL_CMDOUT_TAPNUM_90_DEGREES	0x8
++#define DLL_CMDOUT_TAPNUM_FROM_SW	BIT(24)
++#define DLL_CMDOUT_SRC_CLK_NEG		BIT(28)
++#define DLL_CMDOUT_EN_SRC_CLK_NEG	BIT(29)
++
+ #define DLL_LOCK_WO_TMOUT(x) \
+ 	((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
+ 	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
+@@ -61,10 +72,16 @@
+ #define BOUNDARY_OK(addr, len) \
+ 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+ 
++enum dwcmshc_rk_type {
++	DWCMSHC_RK3568,
++	DWCMSHC_RK3588,
++};
++
+ struct rk35xx_priv {
+ 	/* Rockchip specified optional clocks */
+ 	struct clk_bulk_data rockchip_clks[RK35xx_MAX_CLKS];
+ 	struct reset_control *reset;
++	enum dwcmshc_rk_type devtype;
+ 	u8 txclk_tapnum;
+ };
+ 
+@@ -133,7 +150,9 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
+ 				      unsigned int timing)
+ {
+-	u16 ctrl_2;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	u16 ctrl, ctrl_2;
+ 
+ 	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 	/* Select Bus Speed Mode for host */
+@@ -151,8 +170,15 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
+ 	else if ((timing == MMC_TIMING_UHS_DDR50) ||
+ 		 (timing == MMC_TIMING_MMC_DDR52))
+ 		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+-	else if (timing == MMC_TIMING_MMC_HS400)
++	else if (timing == MMC_TIMING_MMC_HS400) {
++		/* set CARD_IS_EMMC bit to enable Data Strobe for HS400 */
++		ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
++		ctrl |= DWCMSHC_CARD_IS_EMMC;
++		sdhci_writew(host, ctrl, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
++
+ 		ctrl_2 |= DWCMSHC_CTRL_HS400;
++	}
++
+ 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+ }
+ 
+@@ -185,17 +211,11 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 
+ 	host->mmc->actual_clock = 0;
+ 
+-	/*
+-	 * DO NOT TOUCH THIS SETTING. RX clk inverter unit is enabled
+-	 * by default, but it shouldn't be enabled. We should anyway
+-	 * disable it before issuing any cmds.
+-	 */
+-	extra = DWCMSHC_EMMC_DLL_DLYENA |
+-		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
+-	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
+-
+-	if (clock == 0)
++	if (clock == 0) {
++		/* Disable interface clock at initial state. */
++		sdhci_set_clock(host, clock);
+ 		return;
++	}
+ 
+ 	/* Rockchip platform only support 375KHz for identify mode */
+ 	if (clock <= 400000)
+@@ -213,9 +233,21 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 	extra &= ~BIT(0);
+ 	sdhci_writel(host, extra, reg);
+ 
+-	if (clock <= 400000) {
+-		/* Disable DLL to reset sample clock */
++	if (clock <= 52000000) {
++		/* Disable DLL and reset both of sample and drive clock */
+ 		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_CTRL);
++		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_RXCLK);
++		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
++		sdhci_writel(host, 0, DECMSHC_EMMC_DLL_CMDOUT);
++		/*
++		 * Before switching to hs400es mode, the driver will enable
++		 * enhanced strobe first. PHY needs to configure the parameters
++		 * of enhanced strobe first.
++		 */
++		extra = DWCMSHC_EMMC_DLL_DLYENA |
++			DLL_STRBIN_DELAY_NUM_SEL |
++			DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
++		sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
+ 		return;
  	}
  
-+#define PIN_BANK_IOMUX_FLAGS_PULL_FLAGS(id, pins, label, iom0, iom1,	\
-+					iom2, iom3, pull0, pull1,	\
-+					pull2, pull3)			\
-+	{								\
-+		.bank_num	= id,					\
-+		.nr_pins	= pins,					\
-+		.name		= label,				\
-+		.iomux		= {					\
-+			{ .type = iom0, .offset = -1 },			\
-+			{ .type = iom1, .offset = -1 },			\
-+			{ .type = iom2, .offset = -1 },			\
-+			{ .type = iom3, .offset = -1 },			\
-+		},							\
-+		.pull_type[0] = pull0,					\
-+		.pull_type[1] = pull1,					\
-+		.pull_type[2] = pull2,					\
-+		.pull_type[3] = pull3,					\
+@@ -224,6 +256,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 	udelay(1);
+ 	sdhci_writel(host, 0x0, DWCMSHC_EMMC_DLL_CTRL);
+ 
++	/*
++	 * We shouldn't set DLL_RXCLK_NO_INVERTER for identify mode but
++	 * we must set it in higher speed mode.
++	 */
++	extra = DWCMSHC_EMMC_DLL_DLYENA;
++	if (priv->devtype == DWCMSHC_RK3568)
++		extra |= DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
++
+ 	/* Init DLL settings */
+ 	extra = 0x5 << DWCMSHC_EMMC_DLL_START_POINT |
+ 		0x2 << DWCMSHC_EMMC_DLL_INC |
+@@ -246,8 +287,20 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+ 	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
+ 		txclk_tapnum = priv->txclk_tapnum;
+ 
++	if ((priv->devtype == DWCMSHC_RK3588) && host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
++		txclk_tapnum = DLL_TXCLK_TAPNUM_90_DEGREES;
++
++		extra = DLL_CMDOUT_SRC_CLK_NEG |
++			DLL_CMDOUT_EN_SRC_CLK_NEG |
++			DWCMSHC_EMMC_DLL_DLYENA |
++			DLL_CMDOUT_TAPNUM_90_DEGREES |
++			DLL_CMDOUT_TAPNUM_FROM_SW;
++		sdhci_writel(host, extra, DECMSHC_EMMC_DLL_CMDOUT);
 +	}
 +
- #define PIN_BANK_DRV_FLAGS_PULL_FLAGS(id, pins, label, drv0, drv1,	\
- 				      drv2, drv3, pull0, pull1,		\
- 				      pull2, pull3)			\
-@@ -197,6 +216,9 @@
- #define RK_MUXROUTE_PMU(ID, PIN, FUNC, REG, VAL)	\
- 	PIN_BANK_MUX_ROUTE_FLAGS(ID, PIN, FUNC, REG, VAL, ROCKCHIP_ROUTE_PMU)
+ 	extra = DWCMSHC_EMMC_DLL_DLYENA |
+ 		DLL_TXCLK_TAPNUM_FROM_SW |
++		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL |
+ 		txclk_tapnum;
+ 	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_TXCLK);
  
-+#define RK3588_PIN_BANK_FLAGS(ID, PIN, LABEL, M, P)			\
-+	PIN_BANK_IOMUX_FLAGS_PULL_FLAGS(ID, PIN, LABEL, M, M, M, M, P, P, P, P)
-+
- static struct regmap_config rockchip_regmap_config = {
- 	.reg_bits = 32,
- 	.val_bits = 32,
-@@ -822,6 +844,7 @@ static bool rockchip_get_mux_route(struct rockchip_pin_bank *bank, int pin,
- static int rockchip_get_mux(struct rockchip_pin_bank *bank, int pin)
- {
- 	struct rockchip_pinctrl *info = bank->drvdata;
-+	struct rockchip_pin_ctrl *ctrl = info->ctrl;
- 	int iomux_num = (pin / 8);
- 	struct regmap *regmap;
- 	unsigned int val;
-@@ -863,6 +886,27 @@ static int rockchip_get_mux(struct rockchip_pin_bank *bank, int pin)
- 	if (bank->recalced_mask & BIT(pin))
- 		rockchip_get_recalced_mux(bank, pin, &reg, &bit, &mask);
- 
-+	if (ctrl->type == RK3588) {
-+		if (bank->bank_num == 0) {
-+			if ((pin >= RK_PB4) && (pin <= RK_PD7)) {
-+				u32 reg0 = 0;
-+
-+				reg0 = reg + 0x4000 - 0xC; /* PMU2_IOC_BASE */
-+				ret = regmap_read(regmap, reg0, &val);
-+				if (ret)
-+					return ret;
-+
-+				if (!(val & BIT(8)))
-+					return ((val >> bit) & mask);
-+
-+				reg = reg + 0x8000; /* BUS_IOC_BASE */
-+				regmap = info->regmap_base;
-+			}
-+		} else if (bank->bank_num > 0) {
-+			reg += 0x8000; /* BUS_IOC_BASE */
-+		}
-+	}
-+
- 	ret = regmap_read(regmap, reg, &val);
- 	if (ret)
- 		return ret;
-@@ -911,6 +955,7 @@ static int rockchip_verify_mux(struct rockchip_pin_bank *bank,
- static int rockchip_set_mux(struct rockchip_pin_bank *bank, int pin, int mux)
- {
- 	struct rockchip_pinctrl *info = bank->drvdata;
-+	struct rockchip_pin_ctrl *ctrl = info->ctrl;
- 	struct device *dev = info->dev;
- 	int iomux_num = (pin / 8);
- 	struct regmap *regmap;
-@@ -951,6 +996,46 @@ static int rockchip_set_mux(struct rockchip_pin_bank *bank, int pin, int mux)
- 	if (bank->recalced_mask & BIT(pin))
- 		rockchip_get_recalced_mux(bank, pin, &reg, &bit, &mask);
- 
-+	if (ctrl->type == RK3588) {
-+		if (bank->bank_num == 0) {
-+			if ((pin >= RK_PB4) && (pin <= RK_PD7)) {
-+				if (mux < 8) {
-+					reg += 0x4000 - 0xC; /* PMU2_IOC_BASE */
-+					data = (mask << (bit + 16));
-+					rmask = data | (data >> 16);
-+					data |= (mux & mask) << bit;
-+					ret = regmap_update_bits(regmap, reg, rmask, data);
-+				} else {
-+					u32 reg0 = 0;
-+
-+					reg0 = reg + 0x4000 - 0xC; /* PMU2_IOC_BASE */
-+					data = (mask << (bit + 16));
-+					rmask = data | (data >> 16);
-+					data |= 8 << bit;
-+					ret = regmap_update_bits(regmap, reg0, rmask, data);
-+
-+					reg0 = reg + 0x8000; /* BUS_IOC_BASE */
-+					data = (mask << (bit + 16));
-+					rmask = data | (data >> 16);
-+					data |= mux << bit;
-+					regmap = info->regmap_base;
-+					ret |= regmap_update_bits(regmap, reg0, rmask, data);
-+				}
-+			} else {
-+				data = (mask << (bit + 16));
-+				rmask = data | (data >> 16);
-+				data |= (mux & mask) << bit;
-+				ret = regmap_update_bits(regmap, reg, rmask, data);
-+			}
-+			return ret;
-+		} else if (bank->bank_num > 0) {
-+			reg += 0x8000; /* BUS_IOC_BASE */
-+		}
-+	}
-+
-+	if (mux > mask)
-+		return -EINVAL;
-+
- 	if (bank->route_mask & BIT(pin)) {
- 		if (rockchip_get_mux_route(bank, pin, mux, &route_location,
- 					   &route_reg, &route_val)) {
-@@ -1602,6 +1687,187 @@ static int rk3568_calc_drv_reg_and_bit(struct rockchip_pin_bank *bank,
+@@ -345,7 +398,25 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
  	return 0;
  }
  
-+#define RK3588_PMU1_IOC_REG		(0x0000)
-+#define RK3588_PMU2_IOC_REG		(0x4000)
-+#define RK3588_BUS_IOC_REG		(0x8000)
-+#define RK3588_VCCIO1_4_IOC_REG		(0x9000)
-+#define RK3588_VCCIO3_5_IOC_REG		(0xA000)
-+#define RK3588_VCCIO2_IOC_REG		(0xB000)
-+#define RK3588_VCCIO6_IOC_REG		(0xC000)
-+#define RK3588_EMMC_IOC_REG		(0xD000)
-+
-+static const u32 rk3588_ds_regs[][2] = {
-+	{RK_GPIO0_A0, RK3588_PMU1_IOC_REG + 0x0010},
-+	{RK_GPIO0_A4, RK3588_PMU1_IOC_REG + 0x0014},
-+	{RK_GPIO0_B0, RK3588_PMU1_IOC_REG + 0x0018},
-+	{RK_GPIO0_B4, RK3588_PMU2_IOC_REG + 0x0014},
-+	{RK_GPIO0_C0, RK3588_PMU2_IOC_REG + 0x0018},
-+	{RK_GPIO0_C4, RK3588_PMU2_IOC_REG + 0x001C},
-+	{RK_GPIO0_D0, RK3588_PMU2_IOC_REG + 0x0020},
-+	{RK_GPIO0_D4, RK3588_PMU2_IOC_REG + 0x0024},
-+	{RK_GPIO1_A0, RK3588_VCCIO1_4_IOC_REG + 0x0020},
-+	{RK_GPIO1_A4, RK3588_VCCIO1_4_IOC_REG + 0x0024},
-+	{RK_GPIO1_B0, RK3588_VCCIO1_4_IOC_REG + 0x0028},
-+	{RK_GPIO1_B4, RK3588_VCCIO1_4_IOC_REG + 0x002C},
-+	{RK_GPIO1_C0, RK3588_VCCIO1_4_IOC_REG + 0x0030},
-+	{RK_GPIO1_C4, RK3588_VCCIO1_4_IOC_REG + 0x0034},
-+	{RK_GPIO1_D0, RK3588_VCCIO1_4_IOC_REG + 0x0038},
-+	{RK_GPIO1_D4, RK3588_VCCIO1_4_IOC_REG + 0x003C},
-+	{RK_GPIO2_A0, RK3588_EMMC_IOC_REG + 0x0040},
-+	{RK_GPIO2_A4, RK3588_VCCIO3_5_IOC_REG + 0x0044},
-+	{RK_GPIO2_B0, RK3588_VCCIO3_5_IOC_REG + 0x0048},
-+	{RK_GPIO2_B4, RK3588_VCCIO3_5_IOC_REG + 0x004C},
-+	{RK_GPIO2_C0, RK3588_VCCIO3_5_IOC_REG + 0x0050},
-+	{RK_GPIO2_C4, RK3588_VCCIO3_5_IOC_REG + 0x0054},
-+	{RK_GPIO2_D0, RK3588_EMMC_IOC_REG + 0x0058},
-+	{RK_GPIO2_D4, RK3588_EMMC_IOC_REG + 0x005C},
-+	{RK_GPIO3_A0, RK3588_VCCIO3_5_IOC_REG + 0x0060},
-+	{RK_GPIO3_A4, RK3588_VCCIO3_5_IOC_REG + 0x0064},
-+	{RK_GPIO3_B0, RK3588_VCCIO3_5_IOC_REG + 0x0068},
-+	{RK_GPIO3_B4, RK3588_VCCIO3_5_IOC_REG + 0x006C},
-+	{RK_GPIO3_C0, RK3588_VCCIO3_5_IOC_REG + 0x0070},
-+	{RK_GPIO3_C4, RK3588_VCCIO3_5_IOC_REG + 0x0074},
-+	{RK_GPIO3_D0, RK3588_VCCIO3_5_IOC_REG + 0x0078},
-+	{RK_GPIO3_D4, RK3588_VCCIO3_5_IOC_REG + 0x007C},
-+	{RK_GPIO4_A0, RK3588_VCCIO6_IOC_REG + 0x0080},
-+	{RK_GPIO4_A4, RK3588_VCCIO6_IOC_REG + 0x0084},
-+	{RK_GPIO4_B0, RK3588_VCCIO6_IOC_REG + 0x0088},
-+	{RK_GPIO4_B4, RK3588_VCCIO6_IOC_REG + 0x008C},
-+	{RK_GPIO4_C0, RK3588_VCCIO6_IOC_REG + 0x0090},
-+	{RK_GPIO4_C2, RK3588_VCCIO3_5_IOC_REG + 0x0090},
-+	{RK_GPIO4_C4, RK3588_VCCIO3_5_IOC_REG + 0x0094},
-+	{RK_GPIO4_D0, RK3588_VCCIO2_IOC_REG + 0x0098},
-+	{RK_GPIO4_D4, RK3588_VCCIO2_IOC_REG + 0x009C},
-+};
-+
-+static const u32 rk3588_p_regs[][2] = {
-+	{RK_GPIO0_A0, RK3588_PMU1_IOC_REG + 0x0020},
-+	{RK_GPIO0_B0, RK3588_PMU1_IOC_REG + 0x0024},
-+	{RK_GPIO0_B5, RK3588_PMU2_IOC_REG + 0x0028},
-+	{RK_GPIO0_C0, RK3588_PMU2_IOC_REG + 0x002C},
-+	{RK_GPIO0_D0, RK3588_PMU2_IOC_REG + 0x0030},
-+	{RK_GPIO1_A0, RK3588_VCCIO1_4_IOC_REG + 0x0110},
-+	{RK_GPIO1_B0, RK3588_VCCIO1_4_IOC_REG + 0x0114},
-+	{RK_GPIO1_C0, RK3588_VCCIO1_4_IOC_REG + 0x0118},
-+	{RK_GPIO1_D0, RK3588_VCCIO1_4_IOC_REG + 0x011C},
-+	{RK_GPIO2_A0, RK3588_EMMC_IOC_REG + 0x0120},
-+	{RK_GPIO2_A6, RK3588_VCCIO3_5_IOC_REG + 0x0120},
-+	{RK_GPIO2_B0, RK3588_VCCIO3_5_IOC_REG + 0x0124},
-+	{RK_GPIO2_C0, RK3588_VCCIO3_5_IOC_REG + 0x0128},
-+	{RK_GPIO2_D0, RK3588_EMMC_IOC_REG + 0x012C},
-+	{RK_GPIO3_A0, RK3588_VCCIO3_5_IOC_REG + 0x0130},
-+	{RK_GPIO3_B0, RK3588_VCCIO3_5_IOC_REG + 0x0134},
-+	{RK_GPIO3_C0, RK3588_VCCIO3_5_IOC_REG + 0x0138},
-+	{RK_GPIO3_D0, RK3588_VCCIO3_5_IOC_REG + 0x013C},
-+	{RK_GPIO4_A0, RK3588_VCCIO6_IOC_REG + 0x0140},
-+	{RK_GPIO4_B0, RK3588_VCCIO6_IOC_REG + 0x0144},
-+	{RK_GPIO4_C0, RK3588_VCCIO6_IOC_REG + 0x0148},
-+	{RK_GPIO4_C2, RK3588_VCCIO3_5_IOC_REG + 0x0148},
-+	{RK_GPIO4_D0, RK3588_VCCIO2_IOC_REG + 0x014C},
-+};
-+
-+static const u32 rk3588_smt_regs[][2] = {
-+	{RK_GPIO0_A0, RK3588_PMU1_IOC_REG + 0x0030},
-+	{RK_GPIO0_B0, RK3588_PMU1_IOC_REG + 0x0034},
-+	{RK_GPIO0_B5, RK3588_PMU2_IOC_REG + 0x0040},
-+	{RK_GPIO0_C0, RK3588_PMU2_IOC_REG + 0x0044},
-+	{RK_GPIO0_D0, RK3588_PMU2_IOC_REG + 0x0048},
-+	{RK_GPIO1_A0, RK3588_VCCIO1_4_IOC_REG + 0x0210},
-+	{RK_GPIO1_B0, RK3588_VCCIO1_4_IOC_REG + 0x0214},
-+	{RK_GPIO1_C0, RK3588_VCCIO1_4_IOC_REG + 0x0218},
-+	{RK_GPIO1_D0, RK3588_VCCIO1_4_IOC_REG + 0x021C},
-+	{RK_GPIO2_A0, RK3588_EMMC_IOC_REG + 0x0220},
-+	{RK_GPIO2_A6, RK3588_VCCIO3_5_IOC_REG + 0x0220},
-+	{RK_GPIO2_B0, RK3588_VCCIO3_5_IOC_REG + 0x0224},
-+	{RK_GPIO2_C0, RK3588_VCCIO3_5_IOC_REG + 0x0228},
-+	{RK_GPIO2_D0, RK3588_EMMC_IOC_REG + 0x022C},
-+	{RK_GPIO3_A0, RK3588_VCCIO3_5_IOC_REG + 0x0230},
-+	{RK_GPIO3_B0, RK3588_VCCIO3_5_IOC_REG + 0x0234},
-+	{RK_GPIO3_C0, RK3588_VCCIO3_5_IOC_REG + 0x0238},
-+	{RK_GPIO3_D0, RK3588_VCCIO3_5_IOC_REG + 0x023C},
-+	{RK_GPIO4_A0, RK3588_VCCIO6_IOC_REG + 0x0240},
-+	{RK_GPIO4_B0, RK3588_VCCIO6_IOC_REG + 0x0244},
-+	{RK_GPIO4_C0, RK3588_VCCIO6_IOC_REG + 0x0248},
-+	{RK_GPIO4_C2, RK3588_VCCIO3_5_IOC_REG + 0x0248},
-+	{RK_GPIO4_D0, RK3588_VCCIO2_IOC_REG + 0x024C},
-+};
-+
-+#define RK3588_PULL_BITS_PER_PIN		2
-+#define RK3588_PULL_PINS_PER_REG		8
-+
-+static int rk3588_calc_pull_reg_and_bit(struct rockchip_pin_bank *bank,
-+					int pin_num, struct regmap **regmap,
-+					int *reg, u8 *bit)
++static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
 +{
-+	struct rockchip_pinctrl *info = bank->drvdata;
-+	u8 bank_num = bank->bank_num;
-+	u32 pin = bank_num * 32 + pin_num;
-+	int i;
-+
-+	for (i = ARRAY_SIZE(rk3588_p_regs) - 1; i >= 0; i--) {
-+		if (pin >= rk3588_p_regs[i][0]) {
-+			*reg = rk3588_p_regs[i][1];
-+			*regmap = info->regmap_base;
-+			*bit = pin_num % RK3588_PULL_PINS_PER_REG;
-+			*bit *= RK3588_PULL_BITS_PER_PIN;
-+			return 0;
-+		}
++	/*
++	 * Don't support highspeed bus mode with low clk speed as we
++	 * cannot use DLL for this condition.
++	 */
++	if (host->mmc->f_max <= 52000000) {
++		dev_info(mmc_dev(host->mmc), "Disabling HS200/HS400, frequency too low (%d)\n",
++			 host->mmc->f_max);
++		host->mmc->caps2 &= ~(MMC_CAP2_HS200 | MMC_CAP2_HS400);
++		host->mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR);
 +	}
-+
-+	return -EINVAL;
 +}
 +
-+#define RK3588_DRV_BITS_PER_PIN		4
-+#define RK3588_DRV_PINS_PER_REG		4
-+
-+static int rk3588_calc_drv_reg_and_bit(struct rockchip_pin_bank *bank,
-+				       int pin_num, struct regmap **regmap,
-+				       int *reg, u8 *bit)
-+{
-+	struct rockchip_pinctrl *info = bank->drvdata;
-+	u8 bank_num = bank->bank_num;
-+	u32 pin = bank_num * 32 + pin_num;
-+	int i;
-+
-+	for (i = ARRAY_SIZE(rk3588_ds_regs) - 1; i >= 0; i--) {
-+		if (pin >= rk3588_ds_regs[i][0]) {
-+			*reg = rk3588_ds_regs[i][1];
-+			*regmap = info->regmap_base;
-+			*bit = pin_num % RK3588_DRV_PINS_PER_REG;
-+			*bit *= RK3588_DRV_BITS_PER_PIN;
-+			return 0;
-+		}
-+	}
-+
-+	return -EINVAL;
-+}
-+
-+#define RK3588_SMT_BITS_PER_PIN		1
-+#define RK3588_SMT_PINS_PER_REG		8
-+
-+static int rk3588_calc_schmitt_reg_and_bit(struct rockchip_pin_bank *bank,
-+					   int pin_num,
-+					   struct regmap **regmap,
-+					   int *reg, u8 *bit)
-+{
-+	struct rockchip_pinctrl *info = bank->drvdata;
-+	u8 bank_num = bank->bank_num;
-+	u32 pin = bank_num * 32 + pin_num;
-+	int i;
-+
-+	for (i = ARRAY_SIZE(rk3588_smt_regs) - 1; i >= 0; i--) {
-+		if (pin >= rk3588_smt_regs[i][0]) {
-+			*reg = rk3588_smt_regs[i][1];
-+			*regmap = info->regmap_base;
-+			*bit = pin_num % RK3588_SMT_PINS_PER_REG;
-+			*bit *= RK3588_SMT_BITS_PER_PIN;
-+			return 0;
-+		}
-+	}
-+
-+	return -EINVAL;
-+}
-+
- static int rockchip_perpin_drv_list[DRV_TYPE_MAX][8] = {
- 	{ 2, 4, 8, 12, -1, -1, -1, -1 },
- 	{ 3, 6, 9, 12, -1, -1, -1, -1 },
-@@ -1707,7 +1973,11 @@ static int rockchip_set_drive_perpin(struct rockchip_pin_bank *bank,
- 	ret = ctrl->drv_calc_reg(bank, pin_num, &regmap, &reg, &bit);
- 	if (ret)
- 		return ret;
--	if (ctrl->type == RK3568) {
-+	if (ctrl->type == RK3588) {
-+		rmask_bits = RK3588_DRV_BITS_PER_PIN;
-+		ret = strength;
-+		goto config;
-+	} else if (ctrl->type == RK3568) {
- 		rmask_bits = RK3568_DRV_BITS_PER_PIN;
- 		ret = (1 << (strength + 1)) - 1;
- 		goto config;
-@@ -1840,6 +2110,7 @@ static int rockchip_get_pull(struct rockchip_pin_bank *bank, int pin_num)
- 	case RK3308:
- 	case RK3368:
- 	case RK3399:
-+	case RK3588:
- 		pull_type = bank->pull_type[pin_num / 8];
- 		data >>= bit;
- 		data &= (1 << RK3188_PULL_BITS_PER_PIN) - 1;
-@@ -1888,6 +2159,7 @@ static int rockchip_set_pull(struct rockchip_pin_bank *bank,
- 	case RK3368:
- 	case RK3399:
- 	case RK3568:
-+	case RK3588:
- 		pull_type = bank->pull_type[pin_num / 8];
- 		ret = -EINVAL;
- 		for (i = 0; i < ARRAY_SIZE(rockchip_pull_list[pull_type]);
-@@ -2135,6 +2407,7 @@ static bool rockchip_pinconf_pull_valid(struct rockchip_pin_ctrl *ctrl,
- 	case RK3368:
- 	case RK3399:
- 	case RK3568:
-+	case RK3588:
- 		return (pull != PIN_CONFIG_BIAS_PULL_PIN_DEFAULT);
- 	}
+ static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
++	{
++		.compatible = "rockchip,rk3588-dwcmshc",
++		.data = &sdhci_dwcmshc_rk35xx_pdata,
++	},
+ 	{
+ 		.compatible = "rockchip,rk3568-dwcmshc",
+ 		.data = &sdhci_dwcmshc_rk35xx_pdata,
+@@ -433,6 +504,11 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 			goto err_clk;
+ 		}
  
-@@ -3238,6 +3511,29 @@ static struct rockchip_pin_ctrl rk3568_pin_ctrl = {
- 	.schmitt_calc_reg	= rk3568_calc_schmitt_reg_and_bit,
- };
++		if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
++			rk_priv->devtype = DWCMSHC_RK3588;
++		else
++			rk_priv->devtype = DWCMSHC_RK3568;
++
+ 		priv->priv = rk_priv;
  
-+static struct rockchip_pin_bank rk3588_pin_banks[] = {
-+	RK3588_PIN_BANK_FLAGS(0, 32, "gpio0",
-+			      IOMUX_WIDTH_4BIT, PULL_TYPE_IO_1V8_ONLY),
-+	RK3588_PIN_BANK_FLAGS(1, 32, "gpio1",
-+			      IOMUX_WIDTH_4BIT, PULL_TYPE_IO_1V8_ONLY),
-+	RK3588_PIN_BANK_FLAGS(2, 32, "gpio2",
-+			      IOMUX_WIDTH_4BIT, PULL_TYPE_IO_1V8_ONLY),
-+	RK3588_PIN_BANK_FLAGS(3, 32, "gpio3",
-+			      IOMUX_WIDTH_4BIT, PULL_TYPE_IO_1V8_ONLY),
-+	RK3588_PIN_BANK_FLAGS(4, 32, "gpio4",
-+			      IOMUX_WIDTH_4BIT, PULL_TYPE_IO_1V8_ONLY),
-+};
-+
-+static struct rockchip_pin_ctrl rk3588_pin_ctrl = {
-+	.pin_banks		= rk3588_pin_banks,
-+	.nr_banks		= ARRAY_SIZE(rk3588_pin_banks),
-+	.label			= "RK3588-GPIO",
-+	.type			= RK3588,
-+	.pull_calc_reg		= rk3588_calc_pull_reg_and_bit,
-+	.drv_calc_reg		= rk3588_calc_drv_reg_and_bit,
-+	.schmitt_calc_reg	= rk3588_calc_schmitt_reg_and_bit,
-+};
-+
- static const struct of_device_id rockchip_pinctrl_dt_match[] = {
- 	{ .compatible = "rockchip,px30-pinctrl",
- 		.data = &px30_pin_ctrl },
-@@ -3269,6 +3565,8 @@ static const struct of_device_id rockchip_pinctrl_dt_match[] = {
- 		.data = &rk3399_pin_ctrl },
- 	{ .compatible = "rockchip,rk3568-pinctrl",
- 		.data = &rk3568_pin_ctrl },
-+	{ .compatible = "rockchip,rk3588-pinctrl",
-+		.data = &rk3588_pin_ctrl },
- 	{},
- };
+ 		err = dwcmshc_rk35xx_init(host, priv);
+@@ -442,12 +518,21 @@ static int dwcmshc_probe(struct platform_device *pdev)
  
-diff --git a/drivers/pinctrl/pinctrl-rockchip.h b/drivers/pinctrl/pinctrl-rockchip.h
-index 4992a048acbc..3505b5c5f0e5 100644
---- a/drivers/pinctrl/pinctrl-rockchip.h
-+++ b/drivers/pinctrl/pinctrl-rockchip.h
-@@ -18,6 +18,171 @@
- #ifndef _PINCTRL_ROCKCHIP_H
- #define _PINCTRL_ROCKCHIP_H
+ 	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
  
-+#define RK_GPIO0_A0	0
-+#define RK_GPIO0_A1	1
-+#define RK_GPIO0_A2	2
-+#define RK_GPIO0_A3	3
-+#define RK_GPIO0_A4	4
-+#define RK_GPIO0_A5	5
-+#define RK_GPIO0_A6	6
-+#define RK_GPIO0_A7	7
-+#define RK_GPIO0_B0	8
-+#define RK_GPIO0_B1	9
-+#define RK_GPIO0_B2	10
-+#define RK_GPIO0_B3	11
-+#define RK_GPIO0_B4	12
-+#define RK_GPIO0_B5	13
-+#define RK_GPIO0_B6	14
-+#define RK_GPIO0_B7	15
-+#define RK_GPIO0_C0	16
-+#define RK_GPIO0_C1	17
-+#define RK_GPIO0_C2	18
-+#define RK_GPIO0_C3	19
-+#define RK_GPIO0_C4	20
-+#define RK_GPIO0_C5	21
-+#define RK_GPIO0_C6	22
-+#define RK_GPIO0_C7	23
-+#define RK_GPIO0_D0	24
-+#define RK_GPIO0_D1	25
-+#define RK_GPIO0_D2	26
-+#define RK_GPIO0_D3	27
-+#define RK_GPIO0_D4	28
-+#define RK_GPIO0_D5	29
-+#define RK_GPIO0_D6	30
-+#define RK_GPIO0_D7	31
-+
-+#define RK_GPIO1_A0	32
-+#define RK_GPIO1_A1	33
-+#define RK_GPIO1_A2	34
-+#define RK_GPIO1_A3	35
-+#define RK_GPIO1_A4	36
-+#define RK_GPIO1_A5	37
-+#define RK_GPIO1_A6	38
-+#define RK_GPIO1_A7	39
-+#define RK_GPIO1_B0	40
-+#define RK_GPIO1_B1	41
-+#define RK_GPIO1_B2	42
-+#define RK_GPIO1_B3	43
-+#define RK_GPIO1_B4	44
-+#define RK_GPIO1_B5	45
-+#define RK_GPIO1_B6	46
-+#define RK_GPIO1_B7	47
-+#define RK_GPIO1_C0	48
-+#define RK_GPIO1_C1	49
-+#define RK_GPIO1_C2	50
-+#define RK_GPIO1_C3	51
-+#define RK_GPIO1_C4	52
-+#define RK_GPIO1_C5	53
-+#define RK_GPIO1_C6	54
-+#define RK_GPIO1_C7	55
-+#define RK_GPIO1_D0	56
-+#define RK_GPIO1_D1	57
-+#define RK_GPIO1_D2	58
-+#define RK_GPIO1_D3	59
-+#define RK_GPIO1_D4	60
-+#define RK_GPIO1_D5	61
-+#define RK_GPIO1_D6	62
-+#define RK_GPIO1_D7	63
-+
-+#define RK_GPIO2_A0	64
-+#define RK_GPIO2_A1	65
-+#define RK_GPIO2_A2	66
-+#define RK_GPIO2_A3	67
-+#define RK_GPIO2_A4	68
-+#define RK_GPIO2_A5	69
-+#define RK_GPIO2_A6	70
-+#define RK_GPIO2_A7	71
-+#define RK_GPIO2_B0	72
-+#define RK_GPIO2_B1	73
-+#define RK_GPIO2_B2	74
-+#define RK_GPIO2_B3	75
-+#define RK_GPIO2_B4	76
-+#define RK_GPIO2_B5	77
-+#define RK_GPIO2_B6	78
-+#define RK_GPIO2_B7	79
-+#define RK_GPIO2_C0	80
-+#define RK_GPIO2_C1	81
-+#define RK_GPIO2_C2	82
-+#define RK_GPIO2_C3	83
-+#define RK_GPIO2_C4	84
-+#define RK_GPIO2_C5	85
-+#define RK_GPIO2_C6	86
-+#define RK_GPIO2_C7	87
-+#define RK_GPIO2_D0	88
-+#define RK_GPIO2_D1	89
-+#define RK_GPIO2_D2	90
-+#define RK_GPIO2_D3	91
-+#define RK_GPIO2_D4	92
-+#define RK_GPIO2_D5	93
-+#define RK_GPIO2_D6	94
-+#define RK_GPIO2_D7	95
-+
-+#define RK_GPIO3_A0	96
-+#define RK_GPIO3_A1	97
-+#define RK_GPIO3_A2	98
-+#define RK_GPIO3_A3	99
-+#define RK_GPIO3_A4	100
-+#define RK_GPIO3_A5	101
-+#define RK_GPIO3_A6	102
-+#define RK_GPIO3_A7	103
-+#define RK_GPIO3_B0	104
-+#define RK_GPIO3_B1	105
-+#define RK_GPIO3_B2	106
-+#define RK_GPIO3_B3	107
-+#define RK_GPIO3_B4	108
-+#define RK_GPIO3_B5	109
-+#define RK_GPIO3_B6	110
-+#define RK_GPIO3_B7	111
-+#define RK_GPIO3_C0	112
-+#define RK_GPIO3_C1	113
-+#define RK_GPIO3_C2	114
-+#define RK_GPIO3_C3	115
-+#define RK_GPIO3_C4	116
-+#define RK_GPIO3_C5	117
-+#define RK_GPIO3_C6	118
-+#define RK_GPIO3_C7	119
-+#define RK_GPIO3_D0	120
-+#define RK_GPIO3_D1	121
-+#define RK_GPIO3_D2	122
-+#define RK_GPIO3_D3	123
-+#define RK_GPIO3_D4	124
-+#define RK_GPIO3_D5	125
-+#define RK_GPIO3_D6	126
-+#define RK_GPIO3_D7	127
-+
-+#define RK_GPIO4_A0	128
-+#define RK_GPIO4_A1	129
-+#define RK_GPIO4_A2	130
-+#define RK_GPIO4_A3	131
-+#define RK_GPIO4_A4	132
-+#define RK_GPIO4_A5	133
-+#define RK_GPIO4_A6	134
-+#define RK_GPIO4_A7	135
-+#define RK_GPIO4_B0	136
-+#define RK_GPIO4_B1	137
-+#define RK_GPIO4_B2	138
-+#define RK_GPIO4_B3	139
-+#define RK_GPIO4_B4	140
-+#define RK_GPIO4_B5	141
-+#define RK_GPIO4_B6	142
-+#define RK_GPIO4_B7	143
-+#define RK_GPIO4_C0	144
-+#define RK_GPIO4_C1	145
-+#define RK_GPIO4_C2	146
-+#define RK_GPIO4_C3	147
-+#define RK_GPIO4_C4	148
-+#define RK_GPIO4_C5	149
-+#define RK_GPIO4_C6	150
-+#define RK_GPIO4_C7	151
-+#define RK_GPIO4_D0	152
-+#define RK_GPIO4_D1	153
-+#define RK_GPIO4_D2	154
-+#define RK_GPIO4_D3	155
-+#define RK_GPIO4_D4	156
-+#define RK_GPIO4_D5	157
-+#define RK_GPIO4_D6	158
-+#define RK_GPIO4_D7	159
-+
- enum rockchip_pinctrl_type {
- 	PX30,
- 	RV1108,
-@@ -30,6 +195,7 @@ enum rockchip_pinctrl_type {
- 	RK3368,
- 	RK3399,
- 	RK3568,
-+	RK3588,
- };
+-	err = sdhci_add_host(host);
++	err = sdhci_setup_host(host);
+ 	if (err)
+ 		goto err_clk;
  
- /**
++	if (rk_priv)
++		dwcmshc_rk35xx_postinit(host, priv);
++
++	err = __sdhci_add_host(host);
++	if (err)
++		goto err_setup_host;
++
+ 	return 0;
+ 
++err_setup_host:
++	sdhci_cleanup_host(host);
+ err_clk:
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_disable_unprepare(priv->bus_clk);
 -- 
 2.35.1
 
