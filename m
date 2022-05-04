@@ -2,136 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61FF2C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 May 2022 18:18:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43327C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 02:21:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241178AbiECSWP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 May 2022 14:22:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40146 "EHLO
+        id S229579AbiEDCZX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 May 2022 22:25:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235428AbiECSWO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2022 14:22:14 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1CAD3EF00
-        for <linux-mmc@vger.kernel.org>; Tue,  3 May 2022 11:18:41 -0700 (PDT)
-Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=bjornoya.blackshift.org)
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <mkl@pengutronix.de>)
-        id 1nlx5e-0000ix-89; Tue, 03 May 2022 20:17:38 +0200
-Received: from pengutronix.de (unknown [86.103.140.108])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (Client did not present a certificate)
-        (Authenticated sender: mkl-all@blackshift.org)
-        by smtp.blackshift.org (Postfix) with ESMTPSA id 0B74E75107;
-        Tue,  3 May 2022 18:17:23 +0000 (UTC)
-Date:   Tue, 3 May 2022 20:17:23 +0200
-From:   Marc Kleine-Budde <mkl@pengutronix.de>
-To:     Rob Herring <robh@kernel.org>
-Cc:     devicetree@vger.kernel.org,
-        Krzysztof Kozlowski <krzk+dt@kernel.org>,
-        Abel Vesa <abel.vesa@nxp.com>, Stephen Boyd <sboyd@kernel.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Wolfgang Grandegger <wg@grandegger.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Niklas =?utf-8?Q?S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
-        Anson Huang <Anson.Huang@nxp.com>,
-        Fabrice Gasnier <fabrice.gasnier@foss.st.com>,
-        Han Xu <han.xu@nxp.com>, Dario Binacchi <dariobin@libero.it>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Peter Ujfalusi <peter.ujfalusi@ti.com>,
-        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
-        netdev@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-pm@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Drop redundant 'maxItems/minItems' in
- if/then schemas
-Message-ID: <20220503181723.wczerdgfrfoxj5xf@pengutronix.de>
-References: <20220503162738.3827041-1-robh@kernel.org>
+        with ESMTP id S1343873AbiEDCZW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2022 22:25:22 -0400
+X-Greylist: delayed 1056 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 03 May 2022 19:21:47 PDT
+Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [179.61.137.95])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFC3922BDD
+        for <linux-mmc@vger.kernel.org>; Tue,  3 May 2022 19:21:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
+        Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
+        Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
+        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
+        List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
+        List-Archive; bh=P/bTJBLTNLSb6vAoDO2PFF7/0isSOZjyXAy+ojya76I=; b=iAsEtmiQr3tr
+        nAovM3woxF1CfEFfpT3ndWx1GG42SJdhdYBOuhXxJ/K6qAa1Dmc4DEofSQ5Z6iEShF/vLz7ne0UwZ
+        8RLkEjQMjYpQ1xut68NROmnET1E4VzXhu2ofiiRlIRNDXUnj0Cw5vuk9KAvf8WF+Ckhl9bIKFXJMW
+        EFZw8=;
+Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
+        (envelope-from <no-reply@musicianspage.com>)
+        id 1nm4Mz-0006CD-Pt
+        for linux-mmc@vger.kernel.org; Tue, 03 May 2022 19:04:01 -0700
+To:     linux-mmc@vger.kernel.org
+Subject: Your confirmation is needed.
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="vn735wunl5rhhwdp"
-Content-Disposition: inline
-In-Reply-To: <20220503162738.3827041-1-robh@kernel.org>
-X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
-X-SA-Exim-Mail-From: mkl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+From:   Musicians Page <mailingconfirm@musicianspage.com>
+Reply-To: Musicians Page <mailingconfirm@musicianspage.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <E1nm4Mz-0006CD-Pt@list.virtualsheetmusic.com>
+Date:   Tue, 03 May 2022 19:04:01 -0700
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Dear &eth;=9F=92=9B Karen Just Viewed Your Profile! Click Here: Http://inx=
+=2Elv/guaw?yu6o &eth;=9F=92=9B,
 
---vn735wunl5rhhwdp
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+thank you for your interest in subscribing
+to the Musicians Page Newsletter.
+It will keep you informed about the latest
+information about music events, site updates
+and news from the music industry.
 
-On 03.05.2022 11:27:38, Rob Herring wrote:
-> Another round of removing redundant minItems/maxItems when 'items' list is
-> specified. This time it is in if/then schemas as the meta-schema was
-> failing to check this case.
->=20
-> If a property has an 'items' list, then a 'minItems' or 'maxItems' with t=
-he
-> same size as the list is redundant and can be dropped. Note that is DT
-> schema specific behavior and not standard json-schema behavior. The tooli=
-ng
-> will fixup the final schema adding any unspecified minItems/maxItems.
+Your subscription is NOT complete until we
+receive your confirmation. To do so, just click
+the link below which will confirm your registration:
 
->  .../bindings/net/can/bosch,c_can.yaml         |  3 ---
+https://www.musicianspage.com/cj.php?email=3Dlinux-mmc@vger.kernel.org
 
-For net/can:
 
-Acked-by: Marc Kleine-Budde <mkl@pengutronix.de>
+Remember that our staff is always available to answer your questions
+or help with any problems. For assistance, just send a message to:
+mailto:support@musicianspage.com.
 
-regards,
-Marc
+We always strive to help you in your musical pursuits.
 
---=20
-Pengutronix e.K.                 | Marc Kleine-Budde           |
-Embedded Linux                   | https://www.pengutronix.de  |
-Vertretung West/Dortmund         | Phone: +49-231-2826-924     |
-Amtsgericht Hildesheim, HRA 2686 | Fax:   +49-5121-206917-5555 |
+If you did not request, or do not wish to subscribe to the Musicians
+Newsletter, please accept our apology and ignore this message.
 
---vn735wunl5rhhwdp
-Content-Type: application/pgp-signature; name="signature.asc"
+Thank you very much for your attention.
 
------BEGIN PGP SIGNATURE-----
+My kindest regards,
 
-iQEzBAABCgAdFiEEBsvAIBsPu6mG7thcrX5LkNig010FAmJxcbAACgkQrX5LkNig
-010+7wf+Mqx1TWITM4zoyD5krckfHGf4qplQOx8GgcvjVUhJVQ0mDXx9PgM7D2fF
-HjL7mYlg2zj+lrwhgLeH/YNvoCAKzXmbKRVFjs2HfzIEe3xaC1xFXt+vXRU4v1mE
-DXW0vVKC/oYmGqIWCSda8MeqjOhR+hFoQLC1RefyFIHijbaa/4+8W9Qe+oayuzIo
-aDASB5q9KGJUVxeh15402et6p4EqI6rJ8LiKW79xwtgfqRlqBGDQ1LBuBYf0LKFE
-Whl4mJRw2P0razAapZrvNWK6osSzN2ERLC7qQ9dnUOJvHYffN5IFcO8X3GbdpEkX
-SPDiKbA08vY8R9xmqlH4PzUcrR46zg==
-=MWdl
------END PGP SIGNATURE-----
+Fabrizio Ferrari
 
---vn735wunl5rhhwdp--
+supervisor
+Musicians Page
+https://www.musicianspage.com
+
+
+
