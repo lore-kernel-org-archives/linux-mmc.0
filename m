@@ -2,420 +2,672 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5E17C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 20:46:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D301AC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:01:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350146AbiEDUuZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 16:50:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38440 "EHLO
+        id S1378488AbiEDVEm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 May 2022 17:04:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51744 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235092AbiEDUuZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 16:50:25 -0400
-Received: from mail-oa1-f43.google.com (mail-oa1-f43.google.com [209.85.160.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02F194CD65;
-        Wed,  4 May 2022 13:46:48 -0700 (PDT)
-Received: by mail-oa1-f43.google.com with SMTP id 586e51a60fabf-ed8a3962f8so2416129fac.4;
-        Wed, 04 May 2022 13:46:47 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=IBFXUmwSo25T6nWQSnBjsyeMxmAhywOnBgo2cTH20ac=;
-        b=jh/kcx6GNxg5MdmzsrEGWbkM3884BmS/eE9/ixC51amDZlpxqZ0kMeUEz9xriUVEih
-         tDhesejz/95jap2tJLW7mwRnPC1Bc1xV+XffsiMd3cQCJvED0P8uUdUtbsphAkdkRvTz
-         iX8bVd0C5HIQwNcUo6y1RcjLzEdbHXI7JYjAYc6o8dMGw0QYTgSSb+pw313/GxBdiwsT
-         in46GsUkJJ9+N/67CptMnvmN2j73Os9i1tvGVeUQIA6sZiWSS+HBpJEg3l4dwmtqK1RY
-         XzPw2dJgYS97BM1ZugLWBn86Snh3qWy/n1RBXao7U/KR5zAy6C+GXYVX9IFsQeVHxV+6
-         +c7w==
-X-Gm-Message-State: AOAM533QJtI9i65Ph1mzdIF+vNWybR2HJRGB6kit98ue1cJ8yJY9hXQs
-        Zi1s8jlhsBFT4tOKd1UJg7Rx8CRgpg==
-X-Google-Smtp-Source: ABdhPJxgE+I+fKTqdPbcsZqByTLzcAyn4sksXoNnhbzWZBy++6joimK6/YKeAeYia59LtaGroyWCcQ==
-X-Received: by 2002:a05:6870:2491:b0:e9:e30:cf80 with SMTP id s17-20020a056870249100b000e90e30cf80mr682152oaq.44.1651697205875;
-        Wed, 04 May 2022 13:46:45 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id k8-20020a056870d38800b000e2b873f013sm8376365oag.0.2022.05.04.13.46.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 May 2022 13:46:45 -0700 (PDT)
-Received: (nullmailer pid 2198322 invoked by uid 1000);
-        Wed, 04 May 2022 20:46:44 -0000
-Date:   Wed, 4 May 2022 15:46:44 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, bhupesh.linux@gmail.com,
-        agross@kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        bjorn.andersson@linaro.org, ulf.hansson@linaro.org
-Subject: Re: [PATCH 1/4] dt-bindings: mmc/sdhci-msm: Convert bindings to yaml
-Message-ID: <YnLmNCwNfoqZln12@robh.at.kernel.org>
-References: <20220429220833.873672-1-bhupesh.sharma@linaro.org>
- <20220429220833.873672-2-bhupesh.sharma@linaro.org>
+        with ESMTP id S1378480AbiEDVEk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:04:40 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA9C0517F3;
+        Wed,  4 May 2022 14:01:01 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 5B667B8293F;
+        Wed,  4 May 2022 21:01:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01857C385A5;
+        Wed,  4 May 2022 21:00:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651698059;
+        bh=JSBiItZ/YX8dqyG7iRP/7GSNfeFVLR6ezjzwa9M7kBU=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=tMbqSZcB59NTNPhv4Zqu3SeoAtAy+I9vcXzWOBZdHK23BxvMW/xCtTgi5RgeTbKnA
+         CQ8o/fi8jNzBTjoZOwDOqp9Ipi33ChB2hKWh9NKc6M0a1M3+u5xmImKgs7cGqtK6Kr
+         RYvoUngGY6Vx8HVeWo4SJCXybyiX16SJcR5sr/zfde4a7hjtZUUaReBy+vGTE/dvx5
+         V1tu8FofLX7Zyt+w86nAfyhYahMgSdjg1xiTgan0gilbIUUSqjuwYuL9mMYgR9Zczw
+         KSIytdnwnTXomWTT7u6MQrAT+YapRFy9EL+OBchlZQj5iNGBZgtSgryZvtZeo1H1uO
+         CHB2u4KIjjTxQ==
+Date:   Wed, 4 May 2022 22:09:09 +0100
+From:   Jonathan Cameron <jic23@kernel.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     devicetree@vger.kernel.org,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Abel Vesa <abel.vesa@nxp.com>, Stephen Boyd <sboyd@kernel.org>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Niklas =?UTF-8?B?U8O2ZGVybHVuZA==?= 
+        <niklas.soderlund@ragnatech.se>, Anson Huang <Anson.Huang@nxp.com>,
+        Fabrice Gasnier <fabrice.gasnier@foss.st.com>,
+        Han Xu <han.xu@nxp.com>, Dario Binacchi <dariobin@libero.it>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Peter Ujfalusi <peter.ujfalusi@ti.com>,
+        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-can@vger.kernel.org,
+        netdev@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-pm@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Drop redundant 'maxItems/minItems' in
+ if/then schemas
+Message-ID: <20220504220909.253d5efa@jic23-huawei>
+In-Reply-To: <20220503162738.3827041-1-robh@kernel.org>
+References: <20220503162738.3827041-1-robh@kernel.org>
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.33; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220429220833.873672-2-bhupesh.sharma@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Apr 30, 2022 at 03:38:30AM +0530, Bhupesh Sharma wrote:
-> Convert Qualcomm sdhci-msm devicetree binding to YAML.
-> 
+On Tue,  3 May 2022 11:27:38 -0500
+Rob Herring <robh@kernel.org> wrote:
+
+> Another round of removing redundant minItems/maxItems when 'items' list is
+> specified. This time it is in if/then schemas as the meta-schema was
+> failing to check this case.
+>=20
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with t=
+he
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooli=
+ng
+> will fixup the final schema adding any unspecified minItems/maxItems.
+
+Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com> #for IIO
+>=20
+> Cc: Abel Vesa <abel.vesa@nxp.com>
+> Cc: Stephen Boyd <sboyd@kernel.org>
+> Cc: Krzysztof Kozlowski <krzk+dt@kernel.org>
+> Cc: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+> Cc: Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>
+> Cc: Jonathan Cameron <jic23@kernel.org>
+> Cc: Lars-Peter Clausen <lars@metafoo.de>
 > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-> Cc: Rob Herring <robh@kernel.org>
-> Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
+> Cc: Thierry Reding <thierry.reding@gmail.com>
+> Cc: Jonathan Hunter <jonathanh@nvidia.com>
+> Cc: Miquel Raynal <miquel.raynal@bootlin.com>
+> Cc: Richard Weinberger <richard@nod.at>
+> Cc: Vignesh Raghavendra <vigneshr@ti.com>
+> Cc: Wolfgang Grandegger <wg@grandegger.com>
+> Cc: Marc Kleine-Budde <mkl@pengutronix.de>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Jakub Kicinski <kuba@kernel.org>
+> Cc: Paolo Abeni <pabeni@redhat.com>
+> Cc: Kishon Vijay Abraham I <kishon@ti.com>
+> Cc: Vinod Koul <vkoul@kernel.org>
+> Cc: Alessandro Zummo <a.zummo@towertech.it>
+> Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>
+> Cc: Chen-Yu Tsai <wens@csie.org>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Mark Brown <broonie@kernel.org>
+> Cc: "Rafael J. Wysocki" <rafael@kernel.org>
+> Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
+> Cc: Zhang Rui <rui.zhang@intel.com>
+> Cc: "Niklas S=C3=B6derlund" <niklas.soderlund@ragnatech.se>
+> Cc: Anson Huang <Anson.Huang@nxp.com>
+> Cc: Fabrice Gasnier <fabrice.gasnier@foss.st.com>
+> Cc: Han Xu <han.xu@nxp.com>
+> Cc: Dario Binacchi <dariobin@libero.it>
+> Cc: Florian Fainelli <f.fainelli@gmail.com>
+> Cc: Maxime Ripard <mripard@kernel.org>
+> Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> Cc: linux-clk@vger.kernel.org
+> Cc: dri-devel@lists.freedesktop.org
+> Cc: linux-iio@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-mtd@lists.infradead.org
+> Cc: linux-can@vger.kernel.org
+> Cc: netdev@vger.kernel.org
+> Cc: linux-phy@lists.infradead.org
+> Cc: linux-rtc@vger.kernel.org
+> Cc: linux-serial@vger.kernel.org
+> Cc: alsa-devel@alsa-project.org
+> Cc: linux-pm@vger.kernel.org
+> Signed-off-by: Rob Herring <robh@kernel.org>
 > ---
->  .../devicetree/bindings/mmc/sdhci-msm.txt     | 123 -----------
->  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 192 ++++++++++++++++++
->  2 files changed, 192 insertions(+), 123 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> deleted file mode 100644
-> index 6216ed777343..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ /dev/null
-> @@ -1,123 +0,0 @@
-> -* Qualcomm SDHCI controller (sdhci-msm)
-> -
-> -This file documents differences between the core properties in mmc.txt
-> -and the properties used by the sdhci-msm driver.
-> -
-> -Required properties:
-> -- compatible: Should contain a SoC-specific string and a IP version string:
-> -	version strings:
-> -		"qcom,sdhci-msm-v4" for sdcc versions less than 5.0
-> -		"qcom,sdhci-msm-v5" for sdcc version 5.0
-> -		For SDCC version 5.0.0, MCI registers are removed from SDCC
-> -		interface and some registers are moved to HC. New compatible
-> -		string is added to support this change - "qcom,sdhci-msm-v5".
-> -	full compatible strings with SoC and version:
-> -		"qcom,apq8084-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8226-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8953-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8974-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8994-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
-> -		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
-> -		"qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-> -		"qcom,sc7280-sdhci", "qcom,sdhci-msm-v5";
-> -		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
-> -		"qcom,sdx55-sdhci", "qcom,sdhci-msm-v5";
-> -		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
-> -	NOTE that some old device tree files may be floating around that only
-> -	have the string "qcom,sdhci-msm-v4" without the SoC compatible string
-> -	but doing that should be considered a deprecated practice.
-> -
-> -- reg: Base address and length of the register in the following order:
-> -	- Host controller register map (required)
-> -	- SD Core register map (required for controllers earlier than msm-v5)
-> -	- CQE register map (Optional, CQE support is present on SDHC instance meant
-> -	                    for eMMC and version v4.2 and above)
-> -	- Inline Crypto Engine register map (optional)
-> -- reg-names: When CQE register map is supplied, below reg-names are required
-> -	- "hc" for Host controller register map
-> -	- "core" for SD core register map
-> -	- "cqhci" for CQE register map
-> -	- "ice" for Inline Crypto Engine register map (optional)
-> -- interrupts: Should contain an interrupt-specifiers for the interrupts:
-> -	- Host controller interrupt (required)
-> -- pinctrl-names: Should contain only one value - "default".
-> -- pinctrl-0: Should specify pin control groups used for this controller.
-> -- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
-> -- clock-names: Should contain the following:
-> -	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
-> -	"core"	- SDC MMC clock (MCLK) (required)
-> -	"bus"	- SDCC bus voter clock (optional)
-> -	"xo"	- TCXO clock (optional)
-> -	"cal"	- reference clock for RCLK delay calibration (optional)
-> -	"sleep"	- sleep clock for RCLK delay calibration (optional)
-> -	"ice" - clock for Inline Crypto Engine (optional)
-> -
-> -- qcom,ddr-config: Certain chipsets and platforms require particular settings
-> -	for the DDR_CONFIG register. Use this field to specify the register
-> -	value as per the Hardware Programming Guide.
-> -
-> -- qcom,dll-config: Chipset and Platform specific value. Use this field to
-> -	specify the DLL_CONFIG register value as per Hardware Programming Guide.
-> -
-> -Optional Properties:
-> -* Following bus parameters are required for interconnect bandwidth scaling:
-> -- interconnects: Pairs of phandles and interconnect provider specifier
-> -		 to denote the edge source and destination ports of
-> -		 the interconnect path.
-> -
-> -- interconnect-names: For sdhc, we have two main paths.
-> -		1. Data path : sdhc to ddr
-> -		2. Config path : cpu to sdhc
-> -		For Data interconnect path the name supposed to be
-> -		is "sdhc-ddr" and for config interconnect path it is
-> -		"cpu-sdhc".
-> -		Please refer to Documentation/devicetree/bindings/
-> -		interconnect/ for more details.
-> -
-> -Example:
-> -
-> -	sdhc_1: sdhci@f9824900 {
-> -		compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
-> -		reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
-> -		interrupts = <0 123 0>;
-> -		bus-width = <8>;
-> -		non-removable;
-> -
-> -		vmmc-supply = <&pm8941_l20>;
-> -		vqmmc-supply = <&pm8941_s3>;
-> -
-> -		pinctrl-names = "default";
-> -		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
-> -
-> -		clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
-> -		clock-names = "core", "iface";
-> -		interconnects = <&qnoc MASTER_SDCC_ID &qnoc SLAVE_DDR_ID>,
-> -				<&qnoc MASTER_CPU_ID &qnoc SLAVE_SDCC_ID>;
-> -		interconnect-names = "sdhc-ddr","cpu-sdhc";
-> -
-> -		qcom,dll-config = <0x000f642c>;
-> -		qcom,ddr-config = <0x80040868>;
-> -	};
-> -
-> -	sdhc_2: sdhci@f98a4900 {
-> -		compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
-> -		reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
-> -		interrupts = <0 125 0>;
-> -		bus-width = <4>;
-> -		cd-gpios = <&msmgpio 62 0x1>;
-> -
-> -		vmmc-supply = <&pm8941_l21>;
-> -		vqmmc-supply = <&pm8941_l13>;
-> -
-> -		pinctrl-names = "default";
-> -		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
-> -
-> -		clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
-> -		clock-names = "core", "iface";
-> -
-> -		qcom,dll-config = <0x0007642c>;
-> -		qcom,ddr-config = <0x80040868>;
-> -	};
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> new file mode 100644
-> index 000000000000..c33f173e3b6c
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -0,0 +1,192 @@
-> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+>  .../bindings/clock/imx8m-clock.yaml           |  4 ----
+>  .../bindings/display/bridge/renesas,lvds.yaml |  4 ----
+>  .../bindings/display/renesas,du.yaml          | 23 -------------------
+>  .../bindings/iio/adc/st,stm32-adc.yaml        |  2 --
+>  .../bindings/mmc/nvidia,tegra20-sdhci.yaml    |  7 +-----
+>  .../devicetree/bindings/mtd/gpmi-nand.yaml    |  2 --
+>  .../bindings/net/can/bosch,c_can.yaml         |  3 ---
+>  .../bindings/phy/brcm,sata-phy.yaml           | 10 ++++----
+>  .../bindings/rtc/allwinner,sun6i-a31-rtc.yaml | 10 --------
+>  .../bindings/serial/samsung_uart.yaml         |  4 ----
+>  .../sound/allwinner,sun4i-a10-i2s.yaml        |  1 -
+>  .../bindings/sound/ti,j721e-cpb-audio.yaml    |  2 --
+>  .../bindings/thermal/rcar-gen3-thermal.yaml   |  1 -
+>  13 files changed, 5 insertions(+), 68 deletions(-)
+>=20
+> diff --git a/Documentation/devicetree/bindings/clock/imx8m-clock.yaml b/D=
+ocumentation/devicetree/bindings/clock/imx8m-clock.yaml
+> index 625f573a7b90..458c7645ee68 100644
+> --- a/Documentation/devicetree/bindings/clock/imx8m-clock.yaml
+> +++ b/Documentation/devicetree/bindings/clock/imx8m-clock.yaml
+> @@ -55,8 +55,6 @@ allOf:
+>      then:
+>        properties:
+>          clocks:
+> -          minItems: 7
+> -          maxItems: 7
+>            items:
+>              - description: 32k osc
+>              - description: 25m osc
+> @@ -66,8 +64,6 @@ allOf:
+>              - description: ext3 clock input
+>              - description: ext4 clock input
+>          clock-names:
+> -          minItems: 7
+> -          maxItems: 7
+>            items:
+>              - const: ckil
+>              - const: osc_25m
+> diff --git a/Documentation/devicetree/bindings/display/bridge/renesas,lvd=
+s.yaml b/Documentation/devicetree/bindings/display/bridge/renesas,lvds.yaml
+> index a51baf8a4c76..bb9dbfb9beaf 100644
+> --- a/Documentation/devicetree/bindings/display/bridge/renesas,lvds.yaml
+> +++ b/Documentation/devicetree/bindings/display/bridge/renesas,lvds.yaml
+> @@ -95,7 +95,6 @@ then:
+>    properties:
+>      clocks:
+>        minItems: 1
+> -      maxItems: 4
+>        items:
+>          - description: Functional clock
+>          - description: EXTAL input clock
+> @@ -104,7 +103,6 @@ then:
+> =20
+>      clock-names:
+>        minItems: 1
+> -      maxItems: 4
+>        items:
+>          - const: fck
+>          # The LVDS encoder can use the EXTAL or DU_DOTCLKINx clocks.
+> @@ -128,12 +126,10 @@ then:
+>  else:
+>    properties:
+>      clocks:
+> -      maxItems: 1
+>        items:
+>          - description: Functional clock
+> =20
+>      clock-names:
+> -      maxItems: 1
+>        items:
+>          - const: fck
+> =20
+> diff --git a/Documentation/devicetree/bindings/display/renesas,du.yaml b/=
+Documentation/devicetree/bindings/display/renesas,du.yaml
+> index 56cedcd6d576..b3e588022082 100644
+> --- a/Documentation/devicetree/bindings/display/renesas,du.yaml
+> +++ b/Documentation/devicetree/bindings/display/renesas,du.yaml
+> @@ -109,7 +109,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 1
+> -          maxItems: 3
+>            items:
+>              - description: Functional clock
+>              - description: DU_DOTCLKIN0 input clock
+> @@ -117,7 +116,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 1
+> -          maxItems: 3
+>            items:
+>              - const: du.0
+>              - pattern: '^dclkin\.[01]$'
+> @@ -159,7 +157,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -168,7 +165,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -216,7 +212,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -225,7 +220,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -271,7 +265,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -280,7 +273,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -327,7 +319,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -336,7 +327,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -386,7 +376,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 3
+> -          maxItems: 6
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -397,7 +386,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 3
+> -          maxItems: 6
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -448,7 +436,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 4
+> -          maxItems: 8
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -461,7 +448,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 4
+> -          maxItems: 8
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -525,7 +511,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 3
+> -          maxItems: 6
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -536,7 +521,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 3
+> -          maxItems: 6
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -596,7 +580,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 3
+> -          maxItems: 6
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -607,7 +590,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 3
+> -          maxItems: 6
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -666,14 +648,12 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 1
+> -          maxItems: 2
+>            items:
+>              - description: Functional clock for DU0
+>              - description: DU_DOTCLKIN0 input clock
+> =20
+>          clock-names:
+>            minItems: 1
+> -          maxItems: 2
+>            items:
+>              - const: du.0
+>              - const: dclkin.0
+> @@ -723,7 +703,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - description: Functional clock for DU0
+>              - description: Functional clock for DU1
+> @@ -732,7 +711,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 2
+> -          maxItems: 4
+>            items:
+>              - const: du.0
+>              - const: du.1
+> @@ -791,7 +769,6 @@ allOf:
+>              - description: Functional clock
+> =20
+>          clock-names:
+> -          maxItems: 1
+>            items:
+>              - const: du.0
+> =20
+> diff --git a/Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml =
+b/Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml
+> index 4d6074518b5c..fa8da42cb1e6 100644
+> --- a/Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml
+> +++ b/Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml
+> @@ -138,7 +138,6 @@ allOf:
+>              - const: bus
+>              - const: adc
+>            minItems: 1
+> -          maxItems: 2
+> =20
+>          interrupts:
+>            items:
+> @@ -170,7 +169,6 @@ allOf:
+>              - const: bus
+>              - const: adc
+>            minItems: 1
+> -          maxItems: 2
+> =20
+>          interrupts:
+>            items:
+> diff --git a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.y=
+aml b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.yaml
+> index f3f4d5b02744..fe0270207622 100644
+> --- a/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/nvidia,tegra20-sdhci.yaml
+> @@ -202,22 +202,17 @@ allOf:
+>          clocks:
+>            items:
+>              - description: module clock
+> -          minItems: 1
+> -          maxItems: 1
+>      else:
+>        properties:
+>          clocks:
+>            items:
+>              - description: module clock
+>              - description: timeout clock
+> -          minItems: 2
+> -          maxItems: 2
 > +
-> +%YAML 1.2
-> +---
-> +$id: "http://devicetree.org/schemas/mmc/sdhci-msm.yaml#"
-> +$schema: "http://devicetree.org/meta-schemas/core.yaml#"
+>          clock-names:
+>            items:
+>              - const: sdhci
+>              - const: tmclk
+> -          minItems: 2
+> -          maxItems: 2
+>        required:
+>          - clock-names
+> =20
+> diff --git a/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml b/Docum=
+entation/devicetree/bindings/mtd/gpmi-nand.yaml
+> index 9d764e654e1d..849aeae319a9 100644
+> --- a/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml
+> +++ b/Documentation/devicetree/bindings/mtd/gpmi-nand.yaml
+> @@ -147,8 +147,6 @@ allOf:
+>              - description: SoC gpmi io clock
+>              - description: SoC gpmi bch apb clock
+>          clock-names:
+> -          minItems: 2
+> -          maxItems: 2
+>            items:
+>              - const: gpmi_io
+>              - const: gpmi_bch_apb
+> diff --git a/Documentation/devicetree/bindings/net/can/bosch,c_can.yaml b=
+/Documentation/devicetree/bindings/net/can/bosch,c_can.yaml
+> index 8bad328b184d..51aa89ac7e85 100644
+> --- a/Documentation/devicetree/bindings/net/can/bosch,c_can.yaml
+> +++ b/Documentation/devicetree/bindings/net/can/bosch,c_can.yaml
+> @@ -80,8 +80,6 @@ if:
+>  then:
+>    properties:
+>      interrupts:
+> -      minItems: 4
+> -      maxItems: 4
+>        items:
+>          - description: Error and status IRQ
+>          - description: Message object IRQ
+> @@ -91,7 +89,6 @@ then:
+>  else:
+>    properties:
+>      interrupts:
+> -      maxItems: 1
+>        items:
+>          - description: Error and status IRQ
+> =20
+> diff --git a/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml b/D=
+ocumentation/devicetree/bindings/phy/brcm,sata-phy.yaml
+> index cb1aa325336f..435b971dfd9b 100644
+> --- a/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml
+> +++ b/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml
+> @@ -102,19 +102,17 @@ if:
+>  then:
+>    properties:
+>      reg:
+> -      maxItems: 2
+> +      minItems: 2
 > +
-> +title: Qualcomm SDHCI controller (sdhci-msm)
+>      reg-names:
+> -      items:
+> -        - const: "phy"
+> -        - const: "phy-ctrl"
+> +      minItems: 2
+>  else:
+>    properties:
+>      reg:
+>        maxItems: 1
 > +
-> +maintainers:
-> +  - Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> +
-> +description:
-> +  Secure Digital Host Controller Interface (SDHCI) present on
-> +  Qualcomm SOCs supports SD/MMC/SDIO devices.
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - items:
-> +          - enum:
-> +              - qcom,apq8084-sdhci
-> +              - qcom,msm8226-sdhci
-> +              - qcom,msm8953-sdhci
-> +              - qcom,msm8974-sdhci
-> +              - qcom,msm8916-sdhci
-> +              - qcom,msm8992-sdhci
-> +              - qcom,msm8994-sdhci
-> +              - qcom,msm8996-sdhci
-> +              - qcom,qcs404-sdhci
-> +              - qcom,sc7180-sdhci
-> +              - qcom,sc7280-sdhci
-> +              - qcom,sdm630-sdhci
-> +              - qcom,sdm845-sdhci
-> +              - qcom,sdx55-sdhci
-> +              - qcom,sm6125-sdhci
-> +              - qcom,sm6350-sdhci
-> +              - qcom,sm8250-sdhci
-> +          - enum:
-> +              - qcom,sdhci-msm-v4 # for sdcc versions less than 5.0
-> +              - qcom,sdhci-msm-v5 # for sdcc version 5.0
+>      reg-names:
+>        maxItems: 1
+> -      items:
+> -        - const: "phy"
+> =20
+>  required:
+>    - compatible
+> diff --git a/Documentation/devicetree/bindings/rtc/allwinner,sun6i-a31-rt=
+c.yaml b/Documentation/devicetree/bindings/rtc/allwinner,sun6i-a31-rtc.yaml
+> index 0b767fec39d8..6b38bd7eb3b4 100644
+> --- a/Documentation/devicetree/bindings/rtc/allwinner,sun6i-a31-rtc.yaml
+> +++ b/Documentation/devicetree/bindings/rtc/allwinner,sun6i-a31-rtc.yaml
+> @@ -71,7 +71,6 @@ allOf:
+>      then:
+>        properties:
+>          clock-output-names:
+> -          minItems: 1
+>            maxItems: 1
+> =20
+>    - if:
+> @@ -102,7 +101,6 @@ allOf:
+>        properties:
+>          clock-output-names:
+>            minItems: 3
+> -          maxItems: 3
+> =20
+>    - if:
+>        properties:
+> @@ -113,16 +111,12 @@ allOf:
+>      then:
+>        properties:
+>          clocks:
+> -          minItems: 3
+> -          maxItems: 3
+>            items:
+>              - description: Bus clock for register access
+>              - description: 24 MHz oscillator
+>              - description: 32 kHz clock from the CCU
+> =20
+>          clock-names:
+> -          minItems: 3
+> -          maxItems: 3
+>            items:
+>              - const: bus
+>              - const: hosc
+> @@ -142,7 +136,6 @@ allOf:
+>        properties:
+>          clocks:
+>            minItems: 3
+> -          maxItems: 4
+>            items:
+>              - description: Bus clock for register access
+>              - description: 24 MHz oscillator
+> @@ -151,7 +144,6 @@ allOf:
+> =20
+>          clock-names:
+>            minItems: 3
+> -          maxItems: 4
+>            items:
+>              - const: bus
+>              - const: hosc
+> @@ -174,14 +166,12 @@ allOf:
+>      then:
+>        properties:
+>          interrupts:
+> -          minItems: 1
+>            maxItems: 1
+> =20
+>      else:
+>        properties:
+>          interrupts:
+>            minItems: 2
+> -          maxItems: 2
+> =20
+>  required:
+>    - "#clock-cells"
+> diff --git a/Documentation/devicetree/bindings/serial/samsung_uart.yaml b=
+/Documentation/devicetree/bindings/serial/samsung_uart.yaml
+> index d4688e317fc5..901c1e2cea28 100644
+> --- a/Documentation/devicetree/bindings/serial/samsung_uart.yaml
+> +++ b/Documentation/devicetree/bindings/serial/samsung_uart.yaml
+> @@ -100,7 +100,6 @@ allOf:
+>            maxItems: 3
+>          clock-names:
+>            minItems: 2
+> -          maxItems: 3
+>            items:
+>              - const: uart
+>              - pattern: '^clk_uart_baud[0-1]$'
+> @@ -118,11 +117,8 @@ allOf:
+>      then:
+>        properties:
+>          clocks:
+> -          minItems: 2
+>            maxItems: 2
+>          clock-names:
+> -          minItems: 2
+> -          maxItems: 2
+>            items:
+>              - const: uart
+>              - const: clk_uart_baud0
+> diff --git a/Documentation/devicetree/bindings/sound/allwinner,sun4i-a10-=
+i2s.yaml b/Documentation/devicetree/bindings/sound/allwinner,sun4i-a10-i2s.=
+yaml
+> index c21c807b667c..34f6ee9de392 100644
+> --- a/Documentation/devicetree/bindings/sound/allwinner,sun4i-a10-i2s.yaml
+> +++ b/Documentation/devicetree/bindings/sound/allwinner,sun4i-a10-i2s.yaml
+> @@ -89,7 +89,6 @@ allOf:
+>        properties:
+>          dmas:
+>            minItems: 1
+> -          maxItems: 2
+>            items:
+>              - description: RX DMA Channel
+>              - description: TX DMA Channel
+> diff --git a/Documentation/devicetree/bindings/sound/ti,j721e-cpb-audio.y=
+aml b/Documentation/devicetree/bindings/sound/ti,j721e-cpb-audio.yaml
+> index 6806f53a4aed..20ea5883b7ff 100644
+> --- a/Documentation/devicetree/bindings/sound/ti,j721e-cpb-audio.yaml
+> +++ b/Documentation/devicetree/bindings/sound/ti,j721e-cpb-audio.yaml
+> @@ -80,7 +80,6 @@ allOf:
+>      then:
+>        properties:
+>          clocks:
+> -          minItems: 6
+>            items:
+>              - description: AUXCLK clock for McASP used by CPB audio
+>              - description: Parent for CPB_McASP auxclk (for 48KHz)
+> @@ -107,7 +106,6 @@ allOf:
+>      then:
+>        properties:
+>          clocks:
+> -          maxItems: 4
+>            items:
+>              - description: AUXCLK clock for McASP used by CPB audio
+>              - description: Parent for CPB_McASP auxclk (for 48KHz)
+> diff --git a/Documentation/devicetree/bindings/thermal/rcar-gen3-thermal.=
+yaml b/Documentation/devicetree/bindings/thermal/rcar-gen3-thermal.yaml
+> index f963204e0b16..1368d90da0e8 100644
+> --- a/Documentation/devicetree/bindings/thermal/rcar-gen3-thermal.yaml
+> +++ b/Documentation/devicetree/bindings/thermal/rcar-gen3-thermal.yaml
+> @@ -67,7 +67,6 @@ then:
+>    properties:
+>      reg:
+>        minItems: 2
+> -      maxItems: 3
+>        items:
+>          - description: TSC1 registers
+>          - description: TSC2 registers
 
-This should be split up between v4 and v5.
-
-> +      - items:
-> +          - const: qcom,sdhci-msm-v4 # Deprecated (only for backward compatibility)
-> +                                     # for sdcc versions less than 5.0
-
-           deprecated: true
-
-> +
-> +  reg:
-> +    minItems: 1
-> +    items:
-> +      - description: Host controller register map
-> +      - description: SD Core register map
-> +      - description: CQE register map
-> +      - description: Inline Crypto Engine register map
-> +
-> +  clocks:
-> +    minItems: 3
-> +    items:
-> +      - description: Main peripheral bus clock, PCLK/HCLK - AHB Bus clock
-> +      - description: SDC MMC clock, MCLK
-> +      - description: TCXO clock
-> +      - description: clock for Inline Crypto Engine
-> +      - description: SDCC bus voter clock
-> +      - description: reference clock for RCLK delay calibration
-> +      - description: sleep clock for RCLK delay calibration
-> +
-> +  clock-names:
-> +    minItems: 2
-> +    items:
-> +      - const: iface
-> +      - const: core
-> +      - const: xo
-> +      - const: ice
-> +      - const: bus
-> +      - const: cal
-> +      - const: sleep
-> +
-> +  interrupts:
-> +    maxItems: 2
-> +
-> +  interrupt-names:
-> +    items:
-> +      - const: hc_irq
-> +      - const: pwr_irq
-> +
-> +  pinctrl-names:
-> +    minItems: 1
-> +    items:
-> +      - const: default
-> +      - const: sleep
-> +
-> +  pinctrl-0:
-> +    description:
-> +      Should specify pin control groups used for this controller.
-> +
-> +  qcom,ddr-config:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description: platform specific settings for DDR_CONFIG reg.
-> +
-> +  qcom,dll-config:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description: platform specific settings for DLL_CONFIG reg.
-> +
-> +  iommus:
-> +    minItems: 1
-> +    maxItems: 8
-> +    description: |
-> +      phandle to apps_smmu node with sid mask.
-> +
-> +  interconnects:
-> +    items:
-> +      - description: data path, sdhc to ddr
-> +      - description: config path, cpu to sdhc
-> +
-> +  interconnect-names:
-> +    items:
-> +      - const: sdhc-ddr
-> +      - const: cpu-sdhc
-> +
-> +  power-domains:
-> +    description: A phandle to sdhci power domain node
-> +    maxItems: 1
-> +
-> +patternProperties:
-> +  '^opp-table(-[a-z0-9]+)?$':
-> +    if:
-> +      properties:
-> +        compatible:
-> +          const: operating-points-v2
-> +    then:
-> +      patternProperties:
-> +        '^opp-?[0-9]+$':
-> +          required:
-> +            - required-opps
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - clocks
-> +  - clock-names
-> +  - interrupts
-> +
-> +additionalProperties: true
-
-Not valid except for common (incomplete) schemas. Instead you need:
-
-allOf:
-  - $ref: mmc-controller.yaml#
-
-unevaluatedProperties: false
-
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/clock/qcom,gcc-sm8250.h>
-> +    #include <dt-bindings/clock/qcom,rpmh.h>
-> +    #include <dt-bindings/power/qcom-rpmpd.h>
-> +
-> +    sdhc_2: sdhci@8804000 {
-
-This will be an error then.
-
-> +      compatible = "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5";
-> +      reg = <0 0x08804000 0 0x1000>;
-> +
-> +      interrupts = <GIC_SPI 204 IRQ_TYPE_LEVEL_HIGH>,
-> +                   <GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
-> +      interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +      clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-> +               <&gcc GCC_SDCC2_APPS_CLK>,
-> +               <&rpmhcc RPMH_CXO_CLK>;
-> +      clock-names = "iface", "core", "xo";
-> +      iommus = <&apps_smmu 0x4a0 0x0>;
-> +      qcom,dll-config = <0x0007642c>;
-> +      qcom,ddr-config = <0x80040868>;
-> +      power-domains = <&rpmhpd SM8250_CX>;
-> +
-> +      operating-points-v2 = <&sdhc2_opp_table>;
-> +
-> +      sdhc2_opp_table: opp-table {
-> +        compatible = "operating-points-v2";
-> +
-> +        opp-19200000 {
-> +          opp-hz = /bits/ 64 <19200000>;
-> +          required-opps = <&rpmhpd_opp_min_svs>;
-> +        };
-> +
-> +        opp-50000000 {
-> +          opp-hz = /bits/ 64 <50000000>;
-> +          required-opps = <&rpmhpd_opp_low_svs>;
-> +        };
-> +
-> +        opp-100000000 {
-> +          opp-hz = /bits/ 64 <100000000>;
-> +          required-opps = <&rpmhpd_opp_svs>;
-> +        };
-> +
-> +        opp-202000000 {
-> +          opp-hz = /bits/ 64 <202000000>;
-> +          required-opps = <&rpmhpd_opp_svs_l1>;
-> +        };
-> +      };
-> +    };
-> -- 
-> 2.35.1
-> 
-> 
