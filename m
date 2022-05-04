@@ -2,33 +2,33 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F9CDC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92891C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:33:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378619AbiEDVgg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1378625AbiEDVgg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 4 May 2022 17:36:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47898 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351167AbiEDVgf (ORCPT
+        with ESMTP id S1378606AbiEDVgf (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 17:36:35 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02FA051307;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0356351E53;
         Wed,  4 May 2022 14:32:57 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: sre)
-        with ESMTPSA id 089C41F44B1B
+        with ESMTPSA id 07CE61F44A87
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
         s=mail; t=1651699976;
-        bh=DdTo/IHVksNFaY0C3OZeNK8F/zY5vBwcncoBBVcwOBM=;
+        bh=l0V4udZjAuiOeK5vyxVOpBZjaG3ONdg+DU9YAvFIO7A=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=KBupv5Z7FDKZDfpXGWIfS1Z9tOybmQpS/YNWKg6RazHBWNhpK8kOP4xJWUJBepxGs
-         AErYih7Sa/TN4gcSAINce1mpoTnVrqfa8DEILX5EtzzLPucxJ56VrehltcIc4HY7Ti
-         7CExl6xbP466Y2c78cC6yTgQNTeHpSswhBlN6n317lUWS0ET/DFiO2wzuZzPDcMEnF
-         BcS2nSxXMik4PrkzVh7r67OPLMDK5arDWk73F5yE2zAoO5AHXeZ+HAkAlwslgWZU33
-         mzLd9fYRZSN+u21H8NNQcwbzghaP0xQw3Bqqd0qVhWPrOCVJsxnsKs/f6SeVwg3KpV
-         iiVUeEesb5T8Q==
+        b=nJtXbKeArbJodxYDgd7WQSRp2+oaWVHi1plpFtoQSFVxXRZdeST2JEJ9VtxFJu4/H
+         XTFptfhJsUCi+ZkUasVXK+dG/m4iLPSea5fAwjgRpgmcaxlawbD82yr5o925MYR5A1
+         QKMCDaHt5ILJ1G7V5UNRALhlkkHKi5c/t/J2d1Iq51gFYP0uzbZqyqAdPDMuKo0Su9
+         8qgACxjj+cXK6xdhcTaJXN1xIIuv/J9MUKOXXdrZL14qJZKPloIvHJFKI7lV9VbgTM
+         cKdeDhUvg3uO7gXZ2ZXtnb4G+280nfd5AwmwOs36FBw4pZl2v45t+Ls1jg3NJeNj9n
+         SJbOSw6xSceuw==
 Received: by jupiter.universe (Postfix, from userid 1000)
-        id 2FB3948146C; Wed,  4 May 2022 23:32:53 +0200 (CEST)
+        id 33FBB48146E; Wed,  4 May 2022 23:32:53 +0200 (CEST)
 From:   Sebastian Reichel <sebastian.reichel@collabora.com>
 To:     Heiko Stuebner <heiko@sntech.de>
 Cc:     Rob Herring <robh+dt@kernel.org>,
@@ -44,12 +44,11 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         linux-arm-kernel@lists.infradead.org,
         linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
-        Sebastian Reichel <sebastian.reichel@collabora.com>,
-        kernel@collabora.com,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCHv2 01/21] dt-bindings: pinctrl: rockchip: add rk3588
-Date:   Wed,  4 May 2022 23:32:31 +0200
-Message-Id: <20220504213251.264819-2-sebastian.reichel@collabora.com>
+        Elaine Zhang <zhangqing@rock-chips.com>, kernel@collabora.com,
+        Sebastian Reichel <sebastian.reichel@collabora.com>
+Subject: [PATCHv2 03/21] dt-binding: clock: Document rockchip,rk3588-cru bindings
+Date:   Wed,  4 May 2022 23:32:33 +0200
+Message-Id: <20220504213251.264819-4-sebastian.reichel@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220504213251.264819-1-sebastian.reichel@collabora.com>
 References: <20220504213251.264819-1-sebastian.reichel@collabora.com>
@@ -59,27 +58,87 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add compatible string for rk3588 pin controller. No other changes
-are required, since the new controller can use the old binding.
+From: Elaine Zhang <zhangqing@rock-chips.com>
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Document the device tree bindings of the rockchip Rk3588 SoC
+clock driver.
+
+Signed-off-by: Elaine Zhang <zhangqing@rock-chips.com>
 Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 ---
- Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ .../bindings/clock/rockchip,rk3588-cru.yaml   | 63 +++++++++++++++++++
+ 1 file changed, 63 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
 
-diff --git a/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
-index b0eae3a67ab1..e62fb5e9db76 100644
---- a/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
-+++ b/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
-@@ -44,6 +44,7 @@ properties:
-       - rockchip,rk3368-pinctrl
-       - rockchip,rk3399-pinctrl
-       - rockchip,rk3568-pinctrl
-+      - rockchip,rk3588-pinctrl
-       - rockchip,rv1108-pinctrl
- 
-   rockchip,grf:
+diff --git a/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml b/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
+new file mode 100644
+index 000000000000..6e65ee7b0092
+--- /dev/null
++++ b/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
+@@ -0,0 +1,63 @@
++# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/clock/rockchip,rk3588-cru.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Rockchip rk3588 Family Clock Control Module
++
++maintainers:
++  - Elaine Zhang <zhangqing@rock-chips.com>
++  - Heiko Stuebner <heiko@sntech.de>
++
++description: |
++  The RK3588 clock controller generates the clock and also implements a
++  reset controller for SoC peripherals.
++  (examples: provide SCLK_UART2\PCLK_UART2 and SRST_P_UART2\SRST_S_UART2 for UART module)
++  Each clock is assigned an identifier and client nodes can use this identifier
++  to specify the clock which they consume. All available clocks are defined as
++  preprocessor macros in the dt-bindings/clock/rk3588-cru.h headers and can be
++  used in device tree sources.
++
++properties:
++  compatible:
++    enum:
++      - rockchip,rk3588-cru
++
++  reg:
++    maxItems: 1
++
++  "#clock-cells":
++    const: 1
++
++  "#reset-cells":
++    const: 1
++
++  rockchip,grf:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description: >
++      phandle to the syscon managing the "general register files". It is used
++      for GRF muxes, if missing any muxes present in the GRF will not be
++      available.
++
++  clocks: true
++  assigned-clocks: true
++  assigned-clock-rates: true
++
++required:
++  - compatible
++  - reg
++  - "#clock-cells"
++  - "#reset-cells"
++
++additionalProperties: false
++
++examples:
++  # Clock Control Module node:
++  - |
++    cru: clock-controller@fd7c0000 {
++      compatible = "rockchip,rk3588-cru";
++      reg = <0xfd7c0000 0x5c000>;
++      #clock-cells = <1>;
++      #reset-cells = <1>;
++    };
 -- 
 2.35.1
 
