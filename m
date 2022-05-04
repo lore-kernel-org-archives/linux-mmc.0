@@ -2,72 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 456CEC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 10:38:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41B26C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 10:38:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348218AbiEDKle (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 06:41:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48464 "EHLO
+        id S1348215AbiEDKli (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 May 2022 06:41:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48582 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348211AbiEDKld (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 06:41:33 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7F5428E00
-        for <linux-mmc@vger.kernel.org>; Wed,  4 May 2022 03:37:56 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id p12so1591975lfs.5
-        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2022 03:37:56 -0700 (PDT)
+        with ESMTP id S1348227AbiEDKlg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 06:41:36 -0400
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B30E82982C
+        for <linux-mmc@vger.kernel.org>; Wed,  4 May 2022 03:38:00 -0700 (PDT)
+Received: by mail-lf1-x129.google.com with SMTP id bu29so1640227lfb.0
+        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2022 03:38:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=hXrHNwJC3BAV97iHU4og2HGxITVvzbeFV0KAKwYw/nI=;
-        b=QTTdNNHxLgnl1v1dobnNNIk2xfsStVyPHrDEqovPV2KjeX8NQrpD0xCiZDb/x3oQFO
-         LwKab/3vcamG1Nv6zhbuJiDlW4+pPxM3ynh8drc2LqBHXvAv6MztHHfeE/ns5yaBcZ0m
-         ulSKV5CPTLVaKIjvaQVWxxIlfzvJRF/Uh2rF3/Bix5DaZoaJmUrMOtxjQHotAWoS9C0C
-         yMc45JdckmSKuo9Qs4Xc/Y8Snz1ODJbFq2UBiN04hBiv9SeOHOW79fhgHqQIlsLUpy76
-         6YLE3CxLBLsbYrToQL/1cLrNt7caLUc0XrHTiBAF90VQDXWsOGw5Vphlk7rIPgDPcGVl
-         Jseg==
+        bh=Hz2JT0Y66JwO+O7z/3riatkMgFmDBjhZZnw+6wr0nDU=;
+        b=B6BnBHWx7aPR8vkrGgx0QR9P+tAKxG1J+7DVaMCN5lDlbdTmjfEkp4yYbJAMaXF6ot
+         GoR6XyNw+iIfXQgXV/bTHeQK5KJm2oaGpMAm38+Dn+5uVeb2EN4mjsEu2s3b41WpJ6+w
+         /HR5DRX3jO5cAWDnEOF64aWCTdWZ2mgpq6XKxI7DWnW5u2ql4EVUIR7N7GxV2qTXyoPD
+         BLnL6wjNxiiRLu6C6PZNY0O06b5ypr2XaV9JQZUx+cb1rUnX/TJh8yWtHd99UXLQ42SI
+         JNS7subNRPWNu4W9cARVB9Z0ZYyaQN+HSL2DRcWgS9KTb1iLGoEWprOAPz3xqzVFOlDE
+         PitA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=hXrHNwJC3BAV97iHU4og2HGxITVvzbeFV0KAKwYw/nI=;
-        b=l5ch++MO4KqK9wBs8Lv7HTeHNuki4oO2Gh9GWtsRqc/PD7EjJjwtXk8EV8UvOZUKSe
-         UeDj8koRtnP67YaCpZcr3j0Q+RixWb/HE4xDRItrTWPOVrwilUIxNXfFEtc0NETPyzFS
-         2X77+3J1IphXm9Rcp0KXS9/d9E9LmBcMyQqo+c2d0BFZLBWJ0sPjZL/g6AaoUSun33D4
-         yuoAs0M34MuTsglonM36oXzmp64cV7Q86B9z/DJ8jLJsdX5KhdNE6/nY5c0dGdO0sqPV
-         Cgl8M2O1FqXWwS5kbBkoEIzhbivs/5Pq4hsl+pF6rsRyThsKGhdx5caFA3IABHx0nZeV
-         tS/A==
-X-Gm-Message-State: AOAM531fq1CXD8GSRfrctV1cITtefBJn7KCHVQVCiI9miOzKD+dZ6pLp
-        HYkKAatR/wnC7mIyq+ljapLXMFipAQS7hsvm9jY69fVSqns=
-X-Google-Smtp-Source: ABdhPJyvrZpc1dvJUHpgzPqhSF7EzFjSFbIrL2BjM/E8E9i49RX6cCpueU1FHEwqnwkLycU6waf9TfwywbIR9IY7q7k=
-X-Received: by 2002:a05:6512:5cb:b0:472:f7e:a5f5 with SMTP id
- o11-20020a05651205cb00b004720f7ea5f5mr13185193lfo.358.1651660675327; Wed, 04
- May 2022 03:37:55 -0700 (PDT)
+        bh=Hz2JT0Y66JwO+O7z/3riatkMgFmDBjhZZnw+6wr0nDU=;
+        b=ByADYETj77WT+0fS0f07SOUGZmUuVLZBJxu2WsHsTTNGK/VjJ8el5Z5SkUZDLtZ7OH
+         H/lo5hYmD0MF3M5p3QnvTqbm0nQPVBRyuh6C3tdCLXGjvqYvClDyrj228JBQEKGgHU1N
+         o5LYeOA8atTL5Clj8krsPMCp2/dNkKfvHaoPxFKtH8PJcFPSpQDFfS6rS8bN/1H6aiwM
+         g6kAMuZ2SbhL53U7Hx11y4uu46RsI00iedcK8do7Ctk3dRWvNjbiFby9YqpJXJxfIIJN
+         1qugXTS9wdo+OItLMzLt/MaJyWnJ8c0UJTjVbpAJ1AGmva3dNuPl5RRvsFenTtR38btg
+         Grlg==
+X-Gm-Message-State: AOAM53380hMLAffhJIcOkg759lWm7coUIhyaSyUM/kRFdOIRuOOikErX
+        wKbmbOpBwSihYmLnwf5LoW7HOIFF9KiaNsjQXNxBOQ==
+X-Google-Smtp-Source: ABdhPJzffJi2WxI72pnoBTPmIBBRSL7VDCNLLj4ucIPRQm9TAVtT1e6kobqBKWRLvwh7qoaz/IMaD3uO9mTQuMjw6Z8=
+X-Received: by 2002:a05:6512:2627:b0:44a:f55c:ded9 with SMTP id
+ bt39-20020a056512262700b0044af55cded9mr14018771lfb.373.1651660679081; Wed, 04
+ May 2022 03:37:59 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220425105339.3515368-1-chi.minghao@zte.com.cn>
-In-Reply-To: <20220425105339.3515368-1-chi.minghao@zte.com.cn>
+References: <20220427120310.838843-1-wanjiabing@vivo.com>
+In-Reply-To: <20220427120310.838843-1-wanjiabing@vivo.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 May 2022 12:37:18 +0200
-Message-ID: <CAPDyKFporsmucBfHWN4vuBTmGNFKM028K6AWZu9k2rAb2cfZRw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: use kobj_to_dev()
-To:     cgel.zte@gmail.com
-Cc:     axboe@kernel.dk, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Minghao Chi <chi.minghao@zte.com.cn>,
-        Zeal Robot <zealci@zte.com.cn>
+Date:   Wed, 4 May 2022 12:37:22 +0200
+Message-ID: <CAPDyKFoCTX3E-D2OW_YMp0EJ2y872e+Nd-0XtinBD0vmwHjSZw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: atmel-mci: Simplify if(chan) and if(!chan)
+To:     Wan Jiabing <wanjiabing@vivo.com>
+Cc:     Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 25 Apr 2022 at 12:53, <cgel.zte@gmail.com> wrote:
+On Wed, 27 Apr 2022 at 14:03, Wan Jiabing <wanjiabing@vivo.com> wrote:
 >
-> From: Minghao Chi <chi.minghao@zte.com.cn>
+> Use if(!host->dma.chan) instead of if(chan) and if(!chan) to make
+> code better.
 >
-> Use kobj_to_dev() instead of open-coding it.
->
-> Reported-by: Zeal Robot <zealci@zte.com.cn>
-> Signed-off-by: Minghao Chi <chi.minghao@zte.com.cn>
+> Signed-off-by: Wan Jiabing <wanjiabing@vivo.com>
 
 Applied for next, thanks!
 
@@ -76,23 +77,31 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/block.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/atmel-mci.c | 9 ++++-----
+>  1 file changed, 4 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index b35e7a95798b..983151b7296d 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -330,7 +330,7 @@ static struct attribute *mmc_disk_attrs[] = {
->  static umode_t mmc_disk_attrs_is_visible(struct kobject *kobj,
->                 struct attribute *a, int n)
->  {
-> -       struct device *dev = container_of(kobj, struct device, kobj);
-> +       struct device *dev = kobj_to_dev(kobj);
->         struct mmc_blk_data *md = mmc_blk_get(dev_to_disk(dev));
->         umode_t mode = a->mode;
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 807177c953f3..91d52ba7a39f 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -1122,13 +1122,12 @@ atmci_prepare_data_dma(struct atmel_mci *host, struct mmc_data *data)
+>         }
 >
+>         /* If we don't have a channel, we can't do DMA */
+> -       chan = host->dma.chan;
+> -       if (chan)
+> -               host->data_chan = chan;
+> -
+> -       if (!chan)
+> +       if (!host->dma.chan)
+>                 return -ENODEV;
+>
+> +       chan = host->dma.chan;
+> +       host->data_chan = chan;
+> +
+>         if (data->flags & MMC_DATA_READ) {
+>                 host->dma_conf.direction = slave_dirn = DMA_DEV_TO_MEM;
+>                 maxburst = atmci_convert_chksize(host,
 > --
-> 2.25.1
->
+> 2.35.3
 >
