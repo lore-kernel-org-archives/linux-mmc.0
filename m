@@ -2,156 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6224C4167B
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 06:04:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77214C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 07:17:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244067AbiEEGIP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 May 2022 02:08:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57590 "EHLO
+        id S1343612AbiEEHVR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 May 2022 03:21:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230306AbiEEGIN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 02:08:13 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E07F8366A5;
-        Wed,  4 May 2022 23:04:34 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        with ESMTP id S233719AbiEEHVC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 03:21:02 -0400
+Received: from smtp2.math.uni-bielefeld.de (smtp2.math.uni-bielefeld.de [129.70.45.13])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66D313DDCA;
+        Thu,  5 May 2022 00:17:22 -0700 (PDT)
+Received: from math.uni-bielefeld.de (kvm01.math.uni-bielefeld.de [129.70.45.15])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 766EA61C03;
-        Thu,  5 May 2022 06:04:34 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF6FEC385BC;
-        Thu,  5 May 2022 06:04:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651730673;
-        bh=gGag8LcvVDzOYjY7vVQNICNRVUATqvouUQ3T9qB8Y4k=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=IzeX2fl3N2x2kryaheKunqUXxhYq2EKW3EevzAcRMispu7pOGu+LIVB4gtA4lt47H
-         kuw8arO+PfbPq7WQnALg8Llzkb+hKwtvB/sYTsnK/90IacYZCB6DJZ5ZQJOsJ5C1F3
-         TeSHzM+uYa+G41zdiYBmFF25L9TEm88hz+cFkf+LED+1kXeRmilzEAvsC7hDnbfjGn
-         7+T7Dj+o9VKBm1U6ge16L5XMEd+1ntq34MUjLp9fn2cdJO958LQytdZ8prNLl0PmNR
-         JJUBc01v6sbgWXUsh3IWA1bR3+vxPlhbpLgI0/bOseW+q4bkkad+M4ksyG11vuvJyh
-         VmRMQT8XoxC+g==
-Received: by mail-wm1-f49.google.com with SMTP id q20so2010918wmq.1;
-        Wed, 04 May 2022 23:04:33 -0700 (PDT)
-X-Gm-Message-State: AOAM532KYwJ4kV4x0ust3FQTY5P7lDLmdAqa0ZHF8tckDNZFQ3EHpIll
-        agg4oXhlxqv95Hv8yxNuanYbXaFOameqvZcXfEI=
-X-Google-Smtp-Source: ABdhPJxJJBc6IXeb9FDBUjhMgPRC02W3Kaja9XP7Gl4879zHpOvDa2WCA8GypEt4poAHxn+t5qvz/Rnv+5FUxU+6qJI=
-X-Received: by 2002:a05:600c:4f0f:b0:394:54c1:f5b3 with SMTP id
- l15-20020a05600c4f0f00b0039454c1f5b3mr3065513wmq.33.1651730671693; Wed, 04
- May 2022 23:04:31 -0700 (PDT)
+        (Client did not present a certificate)
+        by smtp2.math.uni-bielefeld.de (Postfix) with ESMTPSA id 7447B60327;
+        Thu,  5 May 2022 09:17:19 +0200 (CEST)
+Date:   Thu, 5 May 2022 09:17:18 +0200
+From:   Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "H . Nikolaus Schaller" <hns@goldelico.com>,
+        Huijin Park <huijin.park@samsung.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] mmc: core: Restore (almost) the busy polling for
+ MMC_SEND_OP_COND
+Message-ID: <20220505071718.GA4520@math.uni-bielefeld.de>
+References: <20220304105656.149281-1-ulf.hansson@linaro.org>
+ <CAPDyKFr1PzSaiKqB4ZoqTS_8bGsEH=aB3ARhxyGu+cYeRqeBew@mail.gmail.com>
+ <20220504054652.GA7851@math.uni-bielefeld.de>
+ <CAPDyKFrBVyYx+BybGR2P8paS6qA=V2EHAXH+vPUc9JzxoXn6+g@mail.gmail.com>
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-19-arnd@kernel.org>
- <CACRpkdac8dGKSEmc-HpgooJefrDtiKK+_A1Mv7AJM8yQV9UY-w@mail.gmail.com>
- <CAK8P3a0w3gFzZoBzyRsi1Ta4prESf8Fp0=quAPSKMnaXvbXNTQ@mail.gmail.com> <CACRpkdZNryYkidvdKuT57RM3fz6_X+3oOzF5xaOZd+TyScfUsw@mail.gmail.com>
-In-Reply-To: <CACRpkdZNryYkidvdKuT57RM3fz6_X+3oOzF5xaOZd+TyScfUsw@mail.gmail.com>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Thu, 5 May 2022 08:04:14 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a0y0tVZODpp+GSf0EkMPWbbvMqA-4kNf0NJMc0M2=2WHw@mail.gmail.com>
-Message-ID: <CAK8P3a0y0tVZODpp+GSf0EkMPWbbvMqA-4kNf0NJMc0M2=2WHw@mail.gmail.com>
-Subject: Re: [PATCH 18/48] ARM: pxa: hx4700: use gpio descriptors for audio
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrBVyYx+BybGR2P8paS6qA=V2EHAXH+vPUc9JzxoXn6+g@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, May 4, 2022 at 11:59 PM Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Mon, May 2, 2022 at 9:08 AM Arnd Bergmann <arnd@kernel.org> wrote:
-> > On Sun, May 1, 2022 at 11:41 PM Linus Walleij <linus.walleij@linaro.org> wrote:
-> > >
-> > > (...)
-> > > > +static struct gpiod_lookup_table hx4700_audio_gpio_table = {
-> > > > +       .dev_id = "hx4700-audio",
-> > > > +       .table = {
-> > > > +               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
-> > > > +                           "earphone-ndet", GPIO_ACTIVE_HIGH),
-> > >
-> > > This looks wrong. The n in nDET in the end of the name of the GPIO line
-> > > means active low does it not?
-> > >
-> > > What I usually do when I see this is to properly set it to
-> > > GPIO_ACTIVE_LOW in the descriptor table, then invert the logic
-> > > where it's getting used.
-> > >
-> > > Also rename to earphone-det instead of -ndet
+Ulf Hansson wrote on Wed  4/05/22 11:08:
+> On Wed, 4 May 2022 at 07:46, Jean Rene Dawin
+> <jdawin@math.uni-bielefeld.de> wrote:
 > >
-> > Thanks for taking a look! I changed it now, but I don't know if
-> > I got the correct number of inversions in the end. How does this look?
->
-> Looks wrong, you can just invert the argument to any statement of set_value()
-> after tagging respective line as active low. Then gpilob will do a second
-> inversion.
->
-> > +               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
-> > +                           "earphone-det", GPIO_ACTIVE_LOW),
-> > +               GPIO_LOOKUP("gpio-pxa", GPIO107_HX4700_SPK_nSD,
-> > +                           "spk-sd", GPIO_ACTIVE_LOW),
->
-> So those two have switched polarity.
->
-> > @@ -81,14 +79,14 @@ static const struct snd_soc_ops hx4700_ops = {
-> >  static int hx4700_spk_power(struct snd_soc_dapm_widget *w,
-> >                             struct snd_kcontrol *k, int event)
-> >  {
-> > -       gpio_set_value(GPIO107_HX4700_SPK_nSD, !!SND_SOC_DAPM_EVENT_ON(event));
-> > +       gpiod_set_value(gpiod_spk_sd, !!SND_SOC_DAPM_EVENT_ON(event));
->
-> Thus drop one ! in front of the expression, just !SND_SOC_DAPM_EVENT_ON(event)
+> > Ulf Hansson wrote on Mon  7/03/22 13:17:
+> > > On Fri, 4 Mar 2022 at 11:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > > >
+> > > > Commit 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1"),
+> > > > significantly decreased the polling period from ~10-12ms into just a couple
+> > > > of us. The purpose was to decrease the total time spent in the busy polling
+> > > > loop, but unfortunate it has lead to problems, that causes eMMC cards to
+> > > > never gets out busy and thus fails to be initialized.
+> > > >
+> > > > To fix the problem, but also to try to keep some of the new improved
+> > > > behaviour, let's start by using a polling period of 1-2ms, which then
+> > > > increases for each loop, according to common polling loop in
+> > > > __mmc_poll_for_busy().
+> > > >
+> > > > Reported-by: Jean Rene Dawin <jdawin@math.uni-bielefeld.de>
+> > > > Reported-by: H. Nikolaus Schaller <hns@goldelico.com>
+> > > > Cc: Huijin Park <huijin.park@samsung.com>
+> > > > Fixes: 76bfc7ccc2fa ("mmc: core: adjust polling interval for CMD1")
+> > > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > > > ---
+> > > >
+> > > > Jean Rene and H. Nikolaus, if this doesn't work, please try extending the
+> > > > the MMC_OP_COND_PERIOD_US a bit, to so see if we can find a value that always
+> > > > works.
+> > > >
+> > > > Kind regards
+> > > > Uffe
+> >
+> > >
+> > > Applied for fixes and by adding two tested-by tags from you, thanks!
+> > >
+> > > Kind regards
+> > > Uffe
+> >
+> > Hi,
+> >
+> > with the current value of MMC_OP_COND_PERIOD_US = 1ms I still see
+> >
+> > mmc1: Card stuck being busy! __mmc_poll_for_busy
+> > mmc1: error -110 doing runtime resume
+> >
+> > regularly. The same with 2ms. Setting it to 4ms makes the messages go
+> > away. Would it be ok to increase MMC_OP_COND_PERIOD_US to 4ms?
+> 
+> It doesn't look like we have a very good alternative - unless the
+> problem is tied to a particular type of eMMC card, is it? (If so, we
+> can add a card-quirk).
+> 
+> The only other option I see, would then be to add a generic DT
+> property for eMMCs, that allows us to specify the OP_COND polling
+> period for it. See
+> Documentation/devicetree/bindings/mmc/mmc-card.yaml.
 
-Ok, done. But I still leave the extra 'invert=1' in hs_jack_pin[], right?
+Hi,
 
-/* Headphones jack detection DAPM pin */
-static struct snd_soc_jack_pin hs_jack_pin[] = {
-        {
-                .pin    = "Headphone Jack",
-                .mask   = SND_JACK_HEADPHONE,
-        },
-        {
-                .pin    = "Speaker",
-                /* disable speaker when hp jack is inserted */
-                .mask   = SND_JACK_HEADPHONE,
-                .invert = 1,
-        },
-};
+ok, I will test with another beaglebone which has a different emmc chip.
 
-> > +       gpiod_spk_sd = devm_gpiod_get(&pdev->dev, "spk-sd", GPIOD_OUT_LOW);
->
-> These initial values don't seem to be set in the old code you could
-> just use GPIOD_ASIS as flag to make sure the new code behaves
-> the same.
-
-Ok.
-
-        Arnd
+Regards,
+Jean Rene
