@@ -2,348 +2,401 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7ED7C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 20:08:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8806BC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 20:29:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1385650AbiEEUMB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 May 2022 16:12:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59916 "EHLO
+        id S1385862AbiEEUdZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 May 2022 16:33:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47332 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231878AbiEEUL7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 16:11:59 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F36BE5F247;
-        Thu,  5 May 2022 13:08:18 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 3F323B82C4C;
-        Thu,  5 May 2022 20:08:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BB6CCC385B7;
-        Thu,  5 May 2022 20:08:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651781295;
-        bh=2J3A2nVP5j1kW5YxuBOcohrcVqh9eJh7hKJ6qkG2IxE=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=pGVOA+nlWAv4zF+ej+HpjpYGvH6HjzHeDv3lOmq24s8T0eibj88c7+gk93eI+fRaF
-         Kp3zzYaat/CbzzeB/V10tF09ZsR67AAUtR+0z9cOSKhBAXHUYoO7IQ5BYFKRFGUGr+
-         YQSWOz0N05szaT98gHaOM7xggH2PBGVuuDKZrnw5XyGzmaBHK5ntiBZrWs5sgDoCf+
-         VJ82aib+w3vhPWVcDQ3Cyz6DsJYkC0OKx/WsBcycpc0eIx3+jSu/t+3NgLso6VuUmc
-         neUMO9CWLMcBBYqSO5qbFSr1ATtFaJSrsz3OV9cXjqosJAGpCw/0090GDMQMGxvE6x
-         krOpMKF815ykQ==
-Received: by mail-wm1-f46.google.com with SMTP id o12-20020a1c4d0c000000b00393fbe2973dso5738750wmh.2;
-        Thu, 05 May 2022 13:08:15 -0700 (PDT)
-X-Gm-Message-State: AOAM532d7WSYD7ZC2iW9BXuXRVxpH+486Gmzo/JjBoj5Ob96aKFMRFy6
-        VR3b4Yv8vC1J3thoNkErF0/kAa3eB6IjMRtST0Q=
-X-Google-Smtp-Source: ABdhPJwwObn/UaqT30q1FbiaZHyI1hmOOl8iNniR0W2zAZ7y8tPUXLBWeVll6mQz87F2JUMC3yVO95QaB6biNASW3WU=
-X-Received: by 2002:a05:600c:4144:b0:394:1972:1a73 with SMTP id
- h4-20020a05600c414400b0039419721a73mr27085wmm.71.1651781293834; Thu, 05 May
- 2022 13:08:13 -0700 (PDT)
+        with ESMTP id S1385870AbiEEUdX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 16:33:23 -0400
+Received: from mail-oa1-x2f.google.com (mail-oa1-x2f.google.com [IPv6:2001:4860:4864:20::2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EB205FF20
+        for <linux-mmc@vger.kernel.org>; Thu,  5 May 2022 13:29:40 -0700 (PDT)
+Received: by mail-oa1-x2f.google.com with SMTP id 586e51a60fabf-edf9ddb312so4422951fac.8
+        for <linux-mmc@vger.kernel.org>; Thu, 05 May 2022 13:29:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=E79Hu+ASO7VIz4yIiTZ0/hvo5NTf0z2XjOcP52stTCU=;
+        b=PM1xqkEuWXZbfVjShwF21/MTzOGMRiFid042Gy0UVHlyXci4EeALcCFpZNo0p6IGCp
+         umzxSTNhFV9/rKVE/o+/21/Kg2HzGj+L2+KyaBhE75kzz7FkAXNlJmpyjV+BOOYJFQVw
+         VEWwE7/6H1QcpyDuze9/LP8A10ndTkrY6q4rUZ6fvQWHaCjb3pxyujRnRLLideQHgyk3
+         lei603yId0wclXOtWMNSJ07euMGpwnIAhl6fod7exC0MIuN/6yAGiC/P4KSVIBoilzEv
+         azX01NjQ6yOXkyHTrgpvhm5E+1tGkW7edkEqjYc1ro2DOkFSTFcEVVVdL1NTd6nYPEsJ
+         eKcw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=E79Hu+ASO7VIz4yIiTZ0/hvo5NTf0z2XjOcP52stTCU=;
+        b=yZieV/QDpwiHoJCR/ps2qbDdpR0Map7JBnTKW/VXH9WiAHlnLTJjnejkuE3LKWYxlu
+         54BYXkxUcvt34jIkSglizNX0Fn+EDv9hjFvmdiavBFm3ZGPhbd+U8Sowktl7rnwSNcqt
+         i+Ykj2cMbPjoapNrw8M32F1Pcx3zg/nUr8QFj3DDGzRT5vhuM68Nq5Uyk3k/j7jQEojm
+         J9S7Vh4iDzGgK6XeogtcQJUfXGwdgmOmPoh+WzYCo0jcNx2TdSBo8T3B7Ptt7dz4xdA+
+         p1eMHpmYDSfJbME+XsPIsr7F4K+w8aosk1pqfNd+PNuraFS+6/9AD5HebpoqO+6SlHQI
+         moVw==
+X-Gm-Message-State: AOAM5337ZaQzI6bUqAOHfJLB9JG6L/CQw1Jgtxyl5wHlRMqHkluEJaMC
+        yBYgP9DIsMHcTVPK+e7HOHCYdAyDrxLUhaN99IyDtQ==
+X-Google-Smtp-Source: ABdhPJztXKRlu4CCk3zbEqE9ZgBLuFCcb46GasGSAhdiYfMxEL0ccAvbf5Suni3bphRx3xrrej00DSq9xGmsJ3tvUMY=
+X-Received: by 2002:a05:6870:b50d:b0:ed:e8f5:b1cd with SMTP id
+ v13-20020a056870b50d00b000ede8f5b1cdmr11448oap.147.1651782579552; Thu, 05 May
+ 2022 13:29:39 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-19-arnd@kernel.org>
- <CACRpkdac8dGKSEmc-HpgooJefrDtiKK+_A1Mv7AJM8yQV9UY-w@mail.gmail.com>
- <CAK8P3a0w3gFzZoBzyRsi1Ta4prESf8Fp0=quAPSKMnaXvbXNTQ@mail.gmail.com>
- <CACRpkdZNryYkidvdKuT57RM3fz6_X+3oOzF5xaOZd+TyScfUsw@mail.gmail.com>
- <CAK8P3a0y0tVZODpp+GSf0EkMPWbbvMqA-4kNf0NJMc0M2=2WHw@mail.gmail.com>
- <CACRpkdaNRX0RDYJd_uaGo5jtiXu_qGHmEDGniaCmR=TZvcHH8A@mail.gmail.com>
- <YnPhna5h1+kQGFLa@sirena.org.uk> <CAK8P3a2cYUYMKSMo3VOLVTO0=LWc0sHf72Eph8t_es9axo_eeA@mail.gmail.com>
- <YnPna0pW9csiFkHK@sirena.org.uk>
-In-Reply-To: <YnPna0pW9csiFkHK@sirena.org.uk>
-From:   Arnd Bergmann <arnd@kernel.org>
-Date:   Thu, 5 May 2022 22:07:56 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a1H-74Q1CzqW_Q=7g0KGkcd+TY3HTBbbE27XhXmfJhrRA@mail.gmail.com>
-Message-ID: <CAK8P3a1H-74Q1CzqW_Q=7g0KGkcd+TY3HTBbbE27XhXmfJhrRA@mail.gmail.com>
-Subject: Re: [PATCH 18/48] ARM: pxa: hx4700: use gpio descriptors for audio
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+References: <20220429220833.873672-1-bhupesh.sharma@linaro.org>
+ <20220429220833.873672-2-bhupesh.sharma@linaro.org> <YnLmNCwNfoqZln12@robh.at.kernel.org>
+ <CAPDyKFrJPHnKi+XGP8U-OJM_uf5fM8eAJT9-z3NL6bP=7MAVug@mail.gmail.com>
+In-Reply-To: <CAPDyKFrJPHnKi+XGP8U-OJM_uf5fM8eAJT9-z3NL6bP=7MAVug@mail.gmail.com>
+From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
+Date:   Fri, 6 May 2022 01:59:26 +0530
+Message-ID: <CAH=2NtwKuG8579JFM1GLO0882FB6Jhdn349aPVWgudcA7J8huA@mail.gmail.com>
+Subject: Re: [PATCH 1/4] dt-bindings: mmc/sdhci-msm: Convert bindings to yaml
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Rob Herring <robh@kernel.org>, linux-mmc@vger.kernel.org,
+        bhupesh.linux@gmail.com, agross@kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, bjorn.andersson@linaro.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, May 5, 2022 at 5:04 PM Mark Brown <broonie@kernel.org> wrote:
-> On Thu, May 05, 2022 at 04:59:35PM +0200, Arnd Bergmann wrote:
-> > On Thu, May 5, 2022 at 4:39 PM Mark Brown <broonie@kernel.org> wrote:
-> > > On Thu, May 05, 2022 at 04:33:06PM +0200, Linus Walleij wrote:
-> > > > On Thu, May 5, 2022 at 8:04 AM Arnd Bergmann <arnd@kernel.org> wrote:
+Hi Ulf and Rob,
+
+On Thu, 5 May 2022 at 14:00, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> > > > > static struct snd_soc_jack_pin hs_jack_pin[] = {
-> > > > >         {
-> > > > >                 .pin    = "Headphone Jack",
-> > > > >                 .mask   = SND_JACK_HEADPHONE,
-> > > > >         },
-> > > > >         {
-> > > > >                 .pin    = "Speaker",
-> > > > >                 /* disable speaker when hp jack is inserted */
-> > > > >                 .mask   = SND_JACK_HEADPHONE,
-> > > > >                 .invert = 1,
-> > > > >         },
+> On Wed, 4 May 2022 at 22:46, Rob Herring <robh@kernel.org> wrote:
+> >
+> > On Sat, Apr 30, 2022 at 03:38:30AM +0530, Bhupesh Sharma wrote:
+> > > Convert Qualcomm sdhci-msm devicetree binding to YAML.
+> > >
+> > > Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> > > Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+> > > Cc: Rob Herring <robh@kernel.org>
+> > > Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
+> > > ---
+> > >  .../devicetree/bindings/mmc/sdhci-msm.txt     | 123 -----------
+> > >  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 192 ++++++++++++++++++
+> > >  2 files changed, 192 insertions(+), 123 deletions(-)
+> > >  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> > >  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> > >
+> > > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> > > deleted file mode 100644
+> > > index 6216ed777343..000000000000
+> > > --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> > > +++ /dev/null
+> > > @@ -1,123 +0,0 @@
+> > > -* Qualcomm SDHCI controller (sdhci-msm)
+> > > -
+> > > -This file documents differences between the core properties in mmc.txt
+> > > -and the properties used by the sdhci-msm driver.
+> > > -
+> > > -Required properties:
+> > > -- compatible: Should contain a SoC-specific string and a IP version string:
+> > > -     version strings:
+> > > -             "qcom,sdhci-msm-v4" for sdcc versions less than 5.0
+> > > -             "qcom,sdhci-msm-v5" for sdcc version 5.0
+> > > -             For SDCC version 5.0.0, MCI registers are removed from SDCC
+> > > -             interface and some registers are moved to HC. New compatible
+> > > -             string is added to support this change - "qcom,sdhci-msm-v5".
+> > > -     full compatible strings with SoC and version:
+> > > -             "qcom,apq8084-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8226-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8953-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8994-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
+> > > -             "qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
+> > > -             "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> > > -             "qcom,sc7280-sdhci", "qcom,sdhci-msm-v5";
+> > > -             "qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
+> > > -             "qcom,sdx55-sdhci", "qcom,sdhci-msm-v5";
+> > > -             "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
+> > > -     NOTE that some old device tree files may be floating around that only
+> > > -     have the string "qcom,sdhci-msm-v4" without the SoC compatible string
+> > > -     but doing that should be considered a deprecated practice.
+> > > -
+> > > -- reg: Base address and length of the register in the following order:
+> > > -     - Host controller register map (required)
+> > > -     - SD Core register map (required for controllers earlier than msm-v5)
+> > > -     - CQE register map (Optional, CQE support is present on SDHC instance meant
+> > > -                         for eMMC and version v4.2 and above)
+> > > -     - Inline Crypto Engine register map (optional)
+> > > -- reg-names: When CQE register map is supplied, below reg-names are required
+> > > -     - "hc" for Host controller register map
+> > > -     - "core" for SD core register map
+> > > -     - "cqhci" for CQE register map
+> > > -     - "ice" for Inline Crypto Engine register map (optional)
+> > > -- interrupts: Should contain an interrupt-specifiers for the interrupts:
+> > > -     - Host controller interrupt (required)
+> > > -- pinctrl-names: Should contain only one value - "default".
+> > > -- pinctrl-0: Should specify pin control groups used for this controller.
+> > > -- clocks: A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
+> > > -- clock-names: Should contain the following:
+> > > -     "iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+> > > -     "core"  - SDC MMC clock (MCLK) (required)
+> > > -     "bus"   - SDCC bus voter clock (optional)
+> > > -     "xo"    - TCXO clock (optional)
+> > > -     "cal"   - reference clock for RCLK delay calibration (optional)
+> > > -     "sleep" - sleep clock for RCLK delay calibration (optional)
+> > > -     "ice" - clock for Inline Crypto Engine (optional)
+> > > -
+> > > -- qcom,ddr-config: Certain chipsets and platforms require particular settings
+> > > -     for the DDR_CONFIG register. Use this field to specify the register
+> > > -     value as per the Hardware Programming Guide.
+> > > -
+> > > -- qcom,dll-config: Chipset and Platform specific value. Use this field to
+> > > -     specify the DLL_CONFIG register value as per Hardware Programming Guide.
+> > > -
+> > > -Optional Properties:
+> > > -* Following bus parameters are required for interconnect bandwidth scaling:
+> > > -- interconnects: Pairs of phandles and interconnect provider specifier
+> > > -              to denote the edge source and destination ports of
+> > > -              the interconnect path.
+> > > -
+> > > -- interconnect-names: For sdhc, we have two main paths.
+> > > -             1. Data path : sdhc to ddr
+> > > -             2. Config path : cpu to sdhc
+> > > -             For Data interconnect path the name supposed to be
+> > > -             is "sdhc-ddr" and for config interconnect path it is
+> > > -             "cpu-sdhc".
+> > > -             Please refer to Documentation/devicetree/bindings/
+> > > -             interconnect/ for more details.
+> > > -
+> > > -Example:
+> > > -
+> > > -     sdhc_1: sdhci@f9824900 {
+> > > -             compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
+> > > -             reg = <0xf9824900 0x11c>, <0xf9824000 0x800>;
+> > > -             interrupts = <0 123 0>;
+> > > -             bus-width = <8>;
+> > > -             non-removable;
+> > > -
+> > > -             vmmc-supply = <&pm8941_l20>;
+> > > -             vqmmc-supply = <&pm8941_s3>;
+> > > -
+> > > -             pinctrl-names = "default";
+> > > -             pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
+> > > -
+> > > -             clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+> > > -             clock-names = "core", "iface";
+> > > -             interconnects = <&qnoc MASTER_SDCC_ID &qnoc SLAVE_DDR_ID>,
+> > > -                             <&qnoc MASTER_CPU_ID &qnoc SLAVE_SDCC_ID>;
+> > > -             interconnect-names = "sdhc-ddr","cpu-sdhc";
+> > > -
+> > > -             qcom,dll-config = <0x000f642c>;
+> > > -             qcom,ddr-config = <0x80040868>;
+> > > -     };
+> > > -
+> > > -     sdhc_2: sdhci@f98a4900 {
+> > > -             compatible = "qcom,msm8974-sdhci", "qcom,sdhci-msm-v4";
+> > > -             reg = <0xf98a4900 0x11c>, <0xf98a4000 0x800>;
+> > > -             interrupts = <0 125 0>;
+> > > -             bus-width = <4>;
+> > > -             cd-gpios = <&msmgpio 62 0x1>;
+> > > -
+> > > -             vmmc-supply = <&pm8941_l21>;
+> > > -             vqmmc-supply = <&pm8941_l13>;
+> > > -
+> > > -             pinctrl-names = "default";
+> > > -             pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
+> > > -
+> > > -             clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+> > > -             clock-names = "core", "iface";
+> > > -
+> > > -             qcom,dll-config = <0x0007642c>;
+> > > -             qcom,ddr-config = <0x80040868>;
+> > > -     };
+> > > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> > > new file mode 100644
+> > > index 000000000000..c33f173e3b6c
+> > > --- /dev/null
+> > > +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> > > @@ -0,0 +1,192 @@
+> > > +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+> > > +
+> > > +%YAML 1.2
+> > > +---
+> > > +$id: "http://devicetree.org/schemas/mmc/sdhci-msm.yaml#"
+> > > +$schema: "http://devicetree.org/meta-schemas/core.yaml#"
+> > > +
+> > > +title: Qualcomm SDHCI controller (sdhci-msm)
+> > > +
+> > > +maintainers:
+> > > +  - Bhupesh Sharma <bhupesh.sharma@linaro.org>
+> > > +
+> > > +description:
+> > > +  Secure Digital Host Controller Interface (SDHCI) present on
+> > > +  Qualcomm SOCs supports SD/MMC/SDIO devices.
+> > > +
+> > > +properties:
+> > > +  compatible:
+> > > +    oneOf:
+> > > +      - items:
+> > > +          - enum:
+> > > +              - qcom,apq8084-sdhci
+> > > +              - qcom,msm8226-sdhci
+> > > +              - qcom,msm8953-sdhci
+> > > +              - qcom,msm8974-sdhci
+> > > +              - qcom,msm8916-sdhci
+> > > +              - qcom,msm8992-sdhci
+> > > +              - qcom,msm8994-sdhci
+> > > +              - qcom,msm8996-sdhci
+> > > +              - qcom,qcs404-sdhci
+> > > +              - qcom,sc7180-sdhci
+> > > +              - qcom,sc7280-sdhci
+> > > +              - qcom,sdm630-sdhci
+> > > +              - qcom,sdm845-sdhci
+> > > +              - qcom,sdx55-sdhci
+> > > +              - qcom,sm6125-sdhci
+> > > +              - qcom,sm6350-sdhci
+> > > +              - qcom,sm8250-sdhci
+> > > +          - enum:
+> > > +              - qcom,sdhci-msm-v4 # for sdcc versions less than 5.0
+> > > +              - qcom,sdhci-msm-v5 # for sdcc version 5.0
+> >
+> > This should be split up between v4 and v5.
+> >
+> > > +      - items:
+> > > +          - const: qcom,sdhci-msm-v4 # Deprecated (only for backward compatibility)
+> > > +                                     # for sdcc versions less than 5.0
+> >
+> >            deprecated: true
+> >
+> > > +
+> > > +  reg:
+> > > +    minItems: 1
+> > > +    items:
+> > > +      - description: Host controller register map
+> > > +      - description: SD Core register map
+> > > +      - description: CQE register map
+> > > +      - description: Inline Crypto Engine register map
+> > > +
+> > > +  clocks:
+> > > +    minItems: 3
+> > > +    items:
+> > > +      - description: Main peripheral bus clock, PCLK/HCLK - AHB Bus clock
+> > > +      - description: SDC MMC clock, MCLK
+> > > +      - description: TCXO clock
+> > > +      - description: clock for Inline Crypto Engine
+> > > +      - description: SDCC bus voter clock
+> > > +      - description: reference clock for RCLK delay calibration
+> > > +      - description: sleep clock for RCLK delay calibration
+> > > +
+> > > +  clock-names:
+> > > +    minItems: 2
+> > > +    items:
+> > > +      - const: iface
+> > > +      - const: core
+> > > +      - const: xo
+> > > +      - const: ice
+> > > +      - const: bus
+> > > +      - const: cal
+> > > +      - const: sleep
+> > > +
+> > > +  interrupts:
+> > > +    maxItems: 2
+> > > +
+> > > +  interrupt-names:
+> > > +    items:
+> > > +      - const: hc_irq
+> > > +      - const: pwr_irq
+> > > +
+> > > +  pinctrl-names:
+> > > +    minItems: 1
+> > > +    items:
+> > > +      - const: default
+> > > +      - const: sleep
+> > > +
+> > > +  pinctrl-0:
+> > > +    description:
+> > > +      Should specify pin control groups used for this controller.
+> > > +
+> > > +  qcom,ddr-config:
+> > > +    $ref: /schemas/types.yaml#/definitions/uint32
+> > > +    description: platform specific settings for DDR_CONFIG reg.
+> > > +
+> > > +  qcom,dll-config:
+> > > +    $ref: /schemas/types.yaml#/definitions/uint32
+> > > +    description: platform specific settings for DLL_CONFIG reg.
+> > > +
+> > > +  iommus:
+> > > +    minItems: 1
+> > > +    maxItems: 8
+> > > +    description: |
+> > > +      phandle to apps_smmu node with sid mask.
+> > > +
+> > > +  interconnects:
+> > > +    items:
+> > > +      - description: data path, sdhc to ddr
+> > > +      - description: config path, cpu to sdhc
+> > > +
+> > > +  interconnect-names:
+> > > +    items:
+> > > +      - const: sdhc-ddr
+> > > +      - const: cpu-sdhc
+> > > +
+> > > +  power-domains:
+> > > +    description: A phandle to sdhci power domain node
+> > > +    maxItems: 1
+> > > +
+> > > +patternProperties:
+> > > +  '^opp-table(-[a-z0-9]+)?$':
+> > > +    if:
+> > > +      properties:
+> > > +        compatible:
+> > > +          const: operating-points-v2
+> > > +    then:
+> > > +      patternProperties:
+> > > +        '^opp-?[0-9]+$':
+> > > +          required:
+> > > +            - required-opps
+> > > +
+> > > +required:
+> > > +  - compatible
+> > > +  - reg
+> > > +  - clocks
+> > > +  - clock-names
+> > > +  - interrupts
+> > > +
+> > > +additionalProperties: true
+> >
+> > Not valid except for common (incomplete) schemas. Instead you need:
+> >
+> > allOf:
+> >   - $ref: mmc-controller.yaml#
+> >
+> > unevaluatedProperties: false
+> >
+> > > +
+> > > +examples:
+> > > +  - |
+> > > +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> > > +    #include <dt-bindings/clock/qcom,gcc-sm8250.h>
+> > > +    #include <dt-bindings/clock/qcom,rpmh.h>
+> > > +    #include <dt-bindings/power/qcom-rpmpd.h>
+> > > +
+> > > +    sdhc_2: sdhci@8804000 {
+> >
+> > This will be an error then.
+> >
+> > > +      compatible = "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5";
+> > > +      reg = <0 0x08804000 0 0x1000>;
 >
-> > > > Hm some ASoC thingie. No idea what that is, but I suppose another
-> > > > place where a subsystem for legacy reasons try to do the gpiolib
-> > > > inversion on it's own accord. That one isn't flagged as active low in the
-> > > > descriptor so it's fine I guess.
 >
-> > > It's saying that when the headphone is inserted the headphone output
-> > > should be enabled and the speaker output should be disabled, and vice
-> > > versa.
+> [...]
 >
-> > Ok, that sounds like I should remove the flag here if I declare the
-> > GPIO line as GPIO_ACTIVE_LOW instead of GPIO_ACTIVE_HIGH, right?
->
-> If you change the sense of the GPIO you'll need to flip the invert to
-> the headphone instead of the speaker - whichever way round the GPIO
-> sense is each of the pins should be taking the opposite sense from the
-> GPIO state to the other.
+> Bhupesh, I realized that I was a little too quick to apply @subject
+> patch. Although, rather than dropping it from my branch, can you
+> please address Rob's comments and send an incremental patch on top?
 
-Ok, I hope I got it this time:
+Sure, no problem. I am preparing the incremental patch and will share
+it shortly.
 
-- The hs_jack_gpio/"earphone-det" is declared as GPIO_ACTIVE_LOW,
-    with the ".invert" dropped in the snd_soc_jack_gpio definition to match
-
-- "spk-sd" is declared as GPIO_ACTIVE_LOW, so both
-  this and  "hp-driver" are enabled by setting the gpio to active, rather than
-  the two being opposites
-
-- snd_soc_jack_pin flips the 'invert' flag from speaker to headphone, since
-  the "earphone-det" is now  reversed
-
-- hx4700_spk_power() flips polarity when setting the output to match the
-  GPIO_ACTIVE_LOW setting, but hx4700_hp_power() does not change.
-
-        Arnd
-
-commit 20a9b05eff0488b78aa02c07f58654daa294069a
-Author: Arnd Bergmann <arnd@arndb.de>
-Date:   Wed Sep 11 14:27:13 2019 +0200
-
-    ARM: pxa: hx4700: use gpio descriptors for audio
-
-    The audio driver should not use a hardwired gpio number
-    from the header. Change it to use a lookup table.
-
-    Cc: Philipp Zabel <philipp.zabel@gmail.com>
-    Cc: Paul Parsons <lost.distance@yahoo.com>
-    Acked-by: Mark Brown <broonie@kernel.org>
-    Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
-    Cc: alsa-devel@alsa-project.org
-    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-
-diff --git a/arch/arm/mach-pxa/hx4700-pcmcia.c
-b/arch/arm/mach-pxa/hx4700-pcmcia.c
-index e8acbfc9ef6c..e2331dfe427d 100644
---- a/arch/arm/mach-pxa/hx4700-pcmcia.c
-+++ b/arch/arm/mach-pxa/hx4700-pcmcia.c
-@@ -10,7 +10,7 @@
- #include <linux/irq.h>
-
- #include <asm/mach-types.h>
--#include <mach/hx4700.h>
-+#include "hx4700.h"
-
- #include <pcmcia/soc_common.h>
-
-diff --git a/arch/arm/mach-pxa/hx4700.c b/arch/arm/mach-pxa/hx4700.c
-index 140a44cb2989..2ae06edf413c 100644
---- a/arch/arm/mach-pxa/hx4700.c
-+++ b/arch/arm/mach-pxa/hx4700.c
-@@ -41,7 +41,7 @@
-
- #include "pxa27x.h"
- #include "addr-map.h"
--#include <mach/hx4700.h>
-+#include "hx4700.h"
- #include <linux/platform_data/irda-pxaficp.h>
-
- #include <sound/ak4641.h>
-@@ -834,6 +834,19 @@ static struct i2c_board_info i2c_board_info[]
-__initdata = {
-        },
- };
-
-+static struct gpiod_lookup_table hx4700_audio_gpio_table = {
-+       .dev_id = "hx4700-audio",
-+       .table = {
-+               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
-+                           "earphone-det", GPIO_ACTIVE_LOW),
-+               GPIO_LOOKUP("gpio-pxa", GPIO92_HX4700_HP_DRIVER,
-+                           "hp-driver", GPIO_ACTIVE_HIGH),
-+               GPIO_LOOKUP("gpio-pxa", GPIO107_HX4700_SPK_nSD,
-+                           "spk-sd", GPIO_ACTIVE_LOW),
-+               { },
-+       },
-+};
-+
- static struct platform_device audio = {
-        .name   = "hx4700-audio",
-        .id     = -1,
-@@ -895,6 +908,7 @@ static void __init hx4700_init(void)
-
-        gpiod_add_lookup_table(&bq24022_gpiod_table);
-        gpiod_add_lookup_table(&gpio_vbus_gpiod_table);
-+       gpiod_add_lookup_table(&hx4700_audio_gpio_table);
-        platform_add_devices(devices, ARRAY_SIZE(devices));
-        pwm_add_table(hx4700_pwm_lookup, ARRAY_SIZE(hx4700_pwm_lookup));
-
-diff --git a/arch/arm/mach-pxa/include/mach/hx4700.h
-b/arch/arm/mach-pxa/hx4700.h
-similarity index 99%
-rename from arch/arm/mach-pxa/include/mach/hx4700.h
-rename to arch/arm/mach-pxa/hx4700.h
-index 0c30e6d9c660..ce2db33989e1 100644
---- a/arch/arm/mach-pxa/include/mach/hx4700.h
-+++ b/arch/arm/mach-pxa/hx4700.h
-@@ -10,7 +10,7 @@
-
- #include <linux/gpio.h>
- #include <linux/mfd/asic3.h>
--#include "irqs.h" /* PXA_NR_BUILTIN_GPIO */
-+#include <mach/irqs.h> /* PXA_NR_BUILTIN_GPIO */
-
- #define HX4700_ASIC3_GPIO_BASE PXA_NR_BUILTIN_GPIO
- #define HX4700_EGPIO_BASE      (HX4700_ASIC3_GPIO_BASE + ASIC3_NUM_GPIOS)
-diff --git a/sound/soc/pxa/hx4700.c b/sound/soc/pxa/hx4700.c
-index 7334fac758de..e6473c50e512 100644
---- a/sound/soc/pxa/hx4700.c
-+++ b/sound/soc/pxa/hx4700.c
-@@ -10,7 +10,7 @@
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
- #include <linux/delay.h>
--#include <linux/gpio.h>
-+#include <linux/gpio/consumer.h>
-
- #include <sound/core.h>
- #include <sound/jack.h>
-@@ -18,10 +18,10 @@
- #include <sound/pcm_params.h>
- #include <sound/soc.h>
-
--#include <mach/hx4700.h>
- #include <asm/mach-types.h>
- #include "pxa2xx-i2s.h"
-
-+static struct gpio_desc *gpiod_hp_driver, *gpiod_spk_sd;
- static struct snd_soc_jack hs_jack;
-
- /* Headphones jack detection DAPM pin */
-@@ -29,20 +29,18 @@ static struct snd_soc_jack_pin hs_jack_pin[] = {
-        {
-                .pin    = "Headphone Jack",
-                .mask   = SND_JACK_HEADPHONE,
-+               .invert = 1,
-        },
-        {
-                .pin    = "Speaker",
-                /* disable speaker when hp jack is inserted */
-                .mask   = SND_JACK_HEADPHONE,
--               .invert = 1,
-        },
- };
-
- /* Headphones jack detection GPIO */
- static struct snd_soc_jack_gpio hs_jack_gpio = {
--       .gpio           = GPIO75_HX4700_EARPHONE_nDET,
--       .invert         = true,
--       .name           = "hp-gpio",
-+       .name           = "earphone-det",
-        .report         = SND_JACK_HEADPHONE,
-        .debounce_time  = 200,
- };
-@@ -81,14 +79,14 @@ static const struct snd_soc_ops hx4700_ops = {
- static int hx4700_spk_power(struct snd_soc_dapm_widget *w,
-                            struct snd_kcontrol *k, int event)
- {
--       gpio_set_value(GPIO107_HX4700_SPK_nSD, !!SND_SOC_DAPM_EVENT_ON(event));
-+       gpiod_set_value(gpiod_spk_sd, !SND_SOC_DAPM_EVENT_ON(event));
-        return 0;
- }
-
- static int hx4700_hp_power(struct snd_soc_dapm_widget *w,
-                           struct snd_kcontrol *k, int event)
- {
--       gpio_set_value(GPIO92_HX4700_HP_DRIVER, !!SND_SOC_DAPM_EVENT_ON(event));
-+       gpiod_set_value(gpiod_hp_driver, !!SND_SOC_DAPM_EVENT_ON(event));
-        return 0;
- }
-
-@@ -162,11 +160,6 @@ static struct snd_soc_card snd_soc_card_hx4700 = {
-        .fully_routed           = true,
- };
-
--static struct gpio hx4700_audio_gpios[] = {
--       { GPIO107_HX4700_SPK_nSD, GPIOF_OUT_INIT_HIGH, "SPK_POWER" },
--       { GPIO92_HX4700_HP_DRIVER, GPIOF_OUT_INIT_LOW, "EP_POWER" },
--};
--
- static int hx4700_audio_probe(struct platform_device *pdev)
- {
-        int ret;
-@@ -174,26 +167,26 @@ static int hx4700_audio_probe(struct
-platform_device *pdev)
-        if (!machine_is_h4700())
-                return -ENODEV;
-
--       ret = gpio_request_array(hx4700_audio_gpios,
--                               ARRAY_SIZE(hx4700_audio_gpios));
-+       gpiod_hp_driver = devm_gpiod_get(&pdev->dev, "hp-driver", GPIOD_ASIS);
-+       ret = PTR_ERR_OR_ZERO(gpiod_hp_driver);
-+       if (ret)
-+               return ret;
-+       gpiod_spk_sd = devm_gpiod_get(&pdev->dev, "spk-sd", GPIOD_ASIS);
-+       ret = PTR_ERR_OR_ZERO(gpiod_spk_sd);
-        if (ret)
-                return ret;
-
-+       hs_jack_gpio.gpiod_dev = &pdev->dev;
-        snd_soc_card_hx4700.dev = &pdev->dev;
-        ret = devm_snd_soc_register_card(&pdev->dev, &snd_soc_card_hx4700);
--       if (ret)
--               gpio_free_array(hx4700_audio_gpios,
--                               ARRAY_SIZE(hx4700_audio_gpios));
-
-        return ret;
- }
-
- static int hx4700_audio_remove(struct platform_device *pdev)
- {
--       gpio_set_value(GPIO92_HX4700_HP_DRIVER, 0);
--       gpio_set_value(GPIO107_HX4700_SPK_nSD, 0);
--
--       gpio_free_array(hx4700_audio_gpios, ARRAY_SIZE(hx4700_audio_gpios));
-+       gpiod_set_value(gpiod_hp_driver, 0);
-+       gpiod_set_value(gpiod_spk_sd, 0);
-        return 0;
- }
+Thanks,
+Bhupesh
