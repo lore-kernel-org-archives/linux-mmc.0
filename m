@@ -2,34 +2,34 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB393C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 14:14:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C31F6C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 14:16:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1379708AbiEEOSX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 May 2022 10:18:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42636 "EHLO
+        id S240196AbiEEOTk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 May 2022 10:19:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240196AbiEEOSV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 10:18:21 -0400
+        with ESMTP id S237840AbiEEOTk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 10:19:40 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC9205A08B;
-        Thu,  5 May 2022 07:14:41 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F085453B7A;
+        Thu,  5 May 2022 07:16:00 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: sre)
-        with ESMTPSA id 99B0B1F4579A
+        with ESMTPSA id C8CE51F457A9
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1651760080;
-        bh=r33seUc7ch2ErUOuHDOu/kLhA/pqR1qUoAKMOVPvGl4=;
+        s=mail; t=1651760159;
+        bh=W4SZhjT6xZkzhOrReGV1YPJvbxvwLaVfN3yGmI/6XVw=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Qy+mVmCiI+cGac8hF4ckuNPcfThjIc1BzyLbDAmxrUDhWix4W+GEoZpFD+0RgOl35
-         mEAmmhpXNSQJRWaX0B/PyDotoud2XI0UKts+9HvJ06IPvTh3D5K2N7u6E796aYFyMS
-         nVX50vDvohv1RTKh+5v/tpSTkMAHu3iHv6nCyprnqnSNGfV4iT90FErodSk4rnHQvy
-         zwVy58INW077N0dFQlhEcuTDFJHfRCQkO/QwZZ6SxI9VN696k0kKggJ1mS1eXcmc95
-         O4mqkh/fx9bzgyQ8Dt+uVmVzf4X2vI+gTtt9vGiSQg4TYcK9dbe5KlJhplcrUO306M
-         JDwTHLJDEp8OA==
+        b=btmxl3G8sDIAPPdG1+hUMFjECMvX+iri8m431iaZXu9AYDVoOa5I+oLD04/2xDKhU
+         YsITj8AwxTR14nLRzZWb1WxTFHHqatH58vjU55vtj/3YLoTXnrgyxwHt1G8/CsrrwC
+         /PMrgmjDsWrHXMKmPbkH+UlzqBuXSmKsHdyhebLhHeNP6kKxzlkpLsQrwWhmLD0i0T
+         9p3T48DW3IlxM6C9DHD7qD8dc0I0+tFcbbWETIaN/XArqfSS3PMD4UcjFg18T6+uGA
+         E60GT9kG09E6EXQu9XDKy9+zBR3hVTO2O2VW/AB0QqFUStuoJ4JVTlAAHndBRtMJAa
+         lG1LvrzgN7f2Q==
 Received: by mercury (Postfix, from userid 1000)
-        id 6BBEB1060437; Thu,  5 May 2022 16:14:38 +0200 (CEST)
-Date:   Thu, 5 May 2022 16:14:38 +0200
+        id 234601060437; Thu,  5 May 2022 16:15:57 +0200 (CEST)
+Date:   Thu, 5 May 2022 16:15:57 +0200
 From:   Sebastian Reichel <sebastian.reichel@collabora.com>
 To:     Sebastian Reichel <sebastian.reichel@collabora.com>
 Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
@@ -46,78 +46,77 @@ Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
         linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, kernel@collabora.com,
         Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: Re: [PATCHv2 01/21] dt-bindings: pinctrl: rockchip: add rk3588
-Message-ID: <20220505141438.7tqanpu5gumkpxos@mercury.elektranox.org>
+Subject: Re: [PATCHv2 02/21] dt-bindings: mmc: sdhci-of-dwcmhsc: Add rk3588
+Message-ID: <20220505141557.txgr4ngcxhwr57oe@mercury.elektranox.org>
 References: <20220504213251.264819-1-sebastian.reichel@collabora.com>
- <20220504213251.264819-2-sebastian.reichel@collabora.com>
+ <20220504213251.264819-3-sebastian.reichel@collabora.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="aiobpk3ve3g3geno"
+        protocol="application/pgp-signature"; boundary="ikswav6d3jtgfdq4"
 Content-Disposition: inline
-In-Reply-To: <20220504213251.264819-2-sebastian.reichel@collabora.com>
+In-Reply-To: <20220504213251.264819-3-sebastian.reichel@collabora.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---aiobpk3ve3g3geno
+--ikswav6d3jtgfdq4
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
 Hi,
 
-On Wed, May 04, 2022 at 11:32:31PM +0200, Sebastian Reichel wrote:
-> Add compatible string for rk3588 pin controller. No other changes
-> are required, since the new controller can use the old binding.
+On Wed, May 04, 2022 at 11:32:32PM +0200, Sebastian Reichel wrote:
+> Add compatible value for the Rockchip rk3588 dwcmshc controller.
 >=20
 > Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 > Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 > ---
 
-This patch has already been applied and I accidently resend it.
-Please ignore.
+This patch has already been applied, but I accidently resend it.
+Please ignore it.
 
 -- Sebastian
 
->  Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml | 1 +
+>  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 1 +
 >  1 file changed, 1 insertion(+)
 >=20
-> diff --git a/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.y=
-aml b/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
-> index b0eae3a67ab1..e62fb5e9db76 100644
-> --- a/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
-> +++ b/Documentation/devicetree/bindings/pinctrl/rockchip,pinctrl.yaml
-> @@ -44,6 +44,7 @@ properties:
->        - rockchip,rk3368-pinctrl
->        - rockchip,rk3399-pinctrl
->        - rockchip,rk3568-pinctrl
-> +      - rockchip,rk3588-pinctrl
->        - rockchip,rv1108-pinctrl
+> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yam=
+l b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> index f300ced4cdf3..71f8e726d641 100644
+> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> @@ -17,6 +17,7 @@ properties:
+>    compatible:
+>      enum:
+>        - rockchip,rk3568-dwcmshc
+> +      - rockchip,rk3588-dwcmshc
+>        - snps,dwcmshc-sdhci
 > =20
->    rockchip,grf:
+>    reg:
 > --=20
 > 2.35.1
 >=20
 
---aiobpk3ve3g3geno
+--ikswav6d3jtgfdq4
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAmJz284ACgkQ2O7X88g7
-+prDiBAAjKfr+0DCR6KkMpPqlTHOTGrVzK48kK3SKovBaEB12SpFGm6JjVmrjDFi
-87sS6NIjz8VAoLbKIR9Jvznx9nrg5lm5A9XAwq8tJQa1PGUoj23hmshlQ5xwkYBB
-d4ccesgEuOumHEoMA8FdXWe6geflTCiehaaQNpBS6y0gvfA/DHp/b2lvtDkTAB1X
-zodwTs7Hu5Fcu4yUVai7SfCUf2p/B3uW8PwXowr5OFVjLfYFVui57ZX/1pioWEAy
-StjCo7WRFwTKLZswNTgz1CGDIfp+74C6BoCDyI5RAlmCO2PGO+xtvTMtnS+C3+pN
-HkHLRd5AluhvTqJCrxjOUbQyUVt/oo5k8mP3Wx5PCIbp7GS2vz6sHtugmVkrEQg7
-VNEm/8krtLzRuRnpVqRUuv0pH6ISuKwiHTrCrtEtpVwuAmaY187r9B6VtOBj+Y+v
-ajoSdRfCk8T/McvuJ6Ut6WgLL0LK7blQYo2SpWkI1rQu2NcikEs2DY3tAhAgKm8O
-/owEOTtHLHvsX5bBLALg7GXgfCWYPVwvTiVSdNRNGmdUGa9s5IywThggQu+RG0hU
-IDY+8bSH37udHDAinE0gIbStFzDweQT6RhuRrueoVmBT/Lgzx2looPzTkVKrdPRG
-9ms3yw0hcGtR21VjmjCuW//MutObsThVvgQfD3SLGp0vYSRAUXA=
-=bSaz
+iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAmJz3BwACgkQ2O7X88g7
++przfg/9FbMnqzN7qvpUMSuTIRwd9SJSrzxF+gH4JtICrgZvUPmXt1N+Pk/gebXg
+jeG5x0ldbj/HLRJ+EqMkER8QGhB1aKHtDSLIT02XAh1kZEYEwUeNcIpdfLggfi41
+vqvMPtM7u5skv/Pbdq4VbRAgEeKuWHMHlvqETZQzykbsfbUH71zNTQspLAubtTy2
+AFev02lYfb/njlYgqdudSbHJwHORR0JP1Mmuy2M7Iuihbf0cBa22aHe0kXwgvY7m
+EXWopIIKJmWSSFFCt+ubRpwG4K7NY1LWMgHFEE9Mfaxt8YlnZht832Gn5FJTYyG4
+tDfw/cNNhl32b+W3qxFqdFsm1Wn29VZjOk/pO404Jexyu6PO2nlKgK3r2W5yDAhC
+Kc00Z+8pLMTlhwZktCx6Bs3vzFttkqRYxUMRgu5hmVFzNMidxBssYys+Ni+namvk
+588Wm2STU0kVg2yBTqUlJxlrfArbmC8hIOZ95N/oHkrWR9P2kO1wH6rhwAvUpJVV
+eTDDddmcLKXIrbV1EtcjF2OnwpQR/uLLP1cIGVccagmahiWrzjePFShYfQ0wPEnq
+CUQDIFfgtNUwKk2F8Ya/7Ytj/mHtQdahkR7FVhlCs9YwNB0OdoLSYQHKw0vvi3BD
+b2Rl3V2/IAF5AmWcHynuIZjbKf8dXo9X5o0R2DA6+7SOjcKO3mI=
+=MsHG
 -----END PGP SIGNATURE-----
 
---aiobpk3ve3g3geno--
+--ikswav6d3jtgfdq4--
