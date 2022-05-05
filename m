@@ -2,146 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03B1EC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 May 2022 21:59:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0541C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 05:03:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345813AbiEDWDV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 May 2022 18:03:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55682 "EHLO
+        id S243089AbiEEFGl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 May 2022 01:06:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44926 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238179AbiEDWDU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2022 18:03:20 -0400
-Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B41C4CD58
-        for <linux-mmc@vger.kernel.org>; Wed,  4 May 2022 14:59:43 -0700 (PDT)
-Received: by mail-yb1-xb2d.google.com with SMTP id r11so4696397ybg.6
-        for <linux-mmc@vger.kernel.org>; Wed, 04 May 2022 14:59:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=rmJxiEP7m5MkHAr9riUqfx3uT8FiWx1lLvenswbOwJo=;
-        b=QoiC7QZe2hJyujp1ZRg0nlXjXopykN2j/DeYH65TBWATXUktJf0x/kyffuuacsI/Xo
-         3U/WGyV+fixlajIQ09GKt1DZZYpxMas0dWaDYCL8jonCJtMRr4CSZtyBZVh8caz3Zhfm
-         KLVYZqsNmH6MjXnLA95998XCfsQEg4LoRnNmHuqp/sQ2AApgVFWMqqZBdroSiC1gbSmN
-         F4COMU/J9YGu52LHRSSP9wDA3f+g3bnizNxpCHxuTE9h/gJ7KhKhsdH72IujMMikVg4I
-         fP3vyeXEvVrVnkAX/oRVPo4TmV6M5W4ptTtqSYXWLDxsKe5hoIl7+BOBmDpgqE7s/ubD
-         8xlA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=rmJxiEP7m5MkHAr9riUqfx3uT8FiWx1lLvenswbOwJo=;
-        b=viZpdt00+TxdrHAXvRXDiGQOjqnHTUwF1i3GQc56BLt9enfbkrflFuvUZNUlMjkZd8
-         hbzz+9+oSEuT7Db/P15X9uEtyk7En2xPJLgHnXecfiSD5Lg91pG7sz9qkoQOmapuV/Sv
-         ckMuXB9hhh+sz+oR/7i5k+cvITnxnAOyybAGpDmrCaDjpi1VZJdUHrEPs2cKe8Y37O5t
-         GQlY3ANTxw8YPFQLTDUHEZJisl+3Qj5ArH7m1e197nfb4IZegvnSjiE4QDxR+argQn50
-         Dq9d9DcDjfmpPV4QOmTSzvxinu1bMitvO9bjy/6equGIvhpvjVWTBlFxKpF91dBAOKar
-         eRkA==
-X-Gm-Message-State: AOAM533la7Lhn1XGLbC2tyg0f3CKiAdLeIvtsxoafjSIl07ecuUm6EQK
-        jiGB1n/DPeaApeFXhBGPmhsK8ZLATSBWQXqUjmTMVA==
-X-Google-Smtp-Source: ABdhPJws0kFu4uk8m+EBRW3/56Ag/4uZ6hdskWay/lA/R4RBYkLUb5oUPb5cyXOdcEWwAD5EvFRWUXI3Mh6lxHFGeY0=
-X-Received: by 2002:a25:bcc7:0:b0:648:d728:d39 with SMTP id
- l7-20020a25bcc7000000b00648d7280d39mr19634791ybm.514.1651701582183; Wed, 04
- May 2022 14:59:42 -0700 (PDT)
+        with ESMTP id S230522AbiEEFGk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 01:06:40 -0400
+Received: from muru.com (muru.com [72.249.23.125])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 154E448897;
+        Wed,  4 May 2022 22:03:00 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTPS id 651BB80B0;
+        Thu,  5 May 2022 04:59:39 +0000 (UTC)
+Date:   Thu, 5 May 2022 08:02:58 +0300
+From:   Tony Lindgren <tony@atomide.com>
+To:     Yegor Yefremov <yegorslists@googlemail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linux-OMAP <linux-omap@vger.kernel.org>, linux-mmc@vger.kernel.org
+Subject: Re: Linux 5.18.x: sdhci issue
+Message-ID: <YnNagtAtSudCum75@atomide.com>
+References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
 MIME-Version: 1.0
-References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-19-arnd@kernel.org>
- <CACRpkdac8dGKSEmc-HpgooJefrDtiKK+_A1Mv7AJM8yQV9UY-w@mail.gmail.com> <CAK8P3a0w3gFzZoBzyRsi1Ta4prESf8Fp0=quAPSKMnaXvbXNTQ@mail.gmail.com>
-In-Reply-To: <CAK8P3a0w3gFzZoBzyRsi1Ta4prESf8Fp0=quAPSKMnaXvbXNTQ@mail.gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 4 May 2022 23:59:30 +0200
-Message-ID: <CACRpkdZNryYkidvdKuT57RM3fz6_X+3oOzF5xaOZd+TyScfUsw@mail.gmail.com>
-Subject: Re: [PATCH 18/48] ARM: pxa: hx4700: use gpio descriptors for audio
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Marek Vasut <marek.vasut@gmail.com>,
-        Philipp Zabel <philipp.zabel@gmail.com>,
-        Lubomir Rintel <lkundrak@v3.sk>,
-        Paul Parsons <lost.distance@yahoo.com>,
-        Tomas Cech <sleep_walker@suse.com>,
-        Sergey Lapin <slapin@ossfans.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        IDE-ML <linux-ide@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mtd <linux-mtd@lists.infradead.org>,
-        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
-        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, May 2, 2022 at 9:08 AM Arnd Bergmann <arnd@kernel.org> wrote:
-> On Sun, May 1, 2022 at 11:41 PM Linus Walleij <linus.walleij@linaro.org> wrote:
-> >
-> > (...)
-> > > +static struct gpiod_lookup_table hx4700_audio_gpio_table = {
-> > > +       .dev_id = "hx4700-audio",
-> > > +       .table = {
-> > > +               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
-> > > +                           "earphone-ndet", GPIO_ACTIVE_HIGH),
-> >
-> > This looks wrong. The n in nDET in the end of the name of the GPIO line
-> > means active low does it not?
-> >
-> > What I usually do when I see this is to properly set it to
-> > GPIO_ACTIVE_LOW in the descriptor table, then invert the logic
-> > where it's getting used.
-> >
-> > Also rename to earphone-det instead of -ndet
->
-> Thanks for taking a look! I changed it now, but I don't know if
-> I got the correct number of inversions in the end. How does this look?
+Hi,
 
-Looks wrong, you can just invert the argument to any statement of set_value()
-after tagging respective line as active low. Then gpilob will do a second
-inversion.
+* Yegor Yefremov <yegorslists@googlemail.com> [220504 09:12]:
+> Hi Tony, all,
+> 
+> During the kernel boot I see the following error. The device is still
+> working afterwards. 5.17.5 shows the same behavior. Is this a known
+> issue?
 
-> +               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
-> +                           "earphone-det", GPIO_ACTIVE_LOW),
-> +               GPIO_LOOKUP("gpio-pxa", GPIO107_HX4700_SPK_nSD,
-> +                           "spk-sd", GPIO_ACTIVE_LOW),
+Thanks for reporting it, I was not aware of this one. Might be worth
+bisecting. Adding linux-mmc and Ulf.
 
-So those two have switched polarity.
+Regards,
 
-> @@ -81,14 +79,14 @@ static const struct snd_soc_ops hx4700_ops = {
->  static int hx4700_spk_power(struct snd_soc_dapm_widget *w,
->                             struct snd_kcontrol *k, int event)
->  {
-> -       gpio_set_value(GPIO107_HX4700_SPK_nSD, !!SND_SOC_DAPM_EVENT_ON(event));
-> +       gpiod_set_value(gpiod_spk_sd, !!SND_SOC_DAPM_EVENT_ON(event));
+Tony
 
-Thus drop one ! in front of the expression, just !SND_SOC_DAPM_EVENT_ON(event)
-
-> -       gpio_set_value(GPIO92_HX4700_HP_DRIVER, !!SND_SOC_DAPM_EVENT_ON(event));
-> +       gpiod_set_value(gpiod_hp_driver, !!SND_SOC_DAPM_EVENT_ON(event));
-
-But not this.
-
-> +       gpiod_spk_sd = devm_gpiod_get(&pdev->dev, "spk-sd", GPIOD_OUT_LOW);
-
-These initial values don't seem to be set in the old code you could
-just use GPIOD_ASIS as flag to make sure the new code behaves
-the same.
-
-Yours,
-Linus Walleij
+> [    3.734570] sdhci-omap 48060000.mmc: Got CD GPIO
+> [    3.739989] INFO: trying to register non-static key.
+> [    3.744991] The code is fine but needs lockdep annotation, or maybe
+> [    3.751286] you didn't initialize this object before use?
+> [    3.756707] turning off the locking correctness validator.
+> [    3.762221] CPU: 0 PID: 8 Comm: kworker/u2:0 Not tainted 5.18.0-rc5 #1
+> [    3.768787] Hardware name: Generic AM33XX (Flattened Device Tree)
+> [    3.774913] Workqueue: events_unbound async_run_entry_fn
+> [    3.780283]  unwind_backtrace from show_stack+0x10/0x14
+> [    3.785555]  show_stack from dump_stack_lvl+0x58/0x70
+> [    3.790643]  dump_stack_lvl from register_lock_class+0x4ec/0x55c
+> [    3.796695]  register_lock_class from __lock_acquire+0x60/0x2bd4
+> [    3.802738]  __lock_acquire from lock_acquire.part.0+0xb0/0x248
+> [    3.808695]  lock_acquire.part.0 from _raw_spin_lock_irqsave+0x4c/0x68
+> [    3.815265]  _raw_spin_lock_irqsave from sdhci_init+0x34/0xf4
+> [    3.821051]  sdhci_init from sdhci_runtime_resume_host+0x3c/0x1bc
+> [    3.827180]  sdhci_runtime_resume_host from
+> sdhci_omap_runtime_resume+0x108/0x110
+> [    3.834710]  sdhci_omap_runtime_resume from __rpm_callback+0x3c/0x148
+> [    3.841197]  __rpm_callback from rpm_callback+0x50/0x54
+> [    3.846453]  rpm_callback from rpm_resume+0x518/0x71c
+> [    3.851534]  rpm_resume from __pm_runtime_resume+0x50/0x68
+> [    3.857052]  __pm_runtime_resume from sdhci_omap_probe+0x1e4/0x7a8
+> [    3.863270]  sdhci_omap_probe from platform_probe+0x58/0xbc
+> [    3.868886]  platform_probe from really_probe.part.0+0x9c/0x290
+> [    3.874843]  really_probe.part.0 from __driver_probe_device+0xa0/0x138
+> [    3.881409]  __driver_probe_device from driver_probe_device+0x30/0x10c
+> [    3.887975]  driver_probe_device from __device_attach_driver+0xb0/0xf8
+> [    3.894540]  __device_attach_driver from bus_for_each_drv+0x80/0xd0
+> [    3.900845]  bus_for_each_drv from __device_attach_async_helper+0xac/0xe0
+> [    3.907672]  __device_attach_async_helper from async_run_entry_fn+0x20/0xb0
+> [    3.914675]  async_run_entry_fn from process_one_work+0x284/0x72c
+> [    3.920811]  process_one_work from worker_thread+0x28/0x4b0
+> [    3.926418]  worker_thread from kthread+0xe4/0x104
+> [    3.931243]  kthread from ret_from_fork+0x14/0x28
+> [    3.935977] Exception stack(0xd0035fb0 to 0xd0035ff8)
+> [    3.941056] 5fa0:                                     00000000
+> 00000000 00000000 00000000
+> [    3.949274] 5fc0: 00000000 00000000 00000000 00000000 00000000
+> 00000000 00000000 00000000
+> [    3.957491] 5fe0: 00000000 00000000 00000000 00000000 00000013 00000000
+> [    3.964359] sdhci-omap 48060000.mmc: supply pbias not found, using
+> dummy regulator
+> [    3.972468] sdhci-omap 48060000.mmc: supply vqmmc not found, using
+> dummy regulator
+> [    3.982478] sdhci-omap 481d8000.mmc: supply pbias not found, using
+> dummy regulator
+> [    3.990665] sdhci-omap 481d8000.mmc: supply vqmmc not found, using
+> dummy regulator
+> 
+> Regards,
+> Yegor
