@@ -2,102 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0541C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 05:03:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6224C4167B
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 06:04:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243089AbiEEFGl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 May 2022 01:06:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44926 "EHLO
+        id S244067AbiEEGIP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 May 2022 02:08:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230522AbiEEFGk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 01:06:40 -0400
-Received: from muru.com (muru.com [72.249.23.125])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 154E448897;
-        Wed,  4 May 2022 22:03:00 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by muru.com (Postfix) with ESMTPS id 651BB80B0;
-        Thu,  5 May 2022 04:59:39 +0000 (UTC)
-Date:   Thu, 5 May 2022 08:02:58 +0300
-From:   Tony Lindgren <tony@atomide.com>
-To:     Yegor Yefremov <yegorslists@googlemail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linux-OMAP <linux-omap@vger.kernel.org>, linux-mmc@vger.kernel.org
-Subject: Re: Linux 5.18.x: sdhci issue
-Message-ID: <YnNagtAtSudCum75@atomide.com>
-References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
+        with ESMTP id S230306AbiEEGIN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 02:08:13 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E07F8366A5;
+        Wed,  4 May 2022 23:04:34 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 766EA61C03;
+        Thu,  5 May 2022 06:04:34 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CF6FEC385BC;
+        Thu,  5 May 2022 06:04:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1651730673;
+        bh=gGag8LcvVDzOYjY7vVQNICNRVUATqvouUQ3T9qB8Y4k=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=IzeX2fl3N2x2kryaheKunqUXxhYq2EKW3EevzAcRMispu7pOGu+LIVB4gtA4lt47H
+         kuw8arO+PfbPq7WQnALg8Llzkb+hKwtvB/sYTsnK/90IacYZCB6DJZ5ZQJOsJ5C1F3
+         TeSHzM+uYa+G41zdiYBmFF25L9TEm88hz+cFkf+LED+1kXeRmilzEAvsC7hDnbfjGn
+         7+T7Dj+o9VKBm1U6ge16L5XMEd+1ntq34MUjLp9fn2cdJO958LQytdZ8prNLl0PmNR
+         JJUBc01v6sbgWXUsh3IWA1bR3+vxPlhbpLgI0/bOseW+q4bkkad+M4ksyG11vuvJyh
+         VmRMQT8XoxC+g==
+Received: by mail-wm1-f49.google.com with SMTP id q20so2010918wmq.1;
+        Wed, 04 May 2022 23:04:33 -0700 (PDT)
+X-Gm-Message-State: AOAM532KYwJ4kV4x0ust3FQTY5P7lDLmdAqa0ZHF8tckDNZFQ3EHpIll
+        agg4oXhlxqv95Hv8yxNuanYbXaFOameqvZcXfEI=
+X-Google-Smtp-Source: ABdhPJxJJBc6IXeb9FDBUjhMgPRC02W3Kaja9XP7Gl4879zHpOvDa2WCA8GypEt4poAHxn+t5qvz/Rnv+5FUxU+6qJI=
+X-Received: by 2002:a05:600c:4f0f:b0:394:54c1:f5b3 with SMTP id
+ l15-20020a05600c4f0f00b0039454c1f5b3mr3065513wmq.33.1651730671693; Wed, 04
+ May 2022 23:04:31 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
+References: <20220419163810.2118169-1-arnd@kernel.org> <20220419163810.2118169-19-arnd@kernel.org>
+ <CACRpkdac8dGKSEmc-HpgooJefrDtiKK+_A1Mv7AJM8yQV9UY-w@mail.gmail.com>
+ <CAK8P3a0w3gFzZoBzyRsi1Ta4prESf8Fp0=quAPSKMnaXvbXNTQ@mail.gmail.com> <CACRpkdZNryYkidvdKuT57RM3fz6_X+3oOzF5xaOZd+TyScfUsw@mail.gmail.com>
+In-Reply-To: <CACRpkdZNryYkidvdKuT57RM3fz6_X+3oOzF5xaOZd+TyScfUsw@mail.gmail.com>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Thu, 5 May 2022 08:04:14 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a0y0tVZODpp+GSf0EkMPWbbvMqA-4kNf0NJMc0M2=2WHw@mail.gmail.com>
+Message-ID: <CAK8P3a0y0tVZODpp+GSf0EkMPWbbvMqA-4kNf0NJMc0M2=2WHw@mail.gmail.com>
+Subject: Re: [PATCH 18/48] ARM: pxa: hx4700: use gpio descriptors for audio
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>, Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Marek Vasut <marek.vasut@gmail.com>,
+        Philipp Zabel <philipp.zabel@gmail.com>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Paul Parsons <lost.distance@yahoo.com>,
+        Tomas Cech <sleep_walker@suse.com>,
+        Sergey Lapin <slapin@ossfans.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Helge Deller <deller@gmx.de>, Mark Brown <broonie@kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        IDE-ML <linux-ide@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        "open list:HID CORE LAYER" <linux-input@vger.kernel.org>,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mtd <linux-mtd@lists.infradead.org>,
+        linux-rtc@vger.kernel.org, USB list <linux-usb@vger.kernel.org>,
+        Linux Fbdev development list <linux-fbdev@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Wed, May 4, 2022 at 11:59 PM Linus Walleij <linus.walleij@linaro.org> wrote:
+> On Mon, May 2, 2022 at 9:08 AM Arnd Bergmann <arnd@kernel.org> wrote:
+> > On Sun, May 1, 2022 at 11:41 PM Linus Walleij <linus.walleij@linaro.org> wrote:
+> > >
+> > > (...)
+> > > > +static struct gpiod_lookup_table hx4700_audio_gpio_table = {
+> > > > +       .dev_id = "hx4700-audio",
+> > > > +       .table = {
+> > > > +               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
+> > > > +                           "earphone-ndet", GPIO_ACTIVE_HIGH),
+> > >
+> > > This looks wrong. The n in nDET in the end of the name of the GPIO line
+> > > means active low does it not?
+> > >
+> > > What I usually do when I see this is to properly set it to
+> > > GPIO_ACTIVE_LOW in the descriptor table, then invert the logic
+> > > where it's getting used.
+> > >
+> > > Also rename to earphone-det instead of -ndet
+> >
+> > Thanks for taking a look! I changed it now, but I don't know if
+> > I got the correct number of inversions in the end. How does this look?
+>
+> Looks wrong, you can just invert the argument to any statement of set_value()
+> after tagging respective line as active low. Then gpilob will do a second
+> inversion.
+>
+> > +               GPIO_LOOKUP("gpio-pxa", GPIO75_HX4700_EARPHONE_nDET,
+> > +                           "earphone-det", GPIO_ACTIVE_LOW),
+> > +               GPIO_LOOKUP("gpio-pxa", GPIO107_HX4700_SPK_nSD,
+> > +                           "spk-sd", GPIO_ACTIVE_LOW),
+>
+> So those two have switched polarity.
+>
+> > @@ -81,14 +79,14 @@ static const struct snd_soc_ops hx4700_ops = {
+> >  static int hx4700_spk_power(struct snd_soc_dapm_widget *w,
+> >                             struct snd_kcontrol *k, int event)
+> >  {
+> > -       gpio_set_value(GPIO107_HX4700_SPK_nSD, !!SND_SOC_DAPM_EVENT_ON(event));
+> > +       gpiod_set_value(gpiod_spk_sd, !!SND_SOC_DAPM_EVENT_ON(event));
+>
+> Thus drop one ! in front of the expression, just !SND_SOC_DAPM_EVENT_ON(event)
 
-* Yegor Yefremov <yegorslists@googlemail.com> [220504 09:12]:
-> Hi Tony, all,
-> 
-> During the kernel boot I see the following error. The device is still
-> working afterwards. 5.17.5 shows the same behavior. Is this a known
-> issue?
+Ok, done. But I still leave the extra 'invert=1' in hs_jack_pin[], right?
 
-Thanks for reporting it, I was not aware of this one. Might be worth
-bisecting. Adding linux-mmc and Ulf.
+/* Headphones jack detection DAPM pin */
+static struct snd_soc_jack_pin hs_jack_pin[] = {
+        {
+                .pin    = "Headphone Jack",
+                .mask   = SND_JACK_HEADPHONE,
+        },
+        {
+                .pin    = "Speaker",
+                /* disable speaker when hp jack is inserted */
+                .mask   = SND_JACK_HEADPHONE,
+                .invert = 1,
+        },
+};
 
-Regards,
+> > +       gpiod_spk_sd = devm_gpiod_get(&pdev->dev, "spk-sd", GPIOD_OUT_LOW);
+>
+> These initial values don't seem to be set in the old code you could
+> just use GPIOD_ASIS as flag to make sure the new code behaves
+> the same.
 
-Tony
+Ok.
 
-> [    3.734570] sdhci-omap 48060000.mmc: Got CD GPIO
-> [    3.739989] INFO: trying to register non-static key.
-> [    3.744991] The code is fine but needs lockdep annotation, or maybe
-> [    3.751286] you didn't initialize this object before use?
-> [    3.756707] turning off the locking correctness validator.
-> [    3.762221] CPU: 0 PID: 8 Comm: kworker/u2:0 Not tainted 5.18.0-rc5 #1
-> [    3.768787] Hardware name: Generic AM33XX (Flattened Device Tree)
-> [    3.774913] Workqueue: events_unbound async_run_entry_fn
-> [    3.780283]  unwind_backtrace from show_stack+0x10/0x14
-> [    3.785555]  show_stack from dump_stack_lvl+0x58/0x70
-> [    3.790643]  dump_stack_lvl from register_lock_class+0x4ec/0x55c
-> [    3.796695]  register_lock_class from __lock_acquire+0x60/0x2bd4
-> [    3.802738]  __lock_acquire from lock_acquire.part.0+0xb0/0x248
-> [    3.808695]  lock_acquire.part.0 from _raw_spin_lock_irqsave+0x4c/0x68
-> [    3.815265]  _raw_spin_lock_irqsave from sdhci_init+0x34/0xf4
-> [    3.821051]  sdhci_init from sdhci_runtime_resume_host+0x3c/0x1bc
-> [    3.827180]  sdhci_runtime_resume_host from
-> sdhci_omap_runtime_resume+0x108/0x110
-> [    3.834710]  sdhci_omap_runtime_resume from __rpm_callback+0x3c/0x148
-> [    3.841197]  __rpm_callback from rpm_callback+0x50/0x54
-> [    3.846453]  rpm_callback from rpm_resume+0x518/0x71c
-> [    3.851534]  rpm_resume from __pm_runtime_resume+0x50/0x68
-> [    3.857052]  __pm_runtime_resume from sdhci_omap_probe+0x1e4/0x7a8
-> [    3.863270]  sdhci_omap_probe from platform_probe+0x58/0xbc
-> [    3.868886]  platform_probe from really_probe.part.0+0x9c/0x290
-> [    3.874843]  really_probe.part.0 from __driver_probe_device+0xa0/0x138
-> [    3.881409]  __driver_probe_device from driver_probe_device+0x30/0x10c
-> [    3.887975]  driver_probe_device from __device_attach_driver+0xb0/0xf8
-> [    3.894540]  __device_attach_driver from bus_for_each_drv+0x80/0xd0
-> [    3.900845]  bus_for_each_drv from __device_attach_async_helper+0xac/0xe0
-> [    3.907672]  __device_attach_async_helper from async_run_entry_fn+0x20/0xb0
-> [    3.914675]  async_run_entry_fn from process_one_work+0x284/0x72c
-> [    3.920811]  process_one_work from worker_thread+0x28/0x4b0
-> [    3.926418]  worker_thread from kthread+0xe4/0x104
-> [    3.931243]  kthread from ret_from_fork+0x14/0x28
-> [    3.935977] Exception stack(0xd0035fb0 to 0xd0035ff8)
-> [    3.941056] 5fa0:                                     00000000
-> 00000000 00000000 00000000
-> [    3.949274] 5fc0: 00000000 00000000 00000000 00000000 00000000
-> 00000000 00000000 00000000
-> [    3.957491] 5fe0: 00000000 00000000 00000000 00000000 00000013 00000000
-> [    3.964359] sdhci-omap 48060000.mmc: supply pbias not found, using
-> dummy regulator
-> [    3.972468] sdhci-omap 48060000.mmc: supply vqmmc not found, using
-> dummy regulator
-> [    3.982478] sdhci-omap 481d8000.mmc: supply pbias not found, using
-> dummy regulator
-> [    3.990665] sdhci-omap 481d8000.mmc: supply vqmmc not found, using
-> dummy regulator
-> 
-> Regards,
-> Yegor
+        Arnd
