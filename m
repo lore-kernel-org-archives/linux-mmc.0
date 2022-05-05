@@ -2,79 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CB14C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 09:36:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1660C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 May 2022 13:52:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234023AbiEEJju (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 May 2022 05:39:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55366 "EHLO
+        id S1380234AbiEEN4J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 May 2022 09:56:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41542 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348433AbiEEJjs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 05:39:48 -0400
-Received: from list.virtualsheetmusic.com (list.virtualsheetmusic.com [179.61.137.95])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEA334A3DA
-        for <linux-mmc@vger.kernel.org>; Thu,  5 May 2022 02:36:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=list.virtualsheetmusic.com; s=y; h=Date:Message-Id:
-        Content-Transfer-Encoding:Content-Type:Reply-To:From:MIME-Version:Subject:To:
-        Sender:Cc:Content-ID:Content-Description:Resent-Date:Resent-From:
-        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:
-        List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:
-        List-Archive; bh=aOOGdYfXz1IrjbLaH6tskIGPTvRasIQxz+fxJYBv3F0=; b=iMfPMdfLIE80
-        kgpgIhAkKfb21AtVBaL6bal3y4PjDlq7NbN1jBvcI8NDBky6uBVhOLBbb2/IpQ/qt0ouVFMZFpHJF
-        9k2J/GeJ89FuIXvZRpWGAJnSoFcETvUoWfopZSyrsVVO7D3ntYw2etf/y2/L1H9ovVZsMHtUDosAW
-        zvcdM=;
-Received: from root by list.virtualsheetmusic.com with local (Exim 4.92)
-        (envelope-from <no-reply@musicianspage.com>)
-        id 1nmXty-0003nc-4v
-        for linux-mmc@vger.kernel.org; Thu, 05 May 2022 02:36:02 -0700
-To:     linux-mmc@vger.kernel.org
-Subject: You subscribed successfully.
+        with ESMTP id S1380328AbiEENze (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2022 09:55:34 -0400
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CF6D57980;
+        Thu,  5 May 2022 06:51:29 -0700 (PDT)
+Received: by mail-ej1-x635.google.com with SMTP id i27so8851864ejd.9;
+        Thu, 05 May 2022 06:51:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=03jEfwhlWo+0F3QSErStBbhWJEDMANJVy/9rSPAUx1Y=;
+        b=gDuWgen8Trv88IGdxznU7oSgtaGFD9MISOr5rrDibBMmmE7rdJ9qzu55Y8IjlM48TA
+         Pj1rTM8nEBAfhGlUpxlZz+uzebwMmf42g21Mp/bNWSMUURl4OJqCXAnmVYIugg/zJqXT
+         ggmCRFZethoWCe6B3tJRbgQBma3Yls8XMzFVPNfH0WvxIp9HrKG4u/eguY6/k8fugqHE
+         bJjxcHaonBy5O2ss12U6jckTDgwk/iCRdtWve1Up6aZUc4pNKSBgsqkFdNhZzY3cKDhh
+         KFbS/810r+VUh/Y9fB0WrcwyPhOsGgfsSz5wOM6HxTiz1Az1/oEyM5fW7fxc85E/BhNK
+         H2nw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=03jEfwhlWo+0F3QSErStBbhWJEDMANJVy/9rSPAUx1Y=;
+        b=JX7HkjnWrsBxF70znaiSanXFeElxOHdjmdLO09SG/x7/R8JkgcDO2Ex7Z+3ZWvSNl2
+         NAURg2yEjLglOsTqr5v5Ey+fQqWQTUQ66i5qVS6R1yTKC2wbUZIaQ0KWjNjXOm43Ur1r
+         K4ACQGlhO6kWipUAfo4rmSubKWvqSvDWXr4c2sgeFp7yLId4eEBnSB7gs6pjbYO9yJs7
+         ZR6dvpT3BI/Gg1dpOdTfAktGqo6cg9GCmJphSjf8PZLxHt+LLeediJ/6PbH26/q7fLAr
+         Dag5RSKQE+5P1K228pe6iu24gxRkLBWlFpysgwH8jtB5FAQMf+nO1P63x1mQjtPnCPGC
+         X0sQ==
+X-Gm-Message-State: AOAM531YYXor7wJCh9SZaPihYK8w71m5rcgtA9Aq9uoxzrGcBURzKDYo
+        JPBshY5y8ZhTUvgl0VLHhek=
+X-Google-Smtp-Source: ABdhPJxv3vaDNdwJi00++TLK8Ghuv5Ib+qTCOCEdX5gN/oc0y8OEOLbbC12VtWJ8ETtvXVM4x8Wt6w==
+X-Received: by 2002:a17:907:6e8b:b0:6f4:7147:a6ac with SMTP id sh11-20020a1709076e8b00b006f47147a6acmr16897480ejc.187.1651758687576;
+        Thu, 05 May 2022 06:51:27 -0700 (PDT)
+Received: from archbook.localnet (84-72-105-84.dclient.hispeed.ch. [84.72.105.84])
+        by smtp.gmail.com with ESMTPSA id g3-20020a056402424300b0042617ba6387sm895632edb.17.2022.05.05.06.51.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 May 2022 06:51:27 -0700 (PDT)
+From:   Nicolas Frattaroli <frattaroli.nicolas@gmail.com>
+To:     Heiko Stuebner <heiko@sntech.de>,
+        linux-rockchip@lists.infradead.org
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
+        Jianqun Xu <jay.xu@rock-chips.com>, kernel@collabora.com,
+        Sebastian Reichel <sebastian.reichel@collabora.com>,
+        Sebastian Reichel <sebastian.reichel@collabora.com>
+Subject: Re: [PATCHv2 13/21] pinctrl/rockchip: add rk3588 support
+Date:   Thu, 05 May 2022 15:51:25 +0200
+Message-ID: <1792093.MYTQk1Oth5@archbook>
+In-Reply-To: <20220504213251.264819-14-sebastian.reichel@collabora.com>
+References: <20220504213251.264819-1-sebastian.reichel@collabora.com> <20220504213251.264819-14-sebastian.reichel@collabora.com>
 MIME-Version: 1.0
-From:   Musicians Page <mailingconfirm@musicianspage.com>
-Reply-To: Musicians Page <mailingconfirm@musicianspage.com>
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <E1nmXty-0003nc-4v@list.virtualsheetmusic.com>
-Date:   Thu, 05 May 2022 02:36:02 -0700
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dear Musician and Music Lover,
+On Mittwoch, 4. Mai 2022 23:32:43 CEST Sebastian Reichel wrote:
+> From: Jianqun Xu <jay.xu@rock-chips.com>
+> 
+> Add pinctrl support for RK3588.
+> 
+> Signed-off-by: Jianqun Xu <jay.xu@rock-chips.com>
+> [merged in downstream fixes, simplified register lookup logic for better
+> maintanence at the cost of a bit more static const memory and fixed some
+> incorrect registers]
+> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 
-you have successfully subscribed
-to the Musicians Page Newsletter.
-It will keep you informed about the latest
-information about music events, site updates
-and news from the music industry.
+Hi,
 
-You can personalize your Newsletter at any time from the following link:
+a heads up to the maintainer: this was already merged. The cover letter
+states
 
-https://www.musicianspage.com/em.php?email=3Dlinux-mmc@vger.kernel.org
+>  * Dropped pinctrl and mmc binding patch (applied)
 
+so I think this was included by accident.
 
-Remember that our staff is always available to answer your questions
-or help with any problems. For assistance, just send a message to:
-mailto:support@musicianspage.com.
-
-We always strive to help you in your musical pursuits.
-
-You can unsubscribe at any time by clicking the link below:
-
-https://www.musicianspage.com/unsubscribe.php?email=3Dlinux-mmc@vger.kernel=
-=2Eorg
-
-
-Thank you very much for your interest.
-
-My kindest regards,
-
-Fabrizio Ferrari
-
-supervisor
-Musicians Page
-https://www.musicianspage.com
-
+Regards,
+Nicolas Frattaroli
 
 
