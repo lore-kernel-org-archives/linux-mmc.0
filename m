@@ -2,82 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4985FC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 May 2022 16:07:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7B42C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 May 2022 16:48:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1443539AbiEFQLZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 May 2022 12:11:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43438 "EHLO
+        id S1443896AbiEFQvp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 May 2022 12:51:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52982 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1443494AbiEFQLC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2022 12:11:02 -0400
+        with ESMTP id S1443890AbiEFQvo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2022 12:51:44 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B28E06D96E;
-        Fri,  6 May 2022 09:07:19 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CA5B4551C;
+        Fri,  6 May 2022 09:48:01 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3F17861A8E;
-        Fri,  6 May 2022 16:07:19 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 68152C385A8;
-        Fri,  6 May 2022 16:07:15 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EBF4D62031;
+        Fri,  6 May 2022 16:48:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 57691C385A9;
+        Fri,  6 May 2022 16:48:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1651853238;
-        bh=hlecmGmXMdLPY0SRK5EkvKlwwip1h2w5sOHri907iUo=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=uhFiHHHND8MOJ19d6UW4iRbnGzrkDvFC2fq54yEYFWJXiOnFi4FoJIewObEJ6Nb+k
-         EsWvbsctIbTeLMStgoPFGfDMHxEE07wR8BVYakDYb0uCPIGyfRpYYMhm0CFbJ0R3x7
-         TT7MR+hAhChPi9MZOfVpRpae98ETxmO1wNty9BP/I2yMcUokPs2yJVGaVtDpu8pqHy
-         Ro0zYW5QlFq6Q8yE97Of6cYJyIkxEdAOqtxacw9CYx3mXOW1yA8xcf4wpj48DRuKHj
-         +96B4bM+L5L8s8iIx91QCC0xE2nnbcs/5ow6HUEN5UlVZ411kE7xKUS0YOsuZrIvxB
-         d4nc0r9N1Kwag==
-From:   Will Deacon <will@kernel.org>
-To:     krzk+dt@kernel.org, robin.murphy@arm.com, agross@kernel.org,
-        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
-        joro@8bytes.org, Rohit Agarwal <quic_rohiagar@quicinc.com>,
-        robh+dt@kernel.org
-Cc:     catalin.marinas@arm.com, kernel-team@android.com,
-        Will Deacon <will@kernel.org>, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        iommu@lists.linux-foundation.org,
-        linux-arm-kernel@lists.infradead.org,
-        manivannan.sadhasivam@linaro.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 0/7] SDX65 devicetree updates
-Date:   Fri,  6 May 2022 17:07:03 +0100
-Message-Id: <165185052553.2780438.7989324600616529868.b4-ty@kernel.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <1649670615-21268-1-git-send-email-quic_rohiagar@quicinc.com>
-References: <1649670615-21268-1-git-send-email-quic_rohiagar@quicinc.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+        s=k20201202; t=1651855680;
+        bh=9Or0gQpn6XgC35VPDTr3Yn7QwZGrlv7Zlr90vB8qbjg=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=Xi4/mVDtitzPDXNBYeANtgt6CFslc9arVw7ONfXQEMWfeqBEPlU1VUCuiR0kgNfNI
+         Zot3CGd4jEFCAEsGFoEIgMQQscXuSEBJLrR652MsnFpQnV3qvCTOqP6qMZ0AXoq9hp
+         dS2KqKemmDsr2OmNDYBdlmHz8mq8XGAM4I0XRY5G7dt/dqAS86WcodGW0PecrgGj9l
+         jObIuMK1FIv3gW6ywgkZuNCnfe3Cac5VyQ1xe5e5dmtgaO5kGphKDVOOZkqt1vZFfa
+         0scjYWp9ac5EBxjkbULFSmPsM8ZUzkMmX25GtfbJKQ4RRuD9ri0UO9timnwzbmAdU6
+         i1HM1N2RIRNdg==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 423B4F0389E;
+        Fri,  6 May 2022 16:48:00 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v5.18-rc6
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20220506084238.279365-1-ulf.hansson@linaro.org>
+References: <20220506084238.279365-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20220506084238.279365-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18-rc4
+X-PR-Tracked-Commit-Id: 3e5a8e8494a8122fe4eb3f167662f406cab753b9
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 64267926e01b06f43e26232722fb3dc3f4819823
+Message-Id: <165185568026.1698.9469184276486713504.pr-tracker-bot@kernel.org>
+Date:   Fri, 06 May 2022 16:48:00 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 11 Apr 2022 15:20:08 +0530, Rohit Agarwal wrote:
-> This series adds devicetree nodes for SDX65. It adds reserved memory
-> nodes, SDHCI, smmu and tcsr mutex support.
-> 
-> Changes from v1:
->  - Addressed Mani's Comments and made necessary.
->  - Rebased on top of v5.18-rc2.
-> 
-> [...]
+The pull request you sent on Fri,  6 May 2022 10:42:38 +0200:
 
-Applied SMMU binding patch to will (for-joerg/arm-smmu/updates), thanks!
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18-rc4
 
-[4/7] dt-bindings: arm-smmu: Add binding for SDX65 SMMU
-      https://git.kernel.org/will/c/5a4eb9163471
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/64267926e01b06f43e26232722fb3dc3f4819823
 
-However, I must confess that I don't understand the point in updating
-the binding documentation but not the driver. Should we be matching on
-the new compatible string somewhere?
+Thank you!
 
-Cheers,
 -- 
-Will
-
-https://fixes.arm64.dev
-https://next.arm64.dev
-https://will.arm64.dev
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
