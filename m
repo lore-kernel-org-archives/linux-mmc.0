@@ -2,89 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A47AC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 May 2022 11:48:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B534FC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 May 2022 08:10:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353404AbiELLsH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 May 2022 07:48:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53978 "EHLO
+        id S241067AbiEMIKS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 May 2022 04:10:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353424AbiELLsF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2022 07:48:05 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFF9D527CC;
-        Thu, 12 May 2022 04:48:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1652356083; x=1683892083;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=6kvMfpZvWFSrqwLIvmdaXHccIdQ6zO56Yt3VrJlydlc=;
-  b=V7dUrkL0ct+UBWXUKa4CIOVq6ZCuFSy8YLRwRfQhHlz+VYxQiEIzzHjk
-   HzfwfG0ldrju3k9GuvWgGDqOJev7GrP6uH1eBFMexOCsIh1a2owLLQ/lR
-   v4+VIYxiRfIFKFvjyyR4ezJNCx+Wq4xs5kj+uazpIt+/sOhPglsh+ZocQ
-   CQ0WcRv/YkvunPTq6g3uNbdQbmzOBGnV64cK7zcro/Rf+m+cKS80anBUi
-   gRm2P8c1tpXsqxg2cjzk5TcrlG4rlgWU2j3/Y/5rjM73Zk2YmGJZKbDzW
-   KKLmDCUAzv7Zs8tWrNR3MJsVJr7i+68CMtQXFPtyiWwsrx2kUh/7FPbNY
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10344"; a="257523219"
-X-IronPort-AV: E=Sophos;i="5.91,219,1647327600"; 
-   d="scan'208";a="257523219"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 May 2022 04:48:03 -0700
-X-IronPort-AV: E=Sophos;i="5.91,219,1647327600"; 
-   d="scan'208";a="594630549"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.215])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 May 2022 04:48:00 -0700
-Message-ID: <e502c03a-3ac4-b660-40d5-944d52a31655@intel.com>
-Date:   Thu, 12 May 2022 14:47:56 +0300
+        with ESMTP id S1357650AbiEMIKQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2022 04:10:16 -0400
+Received: from mail.coredeal.pl (mail.coredeal.pl [51.75.73.133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A3BC2A5E97
+        for <linux-mmc@vger.kernel.org>; Fri, 13 May 2022 01:10:15 -0700 (PDT)
+Received: by mail.coredeal.pl (Postfix, from userid 1002)
+        id 91885A2187; Fri, 13 May 2022 08:06:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=coredeal.pl; s=mail;
+        t=1652429224; bh=9KGuIG62LgzC9aYmjKxzocuYLRCVghXg6v9Q1q2LHec=;
+        h=Date:From:To:Subject:From;
+        b=WRNOY32vhRIbzNFIm1ZrNYqK+8xKI+wEX8u8CSCHb0ucs0PtmxGOwJT3m/7sUVngA
+         s3P9KqczzsHSBq2o1IdZSp6Y+jNqagNy+cYDLYbrWp0ZJKUxQUZ9PU9wpEZPamB6P1
+         VC1qSgrK1T+v7M2R1TrvtdeeoIx90F0sYYElEHFxXe+rAyPZEZBq4NvYEjC1pi+8EK
+         ewcpnqt62EjnvGTp4RgWc/aHy7hpq1SQgaQAWFDeM3D1FwfwRojGelZIn8A7FYjKX6
+         giTa85pWeqTTpiNitEx5r4RXjX8QeBYiHbHOQ7WGqllaP9a4zd4+PFfiSjQDDjH2wD
+         2jZesMP8ALG1w==
+Received: by mail.coredeal.pl for <linux-mmc@vger.kernel.org>; Fri, 13 May 2022 08:05:55 GMT
+Message-ID: <20220513064500-0.1.33.o0im.0.3tjy1snkcn@coredeal.pl>
+Date:   Fri, 13 May 2022 08:05:55 GMT
+From:   "Krzysztof Maj" <krzysztof.maj@coredeal.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: Biznesowy angielski
+X-Mailer: mail.coredeal.pl
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.8.1
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add NULL check for data field
-Content-Language: en-US
-To:     Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, git@xilinx.com,
-        saikrishna12468@gmail.com, sgoud@xilinx.com
-References: <1652339993-27280-1-git-send-email-lakshmi.sai.krishna.potthuri@xilinx.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <1652339993-27280-1-git-send-email-lakshmi.sai.krishna.potthuri@xilinx.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/05/22 10:19, Sai Krishna Potthuri wrote:
-> Add NULL check for data field retrieved from of_device_get_match_data()
-> before dereferencing the data.
-> Addresses-coverity: CID 305057:Dereference null return value (NULL_RETURNS)
-> 
-> Signed-off-by: Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>
+Dzie=C5=84 dobry,=20
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+czy rozwa=C5=BCali Pa=C5=84stwo rozw=C3=B3j kwalifikacji j=C4=99zykowych =
+swoich pracownik=C3=B3w?
 
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 6a2e5a468424..757801dfc308 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1577,6 +1577,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	const struct sdhci_arasan_of_data *data;
->  
->  	data = of_device_get_match_data(dev);
-> +	if (!data)
-> +		return -EINVAL;
-> +
->  	host = sdhci_pltfm_init(pdev, data->pdata, sizeof(*sdhci_arasan));
->  
->  	if (IS_ERR(host))
+Opracowali=C5=9Bmy kursy j=C4=99zykowe dla r=C3=B3=C5=BCnych bran=C5=BC, =
+w kt=C3=B3rych koncentrujemy si=C4=99 na podniesieniu poziomu s=C5=82owni=
+ctwa i jako=C5=9Bci komunikacji wykorzystuj=C4=85c autorsk=C4=85 metod=C4=
+=99, stworzon=C4=85 specjalnie dla wymagaj=C4=85cego biznesu.=20
 
+Niestandardowy kurs on-line, dopasowany do profilu firmy i obszar=C3=B3w =
+=C5=9Bwiadczonych us=C5=82ug, w szybkim czasie przyniesie efekty, kt=C3=B3=
+re zwi=C4=99ksz=C4=85 komfort i jako=C5=9B=C4=87 pracy, rozwijaj=C4=85c m=
+o=C5=BCliwo=C5=9Bci biznesowe.=20
+
+Zdalne szkolenie j=C4=99zykowe to m.in. zaj=C4=99cia z native speakerami,=
+ kt=C3=B3re w szybkim czasie naucz=C4=85 pracownik=C3=B3w rozmawia=C4=87 =
+za pomoc=C4=85 jasnego i zwi=C4=99z=C5=82ego j=C4=99zyka Business English=
+=2E
+
+Czy m=C3=B3g=C5=82bym przedstawi=C4=87 wi=C4=99cej szczeg=C3=B3=C5=82=C3=B3=
+w i opowiedzie=C4=87 jak dzia=C5=82amy?=20
+
+
+Pozdrawiam
+Krzysztof Maj
