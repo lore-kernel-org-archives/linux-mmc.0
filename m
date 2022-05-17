@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 797CAC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:09:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24F07C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:09:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351872AbiEQSJQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 May 2022 14:09:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52206 "EHLO
+        id S1351959AbiEQSJc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 May 2022 14:09:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351885AbiEQSJQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:09:16 -0400
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 543454EF70;
-        Tue, 17 May 2022 11:09:15 -0700 (PDT)
-Received: by mail-pj1-x1036.google.com with SMTP id qe3-20020a17090b4f8300b001dc24e4da73so2318909pjb.1;
-        Tue, 17 May 2022 11:09:15 -0700 (PDT)
+        with ESMTP id S1351910AbiEQSJa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:09:30 -0400
+Received: from mail-pg1-x530.google.com (mail-pg1-x530.google.com [IPv6:2607:f8b0:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC36F5FB8;
+        Tue, 17 May 2022 11:09:19 -0700 (PDT)
+Received: by mail-pg1-x530.google.com with SMTP id c22so865046pgu.2;
+        Tue, 17 May 2022 11:09:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Sk+5mSaR9rPPKXkfYc0/VsJM1xTQzkpsddohoa/KxaY=;
-        b=iGPK/GwXeGKXb+JpJA46iSyhnPvw8ykFkQnXHIOb+nnJMZMZNEpCOO5aAaPTON9dL0
-         /arpk5OBwqIkFqJYwu8moP1z3ie3HWE4S9Su3w+237xAGMDlSsrMPNk684b19W459JFh
-         TeukQRXDrrk607aSndZ/R1d9EAiqRw/hzyxU+Bl78iiOCytDyNbfOmVKdwl9G9ZbtL94
-         IT2LRNjS3SgdiT5EcB4zjn0d1SS6f3ngmYD2l7LVkaXOxa8kYtEBKXCdxZUYp3Z5Nw4M
-         5B/QLrscfUylDB+CXuodZ4cgJAjI57t7M+Zb171soqJXr+iVLY4nd84qfn9iB26jTmyv
-         Rc/Q==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=zGBHNRVAReTR8yDYLvhJzA/B3avPsiigOsOP3ZNzQYw=;
+        b=polGNZfBWi5g/eJVDnC60LyaRdJx9thJ5mqQE3iXHQMfcNAQImQ846+Lt7Wz6e6i0h
+         wIftuHyM2SYU7q8X7x25s6UV3R1VgQkweIhF7l2lfzehTrQlaSsIboUkm/L4S1/MJoTm
+         q/SOnSlZ/9KnGgv2gKYf0bd2rlnq0rVqAmhoiwDyuT+VWo5+2CpPdB0oPaXEFxJKYBKX
+         oKJgeveiMEhFr5RRLC4sCQ4aEVW6YWrBAfJ3ZX6lYlGNxzMj/ILeuLyEhQ4McVIbCohK
+         NNLauje8VSBuhCOMBojAI022Sv/jIuT0VhC2HtJcIUZOIpWPOeyoyoyl62qqOmbAX1Db
+         kvtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Sk+5mSaR9rPPKXkfYc0/VsJM1xTQzkpsddohoa/KxaY=;
-        b=trBJ58vCc0eRdjN/MnvENKhAbmz51iysFfGD6wnGvZoajGGbM4wjrdtZV/ibi/lzC9
-         QsSrKtnTykuyROV2rPU49Gw+ny8yRXbe3BFphoGH7CtegBygNd1K9ZsqsyWfBBG0MmdP
-         7b938tlhC90W3BUfMpcnUPbGfxFBQ+A6gLV5xtDkMm8xeyv3qUWM1JsdEAxxwIaQ6PDg
-         m+fIMVblpusTBUd63m8EHX6eBUTobiuDqcUw60hrxCoJp41VU9wiAJpsPHctQkVlOm+H
-         Ep7RMiPFH2rP6K94xgUfd7PlqgFzIHDWnyMV/SFlKKud46uqQHo0jMxDA+vJToKYzNIC
-         Km+w==
-X-Gm-Message-State: AOAM533xzE7adj4MSwESiUwG6Yxhr4P1Qeeuw6GhXthsPJsqdVCa5BQn
-        7L/n2H0cBhYqeExqAXkKjMacBd8Jt4Q=
-X-Google-Smtp-Source: ABdhPJzpEwYEZEmjNkNxL3JHREQJ8h2a9XP7Q653MwGhOMDaN/ejTYzEuPprsM0feUFY+7Epvc+R8g==
-X-Received: by 2002:a17:90a:7e94:b0:1da:3b47:b00e with SMTP id j20-20020a17090a7e9400b001da3b47b00emr38237513pjl.222.1652810954452;
-        Tue, 17 May 2022 11:09:14 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=zGBHNRVAReTR8yDYLvhJzA/B3avPsiigOsOP3ZNzQYw=;
+        b=5EOqd6pMCXS7/J66tCFH4vtWfK4+SbRkzJuVD7xwiqlIMsrmfGp0RKMNZCo0uRWhzE
+         jVyg17Q3fsji4fEuIsL9yGMioxXouGH4wdf2XMgiHMeIE/udCzVYKaoN9FJGb7hSe1zu
+         O7u6W4kW55EqUyIAkWrfIh0eheKoYSI6UGnEDsXDV7NfggcA0TtE8oNrR/ei+xwuxpB7
+         PesGHIDeK5Q5rt4y8cM2MLW3avqUi1lN3tuRjZjawWWfjjSlwtnht/ckAHGR3N8hYpsP
+         VG4wnBOPF05w61YLXJk93oDjAhQRMPfzW1YGNfg2ko8J5jYHofGU9Lq5mmk2KJCGf6Ml
+         1JIA==
+X-Gm-Message-State: AOAM530sJUMtGs3G56IErjqF1YjIaXEbKGeI9TKV0CTns8bBhqm5jf6T
+        NNaymvOHB28tkxK8do62iwD4y2b6ZO0=
+X-Google-Smtp-Source: ABdhPJyI2gEUFdqQjQg0dM1F0fryaEE05aE2j0+UkSByd5iYL6bx26rgrjaDRqPhTyS/GRtMR1+D5w==
+X-Received: by 2002:a63:125e:0:b0:3f2:5b13:5aac with SMTP id 30-20020a63125e000000b003f25b135aacmr11837658pgs.401.1652810958893;
+        Tue, 17 May 2022 11:09:18 -0700 (PDT)
 Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id i5-20020a056a00224500b0050dc7628160sm46854pfu.58.2022.05.17.11.09.13
+        by smtp.gmail.com with ESMTPSA id i5-20020a056a00224500b0050dc7628160sm46854pfu.58.2022.05.17.11.09.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 May 2022 11:09:14 -0700 (PDT)
+        Tue, 17 May 2022 11:09:18 -0700 (PDT)
 From:   Florian Fainelli <f.fainelli@gmail.com>
 To:     stable@vger.kernel.org
-Cc:     Florian Fainelli <f.fainelli@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Avri Altman <avri.altman@wdc.com>,
@@ -60,39 +60,85 @@ Cc:     Florian Fainelli <f.fainelli@gmail.com>,
         linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE
         DIGITAL (SD) AND...), linux-kernel@vger.kernel.org (open list),
         alcooperx@gmail.com, kdasu.kdev@gmail.com
-Subject: [PATCH stable 5.4 0/3] MMC timeout back ports
-Date:   Tue, 17 May 2022 11:09:08 -0700
-Message-Id: <20220517180911.246016-1-f.fainelli@gmail.com>
+Subject: [PATCH stable 5.4 3/3] mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+Date:   Tue, 17 May 2022 11:09:11 -0700
+Message-Id: <20220517180911.246016-4-f.fainelli@gmail.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220517180911.246016-1-f.fainelli@gmail.com>
+References: <20220517180911.246016-1-f.fainelli@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-These 3 commits from upstream allow us to have more fine grained control
-over the MMC command timeouts and this solves the following timeouts
-that we have seen on our systems across suspend/resume cycles:
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-[   14.907496] usb usb2: root hub lost power or was reset
-[   15.216232] usb 1-1: reset high-speed USB device number 2 using
-xhci-hcd
-[   15.485812] bcmgenet 8f00000.ethernet eth0: Link is Down
-[   15.525328] mmc1: error -110 doing runtime resume
-[   15.531864] OOM killer enabled.
+commit 533a6cfe08f96a7b5c65e06d20916d552c11b256 upstream
 
-Thanks!
+All callers of __mmc_switch() should now be specifying a valid timeout for
+the CMD6 command. However, just to be sure, let's print a warning and
+default to use the generic_cmd6_time in case the provided timeout_ms
+argument is zero.
 
-Ulf Hansson (3):
-  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
-  mmc: block: Use generic_cmd6_time when modifying
-    INAND_CMD38_ARG_EXT_CSD
-  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+In this context, let's also simplify some of the corresponding code and
+clarify some related comments.
 
- drivers/mmc/core/block.c   |  6 +++---
- drivers/mmc/core/mmc_ops.c | 25 +++++++++++++------------
- 2 files changed, 16 insertions(+), 15 deletions(-)
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Link: https://lore.kernel.org/r/20200122142747.5690-4-ulf.hansson@linaro.org
+Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+---
+ drivers/mmc/core/mmc_ops.c | 16 +++++++---------
+ 1 file changed, 7 insertions(+), 9 deletions(-)
 
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index d8f419183144..d495ba2f368c 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -460,10 +460,6 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+ 	bool expired = false;
+ 	bool busy = false;
+ 
+-	/* We have an unspecified cmd timeout, use the fallback value. */
+-	if (!timeout_ms)
+-		timeout_ms = MMC_OPS_TIMEOUT_MS;
+-
+ 	/*
+ 	 * In cases when not allowed to poll by using CMD13 or because we aren't
+ 	 * capable of polling by using ->card_busy(), then rely on waiting the
+@@ -536,6 +532,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 
+ 	mmc_retune_hold(host);
+ 
++	if (!timeout_ms) {
++		pr_warn("%s: unspecified timeout for CMD6 - use generic\n",
++			mmc_hostname(host));
++		timeout_ms = card->ext_csd.generic_cmd6_time;
++	}
++
+ 	/*
+ 	 * If the cmd timeout and the max_busy_timeout of the host are both
+ 	 * specified, let's validate them. A failure means we need to prevent
+@@ -544,7 +546,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	 * which also means they are on their own when it comes to deal with the
+ 	 * busy timeout.
+ 	 */
+-	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && timeout_ms &&
++	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) &&
+ 	    host->max_busy_timeout && (timeout_ms > host->max_busy_timeout))
+ 		use_r1b_resp = false;
+ 
+@@ -556,10 +558,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 	cmd.flags = MMC_CMD_AC;
+ 	if (use_r1b_resp) {
+ 		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+-		/*
+-		 * A busy_timeout of zero means the host can decide to use
+-		 * whatever value it finds suitable.
+-		 */
+ 		cmd.busy_timeout = timeout_ms;
+ 	} else {
+ 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
 -- 
 2.25.1
 
