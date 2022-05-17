@@ -2,99 +2,162 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51A2FC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 May 2022 13:57:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26509C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 00:02:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241564AbiEPN5i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 May 2022 09:57:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51298 "EHLO
+        id S1350507AbiEQACC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 May 2022 20:02:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244446AbiEPN40 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2022 09:56:26 -0400
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DB0A3B2BC
-        for <linux-mmc@vger.kernel.org>; Mon, 16 May 2022 06:55:57 -0700 (PDT)
-Received: by mail-lj1-x22d.google.com with SMTP id q130so18235115ljb.5
-        for <linux-mmc@vger.kernel.org>; Mon, 16 May 2022 06:55:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=MeiTmWKbfFkyUDAu36ZyhnVOygglTiIR0GOA0B1eY0c=;
-        b=YSvJoVFPtG6bnfTeQxzBBXy77ERTEhTsg7XgRIV7EvSdREsTC+AE70ohYj7+FaK3bh
-         OZ7sjzRe0LmR1tB7sIiFJ86bssbYh2hpR0Y+aNF/BknPMKa7voNiy1bXK6AW9VSd65yv
-         v93gBe0NGiYn3Ng3ITfp5tpi4Zm9UD8CupDajz7yaQAyoxRnLxRhMZUdN71V296ixtDP
-         dkyIm2FRzpKSi0w/RUH3Cd2tWDxZ+pd/bqglKQcNSg/Jn5paNs/SwNzOb+tRvGMX/LUe
-         855GCPqwIABjYfRzwwNyEXTYySq0ebhv/pRlBayaA8U/7pAbULFuWXgIj151YCTknIOb
-         X47g==
+        with ESMTP id S1347394AbiEQAB6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2022 20:01:58 -0400
+Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E216240A08;
+        Mon, 16 May 2022 17:01:55 -0700 (PDT)
+Received: by mail-oi1-f169.google.com with SMTP id w123so20590886oiw.5;
+        Mon, 16 May 2022 17:01:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=MeiTmWKbfFkyUDAu36ZyhnVOygglTiIR0GOA0B1eY0c=;
-        b=jwT4J0AJqn0mJTARIvb0vlzIqVWixDDK9YCoiOcVx9gMLbbGw9WmuXIRQ7SY5w+Oiy
-         pmv13A6t4EjvImaxxWpRUqMszZN1Jx0X1aO0wFeWKmtnY/3Di3z+ZVMXAbTbwE0qlvC+
-         SS0eQTbabijzRaqWrFNU0VOA5rDB+nC1tC3DaUn2HVraNK9NyNQi7uYjBMb9UQyKNFWd
-         I9Mh1/pqnh8WhjWFa2SJJl5GOWB+XgJEkJQhty0oIqH/yRImRDL0BAnKTLNL39DA+4GZ
-         OJa486KjvwIPZLI/nxa0jJgPH3mMH/e93yXUOsMr+9WTaDjOm6HlCobkWut6TJk9YfF1
-         dtPg==
-X-Gm-Message-State: AOAM531yUiDKIejgLc3r9uVU8m0lMskgak/lnlSA/v9eTpDVSze7vfBi
-        yLS4WscpiK3hRBYNLhJKg2ee05prizYu5VDa/bLcCK1kyeiK4Q==
-X-Google-Smtp-Source: ABdhPJwZ6Em0eLu7RM1SxBb2WiY0uU1ovRh7DwLWOyrbGByueTpyFAw3U7b/oAPWL/x87mDro49Q7VbiwqbPhOi6nCM=
-X-Received: by 2002:a2e:9e54:0:b0:250:d6c8:c2a6 with SMTP id
- g20-20020a2e9e54000000b00250d6c8c2a6mr11865448ljk.16.1652709355591; Mon, 16
- May 2022 06:55:55 -0700 (PDT)
-MIME-Version: 1.0
-References: <1652339993-27280-1-git-send-email-lakshmi.sai.krishna.potthuri@xilinx.com>
-In-Reply-To: <1652339993-27280-1-git-send-email-lakshmi.sai.krishna.potthuri@xilinx.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 16 May 2022 15:55:18 +0200
-Message-ID: <CAPDyKFoWdq+908f18Uz3TPj50M2eDiECC7iLU8UGGEuawCpo1w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add NULL check for data field
-To:     Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Hk36ziFXO9TalU4BGZkjhExbMm1QNoPw9Ie36IVTwNw=;
+        b=2LEK5KD8Kr9QztMwl7tFNasiJ1pwFBWvN9a/FQeOVv3g4ic/CTF76yUDXA8fS8QKNU
+         Y7vxbxGFokY6cnm23iLBsRV7CGGT8F2FZDuqdmwtDQX/emD5Sxcf+HZlA+Z1jSmym4sg
+         h+QEj34mk46VLE/7UykAGn6eccF4ScVYiFSGOXVZay3ZGpfQi27NTvLgabZpTSPLd2u6
+         1Y2BalTKXL7LuL6MWe8vqQQRUYbWVcxE87Rf7dz4XY14+0wj33+ER0pFdb1gmq9kaN/x
+         SX8cm0htaaBOEGRx3CH/J6r1670zbC+OiFhXgfGMLGX8tWPoYCf1nnV10u1iVRJpH7tY
+         UKFA==
+X-Gm-Message-State: AOAM533h/ptK3vHSoIYXYjgjylj8C4Wa21UtAltfrtSLrQ6CZMi9U8G9
+        rXv6TCTrFaBWnyaw+5Wl3w==
+X-Google-Smtp-Source: ABdhPJxNS1w1V4Tgb8Bfadl7HxB3INT74jHp2qXeUshOlyFbHb2JkvEfkCuZymuaXD8jWIfZcHIUqQ==
+X-Received: by 2002:a05:6808:1781:b0:326:d85f:b00d with SMTP id bg1-20020a056808178100b00326d85fb00dmr14638011oib.113.1652745715123;
+        Mon, 16 May 2022 17:01:55 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id 97-20020a9d0eea000000b00605da994088sm4420874otj.2.2022.05.16.17.01.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 May 2022 17:01:54 -0700 (PDT)
+Received: (nullmailer pid 3601836 invoked by uid 1000);
+        Tue, 17 May 2022 00:01:53 -0000
+Date:   Mon, 16 May 2022 19:01:53 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Sebastian Reichel <sebastian.reichel@collabora.com>
+Cc:     Heiko Stuebner <heiko@sntech.de>,
+        Krzysztof Kozlowski <krzk+dt@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, git@xilinx.com,
-        saikrishna12468@gmail.com, sgoud@xilinx.com
-Content-Type: text/plain; charset="UTF-8"
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, linux-clk@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel@lists.collabora.co.uk,
+        Elaine Zhang <zhangqing@rock-chips.com>, kernel@collabora.com
+Subject: Re: [PATCHv2 03/21] dt-binding: clock: Document rockchip,rk3588-cru
+ bindings
+Message-ID: <20220517000153.GA3593598-robh@kernel.org>
+References: <20220504213251.264819-1-sebastian.reichel@collabora.com>
+ <20220504213251.264819-4-sebastian.reichel@collabora.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220504213251.264819-4-sebastian.reichel@collabora.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 12 May 2022 at 09:20, Sai Krishna Potthuri
-<lakshmi.sai.krishna.potthuri@xilinx.com> wrote:
->
-> Add NULL check for data field retrieved from of_device_get_match_data()
-> before dereferencing the data.
-> Addresses-coverity: CID 305057:Dereference null return value (NULL_RETURNS)
->
-> Signed-off-by: Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+On Wed, May 04, 2022 at 11:32:33PM +0200, Sebastian Reichel wrote:
+> From: Elaine Zhang <zhangqing@rock-chips.com>
+> 
+> Document the device tree bindings of the rockchip Rk3588 SoC
+> clock driver.
+> 
+> Signed-off-by: Elaine Zhang <zhangqing@rock-chips.com>
+> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 6a2e5a468424..757801dfc308 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1577,6 +1577,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->         const struct sdhci_arasan_of_data *data;
->
->         data = of_device_get_match_data(dev);
-> +       if (!data)
-> +               return -EINVAL;
+>  .../bindings/clock/rockchip,rk3588-cru.yaml   | 63 +++++++++++++++++++
+>  1 file changed, 63 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml b/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
+> new file mode 100644
+> index 000000000000..6e65ee7b0092
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/clock/rockchip,rk3588-cru.yaml
+> @@ -0,0 +1,63 @@
+> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/clock/rockchip,rk3588-cru.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
 > +
->         host = sdhci_pltfm_init(pdev, data->pdata, sizeof(*sdhci_arasan));
->
->         if (IS_ERR(host))
-> --
-> 2.17.1
->
+> +title: Rockchip rk3588 Family Clock Control Module
+> +
+> +maintainers:
+> +  - Elaine Zhang <zhangqing@rock-chips.com>
+> +  - Heiko Stuebner <heiko@sntech.de>
+> +
+> +description: |
+> +  The RK3588 clock controller generates the clock and also implements a
+> +  reset controller for SoC peripherals.
+> +  (examples: provide SCLK_UART2\PCLK_UART2 and SRST_P_UART2\SRST_S_UART2 for UART module)
+> +  Each clock is assigned an identifier and client nodes can use this identifier
+> +  to specify the clock which they consume. All available clocks are defined as
+> +  preprocessor macros in the dt-bindings/clock/rk3588-cru.h headers and can be
+> +  used in device tree sources.
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - rockchip,rk3588-cru
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  "#clock-cells":
+> +    const: 1
+> +
+> +  "#reset-cells":
+> +    const: 1
+> +
+> +  rockchip,grf:
+> +    $ref: /schemas/types.yaml#/definitions/phandle
+> +    description: >
+> +      phandle to the syscon managing the "general register files". It is used
+> +      for GRF muxes, if missing any muxes present in the GRF will not be
+> +      available.
+> +
+> +  clocks: true
+
+You have to define how many clocks and what they are.
+
+> +  assigned-clocks: true
+> +  assigned-clock-rates: true
+
+You don't need these. They are allowed in any node with 'clocks' or now 
+'#clock-cells'.
+
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - "#clock-cells"
+> +  - "#reset-cells"
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  # Clock Control Module node:
+> +  - |
+> +    cru: clock-controller@fd7c0000 {
+> +      compatible = "rockchip,rk3588-cru";
+> +      reg = <0xfd7c0000 0x5c000>;
+> +      #clock-cells = <1>;
+> +      #reset-cells = <1>;
+> +    };
+> -- 
+> 2.35.1
+> 
+> 
