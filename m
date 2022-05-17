@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6499C43219
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:22:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25C28C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:27:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352109AbiEQSW2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 May 2022 14:22:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54628 "EHLO
+        id S1352023AbiEQS1x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 May 2022 14:27:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352086AbiEQSWZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:22:25 -0400
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0FAB2C66B;
-        Tue, 17 May 2022 11:22:19 -0700 (PDT)
-Received: by mail-pj1-x102e.google.com with SMTP id ds11so6581059pjb.0;
-        Tue, 17 May 2022 11:22:19 -0700 (PDT)
+        with ESMTP id S1352065AbiEQS1v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:27:51 -0400
+Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A2D649F1E;
+        Tue, 17 May 2022 11:27:50 -0700 (PDT)
+Received: by mail-pl1-x636.google.com with SMTP id i8so4157411plr.13;
+        Tue, 17 May 2022 11:27:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=B5z0WBrh/BYYCHvUIIawnVVkGhzF2/2dcuB+5FV8icU=;
-        b=AbmiKr13LjgHA635CCvhqbpmwmKepo6wngtA1F550JNQxJC3Osg5bRdXGL1Vo2Tc62
-         2pMzTwyxYU1XYVg1C7uebLES6pcrHRK2QxLTtQocI5ovbyD1qY6J2Mihj+vKZXcVbZ7V
-         gRHae3em/E3V7nEQO9M+Nz+p0CpCEaTyxAqkzPjXHK1ya0KdxUhhGg8S4j8iyS3Lgq0O
-         2D9RNoI2E/dqrxK0kl0vIVRIPo8FIl2HWYAKorCso6+5P7A6qOejYQXrMi3SnyhhsgdN
-         O+P38Ygoube0r5jgLDrdBSf4JK003qLs1rac/B7MBOmDy7S1muUWBg7aIGe3G05mv45s
-         UibA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Qf7lwYbb+YmEy4Sdln94RYRUHzXpgvgkHrp5ukF/qtk=;
+        b=bExLHaOgI9hzmShhcx+3FrTFTHywGjHpDNkaL1enjGCdwKtwptC3WJ8JqGRyGb7+i3
+         LkdhWIv9iMTvjFZihYAieiUyOJasWm6OMHFQ+GSxr8HgX6fj2aKVLcARvxYJ5ik4oST6
+         fkeDy2JqRFFpJKYhXx9TqhwqT1T4ZDmPl052ttR24JfGpVxCrk2uMWKKX7gxx/LjPCVU
+         Cb1dKVQKMgGyAtw634vDUaqLkCRIqZ5i+WOkVW0TnRaS69+Ajw9NLnSs0cAdVLrMjt+n
+         2LIQprGOCthHvYdBQEF1FY0wFYICUfAMS0RHgU2rmsWDyrA29tv2bjr1ueOFFqCIn626
+         Petg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=B5z0WBrh/BYYCHvUIIawnVVkGhzF2/2dcuB+5FV8icU=;
-        b=ueYU1p0Vxk+OfjOJy4VW54/DL4YmLQbXUL1vW6aM1wQ9im1+zVRqXbKLYULPxnO0Th
-         OFSNFGrTPjy5Hr+NT4XkbInU6J+bvSsV7nDUGNv4di8TM7NVupjzUDB1sapJej88dsxB
-         ETT0L6w3YABBytv6knLANvyZ3NHARXnW1MJpELQLFp10QDpl2bBfNzcDTX5C4aAvuYXm
-         nucXQLTSsjERAzu5Gy/aqDPodrkC7B8bCWDBoypSvZc8f3DibwvdowDttjDGpKg3Oee+
-         IO4d0DMNoatdzK+4UXqcmU3rore+vsYqKnl+WHe6W7uKlvMn8rpIjKfEITwsYKuX6CRN
-         /BAg==
-X-Gm-Message-State: AOAM5318Xn9nZqNcSS70f0mTLnvDqQN0TGjSb809FTYwuDC1ocY7hAh2
-        Tqd1oXHRjwJRZecyIs9pzfkoZe4Zpbo=
-X-Google-Smtp-Source: ABdhPJzke1BkFrhoZLv3sDgDH8hPpHFfyyxhP4PJLb+EMGslHLQiFUrYb3dRzNamgAsCzZrgIwfIuw==
-X-Received: by 2002:a17:902:d896:b0:15e:fb07:ba92 with SMTP id b22-20020a170902d89600b0015efb07ba92mr23648389plz.148.1652811738511;
-        Tue, 17 May 2022 11:22:18 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Qf7lwYbb+YmEy4Sdln94RYRUHzXpgvgkHrp5ukF/qtk=;
+        b=6Tqqi+quEbSAd5/57qDOflaQBRdV0S15VwD3GPr/KcfDE52sCYMRp8zKmfElUmO/wb
+         yLVY3Y6wVfevEY79kVZa36I0rpVX7Bj5CJIfsj1U7iqqqE7Fag9gCp+Syte3+D0K+7W9
+         KlpdNyzU+JiPw/REF4Oq76KXuVvCE3FJiQ4epsOHZ8hWScvoF3DLRNS/hAvZNjZrKKjK
+         Spykicbf+mZslfbrQm6n2QlktM7hwttXOGSeOMj3iyjvSd2QI4qkG9lX3Q2cZoheoHe+
+         MsGJ/m35PEqNKU/ne2OCEEd2DcLTkJrI3go+IpdpNb86B2h9Ren77n9sVLFeXVqbb4x/
+         u3Vw==
+X-Gm-Message-State: AOAM533VdAobdEvwJC/bBLpHjh19CbblQPs+JOAK3tuQz+suV79r7jwM
+        TBRSHR/LdbTw0IB7pJ+OC6qdoVuw4ho=
+X-Google-Smtp-Source: ABdhPJxtaH8iWUJqH+nTzrJd+eTcXj/31uRvWBWafFUUBsRF+lVpnf52IWewqOlemGArt/JodSHyhA==
+X-Received: by 2002:a17:90b:4a42:b0:1dc:6bfa:bc40 with SMTP id lb2-20020a17090b4a4200b001dc6bfabc40mr25770930pjb.215.1652812069527;
+        Tue, 17 May 2022 11:27:49 -0700 (PDT)
 Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id x4-20020a17090ad68400b001d7dd00c231sm1998141pju.22.2022.05.17.11.22.17
+        by smtp.gmail.com with ESMTPSA id b12-20020a170902d88c00b0015e8d4eb1fasm9538656plz.68.2022.05.17.11.27.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 May 2022 11:22:18 -0700 (PDT)
+        Tue, 17 May 2022 11:27:49 -0700 (PDT)
 From:   Florian Fainelli <f.fainelli@gmail.com>
 To:     stable@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Avri Altman <avri.altman@wdc.com>,
@@ -60,68 +60,39 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE
         DIGITAL (SD) AND...), linux-kernel@vger.kernel.org (open list),
         alcooperx@gmail.com, kdasu.kdev@gmail.com
-Subject: [PATCH stable 4.19 2/3] mmc: block: Use generic_cmd6_time when modifying INAND_CMD38_ARG_EXT_CSD
-Date:   Tue, 17 May 2022 11:22:10 -0700
-Message-Id: <20220517182211.249775-3-f.fainelli@gmail.com>
+Subject: [PATCH stable 4.14 0/3] MMC timeout back ports
+Date:   Tue, 17 May 2022 11:27:43 -0700
+Message-Id: <20220517182746.252893-1-f.fainelli@gmail.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220517182211.249775-1-f.fainelli@gmail.com>
-References: <20220517182211.249775-1-f.fainelli@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+These 3 commits from upstream allow us to have more fine grained control
+over the MMC command timeouts and this solves the following timeouts
+that we have seen on our systems across suspend/resume cycles:
 
-commit ad91619aa9d78ab1c6d4a969c3db68bc331ae76c upstream
+[   14.907496] usb usb2: root hub lost power or was reset
+[   15.216232] usb 1-1: reset high-speed USB device number 2 using
+xhci-hcd
+[   15.485812] bcmgenet 8f00000.ethernet eth0: Link is Down
+[   15.525328] mmc1: error -110 doing runtime resume
+[   15.531864] OOM killer enabled.
 
-The INAND_CMD38_ARG_EXT_CSD is a vendor specific EXT_CSD register, which is
-used to prepare an erase/trim operation. However, it doesn't make sense to
-use a timeout of 10 minutes while updating the register, which becomes the
-case when the timeout_ms argument for mmc_switch() is set to zero.
+Thanks!
 
-Instead, let's use the generic_cmd6_time, as that seems like a reasonable
-timeout to use for these cases.
+Ulf Hansson (3):
+  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+  mmc: block: Use generic_cmd6_time when modifying
+    INAND_CMD38_ARG_EXT_CSD
+  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Link: https://lore.kernel.org/r/20200122142747.5690-3-ulf.hansson@linaro.org
-Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
----
- drivers/mmc/core/block.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/core/block.c   |  6 +++---
+ drivers/mmc/core/mmc_ops.c | 27 ++++++++++++++-------------
+ 2 files changed, 17 insertions(+), 16 deletions(-)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 630f3bcba56d..f7379c3473e1 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1133,7 +1133,7 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- 					 arg == MMC_TRIM_ARG ?
- 					 INAND_CMD38_ARG_TRIM :
- 					 INAND_CMD38_ARG_ERASE,
--					 0);
-+					 card->ext_csd.generic_cmd6_time);
- 		}
- 		if (!err)
- 			err = mmc_erase(card, from, nr, arg);
-@@ -1175,7 +1175,7 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 				 arg == MMC_SECURE_TRIM1_ARG ?
- 				 INAND_CMD38_ARG_SECTRIM1 :
- 				 INAND_CMD38_ARG_SECERASE,
--				 0);
-+				 card->ext_csd.generic_cmd6_time);
- 		if (err)
- 			goto out_retry;
- 	}
-@@ -1193,7 +1193,7 @@ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
- 			err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 					 INAND_CMD38_ARG_EXT_CSD,
- 					 INAND_CMD38_ARG_SECTRIM2,
--					 0);
-+					 card->ext_csd.generic_cmd6_time);
- 			if (err)
- 				goto out_retry;
- 		}
 -- 
 2.25.1
 
