@@ -2,87 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCB3BC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:32:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76C1BC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:32:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352222AbiEQScG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 May 2022 14:32:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45758 "EHLO
+        id S1352208AbiEQScc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 May 2022 14:32:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48182 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241586AbiEQSb4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:31:56 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6B61381BB;
-        Tue, 17 May 2022 11:31:53 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id n8so18111019plh.1;
-        Tue, 17 May 2022 11:31:53 -0700 (PDT)
+        with ESMTP id S1352254AbiEQSc3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:32:29 -0400
+Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50157515B8;
+        Tue, 17 May 2022 11:32:21 -0700 (PDT)
+Received: by mail-pf1-x42b.google.com with SMTP id a11so17672610pff.1;
+        Tue, 17 May 2022 11:32:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=2BlNjd9CAoC52vv1NpViW3j0LOH8CyDQbmV+zNI9trs=;
-        b=jsv9Hyjyg47Q8SwmgSZdRGcmVwNcw0cPilFXHjVAK+VY+dv71rZW7/EgcHLJFKzfdX
-         IYClPoPpqqiHx5Obl/kNHjLSo95OEhPJ9o8hi4+N2zoDHznDJoEOdrJuuMOhQbYmalH2
-         TBwMoIuo44vBSmJJe5zexyr4Ud2yfqFG4t8WJqi07GlCQLwjTJdWreoREhkCqT7kIx0x
-         l1hunvCnZkTnNVHqlthMiF12t112O5/jPaRmx8BGZXmnC9j71aJQ6ji7/DjVkeWQaQFq
-         Zf+bkqp2pDDe5cnwe8Q4TiPb6ugGnqT9boaZGNDxr59vObJ6OP/hextqDmYq17sJJhnn
-         dFSA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=DfSZzPRStq2lgHjsq9N6lhXntt9Td2w3Wt1rTuYdWMg=;
+        b=BEsilVrnDcq4mvAgesnro2VrGovQTFKDJ7fiZbv4nEH1PoVEKUcokg4XwMATv7jqFt
+         CEPXWz9TmOhX117rYKl6QzBVWlAHvlwjIy+/2vHIcRSfTKJurqBAQUHCxPLi4wuMSA3Q
+         E+foDM2U5UijFCzkwsCZwbTXi4T0SIk5ddR2oIg4YyzNShM3gA124fffF4cSmYEleQso
+         Cjd5i2DymfGfrX958+Ypge43uHWyBvf0QrBaCDSvuK68V6EKEwp+RyVpOsxnfaWsjAxi
+         tSA/MZFr1dRYAO3zsh/1vdYlvmiUP4r4eB7Of3kk3nwqo7L2jkKO3+JVdqOcbcXQZdtB
+         kFsg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=2BlNjd9CAoC52vv1NpViW3j0LOH8CyDQbmV+zNI9trs=;
-        b=6XUxlcM2ylsFcXqHir1sSsoPBWNI6NhqKJeqPvhKQyKb31AibIDseWo3TwZHU7P++j
-         UoMAXSxr6xcN+8LxUvlNhhasEGfcxXge6pdVJ17rPeeFTLVPIWIj68gvr5FWrTGUKrFd
-         JYfy8Z5GYvi7DWMK8IKyNAXMrZF+nU86N+eJiQ1zVsnRy+VMTy7F1EfMit2Qhpwr7/4r
-         /pXeY67y4W2pEpLYc1nkazMoAZB+LIjxfJV0YfZMZcwEqYI7KrP+wLddaUwqxhNFt+uL
-         NjqUSjBLizUashUfG3p1cptSyF56wGrydqrKH9lcXLG4ugC1by4GdBOr7aiVtsfLZ6RN
-         WqpQ==
-X-Gm-Message-State: AOAM531VI+tBxsNg/IOyeZfBFi68ZbT2SVV6GM2TBotkBWMj1wNIJv2O
-        1g/zs5exmnfzPViGGtaf5Tw=
-X-Google-Smtp-Source: ABdhPJwgtUKlhLdu/MQBoCn3YzFQZD/uRm7Y18I4FmOu02UXRKbIZXBFPA4pyb4sMySs8+um16QFYg==
-X-Received: by 2002:a17:90a:5b03:b0:1df:86d4:ba27 with SMTP id o3-20020a17090a5b0300b001df86d4ba27mr4919253pji.124.1652812313250;
-        Tue, 17 May 2022 11:31:53 -0700 (PDT)
-Received: from [192.168.1.3] (ip72-194-116-95.oc.oc.cox.net. [72.194.116.95])
-        by smtp.gmail.com with ESMTPSA id y23-20020a170902d65700b0015ed3a112c9sm9372718plh.280.2022.05.17.11.31.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 17 May 2022 11:31:52 -0700 (PDT)
-Message-ID: <71d595d7-625c-3feb-b1d0-fb745faf394d@gmail.com>
-Date:   Tue, 17 May 2022 11:31:51 -0700
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.0
-Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: Add Broadcom optional sdio_freq
- clock
-Content-Language: en-US
-To:     Kamal Dasu <kdasu.kdev@gmail.com>, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzk+dt@kernel.org, alcooperx@gmail.com
-Cc:     bcm-kernel-feedback-list@broadcom.com, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-References: <20220517180435.29940-1-kdasu.kdev@gmail.com>
- <20220517180435.29940-2-kdasu.kdev@gmail.com>
+        bh=DfSZzPRStq2lgHjsq9N6lhXntt9Td2w3Wt1rTuYdWMg=;
+        b=3ubxpmV1qMciTx/Uia2/nnOkJIkDfT9Zu4OgxeyPVj+I/uomsRn7rHWysYp9w3YnmN
+         OigVFQziIqZzhPTO9VcCO7qbx637On+zKvwzovs90PkyQyOIl5I/e/m6zV09Ggg/slDO
+         n/yliolcb3rGLUHMLxFLUr92cjj7K22jLPAiFwhkWphrCtm6AvC94VqYdKM00A5ZpLTO
+         KYrOWTbr4npqo8b9sybAYVM9MUKp7M4Zwm4GAuQzxNB+IukqcP7S+LaL783medfm75SU
+         HID09o6qfuPu8KpBbDw2+WwUfFjM6xoXUjSbiTmB+BWitG0aRKcao6dWOibXFEOMQIfs
+         3UXw==
+X-Gm-Message-State: AOAM533X/Dyi5pYJ6lke1X6IHZOu4CtCNLyCzV8WOCGOyUrD8hqc7QUN
+        gVga3a18ePQ0OJS+gdaO/rm7t0u0q8I=
+X-Google-Smtp-Source: ABdhPJxLEibPJLN2OqALmxMCNWk9V8AIgC0wGEbV/nnuZntb+q/ocGVwRvlON7PRAw8RNfhB54CFEA==
+X-Received: by 2002:a05:6a00:a0e:b0:4fd:fa6e:95fc with SMTP id p14-20020a056a000a0e00b004fdfa6e95fcmr23767951pfh.17.1652812340533;
+        Tue, 17 May 2022 11:32:20 -0700 (PDT)
+Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id d26-20020a634f1a000000b003c619f3d086sm8950355pgb.2.2022.05.17.11.32.19
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 May 2022 11:32:20 -0700 (PDT)
 From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <20220517180435.29940-2-kdasu.kdev@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+To:     stable@vger.kernel.org
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Nishad Kamdar <nishadkamdar@gmail.com>,
+        =?UTF-8?q?Christian=20L=C3=B6hle?= <CLoehle@hyperstone.com>,
+        linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE
+        DIGITAL (SD) AND...), linux-kernel@vger.kernel.org (open list),
+        alcooperx@gmail.com, kdasu.kdev@gmail.com
+Subject: [PATCH stable 4.9 0/3] MMC timeout back ports
+Date:   Tue, 17 May 2022 11:32:04 -0700
+Message-Id: <20220517183207.258065-1-f.fainelli@gmail.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+These 3 commits from upstream allow us to have more fine grained control
+over the MMC command timeouts and this solves the following timeouts
+that we have seen on our systems across suspend/resume cycles:
 
+[   14.907496] usb usb2: root hub lost power or was reset
+[   15.216232] usb 1-1: reset high-speed USB device number 2 using
+xhci-hcd
+[   15.485812] bcmgenet 8f00000.ethernet eth0: Link is Down
+[   15.525328] mmc1: error -110 doing runtime resume
+[   15.531864] OOM killer enabled.
 
-On 5/17/2022 11:04 AM, Kamal Dasu wrote:
-> The 72116B0 has improved SDIO controllers that allow the max clock
-> rate to be increased from a max of 100MHz to a max of 150MHz.
-> Optional "sdio_freq" clock is used to drive the bus clock if present
-> optional property "max-frequency" specifies a base clock frequency
-> in Hz that overrides the base clock frequency in the CAPS registers.
-> 
-> Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Thanks!
 
-Acked-by: Florian Fainelli <f.fainelli@gmail.com>
+Ulf Hansson (3):
+  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+  mmc: block: Use generic_cmd6_time when modifying
+    INAND_CMD38_ARG_EXT_CSD
+  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+
+ drivers/mmc/card/block.c   | 6 +++---
+ drivers/mmc/core/core.c    | 5 ++++-
+ drivers/mmc/core/mmc_ops.c | 9 +++++----
+ 3 files changed, 12 insertions(+), 8 deletions(-)
+
 -- 
-Florian
+2.25.1
+
