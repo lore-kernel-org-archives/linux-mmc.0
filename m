@@ -2,64 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81B2AC43217
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 16:23:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 797CAC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:09:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350871AbiEQQXg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 May 2022 12:23:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37000 "EHLO
+        id S1351872AbiEQSJQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 May 2022 14:09:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52206 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350874AbiEQQXf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 12:23:35 -0400
-X-Greylist: delayed 2254 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 17 May 2022 09:23:34 PDT
-Received: from mail.neweas.com (mail.neweas.com [162.19.155.127])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DA583B550
-        for <linux-mmc@vger.kernel.org>; Tue, 17 May 2022 09:23:33 -0700 (PDT)
-Received: by mail.neweas.com (Postfix, from userid 1002)
-        id 8D3A522C3E; Tue, 17 May 2022 15:45:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=neweas.com; s=mail;
-        t=1652802359; bh=qQhd+6rcOH+OhrNQ6A9OWLCE/79cwvyTtb6LUe1aYuU=;
-        h=Date:From:To:Subject:From;
-        b=kuduz6DuK7X9pTX/cDLrMZp1aQS7cQ+fC6wdN3LYXwKrN8Ccd9WMVrIjUhG3dp9eA
-         MqfHlxhVM9ZqukQaqKPxPVOypAqqT/yECL3/fUK7VwEvi4tcBDs278WBLSwVBY4kvZ
-         FnDZMlLbCii/s4Q4UeBStHM2unp/j/LQ9H758fMpUAXtyqARfg+ox1RrzQR155sG1q
-         JKUjkeskXUXsvb9jrX1hVLeIk2kRNNS/JN1UvmAn4WBqFjpH8IzjogfXEiNXJvijhi
-         pNpwsZ0w++W19vMbQ0Yn7LGOvgZuLibE+BAS3GllFmE2q+Qd1XUpTr3n1Vss2yDto6
-         p55vycVQjk+XA==
-Received: by mail.neweas.com for <linux-mmc@vger.kernel.org>; Tue, 17 May 2022 15:45:46 GMT
-Message-ID: <20220517141500-0.1.f.zkt.0.ou64345bq3@neweas.com>
-Date:   Tue, 17 May 2022 15:45:46 GMT
-From:   "Luca Gauthier" <luca.gauthier@neweas.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: New collaboration
-X-Mailer: mail.neweas.com
+        with ESMTP id S1351885AbiEQSJQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:09:16 -0400
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 543454EF70;
+        Tue, 17 May 2022 11:09:15 -0700 (PDT)
+Received: by mail-pj1-x1036.google.com with SMTP id qe3-20020a17090b4f8300b001dc24e4da73so2318909pjb.1;
+        Tue, 17 May 2022 11:09:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Sk+5mSaR9rPPKXkfYc0/VsJM1xTQzkpsddohoa/KxaY=;
+        b=iGPK/GwXeGKXb+JpJA46iSyhnPvw8ykFkQnXHIOb+nnJMZMZNEpCOO5aAaPTON9dL0
+         /arpk5OBwqIkFqJYwu8moP1z3ie3HWE4S9Su3w+237xAGMDlSsrMPNk684b19W459JFh
+         TeukQRXDrrk607aSndZ/R1d9EAiqRw/hzyxU+Bl78iiOCytDyNbfOmVKdwl9G9ZbtL94
+         IT2LRNjS3SgdiT5EcB4zjn0d1SS6f3ngmYD2l7LVkaXOxa8kYtEBKXCdxZUYp3Z5Nw4M
+         5B/QLrscfUylDB+CXuodZ4cgJAjI57t7M+Zb171soqJXr+iVLY4nd84qfn9iB26jTmyv
+         Rc/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Sk+5mSaR9rPPKXkfYc0/VsJM1xTQzkpsddohoa/KxaY=;
+        b=trBJ58vCc0eRdjN/MnvENKhAbmz51iysFfGD6wnGvZoajGGbM4wjrdtZV/ibi/lzC9
+         QsSrKtnTykuyROV2rPU49Gw+ny8yRXbe3BFphoGH7CtegBygNd1K9ZsqsyWfBBG0MmdP
+         7b938tlhC90W3BUfMpcnUPbGfxFBQ+A6gLV5xtDkMm8xeyv3qUWM1JsdEAxxwIaQ6PDg
+         m+fIMVblpusTBUd63m8EHX6eBUTobiuDqcUw60hrxCoJp41VU9wiAJpsPHctQkVlOm+H
+         Ep7RMiPFH2rP6K94xgUfd7PlqgFzIHDWnyMV/SFlKKud46uqQHo0jMxDA+vJToKYzNIC
+         Km+w==
+X-Gm-Message-State: AOAM533xzE7adj4MSwESiUwG6Yxhr4P1Qeeuw6GhXthsPJsqdVCa5BQn
+        7L/n2H0cBhYqeExqAXkKjMacBd8Jt4Q=
+X-Google-Smtp-Source: ABdhPJzpEwYEZEmjNkNxL3JHREQJ8h2a9XP7Q653MwGhOMDaN/ejTYzEuPprsM0feUFY+7Epvc+R8g==
+X-Received: by 2002:a17:90a:7e94:b0:1da:3b47:b00e with SMTP id j20-20020a17090a7e9400b001da3b47b00emr38237513pjl.222.1652810954452;
+        Tue, 17 May 2022 11:09:14 -0700 (PDT)
+Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id i5-20020a056a00224500b0050dc7628160sm46854pfu.58.2022.05.17.11.09.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 May 2022 11:09:14 -0700 (PDT)
+From:   Florian Fainelli <f.fainelli@gmail.com>
+To:     stable@vger.kernel.org
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Nishad Kamdar <nishadkamdar@gmail.com>,
+        =?UTF-8?q?Christian=20L=C3=B6hle?= <CLoehle@hyperstone.com>,
+        linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE
+        DIGITAL (SD) AND...), linux-kernel@vger.kernel.org (open list),
+        alcooperx@gmail.com, kdasu.kdev@gmail.com
+Subject: [PATCH stable 5.4 0/3] MMC timeout back ports
+Date:   Tue, 17 May 2022 11:09:08 -0700
+Message-Id: <20220517180911.246016-1-f.fainelli@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+These 3 commits from upstream allow us to have more fine grained control
+over the MMC command timeouts and this solves the following timeouts
+that we have seen on our systems across suspend/resume cycles:
 
-are you looking for more business clients?
+[   14.907496] usb usb2: root hub lost power or was reset
+[   15.216232] usb 1-1: reset high-speed USB device number 2 using
+xhci-hcd
+[   15.485812] bcmgenet 8f00000.ethernet eth0: Link is Down
+[   15.525328] mmc1: error -110 doing runtime resume
+[   15.531864] OOM killer enabled.
 
-We would like to start working with you as a partner in acquiring or exch=
-anging leads, which directly translates into mutual benefits in the form =
-of an increased client portfolio.
+Thanks!
 
-We work in the sector of internet marketing and as one of the first in Eu=
-rope SEO Agencies we=E2=80=99ve introduced the SEO 360 service which allo=
-ws your clients to gain the access to original SEO consultations.
+Ulf Hansson (3):
+  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+  mmc: block: Use generic_cmd6_time when modifying
+    INAND_CMD38_ARG_EXT_CSD
+  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
 
-By choosing to work with us you receive support in achieving your busines=
-s goals, and help in handling Digital Marketing for your clients.
+ drivers/mmc/core/block.c   |  6 +++---
+ drivers/mmc/core/mmc_ops.c | 25 +++++++++++++------------
+ 2 files changed, 16 insertions(+), 15 deletions(-)
 
-We support over 237 partner companies. We have one of the biggest executi=
-ve departments in Europe at our disposal, we=E2=80=99ve prepared over 200=
-0 campaigns in Europe and 200 in the USA and Canada.
+-- 
+2.25.1
 
-Are you interested in the details of our partnership programme?
-
-Yours sincerely,
-Luca Gauthier
