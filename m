@@ -2,136 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83D36C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:22:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CDEDC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 May 2022 18:22:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352050AbiEQSV5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 May 2022 14:21:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50986 "EHLO
+        id S1352099AbiEQSW0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 May 2022 14:22:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54146 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352065AbiEQSVg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:21:36 -0400
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1E09192BB;
-        Tue, 17 May 2022 11:21:35 -0700 (PDT)
-Received: by mail-pl1-x62c.google.com with SMTP id s14so18088504plk.8;
-        Tue, 17 May 2022 11:21:35 -0700 (PDT)
+        with ESMTP id S1352076AbiEQSWR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2022 14:22:17 -0400
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3785237E7;
+        Tue, 17 May 2022 11:22:16 -0700 (PDT)
+Received: by mail-pj1-x102e.google.com with SMTP id l14so7247382pjk.2;
+        Tue, 17 May 2022 11:22:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=rVtCL90Qae4d8alJpsZ6NZkN+XgFY1ihCUWrdlNKxKc=;
-        b=Ns3zTGCV5bxHw40xDp3VvAthF1xfTEFgaFvFAcXm8fAcnll3uJEabiAtrDv85TYJFB
-         qdBuU0cPg28gvFb7iDiWaPMk67BwvVAHxkxM8baxgpCUe2+rtG8d5F7YTS2a7ZaAj/jg
-         Um4lyLoBefdjgWB4TCahnJi2S5OK+YhrzXRw+Rbq+MGZfaHYQMOIbHKTJ9X8eTi+gW0d
-         jZdyiK0CRg06gWbqbWe2ObqodmBGC2SSSduF98VrWMqHol9liDaJwCwZnKpS3pOiUndy
-         UTQ5T/8bz5REucg3cIrOJiuvBnXDFGmgeA4n9mUrcp8giCWbCfOFT91g/brocYybGIo3
-         9LQg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Sk+5mSaR9rPPKXkfYc0/VsJM1xTQzkpsddohoa/KxaY=;
+        b=gxvr7cWtIkGeoYMwgPEe6gEz9SSAmtQHdj/bHTvLpd6e8SebYBEENYhmf+eAdY7WiA
+         VZn4d5VRAf6u0u4+Qotjv3yxyxcVYDk3WNKr6QZySHM72+qaMiNIeQf+OPvboKyaZqfO
+         zcZWamPZB/dtk7qJ7hkaYzrwu42G/dv77iB7485bUbphfN8mwDDmdlsQ9fG4oLyNeJzS
+         +sBkVtI08FKfSr7msSFreIokn/qV5vhugITZVsU0AH0DUhG1ARfK80xTQ1lQ6zBg+9gf
+         1wCAZR8wG0KHYi+xANC9wFIfp1bkzjFSIMIFpPT3PJ4V1lOP98rAaR10S1S3v5XjyjuE
+         vzPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=rVtCL90Qae4d8alJpsZ6NZkN+XgFY1ihCUWrdlNKxKc=;
-        b=FXGDdUufLs3p88NrOPQnFJ9gFIoqmQbx+w0UIxUCJb9B2bkIlwuyRmsoZflTrh2uux
-         kj1i1li42F9ay2feaaMS1VVitS/6TJoGULupHHkV0VRZn73uUucrugMTB4WhVyjNeDqK
-         TOKhkQja4i3GZmDplR4Hr7XZhl/SPUfSORxpt3ldyPQ5Rio+PRlzp772KFdct8WU4ZxH
-         OnK2OSBWgjGiIXfuUMK1m8VTSjlUyp4/MsQfxAnbX0JSq4zDU9pYvjpM+M9rGphScpAV
-         ipEIDn+j2KpKLeyKPxKQc3iTxJDZ8OJXkpXuPIHFCXotp3II68twH2o7ZLST04ZpDYJ2
-         uV5g==
-X-Gm-Message-State: AOAM532NkG4cnDdZpkilQRPUQQIpFGYz2Z3E0srfxiQyMUIB7XqjdC79
-        h291Bpdlyi5DPrLTj8BGQmE=
-X-Google-Smtp-Source: ABdhPJxlluvBJbnqIYOpmCUiFPEvBJtmJAd/7DRkLs5+AKWgfCAKFaqwI49KsBFtxQ4gqmkYHb26dQ==
-X-Received: by 2002:a17:90b:3903:b0:1dc:8fe0:df4d with SMTP id ob3-20020a17090b390300b001dc8fe0df4dmr26374159pjb.191.1652811695225;
-        Tue, 17 May 2022 11:21:35 -0700 (PDT)
-Received: from mail.broadcom.net ([192.19.11.250])
-        by smtp.gmail.com with ESMTPSA id 125-20020a630383000000b003f5e0c264bcsm837641pgd.66.2022.05.17.11.21.33
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Sk+5mSaR9rPPKXkfYc0/VsJM1xTQzkpsddohoa/KxaY=;
+        b=VisqHyyQtVaOt/IvLMxEs1EPpSFmTZ6NzjG7iGIGynMtKk/Ro4KDbWWNEUx+xEg0zC
+         LCTOXnyJ51hzdOFnHXL/UmnkNnQ7tzETmS49ifimUleahtkMmgBcXnSof4WcDLIXXn91
+         Eh4GEKDNvXMemkt759Ut3RjfD30qqNc2GFLN8buBNs297mbGZXlm9Wol4CNfxqa4nJDi
+         nW/igb6fbWHwUPdPRk+ouYyK1U1oYwbp73rHAhHscjFXHD4GsC4v6tUt2x5U8x/3g0uZ
+         rQ912G26T4q+stqzTfgtjE3AZxBZZQQ1MBQ+ejIOujoIMjtYF+xFlHZrGvpTb7dPMBm9
+         rBgA==
+X-Gm-Message-State: AOAM531BuIIf36+kslYp3Im3Lu3rCku0spIucofYSvLaU/KfDVUPKCf9
+        ItHv+GlEERhJeaQDJAQ4s6Lgsc2WdQQ=
+X-Google-Smtp-Source: ABdhPJzcLw5tXwXfLYNaJNhDtfK9Pdzu3bYq5ZtApJC2+2raAhiaW0V5hluT0TeLRcKzKmlFia2HbQ==
+X-Received: by 2002:a17:902:bc86:b0:161:5f4e:d7d0 with SMTP id bb6-20020a170902bc8600b001615f4ed7d0mr14961198plb.119.1652811735879;
+        Tue, 17 May 2022 11:22:15 -0700 (PDT)
+Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id x4-20020a17090ad68400b001d7dd00c231sm1998141pju.22.2022.05.17.11.22.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 May 2022 11:21:34 -0700 (PDT)
-From:   Kamal Dasu <kdasu.kdev@gmail.com>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
-        alcooperx@gmail.com
-Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Kamal Dasu <kdasu.kdev@gmail.com>
-Subject: [PATCH v2 1/2] dt-bindings: mmc: Add Broadcom optional sdio_freq clock
-Date:   Tue, 17 May 2022 14:04:34 -0400
-Message-Id: <20220517180435.29940-2-kdasu.kdev@gmail.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20220517180435.29940-1-kdasu.kdev@gmail.com>
-References: <20220517180435.29940-1-kdasu.kdev@gmail.com>
+        Tue, 17 May 2022 11:22:15 -0700 (PDT)
+From:   Florian Fainelli <f.fainelli@gmail.com>
+To:     stable@vger.kernel.org
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Nishad Kamdar <nishadkamdar@gmail.com>,
+        =?UTF-8?q?Christian=20L=C3=B6hle?= <CLoehle@hyperstone.com>,
+        linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE
+        DIGITAL (SD) AND...), linux-kernel@vger.kernel.org (open list),
+        alcooperx@gmail.com, kdasu.kdev@gmail.com
+Subject: [PATCH stable 4.19 0/3] MMC timeout back ports
+Date:   Tue, 17 May 2022 11:22:08 -0700
+Message-Id: <20220517182211.249775-1-f.fainelli@gmail.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The 72116B0 has improved SDIO controllers that allow the max clock
-rate to be increased from a max of 100MHz to a max of 150MHz.
-Optional "sdio_freq" clock is used to drive the bus clock if present
-optional property "max-frequency" specifies a base clock frequency
-in Hz that overrides the base clock frequency in the CAPS registers.
+These 3 commits from upstream allow us to have more fine grained control
+over the MMC command timeouts and this solves the following timeouts
+that we have seen on our systems across suspend/resume cycles:
 
-Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
----
- .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 25 ++++++++++++++-----
- 1 file changed, 19 insertions(+), 6 deletions(-)
+[   14.907496] usb usb2: root hub lost power or was reset
+[   15.216232] usb 1-1: reset high-speed USB device number 2 using
+xhci-hcd
+[   15.485812] bcmgenet 8f00000.ethernet eth0: Link is Down
+[   15.525328] mmc1: error -110 doing runtime resume
+[   15.531864] OOM killer enabled.
 
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-index b672202fff4e..3a4f6e75bf5e 100644
---- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-+++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-@@ -10,9 +10,6 @@ maintainers:
-   - Al Cooper <alcooperx@gmail.com>
-   - Florian Fainelli <f.fainelli@gmail.com>
- 
--allOf:
--  - $ref: mmc-controller.yaml#
--
- properties:
-   compatible:
-     oneOf:
-@@ -42,23 +39,39 @@ properties:
-     maxItems: 1
- 
-   clocks:
--    maxItems: 1
--    description:
--      handle to core clock for the sdhci controller.
-+    minItems: 1
-+    items:
-+      - description: handle to core clock for the sdhci controller
-+      - description: handle to improved 150Mhz clock for sdhci controller (Optional clock)
- 
-   clock-names:
-+    minItems: 1
-     items:
-       - const: sw_sdio
-+      - const: sdio_freq # Optional clock
- 
-   sdhci,auto-cmd12:
-     type: boolean
-     description: Specifies that controller should use auto CMD12
- 
-+allOf:
-+  - $ref: mmc-controller.yaml#
-+  - if:
-+      properties:
-+        clock-names:
-+          contains:
-+            const: sdio_freq
-+
-+    then:
-+      required:
-+        - max-frequency
-+
- required:
-   - compatible
-   - reg
-   - interrupts
-   - clocks
-+  - clock-names
- 
- unevaluatedProperties: false
- 
+Thanks!
+
+Ulf Hansson (3):
+  mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+  mmc: block: Use generic_cmd6_time when modifying
+    INAND_CMD38_ARG_EXT_CSD
+  mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+
+ drivers/mmc/core/block.c   |  6 +++---
+ drivers/mmc/core/mmc_ops.c | 25 +++++++++++++------------
+ 2 files changed, 16 insertions(+), 15 deletions(-)
+
 -- 
-2.17.1
+2.25.1
 
