@@ -2,38 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A322C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 May 2022 07:02:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AE6CC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 May 2022 07:02:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231815AbiERHCt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 May 2022 03:02:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55384 "EHLO
+        id S231833AbiERHCv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 May 2022 03:02:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231797AbiERHCs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 May 2022 03:02:48 -0400
+        with ESMTP id S231826AbiERHCv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 May 2022 03:02:51 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21C9646B1B;
-        Wed, 18 May 2022 00:02:47 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B5AB49C9A;
+        Wed, 18 May 2022 00:02:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1652857367; x=1684393367;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references;
-  bh=o1tk6XlxNMrzjjds6+LJNluKL8C/MUSAf8M//8aFVMc=;
-  b=brBfGv5OxR7wj1RC6B2LfE72Dw09wFeVWjoFWS4psP6jR39llnKxysQX
-   vytqh58BYEX09z4N+cp5UjbKFRv+EJsdVv+BGujrSq3Ut8ZJGGxD2nKUq
-   WWMoxpsWo3ZSLANbVQiwkS8LR+XwZ9vIUvGJfVvsBoR1AjJtdoxRgAHCV
-   8=;
-Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
-  by alexa-out.qualcomm.com with ESMTP; 18 May 2022 00:02:47 -0700
+  t=1652857370; x=1684393370;
+  h=from:to:cc:subject:date:message-id;
+  bh=nzQ3RoBzLKBVe4TrsaQAFS0ucwOnGWtgxEuRqF2awk0=;
+  b=KYbMm00Q8K97PWU63sISGmjXIsKJeZh8rFn50Xj2Oy9VNL+JRtY+8iq+
+   OxQiyU5Dupq5rJoDByAfMaeG3LD2c1FEnNd36d1pSNYh4cuKQkJyFVf5z
+   J+kjRqdK2wDkbXfJcN6GDNzmJTWoPphBouBaAAAqP4/eO4zPG7xutaPH1
+   w=;
+Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
+  by alexa-out.qualcomm.com with ESMTP; 18 May 2022 00:02:49 -0700
 X-QCInternal: smtphost
 Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 18 May 2022 00:02:45 -0700
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 18 May 2022 00:02:47 -0700
 X-QCInternal: smtphost
 Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 18 May 2022 12:32:26 +0530
+  by ironmsg01-blr.qualcomm.com with ESMTP; 18 May 2022 12:32:24 +0530
 Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id C1C61177A; Wed, 18 May 2022 12:32:24 +0530 (IST)
+        id 9B68B1756; Wed, 18 May 2022 12:32:22 +0530 (IST)
 From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         wsa+renesas@sang-engineering.com, shawn.lin@rock-chips.com,
@@ -43,244 +42,85 @@ Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
         quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
         quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Liangliang Lu <quic_luliang@quicinc.com>,
-        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V6 2/5] mmc: sdhci: Capture eMMC and SD card errors
-Date:   Wed, 18 May 2022 12:32:17 +0530
-Message-Id: <1652857340-6040-3-git-send-email-quic_c_sbhanu@quicinc.com>
+        Rajeshwari Ravindra Kamble <c_rkambl@qti.qualcomm.com>
+Subject: [PATCH V6 0/5] mmc: add error statistics for eMMC and SD card
+Date:   Wed, 18 May 2022 12:32:15 +0530
+Message-Id: <1652857340-6040-1-git-send-email-quic_c_sbhanu@quicinc.com>
 X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1652857340-6040-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1652857340-6040-1-git-send-email-quic_c_sbhanu@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add changes to capture eMMC and SD card errors.
-This is useful for debug and testing.
+From: Rajeshwari Ravindra Kamble <c_rkambl@qti.qualcomm.com>
 
-Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
-Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
-Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
----
- drivers/mmc/host/sdhci.c | 59 ++++++++++++++++++++++++++++++++++++------------
- drivers/mmc/host/sdhci.h |  3 +++
- include/linux/mmc/mmc.h  |  6 +++++
- 3 files changed, 53 insertions(+), 15 deletions(-)
+Changes since V5:
+	- Considered all error stats enums to set error state.
+	- Added missed tuning error related code changes which was
+	  missed in patch set V5 as Adrain Hunter pointed.
+	- Replaced DEFINE_SIMPLE_ATTRIBUTE with DEFINE_DEBUGFS_ATTRIBUTE
+	  as suggested by Adrain Hunter.
+	  
+Changes since V4:
+	- Defined new macro to increment err_stats members when error occured
+	  as suggested by Adrain Hunter.
+	- Called err_stats members increment function after printing the error
+	  as suggested by Adrain Hunter.
+	- Considered INDEX and END_BIT errors same as CRC errors as suggested
+	  by Adrain Hunter.
+	- Removed Null check for host in debug fs functions and Reordered
+	  err_stats declarationas suggested by Adrain Hunter.
+	- Removed err_state variable stuff and updated err_state debug fs entry
+	  based on the err_stats members state as suggested by Adrain Hunter.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7728f26..bd4372c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -224,6 +224,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
- 		if (timedout) {
- 			pr_err("%s: Reset 0x%x never completed.\n",
- 				mmc_hostname(host->mmc), (int)mask);
-+			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 			sdhci_dumpregs(host);
- 			return;
- 		}
-@@ -1719,6 +1720,7 @@ static bool sdhci_send_command_retry(struct sdhci_host *host,
- 		if (!timeout--) {
- 			pr_err("%s: Controller never released inhibit bit(s).\n",
- 			       mmc_hostname(host->mmc));
-+			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 			sdhci_dumpregs(host);
- 			cmd->error = -EIO;
- 			return false;
-@@ -1968,6 +1970,7 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
- 		if (timedout) {
- 			pr_err("%s: Internal clock never stabilised.\n",
- 			       mmc_hostname(host->mmc));
-+			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 			sdhci_dumpregs(host);
- 			return;
- 		}
-@@ -1990,6 +1993,7 @@ void sdhci_enable_clk(struct sdhci_host *host, u16 clk)
- 			if (timedout) {
- 				pr_err("%s: PLL clock never stabilised.\n",
- 				       mmc_hostname(host->mmc));
-+				sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 				sdhci_dumpregs(host);
- 				return;
- 			}
-@@ -3145,6 +3149,7 @@ static void sdhci_timeout_timer(struct timer_list *t)
- 	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
- 		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
- 		       mmc_hostname(host->mmc));
-+		sdhci_err_stats_inc(host, REQ_TIMEOUT);
- 		sdhci_dumpregs(host);
- 
- 		host->cmd->error = -ETIMEDOUT;
-@@ -3167,6 +3172,7 @@ static void sdhci_timeout_data_timer(struct timer_list *t)
- 	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
- 		pr_err("%s: Timeout waiting for hardware interrupt.\n",
- 		       mmc_hostname(host->mmc));
-+		sdhci_err_stats_inc(host, REQ_TIMEOUT);
- 		sdhci_dumpregs(host);
- 
- 		if (host->data) {
-@@ -3218,17 +3224,21 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
- 			return;
- 		pr_err("%s: Got command interrupt 0x%08x even though no command operation was in progress.\n",
- 		       mmc_hostname(host->mmc), (unsigned)intmask);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 		return;
- 	}
- 
- 	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
- 		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
--		if (intmask & SDHCI_INT_TIMEOUT)
-+		if (intmask & SDHCI_INT_TIMEOUT) {
- 			host->cmd->error = -ETIMEDOUT;
--		else
-+			sdhci_err_stats_inc(host, CMD_TIMEOUT);
-+		} else {
- 			host->cmd->error = -EILSEQ;
--
-+			if (!mmc_op_tuning(host->cmd->opcode))
-+				sdhci_err_stats_inc(host, CMD_CRC);
-+		}
- 		/* Treat data command CRC error the same as data CRC error */
- 		if (host->cmd->data &&
- 		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
-@@ -3249,6 +3259,8 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
- 		int err = (auto_cmd_status & SDHCI_AUTO_CMD_TIMEOUT) ?
- 			  -ETIMEDOUT :
- 			  -EILSEQ;
-+		sdhci_err_stats_inc(host, AUTO_CMD);
-+
- 
- 		if (mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
- 			mrq->sbc->error = err;
-@@ -3326,6 +3338,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
- 				host->data_cmd = NULL;
- 				data_cmd->error = -ETIMEDOUT;
-+				sdhci_err_stats_inc(host, CMD_TIMEOUT);
- 				__sdhci_finish_mrq(host, data_cmd->mrq);
- 				return;
- 			}
-@@ -3354,23 +3367,30 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 
- 		pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
- 		       mmc_hostname(host->mmc), (unsigned)intmask);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 
- 		return;
- 	}
- 
--	if (intmask & SDHCI_INT_DATA_TIMEOUT)
-+	if (intmask & SDHCI_INT_DATA_TIMEOUT) {
- 		host->data->error = -ETIMEDOUT;
--	else if (intmask & SDHCI_INT_DATA_END_BIT)
-+		sdhci_err_stats_inc(host, DAT_TIMEOUT);
-+	} else if (intmask & SDHCI_INT_DATA_END_BIT) {
- 		host->data->error = -EILSEQ;
--	else if ((intmask & SDHCI_INT_DATA_CRC) &&
-+		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
-+			sdhci_err_stats_inc(host, DAT_CRC);
-+	} else if ((intmask & SDHCI_INT_DATA_CRC) &&
- 		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
--			!= MMC_BUS_TEST_R)
-+			!= MMC_BUS_TEST_R) {
- 		host->data->error = -EILSEQ;
--	else if (intmask & SDHCI_INT_ADMA_ERROR) {
-+		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
-+			sdhci_err_stats_inc(host, DAT_CRC);
-+	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
- 		pr_err("%s: ADMA error: 0x%08x\n", mmc_hostname(host->mmc),
- 		       intmask);
- 		sdhci_adma_show_error(host);
-+		sdhci_err_stats_inc(host, ADMA);
- 		host->data->error = -EIO;
- 		if (host->ops->adma_workaround)
- 			host->ops->adma_workaround(host, intmask);
-@@ -3568,6 +3588,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 	if (unexpected) {
- 		pr_err("%s: Unexpected interrupt 0x%08x.\n",
- 			   mmc_hostname(host->mmc), unexpected);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 	}
- 
-@@ -3889,20 +3910,27 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
- 	if (!host->cqe_on)
- 		return false;
- 
--	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC))
-+	if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC)) {
- 		*cmd_error = -EILSEQ;
--	else if (intmask & SDHCI_INT_TIMEOUT)
-+		if (!mmc_op_tuning(host->cmd->opcode))
-+			sdhci_err_stats_inc(host, CMD_CRC);
-+	} else if (intmask & SDHCI_INT_TIMEOUT) {
- 		*cmd_error = -ETIMEDOUT;
--	else
-+		sdhci_err_stats_inc(host, CMD_TIMEOUT);
-+	} else
- 		*cmd_error = 0;
- 
--	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC))
-+	if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
- 		*data_error = -EILSEQ;
--	else if (intmask & SDHCI_INT_DATA_TIMEOUT)
-+		if (!mmc_op_tuning(host->cmd->opcode))
-+			sdhci_err_stats_inc(host, DAT_CRC);
-+	} else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
- 		*data_error = -ETIMEDOUT;
--	else if (intmask & SDHCI_INT_ADMA_ERROR)
-+		sdhci_err_stats_inc(host, DAT_TIMEOUT);
-+	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
- 		*data_error = -EIO;
--	else
-+		sdhci_err_stats_inc(host, ADMA);
-+	} else
- 		*data_error = 0;
- 
- 	/* Clear selected interrupts. */
-@@ -3918,6 +3946,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
- 		sdhci_writel(host, intmask, SDHCI_INT_STATUS);
- 		pr_err("%s: CQE: Unexpected interrupt 0x%08x.\n",
- 		       mmc_hostname(host->mmc), intmask);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 	}
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6c689be..2c02ded 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -356,6 +356,9 @@ struct sdhci_adma2_64_desc {
-  */
- #define MMC_CMD_TRANSFER_TIME	(10 * NSEC_PER_MSEC) /* max 10 ms */
- 
-+#define sdhci_err_stats_inc(host, err_name) \
-+	mmc_debugfs_err_stats_inc((host)->mmc, MMC_ERR_##err_name)
-+
- enum sdhci_cookie {
- 	COOKIE_UNMAPPED,
- 	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index d9a65c6..9c50bc4 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -99,6 +99,12 @@ static inline bool mmc_op_multi(u32 opcode)
- 	       opcode == MMC_READ_MULTIPLE_BLOCK;
- }
- 
-+static inline bool mmc_op_tuning(u32 opcode)
-+{
-+	return opcode == MMC_SEND_TUNING_BLOCK ||
-+			opcode == MMC_SEND_TUNING_BLOCK_HS200;
-+}
-+
- /*
-  * MMC_SWITCH argument format:
-  *
+Changes since V3:
+	- Dropped error stats feature flag as suggested by Adrain Hunter.
+	- Separated error state related changes in separate patches as
+	  suggested by Adrain Hunter.
+	  [PATCH V4 4/7] : error state debug fs
+	  [PATCH V4 5/7] : error state enable function
+	  [PATCH V4 6/7] : error state enable in error case
+	- Note: we are enabling error state before calling sdhci_dumpregs
+	  we couldn't add the err state in error stats array as err state
+	  is not error type.
+	- Corrected Signed-off-by order as suggested by Bjron Andersson.
+	- Moved error state enable code from sdhci_dumpregs to error
+	  conditions as suggested by Adrain Hunter
+
+Changes since V2:
+	- Removed userspace error stats clear debug fs entry as suggested
+	  by Adrain Hunter.
+	- Split patch into 4 patches
+	  [PATCH V3 1/4] : sdhci driver
+	  [PATCH V3 2/4] : debug fs entries
+	  [PATCH V3 3/4] : core driver
+	  [PATCH V3 4/4] : cqhci driver
+	- Used for loop to print error messages instead of using printf
+	  statements for all error messages as suggested by Adrain Hunter.
+	- Introduced one flag to enable error stats feature, if any other
+	  client wants to use this feature, they need to enable that flag.
+	- Moved reset command timeout error statement to card init flow
+	  as suggested by Adrain Hunter.
+
+Changes since V1:
+	- Removed sysfs entry for eMMC and SD card error statistics and added
+	  debugfs entry as suggested by Adrian Hunter and Ulf Hansson.
+
+Shaik Sajida Bhanu (5):
+  mmc: core: Capture eMMC and SD card errors
+  mmc: sdhci: Capture eMMC and SD card errors
+  mmc: debugfs: Add debug fs entry for mmc driver
+  mmc: debugfs: Add debug fs error state entry for mmc driver
+  mmc: cqhci: Capture eMMC and SD card errors
+
+ drivers/mmc/core/core.c       | 10 +++++-
+ drivers/mmc/core/debugfs.c    | 79 +++++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/cqhci-core.c |  9 ++++-
+ drivers/mmc/host/sdhci.c      | 59 ++++++++++++++++++++++++--------
+ drivers/mmc/host/sdhci.h      |  3 ++
+ include/linux/mmc/host.h      | 26 ++++++++++++++
+ include/linux/mmc/mmc.h       |  6 ++++
+ 7 files changed, 175 insertions(+), 17 deletions(-)
+
 -- 
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
 of Code Aurora Forum, hosted by The Linux Foundation
