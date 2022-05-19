@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5351C43217
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 May 2022 18:45:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95948C43219
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 May 2022 18:46:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244054AbiESSpw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 May 2022 14:45:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54198 "EHLO
+        id S244062AbiESSpy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 May 2022 14:45:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243348AbiESSpu (ORCPT
+        with ESMTP id S243300AbiESSpu (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2022 14:45:50 -0400
-Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA6B72BCE;
-        Thu, 19 May 2022 11:45:49 -0700 (PDT)
-Received: by mail-pg1-x52f.google.com with SMTP id a38so2954124pgl.9;
-        Thu, 19 May 2022 11:45:49 -0700 (PDT)
+Received: from mail-pg1-x530.google.com (mail-pg1-x530.google.com [IPv6:2607:f8b0:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 200E2109E;
+        Thu, 19 May 2022 11:45:47 -0700 (PDT)
+Received: by mail-pg1-x530.google.com with SMTP id 137so5831613pgb.5;
+        Thu, 19 May 2022 11:45:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=ZzqOqhSTkWyW6a60hc2pV5v/t4bQqt425oCJrlN7gc0=;
-        b=qsypusjSlrTckBPP5ArDLAECrZ8fySUH4miXGfSSc1QlMcM/cxx5aubfqQGjVVmVkW
-         4vK2X6kHRFe78UZntaE9zvoQG9NSwIpXrPyjnvTWvVaNBIMTGa4aSc4Aje7a16SW2ZBn
-         U7bzRAV5yIgW8af417CkMh8BCqa793GsEBbgNTctMPuSGWNc8T6r4fuBlcfkav2ZRIWJ
-         XBZ2xAvvFrMJguTA+7qYo1VyBQeVWWIy1j7oyyGr5Yy4UndiW42xykJw+eA4BtaQwhlo
-         Xxf+Nl6XMXP9Mj+iVekEeRk9csU3HM3vSKVhbQFm6TXHMh5RYfLP7FPSLKppRA2qKYH8
-         h1wA==
+        bh=5SU+w9hgi+POXdxltfAITobv8QuuLB+odkG94GhTEgs=;
+        b=HCPGXLIowEc4TfgLek+X1SwnRfZRLrsaNkVMgzWo3/y686rkolUMxTgvCnVXNzWJqz
+         pXCIpNKvu51NII8Py9T5e+JZPGhlHoZ2QM5xGzFgsML2ELFnPvQrhrMPHzpN5OKYkzhH
+         jFnQmoIgbCo9hwUpTXeyU+PLfVR6VPKujV3sD9V25PVW5Lr1AlSdGJwhDgFGpdjUFJfR
+         O/UEKSPjNkyjnK3mwuDHBlWQgYT+Aw/s2eu56nS3JoibZvQobz7VCOHQaxfNd0o5CWua
+         2xzEx9Kym2ErT7tZcWyZdnHkNz6lFf07t8YTshfoRYJD8SY+6bOkJvMamPhiBwo52Szn
+         Am4g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ZzqOqhSTkWyW6a60hc2pV5v/t4bQqt425oCJrlN7gc0=;
-        b=Zq89Otm4t8V+g85UXdcZwp5PRC84rfnH+bZQolBwV37Zxcqt8wVcqA4+VEl7LHbp2x
-         DDEg47zCdRkLSsRXv1azSPs1GpLvs8Z7lVAg9MR5uBUvdfBcg/193lp+v1O8LkIbc3ci
-         tLT7b3hMUTUzPueUzQxpULFwyRunzSYebwl0JcVdnEQiuvJA+1C3WvXmnFIqgCIuIpOf
-         KqjwwnQXT1hDWwSe+s5sZYTjB/3Q9tM9JicojbJrwgFzLyWihS3QoU3+Ar1sEVfTfROa
-         a27n7Cr7lCwGLgZyqC2tXBv5iNlA3CwSaqfKSYevLzHjV8KRErbKxvEJq/Cl3lLvJtG1
-         /zSQ==
-X-Gm-Message-State: AOAM5336D5kUHhLyc+FzpJ6eDFnHbjfg+CQN6ri0sQF7zN4yoK5rv2vw
-        7NZjAIt07gNXrrj5y12d0/L6r/APUtM=
-X-Google-Smtp-Source: ABdhPJxRdCTc0olvpIJOOzMkLS6FI1DrpkkBY8Bh9LqDwibV6e8SzxsEAVa/ebrSGs4MaYcULA91hQ==
-X-Received: by 2002:a05:6a00:4086:b0:518:3207:f9df with SMTP id bw6-20020a056a00408600b005183207f9dfmr5999716pfb.9.1652985948802;
-        Thu, 19 May 2022 11:45:48 -0700 (PDT)
+        bh=5SU+w9hgi+POXdxltfAITobv8QuuLB+odkG94GhTEgs=;
+        b=QZ3TiqXac96hGkPkX7mAL/Sg/tEmA13rUvgO4w5BHtOgv6tlBZ140uvdGRn3UXhl8p
+         nI2RUm4Q+txagLQvuIb9mBrwF8GQvGobBKcFAUEE/6/dzdUwUfREGzKPs4CcgHhDCVkG
+         QntpZAt5WexRUSse2l2DK/5GMFGPcLufp/9ZIuGtTIXylEKgdk9za11SAnikdlW7s2Iv
+         ajFIMZf/iejdPeGUiFwhIY3hvZNKMSkPqW4OnehXcuPD0xp+QYmJExZwaknk4zBzQKko
+         mbuaUJYgjZECfyymYm02gyrdr2uGfpzKkWvNs37xebTHBEmcre+E+vIGXrA3jChe5gBC
+         P1/A==
+X-Gm-Message-State: AOAM5302pDBqKuc6k0Y3mOQRGwqWBaHK9D/BtqWa6sFsgcfYaqS95Eyo
+        UaXYK22gz0LwadHxaKOa7O3XYgxJVuk=
+X-Google-Smtp-Source: ABdhPJzTj/U5wGU2C/aGMOITBrjbWQSEEa8cjr65o044OgIUCMFwmEH2e/Gxe0Q9tsZLtevJro52xA==
+X-Received: by 2002:a05:6a00:1c76:b0:510:8b76:93b5 with SMTP id s54-20020a056a001c7600b005108b7693b5mr6171900pfw.44.1652985946249;
+        Thu, 19 May 2022 11:45:46 -0700 (PDT)
 Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id 5-20020aa79245000000b0050dc76281c2sm2965pfp.156.2022.05.19.11.45.47
+        by smtp.gmail.com with ESMTPSA id 5-20020aa79245000000b0050dc76281c2sm2965pfp.156.2022.05.19.11.45.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 May 2022 11:45:48 -0700 (PDT)
+        Thu, 19 May 2022 11:45:45 -0700 (PDT)
 From:   Florian Fainelli <f.fainelli@gmail.com>
 To:     stable@vger.kernel.org
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -60,9 +60,9 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         linux-mmc@vger.kernel.org (open list:MULTIMEDIA CARD (MMC), SECURE
         DIGITAL (SD) AND...), linux-kernel@vger.kernel.org (open list),
         alcooperx@gmail.com, kdasu.kdev@gmail.com
-Subject: [PATCH stable 4.19 v2 4/4] mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
-Date:   Thu, 19 May 2022 11:45:36 -0700
-Message-Id: <20220519184536.370540-5-f.fainelli@gmail.com>
+Subject: [PATCH stable 4.19 v2 2/4] mmc: core: Specify timeouts for BKOPS and CACHE_FLUSH for eMMC
+Date:   Thu, 19 May 2022 11:45:34 -0700
+Message-Id: <20220519184536.370540-3-f.fainelli@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220519184536.370540-1-f.fainelli@gmail.com>
 References: <20220519184536.370540-1-f.fainelli@gmail.com>
@@ -74,71 +74,55 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-commit 533a6cfe08f96a7b5c65e06d20916d552c11b256 upstream
+commit 24ed3bd01d6a844fd5e8a75f48d0a3d10ed71bf9 upstream
 
-All callers of __mmc_switch() should now be specifying a valid timeout for
-the CMD6 command. However, just to be sure, let's print a warning and
-default to use the generic_cmd6_time in case the provided timeout_ms
-argument is zero.
-
-In this context, let's also simplify some of the corresponding code and
-clarify some related comments.
+The timeout values used while waiting for a CMD6 for BKOPS or a CACHE_FLUSH
+to complete, are not defined by the eMMC spec. However, a timeout of 10
+minutes as is currently being used, is just silly for both of these cases.
+Instead, let's specify more reasonable timeouts, 120s for BKOPS and 30s for
+CACHE_FLUSH.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Link: https://lore.kernel.org/r/20200122142747.5690-4-ulf.hansson@linaro.org
+Link: https://lore.kernel.org/r/20200122142747.5690-2-ulf.hansson@linaro.org
 Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
 ---
- drivers/mmc/core/mmc_ops.c | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ drivers/mmc/core/mmc_ops.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 2b0bfead730a..c2187fc6dcba 100644
+index 6d759fc6165d..2b0bfead730a 100644
 --- a/drivers/mmc/core/mmc_ops.c
 +++ b/drivers/mmc/core/mmc_ops.c
-@@ -458,10 +458,6 @@ static int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
- 	bool expired = false;
- 	bool busy = false;
+@@ -23,7 +23,9 @@
+ #include "host.h"
+ #include "mmc_ops.h"
  
--	/* We have an unspecified cmd timeout, use the fallback value. */
--	if (!timeout_ms)
--		timeout_ms = MMC_OPS_TIMEOUT_MS;
--
- 	/*
- 	 * In cases when not allowed to poll by using CMD13 or because we aren't
- 	 * capable of polling by using ->card_busy(), then rely on waiting the
-@@ -534,6 +530,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+-#define MMC_OPS_TIMEOUT_MS	(10 * 60 * 1000) /* 10 minute timeout */
++#define MMC_OPS_TIMEOUT_MS		(10 * 60 * 1000) /* 10min*/
++#define MMC_BKOPS_TIMEOUT_MS		(120 * 1000) /* 120s */
++#define MMC_CACHE_FLUSH_TIMEOUT_MS	(30 * 1000) /* 30s */
  
- 	mmc_retune_hold(host);
- 
-+	if (!timeout_ms) {
-+		pr_warn("%s: unspecified timeout for CMD6 - use generic\n",
-+			mmc_hostname(host));
-+		timeout_ms = card->ext_csd.generic_cmd6_time;
-+	}
-+
- 	/*
- 	 * If the cmd timeout and the max_busy_timeout of the host are both
- 	 * specified, let's validate them. A failure means we need to prevent
-@@ -542,7 +544,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	 * which also means they are on their own when it comes to deal with the
- 	 * busy timeout.
+ static const u8 tuning_blk_pattern_4bit[] = {
+ 	0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+@@ -947,7 +949,7 @@ void mmc_run_bkops(struct mmc_card *card)
+ 	 * urgent levels by using an asynchronous background task, when idle.
  	 */
--	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && timeout_ms &&
-+	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) &&
- 	    host->max_busy_timeout && (timeout_ms > host->max_busy_timeout))
- 		use_r1b_resp = false;
+ 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-			EXT_CSD_BKOPS_START, 1, MMC_OPS_TIMEOUT_MS);
++			 EXT_CSD_BKOPS_START, 1, MMC_BKOPS_TIMEOUT_MS);
+ 	if (err)
+ 		pr_warn("%s: Error %d starting bkops\n",
+ 			mmc_hostname(card->host), err);
+@@ -965,7 +967,8 @@ int mmc_flush_cache(struct mmc_card *card)
  
-@@ -554,10 +556,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	cmd.flags = MMC_CMD_AC;
- 	if (use_r1b_resp) {
- 		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
--		/*
--		 * A busy_timeout of zero means the host can decide to use
--		 * whatever value it finds suitable.
--		 */
- 		cmd.busy_timeout = timeout_ms;
- 	} else {
- 		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+ 	if (mmc_cache_enabled(card->host)) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				EXT_CSD_FLUSH_CACHE, 1, 0);
++				 EXT_CSD_FLUSH_CACHE, 1,
++				 MMC_CACHE_FLUSH_TIMEOUT_MS);
+ 		if (err)
+ 			pr_err("%s: cache flush error %d\n",
+ 					mmc_hostname(card->host), err);
 -- 
 2.25.1
 
