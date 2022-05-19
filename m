@@ -2,114 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B199C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 May 2022 07:02:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C25AC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 May 2022 11:13:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231855AbiERHCy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 May 2022 03:02:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55626 "EHLO
+        id S230081AbiESLNi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 May 2022 07:13:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231830AbiERHCv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 May 2022 03:02:51 -0400
-Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D964F5253C;
-        Wed, 18 May 2022 00:02:50 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1652857371; x=1684393371;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references;
-  bh=W2A1GkyCkwdVeBEfAustBrxgJCxJqGetxADq0juG2ao=;
-  b=Zk84XKLgJmnapzTtVhX4Bq7p97mtlGcV0wthnn2/zPp7s9fIQMhoknhN
-   GHXrS8X4JxyP042fJ2yrfFV6L9pb/gAryCE5+LwaXKK1cGiPk5CxBCwpl
-   wuUdZy7GS6KmfURLMgAamtK3E0K+2W8XngpRFVLQJF1O9vC396dUhrqCb
-   E=;
-Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
-  by alexa-out.qualcomm.com with ESMTP; 18 May 2022 00:02:50 -0700
-X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 18 May 2022 00:02:49 -0700
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 18 May 2022 12:32:28 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 4CBB8176D; Wed, 18 May 2022 12:32:27 +0530 (IST)
-From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        wsa+renesas@sang-engineering.com, shawn.lin@rock-chips.com,
-        yoshihiro.shimoda.uh@renesas.com, digetx@gmail.com,
-        quic_asutoshd@quicinc.com
-Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Liangliang Lu <quic_luliang@quicinc.com>,
-        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V6 4/5] mmc: debugfs: Add debug fs error state entry for mmc driver
-Date:   Wed, 18 May 2022 12:32:19 +0530
-Message-Id: <1652857340-6040-5-git-send-email-quic_c_sbhanu@quicinc.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1652857340-6040-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1652857340-6040-1-git-send-email-quic_c_sbhanu@quicinc.com>
+        with ESMTP id S229554AbiESLNi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2022 07:13:38 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1304939DC;
+        Thu, 19 May 2022 04:13:32 -0700 (PDT)
+X-UUID: 063b111e7c2f4d5f9cbbd243862060e1-20220519
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.5,REQID:46651679-1f31-4533-aab8-1a9d27747305,OB:0,LO
+        B:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACTI
+        ON:release,TS:0
+X-CID-META: VersionHash:2a19b09,CLOUDID:a15dcde2-edbf-4bd4-8a34-dfc5f7bb086d,C
+        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil
+        ,QS:0,BEC:nil
+X-UUID: 063b111e7c2f4d5f9cbbd243862060e1-20220519
+Received: from mtkmbs11n2.mediatek.inc [(172.21.101.187)] by mailgw02.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 944173554; Thu, 19 May 2022 19:13:27 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Thu, 19 May 2022 19:13:26 +0800
+Received: from localhost.localdomain (10.17.3.154) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Thu, 19 May 2022 19:13:25 +0800
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Axe Yang <axe.yang@mediatek.com>, Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>
+Subject: [PATCH v10 0/3] mmc: mediatek: add support for SDIO async IRQ
+Date:   Thu, 19 May 2022 19:13:20 +0800
+Message-ID: <20220519111323.14586-1-axe.yang@mediatek.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add debug fs entry error state to query eMMC and SD card errors statistics.
-If any errors occurred in eMMC and SD card driver level then
-err_state value will be set to 1.
+Changes in v10:
+- add sample node for SDIO host which support wakeup interrupt in yaml
+- skip MMC_PM_WAKE_SDIO_IRQ check before enable SDIO async interrupt
+- add MMC_PM_KEEP_POWER check before SDIO eint pinstate parsing
+- use dev_pm_set_dedicated_wake_irq_reverse() to correct irq control sequence
+- set dedicated irq in msdc_enable_sdio_irq() rather than msdc_drv_probe()
+- remove unnecessary wake irq control, rpm/dpm system shall manage that
+- move wake irq/msdc irq control back to system suspend phase, use rpm_suspend
+  and rpm_resume to ensure irq control sequence:
+     disable msdc irq -> enable wake irq -> disable wake irq -> enable msdc irq
+- simplify variables, check pins_eint to know whether wakeup settings are managed
 
-Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
-Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
-Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
----
- drivers/mmc/core/debugfs.c | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
+Changes in v9:
+- remove pinctrl "state_dat1"
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 6aa5a60..3c7908d 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -223,6 +223,27 @@ static int mmc_clock_opt_set(void *data, u64 val)
- DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
- 	"%llu\n");
- 
-+static int mmc_err_state_get(void *data, u64 *val)
-+{
-+	struct mmc_host *host = data;
-+	int i;
-+
-+	if (!host)
-+		return -EINVAL;
-+
-+	*val = 0;
-+	for (i = 0; i < MMC_ERR_MAX; i++) {
-+		if (host->err_stats[i]) {
-+			*val = 1;
-+			break;
-+		}
-+	}
-+
-+	return 0;
-+}
-+
-+DEFINE_DEBUGFS_ATTRIBUTE(mmc_err_state, mmc_err_state_get, NULL, "%llu\n");
-+
- static int mmc_err_stats_show(struct seq_file *file, void *data)
- {
- 	struct mmc_host *host = (struct mmc_host *)file->private;
-@@ -289,6 +310,8 @@ void mmc_add_host_debugfs(struct mmc_host *host)
- 	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
- 				   &mmc_clock_fops);
- 
-+	debugfs_create_file("err_state", 0600, root, host,
-+			    &mmc_err_state);
- 	debugfs_create_file("err_stats", 0600, root, host,
- 			    &mmc_err_stats_fops);
- 
+Changes in v8:
+- remove maxItems property under pinctrl-names property
+
+Changes in v7:
+- add device_init_wakeup() to register SDIO host as wakeup source
+
+Changes in v6:
+- abandon cap-sdio-async-irq flag, use wakeup-source flag instead
+- extend interrupts and pinctrls in mediatek mmc host controller DT documents
+- add mmc_card_enable_async_irq() to access enable_async_irq flag
+- simplify wakeup irq implementation with dedicate wake up irq related interface
+
+Changes in v5:
+- resort variables to reversed xmas tree order
+- restore old copyright year range and add current year back
+
+Changes in v4:
+- add MMC_CAP2_SDIO_ASYNC_IRQ judge before lookup eint pinctrl
+- replace spin_lock_irqsave() variant with spin_lock() in eint irq handler
+
+Changes in v3:
+- correct abbreviations with capital letters in commit message
+- replace copyright year with 2022 in mtk-sd.c
+- remove unnessary pointer casting
+- adjust variable order to reversed xmas tree
+- remove a redundant blank line
+- refine if statement, following standard pattern
+
+Changes in v2:
+- change flag name from 'cap-sdio-async-int' to 'cap-sdio-async-irq'
+- change corresponding macro names from xxx_INT to xxx_IRQ
+- resort new member in msdc_host structure
+- refine function msdc_request_dat1_eint_irq()
+- rename msdc_{suspend,resume} function names, add suffix '_noirq'
+- add MMC_CAP2_NO_SDIO judgement before parse eint related pin setting
+
+
+Axe Yang (3):
+  dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
+  mmc: core: Add support for SDIO wakeup interrupt
+  mmc: mediatek: add support for SDIO eint wakup IRQ
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 53 +++++++++++++-
+ drivers/mmc/core/sdio.c                       | 14 ++++
+ drivers/mmc/host/mtk-sd.c                     | 73 +++++++++++++++++--
+ include/linux/mmc/card.h                      |  8 +-
+ include/linux/mmc/sdio.h                      |  5 ++
+ 5 files changed, 145 insertions(+), 8 deletions(-)
+
 -- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
+2.18.0
+
 
