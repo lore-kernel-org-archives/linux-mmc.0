@@ -2,163 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2B24C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 May 2022 02:16:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C76AC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 May 2022 08:11:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344576AbiETCQL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 May 2022 22:16:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58368 "EHLO
+        id S1346850AbiETILp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 May 2022 04:11:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58938 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241014AbiETCQK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2022 22:16:10 -0400
-Received: from mail-il1-x131.google.com (mail-il1-x131.google.com [IPv6:2607:f8b0:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4591926AF7;
-        Thu, 19 May 2022 19:16:08 -0700 (PDT)
-Received: by mail-il1-x131.google.com with SMTP id b11so4796568ilr.4;
-        Thu, 19 May 2022 19:16:08 -0700 (PDT)
+        with ESMTP id S1346833AbiETILk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2022 04:11:40 -0400
+Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 462DC57B03;
+        Fri, 20 May 2022 01:11:39 -0700 (PDT)
+Received: by mail-pf1-x429.google.com with SMTP id v11so7153525pff.6;
+        Fri, 20 May 2022 01:11:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=b9fsuYSv3AFjP2s3tX+rRvTxLfT6NzxRhVMjjVIRu9A=;
-        b=Mh2hUJAmXUEOKdWDmaZVYvTz+inntKx6aNXQhQRzWkyWc+/yaUtyZlH7ZXYnp2dh62
-         qz8gcxAV6o77gxr9kJzvVXZOZvpNKucXsE7ovU19SqhB4iBnQPsiJLI9orLIz+MhUVN5
-         zsstHxb6GVPiKRvkDbC9H4qvk6BCJjQin+EUqAOdhA4wdgDpZKWnOuo/epI2lqtpvMgw
-         qcxvqvhoHdt5PxyjfWlcYBimBXwuolA/ohRif4szftLUU30N0A2a3q5Wimb0K9CPGNRC
-         3jirpCOkuTSq3NEcHmxf9JRUpekb3+g9vDNS8QeSYFXeBCtrN7y+aoMsxdF8v9oNOM+y
-         8uAA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=0D6j8CG4wAttV/yAKAZ15WeKE5ykR2+FoJ/c9XSjWvY=;
+        b=UwoIWhyCGRR+ITUai34luAHOCkbCRrMxfoq5DZWqZPVv77ojBE9pno6+Wv/vMEA7eF
+         v69KyubsrRnMswOrJ4eAX+PjjarNipZwL19uQrifqqz6L2a+lI/xk7W2/fYKdWCEZEGA
+         g1tUy+PRquT3oDWe4fxYJAr/HJmapzDun7DeZRp0UVGwMspZr7YPYlijvQRxK4MaWukl
+         Yc23DLAcSMf8zTupRi0txPyTmAbC+KwOlFwsjWdFyYzsAJzaJkMQJN/QdKoY1lne+cHQ
+         pTAgrgJTwaVyufWsIpX3akaB5H1/Yrvrwl2a0fiEuHeJM8hUrP7LCw3lUPkxa5a8Isb5
+         8mNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=b9fsuYSv3AFjP2s3tX+rRvTxLfT6NzxRhVMjjVIRu9A=;
-        b=3uLwajXAUH2bfBMe2KtJd+s58qZbox3Qz+8nh7mioYHG7BVvU3voDqFEl4SRaf7TdP
-         Z9y3+OdWowe51nDzqWF1MuZGHLLA7tdjODTi2Iln49Z0KC2il83o+1FdourjmbOwTy8G
-         z4naQ5KG9L3PbM3mhtEBGwe6GX0NfEW7VlnYjU+hIMKk5lbcOIasbhY4W3E4fmPAPU31
-         hN2cxN4dr3lpcSkP8e1os2mbXUd91glJibC5O7muf7qqhX92kcnOaidBUV9mqc5Grr1z
-         3n7TbjivOVY/+mVvntas9iUIgKHjksYI0qvND/NrFC58hnKr/hPGY43A11Qz58EcwtiL
-         XtNg==
-X-Gm-Message-State: AOAM532ff3lSJFmyuaXpFl/T9H4YuyqJxWsQDgx/e7QBPiT7QAmMvr25
-        ioRhyMYHgXNqtXl1vTdQT/yjoDQfRtTt5OXZCLo=
-X-Google-Smtp-Source: ABdhPJyII6Ge5nBMnmBqpXczGeVK30TV9HE9iSYEj50NOr/4HlM6ql2umXkRuR1KA27Z+zxAayVXh61fQ/qtU7t8rfM=
-X-Received: by 2002:a05:6e02:1d0a:b0:2cd:fdde:a28e with SMTP id
- i10-20020a056e021d0a00b002cdfddea28emr4286910ila.228.1653012967625; Thu, 19
- May 2022 19:16:07 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=0D6j8CG4wAttV/yAKAZ15WeKE5ykR2+FoJ/c9XSjWvY=;
+        b=sdbuvOoMPxdwseyyFsc4D3fuigZfBiBrx6lPVNcVTDRtiN5OSwqguMhN0slXvhsuD4
+         8NgyjHS/KZdGebxESibEszfwBcXJVABS2uuVxADsrossADxrjTmw2PVv+Hdg/ZwvhkDX
+         NpjLSZbfvY1HHTCM8s/AhdngNiik3VIxwkyGfj3CZbvZ1WBCqljZZXKIIhYQLvVDyulg
+         i5/tQBYOx/fSEt6/SE2A+Z+NJ9e9cU1AkRtAg+O8Bg5Pad16ZyyFoe/pDNpNsiPPmLdG
+         66E6aqkNZIJSVsNGZwEhZvx9POmwKmVpUVEzGjuzN1CPirq/ujbK1BJnIsawfQauMOah
+         C/mw==
+X-Gm-Message-State: AOAM532q/BRSfOwFF4NWSbtELe+4fIap+XghaQOjbOMLxrMu7mAt/4Cw
+        18pj0czcj8+qGf8oEAHIEtw=
+X-Google-Smtp-Source: ABdhPJz8tD9PSGaThd46JCD3oJZtBhfEh6uYSkECowQnsl/6K8z6H4dnzDmBtgDQiI2O5ZzdGSUw7Q==
+X-Received: by 2002:a62:8206:0:b0:518:3c6a:21ba with SMTP id w6-20020a628206000000b005183c6a21bamr8203596pfd.63.1653034298762;
+        Fri, 20 May 2022 01:11:38 -0700 (PDT)
+Received: from arch-pc.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id t9-20020a17090a3e4900b001d960eaed66sm1161908pjm.42.2022.05.20.01.11.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 May 2022 01:11:38 -0700 (PDT)
+From:   Ben Chuang <benchuanggli@gmail.com>
+To:     andrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        SeanHY.Chen@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
+        victor.shih@genesyslogic.com.tw,
+        kana.chen@intel.corp-partner.google.com,
+        Ben Chuang <benchuanggli@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Fix GL9763E runtime PM when the system resumes from suspend
+Date:   Fri, 20 May 2022 16:11:20 +0800
+Message-Id: <20220520081120.143927-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.36.0
 MIME-Version: 1.0
-References: <20220513201907.36470-1-kdasu.kdev@gmail.com> <20220513201907.36470-3-kdasu.kdev@gmail.com>
- <CAPDyKFpF_Swon5ZBRSq7M5Zq=8wUMa1q=68XfaD+RQqKYgNJVg@mail.gmail.com>
-In-Reply-To: <CAPDyKFpF_Swon5ZBRSq7M5Zq=8wUMa1q=68XfaD+RQqKYgNJVg@mail.gmail.com>
-From:   Alan Cooper <alcooperx@gmail.com>
-Date:   Thu, 19 May 2022 22:15:56 -0400
-Message-ID: <CAOGqxeUrEe8GUBiZzAkDKmpp2mQRK501ua6LOnaqyYHDNfawbg@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-brcmstb: Add ability to increase max clock
- rate for 72116b0
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Kamal Dasu <kdasu.kdev@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>, krzk+dt@kernel.org,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This seems confusing and seems to overload the meaning of
-"max-frequency" which is typically used to limit the clock rate to
-something slower than what's in the CAPs register as the base clock.
-Instead we're trying to overclock the controller because the hardware
-team has verified that it can be run faster than 100MHz which is how
-the system is configured and is in the CAPs register as the base
-clock.
+When the system resumes from suspend (S3 or S4), the power mode is
+MMC_POWER_OFF. In this status, gl9763e_runtime_resume() should not enable
+PLL. Add a condition to this function to enable PLL only when the power
+mode is MMC_POWER_ON.
 
-Al
+Fixes: d607667bb8fa (mmc: sdhci-pci-gli: Add runtime PM for GL9763E)
+Signed-off-by: Ben Chuang <benchuanggli@gmail.com>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-On Tue, May 17, 2022 at 8:50 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 13 May 2022 at 22:19, Kamal Dasu <kdasu.kdev@gmail.com> wrote:
-> >
-> > From: Al Cooper <alcooperx@gmail.com>
-> >
-> > The 72116B0 has improved SDIO controllers that allow the max clock
-> > rate to be increased from a max of 100MHz to a max of 150MHz. The
-> > driver will need to get the clock and increase it's default rate
-> > and override the caps register, that still indicates a max of 100MHz.
-> > The new clock will be named "sdio_freq" in the DT node's "clock-names"
-> > list. The driver will use a DT property, "clock-frequency", to
->
-> /s/clock-frequency/max-frequency
->
->
-> > enable this functionality and will get the actual rate in MHz
-> > from the property to allow various speeds to be requested.
-> >
-> > Signed-off-by: Al Cooper <alcooperx@gmail.com>
-> > Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
-> > ---
-> >  drivers/mmc/host/sdhci-brcmstb.c | 30 ++++++++++++++++++++++++++++++
-> >  1 file changed, 30 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> > index 8eb57de48e0c..a1ffdd3f1640 100644
-> > --- a/drivers/mmc/host/sdhci-brcmstb.c
-> > +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> > @@ -250,6 +250,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
-> >         struct sdhci_pltfm_host *pltfm_host;
-> >         const struct of_device_id *match;
-> >         struct sdhci_brcmstb_priv *priv;
-> > +       struct clk *master_clk;
-> > +       u32 base_clock_hz = 0;
-> > +       u32 actual_clock_mhz;
-> >         struct sdhci_host *host;
-> >         struct resource *iomem;
-> >         struct clk *clk;
-> > @@ -330,6 +333,33 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
-> >         if (match_priv->flags & BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT)
-> >                 host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> >
-> > +       /* Change the base clock frequency if the DT property exists */
-> > +       if (device_property_read_u32(&pdev->dev, "max-frequency",
-> > +                                    &base_clock_hz) != 0)
-> > +               goto add_host;
->
-> The max-frequency DT property is already being parsed by
-> mmc_of_parse() and the value is put in host->mmc->f_max. You could
-> probably use that instead, right?
->
-> > +
-> > +       master_clk = devm_clk_get(&pdev->dev, "sdio_freq");
-> > +       if (IS_ERR(master_clk)) {
-> > +               dev_warn(&pdev->dev, "Clock for \"sdio_freq\" not found\n");
-> > +               goto add_host;
-> > +       } else {
-> > +               res = clk_prepare_enable(master_clk);
-> > +               if (res)
-> > +                       goto err;
-> > +       }
-> > +
-> > +       /* set improved clock rate */
-> > +       clk_set_rate(master_clk, base_clock_hz);
-> > +       actual_clock_mhz = clk_get_rate(master_clk) / 1000000;
-> > +
-> > +       host->caps &= ~SDHCI_CLOCK_V3_BASE_MASK;
-> > +       host->caps |= (actual_clock_mhz << SDHCI_CLOCK_BASE_SHIFT);
-> > +       /* Disable presets because they are now incorrect */
-> > +       host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
-> > +       dev_dbg(&pdev->dev, "Base Clock Frequency changed to %dMHz\n",
-> > +               actual_clock_mhz);
-> > +
-> > +add_host:
-> >         res = sdhci_brcmstb_add_host(host, priv);
-> >         if (res)
-> >                 goto err;
-> > --
-> > 2.17.1
-> >
->
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index d09728c37d03..d81e5dc90e15 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -972,6 +972,9 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+ 	struct sdhci_host *host = slot->host;
+ 	u16 clock;
+ 
++	if (host->mmc->ios.power_mode != MMC_POWER_ON)
++		return 0;
++
+ 	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+ 
+ 	clock |= SDHCI_CLOCK_PLL_EN;
+-- 
+2.36.0
+
