@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0639C43217
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 May 2022 18:31:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E959C4167D
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 May 2022 18:32:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352765AbiETSb5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 May 2022 14:31:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41666 "EHLO
+        id S1352724AbiETSb6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 May 2022 14:31:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41648 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352741AbiETSbx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2022 14:31:53 -0400
-Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AC7133EA7;
-        Fri, 20 May 2022 11:31:23 -0700 (PDT)
-Received: by mail-pg1-x529.google.com with SMTP id x12so8403222pgj.7;
-        Fri, 20 May 2022 11:31:23 -0700 (PDT)
+        with ESMTP id S1352744AbiETSby (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2022 14:31:54 -0400
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68894344C2;
+        Fri, 20 May 2022 11:31:26 -0700 (PDT)
+Received: by mail-pg1-x533.google.com with SMTP id 31so8409045pgp.8;
+        Fri, 20 May 2022 11:31:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=iO2fsPEYlQDVIZ7lQbZaJ20cTBcTRTZy5qAAh7ygKlw=;
-        b=ElaW/bNy9MYn5dDTQY1NdS7ysepHanfeFKkEUsNW0pkWDxH6vU6ie6Ar15TG24IAw8
-         KvKIl/HtBdRS2/KehJEFHWQqHh5MeEFA+vfBiED0USOmBE5yXfWS9Wvffw/0AbrpVtbU
-         mPfQt00ethvn27cHUNGEjR5bmUrc5nmnuvqQ2pJdjHK3X2u8A5w4fwQihySTH0vC6IbN
-         jp94SMNXHyWziVGB79Od1bBqWhCwI2oT+OgRkok8dxtV5bBQn1SfyXtAXLMfMWQQqD8R
-         vCgTi6nDZ2ZcAHX+S57c3wOZ0GxMgNTR1M4DJRyFDMc/E2Q5i3T+w4NT+rvIICfW+k0A
-         uZ9g==
+        bh=TrVBwi9ChEStDb414/EQSVLSr7SDyZse6yMzYWxEvEo=;
+        b=UBL+P3X7ctSbd7Skb4jmW1zTGbI0arseg8tprz5invYnTFI6mLJBPkwWhZHwuOrBRo
+         Y7KynSP2iDw8VCXkrcbOp18wQR1aHj11ADhnppvJgiGg6POma4kKwUctl5IzIheyezy9
+         JjaPLnHnR3vZZMH7WtZA0+/cVHWMbp9lRVyq1S3E7reScBmpcb5Z11qh7i6VTpJCDv3f
+         +T5DaJStwAjIdtYdVw48QjyaHq3TIQi0yJgzdTz9lWL2DTeQdjzi5NmA3aOqUXvWV8hG
+         HtsZKqmzAdXv3lFl6bPFQ5LQ7zwdybdB3mBS2Z4lOCvgcdJKjoAA17GGFJzJwK6tmHF4
+         tisA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=iO2fsPEYlQDVIZ7lQbZaJ20cTBcTRTZy5qAAh7ygKlw=;
-        b=A+d68B1psDy8WGuDYfyIM81eo4DmIn+xFVVuId41HCRggkt2tBkyCddSitAoT/hF4Y
-         0zDb0xxjbiWojHH+aSNsZ481hH7gRLEjZKo0W831HxguTz4Yd39A7o8OUN/U2T9bT89u
-         8DEkYuWIkpm3bAymkHXaBYPhsfulD8O2YtV43Z1f0aFqmvUkA8crwNwae/77KI7Fltha
-         CgcNffy80pJkGE3N/l0McSVP0AXl4Uxn6rRLtabKSEulnjKHhUxDIYGmreuE9YdQA8tl
-         bdlfQTIqsZI/mTP5ZO2bRkaaeTbmSyUugR6y5YichV8soEtMht8v+A2AKjd9HdIaw6nD
-         NknQ==
-X-Gm-Message-State: AOAM5311hz6N4MIfUv061zUugg6dRbkf0uCgwC3XNanA13hPaMaed9uw
-        vf9FaZUkTjFl/nrSYWy9Vqc=
-X-Google-Smtp-Source: ABdhPJzlYBXhoGS1RkVSAv1iowtzHG6oaqlqF4zDokBBmUHNjpObKmyWvTYKGPZEXZ6CDfy1Ud4GoQ==
-X-Received: by 2002:a05:6a00:14c8:b0:518:7789:d33b with SMTP id w8-20020a056a0014c800b005187789d33bmr2131553pfu.36.1653071482505;
-        Fri, 20 May 2022 11:31:22 -0700 (PDT)
+        bh=TrVBwi9ChEStDb414/EQSVLSr7SDyZse6yMzYWxEvEo=;
+        b=bUDRVA7IOge3scGcMkLoSRp38xTE5ONY4vcDTC47pBq9boMXVFjoyZ0gNyE6h25ei7
+         muJ9qQWe9aZplg7fYGWHwDBz6rPkpZcEhAYt69tVXEascBwIepKZmAur52PxLHo4tcQc
+         Oo3O5uiPBAgS7kIifkPzYgHcahXwt66CB29PFsCftiwQwp2uNvv1U86UvseeE8e+8FHm
+         xijRKhzTPYB6jJPA/vVueY6M0b37kdHf+2dFAkjwD2CyY6auxoQR/a76Q9lYzkqfQQ8x
+         L0B1W6hJDTzBW+4PYTXzyCks8/X6BZnIvNW3Kj4RqmQgmZsbU/Yybmg9CtZpGdWScFcB
+         qzyA==
+X-Gm-Message-State: AOAM532UFg1FDj7CoXnYsO6bipJBfq7yoe72QZEeBitbT+s828w8MxzQ
+        cymn9iB/Lr250URDNC/F9tg=
+X-Google-Smtp-Source: ABdhPJwBo7UF6JOo07RO6EF+qP1fWBEV2SUIBn+kEMRUBayh3o4ygeHqrkqMQBkdxaNQ0BCsm9GY1w==
+X-Received: by 2002:a65:6888:0:b0:3f5:f0e3:c443 with SMTP id e8-20020a656888000000b003f5f0e3c443mr9571332pgt.396.1653071485934;
+        Fri, 20 May 2022 11:31:25 -0700 (PDT)
 Received: from mail.broadcom.net ([192.19.11.250])
-        by smtp.gmail.com with ESMTPSA id i3-20020a170902c94300b0016168e90f3fsm87476pla.5.2022.05.20.11.31.20
+        by smtp.gmail.com with ESMTPSA id i3-20020a170902c94300b0016168e90f3fsm87476pla.5.2022.05.20.11.31.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 20 May 2022 11:31:22 -0700 (PDT)
+        Fri, 20 May 2022 11:31:25 -0700 (PDT)
 From:   Kamal Dasu <kdasu.kdev@gmail.com>
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
         alcooperx@gmail.com
@@ -53,9 +53,9 @@ Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
         adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Kamal Dasu <kdasu.kdev@gmail.com>
-Subject: [PATCH v3 1/2] dt-bindings: mmc: Add Broadcom optional sdio_freq clock
-Date:   Fri, 20 May 2022 14:31:07 -0400
-Message-Id: <20220520183108.47358-2-kdasu.kdev@gmail.com>
+Subject: [PATCH v3 2/2] mmc: sdhci-brcmstb: Add ability to increase max clock rate for 72116b0
+Date:   Fri, 20 May 2022 14:31:08 -0400
+Message-Id: <20220520183108.47358-3-kdasu.kdev@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220520183108.47358-1-kdasu.kdev@gmail.com>
 References: <20220520183108.47358-1-kdasu.kdev@gmail.com>
@@ -64,82 +64,135 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 The 72116B0 has improved SDIO controllers that allow the max clock
-rate to be increased from a max of 100MHz to a max of 150MHz.
-Optional "sdio_freq" clock is used to drive the bus clock if present
-optional property "clock-frequency" specifies a base clock frequency
-in Hz that overrides the base clock frequency in the CAPS registers.
+rate to be increased from a max of 100MHz to a max of 150MHz. The
+driver will need to get the clock and increase it's default rate
+and override the caps register, that still indicates a max of 100MHz.
+The new clock will be named "sdio_freq" in the DT node's "clock-names"
+list. The driver will use a DT property, "clock-frequency", to
+enable this functionality and will get the actual rate in MHz
+from the property to allow various speeds to be requested.
 
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
 Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Acked-by: Florian Fainelli <f.fainelli@gmail.com>
 ---
- .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 32 +++++++++++++++----
- 1 file changed, 26 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci-brcmstb.c | 69 +++++++++++++++++++++++++++++++-
+ 1 file changed, 68 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-index b672202fff4e..c92bfd4eb83a 100644
---- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-+++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.yaml
-@@ -10,9 +10,6 @@ maintainers:
-   - Al Cooper <alcooperx@gmail.com>
-   - Florian Fainelli <f.fainelli@gmail.com>
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index 8eb57de48e0c..f8dff8537920 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -31,6 +31,8 @@
+ struct sdhci_brcmstb_priv {
+ 	void __iomem *cfg_regs;
+ 	unsigned int flags;
++	struct clk *base_clk;
++	u32 base_freq_hz;
+ };
  
--allOf:
--  - $ref: mmc-controller.yaml#
--
- properties:
-   compatible:
-     oneOf:
-@@ -42,23 +39,46 @@ properties:
-     maxItems: 1
+ struct brcmstb_match_priv {
+@@ -250,9 +252,11 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	const struct of_device_id *match;
+ 	struct sdhci_brcmstb_priv *priv;
++	u32 actual_clock_mhz;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+ 	struct clk *clk;
++	struct clk *base_clk;
+ 	int res;
  
-   clocks:
--    maxItems: 1
--    description:
--      handle to core clock for the sdhci controller.
-+    minItems: 1
-+    items:
-+      - description: handle to core clock for the sdhci controller
-+      - description: handle to improved 150Mhz clock for sdhci controller (Optional clock)
+ 	match = of_match_node(sdhci_brcm_of_match, pdev->dev.of_node);
+@@ -330,6 +334,35 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 	if (match_priv->flags & BRCMSTB_MATCH_FLAGS_BROKEN_TIMEOUT)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
  
-   clock-names:
-+    minItems: 1
-     items:
-       - const: sw_sdio
-+      - const: sdio_freq # Optional clock
++	/* Change the base clock frequency if the DT property exists */
++	if (device_property_read_u32(&pdev->dev, "clock-frequency",
++				     &priv->base_freq_hz) != 0)
++		goto add_host;
 +
-+  clock-frequency:
-+    description:
-+      Maximum operating frequency of sdio_freq sdhci controller clock
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    minimum: 100000000
-+    maximum: 150000000
- 
-   sdhci,auto-cmd12:
-     type: boolean
-     description: Specifies that controller should use auto CMD12
- 
-+allOf:
-+  - $ref: mmc-controller.yaml#
-+  - if:
-+      properties:
-+        clock-names:
-+          contains:
-+            const: sdio_freq
++	base_clk = devm_clk_get_optional(&pdev->dev, "sdio_freq");
++	if (IS_ERR(base_clk)) {
++		dev_warn(&pdev->dev, "Clock for \"sdio_freq\" not found\n");
++		goto add_host;
++	}
 +
-+    then:
-+      required:
-+        - clock-frequency
++	res = clk_prepare_enable(base_clk);
++	if (res)
++		goto err;
 +
- required:
-   - compatible
-   - reg
-   - interrupts
-   - clocks
-+  - clock-names
++	/* set improved clock rate */
++	clk_set_rate(base_clk, priv->base_freq_hz);
++	actual_clock_mhz = clk_get_rate(base_clk) / 1000000;
++
++	host->caps &= ~SDHCI_CLOCK_V3_BASE_MASK;
++	host->caps |= (actual_clock_mhz << SDHCI_CLOCK_BASE_SHIFT);
++	/* Disable presets because they are now incorrect */
++	host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
++
++	dev_dbg(&pdev->dev, "Base Clock Frequency changed to %dMHz\n",
++		actual_clock_mhz);
++	priv->base_clk = base_clk;
++
++add_host:
+ 	res = sdhci_brcmstb_add_host(host, priv);
+ 	if (res)
+ 		goto err;
+@@ -340,6 +373,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ err:
+ 	sdhci_pltfm_free(pdev);
+ err_clk:
++	clk_disable_unprepare(base_clk);
+ 	clk_disable_unprepare(clk);
+ 	return res;
+ }
+@@ -351,11 +385,44 @@ static void sdhci_brcmstb_shutdown(struct platform_device *pdev)
  
- unevaluatedProperties: false
+ MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
  
++#ifdef CONFIG_PM_SLEEP
++static int sdhci_brcmstb_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
++
++	clk_disable_unprepare(priv->base_clk);
++	return sdhci_pltfm_suspend(dev);
++}
++
++static int sdhci_brcmstb_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = sdhci_pltfm_resume(dev);
++	if (!ret && priv->base_freq_hz) {
++		ret = clk_prepare_enable(priv->base_clk);
++		if (!ret)
++			ret = clk_set_rate(priv->base_clk, priv->base_freq_hz);
++	}
++
++	return ret;
++}
++#endif
++
++static const struct dev_pm_ops sdhci_brcmstb_pmops = {
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_brcmstb_suspend, sdhci_brcmstb_resume)
++};
++
+ static struct platform_driver sdhci_brcmstb_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-brcmstb",
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+-		.pm	= &sdhci_pltfm_pmops,
++		.pm	= &sdhci_brcmstb_pmops,
+ 		.of_match_table = of_match_ptr(sdhci_brcm_of_match),
+ 	},
+ 	.probe		= sdhci_brcmstb_probe,
 -- 
 2.17.1
 
