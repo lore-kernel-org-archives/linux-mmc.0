@@ -2,67 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 157E6C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 May 2022 18:36:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15FF6C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 21 May 2022 14:40:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233736AbiETSg3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 May 2022 14:36:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53882 "EHLO
+        id S1355282AbiEUOkw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 21 May 2022 10:40:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41620 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1352814AbiETSg2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2022 14:36:28 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D85B34E3BC;
-        Fri, 20 May 2022 11:36:25 -0700 (PDT)
+        with ESMTP id S231202AbiEUOkv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 21 May 2022 10:40:51 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F65BC5D;
+        Sat, 21 May 2022 07:40:50 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 25026B82D77;
-        Fri, 20 May 2022 18:36:24 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id D6DB3C34114;
-        Fri, 20 May 2022 18:36:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653071782;
-        bh=dEOQIT7ynCC7SaYMlrL3ioz9MUqf2dL0s3gA4Tjs9D8=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=olF+iAjxCrH03mMgPNohsO85KaP3HQivf2QWCyEtu/7WxzhxUmrIQF+gVwZWcfzzo
-         9CQ9zKt5q/7mnPZAElXpsYLo1udQAqjgKtGSUnMfzxd2VMk5NMu5+60UFEJdgKxsD6
-         DpyYFkWA8LMkigiST5haZ2hC1eTJ8295CwvT8mBS0TVbdY9+But39ThVPXM68JqwrW
-         ZB0nr2yDgilYB1sYM4CpmvWHnzv5cm2cCgjrh/HKH5QLkDf63V944kGujiV4Pkn+lO
-         KTrLPhUaRIvhtQw08P96n0r2/YRgXEnKfGeRx4ZL9jvMk5ROiV54V6maDJFnMwdKTt
-         t8TkvhftNVhtg==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id B7B9EF03937;
-        Fri, 20 May 2022 18:36:22 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.18-rc8
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20220520123625.46331-1-ulf.hansson@linaro.org>
-References: <20220520123625.46331-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20220520123625.46331-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18-rc4-2
-X-PR-Tracked-Commit-Id: e949dee3625e1b0ef2e40d9aa09c2995281b12f6
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 317de3dbe2f16eb732de685cf49390349ecff2f3
-Message-Id: <165307178274.15282.5846610142505705559.pr-tracker-bot@kernel.org>
-Date:   Fri, 20 May 2022 18:36:22 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        by ams.source.kernel.org (Postfix) with ESMTPS id F1BF9B80022;
+        Sat, 21 May 2022 14:40:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 133D3C385A5;
+        Sat, 21 May 2022 14:40:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1653144047;
+        bh=Z+EJAEeWaRR0EPfhpiHD0bZq+LhpCrhD3EDm2tLhqfU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=qV+MaZslsub/l1lnAjC2Gmm56x00oPFkmue0Q4RO1P36ZRxT07FMsq81dk2+hFbeA
+         KvlA4/A4NWwLuoYwmfD2OwB6tM6KUZf8uMbqLgaboXUlz9Wu6us6HXWjsBUhgDDaye
+         zQs0YBoC0zEiLgjGWz6xt2I1CfTJB36bQSXLeYnw=
+Date:   Sat, 21 May 2022 16:40:44 +0200
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Florian Fainelli <f.fainelli@gmail.com>
+Cc:     stable@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Nishad Kamdar <nishadkamdar@gmail.com>,
+        Christian =?iso-8859-1?Q?L=F6hle?= <CLoehle@hyperstone.com>,
+        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
+        <linux-mmc@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>, alcooperx@gmail.com,
+        kdasu.kdev@gmail.com
+Subject: Re: [PATCH stable 4.19 0/3] MMC timeout back ports
+Message-ID: <Yoj57NDDiQblR5aT@kroah.com>
+References: <20220517182211.249775-1-f.fainelli@gmail.com>
+ <1392eba8-d869-aa1a-b154-cec870017115@gmail.com>
+ <1892af53-5d83-ac8a-1180-970bf07e8889@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <1892af53-5d83-ac8a-1180-970bf07e8889@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 20 May 2022 14:36:25 +0200:
+On Thu, May 19, 2022 at 12:04:59PM -0700, Florian Fainelli wrote:
+> 
+> 
+> On 5/19/2022 10:38 AM, Florian Fainelli wrote:
+> > 
+> > 
+> > On 5/17/2022 11:22 AM, Florian Fainelli wrote:
+> > > These 3 commits from upstream allow us to have more fine grained control
+> > > over the MMC command timeouts and this solves the following timeouts
+> > > that we have seen on our systems across suspend/resume cycles:
+> > > 
+> > > [   14.907496] usb usb2: root hub lost power or was reset
+> > > [   15.216232] usb 1-1: reset high-speed USB device number 2 using
+> > > xhci-hcd
+> > > [   15.485812] bcmgenet 8f00000.ethernet eth0: Link is Down
+> > > [   15.525328] mmc1: error -110 doing runtime resume
+> > > [   15.531864] OOM killer enabled.
+> > > 
+> > > Thanks!
+> > 
+> > Looks like I managed to introduce a build warning due to the unused
+> > timeout variable, let me submit a fresher version for 4.19, 4.14 and
+> > 4.9.
+> 
+> Only v4.19 and v4.14 required a v2, you can find both here:
+> 
+> https://lore.kernel.org/lkml/20220519184536.370540-1-f.fainelli@gmail.com/T/#t
+> 
+> https://lore.kernel.org/lkml/20220519190030.377695-1-f.fainelli@gmail.com/T/#t
+> 
+> Sorry about that, I will build with W=1 in the future to notice those set
+> but unused variable warnings.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.18-rc4-2
+I've queued up the updates now, thanks.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/317de3dbe2f16eb732de685cf49390349ecff2f3
-
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+greg k-h
