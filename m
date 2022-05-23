@@ -2,46 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD2F5C43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 07:24:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C178C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 07:24:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229548AbiEWHXz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 May 2022 03:23:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60010 "EHLO
+        id S229724AbiEWHYa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 May 2022 03:24:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229944AbiEWHXZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 03:23:25 -0400
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C37B431935;
-        Mon, 23 May 2022 00:15:06 -0700 (PDT)
+        with ESMTP id S230086AbiEWHXh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 03:23:37 -0400
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECE13B7FD;
+        Mon, 23 May 2022 00:15:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1653290106; x=1684826106;
+  t=1653290155; x=1684826155;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=vJCMQiIR7liz2b404hqMCKac/tqlSpulijF21UcO9eI=;
-  b=g3EOpxy8eNhxB6L1zDDq8fs0cn6ov5nuuKc3dRJ2kdWWVujZT0Hv4ytb
-   NCChtkD/vrBQ4n4a5kGZPlx9QKEAMRgZrSyeuf6s8ZZGU6CIl5BFQD2UV
-   HfFhI+xPMVcPwY7VA1qXZxIVkw1YLoiZipYcucs8pZ7Iu/BumKtddcTDw
-   XnHaU1IDB2j0yjIJaGDYFQL0KHq+mBM1D2sMgKuSXFAN1VDVXvG94M/XV
-   gUfc9r97yZY2PqiWoM782mjYU7GQTK+YEyd5fVI6FpM6GPQF3Rt39/pz+
-   IMtebzwiFvs9rE3WpHq4TlZauyZF3kIcNY/hc/7/YlQ5F9Ttbm8EfaDGY
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10355"; a="336190510"
+  bh=ow9j/zlS+nPpHK9uJA1pcMosuC0zmgIRNB3sJevPSyc=;
+  b=HgljwizAKTiYr9dKAYh9vOiKP4mytpyZV1edAGT4LOE73k03FR3wSWlu
+   sR+uUGzuA6QaBowrDWG6VCdRYrCpa7yqi7bADXIlG1TkbqSHk0GI93aeT
+   ftFUd+m+9twKCnLL53mP3KGZSj7oS7vc23CMOYlWoLdbeFqW3GZJsUJJt
+   Y0WUisZ2OznYtvhg6NllU8BlmNaORg1XZlfshwzXGPO6rf0k4Ri4sh0mn
+   MAGLdNKXexVub8WONKqnkuhcsrLxD3/Z594xUB3oQi1G/6tOXSo2L08jP
+   eSv5p2W3ahLPuE/flSJHVNghWYBl3CV+ktaq2mI6tN2jK7UdKwOTHh9CL
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10355"; a="273125107"
 X-IronPort-AV: E=Sophos;i="5.91,245,1647327600"; 
-   d="scan'208";a="336190510"
+   d="scan'208";a="273125107"
 Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2022 00:14:51 -0700
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2022 00:15:54 -0700
 X-IronPort-AV: E=Sophos;i="5.91,245,1647327600"; 
-   d="scan'208";a="600488440"
+   d="scan'208";a="600488927"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.56.27])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2022 00:14:46 -0700
-Message-ID: <23b27e40-5b6d-22cb-8e87-19e7378db849@intel.com>
-Date:   Mon, 23 May 2022 10:14:41 +0300
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 May 2022 00:15:50 -0700
+Message-ID: <79590e32-5505-7a0c-81b4-0efd5c8f156f@intel.com>
+Date:   Mon, 23 May 2022 10:15:45 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH V6 1/5] mmc: core: Capture eMMC and SD card errors
+Subject: Re: [PATCH V6 4/5] mmc: debugfs: Add debug fs error state entry for
+ mmc driver
 Content-Language: en-US
 To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
         ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com,
@@ -54,11 +55,11 @@ Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         Liangliang Lu <quic_luliang@quicinc.com>,
         "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
 References: <1652857340-6040-1-git-send-email-quic_c_sbhanu@quicinc.com>
- <1652857340-6040-2-git-send-email-quic_c_sbhanu@quicinc.com>
+ <1652857340-6040-5-git-send-email-quic_c_sbhanu@quicinc.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <1652857340-6040-2-git-send-email-quic_c_sbhanu@quicinc.com>
+In-Reply-To: <1652857340-6040-5-git-send-email-quic_c_sbhanu@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -66,107 +67,67 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 18/05/22 10:02, Shaik Sajida Bhanu wrote:
-> Add changes to capture eMMC and SD card errors.
-> This is useful for debug and testing.
+> Add debug fs entry error state to query eMMC and SD card errors statistics.
+> If any errors occurred in eMMC and SD card driver level then
+> err_state value will be set to 1.
 > 
 > Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
 > Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
 > Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-> Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
 > Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 
-Seems to need to be re-based on Ulf's next branch:
-
-	git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git next
+Could use debugfs_create_file_unsafe() (see below)
 
 Otherwise:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/core/core.c  | 10 +++++++++-
->  include/linux/mmc/host.h | 26 ++++++++++++++++++++++++++
->  2 files changed, 35 insertions(+), 1 deletion(-)
+>  drivers/mmc/core/debugfs.c | 23 +++++++++++++++++++++++
+>  1 file changed, 23 insertions(+)
 > 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 368f104..5db5adf 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -943,9 +943,11 @@ int mmc_execute_tuning(struct mmc_card *card)
->  	}
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 6aa5a60..3c7908d 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -223,6 +223,27 @@ static int mmc_clock_opt_set(void *data, u64 val)
+>  DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+>  	"%llu\n");
 >  
->  	/* Only print error when we don't check for card removal */
-> -	if (!host->detect_change)
-> +	if (!host->detect_change) {
->  		pr_err("%s: tuning execution failed: %d\n",
->  			mmc_hostname(host), err);
-> +		mmc_debugfs_err_stats_inc(host, MMC_ERR_TUNING);
-> +	}
->  
->  	return err;
->  }
-> @@ -2242,6 +2244,12 @@ void mmc_rescan(struct work_struct *work)
->  		if (freqs[i] <= host->f_min)
->  			break;
->  	}
-> +
-> +	/*
-> +	 * Ignore the command timeout errors observed during
-> +	 * the card init as those are excepted.
-> +	 */
-> +	host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
->  	mmc_release_host(host);
->  
->   out:
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 0c0c9a0..0d7c0f7 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -93,6 +93,25 @@ struct mmc_clk_phase_map {
->  
->  struct mmc_host;
->  
-> +enum mmc_err_stat {
-> +	MMC_ERR_CMD_TIMEOUT,
-> +	MMC_ERR_CMD_CRC,
-> +	MMC_ERR_DAT_TIMEOUT,
-> +	MMC_ERR_DAT_CRC,
-> +	MMC_ERR_AUTO_CMD,
-> +	MMC_ERR_ADMA,
-> +	MMC_ERR_TUNING,
-> +	MMC_ERR_CMDQ_RED,
-> +	MMC_ERR_CMDQ_GCE,
-> +	MMC_ERR_CMDQ_ICCE,
-> +	MMC_ERR_REQ_TIMEOUT,
-> +	MMC_ERR_CMDQ_REQ_TIMEOUT,
-> +	MMC_ERR_ICE_CFG,
-> +	MMC_ERR_CTRL_TIMEOUT,
-> +	MMC_ERR_UNEXPECTED_IRQ,
-> +	MMC_ERR_MAX,
-> +};
-> +
->  struct mmc_host_ops {
->  	/*
->  	 * It is optional for the host to implement pre_req and post_req in
-> @@ -498,6 +517,7 @@ struct mmc_host {
->  	/* Host Software Queue support */
->  	bool			hsq_enabled;
->  
-> +	u32			err_stats[MMC_ERR_MAX];
->  	unsigned long		private[] ____cacheline_aligned;
->  };
->  
-> @@ -632,6 +652,12 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
->  	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
->  }
->  
-> +static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
-> +					     enum mmc_err_stat stat)
+> +static int mmc_err_state_get(void *data, u64 *val)
 > +{
-> +	host->err_stats[stat] += 1;
+> +	struct mmc_host *host = data;
+> +	int i;
+> +
+> +	if (!host)
+> +		return -EINVAL;
+> +
+> +	*val = 0;
+> +	for (i = 0; i < MMC_ERR_MAX; i++) {
+> +		if (host->err_stats[i]) {
+> +			*val = 1;
+> +			break;
+> +		}
+> +	}
+> +
+> +	return 0;
 > +}
 > +
->  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
->  int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
+> +DEFINE_DEBUGFS_ATTRIBUTE(mmc_err_state, mmc_err_state_get, NULL, "%llu\n");
+> +
+>  static int mmc_err_stats_show(struct seq_file *file, void *data)
+>  {
+>  	struct mmc_host *host = (struct mmc_host *)file->private;
+> @@ -289,6 +310,8 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+>  	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
+>  				   &mmc_clock_fops);
+>  
+> +	debugfs_create_file("err_state", 0600, root, host,
+> +			    &mmc_err_state);
+
+This could use debugfs_create_file_unsafe()
+
+>  	debugfs_create_file("err_stats", 0600, root, host,
+>  			    &mmc_err_stats_fops);
 >  
 
