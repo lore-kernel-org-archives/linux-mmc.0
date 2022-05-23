@@ -2,90 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D036C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 14:43:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B721BC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 19:47:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237161AbiEWOnF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 May 2022 10:43:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60956 "EHLO
+        id S229821AbiEWTr4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 May 2022 15:47:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237143AbiEWOnE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 10:43:04 -0400
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD4EF473AE;
-        Mon, 23 May 2022 07:43:03 -0700 (PDT)
-Received: by mail-pf1-x42e.google.com with SMTP id c14so13919626pfn.2;
-        Mon, 23 May 2022 07:43:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=myT6Fqbqu1LXacuDQiYi2tYK9nlNzCLLy9owGdyn/GM=;
-        b=W40Zi+DyWWgFk6zFggk1cM4+12Ds4CLiWxJJFIDCHVXXfyZ8Ad7Cqymjsn1kfL8jkv
-         nicUZszJNr5iELKl2BnH40TNaf8VmqkNmstv8EuCzvV/9LsKDXT9DaMPoeb/tUSM/7Ea
-         idPCl3UFMH9bUO0zky1Ig2MFMJT0VA9o4O3uWdp7NlycKRqaAXTb4+dbwEeIw/2EAh39
-         IyVaGbrtl2LNmWaGYYRz5wul6aoaS7lXvjqDT5xYJvlJJzQeMNPbgQiUKnmE8nOIozqc
-         5Dm5He0lxBru+N6WH0o+8ItFZ8380cIozkrcBwM1DlBkDL1i9PpJIEnNk9z5JOMm2gSM
-         yETg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=myT6Fqbqu1LXacuDQiYi2tYK9nlNzCLLy9owGdyn/GM=;
-        b=DJhmo0U2XjahFsIpT0XnBaSqjP7NIDX5Omqxd5EUX1TnqA5ogntomP7wHduwEl9a0x
-         EvNVL6kcRqIydfqocYbvzZY6HqHK74x7F0xClEjPr9qM2Nmqp1BM9wMmcklPazg+evbO
-         NqHA3yCuaqvq9U6fMsYREB9VtSBv4rYJsh1XE4/sQR+3lkKhyKpw79aORH2Dn3uD8JSC
-         daEUSdvCSTT+LsfqJjYQ838RYw55VTlKYqEYTzF23XkvRYFcJFNImJbDtihA3Cedjhik
-         reOMNVENpxoPf41ttCoJyEY6r7XKgGpdi4pwnh15ILu2522QC5+vg2UTzH5cmi24BWCJ
-         +XYw==
-X-Gm-Message-State: AOAM531n0W92XfKVeIU9nS178M/aHQrQQx+swOLsDj7IjKVciPzFYLPT
-        L5FzguTNFa142N63MLl1Y/8=
-X-Google-Smtp-Source: ABdhPJzxucuNqwrbGbtCTMKQBFrCjgq5q/YqLdQJUtRcvT+v69kGz63GH3c5bW+pWxOxdNB+QMbYLQ==
-X-Received: by 2002:a05:6a00:10cc:b0:505:ada6:e03e with SMTP id d12-20020a056a0010cc00b00505ada6e03emr24006767pfu.45.1653316983287;
-        Mon, 23 May 2022 07:43:03 -0700 (PDT)
-Received: from localhost.localdomain ([202.120.234.246])
-        by smtp.googlemail.com with ESMTPSA id jb15-20020a170903258f00b0015e8d4eb256sm5218430plb.160.2022.05.23.07.43.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 May 2022 07:43:03 -0700 (PDT)
-From:   Miaoqian Lin <linmq006@gmail.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        yangbo lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     linmq006@gmail.com
-Subject: [PATCH] mmc: sdhci-of-esdhc: Fix refcount leak in esdhc_signal_voltage_switch
-Date:   Mon, 23 May 2022 18:42:54 +0400
-Message-Id: <20220523144255.10310-1-linmq006@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S229448AbiEWTrz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 15:47:55 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.126.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCA6F20BC4;
+        Mon, 23 May 2022 12:47:52 -0700 (PDT)
+Received: from [192.168.1.107] ([37.4.249.139]) by mrelayeu.kundenserver.de
+ (mreue010 [212.227.15.167]) with ESMTPSA (Nemesis) id
+ 1Mrh9Y-1nYAQI0bTQ-00neu2; Mon, 23 May 2022 21:47:30 +0200
+Message-ID: <129470ff-7570-4643-2dfc-3a187b3fc39f@i2se.com>
+Date:   Mon, 23 May 2022 21:47:28 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.1
+Subject: Re: WARNING: CPU: 2 PID: 3331 at drivers/firmware/raspberrypi.c:63
+ rpi_firmware_property_list
+Content-Language: en-US
+To:     Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc:     open list <linux-kernel@vger.kernel.org>,
+        linux-rpi-kernel@lists.infradead.org,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        lkft-triage@lists.linaro.org, regressions@lists.linux.dev,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Richard Fitzgerald <rf@opensource.cirrus.com>,
+        rcu <rcu@vger.kernel.org>,
+        "Paul E. McKenney" <paulmck@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Phil Elwell <phil@raspberrypi.com>
+References: <CA+G9fYt4+47GzfEYT1nV3dqbGa1YCwFm9XwC668D4PkK4BHFgQ@mail.gmail.com>
+ <55d49dea-1a67-d857-218e-ef2343251361@i2se.com>
+ <CA+G9fYvF7HGmJQtk7ktmakwQNjjraK3EoBeiMr+3NuEvsixi6Q@mail.gmail.com>
+From:   Stefan Wahren <stefan.wahren@i2se.com>
+In-Reply-To: <CA+G9fYvF7HGmJQtk7ktmakwQNjjraK3EoBeiMr+3NuEvsixi6Q@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Provags-ID: V03:K1:m6/4BZrp4B84xb75d/EtlTmi/xvpNb1VeM2r2H289cbnhPS6zJm
+ x1qPfrXpQ1sI+cv+xxufaCiZQkc56HTa2kfr/ltVUIwSIsWczi1Liu08nSuDvebaGbS+UcZ
+ 3m7aSgUNn+4rMQsi+Q4ELiecsQfniNKEB+qJShNzw4iY05kLyI3spREwlWNlO/JOR65lCHt
+ hiFE+MCxa/yAgsto+gGgg==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:88f2pVyoHx4=:dURGxktMBAWL627wqIjt8L
+ 7IIu1xFlzAwh8n6CWQAKfdOomlWjNTesH1f6ALujCWIclGt6p6Zz7F56QHQeajSK2tjkHhPrT
+ osFQ3ZkObxbpeYj7rkRJ4AObv3gSOaVs1jH2RCCYn8YICoIldU0q+Nb8Vn3C1+jn/E5WovKnx
+ EbjwvgonBWF73f3740UYW1B2ZcfO2AQWBriaApJcLaC0Qy4/KxG9OL4lzkklEMcngT5iseXsO
+ TYT+8anx4Ypse6IGQy1LUTOoUG/9vIWEd+ZzYm0FA0dBssbfkmwQMJfBkb0MPJkjY0nFEUgDF
+ 5bz7lKXKw67cqRue/kXfKtl6H+1twKZp43QB2t1bGsVbl5VMKPzwAQD/v290Y7iU46hJLSUu4
+ ECUAFRDqmH0Kd78M7WrBWEivYZw02RA9EZgt+uWaED3xSjO/PPIdUXmBT0Jwv90SPOwnkuqIk
+ dSAE8z+y1f2p+ukNM3/LEf5yox5sCaJQGEDX0UCsqbdzuMY9Mx2SvVgpRs8TmFfUWpMirvyjD
+ hn+KdKFg4GPnjmYX4A6I65Jk3M1GSTPJNVYebOcLD02vcHGi96bPqaJwvGA9vFfDLOgLL4RWB
+ PnyHUEzAECUKh51PA34ghYB+8iIvr6GHniHF+0zYza4FTshsSZd1xYkVPSG0MGe5+OspbMaNm
+ 7hvVFu+493N9UhrwD87+7rAtLbyE39A5hM4hOuCBBTEm3j4WiyncxhdHQbRgyopozjVrT0Er/
+ LGNgPFV3x+k1Xy0NlwiMCfE2AgC17KTfrPilvg12kGmcBp+uoE6MBXeNFrs=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-of_find_matching_node() returns a node pointer with refcount
-incremented, we should use of_node_put() on it when not need anymore.
-Add missing of_node_put() to avoid refcount leak.
-of_node_put() checks null pointer.
+Hi Naresh,
 
-Fixes: ea35645a3c66 ("mmc: sdhci-of-esdhc: add support for signal voltage switch")
-Signed-off-by: Miaoqian Lin <linmq006@gmail.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 1 +
- 1 file changed, 1 insertion(+)
+Am 23.05.22 um 14:35 schrieb Naresh Kamboju:
+> On Mon, 23 May 2022 at 16:43, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+>> Hi Naresh,
+>>
+>> Am 23.05.22 um 11:04 schrieb Naresh Kamboju:
+>>> The following kernel warning was noticed on raspberrypi4 device while
+>>> running LTP controllers with Linus mainline kernel tree.
+>>>
+>>> Reported-by: Linux Kernel Functional Testing <lkft@linaro.org>
+>>>
+>>> metadata:
+>>>     git_ref: master
+>>>     git_repo: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+>>>     git_sha: 4b0986a3613c92f4ec1bdc7f60ec66fea135991f
+>>>     git_describe: v5.18
+>>>     kernel_version: 5.18.0
+>>>     kernel-config: https://builds.tuxbuild.com/29XDpgnCMxtWJ6lVJ9M0x3hTNWu/config
+>>>     artifact-location: https://builds.tuxbuild.com/29XDpgnCMxtWJ6lVJ9M0x3hTNWu
+>>>     toolchain: gcc-11
+>>>     System.map: https://builds.tuxbuild.com/29XDpgnCMxtWJ6lVJ9M0x3hTNWu/System.map
+>>>     vmlinux.xz: https://builds.tuxbuild.com/29XDpgnCMxtWJ6lVJ9M0x3hTNWu/vmlinux.xz
+>> thanks for your report.
+>>
+>> Do you know this worked before (e.g. 5.17)?
+> Yes. it worked before.
+>
+>> Am I correct that you are using GPU firmware 2021-02-25T12:10:40?
+> Correct.
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index d9dc41143bb3..8b3d8119f388 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -904,6 +904,7 @@ static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
- 		scfg_node = of_find_matching_node(NULL, scfg_device_ids);
- 		if (scfg_node)
- 			scfg_base = of_iomap(scfg_node, 0);
-+		of_node_put(scfg_node);
- 		if (scfg_base) {
- 			sdhciovselcr = SDHCIOVSELCR_TGLEN |
- 				       SDHCIOVSELCR_VSELVAL;
--- 
-2.25.1
+Since i also experienced firmware crashes [1] with 5.18, it possible for 
+you to update to a more recent firmware?
 
+Best regards
+
+[1] - 
+https://lore.kernel.org/all/3dd4e0cb-8ba5-e0c7-cde5-29c56a5caa95@i2se.com/
+
+>
+> - Naresh
