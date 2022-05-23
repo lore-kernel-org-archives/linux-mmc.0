@@ -2,70 +2,75 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09765C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 07:45:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95F06C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 07:52:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230224AbiEWHpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 May 2022 03:45:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55696 "EHLO
+        id S231233AbiEWHwn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 May 2022 03:52:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49674 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230204AbiEWHpD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 03:45:03 -0400
+        with ESMTP id S231235AbiEWHwl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 03:52:41 -0400
 Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52D6417065;
-        Mon, 23 May 2022 00:45:02 -0700 (PDT)
-X-UUID: 04018e99e3d744ec8f540b19ed081c95-20220523
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AA04C2A;
+        Mon, 23 May 2022 00:52:38 -0700 (PDT)
+X-UUID: e872954f6e174e2797e08568db490e37-20220523
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.5,REQID:a6f4da93-0487-4c71-9118-8817bfa5d73f,OB:10,L
-        OB:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,AC
+X-CID-O-INFO: VERSION:1.1.5,REQID:1e7946c2-d70e-4544-ab36-c554dcb667a4,OB:0,LO
+        B:10,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,AC
         TION:release,TS:45
-X-CID-INFO: VERSION:1.1.5,REQID:a6f4da93-0487-4c71-9118-8817bfa5d73f,OB:10,LOB
-        :0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACTI
+X-CID-INFO: VERSION:1.1.5,REQID:1e7946c2-d70e-4544-ab36-c554dcb667a4,OB:0,LOB:
+        10,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACTI
         ON:release,TS:45
-X-CID-META: VersionHash:2a19b09,CLOUDID:68f9427a-5ef6-470b-96c9-bdb8ced32786,C
-        OID:18f79406f0a9,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:1,File:nil,QS:0,BEC:nil
-X-UUID: 04018e99e3d744ec8f540b19ed081c95-20220523
+X-CID-META: VersionHash:2a19b09,CLOUDID:805133e3-edbf-4bd4-8a34-dfc5f7bb086d,C
+        OID:9dcc2d6235fe,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
+        RL:0,File:nil,QS:0,BEC:nil
+X-UUID: e872954f6e174e2797e08568db490e37-20220523
 Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
         (envelope-from <axe.yang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1402844007; Mon, 23 May 2022 15:44:58 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
- mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
- Mon, 23 May 2022 15:44:56 +0800
+        with ESMTP id 802858127; Mon, 23 May 2022 15:52:32 +0800
+Received: from MTKMBS07N2.mediatek.inc (172.21.101.141) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Mon, 23 May 2022 15:52:30 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Mon, 23 May 2022 15:52:30 +0800
 Received: from mhfsdcap04 (10.17.3.154) by mtkmbs11n1.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
- Transport; Mon, 23 May 2022 15:44:55 +0800
-Message-ID: <8362953b3f6e5290cbba3aa06f9bfa2535efadb3.camel@mediatek.com>
+ Transport; Mon, 23 May 2022 15:52:29 +0800
+Message-ID: <c6cca70d59ce38db24936fbcaf2d0ceb1d01727b.camel@mediatek.com>
 Subject: Re: [PATCH v10 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
  pinctrls properties
 From:   Axe Yang <axe.yang@mediatek.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     Rob Herring <robh+dt@kernel.org>, <linux-kernel@vger.kernel.org>,
-        "Andrew Jeffery" <andrew@aj.id.au>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        "Satya Tangirala" <satyat@google.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Eric Biggers <ebiggers@google.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Lucas Stach <dev@lynxeye.de>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
-        "Andy Shevchenko" <andriy.shevchenko@linux.intel.com>,
-        Tian Tao <tiantao6@hisilicon.com>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+To:     AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>,
-        Yue Hu <huyue2@yulong.com>, Kiwoong Kim <kwmad.kim@samsung.com>
-Date:   Mon, 23 May 2022 15:44:55 +0800
-In-Reply-To: <1652965539.952223.1359564.nullmailer@robh.at.kernel.org>
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "Chaotian Jing" <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>
+Date:   Mon, 23 May 2022 15:52:28 +0800
+In-Reply-To: <d8de6b98-23a3-1991-8ceb-24098c38c335@collabora.com>
 References: <20220519111323.14586-1-axe.yang@mediatek.com>
          <20220519111323.14586-2-axe.yang@mediatek.com>
-         <1652965539.952223.1359564.nullmailer@robh.at.kernel.org>
+         <d8de6b98-23a3-1991-8ceb-24098c38c335@collabora.com>
 Content-Type: text/plain; charset="UTF-8"
 X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
@@ -75,8 +80,8 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2022-05-19 at 08:05 -0500, Rob Herring wrote:
-> On Thu, 19 May 2022 19:13:21 +0800, Axe Yang wrote:
+On Thu, 2022-05-19 at 13:18 +0200, AngeloGioacchino Del Regno wrote:
+> Il 19/05/22 13:13, Axe Yang ha scritto:
 > > Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
 > > This feature allow SDIO devices alarm asynchronous interrupt to
 > > host
@@ -86,47 +91,52 @@ On Thu, 2022-05-19 at 08:05 -0500, Rob Herring wrote:
 > > 
 > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 > > ---
-> >  .../devicetree/bindings/mmc/mtk-sd.yaml       | 53
+> >   .../devicetree/bindings/mmc/mtk-sd.yaml       | 53
 > > ++++++++++++++++++-
-> >  1 file changed, 52 insertions(+), 1 deletion(-)
+> >   1 file changed, 52 insertions(+), 1 deletion(-)
 > > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > index 2a2e9fa8c188..b068ab67a054 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > @@ -72,12 +72,26 @@ properties:
+> >         - const: ahb_cg
+> >   
+> >     interrupts:
+> > -    maxItems: 1
+> > +    description:
+> > +      Should at least contain MSDC GIC interrupt. To support SDIO
+> > in-band wakeup, an extended
+> > +      interrupt is required and be configured as wakeup source
+> > irq.
+> > +    minItems: 1
+> > +    maxItems: 2
+> > +
+> > +  interrupt-names:
+> > +    items:
+> > +      - const: msdc_irq
+> >   
 > 
-> My bot found errors running 'make DT_CHECKER_FLAGS=-m
-> dt_binding_check'
-> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> That ain't right. You have two interrupts, so you describe two
+> interrupts:
 > 
-> yamllint warnings/errors:
+> interrupt-names:
+>    minItems: 1
+>    items:
+>      - const: msdc
+>      - const: sdio-wakeup
 > 
-> dtschema/dtc warnings/errors:
-> Error: Documentation/devicetree/bindings/mmc/mtk-
-> sd.example.dts:50.36-37 syntax error
-> FATAL ERROR: Unable to parse input tree
-> make[1]: *** [scripts/Makefile.lib:364:
-> Documentation/devicetree/bindings/mmc/mtk-sd.example.dtb] Error 1
-> make[1]: *** Waiting for unfinished jobs....
-> make: *** [Makefile:1401: dt_binding_check] Error 2
-> 
-> doc reference errors (make refcheckdocs):
-> 
-> See https://patchwork.ozlabs.org/patch/
-> 
-> This check can fail if there are any dependencies. The base for a
-> patch
-> series is generally the most recent rc1.
-> 
-> If you already ran 'make dt_binding_check' and didn't see the above
-> error(s), then make sure 'yamllint' is installed and dt-schema is up
-> to
-> date:
-> 
-> pip3 install dtschema --upgrade
-> 
-> Please check and re-submit.
+Fixed in v11.
 
-I reproduced the build error, sorry for that.
-And it has been fixed in v11. 
+> ...also, I personally don't like the "_irq" suffix: we're specifying
+> interrupts in
+> interrupt-names, so it sounds a bit redundant.
+> 
+> You're free to keep it, if you really like it though.
+
+Totally agree with that. The suffix is removed in v11.
 
 Regards,
 Axe
-
 
