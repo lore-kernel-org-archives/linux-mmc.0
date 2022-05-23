@@ -2,41 +2,41 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63FAEC43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 07:40:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F31DC43219
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 07:40:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230316AbiEWHki (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 May 2022 03:40:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42822 "EHLO
+        id S230329AbiEWHkj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 May 2022 03:40:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230261AbiEWHkg (ORCPT
+        with ESMTP id S230245AbiEWHkg (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 03:40:36 -0400
 Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1146F1D304;
-        Mon, 23 May 2022 00:40:29 -0700 (PDT)
-X-UUID: 6d65f54eef3441d3b5df3770083f8a63-20220523
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A502B1E3D5;
+        Mon, 23 May 2022 00:40:31 -0700 (PDT)
+X-UUID: aa0404775dba4755a26050ac8df58aed-20220523
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.5,REQID:d8e92cc5-d9c0-446c-a706-81f7fedae349,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:95,FILE:0,RULE:Release_Ham,AC
-        TION:release,TS:90
-X-CID-INFO: VERSION:1.1.5,REQID:d8e92cc5-d9c0-446c-a706-81f7fedae349,OB:0,LOB:
-        0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:95,FILE:0,RULE:Spam_GS981B3D,AC
-        TION:quarantine,TS:90
-X-CID-META: VersionHash:2a19b09,CLOUDID:3ec8427a-5ef6-470b-96c9-bdb8ced32786,C
-        OID:40d5bd0b5061,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:0,File:nil,QS:0,BEC:nil
-X-UUID: 6d65f54eef3441d3b5df3770083f8a63-20220523
-Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw01.mediatek.com
+X-CID-O-INFO: VERSION:1.1.5,REQID:4cbdbfc7-a64d-4537-b1c8-6e0fa86e6628,OB:0,LO
+        B:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
+        ION:release,TS:-5
+X-CID-META: VersionHash:2a19b09,CLOUDID:50cf32e3-edbf-4bd4-8a34-dfc5f7bb086d,C
+        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil
+        ,QS:0,BEC:nil
+X-UUID: aa0404775dba4755a26050ac8df58aed-20220523
+Received: from mtkmbs11n2.mediatek.inc [(172.21.101.187)] by mailgw01.mediatek.com
         (envelope-from <axe.yang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 478016615; Mon, 23 May 2022 15:40:23 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
- mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
- Mon, 23 May 2022 15:40:21 +0800
+        with ESMTP id 58877276; Mon, 23 May 2022 15:40:25 +0800
+Received: from MTKMBS07N2.mediatek.inc (172.21.101.141) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Mon, 23 May 2022 15:40:25 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
+ mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Mon, 23 May 2022 15:40:24 +0800
 Received: from localhost.localdomain (10.17.3.154) by mtkmbs11n1.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
- Transport; Mon, 23 May 2022 15:40:20 +0800
+ Transport; Mon, 23 May 2022 15:40:23 +0800
 From:   Axe Yang <axe.yang@mediatek.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -58,10 +58,11 @@ CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>
-Subject: [PATCH v11 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
-Date:   Mon, 23 May 2022 15:40:15 +0800
-Message-ID: <20220523074017.12649-2-axe.yang@mediatek.com>
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>
+Subject: [PATCH v11 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
+Date:   Mon, 23 May 2022 15:40:17 +0800
+Message-ID: <20220523074017.12649-4-axe.yang@mediatek.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220523074017.12649-1-axe.yang@mediatek.com>
 References: <20220523074017.12649-1-axe.yang@mediatek.com>
@@ -73,95 +74,202 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
-This feature allow SDIO devices alarm asynchronous interrupt to host
-even when host stop providing clock to SDIO card. An extra wakeup
-interrupt and pinctrl states for SDIO DAT1 pin state switching are
-required in this scenario.
+Add support for eint IRQ when MSDC is used as an SDIO host. This
+feature requires SDIO device support async IRQ function. With this
+feature, SDIO host can be awakened by SDIO card in suspend state,
+without additional pin.
 
+MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+resume, switch GPIO function back to DAT1 mode then turn on clock.
+
+Some device tree property should be added or modified in MSDC node
+to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
+this feature depends on asynchronous interrupts, "wakeup-source",
+"keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
+the interrupts list should be extended(the interrupt named with
+sdio_wakeup):
+        &mmcX {
+		...
+		interrupt-names = "msdc", "sdio_wakeup";
+		interrupts-extended = <...>,
+                              	      <&pio xxx IRQ_TYPE_LEVEL_LOW>;
+                ...
+                pinctrl-names = "default", "state_uhs", "state_eint";
+                ...
+                pinctrl-2 = <&mmc2_pins_eint>;
+                ...
+                cap-sdio-irq;
+		keep-power-in-suspend;
+		wakeup-source;
+                ...
+        };
+
+Co-developed-by: Yong Mao <yong.mao@mediatek.com>
+Signed-off-by: Yong Mao <yong.mao@mediatek.com>
 Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 ---
- .../devicetree/bindings/mmc/mtk-sd.yaml       | 50 ++++++++++++++++++-
- 1 file changed, 49 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mtk-sd.c | 80 ++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 74 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index 2a2e9fa8c188..e83bf10281d6 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -72,12 +72,27 @@ properties:
-       - const: ahb_cg
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 195dc897188b..1233adb1bd0c 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: GPL-2.0-only
+ /*
+- * Copyright (c) 2014-2015 MediaTek Inc.
++ * Copyright (c) 2014-2015, 2022 MediaTek Inc.
+  * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+  */
  
-   interrupts:
--    maxItems: 1
-+    description:
-+      Should at least contain MSDC GIC interrupt. To support SDIO in-band wakeup, an extended
-+      interrupt is required and be configured as wakeup source irq.
-+    minItems: 1
-+    maxItems: 2
+@@ -20,6 +20,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
++#include <linux/pm_wakeirq.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/slab.h>
+ #include <linux/spinlock.h>
+@@ -440,8 +441,10 @@ struct msdc_host {
+ 	struct pinctrl *pinctrl;
+ 	struct pinctrl_state *pins_default;
+ 	struct pinctrl_state *pins_uhs;
++	struct pinctrl_state *pins_eint;
+ 	struct delayed_work req_timeout;
+ 	int irq;		/* host interrupt */
++	int eint_irq;		/* interrupt from sdio device for waking up system */
+ 	struct reset_control *reset;
+ 
+ 	struct clk *src_clk;	/* msdc source clock */
+@@ -1520,17 +1523,41 @@ static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
+ 
+ static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+ {
+-	unsigned long flags;
+ 	struct msdc_host *host = mmc_priv(mmc);
++	unsigned long flags;
++	int ret;
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	__msdc_enable_sdio_irq(host, enb);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-	if (enb)
+-		pm_runtime_get_noresume(host->dev);
+-	else
+-		pm_runtime_put_noidle(host->dev);
++	if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
++		if (enb) {
++			pinctrl_select_state(host->pinctrl, host->pins_eint);
++			ret = dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
 +
-+  interrupt-names:
-+    items:
-+      - const: msdc
-+      - const: sdio_wakeup
- 
-   pinctrl-names:
-+    description:
-+      Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin
-+      will be switched between GPIO mode and SDIO DAT1 mode, state_eint and state_dat1 are
-+      mandatory in this scenarios.
-+    minItems: 2
-     items:
-       - const: default
-       - const: state_uhs
-+      - const: state_eint
- 
-   pinctrl-0:
-     description:
-@@ -89,6 +104,11 @@ properties:
-       should contain uhs mode pin ctrl.
-     maxItems: 1
- 
-+  pinctrl-2:
-+    description:
-+      should switch dat1 pin to GPIO mode.
-+    maxItems: 1
++			if (ret) {
++				dev_err(host->dev, "Failed to register SDIO wakeup irq!\n");
++				host->pins_eint = NULL;
++				pm_runtime_get_noresume(host->dev);
++			} else {
++				dev_info(host->dev, "SDIO eint irq: %d!\n", host->eint_irq);
++				device_init_wakeup(host->dev, true);
++			}
 +
-   assigned-clocks:
-     description:
-       PLL of the source clock.
-@@ -208,4 +228,32 @@ examples:
-         mediatek,hs400-cmd-resp-sel-rising;
-     };
++			pinctrl_select_state(host->pinctrl, host->pins_uhs);
++		} else {
++			dev_pm_clear_wake_irq(host->dev);
++		}
++	} else {
++		if (enb) {
++			/* Ensure host->pins_eint is NULL */
++			kfree(host->pins_eint);
++			pm_runtime_get_noresume(host->dev);
++		} else {
++			pm_runtime_put_noidle(host->dev);
++		}
++	}
+ }
  
-+    mmc3: mmc@11260000 {
-+        compatible = "mediatek,mt8173-mmc";
-+        reg = <0x11260000 0x1000>;
-+        clock-names = "source", "hclk";
-+        clocks = <&pericfg CLK_PERI_MSDC30_3>,
-+                 <&topckgen CLK_TOP_MSDC50_2_H_SEL>;
-+        interrupt-names = "msdc", "sdio_wakeup";
-+        interrupts-extended = <&gic GIC_SPI 74 IRQ_TYPE_LEVEL_LOW 0>,
-+                     <&pio 23 IRQ_TYPE_LEVEL_LOW>;
-+        pinctrl-names = "default", "state_uhs", "state_eint";
-+        pinctrl-0 = <&mmc2_pins_default>;
-+        pinctrl-1 = <&mmc2_pins_uhs>;
-+        pinctrl-2 = <&mmc2_pins_eint>;
-+        bus-width = <4>;
-+        max-frequency = <200000000>;
-+        cap-sd-highspeed;
-+        sd-uhs-sdr104;
-+        keep-power-in-suspend;
-+        wakeup-source;
-+        cap-sdio-irq;
-+        no-mmc;
-+        no-sd;
-+        non-removable;
-+        vmmc-supply = <&sdio_fixed_3v3>;
-+        vqmmc-supply = <&mt6397_vgp3_reg>;
-+        mmc-pwrseq = <&wifi_pwrseq>;
-+    };
+ static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
+@@ -2631,6 +2658,19 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 		goto host_free;
+ 	}
+ 
++	/* Support for SDIO eint irq ? */
++	if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps & MMC_PM_KEEP_POWER)) {
++		host->eint_irq = platform_get_irq_byname(pdev, "sdio_wakeup");
++		if (host->eint_irq > 0) {
++			host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
++			if (IS_ERR(host->pins_eint)) {
++				dev_err_probe(&pdev->dev, PTR_ERR(host->pins_eint),
++					      "Cannot find pinctrl eint!\n");
++				host->pins_eint = NULL;
++			}
++		}
++	}
 +
- ...
+ 	msdc_of_property_parse(pdev, host);
+ 
+ 	host->dev = &pdev->dev;
+@@ -2845,6 +2885,12 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 
+ 	msdc_save_reg(host);
++
++	if (sdio_irq_claimed(mmc) && host->pins_eint) {
++		disable_irq(host->irq);
++		pinctrl_select_state(host->pinctrl, host->pins_eint);
++		sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
++	}
+ 	msdc_gate_clock(host);
+ 	return 0;
+ }
+@@ -2860,12 +2906,19 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
+ 		return ret;
+ 
+ 	msdc_restore_reg(host);
++
++	if (sdio_irq_claimed(mmc) && host->pins_eint) {
++		sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
++		pinctrl_select_state(host->pinctrl, host->pins_uhs);
++		enable_irq(host->irq);
++	}
+ 	return 0;
+ }
+ 
+ static int __maybe_unused msdc_suspend(struct device *dev)
+ {
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
++	struct msdc_host *host = mmc_priv(mmc);
+ 	int ret;
+ 
+ 	if (mmc->caps2 & MMC_CAP2_CQE) {
+@@ -2874,11 +2927,26 @@ static int __maybe_unused msdc_suspend(struct device *dev)
+ 			return ret;
+ 	}
+ 
++	if (sdio_irq_claimed(mmc) && host->pins_eint) {
++		pm_runtime_put_sync_suspend(dev);
++
++		return 0;
++	}
++
+ 	return pm_runtime_force_suspend(dev);
+ }
+ 
+ static int __maybe_unused msdc_resume(struct device *dev)
+ {
++	struct mmc_host *mmc = dev_get_drvdata(dev);
++	struct msdc_host *host = mmc_priv(mmc);
++
++	if (sdio_irq_claimed(mmc) && host->pins_eint) {
++		pm_runtime_get_sync(dev);
++
++		return 0;
++	}
++
+ 	return pm_runtime_force_resume(dev);
+ }
+ 
 -- 
 2.25.1
 
