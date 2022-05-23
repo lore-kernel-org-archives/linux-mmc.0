@@ -2,38 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B191CC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 09:32:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8BCFC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 May 2022 09:32:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233111AbiEWJcg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 May 2022 05:32:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42834 "EHLO
+        id S233071AbiEWJcj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 May 2022 05:32:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233121AbiEWJcf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 05:32:35 -0400
+        with ESMTP id S233093AbiEWJce (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2022 05:32:34 -0400
 Received: from bhuna.collabora.co.uk (bhuna.collabora.co.uk [46.235.227.227])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F19F286E6;
-        Mon, 23 May 2022 02:32:32 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2682D275C5;
+        Mon, 23 May 2022 02:32:31 -0700 (PDT)
 Received: from [127.0.0.1] (localhost [127.0.0.1])
         (Authenticated sender: kholk11)
-        with ESMTPSA id 0A4861F42DBE
+        with ESMTPSA id 57D081F42D94
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1653298351;
-        bh=ZH48jvF0up+hCWZK5ypwMWTFHlSbfZaq2hSsrwUJGyw=;
+        s=mail; t=1653298349;
+        bh=7TQ62V5XbcmQui5rWwD8kHW14UO9LXcaDw1amgKSaUM=;
         h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=VYgCeGVHMpNsdy8YVaOEe6io1q1onUzgTlJlgffHMUa3cVhgDBooaQjGRMCYJb4hy
-         fWsFmiPkEZsyZwrmRvECcT0NvOjnz1P7iVo0nIycEBX8QSnXNyhGLxsuhDlLqQLOTG
-         Gg5syFe5GXzK1k11GHoqEU2yhR+hosiul+EyjucubTJ8lWiRjU+fYrjbP2eVZvjymg
-         gxRLLyMH7L8Vs87RqqolD/UnFJv1AqaBjEEd+WMp66phr7ybmrv2LXLp6frDGmpzpD
-         XGq+FnLXjRarmnzZDNNC1FzkdZG1F8XQQgqNVif6k77QujkXloOpFkT0pZWz6+DNYb
-         bdssQlXDE2kyQ==
-Message-ID: <22b05750-6062-8c59-ac30-c7b342194ea8@collabora.com>
-Date:   Mon, 23 May 2022 11:32:27 +0200
+        b=WHv2XvbeJfFJAlIFiFxuTNDmn8ZLfc3Y/RBFFqXPLIq+9aDlV2WU67DqLpEGVE2dm
+         Hr8KOR7Aa4+Z5vjdu08OITd5VFG/VCRr1WZbCG9zWPyGbbbui0pPK5Mp9xhAB+xqUX
+         WQZHSJolp9HDxO4c/D1AEixqpTqiCUHaABXw+L6AllD01MfDG5jtby7izrBCB3/bl+
+         8qvpM6bsIDoRbQwfnTkpduUI0THnG4bs5AJUEhSeROI6eFS7y8Sql7QWinPGHr8/s4
+         MVP0VhBHomSL3JkEfqvjbl1WqqjjvBqpvDrzrO2zOJERWVdLI8fQ9Yb5/E7Wqirdmc
+         Hq2FbVsw1ec7A==
+Message-ID: <926ec290-7644-4820-41cb-5bffb44e2ffc@collabora.com>
+Date:   Mon, 23 May 2022 11:32:25 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.9.0
-Subject: Re: [PATCH v11 3/3] mmc: mediatek: add support for SDIO eint wakup
- IRQ
+Subject: Re: [PATCH v11 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
+ pinctrls properties
 Content-Language: en-US
 To:     Axe Yang <axe.yang@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -54,13 +54,12 @@ Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        Yong Mao <yong.mao@mediatek.com>
+        Project_Global_Chrome_Upstream_Group@mediatek.com
 References: <20220523074017.12649-1-axe.yang@mediatek.com>
- <20220523074017.12649-4-axe.yang@mediatek.com>
+ <20220523074017.12649-2-axe.yang@mediatek.com>
 From:   AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20220523074017.12649-4-axe.yang@mediatek.com>
+In-Reply-To: <20220523074017.12649-2-axe.yang@mediatek.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -68,41 +67,13 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 Il 23/05/22 09:40, Axe Yang ha scritto:
-> Add support for eint IRQ when MSDC is used as an SDIO host. This
-> feature requires SDIO device support async IRQ function. With this
-> feature, SDIO host can be awakened by SDIO card in suspend state,
-> without additional pin.
+> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
+> This feature allow SDIO devices alarm asynchronous interrupt to host
+> even when host stop providing clock to SDIO card. An extra wakeup
+> interrupt and pinctrl states for SDIO DAT1 pin state switching are
+> required in this scenario.
 > 
-> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> resume, switch GPIO function back to DAT1 mode then turn on clock.
-> 
-> Some device tree property should be added or modified in MSDC node
-> to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
-> this feature depends on asynchronous interrupts, "wakeup-source",
-> "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
-> the interrupts list should be extended(the interrupt named with
-> sdio_wakeup):
->          &mmcX {
-> 		...
-> 		interrupt-names = "msdc", "sdio_wakeup";
-> 		interrupts-extended = <...>,
->                                	      <&pio xxx IRQ_TYPE_LEVEL_LOW>;
->                  ...
->                  pinctrl-names = "default", "state_uhs", "state_eint";
->                  ...
->                  pinctrl-2 = <&mmc2_pins_eint>;
->                  ...
->                  cap-sdio-irq;
-> 		keep-power-in-suspend;
-> 		wakeup-source;
->                  ...
->          };
-> 
-> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
 > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 
 Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-
 
