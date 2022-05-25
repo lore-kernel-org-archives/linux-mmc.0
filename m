@@ -2,63 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28026C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 May 2022 16:59:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80C46C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 May 2022 17:04:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245534AbiEYQ7D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 May 2022 12:59:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47644 "EHLO
+        id S245528AbiEYREE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 May 2022 13:04:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37480 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245296AbiEYQ7B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 12:59:01 -0400
-Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39EA0A5031
-        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 09:59:00 -0700 (PDT)
-Received: by mail-wr1-x433.google.com with SMTP id z15so7130877wrg.11
-        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 09:59:00 -0700 (PDT)
+        with ESMTP id S229551AbiEYRED (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 13:04:03 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D0E651E48
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 10:04:00 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id k30so30965777wrd.5
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 10:04:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=BuZEGOxN6s+QpJ7ff5N18tZNmtTRq26kp+p3466K8F8=;
-        b=PN7c+ZsciJ/kEOjPj7CShyBj/DLMdY+SeuzKoJuV+aZs00rsfGtKPxXYuXkDBJ+S65
-         +uM95I3LPBfkBnNJtlsq3Hb54Vee//W2JCMtzVXiGtQO50V488NIYCi61azqiCWc6O3c
-         Q5lU3W83LYTjnEIjbwpSasu8MmFtG9SIpezhIsHVO5szkxK6XNck9CfoRN9NbVUaLhQ8
-         rYnP9qSQ9RsaMMG4frzZhL/yat5iLtRzzgeCf/MMbJh08/WMAAcFYYbFqaqpNUYbIOLm
-         zw8NrHxtN81kOAdgF/FzYqXwubENk2rIRCDyHk6nuO2yj17cVhEWMQAi40vrNhwTac3X
-         RwsQ==
+        bh=loFo61ZrCr4QaTZkLYB3/JVJBU50T2JZCagmaC/lyAw=;
+        b=Z0B1Dtj6jth9CjXTTNew6KleYGbdoUTXOF3eLdqZhHVQRSY9Ky2118o70pkPI06R9P
+         SCqgbQIPZdZ8A+6XSqyr1osIbRUQ8jpfM1SQtn6RlB5oIv/W8tbxbnvk+47CA+AWjest
+         fU9lJTgzqMVV2QPEjcYrGH5PygljPkdVEauDmiwPjEtRcpCDBLpc0PmAXeWfj4pPKG7P
+         pCI4ZM59v4xHiw267rYLRgaUgXjxAGW8u6XvjRKmXusnMKtuWVLzpPYgToPdkIedX47q
+         k/L2+ukcxX0kz9hd85M5bc1W9/J2LevtOKtA1eKU2NrffXaDBmtVE2rifIsoXEy8zF78
+         gDxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=BuZEGOxN6s+QpJ7ff5N18tZNmtTRq26kp+p3466K8F8=;
-        b=gcJTn4TKivMPdO+cfIAMWk+5KnK83mdqhJgxEMiVQtMXSO1zw+Hv4pPv/VOaY/tzjt
-         VPcIF+u3N8gZNfxqbXL1nvYhfErkjcdKe3xBtso2jOmUh1taVgKKBJ5xczL+xSjVhyeW
-         S6XP7zasI3S0I0HZQqAfDnKspothvXdtUeuPL16JGQg6tiwo1HewiqWZVsHri7+keknI
-         P95BZc/sEVn+w3MeiT8/0iKs8C/O3C8JnCIKslQA5LhGzGVPW69teGIwcncIBGNZsqPX
-         bOoe5/F6HonihaOdCOpaMoUHz4TYLvQIGkyOnhF32xc49lYHzAsp0yPubfjrmH1JS1Xk
-         Od0Q==
-X-Gm-Message-State: AOAM530Do5/OE/T+YKlINOKHm4jVNyNyVn4k5m+zXZFj+t5q2ujGRxEi
-        TB4u7n49EpqTSCCGo8d3R0VuCarzg83xFtAlrYWZig==
-X-Google-Smtp-Source: ABdhPJybIyWNzIkBX1luV1MnU9OIiN8pAZht74AaILdEoJbIQZLlkTffZeSVmkFeLQons+gYVBsMhKaLpMV+YAPqwYA=
+        bh=loFo61ZrCr4QaTZkLYB3/JVJBU50T2JZCagmaC/lyAw=;
+        b=cWndoQtI/IClWV3N+Dqb1pxVdOajJPAw+QzaaUY4m7CEy9kWezYlXIc2C1sNRfGoq9
+         1JuMSCOmu81Q2bHcGlptMotPtOhXVzxrLeVD4YcyAJxhuBKZkUM93UxYoHnXnUbF489k
+         A+WFCtwNUmNEb6qe4GNE2TbGZi7/auGV7jUrsVzPtgGXS49+rqIUwgvonsaDKj1T2skE
+         xqho6kzb15wN6ZPAD7d7GTSTwoF5EFMwUpT7eZzQI+vxtwDJEk5io48Y/C8//hZDvfaM
+         knLbmLhburtuxa2zPBHuvWuUdSamqHWx3ZZk7/OiXF5uBOCH4ItQtMrhcn0UOTaAjR+t
+         skMQ==
+X-Gm-Message-State: AOAM530nLppW8Rr9Co8kp9v761TwAgYWWEIMO1+k2oCxjjy5+OVWTOmV
+        yK9r52/tGdABmn37eNW0/IH6J8530VRDCT7Hzbcc44g3CD5qaeLR
+X-Google-Smtp-Source: ABdhPJzNHPfJp1XyqZV7qhrWcbxNk3IfEfV32VUdXbe3pQf8/N0AgRWU30h5jOGOB2lixvKXXGLLczV8CTTR/5Arbjg=
 X-Received: by 2002:a5d:5954:0:b0:20c:4d55:1388 with SMTP id
- e20-20020a5d5954000000b0020c4d551388mr28019559wri.90.1653497938850; Wed, 25
- May 2022 09:58:58 -0700 (PDT)
+ e20-20020a5d5954000000b0020c4d551388mr28040155wri.90.1653498238868; Wed, 25
+ May 2022 10:03:58 -0700 (PDT)
 MIME-Version: 1.0
 References: <20220406233648.21644-1-brad@pensando.io> <20220406233648.21644-5-brad@pensando.io>
- <7363c5bb-89ed-b6aa-b346-f314a058f2a7@linaro.org>
-In-Reply-To: <7363c5bb-89ed-b6aa-b346-f314a058f2a7@linaro.org>
+ <20220412113739.xczqscungojcitrm@mobilestation>
+In-Reply-To: <20220412113739.xczqscungojcitrm@mobilestation>
 From:   Brad Larson <brad@pensando.io>
-Date:   Wed, 25 May 2022 09:58:47 -0700
-Message-ID: <CAK9rFnzHOTg9BR-KY7rQttN2Cu2SYqAXfjXLYsH+RKYO8Su01g@mail.gmail.com>
+Date:   Wed, 25 May 2022 10:03:48 -0700
+Message-ID: <CAK9rFnx98FCVd9-HHdxMCwp_M9a7C5yd_pkA7TvrMLGM=kkOww@mail.gmail.com>
 Subject: Re: [PATCH 04/11] dt-bindings: spi: Add compatible for Pensando Elba SoC
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+To:     Serge Semin <fancer.lancer@gmail.com>
+Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Arnd Bergmann <arnd@arndb.de>,
         Linus Walleij <linus.walleij@linaro.org>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
         Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Olof Johansson <olof@lixom.net>,
@@ -74,28 +74,21 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Krzysztof,
+Hi Sergey,
 
-On Thu, Apr 7, 2022 at 11:59 AM Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
+On Tue, Apr 12, 2022 at 4:37 AM Serge Semin <fancer.lancer@gmail.com> wrote:
 >
-> On 07/04/2022 01:36, Brad Larson wrote:
-> > Document the cadence qspi controller compatible for Pensando Elba SoC
-> > boards.  The Elba qspi fifo size is 1024.
-> >
-
-> > @@ -48,7 +49,7 @@ properties:
-> >      description:
-> >        Size of the data FIFO in words.
-> >      $ref: "/schemas/types.yaml#/definitions/uint32"
-> > -    enum: [ 128, 256 ]
-> > +    enum: [ 128, 256, 1024 ]
+> > [PATCH 04/11] dt-bindings: spi: Add compatible for Pensando Elba SoC
 >
-> Is 1024 valid for other controllers? If not, then probably this should
-> be further constraint in allOf:if:then...
+> I think you need to be more specific in the patch title to what bindings
+> you are adding the new compatible string. Something like this
+> "dt-bindings: spi: cdns: ..."
+> The same concerns the patch "[PATCH 03/11] dt-bindings: mmc: Add Pensando
+> Elba SoC binding".
+> Otherwise it isn't clear to what schema you are adding the Elba SoC
+> support to.
 
-I'll change this to allOf:if:then so that the 1024 deep FIFO is
-specific to Elba SoC.
+Thanks for the review, I'll add more specifics to the bindings patch title.
 
 Regards,
 Brad
