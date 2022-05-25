@@ -2,64 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 640C1C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 May 2022 17:28:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56BBFC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 May 2022 20:06:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245683AbiEYR2T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 May 2022 13:28:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42168 "EHLO
+        id S1344390AbiEYUGj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 May 2022 16:06:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54148 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241080AbiEYR2T (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 13:28:19 -0400
-Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 639A5AF1C7
-        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 10:28:15 -0700 (PDT)
-Received: by mail-wm1-x330.google.com with SMTP id i82-20020a1c3b55000000b003974edd7c56so1162887wma.2
-        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 10:28:15 -0700 (PDT)
+        with ESMTP id S236448AbiEYUGh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 16:06:37 -0400
+Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 838A45593
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 13:06:35 -0700 (PDT)
+Received: by mail-wm1-x32e.google.com with SMTP id y24so5354561wmq.5
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 13:06:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=5wN5Z1sp0tdcSIvXWY7HQoJeIR7CM7NXDblhbKWMdgk=;
-        b=mFI1Wp+Y3Cx5vpGRNPwKaQ7c2A1hROuIUOJG+McCGpIuG0xM+ehtyZ/T6SKyypafAx
-         oPrmJnVM0/wt1tgCIe5Nt2Oe6rjTwF6aNrJlYUGDp3uoI0dOyOfhVfve5iB48qAX0zre
-         f64IRWsxbTTPK6ONiOw1srs14BAxBnCe0LhiKSL4txovloLEWdmSwRBlxkO91tHj6SFh
-         6Qp71YV0tY0UO5OTt2UCizL+n3IJ4fAStWIvm2hGhrJJN/NL2+oN7gyQ0d86pQeVvEkS
-         ck32xhDsjfkz8lsbqQnIFxjD0mfSpAXmSGeZTfSveMRavywgmVWW4G4aQM37JxkawkmU
-         1D2w==
+        bh=5MlRh8v/O/wHhNLDVqNAGwAJO3u/nvYhL6suQln4qMM=;
+        b=aOtG+77g4SUVZr8bbvfMI4s7jJQI5gdHfJc7aakPzg+lNkGNOOQVJV9iG4Yu/jIe3/
+         QbmCPdfeXzcf5y/4GD8DI74dKjylTbj6yE5dszfna3WO92tO3psktxusV3598aleUFYq
+         6H1cCeAlBOFu3Va+kmZhuRKXO39pTz4MvBX3soqViH7SE3lZthU3f7oHiFWMBQ0Mc3k+
+         nSwL7XWWbT3FArlMgP4a3hyS7DfL6PQZDPlYYkm+NsWMmmjAr3cXFnn9+kjPnlIb1n6d
+         qwgLFiy3/gBjTWnjPyLyJOmMCNivCq0vgmMJcwttRd3X2eybN1mqziJcEI/6rKIvaeeh
+         7K2Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=5wN5Z1sp0tdcSIvXWY7HQoJeIR7CM7NXDblhbKWMdgk=;
-        b=xljzVhEV9VFu+x+T9c3Tgi+dqfziI1ZbLHC7otisLnY0LM0dbQ0UyT7q33GaOQBOQW
-         BheQNHm/L0uTBaXOfCf08X0vn/h5kTcmCFusqd0GO7PwSA3LtM0F3nKeHGYz4L7OHhU7
-         PxDbDNNPqC9eLHASC8JLInduFo7sB8wApOLDojv/Z7l5HRYdhNIFaeJajfpisvS70jIX
-         3DcVDy0yo0Zs0bbpbwlydQMl8e+7mYbVT3dF8eaEG0rqyVSTrsN7BuLjzmhws9aUsYKZ
-         otNGV6cQ5IGzQHg8a8FYFzlDIQbpnCpydiuT3Uajuj+XP1ePLRrrRtHswNYCIKZh4flI
-         gOTw==
-X-Gm-Message-State: AOAM530VjStmIKoRkWCQcuGsU8H6X3VMjkQ1e7rbE/WhJ3NfjL0ZloSQ
-        6dDepMTL+g1TcSXd4MfYo+J2Z1pZbbPkdR5uzE5W1w==
-X-Google-Smtp-Source: ABdhPJx6DRtgAoKLyjqFjkaaX34xnnuGV9Xtj2C2Yh02kMXEfEL4eCaCfewk5Rpm9nkxm+tIIC4hFL0K9GY/vHY4Nes=
-X-Received: by 2002:a1c:acc4:0:b0:392:9dd4:fbcc with SMTP id
- v187-20020a1cacc4000000b003929dd4fbccmr9101955wme.78.1653499693969; Wed, 25
- May 2022 10:28:13 -0700 (PDT)
+        bh=5MlRh8v/O/wHhNLDVqNAGwAJO3u/nvYhL6suQln4qMM=;
+        b=fajbZ/y0VWJtcgHDZ+hyIPc49PEgoSzVYv1JhXXii/ZAmGX53eKhP/CkopFx3URGmg
+         bKwR2bVJwmUdknLkMO8O+iICLTW5zF8VRwlNVNiRGM6vfcveKplCam5OlggPEBxle457
+         8P37PSNM5f3MKJLvYgUC2swzWxm9aRsSkQ4BmQrin8zrmaoyM9T4ylt0RkZzGPA6wA8r
+         yBHcS297lIjBNieaJGQ6N8tH//J3tWlwb5HusHcmIUarMW45IOcI27Gra87cYVfeylav
+         9gGLnkoUL+BNu6W+WwlDIgTI1M2kK5ACrGa/jSMMIHOBDOxZR5uV9i6lOCX5z2QNr9lH
+         7U/Q==
+X-Gm-Message-State: AOAM532zCikVWmgwh/DHmlCuBc9RS+R66sWICItZ9jl8DhD3xDVef+O1
+        L95lt6b93Xz9jdn3Sk+sW703q31PjMD2sIm2nfG/HA==
+X-Google-Smtp-Source: ABdhPJzwmm4iFgAvq41IWkRIMaeSW61oQACieHYUK5Pp+Z5/usjraflqW/p2zQWTbtlA0quoR70s8kdRGnwXUQJemek=
+X-Received: by 2002:a05:600c:3515:b0:394:8c7e:fbde with SMTP id
+ h21-20020a05600c351500b003948c7efbdemr9559357wmq.165.1653509194127; Wed, 25
+ May 2022 13:06:34 -0700 (PDT)
 MIME-Version: 1.0
 References: <20220406233648.21644-1-brad@pensando.io> <20220406233648.21644-12-brad@pensando.io>
- <9c08f621be28dba65e811bc9cdedc882@kernel.org> <CAK9rFnyRTX+VM5g9P-ar=3VaExhHcwR8DzLvxtv-tG8cN9gqEQ@mail.gmail.com>
- <87tub21uoz.wl-maz@kernel.org>
-In-Reply-To: <87tub21uoz.wl-maz@kernel.org>
+ <20220412112239.cucvqqlfsdpjnzju@mobilestation>
+In-Reply-To: <20220412112239.cucvqqlfsdpjnzju@mobilestation>
 From:   Brad Larson <brad@pensando.io>
-Date:   Wed, 25 May 2022 10:28:02 -0700
-Message-ID: <CAK9rFnzbexhS7htxkO9S4-kBF_nTeUkryE7DGTq=a1GHDLwcEQ@mail.gmail.com>
+Date:   Wed, 25 May 2022 13:06:23 -0700
+Message-ID: <CAK9rFnz9a_21Bc9yyUqqmQET_o6g5XK6=mfZVv9jUp4dNxCx4w@mail.gmail.com>
 Subject: Re: [PATCH 11/11] arm64: dts: Add Pensando Elba SoC support
-To:     Marc Zyngier <maz@kernel.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+To:     Serge Semin <fancer.lancer@gmail.com>
+Cc:     Serge Semin <Sergey.Semin@baikalelectronics.ru>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Arnd Bergmann <arnd@arndb.de>,
         Linus Walleij <linus.walleij@linaro.org>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
         Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Olof Johansson <olof@lixom.net>,
@@ -75,30 +74,31 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Marc,
+Hi Sergey,
 
-On Sat, Apr 9, 2022 at 2:18 AM Marc Zyngier <maz@kernel.org> wrote:
+On Tue, Apr 12, 2022 at 4:22 AM Serge Semin <fancer.lancer@gmail.com> wrote:
 >
-> On Sat, 09 Apr 2022 03:38:55 +0100,
-> Brad Larson <brad@pensando.io> wrote:
-> >
+> On Wed, Apr 06, 2022 at 04:36:48PM -0700, Brad Larson wrote:
 
-> > > You are still missing the GICV and GICH regions that are
-> > > provided by the CPU. I already pointed that out in [1].
-> > >
-> > > The Cortex-A72 TRM will tell you where to find them (at
-> > > an offset from PERIPHBASE).
-> >
-> > Hi Marc,
-> >
-> > Got the addresses, neither region is used, and will be included in the
-> > next submission.
+> > +             spi0: spi@2800 {
+> > +                     compatible = "pensando,elba-spi";
+> > +                     reg = <0x0 0x2800 0x0 0x100>;
 >
-> Not sure what you mean by these regions being unused here (the Linux
-> kernel definitely makes use of them). Note that you'll also need to
-> add GICC (which I forgot to mention above).
+> > +                     pensando,syscon-spics = <&mssoc 0x2468>;
+>
+> I am wondering do you really need to define the
+> "pensando,syscon-spics" property as accepting a phandle with an
+> additional argument? That would have been justified if you had at
+> least two SPI controllers with different CS override registers. AFAICS
+> you've got only one here. So you can simplify the bindings by defining
+> the property like "pensando,syscon" (with no "spics" suffix) which
+> accepts the syscon phandle alone. Respective SPICS offset can be
+> locally declared in the driver as a macro with respective name.
 
-Added missing GICV, GICH and GICC regions.
+Yes this can be simplified and doing that in updated patchset.  Only this
+API call is needed in dw_spi_elba_init().
+
+syscon_regmap_lookup_by_phandle(np, "pensando,syscon");
 
 Regards,
 Brad
