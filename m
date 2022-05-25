@@ -2,225 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CDE2C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 May 2022 12:29:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8F1BC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 May 2022 14:36:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242712AbiEYM26 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 May 2022 08:28:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51822 "EHLO
+        id S230492AbiEYOgP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 May 2022 10:36:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59432 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241704AbiEYM2y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 08:28:54 -0400
-Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6437B6D3B5;
-        Wed, 25 May 2022 05:28:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1653481733; x=1685017733;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references;
-  bh=wPKTjp4pBEiMz4EdkImMhZtUIupns5o1HS/xgzUFg7g=;
-  b=Yy2Th0jcWnq/WXMqyHxf4Yu3ggCX+7/CdPIYxRnCnDSsPXcjo7dc8OCO
-   8VsjHkOz0kf44M1utE1cUt2U08FoH/uv3QtDJf8WIgpNwAAy8n1s+IR14
-   DCqMyMHj8GnXTCG4xR+h5Prcx13Ammp2RGB/EZ+iCtCIvL7xwHIHi+DYD
-   s=;
-Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
-  by alexa-out.qualcomm.com with ESMTP; 25 May 2022 05:28:53 -0700
-X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 25 May 2022 05:28:51 -0700
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 25 May 2022 17:58:27 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 3CE99180E; Wed, 25 May 2022 17:58:26 +0530 (IST)
-From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, p.zabel@pengutronix.de,
-        chris@printf.net, venkatg@codeaurora.org, gdjakov@mm-sol.com,
-        quic_asutoshd@quicinc.com
-Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, quic_rampraka@quicinc.com,
-        quic_pragalla@quicinc.com, quic_sartgarg@quicinc.com,
-        quic_nitirawa@quicinc.com, quic_sayalil@quicinc.com,
-        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        Liangliang Lu <quic_luliang@quicinc.com>,
-        "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V7 2/4] mmc: sdhci: Capture eMMC and SD card errors
-Date:   Wed, 25 May 2022 17:58:19 +0530
-Message-Id: <1653481701-19642-3-git-send-email-quic_c_sbhanu@quicinc.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1653481701-19642-1-git-send-email-quic_c_sbhanu@quicinc.com>
-References: <1653481701-19642-1-git-send-email-quic_c_sbhanu@quicinc.com>
+        with ESMTP id S231761AbiEYOgO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 10:36:14 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 836E61E3CE
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 07:36:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1653489371;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=7eghtolzwl0drnd0tYSGSUnL+HRSRExNXVsg8ngNKhI=;
+        b=dtUpmzdyaEK5JvRMu2hMUyT9Qdohxn41hwLKJeE2PtLn5e0W4OCVje1uVdyFmnnFyTka5N
+        fCAboL6/L9VFkkbYF2ODh9rKGxUcPWpyfE4qqFYAgPY8abV5UqJBsdOY8/iUwFoeH08pra
+        gpt9olBOGuQ3iLY5uOXWt+hDY46KUyw=
+Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
+ [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-482-dH-7GMT3P1Wh4rOdr0nFOg-1; Wed, 25 May 2022 10:36:07 -0400
+X-MC-Unique: dH-7GMT3P1Wh4rOdr0nFOg-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id BE8161C00ACB;
+        Wed, 25 May 2022 14:36:06 +0000 (UTC)
+Received: from T590 (ovpn-8-19.pek2.redhat.com [10.72.8.19])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 90B35112131B;
+        Wed, 25 May 2022 14:36:01 +0000 (UTC)
+Date:   Wed, 25 May 2022 22:35:56 +0800
+From:   Ming Lei <ming.lei@redhat.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [PATCH 11/14] block: remove GENHD_FL_EXT_DEVT
+Message-ID: <Yo4+zEnrBTnoEMCz@T590>
+References: <20211122130625.1136848-1-hch@lst.de>
+ <20211122130625.1136848-12-hch@lst.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20211122130625.1136848-12-hch@lst.de>
+X-Scanned-By: MIMEDefang 2.78 on 10.11.54.3
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add changes to capture eMMC and SD card errors.
-This is useful for debug and testing.
+Hi Christoph,
 
-Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
-Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
-Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci.c | 33 ++++++++++++++++++++++++++-------
- drivers/mmc/host/sdhci.h |  3 +++
- include/linux/mmc/mmc.h  |  6 ++++++
- 3 files changed, 35 insertions(+), 7 deletions(-)
+On Mon, Nov 22, 2021 at 02:06:22PM +0100, Christoph Hellwig wrote:
+> All modern drivers can support extra partitions using the extended
+> dev_t.  In fact except for the ioctl method drivers never even see
+> partitions in normal operation.
+> 
+> So remove the GENHD_FL_EXT_DEVT and allow extra partitions for all
+> block devices that do support partitions, and require those that
+> do not support partitions to explicit disallow them using
+> GENHD_FL_NO_PART.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  block/genhd.c                  |  6 +++---
+>  block/partitions/core.c        |  9 ++++-----
+>  drivers/block/amiflop.c        |  1 +
+>  drivers/block/ataflop.c        |  1 +
+>  drivers/block/brd.c            |  1 -
+>  drivers/block/drbd/drbd_main.c |  1 +
+>  drivers/block/floppy.c         |  1 +
+>  drivers/block/loop.c           |  1 -
+>  drivers/block/null_blk/main.c  |  1 -
+>  drivers/block/paride/pcd.c     |  1 +
+>  drivers/block/paride/pf.c      |  1 +
+>  drivers/block/pktcdvd.c        |  2 +-
+>  drivers/block/ps3vram.c        |  1 +
+>  drivers/block/rbd.c            |  6 ++----
+>  drivers/block/swim.c           |  1 +
+>  drivers/block/swim3.c          |  2 +-
+>  drivers/block/virtio_blk.c     |  1 -
+>  drivers/block/z2ram.c          |  1 +
+>  drivers/block/zram/zram_drv.c  |  1 +
+>  drivers/cdrom/gdrom.c          |  1 +
+>  drivers/md/dm.c                |  1 +
+>  drivers/md/md.c                |  5 -----
+>  drivers/mmc/core/block.c       |  1 -
+>  drivers/mtd/ubi/block.c        |  1 +
+>  drivers/scsi/sd.c              |  1 -
+>  drivers/scsi/sr.c              |  1 +
+>  include/linux/genhd.h          | 28 +++++-----------------------
+>  27 files changed, 30 insertions(+), 48 deletions(-)
+> 
+> diff --git a/block/genhd.c b/block/genhd.c
+> index 09abd41249fd4..e9346fae48ad4 100644
+> --- a/block/genhd.c
+> +++ b/block/genhd.c
+> @@ -376,7 +376,7 @@ int disk_scan_partitions(struct gendisk *disk, fmode_t mode)
+>  {
+>  	struct block_device *bdev;
+>  
+> -	if (!disk_part_scan_enabled(disk))
+> +	if (disk->flags & GENHD_FL_NO_PART)
+>  		return -EINVAL;
+>  	if (disk->open_partitions)
+>  		return -EBUSY;
+> @@ -438,7 +438,6 @@ int __must_check device_add_disk(struct device *parent, struct gendisk *disk,
+>  			return ret;
+>  		disk->major = BLOCK_EXT_MAJOR;
+>  		disk->first_minor = ret;
+> -		disk->flags |= GENHD_FL_EXT_DEVT;
+>  	}
+>  
+>  	ret = disk_alloc_events(disk);
+> @@ -872,7 +871,8 @@ static ssize_t disk_ext_range_show(struct device *dev,
+>  {
+>  	struct gendisk *disk = dev_to_disk(dev);
+>  
+> -	return sprintf(buf, "%d\n", disk_max_parts(disk));
+> +	return sprintf(buf, "%d\n",
+> +		(disk->flags & GENHD_FL_NO_PART) ? 1 : DISK_MAX_PARTS);
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4805566..95c1b39 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -183,6 +183,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
- 		if (timeout == 0) {
- 			pr_err("%s: Reset 0x%x never completed.\n",
- 				mmc_hostname(host->mmc), (int)mask);
-+			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 			sdhci_dumpregs(host);
- 			return;
- 		}
-@@ -1093,6 +1094,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		if (timeout == 0) {
- 			pr_err("%s: Controller never released inhibit bit(s).\n",
- 			       mmc_hostname(host->mmc));
-+			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 			sdhci_dumpregs(host);
- 			cmd->error = -EIO;
- 			sdhci_finish_mrq(host, cmd->mrq);
-@@ -1363,6 +1365,7 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		if (timeout == 0) {
- 			pr_err("%s: Internal clock never stabilised.\n",
- 			       mmc_hostname(host->mmc));
-+			sdhci_err_stats_inc(host, CTRL_TIMEOUT);
- 			sdhci_dumpregs(host);
- 			return;
- 		}
-@@ -2362,6 +2365,7 @@ static void sdhci_timeout_timer(unsigned long data)
- 	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
- 		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
- 		       mmc_hostname(host->mmc));
-+		sdhci_err_stats_inc(host, REQ_TIMEOUT);
- 		sdhci_dumpregs(host);
- 
- 		host->cmd->error = -ETIMEDOUT;
-@@ -2385,6 +2389,7 @@ static void sdhci_timeout_data_timer(unsigned long data)
- 	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
- 		pr_err("%s: Timeout waiting for hardware interrupt.\n",
- 		       mmc_hostname(host->mmc));
-+		sdhci_err_stats_inc(host, REQ_TIMEOUT);
- 		sdhci_dumpregs(host);
- 
- 		if (host->data) {
-@@ -2421,16 +2426,21 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
- 			return;
- 		pr_err("%s: Got command interrupt 0x%08x even though no command operation was in progress.\n",
- 		       mmc_hostname(host->mmc), (unsigned)intmask);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 		return;
- 	}
- 
- 	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
- 		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
--		if (intmask & SDHCI_INT_TIMEOUT)
-+		if (intmask & SDHCI_INT_TIMEOUT) {
- 			host->cmd->error = -ETIMEDOUT;
--		else
-+			sdhci_err_stats_inc(host, CMD_TIMEOUT);
-+		} else {
- 			host->cmd->error = -EILSEQ;
-+			if (!mmc_op_tuning(host->cmd->opcode))
-+				sdhci_err_stats_inc(host, CMD_CRC);
-+		}
- 
- 		/*
- 		 * If this command initiates a data phase and a response
-@@ -2524,6 +2534,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 		if (data_cmd && (data_cmd->flags & MMC_RSP_BUSY)) {
- 			if (intmask & SDHCI_INT_DATA_TIMEOUT) {
- 				data_cmd->error = -ETIMEDOUT;
-+				sdhci_err_stats_inc(host, CMD_TIMEOUT);
- 				sdhci_finish_mrq(host, data_cmd->mrq);
- 				return;
- 			}
-@@ -2551,22 +2562,29 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 
- 		pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
- 		       mmc_hostname(host->mmc), (unsigned)intmask);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 
- 		return;
- 	}
- 
--	if (intmask & SDHCI_INT_DATA_TIMEOUT)
-+	if (intmask & SDHCI_INT_DATA_TIMEOUT) {
- 		host->data->error = -ETIMEDOUT;
--	else if (intmask & SDHCI_INT_DATA_END_BIT)
-+		sdhci_err_stats_inc(host, DAT_TIMEOUT);
-+	} else if (intmask & SDHCI_INT_DATA_END_BIT) {
- 		host->data->error = -EILSEQ;
--	else if ((intmask & SDHCI_INT_DATA_CRC) &&
-+		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
-+			sdhci_err_stats_inc(host, DAT_CRC);
-+	} else if ((intmask & SDHCI_INT_DATA_CRC) &&
- 		SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))
--			!= MMC_BUS_TEST_R)
-+			!= MMC_BUS_TEST_R) {
- 		host->data->error = -EILSEQ;
--	else if (intmask & SDHCI_INT_ADMA_ERROR) {
-+		if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
-+			sdhci_err_stats_inc(host, DAT_CRC);
-+	} else if (intmask & SDHCI_INT_ADMA_ERROR) {
- 		pr_err("%s: ADMA error\n", mmc_hostname(host->mmc));
- 		sdhci_adma_show_error(host);
-+		sdhci_err_stats_inc(host, ADMA);
- 		host->data->error = -EIO;
- 		if (host->ops->adma_workaround)
- 			host->ops->adma_workaround(host, intmask);
-@@ -2720,6 +2738,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 	if (unexpected) {
- 		pr_err("%s: Unexpected interrupt 0x%08x.\n",
- 			   mmc_hostname(host->mmc), unexpected);
-+		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
- 		sdhci_dumpregs(host);
- 	}
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c722cd2..492a350 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -321,6 +321,9 @@ struct sdhci_adma2_64_desc {
- /* Allow for a a command request and a data request at the same time */
- #define SDHCI_MAX_MRQS		2
- 
-+#define sdhci_err_stats_inc(host, err_name) \
-+	mmc_debugfs_err_stats_inc((host)->mmc, MMC_ERR_##err_name)
-+
- enum sdhci_cookie {
- 	COOKIE_UNMAPPED,
- 	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index c376209..2d66c89 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -90,6 +90,12 @@ static inline bool mmc_op_multi(u32 opcode)
- 	       opcode == MMC_READ_MULTIPLE_BLOCK;
- }
- 
-+static inline bool mmc_op_tuning(u32 opcode)
-+{
-+	return opcode == MMC_SEND_TUNING_BLOCK ||
-+			opcode == MMC_SEND_TUNING_BLOCK_HS200;
-+}
-+
- /*
-  * MMC_SWITCH argument format:
-  *
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
+The above change breaks parted on loop, which reads 'ext_range' to add
+partitions.
+
+Follows the test case:
+
+	fallocate -l 4096M loop0.img
+	losetup /dev/loop0 loop0.img
+	parted -s /dev/loop0 mklabel MSDOS
+	parted -s /dev/loop0 mkpart pri 1 1248
+
+Since this patch is merged, /dev/loop0p1 can't be created any more
+by above script.
+
+
+
+Thanks,
+Ming
 
