@@ -2,153 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47045C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 May 2022 03:07:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9425DC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 May 2022 06:54:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232208AbiEZDHF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 May 2022 23:07:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42460 "EHLO
+        id S1346283AbiEZGyA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 May 2022 02:54:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55140 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239735AbiEZDHE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 May 2022 23:07:04 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 116D6BA99F
-        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 20:07:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1653534421;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Yba7dzdlyXLUxXl7h4/Mhb6tVNCznb6+6J+A4IPLUE4=;
-        b=AbU/tdmVsHbLlNIuqFibK10/3/Vy4rHPUijGFhBFIx81VZLpvcumuah5faUj6lzkc76gpH
-        vhXvBKeG+CM4Qw5UVhNobHjVCRcg0F2FV4jNfxA5vy+S3hEq2UdzVEkRM7duVoDYdv6f8/
-        4okiEgdmGIZczD7shREGKOvvfb/H+00=
-Received: from mimecast-mx02.redhat.com (mx3-rdu2.redhat.com
- [66.187.233.73]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- us-mta-623-Xsrx41soNLKOfhtc9XNnLg-1; Wed, 25 May 2022 23:06:57 -0400
-X-MC-Unique: Xsrx41soNLKOfhtc9XNnLg-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 5E8713804502;
-        Thu, 26 May 2022 03:06:57 +0000 (UTC)
-Received: from T590 (ovpn-8-28.pek2.redhat.com [10.72.8.28])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 2DFE42026D64;
-        Thu, 26 May 2022 03:06:52 +0000 (UTC)
-Date:   Thu, 26 May 2022 11:06:47 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH 11/14] block: remove GENHD_FL_EXT_DEVT
-Message-ID: <Yo7uxyrD2BywxEHt@T590>
-References: <20211122130625.1136848-1-hch@lst.de>
- <20211122130625.1136848-12-hch@lst.de>
- <Yo4+zEnrBTnoEMCz@T590>
- <20220525165114.GA2750@lst.de>
+        with ESMTP id S1346266AbiEZGx7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2022 02:53:59 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B38A7220A
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 23:53:57 -0700 (PDT)
+Received: by mail-ej1-x62f.google.com with SMTP id rq11so1285484ejc.4
+        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2022 23:53:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=+OlWFNuXubaG+wIbcU6S2PD/trjlRQ/H0QdDAVlC7L8=;
+        b=HTSbKdqa3Nz+rgnORHSDlCCrWGmPxq/uTvVIJ1mdxP93fxi23p4/iaudQGQ0yvJ9qD
+         sVCbrRfo4bBZ9mQRMOESsrCFhgNGIGplr+gRzybCAWSTUbTrkEc8qWTZ4+OL34B9gBo5
+         dOF8MFYMdEGZrlkLcq9wisY90Wjy5NOu5xRch0PKTnXgXXXoQiEdUGSOr8epjCyfTbVS
+         Dr28G81aHk81OulVCikCIbagbO+Y4eDk0jAdcfnyEEMK2ynz5Uduj5WXS6eh/HElm7AY
+         yhKdPVZCKYG7q/YHZlKZoSErjnkxy2vKC9OXBJfkrBc3mnIe3F9Jp3DD8FlhwnTPS8Hy
+         kCZA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=+OlWFNuXubaG+wIbcU6S2PD/trjlRQ/H0QdDAVlC7L8=;
+        b=p8FKfa/D7uBnUTnVMSXMbFUXXqBJiFSEXINJ/1MLOfnMIzYLbLHj70PcXtlPZTqL3h
+         RNWnV1rcmYTaD2sB2GtttMzawX1qPFb2fwsVeLAjlG8n/aiL7y8VF9pJSiZzGr9fPOAz
+         gDj1yQoESWvZ8E134Zqk6PNuleRy2SaLcUhcMq5DSY1wPwXeiLGGUeudt0nxjfDLa2Ho
+         hkUVmfkeGLV4g+O8Yzyp9lI86T0O/p7c5MjBtUKSn2V0WlnfIe4rhZMAoxIJzPtWZ3JR
+         I4Lz1kLpttmDq2xYclSyYm3Ll4JNyQd7hx2fUZ0FnJouzIksiqRa/Uh+z2yaLEJsFJz8
+         6EYQ==
+X-Gm-Message-State: AOAM530AB8+wwPlBR7lgLVDApSxmSkUqENw9ezxbLFtU6f5nPLLdBBsU
+        84jgwKMJTXgPIQ0qemEbHdoqAA==
+X-Google-Smtp-Source: ABdhPJxK0GdBqnqhHeFKnB17hFODfbqtX8jNbVhbmw+n/G8WMqDopEGaBisjwS7Dq3PBf+ZqYanNVA==
+X-Received: by 2002:a17:906:9b90:b0:6ff:a02:1f9 with SMTP id dd16-20020a1709069b9000b006ff0a0201f9mr9350097ejc.672.1653548036203;
+        Wed, 25 May 2022 23:53:56 -0700 (PDT)
+Received: from [192.168.0.177] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id x65-20020a50bac7000000b0042617ba63absm389060ede.53.2022.05.25.23.53.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 25 May 2022 23:53:55 -0700 (PDT)
+Message-ID: <8d2c9375-63d7-6d36-8a0b-6c5d117cc213@linaro.org>
+Date:   Thu, 26 May 2022 08:53:54 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220525165114.GA2750@lst.de>
-X-Scanned-By: MIMEDefang 2.78 on 10.11.54.4
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.1
+Subject: Re: [PATCH 11/11] arm64: dts: Add Pensando Elba SoC support
+Content-Language: en-US
+To:     Brad Larson <brad@pensando.io>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        David Clear <dac2@pensando.io>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20220406233648.21644-1-brad@pensando.io>
+ <20220406233648.21644-12-brad@pensando.io>
+ <eed2f337-3d5a-3440-d19e-c5ff032409ab@linaro.org>
+ <CAK9rFnzPEq1_zOnHYzTDyOOU9xRsuP-KBEFnc84cRoyfAve+Jg@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <CAK9rFnzPEq1_zOnHYzTDyOOU9xRsuP-KBEFnc84cRoyfAve+Jg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, May 25, 2022 at 06:51:14PM +0200, Christoph Hellwig wrote:
-> On Wed, May 25, 2022 at 10:35:56PM +0800, Ming Lei wrote:
-> > > @@ -872,7 +871,8 @@ static ssize_t disk_ext_range_show(struct device *dev,
-> > >  {
-> > >  	struct gendisk *disk = dev_to_disk(dev);
-> > >  
-> > > -	return sprintf(buf, "%d\n", disk_max_parts(disk));
-> > > +	return sprintf(buf, "%d\n",
-> >
-> >
-> > The above change breaks parted on loop, which reads 'ext_range' to add
-> > partitions.
+On 26/05/2022 02:19, Brad Larson wrote:
+> Hi Krzysztof,
 > 
-> That change alone is not the one breaking it alone, as even if the
-> file reported something else you still could not create new partitions.
+> On Thu, Apr 7, 2022 at 12:06 PM Krzysztof Kozlowski
+> <krzysztof.kozlowski@linaro.org> wrote:
+>>
+>> On 07/04/2022 01:36, Brad Larson wrote:
+>>> Add Pensando common and Elba SoC specific device nodes
+>>>
+>>> +&spi0 {
+>>> +     num-cs = <4>;
+>>> +     cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
+>>> +                <&porta 7 GPIO_ACTIVE_LOW>;
+>>> +     status = "okay";
+>>> +     spi0_cs0@0 {
+>>
+>> Generic node name needed matching the class of a devicxe.
 > 
-> Something like the test below should fix it, but I'll need some more
-> time to actually test it:
+> The device on this spi bus is a FPGA with 4 functions and looking at
+> other projects I've changed it to a resource-controller node name.  On
+> cs0 there is a sub-device reset-controller added in the upcoming
+> patchset to enable hardware reset of the eMMC device.
 > 
-> diff --git a/block/genhd.c b/block/genhd.c
-> index 36532b9318419..27205ae47d593 100644
-> --- a/block/genhd.c
-> +++ b/block/genhd.c
-> @@ -385,6 +385,8 @@ int disk_scan_partitions(struct gendisk *disk, fmode_t mode)
->  
->  	if (disk->flags & (GENHD_FL_NO_PART | GENHD_FL_HIDDEN))
->  		return -EINVAL;
-> +	if (test_bit(GD_SUPPRESS_PART_SCAN, &disk->state))
-> +		return -EINVAL;
->  	if (disk->open_partitions)
->  		return -EBUSY;
->  
-> diff --git a/drivers/block/loop.c b/drivers/block/loop.c
-> index e2cb51810e89a..5bef97ffbe21e 100644
-> --- a/drivers/block/loop.c
-> +++ b/drivers/block/loop.c
-> @@ -1102,7 +1102,7 @@ static int loop_configure(struct loop_device *lo, fmode_t mode,
->  		lo->lo_flags |= LO_FLAGS_PARTSCAN;
->  	partscan = lo->lo_flags & LO_FLAGS_PARTSCAN;
->  	if (partscan)
-> -		lo->lo_disk->flags &= ~GENHD_FL_NO_PART;
-> +		clear_bit(GD_SUPPRESS_PART_SCAN, &lo->lo_disk->state);
->  
->  	loop_global_unlock(lo, is_loop);
->  	if (partscan)
-> @@ -1198,7 +1198,7 @@ static void __loop_clr_fd(struct loop_device *lo, bool release)
->  	 */
->  	lo->lo_flags = 0;
->  	if (!part_shift)
-> -		lo->lo_disk->flags |= GENHD_FL_NO_PART;
-> +		set_bit(GD_SUPPRESS_PART_SCAN, &lo->lo_disk->state);
->  	mutex_lock(&lo->lo_mutex);
->  	lo->lo_state = Lo_unbound;
->  	mutex_unlock(&lo->lo_mutex);
-> @@ -1308,7 +1308,7 @@ loop_set_status(struct loop_device *lo, const struct loop_info64 *info)
->  
->  	if (!err && (lo->lo_flags & LO_FLAGS_PARTSCAN) &&
->  	     !(prev_lo_flags & LO_FLAGS_PARTSCAN)) {
-> -		lo->lo_disk->flags &= ~GENHD_FL_NO_PART;
-> +		clear_bit(GD_SUPPRESS_PART_SCAN, &lo->lo_disk->state);
->  		partscan = true;
->  	}
->  out_unlock:
-> @@ -2011,7 +2011,7 @@ static int loop_add(int i)
->  	 * userspace tools. Parameters like this in general should be avoided.
->  	 */
->  	if (!part_shift)
-> -		disk->flags |= GENHD_FL_NO_PART;
-> +		set_bit(GD_SUPPRESS_PART_SCAN, &disk->state);
->  	mutex_init(&lo->lo_mutex);
->  	lo->lo_number		= i;
->  	spin_lock_init(&lo->lo_lock);
-> diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-> index 1b24c1fb3bb1e..bf0c85cfdd8bf 100644
-> --- a/include/linux/blkdev.h
-> +++ b/include/linux/blkdev.h
-> @@ -147,6 +147,7 @@ struct gendisk {
->  #define GD_DEAD				2
->  #define GD_NATIVE_CAPACITY		3
->  #define GD_ADDED			4
-> +#define GD_SUPPRESS_PART_SCAN		4
->  
->  	struct mutex open_mutex;	/* open/close mutex */
->  	unsigned open_partitions;	/* number of open partitions */
+>>> +             compatible = "semtech,sx1301";  /* Enable spidev */
+>>
+>> This comment is a bit odd... did you just use random compatible from
+>> spidev instead of defining proper compatible?
+> 
+> Yes, because adding a compatible was nacked.  We have a driver added
+> (two actually, mfd and reset driver) for the next patch update.
 
-The patch itself can fix the issue in this test case, since ext_range
-recovers to 256.
-
-BTW, SUPPRESS_PART_SCAN looks more like one flag, instead of 'state'.
+Yeah, but using some other one is also not correct.
 
 
 
-Thanks,
-Ming
-
+Best regards,
+Krzysztof
