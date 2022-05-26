@@ -2,108 +2,164 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09F5EC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 May 2022 11:45:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E9EFC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 May 2022 11:58:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347168AbiEZLpV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 May 2022 07:45:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57624 "EHLO
+        id S233894AbiEZL6N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 May 2022 07:58:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347207AbiEZLoj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2022 07:44:39 -0400
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0510D02A3
-        for <linux-mmc@vger.kernel.org>; Thu, 26 May 2022 04:44:25 -0700 (PDT)
-Received: by mail-pf1-x433.google.com with SMTP id j6so1463938pfe.13
-        for <linux-mmc@vger.kernel.org>; Thu, 26 May 2022 04:44:25 -0700 (PDT)
+        with ESMTP id S235385AbiEZL6M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2022 07:58:12 -0400
+Received: from alexa-out-sd-01.qualcomm.com (alexa-out-sd-01.qualcomm.com [199.106.114.38])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 379F7D0293;
+        Thu, 26 May 2022 04:58:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=aFDZFO8zcq3mdOYMY85R5XhCqGoT7ekIVqfcal4vq9k=;
-        b=DdLAOSyeCe3VdSlghPOPR26L4TtMKKCTQ5eKXAKK+10kIhUkQ83tMrA/1RpbabSazS
-         kV6nbvicZrBGsl5IcdntaWX0fV6MCSW1wdiQJTxyHiodRUYUZ11tf5PZA2ahicLgxrUo
-         6ZacmpFJ5OF6b5gRWNANLmf6dpaESFfPH99GDIPXtJ3SwlNJutaOa3SCUTYIXpdBo+Vd
-         I8V9aMtIybOdUujY41iWsXh0sgD7XOPwT6wyHWCJDn/ZIfp5B3sfGTv08/HbdRdVSuce
-         kSLvoxCYkqh6y9ZDmfwO4qM+DWWM36B5cyqGUtzByYX9EUBXqpGlCNxEkh2MUme2AAB9
-         K6kA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=aFDZFO8zcq3mdOYMY85R5XhCqGoT7ekIVqfcal4vq9k=;
-        b=j9LMA5gxAY6eTvkvf++iCppB+Gi9f6+/b+LM8U1YYPY2dsnY8NB5P8Uwz2nj9Bnzxi
-         hoT9cRdedftDV8voysLGp6ogyYUy+H1qXJvZAxIeAOObVZYGVtopBCr1tEiXkokjBw8S
-         jt74ssFU2eI86AsNl15nIPEh7rUToccyiws+Ry9LTFD0gdER0H/Z3SQStL8RC8KjidTM
-         8Awo5MpkNZBP4+ZqB1mGJ9kyvrih9hU/Fh539wuKUbB4DOLGeO51eUprkW5trk5gRjMC
-         BkTWIdsNR4NAxcacOwYLis0uEjSSuX+HrTLOEZfCZogwXFdVbxRWt9zmAZb2FS1r6g3M
-         KghA==
-X-Gm-Message-State: AOAM530PAJU2IZ1tODNCi0EoFppqV+hH6BZuAjQ2l//baXmWF09HCwl9
-        NuPAHGvS+eVI5/f9fDBOjuBXl+bHjGSMwA==
-X-Google-Smtp-Source: ABdhPJymmr3E7XzXOfh11AxGgFOnPpiUnAkMyJxfXNlpjU0Cl3k3slf4lmK7hGJQYeI+J0tXrl2TGQ==
-X-Received: by 2002:a63:8bc1:0:b0:3f9:f00b:f877 with SMTP id j184-20020a638bc1000000b003f9f00bf877mr21914328pge.378.1653565465428;
-        Thu, 26 May 2022 04:44:25 -0700 (PDT)
-Received: from localhost ([122.162.234.2])
-        by smtp.gmail.com with ESMTPSA id f13-20020aa782cd000000b0051887e34143sm1269772pfn.129.2022.05.26.04.44.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 May 2022 04:44:25 -0700 (PDT)
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Viresh Kumar <viresh.kumar@linaro.org>, linux-pm@vger.kernel.org,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        Rafael Wysocki <rjw@rjwysocki.net>,
-        Stephen Boyd <sboyd@kernel.org>, Nishanth Menon <nm@ti.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH 19/31] mmc: sdhci-msm: Migrate to dev_pm_opp_set_config()
-Date:   Thu, 26 May 2022 17:12:18 +0530
-Message-Id: <80314068d96eb53e0d9838736415b96015803844.1653564321.git.viresh.kumar@linaro.org>
-X-Mailer: git-send-email 2.31.1.272.g89b43f80a514
-In-Reply-To: <cover.1653564321.git.viresh.kumar@linaro.org>
-References: <cover.1653564321.git.viresh.kumar@linaro.org>
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1653566291; x=1685102291;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=4zlyYG5DLtUMGECwCuQjiUZwjXRI66JAXV7vKwRun7o=;
+  b=vuaUNiO4ZZ2qxFpSh32QLiOefzN41Mma7/05MZjNSt0VEp0e+iYrXoh8
+   rGdiB/AERxkk0D532p5RzHth4TaKWh+A4t88xC95X45bMaJi/GUm9M6c4
+   sQl/A9qGjzULp5XtS6I2svJpm8rNsV3mOz7wVn+EAjloe1Hdy39+ZdRqn
+   0=;
+Received: from unknown (HELO ironmsg01-sd.qualcomm.com) ([10.53.140.141])
+  by alexa-out-sd-01.qualcomm.com with ESMTP; 26 May 2022 04:58:10 -0700
+X-QCInternal: smtphost
+Received: from unknown (HELO nasanex01a.na.qualcomm.com) ([10.52.223.231])
+  by ironmsg01-sd.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 May 2022 04:58:10 -0700
+Received: from [10.216.50.195] (10.80.80.8) by nasanex01a.na.qualcomm.com
+ (10.52.223.231) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.22; Thu, 26 May
+ 2022 04:58:05 -0700
+Subject: Re: [PATCH V1] mmc: sdhci-msm: Add wakeup functionality support for
+ sdio cards
+To:     "Kamasali Satyanarayan (Consultant) (QUIC)" 
+        <quic_kamasali@quicinc.com>, 'Ulf Hansson' <ulf.hansson@linaro.org>
+CC:     "u.kleine-koenig@pengutronix.de" <u.kleine-koenig@pengutronix.de>,
+        "YehezkelShB@gmail.com" <YehezkelShB@gmail.com>,
+        "rmk+kernel@armlinux.org.uk" <rmk+kernel@armlinux.org.uk>,
+        "t.scherer@eckelmann.de" <t.scherer@eckelmann.de>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "sensor1010@163.com" <sensor1010@163.com>,
+        "sartgarg@codeaurora.org" <sartgarg@codeaurora.org>,
+        "hns@goldelico.com" <hns@goldelico.com>,
+        "uic_kamasali@quicinc.com" <uic_kamasali@quicinc.com>,
+        "tiantao6@hisilicon.com" <tiantao6@hisilicon.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "'quic_spathi@quicinc.com'" <quic_spathi@quicinc.com>
+References: <1650964225-6705-1-git-send-email-quic_spathi@quicinc.com>
+ <CAPDyKFoq2zJwTT6JrnvEjh0VvJLkt6PKhk9KhwVjTF0Eq3jOYw@mail.gmail.com>
+ <MWHPR0201MB34661086E86F830C6831CC99E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
+From:   Sarthak Garg <quic_sartgarg@quicinc.com>
+Message-ID: <1ba7780a-f560-1e10-226a-fcda785f7e89@quicinc.com>
+Date:   Thu, 26 May 2022 17:28:01 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.12.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <MWHPR0201MB34661086E86F830C6831CC99E3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01a.na.qualcomm.com (10.52.223.231)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The OPP core now provides a unified API for setting all configuration
-types, i.e. dev_pm_opp_set_config().
+Hi ulf,
 
-Lets start using it.
+Thanks for the review.
+Please find comments inline.
 
-Signed-off-by: Viresh Kumar <viresh.kumar@linaro.org>
----
- drivers/mmc/host/sdhci-msm.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Thanks,
+Sarthak
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 50c71e0ba5e4..994f3f0231f7 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2496,6 +2496,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	const struct sdhci_msm_offset *msm_offset;
- 	const struct sdhci_msm_variant_info *var_info;
- 	struct device_node *node = pdev->dev.of_node;
-+	struct dev_pm_opp_config opp_config = {
-+		.clk_name = "core",
-+	};
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
- 	if (IS_ERR(host))
-@@ -2564,7 +2567,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto bus_clk_disable;
- 
--	ret = devm_pm_opp_set_clkname(&pdev->dev, "core");
-+	ret = devm_pm_opp_set_config(&pdev->dev, &opp_config);
- 	if (ret)
- 		goto bus_clk_disable;
- 
--- 
-2.31.1.272.g89b43f80a514
+On 5/24/2022 5:26 PM, Kamasali Satyanarayan (Consultant) (QUIC) wrote:
+> Hi,
+> These patches will be further taken by Sarthak.
+>
+> Thanks,
+> Satya
+>
+> -----Original Message-----
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Sent: Wednesday, April 27, 2022 4:06 AM
+> To: quic_spathi <quic_spathi@quicinc.com>
+> Cc: u.kleine-koenig@pengutronix.de; YehezkelShB@gmail.com; rmk+kernel@armlinux.org.uk; t.scherer@eckelmann.de; s.shtylyov@omp.ru; sensor1010@163.com; sartgarg@codeaurora.org; hns@goldelico.com; uic_kamasali@quicinc.com; tiantao6@hisilicon.com; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Kamasali Satyanarayan (Consultant) (QUIC) <quic_kamasali@quicinc.com>
+> Subject: Re: [PATCH V1] mmc: sdhci-msm: Add wakeup functionality support for sdio cards
+>
+> On Tue, 26 Apr 2022 at 11:10, Srinivasarao Pathipati <quic_spathi@quicinc.com> wrote:
+>> From: Sarthak Garg <sartgarg@codeaurora.org>
+>>
+>> This adds external GPIO wakeup support to sdhci-msm driver for sdio
+>> cards.
+> There is not a single line changed in the sdhci-msm driver, so I am not sure what this is intended to fix.
+>
+> I assume this is a downstream patch you want to upstream, which is a good thing that we all appreciate. However, before just posting a patch from downstream code, please have a look at the commit message and let it explain what and why you want to change things.
+>
+> I am deferring to review this, until you post a version with a proper commit message. Sorry.
+>
+> Kind regards
+> Uffe
 
+This is our internal feature where our SDIO card makes use of external 
+tlmm pin to wakeup the host from system suspend.
+It has approx 200 lines of code changes in the sdhci-msm.c file which 
+will create further confusions. For that feature we just need to 
+initialize sdio card as a wakeup source and enable wakeup capability for 
+that.
+Will post V2 patch for that .. please help review.
+
+>
+>> Also enables clk gating only in system Suspend/Resume for SDIO card.
+>>
+>> Also add the below fixes from 4.9 kernel :
+>>
+>> c363224b: Fix wakeup functionality for SDIO
+>> 61fc5bf6: Remove flag MMC_PM_WAKE_SDIO_IRQ in mmc_resume_host
+>> a7a2a82e: Set sdio_pending_processing default state to false.
+>>
+>> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+>> Signed-off-by: kamasali <quic_kamasali@quicinc.com>
+>> Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
+>> ---
+>>   drivers/mmc/core/bus.c  | 7 +++++++
+>>   drivers/mmc/core/sdio.c | 1 +
+>>   2 files changed, 8 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c index
+>> 58a60af..a475fe1 100644
+>> --- a/drivers/mmc/core/bus.c
+>> +++ b/drivers/mmc/core/bus.c
+>> @@ -364,6 +364,13 @@ int mmc_add_card(struct mmc_card *card)  #endif
+>>          card->dev.of_node = mmc_of_find_child_device(card->host, 0);
+>>
+>> +       if (mmc_card_sdio(card)) {
+>> +               ret = device_init_wakeup(&card->dev, true);
+>> +               if (ret)
+>> +                       pr_err("%s: %s: failed to init wakeup: %d\n",
+>> +                               mmc_hostname(card->host), __func__, ret);
+>> +       }
+>> +
+>>          device_enable_async_suspend(&card->dev);
+>>
+>>          ret = device_add(&card->dev);
+>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c index
+>> 25799ac..9502318 100644
+>> --- a/drivers/mmc/core/sdio.c
+>> +++ b/drivers/mmc/core/sdio.c
+>> @@ -1096,6 +1096,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
+>>          mmc_release_host(host);
+>>
+>>          host->pm_flags &= ~MMC_PM_KEEP_POWER;
+>> +       host->pm_flags &= ~MMC_PM_WAKE_SDIO_IRQ;
+>>          return err;
+>>   }
+>>
+>> --
+>> 2.7.4
+>>
