@@ -2,38 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B939EC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 May 2022 17:54:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71A17C4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 May 2022 17:54:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354377AbiE0Ry3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 May 2022 13:54:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42714 "EHLO
+        id S1354383AbiE0Rya (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 May 2022 13:54:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42716 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1354369AbiE0Ry1 (ORCPT
+        with ESMTP id S1354370AbiE0Ry1 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2022 13:54:27 -0400
 Received: from alexa-out.qualcomm.com (alexa-out.qualcomm.com [129.46.98.28])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94810C964A;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E06E5D9E88;
         Fri, 27 May 2022 10:54:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
   d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
-  t=1653674066; x=1685210066;
+  t=1653674067; x=1685210067;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references;
-  bh=CHu2ARZrBEpywEV6kKypue4Tegb6NHNgGRwZVdWVwRE=;
-  b=q5yaiy/gIwkkY1QsNeVuXHzbHQzTdaU08vksFKu9a/6iidLkXH5kLUIK
-   sOpxJTu5oko9S8b2msiC6vvoSDP2WtEZj6xUQIPsZilLgczHk85yldsWV
-   TVDExR2u72JtN1jaB8iUB5pNAe0EcXF3KDQmDnNkSpAncyjF24WtWfLzD
-   I=;
-Received: from ironmsg-lv-alpha.qualcomm.com ([10.47.202.13])
-  by alexa-out.qualcomm.com with ESMTP; 27 May 2022 10:54:26 -0700
+  bh=UN3lY1Pk+MR3I3jKJRMZqOMcLEDD883OqErweoErmtI=;
+  b=wLZ0gezmVjLw2DeG+h2ojFKetLaCtiEnN4WIiaH/kITbUZlfWl0YdRsD
+   fNihuypFZUQWaz7eKBc28vY20WF+zNOEJCgNZz8XpaMs0nwodpr4DtBcY
+   TYXK645xqRDXfXmu3J127spvKYVZaVCMJ2RhSN8exxCKoAegVX2ZS/tqS
+   8=;
+Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
+  by alexa-out.qualcomm.com with ESMTP; 27 May 2022 10:54:27 -0700
 X-QCInternal: smtphost
 Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg-lv-alpha.qualcomm.com with ESMTP/TLS/AES256-SHA; 27 May 2022 10:54:24 -0700
+  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 27 May 2022 10:54:25 -0700
 X-QCInternal: smtphost
 Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 27 May 2022 23:24:01 +0530
+  by ironmsg01-blr.qualcomm.com with ESMTP; 27 May 2022 23:24:03 +0530
 Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id E0C241846; Fri, 27 May 2022 23:23:59 +0530 (IST)
+        id 42B63184A; Fri, 27 May 2022 23:24:02 +0530 (IST)
 From:   Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         wsa+renesas@sang-engineering.com, shawn.lin@rock-chips.com,
@@ -46,9 +46,9 @@ Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
         Liangliang Lu <quic_luliang@quicinc.com>,
         "Bao D . Nguyen" <quic_nguyenb@quicinc.com>
-Subject: [PATCH V8 1/5] mmc: core: Capture eMMC and SD card errors
-Date:   Fri, 27 May 2022 23:23:52 +0530
-Message-Id: <1653674036-21829-2-git-send-email-quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V8 3/5] mmc: debugfs: Add debug fs entry for mmc driver
+Date:   Fri, 27 May 2022 23:23:54 +0530
+Message-Id: <1653674036-21829-4-git-send-email-quic_c_sbhanu@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1653674036-21829-1-git-send-email-quic_c_sbhanu@quicinc.com>
 References: <1653674036-21829-1-git-send-email-quic_c_sbhanu@quicinc.com>
@@ -56,101 +56,91 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add changes to capture eMMC and SD card errors.
-This is useful for debug and testing.
+Add debug fs entry to query eMMC and SD card errors statistics
 
 Signed-off-by: Liangliang Lu <quic_luliang@quicinc.com>
 Signed-off-by: Sayali Lokhande <quic_sayalil@quicinc.com>
 Signed-off-by: Bao D. Nguyen <quic_nguyenb@quicinc.com>
-Signed-off-by: Ram Prakash Gupta <quic_rampraka@quicinc.com>
 Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c  | 10 +++++++++-
- include/linux/mmc/host.h | 26 ++++++++++++++++++++++++++
- 2 files changed, 35 insertions(+), 1 deletion(-)
+ drivers/mmc/core/debugfs.c | 56 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 4b70cbf..ef53a25 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -943,9 +943,11 @@ int mmc_execute_tuning(struct mmc_card *card)
- 	}
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 3fdbc80..6aa5a60 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -223,6 +223,59 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ DEFINE_DEBUGFS_ATTRIBUTE(mmc_clock_fops, mmc_clock_opt_get, mmc_clock_opt_set,
+ 	"%llu\n");
  
- 	/* Only print error when we don't check for card removal */
--	if (!host->detect_change)
-+	if (!host->detect_change) {
- 		pr_err("%s: tuning execution failed: %d\n",
- 			mmc_hostname(host), err);
-+		mmc_debugfs_err_stats_inc(host, MMC_ERR_TUNING);
-+	}
- 
- 	return err;
- }
-@@ -2244,6 +2246,12 @@ void mmc_rescan(struct work_struct *work)
- 		if (freqs[i] <= host->f_min)
- 			break;
- 	}
-+
-+	/*
-+	 * Ignore the command timeout errors observed during
-+	 * the card init as those are excepted.
-+	 */
-+	host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
- 	mmc_release_host(host);
- 
-  out:
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c193c50..eb8bc5b 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -93,6 +93,25 @@ struct mmc_clk_phase_map {
- 
- struct mmc_host;
- 
-+enum mmc_err_stat {
-+	MMC_ERR_CMD_TIMEOUT,
-+	MMC_ERR_CMD_CRC,
-+	MMC_ERR_DAT_TIMEOUT,
-+	MMC_ERR_DAT_CRC,
-+	MMC_ERR_AUTO_CMD,
-+	MMC_ERR_ADMA,
-+	MMC_ERR_TUNING,
-+	MMC_ERR_CMDQ_RED,
-+	MMC_ERR_CMDQ_GCE,
-+	MMC_ERR_CMDQ_ICCE,
-+	MMC_ERR_REQ_TIMEOUT,
-+	MMC_ERR_CMDQ_REQ_TIMEOUT,
-+	MMC_ERR_ICE_CFG,
-+	MMC_ERR_CTRL_TIMEOUT,
-+	MMC_ERR_UNEXPECTED_IRQ,
-+	MMC_ERR_MAX,
-+};
-+
- struct mmc_host_ops {
- 	/*
- 	 * It is optional for the host to implement pre_req and post_req in
-@@ -501,6 +520,7 @@ struct mmc_host {
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
- 
-+	u32			err_stats[MMC_ERR_MAX];
- 	unsigned long		private[] ____cacheline_aligned;
- };
- 
-@@ -635,6 +655,12 @@ static inline enum dma_data_direction mmc_get_dma_dir(struct mmc_data *data)
- 	return data->flags & MMC_DATA_WRITE ? DMA_TO_DEVICE : DMA_FROM_DEVICE;
- }
- 
-+static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
-+					     enum mmc_err_stat stat)
++static int mmc_err_stats_show(struct seq_file *file, void *data)
 +{
-+	host->err_stats[stat] += 1;
++	struct mmc_host *host = (struct mmc_host *)file->private;
++	const char *desc[MMC_ERR_MAX] = {
++		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
++		[MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
++		[MMC_ERR_DAT_TIMEOUT] = "Data Timeout Occurred",
++		[MMC_ERR_DAT_CRC] = "Data CRC Errors Occurred",
++		[MMC_ERR_AUTO_CMD] = "Auto-Cmd Error Occurred",
++		[MMC_ERR_ADMA] = "ADMA Error Occurred",
++		[MMC_ERR_TUNING] = "Tuning Error Occurred",
++		[MMC_ERR_CMDQ_RED] = "CMDQ RED Errors",
++		[MMC_ERR_CMDQ_GCE] = "CMDQ GCE Errors",
++		[MMC_ERR_CMDQ_ICCE] = "CMDQ ICCE Errors",
++		[MMC_ERR_REQ_TIMEOUT] = "Request Timedout",
++		[MMC_ERR_CMDQ_REQ_TIMEOUT] = "CMDQ Request Timedout",
++		[MMC_ERR_ICE_CFG] = "ICE Config Errors",
++		[MMC_ERR_CTRL_TIMEOUT] = "Controller Timedout errors",
++		[MMC_ERR_UNEXPECTED_IRQ] = "Unexpected IRQ errors",
++	};
++	int i;
++
++	for (i = 0; i < MMC_ERR_MAX; i++) {
++		if (desc[i])
++			seq_printf(file, "# %s:\t %d\n",
++					desc[i], host->err_stats[i]);
++	}
++
++	return 0;
 +}
 +
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
++static int mmc_err_stats_open(struct inode *inode, struct file *file)
++{
++	return single_open(file, mmc_err_stats_show, inode->i_private);
++}
++
++static ssize_t mmc_err_stats_write(struct file *filp, const char __user *ubuf,
++				   size_t cnt, loff_t *ppos)
++{
++	struct mmc_host *host = filp->f_mapping->host->i_private;
++
++	pr_debug("%s: Resetting MMC error statistics\n", __func__);
++	memset(host->err_stats, 0, sizeof(host->err_stats));
++
++	return cnt;
++}
++
++static const struct file_operations mmc_err_stats_fops = {
++	.open	= mmc_err_stats_open,
++	.read	= seq_read,
++	.write	= mmc_err_stats_write,
++};
++
+ void mmc_add_host_debugfs(struct mmc_host *host)
+ {
+ 	struct dentry *root;
+@@ -236,6 +289,9 @@ void mmc_add_host_debugfs(struct mmc_host *host)
+ 	debugfs_create_file_unsafe("clock", S_IRUSR | S_IWUSR, root, host,
+ 				   &mmc_clock_fops);
+ 
++	debugfs_create_file("err_stats", 0600, root, host,
++			    &mmc_err_stats_fops);
++
+ #ifdef CONFIG_FAIL_MMC_REQUEST
+ 	if (fail_request)
+ 		setup_fault_attr(&fail_default_attr, fail_request);
 -- 
 QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
 of Code Aurora Forum, hosted by The Linux Foundation
