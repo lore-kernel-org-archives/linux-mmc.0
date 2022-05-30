@@ -2,85 +2,216 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8B90C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 16:03:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9981FC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 16:58:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240904AbiE3QDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 May 2022 12:03:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54962 "EHLO
+        id S238944AbiE3Q66 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 May 2022 12:58:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48092 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242724AbiE3QCd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 12:02:33 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF3EC93;
-        Mon, 30 May 2022 09:02:23 -0700 (PDT)
-X-UUID: 4827a7887c5a489aa9649e311c4d8c30-20220531
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.5,REQID:c7243481-68b2-439e-9beb-cecbb626aa87,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:14,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
-        ION:release,TS:14
-X-CID-META: VersionHash:2a19b09,CLOUDID:2f7bceb8-3c45-407b-8f66-25095432a27a,C
-        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:3,EDM:-3,IP:nil,URL:0,File:nil
-        ,QS:0,BEC:nil
-X-UUID: 4827a7887c5a489aa9649e311c4d8c30-20220531
-Received: from mtkmbs11n2.mediatek.inc [(172.21.101.187)] by mailgw01.mediatek.com
-        (envelope-from <miles.chen@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 68746084; Tue, 31 May 2022 00:02:16 +0800
-Received: from mtkmbs07n1.mediatek.inc (172.21.101.16) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Tue, 31 May 2022 00:02:15 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by
- mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Tue, 31 May 2022 00:02:15 +0800
-Received: from mtksdccf07.mediatek.inc (172.21.84.99) by mtkcas11.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Tue, 31 May 2022 00:02:15 +0800
-From:   Miles Chen <miles.chen@mediatek.com>
-To:     <fparent@baylibre.com>
-CC:     <chaotian.jing@mediatek.com>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
-        <matthias.bgg@gmail.com>, <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mtk-sd: fix typo
-Date:   Tue, 31 May 2022 00:02:15 +0800
-Message-ID: <20220530160215.8749-1-miles.chen@mediatek.com>
-X-Mailer: git-send-email 2.18.0
-In-Reply-To: <20220530123857.692076-1-fparent@baylibre.com>
-References: <20220530123857.692076-1-fparent@baylibre.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
+        with ESMTP id S238922AbiE3Q64 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 12:58:56 -0400
+X-Greylist: delayed 182 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 30 May 2022 09:58:55 PDT
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56CE48A072
+        for <linux-mmc@vger.kernel.org>; Mon, 30 May 2022 09:58:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1653929748;
+    s=strato-dkim-0002; d=goldelico.com;
+    h=Message-Id:To:Cc:Subject:Date:From:Cc:Date:From:Subject:Sender;
+    bh=3stp/0ZU+iCDZnHMwdfUDlVByYs+4oPnlnDY02SV4QE=;
+    b=J+BmhvkW2r5Tp7brxW57HQc+WtIYnBopbETIufk52yfnEvEFZ5As8kM5YKq4bAeGYz
+    Lq9pdn7aVwRmbiF4vU+XGkAtqEeSjMpZlu9OgnNTYuhqhJDRhN56iQcrsCy7aAA81dzw
+    tKltgUOZ7AM3AO/f8TdkxL+cZTQiFvB69uQqeP2hIgaPuOyCRMbhETDw+QesRd8hk6gk
+    bPC30m21FHJXIbRuc8VIOTsZ5uBngHNsAPoOYkGnKMdUTK1nGq49uY78BPNuS6X/nUjz
+    gxZRcK2VBNtjVmjF9bPGvvHE1QotP/2rYvjPo36gnYBVQeUC+djtXht5AhSB5vDVEQqo
+    yawQ==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj7gpw91N5y2S3iMIVeg=="
+X-RZG-CLASS-ID: mo00
+Received: from imac.fritz.box
+    by smtp.strato.de (RZmta 47.44.0 DYNA|AUTH)
+    with ESMTPSA id e48d97y4UGtlN5H
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Mon, 30 May 2022 18:55:47 +0200 (CEST)
+From:   "H. Nikolaus Schaller" <hns@goldelico.com>
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
+Date:   Mon, 30 May 2022 18:55:46 +0200
+Subject: BUG in mmc: core: Disable card detect during shutdown
+Cc:     Discussions about the Letux Kernel <letux-kernel@openphoenux.org>,
+        kernel@pyra-handheld.com, aTc <atc@k-n-p.org>,
+        Tony Lindgren <tony@atomide.com>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Message-Id: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
+X-Mailer: Apple Mail (2.3445.104.21)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
->Fix a typo: Fianl -> Final.
->
->Signed-off-by: Fabien Parent <fparent@baylibre.com>
+Hi Ulf,
+users did report a strange issue that the OMAP5 based Pyra does not
+shutdown if a kernel 5.10.116 is used.
 
-Reviewed-by: Miles Chen <miles.chen@mediatek.com> 
+Someone did a bisect and found that reverting
 
->---
-> drivers/mmc/host/mtk-sd.c | 2 +-
-> 1 file changed, 1 insertion(+), 1 deletion(-)
->
->diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->index 195dc897188b..c7d196f805ec 100644
->--- a/drivers/mmc/host/mtk-sd.c
->+++ b/drivers/mmc/host/mtk-sd.c
->@@ -2318,7 +2318,7 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
-> 	else
-> 		val = readl(host->base + PAD_DS_TUNE);
-> 
->-	dev_info(host->dev, "Fianl PAD_DS_TUNE: 0x%x\n", val);
->+	dev_info(host->dev, "Final PAD_DS_TUNE: 0x%x\n", val);
-> 
-> 	return 0;
-> 
->-- 
->2.36.1
+0d66b395210c5084c2b7324945062c1d1f95487a
+
+resp. upstream
+
+66c915d09b942fb3b2b0cb2f56562180901fba17
+
+solves it.
+
+I could now confirm that it also happens with v5.18.0.
+But interestingly only on the Pyra handheld device and not
+on the omap5evm (which is supported by mainline).
+
+The symptom is:
+
+a) without revert
+
+root@letux:~# poweroff
+
+Broadcast message from root@letux (console) (Sat Jan  1 01:08:25 2000):
+
+The system is going down for system halt NOW!
+INIT: Sending processes the TERM signal
+root@letux:~# [info] Using makefile-style concurrent boot in runlevel 0.
+[....] Stopping cgroup management proxy daemon: cgproxy[....] Stopping =
+cgroup management daemon: cgmanager[....] Stop[ ok bluetooth: =
+/usr/sbin/bluetoothd.
+[FAIL] Stopping ISC DHCP server: dhcpd failed!
+dhcpcd[3055]: sending signal 15 to pid 2976
+dhcpcd[3055]: waiting for pid 2976 to exit
+[ ok ] Shutting down ALSA...done.
+[ ok ] Asking all remaining processes to terminate...done.
+[ ok ] All processes ended within 2 seconds...done.
+[ ok [[c[....] Stopping enhanced syslogd: rsyslogd.
+[ ok ....] Deconfiguring network interfaces...done.
+^[[c[info] Saving the system clock.
+[info] Hardware Clock updated to Sat Jan  1 01:08:30 UTC 2000.
+[ ok ] Deactivating swap...done.
+^[[c[   77.289332] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: none.
+[info] Will now halt.
+
+b) with reverting your patch
+
+root@letux:~# uname -a
+Linux letux 5.18.0-letux-lpae+ #9678 SMP PREEMPT Mon May 30 18:02:28 =
+CEST 2022 armv7l GNU/Linux
+root@letux:~# poweroff
+
+Broadcast message from root@letux (console) (Sat Jan  1 01:39:15 2000):
+
+The system is going down for system halt NOW!
+INIT: Sending processes the TERM signal
+root@letux:~# [info] Using makefile-style concurrent boot in runlevel 0.
+[FAIL] Stopping cgroup management proxy daemon: cgproxy[....] Stopping =
+ISC DHCP server: dhcpd failed!
+[....] Stopping cgroup management daemon: cgmanagerdhcpcd[3100]: sending =
+signal 15 to pid 3013
+dhcpcd[3100]: waiting for pid 3013 to exit
+[ ok ] Stopping bluetooth: /usr/sbin/bluetoothd.
+[ ok ] Shutting down ALSA...done.
+[ ok ] Asking all remaining processes to terminate...done.
+[ ok ] All processes ended within 3 seconds...done.
+[ ok [[c[....] Stopping enhanced syslogd: rsyslogd.
+[ ok ....] Deconfiguring network interfaces...done.
+^[[c[info] Saving the system clock.
+[info] Hardware Clock updated to Sat Jan  1 01:39:21 UTC 2000.
+[ ok ] Deactivating swap...done.
+^[[c[   44.563256] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: none.
+[info] Will now halt.
+[   46.917534] reboot: Power down
 
 
+What I suspect is that we have multiple mmc interfaces and have
+card detect wired up in the Pyra while it is ignored in the
+EVM. Is it possible that __mmc_stop_host() never returns in
+.shutdown_pre if card detect is set up (and potentially
+shut down earlier)?
+
+Setup of mmc is done in omap5-board-common.dtsi and omap5.dtsi.
+
+Out Pyra has a non-upstream device tree where we use
+omap5-board-common.dtsi and overwrite it by e.g.
+
+&mmc4 { /* second (u)SD slot (SDIO capable) */
+	status =3D "okay";
+	vmmc-supply =3D <&ldo2_reg>;
+	pinctrl-names =3D "default";
+	pinctrl-0 =3D <&mmc4_pins>;
+	bus-width =3D <4>;
+	cd-gpios =3D <&gpio3 13 GPIO_ACTIVE_LOW>;	/* gpio3_77 */
+	wp-gpios =3D <&gpio3 15 GPIO_ACTIVE_HIGH>;	/* gpio3_79 */
+};
+
+But I have tried to remove the cd-gpois and wp-gpois. Or make the
+mmc interface being disabled (but I may not have catched everything
+in first place).
+
+Then I added some printk to mmc_stop_host() and __mmc_stop_host().
+
+mmc_stop_host() is not called but __mmc_stop_host() is called 4 times.
+There are 4 active MMC interfaces in the Pyra - 3 for (=C2=B5)SD slots
+and one for an SDIO WLAN module.
+
+Now it looks as if 3 of them are properly teared down (two of them
+seem to have host->slot.cd_irq >=3D 0) but on the fourth call
+cancel_delayed_work_sync(&host->detect); does not return. This is
+likely the location of the stall why we don't see a "reboot: Power down"
+
+Any ideas?
+
+BR and thanks,
+Nikolaus
+
+printk hack:
+
+void __mmc_stop_host(struct mmc_host *host)
+{
+printk("%s 1\n", __func__);
+	if (host->slot.cd_irq >=3D 0) {
+printk("%s 2\n", __func__);
+		mmc_gpio_set_cd_wake(host, false);
+printk("%s 3\n", __func__);
+		disable_irq(host->slot.cd_irq);
+printk("%s 4\n", __func__);
+	}
+
+	host->rescan_disable =3D 1;
+printk("%s 5\n", __func__);
+	cancel_delayed_work_sync(&host->detect);
+printk("%s 6\n", __func__);
+}
+
+resulting log:
+
+[info] Will now halt.
+[  282.780929] __mmc_stop_host 1
+[  282.784276] __mmc_stop_host 2
+[  282.787735] __mmc_stop_host 3
+[  282.791030] __mmc_stop_host 4
+[  282.794235] __mmc_stop_host 5
+[  282.797369] __mmc_stop_host 6
+[  282.800918] __mmc_stop_host 1
+[  282.804269] __mmc_stop_host 5
+[  282.807541] __mmc_stop_host 6
+[  282.810715] __mmc_stop_host 1
+[  282.813842] __mmc_stop_host 2
+[  282.816984] __mmc_stop_host 3
+[  282.820175] __mmc_stop_host 4
+[  282.823302] __mmc_stop_host 5
+[  282.826449] __mmc_stop_host 6
+[  282.830941] __mmc_stop_host 1
+[  282.834076] __mmc_stop_host 5
+
+--- here should be another __mmc_stop_host 6
+--- and reboot: Power down=
