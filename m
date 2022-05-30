@@ -2,133 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 177F4C4707A
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 14:22:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8B90C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 16:03:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236078AbiE3OV4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 May 2022 10:21:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40138 "EHLO
+        id S240904AbiE3QDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 May 2022 12:03:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54962 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241286AbiE3OR1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 10:17:27 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C726311906D;
-        Mon, 30 May 2022 06:45:06 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 186A4B80DB9;
-        Mon, 30 May 2022 13:45:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E800EC3411E;
-        Mon, 30 May 2022 13:45:02 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653918303;
-        bh=HNytHS3bxqCOXMxDzMBLrIaw03gY24xaeS8ZM9yxTB0=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=S4Ug5DbrMZCmMELJBdsxjbBMAeGc5drFbT3D0i+5zCcSI4kteSb/A1yBaCRMhFZy9
-         /+4Mh9g0k+fI/7y3VB3OW/aW+7lFsJmDI+JnmMp779CwxYvfiK1wLdSQxbKL/OuY1B
-         l9FvyhkOaFLsUL1zNi2iuO8pIBsgLdjby891iiqsb20fjKe5BzqXdSeVYmvJF6XLsK
-         Fs0RD294lfOjM5DMnS0ULgnpRvRP12TISophHyyqK5Qrc7dsmr7ichSIPzZe03pE4A
-         p70qK/M426rWqA7bRWCepwa2VeYhrfB7kswDjAgBeoJw8JJE+oYzNt6Wf7Xod8DyIN
-         EefyORVBST9uw==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Aswath Govindraju <a-govindraju@ti.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.10 26/76] drivers: mmc: sdhci_am654: Add the quirk to set TESTCD bit
-Date:   Mon, 30 May 2022 09:43:16 -0400
-Message-Id: <20220530134406.1934928-26-sashal@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220530134406.1934928-1-sashal@kernel.org>
-References: <20220530134406.1934928-1-sashal@kernel.org>
+        with ESMTP id S242724AbiE3QCd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 12:02:33 -0400
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF3EC93;
+        Mon, 30 May 2022 09:02:23 -0700 (PDT)
+X-UUID: 4827a7887c5a489aa9649e311c4d8c30-20220531
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.5,REQID:c7243481-68b2-439e-9beb-cecbb626aa87,OB:0,LO
+        B:0,IP:0,URL:0,TC:0,Content:14,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
+        ION:release,TS:14
+X-CID-META: VersionHash:2a19b09,CLOUDID:2f7bceb8-3c45-407b-8f66-25095432a27a,C
+        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:3,EDM:-3,IP:nil,URL:0,File:nil
+        ,QS:0,BEC:nil
+X-UUID: 4827a7887c5a489aa9649e311c4d8c30-20220531
+Received: from mtkmbs11n2.mediatek.inc [(172.21.101.187)] by mailgw01.mediatek.com
+        (envelope-from <miles.chen@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 68746084; Tue, 31 May 2022 00:02:16 +0800
+Received: from mtkmbs07n1.mediatek.inc (172.21.101.16) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
+ Tue, 31 May 2022 00:02:15 +0800
+Received: from mtkcas11.mediatek.inc (172.21.101.40) by
+ mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Tue, 31 May 2022 00:02:15 +0800
+Received: from mtksdccf07.mediatek.inc (172.21.84.99) by mtkcas11.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 31 May 2022 00:02:15 +0800
+From:   Miles Chen <miles.chen@mediatek.com>
+To:     <fparent@baylibre.com>
+CC:     <chaotian.jing@mediatek.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>,
+        <matthias.bgg@gmail.com>, <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mtk-sd: fix typo
+Date:   Tue, 31 May 2022 00:02:15 +0800
+Message-ID: <20220530160215.8749-1-miles.chen@mediatek.com>
+X-Mailer: git-send-email 2.18.0
+In-Reply-To: <20220530123857.692076-1-fparent@baylibre.com>
+References: <20220530123857.692076-1-fparent@baylibre.com>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Vignesh Raghavendra <vigneshr@ti.com>
+>Fix a typo: Fianl -> Final.
+>
+>Signed-off-by: Fabien Parent <fparent@baylibre.com>
 
-[ Upstream commit c7666240ec76422cb7546bd07cc8ae80dc0ccdd2 ]
+Reviewed-by: Miles Chen <miles.chen@mediatek.com> 
 
-The ARASAN MMC controller on Keystone 3 class of devices need the SDCD
-line to be connected for proper functioning. Similar to the issue pointed
-out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
-sdhci-of-arasan: Set controller to test mode when no CD bit").
+>---
+> drivers/mmc/host/mtk-sd.c | 2 +-
+> 1 file changed, 1 insertion(+), 1 deletion(-)
+>
+>diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+>index 195dc897188b..c7d196f805ec 100644
+>--- a/drivers/mmc/host/mtk-sd.c
+>+++ b/drivers/mmc/host/mtk-sd.c
+>@@ -2318,7 +2318,7 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
+> 	else
+> 		val = readl(host->base + PAD_DS_TUNE);
+> 
+>-	dev_info(host->dev, "Fianl PAD_DS_TUNE: 0x%x\n", val);
+>+	dev_info(host->dev, "Final PAD_DS_TUNE: 0x%x\n", val);
+> 
+> 	return 0;
+> 
+>-- 
+>2.36.1
 
-In cases where this can't be connected, add a quirk to force the
-controller into test mode and set the TESTCD bit. Use the flag
-"ti,fails-without-test-cd", to implement this above quirk when required.
-
-Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
-Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
-Link: https://lore.kernel.org/r/20220425063120.10135-3-a-govindraju@ti.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/sdhci_am654.c | 23 ++++++++++++++++++++++-
- 1 file changed, 22 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index a64ea143d185..7cab9d831afb 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -147,6 +147,9 @@ struct sdhci_am654_data {
- 	int drv_strength;
- 	int strb_sel;
- 	u32 flags;
-+	u32 quirks;
-+
-+#define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
- };
- 
- struct sdhci_am654_driver_data {
-@@ -369,6 +372,21 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
- 	}
- }
- 
-+static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u8 ctrl;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_reset(host, mask);
-+
-+	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
-+}
-+
- static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -500,7 +518,7 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
- 	.set_clock = sdhci_j721e_4bit_set_clock,
- 	.write_b = sdhci_am654_write_b,
- 	.irq = sdhci_am654_cqhci_irq,
--	.reset = sdhci_reset,
-+	.reset = sdhci_am654_reset,
- };
- 
- static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
-@@ -719,6 +737,9 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
- 	device_property_read_u32(dev, "ti,clkbuf-sel",
- 				 &sdhci_am654->clkbuf_sel);
- 
-+	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
-+		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
-+
- 	sdhci_get_of_property(pdev);
- 
- 	return 0;
--- 
-2.35.1
 
