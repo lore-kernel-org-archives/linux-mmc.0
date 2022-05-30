@@ -2,47 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1446C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 13:48:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 630DBC433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 14:09:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238276AbiE3Nsc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 May 2022 09:48:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41224 "EHLO
+        id S239417AbiE3OJf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 May 2022 10:09:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54694 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238922AbiE3NqF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 09:46:05 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E123FA206A;
-        Mon, 30 May 2022 06:33:46 -0700 (PDT)
+        with ESMTP id S238815AbiE3OEw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 10:04:52 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9929ACE5D2;
+        Mon, 30 May 2022 06:40:27 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 4617FB80DAE;
-        Mon, 30 May 2022 13:33:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 1525DC36AE3;
-        Mon, 30 May 2022 13:33:42 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 401D6B80DA9;
+        Mon, 30 May 2022 13:40:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D7E4C3411C;
+        Mon, 30 May 2022 13:40:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653917624;
-        bh=Dz8ai7iKPglweNQzZKbSzXedFDeTrb0db8t40QK1R4o=;
+        s=k20201202; t=1653918025;
+        bh=QYt+iO7UcOgrb7r6gntRdi9a6gboFi7nUPFc2rDvgEY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=FyFr2byDNhWZjSdYSzqVbuBXKpCJgl0/yBWyvq6WI2gJuNVWmM/FKRCNuFWNBhjJu
-         Z6+e+iDHrXRNH2zJaCNZm5tMM2k9MnkTsiDY3AfxrDxcEzBY2ZOrD4vqLSPpz8Q/xj
-         +ZotVPb5sRE70W/P/HHFZBQM5D1YN1ipUwjBDZAlx9w5Nq3F9xD8GjlBhbbLpQ605I
-         9vdEXe49QzjbQRgX9cuEi/ZGOKnVcFi+KraHL/kIOzgUwsKzmKPuraH0+qmhEnWHYs
-         OvaNJoCPDSTCX1SAVatXr1h9429Sghp4LyCeUmBQj+H6hPbq09yV+OzlsodxHjSVaP
-         tH6UMlEmsZ+fg==
+        b=PROPBzat79sKh/KgFI4pFeZiqfwdwhdVC0fqTzDJmj+mHZF44jkZ2VfrnRmmY5dVV
+         bREAoWuxmnwEzbInRJiliruxz+U0aNELKcdwhZpR24N4j2TFmkeiGEqwFxwGvbDXu1
+         yUhaqJ4UHF28vxxLI9xLev9i823o05e4vqL0GYhhLBWOYS0wJVlaUYszCdLLHFtukR
+         R66qb5ZW0XTsBRuXd6jJzV1ROlYDVzko2Po1wp/L0Q6MdaaYe11sM+QYuyz6uPxPIX
+         v9lkKRYVTyFj7j6Mt+LHkcLY4bUolxryXIfGKXvcplJdNWDcHiO5xGYN3D3BDD2cIw
+         /dML9i7Uj6N0w==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Aidan MacDonald <aidanmacdonald.0x0@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, paul@crapouillou.net,
         linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.17 045/135] mmc: jz4740: Apply DMA engine limits to maximum segment size
-Date:   Mon, 30 May 2022 09:30:03 -0400
-Message-Id: <20220530133133.1931716-45-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.15 036/109] mmc: jz4740: Apply DMA engine limits to maximum segment size
+Date:   Mon, 30 May 2022 09:37:12 -0400
+Message-Id: <20220530133825.1933431-36-sashal@kernel.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220530133133.1931716-1-sashal@kernel.org>
-References: <20220530133133.1931716-1-sashal@kernel.org>
+In-Reply-To: <20220530133825.1933431-1-sashal@kernel.org>
+References: <20220530133825.1933431-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -102,10 +102,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 20 insertions(+)
 
 diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 7ab1b38a7be5..b1d563b2ed1b 100644
+index 80a2c270d502..3c59dec08c3b 100644
 --- a/drivers/mmc/host/jz4740_mmc.c
 +++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -247,6 +247,26 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
+@@ -235,6 +235,26 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
  		return PTR_ERR(host->dma_rx);
  	}
  
