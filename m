@@ -2,48 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06973C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 14:09:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4281FC46467
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 May 2022 14:21:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235573AbiE3OJg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 May 2022 10:09:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54690 "EHLO
+        id S237427AbiE3OVr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 May 2022 10:21:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42870 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238821AbiE3OEw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 10:04:52 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3DB1CE5D4;
-        Mon, 30 May 2022 06:40:27 -0700 (PDT)
+        with ESMTP id S241664AbiE3ORz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2022 10:17:55 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0C0566C8F;
+        Mon, 30 May 2022 06:47:52 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 33B4A60F2A;
-        Mon, 30 May 2022 13:40:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9CA96C3411E;
-        Mon, 30 May 2022 13:40:25 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 501A7B80DAA;
+        Mon, 30 May 2022 13:47:51 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 202A4C341C4;
+        Mon, 30 May 2022 13:47:49 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1653918026;
-        bh=3os4nm//VWdtnukH4DMduEp3AKayG5T+pbN7X5F8Egs=;
+        s=k20201202; t=1653918470;
+        bh=RNeHE94BSj+4gptWB0XYtF6cAVaNg9bbvHZewnS9el8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Bps66xW/rNe9sDWn74JYcDwwCvBYakaNWubJvFv4LTT79u2u4t4bqYZEEo/v3qJK6
-         T7eblw4o+cTDV2yxYOurHnyqnxJUbveJaOcLnMuV/zUOf+Pw3d69aIABXGiGboSmGf
-         E7V57cJ92Bes0sqCdBhqA/6X3MbQtkSeHn7Uu40J0K3ONaYqUfyv7d8/lECvcovbPS
-         h/OiusErAS29LvxPcCgi0huM1k+U1oMEZxD//1O7mULjWOaQbyvBXZetF1zSUd1RKk
-         ss4m6OQHnIh8V/d4iXKPYW5nI9335JdsekjYbNrwVTo+j95j113V+NA+gheME0N7xV
-         lAtBHmBtZ4B6g==
+        b=meHHyMmbsZ0N3ZWPjlDV/mdOpeBF5y49oIt7Z8jbMetkpuogvXIHgpR3BighXYwKP
+         X3VpdvsXQU956+WvKjwsTB0xvwvgm+kO6MDt0pORXTNbDStBfjKHLI2aMYOvowTZbZ
+         4opFXtDuXTQsI/9RZHHc/MRB7stxU6JMUOvOh7oeqWCPgRoWNBEUPJ1JmDxU0yiMVj
+         v87oC9o683JhCpWzvqURrfpsWCcQdoRfN4R7TxoUij4yBd7qIWTTpLAv7V+oAIuJVU
+         XKa1KROAl0UA9JKQg54L5HnPeA8NMu8io9CHziNWXMlbaXCy8xi01P+6lUjE/tZReK
+         pRak8mTc//g6w==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Aswath Govindraju <a-govindraju@ti.com>,
+Cc:     Aidan MacDonald <aidanmacdonald.0x0@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.15 037/109] drivers: mmc: sdhci_am654: Add the quirk to set TESTCD bit
-Date:   Mon, 30 May 2022 09:37:13 -0400
-Message-Id: <20220530133825.1933431-37-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>, paul@crapouillou.net,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.4 19/55] mmc: jz4740: Apply DMA engine limits to maximum segment size
+Date:   Mon, 30 May 2022 09:46:25 -0400
+Message-Id: <20220530134701.1935933-19-sashal@kernel.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220530133825.1933431-1-sashal@kernel.org>
-References: <20220530133825.1933431-1-sashal@kernel.org>
+In-Reply-To: <20220530134701.1935933-1-sashal@kernel.org>
+References: <20220530134701.1935933-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -52,83 +51,87 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Vignesh Raghavendra <vigneshr@ti.com>
+From: Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
 
-[ Upstream commit c7666240ec76422cb7546bd07cc8ae80dc0ccdd2 ]
+[ Upstream commit afadb04f1d6e74b18a253403f5274cde5e3fd7bd ]
 
-The ARASAN MMC controller on Keystone 3 class of devices need the SDCD
-line to be connected for proper functioning. Similar to the issue pointed
-out in sdhci-of-arasan.c driver, commit 3794c542641f ("mmc:
-sdhci-of-arasan: Set controller to test mode when no CD bit").
+Do what is done in other DMA-enabled MMC host drivers (cf. host/mmci.c) and
+limit the maximum segment size based on the DMA engine's capabilities. This
+is needed to avoid warnings like the following with CONFIG_DMA_API_DEBUG=y.
 
-In cases where this can't be connected, add a quirk to force the
-controller into test mode and set the TESTCD bit. Use the flag
-"ti,fails-without-test-cd", to implement this above quirk when required.
+------------[ cut here ]------------
+WARNING: CPU: 0 PID: 21 at kernel/dma/debug.c:1162 debug_dma_map_sg+0x2f4/0x39c
+DMA-API: jz4780-dma 13420000.dma-controller: mapping sg segment longer than device claims to support [len=98304] [max=65536]
+CPU: 0 PID: 21 Comm: kworker/0:1H Not tainted 5.18.0-rc1 #19
+Workqueue: kblockd blk_mq_run_work_fn
+Stack : 81575aec 00000004 80620000 80620000 80620000 805e7358 00000009 801537ac
+        814c832c 806276e3 806e34b4 80620000 81575aec 00000001 81575ab8 09291444
+        00000000 00000000 805e7358 81575958 ffffffea 8157596c 00000000 636f6c62
+        6220646b 80387a70 0000000f 6d5f6b6c 80620000 00000000 81575ba4 00000009
+        805e170c 80896640 00000001 00010000 00000000 00000000 00006098 806e0000
+        ...
+Call Trace:
+[<80107670>] show_stack+0x84/0x120
+[<80528cd8>] __warn+0xb8/0xec
+[<80528d78>] warn_slowpath_fmt+0x6c/0xb8
+[<8016f1d4>] debug_dma_map_sg+0x2f4/0x39c
+[<80169d4c>] __dma_map_sg_attrs+0xf0/0x118
+[<8016a27c>] dma_map_sg_attrs+0x14/0x28
+[<804f66b4>] jz4740_mmc_prepare_dma_data+0x74/0xa4
+[<804f6714>] jz4740_mmc_pre_request+0x30/0x54
+[<804f4ff4>] mmc_blk_mq_issue_rq+0x6e0/0x7bc
+[<804f5590>] mmc_mq_queue_rq+0x220/0x2d4
+[<8038b2c0>] blk_mq_dispatch_rq_list+0x480/0x664
+[<80391040>] blk_mq_do_dispatch_sched+0x2dc/0x370
+[<80391468>] __blk_mq_sched_dispatch_requests+0xec/0x164
+[<80391540>] blk_mq_sched_dispatch_requests+0x44/0x94
+[<80387900>] __blk_mq_run_hw_queue+0xb0/0xcc
+[<80134c14>] process_one_work+0x1b8/0x264
+[<80134ff8>] worker_thread+0x2ec/0x3b8
+[<8013b13c>] kthread+0x104/0x10c
+[<80101dcc>] ret_from_kernel_thread+0x14/0x1c
 
-Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
-Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
-Link: https://lore.kernel.org/r/20220425063120.10135-3-a-govindraju@ti.com
+---[ end trace 0000000000000000 ]---
+
+Signed-off-by: Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
+Link: https://lore.kernel.org/r/20220411153753.50443-1-aidanmacdonald.0x0@gmail.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci_am654.c | 23 ++++++++++++++++++++++-
- 1 file changed, 22 insertions(+), 1 deletion(-)
+ drivers/mmc/host/jz4740_mmc.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index b4891bb26648..a3e62e212631 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -147,6 +147,9 @@ struct sdhci_am654_data {
- 	int drv_strength;
- 	int strb_sel;
- 	u32 flags;
-+	u32 quirks;
-+
-+#define SDHCI_AM654_QUIRK_FORCE_CDTEST BIT(0)
- };
- 
- struct sdhci_am654_driver_data {
-@@ -369,6 +372,21 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
+diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+index f816c06ef916..a316c912a118 100644
+--- a/drivers/mmc/host/jz4740_mmc.c
++++ b/drivers/mmc/host/jz4740_mmc.c
+@@ -224,6 +224,26 @@ static int jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
+ 		return PTR_ERR(host->dma_rx);
  	}
+ 
++	/*
++	 * Limit the maximum segment size in any SG entry according to
++	 * the parameters of the DMA engine device.
++	 */
++	if (host->dma_tx) {
++		struct device *dev = host->dma_tx->device->dev;
++		unsigned int max_seg_size = dma_get_max_seg_size(dev);
++
++		if (max_seg_size < host->mmc->max_seg_size)
++			host->mmc->max_seg_size = max_seg_size;
++	}
++
++	if (host->dma_rx) {
++		struct device *dev = host->dma_rx->device->dev;
++		unsigned int max_seg_size = dma_get_max_seg_size(dev);
++
++		if (max_seg_size < host->mmc->max_seg_size)
++			host->mmc->max_seg_size = max_seg_size;
++	}
++
+ 	return 0;
  }
  
-+static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u8 ctrl;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_reset(host, mask);
-+
-+	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
-+}
-+
- static int sdhci_am654_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -500,7 +518,7 @@ static struct sdhci_ops sdhci_j721e_4bit_ops = {
- 	.set_clock = sdhci_j721e_4bit_set_clock,
- 	.write_b = sdhci_am654_write_b,
- 	.irq = sdhci_am654_cqhci_irq,
--	.reset = sdhci_reset,
-+	.reset = sdhci_am654_reset,
- };
- 
- static const struct sdhci_pltfm_data sdhci_j721e_4bit_pdata = {
-@@ -719,6 +737,9 @@ static int sdhci_am654_get_of_property(struct platform_device *pdev,
- 	device_property_read_u32(dev, "ti,clkbuf-sel",
- 				 &sdhci_am654->clkbuf_sel);
- 
-+	if (device_property_read_bool(dev, "ti,fails-without-test-cd"))
-+		sdhci_am654->quirks |= SDHCI_AM654_QUIRK_FORCE_CDTEST;
-+
- 	sdhci_get_of_property(pdev);
- 
- 	return 0;
 -- 
 2.35.1
 
