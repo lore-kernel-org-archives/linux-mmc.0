@@ -2,200 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96681C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 May 2022 13:39:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25B20C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 May 2022 13:39:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241113AbiEaNjS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 May 2022 09:39:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58076 "EHLO
+        id S1344794AbiEaNjb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 May 2022 09:39:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344791AbiEaNjP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2022 09:39:15 -0400
-Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 601B08FF95
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:11 -0700 (PDT)
-Received: by mail-lj1-x233.google.com with SMTP id 1so14701801ljp.8
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:11 -0700 (PDT)
+        with ESMTP id S1344805AbiEaNjU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2022 09:39:20 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19C0198088
+        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:16 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id y32so21532470lfa.6
+        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=8MU8AOeNM0UJsOQCvvfsrp6blLjd6ery6FOHTJsKqmQ=;
-        b=C00OOTf+T0prvir95rinw5NOYb41i+50ujzCI6JGgg0/ZNPUwZLikh8PJi9cPgIjz/
-         0VcQ81X110z2LOJC1/WQm5THL2OnTByI8HPfE9BOfOY2XN4IUqtCywLRb66rb6aRP4Vp
-         6ZoAsN6CVoKa5BIS6ZGnb4gjY/a798pSLVdbUV4fLI1vZY4J0ZNh/CIsbO2KU1Twy+6O
-         YUHb8I3AZFFll66yMCWp+USkFNvh+XJcLu57z4MPTZauaVzY/VMNJixpi17v4XmhlHUi
-         iexJLzAj+nmOsyxwZEw/mE+ZdX3LYG0zntpgIs7ZSYrZAcoo0uE/jF79v8QD/codMlvw
-         uFsQ==
+        bh=Woo8oKshTzh9S1tak5uSOyrCGP/mtqNmhpMc/8wYggk=;
+        b=OFDvFn31/wu3lfug6gv87ucAtyVKBEO1I/1Waqyh6F/j07OSi00oe9ClePLZr0WYLg
+         zQhIMZivQm3z839Yi58bpaO1eRHB0x1WEjHxLeF0jIw0IW8SRCJvovpfJyg5b1jL8LJ3
+         y8LbfXr13DKxczo+6XDURGzTbhgPmR1BKmkJFRpv2nAYnRzG20EykhRe3301dYV3bRr/
+         +F7kSINIQUlyoD4LI7WBkEOEIgQXy+Zae5Van3EdCeQdh+Bpg76eBdbjmxcgAIxQd0LD
+         it7KiUWsght1Sg99iMODMylbXiiYmb/DJlmslxA2w/0hRZwD2ry4DSneh98C0pL9jpwR
+         B1sA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=8MU8AOeNM0UJsOQCvvfsrp6blLjd6ery6FOHTJsKqmQ=;
-        b=XUXV0LAEO85+nIiBZ0ICi+bUbGKa0Bty1Dv27RQN+0jvKrBXMYEOAMN01BDpWWv5VX
-         nao9piiLLi8elcrjhzq0wyrMLvbRcc8n6ta/Q+7gWmWxleHQqc9SpjbCGmWwnSGqHXAw
-         kuAyzj/bN4NGUJn7Pg2ylAKtV5IHWamUZC1nLYwpT3xbIyJb6VlSmLvqlEVrUQ1bPh7+
-         2gN4IYIh5jkE+6dvkMn88XA2VDLGJvdqnPgoWn5TrB6fiWGgTJQCrp9mcnS8rIqdYcre
-         bid4Xa35AsqZRZtBSQicRYW696nPDD1hJt/vtOY+W88258hikn6i2Op4XKrPzXemmxnU
-         /cRw==
-X-Gm-Message-State: AOAM5311w9kPZg8QNXJodhzw5sp/sRWerUwYdH75LpDK4opRlIbecexF
-        /z252hFz/Q/t2rgxiyc7xks8S6GSI5qJjyf3E643fQ==
-X-Google-Smtp-Source: ABdhPJzfxPBr1Pl55mbXLZavP23t6aFW7yYp8/aJ7Txnm0dobZrjHVwcsIneHw2JefVXX07NEzTgOsJhGiICzZ1Ay7o=
-X-Received: by 2002:a2e:a286:0:b0:253:bff6:ed52 with SMTP id
- k6-20020a2ea286000000b00253bff6ed52mr37140754lja.229.1654004350751; Tue, 31
- May 2022 06:39:10 -0700 (PDT)
+        bh=Woo8oKshTzh9S1tak5uSOyrCGP/mtqNmhpMc/8wYggk=;
+        b=xsMe02prbS569taYLTqAAdCqKwZuBZBPdpaccB1QvxJ+poUGJSalw83ZRxwldINokU
+         xIL1V8K8man9e966zucTbFiNJxAlX8gRq1SUiF0VfAG0CvbW7zLSWkTGub0qP8Vw23jB
+         svqJ+3wRRo7sbwQJShBg0xXPPgYWzW1Hl71NCkRxRa2XDRvdDrY1QUNyoqpz1IDjtxuj
+         2F8TotuVLx6XscrcYZau8Btl8fMI4aTqesCZ4ms8DNjiz3hs3D+CFk0TrK+U+mfeTlrP
+         mBDZtGViUOQenZIfg2PNCgs37eC+XuFgG2x2RNCRZivPt77GYO8rgLUKwjtE/27DxsoH
+         QwhA==
+X-Gm-Message-State: AOAM530d82+8Hqq4oClVYlzYDxxpmBWPgp8PXd6LF2jewmqxeqfAcGBg
+        Saya5+4FJ62S/GfgiERl/hZE2K2QuATeuKwN834MXQ==
+X-Google-Smtp-Source: ABdhPJxn1r3MgXJ2C/wc5i1LUO0VYa92fq0hsD61WN7c9DWQuUy4e52MgQnLD+H3DWIDUT8Kmcg4eTj8+At65oR2rc8=
+X-Received: by 2002:a05:6512:3b0e:b0:478:7c53:4d0a with SMTP id
+ f14-20020a0565123b0e00b004787c534d0amr28793645lfv.373.1654004354233; Tue, 31
+ May 2022 06:39:14 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220514220116.1008254-1-bhupesh.sharma@linaro.org>
-In-Reply-To: <20220514220116.1008254-1-bhupesh.sharma@linaro.org>
+References: <20220520114242.150235-1-benchuanggli@gmail.com>
+In-Reply-To: <20220520114242.150235-1-benchuanggli@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 31 May 2022 15:38:34 +0200
-Message-ID: <CAPDyKFpR6kzU4SAZp5DyqSxJ6CfjwZCDMvZ-XGKk__k_8=VdGA@mail.gmail.com>
-Subject: Re: [PATCH 1/1] dt-bindings: mmc: sdhci-msm: Fix issues in yaml bindings
-To:     Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, bhupesh.linux@gmail.com,
-        agross@kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, robh@kernel.org,
-        bjorn.andersson@linaro.org
+Date:   Tue, 31 May 2022 15:38:37 +0200
+Message-ID: <CAPDyKFoQP=4OSwcjj6bJOxDXvrWjqwi-MpvpMe4L5ftWwkEhFQ@mail.gmail.com>
+Subject: Re: [RESEND, PATCH] mmc: sdhci-pci-gli: Fix GL9763E runtime PM when
+ the system resumes from suspend
+To:     Ben Chuang <benchuanggli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, greg.tu@genesyslogic.com.tw,
+        ben.chuang@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw,
+        jason.lai@genesyslogic.com.tw, victor.shih@genesyslogic.com.tw,
+        kane.chen@intel.corp-partner.google.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 15 May 2022 at 00:01, Bhupesh Sharma <bhupesh.sharma@linaro.org> wrote:
+On Fri, 20 May 2022 at 13:43, Ben Chuang <benchuanggli@gmail.com> wrote:
 >
-> Rob pointed some remaining issues in the sdhci-msm yaml
-> bindings (via [1]).
+> When the system resumes from suspend (S3 or S4), the power mode is
+> MMC_POWER_OFF. In this status, gl9763e_runtime_resume() should not enable
+> PLL. Add a condition to this function to enable PLL only when the power
+> mode is MMC_POWER_ON.
 >
-> Fix the same by first using the 'mmc-controller.yaml' as
-> 'ref' and thereafter also fix the issues reported by
-> 'make dtbs_check' check.
->
-> [1]. https://lore.kernel.org/linux-arm-msm/YnLmNCwNfoqZln12@robh.at.kernel.org/
->
-> Fixes: a45537723f4b ("dt-bindings: mmc: sdhci-msm: Convert bindings to yaml")
-> Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-> Cc: Rob Herring <robh@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
+> Fixes: d607667bb8fa (mmc: sdhci-pci-gli: Add runtime PM for GL9763E)
+> Signed-off-by: Ben Chuang <benchuanggli@gmail.com>
 
-Queued for v5.20 on the devel branch, thanks!
+Sorry for the delay, I have been out traveling. Unfortunately this
+didn't make it for v5.18, although I have queued it up for v5.19 and
+added a stable tag.
 
-Kind regards
+Thanks and kind regards
 Uffe
 
 
 > ---
-> -> This patch uses the dts changes sent (here: https://lore.kernel.org/linux-arm-msm/20220514215424.1007718-1-bhupesh.sharma@linaro.org/), for fixing the dtbs_check errors.
-> -> This patch is rebased on 'linux-next/master'
+> Hi,
 >
->  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 52 ++++++++++++++++---
->  1 file changed, 44 insertions(+), 8 deletions(-)
+> Sorry, resend this patch because typo two email addresses.
+> Sorry for Adrian and Kane.
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index e4236334e748..31a3ce208e1a 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -17,6 +17,9 @@ description:
->  properties:
->    compatible:
->      oneOf:
-> +      - enum:
-> +          - qcom,sdhci-msm-v4
-> +        deprecated: true
->        - items:
->            - enum:
->                - qcom,apq8084-sdhci
-> @@ -27,6 +30,9 @@ properties:
->                - qcom,msm8992-sdhci
->                - qcom,msm8994-sdhci
->                - qcom,msm8996-sdhci
-> +          - const: qcom,sdhci-msm-v4 # for sdcc versions less than 5.0
-> +      - items:
-> +          - enum:
->                - qcom,qcs404-sdhci
->                - qcom,sc7180-sdhci
->                - qcom,sc7280-sdhci
-> @@ -38,12 +44,7 @@ properties:
->                - qcom,sm6350-sdhci
->                - qcom,sm8150-sdhci
->                - qcom,sm8250-sdhci
-> -          - enum:
-> -              - qcom,sdhci-msm-v4 # for sdcc versions less than 5.0
-> -              - qcom,sdhci-msm-v5 # for sdcc version 5.0
-> -      - items:
-> -          - const: qcom,sdhci-msm-v4 # Deprecated (only for backward compatibility)
-> -                                     # for sdcc versions less than 5.0
-> +          - const: qcom,sdhci-msm-v5 # for sdcc version 5.0
+> Best regards,
+> Ben
+> ---
+>  drivers/mmc/host/sdhci-pci-gli.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
->    reg:
->      minItems: 1
-> @@ -53,6 +54,28 @@ properties:
->        - description: CQE register map
->        - description: Inline Crypto Engine register map
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index d09728c37d03..d81e5dc90e15 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -972,6 +972,9 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+>         struct sdhci_host *host = slot->host;
+>         u16 clock;
 >
-> +  reg-names:
-> +    minItems: 1
-> +    maxItems: 4
-> +    oneOf:
-> +      - items:
-> +          - const: hc_mem
-> +      - items:
-> +          - const: hc_mem
-> +          - const: core_mem
-> +      - items:
-> +          - const: hc_mem
-> +          - const: cqe_mem
-> +      - items:
-> +          - const: hc_mem
-> +          - const: cqe_mem
-> +          - const: ice_mem
-> +      - items:
-> +          - const: hc_mem
-> +          - const: core_mem
-> +          - const: cqe_mem
-> +          - const: ice_mem
+> +       if (host->mmc->ios.power_mode != MMC_POWER_ON)
+> +               return 0;
 > +
->    clocks:
->      minItems: 3
->      items:
-> @@ -121,6 +144,16 @@ properties:
->      description: A phandle to sdhci power domain node
->      maxItems: 1
+>         clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
 >
-> +  mmc-ddr-1_8v: true
-> +
-> +  mmc-hs200-1_8v: true
-> +
-> +  mmc-hs400-1_8v: true
-> +
-> +  bus-width: true
-> +
-> +  max-frequency: true
-> +
->  patternProperties:
->    '^opp-table(-[a-z0-9]+)?$':
->      if:
-> @@ -140,7 +173,10 @@ required:
->    - clock-names
->    - interrupts
->
-> -additionalProperties: true
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +
-> +unevaluatedProperties: false
->
->  examples:
->    - |
-> @@ -149,7 +185,7 @@ examples:
->      #include <dt-bindings/clock/qcom,rpmh.h>
->      #include <dt-bindings/power/qcom-rpmpd.h>
->
-> -    sdhc_2: sdhci@8804000 {
-> +    sdhc_2: mmc@8804000 {
->        compatible = "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5";
->        reg = <0 0x08804000 0 0x1000>;
->
+>         clock |= SDHCI_CLOCK_PLL_EN;
 > --
-> 2.35.3
+> 2.36.0
 >
