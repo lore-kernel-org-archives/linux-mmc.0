@@ -2,56 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3F1EC43217
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 May 2022 13:39:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDEFEC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 May 2022 13:39:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344769AbiEaNjI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 May 2022 09:39:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57780 "EHLO
+        id S243029AbiEaNjP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 May 2022 09:39:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241615AbiEaNjH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2022 09:39:07 -0400
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 229B44504B
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:03 -0700 (PDT)
-Received: by mail-lj1-x22e.google.com with SMTP id e4so14687328ljb.13
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:02 -0700 (PDT)
+        with ESMTP id S1344785AbiEaNjN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2022 09:39:13 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0044951305
+        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:09 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id br17so21529362lfb.2
+        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:39:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=rV+IwUnjJeMeaLuOoAuodxAXJv2e1zA8eKGCdKHN510=;
-        b=aK6SduPUBnymJsbjYP8iiifXthYMYLwOHK6Ld3DlMMKNkWarDDunHmUfEq5sqmy8GV
-         nRX7yuMXnhH6fyDaiQlcWx++J08xJYRPCWgVH9NQJyKN68AwWt9S14BKBk+vDtcVnAUA
-         ifwgXmWp5PajZLOGS4wIIe1C6saBSt6MonJ5T+AqjBzLximu8th6TDF+hVjKTOaiQCnv
-         pdGXti2Y5aLfwIYoByqBs4dVZYL+AkwdQnxB2vF0akc+16h5AViT2N4idnJJn61tvF3I
-         bz9AMs6+bqVfPmC/CyBlHRKzW4/vUaM2sboP8m1ymnAuOUurizkzERbk/YAOUMz4rf3b
-         xvLg==
+        bh=btwuVJJduXqnSF+V3q9iWM5+3Zcv1LxijPuc1zWO+QY=;
+        b=uKhctOJtyOqlllbp7ZuR/rKBTZU6dNQImP4sfCHCccVv1N3fYshhztRbeJ6xzp++n4
+         GRsSAk6j/GDUkQ8Jjo3vhkaPDbPPSfL8XMfTLZxJIBZf23Cpx4S6F2azLOaMWT/V52ji
+         4gQZSJW5edRgVQqzZM4mt31K5NpSUIevwjkLR7yxQ8hsFdi+I3Epa0cdR5oWWrGW222j
+         m4p0UAqEFG/8PjpvOAnCpEjGSN/wCWbetVnyc/yeBi0YU4iFFSBlIf1beOOpi7a1rAlH
+         /pMLdaZ3AB8HV5t+BdDPcp/rdFE99OWQe7Mf+t6VJcK1rgkxWxD65tBGR/9u165QeMQZ
+         4PrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=rV+IwUnjJeMeaLuOoAuodxAXJv2e1zA8eKGCdKHN510=;
-        b=hpxMeJBxmK+fqAMaoSL/yLVkfNkknNWZnMclAO+cNkazCQ0P44n3XR40P7/uNEdKBk
-         02sV0YuHNethrfTCcFSKqa9FJjID7BqUVkjYVQDTamy56shUPjkl/cT56CeBWlB5o1e/
-         Hio4T7wQktHqgwFMxuMQcRS15coMJ5bKGLHcP0KEAqsZxJisiEwY/xmHGrjf+1Cknq9D
-         ERbuzxUV4ApKCx7WE77y95cSa45gdQ5JVbC0yvTli39UWwUf+z3+xapHZJGPHlXTeSPu
-         Bbrg7bxxqmKdqzsDpLt4QXmZDxvh5NC+XLacH8rDbp2MNIx6PmNHlo7BWcAcKDX931Y0
-         QXaQ==
-X-Gm-Message-State: AOAM533iprH7EdzuDUxM8QC4/IqTdLHat6eLsTJJANjz3DEo5JOTlW2+
-        nDNG+NSSQWHMVUDP22Qojr7Q9DKdzqMuvBjK3jxnSQ==
-X-Google-Smtp-Source: ABdhPJxxSN08j36y9Nsvv/qbdQgjo0d1IK1+kmolxk6AXhFtn4SjzokuR/8mLpb+7H1Msqpw1zPPrGlDxcrRZV9GXWw=
-X-Received: by 2002:a2e:954c:0:b0:253:d9bf:9f55 with SMTP id
- t12-20020a2e954c000000b00253d9bf9f55mr33323645ljh.300.1654004341321; Tue, 31
- May 2022 06:39:01 -0700 (PDT)
+        bh=btwuVJJduXqnSF+V3q9iWM5+3Zcv1LxijPuc1zWO+QY=;
+        b=kmmk+h4II/E5bE699LzkSzle/MFSMg7upEQAu3SZr9nD8qOvXE5xrSC7gbMKuzFbHE
+         PG6ydeIBOCV6g3V1dVzA9JBPPwqiTeEzqybvd5dae+CmTiIo4yCjE6RyioQyaAXqIo8I
+         61GO3pBR728+/XFXIckvvTjCgBuPbenb7vSCi5mGYjbg2xHBni4rAesz1e3jy23ZBkJk
+         9q80gNt7Ek/hGXUwBYR1vZV7qkLT81dvfIS+/URIu1UThLLf4fdqv8zPA2l4yyHvtyWN
+         euXwwWdd62V4NkcJ2RyKJC5vL2HqDme42yljENPfOUnrVcKBKO6K5rEjA0MrDApuPg2V
+         4UHQ==
+X-Gm-Message-State: AOAM5318dXHT/ijLh0KhIv1IJrTPFzyuLDMyzXazS5A9w9ZVz6sQzoK9
+        UhYBwYaYPZJME52vWJrsMBI1wz7OpAU0n5HsjpExGw==
+X-Google-Smtp-Source: ABdhPJyS7PTt0N0HtvrZ/AHpf3/+02IhL+tURlHL/v4I42sP5oUvgNqJquz4RBjGLlnajYVPp4XQjzbTvKusuE3JJq4=
+X-Received: by 2002:a05:6512:e93:b0:478:70ed:6dfb with SMTP id
+ bi19-20020a0565120e9300b0047870ed6dfbmr29507089lfb.358.1654004348038; Tue, 31
+ May 2022 06:39:08 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220504213251.264819-1-sebastian.reichel@collabora.com> <20220504213251.264819-10-sebastian.reichel@collabora.com>
-In-Reply-To: <20220504213251.264819-10-sebastian.reichel@collabora.com>
+References: <20220504213251.264819-1-sebastian.reichel@collabora.com> <20220504213251.264819-12-sebastian.reichel@collabora.com>
+In-Reply-To: <20220504213251.264819-12-sebastian.reichel@collabora.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 31 May 2022 15:38:24 +0200
-Message-ID: <CAPDyKFoRmpX5Pwmu370=tzg6ZAEPNm3LLAooXVLs35z94JsycQ@mail.gmail.com>
-Subject: Re: [PATCHv2 09/21] mmc: sdhci-of-dwcmshc: add reset call back for
- rockchip Socs
+Date:   Tue, 31 May 2022 15:38:31 +0200
+Message-ID: <CAPDyKFo5RRXZncZHHCs=yN11pvW8HakpOAp+2Qfc9QVWimJQug@mail.gmail.com>
+Subject: Re: [PATCHv2 11/21] mmc: sdhci-of-dwcmshc: add support for rk3588
 To:     Sebastian Reichel <sebastian.reichel@collabora.com>
 Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzk+dt@kernel.org>,
@@ -76,13 +75,11 @@ On Wed, 4 May 2022 at 23:33, Sebastian Reichel
 >
 > From: Yifeng Zhao <yifeng.zhao@rock-chips.com>
 >
-> The reset function build in the SDHCI will not reset the logic
-> circuit related to the tuning function, which may cause data
-> reading errors. Resetting the complete SDHCI controller through
-> the reset controller fixes the issue.
+> Add support for RK3588's DWCMSHC controller, which is used for
+> providing the rootfs on the RK3588 evaluation board.
 >
 > Signed-off-by: Yifeng Zhao <yifeng.zhao@rock-chips.com>
-> [rebase, use optional variant of reset getter]
+> [port from vendor BSP]
 > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 > Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 
@@ -93,74 +90,243 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 26 +++++++++++++++++++++++++-
->  1 file changed, 25 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 121 +++++++++++++++++++++++-----
+>  1 file changed, 103 insertions(+), 18 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index bac874ab0b33..3a1b5ba36405 100644
+> index f5fd88c7adef..4e904850973c 100644
 > --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
 > +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -15,6 +15,7 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/reset.h>
->  #include <linux/sizes.h>
+> @@ -31,6 +31,7 @@
+>  /* Offset inside the  vendor area 1 */
+>  #define DWCMSHC_HOST_CTRL3             0x8
+>  #define DWCMSHC_EMMC_CONTROL           0x2c
+> +#define DWCMSHC_CARD_IS_EMMC           BIT(0)
+>  #define DWCMSHC_ENHANCED_STROBE                BIT(8)
+>  #define DWCMSHC_EMMC_ATCTRL            0x40
 >
->  #include "sdhci-pltfm.h"
-> @@ -63,6 +64,7 @@
->  struct rk3568_priv {
+> @@ -39,7 +40,7 @@
+>  #define DWCMSHC_EMMC_DLL_RXCLK         0x804
+>  #define DWCMSHC_EMMC_DLL_TXCLK         0x808
+>  #define DWCMSHC_EMMC_DLL_STRBIN                0x80c
+> -#define DLL_STRBIN_TAPNUM_FROM_SW      BIT(24)
+> +#define DECMSHC_EMMC_DLL_CMDOUT                0x810
+>  #define DWCMSHC_EMMC_DLL_STATUS0       0x840
+>  #define DWCMSHC_EMMC_DLL_START         BIT(0)
+>  #define DWCMSHC_EMMC_DLL_LOCKED                BIT(8)
+> @@ -48,11 +49,21 @@
+>  #define DWCMSHC_EMMC_DLL_START_POINT   16
+>  #define DWCMSHC_EMMC_DLL_INC           8
+>  #define DWCMSHC_EMMC_DLL_DLYENA                BIT(27)
+> -#define DLL_TXCLK_TAPNUM_DEFAULT       0x8
+> -#define DLL_STRBIN_TAPNUM_DEFAULT      0x8
+> +#define DLL_TXCLK_TAPNUM_DEFAULT       0x10
+> +#define DLL_TXCLK_TAPNUM_90_DEGREES    0xA
+>  #define DLL_TXCLK_TAPNUM_FROM_SW       BIT(24)
+> +#define DLL_STRBIN_TAPNUM_DEFAULT      0x8
+> +#define DLL_STRBIN_TAPNUM_FROM_SW      BIT(24)
+> +#define DLL_STRBIN_DELAY_NUM_SEL       BIT(26)
+> +#define DLL_STRBIN_DELAY_NUM_OFFSET    16
+> +#define DLL_STRBIN_DELAY_NUM_DEFAULT   0x16
+>  #define DLL_RXCLK_NO_INVERTER          1
+>  #define DLL_RXCLK_INVERTER             0
+> +#define DLL_CMDOUT_TAPNUM_90_DEGREES   0x8
+> +#define DLL_CMDOUT_TAPNUM_FROM_SW      BIT(24)
+> +#define DLL_CMDOUT_SRC_CLK_NEG         BIT(28)
+> +#define DLL_CMDOUT_EN_SRC_CLK_NEG      BIT(29)
+> +
+>  #define DLL_LOCK_WO_TMOUT(x) \
+>         ((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
+>         (((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
+> @@ -61,10 +72,16 @@
+>  #define BOUNDARY_OK(addr, len) \
+>         ((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+>
+> +enum dwcmshc_rk_type {
+> +       DWCMSHC_RK3568,
+> +       DWCMSHC_RK3588,
+> +};
+> +
+>  struct rk35xx_priv {
 >         /* Rockchip specified optional clocks */
->         struct clk_bulk_data rockchip_clks[RK3568_MAX_CLKS];
-> +       struct reset_control *reset;
+>         struct clk_bulk_data rockchip_clks[RK35xx_MAX_CLKS];
+>         struct reset_control *reset;
+> +       enum dwcmshc_rk_type devtype;
 >         u8 txclk_tapnum;
 >  };
 >
-> @@ -255,6 +257,21 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
->         sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
+> @@ -133,7 +150,9 @@ static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
+>                                       unsigned int timing)
+>  {
+> -       u16 ctrl_2;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +       u16 ctrl, ctrl_2;
+>
+>         ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+>         /* Select Bus Speed Mode for host */
+> @@ -151,8 +170,15 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
+>         else if ((timing == MMC_TIMING_UHS_DDR50) ||
+>                  (timing == MMC_TIMING_MMC_DDR52))
+>                 ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+> -       else if (timing == MMC_TIMING_MMC_HS400)
+> +       else if (timing == MMC_TIMING_MMC_HS400) {
+> +               /* set CARD_IS_EMMC bit to enable Data Strobe for HS400 */
+> +               ctrl = sdhci_readw(host, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
+> +               ctrl |= DWCMSHC_CARD_IS_EMMC;
+> +               sdhci_writew(host, ctrl, priv->vendor_specific_area1 + DWCMSHC_EMMC_CONTROL);
+> +
+>                 ctrl_2 |= DWCMSHC_CTRL_HS400;
+> +       }
+> +
+>         sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
 >  }
 >
-> +static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct dwcmshc_priv *dwc_priv = sdhci_pltfm_priv(pltfm_host);
-> +       struct rk35xx_priv *priv = dwc_priv->priv;
+> @@ -185,17 +211,11 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>
+>         host->mmc->actual_clock = 0;
+>
+> -       /*
+> -        * DO NOT TOUCH THIS SETTING. RX clk inverter unit is enabled
+> -        * by default, but it shouldn't be enabled. We should anyway
+> -        * disable it before issuing any cmds.
+> -        */
+> -       extra = DWCMSHC_EMMC_DLL_DLYENA |
+> -               DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
+> -       sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
+> -
+> -       if (clock == 0)
+> +       if (clock == 0) {
+> +               /* Disable interface clock at initial state. */
+> +               sdhci_set_clock(host, clock);
+>                 return;
+> +       }
+>
+>         /* Rockchip platform only support 375KHz for identify mode */
+>         if (clock <= 400000)
+> @@ -213,9 +233,21 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>         extra &= ~BIT(0);
+>         sdhci_writel(host, extra, reg);
+>
+> -       if (clock <= 400000) {
+> -               /* Disable DLL to reset sample clock */
+> +       if (clock <= 52000000) {
+> +               /* Disable DLL and reset both of sample and drive clock */
+>                 sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_CTRL);
+> +               sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_RXCLK);
+> +               sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
+> +               sdhci_writel(host, 0, DECMSHC_EMMC_DLL_CMDOUT);
+> +               /*
+> +                * Before switching to hs400es mode, the driver will enable
+> +                * enhanced strobe first. PHY needs to configure the parameters
+> +                * of enhanced strobe first.
+> +                */
+> +               extra = DWCMSHC_EMMC_DLL_DLYENA |
+> +                       DLL_STRBIN_DELAY_NUM_SEL |
+> +                       DLL_STRBIN_DELAY_NUM_DEFAULT << DLL_STRBIN_DELAY_NUM_OFFSET;
+> +               sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
+>                 return;
+>         }
+>
+> @@ -224,6 +256,15 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>         udelay(1);
+>         sdhci_writel(host, 0x0, DWCMSHC_EMMC_DLL_CTRL);
+>
+> +       /*
+> +        * We shouldn't set DLL_RXCLK_NO_INVERTER for identify mode but
+> +        * we must set it in higher speed mode.
+> +        */
+> +       extra = DWCMSHC_EMMC_DLL_DLYENA;
+> +       if (priv->devtype == DWCMSHC_RK3568)
+> +               extra |= DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
+> +       sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
 > +
-> +       if (mask & SDHCI_RESET_ALL && priv->reset) {
-> +               reset_control_assert(priv->reset);
-> +               udelay(1);
-> +               reset_control_deassert(priv->reset);
+>         /* Init DLL settings */
+>         extra = 0x5 << DWCMSHC_EMMC_DLL_START_POINT |
+>                 0x2 << DWCMSHC_EMMC_DLL_INC |
+> @@ -246,8 +287,20 @@ static void dwcmshc_rk3568_set_clock(struct sdhci_host *host, unsigned int clock
+>             host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
+>                 txclk_tapnum = priv->txclk_tapnum;
+>
+> +       if ((priv->devtype == DWCMSHC_RK3588) && host->mmc->ios.timing == MMC_TIMING_MMC_HS400) {
+> +               txclk_tapnum = DLL_TXCLK_TAPNUM_90_DEGREES;
+> +
+> +               extra = DLL_CMDOUT_SRC_CLK_NEG |
+> +                       DLL_CMDOUT_EN_SRC_CLK_NEG |
+> +                       DWCMSHC_EMMC_DLL_DLYENA |
+> +                       DLL_CMDOUT_TAPNUM_90_DEGREES |
+> +                       DLL_CMDOUT_TAPNUM_FROM_SW;
+> +               sdhci_writel(host, extra, DECMSHC_EMMC_DLL_CMDOUT);
 > +       }
 > +
-> +       sdhci_reset(host, mask);
+>         extra = DWCMSHC_EMMC_DLL_DLYENA |
+>                 DLL_TXCLK_TAPNUM_FROM_SW |
+> +               DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL |
+>                 txclk_tapnum;
+>         sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_TXCLK);
+>
+> @@ -345,7 +398,25 @@ static int dwcmshc_rk35xx_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
+>         return 0;
+>  }
+>
+> +static void dwcmshc_rk35xx_postinit(struct sdhci_host *host, struct dwcmshc_priv *dwc_priv)
+> +{
+> +       /*
+> +        * Don't support highspeed bus mode with low clk speed as we
+> +        * cannot use DLL for this condition.
+> +        */
+> +       if (host->mmc->f_max <= 52000000) {
+> +               dev_info(mmc_dev(host->mmc), "Disabling HS200/HS400, frequency too low (%d)\n",
+> +                        host->mmc->f_max);
+> +               host->mmc->caps2 &= ~(MMC_CAP2_HS200 | MMC_CAP2_HS400);
+> +               host->mmc->caps &= ~(MMC_CAP_3_3V_DDR | MMC_CAP_1_8V_DDR);
+> +       }
 > +}
 > +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->         .set_clock              = sdhci_set_clock,
->         .set_bus_width          = sdhci_set_bus_width,
-> @@ -269,7 +286,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk3568_ops = {
->         .set_bus_width          = sdhci_set_bus_width,
->         .set_uhs_signaling      = dwcmshc_set_uhs_signaling,
->         .get_max_clock          = sdhci_pltfm_clk_get_max_clock,
-> -       .reset                  = sdhci_reset,
-> +       .reset                  = rk35xx_sdhci_reset,
->         .adma_write_desc        = dwcmshc_adma_write_desc,
->  };
+>  static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+> +       {
+> +               .compatible = "rockchip,rk3588-dwcmshc",
+> +               .data = &sdhci_dwcmshc_rk35xx_pdata,
+> +       },
+>         {
+>                 .compatible = "rockchip,rk3568-dwcmshc",
+>                 .data = &sdhci_dwcmshc_rk35xx_pdata,
+> @@ -433,6 +504,11 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>                         goto err_clk;
+>                 }
 >
-> @@ -292,6 +309,13 @@ static int dwcmshc_rk3568_init(struct sdhci_host *host, struct dwcmshc_priv *dwc
->         int err;
->         struct rk3568_priv *priv = dwc_priv->priv;
->
-> +       priv->reset = devm_reset_control_array_get_optional_exclusive(mmc_dev(host->mmc));
-> +       if (IS_ERR(priv->reset)) {
-> +               err = PTR_ERR(priv->reset);
-> +               dev_err(mmc_dev(host->mmc), "failed to get reset control %d\n", err);
-> +               return err;
-> +       }
+> +               if (of_device_is_compatible(pdev->dev.of_node, "rockchip,rk3588-dwcmshc"))
+> +                       rk_priv->devtype = DWCMSHC_RK3588;
+> +               else
+> +                       rk_priv->devtype = DWCMSHC_RK3568;
 > +
->         priv->rockchip_clks[0].id = "axi";
->         priv->rockchip_clks[1].id = "block";
->         priv->rockchip_clks[2].id = "timer";
+>                 priv->priv = rk_priv;
+>
+>                 err = dwcmshc_rk35xx_init(host, priv);
+> @@ -442,12 +518,21 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>
+>         host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>
+> -       err = sdhci_add_host(host);
+> +       err = sdhci_setup_host(host);
+>         if (err)
+>                 goto err_clk;
+>
+> +       if (rk_priv)
+> +               dwcmshc_rk35xx_postinit(host, priv);
+> +
+> +       err = __sdhci_add_host(host);
+> +       if (err)
+> +               goto err_setup_host;
+> +
+>         return 0;
+>
+> +err_setup_host:
+> +       sdhci_cleanup_host(host);
+>  err_clk:
+>         clk_disable_unprepare(pltfm_host->clk);
+>         clk_disable_unprepare(priv->bus_clk);
 > --
 > 2.35.1
 >
