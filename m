@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88EA7C43219
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 May 2022 13:50:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 74921C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 May 2022 13:51:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344889AbiEaNu4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 May 2022 09:50:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42728 "EHLO
+        id S240521AbiEaNvA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 May 2022 09:51:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344867AbiEaNuo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2022 09:50:44 -0400
-Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC0F65AA79
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:50:40 -0700 (PDT)
-Received: by mail-wr1-x42d.google.com with SMTP id q7so7831344wrg.5
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:50:40 -0700 (PDT)
+        with ESMTP id S1344868AbiEaNun (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2022 09:50:43 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8528855B8
+        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:50:38 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id x17so9726134wrg.6
+        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2022 06:50:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=cScg/ppMZgoA29VxGDOmoca/GEpRNiY6uz4ypL3t+ho=;
-        b=zwHfoJRh4qEpqnVW4tO8Ww9mFoI0xkeYeX75NLKUzehMYnvddYiXCNrP2wQktLHmL4
-         xUHKKb7OGLzcssDx/jyB4RczL28TaZiSTc9JCpmzDJYjcwk/WdM34S2cFCTARqFkGFl1
-         LdctYQzJ9woSuCXBJJsxCZRZHlDhQYnY+IAfX3K1OOxNV0l0E0RleUd2ISc2Rgk1qo4K
-         fJhqz0GMYoawCe4viZIZ0erbtsOEipTnqJ8vO42ycO5gH009W5gktb3F6y4C7C3zfS+j
-         5f6GW9K2Xo/l6wVaOyzBpfe3OMOKhDMwN9sL4RSAhrtp1Bm0pcpeYrF7Ky+FohTwGoxI
-         YHKA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ks9vTtzXL1NzJuLhvcv/lBf9sH/I8oroEcUXJQecJiY=;
+        b=xtZHSA3K85YeP1R8TqJTezh1l7AboO67QnJbxmUxYsSKR3b9HMFsTp1QD4TVZvKYD1
+         HykwJkz0IW4fwjPH1Z0l9xH3Oif1Qyz4EObPsiwZXnAXo/kCZCKI8eI5xsuJ7HgXtaXN
+         igvkGmpchkyuuMO2tdAR159F7tqSL4KCQk76eOzZ0gnvace+L6L/D7RGtYizyiAxNH/H
+         U1OOXHiLwvj0PnjQ9PmyWuR1utFiONwi7NGx9h2FLtpNKsKkOyd7zUg6Z7fPPuvzo2+J
+         OzV184qkC3Q1grDw1sZEiE1et3kV/ow2A5Uy2HR/6AQuE2OaglwYGrTIwCVgkLMJpI+J
+         hYNQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=cScg/ppMZgoA29VxGDOmoca/GEpRNiY6uz4ypL3t+ho=;
-        b=l4/A0UQ9zOlJkqJ1mP0JdYivmd6HtcSAvqkfYe2xOTRDWlg/ojxFNWR1IcmeYgfgjP
-         RVyukf6wBGpghMPeVtfN4wTi9e5dbq1To+EuB50kTLe/Cnt5f65ym//tO4q1kY7LDlAa
-         MnRGziVhZwhehKaSK7g1Ef8GxaaJPOvuFfFZoFW4tSNr34/5Uq40HLLhI1ZcmzgzeJ9A
-         J8/wCkRinA166K3VApWnvTBswC/5nZlhSoj/UmOcATgzInbsv9YRy3L+boejGcHdU5uF
-         Yy7zWIsnBg2IEd4zpwESn8fupkWM5e0Yagc56IJDuWdonIirg+0gEUh9v5qbGoWYJt46
-         AZ/A==
-X-Gm-Message-State: AOAM530gdY7K96kchyYZzNh5q09HW7Yu0DhiNqWB/klYNggHSKSkJct9
-        gXJmqWySmou+q9fx7FtUbbCezg==
-X-Google-Smtp-Source: ABdhPJyHAelw16D3P0Yimp6zHFw2pjrB1y1+t5Sxv+QQxbBuBodm5ZmZ3Iw3GAh8m1iPVVk6MgPgrA==
-X-Received: by 2002:adf:d1ee:0:b0:210:d63:6570 with SMTP id g14-20020adfd1ee000000b002100d636570mr20704871wrd.673.1654005039097;
-        Tue, 31 May 2022 06:50:39 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ks9vTtzXL1NzJuLhvcv/lBf9sH/I8oroEcUXJQecJiY=;
+        b=Uv8duipnCintwPLh92ra8ElLZSML7kezbmZJuurlJ0NFgm+7sHVXK1y3r0fyegceRg
+         5kCD7pR9ZP/ISS+Dm8D7GyVzeWoZ03NK+necRwdA7GkVKMwiukPAa4QvH11tpxTmAs0L
+         HAbu14bpD5hHt5StJiut8sk4g0Pr6F1ufQD7cL8pJl9V0lFHNONZEItbqdiTAAbWeUa0
+         b4KN1qQM5A/R7o78QfBYOO1f3llfyzkqKC9QKt+oKtGCdH7Q1PfoAgDnpa+6dDA+XJ4R
+         vATlevBa6+L7IKUprmj6V/4ibY2sONDC74+6mkN2Z+oaW++Un4DwDEG8w1avMxbrRl2H
+         hl0A==
+X-Gm-Message-State: AOAM530ewb49m0mMaRaffdAqQv8SbATxGyszqKlQlw5JpHOw/G+hbbUn
+        bb3tVm3ps8x2O3EXpeMInYfKxA==
+X-Google-Smtp-Source: ABdhPJzh0ABvRvzeW4VNDfDT+jgXlefhQRDjukiBBkCf5v7KqylLxZRg6Qya21tyLqyBuT1Kzn3OQA==
+X-Received: by 2002:a5d:6f1d:0:b0:20f:ff40:263f with SMTP id ay29-20020a5d6f1d000000b0020fff40263fmr25172992wrb.626.1654005037132;
+        Tue, 31 May 2022 06:50:37 -0700 (PDT)
 Received: from localhost.localdomain ([88.160.162.107])
-        by smtp.gmail.com with ESMTPSA id l11-20020a05600c1d0b00b00394351e35edsm2404806wms.26.2022.05.31.06.50.37
+        by smtp.gmail.com with ESMTPSA id l11-20020a05600c1d0b00b00394351e35edsm2404806wms.26.2022.05.31.06.50.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 31 May 2022 06:50:38 -0700 (PDT)
+        Tue, 31 May 2022 06:50:36 -0700 (PDT)
 From:   Fabien Parent <fparent@baylibre.com>
 To:     robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
         vkoul@kernel.org, qii.wang@mediatek.com, matthias.bgg@gmail.com,
@@ -61,43 +61,77 @@ Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org,
         linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
         linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        Fabien Parent <fparent@baylibre.com>,
-        Rob Herring <robh@kernel.org>
-Subject: [PATCH 01/17] dt-bindings: i2c: i2c-mt65xx: add binding for MT8365 SoC
-Date:   Tue, 31 May 2022 15:50:10 +0200
-Message-Id: <20220531135026.238475-2-fparent@baylibre.com>
+        Fabien Parent <fparent@baylibre.com>
+Subject: [PATCH 00/17] Add support for MT8365 EVK board
+Date:   Tue, 31 May 2022 15:50:09 +0200
+Message-Id: <20220531135026.238475-1-fparent@baylibre.com>
 X-Mailer: git-send-email 2.36.1
-In-Reply-To: <20220531135026.238475-1-fparent@baylibre.com>
-References: <20220531135026.238475-1-fparent@baylibre.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add binding documentation for the MT8365 I2C controllers.
+This patch series adds support for the MT8365 EVK board.
 
-Signed-off-by: Fabien Parent <fparent@baylibre.com>
-Acked-by: Rob Herring <robh@kernel.org>
----
- Documentation/devicetree/bindings/i2c/i2c-mt65xx.yaml | 4 ++++
- 1 file changed, 4 insertions(+)
+This series has dependencies on the following series:
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646256
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646091
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646083
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646081
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646076
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646068
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646020
+https://patchwork.kernel.org/project/linux-mediatek/list/?series=646052
+https://lore.kernel.org/r/20220504091923.2219-2-rex-bc.chen@mediatek.com 
+https://lore.kernel.org/r/20220512062622.31484-2-chunfeng.yun@mediatek.com 
+https://lore.kernel.org/r/20220512062622.31484-1-chunfeng.yun@mediatek.com
+https://lore.kernel.org/r/20220524115019.97246-1-angelogioacchino.delregno@collabora.com
+https://lore.kernel.org/all/20220127015857.9868-1-biao.huang@mediatek.com/
 
-diff --git a/Documentation/devicetree/bindings/i2c/i2c-mt65xx.yaml b/Documentation/devicetree/bindings/i2c/i2c-mt65xx.yaml
-index 16a1a3118204..a6fe0d8b0cbe 100644
---- a/Documentation/devicetree/bindings/i2c/i2c-mt65xx.yaml
-+++ b/Documentation/devicetree/bindings/i2c/i2c-mt65xx.yaml
-@@ -43,6 +43,10 @@ properties:
-           - enum:
-               - mediatek,mt8195-i2c
-           - const: mediatek,mt8192-i2c
-+      - items:
-+          - enum:
-+              - mediatek,mt8365-i2c
-+          - const: mediatek,mt8168-i2c
- 
-   reg:
-     items:
+Fabien Parent (17):
+  dt-bindings: i2c: i2c-mt65xx: add binding for MT8365 SoC
+  dt-bindings: memory: add mt8365 SoC binding documentation
+  dt-bindings: mmc: mtk-sd: add bindings for MT8365 SoC
+  dt-bindings: arm: mediatek: Add binding for mt8365-evk board
+  dt-bindings: dma: mediatek,uart-dma: add MT8365 bindings
+  dt-bindings: iio: adc: mediatek: add MT8365 SoC bindings
+  dt-bindings: nvmem: mediatek,efuse: add MT8365 bindings
+  dt-bindings: watchdog: mtk-wdt: Add MT8365 SoC bindings
+  dt-bindings: spi: mt65xx: add MT8365 SoC bindings
+  dt-bindings: serial: mediatek: add MT8365 bindings
+  dt-bindings: phy: mediatek,dsi-phy: Add MT8365 SoC bindings
+  dt-bindings: phy: mediatek,tphy: add MT8365 SoC bindings
+  dt-bindings: usb: mediatek,mtu3: add MT8365 SoC bindings
+  dt-bindings: usb: mediatek,mtk-xhci: add MT8365 SoC bindings
+  arm64: dts: mediatek: add mt6357 device-tree
+  arm64: dts: mediatek: add mt8365 device-tree
+  arm64: dts: mediatek: add mt8365-evk board device-tree
+
+ .../devicetree/bindings/arm/mediatek.yaml     |    4 +
+ .../bindings/dma/mediatek,uart-dma.yaml       |    1 +
+ .../devicetree/bindings/i2c/i2c-mt65xx.yaml   |    4 +
+ .../iio/adc/mediatek,mt2701-auxadc.yaml       |    1 +
+ .../mediatek,smi-common.yaml                  |    6 +
+ .../memory-controllers/mediatek,smi-larb.yaml |    6 +
+ .../devicetree/bindings/mmc/mtk-sd.yaml       |    3 +
+ .../bindings/nvmem/mediatek,efuse.yaml        |    1 +
+ .../bindings/phy/mediatek,dsi-phy.yaml        |    4 +
+ .../bindings/phy/mediatek,tphy.yaml           |    1 +
+ .../bindings/serial/mediatek,uart.yaml        |    1 +
+ .../bindings/spi/mediatek,spi-mt65xx.yaml     |    1 +
+ .../bindings/usb/mediatek,mtk-xhci.yaml       |    1 +
+ .../bindings/usb/mediatek,mtu3.yaml           |    1 +
+ .../devicetree/bindings/watchdog/mtk-wdt.txt  |    1 +
+ arch/arm64/boot/dts/mediatek/Makefile         |    1 +
+ arch/arm64/boot/dts/mediatek/mt6357.dtsi      |  272 +++++
+ arch/arm64/boot/dts/mediatek/mt8365-evk.dts   |  578 +++++++++
+ arch/arm64/boot/dts/mediatek/mt8365.dtsi      | 1047 +++++++++++++++++
+ 19 files changed, 1934 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/mediatek/mt6357.dtsi
+ create mode 100644 arch/arm64/boot/dts/mediatek/mt8365-evk.dts
+ create mode 100644 arch/arm64/boot/dts/mediatek/mt8365.dtsi
+
 -- 
 2.36.1
 
