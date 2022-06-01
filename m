@@ -2,104 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B2E8C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:46:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8948C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:46:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352977AbiFAMqt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 08:46:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59282 "EHLO
+        id S1353109AbiFAMq5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 08:46:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353038AbiFAMqr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:46:47 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EADDE5FFB
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:46:45 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id a2so2566600lfc.2
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:46:45 -0700 (PDT)
+        with ESMTP id S1344046AbiFAMqv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:46:51 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F5DD6549
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:46:50 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id i10so2611500lfj.0
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:46:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=dt3pR+EuZpEYioOZuqVOF4YuDMykJMYYhRifRhjvIjY=;
-        b=jHYYyLrfXLmrab7gcaYcnAO0G1V1S5zrZq0OomPtG9+JrTQ/6mTinFQVc6soV+Yj1e
-         08LjbTqSlGw4DKQ3601XfC3KIw5PhF53HtfFg6YX2LhWTT1t+oUv8FOyRPhe8IYS0Cwj
-         h2UZdiQTzIWjbR8RuhRHAlkOwGqyROUWTN/ZNb1S8UTplkBxX2RBqemn5X7ymVcnRkhX
-         0jTUgdungncKCR/h9+0dDdAaybh7SfVRGMlXSPY29VHOP1zQ01SboF8ix+HmcrOCKA6I
-         t5+ioTNjME97jrXtV6HxGoveVcsL1vPktbV9y94IX4WdFT8VBtPl8IkdMLLbvEgh5pHY
-         A5+w==
+        bh=ypan38TB2QoAzYWO+fMPZfJPmZAF9oC38F8TiawwsKI=;
+        b=QKLl9jqzOPmCnoTtwZwwMFVM597CPkRIzsC7zl/r8egWnTpbQxRvlGisNM+FCgz6zq
+         SzgGWfUjzldk9oesTJJ3pTNq2j0gQyWLBsTGI7TZsYGyzpEJO0skbzN8wwUT+JBhexmD
+         QRHtDOHBCPRrU4J1Z7EQfEZFVmbIrGWPsvlqdv1bV2JnALQp4eu8vjDC7sdZBdvsuZx/
+         Xqb1C1C7ULHIWYxfSuee1JQm+EMyl9Tg7gKE5IyXbcTgrVvTdj5a+6RPMNXcxsJRvU9j
+         toEZm6RcHXYkeIEMDDh9JcsViH4cOfp337Zy731WcU6doRnwxz7AvaAtyGL736ULW/R3
+         EMAw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=dt3pR+EuZpEYioOZuqVOF4YuDMykJMYYhRifRhjvIjY=;
-        b=Oj9blTvRBOQyQad8A9FS2283kocuEkqLZABkBq4m09DJFCkX9DmgFwOf7sKEqLvl+i
-         oAep88rgNKIcOWH+ImEv+MMS0Wo2vJN1j+iwqtNN2SdVn2tMv9DOuSS20z/wDU5NXWBe
-         bsQHbyvPi251RlMylOdt5n/aVQCrShLgauPbGYXd0TtNDnL6taiBFXY+4UwsPQ91X5sR
-         TqSfd/3+U/z88hzb/63TR9bG0d3WWoFwopql6sVEUyAYi2C64KzyLqgS/lDpHJuaNrv4
-         Izf1bDnlekdWQW5LzJuRgxAuZwRoqvte2YrSpEUVddQT2U2oo0cAgMZV8jBvecMA0VZW
-         0Asw==
-X-Gm-Message-State: AOAM533YjID/xo7hTRAVukqt4KuMrqSCaKtjDIiAtu0GWeBDnyjCJOhA
-        SBwTWfTwz/JsvENI3SD4HyaxRpqflrF2lGnmpQtfkA==
-X-Google-Smtp-Source: ABdhPJwWID4gw3LiSMK7IbU++l/6doq6lZF+9ZfhbHlGNFmjxMEcwDnhR/Hgu0Zbry9/34wZlP+UppzC1nTuZHVIEjk=
-X-Received: by 2002:a05:6512:70b:b0:477:a832:7d07 with SMTP id
- b11-20020a056512070b00b00477a8327d07mr46909371lfs.71.1654087604181; Wed, 01
- Jun 2022 05:46:44 -0700 (PDT)
+        bh=ypan38TB2QoAzYWO+fMPZfJPmZAF9oC38F8TiawwsKI=;
+        b=N2Yv3bNIPfRlvn2AXinv/Sxsf1Y4d2eKhp8qob2pa/6q7uk1gnRe3FFO4jJGgVgnQl
+         2fYOhcfx3d2pjCU8X6ac/2sOfNqmV8fYYu6urEmKL8DF7jfWLw3MOUaTaXrHHi5NQNYP
+         oHTmB4GzGlVoLykOzLZOJhSNPFGSi9xCWrELyK7w7b5KnuBjzVqHcdikkXz8s+4HIvaU
+         rgc4nlR42x6/ARyie42flduVqa0nxopIu85Yo/lMRzFiRv1LgpKv7zqBYqnCtME7LZD6
+         f8Je6Nru6nHuglnpKVEj+p+elc+sx3j8HtyFufB9mDPivoDp9HNYf7RIrjVXRt3vcqFq
+         ckIQ==
+X-Gm-Message-State: AOAM530sRYCgvq/suaMEo5YPK1cp4AvEs+5qfmIIHFTVEl2pHeyu2c0n
+        nIhsXvkJNGmYGDZjeXdE1SJWFdwUVZW5Te0nKgovJg==
+X-Google-Smtp-Source: ABdhPJzsrIu9md7U7n1zgj7u1cLuExn4AAVdSQM0L62PSHkBkuz5iBlGUZBgl32ya7QNulKtLODAF2LpeKSeB6JV/Cs=
+X-Received: by 2002:a05:6512:e93:b0:478:70ed:6dfb with SMTP id
+ bi19-20020a0565120e9300b0047870ed6dfbmr33055330lfb.358.1654087608721; Wed, 01
+ Jun 2022 05:46:48 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220520183108.47358-1-kdasu.kdev@gmail.com>
-In-Reply-To: <20220520183108.47358-1-kdasu.kdev@gmail.com>
+References: <20220523144255.10310-1-linmq006@gmail.com>
+In-Reply-To: <20220523144255.10310-1-linmq006@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Jun 2022 14:46:07 +0200
-Message-ID: <CAPDyKFqzEbijYDGd7vWrWu66m2L-yVnqsDRny7N0c=49R44mLg@mail.gmail.com>
-Subject: Re: [PATCH v3 0/2] mmc: sdhci-brcmstb: Add support for optional
- sdio_freq clock
-To:     Kamal Dasu <kdasu.kdev@gmail.com>
-Cc:     robh+dt@kernel.org, krzk+dt@kernel.org, alcooperx@gmail.com,
-        f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Date:   Wed, 1 Jun 2022 14:46:12 +0200
+Message-ID: <CAPDyKFrtNLRT8prMuVXx9RBVfVuj_yj=KTj9nHaUg0t6euxUDg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: Fix refcount leak in esdhc_signal_voltage_switch
+To:     Miaoqian Lin <linmq006@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        yangbo lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 20 May 2022 at 20:31, Kamal Dasu <kdasu.kdev@gmail.com> wrote:
+On Mon, 23 May 2022 at 16:43, Miaoqian Lin <linmq006@gmail.com> wrote:
 >
-> v3 changes:
-> - PATCH 1/2 v3
->  - Based on review comments reverted to using the 'clock-frequency' field
->    in sdhci-brcmstb controller node for the sdio_freq clock
-> - PATCH 2/2 v3
->   - use devm_clk_get_optional() to get sdio_freq clock
->   - look for clock-frequency value if set in the sdhci-brcmstb dt node
->   - Added pmops to unprepare, prepare sdio_freq clock on suspend/resume
->     in addition to the sdhci_pltfm_suspend/resume()
+> of_find_matching_node() returns a node pointer with refcount
+> incremented, we should use of_node_put() on it when not need anymore.
+> Add missing of_node_put() to avoid refcount leak.
+> of_node_put() checks null pointer.
 >
-> v2 changes :
-> - Added Reviewed-by tag to PATCH v2 1/2
-> - In PATCH v2 2/2 Used host->mmc->f_max instead of parsing the device
->   tree again, /s/clock-frequency/max-frequency in commit message
->
-> v1 Changes :
-> Sending the remaining 2 patches separately after implementing review comments
-> for the patches 3/4 and 4/4 as part of the following:
-> "mmc: sdhci-brcmstb: host controller clock enhancements"
-> https://lore.kernel.org/linux-arm-kernel/96fd3054-17b1-db42-9a44-a60485243807@linaro.org/t/
-> changes are rebased over
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git refs/heads/next
->
-> tested brcm,sdhci-brcmstb.yaml and driver with and without sdio_freq clock.
->
->
-> Kamal Dasu (2):
->   dt-bindings: mmc: Add Broadcom optional sdio_freq clock
->   mmc: sdhci-brcmstb: Add ability to increase max clock rate for 72116b0
->
->  .../bindings/mmc/brcm,sdhci-brcmstb.yaml      | 32 +++++++--
->  drivers/mmc/host/sdhci-brcmstb.c              | 69 ++++++++++++++++++-
->  2 files changed, 94 insertions(+), 7 deletions(-)
->
+> Fixes: ea35645a3c66 ("mmc: sdhci-of-esdhc: add support for signal voltage switch")
+> Signed-off-by: Miaoqian Lin <linmq006@gmail.com>
 
 Queued for v5.20 on the devel branch, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index d9dc41143bb3..8b3d8119f388 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -904,6 +904,7 @@ static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
+>                 scfg_node = of_find_matching_node(NULL, scfg_device_ids);
+>                 if (scfg_node)
+>                         scfg_base = of_iomap(scfg_node, 0);
+> +               of_node_put(scfg_node);
+>                 if (scfg_base) {
+>                         sdhciovselcr = SDHCIOVSELCR_TGLEN |
+>                                        SDHCIOVSELCR_VSELVAL;
+> --
+> 2.25.1
+>
