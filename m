@@ -2,165 +2,164 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A75EEC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:47:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 543B0C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 13:01:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1352242AbiFAMrd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 08:47:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35014 "EHLO
+        id S1351729AbiFANBY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 09:01:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353085AbiFAMrb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:47:31 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5210E1056C
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:47:29 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id j10so2528878lfe.12
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:47:29 -0700 (PDT)
+        with ESMTP id S231140AbiFANBY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 09:01:24 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D5811A27
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 06:01:22 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id t13so1912088ljd.6
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 06:01:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=4li32PBdxnIv+jFKvhCljFF/bYWyWatcYvkg3TZww1s=;
-        b=ywX1q/Sp7hV1p86goYqniFRV4cZlbD1R9yXvl2mfzeiuSR3efubHRWaiRdhX8Esqed
-         mJ3yGD0RUVPPt1f/R+ouSvoTxOqAtRGGgJUYbilgONCDkx8DOopTBoVTnK1YDUsrdubc
-         35isYXnsGcsXSl0mGJFgkq3r3lG7riqq0eSxluKLDD9BSI3Llw6eJre/ph0RCqD4obLC
-         i9YXHOcRy9Xt2c5IM1Gz2xlBGmspzRO9AVWXDux0w0p9TMNZeVhk0CUU/AV1ol0ip3mo
-         xFYcraKqvM6vRkJcCRd/ukGbYMiT6azPbdbKx0f8zsY59oJZGDh+lFQouG4FfWUAYOmP
-         Jukw==
+        bh=7MnvqxACh+uZ2Kj2f4iFs6Q+9J5vjuYCtDh3mHYXw08=;
+        b=bdeMP6ryAZKyMpDzSHaYvRDBep8FwNLjxVniHcllSALFjBtfkYlbFxEvd4K+qMV6AH
+         NNSwwD5xd0mYTNt2att/Gw3xGRmO/7/nKciV/oNdvq95f0Oan0v6cAmLz1lNTO4lVpZW
+         m7qWHPhPmEn38vEoKx8XEzEaEVsdGtg9vacAciXoQ8zk5U+qy8Wjj3nojH7vPG4HPVzC
+         wqbDqZc/jr4hcc9GWKOMZDucLUaOLgWvEiJwr+Qv6PAgvIHRnqm0GGgfYKHiI3Qbo0ZK
+         hkwmciujrTa2nRN+XH8L1lb+4prL4FDEY2Ai+ZkgpK4YjXFVNt6HG3MBHG3MxhPJ/QJY
+         bzZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=4li32PBdxnIv+jFKvhCljFF/bYWyWatcYvkg3TZww1s=;
-        b=RHexGXfb3gD2vLNokiEAgvXqjznw0kvFVFyc1PvlIrWiEWX/mFaj8OoDAQVtyf8SsJ
-         4UPNjTnCzzZbmw2I4YwePB/v/TivGCN4bL4sBVJ2W6CUiF7lEcQ7A4s5+9EZFdMVHG/P
-         8RGyj+hxgd1tr++AhJ8HHaqrJ80vuj247kRTGkYiVG+cXiVbJf/WPeM0nh7QHK1fVO9P
-         YdXzFUilYvLvKfOsn5smvmYFezY9mBih0nQn9wnsrYCxDab5gccyuZsGxcwphb1OqlMw
-         Mt4ui/BzlCdD2ZoWt9cRaPQSb67+Eo2v0PbrckMLFtn4AXPO/ygvsmwi2GXzJu+6ocD0
-         onDw==
-X-Gm-Message-State: AOAM533HNDRdHTb7+S0r5yN9NuSICoyBy8OQrbQgp2IRbs1YPKn2EGHz
-        nnoMflsdwJ1ml+Xi9oopgta2Kq/DqQE7M7kDDWKGbA==
-X-Google-Smtp-Source: ABdhPJw8rLYnetAKH4EyHC77hyUUHRF/sLZFy9a2sig6ks5ygw10wco9yqviC0600wPiouO4wz2Lk4I3fuUHalzgJn0=
-X-Received: by 2002:a05:6512:308b:b0:478:7ab5:4acd with SMTP id
- z11-20020a056512308b00b004787ab54acdmr34023519lfd.167.1654087647633; Wed, 01
- Jun 2022 05:47:27 -0700 (PDT)
+        bh=7MnvqxACh+uZ2Kj2f4iFs6Q+9J5vjuYCtDh3mHYXw08=;
+        b=5FV/T7b3H7MTHVnS4DePSulM3QyLKp4bSM8WR4sM2rEx58vFcC9GyEDl1Y8kUG2oET
+         vzKYK6tqVdKcnz+7byQMxacCO6XcIzNthwEUJD8C7k4WAtwnzN+ISFfUFAuALkZE5D5D
+         s3CI2MOQiJPUyREfTOZYIHARoDiUNcHtOR9wlRcwF0na98hdBQPCL0PgQ5qe0tAl3Hfk
+         TXWpQVIlK5K/63vyLlp2T4gf3OQOTseBApAUB6yRUitrH7IAFqk9tYM/f0vjkKw5fPDN
+         i1g4aSVmymv1aRYtCcgPtiTL3jDFCfmnjU45Sz3KNdddNLKeMwBYm1zpVKOxK7C0YVJT
+         yHNQ==
+X-Gm-Message-State: AOAM533EeLSRimsUsm5TlDabkPdwauSx3rvEJ0QoAnYa/Drp9+tEyd6N
+        svAnBKY/db7GyAZAmzSrNeN56NxdJEncBMKzdonbiQ==
+X-Google-Smtp-Source: ABdhPJwPTvKmzMRmYKBbsHfY6s3ek7XVyozQ93IDPGDfcNlYzRUjMC+ml5u/zRei/ZCdpl+uDY5O8E8BJTLAA3EvYqM=
+X-Received: by 2002:a2e:3908:0:b0:253:c4c5:e82b with SMTP id
+ g8-20020a2e3908000000b00253c4c5e82bmr37277048lja.367.1654088480897; Wed, 01
+ Jun 2022 06:01:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <1653674036-21829-1-git-send-email-quic_c_sbhanu@quicinc.com>
-In-Reply-To: <1653674036-21829-1-git-send-email-quic_c_sbhanu@quicinc.com>
+References: <20220530084702.64943-1-jasonlai.genesyslogic@gmail.com>
+In-Reply-To: <20220530084702.64943-1-jasonlai.genesyslogic@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Jun 2022 14:46:51 +0200
-Message-ID: <CAPDyKFqqSdCGV-SGcbEFCA5rXaqUc0btYd9Tig43NouNuHUG5Q@mail.gmail.com>
-Subject: Re: [PATCH V8 0/5] mmc: add error statistics for eMMC and SD card
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
-        adrian.hunter@intel.com
-Cc:     wsa+renesas@sang-engineering.com, shawn.lin@rock-chips.com,
-        yoshihiro.shimoda.uh@renesas.com, digetx@gmail.com,
-        quic_asutoshd@quicinc.com, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sayalil@quicinc.com
+Date:   Wed, 1 Jun 2022 15:00:44 +0200
+Message-ID: <CAPDyKFpynSNVMd1iRZyk3KY6sVudcXC1rbbzHSXTqa2YQQjinw@mail.gmail.com>
+Subject: Re: [V2] mmc: sdhci-pci-gli: Improve Random 4K Read Performance of GL9763E
+To:     Jason Lai <jasonlai.genesyslogic@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        SeanHY.chen@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
+        victor.shih@genesyslogic.com.tw,
+        Renius Chen <reniuschengl@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 27 May 2022 at 19:54, Shaik Sajida Bhanu
-<quic_c_sbhanu@quicinc.com> wrote:
+On Mon, 30 May 2022 at 10:47, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
 >
-> Changes since V7:
->         - Patch set V6 rebased on Ulf's(Ulf Hansson) master branch instead
->           of Ulf's (Ulf Hansson) next branch by mistake. So rebased patch
->           set on Ulf's next branch now as suggested by Adrain Hunter.
+> This patch is based on patch [1] and adopt Adrian's comment.
 
-Thanks to both of you for moving this forward to become an easy
-maintainable piece of code.
+Please squash $subject patch into [1], rather than making a new patch on top.
 
-Queued for v5.20 on the devel branch, thanks!
+>
+> Due to flaws in hardware design, GL9763E takes long time to exit from L1
+> state. The I/O performance will suffer severe impact if it often enter
+> and exit L1 state.
+>
+> Unfortunately, entering and exiting L1 state is signal handshake in
+> physical layer, software knows nothiong about it. The only way to stop
+> entering L1 state is to disable hardware LPM negotiation on GL9763E.
+>
+> To improve read performance and take battery life into account, we reject
+> L1 negotiation while executing MMC_READ_MULTIPLE_BLOCK command and enable
+> L1 negotiation again when receiving non-MMC_READ_MULTIPLE_BLOCK command.
+
+I am not sure how the HW decides to enter L1. That said, I wonder if
+it would be a better option to turn on/off the LPM from the
+->runtime_suspend|resume() callbacks instead?
 
 Kind regards
 Uffe
 
-
 >
-> Changes since V6:
->         - Rebased on Ulf's(Ulf Hansson) next branch as suggested by
->           Adrain Hunter.
->         - Replaced debugfs_create_file() with debugfs_create_file_unsafe()
->           as suggested by Adrain Hunter.
->         - "[V6,5/5] mmc: cqhci: Capture eMMC and SD card errors" not
->           included in this Patch series as we don't have cqhci changes
->           on Ulf's(Ulf Hansson)next branch.
+> [1] https://patchwork.kernel.org/project/linux-mmc/list/?series=645165
 >
-> Changes since V5:
->         - Considered all error stats enums to set error state.
->         - Added missed tuning error related code changes which was
->           missed in patch set V5 as Adrain Hunter pointed.
->         - Replaced DEFINE_SIMPLE_ATTRIBUTE with DEFINE_DEBUGFS_ATTRIBUTE
->           as suggested by Adrain Hunter.
+> Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+> Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> ---
+>  drivers/mmc/host/sdhci-pci-gli.c | 31 ++++++++++++++++++++-----------
+>  1 file changed, 20 insertions(+), 11 deletions(-)
 >
-> Changes since V4:
->         - Defined new macro to increment err_stats members when error occured
->           as suggested by Adrain Hunter.
->         - Called err_stats members increment function after printing the error
->           as suggested by Adrain Hunter.
->         - Considered INDEX and END_BIT errors same as CRC errors as suggested
->           by Adrain Hunter.
->         - Removed Null check for host in debug fs functions and Reordered
->           err_stats declarationas suggested by Adrain Hunter.
->         - Removed err_state variable stuff and updated err_state debug fs entry
->           based on the err_stats members state as suggested by Adrain Hunter.
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index 86200b73c0b0..13c09202da9c 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -850,24 +850,29 @@ static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool
+>         pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+>  }
 >
-> Changes since V3:
->         - Dropped error stats feature flag as suggested by Adrain Hunter.
->         - Separated error state related changes in separate patches as
->           suggested by Adrain Hunter.
->           [PATCH V4 4/7] : error state debug fs
->           [PATCH V4 5/7] : error state enable function
->           [PATCH V4 6/7] : error state enable in error case
->         - Note: we are enabling error state before calling sdhci_dumpregs
->           we couldn't add the err state in error stats array as err state
->           is not error type.
->         - Corrected Signed-off-by order as suggested by Bjron Andersson.
->         - Moved error state enable code from sdhci_dumpregs to error
->           conditions as suggested by Adrain Hunter
+> +static void gl9763e_set_lpm_negotiation(struct sdhci_pci_slot *slot, bool enable)
+> +{
+> +       struct gli_host *gli_host = sdhci_pci_priv(slot);
+> +
+> +       if (gli_host->lpm_negotiation_enabled == enable)
+> +               return;
+> +
+> +       gli_host->lpm_negotiation_enabled = enable;
+> +
+> +       gl9763e_set_low_power_negotiation(slot, enable);
+> +}
+> +
+>  static void gl9763e_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct sdhci_host *host = mmc_priv(mmc);
+>         struct mmc_command *cmd;
+>         struct sdhci_pci_slot *slot = sdhci_priv(host);
+> -       struct gli_host *gli_host = sdhci_pci_priv(slot);
 >
-> Changes since V2:
->         - Removed userspace error stats clear debug fs entry as suggested
->           by Adrain Hunter.
->         - Split patch into 4 patches
->           [PATCH V3 1/4] : sdhci driver
->           [PATCH V3 2/4] : debug fs entries
->           [PATCH V3 3/4] : core driver
->           [PATCH V3 4/4] : cqhci driver
->         - Used for loop to print error messages instead of using printf
->           statements for all error messages as suggested by Adrain Hunter.
->         - Introduced one flag to enable error stats feature, if any other
->           client wants to use this feature, they need to enable that flag.
->         - Moved reset command timeout error statement to card init flow
->           as suggested by Adrain Hunter.
+>         cmd = mrq->cmd;
+> -
+> -       if (cmd && (cmd->opcode == MMC_READ_MULTIPLE_BLOCK) && gli_host->lpm_negotiation_enabled) {
+> -               gl9763e_set_low_power_negotiation(slot, false);
+> -               gli_host->lpm_negotiation_enabled = false;
+> -       } else {
+> -               if (gli_host->lpm_negotiation_enabled == false) {
+> -                       gl9763e_set_low_power_negotiation(slot, true);
+> -                       gli_host->lpm_negotiation_enabled = true;
+> -               }
+> -       }
+> +       if (cmd && (cmd->opcode == MMC_READ_MULTIPLE_BLOCK))
+> +               gl9763e_set_lpm_negotiation(slot, false);
+> +       else
+> +               gl9763e_set_lpm_negotiation(slot, true);
 >
-> Changes since V1:
->         - Removed sysfs entry for eMMC and SD card error statistics and added
->           debugfs entry as suggested by Adrian Hunter and Ulf Hansson.
+>         sdhci_request(mmc, mrq);
+>  }
+> @@ -975,6 +980,7 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>  {
+>         struct pci_dev *pdev = slot->chip->pdev;
+>         u32 value;
+> +       struct gli_host *gli_host = sdhci_pci_priv(slot);
 >
-> Shaik Sajida Bhanu (5):
->   mmc: core: Capture eMMC and SD card errors
->   mmc: sdhci: Capture eMMC and SD card errors
->   mmc: debugfs: Add debug fs entry for mmc driver
->   mmc: debugfs: Add debug fs error state entry for mmc driver
->   mmc: cqhci: Capture eMMC and SD card errors
+>         pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+>         value &= ~GLI_9763E_VHS_REV;
+> @@ -995,6 +1001,9 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>         value |= FIELD_PREP(GLI_9763E_CFG2_L1DLY, GLI_9763E_CFG2_L1DLY_MID);
+>         pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG2, value);
 >
->  drivers/mmc/core/core.c       | 10 +++++-
->  drivers/mmc/core/debugfs.c    | 79 +++++++++++++++++++++++++++++++++++++++++++
->  drivers/mmc/host/cqhci-core.c |  9 ++++-
->  drivers/mmc/host/sdhci.c      | 59 ++++++++++++++++++++++++--------
->  drivers/mmc/host/sdhci.h      |  3 ++
->  include/linux/mmc/host.h      | 26 ++++++++++++++
->  include/linux/mmc/mmc.h       |  6 ++++
->  7 files changed, 175 insertions(+), 17 deletions(-)
->
+> +       /* Default setting of LPM negotiation is enabled. */
+> +       gli_host->lpm_negotiation_enabled = true;
+> +
+>         pci_read_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, &value);
+>         value &= ~GLI_9763E_HS400_RXDLY;
+>         value |= FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDLY_5);
 > --
-> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
-> of Code Aurora Forum, hosted by The Linux Foundation
+> 2.36.1
 >
