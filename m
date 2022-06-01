@@ -2,134 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6928CC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 06:08:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77034C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 06:45:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349795AbiFAGIT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 02:08:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59202 "EHLO
+        id S1349897AbiFAGpx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 02:45:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36898 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243583AbiFAGIS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 02:08:18 -0400
-Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01D733A5F6;
-        Tue, 31 May 2022 23:08:17 -0700 (PDT)
-Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-306b5b452b1so7510627b3.1;
-        Tue, 31 May 2022 23:08:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gIg3Agwj0lv1Ovj0+uJVN2RThv4snjY10SoUPu90d6Q=;
-        b=E8Pn7wEhBA7UUbUKWYp/6kaUoFeWLX+rNGPsvG7ityirdlwKd3J6p+DTa6kFqXrAVM
-         jq7BNrJB/4Yzi6b2tF8ADSPHx0JKzJdNQAeZOOguVUFPSRxIpYm7pxlxBvIVfexdyJpQ
-         2LUnQjmCdIWCBhvw86e4IvqVHz1VaJcjLIbxm7kimSCYBxWMg6lwFqAuZ1ZFoNvDJf2I
-         6IH8F+1i4sYyu4FnM8AAwTMN3GBwWdQdWWtmJPD0SK3ZAK4yWGOFz5bo+ZSZwbkQuAlH
-         BZFEgU2PS/SvCTmR3/wv2ITIXPqKvtoRhA7H+QRj6U7NNFnHSVwcbP5SQT7EA0HEl48T
-         yYmw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gIg3Agwj0lv1Ovj0+uJVN2RThv4snjY10SoUPu90d6Q=;
-        b=3gmeZ6f+jM42Cn4Yg0N3PwfdxQkJDBEj1nFHfeXOFrepdv6j+DLrKSsw1gOGZBMD8P
-         bVeTKVVnJuSJRyWq41v21McAQslo+nANSZTSJjcbGasfTFrxUX4Bm7qK0Babj110/GXz
-         R0YHavr3wX8iMDdhlkJq/NFB182b6KG4IZKC2DL/RMT79pDsNpfRfUD31BZnGGdLrLRb
-         lpmmvO2H+HfLQWv+EGO69oZ8ESZfIvYZM/ZoS9E3lBefjB9uvOfCtM+Tdf+LfZ9CojQS
-         oaLl3fEGdmOynSY3JeUaGBL1Pci3pdkUf1xR8br3mOmtuUGzmFo+Ej05rij3BSmv8RmE
-         8KaQ==
-X-Gm-Message-State: AOAM532NDGr0HJRBNISipQWB+WJXR6K6nQMrsRsldJDnKzjx4PDMCCOe
-        mWwo/CyuRLygePGVbW7FzWUSFLt6z7mxDGBV8hagpW3x
-X-Google-Smtp-Source: ABdhPJxBjyPQjxT0htPDNEDKDTsNVs0WVxuFeapdBYPyYvk3cWDHR7gt78mvtng45kr9k0MXZ4TzUg/JWnuYIOQSb9I=
-X-Received: by 2002:a81:184b:0:b0:30c:846e:e2b with SMTP id
- 72-20020a81184b000000b0030c846e0e2bmr12384622ywy.97.1654063696148; Tue, 31
- May 2022 23:08:16 -0700 (PDT)
+        with ESMTP id S1349898AbiFAGpp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 02:45:45 -0400
+Received: from mout.kundenserver.de (mout.kundenserver.de [212.227.17.10])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 418CF97298;
+        Tue, 31 May 2022 23:45:44 -0700 (PDT)
+Received: from mail-yw1-f182.google.com ([209.85.128.182]) by
+ mrelayeu.kundenserver.de (mreue108 [213.165.67.113]) with ESMTPSA (Nemesis)
+ id 1Mq2rM-1nR8A00ao6-00n5yQ; Wed, 01 Jun 2022 08:45:42 +0200
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-30c2f288f13so7981187b3.7;
+        Tue, 31 May 2022 23:45:41 -0700 (PDT)
+X-Gm-Message-State: AOAM531Ockax7QFc2a3Q5qinwSYu1zDIjuRbcTFYov4J+ulcWOQG+i4o
+        ZvxrbP2tbkH2/CTqP28E8PCu4ASMNlQ4Wl6LFQI=
+X-Google-Smtp-Source: ABdhPJxq9InuUIrimfB3hr7dW///DRy+5BhspFyMzdFTqUL2RwXpKSW+k/VUx3CUHz+Op8OoRjPlxOTXQCqKN2AESqo=
+X-Received: by 2002:a0d:cfc7:0:b0:300:26d2:30eb with SMTP id
+ r190-20020a0dcfc7000000b0030026d230ebmr42935803ywd.320.1654065940773; Tue, 31
+ May 2022 23:45:40 -0700 (PDT)
 MIME-Version: 1.0
 References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
  <YnNagtAtSudCum75@atomide.com> <CAGm1_kv6wYV6ccrGJuGaeR=rffajEBB6H1Mt17iXJeMJg0JozQ@mail.gmail.com>
- <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com>
-In-Reply-To: <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com>
-From:   Yegor Yefremov <yegorslists@googlemail.com>
-Date:   Wed, 1 Jun 2022 08:08:04 +0200
-Message-ID: <CAGm1_kuYGMAbO0aB52hRwZp6qALALQ4LvMkNuC=F9Pk4P5BdXg@mail.gmail.com>
+ <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com> <CAGm1_kuYGMAbO0aB52hRwZp6qALALQ4LvMkNuC=F9Pk4P5BdXg@mail.gmail.com>
+In-Reply-To: <CAGm1_kuYGMAbO0aB52hRwZp6qALALQ4LvMkNuC=F9Pk4P5BdXg@mail.gmail.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Wed, 1 Jun 2022 08:45:23 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a2kEWU+rS55QXwOq04pRv2oEQAdqcGsDj1or04DQ4Uqag@mail.gmail.com>
+Message-ID: <CAK8P3a2kEWU+rS55QXwOq04pRv2oEQAdqcGsDj1or04DQ4Uqag@mail.gmail.com>
 Subject: Re: Linux 5.18.x: sdhci issue
-To:     Arnd Bergmann <arnd@arndb.de>
-Cc:     Tony Lindgren <tony@atomide.com>,
+To:     Yegor Yefremov <yegorslists@googlemail.com>
+Cc:     Arnd Bergmann <arnd@arndb.de>, Tony Lindgren <tony@atomide.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Linux-OMAP <linux-omap@vger.kernel.org>,
         linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:73Pm1s8KlS1x07jUfJyeHvP2H+5esKuvZWQZ55NDLOdSO9QspLz
+ Xxmd1g74Pc3Wzy7c230DTpOdW3kosYKic2COiDPTXJx/td2rKA6P4//oVTyk5Q0gkr7d39s
+ u+fSbvq9b7F63qWluq/dvsbpvvKSU17mESb/g0DEmh/aJDptWXFgiJEsd+8yuIoeIjq6S9k
+ gTJZUlqVunP1lDIIsURrA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:4/vqMEyctsw=:3ATQxm3it+ZPqRv2tg/+uN
+ qVZm3kLrnEQeuafb0IaetL7broVZrWmdbKZcib+LsbdV/iQfRaDhUHxo78/2TdumPxx4HD6sq
+ 32pzlJaRGaEMYg+ccO61NagTt04p9JZZw6Rc2Jwu4liU8ekaPIuchI0EIFfS9oQNWAlIqHv0F
+ iVC80NPlUqW0J1E2rb1SXdwjt/VZA/gZL4+51NGasHnjZssMxJbwYlIkIbcDG73H/8M3m7iaU
+ fi/tsOJAQrMKlmeJ67gt0orSQLya91IQUYCtcKg0i4fqWRh0O1cBuFdhkUwuxvUQBOB0CedAX
+ snxF6bvkffNcVEbHlL4xycXJFImvXzI7c/7WgfGIvgsZy1pNB8izuTrJjue/zCn9E6ABI13XA
+ 1r96nGx06a8ECyJJwKYqc0olxFLDl0+T1bejoHsGba1JHmMNFpGvCtkqPPYP690EkKVePNbdI
+ WlHwsyq6tnytOjO0/3fAk/pqE9u6A4k5CTyhWkhv/sANhMqlaFckm7XeMc3BDBQ0C+KKqHIHz
+ sdDgDJ9J0h6qYwnsc/22ZLoP/RgycdHf6auj93A8PuzAoAvpgD1XAGPuKvR0R1dNTUh5/GmVU
+ G0tX9cBijYmXpJqooiWzmLfvKudFIjOozNvGdrb7QuIeHowWYSOYVVlEjqJaePljQgzzIWgGH
+ XUVdMjBXauHcoB0IwZqVM6xxVbcIocqxl5r3WSCqz3FfjMCcpd7Jv7CYI9nqh+RyeGx7tEJEA
+ FkycQB6wX3xHkSEq76/S6/EGocJw3dUtqhZ+vw==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, May 31, 2022 at 11:23 AM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On Tue, May 31, 2022 at 10:28 AM Yegor Yefremov
-> <yegorslists@googlemail.com> wrote:
-> > On Thu, May 5, 2022 at 7:03 AM Tony Lindgren <tony@atomide.com> wrote:
-> > >
-> > > Hi,
-> > >
-> > > * Yegor Yefremov <yegorslists@googlemail.com> [220504 09:12]:
-> > > > Hi Tony, all,
-> > > >
-> > > > During the kernel boot I see the following error. The device is still
-> > > > working afterwards. 5.17.5 shows the same behavior. Is this a known
-> > > > issue?
-> > >
-> > > Thanks for reporting it, I was not aware of this one. Might be worth
-> > > bisecting. Adding linux-mmc and Ulf.
+On Wed, Jun 1, 2022 at 8:08 AM Yegor Yefremov
+<yegorslists@googlemail.com> wrote:
+> On Tue, May 31, 2022 at 11:23 AM Arnd Bergmann <arnd@arndb.de> wrote:
+> > On Tue, May 31, 2022 at 10:28 AM Yegor Yefremov
 > >
-> > After enabling the CONFIG_DMA_API_DEBUG option, I also get the following error:
+> > +       WARN_ON_ONCE(memory_intersects(_stext, _etext, buf, size));
+> > +       WARN_ON_ONCE(memory_intersects(__start_rodata, __end_rodata,
+> > buf, size));
+> > +       WARN_ON_ONCE(object_is_on_stack(buf));
+> > +       WARN_ON_ONCE(is_vmalloc_or_module_addr(buf));
+> > +
+> >         /* Do the bulk of the transfer using block mode (if supported). */
+> >         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
+> >                 /* Blocks per command is limited by host count, host transfer
+> >
+> >  Does that show something new?
+> >
+> > If this is a block device, the change won't help, but I can't find a good place
+> > to hook into that at the moment. mmc_mq_queue_rq() might work, but
+> > I think that is still called asynchronously.
 >
-> > [    7.603288]  dma_map_sg_attrs from sdhci_pre_dma_transfer+0xcc/0x134
-> > [    7.609705]  sdhci_pre_dma_transfer from mmc_blk_mq_issue_rq+0x2f4/0xa58
-> > [    7.616462]  mmc_blk_mq_issue_rq from mmc_mq_queue_rq+0x124/0x258
-> > [    7.622604]  mmc_mq_queue_rq from blk_mq_dispatch_rq_list+0x1b8/0x8ac
-> > [    7.629104]  blk_mq_dispatch_rq_list from
-> > blk_mq_do_dispatch_sched+0x2ec/0x350
-> > [    7.636387]  blk_mq_do_dispatch_sched from
-> > __blk_mq_sched_dispatch_requests+0x118/0x170
-> > [    7.644448]  __blk_mq_sched_dispatch_requests from
-> > blk_mq_sched_dispatch_requests+0x34/0x5c
-> > [    7.652859]  blk_mq_sched_dispatch_requests from
-> > __blk_mq_run_hw_queue+0xf8/0x230
-> > [    7.660402]  __blk_mq_run_hw_queue from process_one_work+0x284/0x72c
->
-> This is the blk_mq code taking things off the queue, so we don't really
-> know how they got put on there at this point. To find that, we'd need to
-> annotate the mmc code with the same kind of check to test the buffer
-> address whenever something gets submitted on the blk_mq queue.
->
-> Looking at the calls to sg_init*(), I found sdio_io_rw_ext_helper(), which
-> is what all sdio commands pass through. We could annotate that using
->
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index 79dbf90216b5..4ab063c50649 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -322,6 +322,11 @@ static int sdio_io_rw_ext_helper(struct sdio_func
-> *func, int write,
->         if (!func || (func->num > 7))
->                 return -EINVAL;
->
-> +       WARN_ON_ONCE(memory_intersects(_stext, _etext, buf, size));
-> +       WARN_ON_ONCE(memory_intersects(__start_rodata, __end_rodata,
-> buf, size));
-> +       WARN_ON_ONCE(object_is_on_stack(buf));
-> +       WARN_ON_ONCE(is_vmalloc_or_module_addr(buf));
-> +
->         /* Do the bulk of the transfer using block mode (if supported). */
->         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
->                 /* Blocks per command is limited by host count, host transfer
->
->  Does that show something new?
->
-> If this is a block device, the change won't help, but I can't find a good place
-> to hook into that at the moment. mmc_mq_queue_rq() might work, but
-> I think that is still called asynchronously.
+> No, the patch provides the same output.
 
-No, the patch provides the same output.
+Can you say what devices are attached to the mmc controller? Is it
+an eMMC block device, an SDIO device, or both?
 
-Yegor
+         Arnd
