@@ -2,127 +2,78 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12089C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 13:10:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64EA0CCA46F
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 14:17:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245269AbiFANKf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 09:10:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56272 "EHLO
+        id S1354630AbiFAORs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 10:17:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60818 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236589AbiFANKe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 09:10:34 -0400
-Received: from mout.kundenserver.de (mout.kundenserver.de [217.72.192.73])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E98A2651;
-        Wed,  1 Jun 2022 06:10:31 -0700 (PDT)
-Received: from mail-yw1-f172.google.com ([209.85.128.172]) by
- mrelayeu.kundenserver.de (mreue109 [213.165.67.113]) with ESMTPSA (Nemesis)
- id 1Mbj3Y-1nNsuh2bvy-00dHNg; Wed, 01 Jun 2022 15:10:29 +0200
-Received: by mail-yw1-f172.google.com with SMTP id 00721157ae682-30c143c41e5so17929127b3.3;
-        Wed, 01 Jun 2022 06:10:29 -0700 (PDT)
-X-Gm-Message-State: AOAM533Pit5BA6ILZlKJkSh4DPFXILP63RQiNngdloEoeMez5g7PuF26
-        hDuZZ0lV8tUdvrkmd8krkUbaAQ3B9avvv9mZElM=
-X-Google-Smtp-Source: ABdhPJzosfvbdJ5Di8+MP0zgnpuq38luOXBffT9OoDdz9r9355+pTDnsEc0z8E4YvxZV4OxUHzJEK6B8QiMeHymLDDQ=
-X-Received: by 2002:a0d:cfc7:0:b0:300:26d2:30eb with SMTP id
- r190-20020a0dcfc7000000b0030026d230ebmr44535348ywd.320.1654089028304; Wed, 01
- Jun 2022 06:10:28 -0700 (PDT)
+        with ESMTP id S1356216AbiFAOQL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 10:16:11 -0400
+Received: from mail-oi1-f174.google.com (mail-oi1-f174.google.com [209.85.167.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20E2FC3D08;
+        Wed,  1 Jun 2022 07:04:31 -0700 (PDT)
+Received: by mail-oi1-f174.google.com with SMTP id s188so2782635oie.4;
+        Wed, 01 Jun 2022 07:04:31 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=W+gSZQW06c2J9Vc4RXJEh/UwV2q2eY7fbWj2w4Xp+OA=;
+        b=3pkvJD9bhrEI9E+M3kLHM7NbiPH2JDV0fgSDIkZ/38XeQJA/KTjYU1SZmZTK7CX3NS
+         vOT4fEwFgVNBPOoAQP62V8HGZPErp26zL2l79/QbHgrpWGT86hGBflL1qk1rxkWU8D+D
+         S7tWPo+pcEYJ8AZFGhOsUnZspVqpe6Rpvj09XTpm0nj7qUt8UrsS2qL6LDURouu440Kh
+         aNEyvmEKbj1oFXiD37e9ODGp+WmV9x497QAh3AbX9UgNyptaUc1Awp/bjM9n1+/Dw5A4
+         lE7EHRRDSXUxM14rUjylLbr43dC4jmtqEMMD3S3pY85BnifI1+WnzrxkPhxorBijRbXe
+         Wp/w==
+X-Gm-Message-State: AOAM530wgMX15kUxw6TIhcafKItyfPRrKYyqJ617qiQ5fKfrr8nMchdX
+        N80ldmplE6iMdz+8o3ptOA==
+X-Google-Smtp-Source: ABdhPJzeZmIg6Eaxk/FFSJ7MRleaTDeX9X05UQX/nUSrA/9ETpZVpo1P14wSbRMgFSBe8n1csBuYlQ==
+X-Received: by 2002:a05:6808:b04:b0:32b:8fc2:46e4 with SMTP id s4-20020a0568080b0400b0032b8fc246e4mr3165oij.54.1654092270390;
+        Wed, 01 Jun 2022 07:04:30 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id g9-20020a4a7549000000b0035eb4e5a6d3sm938894oof.41.2022.06.01.07.04.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 01 Jun 2022 07:04:30 -0700 (PDT)
+Received: (nullmailer pid 3915391 invoked by uid 1000);
+        Wed, 01 Jun 2022 14:04:29 -0000
+Date:   Wed, 1 Jun 2022 09:04:29 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Hu Ziji <huziji@marvell.com>, Al Cooper <alcooperx@gmail.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: Fix unevaluatedProperties warnings in
+ examples
+Message-ID: <20220601140429.GA3909718-robh@kernel.org>
+References: <20220526014204.2873107-1-robh@kernel.org>
+ <CAPDyKFoh5FyRDxr22XnkOd76MG4YjkvqL039=+qHGZKwfdFquw@mail.gmail.com>
 MIME-Version: 1.0
-References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
- <YnNagtAtSudCum75@atomide.com> <CAGm1_kv6wYV6ccrGJuGaeR=rffajEBB6H1Mt17iXJeMJg0JozQ@mail.gmail.com>
- <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com>
- <CAGm1_kuYGMAbO0aB52hRwZp6qALALQ4LvMkNuC=F9Pk4P5BdXg@mail.gmail.com>
- <CAK8P3a2kEWU+rS55QXwOq04pRv2oEQAdqcGsDj1or04DQ4Uqag@mail.gmail.com> <CAGm1_ksYy=fueypVJDfVhf=J-cY8r1yJpBYO9cEK5_CTfn5xQA@mail.gmail.com>
-In-Reply-To: <CAGm1_ksYy=fueypVJDfVhf=J-cY8r1yJpBYO9cEK5_CTfn5xQA@mail.gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Wed, 1 Jun 2022 15:10:10 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a0tK5bm7uXBAPfydMBVzO8=eUiBOKbivQMZVDkgjJ2uBg@mail.gmail.com>
-Message-ID: <CAK8P3a0tK5bm7uXBAPfydMBVzO8=eUiBOKbivQMZVDkgjJ2uBg@mail.gmail.com>
-Subject: Re: Linux 5.18.x: sdhci issue
-To:     Yegor Yefremov <yegorslists@googlemail.com>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Tony Lindgren <tony@atomide.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:58aATKFXWXUufymP5AjXJWub7VGT4c4dc3uKA7OshodRgb8Zy7D
- lDdYvRyTZBqvzfnqB5EciQBvkvnAkdM9dKZDX1BtSDwpf1Wo2J1mGKOFZmFJYTrIYgz23Xt
- 2v3k/XMoJAlKwB2EaEyB0qvUWLikKe4BRdJdfS7QtmpHCdMIfr3+emX0+eGpb9lP6UONgYT
- gbGAm3ImCSko80MilIKJQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:vD1JL6/UGSY=:TMHnJSdqFTJE0jNJip8/ny
- FwotG30DfGEbg+E1UdB4rvUW/rXrlaD0FXPYxS7kQm+KeT8fsNUgYL3DJ2i6GnQyIDVLfVwTN
- N8EzNBs2pcQZItZo4U8PVO5INKQJ1jepsLfz3lVBwQT1t1s+JgCHsKG2yjNl8ZJfUrfB6UZsk
- FfEGFUHzknhkKiLQNj70kPqdflplRVN9TtxdlQzGnKpORri+1jlYywqJEeRTvF/fK2so3/Aa7
- 5QmKvzier0l54eSponR7O2fiTjKNBg520pTdFue4I+Ih0RROUjkHNUeATTrMU4vqGyyd/rJVv
- /zWQ2FMsx1gH/Jm8oa7ok6qAOIvtmz8V4VG6j/FqiwpSuz7NhG/Mygq1Bl536Ydr7QZkBbXv4
- CmH41wqgpUXORBJ+47jahDmeQQzP5UxMvIZWbA1LzjsDCNJ9iqCWCC3wg+mxCjzH2kEqmduxu
- U/a/gjURUloq7J0pMaFS7HA1V6P3/7eblocKSDG57stpoFZyMBLSrIDTKGyzDE2Ox1P5Rd5hT
- xRv2OIGMdxDt9FLR/jw0/FCA+21954/gzUS838W2HzI/JdXoRLJnyCSpedVQDjrAhRaEPJskw
- 2tRNCcPHbkGN9iYYLeASD2SpGWvMY3WXF6wZQgghchOqkcX4YXC1NICikC0kZJZGDRFwCTBvU
- UfvdfZ6XtND3jD7+meEpIEh5EAvubgEGeUHyGTeUlyQRa3chklIaNRvbh3WLL8bL98HKC4ClH
- GBTgm/rvMjHxEg2GFCZYWQ207pWgQQ+8WtfUug==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoh5FyRDxr22XnkOd76MG4YjkvqL039=+qHGZKwfdFquw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jun 1, 2022 at 8:49 AM Yegor Yefremov
-<yegorslists@googlemail.com> wrote:
-> On Wed, Jun 1, 2022 at 8:45 AM Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Wed, Jun 1, 2022 at 8:08 AM Yegor Yefremov
-> > <yegorslists@googlemail.com> wrote:
-> > > On Tue, May 31, 2022 at 11:23 AM Arnd Bergmann <arnd@arndb.de> wrote:
-> > > > On Tue, May 31, 2022 at 10:28 AM Yegor Yefremov
-> > > >
-> > > > +       WARN_ON_ONCE(memory_intersects(_stext, _etext, buf, size));
-> > > > +       WARN_ON_ONCE(memory_intersects(__start_rodata, __end_rodata,
-> > > > buf, size));
-> > > > +       WARN_ON_ONCE(object_is_on_stack(buf));
-> > > > +       WARN_ON_ONCE(is_vmalloc_or_module_addr(buf));
-> > > > +
-> > > >         /* Do the bulk of the transfer using block mode (if supported). */
-> > > >         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
-> > > >                 /* Blocks per command is limited by host count, host transfer
-> > > >
-> > > >  Does that show something new?
-> > > >
-> > > > If this is a block device, the change won't help, but I can't find a good place
-> > > > to hook into that at the moment. mmc_mq_queue_rq() might work, but
-> > > > I think that is still called asynchronously.
-> > >
-> > > No, the patch provides the same output.
+On Wed, Jun 01, 2022 at 02:46:21PM +0200, Ulf Hansson wrote:
+> On Thu, 26 May 2022 at 03:42, Rob Herring <robh@kernel.org> wrote:
 > >
-> > Can you say what devices are attached to the mmc controller? Is it
-> > an eMMC block device, an SDIO device, or both?
->
-> From DTS point of view: MMC and WiFi (SDIO). Physically, only MMC
-> (removable SDcard).
+> > The 'unevaluatedProperties' schema checks is not fully working and doesn't
+> > catch some cases where there's a $ref to another schema. A fix is pending,
+> > but results in new warnings in examples. Fix the warnings by removing
+> > spurious properties or adding a missing property to the schema.
+> >
+> > Signed-off-by: Rob Herring <robh@kernel.org>
+> 
+> Queued for v5.20 on the devel branch, thanks!
 
-Ok, I see. Actually I suppose I should have ruled out SDIO as the source
-of the problem because the backtrace clearly listed the blk_mq layer.
+Can you take for 5.19 instead so I can enable this in dtschema sooner 
+rather than later?
 
-This might instead work:
-
-index 4e67c1403cc9..e8f1d89bd019 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1401,6 +1401,11 @@ static void mmc_blk_data_prep(struct mmc_queue
-*mq, struct mmc_queue_req *mqrq,
-                struct scatterlist *sg;
-
-                for_each_sg(brq->data.sg, sg, brq->data.sg_len, i) {
-+                       void *v = sg_virt(sg);
-+
-+                       WARN_ONCE(memory_intersects(_stext, _etext, v,
-sg->length), "dma in .text: %p\n", v);
-+                       WARN_ONCE(memory_intersects(__start_rodata,
-__end_rodata, v, sg->length), "dma in .rodata: %p\n", v);
-+
-                        data_size -= sg->length;
-                        if (data_size <= 0) {
-                                sg->length += data_size;
-
-Maybe also try passing "no_hash_pointers" on the command line to have
-the warning
-print the actual pointer value. If that is indeed part of the kernel
-vmlinux image, you
-should be able to find the address in System.map.
-
-      Arnd
+Rob
