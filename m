@@ -2,246 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54023C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 06:05:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6928CC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 06:08:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243509AbiFAGE4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 02:04:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53022 "EHLO
+        id S1349795AbiFAGIT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 02:08:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237719AbiFAGEz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 02:04:55 -0400
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC6166BFF4;
-        Tue, 31 May 2022 23:04:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1654063494; x=1685599494;
-  h=message-id:date:mime-version:subject:from:to:references:
-   in-reply-to:content-transfer-encoding;
-  bh=WqtYoapdLsHkuvevA00O2e2yJYy3FA/wFh2olBeXk/U=;
-  b=gWDIeCOfdTIh4L/N8cXpuaoVQmVbo+Xyg8lCSUbgCCKAKLwCu/WVZDxS
-   Cxtv/EhiHOavjJsdsJJYmNhT0tuhrjt942sx0sJPvegJTxkrmnafZ8uzA
-   mGOhYgi8XU0UipXZqRM8L5GfdHmlkTAI89dPu/TKsU/cJtCc5aDM8/Fop
-   k9WZ8qF4tirnd+LtHKmQJ8WARSwPa56wGEr9KULUb3kb+WxK8H06qvAiF
-   pbQojEy/LNCeyMBdij/RQVSQw5UQln62bu2PxBStKNd8OGDZDgTk89N71
-   BM+G3jvW7XVDjSTGDK879JxTzCmYvYbY6gpL0OpIXvez+rcmmBARU69C8
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10364"; a="255960931"
-X-IronPort-AV: E=Sophos;i="5.91,266,1647327600"; 
-   d="scan'208";a="255960931"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2022 23:04:54 -0700
-X-IronPort-AV: E=Sophos;i="5.91,266,1647327600"; 
-   d="scan'208";a="606085363"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.44.223])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2022 23:04:50 -0700
-Message-ID: <273f9bf0-0018-a34e-7bf0-2f6ad9aa73ee@intel.com>
-Date:   Wed, 1 Jun 2022 09:04:46 +0300
+        with ESMTP id S243583AbiFAGIS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 02:08:18 -0400
+Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01D733A5F6;
+        Tue, 31 May 2022 23:08:17 -0700 (PDT)
+Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-306b5b452b1so7510627b3.1;
+        Tue, 31 May 2022 23:08:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=gIg3Agwj0lv1Ovj0+uJVN2RThv4snjY10SoUPu90d6Q=;
+        b=E8Pn7wEhBA7UUbUKWYp/6kaUoFeWLX+rNGPsvG7ityirdlwKd3J6p+DTa6kFqXrAVM
+         jq7BNrJB/4Yzi6b2tF8ADSPHx0JKzJdNQAeZOOguVUFPSRxIpYm7pxlxBvIVfexdyJpQ
+         2LUnQjmCdIWCBhvw86e4IvqVHz1VaJcjLIbxm7kimSCYBxWMg6lwFqAuZ1ZFoNvDJf2I
+         6IH8F+1i4sYyu4FnM8AAwTMN3GBwWdQdWWtmJPD0SK3ZAK4yWGOFz5bo+ZSZwbkQuAlH
+         BZFEgU2PS/SvCTmR3/wv2ITIXPqKvtoRhA7H+QRj6U7NNFnHSVwcbP5SQT7EA0HEl48T
+         yYmw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=gIg3Agwj0lv1Ovj0+uJVN2RThv4snjY10SoUPu90d6Q=;
+        b=3gmeZ6f+jM42Cn4Yg0N3PwfdxQkJDBEj1nFHfeXOFrepdv6j+DLrKSsw1gOGZBMD8P
+         bVeTKVVnJuSJRyWq41v21McAQslo+nANSZTSJjcbGasfTFrxUX4Bm7qK0Babj110/GXz
+         R0YHavr3wX8iMDdhlkJq/NFB182b6KG4IZKC2DL/RMT79pDsNpfRfUD31BZnGGdLrLRb
+         lpmmvO2H+HfLQWv+EGO69oZ8ESZfIvYZM/ZoS9E3lBefjB9uvOfCtM+Tdf+LfZ9CojQS
+         oaLl3fEGdmOynSY3JeUaGBL1Pci3pdkUf1xR8br3mOmtuUGzmFo+Ej05rij3BSmv8RmE
+         8KaQ==
+X-Gm-Message-State: AOAM532NDGr0HJRBNISipQWB+WJXR6K6nQMrsRsldJDnKzjx4PDMCCOe
+        mWwo/CyuRLygePGVbW7FzWUSFLt6z7mxDGBV8hagpW3x
+X-Google-Smtp-Source: ABdhPJxBjyPQjxT0htPDNEDKDTsNVs0WVxuFeapdBYPyYvk3cWDHR7gt78mvtng45kr9k0MXZ4TzUg/JWnuYIOQSb9I=
+X-Received: by 2002:a81:184b:0:b0:30c:846e:e2b with SMTP id
+ 72-20020a81184b000000b0030c846e0e2bmr12384622ywy.97.1654063696148; Tue, 31
+ May 2022 23:08:16 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH V1] mmc: core: Enable force hw reset
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     "Sarthak Garg (QUIC)" <quic_sartgarg@quicinc.com>,
-        "Kamasali Satyanarayan (Consultant) (QUIC)" 
-        <quic_kamasali@quicinc.com>, quic_spathi <quic_spathi@quicinc.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "axboe@kernel.dk" <axboe@kernel.dk>,
-        "avri.altman@wdc.com" <avri.altman@wdc.com>,
-        "kch@nvidia.com" <kch@nvidia.com>,
-        "CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
-        "swboyd@chromium.org" <swboyd@chromium.org>,
-        "digetx@gmail.com" <digetx@gmail.com>,
-        "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <1650961818-13452-1-git-send-email-quic_spathi@quicinc.com>
- <7db46c19-a92a-a13a-eb63-38e5ed31580f@intel.com>
- <MWHPR0201MB3466CC9C676988E90D5D7D6FE3D79@MWHPR0201MB3466.namprd02.prod.outlook.com>
- <f21c11f86bf94e9b881761b9176cc45e@quicinc.com>
- <618e533c-7155-3a8d-53f1-04c436a21364@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <618e533c-7155-3a8d-53f1-04c436a21364@intel.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
+ <YnNagtAtSudCum75@atomide.com> <CAGm1_kv6wYV6ccrGJuGaeR=rffajEBB6H1Mt17iXJeMJg0JozQ@mail.gmail.com>
+ <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com>
+In-Reply-To: <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com>
+From:   Yegor Yefremov <yegorslists@googlemail.com>
+Date:   Wed, 1 Jun 2022 08:08:04 +0200
+Message-ID: <CAGm1_kuYGMAbO0aB52hRwZp6qALALQ4LvMkNuC=F9Pk4P5BdXg@mail.gmail.com>
+Subject: Re: Linux 5.18.x: sdhci issue
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Tony Lindgren <tony@atomide.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/05/22 15:44, Adrian Hunter wrote:
-> On 25/05/22 10:06, Sarthak Garg (QUIC) wrote:
->> Hi Adrian,
->>
->> Thanks for the review.
->> Please find comments inline.
->>
->> Thanks,
->> Sarthak
->>
->>> -----Original Message-----
->>> From: Kamasali Satyanarayan (Consultant) (QUIC)
->>> <quic_kamasali@quicinc.com>
->>> Sent: Tuesday, May 24, 2022 5:33 PM
->>> To: 'Adrian Hunter' <adrian.hunter@intel.com>; quic_spathi
->>> <quic_spathi@quicinc.com>; ulf.hansson@linaro.org; riteshh@codeaurora.org;
->>> asutoshd@codeaurora.org; axboe@kernel.dk; avri.altman@wdc.com;
->>> kch@nvidia.com; CLoehle@hyperstone.com; swboyd@chromium.org;
->>> digetx@gmail.com; bigeasy@linutronix.de; linux-mmc@vger.kernel.org; linux-
->>> kernel@vger.kernel.org; Sarthak Garg (QUIC) <quic_sartgarg@quicinc.com>
->>> Cc: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->>> Subject: RE: [PATCH V1] mmc: core: Enable force hw reset
->>>
->>> Hi,
->>> These patches will be further taken by Sarthak.
->>>
->>> Thanks,
->>> Satya
->>>
->>> -----Original Message-----
->>> From: Adrian Hunter <adrian.hunter@intel.com>
->>> Sent: Wednesday, April 27, 2022 6:04 PM
->>> To: quic_spathi <quic_spathi@quicinc.com>; ulf.hansson@linaro.org;
->>> riteshh@codeaurora.org; asutoshd@codeaurora.org; axboe@kernel.dk;
->>> avri.altman@wdc.com; kch@nvidia.com; CLoehle@hyperstone.com;
->>> swboyd@chromium.org; digetx@gmail.com; bigeasy@linutronix.de; linux-
->>> mmc@vger.kernel.org; linux-kernel@vger.kernel.org
->>> Cc: Shaik Sajida Bhanu <sbhanu@codeaurora.org>; Kamasali Satyanarayan
->>> (Consultant) (QUIC) <quic_kamasali@quicinc.com>
->>> Subject: Re: [PATCH V1] mmc: core: Enable force hw reset
->>>
->>> On 26/04/22 11:30, Srinivasarao Pathipati wrote:
->>>> From: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->>>>
->>>> During error recovery set need hw reset to handle ICE error where cqe
->>>> reset is must.
->>>
->>> How do you get ICE errors?  Doesn't it mean either the hardware is broken or
->>> the configuration is broken?
->>
->> This patch is not intended for ice errors and will update the commit text in V2.
->> Long back intermittent recovery failures were observed but after forcing hardware reset during error recovery we have no single instance of recovery failure. This have made recovery more robust for us.
->> Any suggestions on how we can take it forward will be highly appreciated.
-> 
-> We can definitely go forward, but with hopefully a little more
-> explanation first.
-> 
-> It is preferable to be able to explain why changes are being made.
-> 
-> Do you have any logs or other information on the recovery failures?
-> Are you able to reproduce the problem?
-> 
-> I notice you always do mmc_blk_reset_success().  Does that mean you
-> sometimes need several resets in a row?
-> 
-> A potential issue that I notice, is that the recovery does not
-> explicitly deal with the case that the card's command queue has
-> been disabled e.g. due to RPMB access or IOCTL commands. Are you
-> using either of those?
+On Tue, May 31, 2022 at 11:23 AM Arnd Bergmann <arnd@arndb.de> wrote:
+>
+> On Tue, May 31, 2022 at 10:28 AM Yegor Yefremov
+> <yegorslists@googlemail.com> wrote:
+> > On Thu, May 5, 2022 at 7:03 AM Tony Lindgren <tony@atomide.com> wrote:
+> > >
+> > > Hi,
+> > >
+> > > * Yegor Yefremov <yegorslists@googlemail.com> [220504 09:12]:
+> > > > Hi Tony, all,
+> > > >
+> > > > During the kernel boot I see the following error. The device is still
+> > > > working afterwards. 5.17.5 shows the same behavior. Is this a known
+> > > > issue?
+> > >
+> > > Thanks for reporting it, I was not aware of this one. Might be worth
+> > > bisecting. Adding linux-mmc and Ulf.
+> >
+> > After enabling the CONFIG_DMA_API_DEBUG option, I also get the following error:
+>
+> > [    7.603288]  dma_map_sg_attrs from sdhci_pre_dma_transfer+0xcc/0x134
+> > [    7.609705]  sdhci_pre_dma_transfer from mmc_blk_mq_issue_rq+0x2f4/0xa58
+> > [    7.616462]  mmc_blk_mq_issue_rq from mmc_mq_queue_rq+0x124/0x258
+> > [    7.622604]  mmc_mq_queue_rq from blk_mq_dispatch_rq_list+0x1b8/0x8ac
+> > [    7.629104]  blk_mq_dispatch_rq_list from
+> > blk_mq_do_dispatch_sched+0x2ec/0x350
+> > [    7.636387]  blk_mq_do_dispatch_sched from
+> > __blk_mq_sched_dispatch_requests+0x118/0x170
+> > [    7.644448]  __blk_mq_sched_dispatch_requests from
+> > blk_mq_sched_dispatch_requests+0x34/0x5c
+> > [    7.652859]  blk_mq_sched_dispatch_requests from
+> > __blk_mq_run_hw_queue+0xf8/0x230
+> > [    7.660402]  __blk_mq_run_hw_queue from process_one_work+0x284/0x72c
+>
+> This is the blk_mq code taking things off the queue, so we don't really
+> know how they got put on there at this point. To find that, we'd need to
+> annotate the mmc code with the same kind of check to test the buffer
+> address whenever something gets submitted on the blk_mq queue.
+>
+> Looking at the calls to sg_init*(), I found sdio_io_rw_ext_helper(), which
+> is what all sdio commands pass through. We could annotate that using
+>
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index 79dbf90216b5..4ab063c50649 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -322,6 +322,11 @@ static int sdio_io_rw_ext_helper(struct sdio_func
+> *func, int write,
+>         if (!func || (func->num > 7))
+>                 return -EINVAL;
+>
+> +       WARN_ON_ONCE(memory_intersects(_stext, _etext, buf, size));
+> +       WARN_ON_ONCE(memory_intersects(__start_rodata, __end_rodata,
+> buf, size));
+> +       WARN_ON_ONCE(object_is_on_stack(buf));
+> +       WARN_ON_ONCE(is_vmalloc_or_module_addr(buf));
+> +
+>         /* Do the bulk of the transfer using block mode (if supported). */
+>         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
+>                 /* Blocks per command is limited by host count, host transfer
+>
+>  Does that show something new?
+>
+> If this is a block device, the change won't help, but I can't find a good place
+> to hook into that at the moment. mmc_mq_queue_rq() might work, but
+> I think that is still called asynchronously.
 
-Looking closer, the command queue is reenabled on the error
-path so that is not a concern, but I did send:
+No, the patch provides the same output.
 
-https://lore.kernel.org/linux-mmc/20220531171922.76080-1-adrian.hunter@intel.com/
-
-For your case, if it is not about ICE errors, why not add only:
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f4a1281658db..a2ee850a5c16 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1497,7 +1497,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
- 	pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
- 
- 	err = mmc_cqe_recovery(host);
--	if (err)
-+	if (err || host->cqe_recovery_reset_always)
- 		mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
- 	mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
- 
-And then just set it in your host controller driver probe function.
-
-	host->cqe_recovery_reset_always = true;
-
-> 
->>>
->>>>
->>>> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->>>> Signed-off-by: kamasali <quic_kamasali@quicinc.com>
->>>> Signed-off-by: Srinivasarao Pathipati <quic_spathi@quicinc.com>
->>>> ---
->>>>  drivers/mmc/core/block.c      | 8 +++++---
->>>>  drivers/mmc/host/cqhci-core.c | 7 +++++--
->>>>  include/linux/mmc/host.h      | 1 +
->>>>  3 files changed, 11 insertions(+), 5 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
->>>> b35e7a9..f63bf33 100644
->>>> --- a/drivers/mmc/core/block.c
->>>> +++ b/drivers/mmc/core/block.c
->>>> @@ -1482,10 +1482,12 @@ void mmc_blk_cqe_recovery(struct mmc_queue
->>> *mq)
->>>>  	pr_debug("%s: CQE recovery start\n", mmc_hostname(host));
->>>>
->>>>  	err = mmc_cqe_recovery(host);
->>>> -	if (err)
->>>> +	if (err || host->need_hw_reset) {
->>>>  		mmc_blk_reset(mq->blkdata, host,
->>> MMC_BLK_CQE_RECOVERY);
->>>> -	else
->>>> -		mmc_blk_reset_success(mq->blkdata,
->>> MMC_BLK_CQE_RECOVERY);
->>>> +		if (host->need_hw_reset)
->>>> +			host->need_hw_reset = false;
->>>> +	}
->>>> +	mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
->>>>
->>>>  	pr_debug("%s: CQE recovery done\n", mmc_hostname(host));  } diff
->>>> --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
->>>> index b0d30c3..311b510 100644
->>>> --- a/drivers/mmc/host/cqhci-core.c
->>>> +++ b/drivers/mmc/host/cqhci-core.c
->>>> @@ -812,18 +812,21 @@ static void cqhci_finish_mrq(struct mmc_host
->>>> *mmc, unsigned int tag)  irqreturn_t cqhci_irq(struct mmc_host *mmc, u32
->>> intmask, int cmd_error,
->>>>  		      int data_error)
->>>>  {
->>>> -	u32 status;
->>>> +	u32 status, ice_err;
->>>>  	unsigned long tag = 0, comp_status;
->>>>  	struct cqhci_host *cq_host = mmc->cqe_private;
->>>>
->>>>  	status = cqhci_readl(cq_host, CQHCI_IS);
->>>>  	cqhci_writel(cq_host, status, CQHCI_IS);
->>>> +	ice_err = status & (CQHCI_IS_GCE | CQHCI_IS_ICCE);
->>>>
->>>>  	pr_debug("%s: cqhci: IRQ status: 0x%08x\n", mmc_hostname(mmc),
->>>> status);
->>>>
->>>>  	if ((status & (CQHCI_IS_RED | CQHCI_IS_GCE | CQHCI_IS_ICCE)) ||
->>>> -	    cmd_error || data_error)
->>>> +	    cmd_error || data_error || ice_err){
->>>> +		mmc->need_hw_reset = true;
->>>>  		cqhci_error_irq(mmc, status, cmd_error, data_error);
->>>> +	}
->>>>
->>>>  	if (status & CQHCI_IS_TCC) {
->>>>  		/* read TCN and complete the request */ diff --git
->>>> a/include/linux/mmc/host.h b/include/linux/mmc/host.h index
->>>> c193c50..3d00bcf 100644
->>>> --- a/include/linux/mmc/host.h
->>>> +++ b/include/linux/mmc/host.h
->>>> @@ -492,6 +492,7 @@ struct mmc_host {
->>>>  	int			cqe_qdepth;
->>>>  	bool			cqe_enabled;
->>>>  	bool			cqe_on;
->>>> +	bool                    need_hw_reset;
->>>>
->>>>  	/* Inline encryption support */
->>>>  #ifdef CONFIG_MMC_CRYPTO
->>>
->>
-> 
-
+Yegor
