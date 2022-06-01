@@ -2,94 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48E62C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:47:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46D0CC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:47:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353081AbiFAMrH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 08:47:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59514 "EHLO
+        id S1351812AbiFAMrX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 08:47:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353103AbiFAMrD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:47:03 -0400
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28AB35F47
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:47:02 -0700 (PDT)
-Received: by mail-lj1-x231.google.com with SMTP id s13so1873110ljd.4
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:47:02 -0700 (PDT)
+        with ESMTP id S1353041AbiFAMrX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:47:23 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6BC1DEC0
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:47:21 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id be31so2536584lfb.10
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:47:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=JqDKJWJn3KR6F/t8EuCHiF1PKuDwpntQP0fkdEdQKws=;
-        b=Fh6mGwxvUqrYxnGeAf6gRK0flNakrFnVg9b2xz1C0/zw54bfM+TF+jUKVOFwQNYRp+
-         Fcvt5S3hwHMsigKcVt7+uHOLwQRDUSmE9mE/ZU+/wrEkc/M0SuU861PbAuNH8qb+T9E2
-         MV7wlVsmnB6J5j3mAoKwYwuuDeOctq+f/Z0ws6OvbJIfDoWe56zcXxWcWFhs/9QMc9q8
-         701JG9yzRYGhH3j5OoSroN5LU4zBLGWA2KYRMEMa0lnaKRhMDy9UOoZqpSOUDkeV4fI0
-         Qb9Z5HA8xEgqxYfnH9kZ1b2VN2cJ2gTe00YFR07+KpDBiywxJo5UiXprOq+U/Q3Qt2ND
-         v1gg==
+        bh=8u9RNTYeHxY9YWObp6yzipkkBA/vWj6mJ4FlGRiqkoo=;
+        b=LSFLfGwhPD/CksaBMNE5p6uAZAjr81Pcy6QlBdg4n9aaxH6qFvzkLnf3cry1y+PPng
+         qwiBGBYDww9j2fUKH94eQ31VGab56HaeLSLB4c+f8Fud9gFCf/n8Uwa1oQD3L8ccEhCI
+         A4GZ6aDe+kirtSQ7ACTbkAuBDUTooSOAAiwB/qx8hq6BB1h4wlCw9QQYxHW5Stp2u+ev
+         wVMuEWgFxwPsFWIbJbtWdrfTfR23467UmyKtLz5GE3/lEMgoxqtjMhSr6GE3mxVPzNn+
+         50eKsqD5J9gHvXUokp60cHt5R6XaNJ9GyxiMua3HuT7tV0m5PTwW3B9GTj8wMCk15z61
+         YhGA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=JqDKJWJn3KR6F/t8EuCHiF1PKuDwpntQP0fkdEdQKws=;
-        b=K0vH71kiPvF3IFPDB6bzZXJLdNMAr+kKz07lfBjcuOcqBt+UAZOlBdV50iQyNI8tmA
-         lYA6MQiP5sNYZOCWhx4p4DyWAHHiJ5wQWQCxf8p0sLfgXuwhWANmQFyzx1USpczf08Up
-         GxJMoSI9m6f90mDAsDZvCpcct/RvG95bDGuX8xBngdOuXeTXWkxjOFwR/FfZNYRR77g7
-         kEwCeB0mnqcKjwiFVz892/Ajr5DMpco0qiq5llyb2Tw9wUcFbD9XxHdFv0tpQ63qEEQP
-         ADdP1nFMXo4fOnIjv4KFSVLuXCzeN4L7iYMzjVjB7M+kLzmNtmgisz4/YRJJp4oeEtSe
-         U75w==
-X-Gm-Message-State: AOAM5314Nd506CIQxC/pKBTu4vtOICvjik3kVYgcLzeuYSB6DDGZNQ7K
-        AtB9uS4qxc1mN96hY9iGbG9qPPvxhvaK4hh3dKaWU6lNLDI=
-X-Google-Smtp-Source: ABdhPJxJIs39WEUtGpVqKIIbRC1ZzEuJkg8hkJUTVxGDs/YlupuKseOHBIm/4fxNJmL142hY/6+4H6ajgpj9hkeXWnY=
-X-Received: by 2002:a2e:a273:0:b0:253:e0e7:7948 with SMTP id
- k19-20020a2ea273000000b00253e0e77948mr33626186ljm.463.1654087621703; Wed, 01
- Jun 2022 05:47:01 -0700 (PDT)
+        bh=8u9RNTYeHxY9YWObp6yzipkkBA/vWj6mJ4FlGRiqkoo=;
+        b=0III0PlSpQ0dGuXb5HMMA2C6ha3brA8BOy+5pQtsT23lFVyTjz9k3fSymnHYz0ttu1
+         ETjU5li5O20xtm98JhcnEkttMYLsg0N672xrHWiUKyfYgaZYCiCiSiWp3GjqaTNDJRtS
+         UfFj/kenqI94QV2Q9QGACGQjss6dVBrJT2hpFxdKCrymUh20p0RlRGPo7CSunfCJ+P0S
+         HQ9+sgkvkkBdOT1NTo2S6f4QOhALNkAwwrvTpRA+2G+/gZCIKWoPc1xLYXKAGuKX0ld3
+         OOAOJ2gsCDAiwtaqE9sjJjl+hI4VzlBUq3o/ZqfT9vSZle/4iVEQm+fC62DRGXw16og2
+         5MJA==
+X-Gm-Message-State: AOAM532xs/OemxDJ/N/bWHWKyVCI2NsPXAdiI/qvMH3v00VhRtmC+Y1P
+        KL66I2Yv9J28TXuuLYiATLJuBgOlRSIAQJu0mGFboNi6C2k=
+X-Google-Smtp-Source: ABdhPJxDCyWdqBE+ghyIruLdQyvQRKTjhJZ078rEdkP6A6ndEjTtRRBlbO53WBZNtfW9TLaKeVcGSWKH51sPIW5nJIU=
+X-Received: by 2002:a19:ac42:0:b0:478:593c:e6fe with SMTP id
+ r2-20020a19ac42000000b00478593ce6femr40749300lfc.254.1654087640129; Wed, 01
+ Jun 2022 05:47:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220530123857.692076-1-fparent@baylibre.com>
-In-Reply-To: <20220530123857.692076-1-fparent@baylibre.com>
+References: <20220531171922.76080-1-adrian.hunter@intel.com>
+In-Reply-To: <20220531171922.76080-1-adrian.hunter@intel.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Jun 2022 14:46:25 +0200
-Message-ID: <CAPDyKFqNegBhdqc0URv27OLKMupXEMEU5c7-e4YasWsKGA0OQg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mtk-sd: fix typo
-To:     Fabien Parent <fparent@baylibre.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+Date:   Wed, 1 Jun 2022 14:46:42 +0200
+Message-ID: <CAPDyKFpjNj4QP5UvYL6z2ApGz9Cg=_8c9m8QaY_BtUdh6n3_zA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: Fix CQE recovery reset success
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 30 May 2022 at 14:39, Fabien Parent <fparent@baylibre.com> wrote:
+On Tue, 31 May 2022 at 19:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> Fix a typo: Fianl -> Final.
->
-> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+> The intention of the use of mmc_blk_reset_success() in
+> mmc_blk_cqe_recovery() was to prevent repeated resets when retrying and
+> getting the same error. However, that may not be the case - any amount
+> of time and I/O may pass before another recovery is needed, in which
+> case there would be no reason to deny it the opportunity to recover via
+> a reset if necessary. CQE recovery is expected seldom and failure to
+> recover (if the clear tasks command fails), even more seldom, so it is
+> better to allow the reset always, which can be done by calling
+> mmc_blk_reset_success() always.
 
-Queued for v5.20 on the devel branch, thanks!
+Thanks for the explanation, this certainly makes sense to me too!
+
+>
+> Fixes: 1e8e55b67030c6 ("mmc: block: Add CQE support")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/mtk-sd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/core/block.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 195dc897188b..c7d196f805ec 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -2318,7 +2318,7 @@ static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card
->         else
->                 val = readl(host->base + PAD_DS_TUNE);
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 1259ca22d625..f4a1281658db 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1499,8 +1499,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
+>         err = mmc_cqe_recovery(host);
+>         if (err)
+>                 mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
+> -       else
+> -               mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
+> +       mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
 >
-> -       dev_info(host->dev, "Fianl PAD_DS_TUNE: 0x%x\n", val);
-> +       dev_info(host->dev, "Final PAD_DS_TUNE: 0x%x\n", val);
->
->         return 0;
->
+>         pr_debug("%s: CQE recovery done\n", mmc_hostname(host));
+>  }
 > --
-> 2.36.1
+> 2.25.1
 >
