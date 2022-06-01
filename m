@@ -2,73 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8948C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:46:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FF83C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:47:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353109AbiFAMq5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 08:46:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59514 "EHLO
+        id S1353080AbiFAMrA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 08:47:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59352 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344046AbiFAMqv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:46:51 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F5DD6549
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:46:50 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id i10so2611500lfj.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:46:50 -0700 (PDT)
+        with ESMTP id S1353094AbiFAMq5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:46:57 -0400
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 766B665BF
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:46:55 -0700 (PDT)
+Received: by mail-lj1-x232.google.com with SMTP id a23so1860122ljd.9
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:46:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=ypan38TB2QoAzYWO+fMPZfJPmZAF9oC38F8TiawwsKI=;
-        b=QKLl9jqzOPmCnoTtwZwwMFVM597CPkRIzsC7zl/r8egWnTpbQxRvlGisNM+FCgz6zq
-         SzgGWfUjzldk9oesTJJ3pTNq2j0gQyWLBsTGI7TZsYGyzpEJO0skbzN8wwUT+JBhexmD
-         QRHtDOHBCPRrU4J1Z7EQfEZFVmbIrGWPsvlqdv1bV2JnALQp4eu8vjDC7sdZBdvsuZx/
-         Xqb1C1C7ULHIWYxfSuee1JQm+EMyl9Tg7gKE5IyXbcTgrVvTdj5a+6RPMNXcxsJRvU9j
-         toEZm6RcHXYkeIEMDDh9JcsViH4cOfp337Zy731WcU6doRnwxz7AvaAtyGL736ULW/R3
-         EMAw==
+        bh=dK+WD5XiJYQao1gUbsLI8WBYkfdO7ClJ9IlBjdNlTYU=;
+        b=Uf7e90gAF6tfZ96DnpWUuAKw5ev4Z0NSuKKA/kridTFVTdm3T8hGPr5dpfI9oXQ9O0
+         4ahYXu0ipWBqR7Kef0IF8GnElxVp1Vw6sXwinHkLSPebgK1m3kOd9NnQcpX93y5EuWSR
+         H7tN0HnLcj75vjyXpmkTlWGGQF2qrrToaPBcrCsVS18E60+F1L0r/gHpyCdjbLquvcHf
+         izx2wd1YunKDJ3QYyTf3Lz/cE4fFp4HS0pIjqXx1yUYs+AwS76NTBHlcVcvBkMtWOrYo
+         agX4+HAp+AvWl3IoM4scat8hKabUr+cQxMeom19c9avYQCYKiFdC3+qdYBxQfdvg1Pgo
+         wGsQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ypan38TB2QoAzYWO+fMPZfJPmZAF9oC38F8TiawwsKI=;
-        b=N2Yv3bNIPfRlvn2AXinv/Sxsf1Y4d2eKhp8qob2pa/6q7uk1gnRe3FFO4jJGgVgnQl
-         2fYOhcfx3d2pjCU8X6ac/2sOfNqmV8fYYu6urEmKL8DF7jfWLw3MOUaTaXrHHi5NQNYP
-         oHTmB4GzGlVoLykOzLZOJhSNPFGSi9xCWrELyK7w7b5KnuBjzVqHcdikkXz8s+4HIvaU
-         rgc4nlR42x6/ARyie42flduVqa0nxopIu85Yo/lMRzFiRv1LgpKv7zqBYqnCtME7LZD6
-         f8Je6Nru6nHuglnpKVEj+p+elc+sx3j8HtyFufB9mDPivoDp9HNYf7RIrjVXRt3vcqFq
-         ckIQ==
-X-Gm-Message-State: AOAM530sRYCgvq/suaMEo5YPK1cp4AvEs+5qfmIIHFTVEl2pHeyu2c0n
-        nIhsXvkJNGmYGDZjeXdE1SJWFdwUVZW5Te0nKgovJg==
-X-Google-Smtp-Source: ABdhPJzsrIu9md7U7n1zgj7u1cLuExn4AAVdSQM0L62PSHkBkuz5iBlGUZBgl32ya7QNulKtLODAF2LpeKSeB6JV/Cs=
-X-Received: by 2002:a05:6512:e93:b0:478:70ed:6dfb with SMTP id
- bi19-20020a0565120e9300b0047870ed6dfbmr33055330lfb.358.1654087608721; Wed, 01
- Jun 2022 05:46:48 -0700 (PDT)
+        bh=dK+WD5XiJYQao1gUbsLI8WBYkfdO7ClJ9IlBjdNlTYU=;
+        b=Wr1Z7pGJ1mWgg82UTSNXdvZw7ve9d5h2//8lzhFVVRTicMFZSDT+4sgOe6cT6Gopwx
+         XqPDCDdTWAUmJBK1w+C/Yddg6S7ZG8g+XRTf+zo/x0UH+TllJ4IdPMwkuwbqLic8FmXz
+         YWCIFX6CY4mY0VKrX6G6boGdOyYNSi4cCWa9jaR6lm1JlLw7mZ+6mGcDHxl2jDe/IGdS
+         Sg1MngLaNhtT7/YSqZf8/ssn5oBqL/FJZ0MMzVy1jpaZsEMm7QUibYk5uD3cvY6pcjKt
+         qdNpE/z0vsUFQc5ToX+iVXlZ2NHSLD0tXpKpGjmm0WqEtlZfmB2VaOzPzYfGokKoUIUS
+         qKZw==
+X-Gm-Message-State: AOAM530h7fcTisznyLfNKSW81PxcLhDO5lYxGwloLKMnbyMh+kClq2pW
+        6a4QWvSScCkiq4xzkS/Z1zAA7XZib1TFqwLiRaReKQ==
+X-Google-Smtp-Source: ABdhPJyVYivIyiBvSw8561fRU3HvL0Vkat8jPG14fKrabPQJT84ju1r6Ld9N3qe3Y7BV3RYbe++o/QzuTozjXT/zbH8=
+X-Received: by 2002:a05:651c:a04:b0:253:f0b4:a406 with SMTP id
+ k4-20020a05651c0a0400b00253f0b4a406mr26277427ljq.4.1654087613842; Wed, 01 Jun
+ 2022 05:46:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220523144255.10310-1-linmq006@gmail.com>
-In-Reply-To: <20220523144255.10310-1-linmq006@gmail.com>
+References: <20220526010022.1163483-1-festevam@gmail.com>
+In-Reply-To: <20220526010022.1163483-1-festevam@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Jun 2022 14:46:12 +0200
-Message-ID: <CAPDyKFrtNLRT8prMuVXx9RBVfVuj_yj=KTj9nHaUg0t6euxUDg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: Fix refcount leak in esdhc_signal_voltage_switch
-To:     Miaoqian Lin <linmq006@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        yangbo lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Wed, 1 Jun 2022 14:46:17 +0200
+Message-ID: <CAPDyKFqzwkvAz5W-UnS06EwGnDBW-kTcO4D20WbPFakz8SK5+A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mxc: Silence a clang warning
+To:     Fabio Estevam <festevam@gmail.com>
+Cc:     nathan@kernel.org, linux-mmc@vger.kernel.org,
+        kernel test robot <lkp@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 23 May 2022 at 16:43, Miaoqian Lin <linmq006@gmail.com> wrote:
+On Thu, 26 May 2022 at 03:00, Fabio Estevam <festevam@gmail.com> wrote:
 >
-> of_find_matching_node() returns a node pointer with refcount
-> incremented, we should use of_node_put() on it when not need anymore.
-> Add missing of_node_put() to avoid refcount leak.
-> of_node_put() checks null pointer.
+> Change the of_device_get_match_data() cast to (uintptr_t)
+> to silence the following clang warning:
 >
-> Fixes: ea35645a3c66 ("mmc: sdhci-of-esdhc: add support for signal voltage switch")
-> Signed-off-by: Miaoqian Lin <linmq006@gmail.com>
+> drivers/mmc/host/mxcmmc.c:1028:18: warning: cast to smaller integer type 'enum mxcmci_type' from 'const void *' [-Wvoid-pointer-to-enum-cast]
+>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Fixes: 8223e885e74b ("mmc: mxc: Convert the driver to DT-only")
+> Signed-off-by: Fabio Estevam <festevam@gmail.com>
 
 Queued for v5.20 on the devel branch, thanks!
 
@@ -77,21 +77,22 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/mxcmmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index d9dc41143bb3..8b3d8119f388 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -904,6 +904,7 @@ static int esdhc_signal_voltage_switch(struct mmc_host *mmc,
->                 scfg_node = of_find_matching_node(NULL, scfg_device_ids);
->                 if (scfg_node)
->                         scfg_base = of_iomap(scfg_node, 0);
-> +               of_node_put(scfg_node);
->                 if (scfg_base) {
->                         sdhciovselcr = SDHCIOVSELCR_TGLEN |
->                                        SDHCIOVSELCR_VSELVAL;
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index de04b5afef2e..613f13306433 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -1025,7 +1025,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+>         mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+>         mmc->max_seg_size = mmc->max_req_size;
+>
+> -       host->devtype = (enum mxcmci_type)of_device_get_match_data(&pdev->dev);
+> +       host->devtype = (uintptr_t)of_device_get_match_data(&pdev->dev);
+>
+>         /* adjust max_segs after devtype detection */
+>         if (!is_mpc512x_mmc(host))
 > --
 > 2.25.1
 >
