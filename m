@@ -2,97 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC255C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 06:49:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F9CDC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 09:32:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245500AbiFAGtj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 02:49:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48612 "EHLO
+        id S1351083AbiFAJcM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 05:32:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47418 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233201AbiFAGti (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 02:49:38 -0400
-Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B68068FFBE;
-        Tue, 31 May 2022 23:49:37 -0700 (PDT)
-Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-30c2f288f13so8057817b3.7;
-        Tue, 31 May 2022 23:49:37 -0700 (PDT)
+        with ESMTP id S1351078AbiFAJcL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 05:32:11 -0400
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97AA487A15
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 02:32:09 -0700 (PDT)
+Received: by mail-ed1-x52f.google.com with SMTP id 25so1087676edw.8
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 02:32:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=tn4Et6t93FSUGeem3X7ovetc352Wa8MqQtL6j/+Jl2w=;
-        b=NX/eMVpqPgoS5ta99ANSUfXB8rkjp+D9lNgyt2QCWXY81tKFIj6M9TT+pH9GNgAQ7f
-         8mWcGx+4/OTzHRSQphCQqXUpkLixASW3D934ODJfUhbVBKOhIuhBLH8Dy//i4J+AMACJ
-         RYFE+yuLMwe0yqr+fdM7pdIFWVGr6C4AphdzpYwhs9OKR344coez0mEEE4xV2IaiD+qZ
-         n8NCNcD9bdqvyqwX5ZhXs1lDd07MOZvD1OnebO+2SlDQpHP0tbQgJ2y/RxHdSRyMrOKU
-         /u1dEO2bF0Y9gUwZJfsOa8R1c+Bf13WNh/2sp/jZIEvPOR+68CwZp5IgEWTQI4YOaW31
-         cY2w==
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=9rLHj//9k/15fypiFbMELs3ChxXWRGpeQMJrEmUMxUs=;
+        b=QIpbmzzYJ0HAltV9KIinq7hcn1/hnXtpRXtMmZG9J7qu9J+yvPLSDMoa7T1mF07mXK
+         H0apr2OZxGQd0U1WCKeMv8lb+Fm0H/mDYSMtRdWizypZAKluo8iAZmIxB1zzo1cgkxVD
+         8FqROBoannHWns4ltnEoaFMetuFzZVnMg34x8TBZHDiL1S+h+agEWmJXOJBPr45zEleE
+         wIN4pLzhGLnCkSJ6swE6lcLnjUX895KzSJg8xs9oTGRBgvcXRQgxWZs0dfq2tVdBw1lA
+         e+iovxTxiCiSptWs6zjF6xpsc90sU1LjwN9TwlBSRUrniu3cN+/+/2A8nwrc4UNO1Pv1
+         qyIQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=tn4Et6t93FSUGeem3X7ovetc352Wa8MqQtL6j/+Jl2w=;
-        b=5CZyavTeOyUwBwlMAtdwe61FjowFsV0Hjy306oZ56q4jX5Bayk11Biffp5G1/2fryi
-         1ZL3/WqArlVtI+ZB7ausCxRzG7CDQYpfQJTlnpNN6ACxJi0ATwK46hX5I7e5Qi00ug8E
-         ecqENVKhQ3u41skcoEjLevncRcQkf62nml9gwFC54K1bZ6s6lrfLv5l+lXwdJQBXNR32
-         kF/kvFs47aCIoO9jfzHc27lQZzK9Xb01QWNqieiK37KW5vAAjafIO+GVv+5A0va+VqOQ
-         C9+Twq6U557EaT4pX5v65gUmAZhj6FcRrivxDlwLUKrrTLcERnpcLVMJqDkA1ZlN4FAj
-         4iJQ==
-X-Gm-Message-State: AOAM53074PLPCA2JJPZ08gEjcKTqbGoi1rqlTEByUZEnN1/w/HeAPVue
-        /PYbIXPhEFnHMasTKjXEl4WkGP5lXDOunN/rS0U=
-X-Google-Smtp-Source: ABdhPJx3tHxRf08E3gMq3C+ZOIKMccYhm0ULmHf3lfdxJldc7wRtCVs46Tnou/OQbCfsPK9CEqnzl6YYBRHEuZudM1I=
-X-Received: by 2002:a81:488c:0:b0:302:549f:ffbc with SMTP id
- v134-20020a81488c000000b00302549fffbcmr33359120ywa.495.1654066176872; Tue, 31
- May 2022 23:49:36 -0700 (PDT)
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=9rLHj//9k/15fypiFbMELs3ChxXWRGpeQMJrEmUMxUs=;
+        b=g+mLOObmZW6V2f3hez+g9C+cgayCfrFw+NSfc7CnwJ+qsP+peDZmaOcYOXdwkgz+qm
+         +AVbXeu/ySLiTvKOSx1VjVAC0vAvFt06qEskjYur8cEWiZM/g3D+lQVcrYOh7KOcpi0o
+         qYyvgzuIOna3JkheRjrCkgkPC5T5sP0xq9wVcinbs1dUVNTYI6zJ3CbbaRuitF04oQwE
+         RBINGDBSZbqzqtXvRVgaPkS1Q0EiERt0dnB1BNjr3OqXXg2/cJU/qCjn22NuLpr+D/4a
+         bTGw2R9y96bCaDFnroW61NSx9GcVz6WRDmRn3tBQr7jV+LGJMMjbtgRADZYAaPMc4bap
+         IBgw==
+X-Gm-Message-State: AOAM5328MqCx2pDAQuTP+b8s1ChBjurYFOswvLFUGxlsyT/wys/7iu4H
+        2XGkvTYsWcGum7MdnhRvT6hj4A==
+X-Google-Smtp-Source: ABdhPJxIaNQdmdCizYbGGHKjK+me0jgNnS5X6cMWDDf2h3DFwSO74zQhHh65gXy+skv8i/8hh9yGoQ==
+X-Received: by 2002:a05:6402:e9f:b0:41c:df21:b113 with SMTP id h31-20020a0564020e9f00b0041cdf21b113mr69039921eda.217.1654075928172;
+        Wed, 01 Jun 2022 02:32:08 -0700 (PDT)
+Received: from [192.168.0.179] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id i23-20020a1709061e5700b00708a2ae7620sm102525ejj.67.2022.06.01.02.32.06
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 01 Jun 2022 02:32:07 -0700 (PDT)
+Message-ID: <efdbb151-8213-d1e7-a935-0e857947d450@linaro.org>
+Date:   Wed, 1 Jun 2022 11:32:06 +0200
 MIME-Version: 1.0
-References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
- <YnNagtAtSudCum75@atomide.com> <CAGm1_kv6wYV6ccrGJuGaeR=rffajEBB6H1Mt17iXJeMJg0JozQ@mail.gmail.com>
- <CAK8P3a1xxODV3ak-JgqBmVvJTUG6W8eQ+_B8ZcbYFAhP+4o2EQ@mail.gmail.com>
- <CAGm1_kuYGMAbO0aB52hRwZp6qALALQ4LvMkNuC=F9Pk4P5BdXg@mail.gmail.com> <CAK8P3a2kEWU+rS55QXwOq04pRv2oEQAdqcGsDj1or04DQ4Uqag@mail.gmail.com>
-In-Reply-To: <CAK8P3a2kEWU+rS55QXwOq04pRv2oEQAdqcGsDj1or04DQ4Uqag@mail.gmail.com>
-From:   Yegor Yefremov <yegorslists@googlemail.com>
-Date:   Wed, 1 Jun 2022 08:49:25 +0200
-Message-ID: <CAGm1_ksYy=fueypVJDfVhf=J-cY8r1yJpBYO9cEK5_CTfn5xQA@mail.gmail.com>
-Subject: Re: Linux 5.18.x: sdhci issue
-To:     Arnd Bergmann <arnd@arndb.de>
-Cc:     Tony Lindgren <tony@atomide.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.1
+Subject: Re: [PATCH 00/17] Add support for MT8365 EVK board
+Content-Language: en-US
+To:     Fabien Parent <fparent@baylibre.com>, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
+        qii.wang@mediatek.com, matthias.bgg@gmail.com, jic23@kernel.org,
+        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        srinivas.kandagatla@linaro.org, chunfeng.yun@mediatek.com,
+        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-iio@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
+References: <20220531135026.238475-1-fparent@baylibre.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220531135026.238475-1-fparent@baylibre.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jun 1, 2022 at 8:45 AM Arnd Bergmann <arnd@arndb.de> wrote:
->
-> On Wed, Jun 1, 2022 at 8:08 AM Yegor Yefremov
-> <yegorslists@googlemail.com> wrote:
-> > On Tue, May 31, 2022 at 11:23 AM Arnd Bergmann <arnd@arndb.de> wrote:
-> > > On Tue, May 31, 2022 at 10:28 AM Yegor Yefremov
-> > >
-> > > +       WARN_ON_ONCE(memory_intersects(_stext, _etext, buf, size));
-> > > +       WARN_ON_ONCE(memory_intersects(__start_rodata, __end_rodata,
-> > > buf, size));
-> > > +       WARN_ON_ONCE(object_is_on_stack(buf));
-> > > +       WARN_ON_ONCE(is_vmalloc_or_module_addr(buf));
-> > > +
-> > >         /* Do the bulk of the transfer using block mode (if supported). */
-> > >         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
-> > >                 /* Blocks per command is limited by host count, host transfer
-> > >
-> > >  Does that show something new?
-> > >
-> > > If this is a block device, the change won't help, but I can't find a good place
-> > > to hook into that at the moment. mmc_mq_queue_rq() might work, but
-> > > I think that is still called asynchronously.
-> >
-> > No, the patch provides the same output.
->
-> Can you say what devices are attached to the mmc controller? Is it
-> an eMMC block device, an SDIO device, or both?
+On 31/05/2022 15:50, Fabien Parent wrote:
+> This patch series adds support for the MT8365 EVK board.
+> 
+> This series has dependencies on the following series:
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646256
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646091
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646083
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646081
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646076
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646068
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646020
+> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646052
+> https://lore.kernel.org/r/20220504091923.2219-2-rex-bc.chen@mediatek.com 
+> https://lore.kernel.org/r/20220512062622.31484-2-chunfeng.yun@mediatek.com 
+> https://lore.kernel.org/r/20220512062622.31484-1-chunfeng.yun@mediatek.com
+> https://lore.kernel.org/r/20220524115019.97246-1-angelogioacchino.delregno@collabora.com
+> https://lore.kernel.org/all/20220127015857.9868-1-biao.huang@mediatek.com/
 
-From DTS point of view: MMC and WiFi (SDIO). Physically, only MMC
-(removable SDcard).
+Eh... and how we are supposed to test or apply this? Such dependencies
+could mean none of automated tools will pick it up, so your patchset has
+to wait till dependencies got merged.
 
-Yegor
+
+Best regards,
+Krzysztof
