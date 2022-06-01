@@ -2,105 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46D0CC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:47:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A75EEC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 12:47:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351812AbiFAMrX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 08:47:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34366 "EHLO
+        id S1352242AbiFAMrd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Jun 2022 08:47:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1353041AbiFAMrX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:47:23 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6BC1DEC0
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:47:21 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id be31so2536584lfb.10
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:47:21 -0700 (PDT)
+        with ESMTP id S1353085AbiFAMrb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 08:47:31 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5210E1056C
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 05:47:29 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id j10so2528878lfe.12
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 05:47:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=8u9RNTYeHxY9YWObp6yzipkkBA/vWj6mJ4FlGRiqkoo=;
-        b=LSFLfGwhPD/CksaBMNE5p6uAZAjr81Pcy6QlBdg4n9aaxH6qFvzkLnf3cry1y+PPng
-         qwiBGBYDww9j2fUKH94eQ31VGab56HaeLSLB4c+f8Fud9gFCf/n8Uwa1oQD3L8ccEhCI
-         A4GZ6aDe+kirtSQ7ACTbkAuBDUTooSOAAiwB/qx8hq6BB1h4wlCw9QQYxHW5Stp2u+ev
-         wVMuEWgFxwPsFWIbJbtWdrfTfR23467UmyKtLz5GE3/lEMgoxqtjMhSr6GE3mxVPzNn+
-         50eKsqD5J9gHvXUokp60cHt5R6XaNJ9GyxiMua3HuT7tV0m5PTwW3B9GTj8wMCk15z61
-         YhGA==
+        bh=4li32PBdxnIv+jFKvhCljFF/bYWyWatcYvkg3TZww1s=;
+        b=ywX1q/Sp7hV1p86goYqniFRV4cZlbD1R9yXvl2mfzeiuSR3efubHRWaiRdhX8Esqed
+         mJ3yGD0RUVPPt1f/R+ouSvoTxOqAtRGGgJUYbilgONCDkx8DOopTBoVTnK1YDUsrdubc
+         35isYXnsGcsXSl0mGJFgkq3r3lG7riqq0eSxluKLDD9BSI3Llw6eJre/ph0RCqD4obLC
+         i9YXHOcRy9Xt2c5IM1Gz2xlBGmspzRO9AVWXDux0w0p9TMNZeVhk0CUU/AV1ol0ip3mo
+         xFYcraKqvM6vRkJcCRd/ukGbYMiT6azPbdbKx0f8zsY59oJZGDh+lFQouG4FfWUAYOmP
+         Jukw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=8u9RNTYeHxY9YWObp6yzipkkBA/vWj6mJ4FlGRiqkoo=;
-        b=0III0PlSpQ0dGuXb5HMMA2C6ha3brA8BOy+5pQtsT23lFVyTjz9k3fSymnHYz0ttu1
-         ETjU5li5O20xtm98JhcnEkttMYLsg0N672xrHWiUKyfYgaZYCiCiSiWp3GjqaTNDJRtS
-         UfFj/kenqI94QV2Q9QGACGQjss6dVBrJT2hpFxdKCrymUh20p0RlRGPo7CSunfCJ+P0S
-         HQ9+sgkvkkBdOT1NTo2S6f4QOhALNkAwwrvTpRA+2G+/gZCIKWoPc1xLYXKAGuKX0ld3
-         OOAOJ2gsCDAiwtaqE9sjJjl+hI4VzlBUq3o/ZqfT9vSZle/4iVEQm+fC62DRGXw16og2
-         5MJA==
-X-Gm-Message-State: AOAM532xs/OemxDJ/N/bWHWKyVCI2NsPXAdiI/qvMH3v00VhRtmC+Y1P
-        KL66I2Yv9J28TXuuLYiATLJuBgOlRSIAQJu0mGFboNi6C2k=
-X-Google-Smtp-Source: ABdhPJxDCyWdqBE+ghyIruLdQyvQRKTjhJZ078rEdkP6A6ndEjTtRRBlbO53WBZNtfW9TLaKeVcGSWKH51sPIW5nJIU=
-X-Received: by 2002:a19:ac42:0:b0:478:593c:e6fe with SMTP id
- r2-20020a19ac42000000b00478593ce6femr40749300lfc.254.1654087640129; Wed, 01
- Jun 2022 05:47:20 -0700 (PDT)
+        bh=4li32PBdxnIv+jFKvhCljFF/bYWyWatcYvkg3TZww1s=;
+        b=RHexGXfb3gD2vLNokiEAgvXqjznw0kvFVFyc1PvlIrWiEWX/mFaj8OoDAQVtyf8SsJ
+         4UPNjTnCzzZbmw2I4YwePB/v/TivGCN4bL4sBVJ2W6CUiF7lEcQ7A4s5+9EZFdMVHG/P
+         8RGyj+hxgd1tr++AhJ8HHaqrJ80vuj247kRTGkYiVG+cXiVbJf/WPeM0nh7QHK1fVO9P
+         YdXzFUilYvLvKfOsn5smvmYFezY9mBih0nQn9wnsrYCxDab5gccyuZsGxcwphb1OqlMw
+         Mt4ui/BzlCdD2ZoWt9cRaPQSb67+Eo2v0PbrckMLFtn4AXPO/ygvsmwi2GXzJu+6ocD0
+         onDw==
+X-Gm-Message-State: AOAM533HNDRdHTb7+S0r5yN9NuSICoyBy8OQrbQgp2IRbs1YPKn2EGHz
+        nnoMflsdwJ1ml+Xi9oopgta2Kq/DqQE7M7kDDWKGbA==
+X-Google-Smtp-Source: ABdhPJw8rLYnetAKH4EyHC77hyUUHRF/sLZFy9a2sig6ks5ygw10wco9yqviC0600wPiouO4wz2Lk4I3fuUHalzgJn0=
+X-Received: by 2002:a05:6512:308b:b0:478:7ab5:4acd with SMTP id
+ z11-20020a056512308b00b004787ab54acdmr34023519lfd.167.1654087647633; Wed, 01
+ Jun 2022 05:47:27 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220531171922.76080-1-adrian.hunter@intel.com>
-In-Reply-To: <20220531171922.76080-1-adrian.hunter@intel.com>
+References: <1653674036-21829-1-git-send-email-quic_c_sbhanu@quicinc.com>
+In-Reply-To: <1653674036-21829-1-git-send-email-quic_c_sbhanu@quicinc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Jun 2022 14:46:42 +0200
-Message-ID: <CAPDyKFpjNj4QP5UvYL6z2ApGz9Cg=_8c9m8QaY_BtUdh6n3_zA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: Fix CQE recovery reset success
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Date:   Wed, 1 Jun 2022 14:46:51 +0200
+Message-ID: <CAPDyKFqqSdCGV-SGcbEFCA5rXaqUc0btYd9Tig43NouNuHUG5Q@mail.gmail.com>
+Subject: Re: [PATCH V8 0/5] mmc: add error statistics for eMMC and SD card
+To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        adrian.hunter@intel.com
+Cc:     wsa+renesas@sang-engineering.com, shawn.lin@rock-chips.com,
+        yoshihiro.shimoda.uh@renesas.com, digetx@gmail.com,
+        quic_asutoshd@quicinc.com, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
+        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
+        quic_sayalil@quicinc.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 31 May 2022 at 19:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Fri, 27 May 2022 at 19:54, Shaik Sajida Bhanu
+<quic_c_sbhanu@quicinc.com> wrote:
 >
-> The intention of the use of mmc_blk_reset_success() in
-> mmc_blk_cqe_recovery() was to prevent repeated resets when retrying and
-> getting the same error. However, that may not be the case - any amount
-> of time and I/O may pass before another recovery is needed, in which
-> case there would be no reason to deny it the opportunity to recover via
-> a reset if necessary. CQE recovery is expected seldom and failure to
-> recover (if the clear tasks command fails), even more seldom, so it is
-> better to allow the reset always, which can be done by calling
-> mmc_blk_reset_success() always.
+> Changes since V7:
+>         - Patch set V6 rebased on Ulf's(Ulf Hansson) master branch instead
+>           of Ulf's (Ulf Hansson) next branch by mistake. So rebased patch
+>           set on Ulf's next branch now as suggested by Adrain Hunter.
 
-Thanks for the explanation, this certainly makes sense to me too!
+Thanks to both of you for moving this forward to become an easy
+maintainable piece of code.
 
->
-> Fixes: 1e8e55b67030c6 ("mmc: block: Add CQE support")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-
-Applied for fixes, thanks!
+Queued for v5.20 on the devel branch, thanks!
 
 Kind regards
 Uffe
 
 
-> ---
->  drivers/mmc/core/block.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 1259ca22d625..f4a1281658db 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1499,8 +1499,7 @@ void mmc_blk_cqe_recovery(struct mmc_queue *mq)
->         err = mmc_cqe_recovery(host);
->         if (err)
->                 mmc_blk_reset(mq->blkdata, host, MMC_BLK_CQE_RECOVERY);
-> -       else
-> -               mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
-> +       mmc_blk_reset_success(mq->blkdata, MMC_BLK_CQE_RECOVERY);
+> Changes since V6:
+>         - Rebased on Ulf's(Ulf Hansson) next branch as suggested by
+>           Adrain Hunter.
+>         - Replaced debugfs_create_file() with debugfs_create_file_unsafe()
+>           as suggested by Adrain Hunter.
+>         - "[V6,5/5] mmc: cqhci: Capture eMMC and SD card errors" not
+>           included in this Patch series as we don't have cqhci changes
+>           on Ulf's(Ulf Hansson)next branch.
 >
->         pr_debug("%s: CQE recovery done\n", mmc_hostname(host));
->  }
+> Changes since V5:
+>         - Considered all error stats enums to set error state.
+>         - Added missed tuning error related code changes which was
+>           missed in patch set V5 as Adrain Hunter pointed.
+>         - Replaced DEFINE_SIMPLE_ATTRIBUTE with DEFINE_DEBUGFS_ATTRIBUTE
+>           as suggested by Adrain Hunter.
+>
+> Changes since V4:
+>         - Defined new macro to increment err_stats members when error occured
+>           as suggested by Adrain Hunter.
+>         - Called err_stats members increment function after printing the error
+>           as suggested by Adrain Hunter.
+>         - Considered INDEX and END_BIT errors same as CRC errors as suggested
+>           by Adrain Hunter.
+>         - Removed Null check for host in debug fs functions and Reordered
+>           err_stats declarationas suggested by Adrain Hunter.
+>         - Removed err_state variable stuff and updated err_state debug fs entry
+>           based on the err_stats members state as suggested by Adrain Hunter.
+>
+> Changes since V3:
+>         - Dropped error stats feature flag as suggested by Adrain Hunter.
+>         - Separated error state related changes in separate patches as
+>           suggested by Adrain Hunter.
+>           [PATCH V4 4/7] : error state debug fs
+>           [PATCH V4 5/7] : error state enable function
+>           [PATCH V4 6/7] : error state enable in error case
+>         - Note: we are enabling error state before calling sdhci_dumpregs
+>           we couldn't add the err state in error stats array as err state
+>           is not error type.
+>         - Corrected Signed-off-by order as suggested by Bjron Andersson.
+>         - Moved error state enable code from sdhci_dumpregs to error
+>           conditions as suggested by Adrain Hunter
+>
+> Changes since V2:
+>         - Removed userspace error stats clear debug fs entry as suggested
+>           by Adrain Hunter.
+>         - Split patch into 4 patches
+>           [PATCH V3 1/4] : sdhci driver
+>           [PATCH V3 2/4] : debug fs entries
+>           [PATCH V3 3/4] : core driver
+>           [PATCH V3 4/4] : cqhci driver
+>         - Used for loop to print error messages instead of using printf
+>           statements for all error messages as suggested by Adrain Hunter.
+>         - Introduced one flag to enable error stats feature, if any other
+>           client wants to use this feature, they need to enable that flag.
+>         - Moved reset command timeout error statement to card init flow
+>           as suggested by Adrain Hunter.
+>
+> Changes since V1:
+>         - Removed sysfs entry for eMMC and SD card error statistics and added
+>           debugfs entry as suggested by Adrian Hunter and Ulf Hansson.
+>
+> Shaik Sajida Bhanu (5):
+>   mmc: core: Capture eMMC and SD card errors
+>   mmc: sdhci: Capture eMMC and SD card errors
+>   mmc: debugfs: Add debug fs entry for mmc driver
+>   mmc: debugfs: Add debug fs error state entry for mmc driver
+>   mmc: cqhci: Capture eMMC and SD card errors
+>
+>  drivers/mmc/core/core.c       | 10 +++++-
+>  drivers/mmc/core/debugfs.c    | 79 +++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/cqhci-core.c |  9 ++++-
+>  drivers/mmc/host/sdhci.c      | 59 ++++++++++++++++++++++++--------
+>  drivers/mmc/host/sdhci.h      |  3 ++
+>  include/linux/mmc/host.h      | 26 ++++++++++++++
+>  include/linux/mmc/mmc.h       |  6 ++++
+>  7 files changed, 175 insertions(+), 17 deletions(-)
+>
 > --
-> 2.25.1
+> QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member
+> of Code Aurora Forum, hosted by The Linux Foundation
 >
