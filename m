@@ -2,91 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7B96C43334
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jun 2022 14:34:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 344D3C43334
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jun 2022 14:46:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232600AbiFBOeJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Jun 2022 10:34:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56650 "EHLO
+        id S234569AbiFBOqt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Jun 2022 10:46:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230463AbiFBOeI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2022 10:34:08 -0400
-Received: from mail-oa1-f52.google.com (mail-oa1-f52.google.com [209.85.160.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 402BE28184D;
-        Thu,  2 Jun 2022 07:34:07 -0700 (PDT)
-Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-f2e0a41009so6955504fac.6;
-        Thu, 02 Jun 2022 07:34:07 -0700 (PDT)
+        with ESMTP id S234492AbiFBOqt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2022 10:46:49 -0400
+Received: from mail-oi1-f171.google.com (mail-oi1-f171.google.com [209.85.167.171])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D4CB2187;
+        Thu,  2 Jun 2022 07:46:47 -0700 (PDT)
+Received: by mail-oi1-f171.google.com with SMTP id k11so6742835oia.12;
+        Thu, 02 Jun 2022 07:46:47 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=pVu2oQVild1vEKEAE+Rn0XDQ1xRpMhSCJgQ4U59zTYk=;
-        b=ZZ3QM+vL4tRVvjtlv0SZc+pTGL+UO7vgBBhxJ5Pc5MVP0dCee5zUbb+99mOWbKb2Cd
-         9kylzmd5AkFpM0JpzMtUCNEEx044GTQGJ/hZjhndtdHYEV4Z8302ShnfnQtdULaD2fOL
-         DoJzMAMmCynsBf2PPX02bbPHlZRnfbS6mn2/C2dc7q7eYNn0/CuvWTBLXWnWRGgE5xEY
-         JPVvwZKsHsPSoF6yH0yGis4IqlB8CcYaawpyj7ukIIoJ+0KSBMAJVFqH07dD349AbYLs
-         Ltx4u/bDO3Rficd4Q+iq4RBVs39TEFIGsH2EyiVn+x6G3cTz2J5P8f+v+5van0mqb4+y
-         VXpA==
-X-Gm-Message-State: AOAM5321/4pYFhhdhWxCG9C8dHmxIKN0VVTC1VnzkNv71e84E6SCCRjc
-        f18q/fAFkMkmLzZO3e1flpCBMPQh4Q==
-X-Google-Smtp-Source: ABdhPJzHsqGg59s873sO3ghowbtFbU/KemkqSRcAXPRkYLZuOwweeGLbUVPRfijI5vRbV2R7AvRBJg==
-X-Received: by 2002:a05:6870:339a:b0:f2:d065:be1f with SMTP id w26-20020a056870339a00b000f2d065be1fmr2927823oae.69.1654180446565;
-        Thu, 02 Jun 2022 07:34:06 -0700 (PDT)
+        bh=9OqbyLMTa5EEL6RxtyCIR/NHZfXvXp6qSuYlVj8gFdA=;
+        b=uDibgpz8EwlPQvtjAG7dohqOJX9i4xiDSoaXjcYA9UEi5/cuYoj/aV4JPYflzKukTy
+         i+JNjtlyXz/mfqPZd0cdC3KfsgeLAqIdDH68zbobgmhxXT2IK6AR0Xx+5akb3dejwEax
+         xQhld6Q1b/aknXKEPKr5CI5tP8j7YL6Mn5wRlB/FF/6CLFjUVKIClrd+JUmutQFL8Esg
+         p3qv+FqUmM9x/z1GG8kIdyqa8EuyXDwU1qFxTn6uDHhoDUd9AvepOz9XunExnGwnJiXH
+         CcTCmWci/8khwcF+FgB3vSZr43C5C+67RRAk4YfXvMqZ7ar+Fr7cKR7o5w9juIR7SIR0
+         8WAg==
+X-Gm-Message-State: AOAM532ZhCMzaBv2YxcWpuzGP99GXBVBb8WjytdmpowTadxbFzI7zGTg
+        HoDO1NZ2xj1Hyp3+af3Bzg==
+X-Google-Smtp-Source: ABdhPJy6omKqs5U1K2FahbzcdCjnEXHb8La5WghrtetpNPL23YoGja2J0Zasvgq2RMqS0e/WWXxC6g==
+X-Received: by 2002:a05:6808:20aa:b0:32b:a632:fb5e with SMTP id s42-20020a05680820aa00b0032ba632fb5emr2855961oiw.264.1654181206717;
+        Thu, 02 Jun 2022 07:46:46 -0700 (PDT)
 Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id t7-20020a05687044c700b000f34dacf350sm2051519oai.6.2022.06.02.07.34.05
+        by smtp.gmail.com with ESMTPSA id y12-20020a544d8c000000b00325cda1ffbasm2338898oix.57.2022.06.02.07.46.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 02 Jun 2022 07:34:06 -0700 (PDT)
-Received: (nullmailer pid 2263860 invoked by uid 1000);
-        Thu, 02 Jun 2022 14:34:05 -0000
-Date:   Thu, 2 Jun 2022 09:34:05 -0500
+        Thu, 02 Jun 2022 07:46:46 -0700 (PDT)
+Received: (nullmailer pid 2291389 invoked by uid 1000);
+        Thu, 02 Jun 2022 14:46:45 -0000
+Date:   Thu, 2 Jun 2022 09:46:45 -0500
 From:   Rob Herring <robh@kernel.org>
-To:     Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-Cc:     ulf.hansson@linaro.org, krzysztof.kozlowski+dt@linaro.org,
-        bhupesh.sharma@linaro.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        quic_rampraka@quicinc.com, quic_pragalla@quicinc.com,
-        quic_sartgarg@quicinc.com, quic_nitirawa@quicinc.com,
-        quic_sayalil@quicinc.com
-Subject: Re: [PATCH V5] dt-bindings: mmc: sdhci-msm: Add gcc resets strings
-Message-ID: <20220602143405.GA2261501-robh@kernel.org>
-References: <1654170291-29910-1-git-send-email-quic_c_sbhanu@quicinc.com>
+To:     Axe Yang <axe.yang@mediatek.com>
+Cc:     devicetree@vger.kernel.org, Eric Biggers <ebiggers@google.com>,
+        Kiwoong Kim <kwmad.kim@samsung.com>, linux-mmc@vger.kernel.org,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Yue Hu <huyue2@yulong.com>, Stephen Boyd <swboyd@chromium.org>,
+        angelogioacchino.delregno@collabora.com,
+        linux-arm-kernel@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Satya Tangirala <satyat@google.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Tian Tao <tiantao6@hisilicon.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org
+Subject: Re: [RESEND v12 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
+ pinctrls properties
+Message-ID: <20220602144645.GA2291328-robh@kernel.org>
+References: <20220525015140.384-1-axe.yang@mediatek.com>
+ <20220525015140.384-2-axe.yang@mediatek.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1654170291-29910-1-git-send-email-quic_c_sbhanu@quicinc.com>
+In-Reply-To: <20220525015140.384-2-axe.yang@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jun 02, 2022 at 05:14:51PM +0530, Shaik Sajida Bhanu wrote:
-> Add gcc hardware reset supported strings for qcom-sdhci controller
+On Wed, 25 May 2022 09:51:38 +0800, Axe Yang wrote:
+> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
+> This feature allow SDIO devices alarm asynchronous interrupt to host
+> even when host stop providing clock to SDIO card. An extra wakeup
+> interrupt and pinctrl states for SDIO DAT1 pin state switching are
+> required in this scenario.
 > 
-> Signed-off-by: Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
-> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 > ---
-> Changes since V4:
-> 	- Updated Dt bindings changes YAML format as suggested by
-> 	  Ulf Hansson.
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 50 ++++++++++++++++++-
+>  1 file changed, 49 insertions(+), 1 deletion(-)
 > 
-> Changes since V3:
-> 	- Removed reset-names from DT bindings as suggested by
-> 	  Stephen Boyd.
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index e423633..5548c35 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -121,6 +121,9 @@ properties:
->      description: A phandle to sdhci power domain node
->      maxItems: 1
->  
-> +  resets:
-> +    description: Phandle and reset specifier for the device's reset.
 
-Don't need generic descriptions for common properties. What you do need 
-is how many entries and what each entry is if more than one.
-
-Rob
+Reviewed-by: Rob Herring <robh@kernel.org>
