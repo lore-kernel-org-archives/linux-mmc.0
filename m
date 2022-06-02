@@ -2,87 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2748CC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Jun 2022 14:27:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B895CCA479
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Jun 2022 06:07:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355184AbiFAO07 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Jun 2022 10:26:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51588 "EHLO
+        id S230086AbiFBGHT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Jun 2022 02:07:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355620AbiFAO0n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2022 10:26:43 -0400
-Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1262ACD0
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Jun 2022 07:20:52 -0700 (PDT)
-Received: by mail-lj1-x234.google.com with SMTP id g12so2174460lja.3
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2022 07:20:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/qDPxqxtAnqx70yomMz4iKcG/suKMrIdMG5mPCftR2g=;
-        b=gVFN2d29Ob2IsoQslrcbptF3svKScdiHyFPmNr10CFxhknhNn7gqwsCr9mypdHMeuG
-         I7gk65CFQNFA2oKopvqa13ri4A88g45f4vVdOURoytvhrtLUr9CcFjTCUiQugHnnOXiX
-         1jOT8/raJcsgiLpvcIgBcyfQdYnhYIoFsUlynR1Cm5PJGCFH8ubju+VXnv+qmsEJ41uz
-         nRA+RsZVOyGUxogebV8INdIHtxPZrKXyGasyf9ReRz6j850wBTV6UhXNjlxn7RYN70N/
-         ahpY3ajNR6s6gcsLlhKnHBHSwtFNLicEaHdRprD/mwMZ8dQV35aorV1pkxL10dFefyNR
-         NCfQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/qDPxqxtAnqx70yomMz4iKcG/suKMrIdMG5mPCftR2g=;
-        b=hqlB3uUY4XiuRKpRBF/lFjdhDWo0o4m5K9rG5rDCqat9ikDjjjkXxlLhxLDWUuAacI
-         Buyz+INkPp3J2ccBDfQ6D2n5tooH9ci+4jbnKc/p5iRYfVHxCax3mgyIkuPiKawL2rw3
-         PVaE4JBuEFD+7NIFuX6gpd4kHApI5rFjMR0VaQRYLQDy5iSMjh0x0B9qQefmrpAnKPRc
-         qFmr000MWEvD5dhYbWeiNlyXG5ZZaaMDKmHzkZLOz/LE2Wn5vHGrZFnBaFmhYRQ0JMrD
-         z0FmD4DXdiqMjswmK4y27qAOs26VpLvoC3R7iRsbGCuIAUFjYde0L45yfP753OYh30s7
-         9UlQ==
-X-Gm-Message-State: AOAM532p6E54CapQcrSqk0VIVrf/htyIqgMSTz/NSz2cC9fvT7UyWl3i
-        p35pFMfjMIOrvW9Bq8nlRI8++bdxb66aW6vpLvjzgA==
-X-Google-Smtp-Source: ABdhPJyHLe+8u5VYlCGJLP8Qc+G0asgDycWaaA6EZ0mEacenGngsM1+d36udkKA5adI89ZmSgyxTW2xZap3Rb49TyUQ=
-X-Received: by 2002:a2e:9e54:0:b0:250:d6c8:c2a6 with SMTP id
- g20-20020a2e9e54000000b00250d6c8c2a6mr40310597ljk.16.1654093250356; Wed, 01
- Jun 2022 07:20:50 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220526014204.2873107-1-robh@kernel.org> <CAPDyKFoh5FyRDxr22XnkOd76MG4YjkvqL039=+qHGZKwfdFquw@mail.gmail.com>
- <20220601140429.GA3909718-robh@kernel.org>
-In-Reply-To: <20220601140429.GA3909718-robh@kernel.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Jun 2022 16:20:14 +0200
-Message-ID: <CAPDyKFoDfBCFrdvDunCm4a2v_A=UzVMJvHyNN6XAdjjQ=gzkvg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: Fix unevaluatedProperties warnings in examples
-To:     Rob Herring <robh@kernel.org>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Hu Ziji <huziji@marvell.com>, Al Cooper <alcooperx@gmail.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+        with ESMTP id S230346AbiFBGHS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2022 02:07:18 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 423DC115A49;
+        Wed,  1 Jun 2022 23:07:14 -0700 (PDT)
+X-UUID: 64c8e88d33264b52b7a459e9a3d61e39-20220602
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.5,REQID:e0c906d2-7aec-498a-8a7c-523da98f9ed9,OB:0,LO
+        B:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACTI
+        ON:release,TS:0
+X-CID-META: VersionHash:2a19b09,CLOUDID:e8cb910d-3a0d-4bbe-9d72-0e5d26d57423,C
+        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil
+        ,QS:0,BEC:nil
+X-UUID: 64c8e88d33264b52b7a459e9a3d61e39-20220602
+Received: from mtkmbs11n1.mediatek.inc [(172.21.101.185)] by mailgw02.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 1097358930; Thu, 02 Jun 2022 14:07:09 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
+ mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
+ Thu, 2 Jun 2022 14:07:07 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkmbs11n1.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
+ Transport; Thu, 2 Jun 2022 14:07:05 +0800
+Message-ID: <1d07579c0a6b8853ab72e345a0bd0be73549de8c.camel@mediatek.com>
+Subject: Re: [RESEND v12 0/3] mmc: mediatek: add support for SDIO async IRQ
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>
+Date:   Thu, 2 Jun 2022 14:07:04 +0800
+In-Reply-To: <20220525015140.384-1-axe.yang@mediatek.com>
+References: <20220525015140.384-1-axe.yang@mediatek.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 1 Jun 2022 at 16:04, Rob Herring <robh@kernel.org> wrote:
->
-> On Wed, Jun 01, 2022 at 02:46:21PM +0200, Ulf Hansson wrote:
-> > On Thu, 26 May 2022 at 03:42, Rob Herring <robh@kernel.org> wrote:
-> > >
-> > > The 'unevaluatedProperties' schema checks is not fully working and doesn't
-> > > catch some cases where there's a $ref to another schema. A fix is pending,
-> > > but results in new warnings in examples. Fix the warnings by removing
-> > > spurious properties or adding a missing property to the schema.
-> > >
-> > > Signed-off-by: Rob Herring <robh@kernel.org>
-> >
-> > Queued for v5.20 on the devel branch, thanks!
->
-> Can you take for 5.19 instead so I can enable this in dtschema sooner
-> rather than later?
+Hi,
 
-Sure! I have moved the patch to the fixes branch now.
+Gentle ping for this set.
 
-Kind regards
-Uffe
+On Wed, 2022-05-25 at 09:51 +0800, Axe Yang wrote:
+> Changes in v12:
+> - assign NULL to pins_eint directly instead of using kfree()
+> 
+> Changes in v11:
+> - remove '_irq' suffix in interrupts-names property
+> - fix yaml example build error
+> - refactor msdc_enable_sdio_irq(), free pins_eint if async irq is not
+> supported
+> 
+> Changes in v10:
+> - add sample node for SDIO host which support wakeup interrupt in
+> yaml
+> - skip MMC_PM_WAKE_SDIO_IRQ check before enable SDIO async interrupt
+> - add MMC_PM_KEEP_POWER check before SDIO eint pinstate parsing
+> - use dev_pm_set_dedicated_wake_irq_reverse() to correct irq control
+> sequence
+> - set dedicated irq in msdc_enable_sdio_irq() rather than
+> msdc_drv_probe()
+> - remove unnecessary wake irq control, rpm/dpm system shall manage
+> that
+> - move wake irq/msdc irq control back to system suspend phase, use
+> rpm_suspend
+>   and rpm_resume to ensure irq control sequence:
+>      disable msdc irq -> enable wake irq -> disable wake irq ->
+> enable msdc irq
+> - simplify variables, check pins_eint to know whether wakeup settings
+> are managed
+> 
+> Changes in v9:
+> - remove pinctrl "state_dat1"
+> 
+> Changes in v8:
+> - remove maxItems property under pinctrl-names property
+> 
+> Changes in v7:
+> - add device_init_wakeup() to register SDIO host as wakeup source
+> 
+> Changes in v6:
+> - abandon cap-sdio-async-irq flag, use wakeup-source flag instead
+> - extend interrupts and pinctrls in mediatek mmc host controller DT
+> documents
+> - add mmc_card_enable_async_irq() to access enable_async_irq flag
+> - simplify wakeup irq implementation with dedicate wake up irq
+> related interface
+> 
+> Changes in v5:
+> - resort variables to reversed xmas tree order
+> - restore old copyright year range and add current year back
+> 
+> Changes in v4:
+> - add MMC_CAP2_SDIO_ASYNC_IRQ judge before lookup eint pinctrl
+> - replace spin_lock_irqsave() variant with spin_lock() in eint irq
+> handler
+> 
+> Changes in v3:
+> - correct abbreviations with capital letters in commit message
+> - replace copyright year with 2022 in mtk-sd.c
+> - remove unnessary pointer casting
+> - adjust variable order to reversed xmas tree
+> - remove a redundant blank line
+> - refine if statement, following standard pattern
+> 
+> Changes in v2:
+> - change flag name from 'cap-sdio-async-int' to 'cap-sdio-async-irq'
+> - change corresponding macro names from xxx_INT to xxx_IRQ
+> - resort new member in msdc_host structure
+> - refine function msdc_request_dat1_eint_irq()
+> - rename msdc_{suspend,resume} function names, add suffix '_noirq'
+> - add MMC_CAP2_NO_SDIO judgement before parse eint related pin
+> setting
+> 
+> Axe Yang (3):
+>   dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
+>   mmc: core: Add support for SDIO wakeup interrupt
+>   mmc: mediatek: add support for SDIO eint wakup IRQ
+> 
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 50 +++++++++++-
+>  drivers/mmc/core/sdio.c                       | 14 ++++
+>  drivers/mmc/host/mtk-sd.c                     | 80
+> +++++++++++++++++--
+>  include/linux/mmc/card.h                      |  8 +-
+>  include/linux/mmc/sdio.h                      |  5 ++
+>  5 files changed, 149 insertions(+), 8 deletions(-)
+> 
+
