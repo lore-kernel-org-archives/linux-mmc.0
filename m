@@ -2,181 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58909C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 17:03:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E011C43334
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 18:36:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344192AbiFCRD2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Jun 2022 13:03:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40968 "EHLO
+        id S1347523AbiFCSgg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Jun 2022 14:36:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52748 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344194AbiFCRD0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 13:03:26 -0400
-Received: from mailout3.samsung.com (mailout3.samsung.com [203.254.224.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4AC56522DC
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 10:03:25 -0700 (PDT)
-Received: from epcas5p4.samsung.com (unknown [182.195.41.42])
-        by mailout3.samsung.com (KnoxPortal) with ESMTP id 20220603170320epoutp03515a7b881137d8a227d0adcb7eaa5e53~1KxNQT9Nl1777217772epoutp03p
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 17:03:20 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20220603170320epoutp03515a7b881137d8a227d0adcb7eaa5e53~1KxNQT9Nl1777217772epoutp03p
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1654275800;
-        bh=KBmvvzMnh2/52C5pNCCda5UPKYKmJcSnfpNu3ArKFdg=;
-        h=From:To:In-Reply-To:Subject:Date:References:From;
-        b=ukHlhsXxVjZRsrcvznffT5JcJxd/SCR1lE+dcoARecPXuhkrejejEvir4reSVpAH9
-         qlZ8bqE+ewz8ojjhw07fV3MKGAKAYeMEBAuPuB2RhQXGu4CAND/qFkThGa5FVlykuU
-         QntzHVygExfEDJV+fCNSP6IofakfbkfE5SYz2kMk=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-        epcas5p4.samsung.com (KnoxPortal) with ESMTP id
-        20220603170319epcas5p4cd248f1dac3749386583bd44094cea31~1KxMrvFmM2130621306epcas5p4B;
-        Fri,  3 Jun 2022 17:03:19 +0000 (GMT)
-Received: from epsmges5p1new.samsung.com (unknown [182.195.38.174]) by
-        epsnrtp3.localdomain (Postfix) with ESMTP id 4LF8N40MD6z4x9Pp; Fri,  3 Jun
-        2022 17:03:16 +0000 (GMT)
-Received: from epcas5p3.samsung.com ( [182.195.41.41]) by
-        epsmges5p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        F5.4D.10063.3DE3A926; Sat,  4 Jun 2022 02:03:15 +0900 (KST)
-Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
-        epcas5p2.samsung.com (KnoxPortal) with ESMTPA id
-        20220603170315epcas5p2c1f844687b229c436b48253c53f36952~1KxI5z5RT2045720457epcas5p2x;
-        Fri,  3 Jun 2022 17:03:15 +0000 (GMT)
-Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
-        epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
-        20220603170315epsmtrp28f221bfe7ac81eb634f2f6ea5874edeb~1KxI5Ejan1742117421epsmtrp2D;
-        Fri,  3 Jun 2022 17:03:15 +0000 (GMT)
-X-AuditID: b6c32a49-4cbff7000000274f-8f-629a3ed3cddc
-Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        E4.9D.11276.3DE3A926; Sat,  4 Jun 2022 02:03:15 +0900 (KST)
-Received: from alimakhtar03 (unknown [107.122.12.5]) by epsmtip2.samsung.com
-        (KnoxPortal) with ESMTPA id
-        20220603170313epsmtip2c645054fc04ceaa116d867ceb2b86c56~1KxHXyArB0497504975epsmtip2e;
-        Fri,  3 Jun 2022 17:03:13 +0000 (GMT)
-From:   "Alim Akhtar" <alim.akhtar@samsung.com>
-To:     "'Krzysztof Kozlowski'" <krzysztof.kozlowski@linaro.org>,
-        "'Ulf Hansson'" <ulf.hansson@linaro.org>,
-        "'Rob Herring'" <robh+dt@kernel.org>,
-        "'Krzysztof Kozlowski'" <krzysztof.kozlowski+dt@linaro.org>,
-        "'Jaehoon Chung'" <jh80.chung@samsung.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-samsung-soc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-In-Reply-To: <20220603094946.509919-3-krzysztof.kozlowski@linaro.org>
-Subject: RE: [PATCH 2/3] arm64: dts: exynos: align MMC node name with
- dtschema
-Date:   Fri, 3 Jun 2022 22:33:12 +0530
-Message-ID: <012c01d8776b$d08961a0$719c24e0$@samsung.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-Mailer: Microsoft Outlook 16.0
-Thread-Index: AQJnTgxmo1hiaDX0AoRFzAPFxadt/AIGIl0cAkAMriir/gn/QA==
-Content-Language: en-us
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrBJsWRmVeSWpSXmKPExsWy7bCmpu5lu1lJBqtmW1nMP3KO1eLGrzZW
-        i74XD5kt9r7eym6x6fE1VovLu+awWRz5389oMeP8PiaL1r1H2C2Orw134PLYtKqTzePOtT1s
-        HpuX1Hv0bVnF6PF5k1wAa1S2TUZqYkpqkUJqXnJ+SmZeuq2Sd3C8c7ypmYGhrqGlhbmSQl5i
-        bqqtkotPgK5bZg7QTUoKZYk5pUChgMTiYiV9O5ui/NKSVIWM/OISW6XUgpScApMCveLE3OLS
-        vHS9vNQSK0MDAyNToMKE7Iwn7T/YCyYLVJzZtpCpgfECbxcjJ4eEgInEl77ZLCC2kMBuRonV
-        jb5djFxA9idGicsHHzJBON8YJVrOLmGG6Wh8cI8dIrEXqOP6ZkYI5yWjxOItt9hBqtgEdCV2
-        LG5jA0mICCxnlrh+fy5YO6eAq8STroeMILawQIDEv33tYA0sAioSu3d1soLYvAKWErPu/oKy
-        BSVOznwCdiCzgLzE9rdzoM5QkPj5dBlYjYiAk8TnvxOgasQlXh49AnaehMBCDonJew6zQzS4
-        SCx+38oGYQtLvDq+BSouJfH53V6gOAeQ7SGx6I8URDhD4u3y9YwQtr3EgStzWEBKmAU0Jdbv
-        0odYxSfR+/sJE0Qnr0RHmxBEtapE87urLBC2tMTE7m5WCNtD4v+mK9CAu8wo8fXEGpYJjAqz
-        kHw5C8mXs5B8Mwth8wJGllWMkqkFxbnpqcWmBYZ5qeXwCE/Oz93ECE6yWp47GO8++KB3iJGJ
-        g/EQowQHs5IIb9m8mUlCvCmJlVWpRfnxRaU5qcWHGE2BQT+RWUo0OR+Y5vNK4g1NLA1MzMzM
-        TCyNzQyVxHkF/jcmCQmkJ5akZqemFqQWwfQxcXBKNTDtXClb7nXufu+Fb8sfBWWYcRWlPl8V
-        FpRWpxY8Sdv1x5cjax9Mib0g1bJdy1/js3H9IqfNx2d7bZROYEmVnV1tEZZruronWH5h2Mxe
-        3mW7j1/S3r48ZmHqowURRn78+SdT220OXX/2InOexnkZ5Yhr582jPqg1/JN3bfEs/1P/+ud2
-        3sczi1oV9wvvPpXzSbT6QtwFe43WHfvk0m/ulTiw/7ROX6vXrf0J20+tbas+ffDzFjn+bGPX
-        1/dcmLL1mQ38UyN+fJ/y+zWz4Meu6qavdzXtovmZ+ntY4go7T52ZNG/n9FrXQ0n9iRFT5S4d
-        YtiXZ97/1+2ynMABtYQvXy//65K9sc3q4AehsIOl5v+UWIozEg21mIuKEwH4h49LOwQAAA==
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmphkeLIzCtJLcpLzFFi42LZdlhJXvey3awkgx1XBSzmHznHanHjVxur
-        Rd+Lh8wWe19vZbfY9Pgaq8XlXXPYLI7872e0mHF+H5NF694j7BbH14Y7cHlsWtXJ5nHn2h42
-        j81L6j36tqxi9Pi8SS6ANYrLJiU1J7MstUjfLoEr40n7D/aCyQIVZ7YtZGpgvMDbxcjJISFg
-        ItH44B57FyMXh5DAbkaJpW9amSAS0hLXN05gh7CFJVb+ew5V9JxR4vaSt6wgCTYBXYkdi9vY
-        QBIiAuuZJS4fvc8EUXWeUeJD52xmkCpOAVeJJ10PGUFsYQE/iRVP/4F1swioSOze1Qlm8wpY
-        Ssy6+wvKFpQ4OfMJSxcjBwezgJ5E20awVmYBeYntb+cwQ1ykIPHz6TKwchEBJ4nPfyewQNSI
-        S7w8eoR9AqPQLCSTZiFMmoVk0iwkHQsYWVYxSqYWFOem5xYbFhjmpZbrFSfmFpfmpesl5+du
-        YgRHlJbmDsbtqz7oHWJk4mA8xCjBwawkwls2b2aSEG9KYmVValF+fFFpTmrxIUZpDhYlcd4L
-        XSfjhQTSE0tSs1NTC1KLYLJMHJxSDUyc+xZW3lgquLGKaV2O655Dt322Ta+cdDzo2PFqrT9S
-        daaMiZV80/b6553i/9U553xxznaukLle2fvZP6RmmK3bzbohY/trkSVpOc2lB5JiwxPCebpk
-        LVgf3FxVudxNVWrWl/aLH8MuLhJcIPH14O5FU10VNk38l9m9r/HAkVg7qb+f1s6P+iOztr1g
-        bnOV3TzD2iuN/+/Jbd84Z49Kso5e6Yvvnkzd3SEnlnBwWuRrqbQ9YWTb9ebop+WqxU/4i56/
-        TV/2VsnwEY/tG68Fbxh7LD+ujHyVseMfz58v5z7st9dvinwheqIj/KdO0npdu0n794T/YlC+
-        4eu+bOXLC27nEjI1PGR8Qx8wtFeve6ujxFKckWioxVxUnAgASlspUxcDAAA=
-X-CMS-MailID: 20220603170315epcas5p2c1f844687b229c436b48253c53f36952
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-CMS-TYPE: 105P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20220603094957epcas5p301cd5956d180ee9be3bf8f8207cb1a7d
-References: <20220603094946.509919-1-krzysztof.kozlowski@linaro.org>
-        <CGME20220603094957epcas5p301cd5956d180ee9be3bf8f8207cb1a7d@epcas5p3.samsung.com>
-        <20220603094946.509919-3-krzysztof.kozlowski@linaro.org>
+        with ESMTP id S1347800AbiFCSgQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 14:36:16 -0400
+Received: from mail-ot1-f42.google.com (mail-ot1-f42.google.com [209.85.210.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09F7012AD9;
+        Fri,  3 Jun 2022 11:30:06 -0700 (PDT)
+Received: by mail-ot1-f42.google.com with SMTP id g13-20020a9d6b0d000000b0060b13026e0dso6094064otp.8;
+        Fri, 03 Jun 2022 11:30:06 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
+         :message-id;
+        bh=asnSyF8/mpAZrPq7zWDU4GFbPGrqRhvj/yeUHzRFYZ8=;
+        b=JWiYpIvThoNpdAtwS4zINXtFuLI/A6hDDiqZ20AyOB1UkuX0LMP6R6bhj7RKlyv5Yn
+         9PiZ9FufdMu58w0bsA2mpTZcpn2TROdikFLUEHiQqllaq3VWXL2U9oR9MvruWOMlPTCe
+         DHa9kMyLzHvDbuHWqBt4agWYnsRdQdMY9Soj2HC8zQ3voyLTBpQPCL8C71RnaW8lChVJ
+         eQQfpB/dau9H+GyFAMqrZqNgV19bJm0xRpwD6SbIozAtAOjM4ZQkjqlk9IoSc3UMNCP+
+         Brs84uZKunxKw9A/zhKsn0bY28gKnBkk1oxehpL22BoFY5Gz7QfUNNG+V9UBI1tC/45O
+         2Q1A==
+X-Gm-Message-State: AOAM530S06/bKk59jUB0ENyekRVP7esssCQame+BMhpYCiJhbgkzedNZ
+        G04GL/cg45ekP1lNtXngDC6khtFGcQ==
+X-Google-Smtp-Source: ABdhPJwBCtWWCMBC2XiB+cXeV5iJmot0yDdbL/HPwg/J+Vl2LGxsRCbH09vUQX6uMUZZ+9aARYN5hg==
+X-Received: by 2002:a05:6830:1af0:b0:60b:2242:f266 with SMTP id c16-20020a0568301af000b0060b2242f266mr4822951otd.108.1654281005253;
+        Fri, 03 Jun 2022 11:30:05 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id ay31-20020a056808301f00b00328c9e63389sm4524068oib.11.2022.06.03.11.30.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Jun 2022 11:30:04 -0700 (PDT)
+Received: (nullmailer pid 680138 invoked by uid 1000);
+        Fri, 03 Jun 2022 18:30:04 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-samsung-soc@vger.kernel.org
+In-Reply-To: <20220603094946.509919-4-krzysztof.kozlowski@linaro.org>
+References: <20220603094946.509919-1-krzysztof.kozlowski@linaro.org> <20220603094946.509919-4-krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH 3/3] dt-bindings: mmc: samsung,exynos-dw-mshc: convert to dtschema
+Date:   Fri, 03 Jun 2022 13:30:04 -0500
+Message-Id: <1654281004.017781.680137.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Fri, 03 Jun 2022 11:49:46 +0200, Krzysztof Kozlowski wrote:
+> Convert the Samsung Exynos SoC specific extensions to the Synopsys
+> Designware Mobile Storage Host Controller to DT schema.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  .../bindings/mmc/exynos-dw-mshc.txt           |  94 ----------
+>  .../bindings/mmc/samsung,exynos-dw-mshc.yaml  | 162 ++++++++++++++++++
+>  2 files changed, 162 insertions(+), 94 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+> 
 
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
->-----Original Message-----
->From: Krzysztof Kozlowski [mailto:krzysztof.kozlowski@linaro.org]
->Sent: Friday, June 3, 2022 3:20 PM
->To: Ulf Hansson <ulf.hansson@linaro.org>; Rob Herring
-><robh+dt@kernel.org>; Krzysztof Kozlowski
-><krzysztof.kozlowski+dt@linaro.org>; Alim Akhtar
-><alim.akhtar@samsung.com>; Jaehoon Chung <jh80.chung@samsung.com>;
->linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-arm-
->kernel@lists.infradead.org; linux-samsung-soc@vger.kernel.org; linux-
->kernel@vger.kernel.org
->Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->Subject: [PATCH 2/3] arm64: dts: exynos: align MMC node name with
->dtschema
->
->The node names should be generic and MMC controller dtschema expects
->"mmc".
->
->Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->---
+yamllint warnings/errors:
 
-Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+dtschema/dtc warnings/errors:
+Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.example.dtb:0:0: /example-0/mmc@12200000: failed to match any schema with compatible: ['samsung,exynos5420-dw-mshc-smu']
 
+doc reference errors (make refcheckdocs):
 
-> arch/arm64/boot/dts/exynos/exynos5433.dtsi | 6 +++---
-> 1 file changed, 3 insertions(+), 3 deletions(-)
->
->diff --git a/arch/arm64/boot/dts/exynos/exynos5433.dtsi
->b/arch/arm64/boot/dts/exynos/exynos5433.dtsi
->index 75b548e495a0..bd6a354b9cb5 100644
->--- a/arch/arm64/boot/dts/exynos/exynos5433.dtsi
->+++ b/arch/arm64/boot/dts/exynos/exynos5433.dtsi
->@@ -1820,7 +1820,7 @@ usbhost_dwc3: usb@15a00000 {
-> 			};
-> 		};
->
->-		mshc_0: mshc@15540000 {
->+		mshc_0: mmc@15540000 {
-> 			compatible = "samsung,exynos7-dw-mshc-smu";
-> 			interrupts = <GIC_SPI 225 IRQ_TYPE_LEVEL_HIGH>;
-> 			#address-cells = <1>;
->@@ -1833,7 +1833,7 @@ mshc_0: mshc@15540000 {
-> 			status = "disabled";
-> 		};
->
->-		mshc_1: mshc@15550000 {
->+		mshc_1: mmc@15550000 {
-> 			compatible = "samsung,exynos7-dw-mshc-smu";
-> 			interrupts = <GIC_SPI 226 IRQ_TYPE_LEVEL_HIGH>;
-> 			#address-cells = <1>;
->@@ -1846,7 +1846,7 @@ mshc_1: mshc@15550000 {
-> 			status = "disabled";
-> 		};
->
->-		mshc_2: mshc@15560000 {
->+		mshc_2: mmc@15560000 {
-> 			compatible = "samsung,exynos7-dw-mshc-smu";
-> 			interrupts = <GIC_SPI 227 IRQ_TYPE_LEVEL_HIGH>;
-> 			#address-cells = <1>;
->--
->2.34.1
+See https://patchwork.ozlabs.org/patch/
 
+This check can fail if there are any dependencies. The base for a patch
+series is generally the most recent rc1.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit.
 
