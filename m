@@ -2,252 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2D87C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 10:47:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7F67CCA473
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 14:03:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243841AbiFCKrM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Jun 2022 06:47:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33172 "EHLO
+        id S245045AbiFCODH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Jun 2022 10:03:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243824AbiFCKrK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 06:47:10 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3A8AB1C7
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 03:47:06 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id s6so11955124lfo.13
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2022 03:47:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=RuxiiRr7rF1MUtH6zyEJXG+qpZDviq1FdaqXVZ6VyQo=;
-        b=Tz2Fyeczkog0lzxlLJ3ukxJj/pDd7b4Whi/orXkhshX7QoZ2AW2bbQKe07ceZZqV3R
-         4ImLVn2E4ak2XK1tWzclxoxuaB1G0l3SWvzPJVp+dtp6IzdxAxvghiIDRypsZgHoe+FS
-         buXf56GdJWNy6s+qg7H0+Wghx8uDcALR1E7r3eeYhxK/nCPUIPw58IWgR0VXf41DrnoE
-         Nq5a4+QKtftFZ2L8foOlPUVMhv/7e8g8qI7JKXOz7GKJWxQX02FjoeLze3GtdsnwkdDd
-         TRA6m6pQW769Tnt9XziHVwBOCpifKKQ958jGo8Fgdz01rgYMaPxxJ2EgkNFz+q1jgqLJ
-         60sw==
+        with ESMTP id S244783AbiFCODG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 10:03:06 -0400
+Received: from mail-oi1-f170.google.com (mail-oi1-f170.google.com [209.85.167.170])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F3DB27CD7;
+        Fri,  3 Jun 2022 07:03:01 -0700 (PDT)
+Received: by mail-oi1-f170.google.com with SMTP id w130so10577747oig.0;
+        Fri, 03 Jun 2022 07:03:01 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=RuxiiRr7rF1MUtH6zyEJXG+qpZDviq1FdaqXVZ6VyQo=;
-        b=MSxlQXPigsiZcXtNTiF8FmpqxoQ0AVz2xLLg/Av2JEilRIwIwbH7C5DG2LsY2W9afm
-         VQLdp9Nr06uHrszjHjWTMctoRpCDJAtSYfe4/rP4aIXbeUTEQrJ+jz5oO0YMGfIIklt2
-         q+p73RSLuDxGwEe+CYofzxm8V3hXAM59UyE3X/lvIk06BErTANfzcByL8+JgPou0Ybba
-         D5vR+KeD/G+nsxDR0VjIJIB73BzI++D1C164+4XjtvoPznG9TNmwT6O0Lftr4mmrU8QT
-         UpNjmzc1a5urbpcwNGPgT3HEZwNjsOjTgbuiqIDhVmqDvUVso3ZtX1esFcEPuhayDoh4
-         shmg==
-X-Gm-Message-State: AOAM531fXWUxGZ9pAhcPjMdJeFQfi4riPjsW5pldWtqTmh+yU+Dxvrwc
-        l2/bcT48p3eF3TxxsXGXL9os+9s5Qrb4S+rg2m38iw==
-X-Google-Smtp-Source: ABdhPJx7EenVzEen8Z45Wdj8n7/9C/HhCuAPPbgq11H3VQhxJe3Va13Q/K3T2vm7BF0zrkhbyWy1CamMA/oE1TCLrhM=
-X-Received: by 2002:a05:6512:303:b0:479:1baf:7e5b with SMTP id
- t3-20020a056512030300b004791baf7e5bmr1401766lfp.184.1654253224621; Fri, 03
- Jun 2022 03:47:04 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=L4KrDpSYq99VolrzPQGxB5l5hpx3haeHuOlN9SEwbx0=;
+        b=dWRlUqdZW3EC6g9gtD8qyuwfwNaGfrMfUUrKv3vI57AolDjIgR6TtgzH3Pk4T6ehtM
+         8tWZYCwwOJFgmPRm4XQ8IzcMBpNlApbuAHXPhJujBbjle1yVtB/Kn8th+uWIko3rXnwI
+         Kq8YDgZCEkSBxYkCjFUiyvE3d/zluRtR8wr5ZG2TL8yyWIrhnCWfNA6dNRqoF1ZCUn3i
+         2P/nO93EWmOa440wBCwm9Kxap57dSs5PVf9CvDrgQGvThzYI8Q/JKveJAAEwL/NSls/R
+         e6GJldJAqUuPVdt7WXpXmCoyOVj3eGlYIXmJgUvKiejhxSY9+gPrium74sPCn9Af93uz
+         mbWQ==
+X-Gm-Message-State: AOAM531gKUeQjxZiBVNakdmZa39spYjYCsfAm+YbgFgszr/KueidkoVU
+        kub057oSDeK//95d4CvWhg==
+X-Google-Smtp-Source: ABdhPJzNWAcrfALGI9WFStd6O7bU+uyoCscDf+bymPZkJRN1miqnpseIhlLZQcf+wmB4Pok3H4FeGA==
+X-Received: by 2002:a05:6808:144d:b0:32b:7fbc:9440 with SMTP id x13-20020a056808144d00b0032b7fbc9440mr5607304oiv.226.1654264980296;
+        Fri, 03 Jun 2022 07:03:00 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id p3-20020acad803000000b0032e5209af19sm891448oig.31.2022.06.03.07.02.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Jun 2022 07:02:59 -0700 (PDT)
+Received: (nullmailer pid 275907 invoked by uid 1000);
+        Fri, 03 Jun 2022 14:02:58 -0000
+Date:   Fri, 3 Jun 2022 09:02:58 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Axe Yang <axe.yang@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com
+Subject: Re: [RESEND v12 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
+ pinctrls properties
+Message-ID: <20220603140258.GB243231-robh@kernel.org>
+References: <20220525015140.384-1-axe.yang@mediatek.com>
+ <20220525015140.384-2-axe.yang@mediatek.com>
+ <CAPDyKFr25qbAb9DdCpu6Cp9NyK35YAv745Duw_ht7BQc+pQF=A@mail.gmail.com>
 MIME-Version: 1.0
-References: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
-In-Reply-To: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 3 Jun 2022 12:46:28 +0200
-Message-ID: <CAPDyKFrjH8c=2LYkzj81jm7t-sy-EBs3AMzAS7M=LEHsh9qCCA@mail.gmail.com>
-Subject: Re: BUG in mmc: core: Disable card detect during shutdown
-To:     "H. Nikolaus Schaller" <hns@goldelico.com>
-Cc:     Discussions about the Letux Kernel <letux-kernel@openphoenux.org>,
-        kernel@pyra-handheld.com, aTc <atc@k-n-p.org>,
-        Tony Lindgren <tony@atomide.com>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr25qbAb9DdCpu6Cp9NyK35YAv745Duw_ht7BQc+pQF=A@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 30 May 2022 at 18:55, H. Nikolaus Schaller <hns@goldelico.com> wrot=
-e:
->
-> Hi Ulf,
-> users did report a strange issue that the OMAP5 based Pyra does not
-> shutdown if a kernel 5.10.116 is used.
->
-> Someone did a bisect and found that reverting
->
-> 0d66b395210c5084c2b7324945062c1d1f95487a
->
-> resp. upstream
->
-> 66c915d09b942fb3b2b0cb2f56562180901fba17
->
-> solves it.
->
-> I could now confirm that it also happens with v5.18.0.
-> But interestingly only on the Pyra handheld device and not
-> on the omap5evm (which is supported by mainline).
->
-> The symptom is:
->
-> a) without revert
->
-> root@letux:~# poweroff
->
-> Broadcast message from root@letux (console) (Sat Jan  1 01:08:25 2000):
->
-> The system is going down for system halt NOW!
-> INIT: Sending processes the TERM signal
-> root@letux:~# [info] Using makefile-style concurrent boot in runlevel 0.
-> [....] Stopping cgroup management proxy daemon: cgproxy[....] Stopping cg=
-roup management daemon: cgmanager[....] Stop[ ok bluetooth: /usr/sbin/bluet=
-oothd.
-> [FAIL] Stopping ISC DHCP server: dhcpd failed!
-> dhcpcd[3055]: sending signal 15 to pid 2976
-> dhcpcd[3055]: waiting for pid 2976 to exit
-> [ ok ] Shutting down ALSA...done.
-> [ ok ] Asking all remaining processes to terminate...done.
-> [ ok ] All processes ended within 2 seconds...done.
-> [ ok [[c[....] Stopping enhanced syslogd: rsyslogd.
-> [ ok ....] Deconfiguring network interfaces...done.
-> ^[[c[info] Saving the system clock.
-> [info] Hardware Clock updated to Sat Jan  1 01:08:30 UTC 2000.
-> [ ok ] Deactivating swap...done.
-> ^[[c[   77.289332] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: none.
-> [info] Will now halt.
->
-> b) with reverting your patch
->
-> root@letux:~# uname -a
-> Linux letux 5.18.0-letux-lpae+ #9678 SMP PREEMPT Mon May 30 18:02:28 CEST=
- 2022 armv7l GNU/Linux
-> root@letux:~# poweroff
->
-> Broadcast message from root@letux (console) (Sat Jan  1 01:39:15 2000):
->
-> The system is going down for system halt NOW!
-> INIT: Sending processes the TERM signal
-> root@letux:~# [info] Using makefile-style concurrent boot in runlevel 0.
-> [FAIL] Stopping cgroup management proxy daemon: cgproxy[....] Stopping IS=
-C DHCP server: dhcpd failed!
-> [....] Stopping cgroup management daemon: cgmanagerdhcpcd[3100]: sending =
-signal 15 to pid 3013
-> dhcpcd[3100]: waiting for pid 3013 to exit
-> [ ok ] Stopping bluetooth: /usr/sbin/bluetoothd.
-> [ ok ] Shutting down ALSA...done.
-> [ ok ] Asking all remaining processes to terminate...done.
-> [ ok ] All processes ended within 3 seconds...done.
-> [ ok [[c[....] Stopping enhanced syslogd: rsyslogd.
-> [ ok ....] Deconfiguring network interfaces...done.
-> ^[[c[info] Saving the system clock.
-> [info] Hardware Clock updated to Sat Jan  1 01:39:21 UTC 2000.
-> [ ok ] Deactivating swap...done.
-> ^[[c[   44.563256] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: none.
-> [info] Will now halt.
-> [   46.917534] reboot: Power down
->
->
-> What I suspect is that we have multiple mmc interfaces and have
-> card detect wired up in the Pyra while it is ignored in the
-> EVM. Is it possible that __mmc_stop_host() never returns in
-> .shutdown_pre if card detect is set up (and potentially
-> shut down earlier)?
->
-> Setup of mmc is done in omap5-board-common.dtsi and omap5.dtsi.
->
-> Out Pyra has a non-upstream device tree where we use
-> omap5-board-common.dtsi and overwrite it by e.g.
->
-> &mmc4 { /* second (u)SD slot (SDIO capable) */
->         status =3D "okay";
->         vmmc-supply =3D <&ldo2_reg>;
->         pinctrl-names =3D "default";
->         pinctrl-0 =3D <&mmc4_pins>;
->         bus-width =3D <4>;
->         cd-gpios =3D <&gpio3 13 GPIO_ACTIVE_LOW>; /* gpio3_77 */
->         wp-gpios =3D <&gpio3 15 GPIO_ACTIVE_HIGH>;        /* gpio3_79 */
-> };
->
-> But I have tried to remove the cd-gpois and wp-gpois. Or make the
-> mmc interface being disabled (but I may not have catched everything
-> in first place).
->
-> Then I added some printk to mmc_stop_host() and __mmc_stop_host().
->
-> mmc_stop_host() is not called but __mmc_stop_host() is called 4 times.
-> There are 4 active MMC interfaces in the Pyra - 3 for (=C2=B5)SD slots
-> and one for an SDIO WLAN module.
->
-> Now it looks as if 3 of them are properly teared down (two of them
-> seem to have host->slot.cd_irq >=3D 0) but on the fourth call
-> cancel_delayed_work_sync(&host->detect); does not return. This is
-> likely the location of the stall why we don't see a "reboot: Power down"
->
-> Any ideas?
+On Fri, Jun 03, 2022 at 09:28:37AM +0200, Ulf Hansson wrote:
+> On Wed, 25 May 2022 at 03:51, Axe Yang <axe.yang@mediatek.com> wrote:
+> >
+> > Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
+> > This feature allow SDIO devices alarm asynchronous interrupt to host
+> > even when host stop providing clock to SDIO card. An extra wakeup
+> > interrupt and pinctrl states for SDIO DAT1 pin state switching are
+> > required in this scenario.
+> >
+> > Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+> > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> > ---
+> >  .../devicetree/bindings/mmc/mtk-sd.yaml       | 50 ++++++++++++++++++-
+> >  1 file changed, 49 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > index 2a2e9fa8c188..e83bf10281d6 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> > @@ -72,12 +72,27 @@ properties:
+> >        - const: ahb_cg
+> >
+> >    interrupts:
+> > -    maxItems: 1
+> > +    description:
+> > +      Should at least contain MSDC GIC interrupt. To support SDIO in-band wakeup, an extended
+> > +      interrupt is required and be configured as wakeup source irq.
+> > +    minItems: 1
+> > +    maxItems: 2
+> > +
+> > +  interrupt-names:
+> > +    items:
+> > +      - const: msdc
+> > +      - const: sdio_wakeup
+> >
+> >    pinctrl-names:
+> > +    description:
+> > +      Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin
+> > +      will be switched between GPIO mode and SDIO DAT1 mode, state_eint and state_dat1 are
+> > +      mandatory in this scenarios.
+> > +    minItems: 2
+> >      items:
+> >        - const: default
+> >        - const: state_uhs
+> > +      - const: state_eint
+> 
+> Don't you need something along the lines of the below instead? I mean
+> the "state_eint" isn't always needed, right?
+> 
+> oneOf:
+>   - items:
+>       - const: default
+>       - const: state_uhs
+>     - items:
+>         - const: default
+>         - const: state_uhs
+>         - const: state_eint
 
-I guess the call to cancel_delayed_work_sync() in __mmc_stop_host()
-hangs for one of the mmc hosts. This shouldn't happen - and indicates
-that there is something else being wrong.
+This is equivalent to what was done. The 'minItems: 2' makes the 3rd 
+item optional.
 
-See more suggestions below.
-
->
-> BR and thanks,
-> Nikolaus
->
-> printk hack:
->
-> void __mmc_stop_host(struct mmc_host *host)
-> {
-> printk("%s 1\n", __func__);
->         if (host->slot.cd_irq >=3D 0) {
-> printk("%s 2\n", __func__);
->                 mmc_gpio_set_cd_wake(host, false);
-> printk("%s 3\n", __func__);
->                 disable_irq(host->slot.cd_irq);
-> printk("%s 4\n", __func__);
->         }
->
->         host->rescan_disable =3D 1;
-> printk("%s 5\n", __func__);
-
-My guess is that it's the same mmc host that causes the hang. I
-suggest you print the name of the host too, to verify that. Something
-along the lines of the below.
-
-printk("%s: %s 5\n", mmc_hostname(host), __func__);
-
->         cancel_delayed_work_sync(&host->detect);
-> printk("%s 6\n", __func__);
-
-Ditto.
-
-> }
->
-> resulting log:
->
-> [info] Will now halt.
-> [  282.780929] __mmc_stop_host 1
-> [  282.784276] __mmc_stop_host 2
-> [  282.787735] __mmc_stop_host 3
-> [  282.791030] __mmc_stop_host 4
-> [  282.794235] __mmc_stop_host 5
-> [  282.797369] __mmc_stop_host 6
-> [  282.800918] __mmc_stop_host 1
-> [  282.804269] __mmc_stop_host 5
-> [  282.807541] __mmc_stop_host 6
-> [  282.810715] __mmc_stop_host 1
-> [  282.813842] __mmc_stop_host 2
-> [  282.816984] __mmc_stop_host 3
-> [  282.820175] __mmc_stop_host 4
-> [  282.823302] __mmc_stop_host 5
-> [  282.826449] __mmc_stop_host 6
-> [  282.830941] __mmc_stop_host 1
-> [  282.834076] __mmc_stop_host 5
->
-> --- here should be another __mmc_stop_host 6
-> --- and reboot: Power down
-
-When/if you figured out that it's the same host that hangs, you could
-try to disable that host through the DTS files (add status =3D
-"disabled" in the device node, for example) - and see if that works.
-
-Kind regards
-Uffe
+Rob
