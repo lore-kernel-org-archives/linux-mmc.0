@@ -2,352 +2,252 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F516CCA47D
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 09:50:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2D87C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 10:47:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243237AbiFCJuK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Jun 2022 05:50:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52394 "EHLO
+        id S243841AbiFCKrM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Jun 2022 06:47:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33172 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243232AbiFCJt6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 05:49:58 -0400
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A30A525C75
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 02:49:56 -0700 (PDT)
-Received: by mail-ed1-x535.google.com with SMTP id b8so9421737edf.11
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2022 02:49:56 -0700 (PDT)
+        with ESMTP id S243824AbiFCKrK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 06:47:10 -0400
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3A8AB1C7
+        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 03:47:06 -0700 (PDT)
+Received: by mail-lf1-x129.google.com with SMTP id s6so11955124lfo.13
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2022 03:47:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=99fGaK4RqqX9TZZDosYGNUyUM6sQSl8Udc/LexVf/3o=;
-        b=QCS+MIM1geXNdiRcZOC4FD0SyAAqkSlkfTTUPJw4QLBCQF889VGxDCbxdlALwKGjWz
-         rLuFPiz7C+dq5dJJ4F8XDRvvf7wAIK0AEKNjSqQyJoZyK/WLd70iLsBVEOLxBYZHrrLQ
-         Sve9nlrCz+AL/4UrefSaHN5L0iexFfWRaU43Y764pCBdo6EXF7hjvH2bw89U/+cUiqU/
-         Nhdt0e3nK8QAwWhUtwOU3j0GXfYH3BbrjMv87Ts4UCFNiIyiFyOtRmMLB0I3yG16Qy2i
-         tAs6NOV0OmGUdVhPwUY/GCx81HbePeNIisAaxZ27V/fqo22DVS4VnGDaXUXQt/9gF45D
-         upkg==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=RuxiiRr7rF1MUtH6zyEJXG+qpZDviq1FdaqXVZ6VyQo=;
+        b=Tz2Fyeczkog0lzxlLJ3ukxJj/pDd7b4Whi/orXkhshX7QoZ2AW2bbQKe07ceZZqV3R
+         4ImLVn2E4ak2XK1tWzclxoxuaB1G0l3SWvzPJVp+dtp6IzdxAxvghiIDRypsZgHoe+FS
+         buXf56GdJWNy6s+qg7H0+Wghx8uDcALR1E7r3eeYhxK/nCPUIPw58IWgR0VXf41DrnoE
+         Nq5a4+QKtftFZ2L8foOlPUVMhv/7e8g8qI7JKXOz7GKJWxQX02FjoeLze3GtdsnwkdDd
+         TRA6m6pQW769Tnt9XziHVwBOCpifKKQ958jGo8Fgdz01rgYMaPxxJ2EgkNFz+q1jgqLJ
+         60sw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=99fGaK4RqqX9TZZDosYGNUyUM6sQSl8Udc/LexVf/3o=;
-        b=UTZqliAg0e2XmpEF9BhibhRMFNlMeQxu3Tq9PZyJfOYcix59Bw9qP+fNm6PC0mIRLx
-         9pjV41jp5IUaObQibKEHxpRFOnTrDcXFL28ilLxT3vHBKyh7lR1tTszVrUFYpB08zovb
-         wzg1hVr/tUlNtgjRP1VI5/lZ058yFMs/41JKL/z4cdUBNf7/F1OpnIlat2nob3ODZLMq
-         j5gnD4RyES1ku/LaNZ5smXusZuL68azfsSGZpUNibp9xCbNHkv3wdJqHvtOFMEtDJjLL
-         zf+0icYT2FkD+kKYA7p6eR345ddt8N1z92x98V6A7PbC3jzIaVS5OxP12TXvcI8R8J4h
-         SYKA==
-X-Gm-Message-State: AOAM5331OfLeZvuhJ9cvxzQo1K8wDW5QgD2sT2WXS2ltvTxGhttElGpK
-        HAuYez2COcBB8yNU4DWDAC4RVg==
-X-Google-Smtp-Source: ABdhPJzIhBBSSjBKJbGWTQF1sawSyCvgi/jnEyy+I3PWM2Bn6W08R7yGLlLw2HEYq8rp9W3gbT7jAQ==
-X-Received: by 2002:a05:6402:3310:b0:42d:e77b:fef0 with SMTP id e16-20020a056402331000b0042de77bfef0mr9668823eda.193.1654249795082;
-        Fri, 03 Jun 2022 02:49:55 -0700 (PDT)
-Received: from localhost.localdomain (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id y22-20020aa7ca16000000b0042dcbc3f302sm3669561eds.36.2022.06.03.02.49.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 03 Jun 2022 02:49:54 -0700 (PDT)
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 3/3] dt-bindings: mmc: samsung,exynos-dw-mshc: convert to dtschema
-Date:   Fri,  3 Jun 2022 11:49:46 +0200
-Message-Id: <20220603094946.509919-4-krzysztof.kozlowski@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220603094946.509919-1-krzysztof.kozlowski@linaro.org>
-References: <20220603094946.509919-1-krzysztof.kozlowski@linaro.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=RuxiiRr7rF1MUtH6zyEJXG+qpZDviq1FdaqXVZ6VyQo=;
+        b=MSxlQXPigsiZcXtNTiF8FmpqxoQ0AVz2xLLg/Av2JEilRIwIwbH7C5DG2LsY2W9afm
+         VQLdp9Nr06uHrszjHjWTMctoRpCDJAtSYfe4/rP4aIXbeUTEQrJ+jz5oO0YMGfIIklt2
+         q+p73RSLuDxGwEe+CYofzxm8V3hXAM59UyE3X/lvIk06BErTANfzcByL8+JgPou0Ybba
+         D5vR+KeD/G+nsxDR0VjIJIB73BzI++D1C164+4XjtvoPznG9TNmwT6O0Lftr4mmrU8QT
+         UpNjmzc1a5urbpcwNGPgT3HEZwNjsOjTgbuiqIDhVmqDvUVso3ZtX1esFcEPuhayDoh4
+         shmg==
+X-Gm-Message-State: AOAM531fXWUxGZ9pAhcPjMdJeFQfi4riPjsW5pldWtqTmh+yU+Dxvrwc
+        l2/bcT48p3eF3TxxsXGXL9os+9s5Qrb4S+rg2m38iw==
+X-Google-Smtp-Source: ABdhPJx7EenVzEen8Z45Wdj8n7/9C/HhCuAPPbgq11H3VQhxJe3Va13Q/K3T2vm7BF0zrkhbyWy1CamMA/oE1TCLrhM=
+X-Received: by 2002:a05:6512:303:b0:479:1baf:7e5b with SMTP id
+ t3-20020a056512030300b004791baf7e5bmr1401766lfp.184.1654253224621; Fri, 03
+ Jun 2022 03:47:04 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
+In-Reply-To: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 3 Jun 2022 12:46:28 +0200
+Message-ID: <CAPDyKFrjH8c=2LYkzj81jm7t-sy-EBs3AMzAS7M=LEHsh9qCCA@mail.gmail.com>
+Subject: Re: BUG in mmc: core: Disable card detect during shutdown
+To:     "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Discussions about the Letux Kernel <letux-kernel@openphoenux.org>,
+        kernel@pyra-handheld.com, aTc <atc@k-n-p.org>,
+        Tony Lindgren <tony@atomide.com>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the Samsung Exynos SoC specific extensions to the Synopsys
-Designware Mobile Storage Host Controller to DT schema.
+On Mon, 30 May 2022 at 18:55, H. Nikolaus Schaller <hns@goldelico.com> wrot=
+e:
+>
+> Hi Ulf,
+> users did report a strange issue that the OMAP5 based Pyra does not
+> shutdown if a kernel 5.10.116 is used.
+>
+> Someone did a bisect and found that reverting
+>
+> 0d66b395210c5084c2b7324945062c1d1f95487a
+>
+> resp. upstream
+>
+> 66c915d09b942fb3b2b0cb2f56562180901fba17
+>
+> solves it.
+>
+> I could now confirm that it also happens with v5.18.0.
+> But interestingly only on the Pyra handheld device and not
+> on the omap5evm (which is supported by mainline).
+>
+> The symptom is:
+>
+> a) without revert
+>
+> root@letux:~# poweroff
+>
+> Broadcast message from root@letux (console) (Sat Jan  1 01:08:25 2000):
+>
+> The system is going down for system halt NOW!
+> INIT: Sending processes the TERM signal
+> root@letux:~# [info] Using makefile-style concurrent boot in runlevel 0.
+> [....] Stopping cgroup management proxy daemon: cgproxy[....] Stopping cg=
+roup management daemon: cgmanager[....] Stop[ ok bluetooth: /usr/sbin/bluet=
+oothd.
+> [FAIL] Stopping ISC DHCP server: dhcpd failed!
+> dhcpcd[3055]: sending signal 15 to pid 2976
+> dhcpcd[3055]: waiting for pid 2976 to exit
+> [ ok ] Shutting down ALSA...done.
+> [ ok ] Asking all remaining processes to terminate...done.
+> [ ok ] All processes ended within 2 seconds...done.
+> [ ok [[c[....] Stopping enhanced syslogd: rsyslogd.
+> [ ok ....] Deconfiguring network interfaces...done.
+> ^[[c[info] Saving the system clock.
+> [info] Hardware Clock updated to Sat Jan  1 01:08:30 UTC 2000.
+> [ ok ] Deactivating swap...done.
+> ^[[c[   77.289332] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: none.
+> [info] Will now halt.
+>
+> b) with reverting your patch
+>
+> root@letux:~# uname -a
+> Linux letux 5.18.0-letux-lpae+ #9678 SMP PREEMPT Mon May 30 18:02:28 CEST=
+ 2022 armv7l GNU/Linux
+> root@letux:~# poweroff
+>
+> Broadcast message from root@letux (console) (Sat Jan  1 01:39:15 2000):
+>
+> The system is going down for system halt NOW!
+> INIT: Sending processes the TERM signal
+> root@letux:~# [info] Using makefile-style concurrent boot in runlevel 0.
+> [FAIL] Stopping cgroup management proxy daemon: cgproxy[....] Stopping IS=
+C DHCP server: dhcpd failed!
+> [....] Stopping cgroup management daemon: cgmanagerdhcpcd[3100]: sending =
+signal 15 to pid 3013
+> dhcpcd[3100]: waiting for pid 3013 to exit
+> [ ok ] Stopping bluetooth: /usr/sbin/bluetoothd.
+> [ ok ] Shutting down ALSA...done.
+> [ ok ] Asking all remaining processes to terminate...done.
+> [ ok ] All processes ended within 3 seconds...done.
+> [ ok [[c[....] Stopping enhanced syslogd: rsyslogd.
+> [ ok ....] Deconfiguring network interfaces...done.
+> ^[[c[info] Saving the system clock.
+> [info] Hardware Clock updated to Sat Jan  1 01:39:21 UTC 2000.
+> [ ok ] Deactivating swap...done.
+> ^[[c[   44.563256] EXT4-fs (mmcblk0p2): re-mounted. Quota mode: none.
+> [info] Will now halt.
+> [   46.917534] reboot: Power down
+>
+>
+> What I suspect is that we have multiple mmc interfaces and have
+> card detect wired up in the Pyra while it is ignored in the
+> EVM. Is it possible that __mmc_stop_host() never returns in
+> .shutdown_pre if card detect is set up (and potentially
+> shut down earlier)?
+>
+> Setup of mmc is done in omap5-board-common.dtsi and omap5.dtsi.
+>
+> Out Pyra has a non-upstream device tree where we use
+> omap5-board-common.dtsi and overwrite it by e.g.
+>
+> &mmc4 { /* second (u)SD slot (SDIO capable) */
+>         status =3D "okay";
+>         vmmc-supply =3D <&ldo2_reg>;
+>         pinctrl-names =3D "default";
+>         pinctrl-0 =3D <&mmc4_pins>;
+>         bus-width =3D <4>;
+>         cd-gpios =3D <&gpio3 13 GPIO_ACTIVE_LOW>; /* gpio3_77 */
+>         wp-gpios =3D <&gpio3 15 GPIO_ACTIVE_HIGH>;        /* gpio3_79 */
+> };
+>
+> But I have tried to remove the cd-gpois and wp-gpois. Or make the
+> mmc interface being disabled (but I may not have catched everything
+> in first place).
+>
+> Then I added some printk to mmc_stop_host() and __mmc_stop_host().
+>
+> mmc_stop_host() is not called but __mmc_stop_host() is called 4 times.
+> There are 4 active MMC interfaces in the Pyra - 3 for (=C2=B5)SD slots
+> and one for an SDIO WLAN module.
+>
+> Now it looks as if 3 of them are properly teared down (two of them
+> seem to have host->slot.cd_irq >=3D 0) but on the fourth call
+> cancel_delayed_work_sync(&host->detect); does not return. This is
+> likely the location of the stall why we don't see a "reboot: Power down"
+>
+> Any ideas?
 
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
----
- .../bindings/mmc/exynos-dw-mshc.txt           |  94 ----------
- .../bindings/mmc/samsung,exynos-dw-mshc.yaml  | 162 ++++++++++++++++++
- 2 files changed, 162 insertions(+), 94 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+I guess the call to cancel_delayed_work_sync() in __mmc_stop_host()
+hangs for one of the mmc hosts. This shouldn't happen - and indicates
+that there is something else being wrong.
 
-diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-deleted file mode 100644
-index 753e9d7d8956..000000000000
---- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
-+++ /dev/null
-@@ -1,94 +0,0 @@
--* Samsung Exynos specific extensions to the Synopsys Designware Mobile
--  Storage Host Controller
--
--The Synopsys designware mobile storage host controller is used to interface
--a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
--differences between the core Synopsys dw mshc controller properties described
--by synopsys-dw-mshc.txt and the properties used by the Samsung Exynos specific
--extensions to the Synopsys Designware Mobile Storage Host Controller.
--
--Required Properties:
--
--* compatible: should be
--	- "samsung,exynos4210-dw-mshc": for controllers with Samsung Exynos4210
--	  specific extensions.
--	- "samsung,exynos4412-dw-mshc": for controllers with Samsung Exynos4412
--	  specific extensions.
--	- "samsung,exynos5250-dw-mshc": for controllers with Samsung Exynos5250
--	  specific extensions.
--	- "samsung,exynos5420-dw-mshc": for controllers with Samsung Exynos5420
--	  specific extensions.
--	- "samsung,exynos7-dw-mshc": for controllers with Samsung Exynos7
--	  specific extensions.
--	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
--	  specific extensions having an SMU.
--	- "axis,artpec8-dw-mshc": for controllers with ARTPEC-8 specific
--	  extensions.
--
--* samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
--  unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
--  ignored for Exynos4 SoC's. The valid range of divider value is 0 to 7.
--
--* samsung,dw-mshc-sdr-timing: Specifies the value of CIU clock phase shift value
--  in transmit mode and CIU clock phase shift value in receive mode for single
--  data rate mode operation. Refer notes below for the order of the cells and the
--  valid values.
--
--* samsung,dw-mshc-ddr-timing: Specifies the value of CUI clock phase shift value
--  in transmit mode and CIU clock phase shift value in receive mode for double
--  data rate mode operation. Refer notes below for the order of the cells and the
--  valid values.
--* samsung,dw-mshc-hs400-timing: Specifies the value of CIU TX and RX clock phase
--  shift value for hs400 mode operation.
--
--  Notes for the sdr-timing and ddr-timing values:
--
--    The order of the cells should be
--      - First Cell: CIU clock phase shift value for tx mode.
--      - Second Cell: CIU clock phase shift value for rx mode.
--
--    Valid values for SDR and DDR CIU clock timing for Exynos5250:
--      - valid value for tx phase shift and rx phase shift is 0 to 7.
--      - when CIU clock divider value is set to 3, all possible 8 phase shift
--        values can be used.
--      - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
--        phase shift clocks should be 0.
--
--* samsung,read-strobe-delay: RCLK (Data strobe) delay to control HS400 mode
--  (Latency value for delay line in Read path)
--
--Required properties for a slot (Deprecated - Recommend to use one slot per host):
--
--* gpios: specifies a list of gpios used for command, clock and data bus. The
--  first gpio is the command line and the second gpio is the clock line. The
--  rest of the gpios (depending on the bus-width property) are the data lines in
--  no particular order. The format of the gpio specifier depends on the gpio
--  controller.
--(Deprecated - Refer to Documentation/devicetree/bindings/pinctrl/samsung-pinctrl.txt)
--
--Example:
--
--  The MSHC controller node can be split into two portions, SoC specific and
--  board specific portions as listed below.
--
--	dwmmc0@12200000 {
--		compatible = "samsung,exynos5250-dw-mshc";
--		reg = <0x12200000 0x1000>;
--		interrupts = <0 75 0>;
--		#address-cells = <1>;
--		#size-cells = <0>;
--	};
--
--	dwmmc0@12200000 {
--		cap-mmc-highspeed;
--		cap-sd-highspeed;
--		broken-cd;
--		fifo-depth = <0x80>;
--		card-detect-delay = <200>;
--		samsung,dw-mshc-ciu-div = <3>;
--		samsung,dw-mshc-sdr-timing = <2 3>;
--		samsung,dw-mshc-ddr-timing = <1 2>;
--		samsung,dw-mshc-hs400-timing = <0 2>;
--		samsung,read-strobe-delay = <90>;
--		bus-width = <8>;
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-new file mode 100644
-index 000000000000..ccb9d22c1702
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-@@ -0,0 +1,162 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/samsung,exynos-dw-mshc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title:
-+  Samsung Exynos SoC specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+maintainers:
-+  - Jaehoon Chung <jh80.chung@samsung.com>
-+  - Krzysztof Kozlowski <krzk@kernel.org>
-+
-+properties:
-+  compatible:
-+    enum:
-+      - samsung,exynos4210-dw-mshc
-+      - samsung,exynos4412-dw-mshc
-+      - samsung,exynos5250-dw-mshc
-+      - samsung,exynos5420-dw-mshc
-+      - samsung,exynos7-dw-mshc
-+      - samsung,exynos7-dw-mshc-smu
-+      - axis,artpec8-dw-mshc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 2
-+    description:
-+      Handle to "biu" and "ciu" clocks for the
-+      bus interface unit clock and the card interface unit clock.
-+
-+  clock-names:
-+    items:
-+      - const: biu
-+      - const: ciu
-+
-+  samsung,dw-mshc-ciu-div:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    minimum: 0
-+    maximum: 7
-+    description:
-+      The divider value for the card interface unit (ciu) clock.
-+
-+  samsung,dw-mshc-ddr-timing:
-+    $ref: /schemas/types.yaml#/definitions/uint32-array
-+    items:
-+      - description: CIU clock phase shift value for tx mode
-+        minimum: 0
-+        maximum: 7
-+      - description: CIU clock phase shift value for rx mode
-+        minimum: 0
-+        maximum: 7
-+    description:
-+      The value of CUI clock phase shift value in transmit mode and CIU clock
-+      phase shift value in receive mode for double data rate mode operation.
-+      See also samsung,dw-mshc-hs400-timing property.
-+
-+  samsung,dw-mshc-hs400-timing:
-+    $ref: /schemas/types.yaml#/definitions/uint32-array
-+    items:
-+      - description: CIU clock phase shift value for tx mode
-+        minimum: 0
-+        maximum: 7
-+      - description: CIU clock phase shift value for rx mode
-+        minimum: 0
-+        maximum: 7
-+    description: |
-+      The value of CIU TX and RX clock phase shift value for HS400 mode
-+      operation.
-+      Valid values for SDR and DDR CIU clock timing::
-+        - valid value for tx phase shift and rx phase shift is 0 to 7.
-+        - when CIU clock divider value is set to 3, all possible 8 phase shift
-+          values can be used.
-+        - if CIU clock divider value is 0 (that is divide by 1), both tx and rx
-+          phase shift clocks should be 0.
-+      If missing, values from samsung,dw-mshc-ddr-timing property are used.
-+
-+  samsung,dw-mshc-sdr-timing:
-+    $ref: /schemas/types.yaml#/definitions/uint32-array
-+    items:
-+      - description: CIU clock phase shift value for tx mode
-+        minimum: 0
-+        maximum: 7
-+      - description: CIU clock phase shift value for rx mode
-+        minimum: 0
-+        maximum: 7
-+    description:
-+      The value of CIU clock phase shift value in transmit mode and CIU clock
-+      phase shift value in receive mode for single data rate mode operation.
-+      See also samsung,dw-mshc-hs400-timing property.
-+
-+  samsung,read-strobe-delay:
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    description:
-+      RCLK (Data strobe) delay to control HS400 mode (Latency value for delay
-+      line in Read path). If missing, default from hardware is used.
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+  - samsung,dw-mshc-ddr-timing
-+  - samsung,dw-mshc-sdr-timing
-+
-+allOf:
-+  - $ref: "synopsys-dw-mshc-common.yaml#"
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - samsung,exynos5250-dw-mshc
-+              - samsung,exynos5420-dw-mshc
-+              - samsung,exynos7-dw-mshc
-+              - samsung,exynos7-dw-mshc-smu
-+              - axis,artpec8-dw-mshc
-+    then:
-+      required:
-+        - samsung,dw-mshc-ciu-div
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/exynos5420.h>
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+    mmc@12200000 {
-+        compatible = "samsung,exynos5420-dw-mshc-smu";
-+        interrupts = <GIC_SPI 75 IRQ_TYPE_LEVEL_HIGH>;
-+        #address-cells = <1>;
-+        #size-cells = <0>;
-+        reg = <0x12200000 0x2000>;
-+        clocks = <&clock CLK_MMC0>, <&clock CLK_SCLK_MMC0>;
-+        clock-names = "biu", "ciu";
-+        fifo-depth = <0x40>;
-+
-+        mmc-pwrseq = <&emmc_pwrseq>;
-+        card-detect-delay = <200>;
-+        samsung,dw-mshc-ciu-div = <3>;
-+        samsung,dw-mshc-sdr-timing = <0 4>;
-+        samsung,dw-mshc-ddr-timing = <0 2>;
-+        samsung,dw-mshc-hs400-timing = <0 2>;
-+        samsung,read-strobe-delay = <90>;
-+        pinctrl-names = "default";
-+        pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus1 &sd0_bus4 &sd0_bus8 &sd0_cd &sd0_rclk>;
-+        bus-width = <8>;
-+        cap-mmc-highspeed;
-+        mmc-hs200-1_8v;
-+        mmc-hs400-1_8v;
-+        max-frequency = <200000000>;
-+        vmmc-supply = <&ldo18_reg>;
-+        vqmmc-supply = <&ldo3_reg>;
-+    };
--- 
-2.34.1
+See more suggestions below.
 
+>
+> BR and thanks,
+> Nikolaus
+>
+> printk hack:
+>
+> void __mmc_stop_host(struct mmc_host *host)
+> {
+> printk("%s 1\n", __func__);
+>         if (host->slot.cd_irq >=3D 0) {
+> printk("%s 2\n", __func__);
+>                 mmc_gpio_set_cd_wake(host, false);
+> printk("%s 3\n", __func__);
+>                 disable_irq(host->slot.cd_irq);
+> printk("%s 4\n", __func__);
+>         }
+>
+>         host->rescan_disable =3D 1;
+> printk("%s 5\n", __func__);
+
+My guess is that it's the same mmc host that causes the hang. I
+suggest you print the name of the host too, to verify that. Something
+along the lines of the below.
+
+printk("%s: %s 5\n", mmc_hostname(host), __func__);
+
+>         cancel_delayed_work_sync(&host->detect);
+> printk("%s 6\n", __func__);
+
+Ditto.
+
+> }
+>
+> resulting log:
+>
+> [info] Will now halt.
+> [  282.780929] __mmc_stop_host 1
+> [  282.784276] __mmc_stop_host 2
+> [  282.787735] __mmc_stop_host 3
+> [  282.791030] __mmc_stop_host 4
+> [  282.794235] __mmc_stop_host 5
+> [  282.797369] __mmc_stop_host 6
+> [  282.800918] __mmc_stop_host 1
+> [  282.804269] __mmc_stop_host 5
+> [  282.807541] __mmc_stop_host 6
+> [  282.810715] __mmc_stop_host 1
+> [  282.813842] __mmc_stop_host 2
+> [  282.816984] __mmc_stop_host 3
+> [  282.820175] __mmc_stop_host 4
+> [  282.823302] __mmc_stop_host 5
+> [  282.826449] __mmc_stop_host 6
+> [  282.830941] __mmc_stop_host 1
+> [  282.834076] __mmc_stop_host 5
+>
+> --- here should be another __mmc_stop_host 6
+> --- and reboot: Power down
+
+When/if you figured out that it's the same host that hangs, you could
+try to disable that host through the DTS files (add status =3D
+"disabled" in the device node, for example) - and see if that works.
+
+Kind regards
+Uffe
