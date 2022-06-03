@@ -2,189 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BEB2C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 07:29:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 540F7C43334
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Jun 2022 09:50:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241234AbiFCH3U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Jun 2022 03:29:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50522 "EHLO
+        id S243212AbiFCJt4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Jun 2022 05:49:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242168AbiFCH3R (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 03:29:17 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36E6D39157
-        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 00:29:16 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id a2so5184499lfg.5
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2022 00:29:16 -0700 (PDT)
+        with ESMTP id S236738AbiFCJty (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2022 05:49:54 -0400
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE7D51EAFD
+        for <linux-mmc@vger.kernel.org>; Fri,  3 Jun 2022 02:49:52 -0700 (PDT)
+Received: by mail-ed1-x52e.google.com with SMTP id er5so9432915edb.12
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2022 02:49:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=y8cBUqrsGxB4XcVoi60hXgapYNgMM6ASO6X8ICu7KKU=;
-        b=JvmvI66BY5PdeX47FaqqIHw7mLqXqItCJI2ocvGECxB3NYXCHtB5RhhuHVSyqk3wjb
-         yTciGHdf3j7QPV9BDxQA5C1ivbsKedkgbnMOoLa0pmnmIiogdalvylr5eNkLPH+5F50O
-         F5IOCgST9a2GkFdKbp8IJvC1sPoNKbqXmy98OzXGd7po39VQOiOAMkmDJbGr/E3TbBoi
-         SB0af/lCJH2f5gIYHJRppKrpnuz3d4gnBwh13Pc2gh5nyZlsVx5eeXw76n1ej34rJ2Cu
-         yNHH/dPQk1WXojTN6IE8Wm09Uhm4zBLgAiUr99fduVZ4kbhYgSzCbel5NsQWXqkw4SWN
-         EwjA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hcskUL/YxKVHi0SJFnrMIlY4WGD3EyAiKigPR2KkRlY=;
+        b=KmcNPkMHLYTQ2u4xOEzuAGzAw2BxerOp2EFO6RYMwuwAmhs9YMA9jiTMXFjdrn8B0T
+         g2xc+bEd3wnfdop23wye+enxPlHLsaOhEcT1CqK5u1aOj7Cz93J2d/af8r++8M5vBBT+
+         hHb6OsaFUEn/2XlkOA3e34pI0VN8UZwE99OBT2EkiQaULud/eHPWMH5umlI00c22ovGW
+         MEqJ/zQXCVu5OmAJiO7udpON2xZmTfItLSe/khzE7N2ne4e4kF9B1lGPoynXMrxVsZwb
+         Xik/WNi5QCCD3WfyV63eW3BewDT7q4lGVUY7+nVzVeFizOY4ircRhWHdrjTiRt5zn14H
+         qPbw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=y8cBUqrsGxB4XcVoi60hXgapYNgMM6ASO6X8ICu7KKU=;
-        b=rKSwO+h8GPhlO2yxXUco8CvCniu5jNrWFAXsSj+1V9L0E7fTs5T/ca5fiS88pZM5Re
-         6a9i6ziG7hULv4mzSMUIfcy30Z+0rMVDf6V0WMCiCXRrvMDbRf0OKJwJV2F2QuVcZqhU
-         8lTHwGn19+DEZtsp32FltWOz0HsnFtCs436IKt9Ie6r5oOoaXN72qGItJbUc0FUZPXy7
-         +wxPF6sioXkLp2L/V3SZi/oWN5BoeqXLpbOHdep+R2YAqe2VeTYed7r1+HC994vk2Ug7
-         jA5ZRmA7Kk+9DDwBTrPqIUqwo7barHwtnL+9c0j2T3JrN3O3txMsOpsb3cG0aYIyjpsb
-         sgRw==
-X-Gm-Message-State: AOAM530Ymrsdir9L5Jrii72oif10bjqMMUh70ZVvsWqa2aIY1Rr7qwa+
-        PCQb7KwM2NolD99AtgUmaScZYwLfHKH+za3gxCVXEw==
-X-Google-Smtp-Source: ABdhPJzxpMb+QpO2Y7L876DSFjPQ47OzOcrUerdHXU9ipXkXHCtJ7nzmEOMWqo0jbtrVkxxqENpbmvJz6nh0gPZePWs=
-X-Received: by 2002:a05:6512:403:b0:479:1627:a9b7 with SMTP id
- u3-20020a056512040300b004791627a9b7mr2887343lfk.233.1654241354405; Fri, 03
- Jun 2022 00:29:14 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220525015140.384-1-axe.yang@mediatek.com> <20220525015140.384-2-axe.yang@mediatek.com>
-In-Reply-To: <20220525015140.384-2-axe.yang@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 3 Jun 2022 09:28:37 +0200
-Message-ID: <CAPDyKFr25qbAb9DdCpu6Cp9NyK35YAv745Duw_ht7BQc+pQF=A@mail.gmail.com>
-Subject: Re: [RESEND v12 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
- pinctrls properties
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hcskUL/YxKVHi0SJFnrMIlY4WGD3EyAiKigPR2KkRlY=;
+        b=JY3dYybReLr0P9h2pTc5kzbwaDD+0KNVGAoiAPiSMzUh0XqV73iPiik9g8MQzMKFt6
+         zoy0LvIT13T4DtfczWEb4nqTD4f79ubXEChcednWkMZw1eLULuZPzsfe4hx5A3ZrmDp/
+         GacfuZHtDJUeJVkNJHcucbWE3O54PnbzEIvZofLQFY23hdi2wvo2C55sR/k3BWXAZx4d
+         w8tVIcrCvHdPWcbwmIdmG2B+5QN5aN5q+Rh0Woz2v2AVclSocg1TRGuHt1W6OVK6Q18Y
+         S5wXmj9CujtKUGbQe8C/hKcYon+YtBwIUcN1qC4ENOKQviOmShD/PYqxlWSGglySLZ+8
+         oB9w==
+X-Gm-Message-State: AOAM530uNYoagj3ku/d4d0P6GHPhI8B5Lq4SvKpgL6GrepoPL5gWwsxO
+        XW2Hs4VxdPhvfwySzyU29RGEsQ==
+X-Google-Smtp-Source: ABdhPJw1mLgVG5DL3JieRuG/BBYBbsC2SOMvJFC0jlKl5g39mhNigbnuF55FhOi7YLa8lAqCj3fVKA==
+X-Received: by 2002:aa7:d758:0:b0:42d:b3ca:d647 with SMTP id a24-20020aa7d758000000b0042db3cad647mr9837164eds.63.1654249791585;
+        Fri, 03 Jun 2022 02:49:51 -0700 (PDT)
+Received: from localhost.localdomain (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id y22-20020aa7ca16000000b0042dcbc3f302sm3669561eds.36.2022.06.03.02.49.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Jun 2022 02:49:51 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com
-Content-Type: text/plain; charset="UTF-8"
+        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 0/3] mmc: samsung,exynos-dw-mshc: convert to dtschema
+Date:   Fri,  3 Jun 2022 11:49:43 +0200
+Message-Id: <20220603094946.509919-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 25 May 2022 at 03:51, Axe Yang <axe.yang@mediatek.com> wrote:
->
-> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
-> This feature allow SDIO devices alarm asynchronous interrupt to host
-> even when host stop providing clock to SDIO card. An extra wakeup
-> interrupt and pinctrl states for SDIO DAT1 pin state switching are
-> required in this scenario.
->
-> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 50 ++++++++++++++++++-
->  1 file changed, 49 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index 2a2e9fa8c188..e83bf10281d6 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -72,12 +72,27 @@ properties:
->        - const: ahb_cg
->
->    interrupts:
-> -    maxItems: 1
-> +    description:
-> +      Should at least contain MSDC GIC interrupt. To support SDIO in-band wakeup, an extended
-> +      interrupt is required and be configured as wakeup source irq.
-> +    minItems: 1
-> +    maxItems: 2
-> +
-> +  interrupt-names:
-> +    items:
-> +      - const: msdc
-> +      - const: sdio_wakeup
->
->    pinctrl-names:
-> +    description:
-> +      Should at least contain default and state_uhs. To support SDIO in-band wakeup, dat1 pin
-> +      will be switched between GPIO mode and SDIO DAT1 mode, state_eint and state_dat1 are
-> +      mandatory in this scenarios.
-> +    minItems: 2
->      items:
->        - const: default
->        - const: state_uhs
-> +      - const: state_eint
+Hi,
 
-Don't you need something along the lines of the below instead? I mean
-the "state_eint" isn't always needed, right?
+I will take the DTS patches via Samsung SoC.  The MMC dt-bindings patch
+probably via MMC or Rob's tree.
 
-oneOf:
-  - items:
-      - const: default
-      - const: state_uhs
-    - items:
-        - const: default
-        - const: state_uhs
-        - const: state_eint
+Best regards,
+Krzysztof
 
->
->    pinctrl-0:
->      description:
-> @@ -89,6 +104,11 @@ properties:
->        should contain uhs mode pin ctrl.
->      maxItems: 1
->
-> +  pinctrl-2:
-> +    description:
-> +      should switch dat1 pin to GPIO mode.
-> +    maxItems: 1
-> +
->    assigned-clocks:
->      description:
->        PLL of the source clock.
-> @@ -208,4 +228,32 @@ examples:
->          mediatek,hs400-cmd-resp-sel-rising;
->      };
->
-> +    mmc3: mmc@11260000 {
-> +        compatible = "mediatek,mt8173-mmc";
-> +        reg = <0x11260000 0x1000>;
-> +        clock-names = "source", "hclk";
-> +        clocks = <&pericfg CLK_PERI_MSDC30_3>,
-> +                 <&topckgen CLK_TOP_MSDC50_2_H_SEL>;
-> +        interrupt-names = "msdc", "sdio_wakeup";
-> +        interrupts-extended = <&gic GIC_SPI 74 IRQ_TYPE_LEVEL_LOW 0>,
-> +                     <&pio 23 IRQ_TYPE_LEVEL_LOW>;
-> +        pinctrl-names = "default", "state_uhs", "state_eint";
-> +        pinctrl-0 = <&mmc2_pins_default>;
-> +        pinctrl-1 = <&mmc2_pins_uhs>;
-> +        pinctrl-2 = <&mmc2_pins_eint>;
-> +        bus-width = <4>;
-> +        max-frequency = <200000000>;
-> +        cap-sd-highspeed;
-> +        sd-uhs-sdr104;
-> +        keep-power-in-suspend;
-> +        wakeup-source;
-> +        cap-sdio-irq;
-> +        no-mmc;
-> +        no-sd;
-> +        non-removable;
-> +        vmmc-supply = <&sdio_fixed_3v3>;
-> +        vqmmc-supply = <&mt6397_vgp3_reg>;
-> +        mmc-pwrseq = <&wifi_pwrseq>;
-> +    };
-> +
->  ...
-> --
-> 2.25.1
->
+Krzysztof Kozlowski (3):
+  ARM: dts: exynos: align MMC node name with dtschema
+  arm64: dts: exynos: align MMC node name with dtschema
+  dt-bindings: mmc: samsung,exynos-dw-mshc: convert to dtschema
 
-Kind regards
-Uffe
+ .../bindings/mmc/exynos-dw-mshc.txt           |  94 ----------
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml  | 162 ++++++++++++++++++
+ arch/arm/boot/dts/exynos3250.dtsi             |   6 +-
+ arch/arm64/boot/dts/exynos/exynos5433.dtsi    |   6 +-
+ 4 files changed, 168 insertions(+), 100 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+
+-- 
+2.34.1
+
