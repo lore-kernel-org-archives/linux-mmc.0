@@ -2,102 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F540C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Jun 2022 13:33:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 858D0C43334
+	for <linux-mmc@archiver.kernel.org>; Sun,  5 Jun 2022 16:37:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244177AbiFENdd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 5 Jun 2022 09:33:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53930 "EHLO
+        id S1351272AbiFEQhV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 5 Jun 2022 12:37:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343725AbiFENd1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2022 09:33:27 -0400
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D37E839169
-        for <linux-mmc@vger.kernel.org>; Sun,  5 Jun 2022 06:33:24 -0700 (PDT)
-Received: by mail-wr1-x430.google.com with SMTP id q26so6018503wra.1
-        for <linux-mmc@vger.kernel.org>; Sun, 05 Jun 2022 06:33:24 -0700 (PDT)
+        with ESMTP id S1346126AbiFEQhU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2022 12:37:20 -0400
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80B7F11C12
+        for <linux-mmc@vger.kernel.org>; Sun,  5 Jun 2022 09:37:16 -0700 (PDT)
+Received: by mail-ej1-x629.google.com with SMTP id fu3so23306490ejc.7
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Jun 2022 09:37:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=conchuod.ie; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=qvovknsG3pTwsXPXVn/vDXoAWBD8w8aZsXWfzyMtSBs=;
-        b=NETA3GgPfVm66DpPaF2S0nTHcRlk3BDIbRN52sR4sT6nmMn3x8IhGjo7skosK2o2Rw
-         0yYBfruS2m6oFrSu91XMhZEWRJlnF+hKkihrEeIyIS+lSymdFYTDyeQX3c9lecWfIfx+
-         UCkpuQHSKoYkbEXyjYI/3ZF9VjqP0oNBRgQXs3NoqsN7tLB8hVnqXjoP6A1y9QxPlOsw
-         ufvA269uijRyeoA2gNbGtQVH+/gYVCrqWuQfZ+CLHOrycRMDP2LwV6HsVu2GZTfUyyH7
-         2SvjMSpxa8kKULKjRuh09rMb9w/KMnSRMKihpk0bT6XI7vcMmtgf9agmS8Cx9CnLpEUh
-         gU1w==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1Y+9d1+OO9cS6GSXXKsYHP0IPTFCyxWK3UPU27LfYvY=;
+        b=krGDWQbU8FlEbUNByXNyqn1DUlVJRdUW+YI61vu8d4lPd76fIBVxV6C1rdvEIWyZI5
+         4cHK0DOIqfzv/XvvnJcqB6gKn6MC2vuuIdl9HK5Arq1M3fTCfthhtcRjan2D/fW4KWHh
+         UQHiXLE5erUGkwRQ4Q715vzurGBh8gWH+OrGc+Ve8pd9+UgGA/Xbxk0zEsDHhrjRzWkP
+         B3Tn3xjHe7O3GqQclBiE9Yx6hH3PXtVrVXQWl93JEnG/qyFhpKEkREYT2KB9PIkNgey0
+         wQLqn7zxdCQEsb/GEQijdpnkQbzG8LCEG/3ktS6ozHgkqjivO2qEyfZlxyyWzDq1FEkA
+         Breg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=qvovknsG3pTwsXPXVn/vDXoAWBD8w8aZsXWfzyMtSBs=;
-        b=pS5BzmEOiVVGV8dffdIe1s9e5WdLYrlImSInv2rqJGXem7rO7MVCVrLkCqlTgFrYCi
-         hEfSXALQBqR40TwfV309AuX0SkrPyQeVvxfERL3SM2Ez89oDFCci1+K8c4X+q+XZ6bxw
-         bA5WrNzKWrzyAq4Fer4qzA8CO87szLlH9siXdGuG3F10jS3MUMOYc5njZv87ZYz0cXGB
-         jZWivVwC98EyINYF+QHWEH9uBKPh/T7zxBuxBBBDIoRCyMHPVcMD5+JJMci/EimM+ZP9
-         1DPLdt7rW55NCi1IKhZsXHLqyHMXe2ojxnmBlLYt2z0nNupaKN6C5NdNB1/65w3ieuqj
-         TVMA==
-X-Gm-Message-State: AOAM533Ssks8JdLNCIzoAiofENYr+kstTPSDeCbF+0EC+tlTudSyzpol
-        Lw2P5yoM50lnF1ZqNUc93ZDbpQ==
-X-Google-Smtp-Source: ABdhPJyYqVnx0lY8GU7GcUNjnB/0IheYVlGhFGrMvBppFTA/r5QA2twLfKyEZ/k7oTzicp7A7Zjlkw==
-X-Received: by 2002:a05:6000:168b:b0:20f:d4bd:cbc3 with SMTP id y11-20020a056000168b00b0020fd4bdcbc3mr17543214wrd.580.1654436003025;
-        Sun, 05 Jun 2022 06:33:23 -0700 (PDT)
-Received: from henark71.. ([51.37.234.167])
-        by smtp.gmail.com with ESMTPSA id n187-20020a1c27c4000000b0039c151298b7sm18217076wmn.10.2022.06.05.06.33.21
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1Y+9d1+OO9cS6GSXXKsYHP0IPTFCyxWK3UPU27LfYvY=;
+        b=p70sO3OTPu6iwlrJ2+aMrkrzE2rrUTx+qHch/fFsR2x69nHpU5atwC//AiO8/O7zNL
+         rluBmd7MagBbaOwbo+9zYVfPPjipVt5qCLJYpRJQkKgvH8qV4wPK8j/2h3co5rGAki+L
+         CiUlFKnjivCzZDNEOXWKuLnTfGk7pbUn7AUHZ6rbPWpGMKPtALvC5fHhOowuZuiWDQSh
+         dr382/3yAdofzpDez/BXPiIAHpkvfxLcs6dg+oOBlmyIHUOp70qo/5TMRlXeDpXgtNdm
+         h6BrXY9vB9YzSAIX4AQ1mrGAhAygqaZckdnmm1VevHFt4ag039TYjh36/S0pPH9c/2vs
+         d6sw==
+X-Gm-Message-State: AOAM533yG3mHaz9D4QOSRbQZu3DCd5/fTAljqL1ixH+AzBrrw+N0WyoT
+        eZUIvCMi8xjTnnJ2+aix+UCovQ==
+X-Google-Smtp-Source: ABdhPJz5PVIbveEyD/s2fmUpKmKTuS4EOwTP0W93iIA1qKtSRsivtTlk2Zv212mb6+qiZYy0hllPcQ==
+X-Received: by 2002:a17:907:d1d:b0:6fe:f789:31e with SMTP id gn29-20020a1709070d1d00b006fef789031emr17561851ejc.697.1654447035096;
+        Sun, 05 Jun 2022 09:37:15 -0700 (PDT)
+Received: from localhost.localdomain (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id w3-20020a1709064a0300b006ff0b457cdasm5346770eju.53.2022.06.05.09.37.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 05 Jun 2022 06:33:22 -0700 (PDT)
-From:   mail@conchuod.ie
-To:     Rob Herring <robh+dt@kernel.org>,
+        Sun, 05 Jun 2022 09:37:14 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Support Opensource <support.opensource@diasemi.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Steve Twiss <stwiss.opensource@diasemi.com>
-Cc:     Conor Dooley <conor.dooley@microchip.com>,
-        linux-i2c@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        Atul Khare <atulkhare@rivosinc.com>
-Subject: [PATCH v1 6/6] riscv: dts: sifive: "fix" pmic watchdog node name
-Date:   Sun,  5 Jun 2022 14:33:01 +0100
-Message-Id: <20220605133300.376161-7-mail@conchuod.ie>
-X-Mailer: git-send-email 2.36.1
-In-Reply-To: <20220605133300.376161-1-mail@conchuod.ie>
-References: <20220605133300.376161-1-mail@conchuod.ie>
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH v2 0/4] mmc: samsung,exynos-dw-mshc: convert to dtschema
+Date:   Sun,  5 Jun 2022 18:37:06 +0200
+Message-Id: <20220605163710.144210-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Conor Dooley <conor.dooley@microchip.com>
+Hi,
 
-After converting the pmic watchdog binding to yaml, dtbs_check complains
-that the node name doesn't match the binding. "Fix" it.
+I will take the DTS patches via Samsung SoC.  The MMC dt-bindings patch
+probably via MMC or Rob's tree.
 
-Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
----
- arch/riscv/boot/dts/sifive/hifive-unmatched-a00.dts | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changes since v1
+================
+1. Add patch #4 documenting missing compatible.
+2. Add Rb tags.
 
-diff --git a/arch/riscv/boot/dts/sifive/hifive-unmatched-a00.dts b/arch/riscv/boot/dts/sifive/hifive-unmatched-a00.dts
-index c4ed9efdff03..1f386b07a832 100644
---- a/arch/riscv/boot/dts/sifive/hifive-unmatched-a00.dts
-+++ b/arch/riscv/boot/dts/sifive/hifive-unmatched-a00.dts
-@@ -90,7 +90,7 @@ rtc {
- 			compatible = "dlg,da9063-rtc";
- 		};
- 
--		wdt {
-+		watchdog {
- 			compatible = "dlg,da9063-watchdog";
- 		};
- 
+Best regards,
+Krzysztof
+
+Krzysztof Kozlowski (4):
+  ARM: dts: exynos: align MMC node name with dtschema
+  arm64: dts: exynos: align MMC node name with dtschema
+  dt-bindings: mmc: samsung,exynos-dw-mshc: convert to dtschema
+  dt-bindings: mmc: samsung,exynos-dw-mshc: document Exynos5420 SMU
+
+ .../bindings/mmc/exynos-dw-mshc.txt           |  94 ----------
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml  | 160 ++++++++++++++++++
+ arch/arm/boot/dts/exynos3250.dtsi             |   6 +-
+ arch/arm64/boot/dts/exynos/exynos5433.dtsi    |   6 +-
+ 4 files changed, 166 insertions(+), 100 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+
 -- 
-2.36.1
+2.34.1
 
