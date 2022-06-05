@@ -2,198 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54888C43334
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Jun 2022 10:16:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3253C43334
+	for <linux-mmc@archiver.kernel.org>; Sun,  5 Jun 2022 13:33:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234692AbiFDKQm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 4 Jun 2022 06:16:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49372 "EHLO
+        id S244292AbiFENdU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 5 Jun 2022 09:33:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230482AbiFDKQl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 4 Jun 2022 06:16:41 -0400
-Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [85.215.255.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75EC12CC93;
-        Sat,  4 Jun 2022 03:16:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1654337789;
-    s=strato-dkim-0002; d=goldelico.com;
-    h=To:References:Message-Id:Cc:Date:In-Reply-To:From:Subject:Cc:Date:
-    From:Subject:Sender;
-    bh=k2CeLLJk8IKpfoJJqI76qTO2GTN4yxtENEPA2pWHYqA=;
-    b=QBs1+O8KXbUjcO1J8on5lNuqCDK1imYSBsU9Q0VZBafHzdo8s2v+t0SINrSREEDJEY
-    ChXMYdMXxu+gxT3OtgXoWUxvJGtZ7VeC5eJCKeMn28zLjg7tSxBa7AurabfNSO3lpgXn
-    4t0qEBGWRianAsfAqLHdpR0t+1KvrPS62ofblIYXeD2KUrA1hk9uzl/Kjn9rUQDqIY7T
-    BfkhUXHt017hO8KNyb+XtFY9ib6zfkr3sRkG0MzDLEFCbTgugTs748MitDL3mRExtg1N
-    BYG4rOlIZJsFRlXGxVvGl3gHV2JFA4BZsRw+BNevwDTtL8VjxYSk7QUD9YJjgDsVYCpE
-    gyyg==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMgPgp8VKxflSZ1P34KBj4Qpw9iZeHWElw43tkwA="
-X-RZG-CLASS-ID: mo00
-Received: from imac.fritz.box
-    by smtp.strato.de (RZmta 47.44.0 DYNA|AUTH)
-    with ESMTPSA id e48d97y54AGTlfJ
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
-        (Client did not present a certificate);
-    Sat, 4 Jun 2022 12:16:29 +0200 (CEST)
-Content-Type: text/plain;
-        charset=utf-8
-Mime-Version: 1.0 (Mac OS X Mail 12.4 \(3445.104.21\))
-Subject: Re: BUG in mmc: core: Disable card detect during shutdown
-From:   "H. Nikolaus Schaller" <hns@goldelico.com>
-In-Reply-To: <CAPDyKFrjH8c=2LYkzj81jm7t-sy-EBs3AMzAS7M=LEHsh9qCCA@mail.gmail.com>
-Date:   Sat, 4 Jun 2022 12:16:28 +0200
-Cc:     Discussions about the Letux Kernel <letux-kernel@openphoenux.org>,
-        kernel@pyra-handheld.com, aTc <atc@k-n-p.org>,
-        Tony Lindgren <tony@atomide.com>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-Message-Id: <FA636A4D-FA8F-48EE-80C4-EDDFD115FB25@goldelico.com>
-References: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
- <CAPDyKFrjH8c=2LYkzj81jm7t-sy-EBs3AMzAS7M=LEHsh9qCCA@mail.gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-X-Mailer: Apple Mail (2.3445.104.21)
+        with ESMTP id S241332AbiFENdT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2022 09:33:19 -0400
+Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED8FF387BD
+        for <linux-mmc@vger.kernel.org>; Sun,  5 Jun 2022 06:33:16 -0700 (PDT)
+Received: by mail-wm1-x332.google.com with SMTP id l2-20020a05600c1d0200b0039c35ef94c4so4471177wms.4
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Jun 2022 06:33:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=conchuod.ie; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=NbA7wh6jY57A81MjAXEOdG7Q5joLo5XSqFmERYe0yms=;
+        b=KUt8AZOzNgbQqIXStUVCuFGSgDZ2GjKz/m7+3s++R2lHfDBG9uRWnD4abumwN/BtDD
+         sm+WhmB6LHlbFKIIMVxc/XdGG9t5tPqKMQfHhVQNCHaM+x+ztHA09HkGuQikZ7z5PR2I
+         j9FsPbeVBsRZ6Zf6MpPv0sbilYeqPuyR627Bhupbrkjl87E/h19SDQD25s1DZbv8HcgA
+         qhm2RsHyaapoLYtz8k4VipUibyDnHbDUGuGglW7lu6aPe1w5oIU7ce1mWQtkwZQqXlIZ
+         ZtOtz7LczF/LuLJkCgyOjiMvxH9QpzXQxCS6XmDRURKG5EqgkoMY4Qc4RTINiNl1JGDd
+         fnYg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=NbA7wh6jY57A81MjAXEOdG7Q5joLo5XSqFmERYe0yms=;
+        b=adgscxuOiktiId/kOZ2GMjd6n4Rj54BT7hvvCi6tbURboWKfPR6ve86MuUyHZQPMwg
+         liI6lxUuAr+F1ZMKckifb1yctt2DBiWgDMYGmjrwihUCCl7M5hMpZkVlZGLC7s8O0WZc
+         XLOWDKeo9aUkSNwblMSMBctd6+/tGud4aUqWFvLkP/2bZrq0w67QgedhMAbT/fKPj86r
+         HAimx9Q4Iqm4xKB6xQQhtRD9TeaXW3e4fhLhKTgwu4cRYfHNGlBKJrZVwe4Ut8eKu0sp
+         F6qn1WJumjXP7xa7lnf2qZEHa504ndWZK7kLqhsr9VDnHZf2wlzjbv955lM5OM8r1c3n
+         dP4g==
+X-Gm-Message-State: AOAM531eu5Ag7iVw0qMJetiv4qqL2iPIRqemOLhmNmfaq3ChSGqQJfM1
+        Tmbj35fHAkC9ygw7Y+A3S0jMlw==
+X-Google-Smtp-Source: ABdhPJw10bY4o1/w1XS51daNaShBW8xHRcfsZfqKIJEbYDaIL1gaYDHaYsbiQI0FgXSBT2fsoaPqMw==
+X-Received: by 2002:a05:600c:19cc:b0:39c:3022:1b23 with SMTP id u12-20020a05600c19cc00b0039c30221b23mr16534325wmq.106.1654435995365;
+        Sun, 05 Jun 2022 06:33:15 -0700 (PDT)
+Received: from henark71.. ([51.37.234.167])
+        by smtp.gmail.com with ESMTPSA id n187-20020a1c27c4000000b0039c151298b7sm18217076wmn.10.2022.06.05.06.33.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 05 Jun 2022 06:33:14 -0700 (PDT)
+From:   mail@conchuod.ie
+To:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Support Opensource <support.opensource@diasemi.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Steve Twiss <stwiss.opensource@diasemi.com>
+Cc:     Conor Dooley <conor.dooley@microchip.com>,
+        linux-i2c@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        Atul Khare <atulkhare@rivosinc.com>
+Subject: [PATCH v1 0/6] clear riscv dtbs_check errors
+Date:   Sun,  5 Jun 2022 14:32:55 +0100
+Message-Id: <20220605133300.376161-1-mail@conchuod.ie>
+X-Mailer: git-send-email 2.36.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+From: Conor Dooley <conor.dooley@microchip.com>
 
-> Am 03.06.2022 um 12:46 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
->=20
-> On Mon, 30 May 2022 at 18:55, H. Nikolaus Schaller <hns@goldelico.com> =
-wrote:
->>=20
->> Hi Ulf,
->> users did report a strange issue that the OMAP5 based Pyra does not
->> shutdown if a kernel 5.10.116 is used.
->>=20
+Hey,
+Couple conversions from txt to yaml here with the intent of fixing the
+the dtbs_check warnings for riscv. Atul Khare already sent patches for
+the gpio-line-names & cache-sets (which went awol) and will clear the
+remaining two errors.
 
-...
+Rob/Krzysztof:
+Have I correctly expressed the mutually exclusive properties?
+I had a look around, but wasn't able to find an obvious binding to ape.
 
->> mmc_stop_host() is not called but __mmc_stop_host() is called 4 =
-times.
->> There are 4 active MMC interfaces in the Pyra - 3 for (=C2=B5)SD =
-slots
->> and one for an SDIO WLAN module.
->>=20
->> Now it looks as if 3 of them are properly teared down (two of them
->> seem to have host->slot.cd_irq >=3D 0) but on the fourth call
->> cancel_delayed_work_sync(&host->detect); does not return. This is
->> likely the location of the stall why we don't see a "reboot: Power =
-down"
->>=20
->> Any ideas?
->=20
-> I guess the call to cancel_delayed_work_sync() in __mmc_stop_host()
-> hangs for one of the mmc hosts. This shouldn't happen - and indicates
-> that there is something else being wrong.
+Wasn't sure if a txt -> yaml conversion's MAINTAINERS update was meant
+to be in the same patch or not, so feel free to squash.
+Thanks,
+Conor.
 
-Yes, you were right...
+Conor Dooley (6):
+  dt-bindings: mmc: convert mmc-spi-slot to yaml
+  dt-bindings: i2c: convert ocores binding to yaml
+  MAINTAINERS: convert ocores i2c dt-binding to yaml
+  dt-bindings: mfd: convert da9063 to yaml
+  MAINTAINERS: convert da9063 to yaml
+  riscv: dts: sifive: "fix" pmic watchdog node name
 
->=20
-> See more suggestions below.
->=20
->>=20
->> BR and thanks,
->> Nikolaus
->>=20
->> printk hack:
->>=20
->> void __mmc_stop_host(struct mmc_host *host)
->> {
->> printk("%s 1\n", __func__);
->>        if (host->slot.cd_irq >=3D 0) {
->> printk("%s 2\n", __func__);
->>                mmc_gpio_set_cd_wake(host, false);
->> printk("%s 3\n", __func__);
->>                disable_irq(host->slot.cd_irq);
->> printk("%s 4\n", __func__);
->>        }
->>=20
->>        host->rescan_disable =3D 1;
->> printk("%s 5\n", __func__);
->=20
-> My guess is that it's the same mmc host that causes the hang. I
-> suggest you print the name of the host too, to verify that. Something
-> along the lines of the below.
->=20
-> printk("%s: %s 5\n", mmc_hostname(host), __func__);
+ .../devicetree/bindings/i2c/i2c-ocores.txt    |  78 -----------
+ .../devicetree/bindings/i2c/i2c-ocores.yaml   | 132 ++++++++++++++++++
+ .../devicetree/bindings/mfd/da9063.txt        | 111 ---------------
+ .../devicetree/bindings/mfd/da9063.yaml       | 123 ++++++++++++++++
+ .../devicetree/bindings/mmc/mmc-spi-slot.txt  |  29 ----
+ .../devicetree/bindings/mmc/mmc-spi-slot.yaml |  76 ++++++++++
+ .../devicetree/bindings/trivial-devices.yaml  |   2 -
+ MAINTAINERS                                   |   3 +-
+ .../boot/dts/sifive/hifive-unmatched-a00.dts  |   2 +-
+ 9 files changed, 334 insertions(+), 222 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/i2c/i2c-ocores.txt
+ create mode 100644 Documentation/devicetree/bindings/i2c/i2c-ocores.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mfd/da9063.txt
+ create mode 100644 Documentation/devicetree/bindings/mfd/da9063.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
 
-To my surprise, this did report an mmc6 host port where the OMAP5 only =
-has 4...
-
-Yes, we have a special driver for the txs02612 sdio switch and voltage =
-translator
-chip to make two ports out of the single mmc2 port of the OMAP5 SoC.
-
-This driver was begun ca. 7 years ago but never finished...
-
-The idea is to make a mmc port have several subports. For the Pyra =
-handheld hardware
-we needed 5 mmc/sdio interfaces but the omap5 only has 4 of them =
-available to us.
-
-So the txs02612 drivers is sitting between the omap5 mmc2 host pins and =
-switches
-between an =C2=B5SD slot and an eMMC.
-
-Therefore, the driver is a mmc client driver (like e.g. the driver of =
-some WiFi chip
-connected to some SDIO port) and provides multiple mmc host interfaces.
-
-It should intercept data transfer requests to its multiple mmc hosts, =
-synchronize
-(or enqueue) them, control the switch gpio and forward requests to the =
-processor's
-mmc host port so that they are processed (after switching).
-
-We never continued to make this work...
-
-What remained is simple code to manually throw the switch through some =
-/sysfs
-control file after doing an eject and before a fresh partprobe.
-
-Still, the probe function of the txs02612 driver does two calls to =
-mmc_add_host().
-These seem to make=20
-
->=20
->>        cancel_delayed_work_sync(&host->detect);
-
-get stuck. Most likely because the initialization is not complete for =
-handling
-card detection.
-
->>=20
->> --- here should be another __mmc_stop_host 6
->> --- and reboot: Power down
->=20
-> When/if you figured out that it's the same host that hangs, you could
-> try to disable that host through the DTS files (add status =3D
-> "disabled" in the device node, for example) - and see if that works.
-
-When not calling mmc_add_host() in our txs02612 driver fragment we can
-properly shut down the OMAP5. That is the solution with the least =
-efforts.
-The other would be to make the txs02612 properly work...
-
-So in summary there is no bug upstream. It is in our tree.
-
-If you are interested in how our code fragment for the txs02612 looks =
-like:
-
-=
-https://git.goldelico.com/?p=3Dletux-kernel.git;a=3Dshortlog;h=3Drefs/head=
-s/letux/txs02612
-
-Maybe you have some suggestions to make it work?
-
->=20
-> Kind regards
-> Uffe
-
-BR and thanks,
-Nikolaus
+-- 
+2.36.1
 
