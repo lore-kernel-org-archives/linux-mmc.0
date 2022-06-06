@@ -2,99 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83FFFC43334
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jun 2022 15:41:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78B1ACCA482
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jun 2022 17:19:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240989AbiFFPlO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Jun 2022 11:41:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41312 "EHLO
+        id S230016AbiFFRTW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Jun 2022 13:19:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37644 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241023AbiFFPlO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2022 11:41:14 -0400
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D96BB554BA
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Jun 2022 08:41:10 -0700 (PDT)
-Received: by mail-ej1-x62c.google.com with SMTP id v1so19042250ejg.13
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jun 2022 08:41:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=5bsP623yeVUhI4X2qyWKm7xhZAZBEQqTrR3MfihqiO0=;
-        b=pGV3u32GEBOhd7TPDnOWLKJ9oLJuUOxDipMCgJt3EuoZ1rarvWVYq8oK+EU5doKOjK
-         SjmxM35Rzb1UHksLLMUZC4DYfUe6w8HvXhq0YtIZ23J8rixxB6XuOgLghu9cBT3X7v+5
-         8CKA9/yAOJtmExGP8T4abFpaA3PaM3BnjfL2ukfBwdBbz7233FZ2pQAgim1oO1u4diFw
-         Dnf3lFRkKT93piQWB7AwqEXehvglKXOTwbtf2OtFQ4WNsFBDbscEbx8lE2uQE2D7ANLE
-         Aeq7piv2zqJSmwRp4PA+HAoVDcvxcdfbrtP0VaTbP7qHmqDopLuXdRpnHi+IPAgVaH8Y
-         Tqlw==
+        with ESMTP id S229737AbiFFRSy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2022 13:18:54 -0400
+Received: from mail-il1-f172.google.com (mail-il1-f172.google.com [209.85.166.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9672A5130C;
+        Mon,  6 Jun 2022 10:17:53 -0700 (PDT)
+Received: by mail-il1-f172.google.com with SMTP id d6so1584259ilm.4;
+        Mon, 06 Jun 2022 10:17:53 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=5bsP623yeVUhI4X2qyWKm7xhZAZBEQqTrR3MfihqiO0=;
-        b=D/XbuX1cmEFJQme0tU5KOLoIc2w+ITCEfDb2MUbpRNyU7jbQjvLp57nn6zsLP8AiKR
-         tyEsKiYLbN3f4HKVyOZmeGz7BV+vIb7LG6hzakmvXmI8B7lrYf8D5K4A3b+35toD2dp2
-         M9z5xpztCcRNWypGvPJsJV+ecfQEKxrImo6eMzZQrADibG8C9qrmZQrMxGi66osluKqk
-         mOyCJDoT4NWGCJTp+ijvAgcGjE2wE3r2XQRgpPj5NrESSHNjkEyblnMAKoa4UZMT5K8W
-         6pt5amMgLZMKDtaVaEjJ8QVluKop/R8wgh6F2+W4X3tIg1SArwi8F1xJED9CD8Qg9TC/
-         nxfA==
-X-Gm-Message-State: AOAM532Jet7gZLFWDGHwhHpD+y5wjyCbC5c4IW9WGgKaFD/nVnTGuT7N
-        zR8fW7Q5BXdHOLBHnzgBUNagiA==
-X-Google-Smtp-Source: ABdhPJxPmR5o/ptnO48/LLqqFHYgHv9f2kSvvBI4oOyV4SSHNtCri883LtJ4arOlCN8+RLxPMr+1YQ==
-X-Received: by 2002:a17:906:5959:b0:710:c2e8:79f3 with SMTP id g25-20020a170906595900b00710c2e879f3mr11652199ejr.489.1654530069008;
-        Mon, 06 Jun 2022 08:41:09 -0700 (PDT)
-Received: from [192.168.0.181] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id n16-20020aa7c790000000b0042bced44061sm8728646eds.10.2022.06.06.08.41.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Jun 2022 08:41:08 -0700 (PDT)
-Message-ID: <5fe2246f-97db-e7b0-a72e-c8c5ff6b2abe@linaro.org>
-Date:   Mon, 6 Jun 2022 17:41:07 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.10.0
-Subject: Re: [PATCH 06/23] dt-bindings: mmc: exynos-dw-mshc: update
- samsung,pinctrl.yaml reference
-Content-Language: en-US
-To:     Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        Jonathan Corbet <corbet@lwn.net>
-Cc:     Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=HOgnxEn2ntmtyghL8kOb8yKeTcYGElnyCDEZZ25iRQw=;
+        b=4Rh+2Oy1eY+bYftHCMJntZLu8WUck5porKU754FT8zR6Zrc1ge8btPSGostMVvL3OV
+         SnatfcmfJPoHw7VIetGqvBuSKTKPotPkorQG4RXog3r5KyneQybFCNA9fqODyOKRq3cu
+         JkaTE/OFn4WPIjCWenuUfzjbasK2sDP1uqtUW/40cuMglBuofp7f/Oia3KkhOuYBhBs1
+         zDb4DZfYV+MsuQ3edePHr3aP1Esoi6MOLB2QkKXTxM7QsCyoF5MMBvITQaP0EV0aXodl
+         RetlcCfUZYhfHhYAog1vp4KXM6Gzb+sf29gK7B1QzTvRWwHn+wWbjU7x264uiR/Kwrn1
+         9X9A==
+X-Gm-Message-State: AOAM530qDiQ4MgwcvCqSG0y8EZVSl3dzi7fzsuYTm8MTuU14l6VTbLCZ
+        6jqA5yTXnzCXGGmZPA2C0A==
+X-Google-Smtp-Source: ABdhPJxXRz8rpxHVMQETrBoM9cb8XJJozkw5PJACTm4qK/vhBn8tviwY3PyY58j2eoaPB/u3qpK33w==
+X-Received: by 2002:a05:6e02:184f:b0:2d3:d0c2:d56a with SMTP id b15-20020a056e02184f00b002d3d0c2d56amr13953839ilv.174.1654535872910;
+        Mon, 06 Jun 2022 10:17:52 -0700 (PDT)
+Received: from robh.at.kernel.org ([64.188.179.251])
+        by smtp.gmail.com with ESMTPSA id t17-20020a92c0d1000000b002d3da8e4af5sm6121750ilf.23.2022.06.06.10.17.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Jun 2022 10:17:52 -0700 (PDT)
+Received: (nullmailer pid 911134 invoked by uid 1000);
+        Mon, 06 Jun 2022 17:17:47 -0000
+Date:   Mon, 6 Jun 2022 12:17:47 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Mauro Carvalho Chehab <mchehab@kernel.org>
+Cc:     Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+        linux-kernel@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
         Alim Akhtar <alim.akhtar@samsung.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Federico Vaga <federico.vaga@vaga.pv.it>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Jean Delvare <jdelvare@suse.com>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Linus Walleij <linus.walleij@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Sam Protsenko <semen.protsenko@linaro.org>,
+        Markus Mayer <mmayer@broadcom.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-samsung-soc@vger.kernel.org
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        alsa-devel@alsa-project.org, devicetree@vger.kernel.org,
+        keyrings@vger.kernel.org, kvm@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-cachefs@redhat.com,
+        linux-gpio@vger.kernel.org, linux-hwmon@vger.kernel.org,
+        linux-m68k@lists.linux-m68k.org, linux-mmc@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-pm@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org, linux-usb@vger.kernel.org,
+        x86@kernel.org
+Subject: Re: [PATCH 00/23] Update Documentation/ cross-references
+Message-ID: <20220606171747.GB899329-robh@kernel.org>
 References: <cover.1654529011.git.mchehab@kernel.org>
- <5c937793dd7aec30da4964b39561072ae184f89b.1654529011.git.mchehab@kernel.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <5c937793dd7aec30da4964b39561072ae184f89b.1654529011.git.mchehab@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cover.1654529011.git.mchehab@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/06/2022 17:25, Mauro Carvalho Chehab wrote:
-> Changeset af030d83da1d ("dt-bindings: pinctrl: samsung: convert to dtschema")
-> renamed: bindings/pinctrl/samsung-pinctrl.txt
-> to: bindings/pinctrl/samsung-pinctrl.yaml, splitting it into multiple
-> files.
+On Mon, Jun 06, 2022 at 04:25:22PM +0100, Mauro Carvalho Chehab wrote:
+> Hi John,
 > 
-> Update exynos-dw-mshc.txt accordingly.
+> There were a number of DT binding conversions and other docs change that
+> were not updated. Address them, in order to keep the cross-references on
+> a sane state.
 > 
-> Fixes: af030d83da1d ("dt-bindings: pinctrl: samsung: convert to dtschema")
-> Signed-off-by: Mauro Carvalho Chehab <mchehab@kernel.org>
+> Patch series is against v5.19-rc1 (and applies cleanly on the top of
+> today's -next).
+> 
+> Mauro Carvalho Chehab (23):
+>   dt-bindings: mfd: bd9571mwv: update rohm,bd9571mwv.yaml reference
+>   dt-bindings: interrupt-controller: update brcm,l2-intc.yaml reference
+>   dt-bindings: arm: update vexpress-config.yaml references
+>   dt-bindings: reset: update st,stih407-powerdown.yaml references
+>   dt-bindings: mfd: rk808: update rockchip,rk808.yaml reference
+>   dt-bindings: mmc: exynos-dw-mshc: update samsung,pinctrl.yaml
+>     reference
+>   docs: netdev: update maintainer-netdev.rst reference
+>   docs: filesystems: update netfs-api.rst reference
+>   Documentation: update watch_queue.rst references
+>   Documentation: KVM: update s390-pv.rst reference
+>   Documentation: KVM: update amd-memory-encryption.rst references
+>   Documentation: KVM: update msr.rst reference
+>   Documentation: KVM: update s390-diag.rst reference
+>   MAINTAINERS: update arm,hdlcd.yaml reference
+>   MAINTAINERS: update arm,komeda.yaml reference
+>   MAINTAINERS: update arm,malidp.yaml reference
+>   MAINTAINERS: update cortina,gemini-ethernet.yaml reference
+>   MAINTAINERS: update dongwoon,dw9807-vcm.yaml reference
+>   MAINTAINERS: update maxim,max77693.yaml reference
+>   MAINTAINERS: update snps,axs10x-reset.yaml reference
+>   objtool: update objtool.txt references
+>   ASoC: wm8731: update wlf,wm8731.yaml reference
+>   arch: m68k: q40: README: drop references to IDE driver
 
-Commit is okay, but you can also drop it entirely because entire part
-will be removed with:
-https://lore.kernel.org/all/20220605163710.144210-4-krzysztof.kozlowski@linaro.org/
-
-
-
-Best regards,
-Krzysztof
+Applied patches 1-5,17,18,20
