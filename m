@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3122AC43334
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jun 2022 15:26:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5829DCCA473
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jun 2022 15:26:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240724AbiFFP0S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S240735AbiFFP0S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 6 Jun 2022 11:26:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48622 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240705AbiFFP0N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2022 11:26:13 -0400
-Received: from mail-wm1-x32c.google.com (mail-wm1-x32c.google.com [IPv6:2a00:1450:4864:20::32c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02E64328ED7
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Jun 2022 08:26:10 -0700 (PDT)
-Received: by mail-wm1-x32c.google.com with SMTP id i17-20020a7bc951000000b0039c4760ec3fso1976418wml.0
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Jun 2022 08:26:10 -0700 (PDT)
+        with ESMTP id S240718AbiFFP0Q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2022 11:26:16 -0400
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD776328EE5
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Jun 2022 08:26:13 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id q7so20338593wrg.5
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Jun 2022 08:26:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=conchuod.ie; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=oggV4sOjieyiC3zjEdHQHSt2OuXT3mEVI982IJ/c+54=;
-        b=NaB7ujjGsLox+28AdLK9IidwX+NJOkUleLjf4urIgEJUy6CHXhH2EePr22m74qQdEA
-         79mv33qy/xswvfwMxz168siPdwUK7Krz2iUEUbL9+0RK6LltHN1Qqo1e2xXu3s9VCK/z
-         NIJWNpW8d1FTfwhqQ7UccQcdKWY7CLUuNH3z7hTLi+k5MVHte1kWZZOptTtRM2sWmlwW
-         pXAtWMrUN74gUFYtK/9l2Xp7uV0zy5f7NglOI//BfmebbOrBcDQL5jVG6NmVlz/J+oZD
-         dLBPOOPbqxl3xt2MG/bFypavTjAOyw++V0cBBF7Bnu8/rcewEjYER1C7DDYUalMDV95C
-         IAZw==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=x/f1FaPzTGDLsr/DiTII6oEYQHceD1qu+Bo5bSZju/M=;
+        b=e9T05yHPz6TascNJEXfj2bG3nUrDj112EH4rcBcG6wiVBOtMHFuPNpmmyGyldu3Lih
+         VSK3wAqAL996cyT61h1McpAqnhkkKKLcwmTigut8hUrtDBY0re/ynVtd/Yni8ASpqdef
+         VhNoG5I5yEb6PU3D9swh2278LAvqE2WasoDPCuc9C4s7KJnQQNEtne6ha809RF5UV1Hi
+         yNeUH/epC/fuMj3krROewpoFobsCi/WlZQHwExzGZIZhKccmVumCjNVBrVWon4m1XvHS
+         gUxQIlQ5EGVWw+j0i06DVVwXkh2QrPCm7eePNhbtAbdgpntwaSKSkthK/KOLai7yZMfA
+         xATw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=oggV4sOjieyiC3zjEdHQHSt2OuXT3mEVI982IJ/c+54=;
-        b=T65viTuzJWPRio7pQtSJmZJYDTA7qeoPqlIUmkPsOqp55EI+Lva/H5vAV1Z0HnzHfC
-         ll301YHsX5KGSXhIhXmjWT6U7Dsg4fn0n4opNqw8ajZXWHhptMj2NjsmOZ8bQW1Uop58
-         Fuplw6yaMQAahDKdifEY2CWKcNIgvAmxFa5x7uONV0edSODUM9MTn0TOb2iKKK0MxBe7
-         QE3lEIOyJNxcKCDevjeRGu7siQmNlLdTUxc6VrONSHUHDlEPy6SNTqcmnF7RihOYiWR8
-         22cogDnoApFLLMeIBg4m9AUV/BgOnp5YFA91oTCxGcqVENJhigWderUUTRmm/tFzz9n3
-         3qoQ==
-X-Gm-Message-State: AOAM533CKHJdJNUQVS/IiN0wHpb9IxWBoEk0UVvNjxWZqjVhbsonQpll
-        vF4Tkey9Am9ItuZ0MWIUeL2k4w==
-X-Google-Smtp-Source: ABdhPJxQXtq89heOMKFlrzvEzPMju6ZggXxjIjVWhm/vncfRX5ffcbpunfZrkktl/6NLqBfuUMH5Dw==
-X-Received: by 2002:a05:600c:5021:b0:397:54e1:8274 with SMTP id n33-20020a05600c502100b0039754e18274mr52631051wmr.15.1654529169099;
-        Mon, 06 Jun 2022 08:26:09 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=x/f1FaPzTGDLsr/DiTII6oEYQHceD1qu+Bo5bSZju/M=;
+        b=dSEoBGod4Xi+vzzoSWjNI7O0cfV59d7teNHnGXBDa4jpTHvoJ+t8sXt+pOwA0j8jSQ
+         PpRw/KwBzjWm/ueRUVdODl1egmkKag54ZzBSkw9azP7Djv8IhZnJnMEbm7S+HsJgbjG1
+         sXdQjhx1rb0+6ul0TMvFlVSOrpL+Fe9//+YGZq3uR7pConNZyxBmgJHXgAUNV7DGVEEY
+         7sOGHs5lblZQ0VVkgsAgE68DeIxIAMqaXYoLYeCo6zySQ0UkhcGnTOhpBjwMGc6NDXPX
+         ym92fKCyVTgxhGBteQI3jRhOTmy3/4GXgrq9sa4P0M7hFK7wrYQZgIp88YgSvY1chJhe
+         PS0w==
+X-Gm-Message-State: AOAM532Yo6+FUUXEjGTRH0w2G2v1YH1UlmxHLZ2JrKpt0QsFupGI2RtL
+        42sL3o20cYSpk/5UFMdBmD7Q2A==
+X-Google-Smtp-Source: ABdhPJzVN2kv17X6adk/UC8LHcWJ90WyNDYqXo34cL9iDJALH5HczjnpDFV2nYexah8I+mkleqkqmw==
+X-Received: by 2002:a5d:4290:0:b0:213:badd:abc5 with SMTP id k16-20020a5d4290000000b00213baddabc5mr17323489wrq.54.1654529171903;
+        Mon, 06 Jun 2022 08:26:11 -0700 (PDT)
 Received: from henark71.. ([51.37.234.167])
-        by smtp.gmail.com with ESMTPSA id h1-20020adffd41000000b002103aebe8absm15623944wrs.93.2022.06.06.08.26.07
+        by smtp.gmail.com with ESMTPSA id h1-20020adffd41000000b002103aebe8absm15623944wrs.93.2022.06.06.08.26.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Jun 2022 08:26:08 -0700 (PDT)
+        Mon, 06 Jun 2022 08:26:11 -0700 (PDT)
 From:   Conor Dooley <mail@conchuod.ie>
 To:     Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -63,10 +63,12 @@ Cc:     Conor Dooley <conor.dooley@microchip.com>,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-riscv@lists.infradead.org,
         Atul Khare <atulkhare@rivosinc.com>
-Subject: [PATCH v2 0/4] clear riscv dtbs_check errors
-Date:   Mon,  6 Jun 2022 16:25:54 +0100
-Message-Id: <20220606152557.438771-1-mail@conchuod.ie>
+Subject: [PATCH v2 2/4] dt-bindings: i2c: convert ocores binding to yaml
+Date:   Mon,  6 Jun 2022 16:25:56 +0100
+Message-Id: <20220606152557.438771-3-mail@conchuod.ie>
 X-Mailer: git-send-email 2.36.1
+In-Reply-To: <20220606152557.438771-1-mail@conchuod.ie>
+References: <20220606152557.438771-1-mail@conchuod.ie>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -75,40 +77,243 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Conor Dooley <conor.dooley@microchip.com>
 
-Hey,
-Couple conversions from txt to yaml here with the intent of fixing the
-the dtbs_check warnings for riscv when building with "defconfig".
-Atul Khare already sent patches for the gpio-line-names & cache-sets
-(which went awol) and will clear the remaining two errors.
+Convert the open cores i2c controller binding from text to yaml.
 
-Thanks,
-Conor.
-
-Conor Dooley (4):
-  dt-bindings: mmc: convert mmc-spi-slot to yaml
-  dt-bindings: i2c: convert ocores binding to yaml
-  dt-bindings: mfd: convert da9063 to yaml
-  riscv: dts: sifive: "fix" pmic watchdog node name
-
+Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
+---
  .../devicetree/bindings/i2c/i2c-ocores.txt    |  78 -----------
- .../bindings/i2c/opencores,i2c-ocores.yaml    | 123 ++++++++++++++++
- .../devicetree/bindings/mfd/da9063.txt        | 114 ---------------
- .../devicetree/bindings/mfd/dlg,da9063.yaml   | 132 ++++++++++++++++++
- .../devicetree/bindings/mmc/mmc-spi-slot.txt  |  29 ----
- .../devicetree/bindings/mmc/mmc-spi-slot.yaml |  79 +++++++++++
- .../devicetree/bindings/trivial-devices.yaml  |   2 -
- MAINTAINERS                                   |   3 +-
- .../boot/dts/sifive/hifive-unmatched-a00.dts  |   2 +-
- 9 files changed, 337 insertions(+), 225 deletions(-)
+ .../bindings/i2c/opencores,i2c-ocores.yaml    | 123 ++++++++++++++++++
+ MAINTAINERS                                   |   2 +-
+ 3 files changed, 124 insertions(+), 79 deletions(-)
  delete mode 100644 Documentation/devicetree/bindings/i2c/i2c-ocores.txt
  create mode 100644 Documentation/devicetree/bindings/i2c/opencores,i2c-ocores.yaml
- delete mode 100644 Documentation/devicetree/bindings/mfd/da9063.txt
- create mode 100644 Documentation/devicetree/bindings/mfd/dlg,da9063.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
 
-
-base-commit: f2906aa863381afb0015a9eb7fefad885d4e5a56
+diff --git a/Documentation/devicetree/bindings/i2c/i2c-ocores.txt b/Documentation/devicetree/bindings/i2c/i2c-ocores.txt
+deleted file mode 100644
+index a37c9455b244..000000000000
+--- a/Documentation/devicetree/bindings/i2c/i2c-ocores.txt
++++ /dev/null
+@@ -1,78 +0,0 @@
+-Device tree configuration for i2c-ocores
+-
+-Required properties:
+-- compatible      : "opencores,i2c-ocores"
+-                    "aeroflexgaisler,i2cmst"
+-                    "sifive,fu540-c000-i2c", "sifive,i2c0"
+-                    For Opencore based I2C IP block reimplemented in
+-                    FU540-C000 SoC.
+-                    "sifive,fu740-c000-i2c", "sifive,i2c0"
+-                    For Opencore based I2C IP block reimplemented in
+-                    FU740-C000 SoC.
+-                    Please refer to sifive-blocks-ip-versioning.txt for
+-                    additional details.
+-- reg             : bus address start and address range size of device
+-- clocks          : handle to the controller clock; see the note below.
+-                    Mutually exclusive with opencores,ip-clock-frequency
+-- opencores,ip-clock-frequency: frequency of the controller clock in Hz;
+-                    see the note below. Mutually exclusive with clocks
+-- #address-cells  : should be <1>
+-- #size-cells     : should be <0>
+-
+-Optional properties:
+-- interrupts      : interrupt number.
+-- clock-frequency : frequency of bus clock in Hz; see the note below.
+-                    Defaults to 100 KHz when the property is not specified
+-- reg-shift       : device register offsets are shifted by this value
+-- reg-io-width    : io register width in bytes (1, 2 or 4)
+-- regstep         : deprecated, use reg-shift above
+-
+-Note
+-clock-frequency property is meant to control the bus frequency for i2c bus
+-drivers, but it was incorrectly used to specify i2c controller input clock
+-frequency. So the following rules are set to fix this situation:
+-- if clock-frequency is present and neither opencores,ip-clock-frequency nor
+-  clocks are, then clock-frequency specifies i2c controller clock frequency.
+-  This is to keep backwards compatibility with setups using old DTB. i2c bus
+-  frequency is fixed at 100 KHz.
+-- if clocks is present it specifies i2c controller clock. clock-frequency
+-  property specifies i2c bus frequency.
+-- if opencores,ip-clock-frequency is present it specifies i2c controller
+-  clock frequency. clock-frequency property specifies i2c bus frequency.
+-
+-Examples:
+-
+-	i2c0: ocores@a0000000 {
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-		compatible = "opencores,i2c-ocores";
+-		reg = <0xa0000000 0x8>;
+-		interrupts = <10>;
+-		opencores,ip-clock-frequency = <20000000>;
+-
+-		reg-shift = <0>;	/* 8 bit registers */
+-		reg-io-width = <1>;	/* 8 bit read/write */
+-
+-		dummy@60 {
+-			compatible = "dummy";
+-			reg = <0x60>;
+-		};
+-	};
+-or
+-	i2c0: ocores@a0000000 {
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-		compatible = "opencores,i2c-ocores";
+-		reg = <0xa0000000 0x8>;
+-		interrupts = <10>;
+-		clocks = <&osc>;
+-		clock-frequency = <400000>; /* i2c bus frequency 400 KHz */
+-
+-		reg-shift = <0>;	/* 8 bit registers */
+-		reg-io-width = <1>;	/* 8 bit read/write */
+-
+-		dummy@60 {
+-			compatible = "dummy";
+-			reg = <0x60>;
+-		};
+-	};
+diff --git a/Documentation/devicetree/bindings/i2c/opencores,i2c-ocores.yaml b/Documentation/devicetree/bindings/i2c/opencores,i2c-ocores.yaml
+new file mode 100644
+index 000000000000..7074f019d94f
+--- /dev/null
++++ b/Documentation/devicetree/bindings/i2c/opencores,i2c-ocores.yaml
+@@ -0,0 +1,123 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/i2c/opencores,i2c-ocores.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: OpenCores I2C controller
++
++maintainers:
++  - Peter Korsgaard <peter@korsgaard.com>
++  - Andrew Lunn <andrew@lunn.ch>
++
++allOf:
++  - $ref: /schemas/i2c/i2c-controller.yaml#
++
++properties:
++  compatible:
++    oneOf:
++      - items:
++          - enum:
++              - sifive,fu740-c000-i2c # Opencore based IP block FU740-C000 SoC
++              - sifive,fu540-c000-i2c # Opencore based IP block FU540-C000 SoC
++          - const: sifive,i2c0
++      - enum:
++          - opencores,i2c-ocores
++          - aeroflexgaisler,i2cmst
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  "#address-cells":
++    const: 1
++
++  "#size-cells":
++    const: 0
++
++  clock-frequency:
++    description: |
++      Desired I2C bus clock frequency in Hz. As only Standard and Fast
++      modes are supported, possible values are 100000 and 400000.
++      Note:
++      clock-frequency property is meant to control the bus frequency for i2c bus
++      drivers, but it was incorrectly used to specify i2c controller input clock
++      frequency. So the following rules are set to fix this situation:
++      - if clock-frequency is present and neither opencores,ip-clock-frequency nor
++        clocks are, then clock-frequency specifies i2c controller clock frequency.
++        This is to keep backwards compatibility with setups using old DTB. i2c bus
++        frequency is fixed at 100 KHz.
++      - if clocks is present it specifies i2c controller clock. clock-frequency
++        property specifies i2c bus frequency.
++      - if opencores,ip-clock-frequency is present it specifies i2c controller
++        clock frequency. clock-frequency property specifies i2c bus frequency.
++    enum: [100000, 400000]
++    default: 100000
++
++  reg-io-width:
++    description: |
++      io register width in bytes
++    enum: [1, 2, 4]
++
++  reg-shift:
++    description: |
++      device register offsets are shifted by this value
++    default: 0
++
++  regstep:
++    description: |
++      deprecated, use reg-shift above
++    deprecated: true
++
++  opencores,ip-clock-frequency:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: |
++      Frequency of the controller clock in Hz. Mutually exclusive with clocks.
++      See the note above.
++
++required:
++  - compatible
++  - reg
++  - "#address-cells"
++  - "#size-cells"
++
++oneOf:
++  - required:
++      - opencores,ip-clock-frequency
++  - required:
++      - clocks
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    i2c@a0000000 {
++      compatible = "opencores,i2c-ocores";
++      reg = <0xa0000000 0x8>;
++      #address-cells = <1>;
++      #size-cells = <0>;
++      interrupts = <10>;
++      opencores,ip-clock-frequency = <20000000>;
++
++      reg-shift = <0>;	/* 8 bit registers */
++      reg-io-width = <1>;	/* 8 bit read/write */
++    };
++
++    i2c@b0000000 {
++      compatible = "opencores,i2c-ocores";
++      reg = <0xa0000000 0x8>;
++      #address-cells = <1>;
++      #size-cells = <0>;
++      interrupts = <10>;
++      clocks = <&osc>;
++      clock-frequency = <400000>; /* i2c bus frequency 400 KHz */
++
++      reg-shift = <0>;	/* 8 bit registers */
++      reg-io-width = <1>;	/* 8 bit read/write */
++    };
++...
+diff --git a/MAINTAINERS b/MAINTAINERS
+index a6d3bd9d2a8d..cfaf02fc9191 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -14869,7 +14869,7 @@ M:	Peter Korsgaard <peter@korsgaard.com>
+ M:	Andrew Lunn <andrew@lunn.ch>
+ L:	linux-i2c@vger.kernel.org
+ S:	Maintained
+-F:	Documentation/devicetree/bindings/i2c/i2c-ocores.txt
++F:	Documentation/devicetree/bindings/i2c/i2c-ocores.yaml
+ F:	Documentation/i2c/busses/i2c-ocores.rst
+ F:	drivers/i2c/busses/i2c-ocores.c
+ F:	include/linux/platform_data/i2c-ocores.h
 -- 
 2.36.1
 
