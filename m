@@ -2,49 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85054C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jun 2022 14:21:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02246C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Jun 2022 14:23:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239360AbiFFOVM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Jun 2022 10:21:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54072 "EHLO
+        id S239414AbiFFOXM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Jun 2022 10:23:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34874 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239441AbiFFOVL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2022 10:21:11 -0400
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23E6620ED78;
-        Mon,  6 Jun 2022 07:21:02 -0700 (PDT)
-X-UUID: cd0c6cd876844e8d97b4e853391e9f5d-20220606
+        with ESMTP id S239548AbiFFOXM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2022 10:23:12 -0400
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E2D22D5157;
+        Mon,  6 Jun 2022 07:23:10 -0700 (PDT)
+X-UUID: f9478c6507a14847963ee321e94e0dbf-20220606
 X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.5,REQID:9841e478-dbdc-4782-bd99-691bf31b0423,OB:0,LO
+X-CID-O-INFO: VERSION:1.1.5,REQID:767673dc-3f69-4b80-832d-a496eb0a527a,OB:0,LO
         B:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
         ION:release,TS:-5
-X-CID-META: VersionHash:2a19b09,CLOUDID:18e3c6ad-3171-4dd4-a2d9-73b846daf167,C
+X-CID-META: VersionHash:2a19b09,CLOUDID:72f3567e-c8dc-403a-96e8-6237210dceee,C
         OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil
         ,QS:0,BEC:nil
-X-UUID: cd0c6cd876844e8d97b4e853391e9f5d-20220606
-Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw02.mediatek.com
+X-UUID: f9478c6507a14847963ee321e94e0dbf-20220606
+Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw01.mediatek.com
         (envelope-from <mengqi.zhang@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 1901588414; Mon, 06 Jun 2022 22:20:57 +0800
+        with ESMTP id 100457687; Mon, 06 Jun 2022 22:23:03 +0800
 Received: from mtkcas11.mediatek.inc (172.21.101.40) by
  mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Mon, 6 Jun 2022 22:20:55 +0800
+ Mon, 6 Jun 2022 22:23:02 +0800
 Received: from localhost.localdomain (10.17.3.154) by mtkcas11.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Mon, 6 Jun 2022 22:20:55 +0800
+ Transport; Mon, 6 Jun 2022 22:23:01 +0800
 From:   Mengqi Zhang <mengqi.zhang@mediatek.com>
 To:     <chaotian.jing@mediatek.com>, <ulf.hansson@linaro.org>,
         <matthias.bgg@gmail.com>
 CC:     <linux-mmc@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
         <linux-kernel@vger.kernel.org>,
-        "Mengqi Zhang" <mengqi.zhang@mediatek.com>
+        Mengqi Zhang <mengqi.zhang@mediatek.com>
 Subject: [PATCH] mmc: mediatek: wait dma stop bit reset to 0
-Date:   Mon, 6 Jun 2022 22:20:51 +0800
-Message-ID: <20220606142051.20350-1-mengqi.zhang@mediatek.com>
+Date:   Mon, 6 Jun 2022 22:22:59 +0800
+Message-ID: <20220606142259.20407-1-mengqi.zhang@mediatek.com>
 X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7BIT
