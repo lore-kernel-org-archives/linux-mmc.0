@@ -2,99 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03FF1CCA47F
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 14:11:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C838ACCA47E
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 16:08:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245223AbiFGOLt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 10:11:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59176 "EHLO
+        id S1344715AbiFGQIL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 12:08:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245197AbiFGOLq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 10:11:46 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F18DA501E;
-        Tue,  7 Jun 2022 07:11:45 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E81C26157B;
-        Tue,  7 Jun 2022 14:11:44 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 31A53C385A5;
-        Tue,  7 Jun 2022 14:11:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654611104;
-        bh=letTzTlIdmYyCQr3t4i/4sQ++BrVupVi397GE8M9uvI=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=ZmrXJqh5VhK6LBrkWuZLcZPb6LB/aKqB7VgbxKHQ5EKdRZGn1B/UtUl37J/VZlncM
-         XaKVqUs9/CrLhurHZmfQE4ZHromAzF5QHFhfcePHGAZt6gJN4oXn1Jgu9OhytNBGsZ
-         Dpp8c39jiY4Y6vji5iZNzY0BkjvDT9oCjsHIgHSItTWWl1ZaFW8x1MWtKzh54+Jsmx
-         MgLY2ScRWCz28NxqLMnfdu2v0uWPvoMrX/y8LVhRzTo8e9BmO+8kP0GacNDIRYfLCx
-         +YjXzNg0JjEvKZfsqCZP5oIjyElXDN9wiUZpKQTLYg3m4X5qyHVoxoSHYehWp506BX
-         a+HtETwbE/zkg==
-From:   Mark Brown <broonie@kernel.org>
-To:     linux-doc@vger.kernel.org, corbet@lwn.net, mchehab@kernel.org
-Cc:     linux@roeck-us.net, linux-cachefs@redhat.com,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        dave.hansen@linux.intel.com, linux-samsung-soc@vger.kernel.org,
-        geert@linux-m68k.org, ulf.hansson@linaro.org, hpa@zytor.com,
-        alsa-devel@alsa-project.org, linux-m68k@lists.linux-m68k.org,
-        krzysztof.kozlowski+dt@linaro.org,
-        bcm-kernel-feedback-list@broadcom.com, kvm@vger.kernel.org,
-        mingo@redhat.com, mchehab+huawei@kernel.org, jdelvare@suse.com,
-        robh+dt@kernel.org, linux-gpio@vger.kernel.org, rafael@kernel.org,
-        linux-mmc@vger.kernel.org, federico.vaga@vaga.pv.it, bp@alien8.de,
-        linux-phy@lists.infradead.org, mmayer@broadcom.com,
-        keyrings@vger.kernel.org, x86@kernel.org,
-        linux-usb@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        alim.akhtar@samsung.com, Viresh Kumar <viresh.kumar@linaro.org>,
-        linux-pm@vger.kernel.org, linux-hwmon@vger.kernel.org,
-        jarkko@kernel.org, tglx@linutronix.de, linus.walleij@linaro.org
-In-Reply-To: <cover.1654529011.git.mchehab@kernel.org>
-References: <cover.1654529011.git.mchehab@kernel.org>
-Subject: Re: (subset) [PATCH 00/23] Update Documentation/ cross-references
-Message-Id: <165461109692.1597191.11390741473240531333.b4-ty@kernel.org>
-Date:   Tue, 07 Jun 2022 15:11:36 +0100
+        with ESMTP id S1344712AbiFGQIK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 12:08:10 -0400
+Received: from mail-il1-f177.google.com (mail-il1-f177.google.com [209.85.166.177])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ED5E443C9;
+        Tue,  7 Jun 2022 09:08:10 -0700 (PDT)
+Received: by mail-il1-f177.google.com with SMTP id a15so14520200ilq.12;
+        Tue, 07 Jun 2022 09:08:10 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=IcVu4WajHv6XPQv1yYvHjVGQzqBrXJ6uvkB7WM1ORUk=;
+        b=06jDuZtUm01MYz6g1LpOV9IopS+hS3nFlha4QBir6X2SLNHdkZQqJujlorDcv/idcz
+         h/yGfmS1/QP3LWTzOMuHrTrw4b2WntBUrsvg99jQfC6hKhisHR54XMqoaymxmZ/tJVF2
+         CP+Pi6w6N0tGzBL2fCmh6n/ilPp7BPwil4DwHFmjnXV4q4Unnw3GBp1h9Lhg5mozixxE
+         MIEghyTbZsApr9Bb4dbkY9wcgqFpNNY7lRwkRruwxxXqegXZjgoid/v8v0TBwaGd0iqU
+         NLC8TUh+geIlb8bn6RIcLxHPoBLcchyaXOlLb5ZpQIzVYagYDAXNWN1gj3zNoXKsC09N
+         G0+g==
+X-Gm-Message-State: AOAM530bkhrNmgOAqICCVACUft0skGGROzAc8nY71p0IHyL5pAmUWkTj
+        4hMXSXKB+eHOuoba3viBrQ==
+X-Google-Smtp-Source: ABdhPJwkB6tWssEJWTfCQGirJEa1uIPrrUEYFGpmaCAPiwN8q4TlO6GszS0vcXmTn6BhoiBisqAo5w==
+X-Received: by 2002:a05:6e02:1949:b0:2d3:c0fb:322 with SMTP id x9-20020a056e02194900b002d3c0fb0322mr17090293ilu.242.1654618089339;
+        Tue, 07 Jun 2022 09:08:09 -0700 (PDT)
+Received: from robh.at.kernel.org ([64.188.179.251])
+        by smtp.gmail.com with ESMTPSA id i11-20020a02b68b000000b0033167715cf9sm5989686jam.27.2022.06.07.09.08.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 07 Jun 2022 09:08:08 -0700 (PDT)
+Received: (nullmailer pid 3350333 invoked by uid 1000);
+        Tue, 07 Jun 2022 16:08:07 -0000
+Date:   Tue, 7 Jun 2022 10:08:07 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     linux-sunxi@lists.linux.dev, linux-watchdog@vger.kernel.org,
+        Maxime Ripard <mripard@kernel.org>,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Hu Ziji <huziji@marvell.com>,
+        linux-arm-kernel@lists.infradead.org, Chen-Yu Tsai <wens@csie.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        linux-tegra@vger.kernel.org,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        linux-mmc@vger.kernel.org, Jonathan Hunter <jonathanh@nvidia.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Samuel Holland <samuel@sholland.org>
+Subject: Re: [PATCH] dt-bindings: Drop more redundant 'maxItems/minItems' in
+ if/then schemas
+Message-ID: <20220607160807.GA3350189-robh@kernel.org>
+References: <20220606225137.1536010-1-robh@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220606225137.1536010-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 6 Jun 2022 16:25:22 +0100, Mauro Carvalho Chehab wrote:
-> There were a number of DT binding conversions and other docs change that
-> were not updated. Address them, in order to keep the cross-references on
-> a sane state.
+On Mon, 06 Jun 2022 17:51:36 -0500, Rob Herring wrote:
+> Another round from new cases in 5.19-rc of removing redundant
+> minItems/maxItems when 'items' list is specified. This time it is in
+> if/then schemas as the meta-schema was failing to check this case.
 > 
-> Patch series is against v5.19-rc1 (and applies cleanly on the top of
-> today's -next).
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooling
+> will fixup the final schema adding any unspecified minItems/maxItems.
 > 
-> [...]
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+>  .../bindings/memory-controllers/nvidia,tegra186-mc.yaml        | 3 ---
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 1 -
+>  .../devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml  | 1 -
+>  3 files changed, 5 deletions(-)
+> 
 
-Applied to
-
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/sound.git for-next
-
-Thanks!
-
-[22/23] ASoC: wm8731: update wlf,wm8731.yaml reference
-        commit: 69c8027c5ff43d68449fda4510a8cce70e8578b0
-
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
-
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
-
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
-
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
-
-Thanks,
-Mark
+Applied, thanks!
