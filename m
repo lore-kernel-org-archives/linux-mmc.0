@@ -2,218 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93452C43334
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:44:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4934FCCA47F
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:44:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241348AbiFGKn5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 06:43:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36856 "EHLO
+        id S241392AbiFGKoE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 06:44:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241330AbiFGKnz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:43:55 -0400
+        with ESMTP id S241413AbiFGKoD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:44:03 -0400
 Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CEF71F613
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 03:43:54 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id a15so27638227lfb.9
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 03:43:54 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA2E62126C
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 03:44:01 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id w20so6003487lfa.11
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 03:44:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=tfeUV1AwNiT/W19hxcj/NliOzzEK95QXMUgUDGQeGVM=;
-        b=mklHMeniN+Ch9TA/pHudegQh81MPjZetIIdfVLjDQbypod4GCI5NH296O4xL3oLXX5
-         EtSB95qGej4GPTANqSeLL+ml3+OGdRkpbbQd3nd+tb1z5QHIZPdeWwIy9GjH8pZQc50C
-         zDzkcvE0nFPpibbibIYz2TxiRK0MjxayLE0RrcacIAZUSgfhpanYLUuZ1lZQ1ef4w2AN
-         GiIxg3XVYvrQR5k8hBIPZ4uPZx8rnz0rqd6kA63O1jDWdVd1H7Bm+5fqY5eA5Cc5zfC6
-         0g0oy8babwOZ1jqtD/zY3rQIq6OWxFbiaf+s/hVixKGFRHrlCVFvTyQvlxMm1WKzXD6V
-         Wjsw==
+        bh=jtPoJ12oteBNc0kHoMuvW+v6Ds9Jjp/7GrDvRJFQi1Y=;
+        b=rUYTt0nRUcgy2g58Upir6dVsFF4oJe8a+uuLzUV1nk2gTpV0Fq6jaxzgHdC2qrMCxB
+         OasoiAeKELkgi9Arq+AyCuBZWThXJYkiQcpLzz9d04wN1TmneEOCjOJrcLOo+Y0StMx+
+         hnxikTDEDlwgXlYU+D3193UAxMBJkocF+vwfs1Q3mX3BB0ayDXsdZN9nx5G1BHm4PSBD
+         LGGBi5UKB5ITINpRyFRbDGZDDcLKiR6JuMAoiP+GXx1DS8J51u39KCQTVGvUpKbj4YFm
+         pddaB97xGFjm75umbdWyHBU5DljCSc9boyzXph7fkA+MIgmpgIB64RF+TubqIAPVv0bg
+         /Wsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=tfeUV1AwNiT/W19hxcj/NliOzzEK95QXMUgUDGQeGVM=;
-        b=SVYWVdx/KUl3VP8C0KkOrRcH7SjDHSI9O1ZC9+IPQ/u/T9RhfSjCCvfIyszi5TRhV+
-         LumV2dCS6d4y3Zp/lQU83bPDpwg4alxIqUjpQK8ERWFlBHM7wCe9xfvP/glYET6WB2n4
-         bx2lh69Ed0RnXxdx5vl0OkmZdZoEjcu9vn2ttyDVKLe1/7eTwsr7ADVoR/l2Sc2yU1O/
-         eJGsuLgE/m6jQYC+jUL6DNHk0vIxAEa7IRRpIEBWNGnBzj7ND/FO7pq9Bs/AYLUDTVNa
-         Tgds+OIXscc/hME0wTW2w/WIzIUmWGK8sKM8VwUp2B6VT0/xvlncPGD4uxQvcpAHpvlP
-         IBjQ==
-X-Gm-Message-State: AOAM532WB7HqIDjpvsSMxFV3sD+Uw+ZH9/MY/qpy8ErqZzY7CoVi6ehW
-        0sKnEjsfi/DF+V1V/f/z3rFmdDD/BRRnMujaEerKgg==
-X-Google-Smtp-Source: ABdhPJzPGTimBB70OBlGTNcTyqnDOsp8/I8NBiCevRFSY/lrkvKnq2LAYOlDrii5/PhsOwu2dbZ17DoYgnn4hQ42m3A=
-X-Received: by 2002:ac2:54b9:0:b0:479:a29:c1ec with SMTP id
- w25-20020ac254b9000000b004790a29c1ecmr17619658lfk.358.1654598632532; Tue, 07
- Jun 2022 03:43:52 -0700 (PDT)
+        bh=jtPoJ12oteBNc0kHoMuvW+v6Ds9Jjp/7GrDvRJFQi1Y=;
+        b=mjvm89+nNizJqeFw/DFEnc/GGP5OQmg5RUQH4hotTOSZa3WKdpS7BWNHXcQ+8+g6Pz
+         kWevkpeJzuBURfC6q8WoCBjLrHc45J/bobO4wihGPkfAO+FtmlwbfJHxmYXULihmqH4O
+         laolOSBRpHnsOacPWkmC2AxPvFGtUM3+q5QPYU/M4xYSKL8yZ2Wt9FSW2K9AAX5G6wQk
+         ZUxaN8cI8ZTzvezvh40DJpMh8okw6FzxTlgaak8s9vtelXjSvStdlzqa4Ss2lmJoLMbv
+         7RzEX9ndq2Nms+hriADQ4AWullgZWtgcTtoneIT+lPAejHHfar5EKM7Y/+8zBQSgI5XF
+         TOKA==
+X-Gm-Message-State: AOAM533CTM2wKk3b9X2frugFV3mOH0kryAeZVi0Jm5HnGrQYy7AH0rp+
+        7Bc9jxFCjJpNS9uoxZwwrbvI70inqzwtNFVe7HZJbw==
+X-Google-Smtp-Source: ABdhPJzW7vimXP+fNczdUfWycVJCFAkXKrgixYEB9OIcsz1WOIhvya043//GeBabtgT+NvuzfAhjCWui2uQUwSVUGoo=
+X-Received: by 2002:a05:6512:303:b0:479:1baf:7e5b with SMTP id
+ t3-20020a056512030300b004791baf7e5bmr13446489lfp.184.1654598640330; Tue, 07
+ Jun 2022 03:44:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220606201343.514391-1-mail@conchuod.ie> <20220606201343.514391-2-mail@conchuod.ie>
-In-Reply-To: <20220606201343.514391-2-mail@conchuod.ie>
+References: <20220602132543.596-1-chevron.li@bayhubtech.com>
+In-Reply-To: <20220602132543.596-1-chevron.li@bayhubtech.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Jun 2022 12:43:15 +0200
-Message-ID: <CAPDyKFqvo3qf+tK2p-Vkk8=7TGAaAKjAsJvsh=rKYBB_vxpB4A@mail.gmail.com>
-Subject: Re: [PATCH v3 1/4] dt-bindings: mmc: convert mmc-spi-slot to yaml
-To:     Conor Dooley <mail@conchuod.ie>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Support Opensource <support.opensource@diasemi.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Steve Twiss <stwiss.opensource@diasemi.com>,
-        Conor Dooley <conor.dooley@microchip.com>,
-        linux-i2c@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        Atul Khare <atulkhare@rivosinc.com>,
-        Rob Herring <robh@kernel.org>
+Date:   Tue, 7 Jun 2022 12:43:23 +0200
+Message-ID: <CAPDyKFo7FnC_F4biVkBmi7LBaRjkK2UADNFgzdzRmVw79Gr6iw@mail.gmail.com>
+Subject: Re: [PATCH V1 1/1] mmc:sdhci-pci-o2micro:fix card detect issue
+ because card detect debouncing isn't done
+To:     Chevron Li <chevron.li@bayhubtech.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, shaper.liu@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
+        fred.ai@bayhubtech.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 6 Jun 2022 at 22:14, Conor Dooley <mail@conchuod.ie> wrote:
+On Thu, 2 Jun 2022 at 15:26, Chevron Li <chevron.li@bayhubtech.com> wrote:
 >
-> From: Conor Dooley <conor.dooley@microchip.com>
+> get_cd result is uncorrect during card detect debouncing
+> we need to wait card detect stable before return get_cd result
 >
-> Convert the mmc-spi-slot text based binding doc to yaml,
-> with the side effect of cleaning up some of the riscv
-> dtbs_check warnings.
->
-> Reviewed-by: Rob Herring <robh@kernel.org>
-> Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
+> Signed-off-by: Chevron Li<chevron.li@bayhubtech.com>
 
-Applied for next, thanks!
+Applied for fixes, by adding a fixes+stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  .../devicetree/bindings/mmc/mmc-spi-slot.txt  | 29 -------
->  .../devicetree/bindings/mmc/mmc-spi-slot.yaml | 77 +++++++++++++++++++
->  2 files changed, 77 insertions(+), 29 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+> change in V1:
+> add wait card detect stable logical before return card detect result.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt
-> deleted file mode 100644
-> index 5e74db69f581..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt
-> +++ /dev/null
-> @@ -1,29 +0,0 @@
-> -MMC/SD/SDIO slot directly connected to a SPI bus
-> -
-> -This file documents differences between the core properties described
-> -by mmc.txt and the properties used by the mmc_spi driver.
-> -
-> -Required properties:
-> -- spi-max-frequency : maximum frequency for this device (Hz).
-> -
-> -Optional properties:
-> -- voltage-ranges : two cells are required, first cell specifies minimum
-> -  slot voltage (mV), second cell specifies maximum slot voltage (mV).
-> -  Several ranges could be specified. If not provided, 3.2v..3.4v is assumed.
-> -- gpios : may specify GPIOs in this order: Card-Detect GPIO,
-> -  Write-Protect GPIO. Note that this does not follow the
-> -  binding from mmc.txt, for historical reasons.
-> -
-> -Example:
-> -
-> -       mmc-slot@0 {
-> -               compatible = "fsl,mpc8323rdb-mmc-slot",
-> -                            "mmc-spi-slot";
-> -               reg = <0>;
-> -               gpios = <&qe_pio_d 14 1
-> -                        &qe_pio_d 15 0>;
-> -               voltage-ranges = <3300 3300>;
-> -               spi-max-frequency = <50000000>;
-> -               interrupts = <42>;
-> -               interrupt-parent = <&PIC>;
-> -       };
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
-> new file mode 100644
-> index 000000000000..c45b91099325
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
-> @@ -0,0 +1,77 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/mmc-spi-slot.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: MMC/SD/SDIO slot directly connected to a SPI bus
-> +
-> +maintainers:
-> +  - Ulf Hansson <ulf.hansson@linaro.org>
-> +
-> +allOf:
-> +  - $ref: "mmc-controller.yaml"
-> +  - $ref: /schemas/spi/spi-peripheral-props.yaml
-> +
-> +description: |
-> +  The extra properties used by an mmc connected via SPI.
-> +
-> +properties:
-> +  compatible:
-> +    const: mmc-spi-slot
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  spi-max-frequency: true
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  voltage-ranges:
-> +    $ref: /schemas/types.yaml#/definitions/uint32-array
-> +    description: |
-> +      Two cells are required, first cell specifies minimum slot voltage (mV),
-> +      second cell specifies maximum slot voltage (mV).
-> +    items:
-> +      - description: |
-> +          value for minimum slot voltage in mV
-> +        default: 3200
-> +      - description: |
-> +          value for maximum slot voltage in mV
-> +        default: 3400
-> +
-> +  gpios:
-> +    description: |
-> +      For historical reasons, this does not follow the generic mmc-controller
-> +      binding.
-> +    minItems: 1
-> +    items:
-> +      - description: Card-Detect GPIO
-> +      - description: Write-Protect GPIO
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - spi-max-frequency
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/gpio/gpio.h>
-> +    spi {
-> +      #address-cells = <1>;
-> +      #size-cells = <0>;
-> +      mmc@0 {
-> +        compatible = "mmc-spi-slot";
-> +        reg = <0>;
-> +        gpios = <&gpio 14 GPIO_ACTIVE_LOW>, <&gpio 15 GPIO_ACTIVE_HIGH>;
-> +        voltage-ranges = <3300 3300>;
-> +        spi-max-frequency = <50000000>;
-> +        interrupts = <42>;
-> +        interrupt-parent = <&PIC>;
-> +      };
-> +    };
-> +
-> +...
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 92c20cb8074a..0d4d343dbb77 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -152,6 +152,8 @@ static int sdhci_o2_get_cd(struct mmc_host *mmc)
+>
+>         if (!(sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1) & O2_PLL_LOCK_STATUS))
+>                 sdhci_o2_enable_internal_clock(host);
+> +       else
+> +               sdhci_o2_wait_card_detect_stable(host);
+>
+>         return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
+>  }
+>
+> base-commit: d1dc87763f406d4e67caf16dbe438a5647692395
 > --
-> 2.36.1
+> 2.32.0
 >
