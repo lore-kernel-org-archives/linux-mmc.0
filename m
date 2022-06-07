@@ -2,87 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C838ACCA47E
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 16:08:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCD8AC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 17:10:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344715AbiFGQIL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 12:08:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43590 "EHLO
+        id S1345546AbiFGRKN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 13:10:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41240 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344712AbiFGQIK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 12:08:10 -0400
-Received: from mail-il1-f177.google.com (mail-il1-f177.google.com [209.85.166.177])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ED5E443C9;
-        Tue,  7 Jun 2022 09:08:10 -0700 (PDT)
-Received: by mail-il1-f177.google.com with SMTP id a15so14520200ilq.12;
-        Tue, 07 Jun 2022 09:08:10 -0700 (PDT)
+        with ESMTP id S1344376AbiFGRKM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 13:10:12 -0400
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7316A90CEC
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 10:10:10 -0700 (PDT)
+Received: by mail-yb1-xb31.google.com with SMTP id p13so32196475ybm.1
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 10:10:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:from:date:message-id:subject:to:cc;
+        bh=P/gAWYTYcE9jrOxJP6iVGHeZQzn3G/Awl1C3CYU0ggw=;
+        b=VXII/SB83wb/H7vaEllfp+qolXwA53Jspz/m3zQC+mAcIKQGnMclloaomhvdrQ8owB
+         vHO+Uly527y09F5DuLehOkJ0mwZ30gZgyk4g+U2wxwHl0Y4mgV7S9RqtLgSETdNyx6OK
+         8wsp+Y0MkbwvJsfsXmdr6DrYRUD/m0pnxwbu4ivj1VDOAf7zsCj+Ktal0VQ7rxQPrYRu
+         evoywSOsVTSGWCD45fXiF7PxxA2UqM85zCTd9mNp4mxBdN1I/K+pmrs8z9//RXW9UQ6Z
+         9+tq5ACnviSi88l2ctFEs/bsJAV9hXkEtq0QnXCfz7aME/5cbdjMuehnAIQURMtCzTDA
+         gtAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=IcVu4WajHv6XPQv1yYvHjVGQzqBrXJ6uvkB7WM1ORUk=;
-        b=06jDuZtUm01MYz6g1LpOV9IopS+hS3nFlha4QBir6X2SLNHdkZQqJujlorDcv/idcz
-         h/yGfmS1/QP3LWTzOMuHrTrw4b2WntBUrsvg99jQfC6hKhisHR54XMqoaymxmZ/tJVF2
-         CP+Pi6w6N0tGzBL2fCmh6n/ilPp7BPwil4DwHFmjnXV4q4Unnw3GBp1h9Lhg5mozixxE
-         MIEghyTbZsApr9Bb4dbkY9wcgqFpNNY7lRwkRruwxxXqegXZjgoid/v8v0TBwaGd0iqU
-         NLC8TUh+geIlb8bn6RIcLxHPoBLcchyaXOlLb5ZpQIzVYagYDAXNWN1gj3zNoXKsC09N
-         G0+g==
-X-Gm-Message-State: AOAM530bkhrNmgOAqICCVACUft0skGGROzAc8nY71p0IHyL5pAmUWkTj
-        4hMXSXKB+eHOuoba3viBrQ==
-X-Google-Smtp-Source: ABdhPJwkB6tWssEJWTfCQGirJEa1uIPrrUEYFGpmaCAPiwN8q4TlO6GszS0vcXmTn6BhoiBisqAo5w==
-X-Received: by 2002:a05:6e02:1949:b0:2d3:c0fb:322 with SMTP id x9-20020a056e02194900b002d3c0fb0322mr17090293ilu.242.1654618089339;
-        Tue, 07 Jun 2022 09:08:09 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.251])
-        by smtp.gmail.com with ESMTPSA id i11-20020a02b68b000000b0033167715cf9sm5989686jam.27.2022.06.07.09.08.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Jun 2022 09:08:08 -0700 (PDT)
-Received: (nullmailer pid 3350333 invoked by uid 1000);
-        Tue, 07 Jun 2022 16:08:07 -0000
-Date:   Tue, 7 Jun 2022 10:08:07 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     linux-sunxi@lists.linux.dev, linux-watchdog@vger.kernel.org,
-        Maxime Ripard <mripard@kernel.org>,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Hu Ziji <huziji@marvell.com>,
-        linux-arm-kernel@lists.infradead.org, Chen-Yu Tsai <wens@csie.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-tegra@vger.kernel.org,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        linux-mmc@vger.kernel.org, Jonathan Hunter <jonathanh@nvidia.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Samuel Holland <samuel@sholland.org>
-Subject: Re: [PATCH] dt-bindings: Drop more redundant 'maxItems/minItems' in
- if/then schemas
-Message-ID: <20220607160807.GA3350189-robh@kernel.org>
-References: <20220606225137.1536010-1-robh@kernel.org>
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
+        bh=P/gAWYTYcE9jrOxJP6iVGHeZQzn3G/Awl1C3CYU0ggw=;
+        b=I6dqHNOLf1IQYsRVkvzN4hti0vxEVw07Lfnp+p2T+XNuJ/cbAz12FnIJFo30+h0SN6
+         mG80JmpimnhB12pu8eYwCxvwpLzf1LIpOcVRQBbW4MHvRiqktl3un9m6fq183HuMB+VC
+         D9K7lM7QxezK5YE87p0CuCB/MJqlib+yR4cOcQhPPTzg6Cdk5RZeYaAF/u8SsRyCXucJ
+         QyPWyjUncXBrqVZs3AtTAHPkycLA/b4wSZUqM8JNmsqAzKftTwQ5JV+Ggw+YJu2VWaIN
+         qI8xQ+my4GJReBtr52V9w6KuPmlRm8l/0wtWZAs5S6t/GmHY2137WgplwQawQFFYXVwD
+         Knyg==
+X-Gm-Message-State: AOAM5314DOlzNdKvMycrgSMYSJcrYN8s+UbD3AZVnVvyrau7Aj5jP1gy
+        7DXsSMMZ8Fn5Q9X2uFb8XMTrIJFqiiNbq4zI4It4dwS5+CxIGg==
+X-Google-Smtp-Source: ABdhPJxpq/x/7JkNme4htfnqYHKUS7ec2XhW2i49YnLrj8HJECrnh2rhb90mOqlSloG8c/1l1755jAZFUZHfIMAjA2o=
+X-Received: by 2002:a25:22d7:0:b0:663:c13a:893a with SMTP id
+ i206-20020a2522d7000000b00663c13a893amr7638158ybi.98.1654621809618; Tue, 07
+ Jun 2022 10:10:09 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220606225137.1536010-1-robh@kernel.org>
+From:   Yongqin Liu <yongqin.liu@linaro.org>
+Date:   Wed, 8 Jun 2022 01:09:54 +0800
+Message-ID: <CAMSo37WW9veYH6=tHqUR2pa_7YX1UuzHqLBHit60P2QyzQmCEw@mail.gmail.com>
+Subject: Please help cherry pick four mmc related changes into the 4.14 stable kernel
+To:     stable@vger.kernel.org
+Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Benjamin Copeland <benjamin.copeland@linaro.org>,
+        Sumit Semwal <sumit.semwal@linaro.org>,
+        =?UTF-8?B?RGFuaWVsIETDrWF6?= <daniel.diaz@linaro.org>,
+        Alistair Delva <adelva@google.com>,
+        Steve Muckle <smuckle@google.com>,
+        Todd Kjos <tkjos@google.com>,
+        "Bajjuri, Praneeth" <praneeth@ti.com>,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Anders Roxell <anders.roxell@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 06 Jun 2022 17:51:36 -0500, Rob Herring wrote:
-> Another round from new cases in 5.19-rc of removing redundant
-> minItems/maxItems when 'items' list is specified. This time it is in
-> if/then schemas as the meta-schema was failing to check this case.
-> 
-> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
-> same size as the list is redundant and can be dropped. Note that is DT
-> schema specific behavior and not standard json-schema behavior. The tooling
-> will fixup the final schema adding any unspecified minItems/maxItems.
-> 
-> Signed-off-by: Rob Herring <robh@kernel.org>
-> ---
->  .../bindings/memory-controllers/nvidia,tegra186-mc.yaml        | 3 ---
->  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 1 -
->  .../devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml  | 1 -
->  3 files changed, 5 deletions(-)
-> 
+Hi, All
 
-Applied, thanks!
+With the 4.14.281 version[1], there were three mmc related changes merged,
+but that causes one boot failure with the X15 Android builds, a problem
+similar to one reported before here[2].
+After being confirmed with Ulf Hansson, and verified with the X15 Android build,
+it needs to have the following four commits cherry-picked to the 4.14
+branch as well.
+
+    4f32b45c9a2c mmc: core: Allow host controllers to require R1B for CMD6
+    5fc615c1e3eb mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
+    d091259b8d7a mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
+    23161bed631a mmc: sdhci-omap: Fix busy detection by enabling
+MMC_CAP_NEED_RSP_BUSY
+
+The above four commits are from the 4.19 branch, as they are a little
+easier to be cherry-picked
+into the 4.14 branch, compared to the commits from the mainline branch.
+(I have confirmed that the four commits are all in 4.19, 5.4, 5.10 and
+mainline branches already).
+
+Saying that, there will be still one merge conflict reported when
+cherry picking the commit of
+4f32b45c9a2c, it's easy to resolve though.
+To avoid the merge conflict, it could be done like this as well:
+1. revert the 327b6689898b commit from 4.14 first, so that the commits in step#2
+    could be cherry-picked without any problem
+        327b6689898b mmc: core: Default to generic_cmd6_time as
+timeout in __mmc_switch()
+2. git cherry-pick the following commits from 4.19 into the 4.14 branch
+        4f32b45c9a2c mmc: core: Allow host controllers to require R1B for CMD6
+        5fc615c1e3eb mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for
+erase/trim/discard
+        d091259b8d7a mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC
+sleep command
+        23161bed631a mmc: sdhci-omap: Fix busy detection by enabling
+MMC_CAP_NEED_RSP_BUSY
+        26c6f614cf02 mmc: mmc: core: Default to generic_cmd6_time as
+timeout in __mmc_switch()
+    The last commit of 26c6f614cf02 is for the revert in step#1.
+
+I am not sure which way is more convenient for the maintenance work
+here, so just list both of them here
+for your information.
+And please let me know if there is anything else I could help on this
+cherry pick work here.
+
+[1]: https://lore.kernel.org/lkml/16534624745741@kroah.com/T/
+[2]: https://lore.kernel.org/lkml/CA+G9fYuqAQfhzF2BzHr7vMHx68bo8-jT+ob_F3eHQ3=oFjgYdg@mail.gmail.com/
+-- 
+Best Regards,
+Yongqin Liu
+---------------------------------------------------------------
+#mailing list
+linaro-android@lists.linaro.org
+http://lists.linaro.org/mailman/listinfo/linaro-android
