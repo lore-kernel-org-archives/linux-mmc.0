@@ -2,122 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84FCCCCA47C
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:36:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E61FFCCA47C
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:43:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241186AbiFGKge (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 06:36:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40310 "EHLO
+        id S241283AbiFGKnX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 06:43:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33736 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241172AbiFGKgc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:36:32 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15C9FEC3C6
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 03:36:31 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id a2so27640646lfc.2
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 03:36:30 -0700 (PDT)
+        with ESMTP id S241285AbiFGKnV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:43:21 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 082E11D0F9
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 03:43:17 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id be31so27660112lfb.10
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 03:43:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=PCgtiLUZSuHTz5IK2x7L4YWF9E3UmFqw0nwv703neGE=;
-        b=VtxwY0WZ4gkosObf0GXqVeyMNqRlH34rx43Ljv2zwfm9wXOGkVEOzangTkLbA30Nk7
-         4UMUr0ZoLYZQ7bdEc5LpD6XTrk30gR13z02xc8euG+tKqiaYXML6EwNBRfxpwm2m9s20
-         P6944BEiYjl8YMV9ooXTkk23s2eXj7MkdO6zKRh4Rp9O1TMIguL6jXZU8N47a7pBde5T
-         i2LTOARUkYBcLR8cdvmESeUp6CR4WdNOAm5JHzJHMuZFUttkYSybDMAFxEubMx7//b2f
-         3ro6kFTn0b/WQwl8yC1YJYXIO5vQyKdm5i+HnYfZJe+lnVhhek0bVdONcecNNduutPqv
-         xwIg==
+        bh=8XdRg5mTQzw6nhVkPbcttepeHu1kmSLwBbs3fva93xc=;
+        b=N1DSIYQ2tUBiiR928h/wpbuAkWoyNemmJ20vBlcsKVQyNN84AnPudb55G8X5EEHZc5
+         VrfLCbnWDAtsrhHYhabH4L0BcK6Yj8HILDRD4QS8o9jivIkV09uQ9k8+flwSL9YhpfOf
+         EKIY6RpNWcq9H5P5HOecjEdKbfbUTACnthsEE+FVdO9ZPFQkU20CO5hbDY+TsXwi7Gyk
+         XR89OVy0Qnt+8Lqc8HgO4+mf7B2XbeP3Iw4IkdQhRpmxypzV+y4NmZjw14ztQ0cTRyjV
+         Vc9XiSpbooXYnaIEGWYbXJ0j+c6+AycmpTWR911QhQRT0pklscDEgFFUW/dz8ZLGdIVr
+         VVCA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=PCgtiLUZSuHTz5IK2x7L4YWF9E3UmFqw0nwv703neGE=;
-        b=Bv3Wl2j+v4OqjClApUsrP4Ip0MeuKH1AXeMKUrlkQnUequqU0blOMYfiUe26XqcjjO
-         dCaZUW53P4VYBUtFhHizKUP2IVTmMzaNgcLWuxqI7mEyq5JOtFm0mSha1JFCq7L/LUNF
-         Z+jRbQrxGeBPMMy/TnyWYirdZnNLxBYCPE6OtWhitb/hUTfDic8QKjwMPhlSGDBvDGia
-         azUmu8gkrQVbH1lmcs5jL0x6qnCqZnkyMxfgsQ26wvcQTDBTYuV52J28aEIbJZ7gsFKz
-         20hOR0K8JAeXcnuN03EoBFisqIQ5S7X7XMHD9vpSUE1bR9UGxYRKL6nqTRRlYJd1uBdB
-         qbig==
-X-Gm-Message-State: AOAM530RxYBbPEQjdmWCMPjvSf5xVHd3rH0FBQfkHIw/XEAFBHrpG0yG
-        6iKQ7RoINGzS8WEzFCfEfrVI50Nxb37RWFnxidX2KQ==
-X-Google-Smtp-Source: ABdhPJxfsW6DVMMdTLuCpQREFHXfOUnR2FOXxYSOcFvFjAWB2Vboe2sXi8WL4FurxlVmPtwGId9RZuQa8KMbjhiOAl8=
-X-Received: by 2002:a19:ac42:0:b0:478:593c:e6fe with SMTP id
- r2-20020a19ac42000000b00478593ce6femr17792413lfc.254.1654598189364; Tue, 07
- Jun 2022 03:36:29 -0700 (PDT)
+        bh=8XdRg5mTQzw6nhVkPbcttepeHu1kmSLwBbs3fva93xc=;
+        b=QGgK0LEa3QP1atdO9flLMg4l9kYgeJLGYRlpARE25S39ZlXKaNTb6sdw8WW/f1Zu3A
+         2uHn36TSj110kajM3ENYZyyPBe2vEJ2uodP6MIHTc9/OEr8G1GkeOktX6Hacggy6K5oa
+         xT8SZZ0agH5A1y3KvxzGtENjspemj22Um30JSawUAz2epuM9xjZogN1OO58BGpZBCZsU
+         0e+F71vMdOuf6IFE0RN6y8juD23sdYoHfPyhg0P745hJ1smT0KMdrvo+6EgHUkChoxjF
+         +Ci9emt+pnHBUxbrkQuFnAkQ3hjRvluosOIAg+I0hPZnWhFHsKezNfH8TM6zasbl4JkW
+         ZAoA==
+X-Gm-Message-State: AOAM530m2ajMUsl8N+iH7JBt6htsU55ZktFal0AH6WIo6iVwq47IYdnW
+        uiOalI86boTvpb9ZTmDRtoS6b1YGaHhj/C67pDoAHw==
+X-Google-Smtp-Source: ABdhPJzxvjAZjQF6R+Mrr94IoW1X7wi8uwFKBgPf5GLnc+Gvu4doMpfp0SK0kukM6bfhDVOV0zyEW3g+vrtCParwkeY=
+X-Received: by 2002:a05:6512:403:b0:479:1627:a9b7 with SMTP id
+ u3-20020a056512040300b004791627a9b7mr15634227lfk.233.1654598595349; Tue, 07
+ Jun 2022 03:43:15 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220606142051.20350-1-mengqi.zhang@mediatek.com>
-In-Reply-To: <20220606142051.20350-1-mengqi.zhang@mediatek.com>
+References: <20220606225137.1536010-1-robh@kernel.org>
+In-Reply-To: <20220606225137.1536010-1-robh@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Jun 2022 12:35:53 +0200
-Message-ID: <CAPDyKFruh_t3uR3-u-_wH9LmZo77Ra-LumKe808jDfbGGM+04Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mediatek: wait dma stop bit reset to 0
-To:     Mengqi Zhang <mengqi.zhang@mediatek.com>
-Cc:     chaotian.jing@mediatek.com, matthias.bgg@gmail.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+Date:   Tue, 7 Jun 2022 12:42:38 +0200
+Message-ID: <CAPDyKFqNiJB_2aEaQpBo4=Vzc60-986=aKKw4JZtXvO=X9WTqQ@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: Drop more redundant 'maxItems/minItems' in
+ if/then schemas
+To:     Rob Herring <robh@kernel.org>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Hu Ziji <huziji@marvell.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Samuel Holland <samuel@sholland.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-tegra@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-watchdog@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 6 Jun 2022 at 16:21, Mengqi Zhang <mengqi.zhang@mediatek.com> wrote:
+On Tue, 7 Jun 2022 at 00:51, Rob Herring <robh@kernel.org> wrote:
 >
-> MediaTek IP requires that after dma stop, it need to wait this dma stop
-> bit auto-reset to 0. When bus is in high loading state, it will take a
-> while for the dma stop complete. If there is no waiting operation here,
-> when program runs to clear fifo and reset, bus will hang.
+> Another round from new cases in 5.19-rc of removing redundant
+> minItems/maxItems when 'items' list is specified. This time it is in
+> if/then schemas as the meta-schema was failing to check this case.
 >
-> In addition, there should be no return in msdc_data_xfer_next, because no
-> matter what error occurs here, it should continue to excute to the
-> following mmc_request_done. Otherwise the core layer may wait complete
-> forever.
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooling
+> will fixup the final schema adding any unspecified minItems/maxItems.
 >
-> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+> Signed-off-by: Rob Herring <robh@kernel.org>
 
-Is there a certain commit this fixes? In that case, we should add a fixes tag.
-
-> ---
->  drivers/mmc/host/mtk-sd.c | 14 ++++++++++----
->  1 file changed, 10 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 195dc897188b..c925f45786c2 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1385,12 +1385,15 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
->                 sdr_set_field(host->base + MSDC_DMA_CTRL, MSDC_DMA_CTRL_STOP,
->                                 1);
->
-> +               ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CTRL, val,
-> +                                               !(val & MSDC_DMA_CTRL_STOP), 1, 20000);
-> +               if (ret)
-> +                       dev_dbg(host->dev, "DMA stop timed out\n");
-> +
->                 ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CFG, val,
->                                                 !(val & MSDC_DMA_CFG_STS), 1, 20000);
-> -               if (ret) {
-> -                       dev_dbg(host->dev, "DMA stop timed out\n");
-> -                       return false;
-
-Looks like msdc_data_xfer_done() should be turned into a void
-function, as it would always return true beyond this change.
-
-> -               }
-> +               if (ret)
-> +                       dev_dbg(host->dev, "DMA inactive timed out\n");
->
->                 sdr_clr_bits(host->base + MSDC_INTEN, data_ints_mask);
->                 dev_dbg(host->dev, "DMA stop\n");
-> @@ -2416,6 +2419,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
->         if (recovery) {
->                 sdr_set_field(host->base + MSDC_DMA_CTRL,
->                               MSDC_DMA_CTRL_STOP, 1);
-> +               if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CTRL, val,
-> +                       !(val & MSDC_DMA_CTRL_STOP), 1, 3000)))
-> +                       return;
->                 if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
->                         !(val & MSDC_DMA_CFG_STS), 1, 3000)))
->                         return;
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>  .../bindings/memory-controllers/nvidia,tegra186-mc.yaml        | 3 ---
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 1 -
+>  .../devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml  | 1 -
+>  3 files changed, 5 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/memory-controllers/nvidia,tegra186-mc.yaml b/Documentation/devicetree/bindings/memory-controllers/nvidia,tegra186-mc.yaml
+> index c7cfa6c2cd81..935d63d181d9 100644
+> --- a/Documentation/devicetree/bindings/memory-controllers/nvidia,tegra186-mc.yaml
+> +++ b/Documentation/devicetree/bindings/memory-controllers/nvidia,tegra186-mc.yaml
+> @@ -150,7 +150,6 @@ allOf:
+>            description: 5 memory controller channels and 1 for stream-id registers
+>
+>          reg-names:
+> -          maxItems: 6
+>            items:
+>              - const: sid
+>              - const: broadcast
+> @@ -170,7 +169,6 @@ allOf:
+>            description: 17 memory controller channels and 1 for stream-id registers
+>
+>          reg-names:
+> -          minItems: 18
+>            items:
+>              - const: sid
+>              - const: broadcast
+> @@ -202,7 +200,6 @@ allOf:
+>            description: 17 memory controller channels and 1 for stream-id registers
+>
+>          reg-names:
+> -          minItems: 18
+>            items:
+>              - const: sid
+>              - const: broadcast
+> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> index c79639e9027e..7a2b22dd6d05 100644
+> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> @@ -145,7 +145,6 @@ allOf:
+>            items:
+>              - description: Xenon IP registers
+>              - description: Armada 3700 SoC PHY PAD Voltage Control register
+> -          minItems: 2
+>
+>          marvell,pad-type:
+>            $ref: /schemas/types.yaml#/definitions/string
+> diff --git a/Documentation/devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml b/Documentation/devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml
+> index cbcf19f51411..ed6c1ca80dcc 100644
+> --- a/Documentation/devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml
+> +++ b/Documentation/devicetree/bindings/watchdog/allwinner,sun4i-a10-wdt.yaml
+> @@ -64,7 +64,6 @@ if:
+>  then:
+>    properties:
+>      clocks:
+> -      minItems: 2
+>        items:
+>          - description: High-frequency oscillator input, divided internally
+>          - description: Low-frequency oscillator input
+> --
+> 2.34.1
+>
