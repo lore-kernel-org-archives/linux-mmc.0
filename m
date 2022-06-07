@@ -2,55 +2,56 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5B9BCCA47C
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:44:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73E54C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:44:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241412AbiFGKoY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 06:44:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38962 "EHLO
+        id S241378AbiFGKoa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 06:44:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38036 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241431AbiFGKoT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:44:19 -0400
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADB422873F
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 03:44:09 -0700 (PDT)
-Received: by mail-lj1-x22e.google.com with SMTP id b12so7734954ljq.3
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 03:44:09 -0700 (PDT)
+        with ESMTP id S241424AbiFGKoV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:44:21 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FA5B6898D
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 03:44:15 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id a2so27669344lfc.2
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 03:44:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=bYFD6ZOpXjJqsuy7HbhVsOG9Ou/7QiC6/kt1uj8uGVM=;
-        b=bSltXF1fWfX+fOUvFPx7NGF2U404GinR6heDQ9RFgA5S1AIfWYyMsOWYrQUVK3Hwlj
-         +YYobxOOaBFTinTehS/K2KTLPxsVEwCsAIXtaXWe2cluA74jEWCrVArRUB0ZEnWkE6Hy
-         yspw3em1YfkaWVzJUVLbtb2bJKyIv/CIj+3y6g0jI9nDdXtHnY2f1gFefkaa6W89NYSu
-         k0+DYj2xNWWKfwkgpYwFGp4TYCAy1q4065HhDSBHrK0yR0IH/UNdkRO2rzhETKJCkWGH
-         Taa8S0D10XNb8EKmoNRqKxfiIbqYXnQ9Ax66Ba63oAQ2VCsbhaVeLkM68G/eyzX8zkQX
-         6QrQ==
+        bh=oldIK4x+0l/Bv7OoKE6IDpTyHYosL/5Va89KOtvyPN0=;
+        b=sdSbJGbW1OUJvXPvD8Q9Hy5IA42Qek4A5YuRNjE8ookhoq+Z2IAwImXwP49rWgD9SU
+         Hqsj+WzN80ZUlUVCvYiTLy84llXtk+/Aho3Re7A88Vzpw96Wv2fMCFp+iCC0JMTd5snp
+         9cmBizKTETYF+QSAQ97VqAE1Rjr3r8bT4R2AZvAcQdSfZl0WzvxI9JtzNqX5ePIc8gxj
+         ShaCHsx22gOPo67BpDkIiKCD4nmLzFTsAtc9q5D6+5hwZJ/fW8hz8CvquGsZamyANBfG
+         Kn6QAf7oI9jlGmRubPGC9ThRM0EGIzsoQsLgPeO1TTJatbrqihzY50UTKV5djIboTX/t
+         UFxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=bYFD6ZOpXjJqsuy7HbhVsOG9Ou/7QiC6/kt1uj8uGVM=;
-        b=LrBUREroIwfwOCNJf3V02ZI+hQC2r3SGa7rvwg0mxVVze7R6w76DpVyvh2Uow0atXp
-         01y0Hy9qYpRvZ7dHW0ZlJtXNkeqEiInKWyZWhQh46uGvDAo7C1HvD99PzUGlJ406It9u
-         jizfmKXf/gFCZggL2t5sr4l9KWo7vsHW2ZNR/J7MBXBW2OjkWKdvYdKmPQ7V8Djpwj5V
-         pv81LUZCGPwlDn+uTihhhDITICpAk23TiaL56+hNGhJyX42cMKr6rf7nF0iiYG2aAyec
-         x7p/I8ABQL8U7owvd6EFqCbtGATuPf5oPtIFuqqgYMURCPCxqOMIccthyXLKdMmI0gRZ
-         yuGA==
-X-Gm-Message-State: AOAM531kXAfQIGeZNl2Eu9K/MXDTHVPqnGiO/m+WT09rW1C3+pQjwBuJ
-        0IFUhD7t9OmT8MzJDO8gV6RcH+CwwmnWRRc1vFNF0BF750M=
-X-Google-Smtp-Source: ABdhPJwxfeGq9JYJe9QgtkLt2opFT5Zf0MS8KwZYUe5kYBtOX3KQwJvaFyYra3C0vsdx+B421X5GQZ1Ql3rvGgxEx0A=
-X-Received: by 2002:a2e:9e54:0:b0:250:d6c8:c2a6 with SMTP id
- g20-20020a2e9e54000000b00250d6c8c2a6mr55514399ljk.16.1654598648783; Tue, 07
- Jun 2022 03:44:08 -0700 (PDT)
+        bh=oldIK4x+0l/Bv7OoKE6IDpTyHYosL/5Va89KOtvyPN0=;
+        b=b0ugojf8GfhLzInyh4V3nTI51v7FmFiy0JL+SB5CaNLU4gWfBeYO/VOLjzsoO4R7zS
+         tRmMlL0C5LbkmJmoksBNv/UViJi+IFafbAPtdSWYjIGv4l2aiyvJYkL9RZsdlPR5K9GR
+         /mEusGX0hvi68GWVCbVuE6OkADQWH1Pk6+UkcjmybEt8CIi8Ngu5BstLb/gNrPEd1cae
+         dEu3QtEwA+gkzJmOr1LFboGPcvDZcOpyHadrX0CIJJLl3gQpJ6DwMGDaYPw8m0aAc+zH
+         dUU8JQnY3afSkXSzI5pHHW18CMsimXe/+C0+Bv3eIE2EK5qpd6hIhNF9yXuP8hSbRi74
+         RTqw==
+X-Gm-Message-State: AOAM533AVH2kJh5ZOVcNtjuQIQ0a6XvInS3JezhKKDIPJidbMGCySOqw
+        gnVVhiGLPrVh1hIP4L3f1O3Uc0jnpmNjyQr1wXUIpiVl1k0=
+X-Google-Smtp-Source: ABdhPJw8xKe/6musFxtIt/kptw9pdvrPuaN8AtcTfG6jYGUVqCbiWhCGQ5tX61Q3upwDXaY7xQ+Bq9LVDyiHzOqOGeE=
+X-Received: by 2002:a19:ac42:0:b0:478:593c:e6fe with SMTP id
+ r2-20020a19ac42000000b00478593ce6femr17809585lfc.254.1654598653115; Tue, 07
+ Jun 2022 03:44:13 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220603233300.21789-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20220603233300.21789-1-wsa+renesas@sang-engineering.com>
+References: <20220603233810.21972-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220603233810.21972-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Jun 2022 12:43:32 +0200
-Message-ID: <CAPDyKFqU=J2EbNqsRhg-3T0tF46ivjzOcQ2kCNks=Yv5H9N=Hg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: add R-Car Gen4 fallback compatibility string
+Date:   Tue, 7 Jun 2022 12:43:36 +0200
+Message-ID: <CAPDyKFpr_XYj7R=ofgh00jyKi__3k_m8zmFMJYfcfnM5Z_nLGw@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car S4-8 and
+ generic Gen4 support
 To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
@@ -58,11 +59,8 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 4 Jun 2022 at 01:33, Wolfram Sang
+On Sat, 4 Jun 2022 at 01:38, Wolfram Sang
 <wsa+renesas@sang-engineering.com> wrote:
->
-> For now, Gen4 is treated the same as Gen3. But we still want a seperate
-> fallback just in case.
 >
 > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
@@ -73,21 +71,24 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> index 3084b15ae2cb..8f2e6619fa68 100644
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -268,6 +268,7 @@ static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
->         { .compatible = "renesas,sdhi-r8a77990", .data = &of_r8a77990_compatible, },
->         { .compatible = "renesas,sdhi-r8a77995", .data = &of_rcar_gen3_nohs400_compatible, },
->         { .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
-> +       { .compatible = "renesas,rcar-gen4-sdhi", .data = &of_rcar_gen3_compatible, },
->         {},
->  };
->  MODULE_DEVICE_TABLE(of, renesas_sdhi_internal_dmac_of_match);
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> index 9ac4986988c5..b46a90eb2063 100644
+> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> @@ -61,6 +61,10 @@ properties:
+>                - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
+>                - renesas,sdhi-r9a07g054 # RZ/V2L
+>            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
+> +      - items:
+> +          - enum:
+> +              - renesas,sdhi-r8a779f0  # R-Car S4-8
+> +          - const: renesas,rcar-gen4-sdhi # R-Car Gen4
+>
+>    reg:
+>      maxItems: 1
 > --
 > 2.35.1
 >
