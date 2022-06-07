@@ -2,214 +2,234 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D31C43334
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 11:08:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 490D1C43334
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 11:26:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242525AbiFGLIS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 07:08:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42070 "EHLO
+        id S241578AbiFGL0b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 07:26:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242524AbiFGLID (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 07:08:03 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67EAF102760
-        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 04:04:09 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id u23so27759437lfc.1
-        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 04:04:09 -0700 (PDT)
+        with ESMTP id S241539AbiFGL0a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 07:26:30 -0400
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AE8CB0438
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 04:26:29 -0700 (PDT)
+Received: by mail-lj1-x22e.google.com with SMTP id m25so15523012lji.11
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 04:26:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=aO/lSvFaLajkL7Ac/IqTCOTSOPQr+6oNuobROU/TF8k=;
-        b=plZ0JtxWk2Nc24B6pQU1IdzZ7fMFVakDlxjXm1dhZfOhbMC11ALQejl6bnQ4uXxFQq
-         CiRvRizUUB6Q6XOYtz7/pBHYG3DyAdJKKaej8Ki2oFk96Vg4LC8B5NRrQbwIGp50BvQq
-         PCPkamJ/f1O0MGhS4o5loFLInz8co4ctI11OggzRThUimjtNATTeEVur3srhTyvR5aNE
-         UkIncS+2ZcyEDZIzLq6wIxUJfD2flK51qsJ0r3PzGh7yV5Z8nN7KJJePQsOOybCwmYLW
-         GsUb+yluSCn1dtqSGUZvDycBaNNTBCK3iNAg6a5K1Vnz4JR2nK3FrJo1qP6RE2P0bOpK
-         w+Sw==
+         :cc;
+        bh=w+GsRNHM+gUC3ILkZfy0P7gbySArTMhMkLLLOFe/YiE=;
+        b=V/BPpAQ6jPfG/Vm00laKlt3Hf5YyQb2zWxqf/kbJNh2uKllC1S9k5Oz2iZZpe6s5PP
+         pr3TFF/xLoN162ia+ifBo+G7qkY+GS8e5CWBVSHBzDjpcubIQFXZU1eMajzhOdeN+odu
+         XBzyN83RcEH0rx4n/iHPUEzZ4maFz5LWSWqHV6jEoiw6jSqRS7YfcHYSfXRd8BnS5Q+A
+         HLKXysn+Kgl+cwVBjPKQQK/yghZPh/Qgh6vwgs6N4SudlUPcCz7zIAZau2zL4eBcV7b7
+         xqDfU5Kg9Oq4EyYJlce9X62jj3nKQitZNKJRzdBXH3y91rKB92HgOtcceWEZxU//533I
+         QJvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=aO/lSvFaLajkL7Ac/IqTCOTSOPQr+6oNuobROU/TF8k=;
-        b=WG0E5yoscRGyRGNvfQO7Y8Mvb82mowtbJe+JeQ0gsVsx9jSrq+DApIyE6UJ+vReZdK
-         hMDeEZye8on+s/LYLwWyxoLy5+kkCm11X3+PFisW0BdAUquHqKNQ4oFwQ2VnQldZ1RYt
-         9eUWLdtdozhNPbbyiN2kqKEUpm6vsCOwO4Gmhc/363nQ95HF6C8tWyRlEc8u/5UNUzyN
-         1c/ngeQcVTUM5L7w5b8TUNw7vqq2kRFzG2Tb9ORKQ/jAR9GouLE1JnwhejQLbfW8rjRG
-         D5i5u/PQUfT90oJD8Oo1rQl0mBGc+8vlK7uDmimH3dn6fYTAPJU8BLYVfx13HFCicUdT
-         wLcA==
-X-Gm-Message-State: AOAM530DvkEZRond76qzx8M7LGGmZbLGXmzgF34zl1U7i6dn92hc4gyE
-        9q9XC4EpU4dESZJQzbHrt+ximnEQjlQzNsfAvbgrFPedEBI=
-X-Google-Smtp-Source: ABdhPJwD90lne0lHTxYJKzLqW7u3faS4ilXkDxuw9Uqee5o04CDWGrVYZ5DTYIRIF+JkxWbqPbdIMnggcfaJZleojrA=
-X-Received: by 2002:a19:ac42:0:b0:478:593c:e6fe with SMTP id
- r2-20020a19ac42000000b00478593ce6femr17856420lfc.254.1654599847422; Tue, 07
- Jun 2022 04:04:07 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=w+GsRNHM+gUC3ILkZfy0P7gbySArTMhMkLLLOFe/YiE=;
+        b=Ze/Ud8pGfAZ1qsNo1bxhsMz9Tzw6Um5LX9q0JhaDOTXcZ5woOKvDZk+74yYWQHBZTO
+         F6x9EhcoIe8DJrHGJg/hhuIJjzZhQXCiiCM+pBsSfnEUyp41X0u6+HePW2GryatMwpFr
+         FgdFHkvtYDM+pk25bNFfZMl23WhLwGg3ORnt+SbZRFtOQLLDby+xDQGtj/z1qTPRaqLh
+         g9uNFOnBgVMOhjJjc9HByjWAjlP69U3iyR1bePU88Hq444dTxP9argdfC6g7eoo8jHMu
+         pYGie6dMNz54P5VXPJ1Bi5IDqFfb5VTQ3Ypc5ShH/kIO1sYym0y6g3tuFKQ0dTRscYx0
+         bI+A==
+X-Gm-Message-State: AOAM533L65cGFyvwSYKr4R2KSTjSyt4a/zxXowGOiyOkMVXzCySs/PYK
+        HMjyitno5X0Oz5/YoUen53TLgy3SHik119q2sWb6Fw==
+X-Google-Smtp-Source: ABdhPJwQJndIGMpRqM3HTAmHmPqbIhjMJ5/UfRi/Hf4LUiqkae4Plisplb+PU972/BNYkXJeoTouJI3+PzfYXXb+CX4=
+X-Received: by 2002:a05:651c:a04:b0:253:f0b4:a406 with SMTP id
+ k4-20020a05651c0a0400b00253f0b4a406mr41637842ljq.4.1654601187661; Tue, 07 Jun
+ 2022 04:26:27 -0700 (PDT)
 MIME-Version: 1.0
-References: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
- <CAPDyKFrjH8c=2LYkzj81jm7t-sy-EBs3AMzAS7M=LEHsh9qCCA@mail.gmail.com> <FA636A4D-FA8F-48EE-80C4-EDDFD115FB25@goldelico.com>
-In-Reply-To: <FA636A4D-FA8F-48EE-80C4-EDDFD115FB25@goldelico.com>
+References: <20220602114815.1801-1-jasonlai.genesyslogic@gmail.com>
+In-Reply-To: <20220602114815.1801-1-jasonlai.genesyslogic@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 7 Jun 2022 13:03:30 +0200
-Message-ID: <CAPDyKFoe5xYyiqNuOjLc4AnF-U_CwTujmNSjkjkW1E4O-8RKig@mail.gmail.com>
-Subject: Re: BUG in mmc: core: Disable card detect during shutdown
-To:     "H. Nikolaus Schaller" <hns@goldelico.com>
-Cc:     Discussions about the Letux Kernel <letux-kernel@openphoenux.org>,
-        kernel@pyra-handheld.com, aTc <atc@k-n-p.org>,
-        Tony Lindgren <tony@atomide.com>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org
+Date:   Tue, 7 Jun 2022 13:25:51 +0200
+Message-ID: <CAPDyKFqPBLNdLmNPHeQ4eMXbgUSPQfqxnAtD3h9exjoze-yDSQ@mail.gmail.com>
+Subject: Re: [RESEND] mmc: host: Improve READ/WRITE Performance of GL9763E
+To:     Jason Lai <jasonlai.genesyslogic@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        SeanHY.chen@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
+        victor.shih@genesyslogic.com.tw,
+        Renius Chen <reniuschengl@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 4 Jun 2022 at 12:16, H. Nikolaus Schaller <hns@goldelico.com> wrote=
-:
+On Thu, 2 Jun 2022 at 13:48, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
 >
-> Hi,
+> From: Jason Lai <jason.lai@genesyslogic.com.tw>
 >
-> > Am 03.06.2022 um 12:46 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
-> >
-> > On Mon, 30 May 2022 at 18:55, H. Nikolaus Schaller <hns@goldelico.com> =
-wrote:
-> >>
-> >> Hi Ulf,
-> >> users did report a strange issue that the OMAP5 based Pyra does not
-> >> shutdown if a kernel 5.10.116 is used.
-> >>
+> Resend this path to fix typo in the following message.
 >
-> ...
->
-> >> mmc_stop_host() is not called but __mmc_stop_host() is called 4 times.
-> >> There are 4 active MMC interfaces in the Pyra - 3 for (=C2=B5)SD slots
-> >> and one for an SDIO WLAN module.
-> >>
-> >> Now it looks as if 3 of them are properly teared down (two of them
-> >> seem to have host->slot.cd_irq >=3D 0) but on the fourth call
-> >> cancel_delayed_work_sync(&host->detect); does not return. This is
-> >> likely the location of the stall why we don't see a "reboot: Power dow=
-n"
-> >>
-> >> Any ideas?
-> >
-> > I guess the call to cancel_delayed_work_sync() in __mmc_stop_host()
-> > hangs for one of the mmc hosts. This shouldn't happen - and indicates
-> > that there is something else being wrong.
->
-> Yes, you were right...
->
-> >
-> > See more suggestions below.
-> >
-> >>
-> >> BR and thanks,
-> >> Nikolaus
-> >>
-> >> printk hack:
-> >>
-> >> void __mmc_stop_host(struct mmc_host *host)
-> >> {
-> >> printk("%s 1\n", __func__);
-> >>        if (host->slot.cd_irq >=3D 0) {
-> >> printk("%s 2\n", __func__);
-> >>                mmc_gpio_set_cd_wake(host, false);
-> >> printk("%s 3\n", __func__);
-> >>                disable_irq(host->slot.cd_irq);
-> >> printk("%s 4\n", __func__);
-> >>        }
-> >>
-> >>        host->rescan_disable =3D 1;
-> >> printk("%s 5\n", __func__);
-> >
-> > My guess is that it's the same mmc host that causes the hang. I
-> > suggest you print the name of the host too, to verify that. Something
-> > along the lines of the below.
-> >
-> > printk("%s: %s 5\n", mmc_hostname(host), __func__);
->
-> To my surprise, this did report an mmc6 host port where the OMAP5 only ha=
-s 4...
->
-> Yes, we have a special driver for the txs02612 sdio switch and voltage tr=
-anslator
-> chip to make two ports out of the single mmc2 port of the OMAP5 SoC.
->
-> This driver was begun ca. 7 years ago but never finished...
->
-> The idea is to make a mmc port have several subports. For the Pyra handhe=
-ld hardware
-> we needed 5 mmc/sdio interfaces but the omap5 only has 4 of them availabl=
-e to us.
->
-> So the txs02612 drivers is sitting between the omap5 mmc2 host pins and s=
-witches
-> between an =C2=B5SD slot and an eMMC.
->
-> Therefore, the driver is a mmc client driver (like e.g. the driver of som=
-e WiFi chip
-> connected to some SDIO port) and provides multiple mmc host interfaces.
->
-> It should intercept data transfer requests to its multiple mmc hosts, syn=
-chronize
-> (or enqueue) them, control the switch gpio and forward requests to the pr=
-ocessor's
-> mmc host port so that they are processed (after switching).
->
-> We never continued to make this work...
+> This patch is the follow-up to the patch [1] and adopt Ulf's comment.
 
-Well, I can imagine that it's just very difficult to make this work properl=
-y.
+Please start to care about versioning your patches correctly. It's
+difficult to follow what goes on in between each submission, thus it
+makes it harder for me to review.
 
-Moreover, the mmc core and its block layer code isn't designed to
-support this type of configuration. For example, the I/O scheduling
-can't work with this setup.
+Moreover, the above information is nice to have, but it should not be
+a part of the commit message, but rather in the separate section. See
+more below.
 
 >
-> What remained is simple code to manually throw the switch through some /s=
-ysfs
-> control file after doing an eject and before a fresh partprobe.
+> Due to flaws in hardware design, GL9763E takes long time to exit from L1
+> state. The I/O performance will suffer severe impact if it often enter
+> and exit L1 state during I/O requests.
 >
-> Still, the probe function of the txs02612 driver does two calls to mmc_ad=
-d_host().
-> These seem to make
+> To improve READ/WRITE performance and take battery life into account, we
+> turn on GL9763E L1 negotiation before entering runtime suspend and turn
+> off GL9763E L1 negotiation while executing runtime resume. That is to say,
+> GL9763E will not enter L1 state when executing I/O requests and enter L1
+> state when PCIe bus idle.
 >
-> >
-> >>        cancel_delayed_work_sync(&host->detect);
+> [1] https://patchwork.kernel.org/project/linux-mmc/list/?series=645922
 >
-> get stuck. Most likely because the initialization is not complete for han=
-dling
-> card detection.
->
-> >>
-> >> --- here should be another __mmc_stop_host 6
-> >> --- and reboot: Power down
-> >
-> > When/if you figured out that it's the same host that hangs, you could
-> > try to disable that host through the DTS files (add status =3D
-> > "disabled" in the device node, for example) - and see if that works.
->
-> When not calling mmc_add_host() in our txs02612 driver fragment we can
-> properly shut down the OMAP5. That is the solution with the least efforts=
-.
-> The other would be to make the txs02612 properly work...
->
-> So in summary there is no bug upstream. It is in our tree.
+> Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+> Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> ---
 
-Thanks for sharing the details.
+This is where patch versioning and other information belongs. To keep
+the correct patch format, add a newline here and end the section with
+three "dashes" on a separate line.
 
+---
+>  drivers/mmc/host/sdhci-pci-gli.c | 57 +++++++++++++++++++++++++++++++-
+>  1 file changed, 56 insertions(+), 1 deletion(-)
 >
-> If you are interested in how our code fragment for the txs02612 looks lik=
-e:
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index d09728c37d03..891bcd38fd6d 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -95,9 +95,12 @@
+>  #define PCIE_GLI_9763E_SCR      0x8E0
+>  #define   GLI_9763E_SCR_AXI_REQ           BIT(9)
 >
-> https://git.goldelico.com/?p=3Dletux-kernel.git;a=3Dshortlog;h=3Drefs/hea=
-ds/letux/txs02612
+> +#define PCIE_GLI_9763E_CFG       0x8A0
+> +#define   GLI_9763E_CFG_LPSN_DIS   BIT(12)
+> +
+>  #define PCIE_GLI_9763E_CFG2      0x8A4
+>  #define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
+> -#define   GLI_9763E_CFG2_L1DLY_MID 0x54
+> +#define   GLI_9763E_CFG2_L1DLY_MID 0x54                // Set L1 entry delay time to 21us
 >
-> Maybe you have some suggestions to make it work?
+>  #define PCIE_GLI_9763E_MMC_CTRL  0x960
+>  #define   GLI_9763E_HS400_SLOW     BIT(3)
+> @@ -144,6 +147,10 @@
+>
+>  #define GLI_MAX_TUNING_LOOP 40
+>
+> +struct gli_host {
+> +       bool lpm_negotiation_enabled;
+> +};
+> +
+>  /* Genesys Logic chipset */
+>  static inline void gl9750_wt_on(struct sdhci_host *host)
+>  {
+> @@ -818,6 +825,43 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *mmc)
+>         sdhci_dumpregs(mmc_priv(mmc));
+>  }
+>
+> +static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
+> +{
+> +       struct pci_dev *pdev = slot->chip->pdev;
+> +       u32 value;
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +       value &= ~GLI_9763E_VHS_REV;
+> +       value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
+> +
+> +       if (enable)
+> +               value &= ~GLI_9763E_CFG_LPSN_DIS;
+> +       else
+> +               value |= GLI_9763E_CFG_LPSN_DIS;
+> +
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +       value &= ~GLI_9763E_VHS_REV;
+> +       value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +}
+> +
+> +static void gl9763e_set_lpm_negotiation(struct sdhci_pci_slot *slot, bool enable)
+> +{
+> +       struct gli_host *gli_host = sdhci_pci_priv(slot);
+> +
+> +       if (gli_host->lpm_negotiation_enabled == enable)
+> +               return;
 
-Sorry, but I have lots of things to do at this point, maybe some other time=
-.
+I don't think you need to keep track of the previous state.
+
+When the host becomes runtime suspended we enable the lpm mode. When
+the host is runtime resumed we disable the lpm mode. That looks
+sufficient to me, no?
+
+> +
+> +       gli_host->lpm_negotiation_enabled = enable;
+> +
+> +       gl9763e_set_low_power_negotiation(slot, enable);
+> +}
+> +
+>  static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
+>  {
+>         struct cqhci_host *cq_host = mmc->cqe_private;
+> @@ -921,6 +965,7 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>  {
+>         struct pci_dev *pdev = slot->chip->pdev;
+>         u32 value;
+> +       struct gli_host *gli_host = sdhci_pci_priv(slot);
+>
+>         pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+>         value &= ~GLI_9763E_VHS_REV;
+> @@ -941,6 +986,9 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>         value |= FIELD_PREP(GLI_9763E_CFG2_L1DLY, GLI_9763E_CFG2_L1DLY_MID);
+>         pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG2, value);
+>
+> +       /* Default setting of LPM negotiation is enabled. */
+> +       gli_host->lpm_negotiation_enabled = true;
+> +
+>         pci_read_config_dword(pdev, PCIE_GLI_9763E_CLKRXDLY, &value);
+>         value &= ~GLI_9763E_HS400_RXDLY;
+>         value |= FIELD_PREP(GLI_9763E_HS400_RXDLY, GLI_9763E_HS400_RXDLY_5);
+> @@ -959,6 +1007,9 @@ static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+>         struct sdhci_host *host = slot->host;
+>         u16 clock;
+>
+> +       /* Enable LPM negotiatiom to allow entering L1 state */
+> +       gl9763e_set_lpm_negotiation(slot, true);
+> +
+>         clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>         clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+>         sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> @@ -989,6 +1040,9 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+>         clock |= SDHCI_CLOCK_CARD_EN;
+>         sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+>
+> +       /* Disable LPM negotiatiom to avoid entering L1 state. */
+> +       gl9763e_set_lpm_negotiation(slot, false);
+> +
+>         return 0;
+>  }
+>  #endif
+> @@ -1109,4 +1163,5 @@ const struct sdhci_pci_fixes sdhci_gl9763e = {
+>         .allow_runtime_pm = true,
+>  #endif
+>         .add_host       = gl9763e_add_host,
+> +       .priv_size      = sizeof(struct gli_host),
+>  };
+> --
+> 2.36.1
+>
 
 Kind regards
 Uffe
