@@ -2,105 +2,214 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8B95C43334
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 10:48:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D31C43334
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Jun 2022 11:08:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241920AbiFGKsR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 06:48:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41930 "EHLO
+        id S242525AbiFGLIS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Jun 2022 07:08:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241695AbiFGKr4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 06:47:56 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CADAFED7A9;
-        Tue,  7 Jun 2022 03:46:54 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6177B61577;
-        Tue,  7 Jun 2022 10:46:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D994EC34119;
-        Tue,  7 Jun 2022 10:46:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654598813;
-        bh=hlj2Yw+EG0pWKoO3cXlRjHbXss4PXj721LR0qzOjcRQ=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=lLjZE/ozDwyHnNNLv6KyRqV2xvU5uJJz9u7TCauhLkOPhBG38x6MdtEwI+8UIDQGw
-         uwtQiaJiwSNPU3upK6sgPC39kbtNdgB+CJfvt4RS1u1WkKKQpLeo6s5YlC3hEycLWK
-         DZ8Pjgv0h7TbVz5Vt1jDWfcTuWpK/D09EzsT4BVhx4hbG2e1VCKQHVGbNkyCNRk8sg
-         k6i/de3UcYlJTd5vP0lgvg+Z56k+nzRjJukId3zcOJcHo7YFPUDXs4S3klIjdIoaFE
-         QhfEG8FvKM9beX57uQhEHDZQEfg+6mZSxo/qgqEJSsXBAY9yR2jt850+wpSUTN7I+A
-         ZsaWxiF+LqPiw==
-From:   Mark Brown <broonie@kernel.org>
-To:     linux@roeck-us.net, robh+dt@kernel.org, vkoul@kernel.org,
-        matthias.bgg@gmail.com, jic23@kernel.org,
-        srinivas.kandagatla@linaro.org, krzysztof.kozlowski+dt@linaro.org,
-        chunfeng.yun@mediatek.com, fparent@baylibre.com,
-        ulf.hansson@linaro.org, wim@linux-watchdog.org,
-        qii.wang@mediatek.com, chaotian.jing@mediatek.com
-Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-phy@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, dmaengine@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-mediatek@lists.infradead.org
-In-Reply-To: <20220531135026.238475-1-fparent@baylibre.com>
-References: <20220531135026.238475-1-fparent@baylibre.com>
-Subject: Re: (subset) [PATCH 00/17] Add support for MT8365 EVK board
-Message-Id: <165459880859.302078.17715085151206065145.b4-ty@kernel.org>
-Date:   Tue, 07 Jun 2022 11:46:48 +0100
+        with ESMTP id S242524AbiFGLID (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 07:08:03 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67EAF102760
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2022 04:04:09 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id u23so27759437lfc.1
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Jun 2022 04:04:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=aO/lSvFaLajkL7Ac/IqTCOTSOPQr+6oNuobROU/TF8k=;
+        b=plZ0JtxWk2Nc24B6pQU1IdzZ7fMFVakDlxjXm1dhZfOhbMC11ALQejl6bnQ4uXxFQq
+         CiRvRizUUB6Q6XOYtz7/pBHYG3DyAdJKKaej8Ki2oFk96Vg4LC8B5NRrQbwIGp50BvQq
+         PCPkamJ/f1O0MGhS4o5loFLInz8co4ctI11OggzRThUimjtNATTeEVur3srhTyvR5aNE
+         UkIncS+2ZcyEDZIzLq6wIxUJfD2flK51qsJ0r3PzGh7yV5Z8nN7KJJePQsOOybCwmYLW
+         GsUb+yluSCn1dtqSGUZvDycBaNNTBCK3iNAg6a5K1Vnz4JR2nK3FrJo1qP6RE2P0bOpK
+         w+Sw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=aO/lSvFaLajkL7Ac/IqTCOTSOPQr+6oNuobROU/TF8k=;
+        b=WG0E5yoscRGyRGNvfQO7Y8Mvb82mowtbJe+JeQ0gsVsx9jSrq+DApIyE6UJ+vReZdK
+         hMDeEZye8on+s/LYLwWyxoLy5+kkCm11X3+PFisW0BdAUquHqKNQ4oFwQ2VnQldZ1RYt
+         9eUWLdtdozhNPbbyiN2kqKEUpm6vsCOwO4Gmhc/363nQ95HF6C8tWyRlEc8u/5UNUzyN
+         1c/ngeQcVTUM5L7w5b8TUNw7vqq2kRFzG2Tb9ORKQ/jAR9GouLE1JnwhejQLbfW8rjRG
+         D5i5u/PQUfT90oJD8Oo1rQl0mBGc+8vlK7uDmimH3dn6fYTAPJU8BLYVfx13HFCicUdT
+         wLcA==
+X-Gm-Message-State: AOAM530DvkEZRond76qzx8M7LGGmZbLGXmzgF34zl1U7i6dn92hc4gyE
+        9q9XC4EpU4dESZJQzbHrt+ximnEQjlQzNsfAvbgrFPedEBI=
+X-Google-Smtp-Source: ABdhPJwD90lne0lHTxYJKzLqW7u3faS4ilXkDxuw9Uqee5o04CDWGrVYZ5DTYIRIF+JkxWbqPbdIMnggcfaJZleojrA=
+X-Received: by 2002:a19:ac42:0:b0:478:593c:e6fe with SMTP id
+ r2-20020a19ac42000000b00478593ce6femr17856420lfc.254.1654599847422; Tue, 07
+ Jun 2022 04:04:07 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+References: <55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com>
+ <CAPDyKFrjH8c=2LYkzj81jm7t-sy-EBs3AMzAS7M=LEHsh9qCCA@mail.gmail.com> <FA636A4D-FA8F-48EE-80C4-EDDFD115FB25@goldelico.com>
+In-Reply-To: <FA636A4D-FA8F-48EE-80C4-EDDFD115FB25@goldelico.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 7 Jun 2022 13:03:30 +0200
+Message-ID: <CAPDyKFoe5xYyiqNuOjLc4AnF-U_CwTujmNSjkjkW1E4O-8RKig@mail.gmail.com>
+Subject: Re: BUG in mmc: core: Disable card detect during shutdown
+To:     "H. Nikolaus Schaller" <hns@goldelico.com>
+Cc:     Discussions about the Letux Kernel <letux-kernel@openphoenux.org>,
+        kernel@pyra-handheld.com, aTc <atc@k-n-p.org>,
+        Tony Lindgren <tony@atomide.com>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 31 May 2022 15:50:09 +0200, Fabien Parent wrote:
-> This patch series adds support for the MT8365 EVK board.
-> 
-> This series has dependencies on the following series:
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646256
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646091
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646083
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646081
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646076
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646068
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646020
-> https://patchwork.kernel.org/project/linux-mediatek/list/?series=646052
-> https://lore.kernel.org/r/20220504091923.2219-2-rex-bc.chen@mediatek.com
-> https://lore.kernel.org/r/20220512062622.31484-2-chunfeng.yun@mediatek.com
-> https://lore.kernel.org/r/20220512062622.31484-1-chunfeng.yun@mediatek.com
-> https://lore.kernel.org/r/20220524115019.97246-1-angelogioacchino.delregno@collabora.com
-> https://lore.kernel.org/all/20220127015857.9868-1-biao.huang@mediatek.com/
-> 
-> [...]
+On Sat, 4 Jun 2022 at 12:16, H. Nikolaus Schaller <hns@goldelico.com> wrote=
+:
+>
+> Hi,
+>
+> > Am 03.06.2022 um 12:46 schrieb Ulf Hansson <ulf.hansson@linaro.org>:
+> >
+> > On Mon, 30 May 2022 at 18:55, H. Nikolaus Schaller <hns@goldelico.com> =
+wrote:
+> >>
+> >> Hi Ulf,
+> >> users did report a strange issue that the OMAP5 based Pyra does not
+> >> shutdown if a kernel 5.10.116 is used.
+> >>
+>
+> ...
+>
+> >> mmc_stop_host() is not called but __mmc_stop_host() is called 4 times.
+> >> There are 4 active MMC interfaces in the Pyra - 3 for (=C2=B5)SD slots
+> >> and one for an SDIO WLAN module.
+> >>
+> >> Now it looks as if 3 of them are properly teared down (two of them
+> >> seem to have host->slot.cd_irq >=3D 0) but on the fourth call
+> >> cancel_delayed_work_sync(&host->detect); does not return. This is
+> >> likely the location of the stall why we don't see a "reboot: Power dow=
+n"
+> >>
+> >> Any ideas?
+> >
+> > I guess the call to cancel_delayed_work_sync() in __mmc_stop_host()
+> > hangs for one of the mmc hosts. This shouldn't happen - and indicates
+> > that there is something else being wrong.
+>
+> Yes, you were right...
+>
+> >
+> > See more suggestions below.
+> >
+> >>
+> >> BR and thanks,
+> >> Nikolaus
+> >>
+> >> printk hack:
+> >>
+> >> void __mmc_stop_host(struct mmc_host *host)
+> >> {
+> >> printk("%s 1\n", __func__);
+> >>        if (host->slot.cd_irq >=3D 0) {
+> >> printk("%s 2\n", __func__);
+> >>                mmc_gpio_set_cd_wake(host, false);
+> >> printk("%s 3\n", __func__);
+> >>                disable_irq(host->slot.cd_irq);
+> >> printk("%s 4\n", __func__);
+> >>        }
+> >>
+> >>        host->rescan_disable =3D 1;
+> >> printk("%s 5\n", __func__);
+> >
+> > My guess is that it's the same mmc host that causes the hang. I
+> > suggest you print the name of the host too, to verify that. Something
+> > along the lines of the below.
+> >
+> > printk("%s: %s 5\n", mmc_hostname(host), __func__);
+>
+> To my surprise, this did report an mmc6 host port where the OMAP5 only ha=
+s 4...
+>
+> Yes, we have a special driver for the txs02612 sdio switch and voltage tr=
+anslator
+> chip to make two ports out of the single mmc2 port of the OMAP5 SoC.
+>
+> This driver was begun ca. 7 years ago but never finished...
+>
+> The idea is to make a mmc port have several subports. For the Pyra handhe=
+ld hardware
+> we needed 5 mmc/sdio interfaces but the omap5 only has 4 of them availabl=
+e to us.
+>
+> So the txs02612 drivers is sitting between the omap5 mmc2 host pins and s=
+witches
+> between an =C2=B5SD slot and an eMMC.
+>
+> Therefore, the driver is a mmc client driver (like e.g. the driver of som=
+e WiFi chip
+> connected to some SDIO port) and provides multiple mmc host interfaces.
+>
+> It should intercept data transfer requests to its multiple mmc hosts, syn=
+chronize
+> (or enqueue) them, control the switch gpio and forward requests to the pr=
+ocessor's
+> mmc host port so that they are processed (after switching).
+>
+> We never continued to make this work...
 
-Applied to
+Well, I can imagine that it's just very difficult to make this work properl=
+y.
 
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
+Moreover, the mmc core and its block layer code isn't designed to
+support this type of configuration. For example, the I/O scheduling
+can't work with this setup.
 
-Thanks!
+>
+> What remained is simple code to manually throw the switch through some /s=
+ysfs
+> control file after doing an eject and before a fresh partprobe.
+>
+> Still, the probe function of the txs02612 driver does two calls to mmc_ad=
+d_host().
+> These seem to make
+>
+> >
+> >>        cancel_delayed_work_sync(&host->detect);
+>
+> get stuck. Most likely because the initialization is not complete for han=
+dling
+> card detection.
+>
+> >>
+> >> --- here should be another __mmc_stop_host 6
+> >> --- and reboot: Power down
+> >
+> > When/if you figured out that it's the same host that hangs, you could
+> > try to disable that host through the DTS files (add status =3D
+> > "disabled" in the device node, for example) - and see if that works.
+>
+> When not calling mmc_add_host() in our txs02612 driver fragment we can
+> properly shut down the OMAP5. That is the solution with the least efforts=
+.
+> The other would be to make the txs02612 properly work...
+>
+> So in summary there is no bug upstream. It is in our tree.
 
-[09/17] dt-bindings: spi: mt65xx: add MT8365 SoC bindings
-        commit: 901fc8e8079e401f3240006cab6629e65579701c
+Thanks for sharing the details.
 
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
+>
+> If you are interested in how our code fragment for the txs02612 looks lik=
+e:
+>
+> https://git.goldelico.com/?p=3Dletux-kernel.git;a=3Dshortlog;h=3Drefs/hea=
+ds/letux/txs02612
+>
+> Maybe you have some suggestions to make it work?
 
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
+Sorry, but I have lots of things to do at this point, maybe some other time=
+.
 
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
-
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
-
-Thanks,
-Mark
+Kind regards
+Uffe
