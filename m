@@ -2,65 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A34B7CCA47E
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 12:24:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50006C43334
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 13:09:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239176AbiFHMYB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jun 2022 08:24:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56572 "EHLO
+        id S239762AbiFHNJM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jun 2022 09:09:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239152AbiFHMYA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 08:24:00 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 837221F5E3F
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2022 05:23:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=4+g6dudEtGLGNWp0TlEsk7B5ZZb
-        Jl/eGMXhPbDhQFW8=; b=yvKP1qSv0Zall+gQKrckI82Xv46R1jMLRpnP1v52fhD
-        oa6RDNQg0jrzGcauAVQy6MJ1vjZjgEk9WMDoFl1gBhhDny0xT9muOgn+OZXGV9l2
-        9n/kXm5dTa5zVe+VQ/NAbhKfF8WQ3dheZ3Ns4biELFt8k26FDWkvSD2awOfVOWR8
-        =
-Received: (qmail 2895419 invoked from network); 8 Jun 2022 14:23:53 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 8 Jun 2022 14:23:53 +0200
-X-UD-Smtp-Session: l3s3148p1@Hc8/x+7gGA9ZD+7M
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Add R-Car Gen4 clock requirements
-Date:   Wed,  8 Jun 2022 14:23:44 +0200
-Message-Id: <20220608122344.3431-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S239820AbiFHNJL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 09:09:11 -0400
+Received: from smtpbg.qq.com (smtpbg136.qq.com [106.55.201.188])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58B9C26E91F;
+        Wed,  8 Jun 2022 06:09:00 -0700 (PDT)
+X-QQ-mid: bizesmtp73t1654693736t7p6bnci
+Received: from localhost.localdomain ( [111.9.5.115])
+        by bizesmtp.qq.com (ESMTP) with 
+        id ; Wed, 08 Jun 2022 21:08:50 +0800 (CST)
+X-QQ-SSF: 01000000002000C0H000B00A0000000
+X-QQ-FEAT: +ZT4F8HYZJ6G9tB95OH1uDRs6oMrrb5LD4fLM++MBuWC9dntfg6GjlGt4yVdc
+        OiXn4C9LmM67H6bkOZwO09EMSPUp/kccpVWrm7FsS0t1MrDyOQviSmYPgtnqkgBRJ8zTOLv
+        5VECFjBr4GRCqTbyNBg/z34Qsg33NYic8C3/sdcURDGNqBxh+QyOupxHBGujie6Y+jde2Mi
+        ySTgUwdqygr+0cH5T4ChTRZms6d7QS+WgE5GtIX+OIHUd7N1Qx9j4gDdU5Qs1pv9vZk+N0M
+        pirab/pyoLghvrst6TyuxifpaiDvf5OjNFtBPVTVdJrPdhyZZ1peeFRfcjVPyl7JzRkycC+
+        GaOzcrN1Rcm4FmMYEpweYsLLC3npw==
+X-QQ-GoodBg: 0
+From:   Xiang wangx <wangxiang@cdjrlc.com>
+To:     ulf.hansson@linaro.org
+Cc:     linux@armlinux.org.uk, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Xiang wangx <wangxiang@cdjrlc.com>
+Subject: [PATCH] mmc: mmci: Fix typo in comment
+Date:   Wed,  8 Jun 2022 21:08:47 +0800
+Message-Id: <20220608130847.46359-1-wangxiang@cdjrlc.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-QQ-SENDSIZE: 520
+Feedback-ID: bizesmtp:cdjrlc.com:qybgspam:qybgspam7
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The patch enabling generic Gen4 support forgot to add the clock
-requirements which are the same as for Gen3. Update the binding.
+Delete the redundant word 'is'.
 
-Fixes: 6aa26be14d2a ("dt-bindings: mmc: renesas,sdhi: Document R-Car S4-8 and generic Gen4 support")
-Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Xiang wangx <wangxiang@cdjrlc.com>
 ---
- Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/mmci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index d5b29728704b..14945ebc31d2 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -145,6 +145,7 @@ allOf:
-               enum:
-                 - renesas,rcar-gen2-sdhi
-                 - renesas,rcar-gen3-sdhi
-+                - renesas,rcar-gen4-sdhi
-       then:
-         properties:
-           clocks:
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 01159eaf8694..012aa85489d8 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -762,7 +762,7 @@ int mmci_dmae_setup(struct mmci_host *host)
+ 
+ 	/*
+ 	 * If only an RX channel is specified, the driver will
+-	 * attempt to use it bidirectionally, however if it is
++	 * attempt to use it bidirectionally, however if it
+ 	 * is specified but cannot be located, DMA will be disabled.
+ 	 */
+ 	if (dmae->rx_channel && !dmae->tx_channel)
 -- 
-2.35.1
+2.36.1
 
