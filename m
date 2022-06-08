@@ -2,73 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E33EDC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 10:06:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2142BC43334
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 11:16:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236203AbiFHKGV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jun 2022 06:06:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52410 "EHLO
+        id S237897AbiFHLQq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jun 2022 07:16:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34804 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236145AbiFHKFw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 06:05:52 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7796019590B
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2022 02:48:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=W4SwFQDUXTB8fPguP8ZWXaS/Ql0
-        Js9OqnkQ+wPSETy4=; b=ZMAmN6UPjpG3qlfs7aQvimtHtzcxJi/FVSNsAixQdyu
-        neFE5wGo79bS8tFCE1PHHpzdqNsiqi6qZWp+ZumBJCORh/ojmPY4LYEIrGIuS+bB
-        wavQ2ZZpXq9nP/6VQCEGf/xOzbMV96n6jGt9riXbZnqdReRMs6D14TG/FV4T0sGY
-        =
-Received: (qmail 2846080 invoked from network); 8 Jun 2022 11:48:38 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 8 Jun 2022 11:48:38 +0200
-X-UD-Smtp-Session: l3s3148p1@rnoJnOzgLhlZD+1N
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: R-Car V3U is R-Car Gen4
-Date:   Wed,  8 Jun 2022 11:48:31 +0200
-Message-Id: <20220608094831.8242-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S237780AbiFHLQp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 07:16:45 -0400
+Received: from mail-qt1-f177.google.com (mail-qt1-f177.google.com [209.85.160.177])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F7413739DE;
+        Wed,  8 Jun 2022 04:16:44 -0700 (PDT)
+Received: by mail-qt1-f177.google.com with SMTP id z10so1224688qta.2;
+        Wed, 08 Jun 2022 04:16:44 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=QrKTc24aJUxfwS5ZLT4D6EbhdOHRFrkso98/RbnTqgw=;
+        b=2hETDNIJGI88Wa0J45LfO4VMLr0MAbmPEoBIJRVX5on+/0uZuQEX1bXWtyYTtAHjca
+         6eywzr2WQMuqCE6nPaxU50LgEYPpjR8sS1dAdQFa/wDQFA/Cp1zqEsT9yAnm++xjYnf6
+         TPDbzsfaYKV+m7nqSh2vGl1p0WDBgpzPDZZ3KNrlffFp+zLkSAmbuxOv2Z4yKs4jR8Qi
+         +wEzUf47mz7S6X5DTVP8y/DwvM9nLuO3cMrHJ6MS9Xf9dxko5x4e/ZZa6kHaUoO3rqs8
+         7HCVYg9BylvHoK1CId1qdQyHWVQK26iz8YvUWRG1PS0CFp53/LlOEBpeRVf+BJUHdNiD
+         vh6A==
+X-Gm-Message-State: AOAM531CTZrEApmPAiPA/ZviS2oWUtMamqRJ3sl2dbwDbWpu+MjPJBVQ
+        GVFkTYRkNr3tc3592OkfCHCq77KatIrWLQ==
+X-Google-Smtp-Source: ABdhPJzjEgFddioXtt+KPUu10OYFkl7bcANT9YC1vaTBbXxDKymVzdlMMySVe1gjGrZfsNrRWwjxGw==
+X-Received: by 2002:ac8:5b56:0:b0:2f3:f4a7:cd33 with SMTP id n22-20020ac85b56000000b002f3f4a7cd33mr26878928qtw.608.1654687003617;
+        Wed, 08 Jun 2022 04:16:43 -0700 (PDT)
+Received: from mail-yw1-f170.google.com (mail-yw1-f170.google.com. [209.85.128.170])
+        by smtp.gmail.com with ESMTPSA id d8-20020ac85448000000b00304ef07ee7asm5065169qtq.83.2022.06.08.04.16.43
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 08 Jun 2022 04:16:43 -0700 (PDT)
+Received: by mail-yw1-f170.google.com with SMTP id 00721157ae682-30c143c41e5so205284367b3.3;
+        Wed, 08 Jun 2022 04:16:43 -0700 (PDT)
+X-Received: by 2002:a81:9b0c:0:b0:2f4:c522:7d3c with SMTP id
+ s12-20020a819b0c000000b002f4c5227d3cmr36784488ywg.316.1654687003046; Wed, 08
+ Jun 2022 04:16:43 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220603233810.21972-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20220603233810.21972-1-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 8 Jun 2022 13:16:31 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdU3U6PjGpB4m4jXC4UMjruqg1T66WtBSnuF68sKD48WTA@mail.gmail.com>
+Message-ID: <CAMuHMdU3U6PjGpB4m4jXC4UMjruqg1T66WtBSnuF68sKD48WTA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car S4-8 and
+ generic Gen4 support
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Despite the name, R-Car V3U is the first member of the R-Car Gen4
-family.  Hence move its compatible value to the R-Car Gen4 section.
+Hi Wolfram,
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+On Sun, Jun 5, 2022 at 2:34 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Depends on "[PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car S4-8
-and generic Gen4 support" which is already in mmc/next.
+Thanks for your patch!
 
- Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> @@ -61,6 +61,10 @@ properties:
+>                - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
+>                - renesas,sdhi-r9a07g054 # RZ/V2L
+>            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
+> +      - items:
+> +          - enum:
+> +              - renesas,sdhi-r8a779f0  # R-Car S4-8
+> +          - const: renesas,rcar-gen4-sdhi # R-Car Gen4
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index b46a90eb2063..d5b29728704b 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -56,13 +56,13 @@ properties:
-               - renesas,sdhi-r8a77980  # R-Car V3H
-               - renesas,sdhi-r8a77990  # R-Car E3
-               - renesas,sdhi-r8a77995  # R-Car D3
--              - renesas,sdhi-r8a779a0  # R-Car V3U
-               - renesas,sdhi-r9a07g043 # RZ/G2UL
-               - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
-               - renesas,sdhi-r9a07g054 # RZ/V2L
-           - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
-       - items:
-           - enum:
-+              - renesas,sdhi-r8a779a0  # R-Car V3U
-               - renesas,sdhi-r8a779f0  # R-Car S4-8
-           - const: renesas,rcar-gen4-sdhi # R-Car Gen4
- 
--- 
-2.35.1
+LGTM.
 
+>
+>    reg:
+>      maxItems: 1
+
+You forgot to add "renesas,rcar-gen4-sdhi" to the "if" block below, controlling
+clocks and clock-names.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
