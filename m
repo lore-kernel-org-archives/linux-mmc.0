@@ -2,67 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12ED1CCA47F
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 01:10:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87989C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 08:22:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232233AbiFHBJq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Jun 2022 21:09:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49404 "EHLO
+        id S230112AbiFHIWy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jun 2022 04:22:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1583025AbiFGXqB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2022 19:46:01 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F9852E4391;
-        Tue,  7 Jun 2022 15:06:13 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 1C5FAB82456;
-        Tue,  7 Jun 2022 22:06:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id CF913C385A2;
-        Tue,  7 Jun 2022 22:06:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1654639570;
-        bh=RRlJzCWCZfZMbkpaSDZsgTcnf8hYwEfy32E7RVLd1wk=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=pZEPOuC7ua4P3ml30W9JhWc1wxyA3JBUazUt7jNeKwXYg6k6abOcxyyE9E37Z4Qlh
-         VAoX7E7Se8l3QlK330ZjS+wNn12E51teQZe9FN7MgTSzOrR7EOqnCrRZogSuaXYMLu
-         5DngjxZuXnxLgjaULMeOWDOMrCEqDgyQlmaBfqQPDZecKNqxoKOdDNLEgrEftkA6Mq
-         ZM2ay4YSkichat+z6U240i45OGoZ+fZONZmgKI/fFTfEKMkqKpCDPch1dJz8lbqivp
-         Rrcnr7hwlbHMN4QAYyW2tIetKlMNnnf52822K5mee1OlrWp7lnVGpGokR4Jl1FxyYZ
-         trfwaABDkTPRA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id BA93CE737E8;
-        Tue,  7 Jun 2022 22:06:10 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.19-rc2
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20220607094743.204021-1-ulf.hansson@linaro.org>
-References: <20220607094743.204021-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20220607094743.204021-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.19-2
-X-PR-Tracked-Commit-Id: 479260419fa4cb30e3e5d935a857fbdf0ffdd854
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: f7a447eda2120ab8988b0f8c708c1fd3bd4d3729
-Message-Id: <165463957075.23279.17574785845775017961.pr-tracker-bot@kernel.org>
-Date:   Tue, 07 Jun 2022 22:06:10 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S230377AbiFHIVg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 04:21:36 -0400
+Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADC293AD8BC
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2022 00:48:29 -0700 (PDT)
+Received: by mail-wm1-x32d.google.com with SMTP id r123-20020a1c2b81000000b0039c1439c33cso10640223wmr.5
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2022 00:48:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=lqY+yGTizo28KA0GxuLPPWRDIJPNvZCC8690vTojGfw=;
+        b=rJKimGqxM9lPho0kjQMT0As4HYnbCFTaudyp28LP4beS819PzchOl4qBDzu6wfHVhD
+         R/7b2ucXeGP3hrljf6RxhjU+dOHq80y2Xrs/EtV17nXhvc4FpovzQmOiD0QpDrrM02yq
+         zUOTzwD4G9XGZA47M1e9Hbd75sPnAf4N7wPPYS++GeQfVxU+CtKoKijJKfKskGYmlk4w
+         Iu10ozBkMGDF7dtHw0V5NsueqChUEhHQeEdvFoJ77kKZ9Vng3WEewmalzTwvhN2Iuasv
+         hPRwlKg5YH3aI2k4LcgrjdAshwp8ifEcZMf3E5HJO2LFnhSlxfUbxdkpNSg4t5Y8aGSj
+         UKtA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=lqY+yGTizo28KA0GxuLPPWRDIJPNvZCC8690vTojGfw=;
+        b=5vnO24XIk6agp4mngt2EzgTYux/cZkArDJPSareTI84M4r0biTkKJVgQca4YutsEUg
+         o/jVZvpeMM9z09ncF2guuVrkERHDiuiVsaZjzz/U7j40KSp4XHPjQhfRThV0ADiVddLY
+         QQp+D6kDELl/+rleQP9wIN9xXW6Ox+1dgOAUDf3sInRnndDxdYptugkFRPRc35wlQevA
+         f26WhphAPyzLv8quLXPPebjH4JF4tCfEMVuHcRDBIy9gzjWVokg9cZUuTPCpX5Em8ay3
+         9KF40qsx8diY006lFeyB+eP1reAAeUi83CRC6cKJhB8/0hGR2qbbng2jiCu4brjpRDoC
+         uWZQ==
+X-Gm-Message-State: AOAM531xduHiIqst+TGbu6fsx89QU8QFAtNPUi/EBu1qhWYo06T0GaUk
+        rPalALSJpYCQt4rjbVW7EVF3OA==
+X-Google-Smtp-Source: ABdhPJzX8u/vF1uMO+f6IIT0LehkLZnmEeGwTIeTTQ25oBVz6rOOKXk8eZ2rx4zRGhav0uPYaI11Ew==
+X-Received: by 2002:a05:600c:3ac9:b0:397:70f8:bd65 with SMTP id d9-20020a05600c3ac900b0039770f8bd65mr62494168wms.194.1654674508274;
+        Wed, 08 Jun 2022 00:48:28 -0700 (PDT)
+Received: from google.com (cpc155339-bagu17-2-0-cust87.1-3.cable.virginm.net. [86.27.177.88])
+        by smtp.gmail.com with ESMTPSA id i8-20020a05600c354800b0039c6390730bsm1060766wmq.29.2022.06.08.00.48.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 08 Jun 2022 00:48:27 -0700 (PDT)
+Date:   Wed, 8 Jun 2022 08:48:25 +0100
+From:   Lee Jones <lee.jones@linaro.org>
+To:     Conor Dooley <mail@conchuod.ie>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Support Opensource <support.opensource@diasemi.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Steve Twiss <stwiss.opensource@diasemi.com>,
+        Conor Dooley <conor.dooley@microchip.com>,
+        linux-i2c@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-riscv@lists.infradead.org,
+        Atul Khare <atulkhare@rivosinc.com>,
+        Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v3 3/4] dt-bindings: mfd: convert da9063 to yaml
+Message-ID: <YqBUSfyxsRpNdqob@google.com>
+References: <20220606201343.514391-1-mail@conchuod.ie>
+ <20220606201343.514391-4-mail@conchuod.ie>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20220606201343.514391-4-mail@conchuod.ie>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Tue,  7 Jun 2022 11:47:43 +0200:
+On Mon, 06 Jun 2022, Conor Dooley wrote:
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.19-2
+> From: Conor Dooley <conor.dooley@microchip.com>
+> 
+> Convert the dt binding for the da9063/da9063l to yaml.
+> 
+> Reviewed-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
+> ---
+>  .../devicetree/bindings/mfd/da9063.txt        | 114 ---------------
+>  .../devicetree/bindings/mfd/dlg,da9063.yaml   | 132 ++++++++++++++++++
+>  .../devicetree/bindings/trivial-devices.yaml  |   2 -
+>  MAINTAINERS                                   |   1 +
+>  4 files changed, 133 insertions(+), 116 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mfd/da9063.txt
+>  create mode 100644 Documentation/devicetree/bindings/mfd/dlg,da9063.yaml
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/f7a447eda2120ab8988b0f8c708c1fd3bd4d3729
-
-Thank you!
+Applied, thanks.
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Lee Jones [李琼斯]
+Principal Technical Lead - Developer Services
+Linaro.org │ Open source software for Arm SoCs
+Follow Linaro: Facebook | Twitter | Blog
