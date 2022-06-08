@@ -2,104 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87989C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 08:22:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EE83CCA47F
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 09:24:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230112AbiFHIWy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jun 2022 04:22:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60500 "EHLO
+        id S235074AbiFHJXS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jun 2022 05:23:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230377AbiFHIVg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 04:21:36 -0400
-Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADC293AD8BC
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2022 00:48:29 -0700 (PDT)
-Received: by mail-wm1-x32d.google.com with SMTP id r123-20020a1c2b81000000b0039c1439c33cso10640223wmr.5
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2022 00:48:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=lqY+yGTizo28KA0GxuLPPWRDIJPNvZCC8690vTojGfw=;
-        b=rJKimGqxM9lPho0kjQMT0As4HYnbCFTaudyp28LP4beS819PzchOl4qBDzu6wfHVhD
-         R/7b2ucXeGP3hrljf6RxhjU+dOHq80y2Xrs/EtV17nXhvc4FpovzQmOiD0QpDrrM02yq
-         zUOTzwD4G9XGZA47M1e9Hbd75sPnAf4N7wPPYS++GeQfVxU+CtKoKijJKfKskGYmlk4w
-         Iu10ozBkMGDF7dtHw0V5NsueqChUEhHQeEdvFoJ77kKZ9Vng3WEewmalzTwvhN2Iuasv
-         hPRwlKg5YH3aI2k4LcgrjdAshwp8ifEcZMf3E5HJO2LFnhSlxfUbxdkpNSg4t5Y8aGSj
-         UKtA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=lqY+yGTizo28KA0GxuLPPWRDIJPNvZCC8690vTojGfw=;
-        b=5vnO24XIk6agp4mngt2EzgTYux/cZkArDJPSareTI84M4r0biTkKJVgQca4YutsEUg
-         o/jVZvpeMM9z09ncF2guuVrkERHDiuiVsaZjzz/U7j40KSp4XHPjQhfRThV0ADiVddLY
-         QQp+D6kDELl/+rleQP9wIN9xXW6Ox+1dgOAUDf3sInRnndDxdYptugkFRPRc35wlQevA
-         f26WhphAPyzLv8quLXPPebjH4JF4tCfEMVuHcRDBIy9gzjWVokg9cZUuTPCpX5Em8ay3
-         9KF40qsx8diY006lFeyB+eP1reAAeUi83CRC6cKJhB8/0hGR2qbbng2jiCu4brjpRDoC
-         uWZQ==
-X-Gm-Message-State: AOAM531xduHiIqst+TGbu6fsx89QU8QFAtNPUi/EBu1qhWYo06T0GaUk
-        rPalALSJpYCQt4rjbVW7EVF3OA==
-X-Google-Smtp-Source: ABdhPJzX8u/vF1uMO+f6IIT0LehkLZnmEeGwTIeTTQ25oBVz6rOOKXk8eZ2rx4zRGhav0uPYaI11Ew==
-X-Received: by 2002:a05:600c:3ac9:b0:397:70f8:bd65 with SMTP id d9-20020a05600c3ac900b0039770f8bd65mr62494168wms.194.1654674508274;
-        Wed, 08 Jun 2022 00:48:28 -0700 (PDT)
-Received: from google.com (cpc155339-bagu17-2-0-cust87.1-3.cable.virginm.net. [86.27.177.88])
-        by smtp.gmail.com with ESMTPSA id i8-20020a05600c354800b0039c6390730bsm1060766wmq.29.2022.06.08.00.48.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jun 2022 00:48:27 -0700 (PDT)
-Date:   Wed, 8 Jun 2022 08:48:25 +0100
-From:   Lee Jones <lee.jones@linaro.org>
-To:     Conor Dooley <mail@conchuod.ie>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Support Opensource <support.opensource@diasemi.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Steve Twiss <stwiss.opensource@diasemi.com>,
-        Conor Dooley <conor.dooley@microchip.com>,
-        linux-i2c@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
-        Atul Khare <atulkhare@rivosinc.com>,
-        Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 3/4] dt-bindings: mfd: convert da9063 to yaml
-Message-ID: <YqBUSfyxsRpNdqob@google.com>
-References: <20220606201343.514391-1-mail@conchuod.ie>
- <20220606201343.514391-4-mail@conchuod.ie>
+        with ESMTP id S234848AbiFHJWn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 05:22:43 -0400
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82B231208BC;
+        Wed,  8 Jun 2022 01:43:33 -0700 (PDT)
+Received: from canpemm500009.china.huawei.com (unknown [172.30.72.56])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4LJ1123MtPzgYlT;
+        Wed,  8 Jun 2022 16:41:42 +0800 (CST)
+Received: from CHINA (10.175.102.38) by canpemm500009.china.huawei.com
+ (7.192.105.203) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Wed, 8 Jun
+ 2022 16:43:30 +0800
+From:   Wei Yongjun <weiyongjun1@huawei.com>
+To:     <weiyongjun1@huawei.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Liangliang Lu <quic_luliang@quicinc.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "Bao D. Nguyen" <quic_nguyenb@quicinc.com>,
+        Sayali Lokhande <quic_sayalil@quicinc.com>,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+CC:     <linux-mmc@vger.kernel.org>, <kernel-janitors@vger.kernel.org>,
+        Hulk Robot <hulkci@huawei.com>
+Subject: [PATCH -next] mmc: debugfs: Fix file release memory leak
+Date:   Wed, 8 Jun 2022 09:01:52 +0000
+Message-ID: <20220608090152.179395-1-weiyongjun1@huawei.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220606201343.514391-4-mail@conchuod.ie>
+Content-Type:   text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+X-Originating-IP: [10.175.102.38]
+X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
+ canpemm500009.china.huawei.com (7.192.105.203)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 06 Jun 2022, Conor Dooley wrote:
+When using single_open() for opening, single_release() should be
+used instead of seq_release(), otherwise there is a memory leak.
 
-> From: Conor Dooley <conor.dooley@microchip.com>
-> 
-> Convert the dt binding for the da9063/da9063l to yaml.
-> 
-> Reviewed-by: Rob Herring <robh@kernel.org>
-> Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
-> ---
->  .../devicetree/bindings/mfd/da9063.txt        | 114 ---------------
->  .../devicetree/bindings/mfd/dlg,da9063.yaml   | 132 ++++++++++++++++++
->  .../devicetree/bindings/trivial-devices.yaml  |   2 -
->  MAINTAINERS                                   |   1 +
->  4 files changed, 133 insertions(+), 116 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mfd/da9063.txt
->  create mode 100644 Documentation/devicetree/bindings/mfd/dlg,da9063.yaml
+Fixes: c835a6debf06 ("mmc: debugfs: Add debug fs entry for mmc driver")
+Reported-by: Hulk Robot <hulkci@huawei.com>
+Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+---
+ drivers/mmc/core/debugfs.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Applied, thanks.
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 75e98ec88fb9..fe6808771bc7 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -295,6 +295,7 @@ static const struct file_operations mmc_err_stats_fops = {
+ 	.open	= mmc_err_stats_open,
+ 	.read	= seq_read,
+ 	.write	= mmc_err_stats_write,
++	.release = single_release,
+ };
+ 
+ void mmc_add_host_debugfs(struct mmc_host *host)
 
--- 
-Lee Jones [李琼斯]
-Principal Technical Lead - Developer Services
-Linaro.org │ Open source software for Arm SoCs
-Follow Linaro: Facebook | Twitter | Blog
