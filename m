@@ -2,336 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 529FFC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 14:13:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18BF0C433EF
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 14:29:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241147AbiFHON6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jun 2022 10:13:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47200 "EHLO
+        id S241329AbiFHO3W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Jun 2022 10:29:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55916 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241142AbiFHON4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 10:13:56 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 133BF1A06A
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2022 07:13:54 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id s13so22885282ljd.4
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2022 07:13:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=1HU08/x38cJzl3RWDz0YbudrpwkOiqXjB9x6EgAug6c=;
-        b=C1GzNijfksY7wJ7e1wxXZBQxdzNRR6jkfmpvzn6tw2ptJbXSS1293NsbuQsMkyR4t8
-         tByqc5BcvG6KR9ECuMEXffl1u+wJpIPusfY2FtVCHpv3BnZcbyk9xANhA4hFzA6ly0j/
-         tAMA0g4hK7YJ5OnxpSwOP17AC466xGmXg0O/j6NnxeGZfzuLTs5NiZr2FqjzVJk5oEht
-         KGk6aojuhToSTnRhmLS3lbndpxslUwSC75pe+fvApFJwHE9RWC/XD4LK98M2r5CM06lF
-         zb2XbE8NLIkh+5mlZaM9LMPJKZlPLnGxjbS07ZdH5CdsB5Cj2Ui4lu/hFzBpViAAAZZT
-         m5Dg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=1HU08/x38cJzl3RWDz0YbudrpwkOiqXjB9x6EgAug6c=;
-        b=pZ2iO7sZjV7xvkzOWn9VvaxX3opTzyTBeUU5amm+UBwZ5GkcX60tSXuI29u6B6B3cR
-         pXATXOy7gqwVTrtLVUh3oQwEm7AS+Csr9njwbJjV9Z4E1/YylJcWUxX0tmiDGBw+sydF
-         BA3mS+msEPUbq2DVz1o3HYhNgN+hZTsK1Hg2TF0/ixdlk9eFp2g8rc8S7HylYSjjQ9t1
-         gSPm6y/zC3SIkddv5jXEG9dhUBr6khnMJSt75igYlKRRJ72QuuEHVy7irHXRYewfYvdt
-         aYQefSadABIP98wfgzSNJC/m4u/YtIBMZ8zcaiJXYD5VEIxPOGR3fsP19TdxPfZMZRc3
-         QesQ==
-X-Gm-Message-State: AOAM53249/UsT+/NNGyVESYLsNVGvGwUJrdN8pSch3kEmfRn57ksSybe
-        ZkUyfCz5nRs5ktpnB1B0X1w+12wMT1Q6B6++8aYJow==
-X-Google-Smtp-Source: ABdhPJyKzKcS6yXBOP3fYRGJtECdXIxMI8hvyGqf8/RD+uO+Q1kK7qhntqWEY63aI3J4zjJ80cqwlb3xhU1Hx2RdsyM=
-X-Received: by 2002:a2e:818c:0:b0:255:a6c5:4304 with SMTP id
- e12-20020a2e818c000000b00255a6c54304mr5852124ljg.367.1654697632159; Wed, 08
- Jun 2022 07:13:52 -0700 (PDT)
+        with ESMTP id S241571AbiFHO3R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 10:29:17 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BAA7B3608A8;
+        Wed,  8 Jun 2022 07:29:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1654698543; x=1686234543;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=cVVGP+l6ylx7H1FVQbM9NOgNouxbd4z5Jik1bOizeC0=;
+  b=Sqy+70IBk2pC7UQlQLMlVInsTb+0F/FaE9tKFWMf/lTUK4OTOrS/0RlY
+   A1FgP3cKxZJZkBvuzL6o4MFF5YcTa+t2Lb62s6p+FJ+70QcFPi9EUMr0S
+   DaTY4zN5rlGBZUQMHp2UoWrlS8csL62Yw07+WsF1sQjf0wGQ9fVPL8qsN
+   nzfvjsKT0G6ee+f/cgzXaceR+lLy91RfIRt6oZ9NForIQ8nEdiqgjk6xL
+   Jyv6PZHGBDq4jw9+x7ydXQjB+lB6BycIHEwMMHYIk/KsjqiFqrCocUdDK
+   HAI6NxUiKDLlXnxe1Kx9WrZGIAl23S6pNgMJBPyweSa2dYgYtJ1ymfJof
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10371"; a="277748072"
+X-IronPort-AV: E=Sophos;i="5.91,286,1647327600"; 
+   d="scan'208";a="277748072"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jun 2022 07:29:01 -0700
+X-IronPort-AV: E=Sophos;i="5.91,286,1647327600"; 
+   d="scan'208";a="636855861"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.45.203])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Jun 2022 07:28:43 -0700
+Message-ID: <444c88f6-0d4f-9149-b1b8-b07d588258de@intel.com>
+Date:   Wed, 8 Jun 2022 17:28:38 +0300
 MIME-Version: 1.0
-References: <20220525015140.384-1-axe.yang@mediatek.com> <20220525015140.384-4-axe.yang@mediatek.com>
-In-Reply-To: <20220525015140.384-4-axe.yang@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 8 Jun 2022 16:13:15 +0200
-Message-ID: <CAPDyKFqq64L3_Mco2aEbu6mC_W98pPpwk4kd1F1um0pHVR5oOw@mail.gmail.com>
-Subject: Re: [RESEND v12 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        Yong Mao <yong.mao@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.9.1
+Subject: Re: [PATCH -next] mmc: debugfs: Fix file release memory leak
+Content-Language: en-US
+To:     Wei Yongjun <weiyongjun1@huawei.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Liangliang Lu <quic_luliang@quicinc.com>,
+        "Bao D. Nguyen" <quic_nguyenb@quicinc.com>,
+        Sayali Lokhande <quic_sayalil@quicinc.com>,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        Hulk Robot <hulkci@huawei.com>
+References: <20220608090152.179395-1-weiyongjun1@huawei.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220608090152.179395-1-weiyongjun1@huawei.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 25 May 2022 at 03:51, Axe Yang <axe.yang@mediatek.com> wrote:
->
-> Add support for eint IRQ when MSDC is used as an SDIO host. This
-> feature requires SDIO device support async IRQ function. With this
-> feature, SDIO host can be awakened by SDIO card in suspend state,
-> without additional pin.
->
-> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> resume, switch GPIO function back to DAT1 mode then turn on clock.
->
-> Some device tree property should be added or modified in MSDC node
-> to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
-> this feature depends on asynchronous interrupts, "wakeup-source",
-> "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
-> the interrupts list should be extended(the interrupt named with
-> sdio_wakeup):
->         &mmcX {
->                 ...
->                 interrupt-names = "msdc", "sdio_wakeup";
->                 interrupts-extended = <...>,
->                                       <&pio xxx IRQ_TYPE_LEVEL_LOW>;
->                 ...
->                 pinctrl-names = "default", "state_uhs", "state_eint";
->                 ...
->                 pinctrl-2 = <&mmc2_pins_eint>;
->                 ...
->                 cap-sdio-irq;
->                 keep-power-in-suspend;
->                 wakeup-source;
->                 ...
->         };
-> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+On 8/06/22 12:01, Wei Yongjun wrote:
+> When using single_open() for opening, single_release() should be
+> used instead of seq_release(), otherwise there is a memory leak.
+> 
+> Fixes: c835a6debf06 ("mmc: debugfs: Add debug fs entry for mmc driver")
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/mtk-sd.c | 80 ++++++++++++++++++++++++++++++++++++---
->  1 file changed, 74 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 195dc897188b..2d5b23616df6 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1,6 +1,6 @@
->  // SPDX-License-Identifier: GPL-2.0-only
->  /*
-> - * Copyright (c) 2014-2015 MediaTek Inc.
-> + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
->   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
->   */
->
-> @@ -20,6 +20,7 @@
->  #include <linux/platform_device.h>
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pm_wakeirq.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/slab.h>
->  #include <linux/spinlock.h>
-> @@ -440,8 +441,10 @@ struct msdc_host {
->         struct pinctrl *pinctrl;
->         struct pinctrl_state *pins_default;
->         struct pinctrl_state *pins_uhs;
-> +       struct pinctrl_state *pins_eint;
->         struct delayed_work req_timeout;
->         int irq;                /* host interrupt */
-> +       int eint_irq;           /* interrupt from sdio device for waking up system */
->         struct reset_control *reset;
->
->         struct clk *src_clk;    /* msdc source clock */
-> @@ -1520,17 +1523,41 @@ static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
->
->  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
->  {
-> -       unsigned long flags;
->         struct msdc_host *host = mmc_priv(mmc);
-> +       unsigned long flags;
-> +       int ret;
->
->         spin_lock_irqsave(&host->lock, flags);
->         __msdc_enable_sdio_irq(host, enb);
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> -       if (enb)
-> -               pm_runtime_get_noresume(host->dev);
-> -       else
-> -               pm_runtime_put_noidle(host->dev);
-> +       if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
-> +               if (enb) {
-> +                       pinctrl_select_state(host->pinctrl, host->pins_eint);
+>  drivers/mmc/core/debugfs.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 75e98ec88fb9..fe6808771bc7 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -295,6 +295,7 @@ static const struct file_operations mmc_err_stats_fops = {
+>  	.open	= mmc_err_stats_open,
+>  	.read	= seq_read,
+>  	.write	= mmc_err_stats_write,
+> +	.release = single_release,
+>  };
+>  
+>  void mmc_add_host_debugfs(struct mmc_host *host)
+> 
 
-This looks a bit odd to me. The pins are not supposed to be configured
-for wakeirq at this point, right?
-
-As I understand it, the pin state for wakeirq should be set from the
-->runtime_suspend() callback, no?
-
-> +                       ret = dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
-> +
-> +                       if (ret) {
-> +                               dev_err(host->dev, "Failed to register SDIO wakeup irq!\n");
-> +                               host->pins_eint = NULL;
-> +                               pm_runtime_get_noresume(host->dev);
-> +                       } else {
-> +                               dev_info(host->dev, "SDIO eint irq: %d!\n", host->eint_irq);
-
-If you want to log a message, please use a dev_dbg for this instead.
-
-> +                               device_init_wakeup(host->dev, true);
-
-To me, it looks like this is better called from ->probe(), once.
-
-> +                       }
-> +
-> +                       pinctrl_select_state(host->pinctrl, host->pins_uhs);
-
-Assuming that we can drop the earlier call to pinctrl_select_state()
-to set "host->pins_eint", this call can be dropped too.
-
-> +               } else {
-> +                       dev_pm_clear_wake_irq(host->dev);
-> +               }
-> +       } else {
-> +               if (enb) {
-> +                       /* Ensure host->pins_eint is NULL */
-> +                       host->pins_eint = NULL;
-> +                       pm_runtime_get_noresume(host->dev);
-> +               } else {
-> +                       pm_runtime_put_noidle(host->dev);
-> +               }
-> +       }
->  }
->
->  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-> @@ -2631,6 +2658,19 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 goto host_free;
->         }
->
-> +       /* Support for SDIO eint irq ? */
-> +       if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps & MMC_PM_KEEP_POWER)) {
-> +               host->eint_irq = platform_get_irq_byname(pdev, "sdio_wakeup");
-> +               if (host->eint_irq > 0) {
-> +                       host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
-> +                       if (IS_ERR(host->pins_eint)) {
-> +                               dev_err_probe(&pdev->dev, PTR_ERR(host->pins_eint),
-> +                                             "Cannot find pinctrl eint!\n");
-
-We can probably use dev_err() instead of dev_err_probe() as
-pinctrl_lookup_state() should never return -EPROBE_DEFER, I think.
-
-> +                               host->pins_eint = NULL;
-> +                       }
-> +               }
-> +       }
-> +
->         msdc_of_property_parse(pdev, host);
->
->         host->dev = &pdev->dev;
-> @@ -2845,6 +2885,12 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
->         struct msdc_host *host = mmc_priv(mmc);
->
->         msdc_save_reg(host);
-> +
-> +       if (sdio_irq_claimed(mmc) && host->pins_eint) {
-> +               disable_irq(host->irq);
-> +               pinctrl_select_state(host->pinctrl, host->pins_eint);
-> +               sdr_clr_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-
-__msdc_enable_sdio_irq() also calls "sdr_clr_bits(host->base +
-MSDC_INTEN, MSDC_INTEN_SDIOIRQ);"
-
-Perhaps we should call __msdc_enable_sdio_irq() here instead? To be consistent.
-
-> +       }
->         msdc_gate_clock(host);
->         return 0;
->  }
-> @@ -2860,12 +2906,19 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
->                 return ret;
->
->         msdc_restore_reg(host);
-> +
-> +       if (sdio_irq_claimed(mmc) && host->pins_eint) {
-
-msdc_restore_reg() already calls __msdc_enable_sdio_irq(), but based
-only upon whether sdio_irq_claimed() returns true.
-
-It looks like we should align the code in
-msdc_runtime_resume|suspend(). Perhaps sdio_irq_claimed() should
-indicate in both cases that __msdc_enable_sdio_irq() needs to be
-called, while "host->pins_eint" means that we have also additional
-wakeup configurations (pins and irqs) to handle.
-
-> +               sdr_set_bits(host->base + SDC_CFG, SDC_CFG_SDIOIDE);
-> +               pinctrl_select_state(host->pinctrl, host->pins_uhs);
-> +               enable_irq(host->irq);
-> +       }
->         return 0;
->  }
->
->  static int __maybe_unused msdc_suspend(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct msdc_host *host = mmc_priv(mmc);
->         int ret;
->
->         if (mmc->caps2 & MMC_CAP2_CQE) {
-> @@ -2874,11 +2927,26 @@ static int __maybe_unused msdc_suspend(struct device *dev)
->                         return ret;
->         }
->
-> +       if (sdio_irq_claimed(mmc) && host->pins_eint) {
-> +               pm_runtime_put_sync_suspend(dev);
-> +
-> +               return 0;
-> +       }
-> +
-
-I assume the point with the above is to trigger rpm_suspend() to be
-called for the device, so that the wakeirq can be enabled, correctly?
-
-However, this isn't the correct way to do it (for various reasons I
-can explain, if you want). Instead I think there are two options going
-forward:
-1. Deal with the wakeirq from the system suspend/resume callbacks,
-locally in the driver.
-2. Extend pm_runtime_force_suspend|resume() to let it deal with the
-wakeirq for us. Similar to what rpm_suspend|resume() do.
-
-I am inclined to try with option 2) first, as this would prevent the
-boilerplate code that otherwise gets introduced by option 1). To help
-out, I have prepared a patch that I am about to send, I will keep you
-posted.
-
->         return pm_runtime_force_suspend(dev);
->  }
->
->  static int __maybe_unused msdc_resume(struct device *dev)
->  {
-> +       struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       if (sdio_irq_claimed(mmc) && host->pins_eint) {
-> +               pm_runtime_get_sync(dev);
-
-Similar comments apply to this as for msdc_suspend().
-
-> +
-> +               return 0;
-> +       }
-> +
->         return pm_runtime_force_resume(dev);
->  }
->
-
-Kind regards
-Uffe
