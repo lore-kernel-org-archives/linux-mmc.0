@@ -2,134 +2,171 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B41C7C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jun 2022 11:22:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79CD1C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jun 2022 14:20:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234368AbiFILWw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Jun 2022 07:22:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43744 "EHLO
+        id S244174AbiFIOUu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Jun 2022 10:20:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231712AbiFILWv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2022 07:22:51 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9D8863BCF;
-        Thu,  9 Jun 2022 04:22:49 -0700 (PDT)
-X-UUID: 8ada9b9f890c4fa0897b7880ec13b702-20220609
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.5,REQID:725fc40d-d67e-4d22-a5be-9ea2fa638c41,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
-        ION:release,TS:-5
-X-CID-META: VersionHash:2a19b09,CLOUDID:3ae541e5-2ba2-4dc1-b6c5-11feb6c769e0,C
-        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil
-        ,QS:0,BEC:nil
-X-UUID: 8ada9b9f890c4fa0897b7880ec13b702-20220609
-Received: from mtkmbs11n1.mediatek.inc [(172.21.101.185)] by mailgw01.mediatek.com
-        (envelope-from <mengqi.zhang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 660978195; Thu, 09 Jun 2022 19:22:45 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
- mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
- Thu, 9 Jun 2022 19:22:44 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkmbs11n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
- Transport; Thu, 9 Jun 2022 19:22:44 +0800
-From:   Mengqi Zhang <mengqi.zhang@mediatek.com>
-To:     <chaotian.jing@mediatek.com>, <ulf.hansson@linaro.org>,
-        <matthias.bgg@gmail.com>
-CC:     <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <wenbin.mei@mediatek.com>,
-        Mengqi Zhang <mengqi.zhang@mediatek.com>
-Subject: [RESEND V2] mmc: mediatek: wait dma stop bit reset to 0
-Date:   Thu, 9 Jun 2022 19:22:39 +0800
-Message-ID: <20220609112239.18911-1-mengqi.zhang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S244855AbiFIOUf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2022 10:20:35 -0400
+Received: from cloudserver094114.home.pl (cloudserver094114.home.pl [79.96.170.134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54C8626A096;
+        Thu,  9 Jun 2022 07:20:32 -0700 (PDT)
+Received: from localhost (127.0.0.1) (HELO v370.home.net.pl)
+ by /usr/run/smtp (/usr/run/postfix/private/idea_relay_lmtp) via UNIX with SMTP (IdeaSmtpServer 5.0.0)
+ id be4704fa09209c3c; Thu, 9 Jun 2022 16:20:30 +0200
+Received: from kreacher.localnet (unknown [213.134.186.232])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by v370.home.net.pl (Postfix) with ESMTPSA id A406866C7D7;
+        Thu,  9 Jun 2022 16:20:29 +0200 (CEST)
+From:   "Rafael J. Wysocki" <rjw@rjwysocki.net>
+To:     Linux ACPI <linux-acpi@vger.kernel.org>
+Cc:     LKML <linux-kernel@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Sakari Ailus <sakari.ailus@linux.intel.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH v1 15/16] ACPI / MMC: PM: Unify fixing up device power
+Date:   Thu, 09 Jun 2022 16:18:40 +0200
+Message-ID: <2159220.NgBsaNRSFp@kreacher>
+In-Reply-To: <1843211.tdWV9SEqCh@kreacher>
+References: <1843211.tdWV9SEqCh@kreacher>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="UTF-8"
+X-CLIENT-IP: 213.134.186.232
+X-CLIENT-HOSTNAME: 213.134.186.232
+X-VADE-SPAMSTATE: clean
+X-VADE-SPAMCAUSE: gggruggvucftvghtrhhoucdtuddrgedvfedruddtledgjeduucetufdoteggodetrfdotffvucfrrhhofhhilhgvmecujffqoffgrffnpdggtffipffknecuuegrihhlohhuthemucduhedtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenucfjughrpefhvfevufffkfgjfhgggfgtsehtufertddttdejnecuhfhrohhmpedftfgrfhgrvghlucflrdcuhgihshhotghkihdfuceorhhjfiesrhhjfiihshhotghkihdrnhgvtheqnecuggftrfgrthhtvghrnhepvdffueeitdfgvddtudegueejtdffteetgeefkeffvdeftddttdeuhfegfedvjefhnecukfhppedvudefrddufeegrddukeeirddvfedvnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvddufedrudefgedrudekiedrvdefvddphhgvlhhopehkrhgvrggthhgvrhdrlhhotggrlhhnvghtpdhmrghilhhfrhhomhepfdftrghfrggvlhculfdrucghhihsohgtkhhifdcuoehrjhifsehrjhifhihsohgtkhhirdhnvghtqedpnhgspghrtghpthhtohepuddtpdhrtghpthhtoheplhhinhhugidqrggtphhisehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqkhgvrhhnvghlsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheplhhinhhugidqphhmsehvghgvrhdrkhgvrhhnvghlrdhorhhgpdhrtghpthhtoheprghnughrihihrdhshhgvvhgthhgvnhhkoheslhhinhhugidr
+ ihhnthgvlhdrtghomhdprhgtphhtthhopehmihhkrgdrfigvshhtvghrsggvrhhgsehlihhnuhigrdhinhhtvghlrdgtohhmpdhrtghpthhtohephhguvghgohgvuggvsehrvgguhhgrthdrtghomhdprhgtphhtthhopehsrghkrghrihdrrghilhhusheslhhinhhugidrihhnthgvlhdrtghomhdprhgtphhtthhopegrughrihgrnhdrhhhunhhtvghrsehinhhtvghlrdgtohhmpdhrtghpthhtohepuhhlfhdrhhgrnhhsshhonheslhhinhgrrhhordhorhhgpdhrtghpthhtoheplhhinhhugidqmhhmtgesvhhgvghrrdhkvghrnhgvlhdrohhrgh
+X-DCC--Metrics: v370.home.net.pl 1024; Body=10 Fuz1=10 Fuz2=10
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-MediaTek IP requires that after dma stop, it need to wait this dma stop
-bit auto-reset to 0. When bus is in high loading state, it will take a
-while for the dma stop complete. If there is no waiting operation here,
-when program runs to clear fifo and reset, bus will hang.
+From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 
-In addition, there should be no return in msdc_data_xfer_next() if
-there is data need be transferred, because no matter what error occurs
-here, it should continue to excute to the following mmc_request_done.
-Otherwise the core layer may wait complete forever.
+Introduce acpi_device_fix_up_power_extended() for fixing up power of
+a device having an ACPI companion in a manner that takes the device's
+children into account and make the MMC code use it in two places
+instead of walking the list of the device ACPI companion's children
+directly.
 
-Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+This will help to eliminate the children list head from struct
+acpi_device as it is redundant and it is used in questionable ways
+in some places (in particular, locking is needed for walking the
+list pointed to it safely, but it is often missing).
+
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 ---
- drivers/mmc/host/mtk-sd.c | 20 ++++++++++++--------
- 1 file changed, 12 insertions(+), 8 deletions(-)
+ drivers/acpi/device_pm.c          |   22 ++++++++++++++++++++++
+ drivers/mmc/host/sdhci-acpi.c     |    7 ++-----
+ drivers/mmc/host/sdhci-pci-core.c |   11 +++--------
+ include/acpi/acpi_bus.h           |    1 +
+ 4 files changed, 28 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 195dc897188b..9da4489dc345 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1356,7 +1356,7 @@ static void msdc_data_xfer_next(struct msdc_host *host, struct mmc_request *mrq)
- 		msdc_request_done(host, mrq);
- }
- 
--static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
-+static void msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 				struct mmc_request *mrq, struct mmc_data *data)
+Index: linux-pm/drivers/mmc/host/sdhci-acpi.c
+===================================================================
+--- linux-pm.orig/drivers/mmc/host/sdhci-acpi.c
++++ linux-pm/drivers/mmc/host/sdhci-acpi.c
+@@ -775,8 +775,8 @@ static int sdhci_acpi_probe(struct platf
  {
- 	struct mmc_command *stop;
-@@ -1376,7 +1376,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 	spin_unlock_irqrestore(&host->lock, flags);
+ 	struct device *dev = &pdev->dev;
+ 	const struct sdhci_acpi_slot *slot;
+-	struct acpi_device *device, *child;
+ 	const struct dmi_system_id *id;
++	struct acpi_device *device;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+@@ -796,10 +796,7 @@ static int sdhci_acpi_probe(struct platf
+ 	slot = sdhci_acpi_get_slot(device);
  
- 	if (done)
--		return true;
-+		return;
- 	stop = data->stop;
+ 	/* Power on the SDHCI controller and its children */
+-	acpi_device_fix_up_power(device);
+-	list_for_each_entry(child, &device->children, node)
+-		if (child->status.present && child->status.enabled)
+-			acpi_device_fix_up_power(child);
++	acpi_device_fix_up_power_extended(device);
  
- 	if (check_data || (stop && stop->error)) {
-@@ -1385,12 +1385,15 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 		sdr_set_field(host->base + MSDC_DMA_CTRL, MSDC_DMA_CTRL_STOP,
- 				1);
- 
-+		ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CTRL, val,
-+						!(val & MSDC_DMA_CTRL_STOP), 1, 20000);
-+		if (ret)
-+			dev_dbg(host->dev, "DMA stop timed out\n");
-+
- 		ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CFG, val,
- 						!(val & MSDC_DMA_CFG_STS), 1, 20000);
--		if (ret) {
--			dev_dbg(host->dev, "DMA stop timed out\n");
--			return false;
--		}
-+		if (ret)
-+			dev_dbg(host->dev, "DMA inactive timed out\n");
- 
- 		sdr_clr_bits(host->base + MSDC_INTEN, data_ints_mask);
- 		dev_dbg(host->dev, "DMA stop\n");
-@@ -1415,9 +1418,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 		}
- 
- 		msdc_data_xfer_next(host, mrq);
--		done = true;
- 	}
--	return done;
+ 	if (sdhci_acpi_byt_defer(dev))
+ 		return -EPROBE_DEFER;
+Index: linux-pm/drivers/acpi/device_pm.c
+===================================================================
+--- linux-pm.orig/drivers/acpi/device_pm.c
++++ linux-pm/drivers/acpi/device_pm.c
+@@ -369,6 +369,28 @@ int acpi_device_fix_up_power(struct acpi
  }
+ EXPORT_SYMBOL_GPL(acpi_device_fix_up_power);
  
- static void msdc_set_buswidth(struct msdc_host *host, u32 width)
-@@ -2416,6 +2417,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
- 	if (recovery) {
- 		sdr_set_field(host->base + MSDC_DMA_CTRL,
- 			      MSDC_DMA_CTRL_STOP, 1);
-+		if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CTRL, val,
-+			!(val & MSDC_DMA_CTRL_STOP), 1, 3000)))
-+			return;
- 		if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
- 			!(val & MSDC_DMA_CFG_STS), 1, 3000)))
- 			return;
--- 
-2.25.1
++static int fix_up_power_if_applicable(struct acpi_device *adev, void *not_used)
++{
++	if (adev->status.present && adev->status.enabled)
++		acpi_device_fix_up_power(adev);
++
++	return 0;
++}
++
++/**
++ * acpi_device_fix_up_power_extended - Force device and its children into D0.
++ * @adev: Parent device object whose power state is to be fixed up.
++ *
++ * Call acpi_device_fix_up_power() for @adev and its children so long as they
++ * are reported as present and enabled.
++ */
++void acpi_device_fix_up_power_extended(struct acpi_device *adev)
++{
++	acpi_device_fix_up_power(adev);
++	acpi_dev_for_each_child(adev, fix_up_power_if_applicable, NULL);
++}
++EXPORT_SYMBOL_GPL(acpi_device_fix_up_power_extended);
++
+ int acpi_device_update_power(struct acpi_device *device, int *state_p)
+ {
+ 	int state;
+Index: linux-pm/include/acpi/acpi_bus.h
+===================================================================
+--- linux-pm.orig/include/acpi/acpi_bus.h
++++ linux-pm/include/acpi/acpi_bus.h
+@@ -524,6 +524,7 @@ const char *acpi_power_state_string(int
+ int acpi_device_set_power(struct acpi_device *device, int state);
+ int acpi_bus_init_power(struct acpi_device *device);
+ int acpi_device_fix_up_power(struct acpi_device *device);
++void acpi_device_fix_up_power_extended(struct acpi_device *adev);
+ int acpi_bus_update_power(acpi_handle handle, int *state_p);
+ int acpi_device_update_power(struct acpi_device *device, int *state_p);
+ bool acpi_bus_power_manageable(acpi_handle handle);
+Index: linux-pm/drivers/mmc/host/sdhci-pci-core.c
+===================================================================
+--- linux-pm.orig/drivers/mmc/host/sdhci-pci-core.c
++++ linux-pm/drivers/mmc/host/sdhci-pci-core.c
+@@ -1240,16 +1240,11 @@ static const struct sdhci_pci_fixes sdhc
+ #ifdef CONFIG_ACPI
+ static void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot)
+ {
+-	struct acpi_device *device, *child;
++	struct acpi_device *device;
+ 
+ 	device = ACPI_COMPANION(&slot->chip->pdev->dev);
+-	if (!device)
+-		return;
+-
+-	acpi_device_fix_up_power(device);
+-	list_for_each_entry(child, &device->children, node)
+-		if (child->status.present && child->status.enabled)
+-			acpi_device_fix_up_power(child);
++	if (device)
++		acpi_device_fix_up_power_extended(device);
+ }
+ #else
+ static inline void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot) {}
+
+
 
