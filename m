@@ -2,76 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B160CCA47A
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Jun 2022 23:40:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EF95CCA47D
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Jun 2022 05:57:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234424AbiFHXkK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Jun 2022 19:40:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33390 "EHLO
+        id S238713AbiFIF5M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Jun 2022 01:57:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233612AbiFHXj7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2022 19:39:59 -0400
-Received: from mail-qk1-x72b.google.com (mail-qk1-x72b.google.com [IPv6:2607:f8b0:4864:20::72b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8880D169DF4
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2022 16:39:35 -0700 (PDT)
-Received: by mail-qk1-x72b.google.com with SMTP id n197so9608070qke.1
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2022 16:39:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=rivosinc-com.20210112.gappssmtp.com; s=20210112;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=kc8hDtKnDcjkjtnpKv99miwrNZ1mscnVCOSjHJGhRR0=;
-        b=TGdTe8ftgW2E2QSXLDATWBAXq3sauk3KYSj6BMlJLGO6AIyIfhb5n1gjvAikC5sfj1
-         pnF2q+aa3J49SlWeHoe8utIJbft2tfdvJWfSA/DWdGmQ81xwpFbbShsO99rjEfX37VOJ
-         O7nf0OOCHhgW59XOZB2AYutoUpxS75uohsXNuBYCQ74OZWV0IkfqStkyQpIXIgp5Yu/X
-         /b47CaBvS9tF2RvKGzD2OXWMoCKHHF/JqW3mtCMGdzWVyYoNxEJonBGyxomdCDOnzKP5
-         Wm0OipG0BCiWNN5Q3OyAx5VK7fAStBf4WuoirjR9Gnpdd0r+CJ+NosZexvzLXB8JwqtT
-         YXTQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=kc8hDtKnDcjkjtnpKv99miwrNZ1mscnVCOSjHJGhRR0=;
-        b=7/jHFobptZQdi3wAkQZfwwLpQ6BNwDoYxF6v+aAG7dQwWAC6YIg/rAxVcL+vaa5SZp
-         Mta3+K58EZ2uBkrqlox7kn7iHf+NEvYz7zuYWvNmY0xpDcX24CVhUO+lyE/3D3uoa805
-         MjClxEuLicAOkvsxDtZqNk2gwI5AfhsFB14bcYZZYVkMJ3wbthh0abfCf7zuiscXmAmn
-         qrg8JHPssaeDoRVyCBBCN0I4UEbx/hWcbo3MrhmXoRsOz6oR0RxCYreluQNzdsBTFcIp
-         hdcFruS/UDO9JByhK07VkX45smKjnQlPzDRFBhLm7NkYnOMCl4UxE3MgXj+6hdW79tIm
-         8rrw==
-X-Gm-Message-State: AOAM530HThi1rPonBUiyDYY4H+xOU97vvEzRJWt2hcTRo9BX+qrqVybZ
-        jkvQ1HPB3L4fOpJIz3VB4NqxNQ6U6eeN1WwQGZW0JA==
-X-Google-Smtp-Source: ABdhPJwwoi0drQjkYJ1j2Qdt6XiU3x2RVVqapgseeDGRMrMmyQCzzXLwavj3DbqQ68d+IFyAWbxsz4ReHsk+ofIZ0q4=
-X-Received: by 2002:a05:620a:1911:b0:6a6:e8e9:70cd with SMTP id
- bj17-20020a05620a191100b006a6e8e970cdmr6816152qkb.627.1654731574196; Wed, 08
- Jun 2022 16:39:34 -0700 (PDT)
+        with ESMTP id S238569AbiFIF5C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2022 01:57:02 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC7EE2DA8D;
+        Wed,  8 Jun 2022 22:57:00 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 59BA661D58;
+        Thu,  9 Jun 2022 05:57:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CFC28C34114;
+        Thu,  9 Jun 2022 05:56:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1654754219;
+        bh=Lk9VcDtnAmCoMRcuenCeRZs/rDxjxHcun+H8Vl2ka0g=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=G8DsCVOvrbUU3PHnU9OPtRCyArNV8i7UbH9DNGl7TQTrqQ4QI7VQ5i95Stk/stCgr
+         YYAmxAxiLsrvk1cIGG0run+4Ybvh/EToyMRuDLma6Cmb1lDLk5QhonRFQ4sG/OYGAE
+         NGVw+25bVGzor8s8SnzbogYrxcfOjmVgLwdAj5WuJhkIEbpvjEbeOoKPh3mAdmL2hA
+         AK65I65XkoVohj15Fh3+kfSy/Ztc+1NcGEvSKtko3BqWRiyIU+Vd0BrlihMeOsAyxp
+         OFr1SUy/HsJLwXTE6fVsRjmBgTmzESxWO0PkIYFv4lcb1WjgbDfiJolR85nSV0pEM0
+         NrbOxi/3MTnSA==
+Date:   Thu, 9 Jun 2022 11:26:55 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     Fabien Parent <fparent@baylibre.com>
+Cc:     robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        qii.wang@mediatek.com, matthias.bgg@gmail.com, jic23@kernel.org,
+        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        srinivas.kandagatla@linaro.org, chunfeng.yun@mediatek.com,
+        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net,
+        Long Cheng <long.cheng@mediatek.com>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-iio@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH 05/17] dt-bindings: dma: mediatek,uart-dma: add MT8365
+ bindings
+Message-ID: <YqGLpyWUgBJQXG9K@matsya>
+References: <20220531135026.238475-1-fparent@baylibre.com>
+ <20220531135026.238475-6-fparent@baylibre.com>
 MIME-Version: 1.0
-From:   Atul Khare <atulkhare@rivosinc.com>
-Date:   Wed, 8 Jun 2022 16:39:23 -0700
-Message-ID: <CABMhjYp3xUyQ9q6nXHvEA2zuzhYi0ETn6UETeH1apWf2n2eP7A@mail.gmail.com>
-Subject: [PATCH v2 0/2] dt-bindings: sifive: fix dt-schema errors
-To:     Palmer Dabbelt <palmer@rivosinc.com>,
-        Atul Khare <atulkhare@rivosinc.com>
-Cc:     Conor Dooley <conor.dooley@microchip.com>,
-        linux-i2c@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-riscv@lists.infradead.org, Rob Herring <robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220531135026.238475-6-fparent@baylibre.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The patch series fixes dt-schema validation errors that can be reproduced
-using the following: make ARCH=riscv defconfig; make ARCH=riscv
-dt_binding_check dtbs_check
+On 31-05-22, 15:50, Fabien Parent wrote:
+> Add binding documentation in order to support the MT8365 SoC.
 
-This is a rebased version of https://tinyurl.com/yvdvmsjd, and excludes
-two patches that are now redundant.
+Applied to dmaengine-next, thanks
 
-Atul Khare (2):
-  dt-bindings: sifive: add cache-set value of 2048
-  dt-bindings: sifive: add gpio-line-names
+> 
+> Signed-off-by: Fabien Parent <fparent@baylibre.com>
+> ---
+>  Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml b/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml
+> index 54d68fc688b5..19ea8dcbcbce 100644
+> --- a/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml
+> +++ b/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml
+> @@ -22,6 +22,7 @@ properties:
+>        - items:
+>            - enum:
+>                - mediatek,mt2712-uart-dma
+> +              - mediatek,mt8365-uart-dma
+>                - mediatek,mt8516-uart-dma
+>            - const: mediatek,mt6577-uart-dma
+>        - enum:
+> -- 
+> 2.36.1
 
- Documentation/devicetree/bindings/gpio/sifive,gpio.yaml      | 3 +++
- Documentation/devicetree/bindings/riscv/sifive-l2-cache.yaml | 4 +++-
- 2 files changed, 6 insertions(+), 1 deletion(-)
-
---
-2.34.1
+-- 
+~Vinod
