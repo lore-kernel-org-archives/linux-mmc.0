@@ -2,155 +2,159 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22B6BC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 08:35:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 243D9C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 09:29:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231464AbiFMIfp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 04:35:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44618 "EHLO
+        id S229996AbiFMJ3O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 05:29:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46048 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230235AbiFMIfo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 04:35:44 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 440B313E3E
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 01:35:43 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1o0fXr-0006k5-AI; Mon, 13 Jun 2022 10:35:35 +0200
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1o0fXq-000GDa-7j; Mon, 13 Jun 2022 10:35:33 +0200
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1o0fXo-00G0Mf-Rf; Mon, 13 Jun 2022 10:35:32 +0200
-Date:   Mon, 13 Jun 2022 10:35:32 +0200
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        kernel@pengutronix.de, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 4/5] mmc: sdhci-of-arasan: Obviously always return
- success in remove callback
-Message-ID: <20220613083532.thz4pi7mequqlrp6@pengutronix.de>
-References: <20220610211257.102071-1-u.kleine-koenig@pengutronix.de>
- <20220610211257.102071-4-u.kleine-koenig@pengutronix.de>
- <c0a313ac-20b9-2d1a-4c10-9ba57c62ae95@intel.com>
+        with ESMTP id S238848AbiFMJ3L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 05:29:11 -0400
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84FB318399
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 02:29:10 -0700 (PDT)
+Received: by mail-pj1-x102e.google.com with SMTP id v11-20020a17090a4ecb00b001e2c5b837ccso8270728pjl.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 02:29:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=d7Ew5S6rYNqDMYPYBCW42etEGk6gWTnH0c0DcUn+LJg=;
+        b=YyoLhVzuMRhkX/aDN7qdLxl8I1AQpfljJgnV/EyWZ2G/D9WPlAI21ICRrph1zDB+cI
+         cLShGnoRLFKMmf7ZeSTJJYegJjlbx9QKkxPeRietclz1flaGyXZ5uPUDZUg1KCtERahQ
+         fuH3ILxWMHSjl2k6k57MB7LOefJ52h58JhBO8RwX/s+kpM3kTOej73p4U1aurflo5HGP
+         Tu3qKFQzdIbl1Iaaxi+X3zPIRnPHJcHwaNHYmlAU0NlTVFt4kDDyRs6UXBj9tehJVMde
+         pTW3VY6EcRIxwMRI0db4s9xOl5pA6P7A9+zAuPntxTuqpw/lvQUMfliVjMol/myLgQey
+         F31A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=d7Ew5S6rYNqDMYPYBCW42etEGk6gWTnH0c0DcUn+LJg=;
+        b=g3DwNZGazF5qGh/pPbyV8c/TIGdU6GsqCCrGJHR5tU1al6cgVjSAK6q40Nu/NIp+Xc
+         AySYUwtr+qV+/KtRTugeBxqHfnjqKgSGFAIHALdqNKRsjG/0qRMf3wEfS2il6QPLrF4J
+         Us+CGFuJPeTaFcCX7UC4vieY0OJIET6okt1M5vdfkccMtSP0EgdAvEDg+QnKzlzROgR7
+         Rj9TxvxnH7fPeR7vmwfCtV8Ml+0jslzhzyavBnN2qYN79IZs6k091HT+JXAxmFLlsz2H
+         oH2Rk2R+qFkk1+Q8RgjODim3uwRg6B79poFSrDb0e2Ip7aD1s6J15CUYZMoEu4CxPlBD
+         ycQA==
+X-Gm-Message-State: AOAM533KXhaCAqD2bD3UCZgNGSnv+2UdaHJkofzi5+eBy7jEnOi/H1Um
+        EFpgC9RTuaxIUNSen+UCQu4=
+X-Google-Smtp-Source: ABdhPJxBO+qz6eKlGQcVCtuqAcOPci68nHnkiN1sT/FlhaZJY3sc2gYM25SiamXFsBF6anFGDWb+/w==
+X-Received: by 2002:a17:90a:4291:b0:1e2:92f3:20d1 with SMTP id p17-20020a17090a429100b001e292f320d1mr14685247pjg.163.1655112549812;
+        Mon, 13 Jun 2022 02:29:09 -0700 (PDT)
+Received: from PC21-33.genesyslogic.com.tw (60-251-58-169.hinet-ip.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id p8-20020aa79e88000000b0050dc762818csm4845635pfq.102.2022.06.13.02.29.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 13 Jun 2022 02:29:09 -0700 (PDT)
+From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
+X-Google-Original-From: Jason Lai <jason.lai@genesyslogic.com.tw>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
+        greg.tu@genesyslogic.com.tw, SeanHY.chen@genesyslogic.com.tw,
+        jason.lai@genesyslogic.com.tw, jasonlai.genesyslogic@gmail.com,
+        victor.shih@genesyslogic.com.tw,
+        Renius Chen <reniuschengl@gmail.com>
+Subject: [PATCH V2] mmc: host: Improve READ/WRITE Performance of GL9763E
+Date:   Mon, 13 Jun 2022 17:29:07 +0800
+Message-Id: <20220613092907.2502-1-jason.lai@genesyslogic.com.tw>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="sr7shbna5h5acpmw"
-Content-Disposition: inline
-In-Reply-To: <c0a313ac-20b9-2d1a-4c10-9ba57c62ae95@intel.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: Jason Lai <jasonlai.genesyslogic@gmail.com>
 
---sr7shbna5h5acpmw
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+To improve READ/WRITE performance and take battery life into account, we
+turn on GL9763E L1 negotiation before entering runtime suspend and turn
+off GL9763E L1 negotiation while executing runtime resume. That is to say,
+GL9763E will not enter L1 state when executing I/O requests and enter L1
+state when PCIe bus idle.
 
-On Mon, Jun 13, 2022 at 10:13:16AM +0300, Adrian Hunter wrote:
-> On 11/06/22 00:12, Uwe Kleine-K=F6nig wrote:
-> > sdhci_pltfm_unregister() returns 0 unconditionally and returning an
-> > error in a platform remove callback isn't very sensible. (The only
-> > effect of the latter is that the device core emits a generic warning and
-> > then removes the device anyhow.)
-> >=20
-> > So return 0 unconditionally to make it obvious there is no error
-> > forwarded to the upper layers.
-> >=20
-> > This is a preparation for making platform remove callbacks return void.
->=20
-> This preparation seems a bit unnatural.
+Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+---
 
-IMHO it's not. I have to adapt all ~4800 platform drivers together in a
-single commit to change the prototype of the return callback.
+This patch is the follow-up to the patch [1] and adopt Ulf's comment.
 
-Now assume you want to review that commit and make sure there are no
-relevant changes in behaviour. Without the preparation in the commit
-under discussion, the change to sdhci-of-arasan.c would look as follows:
+Due to flaws in hardware design, GL9763E takes long time to exit from L1
+state. The I/O performance will suffer severe impact if it often enter
+and exit L1 state during I/O requests.
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of=
--arasan.c
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -1733,7 +1733,4 @@ static int sdhci_arasan_probe(struct platform_device =
-*pdev)
-=20
- static int sdhci_arasan_remove(struct platform_device *pdev)
+[1] https://patchwork.kernel.org/project/linux-mmc/list/?series=646869
+
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 34 ++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index d09728c37d03..69bc3d614e15 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -95,6 +95,9 @@
+ #define PCIE_GLI_9763E_SCR	 0x8E0
+ #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
+ 
++#define PCIE_GLI_9763E_CFG       0x8A0
++#define   GLI_9763E_CFG_LPSN_DIS   BIT(12)
++
+ #define PCIE_GLI_9763E_CFG2      0x8A4
+ #define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
+ #define   GLI_9763E_CFG2_L1DLY_MID 0x54
+@@ -818,6 +821,31 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *mmc)
+ 	sdhci_dumpregs(mmc_priv(mmc));
+ }
+ 
++static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
++{
++	struct pci_dev *pdev = slot->chip->pdev;
++	u32 value;
++
++	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
++	value &= ~GLI_9763E_VHS_REV;
++	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
++	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
++
++	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
++
++	if (enable)
++		value &= ~GLI_9763E_CFG_LPSN_DIS;
++	else
++		value |= GLI_9763E_CFG_LPSN_DIS;
++
++	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
++
++	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
++	value &= ~GLI_9763E_VHS_REV;
++	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
++	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
++}
++
+ static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
  {
--	int ret;
- 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
- 	struct sdhci_arasan_data *sdhci_arasan =3D sdhci_pltfm_priv(pltfm_host);
-@@ -1747,11 +1746,11 @@ static int sdhci_arasan_remove(struct platform_devi=
-ce *pdev)
-=20
- 	sdhci_arasan_unregister_sdclk(&pdev->dev);
-=20
--	ret =3D sdhci_pltfm_unregister(pdev);
-+	sdhci_pltfm_unregister(pdev);
-=20
- 	clk_disable_unprepare(clk_ahb);
--=20
--	return ret;
+ 	struct cqhci_host *cq_host = mmc->cqe_private;
+@@ -959,6 +987,9 @@ static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+ 	struct sdhci_host *host = slot->host;
+ 	u16 clock;
+ 
++	/* Enable LPM negotiation to allow entering L1 state */
++	gl9763e_set_low_power_negotiation(slot, true);
++
+ 	clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+ 	clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+ 	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+@@ -989,6 +1020,9 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+ 	clock |= SDHCI_CLOCK_CARD_EN;
+ 	sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+ 
++	/* Disable LPM negotiation to avoid entering L1 state. */
++	gl9763e_set_low_power_negotiation(slot, false);
++
+ 	return 0;
  }
-=20
- static struct platform_driver sdhci_arasan_driver =3D {
+ #endif
+-- 
+2.36.1
 
-So you have to look up then what sdhci_pltfm_unregister() does and if
-it's ok to ignore the return value. Should I mention that in the commit
-log? What about the other drivers?
-
-If however the change to the sdhci-arasan driver is only
-
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of=
--arasan.c
-index 3997cad1f793..84c949bd99c8 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -1749,8 +1749,6 @@ static int sdhci_arasan_remove(struct platform_device=
- *pdev)
- 	sdhci_pltfm_unregister(pdev);
-=20
- 	clk_disable_unprepare(clk_ahb);
--
--	return 0;
- }
-=20
- static struct platform_driver sdhci_arasan_driver =3D {
-
-, it's trivial to see that there is no relevant driver specific change.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---sr7shbna5h5acpmw
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmKm9swACgkQwfwUeK3K
-7Aki2wf9F0ud30c2kemIUfXTupGIbY73km9wA/ibaQq0zJy5/F1D3fQ8+zknouGq
-nVWT4pVthEfmJV7/8ePylDmyBgViV91ptCtoB+7v8XAD9Z2pOMTIaCxCYemL8j+N
-ZHCfLAToYr8VhT/dl/aSo5D2A6MSgDZvJ/oYsblcfAT9n5+B8OjNOOaxy3Mp2PMj
-cS3Qi/ga+BgZWuwY55a9s9YVOPET5CynD4OS9ISKqMM9jBP5g4RgCZBH3639WsQr
-hDE7zqf/rMKVmI86G2yntjdOa+drraU0A2F+4ejrNcpON4bb30U5EY/B0nx+snV6
-n89+vPr2lYI3esEBcSrboGXIW9YuHQ==
-=e9uP
------END PGP SIGNATURE-----
-
---sr7shbna5h5acpmw--
