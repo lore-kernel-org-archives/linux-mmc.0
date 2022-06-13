@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 881C8CCA47F
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:47:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 087D3CCA47B
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:47:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349182AbiFMUq6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 16:46:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49382 "EHLO
+        id S1350043AbiFMUrB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 16:47:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52660 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351004AbiFMUqS (ORCPT
+        with ESMTP id S1351017AbiFMUqS (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:18 -0400
-Received: from mail-pl1-x62d.google.com (mail-pl1-x62d.google.com [IPv6:2607:f8b0:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD6D863C2
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:37 -0700 (PDT)
-Received: by mail-pl1-x62d.google.com with SMTP id u18so5983486plb.3
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:37 -0700 (PDT)
+Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C16176471
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:39 -0700 (PDT)
+Received: by mail-pg1-x52d.google.com with SMTP id f65so6489372pgc.7
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=9XPhK7Tm81pQe79Pw/2MjwDbiQKz3NoZ1HTS8NF7C1c=;
-        b=F2qUogG4H3Jjl3npZp4G8zxj5VwYoGiLao3dgfGymTrX/oAPiQGn3mOFB8Aa+UMNwu
-         v5Z6W9i6W2Ot5rqZv1adfZJvS9wJeIJRXo0fLayHSnF3cdRyizVd1eLWixP1qNIGAgvo
-         9FLcJJNs7V8bAmdG1+/ecJnhty4JBvUL7BpTNgGuOzjg1TjtbBBdwKIC4Ntc2rq7i4wr
-         07z7+uOBedF97bHLPZMM3Cvf3yill2Qqzzw9K4W9d/uMKsboEDcDYKfRx8wBv9a3Zfso
-         rpkToSmUyp7c+W9K4ELOXeHFnqufW+HuupcJ2eCtpXsaP9qXCKdZtijdplpw3jtk3J3V
-         hZIA==
+        bh=nT549qJtxV1BDDwSTKGaAnqRktoPUt/jLCJWLyiPvHw=;
+        b=BInp8cPtPQ4tK/ffMW4nn4lxciVcZ+ZvBkzgyySFAs7iefoJqIbAP4xFkGqyL37X/X
+         QXxWt6GI9d6ccwv4X1BmqqGN+EIjbOPH6WwQ5WlLMlG2QMiBmuXx1Z+Hd/ksSeG2H1Um
+         EqkeLB+Is+HjMnDt1Jq7FjCJwXZ3l/fMEOB3PVymJpLF3U5H9nXzGGlSLX+ES3uq+p64
+         Fu2xBZEMgvKz96+lkBo2JKQYbzaRb/J+0MH+oTebasIzixN9dGFlHzQaNlnvlk0KJZsw
+         IE1cdzkeDvtADYoexzp8jNInIheVq9nsosRQh+4FMBoDw0+EHy21vycjqA22JqJ8VBL2
+         Mdyw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=9XPhK7Tm81pQe79Pw/2MjwDbiQKz3NoZ1HTS8NF7C1c=;
-        b=j4jfgr/Q7D3Ff5HM1cJR76Hwe6UisCqgDdcuWDDRMoTU1PoTWSdYjg4Jx8jEfd66vH
-         Gu29eyzRek9JQ7VGMs9jmhZLfwi0XoE37o5uCKYtEVEkF2/REZ4NeWJ4a7ul9FiHOvmV
-         0ri38PPl2JPcX2Aff9O103MuiYHdfhofG9pzcFewFbT/SpMKqiY7sLEh/x9ftMJMVIHm
-         Nh7zBIxi1AfdcVwprojVhaeEmtPKFkn6lA7eetKTAgy0NXcx8b8JY7jLALRya96A+qBC
-         Q94agIqaJm/Z8gb67ZPwo3Qjl49V5+tQdaUJCwvmp2lE2wYH8+I2WxXz5eKercA/oxXx
-         VpqA==
-X-Gm-Message-State: AJIora/DxhaS2BFyWHO8QiyWKsGWhB4rSus4VF9d50nNQhzR8YrtqAtc
-        FO1n/vS1R62f1fsfz8Zo5g4kYw==
-X-Google-Smtp-Source: ABdhPJw44rPeyDOXLR9BU2JaWMAaNNQFCALOuvD6GgvfqdGFiGEthYrxts1XE7vjVSLg0hMvvDsPQg==
-X-Received: by 2002:a17:902:e54a:b0:166:50b6:a08b with SMTP id n10-20020a170902e54a00b0016650b6a08bmr689960plf.90.1655150257089;
-        Mon, 13 Jun 2022 12:57:37 -0700 (PDT)
+        bh=nT549qJtxV1BDDwSTKGaAnqRktoPUt/jLCJWLyiPvHw=;
+        b=2p4Jvqjuqs4X3Gs7ct0kOOWOxJMouoCuY6DGzPWagtdzFwAq+utNdE7y4eio0bxuw9
+         MxNx17bMcUNwP/CpTsgqrwA7+uF9iTouVgZb6NE65pU60MXLn4LIz6TGlaTlFgQAhsNO
+         YxdAvvoUPGEKyLFmpVFPrAOodPeIcNXz6q9iHCePZ5VJkIxdWxeaZiBT3d8Smg8aFezX
+         PiFc9hbjwBcR0QQrOwMMQzmr+ixHcnZhM6qfJ5zRc2dRnb+VnetRYVT9p6lnvd+y3Ov7
+         ofgSzZCNuf+G0gjwyUF17eBTMjU8meDghhzT/o55tkROXVrtPGWzGa+yrm5Uu8Bnup6h
+         f8/g==
+X-Gm-Message-State: AOAM531TWl8wA6AyTEOCb4bDz4HWvg/mBbb5uqrhm4BsJLaVzy1/q6lL
+        1o/eJfZrHu2YyaNisZfKqS5HWw==
+X-Google-Smtp-Source: AGRyM1sHNrT6EA1vne9zoqSs4Kj6VT7gGBwneqiLiE6fypf57czAytG3WSUZqOvsMu1OwLx726vyPQ==
+X-Received: by 2002:a05:6a00:338e:b0:51b:c452:4210 with SMTP id cm14-20020a056a00338e00b0051bc4524210mr583717pfb.69.1655150259258;
+        Mon, 13 Jun 2022 12:57:39 -0700 (PDT)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.35
+        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jun 2022 12:57:36 -0700 (PDT)
+        Mon, 13 Jun 2022 12:57:38 -0700 (PDT)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
@@ -60,9 +60,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
         suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
         ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: [PATCH v5 07/15] dt-bindings: reset: amd,pensando-elbasr-reset: Add AMD Pensando SR Reset Controller bindings
-Date:   Mon, 13 Jun 2022 12:56:50 -0700
-Message-Id: <20220613195658.5607-8-brad@pensando.io>
+Subject: [PATCH v5 08/15] MAINTAINERS: Add entry for AMD PENSANDO
+Date:   Mon, 13 Jun 2022 12:56:51 -0700
+Message-Id: <20220613195658.5607-9-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220613195658.5607-1-brad@pensando.io>
 References: <20220613195658.5607-1-brad@pensando.io>
@@ -72,82 +72,34 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Brad Larson <blarson@amd.com>
 
-Document bindings for AMD Pensando Elba SR Reset Controller
+Add entry for AMD PENSANDO maintainer and files
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- .../reset/amd,pensando-elbasr-reset.yaml      | 62 +++++++++++++++++++
- 1 file changed, 62 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+ MAINTAINERS | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml b/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
-new file mode 100644
-index 000000000000..03bb86ebcfd3
---- /dev/null
-+++ b/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
-@@ -0,0 +1,62 @@
-+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/reset/amd,pensando-elbasr-reset.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 91e9cd30326d..09828169c7c5 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -1777,6 +1777,16 @@ N:	allwinner
+ N:	sun[x456789]i
+ N:	sun50i
+ 
++ARM/AMD PENSANDO ARM64 ARCHITECTURE
++M:	Brad Larson <blarson@amd.com>
++L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
++S:	Supported
++F:	Documentation/devicetree/bindings/*/amd,pensando*
++F:	arch/arm64/boot/dts/amd/elba*
++F:	drivers/mfd/pensando*
++F:	drivers/reset/reset-elbasr.c
++F:	include/dt-bindings/reset/amd,pensando*
 +
-+title: AMD Pensando Elba SoC Reset Controller Device Tree Bindings
-+
-+maintainers:
-+  - Brad Larson <blarson@amd.com>
-+
-+description: |
-+  AMD Pensando Elba SoC reset controller driver which supports a resource
-+  controller connected to the Elba SoC over a SPI bus.  The Elba reset
-+  controller must be defined as a child node of the Elba SPI bus
-+  chip-select 0 node.
-+
-+  See also:
-+  - dt-bindings/reset/amd,pensando-elba-reset.h
-+
-+properties:
-+  $nodename:
-+    pattern: "^reset-controller@[0-9a-f]+$"
-+
-+  compatible:
-+    const: amd,pensando-elbasr-reset
-+
-+  reg:
-+    const: 0
-+
-+  '#reset-cells':
-+    const: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - '#reset-cells'
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/reset/amd,pensando-elba-reset.h>
-+    spi0 {
-+        #address-cells = <1>;
-+        #size-cells = <0>;
-+        num-cs = <4>;
-+
-+        spi@0 {
-+          reg = <0>;
-+          #address-cells = <1>;
-+          #size-cells = <0>;
-+
-+          rstc: reset-controller@0 {
-+            compatible = "amd,pensando-elbasr-reset";
-+            reg = <0>;
-+            #reset-cells = <1>;
-+          };
-+        };
-+    };
-+
-+...
+ ARM/Amlogic Meson SoC CLOCK FRAMEWORK
+ M:	Neil Armstrong <narmstrong@baylibre.com>
+ M:	Jerome Brunet <jbrunet@baylibre.com>
 -- 
 2.17.1
 
