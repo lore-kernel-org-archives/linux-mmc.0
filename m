@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ABD5CCA47F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20316CCA47D
 	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:47:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351289AbiFMUrZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 16:47:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52544 "EHLO
+        id S244251AbiFMUra (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 16:47:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52630 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244364AbiFMUqe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:34 -0400
-Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6253330F49
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:48 -0700 (PDT)
-Received: by mail-pf1-x42f.google.com with SMTP id 15so6670930pfy.3
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:48 -0700 (PDT)
+        with ESMTP id S1343573AbiFMUqh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:37 -0400
+Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 714DF3EA96
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:54 -0700 (PDT)
+Received: by mail-pg1-x52a.google.com with SMTP id d129so6484578pgc.9
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=J8i7pxRlATiJaJBMzj2+HHtob8Vj/qK6ZZPtSwIgoXA=;
-        b=4qrarwpvCbsYDA44xLBUmDZl3kMBPWrb+F1ZrdAepjnpLQDfe+RK2X+Qb1qy2HapQj
-         4451teUpU/58Miy4Ynx46DefK0t5OD4nXXCM25B11//M6G0FmbHeFYSzhL9MJuF6Zd83
-         UGxn9A6rgvd1Wj1l+x0C4pKUcBryFEJIHgp62bC/EKjCI9hr1mxOjIN/zggt56yOIu1L
-         sanCt6I/aOxlK/r1yTsCMVKWZYtDSeCE67NyH42occfi4WX9xoGOB5b5X/UxVbc/NtFu
-         1apJZ9JVsNYbZunD+od5wCTrHxE9G2NblKyZknT/uhu1qv1qW6L/3DnXsFrwncbu7gu9
-         zInA==
+        bh=G5AngU4fQLL9tjwfd3M8P7vnWfa9NLIJ0sasw1HKwk0=;
+        b=mu1MQUUbKSIWTjXFuH9p5fRtMkj/uh3ZnxEfSrme86jAyFfjIy8octcKZ3zNAX4x9c
+         wUnkb7Pm31XhRwRRyE6LbmkkeaxcoeBZLDkixXYqfV794DjWNfiz/mGlQTvWSqTEWWtv
+         GqC866XldQ6zuRlUQUd+E5wwXlgg7da2ICjTbSTrIUNFOls4Cp/NjO1QggHYfg77Vqmv
+         IOItahUEcwJuZw6gpYbkDj2XO+1nM5uvTzeN/Dupw9QpUJ/TRJOBFLDZ2IoP3JOosR4g
+         GHdndKKc4nnSC2cdovhjFcFaV5s1rSJBMKihXZMEouUOTHk2CEILhcxWgL9eChYN+kBi
+         bBZg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=J8i7pxRlATiJaJBMzj2+HHtob8Vj/qK6ZZPtSwIgoXA=;
-        b=f0x9OhKFByNZ905NcH7UUzLM847/IwacA+OFiSCCMedxkMQuh5calyUfIk8JCKA/Nt
-         4Fucem1HxbIPswhW6ecyHJBsdeRXbR8a088HHm+n7PWKCrlzLQGhElMlrWSbUZGnwXPj
-         VFf2u5jYCvx4JD3QZozsCN82fsUSZF0i+Z5YMewRTSdp/0c5O+JfScLENgGraf5/GX0J
-         TSwPQBOihmoUdef72c4BZhHJNyckc4YTNMhPRoDcdFKpWOLit44goQQ4OypQkQME99ju
-         DIC/VbGuKwUb/rvf45ThAljNqPQtYtGPrIrQcTP8E//iCviVWCoMVp83z3vTp428JdrF
-         2Kxw==
-X-Gm-Message-State: AOAM533LR1sDxd6m0i3Y4tvpiVc0PNYJ3klbXo/5+aKAm5xMzO0Wf4Mw
-        FkSONNH4Wb+HnLU2NLrliLIhpQ==
-X-Google-Smtp-Source: ABdhPJyVrR6Wo8rj+rowp622HlFPPwHbw9lplrBcYIho2FBEyOY5wXti9Sz89w7Ii5CZaDeZigAAEw==
-X-Received: by 2002:a62:a50c:0:b0:510:6b52:cd87 with SMTP id v12-20020a62a50c000000b005106b52cd87mr985088pfm.30.1655150268035;
-        Mon, 13 Jun 2022 12:57:48 -0700 (PDT)
+        bh=G5AngU4fQLL9tjwfd3M8P7vnWfa9NLIJ0sasw1HKwk0=;
+        b=pvgHn2ZjKQcnI3a1iU+0fRumjr+901m9imDhkepRv/hvkEwkUxlY5wdNksLm54hfPC
+         fAdEAtwmEGdDDeVOW9HbedDvKU7wb5cJ3RonFQmNOYJ+l+cXYrU1pT7/NxMQyzUsoZYR
+         ST2YX4NAIscluDWozOcsTlCRpEK+CE8TolHMxH+P0fFhmxLAzuyF3L7GLBFzwlJCtJEa
+         oOpEO07Qe0hDsE2aP7jQcc8U+RXhFWTaXdvw7onykS5W3oLlIEBOsAW9XSk1DC+IDk3v
+         A+zn2zWvb+Fp5dHFFyOfLdvy4A3yPrZUdk0mMGCPzEsUSTYd8JbMfHiMb0x7Kf/rrE43
+         5exw==
+X-Gm-Message-State: AOAM531jtVwMpINEP4oBXbIdGOOZ9AbNNDqlISjzAwu4lWxRL047yl0O
+        g4QQmMCQbSkiN9Ob8+qqaQ+elCDCbvMlwA==
+X-Google-Smtp-Source: ABdhPJxT9PVmJkPQk+jDaeQ8grX7yokwcmvdH5gzlVI7dBpN2UU5iRmzY3Wcu+fC+042xx6yhf2Z3A==
+X-Received: by 2002:a63:2cd7:0:b0:3fe:1c0a:75ce with SMTP id s206-20020a632cd7000000b003fe1c0a75cemr1128278pgs.602.1655150274127;
+        Mon, 13 Jun 2022 12:57:54 -0700 (PDT)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.46
+        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jun 2022 12:57:47 -0700 (PDT)
+        Mon, 13 Jun 2022 12:57:53 -0700 (PDT)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
@@ -60,9 +60,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
         suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
         ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: [PATCH v5 12/15] spi: dw: Add support for AMD Pensando Elba SoC
-Date:   Mon, 13 Jun 2022 12:56:55 -0700
-Message-Id: <20220613195658.5607-13-brad@pensando.io>
+Subject: [PATCH v5 15/15] reset: elbasr: Add AMD Pensando Elba SR Reset Controller
+Date:   Mon, 13 Jun 2022 12:56:58 -0700
+Message-Id: <20220613195658.5607-16-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220613195658.5607-1-brad@pensando.io>
 References: <20220613195658.5607-1-brad@pensando.io>
@@ -72,108 +72,168 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Brad Larson <blarson@amd.com>
 
-The AMD Pensando Elba SoC includes a DW apb_ssi v4 controller
-with device specific chip-select control.  The Elba SoC
-provides four chip-selects where the native DW IP supports
-two chip-selects.  The Elba DW_SPI instance has two native
-CS signals that are always overridden.
+This patch adds the reset controller functionality for the
+AMD Pensando Elba System Resource Chip.
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- drivers/spi/spi-dw-mmio.c | 66 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 66 insertions(+)
+ drivers/reset/Kconfig                         |  9 ++
+ drivers/reset/Makefile                        |  1 +
+ drivers/reset/reset-elbasr.c                  | 94 +++++++++++++++++++
+ .../reset/amd,pensando-elba-reset.h           | 11 +++
+ 4 files changed, 115 insertions(+)
+ create mode 100644 drivers/reset/reset-elbasr.c
+ create mode 100644 include/dt-bindings/reset/amd,pensando-elba-reset.h
 
-diff --git a/drivers/spi/spi-dw-mmio.c b/drivers/spi/spi-dw-mmio.c
-index 5101c4c6017b..6b7a557759bd 100644
---- a/drivers/spi/spi-dw-mmio.c
-+++ b/drivers/spi/spi-dw-mmio.c
-@@ -53,6 +53,24 @@ struct dw_spi_mscc {
- 	void __iomem        *spi_mst; /* Not sparx5 */
- };
+diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
+index 93c8d07ee328..13f5a8ca0f03 100644
+--- a/drivers/reset/Kconfig
++++ b/drivers/reset/Kconfig
+@@ -66,6 +66,15 @@ config RESET_BRCMSTB_RESCAL
+ 	  This enables the RESCAL reset controller for SATA, PCIe0, or PCIe1 on
+ 	  BCM7216.
  
-+struct dw_spi_elba {
-+	struct regmap *syscon;
++config RESET_ELBASR
++	tristate "Pensando Elba System Resource reset controller"
++	depends on MFD_PENSANDO_ELBASR || COMPILE_TEST
++	help
++	  This option enables support for the external reset functions
++	  on the Pensando Elba System Resource Chip.  Reset control
++	  of peripherals is accessed over SPI to the system resource
++	  chip device registers using CS0.
++
+ config RESET_HSDK
+ 	bool "Synopsys HSDK Reset Driver"
+ 	depends on HAS_IOMEM
+diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
+index a80a9c4008a7..c0fe12b9950e 100644
+--- a/drivers/reset/Makefile
++++ b/drivers/reset/Makefile
+@@ -10,6 +10,7 @@ obj-$(CONFIG_RESET_BCM6345) += reset-bcm6345.o
+ obj-$(CONFIG_RESET_BERLIN) += reset-berlin.o
+ obj-$(CONFIG_RESET_BRCMSTB) += reset-brcmstb.o
+ obj-$(CONFIG_RESET_BRCMSTB_RESCAL) += reset-brcmstb-rescal.o
++obj-$(CONFIG_RESET_ELBASR) += reset-elbasr.o
+ obj-$(CONFIG_RESET_HSDK) += reset-hsdk.o
+ obj-$(CONFIG_RESET_IMX7) += reset-imx7.o
+ obj-$(CONFIG_RESET_INTEL_GW) += reset-intel-gw.o
+diff --git a/drivers/reset/reset-elbasr.c b/drivers/reset/reset-elbasr.c
+new file mode 100644
+index 000000000000..6e429cb11466
+--- /dev/null
++++ b/drivers/reset/reset-elbasr.c
+@@ -0,0 +1,94 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2022 AMD Pensando
++ */
++
++#include <linux/mfd/pensando-elbasr.h>
++#include <linux/platform_device.h>
++#include <linux/reset-controller.h>
++#include <linux/regmap.h>
++#include <linux/err.h>
++#include <linux/of.h>
++
++#include <dt-bindings/reset/amd,pensando-elba-reset.h>
++
++struct elbasr_reset {
++	struct reset_controller_dev rcdev;
++	struct regmap *regmap;
 +};
 +
-+/*
-+ * Elba SoC does not use ssi, pin override is used for cs 0,1 and
-+ * gpios for cs 2,3 as defined in the device tree.
-+ *
-+ * cs:  |       1               0
-+ * bit: |---3-------2-------1-------0
-+ *      |  cs1   cs1_ovr   cs0   cs0_ovr
-+ */
-+#define ELBA_SPICS_REG			0x2468
-+#define ELBA_SPICS_SHIFT(cs)		(2 * (cs))
-+#define ELBA_SPICS_MASK(cs)		(0x3 << ELBA_SPICS_SHIFT(cs))
-+#define ELBA_SPICS_SET(cs, val)	\
-+			((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(cs))
-+
- /*
-  * The Designware SPI controller (referred to as master in the documentation)
-  * automatically deasserts chip select when the tx fifo is empty. The chip
-@@ -238,6 +256,53 @@ static int dw_spi_canaan_k210_init(struct platform_device *pdev,
- 	return 0;
- }
- 
-+static void dw_spi_elba_override_cs(struct dw_spi_elba *dwselba, int cs, int enable)
++static inline struct elbasr_reset *to_elbasr_rst(struct reset_controller_dev *rc)
 +{
-+	regmap_update_bits(dwselba->syscon, ELBA_SPICS_REG, ELBA_SPICS_MASK(cs),
-+			   ELBA_SPICS_SET(cs, enable));
++	return container_of(rc, struct elbasr_reset, rcdev);
 +}
 +
-+static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
++static inline int elbasr_reset_shift(unsigned long id)
 +{
-+	struct dw_spi *dws = spi_master_get_devdata(spi->master);
-+	struct dw_spi_mmio *dwsmmio = container_of(dws, struct dw_spi_mmio, dws);
-+	struct dw_spi_elba *dwselba = dwsmmio->priv;
-+	u8 cs;
-+
-+	cs = spi->chip_select;
-+	if (cs < 2)
-+		dw_spi_elba_override_cs(dwselba, spi->chip_select, enable);
-+
-+	/*
-+	 * The DW SPI controller needs a native CS bit selected to start
-+	 * the serial engine.
-+	 */
-+	spi->chip_select = 0;
-+	dw_spi_set_cs(spi, enable);
-+	spi->chip_select = cs;
++	switch (id) {
++	case EMMC_HW_RESET:
++		return 6;
++	default:
++		return -EINVAL;
++	}
 +}
 +
-+static int dw_spi_elba_init(struct platform_device *pdev,
-+			    struct dw_spi_mmio *dwsmmio)
++static int elbasr_reset_assert(struct reset_controller_dev *rcdev,
++			       unsigned long id)
 +{
-+	struct dw_spi_elba *dwselba;
-+	struct regmap *regmap;
++	struct elbasr_reset *elbar = to_elbasr_rst(rcdev);
++	u32 mask = 1 << elbasr_reset_shift(id);
 +
-+	regmap = syscon_regmap_lookup_by_compatible("amd,pensando-elba-syscon");
-+	if (IS_ERR(regmap))
-+		return PTR_ERR(regmap);
++	return regmap_update_bits(elbar->regmap, ELBASR_CTRL0_REG, mask, mask);
++}
 +
-+	dwselba = devm_kzalloc(&pdev->dev, sizeof(*dwselba), GFP_KERNEL);
-+	if (!dwselba)
++static int elbasr_reset_deassert(struct reset_controller_dev *rcdev,
++				 unsigned long id)
++{
++	struct elbasr_reset *elbar = to_elbasr_rst(rcdev);
++	u32 mask = 1 << elbasr_reset_shift(id);
++
++	return regmap_update_bits(elbar->regmap, ELBASR_CTRL0_REG, mask, 0);
++}
++
++static const struct reset_control_ops elbasr_reset_ops = {
++	.assert	= elbasr_reset_assert,
++	.deassert = elbasr_reset_deassert,
++};
++
++static int elbasr_reset_probe(struct platform_device *pdev)
++{
++	struct elbasr_data *elbasr = dev_get_drvdata(pdev->dev.parent);
++	struct elbasr_reset *elbar;
++	int ret;
++
++	elbar = devm_kzalloc(&pdev->dev, sizeof(struct elbasr_reset),
++			     GFP_KERNEL);
++	if (!elbar)
 +		return -ENOMEM;
-+	dwselba->syscon = regmap;
 +
-+	dwsmmio->priv = dwselba;
-+	dwsmmio->dws.set_cs = dw_spi_elba_set_cs;
++	elbar->rcdev.owner = THIS_MODULE;
++	elbar->rcdev.nr_resets = ELBASR_NR_RESETS;
++	elbar->rcdev.ops = &elbasr_reset_ops;
++	elbar->rcdev.of_node = pdev->dev.of_node;
++	elbar->regmap = elbasr->elbasr_regs;
 +
-+	return 0;
++	platform_set_drvdata(pdev, elbar);
++
++	ret = devm_reset_controller_register(&pdev->dev, &elbar->rcdev);
++
++	return ret;
 +}
 +
- static int dw_spi_mmio_probe(struct platform_device *pdev)
- {
- 	int (*init_func)(struct platform_device *pdev,
-@@ -352,6 +417,7 @@ static const struct of_device_id dw_spi_mmio_of_match[] = {
- 	{ .compatible = "intel,keembay-ssi", .data = dw_spi_keembay_init},
- 	{ .compatible = "microchip,sparx5-spi", dw_spi_mscc_sparx5_init},
- 	{ .compatible = "canaan,k210-spi", dw_spi_canaan_k210_init},
-+	{ .compatible = "amd,pensando-elba-spi", .data = dw_spi_elba_init},
- 	{ /* end of table */}
- };
- MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
++static const struct of_device_id elba_reset_dt_match[] = {
++	{ .compatible = "amd,pensando-elbasr-reset", },
++	{ /* sentinel */ },
++};
++
++static struct platform_driver elbasr_reset_driver = {
++	.probe	= elbasr_reset_probe,
++	.driver = {
++		.name = "pensando_elbasr_reset",
++		.of_match_table	= elba_reset_dt_match,
++	},
++};
++builtin_platform_driver(elbasr_reset_driver);
+diff --git a/include/dt-bindings/reset/amd,pensando-elba-reset.h b/include/dt-bindings/reset/amd,pensando-elba-reset.h
+new file mode 100644
+index 000000000000..68d69a98e750
+--- /dev/null
++++ b/include/dt-bindings/reset/amd,pensando-elba-reset.h
+@@ -0,0 +1,11 @@
++/* SPDX-License-Identifier: (GPL-2.0+ OR MIT) */
++/*
++ * Copyright (c) 2022, AMD Pensando
++ */
++
++#ifndef _DT_BINDINGS_RESET_AMD_PENSANDO_ELBA_RESET_H
++#define _DT_BINDINGS_RESET_AMD_PENSANDO_ELBA_RESET_H
++
++#define EMMC_HW_RESET		0
++
++#endif
 -- 
 2.17.1
 
