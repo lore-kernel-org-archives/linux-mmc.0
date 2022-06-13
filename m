@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24240C43334
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CAF5CCA47F
 	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:47:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1348114AbiFMUqz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 16:46:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52630 "EHLO
+        id S1348592AbiFMUq4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 16:46:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52706 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1350955AbiFMUqR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:17 -0400
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48EF4272A
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:31 -0700 (PDT)
-Received: by mail-pg1-x52e.google.com with SMTP id s135so6478161pgs.10
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:31 -0700 (PDT)
+        with ESMTP id S1350982AbiFMUqS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:18 -0400
+Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 852256321
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:33 -0700 (PDT)
+Received: by mail-pj1-x102d.google.com with SMTP id o6-20020a17090a0a0600b001e2c6566046so9838246pjo.0
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=kwsOcdJyzi4VFYxBCTzUn3k4YPAv5NziRQo39dPYRYw=;
-        b=5NouKk1RoKP/ZQdfEFImqZI4UVH4ulIfQu/RBQ68QxbQya7CB9JPSw0aNH+o1fq806
-         9Sny1eWhk68b1G2UCx3qq9RDcyqT/iQZOS+wVocsBAjJNdkEKEKkQ9QEfajVu/nZuZcP
-         Q27VQ8Wqg4sVFMsVqoChZyJoM6cxO2O53LT4vDw9yQOYKoH3CgSVOfdSHTZYySRQa2HX
-         Z1AwUEhBLaCS6yvw/BmRCgxqFqomZShiZ4XhPClTyO0TV0SMkdA2xyCI2aHMR1amQEsS
-         rc9aFy8tF0ggmONtwpXl5JZyNq3gsgDOnoHwGy5qY7RPE2U0S1SabobXj9Zn5JnIlRbH
-         zb6Q==
+        bh=9KwEdpp4EHLmLSRu+DnyxFCT3lhc8K5jJavvVNa3rlA=;
+        b=zSwz8WVMIHQg4oW9WeNDAAG5c28m66VAZlfBU6xtkU745PQiZZKb0NcxZvtV6OdkA6
+         jUmkiKU8oM8vJK4s/n2KFz6UJAj1iDwZUD8xAOzILfe3tgYLzMuvnpcJThY+AbQ7YXi3
+         Ynh+4YuX0oQL0e53nznCoFck6OFTtO7NpTtjRzEXj2n2woXhWgaJnILc1UDimQklqLRD
+         Hkw2Uu/hmWIoe9DNuZIw7PPhaGlRGq2mPhevdDdQeXGKjxjnwPk7hFdTd4UoRVmOoKBl
+         jxtcDBq7meFjO12gTG+DmzvVoN0VtNZWTLr/yJlpdHGc8myRpgahFhOzdF9jc4M5qV+k
+         uN3A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=kwsOcdJyzi4VFYxBCTzUn3k4YPAv5NziRQo39dPYRYw=;
-        b=0bfftlwwBWiY9goqmNuAhatCwmmML/1cT/q75xGhs8IHBpWgrLT0QmRXDhvPMFk/9g
-         0xrHak5BqNm0K1dbDLspfUO4IYkown7va8yeCA6Xk4Ezbx5hEtYRz2+Z4yo8WdVqijL9
-         JUT0B3pMINX3AHIwK9/LriyAwKnIho/59yL++9WFYv0ze/BUkR9PgIJBOp9XQfrXbUuW
-         ln4GUfs+UBwkNS66As28TLTIzb1oPeNKzy7Di6adRswyJRuyMWYfheSTwzQFkb2XkVO/
-         /Tr3w9BA1YpY6uv5XVyzLR8gkQuhUzzYxPGgWlJOt0QViWIZW+K7xwnT6uN6DFsBL6sy
-         FeWA==
-X-Gm-Message-State: AOAM5337sQqgZOHeLfNWU9jbL5K7mAQd9b0ixMD5utTJSTUVh3biKPJZ
-        tDdUH18aih5y2HkHPhoteLifD7wlIBJXmw==
-X-Google-Smtp-Source: ABdhPJwJjQXg4744yK1h6U80q2hA9yxTnOTwO3ZYxn9H8X5O7gLQQxaJwrsWn3XeabNgcM5kMe0KHg==
-X-Received: by 2002:aa7:88c6:0:b0:51c:6e36:fad7 with SMTP id k6-20020aa788c6000000b0051c6e36fad7mr1005972pff.2.1655150250573;
-        Mon, 13 Jun 2022 12:57:30 -0700 (PDT)
+        bh=9KwEdpp4EHLmLSRu+DnyxFCT3lhc8K5jJavvVNa3rlA=;
+        b=kHr/0nWm7TrufBc4PqsslPk9UbnLQrS0JvP+QQ40Y1uJsJ4GbOXqtWpoPd5ieuxRyj
+         v92PL8zY8b6ZLC3q/Dfy9v/VeUGTuZ5Yf3UWUYfwDjecxQUhLIshBbyybuVc+4aMTrGU
+         uwxQltmWIyK5oxqgvAHXL8670ToFWzlMppOULRVViH60Q13K98aBbZCtApMzFrdInX67
+         U/ZBOVwLL1rtW944SstOmkdbBsDax6B2LYYaM+nLziYQ8rOLEZnkMT69wo2UMc2cq0YW
+         85793Ezr2GTOzwbLUxlJBMXREK3XjUsd74cigoWClNDhnhXtxTH9fvk+zhZvu+YLQKMc
+         KVfw==
+X-Gm-Message-State: AJIora9YJjfgmuH8gPVoZMTnG9P7NSEZ5tEPuiFhVhXQRc/GuWEIBWLH
+        dWRQ2VslxRH7MbyHpTUDOspmrg==
+X-Google-Smtp-Source: AGRyM1tKqZ68i4YqpSOiqrY85fOOj1ouN0z23ZiBd+JkShEORj/QXiO7j6X0hHfdYvo6dAeKagS/FA==
+X-Received: by 2002:a17:90a:9481:b0:1e8:7bbf:fa9a with SMTP id s1-20020a17090a948100b001e87bbffa9amr417565pjo.164.1655150252722;
+        Mon, 13 Jun 2022 12:57:32 -0700 (PDT)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.28
+        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jun 2022 12:57:30 -0700 (PDT)
+        Mon, 13 Jun 2022 12:57:32 -0700 (PDT)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
@@ -60,9 +60,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
         suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
         ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: [PATCH v5 04/15] dt-bindings: spi: dw: Add AMD Pensando Elba SoC SPI Controller bindings
-Date:   Mon, 13 Jun 2022 12:56:47 -0700
-Message-Id: <20220613195658.5607-5-brad@pensando.io>
+Subject: [PATCH v5 05/15] dt-bindings: mfd: syscon: Add amd,pensando-elba-syscon compatible
+Date:   Mon, 13 Jun 2022 12:56:48 -0700
+Message-Id: <20220613195658.5607-6-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220613195658.5607-1-brad@pensando.io>
 References: <20220613195658.5607-1-brad@pensando.io>
@@ -72,26 +72,25 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Brad Larson <blarson@amd.com>
 
-The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
+Add the AMD Pensando Elba SoC system registers compatible.
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+ Documentation/devicetree/bindings/mfd/syscon.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-index e25d44c218f2..2a55b947cffc 100644
---- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-+++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-@@ -73,6 +73,8 @@ properties:
-               - renesas,r9a06g032-spi # RZ/N1D
-               - renesas,r9a06g033-spi # RZ/N1S
-           - const: renesas,rzn1-spi   # RZ/N1
-+      - description: AMD Pensando Elba SoC SPI Controller
-+        const: amd,pensando-elba-spi
- 
-   reg:
-     minItems: 1
+diff --git a/Documentation/devicetree/bindings/mfd/syscon.yaml b/Documentation/devicetree/bindings/mfd/syscon.yaml
+index fb784045013f..2267f8828e9e 100644
+--- a/Documentation/devicetree/bindings/mfd/syscon.yaml
++++ b/Documentation/devicetree/bindings/mfd/syscon.yaml
+@@ -38,6 +38,7 @@ properties:
+               - allwinner,sun8i-h3-system-controller
+               - allwinner,sun8i-v3s-system-controller
+               - allwinner,sun50i-a64-system-controller
++              - amd,pensando-elba-syscon
+               - brcm,cru-clkset
+               - freecom,fsg-cs2-system-controller
+               - hisilicon,dsa-subctrl
 -- 
 2.17.1
 
