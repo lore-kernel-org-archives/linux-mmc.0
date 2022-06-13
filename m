@@ -2,112 +2,179 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F4FEC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 19:42:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22EBCCCA47F
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:06:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344107AbiFMTm1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 15:42:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43484 "EHLO
+        id S1347620AbiFMUGZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 16:06:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44420 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344627AbiFMTmD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 15:42:03 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CBB406129A;
-        Mon, 13 Jun 2022 11:11:22 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S239018AbiFMUF5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:05:57 -0400
+Received: from cloudserver094114.home.pl (cloudserver094114.home.pl [79.96.170.134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB5F1BCEA8;
+        Mon, 13 Jun 2022 11:40:51 -0700 (PDT)
+Received: from localhost (127.0.0.1) (HELO v370.home.net.pl)
+ by /usr/run/smtp (/usr/run/postfix/private/idea_relay_lmtp) via UNIX with SMTP (IdeaSmtpServer 5.0.0)
+ id 95625e179f97b651; Mon, 13 Jun 2022 20:40:50 +0200
+Received: from kreacher.localnet (unknown [213.134.187.64])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 4DB1461224;
-        Mon, 13 Jun 2022 18:11:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 38F9EC34114;
-        Mon, 13 Jun 2022 18:11:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1655143881;
-        bh=r/uQoIAptd2kdH1sDPm8Dl5Ok9Z2t+kx5mOqVHxzwHY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=oRlwMuHdrdha/YRPgL48dWRuDAB2I+9v1s68B6cwvOAFMGYE45MgdO9fFWO9Yddvt
-         7DM6HxgbVaNSjdfQ+MwWTP1sy7QY3kmC09577rVITa+zQBgEJIaecUzizPBRbfIV1d
-         eRHxJRS18mV2I8+Epp866LNxbCPbzPhozn+8iwJE=
-Date:   Mon, 13 Jun 2022 20:11:18 +0200
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     Yongqin Liu <yongqin.liu@linaro.org>
-Cc:     stable@vger.kernel.org, Naresh Kamboju <naresh.kamboju@linaro.org>,
-        Benjamin Copeland <benjamin.copeland@linaro.org>,
-        Sumit Semwal <sumit.semwal@linaro.org>,
-        Daniel =?iso-8859-1?Q?D=EDaz?= <daniel.diaz@linaro.org>,
-        Alistair Delva <adelva@google.com>,
-        Steve Muckle <smuckle@google.com>,
-        Todd Kjos <tkjos@google.com>,
-        "Bajjuri, Praneeth" <praneeth@ti.com>,
-        Vincent Guittot <vincent.guittot@linaro.org>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Please help cherry pick four mmc related changes into the 4.14
- stable kernel
-Message-ID: <Yqd9xjOiOapfBt/A@kroah.com>
-References: <CAMSo37WW9veYH6=tHqUR2pa_7YX1UuzHqLBHit60P2QyzQmCEw@mail.gmail.com>
+        by v370.home.net.pl (Postfix) with ESMTPSA id 62F9A66C81D;
+        Mon, 13 Jun 2022 20:40:49 +0200 (CEST)
+From:   "Rafael J. Wysocki" <rjw@rjwysocki.net>
+To:     Linux ACPI <linux-acpi@vger.kernel.org>
+Cc:     LKML <linux-kernel@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Sakari Ailus <sakari.ailus@linux.intel.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH v2 15/16] ACPI / MMC: PM: Unify fixing up device power
+Date:   Mon, 13 Jun 2022 20:36:06 +0200
+Message-ID: <3004712.CbtlEUcBR6@kreacher>
+In-Reply-To: <2653857.mvXUDI8C0e@kreacher>
+References: <1843211.tdWV9SEqCh@kreacher> <2653857.mvXUDI8C0e@kreacher>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAMSo37WW9veYH6=tHqUR2pa_7YX1UuzHqLBHit60P2QyzQmCEw@mail.gmail.com>
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="UTF-8"
+X-CLIENT-IP: 213.134.187.64
+X-CLIENT-HOSTNAME: 213.134.187.64
+X-VADE-SPAMSTATE: clean
+X-VADE-SPAMCAUSE: gggruggvucftvghtrhhoucdtuddrgedvfedruddujedguddviecutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfjqffogffrnfdpggftiffpkfenuceurghilhhouhhtmecuudehtdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffvvefufffkjghfggfgtgesthfuredttddtjeenucfhrhhomhepfdftrghfrggvlhculfdrucghhihsohgtkhhifdcuoehrjhifsehrjhifhihsohgtkhhirdhnvghtqeenucggtffrrghtthgvrhhnpedvffeuiedtgfdvtddugeeujedtffetteegfeekffdvfedttddtuefhgeefvdejhfenucfkphepvddufedrudefgedrudekjedrieegnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvddufedrudefgedrudekjedrieegpdhhvghlohepkhhrvggrtghhvghrrdhlohgtrghlnhgvthdpmhgrihhlfhhrohhmpedftfgrfhgrvghlucflrdcuhgihshhotghkihdfuceorhhjfiesrhhjfiihshhotghkihdrnhgvtheqpdhnsggprhgtphhtthhopedutddprhgtphhtthhopehlihhnuhigqdgrtghpihesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhpmhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopegrnhgurhhihidrshhhvghvtghhvghnkhhosehlihhnuhigrdhi
+ nhhtvghlrdgtohhmpdhrtghpthhtohepmhhikhgrrdifvghsthgvrhgsvghrgheslhhinhhugidrihhnthgvlhdrtghomhdprhgtphhtthhopehhuggvghhovgguvgesrhgvughhrghtrdgtohhmpdhrtghpthhtohepshgrkhgrrhhirdgrihhluhhssehlihhnuhigrdhinhhtvghlrdgtohhmpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopehulhhfrdhhrghnshhsohhnsehlihhnrghrohdrohhrghdprhgtphhtthhopehlihhnuhigqdhmmhgtsehvghgvrhdrkhgvrhhnvghlrdhorhhg
+X-DCC--Metrics: v370.home.net.pl 1024; Body=10 Fuz1=10 Fuz2=10
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jun 08, 2022 at 01:09:54AM +0800, Yongqin Liu wrote:
-> Hi, All
-> 
-> With the 4.14.281 version[1], there were three mmc related changes merged,
-> but that causes one boot failure with the X15 Android builds, a problem
-> similar to one reported before here[2].
-> After being confirmed with Ulf Hansson, and verified with the X15 Android build,
-> it needs to have the following four commits cherry-picked to the 4.14
-> branch as well.
-> 
->     4f32b45c9a2c mmc: core: Allow host controllers to require R1B for CMD6
->     5fc615c1e3eb mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for erase/trim/discard
->     d091259b8d7a mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC sleep command
->     23161bed631a mmc: sdhci-omap: Fix busy detection by enabling
-> MMC_CAP_NEED_RSP_BUSY
-> 
-> The above four commits are from the 4.19 branch, as they are a little
-> easier to be cherry-picked
-> into the 4.14 branch, compared to the commits from the mainline branch.
-> (I have confirmed that the four commits are all in 4.19, 5.4, 5.10 and
-> mainline branches already).
-> 
-> Saying that, there will be still one merge conflict reported when
-> cherry picking the commit of
-> 4f32b45c9a2c, it's easy to resolve though.
-> To avoid the merge conflict, it could be done like this as well:
-> 1. revert the 327b6689898b commit from 4.14 first, so that the commits in step#2
->     could be cherry-picked without any problem
->         327b6689898b mmc: core: Default to generic_cmd6_time as
-> timeout in __mmc_switch()
-> 2. git cherry-pick the following commits from 4.19 into the 4.14 branch
->         4f32b45c9a2c mmc: core: Allow host controllers to require R1B for CMD6
->         5fc615c1e3eb mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for
-> erase/trim/discard
->         d091259b8d7a mmc: core: Respect MMC_CAP_NEED_RSP_BUSY for eMMC
-> sleep command
->         23161bed631a mmc: sdhci-omap: Fix busy detection by enabling
-> MMC_CAP_NEED_RSP_BUSY
->         26c6f614cf02 mmc: mmc: core: Default to generic_cmd6_time as
-> timeout in __mmc_switch()
->     The last commit of 26c6f614cf02 is for the revert in step#1.
-> 
-> I am not sure which way is more convenient for the maintenance work
-> here, so just list both of them here
-> for your information.
-> And please let me know if there is anything else I could help on this
-> cherry pick work here.
+From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 
-Please send properly backported patches to us, trying to do the revert
-and fixup like you describe above is going to be hard to verify I got it
-right.  A series of patches is best as that way we know you tested it
-properly and sent us the correct patches.
+Introduce acpi_device_fix_up_power_extended() for fixing up power of
+a device having an ACPI companion in a manner that takes the device's
+children into account and make the MMC code use it in two places
+instead of walking the list of the device ACPI companion's children
+directly.
 
-thanks,
+This will help to eliminate the children list head from struct
+acpi_device as it is redundant and it is used in questionable ways
+in some places (in particular, locking is needed for walking the
+list pointed to it safely, but it is often missing).
 
-greg k-h
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+
+v1 -> v2:
+   * Add R-by from Andy and ACKs from Adrian and Ulf.
+
+---
+ drivers/acpi/device_pm.c          |   22 ++++++++++++++++++++++
+ drivers/mmc/host/sdhci-acpi.c     |    7 ++-----
+ drivers/mmc/host/sdhci-pci-core.c |   11 +++--------
+ include/acpi/acpi_bus.h           |    1 +
+ 4 files changed, 28 insertions(+), 13 deletions(-)
+
+Index: linux-pm/drivers/mmc/host/sdhci-acpi.c
+===================================================================
+--- linux-pm.orig/drivers/mmc/host/sdhci-acpi.c
++++ linux-pm/drivers/mmc/host/sdhci-acpi.c
+@@ -775,8 +775,8 @@ static int sdhci_acpi_probe(struct platf
+ {
+ 	struct device *dev = &pdev->dev;
+ 	const struct sdhci_acpi_slot *slot;
+-	struct acpi_device *device, *child;
+ 	const struct dmi_system_id *id;
++	struct acpi_device *device;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+@@ -796,10 +796,7 @@ static int sdhci_acpi_probe(struct platf
+ 	slot = sdhci_acpi_get_slot(device);
+ 
+ 	/* Power on the SDHCI controller and its children */
+-	acpi_device_fix_up_power(device);
+-	list_for_each_entry(child, &device->children, node)
+-		if (child->status.present && child->status.enabled)
+-			acpi_device_fix_up_power(child);
++	acpi_device_fix_up_power_extended(device);
+ 
+ 	if (sdhci_acpi_byt_defer(dev))
+ 		return -EPROBE_DEFER;
+Index: linux-pm/drivers/acpi/device_pm.c
+===================================================================
+--- linux-pm.orig/drivers/acpi/device_pm.c
++++ linux-pm/drivers/acpi/device_pm.c
+@@ -369,6 +369,28 @@ int acpi_device_fix_up_power(struct acpi
+ }
+ EXPORT_SYMBOL_GPL(acpi_device_fix_up_power);
+ 
++static int fix_up_power_if_applicable(struct acpi_device *adev, void *not_used)
++{
++	if (adev->status.present && adev->status.enabled)
++		acpi_device_fix_up_power(adev);
++
++	return 0;
++}
++
++/**
++ * acpi_device_fix_up_power_extended - Force device and its children into D0.
++ * @adev: Parent device object whose power state is to be fixed up.
++ *
++ * Call acpi_device_fix_up_power() for @adev and its children so long as they
++ * are reported as present and enabled.
++ */
++void acpi_device_fix_up_power_extended(struct acpi_device *adev)
++{
++	acpi_device_fix_up_power(adev);
++	acpi_dev_for_each_child(adev, fix_up_power_if_applicable, NULL);
++}
++EXPORT_SYMBOL_GPL(acpi_device_fix_up_power_extended);
++
+ int acpi_device_update_power(struct acpi_device *device, int *state_p)
+ {
+ 	int state;
+Index: linux-pm/include/acpi/acpi_bus.h
+===================================================================
+--- linux-pm.orig/include/acpi/acpi_bus.h
++++ linux-pm/include/acpi/acpi_bus.h
+@@ -524,6 +524,7 @@ const char *acpi_power_state_string(int
+ int acpi_device_set_power(struct acpi_device *device, int state);
+ int acpi_bus_init_power(struct acpi_device *device);
+ int acpi_device_fix_up_power(struct acpi_device *device);
++void acpi_device_fix_up_power_extended(struct acpi_device *adev);
+ int acpi_bus_update_power(acpi_handle handle, int *state_p);
+ int acpi_device_update_power(struct acpi_device *device, int *state_p);
+ bool acpi_bus_power_manageable(acpi_handle handle);
+Index: linux-pm/drivers/mmc/host/sdhci-pci-core.c
+===================================================================
+--- linux-pm.orig/drivers/mmc/host/sdhci-pci-core.c
++++ linux-pm/drivers/mmc/host/sdhci-pci-core.c
+@@ -1240,16 +1240,11 @@ static const struct sdhci_pci_fixes sdhc
+ #ifdef CONFIG_ACPI
+ static void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot)
+ {
+-	struct acpi_device *device, *child;
++	struct acpi_device *device;
+ 
+ 	device = ACPI_COMPANION(&slot->chip->pdev->dev);
+-	if (!device)
+-		return;
+-
+-	acpi_device_fix_up_power(device);
+-	list_for_each_entry(child, &device->children, node)
+-		if (child->status.present && child->status.enabled)
+-			acpi_device_fix_up_power(child);
++	if (device)
++		acpi_device_fix_up_power_extended(device);
+ }
+ #else
+ static inline void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot) {}
+
+
+
