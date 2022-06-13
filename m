@@ -2,104 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C99BC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 07:14:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22B6BC43334
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 08:35:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239092AbiFMHOT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 03:14:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39156 "EHLO
+        id S231464AbiFMIfp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 04:35:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239305AbiFMHOS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 03:14:18 -0400
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CD451A3A6;
-        Mon, 13 Jun 2022 00:14:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1655104457; x=1686640457;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=wvl/B4oq3q+IXNEFYXE9Z2uZbSwi0g50OFlczbgIglM=;
-  b=GaXj+bO3X8cjT8yYIyMQcjSzBxupw+qwQ+zBiWfLjfVA5vP8J1FfOeaT
-   WL85qviOcLHGw15H5pzoEz6zrM/ep9dmcRNa8M85l6xzYClNKSt57PI5U
-   O8xGs+1vCNaiafarHsv6GtWFVCpS372zhOxF/b7i+l9rRFqhcvdmsiJ2M
-   h3PWI7ZxIxSIyCk7+VY38pi69Wyfrstqp/yEnicP1Jv0t1Njg0r9t+Q3j
-   Y5hfFiEvm9FzqvFVOwV1/SRids14hdmDJfNxzF5EmTLtGQdCzVwFlVTfA
-   Sdo8yeAb5ikDcv7s43B3swXxl/0Dn8Ak9qqZNCmY+0s98GzV+IHjEdlnh
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10376"; a="303586783"
-X-IronPort-AV: E=Sophos;i="5.91,296,1647327600"; 
-   d="scan'208";a="303586783"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Jun 2022 00:14:16 -0700
-X-IronPort-AV: E=Sophos;i="5.91,296,1647327600"; 
-   d="scan'208";a="639571875"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.58.193])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Jun 2022 00:14:14 -0700
-Message-ID: <f4fd942e-2bc8-b70b-d8ec-56690750efbb@intel.com>
-Date:   Mon, 13 Jun 2022 10:14:12 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH 5/5] mmc: sdhci-st: Obviously always return success in
- remove callback
-Content-Language: en-US
-To:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Patrice Chotard <patrice.chotard@foss.st.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     kernel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+        with ESMTP id S230235AbiFMIfo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 04:35:44 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 440B313E3E
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 01:35:43 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1o0fXr-0006k5-AI; Mon, 13 Jun 2022 10:35:35 +0200
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1o0fXq-000GDa-7j; Mon, 13 Jun 2022 10:35:33 +0200
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1o0fXo-00G0Mf-Rf; Mon, 13 Jun 2022 10:35:32 +0200
+Date:   Mon, 13 Jun 2022 10:35:32 +0200
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Michal Simek <michal.simek@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        kernel@pengutronix.de, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 4/5] mmc: sdhci-of-arasan: Obviously always return
+ success in remove callback
+Message-ID: <20220613083532.thz4pi7mequqlrp6@pengutronix.de>
 References: <20220610211257.102071-1-u.kleine-koenig@pengutronix.de>
- <20220610211257.102071-5-u.kleine-koenig@pengutronix.de>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220610211257.102071-5-u.kleine-koenig@pengutronix.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+ <20220610211257.102071-4-u.kleine-koenig@pengutronix.de>
+ <c0a313ac-20b9-2d1a-4c10-9ba57c62ae95@intel.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="sr7shbna5h5acpmw"
+Content-Disposition: inline
+In-Reply-To: <c0a313ac-20b9-2d1a-4c10-9ba57c62ae95@intel.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/06/22 00:12, Uwe Kleine-König wrote:
-> sdhci_pltfm_unregister() returns 0 unconditionally and returning an
-> error in a platform remove callback isn't very sensible. (The only
-> effect of the latter is that the device core emits a generic warning and
-> then removes the device anyhow.)
-> 
-> So return 0 unconditionally to make it obvious there is no error
-> forwarded to the upper layers.
-> 
-> This is a preparation for making platform remove callbacks return void.
-> 
-> Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+--sr7shbna5h5acpmw
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> ---
->  drivers/mmc/host/sdhci-st.c | 5 ++---
->  1 file changed, 2 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> index d41582c21aa3..6415916fbd91 100644
-> --- a/drivers/mmc/host/sdhci-st.c
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -440,15 +440,14 @@ static int sdhci_st_remove(struct platform_device *pdev)
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
->  	struct reset_control *rstc = pdata->rstc;
-> -	int ret;
->  
-> -	ret = sdhci_pltfm_unregister(pdev);
-> +	sdhci_pltfm_unregister(pdev);
->  
->  	clk_disable_unprepare(pdata->icnclk);
->  
->  	reset_control_assert(rstc);
->  
-> -	return ret;
-> +	return 0;
->  }
->  
->  #ifdef CONFIG_PM_SLEEP
+On Mon, Jun 13, 2022 at 10:13:16AM +0300, Adrian Hunter wrote:
+> On 11/06/22 00:12, Uwe Kleine-K=F6nig wrote:
+> > sdhci_pltfm_unregister() returns 0 unconditionally and returning an
+> > error in a platform remove callback isn't very sensible. (The only
+> > effect of the latter is that the device core emits a generic warning and
+> > then removes the device anyhow.)
+> >=20
+> > So return 0 unconditionally to make it obvious there is no error
+> > forwarded to the upper layers.
+> >=20
+> > This is a preparation for making platform remove callbacks return void.
+>=20
+> This preparation seems a bit unnatural.
 
+IMHO it's not. I have to adapt all ~4800 platform drivers together in a
+single commit to change the prototype of the return callback.
+
+Now assume you want to review that commit and make sure there are no
+relevant changes in behaviour. Without the preparation in the commit
+under discussion, the change to sdhci-of-arasan.c would look as follows:
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of=
+-arasan.c
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -1733,7 +1733,4 @@ static int sdhci_arasan_probe(struct platform_device =
+*pdev)
+=20
+ static int sdhci_arasan_remove(struct platform_device *pdev)
+ {
+-	int ret;
+ 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+ 	struct sdhci_arasan_data *sdhci_arasan =3D sdhci_pltfm_priv(pltfm_host);
+@@ -1747,11 +1746,11 @@ static int sdhci_arasan_remove(struct platform_devi=
+ce *pdev)
+=20
+ 	sdhci_arasan_unregister_sdclk(&pdev->dev);
+=20
+-	ret =3D sdhci_pltfm_unregister(pdev);
++	sdhci_pltfm_unregister(pdev);
+=20
+ 	clk_disable_unprepare(clk_ahb);
+-=20
+-	return ret;
+ }
+=20
+ static struct platform_driver sdhci_arasan_driver =3D {
+
+So you have to look up then what sdhci_pltfm_unregister() does and if
+it's ok to ignore the return value. Should I mention that in the commit
+log? What about the other drivers?
+
+If however the change to the sdhci-arasan driver is only
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of=
+-arasan.c
+index 3997cad1f793..84c949bd99c8 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -1749,8 +1749,6 @@ static int sdhci_arasan_remove(struct platform_device=
+ *pdev)
+ 	sdhci_pltfm_unregister(pdev);
+=20
+ 	clk_disable_unprepare(clk_ahb);
+-
+-	return 0;
+ }
+=20
+ static struct platform_driver sdhci_arasan_driver =3D {
+
+, it's trivial to see that there is no relevant driver specific change.
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--sr7shbna5h5acpmw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmKm9swACgkQwfwUeK3K
+7Aki2wf9F0ud30c2kemIUfXTupGIbY73km9wA/ibaQq0zJy5/F1D3fQ8+zknouGq
+nVWT4pVthEfmJV7/8ePylDmyBgViV91ptCtoB+7v8XAD9Z2pOMTIaCxCYemL8j+N
+ZHCfLAToYr8VhT/dl/aSo5D2A6MSgDZvJ/oYsblcfAT9n5+B8OjNOOaxy3Mp2PMj
+cS3Qi/ga+BgZWuwY55a9s9YVOPET5CynD4OS9ISKqMM9jBP5g4RgCZBH3639WsQr
+hDE7zqf/rMKVmI86G2yntjdOa+drraU0A2F+4ejrNcpON4bb30U5EY/B0nx+snV6
+n89+vPr2lYI3esEBcSrboGXIW9YuHQ==
+=e9uP
+-----END PGP SIGNATURE-----
+
+--sr7shbna5h5acpmw--
