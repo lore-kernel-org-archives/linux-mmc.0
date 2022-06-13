@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20316CCA47D
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03DBECCA481
 	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:47:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244251AbiFMUra (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 16:47:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52630 "EHLO
+        id S242525AbiFMUrh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 16:47:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49300 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343573AbiFMUqh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:37 -0400
-Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 714DF3EA96
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:54 -0700 (PDT)
-Received: by mail-pg1-x52a.google.com with SMTP id d129so6484578pgc.9
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:54 -0700 (PDT)
+        with ESMTP id S245082AbiFMUqf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:35 -0400
+Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CECB3B03C
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:50 -0700 (PDT)
+Received: by mail-pj1-x1030.google.com with SMTP id a10so6570248pju.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=G5AngU4fQLL9tjwfd3M8P7vnWfa9NLIJ0sasw1HKwk0=;
-        b=mu1MQUUbKSIWTjXFuH9p5fRtMkj/uh3ZnxEfSrme86jAyFfjIy8octcKZ3zNAX4x9c
-         wUnkb7Pm31XhRwRRyE6LbmkkeaxcoeBZLDkixXYqfV794DjWNfiz/mGlQTvWSqTEWWtv
-         GqC866XldQ6zuRlUQUd+E5wwXlgg7da2ICjTbSTrIUNFOls4Cp/NjO1QggHYfg77Vqmv
-         IOItahUEcwJuZw6gpYbkDj2XO+1nM5uvTzeN/Dupw9QpUJ/TRJOBFLDZ2IoP3JOosR4g
-         GHdndKKc4nnSC2cdovhjFcFaV5s1rSJBMKihXZMEouUOTHk2CEILhcxWgL9eChYN+kBi
-         bBZg==
+        bh=NyzDSLiO0lq4BsA02jWF6/uTinB+6H1C7pCNp978chk=;
+        b=ZmIcykGkPOVNDIZYaCnElS3kYgIFKxs4S+qJ/poIE9evHsNexrAS3suynT0z0YORse
+         KC5NqMHUfpSgKp1XO9Meg7G2JDHXqN+nT4uTTsGqKhNuA8q8TFPVXYXDgeaa49MowTXM
+         cAqglgnT3ywDffzXS+3/Q+DlsGZCwMLANFe+y0spMlW21AvMiz6LMs9PAlAiTsgJ5F7r
+         n7HMxdTjtajX4dGUuaM3iwNhHyRRSeWuImKjcY9e5wIaJxE70LcTokQfZTbTSjgK4nvQ
+         2JDDpZ91PSam7PRoWV97Dz1RySV6ZaNd95cqSjkJw6d3cT0+TU8YpkoIjw94JX+Fem06
+         TEYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=G5AngU4fQLL9tjwfd3M8P7vnWfa9NLIJ0sasw1HKwk0=;
-        b=pvgHn2ZjKQcnI3a1iU+0fRumjr+901m9imDhkepRv/hvkEwkUxlY5wdNksLm54hfPC
-         fAdEAtwmEGdDDeVOW9HbedDvKU7wb5cJ3RonFQmNOYJ+l+cXYrU1pT7/NxMQyzUsoZYR
-         ST2YX4NAIscluDWozOcsTlCRpEK+CE8TolHMxH+P0fFhmxLAzuyF3L7GLBFzwlJCtJEa
-         oOpEO07Qe0hDsE2aP7jQcc8U+RXhFWTaXdvw7onykS5W3oLlIEBOsAW9XSk1DC+IDk3v
-         A+zn2zWvb+Fp5dHFFyOfLdvy4A3yPrZUdk0mMGCPzEsUSTYd8JbMfHiMb0x7Kf/rrE43
-         5exw==
-X-Gm-Message-State: AOAM531jtVwMpINEP4oBXbIdGOOZ9AbNNDqlISjzAwu4lWxRL047yl0O
-        g4QQmMCQbSkiN9Ob8+qqaQ+elCDCbvMlwA==
-X-Google-Smtp-Source: ABdhPJxT9PVmJkPQk+jDaeQ8grX7yokwcmvdH5gzlVI7dBpN2UU5iRmzY3Wcu+fC+042xx6yhf2Z3A==
-X-Received: by 2002:a63:2cd7:0:b0:3fe:1c0a:75ce with SMTP id s206-20020a632cd7000000b003fe1c0a75cemr1128278pgs.602.1655150274127;
-        Mon, 13 Jun 2022 12:57:54 -0700 (PDT)
+        bh=NyzDSLiO0lq4BsA02jWF6/uTinB+6H1C7pCNp978chk=;
+        b=LzAKfH+MLWI3A6qc0OvpzB/TDTi2Jc6of9xkUoBpQe9slrAFfba5NQM+A95ivOesHm
+         yLpJCofpe+hgDVjIARd/llaLDFPcccVGEpaz3S1DogPA5j5sMRBF/BO72dgHprG98KJQ
+         e+HgiSRV+x93gbjq3ty94zsw6xeh2JY6YDyHabrn9rl1QXfhYE1AFM2VpphuCukoLf20
+         4vfQSToDpqTJKg7PwewHPapM69TeI9zhhWulaFVXW41Gc10UPw5arRgimQBRIVXSh15Q
+         Badm6v839Ts/Ws/Aw8lhtNeAxHxW29TLOzj8GIWU9AtHDUpK/wljC3gFfPxI9AfwnGz3
+         a7Hw==
+X-Gm-Message-State: AJIora/xPDc8BysHOBv/x/3IGUBjl8ycvmvipX4r5ytLiTe8na7bxNbJ
+        kiSyQZrTahBW6ZxjAJhOWtG+yA==
+X-Google-Smtp-Source: AGRyM1tJRB1G+7kpXPt5023UTrEaqvVR4vazG7LXSR8ND5eTFK0xKuaEvvCrSvRqmxqYaTDrCGEb+Q==
+X-Received: by 2002:a17:90a:fd92:b0:1e2:d731:9ad5 with SMTP id cx18-20020a17090afd9200b001e2d7319ad5mr386886pjb.199.1655150270023;
+        Mon, 13 Jun 2022 12:57:50 -0700 (PDT)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.52
+        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jun 2022 12:57:53 -0700 (PDT)
+        Mon, 13 Jun 2022 12:57:49 -0700 (PDT)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
@@ -60,9 +60,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
         suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
         ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: [PATCH v5 15/15] reset: elbasr: Add AMD Pensando Elba SR Reset Controller
-Date:   Mon, 13 Jun 2022 12:56:58 -0700
-Message-Id: <20220613195658.5607-16-brad@pensando.io>
+Subject: [PATCH v5 13/15] mmc: sdhci-cadence: Add AMD Pensando Elba SoC support
+Date:   Mon, 13 Jun 2022 12:56:56 -0700
+Message-Id: <20220613195658.5607-14-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220613195658.5607-1-brad@pensando.io>
 References: <20220613195658.5607-1-brad@pensando.io>
@@ -72,168 +72,331 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Brad Larson <blarson@amd.com>
 
-This patch adds the reset controller functionality for the
-AMD Pensando Elba System Resource Chip.
+Add support for AMD Pensando Elba SoC which explicitly controls
+byte-lane enables on writes.  Add priv_write_l() which is
+used on Elba platforms for byte-lane control.
+
+Select MMC_SDHCI_IO_ACCESSORS for MMC_SDHCI_CADENCE which
+allows Elba SoC sdhci_elba_ops to overwrite the SDHCI
+IO memory accessors.
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- drivers/reset/Kconfig                         |  9 ++
- drivers/reset/Makefile                        |  1 +
- drivers/reset/reset-elbasr.c                  | 94 +++++++++++++++++++
- .../reset/amd,pensando-elba-reset.h           | 11 +++
- 4 files changed, 115 insertions(+)
- create mode 100644 drivers/reset/reset-elbasr.c
- create mode 100644 include/dt-bindings/reset/amd,pensando-elba-reset.h
+ drivers/mmc/host/Kconfig         |   1 +
+ drivers/mmc/host/sdhci-cadence.c | 179 ++++++++++++++++++++++++++++---
+ 2 files changed, 166 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
-index 93c8d07ee328..13f5a8ca0f03 100644
---- a/drivers/reset/Kconfig
-+++ b/drivers/reset/Kconfig
-@@ -66,6 +66,15 @@ config RESET_BRCMSTB_RESCAL
- 	  This enables the RESCAL reset controller for SATA, PCIe0, or PCIe1 on
- 	  BCM7216.
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index d6144978e32d..d0a66a74532e 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -243,6 +243,7 @@ config MMC_SDHCI_CADENCE
+ 	tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
+ 	depends on MMC_SDHCI_PLTFM
+ 	depends on OF
++	select MMC_SDHCI_IO_ACCESSORS
+ 	help
+ 	  This selects the Cadence SD/SDIO/eMMC driver.
  
-+config RESET_ELBASR
-+	tristate "Pensando Elba System Resource reset controller"
-+	depends on MFD_PENSANDO_ELBASR || COMPILE_TEST
-+	help
-+	  This option enables support for the external reset functions
-+	  on the Pensando Elba System Resource Chip.  Reset control
-+	  of peripherals is accessed over SPI to the system resource
-+	  chip device registers using CS0.
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 6f2de54a5987..08253357535a 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -12,6 +12,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/reset.h>
+ 
+ #include "sdhci-pltfm.h"
+ 
+@@ -66,7 +67,12 @@ struct sdhci_cdns_phy_param {
+ 
+ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
++	void __iomem *ctl_addr;	/* write control */
++	spinlock_t wrlock;	/* write lock */
+ 	bool enhanced_strobe;
++	void (*priv_write_l)(struct sdhci_cdns_priv *priv, u32 val,
++			     void __iomem *reg);
++	struct reset_control *rst_hw;
+ 	unsigned int nr_phy_params;
+ 	struct sdhci_cdns_phy_param phy_params[];
+ };
+@@ -76,6 +82,11 @@ struct sdhci_cdns_phy_cfg {
+ 	u8 addr;
+ };
+ 
++struct sdhci_cdns_drv_data {
++	int (*init)(struct platform_device *pdev);
++	const struct sdhci_pltfm_data pltfm_data;
++};
 +
- config RESET_HSDK
- 	bool "Synopsys HSDK Reset Driver"
- 	depends on HAS_IOMEM
-diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
-index a80a9c4008a7..c0fe12b9950e 100644
---- a/drivers/reset/Makefile
-+++ b/drivers/reset/Makefile
-@@ -10,6 +10,7 @@ obj-$(CONFIG_RESET_BCM6345) += reset-bcm6345.o
- obj-$(CONFIG_RESET_BERLIN) += reset-berlin.o
- obj-$(CONFIG_RESET_BRCMSTB) += reset-brcmstb.o
- obj-$(CONFIG_RESET_BRCMSTB_RESCAL) += reset-brcmstb-rescal.o
-+obj-$(CONFIG_RESET_ELBASR) += reset-elbasr.o
- obj-$(CONFIG_RESET_HSDK) += reset-hsdk.o
- obj-$(CONFIG_RESET_IMX7) += reset-imx7.o
- obj-$(CONFIG_RESET_INTEL_GW) += reset-intel-gw.o
-diff --git a/drivers/reset/reset-elbasr.c b/drivers/reset/reset-elbasr.c
-new file mode 100644
-index 000000000000..6e429cb11466
---- /dev/null
-+++ b/drivers/reset/reset-elbasr.c
-@@ -0,0 +1,94 @@
-+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+ static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
+ 	{ "cdns,phy-input-delay-sd-highspeed", SDHCI_CDNS_PHY_DLY_SD_HS, },
+ 	{ "cdns,phy-input-delay-legacy", SDHCI_CDNS_PHY_DLY_SD_DEFAULT, },
+@@ -90,6 +101,15 @@ static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
+ 	{ "cdns,phy-dll-delay-strobe", SDHCI_CDNS_PHY_DLY_STROBE, },
+ };
+ 
++static inline void sdhci_cdns_priv_writel(struct sdhci_cdns_priv *priv,
++					  u32 val, void __iomem *reg)
++{
++	if (unlikely(priv->priv_write_l))
++		priv->priv_write_l(priv, val, reg);
++	else
++		writel(val, reg);
++}
++
+ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 				    u8 addr, u8 data)
+ {
+@@ -104,17 +124,17 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 
+ 	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+ 	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+-	writel(tmp, reg);
++	sdhci_cdns_priv_writel(priv, tmp, reg);
+ 
+ 	tmp |= SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	sdhci_cdns_priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
+ 	if (ret)
+ 		return ret;
+ 
+ 	tmp &= ~SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	sdhci_cdns_priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
+ 				 0, 10);
+@@ -191,7 +211,7 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
+ 	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+ 	tmp &= ~SDHCI_CDNS_HRS06_MODE;
+ 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
+-	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
++	sdhci_cdns_priv_writel(priv, tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
+ }
+ 
+ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+@@ -223,7 +243,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	 */
+ 	for (i = 0; i < 2; i++) {
+ 		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
+-		writel(tmp, reg);
++		sdhci_cdns_priv_writel(priv, tmp, reg);
+ 
+ 		ret = readl_poll_timeout(reg, tmp,
+ 					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
+@@ -309,6 +329,89 @@ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
+ 		sdhci_set_uhs_signaling(host, timing);
+ }
+ 
 +/*
-+ * Copyright (c) 2022 AMD Pensando
++ * The Pensando Elba SoC explicitly controls byte-lane enables on writes
++ * which includes writes to the HRS registers.
 + */
++static void elba_priv_write_l(struct sdhci_cdns_priv *priv, u32 val,
++			      void __iomem *reg)
++{
++	unsigned long flags;
 +
-+#include <linux/mfd/pensando-elbasr.h>
-+#include <linux/platform_device.h>
-+#include <linux/reset-controller.h>
-+#include <linux/regmap.h>
-+#include <linux/err.h>
-+#include <linux/of.h>
++	spin_lock_irqsave(&priv->wrlock, flags);
++	writel(0x78, priv->ctl_addr);
++	writel(val, reg);
++	spin_unlock_irqrestore(&priv->wrlock, flags);
++}
 +
-+#include <dt-bindings/reset/amd,pensando-elba-reset.h>
++static void elba_write_l(struct sdhci_host *host, u32 val, int reg)
++{
++	elba_priv_write_l(sdhci_cdns_priv(host), val, host->ioaddr + reg);
++}
 +
-+struct elbasr_reset {
-+	struct reset_controller_dev rcdev;
-+	struct regmap *regmap;
++static void elba_write_w(struct sdhci_host *host, u16 val, int reg)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	unsigned long flags;
++	u32 m = (reg & 0x3);
++	u32 msk = (0x3 << (m));
++
++	spin_lock_irqsave(&priv->wrlock, flags);
++	writel(msk << 3, priv->ctl_addr);
++	writew(val, host->ioaddr + reg);
++	spin_unlock_irqrestore(&priv->wrlock, flags);
++}
++
++static void elba_write_b(struct sdhci_host *host, u8 val, int reg)
++{
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	unsigned long flags;
++	u32 m = (reg & 0x3);
++	u32 msk = (0x1 << (m));
++
++	spin_lock_irqsave(&priv->wrlock, flags);
++	writel(msk << 3, priv->ctl_addr);
++	writeb(val, host->ioaddr + reg);
++	spin_unlock_irqrestore(&priv->wrlock, flags);
++}
++
++static const struct sdhci_ops sdhci_elba_ops = {
++	.write_l = elba_write_l,
++	.write_w = elba_write_w,
++	.write_b = elba_write_b,
++	.set_clock = sdhci_set_clock,
++	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
 +};
 +
-+static inline struct elbasr_reset *to_elbasr_rst(struct reset_controller_dev *rc)
++static int elba_drv_init(struct platform_device *pdev)
 +{
-+	return container_of(rc, struct elbasr_reset, rcdev);
-+}
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
++	struct resource *iomem;
++	void __iomem *ioaddr;
 +
-+static inline int elbasr_reset_shift(unsigned long id)
-+{
-+	switch (id) {
-+	case EMMC_HW_RESET:
-+		return 6;
-+	default:
-+		return -EINVAL;
-+	}
-+}
++	host->mmc->caps |= (MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA);
 +
-+static int elbasr_reset_assert(struct reset_controller_dev *rcdev,
-+			       unsigned long id)
-+{
-+	struct elbasr_reset *elbar = to_elbasr_rst(rcdev);
-+	u32 mask = 1 << elbasr_reset_shift(id);
-+
-+	return regmap_update_bits(elbar->regmap, ELBASR_CTRL0_REG, mask, mask);
-+}
-+
-+static int elbasr_reset_deassert(struct reset_controller_dev *rcdev,
-+				 unsigned long id)
-+{
-+	struct elbasr_reset *elbar = to_elbasr_rst(rcdev);
-+	u32 mask = 1 << elbasr_reset_shift(id);
-+
-+	return regmap_update_bits(elbar->regmap, ELBASR_CTRL0_REG, mask, 0);
-+}
-+
-+static const struct reset_control_ops elbasr_reset_ops = {
-+	.assert	= elbasr_reset_assert,
-+	.deassert = elbasr_reset_deassert,
-+};
-+
-+static int elbasr_reset_probe(struct platform_device *pdev)
-+{
-+	struct elbasr_data *elbasr = dev_get_drvdata(pdev->dev.parent);
-+	struct elbasr_reset *elbar;
-+	int ret;
-+
-+	elbar = devm_kzalloc(&pdev->dev, sizeof(struct elbasr_reset),
-+			     GFP_KERNEL);
-+	if (!elbar)
++	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 1);
++	if (!iomem)
 +		return -ENOMEM;
 +
-+	elbar->rcdev.owner = THIS_MODULE;
-+	elbar->rcdev.nr_resets = ELBASR_NR_RESETS;
-+	elbar->rcdev.ops = &elbasr_reset_ops;
-+	elbar->rcdev.of_node = pdev->dev.of_node;
-+	elbar->regmap = elbasr->elbasr_regs;
++	/* Byte-lane control register */
++	ioaddr = devm_platform_ioremap_resource(pdev, 1);
++	if (IS_ERR(ioaddr))
++		return PTR_ERR(ioaddr);
 +
-+	platform_set_drvdata(pdev, elbar);
++	priv->ctl_addr = ioaddr;
++	priv->priv_write_l = elba_priv_write_l;
++	spin_lock_init(&priv->wrlock);
++	writel(0x78, priv->ctl_addr);
 +
-+	ret = devm_reset_controller_register(&pdev->dev, &elbar->rcdev);
-+
-+	return ret;
++	return 0;
 +}
 +
-+static const struct of_device_id elba_reset_dt_match[] = {
-+	{ .compatible = "amd,pensando-elbasr-reset", },
-+	{ /* sentinel */ },
-+};
-+
-+static struct platform_driver elbasr_reset_driver = {
-+	.probe	= elbasr_reset_probe,
-+	.driver = {
-+		.name = "pensando_elbasr_reset",
-+		.of_match_table	= elba_reset_dt_match,
+ static const struct sdhci_ops sdhci_cdns_ops = {
+ 	.set_clock = sdhci_set_clock,
+ 	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
+@@ -318,15 +421,27 @@ static const struct sdhci_ops sdhci_cdns_ops = {
+ 	.set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
+ };
+ 
+-static const struct sdhci_pltfm_data sdhci_cdns_uniphier_pltfm_data = {
+-	.ops = &sdhci_cdns_ops,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
++	.pltfm_data = {
++		.ops = &sdhci_cdns_ops,
++		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	},
+ };
+ 
+-static const struct sdhci_pltfm_data sdhci_cdns_pltfm_data = {
+-	.ops = &sdhci_cdns_ops,
++static const struct sdhci_cdns_drv_data sdhci_elba_drv_data = {
++	.init = elba_drv_init,
++	.pltfm_data = {
++		.ops = &sdhci_elba_ops,
++	},
+ };
+ 
++static const struct sdhci_cdns_drv_data sdhci_cdns_drv_data = {
++	.pltfm_data = {
++		.ops = &sdhci_cdns_ops,
 +	},
 +};
-+builtin_platform_driver(elbasr_reset_driver);
-diff --git a/include/dt-bindings/reset/amd,pensando-elba-reset.h b/include/dt-bindings/reset/amd,pensando-elba-reset.h
-new file mode 100644
-index 000000000000..68d69a98e750
---- /dev/null
-+++ b/include/dt-bindings/reset/amd,pensando-elba-reset.h
-@@ -0,0 +1,11 @@
-+/* SPDX-License-Identifier: (GPL-2.0+ OR MIT) */
-+/*
-+ * Copyright (c) 2022, AMD Pensando
-+ */
 +
-+#ifndef _DT_BINDINGS_RESET_AMD_PENSANDO_ELBA_RESET_H
-+#define _DT_BINDINGS_RESET_AMD_PENSANDO_ELBA_RESET_H
 +
-+#define EMMC_HW_RESET		0
+ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 					     struct mmc_ios *ios)
+ {
+@@ -347,10 +462,26 @@ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 					 SDHCI_CDNS_HRS06_MODE_MMC_HS400);
+ }
+ 
++static void sdhci_mmc_hw_reset(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
 +
-+#endif
++	dev_info(mmc_dev(host->mmc), "emmc hardware reset\n");
++
++	reset_control_assert(priv->rst_hw);
++	/* For eMMC, minimum is 1us but give it 9us for good measure */
++	udelay(9);
++
++	reset_control_deassert(priv->rst_hw);
++	/* For eMMC, minimum is 200us but give it 300us for good measure */
++	usleep_range(300, 1000);
++}
++
+ static int sdhci_cdns_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
+-	const struct sdhci_pltfm_data *data;
++	const struct sdhci_cdns_drv_data *data;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_cdns_priv *priv;
+ 	struct clk *clk;
+@@ -369,10 +500,10 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 
+ 	data = of_device_get_match_data(dev);
+ 	if (!data)
+-		data = &sdhci_cdns_pltfm_data;
++		data = &sdhci_cdns_drv_data;
+ 
+ 	nr_phy_params = sdhci_cdns_phy_param_count(dev->of_node);
+-	host = sdhci_pltfm_init(pdev, data,
++	host = sdhci_pltfm_init(pdev, &data->pltfm_data,
+ 				struct_size(priv, phy_params, nr_phy_params));
+ 	if (IS_ERR(host)) {
+ 		ret = PTR_ERR(host);
+@@ -389,6 +520,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+ 				sdhci_cdns_hs400_enhanced_strobe;
++	if (data->init) {
++		ret = data->init(pdev);
++		if (ret)
++			goto free;
++	}
+ 	sdhci_enable_v4_mode(host);
+ 	__sdhci_read_caps(host, &version, NULL, NULL);
+ 
+@@ -404,6 +540,17 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto free;
+ 
++	if (host->mmc->caps & MMC_CAP_HW_RESET) {
++		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, "hw");
++		if (IS_ERR(priv->rst_hw)) {
++			ret = PTR_ERR(priv->rst_hw);
++			if (ret == -ENOENT)
++				priv->rst_hw = NULL;
++		} else {
++			host->mmc_host_ops.card_hw_reset = sdhci_mmc_hw_reset;
++		}
++	}
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto free;
+@@ -453,7 +600,11 @@ static const struct dev_pm_ops sdhci_cdns_pm_ops = {
+ static const struct of_device_id sdhci_cdns_match[] = {
+ 	{
+ 		.compatible = "socionext,uniphier-sd4hc",
+-		.data = &sdhci_cdns_uniphier_pltfm_data,
++		.data = &sdhci_cdns_uniphier_drv_data,
++	},
++	{
++		.compatible = "amd,pensando-elba-sd4hc",
++		.data = &sdhci_elba_drv_data
+ 	},
+ 	{ .compatible = "cdns,sd4hc" },
+ 	{ /* sentinel */ }
 -- 
 2.17.1
 
