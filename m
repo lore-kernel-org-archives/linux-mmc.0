@@ -2,179 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22EBCCCA47F
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:06:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30D06C43334
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Jun 2022 20:47:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1347620AbiFMUGZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Jun 2022 16:06:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44420 "EHLO
+        id S239627AbiFMUqy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Jun 2022 16:46:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52466 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239018AbiFMUF5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:05:57 -0400
-Received: from cloudserver094114.home.pl (cloudserver094114.home.pl [79.96.170.134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB5F1BCEA8;
-        Mon, 13 Jun 2022 11:40:51 -0700 (PDT)
-Received: from localhost (127.0.0.1) (HELO v370.home.net.pl)
- by /usr/run/smtp (/usr/run/postfix/private/idea_relay_lmtp) via UNIX with SMTP (IdeaSmtpServer 5.0.0)
- id 95625e179f97b651; Mon, 13 Jun 2022 20:40:50 +0200
-Received: from kreacher.localnet (unknown [213.134.187.64])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by v370.home.net.pl (Postfix) with ESMTPSA id 62F9A66C81D;
-        Mon, 13 Jun 2022 20:40:49 +0200 (CEST)
-From:   "Rafael J. Wysocki" <rjw@rjwysocki.net>
-To:     Linux ACPI <linux-acpi@vger.kernel.org>
-Cc:     LKML <linux-kernel@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH v2 15/16] ACPI / MMC: PM: Unify fixing up device power
-Date:   Mon, 13 Jun 2022 20:36:06 +0200
-Message-ID: <3004712.CbtlEUcBR6@kreacher>
-In-Reply-To: <2653857.mvXUDI8C0e@kreacher>
-References: <1843211.tdWV9SEqCh@kreacher> <2653857.mvXUDI8C0e@kreacher>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="UTF-8"
-X-CLIENT-IP: 213.134.187.64
-X-CLIENT-HOSTNAME: 213.134.187.64
-X-VADE-SPAMSTATE: clean
-X-VADE-SPAMCAUSE: gggruggvucftvghtrhhoucdtuddrgedvfedruddujedguddviecutefuodetggdotefrodftvfcurfhrohhfihhlvgemucfjqffogffrnfdpggftiffpkfenuceurghilhhouhhtmecuudehtdenucesvcftvggtihhpihgvnhhtshculddquddttddmnecujfgurhephffvvefufffkjghfggfgtgesthfuredttddtjeenucfhrhhomhepfdftrghfrggvlhculfdrucghhihsohgtkhhifdcuoehrjhifsehrjhifhihsohgtkhhirdhnvghtqeenucggtffrrghtthgvrhhnpedvffeuiedtgfdvtddugeeujedtffetteegfeekffdvfedttddtuefhgeefvdejhfenucfkphepvddufedrudefgedrudekjedrieegnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepvddufedrudefgedrudekjedrieegpdhhvghlohepkhhrvggrtghhvghrrdhlohgtrghlnhgvthdpmhgrihhlfhhrohhmpedftfgrfhgrvghlucflrdcuhgihshhotghkihdfuceorhhjfiesrhhjfiihshhotghkihdrnhgvtheqpdhnsggprhgtphhtthhopedutddprhgtphhtthhopehlihhnuhigqdgrtghpihesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhkvghrnhgvlhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopehlihhnuhigqdhpmhesvhhgvghrrdhkvghrnhgvlhdrohhrghdprhgtphhtthhopegrnhgurhhihidrshhhvghvtghhvghnkhhosehlihhnuhigrdhi
- nhhtvghlrdgtohhmpdhrtghpthhtohepmhhikhgrrdifvghsthgvrhgsvghrgheslhhinhhugidrihhnthgvlhdrtghomhdprhgtphhtthhopehhuggvghhovgguvgesrhgvughhrghtrdgtohhmpdhrtghpthhtohepshgrkhgrrhhirdgrihhluhhssehlihhnuhigrdhinhhtvghlrdgtohhmpdhrtghpthhtoheprggurhhirghnrdhhuhhnthgvrhesihhnthgvlhdrtghomhdprhgtphhtthhopehulhhfrdhhrghnshhsohhnsehlihhnrghrohdrohhrghdprhgtphhtthhopehlihhnuhigqdhmmhgtsehvghgvrhdrkhgvrhhnvghlrdhorhhg
-X-DCC--Metrics: v370.home.net.pl 1024; Body=10 Fuz1=10 Fuz2=10
+        with ESMTP id S1350089AbiFMUqA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2022 16:46:00 -0400
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7F981B2
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:23 -0700 (PDT)
+Received: by mail-pg1-x52f.google.com with SMTP id h192so6501709pgc.4
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2022 12:57:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pensando.io; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references;
+        bh=JHEBqvjkXFtcJ+qUBNW7+1Xm1a5ZEnXcUDy9oMekAWQ=;
+        b=XcS6UQmDf+C8m9YKYGOusnFCVffgrQStj//J+T4vtRpb8VgAsfxoTf7T3GaDso06eH
+         X95kIF4IKwG/8S1JhVbbu1qsZ3G9zyJTb/zdPBrNw3e3u+BsafMvCjumd1H2HqBLF6sR
+         vo5PIEn0Ap5GtqoJ/NomU+CELebXQIrQn0n2C4cFLCMrUu5MjFj33yt1uLkiNNMLY0Sz
+         WG4+Pal6iFcZuCcYFuVLCJ4D8uGDiCXrROR+P1liCdgg0xVZthTk9ga0rBKF1byxNBQp
+         mHgbrxODTBw7F49GcKmx80eRrSHJkNeSYWxOGbrGIt2oP4Xw3sss5OM9tn9bXFGZTI+y
+         w3lA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references;
+        bh=JHEBqvjkXFtcJ+qUBNW7+1Xm1a5ZEnXcUDy9oMekAWQ=;
+        b=3hk3XtBRejiNsyWFqjC4/cxB65/oa2o6E+ft2wNepFAKbUnQWLCk1YbLOrxGDU2nUn
+         23cL/wey2YML6gzBnmhMG2QbEfquG2/YKtEw+JLRrcR6WD79KqWt602wPIy7Azr+oByl
+         zf358f3jPE/20YjBbi8kcb14ibmNlv8AYrSm89r5BCfbLgqGMY4oXFfi2MQ5iIh9L4p5
+         lI3xZCocACOI2dISbUJ+M3qY4+xG85Eyj6BqVdM03dGxG6WE+SaZKSjsx5HDJgFQR07X
+         tuJvB/CwhhGhE1W1TMCG7AcVVh9wpXGYHfktn/tjT2Wg9tOg48UHBPkZuHs1jS5FboF9
+         KuSw==
+X-Gm-Message-State: AOAM530u9pqTCpuSOlZgc0p6UjtqZW6QTZZOuMijZe1FZ4fz8Ri4ZjvH
+        p8hrjNI9lULmnfwVuwumQJJdeQ==
+X-Google-Smtp-Source: ABdhPJxL8blns0CtPDB1nVU68TFXxXGjE2/ANBGPsJZvdFrheK2PZLnGISiJk46IluCp/UaTXYGycg==
+X-Received: by 2002:a63:5723:0:b0:3fd:d8b4:c19f with SMTP id l35-20020a635723000000b003fdd8b4c19fmr1081427pgb.137.1655150242909;
+        Mon, 13 Jun 2022 12:57:22 -0700 (PDT)
+Received: from platform-dev1.pensando.io ([12.226.153.42])
+        by smtp.gmail.com with ESMTPSA id q21-20020a170902edd500b0016797c33b6csm5509357plk.116.2022.06.13.12.57.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 13 Jun 2022 12:57:22 -0700 (PDT)
+From:   Brad Larson <brad@pensando.io>
+To:     linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de, brad@pensando.io,
+        blarson@amd.com, brijeshkumar.singh@amd.com,
+        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
+Subject: [PATCH v5 01/15] dt-bindings: arm: add AMD Pensando boards
+Date:   Mon, 13 Jun 2022 12:56:44 -0700
+Message-Id: <20220613195658.5607-2-brad@pensando.io>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20220613195658.5607-1-brad@pensando.io>
+References: <20220613195658.5607-1-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+From: Brad Larson <blarson@amd.com>
 
-Introduce acpi_device_fix_up_power_extended() for fixing up power of
-a device having an ACPI companion in a manner that takes the device's
-children into account and make the MMC code use it in two places
-instead of walking the list of the device ACPI companion's children
-directly.
+Document the compatible for AMD Pensando Elba SoC boards.
 
-This will help to eliminate the children list head from struct
-acpi_device as it is redundant and it is used in questionable ways
-in some places (in particular, locking is needed for walking the
-list pointed to it safely, but it is often missing).
-
-Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-Reviewed-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Brad Larson <blarson@amd.com>
 ---
+ .../devicetree/bindings/arm/amd,pensando.yaml | 26 +++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/arm/amd,pensando.yaml
 
-v1 -> v2:
-   * Add R-by from Andy and ACKs from Adrian and Ulf.
-
----
- drivers/acpi/device_pm.c          |   22 ++++++++++++++++++++++
- drivers/mmc/host/sdhci-acpi.c     |    7 ++-----
- drivers/mmc/host/sdhci-pci-core.c |   11 +++--------
- include/acpi/acpi_bus.h           |    1 +
- 4 files changed, 28 insertions(+), 13 deletions(-)
-
-Index: linux-pm/drivers/mmc/host/sdhci-acpi.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-acpi.c
-+++ linux-pm/drivers/mmc/host/sdhci-acpi.c
-@@ -775,8 +775,8 @@ static int sdhci_acpi_probe(struct platf
- {
- 	struct device *dev = &pdev->dev;
- 	const struct sdhci_acpi_slot *slot;
--	struct acpi_device *device, *child;
- 	const struct dmi_system_id *id;
-+	struct acpi_device *device;
- 	struct sdhci_acpi_host *c;
- 	struct sdhci_host *host;
- 	struct resource *iomem;
-@@ -796,10 +796,7 @@ static int sdhci_acpi_probe(struct platf
- 	slot = sdhci_acpi_get_slot(device);
- 
- 	/* Power on the SDHCI controller and its children */
--	acpi_device_fix_up_power(device);
--	list_for_each_entry(child, &device->children, node)
--		if (child->status.present && child->status.enabled)
--			acpi_device_fix_up_power(child);
-+	acpi_device_fix_up_power_extended(device);
- 
- 	if (sdhci_acpi_byt_defer(dev))
- 		return -EPROBE_DEFER;
-Index: linux-pm/drivers/acpi/device_pm.c
-===================================================================
---- linux-pm.orig/drivers/acpi/device_pm.c
-+++ linux-pm/drivers/acpi/device_pm.c
-@@ -369,6 +369,28 @@ int acpi_device_fix_up_power(struct acpi
- }
- EXPORT_SYMBOL_GPL(acpi_device_fix_up_power);
- 
-+static int fix_up_power_if_applicable(struct acpi_device *adev, void *not_used)
-+{
-+	if (adev->status.present && adev->status.enabled)
-+		acpi_device_fix_up_power(adev);
+diff --git a/Documentation/devicetree/bindings/arm/amd,pensando.yaml b/Documentation/devicetree/bindings/arm/amd,pensando.yaml
+new file mode 100644
+index 000000000000..9f3dea681d24
+--- /dev/null
++++ b/Documentation/devicetree/bindings/arm/amd,pensando.yaml
+@@ -0,0 +1,26 @@
++# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/arm/amd,pensando.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+	return 0;
-+}
++title: AMD Pensando SoC Platforms Device Tree Bindings
 +
-+/**
-+ * acpi_device_fix_up_power_extended - Force device and its children into D0.
-+ * @adev: Parent device object whose power state is to be fixed up.
-+ *
-+ * Call acpi_device_fix_up_power() for @adev and its children so long as they
-+ * are reported as present and enabled.
-+ */
-+void acpi_device_fix_up_power_extended(struct acpi_device *adev)
-+{
-+	acpi_device_fix_up_power(adev);
-+	acpi_dev_for_each_child(adev, fix_up_power_if_applicable, NULL);
-+}
-+EXPORT_SYMBOL_GPL(acpi_device_fix_up_power_extended);
++maintainers:
++  - Brad Larson <blarson@amd.com>
 +
- int acpi_device_update_power(struct acpi_device *device, int *state_p)
- {
- 	int state;
-Index: linux-pm/include/acpi/acpi_bus.h
-===================================================================
---- linux-pm.orig/include/acpi/acpi_bus.h
-+++ linux-pm/include/acpi/acpi_bus.h
-@@ -524,6 +524,7 @@ const char *acpi_power_state_string(int
- int acpi_device_set_power(struct acpi_device *device, int state);
- int acpi_bus_init_power(struct acpi_device *device);
- int acpi_device_fix_up_power(struct acpi_device *device);
-+void acpi_device_fix_up_power_extended(struct acpi_device *adev);
- int acpi_bus_update_power(acpi_handle handle, int *state_p);
- int acpi_device_update_power(struct acpi_device *device, int *state_p);
- bool acpi_bus_power_manageable(acpi_handle handle);
-Index: linux-pm/drivers/mmc/host/sdhci-pci-core.c
-===================================================================
---- linux-pm.orig/drivers/mmc/host/sdhci-pci-core.c
-+++ linux-pm/drivers/mmc/host/sdhci-pci-core.c
-@@ -1240,16 +1240,11 @@ static const struct sdhci_pci_fixes sdhc
- #ifdef CONFIG_ACPI
- static void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot)
- {
--	struct acpi_device *device, *child;
-+	struct acpi_device *device;
- 
- 	device = ACPI_COMPANION(&slot->chip->pdev->dev);
--	if (!device)
--		return;
--
--	acpi_device_fix_up_power(device);
--	list_for_each_entry(child, &device->children, node)
--		if (child->status.present && child->status.enabled)
--			acpi_device_fix_up_power(child);
-+	if (device)
-+		acpi_device_fix_up_power_extended(device);
- }
- #else
- static inline void intel_mrfld_mmc_fix_up_power_slot(struct sdhci_pci_slot *slot) {}
-
-
++properties:
++  $nodename:
++    const: "/"
++  compatible:
++    oneOf:
++
++      - description: Boards with Pensando Elba SoC
++        items:
++          - enum:
++              - amd,pensando-elba-ortano
++          - const: amd,pensando-elba
++
++additionalProperties: true
++
++...
+-- 
+2.17.1
 
