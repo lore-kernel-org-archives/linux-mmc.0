@@ -2,97 +2,335 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7C96C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 11:39:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 443DCC43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 11:43:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237149AbiFNLjS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jun 2022 07:39:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56776 "EHLO
+        id S241171AbiFNLnB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jun 2022 07:43:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59560 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232806AbiFNLjR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 07:39:17 -0400
-Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F67A419AC
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2022 04:39:15 -0700 (PDT)
+        with ESMTP id S241596AbiFNLm7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 07:42:59 -0400
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D09AE2408B;
+        Tue, 14 Jun 2022 04:42:58 -0700 (PDT)
+Received: by mail-ej1-x632.google.com with SMTP id m20so16567505ejj.10;
+        Tue, 14 Jun 2022 04:42:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1655206756; x=1686742756;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=237mk2BIhq96XF8iWZ0uz60HefNVAvHEb0ukDsIcCFM=;
-  b=ZOBwCJLSapMzAf9msx0KO0A460/vY/h9ERQxIPKXXtvXgne/lMHgRM5I
-   Kg+1cD50IeM4ChaDb9z1LMGKaOROgQlSp4JvNGsDtR8QuGqXvpvrOOmz3
-   uI52dvR+ntScDlIcEvvfEQtY2gXYyHcf5zNDM5w7P248c4L6WeMuQZlsJ
-   NjHWJBOF7x5hj0rLZbR9D7ur/uXpAfK7/dV6pwoRl65v9SYBmjEG58b8y
-   AW0+NLuR60Caorf8q59RH3XdfMLBmWa7pNQarPIGzqLRodKvnjdbe6Vog
-   WjNJfxy2xuI4Bs815TVJ5c9nomspGM8uCD+SFnJoBoNEjchokoQCWb6MI
-   g==;
-X-IronPort-AV: E=Sophos;i="5.91,300,1647298800"; 
-   d="scan'208";a="24447611"
-Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
-  by mx1-pgp.tq-group.com with ESMTP; 14 Jun 2022 13:39:14 +0200
-Received: from mx1.tq-group.com ([192.168.6.7])
-  by tq-pgp-pr1.tq-net.de (PGP Universal service);
-  Tue, 14 Jun 2022 13:39:14 +0200
-X-PGP-Universal: processed;
-        by tq-pgp-pr1.tq-net.de on Tue, 14 Jun 2022 13:39:14 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1655206754; x=1686742754;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=237mk2BIhq96XF8iWZ0uz60HefNVAvHEb0ukDsIcCFM=;
-  b=dQ5jSAwusgrabgAHIATY5EAIWXJlGt8vkjCTiWZDI9WwT2+QhvrKALIz
-   62wfu0OReCFXzMRkUjzpi+XDe4UwixNWOGwgSmBTBXWwYBJ7MT9x2S8Pj
-   2QO6dScSl3xjRdbc0gNjTO0BdqakxRPxC24Ji1UnJknc+J7BApwtHJVCs
-   yTqXtdUmlgnBjrPCaXF+Ha+squIVVV/YHQyPbHN4jzBuJAEyUY/ADjJ9k
-   a2mgXjlRqqe00oHZT2bSJAqCfNsmgfYiM+H671xUAWymDeHbtAMrqcStz
-   MlHh/h10xV3ba3FnApvUAhAqIEUvZ3FyW9FCHIy7qNW0ZdKQ6HPVHlcST
-   w==;
-X-IronPort-AV: E=Sophos;i="5.91,300,1647298800"; 
-   d="scan'208";a="24447610"
-Received: from vtuxmail01.tq-net.de ([10.115.0.20])
-  by mx1.tq-group.com with ESMTP; 14 Jun 2022 13:39:14 +0200
-Received: from steina-w.tq-net.de (unknown [10.123.49.12])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        by vtuxmail01.tq-net.de (Postfix) with ESMTPSA id 1AA8A280056;
-        Tue, 14 Jun 2022 13:39:14 +0200 (CEST)
-From:   Alexander Stein <alexander.stein@ew.tq-group.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Alexander Stein <alexander.stein@ew.tq-group.com>,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH 1/1] mmc: host: Do not evaluate HS400 capabilities if bus has no MMC capability
-Date:   Tue, 14 Jun 2022 13:39:05 +0200
-Message-Id: <20220614113905.1458715-1-alexander.stein@ew.tq-group.com>
-X-Mailer: git-send-email 2.25.1
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=2dU+JDVuYQhC4RcxMSKR+d7k1wNEwhuhpZjWo6/Bjm0=;
+        b=kaPRDdiiu02eYptvmv/2KYMGBTmPlgjSmJzrOzASsStgGSELwZVIk1N7c50a1lTZvZ
+         QEz4CC4IV9HeY3ZOnI+QdIUSrU8lifD1zuwSKO33aL2DleK7YGObvB7HExWUjhcZdXIm
+         tBmoa4mllq0VgsF6U/ufqwuB3hiKTzOdJpOEhmCXmYmU85JO+/nEeok1YPDG4k1WjkhY
+         lVcaNi0mFZfuLMID3OyJpjOu/nDv25AiUH/rEi2Jt5DnZXY4Qe4HLYLUzz60bEzFnu7L
+         OX2CldUsYREEuNCdgatP+r4ATRW4Mr5mYebhvLEj67kMdQeyya3QnDbHLobuROUpQM7O
+         +7Ig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=2dU+JDVuYQhC4RcxMSKR+d7k1wNEwhuhpZjWo6/Bjm0=;
+        b=qpNW4abgNv5QylInWUpHvqQb3WqHsK9rIJf7qYYd/9PDszhJ+aiPltplai2kHxBGdd
+         ElzTtVi5fidLZ4Ha8lv2Rzozylvu60xcVq0qW6ASdjDBjXzdHbGMHGBNbbihIAxJ7f0v
+         HGiEkUjIjf//6d4Jn2I9hSBDeV54fbghdwrYBWzVdBtGaA2qa7fqnQeNtbQV5BriWLmz
+         zNb5GMyjdM720yRYetAee6mU9nZhM6bVjhzLAIwIhJfWenON13puTGvPGdB870mZ44Ex
+         QLsnIG23CmETQTPWIlT9XymFoQwwzGM29zezwxee3R4bVXXjZK9b5Mc+7mwquLE3QMiw
+         2YAQ==
+X-Gm-Message-State: AOAM5316oesaZcON4gQctYZKNikkX/uw565syruwVnPMOEgBeX0jQc10
+        r/2MMrU/I5tZa3w6xj6xDzx1g24kWM1nzh04lG4=
+X-Google-Smtp-Source: ABdhPJzKXIEBf6sI/Sh/s4ds5CGVfp9pfOtYw05rND6fwMudx7+GizMRGz4kgYksQcy6NGmwfg1mSoJnTeq75dOV3kk=
+X-Received: by 2002:a17:906:149:b0:711:fca6:bc2f with SMTP id
+ 9-20020a170906014900b00711fca6bc2fmr3955821ejh.497.1655206977367; Tue, 14 Jun
+ 2022 04:42:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-15-brad@pensando.io>
+In-Reply-To: <20220613195658.5607-15-brad@pensando.io>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Tue, 14 Jun 2022 13:42:20 +0200
+Message-ID: <CAHp75VeRN+mChDibXqrQjOQqiSz_-inebRqcPQMmAvN_zBTFBg@mail.gmail.com>
+Subject: Re: [PATCH v5 14/15] mfd: pensando-elbasr: Add AMD Pensando Elba
+ System Resource chip
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Al Cooper <alcooperx@gmail.com>, Arnd Bergmann <arnd@arndb.de>,
+        blarson@amd.com, brijeshkumar.singh@amd.com,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Mark Brown <broonie@kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>, piotrs@cadence.com,
+        Pratyush Yadav <p.yadav@ti.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
+        Serge Semin <fancer.lancer@gmail.com>,
+        suravee.suthikulpanit@amd.com,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        devicetree <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If 'no-mmc' is set but 'no-mmc-hs400' is not, this warning is raised.
-Specifying 'no-mmc' should be enough though.
+On Mon, Jun 13, 2022 at 9:57 PM Brad Larson <brad@pensando.io> wrote:
+>
+> From: Brad Larson <blarson@amd.com>
+>
+> Add support for the AMD Pensando Elba SoC System Resource chip
+> using the SPI interface.  The Elba SR is a Multi-function Device
+> supporting device register access using CS0, smbus interface for
+> FRU and board peripherals using CS1, dual Lattice I2C masters for
+> transceiver management using CS2, and CS3 for flash access.
 
-Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
----
- drivers/mmc/core/host.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+...
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 2ed2b4d5e5a5..0fd91f749b3a 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -599,7 +599,7 @@ static int mmc_validate_host_caps(struct mmc_host *host)
- 	}
- 
- 	if (caps2 & (MMC_CAP2_HS400_ES | MMC_CAP2_HS400) &&
--	    !(caps & MMC_CAP_8_BIT_DATA)) {
-+	    !(caps & MMC_CAP_8_BIT_DATA) && !(caps2 & MMC_CAP2_NO_MMC)) {
- 		dev_warn(dev, "drop HS400 support since no 8-bit bus\n");
- 		host->caps2 = caps2 & ~MMC_CAP2_HS400_ES & ~MMC_CAP2_HS400;
- 	}
--- 
-2.25.1
+> +#include <linux/mfd/pensando-elbasr.h>
+> +#include <linux/mfd/core.h>
+> +#include <linux/init.h>
+> +#include <linux/module.h>
+> +#include <linux/ioctl.h>
+> +#include <linux/fs.h>
+> +#include <linux/device.h>
+> +#include <linux/err.h>
+> +#include <linux/list.h>
+> +#include <linux/errno.h>
+> +#include <linux/mutex.h>
+> +#include <linux/slab.h>
+> +#include <linux/compat.h>
+> +#include <linux/of.h>
+> +#include <linux/of_device.h>
+> +#include <linux/regmap.h>
+> +#include <linux/spi/spi.h>
+> +#include <linux/spi/spidev.h>
+> +#include <linux/delay.h>
 
+Keep it sorted?
+It would easily tell that types.h is missed, but maybe other headers
+are superfluous.
+
+...
+
+> +/* The main reason to have this class is to make mdev/udev create the
+> + * /dev/pensrB.C character device nodes exposing our userspace API.
+> + * It also simplifies memory management.  The device nodes
+> + * /dev/pensrB.C are common across Pensando boards.
+> + */
+
+/*
+ * The above style of multi-line
+ * comments is for networking,
+ * the rest uses a slightly different one.
+ */
+
+...
+
+> +static DECLARE_BITMAP(minors, ELBASR_MAX_DEVS);
+> +static unsigned int bufsiz = 4096;
+> +
+> +static LIST_HEAD(device_list);
+> +static DEFINE_MUTEX(device_list_lock);
+
+Is it all to reinvent IDA?
+
+...
+
+> +static ssize_t
+> +elbasr_spi_sync(struct elbasr_data *elbasr_spi, struct spi_message *message)
+> +{
+> +       int status;
+> +       struct spi_device *spi;
+> +
+> +       spin_lock_irq(&elbasr_spi->spi_lock);
+> +       spi = elbasr_spi->spi;
+> +       spin_unlock_irq(&elbasr_spi->spi_lock);
+
+> +
+
+Drop this blank line and see below.
+
+> +       if (spi == NULL)
+> +               status = -ESHUTDOWN;
+
+if (!spi)
+  return ...
+
+> +       else
+
+> +               status = spi_sync(spi, message);
+> +
+> +       if (status == 0)
+> +               status = message->actual_length;
+> +
+> +       return status;
+
+status = spi_sync(...);
+if (status)
+  return status;
+
+return message->actual_length;
+
+> +}
+
+...
+
+> +       if (status) {
+
+> +               pr_debug("elbasr_spi: nothing for minor %d\n", iminor(inode));
+
+We have a device pointer, don't we?
+
+> +               goto err_find_dev;
+> +       }
+
+...
+
+> +static const struct file_operations elbasr_spi_fops = {
+> +       .owner =        THIS_MODULE,
+> +       .write =        elbasr_spi_write,
+> +       .read =         elbasr_spi_read,
+> +       .unlocked_ioctl = elbasr_spi_ioctl,
+> +       .compat_ioctl = elbasr_spi_compat_ioctl,
+> +       .open =         elbasr_spi_open,
+> +       .release =      elbasr_spi_release,
+> +       .llseek =       no_llseek,
+> +};
+
+
+As far as I can see the code looks like a proxy for SPI via SPI. Is
+that the correct interpretation? If so, why this code repeating _a
+lot_ from SPI framework, including character device IOCTL? This is a
+big question here and since there is missed documentation for ABI and
+no points to userspace tools which are going to use this ABI (red
+flag!) the code is no go.
+
+...
+
+> +static bool
+> +elbasr_reg_readable(struct device *dev, unsigned int reg)
+
+It's pretty much one line, can you reduce the number of LoCs by
+reindenting your code a bit?
+
+...
+
+> +static bool
+> +elbasr_reg_writeable(struct device *dev, unsigned int reg)
+
+Ditto and so on.
+
+...
+
+> +       struct spi_transfer t[2] = { { 0 } };
+
+Isn't  `{ }` enough?
+
+...
+
+> +       spi_message_add_tail(&t[0], &m);
+> +       spi_message_add_tail(&t[1], &m);
+
+spi_message_init_with_transfers() ?
+Here and elsewhere.
+
+...
+
+> +       struct spi_transfer t[1] = { { 0 } };
+
+Why does `struct spi_transfer t = { };` not work?!
+
+...
+
+> +static const struct regmap_config pensando_elbasr_regmap_config = {
+> +       .reg_bits = 8,
+> +       .val_bits = 8,
+> +       .cache_type = REGCACHE_NONE,
+> +       .readable_reg = elbasr_reg_readable,
+> +       .writeable_reg = elbasr_reg_writeable,
+> +       .reg_read = elbasr_regs_read,
+> +       .reg_write = elbasr_regs_write,
+> +       .max_register = ELBASR_MAX_REG
+
+Leave a comma here.
+
+> +};
+
+...
+
+> +       elbasr->elbasr_regs = devm_regmap_init(&spi->dev, NULL, spi,
+> +                                              &pensando_elbasr_regmap_config);
+> +       if (IS_ERR(elbasr->elbasr_regs)) {
+> +               ret = PTR_ERR(elbasr->elbasr_regs);
+> +               dev_err(&spi->dev, "Failed to allocate register map: %d\n", ret);
+> +               return ret;
+
+return dev_err_probe(...);
+
+> +       }
+> +
+> +       ret = devm_mfd_add_devices(&spi->dev, PLATFORM_DEVID_NONE,
+> +                                  pensando_elbasr_subdev_info,
+> +                                  ARRAY_SIZE(pensando_elbasr_subdev_info),
+> +                                  NULL, 0, NULL);
+> +       if (ret)
+> +               dev_err(&spi->dev, "Failed to register sub-devices: %d\n", ret);
+> +
+> +       return ret;
+
+Ditto.
+
+...
+
+> +       /* Add Elba reset driver sub-device */
+> +       if (spi->chip_select == 0)
+> +               elbasr_regs_setup(spi, elbasr);
+
+You have an awful mixture of devm_ vs. non-devm_ calls. Either move
+from devm_ completely, or switch to devm_ in the rest of the ->probe()
+code.
+
+...
+
+> +static const struct of_device_id elbasr_spi_of_match[] = {
+> +       { .compatible = "amd,pensando-elbasr" },
+> +       { /* sentinel */ },
+
+Comma is not needed in terminator entry.
+
+> +};
+
+...
+
+> +static struct spi_driver elbasr_spi_driver = {
+> +       .probe = elbasr_spi_probe,
+> +       .driver = {
+> +               .name = "elbasr",
+
+> +               .of_match_table = of_match_ptr(elbasr_spi_of_match),
+
+of_match_ptr() is useless here (look at your Kconfig) and in some
+cases is harmful. No need to use this.
+
+> +       },
+> +};
+
+...
+
+> +#include <linux/cdev.h>
+> +#include <linux/regmap.h>
+
+mutex.h and types.h are missed, for example.
+You need to use headers for direct use of. And in some cases forward
+declarations can be used instead of including a header.
+
+--
+With Best Regards,
+Andy Shevchenko
