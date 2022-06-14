@@ -2,187 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E21EFC43334
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 11:19:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7C96C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 11:39:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241869AbiFNLTw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jun 2022 07:19:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42726 "EHLO
+        id S237149AbiFNLjS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jun 2022 07:39:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56776 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231887AbiFNLTw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 07:19:52 -0400
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3956324084;
-        Tue, 14 Jun 2022 04:19:51 -0700 (PDT)
-Received: by mail-ej1-x62a.google.com with SMTP id s12so16524871ejx.3;
-        Tue, 14 Jun 2022 04:19:51 -0700 (PDT)
+        with ESMTP id S232806AbiFNLjR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 07:39:17 -0400
+Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F67A419AC
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2022 04:39:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=whlmV8UrxJzjBMd38gq+zS77XEXwKIxpWfDi63X16RI=;
-        b=F1qCqa7i5aglLXWDzkorIGtEyjePLR6cCM7gbkmI2+uEezcDn1ZOYp4nihhGTesqd4
-         Xl/ZSuyl3N9fWkP4au0KcoIJDmje5AqlkwNWBw2dqnx5rs98t9EiXOmryhgPTkAOH/Hz
-         Z0Qb7Q1eO2FOkSl0NqgWnQz8mTJc4bwLeRcURCY21g4v91JncsXfrSOoqCCcdMwd03Oq
-         50Mp8McJiZeEoj7bd69VoyG97750V4T+4+gdSmWslJ/S7rRzFX/SU91IuZb4yqRsgr5m
-         nXp1Gd4BfhEVMM6sj8WCXe0/ffHegE3l8izreEzp4FVrqDYpHsngMGYmm9xrwwgQ2oLY
-         sozQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=whlmV8UrxJzjBMd38gq+zS77XEXwKIxpWfDi63X16RI=;
-        b=lB/KURUPKyU44eQbUyUKbMgVIEkd5lhXDRvPmSZpCY5v5KhF9/uv3DNbQ2i0Q+pnpJ
-         eyFdC09RkLrM/2m+BkZm33kQjrZgUuHsVJULOYCLcck6uheqEFKENbDNhlDqN+K1rfZV
-         nef/cXr82fYX/uwjLqUqWeLwdkg1139kgVPeTgqh8hyyzT+7m9EuJYLIz/mvj50FVMGd
-         IBn1yNdbjf1xIuL76kQro2iChKcAmP6LuYupsvPpo8x6lmFqIb2bEp12m0iuw6JYGge2
-         6Vw1lzuLvSNUHdv1/2Gg07e9Kty07qmd+rqwk9jfDeocEcP0LCkQx+9CAi5iqpcL7qo/
-         yYrw==
-X-Gm-Message-State: AOAM531BeJ/bMxQyRsEzuh6rFtyvP+3dFXjElB6bj525hykQ676p9X3D
-        uA5Z0FKW4s/ajFBGVtC6cVLAI77F58xOrIc6OqE=
-X-Google-Smtp-Source: AGRyM1v0nufiTvDZqbD1JqkDhi9ZtowOUuGXYkOfl3Gt3KfgIcCzvqZo7atHU6qMu0TPXakN/shNiAECtO+30c1F6r0=
-X-Received: by 2002:a17:906:d550:b0:704:7ba6:9854 with SMTP id
- cr16-20020a170906d55000b007047ba69854mr3792329ejc.579.1655205589593; Tue, 14
- Jun 2022 04:19:49 -0700 (PDT)
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1655206756; x=1686742756;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=237mk2BIhq96XF8iWZ0uz60HefNVAvHEb0ukDsIcCFM=;
+  b=ZOBwCJLSapMzAf9msx0KO0A460/vY/h9ERQxIPKXXtvXgne/lMHgRM5I
+   Kg+1cD50IeM4ChaDb9z1LMGKaOROgQlSp4JvNGsDtR8QuGqXvpvrOOmz3
+   uI52dvR+ntScDlIcEvvfEQtY2gXYyHcf5zNDM5w7P248c4L6WeMuQZlsJ
+   NjHWJBOF7x5hj0rLZbR9D7ur/uXpAfK7/dV6pwoRl65v9SYBmjEG58b8y
+   AW0+NLuR60Caorf8q59RH3XdfMLBmWa7pNQarPIGzqLRodKvnjdbe6Vog
+   WjNJfxy2xuI4Bs815TVJ5c9nomspGM8uCD+SFnJoBoNEjchokoQCWb6MI
+   g==;
+X-IronPort-AV: E=Sophos;i="5.91,300,1647298800"; 
+   d="scan'208";a="24447611"
+Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
+  by mx1-pgp.tq-group.com with ESMTP; 14 Jun 2022 13:39:14 +0200
+Received: from mx1.tq-group.com ([192.168.6.7])
+  by tq-pgp-pr1.tq-net.de (PGP Universal service);
+  Tue, 14 Jun 2022 13:39:14 +0200
+X-PGP-Universal: processed;
+        by tq-pgp-pr1.tq-net.de on Tue, 14 Jun 2022 13:39:14 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1655206754; x=1686742754;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=237mk2BIhq96XF8iWZ0uz60HefNVAvHEb0ukDsIcCFM=;
+  b=dQ5jSAwusgrabgAHIATY5EAIWXJlGt8vkjCTiWZDI9WwT2+QhvrKALIz
+   62wfu0OReCFXzMRkUjzpi+XDe4UwixNWOGwgSmBTBXWwYBJ7MT9x2S8Pj
+   2QO6dScSl3xjRdbc0gNjTO0BdqakxRPxC24Ji1UnJknc+J7BApwtHJVCs
+   yTqXtdUmlgnBjrPCaXF+Ha+squIVVV/YHQyPbHN4jzBuJAEyUY/ADjJ9k
+   a2mgXjlRqqe00oHZT2bSJAqCfNsmgfYiM+H671xUAWymDeHbtAMrqcStz
+   MlHh/h10xV3ba3FnApvUAhAqIEUvZ3FyW9FCHIy7qNW0ZdKQ6HPVHlcST
+   w==;
+X-IronPort-AV: E=Sophos;i="5.91,300,1647298800"; 
+   d="scan'208";a="24447610"
+Received: from vtuxmail01.tq-net.de ([10.115.0.20])
+  by mx1.tq-group.com with ESMTP; 14 Jun 2022 13:39:14 +0200
+Received: from steina-w.tq-net.de (unknown [10.123.49.12])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPSA id 1AA8A280056;
+        Tue, 14 Jun 2022 13:39:14 +0200 (CEST)
+From:   Alexander Stein <alexander.stein@ew.tq-group.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Alexander Stein <alexander.stein@ew.tq-group.com>,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH 1/1] mmc: host: Do not evaluate HS400 capabilities if bus has no MMC capability
+Date:   Tue, 14 Jun 2022 13:39:05 +0200
+Message-Id: <20220614113905.1458715-1-alexander.stein@ew.tq-group.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-14-brad@pensando.io>
-In-Reply-To: <20220613195658.5607-14-brad@pensando.io>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Tue, 14 Jun 2022 13:19:13 +0200
-Message-ID: <CAHp75Vck4xNF=OOseMssF2R7TV2t+y0AQozRDFN2E6zQ51xR0g@mail.gmail.com>
-Subject: Re: [PATCH v5 13/15] mmc: sdhci-cadence: Add AMD Pensando Elba SoC support
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Al Cooper <alcooperx@gmail.com>, Arnd Bergmann <arnd@arndb.de>,
-        blarson@amd.com, brijeshkumar.singh@amd.com,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Mark Brown <broonie@kernel.org>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>, piotrs@cadence.com,
-        Pratyush Yadav <p.yadav@ti.com>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
-        Serge Semin <fancer.lancer@gmail.com>,
-        suravee.suthikulpanit@amd.com,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 13, 2022 at 9:57 PM Brad Larson <brad@pensando.io> wrote:
->
-> From: Brad Larson <blarson@amd.com>
->
-> Add support for AMD Pensando Elba SoC which explicitly controls
-> byte-lane enables on writes.  Add priv_write_l() which is
+If 'no-mmc' is set but 'no-mmc-hs400' is not, this warning is raised.
+Specifying 'no-mmc' should be enough though.
 
-enabling ?
+Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
+---
+ drivers/mmc/core/host.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> used on Elba platforms for byte-lane control.
->
-> Select MMC_SDHCI_IO_ACCESSORS for MMC_SDHCI_CADENCE which
-> allows Elba SoC sdhci_elba_ops to overwrite the SDHCI
-> IO memory accessors.
-
-...
-
-> +       void (*priv_write_l)(struct sdhci_cdns_priv *priv, u32 val,
-
-priv_writel
-
-> +                            void __iomem *reg);
-
-And perhaps leave it on one line.
-
-I also would swap parameters, so address goes first followed by value.
-
-...
-
-> +static inline void sdhci_cdns_priv_writel(struct sdhci_cdns_priv *priv,
-> +                                         u32 val, void __iomem *reg)
-> +{
-
-> +       if (unlikely(priv->priv_write_l))
-
-First of all, why if (unlikely())-else instead of if (likely())-else?
-
-> +               priv->priv_write_l(priv, val, reg);
-> +       else
-> +               writel(val, reg);
-> +}
-
-Instead of branching each time you do I/O, make sure that callback is
-always set and call it unconditionally. In this case you don't need to
-have this callback, but maybe just a wrapper on `writel()`. As a
-result you may split this to two patches in the first of which you
-simply introduce a callback and a writel() wrapper which is assigned
-unconditionally to all current chips. In the next you add a new chip
-support.
-
-...
-
-> +       u32 m = (reg & 0x3);
-> +       u32 msk = (0x3 << (m));
-> +
-> +       spin_lock_irqsave(&priv->wrlock, flags);
-> +       writel(msk << 3, priv->ctl_addr);
-> +       writew(val, host->ioaddr + reg);
-> +       spin_unlock_irqrestore(&priv->wrlock, flags);
-
-Too many 3:s as magic. Is it GENMASK() or something else? Perhaps it
-needs a definition.
-
-...
-
-> +       u32 m = (reg & 0x3);
-> +       u32 msk = (0x1 << (m));
-> +
-> +       spin_lock_irqsave(&priv->wrlock, flags);
-> +       writel(msk << 3, priv->ctl_addr);
-> +       writeb(val, host->ioaddr + reg);
-> +       spin_unlock_irqrestore(&priv->wrlock, flags);
-
-Ditto.
-
-...
-
-> +       writel(0x78, priv->ctl_addr);
-
-Magic.
-
-...
-
-> +static const struct sdhci_cdns_drv_data sdhci_cdns_drv_data = {
-> +       .pltfm_data = {
-> +               .ops = &sdhci_cdns_ops,
-> +       },
-> +};
-> +
-> +
-
-One blank line is enough.
-
-...
-
-> +       {
-> +               .compatible = "amd,pensando-elba-sd4hc",
-> +               .data = &sdhci_elba_drv_data
-
-Leave a comma here.
-
->         },
-
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 2ed2b4d5e5a5..0fd91f749b3a 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -599,7 +599,7 @@ static int mmc_validate_host_caps(struct mmc_host *host)
+ 	}
+ 
+ 	if (caps2 & (MMC_CAP2_HS400_ES | MMC_CAP2_HS400) &&
+-	    !(caps & MMC_CAP_8_BIT_DATA)) {
++	    !(caps & MMC_CAP_8_BIT_DATA) && !(caps2 & MMC_CAP2_NO_MMC)) {
+ 		dev_warn(dev, "drop HS400 support since no 8-bit bus\n");
+ 		host->caps2 = caps2 & ~MMC_CAP2_HS400_ES & ~MMC_CAP2_HS400;
+ 	}
 -- 
-With Best Regards,
-Andy Shevchenko
+2.25.1
+
