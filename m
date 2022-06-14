@@ -2,126 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37CA1C43334
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 11:47:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 237E1CCA47A
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 12:01:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242393AbiFNLrM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jun 2022 07:47:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34094 "EHLO
+        id S243531AbiFNMBO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jun 2022 08:01:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51380 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239698AbiFNLrL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 07:47:11 -0400
-Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95A844738B;
-        Tue, 14 Jun 2022 04:47:10 -0700 (PDT)
-Received: by mail-ej1-x636.google.com with SMTP id v1so16563497ejg.13;
-        Tue, 14 Jun 2022 04:47:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4T7FatHUEWyE0/J2q0UksKjdBVt/etQpJFBpvcjCzb4=;
-        b=QT0iuhQDlvN3YyjmWFrFiMQmniIBmhz74YIlNADPWNY8MHBAuCO25eBMOU99FifoU2
-         KaFzd71X7/iAGw3Fv99oyWSjDTapjGl/mJ43ITiGvFNm2HXFj6HhVIY244dU7IL4vZxi
-         xwiYdk2kRWWjOc71NUe/IwKQWFxFbfNRpjU1vwHCS+ZDW1Wguco2iYPXQ1VZp9NIG8iz
-         qDbhDtNliMvlwtIEilwU48VzH04NtffUPwXCj/REb1DAGsmzPV2MsPVbJvbQ7Od0uBpd
-         X54CaI/+F9wMs7K1XTWxxHxPw+numHyls8gHf/6VAplZoBHmnCNXsaZHyoqFu/1gC9nN
-         PXZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4T7FatHUEWyE0/J2q0UksKjdBVt/etQpJFBpvcjCzb4=;
-        b=ODrFb7ItEg0c64XloxJ1v6k5Ok0oMjSpCDV2sr5QYsd0t4GTF1S1nSAZpnxLtlmxzg
-         Fndqpdxw4LJXRpuU+tHSFvtWjAwa1FkEotH4oUWIXUhIi5ofzcAvLi8LUElKcxun361h
-         RArWEMNp+MKKObCon5fk67//slIRC5W/mdm7xhxpi+ectSS2JLPagzG4LsEq39cOlTT4
-         14DPnKRmoKQNm5lgSy3YYTre/T31t7D8+w178EjFfPUp2Wk50N6JtfrfdBkCkwhW531W
-         NB/hb/pOGr2lBPtadd25QlkNb+jRVQpJs8HAnMgoT0zQMu93nUv0Iz1vxMoT3kwmQSTG
-         dHKw==
-X-Gm-Message-State: AOAM533B5H7SRzbBQWHtagR9938J0k+2lve4ny0ZLfhJ+0Cu4soN+HC7
-        xUa/kiE1AWlI35hbavTbdkv/VXKwqAftnmrvruc=
-X-Google-Smtp-Source: ABdhPJxdZq2dsz6vvs1wjp4sOAnVfA7wrRHT0ZPd7X7dMxTLo9BCnoRL6nQ1lL2RjN3jeD3LouiP8vDAmOGoPeBGnB0=
-X-Received: by 2002:a17:906:149:b0:711:fca6:bc2f with SMTP id
- 9-20020a170906014900b00711fca6bc2fmr3973476ejh.497.1655207229182; Tue, 14 Jun
- 2022 04:47:09 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-16-brad@pensando.io>
-In-Reply-To: <20220613195658.5607-16-brad@pensando.io>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Tue, 14 Jun 2022 13:46:32 +0200
-Message-ID: <CAHp75Vfrgw4sf7itQ-RVjNTNOrO95YeU9ugZc9sbBUYrpda5eg@mail.gmail.com>
-Subject: Re: [PATCH v5 15/15] reset: elbasr: Add AMD Pensando Elba SR Reset Controller
+        with ESMTP id S231868AbiFNMBN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 08:01:13 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E275747387;
+        Tue, 14 Jun 2022 05:01:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 99292B81863;
+        Tue, 14 Jun 2022 12:01:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 33C38C3411B;
+        Tue, 14 Jun 2022 12:01:03 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1655208070;
+        bh=BQ+K8h3b8NTc0PJ1YVsLsJAAKVHpadGIqdfwE7gJ6EE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=QHZY2f5ThjG7pguJisAlbIb+1htLs+Nc0tQKLX/CwGfJJ3e4ZLjqz9vaw6RabX47/
+         4631C+fahuuV6n7feTi1CEmA+UdnNun5lmCo3Wew/nV0mQ7A/P7BfGxLr2OHQC8a/M
+         w7soKXBx2iVGgM34iRsHnO90tQt/mt0r8mOzBzbkedSqO0Jn99HOQFcViO9R+OXTSs
+         7TzIg8Ls1Yrn3NKp/7URjwc9F17lp+3o1HmlxlO5kNJpoiSj/5pvuHy8JmuCExyonq
+         Xi1vBcUypUxqZN+9xht9NNEVewgRSd4uVgCWW1oOGRwg72SHiN+/Q2z20XAkaGKfJh
+         8ZAX1Zlse6b/g==
+Date:   Tue, 14 Jun 2022 13:01:00 +0100
+From:   Mark Brown <broonie@kernel.org>
 To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Al Cooper <alcooperx@gmail.com>, Arnd Bergmann <arnd@arndb.de>,
+Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
         blarson@amd.com, brijeshkumar.singh@amd.com,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Mark Brown <broonie@kernel.org>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>, piotrs@cadence.com,
-        Pratyush Yadav <p.yadav@ti.com>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
-        Serge Semin <fancer.lancer@gmail.com>,
-        suravee.suthikulpanit@amd.com,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        devicetree <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        lee.jones@linaro.org, yamada.masahiro@socionext.com,
+        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        fancer.lancer@gmail.com, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
+        devicetree@vger.kernel.org
+Subject: Re: [PATCH v5 11/15] spi: cadence-quadspi: Add compatible for AMD
+ Pensando Elba SoC
+Message-ID: <Yqh4fO/OFW6DKmyX@sirena.org.uk>
+References: <20220613195658.5607-1-brad@pensando.io>
+ <20220613195658.5607-12-brad@pensando.io>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="QD+xTY9ZegCZALRr"
+Content-Disposition: inline
+In-Reply-To: <20220613195658.5607-12-brad@pensando.io>
+X-Cookie: DYSLEXICS OF THE WORLD, UNTIE!
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 13, 2022 at 9:57 PM Brad Larson <brad@pensando.io> wrote:
->
-> From: Brad Larson <blarson@amd.com>
->
-> This patch adds the reset controller functionality for the
-> AMD Pensando Elba System Resource Chip.
 
-...
+--QD+xTY9ZegCZALRr
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> +#include <linux/mfd/pensando-elbasr.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/reset-controller.h>
-> +#include <linux/regmap.h>
-> +#include <linux/err.h>
+On Mon, Jun 13, 2022 at 12:56:54PM -0700, Brad Larson wrote:
 
-> +#include <linux/of.h>
+> +	/*
+> +	 * If a hazard exists between the APB and AHB interfaces, perform a
+> +	 * dummy readback from the controller to ensure synchronization.
+> +	 */
+> +	if (cqspi->apb_ahb_hazard)
+> +		(void)readl(reg_base + CQSPI_REG_INDIRECTWR);
 
-There is no user of this header. But there are missed ones, such as
-mod_devicetable.h.
+You shouldn't need the cast here.
 
-Keep them ordered to easily find such issues.
+--QD+xTY9ZegCZALRr
+Content-Type: application/pgp-signature; name="signature.asc"
 
-...
+-----BEGIN PGP SIGNATURE-----
 
-> +       ret = devm_reset_controller_register(&pdev->dev, &elbar->rcdev);
-> +
-> +       return ret;
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmKoeHwACgkQJNaLcl1U
+h9BzAAf/X0wGG5ThEi1bnamNc2nxsc2NVq/sQg9/BZE6fNlcgYGwg73KZznuhleu
+tSQpBsn3Ymko/E7aF/JzRdBUoJOLpU3vQhcuVt67hXYdQV40NbJk9PQZFoLgBUk9
+YF/C82tFviC7ew8ImqJQ2rMPGXKTYtmofoz6SjbqQjUhaS/MpGXwwaek2oeYcgxt
+XYXhaJKFj7ACfQKnVv6APjpqyLYpDN5HuIKvOEvAA+z0z35nM1GpY141XFn8liYB
+lvZKIPd6sQLen83SW4BlmZ1RfkyCwTqLKWzhT5cQQLW5ljzR5sZjBRD/JXM00fGr
+9NDR5Q3Pv/cSVpW8himxFIUAnv3/Ew==
+=/+w/
+-----END PGP SIGNATURE-----
 
-It is simply `return devm_...(...);`. Looking through your patches I
-can tell that you may easily drop LoCs by 10%. Please do so in the
-next version.
-
-...
-
-> +static const struct of_device_id elba_reset_dt_match[] = {
-> +       { .compatible = "amd,pensando-elbasr-reset", },
-> +       { /* sentinel */ },
-
-No comma.
-
-> +};
-
--- 
-With Best Regards,
-Andy Shevchenko
+--QD+xTY9ZegCZALRr--
