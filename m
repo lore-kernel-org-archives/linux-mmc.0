@@ -2,43 +2,43 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BFC8DC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 21:32:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C96CC43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 21:34:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357063AbiFNVcT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jun 2022 17:32:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57366 "EHLO
+        id S1357643AbiFNVef (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jun 2022 17:34:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357051AbiFNVcR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 17:32:17 -0400
-Received: from mail-il1-f176.google.com (mail-il1-f176.google.com [209.85.166.176])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 028F35159E;
-        Tue, 14 Jun 2022 14:32:17 -0700 (PDT)
-Received: by mail-il1-f176.google.com with SMTP id h18so7537992ilj.7;
-        Tue, 14 Jun 2022 14:32:16 -0700 (PDT)
+        with ESMTP id S1357627AbiFNVee (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 17:34:34 -0400
+Received: from mail-il1-f177.google.com (mail-il1-f177.google.com [209.85.166.177])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E4DB515A4;
+        Tue, 14 Jun 2022 14:34:32 -0700 (PDT)
+Received: by mail-il1-f177.google.com with SMTP id d6so7549600ilm.4;
+        Tue, 14 Jun 2022 14:34:32 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=WAWSxknMxGX+lY0dvgXNI7EytYZUhbO7QGP6wzKtlDA=;
-        b=PVT5d87Ho3efHh28u8ameF8F4zecVLn3N1JLsaVSnKU/RmpDOzU/FG0dgzN1LLXkr8
-         TU8jVPUXla/BMSZ+acu445X6EcmiNAP0wA2pDaN/qXKzBYnimebVzzxKMN3Lpli1cBua
-         FncPnbT/uU2GKQjCjlR328pFzxARbfPabfA5YO9M9RHWV7OJgq31d5T4eay/+CzFWEjg
-         4EZAkBHFx2O9PQ/oV33EWovM5fD8Xg66pRWDwr3gGnx07UyTV1q20DBqlMdc1m1FO05g
-         ONpuOG2X4+KUy34QyIhIUVNPt2+QK3dFNw2U8toVRLBIB/ya+WLimSgjYdqmXZj6Lz1b
-         99bg==
-X-Gm-Message-State: AJIora/ryK76m8WvXdZRRfYJsa73qMx6iJ73aqYfCTESuV0RnKePfcQE
-        rmu7G/UHfb4nNbiEZjJd7g==
-X-Google-Smtp-Source: AGRyM1vOcu3sfkryYXXqwTbiJ63jPjdO1e/P/MZ52O46TCKMI1eK6Od0VH4ZduDiY/K9JrSBd8qJVA==
-X-Received: by 2002:a05:6e02:1a03:b0:2d2:c409:b12e with SMTP id s3-20020a056e021a0300b002d2c409b12emr4062820ild.125.1655242336198;
-        Tue, 14 Jun 2022 14:32:16 -0700 (PDT)
+        bh=Lw4KopkplTrYRscEG3rSLSQpHs9JVXnvbLHMj0LfULw=;
+        b=q4bIfxFBPG7WXjR3Anmb8NbKAI4xJgQOXW5+vGMp/a0NbTkSg0Krktuz6rtD5rTfMs
+         X6Yz1+mHknYgUBm+tPDFHxX89BqghI0bbeF9MYPWR5YNHVKiCh9Q3B/T7iDc1qcWjT8S
+         9f2vGocUmBYWvUpUhqK9+SMwzp9MHXQn7Z6XyesjFK8ubvyJ3DZszTfQJ0I2MOjCo9ou
+         a4KImic5ffHWtO9ZqCU5ZqtM4UU455/yVkAuFkE4kT6g0hwonWVA6knO8n1CHcCGbQIq
+         sTwZCXRCYno4ptqJsIweYDmQs9VZbzGMuok0K7ksuQ6pimhq9EWFuJQFUxfAmBMTxerW
+         y07A==
+X-Gm-Message-State: AJIora9MqtyXgDHwU+PeaXIeU3/IwxaZeuPo9rYs6zIue/fOPV877EZ5
+        rz4FzbFoPMhUc+f6dvPD/A==
+X-Google-Smtp-Source: AGRyM1sYmRDfslvd2yjDtZY4AFUFvI4YgrlR4n7PSncRNqJQrdg1VxfmuGZMQYQbFywTUA/imP7UGg==
+X-Received: by 2002:a05:6e02:1d91:b0:2d3:bef3:a073 with SMTP id h17-20020a056e021d9100b002d3bef3a073mr4460072ila.60.1655242471610;
+        Tue, 14 Jun 2022 14:34:31 -0700 (PDT)
 Received: from robh.at.kernel.org ([64.188.179.251])
-        by smtp.gmail.com with ESMTPSA id v7-20020a023847000000b003316536ebc1sm5367228jae.73.2022.06.14.14.32.13
+        by smtp.gmail.com with ESMTPSA id l44-20020a02666c000000b0032b3a781767sm5326612jaf.43.2022.06.14.14.34.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jun 2022 14:32:15 -0700 (PDT)
-Received: (nullmailer pid 2684027 invoked by uid 1000);
-        Tue, 14 Jun 2022 21:32:12 -0000
-Date:   Tue, 14 Jun 2022 15:32:12 -0600
+        Tue, 14 Jun 2022 14:34:31 -0700 (PDT)
+Received: (nullmailer pid 2692703 invoked by uid 1000);
+        Tue, 14 Jun 2022 21:34:28 -0000
+Date:   Tue, 14 Jun 2022 15:34:28 -0600
 From:   Rob Herring <robh@kernel.org>
 To:     Brad Larson <brad@pensando.io>
 Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
@@ -53,102 +53,76 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         samuel@sholland.org, fancer.lancer@gmail.com,
         suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
         ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: Re: [PATCH v5 07/15] dt-bindings: reset: amd,pensando-elbasr-reset:
- Add AMD Pensando SR Reset Controller bindings
-Message-ID: <20220614213212.GA2682090-robh@kernel.org>
+Subject: Re: [PATCH v5 15/15] reset: elbasr: Add AMD Pensando Elba SR Reset
+ Controller
+Message-ID: <20220614213428.GA2684278-robh@kernel.org>
 References: <20220613195658.5607-1-brad@pensando.io>
- <20220613195658.5607-8-brad@pensando.io>
+ <20220613195658.5607-16-brad@pensando.io>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220613195658.5607-8-brad@pensando.io>
+In-Reply-To: <20220613195658.5607-16-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 13, 2022 at 12:56:50PM -0700, Brad Larson wrote:
+On Mon, Jun 13, 2022 at 12:56:58PM -0700, Brad Larson wrote:
 > From: Brad Larson <blarson@amd.com>
 > 
-> Document bindings for AMD Pensando Elba SR Reset Controller
+> This patch adds the reset controller functionality for the
+> AMD Pensando Elba System Resource Chip.
 > 
 > Signed-off-by: Brad Larson <blarson@amd.com>
 > ---
->  .../reset/amd,pensando-elbasr-reset.yaml      | 62 +++++++++++++++++++
->  1 file changed, 62 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+>  drivers/reset/Kconfig                         |  9 ++
+>  drivers/reset/Makefile                        |  1 +
+>  drivers/reset/reset-elbasr.c                  | 94 +++++++++++++++++++
+>  .../reset/amd,pensando-elba-reset.h           | 11 +++
+
+This goes with the binding patch
+
+>  4 files changed, 115 insertions(+)
+>  create mode 100644 drivers/reset/reset-elbasr.c
+>  create mode 100644 include/dt-bindings/reset/amd,pensando-elba-reset.h
 > 
-> diff --git a/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml b/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+> diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
+> index 93c8d07ee328..13f5a8ca0f03 100644
+> --- a/drivers/reset/Kconfig
+> +++ b/drivers/reset/Kconfig
+> @@ -66,6 +66,15 @@ config RESET_BRCMSTB_RESCAL
+>  	  This enables the RESCAL reset controller for SATA, PCIe0, or PCIe1 on
+>  	  BCM7216.
+>  
+> +config RESET_ELBASR
+> +	tristate "Pensando Elba System Resource reset controller"
+> +	depends on MFD_PENSANDO_ELBASR || COMPILE_TEST
+> +	help
+> +	  This option enables support for the external reset functions
+> +	  on the Pensando Elba System Resource Chip.  Reset control
+> +	  of peripherals is accessed over SPI to the system resource
+> +	  chip device registers using CS0.
+> +
+>  config RESET_HSDK
+>  	bool "Synopsys HSDK Reset Driver"
+>  	depends on HAS_IOMEM
+> diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
+> index a80a9c4008a7..c0fe12b9950e 100644
+> --- a/drivers/reset/Makefile
+> +++ b/drivers/reset/Makefile
+> @@ -10,6 +10,7 @@ obj-$(CONFIG_RESET_BCM6345) += reset-bcm6345.o
+>  obj-$(CONFIG_RESET_BERLIN) += reset-berlin.o
+>  obj-$(CONFIG_RESET_BRCMSTB) += reset-brcmstb.o
+>  obj-$(CONFIG_RESET_BRCMSTB_RESCAL) += reset-brcmstb-rescal.o
+> +obj-$(CONFIG_RESET_ELBASR) += reset-elbasr.o
+>  obj-$(CONFIG_RESET_HSDK) += reset-hsdk.o
+>  obj-$(CONFIG_RESET_IMX7) += reset-imx7.o
+>  obj-$(CONFIG_RESET_INTEL_GW) += reset-intel-gw.o
+> diff --git a/drivers/reset/reset-elbasr.c b/drivers/reset/reset-elbasr.c
 > new file mode 100644
-> index 000000000000..03bb86ebcfd3
+> index 000000000000..6e429cb11466
 > --- /dev/null
-> +++ b/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
-> @@ -0,0 +1,62 @@
-> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/reset/amd,pensando-elbasr-reset.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: AMD Pensando Elba SoC Reset Controller Device Tree Bindings
-> +
-> +maintainers:
-> +  - Brad Larson <blarson@amd.com>
-> +
-> +description: |
-> +  AMD Pensando Elba SoC reset controller driver which supports a resource
-> +  controller connected to the Elba SoC over a SPI bus.  The Elba reset
-> +  controller must be defined as a child node of the Elba SPI bus
-> +  chip-select 0 node.
-> +
-> +  See also:
-> +  - dt-bindings/reset/amd,pensando-elba-reset.h
-> +
-> +properties:
-> +  $nodename:
-> +    pattern: "^reset-controller@[0-9a-f]+$"
-> +
-> +  compatible:
-> +    const: amd,pensando-elbasr-reset
-> +
-> +  reg:
-> +    const: 0
-> +
-> +  '#reset-cells':
-> +    const: 1
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - '#reset-cells'
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/reset/amd,pensando-elba-reset.h>
-> +    spi0 {
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +        num-cs = <4>;
-> +
-> +        spi@0 {
+> +++ b/drivers/reset/reset-elbasr.c
+> @@ -0,0 +1,94 @@
+> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 
-'spi' is reserved for SPI buses. I thought this was an MFD.
-
-> +          reg = <0>;
-> +          #address-cells = <1>;
-> +          #size-cells = <0>;
-> +
-> +          rstc: reset-controller@0 {
-> +            compatible = "amd,pensando-elbasr-reset";
-> +            reg = <0>;
-> +            #reset-cells = <1>;
-> +          };
-> +        };
-> +    };
-> +
-> +...
-> -- 
-> 2.17.1
-> 
-> 
+Kernel code is GPL-2.0-only generally.
