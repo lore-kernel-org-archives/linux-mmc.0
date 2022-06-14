@@ -2,127 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C96CC43334
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 21:34:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A650FC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 22:44:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1357643AbiFNVef (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jun 2022 17:34:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60538 "EHLO
+        id S237520AbiFNWo0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jun 2022 18:44:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42318 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357627AbiFNVee (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 17:34:34 -0400
-Received: from mail-il1-f177.google.com (mail-il1-f177.google.com [209.85.166.177])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E4DB515A4;
-        Tue, 14 Jun 2022 14:34:32 -0700 (PDT)
-Received: by mail-il1-f177.google.com with SMTP id d6so7549600ilm.4;
-        Tue, 14 Jun 2022 14:34:32 -0700 (PDT)
+        with ESMTP id S232460AbiFNWoZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 18:44:25 -0400
+Received: from mail-pf1-x436.google.com (mail-pf1-x436.google.com [IPv6:2607:f8b0:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADF3C50E10
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2022 15:44:23 -0700 (PDT)
+Received: by mail-pf1-x436.google.com with SMTP id y196so9826017pfb.6
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2022 15:44:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=tEKPEohOKii6C8FoFw3OQBM5b+J4Se99Td+zgDjIemk=;
+        b=ZTuKG2Fcgea7PbObrnWQU9iarLLlAl0A3+317ktLgMDaPR83JypuyFNwk5IEhWeF5z
+         aUbwZKdEEhBtB/+uY9xN1DmpESlWOKMXVSi6GXFb0QE24SH+uGoGCTLELNITuEURJ+Je
+         GYUglFfOuvGTeVuO12m05G195vaE9hRJdxedwMVzmySSryorit3Re0wFMKzdyV08DHGC
+         n+LfhDjZatZjN10J7znq6vtnMUsrTyfRYPFZnXAKN+5FZ397/PAPu5MPSCaJ4zmtfpXg
+         WLEDiEpiSAKgZJxjDOig8wqWmgw3QL4wbxJ17NWXeuNKDT/GDMD9FLXYlx0rz/MnAOO9
+         PU/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Lw4KopkplTrYRscEG3rSLSQpHs9JVXnvbLHMj0LfULw=;
-        b=q4bIfxFBPG7WXjR3Anmb8NbKAI4xJgQOXW5+vGMp/a0NbTkSg0Krktuz6rtD5rTfMs
-         X6Yz1+mHknYgUBm+tPDFHxX89BqghI0bbeF9MYPWR5YNHVKiCh9Q3B/T7iDc1qcWjT8S
-         9f2vGocUmBYWvUpUhqK9+SMwzp9MHXQn7Z6XyesjFK8ubvyJ3DZszTfQJ0I2MOjCo9ou
-         a4KImic5ffHWtO9ZqCU5ZqtM4UU455/yVkAuFkE4kT6g0hwonWVA6knO8n1CHcCGbQIq
-         sTwZCXRCYno4ptqJsIweYDmQs9VZbzGMuok0K7ksuQ6pimhq9EWFuJQFUxfAmBMTxerW
-         y07A==
-X-Gm-Message-State: AJIora9MqtyXgDHwU+PeaXIeU3/IwxaZeuPo9rYs6zIue/fOPV877EZ5
-        rz4FzbFoPMhUc+f6dvPD/A==
-X-Google-Smtp-Source: AGRyM1sYmRDfslvd2yjDtZY4AFUFvI4YgrlR4n7PSncRNqJQrdg1VxfmuGZMQYQbFywTUA/imP7UGg==
-X-Received: by 2002:a05:6e02:1d91:b0:2d3:bef3:a073 with SMTP id h17-20020a056e021d9100b002d3bef3a073mr4460072ila.60.1655242471610;
-        Tue, 14 Jun 2022 14:34:31 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.251])
-        by smtp.gmail.com with ESMTPSA id l44-20020a02666c000000b0032b3a781767sm5326612jaf.43.2022.06.14.14.34.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 14 Jun 2022 14:34:31 -0700 (PDT)
-Received: (nullmailer pid 2692703 invoked by uid 1000);
-        Tue, 14 Jun 2022 21:34:28 -0000
-Date:   Tue, 14 Jun 2022 15:34:28 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, adrian.hunter@intel.com,
-        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
-        blarson@amd.com, brijeshkumar.singh@amd.com,
-        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        samuel@sholland.org, fancer.lancer@gmail.com,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: Re: [PATCH v5 15/15] reset: elbasr: Add AMD Pensando Elba SR Reset
- Controller
-Message-ID: <20220614213428.GA2684278-robh@kernel.org>
-References: <20220613195658.5607-1-brad@pensando.io>
- <20220613195658.5607-16-brad@pensando.io>
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=tEKPEohOKii6C8FoFw3OQBM5b+J4Se99Td+zgDjIemk=;
+        b=Q65AuRLhvipMA7beS8kg3Vp6heR3n6F+YApk4UR/PQMQp68CSSnnKR/DG0UTJi9m6G
+         qigEQBXoSheDgnkuMynq/eYLrLML9GVnGGZbBzifOPndPOu0n/UdcZ9H0k/Xgzifdoda
+         J7vZeuHTM02jp2rcava9Yl1N8xN+bE0h9uli6xreQDx9On7IbUz6q9YysOzLC79bwdki
+         9cCaf7nbANgFFO2HXr+w5A/aU5OL2aD4GMzQITPyTFRG53D1YUEtDg/iLPBWXaYMgNLp
+         QijUkHrnXM6XrGxOa6VMDXG7mASUKWCFcSXATegdHiFfKe/Vl/fqzM4BuBlw1d0D1bOM
+         sikQ==
+X-Gm-Message-State: AOAM532yvjSzR8TCQdOFvab/xHBoKHcfnJmSYFew+D8/SzwzvHJ9QpTt
+        jgEhy78+XWvwbNU8Wjy1MF0Dng==
+X-Google-Smtp-Source: ABdhPJxXRVyhCovuWMWCtUI4jcVJQFhXzB9PpxsEI2Vao7fIUhQ51iYgdX/g9ne2SL7h97qTH3E1Jw==
+X-Received: by 2002:a63:90c8:0:b0:3fd:157f:3f6f with SMTP id a191-20020a6390c8000000b003fd157f3f6fmr6365006pge.316.1655246663184;
+        Tue, 14 Jun 2022 15:44:23 -0700 (PDT)
+Received: from [172.22.33.138] ([192.77.111.2])
+        by smtp.gmail.com with ESMTPSA id bg11-20020a1709028e8b00b0016782c55790sm7734784plb.232.2022.06.14.15.44.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Jun 2022 15:44:22 -0700 (PDT)
+Message-ID: <c9d90fdf-41fa-a363-fdc0-097c3d0dd547@linaro.org>
+Date:   Tue, 14 Jun 2022 15:44:20 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220613195658.5607-16-brad@pensando.io>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.10.0
+Subject: Re: [PATCH v5 10/15] arm64: dts: Add AMD Pensando Elba SoC support
+Content-Language: en-US
+To:     Brad Larson <brad@pensando.io>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        gsomlo@gmail.com, gerg@linux-m68k.org, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        broonie@kernel.org, yamada.masahiro@socionext.com,
+        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        fancer.lancer@gmail.com, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
+        devicetree@vger.kernel.org
+References: <20220613195658.5607-1-brad@pensando.io>
+ <20220613195658.5607-11-brad@pensando.io>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220613195658.5607-11-brad@pensando.io>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 13, 2022 at 12:56:58PM -0700, Brad Larson wrote:
+On 13/06/2022 12:56, Brad Larson wrote:
 > From: Brad Larson <blarson@amd.com>
 > 
-> This patch adds the reset controller functionality for the
-> AMD Pensando Elba System Resource Chip.
+> Add AMD Pensando common and Elba SoC specific device nodes
 > 
 > Signed-off-by: Brad Larson <blarson@amd.com>
+
+Thank you for your patch. There is something to discuss/improve.
+
 > ---
->  drivers/reset/Kconfig                         |  9 ++
->  drivers/reset/Makefile                        |  1 +
->  drivers/reset/reset-elbasr.c                  | 94 +++++++++++++++++++
->  .../reset/amd,pensando-elba-reset.h           | 11 +++
-
-This goes with the binding patch
-
->  4 files changed, 115 insertions(+)
->  create mode 100644 drivers/reset/reset-elbasr.c
->  create mode 100644 include/dt-bindings/reset/amd,pensando-elba-reset.h
+>  arch/arm64/boot/dts/amd/Makefile              |   1 +
+>  arch/arm64/boot/dts/amd/elba-16core.dtsi      | 189 +++++++++++++++++
+>  arch/arm64/boot/dts/amd/elba-asic-common.dtsi | 103 ++++++++++
+>  arch/arm64/boot/dts/amd/elba-asic.dts         |  28 +++
+>  arch/arm64/boot/dts/amd/elba-flash-parts.dtsi | 106 ++++++++++
+>  arch/arm64/boot/dts/amd/elba.dtsi             | 191 ++++++++++++++++++
+>  6 files changed, 618 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-16core.dtsi
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-asic-common.dtsi
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-asic.dts
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-flash-parts.dtsi
+>  create mode 100644 arch/arm64/boot/dts/amd/elba.dtsi
 > 
-> diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
-> index 93c8d07ee328..13f5a8ca0f03 100644
-> --- a/drivers/reset/Kconfig
-> +++ b/drivers/reset/Kconfig
-> @@ -66,6 +66,15 @@ config RESET_BRCMSTB_RESCAL
->  	  This enables the RESCAL reset controller for SATA, PCIe0, or PCIe1 on
->  	  BCM7216.
->  
-> +config RESET_ELBASR
-> +	tristate "Pensando Elba System Resource reset controller"
-> +	depends on MFD_PENSANDO_ELBASR || COMPILE_TEST
-> +	help
-> +	  This option enables support for the external reset functions
-> +	  on the Pensando Elba System Resource Chip.  Reset control
-> +	  of peripherals is accessed over SPI to the system resource
-> +	  chip device registers using CS0.
-> +
->  config RESET_HSDK
->  	bool "Synopsys HSDK Reset Driver"
->  	depends on HAS_IOMEM
-> diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
-> index a80a9c4008a7..c0fe12b9950e 100644
-> --- a/drivers/reset/Makefile
-> +++ b/drivers/reset/Makefile
-> @@ -10,6 +10,7 @@ obj-$(CONFIG_RESET_BCM6345) += reset-bcm6345.o
->  obj-$(CONFIG_RESET_BERLIN) += reset-berlin.o
->  obj-$(CONFIG_RESET_BRCMSTB) += reset-brcmstb.o
->  obj-$(CONFIG_RESET_BRCMSTB_RESCAL) += reset-brcmstb-rescal.o
-> +obj-$(CONFIG_RESET_ELBASR) += reset-elbasr.o
->  obj-$(CONFIG_RESET_HSDK) += reset-hsdk.o
->  obj-$(CONFIG_RESET_IMX7) += reset-imx7.o
->  obj-$(CONFIG_RESET_INTEL_GW) += reset-intel-gw.o
-> diff --git a/drivers/reset/reset-elbasr.c b/drivers/reset/reset-elbasr.c
-> new file mode 100644
-> index 000000000000..6e429cb11466
-> --- /dev/null
-> +++ b/drivers/reset/reset-elbasr.c
-> @@ -0,0 +1,94 @@
-> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+> diff --git a/arch/arm64/boot/dts/amd/Makefile b/arch/arm64/boot/dts/amd/Makefile
+> index 68103a8b0ef5..9bba020fa880 100644
+> --- a/arch/arm64/boot/dts/amd/Makefile
+> +++ b/arch/arm64/boot/dts/amd/Makefile
+> @@ -1,2 +1,3 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  dtb-$(CONFIG_ARCH_SEATTLE) += amd-overdrive-rev-b0.dtb amd-overdrive-rev-b1.dtb
+> +dtb-$(CONFIG_ARCH_PENSANDO) += elba-asic.dtb
 
-Kernel code is GPL-2.0-only generally.
+Put it in alphabetical order, so not at the end of file.
+
+(...)
+
+> +
+> +&i2c0 {
+> +	clock-frequency = <100000>;
+> +	status = "okay";
+> +	rtc@51 {
+> +		compatible = "nxp,pcf85263";
+> +		reg = <0x51>;
+> +	};
+> +};
+> +
+> +&spi0 {
+> +	num-cs = <4>;
+> +	cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
+> +		   <&porta 7 GPIO_ACTIVE_LOW>;
+> +	status = "okay";
+> +	spi@0 {
+
+Rob's  comment about bindings applies here as well, so please fix both.
+This has to be sorted out - either it is SPI controller or MFD.
+
+Rest looks okay for me.
+
+> +		compatible = "amd,pensando-elbasr", "simple-mfd";
+> +		reg = <0>;
+> +		#address-cells = <1>;
+> +		#size-cells = <0>;
+> +		spi-max-frequency = <12000000>;
+> +
+
+
+Best regards,
+Krzysztof
