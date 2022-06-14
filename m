@@ -2,173 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2932C43334
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 08:50:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71C00CCA47A
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Jun 2022 11:11:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1355879AbiFNIuJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Jun 2022 04:50:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48234 "EHLO
+        id S236382AbiFNLLB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Jun 2022 07:11:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34972 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355895AbiFNItj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 04:49:39 -0400
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 294DF13CF1;
-        Tue, 14 Jun 2022 01:49:34 -0700 (PDT)
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 25E8mpFE060385;
-        Tue, 14 Jun 2022 03:48:51 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1655196531;
-        bh=CDf43wcE6wSh3PzlVgmbjR8Np/ai78l/H7vjoYFhOkU=;
-        h=Date:From:To:CC:Subject:References:In-Reply-To;
-        b=lH+zrL9aZF6hMI1zQYVIj2+YAy4Re0EqZyoS7NsF2LqIU9ht70kczMRbjJSE8pthm
-         DhgCLWbwKjpURMKaDAoU/ylwKjfHqil5RSj+wwKMHzI7dMxQN8gz3PX79kePwTFMBC
-         HT7btcyrJ8HyjPgyLWxPQP8N9AS2B8O5Hew3Q7kw=
-Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 25E8mpXD097757
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 14 Jun 2022 03:48:51 -0500
-Received: from DLEE111.ent.ti.com (157.170.170.22) by DLEE109.ent.ti.com
- (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Tue, 14
- Jun 2022 03:48:50 -0500
-Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE111.ent.ti.com
- (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
- Frontend Transport; Tue, 14 Jun 2022 03:48:50 -0500
-Received: from localhost (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 25E8mnC0016187;
-        Tue, 14 Jun 2022 03:48:50 -0500
-Date:   Tue, 14 Jun 2022 14:18:49 +0530
-From:   Pratyush Yadav <p.yadav@ti.com>
-To:     Brad Larson <brad@pensando.io>
-CC:     <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
-        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
-        <brijeshkumar.singh@amd.com>, <catalin.marinas@arm.com>,
-        <gsomlo@gmail.com>, <gerg@linux-m68k.org>, <krzk@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
-        <broonie@kernel.org>, <yamada.masahiro@socionext.com>,
-        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
-        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
-        <samuel@sholland.org>, <fancer.lancer@gmail.com>,
-        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
-        <ulf.hansson@linaro.org>, <will@kernel.org>,
-        <devicetree@vger.kernel.org>
-Subject: Re: [PATCH v5 11/15] spi: cadence-quadspi: Add compatible for AMD
- Pensando Elba SoC
-Message-ID: <20220614084849.oodxh6cthysga5iq@ti.com>
-References: <20220613195658.5607-1-brad@pensando.io>
- <20220613195658.5607-12-brad@pensando.io>
+        with ESMTP id S1356191AbiFNLLA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2022 07:11:00 -0400
+Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E606B495;
+        Tue, 14 Jun 2022 04:10:59 -0700 (PDT)
+Received: by mail-ed1-x52b.google.com with SMTP id x5so11123881edi.2;
+        Tue, 14 Jun 2022 04:10:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=WPBHsuQCw6LHS2plx2otL7HeQmFNkV5hfWoP76A3RuI=;
+        b=bvmy9uC7Y91x36UUcnI0dZgqvcN99LsDklIpRbe5mWByroOMEilZmL+nJzuVg5/sJX
+         JazMirUEJOH4L96Dl3WY3QNnsYlfu4T8BEab/1Zd+Gw+2yRjnYTYk1s/8YqerBT8zbYe
+         eCvguRBgN4hFzezCezUmHnAy1U9b3EE4weE/tp6VFkgMpEv9A3jFvf3Mw7I3R8Z19wjE
+         mgN51FDicCJmF8p15FjF3yx7eoh2vSuldLwgYr/ODIW950PHqSqZMyIQ3FDXDrWExKFY
+         y3DHKdFyKt2GVLpd1OX2Ed+X35v0UZEpYH0xuAA7xK+aMY3b4456xxkUmBLijOIg0R2o
+         7qOA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=WPBHsuQCw6LHS2plx2otL7HeQmFNkV5hfWoP76A3RuI=;
+        b=Z8zDoJ1ATbUIlwXU46LQ5WY3pBOXE96RipeWz7pO39tnm/RmQHLHQoftFEzXhT3LDI
+         kV8mujlmH2Sv4Hsl9PuSfWxJ4ntXObnOSXwIhL/AEqBlZVj1rZ52ymnoQ07KdJ7Oy66A
+         T6fCVgXuPnuBxwxi+KttVMm1E4ikBCser3Liq3F/lCT3fjdgNhJPPBPFYsyKaDgocbEk
+         Cqec9CceiqVgNcXA4lIzN9d++EUkW+42osjmtElk0ReB6h/Hs7S3gCf9NklAXQQagsGW
+         pT4KUx53zCtqBYQJeBIf60PhBWjOf6SWzfCb4hAMcPmEaz7ZxJ1i0IXgVJWcKXWaqbHo
+         /IRA==
+X-Gm-Message-State: AOAM5337Rd9KjPfWqU0Yn35rxNODkBb+YnvP6fUuS4GwrBtx0lkUmoEk
+        c55Q66odvaJ5PxaTeYN5StxPPwxrYFh9Vtue0Us=
+X-Google-Smtp-Source: ABdhPJzHfPxRHZKBWrh40KmGWV2VLw5jrvhjQmxMw037SGLU2BvNTqYyA1QtJNjaT+QFj6WCBwxH0pY5xCbA8t5p3wk=
+X-Received: by 2002:aa7:d989:0:b0:431:75d5:f204 with SMTP id
+ u9-20020aa7d989000000b0043175d5f204mr5422612eds.230.1655205057577; Tue, 14
+ Jun 2022 04:10:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <20220613195658.5607-12-brad@pensando.io>
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-13-brad@pensando.io>
+In-Reply-To: <20220613195658.5607-13-brad@pensando.io>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Tue, 14 Jun 2022 13:10:20 +0200
+Message-ID: <CAHp75Vex0VkECYd=kY0m6=jXBYSXg2UFu7vn271+Q49WZn22GA@mail.gmail.com>
+Subject: Re: [PATCH v5 12/15] spi: dw: Add support for AMD Pensando Elba SoC
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Al Cooper <alcooperx@gmail.com>, Arnd Bergmann <arnd@arndb.de>,
+        blarson@amd.com, brijeshkumar.singh@amd.com,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Mark Brown <broonie@kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>, piotrs@cadence.com,
+        Pratyush Yadav <p.yadav@ti.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
+        Serge Semin <fancer.lancer@gmail.com>,
+        suravee.suthikulpanit@amd.com,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        devicetree <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brad,
-
-On 13/06/22 12:56PM, Brad Larson wrote:
+On Mon, Jun 13, 2022 at 9:57 PM Brad Larson <brad@pensando.io> wrote:
+>
 > From: Brad Larson <blarson@amd.com>
-> 
-> The AMD Pensando Elba SoC has the Cadence QSPI controller integrated.
-> 
-> The quirk CQSPI_NEEDS_APB_AHB_HAZARD_WAR is added and if enabled
-> a dummy readback from the controller is performed to ensure
-> synchronization.
-> 
-> Signed-off-by: Brad Larson <blarson@amd.com>
-> ---
->  drivers/spi/spi-cadence-quadspi.c | 19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
-> 
-> diff --git a/drivers/spi/spi-cadence-quadspi.c b/drivers/spi/spi-cadence-quadspi.c
-> index 72b1a5a2298c..ebb77ea8e6ba 100644
-> --- a/drivers/spi/spi-cadence-quadspi.c
-> +++ b/drivers/spi/spi-cadence-quadspi.c
-> @@ -39,6 +39,7 @@
->  #define CQSPI_DISABLE_DAC_MODE		BIT(1)
->  #define CQSPI_SUPPORT_EXTERNAL_DMA	BIT(2)
->  #define CQSPI_NO_SUPPORT_WR_COMPLETION	BIT(3)
-> +#define CQSPI_NEEDS_APB_AHB_HAZARD_WAR	BIT(4)
->  
->  /* Capabilities */
->  #define CQSPI_SUPPORTS_OCTAL		BIT(0)
-> @@ -87,6 +88,7 @@ struct cqspi_st {
->  	bool			use_dma_read;
->  	u32			pd_dev_id;
->  	bool			wr_completion;
-> +	bool			apb_ahb_hazard;
->  };
->  
->  struct cqspi_driver_platdata {
-> @@ -952,6 +954,13 @@ static int cqspi_indirect_write_execute(struct cqspi_flash_pdata *f_pdata,
->  	if (cqspi->wr_delay)
->  		ndelay(cqspi->wr_delay);
->  
-> +	/*
-> +	 * If a hazard exists between the APB and AHB interfaces, perform a
-> +	 * dummy readback from the controller to ensure synchronization.
-> +	 */
+>
+> The AMD Pensando Elba SoC includes a DW apb_ssi v4 controller
+> with device specific chip-select control.  The Elba SoC
+> provides four chip-selects where the native DW IP supports
+> two chip-selects.  The Elba DW_SPI instance has two native
+> CS signals that are always overridden.
 
-This is needed for TI's SoCs as well. APB and AHB accesses are 
-independent of each other on the interconnect and can be racy. I wrote a 
-couple patches [0][1] to fix this on TI's fork. I never got around to 
-sending them upstream. It would be great if you can pick those up. They 
-fix the race in all paths, not just indirect write.
+...
 
-I would also prefer if we do this unconditionally. I don't think it has 
-much downside even on platforms that do not strictly need this.
+> +/*
+> + * Elba SoC does not use ssi, pin override is used for cs 0,1 and
+> + * gpios for cs 2,3 as defined in the device tree.
+> + *
+> + * cs:  |       1               0
+> + * bit: |---3-------2-------1-------0
+> + *      |  cs1   cs1_ovr   cs0   cs0_ovr
+> + */
 
-[0] https://git.ti.com/cgit/ti-linux-kernel/ti-linux-kernel/commit/drivers/spi/spi-cadence-quadspi.c?h=ti-linux-5.10.y&id=027f03a8512086e5ef05dc4e4ff53b2628848f95
-[1] https://git.ti.com/cgit/ti-linux-kernel/ti-linux-kernel/commit/drivers/spi/spi-cadence-quadspi.c?h=ti-linux-5.10.y&id=4c367e58bab7d3f9c470c3778441f73546f20398
+> +#define ELBA_SPICS_SHIFT(cs)           (2 * (cs))
 
-> +	if (cqspi->apb_ahb_hazard)
-> +		(void)readl(reg_base + CQSPI_REG_INDIRECTWR);
-> +
->  	while (remaining > 0) {
->  		size_t write_words, mod_bytes;
->  
-> @@ -1667,6 +1676,8 @@ static int cqspi_probe(struct platform_device *pdev)
->  			cqspi->use_dma_read = true;
->  		if (ddata->quirks & CQSPI_NO_SUPPORT_WR_COMPLETION)
->  			cqspi->wr_completion = false;
-> +		if (ddata->quirks & CQSPI_NEEDS_APB_AHB_HAZARD_WAR)
-> +			cqspi->apb_ahb_hazard = true;
->  
->  		if (of_device_is_compatible(pdev->dev.of_node,
->  					    "xlnx,versal-ospi-1.0"))
-> @@ -1789,6 +1800,10 @@ static const struct cqspi_driver_platdata versal_ospi = {
->  	.get_dma_status = cqspi_get_versal_dma_status,
->  };
->  
-> +static const struct cqspi_driver_platdata pen_cdns_qspi = {
-> +	.quirks = CQSPI_NEEDS_APB_AHB_HAZARD_WAR | CQSPI_DISABLE_DAC_MODE,
-> +};
-> +
->  static const struct of_device_id cqspi_dt_ids[] = {
->  	{
->  		.compatible = "cdns,qspi-nor",
-> @@ -1814,6 +1829,10 @@ static const struct of_device_id cqspi_dt_ids[] = {
->  		.compatible = "intel,socfpga-qspi",
->  		.data = &socfpga_qspi,
->  	},
-> +	{
-> +		.compatible = "amd,pensando-elba-qspi",
-> +		.data = &pen_cdns_qspi,
-> +	},
->  	{ /* end of table */ }
->  };
->  
-> -- 
-> 2.17.1
-> 
+Useless.It takes much more than simply multiplying each time in two
+macros. Also see below.
+
+> +#define ELBA_SPICS_MASK(cs)            (0x3 << ELBA_SPICS_SHIFT(cs))
+
+(GENMASK(1, 0) << ((cs) << 1))
+
+Or ((cs) * 2) to show that it takes 2 bits and not two times of CS',
+
+> +#define ELBA_SPICS_SET(cs, val)        \
+> +                       ((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(cs))
+
+BIT(0)
+
+So the main point is to use GENMASK() and BIT() the rest is up to you.
 
 -- 
-Regards,
-Pratyush Yadav
-Texas Instruments Inc.
+With Best Regards,
+Andy Shevchenko
