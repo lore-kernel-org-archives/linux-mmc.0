@@ -2,113 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94945CCA485
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 17:34:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8835ECCA473
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 17:34:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349948AbiFOReD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Jun 2022 13:34:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46424 "EHLO
+        id S1354371AbiFOReF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Jun 2022 13:34:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46250 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357936AbiFORdm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 13:33:42 -0400
+        with ESMTP id S1357860AbiFORdk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 13:33:40 -0400
 Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A406C52518
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96D544F1E3
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:28 -0700 (PDT)
 Received: by mail-lf1-x130.google.com with SMTP id a29so20031547lfk.2
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:34 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=rEBSyXeCbmBUBcCDVrlaJF/sb3hQ6cDD+mTYpXhaT5Y=;
-        b=NHk1jGKwkU2BrG33SfVEnhC0RF9ehEMIxRspkW9YY0bIyXGTIr7Wd9t+5XEZncbb2w
-         Po2euByjQ9qiAh3cOvXZ68Z2NYJEsgK/cqwcuqgjLpcaF/M4EI7uKed+Qz2XwjSRWnK5
-         A7FAIGoMw8pseVV+w6+VmsmAGl/+hCeCipcX0MSWeWCHimBHaA70MKvO04pr5zfmw5HG
-         +3wlOonEgbO/H9EimUhVVT1Ihcd822/7PbCDjOxC7tsls2izvotRwFP2A51p90v/77Rz
-         xV99fIS+FSqF5r0jujwn2gdxaaprTDad65FSN63dEagRi1nTFBBt/2vscajcg9aZv8u4
-         CHtg==
+         :cc;
+        bh=S72eeZ+Row01YghjpUmWYlpXnQzipZvAzNu3EG7dF00=;
+        b=BR3qLXEgSSszCU9YWAmUJhaphZlQ5NrNHteiKYjbK+3eDpYdpbKiVLT1w/vldEp4pX
+         +HF40JInhIku0OCm/pOdQei11tBJSd/sRQUSYNpM6UN/1BGD3idJgDsdLM4C0SRFCv6E
+         HoNKUp07pwCmLjoXQeiU114Pm9YDXswIn+4NLoS5hgo/iZEL57b2eJBPA3PM/6xysOVY
+         mMge2aJD8FyIUZWDSDDQish4QwCdUPY6yELRZnKF3XriuSWdtZviiqnIRlJQrWUdKyOF
+         jaIQfrEi6tdUacNli3heJhT73rzaeOu0mQ2qGtRexeFU8mNVMfB8LBgSLG7kNKAA31DF
+         RkFg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=rEBSyXeCbmBUBcCDVrlaJF/sb3hQ6cDD+mTYpXhaT5Y=;
-        b=hf2sOL4zkfREzbFevJd4MfNnicnsibqYNNH/K2Vuf4A0LXVKFPeIWaxcI7610tPD3Z
-         gDN5hM9tgjvKWlpYg4nGeq9m4E3Rvu6COvmle65Xt2cbuE4bmfrDlz8uLJjVMrEabw5V
-         ga4uY6sROrGMw4IWyEvMc2dpH59AATsmbb0crxzEB0NmIMALMTxCjWZvGWQS0CgmCM0O
-         CVxaI8OdVrptQT63jsgnV2PLx+l6HQ0p5Ez+abp7UhOBEvk2UZrKoDlkaXl0aWpfp9au
-         KdtTQUx7hWTxp/I8CSarJHrjQukSW0VHcLcyj0jJKVq+w4Bqupc5JkjuCcc5AlNAbLal
-         taug==
-X-Gm-Message-State: AJIora9alvjzuYXtO5RElr4tv8szBycYxslkkourmqd/P7HJ6nIr9Hzo
-        pAfnctSm+u4M4fPORdvbr60QqWQJnyicw7Stl2rfVw==
-X-Google-Smtp-Source: AGRyM1sWRqYe+A4qepiU6K08Gk2UDWKSsUHbIH4KwHmf8+CbMzbiIK6O9l48yMlOhTn4bi5DWqmSSxXBKjEklcsVy0U=
-X-Received: by 2002:a05:6512:403:b0:479:1627:a9b7 with SMTP id
- u3-20020a056512040300b004791627a9b7mr343348lfk.233.1655314413654; Wed, 15 Jun
- 2022 10:33:33 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=S72eeZ+Row01YghjpUmWYlpXnQzipZvAzNu3EG7dF00=;
+        b=zXvMb1Me+57uJhMqUNltQhPmfKIo738b0RXCOFLDhqMVO36SSqnHHVGJYiFh17IE+d
+         mGIVN9isiXRHVHDjoiFUP2zugGvyMY/wYPePPzgtbz2jFuQbYPrQO1K720AwxKejUAyC
+         PUl002um04zyJKjUU6tchSfdg5bTzWxCk5FyX9z4IKGRKZNh6aH0VmR9g7vT4GYnUWOi
+         lC4PdcXI7vHPG7YS+wty0Ctp4yuK66684UVt7JlkhilfvfdwBEGm4vsGaZlUGl2VQ8g5
+         XEFJxj831bCsL0tgVvPl+kUuvHcEoJvbRhTEEMG2qHnSvlYKDowQf0hof3GlNj2O5goh
+         2BBg==
+X-Gm-Message-State: AJIora8NB+P4s8NQUG1MNQ4ZRy38kOeT/uhAbnEIA1vBlK1ciWIpkvuf
+        p5Ec2jnjhLVOME8L5cJgyyF385aCKAisTafrM7VKZw==
+X-Google-Smtp-Source: AGRyM1sA46kWiGsTwyik4A+h6I0Rt4vExcza34+hBCc/jIKpPP4aUs4AgBut2tMlPe1cEUer3DeVSKylq48GsEqiYSw=
+X-Received: by 2002:a05:6512:1047:b0:479:2308:ac0b with SMTP id
+ c7-20020a056512104700b004792308ac0bmr349197lfb.167.1655314408139; Wed, 15 Jun
+ 2022 10:33:28 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220610211257.102071-1-u.kleine-koenig@pengutronix.de>
-In-Reply-To: <20220610211257.102071-1-u.kleine-koenig@pengutronix.de>
+References: <20220609112239.18911-1-mengqi.zhang@mediatek.com>
+In-Reply-To: <20220609112239.18911-1-mengqi.zhang@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Jun 2022 10:32:57 -0700
-Message-ID: <CAPDyKFr35sr7RFpv4S0eosY4BT1r0te083rdan_tRq0T+7agJA@mail.gmail.com>
-Subject: Re: [PATCH 1/5] mmc: dw_mmc: exynos: Obviously always return success
- in remove callback
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        kernel@pengutronix.de, Alim Akhtar <alim.akhtar@samsung.com>,
+Date:   Wed, 15 Jun 2022 10:32:52 -0700
+Message-ID: <CAPDyKFrBWBKJvLZaZOgK9K3Td0ZNq_0vP=K5ERjja3OnQFCsNA@mail.gmail.com>
+Subject: Re: [RESEND V2] mmc: mediatek: wait dma stop bit reset to 0
+To:     Mengqi Zhang <mengqi.zhang@mediatek.com>
+Cc:     chaotian.jing@mediatek.com, matthias.bgg@gmail.com,
         linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
+        wenbin.mei@mediatek.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 10 Jun 2022 at 14:13, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@pengutronix.de> wrote:
+On Thu, 9 Jun 2022 at 04:22, Mengqi Zhang <mengqi.zhang@mediatek.com> wrote:
 >
-> dw_mci_pltfm_remove() returns 0 unconditionally and returning an error
-> in a platform remove callback isn't very sensible. (The only effect of
-> the latter is that the device core emits a generic warning and then
-> removes the device anyhow.)
+> MediaTek IP requires that after dma stop, it need to wait this dma stop
+> bit auto-reset to 0. When bus is in high loading state, it will take a
+> while for the dma stop complete. If there is no waiting operation here,
+> when program runs to clear fifo and reset, bus will hang.
 >
-> So return 0 unconditionally to make it obvious there is no error
-> forwarded to the upper layers.
+> In addition, there should be no return in msdc_data_xfer_next() if
+> there is data need be transferred, because no matter what error occurs
+> here, it should continue to excute to the following mmc_request_done.
+> Otherwise the core layer may wait complete forever.
 >
-> This is a preparation for making platform remove callbacks return void.
->
-> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
 
-This one and the other 4 patches in the series, applied for next. Thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/dw_mmc-exynos.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/mtk-sd.c | 20 ++++++++++++--------
+>  1 file changed, 12 insertions(+), 8 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-e=
-xynos.c
-> index ca5be4445ae0..9f20ac524c8b 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -670,7 +670,9 @@ static int dw_mci_exynos_remove(struct platform_devic=
-e *pdev)
->         pm_runtime_set_suspended(&pdev->dev);
->         pm_runtime_put_noidle(&pdev->dev);
->
-> -       return dw_mci_pltfm_remove(pdev);
-> +       dw_mci_pltfm_remove(pdev);
-> +
-> +       return 0;
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 195dc897188b..9da4489dc345 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1356,7 +1356,7 @@ static void msdc_data_xfer_next(struct msdc_host *host, struct mmc_request *mrq)
+>                 msdc_request_done(host, mrq);
 >  }
 >
->  static const struct dev_pm_ops dw_mci_exynos_pmops =3D {
+> -static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+> +static void msdc_data_xfer_done(struct msdc_host *host, u32 events,
+>                                 struct mmc_request *mrq, struct mmc_data *data)
+>  {
+>         struct mmc_command *stop;
+> @@ -1376,7 +1376,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+>         spin_unlock_irqrestore(&host->lock, flags);
 >
-> base-commit: f2906aa863381afb0015a9eb7fefad885d4e5a56
+>         if (done)
+> -               return true;
+> +               return;
+>         stop = data->stop;
+>
+>         if (check_data || (stop && stop->error)) {
+> @@ -1385,12 +1385,15 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+>                 sdr_set_field(host->base + MSDC_DMA_CTRL, MSDC_DMA_CTRL_STOP,
+>                                 1);
+>
+> +               ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CTRL, val,
+> +                                               !(val & MSDC_DMA_CTRL_STOP), 1, 20000);
+> +               if (ret)
+> +                       dev_dbg(host->dev, "DMA stop timed out\n");
+> +
+>                 ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CFG, val,
+>                                                 !(val & MSDC_DMA_CFG_STS), 1, 20000);
+> -               if (ret) {
+> -                       dev_dbg(host->dev, "DMA stop timed out\n");
+> -                       return false;
+> -               }
+> +               if (ret)
+> +                       dev_dbg(host->dev, "DMA inactive timed out\n");
+>
+>                 sdr_clr_bits(host->base + MSDC_INTEN, data_ints_mask);
+>                 dev_dbg(host->dev, "DMA stop\n");
+> @@ -1415,9 +1418,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+>                 }
+>
+>                 msdc_data_xfer_next(host, mrq);
+> -               done = true;
+>         }
+> -       return done;
+>  }
+>
+>  static void msdc_set_buswidth(struct msdc_host *host, u32 width)
+> @@ -2416,6 +2417,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
+>         if (recovery) {
+>                 sdr_set_field(host->base + MSDC_DMA_CTRL,
+>                               MSDC_DMA_CTRL_STOP, 1);
+> +               if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CTRL, val,
+> +                       !(val & MSDC_DMA_CTRL_STOP), 1, 3000)))
+> +                       return;
+>                 if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
+>                         !(val & MSDC_DMA_CFG_STS), 1, 3000)))
+>                         return;
 > --
-> 2.36.1
+> 2.25.1
 >
