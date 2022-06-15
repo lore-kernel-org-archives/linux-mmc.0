@@ -2,56 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 042CEC43334
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 08:13:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7818DC433EF
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 08:59:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239848AbiFOINH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Jun 2022 04:13:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49070 "EHLO
+        id S245242AbiFOI7U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Jun 2022 04:59:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243575AbiFOINH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 04:13:07 -0400
-X-Greylist: delayed 568 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 15 Jun 2022 01:13:06 PDT
-Received: from mail.olerise.pl (mail.olerise.pl [46.183.184.59])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A9C9EE2D
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 01:13:06 -0700 (PDT)
-Received: by mail.olerise.pl (Postfix, from userid 1001)
-        id C2DB2263F9; Wed, 15 Jun 2022 10:00:53 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=olerise.pl; s=mail;
-        t=1655280127; bh=FDuFY3XQoq0gMX1b2gxgT7Py2p4Sxl0PJZYZ4NVaPho=;
-        h=Date:From:To:Subject:From;
-        b=RS5h6A2gWk6fCfqbeTdmAiVTpUW2IKTxSviKnKn3Ge4uZtf5dTpTqRJKiww056FiV
-         LziD7Fj3549Ik+dTLQq4iHnJCxGoESfe9zbdypvKEMSjh+rShb3021my9ocfyhToFP
-         ZH/ZoVX4SbcgmwDrFqew0AXT+k80FpKLcEuRfrOXUDeApXxMQjfzFPsQnC5lEl0dg+
-         pcE0QK0Bwg+QE04aCCU8m1ZQ8/TQzXAG9hvUoiq9uUsyMsBMROvYrArX2Hu17ghEF8
-         p6iE9NjMO0h834ta+NqIBQeJg6LXzUr6WDe27J1ruItIYUAwCzDnL7xwFwBsgRNHWp
-         kGEe8P1KBdFyQ==
-Received: by mail.olerise.pl for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 08:00:27 GMT
-Message-ID: <20220615084500-0.1.f.82f4.0.pbbg2646jr@olerise.pl>
-Date:   Wed, 15 Jun 2022 08:00:27 GMT
-From:   =?UTF-8?Q? "Przemys=C5=82aw_Wr=C3=B3blewski" ?= 
-        <przemyslaw.wroblewski@olerise.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Wycena paneli fotowoltaicznych
-X-Mailer: mail.olerise.pl
+        with ESMTP id S1346703AbiFOI7B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 04:59:01 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B08CEBF49;
+        Wed, 15 Jun 2022 01:59:00 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-3137316bb69so54004137b3.10;
+        Wed, 15 Jun 2022 01:59:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=YY6o5gIXCOujoqtYnZ6ZMVVi/7B441zfJT8ExBoqjZI=;
+        b=odCtOHgyKBn5icb7FDKVoJvmqv2vVQw3BCunPu3BrnWsSJQ+h8B3qzsji8DBLHuQ5+
+         nGyE+sv/4nj0zxkyVuvfw3OfoI76SzuWdtBvxLD6ohCT2AJftoRzjTeYBxXnTti/ScTK
+         Q3mafDTLmM69ze7ZmzXOUORBfnPMN2tyIc6HUsbz8NnZwCROg04mqF7FLAH0A/2fNhHr
+         nu1fGQrusfsaQ2fXsiz7OF8UtU7wGJ9h2GPC57s53+0dOD1u+hVGuZYd2jF43nUdccZP
+         RpfAlReeis6zGKC9pc+8Xv2B9BbMhbTdflC7tnSq8QwwihrBSi19/WpzglCv3/3C/PLA
+         dwuw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=YY6o5gIXCOujoqtYnZ6ZMVVi/7B441zfJT8ExBoqjZI=;
+        b=p4J8/7o5+13S87xnazRto03aBMwqDCxJMPkBL0cKJ6aXiH6/XgVk1IYwkhKp4MDFMF
+         5xu4MZ2G163Kh6aYmHsUy6Z+u1omuMfbqS6SISu+CtkEfB8uvwJPiN8NaXuHHMdMP3QX
+         t7hw5CofWGv3Myng3VPnG3ixJsJlc90s1vUiWUi5NK0oJY/WwHiRMPTpEYvNu5K+fej1
+         3Qugz9fNtIQ+s3vEqJRVU/FCmh0CQ4YHVVXM3VBjkxmx7/nRapUSsrgxdKG/6LTHG1a4
+         jymk69LK66brD3Wj5CRBNoiU/w2wRT1db5C1/26dmT8NyVAO+suRmbiLMaT8+WxqNkXY
+         UF/A==
+X-Gm-Message-State: AJIora9pavaHD0BIFJloi6bcXr1P/bcuigiiaWLQQQs9zEWRHfpknrO3
+        zg2zhrpDemLSIqUd6DOHFcKy8cfRXmUzEyTKvNN8XoFc
+X-Google-Smtp-Source: AGRyM1swVJe6COvD5ORmnOO2vkAVflViuU9r1qNX835e1TaZfBaVlpIm+ruE5eShBDbkfdZDdITJ5UI7zml4HZzf3lc=
+X-Received: by 2002:a81:184b:0:b0:30c:846e:e2b with SMTP id
+ 72-20020a81184b000000b0030c846e0e2bmr10479788ywy.97.1655283539896; Wed, 15
+ Jun 2022 01:58:59 -0700 (PDT)
 MIME-Version: 1.0
+References: <CAGm1_ktMOwwhhgVWj3DpCib-WpRzhkjE4d4DN74mz6kdwJk6BA@mail.gmail.com>
+ <YnNagtAtSudCum75@atomide.com> <CAGm1_ktACExigtZUYFWria8=cxhy6x6vDGpLcaZAvnE9G3Bz_A@mail.gmail.com>
+ <YqmTXqXLala7Li/+@atomide.com>
+In-Reply-To: <YqmTXqXLala7Li/+@atomide.com>
+From:   Yegor Yefremov <yegorslists@googlemail.com>
+Date:   Wed, 15 Jun 2022 10:58:48 +0200
+Message-ID: <CAGm1_kvM0p=T4L4vDpXj2quMCPqoBidztsLaAsKYCYCGpvVnng@mail.gmail.com>
+Subject: Re: Linux 5.18.x: sdhci issue
+To:     Tony Lindgren <tony@atomide.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,
+Hi Tony,
 
-dostrzegam mo=C5=BCliwo=C5=9B=C4=87 wsp=C3=B3=C5=82pracy z Pa=C5=84stwa f=
-irm=C4=85.
+On Wed, Jun 15, 2022 at 10:08 AM Tony Lindgren <tony@atomide.com> wrote:
+>
+> * Yegor Yefremov <yegorslists@googlemail.com> [220615 09:40]:
+> > Hi Tony, Ulf,
+> >
+> > On Thu, May 5, 2022 at 7:03 AM Tony Lindgren <tony@atomide.com> wrote:
+> > >
+> > > Hi,
+> > >
+> > > * Yegor Yefremov <yegorslists@googlemail.com> [220504 09:12]:
+> > > > Hi Tony, all,
+> > > >
+> > > > During the kernel boot I see the following error. The device is still
+> > > > working afterwards. 5.17.5 shows the same behavior. Is this a known
+> > > > issue?
+> > >
+> > > Thanks for reporting it, I was not aware of this one. Might be worth
+> > > bisecting. Adding linux-mmc and Ulf.
+> >
+> > This is my bisect result:
+> >
+> > f433e8aac6b94218394c6e7b80bb89e4e79c9549 is the first bad commit
+> > commit f433e8aac6b94218394c6e7b80bb89e4e79c9549
+> > Author: Tony Lindgren <tony@atomide.com>
+> > Date:   Fri Oct 15 13:47:18 2021 +0300
+> >
+> >     mmc: sdhci-omap: Implement PM runtime functions
+> >
+> >     Implement PM runtime functions and enable autosuspend.
+> >
+> >     Note that we save context in probe to avoid restoring invalid context
+> >     on the first resume. For system suspend, we have the new PM runtime
+> >     functions do most of the work.
+> >
+> >     Signed-off-by: Tony Lindgren <tony@atomide.com>
+> >     Link: https://lore.kernel.org/r/20211015104720.52240-5-tony@atomide.com
+> >     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>
+> OK thanks this makes sense based on what Arnd replied a few days ago.
+>
+> Regards,
 
-=C5=9Awiadczymy kompleksow=C4=85 obs=C5=82ug=C4=99 inwestycji w fotowolta=
-ik=C4=99, kt=C3=B3ra obni=C5=BCa koszty energii elektrycznej nawet o 90%.
+Your patch did the trick: all warnings/errors are gone. Thanks
+everyone for the help.
 
-Czy s=C4=85 Pa=C5=84stwo zainteresowani weryfikacj=C4=85 wst=C4=99pnych p=
-ropozycji?
-
-
-Pozdrawiam,
-Przemys=C5=82aw Wr=C3=B3blewski
+Yegor
