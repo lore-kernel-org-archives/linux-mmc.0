@@ -2,69 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6C90CCA473
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 17:34:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 728B4CCA47F
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 17:34:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241863AbiFORd7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Jun 2022 13:33:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46414 "EHLO
+        id S1345636AbiFOReC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Jun 2022 13:34:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1356203AbiFORdM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 13:33:12 -0400
+        with ESMTP id S1358002AbiFORdr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 13:33:47 -0400
 Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C40AE034
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 524FEE025
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:46 -0700 (PDT)
 Received: by mail-lf1-x130.google.com with SMTP id a29so20031547lfk.2
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:08 -0700 (PDT)
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=BUgb1Pe+Veiyc1nTiM+3RHjRjGi5/SPESrYXTvlvRXM=;
-        b=lpR1a6RXGTDYt15+E4r+yT/00L0A4FILcJrq9e4gJPPiJGz8QAfETf2g5D6di8fvHn
-         J7GYA5sGsmbXV1u5SNJL5nWEPhzVX9ZXAjWr5VcvJQ0QBm3w638+rgeLfqMyuZUP5CRT
-         r9SPqKoElpgdab66HMhgghETs7CMYZtopX0XmpOttnoAR0blC+IH5taRCOCMo4iB/KoE
-         qUUzUvsG3ufiyzwVJK6NnhM84AON/2kpAlzWNHC3BSqlk7afGRPSo17RXmbHzkXIoRYt
-         7XYKtBjLhYjNOkRgR2MCdY7hGcXJabBbejZpsZgZMup2oxjIiJOlOwjYl5DnMbmO/jBX
-         kHpw==
+        bh=3Rr2/eFmxSAglu7fgH0ivcyA6RJfSroBIvj7zrPlOBU=;
+        b=HFHHH4bG6XUFH+LKI17JGgJ8AKrAJBHUzfbDn3x4RDSDfoQY0M6TAKHWcCaT0yhnyg
+         BG3C8lBlZbJzJ17vopxWHWk1LB8Vt42BDaGOM/UilOyXwiwtbRrQnl3pYnHkdxx8xeRr
+         DWJGdvPU0pjyFq8ADPhI0Y8sXT3A6wygCnyZTaLtXGWsYBDzcAjnu7wLT+faXGXCbKAY
+         1L2KMdzSUYHXjl1RpXVFrlbdFfTy/zJGW67Be8fZdcx3Qm5mDEMzHGtmgxvroQ9HkZwe
+         yZKwx5oxqfqfh6AdAZR61io6dsb8hxhiaNBRs6PO04kG7GzuXvAvyg+lhxj/34I35f2I
+         rndA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=BUgb1Pe+Veiyc1nTiM+3RHjRjGi5/SPESrYXTvlvRXM=;
-        b=T6io7wRXrOkcYRDtidoq94F3CacX9k9iFXnoggv/LkdLJgPcIqENsE2Fa4K1XDKbmi
-         92rCw91CPMpxD37WLRYYpNWQVfuZHQaNO28NLrBcBxolN/622SD0WmfjnE1Akoldm+wQ
-         LQ0mlTVfp05gOpp+rMUs865iyn6G3tFdTjTmTxSrwMoXJHYOfKtuFHOI7zVxlftxLkBC
-         eMLwGfz8icQUQFtohPxhdFWMgPAt1+d0fWOFuy3Bd+zK+b1v9mSzieksi3/jtrDpQmkf
-         D1OALBSNEAW+hGKaYlGXz47Yjtloaim7ZO6aTJVZUfsOr1JoRHORca4qh/6mrxoe/TOp
-         5GIw==
-X-Gm-Message-State: AJIora9bQYjeu4PdmqMTiVUwIpQ4Bghf31REndjS3OmoH7mqTJclV3il
-        27lOom5Iv7ZaiE0gCqXlIYz9H4+LinOmyLZN7tVjCw==
-X-Google-Smtp-Source: AGRyM1uzZT5qbrIVqoqKo8NrzQAAiEbammbNVYH24ado8DrBIjHZ7ZONn86vPSD9rtjZsUL6eGAog6NNERQEcawmriM=
-X-Received: by 2002:a05:6512:303:b0:479:1baf:7e5b with SMTP id
- t3-20020a056512030300b004791baf7e5bmr348682lfp.184.1655314386647; Wed, 15 Jun
- 2022 10:33:06 -0700 (PDT)
+        bh=3Rr2/eFmxSAglu7fgH0ivcyA6RJfSroBIvj7zrPlOBU=;
+        b=g4ob1mWVMK1AybqNBQKoKSokDxi4nb+cNt/r/dpNAOJZ8Z9H4M+CvZUTSR7OXxLhVR
+         mTFWQgG0weo8Gfzaa7n5WsJ8hzNjwDYUzHJMsSzG3zmoUDNzhZLXJqCtJBaXn0aUXwep
+         EZu5g7TKUhS/AASZ0KC4BEszIMDdo+qJUw4ndPmbhWAAOMKfJ0Iou6eQqeCYrBLqK9Bf
+         KTTsH2muienmur+aGqm9wAWIhs79VK+VnwFbzQFFtjJgzDqgLumOtox8MNsGdjBvQ3ME
+         P8n/yhaQqzgsCcESDFNFwh7q9HXkhao1UkpBMqU7wkaGhPaNjlB8QcClDbCsTvw8rWGp
+         LZkg==
+X-Gm-Message-State: AJIora8UWIixu60raFg44BnK86O2AsxXTk3C+3P6HPVeZtKrvXJajHuz
+        yUrGvHf8jVprC+mTUijF01HaXJBfCNGZ/QAowBzs8S0wyFH+pw==
+X-Google-Smtp-Source: AGRyM1vRuShCsbq4w/fiDCkBOJhXMwRtkt/9aZmNJtPKoMFMDk9OvBZz2yhq88m+xvY9yFgkiCk//6NZUCNC6p7TjJc=
+X-Received: by 2002:ac2:54b9:0:b0:479:a29:c1ec with SMTP id
+ w25-20020ac254b9000000b004790a29c1ecmr341871lfk.358.1655314425841; Wed, 15
+ Jun 2022 10:33:45 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220608094831.8242-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20220608094831.8242-1-wsa+renesas@sang-engineering.com>
+References: <20220614113905.1458715-1-alexander.stein@ew.tq-group.com>
+In-Reply-To: <20220614113905.1458715-1-alexander.stein@ew.tq-group.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Jun 2022 10:32:29 -0700
-Message-ID: <CAPDyKFqFuZxeGcrBQFL3KM4o4rTSqEQkmW_9YuQ6Fm5pUZtvHQ@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: R-Car V3U is R-Car Gen4
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Date:   Wed, 15 Jun 2022 10:33:08 -0700
+Message-ID: <CAPDyKFpnYRCRbeY-cP3gH+tVTHMCkoxyBhb+xLHxjsg=kx2YWw@mail.gmail.com>
+Subject: Re: [PATCH 1/1] mmc: host: Do not evaluate HS400 capabilities if bus
+ has no MMC capability
+To:     Alexander Stein <alexander.stein@ew.tq-group.com>
+Cc:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 8 Jun 2022 at 10:22, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Tue, 14 Jun 2022 at 04:39, Alexander Stein
+<alexander.stein@ew.tq-group.com> wrote:
 >
-> Despite the name, R-Car V3U is the first member of the R-Car Gen4
-> family.  Hence move its compatible value to the R-Car Gen4 section.
+> If 'no-mmc' is set but 'no-mmc-hs400' is not, this warning is raised.
+> Specifying 'no-mmc' should be enough though.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Alexander Stein <alexander.stein@ew.tq-group.com>
 
 Applied for next, thanks!
 
@@ -73,32 +74,22 @@ Uffe
 
 
 > ---
->
-> Depends on "[PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car S4-8
-> and generic Gen4 support" which is already in mmc/next.
->
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 2 +-
+>  drivers/mmc/core/host.c | 2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index b46a90eb2063..d5b29728704b 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -56,13 +56,13 @@ properties:
->                - renesas,sdhi-r8a77980  # R-Car V3H
->                - renesas,sdhi-r8a77990  # R-Car E3
->                - renesas,sdhi-r8a77995  # R-Car D3
-> -              - renesas,sdhi-r8a779a0  # R-Car V3U
->                - renesas,sdhi-r9a07g043 # RZ/G2UL
->                - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
->                - renesas,sdhi-r9a07g054 # RZ/V2L
->            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
->        - items:
->            - enum:
-> +              - renesas,sdhi-r8a779a0  # R-Car V3U
->                - renesas,sdhi-r8a779f0  # R-Car S4-8
->            - const: renesas,rcar-gen4-sdhi # R-Car Gen4
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 2ed2b4d5e5a5..0fd91f749b3a 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -599,7 +599,7 @@ static int mmc_validate_host_caps(struct mmc_host *host)
+>         }
 >
+>         if (caps2 & (MMC_CAP2_HS400_ES | MMC_CAP2_HS400) &&
+> -           !(caps & MMC_CAP_8_BIT_DATA)) {
+> +           !(caps & MMC_CAP_8_BIT_DATA) && !(caps2 & MMC_CAP2_NO_MMC)) {
+>                 dev_warn(dev, "drop HS400 support since no 8-bit bus\n");
+>                 host->caps2 = caps2 & ~MMC_CAP2_HS400_ES & ~MMC_CAP2_HS400;
+>         }
 > --
-> 2.35.1
+> 2.25.1
 >
