@@ -2,151 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8835ECCA473
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 17:34:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D53C9C43334
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Jun 2022 17:34:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354371AbiFOReF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Jun 2022 13:34:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46250 "EHLO
+        id S1352107AbiFOReE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Jun 2022 13:34:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46436 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1357860AbiFORdk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 13:33:40 -0400
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96D544F1E3
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:28 -0700 (PDT)
-Received: by mail-lf1-x130.google.com with SMTP id a29so20031547lfk.2
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:28 -0700 (PDT)
+        with ESMTP id S1357945AbiFORdm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2022 13:33:42 -0400
+Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1C64C18
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:40 -0700 (PDT)
+Received: by mail-lf1-x12c.google.com with SMTP id 20so19978907lfz.8
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Jun 2022 10:33:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=S72eeZ+Row01YghjpUmWYlpXnQzipZvAzNu3EG7dF00=;
-        b=BR3qLXEgSSszCU9YWAmUJhaphZlQ5NrNHteiKYjbK+3eDpYdpbKiVLT1w/vldEp4pX
-         +HF40JInhIku0OCm/pOdQei11tBJSd/sRQUSYNpM6UN/1BGD3idJgDsdLM4C0SRFCv6E
-         HoNKUp07pwCmLjoXQeiU114Pm9YDXswIn+4NLoS5hgo/iZEL57b2eJBPA3PM/6xysOVY
-         mMge2aJD8FyIUZWDSDDQish4QwCdUPY6yELRZnKF3XriuSWdtZviiqnIRlJQrWUdKyOF
-         jaIQfrEi6tdUacNli3heJhT73rzaeOu0mQ2qGtRexeFU8mNVMfB8LBgSLG7kNKAA31DF
-         RkFg==
+        bh=vcHVsoWguVVLX6D1o9p6ROzYq6Vx8lJC3ceKckv3Ay4=;
+        b=pL1t+th8AsvavKWoWyXCwlHfo4w+BpNrHX/+qZpCkcTcFTvkBhwcJhH6kLrcco5aIT
+         dMzV/4EDZ8W90wOEFxWwC4NuUOkwQG4f/I10x8tN41xmww9Qga+ps7Pyjw6RtKbT1XPt
+         kDclqWzNDQCZL9dVuKvQTuQgtzAjRmw0jHYTat5C1cGwTAgZ/dEbnu6PLJgyDFATORuX
+         kk6OnLexf+I6OeWxz2D7zQR0Z7nL2i0ea9Uh1Mb35r1YssNbBJu/cAyH0QMvBTcdIg+T
+         nVXA9qlfHiPNPtzBEwHt+bM/nl7ITcCXM42nGHqUvGNbgABm7P2bP7zzvLq3RAwCTmbS
+         6uBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=S72eeZ+Row01YghjpUmWYlpXnQzipZvAzNu3EG7dF00=;
-        b=zXvMb1Me+57uJhMqUNltQhPmfKIo738b0RXCOFLDhqMVO36SSqnHHVGJYiFh17IE+d
-         mGIVN9isiXRHVHDjoiFUP2zugGvyMY/wYPePPzgtbz2jFuQbYPrQO1K720AwxKejUAyC
-         PUl002um04zyJKjUU6tchSfdg5bTzWxCk5FyX9z4IKGRKZNh6aH0VmR9g7vT4GYnUWOi
-         lC4PdcXI7vHPG7YS+wty0Ctp4yuK66684UVt7JlkhilfvfdwBEGm4vsGaZlUGl2VQ8g5
-         XEFJxj831bCsL0tgVvPl+kUuvHcEoJvbRhTEEMG2qHnSvlYKDowQf0hof3GlNj2O5goh
-         2BBg==
-X-Gm-Message-State: AJIora8NB+P4s8NQUG1MNQ4ZRy38kOeT/uhAbnEIA1vBlK1ciWIpkvuf
-        p5Ec2jnjhLVOME8L5cJgyyF385aCKAisTafrM7VKZw==
-X-Google-Smtp-Source: AGRyM1sA46kWiGsTwyik4A+h6I0Rt4vExcza34+hBCc/jIKpPP4aUs4AgBut2tMlPe1cEUer3DeVSKylq48GsEqiYSw=
-X-Received: by 2002:a05:6512:1047:b0:479:2308:ac0b with SMTP id
- c7-20020a056512104700b004792308ac0bmr349197lfb.167.1655314408139; Wed, 15 Jun
- 2022 10:33:28 -0700 (PDT)
+        bh=vcHVsoWguVVLX6D1o9p6ROzYq6Vx8lJC3ceKckv3Ay4=;
+        b=Oy58OnKQj+reZt5dQ9IEPIzTjkyeHRBu66yiAOIVG4Ya09FbhMKlphtJOXZAuEXeMB
+         1DOE0TMy1OaPkuW/3RumbYYElGm2/X/q1B8PiMPm/n05Ovo1HCOqky7FN7AEw8eeV7bJ
+         DJq8SlZyXoem9/R0MFksfAswc+I1skuGUBX7sqsjRpTSeDnnoetR9tSCUkHsxpoRBgud
+         wDKy0ThiMoq6ibhck67JCkPI0wElFr2U/z5MZiKGPF8OotYHU9cBLlYpvxWUi2y11Xu+
+         JhXFk4nAOl1BIwqx+LUGDnUnng7qYdSQFdkHobrbVOcZQWlA1/VrYJl4vB4U6HeNuFkK
+         /gvQ==
+X-Gm-Message-State: AJIora8cUVtJDZm9BXTk1VfaFrDTp9wj+pwIqWwjUu79ypYUEgaOPKK7
+        I2vUwZ3xcn9qiHP9jWoQ7pPOQSq8zs7Y3/RdpQsvJg==
+X-Google-Smtp-Source: AGRyM1syp1olg9wmO7O9Qx4xXKGJ5Ujb7iIbPyJx9BtqoyO1ka7CEAlVv9TnzuhTfveTUdS/L89RxjTf47ju1VaOxuI=
+X-Received: by 2002:ac2:4bcc:0:b0:479:16a9:897 with SMTP id
+ o12-20020ac24bcc000000b0047916a90897mr327943lfq.71.1655314419080; Wed, 15 Jun
+ 2022 10:33:39 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220609112239.18911-1-mengqi.zhang@mediatek.com>
-In-Reply-To: <20220609112239.18911-1-mengqi.zhang@mediatek.com>
+References: <20220613092907.2502-1-jason.lai@genesyslogic.com.tw>
+In-Reply-To: <20220613092907.2502-1-jason.lai@genesyslogic.com.tw>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Jun 2022 10:32:52 -0700
-Message-ID: <CAPDyKFrBWBKJvLZaZOgK9K3Td0ZNq_0vP=K5ERjja3OnQFCsNA@mail.gmail.com>
-Subject: Re: [RESEND V2] mmc: mediatek: wait dma stop bit reset to 0
-To:     Mengqi Zhang <mengqi.zhang@mediatek.com>
-Cc:     chaotian.jing@mediatek.com, matthias.bgg@gmail.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        wenbin.mei@mediatek.com
+Date:   Wed, 15 Jun 2022 10:33:03 -0700
+Message-ID: <CAPDyKFp7N61WQYYVT_fBgXYGPUbLWTbu6AL4Jyt=n45bEzuZXQ@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: host: Improve READ/WRITE Performance of GL9763E
+To:     Jason Lai <jasonlai.genesyslogic@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        SeanHY.chen@genesyslogic.com.tw, jason.lai@genesyslogic.com.tw,
+        victor.shih@genesyslogic.com.tw,
+        Renius Chen <reniuschengl@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 9 Jun 2022 at 04:22, Mengqi Zhang <mengqi.zhang@mediatek.com> wrote:
+On Mon, 13 Jun 2022 at 02:29, Jason Lai <jasonlai.genesyslogic@gmail.com> wrote:
 >
-> MediaTek IP requires that after dma stop, it need to wait this dma stop
-> bit auto-reset to 0. When bus is in high loading state, it will take a
-> while for the dma stop complete. If there is no waiting operation here,
-> when program runs to clear fifo and reset, bus will hang.
+> From: Jason Lai <jasonlai.genesyslogic@gmail.com>
 >
-> In addition, there should be no return in msdc_data_xfer_next() if
-> there is data need be transferred, because no matter what error occurs
-> here, it should continue to excute to the following mmc_request_done.
-> Otherwise the core layer may wait complete forever.
+> To improve READ/WRITE performance and take battery life into account, we
+> turn on GL9763E L1 negotiation before entering runtime suspend and turn
+> off GL9763E L1 negotiation while executing runtime resume. That is to say,
+> GL9763E will not enter L1 state when executing I/O requests and enter L1
+> state when PCIe bus idle.
 >
-> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+> Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+> Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/mtk-sd.c | 20 ++++++++++++--------
->  1 file changed, 12 insertions(+), 8 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 195dc897188b..9da4489dc345 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1356,7 +1356,7 @@ static void msdc_data_xfer_next(struct msdc_host *host, struct mmc_request *mrq)
->                 msdc_request_done(host, mrq);
->  }
+> This patch is the follow-up to the patch [1] and adopt Ulf's comment.
 >
-> -static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
-> +static void msdc_data_xfer_done(struct msdc_host *host, u32 events,
->                                 struct mmc_request *mrq, struct mmc_data *data)
->  {
->         struct mmc_command *stop;
-> @@ -1376,7 +1376,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
->         spin_unlock_irqrestore(&host->lock, flags);
+> Due to flaws in hardware design, GL9763E takes long time to exit from L1
+> state. The I/O performance will suffer severe impact if it often enter
+> and exit L1 state during I/O requests.
 >
->         if (done)
-> -               return true;
-> +               return;
->         stop = data->stop;
+> [1] https://patchwork.kernel.org/project/linux-mmc/list/?series=646869
 >
->         if (check_data || (stop && stop->error)) {
-> @@ -1385,12 +1385,15 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
->                 sdr_set_field(host->base + MSDC_DMA_CTRL, MSDC_DMA_CTRL_STOP,
->                                 1);
+> ---
+>  drivers/mmc/host/sdhci-pci-gli.c | 34 ++++++++++++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
 >
-> +               ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CTRL, val,
-> +                                               !(val & MSDC_DMA_CTRL_STOP), 1, 20000);
-> +               if (ret)
-> +                       dev_dbg(host->dev, "DMA stop timed out\n");
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index d09728c37d03..69bc3d614e15 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -95,6 +95,9 @@
+>  #define PCIE_GLI_9763E_SCR      0x8E0
+>  #define   GLI_9763E_SCR_AXI_REQ           BIT(9)
+>
+> +#define PCIE_GLI_9763E_CFG       0x8A0
+> +#define   GLI_9763E_CFG_LPSN_DIS   BIT(12)
 > +
->                 ret = readl_poll_timeout_atomic(host->base + MSDC_DMA_CFG, val,
->                                                 !(val & MSDC_DMA_CFG_STS), 1, 20000);
-> -               if (ret) {
-> -                       dev_dbg(host->dev, "DMA stop timed out\n");
-> -                       return false;
-> -               }
-> +               if (ret)
-> +                       dev_dbg(host->dev, "DMA inactive timed out\n");
->
->                 sdr_clr_bits(host->base + MSDC_INTEN, data_ints_mask);
->                 dev_dbg(host->dev, "DMA stop\n");
-> @@ -1415,9 +1418,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
->                 }
->
->                 msdc_data_xfer_next(host, mrq);
-> -               done = true;
->         }
-> -       return done;
+>  #define PCIE_GLI_9763E_CFG2      0x8A4
+>  #define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
+>  #define   GLI_9763E_CFG2_L1DLY_MID 0x54
+> @@ -818,6 +821,31 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *mmc)
+>         sdhci_dumpregs(mmc_priv(mmc));
 >  }
 >
->  static void msdc_set_buswidth(struct msdc_host *host, u32 width)
-> @@ -2416,6 +2417,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
->         if (recovery) {
->                 sdr_set_field(host->base + MSDC_DMA_CTRL,
->                               MSDC_DMA_CTRL_STOP, 1);
-> +               if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CTRL, val,
-> +                       !(val & MSDC_DMA_CTRL_STOP), 1, 3000)))
-> +                       return;
->                 if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
->                         !(val & MSDC_DMA_CFG_STS), 1, 3000)))
->                         return;
+> +static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
+> +{
+> +       struct pci_dev *pdev = slot->chip->pdev;
+> +       u32 value;
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +       value &= ~GLI_9763E_VHS_REV;
+> +       value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
+> +
+> +       if (enable)
+> +               value &= ~GLI_9763E_CFG_LPSN_DIS;
+> +       else
+> +               value |= GLI_9763E_CFG_LPSN_DIS;
+> +
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +       value &= ~GLI_9763E_VHS_REV;
+> +       value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +}
+> +
+>  static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
+>  {
+>         struct cqhci_host *cq_host = mmc->cqe_private;
+> @@ -959,6 +987,9 @@ static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+>         struct sdhci_host *host = slot->host;
+>         u16 clock;
+>
+> +       /* Enable LPM negotiation to allow entering L1 state */
+> +       gl9763e_set_low_power_negotiation(slot, true);
+> +
+>         clock = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>         clock &= ~(SDHCI_CLOCK_PLL_EN | SDHCI_CLOCK_CARD_EN);
+>         sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+> @@ -989,6 +1020,9 @@ static int gl9763e_runtime_resume(struct sdhci_pci_chip *chip)
+>         clock |= SDHCI_CLOCK_CARD_EN;
+>         sdhci_writew(host, clock, SDHCI_CLOCK_CONTROL);
+>
+> +       /* Disable LPM negotiation to avoid entering L1 state. */
+> +       gl9763e_set_low_power_negotiation(slot, false);
+> +
+>         return 0;
+>  }
+>  #endif
 > --
-> 2.25.1
+> 2.36.1
 >
