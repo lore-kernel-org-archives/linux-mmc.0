@@ -2,93 +2,221 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4464CCA479
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jun 2022 16:55:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52E76C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jun 2022 23:01:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1382514AbiFQQzj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Jun 2022 12:55:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39102 "EHLO
+        id S236845AbiFQXBY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Jun 2022 19:01:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1382738AbiFQQzi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2022 12:55:38 -0400
-Received: from mail-pl1-f179.google.com (mail-pl1-f179.google.com [209.85.214.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00EAA15801;
-        Fri, 17 Jun 2022 09:55:37 -0700 (PDT)
-Received: by mail-pl1-f179.google.com with SMTP id t2so4360695pld.4;
-        Fri, 17 Jun 2022 09:55:37 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=NQvpbNnhd1Hb0j8v30FPXqT+MFqFElEXEqSS6ck3brY=;
-        b=aCyqpQX7dhesop7GetkwFHh8dcccktPV24/VIY3oi+Tzas62t+A1YHIjj0QufjxfDz
-         QBQYzKzZrc3NSnlM0d7OKLXOCj0C7pcm4gc+IJ7UldmYe/Zi5x8yq1vKRfIvj4gGP28L
-         XCYVrFA8Cn8i3Ydrk71gisuIMbLRM5SaaWbHdMq044aUbaYF8TV2kzUp+qtZtlF4BoHm
-         Tqn2DJvJX/XvIcePhAZBdgT4/bfIOuhQpT12JW1Z4amhh5Ax3gCMdv3UHxy64fn36IYg
-         RmI7ik9MM7z+KtFlPPfCphUGmXT6cCxZuEDk7tv1P9GpLtFUYvp/aaw3T3k5QUvbJDLV
-         q2aQ==
-X-Gm-Message-State: AJIora+ix3kQrVLYkT4FEQX0u8Iq4xujKRk1b2yGA0mReu7QRyBAt+wb
-        6OdOIq2e89u/pGzG9Vr67/w=
-X-Google-Smtp-Source: AGRyM1uVwwnPkhP6RYNzI5TunYKnnEx27Gq+Jz+noCToEfYq5XweGJSbPYfjWq1VJ+qXOBF2dFKLpw==
-X-Received: by 2002:a17:90a:784f:b0:1ea:fa7d:7013 with SMTP id y15-20020a17090a784f00b001eafa7d7013mr7943869pjl.222.1655484936639;
-        Fri, 17 Jun 2022 09:55:36 -0700 (PDT)
-Received: from ?IPV6:2620:15c:211:201:5d24:3188:b21f:5671? ([2620:15c:211:201:5d24:3188:b21f:5671])
-        by smtp.gmail.com with ESMTPSA id x1-20020a170902820100b001690b65b2absm3014083pln.175.2022.06.17.09.55.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 17 Jun 2022 09:55:35 -0700 (PDT)
-Message-ID: <c6a0eb8d-ad51-01b1-bc17-758acc37f216@acm.org>
-Date:   Fri, 17 Jun 2022 09:55:34 -0700
+        with ESMTP id S238420AbiFQXBX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2022 19:01:23 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BA6162BE9;
+        Fri, 17 Jun 2022 16:01:21 -0700 (PDT)
+Received: from notapiano.myfiosgateway.com (pool-98-113-53-228.nycmny.fios.verizon.net [98.113.53.228])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: nfraprado)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 11B5466015AF;
+        Sat, 18 Jun 2022 00:01:17 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1655506880;
+        bh=HzB24ka+vz57Ogmycw3WCgaPbXa1Hv253R1g2u8xX1A=;
+        h=From:To:Cc:Subject:Date:From;
+        b=j4XqjOfLpSKcL2Mztni26hqC6h7eaKwGlfecl0neuEsIkbvgPDTnJQApY7yejAbN7
+         fVgdCD+MG3PMfbMWAnO1BLpjnrPP4/ZBzp0UGQ7kxqsNLQWORnZFbNhRO7rjvoongC
+         AYY4JcTAg08Dlyie1XWifBa4oGFgyncLFpGBDkTNpqU/gooRGejCDUgly1CLIlZIO8
+         o4QWlDwHbQtqzF7vr02zzdQsKPUIxK7Aqisn3Ndc73EujqQsviUBfXhFsYuA9ckXN9
+         TA7rtQZha2CWCN2naZxjTjo02mvndfrRlpLY41v736o6bABvf5yL2ico6Qzk160LRN
+         0ecqKf6aDgE4g==
+From:   =?UTF-8?q?N=C3=ADcolas=20F=2E=20R=2E=20A=2E=20Prado?= 
+        <nfraprado@collabora.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     kernel@collabora.com,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        =?UTF-8?q?N=C3=ADcolas=20F=2E=20R=2E=20A=2E=20Prado?= 
+        <nfraprado@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH] dt-bindings: mmc: mtk-sd: Set clocks based on compatible
+Date:   Fri, 17 Jun 2022 19:01:14 -0400
+Message-Id: <20220617230114.2438875-1-nfraprado@collabora.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH 5/5] blk-mq: Drop 'reserved' member of busy_tag_iter_fn
-Content-Language: en-US
-To:     John Garry <john.garry@huawei.com>, axboe@kernel.dk,
-        damien.lemoal@opensource.wdc.com, hch@lst.de, jejb@linux.ibm.com,
-        martin.petersen@oracle.com, hare@suse.de, satishkh@cisco.com,
-        sebaddel@cisco.com, kartilak@cisco.com
-Cc:     linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-        linux-scsi@vger.kernel.org, mpi3mr-linuxdrv.pdl@broadcom.com,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        nbd@other.debian.org
-References: <1655463320-241202-1-git-send-email-john.garry@huawei.com>
- <1655463320-241202-6-git-send-email-john.garry@huawei.com>
- <017cae1e-b45f-04fd-d34c-22ae736b28e5@acm.org>
- <a18fa379-5a9b-ff45-3be4-b253efd96a50@huawei.com>
-From:   Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <a18fa379-5a9b-ff45-3be4-b253efd96a50@huawei.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/17/22 09:42, John Garry wrote:
-> On 17/06/2022 17:33, Bart Van Assche wrote:
->> On 6/17/22 03:55, John Garry wrote:
->>> @@ -276,7 +275,7 @@ static bool bt_iter(struct sbitmap *bitmap, 
->>> unsigned int bitnr, void *data)
->>>       else
->>>           tags = hctx->tags;
->>> -    if (!reserved)
->>> +    if (!iter_data->reserved)
->>>           bitnr += tags->nr_reserved_tags;
->>>       /*
->>>        * We can hit rq == NULL here, because the tagging functions
->>
->> Is the above change really necessary?
-> 
-> It's not totally necessary. Since local variable 'reserved' would now 
-> only be used once I thought it was better to get rid of it.
-> 
-> I can keep it if you really think that is better.
+The binding was describing a single clock list for all platforms, but
+that's not really suitable: mt2712 requires an extra 'bus_clk' on some
+of its controllers, while mt8192 requires four different extra clocks.
+The rest of the platforms can share the same 3 clocks, with the third
+being optional as it's not present on all platforms.
 
-I'd prefer that these changes are either left out or that these are 
-moved into a separate patch. I think that will make this patch series 
-easier to review.
+Move the clock definitions inside if blocks that match on the
+compatibles. In practice this gets rid of dtbs_check warnings on mt8192,
+since the 'bus_clk' clock from mt2712 is no longer expected on this
+platform.
 
-Thanks,
+Fixes: 59a23395d8aa ("dt-bindings: mmc: Add support for MT8192 SoC")
+Signed-off-by: Nícolas F. R. A. Prado <nfraprado@collabora.com>
 
-Bart.
+---
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 115 ++++++++++++------
+ 1 file changed, 81 insertions(+), 34 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index 2a2e9fa8c188..ba48ff041299 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -10,9 +10,6 @@ maintainers:
+   - Chaotian Jing <chaotian.jing@mediatek.com>
+   - Wenbin Mei <wenbin.mei@mediatek.com>
+ 
+-allOf:
+-  - $ref: mmc-controller.yaml#
+-
+ properties:
+   compatible:
+     oneOf:
+@@ -48,28 +45,8 @@ properties:
+   clocks:
+     description:
+       Should contain phandle for the clock feeding the MMC controller.
+-    minItems: 2
+-    items:
+-      - description: source clock (required).
+-      - description: HCLK which used for host (required).
+-      - description: independent source clock gate (required for MT2712).
+-      - description: bus clock used for internal register access (required for MT2712 MSDC0/3).
+-      - description: msdc subsys clock gate (required for MT8192).
+-      - description: peripheral bus clock gate (required for MT8192).
+-      - description: AXI bus clock gate (required for MT8192).
+-      - description: AHB bus clock gate (required for MT8192).
+-
+-  clock-names:
+-    minItems: 2
+-    items:
+-      - const: source
+-      - const: hclk
+-      - const: source_cg
+-      - const: bus_clk
+-      - const: sys_cg
+-      - const: pclk_cg
+-      - const: axi_cg
+-      - const: ahb_cg
++
++  clock-names: true
+ 
+   interrupts:
+     maxItems: 1
+@@ -171,15 +148,85 @@ required:
+   - vmmc-supply
+   - vqmmc-supply
+ 
+-if:
+-  properties:
+-    compatible:
+-      contains:
+-        const: mediatek,mt8183-mmc
+-then:
+-  properties:
+-    reg:
+-      minItems: 2
++allOf:
++  - $ref: mmc-controller.yaml#
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: mediatek,mt8183-mmc
++    then:
++      properties:
++        reg:
++          minItems: 2
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: mediatek,mt8192-mmc
++    then:
++      properties:
++        clocks:
++          items:
++            - description: source clock
++            - description: HCLK which used for host
++            - description: independent source clock gate
++            - description: msdc subsys clock gate
++            - description: peripheral bus clock gate
++            - description: AXI bus clock gate
++            - description: AHB bus clock gate
++        clock-names:
++          items:
++            - const: source
++            - const: hclk
++            - const: source_cg
++            - const: sys_cg
++            - const: pclk_cg
++            - const: axi_cg
++            - const: ahb_cg
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: mediatek,mt2712-mmc
++    then:
++      properties:
++        clocks:
++          minItems: 3
++          items:
++            - description: source clock
++            - description: HCLK which used for host
++            - description: independent source clock gate
++            - description: bus clock used for internal register access (required for MSDC0/3).
++        clock-names:
++          minItems: 3
++          items:
++            - const: source
++            - const: hclk
++            - const: source_cg
++            - const: bus_clk
++  - if:
++      not:
++        properties:
++          compatible:
++            contains:
++              enum:
++                - mediatek,mt2712-mmc
++                - mediatek,mt8192-mmc
++    then:
++      properties:
++        clocks:
++          minItems: 2
++          items:
++            - description: source clock
++            - description: HCLK which used for host
++            - description: independent source clock gate
++        clock-names:
++          minItems: 2
++          items:
++            - const: source
++            - const: hclk
++            - const: source_cg
+ 
+ unevaluatedProperties: false
+ 
+-- 
+2.36.1
+
