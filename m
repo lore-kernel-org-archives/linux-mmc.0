@@ -2,111 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66A43C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jun 2022 06:25:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52FB3C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jun 2022 11:01:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234489AbiFQGZj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Jun 2022 02:25:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40610 "EHLO
+        id S1381504AbiFQLBl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Jun 2022 07:01:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56622 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230307AbiFQGZj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2022 02:25:39 -0400
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08D184B40B;
-        Thu, 16 Jun 2022 23:25:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1655447138; x=1686983138;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=9jX8x1B0yyMxIR5oC5RaasA8RuJ4KOsyAyVIyowaP3U=;
-  b=Dr+rNexBITT+LV2qVZ8tyb1DOL5ojTAn6eHpI1zy+3PUKv/3SgJs2387
-   SvaZqs4QYXQyLEVu7PQKN49HNCcinMvZ95uSD0sdMGscJhpVQMkMTwPVJ
-   VaChYboxD8r50Rywu3IhP6xRd16pGTEMgHTWh8kS3mWkj4Oqj16j+mj00
-   a4NZOucUCl1WliNE6Z3GF3D+fyxD+L0Pwebl52P4Uri4PEVVqpQozaEzs
-   RmoX26JAWymW0LErq+EeF8Y5mDc0CMb/ctI3hSInjQWAkRVukiyofBI1j
-   QAkULj8Ve4mkKztGcXiYibQN5ZUYUTitpqhFxwi/Cltj9OE+ZQfL8i0PH
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10380"; a="365784557"
-X-IronPort-AV: E=Sophos;i="5.92,306,1650956400"; 
-   d="scan'208";a="365784557"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jun 2022 23:25:37 -0700
-X-IronPort-AV: E=Sophos;i="5.92,306,1650956400"; 
-   d="scan'208";a="641906970"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.33.57])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Jun 2022 23:25:34 -0700
-Message-ID: <173521c9-2e5c-8301-1dcf-b6f692866ef2@intel.com>
-Date:   Fri, 17 Jun 2022 09:25:31 +0300
+        with ESMTP id S233957AbiFQLBk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2022 07:01:40 -0400
+Received: from frasgout.his.huawei.com (frasgout.his.huawei.com [185.176.79.56])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56D026C0DF;
+        Fri, 17 Jun 2022 04:01:37 -0700 (PDT)
+Received: from fraeml714-chm.china.huawei.com (unknown [172.18.147.226])
+        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4LPbfJ20Xgz6H6l9;
+        Fri, 17 Jun 2022 18:59:52 +0800 (CST)
+Received: from lhreml724-chm.china.huawei.com (10.201.108.75) by
+ fraeml714-chm.china.huawei.com (10.206.15.33) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Fri, 17 Jun 2022 13:01:34 +0200
+Received: from localhost.localdomain (10.69.192.58) by
+ lhreml724-chm.china.huawei.com (10.201.108.75) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.24; Fri, 17 Jun 2022 12:01:30 +0100
+From:   John Garry <john.garry@huawei.com>
+To:     <axboe@kernel.dk>, <damien.lemoal@opensource.wdc.com>,
+        <bvanassche@acm.org>, <hch@lst.de>, <jejb@linux.ibm.com>,
+        <martin.petersen@oracle.com>, <hare@suse.de>, <satishkh@cisco.com>,
+        <sebaddel@cisco.com>, <kartilak@cisco.com>
+CC:     <linux-rdma@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-nvme@lists.infradead.org>, <linux-s390@vger.kernel.org>,
+        <linux-scsi@vger.kernel.org>, <mpi3mr-linuxdrv.pdl@broadcom.com>,
+        <linux-block@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <nbd@other.debian.org>, John Garry <john.garry@huawei.com>
+Subject: [PATCH 0/5] blk-mq: Add a flag for reserved requests series
+Date:   Fri, 17 Jun 2022 18:55:15 +0800
+Message-ID: <1655463320-241202-1-git-send-email-john.garry@huawei.com>
+X-Mailer: git-send-email 2.8.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH] mmc: sdhci-omap: Fix a lockdep warning for PM runtime
- init
-Content-Language: en-US
-To:     Tony Lindgren <tony@atomide.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
-        Yegor Yefremov <yegorslists@googlemail.com>,
-        Arnd Bergmann <arnd@arndb.de>
-References: <20220617040300.30321-1-tony@atomide.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220617040300.30321-1-tony@atomide.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-Originating-IP: [10.69.192.58]
+X-ClientProxiedBy: dggems706-chm.china.huawei.com (10.3.19.183) To
+ lhreml724-chm.china.huawei.com (10.201.108.75)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/06/22 07:03, Tony Lindgren wrote:
-> We need hardware enabled early in probe to detect capabilities, but must
-> not call sdhci_runtime_resume_host() until sdhci_setup_host() has been
-> called. Let's check for an initialized controller like we already do
-> for context restore.
+In [0] I included "blk-mq: Add a flag for reserved requests" to identify
+if a request is 'reserved' for special handling. Doing this is easier than
+passing a 'reserved' arg to the blk_mq_ops callbacks. Indeed, only 1x
+timeout implementation or blk-mq iter function actually uses the
+'reserved' arg (or 3x if you count SCSI core and FNIC SCSI driver). So
+this series drops the 'reserved' arg for these timeout and iter functions.
+Christoph suggested that I try to upstream now.
 
-Begs the question: why not prevent runtime pm until after sdhci_setup_host().
-Maybe expand the commit message explanation a bit?
+About the SCSI changes, I can leave them in place if people prefer.
 
-> 
-> Fixes: f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions")
-> Reported-by: Yegor Yefremov <yegorslists@googlemail.com>
-> Suggested-by: Arnd Bergmann <arnd@arndb.de>
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
-> ---
->  drivers/mmc/host/sdhci-omap.c | 9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -1441,7 +1441,8 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
->  
-> -	sdhci_runtime_suspend_host(host);
-> +	if (omap_host->con != -EINVAL)
-> +		sdhci_runtime_suspend_host(host);
->  
->  	sdhci_omap_context_save(omap_host);
->  
-> @@ -1458,10 +1459,10 @@ static int __maybe_unused sdhci_omap_runtime_resume(struct device *dev)
->  
->  	pinctrl_pm_select_default_state(dev);
->  
-> -	if (omap_host->con != -EINVAL)
-> +	if (omap_host->con != -EINVAL) {
->  		sdhci_omap_context_restore(omap_host);
-> -
-> -	sdhci_runtime_resume_host(host, 0);
-> +		sdhci_runtime_resume_host(host, 0);
-> +	}
->  
->  	return 0;
->  }
+Based on following:
+c13794dbe936 (block/for-5.20/block) block: Directly use ida_alloc()/free()
+
+[0] https://lore.kernel.org/linux-scsi/1654770559-101375-1-git-send-email-john.garry@huawei.com/T/#m22aa9f89e55835edc2e650d43f7e3219a3a1a324
+
+John Garry (5):
+  scsi: core: Remove reserved request time-out handling
+  blk-mq: Add a flag for reserved requests
+  blk-mq: Drop blk_mq_ops.timeout 'reserved' arg
+  scsi: fnic: Drop reserved request handling
+  blk-mq: Drop 'reserved' member of busy_tag_iter_fn
+
+ block/blk-mq-debugfs.c              |  2 +-
+ block/blk-mq-tag.c                  | 13 +++++--------
+ block/blk-mq.c                      | 22 +++++++++++++---------
+ block/bsg-lib.c                     |  2 +-
+ drivers/block/mtip32xx/mtip32xx.c   | 11 +++++------
+ drivers/block/nbd.c                 |  5 ++---
+ drivers/block/null_blk/main.c       |  2 +-
+ drivers/infiniband/ulp/srp/ib_srp.c |  3 +--
+ drivers/mmc/core/queue.c            |  3 +--
+ drivers/nvme/host/apple.c           |  3 +--
+ drivers/nvme/host/core.c            |  2 +-
+ drivers/nvme/host/fc.c              |  6 ++----
+ drivers/nvme/host/nvme.h            |  2 +-
+ drivers/nvme/host/pci.c             |  2 +-
+ drivers/nvme/host/rdma.c            |  3 +--
+ drivers/nvme/host/tcp.c             |  3 +--
+ drivers/s390/block/dasd.c           |  2 +-
+ drivers/s390/block/dasd_int.h       |  2 +-
+ drivers/scsi/aacraid/comminit.c     |  2 +-
+ drivers/scsi/aacraid/linit.c        |  2 +-
+ drivers/scsi/fnic/fnic_scsi.c       | 14 ++++----------
+ drivers/scsi/hosts.c                | 14 ++++++--------
+ drivers/scsi/mpi3mr/mpi3mr_os.c     | 16 ++++------------
+ drivers/scsi/scsi_lib.c             | 12 ++----------
+ include/linux/blk-mq.h              | 10 ++++++++--
+ include/scsi/scsi_host.h            |  2 +-
+ 26 files changed, 67 insertions(+), 93 deletions(-)
+
+-- 
+2.35.3
 
