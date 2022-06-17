@@ -2,97 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEFD1C43334
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Jun 2022 22:57:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 629ACC43334
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Jun 2022 04:03:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1378996AbiFPW54 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Jun 2022 18:57:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34630 "EHLO
+        id S234033AbiFQEDK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Jun 2022 00:03:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1379248AbiFPW5z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2022 18:57:55 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99B4113CEE
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2022 15:57:54 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id h36so4329365lfv.9
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2022 15:57:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=foFbBVpMYm/Gc4GSlJ3hBTUJlqtStZvyEhHzzHadiP4=;
-        b=zl8pfMtKWBhptJeoc08baEemGuv9aKv1Jn0h1c4BlepEKJUYTPtlqTnWWZ9oroZKJr
-         kzD2Xz2Q092wzBLtcUH8juGrkyk6LO1ggZeWkeNS+e2FvsobHPJ3BG06FB3g/ujVVWpW
-         iPt1ttRgKp1gENNhs42FH9HhOe0fwZVQyd79jJP70KFtuulmTiiRheCMakE0VqCN3s0n
-         pOBkj2Lsnj1vs4x+m+kCVa36omwFUmx2w/OeGy11439k3Ud2jzx2/eHwC025gW1l55xz
-         ao5UkThzIh3OMNQpipjn287sB2CUaFAgOIWf8hE1C6EpPLnRguIGRNWqCA2jXSTELg5o
-         03BA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=foFbBVpMYm/Gc4GSlJ3hBTUJlqtStZvyEhHzzHadiP4=;
-        b=yEIjucGuzHtJtKYhrFGynOJ6Fa4V35pGX3LGje1Vq4BKVKXObsPPxuTqRLg7ZndWzv
-         5TBGhqkseqbNL9vF9TuJJhTvQ33XhOuHfR0QnIpfvkVYDYsITv3sjGEyG6Yh3o3gnm75
-         QiwvjPTIyID3MNh9p6WHGNX5a1WMcQGi8x7lv5XCKvtiuCMrvxH7eoP2PBKP5XxvgLXF
-         I7znadfkLRKq+1PYBtDf/Gi+1K784jDAGSXXoSkhneHO+FknNlAa6Bsb/8lJuCRVMHLQ
-         Yw9NBZra3PCebQlDgguwhyKGuRtyRAkjB/xhpPc9hGTSwHU93pQBT8EyjrAPCPUO9x4W
-         KhpA==
-X-Gm-Message-State: AJIora+S2BbsDYt1IJVPNnq8D34Z1SzCItDJFEEJQFVns/3tHl8xrWzy
-        uYwaeYo3w4hV6myMwraFn8fW6MDk8n7qv1ng/w1EYQ==
-X-Google-Smtp-Source: AGRyM1vfn8Wbf5jZ1bsro7EQrh/0VnN6uTKGpjRNEhxRCmlaYNOLxKAv0gnmzZvxDdL7HlzmHVzuXHgXyvAT734MCz8=
-X-Received: by 2002:ac2:4bcc:0:b0:479:16a9:897 with SMTP id
- o12-20020ac24bcc000000b0047916a90897mr3879288lfq.71.1655420272466; Thu, 16
- Jun 2022 15:57:52 -0700 (PDT)
+        with ESMTP id S232836AbiFQEDI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2022 00:03:08 -0400
+Received: from muru.com (muru.com [72.249.23.125])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4090D13F3F;
+        Thu, 16 Jun 2022 21:03:07 -0700 (PDT)
+Received: from hillo.muru.com (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTP id D09E0812F;
+        Fri, 17 Jun 2022 03:58:15 +0000 (UTC)
+From:   Tony Lindgren <tony@atomide.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
+        Yegor Yefremov <yegorslists@googlemail.com>,
+        Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: sdhci-omap: Fix a lockdep warning for PM runtime init
+Date:   Fri, 17 Jun 2022 07:03:00 +0300
+Message-Id: <20220617040300.30321-1-tony@atomide.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-References: <20220418115833.10738-1-jasonlai.genesyslogic@gmail.com> <CAG0XXUF_YrNHNHPPNRjLSiycYyaAZuwaeCG3XpP_HVJrqYsy-w@mail.gmail.com>
-In-Reply-To: <CAG0XXUF_YrNHNHPPNRjLSiycYyaAZuwaeCG3XpP_HVJrqYsy-w@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 16 Jun 2022 15:57:16 -0700
-Message-ID: <CAPDyKFrTVOq67krAe8Vc_Y75M+6CbrTdS2Uh8pb=CxL=OiDm+g@mail.gmail.com>
-Subject: Re: [PATCH V4 0/6] Preparations to support SD UHS-II cards
-To:     Lai Jason <jasonlai.genesyslogic@gmail.com>
-Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>, dlunev@chromium.org,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        SeanHY.chen@genesyslogic.com.tw,
-        =?UTF-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <greg.tu@genesyslogic.com.tw>,
-        Jason Lai <jason.lai@genesyslogic.com.tw>,
-        victor.shih@genesyslogic.com.tw
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 6 Jun 2022 at 00:25, Lai Jason <jasonlai.genesyslogic@gmail.com> wrote:
->
-> Hi Ulf,
->
-> Do you have any comments for this patch set?
-> If you think this patch set is ok, we will proceed to integrate UHS2 host part
-> of code with this patch set.
->
-> kind regards,
-> Jason Lai
+We need hardware enabled early in probe to detect capabilities, but must
+not call sdhci_runtime_resume_host() until sdhci_setup_host() has been
+called. Let's check for an initialized controller like we already do
+for context restore.
 
-Hi Jason,
+Fixes: f433e8aac6b9 ("mmc: sdhci-omap: Implement PM runtime functions")
+Reported-by: Yegor Yefremov <yegorslists@googlemail.com>
+Suggested-by: Arnd Bergmann <arnd@arndb.de>
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+---
+ drivers/mmc/host/sdhci-omap.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-My apologies for the delays. Unfortunately I need some additional time
-to review this, it has been a busy time for me lately.
-
-Note that, as I said during the earlier review, it looks like it's
-time to rebase the host series and thus include that as a part of a
-complete series. The reason is simply that I would like to get a
-better understanding of how the host driver deployment would look like
-too.
-
-I plan to complete the review of the $subject series next week,
-although please don't wait for my review if you already have a
-complete series ready to be posted, as I would rather review that
-instead.
-
-[...]
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -1441,7 +1441,8 @@ static int __maybe_unused sdhci_omap_runtime_suspend(struct device *dev)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_omap_host *omap_host = sdhci_pltfm_priv(pltfm_host);
+ 
+-	sdhci_runtime_suspend_host(host);
++	if (omap_host->con != -EINVAL)
++		sdhci_runtime_suspend_host(host);
+ 
+ 	sdhci_omap_context_save(omap_host);
+ 
+@@ -1458,10 +1459,10 @@ static int __maybe_unused sdhci_omap_runtime_resume(struct device *dev)
+ 
+ 	pinctrl_pm_select_default_state(dev);
+ 
+-	if (omap_host->con != -EINVAL)
++	if (omap_host->con != -EINVAL) {
+ 		sdhci_omap_context_restore(omap_host);
+-
+-	sdhci_runtime_resume_host(host, 0);
++		sdhci_runtime_resume_host(host, 0);
++	}
+ 
+ 	return 0;
+ }
+-- 
+2.36.1
