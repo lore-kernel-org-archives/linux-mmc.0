@@ -2,52 +2,56 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B645ECCA481
-	for <linux-mmc@archiver.kernel.org>; Sat, 18 Jun 2022 09:03:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9181AC43334
+	for <linux-mmc@archiver.kernel.org>; Sat, 18 Jun 2022 09:03:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231840AbiFRJDk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 18 Jun 2022 05:03:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45068 "EHLO
+        id S232553AbiFRJDo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 18 Jun 2022 05:03:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232498AbiFRJDc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Jun 2022 05:03:32 -0400
-Received: from mail-pj1-x1049.google.com (mail-pj1-x1049.google.com [IPv6:2607:f8b0:4864:20::1049])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65F0F28730
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Jun 2022 02:03:31 -0700 (PDT)
-Received: by mail-pj1-x1049.google.com with SMTP id lk16-20020a17090b33d000b001e68a9ac3a1so4205655pjb.2
-        for <linux-mmc@vger.kernel.org>; Sat, 18 Jun 2022 02:03:31 -0700 (PDT)
+        with ESMTP id S230117AbiFRJDn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 18 Jun 2022 05:03:43 -0400
+Received: from mail-pl1-x649.google.com (mail-pl1-x649.google.com [IPv6:2607:f8b0:4864:20::649])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F1132F00E
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Jun 2022 02:03:40 -0700 (PDT)
+Received: by mail-pl1-x649.google.com with SMTP id d11-20020a170902cecb00b00163fe890197so3766831plg.1
+        for <linux-mmc@vger.kernel.org>; Sat, 18 Jun 2022 02:03:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20210112;
-        h=date:message-id:mime-version:subject:from:to:cc;
-        bh=ptVKPuGcbB2+la+8ZiODjieQiW7k/oxo/Oz/EdgWumA=;
-        b=UIxQ5FEc5KUGjUFI0jmR+pzVeOpPYkxsewDr7QpplKnl9i8FqbhtassrfzcyyW/VG4
-         q4zTZ1jlJegFa1PmQn4JCa7rgZpA9GXdHeGc7DZThZ3KQpZ5ijja2/D22gi939kN75as
-         w19ZMHfgy7cHjfLdCoqYjwhPvt3gyoPZQIRTlpXEuBVi1hRUi93DrwXHyRyr6uPntB+C
-         f5qLDoDNzx+/aL9DTUn2OsNZ3Fo0QayufVMnNZ/CwjjPTMgirdUroVvDRqUjhR2FhpvJ
-         nwHs/ieBLMWCoE89Zwm+PIiFZpaoTHinYCTLH2LFGLCAwEinnlsS9UG+rWKeGDt9sn12
-         wlLg==
+        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
+         :cc;
+        bh=hRpKU2+wZuXkrgTerFV+FyC8dspsYxZX/UCj6fZ1yrg=;
+        b=JzVhxj5JDNEc2mtkSPZdHYnPMP9cMCZLdGw7P4ZximGrSSxMEshrYsrlkhY6nSaKE/
+         PiW8k7/Onr5mcSrvFGzCTi+L/I/xkZeSzmP0DiN36qEQ7TQ/O1ZbszBxv9haFBOLPJeF
+         DFaBdbDGKJErs+yvNfIx9+iWGUT4GUOzbmHiodcR1tCDK3/pg8NYusZ/jwwRZRKaL0AG
+         WRyiJ4j3aDzGOhMrNkv7FX4GWbVkcmRERk4iwmPkAj7bpSZiLAxjmejuYZ/87qjzMYUG
+         110C7Q6VUHjAsd0ezsWRbilzcPz2nH2fAiyEp6oqva7ftfgpkKcP4tPubSPeniySb7o2
+         UsRQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
-        bh=ptVKPuGcbB2+la+8ZiODjieQiW7k/oxo/Oz/EdgWumA=;
-        b=Ez3vdxMEhNGIEM+/i1ThLJx094GkkUJjAhB9O5XiVRbJTxjji3tOInWhKTqyBv6I5u
-         icAietUvuHz4ufoMcjZqNJ4gUur/+EdSFaMk2E5shjchOAmiLYMg3sTdG/e9r3d5N3Vu
-         vu270y9AW1OptfzDSeaoAODTnlQ62KpP0FBq3UYe6XcrDWLZ9vjmFWRaiWT4rQERnZ2c
-         hj5XLA+pyjK9ayUpSOT3Hz24wPtB1ohzeghGH/Opz11r2ODgrgJM6YElZYvVdNstS1pW
-         c+djN8b+QJrgdBbLW/mh9LIx8hhVDDh2o+K3xkp9PMcZ5A2CN8bqK3NqkDCIEOSTjtiG
-         +kqg==
-X-Gm-Message-State: AJIora87WhKYsaGiSyDKDnP4MzTK5y/5ZJPCe0MkBQPOrimaBuQ5Hhcl
-        7yaJq/XKVLWI2N5KB2dWzGEFwQVrd6bqTA==
-X-Google-Smtp-Source: AGRyM1sH2PfcGj8ViDV0lllmFpU71ukSxzCtMA3vIatOWbHB6KvOeV6QomY8XXQV6nt0d4lCuh4I6QRng8JeMg==
+        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
+         :references:subject:from:to:cc;
+        bh=hRpKU2+wZuXkrgTerFV+FyC8dspsYxZX/UCj6fZ1yrg=;
+        b=xQuNPqrJHl4iOPPcuZ8heEikmmiPDNY/GRbG+CA4VCwPOxRi2BAW0ZM7WnCUjyrFm2
+         oHNRXYVynXxZrFVo8bwLsNljcrvZt6h+uCzUicxdZUsR4olu5v2VuEFeh78Pap9qJi2v
+         yC5sD7+ucK9x5Y0MSsUsOjsXwsIJTp76LFk/56sLjZ72qs2cSL9T++jQlAhFBokz1VEF
+         /QVP1l4KqWA+8aTGAj/MK/KlB1FOFvZIVPzDvUEdpMY5MjLDxnXOzeJkZZVAW1SDp4sZ
+         Z0JZzk2Mc8nMi7qx+8NOwO4+6oYL1Q1P5JlDsEhUsVEyJL2uJdnNDCc99TZa+CkQc4ty
+         e01w==
+X-Gm-Message-State: AJIora/mLVCTEQLs9fWI9drWyLltJdY+64Iytvv6CX7WUUh5hUJ4t6ig
+        XS07s1tx2SkB9elOU+L1J8aZqFsgYe/yJw==
+X-Google-Smtp-Source: AGRyM1sE4ALdbglB7bpBXNN0PHIrGrnQefK7N0oeAGA2Ji1YpkiZF/u5QwrXUZGj8UF00AKJ2BvhXZKRS/bkcA==
 X-Received: from slicestar.c.googlers.com ([fda3:e722:ac3:cc00:4f:4b78:c0a8:20a1])
- (user=davidgow job=sendgmr) by 2002:a17:903:11cc:b0:168:eae:da4a with SMTP id
- q12-20020a17090311cc00b001680eaeda4amr13290211plh.21.1655543010775; Sat, 18
- Jun 2022 02:03:30 -0700 (PDT)
-Date:   Sat, 18 Jun 2022 17:03:05 +0800
-Message-Id: <20220618090310.1174932-1-davidgow@google.com>
+ (user=davidgow job=sendgmr) by 2002:a17:902:b617:b0:169:5636:5d46 with SMTP
+ id b23-20020a170902b61700b0016956365d46mr10050902pls.3.1655543019801; Sat, 18
+ Jun 2022 02:03:39 -0700 (PDT)
+Date:   Sat, 18 Jun 2022 17:03:07 +0800
+In-Reply-To: <20220618090310.1174932-1-davidgow@google.com>
+Message-Id: <20220618090310.1174932-3-davidgow@google.com>
 Mime-Version: 1.0
+References: <20220618090310.1174932-1-davidgow@google.com>
 X-Mailer: git-send-email 2.36.1.476.g0c4daa206d-goog
-Subject: [PATCH 0/5] Rework KUnit test execution in modules
+Subject: [PATCH 2/5] kunit: flatten kunit_suite*** to kunit_suite** in .kunit_test_suites
 From:   David Gow <davidgow@google.com>
 To:     Brendan Higgins <brendanhiggins@google.com>,
         Luis Chamberlain <mcgrof@kernel.org>,
@@ -58,80 +62,554 @@ To:     Brendan Higgins <brendanhiggins@google.com>,
         Mika Westerberg <mika.westerberg@linux.intel.com>,
         Andra Paraschiv <andraprs@amazon.com>,
         Longpeng <longpeng2@huawei.com>
-Cc:     David Gow <davidgow@google.com>, kunit-dev@googlegroups.com,
-        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org,
+Cc:     kunit-dev@googlegroups.com, linux-kselftest@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
         "=?UTF-8?q?Ma=C3=ADra=20Canal?=" <maira.canal@usp.br>,
         linux-mmc@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
         openbmc@lists.ozlabs.org, linux-usb@vger.kernel.org,
         linux-modules@vger.kernel.org,
-        Matt Johnston <matt@codeconstruct.com.au>
+        Matt Johnston <matt@codeconstruct.com.au>,
+        David Gow <davidgow@google.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch series makes two changes to how KUnit test suites are stored
-and executed:
-- The .kunit_test_suites section is now used for tests in modules (in
-  lieu of a module_init funciton), as well as for built-in tests. The
-  module loader will now trigger test execution. This frees up the
-  module_init function for other uses.
-- Instead of storing an array of arrays of suites, have the
-  kunit_test_suite() and kunit_test_suites() macros append to one global
-  (or per-module) list of test suites. This removes a needless layer of
-  indirection.
+From: Daniel Latypov <dlatypov@google.com>
 
-The upshot of this is that it should now be possible to use the
-kunit_test_suite() and kunit_test_suites() macros to register test
-suites even from within modules which otherwise had module_init
-functions. This was proving to be quite a common issue, resulting in
-several modules calling into KUnit's private suite execution functions
-to run their tests (often introducing incompatibilities with the KUnit
-tooling).
+We currently store kunit suites in the .kunit_test_suites ELF section as
+a `struct kunit_suite***` (modulo some `const`s).
+For every test file, we store a struct kunit_suite** NULL-terminated array.
 
-This series also fixes the thunderbolt, nitro_enclaves, and
-sdhci-of-aspeed tests to use kunit_test_suite() now that it works.
+This adds quite a bit of complexity to the test filtering code in the
+executor.
 
-Huge thanks to Jeremy Kerr, who designed and implemented the module
-loader changes, and to Daniel Latypov for pushing the simplification of
-the nested arrays in .kunit_test_suites.
+Instead, let's just make the .kunit_test_suites section contain a single
+giant array of struct kunit_suite pointers, which can then be directly
+manipulated.
 
-I've tested this series both with builtin tests, and with modules on
-x86_64, but there's always the possibility that there's something subtle
-and nasty on another architecture, so please test!
+Signed-off-by: Daniel Latypov <dlatypov@google.com>
+Co-developed-by: David Gow <davidgow@google.com>
+Signed-off-by: David Gow <davidgow@google.com>
+---
 
-Cheers,
--- David
+Original RFC version of part of this patch:
+https://lore.kernel.org/linux-kselftest/20211013191320.2490913-1-dlatypov@google.com/
 
-Daniel Latypov (1):
-  kunit: flatten kunit_suite*** to kunit_suite** in .kunit_test_suites
+This version updates the way the .kunit_test_suites section is
+generated, rather than constructing the flattened version at runtime.
 
-David Gow (3):
-  thunderbolt: test: Use kunit_test_suite() macro
-  nitro_enclaves: test: Use kunit_test_suite() macro
-  mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro
+---
+ include/kunit/test.h      |  13 ++--
+ include/linux/module.h    |   2 +-
+ lib/kunit/executor.c      | 117 ++++++++------------------------
+ lib/kunit/executor_test.c | 139 +++++++++++---------------------------
+ lib/kunit/test.c          |  18 ++---
+ 5 files changed, 82 insertions(+), 207 deletions(-)
 
-Jeremy Kerr (1):
-  kunit: unify module and builtin suite definitions
-
- drivers/mmc/host/Kconfig                      |   5 +-
- drivers/mmc/host/sdhci-of-aspeed-test.c       |   8 +-
- drivers/mmc/host/sdhci-of-aspeed.c            |  27 ----
- drivers/thunderbolt/Kconfig                   |   5 +-
- drivers/thunderbolt/domain.c                  |   3 -
- drivers/thunderbolt/tb.h                      |   8 -
- drivers/thunderbolt/test.c                    |  12 +-
- drivers/virt/nitro_enclaves/Kconfig           |   5 +-
- drivers/virt/nitro_enclaves/ne_misc_dev.c     |  27 ----
- .../virt/nitro_enclaves/ne_misc_dev_test.c    |   5 +-
- include/kunit/test.h                          |  60 ++------
- include/linux/module.h                        |   5 +
- kernel/module/main.c                          |   6 +
- lib/kunit/executor.c                          | 117 ++++-----------
- lib/kunit/executor_test.c                     | 139 +++++-------------
- lib/kunit/test.c                              |  54 ++++++-
- 16 files changed, 152 insertions(+), 334 deletions(-)
-
+diff --git a/include/kunit/test.h b/include/kunit/test.h
+index 54306271cfbf..bd8d772979a6 100644
+--- a/include/kunit/test.h
++++ b/include/kunit/test.h
+@@ -237,9 +237,9 @@ size_t kunit_suite_num_test_cases(struct kunit_suite *suite);
+ unsigned int kunit_test_case_num(struct kunit_suite *suite,
+ 				 struct kunit_case *test_case);
+ 
+-int __kunit_test_suites_init(struct kunit_suite * const * const suites);
++int __kunit_test_suites_init(struct kunit_suite * const * const suites, int num_suites);
+ 
+-void __kunit_test_suites_exit(struct kunit_suite **suites);
++void __kunit_test_suites_exit(struct kunit_suite **suites, int num_suites);
+ 
+ #if IS_BUILTIN(CONFIG_KUNIT)
+ int kunit_run_all_tests(void);
+@@ -250,10 +250,10 @@ static inline int kunit_run_all_tests(void)
+ }
+ #endif /* IS_BUILTIN(CONFIG_KUNIT) */
+ 
+-#define __kunit_test_suites(unique_array, unique_suites, ...)		       \
+-	static struct kunit_suite *unique_array[] = { __VA_ARGS__, NULL };     \
+-	static struct kunit_suite **unique_suites			       \
+-	__used __section(".kunit_test_suites") = unique_array
++#define __kunit_test_suites(unique_array, ...)				       \
++	static struct kunit_suite *unique_array[]			       \
++	__aligned(sizeof(struct kunit_suite *))				       \
++	__used __section(".kunit_test_suites") = { __VA_ARGS__ }
+ 
+ /**
+  * kunit_test_suites() - used to register one or more &struct kunit_suite
+@@ -271,7 +271,6 @@ static inline int kunit_run_all_tests(void)
+  */
+ #define kunit_test_suites(__suites...)						\
+ 	__kunit_test_suites(__UNIQUE_ID(array),				\
+-			    __UNIQUE_ID(suites),			\
+ 			    ##__suites)
+ 
+ #define kunit_test_suite(suite)	kunit_test_suites(&suite)
+diff --git a/include/linux/module.h b/include/linux/module.h
+index e3cd6c325794..a9e9180ba3c3 100644
+--- a/include/linux/module.h
++++ b/include/linux/module.h
+@@ -507,7 +507,7 @@ struct module {
+ #endif
+ #ifdef CONFIG_KUNIT
+ 	int num_kunit_suites;
+-	struct kunit_suite ***kunit_suites;
++	struct kunit_suite **kunit_suites;
+ #endif
+ 
+ 
+diff --git a/lib/kunit/executor.c b/lib/kunit/executor.c
+index 96f96e42ce06..53fab8d76a00 100644
+--- a/lib/kunit/executor.c
++++ b/lib/kunit/executor.c
+@@ -9,8 +9,8 @@
+  * These symbols point to the .kunit_test_suites section and are defined in
+  * include/asm-generic/vmlinux.lds.h, and consequently must be extern.
+  */
+-extern struct kunit_suite * const * const __kunit_suites_start[];
+-extern struct kunit_suite * const * const __kunit_suites_end[];
++extern struct kunit_suite * const __kunit_suites_start[];
++extern struct kunit_suite * const __kunit_suites_end[];
+ 
+ #if IS_BUILTIN(CONFIG_KUNIT)
+ 
+@@ -92,62 +92,18 @@ kunit_filter_tests(struct kunit_suite *const suite, const char *test_glob)
+ static char *kunit_shutdown;
+ core_param(kunit_shutdown, kunit_shutdown, charp, 0644);
+ 
+-static struct kunit_suite * const *
+-kunit_filter_subsuite(struct kunit_suite * const * const subsuite,
+-		      struct kunit_test_filter *filter)
+-{
+-	int i, n = 0;
+-	struct kunit_suite **filtered, *filtered_suite;
+-
+-	n = 0;
+-	for (i = 0; subsuite[i]; ++i) {
+-		if (glob_match(filter->suite_glob, subsuite[i]->name))
+-			++n;
+-	}
+-
+-	if (n == 0)
+-		return NULL;
+-
+-	filtered = kmalloc_array(n + 1, sizeof(*filtered), GFP_KERNEL);
+-	if (!filtered)
+-		return ERR_PTR(-ENOMEM);
+-
+-	n = 0;
+-	for (i = 0; subsuite[i] != NULL; ++i) {
+-		if (!glob_match(filter->suite_glob, subsuite[i]->name))
+-			continue;
+-		filtered_suite = kunit_filter_tests(subsuite[i], filter->test_glob);
+-		if (IS_ERR(filtered_suite))
+-			return ERR_CAST(filtered_suite);
+-		else if (filtered_suite)
+-			filtered[n++] = filtered_suite;
+-	}
+-	filtered[n] = NULL;
+-
+-	return filtered;
+-}
+-
++/* Stores a NULL-terminated array of suites. */
+ struct suite_set {
+-	struct kunit_suite * const * const *start;
+-	struct kunit_suite * const * const *end;
++	struct kunit_suite * const *start;
++	struct kunit_suite * const *end;
+ };
+ 
+-static void kunit_free_subsuite(struct kunit_suite * const *subsuite)
+-{
+-	unsigned int i;
+-
+-	for (i = 0; subsuite[i]; i++)
+-		kfree(subsuite[i]);
+-
+-	kfree(subsuite);
+-}
+-
+ static void kunit_free_suite_set(struct suite_set suite_set)
+ {
+-	struct kunit_suite * const * const *suites;
++	struct kunit_suite * const *suites;
+ 
+ 	for (suites = suite_set.start; suites < suite_set.end; suites++)
+-		kunit_free_subsuite(*suites);
++		kfree(*suites);
+ 	kfree(suite_set.start);
+ }
+ 
+@@ -156,10 +112,11 @@ static struct suite_set kunit_filter_suites(const struct suite_set *suite_set,
+ 					    int *err)
+ {
+ 	int i;
+-	struct kunit_suite * const **copy, * const *filtered_subsuite;
++	struct kunit_suite **copy, *filtered_suite;
+ 	struct suite_set filtered;
+ 	struct kunit_test_filter filter;
+ 
++	/* Note: this includes space for the terminating NULL. */
+ 	const size_t max = suite_set->end - suite_set->start;
+ 
+ 	copy = kmalloc_array(max, sizeof(*filtered.start), GFP_KERNEL);
+@@ -171,15 +128,21 @@ static struct suite_set kunit_filter_suites(const struct suite_set *suite_set,
+ 
+ 	kunit_parse_filter_glob(&filter, filter_glob);
+ 
+-	for (i = 0; i < max; ++i) {
+-		filtered_subsuite = kunit_filter_subsuite(suite_set->start[i], &filter);
+-		if (IS_ERR(filtered_subsuite)) {
+-			*err = PTR_ERR(filtered_subsuite);
++	for (i = 0; suite_set->start[i] != NULL; i++) {
++		if (!glob_match(filter.suite_glob, suite_set->start[i]->name))
++			continue;
++
++		filtered_suite = kunit_filter_tests(suite_set->start[i], filter.test_glob);
++		if (IS_ERR(filtered_suite)) {
++			*err = PTR_ERR(filtered_suite);
+ 			return filtered;
+ 		}
+-		if (filtered_subsuite)
+-			*copy++ = filtered_subsuite;
++		if (!filtered_suite)
++			continue;
++
++		*copy++ = filtered_suite;
+ 	}
++	*copy = NULL;
+ 	filtered.end = copy;
+ 
+ 	kfree(filter.suite_glob);
+@@ -201,52 +164,33 @@ static void kunit_handle_shutdown(void)
+ 
+ }
+ 
+-static void kunit_print_tap_header(struct suite_set *suite_set)
+-{
+-	struct kunit_suite * const * const *suites, * const *subsuite;
+-	int num_of_suites = 0;
+-
+-	for (suites = suite_set->start; suites < suite_set->end; suites++)
+-		for (subsuite = *suites; *subsuite != NULL; subsuite++)
+-			num_of_suites++;
+-
+-	pr_info("TAP version 14\n");
+-	pr_info("1..%d\n", num_of_suites);
+-}
+-
+ static void kunit_exec_run_tests(struct suite_set *suite_set)
+ {
+-	struct kunit_suite * const * const *suites;
++	size_t num_suites = suite_set->end - suite_set->start;
+ 
+-	kunit_print_tap_header(suite_set);
++	pr_info("TAP version 14\n");
++	pr_info("1..%zu\n", num_suites);
+ 
+-	for (suites = suite_set->start; suites < suite_set->end; suites++)
+-		__kunit_test_suites_init(*suites);
++	__kunit_test_suites_init(suite_set->start, num_suites);
+ }
+ 
+ static void kunit_exec_list_tests(struct suite_set *suite_set)
+ {
+-	unsigned int i;
+-	struct kunit_suite * const * const *suites;
++	struct kunit_suite * const *suites;
+ 	struct kunit_case *test_case;
+ 
+ 	/* Hack: print a tap header so kunit.py can find the start of KUnit output. */
+ 	pr_info("TAP version 14\n");
+ 
+ 	for (suites = suite_set->start; suites < suite_set->end; suites++)
+-		for (i = 0; (*suites)[i] != NULL; i++) {
+-			kunit_suite_for_each_test_case((*suites)[i], test_case) {
+-				pr_info("%s.%s\n", (*suites)[i]->name, test_case->name);
+-			}
++		kunit_suite_for_each_test_case((*suites), test_case) {
++			pr_info("%s.%s\n", (*suites)->name, test_case->name);
+ 		}
+ }
+ 
+ int kunit_run_all_tests(void)
+ {
+-	struct suite_set suite_set = {
+-		.start = __kunit_suites_start,
+-		.end = __kunit_suites_end,
+-	};
++	struct suite_set suite_set = {__kunit_suites_start, __kunit_suites_end};
+ 	int err = 0;
+ 
+ 	if (filter_glob_param) {
+@@ -264,11 +208,10 @@ int kunit_run_all_tests(void)
+ 	else
+ 		pr_err("kunit executor: unknown action '%s'\n", action_param);
+ 
+-	if (filter_glob_param) { /* a copy was made of each array */
++	if (filter_glob_param) { /* a copy was made of each suite */
+ 		kunit_free_suite_set(suite_set);
+ 	}
+ 
+-
+ out:
+ 	kunit_handle_shutdown();
+ 	return err;
+diff --git a/lib/kunit/executor_test.c b/lib/kunit/executor_test.c
+index eac6ff480273..acbc44af49ed 100644
+--- a/lib/kunit/executor_test.c
++++ b/lib/kunit/executor_test.c
+@@ -9,8 +9,6 @@
+ #include <kunit/test.h>
+ 
+ static void kfree_at_end(struct kunit *test, const void *to_free);
+-static void free_subsuite_at_end(struct kunit *test,
+-				 struct kunit_suite *const *to_free);
+ static struct kunit_suite *alloc_fake_suite(struct kunit *test,
+ 					    const char *suite_name,
+ 					    struct kunit_case *test_cases);
+@@ -41,126 +39,81 @@ static void parse_filter_test(struct kunit *test)
+ 	kfree(filter.test_glob);
+ }
+ 
+-static void filter_subsuite_test(struct kunit *test)
++static void filter_suites_test(struct kunit *test)
+ {
+ 	struct kunit_suite *subsuite[3] = {NULL, NULL, NULL};
+-	struct kunit_suite * const *filtered;
+-	struct kunit_test_filter filter = {
+-		.suite_glob = "suite2",
+-		.test_glob = NULL,
+-	};
++	struct suite_set suite_set = {.start = subsuite, .end = &subsuite[2]};
++	struct suite_set got;
++	int err = 0;
+ 
+ 	subsuite[0] = alloc_fake_suite(test, "suite1", dummy_test_cases);
+ 	subsuite[1] = alloc_fake_suite(test, "suite2", dummy_test_cases);
+ 
+ 	/* Want: suite1, suite2, NULL -> suite2, NULL */
+-	filtered = kunit_filter_subsuite(subsuite, &filter);
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered);
+-	free_subsuite_at_end(test, filtered);
++	got = kunit_filter_suites(&suite_set, "suite2", &err);
++	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, got.start);
++	KUNIT_ASSERT_EQ(test, err, 0);
++	kfree_at_end(test, got.start);
+ 
+ 	/* Validate we just have suite2 */
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered[0]);
+-	KUNIT_EXPECT_STREQ(test, (const char *)filtered[0]->name, "suite2");
+-	KUNIT_EXPECT_FALSE(test, filtered[1]);
++	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, got.start[0]);
++	KUNIT_EXPECT_STREQ(test, (const char *)got.start[0]->name, "suite2");
++	// DO NOT SUBMIT: null-terminated for now.
++	KUNIT_ASSERT_EQ(test, got.end - got.start, 1);
++	KUNIT_EXPECT_FALSE(test, *got.end);
+ }
+ 
+-static void filter_subsuite_test_glob_test(struct kunit *test)
++static void filter_suites_test_glob_test(struct kunit *test)
+ {
+ 	struct kunit_suite *subsuite[3] = {NULL, NULL, NULL};
+-	struct kunit_suite * const *filtered;
+-	struct kunit_test_filter filter = {
+-		.suite_glob = "suite2",
+-		.test_glob = "test2",
+-	};
++	struct suite_set suite_set = {.start = subsuite, .end = &subsuite[2]};
++	struct suite_set got;
++	int err = 0;
+ 
+ 	subsuite[0] = alloc_fake_suite(test, "suite1", dummy_test_cases);
+ 	subsuite[1] = alloc_fake_suite(test, "suite2", dummy_test_cases);
+ 
+ 	/* Want: suite1, suite2, NULL -> suite2 (just test1), NULL */
+-	filtered = kunit_filter_subsuite(subsuite, &filter);
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered);
+-	free_subsuite_at_end(test, filtered);
++	got = kunit_filter_suites(&suite_set, "suite2.test2", &err);
++	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, got.start);
++	KUNIT_ASSERT_EQ(test, err, 0);
++	kfree_at_end(test, got.start);
+ 
+ 	/* Validate we just have suite2 */
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered[0]);
+-	KUNIT_EXPECT_STREQ(test, (const char *)filtered[0]->name, "suite2");
+-	KUNIT_EXPECT_FALSE(test, filtered[1]);
++	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, got.start[0]);
++	KUNIT_EXPECT_STREQ(test, (const char *)got.start[0]->name, "suite2");
++	KUNIT_ASSERT_EQ(test, got.end - got.start, 1);
++	KUNIT_EXPECT_FALSE(test, *got.end);
+ 
+ 	/* Now validate we just have test2 */
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered[0]->test_cases);
+-	KUNIT_EXPECT_STREQ(test, (const char *)filtered[0]->test_cases[0].name, "test2");
+-	KUNIT_EXPECT_FALSE(test, filtered[0]->test_cases[1].name);
++	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, got.start[0]->test_cases);
++	KUNIT_EXPECT_STREQ(test, (const char *)got.start[0]->test_cases[0].name, "test2");
++	KUNIT_EXPECT_FALSE(test, got.start[0]->test_cases[1].name);
+ }
+ 
+-static void filter_subsuite_to_empty_test(struct kunit *test)
++static void filter_suites_to_empty_test(struct kunit *test)
+ {
+ 	struct kunit_suite *subsuite[3] = {NULL, NULL, NULL};
+-	struct kunit_suite * const *filtered;
+-	struct kunit_test_filter filter = {
+-		.suite_glob = "not_found",
+-		.test_glob = NULL,
+-	};
++	struct suite_set suite_set = {.start = subsuite, .end = &subsuite[2]};
++	struct suite_set got;
++	int err = 0;
+ 
+ 	subsuite[0] = alloc_fake_suite(test, "suite1", dummy_test_cases);
+ 	subsuite[1] = alloc_fake_suite(test, "suite2", dummy_test_cases);
+ 
+-	filtered = kunit_filter_subsuite(subsuite, &filter);
+-	free_subsuite_at_end(test, filtered); /* just in case */
+-
+-	KUNIT_EXPECT_FALSE_MSG(test, filtered,
+-			       "should be NULL to indicate no match");
+-}
+-
+-static void kfree_subsuites_at_end(struct kunit *test, struct suite_set *suite_set)
+-{
+-	struct kunit_suite * const * const *suites;
+-
+-	kfree_at_end(test, suite_set->start);
+-	for (suites = suite_set->start; suites < suite_set->end; suites++)
+-		free_subsuite_at_end(test, *suites);
+-}
+-
+-static void filter_suites_test(struct kunit *test)
+-{
+-	/* Suites per-file are stored as a NULL terminated array */
+-	struct kunit_suite *subsuites[2][2] = {
+-		{NULL, NULL},
+-		{NULL, NULL},
+-	};
+-	/* Match the memory layout of suite_set */
+-	struct kunit_suite * const * const suites[2] = {
+-		subsuites[0], subsuites[1],
+-	};
+-
+-	const struct suite_set suite_set = {
+-		.start = suites,
+-		.end = suites + 2,
+-	};
+-	struct suite_set filtered = {.start = NULL, .end = NULL};
+-	int err = 0;
+-
+-	/* Emulate two files, each having one suite */
+-	subsuites[0][0] = alloc_fake_suite(test, "suite0", dummy_test_cases);
+-	subsuites[1][0] = alloc_fake_suite(test, "suite1", dummy_test_cases);
++	got = kunit_filter_suites(&suite_set, "not_found", &err);
++	KUNIT_ASSERT_EQ(test, err, 0);
++	kfree_at_end(test, got.start); /* just in case */
+ 
+-	/* Filter out suite1 */
+-	filtered = kunit_filter_suites(&suite_set, "suite0", &err);
+-	kfree_subsuites_at_end(test, &filtered); /* let us use ASSERTs without leaking */
+-	KUNIT_EXPECT_EQ(test, err, 0);
+-	KUNIT_ASSERT_EQ(test, filtered.end - filtered.start, (ptrdiff_t)1);
+-
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered.start);
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered.start[0]);
+-	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, filtered.start[0][0]);
+-	KUNIT_EXPECT_STREQ(test, (const char *)filtered.start[0][0]->name, "suite0");
++	KUNIT_EXPECT_PTR_EQ_MSG(test, got.start, got.end,
++				"should be empty to indicate no match");
+ }
+ 
+ static struct kunit_case executor_test_cases[] = {
+ 	KUNIT_CASE(parse_filter_test),
+-	KUNIT_CASE(filter_subsuite_test),
+-	KUNIT_CASE(filter_subsuite_test_glob_test),
+-	KUNIT_CASE(filter_subsuite_to_empty_test),
+ 	KUNIT_CASE(filter_suites_test),
++	KUNIT_CASE(filter_suites_test_glob_test),
++	KUNIT_CASE(filter_suites_to_empty_test),
+ 	{}
+ };
+ 
+@@ -190,20 +143,6 @@ static void kfree_at_end(struct kunit *test, const void *to_free)
+ 			     (void *)to_free);
+ }
+ 
+-static void free_subsuite_res_free(struct kunit_resource *res)
+-{
+-	kunit_free_subsuite(res->data);
+-}
+-
+-static void free_subsuite_at_end(struct kunit *test,
+-				 struct kunit_suite *const *to_free)
+-{
+-	if (IS_ERR_OR_NULL(to_free))
+-		return;
+-	kunit_alloc_resource(test, NULL, free_subsuite_res_free,
+-			     GFP_KERNEL, (void *)to_free);
+-}
+-
+ static struct kunit_suite *alloc_fake_suite(struct kunit *test,
+ 					    const char *suite_name,
+ 					    struct kunit_case *test_cases)
+diff --git a/lib/kunit/test.c b/lib/kunit/test.c
+index 3052526b9b89..b6495c7f9a7e 100644
+--- a/lib/kunit/test.c
++++ b/lib/kunit/test.c
+@@ -582,11 +582,11 @@ static void kunit_init_suite(struct kunit_suite *suite)
+ 	suite->suite_init_err = 0;
+ }
+ 
+-int __kunit_test_suites_init(struct kunit_suite * const * const suites)
++int __kunit_test_suites_init(struct kunit_suite * const * const suites, int num_suites)
+ {
+ 	unsigned int i;
+ 
+-	for (i = 0; suites[i] != NULL; i++) {
++	for (i = 0; i < num_suites; i++) {
+ 		kunit_init_suite(suites[i]);
+ 		kunit_run_tests(suites[i]);
+ 	}
+@@ -599,11 +599,11 @@ static void kunit_exit_suite(struct kunit_suite *suite)
+ 	kunit_debugfs_destroy_suite(suite);
+ }
+ 
+-void __kunit_test_suites_exit(struct kunit_suite **suites)
++void __kunit_test_suites_exit(struct kunit_suite **suites, int num_suites)
+ {
+ 	unsigned int i;
+ 
+-	for (i = 0; suites[i] != NULL; i++)
++	for (i = 0; i < num_suites; i++)
+ 		kunit_exit_suite(suites[i]);
+ 
+ 	kunit_suite_counter = 1;
+@@ -613,18 +613,12 @@ EXPORT_SYMBOL_GPL(__kunit_test_suites_exit);
+ #ifdef CONFIG_MODULES
+ static void kunit_module_init(struct module *mod)
+ {
+-	unsigned int i;
+-
+-	for (i = 0; i < mod->num_kunit_suites; i++)
+-		__kunit_test_suites_init(mod->kunit_suites[i]);
++	__kunit_test_suites_init(mod->kunit_suites, mod->num_kunit_suites);
+ }
+ 
+ static void kunit_module_exit(struct module *mod)
+ {
+-	unsigned int i;
+-
+-	for (i = 0; i < mod->num_kunit_suites; i++)
+-		__kunit_test_suites_exit(mod->kunit_suites[i]);
++	__kunit_test_suites_exit(mod->kunit_suites, mod->num_kunit_suites);
+ }
+ 
+ static int kunit_module_notify(struct notifier_block *nb, unsigned long val,
 -- 
 2.36.1.476.g0c4daa206d-goog
 
