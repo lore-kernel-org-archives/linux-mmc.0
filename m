@@ -2,75 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B5DBCCA479
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jun 2022 11:14:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4C70C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Jun 2022 12:49:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241860AbiFTLOm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Jun 2022 07:14:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33714 "EHLO
+        id S241374AbiFTMtC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Jun 2022 08:49:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241874AbiFTLO1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2022 07:14:27 -0400
-Received: from frasgout.his.huawei.com (frasgout.his.huawei.com [185.176.79.56])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D562175A9;
-        Mon, 20 Jun 2022 04:13:17 -0700 (PDT)
-Received: from fraeml704-chm.china.huawei.com (unknown [172.18.147.226])
-        by frasgout.his.huawei.com (SkyGuard) with ESMTP id 4LRRlt2yjBz6H6lq;
-        Mon, 20 Jun 2022 19:11:06 +0800 (CST)
-Received: from lhreml724-chm.china.huawei.com (10.201.108.75) by
- fraeml704-chm.china.huawei.com (10.206.15.53) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2375.24; Mon, 20 Jun 2022 13:12:58 +0200
-Received: from [10.195.35.72] (10.195.35.72) by lhreml724-chm.china.huawei.com
- (10.201.108.75) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.24; Mon, 20 Jun
- 2022 12:12:57 +0100
-Message-ID: <b98ad03b-e599-6023-3b34-ebefb590bf8c@huawei.com>
-Date:   Mon, 20 Jun 2022 12:12:55 +0100
+        with ESMTP id S241625AbiFTMtA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2022 08:49:00 -0400
+Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A07A9A18E
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jun 2022 05:48:59 -0700 (PDT)
+Received: by mail-ej1-x631.google.com with SMTP id s12so20911042ejx.3
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Jun 2022 05:48:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=25MF9bCZg+nfQVclxRAj22UNao3u9KJnaDQNqtN7pPs=;
+        b=y/SePXg4BKIZ2rCBvahqjNHAYrm/fPndCXouPWVx21VOCzQasCbuZb3zCrxchlpc6C
+         iNLqkwLxOPlBIw0Z3lSudBi3E6/djVe18sB4x7j031BQDualuu3SkuBoLGffP1aJP6Vk
+         dLpb83sPdfz0c06+qNqCPQpckLtIppBn1XoFBBk+ydk4ngQhtd0ymBcqHiSGvBkI7C3B
+         4dgJcUNJhfzGzr0Hy9JYSkN3oMtvz6UHUJ/fttdDE0oYd4BUTsAlwgOUJJ5Jr5tP6Aam
+         uyhxv7iZ6u1aNkjYChtk8ixoil/arL/mZr84aDEj9oAa7Zfqo+B2EgB+SYztE+GhB2mt
+         H7IQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=25MF9bCZg+nfQVclxRAj22UNao3u9KJnaDQNqtN7pPs=;
+        b=GIBFK0Ypkv2wQhwlX6X5Kx10qmq/SOsvAaF4oS6pMttZN87QkNqlvk0ukxEl0gSZ7C
+         tGExAU7c/BWVZeNrg0aVb8FU8drAXF4az7FwRlnXNZY084TbcxweKFbGcy15DoX4vrbt
+         QJQipjDpvDSRIHLRRCeghsG77IUgu5CJC+dmVrIKHL1q8bnkSXlz01GSmqPLibbX565h
+         2H6WqHhoHPwrVbD1UvuZA8tOCp+dM3/j2Xw5VOhbuIfadBAi1pE9w73e4RtC2IrCqSHG
+         OOXFsqvLHFsoFCEViG3LMiYBDkNg8Ep+VCcwq2F3s2c2PZT7wMRE2yIza6LJFfJdYXGy
+         GC+A==
+X-Gm-Message-State: AJIora80v9PqdhmuvRNX3c86qNkOak63dZb7AVc6ZHUh/Fb39K3Ta7fy
+        7qSjFplDTCpa9NJZE9hgZWaEDA==
+X-Google-Smtp-Source: AGRyM1ua+PHdvFVhKnc7bKaPda6LbhC16pScYCj1ebE9gDhAUmRSsupGeC4bFEC3ObLAmRhQDhE/Tg==
+X-Received: by 2002:a17:906:4f:b0:712:af2:29d9 with SMTP id 15-20020a170906004f00b007120af229d9mr21303926ejg.751.1655729338197;
+        Mon, 20 Jun 2022 05:48:58 -0700 (PDT)
+Received: from [192.168.0.210] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id p3-20020a17090653c300b006fed93bf71fsm6051568ejo.18.2022.06.20.05.48.56
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 20 Jun 2022 05:48:57 -0700 (PDT)
+Message-ID: <655c8da3-e4ad-b971-39e7-3d69b4dcd241@linaro.org>
+Date:   Mon, 20 Jun 2022 14:48:56 +0200
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.6.1
-Subject: Re: [PATCH 5/5] blk-mq: Drop 'reserved' member of busy_tag_iter_fn
-To:     Bart Van Assche <bvanassche@acm.org>, <axboe@kernel.dk>,
-        <damien.lemoal@opensource.wdc.com>, <hch@lst.de>,
-        <jejb@linux.ibm.com>, <martin.petersen@oracle.com>, <hare@suse.de>,
-        <satishkh@cisco.com>, <sebaddel@cisco.com>, <kartilak@cisco.com>
-CC:     <linux-rdma@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-nvme@lists.infradead.org>, <linux-s390@vger.kernel.org>,
-        <linux-scsi@vger.kernel.org>, <mpi3mr-linuxdrv.pdl@broadcom.com>,
-        <linux-block@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <nbd@other.debian.org>
-References: <1655463320-241202-1-git-send-email-john.garry@huawei.com>
- <1655463320-241202-6-git-send-email-john.garry@huawei.com>
- <017cae1e-b45f-04fd-d34c-22ae736b28e5@acm.org>
- <a18fa379-5a9b-ff45-3be4-b253efd96a50@huawei.com>
- <c6a0eb8d-ad51-01b1-bc17-758acc37f216@acm.org>
-From:   John Garry <john.garry@huawei.com>
-In-Reply-To: <c6a0eb8d-ad51-01b1-bc17-758acc37f216@acm.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.10.0
+Subject: Re: [PATCH v5 01/15] dt-bindings: arm: add AMD Pensando boards
+Content-Language: en-US
+To:     Brad Larson <brad@pensando.io>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        broonie@kernel.org, yamada.masahiro@socionext.com,
+        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        fancer.lancer@gmail.com, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
+        devicetree@vger.kernel.org
+References: <20220613195658.5607-1-brad@pensando.io>
+ <20220613195658.5607-2-brad@pensando.io>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220613195658.5607-2-brad@pensando.io>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.195.35.72]
-X-ClientProxiedBy: lhreml744-chm.china.huawei.com (10.201.108.194) To
- lhreml724-chm.china.huawei.com (10.201.108.75)
-X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/06/2022 17:55, Bart Van Assche wrote:
->>
->> It's not totally necessary. Since local variable 'reserved' would now 
->> only be used once I thought it was better to get rid of it.
->>
->> I can keep it if you really think that is better.
+On 13/06/2022 21:56, Brad Larson wrote:
+> From: Brad Larson <blarson@amd.com>
 > 
-> I'd prefer that these changes are either left out or that these are 
-> moved into a separate patch. I think that will make this patch series 
-> easier to review.
+> Document the compatible for AMD Pensando Elba SoC boards.
+> 
+> Signed-off-by: Brad Larson <blarson@amd.com>
 
-Personally I think that this is a trivial change and does not merit a 
-separate patch. Other reviewers seem to agree. Anyway, if you feel 
-strongly about this then I can put in another patch.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Thanks,
-John
+Best regards,
+Krzysztof
