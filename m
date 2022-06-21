@@ -2,66 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D0F7C43334
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jun 2022 09:45:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42E93C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jun 2022 10:12:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349572AbiFUJpb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Jun 2022 05:45:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58438 "EHLO
+        id S230147AbiFUKMG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Jun 2022 06:12:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349571AbiFUJpa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2022 05:45:30 -0400
-Received: from smtpbg.qq.com (smtpbg136.qq.com [106.55.201.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B6A827B15;
-        Tue, 21 Jun 2022 02:45:26 -0700 (PDT)
-X-QQ-mid: bizesmtp87t1655804705tocof5u4
-Received: from ubuntu.localdomain ( [106.117.99.68])
-        by bizesmtp.qq.com (ESMTP) with 
-        id ; Tue, 21 Jun 2022 17:45:00 +0800 (CST)
-X-QQ-SSF: 0100000000700030B000B00A0000000
-X-QQ-FEAT: rCzLTtzQ0geY+1AMB0PrV2Bh5I3EEKgRkGab8r6id2Ijbf/GqRI5ZyKlHP4pv
-        b5JSPyzkhfY578k0NzjAH6GvMVPD88AtyInmZj3j9YPFjxQGjTdtTUawFRH0EG8CNLpEtRm
-        QNJ61ztZV411N4vHSvJTFD4G97lrwtehKQlduC+YR6NyWQrLCLEJR1EiOVQWsCg//xsIGdv
-        mFkTVTJGHnWYFZIpCVK20QSWT61HMwADsDYEMX4BH5omv0YCxrEApYUJXi7cZdxxux2NLqH
-        Noj2k7pf70nWR4yzzAnBomBxSNHXmnE5XHjzI/LcOHvclut9UYBJw4qqcbD7j9JgRhwwuRL
-        OiURoN3TYPQUeaFBBW7zf5E5oPuhQ==
-X-QQ-GoodBg: 0
-From:   Jiang Jian <jiangjian@cdjrlc.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        jiangjian@cdjrlc.com
-Subject: [PATCH] mmc: sdhci-acpi: remove unexpected word "the"
-Date:   Tue, 21 Jun 2022 17:44:59 +0800
-Message-Id: <20220621094459.80271-1-jiangjian@cdjrlc.com>
-X-Mailer: git-send-email 2.17.1
-X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:cdjrlc.com:qybgspam:qybgspam7
+        with ESMTP id S229889AbiFUKMF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2022 06:12:05 -0400
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E0D4286F0;
+        Tue, 21 Jun 2022 03:12:04 -0700 (PDT)
+Received: by mail-lj1-x22e.google.com with SMTP id j22so8215690ljg.0;
+        Tue, 21 Jun 2022 03:12:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=03Jq4PVZsTZ/X9cKBPWp0lhW/8xvAGxNyHHzAOjpF10=;
+        b=SrLbEFS0VyflCBHWy8qxjLmADDTNnfUoB3nzHcoL08ilgAtm3iTEpGRt9pnRZ2p0Jc
+         NAl0hV9vHjcZh7zBK/WWN+ouwfJSnLl5qihby/8yEcuSj7dcYV2Xcc1RzWy8denk//QY
+         IJ1FXRlRgogyPjEbdLLhwOtR3d6T6xlMz1dkGYr4+0CAMqRIx8xSIZNP+S5k00G6DEa+
+         MBzybVFQqO5m7DZtMAhIAZWhHnknR/4buq7NuzegpZ7iLdDJLDc4B+e8McJxzeefZ6Lt
+         TCRM+RI++A+g93b3QjctW4ykLXyJG21pA544Xmi7bYAHLoTZEq9XvOwe4A/DxKVwdis9
+         Z/Kg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=03Jq4PVZsTZ/X9cKBPWp0lhW/8xvAGxNyHHzAOjpF10=;
+        b=IcrWZLe4G3BRuFRGzAvtt6fs9AC+RT/Qtr1JI40cN887qEko4b6dB5VuasHn7Rwrd6
+         EaiIHR64kMrNS911kWjeh/p1/g3wHdwvQD4dOFIx3s/sFe7tUwggKgQ0cx4BJEXZ2/HE
+         DPyw9igvbKj4q6GNgt5MLEZxoAinruDuQ+WM4rcH6+L+1DOTXfqKX1WcLV/iybrk8cGl
+         s4p28NS6bUuwdThKAysQIOHf7IjbKd6GKuBuMe5HRx8AMtNr4iXPITEAhhLnYG2VaGHb
+         CArzX+Kv4en+NyurNtRqPf9mkOS/mT9dmi3BlR+2LPqzdmNBaVV1yeD/r9Wc17y3Zr7K
+         hPJw==
+X-Gm-Message-State: AJIora8nKjogYItxQIDawQ15Mut/M+GIAevi/vTFfbWf+qMyL74+9idZ
+        dHu14htSseg9Rdj27JLYXpR52km9ug/mKDaz
+X-Google-Smtp-Source: AGRyM1u7isDdRU5wiug9yDoKlpD2Z75vXUFB9x/5E1nRK+BG/iJsMKUrjIJsxTzMAKvUaZBI1V8dsg==
+X-Received: by 2002:a2e:9246:0:b0:25a:6c6a:10ce with SMTP id v6-20020a2e9246000000b0025a6c6a10cemr5393309ljg.501.1655806322381;
+        Tue, 21 Jun 2022 03:12:02 -0700 (PDT)
+Received: from mobilestation ([95.79.189.214])
+        by smtp.gmail.com with ESMTPSA id u5-20020ac258c5000000b0047f71e4b0e5sm69225lfo.255.2022.06.21.03.12.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 21 Jun 2022 03:12:01 -0700 (PDT)
+Date:   Tue, 21 Jun 2022 13:11:59 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Brad Larson <brad@pensando.io>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
+        blarson@amd.com, brijeshkumar.singh@amd.com,
+        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        broonie@kernel.org, yamada.masahiro@socionext.com,
+        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
+Subject: Re: [PATCH v5 04/15] dt-bindings: spi: dw: Add AMD Pensando Elba SoC
+ SPI Controller bindings
+Message-ID: <20220621101159.stvan53rvr6qugna@mobilestation>
+References: <20220613195658.5607-1-brad@pensando.io>
+ <20220613195658.5607-5-brad@pensando.io>
+ <20220620193044.ihxfn6kddif7j5la@mobilestation>
+ <0a68aa72-df85-cf78-dcca-2d75038234c6@kernel.org>
+ <20220620200445.yew3vo3pnjhos7rs@mobilestation>
+ <4ff85493-665a-ee58-07d3-80178c49223b@linaro.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4ff85493-665a-ee58-07d3-80178c49223b@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-there is an unexpected word "the" in the comments that need to be removed
+On Tue, Jun 21, 2022 at 09:00:36AM +0200, Krzysztof Kozlowski wrote:
+> On 20/06/2022 22:04, Serge Semin wrote:
+> > On Mon, Jun 20, 2022 at 09:46:25PM +0200, Krzysztof Kozlowski wrote:
+> >> On 20/06/2022 21:30, Serge Semin wrote:
+> >>> On Mon, Jun 13, 2022 at 12:56:47PM -0700, Brad Larson wrote:
+> >>>> From: Brad Larson <blarson@amd.com>
+> >>>>
+> >>>> The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
+> >>>>
+> >>>> Signed-off-by: Brad Larson <blarson@amd.com>
+> >>>> ---
+> >>>>  Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml | 2 ++
+> >>>>  1 file changed, 2 insertions(+)
+> >>>>
+> >>>> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> >>>> index e25d44c218f2..2a55b947cffc 100644
+> >>>> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> >>>> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> >>>> @@ -73,6 +73,8 @@ properties:
+> >>>>                - renesas,r9a06g032-spi # RZ/N1D
+> >>>>                - renesas,r9a06g033-spi # RZ/N1S
+> >>>>            - const: renesas,rzn1-spi   # RZ/N1
+> >>>
+> >>>> +      - description: AMD Pensando Elba SoC SPI Controller
+> >>>> +        const: amd,pensando-elba-spi
+> >>>
+> >>> Not enough. The driver requires to have a phandle reference to the
+> >>> Pensando System Controller. So the property like
+> >>> "amd,pensando-elba-syscon" is also needed to be added to the DT schema
+> >>> otherwise should the dt-schema tool correctly handle the
+> >>> "unevaluatedProperties: false" setting (Rob says it isn't fully
+> >>> supported at the moment), the dtbs_check procedure will fail on your
+> >>> dts evaluation.
+> >>
+> > 
+> >> The property was here before, now removed, so I assume it was also
+> >> removed from the driver and DTS. Isn't that the case?
+> > 
+> > Ah, the property has been indeed removed. The driver now searches for
+> > the system controller by the next compatible string:
+> > "amd,pensando-elba-syscon" using the
+> > syscon_regmap_lookup_by_compatible() method. My mistake. Sorry for the
+> > noise.
+> > 
 
-*       instead use the the SDR104 preset register.
+> > * Though personally I'd prefer to have a property with the phandle
+> > reference in order to signify the connection between the system controller
+> > and the SPI-controller. Otherwise the implicit DT bindings like having
+> > the "amd,pensando-elba-syscon"-compatible syscon gets to be
+> > hidden behind the DT scene. But seeing we have already got the Microsemi
+> > platform with such semantic, I can't insist on fixing this.
+> 
+> I agree entirely, this should be explicit syscon-type property. Looking
+> up for compatibles:
+>  - creates hidden (not expressed via bindings) dependency between nodes,
+>  - is not portable and several people struggled with it later and needed
+> backward-compatible code (many examples, let's just give recent one: [1])
+> 
+> 
+> [1]
+> https://lore.kernel.org/all/20220619151225.209029-10-tmaimon77@gmail.com/
 
-Signed-off-by: Jiang Jian <jiangjian@cdjrlc.com>
----
- drivers/mmc/host/sdhci-acpi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Seems even more reasonable now. Thanks for providing a bright example
+justifying the property-based approach.
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index c0350e9c03f3..93fe6e5a5f9f 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -648,7 +648,7 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
- 	 *       in reading a garbage value and using the wrong presets.
- 	 *
- 	 *       Since HS400 and HS200 presets must be identical, we could
--	 *       instead use the the SDR104 preset register.
-+	 *       instead use the SDR104 preset register.
- 	 *
- 	 *    If the above issues are resolved we could remove this quirk for
- 	 *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
--- 
-2.17.1
+@Brad, could you get back the property with a phandle to the syscon
+DT-node? (No need in adding the CS CSR address as the phandle argument,
+just a phandle.)
 
+-Sergey
+
+> 
+> 
+> Best regards,
+> Krzysztof
