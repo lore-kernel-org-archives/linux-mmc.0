@@ -2,67 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06820C43334
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jun 2022 09:42:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D0F7C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jun 2022 09:45:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349109AbiFUJmF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Jun 2022 05:42:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54386 "EHLO
+        id S1349572AbiFUJpb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Jun 2022 05:45:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347196AbiFUJmE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2022 05:42:04 -0400
-Received: from smtpbg.qq.com (smtpbg139.qq.com [175.27.65.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D009275F8;
-        Tue, 21 Jun 2022 02:41:58 -0700 (PDT)
-X-QQ-mid: bizesmtp77t1655804512tx770qpz
+        with ESMTP id S1349571AbiFUJpa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2022 05:45:30 -0400
+Received: from smtpbg.qq.com (smtpbg136.qq.com [106.55.201.188])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B6A827B15;
+        Tue, 21 Jun 2022 02:45:26 -0700 (PDT)
+X-QQ-mid: bizesmtp87t1655804705tocof5u4
 Received: from ubuntu.localdomain ( [106.117.99.68])
         by bizesmtp.qq.com (ESMTP) with 
-        id ; Tue, 21 Jun 2022 17:41:47 +0800 (CST)
+        id ; Tue, 21 Jun 2022 17:45:00 +0800 (CST)
 X-QQ-SSF: 0100000000700030B000B00A0000000
-X-QQ-FEAT: 17DF3wlGPwBpeYvVVquB9OjWxaAxvx7F/pUqPL3mjv1Cs5cr/bamdfBa5TQ1K
-        whT3KExX12zCQCiZ9O0XMivDrGFBSO4K1f8zd9z9ZUA8/HAlmvrHYi1lbpiD+V3WgEIiJXb
-        GfW4joXObDznRRRwFVDwODvjn4hG9AgUsg0c//rk4Prnh7BH+k1/XdaTYZgtDXEUllWLI6b
-        YAtmdp4WmQjwgcVG+m0taBMjbqrYTxsBOoiLTj0k/MzVhsJ24uoHlkdMlg4aG/PLDhNowqu
-        BepuhgBIG5eX3zenecXqOQOIE0LqXeTBYFt62byoYz6PGPEtRpnH9HXIaadweST/XEdr8gv
-        TZb8wesZCL/RrlkUAQ1vpbR1TUgKg==
+X-QQ-FEAT: rCzLTtzQ0geY+1AMB0PrV2Bh5I3EEKgRkGab8r6id2Ijbf/GqRI5ZyKlHP4pv
+        b5JSPyzkhfY578k0NzjAH6GvMVPD88AtyInmZj3j9YPFjxQGjTdtTUawFRH0EG8CNLpEtRm
+        QNJ61ztZV411N4vHSvJTFD4G97lrwtehKQlduC+YR6NyWQrLCLEJR1EiOVQWsCg//xsIGdv
+        mFkTVTJGHnWYFZIpCVK20QSWT61HMwADsDYEMX4BH5omv0YCxrEApYUJXi7cZdxxux2NLqH
+        Noj2k7pf70nWR4yzzAnBomBxSNHXmnE5XHjzI/LcOHvclut9UYBJw4qqcbD7j9JgRhwwuRL
+        OiURoN3TYPQUeaFBBW7zf5E5oPuhQ==
 X-QQ-GoodBg: 0
 From:   Jiang Jian <jiangjian@cdjrlc.com>
-To:     jh80.chung@samsung.com, ulf.hansson@linaro.org
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         jiangjian@cdjrlc.com
-Subject: [PATCH] mmc: host: dw_mmc: remove unexpected word "the"
-Date:   Tue, 21 Jun 2022 17:41:46 +0800
-Message-Id: <20220621094146.77216-1-jiangjian@cdjrlc.com>
+Subject: [PATCH] mmc: sdhci-acpi: remove unexpected word "the"
+Date:   Tue, 21 Jun 2022 17:44:59 +0800
+Message-Id: <20220621094459.80271-1-jiangjian@cdjrlc.com>
 X-Mailer: git-send-email 2.17.1
 X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:cdjrlc.com:qybgspam:qybgspam6
+Feedback-ID: bizesmtp:cdjrlc.com:qybgspam:qybgspam7
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 there is an unexpected word "the" in the comments that need to be removed
 
- * command hasn't already completed (indicating the the irq
+*       instead use the the SDR104 preset register.
 
 Signed-off-by: Jiang Jian <jiangjian@cdjrlc.com>
 ---
- drivers/mmc/host/dw_mmc.c | 2 +-
+ drivers/mmc/host/sdhci-acpi.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 581614196a84..7f00d7d7e35e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1363,7 +1363,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 		 * is just about to roll over.
- 		 *
- 		 * We do this whole thing under spinlock and only if the
--		 * command hasn't already completed (indicating the the irq
-+		 * command hasn't already completed (indicating the irq
- 		 * already ran so we don't want the timeout).
- 		 */
- 		spin_lock_irqsave(&host->irq_lock, irqflags);
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index c0350e9c03f3..93fe6e5a5f9f 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -648,7 +648,7 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+ 	 *       in reading a garbage value and using the wrong presets.
+ 	 *
+ 	 *       Since HS400 and HS200 presets must be identical, we could
+-	 *       instead use the the SDR104 preset register.
++	 *       instead use the SDR104 preset register.
+ 	 *
+ 	 *    If the above issues are resolved we could remove this quirk for
+ 	 *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
 -- 
 2.17.1
-
 
