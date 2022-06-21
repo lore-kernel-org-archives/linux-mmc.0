@@ -2,86 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44097CCA473
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jun 2022 13:37:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37885C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Jun 2022 14:03:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231693AbiFUNhQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Jun 2022 09:37:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32802 "EHLO
+        id S1350207AbiFUODd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Jun 2022 10:03:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52542 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351104AbiFUNhA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2022 09:37:00 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 858A12CCAE
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Jun 2022 06:35:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=4z8LIqSE2luIYKYQPL4O7016FE7X
-        ACNUC8HzUXy/qdA=; b=01BO+r+v9RlUR+01A7bMVQzBsQhNNmJIvNZlxSGUGfBq
-        Lqm9gGQAQH9l5Ovg8uCXA4Fb0ihlW/7nFgYGuPR6tBcbKeofmdfLu6jgdfaagLMx
-        3xY98ygVqrniGO11M0EC7INENzj53fQR0ID8FOCv7ERwBl2iscYLOR2BWJdM4P8=
-Received: (qmail 166667 invoked from network); 21 Jun 2022 15:35:31 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Jun 2022 15:35:31 +0200
-X-UD-Smtp-Session: l3s3148p1@NDlbS/Xh2kJZD+65
-Date:   Tue, 21 Jun 2022 15:35:30 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        linux-mmc@vger.kernel.org, Pavel Machek <pavel@denx.de>,
-        linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
+        with ESMTP id S1350675AbiFUODb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2022 10:03:31 -0400
+Received: from mail-yw1-x1136.google.com (mail-yw1-x1136.google.com [IPv6:2607:f8b0:4864:20::1136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8DB413D12;
+        Tue, 21 Jun 2022 07:03:27 -0700 (PDT)
+Received: by mail-yw1-x1136.google.com with SMTP id 00721157ae682-3178ea840easo93975877b3.13;
+        Tue, 21 Jun 2022 07:03:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=+ukcDB9pljhF1AQzBxm6MNzKas06rc0yYeh8QowLyW8=;
+        b=m1UyEamKS6QAtTqv4EtKpzpAs8te/km4KjDsXmv4kHqq7DFK+OnXtVrCGtTI9q8o8Q
+         TqK+4HPRj3U1Ws+cyo12SmQJubZacTD9KREgRQObDGEA0NyDb8T7zQ/6J5PsT/sQ1EOh
+         fyT+dScJTALprBKXWYlPK/4P434CO0cLwbbC/QtRhZYbV5WgTFF+RmDWpjLcwsFvgXUx
+         HWJBu1dcLjFl6FzSBLevA0DnMngK4c4mX9aMQciYRcnsHALsPpIOuSUH9uvN9YPEnz+9
+         zakH5UapughIU1jRxn1lTuV8yJFpYFRkI3Y6PCGt/TxqlF8fUMO0IsSlGrhJlvo1ECiS
+         7Cmw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=+ukcDB9pljhF1AQzBxm6MNzKas06rc0yYeh8QowLyW8=;
+        b=vdvpxVqkQ3+fETn+QRlvAEhpTNef74B0oXq52WFJTUIqvk+ty29qiQ1jquGvJNPobk
+         pEbWVbyo7RmttEvp3d/xPgFJdVQbCMlD5r0CUiiJHF7ZbsWhXdF5YLLs6Y44zOUypeQN
+         sMSOt2B1f9DoUME+CQt48xymEw8A+LR9evWATtF3oKEfeJPeCAUP/QBMOBFsx8lhKviA
+         2t/I51amHGZvK8YOVJjGsXJrQawqYGwDBbs24xDp0vJMTOVGwRO48OnbuvZvZRkioOou
+         /gNy/HI70N+e8xRVXuRVfkD7oqDVL158gNYRJw5lvCnMibOx+UFJQGhBaBL6T6MXsPqQ
+         R5ZA==
+X-Gm-Message-State: AJIora//MxFvmutH838kTUdlKQQ8qy2UOcf2TlThJEm7BfKbhjdx8CO2
+        ThS6aeUyO/FJjgGb1ikcDFKFLJjlcFWidIlqujo=
+X-Google-Smtp-Source: AGRyM1s025+eB4Zs0hBbPkEF9uh5urOs9ZsNMOjbA19LRGjeY1pCnHQFzCCJKxt38rUfRrvYe0WJnC4FPDYeEaMm2z0=
+X-Received: by 2002:a05:690c:58d:b0:317:dd62:f6d9 with SMTP id
+ bo13-20020a05690c058d00b00317dd62f6d9mr9899585ywb.78.1655820206886; Tue, 21
+ Jun 2022 07:03:26 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220404172322.32578-1-prabhakar.mahadev-lad.rj@bp.renesas.com> <YrHJIjhDP0/Sur1M@shikoro>
+In-Reply-To: <YrHJIjhDP0/Sur1M@shikoro>
+From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date:   Tue, 21 Jun 2022 15:03:00 +0100
+Message-ID: <CA+V-a8vYjQxgZxcDE6-0cyMA50-f6MvJAWXZVZiWO1QQn99a4Q@mail.gmail.com>
 Subject: Re: [PATCH 0/2] mmc: renesas: Trivial fixes
-Message-ID: <YrHJIjhDP0/Sur1M@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Philipp Zabel <p.zabel@pengutronix.de>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        linux-mmc@vger.kernel.org, Pavel Machek <pavel@denx.de>,
-        linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Pavel Machek <pavel@denx.de>,
+        LKML <linux-kernel@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
         Prabhakar <prabhakar.csengg@gmail.com>,
         Biju Das <biju.das.jz@bp.renesas.com>
-References: <20220404172322.32578-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="3uiu3xecSU/IzmT8"
-Content-Disposition: inline
-In-Reply-To: <20220404172322.32578-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram,
 
---3uiu3xecSU/IzmT8
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Tue, Jun 21, 2022 at 2:35 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> > This patch series adds trivial fixes to renesas mmc driver.
+>
+> Did I miss if there is anything left to discuss for v2?
+>
+Sorry I missed to follow up. I'll send a v2 soon.
 
-> This patch series adds trivial fixes to renesas mmc driver.
-
-Did I miss if there is anything left to discuss for v2?
-
-
---3uiu3xecSU/IzmT8
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmKxyR8ACgkQFA3kzBSg
-KbaE8g//SE/s4VlQCXBI+FKeQFbA8DLx3Kvl+RVRfKQBXRi00zNdF3soWSUCfIGZ
-8UAkK9nthXXx/jCi9aiBo7fT0StSPiuact2ljH8MEjLRtmWV1Qzb//B4plgw0E0M
-m4VfF+FMjfcpUc8zm/e9VXBOKEsm9C2DmCEP1piB7vXDBx0nECt+o8Khf8WNJ+J3
-lpSlIlbxwNgk5c87oBS52m1TyvhZS0eGG0PH/AwIFoIqfKl4w1ZD9SYyB1EzIxem
-qN4H8pbjpXkeYqOb6HqPb2bgzR2VryQ/akHGT9W9DS08wBaA6nKPwvuU469xh7Ck
-3CW1/wyN55lWcceW0JAg+oKnAtScdRqaiHY8UKVIUmxowCNqMETt567T7JuWDeyF
-4pHa+fZl+/X48unxFDpJJjxuTjR2z0iEyF26Amgnyhj+wazeCYrKvJhzURtzYOpF
-1vIxCBSs8e5+sdrlUMQWGYxyC2ESE6v2cZPvd+hpxR3N1vNS7lLyesJ26Qlx3wOZ
-iYDGoA2UKr6hZPlXgxU9W5e9Q4lM68adKZywSmdM9ouabMGWbPVVQiYMT/ETxJMW
-3Lu68Xiuu8zJFxJ3Xcfzr+IID6Zecq9OV3+NF362S/xS70O7742bLYfW4mN9dL3k
-qtyK/xX7DJ7LbCwjyPHH5wJuvPt0mZfWDpIJt9EjrPWVXJQgtlE=
-=6vn6
------END PGP SIGNATURE-----
-
---3uiu3xecSU/IzmT8--
+Cheers,
+Prabhakar
