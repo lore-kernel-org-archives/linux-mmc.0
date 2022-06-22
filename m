@@ -2,96 +2,150 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 955AAC433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jun 2022 08:44:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2BE4C43334
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jun 2022 08:58:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235861AbiFVIoD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Jun 2022 04:44:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42584 "EHLO
+        id S1349543AbiFVI6T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Jun 2022 04:58:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355558AbiFVInf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2022 04:43:35 -0400
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BEFD340C2
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2022 01:43:34 -0700 (PDT)
+        with ESMTP id S245255AbiFVI6S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2022 04:58:18 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CC6033E17;
+        Wed, 22 Jun 2022 01:58:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1655887414; x=1687423414;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=QgS6gqXUCp98sYOy1tTKtfD3zE2RhCwd03cTX1A7GCE=;
-  b=atqkuYWH0+9/HviWGA7TmwqoH6/4W/1sqGxB/R9J3bADtEytL4np6rAt
-   nx7g3ScGi/zFIdsDLjtTfQVCc4IMiJKYG8yDwUtesVyosc3AHtg27FZpQ
-   UMfaXRZ5jt5Q5rv0YfSbJ8IBtD3SG8tlkLaWNNB7SlJGxiFjL4RJV21ST
-   VzLTh+AJC0YJ6/ELLrq+4NcXfDNjQ3bIo37hZVEL8V/lXka3um9agrzGu
-   aKwRHgWmyCIh1lN0LqsPKJ1qXe468OeMvdqhiOIevN5v2hsGcfgqIh7X5
-   0RPxnOuQ9wUEqzBZJzARu+6QR+Oz1H298gR6S1KXeEabUdcYLPhk9ZqaK
+  t=1655888297; x=1687424297;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=U8gy03Q4jQrZZhWStg1EdzgEeFefaKvkMwEkHvh6v3Y=;
+  b=gzmIDSDBj6G0z8BcNJzunN6KweDjyKbDM2+CfjghelEAV6qvco8wQveY
+   MKxf5o71qtG89G20N8W3rD9cxMLBQHKy9ScUMHCNh/np32lVVy2HNPhJ8
+   x4EOaygkNrbFBypOcDacZjJPBjPymGWpcsLuMzYq/L1xUXsPpfXKlbYae
+   DwFd3xae88qz9y86au8FSBk8P8tzNq7lRg/IIhH9Tx5NiIxGCFGq6HAKc
+   UiC0lgv9bsDXZC9Y+dXkF9p3DdBEIggRiZ3OTbluE457YH3rgefuSieX5
+   wiG3CNquqau2Kl6JGe9xqsubNYP6SurRltNHrQbq1GEidObQJDY1Q04Zk
    Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10385"; a="263391601"
+X-IronPort-AV: E=McAfee;i="6400,9594,10385"; a="277907874"
 X-IronPort-AV: E=Sophos;i="5.92,212,1650956400"; 
-   d="scan'208";a="263391601"
+   d="scan'208";a="277907874"
 Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jun 2022 01:43:34 -0700
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jun 2022 01:58:17 -0700
 X-IronPort-AV: E=Sophos;i="5.92,212,1650956400"; 
-   d="scan'208";a="644081172"
+   d="scan'208";a="644086023"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.59.193])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jun 2022 01:43:32 -0700
-Message-ID: <d1a15acd-dd87-839e-6dbb-7598b63b069d@intel.com>
-Date:   Wed, 22 Jun 2022 11:43:28 +0300
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jun 2022 01:58:15 -0700
+Message-ID: <569cc212-d1b1-d433-1f61-f94bf8037251@intel.com>
+Date:   Wed, 22 Jun 2022 11:58:11 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH] mmc/host/sdhci-of-esdhc: Hold a reference returned by
- of_find_compatible_node
+Subject: Re: [PATCH -next] mmc: sdhci-pci-gli: Fix build error unused-function
 Content-Language: en-US
-To:     Liang He <windhl@126.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-References: <20220621065259.4079817-1-windhl@126.com>
+To:     Ren Zhijie <renzhijie2@huawei.com>, ulf.hansson@linaro.org,
+        reniuschengl@gmail.com, jasonlai.genesyslogic@gmail.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220619104712.125364-1-renzhijie2@huawei.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220621065259.4079817-1-windhl@126.com>
+In-Reply-To: <20220619104712.125364-1-renzhijie2@huawei.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/06/22 09:52, Liang He wrote:
-> In sdhci_esdhc_probe(), we should hold the reference returned by
-> of_find_compatible_node() which is used to of_node_put() for keep
-> refcount balance.
+On 19/06/22 13:47, Ren Zhijie wrote:
+> If CONFIG_PM is not set.
 > 
-> Signed-off-by: Liang He <windhl@126.com>
+> make ARCH=x86_64 CROSS_COMPILE=x86_64-linux-gnu-, will be failed, like this:
+> 
+> drivers/mmc/host/sdhci-pci-gli.c:834:13: error: ‘gl9763e_set_low_power_negotiation’ defined but not used [-Werror=unused-function]
+>  static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
+>              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> cc1: all warnings being treated as errors
+> make[3]: *** [drivers/mmc/host/sdhci-pci-gli.o] Error 1
+> 
+> To fix building warning, wrap all related code with CONFIG_PM.
+> 
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Fixes: 78fe993ae714("mmc: host: Improve I/O read/write performance for GL9763E")
+> Signed-off-by: Ren Zhijie <renzhijie2@huawei.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-pci-gli.c | 50 ++++++++++++++++----------------
+>  1 file changed, 25 insertions(+), 25 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index d9dc41143bb3..9c8cd8b63578 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -1418,7 +1418,7 @@ static int esdhc_hs400_prepare_ddr(struct mmc_host *mmc)
->  static int sdhci_esdhc_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host;
-> -	struct device_node *np;
-> +	struct device_node *np, *tp;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_esdhc *esdhc;
->  	int ret;
-> @@ -1463,7 +1463,9 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
->  	if (esdhc->vendor_ver > VENDOR_V_22)
->  		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> index a76506adc206..4d509f656188 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -831,31 +831,6 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *mmc)
+>  	sdhci_dumpregs(mmc_priv(mmc));
+>  }
 >  
-> -	if (of_find_compatible_node(NULL, NULL, "fsl,p2020-esdhc")) {
-> +	tp = of_find_compatible_node(NULL, NULL, "fsl,p2020-esdhc");
-> +	if (tp) {
-> +		of_node_put(tp);
->  		host->quirks |= SDHCI_QUIRK_RESET_AFTER_REQUEST;
->  		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->  	}
+> -static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
+> -{
+> -	struct pci_dev *pdev = slot->chip->pdev;
+> -	u32 value;
+> -
+> -	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> -	value &= ~GLI_9763E_VHS_REV;
+> -	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
+> -	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> -
+> -	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
+> -
+> -	if (enable)
+> -		value &= ~GLI_9763E_CFG_LPSN_DIS;
+> -	else
+> -		value |= GLI_9763E_CFG_LPSN_DIS;
+> -
+> -	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
+> -
+> -	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> -	value &= ~GLI_9763E_VHS_REV;
+> -	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+> -	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> -}
+> -
+>  static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
+>  {
+>  	struct cqhci_host *cq_host = mmc->cqe_private;
+> @@ -991,6 +966,31 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+>  }
+>  
+>  #ifdef CONFIG_PM
+> +static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
+> +{
+> +	struct pci_dev *pdev = slot->chip->pdev;
+> +	u32 value;
+> +
+> +	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +	value &= ~GLI_9763E_VHS_REV;
+> +	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
+> +	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +
+> +	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
+> +
+> +	if (enable)
+> +		value &= ~GLI_9763E_CFG_LPSN_DIS;
+> +	else
+> +		value |= GLI_9763E_CFG_LPSN_DIS;
+> +
+> +	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
+> +
+> +	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +	value &= ~GLI_9763E_VHS_REV;
+> +	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+> +	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +}
+> +
+>  static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+>  {
+>  	struct sdhci_pci_slot *slot = chip->slots[0];
 
