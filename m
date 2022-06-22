@@ -2,150 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2BE4C43334
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jun 2022 08:58:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43FECC43334
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Jun 2022 09:41:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349543AbiFVI6T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Jun 2022 04:58:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53784 "EHLO
+        id S233494AbiFVJlh convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Jun 2022 05:41:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245255AbiFVI6S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2022 04:58:18 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CC6033E17;
-        Wed, 22 Jun 2022 01:58:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1655888297; x=1687424297;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=U8gy03Q4jQrZZhWStg1EdzgEeFefaKvkMwEkHvh6v3Y=;
-  b=gzmIDSDBj6G0z8BcNJzunN6KweDjyKbDM2+CfjghelEAV6qvco8wQveY
-   MKxf5o71qtG89G20N8W3rD9cxMLBQHKy9ScUMHCNh/np32lVVy2HNPhJ8
-   x4EOaygkNrbFBypOcDacZjJPBjPymGWpcsLuMzYq/L1xUXsPpfXKlbYae
-   DwFd3xae88qz9y86au8FSBk8P8tzNq7lRg/IIhH9Tx5NiIxGCFGq6HAKc
-   UiC0lgv9bsDXZC9Y+dXkF9p3DdBEIggRiZ3OTbluE457YH3rgefuSieX5
-   wiG3CNquqau2Kl6JGe9xqsubNYP6SurRltNHrQbq1GEidObQJDY1Q04Zk
-   Q==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10385"; a="277907874"
-X-IronPort-AV: E=Sophos;i="5.92,212,1650956400"; 
-   d="scan'208";a="277907874"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jun 2022 01:58:17 -0700
-X-IronPort-AV: E=Sophos;i="5.92,212,1650956400"; 
-   d="scan'208";a="644086023"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.59.193])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Jun 2022 01:58:15 -0700
-Message-ID: <569cc212-d1b1-d433-1f61-f94bf8037251@intel.com>
-Date:   Wed, 22 Jun 2022 11:58:11 +0300
+        with ESMTP id S1350562AbiFVJld (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2022 05:41:33 -0400
+Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 118AB39B8B
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2022 02:41:31 -0700 (PDT)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 24BA4462F3F;
+        Wed, 22 Jun 2022 11:41:27 +0200 (CEST)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 15CAC462D2F;
+        Wed, 22 Jun 2022 11:41:27 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Wed, 22 Jun 2022 11:41:27 +0200 (CEST)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Wed, 22 Jun
+ 2022 11:41:26 +0200
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Wed, 22 Jun
+ 2022 11:41:26 +0200
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.1118.009; Wed, 22 Jun 2022 11:41:26 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: [PATCH] mmc-utils: dont divide CMD23 count by sector size
+Thread-Topic: [PATCH] mmc-utils: dont divide CMD23 count by sector size
+Thread-Index: AdiGG5pmW471gNuQTayLmad2s/EH8Q==
+Date:   Wed, 22 Jun 2022 09:41:26 +0000
+Message-ID: <1b5d40da9b8948dc8e8f1b90ef75baab@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: de-DE
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.3.44]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH -next] mmc: sdhci-pci-gli: Fix build error unused-function
-Content-Language: en-US
-To:     Ren Zhijie <renzhijie2@huawei.com>, ulf.hansson@linaro.org,
-        reniuschengl@gmail.com, jasonlai.genesyslogic@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20220619104712.125364-1-renzhijie2@huawei.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220619104712.125364-1-renzhijie2@huawei.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-TMASE-Version: DDEI-5.1-9.0.1002-26970.005
+X-TMASE-Result: 10-2.574000-10.000000
+X-TMASE-MatchedRID: zdfKSpJbRLhPTly3n9bADN9JA2lmQRNUcV3n4J/0zUN7YhuCO/3iFSOV
+        sz0LL9wGIvrftAIhWmLy9zcRSkKatUPu4/hW5W83Ss47mbT7SASu+ZyFqtd5FQE3IOP2oHsonzG
+        rpysaH8BsQpY62QYCy29yZj3aufb5aDAi8sBNMoFqHXONfTwSQsRB0bsfrpPIx1FPlNAAmcBDAA
+        DK5NrUR9zIpaOlXMDS/aoxDQuz0vi9K1jK9k1lpvqy+VVvqH2X
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: db38d67d-9264-4a6a-bc1b-62f542d7c2e6-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/06/22 13:47, Ren Zhijie wrote:
-> If CONFIG_PM is not set.
-> 
-> make ARCH=x86_64 CROSS_COMPILE=x86_64-linux-gnu-, will be failed, like this:
-> 
-> drivers/mmc/host/sdhci-pci-gli.c:834:13: error: ‘gl9763e_set_low_power_negotiation’ defined but not used [-Werror=unused-function]
->  static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
->              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> cc1: all warnings being treated as errors
-> make[3]: *** [drivers/mmc/host/sdhci-pci-gli.o] Error 1
-> 
-> To fix building warning, wrap all related code with CONFIG_PM.
-> 
-> Reported-by: Hulk Robot <hulkci@huawei.com>
-> Fixes: 78fe993ae714("mmc: host: Improve I/O read/write performance for GL9763E")
-> Signed-off-by: Ren Zhijie <renzhijie2@huawei.com>
+FFU used to divide the fw_size by native sector size.
+If native sector size is 4K the accesses need to be aligned
+and a multiple of 4K, other than that CMD23 SET_BLOCK_COUNT
+does not change.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+The previous handling lead to MMC_SET_BLOCK_COUNT setting
+a too small block count for the FFU fw_size.
+While at it also correct CMD25 blksz and blocks fields
+to reflect the actual transfer.
 
-> ---
->  drivers/mmc/host/sdhci-pci-gli.c | 50 ++++++++++++++++----------------
->  1 file changed, 25 insertions(+), 25 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index a76506adc206..4d509f656188 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -831,31 +831,6 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *mmc)
->  	sdhci_dumpregs(mmc_priv(mmc));
->  }
->  
-> -static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
-> -{
-> -	struct pci_dev *pdev = slot->chip->pdev;
-> -	u32 value;
-> -
-> -	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> -	value &= ~GLI_9763E_VHS_REV;
-> -	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
-> -	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> -
-> -	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
-> -
-> -	if (enable)
-> -		value &= ~GLI_9763E_CFG_LPSN_DIS;
-> -	else
-> -		value |= GLI_9763E_CFG_LPSN_DIS;
-> -
-> -	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
-> -
-> -	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> -	value &= ~GLI_9763E_VHS_REV;
-> -	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
-> -	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> -}
-> -
->  static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
->  {
->  	struct cqhci_host *cq_host = mmc->cqe_private;
-> @@ -991,6 +966,31 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
->  }
->  
->  #ifdef CONFIG_PM
-> +static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slot, bool enable)
-> +{
-> +	struct pci_dev *pdev = slot->chip->pdev;
-> +	u32 value;
-> +
-> +	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> +	value &= ~GLI_9763E_VHS_REV;
-> +	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
-> +	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> +
-> +	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
-> +
-> +	if (enable)
-> +		value &= ~GLI_9763E_CFG_LPSN_DIS;
-> +	else
-> +		value |= GLI_9763E_CFG_LPSN_DIS;
-> +
-> +	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
-> +
-> +	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
-> +	value &= ~GLI_9763E_VHS_REV;
-> +	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
-> +	pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
-> +}
-> +
->  static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
->  {
->  	struct sdhci_pci_slot *slot = chip->slots[0];
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ mmc_cmds.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index bb0f022..048a0af 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2768,7 +2768,6 @@ int do_ffu(int nargs, char **argv)
+ 	ssize_t chunk_size;
+ 	char *device;
+ 	struct mmc_ioc_multi_cmd *multi_cmd = NULL;
+-	__u32 blocks = 1;
+ 
+ 	if (nargs != 3) {
+ 		fprintf(stderr, "Usage: ffu <image name> </path/to/mmcblkX> \n");
+@@ -2826,15 +2825,13 @@ int do_ffu(int nargs, char **argv)
+ 		goto out;
+ 	}
+ 
++	/* ensure fw is multiple of native sector size */
+ 	sect_size = (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 0) ? 512 : 4096;
+ 	if (fw_size % sect_size) {
+ 		fprintf(stderr, "Firmware data size (%jd) is not aligned!\n", (intmax_t)fw_size);
+ 		goto out;
+ 	}
+ 
+-	/* calculate required fw blocks for CMD25 */
+-	blocks = fw_size / sect_size;
+-
+ 	/* set CMD ARG */
+ 	arg = ext_csd[EXT_CSD_FFU_ARG_0] |
+ 		ext_csd[EXT_CSD_FFU_ARG_1] << 8 |
+@@ -2857,13 +2854,13 @@ int do_ffu(int nargs, char **argv)
+ 
+ 	/* send block count */
+ 	multi_cmd->cmds[1].opcode = MMC_SET_BLOCK_COUNT;
+-	multi_cmd->cmds[1].arg = blocks;
++	multi_cmd->cmds[1].arg = fw_size;
+ 	multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+ 
+ 	/* send image chunk */
+ 	multi_cmd->cmds[2].opcode = MMC_WRITE_MULTIPLE_BLOCK;
+-	multi_cmd->cmds[2].blksz = sect_size;
+-	multi_cmd->cmds[2].blocks = blocks;
++	multi_cmd->cmds[2].blksz = fw_size;
++	multi_cmd->cmds[2].blocks = 1;
+ 	multi_cmd->cmds[2].arg = arg;
+ 	multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+ 	multi_cmd->cmds[2].write_flag = 1;
+-- 
+2.36.1
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
