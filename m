@@ -2,128 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7DF7C43334
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 08:00:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C602C43334
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 08:55:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230154AbiFWIAQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Jun 2022 04:00:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45228 "EHLO
+        id S230149AbiFWIze (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Jun 2022 04:55:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229734AbiFWIAP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 04:00:15 -0400
-Received: from smtp1.axis.com (smtp1.axis.com [195.60.68.17])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9536746CB2;
-        Thu, 23 Jun 2022 01:00:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1655971214;
-  x=1687507214;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=Y6qmbNorIhVgztbdVRKjKcyLbrdYuGj36PW0vcE3Cwc=;
-  b=YHU19ZN/4MSnVcyn1UV3Rshv1q3ntIf6kcvL0ZpBsj1g0LIeEWpdk2Cb
-   qBdDZi04w+a5AhkZR4ghtAkNiJpDGjYMj8v+uycysxsiSWW/cROo/ABg7
-   q0e93oOtc7ZbIvvhlsYjxGztvJgxTBpMe9ILMAFnukVzeVuQZ7EnEikMY
-   ZjLXaCqWFlMCGwNz6Zwprv0wEXEOqEYFEgPfdm8yh2a3N7XPn1BquJg1G
-   bRGHfgE6FMuAHXFyMYmx9Gz82olgVR2hcTtWV1FRy/N/K2hMDBG23BWPe
-   0vL/AYV7bd1rgiiuMEQaJaoXKOlHb+3CFsw8Fa+HxcmeUlHBd4CIY7idC
-   A==;
-From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@axis.com>,
-        Vincent Whitchurch <vincent.whitchurch@axis.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-Subject: [PATCH] mmc: core: Allow speed modes to be adjusted via module param
-Date:   Thu, 23 Jun 2022 10:00:09 +0200
-Message-ID: <20220623080009.1775574-1-vincent.whitchurch@axis.com>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S230344AbiFWIzc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 04:55:32 -0400
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4042836B42;
+        Thu, 23 Jun 2022 01:55:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1655974531; x=1687510531;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=5e5LpSrE1tJXHTXV3wUUQLHgxzGmhBA+V4BYztZBrKg=;
+  b=Sfub/Y76N7+xhee7W5Yu6CL+UaFiGwcRYJYOZeoaAGfifs+PSELg7iH8
+   JJl+xRW02g2ygoMw6PPSu+6JaeKu7hlqnEPCunjV/E67xv5I69rxIjkcU
+   kFVluoV8vfA5cVVUGtCi5b6X8E2Z1KR6LFsw472dDgD2qiYdmY4gJvx5k
+   6Fr4rGI3oknhT9fpyL2cFhGwgLGvSYWHS3pPpqrTi1cK9By6T0jdXuQkG
+   oZ92pdMBUZc0DwBk7jAmYVQBnlh1J6DQbME7YhylEyQqzkYZeShb75U7s
+   W5KcJacZvblIih0BCZggIgik1CZGr3Hql0aLHaDwpWC+1F05PSUSqP7C/
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10386"; a="344655811"
+X-IronPort-AV: E=Sophos;i="5.92,215,1650956400"; 
+   d="scan'208";a="344655811"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jun 2022 01:55:30 -0700
+X-IronPort-AV: E=Sophos;i="5.92,215,1650956400"; 
+   d="scan'208";a="644641277"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.96])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jun 2022 01:55:29 -0700
+Message-ID: <b6832fce-ee48-c4d8-e898-d9aab17345d1@intel.com>
+Date:   Thu, 23 Jun 2022 11:55:24 +0300
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.9.1
+Subject: Re: [PATCH] mmc: sdhci: drop unexpected word 'a' in comments
+Content-Language: en-US
+To:     Jiang Jian <jiangjian@cdjrlc.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220623071616.13873-1-jiangjian@cdjrlc.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220623071616.13873-1-jiangjian@cdjrlc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-During board verification, there is a need to test the various supported
-eMMC/SD speed modes.  However, since the framework chooses the best mode
-supported by the card and the host controller's caps, this currently
-necessitates changing the devicetree for every iteration.
+On 23/06/22 10:16, Jiang Jian wrote:
+> Remove the repeated word 'a' from comments
+> 
+> file - drivers/mmc/host/sdhci.h
+> line - 348
+> 
+> /* Allow for a a command request and a data request at the same time */
+> 
+> changed to:
+> 
+> /* Allow for a command request and a data request at the same time */
+> 
+> Signed-off-by: Jiang Jian <jiangjian@cdjrlc.com>
 
-To make changing the modes easier, allow the various host controller
-capabilities to be cleared via a module parameter.  (A per-controller
-debugfs wouldn't work since the controller needs to be re-probed to
-trigger re-init of cards.  A module parameter is used instead of a
-global debugfs to allow this to be also set via the kernel command
-line.)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-The values to be written are the raw MMC_CAP* values from
-include/linux/mmc/host.h.  This is rather low-level, and these defines
-are not guaranteed to be stable, but it is perhaps good enough for the
-indented use case.  A warning is emitted when the caps clearing is in
-effect.
-
-Example of use:
-
- # grep timing /sys/kernel/debug/mmc0/ios
- timing spec:	9 (mmc HS200)
-
- // MMC_CAP2_HS200_1_8V_SDR
- # echo $((1 << 5)) > /sys/module/mmc_core/parameters/caps2_clear
-
- # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/unbind
- # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/bind
- # grep timing /sys/kernel/debug/mmc0/ios
- timing spec:	8 (mmc DDR52)
-
- // MMC_CAP_1_8V_DDR
- # echo $((1 << 12)) > /sys/module/mmc_core/parameters/caps_clear
-
- # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/unbind
- # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/bind
- # grep timing /sys/kernel/debug/mmc0/ios
- timing spec:	1 (mmc high-speed)
-
- # echo 0 > /sys/module/mmc_core/parameters/caps2_clear
-
- # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/unbind
- # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/bind
- # grep timing /sys/kernel/debug/mmc0/ios
- timing spec:	9 (mmc HS200)
-
-Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
----
- drivers/mmc/core/host.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
-
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 2ed2b4d5e5a5..37971b7c7f62 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -34,6 +34,10 @@
- #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host, class_dev)
- 
- static DEFINE_IDA(mmc_host_ida);
-+static unsigned int caps_clear, caps2_clear;
-+
-+module_param(caps_clear, uint, 0644);
-+module_param(caps2_clear, uint, 0644);
- 
- #ifdef CONFIG_PM_SLEEP
- static int mmc_host_class_prepare(struct device *dev)
-@@ -411,6 +415,14 @@ int mmc_of_parse(struct mmc_host *host)
- 		host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
- 				 MMC_CAP2_HS400_ES);
- 
-+	if (caps_clear || caps2_clear)
-+		dev_warn(host->parent,
-+			 "clearing host controller caps %#x caps2 %#x\n",
-+			 caps_clear, caps2_clear);
-+
-+	host->caps &= ~caps_clear;
-+	host->caps2 &= ~caps2_clear;
-+
- 	/* Must be after "non-removable" check */
- 	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
- 		if (host->caps & MMC_CAP_NONREMOVABLE)
--- 
-2.34.1
+> ---
+>  drivers/mmc/host/sdhci.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 95a08f09df30..0abe4b428ed5 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -345,7 +345,7 @@ struct sdhci_adma2_64_desc {
+>   */
+>  #define SDHCI_MAX_SEGS		128
+>  
+> -/* Allow for a a command request and a data request at the same time */
+> +/* Allow for a command request and a data request at the same time */
+>  #define SDHCI_MAX_MRQS		2
+>  
+>  /*
 
