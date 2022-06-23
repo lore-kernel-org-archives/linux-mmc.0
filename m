@@ -2,100 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0958DCCA47C
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 11:57:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB1DAC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 12:08:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231637AbiFWL53 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Jun 2022 07:57:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41540 "EHLO
+        id S231337AbiFWMIf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Jun 2022 08:08:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56610 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229734AbiFWL51 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 07:57:27 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 865014D606
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 04:57:23 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id j21so19843311lfe.1
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 04:57:23 -0700 (PDT)
+        with ESMTP id S231334AbiFWMId (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 08:08:33 -0400
+Received: from mail-oi1-x235.google.com (mail-oi1-x235.google.com [IPv6:2607:f8b0:4864:20::235])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8664B4B1EB
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 05:08:32 -0700 (PDT)
+Received: by mail-oi1-x235.google.com with SMTP id w193so4205595oie.5
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 05:08:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=1mE9QbUsQhDNQHJahcefYpWUk+nyUKek2n9Yhh27xak=;
-        b=dWlPd7JPxh6JEyB0r2JZilAbSpO/KUUN+LG/IgOaf5JkFX0cvBgOpordEp0sozk4BI
-         vTLI1MtBSGPjkvhcSsWgNqGCJ/yKFN0ACPi3jRKo7aqL8qHygsUqb5T69j9tK0u0Jhif
-         VfkXBrYILVJPRsKFZlFEwJNM50Fo5po7nYjBtC+3ybbqyMWzvCVDAtroh01tqPu5iBit
-         OVVkhwXxmKOxK0bchYTWIZrb5DrAwCgT+BCdAWavn48OqQmqmUGlIJs1ZnNchkpoxP6/
-         CUY0UkargJtvvmbwYibbQPbwjljzJJapq7CvOoQHozP5AVCVCvNu8I2wmTqPXslDyqeK
-         nNLA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=gyZqQXrE1oAKL67wT+hGw2Pl78mZ0Dy0a81L+pVfTtc=;
+        b=DKgz1RggJTNYg8Dh1902smt3bH0UGIFYKcHYFKRGkzuvs80CrNqI5yZb3+GylkCtk7
+         dlAUgmGrhFVkrHTPD4wPXdSysV+wzxK0FrBgQ6/REZPbGECiqQMMEh9FbYNVQON1sZzD
+         snu6YRfeac+U0ym+SP2G60Y2YATG3QCnCD2qRT0wtKyx4FGBeg4WJZk6wi3pcBHe0ZXW
+         XiVRyLeAey5VlrvW/TuN4EJQFxwUs+ovERwxxgQW7CX3HW5rETYckCc8OS6F3bntNjav
+         DogQrTRKAPV4MoGoX0LfYapMV4KahxUv7fLtFBxMlD4ShX7w8q2ruNWs+q5SBE80yOKP
+         5Blw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=1mE9QbUsQhDNQHJahcefYpWUk+nyUKek2n9Yhh27xak=;
-        b=CgavsdHA0iCPKzj2UZimVjfP2HS8PmYUAXG7anlEXjI3pZa8TKM+LyDudxQXwy1OUu
-         M5SWje4NhxZgay5AqXikrwRvm92vWVN2OyNz8oP/0H/GNkNfR1S0ZFu+AFbCwrWqNKzf
-         8co5+0GO6sXB2ljE1rfFe98MnI9rLYuydwJaUjTLPKL7TvhncR9QWO+osKAmtJ2G4zyY
-         I8ZERU6dWjCm7x+6u9ZI1cecBE2NNgN071E2kmkJtfeXH+4uKipSr8YeH8PF7jS6cBn8
-         Mj/arqdFix301kaxv1lsjPVMSLiboARzycwAxiuqyGDVFI9iop0vcme6UNUdex+vngZV
-         yE3w==
-X-Gm-Message-State: AJIora820aLrXHXMspMBjFShnfIqaX8CLPRpmdGItoEY16WX8qsT+KYs
-        nEnjg1nYIMz0rsYXCtF5AKOqYQ==
-X-Google-Smtp-Source: AGRyM1uy/9tHqBpEUUL+Tg9fSxETwwD30NJQsIrdVfOJ5rW5RAhslEgRXltg5MJmtzQriN7tBV5bpA==
-X-Received: by 2002:a05:6512:3b22:b0:47f:6756:143 with SMTP id f34-20020a0565123b2200b0047f67560143mr5185880lfv.419.1655985441701;
-        Thu, 23 Jun 2022 04:57:21 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-133-137.NA.cust.bahnhof.se. [155.4.133.137])
-        by smtp.gmail.com with ESMTPSA id o14-20020a05651205ce00b00477b6328a4fsm975077lfo.158.2022.06.23.04.57.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Jun 2022 04:57:20 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.19-rc4
-Date:   Thu, 23 Jun 2022 13:57:20 +0200
-Message-Id: <20220623115720.44690-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=gyZqQXrE1oAKL67wT+hGw2Pl78mZ0Dy0a81L+pVfTtc=;
+        b=fmm8E+2if7JIwDHV6vcLoSPY0rvwK6YiX9+tTy3MeIdNrRTpnvlihuwUQNgBSmc3Gs
+         RLRsAVmEISgLsBO5hDnUGhhF7/QsRuDe6PhD7nMvmJwrNCOJWwqjPy6Oznd7Z680uy4i
+         dzZScWLPvPomCDDq/eBDLd85CyrDv9NPJThGb2G/3UkiKfnBnPWMjyLt1ii3q0iQSXEG
+         cX4GGK5wanMJOwnYMXeZW3wydiCEnr0wIwBaQ1Ybj8XNYU+TVOTVXzXylOm2i7lquD+B
+         ANn1C+GISTewOzxCYOPGcsvIBTeyxucTfaIzuyRkrbaP3YCBjcLPfg+Lh2oVmaZ7FK13
+         MukQ==
+X-Gm-Message-State: AJIora+H+a7hdXNtQcby1yWggN07qnGLn9w5ss5Un2S5reezdA6K3ilh
+        1oGEnJIzNqUjkXzquaykBkBXUasKUyi6DA4h40sYhA==
+X-Google-Smtp-Source: AGRyM1sN1Kc805BDBrcC6gBTpk9T04QLNUFNK7mehzsjqN7Ui2L8ULNfuMmkwDLeKdm60BdDNLtwxJcA5CpCTlqmXQA=
+X-Received: by 2002:a05:6808:120a:b0:333:54f1:351 with SMTP id
+ a10-20020a056808120a00b0033354f10351mr2055076oil.70.1655986111699; Thu, 23
+ Jun 2022 05:08:31 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220619104712.125364-1-renzhijie2@huawei.com>
+In-Reply-To: <20220619104712.125364-1-renzhijie2@huawei.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 23 Jun 2022 14:07:54 +0200
+Message-ID: <CAPDyKFp7+wwdUO6=0fqMHeNKsZ5LQqk4fC4RMwrir4g6R+pTpQ@mail.gmail.com>
+Subject: Re: [PATCH -next] mmc: sdhci-pci-gli: Fix build error unused-function
+To:     Ren Zhijie <renzhijie2@huawei.com>
+Cc:     adrian.hunter@intel.com, reniuschengl@gmail.com,
+        jasonlai.genesyslogic@gmail.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Sun, 19 Jun 2022 at 12:48, Ren Zhijie <renzhijie2@huawei.com> wrote:
+>
+> If CONFIG_PM is not set.
+>
+> make ARCH=3Dx86_64 CROSS_COMPILE=3Dx86_64-linux-gnu-, will be failed, lik=
+e this:
+>
+> drivers/mmc/host/sdhci-pci-gli.c:834:13: error: =E2=80=98gl9763e_set_low_=
+power_negotiation=E2=80=99 defined but not used [-Werror=3Dunused-function]
+>  static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slo=
+t, bool enable)
+>              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> cc1: all warnings being treated as errors
+> make[3]: *** [drivers/mmc/host/sdhci-pci-gli.o] Error 1
+>
+> To fix building warning, wrap all related code with CONFIG_PM.
+>
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Fixes: 78fe993ae714("mmc: host: Improve I/O read/write performance for GL=
+9763E")
+> Signed-off-by: Ren Zhijie <renzhijie2@huawei.com>
 
-Here's a PR with a couple of MMC fixes intended for v5.19-rc4. Details about the
-highlights are as usual found in the signed tag.
-
-Please pull this in!
+Applied for next, thanks!
 
 Kind regards
-Ulf Hansson
+Uffe
 
 
-The following changes since commit b13baccc3850ca8b8cccbf8ed9912dbaa0fdf7f3:
-
-  Linux 5.19-rc2 (2022-06-12 16:11:37 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.19-rc2
-
-for you to fetch changes up to 89bcd9a64b849380ef57e3032b307574e48db524:
-
-  mmc: mediatek: wait dma stop bit reset to 0 (2022-06-15 10:05:56 -0700)
-
-----------------------------------------------------------------
-MMC host:
- - mtk-sd: Fix dma hang issues
- - sdhci-pci-o2micro: Fix card detect by dealing with debouncing
-
-----------------------------------------------------------------
-Chevron Li (1):
-      mmc: sdhci-pci-o2micro: Fix card detect by dealing with debouncing
-
-Mengqi Zhang (1):
-      mmc: mediatek: wait dma stop bit reset to 0
-
- drivers/mmc/host/mtk-sd.c            | 20 ++++++++++++--------
- drivers/mmc/host/sdhci-pci-o2micro.c |  2 ++
- 2 files changed, 14 insertions(+), 8 deletions(-)
+> ---
+>  drivers/mmc/host/sdhci-pci-gli.c | 50 ++++++++++++++++----------------
+>  1 file changed, 25 insertions(+), 25 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
+i-gli.c
+> index a76506adc206..4d509f656188 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -831,31 +831,6 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *=
+mmc)
+>         sdhci_dumpregs(mmc_priv(mmc));
+>  }
+>
+> -static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slo=
+t, bool enable)
+> -{
+> -       struct pci_dev *pdev =3D slot->chip->pdev;
+> -       u32 value;
+> -
+> -       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> -       value &=3D ~GLI_9763E_VHS_REV;
+> -       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
+> -       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> -
+> -       pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
+> -
+> -       if (enable)
+> -               value &=3D ~GLI_9763E_CFG_LPSN_DIS;
+> -       else
+> -               value |=3D GLI_9763E_CFG_LPSN_DIS;
+> -
+> -       pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
+> -
+> -       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> -       value &=3D ~GLI_9763E_VHS_REV;
+> -       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+> -       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> -}
+> -
+>  static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
+>  {
+>         struct cqhci_host *cq_host =3D mmc->cqe_private;
+> @@ -991,6 +966,31 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *s=
+lot)
+>  }
+>
+>  #ifdef CONFIG_PM
+> +static void gl9763e_set_low_power_negotiation(struct sdhci_pci_slot *slo=
+t, bool enable)
+> +{
+> +       struct pci_dev *pdev =3D slot->chip->pdev;
+> +       u32 value;
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +       value &=3D ~GLI_9763E_VHS_REV;
+> +       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
+> +
+> +       if (enable)
+> +               value &=3D ~GLI_9763E_CFG_LPSN_DIS;
+> +       else
+> +               value |=3D GLI_9763E_CFG_LPSN_DIS;
+> +
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+> +       value &=3D ~GLI_9763E_VHS_REV;
+> +       value |=3D FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
+> +}
+> +
+>  static int gl9763e_runtime_suspend(struct sdhci_pci_chip *chip)
+>  {
+>         struct sdhci_pci_slot *slot =3D chip->slots[0];
+> --
+> 2.17.1
+>
