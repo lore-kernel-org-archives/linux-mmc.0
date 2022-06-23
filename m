@@ -2,60 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EFA5DC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 07:45:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7DF7C43334
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 08:00:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230406AbiFWHpr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Jun 2022 03:45:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59028 "EHLO
+        id S230154AbiFWIAQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Jun 2022 04:00:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229451AbiFWHpq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 03:45:46 -0400
-Received: from mail.onlinesuccesses.pl (mail.onlinesuccesses.pl [198.244.150.235])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 573BD46B1D
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 00:45:46 -0700 (PDT)
-Received: by mail.onlinesuccesses.pl (Postfix, from userid 1002)
-        id 52A69A4252; Thu, 23 Jun 2022 07:42:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=onlinesuccesses.pl;
-        s=mail; t=1655970169;
-        bh=nE8HqilgMh4dy7+Z8ksfg7Bc9rmPeQtYFq3/3YR2ODU=;
-        h=Date:From:To:Subject:From;
-        b=bM6/uAKSOR5DiEo4R0Yq/lXrPYqpIU4s2kspGRsHbG1HTBUTygJi9SMS8mvDghtkM
-         qEUX76z/I8XCvg6lE/I0GXv36OgT/3esa/ubmQatR5ZyHPA3I55StVqUB+CfCWRfoc
-         7abdg/NNYsd70bE2/g37t9QBxRoSa0DR6GCp8TudzFvyDatQs/xl/hntdDtTxZgmgm
-         5xeOXRTa8Nnt8mOWh5rnSm+cNnb5H/F8m+p5XucGHjadDdsjt4DFO500GgsA0XujNH
-         KXca4JginNO5icX0G0pYtynPcv1K0EHcs8mQ+prjJXK7MOTk4Q4tqdSGW/t3fSFTyq
-         qIx2WG1wsS6oQ==
-Received: by mail.onlinesuccesses.pl for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 07:41:20 GMT
-Message-ID: <20220623064501-0.1.51.1mr7t.0.nb9qe3q6mu@onlinesuccesses.pl>
-Date:   Thu, 23 Jun 2022 07:41:20 GMT
-From:   "Wiktor Zielonko" <wiktor.zielonko@onlinesuccesses.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Ruch z pierwszej pozycji w Google
-X-Mailer: mail.onlinesuccesses.pl
+        with ESMTP id S229734AbiFWIAP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 04:00:15 -0400
+Received: from smtp1.axis.com (smtp1.axis.com [195.60.68.17])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9536746CB2;
+        Thu, 23 Jun 2022 01:00:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=axis.com; q=dns/txt; s=axis-central1; t=1655971214;
+  x=1687507214;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=Y6qmbNorIhVgztbdVRKjKcyLbrdYuGj36PW0vcE3Cwc=;
+  b=YHU19ZN/4MSnVcyn1UV3Rshv1q3ntIf6kcvL0ZpBsj1g0LIeEWpdk2Cb
+   qBdDZi04w+a5AhkZR4ghtAkNiJpDGjYMj8v+uycysxsiSWW/cROo/ABg7
+   q0e93oOtc7ZbIvvhlsYjxGztvJgxTBpMe9ILMAFnukVzeVuQZ7EnEikMY
+   ZjLXaCqWFlMCGwNz6Zwprv0wEXEOqEYFEgPfdm8yh2a3N7XPn1BquJg1G
+   bRGHfgE6FMuAHXFyMYmx9Gz82olgVR2hcTtWV1FRy/N/K2hMDBG23BWPe
+   0vL/AYV7bd1rgiiuMEQaJaoXKOlHb+3CFsw8Fa+HxcmeUlHBd4CIY7idC
+   A==;
+From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <kernel@axis.com>,
+        Vincent Whitchurch <vincent.whitchurch@axis.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: core: Allow speed modes to be adjusted via module param
+Date:   Thu, 23 Jun 2022 10:00:09 +0200
+Message-ID: <20220623080009.1775574-1-vincent.whitchurch@axis.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,=20
+During board verification, there is a need to test the various supported
+eMMC/SD speed modes.  However, since the framework chooses the best mode
+supported by the card and the host controller's caps, this currently
+necessitates changing the devicetree for every iteration.
 
-jaki=C5=9B czas temu zg=C5=82osi=C5=82a si=C4=99 do nas firma, kt=C3=B3re=
-j strona internetowa nie pozycjonowa=C5=82a si=C4=99 wysoko w wyszukiwarc=
-e Google.=20
+To make changing the modes easier, allow the various host controller
+capabilities to be cleared via a module parameter.  (A per-controller
+debugfs wouldn't work since the controller needs to be re-probed to
+trigger re-init of cards.  A module parameter is used instead of a
+global debugfs to allow this to be also set via the kernel command
+line.)
 
-Na podstawie wykonanego przez nas audytu SEO zoptymalizowali=C5=9Bmy tre=C5=
-=9Bci na stronie pod k=C4=85tem wcze=C5=9Bniej opracowanych s=C5=82=C3=B3=
-w kluczowych. Nasz wewn=C4=99trzny system codziennie analizuje prawid=C5=82=
-owe dzia=C5=82anie witryny.  Dzi=C4=99ki indywidualnej strategii, firma z=
-dobywa coraz wi=C4=99cej Klient=C3=B3w. =20
+The values to be written are the raw MMC_CAP* values from
+include/linux/mmc/host.h.  This is rather low-level, and these defines
+are not guaranteed to be stable, but it is perhaps good enough for the
+indented use case.  A warning is emitted when the caps clearing is in
+effect.
 
-Czy chcieliby Pa=C5=84stwo zwi=C4=99kszy=C4=87 liczb=C4=99 os=C3=B3b odwi=
-edzaj=C4=85cych stron=C4=99 internetow=C4=85 firmy? M=C3=B3g=C5=82bym prz=
-edstawi=C4=87 ofert=C4=99?=20
+Example of use:
 
+ # grep timing /sys/kernel/debug/mmc0/ios
+ timing spec:	9 (mmc HS200)
 
-Pozdrawiam serdecznie,
-Wiktor Zielonko
+ // MMC_CAP2_HS200_1_8V_SDR
+ # echo $((1 << 5)) > /sys/module/mmc_core/parameters/caps2_clear
+
+ # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/unbind
+ # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/bind
+ # grep timing /sys/kernel/debug/mmc0/ios
+ timing spec:	8 (mmc DDR52)
+
+ // MMC_CAP_1_8V_DDR
+ # echo $((1 << 12)) > /sys/module/mmc_core/parameters/caps_clear
+
+ # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/unbind
+ # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/bind
+ # grep timing /sys/kernel/debug/mmc0/ios
+ timing spec:	1 (mmc high-speed)
+
+ # echo 0 > /sys/module/mmc_core/parameters/caps2_clear
+
+ # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/unbind
+ # echo 16d40000.mmc > /sys/bus/platform/drivers/dwmmc_exynos/bind
+ # grep timing /sys/kernel/debug/mmc0/ios
+ timing spec:	9 (mmc HS200)
+
+Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+---
+ drivers/mmc/core/host.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 2ed2b4d5e5a5..37971b7c7f62 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -34,6 +34,10 @@
+ #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host, class_dev)
+ 
+ static DEFINE_IDA(mmc_host_ida);
++static unsigned int caps_clear, caps2_clear;
++
++module_param(caps_clear, uint, 0644);
++module_param(caps2_clear, uint, 0644);
+ 
+ #ifdef CONFIG_PM_SLEEP
+ static int mmc_host_class_prepare(struct device *dev)
+@@ -411,6 +415,14 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
+ 				 MMC_CAP2_HS400_ES);
+ 
++	if (caps_clear || caps2_clear)
++		dev_warn(host->parent,
++			 "clearing host controller caps %#x caps2 %#x\n",
++			 caps_clear, caps2_clear);
++
++	host->caps &= ~caps_clear;
++	host->caps2 &= ~caps2_clear;
++
+ 	/* Must be after "non-removable" check */
+ 	if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
+ 		if (host->caps & MMC_CAP_NONREMOVABLE)
+-- 
+2.34.1
+
