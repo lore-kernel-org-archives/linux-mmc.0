@@ -2,275 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9677C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 09:05:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5103EC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 10:35:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231189AbiFWJFU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Jun 2022 05:05:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45084 "EHLO
+        id S230009AbiFWKff convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Jun 2022 06:35:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34770 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231196AbiFWJFQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 05:05:16 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02AD42ED64;
-        Thu, 23 Jun 2022 02:05:13 -0700 (PDT)
-X-UUID: 31197568bbc745978c97424e3aa27bdb-20220623
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.6,REQID:58b3fb4c-fb13-464a-a65a-f3f19a5b78fe,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
-        ION:release,TS:-5
-X-CID-META: VersionHash:b14ad71,CLOUDID:fc1451ea-f7af-4e69-92ee-0fd74a0c286c,C
-        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil
-        ,QS:nil,BEC:nil,COL:0
-X-UUID: 31197568bbc745978c97424e3aa27bdb-20220623
-Received: from mtkmbs11n1.mediatek.inc [(172.21.101.185)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 346200492; Thu, 23 Jun 2022 17:05:09 +0800
-Received: from mtkcas11.mediatek.inc (172.21.101.40) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id 15.2.792.3;
- Thu, 23 Jun 2022 17:05:07 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkcas11.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Thu, 23 Jun 2022 17:05:06 +0800
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Axe Yang <axe.yang@mediatek.com>, Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <angelogioacchino.delregno@collabora.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        Yong Mao <yong.mao@mediatek.com>
-Subject: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
-Date:   Thu, 23 Jun 2022 17:04:45 +0800
-Message-ID: <20220623090445.1401-4-axe.yang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220623090445.1401-1-axe.yang@mediatek.com>
-References: <20220623090445.1401-1-axe.yang@mediatek.com>
+        with ESMTP id S230345AbiFWKf3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 06:35:29 -0400
+Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C82F14A3FC
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 03:35:25 -0700 (PDT)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 146C8122BA8;
+        Thu, 23 Jun 2022 12:35:24 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 042CF12076A;
+        Thu, 23 Jun 2022 12:35:24 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Thu, 23 Jun 2022 12:35:23 +0200 (CEST)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Thu, 23 Jun
+ 2022 12:35:23 +0200
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Thu, 23 Jun
+ 2022 12:35:23 +0200
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.1118.009; Thu, 23 Jun 2022 12:35:23 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] mmc-utils: dont divide CMD23 count by sector size
+Thread-Topic: [PATCH] mmc-utils: dont divide CMD23 count by sector size
+Thread-Index: AdiG7NFoW471gNuQTayLmad2s/EH8Q==
+Date:   Thu, 23 Jun 2022 10:35:23 +0000
+Message-ID: <dc8b93a5c0b24a59b42278c761af1892@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: de-DE
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.3.44]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-MTK:  N
+X-TMASE-Version: DDEI-5.1-9.0.1002-26972.006
+X-TMASE-Result: 10--13.701100-10.000000
+X-TMASE-MatchedRID: 2SDSohiwfqTUL3YCMmnG4o61Z+HJnvsOld00Q5SO0q5RXC4cX65cJOzH
+        NVsaiyNEUsU2l8Z42eIFFkc0RYTLx1JVOThx4FfxXrBIbmgBxjxDVmiiHQSFeIc5XWJfryop0Am
+        pRo8p3xNg73IJeoB8aRLzQdapWbf84acyaNVQ+eMqy6shOlK/48nlJe2gk8vIh78c7tRRuJG7FY
+        /sCUPw05ae1E4/dXn5gnSYGvpeKgP5S+IvXI7mDRqkhv3OdF4DBGvINcfHqhfDqO6/8R69QLXip
+        9G5gJewEwte8QHPZvfb0YjPwnmCByQYLRCMVJ+BpSXVpBS+ilb0swHSFcVJ6Jm3OIVSf4P5InVh
+        PozbL+m1hEo88JH4h05oDy0xSTK5Eb0RuLqy8KF4L+0UwLmbKH0tCKdnhB58nFK7VE/xL0n6C0e
+        Ps7A07fk39LXMSri6Uu++KX+IhY6eh7qX8CJ5q38jEEJ8RfqUFVExS23Cqq8=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 9a08922c-f92d-4e55-bad4-ea8e3ccae4f7-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for eint IRQ when MSDC is used as an SDIO host. This
-feature requires SDIO device support async IRQ function. With this
-feature, SDIO host can be awakened by SDIO card in suspend state,
-without additional pin.
+Hey Avri,
+Thanks for the comments.
 
-MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-resume, switch GPIO function back to DAT1 mode then turn on clock.
+>dont
+>^^^^
+>Don't
+My bad, will correct in v2
 
-Some device tree property should be added or modified in MSDC node
-to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
-this feature depends on asynchronous interrupts, "wakeup-source",
-"keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
-the interrupts list should be extended(the interrupt named with
-sdio_wakeup):
-        &mmcX {
-		...
-		interrupt-names = "msdc", "sdio_wakeup";
-		interrupts-extended = <...>,
-                              	      <&pio xxx IRQ_TYPE_LEVEL_LOW>;
-                ...
-                pinctrl-names = "default", "state_uhs", "state_eint";
-                ...
-                pinctrl-2 = <&mmc2_pins_eint>;
-                ...
-                cap-sdio-irq;
-		keep-power-in-suspend;
-		wakeup-source;
-                ...
-        };
+>
+>
+>> FFU used to divide the fw_size by native sector size.
+>> If native sector size is 4K the accesses need to be aligned and a 
+>> multiple of 4K, other than that CMD23 SET_BLOCK_COUNT does not change.
+>I am not sure what are you fixing, aside of violating a spec requirement:
+>" Downloaded firmware bundle must be DATA_SECTOR_SIZE size aligned (internal padding of the bundle might be required)."
+>So if the fw fluf is not sector-size aligned, you need to make it so.
 
-Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-Signed-off-by: Axe Yang <axe.yang@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 84 ++++++++++++++++++++++++++++++++++++---
- 1 file changed, 78 insertions(+), 6 deletions(-)
+So clearly the commit message does not a good job explaining either the problem or the fix, so let me try again.
+First of all I only care about 4K native sector size devices here, the rest works fine, the behavior should not be changed by the patch
+for 512B sector size devices. (If you think it does, please speak up!)
+4k native sector size device FFU is currently broken in mmc-utils.
+Why?
+We get some firmware of fw_size bytes, we want to tranfer it to the device.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 195dc897188b..f907b96cfd87 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1,6 +1,6 @@
- // SPDX-License-Identifier: GPL-2.0-only
- /*
-- * Copyright (c) 2014-2015 MediaTek Inc.
-+ * Copyright (c) 2014-2015, 2022 MediaTek Inc.
-  * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
-  */
- 
-@@ -20,6 +20,7 @@
- #include <linux/platform_device.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-+#include <linux/pm_wakeirq.h>
- #include <linux/regulator/consumer.h>
- #include <linux/slab.h>
- #include <linux/spinlock.h>
-@@ -440,8 +441,10 @@ struct msdc_host {
- 	struct pinctrl *pinctrl;
- 	struct pinctrl_state *pins_default;
- 	struct pinctrl_state *pins_uhs;
-+	struct pinctrl_state *pins_eint;
- 	struct delayed_work req_timeout;
- 	int irq;		/* host interrupt */
-+	int eint_irq;		/* interrupt from sdio device for waking up system */
- 	struct reset_control *reset;
- 
- 	struct clk *src_clk;	/* msdc source clock */
-@@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
- 
- static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
- {
--	unsigned long flags;
- 	struct msdc_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+	int ret;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 	__msdc_enable_sdio_irq(host, enb);
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	if (enb)
--		pm_runtime_get_noresume(host->dev);
--	else
--		pm_runtime_put_noidle(host->dev);
-+	if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
-+		if (enb) {
-+			/*
-+			 * In dev_pm_set_dedicated_wake_irq_reverse(), eint pin will be set to
-+			 * GPIO mode. We need to restore it to SDIO DAT1 mode after that.
-+			 * Since the current pinstate is pins_uhs, to ensure pinctrl select take
-+			 * affect successfully, we change the pinstate to pins_eint firstly.
-+			 */
-+			pinctrl_select_state(host->pinctrl, host->pins_eint);
-+			ret = dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
-+
-+			if (ret) {
-+				dev_err(host->dev, "Failed to register SDIO wakeup irq!\n");
-+				host->pins_eint = NULL;
-+				pm_runtime_get_noresume(host->dev);
-+			} else {
-+				dev_dbg(host->dev, "SDIO eint irq: %d!\n", host->eint_irq);
-+			}
-+
-+			pinctrl_select_state(host->pinctrl, host->pins_uhs);
-+		} else {
-+			dev_pm_clear_wake_irq(host->dev);
-+		}
-+	} else {
-+		if (enb) {
-+			/* Ensure host->pins_eint is NULL */
-+			host->pins_eint = NULL;
-+			pm_runtime_get_noresume(host->dev);
-+		} else {
-+			pm_runtime_put_noidle(host->dev);
-+		}
-+	}
- }
- 
- static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-@@ -2631,6 +2663,20 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 		goto host_free;
- 	}
- 
-+	/* Support for SDIO eint irq ? */
-+	if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps & MMC_PM_KEEP_POWER)) {
-+		host->eint_irq = platform_get_irq_byname(pdev, "sdio_wakeup");
-+		if (host->eint_irq > 0) {
-+			host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
-+			if (IS_ERR(host->pins_eint)) {
-+				dev_err(&pdev->dev, "Cannot find pinctrl eint!\n");
-+				host->pins_eint = NULL;
-+			} else {
-+				device_init_wakeup(&pdev->dev, true);
-+			}
-+		}
-+	}
-+
- 	msdc_of_property_parse(pdev, host);
- 
- 	host->dev = &pdev->dev;
-@@ -2845,6 +2891,13 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
- 	struct msdc_host *host = mmc_priv(mmc);
- 
- 	msdc_save_reg(host);
-+
-+	if (host->pins_eint) {
-+		disable_irq(host->irq);
-+		pinctrl_select_state(host->pinctrl, host->pins_eint);
-+		if (sdio_irq_claimed(mmc))
-+			__msdc_enable_sdio_irq(host, 0);
-+	}
- 	msdc_gate_clock(host);
- 	return 0;
- }
-@@ -2860,12 +2913,18 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
- 		return ret;
- 
- 	msdc_restore_reg(host);
-+
-+	if (host->pins_eint) {
-+		pinctrl_select_state(host->pinctrl, host->pins_uhs);
-+		enable_irq(host->irq);
-+	}
- 	return 0;
- }
- 
- static int __maybe_unused msdc_suspend(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
-+	struct msdc_host *host = mmc_priv(mmc);
- 	int ret;
- 
- 	if (mmc->caps2 & MMC_CAP2_CQE) {
-@@ -2874,11 +2933,24 @@ static int __maybe_unused msdc_suspend(struct device *dev)
- 			return ret;
- 	}
- 
-+	/*
-+	 * Bump up runtime PM usage counter otherwise dev->power.needs_force_resume will
-+	 * not be marked as 1, pm_runtime_force_resume() will go out directly.
-+	 */
-+	if (host->pins_eint)
-+		pm_runtime_get_noresume(dev);
-+
- 	return pm_runtime_force_suspend(dev);
- }
- 
- static int __maybe_unused msdc_resume(struct device *dev)
- {
-+	struct mmc_host *mmc = dev_get_drvdata(dev);
-+	struct msdc_host *host = mmc_priv(mmc);
-+
-+	if (host->pins_eint)
-+		pm_runtime_put_noidle(dev);
-+
- 	return pm_runtime_force_resume(dev);
- }
- 
--- 
-2.25.1
+Let's go through the code:
+First we have an "alignment" check, which ensures multiple and sets sect_size accordingly.
+sect_size = (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 0) ? 512 : 4096;
+if (fw_size % sect_size) {
+	fprintf(stderr, "Firmware data size (%jd) is not aligned!\n", (intmax_t)fw_size);
+	goto out;
+}
+Then there is the following
+
+/* calculate required fw blocks for CMD25 */
+blocks = fw_size / sect_size;
+
+for native 4k device this is now the mount of 4k blocks of fw.
+
+The fw is now transferred in one CMD23/25 transfer:
+/* send block count */
+multi_cmd->cmds[1].opcode = MMC_SET_BLOCK_COUNT;
+multi_cmd->cmds[1].arg = blocks;
+multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+
+Here we have the problem already, it sets blocks, the fw_size / 4k as block count, this is wrong, should also be fw_size / 512, the patch addresses this.
+
+Now we have the transfer, with an incorrectly set CMD23 as we will see.
+/* send image chunk */
+multi_cmd->cmds[2].opcode = MMC_WRITE_MULTIPLE_BLOCK;
+multi_cmd->cmds[2].blksz = sect_size;
+multi_cmd->cmds[2].blocks = blocks;
+multi_cmd->cmds[2].arg = arg;
+multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+multi_cmd->cmds[2].write_flag = 1;
+mmc_ioc_cmd_set_data(multi_cmd->cmds[2], buf);
+
+blocks*sect_size (data and fw_size size in total) is intended to be transferred, but CMD23 has just set it to fw_size/8 sectors.
+Furthermore I think since we are transferring everything in one chunk, blksz and blocks should reflect this, even though the kernel does not really care in that case.
+The patch addresses this (this part should not change actual 512B sector size behavior).
+
+The error is just a misunderstanding I would say that CMD23 acts in chunks of native sector size, which is not the case, its argument just needs to be divisible by 8 in case of native 4k.
+
+>So if the fw fluf is not sector-size aligned, you need to make it so.
+For now the FFU will cancel for non-aligned fw_size, I did not change this behavior, so I'd say that is fine.
+
+Any future comments appreciated, also I will try to make the commit message more understandable, but if you have suggestions, go ahead.
+
+Regards,
+Christian
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
