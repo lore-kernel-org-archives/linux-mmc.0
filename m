@@ -2,137 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94CECC43334
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 12:24:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22352C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Jun 2022 12:31:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231440AbiFWMYf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Jun 2022 08:24:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40276 "EHLO
+        id S231573AbiFWMa7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Jun 2022 08:30:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45324 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229797AbiFWMYf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 08:24:35 -0400
-Received: from mail-oa1-x2b.google.com (mail-oa1-x2b.google.com [IPv6:2001:4860:4864:20::2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A20431DC3
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 05:24:34 -0700 (PDT)
-Received: by mail-oa1-x2b.google.com with SMTP id 586e51a60fabf-fe023ab520so26367938fac.10
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 05:24:34 -0700 (PDT)
+        with ESMTP id S231550AbiFWMa7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 08:30:59 -0400
+Received: from mail-oo1-xc30.google.com (mail-oo1-xc30.google.com [IPv6:2607:f8b0:4864:20::c30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF329419B6
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 05:30:57 -0700 (PDT)
+Received: by mail-oo1-xc30.google.com with SMTP id n24-20020a4ae758000000b0041b82638b42so4010644oov.9
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Jun 2022 05:30:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=qcOFv+gUkOUIJJ72OOZ9NseYxv0LoGb9wAQ/jFJ2Dk8=;
-        b=ZGAwRzzE8VL85qRDYfMIvCrIHJkVRiIYei98dO36+lgVyF3FWJUe7hqqUrsTwy639Y
-         fc+W8/1hfo7JZohSBn0BmrXgCAuBJ5vCaJB2sAWPRSGsx6O74BR4aBhFhTsdrI8SVpw6
-         yHYggGBjd/sq0CYiDjkFfZkeqRUmrn4J7Dg4e7iicPa2yWiHeuY+8e+bLsDAiI4i8pyr
-         EV80OclS5ilc1yqKp6AG1B401ALvhV3exYBeb2IeV0OW8rpAFVov8Ge0ATahc3RcmxRF
-         4FFQUAnzOwhEN6/m8cyLiVsmXun+S618Er5jfz5mSVTteervSKejh8lx4MtRyhHmQCtR
-         ZssA==
+        bh=lVRculqp+8YlE8R1a3c/ayoMskwxPMfVf3UlLMhmDhU=;
+        b=RlevhDgG85c21yWvbAvjWXGG4oq+QSxPI4MzhJ2M5njYt7JbpUuvuggLqmUe9je3U/
+         XN4SX4JgkNMW1PyyiSmMa3tS1migQVbHQOUC0FmEN5iZ1igS003VX+TuLxWSdw/VTF0j
+         xr673leE2DphsOfujUk25TWi5VY8FpQUxTZxERM+YXIs9WXNOGPyHvrQPqRoi102DPTH
+         iL/6p42GqkUF7C8ebPbVGQdGNSBycxZ2mNPnpQnOLNJ5V5+3UmDVWY8xOUE459viyIYK
+         8hut325I50KHduZZfCdoPcvlQE3VPxXMBbj4woNOKzSwz6BPQ0ZncSTSGJA7DDLC9KKp
+         Zefw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=qcOFv+gUkOUIJJ72OOZ9NseYxv0LoGb9wAQ/jFJ2Dk8=;
-        b=tM4ddCMnVMSzulmdBEwKIjDFp6EeOmP5tK9JGJl/PJwKnPXcjTSrJwsMtBB/H/aERZ
-         TKgRZGwmw2A8xK3KR1KerP+NcTiJunJkK+8rRRT0ir+YJm1iSDgYgvUZaL0zf/7Q5BL5
-         6VAi1bYmAY0XiV9dl8vBbAUQWWY/MvXspQUZNzrY2J2pVTuX9lF6x2QWPQt1FUZF4vQB
-         bTe2db181SjbeuF+AgLBEar/Vfh3mkKgIY4ccQn3D4cmCkuuumuymoVBay4I7Vp337/E
-         NDrgFhBDD0zfaG8z6M+TrUlOlC4bnImV7HtbDq8gzQHRoKmVyQq+/TprgO/II2P7hrcK
-         jwTA==
-X-Gm-Message-State: AJIora9YdmlbyKRVtcxNtpwxI8L/afcP4PV3NN6/Mq1Lxjql9V0n9Efk
-        49ludNVJTityzKj5N34RQ1hKJozAQxiawCfHFW+aTA==
-X-Google-Smtp-Source: AGRyM1tolYit2qOF13LQll2M1apYzVAPtBssHfNXvX79yFs+qX/QdnWSuZSn9LvvuTfowIJzogE5Gto6i2wMUvkyN5I=
-X-Received: by 2002:a05:6870:33a9:b0:f2:c44c:d054 with SMTP id
- w41-20020a05687033a900b000f2c44cd054mr2317236oae.70.1655987073368; Thu, 23
- Jun 2022 05:24:33 -0700 (PDT)
+        bh=lVRculqp+8YlE8R1a3c/ayoMskwxPMfVf3UlLMhmDhU=;
+        b=5iAVc5TRPb8vvPesxbEUm+MlhSSyrgPSi4hRpYaP8olDybgL7Yr6ubvkKjN6OnQDgP
+         NZSmjUc8bEQreuoMpbvulVoO0Hhx6HHajPJR6hSMh/XbLvcjh+SHeTlzBvh+Fkx9w8dC
+         QRUMZMm1B4qNWRwb4XgCnR38Dh+x35xgpDMottXZaG/vxja7FpeAASS2zS49bluXNMit
+         GPOYVwCgArgEUhzUn8QGGaXtUpWNdtQmGAqaPhcWTRiDnKA2D/Tkp/1kCAG4RCdPWHAl
+         58cz25e2P+VAGBci3i0PtpgPd7i/2b+YM4tc+FfPUkMFhraXIT8cpDB+7FLmFw7RM6s8
+         XLHg==
+X-Gm-Message-State: AJIora9vEciWlRo/GiYjHmxKeNYuAHJ28w0jkL9cWkKu1zPd1QBoLiNR
+        Afa53OTpFvB6CGm436YE8XVs8UurWSdNaa42l76t/E7VzAY=
+X-Google-Smtp-Source: AGRyM1vuVf7rC6lm4jrnpHo2nLtmUEuUP8h6EK6raDzX/y8U9qlprmYuclmVvQx9xKqnxcgIrD8Ym/grYKDl5RlImmg=
+X-Received: by 2002:a4a:978d:0:b0:425:78aa:f546 with SMTP id
+ w13-20020a4a978d000000b0042578aaf546mr48715ooi.1.1655987457148; Thu, 23 Jun
+ 2022 05:30:57 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220621085345.603820-1-davidgow@google.com> <20220621085345.603820-6-davidgow@google.com>
- <CAGS_qxp6ZK9K0Sy1JcuU-SGqChOyr6-+5HDxgesOpxjxvDkiXQ@mail.gmail.com>
-In-Reply-To: <CAGS_qxp6ZK9K0Sy1JcuU-SGqChOyr6-+5HDxgesOpxjxvDkiXQ@mail.gmail.com>
+References: <20220621094146.77216-1-jiangjian@cdjrlc.com>
+In-Reply-To: <20220621094146.77216-1-jiangjian@cdjrlc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Jun 2022 14:23:57 +0200
-Message-ID: <CAPDyKFq0cTX5pfTLxTa9SEUBiiEcMuiEeDi3OPfMjFuBWca_jw@mail.gmail.com>
-Subject: Re: [PATCH v2 5/5] mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro
-To:     David Gow <davidgow@google.com>,
-        Daniel Latypov <dlatypov@google.com>
-Cc:     Brendan Higgins <brendanhiggins@google.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Jeremy Kerr <jk@codeconstruct.com.au>,
-        Shuah Khan <skhan@linuxfoundation.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Andra Paraschiv <andraprs@amazon.com>,
-        Longpeng <longpeng2@huawei.com>, Paraschiv@google.com,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        kunit-dev@googlegroups.com, linux-kselftest@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        =?UTF-8?B?TWHDrXJhIENhbmFs?= <maira.canal@usp.br>,
-        linux-mmc@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
-        openbmc@lists.ozlabs.org, linux-usb@vger.kernel.org,
-        linux-modules@vger.kernel.org,
-        Matt Johnston <matt@codeconstruct.com.au>
+Date:   Thu, 23 Jun 2022 14:30:21 +0200
+Message-ID: <CAPDyKFqFLGeLGk6mupPwNdKSbGk5=F9TzCukq-a2hYuF1LYFtw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: dw_mmc: remove unexpected word "the"
+To:     Jiang Jian <jiangjian@cdjrlc.com>
+Cc:     jh80.chung@samsung.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 22 Jun 2022 at 00:19, Daniel Latypov <dlatypov@google.com> wrote:
+On Tue, 21 Jun 2022 at 11:42, Jiang Jian <jiangjian@cdjrlc.com> wrote:
 >
->  On Tue, Jun 21, 2022 at 1:54 AM David Gow <davidgow@google.com> wrote:
-> >
-> > The kunit_test_suite() macro is no-longer incompatible with module_add,
-> > so its use can be reinstated.
-> >
-> > Since this fixes parsing with builtins and kunit_tool, also enable the
-> > test by default when KUNIT_ALL_TESTS is enabled.
-> >
-> > The test can now be run via kunit_tool with:
-> >         ./tools/testing/kunit/kunit.py run --arch=x86_64 \
-> >         --kconfig_add CONFIG_OF=y --kconfig_add CONFIG_OF_ADDRESS=y \
-> >         --kconfig_add CONFIG_MMC=y --kconfig_add CONFIG_MMC_SDHCI=y \
-> >         --kconfig_add CONFIG_MMC_SDHCI_PLTFM=y \
-> >         --kconfig_add CONFIG_MMC_SDHCI_OF_ASPEED=y \
-> >         'sdhci-of-aspeed'
-> >
-> > (It may be worth adding a .kunitconfig at some point, as there are
-> > enough dependencies to make that command scarily long.)
-> >
-> > Signed-off-by: David Gow <davidgow@google.com>
+> there is an unexpected word "the" in the comments that need to be removed
 >
-> Acked-by: Daniel Latypov <dlatypov@google.com>
->
-> Minor, optional suggestion below.
->
-> >  static int __init aspeed_sdc_init(void)
-> > @@ -639,12 +620,6 @@ static int __init aspeed_sdc_init(void)
-> >         if (rc < 0)
-> >                 goto cleanup_sdhci;
-> >
-> > -       rc = aspeed_sdc_tests_init();
-> > -       if (rc < 0) {
-> > -               platform_driver_unregister(&aspeed_sdc_driver);
-> > -               goto cleanup_sdhci;
-> > -       }
-> > -
-> >         return 0;
-> >
-> >  cleanup_sdhci:
->
-> This goto was added in 4af307f57426 ("mmc: sdhci-of-aspeed: Fix
-> kunit-related build error") to allow for this extra call to
-> aspeed_sdc_tests_init().
->
-> This could now be reverted back to what is
->         rc = platform_driver_register(&aspeed_sdc_driver);
->         if (rc < 0)
->                platform_driver_unregister(&aspeed_sdhci_driver);
->
->         return rc;
->
-> but let's see what the maintainers think.
+>  * command hasn't already completed (indicating the the irq
 
-I don't have a strong opinion on this, feel free to pick any of the options.
+I am fine with picking up patches for these kinds of trivial
+spelling/wording mistakes. However, in this case, it seems silly to
+have one patch per single line of change. Would you mind walking
+through the entire drivers/mmc/host/* directory and make one patch for
+all the mmc host drivers instead?
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Then if you want to continue with the mmc core files, that could be
+another separate patch.
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Jiang Jian <jiangjian@cdjrlc.com>
+> ---
+>  drivers/mmc/host/dw_mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 581614196a84..7f00d7d7e35e 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1363,7 +1363,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+>                  * is just about to roll over.
+>                  *
+>                  * We do this whole thing under spinlock and only if the
+> -                * command hasn't already completed (indicating the the irq
+> +                * command hasn't already completed (indicating the irq
+>                  * already ran so we don't want the timeout).
+>                  */
+>                 spin_lock_irqsave(&host->irq_lock, irqflags);
+> --
+> 2.17.1
+>
+>
