@@ -2,241 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E76DBC43334
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jun 2022 02:13:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD1AFC43334
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jun 2022 10:02:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229570AbiFXCNm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Jun 2022 22:13:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42410 "EHLO
+        id S230140AbiFXKC2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Jun 2022 06:02:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47730 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbiFXCNl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Jun 2022 22:13:41 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B5CE50B15;
-        Thu, 23 Jun 2022 19:13:39 -0700 (PDT)
-X-UUID: 34b04833fb34470db8bcbd642ac9da1b-20220624
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.6,REQID:c9ce167b-c3af-4a21-b541-de503d456e63,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACTI
-        ON:release,TS:0
-X-CID-META: VersionHash:b14ad71,CLOUDID:66b2e82d-1756-4fa3-be7f-474a6e4be921,C
-        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:1,File:nil
-        ,QS:nil,BEC:nil,COL:0
-X-UUID: 34b04833fb34470db8bcbd642ac9da1b-20220624
-Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw01.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 1807525243; Fri, 24 Jun 2022 10:13:34 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.185) by
- mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
- Fri, 24 Jun 2022 10:13:32 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkmbs11n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
- Transport; Fri, 24 Jun 2022 10:13:32 +0800
-Message-ID: <e34b886c276805f4778d8eb5cd2fe7314efc08f9.camel@mediatek.com>
+        with ESMTP id S230425AbiFXKCX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jun 2022 06:02:23 -0400
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 811517A1BC
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jun 2022 03:02:21 -0700 (PDT)
+Received: by mail-ej1-x630.google.com with SMTP id lw20so3672955ejb.4
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jun 2022 03:02:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=GtDx/4MtrxYt8hYrk4oMF8kIZqBnmvODq04HfBb169o=;
+        b=EPz+7sJNDH++V1yMWLrc5mRkOsO+NqZvLBrjqveEPoRRpCThZZ41cOoejZek82+QIG
+         28oBv6aGSlevvdxpkzAkvGzcY201imYWhlJNA5NPN/m/8oVaPWKug7D1CfKK5p14lz55
+         QffaEfY+Y4qMXPxB1unyi1u8N9j+/oWBz86a0NptnrYcqC0/eNqg04+K8wUCbeMzYdbd
+         GKmEV6EeeXdzPfmU6cAv14I0z3c8CIK8QUt7x3COZTbu11U1q0p/q8r+5Xmrpth5PUnh
+         VVO2uDmWpLrqkcL+bp5CZJkgvJYl9JM6P22l9/2AL9SIT3Mzf3uyf3FQsdeWRsijrCKz
+         kLfw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=GtDx/4MtrxYt8hYrk4oMF8kIZqBnmvODq04HfBb169o=;
+        b=A05dtDzeOcMe/I/yQ4xpAmTWGHbElzKPLaxF4RxiO1X/xuDYrMn1ipyyQ5f+vE7lsE
+         RMlGpDygiIXWCRCgwXdTD4l0KfFFZZjSoUQSlyFxQBlOJHIzox+Eczj67rP96Ye3IHdr
+         +Hbe3CyVxjVt4Xed+9YnBUAftyx6bCR6YpgHlWPihg488RzJpfycxUspzVOAdTqgeLQ3
+         S9xY43PFfQGsmvLnpqZwM8nofZark7ARZ7Q7mcnaZ3Z5Ouer8Gs68WVkNtp4zdtunPzj
+         BhlBnxD0Ncovrc9A1Xxrjz/CCEKJf92H+gA8zHO94GDxBJsvmSeKyGWKcOgrQnO+5hL5
+         LyrQ==
+X-Gm-Message-State: AJIora+ThfOIuy8KSUIPq4gfpYB0x+DTHCf1HEq06E3cq6i4p8Ie/vsV
+        lJ5JYSLqcEkXvNmbL1rFOle0YQ==
+X-Google-Smtp-Source: AGRyM1sefjpiKJ7ux0kcypv9fmdJCP+pCzqZ3OVhjn3YCPERtUsWGvmVzsziW2GqNk3WP0rJOKi51A==
+X-Received: by 2002:a17:906:5047:b0:710:456a:695e with SMTP id e7-20020a170906504700b00710456a695emr12397953ejk.433.1656064940041;
+        Fri, 24 Jun 2022 03:02:20 -0700 (PDT)
+Received: from [192.168.0.234] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id uz12-20020a170907118c00b00711aed17047sm850487ejb.28.2022.06.24.03.02.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 24 Jun 2022 03:02:18 -0700 (PDT)
+Message-ID: <5a19a73a-e81a-8f7e-e26c-6c1d8e8331a4@linaro.org>
+Date:   Fri, 24 Jun 2022 12:02:17 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.10.0
 Subject: Re: [PATCH v2] dt-bindings: mmc: mtk-sd: Set clocks based on
  compatible
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     "=?ISO-8859-1?Q?N=EDcolas?= F. R. A. Prado" <nfraprado@collabora.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@collabora.com>,
+Content-Language: en-US
+To:     =?UTF-8?B?TsOtY29sYXMgRi4gUi4gQS4gUHJhZG8=?= 
+        <nfraprado@collabora.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     kernel@collabora.com,
         AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-mediatek@lists.infradead.org>, <linux-mmc@vger.kernel.org>
-Date:   Fri, 24 Jun 2022 10:13:31 +0800
-In-Reply-To: <20220623154038.771874-1-nfraprado@collabora.com>
+        Rob Herring <robh+dt@kernel.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        linux-mmc@vger.kernel.org
 References: <20220623154038.771874-1-nfraprado@collabora.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
-MIME-Version: 1.0
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220623154038.771874-1-nfraprado@collabora.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2022-06-23 at 11:40 -0400, Nícolas F. R. A. Prado wrote:
+On 23/06/2022 17:40, Nícolas F. R. A. Prado wrote:
 > The binding was describing a single clock list for all platforms, but
-> that's not really suitable: mt2712 requires an extra 'bus_clk' on
-> some
-> of its controllers, while mt8192 requires four different extra
-> clocks.
+> that's not really suitable: mt2712 requires an extra 'bus_clk' on some
+> of its controllers, while mt8192 requires four different extra clocks.
 > The rest of the platforms can share the same 3 clocks, with the third
 > being optional as it's not present on all platforms.
 > 
 > Move the clock definitions inside if blocks that match on the
-> compatibles. In practice this gets rid of dtbs_check warnings on
-> mt8192,
+> compatibles. In practice this gets rid of dtbs_check warnings on mt8192,
 > since the 'bus_clk' clock from mt2712 is no longer expected on this
 > platform.
-> 
-> Fixes: 59a23395d8aa ("dt-bindings: mmc: Add support for MT8192 SoC")
-> Signed-off-by: Nícolas F. R. A. Prado <nfraprado@collabora.com>
-> 
 
-Reviewed-by: Wenbin Mei <wenbin.mei@mediatek.com>
+And now we see that you introduce incompatible change and ABI break.
+This should not be combined with that patch but instead separate patch
+explaining why ABI break is ok.
 
-> ---
-> v1: 
-> https://lore.kernel.org/all/20220617230114.2438875-1-nfraprado@collabora.com
-> 
-> Changes in v2:
-> - Kept widest minItems/maxItems outside the if blocks
-> 
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 111 +++++++++++++---
-> --
->  1 file changed, 81 insertions(+), 30 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index 2a2e9fa8c188..5e73218d2e6e 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -10,9 +10,6 @@ maintainers:
->    - Chaotian Jing <chaotian.jing@mediatek.com>
->    - Wenbin Mei <wenbin.mei@mediatek.com>
->  
-> -allOf:
-> -  - $ref: mmc-controller.yaml#
-> -
->  properties:
->    compatible:
->      oneOf:
-> @@ -49,27 +46,11 @@ properties:
->      description:
->        Should contain phandle for the clock feeding the MMC
-> controller.
->      minItems: 2
-> -    items:
-> -      - description: source clock (required).
-> -      - description: HCLK which used for host (required).
-> -      - description: independent source clock gate (required for
-> MT2712).
-> -      - description: bus clock used for internal register access
-> (required for MT2712 MSDC0/3).
-> -      - description: msdc subsys clock gate (required for MT8192).
-> -      - description: peripheral bus clock gate (required for
-> MT8192).
-> -      - description: AXI bus clock gate (required for MT8192).
-> -      - description: AHB bus clock gate (required for MT8192).
-> +    maxItems: 7
->  
->    clock-names:
->      minItems: 2
-> -    items:
-> -      - const: source
-> -      - const: hclk
-> -      - const: source_cg
-> -      - const: bus_clk
-> -      - const: sys_cg
-> -      - const: pclk_cg
-> -      - const: axi_cg
-> -      - const: ahb_cg
-> +    maxItems: 7
->  
->    interrupts:
->      maxItems: 1
-> @@ -171,15 +152,85 @@ required:
->    - vmmc-supply
->    - vqmmc-supply
->  
-> -if:
-> -  properties:
-> -    compatible:
-> -      contains:
-> -        const: mediatek,mt8183-mmc
-> -then:
-> -  properties:
-> -    reg:
-> -      minItems: 2
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: mediatek,mt8183-mmc
-> +    then:
-> +      properties:
-> +        reg:
-> +          minItems: 2
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: mediatek,mt8192-mmc
-> +    then:
-> +      properties:
-> +        clocks:
-> +          items:
-> +            - description: source clock
-> +            - description: HCLK which used for host
-> +            - description: independent source clock gate
-> +            - description: msdc subsys clock gate
-> +            - description: peripheral bus clock gate
-> +            - description: AXI bus clock gate
-> +            - description: AHB bus clock gate
-> +        clock-names:
-> +          items:
-> +            - const: source
-> +            - const: hclk
-> +            - const: source_cg
-> +            - const: sys_cg
-> +            - const: pclk_cg
-> +            - const: axi_cg
-> +            - const: ahb_cg
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: mediatek,mt2712-mmc
-> +    then:
-> +      properties:
-> +        clocks:
-> +          minItems: 3
-> +          items:
-> +            - description: source clock
-> +            - description: HCLK which used for host
-> +            - description: independent source clock gate
-> +            - description: bus clock used for internal register
-> access (required for MSDC0/3).
-> +        clock-names:
-> +          minItems: 3
-> +          items:
-> +            - const: source
-> +            - const: hclk
-> +            - const: source_cg
-> +            - const: bus_clk
-> +  - if:
-> +      not:
-> +        properties:
-> +          compatible:
-> +            contains:
-> +              enum:
-> +                - mediatek,mt2712-mmc
-> +                - mediatek,mt8192-mmc
-> +    then:
-> +      properties:
-> +        clocks:
-> +          minItems: 2
-> +          items:
-> +            - description: source clock
-> +            - description: HCLK which used for host
-> +            - description: independent source clock gate
-> +        clock-names:
-> +          minItems: 2
-> +          items:
-> +            - const: source
-> +            - const: hclk
-> +            - const: source_cg
->  
->  unevaluatedProperties: false
->  
-
+Best regards,
+Krzysztof
