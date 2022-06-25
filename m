@@ -2,102 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB4FCC43334
-	for <linux-mmc@archiver.kernel.org>; Sat, 25 Jun 2022 08:16:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD941C43334
+	for <linux-mmc@archiver.kernel.org>; Sat, 25 Jun 2022 12:55:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232159AbiFYIQi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 25 Jun 2022 04:16:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45632 "EHLO
+        id S232479AbiFYMzc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 25 Jun 2022 08:55:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231752AbiFYIQh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Jun 2022 04:16:37 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A470F3136A
-        for <linux-mmc@vger.kernel.org>; Sat, 25 Jun 2022 01:16:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=5V6BSymDH1McbiKZ/xluLb/pdnkM
-        F+FkNit2fs4ZrCs=; b=WXjMsMmmRB5XqQ29xvQymoPX/rAdcvQEn00DGBnJyW+D
-        uJpC6K414X9MPgRp8firZYv612qqVJPsp5ksBnWUrLiK4gwozK0G0CUkc1VcaQ8D
-        wSonuzG1g4uQ7jD5NOYVmA+zAWHN1vrPJHDXxx5npDFrfBbUS3IFVWkAhArTH1s=
-Received: (qmail 1730526 invoked from network); 25 Jun 2022 10:16:34 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Jun 2022 10:16:34 +0200
-X-UD-Smtp-Session: l3s3148p1@iT4LTkHiT7wucq2i
-Date:   Sat, 25 Jun 2022 10:16:33 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-Subject: Re: [PATCH v3 2/2] mmc: renesas_sdhi: Fix typo's
-Message-ID: <YrbEYbLkE4pk+oh0@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        with ESMTP id S232433AbiFYMzb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Jun 2022 08:55:31 -0400
+Received: from smtp.smtpout.orange.fr (smtp04.smtpout.orange.fr [80.12.242.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2E1911A0F
+        for <linux-mmc@vger.kernel.org>; Sat, 25 Jun 2022 05:55:30 -0700 (PDT)
+Received: from pop-os.home ([90.11.190.129])
+        by smtp.orange.fr with ESMTPA
+        id 55Jvo2dUOIaWO55JvobFO3; Sat, 25 Jun 2022 14:55:28 +0200
+X-ME-Helo: pop-os.home
+X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
+X-ME-Date: Sat, 25 Jun 2022 14:55:28 +0200
+X-ME-IP: 90.11.190.129
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+To:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>
-References: <20220624181438.4355-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
- <20220624181438.4355-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+        Andrew Morton <akpm@linux-foundation.org>
+Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH 1/3] memstick/ms_block: Fix some incorrect memory allocation
+Date:   Sat, 25 Jun 2022 14:55:25 +0200
+Message-Id: <dbf633c48c24ae6d95f852557e8d8b3bbdef65fe.1656155715.git.christophe.jaillet@wanadoo.fr>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <cover.1656155715.git.christophe.jaillet@wanadoo.fr>
+References: <cover.1656155715.git.christophe.jaillet@wanadoo.fr>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="3FbAJhIAQpuHUDQY"
-Content-Disposition: inline
-In-Reply-To: <20220624181438.4355-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Some functions of the bitmap API take advantage of the fact that a bitmap
+is an array of long.
 
---3FbAJhIAQpuHUDQY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+So, to make sure this assertion is correct, allocate bitmaps with
+bitmap_zalloc() instead of kzalloc()+hand-computed number of bytes.
 
-On Fri, Jun 24, 2022 at 07:14:38PM +0100, Lad Prabhakar wrote:
-> Fix typo's,
-> * difference -> different
-> * alignment -> aligned
->=20
-> While at it updated the comment to make it clear that Renesas SDHI DMAC
-> needs buffers to be 128-byte aligned.
->=20
-> Reported-by: Pavel Machek <pavel@denx.de>
-> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+While at it, also use bitmap_free() instead of kfree() to keep the
+semantic.
 
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
+Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+---
+I guess that it is not an issue in RL because memory allocation is
+certainly "rounding" to keep memory alignment.
+---
+ drivers/memstick/core/ms_block.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-Thank you!
+diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+index 3993bdd4b519..f8f151163667 100644
+--- a/drivers/memstick/core/ms_block.c
++++ b/drivers/memstick/core/ms_block.c
+@@ -1341,17 +1341,17 @@ static int msb_ftl_initialize(struct msb_data *msb)
+ 	msb->zone_count = msb->block_count / MS_BLOCKS_IN_ZONE;
+ 	msb->logical_block_count = msb->zone_count * 496 - 2;
+ 
+-	msb->used_blocks_bitmap = kzalloc(msb->block_count / 8, GFP_KERNEL);
+-	msb->erased_blocks_bitmap = kzalloc(msb->block_count / 8, GFP_KERNEL);
++	msb->used_blocks_bitmap = bitmap_zalloc(msb->block_count, GFP_KERNEL);
++	msb->erased_blocks_bitmap = bitmap_zalloc(msb->block_count, GFP_KERNEL);
+ 	msb->lba_to_pba_table =
+ 		kmalloc_array(msb->logical_block_count, sizeof(u16),
+ 			      GFP_KERNEL);
+ 
+ 	if (!msb->used_blocks_bitmap || !msb->lba_to_pba_table ||
+ 						!msb->erased_blocks_bitmap) {
+-		kfree(msb->used_blocks_bitmap);
++		bitmap_free(msb->used_blocks_bitmap);
++		bitmap_free(msb->erased_blocks_bitmap);
+ 		kfree(msb->lba_to_pba_table);
+-		kfree(msb->erased_blocks_bitmap);
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -1946,7 +1946,7 @@ static DEFINE_MUTEX(msb_disk_lock); /* protects against races in open/release */
+ static void msb_data_clear(struct msb_data *msb)
+ {
+ 	kfree(msb->boot_page);
+-	kfree(msb->used_blocks_bitmap);
++	bitmap_free(msb->used_blocks_bitmap);
+ 	kfree(msb->lba_to_pba_table);
+ 	kfree(msb->cache);
+ 	msb->card = NULL;
+-- 
+2.34.1
 
-
---3FbAJhIAQpuHUDQY
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmK2xGEACgkQFA3kzBSg
-KbZN/Q/+NTB0ZETpR6A8plpIQaeCyq4O3v6ODzQvcoeRb1fg/ME1/C+1um++EUvm
-voqBAzePAcnHzQ7RasVYaNFM/Tdm1uHpkzaYz0Fpow6wknmaC3rSGO/Vx/0igpJ3
-KTsSXEVhvuv7po0ruuIhxqm3CAxPMwOi1owFFtHl77QY5/igRiaAH2aEQUKh2cWM
-EmlvF9b7g65swIgkZTaWY2s20+vGsQnVAKWDJxX4ayb2RXLTw2H4g/jNjR+tLXU2
-ooj4sqrGyees7jYqdYyENZI9odLnD3HK2+ulqsnE03aI9htLwa/5pK+x6/mgsDSs
-4/S3EeXCZ4cqvADCe6LAoz6x9gmoEEd/0YMqqfTFwuEEMwlxSQ0ptYTIsePuHAi/
-xjxLRX/2LNDKTDAY2ID7kcUK2SJN16gZ7FMsptDc1p8WG+TIMXw9MXuWZcOsL7uP
-fITP4M+QS77LF+I2fQMISfQtfaQ0h76I6+o4yW3ncgooptKdh4TIx23g2lIKZCwF
-c8dS90YG5H/YZf8UuI+oaVwgWFLNGs7zODTpB07ikhTTBgDV23PulPWgr50k1m2Y
-HN2yngTjjuJBxp1eMQZSo1tQZ8FvYxbxd/FMeWL3u2f2rONO/EGiQptVDPc27cCR
-B6dBLP0UzjXkX83M8n/19A5qV46bBzwPXIBvb/4cS5YrSespx4U=
-=oXPX
------END PGP SIGNATURE-----
-
---3FbAJhIAQpuHUDQY--
