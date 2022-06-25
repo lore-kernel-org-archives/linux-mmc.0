@@ -2,68 +2,247 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5733BC43334
-	for <linux-mmc@archiver.kernel.org>; Sat, 25 Jun 2022 12:56:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9088CC433EF
+	for <linux-mmc@archiver.kernel.org>; Sat, 25 Jun 2022 13:17:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232710AbiFYM4M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 25 Jun 2022 08:56:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45846 "EHLO
+        id S233029AbiFYNRq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 25 Jun 2022 09:17:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33414 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232438AbiFYM4L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Jun 2022 08:56:11 -0400
-Received: from smtp.smtpout.orange.fr (smtp02.smtpout.orange.fr [80.12.242.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C72DD18366
-        for <linux-mmc@vger.kernel.org>; Sat, 25 Jun 2022 05:56:10 -0700 (PDT)
-Received: from pop-os.home ([90.11.190.129])
-        by smtp.orange.fr with ESMTPA
-        id 55KZoQtCWgoLG55KZolijr; Sat, 25 Jun 2022 14:56:07 +0200
-X-ME-Helo: pop-os.home
-X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
-X-ME-Date: Sat, 25 Jun 2022 14:56:07 +0200
-X-ME-IP: 90.11.190.129
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-To:     Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH 3/3] memstick/ms_block: Use the bitmap API when applicable
-Date:   Sat, 25 Jun 2022 14:56:05 +0200
-Message-Id: <b216df8798f765ab14bce65739c220643320f376.1656155715.git.christophe.jaillet@wanadoo.fr>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <cover.1656155715.git.christophe.jaillet@wanadoo.fr>
-References: <cover.1656155715.git.christophe.jaillet@wanadoo.fr>
+        with ESMTP id S233027AbiFYNRp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Jun 2022 09:17:45 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09AC911835;
+        Sat, 25 Jun 2022 06:17:44 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id BE4BEB80952;
+        Sat, 25 Jun 2022 13:17:42 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AC717C3411C;
+        Sat, 25 Jun 2022 13:17:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1656163061;
+        bh=UU/aL+tGIzDB82nOhEFyF2YlwcTqXK0M7HEyJZGngmU=;
+        h=From:To:Cc:Subject:Date:From;
+        b=TqZtue+sdNsF28kjqv9L8tguF7NWMUzlJQ19bAdk5swoGtXw/TSI9npw3kFXMx4UL
+         rStEQQo4Z9Jhf7BV26rNRQFw5+9p5Y6fZ/2/1bEGq+cO3DfBW8lTd4gKThry8bDNLh
+         6WK0dnu+NwI5GTbXswm/AEpN9Dkisb/GppVuXZXs1XlfGnwl5qsY6Vsawwr7wGAnOi
+         teqZIbWJa7/ei4gzJuVfvU+r3AF9u5/h/6sLuGvpBPRBeP0pQNvNZNFObSIK3lJ7Qo
+         m/0O7ihZtl7OgrkhLWavsa3xa/xCX9Bz/gbfmZTxBW1mqwDSXU4hK5E/qnjmu2Jxel
+         Fm/UlGI/gvyzg==
+From:   Wolfram Sang <wsa@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH] mmc: tmio: avoid glitches when resetting
+Date:   Sat, 25 Jun 2022 15:17:22 +0200
+Message-Id: <20220625131722.1397-1-wsa@kernel.org>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use bitmap_equal() instead of hand writing it. It improves semantic and
-avoids some explicit computation to convert a number of bits to a number of
-bytes.
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+If we reset because of an error, we need to preserve values for the
+clock frequency. Otherwise, glitches may be seen on the bus.
+
+To achieve that, we introduce a 'preserve' parameter to the reset
+function and the IP core specific reset callbacks to handle everything
+accordingly.
+
+Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 ---
- drivers/memstick/core/ms_block.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 29 ++++++++++++++--------------
+ drivers/mmc/host/tmio_mmc.c          |  2 +-
+ drivers/mmc/host/tmio_mmc.h          |  6 +++++-
+ drivers/mmc/host/tmio_mmc_core.c     | 28 +++++++++++++++++++++------
+ 4 files changed, 42 insertions(+), 23 deletions(-)
 
-diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-index f8fdf88fb240..c05edfc1c841 100644
---- a/drivers/memstick/core/ms_block.c
-+++ b/drivers/memstick/core/ms_block.c
-@@ -2245,8 +2245,8 @@ static int msb_resume(struct memstick_dev *card)
- 		goto out;
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 4404ca1f98d8..5fa365d0c7fd 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -49,9 +49,6 @@
+ #define HOST_MODE_GEN3_32BIT	(HOST_MODE_GEN3_WMODE | HOST_MODE_GEN3_BUSWIDTH)
+ #define HOST_MODE_GEN3_64BIT	0
  
- 	if (msb->block_count != new_msb->block_count ||
--		memcmp(msb->used_blocks_bitmap, new_msb->used_blocks_bitmap,
--							msb->block_count / 8))
-+	    !bitmap_equal(msb->used_blocks_bitmap, new_msb->used_blocks_bitmap,
-+							msb->block_count))
- 		goto out;
+-#define CTL_SDIF_MODE	0xe6
+-#define SDIF_MODE_HS400		BIT(0)
+-
+ #define SDHI_VER_GEN2_SDR50	0x490c
+ #define SDHI_VER_RZ_A1		0x820b
+ /* very old datasheets said 0x490c for SDR104, too. They are wrong! */
+@@ -562,23 +559,25 @@ static void renesas_sdhi_scc_reset(struct tmio_mmc_host *host, struct renesas_sd
+ }
  
- 	card_dead = false;
+ /* only populated for TMIO_MMC_MIN_RCAR2 */
+-static void renesas_sdhi_reset(struct tmio_mmc_host *host)
++static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
+ 	int ret;
+ 	u16 val;
+ 
+-	if (priv->rstc) {
+-		reset_control_reset(priv->rstc);
+-		/* Unknown why but without polling reset status, it will hang */
+-		read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
+-				  false, priv->rstc);
+-		/* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
+-		sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+-		priv->needs_adjust_hs400 = false;
+-		renesas_sdhi_set_clock(host, host->clk_cache);
+-	} else if (priv->scc_ctl) {
+-		renesas_sdhi_scc_reset(host, priv);
++	if (!preserve) {
++		if (priv->rstc) {
++			reset_control_reset(priv->rstc);
++			/* Unknown why but without polling reset status, it will hang */
++			read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
++					  false, priv->rstc);
++			/* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
++			sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
++			priv->needs_adjust_hs400 = false;
++			renesas_sdhi_set_clock(host, host->clk_cache);
++		} else if (priv->scc_ctl) {
++			renesas_sdhi_scc_reset(host, priv);
++		}
+ 	}
+ 
+ 	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
+diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
+index b55a29c53d9c..53a2ad9a24b8 100644
+--- a/drivers/mmc/host/tmio_mmc.c
++++ b/drivers/mmc/host/tmio_mmc.c
+@@ -75,7 +75,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+ 	tmio_mmc_clk_start(host);
+ }
+ 
+-static void tmio_mmc_reset(struct tmio_mmc_host *host)
++static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
+ {
+ 	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
+ 	usleep_range(10000, 11000);
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index e754bb3f5c32..501613c74406 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -42,6 +42,7 @@
+ #define CTL_DMA_ENABLE 0xd8
+ #define CTL_RESET_SD 0xe0
+ #define CTL_VERSION 0xe2
++#define CTL_SDIF_MODE 0xe6 /* only known on R-Car 2+ */
+ 
+ /* Definitions for values the CTL_STOP_INTERNAL_ACTION register can take */
+ #define TMIO_STOP_STP		BIT(0)
+@@ -98,6 +99,9 @@
+ /* Definitions for values the CTL_DMA_ENABLE register can take */
+ #define DMA_ENABLE_DMASDRW	BIT(1)
+ 
++/* Definitions for values the CTL_SDIF_MODE register can take */
++#define SDIF_MODE_HS400		BIT(0) /* only known on R-Car 2+ */
++
+ /* Define some IRQ masks */
+ /* This is the mask used at reset by the chip */
+ #define TMIO_MASK_ALL           0x837f031d
+@@ -181,7 +185,7 @@ struct tmio_mmc_host {
+ 	int (*multi_io_quirk)(struct mmc_card *card,
+ 			      unsigned int direction, int blk_size);
+ 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+-	void (*reset)(struct tmio_mmc_host *host);
++	void (*reset)(struct tmio_mmc_host *host, bool preserve);
+ 	bool (*check_retune)(struct tmio_mmc_host *host, struct mmc_request *mrq);
+ 	void (*fixup_request)(struct tmio_mmc_host *host, struct mmc_request *mrq);
+ 	unsigned int (*get_timeout_cycles)(struct tmio_mmc_host *host);
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index a5850d83908b..437048bb8027 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -179,8 +179,17 @@ static void tmio_mmc_set_bus_width(struct tmio_mmc_host *host,
+ 	sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, reg);
+ }
+ 
+-static void tmio_mmc_reset(struct tmio_mmc_host *host)
++static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
+ {
++	u16 card_opt, clk_ctrl, sdif_mode;
++
++	if (preserve) {
++		card_opt = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
++		clk_ctrl = sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL);
++		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
++			sdif_mode = sd_ctrl_read16(host, CTL_SDIF_MODE);
++	}
++
+ 	/* FIXME - should we set stop clock reg here */
+ 	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
+ 	usleep_range(10000, 11000);
+@@ -190,7 +199,7 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+ 	tmio_mmc_abort_dma(host);
+ 
+ 	if (host->reset)
+-		host->reset(host);
++		host->reset(host, preserve);
+ 
+ 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
+ 	host->sdcard_irq_mask = host->sdcard_irq_mask_all;
+@@ -206,6 +215,13 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+ 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+ 	}
+ 
++	if (preserve) {
++		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, card_opt);
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk_ctrl);
++		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
++			sd_ctrl_write16(host, CTL_SDIF_MODE, sdif_mode);
++	}
++
+ 	if (host->mmc->card)
+ 		mmc_retune_needed(host->mmc);
+ }
+@@ -248,7 +264,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
+ 
+ 	spin_unlock_irqrestore(&host->lock, flags);
+ 
+-	tmio_mmc_reset(host);
++	tmio_mmc_reset(host, true);
+ 
+ 	/* Ready for new calls */
+ 	host->mrq = NULL;
+@@ -961,7 +977,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		tmio_mmc_power_off(host);
+ 		/* For R-Car Gen2+, we need to reset SDHI specific SCC */
+ 		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
+-			tmio_mmc_reset(host);
++			tmio_mmc_reset(host, false);
+ 
+ 		host->set_clock(host, 0);
+ 		break;
+@@ -1189,7 +1205,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 		_host->sdcard_irq_mask_all = TMIO_MASK_ALL;
+ 
+ 	_host->set_clock(_host, 0);
+-	tmio_mmc_reset(_host);
++	tmio_mmc_reset(_host, false);
+ 
+ 	spin_lock_init(&_host->lock);
+ 	mutex_init(&_host->ios_lock);
+@@ -1285,7 +1301,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+ 	struct tmio_mmc_host *host = dev_get_drvdata(dev);
+ 
+ 	tmio_mmc_clk_enable(host);
+-	tmio_mmc_reset(host);
++	tmio_mmc_reset(host, false);
+ 
+ 	if (host->clk_cache)
+ 		host->set_clock(host, host->clk_cache);
 -- 
-2.34.1
+2.35.1
 
