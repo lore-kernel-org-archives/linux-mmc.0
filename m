@@ -2,83 +2,157 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0250C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Jun 2022 18:15:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90BE2CCA47E
+	for <linux-mmc@archiver.kernel.org>; Sat, 25 Jun 2022 05:10:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231336AbiFXSPB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Jun 2022 14:15:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43868 "EHLO
+        id S231542AbiFYFKn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 25 Jun 2022 01:10:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229843AbiFXSO6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jun 2022 14:14:58 -0400
-Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 8D0174832A;
-        Fri, 24 Jun 2022 11:14:57 -0700 (PDT)
-X-IronPort-AV: E=Sophos;i="5.92,218,1650898800"; 
-   d="scan'208";a="125578126"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 25 Jun 2022 03:14:56 +0900
-Received: from localhost.localdomain (unknown [10.226.36.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 640D4400F791;
-        Sat, 25 Jun 2022 03:14:53 +0900 (JST)
-From:   Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Pavel Machek <pavel@denx.de>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org,
-        Prabhakar <prabhakar.csengg@gmail.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: [PATCH v3 2/2] mmc: renesas_sdhi: Fix typo's
-Date:   Fri, 24 Jun 2022 19:14:38 +0100
-Message-Id: <20220624181438.4355-3-prabhakar.mahadev-lad.rj@bp.renesas.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20220624181438.4355-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
-References: <20220624181438.4355-1-prabhakar.mahadev-lad.rj@bp.renesas.com>
+        with ESMTP id S231150AbiFYFKm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 25 Jun 2022 01:10:42 -0400
+Received: from mail-yb1-xb49.google.com (mail-yb1-xb49.google.com [IPv6:2607:f8b0:4864:20::b49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8983747AC7
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jun 2022 22:10:40 -0700 (PDT)
+Received: by mail-yb1-xb49.google.com with SMTP id d132-20020a251d8a000000b0066c8dfb35f4so277007ybd.12
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Jun 2022 22:10:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20210112;
+        h=date:message-id:mime-version:subject:from:to:cc;
+        bh=w4sImYlkO8ijtHtHqXjuNpZj0tKuVZDrJNUstUmHo0Y=;
+        b=EqD8y2+aOVUkTGcq5ZUmSJSlcNdi0/42WaEgggkl5B3OgbsWkhjLvSidKJ/JJ0Ii8D
+         n5a4Jh42vH8vTZ+mrg+TgQiYpMZMV5Wwr7Ontt6SKvDFTSV2uVH5HifBJwaRiN+Mta7o
+         R5UWn0iyCaAL68/7Educg/KLDyigRQWkyUnoluYUe7nfxYLaByKZUDwGF46yZEtAKhbG
+         8UsVYqpRwR/p+mL+pPSwt9lVlTi4ocx+NI0DRkaxQZ5aSTH7oaa9h7Btr1uOipe43x6N
+         IqIiTq7UsvFiUg2NM3r57zmp1YW3HI30VyzT2gakok84AaaSUhD3aDEahzIZwKyBUfhd
+         4f/A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:message-id:mime-version:subject:from:to:cc;
+        bh=w4sImYlkO8ijtHtHqXjuNpZj0tKuVZDrJNUstUmHo0Y=;
+        b=vdaMKYwUJfkf16Y6qehtOZhjmVeSJZ47dOctlA5PgQRt9O/kPQinz1r1/j7jwBLkYb
+         i7Ak5OEWROBjP6NDT9UwITnHdpuUvNnYHxKdTkrrX0eihNNSMusN6w9bWvSa/HBEkcMR
+         JmzPBr7SiiyJev+hXX9d9nBdAw6PSjqFqz0+reTDuBdoLlrHDgBvuN0Z4q+diomkNIlh
+         rJ6xQf2VNLvtBPSd8toPXiqL0QrMCbkZugUMAVm8xrk2l/EkeOTzAo948hGzFlCCaHV3
+         xSRZuk0bCo6n/YyDhqItyOfQbJsfLRy5Bx0SvBEDXqiuh/U2aCbePUzZQRZzPVM53BNB
+         +Vkg==
+X-Gm-Message-State: AJIora9T7VsyAJ0gbK6Q/PWPZMNxfv+U61GUhO5XVx81j8vpFe/SLTSE
+        wE3DqW5eYC4LwC6V7YTmnXejuLz6ACQf6A==
+X-Google-Smtp-Source: AGRyM1un+sBPc/7wBD+YQSQ7XAND66LYZk9RBj7rFNjc67YShu92PiqgyBy4jeaAtiwe0X78yPXPHI8EK15Tmw==
+X-Received: from slicestar.c.googlers.com ([fda3:e722:ac3:cc00:4f:4b78:c0a8:20a1])
+ (user=davidgow job=sendgmr) by 2002:a81:7cd6:0:b0:317:b6a2:6f15 with SMTP id
+ x205-20020a817cd6000000b00317b6a26f15mr2708816ywc.234.1656133839830; Fri, 24
+ Jun 2022 22:10:39 -0700 (PDT)
+Date:   Sat, 25 Jun 2022 13:08:34 +0800
+Message-Id: <20220625050838.1618469-1-davidgow@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.37.0.rc0.161.g10f37bed90-goog
+Subject: [PATCH v3 0/5] Rework KUnit test execution in modules
+From:   David Gow <davidgow@google.com>
+To:     Brendan Higgins <brendanhiggins@google.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Jeremy Kerr <jk@codeconstruct.com.au>,
+        Daniel Latypov <dlatypov@google.com>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Andra Paraschiv <andraprs@amazon.com>,
+        Longpeng <longpeng2@huawei.com>,
+        Greg KH <gregkh@linuxfoundation.org>
+Cc:     David Gow <davidgow@google.com>, kunit-dev@googlegroups.com,
+        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org,
+        "=?UTF-8?q?Ma=C3=ADra=20Canal?=" <maira.canal@usp.br>,
+        linux-mmc@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
+        openbmc@lists.ozlabs.org, linux-usb@vger.kernel.org,
+        linux-modules@vger.kernel.org,
+        Matt Johnston <matt@codeconstruct.com.au>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fix typo's,
-* difference -> different
-* alignment -> aligned
+This patch series makes two changes to how KUnit test suites are stored
+and executed:
+- The .kunit_test_suites section is now used for tests in modules (in
+  lieu of a module_init funciton), as well as for built-in tests. The
+  module loader will now trigger test execution. This frees up the
+  module_init function for other uses.
+- Instead of storing an array of arrays of suites, have the
+  kunit_test_suite() and kunit_test_suites() macros append to one global
+  (or per-module) list of test suites. This removes a needless layer of
+  indirection, and removes the need to NULL-terminate suite_sets.
 
-While at it updated the comment to make it clear that Renesas SDHI DMAC
-needs buffers to be 128-byte aligned.
+The upshot of this is that it should now be possible to use the
+kunit_test_suite() and kunit_test_suites() macros to register test
+suites even from within modules which otherwise had module_init
+functions. This was proving to be quite a common issue, resulting in
+several modules calling into KUnit's private suite execution functions
+to run their tests (often introducing incompatibilities with the KUnit
+tooling).
 
-Reported-by: Pavel Machek <pavel@denx.de>
-Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+This series also fixes the thunderbolt, nitro_enclaves, and
+sdhci-of-aspeed tests to use kunit_test_suite() now that it works. This
+is required, as otherwise the first two patches may break these tests
+entirely.
+
+Huge thanks to Jeremy Kerr, who designed and implemented the module
+loader changes, and to Daniel Latypov for pushing the simplification of
+the nested arrays in .kunit_test_suites.
+
+I've tested this series both with builtin tests on a number of
+architectures, and with modules on x86_64, and it seems good-to-go to
+me. More testing (particularly of modules) with more interesting setups
+never hurts, though!
+
+Cheers,
+-- David
+
+Changes since v2:
+https://lore.kernel.org/linux-kselftest/20220621085345.603820-1-davidgow@google.com/
+- Add various Reviewed-by and Acked-by tags.
+- Fix the Kconfig for thunderbolt to not allow USB4=y and KUNIT=m with
+  tests enabled.
+- Clean up the sdhci-of-aspeed init a bit more (Thanks Daniel)
+
+Changes since v1:
+https://lore.kernel.org/linux-kselftest/20220618090310.1174932-1-davidgow@google.com/
+- Fix a compile issue when CONFIG_KUNIT=m (Thanks Christophe)
+- No longer NULL-terminate suite_sets.
+- Move the thunderbird Kconfig to the correct patch (Thanks Andra)
+- Add all the Tested-by and Acked-by tags.
+
 ---
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Daniel Latypov (1):
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index 3084b15ae2cb..890aa7832baf 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -321,7 +321,7 @@ renesas_sdhi_internal_dmac_dataend_dma(struct tmio_mmc_host *host)
- }
- 
- /*
-- * renesas_sdhi_internal_dmac_map() will be called with two difference
-+ * renesas_sdhi_internal_dmac_map() will be called with two different
-  * sg pointers in two mmc_data by .pre_req(), but tmio host can have a single
-  * sg_ptr only. So, renesas_sdhi_internal_dmac_{un}map() should use a sg
-  * pointer in a mmc_data instead of host->sg_ptr.
-@@ -355,7 +355,7 @@ renesas_sdhi_internal_dmac_map(struct tmio_mmc_host *host,
- 
- 	data->host_cookie = cookie;
- 
--	/* This DMAC cannot handle if buffer is not 128-bytes alignment */
-+	/* This DMAC needs buffers to be 128-byte aligned */
- 	if (!IS_ALIGNED(sg_dma_address(data->sg), 128)) {
- 		renesas_sdhi_internal_dmac_unmap(host, data, cookie);
- 		return false;
+Daniel Latypov (1):
+  kunit: flatten kunit_suite*** to kunit_suite** in .kunit_test_suites
+
+David Gow (3):
+  thunderbolt: test: Use kunit_test_suite() macro
+  nitro_enclaves: test: Use kunit_test_suite() macro
+  mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro
+
+Jeremy Kerr (1):
+  kunit: unify module and builtin suite definitions
+
+ drivers/mmc/host/Kconfig                      |   5 +-
+ drivers/mmc/host/sdhci-of-aspeed-test.c       |   8 +-
+ drivers/mmc/host/sdhci-of-aspeed.c            |  34 +----
+ drivers/thunderbolt/Kconfig                   |   6 +-
+ drivers/thunderbolt/domain.c                  |   3 -
+ drivers/thunderbolt/tb.h                      |   8 -
+ drivers/thunderbolt/test.c                    |  12 +-
+ drivers/virt/nitro_enclaves/Kconfig           |   5 +-
+ drivers/virt/nitro_enclaves/ne_misc_dev.c     |  27 ----
+ .../virt/nitro_enclaves/ne_misc_dev_test.c    |   5 +-
+ include/kunit/test.h                          |  60 ++------
+ include/linux/module.h                        |   5 +
+ kernel/module/main.c                          |   6 +
+ lib/kunit/executor.c                          | 115 ++++----------
+ lib/kunit/executor_test.c                     | 144 +++++-------------
+ lib/kunit/test.c                              |  54 ++++++-
+ 16 files changed, 154 insertions(+), 343 deletions(-)
+
 -- 
-2.17.1
+2.37.0.rc0.161.g10f37bed90-goog
 
