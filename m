@@ -2,106 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FA98C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jun 2022 08:55:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 050FCCCA47F
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jun 2022 09:16:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233144AbiF0Ize (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Jun 2022 04:55:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48682 "EHLO
+        id S233358AbiF0JQK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Jun 2022 05:16:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232628AbiF0Izc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2022 04:55:32 -0400
-Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 722256375
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2022 01:55:31 -0700 (PDT)
-Received: by mail-ed1-x52f.google.com with SMTP id fd6so11965305edb.5
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2022 01:55:31 -0700 (PDT)
+        with ESMTP id S233455AbiF0JQJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2022 05:16:09 -0400
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30CF53893
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2022 02:16:05 -0700 (PDT)
+Received: by mail-ej1-x62e.google.com with SMTP id cw10so17796056ejb.3
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2022 02:16:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :references:from:in-reply-to:content-transfer-encoding;
-        bh=RsBoiseaTkJc51iVjuUsait0HqgvtgtMrYkH57RHGCU=;
-        b=skhj6rL+UZnb3uqF9ljVTdtpJi84kWTrupgEdBvRS3QgaOVnezJVrkAGrGgv6lwF1/
-         3d+Cf7kpB4c6T3MDM1IHVWRw4zKkP5ErkBe5MiyNhOb3VHcLptGsyxMN86lyIkSPfLZ6
-         8lbuEjmq4yaQwnRR9fvPslm2+S20+4kxiGjZwpc5HTiLopSQPYwhe2WUmzi5Hdz+E5cL
-         gnhymObz/v31wdKPoKOsXoWXi99z7gzGLL6WwNDHZO+rx1vx9go6Z0/ebUX3FH4kM5JR
-         MAt9z+4m9z7+EVx/bFKLzfIMBbG6Bva2+NVmJO7WBVSc1PcdLs+t9Tx5QU8lIiLWXGJ+
-         LUrA==
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
+         :content-transfer-encoding;
+        bh=K34hpsdoOs2C6XrJvtKH3w760bg8Auw+6PiZE0x6VBc=;
+        b=MAElcMcBy7W3L/1NKFfqUIL4Wywz4AR35JwPl0uMCOb6A+oI4DcJFaKERYdBLvPWPk
+         fA9e/6uebjkiX25xG64pxQtRrIylNg3diHR2LtEbpHGfwcwvs6ZmXQoTXX6SRQzEmwTX
+         rj0wtE9mlT7P4OfJwUDThH+RJ4MCFQ0Yk0hb/41e+GwRM/2wU4N70nwLQLkdofIw0Yfa
+         Uz0TT4LNLgIw0Yiq3TMj05cRTBVrl3iSNIjm3rLeve0M64xWmvU4WnPnLN8CvasToBIR
+         ++S+LDxS5A8ebjiN7e3+nYOZk7ydfmODN7Qu3H5/9V5uJIW/6DFhwktvXV7Plum6s+Ze
+         nApg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=RsBoiseaTkJc51iVjuUsait0HqgvtgtMrYkH57RHGCU=;
-        b=iiwD/xDd6DG+mlr3L6U576428OiwpKuFCY8H0alzAcxaGpLuahheBgYl5w0MIEdonK
-         29RgvHSfdLvvL5LtBcYKiEQ6xYCUP0RP03h18A2kD2PHtHoXMRejGl8w/cShjIUYtjvW
-         RLKe5Gtux8ioqU3n/GVKTqdVvUs8FdO2YgSdmva7usqozxVhnSNegcDqsRLxBoFP1VYi
-         exvP+wPoy19byEi9+Fmb9qtmsr1B4jg+k74P3iIdOik0ZiXr89hK1MxlbR3alVGUSHYq
-         ruOM0fK3FaNEnZ6bicNZs1Nv0t6FTBgtFZld4EJ8l5lW+uJ2MhaCqVdvO5swpJmcT64e
-         /sXg==
-X-Gm-Message-State: AJIora9a6GeCKsSeB0XxWXJB0BGZnq9P4eoSb8ZInwiOrjeVW8jr5Usb
-        FqFF0ymHe+ImwTQutmS/JHFPiQ==
-X-Google-Smtp-Source: AGRyM1uHTpdt+MsqhWdxTZPyIYF7oRz48lzwDRSQCGhJKEvO+cfipqWJDMQS+cbwyV3uuOPXNkhmjA==
-X-Received: by 2002:a05:6402:452:b0:434:a373:f9f8 with SMTP id p18-20020a056402045200b00434a373f9f8mr15706814edw.290.1656320130078;
-        Mon, 27 Jun 2022 01:55:30 -0700 (PDT)
-Received: from [192.168.0.247] (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
-        by smtp.gmail.com with ESMTPSA id bg6-20020a170906a04600b00722e31fcf42sm4768843ejb.184.2022.06.27.01.55.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Jun 2022 01:55:29 -0700 (PDT)
-Message-ID: <cd6fb785-50d4-8945-b7bc-951856f1c5ae@linaro.org>
-Date:   Mon, 27 Jun 2022 10:55:28 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.10.0
-Subject: Re: [PATCH 1/5] ARM: dts: exynos: align SDHCI node name with dtschema
-Content-Language: en-US
-To:     Alim Akhtar <alim.akhtar@samsung.com>,
-        'Ulf Hansson' <ulf.hansson@linaro.org>,
-        'Rob Herring' <robh+dt@kernel.org>,
-        'Krzysztof Kozlowski' <krzysztof.kozlowski+dt@linaro.org>,
-        'Jaehoon Chung' <jh80.chung@samsung.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org
-References: <20220626120342.38851-1-krzysztof.kozlowski@linaro.org>
- <CGME20220626120350epcas5p25a98e0669eeb11ce7959ace0f3634926@epcas5p2.samsung.com>
- <20220626120342.38851-2-krzysztof.kozlowski@linaro.org>
- <000a01d889c5$adb3bd30$091b3790$@samsung.com>
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=K34hpsdoOs2C6XrJvtKH3w760bg8Auw+6PiZE0x6VBc=;
+        b=0P43VvHx7K5IVFpplqQf5nFoGZ+kescm6WX9+VV17sq1hFk/0pzYOJ2u5nRzWNTwvv
+         sErP6Ba0cmkYmaSRMKbRW5k1mZkZttITpOWeEYHZ2/s7X3IyY2hsmMXe4I6DSDh2ZHu9
+         vs7I1oQxi8wPwT4cfT5AdsM9DIH89dVrnQRu7JUnhPtYvOeXvFxwOZE7hNvYDPiHI+jf
+         z7Uk6WbKDt2iAudG/uzunzZOuM4CITJQAGHxja3Lfg3DlDh493UBasqNjxJNCuIkXLxq
+         GduvKk4jkP6cynyfK5zHO/HJicBLSRwCI7ikfBWiW54lXSMVR1gBp6sJ2OPeEVYS7lAe
+         zOoQ==
+X-Gm-Message-State: AJIora9b39H000+5RMAVYYinUyKw5tpxSavHobGPKtf9DzHN9UDahDTB
+        yR+Y2vNofU3eK9MGc54UdbvOxQ==
+X-Google-Smtp-Source: AGRyM1u1vjhgnzc4Js62EwbqrVQ6LGAtw275UTldHmzMyP6y4Bv0YMffKknJ9apG5elKuoIakqp30Q==
+X-Received: by 2002:a17:906:53ca:b0:6fe:ae32:e01e with SMTP id p10-20020a17090653ca00b006feae32e01emr11405770ejo.455.1656321364523;
+        Mon, 27 Jun 2022 02:16:04 -0700 (PDT)
+Received: from localhost.localdomain (xdsl-188-155-176-92.adslplus.ch. [188.155.176.92])
+        by smtp.gmail.com with ESMTPSA id gy10-20020a170906f24a00b006f3ef214e2csm4805395ejb.146.2022.06.27.02.16.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Jun 2022 02:16:03 -0700 (PDT)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <000a01d889c5$adb3bd30$091b3790$@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+To:     alim.akhtar@samsung.com, linux-arm-kernel@lists.infradead.org,
+        linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        krzysztof.kozlowski@linaro.org, krzysztof.kozlowski+dt@linaro.org,
+        devicetree@vger.kernel.org, jh80.chung@samsung.com,
+        robh+dt@kernel.org
+Subject: Re: (subset) [PATCH 1/5] ARM: dts: exynos: align SDHCI node name with dtschema
+Date:   Mon, 27 Jun 2022 11:15:40 +0200
+Message-Id: <165632135506.81841.3968515588802309460.b4-ty@linaro.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20220626120342.38851-2-krzysztof.kozlowski@linaro.org>
+References: <20220626120342.38851-1-krzysztof.kozlowski@linaro.org> <20220626120342.38851-2-krzysztof.kozlowski@linaro.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/06/2022 03:31, Alim Akhtar wrote:
+On Sun, 26 Jun 2022 14:03:38 +0200, Krzysztof Kozlowski wrote:
+> The node names should be generic and DT schema expects "mmc".
 > 
 > 
->> -----Original Message-----
->> From: Krzysztof Kozlowski [mailto:krzysztof.kozlowski@linaro.org]
->> Sent: Sunday, June 26, 2022 5:34 PM
->> To: Ulf Hansson <ulf.hansson@linaro.org>; Rob Herring
->> <robh+dt@kernel.org>; Krzysztof Kozlowski
->> <krzysztof.kozlowski+dt@linaro.org>; Alim Akhtar
->> <alim.akhtar@samsung.com>; Jaehoon Chung <jh80.chung@samsung.com>;
->> linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-
->> kernel@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-
->> samsung-soc@vger.kernel.org
->> Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->> Subject: [PATCH 1/5] ARM: dts: exynos: align SDHCI node name with
->> dtschema
->>
->> The node names should be generic and DT schema expects "mmc".
->>
->> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->> ---
-> 
->  (for patch 1 ~ 4)
-> 
-> Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 
-Tooling does not handle such cases.
+Applied, thanks!
+
+[1/5] ARM: dts: exynos: align SDHCI node name with dtschema
+      https://git.kernel.org/krzk/linux/c/c805b77caba9e49d43321112f272508d2b1acd25
 
 Best regards,
-Krzysztof
+-- 
+Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
