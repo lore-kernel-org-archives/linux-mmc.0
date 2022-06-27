@@ -2,86 +2,192 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB0DCCCA47C
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Jun 2022 13:59:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72659CCA47C
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Jun 2022 01:32:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234495AbiFZN7B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 26 Jun 2022 09:59:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41272 "EHLO
+        id S230028AbiF0BcF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 26 Jun 2022 21:32:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230497AbiFZN7A (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Jun 2022 09:59:00 -0400
-Received: from mail-wr1-f52.google.com (mail-wr1-f52.google.com [209.85.221.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82DE9DEF1;
-        Sun, 26 Jun 2022 06:58:59 -0700 (PDT)
-Received: by mail-wr1-f52.google.com with SMTP id v14so9497042wra.5;
-        Sun, 26 Jun 2022 06:58:59 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=2AbSkeFZUioPAQ3a70nNyeL3mIPEJabq4zioJ0USaqA=;
-        b=geSJHIbg5t3jd54nRzJoLOR/s7fT7SkWRtJuYJnPsWfbEZyqK4XKlBl3ZvBskPd2oj
-         k/soBnos/N0cL8mZfrCw6KqM7WOgIyQzDzmP9esNMGls56ISU6KAGcithnhQnqvmBlRz
-         wjrFKNY5pvcjCBvfS4Ieron3r35hz1SP8j7aNwuBcUFA4SV+Ik7OChn9qc3++2EUzzs1
-         miSJsOflGOYxku9ZqzRgrbdcdDq78z/EjEmt3o1By8yXjKw9uottB0Nl1j1B9PsOLh5T
-         4ZGjMsfNctiLedXxhlTrwnPNpy8PmrVDvEb8aiUMiKcK5cj8ubAowDLWjrsYHD9IRpw2
-         PTog==
-X-Gm-Message-State: AJIora9lifaGOyMShuRarCPnfspoj6gOeu5wlIVQUn0lNDkCtTMAMvJ7
-        RdRMC7ybQnQAMkBmnLQqQOw=
-X-Google-Smtp-Source: AGRyM1tsNjy9pUQ2/KlwB69wacP4xwTylLY6Td/+6NMMtK1xKOX8O1lC5Yu/j8LwK2/38EbSaAC5PA==
-X-Received: by 2002:adf:f102:0:b0:21b:8bba:5025 with SMTP id r2-20020adff102000000b0021b8bba5025mr8255000wro.174.1656251938109;
-        Sun, 26 Jun 2022 06:58:58 -0700 (PDT)
-Received: from [192.168.64.180] (bzq-219-42-90.isdn.bezeqint.net. [62.219.42.90])
-        by smtp.gmail.com with ESMTPSA id l16-20020adffe90000000b0021b9a4a75e2sm7723716wrr.30.2022.06.26.06.58.56
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 26 Jun 2022 06:58:57 -0700 (PDT)
-Message-ID: <bb9ba2df-ca20-1126-4393-d2f1e6ba6a1b@grimberg.me>
-Date:   Sun, 26 Jun 2022 16:58:55 +0300
+        with ESMTP id S230174AbiF0BcD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Jun 2022 21:32:03 -0400
+Received: from mailout1.samsung.com (mailout1.samsung.com [203.254.224.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FED42AEA
+        for <linux-mmc@vger.kernel.org>; Sun, 26 Jun 2022 18:32:00 -0700 (PDT)
+Received: from epcas5p4.samsung.com (unknown [182.195.41.42])
+        by mailout1.samsung.com (KnoxPortal) with ESMTP id 20220627013157epoutp015d0232d6e165ff3a70472721c38923d4~8Vi2uia6R0731007310epoutp01a
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2022 01:31:57 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20220627013157epoutp015d0232d6e165ff3a70472721c38923d4~8Vi2uia6R0731007310epoutp01a
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1656293517;
+        bh=DRuOUfGFx+COd6dQJMlvRgb9zEgrBMtsnZkmpUoOKdA=;
+        h=From:To:In-Reply-To:Subject:Date:References:From;
+        b=q+/OSGZp4UEXI1t3NZS2DjvzdEMe0YVvsI0GXFhIEMY1BzJ2+Uu0YKn8jtem7qNqU
+         sDO9UdHasw3SO+SQcyG4s/tR8JNO4CGC7J/fW0yLU7Nd6MWmiV1xnH9DF6QknZO0Ww
+         TYSkKs+jxNmbK+n+o5Ar48wCFSaUPjL87SOaOViA=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+        epcas5p2.samsung.com (KnoxPortal) with ESMTP id
+        20220627013156epcas5p2e7d3bc1a234da5d6438694f855901725~8Vi2QXMJa0903509035epcas5p2K;
+        Mon, 27 Jun 2022 01:31:56 +0000 (GMT)
+Received: from epsmges5p1new.samsung.com (unknown [182.195.38.175]) by
+        epsnrtp2.localdomain (Postfix) with ESMTP id 4LWVZK1ftFz4x9Pt; Mon, 27 Jun
+        2022 01:31:53 +0000 (GMT)
+Received: from epcas5p2.samsung.com ( [182.195.41.40]) by
+        epsmges5p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+        D3.4C.09662.98809B26; Mon, 27 Jun 2022 10:31:53 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas5p4.samsung.com (KnoxPortal) with ESMTPA id
+        20220627013152epcas5p45a12c2d14ddc03cc54ee6715731c5d1c~8ViybrjBE2495024950epcas5p4W;
+        Mon, 27 Jun 2022 01:31:52 +0000 (GMT)
+Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220627013152epsmtrp142f57d8ef9f869841bb68395514a3053~8Viya3nVO2912129121epsmtrp1b;
+        Mon, 27 Jun 2022 01:31:52 +0000 (GMT)
+X-AuditID: b6c32a49-86fff700000025be-78-62b90889b72d
+Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
+        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+        C1.07.08905.88809B26; Mon, 27 Jun 2022 10:31:52 +0900 (KST)
+Received: from alimakhtar03 (unknown [107.122.12.5]) by epsmtip1.samsung.com
+        (KnoxPortal) with ESMTPA id
+        20220627013151epsmtip159c923153394b8ed7a419c7d679e8f08~8Viw-gtGj2181421814epsmtip1o;
+        Mon, 27 Jun 2022 01:31:50 +0000 (GMT)
+From:   "Alim Akhtar" <alim.akhtar@samsung.com>
+To:     "'Krzysztof Kozlowski'" <krzysztof.kozlowski@linaro.org>,
+        "'Ulf Hansson'" <ulf.hansson@linaro.org>,
+        "'Rob Herring'" <robh+dt@kernel.org>,
+        "'Krzysztof Kozlowski'" <krzysztof.kozlowski+dt@linaro.org>,
+        "'Jaehoon Chung'" <jh80.chung@samsung.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-samsung-soc@vger.kernel.org>
+In-Reply-To: <20220626120342.38851-2-krzysztof.kozlowski@linaro.org>
+Subject: RE: [PATCH 1/5] ARM: dts: exynos: align SDHCI node name with
+ dtschema
+Date:   Mon, 27 Jun 2022 07:01:49 +0530
+Message-ID: <000a01d889c5$adb3bd30$091b3790$@samsung.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.1
-Subject: Re: [PATCH v2 5/6] blk-mq: Drop 'reserved' arg of busy_tag_iter_fn
-Content-Language: en-US
-To:     John Garry <john.garry@huawei.com>, axboe@kernel.dk,
-        damien.lemoal@opensource.wdc.com, bvanassche@acm.org, hch@lst.de,
-        jejb@linux.ibm.com, martin.petersen@oracle.com, hare@suse.de,
-        satishkh@cisco.com, sebaddel@cisco.com, kartilak@cisco.com
-Cc:     linux-doc@vger.kernel.org, linux-rdma@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-nvme@lists.infradead.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        mpi3mr-linuxdrv.pdl@broadcom.com, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org, nbd@other.debian.org
-References: <1655810143-67784-1-git-send-email-john.garry@huawei.com>
- <1655810143-67784-6-git-send-email-john.garry@huawei.com>
-From:   Sagi Grimberg <sagi@grimberg.me>
-In-Reply-To: <1655810143-67784-6-git-send-email-john.garry@huawei.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Thread-Index: AQJ4rjjbOzoR1c1L7LjC2VF3+X9p2QFDPK8dAYzjnSGsC6x04A==
+Content-Language: en-us
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrBJsWRmVeSWpSXmKPExsWy7bCmhm4nx84kg40nWS3mHznHanHjVxur
+        Rd+Lh8wWe19vZbfY9Pgaq8XlXXPYLI7872e0mHF+H5NF694j7BbH14Y7cHlsWtXJ5nHn2h42
+        j81L6j36tqxi9Pi8SS6ANSrbJiM1MSW1SCE1Lzk/JTMv3VbJOzjeOd7UzMBQ19DSwlxJIS8x
+        N9VWycUnQNctMwfoJiWFssScUqBQQGJxsZK+nU1RfmlJqkJGfnGJrVJqQUpOgUmBXnFibnFp
+        XrpeXmqJlaGBgZEpUGFCdsaMZyvYCrqEKhbumsPawPiPr4uRk0NCwETi2pPTjF2MXBxCArsZ
+        JXr/XmeFcD4xSrS17mYEqRIS+MYoce9HKEzH3nlbmCGK9jJKHP24jA3Cecko0XS1gx2kik1A
+        V2LH4jawhIjAcmaJ0+1r2EASnAIuEsd/zgUbKywQIPFm+WcmEJtFQFVi7uHjYDW8ApYStx4d
+        gLIFJU7OfMICYjMLyEtsfzuHGeIMBYmfT5exgtgiAk4S+9bvYoKoEZd4efQIO8hiCYGFHBLP
+        929lgWhwkXh2ex0jhC0s8er4FnYIW0riZX8bkM0BZHtILPojBRHOkHi7fD1Uub3EgStzWEBK
+        mAU0Jdbv0odYxSfR+/sJE0Qnr0RHmxBEtapE87urUEulJSZ2d7NC2B4Sf271QIP6IqPE99ML
+        WCYwKsxC8uUsJF/OQvLNLITNCxhZVjFKphYU56anFpsWGOallsMjPDk/dxMjOMlqee5gvPvg
+        g94hRiYOxkOMEhzMSiK8r69vTRLiTUmsrEotyo8vKs1JLT7EaAoM+onMUqLJ+cA0n1cSb2hi
+        aWBiZmZmYmlsZqgkzut1dVOSkEB6YklqdmpqQWoRTB8TB6dUA1Ou+sN5FvXMDc87A/5uW5Ew
+        KfBjlPcaPruIrU6pkdd73ur0NxbNWJv4vM36LRvL2t0RLefnSXxfeYKRszI7tZznGJuOoNEm
+        NRe9z/UWL+c8KbnNq9GStUyx3HzL29T5ZRG3tp4rWS/+t8VHsP2kl6RbhMIqH6UWzbjJKp9e
+        1PFqT7jw23iDyGFGZfk1i/7/faC9eMb89W9Oe9877JkzMfNS+3fL4pnxzU3Wpr6fJmTm5yvl
+        3zh66dXpBOu+U84TlbU+7nflFyrcnT7jgJ2yVZHJys5ZmUcb/RZ7l/WsKTh4NdvsSu3l9baF
+        h6eX+r9KdZdfxxQiE3Tlgg/zqzfZZy9G7vQ3f5iZFi9yr/7tHSWW4oxEQy3mouJEANdytNM7
+        BAAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmphkeLIzCtJLcpLzFFi42LZdlhJTreDY2eSwbufUhbzj5xjtbjxq43V
+        ou/FQ2aLva+3sltsenyN1eLyrjlsFkf+9zNazDi/j8mide8Rdovja8MduDw2repk87hzbQ+b
+        x+Yl9R59W1YxenzeJBfAGsVlk5Kak1mWWqRvl8CVMePZCraCLqGKhbvmsDYw/uPrYuTkkBAw
+        kdg7bwtzFyMXh5DAbkaJzu/NjBAJaYnrGyewQ9jCEiv/PWeHKHrOKHHn7R2wBJuArsSOxW1s
+        IAkRgfXMEudv7WCDqDrLKLFx2RxWkCpOAReJ4z/ngo0VFvCT6Dm3jBnEZhFQlZh7+DgbiM0r
+        YClx69EBKFtQ4uTMJyxdjBwczAJ6Em0bwVqZBeQltr+dwwxxkYLEz6fLwMaLCDhJ7Fu/iwmi
+        Rlzi5dEj7BMYhWYhmTQLYdIsJJNmIelYwMiyilEytaA4Nz232LDAMC+1XK84Mbe4NC9dLzk/
+        dxMjOKK0NHcwbl/1Qe8QIxMH4yFGCQ5mJRHe19e3JgnxpiRWVqUW5ccXleakFh9ilOZgURLn
+        vdB1Ml5IID2xJDU7NbUgtQgmy8TBKdXApPypoTTr7e1dKRsfeMQ6abw4d6Lz9Ep3Q4FrXuuW
+        l8i9kMp9VWvjL+pi2bZtS7lbWbmmv/60oifXj/67v93vssOsDs7Gnco/o17xxj5oKlzyNKU4
+        9oy0qFWhqH3X4qX2h2QmdrneeLddN1frQFX3tM3vhVrz+X0zxYtusk6tCOjaIhlze2+serq0
+        4LPt9cdn9QUaV3moz1UK+K7zMTkmPdYg7IM+q79doCff7S2nl0/w/r5EyfFMYv89G03ueyf5
+        l8bYaN96+qO4dbLzOu//s9YsXjQx3aEld1PV5/fqLzYY1a6SPH+uotw92HfK1N1lm9UlFjVb
+        bVjaKnksrYXB1nVT4ve/C7PvFj13uKapxFKckWioxVxUnAgAGCDvCRcDAAA=
+X-CMS-MailID: 20220627013152epcas5p45a12c2d14ddc03cc54ee6715731c5d1c
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+CMS-TYPE: 105P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20220626120350epcas5p25a98e0669eeb11ce7959ace0f3634926
+References: <20220626120342.38851-1-krzysztof.kozlowski@linaro.org>
+        <CGME20220626120350epcas5p25a98e0669eeb11ce7959ace0f3634926@epcas5p2.samsung.com>
+        <20220626120342.38851-2-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-On 6/21/22 14:15, John Garry wrote:
-> We no longer use the 'reserved' arg in busy_tag_iter_fn for any iter
-> function so it may be dropped.
-> 
-> Signed-off-by: John Garry <john.garry@huawei.com>
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Reviewed-by: Hannes Reinecke <hare@suse.de>
-> ---
->   block/blk-mq-debugfs.c              |  2 +-
->   block/blk-mq-tag.c                  |  7 +++----
->   block/blk-mq.c                      | 10 ++++------
->   drivers/block/mtip32xx/mtip32xx.c   |  6 +++---
->   drivers/block/nbd.c                 |  2 +-
->   drivers/infiniband/ulp/srp/ib_srp.c |  3 +--
->   drivers/nvme/host/core.c            |  2 +-
->   drivers/nvme/host/fc.c              |  3 +--
->   drivers/nvme/host/nvme.h            |  2 +-
+>-----Original Message-----
+>From: Krzysztof Kozlowski [mailto:krzysztof.kozlowski@linaro.org]
+>Sent: Sunday, June 26, 2022 5:34 PM
+>To: Ulf Hansson <ulf.hansson@linaro.org>; Rob Herring
+><robh+dt@kernel.org>; Krzysztof Kozlowski
+><krzysztof.kozlowski+dt@linaro.org>; Alim Akhtar
+><alim.akhtar@samsung.com>; Jaehoon Chung <jh80.chung@samsung.com>;
+>linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-
+>kernel@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-
+>samsung-soc@vger.kernel.org
+>Cc: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+>Subject: [PATCH 1/5] ARM: dts: exynos: align SDHCI node name with
+>dtschema
+>
+>The node names should be generic and DT schema expects "mmc".
+>
+>Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+>---
 
-for the nvme bits:
-Reviewed-by: Sagi Grimberg <sagi@grimberg.me>
+ (for patch 1 ~ 4)
+
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+
+
+> arch/arm/boot/dts/exynos4.dtsi | 8 ++++----
+> 1 file changed, 4 insertions(+), 4 deletions(-)
+>
+>diff --git a/arch/arm/boot/dts/exynos4.dtsi
+>b/arch/arm/boot/dts/exynos4.dtsi index 6f0ca3354e39..5c4ecda27a47 100644
+>--- a/arch/arm/boot/dts/exynos4.dtsi
+>+++ b/arch/arm/boot/dts/exynos4.dtsi
+>@@ -316,7 +316,7 @@ keypad: keypad@100a0000 {
+> 			status = "disabled";
+> 		};
+>
+>-		sdhci_0: sdhci@12510000 {
+>+		sdhci_0: mmc@12510000 {
+> 			compatible = "samsung,exynos4210-sdhci";
+> 			reg = <0x12510000 0x100>;
+> 			interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+>@@ -325,7 +325,7 @@ sdhci_0: sdhci@12510000 {
+> 			status = "disabled";
+> 		};
+>
+>-		sdhci_1: sdhci@12520000 {
+>+		sdhci_1: mmc@12520000 {
+> 			compatible = "samsung,exynos4210-sdhci";
+> 			reg = <0x12520000 0x100>;
+> 			interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
+>@@ -334,7 +334,7 @@ sdhci_1: sdhci@12520000 {
+> 			status = "disabled";
+> 		};
+>
+>-		sdhci_2: sdhci@12530000 {
+>+		sdhci_2: mmc@12530000 {
+> 			compatible = "samsung,exynos4210-sdhci";
+> 			reg = <0x12530000 0x100>;
+> 			interrupts = <GIC_SPI 75 IRQ_TYPE_LEVEL_HIGH>;
+>@@ -343,7 +343,7 @@ sdhci_2: sdhci@12530000 {
+> 			status = "disabled";
+> 		};
+>
+>-		sdhci_3: sdhci@12540000 {
+>+		sdhci_3: mmc@12540000 {
+> 			compatible = "samsung,exynos4210-sdhci";
+> 			reg = <0x12540000 0x100>;
+> 			interrupts = <GIC_SPI 76 IRQ_TYPE_LEVEL_HIGH>;
+>--
+>2.34.1
+
+
