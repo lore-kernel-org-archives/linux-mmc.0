@@ -2,117 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EE05CCA479
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 07:28:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8A83C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 07:56:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241104AbiF1H1z convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Jun 2022 03:27:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57784 "EHLO
+        id S1343740AbiF1H4c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Jun 2022 03:56:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51842 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242985AbiF1H1h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 03:27:37 -0400
-Received: from mail-qv1-f41.google.com (mail-qv1-f41.google.com [209.85.219.41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C165B2CE26;
-        Tue, 28 Jun 2022 00:27:35 -0700 (PDT)
-Received: by mail-qv1-f41.google.com with SMTP id i17so18728446qvo.13;
-        Tue, 28 Jun 2022 00:27:35 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=hwgLtruPC06mcRCnQAsf+kJqHCP1mf00hTNnpiQ34M0=;
-        b=3tQxdeTXaeHedyn+zuV/55ACvAhAXmWcP4mEBFJ7jzsyYq6RsSgMON/8hhCXyPFuse
-         MLSN3K1iygLYNzbYfsEUEZlABb1G1eppIZbae+40fb4YMxpctrE+lrJz3qET/ldo5zGd
-         37edeyXGnan1cSc5wL4OCPTZESLkJDeXBVsf5Jitdq4F2SUoLicy4d+r65QQwFBoAQaF
-         rVmUy/gVspn4buiPbwq5cSH0lOm6yf061HBv7eJrhJeCu9Xa08CHGXWzt6wFcbBU42zO
-         cc0C2wJwrVFqggLP3rTWVXzc4tL0SV7qsxw7pHWn+6UvTIPwY9qNnceTZYR/8yu6Ppqr
-         0hkQ==
-X-Gm-Message-State: AJIora91XfpVhN+yRTRlxkAy8ZQagB28kxgOh0hSO/dgpIY4a+cEmxEM
-        RRrXPZ914wNJxYzvqW7oNwha7fO41WOfPA==
-X-Google-Smtp-Source: AGRyM1vuyurBth3w/1QAUlj3nOiF8B4hIrD4wqWY4IUnkxCMfrPNbOyI3fDTEu0sS0pUw3shJaj5og==
-X-Received: by 2002:a05:622a:647:b0:306:6b30:bd0a with SMTP id a7-20020a05622a064700b003066b30bd0amr12004710qtb.327.1656401254977;
-        Tue, 28 Jun 2022 00:27:34 -0700 (PDT)
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com. [209.85.128.182])
-        by smtp.gmail.com with ESMTPSA id f14-20020a05620a408e00b006a5d2eb58b2sm11643530qko.33.2022.06.28.00.27.33
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 28 Jun 2022 00:27:34 -0700 (PDT)
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-3176b6ed923so107319457b3.11;
-        Tue, 28 Jun 2022 00:27:33 -0700 (PDT)
-X-Received: by 2002:a81:a092:0:b0:318:5c89:a935 with SMTP id
- x140-20020a81a092000000b003185c89a935mr20762801ywg.383.1656401253054; Tue, 28
- Jun 2022 00:27:33 -0700 (PDT)
+        with ESMTP id S230434AbiF1H4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 03:56:31 -0400
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9B411581C;
+        Tue, 28 Jun 2022 00:56:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1656402990; x=1687938990;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=S8NYqKZWJ95vXvA9MpHwV3qXnaZ8/CF+EBJ0kgg+LhM=;
+  b=RLmw9SoNs1N2nqyiSQcyX8x4erdFIsdpNzqlfTE+VAS7rGEua4YfOS9O
+   eMVV2RYO7w1RzCpXs48mIk/75x/wKsfgP+lpSIk30Wj6gVbnLPx824AE2
+   0qbfMX4lWr426uDm4pT2zed2X+RWdxq2rFm8Ibea6bu3eIYXVZAgc+f3c
+   QoyC8qF4waO93Zu8NmDj9ylwBKg/n5fPD7xhnHf0GZ5l6QnYzhKZAa81N
+   fCcXjErP8L3q+F3YHmFoOzuC1sCMW4qc2uP2yQeAyQmYOJxWSfnmswSOU
+   sIP5iUA1CHlMEY27jPJKhSEdqW31lDOXw4uIQzDOzKBAqjSemw/rrqoMQ
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10391"; a="261471815"
+X-IronPort-AV: E=Sophos;i="5.92,227,1650956400"; 
+   d="scan'208";a="261471815"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Jun 2022 00:56:16 -0700
+X-IronPort-AV: E=Sophos;i="5.92,227,1650956400"; 
+   d="scan'208";a="646804862"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.204])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Jun 2022 00:56:14 -0700
+Message-ID: <bd0f9fb2-c641-5ad1-c70c-45a9a6e80642@intel.com>
+Date:   Tue, 28 Jun 2022 10:56:11 +0300
 MIME-Version: 1.0
-References: <20220627180432.GA136081@embeddedor>
-In-Reply-To: <20220627180432.GA136081@embeddedor>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 28 Jun 2022 09:27:21 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdU27TG_rpd=WTRPRcY22A4j4aN-6d_8OmK2aNpX06G3ig@mail.gmail.com>
-Message-ID: <CAMuHMdU27TG_rpd=WTRPRcY22A4j4aN-6d_8OmK2aNpX06G3ig@mail.gmail.com>
-Subject: Re: [PATCH][next] treewide: uapi: Replace zero-length arrays with
- flexible-array members
-To:     "Gustavo A. R. Silva" <gustavoars@kernel.org>
-Cc:     Kees Cook <keescook@chromium.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "the arch/x86 maintainers" <x86@kernel.org>, dm-devel@redhat.com,
-        linux-m68k <linux-m68k@lists.linux-m68k.org>,
-        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
-        linux-s390 <linux-s390@vger.kernel.org>,
-        KVM list <kvm@vger.kernel.org>,
-        Intel Graphics Development <intel-gfx@lists.freedesktop.org>,
-        DRI Development <dri-devel@lists.freedesktop.org>,
-        netdev <netdev@vger.kernel.org>, bpf <bpf@vger.kernel.org>,
-        linux-btrfs <linux-btrfs@vger.kernel.org>,
-        linux-can@vger.kernel.org,
-        Linux FS Devel <linux-fsdevel@vger.kernel.org>,
-        linux1394-devel@lists.sourceforge.net, io-uring@vger.kernel.org,
-        lvs-devel@vger.kernel.org,
-        MTD Maling List <linux-mtd@lists.infradead.org>,
-        kasan-dev <kasan-dev@googlegroups.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        nvdimm@lists.linux.dev,
-        NetFilter <netfilter-devel@vger.kernel.org>,
-        coreteam@netfilter.org, linux-perf-users@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-sctp@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        scsi <linux-scsi@vger.kernel.org>,
-        target-devel <target-devel@vger.kernel.org>,
-        USB list <linux-usb@vger.kernel.org>,
-        virtualization@lists.linux-foundation.org,
-        V9FS Developers <v9fs-developer@lists.sourceforge.net>,
-        linux-rdma <linux-rdma@vger.kernel.org>,
-        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
-        linux-hardening@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.9.1
+Subject: Re: [PATCHv2] mmc: block: Add single read for 4k sector cards
+Content-Language: en-US
+To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        Avri Altman <Avri.Altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <6e379c703fe149e1923b31df1a33701e@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <6e379c703fe149e1923b31df1a33701e@hyperstone.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Gustavo,
+On 24/06/22 18:29, Christian Löhle wrote:
+> Cards with 4k native sector size may only be read 4k-aligned,
+> accommodate for this in the single read recovery and use it.
 
-Thanks for your patch!
+Thanks for the patch.
 
-On Mon, Jun 27, 2022 at 8:04 PM Gustavo A. R. Silva
-<gustavoars@kernel.org> wrote:
-> There is a regular need in the kernel to provide a way to declare
-> having a dynamically sized set of trailing elements in a structure.
-> Kernel code should always use “flexible array members”[1] for these
-> cases. The older style of one-element or zero-length arrays should
-> no longer be used[2].
+> 
+> Fixes: 81196976ed946 (mmc: block: Add blk-mq support)
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
-These rules apply to the kernel, but uapi is not considered part of the
-kernel, so different rules apply.  Uapi header files should work with
-whatever compiler that can be used for compiling userspace.
+FYI checkpatch says:
 
-Gr{oetje,eeting}s,
+WARNING: From:/Signed-off-by: email name mismatch: 'From: "Christian Löhle" <CLoehle@hyperstone.com>' != 'Signed-off-by: Christian Loehle <cloehle@hyperstone.com>'
 
-                        Geert
+> ---
+>  drivers/mmc/core/block.c | 25 ++++++++++++-------------
+>  1 file changed, 12 insertions(+), 13 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index f4a1281658db..a75a208ce203 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -176,7 +176,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+>  				      unsigned int part_type);
+>  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  			       struct mmc_card *card,
+> -			       int disable_multi,
+> +			       int recovery_mode,
+>  			       struct mmc_queue *mq);
+>  static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+>  
+> @@ -1302,7 +1302,7 @@ static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+>  }
+>  
+>  static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+> -			      int disable_multi, bool *do_rel_wr_p,
+> +			      int recovery_mode, bool *do_rel_wr_p,
+>  			      bool *do_data_tag_p)
+>  {
+>  	struct mmc_blk_data *md = mq->blkdata;
+> @@ -1372,8 +1372,8 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+>  		 * at a time in order to accurately determine which
+>  		 * sectors can be read successfully.
+>  		 */
+> -		if (disable_multi)
+> -			brq->data.blocks = 1;
+> +		if (recovery_mode)
+> +			brq->data.blocks = mmc_large_sector(card) ? 8 : 1;
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+I suggest changing to use queue_physical_block_size() here and further below
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+			brq->data.blocks = queue_physical_block_size(req->q) >> SECTOR_SHIFT;
+
+>  
+>  		/*
+>  		 * Some controllers have HW issues while operating
+> @@ -1590,7 +1590,7 @@ static int mmc_blk_cqe_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+>  
+>  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  			       struct mmc_card *card,
+> -			       int disable_multi,
+> +			       int recovery_mode,
+>  			       struct mmc_queue *mq)
+>  {
+>  	u32 readcmd, writecmd;
+> @@ -1599,7 +1599,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  	struct mmc_blk_data *md = mq->blkdata;
+>  	bool do_rel_wr, do_data_tag;
+>  
+> -	mmc_blk_data_prep(mq, mqrq, disable_multi, &do_rel_wr, &do_data_tag);
+> +	mmc_blk_data_prep(mq, mqrq, recovery_mode, &do_rel_wr, &do_data_tag);
+>  
+>  	brq->mrq.cmd = &brq->cmd;
+>  
+> @@ -1690,7 +1690,7 @@ static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
+>  
+>  #define MMC_READ_SINGLE_RETRIES	2
+>  
+> -/* Single sector read during recovery */
+> +/* Single (native) sector read during recovery */
+>  static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  {
+>  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> @@ -1698,6 +1698,7 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  	struct mmc_card *card = mq->card;
+>  	struct mmc_host *host = card->host;
+>  	blk_status_t error = BLK_STS_OK;
+> +	size_t bytes_per_read = mmc_large_sector(card) ? 4096 : 512;
+
+	size_t bytes_per_read = queue_physical_block_size(req->q);
+
+>  
+>  	do {
+>  		u32 status;
+> @@ -1732,13 +1733,13 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  		else
+>  			error = BLK_STS_OK;
+>  
+> -	} while (blk_update_request(req, error, 512));
+> +	} while (blk_update_request(req, error, bytes_per_read));
+>  
+>  	return;
+>  
+>  error_exit:
+>  	mrq->data->bytes_xfered = 0;
+> -	blk_update_request(req, BLK_STS_IOERR, 512);
+> +	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
+>  	/* Let it try the remaining request again */
+>  	if (mqrq->retries > MMC_MAX_RETRIES - 1)
+>  		mqrq->retries = MMC_MAX_RETRIES - 1;
+> @@ -1879,10 +1880,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+>  		return;
+>  	}
+>  
+> -	/* FIXME: Missing single sector read for large sector size */
+> -	if (!mmc_large_sector(card) && rq_data_dir(req) == READ &&
+> -	    brq->data.blocks > 1) {
+> -		/* Read one sector at a time */
+> +	if (rq_data_dir(req) == READ && brq->data.blocks > 1) {
+> +		/* Read one (native) sector at a time */
+>  		mmc_blk_read_single(mq, req);
+>  		return;
+>  	}
+
