@@ -2,191 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70290CCA47F
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 13:31:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45163CCA47F
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 13:37:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245738AbiF1Nbi convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Jun 2022 09:31:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56760 "EHLO
+        id S1346739AbiF1NhV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Jun 2022 09:37:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346488AbiF1Nak (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 09:30:40 -0400
-Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9A0E1014;
-        Tue, 28 Jun 2022 06:30:04 -0700 (PDT)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 57164122EC5;
-        Tue, 28 Jun 2022 15:30:03 +0200 (CEST)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 3B739122EB2;
-        Tue, 28 Jun 2022 15:30:03 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.84-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
-        by mail4.swissbit.com (Postfix) with ESMTPS;
-        Tue, 28 Jun 2022 15:30:03 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex02.sbitdom.lan
- (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Tue, 28 Jun
- 2022 15:30:02 +0200
-Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Tue, 28 Jun
- 2022 15:30:02 +0200
-Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
- sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
- 15.02.1118.009; Tue, 28 Jun 2022 15:30:02 +0200
-From:   Christian Loehle <CLoehle@hyperstone.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Avri Altman <Avri.Altman@wdc.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: [PATCHv3] mmc: block: Add single read for 4k sector cards
-Thread-Topic: [PATCHv3] mmc: block: Add single read for 4k sector cards
-Thread-Index: AdiK8uOh9sQudDNBTZK/b3j4jg18Iw==
-Date:   Tue, 28 Jun 2022 13:30:02 +0000
-Message-ID: <ac3d763c9eff4c81aab9eb1245065685@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: de-DE
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.153.3.44]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S1346616AbiF1NhA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 09:37:00 -0400
+Received: from mail-qv1-xf2a.google.com (mail-qv1-xf2a.google.com [IPv6:2607:f8b0:4864:20::f2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D6572A976
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Jun 2022 06:36:54 -0700 (PDT)
+Received: by mail-qv1-xf2a.google.com with SMTP id q4so19917878qvq.8
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Jun 2022 06:36:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ziepe.ca; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=gN4ZNyT9GRZ46Vwx3CUzNgwGxKE3ptwelsb3O/2waMc=;
+        b=SRPS2zIET11DP06FAnMANUW30rX+F+KLnmvgpItTZuHDiHMYbx191l+udZ0BIKVo+p
+         DUqKNFcRnPxEdciA9v/rjMoUuUABeinU5a59o91m7mO0ei+LjGwfeqP1sFK6bST4r2Sc
+         +kwNrequilw+r3whlSvEqjUrw7uEou8aBEv26lUqmckZs7QEO1gxqNAIdKmR6ixdoBBW
+         VwXL+VitONeiHER4+6czyOuvux/gSa01CsajOGl6xQeKgTZdOU9/PF5ai6yeP3/8Na6A
+         VkyCaiWAoLiX3IML+rZ/qAH9obhof6Stg3VEpk4n7D6sOfmWV6A4zI2itZ9nI+NyrBEn
+         GAtg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=gN4ZNyT9GRZ46Vwx3CUzNgwGxKE3ptwelsb3O/2waMc=;
+        b=YVhV7ab1W/l1C/44CBiGWz0yzq/TknMHTdGvyoOlT/MxomOeTyGgO6ZG1aO98rmVQw
+         D1ABzNSoxaE5WKHep/5b0JvOVFGaC/RoOEQ2NysvTEsCHHOcb4ABBMZjElWVHC/Uk0DI
+         r7/CIx++OviPbSNXAN1noxT3H1lchnNT2VWUAB/B+Zci6Ays8HCJSMCxCkcvMsyfpd3L
+         QSFtNknr8ek+uJnVWcaMtfklsHdDKAt+KhE8lT0sNQRberh0OQh247pRQ5UVUkwXZoJY
+         g1ixhbdHBUXlFAV411vzLB1aqL7pFEVAxuB6faDu93eNoV+m5gzsXgtzhLXeSWi8yFTq
+         G1mA==
+X-Gm-Message-State: AJIora8zQSdq+KEDAOQBvMizbNVzGgmIgyErSXvM2BD4+6ELcGPdVMlg
+        Tiv/o1OCDHWqc0eRPDgKnVM1Hw==
+X-Google-Smtp-Source: AGRyM1uooXTVlKXYemR9EvbrrQp4i2XA4BpQT09bjvN7I6xIwm3cKCnpXCNHNGqwd+HxVz52pv3Omw==
+X-Received: by 2002:ac8:5b0d:0:b0:31b:f519:4107 with SMTP id m13-20020ac85b0d000000b0031bf5194107mr1237416qtw.331.1656423413317;
+        Tue, 28 Jun 2022 06:36:53 -0700 (PDT)
+Received: from ziepe.ca (hlfxns017vw-142-162-113-129.dhcp-dynamic.fibreop.ns.bellaliant.net. [142.162.113.129])
+        by smtp.gmail.com with ESMTPSA id s10-20020a05620a29ca00b006a79479657fsm708363qkp.108.2022.06.28.06.36.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 28 Jun 2022 06:36:52 -0700 (PDT)
+Received: from jgg by mlx with local (Exim 4.94)
+        (envelope-from <jgg@ziepe.ca>)
+        id 1o6BOd-002vAA-VA; Tue, 28 Jun 2022 10:36:51 -0300
+Date:   Tue, 28 Jun 2022 10:36:51 -0300
+From:   Jason Gunthorpe <jgg@ziepe.ca>
+To:     "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Cc:     Daniel Borkmann <daniel@iogearbox.net>,
+        Kees Cook <keescook@chromium.org>,
+        linux-kernel@vger.kernel.org, x86@kernel.org, dm-devel@redhat.com,
+        linux-m68k@lists.linux-m68k.org, linux-mips@vger.kernel.org,
+        linux-s390@vger.kernel.org, kvm@vger.kernel.org,
+        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
+        netdev@vger.kernel.org, bpf@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, linux-can@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org,
+        linux1394-devel@lists.sourceforge.net, io-uring@vger.kernel.org,
+        lvs-devel@vger.kernel.org, linux-mtd@lists.infradead.org,
+        kasan-dev@googlegroups.com, linux-mmc@vger.kernel.org,
+        nvdimm@lists.linux.dev, netfilter-devel@vger.kernel.org,
+        coreteam@netfilter.org, linux-perf-users@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-sctp@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-scsi@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-usb@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        v9fs-developer@lists.sourceforge.net, linux-rdma@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-hardening@vger.kernel.org
+Subject: Re: [PATCH][next] treewide: uapi: Replace zero-length arrays with
+ flexible-array members
+Message-ID: <20220628133651.GO23621@ziepe.ca>
+References: <20220627180432.GA136081@embeddedor>
+ <6bc1e94c-ce1d-a074-7d0c-8dbe6ce22637@iogearbox.net>
+ <20220628004052.GM23621@ziepe.ca>
+ <20220628005825.GA161566@embeddedor>
+ <20220628022129.GA8452@embeddedor>
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-26984.000
-X-TMASE-Result: 10-0.824300-10.000000
-X-TMASE-MatchedRID: /+von0vPuFHzXojwcywrzPCW/PNRRp/ZG24YVeuZGmPozDhGeQC9Er8F
-        Hrw7frluf146W0iUu2tacZzTSiX0+bWfqrMzDJSXzYK5U+QI3O5Hyz3bB5kG52fIvzHS0qU71Ie
-        ckOrbKExvzxvIxmtIpxi87IOQ/i43K6km+od/UDyF0P4btTlf9CiBpCFE00S+myiLZetSf8lRfL
-        aSAVDtyiq2rl3dzGQ1ztE+5yrjfKvqmukZ9YtcgwaHSJ3fNGcaiUKfPOUK6NexdCJcd3nhqlXK9
-        tOD+u6c
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 609bbf6a-c05e-4d54-926e-c74465300547-0-0-200-0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220628022129.GA8452@embeddedor>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Cards with 4k native sector size may only be read 4k-aligned,
-accommodate for this in the single read recovery and use it.
+On Tue, Jun 28, 2022 at 04:21:29AM +0200, Gustavo A. R. Silva wrote:
 
-Fixes: 81196976ed946 (mmc: block: Add blk-mq support)
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/block.c | 27 +++++++++++++--------------
- 1 file changed, 13 insertions(+), 14 deletions(-)
+> > > Though maybe we could just switch off -Wgnu-variable-sized-type-not-at-end  during configuration ?
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index f4a1281658db..7b73d77687b1 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -176,7 +176,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
- 				      unsigned int part_type);
- static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 			       struct mmc_card *card,
--			       int disable_multi,
-+			       int recovery_mode,
- 			       struct mmc_queue *mq);
- static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
- 
-@@ -1302,7 +1302,7 @@ static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
- }
- 
- static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
--			      int disable_multi, bool *do_rel_wr_p,
-+			      int recovery_mode, bool *do_rel_wr_p,
- 			      bool *do_data_tag_p)
- {
- 	struct mmc_blk_data *md = mq->blkdata;
-@@ -1368,12 +1368,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 			brq->data.blocks--;
- 
- 		/*
--		 * After a read error, we redo the request one sector
-+		 * After a read error, we redo the request one (native) sector
- 		 * at a time in order to accurately determine which
- 		 * sectors can be read successfully.
- 		 */
--		if (disable_multi)
--			brq->data.blocks = 1;
-+		if (recovery_mode)
-+			brq->data.blocks = queue_physical_block_size(mq->queue) >> 9;
- 
- 		/*
- 		 * Some controllers have HW issues while operating
-@@ -1590,7 +1590,7 @@ static int mmc_blk_cqe_issue_rw_rq(struct mmc_queue *mq, struct request *req)
- 
- static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 			       struct mmc_card *card,
--			       int disable_multi,
-+			       int recovery_mode,
- 			       struct mmc_queue *mq)
- {
- 	u32 readcmd, writecmd;
-@@ -1599,7 +1599,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	struct mmc_blk_data *md = mq->blkdata;
- 	bool do_rel_wr, do_data_tag;
- 
--	mmc_blk_data_prep(mq, mqrq, disable_multi, &do_rel_wr, &do_data_tag);
-+	mmc_blk_data_prep(mq, mqrq, recovery_mode, &do_rel_wr, &do_data_tag);
- 
- 	brq->mrq.cmd = &brq->cmd;
- 
-@@ -1690,7 +1690,7 @@ static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
- 
- #define MMC_READ_SINGLE_RETRIES	2
- 
--/* Single sector read during recovery */
-+/* Single (native) sector read during recovery */
- static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
- {
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-@@ -1698,6 +1698,7 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
- 	struct mmc_card *card = mq->card;
- 	struct mmc_host *host = card->host;
- 	blk_status_t error = BLK_STS_OK;
-+	size_t bytes_per_read = queue_physical_block_size(mq->queue);
- 
- 	do {
- 		u32 status;
-@@ -1732,13 +1733,13 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
- 		else
- 			error = BLK_STS_OK;
- 
--	} while (blk_update_request(req, error, 512));
-+	} while (blk_update_request(req, error, bytes_per_read));
- 
- 	return;
- 
- error_exit:
- 	mrq->data->bytes_xfered = 0;
--	blk_update_request(req, BLK_STS_IOERR, 512);
-+	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
- 	/* Let it try the remaining request again */
- 	if (mqrq->retries > MMC_MAX_RETRIES - 1)
- 		mqrq->retries = MMC_MAX_RETRIES - 1;
-@@ -1879,10 +1880,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
- 		return;
- 	}
- 
--	/* FIXME: Missing single sector read for large sector size */
--	if (!mmc_large_sector(card) && rq_data_dir(req) == READ &&
--	    brq->data.blocks > 1) {
--		/* Read one sector at a time */
-+	if (rq_data_dir(req) == READ && brq->data.blocks > 1) {
-+		/* Read one (native) sector at a time */
- 		mmc_blk_read_single(mq, req);
- 		return;
- 	}
--- 
-2.36.1
+> We need to think in a different strategy.
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+I think we will need to switch off the warning in userspace - this is
+doable for rdma-core.
 
+On the other hand, if the goal is to enable the array size check
+compiler warning I would suggest focusing only on those structs that
+actually hit that warning in the kernel. IIRC infiniband doesn't
+trigger it because it just pointer casts the flex array to some other
+struct.
+
+It isn't actually an array it is a placeholder for a trailing
+structure, so it is never indexed.
+
+This is also why we hit the warning because the convient way for
+userspace to compose the message is to squash the header and trailer
+structs together in a super struct on the stack, then invoke the
+ioctl.
+
+Jason 
