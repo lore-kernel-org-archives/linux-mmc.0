@@ -2,59 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85FBACCA487
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 06:54:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EE05CCA479
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 07:28:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244234AbiF1GyQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Jun 2022 02:54:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33900 "EHLO
+        id S241104AbiF1H1z convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Jun 2022 03:27:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343842AbiF1GyM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 02:54:12 -0400
-X-Greylist: delayed 329 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 27 Jun 2022 23:54:11 PDT
-Received: from mail.privatemain.com (mail.privatemain.com [45.86.209.156])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E462D2715D
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2022 23:54:11 -0700 (PDT)
-Received: by mail.privatemain.com (Postfix, from userid 1001)
-        id 9B40782989; Tue, 28 Jun 2022 02:46:25 -0400 (EDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=privatemain.com;
-        s=mail; t=1656398921;
-        bh=ydItAdwWOyX5wABuTqD9n+VESLmlWw/YxTJchbbqnDQ=;
-        h=Date:From:To:Subject:From;
-        b=O0q6YHdW6he77aY9tzdQSKACVrOXQZpURPZaaZZR82DNijoJmmEEKfJ6A29FgvjUY
-         Cey9pe8CHlNzWKxzI10pRXz8a9NrhnyJlx/67X4gb4eXjJrXEiZcrWoBJZEwNmElzL
-         WW1YzQbWrCPGDku/4tHLQsiHmJXXmHkIOWkLwefbbgMrD0lHs74kzhbiW4IEhaWDeD
-         cOO0uOr55yktyJKKotICO+sAI8Q44MmPvWxtIUaCyV28ANxPh1BdzEar0NV3EAENM5
-         o35Gx5FiAHE8Fo0OAhFsB+onzJeGQCbF+KN+sNYsp4TOZync+hQNRrwbQ2Ai2V0pFw
-         HR9nTxQ1oGsZg==
-Received: by mail.privatemain.com for <linux-mmc@vger.kernel.org>; Tue, 28 Jun 2022 06:46:21 GMT
-Message-ID: <20220628024500-0.1.26.1fl8.0.ead9c55du0@privatemain.com>
-Date:   Tue, 28 Jun 2022 06:46:21 GMT
-From:   "Maciej Kielar" <maciej.kielar@privatemain.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Prawne zabezpieczenie firmy
-X-Mailer: mail.privatemain.com
+        with ESMTP id S242985AbiF1H1h (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 03:27:37 -0400
+Received: from mail-qv1-f41.google.com (mail-qv1-f41.google.com [209.85.219.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C165B2CE26;
+        Tue, 28 Jun 2022 00:27:35 -0700 (PDT)
+Received: by mail-qv1-f41.google.com with SMTP id i17so18728446qvo.13;
+        Tue, 28 Jun 2022 00:27:35 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=hwgLtruPC06mcRCnQAsf+kJqHCP1mf00hTNnpiQ34M0=;
+        b=3tQxdeTXaeHedyn+zuV/55ACvAhAXmWcP4mEBFJ7jzsyYq6RsSgMON/8hhCXyPFuse
+         MLSN3K1iygLYNzbYfsEUEZlABb1G1eppIZbae+40fb4YMxpctrE+lrJz3qET/ldo5zGd
+         37edeyXGnan1cSc5wL4OCPTZESLkJDeXBVsf5Jitdq4F2SUoLicy4d+r65QQwFBoAQaF
+         rVmUy/gVspn4buiPbwq5cSH0lOm6yf061HBv7eJrhJeCu9Xa08CHGXWzt6wFcbBU42zO
+         cc0C2wJwrVFqggLP3rTWVXzc4tL0SV7qsxw7pHWn+6UvTIPwY9qNnceTZYR/8yu6Ppqr
+         0hkQ==
+X-Gm-Message-State: AJIora91XfpVhN+yRTRlxkAy8ZQagB28kxgOh0hSO/dgpIY4a+cEmxEM
+        RRrXPZ914wNJxYzvqW7oNwha7fO41WOfPA==
+X-Google-Smtp-Source: AGRyM1vuyurBth3w/1QAUlj3nOiF8B4hIrD4wqWY4IUnkxCMfrPNbOyI3fDTEu0sS0pUw3shJaj5og==
+X-Received: by 2002:a05:622a:647:b0:306:6b30:bd0a with SMTP id a7-20020a05622a064700b003066b30bd0amr12004710qtb.327.1656401254977;
+        Tue, 28 Jun 2022 00:27:34 -0700 (PDT)
+Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com. [209.85.128.182])
+        by smtp.gmail.com with ESMTPSA id f14-20020a05620a408e00b006a5d2eb58b2sm11643530qko.33.2022.06.28.00.27.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 28 Jun 2022 00:27:34 -0700 (PDT)
+Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-3176b6ed923so107319457b3.11;
+        Tue, 28 Jun 2022 00:27:33 -0700 (PDT)
+X-Received: by 2002:a81:a092:0:b0:318:5c89:a935 with SMTP id
+ x140-20020a81a092000000b003185c89a935mr20762801ywg.383.1656401253054; Tue, 28
+ Jun 2022 00:27:33 -0700 (PDT)
 MIME-Version: 1.0
+References: <20220627180432.GA136081@embeddedor>
+In-Reply-To: <20220627180432.GA136081@embeddedor>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 28 Jun 2022 09:27:21 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdU27TG_rpd=WTRPRcY22A4j4aN-6d_8OmK2aNpX06G3ig@mail.gmail.com>
+Message-ID: <CAMuHMdU27TG_rpd=WTRPRcY22A4j4aN-6d_8OmK2aNpX06G3ig@mail.gmail.com>
+Subject: Re: [PATCH][next] treewide: uapi: Replace zero-length arrays with
+ flexible-array members
+To:     "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Cc:     Kees Cook <keescook@chromium.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "the arch/x86 maintainers" <x86@kernel.org>, dm-devel@redhat.com,
+        linux-m68k <linux-m68k@lists.linux-m68k.org>,
+        "open list:BROADCOM NVRAM DRIVER" <linux-mips@vger.kernel.org>,
+        linux-s390 <linux-s390@vger.kernel.org>,
+        KVM list <kvm@vger.kernel.org>,
+        Intel Graphics Development <intel-gfx@lists.freedesktop.org>,
+        DRI Development <dri-devel@lists.freedesktop.org>,
+        netdev <netdev@vger.kernel.org>, bpf <bpf@vger.kernel.org>,
+        linux-btrfs <linux-btrfs@vger.kernel.org>,
+        linux-can@vger.kernel.org,
+        Linux FS Devel <linux-fsdevel@vger.kernel.org>,
+        linux1394-devel@lists.sourceforge.net, io-uring@vger.kernel.org,
+        lvs-devel@vger.kernel.org,
+        MTD Maling List <linux-mtd@lists.infradead.org>,
+        kasan-dev <kasan-dev@googlegroups.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        nvdimm@lists.linux.dev,
+        NetFilter <netfilter-devel@vger.kernel.org>,
+        coreteam@netfilter.org, linux-perf-users@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-sctp@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        scsi <linux-scsi@vger.kernel.org>,
+        target-devel <target-devel@vger.kernel.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        virtualization@lists.linux-foundation.org,
+        V9FS Developers <v9fs-developer@lists.sourceforge.net>,
+        linux-rdma <linux-rdma@vger.kernel.org>,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        linux-hardening@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry,
+Hi Gustavo,
 
-czy s=C4=85 Pa=C5=84stwo otwarci na rozmowe o wsp=C3=B3=C5=82pracy z nasz=
-a Kancelari=C4=85?
+Thanks for your patch!
 
-Obs=C5=82ugujemy firmy z wojew=C3=B3dztwa pomorskiego w zakresie kompleks=
-owego wsparcia prawnego w rozszerzonym zakresie.=20
+On Mon, Jun 27, 2022 at 8:04 PM Gustavo A. R. Silva
+<gustavoars@kernel.org> wrote:
+> There is a regular need in the kernel to provide a way to declare
+> having a dynamically sized set of trailing elements in a structure.
+> Kernel code should always use “flexible array members”[1] for these
+> cases. The older style of one-element or zero-length arrays should
+> no longer be used[2].
 
-Dzi=C4=99ki wieloletniej praktyce i wsp=C3=B3=C5=82pracy z dzia=C5=82alno=
-=C5=9Bciami Pa=C5=84stwa formatu jestem w stanie wypracowa=C4=87 korzystn=
-e rozwi=C4=85zania pod wzgl=C4=99dem podatkowym i organizacyjnym.
+These rules apply to the kernel, but uapi is not considered part of the
+kernel, so different rules apply.  Uapi header files should work with
+whatever compiler that can be used for compiling userspace.
 
-Mo=C5=BCemy si=C4=99 spotka=C4=87 b=C4=85d=C5=BA porozmawia=C4=87 telefon=
-icznie?
+Gr{oetje,eeting}s,
 
-Pozdrawiam,
-Mec. Maciej Kielar
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
