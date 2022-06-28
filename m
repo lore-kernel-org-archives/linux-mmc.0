@@ -2,176 +2,303 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEC7ACCA487
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 00:58:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEFA5CCA47F
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 01:35:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242788AbiF1A6i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Jun 2022 20:58:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54374 "EHLO
+        id S243136AbiF1Bfv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Jun 2022 21:35:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55674 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242060AbiF1A6e (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2022 20:58:34 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34AA01CFE5;
-        Mon, 27 Jun 2022 17:58:33 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id CD4F7B81C0A;
-        Tue, 28 Jun 2022 00:58:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BBEABC341C8;
-        Tue, 28 Jun 2022 00:58:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1656377910;
-        bh=x4KMhmowxPAczUMJ6x4nBeCjlIDio89Zlndd34Eza5Q=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=rmtqPrxs/EakAnLyUZ+T1Y6Y2PuUVWE1p/lPmqQBXiapPC1WBd92tcHfgEnTJibSz
-         8Cqh6wp+mGRPQenFwVH/ncudi5b7Tg0x4DYK6LYwUDkNgU3v8Yk/6Or0HzPxa5QXgF
-         OYkHqjzJwOTAIzA6m0DkNzWrhG6StDZ8wiRdHVw+Wnp/Deq+bcAy4GlTPygKnkBgqV
-         sUW1DRx9UPn831OT0MRefhs1kf7ZlvXFnW9s3XTKUzsS60aUSNGKPAXfxyQi7QqZvQ
-         a8VxNxF80uRWuCVjsLU3WaCLAUnTapHIuQJvInOf0IrcXvC7dKlHhnQt1FhIxUdbDj
-         Qy7qblTn3AnuA==
-Date:   Tue, 28 Jun 2022 02:58:25 +0200
-From:   "Gustavo A. R. Silva" <gustavoars@kernel.org>
-To:     Jason Gunthorpe <jgg@ziepe.ca>
-Cc:     Daniel Borkmann <daniel@iogearbox.net>,
-        Kees Cook <keescook@chromium.org>,
-        linux-kernel@vger.kernel.org, x86@kernel.org, dm-devel@redhat.com,
-        linux-m68k@lists.linux-m68k.org, linux-mips@vger.kernel.org,
-        linux-s390@vger.kernel.org, kvm@vger.kernel.org,
-        intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org,
-        netdev@vger.kernel.org, bpf@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org,
-        linux1394-devel@lists.sourceforge.net, io-uring@vger.kernel.org,
-        lvs-devel@vger.kernel.org, linux-mtd@lists.infradead.org,
-        kasan-dev@googlegroups.com, linux-mmc@vger.kernel.org,
-        nvdimm@lists.linux.dev, netfilter-devel@vger.kernel.org,
-        coreteam@netfilter.org, linux-perf-users@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-sctp@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org, linux-scsi@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-usb@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        v9fs-developer@lists.sourceforge.net, linux-rdma@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-hardening@vger.kernel.org
-Subject: Re: [PATCH][next] treewide: uapi: Replace zero-length arrays with
- flexible-array members
-Message-ID: <20220628005825.GA161566@embeddedor>
-References: <20220627180432.GA136081@embeddedor>
- <6bc1e94c-ce1d-a074-7d0c-8dbe6ce22637@iogearbox.net>
- <20220628004052.GM23621@ziepe.ca>
+        with ESMTP id S243082AbiF1Bfu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2022 21:35:50 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3AE11AF2D;
+        Mon, 27 Jun 2022 18:35:48 -0700 (PDT)
+X-UUID: e2100dd6e45a49ba848ccabc6625f7d1-20220628
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.7,REQID:54d8fdd5-4023-4efa-a3a0-4525b25c0589,OB:10,L
+        OB:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:51,FILE:0,RULE:Release_Ham,AC
+        TION:release,TS:51
+X-CID-INFO: VERSION:1.1.7,REQID:54d8fdd5-4023-4efa-a3a0-4525b25c0589,OB:10,LOB
+        :0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:51,FILE:0,RULE:Release_Ham,ACTI
+        ON:release,TS:51
+X-CID-META: VersionHash:87442a2,CLOUDID:1fb8fdd5-5d6d-4eaf-a635-828a3ee48b7c,C
+        OID:af11b62a56bb,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
+        RL:0,File:nil,QS:nil,BEC:nil,COL:0
+X-UUID: e2100dd6e45a49ba848ccabc6625f7d1-20220628
+Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
+        (envelope-from <chaotian.jing@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 926094020; Tue, 28 Jun 2022 09:35:42 +0800
+Received: from mtkcas10.mediatek.inc (172.21.101.39) by
+ mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.2.792.15; Tue, 28 Jun 2022 09:35:40 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkcas10.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 28 Jun 2022 09:35:39 +0800
+Message-ID: <8be385651b909c911a9225960cacff72cac96b5b.camel@mediatek.com>
+Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup
+ IRQ
+From:   Chaotian Jing <chaotian.jing@mediatek.com>
+To:     Axe Yang <axe.yang@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>
+Date:   Tue, 28 Jun 2022 09:35:39 +0800
+In-Reply-To: <20220623090445.1401-4-axe.yang@mediatek.com>
+References: <20220623090445.1401-1-axe.yang@mediatek.com>
+         <20220623090445.1401-4-axe.yang@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220628004052.GM23621@ziepe.ca>
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 27, 2022 at 09:40:52PM -0300, Jason Gunthorpe wrote:
-> On Mon, Jun 27, 2022 at 08:27:37PM +0200, Daniel Borkmann wrote:
-> > On 6/27/22 8:04 PM, Gustavo A. R. Silva wrote:
-> > > There is a regular need in the kernel to provide a way to declare
-> > > having a dynamically sized set of trailing elements in a structure.
-> > > Kernel code should always use “flexible array members”[1] for these
-> > > cases. The older style of one-element or zero-length arrays should
-> > > no longer be used[2].
-> > > 
-> > > This code was transformed with the help of Coccinelle:
-> > > (linux-5.19-rc2$ spatch --jobs $(getconf _NPROCESSORS_ONLN) --sp-file script.cocci --include-headers --dir . > output.patch)
-> > > 
-> > > @@
-> > > identifier S, member, array;
-> > > type T1, T2;
-> > > @@
-> > > 
-> > > struct S {
-> > >    ...
-> > >    T1 member;
-> > >    T2 array[
-> > > - 0
-> > >    ];
-> > > };
-> > > 
-> > > -fstrict-flex-arrays=3 is coming and we need to land these changes
-> > > to prevent issues like these in the short future:
-> > > 
-> > > ../fs/minix/dir.c:337:3: warning: 'strcpy' will always overflow; destination buffer has size 0,
-> > > but the source string has length 2 (including NUL byte) [-Wfortify-source]
-> > > 		strcpy(de3->name, ".");
-> > > 		^
-> > > 
-> > > Since these are all [0] to [] changes, the risk to UAPI is nearly zero. If
-> > > this breaks anything, we can use a union with a new member name.
-> > > 
-> > > [1] https://en.wikipedia.org/wiki/Flexible_array_member
-> > > [2] https://www.kernel.org/doc/html/v5.16/process/deprecated.html#zero-length-and-one-element-arrays
-> > > 
-> > > Link: https://github.com/KSPP/linux/issues/78
-> > > Build-tested-by: https://lore.kernel.org/lkml/62b675ec.wKX6AOZ6cbE71vtF%25lkp@intel.com/
-> > > Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
-> > > ---
-> > > Hi all!
-> > > 
-> > > JFYI: I'm adding this to my -next tree. :)
-> > 
-> > Fyi, this breaks BPF CI:
-> > 
-> > https://github.com/kernel-patches/bpf/runs/7078719372?check_suite_focus=true
-> > 
-> >   [...]
-> >   progs/map_ptr_kern.c:314:26: error: field 'trie_key' with variable sized type 'struct bpf_lpm_trie_key' not at the end of a struct or class is a GNU extension [-Werror,-Wgnu-variable-sized-type-not-at-end]
-> >           struct bpf_lpm_trie_key trie_key;
-> >                                   ^
+On Thu, 2022-06-23 at 17:04 +0800, Axe Yang wrote:
+> Add support for eint IRQ when MSDC is used as an SDIO host. This
+> feature requires SDIO device support async IRQ function. With this
+> feature, SDIO host can be awakened by SDIO card in suspend state,
+> without additional pin.
 > 
-> This will break the rdma-core userspace as well, with a similar
-> error:
+> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> resume, switch GPIO function back to DAT1 mode then turn on clock.
 > 
-> /usr/bin/clang-13 -DVERBS_DEBUG -Dibverbs_EXPORTS -Iinclude -I/usr/include/libnl3 -I/usr/include/drm -g -O2 -fdebug-prefix-map=/__w/1/s=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -Wmissing-prototypes -Wmissing-declarations -Wwrite-strings -Wformat=2 -Wcast-function-type -Wformat-nonliteral -Wdate-time -Wnested-externs -Wshadow -Wstrict-prototypes -Wold-style-definition -Werror -Wredundant-decls -g -fPIC   -std=gnu11 -MD -MT libibverbs/CMakeFiles/ibverbs.dir/cmd_flow.c.o -MF libibverbs/CMakeFiles/ibverbs.dir/cmd_flow.c.o.d -o libibverbs/CMakeFiles/ibverbs.dir/cmd_flow.c.o   -c ../libibverbs/cmd_flow.c
-> In file included from ../libibverbs/cmd_flow.c:33:
-> In file included from include/infiniband/cmd_write.h:36:
-> In file included from include/infiniband/cmd_ioctl.h:41:
-> In file included from include/infiniband/verbs.h:48:
-> In file included from include/infiniband/verbs_api.h:66:
-> In file included from include/infiniband/ib_user_ioctl_verbs.h:38:
-> include/rdma/ib_user_verbs.h:436:34: error: field 'base' with variable sized type 'struct ib_uverbs_create_cq_resp' not at the end of a struct or class is a GNU extension [-Werror,-Wgnu-variable-sized-type-not-at-end]
->         struct ib_uverbs_create_cq_resp base;
->                                         ^
-> include/rdma/ib_user_verbs.h:644:34: error: field 'base' with variable sized type 'struct ib_uverbs_create_qp_resp' not at the end of a struct or class is a GNU extension [-Werror,-Wgnu-variable-sized-type-not-at-end]
->         struct ib_uverbs_create_qp_resp base;
+> Some device tree property should be added or modified in MSDC node
+> to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
+> this feature depends on asynchronous interrupts, "wakeup-source",
+> "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
+> the interrupts list should be extended(the interrupt named with
+> sdio_wakeup):
+>         &mmcX {
+> 		...
+> 		interrupt-names = "msdc", "sdio_wakeup";
+> 		interrupts-extended = <...>,
+>                               	      <&pio xxx
+> IRQ_TYPE_LEVEL_LOW>;
+>                 ...
+>                 pinctrl-names = "default", "state_uhs", "state_eint";
+>                 ...
+>                 pinctrl-2 = <&mmc2_pins_eint>;
+>                 ...
+>                 cap-sdio-irq;
+> 		keep-power-in-suspend;
+> 		wakeup-source;
+>                 ...
+>         };
 > 
-> Which is why I gave up trying to change these..
+> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+Reviewed-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 84 ++++++++++++++++++++++++++++++++++++-
+> --
+>  1 file changed, 78 insertions(+), 6 deletions(-)
 > 
-> Though maybe we could just switch off -Wgnu-variable-sized-type-not-at-end  during configuration ?
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 195dc897188b..f907b96cfd87 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1,6 +1,6 @@
+>  // SPDX-License-Identifier: GPL-2.0-only
+>  /*
+> - * Copyright (c) 2014-2015 MediaTek Inc.
+> + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
+>   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+>   */
+>  
+> @@ -20,6 +20,7 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/pm.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/pm_wakeirq.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/slab.h>
+>  #include <linux/spinlock.h>
+> @@ -440,8 +441,10 @@ struct msdc_host {
+>  	struct pinctrl *pinctrl;
+>  	struct pinctrl_state *pins_default;
+>  	struct pinctrl_state *pins_uhs;
+> +	struct pinctrl_state *pins_eint;
+>  	struct delayed_work req_timeout;
+>  	int irq;		/* host interrupt */
+> +	int eint_irq;		/* interrupt from sdio device for
+> waking up system */
+>  	struct reset_control *reset;
+>  
+>  	struct clk *src_clk;	/* msdc source clock */
+> @@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct
+> msdc_host *host, int enb)
+>  
+>  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  {
+> -	unsigned long flags;
+>  	struct msdc_host *host = mmc_priv(mmc);
+> +	unsigned long flags;
+> +	int ret;
+>  
+>  	spin_lock_irqsave(&host->lock, flags);
+>  	__msdc_enable_sdio_irq(host, enb);
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+> -	if (enb)
+> -		pm_runtime_get_noresume(host->dev);
+> -	else
+> -		pm_runtime_put_noidle(host->dev);
+> +	if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
+> +		if (enb) {
+> +			/*
+> +			 * In dev_pm_set_dedicated_wake_irq_reverse(),
+> eint pin will be set to
+> +			 * GPIO mode. We need to restore it to SDIO
+> DAT1 mode after that.
+> +			 * Since the current pinstate is pins_uhs, to
+> ensure pinctrl select take
+> +			 * affect successfully, we change the pinstate
+> to pins_eint firstly.
+> +			 */
+> +			pinctrl_select_state(host->pinctrl, host-
+> >pins_eint);
+> +			ret =
+> dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
+> +
+> +			if (ret) {
+> +				dev_err(host->dev, "Failed to register
+> SDIO wakeup irq!\n");
+> +				host->pins_eint = NULL;
+> +				pm_runtime_get_noresume(host->dev);
+> +			} else {
+> +				dev_dbg(host->dev, "SDIO eint irq:
+> %d!\n", host->eint_irq);
+> +			}
+> +
+> +			pinctrl_select_state(host->pinctrl, host-
+> >pins_uhs);
+> +		} else {
+> +			dev_pm_clear_wake_irq(host->dev);
+> +		}
+> +	} else {
+> +		if (enb) {
+> +			/* Ensure host->pins_eint is NULL */
+> +			host->pins_eint = NULL;
+> +			pm_runtime_get_noresume(host->dev);
+> +		} else {
+> +			pm_runtime_put_noidle(host->dev);
+> +		}
+> +	}
+>  }
+>  
+>  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
+> @@ -2631,6 +2663,20 @@ static int msdc_drv_probe(struct
+> platform_device *pdev)
+>  		goto host_free;
+>  	}
+>  
+> +	/* Support for SDIO eint irq ? */
+> +	if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps &
+> MMC_PM_KEEP_POWER)) {
+> +		host->eint_irq = platform_get_irq_byname(pdev,
+> "sdio_wakeup");
+> +		if (host->eint_irq > 0) {
+> +			host->pins_eint = pinctrl_lookup_state(host-
+> >pinctrl, "state_eint");
+> +			if (IS_ERR(host->pins_eint)) {
+> +				dev_err(&pdev->dev, "Cannot find
+> pinctrl eint!\n");
+> +				host->pins_eint = NULL;
+> +			} else {
+> +				device_init_wakeup(&pdev->dev, true);
+> +			}
+> +		}
+> +	}
+> +
+>  	msdc_of_property_parse(pdev, host);
+>  
+>  	host->dev = &pdev->dev;
+> @@ -2845,6 +2891,13 @@ static int __maybe_unused
+> msdc_runtime_suspend(struct device *dev)
+>  	struct msdc_host *host = mmc_priv(mmc);
+>  
+>  	msdc_save_reg(host);
+> +
+> +	if (host->pins_eint) {
+> +		disable_irq(host->irq);
+> +		pinctrl_select_state(host->pinctrl, host->pins_eint);
+> +		if (sdio_irq_claimed(mmc))
+> +			__msdc_enable_sdio_irq(host, 0);
+> +	}
+>  	msdc_gate_clock(host);
+>  	return 0;
+>  }
+> @@ -2860,12 +2913,18 @@ static int __maybe_unused
+> msdc_runtime_resume(struct device *dev)
+>  		return ret;
+>  
+>  	msdc_restore_reg(host);
+> +
+> +	if (host->pins_eint) {
+> +		pinctrl_select_state(host->pinctrl, host->pins_uhs);
+> +		enable_irq(host->irq);
+> +	}
+>  	return 0;
+>  }
+>  
+>  static int __maybe_unused msdc_suspend(struct device *dev)
+>  {
+>  	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct msdc_host *host = mmc_priv(mmc);
+>  	int ret;
+>  
+>  	if (mmc->caps2 & MMC_CAP2_CQE) {
+> @@ -2874,11 +2933,24 @@ static int __maybe_unused msdc_suspend(struct
+> device *dev)
+>  			return ret;
+>  	}
+>  
+> +	/*
+> +	 * Bump up runtime PM usage counter otherwise dev-
+> >power.needs_force_resume will
+> +	 * not be marked as 1, pm_runtime_force_resume() will go out
+> directly.
+> +	 */
+> +	if (host->pins_eint)
+> +		pm_runtime_get_noresume(dev);
+> +
+>  	return pm_runtime_force_suspend(dev);
+>  }
+>  
+>  static int __maybe_unused msdc_resume(struct device *dev)
+>  {
+> +	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct msdc_host *host = mmc_priv(mmc);
+> +
+> +	if (host->pins_eint)
+> +		pm_runtime_put_noidle(dev);
+> +
+>  	return pm_runtime_force_resume(dev);
+>  }
+>  
 
-No. I think now we can easily workaround these sorts of problems with
-something like this:
-
-	struct flex {
-		any_type any_member;
-		union {
-			type array[0];
-			__DECLARE_FLEX_ARRAY(type, array_flex);
-		};
-	};
-
-and use array_flex in kernel-space.
-
-The same for the one-elment arrays in UAPI:
-
-        struct flex {
-                any_type any_member;
-                union {
-                        type array[1];
-                        __DECLARE_FLEX_ARRAY(type, array_flex);
-                };
-        };
-
-I'll use the idiom above to resolve all these warnings in a follow-up
-patch. :)
-
-Thanks
---
-Gustavo
