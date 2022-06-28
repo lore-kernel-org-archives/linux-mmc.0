@@ -2,64 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11C11C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 09:43:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5C88C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Jun 2022 11:13:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229993AbiF1Jnx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Jun 2022 05:43:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37010 "EHLO
+        id S233200AbiF1LNn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Jun 2022 07:13:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241493AbiF1Jnw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 05:43:52 -0400
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95FE525C44;
-        Tue, 28 Jun 2022 02:43:51 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id E7487CE1F6A;
-        Tue, 28 Jun 2022 09:43:49 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 11CE4C3411D;
-        Tue, 28 Jun 2022 09:43:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1656409428;
-        bh=thS9ui805uOCG9IcSSWQ4Iipyz6nbp+j+pITQe+6x6s=;
-        h=Date:Subject:To:References:From:In-Reply-To:From;
-        b=NEgHDMpubsyaqRktPkNxKRYs44PTuFadcPuXlE1f7H3Xm/oqa4EJNges6S+0lzfwA
-         +FMzXCbWc6Tpw7uUQWm3/NbKteKDqe+JbfQe65eP7tjhGHtEuJixUB+Pm5VkYpGwHG
-         DbR8fzF/qMZN/oT5GxoaCUIK3Y9Opi/9zK4HgSbwlb7RupvPQSypk8U3hp0Vwog1XP
-         B07KyaE9e4N3pqDXsOHV3S5fYlDu8glYF+BEEPpge+PBLAy3K92TGojl2flZ0rzCp1
-         cuMdFPm6aAreguokqyfUxibHtVI9uJHIkWkA//KAt6Y5+nxpYrAEdiWxcDHuet30kL
-         03XOLjoELrd3A==
-Message-ID: <9a4543dd-e441-4803-361f-6fd420bc9a19@kernel.org>
-Date:   Tue, 28 Jun 2022 11:43:44 +0200
+        with ESMTP id S229846AbiF1LNm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2022 07:13:42 -0400
+Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC8052CDFC;
+        Tue, 28 Jun 2022 04:13:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1656414821; x=1687950821;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=w2smDjFDSnaWaF8DZXAccU3orfE582qzoDzr3rq7nFo=;
+  b=CwaEV0TNKZ5KumfWffqVpg0qgRICVLhkfTRKSFvtkKfPWy58J//hY9Yl
+   AZU+zoZolFNebmOi7qVCzrhRvLehRskDvRtfBX3VQfWywJFirKf/xphwh
+   HZxuEn3U9jbdzL+1kfGTY1YRWhULacu8MD4xFUWiOXQXgExjD/b2AOKdq
+   uMQDOSf91vTc0aaSUBs914eq/bfSPkt6IThgofMwvO0ry6I/Mg5gZTc33
+   oWM5mWsiCa6UcjIv3i1PhRzXQGEWGVU6Y4F6u50GngpefgyLUyZCtulmz
+   OFmUI/qeMiB28CtyoOXUNDvo070GQaVjnbbMSnZmuFntzFptMwcs5NTlc
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10391"; a="368025223"
+X-IronPort-AV: E=Sophos;i="5.92,227,1650956400"; 
+   d="scan'208";a="368025223"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Jun 2022 04:13:41 -0700
+X-IronPort-AV: E=Sophos;i="5.92,227,1650956400"; 
+   d="scan'208";a="646871058"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.204])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Jun 2022 04:13:39 -0700
+Message-ID: <e7ebb779-9938-d5f7-d900-dbea55b4ac72@intel.com>
+Date:   Tue, 28 Jun 2022 14:13:36 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.10.0
-Subject: Re: [PATCH] mmc: sdhci_am654: MMC_SDHCI_AM654 should depend on
- ARCH_K3
+ Firefox/91.0 Thunderbird/91.9.1
+Subject: Re: [PATCHv2] mmc: block: Add single read for 4k sector cards
 Content-Language: en-US
-To:     Peter Robinson <pbrobinson@gmail.com>, linux-omap@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-References: <20220628093205.103182-1-pbrobinson@gmail.com>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-In-Reply-To: <20220628093205.103182-1-pbrobinson@gmail.com>
+To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        Avri Altman <Avri.Altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <e0cce326393645d3b4a163ce65c89fb9@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <e0cce326393645d3b4a163ce65c89fb9@hyperstone.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/06/2022 11:32, Peter Robinson wrote:
-> The Texas Instruments sdhci_am654 SDHCI controller is only present on
-> TI K3 SoCs so add a dependency to reflect that, plus COMPILE_TEST.
-> Also update the help text to reflect the new SoC support added since
-> the driver was first added.
+On 28/06/22 12:08, Christian Löhle wrote:
+>> Cards with 4k native sector size may only be read 4k-aligned,
+>>> accommodate for this in the single read recovery and use it.
+>>
+>> Thanks for the patch.
+>>
+>>>
+>>> Fixes: 81196976ed946 (mmc: block: Add blk-mq support)
+>>> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+>>
+>> FYI checkpatch says:
+>>
+>> WARNING: From:/Signed-off-by: email name mismatch: 'From: "Christian Löhle" <CLoehle@hyperstone.com>' != 'Signed-off-by: Christian Loehle <cloehle@hyperstone.com>'
 > 
-> Fixes: 41fd4caeb00b ("mmc: sdhci_am654: Add Initial Support for AM654 SDHCI driver")
+> Will be fixed in my future patches, thanks for the hint.
+> 
+>>
+>>> ---
+>>>  drivers/mmc/core/block.c | 25 ++++++++++++-------------
+>>>  1 file changed, 12 insertions(+), 13 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+>>> index f4a1281658db..a75a208ce203 100644
+>>> --- a/drivers/mmc/core/block.c
+>>> +++ b/drivers/mmc/core/block.c
+>>> @@ -176,7 +176,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+>>>  				      unsigned int part_type);
+>>>  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>>>  			       struct mmc_card *card,
+>>> -			       int disable_multi,
+>>> +			       int recovery_mode,
+>>>  			       struct mmc_queue *mq);
+>>>  static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+>>>  
+>>> @@ -1302,7 +1302,7 @@ static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+>>>  }
+>>>  
+>>>  static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+>>> -			      int disable_multi, bool *do_rel_wr_p,
+>>> +			      int recovery_mode, bool *do_rel_wr_p,
+>>>  			      bool *do_data_tag_p)
+>>>  {
+>>>  	struct mmc_blk_data *md = mq->blkdata;
+>>> @@ -1372,8 +1372,8 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+>>>  		 * at a time in order to accurately determine which
+>>>  		 * sectors can be read successfully.
+>>>  		 */
+>>> -		if (disable_multi)
+>>> -			brq->data.blocks = 1;
+>>> +		if (recovery_mode)
+>>> +			brq->data.blocks = mmc_large_sector(card) ? 8 : 1;
+>>
+>> I suggest changing to use queue_physical_block_size() here and further below
+> 
+> This part I'm impartial about, not sure if it makes it more readable, hopefully we never have to support another "native sector size" apart from the two.
+> Anyway I will send the next patch with queue_physical_block_size()
+> 
+>>
+>> 			brq->data.blocks = queue_physical_block_size(req->q) >> SECTOR_SHIFT;
+> 
+> Do we want to switch to SECTOR_SHIFT instead of 9? So far SECTOR_SHIFT is not used at all in mmc core.
 
-I don't see a bug to fix, so the tag does not look appropriate.
-Otherwise describe how is the bug visible/reproducible etc.
+I guess '9' is more consistent
 
-Best regards,
-Krzysztof
+> If so I would go ahead and change all the others in another patch:
+> queue.c:187:	q->limits.discard_granularity = card->pref_erase << 9;
+> core.c:103:	data->bytes_xfered = (prandom_u32() % (data->bytes_xfered >> 9)) << 9;
+> mmc.c:792:MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
+> mmc.c:793:MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
+> mmc_test.c:1557:	sz = (unsigned long)test->card->pref_erase << 9;
+> mmc_test.c:1570:		t->max_tfr = test->card->host->max_blk_count << 9;
+> mmc_test.c:2461:	if (repeat_cmd && (t->blocks + 1) << 9 > t->max_tfr)
+> sd.c:707:MMC_DEV_ATTR(erase_size, "%u\n", card->erase_size << 9);
+> sd.c:708:MMC_DEV_ATTR(preferred_erase_size, "%u\n", card->pref_erase << 9);
+> block.c:1417:		int i, data_size = brq->data.blocks << 9;
+> block.c:1851:			brq->data.bytes_xfered = blocks << 9;
+> 
+> 
+> 
+> 
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+
