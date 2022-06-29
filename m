@@ -2,69 +2,177 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F913C43334
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jun 2022 08:41:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06470C43334
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jun 2022 13:19:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232731AbiF2Iln (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Jun 2022 04:41:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55028 "EHLO
+        id S232773AbiF2NTE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Jun 2022 09:19:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232488AbiF2Ilm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2022 04:41:42 -0400
-Received: from eu-smtp-delivery-151.mimecast.com (eu-smtp-delivery-151.mimecast.com [185.58.86.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 34BED3CA77
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2022 01:41:41 -0700 (PDT)
-Received: from AcuMS.aculab.com (156.67.243.121 [156.67.243.121]) by
- relay.mimecast.com with ESMTP with STARTTLS (version=TLSv1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- uk-mtapsc-7-3YVn8aRSPNyCaLqH6g1oTw-1; Wed, 29 Jun 2022 09:41:38 +0100
-X-MC-Unique: 3YVn8aRSPNyCaLqH6g1oTw-1
-Received: from AcuMS.Aculab.com (fd9f:af1c:a25b:0:994c:f5c2:35d6:9b65) by
- AcuMS.aculab.com (fd9f:af1c:a25b:0:994c:f5c2:35d6:9b65) with Microsoft SMTP
- Server (TLS) id 15.0.1497.36; Wed, 29 Jun 2022 09:41:37 +0100
-Received: from AcuMS.Aculab.com ([fe80::994c:f5c2:35d6:9b65]) by
- AcuMS.aculab.com ([fe80::994c:f5c2:35d6:9b65%12]) with mapi id
- 15.00.1497.036; Wed, 29 Jun 2022 09:41:37 +0100
-From:   David Laight <David.Laight@ACULAB.COM>
-To:     'Adrian Hunter' <adrian.hunter@intel.com>,
-        =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>,
+        with ESMTP id S231658AbiF2NTD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2022 09:19:03 -0400
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5418E205C9;
+        Wed, 29 Jun 2022 06:19:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1656508742; x=1688044742;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=CQ3A9GaBdJXDZqSlJ5aTJtxYUWa+6jdkJd0vjc9gowg=;
+  b=Bx7wAwgvYWLlV6Gn77Fdu3OWzCwdQDFHJVOYznphfnOlTcNI+KNu5sY6
+   TvB3vaCI0q39h+lFv9kumK155+/LlX8ciqGnMas4quiFFh+kgnliiSl52
+   fe7i+OeV0OnsGGGu5ZIbgpMSxukmNmt9v97sN38HbiSlPdvjaBrqP2dqD
+   3lPD28hW7GCwkf3EVNuu0LUF9NdmPMdoR7hj4Llv01oVLURT86V2lGxui
+   oLLdgMq2+X0OCfHl4Q4LgMnZDMZWw4ufvL+Hpll5zkmXLm/P8LMvPghLV
+   ekPDJb5JPHBE/Oci/4ZOrgPDF74cKYonrgw1hsNAzaBT5rqCc44L5Ejgq
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10392"; a="261828270"
+X-IronPort-AV: E=Sophos;i="5.92,231,1650956400"; 
+   d="scan'208";a="261828270"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jun 2022 06:19:01 -0700
+X-IronPort-AV: E=Sophos;i="5.92,231,1650956400"; 
+   d="scan'208";a="647391167"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.49.39])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jun 2022 06:19:00 -0700
+Message-ID: <23a08ba1-c211-583b-0001-238b44fd6936@intel.com>
+Date:   Wed, 29 Jun 2022 16:18:55 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.9.1
+Subject: Re: [PATCHv3] mmc: block: Add single read for 4k sector cards
+Content-Language: en-US
+To:     Christian Loehle <CLoehle@hyperstone.com>,
         Avri Altman <Avri.Altman@wdc.com>,
         "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCHv2] mmc: block: Add single read for 4k sector cards
-Thread-Topic: [PATCHv2] mmc: block: Add single read for 4k sector cards
-Thread-Index: AQHYiucLByB3ldQ3gEq/geVsHk3Kha1mEXsA
-Date:   Wed, 29 Jun 2022 08:41:37 +0000
-Message-ID: <3d9ff280c02042e58e406241599ce893@AcuMS.aculab.com>
-References: <e0cce326393645d3b4a163ce65c89fb9@hyperstone.com>
- <e7ebb779-9938-d5f7-d900-dbea55b4ac72@intel.com>
-In-Reply-To: <e7ebb779-9938-d5f7-d900-dbea55b4ac72@intel.com>
-Accept-Language: en-GB, en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-ms-exchange-transport-fromentityheader: Hosted
-x-originating-ip: [10.202.205.107]
-MIME-Version: 1.0
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=C51A453 smtp.mailfrom=david.laight@aculab.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: aculab.com
-Content-Language: en-US
+References: <ac3d763c9eff4c81aab9eb1245065685@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <ac3d763c9eff4c81aab9eb1245065685@hyperstone.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Li4uDQo+ID4+IAkJCWJycS0+ZGF0YS5ibG9ja3MgPSBxdWV1ZV9waHlzaWNhbF9ibG9ja19zaXpl
-KHJlcS0+cSkgPj4gU0VDVE9SX1NISUZUOw0KPiA+DQo+ID4gRG8gd2Ugd2FudCB0byBzd2l0Y2gg
-dG8gU0VDVE9SX1NISUZUIGluc3RlYWQgb2YgOT8gU28gZmFyIFNFQ1RPUl9TSElGVCBpcyBub3Qg
-dXNlZCBhdCBhbGwgaW4gbW1jDQo+IGNvcmUuDQo+IA0KPiBJIGd1ZXNzICc5JyBpcyBtb3JlIGNv
-bnNpc3RlbnQNCg0KWW91IGNhbiBqdXN0IG11bHRpcGx5L2RpdmlkZSBieSA1MTJ1IChwcm9iYWJs
-eSBTRUNUT1JfU0laRSkuDQooSW4gc29tZSBzZW5zZXMgNTEydSBpcyBhY3R1YWxseSBiZXR0ZXIh
-KQ0KTW9yZSBvYnZpb3VzIHN0aWxsIGFuZCB0aGUgY29tcGlsZXIgd2lsbCBnZW5lcmF0ZSBhIHNo
-aWZ0IGFueXdheS4NCg0KCURhdmlkDQoNCi0NClJlZ2lzdGVyZWQgQWRkcmVzcyBMYWtlc2lkZSwg
-QnJhbWxleSBSb2FkLCBNb3VudCBGYXJtLCBNaWx0b24gS2V5bmVzLCBNSzEgMVBULCBVSw0KUmVn
-aXN0cmF0aW9uIE5vOiAxMzk3Mzg2IChXYWxlcykNCg==
+On 28/06/22 16:30, Christian Loehle wrote:
+> Cards with 4k native sector size may only be read 4k-aligned,
+> accommodate for this in the single read recovery and use it.
+> 
+> Fixes: 81196976ed946 (mmc: block: Add blk-mq support)
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/block.c | 27 +++++++++++++--------------
+>  1 file changed, 13 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index f4a1281658db..7b73d77687b1 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -176,7 +176,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+>  				      unsigned int part_type);
+>  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  			       struct mmc_card *card,
+> -			       int disable_multi,
+> +			       int recovery_mode,
+>  			       struct mmc_queue *mq);
+>  static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
+>  
+> @@ -1302,7 +1302,7 @@ static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
+>  }
+>  
+>  static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+> -			      int disable_multi, bool *do_rel_wr_p,
+> +			      int recovery_mode, bool *do_rel_wr_p,
+>  			      bool *do_data_tag_p)
+>  {
+>  	struct mmc_blk_data *md = mq->blkdata;
+> @@ -1368,12 +1368,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+>  			brq->data.blocks--;
+>  
+>  		/*
+> -		 * After a read error, we redo the request one sector
+> +		 * After a read error, we redo the request one (native) sector
+>  		 * at a time in order to accurately determine which
+>  		 * sectors can be read successfully.
+>  		 */
+> -		if (disable_multi)
+> -			brq->data.blocks = 1;
+> +		if (recovery_mode)
+> +			brq->data.blocks = queue_physical_block_size(mq->queue) >> 9;
+>  
+>  		/*
+>  		 * Some controllers have HW issues while operating
+> @@ -1590,7 +1590,7 @@ static int mmc_blk_cqe_issue_rw_rq(struct mmc_queue *mq, struct request *req)
+>  
+>  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  			       struct mmc_card *card,
+> -			       int disable_multi,
+> +			       int recovery_mode,
+>  			       struct mmc_queue *mq)
+>  {
+>  	u32 readcmd, writecmd;
+> @@ -1599,7 +1599,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>  	struct mmc_blk_data *md = mq->blkdata;
+>  	bool do_rel_wr, do_data_tag;
+>  
+> -	mmc_blk_data_prep(mq, mqrq, disable_multi, &do_rel_wr, &do_data_tag);
+> +	mmc_blk_data_prep(mq, mqrq, recovery_mode, &do_rel_wr, &do_data_tag);
+>  
+>  	brq->mrq.cmd = &brq->cmd;
+>  
+> @@ -1690,7 +1690,7 @@ static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
+>  
+>  #define MMC_READ_SINGLE_RETRIES	2
+>  
+> -/* Single sector read during recovery */
+> +/* Single (native) sector read during recovery */
+>  static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  {
+>  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+> @@ -1698,6 +1698,7 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  	struct mmc_card *card = mq->card;
+>  	struct mmc_host *host = card->host;
+>  	blk_status_t error = BLK_STS_OK;
+> +	size_t bytes_per_read = queue_physical_block_size(mq->queue);
+>  
+>  	do {
+>  		u32 status;
+> @@ -1732,13 +1733,13 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
+>  		else
+>  			error = BLK_STS_OK;
+>  
+> -	} while (blk_update_request(req, error, 512));
+> +	} while (blk_update_request(req, error, bytes_per_read));
+>  
+>  	return;
+>  
+>  error_exit:
+>  	mrq->data->bytes_xfered = 0;
+> -	blk_update_request(req, BLK_STS_IOERR, 512);
+> +	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
+>  	/* Let it try the remaining request again */
+>  	if (mqrq->retries > MMC_MAX_RETRIES - 1)
+>  		mqrq->retries = MMC_MAX_RETRIES - 1;
+> @@ -1879,10 +1880,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+>  		return;
+>  	}
+>  
+> -	/* FIXME: Missing single sector read for large sector size */
+> -	if (!mmc_large_sector(card) && rq_data_dir(req) == READ &&
+> -	    brq->data.blocks > 1) {
+> -		/* Read one sector at a time */
+> +	if (rq_data_dir(req) == READ && brq->data.blocks > 1) {
+
+brq->data.blocks > 1 would be brq->data.blocks > 8 for mmc_large_sector, right?
+I guess it doesn't matter much.
+
+> +		/* Read one (native) sector at a time */
+>  		mmc_blk_read_single(mq, req);
+>  		return;
+>  	}
 
