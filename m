@@ -2,177 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06470C43334
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Jun 2022 13:19:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF60FC43334
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jun 2022 01:48:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232773AbiF2NTE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Jun 2022 09:19:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52428 "EHLO
+        id S229453AbiF3Bsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Jun 2022 21:48:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231658AbiF2NTD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2022 09:19:03 -0400
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5418E205C9;
-        Wed, 29 Jun 2022 06:19:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1656508742; x=1688044742;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=CQ3A9GaBdJXDZqSlJ5aTJtxYUWa+6jdkJd0vjc9gowg=;
-  b=Bx7wAwgvYWLlV6Gn77Fdu3OWzCwdQDFHJVOYznphfnOlTcNI+KNu5sY6
-   TvB3vaCI0q39h+lFv9kumK155+/LlX8ciqGnMas4quiFFh+kgnliiSl52
-   fe7i+OeV0OnsGGGu5ZIbgpMSxukmNmt9v97sN38HbiSlPdvjaBrqP2dqD
-   3lPD28hW7GCwkf3EVNuu0LUF9NdmPMdoR7hj4Llv01oVLURT86V2lGxui
-   oLLdgMq2+X0OCfHl4Q4LgMnZDMZWw4ufvL+Hpll5zkmXLm/P8LMvPghLV
-   ekPDJb5JPHBE/Oci/4ZOrgPDF74cKYonrgw1hsNAzaBT5rqCc44L5Ejgq
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10392"; a="261828270"
-X-IronPort-AV: E=Sophos;i="5.92,231,1650956400"; 
-   d="scan'208";a="261828270"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jun 2022 06:19:01 -0700
-X-IronPort-AV: E=Sophos;i="5.92,231,1650956400"; 
-   d="scan'208";a="647391167"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.49.39])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jun 2022 06:19:00 -0700
-Message-ID: <23a08ba1-c211-583b-0001-238b44fd6936@intel.com>
-Date:   Wed, 29 Jun 2022 16:18:55 +0300
+        with ESMTP id S229751AbiF3Bsh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2022 21:48:37 -0400
+Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8953D3630C
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2022 18:48:35 -0700 (PDT)
+Received: from epcas1p2.samsung.com (unknown [182.195.41.46])
+        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20220630014829epoutp041d4167e18a25ceecbe5e3eae7b15e76f~9QtKIIP3U2375923759epoutp04P
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Jun 2022 01:48:29 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20220630014829epoutp041d4167e18a25ceecbe5e3eae7b15e76f~9QtKIIP3U2375923759epoutp04P
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1656553709;
+        bh=cBJ+pi16fXfIwI8Nm9AJ40/bPrq8Ll92HTcRio+ez4o=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=eUVbyD0hEsLs/uFrK2kPdwzeyOyj/HnBQvzhqaedNYgEkz0k64CV9CGZwkKXNLuhr
+         W8549sdJYfV48ptAulFcpvL5M7GGeUkhTNCl2P/fe0ZAfZI8TvrMjQmS4A3cAjapxS
+         pk+j7DP1VwOsbuqYU617eQdKDUVADJ8GxyvUAIP8=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+        epcas1p2.samsung.com (KnoxPortal) with ESMTP id
+        20220630014829epcas1p2aa5bb721e7d552b1e0df4024c295567e~9QtJtXmdi1513515135epcas1p2F;
+        Thu, 30 Jun 2022 01:48:29 +0000 (GMT)
+Received: from epsmges1p1.samsung.com (unknown [182.195.36.222]) by
+        epsnrtp2.localdomain (Postfix) with ESMTP id 4LYLp52ghhz4x9QG; Thu, 30 Jun
+        2022 01:48:29 +0000 (GMT)
+Received: from epcas1p2.samsung.com ( [182.195.41.46]) by
+        epsmges1p1.samsung.com (Symantec Messaging Gateway) with SMTP id
+        A3.C7.09657.DE00DB26; Thu, 30 Jun 2022 10:48:29 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas1p1.samsung.com (KnoxPortal) with ESMTPA id
+        20220630014828epcas1p1e780542d769ff8189bb408449624ffb4~9QtJKa2XA0393303933epcas1p1g;
+        Thu, 30 Jun 2022 01:48:28 +0000 (GMT)
+Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220630014828epsmtrp117240d8ebb3eb93db3f71071a8daa4be~9QtJJlXCz2936629366epsmtrp1c;
+        Thu, 30 Jun 2022 01:48:28 +0000 (GMT)
+X-AuditID: b6c32a35-733ff700000025b9-e1-62bd00ed320b
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+        06.76.08905.CE00DB26; Thu, 30 Jun 2022 10:48:28 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.253.100.232]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20220630014828epsmtip27367e7e8d1aad55062433e10e79a11cd~9QtI8ERxV1228512285epsmtip2s;
+        Thu, 30 Jun 2022 01:48:28 +0000 (GMT)
+From:   Chanwoo Lee <cw9316.lee@samsung.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     grant.jung@samsung.com, jt77.jang@samsung.com,
+        dh0421.hwang@samsung.com, sh043.lee@samsung.com,
+        ChanWoo Lee <cw9316.lee@samsung.com>
+Subject: [PATCH] Add define SDHCI_POWER_OFF to improve readability
+Date:   Thu, 30 Jun 2022 10:44:25 +0900
+Message-Id: <20220630014425.3643-1-cw9316.lee@samsung.com>
+X-Mailer: git-send-email 2.29.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCHv3] mmc: block: Add single read for 4k sector cards
-Content-Language: en-US
-To:     Christian Loehle <CLoehle@hyperstone.com>,
-        Avri Altman <Avri.Altman@wdc.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <ac3d763c9eff4c81aab9eb1245065685@hyperstone.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <ac3d763c9eff4c81aab9eb1245065685@hyperstone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFvrPKsWRmVeSWpSXmKPExsWy7bCmnu5bhr1JBlvbRSxOPlnDZjHjVBur
+        xb5rJ9ktfv1dz26x4/kZdosj//sZLZr+7GOxOL423IHDY/Gel0wed67tYfPo27KK0ePzJrkA
+        lqhsm4zUxJTUIoXUvOT8lMy8dFsl7+B453hTMwNDXUNLC3MlhbzE3FRbJRefAF23zBygK5QU
+        yhJzSoFCAYnFxUr6djZF+aUlqQoZ+cUltkqpBSk5BWYFesWJucWleel6eaklVoYGBkamQIUJ
+        2RkzTx5hLlgpXPHs427mBsZ+gS5GTg4JAROJOb1PmEFsIYEdjBLz9yR3MXIB2Z8YJZ586WSF
+        cL4xSryc0sQE0/F0yj82iI69jBKPm3khir4wSnxddZqli5GDg01AS+L2MW+QGhGBAIlXK/tZ
+        QGqYgXZK/DrYxQKSEBZwkjjee58RxGYRUJU4uOMz2Bm8AlYSP64dg1omL/Hnfg9UXFDi5Mwn
+        YL3MQPHmrbOZQYZKCJxjl/j5+DIzRIOLxPIrKxkhbGGJV8e3sEPYUhIv+9vYIRqaGSW2fb3E
+        BOF0MEpsbH0B1WEs8enzZ0aQF5gFNCXW79KHCCtK7Pw9lxFiM5/Eu689rCAlEgK8Eh1tQhAl
+        KhJzus6xwez6eOMxK4TtITGnYwYTJLRiJc6eWsc4gVF+FpJ/ZiH5ZxbC4gWMzKsYxVILinPT
+        U4sNCwzhsZqcn7uJEZwStUx3ME58+0HvECMTB+MhRgkOZiUR3oVndiYJ8aYkVlalFuXHF5Xm
+        pBYfYjQFhvBEZinR5HxgUs4riTc0sTQwMTMysTC2NDZTEuddNe10opBAemJJanZqakFqEUwf
+        EwenVAOT+zM/xlRHHbPv0+u3Ry73CZjN8fbMnEmvlh2fsGTN+W9bp5+fIc+VwvuvX5OrMCQ+
+        5da3vJt9Mu9f2bb6PO+NCOJf466nIcWT3Rbvy9e+w0R9397wvVw8588d6P+6Ybt9426L5/0P
+        Tj+t2Bv9+aLq1aBru57dflxtyLDA4ciDKYFWU63/ula33XOUfiB7mdmnpvDErQWd5ifXJK5+
+        HiHauJSjLTdkRf7PkzFawod43ikrP1UusPV8K1Z4s/melto/2bB7333jwlxO8f4r0lfct9Lu
+        +tei5Tt2NjJvVVk2V6p82lP1CvYbeUlNb2/c6omMNQk3/6yS3yWUfuPOopN590tNTvDvm8Jp
+        Fr3lg5uvEktxRqKhFnNRcSIAZN1AMRIEAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFlrLLMWRmVeSWpSXmKPExsWy7bCSvO4bhr1JBic/61qcfLKGzWLGqTZW
+        i33XTrJb/Pq7nt1ix/Mz7BZH/vczWjT92cdicXxtuAOHx+I9L5k87lzbw+bRt2UVo8fnTXIB
+        LFFcNimpOZllqUX6dglcGTNPHmEuWClc8ezjbuYGxn6BLkZODgkBE4mnU/6xdTFycQgJ7GaU
+        eDvnCRtEQkpi9/7zQDYHkC0scfhwMUTNJ0aJG3vms4DE2QS0JG4f8wYpFxEIklj//BzYHGaB
+        CYwSi6+8ZQZJCAs4SRzvvc8IYrMIqEoc3PEZLM4rYCXx49oxJohd8hJ/7vdAxQUlTs58wgJi
+        MwPFm7fOZp7AyDcLSWoWktQCRqZVjJKpBcW56bnFhgWGeanlesWJucWleel6yfm5mxjBIaql
+        uYNx+6oPeocYmTgYDzFKcDArifAuPLMzSYg3JbGyKrUoP76oNCe1+BCjNAeLkjjvha6T8UIC
+        6YklqdmpqQWpRTBZJg5OqQYmnf9dR5rDMkxur7KV61fseuh1ZjffigLrN0bqpjEvT2xLUQ6z
+        flH89v6UzE0vDToWx78636t8Oflen+3tvxz56flFnsuT17OdmLBacOpmk3vGEae1b65OZV8S
+        5lJuKR/w85nsfdbwGTtd+HX5SjxaDJbEFlvZsFmqWS226Vi5f+/xI6GxR5bkPvdcHiTL25Tj
+        fsVa90eGZdD2aQHml+bM2tQ6I6lazrSxbsXRx1f25xRsfyxkUPHSTuX4g6ZjDRenxEb6edy0
+        WXl1flZ8T43q9zqmt1uvdVrlNK9/se/+j2fua1YsTlpz6nR5fu7/qJg1vX4NgRnRiizhWqWf
+        nJj4ea1Dmt4U//3z206g8IISS3FGoqEWc1FxIgCUEio5wAIAAA==
+X-CMS-MailID: 20220630014828epcas1p1e780542d769ff8189bb408449624ffb4
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20220630014828epcas1p1e780542d769ff8189bb408449624ffb4
+References: <CGME20220630014828epcas1p1e780542d769ff8189bb408449624ffb4@epcas1p1.samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/06/22 16:30, Christian Loehle wrote:
-> Cards with 4k native sector size may only be read 4k-aligned,
-> accommodate for this in the single read recovery and use it.
-> 
-> Fixes: 81196976ed946 (mmc: block: Add blk-mq support)
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
-> ---
->  drivers/mmc/core/block.c | 27 +++++++++++++--------------
->  1 file changed, 13 insertions(+), 14 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index f4a1281658db..7b73d77687b1 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -176,7 +176,7 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
->  				      unsigned int part_type);
->  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->  			       struct mmc_card *card,
-> -			       int disable_multi,
-> +			       int recovery_mode,
->  			       struct mmc_queue *mq);
->  static void mmc_blk_hsq_req_done(struct mmc_request *mrq);
->  
-> @@ -1302,7 +1302,7 @@ static void mmc_blk_eval_resp_error(struct mmc_blk_request *brq)
->  }
->  
->  static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
-> -			      int disable_multi, bool *do_rel_wr_p,
-> +			      int recovery_mode, bool *do_rel_wr_p,
->  			      bool *do_data_tag_p)
->  {
->  	struct mmc_blk_data *md = mq->blkdata;
-> @@ -1368,12 +1368,12 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
->  			brq->data.blocks--;
->  
->  		/*
-> -		 * After a read error, we redo the request one sector
-> +		 * After a read error, we redo the request one (native) sector
->  		 * at a time in order to accurately determine which
->  		 * sectors can be read successfully.
->  		 */
-> -		if (disable_multi)
-> -			brq->data.blocks = 1;
-> +		if (recovery_mode)
-> +			brq->data.blocks = queue_physical_block_size(mq->queue) >> 9;
->  
->  		/*
->  		 * Some controllers have HW issues while operating
-> @@ -1590,7 +1590,7 @@ static int mmc_blk_cqe_issue_rw_rq(struct mmc_queue *mq, struct request *req)
->  
->  static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->  			       struct mmc_card *card,
-> -			       int disable_multi,
-> +			       int recovery_mode,
->  			       struct mmc_queue *mq)
->  {
->  	u32 readcmd, writecmd;
-> @@ -1599,7 +1599,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->  	struct mmc_blk_data *md = mq->blkdata;
->  	bool do_rel_wr, do_data_tag;
->  
-> -	mmc_blk_data_prep(mq, mqrq, disable_multi, &do_rel_wr, &do_data_tag);
-> +	mmc_blk_data_prep(mq, mqrq, recovery_mode, &do_rel_wr, &do_data_tag);
->  
->  	brq->mrq.cmd = &brq->cmd;
->  
-> @@ -1690,7 +1690,7 @@ static int mmc_blk_fix_state(struct mmc_card *card, struct request *req)
->  
->  #define MMC_READ_SINGLE_RETRIES	2
->  
-> -/* Single sector read during recovery */
-> +/* Single (native) sector read during recovery */
->  static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
->  {
->  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
-> @@ -1698,6 +1698,7 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
->  	struct mmc_card *card = mq->card;
->  	struct mmc_host *host = card->host;
->  	blk_status_t error = BLK_STS_OK;
-> +	size_t bytes_per_read = queue_physical_block_size(mq->queue);
->  
->  	do {
->  		u32 status;
-> @@ -1732,13 +1733,13 @@ static void mmc_blk_read_single(struct mmc_queue *mq, struct request *req)
->  		else
->  			error = BLK_STS_OK;
->  
-> -	} while (blk_update_request(req, error, 512));
-> +	} while (blk_update_request(req, error, bytes_per_read));
->  
->  	return;
->  
->  error_exit:
->  	mrq->data->bytes_xfered = 0;
-> -	blk_update_request(req, BLK_STS_IOERR, 512);
-> +	blk_update_request(req, BLK_STS_IOERR, bytes_per_read);
->  	/* Let it try the remaining request again */
->  	if (mqrq->retries > MMC_MAX_RETRIES - 1)
->  		mqrq->retries = MMC_MAX_RETRIES - 1;
-> @@ -1879,10 +1880,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
->  		return;
->  	}
->  
-> -	/* FIXME: Missing single sector read for large sector size */
-> -	if (!mmc_large_sector(card) && rq_data_dir(req) == READ &&
-> -	    brq->data.blocks > 1) {
-> -		/* Read one sector at a time */
-> +	if (rq_data_dir(req) == READ && brq->data.blocks > 1) {
+From: ChanWoo Lee <cw9316.lee@samsung.com>
 
-brq->data.blocks > 1 would be brq->data.blocks > 8 for mmc_large_sector, right?
-I guess it doesn't matter much.
+//sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+A value of '0' has two meanings.
+ - Clear the register.   //2084 line
+ - Set power off.       //2075 line
 
-> +		/* Read one (native) sector at a time */
->  		mmc_blk_read_single(mq, req);
->  		return;
->  	}
+To clarify this and improve readability,
+use the 'power_off' value instead of '0'.
+
+Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 3 ++-
+ drivers/mmc/host/sdhci.c          | 6 +++---
+ drivers/mmc/host/sdhci.h          | 1 +
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 622b7de96c7f..a732eec69bf8 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -584,7 +584,8 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+ 	if (intel_host->needs_pwr_off) {
+ 		intel_host->needs_pwr_off = false;
+ 		if (mode != MMC_POWER_OFF) {
+-			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++			sdhci_writeb(host, SDHCI_POWER_OFF,
++					SDHCI_POWER_CONTROL);
+ 			usleep_range(10000, 12500);
+ 		}
+ 	}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 7689ffec5ad1..602fb3a088e7 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2029,7 +2029,7 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+ 	if (mode != MMC_POWER_OFF)
+ 		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+ 	else
+-		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++		sdhci_writeb(host, SDHCI_POWER_OFF, SDHCI_POWER_CONTROL);
+ }
+ 
+ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+@@ -2075,8 +2075,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ 
+ 	host->pwr = pwr;
+ 
+-	if (pwr == 0) {
+-		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++	if (pwr == SDHCI_POWER_OFF) {
++		sdhci_writeb(host, SDHCI_POWER_OFF, SDHCI_POWER_CONTROL);
+ 		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+ 			sdhci_runtime_pm_bus_off(host);
+ 	} else {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 95a08f09df30..f35d6d7b8326 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -95,6 +95,7 @@
+ #define  SDHCI_CTRL_CDTEST_EN	0x80
+ 
+ #define SDHCI_POWER_CONTROL	0x29
++#define  SDHCI_POWER_OFF	0x00
+ #define  SDHCI_POWER_ON		0x01
+ #define  SDHCI_POWER_180	0x0A
+ #define  SDHCI_POWER_300	0x0C
+-- 
+2.29.0
 
