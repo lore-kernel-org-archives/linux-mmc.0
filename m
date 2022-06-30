@@ -2,92 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59681C43334
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jun 2022 09:09:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 542FECCA47B
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jun 2022 23:15:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233372AbiF3JJl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Jun 2022 05:09:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38300 "EHLO
+        id S232434AbiF3XPm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Jun 2022 19:15:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233700AbiF3JJk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2022 05:09:40 -0400
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D98B8193C6;
-        Thu, 30 Jun 2022 02:09:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1656580179; x=1688116179;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=iUvnkyf1FHI9uJJPInSYCIsHn4vsQKorlvRrdapwgDA=;
-  b=WIwufNFCV83vKTnm7twdVPI387VI/uFNd8FvzlV+9BRJZ5ZkVyhhbYwc
-   ZhY25nBr4+8v/spxEIEASD1+AAT1C7laPV5Ng1lDF/bzpu98r8L/fPXbp
-   IclixoPAtCm0/oaHZMiW1h26y09hJWLC5kGD57qEkQ69iLQE1e66bw3+g
-   zBR1GRV4FuuLiiKrR4AZ0RZaFZKvfQ+VzKMh8MTCVxrcDw9zFkVVo/fCv
-   +zzP1G5ib5XkneP3qz3tpUa8Os7tGx9lNFLzX5WoUyTjIsd93StdE5kMP
-   x7VNjkSOyjDM0xP0N5GNi7m3XHg4Y33BjKDYKzCarla0BtTxkxOXDGjFW
-   g==;
-X-IronPort-AV: E=Sophos;i="5.92,233,1650956400"; 
-   d="scan'208";a="165795106"
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa2.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 30 Jun 2022 02:09:39 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.17; Thu, 30 Jun 2022 02:09:34 -0700
-Received: from ROB-ULT-M18282.microchip.com (10.10.115.15) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2375.17 via Frontend Transport; Thu, 30 Jun 2022 02:09:31 -0700
-From:   Eugen Hristev <eugen.hristev@microchip.com>
-To:     <ulf.hansson@linaro.org>
-CC:     <adrian.hunter@intel.com>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        "Eugen Hristev" <eugen.hristev@microchip.com>,
-        Karl Olsen <karl@micro-technic.com>
-Subject: [PATCH] mmc: sdhci-of-at91: fix set_uhs_signaling rewriting of MC1R
-Date:   Thu, 30 Jun 2022 12:09:26 +0300
-Message-ID: <20220630090926.15061-1-eugen.hristev@microchip.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S232370AbiF3XPk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2022 19:15:40 -0400
+Received: from mail-il1-f170.google.com (mail-il1-f170.google.com [209.85.166.170])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F79F25F3;
+        Thu, 30 Jun 2022 16:15:38 -0700 (PDT)
+Received: by mail-il1-f170.google.com with SMTP id p13so403445ilq.0;
+        Thu, 30 Jun 2022 16:15:38 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=KbKoF7QVYBmq2AlkSxV5k4lgb1s7hwhdeCtoubmk3Gs=;
+        b=jBhunu26yKkgLjouCcuSSHE6ypKqfQ6QPs78OUywdGNsC6ja+z+lLWiqHuJsiV1jqh
+         gORxuy6w3yy6FQSmaiSo1gmuTgeF6ntj0jP80xLJmCpEOf5Xc0LhRVe2vJuHgyI4FM8u
+         QzdI6A2ZYN1LXKthm0Cj1OusTNehYUDtpVMXEMR5JnbYVLaFhM0XhVMBogizc6AnMIKo
+         P4tfJsMMOsTJ0+kWJneBGHe43XoWUC9U5Rf2Fdx6NJVCTx1cFhuTxlzZZ3UhFT5cV8HD
+         yEhAq8j3kiK8ldJWDoBPh+uCd3vAm0rS8SV+E62iGM6J2b+rpGQ+px8h/b4pF02Z/7JY
+         1WAQ==
+X-Gm-Message-State: AJIora/g2ynwNgJI2DI/jg1s4+xwm+i4ezD1YLxx79pFccsKI1DACkLe
+        slitFWuavlspaTodb1UCCg==
+X-Google-Smtp-Source: AGRyM1vZy3Jmsw2q9GC4kAnlyLXpaf0K8vwy4daLOXGv4iZ6PHja3Um5ewE62KIMBmU6l+z65fCQBw==
+X-Received: by 2002:a05:6e02:19ca:b0:2da:a2d8:38c0 with SMTP id r10-20020a056e0219ca00b002daa2d838c0mr6867324ill.148.1656630937867;
+        Thu, 30 Jun 2022 16:15:37 -0700 (PDT)
+Received: from robh.at.kernel.org ([64.188.179.248])
+        by smtp.gmail.com with ESMTPSA id e24-20020a022118000000b00331d764e5b5sm9163571jaa.97.2022.06.30.16.15.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 30 Jun 2022 16:15:37 -0700 (PDT)
+Received: (nullmailer pid 3512196 invoked by uid 1000);
+        Thu, 30 Jun 2022 23:15:35 -0000
+Date:   Thu, 30 Jun 2022 17:15:35 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org, devicetree@vger.kernel.org,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-kernel@vger.kernel.org,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 5/5] dt-bindings: mmc: samsung,s3c6410-sdhci: convert to
+ dtschema
+Message-ID: <20220630231535.GA3512163-robh@kernel.org>
+References: <20220626120342.38851-1-krzysztof.kozlowski@linaro.org>
+ <20220626120342.38851-6-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220626120342.38851-6-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In set_uhs_signaling, the DDR bit is being set by fully writing the MC1R
-register.
-This can lead to accidental erase of certain bits in this register.
-Avoid this by doing a read-modify-write operation.
+On Sun, 26 Jun 2022 14:03:42 +0200, Krzysztof Kozlowski wrote:
+> Convert the Samsung SoC SDHCI Controller bindings to DT schema.
+> 
+> The original bindings were quite old and incomplete, so add during
+> conversion typical (already used) properties like reg, clocks,
+> interrupts.
+> 
+> The bindings were not precising the clocks, although the upstream DTS
+> and Linux driver were expecting bus clocks in certain patterns in any
+> order.  Document the status quo even though it is not a proper approach
+> for bindings.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  .../bindings/mmc/samsung,s3c6410-sdhci.yaml   | 81 +++++++++++++++++++
+>  .../devicetree/bindings/mmc/samsung-sdhci.txt | 32 --------
+>  2 files changed, 81 insertions(+), 32 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
+> 
 
-Fixes: d0918764c17b ("mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection")
-Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-Tested-by: Karl Olsen <karl@micro-technic.com>
----
- drivers/mmc/host/sdhci-of-at91.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 10fb4cb2c731..cd0134580a90 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -100,8 +100,13 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
- static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
- 					 unsigned int timing)
- {
--	if (timing == MMC_TIMING_MMC_DDR52)
--		sdhci_writeb(host, SDMMC_MC1R_DDR, SDMMC_MC1R);
-+	u8 mc1r;
-+
-+	if (timing == MMC_TIMING_MMC_DDR52) {
-+		mc1r = sdhci_readb(host, SDMMC_MC1R);
-+		mc1r |= SDMMC_MC1R_DDR;
-+		sdhci_writeb(host, mc1r, SDMMC_MC1R);
-+	}
- 	sdhci_set_uhs_signaling(host, timing);
- }
- 
--- 
-2.25.1
-
+Reviewed-by: Rob Herring <robh@kernel.org>
