@@ -2,86 +2,212 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 542FECCA47B
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Jun 2022 23:15:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9CB2C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jul 2022 08:20:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232434AbiF3XPm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Jun 2022 19:15:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37430 "EHLO
+        id S233516AbiGAIUr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Jul 2022 04:20:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232370AbiF3XPk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2022 19:15:40 -0400
-Received: from mail-il1-f170.google.com (mail-il1-f170.google.com [209.85.166.170])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F79F25F3;
-        Thu, 30 Jun 2022 16:15:38 -0700 (PDT)
-Received: by mail-il1-f170.google.com with SMTP id p13so403445ilq.0;
-        Thu, 30 Jun 2022 16:15:38 -0700 (PDT)
+        with ESMTP id S232435AbiGAIUq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2022 04:20:46 -0400
+Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0831870AFF
+        for <linux-mmc@vger.kernel.org>; Fri,  1 Jul 2022 01:20:45 -0700 (PDT)
+Received: by mail-pj1-x102c.google.com with SMTP id d14so1922675pjs.3
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Jul 2022 01:20:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=oUYtq84iNGdg4Xe0/YKALbCpeBgj55K/qcb5czheU50=;
+        b=YlwArJ/41k5bqIwMZiuj2szedp3s1rO7QSuQEi13s1O5Ve6bFzu2r9LarZt3O04Y9D
+         PVD3yDK+9Vb0f95dKwdM+JysaoQPKDf3zise0iThezxJk79eOmrZ72/c5Rg1gCbtjVDl
+         F60N2JHzziONCyalfA/wfFDCSlR8hqnvk92kRRSbAFaKwCckeWcCYXOytSRq+zImeRVe
+         lfI7JPrzOCmulRfNW+KQk7bRX6SOCXgDerBmRWMomIAXhT8TLCoNxRQjAHBANqs51hrT
+         iXX1rmjYKKRLhXUKxd6B3MFliSf1sdOs2RlkARJG2gMqxLz4mBo8TozUysUa0f+Xm3N4
+         gDYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=KbKoF7QVYBmq2AlkSxV5k4lgb1s7hwhdeCtoubmk3Gs=;
-        b=jBhunu26yKkgLjouCcuSSHE6ypKqfQ6QPs78OUywdGNsC6ja+z+lLWiqHuJsiV1jqh
-         gORxuy6w3yy6FQSmaiSo1gmuTgeF6ntj0jP80xLJmCpEOf5Xc0LhRVe2vJuHgyI4FM8u
-         QzdI6A2ZYN1LXKthm0Cj1OusTNehYUDtpVMXEMR5JnbYVLaFhM0XhVMBogizc6AnMIKo
-         P4tfJsMMOsTJ0+kWJneBGHe43XoWUC9U5Rf2Fdx6NJVCTx1cFhuTxlzZZ3UhFT5cV8HD
-         yEhAq8j3kiK8ldJWDoBPh+uCd3vAm0rS8SV+E62iGM6J2b+rpGQ+px8h/b4pF02Z/7JY
-         1WAQ==
-X-Gm-Message-State: AJIora/g2ynwNgJI2DI/jg1s4+xwm+i4ezD1YLxx79pFccsKI1DACkLe
-        slitFWuavlspaTodb1UCCg==
-X-Google-Smtp-Source: AGRyM1vZy3Jmsw2q9GC4kAnlyLXpaf0K8vwy4daLOXGv4iZ6PHja3Um5ewE62KIMBmU6l+z65fCQBw==
-X-Received: by 2002:a05:6e02:19ca:b0:2da:a2d8:38c0 with SMTP id r10-20020a056e0219ca00b002daa2d838c0mr6867324ill.148.1656630937867;
-        Thu, 30 Jun 2022 16:15:37 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.248])
-        by smtp.gmail.com with ESMTPSA id e24-20020a022118000000b00331d764e5b5sm9163571jaa.97.2022.06.30.16.15.36
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=oUYtq84iNGdg4Xe0/YKALbCpeBgj55K/qcb5czheU50=;
+        b=7XTYXXen/6cjV73TVmR0HVKUxmbQ40tt/TzhbepS2hJ1yv5PYZzLAWVUFBkvq+pyIG
+         /BMqy2+wtvjbhu9zpb5EIlfc+8RNX6rtk7EJ0zIlD+vjj9AJA4Ksx51fsknbj80DTIf7
+         TQ/RDKihLPFrAJ4WHU0iVIU8ggkKNFQOT8R9cChECQv06c3UYtjXw8x854W0GDy7YIeb
+         E4IMCAAiaSZApyLFO6/utBoTjsggss7zE0GInrj8ntNxs9O7DhDlVZT9cKjkkLwbGi5R
+         3bZwBZK4ZUEczND09pCvSXxmHPDPAE9TZWSWSPvENweIa0xV0NeVJB2ut631uIbSvw/D
+         RA2g==
+X-Gm-Message-State: AJIora8D4pGh+UvZJtIpKFQlTvMgxhh0rqdWuzAS01ZmM8z46JDhZ9n3
+        uLD8vMTXgq7XBUoQUbZrvVBbyg==
+X-Google-Smtp-Source: AGRyM1uw8CKR4s38IcPhcQa1KogQ13yRLMm2Qxe1pU/dJuysA+BJx5bL0ipnbj/Tos0q5dkbVF00/Q==
+X-Received: by 2002:a17:90a:d80b:b0:1ec:9a1a:2266 with SMTP id a11-20020a17090ad80b00b001ec9a1a2266mr15418832pjv.7.1656663644453;
+        Fri, 01 Jul 2022 01:20:44 -0700 (PDT)
+Received: from localhost ([122.172.201.58])
+        by smtp.gmail.com with ESMTPSA id ru10-20020a17090b2bca00b001e880972840sm3443768pjb.29.2022.07.01.01.20.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 30 Jun 2022 16:15:37 -0700 (PDT)
-Received: (nullmailer pid 3512196 invoked by uid 1000);
-        Thu, 30 Jun 2022 23:15:35 -0000
-Date:   Thu, 30 Jun 2022 17:15:35 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, devicetree@vger.kernel.org,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        linux-mmc@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-kernel@vger.kernel.org,
+        Fri, 01 Jul 2022 01:20:43 -0700 (PDT)
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Abhinav Kumar <quic_abhinavk@quicinc.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Alim Akhtar <alim.akhtar@samsung.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/5] dt-bindings: mmc: samsung,s3c6410-sdhci: convert to
- dtschema
-Message-ID: <20220630231535.GA3512163-robh@kernel.org>
-References: <20220626120342.38851-1-krzysztof.kozlowski@linaro.org>
- <20220626120342.38851-6-krzysztof.kozlowski@linaro.org>
+        Alyssa Rosenzweig <alyssa.rosenzweig@collabora.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Chanwoo Choi <cw00.choi@samsung.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+        Dmitry Osipenko <digetx@gmail.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Ilia Lin <ilia.lin@kernel.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Kyungmin Park <kyungmin.park@samsung.com>,
+        Mark Brown <broonie@kernel.org>,
+        MyungJoo Ham <myungjoo.ham@samsung.com>,
+        Nishanth Menon <nm@ti.com>, NXP Linux Team <linux-imx@nxp.com>,
+        Patrice Chotard <patrice.chotard@foss.st.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Qiang Yu <yuq825@gmail.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Rob Clark <robdclark@gmail.com>, Rob Herring <robh@kernel.org>,
+        Samuel Holland <samuel@sholland.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sean Paul <sean@poorly.run>, Shawn Guo <shawnguo@kernel.org>,
+        Stanimir Varbanov <stanimir.varbanov@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Steven Price <steven.price@arm.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Tomeu Vizoso <tomeu.vizoso@collabora.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Yangtao Li <tiny.windzz@gmail.com>
+Cc:     linux-pm@vger.kernel.org,
+        Vincent Guittot <vincent.guittot@linaro.org>,
+        Dmitry Osipenko <dmitry.osipenko@collabora.com>,
+        dri-devel@lists.freedesktop.org, freedreno@lists.freedesktop.org,
+        lima@lists.freedesktop.org, linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-sunxi@lists.linux.dev,
+        linux-tegra@vger.kernel.org
+Subject: [PATCH V2 00/30] OPP: Add new configuration interface: dev_pm_opp_set_config()
+Date:   Fri,  1 Jul 2022 13:49:55 +0530
+Message-Id: <cover.1656660185.git.viresh.kumar@linaro.org>
+X-Mailer: git-send-email 2.31.1.272.g89b43f80a514
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220626120342.38851-6-krzysztof.kozlowski@linaro.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 26 Jun 2022 14:03:42 +0200, Krzysztof Kozlowski wrote:
-> Convert the Samsung SoC SDHCI Controller bindings to DT schema.
-> 
-> The original bindings were quite old and incomplete, so add during
-> conversion typical (already used) properties like reg, clocks,
-> interrupts.
-> 
-> The bindings were not precising the clocks, although the upstream DTS
-> and Linux driver were expecting bus clocks in certain patterns in any
-> order.  Document the status quo even though it is not a proper approach
-> for bindings.
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> ---
->  .../bindings/mmc/samsung,s3c6410-sdhci.yaml   | 81 +++++++++++++++++++
->  .../devicetree/bindings/mmc/samsung-sdhci.txt | 32 --------
->  2 files changed, 81 insertions(+), 32 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml
->  delete mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
-> 
+Hello,
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+We have too many configuration specific APIs currently, six of them already,
+like dev_pm_opp_set_regulators(). This makes it complex/messy for both the OPP
+core and its users to manage. There is also code redundancy in these APIs, in
+the way they add/manage the OPP table specific stuff.
+
+This patch series is an attempt to simplify these interfaces by adding a single
+interface, dev_pm_opp_set_config(), which replaces all the existing ones. This
+series also migrates the users to the new API.
+
+The first two patches help get the API in place, followed by patches to migrate
+the end users. Once all the users are migrated, the last few patches remove the
+now unused interfaces.
+
+This is pushed here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/vireshk/pm.git opp/linux-next
+
+This is already tested by various folks now.
+
+The entire patchset shall get merged via the OPP tree in 5.20-rc1, please do not
+merge individual patches.
+
+V1->V2:
+- dev_pm_opp_set_config() doesn't return the OPP table anymore, but a token
+  allocated with xa_alloc(). The same needs to be passed to clear-config API.
+- Updated all users according to that as well.
+- The clk_names interface is updated to allow multiple clocks.
+- Converted few // comments to /* */.
+- Added tags by few people.
+- Dropped the last patch to rearrange stuff, not required anymore.
+
+Thanks.
+
+--
+Viresh
+
+Viresh Kumar (30):
+  OPP: Track if clock name is configured by platform
+  OPP: Add dev_pm_opp_set_config() and friends
+  cpufreq: dt: Migrate to dev_pm_opp_set_config()
+  cpufreq: imx: Migrate to dev_pm_opp_set_config()
+  cpufreq: qcom-nvmem: Migrate to dev_pm_opp_set_config()
+  cpufreq: sti: Migrate to dev_pm_opp_set_config()
+  cpufreq: sun50i: Migrate to dev_pm_opp_set_config()
+  cpufreq: tegra20: Migrate to dev_pm_opp_set_config()
+  cpufreq: ti: Migrate to dev_pm_opp_set_config()
+  devfreq: exynos: Migrate to dev_pm_opp_set_config()
+  devfreq: sun8i: Migrate to dev_pm_opp_set_config()
+  devfreq: tegra30: Migrate to dev_pm_opp_set_config()
+  drm/lima: Migrate to dev_pm_opp_set_config()
+  drm/msm: Migrate to dev_pm_opp_set_config()
+  drm/panfrost: Migrate to dev_pm_opp_set_config()
+  drm/tegra: Migrate to dev_pm_opp_set_config()
+  media: venus: Migrate to dev_pm_opp_set_config()
+  memory: tegra: Migrate to dev_pm_opp_set_config()
+  mmc: sdhci-msm: Migrate to dev_pm_opp_set_config()
+  OPP: ti: Migrate to dev_pm_opp_set_config()
+  soc/tegra: Add comment over devm_pm_opp_set_clkname()
+  soc/tegra: Migrate to dev_pm_opp_set_config()
+  spi: qcom: Migrate to dev_pm_opp_set_config()
+  serial: qcom: Migrate to dev_pm_opp_set_config()
+  OPP: Remove dev_pm_opp_set_regulators() and friends
+  OPP: Remove dev_pm_opp_set_supported_hw() and friends
+  OPP: Remove dev_pm_opp_set_clkname() and friends
+  OPP: Remove dev_pm_opp_register_set_opp_helper() and friends
+  OPP: Remove dev_pm_opp_attach_genpd() and friends
+  OPP: Remove dev_pm_opp_set_prop_name() and friends
+
+ drivers/cpufreq/cpufreq-dt.c                  |  20 +-
+ drivers/cpufreq/imx-cpufreq-dt.c              |  18 +-
+ drivers/cpufreq/qcom-cpufreq-nvmem.c          | 109 +--
+ drivers/cpufreq/sti-cpufreq.c                 |  27 +-
+ drivers/cpufreq/sun50i-cpufreq-nvmem.c        |  36 +-
+ drivers/cpufreq/tegra20-cpufreq.c             |  18 +-
+ drivers/cpufreq/ti-cpufreq.c                  |  38 +-
+ drivers/devfreq/exynos-bus.c                  |  25 +-
+ drivers/devfreq/sun8i-a33-mbus.c              |   8 +-
+ drivers/devfreq/tegra30-devfreq.c             |   8 +-
+ drivers/gpu/drm/lima/lima_devfreq.c           |  12 +-
+ drivers/gpu/drm/msm/adreno/a5xx_gpu.c         |   8 +-
+ drivers/gpu/drm/msm/adreno/a6xx_gpu.c         |  10 +-
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.c       |   6 +-
+ drivers/gpu/drm/msm/dp/dp_ctrl.c              |   6 +-
+ drivers/gpu/drm/msm/dsi/dsi_host.c            |   6 +-
+ drivers/gpu/drm/panfrost/panfrost_devfreq.c   |   9 +-
+ drivers/gpu/drm/tegra/gr3d.c                  |   6 +-
+ .../media/platform/qcom/venus/pm_helpers.c    |  18 +-
+ drivers/memory/tegra/tegra124-emc.c           |  17 +-
+ drivers/mmc/host/sdhci-msm.c                  |   6 +-
+ drivers/opp/core.c                            | 632 ++++++++----------
+ drivers/opp/opp.h                             |  23 +
+ drivers/opp/ti-opp-supply.c                   |   8 +-
+ drivers/soc/tegra/common.c                    |  45 +-
+ drivers/soc/tegra/pmc.c                       |   8 +-
+ drivers/spi/spi-geni-qcom.c                   |   6 +-
+ drivers/spi/spi-qcom-qspi.c                   |   6 +-
+ drivers/tty/serial/qcom_geni_serial.c         |   6 +-
+ include/linux/pm_opp.h                        | 121 +---
+ 30 files changed, 605 insertions(+), 661 deletions(-)
+
+-- 
+2.31.1.272.g89b43f80a514
+
