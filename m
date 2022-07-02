@@ -2,140 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6A7FCCA482
-	for <linux-mmc@archiver.kernel.org>; Sat,  2 Jul 2022 16:00:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22D79CCA47C
+	for <linux-mmc@archiver.kernel.org>; Sat,  2 Jul 2022 16:51:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232350AbiGBP77 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 2 Jul 2022 11:59:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53230 "EHLO
+        id S232340AbiGBQvd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 2 Jul 2022 12:51:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50168 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232342AbiGBP76 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jul 2022 11:59:58 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06E75BCB2
-        for <linux-mmc@vger.kernel.org>; Sat,  2 Jul 2022 08:59:57 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id z13so8538901lfj.13
-        for <linux-mmc@vger.kernel.org>; Sat, 02 Jul 2022 08:59:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:user-agent:in-reply-to:references
-         :message-id:mime-version:content-transfer-encoding;
-        bh=Hz75Rx42oXHh7NmNLOTnnxJGcRdhgiXUHBkENH9MqHA=;
-        b=t49DnnFkz+tH5eJrrVIDW1KUvaQG95jWIXLzQMKIvbpBvqNP3Roy+FMPGCu/PNyv2w
-         p8pOjYWUSSBJ0Csnt61ODgx79ahGzcV7SPqLtzBoc60unYg+cbcKwQokXJNSqKXO66Uw
-         AHciOKECs0eKerATKAPzaFm+6FKQkVmrjGYC5++MgFLUSWQHeTahilNBL634VEFgYFva
-         LnAMjDrbcLNcYi45ctSY8kTB5rdraekMug3H4ePgfW6lWDBFVdJUmKSOSclc32TvVC7s
-         ygN6y1TrlItsam5I6MBw8WUWLvdkpeFniEX9P/M9Vnc9GHq1IiXHj89dhChCv0jVrToL
-         WxDw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:user-agent:in-reply-to
-         :references:message-id:mime-version:content-transfer-encoding;
-        bh=Hz75Rx42oXHh7NmNLOTnnxJGcRdhgiXUHBkENH9MqHA=;
-        b=MrBqYKFBBbwyauq3PJnx64abyeSUSKWyLKkyNI+i4eplNO2g1NcHyjK0v0VIMCv7EA
-         WU4ti1kkBbIsPPYsviEyrF1yxdGuN+mVNK9XhIai/7T5EyxLVmez0DcwzjGFNVIfGzDZ
-         ZnwRaNikjrlCe9ceYlycgN3WxBCkAgg/RQJ1zxvPE9GU5uEiFMwVCkjdsh3gXqiYy7L2
-         awHZ7ajZmpI9hC4Z7epYSMYFrXxPxnKsx/w6CkNqbOiqe4OPbw5q5Mz/K5SnbzDP5kfw
-         6/bJiXJy5fDNjiD6BYglekqzzx0FUizskbBgRtSRPQdjyqemW7lPz99Ue4ZIIA8oDTJP
-         Xn8Q==
-X-Gm-Message-State: AJIora8KWM9x6k671XRq7mK4qiu2VCCg2d+NoJmLMaBRxtdw/gIOddsU
-        uE/z0cOQGyElvELfDTqWBWNk6Q==
-X-Google-Smtp-Source: AGRyM1tHO8HVvetVfAh0h/jVYaKiWK6Ez13CzIyaZGdFPjFEl84NdJBoTUuNYZcZFE0ahUNr+LAMpQ==
-X-Received: by 2002:a05:6512:2216:b0:481:1ed5:5a72 with SMTP id h22-20020a056512221600b004811ed55a72mr12427813lfu.142.1656777595238;
-        Sat, 02 Jul 2022 08:59:55 -0700 (PDT)
-Received: from [127.0.0.1] ([94.25.229.203])
-        by smtp.gmail.com with ESMTPSA id v6-20020a056512348600b00478f2f2f043sm4165446lfr.147.2022.07.02.08.59.54
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 02 Jul 2022 08:59:54 -0700 (PDT)
-Date:   Sat, 02 Jul 2022 18:59:48 +0300
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To:     Rob Herring <robh@kernel.org>
-CC:     Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Bhupesh Sharma <bhupesh.linux@gmail.com>,
-        "Gross, Andy" <agross@kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: =?US-ASCII?Q?Re=3A_=5BPATCH_1/1=5D_dt-bindings=3A_mmc=3A_sd?= =?US-ASCII?Q?hci-msm=3A_Fix_issues_in_yaml_bindings?=
-User-Agent: K-9 Mail for Android
-In-Reply-To: <CAL_Jsq++gOUymWFf6RwoRuqCFkd9XUNqyo-17QU-UQ-o+TXLtA@mail.gmail.com>
-References: <20220514220116.1008254-1-bhupesh.sharma@linaro.org> <CAL_JsqLxXLFjre9h2dyoUJ=f0+pueUhSYezx_5bZ2SdpDt29xw@mail.gmail.com> <D42FBBDC-A6BA-4374-A726-061A4478D4C7@linaro.org> <CAL_Jsq++gOUymWFf6RwoRuqCFkd9XUNqyo-17QU-UQ-o+TXLtA@mail.gmail.com>
-Message-ID: <36C2A924-3697-42FB-8C14-8E6E163558F2@linaro.org>
+        with ESMTP id S232116AbiGBQvc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jul 2022 12:51:32 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD9E2DEA7;
+        Sat,  2 Jul 2022 09:51:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1656780691; x=1688316691;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=h7voj+BdHoDXvLIKv/HQlK6DZFrt0N8+nXagOZ9WsGY=;
+  b=fxT1bj+TLMhE1l4nIxuLnU+EQCoK6vHpuYYM4fyJC8Eq/xvKQMd720t6
+   kOTWWNRfsK+yGRzuUsR62O9Q+rmbaVzszGv4bFAQhZJ7LEJUzo5vVckZs
+   r0de6fQ1CKWo8BaGaxiG2XfhqGRwe0gGPywL7BTykbqUk9U+wEBrhLP/I
+   wcNSTXk9DFn6EJIrdeb8ODXOqs7xVta2j5B1ZcOwRzP2rXnPSAJBPH+cm
+   IDONItKlLMPicQQh1pXxn+nHfyqDWuq05VK/RcDad0Cm7Q+c6pAu4bYbR
+   K3uYwxJLi+L0zt2ZbxFnAZHHWQNbFc0FMyVjuWyX+kEf2euwT3f+iFyQi
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10396"; a="280405822"
+X-IronPort-AV: E=Sophos;i="5.92,240,1650956400"; 
+   d="scan'208";a="280405822"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jul 2022 09:51:31 -0700
+X-IronPort-AV: E=Sophos;i="5.92,240,1650956400"; 
+   d="scan'208";a="648788101"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.83])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jul 2022 09:51:29 -0700
+Message-ID: <e560121e-6f3b-9188-7ccb-97357881e390@intel.com>
+Date:   Sat, 2 Jul 2022 19:51:25 +0300
 MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.9.1
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix set_uhs_signaling rewriting of
+ MC1R
+Content-Language: en-US
+To:     Eugen Hristev <eugen.hristev@microchip.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, Karl Olsen <karl@micro-technic.com>
+References: <20220630090926.15061-1-eugen.hristev@microchip.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220630090926.15061-1-eugen.hristev@microchip.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 30/06/22 12:09, Eugen Hristev wrote:
+> In set_uhs_signaling, the DDR bit is being set by fully writing the MC1R
+> register.
+> This can lead to accidental erase of certain bits in this register.
+> Avoid this by doing a read-modify-write operation.
+> 
+> Fixes: d0918764c17b ("mmc: sdhci-of-at91: fix MMC_DDR_52 timing selection")
+> Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
+> Tested-by: Karl Olsen <karl@micro-technic.com>
 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-On 2 July 2022 18:22:19 GMT+03:00, Rob Herring <robh@kernel=2Eorg> wrote:
->On Sat, Jul 2, 2022 at 3:14 AM Dmitry Baryshkov
-><dmitry=2Ebaryshkov@linaro=2Eorg> wrote:
->>
->>
->>
->> On 2 July 2022 01:06:48 GMT+03:00, Rob Herring <robh@kernel=2Eorg> wrot=
-e:
->> >On Sat, May 14, 2022 at 4:01 PM Bhupesh Sharma
->> ><bhupesh=2Esharma@linaro=2Eorg> wrote:
->> >>
->> >> Rob pointed some remaining issues in the sdhci-msm yaml
->> >> bindings (via [1])=2E
->> >>
->> >> Fix the same by first using the 'mmc-controller=2Eyaml' as
->> >> 'ref' and thereafter also fix the issues reported by
->> >> 'make dtbs_check' check=2E
->> >>
->> >> [1]=2E https://lore=2Ekernel=2Eorg/linux-arm-msm/YnLmNCwNfoqZln12@ro=
-bh=2Eat=2Ekernel=2Eorg/
->> >>
->> >> Fixes: a45537723f4b ("dt-bindings: mmc: sdhci-msm: Convert bindings =
-to yaml")
->> >> Cc: Bjorn Andersson <bjorn=2Eandersson@linaro=2Eorg>
->> >> Cc: Rob Herring <robh@kernel=2Eorg>
->> >> Cc: Ulf Hansson <ulf=2Ehansson@linaro=2Eorg>
->> >> Signed-off-by: Bhupesh Sharma <bhupesh=2Esharma@linaro=2Eorg>
->> >> ---
->> >> -> This patch uses the dts changes sent (here: https://lore=2Ekernel=
-=2Eorg/linux-arm-msm/20220514215424=2E1007718-1-bhupesh=2Esharma@linaro=2Eo=
-rg/), for fixing the dtbs_check errors=2E
->> >> -> This patch is rebased on 'linux-next/master'
->> >>
->> >>  =2E=2E=2E/devicetree/bindings/mmc/sdhci-msm=2Eyaml    | 52 ++++++++=
-++++++++---
->> >>  1 file changed, 44 insertions(+), 8 deletions(-)
->> >
->> >There's another issue with this applied:
->> >
->> >Documentation/devicetree/bindings/mmc/sdhci-msm=2Eexample=2Edtb:
->> >mmc@8804000: Unevaluated properties are not allowed
->> >('operating-points-v2' was unexpected)
->> >
->> >Should just need a 'operating-points-v2: true' line=2E
->> >
->> >This won't show up until a fix for 'unevaluatedProperties' handling is
->> >applied=2E But first I need all the issues fixed=2E
->>
->> Could you please add a dt-validate (?) argument so that we can validate=
- new schemas with unevaluatedProperties working as expected, while keeping =
-default behaviour intact (while it gets sorted out)?
->>
->
->I think that wouldn't work well because the schemas have to be
->reprocessed when such an option changes=2E Though kbuild does look for
->command line changes=2E=2E=2E
->
->In any case, I'm going to commit this to the main branch in a few
->days=2E There aren't many warnings left=2E
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 9 +++++++--
+>  1 file changed, 7 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 10fb4cb2c731..cd0134580a90 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -100,8 +100,13 @@ static void sdhci_at91_set_clock(struct sdhci_host *host, unsigned int clock)
+>  static void sdhci_at91_set_uhs_signaling(struct sdhci_host *host,
+>  					 unsigned int timing)
+>  {
+> -	if (timing == MMC_TIMING_MMC_DDR52)
+> -		sdhci_writeb(host, SDMMC_MC1R_DDR, SDMMC_MC1R);
+> +	u8 mc1r;
+> +
+> +	if (timing == MMC_TIMING_MMC_DDR52) {
+> +		mc1r = sdhci_readb(host, SDMMC_MC1R);
+> +		mc1r |= SDMMC_MC1R_DDR;
+> +		sdhci_writeb(host, mc1r, SDMMC_MC1R);
+> +	}
+>  	sdhci_set_uhs_signaling(host, timing);
+>  }
+>  
 
-Ack, thanks for the explanation=2E
-
-
---=20
-With best wishes
-Dmitry
