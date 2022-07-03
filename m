@@ -2,134 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFAE3C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat,  2 Jul 2022 16:59:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3AA6C43334
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 21:05:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231540AbiGBQ7B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 2 Jul 2022 12:59:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53900 "EHLO
+        id S231845AbiGCVF5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 3 Jul 2022 17:05:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231520AbiGBQ7B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jul 2022 12:59:01 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22559DFE6
-        for <linux-mmc@vger.kernel.org>; Sat,  2 Jul 2022 09:59:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1656781140; x=1688317140;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=0UEa1lR81GWfzji2zM0TZO4N665Z5tHFW43BYJVTeIQ=;
-  b=bPRaEeISLFNATLpNDL52h1qfnKdiYDlRvYL/rWoh8WBAl6IShk3G/req
-   1YmEWuCVtAJ07kdxwLzQeoI8kSNlJHQThz8X5jdi9pdzcrVFVzNH/LgCu
-   vcn4zBaAQF2zvQ4jdn+Qs2IhtjhGbVPYuloxXK/jI5jOKQe/+N8CKhJCW
-   IyBRXehR4+Q+TJDgXYmOkXaN2sl2BbfUaOu/vC0eKVoDIG9JEKgsliUgG
-   tkR4D2mSyFxqMVSr5qPVr/U8xjm1Q8d0UezouMysTah/pWoxC1fuB7Fv2
-   X3dH3cu7+NiclO4l6GVG9kcIBdvsfKRaWJ8lGO1nrj3H3oC4jCbT+zwxP
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10396"; a="280406293"
-X-IronPort-AV: E=Sophos;i="5.92,240,1650956400"; 
-   d="scan'208";a="280406293"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jul 2022 09:59:00 -0700
-X-IronPort-AV: E=Sophos;i="5.92,240,1650956400"; 
-   d="scan'208";a="648789653"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.83])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Jul 2022 09:58:57 -0700
-Message-ID: <4f4e3eb7-319f-9280-ba5d-78efe0244fe2@intel.com>
-Date:   Sat, 2 Jul 2022 19:58:53 +0300
+        with ESMTP id S229578AbiGCVF4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 17:05:56 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D61C5F7E
+        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 14:05:52 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id q9so10763438wrd.8
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 14:05:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pensando.io; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=1M2WNab/3Dmg4ZgDzZWodPWwNs9gK2nW7vivk0r35wg=;
+        b=qkSJKlPM/Y+LP4AwHgAjRaQiCcGYdC5drro3uQPRSPtk2lJGe0mWE3TYmYgDXofy6O
+         RNnl1A+8+J77swOghtW+B3e9CUyvJgPwLpJmSwzgALWMG9T8HHSjjL71iG92T2mLIYU8
+         7ChIrMCAMpMz8DhryJZz/+181IDb7DNnzBU+vBD6Jww3kENaAoLYki+F8Qbru8E5MVWd
+         C0hi23ubPm95i5QR22d0F/e5BVraMdxQW5d0UisWNWWZIIIGpGJ9cZ+j4LnFi1qA74PQ
+         z0IeEKAXgoXSxvKikqOfQQmpB9Xzbu2XqVU0D3n8kvsccMyucXrvMVrLjdf2DSm1OCJ3
+         MmmQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=1M2WNab/3Dmg4ZgDzZWodPWwNs9gK2nW7vivk0r35wg=;
+        b=nPM8Q/pa4PI/+xM4Adq8w5sBBiJZ6rtyL+OVVzSvojrX+It55bP0kuDL8rafS7uYdI
+         /p7+PFCWWYgTeiWb5vi/w90+9TWxXgriHZsT+5lTFVL3rrm2ygE6sqodzFEbnCtXK5hX
+         P5HsxXkv5Hlwh4BRY8nfHulBrFytu4IYuR5v2DOP4cZWkTe7bFJrti7E9kdMTIA06i2g
+         Flgyzq7DKz7/RY9jfK+NznrstzNyZceNuwHJGcKQuLEnIWeu7hEimSnrKK6+B7Sj1HIR
+         VOMFiR7KaM/t97HnfOSWp4WeZZBcJiHbCgjb6sGzN2/FQpTA1Bf/gX23L6NH4gEv+zwc
+         lUhA==
+X-Gm-Message-State: AJIora9qmJdH/Gurt3sAZaskYo2FHh3UlTHKa4jFIlZut8mGpOMt6Odf
+        8lxUMMP2zjATeOhGGwWxS9uQMRYZGKHEC7q9SpW5Lw==
+X-Google-Smtp-Source: AGRyM1sqRXh7+fnSdDsSPaBVeh45gia04bWxnifN90eaCRsZKfzusUMTYq9RvqMbWslUsPnHiRwkLPmZ93VF6ubeX9Y=
+X-Received: by 2002:a05:6000:2a2:b0:21d:1e00:c198 with SMTP id
+ l2-20020a05600002a200b0021d1e00c198mr23164612wry.520.1656882351066; Sun, 03
+ Jul 2022 14:05:51 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.9.1
-Subject: Re: [PATCH] Add define SDHCI_POWER_OFF to improve readability
-Content-Language: en-US
-To:     Chanwoo Lee <cw9316.lee@samsung.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-Cc:     grant.jung@samsung.com, jt77.jang@samsung.com,
-        dh0421.hwang@samsung.com, sh043.lee@samsung.com
-References: <CGME20220630014828epcas1p1e780542d769ff8189bb408449624ffb4@epcas1p1.samsung.com>
- <20220630014425.3643-1-cw9316.lee@samsung.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220630014425.3643-1-cw9316.lee@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-12-brad@pensando.io>
+ <20220614084849.oodxh6cthysga5iq@ti.com>
+In-Reply-To: <20220614084849.oodxh6cthysga5iq@ti.com>
+From:   Brad Larson <brad@pensando.io>
+Date:   Sun, 3 Jul 2022 14:05:40 -0700
+Message-ID: <CAK9rFnzUGrdahqKM8DDx9Xo-v4Tqs086XSUoHf6wS2fbqK2OHQ@mail.gmail.com>
+Subject: Re: [PATCH v5 11/15] spi: cadence-quadspi: Add compatible for AMD
+ Pensando Elba SoC
+To:     Pratyush Yadav <p.yadav@ti.com>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>, alcooperx@gmail.com,
+        Andy Shevchenko <andy.shevchenko@gmail.com>,
+        Arnd Bergmann <arnd@arndb.de>, blarson@amd.com,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        gsomlo@gmail.com, gerg@linux-m68k.org, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        Mark Brown <broonie@kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        p.zabel@pengutronix.de, piotrs@cadence.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org,
+        Serge Semin <fancer.lancer@gmail.com>,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        Ulf Hansson <ulf.hansson@linaro.org>, will@kernel.org,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/06/22 04:44, Chanwoo Lee wrote:
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
-> 
-> //sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> A value of '0' has two meanings.
->  - Clear the register.   //2084 line
->  - Set power off.       //2075 line
-> 
-> To clarify this and improve readability,
-> use the 'power_off' value instead of '0'.
+Hi Pratyush,
 
-The distinction does not seem that important and there is not
-much chance such a convention will always be followed in the
-future, so I would prefer to leave it as is.
+On Tue, Jun 14, 2022 at 1:49 AM Pratyush Yadav <p.yadav@ti.com> wrote:
 
-> 
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
->  drivers/mmc/host/sdhci.c          | 6 +++---
->  drivers/mmc/host/sdhci.h          | 1 +
->  3 files changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 622b7de96c7f..a732eec69bf8 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -584,7 +584,8 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
->  	if (intel_host->needs_pwr_off) {
->  		intel_host->needs_pwr_off = false;
->  		if (mode != MMC_POWER_OFF) {
-> -			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> +			sdhci_writeb(host, SDHCI_POWER_OFF,
-> +					SDHCI_POWER_CONTROL);
->  			usleep_range(10000, 12500);
->  		}
->  	}
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7689ffec5ad1..602fb3a088e7 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2029,7 +2029,7 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
->  	if (mode != MMC_POWER_OFF)
->  		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
->  	else
-> -		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> +		sdhci_writeb(host, SDHCI_POWER_OFF, SDHCI_POWER_CONTROL);
->  }
->  
->  void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
-> @@ -2075,8 +2075,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->  
->  	host->pwr = pwr;
->  
-> -	if (pwr == 0) {
-> -		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> +	if (pwr == SDHCI_POWER_OFF) {
-> +		sdhci_writeb(host, SDHCI_POWER_OFF, SDHCI_POWER_CONTROL);
->  		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
->  			sdhci_runtime_pm_bus_off(host);
->  	} else {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 95a08f09df30..f35d6d7b8326 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -95,6 +95,7 @@
->  #define  SDHCI_CTRL_CDTEST_EN	0x80
->  
->  #define SDHCI_POWER_CONTROL	0x29
-> +#define  SDHCI_POWER_OFF	0x00
->  #define  SDHCI_POWER_ON		0x01
->  #define  SDHCI_POWER_180	0x0A
->  #define  SDHCI_POWER_300	0x0C
+> This is needed for TI's SoCs as well. APB and AHB accesses are
+> independent of each other on the interconnect and can be racy. I wrote a
+> couple patches [0][1] to fix this on TI's fork. I never got around to
+> sending them upstream. It would be great if you can pick those up. They
+> fix the race in all paths, not just indirect write.
+>
+> I would also prefer if we do this unconditionally. I don't think it has
+> much downside even on platforms that do not strictly need this.
+>
+> [0] https://git.ti.com/cgit/ti-linux-kernel/ti-linux-kernel/commit/drivers/spi/spi-cadence-quadspi.c?h=ti-linux-5.10.y&id=027f03a8512086e5ef05dc4e4ff53b2628848f95
+> [1] https://git.ti.com/cgit/ti-linux-kernel/ti-linux-kernel/commit/drivers/spi/spi-cadence-quadspi.c?h=ti-linux-5.10.y&id=4c367e58bab7d3f9c470c3778441f73546f20398
 
+Let's get Elba specific support in first and then in a separate patch
+go for the unconditional.  An extra op for devices for which its not
+currently done will result in questions I can't answer.
+
+Regards,
+Brad
