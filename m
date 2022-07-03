@@ -2,70 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CC03C43334
-	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 21:42:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F0FDC433EF
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 21:56:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231144AbiGCVmt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 3 Jul 2022 17:42:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43326 "EHLO
+        id S231629AbiGCV46 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 3 Jul 2022 17:56:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47854 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229904AbiGCVmt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 17:42:49 -0400
-Received: from mail-wr1-x42c.google.com (mail-wr1-x42c.google.com [IPv6:2a00:1450:4864:20::42c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76596558A
-        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 14:42:46 -0700 (PDT)
-Received: by mail-wr1-x42c.google.com with SMTP id k7so10816370wrc.12
-        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 14:42:46 -0700 (PDT)
+        with ESMTP id S229470AbiGCV45 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 17:56:57 -0400
+Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 426AA26C9
+        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 14:56:56 -0700 (PDT)
+Received: by mail-wm1-x32d.google.com with SMTP id be14-20020a05600c1e8e00b003a04a458c54so4617215wmb.3
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 14:56:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=zMVVNw/TspXkB20dcfkA7bJulFS5H5tiR5oe4QWMnRk=;
-        b=HsqBHDtGqFr4oqOjiezat5EsmCWzI1KD9rM2XwabQ2iO0RHte1hV/Iwz/dcTBUHBGT
-         eoyvrV7ZkMuQ+k4SwZYaNKCS7PMlRd1FInDGTV88ZbTVoGab2QsDW9xwV1n1Z4c9a1HN
-         QJD7Np2IIDr8C+YuQ104tltO5ToXrUfHe6eh8R3blGo4wZLHq4zm0vp1/nzjqMWuParm
-         aWbiAm7+UFdzvmgd+bNOr3r4/2xvTWl4SSeUyxaGyhQplfL4M8R7NX/5HleaCF9V+G/P
-         G2wDNwWY3CZRX0CCy8Zra5l4T2xGBe/x1gpl6v3SkhZH9xxib1QayfmKhCjm2YM2HX3X
-         DYPA==
+        bh=qnLNcWKNYblu0OnxQiln0hOQP2zX/SMuxR4VzazEJx0=;
+        b=dTLKDKOKkr6ygHuffm6Ni+B4zrkBUnExmqkzN+tNrhmr8RjMl+nsKMZt46ZwNNH7aS
+         OFshMKR6X5w7ERNzztgJLYNiwEBLDQy9elLLyxBzKkG1fCxRUgEBCYC4JXMwJM1b2tTE
+         Kn6rKWQUhEtSu+Fk4cSFQOaSxCfTclAsnD0PuAsUXMvBp0Qvum8zLTiiJNoskS4UdX3K
+         NUWyDCAwCf01xD4LVMLe8FS73UNmm0zlzkjWS3yeH3uTZHi3JSQh4AU6IwNsHIxfCugg
+         oM1RjvOmpflwZP+CZvYMyvAwgUlSgHmgc6ARBlKs6IoHa3/DW4g7T/rgXNT76q0/fvwF
+         hIsw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=zMVVNw/TspXkB20dcfkA7bJulFS5H5tiR5oe4QWMnRk=;
-        b=TVJxOgdVy8zwJOfsCgx/XdQ0EPgYklvrAADF3cXcuthWNvFYJmO67kAVA3kMzzhuSP
-         uHHmaXDUnxsuWYbYTNnP9qXQNLv6pwpLxL1IMuKH6Gw+bnK2sOVJR50ZIEfl1zD3e/j+
-         Ivj94Z4HqK270gZTzSEdCh2FK4f9p67Xkz/XGtV5+CmqDGoEyxBBSnYWxrr1KIEuzCDU
-         7HvwO8T7dcYwPERZTl17MGH4RBRooci2qN8YrxvfVMXWEKXIqp9yEWPLs8pG3AlABe0a
-         5fNo30GkA/YTlXvl6Iw2xKOctNdjcB9uDVMjlW942DsLfNVJUxln9pzw/d/9Jfe5PHuj
-         copQ==
-X-Gm-Message-State: AJIora+4vRfid+/3cG82gCdXhdMmNE18xIAUtpTJ9mxmCi9X30uE7Q6B
-        5L8HmF6PgscR0DVhY95qL8h3J2pf9RVvQRZLrJjAiA==
-X-Google-Smtp-Source: AGRyM1uOJo6rBressjjFHOaRQyjnucznDSp/34HbzfZLcPA+9VX6yTguO55aaKzIkq0N7b83eJGgalRejb/jexIr1cU=
-X-Received: by 2002:a5d:5a15:0:b0:21d:630c:a609 with SMTP id
- bq21-20020a5d5a15000000b0021d630ca609mr6998929wrb.468.1656884565041; Sun, 03
- Jul 2022 14:42:45 -0700 (PDT)
+        bh=qnLNcWKNYblu0OnxQiln0hOQP2zX/SMuxR4VzazEJx0=;
+        b=s1gmsmdVBaaLM9vEttnPb1eIzaZPUtZIRbYdO3+hd5FUeKVcsabXYrKvCLxBgCgtpL
+         SJjbZGTMf/kNzfU3SnK/BgWOYHOEFktQaAyPOfb7591AmGdXdk0fBIP7CODdGQCDMYaA
+         twl1kx5MepKXrf6Pgblx9xGoCh5s+7D6HmTTtvHsmRDMdNt9IL5i8lHz3BJx734sskPh
+         BRAg/FNW2GpnjNXqCooc+gvujhxlJizHcjwgkliv8JPGN86B/OKr6sfkfD5iWuCWxNAz
+         foaOjqpEchZYWf9acviZ2brYNPhjEOlHYpuuynqs8+Mppvr2OqRMD8nqjeMix8bbGOjh
+         +aXA==
+X-Gm-Message-State: AJIora/IHs62Tz+yJKk2sVmCrL+ZZMvpLpjMFdKL8M2BLEMlhguVrWc0
+        cWjjrbVk6Vma5/9ye9lEt2DSWby822MXS78nVam0dQ==
+X-Google-Smtp-Source: AGRyM1sPTmuBec6ys1CNE7pzCd9eS2h05V7JWbkQNKYOkGbhWlIRi92o4/Kfvwy6FdMgpvpULh5vYfV7v5p4lsVu0cI=
+X-Received: by 2002:a05:600c:3505:b0:3a1:9fbb:4d59 with SMTP id
+ h5-20020a05600c350500b003a19fbb4d59mr4240397wmq.165.1656885414782; Sun, 03
+ Jul 2022 14:56:54 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-14-brad@pensando.io>
- <CAHp75Vck4xNF=OOseMssF2R7TV2t+y0AQozRDFN2E6zQ51xR0g@mail.gmail.com>
-In-Reply-To: <CAHp75Vck4xNF=OOseMssF2R7TV2t+y0AQozRDFN2E6zQ51xR0g@mail.gmail.com>
+References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-15-brad@pensando.io>
+ <CAHp75VeRN+mChDibXqrQjOQqiSz_-inebRqcPQMmAvN_zBTFBg@mail.gmail.com>
+In-Reply-To: <CAHp75VeRN+mChDibXqrQjOQqiSz_-inebRqcPQMmAvN_zBTFBg@mail.gmail.com>
 From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 3 Jul 2022 14:42:34 -0700
-Message-ID: <CAK9rFnxR=6G469YXtdEBpNLCHq-+_kQJg4UE+58_yhxwtfBdrA@mail.gmail.com>
-Subject: Re: [PATCH v5 13/15] mmc: sdhci-cadence: Add AMD Pensando Elba SoC support
+Date:   Sun, 3 Jul 2022 14:56:43 -0700
+Message-ID: <CAK9rFnyQnNFfpsCWz3u=vYgmJ+Yi4EWp0z2Q43c_2509JNTgzQ@mail.gmail.com>
+Subject: Re: [PATCH v5 14/15] mfd: pensando-elbasr: Add AMD Pensando Elba
+ System Resource chip
 To:     Andy Shevchenko <andy.shevchenko@gmail.com>
 Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Al Cooper <alcooperx@gmail.com>, Arnd Bergmann <arnd@arndb.de>,
-        blarson@amd.com, Catalin Marinas <catalin.marinas@arm.com>,
+        blarson@amd.com, brijeshkumar.singh@amd.com,
+        Catalin Marinas <catalin.marinas@arm.com>,
         Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
         Krzysztof Kozlowski <krzk@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Lee Jones <lee.jones@linaro.org>,
         Mark Brown <broonie@kernel.org>,
         Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
+        Philipp Zabel <p.zabel@pengutronix.de>, piotrs@cadence.com,
         Pratyush Yadav <p.yadav@ti.com>,
         Randy Dunlap <rdunlap@infradead.org>,
         Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
@@ -82,146 +84,313 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Andy,
 
-On Tue, Jun 14, 2022 at 4:19 AM Andy Shevchenko
+On Tue, Jun 14, 2022 at 4:42 AM Andy Shevchenko
 <andy.shevchenko@gmail.com> wrote:
 >
 > On Mon, Jun 13, 2022 at 9:57 PM Brad Larson <brad@pensando.io> wrote:
+> ...
 >
-> > Add support for AMD Pensando Elba SoC which explicitly controls
-> > byte-lane enables on writes.  Add priv_write_l() which is
+> > +#include <linux/mfd/pensando-elbasr.h>
+> > +#include <linux/mfd/core.h>
+> > +#include <linux/init.h>
+> > +#include <linux/module.h>
+> > +#include <linux/ioctl.h>
+> > +#include <linux/fs.h>
+> > +#include <linux/device.h>
+> > +#include <linux/err.h>
+> > +#include <linux/list.h>
+> > +#include <linux/errno.h>
+> > +#include <linux/mutex.h>
+> > +#include <linux/slab.h>
+> > +#include <linux/compat.h>
+> > +#include <linux/of.h>
+> > +#include <linux/of_device.h>
+> > +#include <linux/regmap.h>
+> > +#include <linux/spi/spi.h>
+> > +#include <linux/spi/spidev.h>
+> > +#include <linux/delay.h>
 >
-> enabling ?
+> Keep it sorted?
+> It would easily tell that types.h is missed, but maybe other headers
+> are superfluous.
 
-Changed to enabling
+Sorted and added types.h
 
 > ...
 >
-> > +       void (*priv_write_l)(struct sdhci_cdns_priv *priv, u32 val,
+> > +/* The main reason to have this class is to make mdev/udev create the
+> > + * /dev/pensrB.C character device nodes exposing our userspace API.
+> > + * It also simplifies memory management.  The device nodes
+> > + * /dev/pensrB.C are common across Pensando boards.
+> > + */
 >
-> priv_writel
+> /*
+>  * The above style of multi-line
+>  * comments is for networking,
+>  * the rest uses a slightly different one.
+>  */
 
-Changed to priv_writel
-
->
-> > +                            void __iomem *reg);
->
-> And perhaps leave it on one line.
->
-> I also would swap parameters, so address goes first followed by value.
-
-Which is the reverse of writel() parameter ordering which is value,
-address.  Should I do this?
+Changed to non-networking multi-line comments, code reuse from
+driver/spi/spidev.c there since ~2007.
 
 > ...
 >
-> > +static inline void sdhci_cdns_priv_writel(struct sdhci_cdns_priv *priv,
-> > +                                         u32 val, void __iomem *reg)
+> > +static DECLARE_BITMAP(minors, ELBASR_MAX_DEVS);
+> > +static unsigned int bufsiz = 4096;
+> > +
+> > +static LIST_HEAD(device_list);
+> > +static DEFINE_MUTEX(device_list_lock);
+>
+> Is it all to reinvent IDA?
+
+I don't know what IDA is, searching linux IDA yields debugger and some
+image viewer.
+The whole purpose of adding this driver was to not use spidev.c to
+provide Elba specific
+access to 4 functions in the fpga and also an emmc reset driver.  The
+reuse of code from
+spidev.c was to avoid breaking production deployments while adding emmc hardware
+reset support as a priority.  I'll strip out any code not used for
+Elba deployments for next
+version.
+
+> ...
+>
+> > +static ssize_t
+> > +elbasr_spi_sync(struct elbasr_data *elbasr_spi, struct spi_message *message)
 > > +{
+> > +       int status;
+> > +       struct spi_device *spi;
+> > +
+> > +       spin_lock_irq(&elbasr_spi->spi_lock);
+> > +       spi = elbasr_spi->spi;
+> > +       spin_unlock_irq(&elbasr_spi->spi_lock);
 >
-> > +       if (unlikely(priv->priv_write_l))
+> > +
 >
-> First of all, why if (unlikely())-else instead of if (likely())-else?
+> Drop this blank line and see below.
+
+Removed
+
+> > +       if (spi == NULL)
+> > +               status = -ESHUTDOWN;
 >
-> > +               priv->priv_write_l(priv, val, reg);
+> if (!spi)
+>   return ...
+>
 > > +       else
-> > +               writel(val, reg);
-> > +}
-
-It was existing code and never looked at it.  This construct looks to
-be widely used however this goes away with the two patch approach
-below.
-
-$ find . -name \*.c | xargs grep if | grep unlikely | wc
-  18640
-
-> Instead of branching each time you do I/O, make sure that callback is
-> always set and call it unconditionally. In this case you don't need to
-> have this callback, but maybe just a wrapper on `writel()`. As a
-> result you may split this to two patches in the first of which you
-> simply introduce a callback and a writel() wrapper which is assigned
-> unconditionally to all current chips. In the next you add a new chip
-> support.
-
-Next version will separate into two patches as described
-
-> ...
 >
-> > +       u32 m = (reg & 0x3);
-> > +       u32 msk = (0x3 << (m));
+> > +               status = spi_sync(spi, message);
 > > +
-> > +       spin_lock_irqsave(&priv->wrlock, flags);
-> > +       writel(msk << 3, priv->ctl_addr);
-> > +       writew(val, host->ioaddr + reg);
-> > +       spin_unlock_irqrestore(&priv->wrlock, flags);
->
-> Too many 3:s as magic. Is it GENMASK() or something else? Perhaps it
-> needs a definition.
-
-Definitely, changed this to be understandable by inspection.
-GENMASK() for word and BIT() for byte makes this more clear.  The 3's
-came from bits [6:3] are the byte-lane enables in the control reg
-where the lower two bits of the address specify the byte(s) to enable.
-
-/*  Elba control reg bits [6:3] are byte-lane enables */
-#define ELBA_BYTE_ENABLE_MASK(x)        ((x) << 3)
-
-elba_priv_write_l(...):
-        writel(ELBA_BYTE_ENABLE_MASK(0xf), priv->ctl_addr);
-        writel(val, reg);
-
-elba_write_w(...):
-        byte_enables = GENMASK(1, 0) << (reg & 0x3);
-        writel(ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
-        writew(val, host->ioaddr + reg);
-
-> ...
->
-> > +       u32 m = (reg & 0x3);
-> > +       u32 msk = (0x1 << (m));
+> > +       if (status == 0)
+> > +               status = message->actual_length;
 > > +
-> > +       spin_lock_irqsave(&priv->wrlock, flags);
-> > +       writel(msk << 3, priv->ctl_addr);
-> > +       writeb(val, host->ioaddr + reg);
-> > +       spin_unlock_irqrestore(&priv->wrlock, flags);
+> > +       return status;
 >
-> Ditto.
+> status = spi_sync(...);
+> if (status)
+>   return status;
+>
+> return message->actual_length;
 
-elba_write_b(...):
-        byte_enables = BIT(0) << (reg & 0x3);
-        writel(ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
-        writeb(val, host->ioaddr + reg);
+Refactored to:
+        if (!spi)
+                return -ESHUTDOWN;
+
+        status = spi_sync(spi, message);
+        if (status)
+                return status;
+
+        return message->actual_length;
+
+> ...
+> > +       if (status) {
+>
+> > +               pr_debug("elbasr_spi: nothing for minor %d\n", iminor(inode));
+
+> We have a device pointer, don't we?
+
+Removed
 
 > ...
 >
-> > +       writel(0x78, priv->ctl_addr);
->
-> Magic.
-
-writel(ELBA_BYTE_ENABLE_MASK(0xf), priv->ctl_addr);
-
-> ...
->
-> > +static const struct sdhci_cdns_drv_data sdhci_cdns_drv_data = {
-> > +       .pltfm_data = {
-> > +               .ops = &sdhci_cdns_ops,
-> > +       },
+> > +static const struct file_operations elbasr_spi_fops = {
+> > +       .owner =        THIS_MODULE,
+> > +       .write =        elbasr_spi_write,
+> > +       .read =         elbasr_spi_read,
+> > +       .unlocked_ioctl = elbasr_spi_ioctl,
+> > +       .compat_ioctl = elbasr_spi_compat_ioctl,
+> > +       .open =         elbasr_spi_open,
+> > +       .release =      elbasr_spi_release,
+> > +       .llseek =       no_llseek,
 > > +};
-> > +
-> > +
 >
-> One blank line is enough.
+>
+> As far as I can see the code looks like a proxy for SPI via SPI. Is
+> that the correct interpretation? If so, why this code repeating _a
+> lot_ from SPI framework, including character device IOCTL? This is a
+> big question here and since there is missed documentation for ABI and
+> no points to userspace tools which are going to use this ABI (red
+> flag!) the code is no go.
 
-Removed extra blank line
+The patch v5-0006-dt-bindings-mfd-amd-pensando-elbasr-Add-AMD-Pensa.patch
+has the documentation where below is the commit message.  This is a required
+companion device to the Elba SoC (on spi0) which is a FPGA with four
+functions.
+One function that isn't filled out (driver not included in base SoC
+support) is accessed
+at /dev/pensr0.2 which is a Lattice dual I2C master for the
+transceiver management.
+There are customer utilities and programs that open /dev/pensr0.x in operation.
+
+  dt-bindings: mfd: amd,pensando-elbasr: Add AMD Pensando Elba System
+Resource chip
+
+  Add support for the AMD Pensando Elba SoC System Resource chip
+  using the SPI interface.  The Elba SR is a Multi-function Device
+  supporting device register access using CS0, smbus interface for
+  FRU and board peripherals using CS1, dual Lattice I2C masters for
+  transceiver management using CS2, and CS3 for flash access.
+
 
 > ...
 >
-> > +       {
-> > +               .compatible = "amd,pensando-elba-sd4hc",
-> > +               .data = &sdhci_elba_drv_data
+> > +static bool
+> > +elbasr_reg_readable(struct device *dev, unsigned int reg)
+>
+> It's pretty much one line, can you reduce the number of LoCs by
+> reindenting your code a bit?
+
+Moved to one line, here and others
+
+> ...
+>
+> > +static bool
+> > +elbasr_reg_writeable(struct device *dev, unsigned int reg)
+>
+> Ditto and so on.
+>
+> ...
+>
+> > +       struct spi_transfer t[2] = { { 0 } };
+>
+> Isn't  `{ }` enough?
+
+Yes, changed
+
+> ...
+>
+> > +       spi_message_add_tail(&t[0], &m);
+> > +       spi_message_add_tail(&t[1], &m);
+>
+> spi_message_init_with_transfers() ?
+> Here and elsewhere.
+
+Changed to use of spi_message_init_with_transfers()
+
+> ...
+>
+> > +       struct spi_transfer t[1] = { { 0 } };
+>
+> Why does `struct spi_transfer t = { };` not work?!
+
+It does, changed
+
+> ...
+>
+> > +static const struct regmap_config pensando_elbasr_regmap_config = {
+> > +       .reg_bits = 8,
+> > +       .val_bits = 8,
+> > +       .cache_type = REGCACHE_NONE,
+> > +       .readable_reg = elbasr_reg_readable,
+> > +       .writeable_reg = elbasr_reg_writeable,
+> > +       .reg_read = elbasr_regs_read,
+> > +       .reg_write = elbasr_regs_write,
+> > +       .max_register = ELBASR_MAX_REG
 >
 > Leave a comma here.
 
-Added comma
+Added a comma after ELBASR_MAX_REG
+
+> > +};
+>
+> ...
+>
+> > +       elbasr->elbasr_regs = devm_regmap_init(&spi->dev, NULL, spi,
+> > +                                              &pensando_elbasr_regmap_config);
+> > +       if (IS_ERR(elbasr->elbasr_regs)) {
+> > +               ret = PTR_ERR(elbasr->elbasr_regs);
+> > +               dev_err(&spi->dev, "Failed to allocate register map: %d\n", ret);
+> > +               return ret;
+>
+> return dev_err_probe(...);
+
+Changed to dev_err_probe(...)
+
+> > +       }
+> > +
+> > +       ret = devm_mfd_add_devices(&spi->dev, PLATFORM_DEVID_NONE,
+> > +                                  pensando_elbasr_subdev_info,
+> > +                                  ARRAY_SIZE(pensando_elbasr_subdev_info),
+> > +                                  NULL, 0, NULL);
+> > +       if (ret)
+> > +               dev_err(&spi->dev, "Failed to register sub-devices: %d\n", ret);
+> > +
+> > +       return ret;
+>
+> Ditto.
+
+Changed to dev_err_probe(...)
+
+> ...
+>
+> > +       /* Add Elba reset driver sub-device */
+> > +       if (spi->chip_select == 0)
+> > +               elbasr_regs_setup(spi, elbasr);
+>
+> You have an awful mixture of devm_ vs. non-devm_ calls. Either move
+> from devm_ completely, or switch to devm_ in the rest of the ->probe()
+> code.
+
+Moved away from devm_
+
+> ...
+>
+> > +static const struct of_device_id elbasr_spi_of_match[] = {
+> > +       { .compatible = "amd,pensando-elbasr" },
+> > +       { /* sentinel */ },
+>
+> Comma is not needed in terminator entry.
+
+Removed comma
+
+> ...
+>
+> > +static struct spi_driver elbasr_spi_driver = {
+> > +       .probe = elbasr_spi_probe,
+> > +       .driver = {
+> > +               .name = "elbasr",
+>
+> > +               .of_match_table = of_match_ptr(elbasr_spi_of_match),
+>
+> of_match_ptr() is useless here (look at your Kconfig) and in some
+> cases is harmful. No need to use this.
+
+Removed use of of_match_ptr()
+
+> > +       },
+> > +};
+>
+> ...
+>
+> > +#include <linux/cdev.h>
+> > +#include <linux/regmap.h>
+>
+> mutex.h and types.h are missed, for example.
+> You need to use headers for direct use of. And in some cases forward
+> declarations can be used instead of including a header.
+
+Added missed mutex.h and types.h
 
 Regards,
 Brad
