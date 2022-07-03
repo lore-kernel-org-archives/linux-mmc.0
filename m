@@ -2,57 +2,57 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84E79C43334
-	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 23:42:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 471DCC433EF
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 23:50:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229593AbiGCXmC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 3 Jul 2022 19:42:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57922 "EHLO
+        id S232749AbiGCXul (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 3 Jul 2022 19:50:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232747AbiGCXmA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 19:42:00 -0400
-Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CAA3F60D4
-        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 16:41:53 -0700 (PDT)
-Received: by mail-wm1-x32d.google.com with SMTP id 205-20020a1c02d6000000b003a03567d5e9so6551167wmc.1
-        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 16:41:53 -0700 (PDT)
+        with ESMTP id S232313AbiGCXuk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 19:50:40 -0400
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D2C560D4
+        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 16:50:39 -0700 (PDT)
+Received: by mail-wr1-x436.google.com with SMTP id q9so11083230wrd.8
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 16:50:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=/2KxyRrp3TRn/WaQ777l/5OLDpcxpRs5tZ2huVSaFVE=;
-        b=ekkt/b+97PkfY5eoJHudZ29CeSCQonrAT7vVbbRds8jlg6Ef1ps8U3SAP0qTX+klTx
-         UVXeOhhPr9VLO5xjNlEngyYvn08QWJvKkjVGSetGqbtp84KFRaitMDhIJrCXx3ly8jsz
-         WfiLZnvvpz3fdHrW6Xia1qR19pCDt2eEm173WzPPwcy7OeTNEmhVknFIxwAoRTQ8ypKP
-         RoDIXdB+8Wm1Yfc4Syv4vs052cve7kAgambBqvHUKqru4YrCLFx3xWdlPrLIZNqMYmzi
-         zxZkKZDlyHd+/gqvtN0qzaMkHRnJVmnwnNVLatXDtM+Sbm6S7QtY2c2l3SWdsS731+SM
-         G7VQ==
+        bh=oRq/e/4c333beIFv9gNYaIdxDIpAmsD9/ZlSeuiZFzY=;
+        b=xZ2sS7h3kN01lP5WAc6i9d0ekvpe8SzRjHWfh7G4ZP+QuV4A+Q8UM8gOCvwip8ugvm
+         1e/zqx1uABp5ft9chPXoGat+L0w7axrrlDwHmhVs0wZ4RrP2LoPIbBXIy+4si2Y2LRvK
+         PztxPVetl2AUI8OunpRgQPZxQFJn/6f1XNQz920RvSuDfW5WoPyC3OOHslT5cxvssIPp
+         91bNVem4Z0gYZTFJmgFmRlTmqvFAXyWfWyeCFVONyOWwXlOKHq+dgyL1m09So+vlwtNr
+         J+rEwjzC4ycC7FkPV5N7HYTDtCv5haXexhVsa4xDbtIiaUcyzJhh+3874zqPDSM+gcV1
+         t+gA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=/2KxyRrp3TRn/WaQ777l/5OLDpcxpRs5tZ2huVSaFVE=;
-        b=jMu76RzSIum9UuUzER76dqDONItEtCdioWVghPPshmse5apArRh4mGNoC9Q4aSSF64
-         XdQGifDZ9QFD5UI8rasVSfZ295TW+cN7QxX1Xc1SGG4dc6Iez1zTvmddz/w5/msMiI3b
-         YCBqiYtuU2QYNfDEp4KYkAWNaBxvwIOeK1yFU6hdLTebqYbm6jd8uo2xFVR8/0lNUU9r
-         XQws/MGbV8mOtW5+oOq5QDkw33LCbnNr8nksRiPlsEbqnyAGlVh0L1VXknMiDUVyPRBY
-         A+z/gECX3I7OQh2ZAwDqcdWvG9IZk6yFNmuK55qoYlhAo0cSFcKjC+V048jtlEVROQxE
-         4j+w==
-X-Gm-Message-State: AJIora9TTMZJjZ3/hPnwFo1W89jYCeetfSSHlIy3alCpVTjWiDj2WdLv
-        RCVfT99WVGT8smzE7I3jPA822a11rzGx16FXCE4c0Q==
-X-Google-Smtp-Source: AGRyM1syKWyVQnRX+KNFIh0qO1Fu/FxomivNEho5XvS7NURPSvHX18dDHeMCypu0UAYUcGAn76afZcnBPtD9SJzuJfc=
-X-Received: by 2002:a05:600c:2051:b0:3a0:3c58:6ff6 with SMTP id
- p17-20020a05600c205100b003a03c586ff6mr29223882wmg.98.1656891712322; Sun, 03
- Jul 2022 16:41:52 -0700 (PDT)
+        bh=oRq/e/4c333beIFv9gNYaIdxDIpAmsD9/ZlSeuiZFzY=;
+        b=reAglStrx/F0nlxV21Hq1OqKZHlg076ZlP5CRKSTqB8hzsxG0GDl6I1fnCQMUP/WtX
+         /pNxF6OgPw2JWqpDHFCseq13HVW/4jW1y3K6KTlVox/ukpSQq1PHmYhuOv8KIo1LB5Sa
+         EyXB/y2iIKjfH6v0J9a13/CDYVk6n8tAFM4JltyuhiP8Qb/pFzxaD67bxOWHmEHY6YPZ
+         ri5Tjpq0zg25+cXKJDSJUFHIvBnt0aAoBvsVZe9q/EhVIt9Nq7bnxI6Jjsdm+yrYI1PZ
+         X2MeXlKr0WUsNAXrSXxyo/vrA4xfkIf4Unlk5oLK+85Xz+BSKf4iMGlzpagW3VxbjNNW
+         Lo3g==
+X-Gm-Message-State: AJIora+v4rqizt1zEY0Ttn9P65v2uCDDiQ3EyaqiB9/MtRGATnfOQs0i
+        aSrjh4A1BlQ7UHRVTk4o3+hfPgk8228QcV+nvZflEQ==
+X-Google-Smtp-Source: AGRyM1t6qMqQOkgpSTAQjUaSv3J6ZyxsLzoJ/MEWwCcPmDPYKAG11Z6w8LtxzlSFzumNlum/bsK2f37ENWE0pAIAsjw=
+X-Received: by 2002:a5d:5a15:0:b0:21d:630c:a609 with SMTP id
+ bq21-20020a5d5a15000000b0021d630ca609mr7314612wrb.468.1656892237654; Sun, 03
+ Jul 2022 16:50:37 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-7-brad@pensando.io>
- <b42b197f-2b11-cb6e-458a-ed12b2eb997d@linaro.org>
-In-Reply-To: <b42b197f-2b11-cb6e-458a-ed12b2eb997d@linaro.org>
+References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-8-brad@pensando.io>
+ <eac223c5-a3d4-65e5-3753-1bd4033513f2@linaro.org>
+In-Reply-To: <eac223c5-a3d4-65e5-3753-1bd4033513f2@linaro.org>
 From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 3 Jul 2022 16:41:41 -0700
-Message-ID: <CAK9rFnwj0c5fuWk8TxxX_RBXDCBpEa8f-rh3V13BN_j_U7Fo7w@mail.gmail.com>
-Subject: Re: [PATCH v5 06/15] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
- Pensando Elba System Resource chip
+Date:   Sun, 3 Jul 2022 16:50:26 -0700
+Message-ID: <CAK9rFnyRgj26MaurS_u83wnzgmq+18=UdZT_FLLZc3jnWD4uFQ@mail.gmail.com>
+Subject: Re: [PATCH v5 07/15] dt-bindings: reset: amd,pensando-elbasr-reset:
+ Add AMD Pensando SR Reset Controller bindings
 To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
@@ -86,58 +86,147 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Krzysztof,
 
-On Mon, Jun 20, 2022 at 5:56 AM Krzysztof Kozlowski
+On Mon, Jun 20, 2022 at 6:00 AM Krzysztof Kozlowski
 <krzysztof.kozlowski@linaro.org> wrote:
 >
 > On 13/06/2022 21:56, Brad Larson wrote:
 > > From: Brad Larson <blarson@amd.com>
 > >
-> > Add support for the AMD Pensando Elba SoC System Resource chip
-> > using the SPI interface.  The Elba SR is a Multi-function Device
-> > supporting device register access using CS0, smbus interface for
-> > FRU and board peripherals using CS1, dual Lattice I2C masters for
-> > transceiver management using CS2, and CS3 for flash access.
+> > Document bindings for AMD Pensando Elba SR Reset Controller
 > >
 > > Signed-off-by: Brad Larson <blarson@amd.com>
 > > ---
-> >  .../bindings/mfd/amd,pensando-elbasr.yaml     | 93 +++++++++++++++++++
-> >  1 file changed, 93 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-> ...
+> >  .../reset/amd,pensando-elbasr-reset.yaml      | 62 +++++++++++++++++++
+> >  1 file changed, 62 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+> >
+> > diff --git a/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml b/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+> > new file mode 100644
+> > index 000000000000..03bb86ebcfd3
+> > --- /dev/null
+> > +++ b/Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+> > @@ -0,0 +1,62 @@
+> > +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+> > +%YAML 1.2
+> > +---
+> > +$id: http://devicetree.org/schemas/reset/amd,pensando-elbasr-reset.yaml#
+> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > +
+> > +title: AMD Pensando Elba SoC Reset Controller Device Tree Bindings
+>
+> Here and in all other patches:
+> s/Device Tree Bindings//
+
+Removed, must be implicit now, currently 366 files use it
+$ find . -name \*.yaml|xargs grep title|grep 'Device Tree Bindings'|wc
+    366
+
+> > +
+> > +maintainers:
+> > +  - Brad Larson <blarson@amd.com>
+> > +
+> > +description: |
+> > +  AMD Pensando Elba SoC reset controller driver which supports a resource
+> > +  controller connected to the Elba SoC over a SPI bus.  The Elba reset
+> > +  controller must be defined as a child node of the Elba SPI bus
+> > +  chip-select 0 node.
+> > +
+> > +  See also:
+> > +  - dt-bindings/reset/amd,pensando-elba-reset.h
+> > +
+> > +properties:
+> > +  $nodename:
+> > +    pattern: "^reset-controller@[0-9a-f]+$"
+>
+> Skip the pattern. No particular need for it and unit address part is not
+> correct (const: 0).
+
+Deleted these lines
+  $nodename:
+    pattern: "^reset-controller@[0-9a-f]+$"
+
+>
+> > +
+> > +  compatible:
+> > +    const: amd,pensando-elbasr-reset
+> > +
+> > +  reg:
+> > +    const: 0
+> > +
+> > +  '#reset-cells':
+> > +    const: 1
+> > +
+> > +required:
+> > +  - compatible
+> > +  - reg
+> > +  - '#reset-cells'
+> > +
+> > +additionalProperties: false
 > > +
 > > +examples:
 > > +  - |
 > > +    #include <dt-bindings/reset/amd,pensando-elba-reset.h>
-> > +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> > +
+>
+> Missing file:
+> ls: cannot access 'include/dt-bindings/reset/amd,pensando-elba-reset.h':
+> No such file or directory
+>
+>
+> Send complete bindings, not parts of it. Did you test it? I am pretty
+> sure that this did not happen. :(
+
+Its in patch v5-0015 with the driver.  I'll check this, the correct
+approach should be put all binding changes as individual patches up
+front or there are exceptions for new driver.
+
+$ cat v5-0015-reset-elbasr-Add-AMD-Pensando-Elba-SR-Reset-Contr.patch
+| grep diff
+diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
+diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
+diff --git a/drivers/reset/reset-elbasr.c b/drivers/reset/reset-elbasr.c
+diff --git a/include/dt-bindings/reset/amd,pensando-elba-reset.h
+b/include/dt-bindings/reset/amd,pensando-elba-reset.h
+
+Yes, tested it with the following and no warnings or errors
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/amd,pensando.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/syscon.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
+make ARCH=arm64 dtbs_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/amd,pensando.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/syscon.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
+make DT_CHECKER_FLAGS=-m dt_binding_check
+DT_SCHEMA_FILES=Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+
 > > +    spi0 {
 >
-> Just "spi"
+> spi
 
 Changed to spi
-
-> > +        #address-cells = <1>;
-> > +        #size-cells = <0>;
-> > +        num-cs = <4>;
-> > +
-> > +        spi@0 {
->
-> "spi" is for SPI controllers. Use generic name matching the device.
-> Usually this is "system-controller", however Rob pointed out your
-> inaccurate bindings and example.
-
-Proposed the below change node in the reply to Rob.  The model I
-followed for this was the Altera mfd/altera-a10sr.c
-
-spi@0 {
-        sr_regs@0 {
-                rstc: reset-controller@0 {
-
-        dw_i2c@1 {
-
-        lattice_i2c@2 {
-
-        flash@3 {
 
 Regards,
 Brad
