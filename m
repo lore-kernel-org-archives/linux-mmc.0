@@ -2,96 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CFCCC43334
-	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 21:09:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7423C43334
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 21:14:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229571AbiGCVJS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 3 Jul 2022 17:09:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58124 "EHLO
+        id S230238AbiGCVOh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 3 Jul 2022 17:14:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229519AbiGCVJR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 17:09:17 -0400
-Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 121BD2627
-        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 14:09:16 -0700 (PDT)
-Received: by mail-wm1-x332.google.com with SMTP id 205-20020a1c02d6000000b003a03567d5e9so6428553wmc.1
-        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 14:09:15 -0700 (PDT)
+        with ESMTP id S229673AbiGCVOg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 17:14:36 -0400
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 362772AE0
+        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 14:14:33 -0700 (PDT)
+Received: by mail-wr1-x436.google.com with SMTP id n4so3399311wru.11
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 14:14:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=PJikOAGFfDOpaBAb8R9M4tTzS49h3/owJMg980ZRk/E=;
-        b=HPOrwTANUSSTyUglOWfmqx3TAqE59f1wu5TsnpCDbHlYvitgr1ZYre1PF8zwpEk8bR
-         7UVh+tTk79uqQRVgs7gBfdpxq1GreddUhZgX0R7RwKdk1qvKIjYI0Jk/OsW8mGXeDqdc
-         bjJ/CDRVHPT9FVve0A6AvaQBdGHEBYPr7EwQp5jQeX2drM0MLNY+QZCYA21abBAmPK1R
-         n2S8xHUeO6ndniVe8n0+bXjfC9c5jF3el+RkuFqchYHEOSmWfjmXe9syHn0g3zXpGTzD
-         05l2Lv9lChwU5sXvfiOpnCTIcdCtNjy+vrlzShYwBTf6f/ISAn+zwKtguJ7v+eIg/i99
-         uwZw==
+        bh=iAJmsrF3a95Q+0VnUpb4xCH/13fcBF1x3IFG7cn4D6k=;
+        b=VDmU/+g6+ItGdGObsTugs6F0a9CGNn1LdQrLZ+S4bmMNhGrL4lg6f88t1G7MDd0tR3
+         7sOmPekqJ9ptc3wRbJD5hsA4Ks2lFG4iHI6Eg/TDhA7DdATqaNvtC787tfehwGBUO+p7
+         +Z9aBKzQIdUpTQVdMoJPoL+Z2LtryBDBETmz9oQcRBUlZ2qibto4P2QZ6uDlLnOE8MIO
+         enUinsLsKMH30GwVxt8Boi/c2DJDttX3PV4RnQhFD6+fgfFxXZMzvgC7NVafF3UOiGnO
+         dm87EoiKomj7Kg5I6nG4mAJNf9b5spDjBNaVEnIELcKyP0p7rg2exX0xAuXNvlg1dY0g
+         aDEw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=PJikOAGFfDOpaBAb8R9M4tTzS49h3/owJMg980ZRk/E=;
-        b=bnZ1d4Sc9u0T2AST6H5/Zd4i7lxdhKrkgkyeqpsqJhSDPkxFIOXUfeB1YV2AM1GbCM
-         WtsUQ50dzGlmg/1ingoNISzjwq3Kk2f62W7Sh34uqqneg8PjRNYbyT/yfnhD3KViB9jg
-         xCy3yZlj8jkgzIfgXUDI1dNJRTFuU4WawO92jZAUXRRYrJ93JwyEtPUPEzvfpnKniLq8
-         J7oR14KDRbG0Fa6vfPU+OLRHfRRWcgXlJpjzEN6ACQTghkYp7nhN5w7BvvEte0G7qXSk
-         E+82BBOMSBzg9tvJENDCiQnXorlrkvnlgoaLhUhLW9+cNPxK2mpNKO0HwfpKYxQvO2nb
-         qfog==
-X-Gm-Message-State: AJIora9hFZX/ivbuJbweFbCZja5ecfnRMJFmzdiBS20V89QzSkQvaHj3
-        uG1rA1wS06FFuHXFfg9Uzq94+9faY1FM9JK/+5ZNZQ==
-X-Google-Smtp-Source: AGRyM1vOEFsk6GxoOvERE6U0eWZvAYgZwMy1flCmqTZIailGzmdOzuiBfuHPrbNr3nr7glQpb5XbCjfw5CdVvGxO4yc=
-X-Received: by 2002:a05:600c:3505:b0:3a1:9fbb:4d59 with SMTP id
- h5-20020a05600c350500b003a19fbb4d59mr4089664wmq.165.1656882554615; Sun, 03
- Jul 2022 14:09:14 -0700 (PDT)
+        bh=iAJmsrF3a95Q+0VnUpb4xCH/13fcBF1x3IFG7cn4D6k=;
+        b=PhEXy8UPXWKvo3KKltJ0Ur7mXqAKZ9dlW369zxA1kppHMBCkwM6twfcEJ5xG6AI+bT
+         sUJhGL4wqOgnMO8zr0HgQr1WCoLE4KEWbH5qEivmAdD8QgtyuaC2ALImKFwq4UCEK+wW
+         BNOLjqmA/V3RK7hM/7FduxynOSU1qJH8zaPCPoHXcTKLzfe0/P9N5oTAp48IVgLG2QQN
+         EJDpJpNstD9zKTSB6Qmj+H7wYD2XllKohnsgKXe0w8Y7ULzlsczcplZNpQzccGFRp/r4
+         r67O3/IUy+r1gWEyDHMMMF5WHRUL2BZKO5oFgMnw1O7UcjfBTdsvg503HrQMUtIxifVk
+         YSNA==
+X-Gm-Message-State: AJIora+iJzlKqwGKWSBQ5HOZTKl4BgmTjjn4UWyUuyqa79Vfp8atNm5p
+        AJvgArzjWg8ufTdre8WaIJwzmyjBJKB86radnT+c3g==
+X-Google-Smtp-Source: AGRyM1sH61bNNTH4eUqt6H5fB2Y8L9uQgLWLJQfrWDVjSV32291aal/naK+DlItLTHlBuj+i021lzeJmSFz6v8bl+bE=
+X-Received: by 2002:a5d:5a15:0:b0:21d:630c:a609 with SMTP id
+ bq21-20020a5d5a15000000b0021d630ca609mr6928728wrb.468.1656882871737; Sun, 03
+ Jul 2022 14:14:31 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-12-brad@pensando.io>
- <Yqh4fO/OFW6DKmyX@sirena.org.uk>
-In-Reply-To: <Yqh4fO/OFW6DKmyX@sirena.org.uk>
+References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-13-brad@pensando.io>
+ <CAHp75Vex0VkECYd=kY0m6=jXBYSXg2UFu7vn271+Q49WZn22GA@mail.gmail.com>
+In-Reply-To: <CAHp75Vex0VkECYd=kY0m6=jXBYSXg2UFu7vn271+Q49WZn22GA@mail.gmail.com>
 From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 3 Jul 2022 14:09:03 -0700
-Message-ID: <CAK9rFnwfTza6dVehO6mmiae=9yKXdJFXUetjW3BuGtEasgp1-Q@mail.gmail.com>
-Subject: Re: [PATCH v5 11/15] spi: cadence-quadspi: Add compatible for AMD
- Pensando Elba SoC
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Sun, 3 Jul 2022 14:14:21 -0700
+Message-ID: <CAK9rFnz=Rv3dGEtRAjknY49qe55MdfTsO8+TNegEOTduJZk6vg@mail.gmail.com>
+Subject: Re: [PATCH v5 12/15] spi: dw: Add support for AMD Pensando Elba SoC
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>, alcooperx@gmail.com,
-        Andy Shevchenko <andy.shevchenko@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>, blarson@amd.com,
-        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee.jones@linaro.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Al Cooper <alcooperx@gmail.com>, Arnd Bergmann <arnd@arndb.de>,
+        blarson@amd.com, Catalin Marinas <catalin.marinas@arm.com>,
+        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Mark Brown <broonie@kernel.org>,
         Masahiro Yamada <yamada.masahiro@socionext.com>,
-        p.zabel@pengutronix.de, Pratyush Yadav <p.yadav@ti.com>,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Pratyush Yadav <p.yadav@ti.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
         Serge Semin <fancer.lancer@gmail.com>,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        Ulf Hansson <ulf.hansson@linaro.org>, will@kernel.org,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>
+        suravee.suthikulpanit@amd.com,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        devicetree <devicetree@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Mark,
+Hi Andy,
 
-On Tue, Jun 14, 2022 at 5:01 AM Mark Brown <broonie@kernel.org> wrote:
+On Tue, Jun 14, 2022 at 4:10 AM Andy Shevchenko
+<andy.shevchenko@gmail.com> wrote:
 >
-> On Mon, Jun 13, 2022 at 12:56:54PM -0700, Brad Larson wrote:
+> On Mon, Jun 13, 2022 at 9:57 PM Brad Larson <brad@pensando.io> wrote:
+> ...
 >
-> > +     /*
-> > +      * If a hazard exists between the APB and AHB interfaces, perform a
-> > +      * dummy readback from the controller to ensure synchronization.
-> > +      */
-> > +     if (cqspi->apb_ahb_hazard)
-> > +             (void)readl(reg_base + CQSPI_REG_INDIRECTWR);
+> > +/*
+> > + * Elba SoC does not use ssi, pin override is used for cs 0,1 and
+> > + * gpios for cs 2,3 as defined in the device tree.
+> > + *
+> > + * cs:  |       1               0
+> > + * bit: |---3-------2-------1-------0
+> > + *      |  cs1   cs1_ovr   cs0   cs0_ovr
+> > + */
 >
-> You shouldn't need the cast here.
+> > +#define ELBA_SPICS_SHIFT(cs)           (2 * (cs))
+>
+> Useless.It takes much more than simply multiplying each time in two
+> macros. Also see below.
+>
+> > +#define ELBA_SPICS_MASK(cs)            (0x3 << ELBA_SPICS_SHIFT(cs))
+>
+> (GENMASK(1, 0) << ((cs) << 1))
+>
+> Or ((cs) * 2) to show that it takes 2 bits and not two times of CS',
+>
+> > +#define ELBA_SPICS_SET(cs, val)        \
+> > +                       ((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(cs))
+>
+> BIT(0)
+>
+> So the main point is to use GENMASK() and BIT() the rest is up to you.
 
-Removed (void) cast
+I think you're recommending this approach which I'll change to
+
+static void dw_spi_elba_override_cs(struct dw_spi_elba *dwselba, int
+cs, int enable)
+{
+        regmap_update_bits(dwselba->syscon, ELBA_SPICS_REG,
+                           (GENMASK(1, 0) << ((cs) << 1)),
+                           ((enable) << 1 | BIT(0)) << ((cs) << 1));
+}
 
 Regards,
 Brad
