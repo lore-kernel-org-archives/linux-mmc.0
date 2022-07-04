@@ -2,310 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A073C43334
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jul 2022 02:33:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61BDEC433EF
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jul 2022 06:41:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230409AbiGDCdw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 3 Jul 2022 22:33:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57540 "EHLO
+        id S232667AbiGDGlz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Jul 2022 02:41:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50592 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229565AbiGDCdv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 22:33:51 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 068D4638F;
-        Sun,  3 Jul 2022 19:33:47 -0700 (PDT)
-X-UUID: 1c3b8c12367841b8ae02986da5c98c8e-20220704
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.7,REQID:8b6b6084-27d5-4bb8-8d25-a02f97a42e01,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACT
-        ION:release,TS:45
-X-CID-INFO: VERSION:1.1.7,REQID:8b6b6084-27d5-4bb8-8d25-a02f97a42e01,OB:0,LOB:
-        0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACTIO
-        N:release,TS:45
-X-CID-META: VersionHash:87442a2,CLOUDID:45a24d63-0b3f-4b2c-b3a6-ed5c044366a0,C
-        OID:26c946f04d04,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:0,File:nil,QS:nil,BEC:nil,COL:0
-X-UUID: 1c3b8c12367841b8ae02986da5c98c8e-20220704
-Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 577633664; Mon, 04 Jul 2022 10:33:43 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
- mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.792.15; Mon, 4 Jul 2022 10:33:42 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkmbs11n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
- Transport; Mon, 4 Jul 2022 10:33:41 +0800
-Message-ID: <81a77333a0b2f9186ce6cb94e3b4e1c815b07843.camel@mediatek.com>
-Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup
- IRQ
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <angelogioacchino.delregno@collabora.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        Yong Mao <yong.mao@mediatek.com>
-Date:   Mon, 4 Jul 2022 10:33:40 +0800
-In-Reply-To: <20220623090445.1401-4-axe.yang@mediatek.com>
-References: <20220623090445.1401-1-axe.yang@mediatek.com>
-         <20220623090445.1401-4-axe.yang@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        with ESMTP id S231544AbiGDGly (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jul 2022 02:41:54 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EA012AEB
+        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 23:41:52 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id i18so14096560lfu.8
+        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 23:41:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=/xTCR3bPZhCA5sareIciLVpBb/bwWDoIGGe6Kd1Xv+w=;
+        b=hgQHadGcMhoSH3Ca+juWM9mdx+9fCV75IphGlK+HJdtR/i4gx0B7DBiSaWAmruJgky
+         D5xJhDtEImx0KCaWYul6S2UI0l56gLyu/L2gfxXpYyyLViA0B+BzCqsOb5LdW7yYxgRY
+         zomyA/I6drlF9k3MnBfvnwDBxzhIVjqjRO/XpFuMZw3SfDzT/E9ae45pUSaVnnMeaQXX
+         h1608xxX8865Hs5cUomfWii/90I/TKFVtzHZ7K4NCjn2m0G/NSVvh5eqOAthC8KKoqCj
+         fAnkRgUlcScDN/VdI3HAbv8MD3ewJPL/5lcQOzqfbHsr/Xc36HS9JGw7ymJLRwY5TuKl
+         +/Kw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=/xTCR3bPZhCA5sareIciLVpBb/bwWDoIGGe6Kd1Xv+w=;
+        b=LnGOEYsHqjkTEWahOW7IXnNwYRhP6kE4lyPOPg0z21z9+N84bLuPvQPWNVnsZczYwC
+         RKxTwV8aV+qSbweLZBrQpD7jG8bh9/ec26OQoiiHYpD+hy7HXp72w3w5V59+QY5Mcmvb
+         9J6roumwnJFJjYqk0iEWtXqISrTIO3fhFUjB7yjjDRElyfWWkYvOPnQdbkvDofChmXSQ
+         jN5tl37adVq/AsLw4TGrlWIMUOQCRP9Yp8v78dD//wZNGq06J3ol6dw4nfneLJIoOG5A
+         ARmTn9EIklK3P8HmWFuGVRgMTdLbiRyPu81I9F7eKW8T0j3jReptjWzDc6fMqHFZ3gx6
+         vWMQ==
+X-Gm-Message-State: AJIora88Z4BoAhSy7KDvAOrB4pUS1zAZYHRKV+gKdBke+2ia51Q7NnYg
+        Vh3sz+2OhpXjG0N/p5EV68dmVA==
+X-Google-Smtp-Source: AGRyM1sSTc5DqVbACUPJW4eop8W1a9JW3DaH/3CvqzBZHFAkvYeJJp4gMOetKPepfi26QwqTyXrr/g==
+X-Received: by 2002:a05:6512:3085:b0:481:182e:a06c with SMTP id z5-20020a056512308500b00481182ea06cmr17866385lfd.374.1656916910911;
+        Sun, 03 Jul 2022 23:41:50 -0700 (PDT)
+Received: from [192.168.1.52] ([84.20.121.239])
+        by smtp.gmail.com with ESMTPSA id k6-20020ac257c6000000b0047fa02cd96csm4994687lfo.162.2022.07.03.23.41.49
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 03 Jul 2022 23:41:50 -0700 (PDT)
+Message-ID: <db82fe69-8caf-f142-0714-ff73ea6f65ec@linaro.org>
+Date:   Mon, 4 Jul 2022 08:41:48 +0200
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.10.0
+Subject: Re: [PATCH v5 07/15] dt-bindings: reset: amd,pensando-elbasr-reset:
+ Add AMD Pensando SR Reset Controller bindings
+Content-Language: en-US
+To:     Brad Larson <brad@pensando.io>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Andy Shevchenko <andy.shevchenko@gmail.com>,
+        Arnd Bergmann <arnd@arndb.de>, blarson@amd.com,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Mark Brown <broonie@kernel.org>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Pratyush Yadav <p.yadav@ti.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
+        Serge Semin <fancer.lancer@gmail.com>,
+        suravee.suthikulpanit@amd.com,
+        Tom Lendacky <thomas.lendacky@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>
+References: <20220613195658.5607-1-brad@pensando.io>
+ <20220613195658.5607-8-brad@pensando.io>
+ <eac223c5-a3d4-65e5-3753-1bd4033513f2@linaro.org>
+ <CAK9rFnyRgj26MaurS_u83wnzgmq+18=UdZT_FLLZc3jnWD4uFQ@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <CAK9rFnyRgj26MaurS_u83wnzgmq+18=UdZT_FLLZc3jnWD4uFQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-Gentle ping for this patch.
-
-With Regards,
-Axe
-
-
-On Thu, 2022-06-23 at 17:04 +0800, Axe Yang wrote:
-> Add support for eint IRQ when MSDC is used as an SDIO host. This
-> feature requires SDIO device support async IRQ function. With this
-> feature, SDIO host can be awakened by SDIO card in suspend state,
-> without additional pin.
+On 04/07/2022 01:50, Brad Larson wrote:
+>> Missing file:
+>> ls: cannot access 'include/dt-bindings/reset/amd,pensando-elba-reset.h':
+>> No such file or directory
+>>
+>>
+>> Send complete bindings, not parts of it. Did you test it? I am pretty
+>> sure that this did not happen. :(
 > 
-> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> resume, switch GPIO function back to DAT1 mode then turn on clock.
-> 
-> Some device tree property should be added or modified in MSDC node
-> to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
-> this feature depends on asynchronous interrupts, "wakeup-source",
-> "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
-> the interrupts list should be extended(the interrupt named with
-> sdio_wakeup):
->         &mmcX {
-> 		...
-> 		interrupt-names = "msdc", "sdio_wakeup";
-> 		interrupts-extended = <...>,
->                               	      <&pio xxx
-> IRQ_TYPE_LEVEL_LOW>;
->                 ...
->                 pinctrl-names = "default", "state_uhs", "state_eint";
->                 ...
->                 pinctrl-2 = <&mmc2_pins_eint>;
->                 ...
->                 cap-sdio-irq;
-> 		keep-power-in-suspend;
-> 		wakeup-source;
->                 ...
->         };
-> 
-> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 84 ++++++++++++++++++++++++++++++++++++-
-> --
->  1 file changed, 78 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 195dc897188b..f907b96cfd87 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1,6 +1,6 @@
->  // SPDX-License-Identifier: GPL-2.0-only
->  /*
-> - * Copyright (c) 2014-2015 MediaTek Inc.
-> + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
->   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
->   */
->  
-> @@ -20,6 +20,7 @@
->  #include <linux/platform_device.h>
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pm_wakeirq.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/slab.h>
->  #include <linux/spinlock.h>
-> @@ -440,8 +441,10 @@ struct msdc_host {
->  	struct pinctrl *pinctrl;
->  	struct pinctrl_state *pins_default;
->  	struct pinctrl_state *pins_uhs;
-> +	struct pinctrl_state *pins_eint;
->  	struct delayed_work req_timeout;
->  	int irq;		/* host interrupt */
-> +	int eint_irq;		/* interrupt from sdio device for
-> waking up system */
->  	struct reset_control *reset;
->  
->  	struct clk *src_clk;	/* msdc source clock */
-> @@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct
-> msdc_host *host, int enb)
->  
->  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
->  {
-> -	unsigned long flags;
->  	struct msdc_host *host = mmc_priv(mmc);
-> +	unsigned long flags;
-> +	int ret;
->  
->  	spin_lock_irqsave(&host->lock, flags);
->  	__msdc_enable_sdio_irq(host, enb);
->  	spin_unlock_irqrestore(&host->lock, flags);
->  
-> -	if (enb)
-> -		pm_runtime_get_noresume(host->dev);
-> -	else
-> -		pm_runtime_put_noidle(host->dev);
-> +	if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
-> +		if (enb) {
-> +			/*
-> +			 * In dev_pm_set_dedicated_wake_irq_reverse(),
-> eint pin will be set to
-> +			 * GPIO mode. We need to restore it to SDIO
-> DAT1 mode after that.
-> +			 * Since the current pinstate is pins_uhs, to
-> ensure pinctrl select take
-> +			 * affect successfully, we change the pinstate
-> to pins_eint firstly.
-> +			 */
-> +			pinctrl_select_state(host->pinctrl, host-
-> >pins_eint);
-> +			ret =
-> dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
-> +
-> +			if (ret) {
-> +				dev_err(host->dev, "Failed to register
-> SDIO wakeup irq!\n");
-> +				host->pins_eint = NULL;
-> +				pm_runtime_get_noresume(host->dev);
-> +			} else {
-> +				dev_dbg(host->dev, "SDIO eint irq:
-> %d!\n", host->eint_irq);
-> +			}
-> +
-> +			pinctrl_select_state(host->pinctrl, host-
-> >pins_uhs);
-> +		} else {
-> +			dev_pm_clear_wake_irq(host->dev);
-> +		}
-> +	} else {
-> +		if (enb) {
-> +			/* Ensure host->pins_eint is NULL */
-> +			host->pins_eint = NULL;
-> +			pm_runtime_get_noresume(host->dev);
-> +		} else {
-> +			pm_runtime_put_noidle(host->dev);
-> +		}
-> +	}
->  }
->  
->  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-> @@ -2631,6 +2663,20 @@ static int msdc_drv_probe(struct
-> platform_device *pdev)
->  		goto host_free;
->  	}
->  
-> +	/* Support for SDIO eint irq ? */
-> +	if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps &
-> MMC_PM_KEEP_POWER)) {
-> +		host->eint_irq = platform_get_irq_byname(pdev,
-> "sdio_wakeup");
-> +		if (host->eint_irq > 0) {
-> +			host->pins_eint = pinctrl_lookup_state(host-
-> >pinctrl, "state_eint");
-> +			if (IS_ERR(host->pins_eint)) {
-> +				dev_err(&pdev->dev, "Cannot find
-> pinctrl eint!\n");
-> +				host->pins_eint = NULL;
-> +			} else {
-> +				device_init_wakeup(&pdev->dev, true);
-> +			}
-> +		}
-> +	}
-> +
->  	msdc_of_property_parse(pdev, host);
->  
->  	host->dev = &pdev->dev;
-> @@ -2845,6 +2891,13 @@ static int __maybe_unused
-> msdc_runtime_suspend(struct device *dev)
->  	struct msdc_host *host = mmc_priv(mmc);
->  
->  	msdc_save_reg(host);
-> +
-> +	if (host->pins_eint) {
-> +		disable_irq(host->irq);
-> +		pinctrl_select_state(host->pinctrl, host->pins_eint);
-> +		if (sdio_irq_claimed(mmc))
-> +			__msdc_enable_sdio_irq(host, 0);
-> +	}
->  	msdc_gate_clock(host);
->  	return 0;
->  }
-> @@ -2860,12 +2913,18 @@ static int __maybe_unused
-> msdc_runtime_resume(struct device *dev)
->  		return ret;
->  
->  	msdc_restore_reg(host);
-> +
-> +	if (host->pins_eint) {
-> +		pinctrl_select_state(host->pinctrl, host->pins_uhs);
-> +		enable_irq(host->irq);
-> +	}
->  	return 0;
->  }
->  
->  static int __maybe_unused msdc_suspend(struct device *dev)
->  {
->  	struct mmc_host *mmc = dev_get_drvdata(dev);
-> +	struct msdc_host *host = mmc_priv(mmc);
->  	int ret;
->  
->  	if (mmc->caps2 & MMC_CAP2_CQE) {
-> @@ -2874,11 +2933,24 @@ static int __maybe_unused msdc_suspend(struct
-> device *dev)
->  			return ret;
->  	}
->  
-> +	/*
-> +	 * Bump up runtime PM usage counter otherwise dev-
-> >power.needs_force_resume will
-> +	 * not be marked as 1, pm_runtime_force_resume() will go out
-> directly.
-> +	 */
-> +	if (host->pins_eint)
-> +		pm_runtime_get_noresume(dev);
-> +
->  	return pm_runtime_force_suspend(dev);
->  }
->  
->  static int __maybe_unused msdc_resume(struct device *dev)
->  {
-> +	struct mmc_host *mmc = dev_get_drvdata(dev);
-> +	struct msdc_host *host = mmc_priv(mmc);
-> +
-> +	if (host->pins_eint)
-> +		pm_runtime_put_noidle(dev);
-> +
->  	return pm_runtime_force_resume(dev);
->  }
->  
+> Its in patch v5-0015 with the driver
 
+Header is part of bindings, not driver.
+
+>.  I'll check this, the correct
+> approach should be put all binding changes as individual patches up
+> front or there are exceptions for new driver.
+> 
+> $ cat v5-0015-reset-elbasr-Add-AMD-Pensando-Elba-SR-Reset-Contr.patch
+> | grep diff
+> diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
+> diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
+> diff --git a/drivers/reset/reset-elbasr.c b/drivers/reset/reset-elbasr.c
+> diff --git a/include/dt-bindings/reset/amd,pensando-elba-reset.h
+> b/include/dt-bindings/reset/amd,pensando-elba-reset.h
+> 
+> Yes, tested it with the following and no warnings or errors
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/amd,pensando.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/syscon.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
+> make ARCH=arm64 dtbs_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+> 
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/arm/amd,pensando.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/syscon.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/cdns,qspi-nor.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/vendor-prefixes.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
+> make DT_CHECKER_FLAGS=-m dt_binding_check
+> DT_SCHEMA_FILES=Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
+
+So how this test could pass if there is no header file included in the
+example here? Are you sure you tested each commit separately (like it
+will be included in the kernel)?
+
+Best regards,
+Krzysztof
