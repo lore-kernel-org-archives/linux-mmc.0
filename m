@@ -2,221 +2,310 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C48CFC43334
-	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jul 2022 23:59:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A073C43334
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jul 2022 02:33:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231428AbiGCX61 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 3 Jul 2022 19:58:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35572 "EHLO
+        id S230409AbiGDCdw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 3 Jul 2022 22:33:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230037AbiGCX6Z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 19:58:25 -0400
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C0211168
-        for <linux-mmc@vger.kernel.org>; Sun,  3 Jul 2022 16:58:21 -0700 (PDT)
-Received: by mail-wr1-x42f.google.com with SMTP id k7so11074419wrc.12
-        for <linux-mmc@vger.kernel.org>; Sun, 03 Jul 2022 16:58:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SeuYhb+fR/O+JId5F96JaZYYxL72Jc9GQ+pLBmOD004=;
-        b=0k8eK8Jojjb91pV+KBQCP6oj1RV40aN8Eu4gH5wQycs8andxXEGKXlAf0hsT21B1Ck
-         6sc49V0peyXIOiZpGcMDu0uO5WKzc4sEY4qV4UPIFM4f4fEMsLJuK/928u1RoHtGqqpE
-         /Ewo7BkSUqyDPUG79XYgf3noOrAN/OIFJtkylSDE7pxH8cGw4OY7Cyvfk/RVaS0L88CG
-         XOViAGcM1pDmq8BoM9aNwihCNg9KAxhwy87pJzql1nw+XZwqKNNs6p5U6fqCwF3zQpD4
-         PVz2b8w6zowYAcLQk7KZOfle07Ssp+3EQmTErDS0iCUJuT7n8E3aq8X9mGElJ+8k36OH
-         zlIw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SeuYhb+fR/O+JId5F96JaZYYxL72Jc9GQ+pLBmOD004=;
-        b=CB6Ukb7MHiYDFolX9AZ7VZic1Kqcdu6xnUOuFnX6xWZpTl/3QCJ79kYgdvYpiN93AO
-         UU3gfztRp32eHs4JBvMaFQpSUyivPEkeYArWNH7hNI3Lj5kXEdmOf7lQ9luIc/siaerH
-         Rm/nts2SbJXz3zYdrEzgoUysuRbXqVqm550uG6XHpDN3/Ihb/m+nvU39n2Q2OeUkEgpD
-         bX0XtMGrjVjt1u/Vx2OF3jdhQXAT++o4+tUtLRJTQM8jMf8/r4LbkAsTo+Of07IVK59/
-         uo5XJpyhSTVkBuD0NvoMdWLYIrSeBUeF5ss4aoa9BhVHhC0uL2A81+c8CD149/fw50iY
-         f1iQ==
-X-Gm-Message-State: AJIora8PldYXrd20yRiwOV/HI2bQC+LhK+7Nloizp6SEFUZ2OnT+sxcq
-        SKNKkmuXVGH5brouzopHL1lslihGTz4cVi2y2n8Pow==
-X-Google-Smtp-Source: AGRyM1tygYh1HzmV04U05tqlPo+WqSVuTRuUoHZi496RPSpLnW4G6fq23HZuTWqnGbIVJFet5kSc/JWgWzgI+wii0fg=
-X-Received: by 2002:a5d:5a15:0:b0:21d:630c:a609 with SMTP id
- bq21-20020a5d5a15000000b0021d630ca609mr7333830wrb.468.1656892700065; Sun, 03
- Jul 2022 16:58:20 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220613195658.5607-1-brad@pensando.io> <20220613195658.5607-5-brad@pensando.io>
- <20220620193044.ihxfn6kddif7j5la@mobilestation> <0a68aa72-df85-cf78-dcca-2d75038234c6@kernel.org>
- <20220620200445.yew3vo3pnjhos7rs@mobilestation> <4ff85493-665a-ee58-07d3-80178c49223b@linaro.org>
- <20220621101159.stvan53rvr6qugna@mobilestation>
-In-Reply-To: <20220621101159.stvan53rvr6qugna@mobilestation>
-From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 3 Jul 2022 16:58:09 -0700
-Message-ID: <CAK9rFnwOq6X5-uDS+SKiU4XQbSVQYiBUe0rEDvzdHy3CO6gUHQ@mail.gmail.com>
-Subject: Re: [PATCH v5 04/15] dt-bindings: spi: dw: Add AMD Pensando Elba SoC
- SPI Controller bindings
-To:     Serge Semin <fancer.lancer@gmail.com>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Andy Shevchenko <andy.shevchenko@gmail.com>,
-        Arnd Bergmann <arnd@arndb.de>, blarson@amd.com,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Gabriel Somlo <gsomlo@gmail.com>, gerg@linux-m68k.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Mark Brown <broonie@kernel.org>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Pratyush Yadav <p.yadav@ti.com>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Rob Herring <robh+dt@kernel.org>, samuel@sholland.org,
-        suravee.suthikulpanit@amd.com,
-        Tom Lendacky <thomas.lendacky@amd.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>
+        with ESMTP id S229565AbiGDCdv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jul 2022 22:33:51 -0400
+Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 068D4638F;
+        Sun,  3 Jul 2022 19:33:47 -0700 (PDT)
+X-UUID: 1c3b8c12367841b8ae02986da5c98c8e-20220704
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.7,REQID:8b6b6084-27d5-4bb8-8d25-a02f97a42e01,OB:0,LO
+        B:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACT
+        ION:release,TS:45
+X-CID-INFO: VERSION:1.1.7,REQID:8b6b6084-27d5-4bb8-8d25-a02f97a42e01,OB:0,LOB:
+        0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACTIO
+        N:release,TS:45
+X-CID-META: VersionHash:87442a2,CLOUDID:45a24d63-0b3f-4b2c-b3a6-ed5c044366a0,C
+        OID:26c946f04d04,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
+        RL:0,File:nil,QS:nil,BEC:nil,COL:0
+X-UUID: 1c3b8c12367841b8ae02986da5c98c8e-20220704
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw01.mediatek.com
+        (envelope-from <axe.yang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 577633664; Mon, 04 Jul 2022 10:33:43 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
+ mtkmbs10n1.mediatek.inc (172.21.101.34) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.792.15; Mon, 4 Jul 2022 10:33:42 +0800
+Received: from mhfsdcap04 (10.17.3.154) by mtkmbs11n1.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
+ Transport; Mon, 4 Jul 2022 10:33:41 +0800
+Message-ID: <81a77333a0b2f9186ce6cb94e3b4e1c815b07843.camel@mediatek.com>
+Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup
+ IRQ
+From:   Axe Yang <axe.yang@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        <angelogioacchino.delregno@collabora.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
+        Yong Mao <yong.mao@mediatek.com>
+Date:   Mon, 4 Jul 2022 10:33:40 +0800
+In-Reply-To: <20220623090445.1401-4-axe.yang@mediatek.com>
+References: <20220623090445.1401-1-axe.yang@mediatek.com>
+         <20220623090445.1401-4-axe.yang@mediatek.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Sergey,
+Hi,
 
-On Tue, Jun 21, 2022 at 3:12 AM Serge Semin <fancer.lancer@gmail.com> wrote:
->
-> On Tue, Jun 21, 2022 at 09:00:36AM +0200, Krzysztof Kozlowski wrote:
-> > On 20/06/2022 22:04, Serge Semin wrote:
-> > > On Mon, Jun 20, 2022 at 09:46:25PM +0200, Krzysztof Kozlowski wrote:
-> > >> On 20/06/2022 21:30, Serge Semin wrote:
-> > >>> On Mon, Jun 13, 2022 at 12:56:47PM -0700, Brad Larson wrote:
-> > >>>> From: Brad Larson <blarson@amd.com>
-> > >>>>
-> > >>>> The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
-> > >>>>
-> > >>>> Signed-off-by: Brad Larson <blarson@amd.com>
-> > >>>> ---
-> > >>>>  Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml | 2 ++
-> > >>>>  1 file changed, 2 insertions(+)
-> > >>>>
-> > >>>> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> > >>>> index e25d44c218f2..2a55b947cffc 100644
-> > >>>> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> > >>>> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> > >>>> @@ -73,6 +73,8 @@ properties:
-> > >>>>                - renesas,r9a06g032-spi # RZ/N1D
-> > >>>>                - renesas,r9a06g033-spi # RZ/N1S
-> > >>>>            - const: renesas,rzn1-spi   # RZ/N1
-> > >>>
-> > >>>> +      - description: AMD Pensando Elba SoC SPI Controller
-> > >>>> +        const: amd,pensando-elba-spi
-> > >>>
-> > >>> Not enough. The driver requires to have a phandle reference to the
-> > >>> Pensando System Controller. So the property like
-> > >>> "amd,pensando-elba-syscon" is also needed to be added to the DT schema
-> > >>> otherwise should the dt-schema tool correctly handle the
-> > >>> "unevaluatedProperties: false" setting (Rob says it isn't fully
-> > >>> supported at the moment), the dtbs_check procedure will fail on your
-> > >>> dts evaluation.
-> > >>
-> > >
-> > >> The property was here before, now removed, so I assume it was also
-> > >> removed from the driver and DTS. Isn't that the case?
-> > >
-> > > Ah, the property has been indeed removed. The driver now searches for
-> > > the system controller by the next compatible string:
-> > > "amd,pensando-elba-syscon" using the
-> > > syscon_regmap_lookup_by_compatible() method. My mistake. Sorry for the
-> > > noise.
-> > >
->
-> > > * Though personally I'd prefer to have a property with the phandle
-> > > reference in order to signify the connection between the system controller
-> > > and the SPI-controller. Otherwise the implicit DT bindings like having
-> > > the "amd,pensando-elba-syscon"-compatible syscon gets to be
-> > > hidden behind the DT scene. But seeing we have already got the Microsemi
-> > > platform with such semantic, I can't insist on fixing this.
-> >
-> > I agree entirely, this should be explicit syscon-type property. Looking
-> > up for compatibles:
-> >  - creates hidden (not expressed via bindings) dependency between nodes,
-> >  - is not portable and several people struggled with it later and needed
-> > backward-compatible code (many examples, let's just give recent one: [1])
-> >
-> >
-> > [1]
-> > https://lore.kernel.org/all/20220619151225.209029-10-tmaimon77@gmail.com/
->
-> Seems even more reasonable now. Thanks for providing a bright example
-> justifying the property-based approach.
->
-> @Brad, could you get back the property with a phandle to the syscon
-> DT-node? (No need in adding the CS CSR address as the phandle argument,
-> just a phandle.)
+Gentle ping for this patch.
 
-Replying to the sequence of review inputs.  The below change to
-version 5 brings back the phandle without the earlier argument that
-complicated the binding (was the motivation for moving in this
-direction in earlier version).  Passes dtbs_check.
+With Regards,
+Axe
 
---- a/drivers/spi/spi-dw-mmio.c
-+++ b/drivers/spi/spi-dw-mmio.c
-@@ -285,12 +285,17 @@ static void dw_spi_elba_set_cs(struct spi_device
-*spi, bool enable)
- static int dw_spi_elba_init(struct platform_device *pdev,
-                            struct dw_spi_mmio *dwsmmio)
- {
-+       struct device_node *np = pdev->dev.of_node;
-+       struct device_node *node;
-        struct dw_spi_elba *dwselba;
-        struct regmap *regmap;
 
--       regmap = syscon_regmap_lookup_by_compatible("amd,pensando-elba-syscon");
--       if (IS_ERR(regmap))
--               return PTR_ERR(regmap);
-+       node = of_parse_phandle(np, "pensando,elba-syscon-spics", 0);
-+       if (node) {
-+               regmap = syscon_node_to_regmap(node);
-+               if (IS_ERR(regmap))
-+                       return PTR_ERR(regmap);
-+       }
+On Thu, 2022-06-23 at 17:04 +0800, Axe Yang wrote:
+> Add support for eint IRQ when MSDC is used as an SDIO host. This
+> feature requires SDIO device support async IRQ function. With this
+> feature, SDIO host can be awakened by SDIO card in suspend state,
+> without additional pin.
+> 
+> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> resume, switch GPIO function back to DAT1 mode then turn on clock.
+> 
+> Some device tree property should be added or modified in MSDC node
+> to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
+> this feature depends on asynchronous interrupts, "wakeup-source",
+> "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
+> the interrupts list should be extended(the interrupt named with
+> sdio_wakeup):
+>         &mmcX {
+> 		...
+> 		interrupt-names = "msdc", "sdio_wakeup";
+> 		interrupts-extended = <...>,
+>                               	      <&pio xxx
+> IRQ_TYPE_LEVEL_LOW>;
+>                 ...
+>                 pinctrl-names = "default", "state_uhs", "state_eint";
+>                 ...
+>                 pinctrl-2 = <&mmc2_pins_eint>;
+>                 ...
+>                 cap-sdio-irq;
+> 		keep-power-in-suspend;
+> 		wakeup-source;
+>                 ...
+>         };
+> 
+> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 84 ++++++++++++++++++++++++++++++++++++-
+> --
+>  1 file changed, 78 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 195dc897188b..f907b96cfd87 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1,6 +1,6 @@
+>  // SPDX-License-Identifier: GPL-2.0-only
+>  /*
+> - * Copyright (c) 2014-2015 MediaTek Inc.
+> + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
+>   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+>   */
+>  
+> @@ -20,6 +20,7 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/pm.h>
+>  #include <linux/pm_runtime.h>
+> +#include <linux/pm_wakeirq.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/slab.h>
+>  #include <linux/spinlock.h>
+> @@ -440,8 +441,10 @@ struct msdc_host {
+>  	struct pinctrl *pinctrl;
+>  	struct pinctrl_state *pins_default;
+>  	struct pinctrl_state *pins_uhs;
+> +	struct pinctrl_state *pins_eint;
+>  	struct delayed_work req_timeout;
+>  	int irq;		/* host interrupt */
+> +	int eint_irq;		/* interrupt from sdio device for
+> waking up system */
+>  	struct reset_control *reset;
+>  
+>  	struct clk *src_clk;	/* msdc source clock */
+> @@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct
+> msdc_host *host, int enb)
+>  
+>  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+>  {
+> -	unsigned long flags;
+>  	struct msdc_host *host = mmc_priv(mmc);
+> +	unsigned long flags;
+> +	int ret;
+>  
+>  	spin_lock_irqsave(&host->lock, flags);
+>  	__msdc_enable_sdio_irq(host, enb);
+>  	spin_unlock_irqrestore(&host->lock, flags);
+>  
+> -	if (enb)
+> -		pm_runtime_get_noresume(host->dev);
+> -	else
+> -		pm_runtime_put_noidle(host->dev);
+> +	if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
+> +		if (enb) {
+> +			/*
+> +			 * In dev_pm_set_dedicated_wake_irq_reverse(),
+> eint pin will be set to
+> +			 * GPIO mode. We need to restore it to SDIO
+> DAT1 mode after that.
+> +			 * Since the current pinstate is pins_uhs, to
+> ensure pinctrl select take
+> +			 * affect successfully, we change the pinstate
+> to pins_eint firstly.
+> +			 */
+> +			pinctrl_select_state(host->pinctrl, host-
+> >pins_eint);
+> +			ret =
+> dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
+> +
+> +			if (ret) {
+> +				dev_err(host->dev, "Failed to register
+> SDIO wakeup irq!\n");
+> +				host->pins_eint = NULL;
+> +				pm_runtime_get_noresume(host->dev);
+> +			} else {
+> +				dev_dbg(host->dev, "SDIO eint irq:
+> %d!\n", host->eint_irq);
+> +			}
+> +
+> +			pinctrl_select_state(host->pinctrl, host-
+> >pins_uhs);
+> +		} else {
+> +			dev_pm_clear_wake_irq(host->dev);
+> +		}
+> +	} else {
+> +		if (enb) {
+> +			/* Ensure host->pins_eint is NULL */
+> +			host->pins_eint = NULL;
+> +			pm_runtime_get_noresume(host->dev);
+> +		} else {
+> +			pm_runtime_put_noidle(host->dev);
+> +		}
+> +	}
+>  }
+>  
+>  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
+> @@ -2631,6 +2663,20 @@ static int msdc_drv_probe(struct
+> platform_device *pdev)
+>  		goto host_free;
+>  	}
+>  
+> +	/* Support for SDIO eint irq ? */
+> +	if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps &
+> MMC_PM_KEEP_POWER)) {
+> +		host->eint_irq = platform_get_irq_byname(pdev,
+> "sdio_wakeup");
+> +		if (host->eint_irq > 0) {
+> +			host->pins_eint = pinctrl_lookup_state(host-
+> >pinctrl, "state_eint");
+> +			if (IS_ERR(host->pins_eint)) {
+> +				dev_err(&pdev->dev, "Cannot find
+> pinctrl eint!\n");
+> +				host->pins_eint = NULL;
+> +			} else {
+> +				device_init_wakeup(&pdev->dev, true);
+> +			}
+> +		}
+> +	}
+> +
+>  	msdc_of_property_parse(pdev, host);
+>  
+>  	host->dev = &pdev->dev;
+> @@ -2845,6 +2891,13 @@ static int __maybe_unused
+> msdc_runtime_suspend(struct device *dev)
+>  	struct msdc_host *host = mmc_priv(mmc);
+>  
+>  	msdc_save_reg(host);
+> +
+> +	if (host->pins_eint) {
+> +		disable_irq(host->irq);
+> +		pinctrl_select_state(host->pinctrl, host->pins_eint);
+> +		if (sdio_irq_claimed(mmc))
+> +			__msdc_enable_sdio_irq(host, 0);
+> +	}
+>  	msdc_gate_clock(host);
+>  	return 0;
+>  }
+> @@ -2860,12 +2913,18 @@ static int __maybe_unused
+> msdc_runtime_resume(struct device *dev)
+>  		return ret;
+>  
+>  	msdc_restore_reg(host);
+> +
+> +	if (host->pins_eint) {
+> +		pinctrl_select_state(host->pinctrl, host->pins_uhs);
+> +		enable_irq(host->irq);
+> +	}
+>  	return 0;
+>  }
+>  
+>  static int __maybe_unused msdc_suspend(struct device *dev)
+>  {
+>  	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct msdc_host *host = mmc_priv(mmc);
+>  	int ret;
+>  
+>  	if (mmc->caps2 & MMC_CAP2_CQE) {
+> @@ -2874,11 +2933,24 @@ static int __maybe_unused msdc_suspend(struct
+> device *dev)
+>  			return ret;
+>  	}
+>  
+> +	/*
+> +	 * Bump up runtime PM usage counter otherwise dev-
+> >power.needs_force_resume will
+> +	 * not be marked as 1, pm_runtime_force_resume() will go out
+> directly.
+> +	 */
+> +	if (host->pins_eint)
+> +		pm_runtime_get_noresume(dev);
+> +
+>  	return pm_runtime_force_suspend(dev);
+>  }
+>  
+>  static int __maybe_unused msdc_resume(struct device *dev)
+>  {
+> +	struct mmc_host *mmc = dev_get_drvdata(dev);
+> +	struct msdc_host *host = mmc_priv(mmc);
+> +
+> +	if (host->pins_eint)
+> +		pm_runtime_put_noidle(dev);
+> +
+>  	return pm_runtime_force_resume(dev);
+>  }
+>  
 
-diff --git a/arch/arm64/boot/dts/amd/elba.dtsi
-b/arch/arm64/boot/dts/amd/elba.dtsi
-index 9739641261c3..ec48be4cfe48 100644
---- a/arch/arm64/boot/dts/amd/elba.dtsi
-+++ b/arch/arm64/boot/dts/amd/elba.dtsi
-@@ -98,6 +98,7 @@
-                        reg = <0x0 0x2800 0x0 0x100>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-+                       pensando,elba-syscon-spics = <&syscon>;
-                        clocks = <&ahb_clk>;
-                        interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
-                        num-cs = <2>;
-
---- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-+++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-@@ -37,6 +37,15 @@ allOf:
-     else:
-       required:
-         - interrupts
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - amd,pensando-elba-spi
-+    then:
-+      required:
-+        - pensando,elba-syscon-spics
-
- properties:
-   compatible:
-
-Regards,
-Brad
