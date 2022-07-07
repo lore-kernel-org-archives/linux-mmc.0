@@ -2,92 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72053C43334
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 08:48:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5CC5C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 09:51:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231393AbiGGIs0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jul 2022 04:48:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35120 "EHLO
+        id S234694AbiGGJvl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jul 2022 05:51:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51386 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234500AbiGGIsY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 04:48:24 -0400
-Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 355121EC
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Jul 2022 01:48:24 -0700 (PDT)
-Received: by mail-yb1-xb33.google.com with SMTP id p129so1604900yba.7
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 01:48:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=3DfoExFZmNTGC0O3yYbMqzldLz9nrmhwSG9ryY0dVz0=;
-        b=BDgmlIy+RqVcpSiA7KHaPJ02JCM4O0LLPu4f3DXuKcSGGeBJxKdOfPukMlWjk9fQJR
-         yGi1ihLdsjTyxd1oeNE1rL+WG8w/NgCiRdTt8BkGs7HKraYi0DYAztZGJE79pCT16Ynw
-         7tomjYx6hNfFizRJLSbn7VhJj77uu3DS17ojACPSPDT4PuQ7P6tfBkpiu5gfgCB8hA2Y
-         8i5qF4SsKIwh7r6SDSktYNl4PMG7l6HrI6hB5wo5KVMWUi02DRJiM1VAuvi7WWjCLiqk
-         Mt+4WlofJLE52nRcOBbt0SqQLhQlXjleCFtTd4dF17U50NLQl9jFr+nrvd6eRp6fLYtH
-         9gpA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=3DfoExFZmNTGC0O3yYbMqzldLz9nrmhwSG9ryY0dVz0=;
-        b=x+ysLwna6H+mVvBebUFaW+8p7/GTfBWwLDN1J3IcgHX8C+Y9qtD+oSgbZLxpn6P0Kb
-         Og9nCruRv/mnMnC5SWnyEzBb/1udOsbWQqstrDoRkRd7+aTsWEUamcE0j+tcKGh7d1V/
-         nBlrwk9CmDvKAUSTES1IXuAR3ynsRQI9VREDsVAP95Ky++T8MghKhIx7dOzBrv8ckusC
-         Im1YPOXG9QfzP4HKPiebO0S1+VtDhIuQPdye+vz4tGEv8I1O5FWZzLqRnzrtq2ErQ6Pb
-         qEppT8sq+q5rvXnCy0s2BY7zAzslOZmO05qvxvMYGcAzeiseTKTx4bNVC8Qq8jhgRlzZ
-         Os2Q==
-X-Gm-Message-State: AJIora8x2cPqwU8i3W1SOEsGQ4iQ4/ooGNOH3K/iolf3YYl2XFztR7EZ
-        9L0Hf7F+b9buLqKJ8Fln4UvUVX8pyTB1LY7/ev9vLQ==
-X-Google-Smtp-Source: AGRyM1vA90z3W6lqHkPxXibfYzpXiWZCS6gabQQsQOgTyTEuu8uMRiVTh7ABrFuXfMlbKiMGtefgAUAwe/tJoe/ih/8=
-X-Received: by 2002:a25:1f57:0:b0:669:b6fa:167e with SMTP id
- f84-20020a251f57000000b00669b6fa167emr50618854ybf.295.1657183703467; Thu, 07
- Jul 2022 01:48:23 -0700 (PDT)
+        with ESMTP id S235013AbiGGJvk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 05:51:40 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2D9E4D4EF;
+        Thu,  7 Jul 2022 02:51:39 -0700 (PDT)
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 9BC2666019AA;
+        Thu,  7 Jul 2022 10:51:37 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1657187498;
+        bh=9cJkFbeGAUaiuZQ1tk/q71MLcCqv08gXnUsskyh+OSU=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=iklc8JelOW6VhhEVCPvFwprlF/PtO1UiLbHjv1p8qAO+07GEsSfkqhh82UATV+2yR
+         vZ6W6oQ+tUvgQY5mdEh0FvE/gIPW94z2dcz9ukkiOyPbO7UmNnW3RgZgXkc6BCCo7r
+         s5tIDcPkIzF4nyW5SM19RQtEzF52PpcOe3U3gGmTLnmmF/hAxn3Lnt1FKMpfUWw3xq
+         tVS1FvQlWqcUFeyONlRidVYyQwfP524W2AFBQSBsbqimnIimNlTt4R0FVMdozDK3gL
+         SYDJjrJqH7NtrCgD/3Dru5zEKWXq67riOPJ1+ySr0EKY9dQQVnRtuFUb6PxCfMqIZy
+         Wil+TudE8xb+A==
+Message-ID: <e0452b8a-0544-5647-5d3c-ce6a208f2b69@collabora.com>
+Date:   Thu, 7 Jul 2022 11:51:34 +0200
 MIME-Version: 1.0
-References: <CGME20220706005238epcas1p110ad467f1406cb9270e449de998090a9@epcas1p1.samsung.com>
- <20220706004840.24812-1-cw9316.lee@samsung.com>
-In-Reply-To: <20220706004840.24812-1-cw9316.lee@samsung.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 7 Jul 2022 10:48:12 +0200
-Message-ID: <CACRpkdYPxozy76jsrt3O-eC2PEW32WmRSMDGz7PrBu7Ee8whzw@mail.gmail.com>
-Subject: Re: [PATCH] Replace with already defined values for readability
-To:     Chanwoo Lee <cw9316.lee@samsung.com>
-Cc:     ulf.hansson@linaro.org, s.shtylyov@omp.ru, huijin.park@samsung.com,
-        andrej.skvortzov@gmail.com, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.10.0
+Subject: Re: [PATCH] dt-bindings: mmc: Add compatible for MediaTek MT8188
+Content-Language: en-US
+To:     Johnson Wang <johnson.wang@mediatek.com>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com
+References: <20220707054710.1396-1-johnson.wang@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <20220707054710.1396-1-johnson.wang@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 6, 2022 at 2:52 AM Chanwoo Lee <cw9316.lee@samsung.com> wrote:
+Il 07/07/22 07:47, Johnson Wang ha scritto:
+> This commit adds dt-binding documentation of mmc for MediaTek MT8188 SoC
+> platform.
+> 
+> Signed-off-by: Johnson Wang <johnson.wang@mediatek.com>
+> ---
+>   Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
+>   1 file changed, 3 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index 2a2e9fa8c188..3fbf33ad4f7c 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -32,6 +32,9 @@ properties:
+>         - items:
+>             - const: mediatek,mt8186-mmc
+>             - const: mediatek,mt8183-mmc
+> +      - items:
+> +          - const: mediatek,mt8188-mmc
+> +          - const: mediatek,mt8183-mmc
+>         - items:
+>             - const: mediatek,mt8192-mmc
+>             - const: mediatek,mt8183-mmc
+> 
 
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
->
-> SD_ROCR_S18A is already defined
-> and is used to check the rocr value as shown below.
->
-> So, replace with already defined values for readability.
->
-> --------------------------------------------------
-> /sd.h
-> .#define SD_OCR_S18R    (1 << 24)    /* 1.8V switching request */
-> .#define SD_ROCR_S18A   SD_OCR_S18R  /* 1.8V switching accepted by card */
->
-> /sd.c
-> static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->         struct mmc_card *oldcard)
-> {
-> ...
->         if (rocr & SD_ROCR_S18A && mmc_host_uhs(host)) {
->                 err = mmc_sd_init_uhs_card(card);
-> }
-> -------------------------------------------------
->
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+Hello Johnson,
 
-Excellent patch.
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+if I'm not wrong, this should be...
+(check with dt_binding_check!)
 
-Yours,
-Linus Walleij
+properties:
+   compatible:
+     oneOf:
+       - enum:
+         - mediatek,mt2701-mmc
+         - .... everything else ....
+       - items:
+         - enum:
+             - mediatek,mt8186-mmc
+             - ... the others ...
+         - const: mediatek.mt8183-mmc
+
+Cheers,
+Angelo
