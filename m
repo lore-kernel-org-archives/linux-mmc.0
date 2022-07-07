@@ -2,113 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B501DC43334
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 07:30:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D34F3CCA47F
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 08:04:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231254AbiGGHau (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jul 2022 03:30:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47220 "EHLO
+        id S234966AbiGGIEm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jul 2022 04:04:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49690 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230028AbiGGHat (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 03:30:49 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D05331235;
-        Thu,  7 Jul 2022 00:30:44 -0700 (PDT)
-X-UUID: d2c34ff1fee144f4b921b7d1d663d878-20220707
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.8,REQID:6841d9ae-7ef7-40e6-9bc8-40cef7c34611,OB:0,LO
-        B:0,IP:0,URL:5,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACT
-        ION:release,TS:50
-X-CID-INFO: VERSION:1.1.8,REQID:6841d9ae-7ef7-40e6-9bc8-40cef7c34611,OB:0,LOB:
-        0,IP:0,URL:5,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACTIO
-        N:release,TS:50
-X-CID-META: VersionHash:0f94e32,CLOUDID:5e91a763-0b3f-4b2c-b3a6-ed5c044366a0,C
-        OID:95ab2f9f30ad,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:1,File:nil,QS:nil,BEC:nil,COL:0
-X-UUID: d2c34ff1fee144f4b921b7d1d663d878-20220707
-Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw01.mediatek.com
-        (envelope-from <johnson.wang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 583295451; Thu, 07 Jul 2022 15:30:41 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
- Thu, 7 Jul 2022 15:30:40 +0800
-Received: from mtksdccf07 (172.21.84.99) by mtkmbs11n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.3 via Frontend
- Transport; Thu, 7 Jul 2022 15:30:40 +0800
-Message-ID: <3216ec92952c7d722feaeb76986e0a6a54340646.camel@mediatek.com>
-Subject: Re: [PATCH] dt-bindings: mmc: Add compatible for MediaTek MT8188
-From:   Johnson Wang <johnson.wang@mediatek.com>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        <ulf.hansson@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>
-Date:   Thu, 7 Jul 2022 15:30:40 +0800
-In-Reply-To: <41e17a56-5cb0-8e90-c7ae-a7a56de986d0@linaro.org>
-References: <20220707054710.1396-1-johnson.wang@mediatek.com>
-         <41e17a56-5cb0-8e90-c7ae-a7a56de986d0@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+        with ESMTP id S234925AbiGGIEl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 04:04:41 -0400
+Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F317F3137A
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Jul 2022 01:04:39 -0700 (PDT)
+Received: by mail-lj1-x22d.google.com with SMTP id 19so407172ljz.4
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 01:04:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=j6cTL70t81aTnV9x0x+mDaCfTVWwcqwkSWQQpbKRysc=;
+        b=je6ZJ8G24GI5T7f3zVncXY2R3x/GyryMMiZeWydkL5djDwH1y3R7eh9Jq7GZ+VjSmb
+         a+eZLklX94jyOz1YD9eehlDaxgYhFP6qzL8qeUH37Tl8CnuJ36fytFm/LKbEq5ghCWY7
+         52C6lpBA/LauPnoSxudh+wPUKILLcfTJMzWPlgNch+LCoN5IgLz2Ehm9S+caQ5g3MFfv
+         lfFYLqzsKAOcxRUzYSGYFwsSx9YRZZcaNuffd5QCnza1wOsBnwCksWBuR8uwRT0ydprz
+         tl8NMIphq/6HsC8d9JJPNgkNAqR+qMtNZJQSjeh7/RRcJbvchImmlZUiQ7Wr3633/+3q
+         N/ag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=j6cTL70t81aTnV9x0x+mDaCfTVWwcqwkSWQQpbKRysc=;
+        b=j1TvsAsGjqKxU93G6WI9IvUJQUYzxOSrvcYsgMfYzCRBhUFCcac/W1PE00XMCkrH5u
+         8CaNzSa08HYnoQNit9s+xULRMPvpl5Bk/5uORglZ4BXvET8cRrvfbM7GN0DQVln0ROlf
+         WyJEJ0XLjMuLERNry1zkC4p8cNa8WSLo1aCxADPgbx/ppSTJuijk+0U7SzZ5LibZFKoJ
+         w7Q9L8VsDT2nFa3YVncZGTLwcqXUNyVwtvyGRwA9p2/eIxQI03+PCdjKy7UO3wSwp/EL
+         QCvNPn/nUXia4gZe1h4q15R/4qYQHbbunoO1gL4NATfXwwxfGYQzXlhpBEllAsVTojjt
+         7Nmw==
+X-Gm-Message-State: AJIora/SejFq9r0+/FnF7+0mLdXrqBCU6mpHzjiJqDqTtYTGaU5ukSmI
+        6YsV5roqec8GF3ezaCKiNlHZyA==
+X-Google-Smtp-Source: AGRyM1s/K+WamhzckF/8xnMBEQZ4YAGMlkNm4IeBoow2nLBL8pH0v4jvCtU+LTl5jPsnxiMxi2PgOg==
+X-Received: by 2002:a05:651c:511:b0:25b:f78e:cb30 with SMTP id o17-20020a05651c051100b0025bf78ecb30mr22584914ljp.327.1657181078252;
+        Thu, 07 Jul 2022 01:04:38 -0700 (PDT)
+Received: from krzk-bin.home ([84.20.121.239])
+        by smtp.gmail.com with ESMTPSA id s6-20020a056512214600b0047b0f2d7650sm6697187lfr.271.2022.07.07.01.04.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 07 Jul 2022 01:04:37 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Cc:     Douglas Anderson <dianders@chromium.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 0/5] dt-bindings: mmc: / ARM: qcom: correct reg-names and clock entries
+Date:   Thu,  7 Jul 2022 09:51:46 +0200
+Message-Id: <20220707075151.67335-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-MTK:  N
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2022-07-07 at 08:46 +0200, Krzysztof Kozlowski wrote:
-> On 07/07/2022 07:47, Johnson Wang wrote:
-> > This commit adds dt-binding documentation of mmc for MediaTek
-> > MT8188 SoC
-> > platform.
-> > 
-> > Signed-off-by: Johnson Wang <johnson.wang@mediatek.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > index 2a2e9fa8c188..3fbf33ad4f7c 100644
-> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> > @@ -32,6 +32,9 @@ properties:
-> >        - items:
-> >            - const: mediatek,mt8186-mmc
-> >            - const: mediatek,mt8183-mmc
-> > +      - items:
-> > +          - const: mediatek,mt8188-mmc
-> 
-> You duplicate quite a lot. Use enum.
-> 
-> Best regards,
-> Krzysztof
+Hi,
 
-Hi Krzysztof,
+No dependencies.  DT bindings patches are independent from DTS, so they can go
+via separate tree.
 
-Thanks for you suggestion.
+Best regards,
+Krzysztof
 
-I will use 'enum' to place this compatible strings.
+Krzysztof Kozlowski (5):
+  dt-bindings: mmc: sdhci-msm: fix reg-names entries
+  dt-bindings: mmc: sdhci-msm: constrain reg-names at least for one
+    variant
+  ARM: dts: qcom: align SDHCI reg-names with DT schema
+  arm64: dts: qcom: align SDHCI reg-names with DT schema
+  ARM: dts: qcom: align SDHCI clocks with DT schema
 
-Just like this:
-- items:
-    - enum:
-        - mediatek,mt8186-mmc
-        - mediatek,mt8188-mmc
-        - mediatek,mt8192-mmc
-        - mediatek,mt8195-mmc
-    - const: mediatek,mt8183-mmc
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    | 40 +++++++++++++------
+ arch/arm/boot/dts/qcom-apq8084.dtsi           | 16 ++++----
+ arch/arm/boot/dts/qcom-ipq4019.dtsi           |  5 ++-
+ arch/arm/boot/dts/qcom-msm8226.dtsi           | 24 +++++------
+ arch/arm/boot/dts/qcom-msm8974.dtsi           | 24 +++++------
+ arch/arm/boot/dts/qcom-msm8974pro.dtsi        |  6 +--
+ arch/arm/boot/dts/qcom-sdx65.dtsi             |  2 +-
+ arch/arm64/boot/dts/qcom/ipq8074.dtsi         |  2 +-
+ arch/arm64/boot/dts/qcom/msm8916.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8953.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8994.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8996.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8998.dtsi         |  2 +-
+ 13 files changed, 77 insertions(+), 60 deletions(-)
 
-Moreover, it seems that missing an "items:" between oneOf and enum in
-the compatible property.
-Is my understanding wrong?
-
-BRs,
-Johnson Wang
-
+-- 
+2.34.1
 
