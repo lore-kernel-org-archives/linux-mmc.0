@@ -2,244 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98FEEC43334
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 08:04:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97BC8CCA492
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 08:09:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234913AbiGGIEu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jul 2022 04:04:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49802 "EHLO
+        id S235373AbiGGIJU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jul 2022 04:09:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235118AbiGGIEq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 04:04:46 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD1F831388
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Jul 2022 01:04:45 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id c15so21313447ljr.0
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 01:04:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=NtRj5O4nkE3cVEceWCLBngIdUnO9GCbDr+tkVq82xkI=;
-        b=IZ/WuPDO2Es2t+93M8st9KdI2bn3shb7sRgxrO49iwvDI1QCCZJofarEfpsidIseO1
-         R+WqbcP6szS/8bTLMIknwl/vuilpf0FFhB8TK3VXhgGT2mlC2JU+yTskZfSGAlUmGzwK
-         RvXPfGf9G3Kfb6ME1/0empb1vN7IzvO8d0nRx55ilZ+FoEgtBUy1lyt+iDMSiQkiXs1s
-         lDN57vRksfHa9Tct/002BRSBAUxRT/TuTTd8Ez+PS8Qkg6SnY/mq9z2dau4LJZouYTxV
-         Ja12Ssw9fUMcuGziBiBnaW8l9CwowvtBqFY2KobHJ/Fu4arctyh676VHJIi+mszh8fx3
-         LOSw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=NtRj5O4nkE3cVEceWCLBngIdUnO9GCbDr+tkVq82xkI=;
-        b=5wh1JatmRnKBN9E/ELGFpTL0DP/9MMv9VkDJ/o7aMiryfsvKZNNj+0G9aV4ps1Bl+N
-         lP21rlntPRy5LQ2UZ92KxdfYYCQfaodgiaxNzU8V2wuOZp+ro+y/2vmDH3HY0VOO6uAK
-         KX2aFD/Hiy5RH2z+04Asi/uY19DOyd/qFWhqeBwiTVE9Th7vezdFCIuKEmNwyiLBYzBJ
-         bcXoc8gSPnNBlFAfWtXYh5eXOkz3okCGvQYUxcZSKzcqN0AL2qEu7ZKufLWR2ytLxjm0
-         ptv84OnD63083xeyOcBF5wUXssXNtFW8vqlL31KvHP7YTkeBneWga0vs9+6qMd/Gpy0C
-         QSqw==
-X-Gm-Message-State: AJIora/PKDcQO9uDoq9LbQlqcHFm0CahzxKh43ja51poecBog0Mw+2Zh
-        grZ/6ba0nQBgt1Lc0uFgIfI1SA==
-X-Google-Smtp-Source: AGRyM1tFydeT/z45l04X0FlpzM1XlJMya0/TVJwM+JiRkhSe36n+dUVfOKUD3tBOoHWEAl6u+yK/Sg==
-X-Received: by 2002:a2e:7c07:0:b0:25a:73a0:4373 with SMTP id x7-20020a2e7c07000000b0025a73a04373mr25637376ljc.409.1657181084041;
-        Thu, 07 Jul 2022 01:04:44 -0700 (PDT)
-Received: from krzk-bin.home ([84.20.121.239])
-        by smtp.gmail.com with ESMTPSA id s6-20020a056512214600b0047b0f2d7650sm6697187lfr.271.2022.07.07.01.04.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Jul 2022 01:04:43 -0700 (PDT)
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc:     Douglas Anderson <dianders@chromium.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 5/5] ARM: dts: qcom: align SDHCI clocks with DT schema
-Date:   Thu,  7 Jul 2022 09:51:51 +0200
-Message-Id: <20220707075151.67335-6-krzysztof.kozlowski@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220707075151.67335-1-krzysztof.kozlowski@linaro.org>
-References: <20220707075151.67335-1-krzysztof.kozlowski@linaro.org>
+        with ESMTP id S235287AbiGGIIq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 04:08:46 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC77C4D165;
+        Thu,  7 Jul 2022 01:08:37 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 057A961F51;
+        Thu,  7 Jul 2022 08:08:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5C8D2C3411E;
+        Thu,  7 Jul 2022 08:08:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1657181316;
+        bh=Mzw+guaGxcvS7S4YlQr9bq/AYy4U/puT8v9DMSRjm+c=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=o8T0RPLH1+QXuxRGiOx0iOcZa4PNW1RYnmq0rwqP4JlY+PYLChMX98BzUOmDLYQt5
+         WHtgniPDP3fJS/IKoiVXIaVBC8g4rRYZFs4Es7HO3CMez5153+NrgRKDzbP84fxvsI
+         PrLKzhYgkU2Ze+gIXne4sqvbIkFu3tT1lxy0BeOk=
+Date:   Thu, 7 Jul 2022 10:08:33 +0200
+From:   Greg KH <gregkh@linuxfoundation.org>
+To:     kernel test robot <lkp@intel.com>
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        virtualization@lists.linux-foundation.org,
+        usbb2k-api-dev@nongnu.org, tipc-discussion@lists.sourceforge.net,
+        target-devel@vger.kernel.org, sound-open-firmware@alsa-project.org,
+        samba-technical@lists.samba.org, rds-devel@oss.oracle.com,
+        patches@opensource.cirrus.com, osmocom-net-gprs@lists.osmocom.org,
+        openipmi-developer@lists.sourceforge.net, nvdimm@lists.linux.dev,
+        ntb@lists.linux.dev, netfilter-devel@vger.kernel.org,
+        netdev@vger.kernel.org, mjpeg-users@lists.sourceforge.net,
+        megaraidlinux.pdl@broadcom.com, linuxppc-dev@lists.ozlabs.org,
+        linux1394-devel@lists.sourceforge.net, linux-x25@vger.kernel.org,
+        linux-wpan@vger.kernel.org, linux-wireless@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-unionfs@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-staging@lists.linux.dev, linux-serial@vger.kernel.org,
+        linux-sctp@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org,
+        linux-rockchip@lists.infradead.org,
+        linux-renesas-soc@vger.kernel.org, linux-rdma@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-perf-users@vger.kernel.org,
+        linux-pci@vger.kernel.org, linux-parport@lists.infradead.org,
+        linux-parisc@vger.kernel.org, linux-omap@vger.kernel.org,
+        linux-nfc@lists.01.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+        linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org,
+        linux-leds@vger.kernel.org, linux-integrity@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-ide@vger.kernel.org, linux-hwmon@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-fpga@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, linux-ext4@vger.kernel.org,
+        linux-efi@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-cxl@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-clk@vger.kernel.org, linux-cifs@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        linux-block@vger.kernel.org, linux-bcache@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linaro-mm-sig@lists.linaro.org,
+        legousb-devel@lists.sourceforge.net, kvm@vger.kernel.org,
+        keyrings@vger.kernel.org, isdn4linux@listserv.isdn4linux.de,
+        iommu@lists.linux.dev, iommu@lists.linux-foundation.org,
+        intel-wired-lan@lists.osuosl.org, greybus-dev@lists.linaro.org,
+        dri-devel@lists.freedesktop.org, dm-devel@redhat.com,
+        devicetree@vger.kernel.org, dev@openvswitch.org,
+        dccp@vger.kernel.org, damon@lists.linux.dev,
+        coreteam@netfilter.org, cgroups@vger.kernel.org,
+        ceph-devel@vger.kernel.org, ath11k@lists.infradead.org,
+        apparmor@lists.ubuntu.com, amd-gfx@lists.freedesktop.org,
+        alsa-devel@alsa-project.org,
+        accessrunner-general@lists.sourceforge.net
+Subject: Re: [linux-next:master] BUILD REGRESSION
+ 088b9c375534d905a4d337c78db3b3bfbb52c4a0
+Message-ID: <YsaUgfPbOg7WuBuB@kroah.com>
+References: <62c683a2.g1VSVt6BrQC6ZzOz%lkp@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <62c683a2.g1VSVt6BrQC6ZzOz%lkp@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The DT schema expects clocks iface-core order.  No functional change.
+On Thu, Jul 07, 2022 at 02:56:34PM +0800, kernel test robot wrote:
+> tree/branch: https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git master
+> branch HEAD: 088b9c375534d905a4d337c78db3b3bfbb52c4a0  Add linux-next specific files for 20220706
+> 
+> Error/Warning reports:
+> 
+> https://lore.kernel.org/linux-doc/202207070644.x48XOOvs-lkp@intel.com
+> 
+> Error/Warning: (recently discovered and may have been fixed)
+> 
+> Documentation/arm/google/chromebook-boot-flow.rst: WARNING: document isn't included in any toctree
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x1108): undefined reference to `__aeabi_ddiv'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x1124): undefined reference to `__aeabi_ui2d'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x1164): undefined reference to `__aeabi_dmul'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x1170): undefined reference to `__aeabi_dadd'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x1180): undefined reference to `__aeabi_dsub'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x1190): undefined reference to `__aeabi_d2uiz'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x162c): undefined reference to `__aeabi_d2iz'
+> arm-linux-gnueabi-ld: dc_dmub_srv.c:(.text+0x16b0): undefined reference to `__aeabi_i2d'
+> dc_dmub_srv.c:(.text+0x10f8): undefined reference to `__aeabi_ui2d'
+> dc_dmub_srv.c:(.text+0x464): undefined reference to `__floatunsidf'
+> dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x33c): undefined reference to `__floatunsidf'
+> drivers/pci/endpoint/functions/pci-epf-vntb.c:975:5: warning: no previous prototype for 'pci_read' [-Wmissing-prototypes]
+> drivers/pci/endpoint/functions/pci-epf-vntb.c:984:5: warning: no previous prototype for 'pci_write' [-Wmissing-prototypes]
+> drivers/vfio/vfio_iommu_type1.c:2141:35: warning: cast to smaller integer type 'enum iommu_cap' from 'void *' [-Wvoid-pointer-to-enum-cast]
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x34c): undefined reference to `__floatunsidf'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x378): undefined reference to `__divdf3'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x38c): undefined reference to `__muldf3'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x3a0): undefined reference to `__adddf3'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x3b4): undefined reference to `__subdf3'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x3d4): undefined reference to `__fixunsdfsi'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x750): undefined reference to `__fixdfsi'
+> mips-linux-ld: dc_dmub_srv.c:(.text.dc_dmub_setup_subvp_dmub_command+0x7c0): undefined reference to `__floatsidf'
+> powerpc-linux-ld: drivers/pci/endpoint/functions/pci-epf-vntb.c:174: undefined reference to `ntb_link_event'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x468): undefined reference to `__divdf3'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x46c): undefined reference to `__muldf3'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x470): undefined reference to `__adddf3'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x474): undefined reference to `__subdf3'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x478): undefined reference to `__fixunsdfsi'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x47c): undefined reference to `__fixdfsi'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x480): undefined reference to `__floatsidf'
+> xtensa-linux-ld: dc_dmub_srv.c:(.text+0x60c): undefined reference to `__floatunsidf'
+> 
+> Unverified Error/Warning (likely false positive, please contact us if interested):
+> 
+> arch/x86/events/core.c:2114 init_hw_perf_events() warn: missing error code 'err'
+> drivers/android/binder.c:1481:19-23: ERROR: from is NULL but dereferenced.
+> drivers/android/binder.c:2920:29-33: ERROR: target_thread is NULL but dereferenced.
+> drivers/android/binder.c:353:25-35: ERROR: node -> proc is NULL but dereferenced.
+> drivers/android/binder.c:4888:16-20: ERROR: t is NULL but dereferenced.
+> drivers/base/regmap/regmap.c:1996:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
+> drivers/char/random.c:869:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
+> drivers/firmware/arm_scmi/clock.c:394:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
+> drivers/firmware/arm_scmi/powercap.c:376:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
+> drivers/gpu/drm/amd/amdgpu/../pm/powerplay/hwmgr/vega10_powertune.c:1214:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
+> drivers/gpu/drm/amd/display/dc/os_types.h: drm/drm_print.h is included more than once.
+> drivers/gpu/drm/bridge/ite-it66121.c:1398:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
+> drivers/greybus/operation.c:617:1: internal compiler error: in arc_ifcvt, at config/arc/arc.c:9637
 
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
----
- arch/arm/boot/dts/qcom-apq8084.dtsi    | 12 ++++++------
- arch/arm/boot/dts/qcom-ipq4019.dtsi    |  4 ++--
- arch/arm/boot/dts/qcom-msm8226.dtsi    | 18 +++++++++---------
- arch/arm/boot/dts/qcom-msm8974.dtsi    | 18 +++++++++---------
- arch/arm/boot/dts/qcom-msm8974pro.dtsi |  6 +++---
- 5 files changed, 29 insertions(+), 29 deletions(-)
+<snip>
 
-diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
-index 45f3cbcf6238..c887ac5cdd7d 100644
---- a/arch/arm/boot/dts/qcom-apq8084.dtsi
-+++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
-@@ -425,10 +425,10 @@ mmc@f9824900 {
- 			reg-names = "hc", "core";
- 			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
--				 <&gcc GCC_SDCC1_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+				 <&gcc GCC_SDCC1_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			status = "disabled";
- 		};
- 
-@@ -438,10 +438,10 @@ mmc@f98a4900 {
- 			reg-names = "hc", "core";
- 			interrupts = <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
--				 <&gcc GCC_SDCC2_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-+				 <&gcc GCC_SDCC2_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			status = "disabled";
- 		};
- 
-diff --git a/arch/arm/boot/dts/qcom-ipq4019.dtsi b/arch/arm/boot/dts/qcom-ipq4019.dtsi
-index 1b98764bab7a..a8a32a5e7e5d 100644
---- a/arch/arm/boot/dts/qcom-ipq4019.dtsi
-+++ b/arch/arm/boot/dts/qcom-ipq4019.dtsi
-@@ -228,9 +228,9 @@ sdhci: mmc@7824900 {
- 			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
- 			bus-width = <8>;
--			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>, <&gcc GCC_SDCC1_APPS_CLK>,
- 				 <&gcc GCC_DCD_XO_CLK>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			status = "disabled";
- 		};
- 
-diff --git a/arch/arm/boot/dts/qcom-msm8226.dtsi b/arch/arm/boot/dts/qcom-msm8226.dtsi
-index f711463d22dc..9d4223bf8fc1 100644
---- a/arch/arm/boot/dts/qcom-msm8226.dtsi
-+++ b/arch/arm/boot/dts/qcom-msm8226.dtsi
-@@ -141,10 +141,10 @@ sdhc_1: mmc@f9824900 {
- 			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
--				 <&gcc GCC_SDCC1_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+				 <&gcc GCC_SDCC1_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sdhc1_default_state>;
- 			status = "disabled";
-@@ -157,10 +157,10 @@ sdhc_2: mmc@f98a4900 {
- 			interrupts = <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
--				 <&gcc GCC_SDCC2_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-+				 <&gcc GCC_SDCC2_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sdhc2_default_state>;
- 			status = "disabled";
-@@ -173,10 +173,10 @@ sdhc_3: mmc@f9864900 {
- 			interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 224 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC3_APPS_CLK>,
--				 <&gcc GCC_SDCC3_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC3_AHB_CLK>,
-+				 <&gcc GCC_SDCC3_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&sdhc3_default_state>;
- 			status = "disabled";
-diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
-index 971eceaef3d1..1f4baa6ac64d 100644
---- a/arch/arm/boot/dts/qcom-msm8974.dtsi
-+++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
-@@ -443,10 +443,10 @@ sdhc_1: mmc@f9824900 {
- 			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
--				 <&gcc GCC_SDCC1_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+				 <&gcc GCC_SDCC1_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			bus-width = <8>;
- 			non-removable;
- 
-@@ -460,10 +460,10 @@ sdhc_3: mmc@f9864900 {
- 			interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 224 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC3_APPS_CLK>,
--				 <&gcc GCC_SDCC3_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC3_AHB_CLK>,
-+				 <&gcc GCC_SDCC3_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			bus-width = <4>;
- 
- 			#address-cells = <1>;
-@@ -479,10 +479,10 @@ sdhc_2: mmc@f98a4900 {
- 			interrupts = <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
- 			interrupt-names = "hc_irq", "pwr_irq";
--			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
--				 <&gcc GCC_SDCC2_AHB_CLK>,
-+			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-+				 <&gcc GCC_SDCC2_APPS_CLK>,
- 				 <&xo_board>;
--			clock-names = "core", "iface", "xo";
-+			clock-names = "iface", "core", "xo";
- 			bus-width = <4>;
- 
- 			#address-cells = <1>;
-diff --git a/arch/arm/boot/dts/qcom-msm8974pro.dtsi b/arch/arm/boot/dts/qcom-msm8974pro.dtsi
-index 1e882e16a221..58df6e75ab6d 100644
---- a/arch/arm/boot/dts/qcom-msm8974pro.dtsi
-+++ b/arch/arm/boot/dts/qcom-msm8974pro.dtsi
-@@ -10,10 +10,10 @@ &gpu {
- };
- 
- &sdhc_1 {
--	clocks = <&gcc GCC_SDCC1_APPS_CLK>,
--		 <&gcc GCC_SDCC1_AHB_CLK>,
-+	clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+		 <&gcc GCC_SDCC1_APPS_CLK>,
- 		 <&xo_board>,
- 		 <&gcc GCC_SDCC1_CDCCAL_FF_CLK>,
- 		 <&gcc GCC_SDCC1_CDCCAL_SLEEP_CLK>;
--	clock-names = "core", "iface", "xo", "cal", "sleep";
-+	clock-names = "iface", "core", "xo", "cal", "sleep";
- };
--- 
-2.34.1
+When the compiler crashes, why are you blaming all of these different
+mailing lists?  Perhaps you need to fix your compiler :)
 
+thanks,
+
+greg k-h
