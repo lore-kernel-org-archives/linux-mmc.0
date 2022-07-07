@@ -2,100 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A891CCA47C
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jul 2022 21:24:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6055DCCA47F
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 02:31:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233839AbiGFVYb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Jul 2022 17:24:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49456 "EHLO
+        id S234892AbiGGCbw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Jul 2022 22:31:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40368 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231872AbiGFVYa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2022 17:24:30 -0400
-Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C686E186EC
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Jul 2022 14:24:28 -0700 (PDT)
-Received: by mail-ej1-x62b.google.com with SMTP id r21so412338eju.0
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Jul 2022 14:24:28 -0700 (PDT)
+        with ESMTP id S231829AbiGGCbq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2022 22:31:46 -0400
+Received: from mail-oa1-x2a.google.com (mail-oa1-x2a.google.com [IPv6:2001:4860:4864:20::2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBBA32F3B0
+        for <linux-mmc@vger.kernel.org>; Wed,  6 Jul 2022 19:31:44 -0700 (PDT)
+Received: by mail-oa1-x2a.google.com with SMTP id 586e51a60fabf-fe023ab520so23650144fac.10
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Jul 2022 19:31:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=+IXn0jI0ldRL7YIjp8QrMhyxAPtVIFHuatfuckvUqnQ=;
-        b=fQNvjxAJ1U+/Z5BLvLosjiWEbNpCZr4z3sBkgnVLosoYyjz5Kec9u9Kf+o2d4q/jrl
-         zJwnBFX/aQaqwYhjaVXnYTPOA2N2wRNI1ZdXo3LS5c53rJQDBg/01HLlXC+3nnmX1FkL
-         MSdhueU1Cby+/ZbGkB6Mdv+e7uPB4fONBcFU7hDeLOqJrh0okawS2UkVcxgAZSr0S41d
-         EjuYNIXct/or+FpmV7ItHH0l+xZ+FN4ZCnWFp1FCF0qr6P13rCX9ffwocjeI/nUoEGLH
-         Lz9yGwfWbHPhHgAWaHOOnshg+WGNM0O/k+l0h1lGaoviuCLThNi+10/uzCb/6nd4wSY3
-         rrjw==
+        d=linaro.org; s=google;
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
+         :content-transfer-encoding;
+        bh=D+S6dx9ymKesv8vcL4EfSnsMhXh2ERT9o+gEy/mb8XQ=;
+        b=KdHKUBw9rcNLrg28C0yLUofxQFbPnP8OErmkZL4BHjE30as12h6/lD+e42D8mEcJ6V
+         RdXOnsH0/WBgkVkMio6oHd8FKOJf4qWFC0CjKn0skEvfy+/s6Kod42ADnEI1xOReVcpZ
+         HhrNy6Zpil1DoBlklsAYL4FsoFVYY4exeq5mM/yJwbvB/V6j68n6Ym+sPEMHfigkEe4s
+         X23fn14vucwBGCJWtyAGF1dxAr1N4qD4gDkHfNPD7Qfh86+TbF0PXKjMxMlnUXqyc6dt
+         PD92St8J9ea+ieHkaXbZ5jjYdQ/BUB+79HkFAF12MUo1WKZQybRbqR0eeNStUvLtYHEh
+         jZYA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=+IXn0jI0ldRL7YIjp8QrMhyxAPtVIFHuatfuckvUqnQ=;
-        b=EcL8vAE9tWHDsrbdlaREdv3nLAn/UmDEU4gj3EBrIp5HVPYqGiTRe8ScXooTuQcNYf
-         NcZNRocN6BlAEwSuTZNdTc/9yG8U8sFJPJY8VebrzNf4n+UQzmXReRBfSjPlA4WLApob
-         zx0RVHpl2SlTZWUuTXIZmzmn+5V7VjtFJFo1eIlhfoM3Jd/YGUB1tjJkp0zf6iVa6Bp6
-         FhtzKMZMyR8VoH5UNnpupc09yanplcGdzRUBkGJHYdPWOen3u1BVrrNaPEoD8Q8RFli4
-         FSLkFLhJ0/AYguNL5Q4EocqJOncFyTrZRTnA8xsvdCU2i/K1hEuw+pK3ghZDvvPqx0Dz
-         1AWA==
-X-Gm-Message-State: AJIora9/41si5n4zUOHfmXPbjpyHOCBBTDsaazWJoqWflupXa/HnLOpG
-        0Cw2jR66HIKwKOl5Ql3SGkn/jOaszwkiHD1YNRQpQQ==
-X-Google-Smtp-Source: AGRyM1sbHYk2Pqpc9qaurG8ACQ+7E+4bfTKqXLTRu9d3ipv8YkEaaHIX9oSlPBTljwJ+/ekeV3QqQO0PmuZmUQvJ4AU=
-X-Received: by 2002:a17:907:3f81:b0:6ff:1a3d:9092 with SMTP id
- hr1-20020a1709073f8100b006ff1a3d9092mr41359251ejc.319.1657142667241; Wed, 06
- Jul 2022 14:24:27 -0700 (PDT)
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=D+S6dx9ymKesv8vcL4EfSnsMhXh2ERT9o+gEy/mb8XQ=;
+        b=NCIJHyvX1YRQg2sBcZM6L9M/QqGeFhYJqJ4FGXN9mogNpfQ59H39QYTE5s9Px5mFiK
+         oAVBaNVmkZCkHVBSJdYcEeaNU3iZ4EH2rnFjUnTMNkEWNEmJStyOVmQEyOgR3eNZuYnn
+         X/jrHZ+FqtFK+sxlJyn2MQosbTfxeQXkuI0EzRWOHDsamSbOKFHclywMOyuRN4rSO6bu
+         XGtnpnnpXAKCo70rgyj49nVfY1X5rkEtSVfZv6h2C3+Xvie1m1w33HHf+aD3d1ksJGWS
+         dhipiXkxop8W6gQh+HWPaODuWA3qrIVOp7jZl4HRXXtGOlTaJXFAYEZnvDJbUYqhcMvd
+         3NQg==
+X-Gm-Message-State: AJIora+kfoPnPecu2wVZJVQuqCEI0Q9cVgW6Hge265vQSCaHcFisZ+YH
+        25CF1V22Rk+Es9W3DW913+JjmQ==
+X-Google-Smtp-Source: AGRyM1tPnl5aAODSDTTA2p1GEeTnUNtXNTQzoZIOArSy6h/gQxxg4dfJykNV776lDkIy0+w02vW70A==
+X-Received: by 2002:a05:6870:430d:b0:102:572e:ffb with SMTP id w13-20020a056870430d00b00102572e0ffbmr1245068oah.232.1657161104289;
+        Wed, 06 Jul 2022 19:31:44 -0700 (PDT)
+Received: from builder.lan (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
+        by smtp.gmail.com with ESMTPSA id x48-20020a056830247000b006168c71ca4asm17024469otr.56.2022.07.06.19.31.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Jul 2022 19:31:43 -0700 (PDT)
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     linux-arm-msm@vger.kernel.org, bhupesh.sharma@linaro.org,
+        krzysztof.kozlowski+dt@linaro.org, konrad.dybcio@somainline.org,
+        Robert Marko <robimarko@gmail.com>, robh+dt@kernel.org,
+        agross@kernel.org, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: (subset) [PATCH v2 2/2] arm64: dts: ipq8074: add reset to SDHCI
+Date:   Wed,  6 Jul 2022 21:31:21 -0500
+Message-Id: <165716107315.864223.2452970591910564452.b4-ty@linaro.org>
+X-Mailer: git-send-email 2.32.0
+In-Reply-To: <20220704143554.1180927-2-robimarko@gmail.com>
+References: <20220704143554.1180927-1-robimarko@gmail.com> <20220704143554.1180927-2-robimarko@gmail.com>
 MIME-Version: 1.0
-References: <20220625050838.1618469-1-davidgow@google.com> <20220625050838.1618469-6-davidgow@google.com>
-In-Reply-To: <20220625050838.1618469-6-davidgow@google.com>
-From:   Brendan Higgins <brendanhiggins@google.com>
-Date:   Wed, 6 Jul 2022 17:24:16 -0400
-Message-ID: <CAFd5g45-SPvFs7JUNEsm=bMbDEZYTA57r0bA6cgRbSGoMz9-uQ@mail.gmail.com>
-Subject: Re: [PATCH v3 5/5] mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro
-To:     David Gow <davidgow@google.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>,
-        Jeremy Kerr <jk@codeconstruct.com.au>,
-        Daniel Latypov <dlatypov@google.com>,
-        Shuah Khan <skhan@linuxfoundation.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Andra Paraschiv <andraprs@amazon.com>,
-        Longpeng <longpeng2@huawei.com>,
-        Greg KH <gregkh@linuxfoundation.org>,
-        kunit-dev@googlegroups.com, linux-kselftest@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        =?UTF-8?B?TWHDrXJhIENhbmFs?= <maira.canal@usp.br>,
-        linux-mmc@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
-        openbmc@lists.ozlabs.org, linux-usb@vger.kernel.org,
-        linux-modules@vger.kernel.org,
-        Matt Johnston <matt@codeconstruct.com.au>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Jun 25, 2022 at 1:11 AM 'David Gow' via KUnit Development
-<kunit-dev@googlegroups.com> wrote:
->
-> The kunit_test_suite() macro is no-longer incompatible with module_add,
-> so its use can be reinstated.
->
-> Since this fixes parsing with builtins and kunit_tool, also enable the
-> test by default when KUNIT_ALL_TESTS is enabled.
->
-> The test can now be run via kunit_tool with:
->         ./tools/testing/kunit/kunit.py run --arch=x86_64 \
->         --kconfig_add CONFIG_OF=y --kconfig_add CONFIG_OF_ADDRESS=y \
->         --kconfig_add CONFIG_MMC=y --kconfig_add CONFIG_MMC_SDHCI=y \
->         --kconfig_add CONFIG_MMC_SDHCI_PLTFM=y \
->         --kconfig_add CONFIG_MMC_SDHCI_OF_ASPEED=y \
->         'sdhci-of-aspeed'
->
-> (It may be worth adding a .kunitconfig at some point, as there are
-> enough dependencies to make that command scarily long.)
->
-> Acked-by: Daniel Latypov <dlatypov@google.com>
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: David Gow <davidgow@google.com>
+On Mon, 4 Jul 2022 16:35:54 +0200, Robert Marko wrote:
+> Add reset to SDHCI controller so it can be reset to avoid timeout issues
+> after software reset due to bootloader set configuration.
+> 
+> 
 
-Acked-by: Brendan Higgins <brendanhiggins@google.com>
+Applied, thanks!
+
+[2/2] arm64: dts: ipq8074: add reset to SDHCI
+      commit: 730d55d861c63647df3cc9f77904a01c6719201b
+
+Best regards,
+-- 
+Bjorn Andersson <bjorn.andersson@linaro.org>
