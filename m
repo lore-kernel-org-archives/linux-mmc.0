@@ -2,82 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6055DCCA47F
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 02:31:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 559C0C43334
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 05:47:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234892AbiGGCbw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Jul 2022 22:31:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40368 "EHLO
+        id S229529AbiGGFrT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jul 2022 01:47:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34234 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231829AbiGGCbq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2022 22:31:46 -0400
-Received: from mail-oa1-x2a.google.com (mail-oa1-x2a.google.com [IPv6:2001:4860:4864:20::2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBBA32F3B0
-        for <linux-mmc@vger.kernel.org>; Wed,  6 Jul 2022 19:31:44 -0700 (PDT)
-Received: by mail-oa1-x2a.google.com with SMTP id 586e51a60fabf-fe023ab520so23650144fac.10
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Jul 2022 19:31:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
-         :content-transfer-encoding;
-        bh=D+S6dx9ymKesv8vcL4EfSnsMhXh2ERT9o+gEy/mb8XQ=;
-        b=KdHKUBw9rcNLrg28C0yLUofxQFbPnP8OErmkZL4BHjE30as12h6/lD+e42D8mEcJ6V
-         RdXOnsH0/WBgkVkMio6oHd8FKOJf4qWFC0CjKn0skEvfy+/s6Kod42ADnEI1xOReVcpZ
-         HhrNy6Zpil1DoBlklsAYL4FsoFVYY4exeq5mM/yJwbvB/V6j68n6Ym+sPEMHfigkEe4s
-         X23fn14vucwBGCJWtyAGF1dxAr1N4qD4gDkHfNPD7Qfh86+TbF0PXKjMxMlnUXqyc6dt
-         PD92St8J9ea+ieHkaXbZ5jjYdQ/BUB+79HkFAF12MUo1WKZQybRbqR0eeNStUvLtYHEh
-         jZYA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=D+S6dx9ymKesv8vcL4EfSnsMhXh2ERT9o+gEy/mb8XQ=;
-        b=NCIJHyvX1YRQg2sBcZM6L9M/QqGeFhYJqJ4FGXN9mogNpfQ59H39QYTE5s9Px5mFiK
-         oAVBaNVmkZCkHVBSJdYcEeaNU3iZ4EH2rnFjUnTMNkEWNEmJStyOVmQEyOgR3eNZuYnn
-         X/jrHZ+FqtFK+sxlJyn2MQosbTfxeQXkuI0EzRWOHDsamSbOKFHclywMOyuRN4rSO6bu
-         XGtnpnnpXAKCo70rgyj49nVfY1X5rkEtSVfZv6h2C3+Xvie1m1w33HHf+aD3d1ksJGWS
-         dhipiXkxop8W6gQh+HWPaODuWA3qrIVOp7jZl4HRXXtGOlTaJXFAYEZnvDJbUYqhcMvd
-         3NQg==
-X-Gm-Message-State: AJIora+kfoPnPecu2wVZJVQuqCEI0Q9cVgW6Hge265vQSCaHcFisZ+YH
-        25CF1V22Rk+Es9W3DW913+JjmQ==
-X-Google-Smtp-Source: AGRyM1tPnl5aAODSDTTA2p1GEeTnUNtXNTQzoZIOArSy6h/gQxxg4dfJykNV776lDkIy0+w02vW70A==
-X-Received: by 2002:a05:6870:430d:b0:102:572e:ffb with SMTP id w13-20020a056870430d00b00102572e0ffbmr1245068oah.232.1657161104289;
-        Wed, 06 Jul 2022 19:31:44 -0700 (PDT)
-Received: from builder.lan (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
-        by smtp.gmail.com with ESMTPSA id x48-20020a056830247000b006168c71ca4asm17024469otr.56.2022.07.06.19.31.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Jul 2022 19:31:43 -0700 (PDT)
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     linux-arm-msm@vger.kernel.org, bhupesh.sharma@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, konrad.dybcio@somainline.org,
-        Robert Marko <robimarko@gmail.com>, robh+dt@kernel.org,
-        agross@kernel.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: (subset) [PATCH v2 2/2] arm64: dts: ipq8074: add reset to SDHCI
-Date:   Wed,  6 Jul 2022 21:31:21 -0500
-Message-Id: <165716107315.864223.2452970591910564452.b4-ty@linaro.org>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20220704143554.1180927-2-robimarko@gmail.com>
-References: <20220704143554.1180927-1-robimarko@gmail.com> <20220704143554.1180927-2-robimarko@gmail.com>
+        with ESMTP id S231829AbiGGFrT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 01:47:19 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACDEA3138F;
+        Wed,  6 Jul 2022 22:47:17 -0700 (PDT)
+X-UUID: a194472b477941c39999f1ef9db2b8c7-20220707
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.8,REQID:b0217c3c-8222-403d-a6a4-4de3ac0ba2bd,OB:0,LO
+        B:0,IP:0,URL:5,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,RULE:Release_Ham,ACT
+        ION:release,TS:0
+X-CID-META: VersionHash:0f94e32,CLOUDID:b389a463-0b3f-4b2c-b3a6-ed5c044366a0,C
+        OID:IGNORED,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:1,File:nil
+        ,QS:nil,BEC:nil,COL:0
+X-UUID: a194472b477941c39999f1ef9db2b8c7-20220707
+Received: from mtkmbs11n1.mediatek.inc [(172.21.101.185)] by mailgw02.mediatek.com
+        (envelope-from <johnson.wang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 1452492003; Thu, 07 Jul 2022 13:47:13 +0800
+Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
+ mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
+ Thu, 7 Jul 2022 13:47:12 +0800
+Received: from mtksdccf07.mediatek.inc (172.21.84.99) by
+ mtkmbs11n2.mediatek.inc (172.21.101.73) with Microsoft SMTP Server id
+ 15.2.792.3 via Frontend Transport; Thu, 7 Jul 2022 13:47:12 +0800
+From:   Johnson Wang <johnson.wang@mediatek.com>
+To:     <ulf.hansson@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
+        Johnson Wang <johnson.wang@mediatek.com>
+Subject: [PATCH] dt-bindings: mmc: Add compatible for MediaTek MT8188
+Date:   Thu, 7 Jul 2022 13:47:10 +0800
+Message-ID: <20220707054710.1396-1-johnson.wang@mediatek.com>
+X-Mailer: git-send-email 2.18.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 4 Jul 2022 16:35:54 +0200, Robert Marko wrote:
-> Add reset to SDHCI controller so it can be reset to avoid timeout issues
-> after software reset due to bootloader set configuration.
-> 
-> 
+This commit adds dt-binding documentation of mmc for MediaTek MT8188 SoC
+platform.
 
-Applied, thanks!
+Signed-off-by: Johnson Wang <johnson.wang@mediatek.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
-[2/2] arm64: dts: ipq8074: add reset to SDHCI
-      commit: 730d55d861c63647df3cc9f77904a01c6719201b
-
-Best regards,
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index 2a2e9fa8c188..3fbf33ad4f7c 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -32,6 +32,9 @@ properties:
+       - items:
+           - const: mediatek,mt8186-mmc
+           - const: mediatek,mt8183-mmc
++      - items:
++          - const: mediatek,mt8188-mmc
++          - const: mediatek,mt8183-mmc
+       - items:
+           - const: mediatek,mt8192-mmc
+           - const: mediatek,mt8183-mmc
 -- 
-Bjorn Andersson <bjorn.andersson@linaro.org>
+2.18.0
+
