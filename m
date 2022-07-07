@@ -2,63 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A3F0C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 14:32:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6630CCA479
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jul 2022 14:32:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235419AbiGGOb7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jul 2022 10:31:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53712 "EHLO
+        id S235674AbiGGOcM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jul 2022 10:32:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234797AbiGGOb6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 10:31:58 -0400
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BED5F2F3B3
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Jul 2022 07:31:56 -0700 (PDT)
-Received: by mail-ed1-x535.google.com with SMTP id y4so10024593edc.4
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 07:31:56 -0700 (PDT)
+        with ESMTP id S235556AbiGGOcL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jul 2022 10:32:11 -0400
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1336F2F669
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Jul 2022 07:32:09 -0700 (PDT)
+Received: by mail-ed1-x52f.google.com with SMTP id v12so10766884edc.10
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 07:32:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=+lY857WNunFqeqIFvxE1vZpLl3WuWGarLzBkhv9eJbA=;
-        b=NSB+HwZAGzym7P8P5YzXKsR+yE+p76mZE/kK8486IflBF3t23m7j3+LsvPtzSC2/Wf
-         dp7N0rTamqmMKX2sd/ZgWDY7mV3EI7hFiKuc7AgeUHmhbGsvaUEaDApZUyMmZe3m7Hjj
-         ySgJA6vxLeoh0FkRpBmq8K4gXxlXxsA+KjtKU=
+        bh=+AFexh2zgEl0TUS1BpdjvCEcYJ2S40IdgLkQGQ1nAyg=;
+        b=DdMEbA8mazmcWoOmd4X7+rwrMU50Nl2RouFMQWjq5AiJRuD9yqY6W1v6xCMAvP/QpS
+         LmGz2dVeW88jXWmqFwOAHUuC17oH51eq2VPRdGjihxZAV2ny33uDXEMAUntg/XZPlJKJ
+         BiZG8CUBuOCysVTKexYbDpLXlIvQxYszmSUn0=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=+lY857WNunFqeqIFvxE1vZpLl3WuWGarLzBkhv9eJbA=;
-        b=g0z5MEw0QQ2X2fXM2VB0o2+jydvq2pndxwEdiLqnHsffqV3oi7u4JbR2b9bPTHXtCT
-         irx/FQtv7Id7DBZCt4Tok2LL75Pnw2sDBDbC77CqMcZWTcgE5UcS7YGNUQKWdGeN4OZF
-         nlIrkd/oCXU9mZyOdIQRI7NPJzTDIE/hEglaGTyGjzsa6C6HnRAKclqqMQSXsQU/v9LD
-         iDb+rJjRMpgPC+t/8m/Y+O4RiQUCEGgvt5fYB20pkGSNMBvyLbXtN8jadC5x1Hb0L2dW
-         kjgygRsfsRamCQVAm4aQ9JcFrb4cxCAhAT7jTTtFyr+uyd6z9y9zjMCMLYxHF/GICpBY
-         TSmA==
-X-Gm-Message-State: AJIora/m2ZLjxVsZIH1ie1eVraU+NdRnplBngD9ywTW/sGuGyaIWkG65
-        wK/GSwPciL0IqrMhHpSHDjHg1I1KyVju9y/nN20=
-X-Google-Smtp-Source: AGRyM1t6oH/OsMETLDM5V4U9ScJhEcPiSapMTl/cG01tFmxbAEP2VgW+3BQrZkNn/O2AYbpnWg8JEQ==
-X-Received: by 2002:a05:6402:3590:b0:43a:8156:e842 with SMTP id y16-20020a056402359000b0043a8156e842mr15839067edc.219.1657204315089;
-        Thu, 07 Jul 2022 07:31:55 -0700 (PDT)
-Received: from mail-wm1-f48.google.com (mail-wm1-f48.google.com. [209.85.128.48])
-        by smtp.gmail.com with ESMTPSA id q25-20020a17090676d900b0072ab06bf296sm7438145ejn.23.2022.07.07.07.31.54
+        bh=+AFexh2zgEl0TUS1BpdjvCEcYJ2S40IdgLkQGQ1nAyg=;
+        b=CnajVJ8PFwXy2vaFN4+I3f4/WuWduyStm4iysHWju22/1QpEEF/jI4rgv09fFG6Grc
+         9wtmiCrFJVD49hUG8fRvJ6bl36PFXalmYzCLiF0azWhsdDgp7/ltics/nhNHuPI0PLTt
+         Lolf1QdUfE6W8kVXgOrFyvwUdF3auRvoaLXJr1UzRro/uHy5N3tELOGbCqZM6wvVP3bc
+         BU3yMRQngRhZ/bSItwaMbi80jXK/au1rBhQ6vb+qFOAuLAB9/uPAEIITa7a0bd2OggVF
+         /qzm/BbWhVXuJs0EstdDdyxN5dauxae+MehVzT0eGdVaCzQGmBM+Wg8EiQvxYkfhIIUo
+         7Alw==
+X-Gm-Message-State: AJIora9nDq75/BzAIQ+koQPsM9kCZ+sq3Er4bWUV88NTuwZ8RdCOhzwc
+        ZTWxNv1hmQbrtM7f7I40JcVDBwdl6JVtCL1CCcc=
+X-Google-Smtp-Source: AGRyM1uF/KEddW9Tzpos9P2AtJYewT3wKEPfv5HuIbiaEi7z3ufmVRj0Y9EtA5NuOKjGKYCCO1bRcg==
+X-Received: by 2002:a05:6402:510e:b0:435:9052:3b16 with SMTP id m14-20020a056402510e00b0043590523b16mr65027777edd.20.1657204327448;
+        Thu, 07 Jul 2022 07:32:07 -0700 (PDT)
+Received: from mail-wr1-f49.google.com (mail-wr1-f49.google.com. [209.85.221.49])
+        by smtp.gmail.com with ESMTPSA id j8-20020a170906094800b006feed200464sm13657893ejd.131.2022.07.07.07.32.05
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 07 Jul 2022 07:31:54 -0700 (PDT)
-Received: by mail-wm1-f48.google.com with SMTP id l42so1073878wms.5
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 07:31:54 -0700 (PDT)
-X-Received: by 2002:a1c:4c0b:0:b0:3a1:92da:bddf with SMTP id
- z11-20020a1c4c0b000000b003a192dabddfmr4827050wmf.188.1657204313641; Thu, 07
- Jul 2022 07:31:53 -0700 (PDT)
+        Thu, 07 Jul 2022 07:32:06 -0700 (PDT)
+Received: by mail-wr1-f49.google.com with SMTP id bk26so11525164wrb.11
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Jul 2022 07:32:05 -0700 (PDT)
+X-Received: by 2002:adf:ead2:0:b0:21d:8b49:6138 with SMTP id
+ o18-20020adfead2000000b0021d8b496138mr1190056wrn.138.1657204325372; Thu, 07
+ Jul 2022 07:32:05 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220707075151.67335-1-krzysztof.kozlowski@linaro.org> <20220707075151.67335-3-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220707075151.67335-3-krzysztof.kozlowski@linaro.org>
+References: <20220707075151.67335-1-krzysztof.kozlowski@linaro.org> <20220707075151.67335-2-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220707075151.67335-2-krzysztof.kozlowski@linaro.org>
 From:   Doug Anderson <dianders@chromium.org>
-Date:   Thu, 7 Jul 2022 07:31:41 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=WFdtx_v3iPaNYDkhBw+fkSRriG0-w1R5vXRCugZPW6Vg@mail.gmail.com>
-Message-ID: <CAD=FV=WFdtx_v3iPaNYDkhBw+fkSRriG0-w1R5vXRCugZPW6Vg@mail.gmail.com>
-Subject: Re: [PATCH 2/5] dt-bindings: mmc: sdhci-msm: constrain reg-names at
- least for one variant
+Date:   Thu, 7 Jul 2022 07:31:53 -0700
+X-Gmail-Original-Message-ID: <CAD=FV=WcUNLrVST5h0ED9ScpJDiaNoVc2hE-FcOCJGD7zxY-Ww@mail.gmail.com>
+Message-ID: <CAD=FV=WcUNLrVST5h0ED9ScpJDiaNoVc2hE-FcOCJGD7zxY-Ww@mail.gmail.com>
+Subject: Re: [PATCH 1/5] dt-bindings: mmc: sdhci-msm: fix reg-names entries
 To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -81,65 +80,15 @@ Hi,
 On Thu, Jul 7, 2022 at 1:04 AM Krzysztof Kozlowski
 <krzysztof.kozlowski@linaro.org> wrote:
 >
-> The entries in arrays must have fixed order, so the bindings and Linux
-> driver expecting various combinations of 'reg' addresses was never
-> actually conforming to guidelines.
+> Bindings before conversion to DT schema expected reg-names without
+> "_mem" suffix.  This was used by older DTS files and by the MSM SDHCI
+> driver.
 >
-> Specifically Linux driver always expects 'core' reg entry as second
-> item, but some DTSes are having there 'cqhci'.
+> Reported-by: Douglas Anderson <dianders@chromium.org>
+> Fixes: edfbf8c307ff ("dt-bindings: mmc: sdhci-msm: Fix issues in yaml bindings")
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 24 +++++++++----------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
 
-This is a bit misleading and makes it sound like we've got a bug. In
-truth the Linux driver looks at the compatible string. If it sees any
-compatible listed as "v5" (or a slight variant of v5 to handle a
-workaround for sc7180 / sdm845) then it _doesn't_ expect 'core' reg as
-the second entry. See the variable `mci_removed`. The old bindings
-".txt" file also had this to say:
-
-                For SDCC version 5.0.0, MCI registers are removed from SDCC
-                interface and some registers are moved to HC. New compatible
-                string is added to support this change - "qcom,sdhci-msm-v5".
-
-So I guess that means this is the documentation for all of the
-combinations you have listed:
-
-* hc only - v5 controller w/out CQE / ICE
-
-* hc + core - v4 controller w/out CQE / ICE
-
-* hc + cqhci - v5 controller w/ CQE and w/out ICE
-
-* hc + cqhci + ice - v5 controller w/ CQE / ICE
-
-* hc + core + cqhci + ice - v4 controller w/ CQE / ICE
-
-Said another way, before v5 the "core" range existed. After v5 it
-apparently doesn't so there's no way we could have specified it.
-
-You'll notice that one of the options above implies that a v4
-controller (with "core" specified) can have CQE and ICE. Is this
-actually true, or was it a misunderstanding in the .txt to .yaml
-conversion?
-
-If it's true that a v4 controller can have CQE and ICE then your patch
-is wrong in asserting that v4 controllers have only "hc" and "core".
-
-If a v4 controller _can't_ have CQE and ICE then your patch is right
-but incomplete. It should also be removing the option:
-          - const: hc
-          - const: core
-          - const: cqhci
-          - const: ice
-
-I am not intimately familiar with Qualcomm MMC controller history.
-That being said, the old .txt file said:
-
-        - CQE register map (Optional, CQE support is present on SDHC
-instance meant
-                            for eMMC and version v4.2 and above)
-
-To me this implies that a v4 controller could _at least_ have "cqhci".
-I dunno about "ice". I seem to recall that this was the argument for
-why the driver had to use reg-names to begin with and why the driver
-looks for "cqhci" by name.
-
--Doug
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
